@@ -157,9 +157,10 @@ async def _main(simulate: bool, tiprack: str, removal: int):
 def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int) -> None:
 
     print("7")
-    print("8")
+    
     # Instrument setup
     pleft = protocol.load_instrument("flex_8channel_1000", "left")
+    print("8")
     # DECK SETUP AND LABWARE
     protocol.load_trash_bin("A3")
     tiprack_1 = protocol.load_labware(tiprack, location="D1")
