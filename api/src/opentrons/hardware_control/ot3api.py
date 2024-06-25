@@ -2246,7 +2246,7 @@ class OT3API(
         instrument.working_volume = tip_volume
 
     async def drop_tip(
-        self, mount: Union[top_types.Mount, OT3Mount], home_after: bool = False
+        self, mount: Union[top_types.Mount, OT3Mount], home_after: bool = False, removal:int = 0
     ) -> None:
         """Drop tip at the current location."""
         realmount = OT3Mount.from_mount(mount)
@@ -2263,7 +2263,7 @@ class OT3API(
             spec = self._pipette_handler.plan_ht_drop_tip()
             await self._tip_motor_action(realmount, spec.tip_action_moves)
         else:
-            spec = self._pipette_handler.plan_lt_drop_tip(realmount)
+            spec = self._pipette_handler.plan_lt_drop_tip(realmount, removal)
             for move in spec.tip_action_moves:
                 async with self._backend.motor_current(move.currents):
                     target_pos = target_position_from_plunger(
