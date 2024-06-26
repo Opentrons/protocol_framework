@@ -10,6 +10,7 @@ from opentrons.protocol_engine.types import LabwareOffset
 import datetime
 import requests
 import time
+from opentrons.types import Mount
 
 
 from hardware_testing.gravimetric.workarounds import (
@@ -144,13 +145,24 @@ async def _main(simulate: bool, tiprack: str, removal: int):
     protocol = helpers.get_api_context(
         "2.18",  # type: ignore[attr-defined]
         is_simulating=simulate,
-        pipette_left= "p1000_multi_flex",
+        pipette_left="p1000_multi_flex",
     )
     for offset in LABWARE_OFFSETS:
         engine = protocol._core._engine_client._transport._engine  # type: ignore[attr-defined]
         engine.state_view._labware_store._add_labware_offset(offset)
+
     hw_api = get_sync_hw_api(protocol)
-    hw_api.cache_instruments()
+    for i in range(10):
+        hw_api.cache_instruments(require={Mount.LEFT: "p1000_multi_flex"})
+        attached = hw_api.attached_pipettes
+        try:
+            print(attached[Mount.LEFT])
+            print(attached[Mount.LEFT]['name'])
+
+            break
+        except:
+            print("failed to find")
+            await asyncio.sleep(1)
     run(protocol, tiprack, removal)
 
     await asyncio.sleep(1)
