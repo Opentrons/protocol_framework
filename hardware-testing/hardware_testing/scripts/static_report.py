@@ -43,7 +43,7 @@ async def _main(simulate: bool, tiprack: str, removal: int):
     print("4")
     # try to figure out how to input everything but final temp, run time, and if removed.
     # test_name = "ABR-Static-Report"
-    sensor = asair_sensor.BuildAsairSensor(False, False)
+    sensor = asair_sensor.BuildAsairSensor(simulate=True)
     print("5")
     print(sensor)
     header = [
