@@ -155,6 +155,10 @@ test-examples:
 test-scripts:
 	$(python) -m hardware_testing.scripts.bowtie_ot3 --simulate
 
+.PHONY: test-static
+test-static:
+	$(python) -m hardware_testing.scripts.static_report --simulate --tip_type=50 --removal 1
+
 .PHONY: test-liquid-sense
 test-liquid-sense:
 	$(python) -m hardware_testing.liquid_sense --simulate --pipette 1000 --channels 1
