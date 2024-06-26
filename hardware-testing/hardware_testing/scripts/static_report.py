@@ -31,117 +31,116 @@ try:
     credentials_path = "/var/lib/jupyter/notebooks/credentials.json"
     print("2")
 except ImportError:
-    raise ImportError(
-        "Run on robot. Make sure google_sheets_tool.py is in jupyter notebook."
-    )
+    pass
 
 
 async def _main(simulate: bool, tiprack: str, removal: int):
     start = time.time()
     print("3")
+    if not simulate:
+        print("4")
+        # try to figure out how to input everything but final temp, run time, and if removed.
+        # test_name = "ABR-Static-Report"
+        sensor = asair_sensor.BuildAsairSensor(simulate=True)
+        print("5")
+        print(sensor)
+        header = [
+            "Intention of Run",
+            "Finish Time",
+            "Tip Size",
+            "Removed?",
+            "Total Run Time",
+            "Temperature (C)",
+            "Humidity (%)",
+            "Software",
+            "Firmware",
+            "Pipette Serial",
+            "Robot Serial",
+            "Static Occured?",
+        ]
+        # Upload to google has passed
+        try:
+            google_sheet = google_sheets_tool.google_sheet(
+                credentials_path, "Static Testing Report", tab_number=0
+            )
+            print("Connected to the google sheet.")
+        except FileNotFoundError:
+            print(
+                "There are no google sheets credentials. Make sure credentials in jupyter notebook."
+            )
 
-    print("4")
-    # try to figure out how to input everything but final temp, run time, and if removed.
-    # test_name = "ABR-Static-Report"
-    sensor = asair_sensor.BuildAsairSensor(simulate=True)
-    print("5")
-    print(sensor)
-    header = [
-        "Intention of Run",
-        "Finish Time",
-        "Tip Size",
-        "Removed?",
-        "Total Run Time",
-        "Temperature (C)",
-        "Humidity (%)",
-        "Software",
-        "Firmware",
-        "Pipette Serial",
-        "Robot Serial",
-        "Static Occured?",
-    ]
-    # Upload to google has passed
-    try:
-        google_sheet = google_sheets_tool.google_sheet(
-            credentials_path, "Static Testing Report", tab_number=0
+        print("6")
+        # main()
+
+        # The part where we get and input sensor data.
+        env_data = sensor.get_reading()
+        temp = env_data.temperature
+        rh = env_data.relative_humidity
+        # grab timestamp
+        timestamp = datetime.datetime.now()
+        # Time adjustment for ABR robot timezone
+        new_timestamp = timestamp - datetime.timedelta(hours=6)
+        # Adjusting time as robots are on UTC
+        print("11")
+        # automatically write what removal attempt was used
+        remove_type = "Control"
+        if removal == 1:
+            remove_type = "Removal Method 1"
+        if removal == 2:
+            remove_type = "Removal Method 2"
+        print("12")
+        # adding data grabbed from the robot's HTTP page
+        # From health: api ver, firm ver, rob serial
+        response = requests.get(
+            f"http://{ip}:31950/health", headers={"opentrons-version": "3"}
         )
-        print("Connected to the google sheet.")
-    except FileNotFoundError:
-        print(
-            "There are no google sheets credentials. Make sure credentials in jupyter notebook."
+        print(response)
+        print("13")
+        health_data = response.json()
+        firm = health_data.get("fw_version", "")
+        soft = health_data.get("system_version", "")
+        rob_serial = health_data.get("robot_serial", "")
+        print("14")
+        # from instruments we get pipette serial
+        response = requests.get(
+            f"http://{ip}:31950/pipettes", headers={"opentrons-version": "3"}
         )
+        pipette_data = response.json()
+        pipette_serial = pipette_data["left"].get("id", "")
+        print("15")
+        # from datetime we get our runtime
+        tot_run_time = int(time.time() - start)
 
-    print("6")
-    # main()
+        row = [
+            remove_type,
+            str(new_timestamp),
+            args.tip_type,
+            "",  # will only write if it is not removed, IE will be blank unless the run fails. LATER
+            tot_run_time,
+            temp,
+            rh,
+            soft,
+            firm,
+            pipette_serial,
+            rob_serial,
+            "",  # static occur? need to input manually
+        ]
+        print("16")
+        # write to google sheet
+        try:
+            if google_sheet.credentials.access_token_expired:
+                google_sheet.gc.login()
+            google_sheet.write_header(header)
+            google_sheet.update_row_index()
+            google_sheet.write_to_row(row)
+            print("Wrote row")
+        except RuntimeError:
+            print("Did not write row.")
+        # hopefully this writes to the google sheet
+        print("17")
 
-    # The part where we get and input sensor data.
-    env_data = sensor.get_reading()
-    temp = env_data.temperature
-    rh = env_data.relative_humidity
-    # grab timestamp
-    timestamp = datetime.datetime.now()
-    # Time adjustment for ABR robot timezone
-    new_timestamp = timestamp - datetime.timedelta(hours=6)
-    # Adjusting time as robots are on UTC
-    print("11")
-    # automatically write what removal attempt was used
-    remove_type = "Control"
-    if removal == 1:
-        remove_type = "Removal Method 1"
-    if removal == 2:
-        remove_type = "Removal Method 2"
-    print("12")
-    # adding data grabbed from the robot's HTTP page
-    # From health: api ver, firm ver, rob serial
-    response = requests.get(
-        f"http://{ip}:31950/health", headers={"opentrons-version": "3"}
-    )
-    print(response)
-    print("13")
-    health_data = response.json()
-    firm = health_data.get("fw_version", "")
-    soft = health_data.get("system_version", "")
-    rob_serial = health_data.get("robot_serial", "")
-    print("14")
-    # from instruments we get pipette serial
-    response = requests.get(
-        f"http://{ip}:31950/pipettes", headers={"opentrons-version": "3"}
-    )
-    pipette_data = response.json()
-    pipette_serial = pipette_data["left"].get("id", "")
-    print("15")
-    # from datetime we get our runtime
-    tot_run_time = int(time.time() - start)
-
-    row = [
-        remove_type,
-        str(new_timestamp),
-        args.tip_type,
-        "",  # will only write if it is not removed, IE will be blank unless the run fails. LATER
-        tot_run_time,
-        temp,
-        rh,
-        soft,
-        firm,
-        pipette_serial,
-        rob_serial,
-        "",  # static occur? need to input manually
-    ]
-    print("16")
-    # write to google sheet
-    try:
-        if google_sheet.credentials.access_token_expired:
-            google_sheet.gc.login()
-        google_sheet.write_header(header)
-        google_sheet.update_row_index()
-        google_sheet.write_to_row(row)
-        print("Wrote row")
-    except RuntimeError:
-        print("Did not write row.")
-    # hopefully this writes to the google sheet
-    print("17")
-
-    LABWARE_OFFSETS.extend(workarounds.http_get_all_labware_offsets())
+        LABWARE_OFFSETS.extend(workarounds.http_get_all_labware_offsets())
+    print(f"simulate {simulate}")
     protocol = helpers.get_api_context(
         "2.18",  # type: ignore[attr-defined]
         is_simulating=simulate,
@@ -160,7 +159,7 @@ async def _main(simulate: bool, tiprack: str, removal: int):
 def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int) -> None:
 
     print("7")
-    
+
     # Instrument setup
     pleft = protocol.load_instrument("flex_8channel_1000", "left")
     print("8")
