@@ -11,6 +11,7 @@ from typing import (
     TypeVar,
 )
 from typing_extensions import Final
+from opentrons.types import Point
 import numpy
 from opentrons_shared_data.pipette.dev_types import UlPerMmAction
 
