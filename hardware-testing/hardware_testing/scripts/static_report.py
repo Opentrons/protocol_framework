@@ -145,10 +145,13 @@ async def _main(simulate: bool, tiprack: str, removal: int):
     protocol = helpers.get_api_context(
         "2.18",  # type: ignore[attr-defined]
         is_simulating=simulate,
+        pipette_left= "p1000_multi_flex",
     )
     for offset in LABWARE_OFFSETS:
         engine = protocol._core._engine_client._transport._engine  # type: ignore[attr-defined]
         engine.state_view._labware_store._add_labware_offset(offset)
+    hw_api = get_sync_hw_api(protocol)
+    hw_api.cache_instruments()
     run(protocol, tiprack, removal)
 
     await asyncio.sleep(1)
