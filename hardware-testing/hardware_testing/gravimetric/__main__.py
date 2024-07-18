@@ -55,7 +55,10 @@ LABWARE_OFFSETS: List[dict] = []
 # Keyed by pipette volume, channel count, and tip volume in that order
 GRAVIMETRIC_CFG = {
     50: {
-        1: gravimetric_ot3_p50_single,
+        1: {
+            20: gravimetric_ot3_p50_single,
+            50: gravimetric_ot3_p50_single
+        },
         8: gravimetric_ot3_p50_multi,
     },
     200: {
