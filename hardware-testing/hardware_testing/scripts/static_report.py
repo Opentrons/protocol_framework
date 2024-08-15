@@ -39,7 +39,6 @@ except ImportError:
 
 async def _main(simulate: bool, tiprack: str, removal: int, tip_location: int, tip_type: int, pipette_size: int, nozzles, nozzle2):
     print("3")
-    """
     if not simulate:
         print("4")
         # try to figure out how to input everything but final temp, run time, and if removed.
@@ -144,7 +143,6 @@ async def _main(simulate: bool, tiprack: str, removal: int, tip_location: int, t
             pipette_serial,
             rob_serial,
         ]
-        print("do my changes matter")
         # write to google sheet
         try:
             if google_sheet.credentials.access_token_expired:
@@ -157,7 +155,6 @@ async def _main(simulate: bool, tiprack: str, removal: int, tip_location: int, t
             print("Did not write row.")
         # hopefully this writes to the google sheet
         print("hope so")
-    """
 
 
     LABWARE_OFFSETS.extend(workarounds.http_get_all_labware_offsets())
@@ -220,21 +217,19 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
         "A12",
     ]
     print("9")
-    #protocol.home()
+    protocol.home()
     print("9.5")
-    #pleft.home()
+    pleft.home()
     print("9.75")
     hw_api = get_sync_hw_api(protocol)
     print("10")
     hw_api.move_to(Mount.LEFT, Point(125,25,250))
     hw_api.drop_tip(mount=Mount.LEFT, removal=2)
-    print("hello? anyone home?")
     input("Press Enter to continue...")    
     #making my life 10x easier 
-    print("9 and 3/4")
-    #if pipette_size != 96:    
-        #protocol.home()   
-        #pleft.home()
+    if pipette_size != 96:    
+        protocol.home()   
+        pleft.home()
     start = time.time()
     #setup differences between waste chute and trash bin and tip types
     if pipette_size == 8:
@@ -264,10 +259,6 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
     if pipette_size == 96:
         onek_adjust = 0
         adjustment = 0
-        # if tip_type == 50 or tip_type == 200:
-        #     adjustment = 49
-        # if tip_type == 1000:
-        #     adjustment = 87
         y_pos = 26
         x_pos = 334
         knock_distance = 250
@@ -287,18 +278,15 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
             hw_api.move_rel(Mount.LEFT, Point(0,0,120)) #make it go up out of tiprack to avoid collision
         
         hw_api.move_to(Mount.LEFT, Point(x_pos,y_pos,250-adjustment)) #200 is subject to change
-        #405 for tape, 330 for bin
         hw_api.move_to(Mount.LEFT, Point(x_pos,y_pos,z_pos)) #is -5
         # consider using tip size var to make it scale
-        print("104030")
         if pipette_size != 96:    
             hw_api.drop_tip(mount=Mount.LEFT, removal=removal)
-        print("new one")
         if removal == 2:
             hw_api.move_to(Mount.LEFT, Point(x_pos - knock_distance,y_pos,(z_pos + adjustment - onek_adjust)))
-        #pleft.home()
-    #protocol.home()
-    #pleft.home()
+        pleft.home()
+    protocol.home()
+    pleft.home()
 
     # from datetime we get our runtime
     tot_run_time = int(time.time() - start)
