@@ -41,8 +41,7 @@ async def _main(simulate: bool, tiprack: str, removal: int, tip_location: int, t
     print("3")
     if not simulate:
         print("4")
-        # try to figure out how to input everything but final temp, run time, and if removed.
-        # test_name = "ABR-Static-Report"
+        """ Commenting out all the google drive data collection
         sensor = asair_sensor.BuildAsairSensor(False, False)
         print("5")
         print(sensor)
@@ -155,7 +154,7 @@ async def _main(simulate: bool, tiprack: str, removal: int, tip_location: int, t
             print("Did not write row.")
         # hopefully this writes to the google sheet
         print("hope so")
-
+        """
 
     LABWARE_OFFSETS.extend(workarounds.http_get_all_labware_offsets())
     print(f"simulate {simulate}")
@@ -223,10 +222,10 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
     print("9.75")
     hw_api = get_sync_hw_api(protocol)
     print("10")
+    #move gantry to the front and extend ejector for easier static application
     hw_api.move_to(Mount.LEFT, Point(125,25,250))
-    hw_api.drop_tip(mount=Mount.LEFT, removal=2)
-    input("Press Enter to continue...")    
-    #making my life 10x easier 
+    hw_api.drop_tip(mount=Mount.LEFT, removal=1)
+    input("Press Enter to continue...")     
     if pipette_size != 96:    
         protocol.home()   
         pleft.home()
@@ -246,11 +245,11 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
         y_pos = 395
         z_pos = -5
         knock_distance = 10
-        if (removal == 2 or removal == 0) and tip_location == 1:
+        if tip_location == 1:
             x_pos = 330
             if tip_type == 1000:
                 z_pos = -43
-        elif (removal == 2 or removal == 0) and tip_location == 2:
+        elif tip_location == 2:
             knock_distance = 30
             y_pos = 25
             x_pos = 327
@@ -259,6 +258,8 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
             if tip_type == 1000:
                 z_pos = 58
                 onek_adjust = 25
+        else:
+            sys.exit("Please choose valid location")
 
     if pipette_size == 96:
         onek_adjust = 0
@@ -268,7 +269,7 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
         knock_distance = 250
         if tip_location == 1:
             sys.exit("Cannot use 96ch and trash bin.")
-        elif (removal == 2 or removal == 0) and tip_location == 2:
+        elif tip_location == 2:
             if tip_type == 50 or tip_type == 200:
                 z_pos = 135
             if tip_type == 1000:
@@ -285,7 +286,7 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
         hw_api.move_to(Mount.LEFT, Point(x_pos,y_pos,z_pos))
         if pipette_size != 96:    
             hw_api.drop_tip(mount=Mount.LEFT, removal=removal)
-        if removal == 2:
+        if removal == 1:
             hw_api.move_to(Mount.LEFT, Point(x_pos - knock_distance,y_pos,(z_pos + adjustment - onek_adjust)))
         pleft.home()
     protocol.home()

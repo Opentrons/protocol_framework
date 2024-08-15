@@ -714,14 +714,14 @@ class OT3PipetteHandler:
                     Axis.Q: tip_motor_current,
                 },
             ),
-            # TipActionMoveSpec(
-            #     distance=prep_move_dist + clamp_move_dist,
-            #     speed=clamp_move_speed,
-            #     currents={
-            #         Axis.P_L: plunger_current,
-            #         Axis.Q: tip_motor_current,
-            #     },
-            # ),
+            TipActionMoveSpec(
+                distance=prep_move_dist + clamp_move_dist,
+                speed=clamp_move_speed,
+                currents={
+                    Axis.P_L: plunger_current,
+                    Axis.Q: tip_motor_current,
+                },
+            ),
         ]
 
     @staticmethod
@@ -890,7 +890,7 @@ class OT3PipetteHandler:
                 },
             ),
         ]
-        #control condition
+        #Regular removal
         if removal == 0:
             drop_seq.append(
                 TipActionMoveSpec(
@@ -903,45 +903,12 @@ class OT3PipetteHandler:
                     },
                 )
             )
-        #removal method type 1
+        #Static removal
         if removal == 1:
-            drop_seq.append(
-                TipActionMoveSpec(
-                    distance=instrument.plunger_positions.bottom,
-                    speed=None,
-                    currents={
-                        Axis.of_main_tool_actuator(mount): config.current,
-                    },
-                ),
-            )   
-            for i in range(3):
-                drop_seq.extend(    
-                    [
-                        TipActionMoveSpec(
-                            distance=instrument.plunger_positions.drop_tip,
-                            speed=None,
-                            currents={
-                                Axis.of_main_tool_actuator(mount): config.current,
-                            },
-                        ),
-                        TipActionMoveSpec(
-                            distance=instrument.plunger_positions.blow_out,
-                            speed=None,
-                            currents={
-                                Axis.of_main_tool_actuator(mount): instrument.plunger_motor_current.run,
-                            },
-                        ),
-                    ]
-                )
-
-        #removal method two
-        shakes: List[Tuple[Point, Optional[float]]] = []
-        if removal == 2:
-            print("pls work")
+            print("no further action")
 
         return TipActionSpec(
-            tip_action_moves=drop_seq,
-            shake_off_moves=shakes,
+            tip_action_moves=drop_seq
         )
 
     def plan_ht_drop_tip(self, removal: int = 0) -> TipActionSpec:
