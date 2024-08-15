@@ -27,14 +27,14 @@ requirements = {
 LABWARE_OFFSETS: List[LabwareOffset] = []
 ip = "10.14.19.236"
 print("1")
-try:
-    sys.path.insert(0, "/var/lib/jupyter/notebooks")
-    import google_sheets_tool  # type: ignore[import]
+# try:
+#     sys.path.insert(0, "/var/lib/jupyter/notebooks")
+#     import google_sheets_tool  # type: ignore[import]
 
-    credentials_path = "/var/lib/jupyter/notebooks/credentials.json"
-    print("2")
-except ImportError:
-    pass
+#     credentials_path = "/var/lib/jupyter/notebooks/credentials.json"
+#     print("2")
+# except ImportError:
+#     pass
 
 
 async def _main(simulate: bool, tiprack: str, removal: int, tip_location: int, tip_type: int, pipette_size: int, nozzles, nozzle2):
