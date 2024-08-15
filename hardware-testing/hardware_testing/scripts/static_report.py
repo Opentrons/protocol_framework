@@ -233,11 +233,15 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
     start = time.time()
     #setup differences between waste chute and trash bin and tip types
     if pipette_size == 8:
+        #the onek_adjustment variable allows the pipette to go both down and to the side when knocking off 1000uL tips on the waste chute
         onek_adjust = 0
+        """the adjustment variable is the height of the tip, allowing the z axis to stay in the same spot when it 
+        goes from thinking it has a tip attached to thinking it does not."""
         if tip_type == 50 or tip_type == 200:
             adjustment = 49
         if tip_type == 1000:
             adjustment = 87
+        #these positions are determined by where the tip is being knocked off
         x_pos = 400
         y_pos = 395
         z_pos = -5
@@ -277,9 +281,8 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
             pleft.pick_up_tip(tiprack_1[column])
             hw_api.move_rel(Mount.LEFT, Point(0,0,120)) #make it go up out of tiprack to avoid collision
         
-        hw_api.move_to(Mount.LEFT, Point(x_pos,y_pos,250-adjustment)) #200 is subject to change
-        hw_api.move_to(Mount.LEFT, Point(x_pos,y_pos,z_pos)) #is -5
-        # consider using tip size var to make it scale
+        hw_api.move_to(Mount.LEFT, Point(x_pos,y_pos,250-adjustment))
+        hw_api.move_to(Mount.LEFT, Point(x_pos,y_pos,z_pos))
         if pipette_size != 96:    
             hw_api.drop_tip(mount=Mount.LEFT, removal=removal)
         if removal == 2:
