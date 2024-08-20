@@ -226,7 +226,9 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
     hw_api.move_to(Mount.LEFT, Point(125,25,250))
     print("11.5")
     hw_api.drop_tip(mount=Mount.LEFT, removal=1)
-    input("Press Enter to continue...")     
+    coords = hw_api.current_position_ot3(Mount.LEFT)
+    print(coords)
+    input("Press Enter to definitely continue...")     
     if pipette_size != 96:    
         protocol.home()   
         pleft.home()
@@ -247,6 +249,7 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
         z_pos = -5
         knock_distance = 10
         if tip_location == 1:
+            knock_distance = 10
             x_pos = 330
             if tip_type == 1000:
                 z_pos = -43
@@ -259,6 +262,11 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
             if tip_type == 1000:
                 z_pos = 58
                 onek_adjust = 25
+        elif tip_location == 3:
+            x_pos = 14.4
+            y_pos = 74.4
+            z_pos = 54
+            knock_distance = -10
         else:
             sys.exit("Please choose valid location")
 
@@ -281,8 +289,11 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
     for column in tiprack_columns:
         if pipette_size != 96:    
             pleft.pick_up_tip(tiprack_1[column])
+            coords = hw_api.current_position_ot3(Mount.LEFT)
+            print(coords)
             hw_api.move_rel(Mount.LEFT, Point(0,0,120)) #make it go up out of tiprack to avoid collision
-        
+        if tip_location == 3:
+            hw_api.move_to(Mount.LEFT, Point(125,25,130))
         hw_api.move_to(Mount.LEFT, Point(x_pos,y_pos,250-adjustment))
         hw_api.move_to(Mount.LEFT, Point(x_pos,y_pos,z_pos))
         if pipette_size != 96:    
