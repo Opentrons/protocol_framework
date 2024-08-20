@@ -908,7 +908,8 @@ class OT3PipetteHandler:
             print("no further action")
 
         return TipActionSpec(
-            tip_action_moves=drop_seq
+            tip_action_moves=drop_seq,
+            shake_off_moves=[],
         )
 
     def plan_ht_drop_tip(self, removal: int = 0) -> TipActionSpec:
