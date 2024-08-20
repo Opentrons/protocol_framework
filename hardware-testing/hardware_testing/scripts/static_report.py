@@ -300,6 +300,8 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
             hw_api.drop_tip(mount=Mount.LEFT, removal=removal)
         if removal == 1:
             hw_api.move_to(Mount.LEFT, Point(x_pos - knock_distance,y_pos,(z_pos + adjustment - onek_adjust)))
+        if tip_location == 3:
+            raise Exception("Sorry, only one column for now")
         pleft.home()
     protocol.home()
     pleft.home()
