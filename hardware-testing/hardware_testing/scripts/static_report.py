@@ -153,7 +153,6 @@ async def _main(simulate: bool, tiprack: str, removal: int, tip_location: int, t
         except RuntimeError:
             print("Did not write row.")
         # hopefully this writes to the google sheet
-        print("hope so")
         """
 
     LABWARE_OFFSETS.extend(workarounds.http_get_all_labware_offsets())
