@@ -704,25 +704,39 @@ class OT3PipetteHandler:
         clamp_move_speed: float,
         tip_motor_current: float,
         plunger_current: float,
+        removal: int,
     ) -> List[TipActionMoveSpec]:
-        return [
-            TipActionMoveSpec(
-                distance=prep_move_dist,
-                speed=prep_move_speed,
-                currents={
-                    Axis.P_L: plunger_current,
-                    Axis.Q: tip_motor_current,
-                },
-            ),
-            TipActionMoveSpec(
-                distance=prep_move_dist + clamp_move_dist,
-                speed=clamp_move_speed,
-                currents={
-                    Axis.P_L: plunger_current,
-                    Axis.Q: tip_motor_current,
-                },
-            ),
-        ]
+        if removal == 1:    
+            return [
+                TipActionMoveSpec(
+                    distance=prep_move_dist,
+                    speed=prep_move_speed,
+                    currents={
+                        Axis.P_L: plunger_current,
+                        Axis.Q: tip_motor_current,
+                    },
+                ),
+            ]
+        else:    
+            return [
+                TipActionMoveSpec(
+                    distance=prep_move_dist,
+                    speed=prep_move_speed,
+                    currents={
+                        Axis.P_L: plunger_current,
+                        Axis.Q: tip_motor_current,
+                    },
+                ),
+                
+                TipActionMoveSpec(
+                    distance=prep_move_dist + clamp_move_dist,
+                    speed=clamp_move_speed,
+                    currents={
+                        Axis.P_L: plunger_current,
+                        Axis.Q: tip_motor_current,
+                    },
+                ),
+            ]
 
     @staticmethod
     def _build_pickup_shakes(
@@ -928,6 +942,7 @@ class OT3PipetteHandler:
             clamp_move_speed=config.speed,
             plunger_current=instrument.plunger_motor_current.run,
             tip_motor_current=config.current,
+            removal = removal,
         )
 
         return TipActionSpec(
