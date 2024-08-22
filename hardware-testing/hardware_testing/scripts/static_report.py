@@ -41,119 +41,6 @@ async def _main(simulate: bool, tiprack: str, removal: int, tip_location: int, t
     print("3")
     if not simulate:
         print("4")
-        """ Commenting out all the google drive data collection
-        sensor = asair_sensor.BuildAsairSensor(False, False)
-        print("5")
-        print(sensor)
-        header = [
-            "Intention of Run",
-            "Removal Location",
-            "Finish Time",
-            "Tip Size",
-            "Removed?",
-            "Total Run Time",
-            "Temperature (C)",
-            "Humidity (%)",
-            "Software",
-            "Firmware",
-            "Pipette Serial",
-            "Robot Serial",
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10",
-            "11",
-            "12",
-            "Total",
-        ]
-        # Upload to google has passed
-        try:
-            google_sheet = google_sheets_tool.google_sheet(
-                credentials_path, "Static Testing Report", tab_number=0
-            )
-            print("Connected to the google sheet.")
-        except FileNotFoundError:
-            print(
-                "There are no google sheets credentials. Make sure credentials in jupyter notebook."
-            )
-
-        print("6")
-        # main()
-
-        # The part where we get and input sensor data.
-        env_data = sensor.get_reading()
-        temp = env_data.temperature
-        rh = env_data.relative_humidity
-        # grab timestamp
-        timestamp = datetime.datetime.now()
-        # Time adjustment for ABR robot timezone
-        new_timestamp = timestamp - datetime.timedelta(hours=6)
-        # Adjusting time as robots are on UTC
-        print("11")
-        # automatically write what removal attempt was used
-        remove_type = "Control"
-        if removal == 1:
-            remove_type = "Removal Method 1"
-        if removal == 2:
-            remove_type = "Removal Method 2"
-        print("12")
-        if tip_location == 1:
-            location = "Trash Bin"
-        if tip_location == 2:
-            location = "Waste Chute"
-        # adding data grabbed from the robot's HTTP page
-        # From health: api ver, firm ver, rob serial
-        response = requests.get(
-            f"http://{ip}:31950/health", headers={"opentrons-version": "3"}
-        )
-        print(response)
-        print("13")
-        health_data = response.json()
-        firm = health_data.get("fw_version", "")
-        soft = health_data.get("api_version", "")
-        rob_serial = health_data.get("robot_serial", "")
-        print("14")
-        # from instruments we get pipette serial
-        response = requests.get(
-            f"http://{ip}:31950/pipettes", headers={"opentrons-version": "3"}
-        )
-        pipette_data = response.json()
-        pipette_serial = pipette_data['left'].get("id", "")
-        print("15")
-
-    #store most data in case of unsuccessful run
-        row = [
-            remove_type,
-            location,
-            str(new_timestamp),
-            args.tip_type,
-            "",  # will only write if it is not removed, IE will be blank unless the run fails. LATER
-            "", #not occured yet
-            temp,
-            rh,
-            soft,
-            firm,
-            pipette_serial,
-            rob_serial,
-        ]
-        # write to google sheet
-        try:
-            if google_sheet.credentials.access_token_expired:
-                google_sheet.gc.login()
-            google_sheet.write_header(header)
-            google_sheet.update_row_index()
-            google_sheet.write_to_row(row)
-            print("Wrote row")
-        except RuntimeError:
-            print("Did not write row.")
-        # hopefully this writes to the google sheet
-        """
 
     LABWARE_OFFSETS.extend(workarounds.http_get_all_labware_offsets())
     print(f"simulate {simulate}")
@@ -193,7 +80,7 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
     pleft = protocol.load_instrument(nozzles, "left")
     print("8")
     # DECK SETUP AND LABWARE
-    tiprack_1 = protocol.load_labware(tiprack, location="D1")
+    tiprack_1 = protocol.load_labware(tiprack, location="D1", adapter = "opentrons_flex_96_tiprack_adapter")
     pcr_plate = protocol.load_labware(
         "opentrons_96_wellplate_200ul_pcr_full_skirt", location="B3"
     )
@@ -227,10 +114,8 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
     hw_api.drop_tip(mount=Mount.LEFT, removal=1)
     coords = hw_api.current_position_ot3(Mount.LEFT)
     print(coords)
-    input("Press Enter to definitely continue...")     
-    if pipette_size != 96:    
-        protocol.home()   
-        pleft.home()
+    input("Press Enter to definitely continue...")    
+    pleft.home() 
     start = time.time()
     #setup differences between waste chute and trash bin and tip types
     if pipette_size == 8:
@@ -285,23 +170,22 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
 
 
     #add pause to measure static charge
-    for column in tiprack_columns:
-        if pipette_size != 96:    
-            pleft.pick_up_tip(tiprack_1[column])
-            coords = hw_api.current_position_ot3(Mount.LEFT)
-            print(coords)
-            hw_api.move_rel(Mount.LEFT, Point(0,0,120)) #make it go up out of tiprack to avoid collision
-        if tip_location == 3:
-            hw_api.move_to(Mount.LEFT, Point(125,25,130))
-        hw_api.move_to(Mount.LEFT, Point(x_pos,y_pos,250-adjustment))
-        hw_api.move_to(Mount.LEFT, Point(x_pos,y_pos,z_pos))
-        if pipette_size != 96:    
-            hw_api.drop_tip(mount=Mount.LEFT, removal=removal)
-        if removal == 1:
-            hw_api.move_to(Mount.LEFT, Point(x_pos - knock_distance,y_pos,(z_pos + adjustment - onek_adjust)))
-        if tip_location == 3:
-            raise Exception("Sorry, only one column for now")
-        pleft.home()
+    #for column in tiprack_columns:
+    pleft.pick_up_tip(tiprack_1["A1"])
+    coords = hw_api.current_position_ot3(Mount.LEFT)
+    print(coords)
+    hw_api.move_rel(Mount.LEFT, Point(0,0,120)) #make it go up out of tiprack to avoid collision
+    if tip_location == 3:
+        hw_api.move_to(Mount.LEFT, Point(125,25,130))
+    hw_api.move_to(Mount.LEFT, Point(x_pos,y_pos,250-adjustment))
+    hw_api.move_to(Mount.LEFT, Point(x_pos,y_pos,z_pos))
+    if pipette_size == 96:    
+        hw_api.drop_tip(mount=Mount.LEFT, removal=removal)
+    # if removal == 1:
+    #     hw_api.move_to(Mount.LEFT, Point(x_pos - knock_distance,y_pos,(z_pos + adjustment - onek_adjust)))
+    if tip_location == 3:
+        raise Exception("Sorry, only one column for now")
+    # pleft.home()
     protocol.home()
     pleft.home()
 
