@@ -706,37 +706,25 @@ class OT3PipetteHandler:
         plunger_current: float,
         removal: int,
     ) -> List[TipActionMoveSpec]:
-        if removal == 1:    
-            return [
-                TipActionMoveSpec(
-                    distance=prep_move_dist,
-                    speed=prep_move_speed,
-                    currents={
-                        Axis.P_L: plunger_current,
-                        Axis.Q: tip_motor_current,
-                    },
-                ),
-            ]
-        else:    
-            return [
-                TipActionMoveSpec(
-                    distance=prep_move_dist,
-                    speed=prep_move_speed,
-                    currents={
-                        Axis.P_L: plunger_current,
-                        Axis.Q: tip_motor_current,
-                    },
-                ),
-                
-                TipActionMoveSpec(
-                    distance=prep_move_dist + clamp_move_dist,
-                    speed=clamp_move_speed,
-                    currents={
-                        Axis.P_L: plunger_current,
-                        Axis.Q: tip_motor_current,
-                    },
-                ),
-            ]
+        return [
+            TipActionMoveSpec(
+                distance=prep_move_dist,
+                speed=prep_move_speed,
+                currents={
+                    Axis.P_L: plunger_current,
+                    Axis.Q: tip_motor_current,
+                },
+            ),
+            
+            TipActionMoveSpec(
+                distance=prep_move_dist + clamp_move_dist,
+                speed=clamp_move_speed,
+                currents={
+                    Axis.P_L: plunger_current,
+                    Axis.Q: tip_motor_current,
+                },
+            ),
+        ]
 
     @staticmethod
     def _build_pickup_shakes(
@@ -784,6 +772,7 @@ class OT3PipetteHandler:
             tip_motor_current=instrument.get_pick_up_current_by_configuration(
                 pick_up_config
             ),
+            removal = 0,
         )
 
         return TipActionSpec(

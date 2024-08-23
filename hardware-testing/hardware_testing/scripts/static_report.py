@@ -111,7 +111,7 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
     #move gantry to the front and extend ejector for easier static application
     hw_api.move_to(Mount.LEFT, Point(125,25,250))
     print("11.5")
-    hw_api.drop_tip(mount=Mount.LEFT, removal=1)
+    hw_api.drop_tip(mount=Mount.LEFT, removal=0)
     coords = hw_api.current_position_ot3(Mount.LEFT)
     print(coords)
     input("Press Enter to definitely continue...")    
@@ -179,15 +179,14 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
         hw_api.move_to(Mount.LEFT, Point(125,25,130))
     hw_api.move_to(Mount.LEFT, Point(x_pos,y_pos,250-adjustment))
     hw_api.move_to(Mount.LEFT, Point(x_pos,y_pos,z_pos))
-    if pipette_size == 96:    
-        hw_api.drop_tip(mount=Mount.LEFT, removal=removal)
+    hw_api.drop_tip(mount=Mount.LEFT)
+    input("Press enter to home pipette")
+    pleft.home()
     # if removal == 1:
     #     hw_api.move_to(Mount.LEFT, Point(x_pos - knock_distance,y_pos,(z_pos + adjustment - onek_adjust)))
     if tip_location == 3:
         raise Exception("Sorry, only one column for now")
     # pleft.home()
-    protocol.home()
-    pleft.home()
 
     # from datetime we get our runtime
     tot_run_time = int(time.time() - start)
