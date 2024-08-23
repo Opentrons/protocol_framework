@@ -111,7 +111,7 @@ def run(protocol: protocol_api.ProtocolContext, tiprack: str, removal: int, tip_
     #move gantry to the front and extend ejector for easier static application
     hw_api.move_to(Mount.LEFT, Point(125,25,250))
     print("11.5")
-    hw_api.drop_tip(mount=Mount.LEFT, removal=0)
+    hw_api.drop_tip(mount=Mount.LEFT)
     coords = hw_api.current_position_ot3(Mount.LEFT)
     print(coords)
     input("Press Enter to definitely continue...")    
