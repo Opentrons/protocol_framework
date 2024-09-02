@@ -929,7 +929,6 @@ class OT3Controller(FlexBackend):
     def _build_tip_action_group(
         self, origin: float, targets: List[Tuple[float, float]]
     ) -> MoveGroup:
-
         move_targets = [
             MoveTarget.build({Axis.Q: target_pos}, speed)
             for target_pos, speed in targets
