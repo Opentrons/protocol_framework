@@ -422,6 +422,26 @@ class HardwareGantryMover(GantryMover):
 
         return point
 
+    async def move_relative_with_mount(
+        self, mount, waypoints: List[Waypoint], speed: Optional[float]
+    ) -> Point:
+        try:
+            await self._hardware_api.move_rel(
+                mount=hw_mount,
+                delta=delta,
+                fail_on_not_homed=True,
+                speed=speed,
+            )
+            point = await self._hardware_api.gantry_position(
+                mount=hw_mount,
+                critical_point=critical_point,
+                fail_on_not_homed=True,
+            )
+        except PositionUnknownError as e:
+            raise MustHomeError(message=str(e), wrapping=[e])
+
+        return point
+
     async def home(self, axes: Optional[List[MotorAxis]]) -> None:
         """Home the gantry."""
         # TODO(mc, 2022-12-01): this is overly complicated
