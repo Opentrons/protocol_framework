@@ -579,7 +579,11 @@ CommandType = Union[
     unsafe.UnsafePlaceLabwareCommandType,
     robot.MoveAxesRelativeCommandType,
     robot.MoveAxesToCommandType,
+<<<<<<< HEAD
     robot.MoveToCommandType,
+=======
+    robot.MoveToCommandType
+>>>>>>> feat: add protocol engine commands for robot movement commands
 ]
 
 CommandCreate = Annotated[
