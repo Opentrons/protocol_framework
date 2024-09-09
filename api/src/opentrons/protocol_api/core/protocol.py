@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 
 class AbstractProtocol(
-    ABC, Generic[InstrumentCoreType, LabwareCoreType, ModuleCoreType]
+    ABC, Generic[InstrumentCoreType, LabwareCoreType, ModuleCoreType, RobotCoreType]
 ):
     @property
     @abstractmethod
