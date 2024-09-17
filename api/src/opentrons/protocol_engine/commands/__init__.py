@@ -554,7 +554,6 @@ __all__ = [
     "LoadLiquidResult",
     "LoadLiquidCommandType",
     # hardware control command models
-    "robot",
     # hardware module command bundles
     "absorbance_reader",
     "heater_shaker",
@@ -565,6 +564,7 @@ __all__ = [
     "calibration",
     # unsafe command bundle
     "unsafe",
+    "robot",
     # configure pipette volume command bundle
     "ConfigureForVolume",
     "ConfigureForVolumeCreate",

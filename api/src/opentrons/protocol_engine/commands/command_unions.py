@@ -567,7 +567,7 @@ CommandType = Union[
     unsafe.UnsafePlaceLabwareCommandType,
     robot.MoveAxesRelativeCommandType,
     robot.MoveAxesToCommandType,
-    robot.MoveToCommandType
+    robot.MoveToCommandType,
 ]
 
 CommandCreate = Annotated[
