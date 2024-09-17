@@ -266,8 +266,8 @@ class LegacyProtocolCore(
     ) -> LegacyLabwareCore:
         """Load an adapter using its identifying parameters"""
         raise APIVersionError(api_element="Loading adapter")
-    
-    def load_robot(self) -> None:
+
+    def load_robot(self) -> None: # type: ignore
         """Load an adapter using its identifying parameters"""
         raise APIVersionError(api_element="Loading robot")
 
