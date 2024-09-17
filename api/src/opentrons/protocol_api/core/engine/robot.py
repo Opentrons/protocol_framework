@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from typing import Optional, Dict
 from opentrons.hardware_control import SyncHardwareAPI
 
@@ -21,18 +20,6 @@ _AXIS_TYPE_TO_MOTOR_AXIS = {
     AxisType.Q: MotorAxis.AXIS_96_CHANNEL_CAM,
 }
 
-=======
-from typing import Optional
-from opentrons.hardware_control import SyncHardwareAPI
-
-from opentrons.types import Mount, MountType, Point, AxisMapType
-from opentrons.protocol_engine import commands as cmd
-from opentrons.protocol_engine.clients import SyncClient as EngineClient
-from opentrons.protocol_engine.types import DeckPoint
-
-from opentrons.protocol_api.core.robot import AbstractRobot
-
->>>>>>> feat: add robot core
 
 class RobotCore(AbstractRobot):
     """Robot API core using a ProtocolEngine.
@@ -63,6 +50,7 @@ class RobotCore(AbstractRobot):
         engine_destination = DeckPoint(
             x=destination.x, y=destination.y, z=destination.z
         )
+
         self._engine_client.execute_command(
             cmd.robot.MoveToParams(
                 mount=engine_mount, destination=engine_destination, speed=speed
