@@ -276,7 +276,6 @@ class AxisType(enum.Enum):
 
     @classmethod
     def axis_for_mount(cls, mount: Mount) -> "AxisType":
-<<<<<<< HEAD
         map_axis_to_mount = {
             Mount.LEFT: cls.Z_L,
             Mount.RIGHT: cls.Z_R,
@@ -292,23 +291,6 @@ class AxisType(enum.Enum):
             cls.Z_G: Mount.EXTENSION,
         }
         return map_mount_to_axis[axis]
-=======
-        if mount == Mount.LEFT:
-            return cls.Z_L
-        elif mount == Mount.RIGHT:
-            return cls.Z_R
-        elif mount == Mount.EXTENSION:
-            return cls.Z_G
-
-    @classmethod
-    def mount_for_axis(cls, axis: "AxisType") -> Mount:
-        if axis == cls.Z_L:
-            return Mount.LEFT
-        elif axis == cls.Z_R:
-            return Mount.RIGHT
-        elif axis == cls.Z_G:
-            return Mount.EXTENSION
->>>>>>> feat: add new axis types
 
     @classmethod
     def plunger_axis_for_mount(cls, mount: Mount) -> "AxisType":
@@ -327,11 +309,7 @@ class AxisType(enum.Enum):
         ]
 
     @classmethod
-<<<<<<< HEAD
     def flex_gantry_axes(cls) -> List["AxisType"]:
-=======
-    def ot3_gantry_axes(cls) -> List["AxisType"]:
->>>>>>> feat: add new axis types
         return [
             AxisType.X,
             AxisType.Y,
@@ -353,10 +331,6 @@ class AxisType(enum.Enum):
 AxisMapType = Dict[AxisType, float]
 StringAxisMap = Dict[str, float]
 
-<<<<<<< HEAD
-
-=======
->>>>>>> feat: add new axis types
 # TODO(mc, 2020-11-09): this makes sense in shared-data or other common
 # model library
 # https://github.com/Opentrons/opentrons/pull/6943#discussion_r519029833
