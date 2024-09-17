@@ -92,11 +92,7 @@ class RobotContext(publisher.CommandPublisher):
     def move_axes_to(
         self,
         axis_map: Union[AxisMapType, StringAxisMap],
-<<<<<<< HEAD
         critical_point: Optional[Union[AxisMapType, StringAxisMap]] = None,
-=======
-        critical_point: Union[AxisMapType, StringAxisMap],
->>>>>>> feat: add move_to, move_axes and move_axes rel functionality as well as helper methods
         speed: Optional[float] = None,
     ) -> None:
         """
