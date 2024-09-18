@@ -18,7 +18,12 @@ from opentrons.protocol_engine.commands.robot.move_axes_to import (
 async def test_move_axes_to_implementation(
     decoy: Decoy,
     gantry_mover: GantryMover,
+<<<<<<< HEAD
     ot3_hardware_api: HardwareControlAPI,
+=======
+    movement: MovementHandler,
+    hardware_api: HardwareControlAPI,
+>>>>>>> some lint fixes for typing conflicts in robot_context
 ) -> None:
     """Test the `robot.moveAxesTo` implementation.
 
@@ -36,6 +41,21 @@ async def test_move_axes_to_implementation(
         speed=567.8,
     )
 
+<<<<<<< HEAD
+=======
+    # OT 2 shape
+    decoy.when(hardware_api.get_robot_type()).then_return(OT2RobotType)
+
+    result = await subject.execute(params=params)
+
+    assert result == SuccessData(
+        public=MoveAxesToResult(
+            position={MotorAxis.X: 10, MotorAxis.Y: 10, MotorAxis.EXTENSION_Z: 20}
+        ),
+        private=None,
+    )
+
+>>>>>>> some lint fixes for typing conflicts in robot_context
     # Flex shape
     decoy.when(ot3_hardware_api.get_robot_type()).then_return(FlexRobotType)
     decoy.when(
@@ -50,5 +70,10 @@ async def test_move_axes_to_implementation(
     assert result == SuccessData(
         public=MoveAxesToResult(
             position={MotorAxis.X: 10, MotorAxis.Y: 10, MotorAxis.EXTENSION_Z: 20}
+<<<<<<< HEAD
         )
+=======
+        ),
+        private=None,
+>>>>>>> some lint fixes for typing conflicts in robot_context
     )

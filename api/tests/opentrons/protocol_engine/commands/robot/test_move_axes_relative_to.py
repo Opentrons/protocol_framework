@@ -1,6 +1,7 @@
 """Test robot.move-axes-relative commands."""
 from decoy import Decoy
 
+<<<<<<< HEAD
 from opentrons.hardware_control import HardwareControlAPI
 
 from opentrons.protocol_engine.execution import GantryMover
@@ -50,3 +51,8 @@ async def test_move_axes_to_implementation(
             position={MotorAxis.X: 10, MotorAxis.Y: 10, MotorAxis.EXTENSION_Z: 20}
         )
     )
+=======
+
+async def test_move_axes_relative_to_success() -> None:
+    return None
+>>>>>>> some lint fixes for typing conflicts in robot_context

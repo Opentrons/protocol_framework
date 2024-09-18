@@ -95,13 +95,9 @@ class RobotCore(AbstractRobot):
 
     def move_to(self, mount: Mount, destination: Point, speed: Optional[float]) -> None:
         engine_mount = MountType[mount.name]
-<<<<<<< HEAD
         engine_destination = DeckPoint(
             x=destination.x, y=destination.y, z=destination.z
         )
-=======
-        engine_destination = DeckPoint(x=destination.x, y=destination.y, z=destination.z)
->>>>>>> feat: add robot core
         self._engine_client.execute_command(
             cmd.robot.MoveToParams(
                 mount=engine_mount, destination=engine_destination, speed=speed
