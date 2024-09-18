@@ -23,6 +23,7 @@ _AXIS_TYPE_TO_MOTOR_AXIS = {
     AxisType.Q: MotorAxis.AXIS_96_CHANNEL_CAM,
 }
 
+
 class RobotCore(AbstractRobot):
     """Robot API core using a ProtocolEngine.
 
