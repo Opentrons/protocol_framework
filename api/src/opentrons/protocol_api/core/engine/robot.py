@@ -50,7 +50,6 @@ class RobotCore(AbstractRobot):
         engine_destination = DeckPoint(
             x=destination.x, y=destination.y, z=destination.z
         )
-
         self._engine_client.execute_command(
             cmd.robot.MoveToParams(
                 mount=engine_mount, destination=engine_destination, speed=speed
