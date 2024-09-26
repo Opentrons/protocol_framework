@@ -264,9 +264,10 @@ def _get_ideal_labware_locations(
     fixture_slot_pos = helpers_ot3.get_slot_bottom_left_position_ot3(
         test_config.slot_fixture
     )
-    fixture_loc_ideal = fixture_slot_pos + pressure_fixture_a1_location(
-        test_config.fixture_side
-    )
+    # fixture_loc_ideal = fixture_slot_pos + pressure_fixture_a1_location(
+    #     test_config.fixture_side
+    # )
+    fixture_loc_ideal = fixture_slot_pos
     if pipette_channels == 8:
         reservoir_loc_ideal += MULTI_CHANNEL_1_OFFSET
         trash_loc_ideal += MULTI_CHANNEL_1_OFFSET
@@ -345,6 +346,38 @@ async def _pick_up_tip(
     return actual
 
 
+async def _pick_up_tip_newfixture(
+    api: OT3API,
+    mount: OT3Mount,
+    tip: str,
+    expected: Optional[Point],
+    actual: Optional[Point],
+    tip_volume: Optional[float] = None,
+) -> Point:
+    # actual = await _move_to_or_calibrate(api, mount, expected, actual)
+    # tip_offset = _tip_name_to_xy_offset(tip)
+    # tip_pos = actual + tip_offset
+    # await helpers_ot3.move_to_arched_ot3(
+    #     api, mount, tip_pos, safe_height=tip_pos.z + SAFE_HEIGHT_TRAVEL
+    # )
+    # if not tip_volume:
+    #     pip = api.hardware_pipettes[mount.to_mount()]
+    #     assert pip
+    #     tip_volume = pip.working_volume
+    tip_length = helpers_ot3.get_default_tip_length(int(tip_volume))
+    try:
+        await api.pick_up_tip(mount, tip_length=tip_length)
+    except Exception as err:
+        #print(f"Error picking up tip: {err}")
+        LOG_GING.critical(f"Error picking up tip: {err}")
+        prinval = f"07-02光电传感器故障: 取针管状态不正确"
+        LOG_GING.error(prinval)
+        FINAL_TEST_FAIL_INFOR.append(prinval)
+        ui.print_fail(prinval)
+
+    await api.move_rel(mount, Point(z=tip_length))
+    return actual
+
 async def _pick_up_tip_for_tip_volume(
     api: OT3API, mount: OT3Mount, tip_volume: int
 ) -> None:
@@ -383,6 +416,23 @@ async def _pick_up_tip_for_tip_volume(
     else:
         raise ValueError(f"unexpected tip volume: {tip_volume}")
 
+async def _pick_up_tip_for_fixture(
+    api: OT3API, mount: OT3Mount, tip_volume: int
+) -> None:
+    pip = api.hardware_pipettes[mount.to_mount()]
+    assert pip
+    pip_channels = pip.channels.value
+    tip = _available_tips[tip_volume][0]
+    _available_tips[tip_volume] = _available_tips[tip_volume][pip_channels:]
+    tip = _available_tips[tip_volume][0]
+    await _pick_up_tip_newfixture(
+            api,
+            mount,
+            tip,
+            IDEAL_LABWARE_LOCATIONS.fixture,
+            CALIBRATED_LABWARE_LOCATIONS.fixture,
+            tip_volume=tip_volume,
+        )
 
 async def _move_to_reservoir_liquid(api: OT3API, mount: OT3Mount) -> None:
     CALIBRATED_LABWARE_LOCATIONS.reservoir = await _move_to_or_calibrate(
@@ -446,13 +496,14 @@ async def _move_to_fixture(api: OT3API, mount: OT3Mount) -> None:
         IDEAL_LABWARE_LOCATIONS.fixture,
         CALIBRATED_LABWARE_LOCATIONS.fixture,
     )
+    
 
     #Z down 0.5
-    if "single" in pipptype[OT3Mount.LEFT]['name']:
-        await api.move_rel(mount, Point(z=-0.4))
-    elif "multi" in pipptype[OT3Mount.LEFT]['name']:
-        await api.move_rel(mount, Point(z=3))
-    CALIBRATED_LABWARE_LOCATIONS.fixture = await api.gantry_position(mount)
+    # if "single" in pipptype[OT3Mount.LEFT]['name']:
+    #     await api.move_rel(mount, Point(z=-0.4))
+    # elif "multi" in pipptype[OT3Mount.LEFT]['name']:
+    #     await api.move_rel(mount, Point(z=3))
+    # CALIBRATED_LABWARE_LOCATIONS.fixture = await api.gantry_position(mount)
 
 
 async def _drop_tip_in_trash(api: OT3API, mount: OT3Mount) -> None:
@@ -652,12 +703,15 @@ async def _fixture_check_pressure(
     fixture: PressureFixtureBase,
     write_cb: Callable,
     accumulate_raw_data_cb: Callable,
+    tip_volume: int
 ) -> bool:
     results = []
     pip = api.hardware_pipettes[mount.to_mount()]
     assert pip
     pip_vol = int(pip.working_volume)
     pip_channels = int(pip.channels)
+
+    await _pick_up_tip_for_fixture(api, mount, tip_volume=tip_volume)
     # above the fixture
     r, _ = await _read_pressure_and_check_results(
         api,
@@ -673,7 +727,15 @@ async def _fixture_check_pressure(
     # insert into the fixture
     # NOTE: unknown amount of pressure here (depends on where Z was calibrated)
     fixture_depth = PRESSURE_FIXTURE_INSERT_DEPTH[pip_vol]
-    await api.move_rel(mount, Point(z=-fixture_depth))
+    #await api.move_rel(mount, Point(z=-fixture_depth))
+    await _drop_tip_in_trash(api, mount)
+
+
+
+    await _move_to_fixture(api, mount)
+
+    input("继续")
+    await _pick_up_tip_for_fixture(api, mount, tip_volume=tip_volume)
     await asyncio.sleep(1)
     r, inserted_pressure_data = await _read_pressure_and_check_results(
         api,
@@ -763,14 +825,13 @@ async def _test_for_leak(
     #     LOG_GING.info(f"current_val:{current_val}")
     #     await helpers_ot3.update_pick_up_current(api,mount,current_val)
     if fixture:
-        await _pick_up_tip_for_tip_volume(api, mount, tip_volume=tip_volume)
+        await _move_to_fixture(api, mount)
         assert write_cb, "pressure fixture requires recording data to disk"
         assert (
             accumulate_raw_data_cb
         ), "pressure fixture requires recording data to disk"
-        await _move_to_fixture(api, mount)
         test_passed = await _fixture_check_pressure(
-            api, mount, test_config, fixture, write_cb, accumulate_raw_data_cb
+            api, mount, test_config, fixture, write_cb, accumulate_raw_data_cb,tip_volume
         )
     else:
         await _pick_up_tip_for_tip_volume(api, mount, tip_volume=tip_volume)
