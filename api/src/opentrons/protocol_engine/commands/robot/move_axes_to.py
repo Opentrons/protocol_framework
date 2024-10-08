@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Literal, Optional, Type, TYPE_CHECKING
 from pydantic import Field, BaseModel
 
+from opentrons.protocol_engine.types import MotorAxis
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.protocol_engine.resources import ensure_ot3_hardware
 
@@ -65,7 +66,7 @@ class MoveAxesToImplementation(
         current_position = await self._gantry_mover.move_axes(
             axis_map=params.axis_map,
             speed=params.speed,
-            critical_point=params.critical_point,
+            critical_point={MotorAxis.X: 0.0, MotorAxis.Y: 0.0, MotorAxis.Z_L: 0.0},
         )
         return SuccessData(
             public=MoveAxesToResult(position=current_position),
