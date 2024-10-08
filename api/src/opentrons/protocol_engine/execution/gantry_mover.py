@@ -181,7 +181,6 @@ class HardwareGantryMover(GantryMover):
         """Transform an engine motor axis map to a hardware axis map."""
         return {_MOTOR_AXIS_TO_HARDWARE_AXIS[ax]: dist for ax, dist in axis_map.items()}
 
-<<<<<<< HEAD
     def _critical_point_for(
         self, mount: Mount, cp_override: Optional[Dict[MotorAxis, float]] = None
     ) -> Point:
@@ -191,25 +190,6 @@ class HardwareGantryMover(GantryMover):
                 y=cp_override[MotorAxis.Y],
                 z=cp_override[_HARDWARE_MOUNT_MOTOR_AXIS_TO[mount]],
             )
-=======
-    def _offset_axis_map_for_mount(self, mount: Mount) -> Dict[HardwareAxis, float]:
-        """Determine the offset for the given hardware mount"""
-        if (
-            self._state_view.config.robot_type == "OT-2 Standard"
-            and mount == Mount.RIGHT
-        ):
-            return {HardwareAxis.X: 0.0, HardwareAxis.Y: 0.0, HardwareAxis.A: 0.0}
-        elif (
-            self._state_view.config.robot_type == "OT-3 Standard"
-            and mount == Mount.EXTENSION
-        ):
-            offset = self._hardware_api.config.gripper_mount_offset  # type: ignore [union-attr]
-            return {
-                HardwareAxis.X: offset[0],
-                HardwareAxis.Y: offset[1],
-                HardwareAxis.Z_G: offset[2],
-            }
->>>>>>> some lint fixes for typing conflicts in robot_context
         else:
             return self._hardware_api.critical_point_for(mount)
 
@@ -395,18 +375,12 @@ class HardwareGantryMover(GantryMover):
         current_position = await self._hardware_api.current_position(
             mount, refresh=True
         )
-<<<<<<< HEAD
         converted_current_position_deck = self._hardware_api.get_deck_from_machine(
             current_position
         )
         return {
             self._hardware_axis_to_motor_axis(ax): pos
             for ax, pos in converted_current_position_deck.items()
-=======
-        return {
-            self._hardware_axis_to_motor_axis(ax): pos
-            for ax, pos in current_position.items()
->>>>>>> some lint fixes for typing conflicts in robot_context
         }
 
     async def move_relative(
