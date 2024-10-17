@@ -132,6 +132,8 @@ def target_axis_map_from_absolute(
     primary_z = Axis.by_mount(primary_mount)
     target_position = OrderedDict()
 
+    log.info(f"The primary critical point {primary_cp} and primary_mount {primary_mount} and type {type(primary_cp)}")
+    log.info(f"The offset {offset} and type is {type(offset)}")
     if Axis.X in keys_for_target_position:
         target_position[Axis.X] = axis_map[Axis.X] - offset.x - primary_cp.x
     if Axis.Y in keys_for_target_position:
