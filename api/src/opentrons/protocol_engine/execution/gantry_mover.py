@@ -339,6 +339,9 @@ class HardwareGantryMover(GantryMover):
                 current_position = await self._hardware_api.current_position(
                     mount, refresh=True
                 )
+                converted_current_position_deck = self._hardware_api._deck_from_machine(
+                    current_position
+                )
                 log.info(f"The current position of the robot is: {current_position}.")
                 converted_current_position_deck = (
                     self._hardware_api.get_deck_from_machine(current_position)
@@ -568,26 +571,37 @@ class VirtualGantryMover(GantryMover):
         axis_map: Dict[MotorAxis, float],
         critical_point: Optional[Dict[MotorAxis, float]] = None,
         speed: Optional[float] = None,
+        relative_move: bool = False,
     ) -> Dict[MotorAxis, float]:
         """Move the give axes map. No-op in virtual implementation."""
         mount = self.pick_mount_from_axis_map(axis_map)
         current_position = await self.get_position_from_mount(mount)
-        axis_map[MotorAxis.X] = axis_map.get(MotorAxis.X, 0.0) + current_position[0]
-        axis_map[MotorAxis.Y] = axis_map.get(MotorAxis.Y, 0.0) + current_position[1]
-        if mount == Mount.RIGHT:
-            axis_map[MotorAxis.RIGHT_Z] = (
-                axis_map.get(MotorAxis.RIGHT_Z, 0.0) + current_position[2]
+        updated_position = {}
+        if relative_move:
+            updated_position[MotorAxis.X] = (
+                axis_map.get(MotorAxis.X, 0.0) + current_position[0]
             )
-        elif mount == Mount.EXTENSION:
-            axis_map[MotorAxis.EXTENSION_Z] = (
-                axis_map.get(MotorAxis.EXTENSION_Z, 0.0) + current_position[2]
+            updated_position[MotorAxis.Y] = (
+                axis_map.get(MotorAxis.Y, 0.0) + current_position[1]
             )
+            if mount == Mount.RIGHT:
+                updated_position[MotorAxis.RIGHT_Z] = (
+                    axis_map.get(MotorAxis.RIGHT_Z, 0.0) + current_position[2]
+                )
+            elif mount == Mount.EXTENSION:
+                updated_position[MotorAxis.EXTENSION_Z] = (
+                    axis_map.get(MotorAxis.EXTENSION_Z, 0.0) + current_position[2]
+                )
+            else:
+                updated_position[MotorAxis.LEFT_Z] = (
+                    axis_map.get(MotorAxis.LEFT_Z, 0.0) + current_position[2]
+                )
         else:
-            axis_map[MotorAxis.LEFT_Z] = (
-                axis_map.get(MotorAxis.LEFT_Z, 0.0) + current_position[2]
-            )
-        critical_point = critical_point or {}
-        return {ax: pos - critical_point.get(ax, 0.0) for ax, pos in axis_map.items()}
+            critical_point = critical_point or {}
+            updated_position = {
+                ax: pos - critical_point.get(ax, 0.0) for ax, pos in axis_map.items()
+            }
+        return updated_position
 
     async def move_mount_to(
         self, mount: Mount, waypoints: List[Waypoint], speed: Optional[float]
