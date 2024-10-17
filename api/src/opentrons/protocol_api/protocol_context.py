@@ -221,6 +221,8 @@ class ProtocolContext(CommandPublisher):
 
         :meta private:
         """
+        if self._core.robot_type != "OT-3 Standard":
+            raise RobotTypeError("The RobotContext is only available on Flex robot.")
         return self._robot
 
     @property
