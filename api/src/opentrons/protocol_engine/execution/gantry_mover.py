@@ -70,7 +70,7 @@ _MOTOR_AXIS_TO_HARDWARE_MOUNT: Dict[MotorAxis, Mount] = {
     MotorAxis.EXTENSION_Z: Mount.EXTENSION,
 }
 
-_HARDWARE_MOUNT_MOTOR_AXIS_TO: Dict[MotorAxis, Mount] = {
+_HARDWARE_MOUNT_MOTOR_AXIS_TO: Dict[Mount, MotorAxis] = {
     Mount.LEFT: MotorAxis.LEFT_Z,
     Mount.RIGHT: MotorAxis.RIGHT_Z,
     Mount.EXTENSION: MotorAxis.EXTENSION_Z,
@@ -367,7 +367,8 @@ class HardwareGantryMover(GantryMover):
                 current_position = await self._hardware_api.current_position(
                     mount, refresh=True
                 )
-                converted_current_position_deck = self._hardware_api._deck_from_machine(
+                log.info(f"The current position of the robot is: {current_position}.")
+                converted_current_position_deck = self._hardware_api.get_deck_from_machine(
                     current_position
                 )
                 log.info(f"The current position of the robot is: {current_position}.")
