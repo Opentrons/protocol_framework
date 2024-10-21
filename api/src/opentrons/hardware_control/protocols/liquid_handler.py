@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict
 from typing_extensions import Protocol
 
 from opentrons.types import Point
