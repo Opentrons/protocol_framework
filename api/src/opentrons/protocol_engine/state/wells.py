@@ -112,9 +112,12 @@ class WellStore(HasState[WellState], HandlesActions):
                 del self._state.probed_volumes[labware_id][well_name]
             else:
                 prev_probed_vol_info = self._state.probed_volumes[labware_id][well_name]
-                assert prev_probed_vol_info.volume is not None
+                if prev_probed_vol_info.volume is None:
+                    new_vol_info: float | None = None
+                else:
+                    new_vol_info = prev_probed_vol_info.volume + state_update.volume
                 self._state.probed_volumes[labware_id][well_name] = ProbedVolumeInfo(
-                    volume=prev_probed_vol_info.volume + state_update.volume,
+                    volume=new_vol_info,
                     last_probed=prev_probed_vol_info.last_probed,
                     operations_since_probe=prev_probed_vol_info.operations_since_probe
                     + 1,
