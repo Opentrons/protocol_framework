@@ -68,7 +68,7 @@ _default_dispense: Dict[str, DispenseSettings] = {
         flow_rate=None,
         break_off=None,
         push_out=None,
-        submerge_mm=-4,  # non-contact is hard b/c clings to outside when exiting tip
+        submerge_mm=3.0,  # non-contact is hard b/c clings to outside when exiting tip
         retract_mm=3.0,
         delay=0.5,
         blow_out=True,
@@ -280,7 +280,7 @@ _defaults: Dict[
                         aspirate=AspirateSettings(
                             z_speed=None,
                             flow_rate=318,
-                            air_gap=0.0,
+                            air_gap=0.1,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=None,
@@ -289,7 +289,7 @@ _defaults: Dict[
                             z_speed=None,
                             flow_rate=318,
                             break_off=_default_accel_p1000_ul_sec_sec,
-                            push_out=5,
+                            push_out=20,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=None,
@@ -342,7 +342,7 @@ _defaults: Dict[
                         aspirate=AspirateSettings(
                             z_speed=None,
                             flow_rate=478,
-                            air_gap=0.0,
+                            air_gap=0.1,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=None,
@@ -351,7 +351,7 @@ _defaults: Dict[
                             z_speed=None,
                             flow_rate=478,
                             break_off=_default_accel_p1000_ul_sec_sec,
-                            push_out=5,
+                            push_out=20,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=None,
@@ -411,9 +411,9 @@ _defaults: Dict[
                         ),
                         dispense=DispenseSettings(
                             z_speed=None,
-                            flow_rate=57,
+                            flow_rate=478,
                             break_off=_default_accel_p1000_ul_sec_sec,
-                            push_out=5,
+                            push_out=20,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=None,
@@ -481,7 +481,7 @@ _defaults: Dict[
                             z_speed=None,
                             flow_rate=716,
                             break_off=_default_accel_p1000_ul_sec_sec,
-                            push_out=12,  # NOTE: production (contact) is 5uL
+                            push_out=20,  # NOTE: production (contact) is 5uL
                             submerge_mm=None,
                             retract_mm=None,
                             delay=None,
@@ -543,7 +543,7 @@ _defaults: Dict[
                             z_speed=None,
                             flow_rate=716,
                             break_off=_default_accel_p1000_ul_sec_sec,
-                            push_out=12,  # NOTE: production (contact) is 5uL
+                            push_out=20,  # NOTE: production (contact) is 5uL
                             submerge_mm=None,
                             retract_mm=None,
                             delay=None,
@@ -605,7 +605,7 @@ _defaults: Dict[
                             z_speed=None,
                             flow_rate=716,
                             break_off=_default_accel_p1000_ul_sec_sec,
-                            push_out=12,  # NOTE: production (contact) uses 5uL
+                            push_out=20,  # NOTE: production (contact) uses 5uL
                             submerge_mm=None,
                             retract_mm=None,
                             delay=None,
@@ -788,7 +788,7 @@ _defaults: Dict[
                         aspirate=AspirateSettings(
                             z_speed=None,
                             flow_rate=716,
-                            air_gap=10,
+                            air_gap=0,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=None,
