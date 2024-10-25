@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     exclude = [
         "__init__.py",
-        "shared_vars_and_funcs.py",
+        "helpers.py",
     ]
     # Walk through the root directory and its subdirectories
     for root, dirs, files in os.walk(root_dir):
