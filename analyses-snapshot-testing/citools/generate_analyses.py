@@ -186,7 +186,7 @@ def analyze(protocol: TargetProtocol, container: docker.models.containers.Contai
     start_time = time.time()
     result = None
     exit_code = None
-    console.print(f'Beginning analysis of {protocol.host_protocol_file_name}')
+    console.print(f'Beginning analysis of {protocol.host_protocol_file.name}')
     try:
         command_result = container.exec_run(cmd=command)
         exit_code = command_result.exit_code
