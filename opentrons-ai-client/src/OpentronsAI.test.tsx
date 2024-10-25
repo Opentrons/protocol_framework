@@ -10,7 +10,6 @@ import { useGetAccessToken } from './resources/hooks'
 import { Header } from './molecules/Header'
 import { Footer } from './molecules/Footer'
 import { HeaderWithMeter } from './molecules/HeaderWithMeter'
-import { TestProvider } from './resources/utils/testUtils'
 import { headerWithMeterAtom } from './resources/atoms'
 
 vi.mock('@auth0/auth0-react')
@@ -29,9 +28,14 @@ vi.mock('./resources/hooks/useTrackEvent', () => ({
   useTrackEvent: () => mockUseTrackEvent,
 }))
 
+const initialValues: Array<[any, any]> = [
+  [headerWithMeterAtom, { displayHeaderWithMeter: false, progress: 0 }],
+]
+
 const render = (): ReturnType<typeof renderWithProviders> => {
   return renderWithProviders(<OpentronsAI />, {
     i18nInstance: i18n,
+    initialValues,
   })
 }
 
@@ -68,35 +72,15 @@ describe('OpentronsAI', () => {
   })
 
   it('should render the default Header component if displayHeaderWithMeter is false', () => {
-    renderWithProviders(
-      <TestProvider
-        initialValues={[
-          [headerWithMeterAtom, { displayHeaderWithMeter: false, progress: 0 }],
-        ]}
-      >
-        <OpentronsAI />
-      </TestProvider>,
-      {
-        i18nInstance: i18n,
-      }
-    )
+    render()
 
     screen.getByText('mock Header component')
   })
 
   it('should render Header with meter component if displayHeaderWithMeter is true', () => {
-    renderWithProviders(
-      <TestProvider
-        initialValues={[
-          [headerWithMeterAtom, { displayHeaderWithMeter: true, progress: 0 }],
-        ]}
-      >
-        <OpentronsAI />
-      </TestProvider>,
-      {
-        i18nInstance: i18n,
-      }
-    )
+    initialValues[0][1].displayHeaderWithMeter = true
+
+    render()
 
     screen.getByText('mock Header With Meter component')
   })

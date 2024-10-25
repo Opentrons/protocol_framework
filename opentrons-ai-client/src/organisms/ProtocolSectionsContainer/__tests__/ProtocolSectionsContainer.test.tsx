@@ -4,7 +4,6 @@ import { renderWithProviders } from '../../../__testing-utils__'
 import { i18n } from '../../../i18n'
 import { ProtocolSectionsContainer } from '..'
 import { FormProvider, useForm } from 'react-hook-form'
-import { Provider } from 'jotai'
 import { fillApplicationSectionAndClickConfirm } from '../../../resources/utils/createProtocolTestUtils'
 
 const TestFormProviderComponent = () => {
@@ -14,9 +13,7 @@ const TestFormProviderComponent = () => {
 
   return (
     <FormProvider {...methods}>
-      <Provider>
-        <ProtocolSectionsContainer />
-      </Provider>
+      <ProtocolSectionsContainer />
     </FormProvider>
   )
 }
