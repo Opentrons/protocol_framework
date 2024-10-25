@@ -21,6 +21,8 @@ from opentrons.protocol_engine.notes import CommandNoteAdder
 from opentrons.protocol_engine.resources import ModelUtils
 from opentrons.protocol_engine.state.state import StateStore
 from opentrons.protocol_engine.commands.pipetting_common import OverpressureError
+from opentrons.protocol_engine.types import CurrentWell
+from opentrons.protocol_engine.state import update_types
 
 
 @pytest.fixture
@@ -91,9 +93,25 @@ async def test_aspirate_in_place_implementation(
         )
     ).then_return(123)
 
+    decoy.when(state_store.pipettes.get_current_location()).then_return(
+        CurrentWell(
+            pipette_id="pipette-id-abc",
+            labware_id="labware-id-1",
+            well_name="well-name-1",
+        )
+    )
+
     result = await subject.execute(params=data)
 
-    assert result == SuccessData(public=AspirateInPlaceResult(volume=123), private=None)
+    assert result == SuccessData(
+        public=AspirateInPlaceResult(volume=123),
+        private=None,
+        state_update=update_types.StateUpdate(
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id="labware-id-1", well_name="well-name-1", volume=-123
+            )
+        ),
+    )
 
 
 async def test_handle_aspirate_in_place_request_not_ready_to_aspirate(

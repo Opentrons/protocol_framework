@@ -21,10 +21,13 @@ from .command import (
     DefinedErrorData,
 )
 from ..errors.error_occurrence import ErrorOccurrence
+from ..state.update_types import StateUpdate
+from ..types import CurrentWell
 
 if TYPE_CHECKING:
     from ..execution import PipettingHandler, GantryMover
     from ..resources import ModelUtils
+    from ..state.state import StateView
 
 
 DispenseInPlaceCommandType = Literal["dispenseInPlace"]
@@ -59,11 +62,13 @@ class DispenseInPlaceImplementation(
     def __init__(
         self,
         pipetting: PipettingHandler,
+        state_view: StateView,
         gantry_mover: GantryMover,
         model_utils: ModelUtils,
         **kwargs: object,
     ) -> None:
         self._pipetting = pipetting
+        self._state_view = state_view
         self._gantry_mover = gantry_mover
         self._model_utils = model_utils
 
@@ -102,9 +107,21 @@ class DispenseInPlaceImplementation(
                 ),
             )
         else:
-            # if location is a well, update WellStore
+            current_location = self._state_view.pipettes.get_current_location()
+            if (
+                isinstance(current_location, CurrentWell)
+                and current_location.pipette_id == params.pipetteId
+            ):
+                state_update = StateUpdate()
+                state_update.set_liquid_operated(
+                    labware_id=current_location.labware_id,
+                    well_name=current_location.well_name,
+                    volume=volume,
+                )
             return SuccessData(
-                public=DispenseInPlaceResult(volume=volume), private=None
+                public=DispenseInPlaceResult(volume=volume),
+                private=None,
+                state_update=state_update,
             )
 
 

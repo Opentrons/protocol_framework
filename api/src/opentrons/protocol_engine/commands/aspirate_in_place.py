@@ -24,6 +24,8 @@ from .command import (
 )
 from ..errors.error_occurrence import ErrorOccurrence
 from ..errors.exceptions import PipetteNotReadyToAspirateError
+from ..state.update_types import StateUpdate
+from ..types import CurrentWell
 
 if TYPE_CHECKING:
     from ..execution import PipettingHandler, GantryMover
@@ -124,9 +126,21 @@ class AspirateInPlaceImplementation(
                 ),
             )
         else:
-            # if location is a well, update WellStore
+            current_location = self._state_view.pipettes.get_current_location()
+            if (
+                isinstance(current_location, CurrentWell)
+                and current_location.pipette_id == params.pipetteId
+            ):
+                state_update = StateUpdate()
+                state_update.set_liquid_operated(
+                    labware_id=current_location.labware_id,
+                    well_name=current_location.well_name,
+                    volume=-volume,
+                )
             return SuccessData(
-                public=AspirateInPlaceResult(volume=volume), private=None
+                public=AspirateInPlaceResult(volume=volume),
+                private=None,
+                state_update=state_update,
             )
 
 
