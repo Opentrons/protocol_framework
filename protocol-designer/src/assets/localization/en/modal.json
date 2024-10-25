@@ -85,7 +85,7 @@
     },
     "body": {
       "blowout_z_offset": "Change from where in the well the robot emits blowout",
-      "aspirate_mmFromBottom": "Change from where in the well the robot aspirates",
+      "aspirate_mmFromBottom": "Change where in the well the robot aspirates from.",
       "dispense_mmFromBottom": "Change from where in the well the robot dispenses",
       "mix_mmFromBottom": "Change from where in the well the robot aspirates and dispenses during the mix",
       "aspirate_touchTip_mmFromBottom": "Change from where in the well the robot performs touch tip",

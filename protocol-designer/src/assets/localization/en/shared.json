@@ -131,6 +131,7 @@
   "stagingArea": "Staging area",
   "step_count": "Step {{current}}",
   "step": "Step {{current}} / {{max}}",
+  "swap_view": "Swap view",
   "temperaturemoduletype": "Temperature Module",
   "thermocyclermoduletype": "Thermocycler Module",
   "trashBin": "Trash Bin",
