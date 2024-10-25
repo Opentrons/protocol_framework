@@ -32,7 +32,6 @@ const showGateModal =
 function ProtocolEditorComponent(): JSX.Element {
   const enableRedesign = useSelector(getEnableRedesign)
   const isValidSize = useScreenSizeCheck()
-
   return (
     <div
       id="protocol-editor"
