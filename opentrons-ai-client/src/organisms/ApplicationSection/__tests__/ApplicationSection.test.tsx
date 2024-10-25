@@ -5,7 +5,6 @@ import { i18n } from '../../../i18n'
 import { ApplicationSection } from '..'
 import { FormProvider, useForm } from 'react-hook-form'
 
-// TODO move to __testing-utils__
 const TestFormProviderComponent = () => {
   const methods = useForm({
     defaultValues: {},
