@@ -1,12 +1,13 @@
-import type * as React from 'react'
 import { fireEvent, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderWithProviders } from '../../../../../__testing-utils__'
-import { i18n } from '../../../../../assets/localization'
-import { TipPositionModal } from '../TipPositionModal'
-import { TipPositionAllViz } from '../TipPositionAllViz'
+import { renderWithProviders } from '../../../__testing-utils__'
+import { i18n } from '../../../assets/localization'
+import { TipPositionSideView } from '../TipPositionSideView'
+import { TipPositionModal } from '..'
 
-vi.mock('../TipPositionAllViz')
+import type * as React from 'react'
+
+vi.mock('../TipPositionSideView')
 const render = (props: React.ComponentProps<typeof TipPositionModal>) => {
   return renderWithProviders(<TipPositionModal {...props} />, {
     i18nInstance: i18n,
@@ -45,17 +46,16 @@ describe('TipPositionModal', () => {
         },
       },
     }
-    vi.mocked(TipPositionAllViz).mockReturnValue(<div>mock TipPositionViz</div>)
+    vi.mocked(TipPositionSideView).mockReturnValue(
+      <div>mock TipPositionSideView</div>
+    )
   })
-  it('renders the modal text and radio button text', () => {
+  it('renders the modal text', () => {
     render(props)
     screen.getByText('Tip Positioning')
-    screen.getByText('Change where in the well the robot aspirates from.')
-    screen.getByRole('radio', { name: '1 mm from the bottom center (default)' })
-    screen.getByRole('radio', { name: 'Custom' })
-    fireEvent.click(screen.getByText('cancel'))
+    fireEvent.click(screen.getByText('Cancel'))
     expect(props.closeModal).toHaveBeenCalled()
-    fireEvent.click(screen.getByText('done'))
+    fireEvent.click(screen.getByText('Save'))
     expect(props.closeModal).toHaveBeenCalled()
     expect(mockUpdateXSpec).toHaveBeenCalled()
     expect(mockUpdateYSpec).toHaveBeenCalled()
@@ -64,7 +64,6 @@ describe('TipPositionModal', () => {
   it('renders the alert if the x/y position values are too close to the max/min for x value', () => {
     props.specs.x.value = 9.7
     render(props)
-    screen.getByText('warning')
     screen.getByText(
       'One or more position offset values are close to the edge of the well and might collide with it'
     )
@@ -72,33 +71,29 @@ describe('TipPositionModal', () => {
   it('renders the alert if the x/y position values are too close to the max/min for y value', () => {
     props.specs.y.value = -9.7
     render(props)
-    screen.getByText('warning')
     screen.getByText(
       'One or more position offset values are close to the edge of the well and might collide with it'
     )
   })
-  it('renders the custom options, captions, and visual', () => {
+  it('renders the captions, and visual', () => {
     render(props)
-    fireEvent.click(screen.getByRole('radio', { name: 'Custom' }))
-    expect(screen.getAllByRole('textbox', { name: '' })).toHaveLength(3)
     screen.getByText('X position')
     screen.getByText('between -5.1 and 5.1')
     screen.getByText('Y position')
     screen.getByText('between -5.2 and 5.2')
     screen.getByText('Z position')
-    screen.getByText('between 0 and 100')
-    screen.getByText('mock TipPositionViz')
+    screen.getByText('between 0 and 50')
+    screen.getByText('mock TipPositionSideView')
   })
   it('renders a custom input field and clicks on it, calling the mock updates', () => {
     render(props)
-    fireEvent.click(screen.getByRole('radio', { name: 'Custom' }))
     const xInputField = screen.getAllByRole('textbox', { name: '' })[0]
     fireEvent.change(xInputField, { target: { value: 3 } })
     const yInputField = screen.getAllByRole('textbox', { name: '' })[1]
     fireEvent.change(yInputField, { target: { value: -2 } })
     const zInputField = screen.getAllByRole('textbox', { name: '' })[2]
     fireEvent.change(zInputField, { target: { value: 10 } })
-    fireEvent.click(screen.getByText('done'))
+    fireEvent.click(screen.getByText('Save'))
     expect(props.closeModal).toHaveBeenCalled()
     expect(mockUpdateXSpec).toHaveBeenCalled()
     expect(mockUpdateYSpec).toHaveBeenCalled()
@@ -126,14 +121,10 @@ describe('TipPositionModal', () => {
       },
     }
     render(props)
-    fireEvent.click(screen.getByText('done'))
-    //  display out of bounds error
-    screen.getByText('accepted range is 0 to 100')
-    screen.getByText('accepted range is -5.2 to 5.2')
-    screen.getByText('accepted range is -5.1 to 5.1')
+    fireEvent.click(screen.getByText('Save'))
     const xInputField = screen.getAllByRole('textbox', { name: '' })[0]
     fireEvent.change(xInputField, { target: { value: 3.55555 } })
-    fireEvent.click(screen.getByText('done'))
+    fireEvent.click(screen.getByText('Save'))
     //   display too many decimals error
     screen.getByText('a max of 1 decimal place is allowed')
   })
