@@ -26,4 +26,7 @@ export interface StepFormProps {
   propsForFields: FieldPropsByName
   toolboxStep: number
   visibleFormErrors: StepFormErrors
+  showFormErrors: boolean
+  focusedField?: string | null
+  setShowFormErrorsAndWarnings?: React.Dispatch<React.SetStateAction<boolean>>
 }

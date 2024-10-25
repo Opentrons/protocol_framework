@@ -25,6 +25,7 @@ import type {
   StepType,
   PathOption,
 } from '../../../../form-types'
+import type { FormError } from '../../../../steplist/formLevel'
 import type { NozzleType } from '../../../../types'
 import type { FieldProps, FieldPropsByName, FocusHandlers } from './types'
 
@@ -321,4 +322,36 @@ export const getSaveStepSnackbarText = (
   } else {
     return t(`protocol_steps:save_no_errors`, { stepType: stepTypeDisplayName })
   }
+}
+
+type ErrorMappedToField = Record<string, FormError>
+
+export const getFormErrorsMappedToField = (
+  formErrors: StepFormErrors
+): ErrorMappedToField => {
+  return formErrors.reduce<ErrorMappedToField>((acc, error) => {
+    const { dependentFields } = error
+    for (const field of dependentFields) {
+      acc[field] = {
+        ...error,
+        showAtField: error.showAtField ?? true,
+        showAtForm: error.showAtForm ?? true,
+      }
+    }
+    return acc
+  }, {})
+}
+
+export const getFormLevelError = (
+  showFormErrors: boolean,
+  fieldName: string,
+  mappedErrorsToField: ErrorMappedToField,
+  focusedField?: string | null
+): string | null => {
+  return showFormErrors &&
+    focusedField !== fieldName &&
+    mappedErrorsToField[fieldName] &&
+    mappedErrorsToField[fieldName].showAtField
+    ? mappedErrorsToField[fieldName].title
+    : null
 }

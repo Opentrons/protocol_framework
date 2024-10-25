@@ -8,6 +8,7 @@ interface InputStepFormFieldProps extends FieldProps {
   padding?: string
   showTooltip?: boolean
   caption?: string
+  formLevelError?: string | null
 }
 
 export function InputStepFormField(
@@ -26,6 +27,7 @@ export function InputStepFormField(
     padding = SPACING.spacing16,
     tooltipContent,
     caption,
+    formLevelError,
     ...otherProps
   } = props
   const { t } = useTranslation('tooltip')
@@ -40,7 +42,7 @@ export function InputStepFormField(
         title={title}
         caption={caption}
         name={name}
-        error={errorToShow}
+        error={formLevelError ?? errorToShow}
         onBlur={onFieldBlur}
         onFocus={onFieldFocus}
         onChange={e => {

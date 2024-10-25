@@ -248,6 +248,9 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
             focusHandlers,
             toolboxStep,
             visibleFormErrors,
+            showFormErrors: showFormErrorsAndWarnings,
+            focusedField,
+            setShowFormErrorsAndWarnings,
           }}
         />
       </Toolbox>

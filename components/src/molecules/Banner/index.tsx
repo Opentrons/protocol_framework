@@ -111,7 +111,10 @@ export function Banner(props: BannerProps): JSX.Element {
       flexDirection={DIRECTION_ROW}
       justifyContent={JUSTIFY_SPACE_BETWEEN}
       alignItems={ALIGN_CENTER}
-      padding={padding ?? SPACING.spacing8}
+      padding={
+        padding ??
+        `${SPACING.spacing8} ${SPACING.spacing8} ${SPACING.spacing8}  ${SPACING.spacing12}`
+      }
       onClick={(e: React.MouseEvent) => {
         e.stopPropagation()
       }}
