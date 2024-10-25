@@ -21,7 +21,11 @@ from opentrons.protocol_engine.notes import CommandNoteAdder
 from opentrons.protocol_engine.resources import ModelUtils
 from opentrons.protocol_engine.state.state import StateStore
 from opentrons.protocol_engine.commands.pipetting_common import OverpressureError
-from opentrons.protocol_engine.types import CurrentWell
+from opentrons.protocol_engine.types import (
+    CurrentWell,
+    CurrentPipetteLocation,
+    CurrentAddressableArea,
+)
 from opentrons.protocol_engine.state import update_types
 
 
@@ -63,6 +67,22 @@ def subject(
     )
 
 
+@pytest.mark.parametrize(
+    "location,stateupdateLabware,stateupdateWell",
+    [
+        (
+            CurrentWell(
+                pipette_id="pipette-id-abc",
+                labware_id="labware-id-1",
+                well_name="well-name-1",
+            ),
+            "labware-id-1",
+            "well-name-1",
+        ),
+        (None, None, None),
+        (CurrentAddressableArea("pipette-id-abc", "addressable-area-1"), None, None),
+    ],
+)
 async def test_aspirate_in_place_implementation(
     decoy: Decoy,
     pipetting: PipettingHandler,
@@ -70,6 +90,9 @@ async def test_aspirate_in_place_implementation(
     hardware_api: HardwareAPI,
     mock_command_note_adder: CommandNoteAdder,
     subject: AspirateInPlaceImplementation,
+    location: CurrentPipetteLocation | None,
+    stateupdateLabware: str,
+    stateupdateWell: str,
 ) -> None:
     """It should aspirate in place."""
     data = AspirateInPlaceParams(
@@ -93,25 +116,27 @@ async def test_aspirate_in_place_implementation(
         )
     ).then_return(123)
 
-    decoy.when(state_store.pipettes.get_current_location()).then_return(
-        CurrentWell(
-            pipette_id="pipette-id-abc",
-            labware_id="labware-id-1",
-            well_name="well-name-1",
-        )
-    )
+    decoy.when(state_store.pipettes.get_current_location()).then_return(location)
 
     result = await subject.execute(params=data)
 
-    assert result == SuccessData(
-        public=AspirateInPlaceResult(volume=123),
-        private=None,
-        state_update=update_types.StateUpdate(
-            liquid_operated=update_types.LiquidOperatedUpdate(
-                labware_id="labware-id-1", well_name="well-name-1", volume=-123
-            )
-        ),
-    )
+    if isinstance(location, CurrentWell):
+        assert result == SuccessData(
+            public=AspirateInPlaceResult(volume=123),
+            private=None,
+            state_update=update_types.StateUpdate(
+                liquid_operated=update_types.LiquidOperatedUpdate(
+                    labware_id=stateupdateLabware,
+                    well_name=stateupdateWell,
+                    volume=-123,
+                )
+            ),
+        )
+    else:
+        assert result == SuccessData(
+            public=AspirateInPlaceResult(volume=123),
+            private=None,
+        )
 
 
 async def test_handle_aspirate_in_place_request_not_ready_to_aspirate(
@@ -171,6 +196,22 @@ async def test_aspirate_raises_volume_error(
         await subject.execute(data)
 
 
+@pytest.mark.parametrize(
+    "location,stateupdateLabware,stateupdateWell",
+    [
+        (
+            CurrentWell(
+                pipette_id="pipette-id",
+                labware_id="labware-id-1",
+                well_name="well-name-1",
+            ),
+            "labware-id-1",
+            "well-name-1",
+        ),
+        (None, None, None),
+        (CurrentAddressableArea("pipette-id", "addressable-area-1"), None, None),
+    ],
+)
 async def test_overpressure_error(
     decoy: Decoy,
     gantry_mover: GantryMover,
@@ -178,6 +219,10 @@ async def test_overpressure_error(
     subject: AspirateInPlaceImplementation,
     model_utils: ModelUtils,
     mock_command_note_adder: CommandNoteAdder,
+    state_store: StateStore,
+    location: CurrentPipetteLocation | None,
+    stateupdateLabware: str,
+    stateupdateWell: str,
 ) -> None:
     """It should return an overpressure error if the hardware API indicates that."""
     pipette_id = "pipette-id"
@@ -209,14 +254,32 @@ async def test_overpressure_error(
     decoy.when(model_utils.generate_id()).then_return(error_id)
     decoy.when(model_utils.get_timestamp()).then_return(error_timestamp)
     decoy.when(await gantry_mover.get_position(pipette_id)).then_return(position)
+    decoy.when(state_store.pipettes.get_current_location()).then_return(location)
 
     result = await subject.execute(data)
 
-    assert result == DefinedErrorData(
-        public=OverpressureError.construct(
-            id=error_id,
-            createdAt=error_timestamp,
-            wrappedErrors=[matchers.Anything()],
-            errorInfo={"retryLocation": (position.x, position.y, position.z)},
-        ),
-    )
+    if isinstance(location, CurrentWell):
+        assert result == DefinedErrorData(
+            public=OverpressureError.construct(
+                id=error_id,
+                createdAt=error_timestamp,
+                wrappedErrors=[matchers.Anything()],
+                errorInfo={"retryLocation": (position.x, position.y, position.z)},
+            ),
+            state_update=update_types.StateUpdate(
+                liquid_operated=update_types.LiquidOperatedUpdate(
+                    labware_id=stateupdateLabware,
+                    well_name=stateupdateWell,
+                    volume=None,
+                )
+            ),
+        )
+    else:
+        assert result == DefinedErrorData(
+            public=OverpressureError.construct(
+                id=error_id,
+                createdAt=error_timestamp,
+                wrappedErrors=[matchers.Anything()],
+                errorInfo={"retryLocation": (position.x, position.y, position.z)},
+            ),
+        )

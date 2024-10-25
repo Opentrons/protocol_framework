@@ -93,6 +93,10 @@ class AspirateInPlaceImplementation(
                 " The first aspirate following a blow-out must be from a specific well"
                 " so the plunger can be reset in a known safe position."
             )
+
+        state_update = StateUpdate()
+        current_location = self._state_view.pipettes.get_current_location()
+
         try:
             current_position = await self._gantry_mover.get_position(params.pipetteId)
             volume = await self._pipetting.aspirate_in_place(
@@ -103,6 +107,15 @@ class AspirateInPlaceImplementation(
             )
         except PipetteOverpressureError as e:
             # TODO(pbm, 10-24-24): if location is a well, get new tip and LiquidProbe in error recovery to reestablish well liquid level
+            if (
+                isinstance(current_location, CurrentWell)
+                and current_location.pipette_id == params.pipetteId
+            ):
+                state_update.set_liquid_operated(
+                    labware_id=current_location.labware_id,
+                    well_name=current_location.well_name,
+                    volume=None,
+                )
             return DefinedErrorData(
                 public=OverpressureError(
                     id=self._model_utils.generate_id(),
@@ -124,14 +137,13 @@ class AspirateInPlaceImplementation(
                         }
                     ),
                 ),
+                state_update=state_update,
             )
         else:
-            current_location = self._state_view.pipettes.get_current_location()
             if (
                 isinstance(current_location, CurrentWell)
                 and current_location.pipette_id == params.pipetteId
             ):
-                state_update = StateUpdate()
                 state_update.set_liquid_operated(
                     labware_id=current_location.labware_id,
                     well_name=current_location.well_name,
