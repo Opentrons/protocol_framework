@@ -1,7 +1,12 @@
 import { useForm, FormProvider } from 'react-hook-form'
-import { COLORS, Flex, POSITION_RELATIVE } from '@opentrons/components'
+import {
+  DIRECTION_COLUMN,
+  DIRECTION_ROW,
+  Flex,
+  JUSTIFY_CENTER,
+  POSITION_RELATIVE,
+} from '@opentrons/components'
 
-import { SidePanel } from '../../molecules/SidePanel'
 import { MainContentContainer } from '../../organisms/MainContentContainer'
 
 export interface InputType {
@@ -18,12 +23,15 @@ export function Chat(): JSX.Element | null {
   return (
     <Flex
       position={POSITION_RELATIVE}
-      minHeight="100vh"
-      backgroundColor={COLORS.grey10}
+      flexDirection={DIRECTION_COLUMN}
+      justifyContent={JUSTIFY_CENTER}
+      width="100%"
     >
       <FormProvider {...methods}>
-        {/* <SidePanel /> */}
-        <MainContentContainer />
+        <Flex flexDirection={DIRECTION_ROW}>
+          {/* <SidePanel /> */}
+          <MainContentContainer />
+        </Flex>
       </FormProvider>
     </Flex>
   )

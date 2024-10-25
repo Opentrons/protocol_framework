@@ -209,6 +209,7 @@ export function UpdateProtocol(): JSX.Element {
             />
           )}
         </Flex>
+        <Flex height={'16px'}></Flex>
         <Flex flexDirection={DIRECTION_COLUMN} width="100%">
           <DropdownMenu
             title={t('type_of_update')}

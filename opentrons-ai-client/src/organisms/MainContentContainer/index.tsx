@@ -4,7 +4,6 @@ import styled from 'styled-components'
 import { useAtom } from 'jotai'
 
 import {
-  COLORS,
   DIRECTION_COLUMN,
   Flex,
   OVERFLOW_AUTO,
@@ -32,14 +31,11 @@ export function MainContentContainer(): JSX.Element {
 
   return (
     <Flex
-      marginTop="2.5rem"
-      marginLeft="24.375rem"
       padding={`${SPACING.spacing40} ${SPACING.spacing40} ${SPACING.spacing24}`}
-      backgroundColor={COLORS.grey10}
-      width="auto"
       flexDirection={DIRECTION_COLUMN}
       gridGap={SPACING.spacing40}
-      height="100vh"
+      height="80vh"
+      width="100%"
     >
       <Flex
         width="100%"
