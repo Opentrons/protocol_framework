@@ -12,6 +12,8 @@ import {
 
 import type { PipetteName, RunTimeCommand } from '@opentrons/shared-data'
 import type { GetCommandText } from '../..'
+import { getFinalMoveToAddressableAreaCmd } from '/app/local-resources/commands/hooks/useCommandTextString/utils/getFinalAddressableAreaCmd'
+import { getAddressableAreaDisplayName } from '/app/local-resources/commands/hooks/useCommandTextString/utils/getAddressableAreaDisplayName'
 
 export const getPipettingCommandText = ({
   command,
@@ -186,7 +188,14 @@ export const getPipettingCommandText = ({
       })
     }
     case 'dropTipInPlace': {
-      return t('drop_tip_in_place')
+      const cmd = getFinalMoveToAddressableAreaCmd(allPreviousCommands ?? [])
+
+      if (cmd != null) {
+        const displayName = getAddressableAreaDisplayName([cmd], cmd?.id, t)
+        return t('dropping_tip_in_trash', { trash: displayName })
+      } else {
+        return t('drop_tip_in_place')
+      }
     }
     case 'dispenseInPlace': {
       const { volume, flowRate } = command.params
