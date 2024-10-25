@@ -1,13 +1,13 @@
 import { GRIPPER_WASTE_CHUTE_ADDRESSABLE_AREA } from '@opentrons/shared-data'
 
-import { getFinalLabwareLocation } from './getFinalLabwareLocation'
+import { getFinalLabwareLocation } from '../getFinalLabwareLocation'
 import {
   getLabwareName,
   getLabwareDisplayLocation,
 } from '/app/local-resources/labware'
 
 import type { MoveLabwareRunTimeCommand } from '@opentrons/shared-data'
-import type { HandlesCommands } from './types'
+import type { HandlesCommands } from '../types'
 
 export function getMoveLabwareCommandText({
   command,

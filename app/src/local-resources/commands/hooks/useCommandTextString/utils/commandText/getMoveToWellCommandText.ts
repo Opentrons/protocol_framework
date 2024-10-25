@@ -3,10 +3,10 @@ import {
   getLabwareDisplayLocation,
 } from '/app/local-resources/labware'
 
-import { getFinalLabwareLocation } from './getFinalLabwareLocation'
+import { getFinalLabwareLocation } from '../getFinalLabwareLocation'
 
 import type { MoveToWellRunTimeCommand } from '@opentrons/shared-data/command'
-import type { HandlesCommands } from './types'
+import type { HandlesCommands } from '../types'
 
 export function getMoveToWellCommandText({
   command,

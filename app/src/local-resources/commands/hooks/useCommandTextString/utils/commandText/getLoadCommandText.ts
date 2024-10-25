@@ -5,8 +5,8 @@ import {
   getPipetteSpecsV2,
 } from '@opentrons/shared-data'
 
-import { getPipetteNameOnMount } from './getPipetteNameOnMount'
-import { getLiquidDisplayName } from './getLiquidDisplayName'
+import { getPipetteNameOnMount } from '../getPipetteNameOnMount'
+import { getLiquidDisplayName } from '../getLiquidDisplayName'
 
 import { getLabwareName } from '/app/local-resources/labware'
 import {
@@ -15,7 +15,7 @@ import {
 } from '/app/local-resources/modules'
 
 import type { LoadLabwareRunTimeCommand } from '@opentrons/shared-data'
-import type { GetCommandText } from '..'
+import type { GetCommandText } from '../..'
 
 export const getLoadCommandText = ({
   command,

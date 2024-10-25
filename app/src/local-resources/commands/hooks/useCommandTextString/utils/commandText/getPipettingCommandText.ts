@@ -1,7 +1,7 @@
 import { getLabwareDefURI } from '@opentrons/shared-data'
 
-import { getFinalLabwareLocation } from './getFinalLabwareLocation'
-import { getWellRange } from './getWellRange'
+import { getFinalLabwareLocation } from '../getFinalLabwareLocation'
+import { getWellRange } from '../getWellRange'
 
 import {
   getLabwareDefinitionsFromCommands,
@@ -11,7 +11,7 @@ import {
 } from '/app/local-resources/labware'
 
 import type { PipetteName, RunTimeCommand } from '@opentrons/shared-data'
-import type { GetCommandText } from '..'
+import type { GetCommandText } from '../..'
 
 export const getPipettingCommandText = ({
   command,

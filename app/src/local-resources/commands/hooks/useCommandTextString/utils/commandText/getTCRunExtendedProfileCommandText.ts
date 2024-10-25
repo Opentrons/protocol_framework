@@ -4,8 +4,8 @@ import type {
   TCProfileCycle,
   AtomicProfileStep,
 } from '@opentrons/shared-data/command'
-import type { GetTCRunExtendedProfileCommandTextResult } from '..'
-import type { HandlesCommands } from './types'
+import type { GetTCRunExtendedProfileCommandTextResult } from '../..'
+import type { HandlesCommands } from '../types'
 
 export interface TCProfileStepText {
   kind: 'step'

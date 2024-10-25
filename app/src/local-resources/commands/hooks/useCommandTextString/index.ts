@@ -7,11 +7,11 @@ import type {
   RobotType,
   LabwareDefinition2,
 } from '@opentrons/shared-data'
-import type { GetDirectTranslationCommandText } from './utils/getDirectTranslationCommandText'
 import type {
   TCProfileStepText,
   TCProfileCycleText,
-} from './utils/getTCRunExtendedProfileCommandText'
+  GetDirectTranslationCommandText,
+} from './utils'
 import type { CommandTextData } from '/app/local-resources/commands/types'
 
 export interface UseCommandTextStringParams {

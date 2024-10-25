@@ -6,7 +6,7 @@ import type {
   HeaterShakerSetTargetTemperatureCreateCommand,
   RunTimeCommand,
 } from '@opentrons/shared-data'
-import type { HandlesCommands } from './types'
+import type { HandlesCommands } from '../types'
 
 export type TemperatureCreateCommand =
   | TemperatureModuleSetTargetTemperatureCreateCommand
