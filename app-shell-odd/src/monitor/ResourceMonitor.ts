@@ -1,12 +1,13 @@
 import { exec } from 'child_process'
 import { promises as fs } from 'fs'
+import path from 'path'
 
 import { createLogger } from '../log'
 import { UI_INITIALIZED } from '../constants'
 
 import type { Action, Dispatch } from '../types'
 
-const PARENT_PROCESSES = [
+export const PARENT_PROCESSES = [
   'opentrons-robot-server.service',
   'opentrons-robot-app.service',
 ] as const
@@ -31,19 +32,23 @@ interface ResourceMonitorDetails {
   processesDetails: ProcessDetails[]
 }
 
-// TODO(jh 10-24-24): Add testing, making proper affordances for mocking fs.readFile.
+interface ResourceMonitorOptions {
+  procPath?: string
+}
 
 // Scrapes system and select process resource metrics, reporting those metrics to the browser layer.
 // Note that only MAX_REPORTED_PROCESSES are actually dispatched.
 export class ResourceMonitor {
   private readonly monitoredProcesses: Set<string>
   private readonly log: ReturnType<typeof createLogger>
+  private readonly procPath: string
   private intervalId: NodeJS.Timeout | null
 
-  constructor() {
+  constructor(options: ResourceMonitorOptions = {}) {
     this.monitoredProcesses = new Set(PARENT_PROCESSES)
     this.log = createLogger('monitor')
     this.intervalId = null
+    this.procPath = options.procPath ?? '/proc' // Override used for testing purposes.
   }
 
   start(dispatch: Dispatch): Dispatch {
@@ -77,6 +82,15 @@ export class ResourceMonitor {
     }
   }
 
+  // Manually stop reporting, clearing internal state.
+  stop(): void {
+    if (this.intervalId != null) {
+      clearInterval(this.intervalId)
+      this.intervalId = null
+      this.monitoredProcesses.clear()
+    }
+  }
+
   private dispatchResourceDetails(
     details: ResourceMonitorDetails,
     dispatch: Dispatch
@@ -107,7 +121,7 @@ export class ResourceMonitor {
   // Scrape system uptime from /proc/uptime.
   private getSystemUptimeHrs(): Promise<string> {
     return fs
-      .readFile('/proc/uptime', 'utf8')
+      .readFile(path.join(this.procPath, 'uptime'), 'utf8')
       .then(uptime => {
         // First value is uptime in seconds, second is idle time
         const uptimeSeconds = Math.floor(parseFloat(uptime.split(' ')[0]))
@@ -125,7 +139,7 @@ export class ResourceMonitor {
   // Scrape system available memory from /proc/meminfo.
   private getSystemAvailableMemory(): Promise<string> {
     return fs
-      .readFile('/proc/meminfo', 'utf8')
+      .readFile(path.join(this.procPath, 'meminfo'), 'utf8')
       .then(meminfo => {
         const match = meminfo.match(/MemAvailable:\s+(\d+)\s+kB/)
         if (match == null) {
@@ -219,7 +233,7 @@ export class ResourceMonitor {
   // Get the exact cmdline string for the given pid, truncating if necessary.
   private getProcessCmdline(pid: number): Promise<string> {
     return fs
-      .readFile(`/proc/${pid}/cmdline`, 'utf8')
+      .readFile(path.join(this.procPath, String(pid), 'cmdline'), 'utf8')
       .then(cmdline => {
         const cmd = cmdline.replace(/\0/g, ' ').trim()
         return cmd.length > MAX_CMD_STR_LENGTH
@@ -272,7 +286,7 @@ export class ResourceMonitor {
   // Scrape VmRSS from /proc/pid/status for a given pid.
   private getProcessMemory(pid: number): Promise<string> {
     return fs
-      .readFile(`/proc/${pid}/status`, 'utf8')
+      .readFile(path.join(this.procPath, String(pid), 'status'), 'utf8')
       .then(status => {
         const match = status.match(/VmRSS:\s+(\d+)\s+kB/)
         if (match == null) {
