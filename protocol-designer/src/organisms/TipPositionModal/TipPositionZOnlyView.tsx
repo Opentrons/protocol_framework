@@ -13,31 +13,27 @@ import MID_LAYER from '../../assets/images/tip_side_mid_layer.svg'
 import TOP_LAYER from '../../assets/images/tip_side_top_layer.svg'
 
 const WELL_HEIGHT_PIXELS = 71
-const WELL_WIDTH_PIXELS = 70
 const PIXEL_DECIMALS = 2
 
-interface TipPositionAllVizProps {
-  mmFromBottom: number
-  xPosition: number
+interface TipPositionZOnlyViewProps {
   wellDepthMm: number
-  xWidthMm: number
+  mmFromBottom?: number
+  mmFromTop?: number
 }
 
-export function TipPositionSideView(
-  props: TipPositionAllVizProps
+export function TipPositionZOnlyView(
+  props: TipPositionZOnlyViewProps
 ): JSX.Element {
-  const { mmFromBottom, xPosition, wellDepthMm, xWidthMm } = props
+  const { mmFromBottom, mmFromTop, wellDepthMm } = props
   const { t } = useTranslation('application')
-  const fractionOfWellHeight = mmFromBottom / wellDepthMm
+  const positionInTube = mmFromBottom ?? mmFromTop ?? 0
+  const fractionOfWellHeight = positionInTube / wellDepthMm
   const pixelsFromBottom =
-    fractionOfWellHeight * WELL_HEIGHT_PIXELS - WELL_HEIGHT_PIXELS
+    fractionOfWellHeight * WELL_HEIGHT_PIXELS -
+    (mmFromBottom != null ? WELL_HEIGHT_PIXELS : 0)
   const roundedPixelsFromBottom = round(pixelsFromBottom, PIXEL_DECIMALS)
-  const bottomPx = wellDepthMm
-    ? roundedPixelsFromBottom * 2
-    : mmFromBottom - WELL_HEIGHT_PIXELS
 
-  const xPx = (WELL_WIDTH_PIXELS / xWidthMm) * xPosition
-  const roundedXPx = round(xPx, PIXEL_DECIMALS)
+  const bottomPx = roundedPixelsFromBottom * 2
 
   return (
     <Box
@@ -51,7 +47,6 @@ export function TipPositionSideView(
         src={MID_LAYER}
         style={{
           position: POSITION_ABSOLUTE,
-          transform: `translate(${roundedXPx}px)`,
           bottom: `calc(${bottomPx}px + 33px)`,
         }}
       />
@@ -60,14 +55,6 @@ export function TipPositionSideView(
         <Box position={POSITION_ABSOLUTE} bottom="7.3rem" right="2rem">
           <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
             {round(wellDepthMm, 0)}
-            {t('units.millimeter')}
-          </StyledText>
-        </Box>
-      )}
-      {xWidthMm !== null && (
-        <Box position={POSITION_ABSOLUTE} bottom="2rem" right="7rem">
-          <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
-            {xWidthMm}
             {t('units.millimeter')}
           </StyledText>
         </Box>

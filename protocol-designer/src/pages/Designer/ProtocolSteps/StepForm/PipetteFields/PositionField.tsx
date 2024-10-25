@@ -13,18 +13,16 @@ import {
   useHoverTooltip,
 } from '@opentrons/components'
 import { getWellsDepth, getWellDimension } from '@opentrons/shared-data'
-import { TipPositionModal } from '../../../../../organisms'
+import { TipPositionModal, ZTipPositionModal } from '../../../../../organisms'
 import { getIsDelayPositionField } from '../../../../../form-types'
 import { getDefaultMmFromBottom } from '../../../../../organisms/TipPositionModal/utils'
 import { selectors as stepFormSelectors } from '../../../../../step-forms'
-import { ZTipPositionModal } from '../../../../../components/StepEditForm/fields/TipPositionField/ZTipPositionModal'
 import type {
   TipXOffsetFields,
   TipYOffsetFields,
   TipZOffsetFields,
 } from '../../../../../form-types'
 import type { PositionSpecs } from '../../../../../organisms'
-
 import type { FieldPropsByName } from '../types'
 interface PositionFieldProps {
   prefix: 'aspirate' | 'dispense' | 'mix'
