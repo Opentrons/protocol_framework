@@ -10,7 +10,7 @@ export function getMoveToAddressableAreaCommandText({
 }: HandlesCommands<MoveToAddressableAreaRunTimeCommand>): string {
   const addressableAreaDisplayName =
     commandTextData != null
-      ? getAddressableAreaDisplayName(commandTextData, command.id, t)
+      ? getAddressableAreaDisplayName(commandTextData.commands, command.id, t)
       : null
 
   return t('move_to_addressable_area', {

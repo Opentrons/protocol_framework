@@ -1,17 +1,16 @@
 import type {
   AddressableAreaName,
   MoveToAddressableAreaParams,
+  RunTimeCommand,
 } from '@opentrons/shared-data'
 import type { TFunction } from 'i18next'
 
-import type { CommandTextData } from '/app/local-resources/commands'
-
 export function getAddressableAreaDisplayName(
-  commandTextData: CommandTextData,
+  commands: RunTimeCommand[] | undefined,
   commandId: string,
   t: TFunction
 ): string {
-  const addressableAreaCommand = (commandTextData?.commands ?? []).find(
+  const addressableAreaCommand = (commands ?? []).find(
     command => command.id === commandId
   )
 
