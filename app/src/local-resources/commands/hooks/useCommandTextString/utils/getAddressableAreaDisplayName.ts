@@ -29,8 +29,11 @@ export function getAddressableAreaDisplayName(
     return t('trash_bin_in_slot', { slot_name: slotName })
   } else if (addressableAreaName.includes('WasteChute')) {
     return t('waste_chute')
-  } else if (addressableAreaName === 'fixedTrash') return t('fixed_trash')
-  else return addressableAreaName
+  } else if (addressableAreaName === 'fixedTrash') {
+    return t('fixed_trash')
+  } else {
+    return addressableAreaName
+  }
 }
 
 const getMovableTrashSlot = (
