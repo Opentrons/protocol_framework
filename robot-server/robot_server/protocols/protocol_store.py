@@ -15,7 +15,7 @@ import sqlalchemy
 from opentrons.protocols.parse import PythonParseMode
 from opentrons.protocol_reader import ProtocolReader, ProtocolSource
 
-from robot_server.data_files.models import DataFile
+from robot_server.data_files.models import DataFile, DataFileSource
 from robot_server.persistence.database import sqlite_rowid
 from robot_server.persistence.tables import (
     analysis_table,
@@ -346,7 +346,7 @@ class ProtocolStore:
                 id=sql_row.id,
                 name=sql_row.name,
                 createdAt=sql_row.created_at,
-                source=sql_row.source,
+                source=DataFileSource(sql_row.source.value),
             )
             for sql_row in data_files_rows
         ]

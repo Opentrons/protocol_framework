@@ -20,8 +20,12 @@ from opentrons.protocol_reader import ProtocolSource, JsonProtocolConfig
 
 from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType, NozzleMap
 
-from robot_server.data_files.data_files_store import DataFilesStore, DataFileInfo
+from robot_server.data_files.data_files_store import (
+    DataFilesStore,
+    DataFileInfo,
+)
 
+from robot_server.data_files.models import DataFileSource
 from robot_server.errors.error_responses import ApiError
 from robot_server.runs.error_recovery_models import ErrorRecoveryPolicy
 from robot_server.service.json_api import (
@@ -250,6 +254,7 @@ async def test_create_protocol_run(
             name="abc.xyz",
             file_hash="987",
             created_at=datetime(month=1, day=2, year=2024),
+            source=DataFileSource.UPLOADED,
         )
     )
     decoy.when(

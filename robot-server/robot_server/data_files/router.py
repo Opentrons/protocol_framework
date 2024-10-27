@@ -20,9 +20,15 @@ from .dependencies import (
     get_data_files_store,
     get_data_file_auto_deleter,
 )
-from .data_files_store import DataFileSource, DataFilesStore, DataFileInfo
+from .data_files_store import DataFilesStore, DataFileInfo
 from .file_auto_deleter import DataFileAutoDeleter
-from .models import DataFile, FileIdNotFoundError, FileIdNotFound, FileInUseError
+from .models import (
+    DataFile,
+    DataFileSource,
+    FileIdNotFoundError,
+    FileIdNotFound,
+    FileInUseError,
+)
 from ..protocols.dependencies import get_file_hasher, get_file_reader_writer
 from ..service.dependencies import get_current_time, get_unique_id
 
@@ -137,6 +143,7 @@ async def upload_data_file(
                     id=existing_file_info.id,
                     name=existing_file_info.name,
                     createdAt=existing_file_info.created_at,
+                    source=existing_file_info.source,
                 )
             ),
             status_code=status.HTTP_200_OK,
@@ -160,6 +167,7 @@ async def upload_data_file(
                 id=file_info.id,
                 name=file_info.name,
                 createdAt=created_at,
+                source=DataFileSource.UPLOADED,
             )
         ),
         status_code=status.HTTP_201_CREATED,
