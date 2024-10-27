@@ -6,16 +6,22 @@ from pydantic import Field
 
 from opentrons_shared_data.errors import GeneralError
 
+from robot_server.data_files.data_files_store import DataFileSource
 from robot_server.errors.error_responses import ErrorDetails
 from robot_server.service.json_api import ResourceModel
 
 
 class DataFile(ResourceModel):
-    """A model representing an uploaded data file."""
+    """A model representing a data file."""
 
     id: str = Field(..., description="A unique identifier for this file.")
-    name: str = Field(..., description="Name of the uploaded file.")
-    createdAt: datetime = Field(..., description="When this data file was *uploaded*.")
+    name: str = Field(..., description="Name of the data file.")
+    source: DataFileSource = Field(
+        ..., description="The origin of the file (uploaded or generated)"
+    )
+    createdAt: datetime = Field(
+        ..., description="When this data file was uploaded or generated.."
+    )
 
 
 class FileIdNotFoundError(GeneralError):

@@ -30,7 +30,7 @@ async def get_file_provider(
         FileProviderWrapper, fastapi.Depends(get_file_provider_wrapper)
     ],
 ) -> FileProvider:
-    """Return theengine `FileProvider` which accepts callbacks from FileProviderWrapper."""
+    """Return the engine `FileProvider` which accepts callbacks from FileProviderWrapper."""
     file_provider = FileProvider(
         data_files_write_csv_callback=file_provider_wrapper.write_csv_callback,
         data_files_filecount=file_provider_wrapper.csv_filecount_callback,

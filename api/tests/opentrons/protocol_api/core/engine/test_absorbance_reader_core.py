@@ -117,9 +117,7 @@ def test_initialize(
     assert subject._initialized_value == [124, 125, 126]
 
 
-def test_initialize_not_ready(
-    subject: AbsorbanceReaderCore
-) -> None:
+def test_initialize_not_ready(subject: AbsorbanceReaderCore) -> None:
     """It should raise CannotPerformModuleAction if you dont call .close_lid() command."""
     subject._ready_to_initialize = False
     with pytest.raises(CannotPerformModuleAction):

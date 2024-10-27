@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
 from pathlib import Path
 from typing import Optional, List, Set
 
@@ -19,6 +20,13 @@ from robot_server.persistence.tables import (
 from .models import FileIdNotFoundError, FileInUseError
 
 
+class DataFileSource(Enum):
+    """The source this data file is from."""
+
+    UPLOADED = "uploaded"
+    GENERATED = "generated"
+
+
 @dataclass(frozen=True)
 class DataFileInfo:
     """Metadata info of a saved data file."""
@@ -27,6 +35,7 @@ class DataFileInfo:
     name: str
     file_hash: str
     created_at: datetime
+    source: DataFileSource
 
 
 class DataFilesStore:
@@ -53,6 +62,7 @@ class DataFilesStore:
         file_info_dict = {
             "id": file_info.id,
             "name": file_info.name,
+            "source": file_info.source,
             "created_at": file_info.created_at,
             "file_hash": file_info.file_hash,
         }
@@ -80,14 +90,18 @@ class DataFilesStore:
             all_rows = transaction.execute(statement).all()
         return [_convert_row_data_file_info(sql_row) for sql_row in all_rows]
 
-    def get_usage_info(self) -> List[FileUsageInfo]:
+    def get_usage_info(self, source: Optional[DataFileSource] = None) -> List[FileUsageInfo]:
         """Return information about usage of all the existing data files in runs & analyses.
 
         Results are ordered with the oldest-added data file first.
         """
-        select_all_data_file_ids = sqlalchemy.select(data_files_table.c.id).order_by(
-            sqlite_rowid
-        )
+        if source is None:
+            select_all_data_file_ids = sqlalchemy.select(data_files_table.c.id).order_by(sqlite_rowid)
+        else:
+            select_all_data_file_ids = sqlalchemy.select(
+                data_files_table.c.id
+            ).where(data_files_table.c.source == source).order_by(sqlite_rowid)
+
         select_ids_used_in_analyses = sqlalchemy.select(
             analysis_csv_rtp_table.c.file_id
         ).where(analysis_csv_rtp_table.c.file_id.is_not(None))
@@ -165,6 +179,7 @@ def _convert_row_data_file_info(row: sqlalchemy.engine.Row) -> DataFileInfo:
     return DataFileInfo(
         id=row.id,
         name=row.name,
+        source=row.source,
         created_at=row.created_at,
         file_hash=row.file_hash,
     )

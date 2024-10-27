@@ -346,6 +346,7 @@ class ProtocolStore:
                 id=sql_row.id,
                 name=sql_row.name,
                 createdAt=sql_row.created_at,
+                source=sql_row.source,
             )
             for sql_row in data_files_rows
         ]
