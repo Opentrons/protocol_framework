@@ -3,12 +3,14 @@ import math
 from opentrons import types
 from typing import List, Union
 from opentrons import protocol_api
-from opentrons.protocol_api import Well
+from opentrons.protocol_api import Well, InstrumentContext
 import numpy as np
 from opentrons.protocol_api.module_contexts import (
     HeaterShakerContext,
     TemperatureModuleContext,
+    MagneticBlockContext,
 )
+from abr_testing.protocols import helpers
 
 metadata = {
     "author": "Zach Galluzzo <zachary.galluzzo@opentrons.com>",
@@ -48,60 +50,21 @@ drop_count = 0
 
 def add_parameters(parameters: protocol_api.ParameterContext) -> None:
     """Define parameters."""
-    parameters.add_int(
-        variable_name="heater_shaker_speed",
-        display_name="Heater Shaker Shake Speed",
-        description="Speed to set the heater shaker to",
-        default=2000,
-        minimum=200,
-        maximum=3000,
-        unit="rpm",
-    )
-    parameters.add_str(
-        variable_name="mount_pos",
-        display_name="Mount Position",
-        description="What mount to use",
-        choices=[
-            {"display_name": "Left Mount", "value": "left"},
-            {"display_name": "Right Mount", "value": "right"},
-        ],
-        default="left",
-    )
-    parameters.add_float(
-        variable_name="dot_bottom",
-        display_name=".bottom",
-        description="Lowest value pipette will go to.",
-        default=0.5,
-        choices=[
-            {"display_name": "0.0", "value": 0.0},
-            {"display_name": "0.1", "value": 0.1},
-            {"display_name": "0.2", "value": 0.2},
-            {"display_name": "0.3", "value": 0.3},
-            {"display_name": "0.4", "value": 0.4},
-            {"display_name": "0.5", "value": 0.5},
-            {"display_name": "0.6", "value": 0.6},
-            {"display_name": "0.7", "value": 0.7},
-            {"display_name": "0.8", "value": 0.8},
-            {"display_name": "0.9", "value": 0.9},
-            {"display_name": "1.0", "value": 1.0},
-        ],
-    )
+    helpers.create_hs_speed_parameter(parameters)
+    helpers.create_pipette_mount_parameter(parameters)
+    helpers.create_dot_bottom_parameter(parameters)
 
 
 def run(ctx: protocol_api.ProtocolContext) -> None:
-    """Protoco Set up."""
+    """Protocol Set Up."""
     heater_shaker_speed = ctx.params.heater_shaker_speed  # type: ignore[attr-defined]
-    mount_pos = ctx.params.mount_pos  # type: ignore[attr-defined]
+    mount = ctx.params.pipette_mount  # type: ignore[attr-defined]
     dot_bottom = ctx.params.dot_bottom  # type: ignore[attr-defined]
-    trash_chute = False  # If this is true, trash chute is loaded in D3, otherwise trash bin is loaded there
-    USE_GRIPPER = True
     dry_run = False
     TIP_TRASH = (
         False  # True = Used tips go in Trash, False = Used tips go back into rack
     )
-    mount = mount_pos
     res_type = "nest_12_reservoir_15ml"
-    temp_mod = True
 
     num_samples = 8
     wash1_vol = 500
@@ -118,37 +81,39 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
     if not dry_run:
         settling_time = 2.0
         lysis_incubation = 30.0
+        bind_time_1 = 10.0
+        bind_time_2 = 1.0
+        wash_time = 5.0
+        drybeads = 9.0
+        lysis_rep_1 = 3
+        lysis_rep_2 = 5
+        bead_reps_2 = 8
     else:
         settling_time = 0.25
         lysis_incubation = 0.25
+        bind_time_1 = bind_time_2 = wash_time = 0.25
+        drybeads = 0.5
+        lysis_rep_1 = lysis_rep_2 = bead_reps_2 = 1
     PK_vol = 20.0
     bead_vol = 25.0
     starting_vol = lysis_vol + sample_vol
     binding_buffer_vol = bind_vol + bead_vol
-    if trash_chute:
-        ctx.load_waste_chute()
-    else:
-        ctx.load_trash_bin("A3")
-    hs_string = "heaterShakerModuleV1"
-    h_s: HeaterShakerContext = ctx.load_module(hs_string, "D1")  # type: ignore[assignment]
+    ctx.load_trash_bin("A3")
+    h_s: HeaterShakerContext = ctx.load_module(helpers.hs_str, "D1")  # type: ignore[assignment]
     h_s_adapter = h_s.load_adapter("opentrons_96_deep_well_adapter")
     sample_plate = h_s_adapter.load_labware(deepwell_type, "Samples")
     h_s.close_labware_latch()
 
-    if temp_mod:
-        temp: TemperatureModuleContext = ctx.load_module(
-            "temperature module gen2", "D3"
-        )  # type: ignore[assignment]
-        temp_block = temp.load_adapter("opentrons_96_well_aluminum_block")
-        elutionplate = temp_block.load_labware(
-            "opentrons_96_wellplate_200ul_pcr_full_skirt", "Elution Plate"
-        )
-    else:
-        elutionplate = ctx.load_labware(
-            "opentrons_96_wellplate_200ul_pcr_full_skirt", "A3", "Elution Plate"
-        )
-
-    magblock = ctx.load_module("magneticBlockV1", "C1")
+    temp: TemperatureModuleContext = ctx.load_module(
+        helpers.temp_str, "D3"
+    )  # type: ignore[assignment]
+    temp_block = temp.load_adapter("opentrons_96_well_aluminum_block")
+    elutionplate = temp_block.load_labware(
+        "opentrons_96_wellplate_200ul_pcr_full_skirt", "Elution Plate"
+    )
+    magblock: MagneticBlockContext = ctx.load_module(
+        helpers.mag_str, "C1"
+    )  # type: ignore[assignment]
     waste = (
         ctx.load_labware("nest_1_reservoir_195ml", "B3", "Liquid Waste")
         .wells()[0]
@@ -183,25 +148,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
     # Redefine per well for liquid definitions
     samps = sample_plate.wells()[: (8 * num_cols)]
 
-    colors = [
-        "#008000",
-        "#008000",
-        "#A52A2A",
-        "#A52A2A",
-        "#00FFFF",
-        "#0000FF",
-        "#800080",
-        "#ADD8E6",
-        "#FF0000",
-        "#FFFF00",
-        "#FF00FF",
-        "#00008B",
-        "#7FFFD4",
-        "#FFC0CB",
-        "#FFA500",
-        "#00FF00",
-        "#C0C0C0",
-    ]
+    colors = helpers.liquid_colors
 
     locations: List[Union[List[Well], Well]] = [
         lysis_,
@@ -250,69 +197,58 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         for i_del in range(delete):
             colors.pop(-1)
 
-    # Defining liquids per reservoir well
-    def liquids_(liq_type: str, location: Union[Well, List[Well]], color, vol: float):
-        sampnum = 8 * (math.ceil(num_samples / 8))
-        """
-        Takes an individual liquid at a time and adds the color to the well
-        in the description.
-        """
-        # Volume Calculation
-        if liq_type == "PK":
-            extra_samples = math.ceil(1500 / lysis_vol)
+    def add_liquid(
+        liq_type: str, wells: Union[Well, List[Well]], color: str, vol: float
+    ) -> None:
+        """Assigns colored liquid to wells based on type and location."""
+        total_samples = math.ceil(num_samples / 8) * 8
 
-        elif liq_type == "Beads":
-            extra_samples = math.ceil(1500 / bind_vol)
-
-        else:
-            extra_samples = math.ceil(1500 / vol)
-
-        # Defining and assigning liquids to wells
-        if isinstance(location, list):
-            limit = sample_max / len(location)  # Calculates samples/ res well
-            iterations = math.ceil(sampnum / limit)
-            left = sampnum - limit
-            while left > limit:
-                left = left - limit
-            if left > 0:
-                last_iteration_samp_num = left
-            elif left < 0:
-                last_iteration_samp_num = sampnum
-            else:
-                last_iteration_samp_num = limit
-
-            samples_per_well = []
-
-            for i in range(iterations):
-                # append the left over on the last iteration
-                if i == (iterations - 1):
-                    samples_per_well.append(last_iteration_samp_num)
-                else:
-                    samples_per_well.append(limit)
-
-            liq = ctx.define_liquid(
-                name=str(liq_type), description=str(liq_type), display_color=color
+        # Calculate extra sample volume based on liquid type
+        extra_samples = math.ceil(
+            1500
+            / (
+                lysis_vol
+                if liq_type == "PK"
+                else bind_vol
+                if liq_type == "Beads"
+                else vol
             )
-            for sample, well in zip(
-                samples_per_well, location[: len(samples_per_well)]
-            ):
-                v = vol * (sample + extra_samples)
-                well.load_liquid(liquid=liq, volume=v)
-        else:
-            v = vol * (sampnum + extra_samples)
-            liq = ctx.define_liquid(
-                name=str(liq_type), description=str(liq_type), display_color=color
-            )
-            location.load_liquid(liquid=liq, volume=v)
+        )
 
-    for x, (ll, l, c, v) in enumerate(zip(liquids, locations, colors, vols)):
-        liquids_(ll, l, c, v)
+        # Define liquid
+        liquid = ctx.define_liquid(
+            name=liq_type, description=liq_type, display_color=color
+        )
+
+        # Assign liquid to each well
+        if isinstance(wells, list):
+            samples_per_well = [sample_max // len(wells)] * (
+                total_samples // (sample_max // len(wells))
+            )
+            remainder = total_samples % (sample_max // len(wells))
+
+            if remainder:
+                samples_per_well.append(remainder)
+
+            for sample_count, well in zip(samples_per_well, wells):
+                well.load_liquid(
+                    liquid=liquid, volume=vol * (sample_count + extra_samples)
+                )
+        else:
+            wells.load_liquid(
+                liquid=liquid, volume=vol * (total_samples + extra_samples)
+            )
+
+    # Apply function for each liquid configuration
+    for liq, well, color, vol in zip(liquids, locations, colors, vols):
+        add_liquid(liq, well, color, vol)
 
     m1000.flow_rate.aspirate = 300
     m1000.flow_rate.dispense = 300
     m1000.flow_rate.blow_out = 300
 
-    def tiptrack(pip, tipbox):
+    def tiptrack(tipbox: List[Well]) -> None:
+        """Track Tips."""
         global tip1k
         global drop_count
         if tipbox == tips:
@@ -324,27 +260,12 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
             drop_count = 0
             ctx.pause("Please empty the waste bin of all the tips before continuing.")
 
-    def blink():
-        for i in range(3):
-            ctx.set_rail_lights(True)
-            ctx.delay(minutes=0.01666667)
-            ctx.set_rail_lights(False)
-            ctx.delay(minutes=0.01666667)
-
-    def remove_supernatant(vol):
+    def remove_supernatant(vol: float) -> None:
+        """Remove supernatant."""
         ctx.comment("-----Removing Supernatant-----")
         m1000.flow_rate.aspirate = 30
         num_trans = math.ceil(vol / 980)
         vol_per_trans = vol / num_trans
-
-        def _waste_track(vol):
-            global waste_vol
-            waste_vol = waste_vol + (vol * 8)
-            if waste_vol >= 185000:
-                m1000.home()
-                blink()
-                ctx.pause("Please empty liquid waste before resuming.")
-                waste_vol = 0
 
         for i, m in enumerate(samples_m):
             m1000.pick_up_tip(tips_sn[8 * i])
@@ -357,16 +278,17 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
                 m1000.transfer(vol_per_trans, loc, waste, new_tip="never", air_gap=20)
                 m1000.blow_out(waste)
                 m1000.air_gap(20)
-            m1000.drop_tip(tips_sn[8 * i]) if TIP_TRASH == True else m1000.return_tip()
+            m1000.drop_tip(tips_sn[8 * i]) if TIP_TRASH else m1000.return_tip()
         m1000.flow_rate.aspirate = 300
 
         # Transfer from Magdeck plate to H-S
-        h_s.open_labware_latch()
-        ctx.move_labware(sample_plate, h_s_adapter, use_gripper=USE_GRIPPER)
-        h_s.close_labware_latch()
+        helpers.move_labware_to_hs(ctx, sample_plate, h_s, h_s_adapter)
 
-    def bead_mixing(well, pip, mvol, reps=8):
-        """
+    def bead_mixing(
+        well: Well, pip: InstrumentContext, mvol: float, reps: int = 8
+    ) -> None:
+        """Mixing.
+
         'mixing' will mix liquid that contains beads. This will be done by
         aspirating from the bottom of the well and dispensing from the top as to
         mix the beads with the other liquids as much as possible. Aspiration and
@@ -408,8 +330,9 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         pip.flow_rate.aspirate = 300
         pip.flow_rate.dispense = 300
 
-    def mixing(well, pip, mvol, reps=8):
-        """
+    def mixing(well: Well, pip: InstrumentContext, mvol: float, reps: int = 8) -> None:
+        """Mixing.
+
         'mixing' will mix liquid that contains beads. This will be done by
         aspirating from the bottom of the well and dispensing from the top as to
         mix the beads with the other liquids as much as possible. Aspiration and
@@ -449,17 +372,18 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         pip.flow_rate.aspirate = 300
         pip.flow_rate.dispense = 300
 
-    def lysis(vol, source):
+    def lysis(vol: float, source: Well) -> None:
+        """Lysis."""
         ctx.comment("-----Beginning Lysis Steps-----")
         ctx.pause(msg="\n Hello \n - step 1 \n - step 2")
         num_transfers = math.ceil(vol / 980)
-        tiptrack(m1000, tips)
+        tiptrack(tips)
         for i in range(num_cols):
             src = source
             tvol = vol / num_transfers
             # Mix Shield and PK before transferring first time
             if i == 0:
-                for x in range(3 if not dry_run else 1):
+                for x in range(lysis_rep_1):
                     m1000.aspirate(vol, src.bottom(1))
                     m1000.dispense(vol, src.bottom(8))
             # Transfer Shield and PK
@@ -472,20 +396,15 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         # Mix shield and pk with samples
         for i in range(num_cols):
             if i != 0:
-                tiptrack(m1000, tips)
-            mixing(samples_m[i], m1000, tvol, reps=5 if not dry_run else 1)
-            m1000.drop_tip() if TIP_TRASH == True else m1000.return_tip()
+                tiptrack(tips)
+            mixing(samples_m[i], m1000, tvol, reps=lysis_rep_2)
+            m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
-        h_s.set_and_wait_for_shake_speed(heater_shaker_speed)
-        speed_val = heater_shaker_speed
-        ctx.delay(
-            minutes=lysis_incubation if not dry_run else 0.25,
-            msg="Shake at " + str(speed_val) + " rpm for 30 minutes.",
-        )
-        h_s.deactivate_shaker()
+        helpers.set_hs_speed(ctx, h_s, heater_shaker_speed, lysis_incubation, True)
 
-    def bind(vol1, vol2):
-        """
+    def bind(vol1: float, vol2: float) -> None:
+        """Binding.
+
         `bind` will perform magnetic bead binding on each sample in the
         deepwell plate. Each channel of binding beads will be mixed before
         transfer, and the samples will be mixed with the binding beads after
@@ -501,7 +420,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         """
         ctx.comment("-----Beginning Binding Steps-----")
         for i, well in enumerate(samples_m):
-            tiptrack(m1000, tips)
+            tiptrack(tips)
             num_trans = math.ceil(vol1 / 980)
             vol_per_trans = vol1 / num_trans
             source = binding_buffer[i // 2]
@@ -520,23 +439,15 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
                     vol_per_trans, source, well.top(), air_gap=20, new_tip="never"
                 )
                 m1000.air_gap(20)
-            bead_mixing(well, m1000, vol_per_trans, reps=8 if not dry_run else 1)
+            bead_mixing(well, m1000, vol_per_trans, reps=bead_reps_2)
             m1000.blow_out()
             m1000.air_gap(10)
-            m1000.drop_tip() if TIP_TRASH == True else m1000.return_tip()
+            m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
-        h_s.set_and_wait_for_shake_speed(heater_shaker_speed * 0.9)
-        speed_val = heater_shaker_speed * 0.9
-        ctx.delay(
-            minutes=10 if not dry_run else 0.25,
-            msg="Shake at " + str(speed_val) + " rpm for 10 minutes.",
-        )
-        h_s.deactivate_shaker()
+        helpers.set_hs_speed(ctx, h_s, heater_shaker_speed * 0.9, bind_time_1, True)
 
         # Transfer from H-S plate to Magdeck plate
-        h_s.open_labware_latch()
-        ctx.move_labware(sample_plate, magblock, use_gripper=USE_GRIPPER)
-        h_s.close_labware_latch()
+        helpers.move_labware_from_hs_to_mag_block(ctx, sample_plate, h_s, magblock)
 
         for bindi in np.arange(
             settling_time + 1, 0, -0.5
@@ -550,7 +461,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         remove_supernatant(vol1 + starting_vol)
 
         ctx.comment("-----Beginning Bind #2 Steps-----")
-        tiptrack(m1000, tips)
+        tiptrack(tips)
         for i, well in enumerate(samples_m):
             num_trans = math.ceil(vol2 / 980)
             vol_per_trans = vol2 / num_trans
@@ -575,24 +486,15 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
 
         for i in range(num_cols):
             if i != 0:
-                tiptrack(m1000, tips)
+                tiptrack(tips)
             bead_mixing(
                 samples_m[i], m1000, vol_per_trans, reps=3 if not dry_run else 1
             )
-            m1000.drop_tip() if TIP_TRASH == True else m1000.return_tip()
-
-        h_s.set_and_wait_for_shake_speed(heater_shaker_speed)
-        speed_val = heater_shaker_speed
-        ctx.delay(
-            minutes=1 if not dry_run else 0.25,
-            msg="Shake at " + str(speed_val) + " rpm for 1 minutes.",
-        )
-        h_s.deactivate_shaker()
+            m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
+        helpers.set_hs_speed(ctx, h_s, heater_shaker_speed, bind_time_2, True)
 
         # Transfer from H-S plate to Magdeck plate
-        h_s.open_labware_latch()
-        ctx.move_labware(sample_plate, magblock, use_gripper=USE_GRIPPER)
-        h_s.close_labware_latch()
+        helpers.move_labware_from_hs_to_mag_block(ctx, sample_plate, h_s, magblock)
 
         for bindi in np.arange(
             settling_time + 1, 0, -0.5
@@ -605,8 +507,8 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         # remove initial supernatant
         remove_supernatant(vol2 + 25)
 
-    def wash(vol, source):
-
+    def wash(vol: float, source: List[Well]) -> None:
+        """Wash Steps."""
         global whichwash  # Defines which wash the protocol is on to log on the app
 
         if source == wash1:
@@ -626,7 +528,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         num_trans = math.ceil(vol / 980)
         vol_per_trans = vol / num_trans
 
-        tiptrack(m1000, tips)
+        tiptrack(tips)
         for i, m in enumerate(samples_m):
             if source == wash1:
                 if i == 0 or i == 3:
@@ -645,15 +547,10 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
                     air_gap=20,
                     new_tip="never",
                 )
-        m1000.drop_tip() if TIP_TRASH == True else m1000.return_tip()
+        m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
+        helpers.set_hs_speed(ctx, h_s, heater_shaker_speed * 0.9, wash_time, True)
 
-        h_s.set_and_wait_for_shake_speed(heater_shaker_speed * 0.9)
-        ctx.delay(minutes=5 if not dry_run else 0.25)
-        h_s.deactivate_shaker()
-
-        h_s.open_labware_latch()
-        ctx.move_labware(sample_plate, magblock, use_gripper=USE_GRIPPER)
-        h_s.close_labware_latch()
+        helpers.move_labware_from_hs_to_mag_block(ctx, sample_plate, h_s, magblock)
 
         for washi in np.arange(
             settling_time, 0, -0.5
@@ -669,27 +566,19 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
 
         remove_supernatant(vol)
 
-    def elute(vol):
-        tiptrack(m1000, tips)
+    def elute(vol: float) -> None:
+        tiptrack(tips)
         for i, m in enumerate(samples_m):
             m1000.require_liquid_presence(elution_solution)
             m1000.aspirate(vol, elution_solution)
             m1000.air_gap(20)
             m1000.dispense(m1000.current_volume, m.top(-3))
-        m1000.drop_tip() if TIP_TRASH == True else m1000.return_tip()
+        m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
-        h_s.set_and_wait_for_shake_speed(heater_shaker_speed)
-        speed_val = heater_shaker_speed
-        ctx.delay(
-            minutes=5 if not dry_run else 0.25,
-            msg="Shake at " + str(speed_val) + " rpm for 5 minutes.",
-        )
-        h_s.deactivate_shaker()
+        helpers.set_hs_speed(ctx, h_s, heater_shaker_speed * 0.9, wash_time, True)
 
         # Transfer back to magnet
-        h_s.open_labware_latch()
-        ctx.move_labware(sample_plate, magblock, use_gripper=USE_GRIPPER)
-        h_s.close_labware_latch()
+        helpers.move_labware_from_hs_to_mag_block(ctx, sample_plate, h_s, magblock)
 
         for elutei in np.arange(settling_time, 0, -0.5):
             ctx.delay(
@@ -698,7 +587,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
             )
 
         for i, (m, e) in enumerate(zip(samples_m, elution_samples_m)):
-            tiptrack(m1000, tips)
+            tiptrack(tips)
             m1000.flow_rate.dispense = 100
             m1000.flow_rate.aspirate = 25
             m1000.transfer(
@@ -706,7 +595,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
             )
             m1000.blow_out(e.top(-2))
             m1000.air_gap(20)
-            m1000.drop_tip() if TIP_TRASH == True else m1000.return_tip()
+            m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
         m1000.flow_rate.aspirate = 150
 
@@ -720,10 +609,6 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
     wash(wash2_vol, wash2)
     wash(wash3_vol, wash3)
     h_s.set_and_wait_for_temperature(55)
-    if not dry_run:
-        drybeads = 9.0  # Number of minutes you want to dry for
-    else:
-        drybeads = 0.5
     for beaddry in np.arange(drybeads, 0, -0.5):
         ctx.delay(
             minutes=0.5,
