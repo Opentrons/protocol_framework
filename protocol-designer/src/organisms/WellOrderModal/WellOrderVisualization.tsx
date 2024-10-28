@@ -25,9 +25,9 @@ const imageMap: Record<string, string> = {
   t2b_r2l,
 }
 
-export const WellOrderVisualization = (
+export function WellOrderVisualization(
   props: WellOrderVisualizationProps
-): JSX.Element => {
+): JSX.Element {
   const { firstValue, secondValue } = props
   const imageKey = `${firstValue}_${secondValue}`
 

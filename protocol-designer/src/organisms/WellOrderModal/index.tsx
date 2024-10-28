@@ -47,9 +47,7 @@ interface State {
   secondValue: WellOrderOption
 }
 
-export const WellOrderModal = (
-  props: WellOrderModalProps
-): JSX.Element | null => {
+export function WellOrderModal(props: WellOrderModalProps): JSX.Element | null {
   const { t } = useTranslation(['form', 'modal', 'shared'])
   const {
     isOpen,
@@ -156,7 +154,7 @@ export const WellOrderModal = (
       footer={
         <Flex
           justifyContent={JUSTIFY_SPACE_BETWEEN}
-          padding={SPACING.spacing24}
+          padding={`0 ${SPACING.spacing24} ${SPACING.spacing24}`}
           alignItems={ALIGN_CENTER}
         >
           <Btn onClick={handleReset} css={BUTTON_LINK_STYLE}>
@@ -175,45 +173,49 @@ export const WellOrderModal = (
     >
       <Flex gridGap={SPACING.spacing40}>
         <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
-          <StyledText desktopStyle="bodyDefaultRegular">
-            {t('shared:change_robot_movement')}
-          </StyledText>
-          <DropdownMenu
-            key={firstName}
-            title={t('shared:primary_order')}
-            dropdownType="neutral"
-            currentOption={{
-              name: t(
-                `step_edit_form.field.well_order.option.${wellOrder.firstValue}`
-              ),
-              value: wellOrder.firstValue,
-            }}
-            onClick={makeOnChange('first')}
-            filterOptions={WELL_ORDER_VALUES.map(value => ({
-              value,
-              name: t(`step_edit_form.field.well_order.option.${value}`),
-            }))}
-          />
-          <StyledText desktopStyle="bodyDefaultRegular">
-            {t('modal:well_order.then')}
-          </StyledText>
-          <DropdownMenu
-            key={secondName}
-            title={t('shared:secondary_order')}
-            dropdownType="neutral"
-            currentOption={{
-              name: t(
-                `step_edit_form.field.well_order.option.${wellOrder.secondValue}`
-              ),
-              value: wellOrder.secondValue,
-            }}
-            onClick={makeOnChange('second')}
-            filterOptions={WELL_ORDER_VALUES.map(value => ({
-              value,
-              name: t(`step_edit_form.field.well_order.option.${value}`),
-              disabled: isSecondOptionDisabled(value),
-            }))}
-          />
+          <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
+            <StyledText desktopStyle="bodyDefaultRegular">
+              {t('shared:change_robot_movement')}
+            </StyledText>
+            <DropdownMenu
+              key={firstName}
+              title={t('shared:primary_order')}
+              dropdownType="neutral"
+              currentOption={{
+                name: t(
+                  `step_edit_form.field.well_order.option.${wellOrder.firstValue}`
+                ),
+                value: wellOrder.firstValue,
+              }}
+              onClick={makeOnChange('first')}
+              filterOptions={WELL_ORDER_VALUES.map(value => ({
+                value,
+                name: t(`step_edit_form.field.well_order.option.${value}`),
+              }))}
+            />
+          </Flex>
+          <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
+            <StyledText desktopStyle="bodyDefaultRegular">
+              {t('modal:well_order.then')}
+            </StyledText>
+            <DropdownMenu
+              key={secondName}
+              title={t('shared:secondary_order')}
+              dropdownType="neutral"
+              currentOption={{
+                name: t(
+                  `step_edit_form.field.well_order.option.${wellOrder.secondValue}`
+                ),
+                value: wellOrder.secondValue,
+              }}
+              onClick={makeOnChange('second')}
+              filterOptions={WELL_ORDER_VALUES.map(value => ({
+                value,
+                name: t(`step_edit_form.field.well_order.option.${value}`),
+                disabled: isSecondOptionDisabled(value),
+              }))}
+            />
+          </Flex>
         </Flex>
         <WellOrderVisualization
           firstValue={wellOrder.firstValue}
