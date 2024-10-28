@@ -394,6 +394,8 @@ class WellInfoSummary(BaseModel):
 
 @dataclass
 class WellLiquidInfo:
+    """Tracked and sensed information about liquid in a well."""
+
     probed_height: Optional[ProbedHeightInfo]
     loaded_volume: Optional[LoadedVolumeInfo]
     probed_volume: Optional[ProbedVolumeInfo]

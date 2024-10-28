@@ -1,6 +1,6 @@
 """Basic well data state and store."""
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
 
 from opentrons.protocol_engine.types import (
     ProbedHeightInfo,

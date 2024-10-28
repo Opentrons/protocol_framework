@@ -1401,7 +1401,6 @@ class GeometryView:
         well_name: str,
     ) -> float:
         """Returns stored meniscus height in specified well."""
-
         well_liquid = self._wells.get_well_liquid_info(
             labware_id=labware_id, well_name=well_name
         )
