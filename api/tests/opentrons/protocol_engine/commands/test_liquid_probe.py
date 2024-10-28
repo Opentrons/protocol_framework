@@ -235,8 +235,8 @@ async def test_liquid_not_found_error(
         liquid_probed=update_types.LiquidProbedUpdate(
             labware_id=labware_id,
             well_name=well_name,
-            height=None,
-            volume=None,
+            height=update_types.CLEAR,
+            volume=update_types.CLEAR,
             last_probed=error_timestamp,
         ),
     )

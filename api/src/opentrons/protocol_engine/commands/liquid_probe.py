@@ -209,8 +209,8 @@ class LiquidProbeImplementation(
             state_update.set_liquid_probed(
                 labware_id=params.labwareId,
                 well_name=params.wellName,
-                height=None,
-                volume=None,
+                height=update_types.CLEAR,
+                volume=update_types.CLEAR,
                 last_probed=self._model_utils.get_timestamp(),
             )
             return DefinedErrorData(
@@ -229,13 +229,15 @@ class LiquidProbeImplementation(
             )
         else:
             try:
-                well_volume = self._state_view.geometry.get_well_volume_at_height(
-                    labware_id=params.labwareId,
-                    well_name=params.wellName,
-                    height=z_pos_or_error,
+                well_volume: float | update_types.ClearType = (
+                    self._state_view.geometry.get_well_volume_at_height(
+                        labware_id=params.labwareId,
+                        well_name=params.wellName,
+                        height=z_pos_or_error,
+                    )
                 )
             except IncompleteLabwareDefinitionError:
-                well_volume = None
+                well_volume = update_types.CLEAR
             state_update.set_liquid_probed(
                 labware_id=params.labwareId,
                 well_name=params.wellName,
@@ -283,7 +285,7 @@ class TryLiquidProbeImplementation(
 
         if isinstance(z_pos_or_error, PipetteLiquidNotFoundError):
             z_pos = None
-            well_volume = None
+            well_volume: float | update_types.ClearType = update_types.CLEAR
         else:
             z_pos = z_pos_or_error
             try:
@@ -291,12 +293,12 @@ class TryLiquidProbeImplementation(
                     labware_id=params.labwareId, well_name=params.wellName, height=z_pos
                 )
             except IncompleteLabwareDefinitionError:
-                well_volume = None
+                well_volume = update_types.CLEAR
 
         state_update.set_liquid_probed(
             labware_id=params.labwareId,
             well_name=params.wellName,
-            height=z_pos,
+            height=z_pos if z_pos is not None else update_types.CLEAR,
             volume=well_volume,
             last_probed=self._model_utils.get_timestamp(),
         )

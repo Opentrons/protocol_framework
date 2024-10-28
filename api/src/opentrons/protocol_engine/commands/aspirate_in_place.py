@@ -24,7 +24,7 @@ from .command import (
 )
 from ..errors.error_occurrence import ErrorOccurrence
 from ..errors.exceptions import PipetteNotReadyToAspirateError
-from ..state.update_types import StateUpdate
+from ..state.update_types import StateUpdate, CLEAR
 from ..types import CurrentWell
 
 if TYPE_CHECKING:
@@ -114,7 +114,7 @@ class AspirateInPlaceImplementation(
                 state_update.set_liquid_operated(
                     labware_id=current_location.labware_id,
                     well_name=current_location.well_name,
-                    volume=None,
+                    volume=CLEAR,
                 )
             return DefinedErrorData(
                 public=OverpressureError(

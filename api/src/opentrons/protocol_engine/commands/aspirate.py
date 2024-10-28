@@ -24,7 +24,7 @@ from ..errors.error_occurrence import ErrorOccurrence
 
 from opentrons.hardware_control import HardwareControlAPI
 
-from ..state.update_types import StateUpdate
+from ..state.update_types import StateUpdate, CLEAR
 from ..types import WellLocation, WellOrigin, CurrentWell, DeckPoint
 
 if TYPE_CHECKING:
@@ -140,7 +140,7 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
             state_update.set_liquid_operated(
                 labware_id=labware_id,
                 well_name=well_name,
-                volume=None,
+                volume=CLEAR,
             )
             return DefinedErrorData(
                 public=OverpressureError(

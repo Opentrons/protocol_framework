@@ -192,8 +192,8 @@ class LiquidProbedUpdate:
     labware_id: str
     well_name: str
     last_probed: datetime
-    height: typing.Optional[float] = None
-    volume: typing.Optional[float] = None
+    height: float | ClearType
+    volume: float | ClearType
 
 
 @dataclasses.dataclass
@@ -202,7 +202,7 @@ class LiquidOperatedUpdate:
 
     labware_id: str
     well_name: str
-    volume: typing.Optional[float] = None
+    volume: float | ClearType
 
 
 @dataclasses.dataclass
@@ -385,8 +385,8 @@ class StateUpdate:
         labware_id: str,
         well_name: str,
         last_probed: datetime,
-        height: typing.Optional[float] = None,
-        volume: typing.Optional[float] = None,
+        height: float | ClearType,
+        volume: float | ClearType,
     ) -> None:
         """Add a liquid height and volume to well state. See `ProbeLiquidUpdate`."""
         self.liquid_probed = LiquidProbedUpdate(
@@ -398,10 +398,7 @@ class StateUpdate:
         )
 
     def set_liquid_operated(
-        self,
-        labware_id: str,
-        well_name: str,
-        volume: typing.Optional[float] = None,
+        self, labware_id: str, well_name: str, volume: float | ClearType
     ) -> None:
         """Update liquid volumes in well state. See `OperateLiquidUpdate`."""
         self.liquid_operated = LiquidOperatedUpdate(

@@ -270,7 +270,7 @@ async def test_overpressure_error(
                 liquid_operated=update_types.LiquidOperatedUpdate(
                     labware_id=stateupdateLabware,
                     well_name=stateupdateWell,
-                    volume=None,
+                    volume=update_types.CLEAR,
                 )
             ),
         )

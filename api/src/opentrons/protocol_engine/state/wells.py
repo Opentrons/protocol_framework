@@ -1,6 +1,6 @@
 """Basic well data state and store."""
 from dataclasses import dataclass
-from typing import Dict, List, Union, Iterator, Optional, Tuple, overload
+from typing import Dict, List, Union, Iterator, Optional, Tuple, overload, TypeVar
 
 from opentrons.protocol_engine.types import (
     ProbedHeightInfo,
@@ -56,7 +56,7 @@ class WellStore(HasState[WellState], HandlesActions):
             self._state.loaded_volumes[labware_id] = {}
         for (well, volume) in state_update.volumes.items():
             self._state.loaded_volumes[labware_id][well] = LoadedVolumeInfo(
-                volume=volume,
+                volume=_none_from_clear(volume),
                 last_loaded=state_update.last_loaded,
                 operations_since_load=0,
             )
@@ -71,11 +71,11 @@ class WellStore(HasState[WellState], HandlesActions):
         if labware_id not in self._state.probed_volumes:
             self._state.probed_volumes[labware_id] = {}
         self._state.probed_heights[labware_id][well_name] = ProbedHeightInfo(
-            height=state_update.height,
+            height=_none_from_clear(state_update.height),
             last_probed=state_update.last_probed,
         )
         self._state.probed_volumes[labware_id][well_name] = ProbedVolumeInfo(
-            volume=state_update.volume,
+            volume=_none_from_clear(state_update.volume),
             last_probed=state_update.last_probed,
             operations_since_probe=0,
         )
@@ -89,7 +89,7 @@ class WellStore(HasState[WellState], HandlesActions):
             labware_id in self._state.loaded_volumes
             and well_name in self._state.loaded_volumes[labware_id]
         ):
-            if state_update.volume is None:
+            if state_update.volume is update_types.CLEAR:
                 del self._state.loaded_volumes[labware_id][well_name]
             else:
                 prev_loaded_vol_info = self._state.loaded_volumes[labware_id][well_name]
@@ -109,7 +109,7 @@ class WellStore(HasState[WellState], HandlesActions):
             labware_id in self._state.probed_volumes
             and well_name in self._state.probed_volumes[labware_id]
         ):
-            if state_update.volume is None:
+            if state_update.volume is update_types.CLEAR:
                 del self._state.probed_volumes[labware_id][well_name]
             else:
                 prev_probed_vol_info = self._state.probed_volumes[labware_id][well_name]
@@ -223,3 +223,12 @@ def _height_from_info(info: Optional[ProbedHeightInfo]) -> Optional[float]:
     if info is None:
         return None
     return info.height
+
+
+MaybeClear = TypeVar("MaybeClear")
+
+
+def _none_from_clear(inval: MaybeClear | update_types.ClearType) -> MaybeClear | None:
+    if inval == update_types.CLEAR:
+        return None
+    return inval

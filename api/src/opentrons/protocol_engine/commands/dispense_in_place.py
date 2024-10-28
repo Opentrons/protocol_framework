@@ -21,7 +21,7 @@ from .command import (
     DefinedErrorData,
 )
 from ..errors.error_occurrence import ErrorOccurrence
-from ..state.update_types import StateUpdate
+from ..state.update_types import StateUpdate, CLEAR
 from ..types import CurrentWell
 
 if TYPE_CHECKING:
@@ -93,7 +93,7 @@ class DispenseInPlaceImplementation(
                 state_update.set_liquid_operated(
                     labware_id=current_location.labware_id,
                     well_name=current_location.well_name,
-                    volume=None,
+                    volume=CLEAR,
                 )
             return DefinedErrorData(
                 public=OverpressureError(
