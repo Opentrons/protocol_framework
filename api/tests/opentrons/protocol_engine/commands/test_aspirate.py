@@ -344,14 +344,10 @@ async def test_aspirate_implementation_meniscus(
 ) -> None:
     """Aspirate should update WellVolumeOffset when called with WellOrigin.MENISCUS."""
     location = LiquidHandlingWellLocation(
-        origin=WellOrigin.MENISCUS, offset=WellOffset(x=0, y=0, z=-1)
-    )
-    updated_location = LiquidHandlingWellLocation(
         origin=WellOrigin.MENISCUS,
         offset=WellOffset(x=0, y=0, z=-1),
         volumeOffset="operationVolume",
     )
-
     data = AspirateParams(
         pipetteId="abc",
         labwareId="123",
@@ -368,7 +364,7 @@ async def test_aspirate_implementation_meniscus(
             pipette_id="abc",
             labware_id="123",
             well_name="A3",
-            well_location=updated_location,
+            well_location=location,
             current_well=None,
             operation_volume=-50,
         ),
