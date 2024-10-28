@@ -5,11 +5,26 @@ import { renderHook } from '@testing-library/react'
 import { mixpanelAtom } from '../../atoms'
 import type { AnalyticsEvent } from '../../../analytics/mixpanel'
 import type { Mixpanel } from '../../types'
-import { TestProvider } from '../../utils/testUtils'
+import { TestProvider } from '../../../__testing-utils__'
 
 vi.mock('../../../analytics/mixpanel', () => ({
   trackEvent: vi.fn(),
 }))
+
+const mockMixpanelAtom: Mixpanel = {
+  analytics: {
+    hasOptedIn: true,
+  },
+  isInitialized: false,
+}
+
+const wrapper = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <TestProvider initialValues={[[mixpanelAtom, mockMixpanelAtom]]}>
+      {children}
+    </TestProvider>
+  )
+}
 
 describe('useTrackEvent', () => {
   afterEach(() => {
@@ -17,12 +32,6 @@ describe('useTrackEvent', () => {
   })
 
   it('should call trackEvent with the correct arguments when hasOptedIn is true', () => {
-    const mockMixpanelAtom: Mixpanel = {
-      analytics: {
-        hasOptedIn: true,
-      },
-    }
-
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <TestProvider initialValues={[[mixpanelAtom, mockMixpanelAtom]]}>
         {children}
@@ -38,17 +47,7 @@ describe('useTrackEvent', () => {
   })
 
   it('should call trackEvent with the correct arguments when hasOptedIn is false', () => {
-    const mockMixpanelAtomFalse: Mixpanel = {
-      analytics: {
-        hasOptedIn: false,
-      },
-    }
-
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <TestProvider initialValues={[[mixpanelAtom, mockMixpanelAtomFalse]]}>
-        {children}
-      </TestProvider>
-    )
+    mockMixpanelAtom.analytics.hasOptedIn = false
 
     const { result } = renderHook(() => useTrackEvent(), { wrapper })
 
