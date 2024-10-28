@@ -16,11 +16,11 @@ from opentrons.hardware_control.nozzle_manager import NozzleMap
 from opentrons.protocol_engine import actions, commands
 from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.tips import TipStore, TipView
-from opentrons.protocol_engine.types import FlowRates
+from opentrons.protocol_engine.types import DeckSlotLocation, FlowRates
 from opentrons.protocol_engine.resources.pipette_data_provider import (
     LoadedStaticPipetteData,
 )
-from opentrons.types import Point
+from opentrons.types import DeckSlotName, Point
 from opentrons_shared_data.pipette.types import PipetteNameType
 from ..pipette_fixtures import (
     NINETY_SIX_MAP,
@@ -61,13 +61,22 @@ def labware_definition() -> LabwareDefinition:
 
 
 @pytest.fixture
-def load_labware_command(labware_definition: LabwareDefinition) -> commands.LoadLabware:
+def load_labware_action(
+    labware_definition: LabwareDefinition,
+) -> actions.SucceedCommandAction:
     """Get a load labware command value object."""
-    return commands.LoadLabware.construct(  # type: ignore[call-arg]
-        result=commands.LoadLabwareResult.construct(
-            labwareId="cool-labware",
-            definition=labware_definition,
-        )
+    return actions.SucceedCommandAction(
+        private_result=None,
+        command=_dummy_command(),
+        state_update=update_types.StateUpdate(
+            loaded_labware=update_types.LoadedLabwareUpdate(
+                labware_id="cool-labware",
+                definition=labware_definition,
+                new_location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
+                display_name=None,
+                offset_id=None,
+            )
+        ),
     )
 
 
@@ -83,17 +92,12 @@ def _dummy_command() -> commands.Command:
     ],
 )
 def test_get_next_tip_returns_none(
-    load_labware_command: commands.LoadLabware,
+    load_labware_action: actions.SucceedCommandAction,
     subject: TipStore,
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
 ) -> None:
     """It should start at the first tip in the labware."""
-    subject.handle_action(
-        actions.SucceedCommandAction(private_result=None, command=load_labware_command)
-    )
-    load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id")
-    )
+    subject.handle_action(load_labware_action)
     config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
@@ -122,7 +126,7 @@ def test_get_next_tip_returns_none(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
-            command=load_pipette_command,
+            command=_dummy_command(),
         )
     )
 
@@ -138,18 +142,14 @@ def test_get_next_tip_returns_none(
 
 @pytest.mark.parametrize("input_tip_amount", [1, 8, 96])
 def test_get_next_tip_returns_first_tip(
-    load_labware_command: commands.LoadLabware,
+    load_labware_action: actions.SucceedCommandAction,
     subject: TipStore,
     input_tip_amount: int,
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
 ) -> None:
     """It should start at the first tip in the labware."""
-    subject.handle_action(
-        actions.SucceedCommandAction(private_result=None, command=load_labware_command)
-    )
-    load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id")
-    )
+    subject.handle_action(load_labware_action)
+
     pipette_name_type = PipetteNameType.P1000_96
     if input_tip_amount == 1:
         pipette_name_type = PipetteNameType.P300_SINGLE_GEN2
@@ -185,7 +185,7 @@ def test_get_next_tip_returns_first_tip(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
-            command=load_pipette_command,
+            command=_dummy_command(),
         )
     )
 
@@ -201,19 +201,15 @@ def test_get_next_tip_returns_first_tip(
 
 @pytest.mark.parametrize("input_tip_amount, result_well_name", [(1, "B1"), (8, "A2")])
 def test_get_next_tip_used_starting_tip(
-    load_labware_command: commands.LoadLabware,
+    load_labware_action: actions.SucceedCommandAction,
     subject: TipStore,
     input_tip_amount: int,
     result_well_name: str,
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
 ) -> None:
     """It should start searching at the given starting tip."""
-    subject.handle_action(
-        actions.SucceedCommandAction(private_result=None, command=load_labware_command)
-    )
-    load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id")
-    )
+    subject.handle_action(load_labware_action)
+
     config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
@@ -242,7 +238,7 @@ def test_get_next_tip_used_starting_tip(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
-            command=load_pipette_command,
+            command=_dummy_command(),
         )
     )
 
@@ -271,7 +267,7 @@ def test_get_next_tip_used_starting_tip(
     ],
 )
 def test_get_next_tip_skips_picked_up_tip(
-    load_labware_command: commands.LoadLabware,
+    load_labware_action: actions.SucceedCommandAction,
     subject: TipStore,
     input_tip_amount: int,
     get_next_tip_tips: int,
@@ -280,13 +276,8 @@ def test_get_next_tip_skips_picked_up_tip(
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
 ) -> None:
     """It should get the next tip in the column if one has been picked up."""
-    subject.handle_action(
-        actions.SucceedCommandAction(private_result=None, command=load_labware_command)
-    )
+    subject.handle_action(load_labware_action)
 
-    load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id")
-    )
     channels_num = input_tip_amount
     if input_starting_tip is not None:
         pipette_name_type = PipetteNameType.P1000_96
@@ -333,7 +324,7 @@ def test_get_next_tip_skips_picked_up_tip(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
-            command=load_pipette_command,
+            command=_dummy_command(),
         )
     )
 
@@ -364,16 +355,12 @@ def test_get_next_tip_skips_picked_up_tip(
 
 def test_get_next_tip_with_starting_tip(
     subject: TipStore,
-    load_labware_command: commands.LoadLabware,
+    load_labware_action: actions.SucceedCommandAction,
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
 ) -> None:
     """It should return the starting tip, and then the following tip after that."""
-    subject.handle_action(
-        actions.SucceedCommandAction(private_result=None, command=load_labware_command)
-    )
-    load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id")
-    )
+    subject.handle_action(load_labware_action)
+
     config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
@@ -402,7 +389,7 @@ def test_get_next_tip_with_starting_tip(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
-            command=load_pipette_command,
+            command=_dummy_command(),
         )
     )
     result = TipView(subject.state).get_next_tip(
@@ -437,16 +424,12 @@ def test_get_next_tip_with_starting_tip(
 
 def test_get_next_tip_with_starting_tip_8_channel(
     subject: TipStore,
-    load_labware_command: commands.LoadLabware,
+    load_labware_action: actions.SucceedCommandAction,
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
 ) -> None:
     """It should return the starting tip, and then the following tip after that."""
-    subject.handle_action(
-        actions.SucceedCommandAction(private_result=None, command=load_labware_command)
-    )
-    load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id")
-    )
+    subject.handle_action(load_labware_action)
+
     config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
@@ -475,7 +458,7 @@ def test_get_next_tip_with_starting_tip_8_channel(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
-            command=load_pipette_command,
+            command=_dummy_command(),
         )
     )
 
@@ -513,16 +496,12 @@ def test_get_next_tip_with_starting_tip_8_channel(
 
 def test_get_next_tip_with_1_channel_followed_by_8_channel(
     subject: TipStore,
-    load_labware_command: commands.LoadLabware,
+    load_labware_action: actions.SucceedCommandAction,
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
 ) -> None:
     """It should return the first tip of column 2 for the 8 channel after performing a single tip pickup on column 1."""
-    subject.handle_action(
-        actions.SucceedCommandAction(private_result=None, command=load_labware_command)
-    )
-    load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id")
-    )
+    subject.handle_action(load_labware_action)
+
     config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
@@ -551,12 +530,10 @@ def test_get_next_tip_with_1_channel_followed_by_8_channel(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
-            command=load_pipette_command,
+            command=_dummy_command(),
         )
     )
-    load_pipette_command_2 = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id2")
-    )
+
     config_update_2 = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id2",
         serial_number="pipette-serial2",
@@ -585,7 +562,7 @@ def test_get_next_tip_with_1_channel_followed_by_8_channel(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update_2),
-            command=load_pipette_command_2,
+            command=_dummy_command(),
         )
     )
 
@@ -623,16 +600,12 @@ def test_get_next_tip_with_1_channel_followed_by_8_channel(
 
 def test_get_next_tip_with_starting_tip_out_of_tips(
     subject: TipStore,
-    load_labware_command: commands.LoadLabware,
+    load_labware_action: actions.SucceedCommandAction,
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
 ) -> None:
     """It should return the starting tip of H12 and then None after that."""
-    subject.handle_action(
-        actions.SucceedCommandAction(private_result=None, command=load_labware_command)
-    )
-    load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id")
-    )
+    subject.handle_action(load_labware_action)
+
     config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
@@ -661,7 +634,7 @@ def test_get_next_tip_with_starting_tip_out_of_tips(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
-            command=load_pipette_command,
+            command=_dummy_command(),
         )
     )
 
@@ -699,16 +672,12 @@ def test_get_next_tip_with_starting_tip_out_of_tips(
 
 def test_get_next_tip_with_column_and_starting_tip(
     subject: TipStore,
-    load_labware_command: commands.LoadLabware,
+    load_labware_action: actions.SucceedCommandAction,
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
 ) -> None:
     """It should return the first tip in a column, taking starting tip into account."""
-    subject.handle_action(
-        actions.SucceedCommandAction(private_result=None, command=load_labware_command)
-    )
-    load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id")
-    )
+    subject.handle_action(load_labware_action)
+
     config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
@@ -737,7 +706,7 @@ def test_get_next_tip_with_column_and_starting_tip(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
-            command=load_pipette_command,
+            command=_dummy_command(),
         )
     )
 
@@ -753,16 +722,12 @@ def test_get_next_tip_with_column_and_starting_tip(
 
 def test_reset_tips(
     subject: TipStore,
-    load_labware_command: commands.LoadLabware,
+    load_labware_action: actions.SucceedCommandAction,
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
 ) -> None:
     """It should be able to reset tip tracking state."""
-    subject.handle_action(
-        actions.SucceedCommandAction(private_result=None, command=load_labware_command)
-    )
-    load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id")
-    )
+    subject.handle_action(load_labware_action)
+
     config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
@@ -792,7 +757,7 @@ def test_reset_tips(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
-            command=load_pipette_command,
+            command=_dummy_command(),
         )
     )
 
@@ -827,9 +792,6 @@ def test_handle_pipette_config_action(
     subject: TipStore, supported_tip_fixture: pipette_definition.SupportedTipsDefinition
 ) -> None:
     """Should add pipette channel to state."""
-    load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id")
-    )
     config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
@@ -858,7 +820,7 @@ def test_handle_pipette_config_action(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
-            command=load_pipette_command,
+            command=_dummy_command(),
         )
     )
 
@@ -876,12 +838,10 @@ def test_handle_pipette_config_action(
     ],
 )
 def test_has_tip_not_tip_rack(
-    load_labware_command: commands.LoadLabware, subject: TipStore
+    load_labware_action: actions.SucceedCommandAction, subject: TipStore
 ) -> None:
     """It should return False if labware isn't a tip rack."""
-    subject.handle_action(
-        actions.SucceedCommandAction(private_result=None, command=load_labware_command)
-    )
+    subject.handle_action(load_labware_action)
 
     result = TipView(state=subject.state).has_clean_tip("cool-labware", "A1")
 
@@ -889,12 +849,10 @@ def test_has_tip_not_tip_rack(
 
 
 def test_has_tip_tip_rack(
-    load_labware_command: commands.LoadLabware, subject: TipStore
+    load_labware_action: actions.SucceedCommandAction, subject: TipStore
 ) -> None:
     """It should return False if labware isn't a tip rack."""
-    subject.handle_action(
-        actions.SucceedCommandAction(private_result=None, command=load_labware_command)
-    )
+    subject.handle_action(load_labware_action)
 
     result = TipView(state=subject.state).has_clean_tip("cool-labware", "A1")
 
@@ -968,9 +926,6 @@ def test_active_channels(
 ) -> None:
     """Should update active channels after pipette configuration change."""
     # Load pipette to update state
-    load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id")
-    )
     config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
@@ -999,7 +954,7 @@ def test_active_channels(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
-            command=load_pipette_command,
+            command=_dummy_command(),
         )
     )
 
@@ -1026,18 +981,13 @@ def test_active_channels(
 def test_next_tip_uses_active_channels(
     subject: TipStore,
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
-    load_labware_command: commands.LoadLabware,
+    load_labware_action: actions.SucceedCommandAction,
 ) -> None:
     """Test that tip tracking logic uses pipette's active channels."""
     # Load labware
-    subject.handle_action(
-        actions.SucceedCommandAction(private_result=None, command=load_labware_command)
-    )
+    subject.handle_action(load_labware_action)
 
     # Load pipette
-    load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id")
-    )
     config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
@@ -1066,7 +1016,7 @@ def test_next_tip_uses_active_channels(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
-            command=load_pipette_command,
+            command=_dummy_command(),
         )
     )
 
@@ -1132,18 +1082,13 @@ def test_next_tip_uses_active_channels(
 def test_next_tip_automatic_tip_tracking_with_partial_configurations(
     subject: TipStore,
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
-    load_labware_command: commands.LoadLabware,
+    load_labware_action: actions.SucceedCommandAction,
 ) -> None:
     """Test tip tracking logic using multiple pipette configurations."""
     # Load labware
-    subject.handle_action(
-        actions.SucceedCommandAction(private_result=None, command=load_labware_command)
-    )
+    subject.handle_action(load_labware_action)
 
     # Load pipette
-    load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id")
-    )
     config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
@@ -1172,7 +1117,7 @@ def test_next_tip_automatic_tip_tracking_with_partial_configurations(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
-            command=load_pipette_command,
+            command=_dummy_command(),
         )
     )
 
@@ -1292,18 +1237,13 @@ def test_next_tip_automatic_tip_tracking_with_partial_configurations(
 def test_next_tip_automatic_tip_tracking_tiprack_limits(
     subject: TipStore,
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
-    load_labware_command: commands.LoadLabware,
+    load_labware_action: actions.SucceedCommandAction,
 ) -> None:
     """Test tip tracking logic to ensure once a tiprack is consumed it returns None when consuming tips using multiple pipette configurations."""
     # Load labware
-    subject.handle_action(
-        actions.SucceedCommandAction(private_result=None, command=load_labware_command)
-    )
+    subject.handle_action(load_labware_action)
 
     # Load pipette
-    load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
-        result=commands.LoadPipetteResult(pipetteId="pipette-id")
-    )
     config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
@@ -1332,7 +1272,7 @@ def test_next_tip_automatic_tip_tracking_tiprack_limits(
         actions.SucceedCommandAction(
             private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
-            command=load_pipette_command,
+            command=_dummy_command(),
         )
     )
 
