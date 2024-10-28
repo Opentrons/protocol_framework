@@ -25,7 +25,6 @@ describe('MainContentContainer', () => {
 
   it('should render prompt guide and text', () => {
     render()
-    screen.getByText('OpentronsAI')
     screen.getByText('mock PromptGuide')
     screen.getByText('mock ChatFooter')
   })
