@@ -18,7 +18,6 @@ from ..commands import (
     Command,
     CommandCreate,
     CommandDefinedErrorData,
-    CommandPrivateResult,
 )
 from ..error_recovery_policy import ErrorRecoveryPolicy, ErrorRecoveryType
 from ..notes.notes import CommandNote
@@ -145,10 +144,6 @@ class SucceedCommandAction:
 
     command: Command
     """The command in its new succeeded state."""
-
-    # todo(mm, 2024-08-26): Remove when no state stores use this anymore.
-    # https://opentrons.atlassian.net/browse/EXEC-639
-    private_result: CommandPrivateResult
 
     state_update: StateUpdate = dataclasses.field(
         # todo(mm, 2024-08-26): This has a default only to make it easier to transition

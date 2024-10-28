@@ -39,7 +39,6 @@ _ResultT = TypeVar("_ResultT", bound=BaseModel)
 _ResultT_co = TypeVar("_ResultT_co", bound=BaseModel, covariant=True)
 _ErrorT = TypeVar("_ErrorT", bound=ErrorOccurrence)
 _ErrorT_co = TypeVar("_ErrorT_co", bound=ErrorOccurrence, covariant=True)
-_PrivateResultT_co = TypeVar("_PrivateResultT_co", covariant=True)
 
 
 class CommandStatus(str, Enum):
@@ -108,18 +107,11 @@ class BaseCommandCreate(
 
 
 @dataclasses.dataclass(frozen=True)
-class SuccessData(Generic[_ResultT_co, _PrivateResultT_co]):
+class SuccessData(Generic[_ResultT_co]):
     """Data from the successful completion of a command."""
 
     public: _ResultT_co
     """Public result data. Exposed over HTTP and stored in databases."""
-
-    private: _PrivateResultT_co
-    """Additional result data, only given to `opentrons.protocol_engine` internals.
-
-    Deprecated:
-        Use `state_update` instead.
-    """
 
     state_update: StateUpdate = dataclasses.field(
         # todo(mm, 2024-08-22): Remove the default once all command implementations

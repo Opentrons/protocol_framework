@@ -38,7 +38,6 @@ from .command_unions import (
     CommandCreate,
     CommandResult,
     CommandType,
-    CommandPrivateResult,
     CommandDefinedErrorData,
 )
 
