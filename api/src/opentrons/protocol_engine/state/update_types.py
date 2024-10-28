@@ -202,7 +202,7 @@ class LiquidOperatedUpdate:
 
     labware_id: str
     well_name: str
-    volume: float | ClearType
+    volume_added: float | ClearType
 
 
 @dataclasses.dataclass
@@ -398,11 +398,11 @@ class StateUpdate:
         )
 
     def set_liquid_operated(
-        self, labware_id: str, well_name: str, volume: float | ClearType
+        self, labware_id: str, well_name: str, volume_added: float | ClearType
     ) -> None:
         """Update liquid volumes in well state. See `OperateLiquidUpdate`."""
         self.liquid_operated = LiquidOperatedUpdate(
             labware_id=labware_id,
             well_name=well_name,
-            volume=volume,
+            volume_added=volume_added,
         )

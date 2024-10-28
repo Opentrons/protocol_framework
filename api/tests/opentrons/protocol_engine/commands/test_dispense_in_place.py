@@ -88,7 +88,9 @@ async def test_dispense_in_place_implementation(
             private=None,
             state_update=update_types.StateUpdate(
                 liquid_operated=update_types.LiquidOperatedUpdate(
-                    labware_id=stateupdateLabware, well_name=stateupdateWell, volume=42
+                    labware_id=stateupdateLabware,
+                    well_name=stateupdateWell,
+                    volume_added=42,
                 )
             ),
         )
@@ -175,7 +177,7 @@ async def test_overpressure_error(
                 liquid_operated=update_types.LiquidOperatedUpdate(
                     labware_id=stateupdateLabware,
                     well_name=stateupdateWell,
-                    volume=update_types.CLEAR,
+                    volume_added=update_types.CLEAR,
                 )
             ),
         )

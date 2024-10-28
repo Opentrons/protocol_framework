@@ -95,7 +95,7 @@ async def test_dispense_implementation(
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id="labware-id-abc123",
                 well_name="A3",
-                volume=42,
+                volume_added=42,
             ),
         ),
     )
@@ -169,7 +169,7 @@ async def test_overpressure_error(
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id="labware-id",
                 well_name="well-name",
-                volume=update_types.CLEAR,
+                volume_added=update_types.CLEAR,
             ),
         ),
     )

@@ -113,7 +113,7 @@ class AspirateInPlaceImplementation(
                 state_update.set_liquid_operated(
                     labware_id=current_location.labware_id,
                     well_name=current_location.well_name,
-                    volume=CLEAR,
+                    volume_added=CLEAR,
                 )
             return DefinedErrorData(
                 public=OverpressureError(
@@ -146,7 +146,7 @@ class AspirateInPlaceImplementation(
                 state_update.set_liquid_operated(
                     labware_id=current_location.labware_id,
                     well_name=current_location.well_name,
-                    volume=-volume,
+                    volume_added=-volume,
                 )
             return SuccessData(
                 public=AspirateInPlaceResult(volume=volume),

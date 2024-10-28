@@ -139,7 +139,7 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
             state_update.set_liquid_operated(
                 labware_id=labware_id,
                 well_name=well_name,
-                volume=CLEAR,
+                volume_added=CLEAR,
             )
             return DefinedErrorData(
                 public=OverpressureError(
@@ -160,7 +160,7 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
             state_update.set_liquid_operated(
                 labware_id=labware_id,
                 well_name=well_name,
-                volume=-volume_aspirated,
+                volume_added=-volume_aspirated,
             )
             return SuccessData(
                 public=AspirateResult(

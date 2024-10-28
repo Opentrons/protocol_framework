@@ -89,13 +89,13 @@ class WellStore(HasState[WellState], HandlesActions):
             labware_id in self._state.loaded_volumes
             and well_name in self._state.loaded_volumes[labware_id]
         ):
-            if state_update.volume is update_types.CLEAR:
+            if state_update.volume_added is update_types.CLEAR:
                 del self._state.loaded_volumes[labware_id][well_name]
             else:
                 prev_loaded_vol_info = self._state.loaded_volumes[labware_id][well_name]
                 assert prev_loaded_vol_info.volume is not None
                 self._state.loaded_volumes[labware_id][well_name] = LoadedVolumeInfo(
-                    volume=prev_loaded_vol_info.volume + state_update.volume,
+                    volume=prev_loaded_vol_info.volume + state_update.volume_added,
                     last_loaded=prev_loaded_vol_info.last_loaded,
                     operations_since_load=prev_loaded_vol_info.operations_since_load
                     + 1,
@@ -109,14 +109,16 @@ class WellStore(HasState[WellState], HandlesActions):
             labware_id in self._state.probed_volumes
             and well_name in self._state.probed_volumes[labware_id]
         ):
-            if state_update.volume is update_types.CLEAR:
+            if state_update.volume_added is update_types.CLEAR:
                 del self._state.probed_volumes[labware_id][well_name]
             else:
                 prev_probed_vol_info = self._state.probed_volumes[labware_id][well_name]
                 if prev_probed_vol_info.volume is None:
                     new_vol_info: float | None = None
                 else:
-                    new_vol_info = prev_probed_vol_info.volume + state_update.volume
+                    new_vol_info = (
+                        prev_probed_vol_info.volume + state_update.volume_added
+                    )
                 self._state.probed_volumes[labware_id][well_name] = ProbedVolumeInfo(
                     volume=new_vol_info,
                     last_probed=prev_probed_vol_info.last_probed,

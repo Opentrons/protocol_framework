@@ -113,7 +113,7 @@ async def test_aspirate_implementation_no_prep(
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id="123",
                 well_name="A3",
-                volume=-50,
+                volume_added=-50,
             ),
         ),
     )
@@ -187,7 +187,7 @@ async def test_aspirate_implementation_with_prep(
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id="123",
                 well_name="A3",
-                volume=-50,
+                volume_added=-50,
             ),
         ),
     )
@@ -327,7 +327,7 @@ async def test_overpressure_error(
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id=labware_id,
                 well_name=well_name,
-                volume=update_types.CLEAR,
+                volume_added=update_types.CLEAR,
             ),
         ),
     )
@@ -393,7 +393,7 @@ async def test_aspirate_implementation_meniscus(
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id="123",
                 well_name="A3",
-                volume=-50,
+                volume_added=-50,
             ),
         ),
     )

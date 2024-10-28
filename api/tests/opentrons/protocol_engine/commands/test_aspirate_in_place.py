@@ -128,7 +128,7 @@ async def test_aspirate_in_place_implementation(
                 liquid_operated=update_types.LiquidOperatedUpdate(
                     labware_id=stateupdateLabware,
                     well_name=stateupdateWell,
-                    volume=-123,
+                    volume_added=-123,
                 )
             ),
         )
@@ -270,7 +270,7 @@ async def test_overpressure_error(
                 liquid_operated=update_types.LiquidOperatedUpdate(
                     labware_id=stateupdateLabware,
                     well_name=stateupdateWell,
-                    volume=update_types.CLEAR,
+                    volume_added=update_types.CLEAR,
                 )
             ),
         )

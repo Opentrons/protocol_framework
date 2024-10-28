@@ -143,7 +143,7 @@ def test_handles_load_liquid_and_aspirate(subject: WellStore) -> None:
                 liquid_operated=update_types.LiquidOperatedUpdate(
                     labware_id=labware_id,
                     well_name=well_name_1,
-                    volume=-aspirated_volume,
+                    volume_added=-aspirated_volume,
                 )
             ),
         )
@@ -156,7 +156,7 @@ def test_handles_load_liquid_and_aspirate(subject: WellStore) -> None:
                 liquid_operated=update_types.LiquidOperatedUpdate(
                     labware_id=labware_id,
                     well_name=well_name_2,
-                    volume=-aspirated_volume,
+                    volume_added=-aspirated_volume,
                 )
             ),
         )
@@ -220,7 +220,7 @@ def test_handles_liquid_probe_and_aspirate(subject: WellStore) -> None:
                 liquid_operated=update_types.LiquidOperatedUpdate(
                     labware_id="labware-id",
                     well_name="well-name",
-                    volume=-aspirated_volume,
+                    volume_added=-aspirated_volume,
                 )
             ),
         )
