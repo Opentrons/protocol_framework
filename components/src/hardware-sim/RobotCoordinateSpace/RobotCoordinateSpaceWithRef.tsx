@@ -34,19 +34,12 @@ export function RobotCoordinateSpaceWithRef(
       {}
     )
 
-    wholeDeckViewBox = `${viewBoxOriginX} ${-deckYDimension} ${deckXDimension} ${deckYDimension}`
-
-    // wholeDeckViewBox = `${viewBoxOriginX} ${viewBoxOriginY} ${deckXDimension} ${deckYDimension}`
     // Add padding to prevent clipping and better center the content
-    const padding = 20
-    wholeDeckViewBox = `${viewBoxOriginX - padding} ${
-      viewBoxOriginY - padding
-    } ${deckXDimension + padding * 2} ${deckYDimension + padding * 2}`
-    // Invert Y-axis by setting min-y to negative of deckYDimension
+    const PADDING = 20
+    wholeDeckViewBox = `${viewBoxOriginX - PADDING} ${
+      viewBoxOriginY - PADDING
+    } ${deckXDimension + PADDING * 2} ${deckYDimension + PADDING * 2}`
   }
-  console.log('wholeDeckViewBox', wholeDeckViewBox)
-  console.log('viewBox', viewBox)
-  console.log(viewBox || wholeDeckViewBox)
   return (
     <Flex
       width="100%"
