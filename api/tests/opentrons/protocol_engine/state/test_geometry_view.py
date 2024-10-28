@@ -1668,9 +1668,9 @@ def test_get_well_position_with_meniscus_and_literal_volume_offset(
     )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
         WellLiquidInfo(
-            loaded_liquid=None,
+            loaded_volume=None,
             probed_height=ProbedHeightInfo(height=45.0, last_probed=datetime.now()),
-            probed_liquid=None,
+            probed_volume=None,
         )
     )
     labware_def = _load_labware_definition_data()
