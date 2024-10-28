@@ -95,13 +95,13 @@ export const getErrors = (args: {
     // blank or otherwise invalid should show this error as a fallback
     return [OUT_OF_BOUNDS]
   }
-  const incorrectDecimals = round(value, DECIMALS_ALLOWED) !== value
-  const outOfBounds = value > maxMm || value < minMm
-  console.log(outOfBounds)
-  if (incorrectDecimals) {
+  const hasIncorrectDecimals = round(value, DECIMALS_ALLOWED) !== value
+  const isOutOfBounds = value > maxMm || value < minMm
+
+  if (hasIncorrectDecimals) {
     errors.push(TOO_MANY_DECIMALS)
   }
-  if (outOfBounds) {
+  if (isOutOfBounds) {
     errors.push(OUT_OF_BOUNDS)
   }
   return errors

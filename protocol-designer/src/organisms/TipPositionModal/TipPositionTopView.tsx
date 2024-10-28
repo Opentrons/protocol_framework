@@ -35,8 +35,8 @@ export function TipPositionTopView(props: TipPositionAllVizProps): JSX.Element {
   return (
     <Box
       position={POSITION_RELATIVE}
-      width="253px"
-      height="288px"
+      width="15.8125rem"
+      height="18rem"
       overflow={OVERFLOW_HIDDEN}
     >
       <img src={BOTTOM_LAYER} style={{ position: POSITION_ABSOLUTE }} />

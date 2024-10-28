@@ -104,7 +104,7 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
 
   const handleDone = (): void => {
     if (!hasErrors) {
-      updateValue(value === null ? null : Number(value))
+      updateValue(value == null ? null : Number(value))
       closeModal()
     }
   }

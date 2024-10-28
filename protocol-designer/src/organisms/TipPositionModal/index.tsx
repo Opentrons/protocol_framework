@@ -271,89 +271,91 @@ export function TipPositionModal(
         </Flex>
       }
     >
-      {isXValueNearEdge || isYValueNearEdge || isZValueAtBottom ? (
-        <Banner type="warning">
-          <StyledText desktopStyle="bodyDefaultRegular">
-            {t('tip_position.warning')}
-          </StyledText>
-        </Banner>
-      ) : null}
-      <Flex gridGap={SPACING.spacing40}>
-        <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
-          <StyledText desktopStyle="bodyDefaultRegular">
-            {t(`tip_position.body.${zSpec?.name}`)}
-          </StyledText>
-          <InputField
-            title={t('tip_position.field_titles.x_position')}
-            caption={t('tip_position.caption', {
-              min: roundedXMin,
-              max: roundedXMax,
-            })}
-            error={xErrorText}
-            id="TipPositionModal_x_custom_input"
-            onChange={handleXInputFieldChange}
-            units={t('application:units.millimeter')}
-            value={xValue ?? ''}
-          />
-          <InputField
-            tooltipText={t('tooltip:y_position_value')}
-            title={t('tip_position.field_titles.y_position')}
-            caption={t('tip_position.caption', {
-              min: roundedYMin,
-              max: roundedYMax,
-            })}
-            error={yErrorText}
-            id="TipPositionModal_y_custom_input"
-            onChange={handleYInputFieldChange}
-            units={t('application:units.millimeter')}
-            value={yValue ?? ''}
-          />
-          <InputField
-            title={t('tip_position.field_titles.z_position')}
-            caption={t('tip_position.caption', {
-              min: minMmFromBottom,
-              max: maxMmFromBottom,
-            })}
-            error={zErrorText}
-            id="TipPositionModal_z_custom_input"
-            isIndeterminate={zValue === null && isIndeterminate}
-            onChange={handleZInputFieldChange}
-            units={t('application:units.millimeter')}
-            value={zValue !== null ? zValue : ''}
-          />
-        </Flex>
-        <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
-          <Flex justifyContent={JUSTIFY_SPACE_BETWEEN}>
+      <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
+        {isXValueNearEdge || isYValueNearEdge || isZValueAtBottom ? (
+          <Banner type="warning">
             <StyledText desktopStyle="bodyDefaultRegular">
-              {view === 'side' ? 'Side view' : 'Top view'}
+              {t('tip_position.warning')}
             </StyledText>
-            <Btn
-              fontWeight={TYPOGRAPHY.fontWeightSemiBold}
-              css={BUTTON_LINK_STYLE}
-              onClick={() => {
-                setView(view === 'side' ? 'top' : 'side')
-              }}
-            >
-              {t('shared:swap_view')}
-            </Btn>
+          </Banner>
+        ) : null}
+        <Flex gridGap={SPACING.spacing40}>
+          <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
+            <StyledText desktopStyle="bodyDefaultRegular">
+              {t(`tip_position.body.${zSpec?.name}`)}
+            </StyledText>
+            <InputField
+              title={t('tip_position.field_titles.x_position')}
+              caption={t('tip_position.caption', {
+                min: roundedXMin,
+                max: roundedXMax,
+              })}
+              error={xErrorText}
+              id="TipPositionModal_x_custom_input"
+              onChange={handleXInputFieldChange}
+              units={t('application:units.millimeter')}
+              value={xValue ?? ''}
+            />
+            <InputField
+              tooltipText={t('tooltip:y_position_value')}
+              title={t('tip_position.field_titles.y_position')}
+              caption={t('tip_position.caption', {
+                min: roundedYMin,
+                max: roundedYMax,
+              })}
+              error={yErrorText}
+              id="TipPositionModal_y_custom_input"
+              onChange={handleYInputFieldChange}
+              units={t('application:units.millimeter')}
+              value={yValue ?? ''}
+            />
+            <InputField
+              title={t('tip_position.field_titles.z_position')}
+              caption={t('tip_position.caption', {
+                min: minMmFromBottom,
+                max: maxMmFromBottom,
+              })}
+              error={zErrorText}
+              id="TipPositionModal_z_custom_input"
+              isIndeterminate={zValue === null && isIndeterminate}
+              onChange={handleZInputFieldChange}
+              units={t('application:units.millimeter')}
+              value={zValue !== null ? zValue : ''}
+            />
           </Flex>
-          {view === 'side' ? (
-            <TipPositionSideView
-              mmFromBottom={
-                zValue !== null ? Number(zValue) : defaultMmFromBottom
-              }
-              wellDepthMm={wellDepthMm}
-              xPosition={parseInt(xValue ?? '0')}
-              xWidthMm={wellXWidthMm}
-            />
-          ) : (
-            <TipPositionTopView
-              xPosition={parseInt(xValue ?? '0')}
-              xWidthMm={wellXWidthMm}
-              yPosition={parseInt(yValue ?? '0')}
-              yWidthMm={wellYWidthMm}
-            />
-          )}
+          <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
+            <Flex justifyContent={JUSTIFY_SPACE_BETWEEN}>
+              <StyledText desktopStyle="bodyDefaultRegular">
+                {view === 'side' ? 'Side view' : 'Top view'}
+              </StyledText>
+              <Btn
+                fontWeight={TYPOGRAPHY.fontWeightSemiBold}
+                css={BUTTON_LINK_STYLE}
+                onClick={() => {
+                  setView(view === 'side' ? 'top' : 'side')
+                }}
+              >
+                {t('shared:swap_view')}
+              </Btn>
+            </Flex>
+            {view === 'side' ? (
+              <TipPositionSideView
+                mmFromBottom={
+                  zValue !== null ? Number(zValue) : defaultMmFromBottom
+                }
+                wellDepthMm={wellDepthMm}
+                xPosition={parseInt(xValue ?? '0')}
+                xWidthMm={wellXWidthMm}
+              />
+            ) : (
+              <TipPositionTopView
+                xPosition={parseInt(xValue ?? '0')}
+                xWidthMm={wellXWidthMm}
+                yPosition={parseInt(yValue ?? '0')}
+                yWidthMm={wellYWidthMm}
+              />
+            )}
+          </Flex>
         </Flex>
       </Flex>
     </Modal>,
