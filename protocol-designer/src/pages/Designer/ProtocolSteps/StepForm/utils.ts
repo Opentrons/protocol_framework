@@ -335,6 +335,13 @@ export const getFormErrorsMappedToField = (
   return formErrors.reduce<ErrorMappedToField>((acc, error) => {
     const { dependentFields } = error
     for (const field of dependentFields) {
+      const { showAtField, showAtForm, title } = error
+      if (showAtField == null || showAtForm == null) {
+        console.error(
+          `${title} should wire up where to show error (at form and/or field)`
+        )
+      }
+      // map each field to only one one error
       acc[field] = {
         ...error,
         showAtField: error.showAtField ?? true,
