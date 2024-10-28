@@ -1,7 +1,7 @@
-import { getAddressableAreaDisplayName } from './getAddressableAreaDisplayName'
+import { getAddressableAreaDisplayName } from '../getAddressableAreaDisplayName'
 
 import type { MoveToAddressableAreaRunTimeCommand } from '@opentrons/shared-data/command'
-import type { HandlesCommands } from './types'
+import type { HandlesCommands } from '../types'
 
 export function getMoveToAddressableAreaCommandText({
   command,
@@ -10,7 +10,7 @@ export function getMoveToAddressableAreaCommandText({
 }: HandlesCommands<MoveToAddressableAreaRunTimeCommand>): string {
   const addressableAreaDisplayName =
     commandTextData != null
-      ? getAddressableAreaDisplayName(commandTextData, command.id, t)
+      ? getAddressableAreaDisplayName(commandTextData.commands, command.id, t)
       : null
 
   return t('move_to_addressable_area', {

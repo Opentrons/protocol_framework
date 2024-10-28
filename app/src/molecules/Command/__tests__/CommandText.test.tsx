@@ -444,7 +444,7 @@ describe('CommandText', () => {
       />,
       { i18nInstance: i18n }
     )
-    screen.getByText('Dropping tip in place')
+    screen.getByText('Dropping tip in D3')
   })
   it('renders correct text for pickUpTip', () => {
     const command = mockCommandTextData.commands.find(

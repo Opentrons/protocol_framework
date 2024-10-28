@@ -1,5 +1,5 @@
 import type { DeprecatedDelayRunTimeCommand } from '@opentrons/shared-data/command'
-import type { HandlesCommands } from './types'
+import type { HandlesCommands } from '../types'
 
 export function getDelayCommandText({
   command,

@@ -7895,7 +7895,14 @@
       },
       "id": "UUID",
       "key": "675eb8be-6c85-4204-9c87-d7fdd522f580",
-      "notes": [],
+      "notes": [
+        {
+          "longMessage": "Handling this command failure with FAIL_RUN.",
+          "noteKind": "debugErrorRecovery",
+          "shortMessage": "Handling this command failure with FAIL_RUN.",
+          "source": "execution"
+        }
+      ],
       "params": {
         "moduleId": "UUID"
       },
