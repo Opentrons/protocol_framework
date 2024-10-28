@@ -117,22 +117,21 @@ export const LabwareStackModal = (
   const isAdapterForTiprack =
     adapterDef?.parameters.loadName === 'opentrons_flex_96_tiprack_adapter'
 
-  const labwareImg = Object.keys(LABWARE_LOAD_NAMES_TO_SHOW_IMAGE).includes(
-    topDefinition.parameters.loadName
-  ) ? (
-    <img
-      src={LABWARE_LOAD_NAMES_TO_SHOW_IMAGE[topDefinition.parameters.loadName]}
-      css={IMAGE_STYLE}
-    />
-  ) : null
+  const labwareImg =
+    topDefinition.parameters.loadName in LABWARE_LOAD_NAMES_TO_SHOW_IMAGE ? (
+      <img
+        src={
+          LABWARE_LOAD_NAMES_TO_SHOW_IMAGE[topDefinition.parameters.loadName]
+        }
+        css={IMAGE_STYLE}
+      />
+    ) : null
 
   const adapterImg =
     adapterDef != null &&
-    Object.keys(ADAPTER_LOAD_NAMES_TO_SHOW_IMAGE).includes(
-      adapterDef.parameters.loadName
-    ) ? (
+    adapterDef.parameters.loadName in ADAPTER_LOAD_NAMES_TO_SHOW_IMAGE ? (
       <img
-        src={ADAPTER_LOAD_NAMES_TO_SHOW_IMAGE[adapterDef?.parameters.loadName]}
+        src={ADAPTER_LOAD_NAMES_TO_SHOW_IMAGE[adapterDef.parameters.loadName]}
         css={IMAGE_STYLE}
       />
     ) : null
