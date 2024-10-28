@@ -1,9 +1,11 @@
 import { useTranslation } from 'react-i18next'
 import { Flex, InputField, SPACING } from '@opentrons/components'
+import type { Dispatch, SetStateAction } from 'react'
 import type { FieldProps } from '../../components/StepEditForm/types'
 
 interface InputStepFormFieldProps extends FieldProps {
   title: string
+  setIsPristine?: Dispatch<SetStateAction<boolean>>
   units?: string
   padding?: string
   showTooltip?: boolean
@@ -28,6 +30,7 @@ export function InputStepFormField(
     tooltipContent,
     caption,
     formLevelError,
+    setIsPristine,
     ...otherProps
   } = props
   const { t } = useTranslation('tooltip')
@@ -39,6 +42,7 @@ export function InputStepFormField(
         tooltipText={
           showTooltip ? t(`${tooltipContent}`) ?? undefined : undefined
         }
+        type="number"
         title={title}
         caption={caption}
         name={name}
@@ -47,6 +51,9 @@ export function InputStepFormField(
         onFocus={onFieldFocus}
         onChange={e => {
           updateValue(e.currentTarget.value)
+          if (setIsPristine != null) {
+            setIsPristine(false)
+          }
         }}
         value={value ? String(value) : null}
         units={units}
