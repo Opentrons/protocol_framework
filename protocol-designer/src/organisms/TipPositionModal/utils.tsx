@@ -9,11 +9,6 @@ import {
 import { DECIMALS_ALLOWED, TOO_MANY_DECIMALS } from './constants'
 import type { StepFieldName } from '../../form-types'
 
-// TODO: Ian + Brian 2019-02-13 this should switch on stepType, not use field
-// name to infer step type!
-//
-// TODO(IL, 2021-03-10): after resolving #7470, use this util instead
-// of directly using these constants, wherever these constants are used. See also #7469
 export function getDefaultMmFromBottom(args: {
   name: StepFieldName
   wellDepthMm: number
@@ -102,7 +97,7 @@ export const getErrors = (args: {
   }
   const incorrectDecimals = round(value, DECIMALS_ALLOWED) !== value
   const outOfBounds = value > maxMm || value < minMm
-console.log(outOfBounds)
+  console.log(outOfBounds)
   if (incorrectDecimals) {
     errors.push(TOO_MANY_DECIMALS)
   }
