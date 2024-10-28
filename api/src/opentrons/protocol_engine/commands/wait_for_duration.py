@@ -29,7 +29,7 @@ class WaitForDurationResult(BaseModel):
 
 
 class WaitForDurationImplementation(
-    AbstractCommandImpl[WaitForDurationParams, SuccessData[WaitForDurationResult, None]]
+    AbstractCommandImpl[WaitForDurationParams, SuccessData[WaitForDurationResult]]
 ):
     """Wait for duration command implementation."""
 
@@ -38,7 +38,7 @@ class WaitForDurationImplementation(
 
     async def execute(
         self, params: WaitForDurationParams
-    ) -> SuccessData[WaitForDurationResult, None]:
+    ) -> SuccessData[WaitForDurationResult]:
         """Wait for a duration of time."""
         await self._run_control.wait_for_duration(params.seconds)
         return SuccessData(

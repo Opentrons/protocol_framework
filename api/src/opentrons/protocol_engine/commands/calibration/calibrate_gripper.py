@@ -71,9 +71,7 @@ class CalibrateGripperResult(BaseModel):
 
 
 class CalibrateGripperImplementation(
-    AbstractCommandImpl[
-        CalibrateGripperParams, SuccessData[CalibrateGripperResult, None]
-    ]
+    AbstractCommandImpl[CalibrateGripperParams, SuccessData[CalibrateGripperResult]]
 ):
     """The implementation of a `calibrateGripper` command."""
 
@@ -87,7 +85,7 @@ class CalibrateGripperImplementation(
 
     async def execute(
         self, params: CalibrateGripperParams
-    ) -> SuccessData[CalibrateGripperResult, None]:
+    ) -> SuccessData[CalibrateGripperResult]:
         """Execute a `calibrateGripper` command.
 
         1. Move from the current location to the calibration area on the deck.

@@ -28,7 +28,7 @@ class OpenLidResult(BaseModel):
     """Result data from opening a Thermocycler's lid."""
 
 
-class OpenLidImpl(AbstractCommandImpl[OpenLidParams, SuccessData[OpenLidResult, None]]):
+class OpenLidImpl(AbstractCommandImpl[OpenLidParams, SuccessData[OpenLidResult]]):
     """Execution implementation of a Thermocycler's open lid command."""
 
     def __init__(
@@ -42,7 +42,7 @@ class OpenLidImpl(AbstractCommandImpl[OpenLidParams, SuccessData[OpenLidResult, 
         self._equipment = equipment
         self._movement = movement
 
-    async def execute(self, params: OpenLidParams) -> SuccessData[OpenLidResult, None]:
+    async def execute(self, params: OpenLidParams) -> SuccessData[OpenLidResult]:
         """Open a Thermocycler's lid."""
         state_update = update_types.StateUpdate()
 

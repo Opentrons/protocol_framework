@@ -57,7 +57,7 @@ class MoveToMaintenancePositionResult(BaseModel):
 class MoveToMaintenancePositionImplementation(
     AbstractCommandImpl[
         MoveToMaintenancePositionParams,
-        SuccessData[MoveToMaintenancePositionResult, None],
+        SuccessData[MoveToMaintenancePositionResult],
     ]
 ):
     """Calibration set up position command implementation."""
@@ -73,7 +73,7 @@ class MoveToMaintenancePositionImplementation(
 
     async def execute(
         self, params: MoveToMaintenancePositionParams
-    ) -> SuccessData[MoveToMaintenancePositionResult, None]:
+    ) -> SuccessData[MoveToMaintenancePositionResult]:
         """Move the requested mount to a maintenance deck slot."""
         ot3_api = ensure_ot3_hardware(
             self._hardware_api,

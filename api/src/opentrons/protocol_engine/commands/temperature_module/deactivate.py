@@ -27,7 +27,7 @@ class DeactivateTemperatureResult(BaseModel):
 
 class DeactivateTemperatureImpl(
     AbstractCommandImpl[
-        DeactivateTemperatureParams, SuccessData[DeactivateTemperatureResult, None]
+        DeactivateTemperatureParams, SuccessData[DeactivateTemperatureResult]
     ]
 ):
     """Execution implementation of a Temperature Module's deactivate command."""
@@ -43,7 +43,7 @@ class DeactivateTemperatureImpl(
 
     async def execute(
         self, params: DeactivateTemperatureParams
-    ) -> SuccessData[DeactivateTemperatureResult, None]:
+    ) -> SuccessData[DeactivateTemperatureResult]:
         """Deactivate a Temperature Module."""
         # Allow propagation of ModuleNotLoadedError and WrongModuleTypeError.
         module_substate = self._state_view.modules.get_temperature_module_substate(

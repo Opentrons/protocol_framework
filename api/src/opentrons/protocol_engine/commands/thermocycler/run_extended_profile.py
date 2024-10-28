@@ -59,7 +59,6 @@ class RunExtendedProfileResult(BaseModel):
 def _transform_profile_step(
     step: ProfileStep, thermocycler_state: ThermocyclerModuleSubState
 ) -> ThermocyclerStep:
-
     return ThermocyclerStep(
         temperature=thermocycler_state.validate_target_block_temperature(step.celsius),
         hold_time_seconds=step.holdSeconds,
@@ -97,9 +96,7 @@ def _transform_profile_element(
 
 
 class RunExtendedProfileImpl(
-    AbstractCommandImpl[
-        RunExtendedProfileParams, SuccessData[RunExtendedProfileResult, None]
-    ]
+    AbstractCommandImpl[RunExtendedProfileParams, SuccessData[RunExtendedProfileResult]]
 ):
     """Execution implementation of a Thermocycler's run profile command."""
 
@@ -114,7 +111,7 @@ class RunExtendedProfileImpl(
 
     async def execute(
         self, params: RunExtendedProfileParams
-    ) -> SuccessData[RunExtendedProfileResult, None]:
+    ) -> SuccessData[RunExtendedProfileResult]:
         """Run a Thermocycler profile."""
         thermocycler_state = self._state_view.modules.get_thermocycler_module_substate(
             params.moduleId

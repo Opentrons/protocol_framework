@@ -220,7 +220,7 @@ class _TestCommandDefinedError(ErrorOccurrence):
 
 
 _TestCommandReturn = Union[
-    SuccessData[_TestCommandResult, None],
+    SuccessData[_TestCommandResult],
     DefinedErrorData[_TestCommandDefinedError],
 ]
 

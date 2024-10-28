@@ -98,9 +98,7 @@ class GripperMovementError(ErrorOccurrence):
     errorType: Literal["gripperMovement"] = "gripperMovement"
 
 
-_ExecuteReturn = (
-    SuccessData[MoveLabwareResult, None] | DefinedErrorData[GripperMovementError]
-)
+_ExecuteReturn = SuccessData[MoveLabwareResult] | DefinedErrorData[GripperMovementError]
 
 
 class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteReturn]):

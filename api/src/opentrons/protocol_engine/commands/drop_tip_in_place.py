@@ -44,8 +44,7 @@ class DropTipInPlaceResult(BaseModel):
 
 
 _ExecuteReturn = (
-    SuccessData[DropTipInPlaceResult, None]
-    | DefinedErrorData[TipPhysicallyAttachedError]
+    SuccessData[DropTipInPlaceResult] | DefinedErrorData[TipPhysicallyAttachedError]
 )
 
 

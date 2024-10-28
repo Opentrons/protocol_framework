@@ -28,7 +28,7 @@ class WaitForLidTemperatureResult(BaseModel):
 
 class WaitForLidTemperatureImpl(
     AbstractCommandImpl[
-        WaitForLidTemperatureParams, SuccessData[WaitForLidTemperatureResult, None]
+        WaitForLidTemperatureParams, SuccessData[WaitForLidTemperatureResult]
     ]
 ):
     """Execution implementation of Thermocycler's wait for lid temperature command."""
@@ -45,7 +45,7 @@ class WaitForLidTemperatureImpl(
     async def execute(
         self,
         params: WaitForLidTemperatureParams,
-    ) -> SuccessData[WaitForLidTemperatureResult, None]:
+    ) -> SuccessData[WaitForLidTemperatureResult]:
         """Wait for a Thermocycler's lid temperature."""
         thermocycler_state = self._state_view.modules.get_thermocycler_module_substate(
             params.moduleId

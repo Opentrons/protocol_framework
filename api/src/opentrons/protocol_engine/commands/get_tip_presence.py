@@ -38,7 +38,7 @@ class GetTipPresenceResult(BaseModel):
 
 
 class GetTipPresenceImplementation(
-    AbstractCommandImpl[GetTipPresenceParams, SuccessData[GetTipPresenceResult, None]]
+    AbstractCommandImpl[GetTipPresenceParams, SuccessData[GetTipPresenceResult]]
 ):
     """GetTipPresence command implementation."""
 
@@ -51,7 +51,7 @@ class GetTipPresenceImplementation(
 
     async def execute(
         self, params: GetTipPresenceParams
-    ) -> SuccessData[GetTipPresenceResult, None]:
+    ) -> SuccessData[GetTipPresenceResult]:
         """Verify if tip presence is as expected for the requested pipette."""
         pipette_id = params.pipetteId
 

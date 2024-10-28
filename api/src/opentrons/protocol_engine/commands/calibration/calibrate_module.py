@@ -49,7 +49,7 @@ class CalibrateModuleResult(BaseModel):
 
 
 class CalibrateModuleImplementation(
-    AbstractCommandImpl[CalibrateModuleParams, SuccessData[CalibrateModuleResult, None]]
+    AbstractCommandImpl[CalibrateModuleParams, SuccessData[CalibrateModuleResult]]
 ):
     """CalibrateModule command implementation."""
 
@@ -64,7 +64,7 @@ class CalibrateModuleImplementation(
 
     async def execute(
         self, params: CalibrateModuleParams
-    ) -> SuccessData[CalibrateModuleResult, None]:
+    ) -> SuccessData[CalibrateModuleResult]:
         """Execute calibrate-module command."""
         ot3_api = ensure_ot3_hardware(
             self._hardware_api,

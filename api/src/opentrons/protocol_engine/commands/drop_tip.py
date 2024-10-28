@@ -68,7 +68,7 @@ class DropTipResult(DestinationPositionResult):
 
 
 _ExecuteReturn = (
-    SuccessData[DropTipResult, None] | DefinedErrorData[TipPhysicallyAttachedError]
+    SuccessData[DropTipResult] | DefinedErrorData[TipPhysicallyAttachedError]
 )
 
 

@@ -86,7 +86,7 @@ class MoveToAddressableAreaForDropTipResult(DestinationPositionResult):
 class MoveToAddressableAreaForDropTipImplementation(
     AbstractCommandImpl[
         MoveToAddressableAreaForDropTipParams,
-        SuccessData[MoveToAddressableAreaForDropTipResult, None],
+        SuccessData[MoveToAddressableAreaForDropTipResult],
     ]
 ):
     """Move to addressable area for drop tip command implementation."""
@@ -99,7 +99,7 @@ class MoveToAddressableAreaForDropTipImplementation(
 
     async def execute(
         self, params: MoveToAddressableAreaForDropTipParams
-    ) -> SuccessData[MoveToAddressableAreaForDropTipResult, None]:
+    ) -> SuccessData[MoveToAddressableAreaForDropTipResult]:
         """Move the requested pipette to the requested addressable area in preperation of a drop tip."""
         state_update = update_types.StateUpdate()
 

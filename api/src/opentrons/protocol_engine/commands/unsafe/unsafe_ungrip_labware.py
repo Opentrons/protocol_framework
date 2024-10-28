@@ -27,7 +27,7 @@ class UnsafeUngripLabwareResult(BaseModel):
 class UnsafeUngripLabwareImplementation(
     AbstractCommandImpl[
         UnsafeUngripLabwareParams,
-        SuccessData[UnsafeUngripLabwareResult, None],
+        SuccessData[UnsafeUngripLabwareResult],
     ]
 ):
     """Ungrip labware command implementation."""
@@ -41,7 +41,7 @@ class UnsafeUngripLabwareImplementation(
 
     async def execute(
         self, params: UnsafeUngripLabwareParams
-    ) -> SuccessData[UnsafeUngripLabwareResult, None]:
+    ) -> SuccessData[UnsafeUngripLabwareResult]:
         """Ungrip Labware."""
         ot3_hardware_api = ensure_ot3_hardware(self._hardware_api)
         if not ot3_hardware_api.has_gripper():

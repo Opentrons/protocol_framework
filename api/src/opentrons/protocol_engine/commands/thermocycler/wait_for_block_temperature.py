@@ -28,7 +28,7 @@ class WaitForBlockTemperatureResult(BaseModel):
 
 class WaitForBlockTemperatureImpl(
     AbstractCommandImpl[
-        WaitForBlockTemperatureParams, SuccessData[WaitForBlockTemperatureResult, None]
+        WaitForBlockTemperatureParams, SuccessData[WaitForBlockTemperatureResult]
     ]
 ):
     """Execution implementation of Thermocycler's wait for block temperature command."""
@@ -45,7 +45,7 @@ class WaitForBlockTemperatureImpl(
     async def execute(
         self,
         params: WaitForBlockTemperatureParams,
-    ) -> SuccessData[WaitForBlockTemperatureResult, None]:
+    ) -> SuccessData[WaitForBlockTemperatureResult]:
         """Wait for a Thermocycler's target block temperature."""
         thermocycler_state = self._state_view.modules.get_thermocycler_module_substate(
             params.moduleId

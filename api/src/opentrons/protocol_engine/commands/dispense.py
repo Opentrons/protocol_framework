@@ -54,7 +54,7 @@ class DispenseResult(BaseLiquidHandlingResult, DestinationPositionResult):
 
 
 _ExecuteReturn = Union[
-    SuccessData[DispenseResult, None],
+    SuccessData[DispenseResult],
     DefinedErrorData[OverpressureError],
 ]
 

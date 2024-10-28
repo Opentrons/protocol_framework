@@ -34,9 +34,7 @@ class OpenLabwareLatchResult(BaseModel):
 
 
 class OpenLabwareLatchImpl(
-    AbstractCommandImpl[
-        OpenLabwareLatchParams, SuccessData[OpenLabwareLatchResult, None]
-    ]
+    AbstractCommandImpl[OpenLabwareLatchParams, SuccessData[OpenLabwareLatchResult]]
 ):
     """Execution implementation of a Heater-Shaker's open latch labware command."""
 
@@ -53,7 +51,7 @@ class OpenLabwareLatchImpl(
 
     async def execute(
         self, params: OpenLabwareLatchParams
-    ) -> SuccessData[OpenLabwareLatchResult, None]:
+    ) -> SuccessData[OpenLabwareLatchResult]:
         """Open a Heater-Shaker's labware latch."""
         state_update = update_types.StateUpdate()
 

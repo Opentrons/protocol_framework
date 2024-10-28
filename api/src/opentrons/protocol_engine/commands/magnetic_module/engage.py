@@ -54,7 +54,7 @@ class EngageResult(BaseModel):
 
 
 class EngageImplementation(
-    AbstractCommandImpl[EngageParams, SuccessData[EngageResult, None]]
+    AbstractCommandImpl[EngageParams, SuccessData[EngageResult]]
 ):
     """The implementation of a Magnetic Module engage command."""
 
@@ -67,7 +67,7 @@ class EngageImplementation(
         self._state_view = state_view
         self._equipment = equipment
 
-    async def execute(self, params: EngageParams) -> SuccessData[EngageResult, None]:
+    async def execute(self, params: EngageParams) -> SuccessData[EngageResult]:
         """Execute a Magnetic Module engage command.
 
         Raises:

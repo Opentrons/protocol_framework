@@ -28,9 +28,7 @@ class CloseLidResult(BaseModel):
     """Result data from closing a Thermocycler's lid."""
 
 
-class CloseLidImpl(
-    AbstractCommandImpl[CloseLidParams, SuccessData[CloseLidResult, None]]
-):
+class CloseLidImpl(AbstractCommandImpl[CloseLidParams, SuccessData[CloseLidResult]]):
     """Execution implementation of a Thermocycler's close lid command."""
 
     def __init__(
@@ -44,9 +42,7 @@ class CloseLidImpl(
         self._equipment = equipment
         self._movement = movement
 
-    async def execute(
-        self, params: CloseLidParams
-    ) -> SuccessData[CloseLidResult, None]:
+    async def execute(self, params: CloseLidParams) -> SuccessData[CloseLidResult]:
         """Close a Thermocycler's lid."""
         state_update = update_types.StateUpdate()
 

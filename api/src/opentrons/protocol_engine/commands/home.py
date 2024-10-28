@@ -42,15 +42,13 @@ class HomeResult(BaseModel):
     """Result data from the execution of a Home command."""
 
 
-class HomeImplementation(
-    AbstractCommandImpl[HomeParams, SuccessData[HomeResult, None]]
-):
+class HomeImplementation(AbstractCommandImpl[HomeParams, SuccessData[HomeResult]]):
     """Home command implementation."""
 
     def __init__(self, movement: MovementHandler, **kwargs: object) -> None:
         self._movement = movement
 
-    async def execute(self, params: HomeParams) -> SuccessData[HomeResult, None]:
+    async def execute(self, params: HomeParams) -> SuccessData[HomeResult]:
         """Home some or all motors to establish positional accuracy."""
         state_update = update_types.StateUpdate()
 

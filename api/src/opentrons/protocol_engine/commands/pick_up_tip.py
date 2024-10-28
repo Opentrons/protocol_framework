@@ -86,7 +86,7 @@ class TipPhysicallyMissingError(ErrorOccurrence):
 
 
 _ExecuteReturn = Union[
-    SuccessData[PickUpTipResult, None],
+    SuccessData[PickUpTipResult],
     DefinedErrorData[TipPhysicallyMissingError],
 ]
 
@@ -109,7 +109,7 @@ class PickUpTipImplementation(AbstractCommandImpl[PickUpTipParams, _ExecuteRetur
 
     async def execute(
         self, params: PickUpTipParams
-    ) -> Union[SuccessData[PickUpTipResult, None], _ExecuteReturn]:
+    ) -> Union[SuccessData[PickUpTipResult], _ExecuteReturn]:
         """Move to and pick up a tip using the requested pipette."""
         pipette_id = params.pipetteId
         labware_id = params.labwareId

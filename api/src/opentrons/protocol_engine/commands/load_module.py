@@ -106,7 +106,7 @@ class LoadModuleResult(BaseModel):
 
 
 class LoadModuleImplementation(
-    AbstractCommandImpl[LoadModuleParams, SuccessData[LoadModuleResult, None]]
+    AbstractCommandImpl[LoadModuleParams, SuccessData[LoadModuleResult]]
 ):
     """The implementation of the load module command."""
 
@@ -116,9 +116,7 @@ class LoadModuleImplementation(
         self._equipment = equipment
         self._state_view = state_view
 
-    async def execute(
-        self, params: LoadModuleParams
-    ) -> SuccessData[LoadModuleResult, None]:
+    async def execute(self, params: LoadModuleParams) -> SuccessData[LoadModuleResult]:
         """Check that the requested module is attached and assign its identifier."""
         module_type = params.model.as_type()
         self._ensure_module_location(params.location.slotName, module_type)

@@ -50,7 +50,7 @@ class TouchTipResult(DestinationPositionResult):
 
 
 class TouchTipImplementation(
-    AbstractCommandImpl[TouchTipParams, SuccessData[TouchTipResult, None]]
+    AbstractCommandImpl[TouchTipParams, SuccessData[TouchTipResult]]
 ):
     """Touch tip command implementation."""
 
@@ -65,9 +65,7 @@ class TouchTipImplementation(
         self._movement = movement
         self._gantry_mover = gantry_mover
 
-    async def execute(
-        self, params: TouchTipParams
-    ) -> SuccessData[TouchTipResult, None]:
+    async def execute(self, params: TouchTipParams) -> SuccessData[TouchTipResult]:
         """Touch tip to sides of a well using the requested pipette."""
         pipette_id = params.pipetteId
         labware_id = params.labwareId

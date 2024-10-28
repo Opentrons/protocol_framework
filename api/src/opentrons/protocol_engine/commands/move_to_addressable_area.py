@@ -76,7 +76,7 @@ class MoveToAddressableAreaResult(DestinationPositionResult):
 
 class MoveToAddressableAreaImplementation(
     AbstractCommandImpl[
-        MoveToAddressableAreaParams, SuccessData[MoveToAddressableAreaResult, None]
+        MoveToAddressableAreaParams, SuccessData[MoveToAddressableAreaResult]
     ]
 ):
     """Move to addressable area command implementation."""
@@ -89,7 +89,7 @@ class MoveToAddressableAreaImplementation(
 
     async def execute(
         self, params: MoveToAddressableAreaParams
-    ) -> SuccessData[MoveToAddressableAreaResult, None]:
+    ) -> SuccessData[MoveToAddressableAreaResult]:
         """Move the requested pipette to the requested addressable area."""
         state_update = update_types.StateUpdate()
 

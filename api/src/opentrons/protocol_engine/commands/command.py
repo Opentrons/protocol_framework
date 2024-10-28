@@ -231,8 +231,6 @@ class BaseCommand(
                     # Our _ImplementationCls must return public result data that can fit
                     # in our `result` field:
                     _ResultT,
-                    # But we don't care (here) what kind of private result data it returns:
-                    object,
                 ],
                 DefinedErrorData[
                     # Our _ImplementationCls must return public error data that can fit
@@ -247,7 +245,7 @@ class BaseCommand(
 _ExecuteReturnT_co = TypeVar(
     "_ExecuteReturnT_co",
     bound=Union[
-        SuccessData[BaseModel, object],
+        SuccessData[BaseModel],
         DefinedErrorData[ErrorOccurrence],
     ],
     covariant=True,

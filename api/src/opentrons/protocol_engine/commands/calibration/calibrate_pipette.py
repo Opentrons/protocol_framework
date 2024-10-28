@@ -34,9 +34,7 @@ class CalibratePipetteResult(BaseModel):
 
 
 class CalibratePipetteImplementation(
-    AbstractCommandImpl[
-        CalibratePipetteParams, SuccessData[CalibratePipetteResult, None]
-    ]
+    AbstractCommandImpl[CalibratePipetteParams, SuccessData[CalibratePipetteResult]]
 ):
     """CalibratePipette command implementation."""
 
@@ -49,7 +47,7 @@ class CalibratePipetteImplementation(
 
     async def execute(
         self, params: CalibratePipetteParams
-    ) -> SuccessData[CalibratePipetteResult, None]:
+    ) -> SuccessData[CalibratePipetteResult]:
         """Execute calibrate-pipette command."""
         # TODO (tz, 20-9-22): Add a better solution to determine if a command can be executed on an OT-3/OT-2
         ot3_api = ensure_ot3_hardware(

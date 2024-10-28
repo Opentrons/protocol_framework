@@ -47,7 +47,7 @@ class RunProfileResult(BaseModel):
 
 
 class RunProfileImpl(
-    AbstractCommandImpl[RunProfileParams, SuccessData[RunProfileResult, None]]
+    AbstractCommandImpl[RunProfileParams, SuccessData[RunProfileResult]]
 ):
     """Execution implementation of a Thermocycler's run profile command."""
 
@@ -60,9 +60,7 @@ class RunProfileImpl(
         self._state_view = state_view
         self._equipment = equipment
 
-    async def execute(
-        self, params: RunProfileParams
-    ) -> SuccessData[RunProfileResult, None]:
+    async def execute(self, params: RunProfileParams) -> SuccessData[RunProfileResult]:
         """Run a Thermocycler profile."""
         thermocycler_state = self._state_view.modules.get_thermocycler_module_substate(
             params.moduleId

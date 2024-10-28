@@ -43,7 +43,7 @@ class ConfigureForVolumeResult(BaseModel):
 class ConfigureForVolumeImplementation(
     AbstractCommandImpl[
         ConfigureForVolumeParams,
-        SuccessData[ConfigureForVolumeResult, None],
+        SuccessData[ConfigureForVolumeResult],
     ]
 ):
     """Configure for volume command implementation."""
@@ -53,7 +53,7 @@ class ConfigureForVolumeImplementation(
 
     async def execute(
         self, params: ConfigureForVolumeParams
-    ) -> SuccessData[ConfigureForVolumeResult, None]:
+    ) -> SuccessData[ConfigureForVolumeResult]:
         """Check that requested pipette can be configured for the given volume."""
         pipette_result = await self._equipment.configure_for_volume(
             pipette_id=params.pipetteId,

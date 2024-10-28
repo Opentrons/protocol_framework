@@ -52,7 +52,7 @@ class AspirateResult(BaseLiquidHandlingResult, DestinationPositionResult):
 
 
 _ExecuteReturn = Union[
-    SuccessData[AspirateResult, None],
+    SuccessData[AspirateResult],
     DefinedErrorData[OverpressureError],
 ]
 

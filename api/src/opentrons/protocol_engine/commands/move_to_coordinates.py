@@ -35,9 +35,7 @@ class MoveToCoordinatesResult(DestinationPositionResult):
 
 
 class MoveToCoordinatesImplementation(
-    AbstractCommandImpl[
-        MoveToCoordinatesParams, SuccessData[MoveToCoordinatesResult, None]
-    ]
+    AbstractCommandImpl[MoveToCoordinatesParams, SuccessData[MoveToCoordinatesResult]]
 ):
     """Move to coordinates command implementation."""
 
@@ -50,7 +48,7 @@ class MoveToCoordinatesImplementation(
 
     async def execute(
         self, params: MoveToCoordinatesParams
-    ) -> SuccessData[MoveToCoordinatesResult, None]:
+    ) -> SuccessData[MoveToCoordinatesResult]:
         """Move the requested pipette to the requested coordinates."""
         state_update = update_types.StateUpdate()
 

@@ -46,7 +46,7 @@ class ConfigureNozzleLayoutResult(BaseModel):
 class ConfigureNozzleLayoutImplementation(
     AbstractCommandImpl[
         ConfigureNozzleLayoutParams,
-        SuccessData[ConfigureNozzleLayoutResult, None],
+        SuccessData[ConfigureNozzleLayoutResult],
     ]
 ):
     """Configure nozzle layout command implementation."""
@@ -59,7 +59,7 @@ class ConfigureNozzleLayoutImplementation(
 
     async def execute(
         self, params: ConfigureNozzleLayoutParams
-    ) -> SuccessData[ConfigureNozzleLayoutResult, None]:
+    ) -> SuccessData[ConfigureNozzleLayoutResult]:
         """Check that requested pipette can support the requested nozzle layout."""
         primary_nozzle = params.configurationParams.dict().get("primaryNozzle")
         front_right_nozzle = params.configurationParams.dict().get("frontRightNozzle")

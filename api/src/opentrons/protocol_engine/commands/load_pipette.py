@@ -66,7 +66,7 @@ class LoadPipetteResult(BaseModel):
 
 
 class LoadPipetteImplementation(
-    AbstractCommandImpl[LoadPipetteParams, SuccessData[LoadPipetteResult, None]]
+    AbstractCommandImpl[LoadPipetteParams, SuccessData[LoadPipetteResult]]
 ):
     """Load pipette command implementation."""
 
@@ -78,7 +78,7 @@ class LoadPipetteImplementation(
 
     async def execute(
         self, params: LoadPipetteParams
-    ) -> SuccessData[LoadPipetteResult, None]:
+    ) -> SuccessData[LoadPipetteResult]:
         """Check that requested pipette is attached and assign its identifier."""
         pipette_generation = convert_to_pipette_name_type(
             params.pipetteName.value

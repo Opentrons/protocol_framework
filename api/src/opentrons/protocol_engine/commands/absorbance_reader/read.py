@@ -48,7 +48,7 @@ class ReadAbsorbanceResult(BaseModel):
 
 
 class ReadAbsorbanceImpl(
-    AbstractCommandImpl[ReadAbsorbanceParams, SuccessData[ReadAbsorbanceResult, None]]
+    AbstractCommandImpl[ReadAbsorbanceParams, SuccessData[ReadAbsorbanceResult]]
 ):
     """Execution implementation of an Absorbance Reader measurement."""
 
@@ -65,7 +65,7 @@ class ReadAbsorbanceImpl(
 
     async def execute(  # noqa: C901
         self, params: ReadAbsorbanceParams
-    ) -> SuccessData[ReadAbsorbanceResult, None]:
+    ) -> SuccessData[ReadAbsorbanceResult]:
         """Initiate an absorbance measurement."""
         abs_reader_substate = self._state_view.modules.get_absorbance_reader_substate(
             module_id=params.moduleId

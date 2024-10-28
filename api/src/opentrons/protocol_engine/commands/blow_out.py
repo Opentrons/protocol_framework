@@ -48,7 +48,7 @@ class BlowOutResult(DestinationPositionResult):
 
 
 _ExecuteReturn = Union[
-    SuccessData[BlowOutResult, None],
+    SuccessData[BlowOutResult],
     DefinedErrorData[OverpressureError],
 ]
 

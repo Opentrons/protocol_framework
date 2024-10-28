@@ -86,10 +86,10 @@ class TryLiquidProbeResult(DestinationPositionResult):
 
 
 _LiquidProbeExecuteReturn = Union[
-    SuccessData[LiquidProbeResult, None],
+    SuccessData[LiquidProbeResult],
     DefinedErrorData[LiquidNotFoundError],
 ]
-_TryLiquidProbeExecuteReturn = SuccessData[TryLiquidProbeResult, None]
+_TryLiquidProbeExecuteReturn = SuccessData[TryLiquidProbeResult]
 
 
 class _ExecuteCommonResult(NamedTuple):

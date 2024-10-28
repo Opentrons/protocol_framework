@@ -24,14 +24,14 @@ class CommentResult(BaseModel):
 
 
 class CommentImplementation(
-    AbstractCommandImpl[CommentParams, SuccessData[CommentResult, None]]
+    AbstractCommandImpl[CommentParams, SuccessData[CommentResult]]
 ):
     """Comment command implementation."""
 
     def __init__(self, **kwargs: object) -> None:
         pass
 
-    async def execute(self, params: CommentParams) -> SuccessData[CommentResult, None]:
+    async def execute(self, params: CommentParams) -> SuccessData[CommentResult]:
         """No operation taken other than capturing message in command."""
         return SuccessData(
             public=CommentResult(),

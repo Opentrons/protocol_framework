@@ -27,7 +27,7 @@ class DeactivateLidResult(BaseModel):
 
 
 class DeactivateLidImpl(
-    AbstractCommandImpl[DeactivateLidParams, SuccessData[DeactivateLidResult, None]]
+    AbstractCommandImpl[DeactivateLidParams, SuccessData[DeactivateLidResult]]
 ):
     """Execution implementation of a Thermocycler's deactivate lid command."""
 
@@ -42,7 +42,7 @@ class DeactivateLidImpl(
 
     async def execute(
         self, params: DeactivateLidParams
-    ) -> SuccessData[DeactivateLidResult, None]:
+    ) -> SuccessData[DeactivateLidResult]:
         """Unset a Thermocycler's target lid temperature."""
         thermocycler_state = self._state_view.modules.get_thermocycler_module_substate(
             params.moduleId

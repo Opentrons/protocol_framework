@@ -46,7 +46,7 @@ class SetTargetBlockTemperatureResult(BaseModel):
 class SetTargetBlockTemperatureImpl(
     AbstractCommandImpl[
         SetTargetBlockTemperatureParams,
-        SuccessData[SetTargetBlockTemperatureResult, None],
+        SuccessData[SetTargetBlockTemperatureResult],
     ]
 ):
     """Execution implementation of a Thermocycler's set block temperature command."""
@@ -63,7 +63,7 @@ class SetTargetBlockTemperatureImpl(
     async def execute(
         self,
         params: SetTargetBlockTemperatureParams,
-    ) -> SuccessData[SetTargetBlockTemperatureResult, None]:
+    ) -> SuccessData[SetTargetBlockTemperatureResult]:
         """Set a Thermocycler's target block temperature."""
         thermocycler_state = self._state_view.modules.get_thermocycler_module_substate(
             params.moduleId

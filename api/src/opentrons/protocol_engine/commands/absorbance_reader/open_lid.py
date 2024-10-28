@@ -38,7 +38,7 @@ class OpenLidResult(BaseModel):
     """Result data from opening the lid on an aborbance reading."""
 
 
-class OpenLidImpl(AbstractCommandImpl[OpenLidParams, SuccessData[OpenLidResult, None]]):
+class OpenLidImpl(AbstractCommandImpl[OpenLidParams, SuccessData[OpenLidResult]]):
     """Execution implementation of opening the lid on an Absorbance Reader."""
 
     def __init__(
@@ -52,7 +52,7 @@ class OpenLidImpl(AbstractCommandImpl[OpenLidParams, SuccessData[OpenLidResult, 
         self._equipment = equipment
         self._labware_movement = labware_movement
 
-    async def execute(self, params: OpenLidParams) -> SuccessData[OpenLidResult, None]:
+    async def execute(self, params: OpenLidParams) -> SuccessData[OpenLidResult]:
         """Move the absorbance reader lid from the module to the lid dock."""
         mod_substate = self._state_view.modules.get_absorbance_reader_substate(
             module_id=params.moduleId
