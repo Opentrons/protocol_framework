@@ -58,7 +58,7 @@ export function FlowRateField(props: FlowRateFieldProps): JSX.Element {
 
   let errorMessage: string | null = null
   if (
-    (!isPristine && passThruProps.value != undefined && flowRateNum === 0) ||
+    (!isPristine && passThruProps.value !== undefined && flowRateNum === 0) ||
     outOfBounds
   ) {
     errorMessage = i18n.format(
