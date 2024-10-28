@@ -384,12 +384,8 @@ class WellInfoSummary(BaseModel):
     labware_id: str
     well_name: str
     loaded_volume: Optional[float] = None
-    last_loaded: Optional[datetime] = None
-    operations_since_load: Optional[int] = None
     probed_height: Optional[float] = None
     probed_volume: Optional[float] = None
-    last_probed: Optional[datetime] = None
-    operations_since_probe: Optional[int] = None
 
 
 @dataclass

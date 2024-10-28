@@ -1,6 +1,6 @@
 """Basic well data state and store."""
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, Union, Iterator, Optional, Tuple, overload
 
 from opentrons.protocol_engine.types import (
     ProbedHeightInfo,
@@ -169,67 +169,57 @@ class WellView(HasState[WellState]):
 
     def get_all(self) -> List[WellInfoSummary]:
         """Get all well liquid info summaries."""
-        summaries: List[WellInfoSummary] = []
-        for lv_labware, lv_wells in self._state.loaded_volumes.items():
-            for lv_well, lvi in lv_wells.items():
-                whi = WellInfoSummary(
-                    labware_id=lv_labware,
-                    well_name=lv_well,
-                    loaded_volume=lvi.volume,
-                    last_loaded=lvi.last_loaded,
-                    operations_since_load=lvi.operations_since_load,
-                )
-                summaries.append(whi)
-        summaries = self._append_summaries_with_probed_heights(summaries=summaries)
-        summaries = self._append_summaries_with_probed_volumes(summaries=summaries)
-        return summaries
 
-    def _append_summaries_with_probed_heights(
-        self, summaries: List[WellInfoSummary]
-    ) -> List[WellInfoSummary]:
-        for ph_labware, ph_wells in self._state.probed_heights.items():
-            for ph_well, phi in ph_wells.items():
-                found = False
-                for summary in summaries:
-                    if (
-                        ph_labware == summary.labware_id
-                        and ph_well == summary.well_name
-                    ):
-                        summary.probed_height = phi.height
-                        summary.last_probed = phi.last_probed
-                        found = True
-                if not found:
-                    whi = WellInfoSummary(
-                        labware_id=ph_labware,
-                        well_name=ph_well,
-                        probed_height=phi.height,
-                        last_probed=phi.last_probed,
-                    )
-                    summaries.append(whi)
-        return summaries
+        def _all_well_combos() -> Iterator[Tuple[str, str, str]]:
+            for labware, lv_wells in self._state.loaded_volumes.items():
+                for well_name in lv_wells.keys():
+                    yield f"{labware}{well_name}", labware, well_name
+            for labware, ph_wells in self._state.probed_heights.items():
+                for well_name in ph_wells.keys():
+                    yield f"{labware}{well_name}", labware, well_name
+            for labware, pv_wells in self._state.probed_volumes.items():
+                for well_name in pv_wells.keys():
+                    yield f"{labware}{well_name}", labware, well_name
 
-    def _append_summaries_with_probed_volumes(
-        self, summaries: List[WellInfoSummary]
-    ) -> List[WellInfoSummary]:
-        for pv_labware, pv_wells in self._state.probed_volumes.items():
-            for pv_well, pvi in pv_wells.items():
-                found = False
-                for summary in summaries:
-                    if (
-                        pv_labware == summary.labware_id
-                        and pv_well == summary.well_name
-                    ):
-                        summary.probed_volume = pvi.volume
-                        summary.last_probed = pvi.last_probed
-                        summary.operations_since_probe = pvi.operations_since_probe
-                        found = True
-                if not found:
-                    whi = WellInfoSummary(
-                        labware_id=pv_labware,
-                        well_name=pv_well,
-                        probed_volume=pvi.volume,
-                        last_probed=pvi.last_probed,
-                        operations_since_probe=pvi.operations_since_probe,
-                    )
-                    summaries.append(whi)
-        return summaries
+        wells = {
+            key: (labware_id, well_name)
+            for key, labware_id, well_name in _all_well_combos()
+        }
+        return [
+            self._summarize_well(labware_id, well_name)
+            for labware_id, well_name in wells.values()
+        ]
+
+    def _summarize_well(self, labware_id: str, well_name: str) -> WellInfoSummary:
+        well_liquid_info = self.get_well_liquid_info(labware_id, well_name)
+        return WellInfoSummary(
+            labware_id=labware_id,
+            well_name=well_name,
+            loaded_volume=_volume_from_info(well_liquid_info.loaded_volume),
+            probed_volume=_volume_from_info(well_liquid_info.probed_volume),
+            probed_height=_height_from_info(well_liquid_info.probed_height),
+        )
+
+
+@overload
+def _volume_from_info(info: Optional[ProbedVolumeInfo]) -> Optional[float]:
+    ...
+
+
+@overload
+def _volume_from_info(info: Optional[LoadedVolumeInfo]) -> Optional[float]:
+    ...
+
+
+def _volume_from_info(
+    info: Union[ProbedVolumeInfo, LoadedVolumeInfo, None]
+) -> Optional[float]:
+    if info is None:
+        return None
+    return info.volume
+
+
+def _height_from_info(info: Optional[ProbedHeightInfo]) -> Optional[float]:
+    if info is None:
+        return None
+    return info.height
