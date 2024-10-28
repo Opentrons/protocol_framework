@@ -12,7 +12,7 @@ from opentrons.protocol_engine.types import (
 from . import update_types
 from ._abstract_store import HasState, HandlesActions
 from ..actions import Action
-from ..actions.get_state_update import get_state_update
+from ..actions.get_state_update import get_state_updates
 
 
 LabwareId = str
@@ -39,8 +39,7 @@ class WellStore(HasState[WellState], HandlesActions):
 
     def handle_action(self, action: Action) -> None:
         """Modify state in reaction to an action."""
-        state_update = get_state_update(action)
-        if state_update is not None:
+        for state_update in get_state_updates(action):
             if state_update.liquid_loaded != update_types.NO_CHANGE:
                 self._handle_liquid_loaded_update(state_update.liquid_loaded)
             if state_update.liquid_probed != update_types.NO_CHANGE:
