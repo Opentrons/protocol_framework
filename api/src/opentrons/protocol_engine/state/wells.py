@@ -11,7 +11,8 @@ from opentrons.protocol_engine.types import (
 
 from . import update_types
 from ._abstract_store import HasState, HandlesActions
-from ..actions import Action, get_state_update
+from ..actions import Action
+from ..actions.get_state_update import get_state_update
 
 
 LabwareId = str
