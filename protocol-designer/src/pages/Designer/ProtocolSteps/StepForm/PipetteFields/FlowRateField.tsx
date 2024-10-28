@@ -26,7 +26,6 @@ export function FlowRateField(props: FlowRateFieldProps): JSX.Element {
   const { t } = useTranslation('shared')
   const pipetteEntities = useSelector(stepFormSelectors.getPipetteEntities)
   const pipette = pipetteId != null ? pipetteEntities[pipetteId] : null
-  const pipetteDisplayName = pipette ? pipette.spec.displayName : t('pipette')
   const innerKey = `${name}:${String(value || 0)}`
   const matchingTipLiquidSpecs =
     pipette != null
@@ -52,7 +51,6 @@ export function FlowRateField(props: FlowRateFieldProps): JSX.Element {
       name={name}
       value={value}
       flowRateType={flowRateType}
-      pipetteDisplayName={pipetteDisplayName}
       key={innerKey}
       defaultFlowRate={defaultFlowRate}
       minFlowRate={0}
