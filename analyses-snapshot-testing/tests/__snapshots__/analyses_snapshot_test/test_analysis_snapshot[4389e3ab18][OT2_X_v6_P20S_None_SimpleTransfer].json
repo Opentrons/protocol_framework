@@ -1772,7 +1772,14 @@
       },
       "id": "UUID",
       "key": "c2e4fa67-3c04-4d22-b3fa-5d61e956c488",
-      "notes": [],
+      "notes": [
+        {
+          "longMessage": "Handling this command failure with FAIL_RUN.",
+          "noteKind": "debugErrorRecovery",
+          "shortMessage": "Handling this command failure with FAIL_RUN.",
+          "source": "execution"
+        }
+      ],
       "params": {
         "flowRate": 3.78,
         "labwareId": "UUID",
