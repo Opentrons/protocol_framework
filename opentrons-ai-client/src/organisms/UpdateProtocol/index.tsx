@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import {
   COLORS,
   DIRECTION_COLUMN,
@@ -20,6 +20,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { FileUpload } from '../../molecules/FileUpload'
 import { useNavigate } from 'react-router-dom'
 import { chatDataAtom, headerWithMeterAtom } from '../../resources/atoms'
+import { CSSTransition } from 'react-transition-group'
 import type { ChatData } from '../../resources/types'
 import { useAtom } from 'jotai'
 
@@ -32,6 +33,25 @@ const updateOptions: DropdownOption[] = [
   { name: 'Change pipettes', value: 'change_pipettes' },
   { name: 'Other', value: 'other' },
 ]
+
+const FadeWrapper = styled.div`
+  &.fade-enter {
+    opacity: 0;
+  }
+  &.fade-enter-active {
+    opacity: 1;
+    transition: opacity 1000ms;
+  }
+  &.fade-exit {
+    height: 100%;
+    opacity: 1;
+  }
+  &.fade-exit-active {
+    opacity: 0;
+    height: 0%;
+    transition: opacity 1000ms;
+  }
+`
 
 const Container = styled(Flex)`
   width: 100%;
@@ -170,50 +190,68 @@ export function UpdateProtocol(): JSX.Element {
         <Flex
           paddingTop={fileValue !== null ? '8px' : '40px'}
           width="auto"
-          flexDirection={DIRECTION_ROW}
+          flexDirection={DIRECTION_COLUMN}
           justifyContent={JUSTIFY_CENTER}
         >
-          {fileValue !== null ? (
-            <Flex width="100%" flexDirection={DIRECTION_COLUMN}>
-              <FileUpload
-                file={fileValue}
-                fileError={errorText}
-                handleClick={function (): void {
-                  setFile(null)
-                  setErrorText(null)
-                }}
-              ></FileUpload>
-            </Flex>
-          ) : (
-            <UploadInput
-              uploadButtonText={t('choose_file')}
-              dragAndDropText={
-                <StyledText as="p">
-                  <Trans
-                    t={t}
-                    i18nKey={t('drag_and_drop')}
-                    components={{
-                      a: (
-                        <LinkComponent
-                          color={COLORS.blue55}
-                          role="button"
-                          to={''}
-                        />
-                      ),
+          <CSSTransition
+            in={fileValue !== null}
+            timeout={1000}
+            classNames="fade"
+            unmountOnExit
+          >
+            <FadeWrapper>
+              {fileValue !== null ? (
+                <Flex width="100%" flexDirection={DIRECTION_COLUMN}>
+                  <FileUpload
+                    file={fileValue}
+                    fileError={errorText}
+                    handleClick={function (): void {
+                      setFile(null)
+                      setErrorText(null)
                     }}
-                  />
-                </StyledText>
-              }
-              onUpload={async function (file: File) {
-                try {
-                  await handleFileUpload(file)
-                } catch (error) {
-                  // todo perhaps make this a toast?
-                  console.error('Error uploading file:', error)
+                  ></FileUpload>
+                </Flex>
+              ) : null}
+            </FadeWrapper>
+          </CSSTransition>
+
+          <CSSTransition
+            in={fileValue == null}
+            timeout={300}
+            classNames="fade"
+            unmountOnExit
+          >
+            <FadeWrapper>
+              <UploadInput
+                uploadButtonText={t('choose_file')}
+                dragAndDropText={
+                  <StyledText as="p">
+                    <Trans
+                      t={t}
+                      i18nKey={t('drag_and_drop')}
+                      components={{
+                        a: (
+                          <LinkComponent
+                            color={COLORS.blue55}
+                            role="button"
+                            to={''}
+                          />
+                        ),
+                      }}
+                    />
+                  </StyledText>
                 }
-              }}
-            />
-          )}
+                onUpload={async function (file: File) {
+                  try {
+                    await handleFileUpload(file)
+                  } catch (error) {
+                    // todo perhaps make this a toast?
+                    console.error('Error uploading file:', error)
+                  }
+                }}
+              />
+            </FadeWrapper>
+          </CSSTransition>
         </Flex>
         <Flex height={'16px'}></Flex>
         <Flex flexDirection={DIRECTION_COLUMN} width="100%">
