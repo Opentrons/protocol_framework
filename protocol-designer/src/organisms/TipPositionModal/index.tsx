@@ -42,11 +42,12 @@ interface TipPositionModalProps {
   wellXWidthMm: number
   wellYWidthMm: number
   isIndeterminate?: boolean
+  prefix: 'aspirate' | 'dispense' | 'mix'
 }
 
-export const TipPositionModal = (
+export function TipPositionModal(
   props: TipPositionModalProps
-): JSX.Element | null => {
+): JSX.Element | null {
   const {
     isIndeterminate,
     specs,
@@ -54,6 +55,7 @@ export const TipPositionModal = (
     wellXWidthMm,
     wellYWidthMm,
     closeModal,
+    prefix,
   } = props
   const { t } = useTranslation([
     'modal',
@@ -240,7 +242,7 @@ export const TipPositionModal = (
       type="info"
       width="594px"
       closeOnOutsideClick
-      title={t('tip_position.title')}
+      title={t('shared:tip_position', { prefix })}
       onClose={handleCancel}
       footer={
         <Flex

@@ -23,6 +23,7 @@ describe('TipPositionModal', () => {
 
   beforeEach(() => {
     props = {
+      prefix: 'aspirate',
       closeModal: vi.fn(),
       wellDepthMm: 50,
       wellXWidthMm: 10.3,
@@ -52,7 +53,7 @@ describe('TipPositionModal', () => {
   })
   it('renders the modal text', () => {
     render(props)
-    screen.getByText('Tip Positioning')
+    screen.getByText('Edit aspirate tip position')
     fireEvent.click(screen.getByText('Cancel'))
     expect(props.closeModal).toHaveBeenCalled()
     fireEvent.click(screen.getByText('Save'))
@@ -65,14 +66,14 @@ describe('TipPositionModal', () => {
     props.specs.x.value = 9.7
     render(props)
     screen.getByText(
-      'One or more position offset values are close to the edge of the well and might collide with it'
+      'Tip position is close to the edge of the well and may cause collisions.'
     )
   })
   it('renders the alert if the x/y position values are too close to the max/min for y value', () => {
     props.specs.y.value = -9.7
     render(props)
     screen.getByText(
-      'One or more position offset values are close to the edge of the well and might collide with it'
+      'Tip position is close to the edge of the well and may cause collisions.'
     )
   })
   it('renders the captions, and visual', () => {

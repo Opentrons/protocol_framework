@@ -145,6 +145,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
         wellYWidthMm={wellYWidthMm}
         isIndeterminate={isIndeterminate}
         specs={specs}
+        prefix={prefix}
       />
     )
   }

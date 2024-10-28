@@ -29,7 +29,7 @@ interface ZTipPositionModalProps {
   closeModal: () => void
   zValue: number | null
   name: StepFieldName
-  updateValue: (val?: number | null) => unknown
+  updateValue: (val?: number | null) => void
   wellDepthMm: number
   isIndeterminate?: boolean
 }
@@ -143,7 +143,7 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
       type="info"
       width="594px"
       closeOnOutsideClick
-      title={t('tip_position.title')}
+      title={t(`shared:tip_position_${name}`)}
       onClose={handleCancel}
       footer={
         <Flex
