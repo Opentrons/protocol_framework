@@ -85,7 +85,6 @@ class DispenseInPlaceImplementation(
                 push_out=params.pushOut,
             )
         except PipetteOverpressureError as e:
-            # TODO(pbm, 10-24-24): if location is a well, get new tip and LiquidProbe in error recovery to reestablish well liquid level
             if (
                 isinstance(current_location, CurrentWell)
                 and current_location.pipette_id == params.pipetteId

@@ -107,7 +107,6 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
                 push_out=params.pushOut,
             )
         except PipetteOverpressureError as e:
-            # TODO(pbm, 10-24-24): get new tip and LiquidProbe in error recovery to reestablish well liquid level
             state_update.set_liquid_operated(
                 labware_id=labware_id,
                 well_name=well_name,
