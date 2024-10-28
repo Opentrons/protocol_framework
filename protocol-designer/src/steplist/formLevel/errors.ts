@@ -159,13 +159,13 @@ const LID_TEMPERATURE_HOLD_REQUIRED: FormError = {
   showAtField: true,
 }
 const SHAKE_SPEED_REQUIRED: FormError = {
-  title: 'Shake speed required',
+  title: 'Speed required',
   dependentFields: ['setShake', 'targetSpeed'],
   showAtForm: false,
   showAtField: true,
 }
 const SHAKE_TIME_REQUIRED: FormError = {
-  title: 'Shake duration required',
+  title: 'Duration required',
   dependentFields: ['heaterShakerSetTimer', 'heaterShakerTimer'],
   showAtForm: false,
   showAtField: true,
