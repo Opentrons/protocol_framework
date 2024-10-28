@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import {
   COLORS,
   DIRECTION_COLUMN,
@@ -19,9 +19,8 @@ import type { ChangeEvent } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { FileUpload } from '../../molecules/FileUpload'
 import { useNavigate } from 'react-router-dom'
-import { chatDataAtom, headerWithMeterAtom } from '../../resources/atoms'
+import { chatPromptAtom, headerWithMeterAtom } from '../../resources/atoms'
 import { CSSTransition } from 'react-transition-group'
-import type { ChatData } from '../../resources/types'
 import { useAtom } from 'jotai'
 
 const updateOptions: DropdownOption[] = [
@@ -92,7 +91,7 @@ export function UpdateProtocol(): JSX.Element {
   const { t }: { t: (key: string) => string } = useTranslation(
     'protocol_generator'
   )
-  const [, setChatData] = useAtom(chatDataAtom)
+  const [, setChatPrompt] = useAtom(chatPromptAtom)
   const [headerState, setHeaderWithMeterAtom] = useAtom(headerWithMeterAtom)
   const [updateType, setUpdateType] = useState<DropdownOption | null>(null)
   const [detailsValue, setDetailsValue] = useState<string>('')
@@ -156,8 +155,7 @@ export function UpdateProtocol(): JSX.Element {
   }
 
   function processDataAndNavigateToChat(): void {
-    const userPrompt = `
-    Modify the following Python code using the Opentrons Python Protocol API v2. \nEnsure that the new labware and pipettes are compatible with the Flex robot. \nEnsure that you perform the correct Type of Update use the Details of Changes.
+    const userPrompt = `Modify the following Python code using the Opentrons Python Protocol API v2. Ensure that the new labware and pipettes are compatible with the Flex robot. Ensure that you perform the correct Type of Update use the Details of Changes.
 
     Original Python Code:
     \`\`\`python
@@ -172,12 +170,7 @@ export function UpdateProtocol(): JSX.Element {
   `
     console.log(userPrompt)
 
-    const userInput: ChatData = {
-      role: 'user',
-      reply: userPrompt,
-    }
-
-    setChatData(chatData => [...chatData, userInput])
+    setChatPrompt(chatData => userPrompt)
     navigate('/chat')
   }
 
