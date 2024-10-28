@@ -24,8 +24,8 @@
     "yDimension": 85.48,
     "zDimension": 124.35
   },
-  "schemaVersion": "3",
-  "version": "2",
+  "schemaVersion": 3,
+  "version": 2,
   "namespace": "opentrons",
   "wells": {
     "C1": {

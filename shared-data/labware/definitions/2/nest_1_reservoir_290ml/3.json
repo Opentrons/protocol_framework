@@ -45,8 +45,8 @@
     "loadName": "nest_1_reservoir_290ml"
   },
   "namespace": "opentrons",
-  "version": "2",
-  "schemaVersion": "3",
+  "version": 2,
+  "schemaVersion": 3,
   "cornerOffsetFromSlot": {
     "x": 0,
     "y": 0,

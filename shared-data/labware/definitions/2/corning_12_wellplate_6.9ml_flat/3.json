@@ -12,8 +12,8 @@
       "https://ecatalog.corning.com/life-sciences/b2c/US/en/Microplates/Assay-Microplates/96-Well-Microplates/Costar%C2%AE-Multiple-Well-Cell-Culture-Plates/p/3513?clear=true"
     ]
   },
-  "schemaVersion": "3",
-  "version": "3",
+  "schemaVersion": 3,
+  "version": 3,
   "namespace": "opentrons",
   "metadata": {
     "displayName": "Corning 12 Well Plate 6.9 mL Flat",

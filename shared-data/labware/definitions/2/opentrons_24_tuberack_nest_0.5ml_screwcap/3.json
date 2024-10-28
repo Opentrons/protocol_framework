@@ -314,8 +314,8 @@
     "loadName": "opentrons_24_tuberack_nest_0.5ml_screwcap"
   },
   "namespace": "opentrons",
-  "version": "2",
-  "schemaVersion": "3",
+  "version": 2,
+  "schemaVersion": 3,
   "cornerOffsetFromSlot": {
     "x": 0,
     "y": 0,

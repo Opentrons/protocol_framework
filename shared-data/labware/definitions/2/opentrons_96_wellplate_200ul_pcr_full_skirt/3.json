@@ -1,7 +1,7 @@
 {
   "namespace": "opentrons",
-  "version": "3",
-  "schemaVersion": "3",
+  "version": 3,
+  "schemaVersion": 3,
   "parameters": {
     "loadName": "opentrons_96_wellplate_200ul_pcr_full_skirt",
     "format": "96Standard",

@@ -1105,8 +1105,8 @@
     "loadName": "nest_96_wellplate_200ul_flat"
   },
   "namespace": "opentrons",
-  "version": "3",
-  "schemaVersion": "3",
+  "version": 3,
+  "schemaVersion": 3,
   "cornerOffsetFromSlot": {
     "x": 0,
     "y": 0,
