@@ -57,6 +57,7 @@ from opentrons.protocol_engine.types import (
     ModuleDefinition,
     ProbedHeightInfo,
     LoadedVolumeInfo,
+    WellLiquidInfo,
 )
 from opentrons.protocol_engine.commands import (
     CommandStatus,
@@ -1542,7 +1543,11 @@ def test_get_well_position_with_meniscus_offset(
         well_def
     )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
-        (None, ProbedHeightInfo(height=70.5, last_probed=datetime.now()), None)
+        WellLiquidInfo(
+            probed_volume=None,
+            probed_height=ProbedHeightInfo(height=70.5, last_probed=datetime.now()),
+            loaded_volume=None,
+        )
     )
     decoy.when(
         mock_pipette_view.get_current_tip_lld_settings(pipette_id="pipette-id")
@@ -1600,7 +1605,11 @@ def test_get_well_position_with_volume_offset_raises_error(
         well_def
     )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
-        (None, ProbedHeightInfo(height=45.0, last_probed=datetime.now()), None)
+        WellLiquidInfo(
+            loaded_volume=None,
+            probed_height=ProbedHeightInfo(height=45.0, last_probed=datetime.now()),
+            probed_volume=None,
+        )
     )
     decoy.when(
         mock_pipette_view.get_current_tip_lld_settings(pipette_id="pipette-id")
@@ -1658,7 +1667,11 @@ def test_get_well_position_with_meniscus_and_literal_volume_offset(
         well_def
     )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
-        (None, ProbedHeightInfo(height=45.0, last_probed=datetime.now()), None)
+        WellLiquidInfo(
+            loaded_liquid=None,
+            probed_height=ProbedHeightInfo(height=45.0, last_probed=datetime.now()),
+            probed_liquid=None,
+        )
     )
     labware_def = _load_labware_definition_data()
     assert labware_def.innerLabwareGeometry is not None
@@ -1724,7 +1737,11 @@ def test_get_well_position_with_meniscus_and_float_volume_offset(
         well_def
     )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
-        (None, ProbedHeightInfo(height=45.0, last_probed=datetime.now()), None)
+        WellLiquidInfo(
+            loaded_volume=None,
+            probed_height=ProbedHeightInfo(height=45.0, last_probed=datetime.now()),
+            probed_volume=None,
+        )
     )
     labware_def = _load_labware_definition_data()
     assert labware_def.innerLabwareGeometry is not None
@@ -1789,7 +1806,11 @@ def test_get_well_position_raises_validation_error(
         well_def
     )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
-        (None, ProbedHeightInfo(height=40.0, last_probed=datetime.now()), None)
+        WellLiquidInfo(
+            loaded_volume=None,
+            probed_height=ProbedHeightInfo(height=40.0, last_probed=datetime.now()),
+            probed_volume=None,
+        )
     )
     labware_def = _load_labware_definition_data()
     assert labware_def.innerLabwareGeometry is not None
@@ -1850,12 +1871,12 @@ def test_get_meniscus_height(
         well_def
     )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
-        (
-            LoadedVolumeInfo(
+        WellLiquidInfo(
+            loaded_volume=LoadedVolumeInfo(
                 volume=2000.0, last_loaded=datetime.now(), operations_since_load=0
             ),
-            None,
-            None,
+            probed_height=None,
+            probed_volume=None,
         )
     )
     labware_def = _load_labware_definition_data()
@@ -3264,7 +3285,11 @@ def test_validate_dispense_volume_into_well_meniscus(
         inner_well_def
     )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
-        (None, ProbedHeightInfo(height=40.0, last_probed=datetime.now()), None)
+        WellLiquidInfo(
+            loaded_volume=None,
+            probed_height=ProbedHeightInfo(height=40.0, last_probed=datetime.now()),
+            probed_volume=None,
+        )
     )
 
     with pytest.raises(errors.InvalidDispenseVolumeError):

@@ -30,22 +30,22 @@ def subject() -> WellView:
 
 def test_get_well_liquid_info(subject: WellView) -> None:
     """Should return a tuple of well infos."""
-    lvi, phi, pvi = subject.get_well_liquid_info(
+    volume_info = subject.get_well_liquid_info(
         labware_id="labware_id_1", well_name="well_name"
     )
-    assert lvi is not None
-    assert phi is None
-    assert pvi is None
-    assert lvi.volume == 30.0
+    assert volume_info.loaded_volume is not None
+    assert volume_info.probed_height is None
+    assert volume_info.probed_volume is None
+    assert volume_info.loaded_volume.volume == 30.0
 
-    lvi, phi, pvi = subject.get_well_liquid_info(
+    volume_info = subject.get_well_liquid_info(
         labware_id="labware_id_2", well_name="well_name"
     )
-    assert lvi is None
-    assert phi is not None
-    assert pvi is not None
-    assert phi.height == 5.5
-    assert pvi.volume == 25.0
+    assert volume_info.loaded_volume is None
+    assert volume_info.probed_height is not None
+    assert volume_info.probed_volume is not None
+    assert volume_info.probed_height.height == 5.5
+    assert volume_info.probed_volume.volume == 25.0
 
 
 def test_get_all(subject: WellView) -> None:

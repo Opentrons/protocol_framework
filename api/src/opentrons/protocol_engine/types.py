@@ -392,6 +392,13 @@ class WellInfoSummary(BaseModel):
     operations_since_probe: Optional[int] = None
 
 
+@dataclass
+class WellLiquidInfo:
+    probed_height: Optional[ProbedHeightInfo]
+    loaded_volume: Optional[LoadedVolumeInfo]
+    probed_volume: Optional[ProbedVolumeInfo]
+
+
 @dataclass(frozen=True)
 class CurrentAddressableArea:
     """The latest addressable area the robot has accessed."""

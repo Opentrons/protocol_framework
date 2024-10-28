@@ -7,6 +7,7 @@ from opentrons.protocol_engine.types import (
     ProbedVolumeInfo,
     LoadedVolumeInfo,
     WellInfoSummary,
+    WellLiquidInfo,
 )
 
 from . import update_types
@@ -137,13 +138,7 @@ class WellView(HasState[WellState]):
         """
         self._state = state
 
-    def get_well_liquid_info(
-        self, labware_id: str, well_name: str
-    ) -> Tuple[
-        Optional[LoadedVolumeInfo],
-        Optional[ProbedHeightInfo],
-        Optional[ProbedVolumeInfo],
-    ]:
+    def get_well_liquid_info(self, labware_id: str, well_name: str) -> WellLiquidInfo:
         """Return all the liquid info for a well."""
         if (
             labware_id not in self._state.loaded_volumes
@@ -166,7 +161,11 @@ class WellView(HasState[WellState]):
             probed_volume_info = None
         else:
             probed_volume_info = self._state.probed_volumes[labware_id][well_name]
-        return loaded_volume_info, probed_height_info, probed_volume_info
+        return WellLiquidInfo(
+            loaded_volume=loaded_volume_info,
+            probed_height=probed_height_info,
+            probed_volume=probed_volume_info,
+        )
 
     def get_all(self) -> List[WellInfoSummary]:
         """Get all well liquid info summaries."""

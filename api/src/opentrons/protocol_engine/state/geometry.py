@@ -1401,24 +1401,32 @@ class GeometryView:
         well_name: str,
     ) -> float:
         """Returns stored meniscus height in specified well."""
-        (
-            loaded_volume_info,
-            probed_height_info,
-            probed_volume_info,
-        ) = self._wells.get_well_liquid_info(labware_id=labware_id, well_name=well_name)
-        if probed_height_info is not None and probed_height_info.height is not None:
-            return probed_height_info.height
-        elif loaded_volume_info is not None and loaded_volume_info.volume is not None:
+
+        well_liquid = self._wells.get_well_liquid_info(
+            labware_id=labware_id, well_name=well_name
+        )
+        if (
+            well_liquid.probed_height is not None
+            and well_liquid.probed_height.height is not None
+        ):
+            return well_liquid.probed_height.height
+        elif (
+            well_liquid.loaded_volume is not None
+            and well_liquid.loaded_volume.volume is not None
+        ):
             return self.get_well_height_at_volume(
                 labware_id=labware_id,
                 well_name=well_name,
-                volume=loaded_volume_info.volume,
+                volume=well_liquid.loaded_volume.volume,
             )
-        elif probed_volume_info is not None and probed_volume_info.volume is not None:
+        elif (
+            well_liquid.probed_volume is not None
+            and well_liquid.probed_volume.volume is not None
+        ):
             return self.get_well_height_at_volume(
                 labware_id=labware_id,
                 well_name=well_name,
-                volume=probed_volume_info.volume,
+                volume=well_liquid.probed_volume.volume,
             )
         else:
             raise errors.LiquidHeightUnknownError(
