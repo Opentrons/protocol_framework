@@ -23,6 +23,8 @@
   "edit_protocol_metadata": "Edit protocol metadata",
   "edit": "edit",
   "eight_channel": "8-Channel",
+  "error_boundary_pd_app_description": "You need to reload the app. Contact support with the following error message:",
+  "error_boundary_title": "An unknown error has occurred",
   "exact_labware_match": "Duplicate labware definition",
   "exit": "exit",
   "fixtures": "Fixtures",
@@ -105,8 +107,10 @@
   "re_export": "To use this definition, use Labware Creator to give it a unique load name and display name.",
   "remove": "remove",
   "reject": "Reject",
+  "reload_app": "Reload app",
   "reset_hints_and_tips": "Reset all hints and tips notifications",
   "reset_hints": "Reset hints",
+  "resize_your_browser": "Resize your browser to at least 600px wide and 650px tall to continue editing your protocol",
   "review_our_privacy_policy": "You can adjust this setting at any time by clicking on the settings icon. Find detailed information in our <link1>privacy policy</link1>.",
   "right": "Right",
   "save": "Save",
@@ -135,5 +139,6 @@
   "we_are_improving": "In order to improve our products, Opentrons would like to collect data related to your use of Protocol Designer. With your consent, Opentrons will collect and store analytics and session data, including through the use of cookies and similar technologies, solely for the purpose enhancing our products. Find detailed information in our <link1>privacy policy</link1>. By using Protocol Designer, you consent to the Opentrons <link2>EULA</link2>.",
   "welcome": "Welcome to Protocol Designer!",
   "opentrons_collects_data": "In order to improve our products, Opentrons would like to collect data related to your use of Protocol Designer. With your consent, Opentrons will collect and store analytics and session data, including through the use of cookies and similar technologies, solely for the purpose enhancing our products.",
-  "yes": "Yes"
+  "yes": "Yes",
+  "your_screen_is_too_small": "Your browser size is too small"
 }

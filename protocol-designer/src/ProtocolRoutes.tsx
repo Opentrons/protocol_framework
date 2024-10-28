@@ -1,4 +1,5 @@
-import { Route, Navigate, Routes } from 'react-router-dom'
+import { Route, Navigate, Routes, useNavigate } from 'react-router-dom'
+import { ErrorBoundary } from 'react-error-boundary'
 import { Box } from '@opentrons/components'
 import { Landing } from './pages/Landing'
 import { ProtocolOverview } from './pages/ProtocolOverview'
@@ -13,6 +14,7 @@ import {
   LabwareUploadModal,
   GateModal,
 } from './organisms'
+import { ProtocolDesignerAppFallback } from './resources/ProtocolDesignerAppFallback'
 
 import type { RouteProps } from './types'
 
@@ -60,9 +62,18 @@ export function ProtocolRoutes(): JSX.Element {
   const showGateModal =
     process.env.NODE_ENV === 'production' || process.env.OT_PD_SHOW_GATE
 
+  const navigate = useNavigate()
+  const handleReset = (): void => {
+    navigate('/', { replace: true })
+  }
+
   return (
-    <>
+    <ErrorBoundary
+      FallbackComponent={ProtocolDesignerAppFallback}
+      onReset={handleReset}
+    >
       <NavigationBar />
+
       <Kitchen>
         <Box width="100%">
           {showGateModal ? <GateModal /> : null}
@@ -76,6 +87,6 @@ export function ProtocolRoutes(): JSX.Element {
           </Routes>
         </Box>
       </Kitchen>
-    </>
+    </ErrorBoundary>
   )
 }
