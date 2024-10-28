@@ -27,7 +27,6 @@ def test_handles_liquid_probe_success(subject: WellStore) -> None:
 
     subject.handle_action(
         SucceedCommandAction(
-            private_result=None,
             command=liquid_probe,
             state_update=update_types.StateUpdate(
                 liquid_probed=update_types.LiquidProbedUpdate(
@@ -65,7 +64,6 @@ def test_handles_load_liquid_success(subject: WellStore) -> None:
 
     subject.handle_action(
         SucceedCommandAction(
-            private_result=None,
             command=load_liquid,
             state_update=update_types.StateUpdate(
                 liquid_loaded=update_types.LiquidLoadedUpdate(
@@ -124,7 +122,6 @@ def test_handles_load_liquid_and_aspirate(subject: WellStore) -> None:
 
     subject.handle_action(
         SucceedCommandAction(
-            private_result=None,
             command=load_liquid,
             state_update=update_types.StateUpdate(
                 liquid_loaded=update_types.LiquidLoadedUpdate(
@@ -137,7 +134,6 @@ def test_handles_load_liquid_and_aspirate(subject: WellStore) -> None:
     )
     subject.handle_action(
         SucceedCommandAction(
-            private_result=None,
             command=aspirate_1,
             state_update=update_types.StateUpdate(
                 liquid_operated=update_types.LiquidOperatedUpdate(
@@ -150,7 +146,6 @@ def test_handles_load_liquid_and_aspirate(subject: WellStore) -> None:
     )
     subject.handle_action(
         SucceedCommandAction(
-            private_result=None,
             command=aspirate_2,
             state_update=update_types.StateUpdate(
                 liquid_operated=update_types.LiquidOperatedUpdate(
@@ -199,7 +194,6 @@ def test_handles_liquid_probe_and_aspirate(subject: WellStore) -> None:
 
     subject.handle_action(
         SucceedCommandAction(
-            private_result=None,
             command=liquid_probe,
             state_update=update_types.StateUpdate(
                 liquid_probed=update_types.LiquidProbedUpdate(
@@ -214,7 +208,6 @@ def test_handles_liquid_probe_and_aspirate(subject: WellStore) -> None:
     )
     subject.handle_action(
         SucceedCommandAction(
-            private_result=None,
             command=aspirate,
             state_update=update_types.StateUpdate(
                 liquid_operated=update_types.LiquidOperatedUpdate(

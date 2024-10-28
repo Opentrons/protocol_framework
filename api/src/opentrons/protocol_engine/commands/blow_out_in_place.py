@@ -99,7 +99,9 @@ class BlowOutInPlaceImplementation(
                 ),
             )
         else:
-            return SuccessData(public=BlowOutInPlaceResult(), private=None)
+            return SuccessData(
+                public=BlowOutInPlaceResult(),
+            )
 
 
 class BlowOutInPlace(

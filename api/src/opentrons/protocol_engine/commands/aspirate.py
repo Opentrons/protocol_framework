@@ -167,7 +167,6 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
                     volume=volume_aspirated,
                     position=deck_point,
                 ),
-                private=None,
                 state_update=state_update,
             )
 

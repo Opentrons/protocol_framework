@@ -70,7 +70,6 @@ class ConfigureForVolumeImplementation(
 
         return SuccessData(
             public=ConfigureForVolumeResult(),
-            private=None,
             state_update=state_update,
         )
 

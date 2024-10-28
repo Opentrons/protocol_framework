@@ -79,7 +79,7 @@ class UnsafeDropTipInPlaceImplementation(
         )
 
         return SuccessData(
-            public=UnsafeDropTipInPlaceResult(), private=None, state_update=state_update
+            public=UnsafeDropTipInPlaceResult(), state_update=state_update
         )
 
 

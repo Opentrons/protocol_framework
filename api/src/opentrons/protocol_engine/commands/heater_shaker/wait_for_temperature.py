@@ -72,7 +72,9 @@ class WaitForTemperatureImpl(
         if hs_hardware_module is not None:
             await hs_hardware_module.await_temperature(awaiting_temperature=target_temp)
 
-        return SuccessData(public=WaitForTemperatureResult(), private=None)
+        return SuccessData(
+            public=WaitForTemperatureResult(),
+        )
 
 
 class WaitForTemperature(

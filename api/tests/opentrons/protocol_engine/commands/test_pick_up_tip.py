@@ -84,7 +84,6 @@ async def test_success(
             tipDiameter=5,
             position=DeckPoint(x=111, y=222, z=333),
         ),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="pipette-id",

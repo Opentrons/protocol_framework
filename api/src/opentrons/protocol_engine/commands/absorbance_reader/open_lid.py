@@ -137,7 +137,6 @@ class OpenLidImpl(AbstractCommandImpl[OpenLidParams, SuccessData[OpenLidResult, 
 
         return SuccessData(
             public=OpenLidResult(),
-            private=None,
             state_update=state_update,
         )
 

@@ -118,7 +118,9 @@ class MoveToMaintenancePositionImplementation(
                 )
                 await ot3_api.disengage_axes([Axis.Z_R])
 
-        return SuccessData(public=MoveToMaintenancePositionResult(), private=None)
+        return SuccessData(
+            public=MoveToMaintenancePositionResult(),
+        )
 
 
 class MoveToMaintenancePosition(

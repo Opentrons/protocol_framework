@@ -41,7 +41,9 @@ class SetRailLightsImplementation(
     ) -> SuccessData[SetRailLightsResult, None]:
         """Dispatch a set lights command setting the state of the rail lights."""
         await self._rail_lights.set_rail_lights(params.on)
-        return SuccessData(public=SetRailLightsResult(), private=None)
+        return SuccessData(
+            public=SetRailLightsResult(),
+        )
 
 
 class SetRailLights(

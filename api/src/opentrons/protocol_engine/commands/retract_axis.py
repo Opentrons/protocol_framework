@@ -53,9 +53,7 @@ class RetractAxisImplementation(
         state_update = update_types.StateUpdate()
         await self._movement.retract_axis(axis=params.axis)
         state_update.clear_all_pipette_locations()
-        return SuccessData(
-            public=RetractAxisResult(), private=None, state_update=state_update
-        )
+        return SuccessData(public=RetractAxisResult(), state_update=state_update)
 
 
 class RetractAxis(BaseCommand[RetractAxisParams, RetractAxisResult, ErrorOccurrence]):

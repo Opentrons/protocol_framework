@@ -85,7 +85,6 @@ async def test_dispense_in_place_implementation(
     if isinstance(location, CurrentWell):
         assert result == SuccessData(
             public=DispenseInPlaceResult(volume=42),
-            private=None,
             state_update=update_types.StateUpdate(
                 liquid_operated=update_types.LiquidOperatedUpdate(
                     labware_id=stateupdateLabware,
@@ -97,7 +96,6 @@ async def test_dispense_in_place_implementation(
     else:
         assert result == SuccessData(
             public=DispenseInPlaceResult(volume=42),
-            private=None,
         )
 
 

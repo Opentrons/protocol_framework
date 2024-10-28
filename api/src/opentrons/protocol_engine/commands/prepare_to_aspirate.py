@@ -92,7 +92,9 @@ class PrepareToAspirateImplementation(
                 ),
             )
         else:
-            return SuccessData(public=PrepareToAspirateResult(), private=None)
+            return SuccessData(
+                public=PrepareToAspirateResult(),
+            )
 
 
 class PrepareToAspirate(

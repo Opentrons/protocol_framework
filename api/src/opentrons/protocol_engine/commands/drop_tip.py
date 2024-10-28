@@ -161,7 +161,6 @@ class DropTipImplementation(AbstractCommandImpl[DropTipParams, _ExecuteReturn]):
             )
             return SuccessData(
                 public=DropTipResult(position=deck_point),
-                private=None,
                 state_update=state_update,
             )
 

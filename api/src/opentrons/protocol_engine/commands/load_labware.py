@@ -167,7 +167,6 @@ class LoadLabwareImplementation(
                 definition=loaded_labware.definition,
                 offsetId=loaded_labware.offsetId,
             ),
-            private=None,
             state_update=state_update,
         )
 

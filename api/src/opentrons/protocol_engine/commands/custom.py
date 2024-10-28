@@ -49,7 +49,9 @@ class CustomImplementation(
     # for legacy RPC (pre-ProtocolEngine) payloads.
     async def execute(self, params: CustomParams) -> SuccessData[CustomResult, None]:
         """A custom command does nothing when executed directly."""
-        return SuccessData(public=CustomResult.construct(), private=None)
+        return SuccessData(
+            public=CustomResult.construct(),
+        )
 
 
 class Custom(BaseCommand[CustomParams, CustomResult, ErrorOccurrence]):

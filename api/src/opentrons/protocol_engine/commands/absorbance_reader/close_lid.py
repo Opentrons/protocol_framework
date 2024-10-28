@@ -142,7 +142,6 @@ class CloseLidImpl(
 
         return SuccessData(
             public=CloseLidResult(),
-            private=None,
             state_update=state_update,
         )
 

@@ -84,7 +84,6 @@ def test_command_queue_and_unqueue() -> None:
         started_at=datetime(year=2022, month=2, day=2),
     )
     succeed_2 = SucceedCommandAction(
-        private_result=None,
         command=create_succeeded_command(command_id="command-id-2"),
     )
 
@@ -137,7 +136,6 @@ def test_setup_command_queue_and_unqueue() -> None:
         command_id="command-id-2", started_at=datetime(year=2022, month=2, day=2)
     )
     succeed_2 = SucceedCommandAction(
-        private_result=None,
         command=create_succeeded_command(command_id="command-id-2"),
     )
 
@@ -214,7 +212,6 @@ def test_running_command_id() -> None:
         started_at=datetime(year=2021, month=1, day=1),
     )
     succeed = SucceedCommandAction(
-        private_result=None,
         command=create_succeeded_command(command_id="command-id-1"),
     )
 
@@ -303,7 +300,6 @@ def test_command_store_keeps_commands_in_queue_order() -> None:
             command=create_succeeded_command(
                 command_id="command-id-2",
             ),
-            private_result=None,
         )
     )
     assert subject.state.command_history.get_all_ids() == [

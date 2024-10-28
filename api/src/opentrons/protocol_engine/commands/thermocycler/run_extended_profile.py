@@ -142,7 +142,9 @@ class RunExtendedProfileImpl(
                 profile=profile, volume=target_volume
             )
 
-        return SuccessData(public=RunExtendedProfileResult(), private=None)
+        return SuccessData(
+            public=RunExtendedProfileResult(),
+        )
 
 
 class RunExtendedProfile(

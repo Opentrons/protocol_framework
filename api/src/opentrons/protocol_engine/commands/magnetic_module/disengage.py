@@ -75,7 +75,9 @@ class DisengageImplementation(
         if hardware_module is not None:  # Not virtualizing modules.
             await hardware_module.deactivate()
 
-        return SuccessData(public=DisengageResult(), private=None)
+        return SuccessData(
+            public=DisengageResult(),
+        )
 
 
 class Disengage(BaseCommand[DisengageParams, DisengageResult, ErrorOccurrence]):

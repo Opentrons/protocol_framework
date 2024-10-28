@@ -117,7 +117,6 @@ def test_map_after_command() -> None:
 
     assert result == [
         pe_actions.SucceedCommandAction(
-            private_result=None,
             command=pe_commands.Comment.construct(
                 id="command.COMMENT-0",
                 key="command.COMMENT-0",
@@ -241,7 +240,6 @@ def test_command_stack() -> None:
             command_id="command.COMMENT-1", started_at=matchers.IsA(datetime)
         ),
         pe_actions.SucceedCommandAction(
-            private_result=None,
             command=pe_commands.Comment.construct(
                 id="command.COMMENT-0",
                 key="command.COMMENT-0",
@@ -321,7 +319,6 @@ def test_map_labware_load(minimal_labware_def: LabwareDefinition) -> None:
             ),
             notes=[],
         ),
-        private_result=None,
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="labware-0",
@@ -381,7 +378,6 @@ def test_map_instrument_load(decoy: Decoy) -> None:
             result=pe_commands.LoadPipetteResult(pipetteId="pipette-0"),
             notes=[],
         ),
-        private_result=None,
         state_update=StateUpdate(
             loaded_pipette=LoadPipetteUpdate(
                 pipette_id="pipette-0",
@@ -460,7 +456,6 @@ def test_map_module_load(
             ),
             notes=[],
         ),
-        private_result=None,
     )
 
     [result_queue, result_run, result_succeed] = LegacyCommandMapper(
@@ -525,7 +520,6 @@ def test_map_module_labware_load(minimal_labware_def: LabwareDefinition) -> None
             ),
             notes=[],
         ),
-        private_result=None,
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="labware-0",
@@ -584,7 +578,6 @@ def test_map_pause() -> None:
             started_at=matchers.IsA(datetime),
         ),
         pe_actions.SucceedCommandAction(
-            private_result=None,
             command=pe_commands.WaitForResume.construct(
                 id="command.PAUSE-0",
                 key="command.PAUSE-0",

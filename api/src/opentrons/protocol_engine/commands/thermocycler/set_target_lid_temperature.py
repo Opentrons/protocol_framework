@@ -70,7 +70,6 @@ class SetTargetLidTemperatureImpl(
             public=SetTargetLidTemperatureResult(
                 targetLidTemperature=target_temperature
             ),
-            private=None,
         )
 
 

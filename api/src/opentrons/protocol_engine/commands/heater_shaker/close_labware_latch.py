@@ -59,7 +59,9 @@ class CloseLabwareLatchImpl(
         if hs_hardware_module is not None:
             await hs_hardware_module.close_labware_latch()
 
-        return SuccessData(public=CloseLabwareLatchResult(), private=None)
+        return SuccessData(
+            public=CloseLabwareLatchResult(),
+        )
 
 
 class CloseLabwareLatch(

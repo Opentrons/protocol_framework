@@ -271,7 +271,6 @@ class LegacyCommandMapper:
                 results.append(
                     pe_actions.SucceedCommandAction(
                         completed_command,
-                        private_result=None,
                         state_update=StateUpdate(),
                     )
                 )
@@ -689,7 +688,6 @@ class LegacyCommandMapper:
 
         succeed_action = pe_actions.SucceedCommandAction(
             command=succeeded_command,
-            private_result=None,
             state_update=state_update,
         )
 
@@ -764,7 +762,6 @@ class LegacyCommandMapper:
 
         succeed_action = pe_actions.SucceedCommandAction(
             command=succeeded_command,
-            private_result=None,
             state_update=state_update,
         )
 
@@ -830,7 +827,7 @@ class LegacyCommandMapper:
             started_at=succeeded_command.startedAt,  # type: ignore[arg-type]
         )
         succeed_action = pe_actions.SucceedCommandAction(
-            command=succeeded_command, private_result=None, state_update=StateUpdate()
+            command=succeeded_command, state_update=StateUpdate()
         )
 
         self._command_count["LOAD_MODULE"] = count + 1

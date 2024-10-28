@@ -67,9 +67,7 @@ class LoadLiquidImplementation(
             last_loaded=self._model_utils.get_timestamp(),
         )
 
-        return SuccessData(
-            public=LoadLiquidResult(), private=None, state_update=state_update
-        )
+        return SuccessData(public=LoadLiquidResult(), state_update=state_update)
 
 
 class LoadLiquid(BaseCommand[LoadLiquidParams, LoadLiquidResult, ErrorOccurrence]):

@@ -64,7 +64,6 @@ async def test_calibrate_pipette_implementation(
         public=CalibratePipetteResult(
             pipetteOffset=InstrumentOffsetVector(x=3, y=4, z=6)
         ),
-        private=None,
     )
 
 

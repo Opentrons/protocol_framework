@@ -66,7 +66,7 @@ class HomeImplementation(
         # preserve prior behavior, but we might only want to do this if we actually home.
         state_update.clear_all_pipette_locations()
 
-        return SuccessData(public=HomeResult(), private=None, state_update=state_update)
+        return SuccessData(public=HomeResult(), state_update=state_update)
 
 
 class Home(BaseCommand[HomeParams, HomeResult, ErrorOccurrence]):

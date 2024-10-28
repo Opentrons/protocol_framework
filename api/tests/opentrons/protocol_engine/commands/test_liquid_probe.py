@@ -154,7 +154,6 @@ async def test_liquid_probe_implementation(
     assert type(result.public) is result_type  # Pydantic v1 only compares the fields.
     assert result == SuccessData(
         public=result_type(z_position=15.0, position=DeckPoint(x=1, y=2, z=3)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="abc",
@@ -255,7 +254,6 @@ async def test_liquid_not_found_error(
                 z_position=None,
                 position=DeckPoint(x=position.x, y=position.y, z=position.z),
             ),
-            private=None,
             state_update=expected_state_update,
         )
 

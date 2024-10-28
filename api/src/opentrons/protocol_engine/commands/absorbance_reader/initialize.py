@@ -105,7 +105,6 @@ class InitializeImpl(
 
         return SuccessData(
             public=InitializeResult(),
-            private=None,
         )
 
 

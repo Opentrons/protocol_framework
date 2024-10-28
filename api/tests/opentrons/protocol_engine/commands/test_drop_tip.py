@@ -129,7 +129,6 @@ async def test_drop_tip_implementation(
 
     assert result == SuccessData(
         public=DropTipResult(position=DeckPoint(x=111, y=222, z=333)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="abc",
@@ -207,7 +206,6 @@ async def test_drop_tip_with_alternating_locations(
     result = await subject.execute(params)
     assert result == SuccessData(
         public=DropTipResult(position=DeckPoint(x=111, y=222, z=333)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="abc",

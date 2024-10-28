@@ -72,7 +72,6 @@ class CalibratePipetteImplementation(
                     x=pipette_offset.x, y=pipette_offset.y, z=pipette_offset.z
                 )
             ),
-            private=None,
         )
 
 

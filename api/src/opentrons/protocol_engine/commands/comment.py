@@ -33,7 +33,9 @@ class CommentImplementation(
 
     async def execute(self, params: CommentParams) -> SuccessData[CommentResult, None]:
         """No operation taken other than capturing message in command."""
-        return SuccessData(public=CommentResult(), private=None)
+        return SuccessData(
+            public=CommentResult(),
+        )
 
 
 class Comment(BaseCommand[CommentParams, CommentResult, ErrorOccurrence]):

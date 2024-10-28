@@ -2937,7 +2937,6 @@ def test_get_offset_location_deck_slot(
                 version=nice_labware_definition.version,
             ),
         ),
-        private_result=None,
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="labware-id-1",
@@ -2982,7 +2981,6 @@ def test_get_offset_location_module(
                 model=tempdeck_v2_def.model,
             ),
         ),
-        private_result=None,
     )
     load_labware = SucceedCommandAction(
         command=LoadLabware(
@@ -3002,7 +3000,6 @@ def test_get_offset_location_module(
                 version=nice_labware_definition.version,
             ),
         ),
-        private_result=None,
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="labware-id-1",
@@ -3051,7 +3048,6 @@ def test_get_offset_location_module_with_adapter(
                 model=tempdeck_v2_def.model,
             ),
         ),
-        private_result=None,
     )
     load_adapter = SucceedCommandAction(
         command=LoadLabware(
@@ -3071,7 +3067,6 @@ def test_get_offset_location_module_with_adapter(
                 version=nice_adapter_definition.version,
             ),
         ),
-        private_result=None,
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="adapter-id-1",
@@ -3100,7 +3095,6 @@ def test_get_offset_location_module_with_adapter(
                 version=nice_labware_definition.version,
             ),
         ),
-        private_result=None,
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="labware-id-1",
@@ -3149,7 +3143,6 @@ def test_get_offset_fails_with_off_deck_labware(
                 version=nice_labware_definition.version,
             ),
         ),
-        private_result=None,
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="labware-id-1",

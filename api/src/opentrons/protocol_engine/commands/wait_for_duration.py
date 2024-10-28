@@ -41,7 +41,9 @@ class WaitForDurationImplementation(
     ) -> SuccessData[WaitForDurationResult, None]:
         """Wait for a duration of time."""
         await self._run_control.wait_for_duration(params.seconds)
-        return SuccessData(public=WaitForDurationResult(), private=None)
+        return SuccessData(
+            public=WaitForDurationResult(),
+        )
 
 
 class WaitForDuration(

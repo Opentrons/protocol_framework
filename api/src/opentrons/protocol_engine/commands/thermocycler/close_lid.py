@@ -69,9 +69,7 @@ class CloseLidImpl(
         if thermocycler_hardware is not None:
             await thermocycler_hardware.close()
 
-        return SuccessData(
-            public=CloseLidResult(), private=None, state_update=state_update
-        )
+        return SuccessData(public=CloseLidResult(), state_update=state_update)
 
 
 class CloseLid(BaseCommand[CloseLidParams, CloseLidResult, ErrorOccurrence]):

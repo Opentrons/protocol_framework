@@ -65,9 +65,7 @@ class OpenLidImpl(AbstractCommandImpl[OpenLidParams, SuccessData[OpenLidResult, 
         if thermocycler_hardware is not None:
             await thermocycler_hardware.open()
 
-        return SuccessData(
-            public=OpenLidResult(), private=None, state_update=state_update
-        )
+        return SuccessData(public=OpenLidResult(), state_update=state_update)
 
 
 class OpenLid(BaseCommand[OpenLidParams, OpenLidResult, ErrorOccurrence]):

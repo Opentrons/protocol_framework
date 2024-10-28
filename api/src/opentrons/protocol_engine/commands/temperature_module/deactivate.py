@@ -57,7 +57,9 @@ class DeactivateTemperatureImpl(
 
         if temp_hardware_module is not None:
             await temp_hardware_module.deactivate()
-        return SuccessData(public=DeactivateTemperatureResult(), private=None)
+        return SuccessData(
+            public=DeactivateTemperatureResult(),
+        )
 
 
 class DeactivateTemperature(

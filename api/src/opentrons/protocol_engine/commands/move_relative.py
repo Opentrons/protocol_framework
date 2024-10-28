@@ -67,7 +67,6 @@ class MoveRelativeImplementation(
 
         return SuccessData(
             public=MoveRelativeResult(position=deck_point),
-            private=None,
             state_update=state_update,
         )
 

@@ -66,7 +66,6 @@ def load_labware_action(
 ) -> actions.SucceedCommandAction:
     """Get a load labware command value object."""
     return actions.SucceedCommandAction(
-        private_result=None,
         command=_dummy_command(),
         state_update=update_types.StateUpdate(
             loaded_labware=update_types.LoadedLabwareUpdate(
@@ -124,7 +123,6 @@ def test_get_next_tip_returns_none(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
             command=_dummy_command(),
         )
@@ -183,7 +181,6 @@ def test_get_next_tip_returns_first_tip(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
             command=_dummy_command(),
         )
@@ -236,7 +233,6 @@ def test_get_next_tip_used_starting_tip(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
             command=_dummy_command(),
         )
@@ -322,7 +318,6 @@ def test_get_next_tip_skips_picked_up_tip(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
             command=_dummy_command(),
         )
@@ -338,7 +333,6 @@ def test_get_next_tip_skips_picked_up_tip(
     subject.handle_action(
         actions.SucceedCommandAction(
             command=_dummy_command(),
-            private_result=None,
             state_update=pick_up_tip_state_update,
         )
     )
@@ -387,7 +381,6 @@ def test_get_next_tip_with_starting_tip(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
             command=_dummy_command(),
         )
@@ -407,7 +400,6 @@ def test_get_next_tip_with_starting_tip(
     subject.handle_action(
         actions.SucceedCommandAction(
             command=_dummy_command(),
-            private_result=None,
             state_update=pick_up_tip_state_update,
         )
     )
@@ -456,7 +448,6 @@ def test_get_next_tip_with_starting_tip_8_channel(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
             command=_dummy_command(),
         )
@@ -479,7 +470,6 @@ def test_get_next_tip_with_starting_tip_8_channel(
     subject.handle_action(
         actions.SucceedCommandAction(
             command=_dummy_command(),
-            private_result=None,
             state_update=pick_up_tip_state_update,
         )
     )
@@ -528,7 +518,6 @@ def test_get_next_tip_with_1_channel_followed_by_8_channel(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
             command=_dummy_command(),
         )
@@ -560,7 +549,6 @@ def test_get_next_tip_with_1_channel_followed_by_8_channel(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update_2),
             command=_dummy_command(),
         )
@@ -583,7 +571,6 @@ def test_get_next_tip_with_1_channel_followed_by_8_channel(
     subject.handle_action(
         actions.SucceedCommandAction(
             command=_dummy_command(),
-            private_result=None,
             state_update=pick_up_tip_2_state_update,
         )
     )
@@ -632,7 +619,6 @@ def test_get_next_tip_with_starting_tip_out_of_tips(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
             command=_dummy_command(),
         )
@@ -655,7 +641,6 @@ def test_get_next_tip_with_starting_tip_out_of_tips(
     subject.handle_action(
         actions.SucceedCommandAction(
             command=_dummy_command(),
-            private_result=None,
             state_update=pick_up_tip_state_update,
         )
     )
@@ -704,7 +689,6 @@ def test_get_next_tip_with_column_and_starting_tip(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
             command=_dummy_command(),
         )
@@ -755,7 +739,6 @@ def test_reset_tips(
 
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
             command=_dummy_command(),
         )
@@ -764,7 +747,6 @@ def test_reset_tips(
     subject.handle_action(
         actions.SucceedCommandAction(
             command=_dummy_command(),
-            private_result=None,
             state_update=update_types.StateUpdate(
                 tips_used=update_types.TipsUsedUpdate(
                     pipette_id="pipette-id",
@@ -818,7 +800,6 @@ def test_handle_pipette_config_action(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
             command=_dummy_command(),
         )
@@ -952,7 +933,6 @@ def test_active_channels(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
             command=_dummy_command(),
         )
@@ -968,7 +948,6 @@ def test_active_channels(
     subject.handle_action(
         actions.SucceedCommandAction(
             command=_dummy_command(),
-            private_result=None,
             state_update=state_update,
         )
     )
@@ -1014,7 +993,6 @@ def test_next_tip_uses_active_channels(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
             command=_dummy_command(),
         )
@@ -1051,7 +1029,6 @@ def test_next_tip_uses_active_channels(
     subject.handle_action(
         actions.SucceedCommandAction(
             command=_dummy_command(),
-            private_result=None,
             state_update=state_update,
         )
     )
@@ -1059,7 +1036,6 @@ def test_next_tip_uses_active_channels(
     subject.handle_action(
         actions.SucceedCommandAction(
             command=_dummy_command(),
-            private_result=None,
             state_update=update_types.StateUpdate(
                 tips_used=update_types.TipsUsedUpdate(
                     pipette_id="pipette-id",
@@ -1115,7 +1091,6 @@ def test_next_tip_automatic_tip_tracking_with_partial_configurations(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
             command=_dummy_command(),
         )
@@ -1141,7 +1116,6 @@ def test_next_tip_automatic_tip_tracking_with_partial_configurations(
         subject.handle_action(
             actions.SucceedCommandAction(
                 command=_dummy_command(),
-                private_result=None,
                 state_update=pick_up_tip_state_update,
             )
         )
@@ -1212,7 +1186,6 @@ def test_next_tip_automatic_tip_tracking_with_partial_configurations(
         subject.handle_action(
             actions.SucceedCommandAction(
                 command=_dummy_command(),
-                private_result=None,
                 state_update=state_update,
             )
         )
@@ -1270,7 +1243,6 @@ def test_next_tip_automatic_tip_tracking_tiprack_limits(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=None,
             state_update=update_types.StateUpdate(pipette_config=config_update),
             command=_dummy_command(),
         )
@@ -1293,7 +1265,6 @@ def test_next_tip_automatic_tip_tracking_tiprack_limits(
             subject.handle_action(
                 actions.SucceedCommandAction(
                     command=_dummy_command(),
-                    private_result=None,
                     state_update=pick_up_tip_state_update,
                 )
             )
@@ -1337,7 +1308,7 @@ def test_next_tip_automatic_tip_tracking_tiprack_limits(
         )
         subject.handle_action(
             actions.SucceedCommandAction(
-                command=_dummy_command(), private_result=None, state_update=state_update
+                command=_dummy_command(), state_update=state_update
             )
         )
         return nozzle_map

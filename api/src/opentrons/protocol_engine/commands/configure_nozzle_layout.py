@@ -84,7 +84,6 @@ class ConfigureNozzleLayoutImplementation(
 
         return SuccessData(
             public=ConfigureNozzleLayoutResult(),
-            private=None,
             state_update=update_state,
         )
 

@@ -67,7 +67,9 @@ class VerifyTipPresenceImplementation(
             follow_singular_sensor=follow_singular_sensor,
         )
 
-        return SuccessData(public=VerifyTipPresenceResult(), private=None)
+        return SuccessData(
+            public=VerifyTipPresenceResult(),
+        )
 
 
 class VerifyTipPresence(

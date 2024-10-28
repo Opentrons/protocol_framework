@@ -179,7 +179,6 @@ class PickUpTipImplementation(AbstractCommandImpl[PickUpTipParams, _ExecuteRetur
                     tipDiameter=tip_geometry.diameter,
                     position=deck_point,
                 ),
-                private=None,
                 state_update=state_update,
             )
 

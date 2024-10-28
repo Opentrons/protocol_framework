@@ -54,7 +54,9 @@ class DeactivateLidImpl(
         if thermocycler_hardware is not None:
             await thermocycler_hardware.deactivate_lid()
 
-        return SuccessData(public=DeactivateLidResult(), private=None)
+        return SuccessData(
+            public=DeactivateLidResult(),
+        )
 
 
 class DeactivateLid(

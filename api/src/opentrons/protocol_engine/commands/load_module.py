@@ -198,7 +198,6 @@ class LoadModuleImplementation(
                 model=loaded_module.definition.model,
                 definition=loaded_module.definition,
             ),
-            private=None,
         )
 
     def _ensure_module_location(

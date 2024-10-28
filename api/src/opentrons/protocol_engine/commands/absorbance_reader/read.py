@@ -168,12 +168,10 @@ class ReadAbsorbanceImpl(
                     public=ReadAbsorbanceResult(
                         data=asbsorbance_result, fileIds=file_ids
                     ),
-                    private=None,
                 )
 
         return SuccessData(
             public=ReadAbsorbanceResult(data=asbsorbance_result, fileIds=file_ids),
-            private=None,
         )
 
 

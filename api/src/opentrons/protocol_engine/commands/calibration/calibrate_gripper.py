@@ -126,7 +126,6 @@ class CalibrateGripperImplementation(
                 ),
                 savedCalibration=calibration_data,
             ),
-            private=None,
         )
 
     @staticmethod

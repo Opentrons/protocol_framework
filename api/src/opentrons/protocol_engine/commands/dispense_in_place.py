@@ -129,7 +129,6 @@ class DispenseInPlaceImplementation(
                 )
             return SuccessData(
                 public=DispenseInPlaceResult(volume=volume),
-                private=None,
                 state_update=state_update,
             )
 

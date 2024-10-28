@@ -119,7 +119,6 @@ class TouchTipImplementation(
 
         return SuccessData(
             public=TouchTipResult(position=final_deck_point),
-            private=None,
             state_update=state_update,
         )
 

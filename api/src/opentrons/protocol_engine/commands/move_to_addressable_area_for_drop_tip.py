@@ -140,7 +140,6 @@ class MoveToAddressableAreaForDropTipImplementation(
             public=MoveToAddressableAreaForDropTipResult(
                 position=DeckPoint(x=x, y=y, z=z)
             ),
-            private=None,
             state_update=state_update,
         )
 

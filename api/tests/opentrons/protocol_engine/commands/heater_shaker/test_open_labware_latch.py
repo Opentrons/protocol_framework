@@ -81,7 +81,6 @@ async def test_open_labware_latch(
         public=heater_shaker.OpenLabwareLatchResult(
             pipetteRetracted=expect_pipette_retracted
         ),
-        private=None,
         state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR)
         if expect_pipette_retracted
         else update_types.StateUpdate(),

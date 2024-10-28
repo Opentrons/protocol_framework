@@ -249,7 +249,6 @@ class LiquidProbeImplementation(
                 public=LiquidProbeResult(
                     z_position=z_pos_or_error, position=deck_point
                 ),
-                private=None,
                 state_update=state_update,
             )
 
@@ -308,7 +307,6 @@ class TryLiquidProbeImplementation(
                 z_position=z_pos,
                 position=deck_point,
             ),
-            private=None,
             state_update=state_update,
         )
 

@@ -64,7 +64,9 @@ class SetTargetTemperatureImpl(
         if hs_hardware_module is not None:
             await hs_hardware_module.start_set_temperature(validated_temp)
 
-        return SuccessData(public=SetTargetTemperatureResult(), private=None)
+        return SuccessData(
+            public=SetTargetTemperatureResult(),
+        )
 
 
 class SetTargetTemperature(

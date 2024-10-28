@@ -87,7 +87,6 @@ class OpenLabwareLatchImpl(
 
         return SuccessData(
             public=OpenLabwareLatchResult(pipetteRetracted=pipette_should_retract),
-            private=None,
             state_update=state_update,
         )
 

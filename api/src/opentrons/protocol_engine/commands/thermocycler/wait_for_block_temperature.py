@@ -61,7 +61,9 @@ class WaitForBlockTemperatureImpl(
         if thermocycler_hardware is not None:
             await thermocycler_hardware.wait_for_block_target()
 
-        return SuccessData(public=WaitForBlockTemperatureResult(), private=None)
+        return SuccessData(
+            public=WaitForBlockTemperatureResult(),
+        )
 
 
 class WaitForBlockTemperature(

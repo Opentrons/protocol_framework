@@ -26,6 +26,6 @@ async def test_set_rail_lights_implementation(
 
     result = await subject.execute(data)
 
-    assert result == SuccessData(public=SetRailLightsResult(), private=None)
+    assert result == SuccessData(public=SetRailLightsResult())
 
     decoy.verify(await rail_lights.set_rail_lights(True), times=1)

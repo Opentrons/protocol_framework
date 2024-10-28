@@ -67,7 +67,9 @@ class UnsafeBlowOutInPlaceImplementation(
             pipette_id=params.pipetteId, flow_rate=params.flowRate
         )
 
-        return SuccessData(public=UnsafeBlowOutInPlaceResult(), private=None)
+        return SuccessData(
+            public=UnsafeBlowOutInPlaceResult(),
+        )
 
 
 class UnsafeBlowOutInPlace(

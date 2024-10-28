@@ -95,7 +95,9 @@ class EngageImplementation(
         if hardware_module is not None:  # Not virtualizing modules.
             await hardware_module.engage(height=hardware_height)
 
-        return SuccessData(public=EngageResult(), private=None)
+        return SuccessData(
+            public=EngageResult(),
+        )
 
 
 class Engage(BaseCommand[EngageParams, EngageResult, ErrorOccurrence]):

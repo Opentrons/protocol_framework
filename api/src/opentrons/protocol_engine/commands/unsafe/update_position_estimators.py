@@ -59,7 +59,9 @@ class UpdatePositionEstimatorsImplementation(
                 for axis in params.axes
             ]
         )
-        return SuccessData(public=UpdatePositionEstimatorsResult(), private=None)
+        return SuccessData(
+            public=UpdatePositionEstimatorsResult(),
+        )
 
 
 class UpdatePositionEstimators(

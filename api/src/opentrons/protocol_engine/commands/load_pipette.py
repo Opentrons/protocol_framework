@@ -130,7 +130,6 @@ class LoadPipetteImplementation(
 
         return SuccessData(
             public=LoadPipetteResult(pipetteId=loaded_pipette.pipette_id),
-            private=None,
             state_update=state_update,
         )
 

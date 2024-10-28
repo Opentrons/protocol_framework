@@ -97,7 +97,6 @@ class SetTargetBlockTemperatureImpl(
             public=SetTargetBlockTemperatureResult(
                 targetBlockTemperature=target_temperature
             ),
-            private=None,
         )
 
 

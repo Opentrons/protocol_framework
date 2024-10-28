@@ -78,7 +78,6 @@ class ReloadLabwareImplementation(
                 labwareId=params.labwareId,
                 offsetId=reloaded_labware.offsetId,
             ),
-            private=None,
             state_update=state_update,
         )
 

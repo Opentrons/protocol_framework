@@ -48,7 +48,6 @@ async def test_load_liquid_implementation(
 
     assert result == SuccessData(
         public=LoadLiquidResult(),
-        private=None,
         state_update=update_types.StateUpdate(
             liquid_loaded=update_types.LiquidLoadedUpdate(
                 labware_id="labware-id",

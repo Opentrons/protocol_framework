@@ -55,5 +55,5 @@ async def test_set_target_temperature(
     result = await subject.execute(data)
     decoy.verify(await hs_hardware.start_set_temperature(celsius=45.6), times=1)
     assert result == SuccessData(
-        public=heater_shaker.SetTargetTemperatureResult(), private=None
+        public=heater_shaker.SetTargetTemperatureResult(),
     )

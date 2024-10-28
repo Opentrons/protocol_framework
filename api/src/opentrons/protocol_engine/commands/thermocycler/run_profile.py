@@ -96,7 +96,9 @@ class RunProfileImpl(
                 steps=steps, repetitions=1, volume=target_volume
             )
 
-        return SuccessData(public=RunProfileResult(), private=None)
+        return SuccessData(
+            public=RunProfileResult(),
+        )
 
 
 class RunProfile(BaseCommand[RunProfileParams, RunProfileResult, ErrorOccurrence]):

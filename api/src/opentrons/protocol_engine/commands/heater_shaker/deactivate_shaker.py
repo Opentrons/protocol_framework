@@ -60,7 +60,9 @@ class DeactivateShakerImpl(
         if hs_hardware_module is not None:
             await hs_hardware_module.deactivate_shaker()
 
-        return SuccessData(public=DeactivateShakerResult(), private=None)
+        return SuccessData(
+            public=DeactivateShakerResult(),
+        )
 
 
 class DeactivateShaker(

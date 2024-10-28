@@ -83,7 +83,6 @@ class MoveToWellImplementation(
 
         return SuccessData(
             public=MoveToWellResult(position=deck_point),
-            private=None,
             state_update=state_update,
         )
 

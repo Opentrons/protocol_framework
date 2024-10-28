@@ -91,7 +91,6 @@ class CalibrateModuleImplementation(
                 ),
                 location=slot,
             ),
-            private=None,
         )
 
 

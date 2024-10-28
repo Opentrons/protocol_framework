@@ -84,7 +84,6 @@ async def test_configure_for_volume_implementation(
 
     assert result == SuccessData(
         public=ConfigureForVolumeResult(),
-        private=None,
         state_update=StateUpdate(
             pipette_config=PipetteConfigUpdate(
                 pipette_id="pipette-id", serial_number="some number", config=config

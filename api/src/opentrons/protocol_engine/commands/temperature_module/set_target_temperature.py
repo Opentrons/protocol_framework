@@ -69,7 +69,6 @@ class SetTargetTemperatureImpl(
             await temp_hardware_module.start_set_temperature(celsius=validated_temp)
         return SuccessData(
             public=SetTargetTemperatureResult(targetTemperature=validated_temp),
-            private=None,
         )
 
 

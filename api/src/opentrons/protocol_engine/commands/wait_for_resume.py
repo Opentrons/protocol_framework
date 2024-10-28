@@ -42,7 +42,9 @@ class WaitForResumeImplementation(
     ) -> SuccessData[WaitForResumeResult, None]:
         """Dispatch a PauseAction to the store to pause the protocol."""
         await self._run_control.wait_for_resume()
-        return SuccessData(public=WaitForResumeResult(), private=None)
+        return SuccessData(
+            public=WaitForResumeResult(),
+        )
 
 
 class WaitForResume(

@@ -82,7 +82,6 @@ async def test_dispense_implementation(
 
     assert result == SuccessData(
         public=DispenseResult(volume=42, position=DeckPoint(x=1, y=2, z=3)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="pipette-id-abc123",

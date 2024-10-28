@@ -150,7 +150,6 @@ class AspirateInPlaceImplementation(
                 )
             return SuccessData(
                 public=AspirateInPlaceResult(volume=volume),
-                private=None,
                 state_update=state_update,
             )
 

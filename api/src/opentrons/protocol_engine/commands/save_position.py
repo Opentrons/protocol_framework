@@ -76,7 +76,6 @@ class SavePositionImplementation(
                 positionId=position_id,
                 position=DeckPoint(x=x, y=y, z=z),
             ),
-            private=None,
         )
 
 

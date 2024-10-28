@@ -89,7 +89,6 @@ async def test_load_pipette_implementation(
 
     assert result == SuccessData(
         public=LoadPipetteResult(pipetteId="some id"),
-        private=None,
         state_update=StateUpdate(
             loaded_pipette=LoadPipetteUpdate(
                 pipette_name=PipetteNameType.P300_SINGLE,
@@ -155,7 +154,6 @@ async def test_load_pipette_implementation_96_channel(
 
     assert result == SuccessData(
         public=LoadPipetteResult(pipetteId="pipette-id"),
-        private=None,
         state_update=StateUpdate(
             loaded_pipette=LoadPipetteUpdate(
                 pipette_name=PipetteNameType.P1000_96,

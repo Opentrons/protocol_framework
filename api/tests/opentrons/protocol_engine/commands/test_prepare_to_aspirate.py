@@ -43,7 +43,7 @@ async def test_prepare_to_aspirate_implmenetation(
     )
 
     result = await subject.execute(data)
-    assert result == SuccessData(public=PrepareToAspirateResult(), private=None)
+    assert result == SuccessData(public=PrepareToAspirateResult())
 
 
 async def test_overpressure_error(

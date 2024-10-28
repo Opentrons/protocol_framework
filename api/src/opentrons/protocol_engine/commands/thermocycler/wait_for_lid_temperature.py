@@ -61,7 +61,9 @@ class WaitForLidTemperatureImpl(
         if thermocycler_hardware is not None:
             await thermocycler_hardware.wait_for_lid_target()
 
-        return SuccessData(public=WaitForLidTemperatureResult(), private=None)
+        return SuccessData(
+            public=WaitForLidTemperatureResult(),
+        )
 
 
 class WaitForLidTemperature(

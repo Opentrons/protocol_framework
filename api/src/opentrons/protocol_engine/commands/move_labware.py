@@ -301,7 +301,6 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
 
         return SuccessData(
             public=MoveLabwareResult(offsetId=new_offset_id),
-            private=None,
             state_update=state_update,
         )
 

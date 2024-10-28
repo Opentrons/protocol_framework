@@ -58,7 +58,9 @@ class DeactivateHeaterImpl(
         if hs_hardware_module is not None:
             await hs_hardware_module.deactivate_heater()
 
-        return SuccessData(public=DeactivateHeaterResult(), private=None)
+        return SuccessData(
+            public=DeactivateHeaterResult(),
+        )
 
 
 class DeactivateHeater(

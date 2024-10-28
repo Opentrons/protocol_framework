@@ -57,7 +57,9 @@ class UnsafeEngageAxesImplementation(
                 for axis in params.axes
             ]
         )
-        return SuccessData(public=UnsafeEngageAxesResult(), private=None)
+        return SuccessData(
+            public=UnsafeEngageAxesResult(),
+        )
 
 
 class UnsafeEngageAxes(

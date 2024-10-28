@@ -74,7 +74,9 @@ class WaitForTemperatureImpl(
             await temp_hardware_module.await_temperature(
                 awaiting_temperature=target_temp
             )
-        return SuccessData(public=WaitForTemperatureResult(), private=None)
+        return SuccessData(
+            public=WaitForTemperatureResult(),
+        )
 
 
 class WaitForTemperature(

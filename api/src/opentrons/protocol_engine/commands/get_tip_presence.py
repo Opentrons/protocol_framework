@@ -59,7 +59,9 @@ class GetTipPresenceImplementation(
             pipette_id=pipette_id,
         )
 
-        return SuccessData(public=GetTipPresenceResult(status=result), private=None)
+        return SuccessData(
+            public=GetTipPresenceResult(status=result),
+        )
 
 
 class GetTipPresence(
