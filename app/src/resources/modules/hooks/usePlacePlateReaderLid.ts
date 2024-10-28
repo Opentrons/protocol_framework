@@ -1,12 +1,11 @@
 import {
-  CreateCommand,
-  OnDeckLabwareLocation,
-  ModuleLocation,
+  type CreateCommand,
+  type OnDeckLabwareLocation,
+  type ModuleLocation,
 } from '@opentrons/shared-data'
-import { UseRobotControlCommandsProps } from '/app/resources/maintenance_runs'
+import { type UseRobotControlCommandsProps , useRobotControlCommands } from '/app/resources/maintenance_runs'
 import { useRunCurrentState } from '@opentrons/react-api-client'
 import { useCurrentRunId } from '../../runs'
-import { useRobotControlCommands } from '/app/resources/maintenance_runs'
 
 interface UsePlacePlateReaderLidResult {
   handlePlaceReaderLid: () => Promise<void>
@@ -58,7 +57,7 @@ export function usePlacePlateReaderLid(
 
   return {
     handlePlaceReaderLid,
-    isExecuting: isExecuting,
+    isExecuting,
     isValidPlateReaderMove,
   }
 }
@@ -66,7 +65,7 @@ export function usePlacePlateReaderLid(
 const buildLoadModuleCommand = (location: ModuleLocation): CreateCommand => {
   return {
     commandType: 'loadModule' as const,
-    params: { model: 'absorbanceReaderV1', location: location },
+    params: { model: 'absorbanceReaderV1', location },
   }
 }
 

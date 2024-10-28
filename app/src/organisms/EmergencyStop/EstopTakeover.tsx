@@ -7,7 +7,7 @@ import { EstopMissingModal } from './EstopMissingModal'
 import { useIsUnboxingFlowOngoing } from '/app/redux-resources/config'
 import { getLocalRobot } from '/app/redux/discovery'
 import { PHYSICALLY_ENGAGED, NOT_PRESENT, DISENGAGED } from './constants'
-import { EstopState } from '@opentrons/api-client'
+import { type EstopState } from '@opentrons/api-client'
 
 const ESTOP_CURRENTLY_DISENGAGED_REFETCH_INTERVAL_MS = 10000
 const ESTOP_CURRENTLY_ENGAGED_REFETCH_INTERVAL_MS = 1000
