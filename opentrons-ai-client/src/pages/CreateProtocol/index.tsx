@@ -19,6 +19,11 @@ interface CreateProtocolFormData {
     otherApplication?: string
     description: string
   }
+  instruments: {
+    robot: string
+    pipettes: string
+    flexGripper: string
+  }
 }
 
 const TOTAL_STEPS = 5
@@ -35,6 +40,7 @@ export function CreateProtocol(): JSX.Element | null {
         otherApplication: '',
         description: '',
       },
+      instruments: {},
     },
   })
 
