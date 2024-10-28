@@ -11,14 +11,14 @@ interface RobotCoordinateSpaceWithRefProps
   extends React.ComponentProps<typeof Svg> {
   viewBox?: string | null
   deckDef?: DeckDefinition
-  zoomed: boolean
+  zoomed?: boolean
   children?: (props: RobotCoordinateSpaceWithRefRenderProps) => React.ReactNode
 }
 
 export function RobotCoordinateSpaceWithRef(
   props: RobotCoordinateSpaceWithRefProps
 ): JSX.Element | null {
-  const { children, deckDef, viewBox, zoomed, ...restProps } = props
+  const { children, deckDef, viewBox, zoomed = false, ...restProps } = props
   const wrapperRef = React.useRef<SVGSVGElement>(null)
 
   if (deckDef == null && viewBox == null) return null
