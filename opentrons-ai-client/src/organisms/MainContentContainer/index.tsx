@@ -34,7 +34,7 @@ export function MainContentContainer(): JSX.Element {
       padding={`${SPACING.spacing40} ${SPACING.spacing40} ${SPACING.spacing24}`}
       flexDirection={DIRECTION_COLUMN}
       gridGap={SPACING.spacing40}
-      height="80vh"
+      height="100vh"
       width="100%"
     >
       <Flex
@@ -44,8 +44,6 @@ export function MainContentContainer(): JSX.Element {
         flexGrow="1"
       >
         <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
-          {/* Prompt Guide remain as a reference for users. */}
-          <LegacyStyledText>{t('opentronsai')}</LegacyStyledText>
           <PromptGuide />
         </Flex>
         <ChatDataContainer>
@@ -70,6 +68,5 @@ export function MainContentContainer(): JSX.Element {
 
 const ChatDataContainer = styled(Flex)`
   flex-direction: ${DIRECTION_COLUMN};
-  grid-gap: ${SPACING.spacing40};
   width: 100%;
 `
