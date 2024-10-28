@@ -8,8 +8,8 @@ import {
 import { InputStepFormField } from '../../../../../../molecules'
 import { getFormErrorsMappedToField, getFormLevelError } from '../../utils'
 
-import type { FieldPropsByName } from '../../types'
 import type { StepFormErrors } from '../../../../../../steplist'
+import type { FieldPropsByName } from '../../types'
 
 interface ProfileSettingsProps {
   propsForFields: FieldPropsByName
