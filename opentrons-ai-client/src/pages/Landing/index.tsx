@@ -49,6 +49,7 @@ export function Landing(): JSX.Element | null {
         justifyContent={JUSTIFY_CENTER}
         width="100%"
         maxWidth="548px"
+        minHeight="600px"
         gridGap={SPACING.spacing16}
         textAlign={TEXT_ALIGN_CENTER}
       >
