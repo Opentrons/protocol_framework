@@ -142,7 +142,8 @@ export function parseInitialLoadedLabwareBySlot(
 // information
 export function getTopLabwareInfo(
   labwareId: string,
-  loadLabwareCommands: LoadLabwareRunTimeCommand[]
+  loadLabwareCommands: LoadLabwareRunTimeCommand[],
+  currentStackHeight: number = 0
 ): {
   topLabwareId: string
   topLabwareDefinition?: LabwareDefinition2
@@ -155,7 +156,9 @@ export function getTopLabwareInfo(
       'labwareId' in command.params.location &&
       command.params.location.labwareId === labwareId
   )
-  if (nestedCommand == null) {
+  // prevent recurssion errors (like labware stacked on itself)
+  // by enforcing a max stack height
+  if (nestedCommand == null || currentStackHeight > 5) {
     const loadCommand = loadLabwareCommands.find(
       command =>
         command.commandType === 'loadLabware' &&
@@ -174,7 +177,8 @@ export function getTopLabwareInfo(
   } else {
     return getTopLabwareInfo(
       nestedCommand?.result?.labwareId as string,
-      loadLabwareCommands
+      loadLabwareCommands,
+      currentStackHeight + 1
     )
   }
 }
@@ -221,7 +225,9 @@ export function getLabwareStackCountAndLocation(
       loadLabwareCommand.params.loadName ===
       lowerLabwareCommand?.params.loadName
 
-    if (isSameLabware) {
+    // add protection for recursion errors by having a max stack of 5 which is current
+    // allowed max stack of TC lids
+    if (isSameLabware && initialQuantity < 5) {
       const newQuantity = initialQuantity + 1
       return getLabwareStackCountAndLocation(
         lowerLabwareCommand.result.labwareId,
