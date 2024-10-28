@@ -33,8 +33,8 @@ export function WellOrderVisualization(
 
   return (
     <img
-      height="100%"
-      width="274px"
+      width="253px"
+      height="274px"
       src={imageMap[imageKey]}
       alt={`${firstValue} ${secondValue}`}
     />
