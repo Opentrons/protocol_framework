@@ -1,7 +1,7 @@
 """Union types of concrete command definitions."""
 
 from collections.abc import Collection
-from typing import Annotated, Type, Union, get_type_hints
+from typing import Annotated, Literal, Type, Union, get_type_hints
 
 from pydantic import Field
 
@@ -141,7 +141,6 @@ from .load_pipette import (
     LoadPipetteCreate,
     LoadPipetteResult,
     LoadPipetteCommandType,
-    LoadPipettePrivateResult,
 )
 
 from .move_labware import (
@@ -272,7 +271,6 @@ from .configure_for_volume import (
     ConfigureForVolumeCreate,
     ConfigureForVolumeResult,
     ConfigureForVolumeCommandType,
-    ConfigureForVolumePrivateResult,
 )
 
 from .prepare_to_aspirate import (
@@ -701,15 +699,9 @@ CommandResult = Union[
     unsafe.UnsafeUngripLabwareResult,
 ]
 
-# todo(mm, 2024-06-12): Ideally, command return types would have specific
-# CommandPrivateResults paired with specific CommandResults. For example,
-# a TouchTipResult can never be paired with a LoadPipettePrivateResult in practice,
-# and ideally our types would reflect that.
-CommandPrivateResult = Union[
-    None,
-    LoadPipettePrivateResult,
-    ConfigureForVolumePrivateResult,
-]
+# todo(mm, 2024-10-28): This has been obsoleted by StateUpdate. Delete this.
+# https://opentrons.atlassian.net/browse/EXEC-639
+CommandPrivateResult = Literal[None]
 
 # All `DefinedErrorData`s that implementations will actually return in practice.
 CommandDefinedErrorData = Union[

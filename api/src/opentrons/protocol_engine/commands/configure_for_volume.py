@@ -7,7 +7,6 @@ from typing_extensions import Literal
 from .pipetting_common import PipetteIdMixin
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ..errors.error_occurrence import ErrorOccurrence
-from .configuring_common import PipetteConfigUpdateResultMixin
 from ..state.update_types import StateUpdate
 
 if TYPE_CHECKING:
@@ -35,12 +34,6 @@ class ConfigureForVolumeParams(PipetteIdMixin):
     )
 
 
-class ConfigureForVolumePrivateResult(PipetteConfigUpdateResultMixin):
-    """Result sent to the store but not serialized."""
-
-    pass
-
-
 class ConfigureForVolumeResult(BaseModel):
     """Result data from execution of an ConfigureForVolume command."""
 
@@ -50,7 +43,7 @@ class ConfigureForVolumeResult(BaseModel):
 class ConfigureForVolumeImplementation(
     AbstractCommandImpl[
         ConfigureForVolumeParams,
-        SuccessData[ConfigureForVolumeResult, ConfigureForVolumePrivateResult],
+        SuccessData[ConfigureForVolumeResult, None],
     ]
 ):
     """Configure for volume command implementation."""
@@ -60,7 +53,7 @@ class ConfigureForVolumeImplementation(
 
     async def execute(
         self, params: ConfigureForVolumeParams
-    ) -> SuccessData[ConfigureForVolumeResult, ConfigureForVolumePrivateResult]:
+    ) -> SuccessData[ConfigureForVolumeResult, None]:
         """Check that requested pipette can be configured for the given volume."""
         pipette_result = await self._equipment.configure_for_volume(
             pipette_id=params.pipetteId,
@@ -77,11 +70,7 @@ class ConfigureForVolumeImplementation(
 
         return SuccessData(
             public=ConfigureForVolumeResult(),
-            private=ConfigureForVolumePrivateResult(
-                pipette_id=pipette_result.pipette_id,
-                serial_number=pipette_result.serial_number,
-                config=pipette_result.static_config,
-            ),
+            private=None,
             state_update=state_update,
         )
 

@@ -94,7 +94,7 @@ def test_get_next_tip_returns_none(
     load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
         result=commands.LoadPipetteResult(pipetteId="pipette-id")
     )
-    load_pipette_private_result = commands.LoadPipettePrivateResult(
+    config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
         config=LoadedStaticPipetteData(
@@ -120,7 +120,9 @@ def test_get_next_tip_returns_none(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result, command=load_pipette_command
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update),
+            command=load_pipette_command,
         )
     )
 
@@ -155,7 +157,7 @@ def test_get_next_tip_returns_first_tip(
         pipette_name_type = PipetteNameType.P300_MULTI_GEN2
     else:
         pipette_name_type = PipetteNameType.P1000_96
-    load_pipette_private_result = commands.LoadPipettePrivateResult(
+    config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
         config=LoadedStaticPipetteData(
@@ -181,7 +183,9 @@ def test_get_next_tip_returns_first_tip(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result, command=load_pipette_command
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update),
+            command=load_pipette_command,
         )
     )
 
@@ -210,7 +214,7 @@ def test_get_next_tip_used_starting_tip(
     load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
         result=commands.LoadPipetteResult(pipetteId="pipette-id")
     )
-    load_pipette_private_result = commands.LoadPipettePrivateResult(
+    config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
         config=LoadedStaticPipetteData(
@@ -236,7 +240,9 @@ def test_get_next_tip_used_starting_tip(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result, command=load_pipette_command
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update),
+            command=load_pipette_command,
         )
     )
 
@@ -299,7 +305,7 @@ def test_get_next_tip_skips_picked_up_tip(
             pipette_name_type = PipetteNameType.P300_MULTI_GEN2
         else:
             pipette_name_type = PipetteNameType.P1000_96
-    load_pipette_private_result = commands.LoadPipettePrivateResult(
+    config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
         config=LoadedStaticPipetteData(
@@ -325,7 +331,9 @@ def test_get_next_tip_skips_picked_up_tip(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result, command=load_pipette_command
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update),
+            command=load_pipette_command,
         )
     )
 
@@ -348,7 +356,7 @@ def test_get_next_tip_skips_picked_up_tip(
         labware_id="cool-labware",
         num_tips=get_next_tip_tips,
         starting_tip_name=input_starting_tip,
-        nozzle_map=load_pipette_private_result.config.nozzle_map,
+        nozzle_map=config_update.config.nozzle_map,
     )
 
     assert result == result_well_name
@@ -366,7 +374,7 @@ def test_get_next_tip_with_starting_tip(
     load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
         result=commands.LoadPipetteResult(pipetteId="pipette-id")
     )
-    load_pipette_private_result = commands.LoadPipettePrivateResult(
+    config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
         config=LoadedStaticPipetteData(
@@ -392,14 +400,16 @@ def test_get_next_tip_with_starting_tip(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result, command=load_pipette_command
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update),
+            command=load_pipette_command,
         )
     )
     result = TipView(subject.state).get_next_tip(
         labware_id="cool-labware",
         num_tips=1,
         starting_tip_name="B2",
-        nozzle_map=load_pipette_private_result.config.nozzle_map,
+        nozzle_map=config_update.config.nozzle_map,
     )
 
     assert result == "B2"
@@ -419,7 +429,7 @@ def test_get_next_tip_with_starting_tip(
         labware_id="cool-labware",
         num_tips=1,
         starting_tip_name="B2",
-        nozzle_map=load_pipette_private_result.config.nozzle_map,
+        nozzle_map=config_update.config.nozzle_map,
     )
 
     assert result == "C2"
@@ -437,7 +447,7 @@ def test_get_next_tip_with_starting_tip_8_channel(
     load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
         result=commands.LoadPipetteResult(pipetteId="pipette-id")
     )
-    load_pipette_private_result = commands.LoadPipettePrivateResult(
+    config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
         config=LoadedStaticPipetteData(
@@ -463,7 +473,9 @@ def test_get_next_tip_with_starting_tip_8_channel(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result, command=load_pipette_command
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update),
+            command=load_pipette_command,
         )
     )
 
@@ -511,7 +523,7 @@ def test_get_next_tip_with_1_channel_followed_by_8_channel(
     load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
         result=commands.LoadPipetteResult(pipetteId="pipette-id")
     )
-    load_pipette_private_result = commands.LoadPipettePrivateResult(
+    config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
         config=LoadedStaticPipetteData(
@@ -537,13 +549,15 @@ def test_get_next_tip_with_1_channel_followed_by_8_channel(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result, command=load_pipette_command
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update),
+            command=load_pipette_command,
         )
     )
     load_pipette_command_2 = commands.LoadPipette.construct(  # type: ignore[call-arg]
         result=commands.LoadPipetteResult(pipetteId="pipette-id2")
     )
-    load_pipette_private_result_2 = commands.LoadPipettePrivateResult(
+    config_update_2 = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id2",
         serial_number="pipette-serial2",
         config=LoadedStaticPipetteData(
@@ -569,7 +583,9 @@ def test_get_next_tip_with_1_channel_followed_by_8_channel(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result_2, command=load_pipette_command_2
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update_2),
+            command=load_pipette_command_2,
         )
     )
 
@@ -617,7 +633,7 @@ def test_get_next_tip_with_starting_tip_out_of_tips(
     load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
         result=commands.LoadPipetteResult(pipetteId="pipette-id")
     )
-    load_pipette_private_result = commands.LoadPipettePrivateResult(
+    config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
         config=LoadedStaticPipetteData(
@@ -643,7 +659,9 @@ def test_get_next_tip_with_starting_tip_out_of_tips(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result, command=load_pipette_command
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update),
+            command=load_pipette_command,
         )
     )
 
@@ -691,7 +709,7 @@ def test_get_next_tip_with_column_and_starting_tip(
     load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
         result=commands.LoadPipetteResult(pipetteId="pipette-id")
     )
-    load_pipette_private_result = commands.LoadPipettePrivateResult(
+    config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
         config=LoadedStaticPipetteData(
@@ -717,7 +735,9 @@ def test_get_next_tip_with_column_and_starting_tip(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result, command=load_pipette_command
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update),
+            command=load_pipette_command,
         )
     )
 
@@ -743,7 +763,7 @@ def test_reset_tips(
     load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
         result=commands.LoadPipetteResult(pipetteId="pipette-id")
     )
-    load_pipette_private_result = commands.LoadPipettePrivateResult(
+    config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
         config=LoadedStaticPipetteData(
@@ -770,7 +790,9 @@ def test_reset_tips(
 
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result, command=load_pipette_command
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update),
+            command=load_pipette_command,
         )
     )
 
@@ -808,7 +830,7 @@ def test_handle_pipette_config_action(
     load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
         result=commands.LoadPipetteResult(pipetteId="pipette-id")
     )
-    load_pipette_private_result = commands.LoadPipettePrivateResult(
+    config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
         config=LoadedStaticPipetteData(
@@ -834,7 +856,9 @@ def test_handle_pipette_config_action(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result, command=load_pipette_command
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update),
+            command=load_pipette_command,
         )
     )
 
@@ -947,7 +971,7 @@ def test_active_channels(
     load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
         result=commands.LoadPipetteResult(pipetteId="pipette-id")
     )
-    load_pipette_private_result = commands.LoadPipettePrivateResult(
+    config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
         config=LoadedStaticPipetteData(
@@ -973,7 +997,9 @@ def test_active_channels(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result, command=load_pipette_command
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update),
+            command=load_pipette_command,
         )
     )
 
@@ -1012,7 +1038,7 @@ def test_next_tip_uses_active_channels(
     load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
         result=commands.LoadPipetteResult(pipetteId="pipette-id")
     )
-    load_pipette_private_result = commands.LoadPipettePrivateResult(
+    config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
         config=LoadedStaticPipetteData(
@@ -1038,7 +1064,9 @@ def test_next_tip_uses_active_channels(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result, command=load_pipette_command
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update),
+            command=load_pipette_command,
         )
     )
 
@@ -1116,7 +1144,7 @@ def test_next_tip_automatic_tip_tracking_with_partial_configurations(
     load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
         result=commands.LoadPipetteResult(pipetteId="pipette-id")
     )
-    load_pipette_private_result = commands.LoadPipettePrivateResult(
+    config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
         config=LoadedStaticPipetteData(
@@ -1142,7 +1170,9 @@ def test_next_tip_automatic_tip_tracking_with_partial_configurations(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result, command=load_pipette_command
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update),
+            command=load_pipette_command,
         )
     )
 
@@ -1274,7 +1304,7 @@ def test_next_tip_automatic_tip_tracking_tiprack_limits(
     load_pipette_command = commands.LoadPipette.construct(  # type: ignore[call-arg]
         result=commands.LoadPipetteResult(pipetteId="pipette-id")
     )
-    load_pipette_private_result = commands.LoadPipettePrivateResult(
+    config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
         serial_number="pipette-serial",
         config=LoadedStaticPipetteData(
@@ -1300,7 +1330,9 @@ def test_next_tip_automatic_tip_tracking_tiprack_limits(
     )
     subject.handle_action(
         actions.SucceedCommandAction(
-            private_result=load_pipette_private_result, command=load_pipette_command
+            private_result=None,
+            state_update=update_types.StateUpdate(pipette_config=config_update),
+            command=load_pipette_command,
         )
     )
 

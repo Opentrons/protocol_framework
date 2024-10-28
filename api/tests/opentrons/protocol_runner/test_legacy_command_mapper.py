@@ -6,6 +6,7 @@ from typing import cast
 from opentrons.protocol_engine.state.update_types import (
     LoadPipetteUpdate,
     LoadedLabwareUpdate,
+    PipetteConfigUpdate,
     StateUpdate,
 )
 import pytest
@@ -380,16 +381,19 @@ def test_map_instrument_load(decoy: Decoy) -> None:
             result=pe_commands.LoadPipetteResult(pipetteId="pipette-0"),
             notes=[],
         ),
-        private_result=pe_commands.LoadPipettePrivateResult(
-            pipette_id="pipette-0", serial_number="fizzbuzz", config=pipette_config
-        ),
+        private_result=None,
         state_update=StateUpdate(
             loaded_pipette=LoadPipetteUpdate(
                 pipette_id="pipette-0",
                 mount=expected_params.mount,
                 pipette_name=expected_params.pipetteName,
                 liquid_presence_detection=expected_params.liquidPresenceDetection,
-            )
+            ),
+            pipette_config=PipetteConfigUpdate(
+                pipette_id="pipette-0",
+                serial_number="fizzbuzz",
+                config=pipette_config,
+            ),
         ),
     )
 

@@ -731,7 +731,14 @@ class LegacyCommandMapper:
             result=pe_commands.LoadPipetteResult.construct(pipetteId=pipette_id),
         )
         serial = instrument_load_info.pipette_dict.get("pipette_id", None) or ""
-        pipette_config_result = pe_commands.LoadPipettePrivateResult(
+        state_update = StateUpdate()
+        state_update.set_load_pipette(
+            pipette_id=pipette_id,
+            mount=succeeded_command.params.mount,
+            pipette_name=succeeded_command.params.pipetteName,
+            liquid_presence_detection=succeeded_command.params.liquidPresenceDetection,
+        )
+        state_update.update_pipette_config(
             pipette_id=pipette_id,
             serial_number=serial,
             config=pipette_data_provider.get_pipette_static_config(
@@ -754,16 +761,10 @@ class LegacyCommandMapper:
             # We just set this above, so we know it's not None.
             started_at=succeeded_command.startedAt,  # type: ignore[arg-type]
         )
-        state_update = StateUpdate()
-        state_update.set_load_pipette(
-            pipette_id=pipette_id,
-            mount=succeeded_command.params.mount,
-            pipette_name=succeeded_command.params.pipetteName,
-            liquid_presence_detection=succeeded_command.params.liquidPresenceDetection,
-        )
+
         succeed_action = pe_actions.SucceedCommandAction(
             command=succeeded_command,
-            private_result=pipette_config_result,
+            private_result=None,
             state_update=state_update,
         )
 

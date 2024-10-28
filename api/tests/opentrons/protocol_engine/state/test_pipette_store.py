@@ -638,13 +638,10 @@ def test_add_pipette_config(
         pipette_lld_settings={},
     )
 
-    private_result = cmd.LoadPipettePrivateResult(
-        pipette_id="pipette-id", serial_number="pipette-serial", config=config
-    )
     subject.handle_action(
         SucceedCommandAction(
             command=command,
-            private_result=private_result,
+            private_result=None,
             state_update=update_types.StateUpdate(
                 pipette_config=update_types.PipetteConfigUpdate(
                     pipette_id="pipette-id",
