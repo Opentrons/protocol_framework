@@ -72,7 +72,7 @@ class QueueWorker:
             try:
                 await self._command_executor.execute(command_id=command_id)
             except BaseException:
-                log.exception('Unhandled failure in command executor')
+                log.exception("Unhandled failure in command executor")
                 raise
             # Yield to the event loop in case we're executing a long sequence of commands
             # that never yields internally. For example, a long sequence of comment commands.
