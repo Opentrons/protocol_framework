@@ -14,13 +14,12 @@ import {
 } from '@opentrons/components'
 import type { DropdownOption } from '@opentrons/components'
 import { UploadInput } from '../../molecules/UploadInput'
-import { HeaderWithMeter } from '../../molecules/HeaderWithMeter'
 import { useEffect, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { FileUpload } from '../../molecules/FileUpload'
 import { useNavigate } from 'react-router-dom'
-import { chatDataAtom } from '../../resources/atoms'
+import { chatDataAtom, headerWithMeterAtom } from '../../resources/atoms'
 import type { ChatData } from '../../resources/types'
 import { useAtom } from 'jotai'
 
@@ -74,7 +73,7 @@ export function UpdateProtocol(): JSX.Element {
     'protocol_generator'
   )
   const [, setChatData] = useAtom(chatDataAtom)
-  const [progressPercentage, setProgressPercentage] = useState<number>(0.0)
+  const [headerState, setHeaderWithMeterAtom] = useAtom(headerWithMeterAtom)
   const [updateType, setUpdateType] = useState<DropdownOption | null>(null)
   const [detailsValue, setDetailsValue] = useState<string>('')
   const [fileValue, setFile] = useState<File | null>(null)
@@ -95,8 +94,18 @@ export function UpdateProtocol(): JSX.Element {
       progress += 0.34
     }
 
-    setProgressPercentage(progress)
-  }, [updateType, detailsValue, pythonText, errorText, fileValue])
+    setHeaderWithMeterAtom({
+      displayHeaderWithMeter: true,
+      progress,
+    })
+  }, [
+    updateType,
+    detailsValue,
+    pythonText,
+    errorText,
+    fileValue,
+    setHeaderWithMeterAtom,
+  ])
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setDetailsValue(event.target.value)
@@ -128,7 +137,7 @@ export function UpdateProtocol(): JSX.Element {
 
   function processDataAndNavigateToChat(): void {
     const userPrompt = `
-    Modify the following Python code using the Opentrons Python Protocol API v2. Ensure that the new labware and pipettes are compatible with the Flex robot. Ensure that you perform the correct Type of Update use the Details of Changes.
+    Modify the following Python code using the Opentrons Python Protocol API v2. \nEnsure that the new labware and pipettes are compatible with the Flex robot. \nEnsure that you perform the correct Type of Update use the Details of Changes.
 
     Original Python Code:
     \`\`\`python
@@ -154,9 +163,6 @@ export function UpdateProtocol(): JSX.Element {
 
   return (
     <Container>
-      <HeaderWithMeter
-        progressPercentage={progressPercentage}
-      ></HeaderWithMeter>
       <Spacer />
       <ContentBox>
         <HeadingText>{t('update_existing_protocol')}</HeadingText>
@@ -243,7 +249,7 @@ export function UpdateProtocol(): JSX.Element {
           justifyContent={JUSTIFY_END}
         >
           <LargeButton
-            disabled={progressPercentage !== 1.0}
+            disabled={headerState.progress !== 1.0}
             buttonText={t('submit_prompt')}
             onClick={processDataAndNavigateToChat}
           />
