@@ -8,6 +8,13 @@ from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     AspirateProperties as SharedDataAspirateProperties,
     SingleDispenseProperties as SharedDataSingleDispenseProperties,
     MultiDispenseProperties as SharedDataMultiDispenseProperties,
+    DelayProperties as SharedDataDelayProperties,
+    TouchTipProperties as SharedDataTouchTipProperties,
+    MixProperties as SharedDataMixProperties,
+    BlowoutProperties as SharedDataBlowoutProperties,
+    Submerge as SharedDataSubmerge,
+    RetractAspirate as SharedDataRetractAspirate,
+    RetractDispense as SharedDataRetractDispense,
     ByPipetteSetting,
     ByTipTypeSetting,
     BlowoutLocation,
@@ -512,3 +519,143 @@ class LiquidClass:
             _dispense=settings_for_tip[0].singleDispense,
             _multi_dispense=settings_for_tip[0].multiDispense,
         )
+
+
+def _build_delay_properties(
+    delay_properties: SharedDataDelayProperties,
+) -> DelayProperties:
+    if delay_properties.params is not None:
+        duration = delay_properties.params.duration
+    else:
+        duration = None
+    return DelayProperties(enable=delay_properties.enable, duration=duration)
+
+
+def _build_touch_tip_properties(
+    touch_tip_properties: SharedDataTouchTipProperties,
+) -> TouchTipProperties:
+    if touch_tip_properties.params is not None:
+        z_offset = touch_tip_properties.params.zOffset
+        mm_to_edge = touch_tip_properties.params.mmToEdge
+        speed = touch_tip_properties.params.speed
+    else:
+        z_offset = None
+        mm_to_edge = None
+        speed = None
+    return TouchTipProperties(
+        enable=touch_tip_properties.enable,
+        z_offset=z_offset,
+        mm_to_edge=mm_to_edge,
+        speed=speed,
+    )
+
+
+def _build_mix_properties(
+    mix_properties: SharedDataMixProperties,
+) -> MixProperties:
+    if mix_properties.params is not None:
+        repetitions = mix_properties.params.repetitions
+        volume = mix_properties.params.volume
+    else:
+        repetitions = None
+        volume = None
+    return MixProperties(
+        enable=mix_properties.enable, repetitions=repetitions, volume=volume
+    )
+
+
+def _build_blowout_properties(
+    blowout_properties: SharedDataBlowoutProperties,
+) -> BlowoutProperties:
+    if blowout_properties.params is not None:
+        location = blowout_properties.params.location
+        flow_rate = blowout_properties.params.flowRate
+    else:
+        location = None
+        flow_rate = None
+    return BlowoutProperties(
+        enable=blowout_properties.enable, location=location, flow_rate=flow_rate
+    )
+
+
+def _build_submerge(
+    submerge_properties: SharedDataSubmerge,
+) -> Submerge:
+    return Submerge(
+        position_reference=submerge_properties.positionReference,
+        offset=submerge_properties.offset,
+        speed=submerge_properties.speed,
+        delay=_build_delay_properties(submerge_properties.delay),
+    )
+
+
+def _build_retract_aspirate(
+    retract_aspirate: SharedDataRetractAspirate,
+) -> RetractAspirate:
+    return RetractAspirate(
+        position_reference=retract_aspirate.positionReference,
+        offset=retract_aspirate.offset,
+        speed=retract_aspirate.speed,
+        air_gap_by_volume=retract_aspirate.airGapByVolume,
+        touch_tip=_build_touch_tip_properties(retract_aspirate.touchTip),
+        delay=_build_delay_properties(retract_aspirate.delay),
+    )
+
+
+def _build_retract_dispense(
+    retract_dispense: SharedDataRetractDispense,
+) -> RetractDispense:
+    return RetractDispense(
+        position_reference=retract_dispense.positionReference,
+        offset=retract_dispense.offset,
+        speed=retract_dispense.speed,
+        air_gap_by_volume=retract_dispense.airGapByVolume,
+        blowout=_build_blowout_properties(retract_dispense.blowout),
+        touch_tip=_build_touch_tip_properties(retract_dispense.touchTip),
+        delay=_build_delay_properties(retract_dispense.delay),
+    )
+
+
+def build_aspirate_properties(
+    aspirate_properties: SharedDataAspirateProperties,
+) -> AspirateProperties:
+    return AspirateProperties(
+        submerge=_build_submerge(aspirate_properties.submerge),
+        retract=_build_retract_aspirate(aspirate_properties.retract),
+        position_reference=aspirate_properties.positionReference,
+        offset=aspirate_properties.offset,
+        flow_rate_by_volume=aspirate_properties.flowRateByVolume,
+        pre_wet=aspirate_properties.preWet,
+        mix=_build_mix_properties(aspirate_properties.mix),
+        delay=_build_delay_properties(aspirate_properties.delay),
+    )
+
+
+def build_single_dispense_properties(
+    single_dispense_properties: SharedDataSingleDispenseProperties,
+) -> SingleDispenseProperties:
+    return SingleDispenseProperties(
+        submerge=_build_submerge(single_dispense_properties.submerge),
+        retract=_build_retract_dispense(single_dispense_properties.retract),
+        position_reference=single_dispense_properties.positionReference,
+        offset=single_dispense_properties.offset,
+        flow_rate_by_volume=single_dispense_properties.flowRateByVolume,
+        mix=_build_mix_properties(single_dispense_properties.mix),
+        push_out_by_volume=single_dispense_properties.pushOutByVolume,
+        delay=_build_delay_properties(single_dispense_properties.delay),
+    )
+
+
+def build_multi_dispense_properties(
+    multi_dispense_properties: SharedDataMultiDispenseProperties,
+) -> MultiDispenseProperties:
+    return MultiDispenseProperties(
+        submerge=_build_submerge(multi_dispense_properties.submerge),
+        retract=_build_retract_dispense(multi_dispense_properties.retract),
+        position_reference=multi_dispense_properties.positionReference,
+        offset=multi_dispense_properties.offset,
+        flow_rate_by_volume=multi_dispense_properties.flowRateByVolume,
+        conditioning_by_volume=multi_dispense_properties.conditioningByVolume,
+        disposal_by_volume=multi_dispense_properties.disposalByVolume,
+        delay=_build_delay_properties(multi_dispense_properties.delay),
+    )
