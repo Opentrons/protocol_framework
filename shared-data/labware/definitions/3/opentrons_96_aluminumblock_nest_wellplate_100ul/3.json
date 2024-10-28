@@ -1121,6 +1121,27 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "sections": []
+    "sections": [
+      {
+        "shape": "spherical",
+        "radiusOfCurvature": 3.015,
+        "topHeight": 0.2,
+        "bottomHeight": 0.0
+      },
+      {
+        "shape": "conical",
+        "bottomDiameter": 2.16,
+        "topDiameter": 5.26,
+        "topHeight": 0.2,
+        "bottomHeight": 9.89
+      },
+      {
+        "shape": "conical",
+        "bottomDiameter": 5.26,
+        "topDiameter": 5.34,
+        "topHeight": 14.7,
+        "bottomHeight": 9.89
+      }
+    ]
   }
 }
