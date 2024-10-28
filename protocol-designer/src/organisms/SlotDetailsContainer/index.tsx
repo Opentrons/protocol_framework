@@ -105,7 +105,7 @@ export function SlotDetailsContainer(
   return location.pathname === '/designer' && slot !== 'offDeck' ? (
     <RobotCoordsForeignObject
       width="15.8125rem"
-      height="26.75rem"
+      height="32.3125rem"
       x="-400"
       y={getYPosition({ robotType, slot })}
     >

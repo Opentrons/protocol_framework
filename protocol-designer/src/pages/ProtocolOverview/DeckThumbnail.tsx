@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { useSelector } from 'react-redux'
+import { css } from 'styled-components'
 import {
   ALIGN_CENTER,
   BORDERS,
@@ -11,6 +12,7 @@ import {
   RobotCoordinateSpaceWithRef,
   SingleSlotFixture,
   SlotLabels,
+  SPACING,
   StagingAreaFixture,
   WasteChuteFixture,
   WasteChuteStagingAreaFixture,
@@ -99,11 +101,17 @@ export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
       width="100%"
       alignItems={ALIGN_CENTER}
       justifyContent={JUSTIFY_CENTER}
-      backgroundColor={COLORS.grey10}
+      backgroundColor={
+        robotType === OT2_ROBOT_TYPE ? COLORS.white : COLORS.grey10
+      }
       borderRadius={BORDERS.borderRadius8}
+      paddingY={SPACING.spacing24}
+      css={css`
+        outline: green solid 1px;
+      `}
     >
       <RobotCoordinateSpaceWithRef
-        height="80%"
+        height="100%"
         width="100%"
         deckDef={deckDef}
         viewBox={`${deckDef.cornerOffsetFromOrigin[0]} ${
