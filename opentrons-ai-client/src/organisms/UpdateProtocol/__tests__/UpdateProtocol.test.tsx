@@ -6,6 +6,9 @@ import type { NavigateFunction } from 'react-router-dom'
 import { UpdateProtocol } from '../index'
 import { i18n } from '../../../i18n'
 
+// global.Blob = BlobPolyfill as any
+global.Blob = require('node:buffer').Blob
+
 const mockNavigate = vi.fn()
 const mockUseTrackEvent = vi.fn()
 const mockUseChatData = vi.fn()
@@ -13,6 +16,8 @@ const mockUseChatData = vi.fn()
 vi.mock('../../../resources/hooks/useTrackEvent', () => ({
   useTrackEvent: () => mockUseTrackEvent,
 }))
+
+File.prototype.text = vi.fn().mockResolvedValue('test file content')
 
 vi.mock('../../../resources/chatDataAtom', () => ({
   chatDataAtom: () => mockUseChatData,
@@ -50,7 +55,7 @@ describe('Update Protocol', () => {
     ).toBeInTheDocument()
   })
 
-  it.skip('should update the file value when the file is uploaded', async () => {
+  it('should update the file value when the file is uploaded', async () => {
     render()
 
     const blobParts: BlobPart[] = [
@@ -74,15 +79,47 @@ describe('Update Protocol', () => {
     })
   })
 
-  it.skip('should have the submit prompt button disabled when the progress percentage is not 1.0', () => {
+  it('should not proceed when you click the submit prompt when the progress percentage is not 1.0', () => {
     render()
-    expect(screen.getByText('Submit prompt')).toBeDisabled()
+    expect(mockNavigate).not.toHaveBeenCalled()
   })
 
-  it.skip('should call navigate to the chat page when the submit prompt button is clicked', () => {
+  it.skip('should call navigate to the chat page when the submit prompt button is clicked when progress is 1.0', async () => {
     render()
+
+    // upload file
+    const blobParts: BlobPart[] = [
+      'x = 1\n',
+      'x = 2\n',
+      'x = 3\n',
+      'x = 4\n',
+      'print("x is 1.")\n',
+    ]
+    const file = new File(blobParts, 'test-file.py', { type: 'text/python' })
+    fireEvent.drop(screen.getByTestId('file_drop_zone'), {
+      dataTransfer: {
+        files: [file],
+      },
+    })
+
+    // input description
+    const describeInput = screen.getByRole('textbox')
+    fireEvent.change(describeInput, { target: { value: 'Test description' } })
+
+    expect(screen.getByDisplayValue('Test description')).toBeInTheDocument()
+
+    // select update type
+    const applicationDropdown = screen.getByText('Select an option')
+    fireEvent.click(applicationDropdown)
+
+    const basicOtherOption = screen.getByText('Other')
+    fireEvent.click(basicOtherOption)
+
     const submitPromptButton = screen.getByText('Submit prompt')
-    submitPromptButton.click()
+    await waitFor(() => {
+      expect(submitPromptButton).toBeEnabled()
+      submitPromptButton.click()
+    })
     expect(mockNavigate).toHaveBeenCalledWith('/chat')
   })
 })
