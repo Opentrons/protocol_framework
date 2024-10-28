@@ -35,7 +35,7 @@ export function RobotCoordinateSpaceWithRef(
     )
 
     // Add padding to prevent clipping and better center the content
-    const PADDING = 20
+    const PADDING = deckDef.otId === 'ot2_standard' ? 5 : 20
     wholeDeckViewBox = `${viewBoxOriginX - PADDING} ${
       viewBoxOriginY - PADDING
     } ${deckXDimension + PADDING * 2} ${deckYDimension + PADDING * 2}`
