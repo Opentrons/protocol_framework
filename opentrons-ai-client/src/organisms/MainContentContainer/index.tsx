@@ -1,5 +1,4 @@
 import { useRef, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { useAtom } from 'jotai'
 
@@ -8,7 +7,6 @@ import {
   Flex,
   OVERFLOW_AUTO,
   SPACING,
-  LegacyStyledText,
 } from '@opentrons/components'
 import { PromptGuide } from '../../molecules/PromptGuide'
 import { ChatDisplay } from '../../molecules/ChatDisplay'
@@ -16,7 +14,6 @@ import { ChatFooter } from '../../molecules/ChatFooter'
 import { chatDataAtom } from '../../resources/atoms'
 
 export function MainContentContainer(): JSX.Element {
-  const { t } = useTranslation('protocol_generator')
   const [chatData] = useAtom(chatDataAtom)
   const scrollRef = useRef<HTMLSpanElement | null>(null)
 
