@@ -14,7 +14,7 @@ def create_trials_parameter(parameters: ParameterContext) -> None:
         display_name="Number of Trials",
         minimum=1,
         maximum=100,
-        default=5,
+        default=3,
     )
 
 

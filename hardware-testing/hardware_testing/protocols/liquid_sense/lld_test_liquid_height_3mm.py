@@ -75,7 +75,7 @@ SLOT_DIAL = "B3"
 ###########################################
 
 
-metadata = {"protocolName": "lld-test-liquid-height-3mm-large-vols"}
+metadata = {"protocolName": "lld-test-liquid-height-3mm-FIXED-TUBES"}
 requirements = {"robotType": "Flex", "apiLevel": "2.20"}
 
 
@@ -158,7 +158,7 @@ def _setup(
 
     if tube_volume == 15:
         # Replace volumes with 15 ml volumes
-        VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [16262.0, 6965.67, 25.4, 0.0]
+        VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [25.4, 6965.67, 16262.0,  0.0]
         VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] = [15956.6, 40.8, 0.0]
     
     volumes = VOLUMES_3MM_TOP_BOTTOM[labware.load_name]
@@ -218,15 +218,18 @@ def _get_test_wells(labware: Labware, channels: int, tube_volume: int, total_tes
     well_names = []
     try:
         if tube_volume == 15:
-            print(channels)
-            TEST_WELLS[channels]["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] == ["A1", "B1", "C1", "A2", "B2", "C2"]
-            TEST_WELLS[channels]["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] == ["A1", "B1", "C1", "A2", "B2", "C2"]
+            print("cHANGING LABWARE WELLS")
+            
+            TEST_WELLS[channels]["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = ["A1", "B1", "C1", "A2", "B2", "C2"]
+            TEST_WELLS[channels]["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] = ["A1", "B1", "C1", "A2", "B2", "C2"]
             well_names = TEST_WELLS[channels][labware.load_name]
+            print(TEST_WELLS[channels][labware.load_name])
         else:
             well_names = TEST_WELLS[channels][labware.load_name]
     except KeyError:
         well_names = [str(well_name).split(" ")[0].replace(" ", "") for well_name in labware.wells()]
         print(len(well_names))
+    print(well_names)
     amount_of_well_names = len(well_names)
     if amount_of_well_names < total_test_wells:
         wells_needed = total_test_wells - amount_of_well_names
@@ -389,10 +392,11 @@ def _test_for_finding_liquid_height(
                     # dispense
                     if did_air_gap:
                         liquid_pipette.dispense(5, well.top(5))
-                    if volume < well.max_volume * 0.5:
-                        dispense_loc = well.bottom(3 + DISPENSE_MM_FROM_MENISCUS)
-                    else:
+                    # default will be to dispense from top
+                    if volume > well.max_volume * 0.5:
                         dispense_loc = well.top(-3 + DISPENSE_MM_FROM_MENISCUS)
+                    else:
+                        dispense_loc = well.bottom(3 + DISPENSE_MM_FROM_MENISCUS)
                     liquid_pipette.dispense(transfer_vol, dispense_loc)
                     total_vol_in_tube += transfer_vol
                     ctx.delay(seconds=1.5)
@@ -458,7 +462,7 @@ def run(ctx: ProtocolContext) -> None:
     try:
         if tube_volume == 15:
             # Replace volumes with 15 ml volumes
-            VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [15191.0, 6154.7, 27.2, 0.0]
+            VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [25.4, 6965.67, 16262.0, 0.0]
             VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] = [15956.6, 40.8, 0.0]
         volumes = VOLUMES_3MM_TOP_BOTTOM[labware.load_name]
     except KeyError:
