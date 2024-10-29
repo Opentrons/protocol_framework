@@ -1,7 +1,7 @@
 import type * as React from 'react'
 import { fireEvent, screen } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
-import { describe, it, vi, beforeEach, expect, Mock } from 'vitest'
+import { describe, it, vi, beforeEach, expect } from 'vitest'
 import { renderWithProviders } from '/app/__testing-utils__'
 import { useAcknowledgeEstopDisengageMutation } from '@opentrons/react-api-client'
 

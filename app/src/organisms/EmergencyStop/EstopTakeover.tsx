@@ -35,7 +35,7 @@ export function EstopTakeover({ robotName }: EstopTakeoverProps): JSX.Element {
   useEffect(() => {
     if (estopStatus) {
       setEstopState(estopStatus.data.status)
-      setShowEmergencyStopModal(estopStatus.data.status != DISENGAGED || isWaitingForResumeOperation)
+      setShowEmergencyStopModal(estopStatus.data.status !== DISENGAGED || isWaitingForResumeOperation)
     }
   }, [estopStatus])
 
