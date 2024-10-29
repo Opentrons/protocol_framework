@@ -153,6 +153,8 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                 absolute_point=location.point,
                 is_meniscus=is_meniscus,
             )
+            if well_location.origin == WellOrigin.MENISCUS:
+                well_location.volumeOffset = "operationVolume"
             pipette_movement_conflict.check_safe_for_pipette_movement(
                 engine_state=self._engine_client.state,
                 pipette_id=self._pipette_id,

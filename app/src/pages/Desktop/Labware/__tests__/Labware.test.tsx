@@ -121,6 +121,9 @@ describe('Labware', () => {
     screen.getByRole('button', { name: 'Tube Rack' })
     screen.getByRole('button', { name: 'Reservoir' })
     screen.getByRole('button', { name: 'Aluminum Block' })
+    screen.getByRole('button', { name: 'Adapter' })
+    screen.getByRole('button', { name: 'Lid' })
+    screen.getByRole('button', { name: 'Custom Labware' })
   })
   it('renders changes filter menu button when an option is selected', () => {
     render()

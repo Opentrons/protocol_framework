@@ -141,7 +141,6 @@ from .load_pipette import (
     LoadPipetteCreate,
     LoadPipetteResult,
     LoadPipetteCommandType,
-    LoadPipettePrivateResult,
 )
 
 from .move_labware import (
@@ -272,7 +271,6 @@ from .configure_for_volume import (
     ConfigureForVolumeCreate,
     ConfigureForVolumeResult,
     ConfigureForVolumeCommandType,
-    ConfigureForVolumePrivateResult,
 )
 
 from .prepare_to_aspirate import (
@@ -706,15 +704,6 @@ CommandResult = Union[
     unsafe.UnsafePlaceLabwareResult,
 ]
 
-# todo(mm, 2024-06-12): Ideally, command return types would have specific
-# CommandPrivateResults paired with specific CommandResults. For example,
-# a TouchTipResult can never be paired with a LoadPipettePrivateResult in practice,
-# and ideally our types would reflect that.
-CommandPrivateResult = Union[
-    None,
-    LoadPipettePrivateResult,
-    ConfigureForVolumePrivateResult,
-]
 
 # All `DefinedErrorData`s that implementations will actually return in practice.
 CommandDefinedErrorData = Union[

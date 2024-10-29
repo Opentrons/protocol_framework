@@ -45,7 +45,7 @@ class BlowOutInPlaceResult(BaseModel):
 
 
 _ExecuteReturn = Union[
-    SuccessData[BlowOutInPlaceResult, None],
+    SuccessData[BlowOutInPlaceResult],
     DefinedErrorData[OverpressureError],
 ]
 
@@ -99,7 +99,9 @@ class BlowOutInPlaceImplementation(
                 ),
             )
         else:
-            return SuccessData(public=BlowOutInPlaceResult(), private=None)
+            return SuccessData(
+                public=BlowOutInPlaceResult(),
+            )
 
 
 class BlowOutInPlace(

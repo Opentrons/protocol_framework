@@ -43,6 +43,7 @@ describe('LiquidDetails', () => {
     vi.mocked(getLocationInfoNames).mockReturnValue({
       slotName: '4',
       labwareName: 'mock labware name',
+      labwareQuantity: 1,
     })
     vi.mocked(LiquidsLabwareDetailsModal).mockReturnValue(<div>mock modal</div>)
   })

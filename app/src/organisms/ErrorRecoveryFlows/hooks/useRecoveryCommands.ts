@@ -5,10 +5,12 @@ import {
   useResumeRunFromRecoveryMutation,
   useStopRunMutation,
   useUpdateErrorRecoveryPolicy,
+  useResumeRunFromRecoveryAssumingFalsePositiveMutation,
 } from '@opentrons/react-api-client'
 
 import { useChainRunCommands } from '/app/resources/runs'
-import { RECOVERY_MAP } from '../constants'
+import { ERROR_KINDS, RECOVERY_MAP } from '../constants'
+import { getErrorKind } from '/app/organisms/ErrorRecoveryFlows/utils'
 
 import type {
   CreateCommand,
@@ -23,7 +25,9 @@ import type {
 } from '@opentrons/shared-data'
 import type {
   CommandData,
+  IfMatchType,
   RecoveryPolicyRulesParams,
+  RunAction,
 } from '@opentrons/api-client'
 import type { WellGroup } from '@opentrons/components'
 import type { FailedCommand, RecoveryRoute, RouteStep } from '../types'
@@ -63,7 +67,7 @@ export interface UseRecoveryCommandsResult {
   /* A non-terminal recovery command */
   releaseGripperJaws: () => Promise<CommandData[]>
   /* A non-terminal recovery command */
-  homeGripperZAxis: () => Promise<CommandData[]>
+  updatePositionEstimatorsAndHomeGripper: () => Promise<CommandData[]>
   /* A non-terminal recovery command */
   moveLabwareWithoutPause: () => Promise<CommandData[]>
 }
@@ -89,6 +93,9 @@ export function useRecoveryCommands({
   const {
     mutateAsync: resumeRunFromRecovery,
   } = useResumeRunFromRecoveryMutation()
+  const {
+    mutateAsync: resumeRunFromRecoveryAssumingFalsePositive,
+  } = useResumeRunFromRecoveryAssumingFalsePositiveMutation()
   const { stopRun } = useStopRunMutation()
   const {
     mutateAsync: updateErrorRecoveryPolicy,
@@ -198,9 +205,16 @@ export function useRecoveryCommands({
   const handleIgnoringErrorKind = useCallback((): Promise<void> => {
     if (ignoreErrors) {
       if (failedCommandByRunRecord?.error != null) {
+        const ifMatch: IfMatchType = isAssumeFalsePositiveResumeKind(
+          failedCommandByRunRecord
+        )
+          ? 'assumeFalsePositiveAndContinue'
+          : 'ignoreAndContinue'
+
         const ignorePolicyRules = buildIgnorePolicyRules(
           failedCommandByRunRecord.commandType,
-          failedCommandByRunRecord.error.errorType
+          failedCommandByRunRecord.error.errorType,
+          ifMatch
         )
 
         return updateErrorRecoveryPolicy(ignorePolicyRules)
@@ -247,9 +261,17 @@ export function useRecoveryCommands({
     stopRun(runId)
   }, [runId])
 
+  const handleResumeAction = (): Promise<RunAction> => {
+    if (isAssumeFalsePositiveResumeKind(failedCommandByRunRecord)) {
+      return resumeRunFromRecoveryAssumingFalsePositive(runId)
+    } else {
+      return resumeRunFromRecovery(runId)
+    }
+  }
+
   const skipFailedCommand = useCallback((): void => {
     void handleIgnoringErrorKind().then(() =>
-      resumeRunFromRecovery(runId).then(() => {
+      handleResumeAction().then(() => {
         analytics.reportActionSelectedResult(
           selectedRecoveryOption,
           'succeeded'
@@ -269,8 +291,13 @@ export function useRecoveryCommands({
     return chainRunRecoveryCommands([RELEASE_GRIPPER_JAW])
   }, [chainRunRecoveryCommands])
 
-  const homeGripperZAxis = useCallback((): Promise<CommandData[]> => {
-    return chainRunRecoveryCommands([HOME_GRIPPER_Z_AXIS])
+  const updatePositionEstimatorsAndHomeGripper = useCallback((): Promise<
+    CommandData[]
+  > => {
+    return chainRunRecoveryCommands([
+      UPDATE_ESTIMATORS_EXCEPT_PLUNGERS,
+      HOME_GRIPPER_Z,
+    ])
   }, [chainRunRecoveryCommands])
 
   const moveLabwareWithoutPause = useCallback((): Promise<CommandData[]> => {
@@ -291,10 +318,24 @@ export function useRecoveryCommands({
     homePipetteZAxes,
     pickUpTips,
     releaseGripperJaws,
-    homeGripperZAxis,
+    updatePositionEstimatorsAndHomeGripper,
     moveLabwareWithoutPause,
     skipFailedCommand,
     ignoreErrorKindThisRun,
+  }
+}
+
+export function isAssumeFalsePositiveResumeKind(
+  failedCommandByRunRecord: UseRecoveryCommandsParams['failedCommandByRunRecord']
+): boolean {
+  const errorKind = getErrorKind(failedCommandByRunRecord)
+
+  switch (errorKind) {
+    case ERROR_KINDS.TIP_NOT_DETECTED:
+    case ERROR_KINDS.TIP_DROP_FAILED:
+      return true
+    default:
+      return false
   }
 }
 
@@ -310,10 +351,15 @@ export const RELEASE_GRIPPER_JAW: CreateCommand = {
   intent: 'fixit',
 }
 
-export const HOME_GRIPPER_Z_AXIS: CreateCommand = {
+// in case the gripper does not know the position after a stall/collision we must update the position.
+export const UPDATE_ESTIMATORS_EXCEPT_PLUNGERS: CreateCommand = {
+  commandType: 'unsafe/updatePositionEstimators',
+  params: { axes: ['x', 'y', 'extensionZ'] },
+}
+
+export const HOME_GRIPPER_Z: CreateCommand = {
   commandType: 'home',
   params: { axes: ['extensionZ'] },
-  intent: 'fixit',
 }
 
 const buildMoveLabwareWithoutPause = (
@@ -362,13 +408,14 @@ export const buildPickUpTips = (
 
 export const buildIgnorePolicyRules = (
   commandType: FailedCommand['commandType'],
-  errorType: string
+  errorType: string,
+  ifMatch: IfMatchType
 ): RecoveryPolicyRulesParams => {
   return [
     {
       commandType,
       errorType,
-      ifMatch: 'ignoreAndContinue',
+      ifMatch,
     },
   ]
 }

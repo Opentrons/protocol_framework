@@ -12,6 +12,7 @@ from opentrons_shared_data.errors.exceptions import (
 )
 
 from opentrons.protocol_engine.commands.command import SuccessData
+from opentrons.protocol_engine.notes import make_error_recovery_debug_note
 
 from ..state.state import StateStore
 from ..resources import ModelUtils, FileProvider
@@ -161,6 +162,12 @@ class CommandExecutor:
             elif not isinstance(error, EnumeratedError):
                 error = PythonException(error)
 
+            error_recovery_type = error_recovery_policy(
+                self._state_store.config,
+                running_command,
+                None,
+            )
+            note_tracker(make_error_recovery_debug_note(error_recovery_type))
             self._action_dispatcher.dispatch(
                 FailCommandAction(
                     error=error,
@@ -169,11 +176,7 @@ class CommandExecutor:
                     error_id=self._model_utils.generate_id(),
                     failed_at=self._model_utils.get_timestamp(),
                     notes=note_tracker.get_notes(),
-                    type=error_recovery_policy(
-                        self._state_store.config,
-                        running_command,
-                        None,
-                    ),
+                    type=error_recovery_type,
                 )
             )
 
@@ -189,12 +192,17 @@ class CommandExecutor:
                 self._action_dispatcher.dispatch(
                     SucceedCommandAction(
                         command=succeeded_command,
-                        private_result=result.private,
                         state_update=result.state_update,
                     ),
                 )
             else:
                 # The command encountered a defined error.
+                error_recovery_type = error_recovery_policy(
+                    self._state_store.config,
+                    running_command,
+                    result,
+                )
+                note_tracker(make_error_recovery_debug_note(error_recovery_type))
                 self._action_dispatcher.dispatch(
                     FailCommandAction(
                         error=result,
@@ -203,10 +211,6 @@ class CommandExecutor:
                         error_id=result.public.id,
                         failed_at=result.public.createdAt,
                         notes=note_tracker.get_notes(),
-                        type=error_recovery_policy(
-                            self._state_store.config,
-                            running_command,
-                            result,
-                        ),
+                        type=error_recovery_type,
                     )
                 )

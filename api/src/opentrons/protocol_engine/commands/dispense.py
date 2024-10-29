@@ -8,7 +8,7 @@ from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
 from pydantic import Field
 
 from ..types import DeckPoint
-from ..state.update_types import StateUpdate
+from ..state.update_types import StateUpdate, CLEAR
 from .pipetting_common import (
     PipetteIdMixin,
     DispenseVolumeMixin,
@@ -54,7 +54,7 @@ class DispenseResult(BaseLiquidHandlingResult, DestinationPositionResult):
 
 
 _ExecuteReturn = Union[
-    SuccessData[DispenseResult, None],
+    SuccessData[DispenseResult],
     DefinedErrorData[OverpressureError],
 ]
 
@@ -107,6 +107,11 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
                 push_out=params.pushOut,
             )
         except PipetteOverpressureError as e:
+            state_update.set_liquid_operated(
+                labware_id=labware_id,
+                well_name=well_name,
+                volume_added=CLEAR,
+            )
             return DefinedErrorData(
                 public=OverpressureError(
                     id=self._model_utils.generate_id(),
@@ -123,9 +128,13 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
                 state_update=state_update,
             )
         else:
+            state_update.set_liquid_operated(
+                labware_id=labware_id,
+                well_name=well_name,
+                volume_added=volume,
+            )
             return SuccessData(
                 public=DispenseResult(volume=volume, position=deck_point),
-                private=None,
                 state_update=state_update,
             )
 

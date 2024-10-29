@@ -76,7 +76,6 @@ async def test_blow_out_implementation(
 
     assert result == SuccessData(
         public=BlowOutResult(position=DeckPoint(x=1, y=2, z=3)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="pipette-id",

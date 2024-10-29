@@ -61,7 +61,6 @@ async def test_move_to_well_implementation(
 
     assert result == SuccessData(
         public=MoveToWellResult(position=DeckPoint(x=9, y=8, z=7)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="abc",
