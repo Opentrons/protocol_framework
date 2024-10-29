@@ -135,7 +135,9 @@ export const reduxActionToAnalyticsEvent = (
   if (action.type === 'COMPUTE_ROBOT_STATE_TIMELINE_SUCCESS') {
     const generatedTimeline: Timeline = action.payload.standardTimeline
     const { errors, timeline } = generatedTimeline
-    const warnings = timeline.filter(t => t.warnings)
+    const warnings = timeline
+      .filter(t => t.warnings != null)
+      .flatMap(state => state.warnings!)
     if (errors != null) {
       const errorTypes = errors.map(error => error.type)
 
@@ -169,7 +171,7 @@ export const trackEventMiddleware: Middleware<BaseState, any> = ({
 
   const optedIn = getHasOptedIn(state as BaseState) ?? false
   const event = reduxActionToAnalyticsEvent(state as BaseState, action)
-  console.log('event', event)
+
   if (event != null) {
     // actually report to analytics (trackEvent is responsible for using optedIn)
     trackEvent(event, optedIn)
