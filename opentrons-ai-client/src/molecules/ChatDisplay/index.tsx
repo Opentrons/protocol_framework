@@ -19,6 +19,7 @@ import {
   LegacyStyledText,
   TYPOGRAPHY,
   OVERFLOW_AUTO,
+  StyledText,
 } from '@opentrons/components'
 
 import type { ChatData } from '../../resources/types'
@@ -46,23 +47,18 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
   }
 
   return (
-    <Flex
-      flexDirection={DIRECTION_COLUMN}
-      gridGap={SPACING.spacing12}
-      paddingLeft={isUser ? SPACING.spacing40 : undefined}
-      paddingRight={isUser ? undefined : SPACING.spacing40}
-    >
+    <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
       <Flex justifyContent={isUser ? JUSTIFY_FLEX_END : JUSTIFY_FLEX_START}>
-        <LegacyStyledText>
+        <StyledText paddingTop="12px">
           {isUser ? t('you') : t('opentronsai')}
-        </LegacyStyledText>
+        </StyledText>
       </Flex>
       {/* text should be markdown so this component will have a package or function to parse markdown */}
       <Flex
         padding={SPACING.spacing32}
         backgroundColor={isUser ? COLORS.blue30 : COLORS.grey30}
         data-testid={`ChatDisplay_from_${isUser ? 'user' : 'backend'}`}
-        borderRadius={BORDERS.borderRadius12}
+        borderRadius={isUser ? '12px 12px 0 12px' : '12px 12px 12px 0'}
         width="100%"
         overflowY={OVERFLOW_AUTO}
         flexDirection={DIRECTION_COLUMN}

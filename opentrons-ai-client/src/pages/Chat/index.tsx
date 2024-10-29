@@ -1,15 +1,6 @@
 import { useForm, FormProvider } from 'react-hook-form'
-import {
-  DIRECTION_COLUMN,
-  DIRECTION_ROW,
-  Flex,
-  JUSTIFY_CENTER,
-  OVERFLOW_AUTO,
-  POSITION_RELATIVE,
-  SPACING,
-} from '@opentrons/components'
+import { DIRECTION_COLUMN, Flex, SPACING } from '@opentrons/components'
 
-import { MainContentContainer } from '../../organisms/MainContentContainer'
 import { useAtom } from 'jotai'
 import { useRef, useEffect } from 'react'
 import { chatDataAtom } from '../../resources/atoms'
@@ -17,6 +8,7 @@ import { ChatDisplay } from '../../molecules/ChatDisplay'
 import { ChatFooter } from '../../molecules/ChatFooter'
 import { PromptGuide } from '../../molecules/PromptGuide'
 import styled from 'styled-components'
+import { Footer } from '../../molecules/Footer'
 
 export interface InputType {
   userPrompt: string
@@ -43,38 +35,35 @@ export function Chat(): JSX.Element | null {
 
   return (
     <FormProvider {...methods}>
-      <Flex flexDirection={DIRECTION_ROW}>
+      <Flex
+        padding={`${SPACING.spacing40} ${SPACING.spacing40} ${SPACING.spacing20}`}
+        flexDirection={DIRECTION_COLUMN}
+        gridGap={SPACING.spacing12}
+        height="50vh"
+        width="100%"
+      >
         <Flex
-          padding={`${SPACING.spacing40} ${SPACING.spacing40} ${SPACING.spacing20}`}
-          flexDirection={DIRECTION_COLUMN}
-          gridGap={SPACING.spacing40}
-          height="85vh"
           width="100%"
+          flexDirection={DIRECTION_COLUMN}
+          gridGap={SPACING.spacing24}
         >
-          <Flex
-            width="100%"
-            overflowY={OVERFLOW_AUTO}
-            flexDirection={DIRECTION_COLUMN}
-            flexGrow="1"
-            gridGap={SPACING.spacing12}
-          >
-            <PromptGuide />
+          <PromptGuide />
 
-            <ChatDataContainer>
-              {chatData.length > 0
-                ? chatData.map((chat, index) => (
-                    <ChatDisplay
-                      key={`prompt-from_${chat.role}_${index}`}
-                      chat={chat}
-                      chatId={`${chat.role}_${index}`}
-                    />
-                  ))
-                : null}
-            </ChatDataContainer>
-            <span ref={scrollRef} />
-          </Flex>
-          <ChatFooter />
+          <ChatDataContainer>
+            {chatData.length > 0
+              ? chatData.map((chat, index) => (
+                  <ChatDisplay
+                    key={`prompt-from_${chat.role}_${index}`}
+                    chat={chat}
+                    chatId={`${chat.role}_${index}`}
+                  />
+                ))
+              : null}
+          </ChatDataContainer>
+          <span ref={scrollRef} />
         </Flex>
+        <ChatFooter />
+        <Footer></Footer>
       </Flex>
     </FormProvider>
   )
