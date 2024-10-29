@@ -237,6 +237,7 @@ class OT3PipetteHandler:
                 "back_compat_names",
                 "supported_tips",
                 "lld_settings",
+                "plunger_positions",
             ]
 
             instr_dict = instr.as_dict()
@@ -282,6 +283,12 @@ class OT3PipetteHandler:
                 "pipette_bounding_box_offsets"
             ] = instr.config.pipette_bounding_box_offsets
             result["lld_settings"] = instr.config.lld_settings
+            result["plunger_positions"] = {
+                "top": instr.plunger_positions.top,
+                "bottom": instr.plunger_positions.bottom,
+                "blow_out": instr.plunger_positions.blow_out,
+                "drop_tip": instr.plunger_positions.drop_tip,
+            }
         return cast(PipetteDict, result)
 
     @property
