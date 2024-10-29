@@ -5,6 +5,7 @@ import {
   JUSTIFY_FLEX_END,
   LargeButton,
   SPACING,
+  StyledText,
 } from '@opentrons/components'
 import { useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -37,6 +38,7 @@ export function InstrumentsSection(): JSX.Element | null {
 
   const isOtherPipettesSelected =
     watch('instruments.pipettes') === 'other-pipettes'
+  const isOpentronsOT2Selected = watch('instruments.robot') === 'opentrons-ot2'
 
   function handleConfirmButtonClick(): void {
     const step =
@@ -100,16 +102,23 @@ export function InstrumentsSection(): JSX.Element | null {
         defaultValue="opentrons-flex"
       />
 
-      <PipettesSection>
-        <ControlledRadioButtonGroup
-          radioButtons={pipetteOptions}
-          title="What pipettes would you like to use?"
-          name={'instruments.pipettes'}
-          defaultValue="96-channel-1000ul-pipette"
-        />
+      <PipettesSection isOpentronsOT2Selected={isOpentronsOT2Selected}>
+        {!isOpentronsOT2Selected && (
+          <ControlledRadioButtonGroup
+            radioButtons={pipetteOptions}
+            title="What pipettes would you like to use?"
+            name={'instruments.pipettes'}
+            defaultValue="96-channel-1000ul-pipette"
+          />
+        )}
 
-        {isOtherPipettesSelected && (
-          <PipettesDropdown>
+        {(isOtherPipettesSelected || isOpentronsOT2Selected) && (
+          <PipettesDropdown isOpentronsOT2Selected={isOpentronsOT2Selected}>
+            {isOpentronsOT2Selected && (
+              <StyledText desktopStyle="bodyDefaultSemiBold">
+                What instruments would you like to use?
+              </StyledText>
+            )}
             <ControlledDropdownMenu
               width="100%"
               dropdownType="neutral"
@@ -128,12 +137,14 @@ export function InstrumentsSection(): JSX.Element | null {
         )}
       </PipettesSection>
 
-      <ControlledRadioButtonGroup
-        radioButtons={flexGripperOptions}
-        title="Do you want to use the Flex Gripper?"
-        name={'instruments.flex-gripper'}
-        defaultValue="flex-gripper"
-      />
+      {!isOpentronsOT2Selected && (
+        <ControlledRadioButtonGroup
+          radioButtons={flexGripperOptions}
+          title="Do you want to use the Flex Gripper?"
+          name={'instruments.flex-gripper'}
+          defaultValue="flex-gripper"
+        />
+      )}
 
       <ButtonContainer>
         <LargeButton
@@ -151,14 +162,20 @@ const ButtonContainer = styled.div`
   justify-content: ${JUSTIFY_FLEX_END};
 `
 
-const PipettesDropdown = styled.div`
+const PipettesDropdown = styled.div<{ isOpentronsOT2Selected?: boolean }>`
   display: flex;
   flex-direction: column;
-  gap: ${SPACING.spacing8};
+  gap: ${props =>
+    props.isOpentronsOT2Selected ?? false
+      ? SPACING.spacing16
+      : SPACING.spacing8};
 `
 
-const PipettesSection = styled.div`
+const PipettesSection = styled.div<{ isOpentronsOT2Selected?: boolean }>`
   display: flex;
   flex-direction: column;
-  gap: ${SPACING.spacing8};
+  gap: ${props =>
+    props.isOpentronsOT2Selected ?? false
+      ? SPACING.spacing16
+      : SPACING.spacing8};
 `

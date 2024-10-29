@@ -39,7 +39,7 @@ describe('ApplicationSection', () => {
     expect(screen.getByText('Confirm')).toBeInTheDocument()
   })
 
-  it('should not render left and right mount dropdowns if other pipettes option is not selected', () => {
+  it('should not render left and right mount dropdowns if other pipettes option or Opentrons OT-2 robot is not selected', () => {
     render()
 
     expect(screen.queryByText('Left mount')).not.toBeInTheDocument()
@@ -57,6 +57,39 @@ describe('ApplicationSection', () => {
 
     expect(screen.getByText('Left mount')).toBeInTheDocument()
     expect(screen.getByText('Right mount')).toBeInTheDocument()
+  })
+
+  it('should render left and right mount dropdowns if Opentrons OT-2 is selected', () => {
+    render()
+
+    expect(
+      screen.queryByText('What instruments would you like to use?')
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText('Left mount')).not.toBeInTheDocument()
+    expect(screen.queryByText('Right mount')).not.toBeInTheDocument()
+
+    const ot2Radio = screen.getByLabelText('Opentrons OT-2')
+    fireEvent.click(ot2Radio)
+
+    expect(
+      screen.getByText('What instruments would you like to use?')
+    ).toBeInTheDocument()
+    expect(screen.getByText('Left mount')).toBeInTheDocument()
+    expect(screen.getByText('Right mount')).toBeInTheDocument()
+  })
+
+  it('should not render pipettes and flex gripper radio buttons if Opentrons OT-2 is selected', () => {
+    render()
+
+    const ot2Radio = screen.getByLabelText('Opentrons OT-2')
+    fireEvent.click(ot2Radio)
+
+    expect(
+      screen.queryByText('What pipettes would you like to use?')
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('Do you want to use the Flex Gripper?')
+    ).not.toBeInTheDocument()
   })
 
   // it('should enable confirm button when all fields are filled', async () => {
