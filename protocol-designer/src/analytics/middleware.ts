@@ -4,7 +4,7 @@ import {
   getPipetteEntities,
   getSavedStepForms,
 } from '../step-forms/selectors'
-import { getFileMetadata } from '../file-data/selectors'
+import { getFileMetadata, getRobotStateTimeline } from '../file-data/selectors'
 import { trackEvent } from './mixpanel'
 import { getHasOptedIn } from './selectors'
 import { flattenNestedProperties } from './utils/flattenNestedProperties'
@@ -15,6 +15,8 @@ import type { StepArgsAndErrors } from '../steplist'
 import type { SaveStepFormAction } from '../ui/steps/actions/thunks'
 import type { AnalyticsEventAction } from './actions'
 import type { AnalyticsEvent } from './mixpanel'
+import { getTimelineWarningsForSelectedStep } from '../top-selectors/timelineWarnings'
+import { CommandCreatorError, Timeline } from '@opentrons/step-generation'
 
 // Converts Redux actions to analytics events (read: Mixpanel events).
 // Returns null if there is no analytics event associated with the action,
@@ -27,6 +29,7 @@ export const reduxActionToAnalyticsEvent = (
     // create the "saveStep" action, taking advantage of the formToArgs machinery
     // to get nice cleaned-up data instead of the raw form data.
     const a: SaveStepFormAction = action
+
     const argsAndErrors: StepArgsAndErrors = getArgsAndErrorsByStepId(state)[
       a.payload.id
     ]
@@ -129,6 +132,25 @@ export const reduxActionToAnalyticsEvent = (
       properties: {},
     }
   }
+  if (action.type === 'COMPUTE_ROBOT_STATE_TIMELINE_SUCCESS') {
+    const generatedTimeline: Timeline = action.payload.standardTimeline
+    const { errors, timeline } = generatedTimeline
+    const warnings = timeline.filter(t => t.warnings)
+    if (errors != null) {
+      const errorTypes = errors.map(error => error.type)
+
+      return {
+        name: 'timelineErrors',
+        properties: { errorTypes },
+      }
+    }
+    if (warnings.length > 0) {
+      return {
+        name: 'timelineWarnings',
+        properties: { warnings },
+      }
+    }
+  }
   if (action.type === 'ANALYTICS_EVENT') {
     const a: AnalyticsEventAction = action
     return a.payload
@@ -147,6 +169,7 @@ export const trackEventMiddleware: Middleware<BaseState, any> = ({
 
   const optedIn = getHasOptedIn(state as BaseState) ?? false
   const event = reduxActionToAnalyticsEvent(state as BaseState, action)
+  console.log('event', event)
   if (event != null) {
     // actually report to analytics (trackEvent is responsible for using optedIn)
     trackEvent(event, optedIn)
