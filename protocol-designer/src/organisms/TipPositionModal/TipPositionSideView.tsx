@@ -36,8 +36,8 @@ export function TipPositionSideView(
     ? roundedPixelsFromBottom * 2
     : mmFromBottom - WELL_HEIGHT_PIXELS
 
-  const xPx = (WELL_WIDTH_PIXELS / xWidthMm) * xPosition
-  const roundedXPx = round(xPx, PIXEL_DECIMALS)
+  const xPositionPixels = (WELL_WIDTH_PIXELS / xWidthMm) * xPosition
+  const roundedXPositionPixels = round(xPositionPixels, PIXEL_DECIMALS)
 
   return (
     <Box
@@ -51,7 +51,7 @@ export function TipPositionSideView(
         src={MID_LAYER}
         style={{
           position: POSITION_ABSOLUTE,
-          transform: `translate(${roundedXPx}px)`,
+          transform: `translate(${roundedXPositionPixels}px)`,
           bottom: `calc(${bottomPx}px + 33px)`,
         }}
       />
