@@ -10,6 +10,7 @@ import {
   getInitialDeckSetup,
   getSavedStepForms,
 } from '../../../step-forms/selectors'
+import { getDismissedHints } from '../../../tutorial/selectors'
 import { MaterialsListModal } from '../../../organisms/MaterialsListModal'
 import { selectors as labwareIngredSelectors } from '../../../labware-ingred/selectors'
 import { ProtocolOverview } from '../index'
@@ -21,7 +22,6 @@ import { LiquidDefinitions } from '../LiquidDefinitions'
 import { StepsInfo } from '../StepsInfo'
 
 import type { NavigateFunction } from 'react-router-dom'
-import { getDismissedHints } from '../../../tutorial/selectors'
 
 vi.mock('../OffdeckThumbnail')
 vi.mock('../DeckThumbnail')

@@ -105,11 +105,6 @@ export function getWarningContent({
                 </StyledText>
               ))}
             </Flex>
-            <StyledText desktopStyle="bodyDefaultRegular">
-              {t(
-                'alert:export_warnings.redesign.unused_hardware_content.body2'
-              )}
-            </StyledText>
           </Flex>
         ),
       }
