@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { SketchPicker } from 'react-color'
 import { yupResolver } from '@hookform/resolvers/yup'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import * as Yup from 'yup'
 import { Controller, useForm } from 'react-hook-form'
 import {
@@ -34,6 +34,7 @@ import { selectors as labwareIngredSelectors } from '../../labware-ingred/select
 import { swatchColors } from '../../components/swatchColors'
 import { checkColor } from './utils'
 import { HandleEnter } from '../../atoms/HandleEnter'
+import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
 
 import type { ColorResult, RGBColor } from 'react-color'
 import type { ThunkDispatch } from 'redux-thunk'
@@ -173,7 +174,10 @@ export function DefineLiquidsModal(
           selectedIngredFields != null ? (
             <Flex gridGap={SPACING.spacing8}>
               <LiquidIcon color={initialValues.displayColor} />
-              <StyledText desktopStyle="bodyLargeSemiBold">
+              <StyledText
+                desktopStyle="bodyLargeSemiBold"
+                css={LINE_CLAMP_TEXT_STYLE(1)}
+              >
                 {initialValues.name}
               </StyledText>
             </Flex>

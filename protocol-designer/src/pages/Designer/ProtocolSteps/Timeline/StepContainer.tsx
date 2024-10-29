@@ -227,10 +227,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
               )}
               <StyledText
                 desktopStyle="bodyDefaultRegular"
-                css={`
-                  ${LINE_CLAMP_TEXT_STYLE(1)}
-                  word-break: break-all
-                `}
+                css={LINE_CLAMP_TEXT_STYLE(1)}
               >
                 {capitalizeFirstLetterAfterNumber(title)}
               </StyledText>

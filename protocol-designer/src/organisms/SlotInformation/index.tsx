@@ -12,6 +12,8 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
+import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+
 import type { FC } from 'react'
 import type { RobotType } from '@opentrons/shared-data'
 
@@ -53,7 +55,15 @@ export const SlotInformation: FC<SlotInformationProps> = ({
           <ListItem type="noActive" width="max-content">
             <ListItemDescriptor
               type="default"
-              content={<StyledText>{liquids.join(', ')}</StyledText>}
+              content={
+                <StyledText
+                  desktopStyle="bodyDefaultRegular"
+                  textAlign={TYPOGRAPHY.textAlignRight}
+                  css={LINE_CLAMP_TEXT_STYLE(2)}
+                >
+                  {liquids.join(', ')}
+                </StyledText>
+              }
               description={t('liquid')}
             />
           </ListItem>
