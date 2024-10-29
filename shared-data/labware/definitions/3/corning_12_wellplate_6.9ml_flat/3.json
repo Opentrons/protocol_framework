@@ -190,6 +190,8 @@
     }
   },
   "innerLabwareGeometry": {
-    "sections": []
+    "a": {
+      "sections": []
+    }
   }
 }

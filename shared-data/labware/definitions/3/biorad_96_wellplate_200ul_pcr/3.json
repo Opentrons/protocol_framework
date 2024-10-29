@@ -1140,41 +1140,43 @@
     }
   },
   "innerLabwareGeometry": {
-    "sections": [
-      {
-        "shape": "spherical",
-        "radiusOfCurvature": 1.42,
-        "topHeight": 1.21,
-        "bottomHeight": 0.0
-      },
-      {
-        "shape": "conical",
-        "bottomDiameter": 2.81,
-        "topDiameter": 3,
-        "topHeight": 1.87,
-        "bottomHeight": 1.21
-      },
-      {
-        "shape": "conical",
-        "bottomDiameter": 3,
-        "topDiameter": 4.98,
-        "topHeight": 8.58,
-        "bottomHeight": 1.87
-      },
-      {
-        "shape": "conical",
-        "bottomDiameter": 3,
-        "topDiameter": 5.44,
-        "topHeight": 10.14,
-        "bottomHeight": 8.58
-      },
-      {
-        "shape": "conical",
-        "bottomDiameter": 5.44,
-        "topDiameter": 5.44,
-        "topHeight": 14.57,
-        "bottomHeight": 10.14
-      }
-    ]
+    "a": {
+      "sections": [
+        {
+          "shape": "spherical",
+          "radiusOfCurvature": 1.42,
+          "topHeight": 1.21,
+          "bottomHeight": 0.0
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 2.81,
+          "topDiameter": 3,
+          "topHeight": 1.87,
+          "bottomHeight": 1.21
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 3,
+          "topDiameter": 4.98,
+          "topHeight": 8.58,
+          "bottomHeight": 1.87
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 3,
+          "topDiameter": 5.44,
+          "topHeight": 10.14,
+          "bottomHeight": 8.58
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 5.44,
+          "topDiameter": 5.44,
+          "topHeight": 14.57,
+          "bottomHeight": 10.14
+        }
+      ]
+    }
   }
 }

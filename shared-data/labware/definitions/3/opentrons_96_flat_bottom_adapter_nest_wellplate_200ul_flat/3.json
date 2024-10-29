@@ -1121,14 +1121,16 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "sections": [
-      {
-        "shape": "conical",
-        "bottomDiameter": 6.32,
-        "topDiameter": 6.85,
-        "topHeight": 10.8,
-        "bottomHeight": 0.0
-      }
-    ]
+    "a": {
+      "sections": [
+        {
+          "shape": "conical",
+          "bottomDiameter": 6.32,
+          "topDiameter": 6.85,
+          "topHeight": 10.8,
+          "bottomHeight": 0.0
+        }
+      ]
+    }
   }
 }

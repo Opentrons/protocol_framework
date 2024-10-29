@@ -4702,27 +4702,29 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "sections": [
-      {
-        "shape": "spherical",
-        "radiusOfCurvature": 0.89,
-        "topHeight": 0.34,
-        "bottomHeight": 0.0
-      },
-      {
-        "shape": "conical",
-        "bottomDiameter": 1.4,
-        "topDiameter": 3.17,
-        "topHeight": 5.77,
-        "bottomHeight": 0.34
-      },
-      {
-        "shape": "conical",
-        "bottomDiameter": 3.17,
-        "topDiameter": 3.17,
-        "topHeight": 9.09,
-        "bottomHeight": 5.77
-      }
-    ]
+    "a": {
+      "sections": [
+        {
+          "shape": "spherical",
+          "radiusOfCurvature": 0.89,
+          "topHeight": 0.34,
+          "bottomHeight": 0.0
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 1.4,
+          "topDiameter": 3.17,
+          "topHeight": 5.77,
+          "bottomHeight": 0.34
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 3.17,
+          "topDiameter": 3.17,
+          "topHeight": 9.09,
+          "bottomHeight": 5.77
+        }
+      ]
+    }
   }
 }

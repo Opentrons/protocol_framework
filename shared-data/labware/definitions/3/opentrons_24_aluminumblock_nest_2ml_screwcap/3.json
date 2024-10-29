@@ -321,28 +321,30 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "sections": [
-      {
-        "shape": "conical",
-        "bottomDiameter": 1.21,
-        "topDiameter": 6.5,
-        "topHeight": 2.08,
-        "bottomHeight": 0.0
-      },
-      {
-        "shape": "conical",
-        "bottomDiameter": 6.5,
-        "topDiameter": 8.14,
-        "topHeight": 3.04,
-        "bottomHeight": 2.08
-      },
-      {
-        "shape": "conical",
-        "bottomDiameter": 8.14,
-        "topDiameter": 8.55,
-        "topHeight": 43.4,
-        "bottomHeight": 3.04
-      }
-    ]
+    "a": {
+      "sections": [
+        {
+          "shape": "conical",
+          "bottomDiameter": 1.21,
+          "topDiameter": 6.5,
+          "topHeight": 2.08,
+          "bottomHeight": 0.0
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 6.5,
+          "topDiameter": 8.14,
+          "topHeight": 3.04,
+          "bottomHeight": 2.08
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 8.14,
+          "topDiameter": 8.55,
+          "topHeight": 43.4,
+          "bottomHeight": 3.04
+        }
+      ]
+    }
   }
 }

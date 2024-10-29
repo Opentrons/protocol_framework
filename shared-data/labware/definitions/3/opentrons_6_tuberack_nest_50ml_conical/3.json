@@ -114,6 +114,8 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "sections": []
+    "a": {
+      "sections": []
+    }
   }
 }

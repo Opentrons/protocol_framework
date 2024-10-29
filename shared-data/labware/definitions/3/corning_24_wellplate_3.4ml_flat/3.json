@@ -322,6 +322,8 @@
     }
   },
   "innerLabwareGeometry": {
-    "sections": []
+    "a": {
+      "sections": []
+    }
   }
 }

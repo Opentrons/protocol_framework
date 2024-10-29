@@ -324,55 +324,57 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "sections": [
-      {
-        "shape": "spherical",
-        "radiusOfCurvature": 3.19,
-        "topHeight": 1.21,
-        "bottomHeight": 0.0
-      },
-      {
-        "shape": "conical",
-        "bottomDiameter": 5,
-        "topDiameter": 6,
-        "topHeight": 1.83,
-        "bottomHeight": 1.21
-      },
-      {
-        "shape": "conical",
-        "bottomDiameter": 6,
-        "topDiameter": 7,
-        "topHeight": 2.59,
-        "bottomHeight": 1.83
-      },
-      {
-        "shape": "conical",
-        "bottomDiameter": 7,
-        "topDiameter": 7.2,
-        "topHeight": 2.74,
-        "bottomHeight": 2.59
-      },
-      {
-        "shape": "conical",
-        "bottomDiameter": 7.2,
-        "topDiameter": 8,
-        "topHeight": 3.89,
-        "bottomHeight": 2.74
-      },
-      {
-        "shape": "conical",
-        "bottomDiameter": 8,
-        "topDiameter": 8.9,
-        "topHeight": 15.05,
-        "bottomHeight": 3.89
-      },
-      {
-        "shape": "conical",
-        "bottomDiameter": 8.9,
-        "topDiameter": 9.28,
-        "topHeight": 39.28,
-        "bottomHeight": 15.04
-      }
-    ]
+    "a": {
+      "sections": [
+        {
+          "shape": "spherical",
+          "radiusOfCurvature": 3.19,
+          "topHeight": 1.21,
+          "bottomHeight": 0.0
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 5,
+          "topDiameter": 6,
+          "topHeight": 1.83,
+          "bottomHeight": 1.21
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 6,
+          "topDiameter": 7,
+          "topHeight": 2.59,
+          "bottomHeight": 1.83
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 7,
+          "topDiameter": 7.2,
+          "topHeight": 2.74,
+          "bottomHeight": 2.59
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 7.2,
+          "topDiameter": 8,
+          "topHeight": 3.89,
+          "bottomHeight": 2.74
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 8,
+          "topDiameter": 8.9,
+          "topHeight": 15.05,
+          "bottomHeight": 3.89
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 8.9,
+          "topDiameter": 9.28,
+          "topHeight": 39.28,
+          "bottomHeight": 15.04
+        }
+      ]
+    }
   }
 }
