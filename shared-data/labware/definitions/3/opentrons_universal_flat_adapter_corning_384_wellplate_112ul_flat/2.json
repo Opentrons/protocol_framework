@@ -5093,7 +5093,15 @@
   },
   "innerLabwareGeometry": {
     "a": {
-      "sections": []
+      "sections": [
+        {
+          "shape": "conical",
+          "bottomDiameter": 3.64,
+          "topDiameter": 2.74,
+          "topHeight": 11.65,
+          "bottomHeight": 0.0
+        }
+      ]
     }
   }
 }

@@ -364,13 +364,6 @@
           "bottomDiameter": 8.56,
           "topHeight": 25.2,
           "bottomHeight": 13.95
-        },
-        {
-          "shape": "conical",
-          "bottomDiameter": 8.9,
-          "topDiameter": 9.28,
-          "topHeight": 39.28,
-          "bottomHeight": 15.04
         }
       ]
     }

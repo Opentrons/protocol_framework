@@ -8,7 +8,7 @@
       "x": 13.88,
       "y": 67.75,
       "z": 6.85,
-      "geometryDefinitionId": "15mLConicalWell"
+      "geometryDefinitionId": "a"
     },
     "B1": {
       "totalLiquidVolume": 15000,
@@ -18,7 +18,7 @@
       "x": 13.88,
       "y": 42.75,
       "z": 6.85,
-      "geometryDefinitionId": "15mLConicalWell"
+      "geometryDefinitionId": "a"
     },
     "C1": {
       "totalLiquidVolume": 15000,
@@ -28,7 +28,7 @@
       "x": 13.88,
       "y": 17.75,
       "z": 6.85,
-      "geometryDefinitionId": "15mLConicalWell"
+      "geometryDefinitionId": "a"
     },
     "A2": {
       "totalLiquidVolume": 15000,
@@ -38,7 +38,7 @@
       "x": 38.88,
       "y": 67.75,
       "z": 6.85,
-      "geometryDefinitionId": "15mLConicalWell"
+      "geometryDefinitionId": "a"
     },
     "B2": {
       "totalLiquidVolume": 15000,
@@ -48,7 +48,7 @@
       "x": 38.88,
       "y": 42.75,
       "z": 6.85,
-      "geometryDefinitionId": "15mLConicalWell"
+      "geometryDefinitionId": "a"
     },
     "C2": {
       "totalLiquidVolume": 15000,
@@ -58,7 +58,7 @@
       "x": 38.88,
       "y": 17.75,
       "z": 6.85,
-      "geometryDefinitionId": "15mLConicalWell"
+      "geometryDefinitionId": "a"
     },
     "A3": {
       "totalLiquidVolume": 50000,
@@ -68,7 +68,7 @@
       "x": 71.38,
       "y": 60.25,
       "z": 7.3,
-      "geometryDefinitionId": "50mLConicalWell"
+      "geometryDefinitionId": "b"
     },
     "B3": {
       "totalLiquidVolume": 50000,
@@ -78,7 +78,7 @@
       "x": 71.38,
       "y": 25.25,
       "z": 7.3,
-      "geometryDefinitionId": "50mLConicalWell"
+      "geometryDefinitionId": "b"
     },
     "A4": {
       "totalLiquidVolume": 50000,
@@ -88,7 +88,7 @@
       "x": 106.38,
       "y": 60.25,
       "z": 7.3,
-      "geometryDefinitionId": "50mLConicalWell"
+      "geometryDefinitionId": "b"
     },
     "B4": {
       "totalLiquidVolume": 50000,
@@ -98,7 +98,7 @@
       "x": 106.38,
       "y": 25.25,
       "z": 7.3,
-      "geometryDefinitionId": "50mLConicalWell"
+      "geometryDefinitionId": "b"
     }
   },
   "groups": [
@@ -168,7 +168,7 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "15mLConicalWell": {
+    "a": {
       "sections": [
         {
           "shape": "conical",
@@ -193,7 +193,7 @@
         }
       ]
     },
-    "50mLConicalWell": {
+    "b": {
       "sections": [
         {
           "shape": "conical",

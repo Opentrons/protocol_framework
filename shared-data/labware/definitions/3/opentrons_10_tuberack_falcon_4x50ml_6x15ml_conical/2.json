@@ -94,7 +94,7 @@
       "x": 71.38,
       "y": 60.25,
       "z": 7.3,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "b"
     },
     "B3": {
       "totalLiquidVolume": 50000,
@@ -104,7 +104,7 @@
       "x": 71.38,
       "y": 25.25,
       "z": 7.3,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "b"
     },
     "A4": {
       "totalLiquidVolume": 50000,
@@ -114,7 +114,7 @@
       "x": 106.38,
       "y": 60.25,
       "z": 7.3,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "b"
     },
     "B4": {
       "totalLiquidVolume": 50000,
@@ -124,7 +124,7 @@
       "x": 106.38,
       "y": 25.25,
       "z": 7.3,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "b"
     }
   },
   "brand": {
@@ -173,7 +173,60 @@
   },
   "innerLabwareGeometry": {
     "a": {
-      "sections": []
+      "sections": [
+        {
+          "shape": "spherical",
+          "radiusOfCurvature": 2.9,
+          "topHeight": 0.8,
+          "bottomHeight": 0.0
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 4,
+          "topDiameter": 13.5,
+          "topHeight": 20.7,
+          "bottomHeight": 0.8
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 13.5,
+          "topDiameter": 14.5,
+          "topHeight": 108.6,
+          "bottomHeight": 20.7
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 14.5,
+          "topDiameter": 14.7,
+          "topHeight": 118.2,
+          "bottomHeight": 108.6
+        }
+      ]
+    },
+    "b": {
+      "sections": [
+        {
+          "shape": "conical",
+          "bottomDiameter": 6.15,
+          "topDiameter": 26.18,
+          "topHeight": 14.3,
+          "bottomHeight": 0.0
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 26.18,
+          "topDiameter": 27.52,
+          "topHeight": 100.65,
+          "bottomHeight": 14.3
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 27.52,
+          "topDiameter": 27.81,
+          "topHeight": 112.85,
+          "bottomHeight": 100.65
+        }
+      ]
     }
   }
 }

@@ -115,7 +115,29 @@
   },
   "innerLabwareGeometry": {
     "a": {
-      "sections": []
+      "sections": [
+        {
+          "shape": "conical",
+          "topDiameter": 26.0,
+          "bottomDiameter": 6.0,
+          "topHeight": 14.28,
+          "bottomHeight": 0.0
+        },
+        {
+          "shape": "conical",
+          "topDiameter": 27.0,
+          "bottomDiameter": 26.0,
+          "topHeight": 109.0,
+          "bottomHeight": 14.28
+        },
+        {
+          "shape": "conical",
+          "topDiameter": 27.45,
+          "bottomDiameter": 27.0,
+          "topHeight": 113.3,
+          "bottomHeight": 109.0
+        }
+      ]
     }
   }
 }

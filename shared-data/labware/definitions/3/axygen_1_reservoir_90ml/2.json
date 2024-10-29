@@ -56,7 +56,17 @@
   },
   "innerLabwareGeometry": {
     "a": {
-      "sections": []
+      "sections": [
+        {
+          "shape": "cuboidal",
+          "topXDimension": 106.8,
+          "topYDimension": 70.5,
+          "bottomXDimension": 106.4,
+          "bottomYDimension": 70,
+          "topHeight": 12.42,
+          "bottomHeight": 0.0
+        }
+      ]
     }
   }
 }
