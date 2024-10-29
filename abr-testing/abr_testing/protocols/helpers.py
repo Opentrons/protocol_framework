@@ -13,7 +13,7 @@ from opentrons.protocol_api.module_contexts import (
     ThermocyclerContext,
 )
 
-from typing import List
+from typing import List, Union
 
 
 def load_common_liquid_setup_labware_and_instruments(
@@ -147,16 +147,22 @@ def set_hs_speed(
 
 
 def load_disposable_lids(
-    protocol: ProtocolContext, num_of_lids: int, deck_slot: str
+    protocol: ProtocolContext, num_of_lids: int, deck_slot: List[str]
 ) -> List[Labware]:
     """Load Stack of Disposable lids."""
     unused_lids = [
-        protocol.load_labware("opentrons_tough_pcr_auto_sealing_lid", deck_slot)
+        protocol.load_labware("opentrons_tough_pcr_auto_sealing_lid", deck_slot[0])
     ]
-    for i in range(num_of_lids - 1):
-        unused_lids.append(
-            unused_lids[-1].load_labware("opentrons_tough_pcr_auto_sealing_lid")
-        )
+    if len(deck_slot) == 1:
+        for i in range(num_of_lids - 1):
+            unused_lids.append(
+                unused_lids[-1].load_labware("opentrons_tough_pcr_auto_sealing_lid")
+            )
+    else:
+        for i in range(len(deck_slot)-1):
+            unused_lids.append(
+                protocol.load_labware("opentrons_tough_pcr_auto_sealing_lid", deck_slot[i])
+            )
     unused_lids.reverse()
     return unused_lids
 
