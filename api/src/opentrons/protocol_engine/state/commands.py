@@ -450,8 +450,8 @@ class CommandStore(HasState[CommandState], HandlesActions):
     def _handle_stop_action(self, action: StopAction) -> None:
         if not self._state.run_result:
             self._state.recovery_target = None
-
             self._state.queue_status = QueueStatus.PAUSED
+
             if action.from_estop:
                 self._state.stopped_by_estop = True
                 self._state.run_result = RunResult.FAILED
@@ -460,7 +460,9 @@ class CommandStore(HasState[CommandState], HandlesActions):
 
     def _handle_finish_action(self, action: FinishAction) -> None:
         if not self._state.run_result:
+            self._state.recovery_target = None
             self._state.queue_status = QueueStatus.PAUSED
+
             if action.set_run_status:
                 self._state.run_result = (
                     RunResult.SUCCEEDED
