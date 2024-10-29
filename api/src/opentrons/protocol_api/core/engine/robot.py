@@ -9,6 +9,8 @@ from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocol_engine.types import DeckPoint, MotorAxis
 
 from opentrons.protocol_api.core.robot import AbstractRobot
+from opentrons.protocol_api._types import PlungerPositionTypes, PipetteActionTypes
+
 
 
 _AXIS_TYPE_TO_MOTOR_AXIS = {
