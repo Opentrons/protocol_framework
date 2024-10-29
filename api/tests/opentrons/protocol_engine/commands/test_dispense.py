@@ -82,7 +82,6 @@ async def test_dispense_implementation(
 
     assert result == SuccessData(
         public=DispenseResult(volume=42, position=DeckPoint(x=1, y=2, z=3)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="pipette-id-abc123",
@@ -91,6 +90,11 @@ async def test_dispense_implementation(
                     well_name="A3",
                 ),
                 new_deck_point=DeckPoint.construct(x=1, y=2, z=3),
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id="labware-id-abc123",
+                well_name="A3",
+                volume_added=42,
             ),
         ),
     )
@@ -160,6 +164,11 @@ async def test_overpressure_error(
                     well_name="well-name",
                 ),
                 new_deck_point=DeckPoint.construct(x=1, y=2, z=3),
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id="labware-id",
+                well_name="well-name",
+                volume_added=update_types.CLEAR,
             ),
         ),
     )

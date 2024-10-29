@@ -8,7 +8,7 @@ import type {
   RunTimeCommand,
   RunTimeParameter,
   NozzleLayoutConfig,
-  LabwareLocation,
+  OnDeckLabwareLocation,
 } from '@opentrons/shared-data'
 import type { ResourceLink, ErrorDetails } from '../types'
 export * from './commands/types'
@@ -215,6 +215,6 @@ export interface NozzleLayoutValues {
 
 export interface PlaceLabwareState {
   labwareId: string
-  location: LabwareLocation
+  location: OnDeckLabwareLocation
   shouldPlaceDown: boolean
 }

@@ -44,8 +44,7 @@ class DropTipInPlaceResult(BaseModel):
 
 
 _ExecuteReturn = (
-    SuccessData[DropTipInPlaceResult, None]
-    | DefinedErrorData[TipPhysicallyAttachedError]
+    SuccessData[DropTipInPlaceResult] | DefinedErrorData[TipPhysicallyAttachedError]
 )
 
 
@@ -72,6 +71,10 @@ class DropTipInPlaceImplementation(
                 pipette_id=params.pipetteId, home_after=params.homeAfter
             )
         except TipAttachedError as exception:
+            state_update_if_false_positive = update_types.StateUpdate()
+            state_update_if_false_positive.update_pipette_tip_state(
+                pipette_id=params.pipetteId, tip_geometry=None
+            )
             error = TipPhysicallyAttachedError(
                 id=self._model_utils.generate_id(),
                 createdAt=self._model_utils.get_timestamp(),
@@ -83,14 +86,16 @@ class DropTipInPlaceImplementation(
                     )
                 ],
             )
-            return DefinedErrorData(public=error, state_update=state_update)
+            return DefinedErrorData(
+                public=error,
+                state_update=state_update,
+                state_update_if_false_positive=state_update_if_false_positive,
+            )
         else:
             state_update.update_pipette_tip_state(
                 pipette_id=params.pipetteId, tip_geometry=None
             )
-            return SuccessData(
-                public=DropTipInPlaceResult(), private=None, state_update=state_update
-            )
+            return SuccessData(public=DropTipInPlaceResult(), state_update=state_update)
 
 
 class DropTipInPlace(

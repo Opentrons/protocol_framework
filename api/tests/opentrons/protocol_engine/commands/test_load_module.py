@@ -92,7 +92,6 @@ async def test_load_module_implementation(
             model=ModuleModel.TEMPERATURE_MODULE_V2,
             definition=tempdeck_v2_def,
         ),
-        private=None,
     )
 
 
@@ -148,7 +147,6 @@ async def test_load_module_implementation_mag_block(
             model=ModuleModel.MAGNETIC_BLOCK_V1,
             definition=mag_block_v1_def,
         ),
-        private=None,
     )
 
 
@@ -204,7 +202,6 @@ async def test_load_module_implementation_abs_reader(
             model=ModuleModel.ABSORBANCE_READER_V1,
             definition=abs_reader_v1_def,
         ),
-        private=None,
     )
 
 

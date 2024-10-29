@@ -18,7 +18,15 @@ import type { StepFormProps } from '../../types'
 type ThermocyclerContentType = 'thermocyclerState' | 'thermocyclerProfile'
 
 export function ThermocyclerTools(props: StepFormProps): JSX.Element {
-  const { propsForFields, formData, toolboxStep } = props
+  const {
+    propsForFields,
+    formData,
+    toolboxStep,
+    showFormErrors = true,
+    visibleFormErrors,
+    focusedField,
+    setShowFormErrorsAndWarnings,
+  } = props
   const { t } = useTranslation('form')
 
   const [contentType, setContentType] = useState<ThermocyclerContentType>(
@@ -42,6 +50,7 @@ export function ThermocyclerTools(props: StepFormProps): JSX.Element {
           onChange={() => {
             setContentType('thermocyclerState')
             propsForFields.thermocyclerFormType.updateValue('thermocyclerState')
+            setShowFormErrorsAndWarnings?.(false)
           }}
           isSelected={contentType === 'thermocyclerState'}
         />
@@ -56,6 +65,7 @@ export function ThermocyclerTools(props: StepFormProps): JSX.Element {
             propsForFields.thermocyclerFormType.updateValue(
               'thermocyclerProfile'
             )
+            setShowFormErrorsAndWarnings?.(false)
           }}
           isSelected={contentType === 'thermocyclerProfile'}
         />
@@ -67,12 +77,20 @@ export function ThermocyclerTools(props: StepFormProps): JSX.Element {
         title={t('step_edit_form.field.thermocyclerState.state')}
         propsForFields={propsForFields}
         formData={formData}
+        showFormErrors={showFormErrors}
+        visibleFormErrors={visibleFormErrors}
+        focusedField={focusedField}
       />
     )
   } else {
     return (
       <Flex flexDirection={DIRECTION_COLUMN}>
-        <ProfileSettings propsForFields={propsForFields} />
+        <ProfileSettings
+          propsForFields={propsForFields}
+          showFormErrors={showFormErrors}
+          visibleFormErrors={visibleFormErrors}
+          focusedField={focusedField}
+        />
         <Divider marginY="0" />
         <ProfileStepsSummary
           propsForFields={propsForFields}
@@ -84,6 +102,9 @@ export function ThermocyclerTools(props: StepFormProps): JSX.Element {
           propsForFields={propsForFields}
           formData={formData}
           isHold
+          showFormErrors={showFormErrors}
+          visibleFormErrors={visibleFormErrors}
+          focusedField={focusedField}
         />
       </Flex>
     )

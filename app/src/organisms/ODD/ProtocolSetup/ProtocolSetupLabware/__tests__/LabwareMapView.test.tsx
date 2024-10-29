@@ -114,7 +114,6 @@ describe('LabwareMapView', () => {
       handleLabwareClick: vi.fn(),
       deckDef: (deckDefFixture as unknown) as DeckDefinition,
       mostRecentAnalysis: ({} as unknown) as CompletedProtocolAnalysis,
-      initialLoadedLabwareByAdapter: {},
       attachedProtocolModuleMatches: [
         {
           ...mockProtocolModuleInfo[0],

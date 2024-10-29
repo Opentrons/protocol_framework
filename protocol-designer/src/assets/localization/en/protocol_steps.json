@@ -10,6 +10,7 @@
   "blowout_location": "Blowout location",
   "blowout_position": "Blowout position from bottom",
   "change_tips": "Change tips",
+  "default_flow_rate": "The default flow rate is {{flowRate}}",
   "default_tip_option": "Default - get next tip",
   "delay_duration": "Delay duration",
   "delay_position": "Delay position from bottom",

@@ -48,7 +48,7 @@ class BlowOutResult(DestinationPositionResult):
 
 
 _ExecuteReturn = Union[
-    SuccessData[BlowOutResult, None],
+    SuccessData[BlowOutResult],
     DefinedErrorData[OverpressureError],
 ]
 
@@ -116,7 +116,6 @@ class BlowOutImplementation(AbstractCommandImpl[BlowOutParams, _ExecuteReturn]):
         else:
             return SuccessData(
                 public=BlowOutResult(position=deck_point),
-                private=None,
                 state_update=state_update,
             )
 

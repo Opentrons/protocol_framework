@@ -17,7 +17,6 @@ from opentrons.types import MountType
 
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ..errors.error_occurrence import ErrorOccurrence
-from .configuring_common import PipetteConfigUpdateResultMixin
 from ..errors import InvalidSpecificationForRobotTypeError, InvalidLoadPipetteSpecsError
 
 if TYPE_CHECKING:
@@ -26,12 +25,6 @@ if TYPE_CHECKING:
 
 
 LoadPipetteCommandType = Literal["loadPipette"]
-
-
-class LoadPipettePrivateResult(PipetteConfigUpdateResultMixin):
-    """The not-to-be-exposed results of a load pipette call."""
-
-    ...
 
 
 class LoadPipetteParams(BaseModel):
@@ -73,9 +66,7 @@ class LoadPipetteResult(BaseModel):
 
 
 class LoadPipetteImplementation(
-    AbstractCommandImpl[
-        LoadPipetteParams, SuccessData[LoadPipetteResult, LoadPipettePrivateResult]
-    ]
+    AbstractCommandImpl[LoadPipetteParams, SuccessData[LoadPipetteResult]]
 ):
     """Load pipette command implementation."""
 
@@ -87,7 +78,7 @@ class LoadPipetteImplementation(
 
     async def execute(
         self, params: LoadPipetteParams
-    ) -> SuccessData[LoadPipetteResult, LoadPipettePrivateResult]:
+    ) -> SuccessData[LoadPipetteResult]:
         """Check that requested pipette is attached and assign its identifier."""
         pipette_generation = convert_to_pipette_name_type(
             params.pipetteName.value
@@ -139,11 +130,6 @@ class LoadPipetteImplementation(
 
         return SuccessData(
             public=LoadPipetteResult(pipetteId=loaded_pipette.pipette_id),
-            private=LoadPipettePrivateResult(
-                pipette_id=loaded_pipette.pipette_id,
-                serial_number=loaded_pipette.serial_number,
-                config=loaded_pipette.static_config,
-            ),
             state_update=state_update,
         )
 

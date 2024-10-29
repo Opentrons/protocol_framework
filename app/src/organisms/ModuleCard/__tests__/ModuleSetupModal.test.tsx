@@ -47,4 +47,23 @@ describe('ModuleSetupModal', () => {
     fireEvent.click(closeButton)
     expect(props.close).toHaveBeenCalled()
   })
+  it('should render variable copy and link if absorbance reader', () => {
+    props = {
+      ...props,
+      isAbsorbanceReader: true,
+    }
+    render(props)
+    screen.getByText(
+      'For step-by-step instructions on setting up your module, consult the Quickstart Guide that came in its box. You can also click the link below or scan the QR code to read the module Instruction Manual.'
+    )
+    expect(
+      screen
+        .getByRole('link', {
+          name: 'mockModuleDisplayName setup instructions',
+        })
+        .getAttribute('href')
+    ).toBe(
+      'https://insights.opentrons.com/hubfs/Absorbance%20Plate%20Reader%20Instruction%20Manual.pdf'
+    )
+  })
 })

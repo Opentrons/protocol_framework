@@ -40,7 +40,7 @@ class PrepareToAspirateResult(BaseModel):
 
 
 _ExecuteReturn = Union[
-    SuccessData[PrepareToAspirateResult, None],
+    SuccessData[PrepareToAspirateResult],
     DefinedErrorData[OverpressureError],
 ]
 
@@ -92,7 +92,9 @@ class PrepareToAspirateImplementation(
                 ),
             )
         else:
-            return SuccessData(public=PrepareToAspirateResult(), private=None)
+            return SuccessData(
+                public=PrepareToAspirateResult(),
+            )
 
 
 class PrepareToAspirate(

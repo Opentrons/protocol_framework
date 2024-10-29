@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useEstopQuery } from '@opentrons/react-api-client'
 
@@ -7,7 +7,7 @@ import { EstopMissingModal } from './EstopMissingModal'
 import { useIsUnboxingFlowOngoing } from '/app/redux-resources/config'
 import { getLocalRobot } from '/app/redux/discovery'
 import { PHYSICALLY_ENGAGED, NOT_PRESENT, DISENGAGED } from './constants'
-import { EstopState } from '@opentrons/api-client'
+import type { EstopState } from '@opentrons/api-client'
 
 const ESTOP_CURRENTLY_DISENGAGED_REFETCH_INTERVAL_MS = 10000
 const ESTOP_CURRENTLY_ENGAGED_REFETCH_INTERVAL_MS = 1000
@@ -23,23 +23,25 @@ export function EstopTakeover({ robotName }: EstopTakeoverProps): JSX.Element {
     setIsWatingForResumeOperation,
   ] = useState<boolean>(false)
 
-  const [estopState, setEstopState] = useState<EstopState>(DISENGAGED)
+  const [estopState, setEstopState] = useState<EstopState>()
   const [showEmergencyStopModal, setShowEmergencyStopModal] = useState<boolean>(
     false
   )
 
   // TODO: (ba, 2024-10-24): Use notifications instead of polling
-  useEstopQuery({
+  const { data: estopStatus } = useEstopQuery({
     refetchInterval: showEmergencyStopModal
       ? ESTOP_CURRENTLY_ENGAGED_REFETCH_INTERVAL_MS
       : ESTOP_CURRENTLY_DISENGAGED_REFETCH_INTERVAL_MS,
-    onSuccess: response => {
-      setEstopState(response?.data.status)
-      setShowEmergencyStopModal(
-        response.data.status !== DISENGAGED || isWaitingForResumeOperation
-      )
-    },
   })
+  useEffect(() => {
+    if (estopStatus) {
+      setEstopState(estopStatus.data.status)
+      setShowEmergencyStopModal(
+        estopStatus.data.status !== DISENGAGED || isWaitingForResumeOperation
+      )
+    }
+  }, [estopStatus])
 
   const isUnboxingFlowOngoing = useIsUnboxingFlowOngoing()
   const closeModal = (): void => {

@@ -94,7 +94,6 @@ async def test_load_labware_implementation(
             definition=well_plate_def,
             offsetId="labware-offset-id",
         ),
-        private=None,
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="labware-id",
@@ -178,7 +177,6 @@ async def test_load_labware_on_labware(
             definition=well_plate_def,
             offsetId="labware-offset-id",
         ),
-        private=None,
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="labware-id",

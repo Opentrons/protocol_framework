@@ -105,6 +105,7 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
             : undefined
         }
         width="100%"
+        iconMarginLeft={SPACING.spacing4}
       >
         <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
           <StyledText desktopStyle="bodyDefaultSemiBold">
@@ -120,10 +121,16 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
     </Flex>
   )
   const formErrors = [
-    ...visibleFormErrors.map(error => ({
-      title: error.title,
-      description: error.body || null,
-    })),
+    ...visibleFormErrors.reduce((acc, error) => {
+      return error.showAtForm ?? true
+        ? {
+            ...acc,
+            title: error.title,
+            description: error.body || null,
+            showAtForm: error.showAtForm ?? true,
+          }
+        : acc
+    }, []),
     ...visibleDynamicFieldFormErrors.map(error => ({
       title: error.title,
       description: error.body || null,

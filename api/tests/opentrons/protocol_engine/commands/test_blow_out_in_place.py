@@ -52,7 +52,7 @@ async def test_blow_out_in_place_implementation(
 
     result = await subject.execute(data)
 
-    assert result == SuccessData(public=BlowOutInPlaceResult(), private=None)
+    assert result == SuccessData(public=BlowOutInPlaceResult())
 
     decoy.verify(
         await pipetting.blow_out_in_place(pipette_id="pipette-id", flow_rate=1.234)

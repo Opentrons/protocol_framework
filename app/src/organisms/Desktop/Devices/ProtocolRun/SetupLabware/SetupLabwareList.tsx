@@ -6,10 +6,7 @@ import {
   StyledText,
   COLORS,
 } from '@opentrons/components'
-import {
-  getLabwareSetupItemGroups,
-  getNestedLabwareInfo,
-} from '/app/transformations/commands'
+import { getLabwareSetupItemGroups } from '/app/transformations/commands'
 import { LabwareListItem } from './LabwareListItem'
 
 import type { RunTimeCommand } from '@opentrons/shared-data'
@@ -56,6 +53,7 @@ export function SetupLabwareList(
         </StyledText>
       </Flex>
       {allItems.map((labwareItem, index) => {
+        // filtering out all labware that aren't on a module or the deck
         const labwareOnAdapter = allItems.find(
           item =>
             labwareItem.initialLocation !== 'offDeck' &&
@@ -70,7 +68,6 @@ export function SetupLabwareList(
             extraAttentionModules={extraAttentionModules}
             {...labwareItem}
             isFlex={isFlex}
-            nestedLabwareInfo={getNestedLabwareInfo(labwareItem, commands)}
           />
         )
       })}

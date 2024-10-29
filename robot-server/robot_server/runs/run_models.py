@@ -321,7 +321,7 @@ class PlaceLabwareState(BaseModel):
 
     labwareId: str = Field(..., description="The ID of the labware to place.")
     location: OnDeckLabwareLocation = Field(
-        ..., description="The location the Plate Reade lid should be in."
+        ..., description="The location the labware should be in."
     )
     shouldPlaceDown: bool = Field(
         ..., description="Whether the gripper should place down the labware."
@@ -332,8 +332,8 @@ class RunCurrentState(BaseModel):
     """Current details about a run."""
 
     estopEngaged: bool = Field(..., description="")
-    activeNozzleLayouts: Dict[str, ActiveNozzleLayout] = Field(..., description="")
-    placeLabwareState: Optional[PlaceLabwareState] = Field(None, description="")
+    activeNozzleLayouts: Dict[str, ActiveNozzleLayout] = Field(...)
+    placeLabwareState: Optional[PlaceLabwareState] = Field(None)
 
 
 class CommandLinkNoMeta(BaseModel):

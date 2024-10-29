@@ -46,7 +46,7 @@ class SavePositionResult(BaseModel):
 
 
 class SavePositionImplementation(
-    AbstractCommandImpl[SavePositionParams, SuccessData[SavePositionResult, None]]
+    AbstractCommandImpl[SavePositionParams, SuccessData[SavePositionResult]]
 ):
     """Save position command implementation."""
 
@@ -61,7 +61,7 @@ class SavePositionImplementation(
 
     async def execute(
         self, params: SavePositionParams
-    ) -> SuccessData[SavePositionResult, None]:
+    ) -> SuccessData[SavePositionResult]:
         """Check the requested pipette's current position."""
         position_id = self._model_utils.ensure_id(params.positionId)
         fail_on_not_homed = (
@@ -76,7 +76,6 @@ class SavePositionImplementation(
                 positionId=position_id,
                 position=DeckPoint(x=x, y=y, z=z),
             ),
-            private=None,
         )
 
 

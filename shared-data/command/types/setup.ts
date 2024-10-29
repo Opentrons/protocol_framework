@@ -112,7 +112,6 @@ export type OnDeckLabwareLocation =
   | { labwareId: string }
   | { addressableAreaName: AddressableAreaName }
 
-
 export type NonStackedLocation =
   | 'offDeck'
   | { slotName: string }

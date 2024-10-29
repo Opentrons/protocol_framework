@@ -52,11 +52,10 @@
       "body6": "All protocols require {{app}} version <strong>7.3.0 or later</strong> to run."
     },
     "redesign": {
-      "body1": "Welcome to Protocol Designer 9.0.0!",
-      "body2": "We’re excited to release the new Opentrons Protocol Designer, now with a fresh redesign! Enjoy the same functionality with some powerful new features:",
-      "body3": "Easily group multiple steps together, name the group, and keep your protocols organized with step grouping.",
-      "body4": "Add multiple Heater-Shaker Modules and Magnetic Blocks to the deck (Flex only).",
-      "body5": "All protocols now require Opentrons App version <strong>8.0.0+</strong> to run."
+      "body1": "Welcome to Protocol Designer 8.2.0!",
+      "body2": "We’re excited to release the new Opentrons Protocol Designer, now with a fresh redesign!  Enjoy the same functionality with the added ability to:",
+      "body3": "Add multiple Heater-Shaker Modules and Magnetic Blocks to the deck (Flex only).",
+      "body4": "All protocols now require Opentrons App version <strong>8.0.0+</strong> to run."
     }
   },
   "labware_selection": {

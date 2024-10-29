@@ -45,7 +45,7 @@ class UnsafePlaceLabwareResult(BaseModel):
 class UnsafePlaceLabwareImplementation(
     AbstractCommandImpl[
         UnsafePlaceLabwareParams,
-        SuccessData[UnsafePlaceLabwareResult, None],
+        SuccessData[UnsafePlaceLabwareResult],
     ]
 ):
     """The UnsafePlaceLabware command implementation."""
@@ -63,8 +63,18 @@ class UnsafePlaceLabwareImplementation(
 
     async def execute(
         self, params: UnsafePlaceLabwareParams
-    ) -> SuccessData[UnsafePlaceLabwareResult, None]:
-        """Place Labware."""
+    ) -> SuccessData[UnsafePlaceLabwareResult]:
+        """Place Labware.
+
+        This command is used only when the gripper is in the middle of moving
+        labware but is interrupted before completing the move. (i.e., the e-stop
+        is pressed, get into error recovery, etc).
+
+        Unlike the `moveLabware` command, where you pick a source and destination
+        location, this command takes the labwareId to be moved and location to
+        move it to.
+
+        """
         ot3api = ensure_ot3_hardware(self._hardware_api)
         if not ot3api.has_gripper():
             raise GripperNotAttachedError("No gripper found to perform labware place.")
@@ -104,7 +114,7 @@ class UnsafePlaceLabwareImplementation(
             labware_location=location,
         )
 
-        # NOTE: When the estop is pressed, the gantry loses postion,
+        # NOTE: When the estop is pressed, the gantry loses position,
         # so the robot needs to home x, y to sync.
         await ot3api.home(axes=[Axis.Z_L, Axis.Z_R, Axis.Z_G, Axis.X, Axis.Y])
         state_update = StateUpdate()
@@ -117,9 +127,7 @@ class UnsafePlaceLabwareImplementation(
             new_location=location,
             new_offset_id=new_offset_id,
         )
-        return SuccessData(
-            public=UnsafePlaceLabwareResult(), private=None, state_update=state_update
-        )
+        return SuccessData(public=UnsafePlaceLabwareResult(), state_update=state_update)
 
     async def _start_movement(
         self,
