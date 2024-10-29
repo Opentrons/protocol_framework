@@ -21,10 +21,12 @@ import { LiquidDefinitions } from '../LiquidDefinitions'
 import { StepsInfo } from '../StepsInfo'
 
 import type { NavigateFunction } from 'react-router-dom'
+import { getDismissedHints } from '../../../tutorial/selectors'
 
 vi.mock('../OffdeckThumbnail')
 vi.mock('../DeckThumbnail')
 vi.mock('../../../step-forms/selectors')
+vi.mock('../../../tutorial/selectors')
 vi.mock('../../../file-data/selectors')
 vi.mock('../../../organisms/MaterialsListModal')
 vi.mock('../../../labware-ingred/selectors')
@@ -61,6 +63,7 @@ describe('ProtocolOverview', () => {
     vi.mocked(labwareIngredSelectors.allIngredientGroupFields).mockReturnValue(
       {}
     )
+    vi.mocked(getDismissedHints).mockReturnValue([])
     vi.mocked(getRobotType).mockReturnValue(FLEX_ROBOT_TYPE)
     vi.mocked(getInitialDeckSetup).mockReturnValue({
       pipettes: {},
