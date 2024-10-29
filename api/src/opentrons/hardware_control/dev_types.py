@@ -20,6 +20,7 @@ from opentrons_shared_data.pipette.pipette_definition import (
     PipetteConfigurations,
     SupportedTipsDefinition,
     PipetteBoundingBoxOffsetDefinition,
+    PlungerPositions,
 )
 from opentrons_shared_data.gripper import (
     GripperModel,
