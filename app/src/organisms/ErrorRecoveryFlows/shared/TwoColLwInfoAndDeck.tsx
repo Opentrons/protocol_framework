@@ -47,6 +47,7 @@ export function TwoColLwInfoAndDeck(
   }
 
   const [slot] = getSlotNameAndLwLocFrom(failedLabware?.location ?? null, false)
+  console.log('=>(TwoColLwInfoAndDeck.tsx:50) slot', slot)
 
   const buildTitle = (): string => {
     switch (selectedRecoveryOption) {
