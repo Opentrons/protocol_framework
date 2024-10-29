@@ -127,9 +127,7 @@ class UnsafePlaceLabwareImplementation(
             new_location=location,
             new_offset_id=new_offset_id,
         )
-        return SuccessData(
-            public=UnsafePlaceLabwareResult(), state_update=state_update
-        )
+        return SuccessData(public=UnsafePlaceLabwareResult(), state_update=state_update)
 
     async def _start_movement(
         self,
