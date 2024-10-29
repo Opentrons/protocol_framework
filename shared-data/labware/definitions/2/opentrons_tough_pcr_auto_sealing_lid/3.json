@@ -1,8 +1,5 @@
 {
-  "allowedRoles": [
-    "labware",
-    "lid"
-  ],
+  "allowedRoles": ["labware", "lid"],
   "ordering": [],
   "brand": {
     "brand": "Opentrons",
@@ -33,9 +30,7 @@
   },
   "parameters": {
     "format": "irregular",
-    "quirks": [
-      "stackingMaxFive"
-    ],
+    "quirks": ["stackingMaxFive"],
     "isTiprack": false,
     "isMagneticModuleCompatible": false,
     "loadName": "opentrons_tough_pcr_auto_sealing_lid"

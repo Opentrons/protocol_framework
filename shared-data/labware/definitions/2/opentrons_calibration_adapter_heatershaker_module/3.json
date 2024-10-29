@@ -1,10 +1,5 @@
 {
-  "ordering": [
-    [
-      "A1",
-      "B1"
-    ]
-  ],
+  "ordering": [["A1", "B1"]],
   "brand": {
     "brand": "Opentrons",
     "brandId": []
@@ -48,10 +43,7 @@
       "metadata": {
         "wellBottomShape": "flat"
       },
-      "wells": [
-        "A1",
-        "B1"
-      ]
+      "wells": ["A1", "B1"]
     }
   ],
   "parameters": {

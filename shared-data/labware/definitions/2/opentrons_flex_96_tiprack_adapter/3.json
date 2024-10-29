@@ -24,9 +24,7 @@
   ],
   "parameters": {
     "format": "96Standard",
-    "quirks": [
-      "tiprackAdapterFor96Channel"
-    ],
+    "quirks": ["tiprackAdapterFor96Channel"],
     "isTiprack": false,
     "isMagneticModuleCompatible": false,
     "loadName": "opentrons_flex_96_tiprack_adapter"
@@ -34,9 +32,7 @@
   "namespace": "opentrons",
   "version": "2",
   "schemaVersion": "3",
-  "allowedRoles": [
-    "adapter"
-  ],
+  "allowedRoles": ["adapter"],
   "cornerOffsetFromSlot": {
     "x": -14.25,
     "y": -3.5,

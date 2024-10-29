@@ -29,18 +29,14 @@
         "displayName": "Opentrons Calibration Block - Tall Side",
         "wellBottomShape": "flat"
       },
-      "wells": [
-        "A1"
-      ]
+      "wells": ["A1"]
     },
     {
       "metadata": {
         "displayName": "Opentrons Calibration Block - Short Side",
         "wellBottomShape": "flat"
       },
-      "wells": [
-        "A2"
-      ]
+      "wells": ["A2"]
     }
   ],
   "brand": {
@@ -65,14 +61,7 @@
     "isMagneticModuleCompatible": false,
     "loadName": "opentrons_calibrationblock_short_side_right"
   },
-  "ordering": [
-    [
-      "A1"
-    ],
-    [
-      "A2"
-    ]
-  ],
+  "ordering": [["A1"], ["A2"]],
   "namespace": "opentrons",
   "version": "2",
   "schemaVersion": "3",
