@@ -35,7 +35,7 @@ VOLUMES_3MM_TOP_BOTTOM = {
     "thermoscientificnunc_96_wellplate_1300ul": [1155.1, 73.5, 0.0],
     "thermoscientificnunc_96_wellplate_2000ul": [1768.0, 73.5, 0.0],
     "biorad_96_wellplate_200ul_pcr": [161.2, 71.32, 17.9, 0.0],
-    "nest_1_reservoir_290ml": [16570.4, 0.0],
+    "nest_1_reservoir_290ml": [16570.4, 271690.5, 0.0],
     "corning_12_wellplate_6.9ml_flat": [5654.8, 1156.3, 0.0],
     "corning_24_wellplate_3.4ml_flat": [2853.4, 1701.37, 579.0, 0.0],
     "corning_6_wellplate_16.8ml_flat": [13901.9, 2862.1, 0.0],
@@ -45,9 +45,9 @@ VOLUMES_3MM_TOP_BOTTOM = {
     "opentrons_24_tuberack_nest_1.5ml_snapcap": [1650.6, 619.18, 27.7, 0.0],
     "opentrons_24_tuberack_nest_2ml_screwcap": [2104.9, 66.6, 0.0],
     "opentrons_24_tuberack_nest_2ml_snapcap": [2148.5, 69.6, 0.0],
-    "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical": [ 158.1, 0.0],
-    "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical": [163.9,57720.5, 0.0],
-    "nest_1_reservoir_195ml": [14034.2, 0.0]
+    "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical": [56267.2, 158.1, 0.0],
+    "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical": [57720.5,163.9, 0.0],
+    "nest_1_reservoir_195ml": [14034.2, 172301.9, 0.0]
 }
 
 SAME_TIP = True  # this is fine when using Ethanol (b/c it evaporates)
@@ -75,7 +75,7 @@ SLOT_DIAL = "B3"
 ###########################################
 
 
-metadata = {"protocolName": "lld-test-liquid-height-3mm-LOW-VOL"}
+metadata = {"protocolName": "lld-test-liquid-height-3mm-large-vols"}
 requirements = {"robotType": "Flex", "apiLevel": "2.20"}
 
 
@@ -158,7 +158,7 @@ def _setup(
 
     if tube_volume == 15:
         # Replace volumes with 15 ml volumes
-        VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [15191.0, 6154.7, 27.2, 0.0]
+        VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [16262.0, 6965.67, 25.4, 0.0]
         VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] = [15956.6, 40.8, 0.0]
     
     volumes = VOLUMES_3MM_TOP_BOTTOM[labware.load_name]
@@ -331,76 +331,79 @@ def _test_for_finding_liquid_height(
         total_vol_in_tube = 0.0
         if volume:
             # transfer over and over until all volume is moved
-            need_to_transfer_per_ch = volume / liquid_pipette.channels
-            # set flow-rates
-            liquid_pipette.flow_rate.aspirate = min(
-                max(min(liquid_pipette.max_volume, need_to_transfer_per_ch), 10), 200
-            )
-            liquid_pipette.flow_rate.dispense = min(
-                liquid_pipette.flow_rate.aspirate, 50
-            )
-            liquid_pipette.flow_rate.blow_out = 100
-            if _src_meniscus_height is None:
-                _src_meniscus_height = src_well.depth - 1.0
-            if src_well.diameter:
-                src_well_z_ul_per_mm = math.pi * math.pow(src_well.diameter * 0.5, 2)
-            elif src_well.width is not None and src_well.length is not None:
-                src_well_z_ul_per_mm = src_well.width * src_well.length
-            else:
-                src_well_z_ul_per_mm = 0.0
+            if volume < 50000:
+                need_to_transfer_per_ch = volume / liquid_pipette.channels
+                # set flow-rates
+                liquid_pipette.flow_rate.aspirate = min(
+                    max(min(liquid_pipette.max_volume, need_to_transfer_per_ch), 10), 200
+                )
+                liquid_pipette.flow_rate.dispense = min(
+                    liquid_pipette.flow_rate.aspirate, 50
+                )
+                liquid_pipette.flow_rate.blow_out = 100
+                if _src_meniscus_height is None:
+                    _src_meniscus_height = src_well.depth - 1.0
+                if src_well.diameter:
+                    src_well_z_ul_per_mm = math.pi * math.pow(src_well.diameter * 0.5, 2)
+                elif src_well.width is not None and src_well.length is not None:
+                    src_well_z_ul_per_mm = src_well.width * src_well.length
+                else:
+                    src_well_z_ul_per_mm = 0.0
 
-            while need_to_transfer_per_ch > 0.001:
-                transfer_vol = min(
-                    liquid_pipette.max_volume * 0.9, need_to_transfer_per_ch
-                )
-                if not liquid_pipette.has_tip:
-                    liquid_pipette.pick_up_tip(liq_tip)
-                    # NOTE: only use new, dry tips to probe
-                    if not ctx.is_simulating():
-                        _src_meniscus_height = (
-                            liquid_pipette.measure_liquid_height(src_well)
-                            - src_well.bottom().point.z
-                        )
-                else:
-                    # try and get any remaining droplets out of the way
-                    liquid_pipette.move_to(src_well.top(10))
-                    liquid_pipette.aspirate().blow_out().prepare_to_aspirate()
-                # aspirate
-                meniscus_shift_mm = transfer_vol / src_well_z_ul_per_mm
-                draft_multiplier = 1.2 if src_well.diameter else 1.5
-                _src_meniscus_height -= draft_multiplier * meniscus_shift_mm
-                asp_mm = max(_src_meniscus_height + -2, 2)
-                liquid_pipette.aspirate(transfer_vol, src_well.bottom(asp_mm))
-                need_to_transfer_per_ch -= transfer_vol
-                ctx.comment(
-                    f"Aspirated {round(transfer_vol, 2)} from src, "
-                    f"removed {round(meniscus_shift_mm, 2)} mm, "
-                    f"now is {round(_src_meniscus_height, 2)} mm tall,"
-                    f"aspirating from {round(asp_mm, 2)} from bottom."
-                )
-                liquid_pipette.move_to(src_well.bottom(_src_meniscus_height + 5))
-                ctx.delay(seconds=1.5)
-                liquid_pipette.touch_tip(src_well, speed=30)
-                did_air_gap = False
-                if transfer_vol <= liquid_pipette.max_volume - 5:
-                    liquid_pipette.aspirate(5, src_well.top(2))
-                    did_air_gap = True
-                # dispense
-                if did_air_gap:
-                    liquid_pipette.dispense(5, well.top(5))
-                if volume < well.max_volume * 0.5:
-                    dispense_loc = well.bottom(3 + DISPENSE_MM_FROM_MENISCUS)
-                else:
-                    dispense_loc = well.top(-3 + DISPENSE_MM_FROM_MENISCUS)
-                liquid_pipette.dispense(transfer_vol, dispense_loc)
-                total_vol_in_tube += transfer_vol
-                ctx.delay(seconds=1.5)
-                liquid_pipette.move_to(well.top())
-                ctx.delay(seconds=1.5)
-                liquid_pipette.blow_out(well.top())
-                ctx.delay(seconds=1.5)
-                liquid_pipette.prepare_to_aspirate()
-            # get height of liquid
+                while need_to_transfer_per_ch > 0.001:
+                    transfer_vol = min(
+                        liquid_pipette.max_volume * 0.9, need_to_transfer_per_ch
+                    )
+                    if not liquid_pipette.has_tip:
+                        liquid_pipette.pick_up_tip(liq_tip)
+                        # NOTE: only use new, dry tips to probe
+                        if not ctx.is_simulating():
+                            _src_meniscus_height = (
+                                liquid_pipette.measure_liquid_height(src_well)
+                                - src_well.bottom().point.z
+                            )
+                    else:
+                        # try and get any remaining droplets out of the way
+                        liquid_pipette.move_to(src_well.top(10))
+                        liquid_pipette.aspirate().blow_out().prepare_to_aspirate()
+                    # aspirate
+                    meniscus_shift_mm = transfer_vol / src_well_z_ul_per_mm
+                    draft_multiplier = 1.2 if src_well.diameter else 1.5
+                    _src_meniscus_height -= draft_multiplier * meniscus_shift_mm
+                    asp_mm = max(_src_meniscus_height + -2, 2)
+                    liquid_pipette.aspirate(transfer_vol, src_well.bottom(asp_mm))
+                    need_to_transfer_per_ch -= transfer_vol
+                    ctx.comment(
+                        f"Aspirated {round(transfer_vol, 2)} from src, "
+                        f"removed {round(meniscus_shift_mm, 2)} mm, "
+                        f"now is {round(_src_meniscus_height, 2)} mm tall,"
+                        f"aspirating from {round(asp_mm, 2)} from bottom."
+                    )
+                    liquid_pipette.move_to(src_well.bottom(_src_meniscus_height + 5))
+                    ctx.delay(seconds=1.5)
+                    liquid_pipette.touch_tip(src_well, speed=30)
+                    did_air_gap = False
+                    if transfer_vol <= liquid_pipette.max_volume - 5:
+                        liquid_pipette.aspirate(5, src_well.top(2))
+                        did_air_gap = True
+                    # dispense
+                    if did_air_gap:
+                        liquid_pipette.dispense(5, well.top(5))
+                    if volume < well.max_volume * 0.5:
+                        dispense_loc = well.bottom(3 + DISPENSE_MM_FROM_MENISCUS)
+                    else:
+                        dispense_loc = well.top(-3 + DISPENSE_MM_FROM_MENISCUS)
+                    liquid_pipette.dispense(transfer_vol, dispense_loc)
+                    total_vol_in_tube += transfer_vol
+                    ctx.delay(seconds=1.5)
+                    liquid_pipette.move_to(well.top())
+                    ctx.delay(seconds=1.5)
+                    liquid_pipette.blow_out(well.top())
+                    ctx.delay(seconds=1.5)
+                    liquid_pipette.prepare_to_aspirate()
+                # get height of liquid
+            else:
+                ctx.pause("Fill well.")
             height = probing_pipette.measure_liquid_height(well) - well.bottom().point.z
         else:
             is_empty = not probing_pipette.detect_liquid_presence(well)
