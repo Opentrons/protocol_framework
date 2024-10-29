@@ -49,7 +49,11 @@ describe('TwoColLwInfoAndDeck', () => {
       failedLabwareUtils: {
         relevantWellName: 'A1',
         failedLabware: { location: 'C1' },
-        failedLabwareLocations: { newLoc: {}, currentLoc: {} },
+        failedLabwareLocations: {
+          newLoc: {},
+          currentLoc: {},
+          displayNameCurrentLoc: 'Slot C1',
+        },
       },
       deckMapUtils: {
         movedLabwareDef: {},
