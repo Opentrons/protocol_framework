@@ -19,7 +19,16 @@ Welcome to the v8.2.0 release of the Opentrons App! This release adds support fo
 
 ### Improved Features
 
-- Error recovery now works in more partial tip pickup configurations.
+- Error recovery now works in more situations and has more options.
+  - Recover from gripper errors.
+  - Recover from failure to drop tips.
+  - Indicate that an error was improperly detected and skip similar errors later in the run.
+  - Choose from more options of where to drop tips as part of recovery.
+  - Disable error recovery entirely, if your application requires it. Runs will fail on any error.
+
+### Bug Fixes
+
+- Fixed an app crash when performing certain error recovery steps with Python API version 2.15 protocols.
 
 ---
 

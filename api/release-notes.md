@@ -20,6 +20,10 @@ Welcome to the v8.2.0 release of the Opentrons robot software! This release adds
 
 - Liquid presence detection no longer checks for liquid before every aspiration in a `mix()` command.
 
+### Bug Fixes
+
+- Error recovery no longer causes an `AssertionError` when a Python protocol changes the pipette speed.
+
 ---
 
 ## Opentrons Robot Software Changes in 8.1.0
