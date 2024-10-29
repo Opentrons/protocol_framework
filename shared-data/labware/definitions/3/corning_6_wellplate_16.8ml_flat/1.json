@@ -10,8 +10,8 @@
     "displayCategory": "wellPlate",
     "tags": []
   },
-  "schemaVersion": "3",
-  "version": "3",
+  "schemaVersion": 3,
+  "version": 1,
   "namespace": "opentrons",
   "dimensions": {
     "xDimension": 127.76,
@@ -33,7 +33,7 @@
       "x": 24.76,
       "y": 23.16,
       "z": 2.87,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "A1": {
       "shape": "circular",
@@ -43,7 +43,7 @@
       "x": 24.76,
       "y": 62.28,
       "z": 2.87,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "B2": {
       "shape": "circular",
@@ -53,7 +53,7 @@
       "x": 63.88,
       "y": 23.16,
       "z": 2.87,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "A2": {
       "shape": "circular",
@@ -63,7 +63,7 @@
       "x": 63.88,
       "y": 62.28,
       "z": 2.87,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "B3": {
       "shape": "circular",
@@ -73,7 +73,7 @@
       "x": 103,
       "y": 23.16,
       "z": 2.87,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "A3": {
       "shape": "circular",
@@ -83,7 +83,7 @@
       "x": 103,
       "y": 62.28,
       "z": 2.87,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     }
   },
   "brand": {
@@ -114,12 +114,12 @@
     }
   },
   "innerLabwareGeometry": {
-    "conicalWell": {
+    "a": {
       "sections": [
         {
           "shape": "conical",
-          "topDiameter": 35.433,
           "bottomDiameter": 34.798,
+          "topDiameter": 35.433,
           "topHeight": 17.399,
           "bottomHeight": 0.0
         }

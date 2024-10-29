@@ -22,8 +22,8 @@
     "yDimension": 85.48,
     "zDimension": 120.3
   },
-  "schemaVersion": "3",
-  "version": "2",
+  "schemaVersion": 3,
+  "version": 1,
   "namespace": "opentrons",
   "wells": {
     "B1": {
@@ -116,6 +116,8 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "sections": []
+    "a": {
+      "sections": []
+    }
   }
 }

@@ -5,8 +5,8 @@
     ["A3", "B3"],
     ["A4", "B4"]
   ],
-  "schemaVersion": "3",
-  "version": "2",
+  "schemaVersion": 3,
+  "version": 1,
   "namespace": "opentrons",
   "metadata": {
     "displayName": "Opentrons 10 Tube Rack with Falcon 4x50 mL, 6x15 mL Conical",
@@ -172,6 +172,8 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "sections": []
+    "a": {
+      "sections": []
+    }
   }
 }

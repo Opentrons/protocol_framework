@@ -417,8 +417,8 @@
     "zDimension": 49.22
   },
   "namespace": "opentrons",
-  "schemaVersion": "3",
-  "version": "2",
+  "schemaVersion": 3,
+  "version": 1,
   "parameters": {
     "format": "irregular",
     "quirks": ["gripperIncompatible"],
@@ -519,6 +519,8 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "sections": []
+    "a": {
+      "sections": []
+    }
   }
 }

@@ -34,7 +34,7 @@
       "x": 18.21,
       "y": 75.43,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "B1": {
       "depth": 25.2,
@@ -44,7 +44,7 @@
       "x": 18.21,
       "y": 56.15,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "C1": {
       "depth": 25.2,
@@ -54,7 +54,7 @@
       "x": 18.21,
       "y": 36.87,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "D1": {
       "depth": 25.2,
@@ -64,7 +64,7 @@
       "x": 18.21,
       "y": 17.59,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "A2": {
       "depth": 25.2,
@@ -74,7 +74,7 @@
       "x": 38.1,
       "y": 75.43,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "B2": {
       "depth": 25.2,
@@ -84,7 +84,7 @@
       "x": 38.1,
       "y": 56.15,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "C2": {
       "depth": 25.2,
@@ -94,7 +94,7 @@
       "x": 38.1,
       "y": 36.87,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "D2": {
       "depth": 25.2,
@@ -104,7 +104,7 @@
       "x": 38.1,
       "y": 17.59,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "A3": {
       "depth": 25.2,
@@ -114,7 +114,7 @@
       "x": 57.99,
       "y": 75.43,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "B3": {
       "depth": 25.2,
@@ -124,7 +124,7 @@
       "x": 57.99,
       "y": 56.15,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "C3": {
       "depth": 25.2,
@@ -134,7 +134,7 @@
       "x": 57.99,
       "y": 36.87,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "D3": {
       "depth": 25.2,
@@ -144,7 +144,7 @@
       "x": 57.99,
       "y": 17.59,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "A4": {
       "depth": 25.2,
@@ -154,7 +154,7 @@
       "x": 77.88,
       "y": 75.43,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "B4": {
       "depth": 25.2,
@@ -164,7 +164,7 @@
       "x": 77.88,
       "y": 56.15,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "C4": {
       "depth": 25.2,
@@ -174,7 +174,7 @@
       "x": 77.88,
       "y": 36.87,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "D4": {
       "depth": 25.2,
@@ -184,7 +184,7 @@
       "x": 77.88,
       "y": 17.59,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "A5": {
       "depth": 25.2,
@@ -194,7 +194,7 @@
       "x": 97.77,
       "y": 75.43,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "B5": {
       "depth": 25.2,
@@ -204,7 +204,7 @@
       "x": 97.77,
       "y": 56.15,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "C5": {
       "depth": 25.2,
@@ -214,7 +214,7 @@
       "x": 97.77,
       "y": 36.87,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "D5": {
       "depth": 25.2,
@@ -224,7 +224,7 @@
       "x": 97.77,
       "y": 17.59,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "A6": {
       "depth": 25.2,
@@ -234,7 +234,7 @@
       "x": 117.66,
       "y": 75.43,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "B6": {
       "depth": 25.2,
@@ -244,7 +244,7 @@
       "x": 117.66,
       "y": 56.15,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "C6": {
       "depth": 25.2,
@@ -254,7 +254,7 @@
       "x": 117.66,
       "y": 36.87,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     },
     "D6": {
       "depth": 25.2,
@@ -264,7 +264,7 @@
       "x": 117.66,
       "y": 17.59,
       "z": 60,
-      "geometryDefinitionId": "conicalWell"
+      "geometryDefinitionId": "a"
     }
   },
   "groups": [
@@ -314,15 +314,15 @@
     "loadName": "opentrons_24_tuberack_nest_0.5ml_screwcap"
   },
   "namespace": "opentrons",
-  "version": "2",
-  "schemaVersion": "3",
+  "version": 1,
+  "schemaVersion": 3,
   "cornerOffsetFromSlot": {
     "x": 0,
     "y": 0,
     "z": 0
   },
   "innerLabwareGeometry": {
-    "conicalWell": {
+    "a": {
       "sections": [
         {
           "shape": "spherical",
@@ -364,6 +364,13 @@
           "bottomDiameter": 8.56,
           "topHeight": 25.2,
           "bottomHeight": 13.95
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 8.9,
+          "topDiameter": 9.28,
+          "topHeight": 39.28,
+          "bottomHeight": 15.04
         }
       ]
     }

@@ -1105,14 +1105,30 @@
     "loadName": "thermoscientificnunc_96_wellplate_2000ul"
   },
   "namespace": "opentrons",
-  "version": "2",
-  "schemaVersion": "3",
+  "version": 1,
+  "schemaVersion": 3,
   "cornerOffsetFromSlot": {
     "x": 0,
     "y": 0,
     "z": 0
   },
   "innerLabwareGeometry": {
-    "sections": []
+    "a": {
+      "sections": [
+        {
+          "shape": "spherical",
+          "radiusOfCurvature": 3.6,
+          "topHeight": 3.6,
+          "bottomHeight": 0.0
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 7.2,
+          "topDiameter": 8.5,
+          "topHeight": 41.5,
+          "bottomHeight": 3.6
+        }
+      ]
+    }
   }
 }

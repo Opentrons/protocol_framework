@@ -1,6 +1,6 @@
 {
-  "schemaVersion": "3",
-  "version": "3",
+  "schemaVersion": 3,
+  "version": 1,
   "namespace": "opentrons",
   "ordering": [
     [
@@ -5099,6 +5099,16 @@
     }
   },
   "innerLabwareGeometry": {
-    "sections": []
+    "a": {
+      "sections": [
+        {
+          "shape": "conical",
+          "bottomDiameter": 3.64,
+          "topDiameter": 2.74,
+          "topHeight": 11.65,
+          "bottomHeight": 0.0
+        }
+      ]
+    }
   }
 }

@@ -162,14 +162,16 @@
     }
   ],
   "namespace": "opentrons",
-  "version": "2",
-  "schemaVersion": "3",
+  "version": 1,
+  "schemaVersion": 3,
   "cornerOffsetFromSlot": {
     "x": 0,
     "y": 0,
     "z": 0
   },
   "innerLabwareGeometry": {
-    "sections": []
+    "a": {
+      "sections": []
+    }
   }
 }
