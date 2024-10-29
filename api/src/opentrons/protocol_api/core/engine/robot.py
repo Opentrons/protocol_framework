@@ -1,12 +1,20 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, Union
 from opentrons.hardware_control import SyncHardwareAPI
 
 from opentrons.types import Mount, MountType, Point, AxisType, AxisMapType
+from opentrons_shared_data.pipette.ul_per_mm import (
+    piecewise_volume_conversion,
+    PIPETTING_FUNCTION_FALLBACK_VERSION,
+    PIPETTING_FUNCTION_LATEST_VERSION,
+)
+from opentrons.protocol_api._types import PipetteActionTypes, PlungerPositionTypes
 from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocol_engine.types import DeckPoint, MotorAxis
 
 from opentrons.protocol_api.core.robot import AbstractRobot
+from opentrons.protocol_api._types import PlungerPositionTypes, PipetteActionTypes
+
 
 _AXIS_TYPE_TO_MOTOR_AXIS = {
     AxisType.X: MotorAxis.X,
@@ -39,11 +47,57 @@ class RobotCore(AbstractRobot):
     def _convert_to_engine_mount(self, axis_map: AxisMapType) -> Dict[MotorAxis, float]:
         return {_AXIS_TYPE_TO_MOTOR_AXIS[ax]: dist for ax, dist in axis_map.items()}
 
-    def get_pipette_type_from_engine(self, mount: Mount) -> Optional[str]:
+    def _ul_per_mm_conversion(
+        self, pipette_settings, ul: float, action, function_version
+    ) -> float:
+        if action == "aspirate":
+            sequence = pipette_settings.aspirate.default[function_version]
+        elif action == "blowout":
+            return 1.0
+        else:
+            sequence = pipette_settings.dispense.default[function_version]
+        return piecewise_volume_conversion(ul, sequence)
+
+    def get_pipette_type_from_engine(self, mount: Union[Mount, str]) -> Optional[str]:
         """Get the pipette attached to the given mount."""
-        engine_mount = MountType[mount.name]
+        if isinstance(mount, Mount):
+            engine_mount = MountType[mount.name]
+        else:
+            engine_mount = MountType[mount]
         maybe_pipette = self._engine_client.state.pipettes.get_by_mount(engine_mount)
         return maybe_pipette.pipetteName if maybe_pipette else None
+
+    def get_plunger_position_from_name(
+        self, mount: Mount, position_name: PipetteActionTypes
+    ) -> float:
+        maybe_pipette_state = self._sync_hardware_api.get_attached_instrument(mount)
+        if not maybe_pipette_state:
+            return 0.0
+        return maybe_pipette_state.plunger_positions[position_name.value]
+
+    def get_plunger_position_from_volume(
+        self, mount: Mount, volume: float, action: PlungerPositionTypes, robot_type: str
+    ) -> float:
+        maybe_pipette_state = self._sync_hardware_api.get_attached_instrument(mount)
+        if not maybe_pipette_state:
+            return 0.0
+        tip_settings = maybe_pipette_state.supported_tips[
+            maybe_pipette_state.working_volume
+        ]
+
+        if robot_type == "OT-2 Standard":
+            convert_volume = self._ul_per_mm_conversion(
+                tip_settings, volume, action, PIPETTING_FUNCTION_FALLBACK_VERSION
+            )
+            mm = volume / convert_volume
+            position = maybe_pipette_state.plunger_positions.bottom + mm
+        else:
+            convert_volume = self._ul_per_mm_conversion(
+                tip_settings, volume, action, PIPETTING_FUNCTION_LATEST_VERSION
+            )
+            mm = volume / convert_volume
+            position = maybe_pipette_state.plunger_positions.bottom - mm
+        return round(position, 6)
 
     def move_to(self, mount: Mount, destination: Point, speed: Optional[float]) -> None:
         engine_mount = MountType[mount.name]

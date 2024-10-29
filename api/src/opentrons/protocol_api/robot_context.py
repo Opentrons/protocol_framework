@@ -19,6 +19,7 @@ from . import validation
 from .core.common import ProtocolCore, RobotCore
 from .module_contexts import ModuleContext
 from .labware import Labware
+from ._types import PipetteActionTypes, PlungerPositionTypes
 
 
 class HardwareManager(NamedTuple):
@@ -200,14 +201,38 @@ class RobotContext(publisher.CommandPublisher):
             raise TypeError("You must specify a location to move to.")
 
     def plunger_coordinates_for_volume(
-        self, mount: Union[Mount, str], volume: float
-    ) -> None:
-        raise NotImplementedError()
+        self, mount: Union[Mount, str], volume: float, action: PlungerPositionTypes
+    ) -> AxisMapType:
+        """
+        Build a :py:class:`.types.AxisMapType` for a pipette plunger motor from volume.
+
+        """
+        pipette_name = self._core.get_pipette_type_from_engine(mount)
+        mount = validation.ensure_mount_for_pipette(mount, pipette_name)
+        mount_axis = AxisType.axis_for_mount(mount)
+        pipette_axis = AxisType.plunger_axis_for_mount(mount)
+
+        pipette_position = self._core.get_plunger_position_from_volume(
+            mount, volume, action, self._protocol_core.robot_type
+        )
+        return {mount_axis: 0.0, pipette_axis: pipette_position}
 
     def plunger_coordinates_for_named_position(
-        self, mount: Union[Mount, str], position_name: str
-    ) -> None:
-        raise NotImplementedError()
+        self, mount: Union[Mount, str], position_name: PipetteActionTypes
+    ) -> AxisMapType:
+        """
+        Build a :py:class:`.types.AxisMapType` for a pipette plunger motor from position_name.
+
+        """
+        pipette_name = self._core.get_pipette_type_from_engine(mount)
+
+        mount = validation.ensure_mount_for_pipette(mount, pipette_name)
+        mount_axis = AxisType.axis_for_mount(mount)
+        pipette_axis = AxisType.plunger_axis_for_mount(mount)
+        pipette_position = self._core.get_plunger_position_from_name(
+            mount, position_name
+        )
+        return {mount_axis: 0.0, pipette_axis: pipette_position}
 
     def build_axis_map(self, axis_map: StringAxisMap) -> AxisMapType:
         """Take in a :py:class:`.types.StringAxisMap` and output a :py:class:`.types.AxisMapType`.
