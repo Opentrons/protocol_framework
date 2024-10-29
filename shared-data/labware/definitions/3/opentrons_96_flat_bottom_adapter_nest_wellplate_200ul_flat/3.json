@@ -1113,7 +1113,7 @@
     "loadName": "opentrons_96_flat_bottom_adapter_nest_wellplate_200ul_flat"
   },
   "namespace": "opentrons",
-  "version": 2,
+  "version": 1,
   "schemaVersion": 3,
   "cornerOffsetFromSlot": {
     "x": 0,

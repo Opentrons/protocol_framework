@@ -1,6 +1,6 @@
 {
   "namespace": "opentrons",
-  "version": 3,
+  "version": 1,
   "schemaVersion": 3,
   "parameters": {
     "loadName": "armadillo_96_wellplate_200ul_pcr_full_skirt",

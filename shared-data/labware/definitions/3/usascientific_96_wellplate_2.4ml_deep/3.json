@@ -1202,7 +1202,7 @@
     "loadName": "usascientific_96_wellplate_2.4ml_deep"
   },
   "namespace": "opentrons",
-  "version": 2,
+  "version": 1,
   "schemaVersion": 3,
   "cornerOffsetFromSlot": {
     "x": 0,

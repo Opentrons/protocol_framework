@@ -1111,7 +1111,7 @@
     "loadName": "opentrons_96_pcr_adapter_nest_wellplate_100ul_pcr_full_skirt"
   },
   "namespace": "opentrons",
-  "version": 2,
+  "version": 1,
   "schemaVersion": 3,
   "cornerOffsetFromSlot": {
     "x": 0,

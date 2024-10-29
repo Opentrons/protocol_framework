@@ -418,7 +418,7 @@
   },
   "namespace": "opentrons",
   "schemaVersion": 3,
-  "version": 2,
+  "version": 1,
   "parameters": {
     "format": "irregular",
     "quirks": ["gripperIncompatible"],

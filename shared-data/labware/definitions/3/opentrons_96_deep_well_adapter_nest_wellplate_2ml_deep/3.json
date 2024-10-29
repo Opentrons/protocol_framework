@@ -1207,7 +1207,7 @@
     "loadName": "opentrons_96_deep_well_adapter_nest_wellplate_2ml_deep"
   },
   "namespace": "opentrons",
-  "version": 2,
+  "version": 1,
   "schemaVersion": 3,
   "cornerOffsetFromSlot": {
     "x": 0,

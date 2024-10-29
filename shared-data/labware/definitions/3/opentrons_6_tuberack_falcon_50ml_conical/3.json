@@ -23,7 +23,7 @@
     "zDimension": 120.3
   },
   "schemaVersion": 3,
-  "version": 2,
+  "version": 1,
   "namespace": "opentrons",
   "wells": {
     "B1": {

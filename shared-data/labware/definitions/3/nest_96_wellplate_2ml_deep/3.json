@@ -1209,7 +1209,7 @@
     "magneticModuleEngageHeight": 6.8
   },
   "namespace": "opentrons",
-  "version": 3,
+  "version": 1,
   "schemaVersion": 3,
   "cornerOffsetFromSlot": {
     "x": 0,

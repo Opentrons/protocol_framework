@@ -45,7 +45,7 @@
     "quirks": ["centerMultichannelOnWells", "touchTipDisabled"]
   },
   "namespace": "opentrons",
-  "version": 2,
+  "version": 1,
   "schemaVersion": 3,
   "cornerOffsetFromSlot": {
     "x": 0,

@@ -106,7 +106,7 @@
     "loadName": "opentrons_6_tuberack_nest_50ml_conical"
   },
   "namespace": "opentrons",
-  "version": 2,
+  "version": 1,
   "schemaVersion": 3,
   "cornerOffsetFromSlot": {
     "x": 0,

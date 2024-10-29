@@ -8,7 +8,7 @@
     ["A6", "B6", "C6", "D6"]
   ],
   "schemaVersion": 3,
-  "version": 3,
+  "version": 1,
   "namespace": "opentrons",
   "metadata": {
     "displayName": "Opentrons 24 Well Aluminum Block with Generic 2 mL Screwcap",

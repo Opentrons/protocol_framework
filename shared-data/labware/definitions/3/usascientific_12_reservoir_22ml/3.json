@@ -14,7 +14,7 @@
     ["A12"]
   ],
   "schemaVersion": 3,
-  "version": 2,
+  "version": 1,
   "namespace": "opentrons",
   "metadata": {
     "displayName": "USA Scientific 12 Well Reservoir 22 mL",

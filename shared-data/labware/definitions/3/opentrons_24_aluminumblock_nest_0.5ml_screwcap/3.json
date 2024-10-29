@@ -313,7 +313,7 @@
     "loadName": "opentrons_24_aluminumblock_nest_0.5ml_screwcap"
   },
   "namespace": "opentrons",
-  "version": 2,
+  "version": 1,
   "schemaVersion": 3,
   "cornerOffsetFromSlot": {
     "x": 0,
