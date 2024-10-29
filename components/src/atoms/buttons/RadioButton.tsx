@@ -55,12 +55,7 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
     setHovered,
     setNoHover,
   } = props
-
   const isLarge = radioButtonType === 'large'
-
-  const SettingButton = styled.input`
-    display: none;
-  `
 
   const AVAILABLE_BUTTON_STYLE = css`
     background: ${COLORS.blue35};
@@ -78,46 +73,6 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
     &:hover,
     &:active {
       background-color: ${disabled ? COLORS.grey35 : COLORS.blue60};
-    }
-  `
-
-  const DISABLED_BUTTON_STYLE = css`
-    background-color: ${COLORS.grey35};
-    color: ${COLORS.grey50};
-
-    &:hover,
-    &:active {
-      background-color: ${COLORS.grey35};
-    }
-
-    @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-      cursor: ${CURSOR_NOT_ALLOWED};
-    }
-  `
-
-  const SettingButtonLabel = styled.label`
-    border-radius: ${!largeDesktopBorderRadius
-      ? BORDERS.borderRadius40
-      : BORDERS.borderRadius8};
-    cursor: ${CURSOR_POINTER};
-    padding: ${SPACING.spacing12} ${SPACING.spacing16};
-    width: 100%;
-
-    ${isSelected ? SELECTED_BUTTON_STYLE : AVAILABLE_BUTTON_STYLE}
-    ${disabled && DISABLED_BUTTON_STYLE}
-
-    &:focus-visible {
-      outline: 2px solid ${COLORS.blue55};
-    }
-
-    @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-      cursor: ${CURSOR_DEFAULT};
-      padding: ${isLarge ? SPACING.spacing24 : SPACING.spacing20};
-      border-radius: ${BORDERS.borderRadius16};
-      display: ${maxLines != null ? '-webkit-box' : undefined};
-      -webkit-line-clamp: ${maxLines ?? undefined};
-      -webkit-box-orient: ${maxLines != null ? 'vertical' : undefined};
-      word-wrap: break-word;
     }
   `
 
@@ -149,10 +104,16 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
       />
       <SettingButtonLabel
         tabIndex={0}
+        isLarge={isLarge}
+        maxLines={maxLines}
+        largeDesktopBorderRadius={largeDesktopBorderRadius}
+        disabled={disabled}
+        isSelected={isSelected}
         role="label"
         htmlFor={id}
         onMouseEnter={setHovered}
         onMouseLeave={setNoHover}
+        css={isSelected ? SELECTED_BUTTON_STYLE : AVAILABLE_BUTTON_STYLE}
       >
         <Flex
           flexDirection={DIRECTION_ROW}
@@ -194,3 +155,54 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
     </Flex>
   )
 }
+const DISABLED_BUTTON_STYLE = css`
+  background-color: ${COLORS.grey35};
+  color: ${COLORS.grey50};
+
+  &:hover,
+  &:active {
+    background-color: ${COLORS.grey35};
+  }
+
+  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+    cursor: ${CURSOR_NOT_ALLOWED};
+  }
+`
+
+const SettingButton = styled.input`
+  display: none;
+`
+
+interface SettingsButtonLabelProps {
+  isSelected: boolean
+  disabled: boolean
+  largeDesktopBorderRadius: boolean
+  isLarge: boolean
+  maxLines?: number | null
+}
+
+const SettingButtonLabel = styled.label<SettingsButtonLabelProps>`
+  border-radius: ${({ largeDesktopBorderRadius }) =>
+    !largeDesktopBorderRadius ? BORDERS.borderRadius40 : BORDERS.borderRadius8};
+  cursor: ${CURSOR_POINTER};
+  padding: ${SPACING.spacing12} ${SPACING.spacing16};
+  width: 100%;
+
+  ${({ disabled }) => disabled && DISABLED_BUTTON_STYLE}
+  &:focus-visible {
+    outline: 2px solid ${COLORS.blue55};
+  }
+
+  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+    cursor: ${CURSOR_DEFAULT};
+    padding: ${({ largeDesktopBorderRadius }) =>
+      largeDesktopBorderRadius ? SPACING.spacing24 : SPACING.spacing20};
+    border-radius: ${BORDERS.borderRadius16};
+    display: ${({ maxLines }) =>
+      maxLines != null ? '-webkit-box' : undefined};
+    -webkit-line-clamp: ${({ maxLines }) => maxLines ?? undefined};
+    -webkit-box-orient: ${({ maxLines }) =>
+      maxLines != null ? 'vertical' : undefined};
+    word-wrap: break-word;
+  }
+`
