@@ -58,6 +58,10 @@ export const HoveredItems = (
     hoveredLabware != null
       ? defs[hoveredLabware] ?? customLabwareDefs[hoveredLabware] ?? null
       : null
+  const selectedLabwareDef =
+    selectedLabwareDefUri != null
+      ? defs[selectedLabwareDefUri] ?? customLabwareDefs[selectedLabwareDefUri]
+      : null
 
   const orientation =
     hoveredSlotPosition != null
@@ -65,11 +69,11 @@ export const HoveredItems = (
       : null
 
   const nestedInfo: DeckLabelProps[] =
-    selectedLabwareDefUri != null &&
+    selectedLabwareDef != null &&
     (hoveredLabware == null || hoveredLabware !== selectedLabwareDefUri)
       ? [
           {
-            text: defs[selectedLabwareDefUri].metadata.displayName,
+            text: selectedLabwareDef.metadata.displayName,
             isLast: false,
             isSelected: true,
           },

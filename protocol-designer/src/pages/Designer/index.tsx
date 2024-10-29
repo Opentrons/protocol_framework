@@ -181,6 +181,7 @@ export function Designer(): JSX.Element {
               onClick={() => {
                 if (hasTrashEntity) {
                   navigate('/overview')
+                  dispatch(selectTerminalItem('__initial_setup__'))
                 } else {
                   makeSnackbar(t('trash_required') as string)
                 }
