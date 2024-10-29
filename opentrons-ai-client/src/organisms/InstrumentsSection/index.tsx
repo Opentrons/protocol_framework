@@ -16,6 +16,16 @@ import { INSTRUMENTS_STEP } from '../ProtocolSectionsContainer'
 import { ControlledDropdownMenu } from '../../atoms/ControlledDropdownMenu'
 import { ControlledRadioButtonGroup } from '../../molecules/ControlledRadioButtonGroup'
 
+export const ROBOT_FIELD_NAME = 'instruments.robot'
+export const PIPETTES_FIELD_NAME = 'instruments.pipettes'
+export const FLEX_GRIPPER_FIELD_NAME = 'instruments.flex_gripper'
+export const FLEX_GRIPPER = 'flex_gripper'
+export const NO_FLEX_GRIPPER = 'no_flex_gripper'
+export const OPENTRONS_FLEX = 'opentrons_flex'
+export const OPENTRONS_OT2 = 'opentrons_ot2'
+export const _96_CHANNEL_1000UL_PIPETTE = '96_channel_1000ul_pipette'
+export const TWO_PIPETTES = 'two_pipettes'
+
 export function InstrumentsSection(): JSX.Element | null {
   const { t } = useTranslation('create_protocol')
   const {
@@ -36,9 +46,8 @@ export function InstrumentsSection(): JSX.Element | null {
   //   { name: t(OTHER), value: OTHER },
   // ]
 
-  const isOtherPipettesSelected =
-    watch('instruments.pipettes') === 'other-pipettes'
-  const isOpentronsOT2Selected = watch('instruments.robot') === 'opentrons-ot2'
+  const isOtherPipettesSelected = watch(PIPETTES_FIELD_NAME) === TWO_PIPETTES
+  const isOpentronsOT2Selected = watch(ROBOT_FIELD_NAME) === OPENTRONS_OT2
 
   function handleConfirmButtonClick(): void {
     const step =
@@ -52,40 +61,40 @@ export function InstrumentsSection(): JSX.Element | null {
 
   const robotOptions = [
     {
-      id: 'opentrons-flex',
-      buttonLabel: 'Opentrons Flex',
-      buttonValue: 'opentrons-flex',
+      id: OPENTRONS_FLEX,
+      buttonLabel: t('opentrons_flex_label'),
+      buttonValue: OPENTRONS_FLEX,
     },
     {
-      id: 'opentrons-ot2',
-      buttonLabel: 'Opentrons OT-2',
-      buttonValue: 'opentrons-ot2',
+      id: OPENTRONS_OT2,
+      buttonLabel: t('opentrons_ot2_label'),
+      buttonValue: OPENTRONS_OT2,
     },
   ]
 
   const pipetteOptions = [
     {
-      id: '96-channel-1000ul-pipette',
-      buttonLabel: '96-Channel 1000µL pipette',
-      buttonValue: '96-channel-1000ul-pipette',
+      id: TWO_PIPETTES,
+      buttonLabel: t('two_pipettes_label'),
+      buttonValue: TWO_PIPETTES,
     },
     {
-      id: 'other-pipettes',
-      buttonLabel: 'Other pipettes',
-      buttonValue: 'other-pipettes',
+      id: _96_CHANNEL_1000UL_PIPETTE,
+      buttonLabel: t('96_channel_1000ul_pipette_label'),
+      buttonValue: _96_CHANNEL_1000UL_PIPETTE,
     },
   ]
 
   const flexGripperOptions = [
     {
-      id: 'flex-gripper',
-      buttonLabel: 'Yes, use the Flex Gripper',
-      buttonValue: 'flex-gripper',
+      id: FLEX_GRIPPER,
+      buttonLabel: t('flex_gripper_yes_label'),
+      buttonValue: FLEX_GRIPPER,
     },
     {
-      id: 'no-flex-gripper',
-      buttonLabel: 'No, do not use the Flex Gripper',
-      buttonValue: 'no-flex-gripper',
+      id: NO_FLEX_GRIPPER,
+      buttonLabel: t('flex_gripper_no_label'),
+      buttonValue: NO_FLEX_GRIPPER,
     },
   ]
 
@@ -97,18 +106,18 @@ export function InstrumentsSection(): JSX.Element | null {
     >
       <ControlledRadioButtonGroup
         radioButtons={robotOptions}
-        title="What robot would you like to use?"
-        name={'instruments.robot'}
-        defaultValue="opentrons-flex"
+        title={t('instruments_robot_title')}
+        name={ROBOT_FIELD_NAME}
+        defaultValue={OPENTRONS_FLEX}
       />
 
       <PipettesSection isOpentronsOT2Selected={isOpentronsOT2Selected}>
         {!isOpentronsOT2Selected && (
           <ControlledRadioButtonGroup
             radioButtons={pipetteOptions}
-            title="What pipettes would you like to use?"
-            name={'instruments.pipettes'}
-            defaultValue="96-channel-1000ul-pipette"
+            title={t('instruments_pipettes_title')}
+            name={PIPETTES_FIELD_NAME}
+            defaultValue={_96_CHANNEL_1000UL_PIPETTE}
           />
         )}
 
@@ -116,22 +125,24 @@ export function InstrumentsSection(): JSX.Element | null {
           <PipettesDropdown isOpentronsOT2Selected={isOpentronsOT2Selected}>
             {isOpentronsOT2Selected && (
               <StyledText desktopStyle="bodyDefaultSemiBold">
-                What instruments would you like to use?
+                {t('instruments_pipettes_title')}
               </StyledText>
             )}
             <ControlledDropdownMenu
               width="100%"
               dropdownType="neutral"
-              title="Left mount"
+              title={t('left_pipette_label')}
               name={''}
               options={[]}
+              placeholder={t('choose_pipette_placeholder')}
             />
             <ControlledDropdownMenu
               width="100%"
               dropdownType="neutral"
-              title="Right mount"
+              title={t('right_pipette_label')}
               name={''}
               options={[]}
+              placeholder={t('choose_pipette_placeholder')}
             />
           </PipettesDropdown>
         )}
@@ -140,9 +151,9 @@ export function InstrumentsSection(): JSX.Element | null {
       {!isOpentronsOT2Selected && (
         <ControlledRadioButtonGroup
           radioButtons={flexGripperOptions}
-          title="Do you want to use the Flex Gripper?"
-          name={'instruments.flex-gripper'}
-          defaultValue="flex-gripper"
+          title={t('instruments_flex_gripper_title')}
+          name={FLEX_GRIPPER_FIELD_NAME}
+          defaultValue={FLEX_GRIPPER}
         />
       )}
 
