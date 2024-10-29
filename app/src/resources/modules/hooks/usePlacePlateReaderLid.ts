@@ -1,11 +1,13 @@
-import {
-  type CreateCommand,
-  type OnDeckLabwareLocation,
-  type ModuleLocation,
-} from '@opentrons/shared-data'
-import { type UseRobotControlCommandsProps , useRobotControlCommands } from '/app/resources/maintenance_runs'
 import { useRunCurrentState } from '@opentrons/react-api-client'
 import { useCurrentRunId } from '../../runs'
+import { useRobotControlCommands } from '/app/resources/maintenance_runs'
+
+import type {
+  CreateCommand,
+  OnDeckLabwareLocation,
+  ModuleLocation,
+} from '@opentrons/shared-data'
+import type { UseRobotControlCommandsProps } from '/app/resources/maintenance_runs'
 
 interface UsePlacePlateReaderLidResult {
   handlePlaceReaderLid: () => Promise<void>
