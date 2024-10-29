@@ -228,8 +228,6 @@ export function ProtocolOverview(): JSX.Element {
     handleContinue: confirmExport,
   })
 
-  console.log({ showExportWarningModal, warning })
-
   return (
     <Fragment>
       {showEditMetadataModal ? (
