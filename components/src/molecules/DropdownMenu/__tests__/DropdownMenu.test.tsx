@@ -41,13 +41,11 @@ describe('DropdownMenu', () => {
       currentOption: mockOptions[0],
       dropdownType: 'neutral',
       title: 'Custom Dropdown',
-      caption: 'Select an option',
       tooltipText: 'This is a tooltip',
     }
     render(props)
 
     expect(screen.getByText('Custom Dropdown')).toBeInTheDocument()
-    expect(screen.getByText('Select an option')).toBeInTheDocument()
     expect(screen.getByText('Option 1')).toBeInTheDocument()
   })
 

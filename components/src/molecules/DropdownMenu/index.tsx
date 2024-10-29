@@ -19,7 +19,6 @@ import { Flex } from '../../primitives'
 import { Icon } from '../../icons'
 import { useHoverTooltip } from '../../tooltips'
 import { useOnClickOutside } from '../../interaction-enhancers'
-import { LegacyStyledText } from '../../atoms/StyledText/LegacyStyledText'
 import { MenuItem } from '../../atoms/MenuList/MenuItem'
 import { Tooltip } from '../../atoms/Tooltip'
 import { StyledText } from '../../atoms/StyledText'
@@ -55,8 +54,6 @@ export interface DropdownMenuProps {
   dropdownType?: DropdownBorder
   /** dropdown title */
   title?: string
-  /** dropdown item caption */
-  caption?: string | null
   /** text for tooltip */
   tooltipText?: string | null
   /** html tabindex property */
@@ -79,7 +76,6 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
     width = '9.125rem',
     dropdownType = 'rounded',
     title,
-    caption,
     tooltipText,
     tabIndex = 0,
     error,
@@ -197,11 +193,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
     }
   `
   return (
-    <Flex
-      flexDirection={DIRECTION_COLUMN}
-      ref={dropDownMenuWrapperRef}
-      gridGap={SPACING.spacing4}
-    >
+    <Flex flexDirection={DIRECTION_COLUMN} ref={dropDownMenuWrapperRef}>
       {title !== null ? (
         <Flex gridGap={SPACING.spacing8} paddingBottom={SPACING.spacing8}>
           <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
@@ -222,7 +214,11 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
           ) : null}
         </Flex>
       ) : null}
-      <Flex flexDirection={DIRECTION_COLUMN} position={POSITION_RELATIVE}>
+      <Flex
+        flexDirection={DIRECTION_COLUMN}
+        position={POSITION_RELATIVE}
+        paddingBottom={SPACING.spacing4}
+      >
         <Flex
           onClick={(e: MouseEvent) => {
             e.preventDefault()
@@ -302,11 +298,6 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
           </Flex>
         )}
       </Flex>
-      {caption != null ? (
-        <LegacyStyledText as="label" color={COLORS.grey60}>
-          {caption}
-        </LegacyStyledText>
-      ) : null}
       {error != null ? (
         <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.red50}>
           {error}
