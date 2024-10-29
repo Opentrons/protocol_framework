@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { SketchPicker } from 'react-color'
 import { yupResolver } from '@hookform/resolvers/yup'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import * as Yup from 'yup'
 import { Controller, useForm } from 'react-hook-form'
 import {
