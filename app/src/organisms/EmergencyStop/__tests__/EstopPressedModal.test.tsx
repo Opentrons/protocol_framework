@@ -1,16 +1,18 @@
 import type * as React from 'react'
 import { fireEvent, screen } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
-import { describe, it, vi, beforeEach, expect } from 'vitest'
+import { describe, it, vi, beforeEach, expect, Mock } from 'vitest'
 import { renderWithProviders } from '/app/__testing-utils__'
 import { useAcknowledgeEstopDisengageMutation } from '@opentrons/react-api-client'
 
 import { i18n } from '/app/i18n'
 import { getIsOnDevice } from '/app/redux/config'
 import { EstopPressedModal } from '../EstopPressedModal'
+import { usePlacePlateReaderLid } from '/app/resources/modules'
 
 vi.mock('@opentrons/react-api-client')
 vi.mock('/app/redux/config')
+vi.mock('/app/resources/modules')
 
 const render = (props: React.ComponentProps<typeof EstopPressedModal>) => {
   return renderWithProviders(<EstopPressedModal {...props} />, {
@@ -25,13 +27,19 @@ describe('EstopPressedModal - Touchscreen', () => {
     props = {
       isEngaged: true,
       closeModal: vi.fn(),
-      isWaitingForLogicalDisengage: false,
-      setShouldSeeLogicalDisengage: vi.fn(),
+      isWaitingForResumeOperation: false,
+      setIsWaitingForResumeOperation: vi.fn(),
     }
     vi.mocked(getIsOnDevice).mockReturnValue(true)
     vi.mocked(useAcknowledgeEstopDisengageMutation).mockReturnValue({
       setEstopPhysicalStatus: vi.fn(),
     } as any)
+
+    vi.mocked(usePlacePlateReaderLid).mockReturnValue({
+      handlePlaceReaderLid: vi.fn(),
+      isValidPlateReaderMove: false,
+      isExecuting: false,
+    })
   })
 
   it('should render text and button', () => {
@@ -59,6 +67,20 @@ describe('EstopPressedModal - Touchscreen', () => {
     render(props)
     fireEvent.click(screen.getByText('Resume robot operations'))
     expect(useAcknowledgeEstopDisengageMutation).toHaveBeenCalled()
+    expect(usePlacePlateReaderLid).toHaveBeenCalled()
+  })
+
+  it('should call a mock function to place the labware to a slot', () => {
+    vi.mocked(usePlacePlateReaderLid).mockReturnValue({
+      handlePlaceReaderLid: vi.fn(),
+      isValidPlateReaderMove: true,
+      isExecuting: true,
+    })
+
+    render(props)
+    fireEvent.click(screen.getByText('Resume robot operations'))
+    expect(useAcknowledgeEstopDisengageMutation).toHaveBeenCalled()
+    expect(usePlacePlateReaderLid).toHaveBeenCalled()
   })
 })
 
@@ -69,15 +91,19 @@ describe('EstopPressedModal - Desktop', () => {
     props = {
       isEngaged: true,
       closeModal: vi.fn(),
-      isDismissedModal: false,
-      setIsDismissedModal: vi.fn(),
-      isWaitingForLogicalDisengage: false,
-      setShouldSeeLogicalDisengage: vi.fn(),
+      isWaitingForResumeOperation: false,
+      setIsWaitingForResumeOperation: vi.fn(),
     }
     vi.mocked(getIsOnDevice).mockReturnValue(false)
     vi.mocked(useAcknowledgeEstopDisengageMutation).mockReturnValue({
       setEstopPhysicalStatus: vi.fn(),
     } as any)
+
+    vi.mocked(usePlacePlateReaderLid).mockReturnValue({
+      handlePlaceReaderLid: vi.fn(),
+      isValidPlateReaderMove: false,
+      isExecuting: false,
+    })
   })
   it('should render text and button', () => {
     render(props)
@@ -99,10 +125,18 @@ describe('EstopPressedModal - Desktop', () => {
     ).not.toBeDisabled()
   })
 
+  it('should resume robot operation button is disabled when waiting for labware plate to finish', () => {
+    props.isEngaged = false
+    props.isWaitingForResumeOperation = true
+    render(props)
+    expect(
+      screen.getByRole('button', { name: 'Resume robot operations' })
+    ).toBeDisabled()
+  })
+
   it('should call a mock function when clicking close icon', () => {
     render(props)
     fireEvent.click(screen.getByTestId('ModalHeader_icon_close_E-stop pressed'))
-    expect(props.setIsDismissedModal).toHaveBeenCalled()
     expect(props.closeModal).toHaveBeenCalled()
   })
 
