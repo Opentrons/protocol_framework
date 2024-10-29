@@ -34,11 +34,7 @@
       "x": 18.21,
       "y": 75.43,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "B1": {
       "depth": 44.05,
@@ -48,11 +44,7 @@
       "x": 18.21,
       "y": 56.15,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "C1": {
       "depth": 44.05,
@@ -62,11 +54,7 @@
       "x": 18.21,
       "y": 36.87,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "D1": {
       "depth": 44.05,
@@ -76,11 +64,7 @@
       "x": 18.21,
       "y": 17.59,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "A2": {
       "depth": 44.05,
@@ -90,11 +74,7 @@
       "x": 38.1,
       "y": 75.43,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "B2": {
       "depth": 44.05,
@@ -104,11 +84,7 @@
       "x": 38.1,
       "y": 56.15,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "C2": {
       "depth": 44.05,
@@ -118,11 +94,7 @@
       "x": 38.1,
       "y": 36.87,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "D2": {
       "depth": 44.05,
@@ -132,11 +104,7 @@
       "x": 38.1,
       "y": 17.59,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "A3": {
       "depth": 44.05,
@@ -146,11 +114,7 @@
       "x": 57.99,
       "y": 75.43,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "B3": {
       "depth": 44.05,
@@ -160,11 +124,7 @@
       "x": 57.99,
       "y": 56.15,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "C3": {
       "depth": 44.05,
@@ -174,11 +134,7 @@
       "x": 57.99,
       "y": 36.87,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "D3": {
       "depth": 44.05,
@@ -188,11 +144,7 @@
       "x": 57.99,
       "y": 17.59,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "A4": {
       "depth": 44.05,
@@ -202,11 +154,7 @@
       "x": 77.88,
       "y": 75.43,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "B4": {
       "depth": 44.05,
@@ -216,11 +164,7 @@
       "x": 77.88,
       "y": 56.15,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "C4": {
       "depth": 44.05,
@@ -230,11 +174,7 @@
       "x": 77.88,
       "y": 36.87,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "D4": {
       "depth": 44.05,
@@ -244,11 +184,7 @@
       "x": 77.88,
       "y": 17.59,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "A5": {
       "depth": 44.05,
@@ -258,11 +194,7 @@
       "x": 97.77,
       "y": 75.43,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "B5": {
       "depth": 44.05,
@@ -272,11 +204,7 @@
       "x": 97.77,
       "y": 56.15,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "C5": {
       "depth": 44.05,
@@ -286,11 +214,7 @@
       "x": 97.77,
       "y": 36.87,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "D5": {
       "depth": 44.05,
@@ -300,11 +224,7 @@
       "x": 97.77,
       "y": 17.59,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "A6": {
       "depth": 44.05,
@@ -314,11 +234,7 @@
       "x": 117.66,
       "y": 75.43,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "B6": {
       "depth": 44.05,
@@ -328,11 +244,7 @@
       "x": 117.66,
       "y": 56.15,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "C6": {
       "depth": 44.05,
@@ -342,11 +254,7 @@
       "x": 117.66,
       "y": 36.87,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     },
     "D6": {
       "depth": 44.05,
@@ -356,11 +264,7 @@
       "x": 117.66,
       "y": 17.59,
       "z": 41.3,
-<<<<<<< HEAD
-      "geometryDefinitionId": "conicalWell"
-=======
       "geometryDefinitionId": "a"
->>>>>>> d6bc79d0c8 (rename files to 1.json)
     }
   },
   "groups": [

@@ -822,7 +822,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "D10": {
       "depth": 14.95,
@@ -834,7 +833,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "E10": {
       "depth": 14.95,
@@ -846,7 +844,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "F10": {
       "depth": 14.95,
@@ -858,7 +855,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "G10": {
       "depth": 14.95,
@@ -870,7 +866,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "H10": {
       "depth": 14.95,
@@ -882,7 +877,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "A11": {
       "depth": 14.95,
@@ -894,7 +888,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "B11": {
       "depth": 14.95,
@@ -906,7 +899,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "C11": {
       "depth": 14.95,
@@ -918,7 +910,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "D11": {
       "depth": 14.95,
@@ -930,7 +921,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "E11": {
       "depth": 14.95,
@@ -942,7 +932,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "F11": {
       "depth": 14.95,
@@ -954,7 +943,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "G11": {
       "depth": 14.95,
@@ -966,7 +954,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "H11": {
       "depth": 14.95,
@@ -978,7 +965,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "A12": {
       "depth": 14.95,
@@ -990,7 +976,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "B12": {
       "depth": 14.95,
@@ -1002,7 +987,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "C12": {
       "depth": 14.95,
@@ -1014,7 +998,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "D12": {
       "depth": 14.95,
@@ -1026,7 +1009,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "E12": {
       "depth": 14.95,
@@ -1038,7 +1020,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "F12": {
       "depth": 14.95,
@@ -1050,7 +1031,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "G12": {
       "depth": 14.95,
@@ -1062,7 +1042,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     },
     "H12": {
       "depth": 14.95,
@@ -1074,7 +1053,6 @@
       "z": 1.05,
 
       "geometryDefinitionId": "a"
-
     }
   },
   "groups": [

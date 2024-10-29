@@ -1105,13 +1105,8 @@
     "loadName": "thermoscientificnunc_96_wellplate_1300ul"
   },
   "namespace": "opentrons",
-<<<<<<< HEAD
-  "version": "2",
-  "schemaVersion": "3",
-=======
   "version": 1,
   "schemaVersion": 3,
->>>>>>> d6bc79d0c8 (rename files to 1.json)
   "cornerOffsetFromSlot": {
     "x": 0,
     "y": 0,
