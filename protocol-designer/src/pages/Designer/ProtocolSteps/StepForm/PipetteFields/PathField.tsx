@@ -6,7 +6,6 @@ import {
   Flex,
   RadioButton,
   SPACING,
-  TOOLTIP_FIXED,
   TOOLTIP_TOP_START,
   Tooltip,
   useHoverTooltip,
@@ -21,14 +20,16 @@ import type { FieldProps } from '../types'
 import type { DisabledPathMap, ValuesForPath } from './utils'
 
 const PATH_ANIMATION_IMAGES = {
-  single: new URL('../../../../../assets/images/single.gif', import.meta.url)
-    .href,
+  single: new URL(
+    '../../../../../assets/images/path_single.gif',
+    import.meta.url
+  ).href,
   multiAspirate: new URL(
-    '../../../../../assets/images/multiAspirate.gif',
+    '../../../../../assets/images/path_multiAspirate.gif',
     import.meta.url
   ).href,
   multiDispense: new URL(
-    '../../../../../assets/images/multiDispense.gif',
+    '../../../../../assets/images/path_multiDispense.gif',
     import.meta.url
   ).href,
 }
@@ -63,7 +64,7 @@ interface PathButtonProps {
 function PathButton(props: PathButtonProps): JSX.Element {
   const { disabled, onClick, id, path, selected, subtitle } = props
   const [targetProps, tooltipProps] = useHoverTooltip({
-    placement: 'top-start',
+    placement: TOOLTIP_TOP_START,
   })
   const { t } = useTranslation(['form', 'protocol_steps'])
   // TODO: update the tooltip and images
