@@ -81,6 +81,10 @@ _RIGHT_SIDE_SLOTS = {
 }
 
 
+# The max height of the labware that can fit in a plate reader
+_PLATE_READER_MAX_LABWARE_Z_MM = 15
+
+
 class LabwareLoadParams(NamedTuple):
     """Parameters required to load a labware in Protocol Engine."""
 
@@ -816,6 +820,30 @@ class LabwareView(HasState[LabwareState]):
             if labware.location == location:
                 raise errors.LocationIsOccupiedError(
                     f"Labware {labware.loadName} is already present at {location}."
+                )
+
+    def raise_if_labware_incompatible_with_plate_reader(
+        self,
+        labware_id: str,
+    ) -> None:
+        """Raise an error if the labware is not compatible with the plate reader."""
+        labware_definition = self.get_definition(labware_id)
+        if labware_definition is not None:
+            number_of_wells = len(labware_definition.wells)
+            if number_of_wells != 96:
+                raise errors.LabwareMovementNotAllowedError(
+                    f"Cannot move '{labware_definition.parameters.loadName}'"
+                    f" into plate reader because the labware contains {number_of_wells}"
+                    f" wells where 96 wells is expected."
+                )
+            elif (
+                labware_definition.dimensions.zDimension
+                > _PLATE_READER_MAX_LABWARE_Z_MM
+            ):
+                raise errors.LabwareMovementNotAllowedError(
+                    f"Cannot move '{labware_definition.parameters.loadName}'"
+                    f" into plate reader because the maximum allowed labware height"
+                    f" is {_PLATE_READER_MAX_LABWARE_Z_MM}mm."
                 )
 
     def raise_if_labware_cannot_be_stacked(  # noqa: C901
