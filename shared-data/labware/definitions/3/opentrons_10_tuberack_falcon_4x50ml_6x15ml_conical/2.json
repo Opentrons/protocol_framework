@@ -34,7 +34,7 @@
       "x": 13.88,
       "y": 67.75,
       "z": 6.85,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B1": {
       "totalLiquidVolume": 15000,
@@ -44,7 +44,7 @@
       "x": 13.88,
       "y": 42.75,
       "z": 6.85,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "C1": {
       "totalLiquidVolume": 15000,
@@ -54,7 +54,7 @@
       "x": 13.88,
       "y": 17.75,
       "z": 6.85,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A2": {
       "totalLiquidVolume": 15000,
@@ -64,7 +64,7 @@
       "x": 38.88,
       "y": 67.75,
       "z": 6.85,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B2": {
       "totalLiquidVolume": 15000,
@@ -74,7 +74,7 @@
       "x": 38.88,
       "y": 42.75,
       "z": 6.85,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "C2": {
       "totalLiquidVolume": 15000,
@@ -84,7 +84,7 @@
       "x": 38.88,
       "y": 17.75,
       "z": 6.85,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A3": {
       "totalLiquidVolume": 50000,
@@ -172,7 +172,7 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "a": {
+    "conicalWell": {
       "sections": [
         {
           "shape": "spherical",

@@ -28,7 +28,7 @@
       "x": 63.88,
       "y": 42.74,
       "z": 4.55,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     }
   },
   "groups": [
@@ -55,7 +55,7 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "a": {
+    "cuboidalWell": {
       "sections": []
     }
   }

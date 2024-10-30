@@ -8,7 +8,7 @@
       "x": 19,
       "y": 74,
       "z": 5.78,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B1": {
       "totalLiquidVolume": 15000,
@@ -18,7 +18,7 @@
       "x": 19,
       "y": 42.5,
       "z": 5.78,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "C1": {
       "totalLiquidVolume": 15000,
@@ -28,7 +28,7 @@
       "x": 19,
       "y": 11,
       "z": 5.78,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A2": {
       "totalLiquidVolume": 15000,
@@ -38,7 +38,7 @@
       "x": 42,
       "y": 74,
       "z": 5.78,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B2": {
       "totalLiquidVolume": 15000,
@@ -48,7 +48,7 @@
       "x": 42,
       "y": 42.5,
       "z": 5.78,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "C2": {
       "totalLiquidVolume": 15000,
@@ -58,7 +58,7 @@
       "x": 42,
       "y": 11,
       "z": 5.78,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A3": {
       "totalLiquidVolume": 50000,
@@ -68,7 +68,7 @@
       "x": 70.2,
       "y": 62.2,
       "z": 5.95,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B3": {
       "totalLiquidVolume": 50000,
@@ -78,7 +78,7 @@
       "x": 70.2,
       "y": 16.8,
       "z": 5.95,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A4": {
       "totalLiquidVolume": 50000,
@@ -88,7 +88,7 @@
       "x": 106.1,
       "y": 62.2,
       "z": 5.95,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B4": {
       "totalLiquidVolume": 50000,
@@ -98,7 +98,7 @@
       "x": 106.1,
       "y": 16.8,
       "z": 5.95,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     }
   },
   "brand": {
@@ -170,7 +170,7 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "a": {
+    "conicalWell": {
       "sections": []
     }
   }

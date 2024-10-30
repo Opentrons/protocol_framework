@@ -37,7 +37,7 @@
       "x": 20.75,
       "y": 16.88,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "C1": {
       "shape": "circular",
@@ -47,7 +47,7 @@
       "x": 20.75,
       "y": 34.13,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B1": {
       "shape": "circular",
@@ -57,7 +57,7 @@
       "x": 20.75,
       "y": 51.38,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A1": {
       "shape": "circular",
@@ -67,7 +67,7 @@
       "x": 20.75,
       "y": 68.63,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "D2": {
       "shape": "circular",
@@ -77,7 +77,7 @@
       "x": 38,
       "y": 16.88,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "C2": {
       "shape": "circular",
@@ -87,7 +87,7 @@
       "x": 38,
       "y": 34.13,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B2": {
       "shape": "circular",
@@ -97,7 +97,7 @@
       "x": 38,
       "y": 51.38,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A2": {
       "shape": "circular",
@@ -107,7 +107,7 @@
       "x": 38,
       "y": 68.63,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "D3": {
       "shape": "circular",
@@ -117,7 +117,7 @@
       "x": 55.25,
       "y": 16.88,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "C3": {
       "shape": "circular",
@@ -127,7 +127,7 @@
       "x": 55.25,
       "y": 34.13,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B3": {
       "shape": "circular",
@@ -137,7 +137,7 @@
       "x": 55.25,
       "y": 51.38,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A3": {
       "shape": "circular",
@@ -147,7 +147,7 @@
       "x": 55.25,
       "y": 68.63,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "D4": {
       "shape": "circular",
@@ -157,7 +157,7 @@
       "x": 72.5,
       "y": 16.88,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "C4": {
       "shape": "circular",
@@ -167,7 +167,7 @@
       "x": 72.5,
       "y": 34.13,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B4": {
       "shape": "circular",
@@ -177,7 +177,7 @@
       "x": 72.5,
       "y": 51.38,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A4": {
       "shape": "circular",
@@ -187,7 +187,7 @@
       "x": 72.5,
       "y": 68.63,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "D5": {
       "shape": "circular",
@@ -197,7 +197,7 @@
       "x": 89.75,
       "y": 16.88,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "C5": {
       "shape": "circular",
@@ -207,7 +207,7 @@
       "x": 89.75,
       "y": 34.13,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B5": {
       "shape": "circular",
@@ -217,7 +217,7 @@
       "x": 89.75,
       "y": 51.38,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A5": {
       "shape": "circular",
@@ -227,7 +227,7 @@
       "x": 89.75,
       "y": 68.63,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "D6": {
       "shape": "circular",
@@ -237,7 +237,7 @@
       "x": 107,
       "y": 16.88,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "C6": {
       "shape": "circular",
@@ -247,7 +247,7 @@
       "x": 107,
       "y": 34.13,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B6": {
       "shape": "circular",
@@ -257,7 +257,7 @@
       "x": 107,
       "y": 51.38,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A6": {
       "shape": "circular",
@@ -267,7 +267,7 @@
       "x": 107,
       "y": 68.63,
       "z": 6.7,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     }
   },
   "brand": {
@@ -323,7 +323,7 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "a": {
+    "conicalWell": {
       "sections": []
     }
   }

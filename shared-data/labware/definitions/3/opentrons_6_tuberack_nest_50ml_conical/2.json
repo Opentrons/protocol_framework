@@ -31,7 +31,7 @@
       "x": 35.5,
       "y": 60.24,
       "z": 7.3,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B1": {
       "depth": 113.05,
@@ -41,7 +41,7 @@
       "x": 35.5,
       "y": 25.24,
       "z": 7.3,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A2": {
       "depth": 113.05,
@@ -51,7 +51,7 @@
       "x": 70.5,
       "y": 60.24,
       "z": 7.3,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B2": {
       "depth": 113.05,
@@ -61,7 +61,7 @@
       "x": 70.5,
       "y": 25.24,
       "z": 7.3,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A3": {
       "depth": 113.05,
@@ -71,7 +71,7 @@
       "x": 105.5,
       "y": 60.24,
       "z": 7.3,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B3": {
       "depth": 113.05,
@@ -81,7 +81,7 @@
       "x": 105.5,
       "y": 25.24,
       "z": 7.3,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     }
   },
   "groups": [
@@ -114,7 +114,7 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "a": {
+    "conicalWell": {
       "sections": [
         {
           "shape": "conical",

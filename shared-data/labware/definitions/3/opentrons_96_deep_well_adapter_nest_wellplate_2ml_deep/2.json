@@ -39,7 +39,7 @@
       "x": 14.3,
       "y": 74.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "B1": {
       "depth": 38,
@@ -50,7 +50,7 @@
       "x": 14.3,
       "y": 65.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "C1": {
       "depth": 38,
@@ -61,7 +61,7 @@
       "x": 14.3,
       "y": 56.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "D1": {
       "depth": 38,
@@ -72,7 +72,7 @@
       "x": 14.3,
       "y": 47.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "E1": {
       "depth": 38,
@@ -83,7 +83,7 @@
       "x": 14.3,
       "y": 38.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "F1": {
       "depth": 38,
@@ -94,7 +94,7 @@
       "x": 14.3,
       "y": 29.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "G1": {
       "depth": 38,
@@ -105,7 +105,7 @@
       "x": 14.3,
       "y": 20.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "H1": {
       "depth": 38,
@@ -116,7 +116,7 @@
       "x": 14.3,
       "y": 11.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "A2": {
       "depth": 38,
@@ -127,7 +127,7 @@
       "x": 23.3,
       "y": 74.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "B2": {
       "depth": 38,
@@ -138,7 +138,7 @@
       "x": 23.3,
       "y": 65.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "C2": {
       "depth": 38,
@@ -149,7 +149,7 @@
       "x": 23.3,
       "y": 56.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "D2": {
       "depth": 38,
@@ -160,7 +160,7 @@
       "x": 23.3,
       "y": 47.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "E2": {
       "depth": 38,
@@ -171,7 +171,7 @@
       "x": 23.3,
       "y": 38.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "F2": {
       "depth": 38,
@@ -182,7 +182,7 @@
       "x": 23.3,
       "y": 29.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "G2": {
       "depth": 38,
@@ -193,7 +193,7 @@
       "x": 23.3,
       "y": 20.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "H2": {
       "depth": 38,
@@ -204,7 +204,7 @@
       "x": 23.3,
       "y": 11.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "A3": {
       "depth": 38,
@@ -215,7 +215,7 @@
       "x": 32.3,
       "y": 74.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "B3": {
       "depth": 38,
@@ -226,7 +226,7 @@
       "x": 32.3,
       "y": 65.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "C3": {
       "depth": 38,
@@ -237,7 +237,7 @@
       "x": 32.3,
       "y": 56.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "D3": {
       "depth": 38,
@@ -248,7 +248,7 @@
       "x": 32.3,
       "y": 47.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "E3": {
       "depth": 38,
@@ -259,7 +259,7 @@
       "x": 32.3,
       "y": 38.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "F3": {
       "depth": 38,
@@ -270,7 +270,7 @@
       "x": 32.3,
       "y": 29.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "G3": {
       "depth": 38,
@@ -281,7 +281,7 @@
       "x": 32.3,
       "y": 20.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "H3": {
       "depth": 38,
@@ -292,7 +292,7 @@
       "x": 32.3,
       "y": 11.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "A4": {
       "depth": 38,
@@ -303,7 +303,7 @@
       "x": 41.3,
       "y": 74.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "B4": {
       "depth": 38,
@@ -314,7 +314,7 @@
       "x": 41.3,
       "y": 65.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "C4": {
       "depth": 38,
@@ -325,7 +325,7 @@
       "x": 41.3,
       "y": 56.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "D4": {
       "depth": 38,
@@ -336,7 +336,7 @@
       "x": 41.3,
       "y": 47.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "E4": {
       "depth": 38,
@@ -347,7 +347,7 @@
       "x": 41.3,
       "y": 38.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "F4": {
       "depth": 38,
@@ -358,7 +358,7 @@
       "x": 41.3,
       "y": 29.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "G4": {
       "depth": 38,
@@ -369,7 +369,7 @@
       "x": 41.3,
       "y": 20.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "H4": {
       "depth": 38,
@@ -380,7 +380,7 @@
       "x": 41.3,
       "y": 11.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "A5": {
       "depth": 38,
@@ -391,7 +391,7 @@
       "x": 50.3,
       "y": 74.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "B5": {
       "depth": 38,
@@ -402,7 +402,7 @@
       "x": 50.3,
       "y": 65.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "C5": {
       "depth": 38,
@@ -413,7 +413,7 @@
       "x": 50.3,
       "y": 56.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "D5": {
       "depth": 38,
@@ -424,7 +424,7 @@
       "x": 50.3,
       "y": 47.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "E5": {
       "depth": 38,
@@ -435,7 +435,7 @@
       "x": 50.3,
       "y": 38.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "F5": {
       "depth": 38,
@@ -446,7 +446,7 @@
       "x": 50.3,
       "y": 29.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "G5": {
       "depth": 38,
@@ -457,7 +457,7 @@
       "x": 50.3,
       "y": 20.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "H5": {
       "depth": 38,
@@ -468,7 +468,7 @@
       "x": 50.3,
       "y": 11.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "A6": {
       "depth": 38,
@@ -479,7 +479,7 @@
       "x": 59.3,
       "y": 74.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "B6": {
       "depth": 38,
@@ -490,7 +490,7 @@
       "x": 59.3,
       "y": 65.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "C6": {
       "depth": 38,
@@ -501,7 +501,7 @@
       "x": 59.3,
       "y": 56.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "D6": {
       "depth": 38,
@@ -512,7 +512,7 @@
       "x": 59.3,
       "y": 47.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "E6": {
       "depth": 38,
@@ -523,7 +523,7 @@
       "x": 59.3,
       "y": 38.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "F6": {
       "depth": 38,
@@ -534,7 +534,7 @@
       "x": 59.3,
       "y": 29.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "G6": {
       "depth": 38,
@@ -545,7 +545,7 @@
       "x": 59.3,
       "y": 20.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "H6": {
       "depth": 38,
@@ -556,7 +556,7 @@
       "x": 59.3,
       "y": 11.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "A7": {
       "depth": 38,
@@ -567,7 +567,7 @@
       "x": 68.3,
       "y": 74.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "B7": {
       "depth": 38,
@@ -578,7 +578,7 @@
       "x": 68.3,
       "y": 65.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "C7": {
       "depth": 38,
@@ -589,7 +589,7 @@
       "x": 68.3,
       "y": 56.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "D7": {
       "depth": 38,
@@ -600,7 +600,7 @@
       "x": 68.3,
       "y": 47.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "E7": {
       "depth": 38,
@@ -611,7 +611,7 @@
       "x": 68.3,
       "y": 38.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "F7": {
       "depth": 38,
@@ -622,7 +622,7 @@
       "x": 68.3,
       "y": 29.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "G7": {
       "depth": 38,
@@ -633,7 +633,7 @@
       "x": 68.3,
       "y": 20.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "H7": {
       "depth": 38,
@@ -644,7 +644,7 @@
       "x": 68.3,
       "y": 11.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "A8": {
       "depth": 38,
@@ -655,7 +655,7 @@
       "x": 77.3,
       "y": 74.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "B8": {
       "depth": 38,
@@ -666,7 +666,7 @@
       "x": 77.3,
       "y": 65.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "C8": {
       "depth": 38,
@@ -677,7 +677,7 @@
       "x": 77.3,
       "y": 56.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "D8": {
       "depth": 38,
@@ -688,7 +688,7 @@
       "x": 77.3,
       "y": 47.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "E8": {
       "depth": 38,
@@ -699,7 +699,7 @@
       "x": 77.3,
       "y": 38.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "F8": {
       "depth": 38,
@@ -710,7 +710,7 @@
       "x": 77.3,
       "y": 29.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "G8": {
       "depth": 38,
@@ -721,7 +721,7 @@
       "x": 77.3,
       "y": 20.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "H8": {
       "depth": 38,
@@ -732,7 +732,7 @@
       "x": 77.3,
       "y": 11.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "A9": {
       "depth": 38,
@@ -743,7 +743,7 @@
       "x": 86.3,
       "y": 74.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "B9": {
       "depth": 38,
@@ -754,7 +754,7 @@
       "x": 86.3,
       "y": 65.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "C9": {
       "depth": 38,
@@ -765,7 +765,7 @@
       "x": 86.3,
       "y": 56.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "D9": {
       "depth": 38,
@@ -776,7 +776,7 @@
       "x": 86.3,
       "y": 47.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "E9": {
       "depth": 38,
@@ -787,7 +787,7 @@
       "x": 86.3,
       "y": 38.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "F9": {
       "depth": 38,
@@ -798,7 +798,7 @@
       "x": 86.3,
       "y": 29.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "G9": {
       "depth": 38,
@@ -809,7 +809,7 @@
       "x": 86.3,
       "y": 20.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "H9": {
       "depth": 38,
@@ -820,7 +820,7 @@
       "x": 86.3,
       "y": 11.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "A10": {
       "depth": 38,
@@ -831,7 +831,7 @@
       "x": 95.3,
       "y": 74.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "B10": {
       "depth": 38,
@@ -842,7 +842,7 @@
       "x": 95.3,
       "y": 65.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "C10": {
       "depth": 38,
@@ -853,7 +853,7 @@
       "x": 95.3,
       "y": 56.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "D10": {
       "depth": 38,
@@ -864,7 +864,7 @@
       "x": 95.3,
       "y": 47.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "E10": {
       "depth": 38,
@@ -875,7 +875,7 @@
       "x": 95.3,
       "y": 38.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "F10": {
       "depth": 38,
@@ -886,7 +886,7 @@
       "x": 95.3,
       "y": 29.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "G10": {
       "depth": 38,
@@ -897,7 +897,7 @@
       "x": 95.3,
       "y": 20.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "H10": {
       "depth": 38,
@@ -908,7 +908,7 @@
       "x": 95.3,
       "y": 11.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "A11": {
       "depth": 38,
@@ -919,7 +919,7 @@
       "x": 104.3,
       "y": 74.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "B11": {
       "depth": 38,
@@ -930,7 +930,7 @@
       "x": 104.3,
       "y": 65.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "C11": {
       "depth": 38,
@@ -941,7 +941,7 @@
       "x": 104.3,
       "y": 56.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "D11": {
       "depth": 38,
@@ -952,7 +952,7 @@
       "x": 104.3,
       "y": 47.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "E11": {
       "depth": 38,
@@ -963,7 +963,7 @@
       "x": 104.3,
       "y": 38.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "F11": {
       "depth": 38,
@@ -974,7 +974,7 @@
       "x": 104.3,
       "y": 29.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "G11": {
       "depth": 38,
@@ -985,7 +985,7 @@
       "x": 104.3,
       "y": 20.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "H11": {
       "depth": 38,
@@ -996,7 +996,7 @@
       "x": 104.3,
       "y": 11.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "A12": {
       "depth": 38,
@@ -1007,7 +1007,7 @@
       "x": 113.3,
       "y": 74.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "B12": {
       "depth": 38,
@@ -1018,7 +1018,7 @@
       "x": 113.3,
       "y": 65.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "C12": {
       "depth": 38,
@@ -1029,7 +1029,7 @@
       "x": 113.3,
       "y": 56.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "D12": {
       "depth": 38,
@@ -1040,7 +1040,7 @@
       "x": 113.3,
       "y": 47.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "E12": {
       "depth": 38,
@@ -1051,7 +1051,7 @@
       "x": 113.3,
       "y": 38.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "F12": {
       "depth": 38,
@@ -1062,7 +1062,7 @@
       "x": 113.3,
       "y": 29.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "G12": {
       "depth": 38,
@@ -1073,7 +1073,7 @@
       "x": 113.3,
       "y": 20.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     },
     "H12": {
       "depth": 38,
@@ -1084,7 +1084,7 @@
       "x": 113.3,
       "y": 11.15,
       "z": 4.25,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "cuboidalWell"
     }
   },
   "groups": [
@@ -1215,7 +1215,7 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "a": {
+    "cuboidalWell": {
       "sections": [
         {
           "shape": "cuboidal",

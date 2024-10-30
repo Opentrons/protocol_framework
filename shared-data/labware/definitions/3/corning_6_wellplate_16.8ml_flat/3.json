@@ -33,7 +33,7 @@
       "x": 24.76,
       "y": 23.16,
       "z": 2.87,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A1": {
       "shape": "circular",
@@ -43,7 +43,7 @@
       "x": 24.76,
       "y": 62.28,
       "z": 2.87,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B2": {
       "shape": "circular",
@@ -53,7 +53,7 @@
       "x": 63.88,
       "y": 23.16,
       "z": 2.87,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A2": {
       "shape": "circular",
@@ -63,7 +63,7 @@
       "x": 63.88,
       "y": 62.28,
       "z": 2.87,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "B3": {
       "shape": "circular",
@@ -73,7 +73,7 @@
       "x": 103,
       "y": 23.16,
       "z": 2.87,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     },
     "A3": {
       "shape": "circular",
@@ -83,7 +83,7 @@
       "x": 103,
       "y": 62.28,
       "z": 2.87,
-      "geometryDefinitionId": "a"
+      "geometryDefinitionId": "conicalWell"
     }
   },
   "brand": {
@@ -114,7 +114,7 @@
     }
   },
   "innerLabwareGeometry": {
-    "a": {
+    "conicalWell": {
       "sections": [
         {
           "shape": "conical",
