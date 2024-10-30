@@ -16,6 +16,8 @@ export const chatPromptAtom = atom<string>('')
 
 export const chatHistoryAtom = atom<Chat[]>([])
 
+export const feedbackModalAtom = atom<boolean>(false)
+
 export const tokenAtom = atom<string | null>(null)
 
 export const mixpanelAtom = atom<Mixpanel | null>({

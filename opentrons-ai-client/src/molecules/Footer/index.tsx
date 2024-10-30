@@ -40,6 +40,7 @@ export function Footer(): JSX.Element {
       backgroundColor={COLORS.grey10}
       alignItems={ALIGN_CENTER}
       justifyContent={JUSTIFY_CENTER}
+      paddingTop={SPACING.spacing24}
     >
       <FooterText>
         <Trans

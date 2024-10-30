@@ -3,12 +3,13 @@ import { DIRECTION_COLUMN, Flex, SPACING } from '@opentrons/components'
 
 import { useAtom } from 'jotai'
 import { useRef, useEffect } from 'react'
-import { chatDataAtom } from '../../resources/atoms'
+import { chatDataAtom, feedbackModalAtom } from '../../resources/atoms'
 import { ChatDisplay } from '../../molecules/ChatDisplay'
 import { ChatFooter } from '../../molecules/ChatFooter'
 import { PromptGuide } from '../../molecules/PromptGuide'
 import styled from 'styled-components'
 import { Footer } from '../../molecules/Footer'
+import { FeedbackModal } from '../../molecules/FeedbackModal'
 
 export interface InputType {
   userPrompt: string
@@ -23,6 +24,7 @@ export function Chat(): JSX.Element | null {
 
   const [chatData] = useAtom(chatDataAtom)
   const scrollRef = useRef<HTMLSpanElement | null>(null)
+  const [showFeedbackModal] = useAtom(feedbackModalAtom)
 
   useEffect(() => {
     if (scrollRef.current != null)
@@ -64,6 +66,7 @@ export function Chat(): JSX.Element | null {
         </Flex>
         <ChatFooter />
         <Footer></Footer>
+        {showFeedbackModal ? <FeedbackModal /> : null}
       </Flex>
     </FormProvider>
   )
