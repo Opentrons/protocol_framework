@@ -128,7 +128,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         nozzles={String(propsForFields.nozzles.value) ?? null}
         hasFormError={
           visibleFormErrors?.some(error =>
-            error.dependentFields.includes('aspirate_labware')
+            error.dependentFields.includes('aspirate_wells')
           ) ?? false
         }
       />
