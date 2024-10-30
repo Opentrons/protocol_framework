@@ -125,6 +125,7 @@
     }
   },
   "time": "Time",
+  "tiprack": "Tiprack",
   "tip_position": "{{prefix}} tip position",
   "touch_tip_position": "Touch tip position from top",
   "valid_range": "Valid range between {{min}} - {{max}} {{unit}}",
