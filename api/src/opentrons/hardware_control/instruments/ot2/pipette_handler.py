@@ -220,7 +220,6 @@ class PipetteHandlerProvider(Generic[MountType]):
                 "back_compat_names",
                 "supported_tips",
                 "lld_settings",
-                "plunger_positions",
             ]
 
             instr_dict = instr.as_dict()

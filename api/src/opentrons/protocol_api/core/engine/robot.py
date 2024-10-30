@@ -2,6 +2,7 @@ from typing import Optional, Dict, Union
 from opentrons.hardware_control import SyncHardwareAPI
 
 from opentrons.types import Mount, MountType, Point, AxisType, AxisMapType
+from opentrons_shared_data.pipette import types as pip_types
 from opentrons_shared_data.pipette.ul_per_mm import (
     piecewise_volume_conversion,
     PIPETTING_FUNCTION_FALLBACK_VERSION,
@@ -76,7 +77,7 @@ class RobotCore(AbstractRobot):
         maybe_pipette_state = self._sync_hardware_api.get_attached_instrument(mount)
         if not maybe_pipette_state:
             return 0.0
-        return maybe_pipette_state.plunger_positions[position_name.value]
+        return maybe_pipette_state["plunger_positions"][position_name.value]
 
     def get_plunger_position_from_volume(
         self, mount: Mount, volume: float, action: PlungerPositionTypes, robot_type: str
@@ -84,22 +85,23 @@ class RobotCore(AbstractRobot):
         maybe_pipette_state = self._sync_hardware_api.get_attached_instrument(mount)
         if not maybe_pipette_state:
             return 0.0
-        tip_settings = maybe_pipette_state.supported_tips[
-            maybe_pipette_state.working_volume
-        ]
-
+        converted_working_volume = pip_types.PipetteTipType.check_and_return_type(
+            maybe_pipette_state["working_volume"], maybe_pipette_state["max_volume"]
+        )
+        tip_settings = maybe_pipette_state["supported_tips"][converted_working_volume]
+        plunger_bottom = maybe_pipette_state["plunger_positions"]["bottom"]
         if robot_type == "OT-2 Standard":
             convert_volume = self._ul_per_mm_conversion(
                 tip_settings, volume, action, PIPETTING_FUNCTION_FALLBACK_VERSION
             )
             mm = volume / convert_volume
-            position = maybe_pipette_state.plunger_positions.bottom + mm
+            position = plunger_bottom + mm
         else:
             convert_volume = self._ul_per_mm_conversion(
                 tip_settings, volume, action, PIPETTING_FUNCTION_LATEST_VERSION
             )
             mm = volume / convert_volume
-            position = maybe_pipette_state.plunger_positions.bottom - mm
+            position = plunger_bottom - mm
         return round(position, 6)
 
     def move_to(self, mount: Mount, destination: Point, speed: Optional[float]) -> None:
