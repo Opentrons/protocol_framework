@@ -21,7 +21,6 @@ import {
   getModuleType,
   HEATERSHAKER_MODULE_TYPE,
   MAGNETIC_BLOCK_TYPE,
-  MAGNETIC_BLOCK_V1,
   TEMPERATURE_MODULE_TYPE,
 } from '@opentrons/shared-data'
 import { uuid } from '../../utils'

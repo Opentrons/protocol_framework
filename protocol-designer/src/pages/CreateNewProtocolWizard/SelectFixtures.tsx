@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 import without from 'lodash/without'
-import { THERMOCYCLER_MODULE_V2 } from '@opentrons/shared-data'
 import {
   ALIGN_CENTER,
   BORDERS,
@@ -40,11 +39,6 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
   const modules = watch('modules')
   const { t } = useTranslation(['create_new_protocol', 'shared'])
 
-  const hasTC =
-    modules != null &&
-    Object.values(modules).some(
-      module => module.model === THERMOCYCLER_MODULE_V2
-    )
   const hasTrash = additionalEquipment.some(
     ae => ae === 'trashBin' || ae === 'wasteChute'
   )

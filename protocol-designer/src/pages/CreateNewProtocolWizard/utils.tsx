@@ -80,7 +80,9 @@ export const getNumSlotsAvailable = (
       return 0
     }
     // TODO: wire up absorbance reader
-    case ABSORBANCE_READER_V1:
+    case ABSORBANCE_READER_V1: {
+      return 1
+    }
     //  these modules don't support MoaM
     case THERMOCYCLER_MODULE_V1:
     case TEMPERATURE_MODULE_V1:
