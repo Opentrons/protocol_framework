@@ -244,9 +244,11 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
           </Flex>
         }
       >
-        {showFormErrorsAndWarnings ? (
-          <FormAlerts focusedField={focusedField} dirtyFields={dirtyFields} />
-        ) : null}
+        <FormAlerts
+          focusedField={focusedField}
+          dirtyFields={dirtyFields}
+          showFormErrorsAndWarnings={showFormErrorsAndWarnings}
+        />
         <ToolsComponent
           {...{
             formData,
