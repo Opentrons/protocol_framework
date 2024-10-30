@@ -83,15 +83,6 @@ export function PauseTools(props: StepFormProps): JSX.Element {
 
   const { pauseAction } = props.formData
 
-  useEffect(() => {
-    if (
-      pauseAction === PAUSE_UNTIL_RESUME ||
-      pauseAction === PAUSE_UNTIL_TIME
-    ) {
-      propsForFields.moduleId.updateValue(null)
-    }
-  }, [pauseAction])
-
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
   return (
