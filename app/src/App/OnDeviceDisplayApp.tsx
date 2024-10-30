@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, lazy, Suspense } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { css } from 'styled-components'
@@ -55,6 +55,7 @@ import { updateBrightness } from '/app/redux/shell'
 import { SLEEP_NEVER_MS } from '/app/local-resources/config'
 import { useProtocolReceiptToast, useSoftwareUpdatePoll } from './hooks'
 import { ODDTopLevelRedirects } from './ODDTopLevelRedirects'
+import { ReactQueryDevtools } from '/app/App/tools'
 
 import { OnDeviceDisplayAppFallback } from './OnDeviceDisplayAppFallback'
 
@@ -153,12 +154,6 @@ const onDeviceDisplayEvents: Array<keyof DocumentEventMap> = [
 
 const TURN_OFF_BACKLIGHT = '7'
 
-const ReactQueryDevtools = lazy(() =>
-  import('react-query/devtools/development').then(d => ({
-    default: d.ReactQueryDevtools,
-  }))
-)
-
 export const OnDeviceDisplayApp = (): JSX.Element => {
   useSoftwareUpdatePoll()
   const { brightness: userSetBrightness, sleepMs } = useSelector(
@@ -189,9 +184,7 @@ export const OnDeviceDisplayApp = (): JSX.Element => {
   // TODO (sb:6/12/23) Create a notification manager to set up preference and order of takeover modals
   return (
     <ApiHostProvider hostname="127.0.0.1">
-      <Suspense fallback={null}>
-        <ReactQueryDevtools initialIsOpen={false} position={'bottom-right'} />
-      </Suspense>
+      <ReactQueryDevtools />
       <InitialLoadingScreen>
         <LocalizationProvider>
           <ErrorBoundary FallbackComponent={OnDeviceDisplayAppFallback}>

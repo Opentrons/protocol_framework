@@ -1,4 +1,4 @@
-import { useState, Fragment, lazy, Suspense } from 'react'
+import { useState, Fragment } from 'react'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
 
@@ -38,14 +38,9 @@ import { useRobot, useIsFlex } from '/app/redux-resources/robots'
 import { ProtocolTimeline } from '/app/pages/Desktop/Protocols/ProtocolDetails/ProtocolTimeline'
 import { PortalRoot as ModalPortalRoot } from './portal'
 import { DesktopAppFallback } from './DesktopAppFallback'
+import { ReactQueryDevtools } from './tools'
 
 import type { RouteProps } from './types'
-
-const ReactQueryDevtools = lazy(() =>
-  import('react-query/devtools/development').then(d => ({
-    default: d.ReactQueryDevtools,
-  }))
-)
 
 export const DesktopApp = (): JSX.Element => {
   useSoftwareUpdatePoll()
@@ -112,11 +107,9 @@ export const DesktopApp = (): JSX.Element => {
 
   return (
     <NiceModal.Provider>
-      <Suspense fallback={null}>
-        <ReactQueryDevtools initialIsOpen={false} position={'bottom-right'} />
-      </Suspense>
       <LocalizationProvider>
         <ErrorBoundary FallbackComponent={DesktopAppFallback}>
+          <ReactQueryDevtools />
           <SystemLanguagePreferenceModal />
           <Navbar routes={desktopRoutes} />
           <ToasterOven>
