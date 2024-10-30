@@ -39,7 +39,7 @@ class MoveRelativeResult(DestinationPositionResult):
 
 
 class MoveRelativeImplementation(
-    AbstractCommandImpl[MoveRelativeParams, SuccessData[MoveRelativeResult, None]]
+    AbstractCommandImpl[MoveRelativeParams, SuccessData[MoveRelativeResult]]
 ):
     """Move relative command implementation."""
 
@@ -48,7 +48,7 @@ class MoveRelativeImplementation(
 
     async def execute(
         self, params: MoveRelativeParams
-    ) -> SuccessData[MoveRelativeResult, None]:
+    ) -> SuccessData[MoveRelativeResult]:
         """Move (jog) a given pipette a relative distance."""
         state_update = update_types.StateUpdate()
 
@@ -67,7 +67,6 @@ class MoveRelativeImplementation(
 
         return SuccessData(
             public=MoveRelativeResult(position=deck_point),
-            private=None,
             state_update=state_update,
         )
 

@@ -103,13 +103,17 @@ async def test_aspirate_implementation_no_prep(
 
     assert result == SuccessData(
         public=AspirateResult(volume=50, position=DeckPoint(x=1, y=2, z=3)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="abc",
                 new_location=update_types.Well(labware_id="123", well_name="A3"),
                 new_deck_point=DeckPoint(x=1, y=2, z=3),
-            )
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id="123",
+                well_name="A3",
+                volume_added=-50,
+            ),
         ),
     )
 
@@ -172,13 +176,17 @@ async def test_aspirate_implementation_with_prep(
 
     assert result == SuccessData(
         public=AspirateResult(volume=50, position=DeckPoint(x=1, y=2, z=3)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="abc",
                 new_location=update_types.Well(labware_id="123", well_name="A3"),
                 new_deck_point=DeckPoint(x=1, y=2, z=3),
-            )
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id="123",
+                well_name="A3",
+                volume_added=-50,
+            ),
         ),
     )
 
@@ -313,7 +321,12 @@ async def test_overpressure_error(
                     labware_id=labware_id, well_name=well_name
                 ),
                 new_deck_point=DeckPoint(x=position.x, y=position.y, z=position.z),
-            )
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id=labware_id,
+                well_name=well_name,
+                volume_added=update_types.CLEAR,
+            ),
         ),
     )
 
@@ -329,14 +342,10 @@ async def test_aspirate_implementation_meniscus(
 ) -> None:
     """Aspirate should update WellVolumeOffset when called with WellOrigin.MENISCUS."""
     location = LiquidHandlingWellLocation(
-        origin=WellOrigin.MENISCUS, offset=WellOffset(x=0, y=0, z=-1)
-    )
-    updated_location = LiquidHandlingWellLocation(
         origin=WellOrigin.MENISCUS,
         offset=WellOffset(x=0, y=0, z=-1),
         volumeOffset="operationVolume",
     )
-
     data = AspirateParams(
         pipetteId="abc",
         labwareId="123",
@@ -353,7 +362,7 @@ async def test_aspirate_implementation_meniscus(
             pipette_id="abc",
             labware_id="123",
             well_name="A3",
-            well_location=updated_location,
+            well_location=location,
             current_well=None,
             operation_volume=-50,
         ),
@@ -372,12 +381,16 @@ async def test_aspirate_implementation_meniscus(
 
     assert result == SuccessData(
         public=AspirateResult(volume=50, position=DeckPoint(x=1, y=2, z=3)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="abc",
                 new_location=update_types.Well(labware_id="123", well_name="A3"),
                 new_deck_point=DeckPoint(x=1, y=2, z=3),
-            )
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id="123",
+                well_name="A3",
+                volume_added=-50,
+            ),
         ),
     )

@@ -1,4 +1,4 @@
-"""v6 of our SQLite schema."""
+"""v7 of our SQLite schema."""
 import enum
 import sqlalchemy
 
@@ -21,6 +21,13 @@ class ProtocolKindSQLEnum(enum.Enum):
 
     STANDARD = "standard"
     QUICK_TRANSFER = "quick-transfer"
+
+
+class DataFileSourceSQLEnum(enum.Enum):
+    """The source this data file is from."""
+
+    UPLOADED = "uploaded"
+    GENERATED = "generated"
 
 
 protocol_table = sqlalchemy.Table(
@@ -236,6 +243,17 @@ data_files_table = sqlalchemy.Table(
     sqlalchemy.Column(
         "created_at",
         UTCDateTime,
+        nullable=False,
+    ),
+    sqlalchemy.Column(
+        "source",
+        sqlalchemy.Enum(
+            DataFileSourceSQLEnum,
+            values_callable=lambda obj: [e.value for e in obj],
+            validate_strings=True,
+            create_constraint=True,
+        ),
+        index=True,
         nullable=False,
     ),
 )

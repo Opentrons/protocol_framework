@@ -59,6 +59,12 @@
       "body2": "7.3.0 or higher",
       "body3": ". Please ensure your robot is updated to the correct version."
     },
+    "unused_hardware": {
+      "title": "Protocol has unused hardware"
+    },
+    "no_commands": {
+      "title": "Protocol has no steps"
+    },
     "change_magnet_module_model": {
       "title": "All existing engage heights will be cleared"
     },
@@ -269,10 +275,42 @@
     "no_commands": {
       "heading": "Your protocol has no steps",
       "body1": "This protocol has no steps in it- there's nothing for the robot to do! Before trying to run this on your robot add at least one step between your Starting Deck State and Final Deck State.",
-      "body2": "Learn more about building steps ",
-      "redesign": {
+      "body2": "Learn more about building steps "
+    },
+    "redesign": {
+      "unused_hardware": "Unused hardware:",
+      "unused_module": "{{module}} in slot {{slot}}",
+      "unused_pipette": "{{pipette}} on {{mount}} mount",
+      "unused_staging_area": "Staging area in slot {{slot}}",
+      "no_commands": {
         "heading": "Protocol has no steps",
-        "body": "This protocol has no steps. Before trying to run this protocol on your robot, add at least one step."
+        "body1": "This protocol has no steps. Before trying to run this protocol on your robot, add at least one step."
+      },
+      "unused_gripper": {
+        "heading": "Protocol has unused gripper",
+        "body1": "The Flex Gripper is not used in any step. You won't be able to run this protocol unless the gripper is attached to your robot.",
+        "body2": "If you don’t intend to use the gripper, remove it from your protocol."
+      },
+      "unused_hardware_content": {
+        "heading": "Protocol has unused hardware",
+        "body1": "The hardware listed below is not used in any step. You won't be able to run this protocol unless the hardware is attached to your robot.",
+        "body2": "If you don’t intend to use this hardware, remove it from your protocol."
+      },
+      "unused_module_content": {
+        "heading": "Protocol has unused module",
+        "body1": "The {{module}} in slot {{slot}} is not used in any step. You won't be able to run this protocol unless the module is attached to your robot.",
+        "body2": "If you don’t intend to use the module, remove it from your protocol."
+      },
+      "unused_pipette_content": {
+        "heading": "Protocol has unused pipette",
+        "body1": "The {{pipette}} on {{mount}} mount is currently not used in any step. You won't be able to run this protocol unless this pipette is attached to your robot.",
+        "body1_96ch": "The Flex 8-Channel 1000 μL is currently not used in any step. You won't be able to run this protocol unless this pipette is attached to your robot.",
+        "body2": "If you don’t intend to use the pipette, remove it from your protocol."
+      },
+      "unused_staging_area_content": {
+        "heading": "Protocol has unused staging area",
+        "body1": "The staging area in {{slot}} is not used in any step. You won't be able to run this protocol unless it is in your robot's deck configuration.",
+        "body2": "If you don’t intend to use the staging area, remove it from your protocol."
       }
     },
     "unused_pipette_and_module": {

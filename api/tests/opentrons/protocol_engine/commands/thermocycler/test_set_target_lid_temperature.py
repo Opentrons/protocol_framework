@@ -56,4 +56,4 @@ async def test_set_target_lid_temperature(
     result = await subject.execute(data)
 
     decoy.verify(await tc_hardware.set_target_lid_temperature(celsius=45.6), times=1)
-    assert result == SuccessData(public=expected_result, private=None)
+    assert result == SuccessData(public=expected_result)

@@ -112,4 +112,4 @@ async def test_run_extended_profile(
         ),
         times=1,
     )
-    assert result == SuccessData(public=expected_result, private=None)
+    assert result == SuccessData(public=expected_result)

@@ -126,7 +126,6 @@ async def test_manual_move_labware_implementation(
         public=MoveLabwareResult(
             offsetId="wowzers-a-new-offset-id",
         ),
-        private=None,
         state_update=update_types.StateUpdate(
             labware_location=update_types.LabwareLocationUpdate(
                 labware_id="my-cool-labware-id",
@@ -192,7 +191,6 @@ async def test_move_labware_implementation_on_labware(
         public=MoveLabwareResult(
             offsetId="wowzers-a-new-offset-id",
         ),
-        private=None,
         state_update=update_types.StateUpdate(
             labware_location=update_types.LabwareLocationUpdate(
                 labware_id="my-cool-labware-id",
@@ -280,7 +278,6 @@ async def test_gripper_move_labware_implementation(
         public=MoveLabwareResult(
             offsetId="wowzers-a-new-offset-id",
         ),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.CLEAR,
             labware_location=update_types.LabwareLocationUpdate(
@@ -516,7 +513,6 @@ async def test_gripper_move_to_waste_chute_implementation(
         public=MoveLabwareResult(
             offsetId="wowzers-a-new-offset-id",
         ),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.CLEAR,
             labware_location=update_types.LabwareLocationUpdate(

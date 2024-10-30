@@ -14,7 +14,7 @@ import {
   FLEX_ROBOT_TYPE,
   getDeckDefFromRobotType,
   getSimplestDeckConfigForProtocol,
-  parseInitialLoadedLabwareByAdapter,
+  getTopLabwareInfo,
   parseLabwareInfoByLiquidId,
   parseLiquidsInLoadOrder,
   THERMOCYCLER_MODULE_V1,
@@ -32,6 +32,8 @@ import {
 import type {
   CompletedProtocolAnalysis,
   ProtocolAnalysisOutput,
+  RunTimeCommand,
+  LoadLabwareRunTimeCommand,
 } from '@opentrons/shared-data'
 
 interface SetupLiquidsMapProps {
@@ -50,11 +52,14 @@ export function SetupLiquidsMap(
 
   if (protocolAnalysis == null) return null
 
+  const commands: RunTimeCommand[] = protocolAnalysis.commands
+  const loadLabwareCommands = commands?.filter(
+    (command): command is LoadLabwareRunTimeCommand =>
+      command.commandType === 'loadLabware'
+  )
+
   const liquids = parseLiquidsInLoadOrder(
     protocolAnalysis.liquids != null ? protocolAnalysis.liquids : [],
-    protocolAnalysis.commands ?? []
-  )
-  const initialLoadedLabwareByAdapter = parseInitialLoadedLabwareByAdapter(
     protocolAnalysis.commands ?? []
   )
   const robotType = protocolAnalysis.robotType ?? FLEX_ROBOT_TYPE
@@ -69,19 +74,11 @@ export function SetupLiquidsMap(
   const protocolModulesInfo = getProtocolModulesInfo(protocolAnalysis, deckDef)
 
   const modulesOnDeck = protocolModulesInfo.map(module => {
-    const labwareInAdapterInMod =
-      module.nestedLabwareId != null
-        ? initialLoadedLabwareByAdapter[module.nestedLabwareId]
-        : null
-    //  only rendering the labware on top most layer so
-    //  either the adapter or the labware are rendered but not both
-    const topLabwareDefinition =
-      labwareInAdapterInMod?.result?.definition ?? module.nestedLabwareDef
-    const topLabwareId =
-      labwareInAdapterInMod?.result?.labwareId ?? module.nestedLabwareId
-    const topLabwareDisplayName =
-      labwareInAdapterInMod?.params.displayName ??
-      module.nestedLabwareDisplayName
+    const {
+      topLabwareId,
+      topLabwareDefinition,
+      topLabwareDisplayName,
+    } = getTopLabwareInfo(module.nestedLabwareId ?? '', loadLabwareCommands)
     const nestedLabwareWellFill = getWellFillFromLabwareId(
       topLabwareId ?? '',
       liquids,
@@ -120,7 +117,7 @@ export function SetupLiquidsMap(
               hover={topLabwareId === hoverLabwareId && labwareHasLiquid}
               labwareHasLiquid={labwareHasLiquid}
               labwareId={topLabwareId}
-              displayName={topLabwareDisplayName}
+              displayName={topLabwareDisplayName ?? null}
               runId={runId}
             />
           </g>
@@ -140,59 +137,52 @@ export function SetupLiquidsMap(
         labwareOnDeck={[]}
         modulesOnDeck={modulesOnDeck}
       >
-        {map(
-          labwareRenderInfo,
-          ({ x, y, labwareDef, displayName }, labwareId) => {
-            const labwareInAdapter = initialLoadedLabwareByAdapter[labwareId]
-            //  only rendering the labware on top most layer so
-            //  either the adapter or the labware are rendered but not both
-            const topLabwareDefinition =
-              labwareInAdapter?.result?.definition ?? labwareDef
-            const topLabwareId =
-              labwareInAdapter?.result?.labwareId ?? labwareId
-            const topLabwareDisplayName =
-              labwareInAdapter?.params.displayName ?? displayName
-            const wellFill = getWellFillFromLabwareId(
-              topLabwareId ?? '',
-              liquids,
-              labwareByLiquidId
-            )
-            const labwareHasLiquid = !isEmpty(wellFill)
-            return (
-              <Fragment key={`LabwareSetup_Labware_${topLabwareId}_${x}${y}`}>
-                <g
-                  transform={`translate(${x},${y})`}
-                  onMouseEnter={() => {
-                    setHoverLabwareId(topLabwareId)
-                  }}
-                  onMouseLeave={() => {
-                    setHoverLabwareId('')
-                  }}
-                  onClick={() => {
-                    if (labwareHasLiquid) {
-                      setLiquidDetailsLabwareId(topLabwareId)
-                    }
-                  }}
-                  cursor={labwareHasLiquid ? 'pointer' : ''}
-                >
-                  <LabwareRender
-                    definition={topLabwareDefinition}
-                    wellFill={labwareHasLiquid ? wellFill : undefined}
-                    highlight={labwareId === hoverLabwareId && labwareHasLiquid}
-                  />
-                  <LabwareInfoOverlay
-                    definition={topLabwareDefinition}
-                    labwareId={topLabwareId}
-                    displayName={topLabwareDisplayName}
-                    runId={runId}
-                    hover={labwareId === hoverLabwareId && labwareHasLiquid}
-                    labwareHasLiquid={labwareHasLiquid}
-                  />
-                </g>
-              </Fragment>
-            )
-          }
-        )}
+        {map(labwareRenderInfo, ({ x, y }, labwareId) => {
+          const {
+            topLabwareId,
+            topLabwareDefinition,
+            topLabwareDisplayName,
+          } = getTopLabwareInfo(labwareId, loadLabwareCommands)
+          const wellFill = getWellFillFromLabwareId(
+            topLabwareId ?? '',
+            liquids,
+            labwareByLiquidId
+          )
+          const labwareHasLiquid = !isEmpty(wellFill)
+          return topLabwareDefinition != null ? (
+            <Fragment key={`LabwareSetup_Labware_${topLabwareId}_${x}${y}`}>
+              <g
+                transform={`translate(${x},${y})`}
+                onMouseEnter={() => {
+                  setHoverLabwareId(topLabwareId)
+                }}
+                onMouseLeave={() => {
+                  setHoverLabwareId('')
+                }}
+                onClick={() => {
+                  if (labwareHasLiquid) {
+                    setLiquidDetailsLabwareId(topLabwareId)
+                  }
+                }}
+                cursor={labwareHasLiquid ? 'pointer' : ''}
+              >
+                <LabwareRender
+                  definition={topLabwareDefinition}
+                  wellFill={labwareHasLiquid ? wellFill : undefined}
+                  highlight={labwareId === hoverLabwareId && labwareHasLiquid}
+                />
+                <LabwareInfoOverlay
+                  definition={topLabwareDefinition}
+                  labwareId={topLabwareId}
+                  displayName={topLabwareDisplayName ?? null}
+                  runId={runId}
+                  hover={labwareId === hoverLabwareId && labwareHasLiquid}
+                  labwareHasLiquid={labwareHasLiquid}
+                />
+              </g>
+            </Fragment>
+          ) : null
+        })}
       </BaseDeck>
       {liquidDetailsLabwareId != null && (
         <LiquidsLabwareDetailsModal

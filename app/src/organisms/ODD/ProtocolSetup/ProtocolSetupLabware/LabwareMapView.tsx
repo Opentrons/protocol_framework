@@ -3,18 +3,22 @@ import { BaseDeck, Flex } from '@opentrons/components'
 import {
   FLEX_ROBOT_TYPE,
   getSimplestDeckConfigForProtocol,
+  getTopLabwareInfo,
   THERMOCYCLER_MODULE_V1,
 } from '@opentrons/shared-data'
 
 import { getStandardDeckViewLayerBlockList } from '/app/local-resources/deck_configuration'
 import { getLabwareRenderInfo } from '/app/transformations/analysis'
 
+import type { LabwareOnDeck } from '@opentrons/components'
 import type {
   CompletedProtocolAnalysis,
   DeckDefinition,
   LabwareDefinition2,
-  LoadedLabwareByAdapter,
+  RunTimeCommand,
+  LoadLabwareRunTimeCommand,
 } from '@opentrons/shared-data'
+
 import type { AttachedProtocolModuleMatch } from '/app/transformations/analysis'
 
 interface LabwareMapViewProps {
@@ -23,7 +27,6 @@ interface LabwareMapViewProps {
     labwareDef: LabwareDefinition2,
     labwareId: string
   ) => void
-  initialLoadedLabwareByAdapter: LoadedLabwareByAdapter
   deckDef: DeckDefinition
   mostRecentAnalysis: CompletedProtocolAnalysis | null
 }
@@ -32,11 +35,16 @@ export function LabwareMapView(props: LabwareMapViewProps): JSX.Element {
   const {
     handleLabwareClick,
     attachedProtocolModuleMatches,
-    initialLoadedLabwareByAdapter,
     deckDef,
     mostRecentAnalysis,
   } = props
   const deckConfig = getSimplestDeckConfigForProtocol(mostRecentAnalysis)
+  const commands: RunTimeCommand[] = mostRecentAnalysis?.commands ?? []
+  const loadLabwareCommands = commands?.filter(
+    (command): command is LoadLabwareRunTimeCommand =>
+      command.commandType === 'loadLabware'
+  )
+
   const labwareRenderInfo =
     mostRecentAnalysis != null
       ? getLabwareRenderInfo(mostRecentAnalysis, deckDef)
@@ -44,16 +52,11 @@ export function LabwareMapView(props: LabwareMapViewProps): JSX.Element {
 
   const modulesOnDeck = attachedProtocolModuleMatches.map(module => {
     const { moduleDef, nestedLabwareDef, nestedLabwareId, slotName } = module
-    const labwareInAdapterInMod =
-      nestedLabwareId != null
-        ? initialLoadedLabwareByAdapter[nestedLabwareId]
-        : null
-    //  only rendering the labware on top most layer so
-    //  either the adapter or the labware are rendered but not both
-    const topLabwareDefinition =
-      labwareInAdapterInMod?.result?.definition ?? nestedLabwareDef
-    const topLabwareId =
-      labwareInAdapterInMod?.result?.labwareId ?? nestedLabwareId
+    const isLabwareStacked = nestedLabwareId != null && nestedLabwareDef != null
+    const { topLabwareId, topLabwareDefinition } = getTopLabwareInfo(
+      module.nestedLabwareId ?? '',
+      loadLabwareCommands
+    )
 
     return {
       moduleModel: moduleDef.model,
@@ -70,40 +73,39 @@ export function LabwareMapView(props: LabwareMapViewProps): JSX.Element {
             }
           : undefined,
       highlightLabware: true,
-      highlightShadowLabware:
-        topLabwareDefinition != null && topLabwareId != null,
+      highlightShadowLabware: isLabwareStacked,
       moduleChildren: null,
-      stacked: topLabwareDefinition != null && topLabwareId != null,
+      stacked: isLabwareStacked,
     }
   })
 
-  const labwareLocations = map(
+  const labwareLocations: Array<LabwareOnDeck | null> = map(
     labwareRenderInfo,
-    ({ labwareDef, slotName }, labwareId) => {
-      const labwareInAdapter = initialLoadedLabwareByAdapter[labwareId]
-      //  only rendering the labware on top most layer so
-      //  either the adapter or the labware are rendered but not both
-      const topLabwareDefinition =
-        labwareInAdapter?.result?.definition ?? labwareDef
-      const topLabwareId = labwareInAdapter?.result?.labwareId ?? labwareId
-      const isLabwareInStack =
-        topLabwareDefinition != null &&
-        topLabwareId != null &&
-        labwareInAdapter != null
+    ({ slotName }, labwareId) => {
+      const { topLabwareId, topLabwareDefinition } = getTopLabwareInfo(
+        labwareId,
+        loadLabwareCommands
+      )
+      const isLabwareInStack = labwareId !== topLabwareId
 
-      return {
-        labwareLocation: { slotName },
-        definition: topLabwareDefinition,
-        topLabwareId,
-        onLabwareClick: () => {
-          handleLabwareClick(topLabwareDefinition, topLabwareId)
-        },
-        labwareChildren: null,
-        highlight: true,
-        highlightShadow: isLabwareInStack,
-        stacked: isLabwareInStack,
-      }
+      return topLabwareDefinition != null
+        ? {
+            labwareLocation: { slotName },
+            definition: topLabwareDefinition,
+            onLabwareClick: () => {
+              handleLabwareClick(topLabwareDefinition, topLabwareId)
+            },
+            highlight: true,
+            highlightShadow: isLabwareInStack,
+            stacked: isLabwareInStack,
+          }
+        : null
     }
+  )
+
+  const labwareLocationsFiltered: LabwareOnDeck[] = labwareLocations.filter(
+    (labwareLocation): labwareLocation is LabwareOnDeck =>
+      labwareLocation != null
   )
 
   return (
@@ -112,7 +114,7 @@ export function LabwareMapView(props: LabwareMapViewProps): JSX.Element {
         deckConfig={deckConfig}
         deckLayerBlocklist={getStandardDeckViewLayerBlockList(FLEX_ROBOT_TYPE)}
         robotType={FLEX_ROBOT_TYPE}
-        labwareOnDeck={labwareLocations}
+        labwareOnDeck={labwareLocationsFiltered}
         modulesOnDeck={modulesOnDeck}
       />
     </Flex>

@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { format } from 'date-fns'
 import { css } from 'styled-components'
-import { createPortal } from 'react-dom'
 
 import {
   ALIGN_CENTER,
@@ -12,14 +11,10 @@ import {
   DIRECTION_COLUMN,
   EndUserAgreementFooter,
   Flex,
-  JUSTIFY_END,
   JUSTIFY_FLEX_END,
   JUSTIFY_SPACE_BETWEEN,
   LargeButton,
-  Modal,
   NO_WRAP,
-  PrimaryButton,
-  SecondaryButton,
   SPACING,
   StyledText,
   ToggleGroup,
@@ -43,7 +38,7 @@ import {
 } from '../../components/FileSidebar/utils'
 import { MaterialsListModal } from '../../organisms/MaterialsListModal'
 import { BUTTON_LINK_STYLE, LINE_CLAMP_TEXT_STYLE } from '../../atoms'
-import { getMainPagePortalEl } from '../../components/portals/MainPageModalPortal'
+import { useBlockingHint } from '../../organisms/BlockingHintModal/useBlockingHint'
 import {
   EditProtocolMetadataModal,
   EditInstrumentsModal,
@@ -83,6 +78,7 @@ export function ProtocolOverview(): JSX.Element {
     'alert',
     'shared',
     'starting_deck_State',
+    'modules',
   ])
   const navigate = useNavigate()
   const [
@@ -219,6 +215,19 @@ export function ProtocolOverview(): JSX.Element {
     setShowExportWarningModal(false)
   }
 
+  const confirmExport = (): void => {
+    setShowExportWarningModal(false)
+    dispatch(loadFileActions.saveProtocolFile())
+  }
+
+  const exportWarningModal = useBlockingHint({
+    hintKey: warning?.hintKey ?? null,
+    enabled: showExportWarningModal && warning?.hintKey != null,
+    content: warning?.content,
+    handleCancel: cancelModal,
+    handleContinue: confirmExport,
+  })
+
   return (
     <Fragment>
       {showEditMetadataModal ? (
@@ -235,37 +244,7 @@ export function ProtocolOverview(): JSX.Element {
           }}
         />
       ) : null}
-      {showExportWarningModal &&
-        createPortal(
-          <Modal
-            title={warning && warning.heading}
-            onClose={cancelModal}
-            titleElement1={warning?.titleElement}
-            childrenPadding={SPACING.spacing24}
-            footer={
-              <Flex
-                justifyContent={JUSTIFY_END}
-                gridGap={SPACING.spacing8}
-                padding={`0 ${SPACING.spacing24} ${SPACING.spacing24}`}
-              >
-                <SecondaryButton onClick={cancelModal}>
-                  {t('shared:cancel')}
-                </SecondaryButton>
-                <PrimaryButton
-                  onClick={() => {
-                    setShowExportWarningModal(false)
-                    dispatch(loadFileActions.saveProtocolFile())
-                  }}
-                >
-                  {t('alert:continue_with_export')}
-                </PrimaryButton>
-              </Flex>
-            }
-          >
-            {warning && warning.content}
-          </Modal>,
-          getMainPagePortalEl()
-        )}
+      {exportWarningModal}
       {showMaterialsListModal ? (
         <MaterialsListModal
           hardware={Object.values(modulesOnDeck)}
@@ -319,7 +298,7 @@ export function ProtocolOverview(): JSX.Element {
             <LargeButton
               buttonText={t('export_protocol')}
               onClick={() => {
-                if (hasWarning) {
+                if (warning != null) {
                   setShowExportWarningModal(true)
                 } else {
                   dispatch(loadFileActions.saveProtocolFile())

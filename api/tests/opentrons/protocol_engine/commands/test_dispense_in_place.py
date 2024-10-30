@@ -1,6 +1,7 @@
 """Test dispense-in-place commands."""
 from datetime import datetime
 
+import pytest
 from decoy import Decoy, matchers
 
 from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
@@ -16,17 +17,53 @@ from opentrons.protocol_engine.commands.dispense_in_place import (
 )
 from opentrons.protocol_engine.commands.pipetting_common import OverpressureError
 from opentrons.protocol_engine.resources import ModelUtils
+from opentrons.protocol_engine.state.state import StateStore
+from opentrons.protocol_engine.types import (
+    CurrentWell,
+    CurrentPipetteLocation,
+    CurrentAddressableArea,
+)
+from opentrons.protocol_engine.state import update_types
 
 
+@pytest.fixture
+def state_store(decoy: Decoy) -> StateStore:
+    """Get a mock in the shape of a StateStore."""
+    return decoy.mock(cls=StateStore)
+
+
+@pytest.mark.parametrize(
+    "location,stateupdateLabware,stateupdateWell",
+    [
+        (
+            CurrentWell(
+                pipette_id="pipette-id-abc",
+                labware_id="labware-id-1",
+                well_name="well-name-1",
+            ),
+            "labware-id-1",
+            "well-name-1",
+        ),
+        (None, None, None),
+        (CurrentAddressableArea("pipette-id-abc", "addressable-area-1"), None, None),
+    ],
+)
 async def test_dispense_in_place_implementation(
     decoy: Decoy,
     pipetting: PipettingHandler,
+    state_store: StateStore,
     gantry_mover: GantryMover,
     model_utils: ModelUtils,
+    location: CurrentPipetteLocation | None,
+    stateupdateLabware: str,
+    stateupdateWell: str,
 ) -> None:
     """It should dispense in place."""
     subject = DispenseInPlaceImplementation(
-        pipetting=pipetting, gantry_mover=gantry_mover, model_utils=model_utils
+        pipetting=pipetting,
+        state_view=state_store,
+        gantry_mover=gantry_mover,
+        model_utils=model_utils,
     )
 
     data = DispenseInPlaceParams(
@@ -41,20 +78,59 @@ async def test_dispense_in_place_implementation(
         )
     ).then_return(42)
 
+    decoy.when(state_store.pipettes.get_current_location()).then_return(location)
+
     result = await subject.execute(data)
 
-    assert result == SuccessData(public=DispenseInPlaceResult(volume=42), private=None)
+    if isinstance(location, CurrentWell):
+        assert result == SuccessData(
+            public=DispenseInPlaceResult(volume=42),
+            state_update=update_types.StateUpdate(
+                liquid_operated=update_types.LiquidOperatedUpdate(
+                    labware_id=stateupdateLabware,
+                    well_name=stateupdateWell,
+                    volume_added=42,
+                )
+            ),
+        )
+    else:
+        assert result == SuccessData(
+            public=DispenseInPlaceResult(volume=42),
+        )
 
 
+@pytest.mark.parametrize(
+    "location,stateupdateLabware,stateupdateWell",
+    [
+        (
+            CurrentWell(
+                pipette_id="pipette-id",
+                labware_id="labware-id-1",
+                well_name="well-name-1",
+            ),
+            "labware-id-1",
+            "well-name-1",
+        ),
+        (None, None, None),
+        (CurrentAddressableArea("pipette-id", "addressable-area-1"), None, None),
+    ],
+)
 async def test_overpressure_error(
     decoy: Decoy,
     gantry_mover: GantryMover,
     pipetting: PipettingHandler,
+    state_store: StateStore,
     model_utils: ModelUtils,
+    location: CurrentPipetteLocation | None,
+    stateupdateLabware: str,
+    stateupdateWell: str,
 ) -> None:
     """It should return an overpressure error if the hardware API indicates that."""
     subject = DispenseInPlaceImplementation(
-        pipetting=pipetting, gantry_mover=gantry_mover, model_utils=model_utils
+        pipetting=pipetting,
+        state_view=state_store,
+        gantry_mover=gantry_mover,
+        model_utils=model_utils,
     )
 
     pipette_id = "pipette-id"
@@ -83,14 +159,32 @@ async def test_overpressure_error(
     decoy.when(model_utils.generate_id()).then_return(error_id)
     decoy.when(model_utils.get_timestamp()).then_return(error_timestamp)
     decoy.when(await gantry_mover.get_position(pipette_id)).then_return(position)
+    decoy.when(state_store.pipettes.get_current_location()).then_return(location)
 
     result = await subject.execute(data)
 
-    assert result == DefinedErrorData(
-        public=OverpressureError.construct(
-            id=error_id,
-            createdAt=error_timestamp,
-            wrappedErrors=[matchers.Anything()],
-            errorInfo={"retryLocation": (position.x, position.y, position.z)},
-        ),
-    )
+    if isinstance(location, CurrentWell):
+        assert result == DefinedErrorData(
+            public=OverpressureError.construct(
+                id=error_id,
+                createdAt=error_timestamp,
+                wrappedErrors=[matchers.Anything()],
+                errorInfo={"retryLocation": (position.x, position.y, position.z)},
+            ),
+            state_update=update_types.StateUpdate(
+                liquid_operated=update_types.LiquidOperatedUpdate(
+                    labware_id=stateupdateLabware,
+                    well_name=stateupdateWell,
+                    volume_added=update_types.CLEAR,
+                )
+            ),
+        )
+    else:
+        assert result == DefinedErrorData(
+            public=OverpressureError.construct(
+                id=error_id,
+                createdAt=error_timestamp,
+                wrappedErrors=[matchers.Anything()],
+                errorInfo={"retryLocation": (position.x, position.y, position.z)},
+            )
+        )

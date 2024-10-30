@@ -38,7 +38,6 @@ async def test_move_relative_implementation(
 
     assert result == SuccessData(
         public=MoveRelativeResult(position=DeckPoint(x=1, y=2, z=3)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="pipette-id",
