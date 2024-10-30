@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 
-import type { Instance, Options, Modifier } from '@popperjs/core/lib/types'
+import type { Instance, Options, Modifier, Offsets } from '@popperjs/core/lib/types'
 
 import type { UseHoverOptions, HoverHandlers } from '../interaction-enhancers'
 

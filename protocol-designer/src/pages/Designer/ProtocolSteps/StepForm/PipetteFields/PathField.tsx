@@ -6,6 +6,8 @@ import {
   Flex,
   RadioButton,
   SPACING,
+  TOOLTIP_FIXED,
+  TOOLTIP_TOP_START,
   Tooltip,
   useHoverTooltip,
 } from '@opentrons/components'
@@ -19,16 +21,14 @@ import type { FieldProps } from '../types'
 import type { DisabledPathMap, ValuesForPath } from './utils'
 
 const PATH_ANIMATION_IMAGES = {
-  single: new URL(
-    '../../../../../assets/images/path_single.gif',
-    import.meta.url
-  ).href,
+  single: new URL('../../../../../assets/images/single.gif', import.meta.url)
+    .href,
   multiAspirate: new URL(
-    '../../../../../assets/images/path_multiAspirate.gif',
+    '../../../../../assets/images/multiAspirate.gif',
     import.meta.url
   ).href,
   multiDispense: new URL(
-    '../../../../../assets/images/path_multiDispense.gif',
+    '../../../../../assets/images/multiDispense.gif',
     import.meta.url
   ).href,
 }
@@ -62,19 +62,23 @@ interface PathButtonProps {
 
 function PathButton(props: PathButtonProps): JSX.Element {
   const { disabled, onClick, id, path, selected, subtitle } = props
-  const [targetProps, tooltipProps] = useHoverTooltip()
+  const [targetProps, tooltipProps] = useHoverTooltip({
+    placement: 'top-start',
+  })
   const { t } = useTranslation(['form', 'protocol_steps'])
   // TODO: update the tooltip and images
   const tooltip = (
-    <Tooltip tooltipProps={tooltipProps}>
-      <Box>{t(`step_edit_form.field.path.title.${path}`)}</Box>
-      <img src={PATH_ANIMATION_IMAGES[path]} />
-      <Box>{subtitle}</Box>
+    <Tooltip tooltipProps={tooltipProps} maxWidth={'17rem'}>
+      <Flex gridGap={SPACING.spacing8} flexDirection={DIRECTION_COLUMN}>
+        <Box>{t(`step_edit_form.field.path.title.${path}`)}</Box>
+        <img src={PATH_ANIMATION_IMAGES[path]} width={'100%'} />
+        <Box>{subtitle}</Box>
+      </Flex>
     </Tooltip>
   )
 
   return (
-    <Flex {...targetProps} width="100%" key={id}>
+    <Flex {...targetProps} key={id}>
       {tooltip}
       <RadioButton
         width="100%"
