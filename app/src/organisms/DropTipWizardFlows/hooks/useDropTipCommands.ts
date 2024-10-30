@@ -102,7 +102,7 @@ export function useDropTipCommands({
 
   const moveToAddressableArea = (
     addressableArea: AddressableAreaName,
-    stayAtHighestPossibleZ = true // Generally false when moving to a waste chute or trash bin.
+    stayAtHighestPossibleZ = true // Generally false when moving to a waste chute or trash bin or during "fixit" flows.
   ): Promise<void> => {
     return new Promise((resolve, reject) => {
       const addressableAreaFromConfig = getAddressableAreaFromConfig(
@@ -127,7 +127,7 @@ export function useDropTipCommands({
                 moveToAACommand,
               ]
             : [Z_HOME, moveToAACommand],
-          true
+          false
         )
           .then((commandData: CommandData[]) => {
             const error = commandData[0].data.error
@@ -222,7 +222,7 @@ export function useDropTipCommands({
         currentRoute === DT_ROUTES.BLOWOUT
           ? buildBlowoutCommands(instrumentModelSpecs, isFlex, pipetteId)
           : buildDropTipInPlaceCommand(isFlex, pipetteId),
-        true
+        false
       )
         .then((commandData: CommandData[]) => {
           const error = commandData[0].data.error
