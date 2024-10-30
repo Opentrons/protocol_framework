@@ -122,17 +122,13 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
       </Banner>
     </Flex>
   )
+
   const formErrors = [
-    ...visibleFormErrors.reduce((acc, error) => {
-      return error.showAtForm ?? true
-        ? {
-            ...acc,
-            title: error.title,
-            description: error.body || null,
-            showAtForm: error.showAtForm ?? true,
-          }
-        : acc
-    }, []),
+    ...visibleFormErrors.map(error => ({
+      title: error.title,
+      description: error.body ?? null,
+      showAtForm: error.showAtForm ?? true,
+    })),
     ...visibleDynamicFieldFormErrors.map(error => ({
       title: error.title,
       description: error.body || null,
