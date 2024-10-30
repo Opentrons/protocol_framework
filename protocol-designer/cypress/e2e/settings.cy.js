@@ -1,30 +1,22 @@
 describe('The Settings Page', () => {
   // const exptlSettingText = 'Disable module placement restrictions'
-
   // before(() => {
   //   cy.visit('/')
   // })
-
   // it('Verify the settings page', () => {
-    // displays the announcement modal and clicks "GOT IT!" to close it
+  // displays the announcement modal and clicks "GOT IT!" to close it
   //   cy.closeAnnouncementModal()
-
   //   // contains a working settings button
   //   cy.openSettingsPage()
   //   cy.contains('App Settings')
-
   //   // contains an information section
   //   cy.get('h3').contains('Information').should('exist')
-
   //   // contains version information
   //   cy.contains('Protocol Designer Version').should('exist')
-
   //   // contains a hints section
   //   cy.get('h3').contains('Hints').should('exist')
-
   //   // contains a privacy section
   //   cy.get('h3').contains('Privacy').should('exist')
-
   //   // contains a share settings button in the pivacy section
   //   // It's toggled off by default
   //   cy.contains('Share sessions')
@@ -45,10 +37,8 @@ describe('The Settings Page', () => {
   //     .next()
   //     .should('have.attr', 'class')
   //     .and('match', /toggled_off/)
-
   //   // contains an experimental settings section
   //   cy.get('h3').contains('Experimental Settings').should('exist')
-
   //   // contains a 'disable module placement restrictions' experimental feature
   //   // It's toggled off by default
   //   cy.contains(exptlSettingText)
@@ -86,7 +76,6 @@ describe('The Settings Page', () => {
   //     .next()
   //     .should('have.attr', 'class')
   //     .and('match', /toggled_off/)
-
   //   // contains a 'disable module placement restrictions' toggle in the experimental settings card
   //   // It's toggled off by default
   //   cy.contains('Disable module')
@@ -123,7 +112,6 @@ describe('The Settings Page', () => {
   //     .next()
   //     .should('have.attr', 'class')
   //     .and('match', /toggled_off/)
-
   //   // PD remembers when we enable things
   //   // Enable a button
   //   // We're not using the privacy button because that
@@ -140,7 +128,6 @@ describe('The Settings Page', () => {
   //     .next()
   //     .should('have.attr', 'class')
   //     .and('match', /toggled_on/)
-
   //   // PD remembers when we disable things
   //   // Disable a button
   //   // We're not using the privacy button because that
