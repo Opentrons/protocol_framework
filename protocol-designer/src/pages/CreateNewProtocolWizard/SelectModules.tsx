@@ -43,9 +43,6 @@ import type { ModuleModel, ModuleType } from '@opentrons/shared-data'
 import type { FormModule, FormModules } from '../../step-forms'
 import type { WizardTileProps } from './types'
 
-const MAX_MAGNETIC_BLOCKS = 4
-const MAGNETIC_BLOCKS_ADJUSTMENT = 3
-
 export function SelectModules(props: WizardTileProps): JSX.Element | null {
   const { goBack, proceed, watch, setValue } = props
   const { t } = useTranslation(['create_new_protocol', 'shared'])
@@ -60,14 +57,6 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
       ? FLEX_SUPPORTED_MODULE_MODELS
       : OT2_SUPPORTED_MODULE_MODELS
 
-  const numSlotsAvailable = getNumSlotsAvailable(modules, additionalEquipment)
-  const hasNoAvailableSlots = numSlotsAvailable === 0
-  const numMagneticBlocks =
-    modules != null
-      ? Object.values(modules).filter(
-          module => module.model === MAGNETIC_BLOCK_V1
-        )?.length
-      : 0
   const filteredSupportedModules = supportedModules.filter(
     moduleModel =>
       !(
@@ -85,7 +74,10 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
     MAGNETIC_BLOCK_TYPE,
   ]
 
-  const handleAddModule = (moduleModel: ModuleModel): void => {
+  const handleAddModule = (
+    moduleModel: ModuleModel,
+    hasNoAvailableSlots: boolean
+  ): void => {
     if (hasNoAvailableSlots) {
       makeSnackbar(t('slots_limit_reached') as string)
     } else {
@@ -186,26 +178,25 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                     ? module
                     : module !== ABSORBANCE_READER_V1
                 )
-                .map(moduleModel => (
-                  <EmptySelectorButton
-                    key={moduleModel}
-                    disabled={
-                      (moduleModel !== 'magneticBlockV1' &&
-                        hasNoAvailableSlots) ||
-                      (moduleModel === 'thermocyclerModuleV2' &&
-                        numSlotsAvailable <= 1) ||
-                      (moduleModel === 'magneticBlockV1' &&
-                        hasNoAvailableSlots &&
-                        numMagneticBlocks === MAX_MAGNETIC_BLOCKS)
-                    }
-                    textAlignment={TYPOGRAPHY.textAlignLeft}
-                    iconName="plus"
-                    text={getModuleDisplayName(moduleModel)}
-                    onClick={() => {
-                      handleAddModule(moduleModel)
-                    }}
-                  />
-                ))}
+                .map(moduleModel => {
+                  const numSlotsAvailable = getNumSlotsAvailable(
+                    modules,
+                    additionalEquipment,
+                    moduleModel
+                  )
+                  return (
+                    <EmptySelectorButton
+                      key={moduleModel}
+                      disabled={numSlotsAvailable === 0}
+                      textAlignment={TYPOGRAPHY.textAlignLeft}
+                      iconName="plus"
+                      text={getModuleDisplayName(moduleModel)}
+                      onClick={() => {
+                        handleAddModule(moduleModel, numSlotsAvailable === 0)
+                      }}
+                    />
+                  )
+                })}
             </Flex>
             {modules != null && Object.keys(modules).length > 0 ? (
               <Flex
@@ -241,6 +232,11 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                       []
                     )
                     .map(module => {
+                      const numSlotsAvailable = getNumSlotsAvailable(
+                        modules,
+                        additionalEquipment,
+                        module.model
+                      )
                       const dropdownProps = {
                         currentOption: {
                           name: `${module.count}`,
@@ -255,11 +251,7 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                         },
                         dropdownType: 'neutral' as DropdownBorder,
                         filterOptions: getNumOptions(
-                          module.model === 'magneticBlockV1'
-                            ? numSlotsAvailable +
-                                MAGNETIC_BLOCKS_ADJUSTMENT +
-                                module.count
-                            : numSlotsAvailable + module.count
+                          numSlotsAvailable + module.count
                         ),
                       }
                       return (

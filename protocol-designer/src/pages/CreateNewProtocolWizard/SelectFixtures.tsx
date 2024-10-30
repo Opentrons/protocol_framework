@@ -28,7 +28,7 @@ import type { DropdownBorder } from '@opentrons/components'
 import type { AdditionalEquipment, WizardTileProps } from './types'
 
 const MAX_SLOTS = 4
-const ADDITIONAL_EQUIPMENTS: AdditionalEquipment[] = [
+export const ADDITIONAL_EQUIPMENTS: AdditionalEquipment[] = [
   'wasteChute',
   'trashBin',
   'stagingArea',
@@ -39,7 +39,6 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
   const additionalEquipment = watch('additionalEquipment')
   const modules = watch('modules')
   const { t } = useTranslation(['create_new_protocol', 'shared'])
-  const numSlotsAvailable = getNumSlotsAvailable(modules, additionalEquipment)
 
   const hasTC =
     modules != null &&
@@ -87,25 +86,33 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
               </StyledText>
             ) : null}
             <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
-              {filteredAdditionalEquipment.map(equipment => (
-                <EmptySelectorButton
-                  disabled={numSlotsAvailable === 0}
-                  key={equipment}
-                  textAlignment={TYPOGRAPHY.textAlignLeft}
-                  iconName="plus"
-                  text={t(`${equipment}`)}
-                  onClick={() => {
-                    if (numSlotsAvailable === 0) {
-                      makeSnackbar(t('slots_limit_reached') as string)
-                    } else {
-                      setValue('additionalEquipment', [
-                        ...additionalEquipment,
-                        equipment,
-                      ])
-                    }
-                  }}
-                />
-              ))}
+              {filteredAdditionalEquipment.map(equipment => {
+                const numSlotsAvailable = getNumSlotsAvailable(
+                  modules,
+                  additionalEquipment,
+                  equipment
+                )
+
+                return (
+                  <EmptySelectorButton
+                    disabled={numSlotsAvailable === 0}
+                    key={equipment}
+                    textAlignment={TYPOGRAPHY.textAlignLeft}
+                    iconName="plus"
+                    text={t(`${equipment}`)}
+                    onClick={() => {
+                      if (numSlotsAvailable === 0) {
+                        makeSnackbar(t('slots_limit_reached') as string)
+                      } else {
+                        setValue('additionalEquipment', [
+                          ...additionalEquipment,
+                          equipment,
+                        ])
+                      }
+                    }}
+                  />
+                )
+              })}
             </Flex>
           </Flex>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
@@ -117,6 +124,11 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
                 const numStagingAreas = filteredAdditionalEquipmentWithoutGripper.filter(
                   additionalEquipment => additionalEquipment === 'stagingArea'
                 )?.length
+                const numSlotsAvailable = getNumSlotsAvailable(
+                  modules,
+                  additionalEquipment,
+                  ae
+                )
 
                 const dropdownProps = {
                   currentOption: {
@@ -127,7 +139,7 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
                   filterOptions: getNumOptions(
                     numSlotsAvailable >= MAX_SLOTS
                       ? MAX_SLOTS
-                      : numSlotsAvailable + numStagingAreas - (hasTC ? 1 : 0)
+                      : numSlotsAvailable + numStagingAreas
                   ),
                   onClick: (value: string) => {
                     const inputNum = parseInt(value)
