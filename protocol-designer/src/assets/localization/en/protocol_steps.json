@@ -72,6 +72,7 @@
     "untilTemperature": "<text>Pausing until</text><semiBoldText>{{module}}</semiBoldText><text>reaches</text><tag/>",
     "untilTime": "<text>Pausing for</text><tag/>"
   },
+  "pipette": "Pipette",
   "protocol_steps": "Protocol steps",
   "protocol_timeline": "Protocol timeline",
   "rename": "Rename",
