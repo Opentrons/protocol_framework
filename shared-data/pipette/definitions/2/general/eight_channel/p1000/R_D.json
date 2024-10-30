@@ -1,0 +1,68 @@
+{
+  "$otSharedSchema": "#/pipette/schemas/2/pipettePropertiesSchema.json",
+  "displayName": "Flex 8-Channel 1000 μL",
+  "model": "p1000",
+  "displayCategory": "FLEX",
+  "pickUpTipConfigurations": {
+    "pressFit": {
+      "presses": 1,
+      "speed": 10,
+      "increment": 0.0,
+      "distance": 13.0,
+      "currentByTipCount": {
+        "1": 0.2,
+        "2": 0.14,
+        "3": 0.21,
+        "4": 0.28,
+        "5": 0.34,
+        "6": 0.41,
+        "7": 0.48,
+        "8": 0.55
+      }
+    }
+  },
+  "dropTipConfigurations": {
+    "plungerEject": {
+      "current": 1.0,
+      "speed": 10
+    }
+  },
+  "plungerMotorConfigurations": {
+    "idle": 0.3,
+    "run": 1.0
+  },
+  "plungerPositionsConfigurations": {
+    "default": {
+      "top": 0.0,
+      "bottom": 65.5,
+      "blowout": 70.5,
+      "drop": 86.5
+    }
+  },
+  "availableSensors": {
+    "sensors": ["pressure", "capacitive", "environment"],
+    "pressure": {
+      "count": 2
+    },
+    "capacitive": {
+      "count": 2
+    },
+    "environment": {
+      "count": 1
+    }
+  },
+  "partialTipConfigurations": {
+    "partialTipSupported": true,
+    "availableConfigurations": [1, 2, 3, 4, 5, 6, 7, 8]
+  },
+  "backCompatNames": [],
+  "channels": 8,
+  "shaftDiameter": 5.0,
+  "shaftULperMM": 19.6349,
+  "backlashDistance": 1.0,
+  "quirks": [],
+  "plungerHomingConfigurations": {
+    "current": 1.0,
+    "speed": 30
+  }
+}
