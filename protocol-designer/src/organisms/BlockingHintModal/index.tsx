@@ -38,7 +38,6 @@ export function BlockingHintModal(props: HintProps): JSX.Element {
   }, [])
 
   const onCancelClick = (): void => {
-    dispatch(actions.removeHint(hintKey, rememberDismissal))
     handleCancel()
   }
 
@@ -56,7 +55,7 @@ export function BlockingHintModal(props: HintProps): JSX.Element {
         <Flex
           alignItems={ALIGN_CENTER}
           justifyContent={JUSTIFY_SPACE_BETWEEN}
-          padding={SPACING.spacing24}
+          padding={`0 ${SPACING.spacing24} ${SPACING.spacing24}`}
         >
           <Flex
             alignItems={ALIGN_CENTER}
