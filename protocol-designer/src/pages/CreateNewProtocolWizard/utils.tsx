@@ -19,7 +19,7 @@ import type {
 import type { DropdownOption } from '@opentrons/components'
 import type { AdditionalEquipment, WizardFormState } from './types'
 
-const TOTAL_MODULE_SLOTS = 8
+const TOTAL_OUTER_SLOTS = 8
 const MIDDLE_SLOT_NUM = 4
 
 export const getNumOptions = (length: number): DropdownOption[] => {
@@ -31,9 +31,18 @@ export const getNumOptions = (length: number): DropdownOption[] => {
 
 export const getNumSlotsAvailable = (
   modules: WizardFormState['modules'],
-  additionalEquipment: WizardFormState['additionalEquipment']
+  additionalEquipment: WizardFormState['additionalEquipment'],
+  type:
+    | 'thermocycler'
+    | 'heaterShaker'
+    | 'magneticBlock'
+    | 'temperature'
+    | 'trash'
+    | 'stagingArea'
 ): number => {
-  const additionalEquipmentLength = additionalEquipment.length
+  const additionalEquipmentLength = additionalEquipment.filter(
+    ae => ae !== 'gripper'
+  ).length
   const hasTC = Object.values(modules || {}).some(
     module => module.type === THERMOCYCLER_MODULE_TYPE
   )
@@ -45,9 +54,6 @@ export const getNumSlotsAvailable = (
     module => module.type === MAGNETIC_BLOCK_TYPE
   )
   let filteredModuleLength = modules != null ? Object.keys(modules).length : 0
-  if (hasTC) {
-    filteredModuleLength = filteredModuleLength + 1
-  }
   if (magneticBlocks.length > 0) {
     //  once blocks exceed 4, then we dont' want to subtract the amount available
     //  because block can go into the center slots where all other modules/trashes can not
@@ -55,22 +61,63 @@ export const getNumSlotsAvailable = (
       magneticBlocks.length > 4 ? MIDDLE_SLOT_NUM : magneticBlocks.length
     filteredModuleLength = filteredModuleLength - numBlocks
   }
-
-  const hasGripper = additionalEquipment.some(equipment =>
-    equipment.includes('gripper')
-  )
-
+  if (hasTC) {
+    filteredModuleLength = filteredModuleLength + 1
+  }
   let filteredAdditionalEquipmentLength = additionalEquipmentLength
-  if (hasGripper) {
+  if (numStagingAreas === 4 && hasWasteChute) {
     filteredAdditionalEquipmentLength = filteredAdditionalEquipmentLength - 1
   }
-  if (numStagingAreas === MIDDLE_SLOT_NUM && hasWasteChute) {
-    filteredAdditionalEquipmentLength = filteredAdditionalEquipmentLength - 1
+  switch (type) {
+    case 'thermocycler': {
+      if (filteredModuleLength + filteredAdditionalEquipmentLength > 7) {
+        return 0
+      } else {
+        return 2
+      }
+    }
+    case 'trash':
+    case 'heaterShaker':
+    case 'temperature': {
+      return (
+        TOTAL_OUTER_SLOTS -
+        (filteredModuleLength + filteredAdditionalEquipmentLength)
+      )
+    }
+    case 'stagingArea': {
+      const totalUsedSlots =
+        filteredModuleLength - 4 + filteredAdditionalEquipmentLength
+      return 4 - totalUsedSlots
+    }
+    case 'magneticBlock': {
+    }
   }
-  return (
-    TOTAL_MODULE_SLOTS -
-    (filteredModuleLength + filteredAdditionalEquipmentLength)
-  )
+  // if (hasTC) {
+  //   filteredModuleLength = filteredModuleLength + 1
+  // }
+  // if (magneticBlocks.length > 0) {
+  //   //  once blocks exceed 4, then we dont' want to subtract the amount available
+  //   //  because block can go into the center slots where all other modules/trashes can not
+  //   const numBlocks =
+  //     magneticBlocks.length > 4 ? MIDDLE_SLOT_NUM : magneticBlocks.length
+  //   filteredModuleLength = filteredModuleLength - numBlocks
+  // }
+
+  // const hasGripper = additionalEquipment.some(equipment =>
+  //   equipment.includes('gripper')
+  // )
+
+  // let filteredAdditionalEquipmentLength = additionalEquipmentLength
+  // if (hasGripper) {
+  //   filteredAdditionalEquipmentLength = filteredAdditionalEquipmentLength - 1
+  // }
+  // if (numStagingAreas === MIDDLE_SLOT_NUM && hasWasteChute) {
+  //   filteredAdditionalEquipmentLength = filteredAdditionalEquipmentLength - 1
+  // }
+  // return (
+  //   TOTAL_MODULE_SLOTS -
+  //   (filteredModuleLength + filteredAdditionalEquipmentLength)
+  // )
 }
 
 interface EquipmentProps {
