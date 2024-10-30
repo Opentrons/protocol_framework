@@ -22,6 +22,7 @@
   "left_pipette_label": "Left mount",
   "choose_pipette_placeholder": "Choose pipette",
   "96_channel_1000ul_pipette_label": "96-Channel 1000µL pipette",
+  "96_channel_1000ul_pipette": "96-Channel 1000µL pipette",
   "instruments_flex_gripper_title": "Do you want to use the Flex Gripper?",
   "flex_gripper_yes_label": "Yes, use the Flex Gripper",
   "flex_gripper": "Flex Gripper",
