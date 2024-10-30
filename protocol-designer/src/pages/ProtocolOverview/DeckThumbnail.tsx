@@ -106,9 +106,6 @@ export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
       }
       borderRadius={BORDERS.borderRadius8}
       paddingY={SPACING.spacing24}
-      css={css`
-        outline: green solid 1px;
-      `}
     >
       <RobotCoordinateSpaceWithRef
         height="100%"

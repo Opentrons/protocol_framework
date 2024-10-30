@@ -8,11 +8,12 @@ import { selectors } from '../../labware-ingred/selectors'
 import { selectors as uiLabwareSelectors } from '../../ui/labware'
 import { getDeckSetupForActiveItem } from '../../top-selectors/labware-locations'
 import { SlotInformation } from '../../organisms/SlotInformation'
-import { getYPosition } from './utils'
+import { getXPosition } from './utils'
 
 import type { DeckSlotId, RobotType } from '@opentrons/shared-data'
 import type { ContentsByWell } from '../../labware-ingred/types'
 
+const SLOT_DETAIL_Y_POSITION = '-10'
 interface SlotDetailContainerProps {
   robotType: RobotType
   slot: DeckSlotId | null
@@ -105,9 +106,9 @@ export function SlotDetailsContainer(
   return location.pathname === '/designer' && slot !== 'offDeck' ? (
     <RobotCoordsForeignObject
       width="15.8125rem"
-      height="32.3125rem"
-      x="-400"
-      y={getYPosition({ robotType, slot })}
+      height="26.75rem"
+      x={getXPosition(slot, robotType)}
+      y={SLOT_DETAIL_Y_POSITION}
     >
       <SlotInformation
         location={slot}

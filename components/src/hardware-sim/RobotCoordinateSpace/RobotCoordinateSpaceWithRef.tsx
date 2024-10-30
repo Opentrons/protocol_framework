@@ -1,8 +1,6 @@
 import * as React from 'react'
-import { css } from 'styled-components'
-import { Flex, Svg } from '../../primitives'
+import { Svg } from '../../primitives'
 import type { DeckDefinition, DeckSlot } from '@opentrons/shared-data'
-import { ALIGN_CENTER, JUSTIFY_CENTER } from '../../styles'
 
 export interface RobotCoordinateSpaceWithRefRenderProps {
   deckSlotsById: { [slotId: string]: DeckSlot }
@@ -42,28 +40,15 @@ export function RobotCoordinateSpaceWithRef(
     } ${deckXDimension + PADDING * 2} ${deckYDimension + PADDING * 2}`
   }
   return (
-    <Flex
+    <Svg
+      viewBox={zoomed ? viewBox : wholeDeckViewBox}
+      ref={wrapperRef}
+      transform="scale(1, -1)"
       width="100%"
       height="100%"
-      alignItems={ALIGN_CENTER}
-      justifyContent={JUSTIFY_CENTER}
-      css={css`
-        outline: purple solid 1px;
-      `}
+      {...restProps}
     >
-      <Svg
-        viewBox={zoomed ? viewBox : wholeDeckViewBox}
-        ref={wrapperRef}
-        transform="scale(1, -1)"
-        width="100%"
-        height="100%"
-        css={css`
-          outline: red solid 1px;
-        `}
-        {...restProps}
-      >
-        {children?.({ deckSlotsById })}
-      </Svg>
-    </Flex>
+      {children?.({ deckSlotsById })}
+    </Svg>
   )
 }

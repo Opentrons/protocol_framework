@@ -180,9 +180,6 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
         height={zoomIn.slot != null ? '75vh' : '70vh'}
         flexDirection={DIRECTION_COLUMN}
         padding={SPACING.spacing40}
-        css={css`
-          outline: green solid 1px;
-        `}
       >
         <Flex
           width="100%"
