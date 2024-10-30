@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { getModuleDisplayName } from '@opentrons/shared-data'
 import { RobotCoordsForeignObject } from '@opentrons/components'
 import * as wellContentsSelectors from '../../top-selectors/well-contents'
+import { getAdditionalEquipmentEntities } from '../../step-forms/selectors'
 import { selectors } from '../../labware-ingred/selectors'
 import { selectors as uiLabwareSelectors } from '../../ui/labware'
 import { getDeckSetupForActiveItem } from '../../top-selectors/labware-locations'
@@ -32,6 +33,10 @@ export function SlotDetailsContainer(
   )
   const nickNames = useSelector(uiLabwareSelectors.getLabwareNicknamesById)
   const allIngredNamesIds = useSelector(selectors.allIngredientNamesIds)
+  const additionalEquipment = useSelector(getAdditionalEquipmentEntities)
+  const hasStagingArea = Object.values(additionalEquipment).some(
+    item => item.name === 'stagingArea'
+  )
 
   if (slot == null || (slot === 'offDeck' && offDeckLabwareId == null)) {
     return null
@@ -107,7 +112,7 @@ export function SlotDetailsContainer(
     <RobotCoordsForeignObject
       width="15.8125rem"
       height="26.75rem"
-      x={getXPosition(slot, robotType)}
+      x={getXPosition(slot, robotType, hasStagingArea)}
       y={SLOT_DETAIL_Y_POSITION}
     >
       <SlotInformation
