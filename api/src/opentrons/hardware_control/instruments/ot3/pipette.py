@@ -585,6 +585,7 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
                 "versioned_tip_overlap": self.tip_overlap,
                 "back_compat_names": self._config.pipette_backcompat_names,
                 "supported_tips": self.liquid_class.supported_tips,
+                "plunger_positions": self.plunger_positions,
             }
         )
         return self._config_as_dict
