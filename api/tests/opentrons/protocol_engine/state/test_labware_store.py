@@ -126,7 +126,6 @@ def test_handles_load_labware(
     )
     subject.handle_action(
         SucceedCommandAction(
-            private_result=None,
             command=command,
             state_update=update_types.StateUpdate(
                 loaded_labware=update_types.LoadedLabwareUpdate(
@@ -154,7 +153,6 @@ def test_handles_reload_labware(
 
     subject.handle_action(
         SucceedCommandAction(
-            private_result=None,
             command=command,
             state_update=update_types.StateUpdate(
                 loaded_labware=update_types.LoadedLabwareUpdate(
@@ -194,7 +192,6 @@ def test_handles_reload_labware(
     )
     subject.handle_action(
         SucceedCommandAction(
-            private_result=None,
             command=comment_command_2,
             state_update=update_types.StateUpdate(
                 labware_location=update_types.LabwareLocationUpdate(
@@ -254,7 +251,6 @@ def test_handles_move_labware(
     )
     subject.handle_action(
         SucceedCommandAction(
-            private_result=None,
             command=comment_command,
             state_update=update_types.StateUpdate(
                 loaded_labware=update_types.LoadedLabwareUpdate(
@@ -273,7 +269,6 @@ def test_handles_move_labware(
     )
     subject.handle_action(
         SucceedCommandAction(
-            private_result=None,
             command=comment_2,
             state_update=update_types.StateUpdate(
                 labware_location=update_types.LabwareLocationUpdate(
@@ -311,7 +306,6 @@ def test_handles_move_labware_off_deck(
     )
     subject.handle_action(
         SucceedCommandAction(
-            private_result=None,
             command=comment_command,
             state_update=update_types.StateUpdate(
                 loaded_labware=update_types.LoadedLabwareUpdate(
@@ -330,7 +324,6 @@ def test_handles_move_labware_off_deck(
     )
     subject.handle_action(
         SucceedCommandAction(
-            private_result=None,
             command=comment_2,
             state_update=update_types.StateUpdate(
                 labware_location=update_types.LabwareLocationUpdate(

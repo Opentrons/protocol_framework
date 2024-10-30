@@ -50,7 +50,7 @@ describe('TipPositionModal', () => {
   it('renders the modal text and radio button text', () => {
     render(props)
     screen.getByText('Tip Positioning')
-    screen.getByText('Change from where in the well the robot aspirates')
+    screen.getByText('Change where in the well the robot aspirates from.')
     screen.getByRole('radio', { name: '1 mm from the bottom center (default)' })
     screen.getByRole('radio', { name: 'Custom' })
     fireEvent.click(screen.getByText('cancel'))
@@ -66,7 +66,7 @@ describe('TipPositionModal', () => {
     render(props)
     screen.getByText('warning')
     screen.getByText(
-      'One or more position offset values are close to the edge of the well and might collide with it'
+      'Tip position is close to the edge of the well and may cause collisions.'
     )
   })
   it('renders the alert if the x/y position values are too close to the max/min for y value', () => {
@@ -74,7 +74,7 @@ describe('TipPositionModal', () => {
     render(props)
     screen.getByText('warning')
     screen.getByText(
-      'One or more position offset values are close to the edge of the well and might collide with it'
+      'Tip position is close to the edge of the well and may cause collisions.'
     )
   })
   it('renders the custom options, captions, and visual', () => {

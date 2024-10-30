@@ -14,8 +14,11 @@ from opentrons.protocol_reader import (
     PythonProtocolConfig,
 )
 
-from robot_server.data_files.data_files_store import DataFilesStore, DataFileInfo
-from robot_server.data_files.models import DataFile
+from robot_server.data_files.data_files_store import (
+    DataFilesStore,
+    DataFileInfo,
+)
+from robot_server.data_files.models import DataFile, DataFileSource
 from robot_server.protocols.analysis_memcache import MemoryCache
 from robot_server.protocols.analysis_models import (
     CompletedAnalysis,
@@ -588,6 +591,7 @@ async def test_get_referenced_data_files(
             id="data-file-id-1",
             name="file-name",
             file_hash="abc123",
+            source=DataFileSource.UPLOADED,
             created_at=datetime(year=2021, month=1, day=1, tzinfo=timezone.utc),
         )
     )
@@ -596,6 +600,7 @@ async def test_get_referenced_data_files(
             id="data-file-id-2",
             name="file-name",
             file_hash="abc123",
+            source=DataFileSource.UPLOADED,
             created_at=datetime(year=2021, month=1, day=1, tzinfo=timezone.utc),
         )
     )
@@ -604,6 +609,7 @@ async def test_get_referenced_data_files(
             id="data-file-id-3",
             name="file-name",
             file_hash="abc123",
+            source=DataFileSource.UPLOADED,
             created_at=datetime(year=2021, month=1, day=1, tzinfo=timezone.utc),
         )
     )
@@ -653,15 +659,18 @@ async def test_get_referenced_data_files(
             id="data-file-id-1",
             name="file-name",
             createdAt=datetime(year=2021, month=1, day=1, tzinfo=timezone.utc),
+            source=DataFileSource.UPLOADED,
         ),
         DataFile(
             id="data-file-id-2",
             name="file-name",
             createdAt=datetime(year=2021, month=1, day=1, tzinfo=timezone.utc),
+            source=DataFileSource.UPLOADED,
         ),
         DataFile(
             id="data-file-id-3",
             name="file-name",
             createdAt=datetime(year=2021, month=1, day=1, tzinfo=timezone.utc),
+            source=DataFileSource.UPLOADED,
         ),
     ]

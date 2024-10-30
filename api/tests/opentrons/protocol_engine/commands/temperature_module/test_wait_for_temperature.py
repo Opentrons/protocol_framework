@@ -48,7 +48,7 @@ async def test_wait_for_temperature(
         await tempdeck_hardware.await_temperature(awaiting_temperature=123), times=1
     )
     assert result == SuccessData(
-        public=temperature_module.WaitForTemperatureResult(), private=None
+        public=temperature_module.WaitForTemperatureResult(),
     )
 
 
@@ -90,5 +90,5 @@ async def test_wait_for_temperature_requested_celsius(
         await tempdeck_hardware.await_temperature(awaiting_temperature=12), times=1
     )
     assert result == SuccessData(
-        public=temperature_module.WaitForTemperatureResult(), private=None
+        public=temperature_module.WaitForTemperatureResult(),
     )

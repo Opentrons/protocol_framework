@@ -163,18 +163,14 @@ async def test_command_broker_messages(
 
     decoy.when(
         mock_legacy_command_mapper.map_command(command=legacy_command)
-    ).then_return(
-        [pe_actions.SucceedCommandAction(engine_command, private_result=None)]
-    )
+    ).then_return([pe_actions.SucceedCommandAction(engine_command)])
 
     await to_thread.run_sync(handler, legacy_command)
 
     await subject.teardown()
 
     decoy.verify(
-        mock_action_dispatcher.dispatch(
-            pe_actions.SucceedCommandAction(engine_command, private_result=None)
-        )
+        mock_action_dispatcher.dispatch(pe_actions.SucceedCommandAction(engine_command))
     )
 
 
@@ -222,9 +218,7 @@ async def test_equipment_broker_messages(
 
     decoy.when(
         mock_legacy_command_mapper.map_equipment_load(load_info=load_info)
-    ).then_return(
-        [pe_actions.SucceedCommandAction(command=engine_command, private_result=None)]
-    )
+    ).then_return([pe_actions.SucceedCommandAction(command=engine_command)])
 
     await to_thread.run_sync(handler, load_info)
 
@@ -232,6 +226,6 @@ async def test_equipment_broker_messages(
 
     decoy.verify(
         mock_action_dispatcher.dispatch(
-            pe_actions.SucceedCommandAction(command=engine_command, private_result=None)
+            pe_actions.SucceedCommandAction(command=engine_command)
         ),
     )

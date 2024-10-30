@@ -34,6 +34,7 @@ stages:
           id: !anystr
           name: "sample_plates.csv"
           createdAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
+          source: "uploaded"
 
   - name: Create run from protocol
     request:

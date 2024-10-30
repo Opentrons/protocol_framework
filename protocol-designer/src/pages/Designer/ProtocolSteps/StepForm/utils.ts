@@ -25,6 +25,7 @@ import type {
   StepType,
   PathOption,
 } from '../../../../form-types'
+import type { FormError } from '../../../../steplist/formLevel'
 import type { NozzleType } from '../../../../types'
 import type { FieldProps, FieldPropsByName, FocusHandlers } from './types'
 
@@ -325,3 +326,42 @@ export const getSaveStepSnackbarText = (
 
 export const capitalizeFirstLetter = (stepName: string): string =>
   `${stepName.charAt(0).toUpperCase()}${stepName.slice(1)}`
+
+type ErrorMappedToField = Record<string, FormError>
+
+export const getFormErrorsMappedToField = (
+  formErrors: StepFormErrors
+): ErrorMappedToField => {
+  return formErrors.reduce<ErrorMappedToField>((acc, error) => {
+    const { dependentFields } = error
+    for (const field of dependentFields) {
+      const { showAtField, showAtForm, title } = error
+      if (showAtField == null || showAtForm == null) {
+        console.error(
+          `${title} should wire up where to show error (at form and/or field)`
+        )
+      }
+      // map each field to only one one error
+      acc[field] = {
+        ...error,
+        showAtField: error.showAtField ?? true,
+        showAtForm: error.showAtForm ?? true,
+      }
+    }
+    return acc
+  }, {})
+}
+
+export const getFormLevelError = (
+  showFormErrors: boolean,
+  fieldName: string,
+  mappedErrorsToField: ErrorMappedToField,
+  focusedField?: string | null
+): string | null => {
+  return showFormErrors &&
+    focusedField !== fieldName &&
+    mappedErrorsToField[fieldName] &&
+    mappedErrorsToField[fieldName].showAtField
+    ? mappedErrorsToField[fieldName].title
+    : null
+}

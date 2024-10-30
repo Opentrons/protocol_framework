@@ -15,4 +15,4 @@ async def test_comment_implementation() -> None:
 
     result = await subject.execute(data)
 
-    assert result == SuccessData(public=CommentResult(), private=None)
+    assert result == SuccessData(public=CommentResult())

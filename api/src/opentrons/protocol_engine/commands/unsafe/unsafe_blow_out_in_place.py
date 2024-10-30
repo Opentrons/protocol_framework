@@ -36,7 +36,7 @@ class UnsafeBlowOutInPlaceResult(BaseModel):
 
 class UnsafeBlowOutInPlaceImplementation(
     AbstractCommandImpl[
-        UnsafeBlowOutInPlaceParams, SuccessData[UnsafeBlowOutInPlaceResult, None]
+        UnsafeBlowOutInPlaceParams, SuccessData[UnsafeBlowOutInPlaceResult]
     ]
 ):
     """UnsafeBlowOutInPlace command implementation."""
@@ -54,7 +54,7 @@ class UnsafeBlowOutInPlaceImplementation(
 
     async def execute(
         self, params: UnsafeBlowOutInPlaceParams
-    ) -> SuccessData[UnsafeBlowOutInPlaceResult, None]:
+    ) -> SuccessData[UnsafeBlowOutInPlaceResult]:
         """Blow-out without moving the pipette even when position is unknown."""
         ot3_hardware_api = ensure_ot3_hardware(self._hardware_api)
         pipette_location = self._state_view.motion.get_pipette_location(
@@ -67,7 +67,9 @@ class UnsafeBlowOutInPlaceImplementation(
             pipette_id=params.pipetteId, flow_rate=params.flowRate
         )
 
-        return SuccessData(public=UnsafeBlowOutInPlaceResult(), private=None)
+        return SuccessData(
+            public=UnsafeBlowOutInPlaceResult(),
+        )
 
 
 class UnsafeBlowOutInPlace(

@@ -376,6 +376,7 @@ describe('SetupModulesList', () => {
           id: 'heatershaker_id',
           model: 'heaterShakerModuleV1',
           moduleType: 'heaterShakerModuleType',
+          displayName: 'mockHeaterShakerName',
           serialNumber: 'jkl123',
           hardwareRevision: 'heatershaker_v4.0',
           firmwareVersion: 'v2.0.0',

@@ -36,7 +36,7 @@ class SetAndWaitForShakeSpeedResult(BaseModel):
 
 class SetAndWaitForShakeSpeedImpl(
     AbstractCommandImpl[
-        SetAndWaitForShakeSpeedParams, SuccessData[SetAndWaitForShakeSpeedResult, None]
+        SetAndWaitForShakeSpeedParams, SuccessData[SetAndWaitForShakeSpeedResult]
     ]
 ):
     """Execution implementation of Heater-Shaker's set and wait shake speed command."""
@@ -55,7 +55,7 @@ class SetAndWaitForShakeSpeedImpl(
     async def execute(
         self,
         params: SetAndWaitForShakeSpeedParams,
-    ) -> SuccessData[SetAndWaitForShakeSpeedResult, None]:
+    ) -> SuccessData[SetAndWaitForShakeSpeedResult]:
         """Set and wait for a Heater-Shaker's target shake speed."""
         state_update = update_types.StateUpdate()
 
@@ -94,7 +94,6 @@ class SetAndWaitForShakeSpeedImpl(
             public=SetAndWaitForShakeSpeedResult(
                 pipetteRetracted=pipette_should_retract
             ),
-            private=None,
             state_update=state_update,
         )
 

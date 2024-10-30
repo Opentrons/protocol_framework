@@ -6,7 +6,23 @@ import {
 import {
   capitalizeFirstLetter,
   getBlowoutLocationOptionsForForm,
+  getFormErrorsMappedToField,
+  getFormLevelError,
 } from '../utils'
+
+const BASE_VISIBLE_FORM_ERROR = {
+  title: 'form level error title',
+  dependentFields: ['field1', 'field2'],
+}
+
+const MAPPED_ERRORS = {
+  field1: {
+    title: 'form level error title',
+    dependentFields: ['field1', 'field2'],
+    showAtField: true,
+    showAtForm: true,
+  },
+}
 
 describe('getBlowoutLocationOptionsForForm', () => {
   const destOption = {
@@ -67,5 +83,65 @@ describe('capitalizeFirstLetter', () => {
     expect(capitalizeFirstLetter(stepName)).toBe(
       'Move labware to D3 on top of Magnetic Block'
     )
+  })
+})
+
+describe('getFormErrorsMappedToField', () => {
+  it('should flatten form-level errors to an object keyed by each implicated field with form-level error as the value', () => {
+    const result = getFormErrorsMappedToField([BASE_VISIBLE_FORM_ERROR])
+    expect(result).toEqual({
+      field1: {
+        ...BASE_VISIBLE_FORM_ERROR,
+        showAtField: true,
+        showAtForm: true,
+      },
+      field2: {
+        ...BASE_VISIBLE_FORM_ERROR,
+        showAtField: true,
+        showAtForm: true,
+      },
+    })
+  })
+  it('should maintain booleans for showAtForm and showAtField', () => {
+    const result = getFormErrorsMappedToField([
+      { ...BASE_VISIBLE_FORM_ERROR, showAtForm: false },
+    ])
+    expect(result).toEqual({
+      field1: {
+        ...BASE_VISIBLE_FORM_ERROR,
+        showAtField: true,
+        showAtForm: false,
+      },
+      field2: {
+        ...BASE_VISIBLE_FORM_ERROR,
+        showAtField: true,
+        showAtForm: false,
+      },
+    })
+  })
+})
+
+describe('getFormLevelError', () => {
+  it('shows form-level error at field when field is not focused and showAtField is true', () => {
+    const result = getFormLevelError(true, 'field1', MAPPED_ERRORS)
+    expect(result).toEqual('form level error title')
+  })
+
+  it('shows no form-level error at field when field is focused and showAtField is true', () => {
+    const result = getFormLevelError(true, 'field1', MAPPED_ERRORS, 'field1')
+    expect(result).toBeNull()
+  })
+
+  it('shows no form-level error at field when field is not focused and showAtField is false', () => {
+    const result = getFormLevelError(
+      true,
+      'field1',
+      {
+        ...MAPPED_ERRORS,
+        field1: { ...MAPPED_ERRORS.field1, showAtField: false },
+      },
+      'field2'
+    )
+    expect(result).toBeNull()
   })
 })

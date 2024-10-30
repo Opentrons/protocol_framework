@@ -50,7 +50,6 @@ async def test_drop_tip_implementation(
 
     assert result == SuccessData(
         public=UnsafeDropTipInPlaceResult(),
-        private=None,
         state_update=StateUpdate(
             pipette_tip_state=PipetteTipStateUpdate(pipette_id="abc", tip_geometry=None)
         ),

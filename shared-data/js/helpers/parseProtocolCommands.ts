@@ -10,6 +10,7 @@ import type {
   LoadModuleRunTimeCommand,
   LoadPipetteRunTimeCommand,
   RunTimeCommand,
+  LabwareLocation,
 } from '../../command/types'
 import type { PipetteName } from '../pipettes'
 import type {
@@ -18,6 +19,7 @@ import type {
   LoadedModule,
   LoadedPipette,
   ModuleModel,
+  LabwareDefinition2,
 } from '../types'
 
 interface PipetteNamesByMount {
@@ -133,6 +135,111 @@ export function parseInitialLoadedLabwareBySlot(
     },
     {}
   )
+}
+
+// given a labware id and load labware commands, this function
+// finds the top most labware in the stack and returns relevant
+// information
+export function getTopLabwareInfo(
+  labwareId: string,
+  loadLabwareCommands: LoadLabwareRunTimeCommand[],
+  currentStackHeight: number = 0
+): {
+  topLabwareId: string
+  topLabwareDefinition?: LabwareDefinition2
+  topLabwareDisplayName?: string
+} {
+  const nestedCommand = loadLabwareCommands.find(
+    command =>
+      command.commandType === 'loadLabware' &&
+      command.params.location !== 'offDeck' &&
+      'labwareId' in command.params.location &&
+      command.params.location.labwareId === labwareId
+  )
+  // prevent recurssion errors (like labware stacked on itself)
+  // by enforcing a max stack height
+  if (nestedCommand == null || currentStackHeight > 5) {
+    const loadCommand = loadLabwareCommands.find(
+      command =>
+        command.commandType === 'loadLabware' &&
+        command.result?.labwareId === labwareId
+    )
+    if (loadCommand == null) {
+      console.warn(
+        `could not find the load labware command assosciated with thie labwareId: ${labwareId}`
+      )
+    }
+    return {
+      topLabwareId: labwareId,
+      topLabwareDefinition: loadCommand?.result?.definition,
+      topLabwareDisplayName: loadCommand?.params.displayName,
+    }
+  } else {
+    return getTopLabwareInfo(
+      nestedCommand?.result?.labwareId as string,
+      loadLabwareCommands,
+      currentStackHeight + 1
+    )
+  }
+}
+
+// this recursive function will parse through load labware commands
+// and give the quantity of LIKE labware stacked below the given labware
+// id and the labware location of the bottom-most stacked item
+export function getLabwareStackCountAndLocation(
+  topLabwareId: string,
+  commands: RunTimeCommand[],
+  initialQuantity: number = 1
+): { labwareQuantity: number; labwareLocation: LabwareLocation } {
+  const loadLabwareCommands = commands?.filter(
+    (command): command is LoadLabwareRunTimeCommand =>
+      command.commandType === 'loadLabware'
+  )
+  const loadLabwareCommand = loadLabwareCommands?.find(
+    command => command.result?.labwareId === topLabwareId
+  )
+
+  if (loadLabwareCommands == null || loadLabwareCommand == null) {
+    console.warn(
+      `could not find the load labware command assosciated with thie labwareId: ${topLabwareId}`
+    )
+    return { labwareLocation: 'offDeck', labwareQuantity: 0 }
+  }
+
+  const labwareLocation = loadLabwareCommand.params.location
+
+  if (labwareLocation !== 'offDeck' && 'labwareId' in labwareLocation) {
+    const lowerLabwareCommand = loadLabwareCommands?.find(command =>
+      command.result != null
+        ? command.result?.labwareId === labwareLocation.labwareId
+        : ''
+    )
+    if (lowerLabwareCommand?.result?.labwareId == null) {
+      console.warn(
+        `could not find the load labware command assosciated with thie labwareId: ${labwareLocation.labwareId}`
+      )
+      return { labwareLocation: 'offDeck', labwareQuantity: 0 }
+    }
+
+    const isSameLabware =
+      loadLabwareCommand.params.loadName ===
+      lowerLabwareCommand?.params.loadName
+
+    // add protection for recursion errors by having a max stack of 5 which is current
+    // allowed max stack of TC lids
+    if (isSameLabware && initialQuantity < 5) {
+      const newQuantity = initialQuantity + 1
+      return getLabwareStackCountAndLocation(
+        lowerLabwareCommand.result.labwareId,
+        commands,
+        newQuantity
+      )
+    }
+  }
+  return {
+    labwareQuantity: initialQuantity,
+    labwareLocation,
+  }
 }
 
 export interface LoadedLabwareByAdapter {

@@ -3,7 +3,6 @@ import {
   incompatibleAspirateLabware,
   incompatibleDispenseLabware,
   incompatibleLabware,
-  pauseForTimeOrUntilTold,
   wellRatioMoveLiquid,
   magnetActionRequired,
   engageHeightRequired,
@@ -20,6 +19,8 @@ import {
   shakeSpeedRequired,
   temperatureRequired,
   shakeTimeRequired,
+  pauseTimeRequired,
+  pauseTemperatureRequired,
 } from './errors'
 
 import {
@@ -69,7 +70,7 @@ const stepFormHelperMap: Partial<Record<StepType, FormHelpers>> = {
     ),
   },
   pause: {
-    getErrors: composeErrors(pauseForTimeOrUntilTold),
+    getErrors: composeErrors(pauseTimeRequired, pauseTemperatureRequired),
   },
   moveLiquid: {
     getErrors: composeErrors(
