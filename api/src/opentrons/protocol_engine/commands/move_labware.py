@@ -22,7 +22,11 @@ from ..types import (
     LabwareOffsetVector,
     LabwareMovementOffsetData,
 )
-from ..errors import LabwareMovementNotAllowedError, NotSupportedOnRobotType
+from ..errors import (
+    LabwareMovementNotAllowedError,
+    NotSupportedOnRobotType,
+    LabwareOffsetDoesNotExistError,
+)
 from ..resources import labware_validation, fixture_validation
 from .command import (
     AbstractCommandImpl,
@@ -171,11 +175,26 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
                 if labware_validation.validate_definition_is_lid(
                     self._state_view.labware.get_definition(params.labwareId)
                 ):
-                    trash_lid_drop_offset = LabwareOffsetVector(
-                        x=0,
-                        y=10.0,
-                        z=50.0,
-                    )
+                    self._state_view.labware.get_labware_gripper_offsets
+                    if (
+                        "lidDisposalOffsets"
+                        in current_labware_definition.gripperOffsets.keys()
+                    ):
+                        trash_lid_drop_offset = LabwareOffsetVector(
+                            x=current_labware_definition.gripperOffsets[
+                                "lidDisposalOffsets"
+                            ].dropOffset.x,
+                            y=current_labware_definition.gripperOffsets[
+                                "lidDisposalOffsets"
+                            ].dropOffset.y,
+                            z=current_labware_definition.gripperOffsets[
+                                "lidDisposalOffsets"
+                            ].dropOffset.z,
+                        )
+                    else:
+                        raise LabwareOffsetDoesNotExistError(
+                            f"Labware Definition {current_labware.loadName} does not contain required field 'lidDisposalOffsets' of 'gripperOffsets'."
+                        )
                 else:
                     raise LabwareMovementNotAllowedError(
                         "Can only move labware with allowed role 'Lid' to a Trash Bin."

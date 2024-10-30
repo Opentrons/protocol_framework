@@ -1012,7 +1012,7 @@ def test_move_lid_to_trash_passes(
         mock_core.move_labware(
             labware_core=mock_labware_core,
             new_location=trash_location,
-            use_gripper=True,
+            use_gripper=False,
             pause_for_manual_move=True,
             pick_up_offset=None,
             drop_offset=None,
