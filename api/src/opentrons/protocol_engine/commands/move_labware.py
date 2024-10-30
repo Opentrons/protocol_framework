@@ -174,7 +174,7 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
                     trash_lid_drop_offset = LabwareOffsetVector(
                         x=0,
                         y=20.0,
-                        z=0,
+                        z=50.0,
                     )
                 else:
                     raise LabwareMovementNotAllowedError(

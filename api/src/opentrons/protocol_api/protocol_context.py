@@ -45,6 +45,7 @@ from opentrons.protocols.api_support.util import (
     UnsupportedAPIError,
 )
 from opentrons_shared_data.errors.exceptions import CommandPreconditionViolated
+from opentrons.protocol_engine.errors import LabwareMovementNotAllowedError
 
 from ._types import OffDeckType
 from .core.common import ModuleCore, LabwareCore, ProtocolCore
@@ -737,8 +738,8 @@ class ProtocolContext(CommandPublisher):
             if labware._core.is_lid():
                 location = new_location
             else:
-                raise CommandPreconditionViolated(
-                    "Can only dispose of Lid-type labware and tips in the Trash Bin. Did you mean to use a Waste Chute?"
+                raise LabwareMovementNotAllowedError(
+                    "Can only dispose of tips and Lid-type labware in a Trash Bin. Did you mean to use a Waste Chute?"
                 )
         else:
             location = validation.ensure_and_convert_deck_slot(
