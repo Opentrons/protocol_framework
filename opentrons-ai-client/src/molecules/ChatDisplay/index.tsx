@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import Markdown from 'react-markdown'
@@ -12,28 +12,59 @@ import {
   JUSTIFY_CENTER,
   JUSTIFY_FLEX_END,
   JUSTIFY_FLEX_START,
-  POSITION_ABSOLUTE,
   POSITION_RELATIVE,
-  PrimaryButton,
   SPACING,
   LegacyStyledText,
   TYPOGRAPHY,
-  OVERFLOW_AUTO,
   StyledText,
+  DIRECTION_ROW,
+  OVERFLOW_SCROLL,
 } from '@opentrons/components'
 
 import type { ChatData } from '../../resources/types'
+import { useAtom } from 'jotai'
+import { feedbackModalAtom } from '../../resources/atoms'
+import { delay } from 'lodash'
 
 interface ChatDisplayProps {
   chat: ChatData
   chatId: string
 }
 
+const HoverShadow = styled(Flex)`
+  alignitems: ${ALIGN_CENTER};
+  justifycontent: ${JUSTIFY_CENTER};
+  padding: ${SPACING.spacing8};
+  transition: box-shadow 0.3s ease;
+  border-radius: ${BORDERS.borderRadius8};
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: ${BORDERS.borderRadius8};
+  }
+`
+
+const StyledIcon = styled(Icon)`
+  size: ${SPACING.spacing20};
+  color: ${COLORS.blue50};
+`
+
 export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
   const { t } = useTranslation('protocol_generator')
   const [isCopied, setIsCopied] = useState<boolean>(false)
+  const [, setShowFeedbackModal] = useAtom(feedbackModalAtom)
   const { role, reply } = chat
   const isUser = role === 'user'
+
+  const handleFileDownload = (): void => {
+    const lastCodeBlock = document.querySelector(`#${chatId}`)
+    const code = lastCodeBlock?.textContent ?? ''
+    const blobParts: BlobPart[] = [code]
+
+    const file = new File(blobParts, 'test-file.py', { type: 'text/python' })
+    console.log(file.name)
+    console.log(file.text().then(console.log))
+  }
 
   const handleClickCopy = async (): Promise<void> => {
     const lastCodeBlock = document.querySelector(`#${chatId}`)
@@ -42,6 +73,13 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
     setIsCopied(true)
   }
 
+  useEffect(() => {
+    if (isCopied)
+      delay(() => {
+        setIsCopied(false)
+      }, 2000)
+  }, [isCopied])
+
   function CodeText(props: JSX.IntrinsicAttributes): JSX.Element {
     return <CodeWrapper {...props} id={chatId} />
   }
@@ -49,19 +87,19 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
   return (
     <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
       <Flex justifyContent={isUser ? JUSTIFY_FLEX_END : JUSTIFY_FLEX_START}>
-        <StyledText paddingTop="12px">
+        <StyledText paddingTop={SPACING.spacing12}>
           {isUser ? t('you') : t('opentronsai')}
         </StyledText>
       </Flex>
       {/* text should be markdown so this component will have a package or function to parse markdown */}
       <Flex
-        padding={SPACING.spacing32}
+        padding={SPACING.spacing20}
         backgroundColor={isUser ? COLORS.blue30 : COLORS.grey30}
         data-testid={`ChatDisplay_from_${isUser ? 'user' : 'backend'}`}
-        borderRadius={isUser ? '12px 12px 0 12px' : '12px 12px 12px 0'}
+        borderRadius={SPACING.spacing12}
         width="100%"
-        overflowY={OVERFLOW_AUTO}
         flexDirection={DIRECTION_COLUMN}
+        overflowX={OVERFLOW_SCROLL}
         gridGap={SPACING.spacing16}
         position={POSITION_RELATIVE}
       >
@@ -80,21 +118,57 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
         </Markdown>
 
         {!isUser ? (
-          <PrimaryButton
-            position={POSITION_ABSOLUTE}
-            right={SPACING.spacing16}
-            bottom={`-${SPACING.spacing24}`}
-            borderRadius={BORDERS.borderRadiusFull}
-            onClick={handleClickCopy}
+          <Flex
+            flexDirection={DIRECTION_ROW}
+            justifyContent={JUSTIFY_FLEX_END}
+            gridGap={SPACING.spacing20}
+            paddingTop={SPACING.spacing12}
           >
-            <Flex alignItems={ALIGN_CENTER} justifyContent={JUSTIFY_CENTER}>
-              <Icon
-                size="2rem"
-                name={isCopied ? 'check' : 'copy-text'}
-                color={COLORS.white}
+            <HoverShadow
+              onClick={() => {
+                setShowFeedbackModal(true)
+              }}
+            >
+              <StyledIcon
+                size={SPACING.spacing20}
+                name={'reload'}
+                color={COLORS.blue50}
               />
-            </Flex>
-          </PrimaryButton>
+            </HoverShadow>
+            <HoverShadow
+              onClick={() => {
+                setShowFeedbackModal(true)
+              }}
+            >
+              <StyledIcon
+                size={SPACING.spacing20}
+                name={'thumbs-down'}
+                color={COLORS.blue50}
+              />
+            </HoverShadow>
+            <HoverShadow
+              onClick={async () => {
+                await handleClickCopy()
+              }}
+            >
+              <StyledIcon
+                size={SPACING.spacing20}
+                name={isCopied ? 'check' : 'content-copy'}
+                color={COLORS.blue50}
+              />
+            </HoverShadow>
+            <HoverShadow
+              onClick={() => {
+                handleFileDownload()
+              }}
+            >
+              <StyledIcon
+                size={SPACING.spacing20}
+                name={'download'}
+                color={COLORS.blue50}
+              />
+            </HoverShadow>
+          </Flex>
         ) : null}
       </Flex>
     </Flex>
