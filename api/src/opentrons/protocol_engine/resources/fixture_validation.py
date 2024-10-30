@@ -29,10 +29,12 @@ def is_drop_tip_waste_chute(addressable_area_name: str) -> bool:
 
 def is_trash(addressable_area_name: str) -> bool:
     """Check if an addressable area is a trash bin."""
-    return [
-        s in addressable_area_name
-        for s in {"movableTrash", "fixedTrash", "shortFixedTrash"}
-    ]
+    return any(
+        [
+            s in addressable_area_name
+            for s in {"movableTrash", "fixedTrash", "shortFixedTrash"}
+        ]
+    )
 
 
 def is_staging_slot(addressable_area_name: str) -> bool:
