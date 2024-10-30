@@ -329,6 +329,7 @@ class ProtocolCore(
             NonConnectedModuleCore,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ],
         use_gripper: bool,
         pause_for_manual_move: bool,
@@ -802,6 +803,7 @@ class ProtocolCore(
             NonConnectedModuleCore,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ],
     ) -> LabwareLocation:
         if isinstance(location, LabwareCore):
@@ -818,6 +820,7 @@ class ProtocolCore(
             NonConnectedModuleCore,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ]
     ) -> NonStackedLocation:
         if isinstance(location, (ModuleCore, NonConnectedModuleCore)):
@@ -831,3 +834,5 @@ class ProtocolCore(
         elif isinstance(location, WasteChute):
             # TODO(mm, 2023-12-06) This will need to determine the appropriate Waste Chute to return, but only move_labware uses this for now
             return AddressableAreaLocation(addressableAreaName="gripperWasteChute")
+        elif isinstance(location, TrashBin):
+            return AddressableAreaLocation(addressableAreaName=location.area_name)

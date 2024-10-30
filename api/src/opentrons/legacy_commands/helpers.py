@@ -49,7 +49,9 @@ def stringify_disposal_location(location: Union[TrashBin, WasteChute]) -> str:
 
 
 def _stringify_labware_movement_location(
-    location: Union[DeckLocation, OffDeckType, Labware, ModuleContext, WasteChute]
+    location: Union[
+        DeckLocation, OffDeckType, Labware, ModuleContext, WasteChute, TrashBin
+    ]
 ) -> str:
     if isinstance(location, (int, str)):
         return f"slot {location}"
@@ -61,11 +63,15 @@ def _stringify_labware_movement_location(
         return str(location)
     elif isinstance(location, WasteChute):
         return "Waste Chute"
+    elif isinstance(location, TrashBin):
+        return "Trash Bin " + location.location.name
 
 
 def stringify_labware_movement_command(
     source_labware: Labware,
-    destination: Union[DeckLocation, OffDeckType, Labware, ModuleContext, WasteChute],
+    destination: Union[
+        DeckLocation, OffDeckType, Labware, ModuleContext, WasteChute, TrashBin
+    ],
     use_gripper: bool,
 ) -> str:
     source_labware_text = _stringify_labware_movement_location(source_labware)

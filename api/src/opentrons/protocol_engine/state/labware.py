@@ -227,10 +227,11 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
             if labware_location_update.new_location:
                 new_location = labware_location_update.new_location
 
-                if isinstance(
-                    new_location, AddressableAreaLocation
-                ) and fixture_validation.is_gripper_waste_chute(
-                    new_location.addressableAreaName
+                if isinstance(new_location, AddressableAreaLocation) and (
+                    fixture_validation.is_gripper_waste_chute(
+                        new_location.addressableAreaName
+                    )
+                    or fixture_validation.is_trash(new_location.addressableAreaName)
                 ):
                     # If a labware has been moved into a waste chute it's been chuted away and is now technically off deck
                     new_location = OFF_DECK_LOCATION

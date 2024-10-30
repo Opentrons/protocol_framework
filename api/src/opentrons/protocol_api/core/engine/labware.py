@@ -139,6 +139,10 @@ class LabwareCore(AbstractLabware[WellCore]):
         """Whether the labware is an adapter."""
         return LabwareRole.adapter in self._definition.allowedRoles
 
+    def is_lid(self) -> bool:
+        """Whether the labware is a lid."""
+        return LabwareRole.lid in self._definition.allowedRoles
+
     def is_fixed_trash(self) -> bool:
         """Whether the labware is a fixed trash."""
         return self._engine_client.state.labware.is_fixed_trash(

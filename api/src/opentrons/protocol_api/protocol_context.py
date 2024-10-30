@@ -668,7 +668,7 @@ class ProtocolContext(CommandPublisher):
         self,
         labware: Labware,
         new_location: Union[
-            DeckLocation, Labware, ModuleTypes, OffDeckType, WasteChute
+            DeckLocation, Labware, ModuleTypes, OffDeckType, WasteChute, TrashBin
         ],
         use_gripper: bool = False,
         pick_up_offset: Optional[Mapping[str, float]] = None,
@@ -727,11 +727,19 @@ class ProtocolContext(CommandPublisher):
             OffDeckType,
             DeckSlotName,
             StagingSlotName,
+            TrashBin,
         ]
         if isinstance(new_location, (Labware, ModuleContext)):
             location = new_location._core
         elif isinstance(new_location, (OffDeckType, WasteChute)):
             location = new_location
+        elif isinstance(new_location, TrashBin):
+            if labware._core.is_lid():
+                location = new_location
+            else:
+                raise CommandPreconditionViolated(
+                    "Can only dispose of Lid-type labware and tips in the Trash Bin. Did you mean to use a Waste Chute?"
+                )
         else:
             location = validation.ensure_and_convert_deck_slot(
                 new_location, self._api_version, self._core.robot_type
