@@ -62,7 +62,7 @@ def run(ctx: ProtocolContext) -> None:
         helpers.temp_str, "C1"
     )  # type: ignore[assignment]
     if disposable_lid:
-        unused_lids = helpers.load_disposable_lids(ctx, 3, "A4")
+        unused_lids = helpers.load_disposable_lids(ctx, 3, ["A4"])
     used_lids: List[Labware] = []
     thermocycler.open_lid()
     h_s.open_labware_latch()

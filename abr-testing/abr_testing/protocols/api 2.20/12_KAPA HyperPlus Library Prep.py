@@ -153,7 +153,7 @@ def run(ctx: ProtocolContext) -> None:
 
     trash = ctx.load_waste_chute()
     # Load TC Lids
-    unused_lids = helpers.load_disposable_lids(ctx, 5, "C3")
+    unused_lids = helpers.load_disposable_lids(ctx, 5, ["C3"])
     # Import Global Variables
 
     global tip50

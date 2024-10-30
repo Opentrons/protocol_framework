@@ -363,6 +363,4 @@ if __name__ == "__main__":
     folder_name = args.folder_name[0]
     google_sheet_name = args.google_sheet_name[0]
     email = args.email[0]
-    run(
-            storage_directory, folder_name, google_sheet_name, email
-        )
+    run(storage_directory, folder_name, google_sheet_name, email)

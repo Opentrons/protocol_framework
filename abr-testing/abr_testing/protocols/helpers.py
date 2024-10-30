@@ -13,7 +13,7 @@ from opentrons.protocol_api.module_contexts import (
     ThermocyclerContext,
 )
 
-from typing import List, Union
+from typing import List
 
 
 def load_common_liquid_setup_labware_and_instruments(
@@ -159,9 +159,11 @@ def load_disposable_lids(
                 unused_lids[-1].load_labware("opentrons_tough_pcr_auto_sealing_lid")
             )
     else:
-        for i in range(len(deck_slot)-1):
+        for i in range(len(deck_slot) - 1):
             unused_lids.append(
-                protocol.load_labware("opentrons_tough_pcr_auto_sealing_lid", deck_slot[i])
+                protocol.load_labware(
+                    "opentrons_tough_pcr_auto_sealing_lid", deck_slot[i]
+                )
             )
     unused_lids.reverse()
     return unused_lids
