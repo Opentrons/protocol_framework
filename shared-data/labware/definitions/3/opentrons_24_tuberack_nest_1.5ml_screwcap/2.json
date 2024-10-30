@@ -322,7 +322,7 @@
     "z": 0
   },
   "innerLabwareGeometry": {
-    "conicalWell"`: {
+    "conicalWell": {
       "sections": [
         {
           "shape": "spherical",
