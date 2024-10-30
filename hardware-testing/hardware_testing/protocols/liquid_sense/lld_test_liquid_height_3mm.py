@@ -41,13 +41,16 @@ VOLUMES_3MM_TOP_BOTTOM = {
     "corning_6_wellplate_16.8ml_flat": [13901.9, 2862.1, 0.0],
     "corning_48_wellplate_1.6ml_flat": [1327.0, 790.63, 268.9, 0.0],
     "opentrons_24_tuberack_nest_0.5ml_screwcap": [795.4, 21.95, 0.0],
-    "opentrons_24_tuberack_nest_1.5ml_screwcap": [1750.8, 735.89, 19.5, 0.0],
-    "opentrons_24_tuberack_nest_1.5ml_snapcap": [1650.6, 619.18, 27.7, 0.0],
+    "opentrons_24_tuberack_nest_1.5ml_screwcap": [19.5, 735.89, 1750.8, 0.0],
+    #"opentrons_24_tuberack_nest_1.5ml_screwcap": [19.5],
+    #"opentrons_24_tuberack_nest_1.5ml_snapcap": [27.7],
+    "opentrons_24_tuberack_nest_1.5ml_snapcap": [27.7, 1650.6, 619.18, 0.0],
     "opentrons_24_tuberack_nest_2ml_screwcap": [2104.9, 66.6, 0.0],
     "opentrons_24_tuberack_nest_2ml_snapcap": [2148.5, 69.6, 0.0],
     "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical": [56267.2, 158.1, 0.0],
     "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical": [57720.5,163.9, 0.0],
-    "nest_1_reservoir_195ml": [14034.2, 172301.9, 0.0]
+    "nest_1_reservoir_195ml": [14034.2, 172301.9, 0.0],
+    "axygen_1_reservoir_90ml": [22373.4, 70450.6, 0.0]
 }
 
 SAME_TIP = True  # this is fine when using Ethanol (b/c it evaporates)
@@ -75,7 +78,7 @@ SLOT_DIAL = "B3"
 ###########################################
 
 
-metadata = {"protocolName": "lld-test-liquid-height-3mm-FIXED-TUBES"}
+metadata = {"protocolName": "lld-test-liquid-height-3mm"}
 requirements = {"robotType": "Flex", "apiLevel": "2.20"}
 
 
@@ -162,8 +165,9 @@ def _setup(
         VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] = [15956.6, 40.8, 0.0]
     
     volumes = VOLUMES_3MM_TOP_BOTTOM[labware.load_name]
-
-    total_volume_to_aspirate = (volumes[0] * 3) + (volumes[1] * 3)
+    total_volume_to_aspirate = 0.0
+    for one_vols in volumes:
+        total_volume_to_aspirate += one_vols * num_trials
     if liquid_pip_channels == 1 and total_volume_to_aspirate < 1000:
         RESERVOIR = "opentrons_15_tuberack_nest_15ml_conical"
     else:
