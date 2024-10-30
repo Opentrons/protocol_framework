@@ -1,5 +1,6 @@
 import type * as React from 'react'
 import styled, { css } from 'styled-components'
+import type { FlattenSimpleInterpolation } from 'styled-components'
 import { Flex } from '../../primitives'
 import {
   ALIGN_CENTER,
@@ -58,10 +59,6 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
 
   const isLarge = radioButtonType === 'large'
 
-  const SettingButton = styled.input`
-    display: none;
-  `
-
   const AVAILABLE_BUTTON_STYLE = css`
     background: ${COLORS.blue35};
 
@@ -95,32 +92,6 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
     }
   `
 
-  const SettingButtonLabel = styled.label`
-    border-radius: ${!largeDesktopBorderRadius
-      ? BORDERS.borderRadius40
-      : BORDERS.borderRadius8};
-    cursor: ${CURSOR_POINTER};
-    padding: ${SPACING.spacing12} ${SPACING.spacing16};
-    width: 100%;
-
-    ${isSelected ? SELECTED_BUTTON_STYLE : AVAILABLE_BUTTON_STYLE}
-    ${disabled && DISABLED_BUTTON_STYLE}
-
-    &:focus-visible {
-      outline: 2px solid ${COLORS.blue55};
-    }
-
-    @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-      cursor: ${CURSOR_DEFAULT};
-      padding: ${isLarge ? SPACING.spacing24 : SPACING.spacing20};
-      border-radius: ${BORDERS.borderRadius16};
-      display: ${maxLines != null ? '-webkit-box' : undefined};
-      -webkit-line-clamp: ${maxLines ?? undefined};
-      -webkit-box-orient: ${maxLines != null ? 'vertical' : undefined};
-      word-wrap: break-word;
-    }
-  `
-
   const SUBBUTTON_LABEL_STYLE = css`
     color: ${disabled
       ? COLORS.grey50
@@ -148,6 +119,14 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
         value={buttonValue}
       />
       <SettingButtonLabel
+        isSelected={isSelected}
+        disabled={disabled}
+        largeDesktopBorderRadius={largeDesktopBorderRadius}
+        isLarge={isLarge}
+        maxLines={maxLines}
+        selectedButtonStyle={SELECTED_BUTTON_STYLE}
+        availableButtonStyle={AVAILABLE_BUTTON_STYLE}
+        disabledButtonStyle={DISABLED_BUTTON_STYLE}
         tabIndex={0}
         role="label"
         htmlFor={id}
@@ -194,3 +173,48 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
     </Flex>
   )
 }
+
+const SettingButton = styled.input`
+  display: none;
+`
+
+const SettingButtonLabel = styled.label<{
+  isSelected?: boolean
+  disabled?: boolean
+  largeDesktopBorderRadius?: boolean
+  isLarge?: boolean
+  maxLines?: number | null
+  selectedButtonStyle: FlattenSimpleInterpolation
+  availableButtonStyle: FlattenSimpleInterpolation
+  disabledButtonStyle: FlattenSimpleInterpolation
+}>`
+  border-radius: ${props =>
+    !(props.largeDesktopBorderRadius ?? false)
+      ? BORDERS.borderRadius40
+      : BORDERS.borderRadius8};
+  cursor: ${CURSOR_POINTER};
+  padding: ${SPACING?.spacing12} ${SPACING?.spacing16};
+  width: 100%;
+
+  ${props =>
+    props.isSelected === true
+      ? props.selectedButtonStyle
+      : props.availableButtonStyle}
+  ${props => props.disabled === true && props.disabledButtonStyle}
+
+&:focus-visible {
+    outline: 2px solid ${COLORS?.blue55};
+  }
+
+  @media ${RESPONSIVENESS?.touchscreenMediaQuerySpecs} {
+    cursor: ${CURSOR_DEFAULT};
+    padding: ${props =>
+      props.isLarge === true ? SPACING?.spacing24 : SPACING?.spacing20};
+    border-radius: ${BORDERS?.borderRadius16};
+    display: ${props => (props.maxLines != null ? '-webkit-box' : undefined)};
+    -webkit-line-clamp: ${props => props.maxLines ?? undefined};
+    -webkit-box-orient: ${props =>
+      props.maxLines != null ? 'vertical' : undefined};
+    word-wrap: break-word;
+  }
+`
