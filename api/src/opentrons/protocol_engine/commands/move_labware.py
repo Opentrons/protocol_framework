@@ -175,21 +175,16 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
                 if labware_validation.validate_definition_is_lid(
                     self._state_view.labware.get_definition(params.labwareId)
                 ):
-                    self._state_view.labware.get_labware_gripper_offsets
-                    if (
-                        "lidDisposalOffsets"
-                        in current_labware_definition.gripperOffsets.keys()
-                    ):
+                    lid_disposable_offfets = (
+                        current_labware_definition.gripperOffsets.get(
+                            "lidDisposalOffsets"
+                        )
+                    )
+                    if lid_disposable_offfets is not None:
                         trash_lid_drop_offset = LabwareOffsetVector(
-                            x=current_labware_definition.gripperOffsets[
-                                "lidDisposalOffsets"
-                            ].dropOffset.x,
-                            y=current_labware_definition.gripperOffsets[
-                                "lidDisposalOffsets"
-                            ].dropOffset.y,
-                            z=current_labware_definition.gripperOffsets[
-                                "lidDisposalOffsets"
-                            ].dropOffset.z,
+                            x=lid_disposable_offfets.dropOffset.x,
+                            y=lid_disposable_offfets.dropOffset.y,
+                            z=lid_disposable_offfets.dropOffset.z,
                         )
                     else:
                         raise LabwareOffsetDoesNotExistError(
