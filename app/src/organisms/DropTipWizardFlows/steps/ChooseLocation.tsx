@@ -32,6 +32,7 @@ interface ChooseLocationProps extends DropTipWizardContainerProps {
 }
 
 export function ChooseLocation({
+  issuedCommandsType,
   dropTipCommandLocations,
   dropTipCommands,
   goBackRunValid,
@@ -97,7 +98,7 @@ export function ChooseLocation({
     toggleIsRobotPipetteMoving()
     void moveToAddressableArea(
       selectedLocation?.slotName as AddressableAreaName,
-      false
+      issuedCommandsType === 'fixit' // Because PE has tip state during fixit flows, do not specify a manual offset.
     ).then(() => {
       void blowoutOrDropTip(currentRoute, () => {
         const successStep =

@@ -28,7 +28,7 @@ import type {
   MoveLabwareRunTimeCommand,
   LabwareLocation,
 } from '@opentrons/shared-data'
-import type { LabwareDisplayLocationSlotOnly } from '/app/local-resources/labware'
+import type { DisplayLocationSlotOnlyParams } from '/app/local-resources/labware'
 import type { ErrorRecoveryFlowsProps } from '..'
 import type { ERUtilsProps } from './useERUtils'
 
@@ -214,8 +214,9 @@ function useTipSelectionUtils(
   const initialLocs = useInitialSelectedLocationsFrom(
     recentRelevantFailedLabwareCmd
   )
-  // Set the initial locs when they first become available.
-  if (selectedLocs == null && initialLocs != null) {
+
+  // Set the initial locs when they first become available or update.
+  if (selectedLocs !== initialLocs) {
     setSelectedLocs(initialLocs)
   }
 
@@ -253,17 +254,20 @@ function useTipSelectionUtils(
 }
 
 // Set the initial well selection to be the last pickup tip location for the pipette used in the failed command.
-function useInitialSelectedLocationsFrom(
+export function useInitialSelectedLocationsFrom(
   recentRelevantFailedLabwareCmd: FailedCommandRelevantLabware
 ): WellGroup | null {
   const [initialWells, setInitialWells] = useState<WellGroup | null>(null)
 
   // Note that while other commands may have a wellName associated with them,
   // we are only interested in wells for the purposes of tip picking up.
+  // Support state updates if the underlying data changes, since this data is lazily loaded and may change shortly
+  // after Error Recovery launches.
   if (
     recentRelevantFailedLabwareCmd != null &&
     recentRelevantFailedLabwareCmd.commandType === 'pickUpTip' &&
-    initialWells == null
+    (initialWells == null ||
+      !(recentRelevantFailedLabwareCmd.params.wellName in initialWells))
   ) {
     setInitialWells({ [recentRelevantFailedLabwareCmd.params.wellName]: null })
   }
@@ -352,10 +356,7 @@ export function useRelevantFailedLwLocations({
 }: GetRelevantLwLocationsParams): RelevantFailedLabwareLocations {
   const { t } = useTranslation('protocol_command_text')
 
-  const BASE_DISPLAY_PARAMS: Omit<
-    LabwareDisplayLocationSlotOnly,
-    'location'
-  > = {
+  const BASE_DISPLAY_PARAMS: Omit<DisplayLocationSlotOnlyParams, 'location'> = {
     loadedLabwares: runRecord?.data?.labware ?? [],
     loadedModules: runRecord?.data?.modules ?? [],
     robotType: FLEX_ROBOT_TYPE,

@@ -9,6 +9,7 @@ import {
 } from '@opentrons/shared-data'
 
 import { mockPickUpTipLabware } from '../../__fixtures__'
+import { getLabwareLocation } from '/app/local-resources/labware'
 import {
   getIsLabwareMatch,
   getSlotNameAndLwLocFrom,
@@ -29,6 +30,7 @@ vi.mock('@opentrons/shared-data', async importOriginal => {
     getModuleDef2: vi.fn(),
   }
 })
+vi.mock('/app/local-resources/labware')
 
 describe('getRunCurrentModulesOnDeck', () => {
   const mockLabwareDef: LabwareDefinition2 = {
@@ -49,12 +51,13 @@ describe('getRunCurrentModulesOnDeck', () => {
       moduleDef: mockModuleDef,
       slotName: 'A1',
       nestedLabwareDef: mockLabwareDef,
-      nestedLabwareSlotName: 'MOCK_MODULE_ID',
+      nestedLabwareSlotName: 'A1',
     },
   ]
 
   beforeEach(() => {
     vi.mocked(getModuleDef2).mockReturnValue({ model: 'MOCK_MODEL' } as any)
+    vi.mocked(getLabwareLocation).mockReturnValue({ slotName: 'A1' })
   })
 
   it('should return an array of RunCurrentModulesOnDeck objects', () => {
@@ -64,9 +67,11 @@ describe('getRunCurrentModulesOnDeck', () => {
         location: { moduleId: 'MOCK_MODULE_ID' },
       },
     } as any
+    vi.mocked(getLabwareLocation).mockReturnValue({ slotName: 'A1' })
 
     const result = getRunCurrentModulesOnDeck({
       failedLabwareUtils: mockPickUpTipLabwareSameSlot,
+      runRecord: {} as any,
       currentModulesInfo: mockCurrentModulesInfo,
     })
 
@@ -76,13 +81,14 @@ describe('getRunCurrentModulesOnDeck', () => {
         moduleLocation: { slotName: 'A1' },
         innerProps: {},
         nestedLabwareDef: mockLabwareDef,
-        highlight: 'MOCK_MODULE_ID',
+        highlight: 'A1',
       },
     ])
   })
   it('should set highlight to null if getIsLabwareMatch returns false', () => {
     const result = getRunCurrentModulesOnDeck({
       failedLabwareUtils: mockFailedLabwareUtils,
+      runRecord: {} as any,
       currentModulesInfo: [
         {
           ...mockCurrentModulesInfo[0],
@@ -95,8 +101,11 @@ describe('getRunCurrentModulesOnDeck', () => {
   })
 
   it('should set highlight to null if nestedLabwareDef is null', () => {
+    vi.mocked(getLabwareLocation).mockReturnValue(null)
+
     const result = getRunCurrentModulesOnDeck({
       failedLabwareUtils: mockFailedLabwareUtils,
+      runRecord: {} as any,
       currentModulesInfo: [
         { ...mockCurrentModulesInfo[0], nestedLabwareDef: null },
       ],
@@ -126,8 +135,10 @@ describe('getRunCurrentLabwareOnDeck', () => {
   } as any
 
   it('should return a valid RunCurrentLabwareOnDeck with a labware highlight if the labware is the pickUpTipLabware', () => {
+    vi.mocked(getLabwareLocation).mockReturnValue({ slotName: 'A1' })
     const result = getRunCurrentLabwareOnDeck({
       currentLabwareInfo: [mockCurrentLabwareInfo],
+      runRecord: {} as any,
       failedLabwareUtils: mockFailedLabwareUtils,
     })
 
@@ -141,6 +152,7 @@ describe('getRunCurrentLabwareOnDeck', () => {
   })
 
   it('should set highlight to null if getIsLabwareMatch returns false', () => {
+    vi.mocked(getLabwareLocation).mockReturnValue(null)
     const result = getRunCurrentLabwareOnDeck({
       failedLabwareUtils: {
         ...mockFailedLabwareUtils,
@@ -149,6 +161,7 @@ describe('getRunCurrentLabwareOnDeck', () => {
           location: { slotName: 'B1' },
         },
       },
+      runRecord: {} as any,
       currentLabwareInfo: [mockCurrentLabwareInfo],
     })
 
@@ -201,6 +214,7 @@ describe('getRunCurrentModulesInfo', () => {
   })
 
   it('should return an array of RunCurrentModuleInfo objects for each module in runRecord.data.modules', () => {
+    vi.mocked(getLabwareLocation).mockReturnValue({ slotName: 'A1' })
     const result = getRunCurrentModulesInfo({
       runRecord: mockRunRecord,
       deckDef: mockDeckDef,
@@ -214,7 +228,7 @@ describe('getRunCurrentModulesInfo', () => {
         moduleId: mockModule.id,
         moduleDef: 'MOCK_MODULE_DEF',
         nestedLabwareDef: 'MOCK_LW_DEF',
-        nestedLabwareSlotName: 'MOCK_MODULE_ID',
+        nestedLabwareSlotName: 'A1',
         slotName: mockModule.location.slotName,
       },
     ])
@@ -311,46 +325,64 @@ describe('getRunCurrentLabwareInfo', () => {
 
 describe('getSlotNameAndLwLocFrom', () => {
   it('should return [null, null] if location is null', () => {
-    const result = getSlotNameAndLwLocFrom(null, false)
+    const result = getSlotNameAndLwLocFrom(null, {} as any, false)
     expect(result).toEqual([null, null])
   })
 
   it('should return [null, null] if location is "offDeck"', () => {
-    const result = getSlotNameAndLwLocFrom('offDeck', false)
+    const result = getSlotNameAndLwLocFrom('offDeck', {} as any, false)
     expect(result).toEqual([null, null])
   })
 
   it('should return [null, null] if location has a moduleId and excludeModules is true', () => {
-    const result = getSlotNameAndLwLocFrom({ moduleId: 'MOCK_MODULE_ID' }, true)
+    const result = getSlotNameAndLwLocFrom(
+      { moduleId: 'MOCK_MODULE_ID' },
+      {} as any,
+      true
+    )
     expect(result).toEqual([null, null])
   })
 
-  it('should return [moduleId, { moduleId }] if location has a moduleId and excludeModules is false', () => {
+  it('should return [baseSlot, { moduleId }] if location has a moduleId and excludeModules is false', () => {
+    vi.mocked(getLabwareLocation).mockReturnValue({ slotName: 'A1' })
     const result = getSlotNameAndLwLocFrom(
       { moduleId: 'MOCK_MODULE_ID' },
+      {} as any,
       false
     )
-    expect(result).toEqual(['MOCK_MODULE_ID', { moduleId: 'MOCK_MODULE_ID' }])
+    expect(result).toEqual(['A1', { moduleId: 'MOCK_MODULE_ID' }])
   })
 
-  it('should return [labwareId, { labwareId }] if location has a labwareId', () => {
-    const result = getSlotNameAndLwLocFrom({ labwareId: 'MOCK_LW_ID' }, false)
-    expect(result).toEqual(['MOCK_LW_ID', { labwareId: 'MOCK_LW_ID' }])
+  it('should return [baseSlot, { labwareId }] if location has a labwareId', () => {
+    vi.mocked(getLabwareLocation).mockReturnValue({ slotName: 'A1' })
+    const result = getSlotNameAndLwLocFrom(
+      { labwareId: 'MOCK_LW_ID' },
+      {} as any,
+      false
+    )
+    expect(result).toEqual(['A1', { labwareId: 'MOCK_LW_ID' }])
   })
 
   it('should return [addressableAreaName, { addressableAreaName }] if location has an addressableAreaName', () => {
-    const result = getSlotNameAndLwLocFrom({ addressableAreaName: 'A1' }, false)
+    vi.mocked(getLabwareLocation).mockReturnValue({ slotName: 'A1' })
+    const result = getSlotNameAndLwLocFrom(
+      { addressableAreaName: 'A1' },
+      {} as any,
+      false
+    )
     expect(result).toEqual(['A1', { addressableAreaName: 'A1' }])
   })
 
   it('should return [slotName, { slotName }] if location has a slotName', () => {
-    const result = getSlotNameAndLwLocFrom({ slotName: 'A1' }, false)
+    vi.mocked(getLabwareLocation).mockReturnValue({ slotName: 'A1' })
+    const result = getSlotNameAndLwLocFrom({ slotName: 'A1' }, {} as any, false)
     expect(result).toEqual(['A1', { slotName: 'A1' }])
   })
 
   it('should return [null, null] if location does not match any known location type', () => {
     const result = getSlotNameAndLwLocFrom(
       { unknownProperty: 'MOCK_VALUE' } as any,
+      {} as any,
       false
     )
     expect(result).toEqual([null, null])
@@ -358,57 +390,90 @@ describe('getSlotNameAndLwLocFrom', () => {
 })
 
 describe('getIsLabwareMatch', () => {
+  beforeEach(() => {
+    vi.mocked(getLabwareLocation).mockReturnValue(null)
+  })
+
   it('should return false if pickUpTipLabware is null', () => {
-    const result = getIsLabwareMatch('A1', null)
+    const result = getIsLabwareMatch('A1', {} as any, null)
     expect(result).toBe(false)
   })
 
   it('should return false if pickUpTipLabware location is a string', () => {
-    const result = getIsLabwareMatch('offdeck', { location: 'offdeck' } as any)
+    const result = getIsLabwareMatch(
+      'offdeck',
+      {} as any,
+      { location: 'offdeck' } as any
+    )
     expect(result).toBe(false)
   })
 
   it('should return false if pickUpTipLabware location has a moduleId', () => {
-    const result = getIsLabwareMatch('A1', {
-      location: { moduleId: 'MOCK_MODULE_ID' },
-    } as any)
+    const result = getIsLabwareMatch(
+      'A1',
+      {} as any,
+      {
+        location: { moduleId: 'MOCK_MODULE_ID' },
+      } as any
+    )
     expect(result).toBe(false)
   })
 
   it('should return true if pickUpTipLabware location slotName matches the provided slotName', () => {
-    const result = getIsLabwareMatch('A1', {
-      location: { slotName: 'A1' },
-    } as any)
+    vi.mocked(getLabwareLocation).mockReturnValue({ slotName: 'A1' })
+    const result = getIsLabwareMatch(
+      'A1',
+      {} as any,
+      {
+        location: { slotName: 'A1' },
+      } as any
+    )
     expect(result).toBe(true)
   })
 
   it('should return false if pickUpTipLabware location slotName does not match the provided slotName', () => {
-    const result = getIsLabwareMatch('A1', {
-      location: { slotName: 'A2' },
-    } as any)
+    const result = getIsLabwareMatch(
+      'A1',
+      {} as any,
+      {
+        location: { slotName: 'A2' },
+      } as any
+    )
     expect(result).toBe(false)
   })
 
   it('should return true if pickUpTipLabware location labwareId matches the provided slotName', () => {
-    const result = getIsLabwareMatch('lwId', {
-      location: { labwareId: 'lwId' },
-    } as any)
+    vi.mocked(getLabwareLocation).mockReturnValue({ slotName: 'C1' })
+
+    const result = getIsLabwareMatch(
+      'C1',
+      {} as any,
+      {
+        location: { labwareId: 'lwId' },
+      } as any
+    )
     expect(result).toBe(true)
   })
 
   it('should return false if pickUpTipLabware location labwareId does not match the provided slotName', () => {
-    const result = getIsLabwareMatch('lwId', {
-      location: { labwareId: 'lwId2' },
-    } as any)
+    const result = getIsLabwareMatch(
+      'lwId',
+      {} as any,
+      {
+        location: { labwareId: 'lwId2' },
+      } as any
+    )
     expect(result).toBe(false)
   })
 
   it('should return true if pickUpTipLabware location addressableAreaName matches the provided slotName', () => {
+    vi.mocked(getLabwareLocation).mockReturnValue({ slotName: 'B1' })
+
     const slotName = 'B1'
     const pickUpTipLabware = {
       location: { addressableAreaName: 'B1' },
     } as any
-    const result = getIsLabwareMatch(slotName, pickUpTipLabware)
+    const result = getIsLabwareMatch(slotName, {} as any, pickUpTipLabware)
     expect(result).toBe(true)
   })
 
@@ -417,7 +482,7 @@ describe('getIsLabwareMatch', () => {
     const pickUpTipLabware = {
       location: { addressableAreaName: 'B2' },
     } as any
-    const result = getIsLabwareMatch(slotName, pickUpTipLabware)
+    const result = getIsLabwareMatch(slotName, {} as any, pickUpTipLabware)
     expect(result).toBe(false)
   })
 
@@ -426,7 +491,7 @@ describe('getIsLabwareMatch', () => {
     const pickUpTipLabware = {
       location: { unknownProperty: 'someValue' },
     } as any
-    const result = getIsLabwareMatch(slotName, pickUpTipLabware)
+    const result = getIsLabwareMatch(slotName, {} as any, pickUpTipLabware)
     expect(result).toBe(false)
   })
 })
