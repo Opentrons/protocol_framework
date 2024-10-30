@@ -11,9 +11,9 @@ import { useForm, FormProvider } from 'react-hook-form'
 import { createProtocolAtom, headerWithMeterAtom } from '../../resources/atoms'
 import { useAtom } from 'jotai'
 import { ProtocolSectionsContainer } from '../../organisms/ProtocolSectionsContainer'
-import { OTHER } from '../../organisms/ApplicationSection'
+import { generatePromptPreviewData } from '../../resources/utils/createProtocolUtils'
 
-interface CreateProtocolFormData {
+export interface CreateProtocolFormData {
   application: {
     scientificApplication: string
     otherApplication?: string
@@ -57,36 +57,6 @@ export function CreateProtocol(): JSX.Element | null {
     })
   }, [currentStep])
 
-  function generatePromptPreviewApplicationItems(): string[] {
-    const {
-      application: { scientificApplication, otherApplication, description },
-    } = methods.watch()
-
-    const scientificOrOtherApplication =
-      scientificApplication === OTHER
-        ? otherApplication
-        : scientificApplication !== ''
-        ? t(scientificApplication)
-        : ''
-
-    return [
-      scientificOrOtherApplication !== '' && scientificOrOtherApplication,
-      description !== '' && description,
-    ].filter(Boolean)
-  }
-
-  function generatePromptPreviewData(): Array<{
-    title: string
-    items: string[]
-  }> {
-    return [
-      {
-        title: t('application_title'),
-        items: generatePromptPreviewApplicationItems(),
-      },
-    ]
-  }
-
   return (
     <FormProvider {...methods}>
       <Flex
@@ -102,7 +72,7 @@ export function CreateProtocol(): JSX.Element | null {
           handleSubmit={function (): void {
             throw new Error('Function not implemented.')
           }}
-          promptPreviewData={generatePromptPreviewData()}
+          promptPreviewData={generatePromptPreviewData(methods.watch, t)}
         />
       </Flex>
     </FormProvider>
