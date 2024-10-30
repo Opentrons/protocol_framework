@@ -13,9 +13,11 @@ from typing_extensions import Literal
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
 from opentrons.types import Point
 from ..types import (
+    ModuleModel,
     CurrentWell,
     LabwareLocation,
     DeckSlotLocation,
+    ModuleLocation,
     OnLabwareLocation,
     AddressableAreaLocation,
     LabwareMovementStrategy,
@@ -187,6 +189,13 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
             if params.labwareId == available_new_location.labwareId:
                 raise LabwareMovementNotAllowedError(
                     "Cannot move a labware onto itself."
+                )
+        # Labware needs to be 15mm or less to fit into the absorbance reader
+        elif isinstance(available_new_location, ModuleLocation):
+            module = self._state_view.modules.get(available_new_location.moduleId)
+            if module is not None and module.model == ModuleModel.ABSORBANCE_READER_V1:
+                self._state_view.labware.raise_if_labware_incompatible_with_plate_reader(
+                    params.labwareId
                 )
 
         # Allow propagation of ModuleNotLoadedError.
