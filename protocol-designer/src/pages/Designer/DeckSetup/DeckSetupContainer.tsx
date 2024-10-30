@@ -1,6 +1,5 @@
 import { useMemo, useState, Fragment } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { css } from 'styled-components'
 import {
   ALIGN_CENTER,
   BORDERS,
