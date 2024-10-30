@@ -52,13 +52,15 @@ describe('ControlledRadioButtonGroup', () => {
   })
 
   it('should select the correct option initially', () => {
-    render()
+    const { rerender } = render()
 
     const radio1 = screen.getByLabelText('Radio Label 1')
     const radio2 = screen.getByLabelText('Radio Label 2')
 
     expect(radio1).toBeChecked()
     expect(radio2).not.toBeChecked()
+
+    rerender(<TestFormProviderComponent />)
 
     expect(screen.getByText('selected value: value 1')).toBeInTheDocument()
   })
