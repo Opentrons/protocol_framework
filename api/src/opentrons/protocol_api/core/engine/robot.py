@@ -63,7 +63,10 @@ class RobotCore(AbstractRobot):
         if isinstance(mount, Mount):
             engine_mount = MountType[mount.name]
         else:
-            engine_mount = MountType[mount]
+            if mount.lower() == "right":
+                engine_mount = MountType.RIGHT
+            else:
+                engine_mount = MountType.LEFT
         maybe_pipette = self._engine_client.state.pipettes.get_by_mount(engine_mount)
         return maybe_pipette.pipetteName if maybe_pipette else None
 
