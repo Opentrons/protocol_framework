@@ -74,7 +74,7 @@ export function ProtocolSectionsContainer(): JSX.Element | null {
           }}
           isCompleted={displayCheckmark(stepNumber)}
         >
-          <Component />
+          {focusStep === stepNumber && <Component />}
         </Accordion>
       ))}
     </ProtocolSections>

@@ -1,4 +1,4 @@
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { i18n } from '../../../i18n'
@@ -24,7 +24,7 @@ const render = (): ReturnType<typeof renderWithProviders> => {
 }
 
 describe('ApplicationSection', () => {
-  it('should render scientific application dropdown, describe input and confirm button', () => {
+  it('should render robot, pipette, flex gripper radios, mounts dropdowns, and confirm button', async () => {
     render()
 
     expect(
@@ -33,87 +33,76 @@ describe('ApplicationSection', () => {
     expect(
       screen.getByText('What pipettes would you like to use?')
     ).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Left mount')).toBeInTheDocument()
+    })
+    expect(screen.getByText('Right mount')).toBeInTheDocument()
     expect(
       screen.getByText('Do you want to use the Flex Gripper?')
     ).toBeInTheDocument()
     expect(screen.getByText('Confirm')).toBeInTheDocument()
   })
 
-  it('should not render left and right mount dropdowns if other pipettes option or Opentrons OT-2 robot is not selected', () => {
+  it('should not render left and right mount dropdowns if 96-Channel 1000µL pipette radio is selected', () => {
     render()
+
+    const pipettesRadioButton = screen.getByLabelText(
+      '96-Channel 1000µL pipette'
+    )
+    fireEvent.click(pipettesRadioButton)
 
     expect(screen.queryByText('Left mount')).not.toBeInTheDocument()
     expect(screen.queryByText('Right mount')).not.toBeInTheDocument()
   })
 
-  it('should render left and right mount dropdowns if other pipettes is selected', () => {
+  it('should render only left and right mount dropdowns if Opentrons OT-2 is selected', () => {
     render()
-
-    expect(screen.queryByText('Left mount')).not.toBeInTheDocument()
-    expect(screen.queryByText('Right mount')).not.toBeInTheDocument()
-
-    const otherPipettesRadioButton = screen.getByLabelText('Other pipettes')
-    fireEvent.click(otherPipettesRadioButton)
-
-    expect(screen.getByText('Left mount')).toBeInTheDocument()
-    expect(screen.getByText('Right mount')).toBeInTheDocument()
-  })
-
-  it('should render left and right mount dropdowns if Opentrons OT-2 is selected', () => {
-    render()
-
-    expect(
-      screen.queryByText('What instruments would you like to use?')
-    ).not.toBeInTheDocument()
-    expect(screen.queryByText('Left mount')).not.toBeInTheDocument()
-    expect(screen.queryByText('Right mount')).not.toBeInTheDocument()
 
     const ot2Radio = screen.getByLabelText('Opentrons OT-2')
     fireEvent.click(ot2Radio)
 
     expect(
-      screen.getByText('What instruments would you like to use?')
+      screen.getByText('What pipettes would you like to use?')
     ).toBeInTheDocument()
     expect(screen.getByText('Left mount')).toBeInTheDocument()
     expect(screen.getByText('Right mount')).toBeInTheDocument()
+
+    expect(screen.queryByText('Two pipettes')).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('96-Channel 1000µL pipette')
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('Do you want to use the Flex Gripper')
+    ).not.toBeInTheDocument()
   })
 
-  it('should not render pipettes and flex gripper radio buttons if Opentrons OT-2 is selected', () => {
+  it('should enable confirm button when all fields are filled', async () => {
     render()
 
-    const ot2Radio = screen.getByLabelText('Opentrons OT-2')
-    fireEvent.click(ot2Radio)
+    const confirmButton = screen.getByRole('button')
+    await waitFor(() => {
+      expect(confirmButton).not.toBeEnabled()
+    })
 
-    expect(
-      screen.queryByText('What pipettes would you like to use?')
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByText('Do you want to use the Flex Gripper?')
-    ).not.toBeInTheDocument()
+    const leftMount = screen.getAllByText('Choose pipette')[0]
+    fireEvent.click(leftMount)
+    fireEvent.click(screen.getByText('Flex 1-Channel 50 μL'))
+
+    const rightMount = screen.getByText('Choose pipette')
+    fireEvent.click(rightMount)
+    fireEvent.click(screen.getByText('Flex 8-Channel 50 μL'))
+
+    await waitFor(() => {
+      expect(confirmButton).toBeEnabled()
+    })
   })
 
-  // it('should enable confirm button when all fields are filled', async () => {
-  //   render()
+  it('should disable confirm button when all fields are not filled', async () => {
+    render()
 
-  //   const applicationDropdown = screen.getByText('Select an option')
-  //   fireEvent.click(applicationDropdown)
-
-  //   const basicAliquotingOption = screen.getByText('Basic aliquoting')
-  //   fireEvent.click(basicAliquotingOption)
-
-  //   const describeInput = screen.getByRole('textbox')
-  //   fireEvent.change(describeInput, { target: { value: 'Test description' } })
-
-  //   const confirmButton = screen.getByRole('button')
-  //   await waitFor(() => {
-  //     expect(confirmButton).toBeEnabled()
-  //   })
-  // })
-
-  // it('should disable confirm button when all fields are not filled', () => {
-  //   render()
-
-  //   const confirmButton = screen.getByRole('button')
-  //   expect(confirmButton).toBeDisabled()
-  // })
+    const confirmButton = screen.getByRole('button')
+    await waitFor(() => {
+      expect(confirmButton).not.toBeEnabled()
+    })
+  })
 })

@@ -1,4 +1,5 @@
 import {
+  COLORS,
   DIRECTION_COLUMN,
   DIRECTION_ROW,
   Flex,
@@ -32,7 +33,9 @@ export function ControlledRadioButtonGroup({
   return (
     <Flex id={id} flexDirection={DIRECTION_COLUMN} gap={SPACING.spacing8}>
       {title !== '' && (
-        <StyledText desktopStyle="bodyDefaultSemiBold">{title}</StyledText>
+        <StyledText color={COLORS.grey60} desktopStyle="bodyDefaultSemiBold">
+          {title}
+        </StyledText>
       )}
       <Controller
         defaultValue={defaultValue}
@@ -45,6 +48,7 @@ export function ControlledRadioButtonGroup({
                 <RadioButton
                   key={index}
                   {...radioButton}
+                  radioButtonType={'small'}
                   isSelected={field.value === radioButton.buttonValue}
                   onChange={e => {
                     field.onChange(e)

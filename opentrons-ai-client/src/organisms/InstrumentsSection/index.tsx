@@ -1,4 +1,5 @@
 import {
+  COLORS,
   DIRECTION_COLUMN,
   DISPLAY_FLEX,
   Flex,
@@ -15,10 +16,20 @@ import { createProtocolAtom } from '../../resources/atoms'
 import { INSTRUMENTS_STEP } from '../ProtocolSectionsContainer'
 import { ControlledDropdownMenu } from '../../atoms/ControlledDropdownMenu'
 import { ControlledRadioButtonGroup } from '../../molecules/ControlledRadioButtonGroup'
+import { useMemo } from 'react'
+import {
+  getAllPipetteNames,
+  getPipetteSpecsV2,
+  OT2_PIPETTES,
+  OT2_ROBOT_TYPE,
+  OT3_PIPETTES,
+} from '@opentrons/shared-data'
 
 export const ROBOT_FIELD_NAME = 'instruments.robot'
 export const PIPETTES_FIELD_NAME = 'instruments.pipettes'
-export const FLEX_GRIPPER_FIELD_NAME = 'instruments.flex_gripper'
+export const FLEX_GRIPPER_FIELD_NAME = 'instruments.flexGripper'
+export const LEFT_PIPETTE_FIELD_NAME = 'instruments.leftPipette'
+export const RIGHT_PIPETTE_FIELD_NAME = 'instruments.rightPipette'
 export const FLEX_GRIPPER = 'flex_gripper'
 export const NO_FLEX_GRIPPER = 'no_flex_gripper'
 export const OPENTRONS_FLEX = 'opentrons_flex'
@@ -33,33 +44,11 @@ export function InstrumentsSection(): JSX.Element | null {
     watch,
   } = useFormContext()
   const [{ currentStep }, setCreateProtocolAtom] = useAtom(createProtocolAtom)
-
-  // const leftMountOptions = [
-  //   { name: t(BASIC_ALIQUOTING), value: BASIC_ALIQUOTING },
-  //   { name: t(PCR), value: PCR },
-  //   { name: t(OTHER), value: OTHER },
-  // ]
-
-  // const rightMountOptions = [
-  //   { name: t(BASIC_ALIQUOTING), value: BASIC_ALIQUOTING },
-  //   { name: t(PCR), value: PCR },
-  //   { name: t(OTHER), value: OTHER },
-  // ]
-
+  const robotType = watch(ROBOT_FIELD_NAME)
   const isOtherPipettesSelected = watch(PIPETTES_FIELD_NAME) === TWO_PIPETTES
-  const isOpentronsOT2Selected = watch(ROBOT_FIELD_NAME) === OPENTRONS_OT2
+  const isOpentronsOT2Selected = robotType === OPENTRONS_OT2
 
-  function handleConfirmButtonClick(): void {
-    const step =
-      currentStep > INSTRUMENTS_STEP ? currentStep : INSTRUMENTS_STEP + 1
-
-    setCreateProtocolAtom({
-      currentStep: step,
-      focusStep: step,
-    })
-  }
-
-  const robotOptions = [
+  const robotRadioButtons = [
     {
       id: OPENTRONS_FLEX,
       buttonLabel: t('opentrons_flex_label'),
@@ -72,7 +61,7 @@ export function InstrumentsSection(): JSX.Element | null {
     },
   ]
 
-  const pipetteOptions = [
+  const pipetteRadioButtons = [
     {
       id: TWO_PIPETTES,
       buttonLabel: t('two_pipettes_label'),
@@ -85,7 +74,7 @@ export function InstrumentsSection(): JSX.Element | null {
     },
   ]
 
-  const flexGripperOptions = [
+  const flexGripperRadionButtons = [
     {
       id: FLEX_GRIPPER,
       buttonLabel: t('flex_gripper_yes_label'),
@@ -98,6 +87,30 @@ export function InstrumentsSection(): JSX.Element | null {
     },
   ]
 
+  const pipetteOptions = useMemo(() => {
+    const allPipetteOptions = getAllPipetteNames('maxVolume', 'channels')
+      .filter(name =>
+        (robotType === OT2_ROBOT_TYPE ? OT2_PIPETTES : OT3_PIPETTES).includes(
+          name
+        )
+      )
+      .map(name => ({
+        value: name,
+        name: getPipetteSpecsV2(name)?.displayName ?? '',
+      }))
+    return allPipetteOptions.filter(o => o.value !== 'p1000_96')
+  }, [robotType])
+
+  function handleConfirmButtonClick(): void {
+    const step =
+      currentStep > INSTRUMENTS_STEP ? currentStep : INSTRUMENTS_STEP + 1
+
+    setCreateProtocolAtom({
+      currentStep: step,
+      focusStep: step,
+    })
+  }
+
   return (
     <Flex
       flexDirection={DIRECTION_COLUMN}
@@ -105,26 +118,31 @@ export function InstrumentsSection(): JSX.Element | null {
       gap={SPACING.spacing24}
     >
       <ControlledRadioButtonGroup
-        radioButtons={robotOptions}
+        radioButtons={robotRadioButtons}
         title={t('instruments_robot_title')}
         name={ROBOT_FIELD_NAME}
         defaultValue={OPENTRONS_FLEX}
+        rules={{ required: true }}
       />
 
       <PipettesSection isOpentronsOT2Selected={isOpentronsOT2Selected}>
         {!isOpentronsOT2Selected && (
           <ControlledRadioButtonGroup
-            radioButtons={pipetteOptions}
+            radioButtons={pipetteRadioButtons}
             title={t('instruments_pipettes_title')}
             name={PIPETTES_FIELD_NAME}
-            defaultValue={_96_CHANNEL_1000UL_PIPETTE}
+            defaultValue={TWO_PIPETTES}
+            rules={{ required: true }}
           />
         )}
 
         {(isOtherPipettesSelected || isOpentronsOT2Selected) && (
           <PipettesDropdown isOpentronsOT2Selected={isOpentronsOT2Selected}>
             {isOpentronsOT2Selected && (
-              <StyledText desktopStyle="bodyDefaultSemiBold">
+              <StyledText
+                color={COLORS.grey60}
+                desktopStyle="bodyDefaultSemiBold"
+              >
                 {t('instruments_pipettes_title')}
               </StyledText>
             )}
@@ -132,17 +150,19 @@ export function InstrumentsSection(): JSX.Element | null {
               width="100%"
               dropdownType="neutral"
               title={t('left_pipette_label')}
-              name={''}
-              options={[]}
+              name={LEFT_PIPETTE_FIELD_NAME}
+              options={pipetteOptions}
               placeholder={t('choose_pipette_placeholder')}
+              rules={{ required: true }}
             />
             <ControlledDropdownMenu
               width="100%"
               dropdownType="neutral"
               title={t('right_pipette_label')}
-              name={''}
-              options={[]}
+              name={RIGHT_PIPETTE_FIELD_NAME}
+              options={pipetteOptions}
               placeholder={t('choose_pipette_placeholder')}
+              rules={{ required: true }}
             />
           </PipettesDropdown>
         )}
@@ -150,10 +170,11 @@ export function InstrumentsSection(): JSX.Element | null {
 
       {!isOpentronsOT2Selected && (
         <ControlledRadioButtonGroup
-          radioButtons={flexGripperOptions}
+          radioButtons={flexGripperRadionButtons}
           title={t('instruments_flex_gripper_title')}
           name={FLEX_GRIPPER_FIELD_NAME}
           defaultValue={FLEX_GRIPPER}
+          rules={{ required: true }}
         />
       )}
 

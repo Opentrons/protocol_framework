@@ -22,6 +22,8 @@ interface CreateProtocolFormData {
   instruments: {
     robot: string
     pipettes: string
+    leftPipette: string
+    rightPipette: string
     flexGripper: string
   }
 }
@@ -93,6 +95,7 @@ export function CreateProtocol(): JSX.Element | null {
         gap={SPACING.spacing32}
         margin={`${SPACING.spacing16} ${SPACING.spacing16}`}
         height="100%"
+        width="100%"
       >
         <ProtocolSectionsContainer />
         <PromptPreview
