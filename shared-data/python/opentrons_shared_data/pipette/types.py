@@ -14,8 +14,8 @@ PipetteModelMinorVersion = [0, 1, 2, 3, 4, 5, 6]
 # exact values. Is there a better typing mechanism
 # so we don't need to keep track of versions in two
 # different places?
-PipetteModelMajorVersionType = Literal[1, 2, 3]
-PipetteModelMinorVersionType = Literal[0, 1, 2, 3, 4, 5, 6]
+PipetteModelMajorVersionType = Literal[1, 2, 3, 9]
+PipetteModelMinorVersionType = Literal[0, 1, 2, 3, 4, 5, 6, 9]
 
 
 class LiquidClasses(enum.Enum):
