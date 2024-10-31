@@ -90,8 +90,39 @@ async def test_driver_get_device_info(
 
     info = await connected_driver.get_device_info()
 
-    mock_interface.get_device_information.assert_called_once()
     assert info == {"serial": "BYOMAA00013", "model": "ABS96", "version": "v1.0.2"}
+    mock_interface.get_device_information.assert_called_once()
+    mock_interface.reset_mock()
+
+    # Test Device info with updated serial format
+    DEVICE_INFO.sn = "OPTMAA00034"
+    DEVICE_INFO.version = "Absorbance V1.0.2 2024-04-18"
+
+    mock_interface.get_device_information.return_value = (
+        MockErrorCode.NO_ERROR,
+        DEVICE_INFO,
+    )
+
+    info = await connected_driver.get_device_info()
+
+    assert info == {"serial": "OPTMAA00034", "model": "ABS96", "version": "v1.0.2"}
+    mock_interface.get_device_information.assert_called_once()
+    mock_interface.reset_mock()
+
+    # Test Device info with invalid serial format
+    DEVICE_INFO.sn = "YRFGHVMAA00034"
+    DEVICE_INFO.version = "Absorbance V1.0.2 2024-04-18"
+
+    mock_interface.get_device_information.return_value = (
+        MockErrorCode.NO_ERROR,
+        DEVICE_INFO,
+    )
+
+    info = await connected_driver.get_device_info()
+
+    assert info == {"serial": "OPTMAA00000", "model": "ABS96", "version": "v1.0.2"}
+    mock_interface.get_device_information.assert_called_once()
+    mock_interface.reset_mock()
 
 
 @pytest.mark.parametrize(
