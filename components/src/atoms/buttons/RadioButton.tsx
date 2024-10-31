@@ -7,6 +7,58 @@ import { CURSOR_DEFAULT, CURSOR_POINTER, CURSOR_NOT_ALLOWED, DIRECTION_ROW, ALIG
 import type { IconName } from '../..'
 import type { StyleProps } from '../../primitives'
 
+const DISABLED_BUTTON_STYLE = css`
+  background-color: ${COLORS.grey35};
+  color: ${COLORS.grey50};
+
+  &:hover,
+  &:active {
+    background-color: ${COLORS.grey35};
+  }
+
+  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+    cursor: ${CURSOR_NOT_ALLOWED};
+  }
+`
+
+const SettingButton = styled.input`
+  display: none;
+`
+
+interface SettingsButtonLabelProps {
+  isSelected: boolean
+  disabled: boolean
+  largeDesktopBorderRadius: boolean
+  isLarge: boolean
+  maxLines?: number | null
+}
+
+const SettingButtonLabel = styled.label<SettingsButtonLabelProps>`
+  border-radius: ${({ largeDesktopBorderRadius }) =>
+    !largeDesktopBorderRadius ? BORDERS.borderRadius40 : BORDERS.borderRadius8};
+  cursor: ${CURSOR_POINTER};
+  padding: ${SPACING.spacing12} ${SPACING.spacing16};
+  width: 100%;
+
+  ${({ disabled }) => disabled && DISABLED_BUTTON_STYLE}
+  &:focus-visible {
+    outline: 2px solid ${COLORS.blue55};
+  }
+
+  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+    cursor: ${CURSOR_DEFAULT};
+    padding: ${({ largeDesktopBorderRadius }) =>
+      largeDesktopBorderRadius ? SPACING.spacing24 : SPACING.spacing20};
+    border-radius: ${BORDERS.borderRadius16};
+    display: ${({ maxLines }) =>
+      maxLines != null ? '-webkit-box' : undefined};
+    -webkit-line-clamp: ${({ maxLines }) => maxLines ?? undefined};
+    -webkit-box-orient: ${({ maxLines }) =>
+      maxLines != null ? 'vertical' : undefined};
+    word-wrap: break-word;
+  }
+`
+
 interface RadioButtonProps extends StyleProps {
   buttonLabel: string | React.ReactNode
   buttonValue: string | number
