@@ -3,7 +3,6 @@ import { fireEvent, screen } from '@testing-library/react'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { i18n } from '../../../assets/localization'
 import { AutoAddPauseUntilTempStepModal } from '../AutoAddPauseUntilTempStepModal'
-import { TEMPERATURE_MODULE_TYPE } from '@opentrons/shared-data'
 
 import type { ComponentProps } from 'react'
 
