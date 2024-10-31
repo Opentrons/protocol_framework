@@ -24,7 +24,7 @@ from opentrons.hardware_control.modules.errors import AbsorbanceReaderDisconnect
 
 SN_PARSER = re.compile(r'ATTRS{serial}=="(?P<serial>.+?)"')
 VERSION_PARSER = re.compile(r"Absorbance (?P<version>V\d+\.\d+\.\d+)")
-SERIAL_PARSER = re.compile(r"(?P<serial>(OPT|BYO)[A-Z]{3}[0-9]{5})")
+SERIAL_PARSER = re.compile(r"(?P<serial>(OPT|BYO)[A-Z]{3}[0-9]+)")
 
 
 class AsyncByonoy:
@@ -156,9 +156,9 @@ class AsyncByonoy:
             func=partial(self._interface.get_device_information, handle),
         )
         self._raise_if_error(err.name, f"Error getting device information: {err}")
-        serial_match = SERIAL_PARSER.match(device_info.sn)
+        serial_match = SERIAL_PARSER.fullmatch(device_info.sn)
         version_match = VERSION_PARSER.match(device_info.version)
-        serial = serial_match["serial"] if serial_match else "OPTMAA00000"
+        serial = serial_match["serial"].strip() if serial_match else "OPTMAA00000"
         version = version_match["version"].lower() if version_match else "v0.0.0"
         info = {
             "serial": serial,
