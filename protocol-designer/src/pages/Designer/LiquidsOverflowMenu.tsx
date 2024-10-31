@@ -1,5 +1,4 @@
-import type * as React from 'react'
-import styled from 'styled-components'
+import { css } from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
@@ -8,12 +7,12 @@ import {
   BORDERS,
   Box,
   COLORS,
-  CURSOR_AUTO,
   CURSOR_POINTER,
   DIRECTION_COLUMN,
   Flex,
   Icon,
   LiquidIcon,
+  MenuItem,
   POSITION_ABSOLUTE,
   SPACING,
   StyledText,
@@ -22,6 +21,8 @@ import {
 import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import * as labwareIngredActions from '../../labware-ingred/actions'
+
+import type { MouseEvent } from 'react'
 import type { ThunkDispatch } from '../../types'
 
 const NAV_HEIGHT = '64px'
@@ -52,7 +53,7 @@ export function LiquidsOverflowMenu(
       boxShadow="0px 1px 3px rgba(0, 0, 0, 0.2)"
       backgroundColor={COLORS.white}
       flexDirection={DIRECTION_COLUMN}
-      onClick={(e: React.MouseEvent) => {
+      onClick={(e: MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
       }}
@@ -60,7 +61,7 @@ export function LiquidsOverflowMenu(
     >
       {liquids.map(({ name, displayColor, ingredientId }) => {
         return (
-          <MenuButton
+          <MenuItem
             data-testid={`${name}_${ingredientId}`}
             onClick={() => {
               onClose()
@@ -68,6 +69,9 @@ export function LiquidsOverflowMenu(
               dispatch(labwareIngredActions.selectLiquidGroup(ingredientId))
             }}
             key={ingredientId}
+            css={css`
+              cursor: ${CURSOR_POINTER};
+            `}
           >
             <Flex alignItems={ALIGN_CENTER} gridGap={SPACING.spacing8}>
               <LiquidIcon color={displayColor ?? ''} />
@@ -81,13 +85,13 @@ export function LiquidsOverflowMenu(
                 {name}
               </StyledText>
             </Flex>
-          </MenuButton>
+          </MenuItem>
         )
       })}
       {liquids.length > 0 ? (
         <Box width="100%" border={`1px solid ${COLORS.grey20}`} />
       ) : null}
-      <MenuButton
+      <MenuItem
         data-testid="defineLiquid"
         onClick={() => {
           onClose()
@@ -95,6 +99,9 @@ export function LiquidsOverflowMenu(
           dispatch(labwareIngredActions.createNewLiquidGroup())
         }}
         key="defineLiquid"
+        css={css`
+          cursor: ${CURSOR_POINTER};
+        `}
       >
         <Flex alignItems={ALIGN_CENTER} gridGap={SPACING.spacing8}>
           <Icon name="plus" size="1rem" />
@@ -102,21 +109,7 @@ export function LiquidsOverflowMenu(
             {t('define_liquid')}
           </StyledText>
         </Flex>
-      </MenuButton>
+      </MenuItem>
     </Flex>
   )
 }
-const MenuButton = styled.button`
-  background-color: ${COLORS.transparent};
-  cursor: ${CURSOR_POINTER};
-  padding: ${SPACING.spacing8} ${SPACING.spacing12};
-  border: none;
-  border-radius: inherit;
-  &:hover {
-    background-color: ${COLORS.blue10};
-  }
-  &:disabled {
-    color: ${COLORS.grey40};
-    cursor: ${CURSOR_AUTO};
-  }
-`

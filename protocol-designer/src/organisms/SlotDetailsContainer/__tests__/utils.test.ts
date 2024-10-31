@@ -16,7 +16,7 @@ describe('getXPosition', () => {
   })
 
   it('should return the right position for OT2 robot type and slot 6', () => {
-    expect(getXPosition('6', OT2_ROBOT_TYPE, false)).toBe('500')
+    expect(getXPosition('6', OT2_ROBOT_TYPE, false)).toBe('420')
   })
 
   it('should return the left position for OT2 robot type and slot 2', () => {

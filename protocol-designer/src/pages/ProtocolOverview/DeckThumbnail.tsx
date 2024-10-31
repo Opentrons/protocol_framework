@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { Fragment, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import {
   ALIGN_CENTER,
@@ -17,6 +17,7 @@ import {
   WasteChuteStagingAreaFixture,
 } from '@opentrons/components'
 import {
+  FLEX_ROBOT_TYPE,
   getCutoutIdForAddressableArea,
   getDeckDefFromRobotType,
   isAddressableAreaStandardSlot,
@@ -28,6 +29,8 @@ import {
 import { getRobotType } from '../../file-data/selectors'
 import { getInitialDeckSetup } from '../../step-forms/selectors'
 import { DeckThumbnailDetails } from './DeckThumbnailDetails'
+
+import type { Dispatch, SetStateAction } from 'react'
 import type { StagingAreaLocation, TrashCutoutId } from '@opentrons/components'
 import type { CutoutId, DeckSlotId } from '@opentrons/shared-data'
 import type { AdditionalEquipmentEntity } from '@opentrons/step-generation'
@@ -48,13 +51,13 @@ const lightFill = COLORS.grey35
 
 interface DeckThumbnailProps {
   hoverSlot: DeckSlotId | null
-  setHoverSlot: React.Dispatch<React.SetStateAction<string | null>>
+  setHoverSlot: Dispatch<SetStateAction<string | null>>
 }
 export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
   const { hoverSlot, setHoverSlot } = props
   const initialDeckSetup = useSelector(getInitialDeckSetup)
   const robotType = useSelector(getRobotType)
-  const deckDef = React.useMemo(() => getDeckDefFromRobotType(robotType), [])
+  const deckDef = useMemo(() => getDeckDefFromRobotType(robotType), [])
   const trash = Object.values(initialDeckSetup.additionalEquipmentOnDeck).find(
     ae => ae.name === 'trashBin'
   )
@@ -103,8 +106,8 @@ export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
       backgroundColor={
         robotType === OT2_ROBOT_TYPE ? COLORS.white : COLORS.grey10
       }
+      paddingY={robotType === FLEX_ROBOT_TYPE && SPACING.spacing24}
       borderRadius={BORDERS.borderRadius8}
-      paddingY={SPACING.spacing24}
     >
       <RobotCoordinateSpaceWithRef
         height="100%"
@@ -151,7 +154,7 @@ export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
                 {trash != null
                   ? trashBinFixtures.map(({ cutoutId }) =>
                       cutoutId != null ? (
-                        <React.Fragment key={cutoutId}>
+                        <Fragment key={cutoutId}>
                           <SingleSlotFixture
                             cutoutId={cutoutId}
                             deckDefinition={deckDef}
@@ -164,7 +167,7 @@ export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
                             trashCutoutId={cutoutId as TrashCutoutId}
                             backgroundColor={COLORS.grey50}
                           />
-                        </React.Fragment>
+                        </Fragment>
                       ) : null
                     )
                   : null}

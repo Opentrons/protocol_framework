@@ -1,5 +1,7 @@
-import * as React from 'react'
+import { useRef } from 'react'
 import { Svg } from '../../primitives'
+
+import type { ReactNode } from 'react'
 import type { DeckDefinition, DeckSlot } from '@opentrons/shared-data'
 
 export interface RobotCoordinateSpaceWithRefRenderProps {
@@ -11,14 +13,14 @@ interface RobotCoordinateSpaceWithRefProps
   viewBox?: string | null
   deckDef?: DeckDefinition
   zoomed?: boolean
-  children?: (props: RobotCoordinateSpaceWithRefRenderProps) => React.ReactNode
+  children?: (props: RobotCoordinateSpaceWithRefRenderProps) => ReactNode
 }
 
 export function RobotCoordinateSpaceWithRef(
   props: RobotCoordinateSpaceWithRefProps
 ): JSX.Element | null {
   const { children, deckDef, viewBox, zoomed = false, ...restProps } = props
-  const wrapperRef = React.useRef<SVGSVGElement>(null)
+  const wrapperRef = useRef<SVGSVGElement>(null)
 
   if (deckDef == null && viewBox == null) return null
 
@@ -33,11 +35,17 @@ export function RobotCoordinateSpaceWithRef(
       {}
     )
 
-    // Add padding to prevent clipping and better center the content
-    const PADDING = deckDef.otId === 'ot2_standard' ? 5 : 20
-    wholeDeckViewBox = `${viewBoxOriginX - PADDING} ${
-      viewBoxOriginY + PADDING
-    } ${deckXDimension + PADDING * 2} ${deckYDimension + PADDING * 2}`
+    if (deckDef.otId === 'ot2_standard') {
+      const PADDING = 5
+      wholeDeckViewBox = `${viewBoxOriginX - PADDING} ${
+        viewBoxOriginY + PADDING * 5
+      } ${deckXDimension + PADDING * 2} ${deckYDimension - PADDING * 10}`
+    } else {
+      const PADDING = 20
+      wholeDeckViewBox = `${viewBoxOriginX - PADDING} ${
+        viewBoxOriginY + PADDING
+      } ${deckXDimension + PADDING * 2} ${deckYDimension + PADDING * 2}`
+    }
   }
   return (
     <Svg

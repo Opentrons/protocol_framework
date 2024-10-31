@@ -65,7 +65,7 @@ export const getXPosition = (
       regex: /[34]/,
     },
     OT2: {
-      right: '500',
+      right: '420',
       left: '-300',
       regex: /[369]/,
     },
