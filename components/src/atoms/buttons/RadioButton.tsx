@@ -26,7 +26,7 @@ interface RadioButtonProps extends StyleProps {
   radioButtonType?: 'large' | 'small'
   subButtonLabel?: string
   id?: string
-  maxLines?: number | null
+  maxLines?: number
   //  used for mouseEnter and mouseLeave
   setNoHover?: () => void
   setHovered?: () => void
@@ -49,7 +49,7 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
       : `RadioButtonId_${buttonValue}`,
     largeDesktopBorderRadius = false,
     iconName,
-    maxLines = null,
+    maxLines = 1,
     setHovered,
     setNoHover,
   } = props
@@ -82,6 +82,12 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
       : COLORS.grey60};
   `
 
+  const getButtonStyle = (isSelected: boolean, disabled: boolean) => {
+    if (disabled) return DISABLED_BUTTON_STYLE
+    if (isSelected) return SELECTED_BUTTON_STYLE
+    return AVAILABLE_BUTTON_STYLE
+  }
+
   return (
     <Flex
       css={css`
@@ -111,13 +117,7 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
         htmlFor={id}
         onMouseEnter={setHovered}
         onMouseLeave={setNoHover}
-        css={
-          isSelected
-            ? SELECTED_BUTTON_STYLE
-            : disabled
-            ? DISABLED_BUTTON_STYLE
-            : AVAILABLE_BUTTON_STYLE
-        }
+        css={getButtonStyle(isSelected, disabled)}
       >
         <Flex
           flexDirection={DIRECTION_ROW}
@@ -203,11 +203,10 @@ const SettingButtonLabel = styled.label<SettingsButtonLabelProps>`
     padding: ${({ largeDesktopBorderRadius }) =>
       largeDesktopBorderRadius ? SPACING.spacing24 : SPACING.spacing20};
     border-radius: ${BORDERS.borderRadius16};
-    display: ${({ maxLines }) =>
-      maxLines != null ? '-webkit-box' : undefined};
-    -webkit-line-clamp: ${({ maxLines }) => maxLines ?? undefined};
+    display: ${({ maxLines }) => (maxLines != null ? '-webkit-box' : 'none')};
+    -webkit-line-clamp: ${({ maxLines }) => maxLines ?? 'none'};
     -webkit-box-orient: ${({ maxLines }) =>
-      maxLines != null ? 'vertical' : undefined};
+      maxLines != null ? 'vertical' : 'none'};
     word-wrap: break-word;
   }
 `
