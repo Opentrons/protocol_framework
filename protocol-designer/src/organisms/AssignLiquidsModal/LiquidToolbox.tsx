@@ -1,9 +1,11 @@
-import type * as React from 'react'
+import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
+  Banner,
   Btn,
+  COLORS,
   DIRECTION_COLUMN,
   DropdownMenu,
   Flex,
@@ -16,9 +18,10 @@ import {
   TYPOGRAPHY,
   Toolbox,
 } from '@opentrons/components'
+import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import * as wellContentsSelectors from '../../top-selectors/well-contents'
 import * as fieldProcessors from '../../steplist/fieldLevel/processing'
-import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
+import * as labwareIngredActions from '../../labware-ingred/actions'
 import { getSelectedWells } from '../../well-selection/selectors'
 import { getLabwareNicknamesById } from '../../ui/labware/selectors'
 import {
@@ -26,8 +29,9 @@ import {
   setWellContents,
 } from '../../labware-ingred/actions'
 import { deselectAllWells } from '../../well-selection/actions'
+import { DefineLiquidsModal } from '../DefineLiquidsModal'
 import { LiquidCard } from './LiquidCard'
-
+import type * as React from 'react'
 import type { DropdownOption } from '@opentrons/components'
 import type { ContentsByWell } from '../../labware-ingred/types'
 
@@ -53,6 +57,7 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
   const { onClose } = props
   const { t } = useTranslation(['liquids', 'shared'])
   const dispatch = useDispatch()
+  const [showDefineLiquidModal, setDefineLiquidModal] = useState<boolean>(false)
   const liquids = useSelector(labwareIngredSelectors.allIngredientNamesIds)
   const labwareId = useSelector(labwareIngredSelectors.getSelectedLabwareId)
   const selectedWellGroups = useSelector(getSelectedWells)
@@ -214,145 +219,180 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
     })
     .filter(Boolean)
   return (
-    <Toolbox
-      title={
-        <StyledText desktopStyle="bodyLargeSemiBold">
-          {labwareDisplayName}
-        </StyledText>
-      }
-      confirmButtonText={t('shared:done')}
-      onConfirmClick={onClose}
-      onCloseClick={handleClearSelectedWells}
-      height="calc(100vh - 64px)"
-      closeButton={
-        <StyledText desktopStyle="bodyDefaultRegular">
-          {t('clear_wells')}
-        </StyledText>
-      }
-      disableCloseButton={
-        !(labwareId != null && selectedWells != null && selectionHasLiquids)
-      }
-    >
-      <form onSubmit={handleSubmit(handleSaveSubmit)}>
-        <ListItem type="noActive">
-          {selectedWells.length > 0 ? (
-            <Flex
-              padding={SPACING.spacing12}
-              gridGap={SPACING.spacing12}
-              flexDirection={DIRECTION_COLUMN}
-            >
-              <StyledText desktopStyle="bodyDefaultSemiBold">
-                {t('add_liquid')}
-              </StyledText>
-              <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
-                <StyledText desktopStyle="bodyDefaultRegular">
-                  {t('liquid')}
+    <>
+      {showDefineLiquidModal ? (
+        <DefineLiquidsModal
+          onClose={() => {
+            setDefineLiquidModal(false)
+          }}
+        />
+      ) : null}
+
+      <Toolbox
+        title={
+          <StyledText desktopStyle="bodyLargeSemiBold">
+            {labwareDisplayName}
+          </StyledText>
+        }
+        confirmButtonText={t('shared:done')}
+        onConfirmClick={onClose}
+        onCloseClick={handleClearSelectedWells}
+        height="calc(100vh - 64px)"
+        closeButton={
+          <StyledText desktopStyle="bodyDefaultRegular">
+            {t('clear_wells')}
+          </StyledText>
+        }
+        disableCloseButton={
+          !(labwareId != null && selectedWells != null && selectionHasLiquids)
+        }
+      >
+        <form onSubmit={handleSubmit(handleSaveSubmit)}>
+          <ListItem type="noActive">
+            {selectedWells.length > 0 ? (
+              <Flex
+                padding={SPACING.spacing12}
+                gridGap={SPACING.spacing12}
+                flexDirection={DIRECTION_COLUMN}
+              >
+                <StyledText desktopStyle="bodyDefaultSemiBold">
+                  {t('add_liquid')}
                 </StyledText>
-                <Controller
-                  name="selectedLiquidId"
-                  control={control}
-                  rules={{
-                    required: true,
-                  }}
-                  render={({ field }) => {
-                    const fullOptions: DropdownOption[] = liquidSelectionOptions.map(
-                      option => {
-                        const liquid = liquids.find(
-                          liquid => liquid.ingredientId === option.value
-                        )
-
-                        return {
-                          name: option.name,
-                          value: option.value,
-                          liquidColor: liquid?.displayColor ?? '',
-                        }
-                      }
-                    )
-                    const selectedLiquid = fullOptions.find(
-                      option => option.value === selectedLiquidId
-                    )
-                    const selectLiquidIdName = selectedLiquid?.name
-                    const selectLiquidColor = selectedLiquid?.liquidColor
-
-                    return (
-                      <DropdownMenu
-                        width="254px"
-                        dropdownType="neutral"
-                        filterOptions={fullOptions}
-                        currentOption={{
-                          value: selectedLiquidId ?? '',
-                          name: selectLiquidIdName ?? '',
-                          liquidColor: selectLiquidColor,
+                {liquidSelectionOptions.length === 0 ? (
+                  <Banner type="warning">
+                    <Flex justifyContent={JUSTIFY_SPACE_BETWEEN} width="100%">
+                      <StyledText desktopStyle="captionRegular">
+                        {t('no_liquids_defined')}
+                      </StyledText>
+                      <Btn
+                        textDecoration={TYPOGRAPHY.textDecorationUnderline}
+                        onClick={() => {
+                          setDefineLiquidModal(true)
+                          dispatch(labwareIngredActions.createNewLiquidGroup())
                         }}
-                        onClick={field.onChange}
-                      />
-                    )
-                  }}
-                />
-              </Flex>
+                      >
+                        <StyledText desktopStyle="captionRegular">
+                          {t('define_liq')}
+                        </StyledText>
+                      </Btn>
+                    </Flex>
+                  </Banner>
+                ) : null}
+                <Flex
+                  flexDirection={DIRECTION_COLUMN}
+                  gridGap={SPACING.spacing8}
+                >
+                  <Controller
+                    name="selectedLiquidId"
+                    control={control}
+                    rules={{
+                      required: true,
+                    }}
+                    render={({ field }) => {
+                      const fullOptions: DropdownOption[] = liquidSelectionOptions.map(
+                        option => {
+                          const liquid = liquids.find(
+                            liquid => liquid.ingredientId === option.value
+                          )
 
-              <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
-                <StyledText desktopStyle="bodyDefaultRegular">
-                  {t('liquid_volume')}
-                </StyledText>
-                <Controller
-                  name="volume"
-                  control={control}
-                  rules={{
-                    required: true,
-                  }}
-                  render={({ field }) => (
-                    <InputField
-                      name="volume"
-                      units={t('application:units.microliter')}
-                      value={volume}
-                      error={volumeErrors}
-                      onBlur={field.onBlur}
-                      onChange={handleChangeVolume}
-                    />
-                  )}
-                />
-              </Flex>
-              <Flex justifyContent={JUSTIFY_SPACE_BETWEEN}>
-                <Btn
-                  textDecoration={TYPOGRAPHY.textDecorationUnderline}
-                  onClick={handleCancelForm}
+                          return {
+                            name: option.name,
+                            value: option.value,
+                            liquidColor: liquid?.displayColor ?? '',
+                          }
+                        }
+                      )
+                      const selectedLiquid = fullOptions.find(
+                        option => option.value === selectedLiquidId
+                      )
+                      const selectLiquidIdName = selectedLiquid?.name
+                      const selectLiquidColor = selectedLiquid?.liquidColor
+
+                      return (
+                        <DropdownMenu
+                          title={t('liquid')}
+                          disabled={liquidSelectionOptions.length === 0}
+                          width="15.875rem"
+                          dropdownType="neutral"
+                          filterOptions={fullOptions}
+                          currentOption={{
+                            value: selectedLiquidId ?? '',
+                            name: selectLiquidIdName ?? '',
+                            liquidColor: selectLiquidColor,
+                          }}
+                          onClick={field.onChange}
+                        />
+                      )
+                    }}
+                  />
+                </Flex>
+
+                <Flex
+                  flexDirection={DIRECTION_COLUMN}
+                  gridGap={SPACING.spacing8}
                 >
                   <StyledText desktopStyle="bodyDefaultRegular">
-                    {t('shared:cancel')}
+                    {t('liquid_volume')}
                   </StyledText>
-                </Btn>
-                <PrimaryButton
-                  disabled={
-                    volumeErrors != null ||
-                    volume == null ||
-                    volume === '' ||
-                    selectedLiquidId == null ||
-                    selectedLiquidId === ''
-                  }
-                  type="submit"
-                >
-                  {t('save')}
-                </PrimaryButton>
+                  <Controller
+                    name="volume"
+                    control={control}
+                    rules={{
+                      required: true,
+                    }}
+                    render={({ field }) => (
+                      <InputField
+                        name="volume"
+                        units={t('application:units.microliter')}
+                        value={volume}
+                        error={volumeErrors}
+                        onBlur={field.onBlur}
+                        onChange={handleChangeVolume}
+                      />
+                    )}
+                  />
+                </Flex>
+                <Flex justifyContent={JUSTIFY_SPACE_BETWEEN}>
+                  <Btn
+                    textDecoration={TYPOGRAPHY.textDecorationUnderline}
+                    onClick={handleCancelForm}
+                  >
+                    <StyledText desktopStyle="bodyDefaultRegular">
+                      {t('shared:cancel')}
+                    </StyledText>
+                  </Btn>
+                  <PrimaryButton
+                    disabled={
+                      volumeErrors != null ||
+                      volume == null ||
+                      volume === '' ||
+                      selectedLiquidId == null ||
+                      selectedLiquidId === ''
+                    }
+                    type="submit"
+                  >
+                    {t('save')}
+                  </PrimaryButton>
+                </Flex>
               </Flex>
-            </Flex>
-          ) : null}
-        </ListItem>
-        <Flex
-          flexDirection={DIRECTION_COLUMN}
-          gridGap={SPACING.spacing8}
-          marginTop={SPACING.spacing24}
-        >
-          {liquidInfo.length > 0 ? (
-            <StyledText desktopStyle="bodyDefaultSemiBold">
-              {t('liquids_added')}
-            </StyledText>
-          ) : null}
-          {liquidInfo.map(info => {
-            return <LiquidCard key={info.liquidIndex} info={info} />
-          })}
-        </Flex>
-      </form>
-    </Toolbox>
+            ) : null}
+          </ListItem>
+          <Flex
+            flexDirection={DIRECTION_COLUMN}
+            gridGap={SPACING.spacing8}
+            marginTop={SPACING.spacing24}
+          >
+            {liquidInfo.length > 0 ? (
+              <StyledText desktopStyle="bodyDefaultSemiBold">
+                {t('liquids_added')}
+              </StyledText>
+            ) : null}
+            {liquidInfo.map(info => {
+              return <LiquidCard key={info.liquidIndex} info={info} />
+            })}
+          </Flex>
+        </form>
+      </Toolbox>
+    </>
   )
 }
