@@ -27,7 +27,7 @@ import type { DropdownBorder } from '@opentrons/components'
 import type { AdditionalEquipment, WizardTileProps } from './types'
 
 const MAX_SLOTS = 4
-export const ADDITIONAL_EQUIPMENTS: AdditionalEquipment[] = [
+const ADDITIONAL_EQUIPMENTS: AdditionalEquipment[] = [
   'wasteChute',
   'trashBin',
   'stagingArea',
