@@ -141,6 +141,9 @@ async def test_drop_tip_implementation(
             pipette_tip_state=update_types.PipetteTipStateUpdate(
                 pipette_id="abc", tip_geometry=None
             ),
+            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                pipette_id="abc"
+            ),
         ),
     )
 
@@ -218,6 +221,9 @@ async def test_drop_tip_with_alternating_locations(
             pipette_tip_state=update_types.PipetteTipStateUpdate(
                 pipette_id="abc", tip_geometry=None
             ),
+            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                pipette_id="abc"
+            ),
         ),
     )
 
@@ -291,11 +297,17 @@ async def test_tip_attached_error(
                 ),
                 new_deck_point=DeckPoint(x=111, y=222, z=333),
             ),
+            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                pipette_id="abc"
+            ),
         ),
         state_update_if_false_positive=update_types.StateUpdate(
             pipette_tip_state=update_types.PipetteTipStateUpdate(
                 pipette_id="abc",
                 tip_geometry=None,
-            )
+            ),
+            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                pipette_id="abc"
+            ),
         ),
     )

@@ -48,6 +48,7 @@ async def test_dispense_implementation(
     movement: MovementHandler,
     pipetting: PipettingHandler,
     subject: DispenseImplementation,
+    state_view: StateView,
 ) -> None:
     """It should move to the target location and then dispense."""
     well_location = LiquidHandlingWellLocation(
@@ -77,6 +78,11 @@ async def test_dispense_implementation(
             pipette_id="pipette-id-abc123", volume=50, flow_rate=1.23, push_out=None
         )
     ).then_return(42)
+    decoy.when(
+        state_view.pipettes.get_liquid_dispensed_by_ejecting_volume(
+            pipette_id="pipette-id-abc123", volume=42
+        )
+    ).then_return(34)
 
     result = await subject.execute(data)
 
@@ -94,7 +100,10 @@ async def test_dispense_implementation(
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id="labware-id-abc123",
                 well_name="A3",
-                volume_added=42,
+                volume_added=34,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteEjectedFluidUpdate(
+                pipette_id="pipette-id-abc123", volume=42
             ),
         ),
     )
@@ -169,6 +178,9 @@ async def test_overpressure_error(
                 labware_id="labware-id",
                 well_name="well-name",
                 volume_added=update_types.CLEAR,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                pipette_id="pipette-id"
             ),
         ),
     )

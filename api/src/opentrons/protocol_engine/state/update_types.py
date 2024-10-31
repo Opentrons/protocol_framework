@@ -8,7 +8,12 @@ from datetime import datetime
 
 from opentrons.hardware_control.nozzle_manager import NozzleMap
 from opentrons.protocol_engine.resources import pipette_data_provider
-from opentrons.protocol_engine.types import DeckPoint, LabwareLocation, TipGeometry
+from opentrons.protocol_engine.types import (
+    DeckPoint,
+    LabwareLocation,
+    TipGeometry,
+    AspiratedFluid,
+)
 from opentrons.types import MountType
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType
@@ -206,6 +211,40 @@ class LiquidOperatedUpdate:
 
 
 @dataclasses.dataclass
+class PipetteAspiratedFluidUpdate:
+    """Represents the pipette aspirating something. Might be air or liquid from a well."""
+
+    pipette_id: str
+    fluid: AspiratedFluid
+    type: typing.Literal["aspirated"] = "aspirated"
+
+
+@dataclasses.dataclass
+class PipetteEjectedFluidUpdate:
+    """Represents the pipette pushing something out. Might be air or liquid."""
+
+    pipette_id: str
+    volume: float
+    type: typing.Literal["ejected"] = "ejected"
+
+
+@dataclasses.dataclass
+class PipetteUnknownFluidUpdate:
+    """Represents the amount of fluid in the pipette becoming unknown."""
+
+    pipette_id: str
+    type: typing.Literal["unknown"] = "unknown"
+
+
+@dataclasses.dataclass
+class PipetteEmptyFluidUpdate:
+    """Sets the pipette to be valid and empty."""
+
+    pipette_id: str
+    type: typing.Literal["empty"] = "empty"
+
+
+@dataclasses.dataclass
 class StateUpdate:
     """Represents an update to perform on engine state."""
 
@@ -218,6 +257,10 @@ class StateUpdate:
     pipette_nozzle_map: PipetteNozzleMapUpdate | NoChangeType = NO_CHANGE
 
     pipette_tip_state: PipetteTipStateUpdate | NoChangeType = NO_CHANGE
+
+    pipette_aspirated_fluid: PipetteAspiratedFluidUpdate | PipetteEjectedFluidUpdate | PipetteUnknownFluidUpdate | PipetteEmptyFluidUpdate | NoChangeType = (
+        NO_CHANGE
+    )
 
     labware_location: LabwareLocationUpdate | NoChangeType = NO_CHANGE
 
@@ -405,4 +448,28 @@ class StateUpdate:
             labware_id=labware_id,
             well_name=well_name,
             volume_added=volume_added,
+        )
+
+    def set_fluid_aspirated(self, pipette_id: str, fluid: AspiratedFluid) -> None:
+        """Update record of fluid held inside a pipette. See `PipetteAspiratedFluidUpdate`."""
+        self.pipette_aspirated_fluid = PipetteAspiratedFluidUpdate(
+            type="aspirated", pipette_id=pipette_id, fluid=fluid
+        )
+
+    def set_fluid_ejected(self, pipette_id: str, volume: float) -> None:
+        """Update record of fluid held inside a pipette. See `PipetteEjectedFluidUpdate`."""
+        self.pipette_aspirated_fluid = PipetteEjectedFluidUpdate(
+            type="ejected", pipette_id=pipette_id, volume=volume
+        )
+
+    def set_fluid_unknown(self, pipette_id: str) -> None:
+        """Update record fo fluid held inside a pipette. See `PipetteUnknownFluidUpdate`."""
+        self.pipette_aspirated_fluid = PipetteUnknownFluidUpdate(
+            type="unknown", pipette_id=pipette_id
+        )
+
+    def set_fluid_empty(self, pipette_id: str) -> None:
+        """Update record fo fluid held inside a pipette. See `PipetteEmptyFluidUpdate`."""
+        self.pipette_aspirated_fluid = PipetteEmptyFluidUpdate(
+            type="empty", pipette_id=pipette_id
         )
