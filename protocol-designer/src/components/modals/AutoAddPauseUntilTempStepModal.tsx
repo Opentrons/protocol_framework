@@ -12,13 +12,10 @@ import {
   StyledText,
 } from '@opentrons/components'
 
-import type { ModuleType } from '@opentrons/shared-data'
-
 interface Props {
   displayTemperature: string
   handleCancelClick: () => void
   handleContinueClick: () => void
-  moduleType: ModuleType
   displayModule?: string
 }
 
