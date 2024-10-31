@@ -7,8 +7,6 @@ import { ProtocolRoutes } from './ProtocolRoutes'
 import { useScreenSizeCheck } from './resources/useScreenSizeCheck'
 import { DisabledScreen } from './organisms/DisabledScreen'
 
-import './css/reset.module.css'
-
 function ProtocolEditorComponent(): JSX.Element {
   const isValidSize = useScreenSizeCheck()
   return (

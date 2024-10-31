@@ -23,6 +23,8 @@ export const DEPRECATED_FLAGS = [
   'OT_PD_ALLOW_96_CHANNEL',
   'OT_PD_ENABLE_FLEX_DECK_MODIFICATION',
   'OT_PD_ENABLE_MULTI_TIP',
+  'OT_PD_ENABLE_MOAM',
+  'OT_PD_ENABLE_REDESIGN',
 ]
 // union of feature flag string constant IDs
 export type FlagTypes =
