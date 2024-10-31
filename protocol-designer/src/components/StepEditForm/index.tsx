@@ -188,12 +188,6 @@ const StepEditFormManager = (
           }
           handleCancelClick={saveStepForm}
           handleContinueClick={handleSave}
-          // TODO (nd: 10/21/2024) can remove this prop once redesign FF removed
-          moduleType={
-            showAddPauseUntilTempStepModal
-              ? TEMPERATURE_MODULE_TYPE
-              : HEATERSHAKER_MODULE_TYPE
-          }
         />
       ) : null}
       <StepEditFormComponent

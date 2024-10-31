@@ -183,11 +183,6 @@ function StepFormManager(props: StepFormManagerProps): JSX.Element | null {
           }
           handleCancelClick={saveStepForm}
           handleContinueClick={handleSave}
-          moduleType={
-            showAddPauseUntilTempStepModal
-              ? TEMPERATURE_MODULE_TYPE
-              : HEATERSHAKER_MODULE_TYPE
-          }
         />
       ) : null}
       <StepFormToolbox
