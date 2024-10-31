@@ -4,11 +4,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import {
   ALIGN_CENTER,
   BORDERS,
-  Box,
   Btn,
   COLORS,
   CURSOR_DEFAULT,
   CURSOR_POINTER,
+  DIRECTION_COLUMN,
   Flex,
   Icon,
   JUSTIFY_SPACE_BETWEEN,
@@ -55,6 +55,7 @@ export interface StepContainerProps {
   hovered?: boolean
   hasError?: boolean
   isStepAfterError?: boolean
+  dragHovered?: boolean
 }
 
 export function StepContainer(props: StepContainerProps): JSX.Element {
@@ -71,6 +72,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
     title,
     hasError = false,
     isStepAfterError = false,
+    dragHovered = false,
   } = props
   const [top, setTop] = React.useState<number>(0)
   const menuRootRef = React.useRef<HTMLDivElement | null>(null)
@@ -188,12 +190,14 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
           onCancelClick={cancelMultiDelete}
         />
       )}
-      <Box
+      <Flex
         id={stepId}
         {...{
           onMouseEnter: isStepAfterError ? undefined : onMouseEnter,
           onMouseLeave: isStepAfterError ? undefined : onMouseLeave,
         }}
+        gridGap={SPACING.spacing4}
+        flexDirection={DIRECTION_COLUMN}
       >
         <Btn
           onDoubleClick={onDoubleClick}
@@ -249,7 +253,16 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
             ) : null}
           </Flex>
         </Btn>
-      </Box>
+        {dragHovered ? (
+          <Flex
+            data-testid={`${stepId}-divider`}
+            backgroundColor={COLORS.blue50}
+            height="0.25rem"
+            width="100%"
+            borderRadius={BORDERS.borderRadius2}
+          />
+        ) : null}
+      </Flex>
       {stepOverflowMenu && stepId != null
         ? createPortal(
             <StepOverflowMenu
