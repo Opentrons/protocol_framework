@@ -13,7 +13,11 @@ import type {
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import type { CommandData, PipetteData } from '@opentrons/api-client'
 import type { Axis, Sign, StepSize } from '/app/molecules/JogControls/types'
-import type { DropTipFlowsRoute, FixitCommandTypeUtils } from '../types'
+import type {
+  DropTipFlowsRoute,
+  FixitCommandTypeUtils,
+  IssuedCommandsType,
+} from '../types'
 import type { SetRobotErrorDetailsParams, UseDTWithTypeParams } from '.'
 import type { RunCommandByCommandTypeParams } from './useDropTipCreateCommands'
 
@@ -37,7 +41,7 @@ export interface UseDropTipCommandsResult {
   handleCleanUpAndClose: (homeOnExit?: boolean) => Promise<void>
   moveToAddressableArea: (
     addressableArea: AddressableAreaName,
-    stayAtHighestPossibleZ?: boolean
+    isPredefinedLocation: boolean // Is a predefined location in "choose location."
   ) => Promise<void>
   handleJog: (axis: Axis, dir: Sign, step: StepSize) => void
   blowoutOrDropTip: (
@@ -102,7 +106,7 @@ export function useDropTipCommands({
 
   const moveToAddressableArea = (
     addressableArea: AddressableAreaName,
-    stayAtHighestPossibleZ = true // Generally false when moving to a waste chute or trash bin or during "fixit" flows.
+    isPredefinedLocation: boolean
   ): Promise<void> => {
     return new Promise((resolve, reject) => {
       const addressableAreaFromConfig = getAddressableAreaFromConfig(
@@ -116,7 +120,8 @@ export function useDropTipCommands({
         const moveToAACommand = buildMoveToAACommand(
           addressableAreaFromConfig,
           pipetteId,
-          stayAtHighestPossibleZ
+          isPredefinedLocation,
+          issuedCommandsType
         )
         return chainRunCommands(
           isFlex
@@ -386,11 +391,16 @@ const buildBlowoutCommands = (
 const buildMoveToAACommand = (
   addressableAreaFromConfig: AddressableAreaName,
   pipetteId: string | null,
-  stayAtHighestPossibleZ: boolean
+  isPredefinedLocation: boolean,
+  commandType: IssuedCommandsType
 ): CreateCommand => {
+  // Always ensure the user does all the jogging if choosing a custom location on the deck.
+  const stayAtHighestPossibleZ = !isPredefinedLocation
+
   // Because we can never be certain about which tip is attached outside a protocol run, always assume the most
   // conservative estimate, a 1000ul tip.
-  const zOffset = stayAtHighestPossibleZ ? 0 : 88
+  const zOffset = commandType === 'setup' && !stayAtHighestPossibleZ ? 88 : 0
+
   return {
     commandType: 'moveToAddressableArea',
     params: {
