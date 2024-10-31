@@ -1,5 +1,5 @@
 import type * as React from 'react'
-import styled, { css } from 'styled-components'
+import styled, { FlattenSimpleInterpolation, css } from 'styled-components'
 import { Flex } from '../../primitives'
 import { COLORS, BORDERS } from '../../helix-design-system'
 import { RESPONSIVENESS, SPACING } from '../../ui-style-constants'
@@ -82,7 +82,10 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
       : COLORS.grey60};
   `
 
-  const getButtonStyle = (isSelected: boolean, disabled: boolean) => {
+  const getButtonStyle = (
+    isSelected: boolean,
+    disabled: boolean
+  ): FlattenSimpleInterpolation => {
     if (disabled) return DISABLED_BUTTON_STYLE
     if (isSelected) return SELECTED_BUTTON_STYLE
     return AVAILABLE_BUTTON_STYLE
