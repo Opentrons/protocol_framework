@@ -256,6 +256,10 @@ class SphericalSegment(BaseModel):
         ...,
         description="Height of the bottom of the segment, must be 0.0",
     )
+    count: _NonNegativeNumber = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
 
 
 class ConicalFrustum(BaseModel):
@@ -275,6 +279,10 @@ class ConicalFrustum(BaseModel):
     bottomHeight: _NonNegativeNumber = Field(
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
+    )
+    count: _NonNegativeNumber = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
 
 
@@ -304,6 +312,10 @@ class CuboidalFrustum(BaseModel):
     bottomHeight: _NonNegativeNumber = Field(
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
+    )
+    count: _NonNegativeNumber = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
 
 
@@ -353,6 +365,10 @@ class SquaredConeSegment(BaseModel):
     bottomHeight: _NonNegativeNumber = Field(
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
+    )
+    count: _NonNegativeNumber = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
 
     @staticmethod
@@ -545,6 +561,10 @@ class RoundedCuboidSegment(BaseModel):
     bottomHeight: _NonNegativeNumber = Field(
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
+    )
+    count: _NonNegativeNumber = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
 
 
