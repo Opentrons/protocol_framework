@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import without from 'lodash/without'
 import { useTranslation } from 'react-i18next'
 
@@ -211,14 +211,25 @@ function useTipSelectionUtils(
 ): UseTipSelectionUtilsResult {
   const [selectedLocs, setSelectedLocs] = useState<WellGroup | null>(null)
 
-  const initialLocs = useInitialSelectedLocationsFrom(
-    recentRelevantFailedLabwareCmd
-  )
-
-  // Set the initial locs when they first become available or update.
-  if (selectedLocs !== initialLocs) {
-    setSelectedLocs(initialLocs)
-  }
+  // Note that while other commands may have a wellName associated with them,
+  // we are only interested in wells for the purposes of tip picking up.
+  // Support state updates if the underlying well data changes, since this data is lazily retrieved and may change shortly
+  // after Error Recovery launches.
+  const initialWellName =
+    recentRelevantFailedLabwareCmd != null &&
+    recentRelevantFailedLabwareCmd.commandType === 'pickUpTip'
+      ? recentRelevantFailedLabwareCmd.params.wellName
+      : null
+  useEffect(() => {
+    if (
+      recentRelevantFailedLabwareCmd != null &&
+      recentRelevantFailedLabwareCmd.commandType === 'pickUpTip'
+    ) {
+      setSelectedLocs({
+        [recentRelevantFailedLabwareCmd.params.wellName]: null,
+      })
+    }
+  }, [initialWellName])
 
   const deselectTips = (locations: string[]): void => {
     setSelectedLocs(prevLocs =>
@@ -251,28 +262,6 @@ function useTipSelectionUtils(
     deselectTips,
     areTipsSelected,
   }
-}
-
-// Set the initial well selection to be the last pickup tip location for the pipette used in the failed command.
-export function useInitialSelectedLocationsFrom(
-  recentRelevantFailedLabwareCmd: FailedCommandRelevantLabware
-): WellGroup | null {
-  const [initialWells, setInitialWells] = useState<WellGroup | null>(null)
-
-  // Note that while other commands may have a wellName associated with them,
-  // we are only interested in wells for the purposes of tip picking up.
-  // Support state updates if the underlying data changes, since this data is lazily loaded and may change shortly
-  // after Error Recovery launches.
-  if (
-    recentRelevantFailedLabwareCmd != null &&
-    recentRelevantFailedLabwareCmd.commandType === 'pickUpTip' &&
-    (initialWells == null ||
-      !(recentRelevantFailedLabwareCmd.params.wellName in initialWells))
-  ) {
-    setInitialWells({ [recentRelevantFailedLabwareCmd.params.wellName]: null })
-  }
-
-  return initialWells
 }
 
 // Get the name of the relevant labware relevant to the failed command, if any.
