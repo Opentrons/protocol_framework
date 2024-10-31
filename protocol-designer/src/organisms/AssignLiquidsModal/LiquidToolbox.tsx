@@ -14,8 +14,8 @@ import {
   PrimaryButton,
   SPACING,
   StyledText,
-  TYPOGRAPHY,
   Toolbox,
+  TYPOGRAPHY,
 } from '@opentrons/components'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import * as wellContentsSelectors from '../../top-selectors/well-contents'
@@ -30,7 +30,6 @@ import {
 import { deselectAllWells } from '../../well-selection/actions'
 import { DefineLiquidsModal } from '../DefineLiquidsModal'
 import { LiquidCard } from './LiquidCard'
-import type * as React from 'react'
 import type { DropdownOption } from '@opentrons/components'
 import type { ContentsByWell } from '../../labware-ingred/types'
 
@@ -271,7 +270,7 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
                         }}
                       >
                         <StyledText desktopStyle="captionRegular">
-                          {t('define_liq')}
+                          {t('define_liquid')}
                         </StyledText>
                       </Btn>
                     </Flex>
