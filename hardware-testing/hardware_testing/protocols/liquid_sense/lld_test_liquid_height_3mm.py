@@ -50,7 +50,7 @@ VOLUMES_3MM_TOP_BOTTOM = {
     "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical": [56267.2, 158.1, 0.0],
     "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical": [57720.5,163.9, 0.0],
     "nest_1_reservoir_195ml": [14034.2, 172301.9, 0.0],
-    "axygen_1_reservoir_90ml": [22373.4, 70450.6, 0.0]
+    "axygen_1_reservoir_90ml": [23136.9, 72854.8, 0.0]
 }
 
 SAME_TIP = True  # this is fine when using Ethanol (b/c it evaporates)
@@ -161,9 +161,8 @@ def _setup(
 
     if tube_volume == 15:
         # Replace volumes with 15 ml volumes
-        VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [25.4, 6965.67, 16262.0,  0.0]
+        VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [17.3,7090.6, 16077.5,  0.0]
         VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] = [15956.6, 40.8, 0.0]
-    
     volumes = VOLUMES_3MM_TOP_BOTTOM[labware.load_name]
     total_volume_to_aspirate = 0.0
     for one_vols in volumes:
@@ -420,6 +419,7 @@ def _test_for_finding_liquid_height(
             )  # some obviously fake number so we know it failed
         corrected_height = height + tip_z_error
         all_corrected_heights.append(corrected_height)
+        ctx.pause("CHECK LABWARE")
         # drop tips
         if not SAME_TIP:
             if liquid_pipette.has_tip:
@@ -466,7 +466,7 @@ def run(ctx: ProtocolContext) -> None:
     try:
         if tube_volume == 15:
             # Replace volumes with 15 ml volumes
-            VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [25.4, 6965.67, 16262.0, 0.0]
+            VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [17.3,7090.6, 16077.5,  0.0]
             VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] = [15956.6, 40.8, 0.0]
         volumes = VOLUMES_3MM_TOP_BOTTOM[labware.load_name]
     except KeyError:
