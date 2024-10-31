@@ -29,10 +29,6 @@ export const getEnableAbsorbanceReader: Selector<boolean> = createSelector(
   getFeatureFlagData,
   flags => flags.OT_PD_ENABLE_ABSORBANCE_READER ?? false
 )
-export const getEnableRedesign: Selector<boolean> = createSelector(
-  getFeatureFlagData,
-  flags => flags.OT_PD_ENABLE_REDESIGN ?? false
-)
 export const getEnableComment: Selector<boolean> = createSelector(
   getFeatureFlagData,
   flags => flags.OT_PD_ENABLE_COMMENT ?? false
