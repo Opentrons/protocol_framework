@@ -1,13 +1,7 @@
 import { Flex, WRAP, SPACING, EmptySelectorButton } from '@opentrons/components'
-import type { ModuleType, ModuleModel } from '@opentrons/shared-data'
 import { Controller, useFormContext } from 'react-hook-form'
-
-export interface DisplayModules {
-  type: ModuleType
-  model: ModuleModel
-  name: string
-  adapter?: string
-}
+import type { DisplayModules } from '../../organisms/ModulesSection'
+import { MODULES_FIELD_NAME } from '../../organisms/ModulesSection'
 
 export function ControlledEmptySelectorButtonGroup({
   modules,
@@ -15,12 +9,12 @@ export function ControlledEmptySelectorButtonGroup({
   modules: DisplayModules[]
 }): JSX.Element | null {
   const { watch } = useFormContext()
-  const modulesWatch: DisplayModules[] = watch('modules') ?? []
+  const modulesWatch: DisplayModules[] = watch(MODULES_FIELD_NAME) ?? []
 
   return (
     <Controller
       defaultValue={[]}
-      name={'modules'}
+      name={MODULES_FIELD_NAME}
       rules={{ required: true, validate: value => value.length > 0 }}
       render={({ field }) => {
         return (

@@ -12,6 +12,7 @@ import { createProtocolAtom, headerWithMeterAtom } from '../../resources/atoms'
 import { useAtom } from 'jotai'
 import { ProtocolSectionsContainer } from '../../organisms/ProtocolSectionsContainer'
 import { generatePromptPreviewData } from '../../resources/utils/createProtocolUtils'
+import type { DisplayModules } from '../../organisms/ModulesSection'
 
 export interface CreateProtocolFormData {
   application: {
@@ -26,6 +27,7 @@ export interface CreateProtocolFormData {
     rightPipette: string
     flexGripper: string
   }
+  modules: DisplayModules[]
 }
 
 const TOTAL_STEPS = 5

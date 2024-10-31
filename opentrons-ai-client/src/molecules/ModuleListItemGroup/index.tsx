@@ -8,23 +8,18 @@ import {
   ListItemCustomize,
 } from '@opentrons/components'
 import type { DropdownBorder } from '@opentrons/components'
-import type { ModuleType, ModuleModel } from '@opentrons/shared-data'
 import { getModuleDisplayName } from '@opentrons/shared-data'
 import { Controller, useFormContext } from 'react-hook-form'
 import { ModuleDiagram } from '../ModelDiagram'
-
-export interface DisplayModules {
-  type: ModuleType
-  model: ModuleModel
-  name: string
-  adapter?: string
-}
+import { MODULES_FIELD_NAME, type DisplayModules } from '../../organisms/ModulesSection'
+import { useTranslation } from 'react-i18next'
 
 const adapters = ['adapter1', 'adapter2', 'adapter3']
 
 export function ModuleListItemGroup(): JSX.Element | null {
   const { watch, setValue } = useFormContext()
-  const modulesWatch: DisplayModules[] = watch('modules') ?? []
+  const { t } = useTranslation('create_protocol')
+  const modulesWatch: DisplayModules[] = watch(MODULES_FIELD_NAME) ?? []
 
   return (
     <>
@@ -32,16 +27,16 @@ export function ModuleListItemGroup(): JSX.Element | null {
         return (
           <Controller
             key={module.type}
-            name={`modules.${module.type}`}
+            name={`${MODULES_FIELD_NAME}.${module.type}`}
             render={({ field }) => (
               <ListItem type="noActive" key={module.type}>
                 <ListItemCustomize
                   label={
                     adapters != null && adapters.length > 0
-                      ? 'Adapter'
+                      ? t('modules_adapter_label')
                       : undefined
                   }
-                  linkText={'remove'}
+                  linkText={t('modules_remove_label')}
                   dropdown={
                     adapters != null && adapters.length > 0
                       ? {
@@ -63,7 +58,7 @@ export function ModuleListItemGroup(): JSX.Element | null {
                   }
                   onClick={() => {
                     setValue(
-                      'modules',
+                      MODULES_FIELD_NAME,
                       modulesWatch.filter(m => m.type !== module.type),
                       { shouldValidate: true }
                     )

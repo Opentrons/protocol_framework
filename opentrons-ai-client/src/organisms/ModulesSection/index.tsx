@@ -14,8 +14,17 @@ import { useAtom } from 'jotai'
 import { createProtocolAtom } from '../../resources/atoms'
 import { MODULES_STEP } from '../ProtocolSectionsContainer'
 import { ControlledEmptySelectorButtonGroup } from '../../molecules/ControlledEmptySelectorButtonGroup'
-import type { DisplayModules } from '../../molecules/ControlledEmptySelectorButtonGroup'
 import { ModuleListItemGroup } from '../../molecules/ModuleListItemGroup'
+import type { ModuleType, ModuleModel } from '@opentrons/shared-data'
+
+export interface DisplayModules {
+  type: ModuleType
+  model: ModuleModel
+  name: string
+  adapter?: string
+}
+
+export const MODULES_FIELD_NAME = 'modules'
 
 export function ModulesSection(): JSX.Element | null {
   const { t } = useTranslation('create_protocol')
@@ -29,22 +38,22 @@ export function ModulesSection(): JSX.Element | null {
     {
       type: 'heaterShakerModuleType',
       model: 'heaterShakerModuleV1',
-      name: 'Heater-Shaker Module GEN1',
+      name: t('heater_shaker_module_v1'),
     },
     {
       type: 'temperatureModuleType',
       model: 'temperatureModuleV2',
-      name: 'Temperature Module GEN2',
+      name: t('temperature_module_v2'),
     },
     {
       type: 'thermocyclerModuleType',
       model: 'thermocyclerModuleV2',
-      name: 'Thermocycler Module GEN2',
+      name: t('thermocycler_module_v2'),
     },
     {
       type: 'magneticModuleType',
       model: 'magneticModuleV1',
-      name: 'Magnetic Block GEN1',
+      name: t('magnetic_module_v1'),
     },
   ]
 
@@ -57,7 +66,7 @@ export function ModulesSection(): JSX.Element | null {
     })
   }
 
-  const modulesWatch: DisplayModules[] = watch('modules') ?? []
+  const modulesWatch: DisplayModules[] = watch(MODULES_FIELD_NAME) ?? []
 
   return (
     <Flex
@@ -68,7 +77,7 @@ export function ModulesSection(): JSX.Element | null {
       <ControlledEmptySelectorButtonGroup modules={modules} />
 
       {modulesWatch.length === 0 && (
-        <InfoScreen content="No modules added yet" />
+        <InfoScreen content={t('no_modules_added_yet')} />
       )}
 
       <ModuleListItemGroup />
