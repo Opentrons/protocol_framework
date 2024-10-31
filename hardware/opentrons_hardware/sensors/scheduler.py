@@ -31,6 +31,7 @@ from opentrons_hardware.firmware_bindings.messages.message_definitions import (
     BaselineSensorRequest,
     SensorThresholdResponse,
     ReadFromSensorResponse,
+    BatchReadFromSensorResponse,
     BaselineSensorResponse,
     PeripheralStatusResponse,
     BindSensorOutputRequest,
@@ -456,6 +457,19 @@ class SensorScheduler:
                 response_queue.put_nowait(
                     SensorDataType.build(payload.sensor_data, payload.sensor).to_float()
                 )
+            if isinstance(message, BatchReadFromSensorResponse):
+                data_length = message.payload.data_length.value
+                data_bytes = message.payload.sensor_data.value
+                data_ints = [
+                    int.from_bytes(data_bytes[i * 4 : i * 4 + 4], byteorder="little")
+                    for i in range(data_length)
+                ]
+                data_floats = [
+                    SensorDataType.build(d, message.payload.sensor).to_float()
+                    for d in data_ints
+                ]
+                for data in data_floats:
+                    response_queue.put_nowait(data)
             if isinstance(message, ErrorMessage):
                 log.error(f"Received error message {str(message)}")
 
@@ -467,6 +481,8 @@ class SensorScheduler:
                 MessageId(arbitration_id.parts.message_id)
                 == MessageId.read_sensor_response
                 or MessageId(arbitration_id.parts.message_id) == MessageId.error_message
+                or MessageId(arbitration_id.parts.message_id)
+                == MessageId.batch_read_sensor_response
             )
 
         can_messenger.add_listener(_logging_listener, _filter)
