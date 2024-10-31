@@ -764,6 +764,7 @@ export function ProtocolSetup(): JSX.Element {
   const [providedFixtureOptions, setProvidedFixtureOptions] = React.useState<
     CutoutFixtureId[]
   >([])
+  // TODO(jh 10-31-24): Refactor the below to utilize useMissingStepsModal.
   const [labwareConfirmed, setLabwareConfirmed] = React.useState<boolean>(false)
   const [liquidsConfirmed, setLiquidsConfirmed] = React.useState<boolean>(false)
   const [offsetsConfirmed, setOffsetsConfirmed] = React.useState<boolean>(false)
