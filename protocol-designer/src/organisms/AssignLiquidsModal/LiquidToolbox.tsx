@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next'
 import {
   Banner,
   Btn,
-  COLORS,
   DIRECTION_COLUMN,
   DropdownMenu,
   Flex,
