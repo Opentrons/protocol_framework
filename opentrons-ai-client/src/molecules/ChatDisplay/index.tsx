@@ -18,7 +18,6 @@ import {
   TYPOGRAPHY,
   StyledText,
   DIRECTION_ROW,
-  OVERFLOW_SCROLL,
 } from '@opentrons/components'
 
 import type { ChatData } from '../../resources/types'
@@ -45,7 +44,6 @@ const HoverShadow = styled(Flex)`
 `
 
 const StyledIcon = styled(Icon)`
-  size: ${SPACING.spacing20};
   color: ${COLORS.blue50};
 `
 
@@ -61,9 +59,15 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
     const code = lastCodeBlock?.textContent ?? ''
     const blobParts: BlobPart[] = [code]
 
-    const file = new File(blobParts, 'test-file.py', { type: 'text/python' })
-    console.log(file.name)
-    console.log(file.text().then(console.log))
+    const file = new File(blobParts, 'OpentronsAI.py', { type: 'text/python' })
+    const url = URL.createObjectURL(file)
+    const a = document.createElement('a')
+
+    document.body.appendChild(a)
+    a.href = url
+    a.download = 'OpentronsAI.py'
+    a.click()
+    window.URL.revokeObjectURL(url)
   }
 
   const handleClickCopy = async (): Promise<void> => {
@@ -99,7 +103,6 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
         borderRadius={SPACING.spacing12}
         width="100%"
         flexDirection={DIRECTION_COLUMN}
-        overflowX={OVERFLOW_SCROLL}
         gridGap={SPACING.spacing16}
         position={POSITION_RELATIVE}
       >
@@ -129,22 +132,14 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
                 setShowFeedbackModal(true)
               }}
             >
-              <StyledIcon
-                size={SPACING.spacing20}
-                name={'reload'}
-                color={COLORS.blue50}
-              />
+              <StyledIcon size={SPACING.spacing20} name={'reload'} />
             </HoverShadow>
             <HoverShadow
               onClick={() => {
                 setShowFeedbackModal(true)
               }}
             >
-              <StyledIcon
-                size={SPACING.spacing20}
-                name={'thumbs-down'}
-                color={COLORS.blue50}
-              />
+              <StyledIcon size={SPACING.spacing20} name={'thumbs-down'} />
             </HoverShadow>
             <HoverShadow
               onClick={async () => {
@@ -154,7 +149,6 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
               <StyledIcon
                 size={SPACING.spacing20}
                 name={isCopied ? 'check' : 'content-copy'}
-                color={COLORS.blue50}
               />
             </HoverShadow>
             <HoverShadow
@@ -162,11 +156,7 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
                 handleFileDownload()
               }}
             >
-              <StyledIcon
-                size={SPACING.spacing20}
-                name={'download'}
-                color={COLORS.blue50}
-              />
+              <StyledIcon size={SPACING.spacing20} name={'download'} />
             </HoverShadow>
           </Flex>
         ) : null}
