@@ -593,7 +593,7 @@ class InnerWellGeometry(BaseModel):
 
 
 class LabwareDefinition(BaseModel):
-    schemaVersion: Literal[1, 2] = Field(
+    schemaVersion: Literal[1, 2, 3] = Field(
         ..., description="Which schema version a labware is using"
     )
     version: int = Field(
