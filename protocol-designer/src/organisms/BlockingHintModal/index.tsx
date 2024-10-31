@@ -49,6 +49,7 @@ export function BlockingHintModal(props: HintProps): JSX.Element {
   return createPortal(
     <Modal
       type="warning"
+      zIndexOverlay={15}
       title={t(`hint.${hintKey}.title`)}
       onClose={onCancelClick}
       footer={
