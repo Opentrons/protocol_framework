@@ -1392,6 +1392,7 @@ class OT3Controller(FlexBackend):
             sensor_id=sensor_id_for_instrument(probe),
             force_both_sensors=force_both_sensors,
             response_queue=response_queue,
+            mount_acceleration=mount_acceleration,
         )
         for node, point in positions.items():
             self._position.update({node: point.motor_position})
