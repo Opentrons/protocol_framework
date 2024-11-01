@@ -15,7 +15,6 @@ export function ControlledEmptySelectorButtonGroup({
     <Controller
       defaultValue={[]}
       name={MODULES_FIELD_NAME}
-      rules={{ required: true, validate: value => value.length > 0 }}
       render={({ field }) => {
         return (
           <Flex flexWrap={WRAP} gap={SPACING.spacing8}>

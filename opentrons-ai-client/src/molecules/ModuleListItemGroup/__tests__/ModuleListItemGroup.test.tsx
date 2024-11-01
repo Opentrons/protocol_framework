@@ -64,4 +64,30 @@ describe('ModuleListItemGroup', () => {
       screen.queryByText('Heater-Shaker Module GEN1')
     ).not.toBeInTheDocument()
   })
+
+  it('should render the dropdown if adapters are available', () => {
+    render()
+
+    expect(screen.getAllByText('Choose an adapter').length).toBe(2)
+  })
+
+  it('should be able to select an adapter', () => {
+    render()
+
+    const dropdownButton = screen.getAllByText('Choose an adapter')[1]
+
+    fireEvent.click(dropdownButton)
+
+    const adapterOption = screen.getByText(
+      'Opentrons 24 Well Aluminum Block with Generic 2 mL Screwcap'
+    )
+
+    fireEvent.click(adapterOption)
+
+    expect(
+      screen.getByText(
+        'Opentrons 24 Well Aluminum Block with Generic 2 mL Screwcap'
+      )
+    ).toBeInTheDocument()
+  })
 })

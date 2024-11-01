@@ -24,6 +24,7 @@ interface PromptPreviewProps {
 const PromptPreviewContainer = styled(Flex)`
   flex-direction: ${DIRECTION_COLUMN};
   width: 100%;
+  max-width: 516px;
   height: ${SIZE_AUTO};
   padding-top: ${SPACING.spacing8};
   background-color: ${COLORS.transparent};
@@ -78,7 +79,7 @@ export function PromptPreview({
               key={`section-${index}`}
               title={section.title}
               items={section.items}
-              itemMaxWidth={index <= 2 ? '33.33%' : '100%'}
+              itemMaxWidth={index <= 1 ? '33.33%' : '100%'}
             />
           )
       )}
