@@ -2716,12 +2716,22 @@ class OT3API(
             probe_settings = deepcopy(self.config.liquid_sense)
 
         # We need to significatly slow down the 96 channel liquid probe
+        max_mount_acceleration = self.config.motion_settings.acceleration[
+            GantryLoad.LOW_THROUGHPUT
+        ][OT3AxisKind.Z]
+
         if self.gantry_load == GantryLoad.HIGH_THROUGHPUT:
             max_plunger_speed = self.config.motion_settings.max_speed_discontinuity[
                 GantryLoad.HIGH_THROUGHPUT
             ][OT3AxisKind.P]
+            max_mount_acceleration = self.config.motion_settings.acceleration[
+                GantryLoad.HIGH_THROUGHPUT
+            ][OT3AxisKind.Z]
             probe_settings.plunger_speed = min(
                 max_plunger_speed, probe_settings.plunger_speed
+            )
+            probe_settings.mount_acceleration = min(
+                max_mount_acceleration, probe_settings.mount_acceleration
             )
 
         starting_position = await self.gantry_position(checked_mount, refresh=True)
