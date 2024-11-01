@@ -202,7 +202,7 @@ def mock_move_group_run() -> Iterator[mock.AsyncMock]:
         "opentrons.hardware_control.backends.ot3controller.MoveGroupRunner.run",
         autospec=True,
     ) as mock_mgr_run:
-        mock_mgr_run.side_effect = {}
+        mock_mgr_run.return_value = {}
         yield mock_mgr_run
 
 
