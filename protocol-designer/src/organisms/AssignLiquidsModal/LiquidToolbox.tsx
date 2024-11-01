@@ -257,7 +257,7 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
                   {t('add_liquid')}
                 </StyledText>
                 {liquidSelectionOptions.length === 0 ? (
-                  <Banner type="warning">
+                  <Banner type="warning" iconMarginLeft={SPACING.spacing4}>
                     <Flex justifyContent={JUSTIFY_SPACE_BETWEEN} width="100%">
                       <StyledText desktopStyle="captionRegular">
                         {t('no_liquids_defined')}
