@@ -294,7 +294,7 @@ class MovementHandler:
             ),
             max_travel_z=max_travel_z,
             direct=direct,
-            additional_min_travel_z=None,
+            additional_min_travel_z=additional_min_travel_z,
         )
 
         speed = self._state_store.pipettes.get_movement_speed(

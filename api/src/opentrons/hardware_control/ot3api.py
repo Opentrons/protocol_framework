@@ -352,7 +352,9 @@ class OT3API(
     def _reset_last_mount(self) -> None:
         self._last_moved_mount = None
 
-    def get_deck_from_machine(self, machine_pos: Dict[Axis, float]) -> Dict[Axis, float]:
+    def get_deck_from_machine(
+        self, machine_pos: Dict[Axis, float]
+    ) -> Dict[Axis, float]:
         return deck_from_machine(
             machine_pos=machine_pos,
             attitude=self._robot_calibration.deck_calibration.attitude,

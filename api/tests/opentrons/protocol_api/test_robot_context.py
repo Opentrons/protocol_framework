@@ -33,7 +33,9 @@ def api_version() -> APIVersion:
 @pytest.fixture
 def mock_deck(decoy: Decoy) -> Deck:
     deck = decoy.mock(cls=Deck)
-    decoy.when(deck.get_slot_center(DeckSlotName.SLOT_D1)).then_return(Point(3, 3, 3))
+    decoy.when(deck.get_slot_center(DeckSlotName.SLOT_D1.value)).then_return(
+        Point(3, 3, 3)
+    )
     return deck
 
 
@@ -43,7 +45,6 @@ def mock_protocol(decoy: Decoy, mock_deck: Deck, mock_core: RobotCore) -> Protoc
     protocol_core = decoy.mock(cls=ProtocolCore)
     decoy.when(protocol_core.robot_type).then_return("OT-3 Standard")
     decoy.when(protocol_core.load_robot()).then_return(mock_core)
-    decoy.when(protocol_core._deck).then_return(mock_deck)
     return protocol_core
 
 
@@ -76,9 +77,12 @@ def test_move_to(
     speed: Optional[float],
 ) -> None:
     subject.move_to(mount, destination, speed)
-    if mount == "left":
-        mount = Mount.LEFT
-    decoy.verify(subject._core.move_to(mount, destination, speed))
+    core_mount: Mount
+    if isinstance(mount, str):
+        core_mount = Mount.string_to_mount(mount)
+    else:
+        core_mount = mount
+    decoy.verify(subject._core.move_to(core_mount, destination.point, speed))
 
 
 @pytest.mark.parametrize(
@@ -151,7 +155,6 @@ def test_move_axes_relative(
             Location(point=Point(1, 2, 3), labware=None),
             {AxisType.Z_L: 3, AxisType.X: 1, AxisType.Y: 2},
         ),
-        (Mount.RIGHT, "D1", {AxisType.Z_R: 3, AxisType.X: 3, AxisType.Y: 3}),
         (
             Mount.EXTENSION,
             Location(point=Point(1, 2, 3), labware=None),

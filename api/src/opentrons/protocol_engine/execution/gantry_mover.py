@@ -1,8 +1,8 @@
 """Gantry movement wrapper for hardware and simulation based movement."""
 from logging import getLogger
-
+from opentrons.config.types import OT3Config
 from functools import partial
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Tuple
 from typing_extensions import Protocol as TypingProtocol
 
 from opentrons.types import Point, Mount, MountType
@@ -190,6 +190,20 @@ class HardwareGantryMover(GantryMover):
         else:
             return self._hardware_api.critical_point_for(mount)
 
+    def _get_gantry_offsets_for_robot_type(self) -> Tuple[Point, Point, Optional[Point]]:
+        if isinstance(self._hardware_api.config, OT3Config):
+            return (
+                Point(*self._hardware_api.config.left_mount_offset),
+                Point(*self._hardware_api.config.right_mount_offset),
+                Point(*self._hardware_api.config.gripper_mount_offset),
+            )
+        else:
+            return (
+                Point(*self._hardware_api.config.left_mount_offset),
+                Point(0, 0, 0),
+                None,
+            )
+
     def pick_mount_from_axis_map(self, axis_map: Dict[MotorAxis, float]) -> Mount:
         """Find a mount axis in the axis_map if it exists otherwise default to left mount."""
         found_mount = Mount.LEFT
@@ -315,20 +329,19 @@ class HardwareGantryMover(GantryMover):
                 )
                 log.info(f"The current position of the robot is: {current_position}.")
 
-                pos_hw = target_axis_map_from_relative(
-                    pos_hw, current_position
-                )
+                pos_hw = target_axis_map_from_relative(pos_hw, current_position)
                 log.info(
                     f"The absolute position is: {pos_hw} and hw pos map is {pos_hw}."
                 )
             log.info(f"The calculated move {pos_hw} and {mount}")
+            left_offset, right_offset, gripper_offset = self._get_gantry_offsets_for_robot_type()
             absolute_pos = target_axis_map_from_absolute(
                 mount,
                 pos_hw,
                 partial(self._critical_point_for, cp_override=critical_point),
-                Point(*self._hardware_api.config.left_mount_offset),
-                Point(*self._hardware_api.config.right_mount_offset),
-                Point(*self._hardware_api.config.gripper_mount_offset),
+                left_mount_offset=left_offset,
+                right_mount_offset=right_offset,
+                gripper_mount_offset=gripper_offset,
             )
             log.info(f"The prepped abs {absolute_pos}")
             await self._hardware_api.move_axes(

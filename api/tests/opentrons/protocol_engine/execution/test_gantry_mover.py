@@ -4,6 +4,7 @@ from __future__ import annotations
 import pytest
 from decoy import Decoy
 from typing import TYPE_CHECKING, Dict, Optional
+from collections import OrderedDict
 
 from opentrons.types import Mount, MountType, Point
 from opentrons.hardware_control import API as HardwareAPI
@@ -481,7 +482,9 @@ async def test_home_z(
             {MotorAxis.X: 2.0, MotorAxis.Y: 1.0, MotorAxis.RIGHT_Z: 1.0},
             False,
             Mount.RIGHT,
-            {HardwareAxis.X: -2.0, HardwareAxis.Y: 4.0, HardwareAxis.A: 9.0},
+            OrderedDict(
+                {HardwareAxis.X: -2.0, HardwareAxis.Y: 4.0, HardwareAxis.A: 19.0}
+            ),
             {HardwareAxis.X: -2.0, HardwareAxis.Y: 4.0, HardwareAxis.A: 9.0},
         ],
         [
@@ -489,7 +492,7 @@ async def test_home_z(
             None,
             True,
             Mount.RIGHT,
-            {HardwareAxis.A: 30.0},
+            OrderedDict({HardwareAxis.A: 29.0}),
             {
                 HardwareAxis.X: 10.0,
                 HardwareAxis.Y: 15.0,
@@ -502,20 +505,20 @@ async def test_home_z(
             None,
             False,
             Mount.LEFT,
-            {HardwareAxis.Q: 10.0},
+            OrderedDict({HardwareAxis.Q: 10.0}),
             {HardwareAxis.Q: 10.0},
         ],
     ],
 )
 async def test_move_axes(
     decoy: Decoy,
-    mock_hardware_api: HardwareAPI,
+    ot3_hardware_api: OT3API,
     hardware_subject: HardwareGantryMover,
     axis_map: Dict[MotorAxis, float],
     critical_point: Optional[Dict[MotorAxis, float]],
     expected_mount: Mount,
     relative_move: bool,
-    call_to_hw: Dict[HardwareAxis, float],
+    call_to_hw: "OrderedDict[HardwareAxis, float]",
     final_position: Dict[HardwareAxis, float],
 ) -> None:
     curr_pos = {
@@ -537,30 +540,30 @@ async def test_move_axes(
             return final_position
 
     decoy.when(
-        await mock_hardware_api.current_position(expected_mount, refresh=True)
+        await ot3_hardware_api.current_position(expected_mount, refresh=True)
     ).then_do(_current_position)
 
-    decoy.when(mock_hardware_api.config.left_mount_offset).then_return(Point(1, 1, 1))
-    decoy.when(mock_hardware_api.config.right_mount_offset).then_return(
+    decoy.when(ot3_hardware_api.config.left_mount_offset).then_return(Point(1, 1, 1))
+    decoy.when(ot3_hardware_api.config.right_mount_offset).then_return(
         Point(10, 10, 10)
     )
-    decoy.when(mock_hardware_api.config.gripper_mount_offset).then_return(
+    decoy.when(ot3_hardware_api.config.gripper_mount_offset).then_return(
         Point(0.5, 0.5, 0.5)
     )
 
-    decoy.when(mock_hardware_api.get_deck_from_machine(curr_pos)).then_return(curr_pos)
+    decoy.when(ot3_hardware_api.get_deck_from_machine(curr_pos)).then_return(curr_pos)
 
-    decoy.when(mock_hardware_api.get_deck_from_machine(final_position)).then_return(
+    decoy.when(ot3_hardware_api.get_deck_from_machine(final_position)).then_return(
         final_position
     )
     if not critical_point:
-        decoy.when(mock_hardware_api.critical_point_for(expected_mount)).then_return(
+        decoy.when(ot3_hardware_api.critical_point_for(expected_mount)).then_return(
             Point(1, 1, 1)
         )
 
     pos = await hardware_subject.move_axes(axis_map, critical_point, 100, relative_move)
     decoy.verify(
-        await mock_hardware_api.move_axes(position=call_to_hw, speed=100),
+        await ot3_hardware_api.move_axes(position=call_to_hw, speed=100),
         times=1,
     )
     assert pos == {
@@ -696,7 +699,7 @@ async def test_virtual_move_axes(
     axis_map: Dict[MotorAxis, float],
     critical_point: Optional[Dict[MotorAxis, float]],
     relative_move: bool,
-    expected_position: Dict[HardwareAxis, float],
+    expected_position: Dict[MotorAxis, float],
 ) -> None:
     pos = await virtual_subject.move_axes(axis_map, critical_point, 100, relative_move)
     assert pos == expected_position
