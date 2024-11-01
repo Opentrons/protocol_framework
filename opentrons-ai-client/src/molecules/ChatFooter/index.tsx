@@ -14,7 +14,11 @@ export function ChatFooter(): JSX.Element {
   const { t } = useTranslation('protocol_generator')
 
   return (
-    <Flex gridGap={SPACING.spacing24} flexDirection={DIRECTION_COLUMN}>
+    <Flex
+      paddingTop={SPACING.spacing24}
+      gridGap={SPACING.spacing24}
+      flexDirection={DIRECTION_COLUMN}
+    >
       <InputPrompt />
       <LegacyStyledText css={DISCLAIMER_TEXT_STYLE}>
         {t('disclaimer')}

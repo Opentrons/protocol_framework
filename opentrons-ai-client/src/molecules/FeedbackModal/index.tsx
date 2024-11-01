@@ -54,7 +54,6 @@ export function FeedbackModal(): JSX.Element {
     >
       <InputField
         title={t(`send_feedback_input_title`)}
-        placeholder={t(`send_feedback_input_placeholder`)}
         size="medium"
         value={feedbackValue}
         onChange={event => {

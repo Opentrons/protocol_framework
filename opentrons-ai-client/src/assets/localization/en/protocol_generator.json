@@ -44,7 +44,6 @@
   "robot": "Robot: OT-2.",
   "share_your_thoughts": "Share your thoughts here",
   "send_feedback": "Send feedback",
-  "send_feedback_input_placeholder": "I was frustrated by how long it took for the protocol to be generated",
   "send_feedback_input_title": "Share why the response was not helpful",
   "send_feedback_to_opentrons": "Send feedback to Opentrons",
   "side_panel_body": "Write a prompt in natural language to generate a Reagent Transfer or a PCR protocol for the OT-2 or Opentrons Flex using the Opentrons Python Protocol API.",
