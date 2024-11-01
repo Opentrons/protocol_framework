@@ -69,7 +69,7 @@ function PathButton(props: PathButtonProps): JSX.Element {
   const { t } = useTranslation(['form', 'protocol_steps'])
   // TODO: update the tooltip and images
   const tooltip = (
-    <Tooltip tooltipProps={tooltipProps} maxWidth={'24.5rem'}>
+    <Tooltip tooltipProps={tooltipProps} maxWidth="24.5rem">
       <Flex gridGap={SPACING.spacing8} flexDirection={DIRECTION_COLUMN}>
         <Box>{t(`step_edit_form.field.path.title.${path}`)}</Box>
         <img src={PATH_ANIMATION_IMAGES[path]} width="361px" />
