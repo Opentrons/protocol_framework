@@ -201,6 +201,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
         flexDirection={DIRECTION_COLUMN}
       >
         <Box
+          role="button"
           onDoubleClick={onDoubleClick}
           onClick={onClick}
           padding={SPACING.spacing12}

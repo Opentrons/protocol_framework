@@ -5,13 +5,13 @@ import { Flex } from '../../../primitives'
 import { StyledText } from '../../StyledText'
 import { CURSOR_POINTER } from '../../../styles'
 
-import type * as React from 'react'
+import type { ChangeEventHandler, MouseEvent } from 'react'
 import type { StyleProps } from '../../../primitives'
 
 interface ListButtonRadioButtonProps extends StyleProps {
   buttonText: string
   buttonValue: string | number
-  onChange: React.ChangeEventHandler<HTMLInputElement>
+  onChange: ChangeEventHandler<HTMLInputElement>
   setNoHover?: () => void
   setHovered?: () => void
   disabled?: boolean
@@ -38,7 +38,7 @@ export function ListButtonRadioButton(
     <Flex
       width="100%"
       margin={SPACING.spacing4}
-      onClick={(e: React.MouseEvent) => {
+      onClick={(e: MouseEvent) => {
         e.stopPropagation()
       }}
     >
