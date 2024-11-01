@@ -1,22 +1,36 @@
 import uniq from 'lodash/uniq'
 import {
+  FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
+  MOVABLE_TRASH_ADDRESSABLE_AREAS,
+  WASTE_CHUTE_ADDRESSABLE_AREAS,
+  getModuleDisplayName,
+  getPipetteSpecsV2,
+} from '@opentrons/shared-data'
+import {
   getArgsAndErrorsByStepId,
   getPipetteEntities,
   getSavedStepForms,
 } from '../step-forms/selectors'
-import { getFileMetadata, getRobotStateTimeline } from '../file-data/selectors'
+import { createFile, getFileMetadata } from '../file-data/selectors'
 import { trackEvent } from './mixpanel'
 import { getHasOptedIn } from './selectors'
 import { flattenNestedProperties } from './utils/flattenNestedProperties'
 import type { Middleware } from 'redux'
+import type {
+  AddressableAreaName,
+  LoadLabwareCreateCommand,
+  LoadModuleCreateCommand,
+  LoadPipetteCreateCommand,
+  PipetteName,
+} from '@opentrons/shared-data'
 import type { BaseState } from '../types'
 import type { FormData, StepIdType, StepType } from '../form-types'
 import type { StepArgsAndErrors } from '../steplist'
 import type { SaveStepFormAction } from '../ui/steps/actions/thunks'
 import type { AnalyticsEventAction } from './actions'
 import type { AnalyticsEvent } from './mixpanel'
-import { getTimelineWarningsForSelectedStep } from '../top-selectors/timelineWarnings'
-import { CommandCreatorError, Timeline } from '@opentrons/step-generation'
+import type { ComputeRobotStateTimelineSuccessAction } from '../file-data/actions'
+import { FIXED_TRASH_ID } from '../constants'
 
 // Converts Redux actions to analytics events (read: Mixpanel events).
 // Returns null if there is no analytics event associated with the action,
@@ -59,17 +73,9 @@ export const reduxActionToAnalyticsEvent = (
           pipetteEntities[stepArgs?.pipette].name
       }
       const stepName = stepArgs.commandCreatorFnName
-
-      switch (stepName) {
-        case 'transfer': {
-          return {
-            name: 'transferStep',
-            properties: { ...stepArgs, ...additionalProperties },
-          }
-        }
-      }
+      const modifiedStepName = stepName === 'delay' ? 'pause' : stepName
       return {
-        name: 'saveStep',
+        name: `${modifiedStepName}Step`,
         properties: { ...stepArgs, ...additionalProperties },
       }
     }
@@ -129,24 +135,15 @@ export const reduxActionToAnalyticsEvent = (
       properties: {},
     }
   }
-  if (action.type === 'EXPAND_MULTIPLE_STEPS') {
-    return {
-      name: 'expandMultipleSteps',
-      properties: {},
-    }
-  }
-  if (action.type === 'COLLAPSE_MULTIPLE_STEPS') {
-    return {
-      name: 'collapseMultipleSteps',
-      properties: {},
-    }
-  }
   if (action.type === 'COMPUTE_ROBOT_STATE_TIMELINE_SUCCESS') {
-    const generatedTimeline: Timeline = action.payload.standardTimeline
+    const a: ComputeRobotStateTimelineSuccessAction = action
+    const generatedTimeline = a.payload.standardTimeline
     const { errors, timeline } = generatedTimeline
-    const warnings = timeline
-      .filter(t => t.warnings != null)
-      .flatMap(state => state.warnings!)
+    const commandAndRobotState = timeline.filter(t => t.warnings != null)
+    const warnings =
+      commandAndRobotState.length > 0
+        ? commandAndRobotState.flatMap(state => state.warnings!)
+        : []
     if (errors != null) {
       const errorTypes = errors.map(error => error.type)
 
@@ -160,6 +157,117 @@ export const reduxActionToAnalyticsEvent = (
         name: 'timelineWarnings',
         properties: { warnings },
       }
+    }
+  }
+  if (action.type === 'LOAD_FILE') {
+    return {
+      name: 'loadFile',
+      properties: {},
+    }
+  }
+  if (action.type === 'TOGGLE_NEW_PROTOCOL_FILE') {
+    return {
+      name: 'createNewProtocol',
+      properties: {},
+    }
+  }
+  if (action.type === 'SAVE_PROTOCOL_FILE') {
+    const file = createFile(state)
+    const stepForms = getSavedStepForms(state)
+    const { commands, metadata, robot, liquids } = file
+    const robotType = { robotType: robot.model }
+    const pipetteDisplayNames = commands
+      .filter(
+        (command): command is LoadPipetteCreateCommand =>
+          command.commandType === 'loadPipette'
+      )
+      ?.map(
+        command =>
+          getPipetteSpecsV2(command.params.pipetteName as PipetteName)
+            ?.displayName ?? command.params.pipetteName
+      )
+    const moduleModels = commands
+      .filter(
+        (command): command is LoadModuleCreateCommand =>
+          command.commandType === 'loadModule'
+      )
+      ?.map(command => getModuleDisplayName(command.params.model))
+    const labwareDisplayNames = commands
+      .filter(
+        (command): command is LoadLabwareCreateCommand =>
+          command.commandType === 'loadLabware'
+      )
+      ?.map(command => command.params.displayName ?? command.params.loadName)
+
+    const numberOfSteps = { numberOfSteps: Object.keys(stepForms).length - 1 }
+    const trashCommands = commands?.some(
+      command =>
+        (command.commandType === 'moveToAddressableArea' &&
+          (MOVABLE_TRASH_ADDRESSABLE_AREAS.includes(
+            command.params.addressableAreaName as AddressableAreaName
+          ) ||
+            command.params.addressableAreaName === FIXED_TRASH_ID)) ||
+        command.commandType === 'moveToAddressableAreaForDropTip'
+    )
+    const wasteChuteCommands = commands?.some(
+      command =>
+        (command.commandType === 'moveToAddressableArea' &&
+          WASTE_CHUTE_ADDRESSABLE_AREAS.includes(
+            command.params.addressableAreaName as AddressableAreaName
+          )) ||
+        (command.commandType === 'moveLabware' &&
+          command.params.newLocation !== 'offDeck' &&
+          'addressableAreaName' in command.params.newLocation &&
+          command.params.newLocation.addressableAreaName ===
+            'gripperWasteChute')
+    )
+    const hasGripperCommands = commands?.some(
+      command =>
+        command.commandType === 'moveLabware' &&
+        command.params.strategy === 'usingGripper'
+    )
+
+    const stagingAreaSlots = FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS.filter(
+      location =>
+        commands?.some(
+          command =>
+            (command.commandType === 'loadLabware' &&
+              command.params.location !== 'offDeck' &&
+              'addressableAreaName' in command.params.location &&
+              command.params.location.addressableAreaName === location) ||
+            (command.commandType === 'moveLabware' &&
+              command.params.newLocation !== 'offDeck' &&
+              'addressableAreaName' in command.params.newLocation &&
+              command.params.newLocation.addressableAreaName === location)
+        )
+          ? null
+          : location
+    )
+    const flattenedLiquids = flattenNestedProperties(liquids)
+
+    const fixtureInfo = {
+      trashBin: trashCommands,
+      wasteChute: wasteChuteCommands,
+      stagingAreaSlots: stagingAreaSlots,
+      gripper: hasGripperCommands,
+    }
+
+    const loadCommandInfo = {
+      modules: moduleModels,
+      pipettes: pipetteDisplayNames,
+      labware: labwareDisplayNames,
+    }
+
+    return {
+      name: 'saveProtocol',
+      properties: {
+        ...metadata,
+        ...loadCommandInfo,
+        ...robotType,
+        ...flattenedLiquids,
+        ...numberOfSteps,
+        ...fixtureInfo,
+      },
     }
   }
   if (action.type === 'ANALYTICS_EVENT') {
