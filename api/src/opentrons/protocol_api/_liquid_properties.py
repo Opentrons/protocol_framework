@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Optional, Dict, Sequence
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
@@ -21,10 +22,11 @@ from opentrons_shared_data.liquid_classes.liquid_class_definition import (
 LiquidHandlingPropertyByVolume = Dict[str, float]
 
 
+@dataclass
 class DelayProperties:
-    def __init__(self, enable: bool, duration: Optional[float]) -> None:
-        self._enabled = enable
-        self._duration = duration
+
+    _enabled: bool
+    _duration: Optional[float]
 
     @property
     def enabled(self) -> bool:
@@ -47,18 +49,13 @@ class DelayProperties:
         self._duration = new_duration
 
 
+@dataclass
 class TouchTipProperties:
-    def __init__(
-        self,
-        enable: bool,
-        z_offset: Optional[float],
-        mm_to_edge: Optional[float],
-        speed: Optional[float],
-    ) -> None:
-        self._enabled = enable
-        self._z_offset = z_offset
-        self._mm_to_edge = mm_to_edge
-        self._speed = speed
+
+    _enabled: bool
+    _z_offset: Optional[float]
+    _mm_to_edge: Optional[float]
+    _speed: Optional[float]
 
     @property
     def enabled(self) -> bool:
@@ -103,13 +100,12 @@ class TouchTipProperties:
         self._speed = new_speed
 
 
+@dataclass
 class MixProperties:
-    def __init__(
-        self, enable: bool, repetitions: Optional[int], volume: Optional[float]
-    ) -> None:
-        self._enabled = enable
-        self._repetitions = repetitions
-        self._volume = volume
+
+    _enabled: bool
+    _repetitions: Optional[int]
+    _volume: Optional[float]
 
     @property
     def enabled(self) -> bool:
@@ -141,16 +137,12 @@ class MixProperties:
         self._volume = new_volume
 
 
+@dataclass
 class BlowoutProperties:
-    def __init__(
-        self,
-        enable: bool,
-        location: Optional[BlowoutLocation],
-        flow_rate: Optional[float],
-    ) -> None:
-        self._enabled = enable
-        self._location = location
-        self._flow_rate = flow_rate
+
+    _enabled: bool
+    _location: Optional[BlowoutLocation]
+    _flow_rate: Optional[float]
 
     @property
     def enabled(self) -> bool:
@@ -427,7 +419,7 @@ def _build_delay_properties(
         duration = delay_properties.params.duration
     else:
         duration = None
-    return DelayProperties(enable=delay_properties.enable, duration=duration)
+    return DelayProperties(_enabled=delay_properties.enable, _duration=duration)
 
 
 def _build_touch_tip_properties(
@@ -442,10 +434,10 @@ def _build_touch_tip_properties(
         mm_to_edge = None
         speed = None
     return TouchTipProperties(
-        enable=touch_tip_properties.enable,
-        z_offset=z_offset,
-        mm_to_edge=mm_to_edge,
-        speed=speed,
+        _enabled=touch_tip_properties.enable,
+        _z_offset=z_offset,
+        _mm_to_edge=mm_to_edge,
+        _speed=speed,
     )
 
 
@@ -459,7 +451,7 @@ def _build_mix_properties(
         repetitions = None
         volume = None
     return MixProperties(
-        enable=mix_properties.enable, repetitions=repetitions, volume=volume
+        _enabled=mix_properties.enable, _repetitions=repetitions, _volume=volume
     )
 
 
@@ -473,7 +465,7 @@ def _build_blowout_properties(
         location = None
         flow_rate = None
     return BlowoutProperties(
-        enable=blowout_properties.enable, location=location, flow_rate=flow_rate
+        _enabled=blowout_properties.enable, _location=location, _flow_rate=flow_rate
     )
 
 
