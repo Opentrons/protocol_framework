@@ -65,7 +65,8 @@
           "bottomYDimension": 1.93,
           "topHeight": 2,
           "bottomHeight": 0,
-          "count": 96
+          "xCount": 12,
+          "yCount": 8
         },
         {
           "shape": "cuboidal",
