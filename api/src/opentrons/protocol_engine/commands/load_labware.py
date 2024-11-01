@@ -162,12 +162,12 @@ class LoadLabwareImplementation(
                 top_labware_definition=loaded_labware.definition,
                 bottom_labware_id=verified_location.labwareId,
             )
-        # Labware needs to be 15mm or less to fit into the absorbance reader
+        # Validate labware for the absorbance reader
         elif isinstance(params.location, ModuleLocation):
             module = self._state_view.modules.get(params.location.moduleId)
             if module is not None and module.model == ModuleModel.ABSORBANCE_READER_V1:
                 self._state_view.labware.raise_if_labware_incompatible_with_plate_reader(
-                    loaded_labware.labware_id
+                    loaded_labware.definition
                 )
 
         return SuccessData(

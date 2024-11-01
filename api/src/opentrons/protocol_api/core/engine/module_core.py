@@ -581,7 +581,34 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
                 "Cannot perform Initialize action on Absorbance Reader without calling `.close_lid()` first."
             )
 
-        # TODO: check that the wavelengths are within the supported wavelengths
+        wavelength_len = len(wavelengths)
+        if mode == "single" and wavelength_len != 1:
+            raise ValueError(
+                f"Single mode can only be initialized with 1 wavelength"
+                f" {wavelength_len} wavelengths provided instead."
+            )
+
+        if mode == "multi" and (wavelength_len < 1 or wavelength_len > 6):
+            raise ValueError(
+                f"Multi mode can only be initialized with 1 - 6 wavelengths."
+                f" {wavelength_len} wavelengths provided instead."
+            )
+
+        if reference_wavelength is not None and (
+            reference_wavelength < 350 or reference_wavelength > 1000
+        ):
+            raise ValueError(
+                f"Unsupported reference wavelength: ({reference_wavelength}) needs"
+                f" to between 350 and 1000 nm."
+            )
+
+        for wavelength in wavelengths:
+            if not isinstance(wavelength, int) or wavelength < 350 or wavelength > 1000:
+                raise ValueError(
+                    f"Unsupported sample wavelength: ({wavelength}) needs"
+                    f" to between 350 and 1000 nm."
+                )
+
         self._engine_client.execute_command(
             cmd.absorbance_reader.InitializeParams(
                 moduleId=self.module_id,

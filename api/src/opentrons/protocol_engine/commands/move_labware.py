@@ -223,12 +223,12 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
                 raise LabwareMovementNotAllowedError(
                     "Cannot move a labware onto itself."
                 )
-        # Labware needs to be 15mm or less to fit into the absorbance reader
+        # Validate labware for the absorbance reader
         elif isinstance(available_new_location, ModuleLocation):
             module = self._state_view.modules.get(available_new_location.moduleId)
             if module is not None and module.model == ModuleModel.ABSORBANCE_READER_V1:
                 self._state_view.labware.raise_if_labware_incompatible_with_plate_reader(
-                    params.labwareId
+                    current_labware_definition
                 )
 
         # Allow propagation of ModuleNotLoadedError.

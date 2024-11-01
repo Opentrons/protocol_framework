@@ -82,7 +82,7 @@ _RIGHT_SIDE_SLOTS = {
 
 
 # The max height of the labware that can fit in a plate reader
-_PLATE_READER_MAX_LABWARE_Z_MM = 15
+_PLATE_READER_MAX_LABWARE_Z_MM = 16
 
 
 class LabwareLoadParams(NamedTuple):
@@ -824,26 +824,25 @@ class LabwareView(HasState[LabwareState]):
 
     def raise_if_labware_incompatible_with_plate_reader(
         self,
-        labware_id: str,
+        labware_definition: LabwareDefinition,
     ) -> None:
         """Raise an error if the labware is not compatible with the plate reader."""
-        labware_definition = self.get_definition(labware_id)
-        if labware_definition is not None:
+        # TODO: (ba, 2024-11-1): the plate reader lid should not be a labware.
+        load_name = labware_definition.parameters.loadName
+        if load_name != "opentrons_flex_lid_absorbance_plate_reader_module":
             number_of_wells = len(labware_definition.wells)
             if number_of_wells != 96:
                 raise errors.LabwareMovementNotAllowedError(
-                    f"Cannot move '{labware_definition.parameters.loadName}'"
-                    f" into plate reader because the labware contains {number_of_wells}"
-                    f" wells where 96 wells is expected."
+                    f"Cannot move '{load_name}' into plate reader because the"
+                    f" labware contains {number_of_wells} wells where 96 wells is expected."
                 )
             elif (
                 labware_definition.dimensions.zDimension
                 > _PLATE_READER_MAX_LABWARE_Z_MM
             ):
                 raise errors.LabwareMovementNotAllowedError(
-                    f"Cannot move '{labware_definition.parameters.loadName}'"
-                    f" into plate reader because the maximum allowed labware height"
-                    f" is {_PLATE_READER_MAX_LABWARE_Z_MM}mm."
+                    f"Cannot move '{load_name}' into plate reader because the"
+                    f" maximum allowed labware height is {_PLATE_READER_MAX_LABWARE_Z_MM}mm."
                 )
 
     def raise_if_labware_cannot_be_stacked(  # noqa: C901
