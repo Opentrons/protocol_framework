@@ -79,8 +79,10 @@ def _fix_pass_step_for_buffer(
     speed: Dict[NodeId, float],
     sensor_type: SensorType,
     sensor_id: SensorId,
+    head_node: NodeId,
     stop_condition: MoveStopCondition = MoveStopCondition.sync_line,
     binding_flags: Optional[int] = None,
+    mount_acceleration: float = 0.0,
 ) -> MoveGroupStep:
     if binding_flags is None:
         binding_flags = (
@@ -99,7 +101,7 @@ def _fix_pass_step_for_buffer(
             velocity={
                 ax: float64(speed[ax] * copysign(1.0, distance[ax])) for ax in movers
             },
-            acceleration={},
+            acceleration={head_node: float64(mount_acceleration)},
             # use any node present to calculate duration of the move, assuming the durations
             #   will be the same
             duration=float64(abs(distance[movers[0]] / speed[movers[0]])),
@@ -134,15 +136,17 @@ def _build_pass_step(
     speed: Dict[NodeId, float],
     sensor_type: SensorType,
     sensor_id: SensorId,
+    head_node: NodeId,
     stop_condition: MoveStopCondition = MoveStopCondition.sync_line,
     binding_flags: Optional[int] = None,
+    mount_acceleration: float = 0.0,
 ) -> MoveGroupStep:
     move_group = create_step(
         distance={ax: float64(abs(distance[ax])) for ax in movers},
         velocity={
             ax: float64(speed[ax] * copysign(1.0, distance[ax])) for ax in movers
         },
-        acceleration={},
+        acceleration={head_node: float64(mount_acceleration)},
         # use any node present to calculate duration of the move, assuming the durations
         #   will be the same
         duration=float64(abs(distance[movers[0]] / speed[movers[0]])),
@@ -274,6 +278,7 @@ async def liquid_probe(
     response_queue: Optional[
         asyncio.Queue[Dict[SensorId, List[SensorDataType]]]
     ] = None,
+    mount_acceleration: float = 0.0,
 ) -> Dict[NodeId, MotorPositionStatus]:
     """Move the mount and pipette simultaneously while reading from the pressure sensor."""
     sensor_driver = SensorDriver()
@@ -315,8 +320,10 @@ async def liquid_probe(
         speed={head_node: mount_speed, tool: plunger_speed},
         sensor_type=SensorType.pressure,
         sensor_id=sensor_id,
+        head_node=head_node,
         stop_condition=MoveStopCondition.sync_line,
         binding_flags=sensor_binding,
+        mount_acceleration=mount_acceleration,
     )
 
     sensor_group = _fix_pass_step_for_buffer(
@@ -326,15 +333,17 @@ async def liquid_probe(
         speed={head_node: mount_speed, tool: plunger_speed},
         sensor_type=SensorType.pressure,
         sensor_id=sensor_id,
+        head_node=head_node,
         stop_condition=MoveStopCondition.sync_line,
         binding_flags=sensor_binding,
+        mount_acceleration=mount_acceleration,
     )
     sensor_runner = MoveGroupRunner(move_groups=[[lower_plunger], [sensor_group]])
 
     raise_z = create_step(
         distance={head_node: float64(max_z_distance)},
         velocity={head_node: float64(-1 * mount_speed)},
-        acceleration={},
+        acceleration={head_node: float64(mount_acceleration)},
         duration=float64(max_z_distance / mount_speed),
         present_nodes=[head_node],
     )
@@ -434,6 +443,7 @@ async def capacitive_probe(
         speed=probe_speed,
         sensor_type=SensorType.capacitive,
         sensor_id=sensor_id,
+        head_node=mover,
         stop_condition=MoveStopCondition.sync_line,
     )
 
@@ -444,6 +454,7 @@ async def capacitive_probe(
         speed=probe_speed,
         sensor_type=SensorType.capacitive,
         sensor_id=sensor_id,
+        head_node=mover,
         stop_condition=MoveStopCondition.sync_line,
     )
 
@@ -491,6 +502,7 @@ async def capacitive_pass(
         speed={mover: speed},
         sensor_type=SensorType.capacitive,
         sensor_id=sensor_id,
+        head_node=mover,
     )
 
     runner = MoveGroupRunner(move_groups=[[sensor_group]])
