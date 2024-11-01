@@ -222,7 +222,7 @@ run_command_table = sqlalchemy.Table(
     ),
 )
 
-run_command_table = sqlalchemy.Table(
+run_command_errors_table = sqlalchemy.Table(
     "run_command_errors",
     metadata,
     sqlalchemy.Column("row_id", sqlalchemy.Integer, primary_key=True),

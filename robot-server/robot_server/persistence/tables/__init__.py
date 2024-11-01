@@ -1,7 +1,7 @@
 """SQL database schemas."""
 
 # Re-export the latest schema.
-from .schema_7 import (
+from .schema_8 import (
     metadata,
     protocol_table,
     analysis_table,
@@ -9,6 +9,7 @@ from .schema_7 import (
     analysis_csv_rtp_table,
     run_table,
     run_command_table,
+    run_command_errors_table,
     action_table,
     run_csv_rtp_table,
     data_files_table,
@@ -28,6 +29,7 @@ __all__ = [
     "analysis_csv_rtp_table",
     "run_table",
     "run_command_table",
+    "run_command_errors_table",
     "action_table",
     "run_csv_rtp_table",
     "data_files_table",

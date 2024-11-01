@@ -30,6 +30,7 @@ from robot_server.persistence.database import sqlite_rowid
 from robot_server.persistence.tables import (
     run_table,
     run_command_table,
+    run_command_errors_table,
     action_table,
     run_csv_rtp_table,
 )
@@ -159,6 +160,8 @@ class RunStore:
             run_command_table.c.run_id == run_id
         )
         insert_command = sqlalchemy.insert(run_command_table)
+
+        insert_command_errors = sqlalchemy.insert(run_command_errors_table)
 
         select_run_resource = sqlalchemy.select(*_run_columns).where(
             run_table.c.id == run_id
