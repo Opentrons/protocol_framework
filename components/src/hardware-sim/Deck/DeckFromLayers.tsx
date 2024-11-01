@@ -1,4 +1,3 @@
-import { cloneElement } from 'react'
 import { OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
   FixedBase,
@@ -12,9 +11,9 @@ import {
   RemovalHandle,
   ScrewHoles,
 } from './OT2Layers'
+import { ALL_OT2_DECK_LAYERS } from './constants'
 
 import type { RobotType } from '@opentrons/shared-data'
-import { ALL_OT2_DECK_LAYERS } from './constants'
 
 export interface DeckFromLayersProps {
   robotType: RobotType
@@ -22,18 +21,18 @@ export interface DeckFromLayersProps {
 }
 
 const OT2_LAYER_MAP: {
-  [layer in typeof ALL_OT2_DECK_LAYERS[number]]: JSX.Element
+  [layer in typeof ALL_OT2_DECK_LAYERS[number]]: () => JSX.Element
 } = {
-  fixedBase: <FixedBase />,
-  fixedTrash: <FixedTrash />,
-  doorStops: <DoorStops />,
-  metalFrame: <MetalFrame />,
-  removableDeckOutline: <RemovableDeckOutline />,
-  slotRidges: <SlotRidges />,
-  slotNumbers: <SlotNumbers />,
-  calibrationMarkings: <CalibrationMarkings />,
-  removalHandle: <RemovalHandle />,
-  screwHoles: <ScrewHoles />,
+  fixedBase: () => <FixedBase />,
+  fixedTrash: () => <FixedTrash />,
+  doorStops: () => <DoorStops />,
+  metalFrame: () => <MetalFrame />,
+  removableDeckOutline: () => <RemovableDeckOutline />,
+  slotRidges: () => <SlotRidges />,
+  slotNumbers: () => <SlotNumbers />,
+  calibrationMarkings: () => <CalibrationMarkings />,
+  removalHandle: () => <RemovalHandle />,
+  screwHoles: () => <ScrewHoles />,
 }
 
 /**
@@ -48,10 +47,12 @@ export function DeckFromLayers(props: DeckFromLayersProps): JSX.Element | null {
 
   return (
     <g id="deckLayers">
-      {ALL_OT2_DECK_LAYERS.reduce<JSX.Element[]>((acc, layer) => {
-        if (layerBlocklist.includes(layer)) return acc
-        return [...acc, cloneElement(OT2_LAYER_MAP[layer], { key: layer })]
-      }, [])}
+      {ALL_OT2_DECK_LAYERS.filter(layer => !layerBlocklist.includes(layer)).map(
+        layer => {
+          const LayerComponent = OT2_LAYER_MAP[layer]
+          return <LayerComponent key={layer} />
+        }
+      )}
     </g>
   )
 }
