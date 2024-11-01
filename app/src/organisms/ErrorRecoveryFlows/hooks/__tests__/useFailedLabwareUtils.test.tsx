@@ -93,7 +93,7 @@ describe('getRelevantFailedLabwareCmdFrom', () => {
       },
     }
     const result = getRelevantFailedLabwareCmdFrom({
-      failedCommandByRunRecord: failedLiquidProbeCommand,
+      failedCommand: { byRunRecord: failedLiquidProbeCommand } as any,
     })
     expect(result).toEqual(failedLiquidProbeCommand)
   })
@@ -118,11 +118,13 @@ describe('getRelevantFailedLabwareCmdFrom', () => {
 
     overpressureErrorKinds.forEach(([commandType, errorType]) => {
       const result = getRelevantFailedLabwareCmdFrom({
-        failedCommandByRunRecord: {
-          ...failedCommand,
-          commandType,
-          error: { isDefined: true, errorType },
-        },
+        failedCommand: {
+          byRunRecord: {
+            ...failedCommand,
+            commandType,
+            error: { isDefined: true, errorType },
+          },
+        } as any,
         runCommands,
       })
       expect(result).toBe(pickUpTipCommand)
@@ -139,27 +141,33 @@ describe('getRelevantFailedLabwareCmdFrom', () => {
       },
     }
     const result = getRelevantFailedLabwareCmdFrom({
-      failedCommandByRunRecord: failedGripperCommand,
+      failedCommand: { byRunRecord: failedGripperCommand } as any,
     })
     expect(result).toEqual(failedGripperCommand)
   })
 
   it('should return null for GENERAL_ERROR error kind', () => {
     const result = getRelevantFailedLabwareCmdFrom({
-      failedCommandByRunRecord: {
-        ...failedCommand,
-        error: { errorType: 'literally anything else' },
-      },
+      failedCommand: {
+        byRunRecord: {
+          ...failedCommand,
+          error: {
+            errorType: 'literally anything else',
+          },
+        },
+      } as any,
     })
     expect(result).toBeNull()
   })
 
   it('should return null for unhandled error kinds', () => {
     const result = getRelevantFailedLabwareCmdFrom({
-      failedCommandByRunRecord: {
-        ...failedCommand,
-        error: { errorType: 'SOME_UNHANDLED_ERROR' },
-      },
+      failedCommand: {
+        byRunRecord: {
+          ...failedCommand,
+          error: { errorType: 'SOME_UNHANDLED_ERROR' },
+        },
+      } as any,
     })
     expect(result).toBeNull()
   })

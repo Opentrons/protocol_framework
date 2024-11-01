@@ -161,7 +161,8 @@ export function useERUtils({
 
   const recoveryCommands = useRecoveryCommands({
     runId,
-    failedCommandByRunRecord: unvalidatedFailedCommand,
+    failedCommand,
+    unvalidatedFailedCommand,
     failedLabwareUtils,
     routeUpdateActions,
     recoveryToastUtils,
