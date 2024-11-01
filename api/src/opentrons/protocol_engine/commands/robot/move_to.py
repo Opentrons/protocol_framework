@@ -48,7 +48,7 @@ class MoveToResult(DestinationPositionResult):
 
 
 class MoveToImplementation(
-    AbstractCommandImpl[MoveToParams, SuccessData[MoveToResult, None]]
+    AbstractCommandImpl[MoveToParams, SuccessData[MoveToResult]]
 ):
     """MoveTo command implementation."""
 
@@ -59,13 +59,12 @@ class MoveToImplementation(
     ) -> None:
         self._movement = movement
 
-    async def execute(self, params: MoveToParams) -> SuccessData[MoveToResult, None]:
+    async def execute(self, params: MoveToParams) -> SuccessData[MoveToResult]:
         x, y, z = await self._movement.move_mount_to(
             mount=params.mount, destination=params.destination, speed=params.speed
         )
         return SuccessData(
             public=MoveToResult(position=DeckPoint(x=x, y=y, z=z)),
-            private=None,
         )
 
 

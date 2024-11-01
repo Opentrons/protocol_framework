@@ -510,10 +510,11 @@ async def test_home_z(
         ],
     ],
 )
+@pytest.mark.ot3_only
 async def test_move_axes(
     decoy: Decoy,
     ot3_hardware_api: OT3API,
-    hardware_subject: HardwareGantryMover,
+    mock_state_view: StateView,
     axis_map: Dict[MotorAxis, float],
     critical_point: Optional[Dict[MotorAxis, float]],
     expected_mount: Mount,
@@ -521,6 +522,9 @@ async def test_move_axes(
     call_to_hw: "OrderedDict[HardwareAxis, float]",
     final_position: Dict[HardwareAxis, float],
 ) -> None:
+    subject = HardwareGantryMover(
+        state_view=mock_state_view, hardware_api=ot3_hardware_api
+    )
     curr_pos = {
         HardwareAxis.X: 10.0,
         HardwareAxis.Y: 15.0,
@@ -561,13 +565,13 @@ async def test_move_axes(
             Point(1, 1, 1)
         )
 
-    pos = await hardware_subject.move_axes(axis_map, critical_point, 100, relative_move)
+    pos = await subject.move_axes(axis_map, critical_point, 100, relative_move)
     decoy.verify(
         await ot3_hardware_api.move_axes(position=call_to_hw, speed=100),
         times=1,
     )
     assert pos == {
-        hardware_subject._hardware_axis_to_motor_axis(ax): pos
+        subject._hardware_axis_to_motor_axis(ax): pos
         for ax, pos in final_position.items()
     }
 

@@ -43,6 +43,5 @@ async def test_move_to_implementation(
     result = await subject.execute(params=params)
 
     assert result == SuccessData(
-        public=MoveToResult(position=DeckPoint(x=4.44, y=5.55, z=6.66)),
-        private=None,
+        public=MoveToResult(position=DeckPoint(x=4.44, y=5.55, z=6.66))
     )

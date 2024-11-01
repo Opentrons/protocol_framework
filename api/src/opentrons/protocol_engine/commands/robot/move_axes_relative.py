@@ -42,9 +42,7 @@ class MoveAxesRelativeResult(DestinationRobotPositionResult):
 
 
 class MoveAxesRelativeImplementation(
-    AbstractCommandImpl[
-        MoveAxesRelativeParams, SuccessData[MoveAxesRelativeResult, None]
-    ]
+    AbstractCommandImpl[MoveAxesRelativeParams, SuccessData[MoveAxesRelativeResult]]
 ):
     """MoveAxesRelative command implementation."""
 
@@ -59,7 +57,7 @@ class MoveAxesRelativeImplementation(
 
     async def execute(
         self, params: MoveAxesRelativeParams
-    ) -> SuccessData[MoveAxesRelativeResult, None]:
+    ) -> SuccessData[MoveAxesRelativeResult]:
         # TODO (lc 08-16-2024) implement `move_axes` for OT 2 hardware controller
         # and then we can remove this validation.
         ensure_ot3_hardware(self._hardware_api)
@@ -69,7 +67,6 @@ class MoveAxesRelativeImplementation(
         )
         return SuccessData(
             public=MoveAxesRelativeResult(position=current_position),
-            private=None,
         )
 
 

@@ -190,7 +190,9 @@ class HardwareGantryMover(GantryMover):
         else:
             return self._hardware_api.critical_point_for(mount)
 
-    def _get_gantry_offsets_for_robot_type(self) -> Tuple[Point, Point, Optional[Point]]:
+    def _get_gantry_offsets_for_robot_type(
+        self,
+    ) -> Tuple[Point, Point, Optional[Point]]:
         if isinstance(self._hardware_api.config, OT3Config):
             return (
                 Point(*self._hardware_api.config.left_mount_offset),
@@ -334,7 +336,11 @@ class HardwareGantryMover(GantryMover):
                     f"The absolute position is: {pos_hw} and hw pos map is {pos_hw}."
                 )
             log.info(f"The calculated move {pos_hw} and {mount}")
-            left_offset, right_offset, gripper_offset = self._get_gantry_offsets_for_robot_type()
+            (
+                left_offset,
+                right_offset,
+                gripper_offset,
+            ) = self._get_gantry_offsets_for_robot_type()
             absolute_pos = target_axis_map_from_absolute(
                 mount,
                 pos_hw,
@@ -530,10 +536,11 @@ class VirtualGantryMover(GantryMover):
             )
         else:
             instrument_height = VIRTUAL_MAX_OT3_HEIGHT
-        tip_length = (
-            self._state_view.tips.get_tip_length(pipette.id) if pipette else 0.0
-        )
-
+        if pipette:
+            tip = self._state_view.pipettes.get_attached_tip(pipette_id=pipette.id)
+            tip_length = tip.length if tip is not None else 0.0
+        else:
+            tip_length = 0.0
         return instrument_height - tip_length
 
     async def move_axes(
