@@ -57,7 +57,7 @@ type ErrorDetailsModalProps = Omit<
 
 export function ErrorDetailsModal(props: ErrorDetailsModalProps): JSX.Element {
   const { failedCommand, toggleModal, isOnDevice } = props
-  const errorKind = getErrorKind(failedCommand?.byRunRecord ?? null)
+  const errorKind = getErrorKind(failedCommand)
   const errorName = useErrorName(errorKind)
 
   const isNotificationErrorKind = (): boolean => {

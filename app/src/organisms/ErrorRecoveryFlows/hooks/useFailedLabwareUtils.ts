@@ -33,7 +33,7 @@ import type { ErrorRecoveryFlowsProps } from '..'
 import type { FailedCommandBySource } from './useRetainedFailedCommandBySource'
 
 interface UseFailedLabwareUtilsProps {
-  failedCommandByRunRecord: FailedCommandBySource['byRunRecord'] | null
+  failedCommand: FailedCommandBySource | null
   protocolAnalysis: ErrorRecoveryFlowsProps['protocolAnalysis']
   failedPipetteInfo: PipetteData | null
   runCommands?: CommandsData
@@ -67,16 +67,17 @@ export type UseFailedLabwareUtilsResult = UseTipSelectionUtilsResult & {
  * For no liquid detected errors, the relevant labware is the well in which no liquid was detected.
  */
 export function useFailedLabwareUtils({
-  failedCommandByRunRecord,
+  failedCommand,
   protocolAnalysis,
   failedPipetteInfo,
   runCommands,
   runRecord,
 }: UseFailedLabwareUtilsProps): UseFailedLabwareUtilsResult {
+  const failedCommandByRunRecord = failedCommand?.byRunRecord ?? null
   const recentRelevantFailedLabwareCmd = useMemo(
     () =>
       getRelevantFailedLabwareCmdFrom({
-        failedCommandByRunRecord,
+        failedCommand,
         runCommands,
       }),
     [failedCommandByRunRecord?.key, runCommands?.meta.totalLength]
@@ -129,16 +130,17 @@ type FailedCommandRelevantLabware =
   | null
 
 interface RelevantFailedLabwareCmd {
-  failedCommandByRunRecord: UseFailedLabwareUtilsProps['failedCommandByRunRecord']
+  failedCommand: FailedCommandBySource | null
   runCommands?: CommandsData
 }
 
 // Return the actual command that contains the info relating to the relevant labware.
 export function getRelevantFailedLabwareCmdFrom({
-  failedCommandByRunRecord,
+  failedCommand,
   runCommands,
 }: RelevantFailedLabwareCmd): FailedCommandRelevantLabware {
-  const errorKind = getErrorKind(failedCommandByRunRecord)
+  const failedCommandByRunRecord = failedCommand?.byRunRecord ?? null
+  const errorKind = getErrorKind(failedCommand)
 
   switch (errorKind) {
     case ERROR_KINDS.NO_LIQUID_DETECTED:
@@ -161,7 +163,7 @@ export function getRelevantFailedLabwareCmdFrom({
 
 // Returns the most recent pickUpTip command for the pipette used in the failed command, if any.
 function getRelevantPickUpTipCommand(
-  failedCommandByRunRecord: UseFailedLabwareUtilsProps['failedCommandByRunRecord'],
+  failedCommandByRunRecord: FailedCommandBySource['byRunRecord'] | null,
   runCommands?: CommandsData
 ): Omit<PickUpTipRunTimeCommand, 'result'> | null {
   if (
@@ -344,9 +346,10 @@ export function getRelevantWellName(
 
 export type GetRelevantLwLocationsParams = Pick<
   UseFailedLabwareUtilsProps,
-  'runRecord' | 'failedCommandByRunRecord'
+  'runRecord'
 > & {
   failedLabware: UseFailedLabwareUtilsResult['failedLabware']
+  failedCommandByRunRecord: FailedCommandBySource['byRunRecord'] | null
 }
 
 export function useRelevantFailedLwLocations({

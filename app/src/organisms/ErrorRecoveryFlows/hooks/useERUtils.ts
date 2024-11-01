@@ -120,7 +120,7 @@ export function useERUtils({
   )
 
   const recoveryToastUtils = useRecoveryToasts({
-    currentStepCount: stepCounts.currentStepNumber,
+    stepCounts,
     selectedRecoveryOption: currentRecoveryOptionUtils.selectedRecoveryOption,
     isOnDevice,
     commandTextData: protocolAnalysis,
@@ -152,7 +152,7 @@ export function useERUtils({
   })
 
   const failedLabwareUtils = useFailedLabwareUtils({
-    failedCommandByRunRecord: failedCommand?.byRunRecord ?? null,
+    failedCommand,
     protocolAnalysis,
     failedPipetteInfo,
     runRecord,
