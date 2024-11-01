@@ -177,12 +177,11 @@ INCREMENTS = {
         1000: {  # FIXME: need to update based on PVT data
             50: {
                 "default": [
-                    3.90,
-                    4.80,
-                    5.90,
-                    6.95,
-                    8.93
-                   
+                    6.4,
+                    6.5,
+                    6.6,
+                    6.8,
+                    6.9
                 ],
             },
             200: {
