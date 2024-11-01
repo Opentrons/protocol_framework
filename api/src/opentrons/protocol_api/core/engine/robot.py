@@ -49,11 +49,12 @@ class RobotCore(AbstractRobot):
         return {_AXIS_TYPE_TO_MOTOR_AXIS[ax]: dist for ax, dist in axis_map.items()}
 
     def _ul_per_mm_conversion(
-        self, pipette_settings, ul: float, action, function_version
+        self, pipette_settings, ul: float, action: PipetteActionTypes, function_version: str
     ) -> float:
-        if action == "aspirate":
-            sequence = pipette_settings.aspirate.default[function_version]
-        elif action == "blowout":
+        if action == PipetteActionTypes.ASPIRATE_ACTION:
+            sequence = pipette_settings.aspirate.default.get(function_version, )
+        elif action == PipetteActionTypes.BLOWOUT_ACTION:
+            # TODO in followup work we should support handling blow out actions for volume.
             return 1.0
         else:
             sequence = pipette_settings.dispense.default[function_version]
@@ -72,7 +73,7 @@ class RobotCore(AbstractRobot):
         return maybe_pipette.pipetteName if maybe_pipette else None
 
     def get_plunger_position_from_name(
-        self, mount: Mount, position_name: PipetteActionTypes
+        self, mount: Mount, position_name: PlungerPositionTypes
     ) -> float:
         maybe_pipette_state = self._sync_hardware_api.get_attached_instrument(mount)
         if not maybe_pipette_state:
@@ -80,7 +81,7 @@ class RobotCore(AbstractRobot):
         return maybe_pipette_state["plunger_positions"][position_name.value]
 
     def get_plunger_position_from_volume(
-        self, mount: Mount, volume: float, action: PlungerPositionTypes, robot_type: str
+        self, mount: Mount, volume: float, action: PipetteActionTypes, robot_type: str
     ) -> float:
         maybe_pipette_state = self._sync_hardware_api.get_attached_instrument(mount)
         if not maybe_pipette_state:

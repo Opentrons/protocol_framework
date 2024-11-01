@@ -209,13 +209,12 @@ class RobotContext(publisher.CommandPublisher):
         """
         pipette_name = self._core.get_pipette_type_from_engine(mount)
         mount = validation.ensure_mount_for_pipette(mount, pipette_name)
-        mount_axis = AxisType.axis_for_mount(mount)
         pipette_axis = AxisType.plunger_axis_for_mount(mount)
 
         pipette_position = self._core.get_plunger_position_from_volume(
             mount, volume, action, self._protocol_core.robot_type
         )
-        return {mount_axis: 0.0, pipette_axis: pipette_position}
+        return {pipette_axis: pipette_position}
 
     def plunger_coordinates_for_named_position(
         self, mount: Union[Mount, str], position_name: PipetteActionTypes
@@ -227,12 +226,11 @@ class RobotContext(publisher.CommandPublisher):
         pipette_name = self._core.get_pipette_type_from_engine(mount)
 
         mount = validation.ensure_mount_for_pipette(mount, pipette_name)
-        mount_axis = AxisType.axis_for_mount(mount)
         pipette_axis = AxisType.plunger_axis_for_mount(mount)
         pipette_position = self._core.get_plunger_position_from_name(
             mount, position_name
         )
-        return {mount_axis: 0.0, pipette_axis: pipette_position}
+        return {pipette_axis: pipette_position}
 
     def build_axis_map(self, axis_map: StringAxisMap) -> AxisMapType:
         """Take in a :py:class:`.types.StringAxisMap` and output a :py:class:`.types.AxisMapType`.
