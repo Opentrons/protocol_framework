@@ -20,7 +20,7 @@ from opentrons.protocol_engine.errors.error_occurrence import ErrorOccurrence
 from opentrons.protocol_engine.errors.exceptions import (
     EStopActivatedError as PE_EStopActivatedError,
 )
-from opentrons.protocol_engine.resources import ModelUtils
+from opentrons.protocol_engine.resources import ModelUtils, FileProvider
 from opentrons.protocol_engine.state.state import StateStore
 from opentrons.protocol_engine.actions import (
     ActionDispatcher,
@@ -176,6 +176,7 @@ def subject(
     state_store: StateStore,
     action_dispatcher: ActionDispatcher,
     equipment: EquipmentHandler,
+    file_provider: FileProvider,
     movement: MovementHandler,
     mock_gantry_mover: GantryMover,
     labware_movement: LabwareMovementHandler,
@@ -190,6 +191,7 @@ def subject(
     """Get a CommandExecutor test subject with its dependencies mocked out."""
     return CommandExecutor(
         hardware_api=hardware_api,
+        file_provider=file_provider,
         state_store=state_store,
         action_dispatcher=action_dispatcher,
         equipment=equipment,
@@ -220,8 +222,8 @@ class _TestCommandDefinedError(ErrorOccurrence):
 
 
 _TestCommandReturn = Union[
-    SuccessData[_TestCommandResult, None],
-    DefinedErrorData[_TestCommandDefinedError, None],
+    SuccessData[_TestCommandResult],
+    DefinedErrorData[_TestCommandDefinedError],
 ]
 
 
@@ -236,6 +238,7 @@ async def test_execute(
     state_store: StateStore,
     action_dispatcher: ActionDispatcher,
     equipment: EquipmentHandler,
+    file_provider: FileProvider,
     movement: MovementHandler,
     mock_gantry_mover: GantryMover,
     labware_movement: LabwareMovementHandler,
@@ -270,7 +273,8 @@ async def test_execute(
         )
 
     command_params = _TestCommandParams()
-    command_result = SuccessData(public=_TestCommandResult(), private=None)
+    command_result = SuccessData(public=_TestCommandResult())
+
     queued_command = cast(
         Command,
         _TestCommand.model_construct(  # type: ignore[call-arg]
@@ -337,6 +341,7 @@ async def test_execute(
         queued_command._ImplementationCls(
             state_view=state_store,
             hardware_api=hardware_api,
+            file_provider=file_provider,
             equipment=equipment,
             movement=movement,
             gantry_mover=mock_gantry_mover,
@@ -370,9 +375,7 @@ async def test_execute(
 
     decoy.verify(
         action_dispatcher.dispatch(
-            SucceedCommandAction(
-                private_result=None, command=expected_completed_command
-            )
+            SucceedCommandAction(command=expected_completed_command)
         ),
     )
 
@@ -404,6 +407,7 @@ async def test_execute_undefined_error(
     state_store: StateStore,
     action_dispatcher: ActionDispatcher,
     equipment: EquipmentHandler,
+    file_provider: FileProvider,
     movement: MovementHandler,
     mock_gantry_mover: GantryMover,
     labware_movement: LabwareMovementHandler,
@@ -488,6 +492,7 @@ async def test_execute_undefined_error(
         queued_command._ImplementationCls(
             state_view=state_store,
             hardware_api=hardware_api,
+            file_provider=file_provider,
             equipment=equipment,
             movement=movement,
             gantry_mover=mock_gantry_mover,
@@ -542,6 +547,7 @@ async def test_execute_defined_error(
     state_store: StateStore,
     action_dispatcher: ActionDispatcher,
     equipment: EquipmentHandler,
+    file_provider: FileProvider,
     movement: MovementHandler,
     mock_gantry_mover: GantryMover,
     labware_movement: LabwareMovementHandler,
@@ -577,7 +583,6 @@ async def test_execute_defined_error(
     error_id = "error-id"
     returned_error = DefinedErrorData(
         public=_TestCommandDefinedError(id=error_id, createdAt=failed_at),
-        private=None,
     )
     queued_command = cast(
         Command,
@@ -627,6 +632,7 @@ async def test_execute_defined_error(
         queued_command._ImplementationCls(
             state_view=state_store,
             hardware_api=hardware_api,
+            file_provider=file_provider,
             equipment=equipment,
             movement=movement,
             gantry_mover=mock_gantry_mover,

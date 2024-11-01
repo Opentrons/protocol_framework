@@ -7,10 +7,13 @@ import {
   maxFieldValue,
   temperatureRangeFieldValue,
   realNumber,
+  isTimeFormat,
+  isTimeFormatMinutesSeconds,
 } from './errors'
 import {
   maskToInteger,
   maskToFloat,
+  maskToTime,
   numberOrNull,
   onlyPositiveNumbers,
   defaultTo,
@@ -343,8 +346,18 @@ const stepFieldHelperMap: Record<StepFieldName, StepFieldHelpers> = {
     maskValue: composeMaskers(maskToInteger, onlyPositiveNumbers),
     castValue: Number,
   },
+  heaterShakerTimer: {
+    maskValue: composeMaskers(maskToTime),
+    getErrors: composeErrors(isTimeFormatMinutesSeconds),
+    castValue: String,
+  },
   pauseAction: {
     getErrors: composeErrors(requiredField),
+  },
+  pauseTime: {
+    maskValue: composeMaskers(maskToTime),
+    getErrors: composeErrors(isTimeFormat),
+    castValue: String,
   },
   pauseTemperature: {
     getErrors: composeErrors(
@@ -374,6 +387,7 @@ const stepFieldHelperMap: Record<StepFieldName, StepFieldHelpers> = {
     ),
   },
   profileVolume: {
+    maskValue: composeMaskers(maskToFloat, onlyPositiveNumbers),
     getErrors: composeErrors(
       minFieldValue(MIN_TC_PROFILE_VOLUME),
       maxFieldValue(MAX_TC_PROFILE_VOLUME)
@@ -402,6 +416,15 @@ const stepFieldHelperMap: Record<StepFieldName, StepFieldHelpers> = {
   },
   tipRack: {
     getErrors: composeErrors(requiredField),
+  },
+  aspirate_flowRate: {
+    maskValue: composeMaskers(trimDecimals(1)),
+  },
+  dispense_flowRate: {
+    maskValue: composeMaskers(trimDecimals(1)),
+  },
+  mix_flowRate: {
+    maskValue: composeMaskers(trimDecimals(1)),
   },
 }
 const profileFieldHelperMap: Record<string, StepFieldHelpers> = {

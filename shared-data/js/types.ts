@@ -86,7 +86,7 @@ export type LabwareDisplayCategory =
   | 'trash'
   | 'other'
   | 'adapter'
-
+  | 'lid'
 export type LabwareVolumeUnits = 'µL' | 'mL' | 'L'
 
 // TODO(mc, 2019-05-29): Remove this enum in favor of string + exported
@@ -159,38 +159,60 @@ export type LabwareWell = LabwareWellProperties & {
   geometryDefinitionId?: string
 }
 
-export interface CircularCrossSection {
-  shape: 'circular'
-  diameter: number
-}
-
-export interface RectangularCrossSection {
-  shape: 'rectangular'
-  xDimension: number
-  yDimension: number
-}
-
 export interface SphericalSegment {
   shape: 'spherical'
   radiusOfCurvature: number
-  depth: number
-}
-
-export type TopCrossSection = CircularCrossSection | RectangularCrossSection
-
-export type BottomShape =
-  | CircularCrossSection
-  | RectangularCrossSection
-  | SphericalSegment
-
-export interface BoundedSection {
-  geometry: TopCrossSection
   topHeight: number
+  bottomHeight: number
 }
+
+export interface ConicalFrustum {
+  shape: 'conical'
+  bottomDiameter: number
+  topDiameter: number
+  topHeight: number
+  bottomHeight: number
+}
+
+export interface CuboidalFrustum {
+  shape: 'cuboidal'
+  bottomXDimension: number
+  bottomYDimension: number
+  topXDimension: number
+  topYDimension: number
+  topHeight: number
+  bottomHeight: number
+}
+
+export interface SquaredConeSegment {
+  shape: 'squaredcone'
+  bottomCrossSection: string
+  circleDiameter: number
+  rectangleXDimension: number
+  rectangleYDimension: number
+  topHeight: number
+  bottomHeight: number
+}
+
+export interface RoundedCuboidSegment {
+  shape: 'roundedcuboid'
+  bottomCrossSection: string
+  circleDiameter: number
+  rectangleXDimension: number
+  rectangleYDimension: number
+  topHeight: number
+  bottomHeight: number
+}
+
+export type WellSegment =
+  | CuboidalFrustum
+  | ConicalFrustum
+  | SquaredConeSegment
+  | SphericalSegment
+  | RoundedCuboidSegment
 
 export interface InnerWellGeometry {
-  frusta: BoundedSection[]
-  bottomShape: BottomShape
+  sections: WellSegment[]
 }
 
 // TODO(mc, 2019-03-21): exact object is tough to use with the initial value in
@@ -209,7 +231,12 @@ export interface LabwareWellGroup {
   brand?: LabwareBrand
 }
 
-export type LabwareRoles = 'labware' | 'adapter' | 'fixture' | 'maintenance'
+export type LabwareRoles =
+  | 'labware'
+  | 'adapter'
+  | 'fixture'
+  | 'maintenance'
+  | 'lid'
 
 // NOTE: must be synced with shared-data/labware/schemas/2.json
 export interface LabwareDefinition2 {
@@ -856,3 +883,10 @@ export interface CutoutConfig {
 }
 
 export type DeckConfiguration = CutoutConfig[]
+
+export type NozzleLayoutConfig =
+  | 'single'
+  | 'column'
+  | 'row'
+  | 'full'
+  | 'subrect'

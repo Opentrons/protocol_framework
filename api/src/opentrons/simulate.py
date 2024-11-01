@@ -815,6 +815,7 @@ def _create_live_context_pe(
                 robot_type, use_pe_virtual_hardware=use_pe_virtual_hardware
             ),
             deck_configuration=None,
+            file_provider=None,
             error_recovery_policy=error_recovery_policy.never_recover,
             drop_tips_after_run=False,
             post_run_hardware_state=PostRunHardwareState.STAY_ENGAGED_IN_PLACE,
@@ -885,8 +886,6 @@ def _run_file_non_pe(
     context.home()
     with scraper.scrape():
         try:
-            # TODO (spp, 2024-03-18): use true run-time param overrides once enabled
-            #  for cli protocol simulation/ execution
             execute.run_protocol(
                 protocol, context, run_time_parameters_with_overrides=None
             )
@@ -916,6 +915,7 @@ def _run_file_pe(
     log_level: str,
 ) -> _SimulateResult:
     """Run a protocol file with Protocol Engine."""
+    # TODO (spp, 2024-03-18): use run-time param overrides once enabled for cli protocol simulation.
 
     async def run(protocol_source: ProtocolSource) -> _SimulateResult:
         hardware_api_wrapped = hardware_api.wrapped()

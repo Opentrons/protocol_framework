@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 
@@ -16,7 +15,7 @@ import {
   RESPONSIVENESS,
 } from '@opentrons/components'
 
-import { SmallButton, TextOnlyButton } from '../../../atoms/buttons'
+import { SmallButton, TextOnlyButton } from '/app/atoms/buttons'
 
 interface RecoveryFooterButtonProps {
   primaryBtnOnClick: () => void
@@ -45,8 +44,10 @@ export function RecoveryFooterButtons(
       alignItems={ALIGN_FLEX_END}
       gridGap={SPACING.spacing8}
     >
-      {!props.secondaryAsTertiary && <RecoveryGoBackButton {...props} />}
-      <PrimaryButtonGroup {...props} />
+      <Flex justifyContent={JUSTIFY_SPACE_BETWEEN} width="100%">
+        {!props.secondaryAsTertiary && <RecoveryGoBackButton {...props} />}
+        <PrimaryButtonGroup {...props} />
+      </Flex>
     </Flex>
   )
 }
@@ -58,12 +59,10 @@ function RecoveryGoBackButton({
   const showGoBackBtn = secondaryBtnOnClick != null
   const { t } = useTranslation('error_recovery')
   return showGoBackBtn ? (
-    <Flex>
-      <TextOnlyButton
-        onClick={secondaryBtnOnClick}
-        buttonText={secondaryBtnTextOverride ?? t('go_back')}
-      />
-    </Flex>
+    <TextOnlyButton
+      onClick={secondaryBtnOnClick}
+      buttonText={secondaryBtnTextOverride ?? t('go_back')}
+    />
   ) : (
     <Box />
   )

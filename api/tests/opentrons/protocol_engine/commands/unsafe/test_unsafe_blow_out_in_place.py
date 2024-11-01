@@ -41,7 +41,7 @@ async def test_blow_out_in_place_implementation(
 
     result = await subject.execute(data)
 
-    assert result == SuccessData(public=UnsafeBlowOutInPlaceResult(), private=None)
+    assert result == SuccessData(public=UnsafeBlowOutInPlaceResult())
 
     decoy.verify(
         await ot3_hardware_api.update_axis_position_estimations([Axis.P_L]),

@@ -8,6 +8,34 @@ By installing and using Opentrons software, you agree to the Opentrons End-User 
 
 ---
 
+## Opentrons Robot Software Changes in 8.2.0
+
+Welcome to the v8.2.0 release of the Opentrons robot software! This release adds support for the Opentrons Absorbance Plate Reader Module.
+
+### New Features
+
+- Create and run Python protocols that use the Opentrons Absorbance Plate Reader.
+
+### Improved Features
+
+- Liquid presence detection no longer checks for liquid before every aspiration in a `mix()` command.
+
+### Bug Fixes
+
+- Error recovery no longer causes an `AssertionError` when a Python protocol changes the pipette speed.
+
+---
+
+## Opentrons Robot Software Changes in 8.1.0
+
+Welcome to the v8.1.0 release of the Opentrons robot software!
+
+### Hardware Support
+
+- Latest production version of Flex robots
+
+---
+
 ## Opentrons Robot Software Changes in 8.0.0
 
 Welcome to the v8.0.0 release of the Opentrons robot software!
@@ -23,6 +51,12 @@ Welcome to the v8.0.0 release of the Opentrons robot software!
 
 - Provides more partial tip pickup configurations. All multi-channel pipettes now support single and partial column pickup, and the Flex 96-channel pipette now supports row pickup.
 - Improves homing behavior when a Flex protocol completes or is canceled with liquid-filled tips attached to the pipette.
+
+### Known Issues
+
+- During single-tip or partial-column pickup with a multi-channel pipette, tips in adjacent columns may cling to empty nozzles. Pick up tips row by row, rather than column by column, to avoid this.
+- Protocol analysis and `opentrons_simulate` do not raise an error when a protocol tries to detect liquid with a pipette nozzle configuration that doesn't contain a pressure sensor (single-tip pickup with A12 or H1). Avoid using the A12 and H1 nozzles for single-tip pickup if you need to detect liquid presence within wells.
+- `opentrons_simulate` describes motion to wells only with respect to the primary channel, regardless of the current pipette nozzle configuration.
 
 ---
 

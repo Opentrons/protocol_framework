@@ -1,5 +1,6 @@
 """Configure nozzle layout command request, result, and implementation models."""
 from __future__ import annotations
+from opentrons.protocol_engine.state.update_types import StateUpdate
 from pydantic import BaseModel
 from typing import TYPE_CHECKING, Optional, Type, Union
 from typing_extensions import Literal
@@ -9,9 +10,6 @@ from .pipetting_common import (
 )
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ..errors.error_occurrence import ErrorOccurrence
-from .configuring_common import (
-    PipetteNozzleLayoutResultMixin,
-)
 from ..types import (
     AllNozzleLayoutConfiguration,
     SingleNozzleLayoutConfiguration,
@@ -39,12 +37,6 @@ class ConfigureNozzleLayoutParams(PipetteIdMixin):
     ]
 
 
-class ConfigureNozzleLayoutPrivateResult(PipetteNozzleLayoutResultMixin):
-    """Result sent to the store but not serialized."""
-
-    pass
-
-
 class ConfigureNozzleLayoutResult(BaseModel):
     """Result data from execution of an configureNozzleLayout command."""
 
@@ -54,7 +46,7 @@ class ConfigureNozzleLayoutResult(BaseModel):
 class ConfigureNozzleLayoutImplementation(
     AbstractCommandImpl[
         ConfigureNozzleLayoutParams,
-        SuccessData[ConfigureNozzleLayoutResult, ConfigureNozzleLayoutPrivateResult],
+        SuccessData[ConfigureNozzleLayoutResult],
     ]
 ):
     """Configure nozzle layout command implementation."""
@@ -67,7 +59,7 @@ class ConfigureNozzleLayoutImplementation(
 
     async def execute(
         self, params: ConfigureNozzleLayoutParams
-    ) -> SuccessData[ConfigureNozzleLayoutResult, ConfigureNozzleLayoutPrivateResult]:
+    ) -> SuccessData[ConfigureNozzleLayoutResult]:
         """Check that requested pipette can support the requested nozzle layout."""
         primary_nozzle = params.configurationParams.dict().get("primaryNozzle")
         front_right_nozzle = params.configurationParams.dict().get("frontRightNozzle")
@@ -85,12 +77,14 @@ class ConfigureNozzleLayoutImplementation(
             **nozzle_params,
         )
 
+        update_state = StateUpdate()
+        update_state.update_pipette_nozzle(
+            pipette_id=params.pipetteId, nozzle_map=nozzle_map
+        )
+
         return SuccessData(
             public=ConfigureNozzleLayoutResult(),
-            private=ConfigureNozzleLayoutPrivateResult(
-                pipette_id=params.pipetteId,
-                nozzle_map=nozzle_map,
-            ),
+            state_update=update_state,
         )
 
 

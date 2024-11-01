@@ -1,5 +1,6 @@
 """Command models to drop tip in place while plunger positions are unknown."""
 from __future__ import annotations
+from opentrons.protocol_engine.state.update_types import StateUpdate
 from pydantic import Field, BaseModel
 from typing import TYPE_CHECKING, Optional, Type
 from typing_extensions import Literal
@@ -41,7 +42,7 @@ class UnsafeDropTipInPlaceResult(BaseModel):
 
 class UnsafeDropTipInPlaceImplementation(
     AbstractCommandImpl[
-        UnsafeDropTipInPlaceParams, SuccessData[UnsafeDropTipInPlaceResult, None]
+        UnsafeDropTipInPlaceParams, SuccessData[UnsafeDropTipInPlaceResult]
     ]
 ):
     """Unsafe drop tip in place command implementation."""
@@ -59,7 +60,7 @@ class UnsafeDropTipInPlaceImplementation(
 
     async def execute(
         self, params: UnsafeDropTipInPlaceParams
-    ) -> SuccessData[UnsafeDropTipInPlaceResult, None]:
+    ) -> SuccessData[UnsafeDropTipInPlaceResult]:
         """Drop a tip using the requested pipette, even if the plunger position is not known."""
         ot3_hardware_api = ensure_ot3_hardware(self._hardware_api)
         pipette_location = self._state_view.motion.get_pipette_location(
@@ -72,7 +73,14 @@ class UnsafeDropTipInPlaceImplementation(
             pipette_id=params.pipetteId, home_after=params.homeAfter
         )
 
-        return SuccessData(public=UnsafeDropTipInPlaceResult(), private=None)
+        state_update = StateUpdate()
+        state_update.update_pipette_tip_state(
+            pipette_id=params.pipetteId, tip_geometry=None
+        )
+
+        return SuccessData(
+            public=UnsafeDropTipInPlaceResult(), state_update=state_update
+        )
 
 
 class UnsafeDropTipInPlace(

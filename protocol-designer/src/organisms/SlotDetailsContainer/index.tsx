@@ -1,23 +1,24 @@
-import * as React from 'react'
 import { useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { FLEX_ROBOT_TYPE, getModuleDisplayName } from '@opentrons/shared-data'
+import { getModuleDisplayName } from '@opentrons/shared-data'
 import { RobotCoordsForeignObject } from '@opentrons/components'
 import * as wellContentsSelectors from '../../top-selectors/well-contents'
+import { getAdditionalEquipmentEntities } from '../../step-forms/selectors'
 import { selectors } from '../../labware-ingred/selectors'
 import { selectors as uiLabwareSelectors } from '../../ui/labware'
 import { getDeckSetupForActiveItem } from '../../top-selectors/labware-locations'
 import { SlotInformation } from '../../organisms/SlotInformation'
-import { getYPosition } from './utils'
+import { getXPosition } from './utils'
 
 import type { DeckSlotId, RobotType } from '@opentrons/shared-data'
 import type { ContentsByWell } from '../../labware-ingred/types'
 
+const SLOT_DETAIL_Y_POSITION = '-10'
 interface SlotDetailContainerProps {
   robotType: RobotType
   slot: DeckSlotId | null
-  offDeckLabwareId?: string
+  offDeckLabwareId?: string | null
 }
 
 export function SlotDetailsContainer(
@@ -32,6 +33,10 @@ export function SlotDetailsContainer(
   )
   const nickNames = useSelector(uiLabwareSelectors.getLabwareNicknamesById)
   const allIngredNamesIds = useSelector(selectors.allIngredientNamesIds)
+  const additionalEquipment = useSelector(getAdditionalEquipmentEntities)
+  const hasStagingArea = Object.values(additionalEquipment).some(
+    item => item.name === 'stagingArea'
+  )
 
   if (slot == null || (slot === 'offDeck' && offDeckLabwareId == null)) {
     return null
@@ -43,10 +48,8 @@ export function SlotDetailsContainer(
     additionalEquipmentOnDeck,
   } = deckSetup
 
-  const offDeckLabwareDisplayName =
-    offDeckLabwareId != null
-      ? deckSetupLabwares[offDeckLabwareId].def.metadata.displayName
-      : null
+  const offDeckLabwareNickName =
+    offDeckLabwareId != null ? nickNames[offDeckLabwareId] : null
 
   const moduleOnSlot = Object.values(deckSetupModules).find(
     module => module.slot === slot
@@ -93,14 +96,15 @@ export function SlotDetailsContainer(
     .filter(Boolean)
 
   const labwares: string[] = []
-  if (offDeckLabwareDisplayName != null) {
-    labwares.push(offDeckLabwareDisplayName)
+  const adapters: string[] = []
+  if (offDeckLabwareNickName != null) {
+    labwares.push(offDeckLabwareNickName)
   } else {
-    if (labwareOnSlot != null) {
-      labwares.push(nickNames[labwareOnSlot.id])
-    }
-    if (nestedLabwareOnSlot != null) {
+    if (nestedLabwareOnSlot != null && labwareOnSlot != null) {
+      adapters.push(nickNames[labwareOnSlot.id])
       labwares.push(nickNames[nestedLabwareOnSlot.id])
+    } else if (nestedLabwareOnSlot == null && labwareOnSlot != null) {
+      labwares.push(nickNames[labwareOnSlot.id])
     }
   }
 
@@ -108,8 +112,8 @@ export function SlotDetailsContainer(
     <RobotCoordsForeignObject
       width="15.8125rem"
       height="26.75rem"
-      x={robotType === FLEX_ROBOT_TYPE ? '-400' : '-300'}
-      y={getYPosition({ robotType, slot })}
+      x={getXPosition(slot, robotType, hasStagingArea)}
+      y={SLOT_DETAIL_Y_POSITION}
     >
       <SlotInformation
         location={slot}
@@ -118,6 +122,7 @@ export function SlotDetailsContainer(
         labwares={labwares}
         fixtures={fixtureDisplayNames}
         liquids={liquidNamesOnLabware}
+        adapters={adapters}
       />
     </RobotCoordsForeignObject>
   ) : (
@@ -126,6 +131,7 @@ export function SlotDetailsContainer(
       robotType={robotType}
       modules={moduleDisplayName != null ? [moduleDisplayName] : []}
       labwares={labwares}
+      adapters={adapters}
       fixtures={fixtureDisplayNames}
       liquids={liquidNamesOnLabware}
     />

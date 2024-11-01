@@ -5,6 +5,7 @@ from typing_extensions import Literal
 from pydantic import BaseModel, Field
 
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
+from ..errors import ModuleNotLoadedError
 from ..errors.error_occurrence import ErrorOccurrence
 from ..types import (
     DeckSlotLocation,
@@ -105,7 +106,7 @@ class LoadModuleResult(BaseModel):
 
 
 class LoadModuleImplementation(
-    AbstractCommandImpl[LoadModuleParams, SuccessData[LoadModuleResult, None]]
+    AbstractCommandImpl[LoadModuleParams, SuccessData[LoadModuleResult]]
 ):
     """The implementation of the load module command."""
 
@@ -115,9 +116,7 @@ class LoadModuleImplementation(
         self._equipment = equipment
         self._state_view = state_view
 
-    async def execute(
-        self, params: LoadModuleParams
-    ) -> SuccessData[LoadModuleResult, None]:
+    async def execute(self, params: LoadModuleParams) -> SuccessData[LoadModuleResult]:
         """Check that the requested module is attached and assign its identifier."""
         module_type = params.model.as_type()
         self._ensure_module_location(params.location.slotName, module_type)
@@ -159,11 +158,14 @@ class LoadModuleImplementation(
             and params.model == ModuleModel.ABSORBANCE_READER_V1
             and params.moduleId is not None
         ):
-            abs_reader = self._equipment.get_module_hardware_api(
-                self._state_view.modules.get_absorbance_reader_substate(
-                    params.moduleId
-                ).module_id
-            )
+            try:
+                abs_reader = self._equipment.get_module_hardware_api(
+                    self._state_view.modules.get_absorbance_reader_substate(
+                        params.moduleId
+                    ).module_id
+                )
+            except ModuleNotLoadedError:
+                abs_reader = None
 
             if abs_reader is not None:
                 result = await abs_reader.get_current_lid_status()
@@ -194,7 +196,6 @@ class LoadModuleImplementation(
                 model=loaded_module.definition.model,
                 definition=loaded_module.definition,
             ),
-            private=None,
         )
 
     def _ensure_module_location(

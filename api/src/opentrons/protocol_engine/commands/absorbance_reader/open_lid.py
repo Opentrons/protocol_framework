@@ -9,11 +9,13 @@ from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, Succe
 from ...errors.error_occurrence import ErrorOccurrence
 from ...errors import CannotPerformModuleAction
 
-from .types import MoveLidResult
 from opentrons.protocol_engine.resources import labware_validation
 from opentrons.protocol_engine.types import AddressableAreaLocation
 
 from opentrons.drivers.types import AbsorbanceReaderLidStatus
+
+from ...state.update_types import StateUpdate
+
 
 if TYPE_CHECKING:
     from opentrons.protocol_engine.state.state import StateView
@@ -32,11 +34,11 @@ class OpenLidParams(BaseModel):
     moduleId: str = Field(..., description="Unique ID of the absorbance reader.")
 
 
-class OpenLidResult(MoveLidResult):
+class OpenLidResult(BaseModel):
     """Result data from opening the lid on an aborbance reading."""
 
 
-class OpenLidImpl(AbstractCommandImpl[OpenLidParams, SuccessData[OpenLidResult, None]]):
+class OpenLidImpl(AbstractCommandImpl[OpenLidParams, SuccessData[OpenLidResult]]):
     """Execution implementation of opening the lid on an Absorbance Reader."""
 
     def __init__(
@@ -50,7 +52,7 @@ class OpenLidImpl(AbstractCommandImpl[OpenLidParams, SuccessData[OpenLidResult, 
         self._equipment = equipment
         self._labware_movement = labware_movement
 
-    async def execute(self, params: OpenLidParams) -> SuccessData[OpenLidResult, None]:
+    async def execute(self, params: OpenLidParams) -> SuccessData[OpenLidResult]:
         """Move the absorbance reader lid from the module to the lid dock."""
         mod_substate = self._state_view.modules.get_absorbance_reader_substate(
             module_id=params.moduleId
@@ -125,13 +127,17 @@ class OpenLidImpl(AbstractCommandImpl[OpenLidParams, SuccessData[OpenLidResult, 
                 labware_location=new_location,
             )
 
+        state_update = StateUpdate()
+
+        state_update.set_labware_location(
+            labware_id=loaded_lid.id,
+            new_location=new_location,
+            new_offset_id=new_offset_id,
+        )
+
         return SuccessData(
-            public=OpenLidResult(
-                lidId=loaded_lid.id,
-                newLocation=new_location,
-                offsetId=new_offset_id,
-            ),
-            private=None,
+            public=OpenLidResult(),
+            state_update=state_update,
         )
 
 

@@ -1,8 +1,6 @@
 // labware display card
-import * as React from 'react'
 import uniq from 'lodash/uniq'
 import { Icon } from '@opentrons/components'
-import { getPublicPath } from '../../public-path'
 import { isNewLabware } from '../../definitions'
 import { Link } from '../ui'
 import {
@@ -77,7 +75,7 @@ function Title(props: LabwareCardProps): JSX.Element {
   const { displayName } = props.definition.metadata
 
   return (
-    <Link to={`${getPublicPath()}${loadName}`}>
+    <Link to={'/'} search={`loadName=${loadName}`}>
       <h2 className={styles.title}>
         <span className={styles.title_text}>{displayName}</span>
         <Icon className={styles.title_icon} name="chevron-right" />

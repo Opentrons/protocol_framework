@@ -54,7 +54,7 @@ class EngageResult(BaseModel):
 
 
 class EngageImplementation(
-    AbstractCommandImpl[EngageParams, SuccessData[EngageResult, None]]
+    AbstractCommandImpl[EngageParams, SuccessData[EngageResult]]
 ):
     """The implementation of a Magnetic Module engage command."""
 
@@ -67,7 +67,7 @@ class EngageImplementation(
         self._state_view = state_view
         self._equipment = equipment
 
-    async def execute(self, params: EngageParams) -> SuccessData[EngageResult, None]:
+    async def execute(self, params: EngageParams) -> SuccessData[EngageResult]:
         """Execute a Magnetic Module engage command.
 
         Raises:
@@ -95,7 +95,9 @@ class EngageImplementation(
         if hardware_module is not None:  # Not virtualizing modules.
             await hardware_module.engage(height=hardware_height)
 
-        return SuccessData(public=EngageResult(), private=None)
+        return SuccessData(
+            public=EngageResult(),
+        )
 
 
 class Engage(BaseCommand[EngageParams, EngageResult, ErrorOccurrence]):

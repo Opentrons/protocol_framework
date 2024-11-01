@@ -8,7 +8,7 @@ import { Icon } from '../../icons'
 import { RESPONSIVENESS, SPACING, TYPOGRAPHY } from '../../ui-style-constants'
 import { Tooltip } from '../Tooltip'
 import { useHoverTooltip } from '../../tooltips'
-import { LegacyStyledText } from '../StyledText'
+import { StyledText } from '../StyledText'
 import type { IconName } from '../../icons'
 export const INPUT_TYPE_NUMBER = 'number' as const
 export const LEGACY_INPUT_TYPE_TEXT = 'text' as const
@@ -71,6 +71,7 @@ export interface InputFieldProps {
   leftIcon?: IconName
   showDeleteIcon?: boolean
   onDelete?: () => void
+  hasBackgroundError?: boolean
 }
 
 export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
@@ -83,6 +84,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
       tooltipText,
       tabIndex = 0,
       showDeleteIcon = false,
+      hasBackgroundError = false,
       ...inputProps
     } = props
     const hasError = props.error != null
@@ -103,11 +105,13 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
 
     const INPUT_FIELD = css`
       display: flex;
-      background-color: ${COLORS.white};
+      background-color: ${hasBackgroundError ? COLORS.red30 : COLORS.white};
       border-radius: ${BORDERS.borderRadius4};
       padding: ${SPACING.spacing8};
-      border: 1px ${BORDERS.styleSolid}
-        ${hasError ? COLORS.red50 : COLORS.grey50};
+      border: ${hasBackgroundError
+        ? 'none'
+        : `1px ${BORDERS.styleSolid}
+        ${hasError ? COLORS.red50 : COLORS.grey50}`};
       font-size: ${TYPOGRAPHY.fontSizeP};
       width: 100%;
       height: ${size === 'small' ? '2rem' : '2.75rem'};
@@ -198,8 +202,8 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
     `
 
     const TITLE_STYLE = css`
-      color: ${hasError ? COLORS.red50 : COLORS.black90};
-      padding-bottom: ${SPACING.spacing8};
+      color: ${COLORS.grey60};
+      padding-bottom: ${SPACING.spacing4};
       text-align: ${textAlign};
       @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
         font-size: ${TYPOGRAPHY.fontSize22};
@@ -221,9 +225,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
 
     const UNITS_STYLE = css`
       color: ${props.disabled ? COLORS.grey40 : COLORS.grey50};
-      font-size: ${TYPOGRAPHY.fontSizeLabel};
-      font-weight: ${TYPOGRAPHY.fontWeightSemiBold};
-      line-height: ${TYPOGRAPHY.lineHeight12};
+      font: ${TYPOGRAPHY.bodyTextRegular};
       text-align: ${TYPOGRAPHY.textAlignRight};
       @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
         color: ${props.disabled ? COLORS.grey40 : COLORS.grey50};
@@ -236,6 +238,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
 
     return (
       <Flex
+        width="100%"
         alignItems={ALIGN_CENTER}
         lineHeight={1}
         fontSize={TYPOGRAPHY.fontSizeP}
@@ -246,14 +249,13 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
         <Flex flexDirection={DIRECTION_COLUMN} width="100%">
           {title != null ? (
             <Flex gridGap={SPACING.spacing8}>
-              <LegacyStyledText
-                as="label"
-                fontWeight={TYPOGRAPHY.fontWeightSemiBold}
+              <StyledText
+                desktopStyle="bodyDefaultRegular"
                 htmlFor={props.id}
                 css={TITLE_STYLE}
               >
                 {title}
-              </LegacyStyledText>
+              </StyledText>
               {tooltipText != null ? (
                 <>
                   <Flex {...targetProps}>
@@ -314,18 +316,18 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
             </Flex>
           </Flex>
           {props.caption != null ? (
-            <LegacyStyledText
-              as="label"
+            <StyledText
+              desktopStyle="bodyDefaultRegular"
               css={FORM_BOTTOM_SPACE_STYLE}
               color={COLORS.grey60}
             >
               {props.caption}
-            </LegacyStyledText>
+            </StyledText>
           ) : null}
           {hasError ? (
-            <LegacyStyledText as="label" css={ERROR_TEXT_STYLE}>
+            <StyledText desktopStyle="captionRegular" css={ERROR_TEXT_STYLE}>
               {props.error}
-            </LegacyStyledText>
+            </StyledText>
           ) : null}
         </Flex>
       </Flex>
@@ -334,6 +336,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
 )
 
 const StyledInput = styled.input`
+  background-color: transparent;
   &::placeholder {
     color: ${COLORS.grey40};
   }

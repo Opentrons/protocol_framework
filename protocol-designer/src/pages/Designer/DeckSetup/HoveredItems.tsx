@@ -1,6 +1,5 @@
-import * as React from 'react'
+import { Fragment } from 'react'
 import { useSelector } from 'react-redux'
-import { FixtureRender } from './FixtureRender'
 import { LabwareRender, Module } from '@opentrons/components'
 import {
   getModuleDef2,
@@ -9,6 +8,10 @@ import {
 import { selectors } from '../../../labware-ingred/selectors'
 import { getOnlyLatestDefs } from '../../../labware-defs'
 import { getCustomLabwareDefsByURI } from '../../../labware-defs/selectors'
+import { ModuleLabel } from './ModuleLabel'
+import { LabwareLabel } from '../LabwareLabel'
+import { FixtureRender } from './FixtureRender'
+import type { DeckLabelProps } from '@opentrons/components'
 import type {
   CoordinateTuple,
   DeckDefinition,
@@ -37,7 +40,11 @@ export const HoveredItems = (
     hoveredSlotPosition,
   } = props
   const selectedSlotInfo = useSelector(selectors.getZoomedInSlotInfo)
-  const { selectedSlot, selectedModuleModel } = selectedSlotInfo
+  const {
+    selectedSlot,
+    selectedModuleModel,
+    selectedLabwareDefUri,
+  } = selectedSlotInfo
 
   const customLabwareDefs = useSelector(getCustomLabwareDefsByURI)
   const defs = getOnlyLatestDefs()
@@ -51,11 +58,27 @@ export const HoveredItems = (
     hoveredLabware != null
       ? defs[hoveredLabware] ?? customLabwareDefs[hoveredLabware] ?? null
       : null
+  const selectedLabwareDef =
+    selectedLabwareDefUri != null
+      ? defs[selectedLabwareDefUri] ?? customLabwareDefs[selectedLabwareDefUri]
+      : null
 
   const orientation =
     hoveredSlotPosition != null
       ? inferModuleOrientationFromXCoordinate(hoveredSlotPosition[0])
       : null
+
+  const nestedInfo: DeckLabelProps[] =
+    selectedLabwareDef != null &&
+    (hoveredLabware == null || hoveredLabware !== selectedLabwareDefUri)
+      ? [
+          {
+            text: selectedLabwareDef.metadata.displayName,
+            isLast: false,
+            isSelected: true,
+          },
+        ]
+      : []
 
   return (
     <>
@@ -70,25 +93,44 @@ export const HoveredItems = (
       {hoveredModuleDef != null &&
       hoveredSlotPosition != null &&
       orientation != null ? (
-        <Module
-          key={`${hoveredModuleDef.model}_${selectedSlot.slot}_hover`}
-          x={hoveredSlotPosition[0]}
-          y={hoveredSlotPosition[1]}
-          def={hoveredModuleDef}
-          orientation={orientation}
-        />
+        <>
+          <Module
+            key={`${hoveredModuleDef.model}_${selectedSlot.slot}_hover`}
+            x={hoveredSlotPosition[0]}
+            y={hoveredSlotPosition[1]}
+            def={hoveredModuleDef}
+            orientation={orientation}
+          />
+          {hoveredModule != null ? (
+            <ModuleLabel
+              moduleModel={hoveredModule}
+              position={hoveredSlotPosition}
+              orientation={orientation}
+              isSelected={false}
+              isLast={true}
+            />
+          ) : null}
+        </>
       ) : null}
 
       {hoveredLabwareDef != null &&
       hoveredSlotPosition != null &&
+      hoveredLabware != null &&
       selectedModuleModel == null ? (
-        <React.Fragment key={`${hoveredLabwareDef.parameters.loadName}_hover`}>
+        <Fragment key={`${hoveredLabwareDef.parameters.loadName}_hover`}>
           <g
             transform={`translate(${hoveredSlotPosition[0]}, ${hoveredSlotPosition[1]})`}
           >
             <LabwareRender definition={hoveredLabwareDef} />
           </g>
-        </React.Fragment>
+          <LabwareLabel
+            isLast={true}
+            isSelected={false}
+            labwareDef={hoveredLabwareDef}
+            position={hoveredSlotPosition}
+            nestedLabwareInfo={nestedInfo}
+          />
+        </Fragment>
       ) : null}
     </>
   )

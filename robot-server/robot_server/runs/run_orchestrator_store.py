@@ -1,7 +1,7 @@
 """In-memory storage of ProtocolEngine instances."""
 import asyncio
 import logging
-from typing import List, Optional, Callable
+from typing import List, Optional, Callable, Dict
 
 from opentrons.protocol_engine.errors.exceptions import EStopActivatedError
 from opentrons.protocol_engine.types import (
@@ -16,6 +16,7 @@ from opentrons_shared_data.robot.types import RobotTypeEnum
 
 from opentrons.config import feature_flags
 from opentrons.hardware_control import HardwareControlAPI
+from opentrons.hardware_control.nozzle_manager import NozzleMap
 from opentrons.hardware_control.types import (
     EstopState,
     HardwareEvent,
@@ -51,8 +52,7 @@ from opentrons.protocol_engine.types import (
     EngineStatus,
 )
 from opentrons_shared_data.labware.types import LabwareUri
-
-from .error_recovery_mapping import default_error_recovery_policy
+from opentrons.protocol_engine.resources.file_provider import FileProvider
 
 _log = logging.getLogger(__name__)
 
@@ -118,8 +118,6 @@ def _get_estop_listener(
 class RunOrchestratorStore:
     """Factory and in-memory storage for ProtocolEngine."""
 
-    _run_orchestrator: Optional[RunOrchestrator] = None
-
     def __init__(
         self,
         hardware_api: HardwareControlAPI,
@@ -137,6 +135,7 @@ class RunOrchestratorStore:
         self._hardware_api = hardware_api
         self._robot_type = robot_type
         self._deck_type = deck_type
+        self._run_orchestrator: Optional[RunOrchestrator] = None
         self._default_run_orchestrator: Optional[RunOrchestrator] = None
         hardware_api.register_callback(_get_estop_listener(self))
 
@@ -178,6 +177,9 @@ class RunOrchestratorStore:
                     deck_type=self._deck_type,
                     block_on_door_open=False,
                 ),
+                # Error recovery mode would not make sense outside the context of a run--
+                # for example, there would be no equivalent to the `POST /runs/{id}/actions`
+                # endpoint to resume normal operation.
                 error_recovery_policy=error_recovery_policy.never_recover,
             )
             self._default_run_orchestrator = RunOrchestrator.build_orchestrator(
@@ -190,7 +192,9 @@ class RunOrchestratorStore:
         self,
         run_id: str,
         labware_offsets: List[LabwareOffsetCreate],
+        initial_error_recovery_policy: error_recovery_policy.ErrorRecoveryPolicy,
         deck_configuration: DeckConfigurationType,
+        file_provider: FileProvider,
         notify_publishers: Callable[[], None],
         protocol: Optional[ProtocolResource],
         run_time_param_values: Optional[PrimitiveRunTimeParamValuesType] = None,
@@ -203,6 +207,7 @@ class RunOrchestratorStore:
             run_id: The run resource the run orchestrator is assigned to.
             labware_offsets: Labware offsets to create the run with.
             deck_configuration: A mapping of fixtures to cutout fixtures the deck will be loaded with.
+            file_provider: Wrapper to let the engine read/write data files.
             notify_publishers: Utilized by the engine to notify publishers of state changes.
             protocol: The protocol to load the runner with, if any.
             run_time_param_values: Any runtime parameter values to set.
@@ -231,9 +236,10 @@ class RunOrchestratorStore:
                     RobotTypeEnum.robot_literal_to_enum(self._robot_type)
                 ),
             ),
-            error_recovery_policy=default_error_recovery_policy,
+            error_recovery_policy=initial_error_recovery_policy,
             load_fixed_trash=load_fixed_trash,
             deck_configuration=deck_configuration,
+            file_provider=file_provider,
             notify_publishers=notify_publishers,
         )
 
@@ -305,9 +311,9 @@ class RunOrchestratorStore:
         """Stop the run."""
         await self.run_orchestrator.stop()
 
-    def resume_from_recovery(self) -> None:
+    def resume_from_recovery(self, reconcile_false_positive: bool) -> None:
         """Resume the run from recovery mode."""
-        self.run_orchestrator.resume_from_recovery()
+        self.run_orchestrator.resume_from_recovery(reconcile_false_positive)
 
     async def finish(self, error: Optional[Exception]) -> None:
         """Finish the run."""
@@ -321,26 +327,35 @@ class RunOrchestratorStore:
         """Get loaded labware definitions."""
         return self.run_orchestrator.get_loaded_labware_definitions()
 
+    def get_nozzle_maps(self) -> Dict[str, NozzleMap]:
+        """Get the current nozzle map keyed by pipette id."""
+        return self.run_orchestrator.get_nozzle_maps()
+
     def get_run_time_parameters(self) -> List[RunTimeParameter]:
         """Parameter definitions defined by protocol, if any. Will always be empty before execution."""
         return self.run_orchestrator.get_run_time_parameters()
 
     def get_current_command(self) -> Optional[CommandPointer]:
-        """Get the current running command."""
+        """Get the current running command, if any."""
         return self.run_orchestrator.get_current_command()
 
+    def get_most_recently_finalized_command(self) -> Optional[CommandPointer]:
+        """Get the most recently finalized command, if any."""
+        return self.run_orchestrator.get_most_recently_finalized_command()
+
     def get_command_slice(
-        self,
-        cursor: Optional[int],
-        length: int,
+        self, cursor: Optional[int], length: int, include_fixit_commands: bool
     ) -> CommandSlice:
         """Get a slice of run commands.
 
         Args:
             cursor: Requested index of first command in the returned slice.
             length: Length of slice to return.
+            include_fixit_commands: Include fixit commands.
         """
-        return self.run_orchestrator.get_command_slice(cursor=cursor, length=length)
+        return self.run_orchestrator.get_command_slice(
+            cursor=cursor, length=length, include_fixit_commands=include_fixit_commands
+        )
 
     def get_command_error_slice(
         self,

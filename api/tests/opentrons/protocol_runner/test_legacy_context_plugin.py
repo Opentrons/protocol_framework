@@ -1,4 +1,5 @@
 """Tests for the PythonAndLegacyRunner's LegacyContextPlugin."""
+import asyncio
 import pytest
 from anyio import to_thread
 from decoy import Decoy, matchers
@@ -60,7 +61,7 @@ def mock_action_dispatcher(decoy: Decoy) -> pe_actions.ActionDispatcher:
 
 
 @pytest.fixture
-def subject(
+async def subject(
     mock_legacy_broker: LegacyBroker,
     mock_equipment_broker: ReadOnlyBroker[LoadInfo],
     mock_legacy_command_mapper: LegacyCommandMapper,
@@ -69,6 +70,7 @@ def subject(
 ) -> LegacyContextPlugin:
     """Get a configured LegacyContextPlugin with its dependencies mocked out."""
     plugin = LegacyContextPlugin(
+        engine_loop=asyncio.get_running_loop(),
         broker=mock_legacy_broker,
         equipment_broker=mock_equipment_broker,
         legacy_command_mapper=mock_legacy_command_mapper,
@@ -161,18 +163,14 @@ async def test_command_broker_messages(
 
     decoy.when(
         mock_legacy_command_mapper.map_command(command=legacy_command)
-    ).then_return(
-        [pe_actions.SucceedCommandAction(engine_command, private_result=None)]
-    )
+    ).then_return([pe_actions.SucceedCommandAction(engine_command)])
 
     await to_thread.run_sync(handler, legacy_command)
 
     await subject.teardown()
 
     decoy.verify(
-        mock_action_dispatcher.dispatch(
-            pe_actions.SucceedCommandAction(engine_command, private_result=None)
-        )
+        mock_action_dispatcher.dispatch(pe_actions.SucceedCommandAction(engine_command))
     )
 
 
@@ -220,9 +218,7 @@ async def test_equipment_broker_messages(
 
     decoy.when(
         mock_legacy_command_mapper.map_equipment_load(load_info=load_info)
-    ).then_return(
-        [pe_actions.SucceedCommandAction(command=engine_command, private_result=None)]
-    )
+    ).then_return([pe_actions.SucceedCommandAction(command=engine_command)])
 
     await to_thread.run_sync(handler, load_info)
 
@@ -230,6 +226,6 @@ async def test_equipment_broker_messages(
 
     decoy.verify(
         mock_action_dispatcher.dispatch(
-            pe_actions.SucceedCommandAction(command=engine_command, private_result=None)
+            pe_actions.SucceedCommandAction(command=engine_command)
         ),
     )

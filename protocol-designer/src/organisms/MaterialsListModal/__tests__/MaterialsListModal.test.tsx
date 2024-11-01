@@ -1,18 +1,22 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { describe, it, beforeEach, vi, expect } from 'vitest'
 import { screen } from '@testing-library/react'
 
 import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 
 import { i18n } from '../../../assets/localization'
+import { selectors as labwareIngredSelectors } from '../../../labware-ingred/selectors'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { getRobotType } from '../../../file-data/selectors'
+import { getInitialDeckSetup } from '../../../step-forms/selectors'
 import { MaterialsListModal } from '..'
 
 import type { InfoScreen } from '@opentrons/components'
 import type { LabwareOnDeck, ModuleOnDeck } from '../../../step-forms'
 import type { FixtureInList } from '..'
 
+vi.mock('../../../step-forms/selectors')
+vi.mock('../../../labware-ingred/selectors')
 vi.mock('../../../file-data/selectors')
 vi.mock('@opentrons/components', async importOriginal => {
   const actual = await importOriginal<typeof InfoScreen>()
@@ -76,7 +80,14 @@ describe('MaterialsListModal', () => {
       liquids: [],
       setShowMaterialsListModal: mockSetShowMaterialsListModal,
     }
+    vi.mocked(getInitialDeckSetup).mockReturnValue({
+      labware: {},
+      modules: {},
+      additionalEquipmentOnDeck: {},
+      pipettes: {},
+    })
     vi.mocked(getRobotType).mockReturnValue(FLEX_ROBOT_TYPE)
+    vi.mocked(labwareIngredSelectors.getLiquidsByLabwareId).mockReturnValue({})
   })
 
   it('should render render text', () => {
@@ -138,6 +149,27 @@ describe('MaterialsListModal', () => {
     screen.getByText('7,8,10,11')
   })
 
-  // ToDo (kk:09/03/2024) add test when implementing liquids part completely
-  it.todo('should render liquids info', () => {})
+  it('should render liquids info', () => {
+    const mockId = 'mockId'
+    vi.mocked(labwareIngredSelectors.getLiquidsByLabwareId).mockReturnValue({
+      labware1: { well1: { [mockId]: { volume: 10 } } },
+    })
+    props = {
+      ...props,
+
+      liquids: [
+        {
+          ingredientId: mockId,
+          name: 'mockName',
+          displayColor: 'mockDisplayColor',
+        },
+      ],
+    }
+    render(props)
+    screen.getByText('Liquids')
+    screen.getByText('Name')
+    screen.getByText('Total Well Volume')
+    screen.getByText('mockName')
+    screen.getByText('10 uL')
+  })
 })

@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom'
 import {
   BORDERS,
   COLORS,
+  CURSOR_AUTO,
+  CURSOR_POINTER,
   DIRECTION_COLUMN,
   Flex,
   NO_WRAP,
@@ -16,6 +18,7 @@ import {
   useOnClickOutside,
 } from '@opentrons/components'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
+
 import { deleteModule } from '../../../step-forms/actions'
 import { EditNickNameModal } from '../../../organisms'
 import { deleteDeckFixture } from '../../../step-forms/actions/additionalItems'
@@ -24,6 +27,7 @@ import {
   duplicateLabware,
   openIngredientSelector,
 } from '../../../labware-ingred/actions'
+import { selectors as labwareIngredSelectors } from '../../../labware-ingred/selectors'
 import type { CoordinateTuple, DeckSlotId } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../../types'
 
@@ -49,7 +53,8 @@ const TOP_SLOT_Y_POSITION_ALL_BUTTONS = 110
 const TOP_SLOT_Y_POSITION_2_BUTTONS = 35
 
 interface SlotOverflowMenuProps {
-  slot: DeckSlotId
+  //   can be off-deck id or deck slot
+  location: DeckSlotId | string
   setShowMenuList: (value: React.SetStateAction<boolean>) => void
   addEquipment: (slotId: string) => void
   menuListSlotPosition?: CoordinateTuple
@@ -57,7 +62,12 @@ interface SlotOverflowMenuProps {
 export function SlotOverflowMenu(
   props: SlotOverflowMenuProps
 ): JSX.Element | null {
-  const { slot, setShowMenuList, addEquipment, menuListSlotPosition } = props
+  const {
+    location,
+    setShowMenuList,
+    addEquipment,
+    menuListSlotPosition,
+  } = props
   const { t } = useTranslation('starting_deck_state')
   const navigate = useNavigate()
   const dispatch = useDispatch<ThunkDispatch<any>>()
@@ -72,17 +82,25 @@ export function SlotOverflowMenu(
     },
   })
   const deckSetup = useSelector(getDeckSetupForActiveItem)
+
+  const liquidLocations = useSelector(
+    labwareIngredSelectors.getLiquidsByLabwareId
+  )
+
   const {
     labware: deckSetupLabware,
     modules: deckSetupModules,
     additionalEquipmentOnDeck,
   } = deckSetup
+  const isOffDeckLocation = deckSetupLabware[location] != null
 
   const moduleOnSlot = Object.values(deckSetupModules).find(
-    module => module.slot === slot
+    module => module.slot === location
   )
-  const labwareOnSlot = Object.values(deckSetupLabware).find(
-    lw => lw.slot === slot || lw.slot === moduleOnSlot?.id
+  const labwareOnSlot = Object.values(deckSetupLabware).find(lw =>
+    isOffDeckLocation
+      ? lw.id === location
+      : lw.slot === location || lw.slot === moduleOnSlot?.id
   )
   const isLabwareTiprack = labwareOnSlot?.def.parameters.isTiprack ?? false
   const isLabwareAnAdapter =
@@ -91,14 +109,12 @@ export function SlotOverflowMenu(
     lw => lw.slot === labwareOnSlot?.id
   )
   const fixturesOnSlot = Object.values(additionalEquipmentOnDeck).filter(
-    ae => ae.location?.split('cutout')[1] === slot
+    ae => ae.location?.split('cutout')[1] === location
   )
 
   const hasNoItems =
     moduleOnSlot == null && labwareOnSlot == null && fixturesOnSlot.length === 0
-  const hasTrashOnSlot = fixturesOnSlot.some(
-    fixture => fixture.name === 'trashBin'
-  )
+
   const handleClear = (): void => {
     //  clear module from slot
     if (moduleOnSlot != null) {
@@ -130,25 +146,33 @@ export function SlotOverflowMenu(
       nestedLabwareOnSlot == null) ||
     nestedLabwareOnSlot != null
 
-  let position = ROBOT_BOTTOM_HALF_SLOTS.includes(slot)
+  let position = ROBOT_BOTTOM_HALF_SLOTS.includes(location)
     ? BOTTOM_SLOT_Y_POSITION
     : TOP_SLOT_Y_POSITION
 
-  if (showDuplicateBtn && !ROBOT_BOTTOM_HALF_SLOTS.includes(slot)) {
+  if (showDuplicateBtn && !ROBOT_BOTTOM_HALF_SLOTS.includes(location)) {
     position += showEditAndLiquidsBtns
       ? TOP_SLOT_Y_POSITION_ALL_BUTTONS
       : TOP_SLOT_Y_POSITION_2_BUTTONS
   }
 
+  let nickNameId = labwareOnSlot?.id
+  if (nestedLabwareOnSlot != null) {
+    nickNameId = nestedLabwareOnSlot.id
+  } else if (isOffDeckLocation) {
+    nickNameId = location
+  }
+
+  const selectionHasLiquids =
+    nickNameId != null &&
+    liquidLocations[nickNameId] != null &&
+    Object.keys(liquidLocations[nickNameId]).length > 0
+
   const slotOverflowBody = (
     <>
-      {showNickNameModal && labwareOnSlot != null ? (
+      {showNickNameModal && nickNameId != null ? (
         <EditNickNameModal
-          labwareId={
-            nestedLabwareOnSlot != null
-              ? nestedLabwareOnSlot.id
-              : labwareOnSlot.id
-          }
+          labwareId={nickNameId}
           onClose={() => {
             setShowNickNameModal(false)
             setShowMenuList(false)
@@ -169,14 +193,14 @@ export function SlotOverflowMenu(
       >
         <MenuButton
           onClick={() => {
-            addEquipment(slot)
+            addEquipment(location)
             setShowMenuList(false)
           }}
         >
           <StyledText desktopStyle="bodyDefaultRegular">
             {hasNoItems
-              ? t(slot === 'offDeck' ? 'add_labware' : 'add_hw_lw')
-              : t(slot === 'offDeck' ? 'edit_labware' : 'edit_hw_lw')}
+              ? t(isOffDeckLocation ? 'add_labware' : 'add_hw_lw')
+              : t(isOffDeckLocation ? 'edit_labware' : 'edit_hw_lw')}
           </StyledText>
         </MenuButton>
         {showEditAndLiquidsBtns ? (
@@ -194,14 +218,16 @@ export function SlotOverflowMenu(
             </MenuButton>
             <MenuButton
               onClick={() => {
-                if (labwareOnSlot != null) {
+                if (nestedLabwareOnSlot != null) {
+                  dispatch(openIngredientSelector(nestedLabwareOnSlot.id))
+                } else if (labwareOnSlot != null) {
                   dispatch(openIngredientSelector(labwareOnSlot.id))
                 }
                 navigate('/liquids')
               }}
             >
               <StyledText desktopStyle="bodyDefaultRegular">
-                {t('add_liquid')}
+                {selectionHasLiquids ? t('edit_liquid') : t('add_liquid')}
               </StyledText>
             </MenuButton>
           </>
@@ -227,14 +253,14 @@ export function SlotOverflowMenu(
           </MenuButton>
         ) : null}
         <MenuButton
-          disabled={hasNoItems || hasTrashOnSlot}
+          disabled={hasNoItems}
           onClick={() => {
             handleClear()
             setShowMenuList(false)
           }}
         >
           <StyledText desktopStyle="bodyDefaultRegular">
-            {t(slot === 'offDeck' ? 'clear_labware' : 'clear_slot')}
+            {t(isOffDeckLocation ? 'clear_labware' : 'clear_slot')}
           </StyledText>
         </MenuButton>
       </Flex>
@@ -264,7 +290,7 @@ export function SlotOverflowMenu(
 const MenuButton = styled.button`
   background-color: ${COLORS.transparent};
   border-radius: inherit;
-  cursor: pointer;
+  cursor: ${CURSOR_POINTER};
   padding: ${SPACING.spacing8} ${SPACING.spacing12};
   border: none;
   border-radius: inherit;
@@ -273,6 +299,6 @@ const MenuButton = styled.button`
   }
   &:disabled {
     color: ${COLORS.grey40};
-    cursor: auto;
+    cursor: ${CURSOR_AUTO};
   }
 `

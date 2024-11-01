@@ -3,8 +3,8 @@
 
 from __future__ import annotations
 
+import dataclasses
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import (
@@ -20,6 +20,7 @@ from typing import (
 from pydantic import BaseModel, Field
 
 from opentrons.hardware_control import HardwareControlAPI
+from opentrons.protocol_engine.state.update_types import StateUpdate
 
 from ..resources import ModelUtils
 from ..errors import ErrorOccurrence
@@ -37,7 +38,6 @@ _ResultT = TypeVar("_ResultT", bound=BaseModel)
 _ResultT_co = TypeVar("_ResultT_co", bound=BaseModel, covariant=True)
 _ErrorT = TypeVar("_ErrorT", bound=ErrorOccurrence)
 _ErrorT_co = TypeVar("_ErrorT_co", bound=ErrorOccurrence, covariant=True)
-_PrivateResultT_co = TypeVar("_PrivateResultT_co", covariant=True)
 
 
 class CommandStatus(str, Enum):
@@ -105,19 +105,23 @@ class BaseCommandCreate(
     )
 
 
-@dataclass(frozen=True)
-class SuccessData(Generic[_ResultT_co, _PrivateResultT_co]):
+@dataclasses.dataclass(frozen=True)
+class SuccessData(Generic[_ResultT_co]):
     """Data from the successful completion of a command."""
 
     public: _ResultT_co
     """Public result data. Exposed over HTTP and stored in databases."""
 
-    private: _PrivateResultT_co
-    """Additional result data, only given to `opentrons.protocol_engine` internals."""
+    state_update: StateUpdate = dataclasses.field(
+        # todo(mm, 2024-08-22): Remove the default once all command implementations
+        # use this, to make it harder to forget in new command implementations.
+        default_factory=StateUpdate
+    )
+    """How the engine state should be updated to reflect this command success."""
 
 
-@dataclass(frozen=True)
-class DefinedErrorData(Generic[_ErrorT_co, _PrivateResultT_co]):
+@dataclasses.dataclass(frozen=True)
+class DefinedErrorData(Generic[_ErrorT_co]):
     """Data from a command that failed with a defined error.
 
     This should only be used for "defined" errors, not any error.
@@ -127,8 +131,16 @@ class DefinedErrorData(Generic[_ErrorT_co, _PrivateResultT_co]):
     public: _ErrorT_co
     """Public error data. Exposed over HTTP and stored in databases."""
 
-    private: _PrivateResultT_co
-    """Additional error data, only given to `opentrons.protocol_engine` internals."""
+    state_update: StateUpdate = dataclasses.field(
+        # todo(mm, 2024-08-22): Remove the default once all command implementations
+        # use this, to make it harder to forget in new command implementations.
+        default_factory=StateUpdate
+    )
+    """How the engine state should be updated to reflect this command failure."""
+
+    state_update_if_false_positive: StateUpdate = dataclasses.field(
+        default_factory=StateUpdate
+    )
 
 
 _ExecuteReturnT_co = TypeVar(
@@ -157,6 +169,7 @@ class AbstractCommandImpl(
         state_view: StateView,
         hardware_api: HardwareControlAPI,
         equipment: execution.EquipmentHandler,
+        file_provider: execution.FileProvider,
         movement: execution.MovementHandler,
         gantry_mover: execution.GantryMover,
         labware_movement: execution.LabwareMovementHandler,
@@ -274,13 +287,11 @@ class BaseCommand(
                     # Our _ImplementationCls must return public result data that can fit
                     # in our `result` field:
                     _ResultT,
-                    # But we don't care (here) what kind of private result data it returns:
-                    object,
                 ],
                 DefinedErrorData[
-                    # Likewise, for our `error` field:
+                    # Our _ImplementationCls must return public error data that can fit
+                    # in our `error` field:
                     _ErrorT,
-                    object,
                 ],
             ],
         ]

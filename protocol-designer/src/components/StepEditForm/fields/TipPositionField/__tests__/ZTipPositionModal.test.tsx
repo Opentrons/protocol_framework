@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { fireEvent, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderWithProviders } from '../../../../../__testing-utils__'
@@ -31,7 +31,7 @@ describe('ZTipPositionModal', () => {
   it('renders the text and radio buttons', () => {
     render(props)
     screen.getByText('Tip Positioning')
-    screen.getByText('Change from where in the well the robot emits blowout')
+    screen.getByText('Change where in the well the robot performs the blowout.')
     screen.getByRole('radio', { name: '0 mm from the top center (default)' })
     screen.getByRole('radio', { name: 'Custom' })
     fireEvent.click(screen.getByText('cancel'))

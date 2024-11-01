@@ -34,6 +34,9 @@ from opentrons.protocol_engine.resources import (
     ModuleDataProvider,
     pipette_data_provider,
 )
+from opentrons.protocol_engine.state.update_types import (
+    StateUpdate,
+)
 
 from opentrons_shared_data.labware.models import LabwareDefinition
 from opentrons_shared_data.errors import ErrorCodes, EnumeratedError, PythonException
@@ -267,7 +270,8 @@ class LegacyCommandMapper:
                     )
                 results.append(
                     pe_actions.SucceedCommandAction(
-                        completed_command, private_result=None
+                        completed_command,
+                        state_update=StateUpdate(),
                     )
                 )
 
@@ -666,9 +670,19 @@ class LegacyCommandMapper:
             # We just set this above, so we know it's not None.
             started_at=succeeded_command.startedAt,  # type: ignore[arg-type]
         )
+        state_update = StateUpdate()
+        assert succeeded_command.result is not None
+        state_update.set_loaded_labware(
+            labware_id=labware_id,
+            definition=succeeded_command.result.definition,
+            display_name=labware_load_info.labware_display_name,
+            offset_id=labware_load_info.offset_id,
+            location=location,
+        )
+
         succeed_action = pe_actions.SucceedCommandAction(
             command=succeeded_command,
-            private_result=None,
+            state_update=state_update,
         )
 
         self._command_count["LOAD_LABWARE"] = count + 1
@@ -709,7 +723,14 @@ class LegacyCommandMapper:
             result=pe_commands.LoadPipetteResult(pipetteId=pipette_id),
         )
         serial = instrument_load_info.pipette_dict.get("pipette_id", None) or ""
-        pipette_config_result = pe_commands.LoadPipettePrivateResult(
+        state_update = StateUpdate()
+        state_update.set_load_pipette(
+            pipette_id=pipette_id,
+            mount=succeeded_command.params.mount,
+            pipette_name=succeeded_command.params.pipetteName,
+            liquid_presence_detection=succeeded_command.params.liquidPresenceDetection,
+        )
+        state_update.update_pipette_config(
             pipette_id=pipette_id,
             serial_number=serial,
             config=pipette_data_provider.get_pipette_static_config(
@@ -732,9 +753,10 @@ class LegacyCommandMapper:
             # We just set this above, so we know it's not None.
             started_at=succeeded_command.startedAt,  # type: ignore[arg-type]
         )
+
         succeed_action = pe_actions.SucceedCommandAction(
             command=succeeded_command,
-            private_result=pipette_config_result,
+            state_update=state_update,
         )
 
         self._command_count["LOAD_PIPETTE"] = count + 1
@@ -799,8 +821,7 @@ class LegacyCommandMapper:
             started_at=succeeded_command.startedAt,  # type: ignore[arg-type]
         )
         succeed_action = pe_actions.SucceedCommandAction(
-            command=succeeded_command,
-            private_result=None,
+            command=succeeded_command, state_update=StateUpdate()
         )
 
         self._command_count["LOAD_MODULE"] = count + 1

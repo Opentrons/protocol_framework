@@ -31,6 +31,24 @@ from .unsafe_engage_axes import (
     UnsafeEngageAxesCreate,
 )
 
+from .unsafe_ungrip_labware import (
+    UnsafeUngripLabwareCommandType,
+    UnsafeUngripLabwareParams,
+    UnsafeUngripLabwareResult,
+    UnsafeUngripLabware,
+    UnsafeUngripLabwareCreate,
+)
+
+
+from .unsafe_place_labware import (
+    UnsafePlaceLabwareCommandType,
+    UnsafePlaceLabwareParams,
+    UnsafePlaceLabwareResult,
+    UnsafePlaceLabware,
+    UnsafePlaceLabwareCreate,
+)
+
+
 __all__ = [
     # Unsafe blow-out-in-place command models
     "UnsafeBlowOutInPlaceCommandType",
@@ -56,4 +74,16 @@ __all__ = [
     "UnsafeEngageAxesResult",
     "UnsafeEngageAxes",
     "UnsafeEngageAxesCreate",
+    # Unsafe ungrip labware
+    "UnsafeUngripLabwareCommandType",
+    "UnsafeUngripLabwareParams",
+    "UnsafeUngripLabwareResult",
+    "UnsafeUngripLabware",
+    "UnsafeUngripLabwareCreate",
+    # Unsafe place labware
+    "UnsafePlaceLabwareCommandType",
+    "UnsafePlaceLabwareParams",
+    "UnsafePlaceLabwareResult",
+    "UnsafePlaceLabware",
+    "UnsafePlaceLabwareCreate",
 ]

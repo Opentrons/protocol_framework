@@ -1,5 +1,3 @@
-import * as React from 'react'
-
 import { SPACING, VIEWPORT } from '../../ui-style-constants'
 import { DIRECTION_COLUMN } from '../../styles'
 import { Flex } from '../../primitives'
@@ -52,7 +50,7 @@ export const ListItemDescriptorDefault: Story = {
     type: 'noActive',
     children: (
       <ListItemDescriptor
-        type="default"
+        type="large"
         content={<div>mock content</div>}
         description={<div>mock description</div>}
       />
@@ -65,7 +63,7 @@ export const ListItemDescriptorMini: Story = {
     type: 'noActive',
     children: (
       <ListItemDescriptor
-        type="mini"
+        type="default"
         content={<div>mock content</div>}
         description={<div>mock description</div>}
       />

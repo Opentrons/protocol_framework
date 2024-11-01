@@ -1,8 +1,8 @@
-import * as React from 'react'
 import { Box } from '@opentrons/components'
 import { CommandText as CommandTextComponent } from '.'
 import type { RobotType } from '@opentrons/shared-data'
 import * as Fixtures from './__fixtures__'
+import { getLabwareDefinitionsFromCommands } from '../../local-resources/labware'
 
 import type { Meta, StoryObj } from '@storybook/react'
 
@@ -13,6 +13,10 @@ interface StorybookArgs {
 }
 
 function Wrapper(props: StorybookArgs): JSX.Element {
+  const allRunDefs = getLabwareDefinitionsFromCommands(
+    Fixtures.mockDoItAllTextData.commands
+  )
+
   return (
     <Box width="960px" height="532">
       <CommandTextComponent
@@ -20,6 +24,7 @@ function Wrapper(props: StorybookArgs): JSX.Element {
         commandTextData={Fixtures.mockDoItAllTextData}
         robotType={props.robotType}
         isOnDevice={props.onDevice}
+        allRunDefs={allRunDefs}
       />
     </Box>
   )

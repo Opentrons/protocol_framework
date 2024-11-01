@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { fireEvent, screen } from '@testing-library/react'
 import { i18n } from '../../../assets/localization'
@@ -41,5 +41,16 @@ describe('EditNickNameModal', () => {
     fireEvent.click(screen.getByText('Save'))
     expect(vi.mocked(renameLabware)).toHaveBeenCalled()
     expect(props.onClose).toHaveBeenCalled()
+  })
+  it('renders the too long nickname error', () => {
+    render(props)
+    const input = screen.getByRole('textbox')
+    fireEvent.change(input, {
+      target: {
+        value:
+          'mockNickNameisthelongestnicknameihaveeverseen mockNickNameisthelongestnicknameihaveeverseen mockNickNameisthelongest',
+      },
+    })
+    screen.getByText('Labware names must be 115 characters or fewer.')
   })
 })

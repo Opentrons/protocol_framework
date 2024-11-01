@@ -14,6 +14,7 @@ from opentrons_shared_data.robot.types import RobotType
 from . import protocol_runner, RunResult, JsonRunner, PythonAndLegacyRunner
 from ..hardware_control import HardwareControlAPI
 from ..hardware_control.modules import AbstractModule as HardwareModuleAPI
+from ..hardware_control.nozzle_manager import NozzleMap
 from ..protocol_engine import (
     ProtocolEngine,
     CommandCreate,
@@ -204,9 +205,9 @@ class RunOrchestrator:
                 post_run_hardware_state=PostRunHardwareState.STAY_ENGAGED_IN_PLACE,
             )
 
-    def resume_from_recovery(self) -> None:
+    def resume_from_recovery(self, reconcile_false_positive: bool) -> None:
         """Resume the run from recovery."""
-        self._protocol_engine.resume_from_recovery()
+        self._protocol_engine.resume_from_recovery(reconcile_false_positive)
 
     async def finish(
         self,
@@ -256,19 +257,34 @@ class RunOrchestrator:
         """Get the "current" command, if any."""
         return self._protocol_engine.state_view.commands.get_current()
 
+    def get_most_recently_finalized_command(self) -> Optional[CommandPointer]:
+        """Get the most recently finalized command, if any."""
+        most_recently_finalized_command = (
+            self._protocol_engine.state_view.commands.get_most_recently_finalized_command()
+        )
+        return (
+            CommandPointer(
+                command_id=most_recently_finalized_command.command.id,
+                command_key=most_recently_finalized_command.command.key,
+                created_at=most_recently_finalized_command.command.createdAt,
+                index=most_recently_finalized_command.index,
+            )
+            if most_recently_finalized_command
+            else None
+        )
+
     def get_command_slice(
-        self,
-        cursor: Optional[int],
-        length: int,
+        self, cursor: Optional[int], length: int, include_fixit_commands: bool
     ) -> CommandSlice:
         """Get a slice of run commands.
 
         Args:
             cursor: Requested index of first command in the returned slice.
             length: Length of slice to return.
+            include_fixit_commands: Get all command intents.
         """
         return self._protocol_engine.state_view.commands.get_slice(
-            cursor=cursor, length=length
+            cursor=cursor, length=length, include_fixit_commands=include_fixit_commands
         )
 
     def get_command_error_slice(
@@ -397,6 +413,10 @@ class RunOrchestrator:
     def get_deck_type(self) -> DeckType:
         """Get engine deck type."""
         return self._protocol_engine.state_view.config.deck_type
+
+    def get_nozzle_maps(self) -> Dict[str, NozzleMap]:
+        """Get current nozzle maps keyed by pipette id."""
+        return self._protocol_engine.state_view.tips.get_pipette_nozzle_maps()
 
     def set_error_recovery_policy(self, policy: ErrorRecoveryPolicy) -> None:
         """Create error recovery policy for the run."""

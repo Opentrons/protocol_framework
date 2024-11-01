@@ -1,9 +1,10 @@
-import * as React from 'react'
 import { Opentrons96DeepWellAdapter } from './Opentrons96DeepWellAdapter'
 import { Opentrons96FlatBottomAdapter } from './Opentrons96FlatBottomAdapter'
 import { OpentronsUniversalFlatAdapter } from './OpentronsUniversalFlatAdapter'
 import { OpentronsAluminumFlatBottomPlate } from './OpentronsAluminumFlatBottomPlate'
 import { OpentronsFlex96TiprackAdapter } from './OpentronsFlex96TiprackAdapter'
+import { OpentronsToughPCRAutoSealingLid } from './OpentronsToughPCRAutoSealingLid'
+import { OpentronsAutoclavableDeckRiser } from './OpentronsAutoclavableDeckRiser'
 import { COLORS } from '../../../helix-design-system'
 import { LabwareOutline } from '../labwareInternals'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
@@ -14,6 +15,8 @@ const LABWARE_ADAPTER_LOADNAME_PATHS = {
   opentrons_aluminum_flat_bottom_plate: OpentronsAluminumFlatBottomPlate,
   opentrons_flex_96_tiprack_adapter: OpentronsFlex96TiprackAdapter,
   opentrons_universal_flat_adapter: OpentronsUniversalFlatAdapter,
+  opentrons_tough_pcr_auto_sealing_lid: OpentronsToughPCRAutoSealingLid,
+  opentrons_flex_deck_riser: OpentronsAutoclavableDeckRiser,
 }
 
 export type LabwareAdapterLoadName = keyof typeof LABWARE_ADAPTER_LOADNAME_PATHS

@@ -1,5 +1,4 @@
 // labware filters
-import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { Icon } from '@opentrons/components'
 import {
@@ -9,7 +8,6 @@ import {
   CREATING_CUSTOM_LABWARE_DEFINITIONS,
   LABWARE_CREATOR,
 } from '../../localization'
-import { getPublicPath } from '../../public-path'
 import styles from './styles.module.css'
 
 const LINKS = [
@@ -55,10 +53,7 @@ export function LabwareGuide(): JSX.Element {
             </li>
           ))}
           <li>
-            <Link
-              to={`${getPublicPath()}create`}
-              className={styles.labware_guide_link}
-            >
+            <Link to={`/create`} className={styles.labware_guide_link}>
               {LABWARE_CREATOR}
             </Link>
           </li>

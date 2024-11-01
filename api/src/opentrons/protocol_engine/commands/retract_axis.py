@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from typing import TYPE_CHECKING, Optional, Type
 from typing_extensions import Literal
 
+from ..state import update_types
 from ..types import MotorAxis
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ..errors.error_occurrence import ErrorOccurrence
@@ -38,7 +39,7 @@ class RetractAxisResult(BaseModel):
 
 
 class RetractAxisImplementation(
-    AbstractCommandImpl[RetractAxisParams, SuccessData[RetractAxisResult, None]]
+    AbstractCommandImpl[RetractAxisParams, SuccessData[RetractAxisResult]]
 ):
     """Retract Axis command implementation."""
 
@@ -47,10 +48,12 @@ class RetractAxisImplementation(
 
     async def execute(
         self, params: RetractAxisParams
-    ) -> SuccessData[RetractAxisResult, None]:
+    ) -> SuccessData[RetractAxisResult]:
         """Retract the specified axis."""
+        state_update = update_types.StateUpdate()
         await self._movement.retract_axis(axis=params.axis)
-        return SuccessData(public=RetractAxisResult(), private=None)
+        state_update.clear_all_pipette_locations()
+        return SuccessData(public=RetractAxisResult(), state_update=state_update)
 
 
 class RetractAxis(BaseCommand[RetractAxisParams, RetractAxisResult, ErrorOccurrence]):

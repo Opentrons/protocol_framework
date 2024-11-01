@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import {
@@ -13,19 +13,21 @@ import {
   RUN_STATUS_STOP_REQUESTED,
   RUN_STATUS_SUCCEEDED,
 } from '@opentrons/api-client'
-import { OT2_ROBOT_TYPE } from '@opentrons/shared-data'
+import {
+  getLoadedLabwareDefinitionsByUri,
+  OT2_ROBOT_TYPE,
+} from '@opentrons/shared-data'
 import { useHost } from '@opentrons/react-api-client'
 
-import { getIsOnDevice } from '../../redux/config'
+import { getIsOnDevice } from '/app/redux/config'
 import { ErrorRecoveryWizard, useERWizard } from './ErrorRecoveryWizard'
-import { RunPausedSplash, useRunPausedSplash } from './RunPausedSplash'
+import { RecoverySplash, useRecoverySplash } from './RecoverySplash'
 import { RecoveryTakeover } from './RecoveryTakeover'
 import {
   useCurrentlyRecoveringFrom,
   useERUtils,
   useRecoveryTakeover,
   useRetainedFailedCommandBySource,
-  useShowDoorInfo,
 } from './hooks'
 
 import type { RunStatus } from '@opentrons/api-client'
@@ -48,7 +50,7 @@ const INVALID_ER_RUN_STATUSES: RunStatus[] = [
   RUN_STATUS_IDLE,
 ]
 
-interface UseErrorRecoveryResult {
+export interface UseErrorRecoveryResult {
   isERActive: boolean
   /* There is no FailedCommand if the run statis is not AWAITING_RECOVERY. */
   failedCommand: FailedCommand | null
@@ -58,11 +60,9 @@ export function useErrorRecoveryFlows(
   runId: string,
   runStatus: RunStatus | null
 ): UseErrorRecoveryResult {
-  const [isERActive, setIsERActive] = React.useState(false)
+  const [isERActive, setIsERActive] = useState(false)
   // If client accesses a valid ER runs status besides AWAITING_RECOVERY but accesses it outside of Error Recovery flows, don't show ER.
-  const [hasSeenAwaitingRecovery, setHasSeenAwaitingRecovery] = React.useState(
-    false
-  )
+  const [hasSeenAwaitingRecovery, setHasSeenAwaitingRecovery] = useState(false)
   const failedCommand = useCurrentlyRecoveringFrom(runId, runStatus)
 
   if (
@@ -128,15 +128,27 @@ export function ErrorRecoveryFlows(
   const robotType = protocolAnalysis?.robotType ?? OT2_ROBOT_TYPE
   const robotName = useHost()?.robotName ?? 'robot'
 
-  const isDoorOpen = useShowDoorInfo(runStatus)
+  const isValidRobotSideAnalysis = protocolAnalysis != null
+
+  // TODO(jh, 10-22-24): EXEC-769.
+  const labwareDefinitionsByUri = useMemo(
+    () =>
+      protocolAnalysis != null
+        ? getLoadedLabwareDefinitionsByUri(protocolAnalysis?.commands)
+        : null,
+    [isValidRobotSideAnalysis]
+  )
+  const allRunDefs =
+    labwareDefinitionsByUri != null
+      ? Object.values(labwareDefinitionsByUri)
+      : []
+
   const {
     showTakeover,
     isActiveUser,
     intent,
     toggleERWizAsActiveUser,
   } = useRecoveryTakeover(toggleERWizard)
-  const renderWizard = isActiveUser && (showERWizard || isDoorOpen)
-  const showSplash = useRunPausedSplash(isOnDevice, renderWizard)
 
   const recoveryUtils = useERUtils({
     ...props,
@@ -144,8 +156,16 @@ export function ErrorRecoveryFlows(
     toggleERWizAsActiveUser,
     isOnDevice,
     robotType,
+    showTakeover,
     failedCommand: failedCommandBySource,
+    allRunDefs,
+    labwareDefinitionsByUri,
   })
+
+  const renderWizard =
+    isActiveUser &&
+    (showERWizard || recoveryUtils.doorStatusUtils.isProhibitedDoorOpen)
+  const showSplash = useRecoverySplash(isOnDevice, renderWizard as boolean)
 
   return (
     <>
@@ -163,12 +183,12 @@ export function ErrorRecoveryFlows(
           {...recoveryUtils}
           robotType={robotType}
           isOnDevice={isOnDevice}
-          isDoorOpen={isDoorOpen}
           failedCommand={failedCommandBySource}
+          allRunDefs={allRunDefs}
         />
       ) : null}
       {showSplash ? (
-        <RunPausedSplash
+        <RecoverySplash
           {...props}
           {...recoveryUtils}
           robotType={robotType}
@@ -176,6 +196,8 @@ export function ErrorRecoveryFlows(
           isOnDevice={isOnDevice}
           toggleERWizAsActiveUser={toggleERWizAsActiveUser}
           failedCommand={failedCommandBySource}
+          resumePausedRecovery={!renderWizard && !showTakeover}
+          allRunDefs={allRunDefs}
         />
       ) : null}
     </>

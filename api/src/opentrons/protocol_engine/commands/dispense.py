@@ -8,15 +8,15 @@ from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
 from pydantic import Field
 
 from ..types import DeckPoint
+from ..state.update_types import StateUpdate, CLEAR
 from .pipetting_common import (
     PipetteIdMixin,
     DispenseVolumeMixin,
     FlowRateMixin,
-    WellLocationMixin,
+    LiquidHandlingWellLocationMixin,
     BaseLiquidHandlingResult,
     DestinationPositionResult,
     OverpressureError,
-    OverpressureErrorInternalData,
 )
 from .command import (
     AbstractCommandImpl,
@@ -30,13 +30,14 @@ from ..errors.error_occurrence import ErrorOccurrence
 if TYPE_CHECKING:
     from ..execution import MovementHandler, PipettingHandler
     from ..resources import ModelUtils
+    from ..state.state import StateView
 
 
 DispenseCommandType = Literal["dispense"]
 
 
 class DispenseParams(
-    PipetteIdMixin, DispenseVolumeMixin, FlowRateMixin, WellLocationMixin
+    PipetteIdMixin, DispenseVolumeMixin, FlowRateMixin, LiquidHandlingWellLocationMixin
 ):
     """Payload required to dispense to a specific well."""
 
@@ -53,8 +54,8 @@ class DispenseResult(BaseLiquidHandlingResult, DestinationPositionResult):
 
 
 _ExecuteReturn = Union[
-    SuccessData[DispenseResult, None],
-    DefinedErrorData[OverpressureError, OverpressureErrorInternalData],
+    SuccessData[DispenseResult],
+    DefinedErrorData[OverpressureError],
 ]
 
 
@@ -63,31 +64,54 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
 
     def __init__(
         self,
+        state_view: StateView,
         movement: MovementHandler,
         pipetting: PipettingHandler,
         model_utils: ModelUtils,
         **kwargs: object,
     ) -> None:
+        self._state_view = state_view
         self._movement = movement
         self._pipetting = pipetting
         self._model_utils = model_utils
 
     async def execute(self, params: DispenseParams) -> _ExecuteReturn:
         """Move to and dispense to the requested well."""
+        state_update = StateUpdate()
+        well_location = params.wellLocation
+        labware_id = params.labwareId
+        well_name = params.wellName
+        volume = params.volume
+
+        # TODO(pbm, 10-15-24): call self._state_view.geometry.validate_dispense_volume_into_well()
+
         position = await self._movement.move_to_well(
             pipette_id=params.pipetteId,
-            labware_id=params.labwareId,
-            well_name=params.wellName,
-            well_location=params.wellLocation,
+            labware_id=labware_id,
+            well_name=well_name,
+            well_location=well_location,
         )
+        deck_point = DeckPoint.construct(x=position.x, y=position.y, z=position.z)
+        state_update.set_pipette_location(
+            pipette_id=params.pipetteId,
+            new_labware_id=labware_id,
+            new_well_name=well_name,
+            new_deck_point=deck_point,
+        )
+
         try:
             volume = await self._pipetting.dispense_in_place(
                 pipette_id=params.pipetteId,
-                volume=params.volume,
+                volume=volume,
                 flow_rate=params.flowRate,
                 push_out=params.pushOut,
             )
         except PipetteOverpressureError as e:
+            state_update.set_liquid_operated(
+                labware_id=labware_id,
+                well_name=well_name,
+                volume_added=CLEAR,
+            )
             return DefinedErrorData(
                 public=OverpressureError(
                     id=self._model_utils.generate_id(),
@@ -101,23 +125,21 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
                     ],
                     errorInfo={"retryLocation": (position.x, position.y, position.z)},
                 ),
-                private=OverpressureErrorInternalData(
-                    position=DeckPoint.construct(
-                        x=position.x, y=position.y, z=position.z
-                    )
-                ),
+                state_update=state_update,
             )
         else:
+            state_update.set_liquid_operated(
+                labware_id=labware_id,
+                well_name=well_name,
+                volume_added=volume,
+            )
             return SuccessData(
-                public=DispenseResult(
-                    volume=volume,
-                    position=DeckPoint(x=position.x, y=position.y, z=position.z),
-                ),
-                private=None,
+                public=DispenseResult(volume=volume, position=deck_point),
+                state_update=state_update,
             )
 
 
-class Dispense(BaseCommand[DispenseParams, DispenseResult, ErrorOccurrence]):
+class Dispense(BaseCommand[DispenseParams, DispenseResult, OverpressureError]):
     """Dispense command model."""
 
     commandType: DispenseCommandType = "dispense"

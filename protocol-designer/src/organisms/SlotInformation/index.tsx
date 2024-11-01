@@ -1,8 +1,7 @@
-import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router-dom'
 import {
   ALIGN_CENTER,
-  Box,
   DeckInfoLabel,
   DIRECTION_COLUMN,
   Flex,
@@ -10,8 +9,12 @@ import {
   ListItemDescriptor,
   SPACING,
   StyledText,
+  TYPOGRAPHY,
 } from '@opentrons/components'
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
+import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+
+import type { FC } from 'react'
 import type { RobotType } from '@opentrons/shared-data'
 
 interface SlotInformationProps {
@@ -19,15 +22,17 @@ interface SlotInformationProps {
   robotType: RobotType
   liquids?: string[]
   labwares?: string[]
+  adapters?: string[]
   modules?: string[]
   fixtures?: string[]
 }
 
-export const SlotInformation: React.FC<SlotInformationProps> = ({
+export const SlotInformation: FC<SlotInformationProps> = ({
   location,
   robotType,
   liquids = [],
   labwares = [],
+  adapters = [],
   modules = [],
   fixtures = [],
 }) => {
@@ -47,10 +52,18 @@ export const SlotInformation: React.FC<SlotInformationProps> = ({
       </Flex>
       <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
         {liquids.length > 1 ? (
-          <ListItem type="noActive">
+          <ListItem type="noActive" width="max-content">
             <ListItemDescriptor
-              type="mini"
-              content={liquids.join(', ')}
+              type="default"
+              content={
+                <StyledText
+                  desktopStyle="bodyDefaultRegular"
+                  textAlign={TYPOGRAPHY.textAlignRight}
+                  css={LINE_CLAMP_TEXT_STYLE(2)}
+                >
+                  {liquids.join(', ')}
+                </StyledText>
+              }
               description={t('liquid')}
             />
           </ListItem>
@@ -58,6 +71,9 @@ export const SlotInformation: React.FC<SlotInformationProps> = ({
           <StackInfoList title={t('liquid')} items={liquids} />
         )}
         <StackInfoList title={t('labware')} items={labwares} />
+        {adapters.length > 0 ? (
+          <StackInfoList title={t('labware')} items={adapters} />
+        ) : null}
         {isOffDeck ? null : (
           <StackInfoList title={t('module')} items={modules} />
         )}
@@ -75,8 +91,13 @@ interface StackInfoListProps {
 }
 
 function StackInfoList({ title, items }: StackInfoListProps): JSX.Element {
+  const pathLocation = useLocation()
   return (
-    <Box width="15.8125rem">
+    <Flex
+      flexDirection={DIRECTION_COLUMN}
+      width={pathLocation.pathname === '/designer' ? '15.8125rem' : '100%'}
+      gridGap={SPACING.spacing4}
+    >
       {items.length > 0 ? (
         items.map((item, index) => (
           <StackInfo
@@ -88,7 +109,7 @@ function StackInfoList({ title, items }: StackInfoListProps): JSX.Element {
       ) : (
         <StackInfo title={title} />
       )}
-    </Box>
+    </Flex>
   )
 }
 
@@ -102,9 +123,16 @@ function StackInfo({ title, stackInformation }: StackInfoProps): JSX.Element {
   return (
     <ListItem type="noActive">
       <ListItemDescriptor
-        type="mini"
-        content={stackInformation ?? t('none')}
-        description={title}
+        type="default"
+        content={
+          <StyledText
+            desktopStyle="bodyDefaultRegular"
+            textAlign={TYPOGRAPHY.textAlignRight}
+          >
+            {stackInformation ?? t('none')}
+          </StyledText>
+        }
+        description={<Flex width="7.40625rem">{title}</Flex>}
       />
     </ListItem>
   )

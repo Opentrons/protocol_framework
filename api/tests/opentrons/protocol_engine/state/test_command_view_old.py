@@ -22,6 +22,9 @@ from opentrons.protocol_engine.actions.actions import ResumeFromRecoveryAction
 
 from opentrons.protocol_engine.error_recovery_policy import ErrorRecoveryType
 from opentrons.protocol_engine.state.commands import (
+    # todo(mm, 2024-10-24): Avoid testing internal implementation details like
+    # _RecoveryTargetInfo. See note above about porting to test_command_state.py.
+    _RecoveryTargetInfo,
     CommandState,
     CommandView,
     CommandSlice,
@@ -38,6 +41,7 @@ from opentrons.protocol_engine.errors import ProtocolCommandFailedError, ErrorOc
 from opentrons_shared_data.errors.codes import ErrorCodes
 
 from opentrons.protocol_engine.state.command_history import CommandHistory
+from opentrons.protocol_engine.state.update_types import StateUpdate
 
 from .command_fixtures import (
     create_queued_command,
@@ -81,6 +85,7 @@ def get_command_view(  # noqa: C901
 
     if running_command_id:
         command_history._set_running_command_id(running_command_id)
+    # TODO(tz, 8-21-24): consolidate all quques into 1 and use append_queued_command
     if queued_command_ids:
         for command_id in queued_command_ids:
             command_history._add_to_queue(command_id)
@@ -107,7 +112,12 @@ def get_command_view(  # noqa: C901
         finish_error=finish_error,
         failed_command=failed_command,
         command_error_recovery_types=command_error_recovery_types or {},
-        recovery_target_command_id=recovery_target_command_id,
+        recovery_target=_RecoveryTargetInfo(
+            command_id=recovery_target_command_id,
+            state_update_if_false_positive=StateUpdate(),
+        )
+        if recovery_target_command_id is not None
+        else None,
         run_started_at=run_started_at,
         latest_protocol_command_hash=latest_command_hash,
         stopped_by_estop=False,
@@ -591,8 +601,23 @@ action_allowed_specs: List[ActionAllowedSpec] = [
                 ),
             ),
         ),
-        action=ResumeFromRecoveryAction(),
+        action=ResumeFromRecoveryAction(StateUpdate()),
         expected_error=errors.ResumeFromRecoveryNotAllowedError,
+    ),
+    ActionAllowedSpec(
+        subject=get_command_view(
+            queue_status=QueueStatus.AWAITING_RECOVERY_PAUSED, is_door_blocking=True
+        ),
+        action=QueueCommandAction(
+            request=cmd.unsafe.UnsafeUngripLabwareCreate(
+                params=cmd.unsafe.UnsafeUngripLabwareParams(),
+                intent=cmd.CommandIntent.FIXIT,
+            ),
+            request_hash=None,
+            command_id="command-id",
+            created_at=datetime(year=2021, month=1, day=1),
+        ),
+        expected_error=None,
     ),
 ]
 
@@ -904,7 +929,7 @@ def test_get_current() -> None:
 def test_get_slice_empty() -> None:
     """It should return a slice from the tail if no current command."""
     subject = get_command_view(commands=[])
-    result = subject.get_slice(cursor=0, length=2)
+    result = subject.get_slice(cursor=0, length=2, include_fixit_commands=True)
 
     assert result == CommandSlice(commands=[], cursor=0, total_length=0)
 
@@ -918,7 +943,7 @@ def test_get_slice() -> None:
 
     subject = get_command_view(commands=[command_1, command_2, command_3, command_4])
 
-    result = subject.get_slice(cursor=1, length=3)
+    result = subject.get_slice(cursor=1, length=3, include_fixit_commands=True)
 
     assert result == CommandSlice(
         commands=[command_2, command_3, command_4],
@@ -926,7 +951,7 @@ def test_get_slice() -> None:
         total_length=4,
     )
 
-    result = subject.get_slice(cursor=-3, length=10)
+    result = subject.get_slice(cursor=-3, length=10, include_fixit_commands=True)
 
     assert result == CommandSlice(
         commands=[command_1, command_2, command_3, command_4],
@@ -944,7 +969,7 @@ def test_get_slice_default_cursor_no_current() -> None:
 
     subject = get_command_view(commands=[command_1, command_2, command_3, command_4])
 
-    result = subject.get_slice(cursor=None, length=3)
+    result = subject.get_slice(cursor=None, length=3, include_fixit_commands=True)
 
     assert result == CommandSlice(
         commands=[command_2, command_3, command_4],
@@ -975,7 +1000,7 @@ def test_get_slice_default_cursor_failed_command() -> None:
         failed_command=CommandEntry(index=2, command=command_3),
     )
 
-    result = subject.get_slice(cursor=None, length=3)
+    result = subject.get_slice(cursor=None, length=3, include_fixit_commands=True)
 
     assert result == CommandSlice(
         commands=[command_3, command_4],
@@ -997,7 +1022,7 @@ def test_get_slice_default_cursor_running() -> None:
         running_command_id="command-id-3",
     )
 
-    result = subject.get_slice(cursor=None, length=2)
+    result = subject.get_slice(cursor=None, length=2, include_fixit_commands=True)
 
     assert result == CommandSlice(
         commands=[command_3, command_4],
@@ -1039,4 +1064,49 @@ def test_get_errors_slice() -> None:
         commands_errors=[error_1, error_2, error_3, error_4],
         cursor=0,
         total_length=4,
+    )
+
+
+def test_get_slice_without_fixit() -> None:
+    """It should select a cursor based on the running command, if present."""
+    command_1 = create_succeeded_command(command_id="command-id-1")
+    command_2 = create_succeeded_command(command_id="command-id-2")
+    command_3 = create_running_command(command_id="command-id-3")
+    command_4 = create_queued_command(command_id="command-id-4")
+    command_5 = create_queued_command(command_id="command-id-5")
+    command_6 = create_queued_command(
+        command_id="fixit-id-1", intent=cmd.CommandIntent.FIXIT
+    )
+    command_7 = create_queued_command(
+        command_id="fixit-id-2", intent=cmd.CommandIntent.FIXIT
+    )
+
+    subject = get_command_view(
+        commands=[
+            command_1,
+            command_2,
+            command_3,
+            command_4,
+            command_5,
+            command_6,
+            command_7,
+        ],
+        queued_command_ids=[
+            "command-id-1",
+            "command-id-2",
+            "command-id-3",
+            "command-id-4",
+            "command-id-5",
+            "fixit-id-1",
+            "fixit-id-2",
+        ],
+        queued_fixit_command_ids=["fixit-id-1", "fixit-id-2"],
+    )
+
+    result = subject.get_slice(cursor=None, length=7, include_fixit_commands=False)
+
+    assert result == CommandSlice(
+        commands=[command_1, command_2, command_3, command_4, command_5],
+        cursor=0,
+        total_length=5,
     )

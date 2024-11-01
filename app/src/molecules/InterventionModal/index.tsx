@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { useSelector } from 'react-redux'
 import { css } from 'styled-components'
 
@@ -6,6 +6,9 @@ import {
   ALIGN_CENTER,
   BORDERS,
   COLORS,
+  CURSOR_DEFAULT,
+  CURSOR_POINTER,
+  DIRECTION_COLUMN,
   Flex,
   Icon,
   JUSTIFY_CENTER,
@@ -14,12 +17,11 @@ import {
   POSITION_ABSOLUTE,
   POSITION_RELATIVE,
   POSITION_STICKY,
-  SPACING,
-  DIRECTION_COLUMN,
   RESPONSIVENESS,
+  SPACING,
 } from '@opentrons/components'
 
-import { getIsOnDevice } from '../../redux/config'
+import { getIsOnDevice } from '/app/redux/config'
 
 import type { IconName } from '@opentrons/components'
 import { ModalContentOneColSimpleButtons } from './ModalContentOneColSimpleButtons'
@@ -51,6 +53,7 @@ const BASE_STYLE = {
   right: 0,
   bottom: 0,
   left: 0,
+  padding: '1rem',
   width: '100%',
   height: '100%',
   'data-testid': '__otInterventionModalHeaderBase',
@@ -101,7 +104,7 @@ const WRAPPER_STYLE = {
   bottom: '0',
   zIndex: '1',
   backgroundColor: `${COLORS.black90}${COLORS.opacity40HexCode}`,
-  cursor: 'default',
+  cursor: CURSOR_DEFAULT,
   'data-testid': '__otInterventionModalWrapper',
 } as const
 
@@ -179,7 +182,7 @@ const ICON_STYLE = css`
   width: ${SPACING.spacing16};
   height: ${SPACING.spacing16};
   margin: ${SPACING.spacing4};
-  cursor: pointer;
+  cursor: ${CURSOR_POINTER};
 
   @media (${RESPONSIVENESS.touchscreenMediaQuerySpecs}) {
     width: ${SPACING.spacing32};

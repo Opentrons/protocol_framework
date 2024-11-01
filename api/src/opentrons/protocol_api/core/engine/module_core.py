@@ -1,14 +1,13 @@
 """Protocol API module implementation logic."""
 from __future__ import annotations
 
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Union
 
 from opentrons.hardware_control import SynchronousAdapter, modules as hw_modules
 from opentrons.hardware_control.modules.types import (
     ModuleModel,
     TemperatureStatus,
     MagneticStatus,
-    ThermocyclerStep,
     SpeedStatus,
     module_model_from_string,
 )
@@ -18,6 +17,7 @@ from opentrons.drivers.types import (
 )
 
 from opentrons.protocol_engine import commands as cmd
+from opentrons.protocol_engine.types import ABSMeasureMode
 from opentrons.types import DeckSlotName
 from opentrons.protocol_engine.clients import SyncClient as ProtocolEngineClient
 from opentrons.protocol_engine.errors.exceptions import (
@@ -26,7 +26,7 @@ from opentrons.protocol_engine.errors.exceptions import (
     CannotPerformModuleAction,
 )
 
-from opentrons.protocols.api_support.types import APIVersion
+from opentrons.protocols.api_support.types import APIVersion, ThermocyclerStep
 
 from ... import validation
 from ..module import (
@@ -326,15 +326,13 @@ class ThermocyclerModuleCore(ModuleCore, AbstractThermocyclerCore):
             cmd.thermocycler.WaitForLidTemperatureParams(moduleId=self.module_id)
         )
 
-    def execute_profile(
+    def _execute_profile_pre_221(
         self,
         steps: List[ThermocyclerStep],
         repetitions: int,
-        block_max_volume: Optional[float] = None,
+        block_max_volume: Optional[float],
     ) -> None:
-        """Execute a Thermocycler Profile."""
-        self._repetitions = repetitions
-        self._step_count = len(steps)
+        """Execute a thermocycler profile using thermocycler/runProfile and flattened steps."""
         engine_steps = [
             cmd.thermocycler.RunProfileStepParams(
                 celsius=step["temperature"],
@@ -350,6 +348,49 @@ class ThermocyclerModuleCore(ModuleCore, AbstractThermocyclerCore):
                 blockMaxVolumeUl=block_max_volume,
             )
         )
+
+    def _execute_profile_post_221(
+        self,
+        steps: List[ThermocyclerStep],
+        repetitions: int,
+        block_max_volume: Optional[float],
+    ) -> None:
+        """Execute a thermocycler profile using thermocycler/runExtendedProfile."""
+        engine_steps: List[
+            Union[cmd.thermocycler.ProfileCycle, cmd.thermocycler.ProfileStep]
+        ] = [
+            cmd.thermocycler.ProfileCycle(
+                repetitions=repetitions,
+                steps=[
+                    cmd.thermocycler.ProfileStep(
+                        celsius=step["temperature"],
+                        holdSeconds=step["hold_time_seconds"],
+                    )
+                    for step in steps
+                ],
+            )
+        ]
+        self._engine_client.execute_command(
+            cmd.thermocycler.RunExtendedProfileParams(
+                moduleId=self.module_id,
+                profileElements=engine_steps,
+                blockMaxVolumeUl=block_max_volume,
+            )
+        )
+
+    def execute_profile(
+        self,
+        steps: List[ThermocyclerStep],
+        repetitions: int,
+        block_max_volume: Optional[float] = None,
+    ) -> None:
+        """Execute a Thermocycler Profile."""
+        self._repetitions = repetitions
+        self._step_count = len(steps)
+        if self.api_version >= APIVersion(2, 21):
+            return self._execute_profile_post_221(steps, repetitions, block_max_volume)
+        else:
+            return self._execute_profile_pre_221(steps, repetitions, block_max_volume)
 
     def deactivate_lid(self) -> None:
         """Turn off the heated lid."""
@@ -525,24 +566,45 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
     """Absorbance Reader core logic implementation for Python protocols."""
 
     _sync_module_hardware: SynchronousAdapter[hw_modules.AbsorbanceReader]
-    _initialized_value: Optional[int] = None
+    _initialized_value: Optional[List[int]] = None
+    _ready_to_initialize: bool = False
 
-    def initialize(self, wavelength: int) -> None:
+    def initialize(
+        self,
+        mode: ABSMeasureMode,
+        wavelengths: List[int],
+        reference_wavelength: Optional[int] = None,
+    ) -> None:
         """Initialize the Absorbance Reader by taking zero reading."""
+        if not self._ready_to_initialize:
+            raise CannotPerformModuleAction(
+                "Cannot perform Initialize action on Absorbance Reader without calling `.close_lid()` first."
+            )
+
+        # TODO: check that the wavelengths are within the supported wavelengths
         self._engine_client.execute_command(
             cmd.absorbance_reader.InitializeParams(
                 moduleId=self.module_id,
-                sampleWavelength=wavelength,
+                measureMode=mode,
+                sampleWavelengths=wavelengths,
+                referenceWavelength=reference_wavelength,
             ),
         )
-        self._initialized_value = wavelength
+        self._initialized_value = wavelengths
 
-    def read(self) -> Optional[Dict[str, float]]:
-        """Initiate a read on the Absorbance Reader, and return the results. During Analysis, this will return None."""
+    def read(self, filename: Optional[str] = None) -> Dict[int, Dict[str, float]]:
+        """Initiate a read on the Absorbance Reader, and return the results. During Analysis, this will return a measurement of zero for all wells."""
+        wavelengths = self._engine_client.state.modules.get_absorbance_reader_substate(
+            self.module_id
+        ).configured_wavelengths
+        if wavelengths is None:
+            raise CannotPerformModuleAction(
+                "Cannot perform Read action on Absorbance Reader without calling `.initialize(...)` first."
+            )
         if self._initialized_value:
             self._engine_client.execute_command(
                 cmd.absorbance_reader.ReadAbsorbanceParams(
-                    moduleId=self.module_id, sampleWavelength=self._initialized_value
+                    moduleId=self.module_id, fileName=filename
                 )
             )
         if not self._engine_client.state.config.use_virtual_modules:
@@ -556,7 +618,17 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
             raise CannotPerformModuleAction(
                 "Absorbance Reader failed to return expected read result."
             )
-        return None
+
+        # When using virtual modules, return all zeroes
+        virtual_asbsorbance_result: Dict[int, Dict[str, float]] = {}
+        for wavelength in wavelengths:
+            converted_values = (
+                self._engine_client.state.modules.convert_absorbance_reader_data_points(
+                    data=[0] * 96
+                )
+            )
+            virtual_asbsorbance_result[wavelength] = converted_values
+        return virtual_asbsorbance_result
 
     def close_lid(
         self,
@@ -567,6 +639,7 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
                 moduleId=self.module_id,
             )
         )
+        self._ready_to_initialize = True
 
     def open_lid(self) -> None:
         """Close the Absorbance Reader's lid."""

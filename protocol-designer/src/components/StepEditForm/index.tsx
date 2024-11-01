@@ -1,7 +1,9 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { connect } from 'react-redux'
 import { useConditionalConfirm } from '@opentrons/components'
+import { getModuleDisplayName } from '@opentrons/shared-data'
+
 import { actions } from '../../steplist'
 import { actions as stepsActions } from '../../ui/steps'
 import { resetScrollElements } from '../../ui/steps/utils'
@@ -12,7 +14,6 @@ import {
 import { maskField } from '../../steplist/fieldLevel'
 import { getInvariantContext } from '../../step-forms/selectors'
 import { AutoAddPauseUntilTempStepModal } from '../modals/AutoAddPauseUntilTempStepModal'
-import { AutoAddPauseUntilHeaterShakerTempStepModal } from '../modals/AutoAddPauseUntilHeaterShakerTempStepModal'
 import {
   ConfirmDeleteModal,
   DELETE_STEP_FORM,
@@ -23,6 +24,7 @@ import { makeSingleEditFieldProps } from './fields/makeSingleEditFieldProps'
 import { StepEditFormComponent } from './StepEditFormComponent'
 import { getDirtyFields } from './utils'
 
+import type { ConnectedComponent } from 'react-redux'
 import type { InvariantContext } from '@opentrons/step-generation'
 import type { BaseState, ThunkDispatch } from '../../types'
 import type { FormData, StepFieldName, StepIdType } from '../../form-types'
@@ -65,12 +67,11 @@ const StepEditFormManager = (
     invariantContext,
   } = props
   const { t } = useTranslation('tooltip')
-  const [
-    showMoreOptionsModal,
-    setShowMoreOptionsModal,
-  ] = React.useState<boolean>(false)
-  const [focusedField, setFocusedField] = React.useState<string | null>(null)
-  const [dirtyFields, setDirtyFields] = React.useState<StepFieldName[]>(
+  const [showMoreOptionsModal, setShowMoreOptionsModal] = useState<boolean>(
+    false
+  )
+  const [focusedField, setFocusedField] = useState<string | null>(null)
+  const [dirtyFields, setDirtyFields] = useState<StepFieldName[]>(
     getDirtyFields(isNewStep, formData)
   )
   const toggleMoreOptionsModal = (): void => {
@@ -166,20 +167,25 @@ const StepEditFormManager = (
           onContinueClick={confirmClose}
         />
       )}
-      {showAddPauseUntilTempStepModal && (
+      {showAddPauseUntilTempStepModal ||
+      showAddPauseUntilHeaterShakerTempStepModal ? (
         <AutoAddPauseUntilTempStepModal
-          displayTemperature={formData?.targetTemperature ?? '?'}
+          displayTemperature={
+            showAddPauseUntilTempStepModal
+              ? formData?.targetTemperature
+              : formData?.targetHeaterShakerTemperature
+          }
+          displayModule={
+            formData.moduleId != null
+              ? getModuleDisplayName(
+                  invariantContext.moduleEntities[formData.moduleId].model
+                )
+              : ''
+          }
           handleCancelClick={saveStepForm}
-          handleContinueClick={confirmAddPauseUntilTempStep}
+          handleContinueClick={handleSave}
         />
-      )}
-      {showAddPauseUntilHeaterShakerTempStepModal && (
-        <AutoAddPauseUntilHeaterShakerTempStepModal
-          displayTemperature={formData?.targetHeaterShakerTemperature ?? '?'}
-          handleCancelClick={saveStepForm}
-          handleContinueClick={confirmAddPauseUntilHeaterShakerTempStep}
-        />
-      )}
+      ) : null}
       <StepEditFormComponent
         {...{
           canSave,
@@ -247,7 +253,10 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<any>): DP => {
 // It doesn't matter if the children are using connect or useSelector,
 // only the parent matters.)
 // https://react-redux.js.org/api/hooks#stale-props-and-zombie-children
-export const StepEditForm = connect(
+export const StepEditForm: ConnectedComponent<
+  typeof StepEditFormManager,
+  {}
+> = connect(
   mapStateToProps,
   mapDispatchToProps
 )((props: StepEditFormManagerProps) => (

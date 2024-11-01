@@ -73,6 +73,7 @@ def engine_state_summary() -> StateSummary:
                 id="some-liquid-id", displayName="liquid", description="desc"
             )
         ],
+        wells=[],
     )
 
 

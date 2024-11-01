@@ -1,7 +1,6 @@
-import * as React from 'react'
+import { useState, Fragment } from 'react'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
-import { I18nextProvider } from 'react-i18next'
 
 import {
   Box,
@@ -12,29 +11,34 @@ import {
 import { ApiHostProvider } from '@opentrons/react-api-client'
 import NiceModal from '@ebay/nice-modal-react'
 
-import { i18n } from '../i18n'
-import { Alerts } from '../organisms/Alerts'
-import { Breadcrumbs } from '../organisms/Breadcrumbs'
-import { ToasterOven } from '../organisms/ToasterOven'
-import { CalibrationDashboard } from '../pages/Devices/CalibrationDashboard'
-import { DeviceDetails } from '../pages/Devices/DeviceDetails'
-import { DevicesLanding } from '../pages/Devices/DevicesLanding'
-import { ProtocolRunDetails } from '../pages/Devices/ProtocolRunDetails'
-import { RobotSettings } from '../pages/Devices/RobotSettings'
-import { ProtocolsLanding } from '../pages/Protocols/ProtocolsLanding'
-import { ProtocolDetails } from '../pages/Protocols/ProtocolDetails'
-import { AppSettings } from '../pages/AppSettings'
-import { Labware } from '../pages/Labware'
+import { LocalizationProvider } from '/app/LocalizationProvider'
+import { Alerts } from '/app/organisms/Desktop/Alerts'
+import { Breadcrumbs } from '/app/organisms/Desktop/Breadcrumbs'
+import { SystemLanguagePreferenceModal } from '/app/organisms/Desktop/SystemLanguagePreferenceModal'
+import { ToasterOven } from '/app/organisms/ToasterOven'
+import { CalibrationDashboard } from '/app/pages/Desktop/Devices/CalibrationDashboard'
+import { DeviceDetails } from '/app/pages/Desktop/Devices/DeviceDetails'
+import { DevicesLanding } from '/app/pages/Desktop/Devices/DevicesLanding'
+import { ProtocolRunDetails } from '/app/pages/Desktop/Devices/ProtocolRunDetails'
+import { RobotSettings } from '/app/pages/Desktop/Devices/RobotSettings'
+import { ProtocolsLanding } from '/app/pages/Desktop/Protocols/ProtocolsLanding'
+import { ProtocolDetails } from '/app/pages/Desktop/Protocols/ProtocolDetails'
+import { AppSettings } from '/app/pages/Desktop/AppSettings'
+import { Labware } from '/app/pages/Desktop/Labware'
 import { useSoftwareUpdatePoll } from './hooks'
 import { Navbar } from './Navbar'
-import { EstopTakeover, EmergencyStopContext } from '../organisms/EmergencyStop'
-import { IncompatibleModuleTakeover } from '../organisms/IncompatibleModule'
-import { OPENTRONS_USB } from '../redux/discovery'
-import { appShellRequestor } from '../redux/shell/remote'
-import { useRobot, useIsFlex } from '../organisms/Devices/hooks'
-import { ProtocolTimeline } from '../pages/Protocols/ProtocolDetails/ProtocolTimeline'
+import {
+  EstopTakeover,
+  EmergencyStopContext,
+} from '/app/organisms/EmergencyStop'
+import { IncompatibleModuleTakeover } from '/app/organisms/IncompatibleModule'
+import { OPENTRONS_USB } from '/app/redux/discovery'
+import { appShellRequestor } from '/app/redux/shell/remote'
+import { useRobot, useIsFlex } from '/app/redux-resources/robots'
+import { ProtocolTimeline } from '/app/pages/Desktop/Protocols/ProtocolDetails/ProtocolTimeline'
 import { PortalRoot as ModalPortalRoot } from './portal'
 import { DesktopAppFallback } from './DesktopAppFallback'
+import { ReactQueryDevtools } from './tools'
 
 import type { RouteProps } from './types'
 
@@ -43,12 +47,12 @@ export const DesktopApp = (): JSX.Element => {
   const [
     isEmergencyStopModalDismissed,
     setIsEmergencyStopModalDismissed,
-  ] = React.useState<boolean>(false)
+  ] = useState<boolean>(false)
 
   const desktopRoutes: RouteProps[] = [
     {
       Component: ProtocolsLanding,
-      name: 'Protocols',
+      name: 'protocols',
       navLinkTo: '/protocols',
       path: '/protocols',
     },
@@ -64,13 +68,13 @@ export const DesktopApp = (): JSX.Element => {
     },
     {
       Component: Labware,
-      name: 'Labware',
+      name: 'labware',
       navLinkTo: '/labware',
       path: '/labware',
     },
     {
       Component: DevicesLanding,
-      name: 'Devices',
+      name: 'devices',
       navLinkTo: '/devices',
       path: '/devices',
     },
@@ -103,8 +107,10 @@ export const DesktopApp = (): JSX.Element => {
 
   return (
     <NiceModal.Provider>
-      <I18nextProvider i18n={i18n}>
+      <LocalizationProvider>
         <ErrorBoundary FallbackComponent={DesktopAppFallback}>
+          <ReactQueryDevtools />
+          <SystemLanguagePreferenceModal />
           <Navbar routes={desktopRoutes} />
           <ToasterOven>
             <EmergencyStopContext.Provider
@@ -121,7 +127,7 @@ export const DesktopApp = (): JSX.Element => {
                         <Route
                           key={path}
                           element={
-                            <React.Fragment key={Component.name}>
+                            <Fragment key={Component.name}>
                               <Breadcrumbs />
                               <Box
                                 position={POSITION_RELATIVE}
@@ -138,7 +144,7 @@ export const DesktopApp = (): JSX.Element => {
                                   <Component />
                                 </Box>
                               </Box>
-                            </React.Fragment>
+                            </Fragment>
                           }
                           path={path}
                         />
@@ -152,7 +158,7 @@ export const DesktopApp = (): JSX.Element => {
             </EmergencyStopContext.Provider>
           </ToasterOven>
         </ErrorBoundary>
-      </I18nextProvider>
+      </LocalizationProvider>
     </NiceModal.Provider>
   )
 }

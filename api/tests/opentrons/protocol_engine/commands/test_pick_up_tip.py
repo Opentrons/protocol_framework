@@ -2,13 +2,20 @@
 from datetime import datetime
 
 from decoy import Decoy, matchers
+from unittest.mock import sentinel
 
 from opentrons.types import MountType, Point
 
-from opentrons.protocol_engine import WellLocation, WellOffset, DeckPoint
-from opentrons.protocol_engine.errors import TipNotAttachedError
+from opentrons.protocol_engine import (
+    WellLocation,
+    PickUpTipWellLocation,
+    WellOffset,
+    DeckPoint,
+)
+from opentrons.protocol_engine.errors import PickUpTipTipNotAttachedError
 from opentrons.protocol_engine.execution import MovementHandler, TipHandler
 from opentrons.protocol_engine.resources import ModelUtils
+from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.types import TipGeometry
 
@@ -18,7 +25,6 @@ from opentrons.protocol_engine.commands.pick_up_tip import (
     PickUpTipResult,
     PickUpTipImplementation,
     TipPhysicallyMissingError,
-    TipPhysicallyMissingErrorInternalData,
 )
 
 
@@ -38,6 +44,12 @@ async def test_success(
     )
 
     decoy.when(state_view.pipettes.get_mount("pipette-id")).then_return(MountType.LEFT)
+
+    decoy.when(
+        state_view.geometry.convert_pick_up_tip_well_location(
+            well_location=PickUpTipWellLocation(offset=WellOffset(x=1, y=2, z=3))
+        )
+    ).then_return(WellLocation(offset=WellOffset(x=1, y=2, z=3)))
 
     decoy.when(
         await movement.move_to_well(
@@ -61,7 +73,7 @@ async def test_success(
             pipetteId="pipette-id",
             labwareId="labware-id",
             wellName="A3",
-            wellLocation=WellLocation(offset=WellOffset(x=1, y=2, z=3)),
+            wellLocation=PickUpTipWellLocation(offset=WellOffset(x=1, y=2, z=3)),
         )
     )
 
@@ -72,7 +84,20 @@ async def test_success(
             tipDiameter=5,
             position=DeckPoint(x=111, y=222, z=333),
         ),
-        private=None,
+        state_update=update_types.StateUpdate(
+            pipette_location=update_types.PipetteLocationUpdate(
+                pipette_id="pipette-id",
+                new_location=update_types.Well(labware_id="labware-id", well_name="A3"),
+                new_deck_point=DeckPoint(x=111, y=222, z=333),
+            ),
+            pipette_tip_state=update_types.PipetteTipStateUpdate(
+                pipette_id="pipette-id",
+                tip_geometry=TipGeometry(length=42, diameter=5, volume=300),
+            ),
+            tips_used=update_types.TipsUsedUpdate(
+                pipette_id="pipette-id", labware_id="labware-id", well_name="A3"
+            ),
+        ),
     )
 
 
@@ -98,10 +123,24 @@ async def test_tip_physically_missing_error(
     error_created_at = datetime(1234, 5, 6)
 
     decoy.when(
+        state_view.geometry.convert_pick_up_tip_well_location(
+            well_location=PickUpTipWellLocation(offset=WellOffset())
+        )
+    ).then_return(WellLocation(offset=WellOffset()))
+
+    decoy.when(
+        await movement.move_to_well(
+            pipette_id="pipette-id",
+            labware_id="labware-id",
+            well_name="well-name",
+            well_location=WellLocation(offset=WellOffset()),
+        )
+    ).then_return(Point(x=111, y=222, z=333))
+    decoy.when(
         await tip_handler.pick_up_tip(
             pipette_id=pipette_id, labware_id=labware_id, well_name=well_name
         )
-    ).then_raise(TipNotAttachedError())
+    ).then_raise(PickUpTipTipNotAttachedError(tip_geometry=sentinel.tip_geometry))
     decoy.when(model_utils.generate_id()).then_return(error_id)
     decoy.when(model_utils.get_timestamp()).then_return(error_created_at)
 
@@ -113,7 +152,21 @@ async def test_tip_physically_missing_error(
         public=TipPhysicallyMissingError.construct(
             id=error_id, createdAt=error_created_at, wrappedErrors=[matchers.Anything()]
         ),
-        private=TipPhysicallyMissingErrorInternalData(
-            pipette_id=pipette_id, labware_id=labware_id, well_name=well_name
+        state_update=update_types.StateUpdate(
+            pipette_location=update_types.PipetteLocationUpdate(
+                pipette_id="pipette-id",
+                new_location=update_types.Well(
+                    labware_id="labware-id", well_name="well-name"
+                ),
+                new_deck_point=DeckPoint(x=111, y=222, z=333),
+            ),
+            tips_used=update_types.TipsUsedUpdate(
+                pipette_id="pipette-id", labware_id="labware-id", well_name="well-name"
+            ),
+        ),
+        state_update_if_false_positive=update_types.StateUpdate(
+            pipette_tip_state=update_types.PipetteTipStateUpdate(
+                pipette_id="pipette-id", tip_geometry=sentinel.tip_geometry
+            )
         ),
     )

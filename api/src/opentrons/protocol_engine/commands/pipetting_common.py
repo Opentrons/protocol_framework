@@ -1,5 +1,4 @@
 """Common pipetting command base models."""
-from dataclasses import dataclass
 from opentrons_shared_data.errors import ErrorCodes
 from pydantic import BaseModel, Field
 from typing import Literal, Optional, Tuple
@@ -7,7 +6,7 @@ from typing_extensions import TypedDict
 
 from opentrons.protocol_engine.errors.error_occurrence import ErrorOccurrence
 
-from ..types import WellLocation, DeckPoint
+from ..types import WellLocation, LiquidHandlingWellLocation, DeckPoint
 
 
 class PipetteIdMixin(BaseModel):
@@ -70,6 +69,23 @@ class WellLocationMixin(BaseModel):
     )
 
 
+class LiquidHandlingWellLocationMixin(BaseModel):
+    """Mixin for command requests that take a location that's somewhere in a well."""
+
+    labwareId: str = Field(
+        ...,
+        description="Identifier of labware to use.",
+    )
+    wellName: str = Field(
+        ...,
+        description="Name of well to use in labware.",
+    )
+    wellLocation: LiquidHandlingWellLocation = Field(
+        default_factory=LiquidHandlingWellLocation,
+        description="Relative well location at which to perform the operation",
+    )
+
+
 class MovementMixin(BaseModel):
     """Mixin for command requests that move a pipette."""
 
@@ -115,6 +131,14 @@ class BaseLiquidHandlingResult(BaseModel):
 class DestinationPositionResult(BaseModel):
     """Mixin for command results that move a pipette."""
 
+    # todo(mm, 2024-08-02): Consider deprecating or redefining this.
+    #
+    # This is here because opentrons.protocol_engine needed it for internal bookkeeping
+    # and, at the time, we didn't have a way to do that without adding this to the
+    # public command results. Its usefulness to callers outside
+    # opentrons.protocol_engine is questionable because they would need to know which
+    # critical point is in play, and I think that can change depending on obscure
+    # things like labware quirks.
     position: DeckPoint = Field(
         DeckPoint(x=0, y=0, z=0),
         description=(
@@ -150,14 +174,6 @@ class OverpressureError(ErrorOccurrence):
     errorInfo: ErrorLocationInfo
 
 
-@dataclass(frozen=True)
-class OverpressureErrorInternalData:
-    """Internal-to-ProtocolEngine data about an OverpressureError."""
-
-    position: DeckPoint
-    """Same meaning as DestinationPositionResult.position."""
-
-
 class LiquidNotFoundError(ErrorOccurrence):
     """Returned when no liquid is detected during the liquid probe process/move.
 
@@ -172,9 +188,17 @@ class LiquidNotFoundError(ErrorOccurrence):
     detail: str = ErrorCodes.PIPETTE_LIQUID_NOT_FOUND.value.detail
 
 
-@dataclass(frozen=True)
-class LiquidNotFoundErrorInternalData:
-    """Internal-to-ProtocolEngine data about a LiquidNotFoundError."""
+class TipPhysicallyAttachedError(ErrorOccurrence):
+    """Returned when sensors determine that a tip remains on the pipette after a drop attempt.
 
-    position: DeckPoint
-    """Same meaning as DestinationPositionResult.position."""
+    The pipette will act as if the tip was not dropped. So, you won't be able to pick
+    up a new tip without dropping the current one, and movement commands will assume
+    there is a tip hanging off the bottom of the pipette.
+    """
+
+    isDefined: bool = True
+
+    errorType: Literal["tipPhysicallyAttached"] = "tipPhysicallyAttached"
+
+    errorCode: str = ErrorCodes.TIP_DROP_FAILED.value.code
+    detail: str = ErrorCodes.TIP_DROP_FAILED.value.detail

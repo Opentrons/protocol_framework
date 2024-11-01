@@ -1,7 +1,9 @@
 """Request and response models for run resources."""
 from datetime import datetime
+
+from enum import Enum
 from pydantic import BaseModel, Field
-from typing import List, Optional, Literal
+from typing import List, Optional, Literal, Dict
 
 from opentrons.protocol_engine import (
     CommandStatus,
@@ -19,6 +21,7 @@ from opentrons.protocol_engine import (
     CommandNote,
 )
 from opentrons.protocol_engine.types import (
+    OnDeckLabwareLocation,
     RunTimeParameter,
     PrimitiveRunTimeParamValuesType,
     CSVRunTimeParamFilesType,
@@ -144,6 +147,10 @@ class Run(ResourceModel):
             " if none are specified in the request."
         ),
     )
+    outputFileIds: List[str] = Field(
+        ...,
+        description="File IDs of files output during a protocol run.",
+    )
     protocolId: Optional[str] = Field(
         None,
         description=(
@@ -221,6 +228,10 @@ class BadRun(ResourceModel):
             " if none are specified in the request."
         ),
     )
+    outputFileIds: List[str] = Field(
+        ...,
+        description="File IDs of files output during a protocol run.",
+    )
     protocolId: Optional[str] = Field(
         None,
         description=(
@@ -278,6 +289,58 @@ class LabwareDefinitionSummary(BaseModel):
         ...,
         description="The definition's unique resource identifier in the run.",
     )
+
+
+class NozzleLayoutConfig(str, Enum):
+    """Possible valid nozzle configurations."""
+
+    COLUMN = "column"
+    ROW = "row"
+    SINGLE = "single"
+    FULL = "full"
+    SUBRECT = "subrect"
+
+
+class ActiveNozzleLayout(BaseModel):
+    """Details about the active nozzle layout for a pipette used in the current run."""
+
+    startingNozzle: str = Field(
+        ..., description="The nozzle used when issuing pipette commands."
+    )
+    activeNozzles: List[str] = Field(
+        ...,
+        description="A map of all the pipette nozzles active in the current configuration.",
+    )
+    config: NozzleLayoutConfig = Field(
+        ..., description="The active nozzle configuration."
+    )
+
+
+class PlaceLabwareState(BaseModel):
+    """Details the labware being placed by the gripper."""
+
+    labwareId: str = Field(..., description="The ID of the labware to place.")
+    location: OnDeckLabwareLocation = Field(
+        ..., description="The location the labware should be in."
+    )
+    shouldPlaceDown: bool = Field(
+        ..., description="Whether the gripper should place down the labware."
+    )
+
+
+class RunCurrentState(BaseModel):
+    """Current details about a run."""
+
+    estopEngaged: bool = Field(..., description="")
+    activeNozzleLayouts: Dict[str, ActiveNozzleLayout] = Field(...)
+    placeLabwareState: Optional[PlaceLabwareState] = Field(None)
+
+
+class CommandLinkNoMeta(BaseModel):
+    """A link to a command resource without a meta field."""
+
+    id: str = Field(..., description="The ID of the command.")
+    href: str = Field(..., description="The HTTP API path to the command.")
 
 
 class RunNotFoundError(GeneralError):

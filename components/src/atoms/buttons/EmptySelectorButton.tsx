@@ -1,12 +1,13 @@
-import * as React from 'react'
+import styled from 'styled-components'
 import { Flex } from '../../primitives'
 import {
   BORDERS,
   COLORS,
+  CURSOR_DEFAULT,
+  CURSOR_POINTER,
   Icon,
   SPACING,
   StyledText,
-  Btn,
   JUSTIFY_CENTER,
   JUSTIFY_START,
   ALIGN_CENTER,
@@ -19,7 +20,6 @@ interface EmptySelectorButtonProps {
   text: string
   textAlignment: 'left' | 'middle'
   iconName?: IconName
-  size?: 'large' | 'small'
   disabled?: boolean
 }
 
@@ -27,18 +27,22 @@ interface EmptySelectorButtonProps {
 export function EmptySelectorButton(
   props: EmptySelectorButtonProps
 ): JSX.Element {
-  const {
-    onClick,
-    text,
-    iconName,
-    size = 'large',
-    textAlignment,
-    disabled = false,
-  } = props
-  const buttonSizing = size === 'large' ? '100%' : FLEX_MAX_CONTENT
+  const { onClick, text, iconName, textAlignment, disabled = false } = props
+
+  const StyledButton = styled.button`
+    border: none;
+    width: ${FLEX_MAX_CONTENT};
+    height: ${FLEX_MAX_CONTENT};
+    cursor: ${disabled ? CURSOR_DEFAULT : CURSOR_POINTER};
+    &:focus-visible {
+      outline: 2px solid ${COLORS.white};
+      box-shadow: 0 0 0 4px ${COLORS.blue50};
+      border-radius: ${BORDERS.borderRadius8};
+    }
+  `
 
   return (
-    <Btn onClick={onClick} width={buttonSizing} height={buttonSizing}>
+    <StyledButton onClick={onClick}>
       <Flex
         gridGap={SPACING.spacing4}
         padding={SPACING.spacing12}
@@ -63,6 +67,6 @@ export function EmptySelectorButton(
         ) : null}
         <StyledText desktopStyle="bodyDefaultSemiBold">{text}</StyledText>
       </Flex>
-    </Btn>
+    </StyledButton>
   )
 }

@@ -22,7 +22,13 @@ from .dependencies import (
 )
 from .data_files_store import DataFilesStore, DataFileInfo
 from .file_auto_deleter import DataFileAutoDeleter
-from .models import DataFile, FileIdNotFoundError, FileIdNotFound, FileInUseError
+from .models import (
+    DataFile,
+    DataFileSource,
+    FileIdNotFoundError,
+    FileIdNotFound,
+    FileInUseError,
+)
 from ..protocols.dependencies import get_file_hasher, get_file_reader_writer
 from ..service.dependencies import get_current_time, get_unique_id
 
@@ -137,6 +143,7 @@ async def upload_data_file(
                     id=existing_file_info.id,
                     name=existing_file_info.name,
                     createdAt=existing_file_info.created_at,
+                    source=existing_file_info.source,
                 )
             ),
             status_code=status.HTTP_200_OK,
@@ -151,6 +158,7 @@ async def upload_data_file(
         name=buffered_file.name,
         file_hash=file_hash,
         created_at=created_at,
+        source=DataFileSource.UPLOADED,
     )
     await data_files_store.insert(file_info)
     return await PydanticResponse.create(
@@ -159,6 +167,7 @@ async def upload_data_file(
                 id=file_info.id,
                 name=file_info.name,
                 createdAt=created_at,
+                source=DataFileSource.UPLOADED,
             )
         ),
         status_code=status.HTTP_201_CREATED,
@@ -195,6 +204,7 @@ async def get_data_file_info_by_id(
                 id=resource.id,
                 name=resource.name,
                 createdAt=resource.created_at,
+                source=resource.source,
             )
         ),
         status_code=status.HTTP_200_OK,
@@ -260,6 +270,7 @@ async def get_all_data_files(
                     id=data_file_info.id,
                     name=data_file_info.name,
                     createdAt=data_file_info.created_at,
+                    source=data_file_info.source,
                 )
                 for data_file_info in data_files
             ],
@@ -282,7 +293,7 @@ async def delete_file_by_id(
     dataFileId: str,
     data_files_store: DataFilesStore = Depends(get_data_files_store),
 ) -> PydanticResponse[SimpleEmptyBody]:
-    """Delete an uploaded data file by ID.
+    """Delete an uploaded or generated data file by ID.
 
     Arguments:
         dataFileId: ID of the data file to delete, pulled from URL.

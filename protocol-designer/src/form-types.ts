@@ -146,11 +146,11 @@ export type StepType =
 
 export const stepIconsByType: Record<StepType, IconName> = {
   comment: 'comment',
-  moveLabware: 'move-xy',
-  moveLiquid: 'ot-transfer',
-  mix: 'ot-mix',
-  pause: 'pause',
-  manualIntervention: 'pause',
+  moveLabware: 'ot-move',
+  moveLiquid: 'transfer',
+  mix: 'mix',
+  pause: 'pause-circle',
+  manualIntervention: 'pause-circle',
   magnet: 'ot-magnet-v2',
   temperature: 'ot-temperature-v2',
   thermocycler: 'ot-thermocycler',
@@ -192,6 +192,7 @@ export type PauseForm = AnnotationFields & {
   pauseSecond?: string
   pauseMessage?: string
   pauseTemperature?: string
+  pauseTime?: string
 }
 // TODO: separate field values from from metadata
 export interface FormData {
@@ -365,6 +366,7 @@ export interface HydratedHeaterShakerFormData {
   heaterShakerSetTimer: 'true' | 'false' | null
   heaterShakerTimerMinutes: string | null
   heaterShakerTimerSeconds: string | null
+  heaterShakerTimer?: string | null
   id: string
   latchOpen: boolean
   moduleId: string

@@ -4,8 +4,8 @@ import {
   getTiprackVolume,
   getLabwareDefURI,
 } from '@opentrons/shared-data'
-import { getModuleInitialLoadInfo } from '../../Devices/ProtocolRun/utils/getModuleInitialLoadInfo'
-import { getLabwareDefinitionsFromCommands } from '../../../molecules/Command/utils/getLabwareDefinitionsFromCommands'
+import { getModuleInitialLoadInfo } from '/app/transformations/commands'
+import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import type {
   CompletedProtocolAnalysis,
   LabwareDefinition2,

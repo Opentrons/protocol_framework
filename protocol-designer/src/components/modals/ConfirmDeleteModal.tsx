@@ -1,9 +1,18 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { AlertModal } from '@opentrons/components'
-import { getMainPagePortalEl } from '../portals/MainPageModalPortal'
-import modalStyles from './modal.module.css'
+import {
+  ALIGN_FLEX_END,
+  AlertPrimaryButton,
+  COLORS,
+  Flex,
+  Icon,
+  Modal,
+  SPACING,
+  SecondaryButton,
+  StyledText,
+} from '@opentrons/components'
+import { getTopPortalEl } from '../portals/TopPortal'
 
 export const DELETE_PROFILE_CYCLE: 'deleteProfileCycle' = 'deleteProfileCycle'
 export const CLOSE_STEP_FORM_WITH_CHANGES: 'closeStepFormWithChanges' =
@@ -31,33 +40,43 @@ interface Props {
 }
 
 export function ConfirmDeleteModal(props: Props): JSX.Element {
-  const { t } = useTranslation(['modal', 'button'])
+  const { i18n, t } = useTranslation(['modal', 'button'])
   const { modalType, onCancelClick, onContinueClick } = props
-  const cancelCopy = t('button:cancel')
-  const continueCopy = t(
-    `confirm_delete_modal.${modalType}.confirm_button`,
-    t('button:continue')
+  const cancelCopy = i18n.format(t('button:cancel'), 'capitalize')
+  const continueCopy = i18n.format(
+    t(`confirm_delete_modal.${modalType}.confirm_button`, t('button:continue')),
+    'capitalize'
   )
-  const buttons = [
-    { title: cancelCopy, children: cancelCopy, onClick: onCancelClick },
-    {
-      title: continueCopy,
-      children: continueCopy,
-      className: modalStyles.long_button,
-      onClick: onContinueClick,
-    },
-  ]
+
   return createPortal(
-    <AlertModal
-      alertOverlay
-      restrictOuterScroll={false}
-      buttons={buttons}
-      onCloseClick={onCancelClick}
-      className={modalStyles.modal}
-      heading={t(`confirm_delete_modal.${modalType}.title`)}
+    <Modal
+      title={t(`confirm_delete_modal.${modalType}.title`)}
+      titleElement1={
+        <Icon name="alert-circle" color={COLORS.yellow50} size="1.25rem" />
+      }
+      footer={
+        <Flex
+          padding={`0 ${SPACING.spacing24} ${SPACING.spacing24}`}
+          gridGap={SPACING.spacing8}
+          justifyContent={ALIGN_FLEX_END}
+        >
+          <SecondaryButton onClick={onCancelClick}>
+            <StyledText desktopStyle="bodyDefaultSemiBold">
+              {cancelCopy}
+            </StyledText>
+          </SecondaryButton>
+          <AlertPrimaryButton onClick={onContinueClick}>
+            <StyledText desktopStyle="bodyDefaultSemiBold">
+              {continueCopy}
+            </StyledText>
+          </AlertPrimaryButton>
+        </Flex>
+      }
     >
-      <p>{t(`confirm_delete_modal.${modalType}.body`)}</p>
-    </AlertModal>,
-    getMainPagePortalEl()
+      <StyledText desktopStyle="bodyDefaultRegular">
+        {t(`confirm_delete_modal.${modalType}.body`)}
+      </StyledText>
+    </Modal>,
+    getTopPortalEl()
   )
 }

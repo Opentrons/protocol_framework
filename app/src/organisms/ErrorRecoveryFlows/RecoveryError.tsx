@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 
@@ -16,7 +15,7 @@ import {
   RESPONSIVENESS,
 } from '@opentrons/components'
 
-import { SmallButton } from '../../atoms/buttons'
+import { SmallButton } from '/app/atoms/buttons'
 import { RecoverySingleColumnContentWrapper } from './shared'
 import {
   DESKTOP_ONLY,
@@ -55,19 +54,23 @@ export function ErrorRecoveryFlowError({
   currentRecoveryOptionUtils,
   routeUpdateActions,
   recoveryCommands,
+  errorKind,
 }: RecoveryContentProps): JSX.Element {
   const { OPTION_SELECTION } = RECOVERY_MAP
   const { t } = useTranslation('error_recovery')
   const { selectedRecoveryOption } = currentRecoveryOptionUtils
-  const { proceedToRouteAndStep, setRobotInMotion } = routeUpdateActions
+  const { proceedToRouteAndStep, handleMotionRouting } = routeUpdateActions
   const { homePipetteZAxes } = recoveryCommands
 
-  const userRecoveryOptionCopy = getRecoveryOptionCopy(selectedRecoveryOption)
+  const userRecoveryOptionCopy = getRecoveryOptionCopy(
+    selectedRecoveryOption,
+    errorKind
+  )
 
   const onPrimaryClick = (): void => {
-    void setRobotInMotion(true)
+    void handleMotionRouting(true)
       .then(() => homePipetteZAxes())
-      .finally(() => setRobotInMotion(false))
+      .finally(() => handleMotionRouting(false))
       .then(() => proceedToRouteAndStep(OPTION_SELECTION.ROUTE))
   }
 
@@ -88,6 +91,7 @@ export function RecoveryDropTipFlowErrors({
   currentRecoveryOptionUtils,
   routeUpdateActions,
   getRecoveryOptionCopy,
+  errorKind,
 }: RecoveryContentProps): JSX.Element {
   const { t } = useTranslation('error_recovery')
   const { step } = recoveryMap
@@ -99,7 +103,10 @@ export function RecoveryDropTipFlowErrors({
   const { selectedRecoveryOption } = currentRecoveryOptionUtils
   const { proceedToRouteAndStep } = routeUpdateActions
 
-  const userRecoveryOptionCopy = getRecoveryOptionCopy(selectedRecoveryOption)
+  const userRecoveryOptionCopy = getRecoveryOptionCopy(
+    selectedRecoveryOption,
+    errorKind
+  )
 
   const buildTitle = (): string => {
     switch (step) {

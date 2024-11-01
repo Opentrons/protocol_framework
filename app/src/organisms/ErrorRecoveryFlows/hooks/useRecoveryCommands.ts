@@ -1,14 +1,16 @@
-import * as React from 'react'
+import { useCallback, useState } from 'react'
 import head from 'lodash/head'
 
 import {
   useResumeRunFromRecoveryMutation,
   useStopRunMutation,
   useUpdateErrorRecoveryPolicy,
+  useResumeRunFromRecoveryAssumingFalsePositiveMutation,
 } from '@opentrons/react-api-client'
 
-import { useChainRunCommands } from '../../../resources/runs'
-import { RECOVERY_MAP } from '../constants'
+import { useChainRunCommands } from '/app/resources/runs'
+import { ERROR_KINDS, RECOVERY_MAP } from '../constants'
+import { getErrorKind } from '/app/organisms/ErrorRecoveryFlows/utils'
 
 import type {
   CreateCommand,
@@ -19,17 +21,20 @@ import type {
   DispenseInPlaceRunTimeCommand,
   DropTipInPlaceRunTimeCommand,
   PrepareToAspirateRunTimeCommand,
+  MoveLabwareParams,
 } from '@opentrons/shared-data'
 import type {
   CommandData,
+  IfMatchType,
   RecoveryPolicyRulesParams,
+  RunAction,
 } from '@opentrons/api-client'
 import type { WellGroup } from '@opentrons/components'
-import type { FailedCommand } from '../types'
+import type { FailedCommand, RecoveryRoute, RouteStep } from '../types'
 import type { UseFailedLabwareUtilsResult } from './useFailedLabwareUtils'
 import type { UseRouteUpdateActionsResult } from './useRouteUpdateActions'
 import type { RecoveryToasts } from './useRecoveryToasts'
-import type { UseRecoveryAnalyticsResult } from './useRecoveryAnalytics'
+import type { UseRecoveryAnalyticsResult } from '/app/redux-resources/analytics'
 import type { CurrentRecoveryOptionUtils } from './useRecoveryRouting'
 import type { ErrorRecoveryFlowsProps } from '../index'
 
@@ -39,7 +44,7 @@ interface UseRecoveryCommandsParams {
   failedLabwareUtils: UseFailedLabwareUtilsResult
   routeUpdateActions: UseRouteUpdateActionsResult
   recoveryToastUtils: RecoveryToasts
-  analytics: UseRecoveryAnalyticsResult
+  analytics: UseRecoveryAnalyticsResult<RecoveryRoute, RouteStep>
   selectedRecoveryOption: CurrentRecoveryOptionUtils['selectedRecoveryOption']
 }
 export interface UseRecoveryCommandsResult {
@@ -49,14 +54,22 @@ export interface UseRecoveryCommandsResult {
   cancelRun: () => void
   /* A terminal recovery command, that causes ER to exit as the run status becomes "running" */
   skipFailedCommand: () => void
-  /* A non-terminal recovery command. Ignore this errorKind for the rest of this run. */
-  ignoreErrorKindThisRun: () => Promise<void>
+  /* A non-terminal recovery command. Ignore this errorKind for the rest of this run.
+   * The server is not informed of recovery policy changes until a terminal recovery command occurs that does not result
+   * in termination of the run. */
+  ignoreErrorKindThisRun: (ignoreErrors: boolean) => Promise<void>
   /* A non-terminal recovery command */
   retryFailedCommand: () => Promise<CommandData[]>
   /* A non-terminal recovery command */
   homePipetteZAxes: () => Promise<CommandData[]>
   /* A non-terminal recovery command */
   pickUpTips: () => Promise<CommandData[]>
+  /* A non-terminal recovery command */
+  releaseGripperJaws: () => Promise<CommandData[]>
+  /* A non-terminal recovery command */
+  updatePositionEstimatorsAndHomeGripper: () => Promise<CommandData[]>
+  /* A non-terminal recovery command */
+  moveLabwareWithoutPause: () => Promise<CommandData[]>
 }
 
 // TODO(jh, 07-24-24): Create tighter abstractions for terminal vs. non-terminal commands.
@@ -70,6 +83,8 @@ export function useRecoveryCommands({
   analytics,
   selectedRecoveryOption,
 }: UseRecoveryCommandsParams): UseRecoveryCommandsResult {
+  const [ignoreErrors, setIgnoreErrors] = useState(false)
+
   const { proceedToRouteAndStep } = routeUpdateActions
   const { chainRunCommands } = useChainRunCommands(
     runId,
@@ -78,9 +93,29 @@ export function useRecoveryCommands({
   const {
     mutateAsync: resumeRunFromRecovery,
   } = useResumeRunFromRecoveryMutation()
+  const {
+    mutateAsync: resumeRunFromRecoveryAssumingFalsePositive,
+  } = useResumeRunFromRecoveryAssumingFalsePositiveMutation()
   const { stopRun } = useStopRunMutation()
-  const { updateErrorRecoveryPolicy } = useUpdateErrorRecoveryPolicy(runId)
+  const {
+    mutateAsync: updateErrorRecoveryPolicy,
+  } = useUpdateErrorRecoveryPolicy(runId)
   const { makeSuccessToast } = recoveryToastUtils
+
+  const chainRunRecoveryCommands = useCallback(
+    (
+      commands: CreateCommand[],
+      continuePastFailure: boolean = false
+    ): Promise<CommandData[]> =>
+      chainRunCommands(commands, continuePastFailure).catch(e => {
+        console.warn(`Error executing "fixit" command: ${e}`)
+        analytics.reportActionSelectedResult(selectedRecoveryOption, 'failed')
+        // the catch never occurs if continuePastCommandFailure is "true"
+        void proceedToRouteAndStep(RECOVERY_MAP.ERROR_WHILE_RECOVERING.ROUTE)
+        return Promise.reject(new Error(`Could not execute command: ${e}`))
+      }),
+    [analytics, selectedRecoveryOption]
+  )
 
   const buildRetryPrepMove = (): MoveToCoordinatesCreateCommand | null => {
     type InPlaceCommand =
@@ -126,22 +161,8 @@ export function useRecoveryCommands({
         : null
       : null
   }
-  const chainRunRecoveryCommands = React.useCallback(
-    (
-      commands: CreateCommand[],
-      continuePastFailure: boolean = false
-    ): Promise<CommandData[]> =>
-      chainRunCommands(commands, continuePastFailure).catch(e => {
-        console.warn(`Error executing "fixit" command: ${e}`)
-        analytics.reportActionSelectedResult(selectedRecoveryOption, 'failed')
-        // the catch never occurs if continuePastCommandFailure is "true"
-        void proceedToRouteAndStep(RECOVERY_MAP.ERROR_WHILE_RECOVERING.ROUTE)
-        return Promise.reject(new Error(`Could not execute command: ${e}`))
-      }),
-    [chainRunCommands]
-  )
 
-  const retryFailedCommand = React.useCallback((): Promise<CommandData[]> => {
+  const retryFailedCommand = useCallback((): Promise<CommandData[]> => {
     const { commandType, params } = failedCommandByRunRecord as FailedCommand // Null case is handled before command could be issued.
     return chainRunRecoveryCommands(
       [
@@ -153,12 +174,12 @@ export function useRecoveryCommands({
   }, [chainRunRecoveryCommands, failedCommandByRunRecord?.key])
 
   // Homes the Z-axis of all attached pipettes.
-  const homePipetteZAxes = React.useCallback((): Promise<CommandData[]> => {
+  const homePipetteZAxes = useCallback((): Promise<CommandData[]> => {
     return chainRunRecoveryCommands([HOME_PIPETTE_Z_AXES])
   }, [chainRunRecoveryCommands])
 
   // Pick up the user-selected tips
-  const pickUpTips = React.useCallback((): Promise<CommandData[]> => {
+  const pickUpTips = useCallback((): Promise<CommandData[]> => {
     const { selectedTipLocations, failedLabware } = failedLabwareUtils
 
     const pickUpTipCmd = buildPickUpTips(
@@ -174,43 +195,121 @@ export function useRecoveryCommands({
     }
   }, [chainRunRecoveryCommands, failedCommandByRunRecord, failedLabwareUtils])
 
-  const resumeRun = React.useCallback((): void => {
-    void resumeRunFromRecovery(runId).then(() => {
-      analytics.reportActionSelectedResult(selectedRecoveryOption, 'succeeded')
-      makeSuccessToast()
-    })
-  }, [runId, resumeRunFromRecovery, makeSuccessToast])
+  const ignoreErrorKindThisRun = (ignoreErrors: boolean): Promise<void> => {
+    setIgnoreErrors(ignoreErrors)
+    return Promise.resolve()
+  }
 
-  const cancelRun = React.useCallback((): void => {
-    analytics.reportActionSelectedResult(selectedRecoveryOption, 'succeeded')
-    stopRun(runId)
-  }, [runId])
+  // Only send the finalized error policy to the server during a terminal recovery command that does not terminate the run.
+  // If the request to update the policy fails, route to the error modal.
+  const handleIgnoringErrorKind = useCallback((): Promise<void> => {
+    if (ignoreErrors) {
+      if (failedCommandByRunRecord?.error != null) {
+        const ifMatch: IfMatchType = isAssumeFalsePositiveResumeKind(
+          failedCommandByRunRecord
+        )
+          ? 'assumeFalsePositiveAndContinue'
+          : 'ignoreAndContinue'
 
-  const skipFailedCommand = React.useCallback((): void => {
-    void resumeRunFromRecovery(runId).then(() => {
-      analytics.reportActionSelectedResult(selectedRecoveryOption, 'succeeded')
-      makeSuccessToast()
-    })
-  }, [runId, resumeRunFromRecovery, makeSuccessToast])
+        const ignorePolicyRules = buildIgnorePolicyRules(
+          failedCommandByRunRecord.commandType,
+          failedCommandByRunRecord.error.errorType,
+          ifMatch
+        )
 
-  const ignoreErrorKindThisRun = React.useCallback((): Promise<void> => {
-    if (failedCommandByRunRecord?.error != null) {
-      const ignorePolicyRules = buildIgnorePolicyRules(
-        failedCommandByRunRecord.commandType,
-        failedCommandByRunRecord.error.errorType
-      )
-
-      updateErrorRecoveryPolicy(ignorePolicyRules)
-      return Promise.resolve()
+        return updateErrorRecoveryPolicy(ignorePolicyRules)
+          .then(() => Promise.resolve())
+          .catch(() =>
+            Promise.reject(new Error('Failed to update recovery policy.'))
+          )
+      } else {
+        void proceedToRouteAndStep(RECOVERY_MAP.ERROR_WHILE_RECOVERING.ROUTE)
+        return Promise.reject(
+          new Error('Could not execute command. No failed command.')
+        )
+      }
     } else {
-      return Promise.reject(
-        new Error('Could not execute command. No failed command.')
-      )
+      return Promise.resolve()
     }
   }, [
     failedCommandByRunRecord?.error?.errorType,
     failedCommandByRunRecord?.commandType,
+    ignoreErrors,
   ])
+
+  const resumeRun = useCallback((): void => {
+    void handleIgnoringErrorKind()
+      .then(() => resumeRunFromRecovery(runId))
+      .then(() => {
+        analytics.reportActionSelectedResult(
+          selectedRecoveryOption,
+          'succeeded'
+        )
+        makeSuccessToast()
+      })
+  }, [
+    runId,
+    ignoreErrors,
+    resumeRunFromRecovery,
+    handleIgnoringErrorKind,
+    selectedRecoveryOption,
+    makeSuccessToast,
+  ])
+
+  const cancelRun = useCallback((): void => {
+    analytics.reportActionSelectedResult(selectedRecoveryOption, 'succeeded')
+    stopRun(runId)
+  }, [runId])
+
+  const handleResumeAction = (): Promise<RunAction> => {
+    if (isAssumeFalsePositiveResumeKind(failedCommandByRunRecord)) {
+      return resumeRunFromRecoveryAssumingFalsePositive(runId)
+    } else {
+      return resumeRunFromRecovery(runId)
+    }
+  }
+
+  const skipFailedCommand = useCallback((): void => {
+    void handleIgnoringErrorKind().then(() =>
+      handleResumeAction().then(() => {
+        analytics.reportActionSelectedResult(
+          selectedRecoveryOption,
+          'succeeded'
+        )
+        makeSuccessToast()
+      })
+    )
+  }, [
+    runId,
+    resumeRunFromRecovery,
+    handleIgnoringErrorKind,
+    selectedRecoveryOption,
+    makeSuccessToast,
+  ])
+
+  const releaseGripperJaws = useCallback((): Promise<CommandData[]> => {
+    return chainRunRecoveryCommands([RELEASE_GRIPPER_JAW])
+  }, [chainRunRecoveryCommands])
+
+  const updatePositionEstimatorsAndHomeGripper = useCallback((): Promise<
+    CommandData[]
+  > => {
+    return chainRunRecoveryCommands([
+      UPDATE_ESTIMATORS_EXCEPT_PLUNGERS,
+      HOME_GRIPPER_Z,
+    ])
+  }, [chainRunRecoveryCommands])
+
+  const moveLabwareWithoutPause = useCallback((): Promise<CommandData[]> => {
+    const moveLabwareCmd = buildMoveLabwareWithoutPause(
+      failedCommandByRunRecord
+    )
+    if (moveLabwareCmd == null) {
+      return Promise.reject(new Error('Invalid use of MoveLabware command'))
+    } else {
+      return chainRunRecoveryCommands([moveLabwareCmd])
+    }
+  }, [chainRunRecoveryCommands, failedCommandByRunRecord])
 
   return {
     resumeRun,
@@ -218,8 +317,25 @@ export function useRecoveryCommands({
     retryFailedCommand,
     homePipetteZAxes,
     pickUpTips,
+    releaseGripperJaws,
+    updatePositionEstimatorsAndHomeGripper,
+    moveLabwareWithoutPause,
     skipFailedCommand,
     ignoreErrorKindThisRun,
+  }
+}
+
+export function isAssumeFalsePositiveResumeKind(
+  failedCommandByRunRecord: UseRecoveryCommandsParams['failedCommandByRunRecord']
+): boolean {
+  const errorKind = getErrorKind(failedCommandByRunRecord)
+
+  switch (errorKind) {
+    case ERROR_KINDS.TIP_NOT_DETECTED:
+    case ERROR_KINDS.TIP_DROP_FAILED:
+      return true
+    default:
+      return false
   }
 }
 
@@ -227,6 +343,41 @@ export const HOME_PIPETTE_Z_AXES: CreateCommand = {
   commandType: 'home',
   params: { axes: ['leftZ', 'rightZ'] },
   intent: 'fixit',
+}
+
+export const RELEASE_GRIPPER_JAW: CreateCommand = {
+  commandType: 'unsafe/ungripLabware',
+  params: {},
+  intent: 'fixit',
+}
+
+// in case the gripper does not know the position after a stall/collision we must update the position.
+export const UPDATE_ESTIMATORS_EXCEPT_PLUNGERS: CreateCommand = {
+  commandType: 'unsafe/updatePositionEstimators',
+  params: { axes: ['x', 'y', 'extensionZ'] },
+}
+
+export const HOME_GRIPPER_Z: CreateCommand = {
+  commandType: 'home',
+  params: { axes: ['extensionZ'] },
+}
+
+const buildMoveLabwareWithoutPause = (
+  failedCommand: FailedCommand | null
+): CreateCommand | null => {
+  if (failedCommand == null) {
+    return null
+  }
+  const moveLabwareParams = failedCommand.params as MoveLabwareParams
+  return {
+    commandType: 'moveLabware',
+    params: {
+      labwareId: moveLabwareParams.labwareId,
+      newLocation: moveLabwareParams.newLocation,
+      strategy: 'manualMoveWithoutPause',
+    },
+    intent: 'fixit',
+  }
 }
 
 export const buildPickUpTips = (
@@ -257,13 +408,14 @@ export const buildPickUpTips = (
 
 export const buildIgnorePolicyRules = (
   commandType: FailedCommand['commandType'],
-  errorType: string
+  errorType: string,
+  ifMatch: IfMatchType
 ): RecoveryPolicyRulesParams => {
   return [
     {
       commandType,
       errorType,
-      ifMatch: 'ignoreAndContinue',
+      ifMatch,
     },
   ]
 }

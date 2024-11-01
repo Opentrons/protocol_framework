@@ -52,3 +52,31 @@ export const getYPosition = ({ robotType, slot }: YPositionProps): string => {
     }
   }
 }
+
+export const getXPosition = (
+  slot: string,
+  robotType: RobotType,
+  hasStagingArea: boolean
+): string => {
+  const POSITION_MAP = {
+    FLEX: {
+      right: (slot: string) => (hasStagingArea ? '700' : '600'),
+      left: '-400',
+      regex: /[34]/,
+    },
+    OT2: {
+      right: '420',
+      left: '-300',
+      regex: /[369]/,
+    },
+  }
+
+  const { right, left, regex } =
+    robotType === FLEX_ROBOT_TYPE ? POSITION_MAP.FLEX : POSITION_MAP.OT2
+
+  return regex.test(slot)
+    ? typeof right === 'function'
+      ? right(slot)
+      : right
+    : left
+}

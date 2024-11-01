@@ -5,12 +5,15 @@ from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
 from decoy import matchers, Decoy
 import pytest
 
-from opentrons.protocol_engine.commands.pipetting_common import (
-    OverpressureError,
-    OverpressureErrorInternalData,
-)
+from opentrons.protocol_engine.commands.pipetting_common import OverpressureError
+from opentrons.protocol_engine.state import update_types
 from opentrons.types import MountType, Point
-from opentrons.protocol_engine import WellLocation, WellOrigin, WellOffset, DeckPoint
+from opentrons.protocol_engine import (
+    LiquidHandlingWellLocation,
+    WellOrigin,
+    WellOffset,
+    DeckPoint,
+)
 
 from opentrons.protocol_engine.commands.aspirate import (
     AspirateParams,
@@ -61,7 +64,9 @@ async def test_aspirate_implementation_no_prep(
     mock_command_note_adder: CommandNoteAdder,
 ) -> None:
     """An Aspirate should have an execution implementation without preparing to aspirate."""
-    location = WellLocation(origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1))
+    location = LiquidHandlingWellLocation(
+        origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1)
+    )
 
     data = AspirateParams(
         pipetteId="abc",
@@ -81,6 +86,7 @@ async def test_aspirate_implementation_no_prep(
             well_name="A3",
             well_location=location,
             current_well=None,
+            operation_volume=-50,
         ),
     ).then_return(Point(x=1, y=2, z=3))
 
@@ -97,7 +103,18 @@ async def test_aspirate_implementation_no_prep(
 
     assert result == SuccessData(
         public=AspirateResult(volume=50, position=DeckPoint(x=1, y=2, z=3)),
-        private=None,
+        state_update=update_types.StateUpdate(
+            pipette_location=update_types.PipetteLocationUpdate(
+                pipette_id="abc",
+                new_location=update_types.Well(labware_id="123", well_name="A3"),
+                new_deck_point=DeckPoint(x=1, y=2, z=3),
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id="123",
+                well_name="A3",
+                volume_added=-50,
+            ),
+        ),
     )
 
 
@@ -111,7 +128,9 @@ async def test_aspirate_implementation_with_prep(
     subject: AspirateImplementation,
 ) -> None:
     """An Aspirate should have an execution implementation with preparing to aspirate."""
-    location = WellLocation(origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1))
+    location = LiquidHandlingWellLocation(
+        origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1)
+    )
 
     data = AspirateParams(
         pipetteId="abc",
@@ -138,6 +157,7 @@ async def test_aspirate_implementation_with_prep(
                 labware_id="123",
                 well_name="A3",
             ),
+            operation_volume=-50,
         ),
     ).then_return(Point(x=1, y=2, z=3))
 
@@ -154,7 +174,18 @@ async def test_aspirate_implementation_with_prep(
 
     assert result == SuccessData(
         public=AspirateResult(volume=50, position=DeckPoint(x=1, y=2, z=3)),
-        private=None,
+        state_update=update_types.StateUpdate(
+            pipette_location=update_types.PipetteLocationUpdate(
+                pipette_id="abc",
+                new_location=update_types.Well(labware_id="123", well_name="A3"),
+                new_deck_point=DeckPoint(x=1, y=2, z=3),
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id="123",
+                well_name="A3",
+                volume_added=-50,
+            ),
+        ),
     )
 
     decoy.verify(
@@ -162,7 +193,7 @@ async def test_aspirate_implementation_with_prep(
             pipette_id="abc",
             labware_id="123",
             well_name="A3",
-            well_location=WellLocation(origin=WellOrigin.TOP),
+            well_location=LiquidHandlingWellLocation(origin=WellOrigin.TOP),
         ),
         await pipetting.prepare_for_aspirate(pipette_id="abc"),
     )
@@ -171,11 +202,14 @@ async def test_aspirate_implementation_with_prep(
 async def test_aspirate_raises_volume_error(
     decoy: Decoy,
     pipetting: PipettingHandler,
+    movement: MovementHandler,
     mock_command_note_adder: CommandNoteAdder,
     subject: AspirateImplementation,
 ) -> None:
     """Should raise an assertion error for volume larger than working volume."""
-    location = WellLocation(origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1))
+    location = LiquidHandlingWellLocation(
+        origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1)
+    )
 
     data = AspirateParams(
         pipetteId="abc",
@@ -187,6 +221,17 @@ async def test_aspirate_raises_volume_error(
     )
 
     decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id="abc")).then_return(True)
+
+    decoy.when(
+        await movement.move_to_well(
+            pipette_id="abc",
+            labware_id="123",
+            well_name="A3",
+            well_location=location,
+            current_well=None,
+            operation_volume=-50,
+        ),
+    ).then_return(Point(1, 2, 3))
 
     decoy.when(
         await pipetting.aspirate_in_place(
@@ -213,7 +258,7 @@ async def test_overpressure_error(
     pipette_id = "pipette-id"
     labware_id = "labware-id"
     well_name = "well-name"
-    well_location = WellLocation(
+    well_location = LiquidHandlingWellLocation(
         origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1)
     )
 
@@ -242,6 +287,7 @@ async def test_overpressure_error(
             well_name=well_name,
             well_location=well_location,
             current_well=None,
+            operation_volume=-50,
         ),
     ).then_return(position)
 
@@ -266,7 +312,83 @@ async def test_overpressure_error(
             wrappedErrors=[matchers.Anything()],
             errorInfo={"retryLocation": (position.x, position.y, position.z)},
         ),
-        private=OverpressureErrorInternalData(
-            position=DeckPoint(x=position.x, y=position.y, z=position.z)
+        state_update=update_types.StateUpdate(
+            pipette_location=update_types.PipetteLocationUpdate(
+                pipette_id=pipette_id,
+                new_location=update_types.Well(
+                    labware_id=labware_id, well_name=well_name
+                ),
+                new_deck_point=DeckPoint(x=position.x, y=position.y, z=position.z),
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id=labware_id,
+                well_name=well_name,
+                volume_added=update_types.CLEAR,
+            ),
+        ),
+    )
+
+
+async def test_aspirate_implementation_meniscus(
+    decoy: Decoy,
+    state_view: StateView,
+    hardware_api: HardwareControlAPI,
+    movement: MovementHandler,
+    pipetting: PipettingHandler,
+    subject: AspirateImplementation,
+    mock_command_note_adder: CommandNoteAdder,
+) -> None:
+    """Aspirate should update WellVolumeOffset when called with WellOrigin.MENISCUS."""
+    location = LiquidHandlingWellLocation(
+        origin=WellOrigin.MENISCUS,
+        offset=WellOffset(x=0, y=0, z=-1),
+        volumeOffset="operationVolume",
+    )
+    data = AspirateParams(
+        pipetteId="abc",
+        labwareId="123",
+        wellName="A3",
+        wellLocation=location,
+        volume=50,
+        flowRate=1.23,
+    )
+
+    decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id="abc")).then_return(True)
+
+    decoy.when(
+        await movement.move_to_well(
+            pipette_id="abc",
+            labware_id="123",
+            well_name="A3",
+            well_location=location,
+            current_well=None,
+            operation_volume=-50,
+        ),
+    ).then_return(Point(x=1, y=2, z=3))
+
+    decoy.when(
+        await pipetting.aspirate_in_place(
+            pipette_id="abc",
+            volume=50,
+            flow_rate=1.23,
+            command_note_adder=mock_command_note_adder,
+        ),
+    ).then_return(50)
+
+    result = await subject.execute(data)
+
+    assert result == SuccessData(
+        public=AspirateResult(volume=50, position=DeckPoint(x=1, y=2, z=3)),
+        state_update=update_types.StateUpdate(
+            pipette_location=update_types.PipetteLocationUpdate(
+                pipette_id="abc",
+                new_location=update_types.Well(labware_id="123", well_name="A3"),
+                new_deck_point=DeckPoint(x=1, y=2, z=3),
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id="123",
+                well_name="A3",
+                volume_added=-50,
+            ),
         ),
     )

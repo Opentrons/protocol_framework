@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { Fragment, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
@@ -9,21 +9,20 @@ import {
   ALIGN_CENTER,
   Btn,
   DIRECTION_COLUMN,
+  EndUserAgreementFooter,
   Flex,
   JUSTIFY_FLEX_END,
   JUSTIFY_SPACE_BETWEEN,
   LargeButton,
-  ListItem,
-  ListItemDescriptor,
+  NO_WRAP,
   SPACING,
   StyledText,
+  ToggleGroup,
   TYPOGRAPHY,
+  WRAP,
 } from '@opentrons/components'
-import {
-  getPipetteSpecsV2,
-  FLEX_ROBOT_TYPE,
-  OT2_ROBOT_TYPE,
-} from '@opentrons/shared-data'
+import { OT2_ROBOT_TYPE } from '@opentrons/shared-data'
+
 import {
   getAdditionalEquipmentEntities,
   getInitialDeckSetup,
@@ -37,20 +36,25 @@ import {
   getUnusedStagingAreas,
   getUnusedTrash,
 } from '../../components/FileSidebar/utils'
-import { resetScrollElements } from '../../ui/steps/utils'
-import { useBlockingHint } from '../../components/Hints/useBlockingHint'
-import { v8WarningContent } from '../../components/FileSidebar/FileSidebar'
 import { MaterialsListModal } from '../../organisms/MaterialsListModal'
+import { BUTTON_LINK_STYLE, LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { useBlockingHint } from '../../organisms/BlockingHintModal/useBlockingHint'
 import {
   EditProtocolMetadataModal,
   EditInstrumentsModal,
+  SlotDetailsContainer,
 } from '../../organisms'
 import { DeckThumbnail } from './DeckThumbnail'
+import { OffDeckThumbnail } from './OffdeckThumbnail'
+import { getWarningContent } from './UnusedModalContent'
+import { ProtocolMetadata } from './ProtocolMetadata'
+import { InstrumentsInfo } from './InstrumentsInfo'
+import { LiquidDefinitions } from './LiquidDefinitions'
+import { StepsInfo } from './StepsInfo'
 
-import type { CreateCommand, PipetteName } from '@opentrons/shared-data'
+import type { CreateCommand } from '@opentrons/shared-data'
 import type { DeckSlot } from '@opentrons/step-generation'
 import type { ThunkDispatch } from '../../types'
-import type { HintKey } from '../../tutorial'
 
 const DATE_ONLY_FORMAT = 'MMMM dd, yyyy'
 const DATETIME_FORMAT = 'MMMM dd, yyyy | h:mm a'
@@ -62,46 +66,71 @@ const LOAD_COMMANDS: Array<CreateCommand['commandType']> = [
   'loadLiquid',
 ]
 
-interface Fixture {
+export interface Fixture {
   trashBin: boolean
   wasteChute: boolean
   stagingAreaSlots: string[]
 }
 
 export function ProtocolOverview(): JSX.Element {
-  const { t } = useTranslation(['protocol_overview', 'alert', 'shared'])
+  const { t } = useTranslation([
+    'protocol_overview',
+    'alert',
+    'shared',
+    'starting_deck_State',
+    'modules',
+  ])
   const navigate = useNavigate()
   const [
     showEditInstrumentsModal,
     setShowEditInstrumentsModal,
-  ] = React.useState<boolean>(false)
-  const [
-    showEditMetadataModal,
-    setShowEditMetadataModal,
-  ] = React.useState<boolean>(false)
+  ] = useState<boolean>(false)
+  const [showEditMetadataModal, setShowEditMetadataModal] = useState<boolean>(
+    false
+  )
+  const [showExportWarningModal, setShowExportWarningModal] = useState<boolean>(
+    false
+  )
   const formValues = useSelector(fileSelectors.getFileMetadata)
   const robotType = useSelector(fileSelectors.getRobotType)
   const initialDeckSetup = useSelector(getInitialDeckSetup)
+  const allIngredientGroupFields = useSelector(
+    labwareIngredSelectors.allIngredientGroupFields
+  )
   const dispatch: ThunkDispatch<any> = useDispatch()
-  const [hoverSlot, setHoverSlot] = React.useState<DeckSlot | null>(null)
-  // TODO: wire up the slot information from hoverSlot
-  const [showBlockingHint, setShowBlockingHint] = React.useState<boolean>(false)
-  const [
-    showMaterialsListModal,
-    setShowMaterialsListModal,
-  ] = React.useState<boolean>(false)
+  const [hover, setHover] = useState<DeckSlot | string | null>(null)
+  const [showMaterialsListModal, setShowMaterialsListModal] = useState<boolean>(
+    false
+  )
   const fileData = useSelector(fileSelectors.createFile)
   const savedStepForms = useSelector(stepFormSelectors.getSavedStepForms)
   const additionalEquipment = useSelector(getAdditionalEquipmentEntities)
   const liquidsOnDeck = useSelector(
     labwareIngredSelectors.allIngredientNamesIds
   )
+  const leftString = t('starting_deck_state:onDeck')
+  const rightString = t('starting_deck_state:offDeck')
+
+  const [deckView, setDeckView] = useState<
+    typeof leftString | typeof rightString
+  >(leftString)
+
+  useEffect(() => {
+    if (formValues?.created == null) {
+      console.warn(
+        'formValues was refreshed while on the overview page, redirecting to landing page'
+      )
+      navigate('/')
+    }
+  }, [formValues])
+
   const {
     modules: modulesOnDeck,
     labware: labwaresOnDeck,
     additionalEquipmentOnDeck,
     pipettes,
   } = initialDeckSetup
+  const isOffDeckHover = hover != null && labwaresOnDeck[hover] != null
 
   const nonLoadCommands =
     fileData?.commands.filter(
@@ -145,8 +174,6 @@ export function ProtocolOverview(): JSX.Element {
   }
 
   const pipettesOnDeck = Object.values(pipettes)
-  const leftPip = pipettesOnDeck.find(pip => pip.mount === 'left')
-  const rightPip = pipettesOnDeck.find(pip => pip.mount === 'right')
   const {
     protocolName,
     description,
@@ -173,33 +200,36 @@ export function ProtocolOverview(): JSX.Element {
     fixtureWithoutStep.wasteChute ||
     fixtureWithoutStep.stagingAreaSlots.length > 0
 
-  const getExportHintContent = (): {
-    hintKey: HintKey
-    content: React.ReactNode
-  } => {
-    return {
-      hintKey: t('alert:export_v8_1_protocol_7_3'),
-      content: v8WarningContent(t),
-    }
+  const warning = hasWarning
+    ? getWarningContent({
+        noCommands,
+        pipettesWithoutStep,
+        modulesWithoutStep,
+        gripperWithoutStep,
+        fixtureWithoutStep,
+        t,
+      })
+    : null
+
+  const cancelModal = (): void => {
+    setShowExportWarningModal(false)
   }
 
-  const { hintKey, content } = getExportHintContent()
+  const confirmExport = (): void => {
+    setShowExportWarningModal(false)
+    dispatch(loadFileActions.saveProtocolFile())
+  }
 
-  const blockingExportHint = useBlockingHint({
-    enabled: showBlockingHint,
-    hintKey,
-    content,
-    handleCancel: () => {
-      setShowBlockingHint(false)
-    },
-    handleContinue: () => {
-      setShowBlockingHint(false)
-      dispatch(loadFileActions.saveProtocolFile())
-    },
+  const exportWarningModal = useBlockingHint({
+    hintKey: warning?.hintKey ?? null,
+    enabled: showExportWarningModal && warning?.hintKey != null,
+    content: warning?.content,
+    handleCancel: cancelModal,
+    handleContinue: confirmExport,
   })
 
   return (
-    <>
+    <Fragment>
       {showEditMetadataModal ? (
         <EditProtocolMetadataModal
           onClose={() => {
@@ -214,7 +244,7 @@ export function ProtocolOverview(): JSX.Element {
           }}
         />
       ) : null}
-      {blockingExportHint}
+      {exportWarningModal}
       {showMaterialsListModal ? (
         <MaterialsListModal
           hardware={Object.values(modulesOnDeck)}
@@ -242,7 +272,7 @@ export function ProtocolOverview(): JSX.Element {
           <Flex flex="1">
             <StyledText
               desktopStyle="displayBold"
-              css={PROTOCOL_NAME_TEXT_STYLE}
+              css={LINE_CLAMP_TEXT_STYLE(3)}
             >
               {protocolName != null && protocolName !== ''
                 ? protocolName
@@ -262,209 +292,117 @@ export function ProtocolOverview(): JSX.Element {
               onClick={() => {
                 navigate('/designer')
               }}
-              whiteSpace="nowrap"
+              whiteSpace={NO_WRAP}
               height="3.5rem"
             />
             <LargeButton
               buttonText={t('export_protocol')}
               onClick={() => {
-                //  ToDo (kk:08/26/2024) should use hasWarning later
-                if (!hasWarning) {
-                  resetScrollElements()
-                  // ToDo (kk:08/26/2024) create warning modal
+                if (warning != null) {
+                  setShowExportWarningModal(true)
                 } else {
-                  resetScrollElements()
-                  setShowBlockingHint(true)
+                  dispatch(loadFileActions.saveProtocolFile())
                 }
               }}
               iconName="arrow-right"
-              whiteSpace="nowrap"
+              whiteSpace={NO_WRAP}
             />
           </Flex>
         </Flex>
-        <Flex gridGap={SPACING.spacing80}>
+        <Flex gridGap={SPACING.spacing80} flexWrap={WRAP}>
           <Flex
+            flex="1.27"
             flexDirection={DIRECTION_COLUMN}
-            width="50%"
+            css={COLUMN_STYLE}
             gridGap={SPACING.spacing40}
           >
-            <Flex flexDirection={DIRECTION_COLUMN}>
-              <Flex
-                justifyContent={JUSTIFY_SPACE_BETWEEN}
-                marginBottom={SPACING.spacing12}
-              >
-                <StyledText desktopStyle="headingSmallBold">
-                  {t('protocol_metadata')}
-                </StyledText>
-                <Btn
-                  textDecoration={TYPOGRAPHY.textDecorationUnderline}
-                  onClick={() => {
-                    setShowEditMetadataModal(true)
-                  }}
-                  data-testid="ProtocolOverview_MetadataEditButton"
-                >
-                  <StyledText desktopStyle="bodyDefaultRegular">
-                    {t('edit')}
-                  </StyledText>
-                </Btn>
-              </Flex>
-              <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
-                {metaDataInfo.map(info => {
-                  const [title, value] = Object.entries(info)[0]
-
-                  return (
-                    <ListItem type="noActive" key={`ProtocolOverview_${title}`}>
-                      <ListItemDescriptor
-                        type="default"
-                        description={t(`${title}`)}
-                        content={value ?? 'N/A'}
-                      />
-                    </ListItem>
-                  )
-                })}
-              </Flex>
-            </Flex>
-            <Flex flexDirection={DIRECTION_COLUMN}>
-              <Flex
-                justifyContent={JUSTIFY_SPACE_BETWEEN}
-                marginBottom={SPACING.spacing12}
-              >
-                <StyledText desktopStyle="headingSmallBold">
-                  {t('instruments')}
-                </StyledText>
-                <Btn
-                  textDecoration={TYPOGRAPHY.textDecorationUnderline}
-                  onClick={() => {
-                    setShowEditInstrumentsModal(true)
-                  }}
-                >
-                  <StyledText desktopStyle="bodyDefaultRegular">
-                    {t('edit')}
-                  </StyledText>
-                </Btn>
-              </Flex>
-              <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
-                <ListItem type="noActive" key={`ProtocolOverview_robotType`}>
-                  <ListItemDescriptor
-                    type="default"
-                    description={t('robotType')}
-                    content={
-                      robotType === FLEX_ROBOT_TYPE
-                        ? t('shared:opentrons_flex')
-                        : t('shared:ot2')
-                    }
-                  />
-                </ListItem>
-                <ListItem type="noActive" key={`ProtocolOverview_left`}>
-                  <ListItemDescriptor
-                    type="default"
-                    description={t('left_pip')}
-                    content={
-                      leftPip != null
-                        ? getPipetteSpecsV2(leftPip.name as PipetteName)
-                            ?.displayName ?? 'N/A'
-                        : 'N/A'
-                    }
-                  />
-                </ListItem>
-                <ListItem type="noActive" key={`ProtocolOverview_right`}>
-                  <ListItemDescriptor
-                    type="default"
-                    description={t('right_pip')}
-                    content={
-                      rightPip != null
-                        ? getPipetteSpecsV2(rightPip.name as PipetteName)
-                            ?.displayName ?? 'N/A'
-                        : 'N/A'
-                    }
-                  />
-                </ListItem>
-                {robotType === FLEX_ROBOT_TYPE ? (
-                  <ListItem type="noActive" key={`ProtocolOverview_gripper`}>
-                    <ListItemDescriptor
-                      type="default"
-                      description={t('extension')}
-                      content={isGripperAttached ? t('gripper') : t('na')}
-                    />
-                  </ListItem>
-                ) : null}
-              </Flex>
-            </Flex>
-            <Flex flexDirection={DIRECTION_COLUMN}>
-              <Flex marginBottom={SPACING.spacing12}>
-                <StyledText desktopStyle="headingSmallBold">
-                  {t('liquids')}
-                </StyledText>
-              </Flex>
-              <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
-                <ListItem type="noActive" key={`ProtocolOverview_Liquids`}>
-                  <ListItemDescriptor
-                    type="default"
-                    description={'TODO'}
-                    content={'WIRE THIS UP'}
-                  />
-                </ListItem>
-              </Flex>
-            </Flex>
-            <Flex flexDirection={DIRECTION_COLUMN}>
-              <Flex marginBottom={SPACING.spacing12}>
-                <StyledText desktopStyle="headingSmallBold">
-                  {t('step')}
-                </StyledText>
-              </Flex>
-              <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
-                <ListItem type="noActive" key={`ProtocolOverview_Step`}>
-                  <ListItemDescriptor
-                    type="default"
-                    description={'TODO'}
-                    content={'WIRE THIS UP'}
-                  />
-                </ListItem>
-              </Flex>
-            </Flex>
+            <ProtocolMetadata
+              metaDataInfo={metaDataInfo}
+              setShowEditMetadataModal={setShowEditMetadataModal}
+            />
+            <InstrumentsInfo
+              robotType={robotType}
+              pipettesOnDeck={pipettesOnDeck}
+              additionalEquipment={additionalEquipment}
+              setShowEditInstrumentsModal={setShowEditInstrumentsModal}
+            />
+            <LiquidDefinitions
+              allIngredientGroupFields={allIngredientGroupFields}
+            />
+            <StepsInfo savedStepForms={savedStepForms} />
           </Flex>
-          <Flex flexDirection={DIRECTION_COLUMN} width="50%">
+          <Flex
+            flexDirection={DIRECTION_COLUMN}
+            css={COLUMN_STYLE}
+            gridGap={SPACING.spacing12}
+          >
             <Flex
-              marginBottom={SPACING.spacing12}
               justifyContent={JUSTIFY_SPACE_BETWEEN}
+              alignItems={ALIGN_CENTER}
             >
-              <StyledText desktopStyle="headingSmallBold">
-                {t('starting_deck')}
-              </StyledText>
-              <Btn
-                data-testid="Materials_list"
-                textDecoration={TYPOGRAPHY.textDecorationUnderline}
-                onClick={() => {
-                  setShowMaterialsListModal(true)
-                }}
-              >
-                <StyledText desktopStyle="bodyDefaultRegular">
-                  {t('materials_list')}
+              <Flex gridGap="1.875rem" alignItems={ALIGN_CENTER}>
+                <StyledText desktopStyle="headingSmallBold">
+                  {t('starting_deck')}
                 </StyledText>
-              </Btn>
+                <Flex padding={SPACING.spacing4}>
+                  <Btn
+                    data-testid="Materials_list"
+                    textDecoration={TYPOGRAPHY.textDecorationUnderline}
+                    onClick={() => {
+                      setShowMaterialsListModal(true)
+                    }}
+                    css={BUTTON_LINK_STYLE}
+                  >
+                    <StyledText desktopStyle="bodyDefaultRegular">
+                      {t('materials_list')}
+                    </StyledText>
+                  </Btn>
+                </Flex>
+              </Flex>
+              <ToggleGroup
+                selectedValue={deckView}
+                leftText={leftString}
+                rightText={rightString}
+                leftClick={() => {
+                  setDeckView(leftString)
+                }}
+                rightClick={() => {
+                  setDeckView(rightString)
+                }}
+              />
             </Flex>
             <Flex
               flexDirection={DIRECTION_COLUMN}
-              gridGap={SPACING.spacing4}
+              gridGap={SPACING.spacing32}
               alignItems={ALIGN_CENTER}
             >
-              <DeckThumbnail
-                hoverSlot={hoverSlot}
-                setHoverSlot={setHoverSlot}
+              {deckView === leftString ? (
+                <DeckThumbnail hoverSlot={hover} setHoverSlot={setHover} />
+              ) : (
+                <OffDeckThumbnail
+                  hover={hover}
+                  setHover={setHover}
+                  width="100%"
+                />
+              )}
+              <SlotDetailsContainer
+                robotType={robotType}
+                slot={isOffDeckHover ? 'offDeck' : hover}
+                offDeckLabwareId={isOffDeckHover ? hover : null}
               />
             </Flex>
           </Flex>
         </Flex>
       </Flex>
-    </>
+      <EndUserAgreementFooter />
+    </Fragment>
   )
 }
 
-const PROTOCOL_NAME_TEXT_STYLE = css`
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-wrap: break-word;
-  -webkit-line-clamp: 3;
+const MIN_OVERVIEW_WIDTH = '64rem'
+const COLUMN_GRID_GAP = '5rem'
+const COLUMN_STYLE = css`
+  flex-direction: ${DIRECTION_COLUMN};
+  min-width: calc((${MIN_OVERVIEW_WIDTH} - ${COLUMN_GRID_GAP}) * 0.5);
+  flex: 1;
 `

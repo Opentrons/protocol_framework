@@ -12,9 +12,10 @@ from opentrons_shared_data.errors.exceptions import (
 )
 
 from opentrons.protocol_engine.commands.command import SuccessData
+from opentrons.protocol_engine.notes import make_error_recovery_debug_note
 
 from ..state.state import StateStore
-from ..resources import ModelUtils
+from ..resources import ModelUtils, FileProvider
 from ..commands import CommandStatus
 from ..actions import (
     ActionDispatcher,
@@ -72,6 +73,7 @@ class CommandExecutor:
     def __init__(
         self,
         hardware_api: HardwareControlAPI,
+        file_provider: FileProvider,
         state_store: StateStore,
         action_dispatcher: ActionDispatcher,
         equipment: EquipmentHandler,
@@ -88,6 +90,7 @@ class CommandExecutor:
     ) -> None:
         """Initialize the CommandExecutor with access to its dependencies."""
         self._hardware_api = hardware_api
+        self._file_provider = file_provider
         self._state_store = state_store
         self._action_dispatcher = action_dispatcher
         self._equipment = equipment
@@ -116,6 +119,7 @@ class CommandExecutor:
         command_impl = queued_command._ImplementationCls(
             state_view=self._state_store,
             hardware_api=self._hardware_api,
+            file_provider=self._file_provider,
             equipment=self._equipment,
             movement=self._movement,
             gantry_mover=self._gantry_mover,
@@ -158,6 +162,12 @@ class CommandExecutor:
             elif not isinstance(error, EnumeratedError):
                 error = PythonException(error)
 
+            error_recovery_type = error_recovery_policy(
+                self._state_store.config,
+                running_command,
+                None,
+            )
+            note_tracker(make_error_recovery_debug_note(error_recovery_type))
             self._action_dispatcher.dispatch(
                 FailCommandAction(
                     error=error,
@@ -166,11 +176,7 @@ class CommandExecutor:
                     error_id=self._model_utils.generate_id(),
                     failed_at=self._model_utils.get_timestamp(),
                     notes=note_tracker.get_notes(),
-                    type=error_recovery_policy(
-                        self._state_store.config,
-                        running_command,
-                        None,
-                    ),
+                    type=error_recovery_type,
                 )
             )
 
@@ -185,11 +191,18 @@ class CommandExecutor:
                 succeeded_command = running_command.model_copy(update=update)
                 self._action_dispatcher.dispatch(
                     SucceedCommandAction(
-                        command=succeeded_command, private_result=result.private
+                        command=succeeded_command,
+                        state_update=result.state_update,
                     ),
                 )
             else:
                 # The command encountered a defined error.
+                error_recovery_type = error_recovery_policy(
+                    self._state_store.config,
+                    running_command,
+                    result,
+                )
+                note_tracker(make_error_recovery_debug_note(error_recovery_type))
                 self._action_dispatcher.dispatch(
                     FailCommandAction(
                         error=result,
@@ -198,10 +211,6 @@ class CommandExecutor:
                         error_id=result.public.id,
                         failed_at=result.public.createdAt,
                         notes=note_tracker.get_notes(),
-                        type=error_recovery_policy(
-                            self._state_store.config,
-                            running_command,
-                            result,
-                        ),
+                        type=error_recovery_type,
                     )
                 )

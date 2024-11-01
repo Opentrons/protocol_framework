@@ -5,7 +5,7 @@ import dns from 'dns'
 import contextMenu from 'electron-context-menu'
 import * as electronDevtoolsInstaller from 'electron-devtools-installer'
 
-import { createUi, registerReloadUi } from './ui'
+import { createUi, registerReloadUi, registerSystemLanguage } from './ui'
 import { initializeMenu } from './menu'
 import { createLogger } from './log'
 import { registerProtocolAnalysis } from './protocol-analysis'
@@ -18,7 +18,6 @@ import { registerProtocolStorage } from './protocol-storage'
 import { getConfig, getStore, getOverrides, registerConfig } from './config'
 import { registerUsb } from './usb'
 import { registerNotify, closeAllNotifyConnections } from './notifications'
-
 import type { BrowserWindow } from 'electron'
 import type { Action, Dispatch, Logger } from './types'
 import type { LogEntry } from 'winston'
@@ -110,6 +109,7 @@ function startUp(): void {
     registerUsb(dispatch),
     registerNotify(dispatch, mainWindow),
     registerReloadUi(mainWindow),
+    registerSystemLanguage(dispatch),
   ]
 
   ipcMain.on('dispatch', (_, action) => {

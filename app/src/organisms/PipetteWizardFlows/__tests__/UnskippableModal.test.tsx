@@ -1,9 +1,9 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { fireEvent, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 
-import { renderWithProviders } from '../../../__testing-utils__'
-import { i18n } from '../../../i18n'
+import { renderWithProviders } from '/app/__testing-utils__'
+import { i18n } from '/app/i18n'
 import { UnskippableModal } from '../UnskippableModal'
 
 const render = (props: React.ComponentProps<typeof UnskippableModal>) => {
@@ -24,7 +24,7 @@ describe('UnskippableModal', () => {
     render(props)
     screen.getByText('This is a critical step that should not be skipped')
     screen.getByText(
-      'You must detach the mounting plate and reattach the z-axis carraige before using other pipettes. We do not recommend exiting this process before completion.'
+      'You must detach the mounting plate and reattach the z-axis carriage before using other pipettes. We do not recommend exiting this process before completion.'
     )
     fireEvent.click(screen.getByRole('button', { name: 'Go back' }))
     expect(props.goBack).toHaveBeenCalled()
@@ -39,7 +39,7 @@ describe('UnskippableModal', () => {
     render(props)
     screen.getByText('This is a critical step that should not be skipped')
     screen.getByText(
-      'You must detach the mounting plate and reattach the z-axis carraige before using other pipettes. We do not recommend exiting this process before completion.'
+      'You must detach the mounting plate and reattach the z-axis carriage before using other pipettes. We do not recommend exiting this process before completion.'
     )
     screen.getByText('Exit')
     screen.getByText('Go back')

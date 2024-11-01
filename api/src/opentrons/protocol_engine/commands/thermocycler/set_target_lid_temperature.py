@@ -34,7 +34,7 @@ class SetTargetLidTemperatureResult(BaseModel):
 
 class SetTargetLidTemperatureImpl(
     AbstractCommandImpl[
-        SetTargetLidTemperatureParams, SuccessData[SetTargetLidTemperatureResult, None]
+        SetTargetLidTemperatureParams, SuccessData[SetTargetLidTemperatureResult]
     ]
 ):
     """Execution implementation of a Thermocycler's set lid temperature command."""
@@ -51,7 +51,7 @@ class SetTargetLidTemperatureImpl(
     async def execute(
         self,
         params: SetTargetLidTemperatureParams,
-    ) -> SuccessData[SetTargetLidTemperatureResult, None]:
+    ) -> SuccessData[SetTargetLidTemperatureResult]:
         """Set a Thermocycler's target lid temperature."""
         thermocycler_state = self._state_view.modules.get_thermocycler_module_substate(
             params.moduleId
@@ -70,7 +70,6 @@ class SetTargetLidTemperatureImpl(
             public=SetTargetLidTemperatureResult(
                 targetLidTemperature=target_temperature
             ),
-            private=None,
         )
 
 

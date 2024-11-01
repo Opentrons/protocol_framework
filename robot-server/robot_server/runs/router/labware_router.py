@@ -16,7 +16,6 @@ from robot_server.service.json_api import (
     RequestModel,
     SimpleBody,
     PydanticResponse,
-    ResponseList,
 )
 
 from ..run_models import Run, LabwareDefinitionSummary
@@ -86,7 +85,7 @@ async def add_labware_offset(
     ),
     status_code=status.HTTP_201_CREATED,
     responses={
-        status.HTTP_201_CREATED: {"model": SimpleBody[Run]},
+        status.HTTP_201_CREATED: {"model": SimpleBody[LabwareDefinitionSummary]},
         status.HTTP_404_NOT_FOUND: {"model": ErrorBody[RunNotFound]},
         status.HTTP_409_CONFLICT: {"model": ErrorBody[Union[RunStopped, RunNotIdle]]},
     },
@@ -134,14 +133,14 @@ async def add_labware_definition(
         " Repeated definitions will be deduplicated."
     ),
     responses={
-        status.HTTP_200_OK: {"model": SimpleBody[Run]},
+        status.HTTP_200_OK: {"model": SimpleBody[list[SD_LabwareDefinition]]},
         status.HTTP_409_CONFLICT: {"model": ErrorBody[RunStopped]},
     },
 )
 async def get_run_loaded_labware_definitions(
     runId: str,
     run_data_manager: Annotated[RunDataManager, Depends(get_run_data_manager)],
-) -> PydanticResponse[SimpleBody[ResponseList[SD_LabwareDefinition]]]:
+) -> PydanticResponse[SimpleBody[list[SD_LabwareDefinition]]]:
     """Get a run's loaded labware definition by the run ID.
 
     Args:

@@ -108,6 +108,6 @@ class RobotServerSettings(BaseSettings):
         default=50,
         gt=0,
         description=(
-            "The maximum number of data files to allow before auto-deleting old ones."
+            "The maximum number of uploaded data files to allow before auto-deleting old ones."
         ),
     )

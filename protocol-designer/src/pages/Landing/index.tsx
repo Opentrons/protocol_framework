@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
@@ -6,16 +6,28 @@ import { useTranslation } from 'react-i18next'
 import {
   ALIGN_CENTER,
   COLORS,
+  CURSOR_POINTER,
   DIRECTION_COLUMN,
+  EndUserAgreementFooter,
   Flex,
+  INFO_TOAST,
+  JUSTIFY_CENTER,
   LargeButton,
   SPACING,
   StyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
+import { BUTTON_LINK_STYLE } from '../../atoms'
+import { AnnouncementModal } from '../../organisms'
 import { actions as loadFileActions } from '../../load-file'
 import { getFileMetadata } from '../../file-data/selectors'
+import { toggleNewProtocolModal } from '../../navigation/actions'
+import { useKitchen } from '../../organisms/Kitchen/hooks'
+import { getHasOptedIn } from '../../analytics/selectors'
+import { useAnnouncements } from '../../organisms/AnnouncementModal/announcements'
+import { getLocalStorageItem, localStorageAnnouncementKey } from '../../persist'
 import welcomeImage from '../../assets/images/welcome_page.png'
+
 import type { ThunkDispatch } from '../../types'
 
 export function Landing(): JSX.Element {
@@ -23,12 +35,45 @@ export function Landing(): JSX.Element {
   const dispatch: ThunkDispatch<any> = useDispatch()
   const metadata = useSelector(getFileMetadata)
   const navigate = useNavigate()
+  const [showAnnouncementModal, setShowAnnouncementModal] = useState<boolean>(
+    false
+  )
+  const hasOptedIn = useSelector(getHasOptedIn)
+  const { bakeToast, eatToast } = useKitchen()
+  const announcements = useAnnouncements()
+  const lastAnnouncement = announcements[announcements.length - 1]
+  const announcementKey = lastAnnouncement
+    ? lastAnnouncement.announcementKey
+    : null
 
-  React.useEffect(() => {
+  const userHasNotSeenAnnouncement =
+    getLocalStorageItem(localStorageAnnouncementKey) !== announcementKey &&
+    hasOptedIn != null
+
+  useEffect(() => {
+    if (userHasNotSeenAnnouncement) {
+      const toastId = bakeToast(
+        t('learn_more', { version: process.env.OT_PD_VERSION }) as string,
+        INFO_TOAST,
+        {
+          heading: t('updated_protocol_designer'),
+          closeButton: true,
+          linkText: t('view_release_notes'),
+          onLinkClick: () => {
+            eatToast(toastId)
+            setShowAnnouncementModal(true)
+          },
+          disableTimeout: true,
+          justifyContent: JUSTIFY_CENTER,
+        }
+      )
+    }
+  }, [userHasNotSeenAnnouncement])
+
+  useEffect(() => {
     if (metadata?.created != null) {
+      console.warn('protocol already exists, navigating to overview')
       navigate('/overview')
-    } else {
-      navigate('/')
     }
   }, [metadata, navigate])
 
@@ -39,59 +84,86 @@ export function Landing(): JSX.Element {
   }
 
   return (
-    <Flex
-      backgroundColor={COLORS.grey20}
-      flexDirection={DIRECTION_COLUMN}
-      alignItems={ALIGN_CENTER}
-      paddingTop="14.875rem"
-      height="calc(100vh - 48px)"
-      width="100%"
-    >
-      <img
-        src={welcomeImage}
-        height="132px"
-        width="548px"
-        aria-label="welcome image"
-      />
-      <StyledText desktopStyle="headingLargeBold" marginY={SPACING.spacing16}>
-        {t('welcome')}
-      </StyledText>
-      <StyledText
-        desktopStyle="headingSmallRegular"
-        color={COLORS.grey60}
-        maxWidth="34.25rem"
-        textAlign={TYPOGRAPHY.textAlignCenter}
+    <>
+      {showAnnouncementModal ? (
+        <AnnouncementModal
+          isViewReleaseNotes={showAnnouncementModal}
+          onClose={() => {
+            setShowAnnouncementModal(false)
+          }}
+        />
+      ) : null}
+      <Flex
+        backgroundColor={COLORS.grey20}
+        flexDirection={DIRECTION_COLUMN}
+        alignItems={ALIGN_CENTER}
+        justifyContent={JUSTIFY_CENTER}
+        height="calc(100vh - 9rem)"
+        width="100%"
+        gridGap={SPACING.spacing32}
       >
-        {t('no-code-required')}
-      </StyledText>
-      <LargeButton
-        marginY={SPACING.spacing32}
-        buttonText={
-          <StyledNavLink to={'/createNew'}>
-            <StyledText desktopStyle="bodyLargeRegular">
-              {t('create_a_protocol')}
+        <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing16}>
+          <img
+            src={welcomeImage}
+            height="132px"
+            width="548px"
+            aria-label="welcome image"
+          />
+          <Flex
+            flexDirection={DIRECTION_COLUMN}
+            gridGap={SPACING.spacing8}
+            alignItems={ALIGN_CENTER}
+          >
+            <StyledText desktopStyle="headingLargeBold">
+              {t('welcome')}
             </StyledText>
-          </StyledNavLink>
-        }
-      />
-
-      <StyledLabel>
-        <StyledText desktopStyle="bodyLargeRegular" color={COLORS.grey60}>
-          {t('edit_existing')}
-        </StyledText>
-        <input type="file" onChange={loadFile}></input>
-      </StyledLabel>
-    </Flex>
+            <StyledText
+              desktopStyle="headingSmallRegular"
+              color={COLORS.grey60}
+              maxWidth="34.25rem"
+              textAlign={TYPOGRAPHY.textAlignCenter}
+            >
+              {t('no-code-required')}
+            </StyledText>
+          </Flex>
+        </Flex>
+        <StyledNavLink to={'/createNew'}>
+          <LargeButton
+            onClick={() => {
+              dispatch(toggleNewProtocolModal(true))
+            }}
+            buttonText={<ButtonText>{t('create_a_protocol')}</ButtonText>}
+          />
+        </StyledNavLink>
+        <StyledLabel>
+          <Flex css={BUTTON_LINK_STYLE}>
+            <StyledText desktopStyle="bodyLargeRegular">
+              {t('edit_existing')}
+            </StyledText>
+          </Flex>
+          <input type="file" onChange={loadFile}></input>
+        </StyledLabel>
+      </Flex>
+      <EndUserAgreementFooter />
+    </>
   )
 }
 
 const StyledLabel = styled.label`
   display: inline-block;
-  cursor: pointer;
+  cursor: ${CURSOR_POINTER};
   input[type='file'] {
     display: none;
   }
 `
+
+const ButtonText = styled.span`
+  line-height: ${TYPOGRAPHY.lineHeight24};
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: ${TYPOGRAPHY.fontWeightSemiBold};
+`
+
 const StyledNavLink = styled(NavLink)<React.ComponentProps<typeof NavLink>>`
   color: ${COLORS.white};
   text-decoration: none;

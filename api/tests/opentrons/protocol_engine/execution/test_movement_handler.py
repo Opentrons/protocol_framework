@@ -1,7 +1,7 @@
 """MovementHandler command subject."""
 import pytest
 from decoy import Decoy
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 
 from opentrons.types import MountType, Point, DeckSlotName, Mount
 from opentrons.hardware_control import API as HardwareAPI
@@ -149,6 +149,7 @@ async def test_move_to_well(
             current_well=None,
             force_direct=True,
             minimum_z_height=12.3,
+            operation_volume=None,
         )
     ).then_return(
         [Waypoint(Point(1, 2, 3), CriticalPoint.XY_CENTER), Waypoint(Point(4, 5, 6))]
@@ -257,6 +258,7 @@ async def test_move_to_well_from_starting_location(
             well_location=well_location,
             force_direct=False,
             minimum_z_height=None,
+            operation_volume=None,
         )
     ).then_return([Waypoint(Point(1, 2, 3), CriticalPoint.XY_CENTER)])
 
@@ -297,6 +299,10 @@ async def test_move_to_well_from_starting_location(
     )
 
 
+@pytest.mark.parametrize(
+    "stay_at_max_z,z_extra_offset",
+    [(True, None), (True, 5.0), (False, None), (False, 5.0)],
+)
 async def test_move_to_addressable_area(
     decoy: Decoy,
     state_store: StateStore,
@@ -304,6 +310,8 @@ async def test_move_to_addressable_area(
     heater_shaker_movement_flagger: HeaterShakerMovementFlagger,
     mock_gantry_mover: GantryMover,
     subject: MovementHandler,
+    stay_at_max_z: bool,
+    z_extra_offset: Optional[float],
 ) -> None:
     """Move requests should call hardware controller with movement data."""
     decoy.when(
@@ -353,8 +361,9 @@ async def test_move_to_addressable_area(
             max_travel_z=42.0,
             force_direct=True,
             minimum_z_height=12.3,
-            stay_at_max_travel_z=True,
+            stay_at_max_travel_z=stay_at_max_z,
             ignore_tip_configuration=False,
+            max_travel_z_extra_margin=z_extra_offset,
         )
     ).then_return(
         [Waypoint(Point(1, 2, 3), CriticalPoint.XY_CENTER), Waypoint(Point(4, 5, 6))]
@@ -378,8 +387,9 @@ async def test_move_to_addressable_area(
         force_direct=True,
         minimum_z_height=12.3,
         speed=45.6,
-        stay_at_highest_possible_z=True,
+        stay_at_highest_possible_z=stay_at_max_z,
         ignore_tip_configuration=False,
+        highest_possible_z_extra_offset=z_extra_offset,
     )
 
     assert result == Point(x=4, y=5, z=6)

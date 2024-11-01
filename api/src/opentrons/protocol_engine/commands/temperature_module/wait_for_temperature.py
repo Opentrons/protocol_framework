@@ -35,9 +35,7 @@ class WaitForTemperatureResult(BaseModel):
 
 
 class WaitForTemperatureImpl(
-    AbstractCommandImpl[
-        WaitForTemperatureParams, SuccessData[WaitForTemperatureResult, None]
-    ]
+    AbstractCommandImpl[WaitForTemperatureParams, SuccessData[WaitForTemperatureResult]]
 ):
     """Execution implementation of Temperature Module's wait for temperature command."""
 
@@ -52,7 +50,7 @@ class WaitForTemperatureImpl(
 
     async def execute(
         self, params: WaitForTemperatureParams
-    ) -> SuccessData[WaitForTemperatureResult, None]:
+    ) -> SuccessData[WaitForTemperatureResult]:
         """Wait for a Temperature Module's target temperature."""
         # Allow propagation of ModuleNotLoadedError and WrongModuleTypeError.
         module_substate = self._state_view.modules.get_temperature_module_substate(
@@ -74,7 +72,9 @@ class WaitForTemperatureImpl(
             await temp_hardware_module.await_temperature(
                 awaiting_temperature=target_temp
             )
-        return SuccessData(public=WaitForTemperatureResult(), private=None)
+        return SuccessData(
+            public=WaitForTemperatureResult(),
+        )
 
 
 class WaitForTemperature(

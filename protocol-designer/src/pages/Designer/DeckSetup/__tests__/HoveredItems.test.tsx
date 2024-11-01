@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { describe, it, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { screen } from '@testing-library/react'
@@ -64,11 +64,13 @@ describe('HoveredItems', () => {
     props.hoveredLabware = 'fixture/fixture_universal_flat_bottom_adapter/1'
     render(props)
     screen.getByText('mock LabwareRender')
+    screen.getByText('Fixture Opentrons Universal Flat Heater-Shaker Adapter')
   })
   it('renders a hovered module', () => {
     props.hoveredFixture = null
     props.hoveredModule = TEMPERATURE_MODULE_V2
     render(props)
     screen.getByText('mock Module')
+    screen.getByText('Temperature Module GEN2')
   })
 })

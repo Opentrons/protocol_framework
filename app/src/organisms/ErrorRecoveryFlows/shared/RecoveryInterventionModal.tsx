@@ -1,13 +1,19 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { createPortal } from 'react-dom'
 import { css } from 'styled-components'
 
-import { Flex, RESPONSIVENESS, SPACING } from '@opentrons/components'
+import {
+  Flex,
+  OVERFLOW_AUTO,
+  OVERFLOW_HIDDEN,
+  RESPONSIVENESS,
+  SPACING,
+} from '@opentrons/components'
 
-import { InterventionModal } from '../../../molecules/InterventionModal'
-import { getModalPortalEl, getTopPortalEl } from '../../../App/portal'
+import { InterventionModal } from '/app/molecules/InterventionModal'
+import { getModalPortalEl, getTopPortalEl } from '/app/App/portal'
 
-import type { ModalType } from '../../../molecules/InterventionModal'
+import type { ModalType } from '/app/molecules/InterventionModal'
 import type { DesktopSizeType } from '../types'
 
 export type RecoveryInterventionModalProps = Omit<
@@ -50,12 +56,22 @@ export function RecoveryInterventionModal({
 const SMALL_MODAL_STYLE = css`
   height: 22rem;
   padding: ${SPACING.spacing32};
+  width: 100%;
+  overflow-y: ${OVERFLOW_AUTO};
 
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
     padding: ${SPACING.spacing32};
     height: 100%;
+    overflow: ${OVERFLOW_HIDDEN};
   }
 `
 const LARGE_MODAL_STYLE = css`
   height: 26.75rem;
+  width: 100%;
+  overflow-y: ${OVERFLOW_AUTO};
+
+  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+    height: 100%;
+    overflow: ${OVERFLOW_HIDDEN};
+  }
 `

@@ -1,6 +1,6 @@
 """Motion state store and getters."""
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from opentrons.types import MountType, Point
 from opentrons.hardware_control.types import CriticalPoint
@@ -15,6 +15,7 @@ from .. import errors
 from ..types import (
     MotorAxis,
     WellLocation,
+    LiquidHandlingWellLocation,
     CurrentWell,
     CurrentPipetteLocation,
     AddressableOffsetVector,
@@ -89,13 +90,14 @@ class MotionView:
         pipette_id: str,
         labware_id: str,
         well_name: str,
-        well_location: Optional[WellLocation],
+        well_location: Optional[Union[WellLocation, LiquidHandlingWellLocation]],
         origin: Point,
         origin_cp: Optional[CriticalPoint],
         max_travel_z: float,
         current_well: Optional[CurrentWell] = None,
         force_direct: bool = False,
         minimum_z_height: Optional[float] = None,
+        operation_volume: Optional[float] = None,
     ) -> List[motion_planning.Waypoint]:
         """Calculate waypoints to a destination that's specified as a well."""
         location = current_well or self._pipettes.get_current_location()
@@ -107,9 +109,11 @@ class MotionView:
             destination_cp = CriticalPoint.XY_CENTER
 
         destination = self._geometry.get_well_position(
-            labware_id,
-            well_name,
-            well_location,
+            labware_id=labware_id,
+            well_name=well_name,
+            well_location=well_location,
+            operation_volume=operation_volume,
+            pipette_id=pipette_id,
         )
 
         move_type = _move_types.get_move_type_to_well(
@@ -151,6 +155,7 @@ class MotionView:
         minimum_z_height: Optional[float] = None,
         stay_at_max_travel_z: bool = False,
         ignore_tip_configuration: Optional[bool] = True,
+        max_travel_z_extra_margin: Optional[float] = None,
     ) -> List[motion_planning.Waypoint]:
         """Calculate waypoints to a destination that's specified as an addressable area."""
         location = self._pipettes.get_current_location()
@@ -169,7 +174,9 @@ class MotionView:
                 # beneath max_travel_z. Investigate why motion_planning.get_waypoints() does not
                 # let us travel at max_travel_z, and whether it's safe to make it do that.
                 # Possibly related: https://github.com/Opentrons/opentrons/pull/6882#discussion_r514248062
-                max_travel_z - motion_planning.waypoints.MINIMUM_Z_MARGIN,
+                max_travel_z
+                - motion_planning.waypoints.MINIMUM_Z_MARGIN
+                - (max_travel_z_extra_margin or 0.0),
             )
             destination = base_destination_at_max_z + Point(
                 offset.x, offset.y, offset.z

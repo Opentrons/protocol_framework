@@ -6,7 +6,11 @@ shared-data. It's been modified by hand to be more friendly.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, List, Optional, Literal, Union
+from typing import Any, Dict, List, Optional, Literal, Union, TYPE_CHECKING
+from typing import TYPE_
+from math import sqrt, asin
+from numpy import pi, trapz
+from functools import cached_property
 
 from pydantic import (
     ConfigDict,
@@ -15,6 +19,17 @@ from pydantic import (
 )
 from opentrons_shared_data.types import Vec3f, Number, NonNegativeNumber
 
+
+from .constants import (
+    Conical,
+    Cuboidal,
+    RoundedCuboid,
+    SquaredCone,
+    Spherical,
+    WellShape,
+    Circular,
+    Rectangular,
+)
 
 SAFE_STRING_REGEX = "^[a-z0-9._]+$"
 
@@ -80,6 +95,7 @@ class DisplayCategory(str, Enum):
     aluminumBlock = "aluminumBlock"
     adapter = "adapter"
     other = "other"
+    lid = "lid"
 
 
 class LabwareRole(str, Enum):
@@ -87,6 +103,7 @@ class LabwareRole(str, Enum):
     fixture = "fixture"
     adapter = "adapter"
     maintenance = "maintenance"
+    lid = "lid"
 
 
 class Metadata(BaseModel):
@@ -203,53 +220,381 @@ class WellDefinition(BaseModel):
     )
 
 
-class CircularCrossSection(BaseModel):
-    shape: Literal["circular"] = Field(..., description="Denote shape as circular")
-    diameter: NonNegativeNumber = Field(
-        ..., description="The diameter of a circular cross section of a well"
-    )
-
-
-class RectangularCrossSection(BaseModel):
-    shape: Literal["rectangular"] = Field(
-        ..., description="Denote shape as rectangular"
-    )
-    xDimension: Optional[NonNegativeNumber] = Field(
-        None,
-        description="x dimension of a subsection of wells",
-    )
-    yDimension: Optional[NonNegativeNumber] = Field(
-        None,
-        description="y dimension of a subsection of wells",
-    )
-
-
 class SphericalSegment(BaseModel):
-    shape: Literal["spherical"] = Field(..., description="Denote shape as spherical")
-    radius_of_curvature: NonNegativeNumber = Field(
+    shape: Spherical = Field(..., description="Denote shape as spherical")
+    radiusOfCurvature: _NonNegativeNumber = Field(
         ...,
         description="radius of curvature of bottom subsection of wells",
     )
-    depth: NonNegativeNumber = Field(
+    topHeight: _NonNegativeNumber = Field(
         ..., description="The depth of a spherical bottom of a well"
     )
-
-
-TopCrossSection = Union[CircularCrossSection, RectangularCrossSection]
-BottomShape = Union[CircularCrossSection, RectangularCrossSection, SphericalSegment]
-
-
-class BoundedSection(BaseModel):
-    geometry: TopCrossSection = Field(
+    bottomHeight: _NonNegativeNumber = Field(
         ...,
-        description="Geometrical information needed to calculate the volume of a subsection of a well",
-        discriminator="shape",
+        description="Height of the bottom of the segment, must be 0.0",
+    )
+    xCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+    yCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+
+    @cached_property
+    def count(self) -> int:
+        return self.xCount * self.yCount
+
+    class Config:
+        keep_untouched = (cached_property,)
+
+
+class ConicalFrustum(BaseModel):
+    shape: Conical = Field(..., description="Denote shape as conical")
+    bottomDiameter: _NonNegativeNumber = Field(
+        ...,
+        description="The diameter at the bottom cross-section of a circular frustum",
+    )
+    topDiameter: _NonNegativeNumber = Field(
+        ..., description="The diameter at the top cross-section of a circular frustum"
     )
     topHeight: NonNegativeNumber = Field(
         ...,
         description="The height at the top of a bounded subsection of a well, relative to the bottom"
         "of the well",
     )
+    bottomHeight: _NonNegativeNumber = Field(
+        ...,
+        description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
+    )
+    xCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+    yCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+
+    @cached_property
+    def count(self) -> int:
+        return self.xCount * self.yCount
+
+    class Config:
+        keep_untouched = (cached_property,)
+
+
+class CuboidalFrustum(BaseModel):
+    shape: Cuboidal = Field(..., description="Denote shape as cuboidal")
+    bottomXDimension: _NonNegativeNumber = Field(
+        ...,
+        description="x dimension of the bottom cross-section of a rectangular frustum",
+    )
+    bottomYDimension: _NonNegativeNumber = Field(
+        ...,
+        description="y dimension of the bottom cross-section of a rectangular frustum",
+    )
+    topXDimension: _NonNegativeNumber = Field(
+        ...,
+        description="x dimension of the top cross-section of a rectangular frustum",
+    )
+    topYDimension: _NonNegativeNumber = Field(
+        ...,
+        description="y dimension of the top cross-section of a rectangular frustum",
+    )
+    topHeight: _NonNegativeNumber = Field(
+        ...,
+        description="The height at the top of a bounded subsection of a well, relative to the bottom"
+        "of the well",
+    )
+    bottomHeight: _NonNegativeNumber = Field(
+        ...,
+        description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
+    )
+    xCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+    yCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+
+    @cached_property
+    def count(self) -> int:
+        return self.xCount * self.yCount
+
+    class Config:
+        keep_untouched = (cached_property,)
+
+
+# A squared cone is the intersection of a cube and a cone that both
+# share a central axis, and is a transitional shape between a cone and pyramid
+"""
+module RectangularPrismToCone(bottom_shape, diameter, x, y, z) {
+    circle_radius = diameter/2;
+    r1 = sqrt(x*x + y*y)/2;
+    r2 = circle_radius/2;
+    top_r = bottom_shape == "square" ? r1 : r2;
+    bottom_r = bottom_shape == "square" ? r2 : r1;
+    intersection() {
+        cylinder(z,top_r,bottom_r,$fn=100);
+        translate([0,0,z/2])cube([x, y, z], center=true);
+    }
+}
+"""
+
+
+class SquaredConeSegment(BaseModel):
+    shape: SquaredCone = Field(
+        ..., description="Denote shape as a squared conical segment"
+    )
+    bottomCrossSection: WellShape = Field(
+        ...,
+        description="Denote if the shape is going from circular to rectangular or vise versa",
+    )
+    circleDiameter: _NonNegativeNumber = Field(
+        ...,
+        description="diameter of the circular face of a truncated circular segment",
+    )
+
+    rectangleXDimension: _NonNegativeNumber = Field(
+        ...,
+        description="x dimension of the rectangular face of a truncated circular segment",
+    )
+    rectangleYDimension: _NonNegativeNumber = Field(
+        ...,
+        description="y dimension of the rectangular face of a truncated circular segment",
+    )
+    topHeight: _NonNegativeNumber = Field(
+        ...,
+        description="The height at the top of a bounded subsection of a well, relative to the bottom"
+        "of the well",
+    )
+    bottomHeight: _NonNegativeNumber = Field(
+        ...,
+        description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
+    )
+    xCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+    yCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+
+    @staticmethod
+    def _area_trap_points(
+        total_frustum_height: float,
+        circle_diameter: float,
+        rectangle_x: float,
+        rectangle_y: float,
+        dx: float,
+    ) -> List[float]:
+        """Grab a bunch of data points of area at given heights."""
+
+        def _area_arcs(r: float, c: float, d: float) -> float:
+            """Return the area of all 4 arc segments."""
+            theata_y = asin(c / r)
+            theata_x = asin(d / r)
+            theata_arc = (pi / 2) - theata_y - theata_x
+            # area of all 4 arcs is 4 * pi*r^2*(theata/2pi)
+            return 2 * r**2 * theata_arc
+
+        def _area(r: float) -> float:
+            """Return the area of a given r_y."""
+            # distance from the center of y axis of the rectangle to where the arc intercepts that side
+            c: float = (
+                sqrt(r**2 - (rectangle_y / 2) ** 2) if (rectangle_y / 2) < r else 0
+            )
+            # distance from the center of x axis of the rectangle to where the arc intercepts that side
+            d: float = (
+                sqrt(r**2 - (rectangle_x / 2) ** 2) if (rectangle_x / 2) < r else 0
+            )
+            arc_area = _area_arcs(r, c, d)
+            y_triangles: float = rectangle_y * c
+            x_triangles: float = rectangle_x * d
+            return arc_area + y_triangles + x_triangles
+
+        r_0 = circle_diameter / 2
+        r_h = sqrt(rectangle_x**2 + rectangle_y**2) / 2
+
+        num_steps = int(total_frustum_height / dx)
+        points = [0.0]
+        for i in range(num_steps + 1):
+            r_y = (i * dx / total_frustum_height) * (r_h - r_0) + r_0
+            points.append(_area(r_y))
+        return points
+
+    @cached_property
+    def height_to_volume_table(self) -> Dict[float, float]:
+        """Return a lookup table of heights to volumes."""
+        # the accuracy of this method is approximately +- 10*dx so for dx of 0.001 we have a +- 0.01 ul
+        dx = 0.001
+        total_height = self.topHeight - self.bottomHeight
+        points = SquaredConeSegment._area_trap_points(
+            total_height,
+            self.circleDiameter,
+            self.rectangleXDimension,
+            self.rectangleYDimension,
+            dx,
+        )
+        if self.bottomCrossSection is Rectangular:
+            # The points function assumes the circle is at the bottom but if its flipped we just reverse the points
+            points.reverse()
+        elif self.bottomCrossSection is not Circular:
+            raise NotImplementedError(
+                "If you see this error a new well shape has been added without updating this code"
+            )
+        y = 0.0
+        table: Dict[float, float] = {}
+        # fill in the table
+        while y < total_height:
+            table[y] = trapz(points[0 : int(y / dx)], dx=dx)
+            y = y + dx
+
+        # we always want to include the volume at the max height
+        table[total_height] = trapz(points, dx=dx)
+        return table
+
+    @cached_property
+    def volume_to_height_table(self) -> Dict[float, float]:
+        return dict((v, k) for k, v in self.height_to_volume_table.items())
+
+    @cached_property
+    def count(self) -> int:
+        return self.xCount * self.yCount
+
+    class Config:
+        keep_untouched = (cached_property,)
+
+
+"""
+module filitedCuboidSquare(bottom_shape, diameter, width, length, height, steps) {
+    module _slice(depth, x, y, r) {
+        echo("called with: ", depth, x, y, r);
+        circle_centers = [
+            [(x/2)-r, (y/2)-r, 0],
+            [(-x/2)+r, (y/2)-r, 0],
+            [(x/2)-r, (-y/2)+r, 0],
+            [(-x/2)+r, (-y/2)+r, 0]
+
+        ];
+        translate([0,0,depth/2])cube([x-2*r,y,depth], center=true);
+        translate([0,0,depth/2])cube([x,y-2*r,depth], center=true);
+        for (center = circle_centers) {
+            translate(center) cylinder(depth, r, r, $fn=100);
+        }
+    }
+    for (slice_height = [0:height/steps:height]) {
+        r = (diameter) * (slice_height/height);
+        translate([0,0,slice_height]) {
+             _slice(height/steps , width, length, r/2);
+        }
+    }
+}
+module filitedCuboidForce(bottom_shape, diameter, width, length, height, steps) {
+    module single_cone(r,x,y,z) {
+        r = diameter/2;
+        circle_face = [[ for (i = [0:1: steps]) i ]];
+        theta = 360/steps;
+        circle_points = [for (step = [0:1:steps]) [r*cos(theta*step), r*sin(theta*step), z]];
+        final_points = [[x,y,0]];
+        all_points = concat(circle_points, final_points);
+        triangles = [for (step = [0:1:steps-1]) [step, step+1, steps+1]];
+        faces = concat(circle_face, triangles);
+        polyhedron(all_points, faces);
+    }
+    module square_section(r, x, y, z) {
+        points = [
+            [x,y,0],
+            [-x,y,0],
+            [-x,-y,0],
+            [x,-y,0],
+            [r,0,z],
+            [0,r,z],
+            [-r,0,z],
+            [0,-r,z],
+        ];
+        faces = [
+            [0,1,2,3],
+            [4,5,6,7],
+            [4, 0, 3],
+            [5, 0, 1],
+            [6, 1, 2],
+            [7, 2, 3],
+        ];
+        polyhedron(points, faces);
+    }
+    circle_height = bottom_shape == "square" ? height : -height;
+    translate_height = bottom_shape == "square" ? 0 : height;
+    translate ([0,0, translate_height]) {
+        union() {
+            single_cone(diameter/2, width/2, length/2, circle_height);
+            single_cone(diameter/2, -width/2, length/2, circle_height);
+            single_cone(diameter/2, width/2, -length/2, circle_height);
+            single_cone(diameter/2, -width/2, -length/2, circle_height);
+            square_section(diameter/2, width/2, length/2, circle_height);
+        }
+    }
+}
+
+module filitedCuboid(bottom_shape, diameter, width, length, height) {
+    if (width == length && width == diameter) {
+        filitedCuboidSquare(bottom_shape, diameter, width, length, height, 100);
+    }
+    else {
+        filitedCuboidForce(bottom_shape, diameter, width, length, height, 100);
+    }
+}"""
+
+
+class RoundedCuboidSegment(BaseModel):
+    shape: RoundedCuboid = Field(
+        ..., description="Denote shape as a rounded cuboidal segment"
+    )
+    bottomCrossSection: WellShape = Field(
+        ...,
+        description="Denote if the shape is going from circular to rectangular or vise versa",
+    )
+    circleDiameter: _NonNegativeNumber = Field(
+        ...,
+        description="diameter of the circular face of a rounded rectangular segment",
+    )
+    rectangleXDimension: _NonNegativeNumber = Field(
+        ...,
+        description="x dimension of the rectangular face of a rounded rectangular segment",
+    )
+    rectangleYDimension: _NonNegativeNumber = Field(
+        ...,
+        description="y dimension of the rectangular face of a rounded rectangular segment",
+    )
+    topHeight: _NonNegativeNumber = Field(
+        ...,
+        description="The height at the top of a bounded subsection of a well, relative to the bottom"
+        "of the well",
+    )
+    bottomHeight: _NonNegativeNumber = Field(
+        ...,
+        description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
+    )
+    xCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+    yCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+
+    @cached_property
+    def count(self) -> int:
+        return self.xCount * self.yCount
+
+    class Config:
+        keep_untouched = (cached_property,)
 
 
 class Metadata1(BaseModel):
@@ -280,20 +625,24 @@ class Group(BaseModel):
     )
 
 
+WellSegment = Union[
+    ConicalFrustum,
+    CuboidalFrustum,
+    SquaredConeSegment,
+    RoundedCuboidSegment,
+    SphericalSegment,
+]
+
+
 class InnerWellGeometry(BaseModel):
-    frusta: List[BoundedSection] = Field(
+    sections: List[WellSegment] = Field(
         ...,
         description="A list of all of the sections of the well that have a contiguous shape",
-    )
-    bottomShape: BottomShape = Field(
-        ...,
-        description="The shape at the bottom of the well: either a spherical segment or a cross-section",
-        discriminator="shape",
     )
 
 
 class LabwareDefinition(BaseModel):
-    schemaVersion: Literal[1, 2] = Field(
+    schemaVersion: Literal[1, 2, 3] = Field(
         ..., description="Which schema version a labware is using"
     )
     version: int = Field(

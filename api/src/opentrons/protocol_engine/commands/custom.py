@@ -34,16 +34,18 @@ class CustomResult(BaseModel):
 
 
 class CustomImplementation(
-    AbstractCommandImpl[CustomParams, SuccessData[CustomResult, None]]
+    AbstractCommandImpl[CustomParams, SuccessData[CustomResult]]
 ):
     """Custom command implementation."""
 
     # TODO(mm, 2022-11-09): figure out how a plugin can specify a custom command
     # implementation. For now, always no-op, so we can use custom commands as containers
     # for legacy RPC (pre-ProtocolEngine) payloads.
-    async def execute(self, params: CustomParams) -> SuccessData[CustomResult, None]:
+    async def execute(self, params: CustomParams) -> SuccessData[CustomResult]:
         """A custom command does nothing when executed directly."""
-        return SuccessData(public=CustomResult.model_construct(), private=None)
+        return SuccessData(
+            public=CustomResult.model_construct(),
+        )
 
 
 class Custom(BaseCommand[CustomParams, CustomResult, ErrorOccurrence]):

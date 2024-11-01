@@ -12,7 +12,13 @@ from fastapi import APIRouter, Depends, status, Query
 from pydantic import BaseModel, Field
 
 from opentrons_shared_data.errors import ErrorCodes
-from opentrons.protocol_engine.types import CSVRuntimeParamPaths
+from opentrons_shared_data.robot.types import RobotTypeEnum
+from opentrons.hardware_control import HardwareControlAPI
+from opentrons.hardware_control.modules.absorbance_reader import AbsorbanceReader
+from opentrons.hardware_control.types import EstopState
+from opentrons.protocol_engine.commands.absorbance_reader import CloseLid, OpenLid
+from opentrons.protocol_engine.commands.move_labware import MoveLabware
+from opentrons.protocol_engine.types import CSVRuntimeParamPaths, DeckSlotLocation
 from opentrons.protocol_engine import (
     errors as pe_errors,
 )
@@ -27,6 +33,7 @@ from robot_server.errors.error_responses import ErrorDetails, ErrorBody
 from robot_server.protocols.protocol_models import ProtocolKind
 from robot_server.service.dependencies import get_current_time, get_unique_id
 from robot_server.robot.control.dependencies import require_estop_in_good_state
+from robot_server.hardware import get_hardware, get_robot_type_enum
 
 from robot_server.service.json_api import (
     RequestModel,
@@ -37,6 +44,7 @@ from robot_server.service.json_api import (
     MultiBodyMeta,
     ResourceLink,
     PydanticResponse,
+    Body,
 )
 
 from robot_server.protocols.dependencies import get_protocol_store
@@ -46,11 +54,21 @@ from robot_server.protocols.protocol_store import (
 )
 from robot_server.protocols.router import ProtocolNotFound
 
-from ..run_models import RunNotFoundError
+from ..run_models import (
+    PlaceLabwareState,
+    RunNotFoundError,
+    ActiveNozzleLayout,
+    RunCurrentState,
+    CommandLinkNoMeta,
+    NozzleLayoutConfig,
+)
 from ..run_auto_deleter import RunAutoDeleter
 from ..run_models import Run, BadRun, RunCreate, RunUpdate
 from ..run_orchestrator_store import RunConflictError
-from ..run_data_manager import RunDataManager, RunNotCurrentError
+from ..run_data_manager import (
+    RunDataManager,
+    RunNotCurrentError,
+)
 from ..dependencies import (
     get_run_data_manager,
     get_run_auto_deleter,
@@ -62,6 +80,10 @@ from robot_server.deck_configuration.fastapi_dependencies import (
     get_deck_configuration_store,
 )
 from robot_server.deck_configuration.store import DeckConfigurationStore
+from robot_server.file_provider.fastapi_dependencies import (
+    get_file_provider,
+)
+from opentrons.protocol_engine.resources.file_provider import FileProvider
 from robot_server.service.notifications import get_pe_notify_publishers
 
 log = logging.getLogger(__name__)
@@ -112,6 +134,15 @@ class AllRunsLinks(BaseModel):
     current: Optional[ResourceLink] = Field(
         None,
         description="Path to the currently active run, if a run is active.",
+    )
+
+
+class CurrentStateLinks(BaseModel):
+    """Links returned with the current state of a run."""
+
+    lastCompleted: Optional[CommandLinkNoMeta] = Field(
+        None,
+        description="Path to the last completed command when current state was reported, if any.",
     )
 
 
@@ -168,6 +199,7 @@ async def create_run(  # noqa: C901
     deck_configuration_store: Annotated[
         DeckConfigurationStore, Depends(get_deck_configuration_store)
     ],
+    file_provider: Annotated[FileProvider, Depends(get_file_provider)],
     notify_publishers: Annotated[Callable[[], None], Depends(get_pe_notify_publishers)],
     request_body: Optional[RequestModel[RunCreate]] = None,
 ) -> PydanticResponse[SimpleBody[Union[Run, BadRun]]]:
@@ -187,6 +219,7 @@ async def create_run(  # noqa: C901
         resources to make room for the new run.
         check_estop: Dependency to verify the estop is in a valid state.
         deck_configuration_store: Dependency to fetch the deck configuration.
+        file_provider: Dependency to provide access to file Reading and Writing to Protocol engine.
         notify_publishers: Utilized by the engine to notify publishers of state changes.
     """
     protocol_id = request_body.data.protocolId if request_body is not None else None
@@ -241,6 +274,7 @@ async def create_run(  # noqa: C901
             created_at=created_at,
             labware_offsets=offsets,
             deck_configuration=deck_configuration,
+            file_provider=file_provider,
             run_time_param_values=rtp_values,
             run_time_param_paths=rtp_paths,
             protocol=protocol_resource,
@@ -407,14 +441,15 @@ async def update_run(
 @PydanticResponse.wrap_route(
     base_router.put,
     path="/runs/{runId}/errorRecoveryPolicy",
-    summary="Set run policies",
+    summary="Set a run's error recovery policy",
     description=dedent(
         """
         Update how to handle different kinds of command failures.
-        The following rules will persist during the run.
+
+        For this to have any effect, error recovery must also be enabled globally.
+        See `PATCH /errorRecovery/settings`.
         """
     ),
-    status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_200_OK: {"model": SimpleEmptyBody},
         status.HTTP_409_CONFLICT: {"model": ErrorBody[RunStopped]},
@@ -432,12 +467,11 @@ async def put_error_recovery_policy(
         request_body:  Request body with run policies data.
         run_data_manager: Current and historical run data management.
     """
-    policies = request_body.data.policyRules
-    if policies:
-        try:
-            run_data_manager.set_policies(run_id=runId, policies=policies)
-        except RunNotCurrentError as e:
-            raise RunStopped(detail=str(e)).as_error(status.HTTP_409_CONFLICT) from e
+    rules = request_body.data.policyRules
+    try:
+        run_data_manager.set_error_recovery_rules(run_id=runId, rules=rules)
+    except RunNotCurrentError as e:
+        raise RunStopped(detail=str(e)).as_error(status.HTTP_409_CONFLICT) from e
 
     return await PydanticResponse.create(
         content=SimpleEmptyBody.construct(),
@@ -520,6 +554,125 @@ async def get_run_commands_error(
         content=SimpleMultiBody.construct(
             data=command_error_slice.commands_errors,
             meta=meta,
+        ),
+        status_code=status.HTTP_200_OK,
+    )
+
+
+@PydanticResponse.wrap_route(
+    base_router.get,
+    path="/runs/{runId}/currentState",
+    summary="Get a run's current state.",
+    description=dedent(
+        """
+        Get current state associated with a run if the run is current.
+        "\n\n"
+        Note that this endpoint is experimental and subject to change.
+        """
+    ),
+    responses={
+        status.HTTP_200_OK: {"model": Body[RunCurrentState, CurrentStateLinks]},
+        status.HTTP_409_CONFLICT: {"model": ErrorBody[RunStopped]},
+    },
+)
+async def get_current_state(  # noqa: C901
+    runId: str,
+    run_data_manager: Annotated[RunDataManager, Depends(get_run_data_manager)],
+    hardware: Annotated[HardwareControlAPI, Depends(get_hardware)],
+    robot_type: Annotated[RobotTypeEnum, Depends(get_robot_type_enum)],
+) -> PydanticResponse[Body[RunCurrentState, CurrentStateLinks]]:
+    """Get current state associated with a run if the run is current.
+
+    Arguments:
+        runId: Run ID pulled from URL.
+        run_data_manager: Run data retrieval interface.
+        hardware: Hardware control interface.
+        robot_type: The type of robot.
+    """
+    try:
+        run = run_data_manager.get(run_id=runId)
+        active_nozzle_maps = run_data_manager.get_nozzle_maps(run_id=runId)
+
+        nozzle_layouts = {
+            pipetteId: ActiveNozzleLayout.construct(
+                startingNozzle=nozzle_map.starting_nozzle,
+                activeNozzles=list(nozzle_map.map_store.keys()),
+                config=NozzleLayoutConfig(nozzle_map.configuration.value.lower()),
+            )
+            for pipetteId, nozzle_map in active_nozzle_maps.items()
+        }
+
+        current_command = run_data_manager.get_current_command(run_id=runId)
+        last_completed_command = run_data_manager.get_last_completed_command(
+            run_id=runId
+        )
+    except RunNotCurrentError as e:
+        raise RunStopped(detail=str(e)).as_error(status.HTTP_409_CONFLICT)
+
+    links = CurrentStateLinks.construct(
+        lastCompleted=CommandLinkNoMeta.construct(
+            id=last_completed_command.command_id,
+            href=f"/runs/{runId}/commands/{last_completed_command.command_id}",
+        )
+        if last_completed_command is not None
+        else None
+    )
+
+    estop_engaged = False
+    place_labware = None
+    if robot_type == RobotTypeEnum.FLEX:
+        estop_engaged = hardware.get_estop_state() in [
+            EstopState.PHYSICALLY_ENGAGED,
+            EstopState.LOGICALLY_ENGAGED,
+        ]
+
+        command = (
+            run_data_manager.get_command(runId, current_command.command_id)
+            if current_command
+            else None
+        )
+
+        # Labware state when estop is engaged
+        if isinstance(command, MoveLabware):
+            location = command.params.newLocation
+            if isinstance(location, DeckSlotLocation):
+                place_labware = PlaceLabwareState(
+                    location=location,
+                    labwareId=command.params.labwareId,
+                    shouldPlaceDown=False,
+                )
+        # Handle absorbance reader lid
+        elif isinstance(command, (OpenLid, CloseLid)):
+            for mod in run.modules:
+                if (
+                    not isinstance(mod, AbsorbanceReader)
+                    and mod.id != command.params.moduleId
+                ):
+                    continue
+                for hw_mod in hardware.attached_modules:
+                    if (
+                        mod.location is not None
+                        and hw_mod.serial_number == mod.serialNumber
+                    ):
+                        location = mod.location
+                        labware_id = f"{mod.model}Lid{location.slotName}"
+                        place_labware = PlaceLabwareState(
+                            location=location,
+                            labwareId=labware_id,
+                            shouldPlaceDown=estop_engaged,
+                        )
+                        break
+                if place_labware:
+                    break
+
+    return await PydanticResponse.create(
+        content=Body.construct(
+            data=RunCurrentState.construct(
+                estopEngaged=estop_engaged,
+                activeNozzleLayouts=nozzle_layouts,
+                placeLabwareState=place_labware,
+            ),
+            links=links,
         ),
         status_code=status.HTTP_200_OK,
     )

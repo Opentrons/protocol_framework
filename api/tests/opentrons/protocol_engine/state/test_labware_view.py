@@ -460,6 +460,17 @@ def test_get_well_definition_get_first(well_plate_def: LabwareDefinition) -> Non
     assert result == expected_well_def
 
 
+def test_get_well_geometry_raises_error(well_plate_def: LabwareDefinition) -> None:
+    """It should raise an IncompleteLabwareDefinitionError when there's no innerLabwareGeometry."""
+    subject = get_labware_view(
+        labware_by_id={"plate-id": plate},
+        definitions_by_uri={"some-plate-uri": well_plate_def},
+    )
+
+    with pytest.raises(errors.IncompleteLabwareDefinitionError):
+        subject.get_well_geometry(labware_id="plate-id")
+
+
 def test_get_well_size_circular(well_plate_def: LabwareDefinition) -> None:
     """It should return the well dimensions of a circular well."""
     subject = get_labware_view(
@@ -1378,11 +1389,18 @@ def test_raise_if_labware_cannot_be_stacked_on_labware_on_adapter() -> None:
             ),
         },
         definitions_by_uri={
-            "def-uri-2": LabwareDefinition.construct(allowedRoles=[LabwareRole.adapter])
+            "def-uri-1": LabwareDefinition.construct(  # type: ignore[call-arg]
+                allowedRoles=[LabwareRole.labware]
+            ),
+            "def-uri-2": LabwareDefinition.construct(  # type: ignore[call-arg]
+                allowedRoles=[LabwareRole.adapter]
+            ),
         },
     )
 
-    with pytest.raises(errors.LabwareCannotBeStackedError, match="on top of adapter"):
+    with pytest.raises(
+        errors.LabwareCannotBeStackedError, match="cannot be loaded to stack"
+    ):
         subject.raise_if_labware_cannot_be_stacked(
             top_labware_definition=LabwareDefinition.construct(
                 parameters=Parameters.construct(loadName="name"),
@@ -1391,6 +1409,90 @@ def test_raise_if_labware_cannot_be_stacked_on_labware_on_adapter() -> None:
                 },
             ),
             bottom_labware_id="labware-id",
+        )
+
+
+@pytest.mark.parametrize(
+    argnames=[
+        "allowed_roles",
+        "stacking_quirks",
+        "exception",
+    ],
+    argvalues=[
+        [
+            [LabwareRole.labware],
+            [],
+            pytest.raises(errors.LabwareCannotBeStackedError),
+        ],
+        [
+            [LabwareRole.lid],
+            ["stackingMaxFive"],
+            does_not_raise(),
+        ],
+    ],
+)
+def test_labware_stacking_height_passes_or_raises(
+    allowed_roles: List[LabwareRole],
+    stacking_quirks: List[str],
+    exception: ContextManager[None],
+) -> None:
+    """It should raise if the labware is stacked too high, and pass if the labware definition allowed this."""
+    subject = get_labware_view(
+        labware_by_id={
+            "labware-id4": LoadedLabware(
+                id="labware-id4",
+                loadName="test",
+                definitionUri="def-uri-1",
+                location=OnLabwareLocation(labwareId="labware-id3"),
+            ),
+            "labware-id3": LoadedLabware(
+                id="labware-id3",
+                loadName="test",
+                definitionUri="def-uri-1",
+                location=OnLabwareLocation(labwareId="labware-id2"),
+            ),
+            "labware-id2": LoadedLabware(
+                id="labware-id2",
+                loadName="test",
+                definitionUri="def-uri-1",
+                location=OnLabwareLocation(labwareId="labware-id1"),
+            ),
+            "labware-id1": LoadedLabware(
+                id="labware-id1",
+                loadName="test",
+                definitionUri="def-uri-1",
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_1),
+            ),
+        },
+        definitions_by_uri={
+            "def-uri-1": LabwareDefinition.construct(  # type: ignore[call-arg]
+                allowedRoles=allowed_roles,
+                parameters=Parameters.construct(
+                    format="irregular",
+                    quirks=stacking_quirks,
+                    isTiprack=False,
+                    loadName="name",
+                    isMagneticModuleCompatible=False,
+                ),
+            )
+        },
+    )
+
+    with exception:
+        subject.raise_if_labware_cannot_be_stacked(
+            top_labware_definition=LabwareDefinition.construct(  # type: ignore[call-arg]
+                parameters=Parameters.construct(
+                    format="irregular",
+                    quirks=stacking_quirks,
+                    isTiprack=False,
+                    loadName="name",
+                    isMagneticModuleCompatible=False,
+                ),
+                stackingOffsetWithLabware={
+                    "test": SharedDataOverlapOffset(x=0, y=0, z=0)
+                },
+            ),
+            bottom_labware_id="labware-id4",
         )
 
 

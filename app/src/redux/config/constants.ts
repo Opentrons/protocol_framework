@@ -6,6 +6,8 @@ export const DEV_INTERNAL_FLAGS: DevInternalFlag[] = [
   'enableRunNotes',
   'protocolTimeline',
   'enableLabwareCreator',
+  'enableLocalization',
+  'reactQueryDevtools',
 ]
 
 // action type constants

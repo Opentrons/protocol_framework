@@ -11,6 +11,7 @@ from ..types import (
     LoadedModule,
     LoadedPipette,
     Liquid,
+    WellInfoSummary,
 )
 
 
@@ -29,3 +30,5 @@ class StateSummary(BaseModel):
     startedAt: Optional[datetime] = None
     completedAt: Optional[datetime] = None
     liquids: List[Liquid] = Field(default_factory=list)
+    wells: List[WellInfoSummary] = Field(default_factory=list)
+    files: List[str] = Field(default_factory=list)

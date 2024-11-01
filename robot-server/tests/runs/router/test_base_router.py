@@ -1,20 +1,31 @@
 """Tests for base /runs routes."""
+from typing import Dict
+
+from opentrons.hardware_control import HardwareControlAPI
+from opentrons_shared_data.robot.types import RobotTypeEnum
 import pytest
 from datetime import datetime
 from decoy import Decoy
 from pathlib import Path
 
-from opentrons.types import DeckSlotName
+from opentrons.types import DeckSlotName, Point
 from opentrons.protocol_engine import (
     LabwareOffsetCreate,
     types as pe_types,
     errors as pe_errors,
     CommandErrorSlice,
+    CommandPointer,
 )
 from opentrons.protocol_reader import ProtocolSource, JsonProtocolConfig
 
-from robot_server.data_files.data_files_store import DataFilesStore, DataFileInfo
+from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType, NozzleMap
 
+from robot_server.data_files.data_files_store import (
+    DataFilesStore,
+    DataFileInfo,
+)
+
+from robot_server.data_files.models import DataFileSource
 from robot_server.errors.error_responses import ApiError
 from robot_server.runs.error_recovery_models import ErrorRecoveryPolicy
 from robot_server.service.json_api import (
@@ -34,9 +45,20 @@ from robot_server.protocols.protocol_store import (
 
 from robot_server.runs.run_auto_deleter import RunAutoDeleter
 
-from robot_server.runs.run_models import Run, RunCreate, RunUpdate
+from robot_server.runs.run_models import (
+    Run,
+    RunCreate,
+    RunUpdate,
+    RunCurrentState,
+    ActiveNozzleLayout,
+    CommandLinkNoMeta,
+    NozzleLayoutConfig,
+)
 from robot_server.runs.run_orchestrator_store import RunConflictError
-from robot_server.runs.run_data_manager import RunDataManager, RunNotCurrentError
+from robot_server.runs.run_data_manager import (
+    RunDataManager,
+    RunNotCurrentError,
+)
 from robot_server.runs.run_models import RunNotFoundError
 from robot_server.runs.router.base_router import (
     AllRunsLinks,
@@ -48,9 +70,15 @@ from robot_server.runs.router.base_router import (
     update_run,
     put_error_recovery_policy,
     get_run_commands_error,
+    get_current_state,
+    CurrentStateLinks,
 )
 
 from robot_server.deck_configuration.store import DeckConfigurationStore
+from opentrons.protocol_engine.resources.file_provider import (
+    FileProvider,
+)
+from robot_server.file_provider.provider import FileProviderWrapper
 
 
 def mock_notify_publishers() -> None:
@@ -84,14 +112,33 @@ def labware_offset_create() -> LabwareOffsetCreate:
     )
 
 
+@pytest.fixture
+def mock_nozzle_maps() -> Dict[str, NozzleMap]:
+    """Get mock NozzleMaps."""
+    return {
+        "mock-pipette-id": NozzleMap(
+            configuration=NozzleConfigurationType.FULL,
+            columns={"1": ["A1"]},
+            rows={"A": ["A1"]},
+            map_store={"A1": Point(0, 0, 0)},
+            starting_nozzle="A1",
+            valid_map_key="mock-key",
+            full_instrument_map_store={},
+            full_instrument_rows={},
+        )
+    }
+
+
 async def test_create_run(
     decoy: Decoy,
     mock_run_data_manager: RunDataManager,
     mock_run_auto_deleter: RunAutoDeleter,
     labware_offset_create: pe_types.LabwareOffsetCreate,
     mock_deck_configuration_store: DeckConfigurationStore,
+    mock_file_provider_wrapper: FileProviderWrapper,
     mock_protocol_store: ProtocolStore,
     mock_data_files_store: DataFilesStore,
+    mock_file_provider: FileProvider,
 ) -> None:
     """It should be able to create a basic run."""
     run_id = "run-id"
@@ -110,17 +157,20 @@ async def test_create_run(
         labwareOffsets=[],
         status=pe_types.EngineStatus.IDLE,
         liquids=[],
+        outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
     decoy.when(
         await mock_deck_configuration_store.get_deck_configuration()
     ).then_return([])
+
     decoy.when(
         await mock_run_data_manager.create(
             run_id=run_id,
             created_at=run_created_at,
             labware_offsets=[labware_offset_create],
             deck_configuration=[],
+            file_provider=mock_file_provider,
             protocol=None,
             run_time_param_values=None,
             run_time_param_paths=None,
@@ -140,6 +190,7 @@ async def test_create_run(
         run_auto_deleter=mock_run_auto_deleter,
         quick_transfer_run_auto_deleter=mock_run_auto_deleter,
         deck_configuration_store=mock_deck_configuration_store,
+        file_provider=mock_file_provider,
         notify_publishers=mock_notify_publishers,
         protocol_store=mock_protocol_store,
         check_estop=True,
@@ -158,6 +209,7 @@ async def test_create_protocol_run(
     mock_run_auto_deleter: RunAutoDeleter,
     mock_deck_configuration_store: DeckConfigurationStore,
     mock_data_files_store: DataFilesStore,
+    mock_file_provider: FileProvider,
 ) -> None:
     """It should be able to create a protocol run."""
     run_id = "run-id"
@@ -193,6 +245,7 @@ async def test_create_protocol_run(
         labwareOffsets=[],
         status=pe_types.EngineStatus.IDLE,
         liquids=[],
+        outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
     decoy.when(mock_data_files_store.get("file-id")).then_return(
@@ -201,6 +254,7 @@ async def test_create_protocol_run(
             name="abc.xyz",
             file_hash="987",
             created_at=datetime(month=1, day=2, year=2024),
+            source=DataFileSource.UPLOADED,
         )
     )
     decoy.when(
@@ -216,6 +270,7 @@ async def test_create_protocol_run(
             created_at=run_created_at,
             labware_offsets=[],
             deck_configuration=[],
+            file_provider=mock_file_provider,
             protocol=protocol_resource,
             run_time_param_values={"foo": "bar"},
             run_time_param_paths={"my-csv-param": Path("/dev/null/file-id/abc.xyz")},
@@ -240,6 +295,7 @@ async def test_create_protocol_run(
         run_auto_deleter=mock_run_auto_deleter,
         quick_transfer_run_auto_deleter=mock_run_auto_deleter,
         deck_configuration_store=mock_deck_configuration_store,
+        file_provider=mock_file_provider,
         notify_publishers=mock_notify_publishers,
         check_estop=True,
     )
@@ -258,6 +314,7 @@ async def test_create_protocol_run_bad_protocol_id(
     mock_run_auto_deleter: RunAutoDeleter,
     mock_data_files_store: DataFilesStore,
     mock_data_files_directory: Path,
+    mock_file_provider: FileProvider,
 ) -> None:
     """It should 404 if a protocol for a run does not exist."""
     error = ProtocolNotFoundError("protocol-id")
@@ -274,6 +331,7 @@ async def test_create_protocol_run_bad_protocol_id(
             run_data_manager=mock_run_data_manager,
             data_files_store=mock_data_files_store,
             data_files_directory=mock_data_files_directory,
+            file_provider=mock_file_provider,
             run_id="run-id",
             created_at=datetime.now(),
             run_auto_deleter=mock_run_auto_deleter,
@@ -294,6 +352,7 @@ async def test_create_run_conflict(
     mock_protocol_store: ProtocolStore,
     mock_data_files_store: DataFilesStore,
     mock_data_files_directory: Path,
+    mock_file_provider: FileProvider,
 ) -> None:
     """It should respond with a conflict error if multiple engines are created."""
     created_at = datetime(year=2021, month=1, day=1)
@@ -307,6 +366,7 @@ async def test_create_run_conflict(
             created_at=created_at,
             labware_offsets=[],
             deck_configuration=[],
+            file_provider=mock_file_provider,
             protocol=None,
             run_time_param_values=None,
             run_time_param_paths=None,
@@ -326,6 +386,7 @@ async def test_create_run_conflict(
             deck_configuration_store=mock_deck_configuration_store,
             data_files_store=mock_data_files_store,
             data_files_directory=mock_data_files_directory,
+            file_provider=mock_file_provider,
             notify_publishers=mock_notify_publishers,
             check_estop=True,
         )
@@ -352,6 +413,7 @@ async def test_get_run_data_from_url(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
 
@@ -399,6 +461,7 @@ async def test_get_run() -> None:
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
 
@@ -445,6 +508,7 @@ async def test_get_runs_not_empty(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
 
@@ -461,6 +525,7 @@ async def test_get_runs_not_empty(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
 
@@ -540,6 +605,7 @@ async def test_update_run_to_not_current(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
 
@@ -575,6 +641,7 @@ async def test_update_current_none_noop(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
 
@@ -663,8 +730,8 @@ async def test_create_policies(
         run_data_manager=mock_run_data_manager,
     )
     decoy.verify(
-        mock_run_data_manager.set_policies(
-            run_id="rud-id", policies=policies.policyRules
+        mock_run_data_manager.set_error_recovery_rules(
+            run_id="rud-id", rules=policies.policyRules
         )
     )
 
@@ -675,8 +742,8 @@ async def test_create_policies_raises_not_active_run(
     """It should raise that the run is not current."""
     policies = decoy.mock(cls=ErrorRecoveryPolicy)
     decoy.when(
-        mock_run_data_manager.set_policies(
-            run_id="rud-id", policies=policies.policyRules
+        mock_run_data_manager.set_error_recovery_rules(
+            run_id="rud-id", rules=policies.policyRules
         )
     ).then_raise(RunNotCurrentError())
     with pytest.raises(ApiError) as exc_info:
@@ -803,3 +870,82 @@ async def test_get_run_commands_errors_defualt_cursor(
         cursor=expected_cursor_result, totalLength=3
     )
     assert result.status_code == 200
+
+
+async def test_get_current_state_success(
+    decoy: Decoy,
+    mock_run_data_manager: RunDataManager,
+    mock_hardware_api: HardwareControlAPI,
+    mock_nozzle_maps: Dict[str, NozzleMap],
+) -> None:
+    """It should return different state from the current run.
+
+    - the active nozzle layout for a specific pipette.
+    - place plate reader state for absorbance reader.
+    """
+    run_id = "test-run-id"
+
+    decoy.when(mock_run_data_manager.get_nozzle_maps(run_id=run_id)).then_return(
+        mock_nozzle_maps
+    )
+    command_pointer = CommandPointer(
+        command_id="command-id",
+        command_key="command-key",
+        created_at=datetime(year=2024, month=4, day=4),
+        index=101,
+    )
+    decoy.when(
+        mock_run_data_manager.get_last_completed_command(run_id=run_id)
+    ).then_return(command_pointer)
+    decoy.when(mock_run_data_manager.get_current_command(run_id=run_id)).then_return(
+        command_pointer
+    )
+
+    result = await get_current_state(
+        runId=run_id,
+        run_data_manager=mock_run_data_manager,
+        hardware=mock_hardware_api,
+        robot_type=RobotTypeEnum.FLEX,
+    )
+
+    assert result.status_code == 200
+    assert result.content.data == RunCurrentState.construct(
+        estopEngaged=False,
+        activeNozzleLayouts={
+            "mock-pipette-id": ActiveNozzleLayout(
+                startingNozzle="A1",
+                activeNozzles=["A1"],
+                config=NozzleLayoutConfig.FULL,
+            )
+        },
+    )
+    assert result.content.links == CurrentStateLinks(
+        lastCompleted=CommandLinkNoMeta(
+            href="/runs/test-run-id/commands/command-id",
+            id="command-id",
+        )
+    )
+
+
+async def test_get_current_state_run_not_current(
+    decoy: Decoy,
+    mock_run_data_manager: RunDataManager,
+    mock_hardware_api: HardwareControlAPI,
+) -> None:
+    """It should raise RunStopped when the run is not current."""
+    run_id = "non-current-run-id"
+
+    decoy.when(mock_run_data_manager.get_nozzle_maps(run_id=run_id)).then_raise(
+        RunNotCurrentError("Run is not current")
+    )
+
+    with pytest.raises(ApiError) as exc_info:
+        await get_current_state(
+            runId=run_id,
+            run_data_manager=mock_run_data_manager,
+            hardware=mock_hardware_api,
+            robot_type=RobotTypeEnum.FLEX,
+        )
+
+    assert exc_info.value.status_code == 409
+    assert exc_info.value.content["errors"][0]["id"] == "RunStopped"
