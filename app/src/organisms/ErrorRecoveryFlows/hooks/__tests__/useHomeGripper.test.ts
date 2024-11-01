@@ -94,7 +94,7 @@ describe('useHomeGripper', () => {
     ).toHaveBeenCalledTimes(1)
   })
 
-  it('should reset hasHomedOnce when step changes to non-manual gripper step and back', async () => {
+  it('should only reset hasHomedOnce when step changes to non-manual gripper step', async () => {
     const { rerender } = renderHook(
       ({ recoveryMap }) => {
         useHomeGripper({
@@ -122,6 +122,10 @@ describe('useHomeGripper', () => {
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 0))
     })
+
+    expect(
+      mockRecoveryCommands.updatePositionEstimatorsAndHomeGripper
+    ).toHaveBeenCalledTimes(1)
 
     rerender({ recoveryMap: mockRecoveryMap })
 

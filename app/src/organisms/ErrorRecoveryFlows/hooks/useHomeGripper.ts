@@ -29,14 +29,14 @@ export function useHomeGripper({
         } else {
           void handleMotionRouting(true)
             .then(() => updatePositionEstimatorsAndHomeGripper())
-            .then(() => {
+            .finally(() => {
+              handleMotionRouting(false)
               setHasHomedOnce(true)
             })
-            .finally(() => handleMotionRouting(false))
         }
       }
     } else {
-      if (!isManualGripperStep) {
+      if (!isManualGripperStep && hasHomedOnce) {
         setHasHomedOnce(false)
       }
     }
