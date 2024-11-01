@@ -244,7 +244,7 @@ class MoveGroupRunner:
                 for node in sequence.keys():
                     node_set.add(node)
         return node_set
-    
+
     def all_moving_nodes(self) -> Set[NodeId]:
         """Get all of the moving nodes in the move group runner's move groups."""
         node_set: Set[NodeId] = set()
@@ -253,7 +253,7 @@ class MoveGroupRunner:
                 for node, node_step in sequence.items():
                     if node_step.is_moving_step():
                         node_set.add(node)
-            return node_set
+        return node_set
 
     def all_moving_nodes(self) -> Set[NodeId]:
         """Get all of the moving nodes in the move group runner's move groups."""
