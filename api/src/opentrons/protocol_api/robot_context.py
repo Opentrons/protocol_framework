@@ -201,7 +201,7 @@ class RobotContext(publisher.CommandPublisher):
             raise TypeError("You must specify a location to move to.")
 
     def plunger_coordinates_for_volume(
-        self, mount: Union[Mount, str], volume: float, action: PlungerPositionTypes
+        self, mount: Union[Mount, str], volume: float, action: PipetteActionTypes
     ) -> AxisMapType:
         """
         Build a :py:class:`.types.AxisMapType` for a pipette plunger motor from volume.
@@ -217,7 +217,7 @@ class RobotContext(publisher.CommandPublisher):
         return {pipette_axis: pipette_position}
 
     def plunger_coordinates_for_named_position(
-        self, mount: Union[Mount, str], position_name: PipetteActionTypes
+        self, mount: Union[Mount, str], position_name: PlungerPositionTypes
     ) -> AxisMapType:
         """
         Build a :py:class:`.types.AxisMapType` for a pipette plunger motor from position_name.

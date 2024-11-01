@@ -18,6 +18,8 @@ from opentrons.protocol_api.core.common import ProtocolCore, RobotCore
 from opentrons.protocol_api import RobotContext, ModuleContext
 from opentrons.protocol_api.deck import Deck
 
+from opentrons.protocol_api._types import PipetteActionTypes, PlungerPositionTypes
+
 
 @pytest.fixture
 def mock_core(decoy: Decoy) -> RobotCore:
@@ -176,3 +178,45 @@ def test_get_axes_coordinates_for(
     """Test `RobotContext.get_axis_coordinates_for`."""
     res = subject.axis_coordinates_for(mount, location_to_move)
     assert res == expected_axis_map
+
+@pytest.mark.parametrize(
+    argnames=["mount", "volume", "action", "expected_axis_map"],
+    argvalues=[
+        (
+            "left",
+            100,
+            PipetteActionTypes.ASPIRATE_ACTION,
+            {AxisType.P_L: 100}
+        ),
+        (Mount.RIGHT, 200, PipetteActionTypes.ASPIRATE_ACTION, {AxisType.P_R: 100}),
+        (
+            Mount.LEFT,
+            100,
+            PipetteActionTypes.DISPENSE_ACTION,
+            {AxisType.P_L: 100}
+        ),
+    ],
+)
+def test_plunger_coordinates_for_volume(subject: RobotContext, mount: Union[Mount, str], volume: float, action: PipetteActionTypes, expected_axis_map: AxisMapType) -> None:
+    result = subject.plunger_coordinates_for_volume(mount, volume, action)
+    assert result == expected_axis_map
+
+@pytest.mark.parametrize(
+    argnames=["mount", "position_name", "expected_axis_map"],
+    argvalues=[
+        (
+            "left",
+            PlungerPositionTypes.PLUNGER_TOP,
+            {AxisType.P_L: 3},
+        ),
+        (Mount.RIGHT, PlungerPositionTypes.PLUNGER_TOP, {AxisType.P_R: 3}),
+        (
+            Mount.RIGHT,
+            PlungerPositionTypes.PLUNGER_BOTTOM,
+            {AxisType.P_R: 3},
+        ),
+    ],
+)
+def test_plunger_coordinates_for_named_position(subject: RobotContext, mount: Union[Mount, str], position_name: PlungerPositionTypes, expected_axis_map: AxisMapType) -> None:
+    result = subject.plunger_coordinates_for_named_position(mount, position_name)
+    assert result == expected_axis_map
