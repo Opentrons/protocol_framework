@@ -353,6 +353,7 @@ class OT3Simulator(FlexBackend):
         response_queue: Optional[
             asyncio.Queue[Dict[SensorId, List[SensorDataType]]]
         ] = None,
+        mount_acceleration: float = 0.0,
     ) -> float:
         z_axis = Axis.by_mount(mount)
         pos = self._position

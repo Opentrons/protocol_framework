@@ -31,6 +31,7 @@ DEFAULT_LIQUID_PROBE_SETTINGS: Final[LiquidProbeSettings] = LiquidProbeSettings(
     plunger_reset_offset=2.0,
     samples_for_baselining=20,
     sample_time_sec=0.004,
+    mount_acceleration=0,
 )
 
 DEFAULT_CALIBRATION_SETTINGS: Final[OT3CalibrationSettings] = OT3CalibrationSettings(
@@ -322,6 +323,9 @@ def _build_default_liquid_probe(
             "samples_for_baselining", default.samples_for_baselining
         ),
         sample_time_sec=from_conf.get("sample_time_sec", default.sample_time_sec),
+        mount_acceleration=from_conf.get(
+            "mount_acceleration", default.mount_acceleration
+        ),
     )
 
 

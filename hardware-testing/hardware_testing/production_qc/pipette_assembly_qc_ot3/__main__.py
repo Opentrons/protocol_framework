@@ -1383,6 +1383,7 @@ async def _test_liquid_probe(
                 plunger_reset_offset=2.0,
                 samples_for_baselining=20,
                 sample_time_sec=0.004,
+                mount_acceleration=0,
             )
             end_z = await api.liquid_probe(
                 mount, max_z_distance_machine_coords, probe_settings, probe=probe

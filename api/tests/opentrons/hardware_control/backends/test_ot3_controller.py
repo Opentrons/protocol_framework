@@ -183,6 +183,7 @@ def fake_liquid_settings() -> LiquidProbeSettings:
         plunger_reset_offset=2.0,
         samples_for_baselining=20,
         sample_time_sec=0.004,
+        mount_acceleration=0,
     )
 
 

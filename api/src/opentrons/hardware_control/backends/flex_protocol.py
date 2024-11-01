@@ -159,6 +159,7 @@ class FlexBackend(Protocol):
         response_queue: Optional[
             asyncio.Queue[Dict[SensorId, List[SensorDataType]]]
         ] = None,
+        mount_acceleration: float = 0.0,
     ) -> float:
         ...
 

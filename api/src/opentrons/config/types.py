@@ -127,6 +127,7 @@ class LiquidProbeSettings:
     plunger_reset_offset: float
     samples_for_baselining: int
     sample_time_sec: float
+    mount_acceleration: float
 
 
 @dataclass(frozen=True)

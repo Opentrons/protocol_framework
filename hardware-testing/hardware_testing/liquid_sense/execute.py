@@ -450,6 +450,7 @@ def _run_trial(
         plunger_reset_offset=2.0,
         samples_for_baselining=20,
         sample_time_sec=0.004,
+        mount_acceleration=0,
     )
 
     hw_mount = OT3Mount.LEFT if run_args.pipette.mount == "left" else OT3Mount.RIGHT

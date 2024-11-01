@@ -126,6 +126,7 @@ def fake_liquid_settings() -> LiquidProbeSettings:
         plunger_reset_offset=2.0,
         samples_for_baselining=20,
         sample_time_sec=0.004,
+        mount_acceleration=0,
     )
 
 
@@ -829,6 +830,7 @@ async def test_liquid_probe(
             plunger_reset_offset=2.0,
             samples_for_baselining=20,
             sample_time_sec=0.004,
+            mount_acceleration=0,
         )
         fake_max_z_dist = 10.0
         non_responsive_z_mm = ot3_hardware.liquid_probe_non_responsive_z_distance(
@@ -1097,6 +1099,7 @@ async def test_multi_liquid_probe(
             plunger_reset_offset=2.0,
             samples_for_baselining=20,
             sample_time_sec=0.004,
+            mount_acceleration=0,
         )
         fake_max_z_dist = 10.0
         await ot3_hardware.liquid_probe(
@@ -1173,6 +1176,7 @@ async def test_liquid_not_found(
         plunger_reset_offset=2.0,
         samples_for_baselining=20,
         sample_time_sec=0.004,
+        mount_acceleration=0.0,
     )
     # with a mount speed of 5, pass overlap of 0.5 and a 0.2s delay on z
     # the actual distance traveled is 3.5mm per pass

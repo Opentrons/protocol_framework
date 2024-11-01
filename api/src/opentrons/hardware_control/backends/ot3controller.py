@@ -1375,6 +1375,7 @@ class OT3Controller(FlexBackend):
         response_queue: Optional[
             asyncio.Queue[Dict[SensorId, List[SensorDataType]]]
         ] = None,
+        mount_acceleration: float = 0.0,
     ) -> float:
         head_node = axis_to_node(Axis.by_mount(mount))
         tool = sensor_node_for_pipette(OT3Mount(mount.value))

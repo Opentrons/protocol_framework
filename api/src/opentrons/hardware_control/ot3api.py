@@ -2656,6 +2656,7 @@ class OT3API(
             probe=probe,
             force_both_sensors=force_both_sensors,
             response_queue=response_queue,
+            mount_acceleration=probe_settings.mount_acceleration,
         )
         machine_pos = await self._backend.update_position()
         machine_pos[Axis.by_mount(mount)] = end_z
