@@ -11,7 +11,12 @@ from sqlalchemy import and_
 from pydantic import ValidationError
 
 from opentrons.util.helpers import utc_now
-from opentrons.protocol_engine import StateSummary, CommandSlice, CommandIntent
+from opentrons.protocol_engine import (
+    StateSummary,
+    CommandSlice,
+    CommandIntent,
+    ErrorOccurrence,
+)
 from opentrons.protocol_engine.commands import Command
 from opentrons.protocol_engine.types import RunTimeParameter
 
@@ -119,6 +124,7 @@ class RunStore:
         run_id: str,
         summary: StateSummary,
         commands: List[Command],
+        command_errors: List[ErrorOccurrence],
         run_time_parameters: List[RunTimeParameter],
     ) -> RunResource:
         """Update the run's state summary and commands list.
@@ -127,6 +133,7 @@ class RunStore:
             run_id: The run to update
             summary: The run's equipment and status summary.
             commands: The run's commands.
+            command_errors:  The run's commands errors.
             run_time_parameters: The run's run time parameters, if any.
 
         Returns:

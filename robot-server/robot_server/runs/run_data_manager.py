@@ -207,6 +207,7 @@ class RunDataManager:
                 run_id=prev_run_id,
                 summary=prev_run_result.state_summary,
                 commands=prev_run_result.commands,
+                command_errors=prev_run_result.command_errors,
                 run_time_parameters=prev_run_result.parameters,
             )
 
@@ -367,6 +368,7 @@ class RunDataManager:
         if next_current is False:
             (
                 commands,
+                command_errors,
                 state_summary,
                 parameters,
             ) = await self._run_orchestrator_store.clear()
@@ -376,6 +378,7 @@ class RunDataManager:
                 run_id=run_id,
                 summary=state_summary,
                 commands=commands,
+                command_errors=command_errors,
                 run_time_parameters=parameters,
             )
             self._runs_publisher.publish_pre_serialized_commands_notification(run_id)

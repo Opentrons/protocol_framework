@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 
 import anyio
 
+from api.src.opentrons.protocol_engine.errors.error_occurrence import ErrorOccurrence
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons import protocol_reader
 from opentrons.legacy_broker import LegacyBroker
@@ -56,6 +57,7 @@ class RunResult(NamedTuple):
     commands: List[Command]
     state_summary: StateSummary
     parameters: List[RunTimeParameter]
+    command_errors: Optional[List[ErrorOccurrence]] = None
 
 
 class AbstractRunner(ABC):
