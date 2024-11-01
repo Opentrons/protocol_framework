@@ -58,7 +58,16 @@ export const reduxActionToAnalyticsEvent = (
         additionalProperties.__pipetteName =
           pipetteEntities[stepArgs?.pipette].name
       }
+      const stepName = stepArgs.commandCreatorFnName
 
+      switch (stepName) {
+        case 'transfer': {
+          return {
+            name: 'transferStep',
+            properties: { ...stepArgs, ...additionalProperties },
+          }
+        }
+      }
       return {
         name: 'saveStep',
         properties: { ...stepArgs, ...additionalProperties },
