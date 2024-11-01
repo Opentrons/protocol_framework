@@ -176,18 +176,13 @@ class BlowoutProperties:
         self._flow_rate = new_flow_rate
 
 
+@dataclass
 class Submerge:
-    def __init__(
-        self,
-        position_reference: PositionReference,
-        offset: Coordinate,
-        speed: float,
-        delay: DelayProperties,
-    ) -> None:
-        self._position_reference = position_reference
-        self._offset = offset
-        self._speed = speed
-        self._delay = delay
+
+    _position_reference: PositionReference
+    _offset: Coordinate
+    _speed: float
+    _delay: DelayProperties
 
     @property
     def position_reference(self) -> PositionReference:
@@ -221,19 +216,11 @@ class Submerge:
         return self._delay
 
 
+@dataclass
 class RetractAspirate(Submerge):
-    def __init__(
-        self,
-        position_reference: PositionReference,
-        offset: Coordinate,
-        speed: float,
-        delay: DelayProperties,
-        air_gap_by_volume: LiquidHandlingPropertyByVolume,
-        touch_tip: TouchTipProperties,
-    ) -> None:
-        super().__init__(position_reference, offset, speed, delay)
-        self._air_gap_by_volume = air_gap_by_volume
-        self._touch_tip = touch_tip
+
+    _air_gap_by_volume: LiquidHandlingPropertyByVolume
+    _touch_tip: TouchTipProperties
 
     @property
     def air_gap_by_volume(self) -> LiquidHandlingPropertyByVolume:
@@ -244,41 +231,24 @@ class RetractAspirate(Submerge):
         return self._touch_tip
 
 
+@dataclass
 class RetractDispense(RetractAspirate):
-    def __init__(
-        self,
-        position_reference: PositionReference,
-        offset: Coordinate,
-        speed: float,
-        delay: DelayProperties,
-        air_gap_by_volume: LiquidHandlingPropertyByVolume,
-        touch_tip: TouchTipProperties,
-        blowout: BlowoutProperties,
-    ) -> None:
-        super().__init__(
-            position_reference, offset, speed, delay, air_gap_by_volume, touch_tip
-        )
-        self._blowout = blowout
+
+    _blowout: BlowoutProperties
 
     @property
     def blowout(self) -> BlowoutProperties:
         return self._blowout
 
 
+@dataclass
 class BaseLiquidHandlingProperties:
-    def __init__(
-        self,
-        submerge: Submerge,
-        position_reference: PositionReference,
-        offset: Coordinate,
-        flow_rate_by_volume: LiquidHandlingPropertyByVolume,
-        delay: DelayProperties,
-    ):
-        self._submerge = submerge
-        self._position_reference = position_reference
-        self._offset = offset
-        self._flow_rate_by_volume = flow_rate_by_volume
-        self._delay = delay
+
+    _submerge: Submerge
+    _position_reference: PositionReference
+    _offset: Coordinate
+    _flow_rate_by_volume: LiquidHandlingPropertyByVolume
+    _delay: DelayProperties
 
     @property
     def submerge(self) -> Submerge:
@@ -311,24 +281,12 @@ class BaseLiquidHandlingProperties:
         return self._delay
 
 
+@dataclass
 class AspirateProperties(BaseLiquidHandlingProperties):
-    def __init__(
-        self,
-        submerge: Submerge,
-        position_reference: PositionReference,
-        offset: Coordinate,
-        flow_rate_by_volume: LiquidHandlingPropertyByVolume,
-        delay: DelayProperties,
-        retract: RetractAspirate,
-        pre_wet: bool,
-        mix: MixProperties,
-    ):
-        super().__init__(
-            submerge, position_reference, offset, flow_rate_by_volume, delay
-        )
-        self._retract = retract
-        self._pre_wet = pre_wet
-        self._mix = mix
+
+    _retract: RetractAspirate
+    _pre_wet: bool
+    _mix: MixProperties
 
     @property
     def pre_wet(self) -> bool:
@@ -348,24 +306,12 @@ class AspirateProperties(BaseLiquidHandlingProperties):
         return self._mix
 
 
+@dataclass
 class SingleDispenseProperties(BaseLiquidHandlingProperties):
-    def __init__(
-        self,
-        submerge: Submerge,
-        position_reference: PositionReference,
-        offset: Coordinate,
-        flow_rate_by_volume: LiquidHandlingPropertyByVolume,
-        delay: DelayProperties,
-        retract: RetractDispense,
-        mix: MixProperties,
-        push_out_by_volume: LiquidHandlingPropertyByVolume,
-    ):
-        super().__init__(
-            submerge, position_reference, offset, flow_rate_by_volume, delay
-        )
-        self._retract = retract
-        self._push_out_by_volume = push_out_by_volume
-        self._mix = mix
+
+    _retract: RetractDispense
+    _push_out_by_volume: LiquidHandlingPropertyByVolume
+    _mix: MixProperties
 
     @property
     def push_out_by_volume(self) -> LiquidHandlingPropertyByVolume:
@@ -380,24 +326,12 @@ class SingleDispenseProperties(BaseLiquidHandlingProperties):
         return self._mix
 
 
+@dataclass
 class MultiDispenseProperties(BaseLiquidHandlingProperties):
-    def __init__(
-        self,
-        submerge: Submerge,
-        position_reference: PositionReference,
-        offset: Coordinate,
-        flow_rate_by_volume: LiquidHandlingPropertyByVolume,
-        delay: DelayProperties,
-        retract: RetractDispense,
-        conditioning_by_volume: LiquidHandlingPropertyByVolume,
-        disposal_by_volume: LiquidHandlingPropertyByVolume,
-    ):
-        super().__init__(
-            submerge, position_reference, offset, flow_rate_by_volume, delay
-        )
-        self._retract = retract
-        self._conditioning_by_volume = conditioning_by_volume
-        self._disposal_by_volume = disposal_by_volume
+
+    _retract: RetractDispense
+    _conditioning_by_volume: LiquidHandlingPropertyByVolume
+    _disposal_by_volume: LiquidHandlingPropertyByVolume
 
     @property
     def retract(self) -> RetractDispense:
@@ -473,10 +407,10 @@ def _build_submerge(
     submerge_properties: SharedDataSubmerge,
 ) -> Submerge:
     return Submerge(
-        position_reference=submerge_properties.positionReference,
-        offset=submerge_properties.offset,
-        speed=submerge_properties.speed,
-        delay=_build_delay_properties(submerge_properties.delay),
+        _position_reference=submerge_properties.positionReference,
+        _offset=submerge_properties.offset,
+        _speed=submerge_properties.speed,
+        _delay=_build_delay_properties(submerge_properties.delay),
     )
 
 
@@ -484,12 +418,12 @@ def _build_retract_aspirate(
     retract_aspirate: SharedDataRetractAspirate,
 ) -> RetractAspirate:
     return RetractAspirate(
-        position_reference=retract_aspirate.positionReference,
-        offset=retract_aspirate.offset,
-        speed=retract_aspirate.speed,
-        air_gap_by_volume=retract_aspirate.airGapByVolume,
-        touch_tip=_build_touch_tip_properties(retract_aspirate.touchTip),
-        delay=_build_delay_properties(retract_aspirate.delay),
+        _position_reference=retract_aspirate.positionReference,
+        _offset=retract_aspirate.offset,
+        _speed=retract_aspirate.speed,
+        _air_gap_by_volume=retract_aspirate.airGapByVolume,
+        _touch_tip=_build_touch_tip_properties(retract_aspirate.touchTip),
+        _delay=_build_delay_properties(retract_aspirate.delay),
     )
 
 
@@ -497,13 +431,13 @@ def _build_retract_dispense(
     retract_dispense: SharedDataRetractDispense,
 ) -> RetractDispense:
     return RetractDispense(
-        position_reference=retract_dispense.positionReference,
-        offset=retract_dispense.offset,
-        speed=retract_dispense.speed,
-        air_gap_by_volume=retract_dispense.airGapByVolume,
-        blowout=_build_blowout_properties(retract_dispense.blowout),
-        touch_tip=_build_touch_tip_properties(retract_dispense.touchTip),
-        delay=_build_delay_properties(retract_dispense.delay),
+        _position_reference=retract_dispense.positionReference,
+        _offset=retract_dispense.offset,
+        _speed=retract_dispense.speed,
+        _air_gap_by_volume=retract_dispense.airGapByVolume,
+        _blowout=_build_blowout_properties(retract_dispense.blowout),
+        _touch_tip=_build_touch_tip_properties(retract_dispense.touchTip),
+        _delay=_build_delay_properties(retract_dispense.delay),
     )
 
 
@@ -511,14 +445,14 @@ def build_aspirate_properties(
     aspirate_properties: SharedDataAspirateProperties,
 ) -> AspirateProperties:
     return AspirateProperties(
-        submerge=_build_submerge(aspirate_properties.submerge),
-        retract=_build_retract_aspirate(aspirate_properties.retract),
-        position_reference=aspirate_properties.positionReference,
-        offset=aspirate_properties.offset,
-        flow_rate_by_volume=aspirate_properties.flowRateByVolume,
-        pre_wet=aspirate_properties.preWet,
-        mix=_build_mix_properties(aspirate_properties.mix),
-        delay=_build_delay_properties(aspirate_properties.delay),
+        _submerge=_build_submerge(aspirate_properties.submerge),
+        _retract=_build_retract_aspirate(aspirate_properties.retract),
+        _position_reference=aspirate_properties.positionReference,
+        _offset=aspirate_properties.offset,
+        _flow_rate_by_volume=aspirate_properties.flowRateByVolume,
+        _pre_wet=aspirate_properties.preWet,
+        _mix=_build_mix_properties(aspirate_properties.mix),
+        _delay=_build_delay_properties(aspirate_properties.delay),
     )
 
 
@@ -526,14 +460,14 @@ def build_single_dispense_properties(
     single_dispense_properties: SharedDataSingleDispenseProperties,
 ) -> SingleDispenseProperties:
     return SingleDispenseProperties(
-        submerge=_build_submerge(single_dispense_properties.submerge),
-        retract=_build_retract_dispense(single_dispense_properties.retract),
-        position_reference=single_dispense_properties.positionReference,
-        offset=single_dispense_properties.offset,
-        flow_rate_by_volume=single_dispense_properties.flowRateByVolume,
-        mix=_build_mix_properties(single_dispense_properties.mix),
-        push_out_by_volume=single_dispense_properties.pushOutByVolume,
-        delay=_build_delay_properties(single_dispense_properties.delay),
+        _submerge=_build_submerge(single_dispense_properties.submerge),
+        _retract=_build_retract_dispense(single_dispense_properties.retract),
+        _position_reference=single_dispense_properties.positionReference,
+        _offset=single_dispense_properties.offset,
+        _flow_rate_by_volume=single_dispense_properties.flowRateByVolume,
+        _mix=_build_mix_properties(single_dispense_properties.mix),
+        _push_out_by_volume=single_dispense_properties.pushOutByVolume,
+        _delay=_build_delay_properties(single_dispense_properties.delay),
     )
 
 
@@ -543,12 +477,12 @@ def build_multi_dispense_properties(
     if multi_dispense_properties is None:
         return None
     return MultiDispenseProperties(
-        submerge=_build_submerge(multi_dispense_properties.submerge),
-        retract=_build_retract_dispense(multi_dispense_properties.retract),
-        position_reference=multi_dispense_properties.positionReference,
-        offset=multi_dispense_properties.offset,
-        flow_rate_by_volume=multi_dispense_properties.flowRateByVolume,
-        conditioning_by_volume=multi_dispense_properties.conditioningByVolume,
-        disposal_by_volume=multi_dispense_properties.disposalByVolume,
-        delay=_build_delay_properties(multi_dispense_properties.delay),
+        _submerge=_build_submerge(multi_dispense_properties.submerge),
+        _retract=_build_retract_dispense(multi_dispense_properties.retract),
+        _position_reference=multi_dispense_properties.positionReference,
+        _offset=multi_dispense_properties.offset,
+        _flow_rate_by_volume=multi_dispense_properties.flowRateByVolume,
+        _conditioning_by_volume=multi_dispense_properties.conditioningByVolume,
+        _disposal_by_volume=multi_dispense_properties.disposalByVolume,
+        _delay=_build_delay_properties(multi_dispense_properties.delay),
     )
