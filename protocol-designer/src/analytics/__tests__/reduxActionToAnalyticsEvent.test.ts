@@ -3,8 +3,8 @@ import { when } from 'vitest-when'
 import { reduxActionToAnalyticsEvent } from '../middleware'
 import { getFileMetadata } from '../../file-data/selectors'
 import {
-  getArgsAndErrorsByStepId,
-  getPipetteEntities,
+  // getArgsAndErrorsByStepId,
+  // getPipetteEntities,
   getSavedStepForms,
 } from '../../step-forms/selectors'
 import type { SaveStepFormsMultiAction } from '../../step-forms/actions'

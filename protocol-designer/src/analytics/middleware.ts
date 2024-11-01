@@ -12,6 +12,7 @@ import {
   getSavedStepForms,
 } from '../step-forms/selectors'
 import { createFile, getFileMetadata } from '../file-data/selectors'
+import { FIXED_TRASH_ID } from '../constants'
 import { trackEvent } from './mixpanel'
 import { getHasOptedIn } from './selectors'
 import { flattenNestedProperties } from './utils/flattenNestedProperties'
@@ -30,7 +31,7 @@ import type { SaveStepFormAction } from '../ui/steps/actions/thunks'
 import type { AnalyticsEventAction } from './actions'
 import type { AnalyticsEvent } from './mixpanel'
 import type { ComputeRobotStateTimelineSuccessAction } from '../file-data/actions'
-import { FIXED_TRASH_ID } from '../constants'
+import type { RenameStepAction } from '../labware-ingred/actions'
 
 // Converts Redux actions to analytics events (read: Mixpanel events).
 // Returns null if there is no analytics event associated with the action,
@@ -142,7 +143,7 @@ export const reduxActionToAnalyticsEvent = (
     const commandAndRobotState = timeline.filter(t => t.warnings != null)
     const warnings =
       commandAndRobotState.length > 0
-        ? commandAndRobotState.flatMap(state => state.warnings!)
+        ? commandAndRobotState.flatMap(state => state.warnings ?? [])
         : []
     if (errors != null) {
       const errorTypes = errors.map(error => error.type)
@@ -165,16 +166,29 @@ export const reduxActionToAnalyticsEvent = (
       properties: {},
     }
   }
-  if (action.type === 'TOGGLE_NEW_PROTOCOL_FILE') {
+  if (action.type === 'GENERATE_NEW_PROTOCOL') {
     return {
       name: 'createNewProtocol',
       properties: {},
+    }
+  }
+  if (action.type === 'CHANGE_STEP_DETAILS') {
+    const a: RenameStepAction = action
+    if ('stepDetails' in a.payload.update) {
+      return {
+        name: 'editStepMetadata',
+        properties: {
+          stepDetails: a.payload.update.stepName,
+          stepName: a.payload.update.stepName,
+        },
+      }
     }
   }
   if (action.type === 'SAVE_PROTOCOL_FILE') {
     const file = createFile(state)
     const stepForms = getSavedStepForms(state)
     const { commands, metadata, robot, liquids } = file
+
     const robotType = { robotType: robot.model }
     const pipetteDisplayNames = commands
       .filter(
@@ -192,12 +206,18 @@ export const reduxActionToAnalyticsEvent = (
           command.commandType === 'loadModule'
       )
       ?.map(command => getModuleDisplayName(command.params.model))
-    const labwareDisplayNames = commands
+    const labwareInfo = commands
       .filter(
         (command): command is LoadLabwareCreateCommand =>
           command.commandType === 'loadLabware'
       )
-      ?.map(command => command.params.displayName ?? command.params.loadName)
+      .reduce((acc: Record<string, string>, command) => {
+        acc[command.params.loadName] =
+          command.params.location === 'offDeck'
+            ? 'offDeck'
+            : Object.values(command.params.location).join('')
+        return acc
+      }, {})
 
     const numberOfSteps = { numberOfSteps: Object.keys(stepForms).length - 1 }
     const trashCommands = commands?.some(
@@ -229,7 +249,7 @@ export const reduxActionToAnalyticsEvent = (
 
     const stagingAreaSlots = FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS.filter(
       location =>
-        commands?.some(
+        !commands?.some(
           command =>
             (command.commandType === 'loadLabware' &&
               command.params.location !== 'offDeck' &&
@@ -255,7 +275,6 @@ export const reduxActionToAnalyticsEvent = (
     const loadCommandInfo = {
       modules: moduleModels,
       pipettes: pipetteDisplayNames,
-      labware: labwareDisplayNames,
     }
 
     return {
@@ -267,6 +286,7 @@ export const reduxActionToAnalyticsEvent = (
         ...flattenedLiquids,
         ...numberOfSteps,
         ...fixtureInfo,
+        ...labwareInfo,
       },
     }
   }
