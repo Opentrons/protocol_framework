@@ -1,3 +1,4 @@
+import { cloneElement } from 'react'
 import { OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
   FixedBase,
@@ -49,7 +50,7 @@ export function DeckFromLayers(props: DeckFromLayersProps): JSX.Element | null {
     <g id="deckLayers">
       {ALL_OT2_DECK_LAYERS.reduce<JSX.Element[]>((acc, layer) => {
         if (layerBlocklist.includes(layer)) return acc
-        return [...acc, OT2_LAYER_MAP[layer]]
+        return [...acc, cloneElement(OT2_LAYER_MAP[layer], { key: layer })]
       }, [])}
     </g>
   )

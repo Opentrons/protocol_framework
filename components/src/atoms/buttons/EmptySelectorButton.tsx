@@ -30,7 +30,7 @@ export function EmptySelectorButton(
   const { onClick, text, iconName, textAlignment, disabled = false } = props
 
   return (
-    <StyledButton onClick={onClick}>
+    <StyledButton onClick={onClick} disabled={disabled}>
       <Flex
         gridGap={SPACING.spacing4}
         padding={SPACING.spacing12}
