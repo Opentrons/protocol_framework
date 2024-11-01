@@ -116,6 +116,7 @@ ot3_dummy_settings = {
     "left_mount_offset": (2, 2, 2),
     "gripper_mount_offset": (1, 1, 1),
     "liquid_sense": {
+        "mount_acceleration": 0,
         "mount_speed": 10,
         "plunger_speed": 10,
         "plunger_impulse_time": 0.2,

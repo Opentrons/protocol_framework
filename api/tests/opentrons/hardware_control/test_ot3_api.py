@@ -860,6 +860,7 @@ async def test_liquid_probe(
             probe=InstrumentProbeType.PRIMARY,
             force_both_sensors=False,
             response_queue=None,
+            mount_acceleration=fake_settings_aspirate.mount_acceleration,
         )
 
         await ot3_hardware.liquid_probe(
@@ -1117,6 +1118,7 @@ async def test_multi_liquid_probe(
             probe=InstrumentProbeType.PRIMARY,
             force_both_sensors=False,
             response_queue=None,
+            mount_acceleration=fake_settings_aspirate.mount_acceleration,
         )
         assert mock_liquid_probe.call_count == 3
 
@@ -1154,6 +1156,7 @@ async def test_liquid_not_found(
         response_queue: Optional[
             asyncio.Queue[Dict[SensorId, List[SensorDataType]]]
         ] = None,
+        mount_acceleration: float = 0,
     ) -> float:
         pos = self._position
         pos[Axis.by_mount(mount)] += mount_speed * (
