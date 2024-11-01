@@ -14,14 +14,14 @@ from ..measurement import SupportedLiquid
 
 _WATER = SupportedLiquid.WATER.name
 _GLYCEROL_50 = SupportedLiquid.GLYCEROL.name_with_dilution(0.5)
-_ETHANOL_70 = SupportedLiquid.ETHANOL.name_with_dilution(0.7)
+_ETHANOL_70 = SupportedLiquid.ETHANOL.name_with_dilution(0.8)
 
 _default_aspirate: Dict[str, AspirateSettings] = {
     _WATER: AspirateSettings(
         z_speed=50,
         flow_rate=None,
         air_gap=None,
-        submerge_mm=-3.0,
+        submerge_mm=-1.5,
         retract_mm=3.0,
         delay=1.0,
     ),
@@ -90,7 +90,7 @@ _defaults: Dict[
                         aspirate=AspirateSettings(
                             z_speed=None,
                             flow_rate=35,
-                            air_gap=0.0,
+                            air_gap=0.1,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=None,
@@ -99,7 +99,7 @@ _defaults: Dict[
                             z_speed=None,
                             flow_rate=57,
                             break_off=_default_accel_p50_ul_sec_sec,
-                            push_out=11,
+                            push_out=7.0,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=None,
@@ -152,7 +152,7 @@ _defaults: Dict[
                         aspirate=AspirateSettings(
                             z_speed=None,
                             flow_rate=23.5,
-                            air_gap=0.0,
+                            air_gap=0.1,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=None,
@@ -161,7 +161,7 @@ _defaults: Dict[
                             z_speed=None,
                             flow_rate=57,
                             break_off=_default_accel_p50_ul_sec_sec,
-                            push_out=11,
+                            push_out=7.0,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=None,
@@ -765,17 +765,17 @@ _defaults: Dict[
                     _ETHANOL_70: LiquidClassSettings(  # ethanol-70
                         aspirate=AspirateSettings(
                             z_speed=None,
-                            flow_rate=100,
-                            air_gap=10.0,
+                            flow_rate=200,
+                            air_gap=5.0,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=0.0,
                         ),
                         dispense=DispenseSettings(
                             z_speed=None,
-                            flow_rate=100,
+                            flow_rate=200,
                             break_off=_default_accel_p1000_ul_sec_sec,
-                            push_out=0.0,
+                            push_out=20.0,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=0.0,
@@ -827,17 +827,17 @@ _defaults: Dict[
                     _ETHANOL_70: LiquidClassSettings(  # ethanol-70
                         aspirate=AspirateSettings(
                             z_speed=None,
-                            flow_rate=800,
-                            air_gap=0.0,
+                            flow_rate=200,
+                            air_gap=5.0,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=0.0,
                         ),
                         dispense=DispenseSettings(
                             z_speed=None,
-                            flow_rate=800,
+                            flow_rate=200,
                             break_off=_default_accel_p1000_ul_sec_sec,
-                            push_out=0.0,
+                            push_out=20.0,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=0.0,
