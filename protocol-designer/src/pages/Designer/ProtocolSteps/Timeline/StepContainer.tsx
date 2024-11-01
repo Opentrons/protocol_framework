@@ -9,6 +9,7 @@ import {
   CURSOR_DEFAULT,
   CURSOR_POINTER,
   DIRECTION_COLUMN,
+  Divider,
   Flex,
   Icon,
   JUSTIFY_SPACE_BETWEEN,
@@ -254,11 +255,12 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
           </Flex>
         </Btn>
         {dragHovered ? (
-          <Flex
+          <Divider
             data-testid={`${stepId}-divider`}
-            backgroundColor={COLORS.blue50}
+            marginY="0"
             height="0.25rem"
             width="100%"
+            backgroundColor={COLORS.blue50}
             borderRadius={BORDERS.borderRadius2}
           />
         ) : null}
