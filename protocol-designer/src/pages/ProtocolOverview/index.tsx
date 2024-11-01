@@ -117,8 +117,8 @@ export function ProtocolOverview(): JSX.Element {
 
   useEffect(() => {
     if (formValues?.created == null) {
-      console.warn(
-        'formValues was refreshed while on the overview page, redirecting to landing page'
+      console.log(
+        'formValues was possibly refreshed while on the overview page, redirecting to landing page'
       )
       navigate('/')
     }
