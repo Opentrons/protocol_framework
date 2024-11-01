@@ -44,7 +44,7 @@ export function useErrorDetailsModal(): {
 
 type ErrorDetailsModalProps = Omit<
   ErrorRecoveryFlowsProps,
-  'failedCommandByRunRecord'
+  'unvalidatedFailedCommand'
 > &
   ERUtilsResults & {
     toggleModal: () => void

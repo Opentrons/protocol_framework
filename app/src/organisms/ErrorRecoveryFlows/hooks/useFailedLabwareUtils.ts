@@ -30,10 +30,10 @@ import type {
 } from '@opentrons/shared-data'
 import type { DisplayLocationSlotOnlyParams } from '/app/local-resources/labware'
 import type { ErrorRecoveryFlowsProps } from '..'
-import type { ERUtilsProps } from './useERUtils'
+import type { FailedCommandBySource } from './useRetainedFailedCommandBySource'
 
 interface UseFailedLabwareUtilsProps {
-  failedCommandByRunRecord: ERUtilsProps['failedCommandByRunRecord']
+  failedCommandByRunRecord: FailedCommandBySource['byRunRecord'] | null
   protocolAnalysis: ErrorRecoveryFlowsProps['protocolAnalysis']
   failedPipetteInfo: PipetteData | null
   runCommands?: CommandsData
@@ -129,7 +129,7 @@ type FailedCommandRelevantLabware =
   | null
 
 interface RelevantFailedLabwareCmd {
-  failedCommandByRunRecord: ErrorRecoveryFlowsProps['failedCommandByRunRecord']
+  failedCommandByRunRecord: UseFailedLabwareUtilsProps['failedCommandByRunRecord']
   runCommands?: CommandsData
 }
 
@@ -161,7 +161,7 @@ export function getRelevantFailedLabwareCmdFrom({
 
 // Returns the most recent pickUpTip command for the pipette used in the failed command, if any.
 function getRelevantPickUpTipCommand(
-  failedCommandByRunRecord: ErrorRecoveryFlowsProps['failedCommandByRunRecord'],
+  failedCommandByRunRecord: UseFailedLabwareUtilsProps['failedCommandByRunRecord'],
   runCommands?: CommandsData
 ): Omit<PickUpTipRunTimeCommand, 'result'> | null {
   if (

@@ -40,7 +40,7 @@ import type { ErrorRecoveryFlowsProps } from '../index'
 
 interface UseRecoveryCommandsParams {
   runId: string
-  failedCommandByRunRecord: ErrorRecoveryFlowsProps['failedCommandByRunRecord']
+  failedCommandByRunRecord: ErrorRecoveryFlowsProps['unvalidatedFailedCommand']
   failedLabwareUtils: UseFailedLabwareUtilsResult
   routeUpdateActions: UseRouteUpdateActionsResult
   recoveryToastUtils: RecoveryToasts
