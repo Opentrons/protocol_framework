@@ -1,5 +1,6 @@
 from typing import Optional, Dict, Union
 from opentrons.hardware_control import SyncHardwareAPI
+from opentrons_shared_data.pipette.pipette_definition import SupportedTipsDefinition
 
 from opentrons.types import Mount, MountType, Point, AxisType, AxisMapType
 from opentrons_shared_data.pipette import types as pip_types
