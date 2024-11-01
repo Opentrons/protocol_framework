@@ -11,7 +11,11 @@ import {
   getPipetteEntities,
   getSavedStepForms,
 } from '../step-forms/selectors'
-import { createFile, getFileMetadata } from '../file-data/selectors'
+import {
+  createFile,
+  getFileMetadata,
+  getRobotStateTimeline,
+} from '../file-data/selectors'
 import { FIXED_TRASH_ID } from '../constants'
 import { trackEvent } from './mixpanel'
 import { getHasOptedIn } from './selectors'
@@ -30,8 +34,8 @@ import type { StepArgsAndErrors } from '../steplist'
 import type { SaveStepFormAction } from '../ui/steps/actions/thunks'
 import type { AnalyticsEventAction } from './actions'
 import type { AnalyticsEvent } from './mixpanel'
-import type { ComputeRobotStateTimelineSuccessAction } from '../file-data/actions'
 import type { RenameStepAction } from '../labware-ingred/actions'
+import type { SetFeatureFlagAction } from '../feature-flags/actions'
 
 // Converts Redux actions to analytics events (read: Mixpanel events).
 // Returns null if there is no analytics event associated with the action,
@@ -48,6 +52,14 @@ export const reduxActionToAnalyticsEvent = (
     const argsAndErrors: StepArgsAndErrors = getArgsAndErrorsByStepId(state)[
       a.payload.id
     ]
+    const robotTimeline = getRobotStateTimeline(state)
+    const { errors, timeline } = robotTimeline
+    const commandAndRobotState = timeline.filter(t => t.warnings != null)
+    const warnings =
+      commandAndRobotState.length > 0
+        ? commandAndRobotState.flatMap(state => state.warnings ?? [])
+        : []
+
     const { stepArgs } = argsAndErrors
 
     if (stepArgs !== null) {
@@ -73,6 +85,21 @@ export const reduxActionToAnalyticsEvent = (
         additionalProperties.__pipetteName =
           pipetteEntities[stepArgs?.pipette].name
       }
+
+      if (errors != null) {
+        const errorTypes = errors.map(error => error.type)
+        return {
+          name: 'timelineErrors',
+          properties: { errorTypes },
+        }
+      }
+      if (warnings.length > 0) {
+        return {
+          name: 'timelineWarnings',
+          properties: { warnings },
+        }
+      }
+
       const stepName = stepArgs.commandCreatorFnName
       const modifiedStepName = stepName === 'delay' ? 'pause' : stepName
       return {
@@ -136,30 +163,6 @@ export const reduxActionToAnalyticsEvent = (
       properties: {},
     }
   }
-  if (action.type === 'COMPUTE_ROBOT_STATE_TIMELINE_SUCCESS') {
-    const a: ComputeRobotStateTimelineSuccessAction = action
-    const generatedTimeline = a.payload.standardTimeline
-    const { errors, timeline } = generatedTimeline
-    const commandAndRobotState = timeline.filter(t => t.warnings != null)
-    const warnings =
-      commandAndRobotState.length > 0
-        ? commandAndRobotState.flatMap(state => state.warnings ?? [])
-        : []
-    if (errors != null) {
-      const errorTypes = errors.map(error => error.type)
-
-      return {
-        name: 'timelineErrors',
-        properties: { errorTypes },
-      }
-    }
-    if (warnings.length > 0) {
-      return {
-        name: 'timelineWarnings',
-        properties: { warnings },
-      }
-    }
-  }
   if (action.type === 'LOAD_FILE') {
     return {
       name: 'loadFile',
@@ -178,7 +181,7 @@ export const reduxActionToAnalyticsEvent = (
       return {
         name: 'editStepMetadata',
         properties: {
-          stepDetails: a.payload.update.stepName,
+          stepDetails: a.payload.update.stepDetails,
           stepName: a.payload.update.stepName,
         },
       }
@@ -288,6 +291,15 @@ export const reduxActionToAnalyticsEvent = (
         ...fixtureInfo,
         ...labwareInfo,
       },
+    }
+  }
+  if (action.type === 'SET_FEATURE_FLAGS') {
+    const a: SetFeatureFlagAction = action
+    if (a.payload.OT_PD_ALLOW_ALL_TIPRACKS === true) {
+      return {
+        name: 'allowAllTipracks',
+        properties: {},
+      }
     }
   }
   if (action.type === 'ANALYTICS_EVENT') {

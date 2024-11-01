@@ -154,6 +154,7 @@ const validationSchema: any = Yup.object().shape({
 export function CreateNewProtocolWizard(): JSX.Element | null {
   const navigate = useNavigate()
   const showWizard = useSelector(getNewProtocolModal)
+  const [analyticsStartTime] = React.useState<Date>(new Date())
   const customLabware = useSelector(
     labwareDefSelectors.getCustomLabwareDefsByURI
   )
@@ -381,6 +382,7 @@ export function CreateNewProtocolWizard(): JSX.Element | null {
         proceed={proceed}
         goBack={goBack}
         setWizardSteps={setWizardSteps}
+        analyticsStartTime={analyticsStartTime}
       />
     </Box>
   ) : null
@@ -392,6 +394,7 @@ interface CreateFileFormProps {
   goBack: () => void
   proceed: () => void
   setWizardSteps: React.Dispatch<React.SetStateAction<WizardStep[]>>
+  analyticsStartTime: Date
 }
 
 function CreateFileForm(props: CreateFileFormProps): JSX.Element {
@@ -401,6 +404,7 @@ function CreateFileForm(props: CreateFileFormProps): JSX.Element {
     proceed,
     goBack,
     setWizardSteps,
+    analyticsStartTime,
   } = props
   const { ...formProps } = useForm<WizardFormState>({
     defaultValues: initialFormState,
@@ -449,6 +453,7 @@ function CreateFileForm(props: CreateFileFormProps): JSX.Element {
                   createProtocolFile(formProps.getValues())
                 }}
                 goBack={goBack}
+                analyticsStartTime={analyticsStartTime}
               />
             )
           default:
