@@ -51,6 +51,6 @@ describe('StepContainer', () => {
   })
   it('renders the divider if hover targets that step', () => {
     render({ ...props, dragHovered: true })
-    screen.getByTestId('mockStepId-divider')
+    screen.getByTestId('divider')
   })
 })

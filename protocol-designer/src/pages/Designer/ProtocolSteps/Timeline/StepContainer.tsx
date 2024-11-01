@@ -256,7 +256,6 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
         </Btn>
         {dragHovered ? (
           <Divider
-            data-testid={`${stepId}-divider`}
             marginY="0"
             height="0.25rem"
             width="100%"
