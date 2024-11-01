@@ -1,5 +1,6 @@
 from typing import Optional, Dict, Union
 from opentrons.hardware_control import SyncHardwareAPI
+from opentrons_shared_data.pipette.pipette_definition import SupportedTipsDefinition
 
 from opentrons.types import Mount, MountType, Point, AxisType, AxisMapType
 from opentrons_shared_data.pipette import types as pip_types
@@ -49,15 +50,17 @@ class RobotCore(AbstractRobot):
         return {_AXIS_TYPE_TO_MOTOR_AXIS[ax]: dist for ax, dist in axis_map.items()}
 
     def _ul_per_mm_conversion(
-        self, pipette_settings, ul: float, action: PipetteActionTypes, function_version: str
+        self, pipette_settings: SupportedTipsDefinition, ul: float, action: PipetteActionTypes
     ) -> float:
         if action == PipetteActionTypes.ASPIRATE_ACTION:
-            sequence = pipette_settings.aspirate.default.get(function_version, )
+            fallback = pipette_settings.aspirate.default[PIPETTING_FUNCTION_FALLBACK_VERSION]
+            sequence = pipette_settings.aspirate.default.get(PIPETTING_FUNCTION_LATEST_VERSION, fallback)
         elif action == PipetteActionTypes.BLOWOUT_ACTION:
             # TODO in followup work we should support handling blow out actions for volume.
             return 1.0
         else:
-            sequence = pipette_settings.dispense.default[function_version]
+            fallback = pipette_settings.aspirate.default[PIPETTING_FUNCTION_FALLBACK_VERSION]
+            sequence = pipette_settings.dispense.default.get(PIPETTING_FUNCTION_LATEST_VERSION, fallback)
         return piecewise_volume_conversion(ul, sequence)
 
     def get_pipette_type_from_engine(self, mount: Union[Mount, str]) -> Optional[str]:
@@ -91,17 +94,12 @@ class RobotCore(AbstractRobot):
         )
         tip_settings = maybe_pipette_state["supported_tips"][converted_working_volume]
         plunger_bottom = maybe_pipette_state["plunger_positions"]["bottom"]
+
+        convert_volume = self._ul_per_mm_conversion(tip_settings, volume, action)
+        mm = volume / convert_volume
         if robot_type == "OT-2 Standard":
-            convert_volume = self._ul_per_mm_conversion(
-                tip_settings, volume, action, PIPETTING_FUNCTION_FALLBACK_VERSION
-            )
-            mm = volume / convert_volume
             position = plunger_bottom + mm
         else:
-            convert_volume = self._ul_per_mm_conversion(
-                tip_settings, volume, action, PIPETTING_FUNCTION_LATEST_VERSION
-            )
-            mm = volume / convert_volume
             position = plunger_bottom - mm
         return round(position, 6)
 

@@ -12,13 +12,13 @@ class AbstractRobot(ABC):
 
     @abstractmethod
     def get_plunger_position_from_volume(
-        self, mount: Mount, volume: float, action: PlungerPositionTypes, robot_type: str
+        self, mount: Mount, volume: float, action: PipetteActionTypes, robot_type: str
     ) -> float:
         ...
 
     @abstractmethod
     def get_plunger_position_from_name(
-        self, mount: Mount, position_name: PipetteActionTypes
+        self, mount: Mount, position_name: PlungerPositionTypes
     ) -> float:
         ...
 
