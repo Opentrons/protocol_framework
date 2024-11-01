@@ -80,6 +80,7 @@ export function FlowRateField(props: FlowRateFieldProps): JSX.Element {
     <InputStepFormField
       {...passThruProps}
       padding="0"
+      type="number"
       setIsPristine={setIsPristine}
       errorToShow={errorMessage}
       key={`${flowRateType}_FlowRateInput`}

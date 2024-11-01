@@ -392,6 +392,7 @@ Command = Annotated[
         unsafe.UpdatePositionEstimators,
         unsafe.UnsafeEngageAxes,
         unsafe.UnsafeUngripLabware,
+        unsafe.UnsafePlaceLabware,
     ],
     Field(discriminator="commandType"),
 ]
@@ -469,6 +470,7 @@ CommandParams = Union[
     unsafe.UpdatePositionEstimatorsParams,
     unsafe.UnsafeEngageAxesParams,
     unsafe.UnsafeUngripLabwareParams,
+    unsafe.UnsafePlaceLabwareParams,
 ]
 
 CommandType = Union[
@@ -544,6 +546,7 @@ CommandType = Union[
     unsafe.UpdatePositionEstimatorsCommandType,
     unsafe.UnsafeEngageAxesCommandType,
     unsafe.UnsafeUngripLabwareCommandType,
+    unsafe.UnsafePlaceLabwareCommandType,
 ]
 
 CommandCreate = Annotated[
@@ -620,6 +623,7 @@ CommandCreate = Annotated[
         unsafe.UpdatePositionEstimatorsCreate,
         unsafe.UnsafeEngageAxesCreate,
         unsafe.UnsafeUngripLabwareCreate,
+        unsafe.UnsafePlaceLabwareCreate,
     ],
     Field(discriminator="commandType"),
 ]
@@ -697,6 +701,7 @@ CommandResult = Union[
     unsafe.UpdatePositionEstimatorsResult,
     unsafe.UnsafeEngageAxesResult,
     unsafe.UnsafeUngripLabwareResult,
+    unsafe.UnsafePlaceLabwareResult,
 ]
 
 

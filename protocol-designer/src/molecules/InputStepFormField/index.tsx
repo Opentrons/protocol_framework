@@ -5,6 +5,7 @@ import type { FieldProps } from '../../components/StepEditForm/types'
 
 interface InputStepFormFieldProps extends FieldProps {
   title: string
+  type?: 'number' | 'text' | 'password'
   setIsPristine?: Dispatch<SetStateAction<boolean>>
   units?: string
   padding?: string
@@ -31,6 +32,7 @@ export function InputStepFormField(
     caption,
     formLevelError,
     setIsPristine,
+    type,
     ...otherProps
   } = props
   const { t } = useTranslation('tooltip')
@@ -42,7 +44,7 @@ export function InputStepFormField(
         tooltipText={
           showTooltip ? t(`${tooltipContent}`) ?? undefined : undefined
         }
-        type="number"
+        type={type}
         title={title}
         caption={caption}
         name={name}

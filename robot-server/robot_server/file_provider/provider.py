@@ -9,8 +9,12 @@ from robot_server.data_files.dependencies import (
     get_data_files_directory,
     get_data_files_store,
 )
+from robot_server.data_files.models import DataFileSource
 from ..service.dependencies import get_current_time, get_unique_id
-from robot_server.data_files.data_files_store import DataFilesStore, DataFileInfo
+from robot_server.data_files.data_files_store import (
+    DataFilesStore,
+    DataFileInfo,
+)
 from opentrons.protocol_engine.resources.file_provider import GenericCsvTransform
 
 
@@ -62,13 +66,14 @@ class FileProviderWrapper:
                 name=csv_data.filename,
                 file_hash="",
                 created_at=created_at,
+                source=DataFileSource.GENERATED,
             )
             await self._data_files_store.insert(file_info)
             return file_id
 
     async def csv_filecount_callback(self) -> int:
-        """Return the current count of files stored within the data files directory."""
-        data_file_usage_info = [
-            usage_info for usage_info in self._data_files_store.get_usage_info()
-        ]
+        """Return the current count of generated files stored within the data files directory."""
+        data_file_usage_info = self._data_files_store.get_usage_info(
+            DataFileSource.GENERATED
+        )
         return len(data_file_usage_info)

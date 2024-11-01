@@ -234,19 +234,18 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
             <Icon size="1rem" name={icon} minWidth="1rem" />
             <StyledText
               desktopStyle="bodyLargeSemiBold"
-              css={`
-                ${LINE_CLAMP_TEXT_STYLE(2)}
-                word-break: break-all
-              `}
+              css={LINE_CLAMP_TEXT_STYLE(2)}
             >
               {capitalizeFirstLetter(String(formData.stepName))}
             </StyledText>
           </Flex>
         }
       >
-        {showFormErrorsAndWarnings ? (
-          <FormAlerts focusedField={focusedField} dirtyFields={dirtyFields} />
-        ) : null}
+        <FormAlerts
+          focusedField={focusedField}
+          dirtyFields={dirtyFields}
+          showFormErrorsAndWarnings={showFormErrorsAndWarnings}
+        />
         <ToolsComponent
           {...{
             formData,

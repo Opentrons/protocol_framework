@@ -256,6 +256,21 @@ class SphericalSegment(BaseModel):
         ...,
         description="Height of the bottom of the segment, must be 0.0",
     )
+    xCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+    yCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+
+    @cached_property
+    def count(self) -> int:
+        return self.xCount * self.yCount
+
+    class Config:
+        keep_untouched = (cached_property,)
 
 
 class ConicalFrustum(BaseModel):
@@ -276,6 +291,21 @@ class ConicalFrustum(BaseModel):
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
     )
+    xCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+    yCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+
+    @cached_property
+    def count(self) -> int:
+        return self.xCount * self.yCount
+
+    class Config:
+        keep_untouched = (cached_property,)
 
 
 class CuboidalFrustum(BaseModel):
@@ -305,6 +335,21 @@ class CuboidalFrustum(BaseModel):
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
     )
+    xCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+    yCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+
+    @cached_property
+    def count(self) -> int:
+        return self.xCount * self.yCount
+
+    class Config:
+        keep_untouched = (cached_property,)
 
 
 # A squared cone is the intersection of a cube and a cone that both
@@ -353,6 +398,14 @@ class SquaredConeSegment(BaseModel):
     bottomHeight: _NonNegativeNumber = Field(
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
+    )
+    xCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+    yCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
 
     @staticmethod
@@ -432,6 +485,10 @@ class SquaredConeSegment(BaseModel):
     @cached_property
     def volume_to_height_table(self) -> Dict[float, float]:
         return dict((v, k) for k, v in self.height_to_volume_table.items())
+
+    @cached_property
+    def count(self) -> int:
+        return self.xCount * self.yCount
 
     class Config:
         keep_untouched = (cached_property,)
@@ -546,6 +603,21 @@ class RoundedCuboidSegment(BaseModel):
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
     )
+    xCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+    yCount: _StrictNonNegativeInt = Field(
+        default=1,
+        description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
+    )
+
+    @cached_property
+    def count(self) -> int:
+        return self.xCount * self.yCount
+
+    class Config:
+        keep_untouched = (cached_property,)
 
 
 class Metadata1(BaseModel):
@@ -593,7 +665,7 @@ class InnerWellGeometry(BaseModel):
 
 
 class LabwareDefinition(BaseModel):
-    schemaVersion: Literal[1, 2] = Field(
+    schemaVersion: Literal[1, 2, 3] = Field(
         ..., description="Which schema version a labware is using"
     )
     version: int = Field(

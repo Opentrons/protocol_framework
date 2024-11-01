@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 from opentrons.config import CONFIG, ARCHITECTURE, SystemArchitecture
 
-if ARCHITECTURE is SystemArchitecture.BUILDROOT:
+if ARCHITECTURE is SystemArchitecture.YOCTO:
     from opentrons_hardware.sensors import SENSOR_LOG_NAME
 else:
     # we don't use the sensor log on ot2 or host

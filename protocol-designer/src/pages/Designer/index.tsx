@@ -202,7 +202,7 @@ export function Designer(): JSX.Element {
             padding={zoomIn.slot != null ? '0' : SPACING.spacing80}
             height="calc(100vh - 64px)"
           >
-            <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing24}>
+            <Flex flexDirection={DIRECTION_COLUMN}>
               {zoomIn.slot == null ? (
                 <Flex alignSelf={ALIGN_END}>
                   <ToggleGroup

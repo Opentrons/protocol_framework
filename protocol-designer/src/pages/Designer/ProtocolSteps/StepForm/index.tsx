@@ -2,11 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { connect } from 'react-redux'
 import { useConditionalConfirm } from '@opentrons/components'
-import {
-  HEATERSHAKER_MODULE_TYPE,
-  TEMPERATURE_MODULE_TYPE,
-  getModuleDisplayName,
-} from '@opentrons/shared-data'
+import { getModuleDisplayName } from '@opentrons/shared-data'
 
 import { actions } from '../../../../steplist'
 import { actions as stepsActions } from '../../../../ui/steps'
@@ -183,11 +179,6 @@ function StepFormManager(props: StepFormManagerProps): JSX.Element | null {
           }
           handleCancelClick={saveStepForm}
           handleContinueClick={handleSave}
-          moduleType={
-            showAddPauseUntilTempStepModal
-              ? TEMPERATURE_MODULE_TYPE
-              : HEATERSHAKER_MODULE_TYPE
-          }
         />
       ) : null}
       <StepFormToolbox

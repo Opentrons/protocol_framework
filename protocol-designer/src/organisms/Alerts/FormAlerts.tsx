@@ -28,12 +28,14 @@ import type { ProfileFormError } from '../../steplist/formLevel/profileErrors'
 import type { MakeAlert } from './types'
 
 interface FormAlertsProps {
+  showFormErrorsAndWarnings: boolean
   focusedField?: StepFieldName | null
   dirtyFields?: StepFieldName[]
 }
 
 function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
-  const { focusedField, dirtyFields } = props
+  const { showFormErrorsAndWarnings, focusedField, dirtyFields } = props
+
   const { t } = useTranslation('alert')
   const dispatch = useDispatch()
   const formLevelErrorsForUnsavedForm = useSelector(
@@ -120,17 +122,13 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
       </Banner>
     </Flex>
   )
+
   const formErrors = [
-    ...visibleFormErrors.reduce((acc, error) => {
-      return error.showAtForm ?? true
-        ? {
-            ...acc,
-            title: error.title,
-            description: error.body || null,
-            showAtForm: error.showAtForm ?? true,
-          }
-        : acc
-    }, []),
+    ...visibleFormErrors.map(error => ({
+      title: error.title,
+      description: error.body ?? null,
+      showAtForm: error.showAtForm ?? true,
+    })),
     ...visibleDynamicFieldFormErrors.map(error => ({
       title: error.title,
       description: error.body || null,
@@ -161,14 +159,26 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
       )
     }
   }
-  return [...formErrors, ...formWarnings, ...timelineWarnings].length > 0 ? (
+
+  if (showFormErrorsAndWarnings) {
+    return [...formErrors, ...formWarnings].length > 0 ? (
+      <Flex
+        flexDirection={DIRECTION_COLUMN}
+        gridGap={SPACING.spacing4}
+        padding={`${SPACING.spacing16} ${SPACING.spacing16} 0`}
+      >
+        {formErrors.map((error, key) => makeAlert('error', error, key))}
+        {formWarnings.map((warning, key) => makeAlert('warning', warning, key))}
+      </Flex>
+    ) : null
+  }
+
+  return timelineWarnings.length > 0 ? (
     <Flex
       flexDirection={DIRECTION_COLUMN}
       gridGap={SPACING.spacing4}
       padding={`${SPACING.spacing16} ${SPACING.spacing16} 0`}
     >
-      {formErrors.map((error, key) => makeAlert('error', error, key))}
-      {formWarnings.map((warning, key) => makeAlert('warning', warning, key))}
       {timelineWarnings.map((warning, key) =>
         makeAlert('warning', warning, key)
       )}
