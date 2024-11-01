@@ -177,7 +177,7 @@ class BlowoutProperties:
 
 
 @dataclass
-class Submerge:
+class SubmergeRetractCommon:
 
     _position_reference: PositionReference
     _offset: Coordinate
@@ -217,7 +217,12 @@ class Submerge:
 
 
 @dataclass
-class RetractAspirate(Submerge):
+class Submerge(SubmergeRetractCommon):
+    ...
+
+
+@dataclass
+class RetractAspirate(SubmergeRetractCommon):
 
     _air_gap_by_volume: LiquidHandlingPropertyByVolume
     _touch_tip: TouchTipProperties
@@ -232,9 +237,19 @@ class RetractAspirate(Submerge):
 
 
 @dataclass
-class RetractDispense(RetractAspirate):
+class RetractDispense(SubmergeRetractCommon):
 
+    _air_gap_by_volume: LiquidHandlingPropertyByVolume
+    _touch_tip: TouchTipProperties
     _blowout: BlowoutProperties
+
+    @property
+    def air_gap_by_volume(self) -> LiquidHandlingPropertyByVolume:
+        return self._air_gap_by_volume
+
+    @property
+    def touch_tip(self) -> TouchTipProperties:
+        return self._touch_tip
 
     @property
     def blowout(self) -> BlowoutProperties:
