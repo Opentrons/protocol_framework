@@ -55,7 +55,6 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
     robotType === FLEX_ROBOT_TYPE
       ? FLEX_SUPPORTED_MODULE_MODELS
       : OT2_SUPPORTED_MODULE_MODELS
-
   const filteredSupportedModules = supportedModules.filter(
     moduleModel =>
       !(
@@ -111,37 +110,40 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
     module: FormModule,
     newQuantity: number
   ): void => {
-    const moamModules =
-      modules != null
-        ? Object.entries(modules).filter(
-            ([key, mod]) => mod.type === module.type
-          )
-        : []
-    if (newQuantity > moamModules.length) {
-      const newModules = { ...modules }
-      for (let i = 0; i < newQuantity - moamModules.length; i++) {
+    if (!modules) return
+
+    const modulesOfType = Object.entries(modules).filter(
+      ([, mod]) => mod.type === module.type
+    )
+    const otherModules = Object.entries(modules).filter(
+      ([, mod]) => mod.type !== module.type
+    )
+
+    if (newQuantity > modulesOfType.length) {
+      const additionalModules: FormModules = {}
+      for (let i = 0; i < newQuantity - modulesOfType.length; i++) {
         //  @ts-expect-error: TS can't determine modules's type correctly
-        newModules[uuid()] = {
+        additionalModules[uuid()] = {
           model: module.model,
           type: module.type,
           slot: null,
         }
       }
+
+      const newModules = Object.fromEntries([
+        ...otherModules,
+        ...modulesOfType,
+        ...Object.entries(additionalModules),
+      ])
       setValue('modules', newModules)
-    } else if (newQuantity < moamModules.length) {
-      const modulesToRemove = moamModules.length - newQuantity
-      const remainingModules: FormModules = {}
+    } else if (newQuantity < modulesOfType.length) {
+      const modulesToKeep = modulesOfType.slice(0, newQuantity)
+      const updatedModules = Object.fromEntries([
+        ...otherModules,
+        ...modulesToKeep,
+      ])
 
-      Object.entries(modules).forEach(([key, mod]) => {
-        const shouldRemove = moamModules
-          .slice(-modulesToRemove)
-          .some(([removeKey]) => removeKey === key)
-        if (!shouldRemove) {
-          remainingModules[parseInt(key)] = mod
-        }
-      })
-
-      setValue('modules', remainingModules)
+      setValue('modules', updatedModules)
     }
   }
 
