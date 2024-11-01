@@ -21,6 +21,8 @@ from opentrons_shared_data.pipette.types import PipetteNameType
 
 from opentrons.protocol_api._types import PipetteActionTypes, PlungerPositionTypes
 
+from opentrons.protocol_api._types import PipetteActionTypes, PlungerPositionTypes
+
 
 @pytest.fixture
 def mock_core(decoy: Decoy) -> RobotCore:
