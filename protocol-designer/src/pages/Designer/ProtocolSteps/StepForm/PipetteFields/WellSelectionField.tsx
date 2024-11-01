@@ -1,7 +1,9 @@
 import { createPortal } from 'react-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
+
 import {
+  ALIGN_CENTER,
   COLORS,
   DIRECTION_COLUMN,
   Flex,
@@ -13,6 +15,7 @@ import {
   useHoverTooltip,
 } from '@opentrons/components'
 import { COLUMN } from '@opentrons/shared-data'
+
 import {
   actions as stepsActions,
   getSelectedStepId,
@@ -22,6 +25,7 @@ import { selectors as stepFormSelectors } from '../../../../../step-forms'
 import { SelectWellsModal } from '../../../../../organisms'
 import { getMainPagePortalEl } from '../../../../../components/portals/MainPageModalPortal'
 import { getNozzleType } from '../utils'
+
 import type { FieldProps } from '../types'
 
 export type WellSelectionFieldProps = FieldProps & {
@@ -94,8 +98,13 @@ export const WellSelectionField = (
   const [targetProps, tooltipProps] = useHoverTooltip()
   return (
     <>
-      <Flex flexDirection={DIRECTION_COLUMN} padding={SPACING.spacing16}>
-        <Flex gridGap={SPACING.spacing8}>
+      <Flex
+        flexDirection={DIRECTION_COLUMN}
+        padding={SPACING.spacing16}
+        id="hello"
+        gridGap={SPACING.spacing4}
+      >
+        <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
           <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
             {i18n.format(label, 'capitalize')}
           </StyledText>

@@ -17,12 +17,13 @@ export function LabwareField(props: FieldProps): JSX.Element {
       ? [...options, ...disposalOptions]
       : [...options]
 
+  console.log('name', name)
   return (
     <DropdownStepFormField
       {...props}
       name={name}
       options={allOptions}
-      title={t(`select_${name}`)}
+      title={t(`${name}`)}
     />
   )
 }

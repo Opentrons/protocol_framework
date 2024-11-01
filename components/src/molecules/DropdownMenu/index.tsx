@@ -203,7 +203,11 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
       gridGap={SPACING.spacing4}
     >
       {title !== null ? (
-        <Flex gridGap={SPACING.spacing8} paddingBottom={SPACING.spacing8}>
+        <Flex
+          gridGap={SPACING.spacing8}
+          paddingBottom={SPACING.spacing8}
+          alignItems={ALIGN_CENTER}
+        >
           <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
             {title}
           </StyledText>

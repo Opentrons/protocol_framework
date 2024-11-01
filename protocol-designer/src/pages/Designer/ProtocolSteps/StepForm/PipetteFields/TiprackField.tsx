@@ -43,11 +43,12 @@ export function TiprackField(props: TiprackFieldProps): JSX.Element {
           {...props}
           options={tiprackOptions}
           value={String(value) != null ? String(value) : null}
-          title={t('select_tiprack')}
+          title={t('tiprack')}
           tooltipContent={hasMissingTiprack ? 'missing_tiprack' : null}
         />
       ) : (
         <Flex
+          padding={SPACING.spacing16}
           gridGap={SPACING.spacing8}
           flexDirection={DIRECTION_COLUMN}
           width="100%"
