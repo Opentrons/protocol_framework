@@ -169,6 +169,7 @@ export function DefineLiquidsModal(
       }}
     >
       <Modal
+        zIndexOverlay={15}
         width="42.0625rem"
         title={
           selectedIngredFields != null ? (

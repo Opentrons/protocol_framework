@@ -1122,7 +1122,28 @@
   ],
   "innerLabwareGeometry": {
     "conicalWell": {
-      "sections": []
+      "sections": [
+        {
+          "shape": "spherical",
+          "radiusOfCurvature": 1.25,
+          "topHeight": 0.8,
+          "bottomHeight": 0.0
+        },
+        {
+          "shape": "conical",
+          "topDiameter": 5.5,
+          "bottomDiameter": 2.33,
+          "topHeight": 11.35,
+          "bottomHeight": 0.8
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 5.5,
+          "topDiameter": 5.5,
+          "topHeight": 14.95,
+          "bottomHeight": 11.35
+        }
+      ]
     }
   }
 }
