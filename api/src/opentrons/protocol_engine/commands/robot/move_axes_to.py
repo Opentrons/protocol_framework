@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Literal, Optional, Type, TYPE_CHECKING
 from pydantic import Field, BaseModel
 
-from opentrons.protocol_engine.types import MotorAxis
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.protocol_engine.resources import ensure_ot3_hardware
 
