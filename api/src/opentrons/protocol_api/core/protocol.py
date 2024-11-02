@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod, ABC
-from typing import Generic, Type, List, Optional, Union, Tuple, Dict, TYPE_CHECKING
+from typing import Generic, List, Optional, Union, Tuple, Dict, TYPE_CHECKING
 
 from opentrons_shared_data.deck.types import DeckDefinitionV5, SlotDefV3
 from opentrons_shared_data.pipette.types import PipetteNameType

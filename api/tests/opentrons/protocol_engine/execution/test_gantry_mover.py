@@ -705,5 +705,6 @@ async def test_virtual_move_axes(
     relative_move: bool,
     expected_position: Dict[MotorAxis, float],
 ) -> None:
+    """It should simulate moving a set of axis by a certain distance."""
     pos = await virtual_subject.move_axes(axis_map, critical_point, 100, relative_move)
     assert pos == expected_position

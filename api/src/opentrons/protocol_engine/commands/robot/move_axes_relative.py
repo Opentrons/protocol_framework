@@ -58,6 +58,7 @@ class MoveAxesRelativeImplementation(
     async def execute(
         self, params: MoveAxesRelativeParams
     ) -> SuccessData[MoveAxesRelativeResult]:
+        """Move the axes on a flex a relative distance."""
         # TODO (lc 08-16-2024) implement `move_axes` for OT 2 hardware controller
         # and then we can remove this validation.
         ensure_ot3_hardware(self._hardware_api)

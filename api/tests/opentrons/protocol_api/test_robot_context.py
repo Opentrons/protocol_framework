@@ -76,6 +76,7 @@ def test_move_to(
     destination: Location,
     speed: Optional[float],
 ) -> None:
+    """Test `RobotContext.move_to`."""
     subject.move_to(mount, destination, speed)
     core_mount: Mount
     if isinstance(mount, str):
@@ -119,6 +120,7 @@ def test_move_axes_to(
     expected_critical_point: AxisMapType,
     speed: Optional[float],
 ) -> None:
+    """Test `RobotContext.move_axes_to`."""
     subject.move_axes_to(axis_map, critical_point, speed)
     decoy.verify(
         subject._core.move_axes_to(expected_axis_map, expected_critical_point, speed)
@@ -143,6 +145,7 @@ def test_move_axes_relative(
     converted_map: AxisMapType,
     speed: Optional[float],
 ) -> None:
+    """Test `RobotContext.move_axes_relative`."""
     subject.move_axes_relative(axis_map, speed)
     decoy.verify(subject._core.move_axes_relative(converted_map, speed))
 
@@ -168,5 +171,6 @@ def test_get_axes_coordinates_for(
     location_to_move: Union[Location, ModuleContext, DeckLocation],
     expected_axis_map: AxisMapType,
 ) -> None:
+    """Test `RobotContext.get_axis_coordinates_for`."""
     res = subject.axis_coordinates_for(mount, location_to_move)
     assert res == expected_axis_map

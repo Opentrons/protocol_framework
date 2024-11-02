@@ -193,29 +193,24 @@ def ensure_pipette_name(pipette_name: str) -> PipetteNameType:
         ) from None
 
 
-def ensure_axis_map_type(
-    axis_map: Union[AxisMapType, StringAxisMap],
-    robot_type: RobotType,
-    is_96_channel: bool = False,
-) -> AxisMapType:
-    """Ensure that the axis map provided is in the correct shape and contains the correct keys."""
-    axis_map_keys = list(axis_map.keys())
-    key_type = set(type(k) for k in axis_map_keys)
-
-    if len(key_type) > 1:
-        raise IncorrectAxisError(
-            "Please provide an `axis_map` with only string or only AxisType keys."
-        )
+def _check_ot2_axis_type(
+    robot_type: RobotType, axis_map_keys: Union[List[str], List[AxisType]]
+) -> None:
     if robot_type == "OT-2 Standard" and isinstance(axis_map_keys[0], AxisType):
         if any(k not in AxisType.ot2_axes() for k in axis_map_keys):
             raise IncorrectAxisError(
                 f"An OT-2 Robot only accepts the following axes {AxisType.ot2_axes()}"
             )
     if robot_type == "OT-2 Standard" and isinstance(axis_map_keys[0], str):
-        if any(k.upper() not in [axis.value for axis in AxisType.ot2_axes()] for k in axis_map_keys):  # type: ignore [attr-defined]
+        if any(k.upper() not in [axis.value for axis in AxisType.ot2_axes()] for k in axis_map_keys):  # type: ignore [union-attr]
             raise IncorrectAxisError(
                 f"An OT-2 Robot only accepts the following axes {AxisType.ot2_axes()}"
             )
+
+
+def _check_96_channel_axis_type(
+    is_96_channel: bool, axis_map_keys: Union[List[str], List[AxisType]]
+) -> None:
     if is_96_channel and any(
         key_variation in axis_map_keys for key_variation in ["Z_R", "z_r", AxisType.Z_R]
     ):
@@ -229,6 +224,23 @@ def ensure_axis_map_type(
             "A 96 channel is not attached. The clamp `Q` motor does not exist."
         )
 
+
+def ensure_axis_map_type(
+    axis_map: Union[AxisMapType, StringAxisMap],
+    robot_type: RobotType,
+    is_96_channel: bool = False,
+) -> AxisMapType:
+    """Ensure that the axis map provided is in the correct shape and contains the correct keys."""
+    axis_map_keys: Union[List[str], List[AxisType]] = list(axis_map.keys())  # type: ignore
+    key_type = set(type(k) for k in axis_map_keys)
+
+    if len(key_type) > 1:
+        raise IncorrectAxisError(
+            "Please provide an `axis_map` with only string or only AxisType keys."
+        )
+    _check_ot2_axis_type(robot_type, axis_map_keys)
+    _check_96_channel_axis_type(is_96_channel, axis_map_keys)
+
     if all(isinstance(k, AxisType) for k in axis_map_keys):
         return_map: AxisMapType = axis_map  # type: ignore
         return return_map
@@ -241,6 +253,7 @@ def ensure_axis_map_type(
 def ensure_only_gantry_axis_map_type(
     axis_map: AxisMapType, robot_type: RobotType
 ) -> None:
+    """Ensure that the axis map provided is in the correct shape and matches the gantry axes for the robot."""
     if robot_type == "OT-2 Standard":
         if any(k not in AxisType.ot2_gantry_axes() for k in axis_map.keys()):
             raise IncorrectAxisError(

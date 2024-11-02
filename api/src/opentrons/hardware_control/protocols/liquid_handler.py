@@ -1,8 +1,8 @@
-from typing import Optional, Dict
+from typing import Optional
 from typing_extensions import Protocol
 
 from opentrons.types import Point
-from opentrons.hardware_control.types import CriticalPoint, Axis
+from opentrons.hardware_control.types import CriticalPoint
 from .types import MountArgType, CalibrationType, ConfigType
 
 from .instrument_configurer import InstrumentConfigurer

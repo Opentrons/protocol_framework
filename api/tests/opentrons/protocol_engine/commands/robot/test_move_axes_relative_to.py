@@ -5,8 +5,7 @@ from opentrons.hardware_control import HardwareControlAPI
 
 from opentrons.protocol_engine.execution import GantryMover
 from opentrons.protocol_engine.types import MotorAxis
-from opentrons.hardware_control.protocols.types import FlexRobotType, OT2RobotType
-from opentrons.types import Point, MountType
+from opentrons.hardware_control.protocols.types import FlexRobotType
 
 from opentrons.protocol_engine.commands.command import SuccessData
 from opentrons.protocol_engine.commands.robot.move_axes_relative import (

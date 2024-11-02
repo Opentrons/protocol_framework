@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Literal, Optional, Type, TYPE_CHECKING
 from pydantic import Field, BaseModel
 
-from opentrons.protocol_engine.types import MotorAxis
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.protocol_engine.resources import ensure_ot3_hardware
 
@@ -59,6 +58,7 @@ class MoveAxesToImplementation(
         self._hardware_api = hardware_api
 
     async def execute(self, params: MoveAxesToParams) -> SuccessData[MoveAxesToResult]:
+        """Move the axes on a flex an absolute distance."""
         # TODO (lc 08-16-2024) implement `move_axes` for OT 2 hardware controller
         # and then we can remove this validation.
         ensure_ot3_hardware(self._hardware_api)

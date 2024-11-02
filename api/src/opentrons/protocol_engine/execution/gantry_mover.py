@@ -246,6 +246,13 @@ class HardwareGantryMover(GantryMover):
         critical_point: Optional[CriticalPoint] = None,
         fail_on_not_homed: bool = False,
     ) -> Point:
+        """Get the current position of the gantry based on the mount.
+
+        Args:
+            mount: The mount to get the position for.
+            critical_point: Optional parameter for getting instrument location data, effects critical point.
+            fail_on_not_homed: Raise PositionUnknownError if gantry position is not known.
+        """
         try:
             point = await self._hardware_api.gantry_position(
                 mount=mount,
@@ -319,8 +326,9 @@ class HardwareGantryMover(GantryMover):
 
         Args:
             axis_map: The mapping of axes to command.
-            relative_move: Specifying whether a relative move needs to be handled or not.
+            critical_point: A critical point override for axes
             speed: Optional speed parameter for the move.
+            relative_move: Specifying whether a relative move needs to be handled or not.
         """
         try:
             pos_hw = self._convert_axis_map_for_hw(axis_map)
@@ -496,6 +504,13 @@ class VirtualGantryMover(GantryMover):
         critical_point: Optional[CriticalPoint] = None,
         fail_on_not_homed: bool = False,
     ) -> Point:
+        """Get the current position of the gantry based on the mount.
+
+        Args:
+            mount: The mount to get the position for.
+            critical_point: Optional parameter for getting instrument location data, effects critical point.
+            fail_on_not_homed: Raise PositionUnknownError if gantry position is not known.
+        """
         pipette = self._state_view.pipettes.get_by_mount(MountType[mount.name])
         origin_deck_point = (
             self._state_view.pipettes.get_deck_point(pipette.id) if pipette else None

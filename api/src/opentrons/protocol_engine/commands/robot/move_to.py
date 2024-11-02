@@ -4,7 +4,6 @@ from typing import Literal, Type, Optional, TYPE_CHECKING
 
 from pydantic import BaseModel, Field
 from opentrons.types import MountType
-from opentrons.hardware_control.protocols.types import FlexRobotType
 
 from ..pipetting_common import DestinationPositionResult
 from ..command import (
@@ -60,6 +59,7 @@ class MoveToImplementation(
         self._movement = movement
 
     async def execute(self, params: MoveToParams) -> SuccessData[MoveToResult]:
+        """Move to a given destination on a flex."""
         x, y, z = await self._movement.move_mount_to(
             mount=params.mount, destination=params.destination, speed=params.speed
         )
