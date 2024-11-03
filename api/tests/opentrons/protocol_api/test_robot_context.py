@@ -15,7 +15,7 @@ from opentrons.types import (
 )
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocol_api.core.common import ProtocolCore, RobotCore
-from opentrons.protocol_api import RobotContext, ModuleContext, MAX_SUPPORTED_VERSION
+from opentrons.protocol_api import RobotContext, ModuleContext
 from opentrons.protocol_api.deck import Deck
 
 
@@ -28,7 +28,7 @@ def mock_core(decoy: Decoy) -> RobotCore:
 @pytest.fixture
 def api_version() -> APIVersion:
     """Get the API version to test at."""
-    return MAX_SUPPORTED_VERSION
+    return APIVersion(2, 22)
 
 
 @pytest.fixture

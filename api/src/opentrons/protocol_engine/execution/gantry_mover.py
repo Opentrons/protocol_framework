@@ -74,6 +74,8 @@ _HARDWARE_AXIS_TO_MOTOR_AXIS: Dict[HardwareAxis, MotorAxis] = {
 # That OT3Simulator return value is what Protocol Engine uses for simulation when Protocol Engine
 # is configured to not virtualize pipettes, so this number should match it.
 VIRTUAL_MAX_OT3_HEIGHT = 248.0
+# This number was found by using the longest pipette's P1000V2 default configuration values.
+VIRTUAL_MAX_OT2_HEIGHT = 268.14
 
 
 class GantryMover(TypingProtocol):
@@ -544,8 +546,10 @@ class VirtualGantryMover(GantryMover):
         """Get the maximum allowed z-height for mount."""
         pipette = self._state_view.pipettes.get_by_mount(mount)
         if self._state_view.config.robot_type == "OT-2 Standard":
-            instrument_height = self._state_view.pipettes.get_instrument_max_height_ot2(
-                pipette.id
+            instrument_height = (
+                self._state_view.pipettes.get_instrument_max_height_ot2(pipette.id)
+                if pipette
+                else VIRTUAL_MAX_OT2_HEIGHT
             )
         else:
             instrument_height = VIRTUAL_MAX_OT3_HEIGHT

@@ -17,7 +17,7 @@ _AXIS_TYPE_TO_MOTOR_AXIS = {
     AxisType.Z_R: MotorAxis.RIGHT_Z,
     AxisType.Z_G: MotorAxis.EXTENSION_Z,
     AxisType.G: MotorAxis.EXTENSION_JAW,
-    AxisType.Q: MotorAxis.CLAMP_JAW_96_CHANNEL,
+    AxisType.Q: MotorAxis.AXIS_96_CHANNEL_CAM,
 }
 
 

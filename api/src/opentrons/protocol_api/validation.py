@@ -260,9 +260,9 @@ def ensure_only_gantry_axis_map_type(
                 f"A critical point only accepts OT-2 gantry axes which are {AxisType.ot2_gantry_axes()}"
             )
     else:
-        if any(k not in AxisType.ot3_gantry_axes() for k in axis_map.keys()):
+        if any(k not in AxisType.flex_gantry_axes() for k in axis_map.keys()):
             raise IncorrectAxisError(
-                f"A critical point only accepts Flex gantry axes which are {AxisType.ot3_gantry_axes()}"
+                f"A critical point only accepts Flex gantry axes which are {AxisType.flex_gantry_axes()}"
             )
 
 
