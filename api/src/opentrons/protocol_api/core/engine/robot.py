@@ -10,7 +10,6 @@ from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocol_engine.types import DeckPoint, MotorAxis
 
 from opentrons.protocol_api.core.robot import AbstractRobot
-from opentrons.protocol_api._types import PlungerPositionTypes, PipetteActionTypes
 
 
 
@@ -45,6 +44,34 @@ class RobotCore(AbstractRobot):
     def _convert_to_engine_mount(self, axis_map: AxisMapType) -> Dict[MotorAxis, float]:
         return {_AXIS_TYPE_TO_MOTOR_AXIS[ax]: dist for ax, dist in axis_map.items()}
 
+<<<<<<< HEAD
+=======
+    def _ul_per_mm_conversion(
+        self,
+        pipette_settings: SupportedTipsDefinition,
+        ul: float,
+        action: PipetteActionTypes,
+    ) -> float:
+        if action == PipetteActionTypes.ASPIRATE_ACTION:
+            fallback = pipette_settings.aspirate.default[
+                PIPETTING_FUNCTION_FALLBACK_VERSION
+            ]
+            sequence = pipette_settings.aspirate.default.get(
+                PIPETTING_FUNCTION_LATEST_VERSION, fallback
+            )
+        elif action == PipetteActionTypes.BLOWOUT_ACTION:
+            # TODO in followup work we should support handling blow out actions for volume.
+            return 1.0
+        else:
+            fallback = pipette_settings.aspirate.default[
+                PIPETTING_FUNCTION_FALLBACK_VERSION
+            ]
+            sequence = pipette_settings.dispense.default.get(
+                PIPETTING_FUNCTION_LATEST_VERSION, fallback
+            )
+        return piecewise_volume_conversion(ul, sequence)
+
+>>>>>>> fix up formatting, lint and tests
     def get_pipette_type_from_engine(
         self, mount: Union[Mount, str]
     ) -> Optional[pip_types.PipetteNameType]:
@@ -89,12 +116,20 @@ class RobotCore(AbstractRobot):
                 maybe_pipette.id, "bottom"
             )
         )
+<<<<<<< HEAD
+=======
+        tip_settings = maybe_pipette_state["supported_tips"][converted_working_volume]
+        plunger_bottom = maybe_pipette_state["plunger_positions"]["bottom"]
+
+        convert_volume = self._ul_per_mm_conversion(tip_settings, volume, action)
+
+>>>>>>> fix up formatting, lint and tests
         mm = volume / convert_volume
         if robot_type == "OT-2 Standard":
             position = plunger_bottom + mm
         else:
             position = plunger_bottom - mm
-        return round(position, 6)
+        return round(position, 6)  # type: ignore[no-any-return]
 
     def move_to(self, mount: Mount, destination: Point, speed: Optional[float]) -> None:
         engine_mount = MountType[mount.name]

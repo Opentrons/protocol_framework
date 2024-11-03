@@ -557,56 +557,6 @@ class VirtualGantryMover(GantryMover):
             instrument_height = (
                 self._state_view.pipettes.get_instrument_max_height_ot2(pipette.id)
                 if pipette
-                else VIRTUAL_MAX_OT3_HEIGHT
-            )
-        else:
-            instrument_height = VIRTUAL_MAX_OT3_HEIGHT
-        tip_length = (
-            self._state_view.tips.get_tip_length(pipette.id) if pipette else 0.0
-        )
-
-        return instrument_height - tip_length
-
-    async def move_axes(
-        self,
-        axis_map: Dict[MotorAxis, float],
-        critical_point: Optional[Dict[MotorAxis, float]] = None,
-        speed: Optional[float] = None,
-    ) -> Dict[MotorAxis, float]:
-        """Move the give axes map. No-op in virtual implementation."""
-        mount = self.pick_mount_from_axis_map(axis_map)
-        current_position = await self.get_position_from_mount(mount)
-        axis_map[MotorAxis.X] = axis_map.get(MotorAxis.X, 0.0) + current_position[0]
-        axis_map[MotorAxis.Y] = axis_map.get(MotorAxis.Y, 0.0) + current_position[1]
-        if mount == Mount.RIGHT:
-            axis_map[MotorAxis.RIGHT_Z] = (
-                axis_map.get(MotorAxis.RIGHT_Z, 0.0) + current_position[2]
-            )
-        elif mount == Mount.EXTENSION:
-            axis_map[MotorAxis.EXTENSION_Z] = (
-                axis_map.get(MotorAxis.EXTENSION_Z, 0.0) + current_position[2]
-            )
-        else:
-            axis_map[MotorAxis.LEFT_Z] = (
-                axis_map.get(MotorAxis.LEFT_Z, 0.0) + current_position[2]
-            )
-        critical_point = critical_point or {}
-        return {ax: pos - critical_point.get(ax, 0.0) for ax, pos in axis_map.items()}
-
-    async def move_mount_to(
-        self, mount: Mount, waypoints: List[Waypoint], speed: Optional[float]
-    ) -> Point:
-        """Move the hardware mount to a waypoint. No-op in virtual implementation."""
-        assert len(waypoints) > 0, "Must have at least one waypoint"
-        return waypoints[-1].position
-
-    def get_max_travel_z_from_mount(self, mount: MountType) -> float:
-        """Get the maximum allowed z-height for mount."""
-        pipette = self._state_view.pipettes.get_by_mount(mount)
-        if self._state_view.config.robot_type == "OT-2 Standard":
-            instrument_height = (
-                self._state_view.pipettes.get_instrument_max_height_ot2(pipette.id)
-                if pipette
                 else VIRTUAL_MAX_OT2_HEIGHT
             )
         else:
