@@ -246,6 +246,7 @@ def pipette_dict(
             "t200": {"minHeight": 0.5, "minVolume": 0},
             "t1000": {"minHeight": 0.5, "minVolume": 0},
         },
+        "plunger_positions": {"top": 100, "bottom": 20, "blow_out": 10, "drop_tip": 0},
     }
 
 

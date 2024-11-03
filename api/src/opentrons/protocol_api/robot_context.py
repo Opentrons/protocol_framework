@@ -208,6 +208,10 @@ class RobotContext(publisher.CommandPublisher):
 
         """
         pipette_name = self._core.get_pipette_type_from_engine(mount)
+        if not pipette_name:
+            raise ValueError(
+                f"Expected a pipette to be attached to provided mount {mount}"
+            )
         mount = validation.ensure_mount_for_pipette(mount, pipette_name)
         pipette_axis = AxisType.plunger_axis_for_mount(mount)
 
@@ -224,7 +228,10 @@ class RobotContext(publisher.CommandPublisher):
 
         """
         pipette_name = self._core.get_pipette_type_from_engine(mount)
-
+        if not pipette_name:
+            raise ValueError(
+                f"Expected a pipette to be attached to provided mount {mount}"
+            )
         mount = validation.ensure_mount_for_pipette(mount, pipette_name)
         pipette_axis = AxisType.plunger_axis_for_mount(mount)
         pipette_position = self._core.get_plunger_position_from_name(
