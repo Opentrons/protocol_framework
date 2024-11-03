@@ -501,7 +501,7 @@ async def test_home_z(
             },
         ],
         [
-            {MotorAxis.CLAMP_JAW_96_CHANNEL: 10.0},
+            {MotorAxis.AXIS_96_CHANNEL_CAM: 10.0},
             None,
             False,
             Mount.LEFT,
@@ -522,6 +522,7 @@ async def test_move_axes(
     call_to_hw: "OrderedDict[HardwareAxis, float]",
     final_position: Dict[HardwareAxis, float],
 ) -> None:
+    """Test the move axes function."""
     subject = HardwareGantryMover(
         state_view=mock_state_view, hardware_api=ot3_hardware_api
     )
@@ -690,10 +691,10 @@ async def test_virtual_move_to(
             {MotorAxis.X: 0.0, MotorAxis.Y: 0.0, MotorAxis.RIGHT_Z: 20},
         ],
         [
-            {MotorAxis.CLAMP_JAW_96_CHANNEL: 10},
+            {MotorAxis.AXIS_96_CHANNEL_CAM: 10},
             None,
             False,
-            {MotorAxis.CLAMP_JAW_96_CHANNEL: 10},
+            {MotorAxis.AXIS_96_CHANNEL_CAM: 10},
         ],
     ],
 )

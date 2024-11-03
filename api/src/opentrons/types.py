@@ -303,7 +303,7 @@ class AxisType(enum.Enum):
         ]
 
     @classmethod
-    def ot3_gantry_axes(cls) -> List["AxisType"]:
+    def flex_gantry_axes(cls) -> List["AxisType"]:
         return [
             AxisType.X,
             AxisType.Y,
@@ -324,6 +324,7 @@ class AxisType(enum.Enum):
 
 AxisMapType = Dict[AxisType, float]
 StringAxisMap = Dict[str, float]
+
 
 # TODO(mc, 2020-11-09): this makes sense in shared-data or other common
 # model library

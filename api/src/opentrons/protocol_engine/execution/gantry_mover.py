@@ -33,7 +33,7 @@ _MOTOR_AXIS_TO_HARDWARE_AXIS: Dict[MotorAxis, HardwareAxis] = {
     MotorAxis.RIGHT_PLUNGER: HardwareAxis.C,
     MotorAxis.EXTENSION_Z: HardwareAxis.Z_G,
     MotorAxis.EXTENSION_JAW: HardwareAxis.G,
-    MotorAxis.CLAMP_JAW_96_CHANNEL: HardwareAxis.Q,
+    MotorAxis.AXIS_96_CHANNEL_CAM: HardwareAxis.Q,
 }
 
 _MOTOR_AXIS_TO_HARDWARE_MOUNT: Dict[MotorAxis, Mount] = {
@@ -61,7 +61,7 @@ _HARDWARE_AXIS_TO_MOTOR_AXIS: Dict[HardwareAxis, MotorAxis] = {
     HardwareAxis.Z_R: MotorAxis.RIGHT_Z,
     HardwareAxis.Z_G: MotorAxis.EXTENSION_Z,
     HardwareAxis.G: MotorAxis.EXTENSION_JAW,
-    HardwareAxis.Q: MotorAxis.CLAMP_JAW_96_CHANNEL,
+    HardwareAxis.Q: MotorAxis.AXIS_96_CHANNEL_CAM,
 }
 
 # The height of the bottom of the pipette nozzle at home position without any tips.
@@ -328,7 +328,7 @@ class HardwareGantryMover(GantryMover):
             axis_map: The mapping of axes to command.
             critical_point: A critical point override for axes
             speed: Optional speed parameter for the move.
-            relative_move: Specifying whether a relative move needs to be handled or not.
+            relative_move: Whether the axis map needs to be converted from a relative to absolute move.
         """
         try:
             pos_hw = self._convert_axis_map_for_hw(axis_map)
@@ -544,10 +544,8 @@ class VirtualGantryMover(GantryMover):
         """Get the maximum allowed z-height for mount."""
         pipette = self._state_view.pipettes.get_by_mount(mount)
         if self._state_view.config.robot_type == "OT-2 Standard":
-            instrument_height = (
-                self._state_view.pipettes.get_instrument_max_height_ot2(pipette.id)
-                if pipette
-                else VIRTUAL_MAX_OT3_HEIGHT
+            instrument_height = self._state_view.pipettes.get_instrument_max_height_ot2(
+                pipette.id
             )
         else:
             instrument_height = VIRTUAL_MAX_OT3_HEIGHT

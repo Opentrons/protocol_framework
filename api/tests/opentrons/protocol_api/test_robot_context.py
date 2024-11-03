@@ -1,3 +1,4 @@
+"""Test the functionality of the `RobotContext`."""
 import pytest
 from decoy import Decoy
 from typing import Union, Optional
@@ -32,6 +33,7 @@ def api_version() -> APIVersion:
 
 @pytest.fixture
 def mock_deck(decoy: Decoy) -> Deck:
+    """Get a mocked deck object."""
     deck = decoy.mock(cls=Deck)
     decoy.when(deck.get_slot_center(DeckSlotName.SLOT_D1.value)).then_return(
         Point(3, 3, 3)

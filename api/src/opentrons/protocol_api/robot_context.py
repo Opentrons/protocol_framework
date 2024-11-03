@@ -56,7 +56,7 @@ class RobotContext(publisher.CommandPublisher):
         self._api_version = api_version
 
     @property
-    @requires_version(2, 21)
+    @requires_version(2, 22)
     def api_version(self) -> APIVersion:
         return self._api_version
 
@@ -67,7 +67,7 @@ class RobotContext(publisher.CommandPublisher):
         # context commands.
         return self._hardware
 
-    @requires_version(2, 21)
+    @requires_version(2, 22)
     def move_to(
         self,
         mount: Union[Mount, str],
@@ -88,7 +88,7 @@ class RobotContext(publisher.CommandPublisher):
         mount = validation.ensure_instrument_mount(mount)
         self._core.move_to(mount, destination.point, speed)
 
-    @requires_version(2, 21)
+    @requires_version(2, 22)
     def move_axes_to(
         self,
         axis_map: Union[AxisMapType, StringAxisMap],
@@ -120,7 +120,7 @@ class RobotContext(publisher.CommandPublisher):
             critical_point = None
         self._core.move_axes_to(axis_map, critical_point, speed)
 
-    @requires_version(2, 21)
+    @requires_version(2, 22)
     def move_axes_relative(
         self,
         axis_map: Union[AxisMapType, StringAxisMap],

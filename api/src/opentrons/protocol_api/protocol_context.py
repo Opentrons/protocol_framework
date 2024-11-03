@@ -218,14 +218,14 @@ class ProtocolContext(CommandPublisher):
         return self._api_version
 
     @property
-    @requires_version(2, 21)
+    @requires_version(2, 22)
     def robot(self) -> RobotContext:
         """The :py:class:`.RobotContext` for the protocol.
 
         :meta private:
         """
         if self._core.robot_type != "OT-3 Standard" or not self._robot:
-            raise RobotTypeError("The RobotContext is only available on Flex robot.")
+            raise RobotTypeError("The RobotContext is only available on Flex robots.")
         return self._robot
 
     @property

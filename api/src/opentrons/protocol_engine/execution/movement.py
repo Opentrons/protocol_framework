@@ -147,6 +147,7 @@ class MovementHandler:
     async def move_mount_to(
         self, mount: MountType, destination: DeckPoint, speed: Optional[float] = None
     ) -> Point:
+        """Move mount to a specific location on the deck."""
         hw_mount = mount.to_hw_mount()
         await self._gantry_mover.prepare_for_mount_movement(hw_mount)
         origin = await self._gantry_mover.get_position_from_mount(mount=hw_mount)

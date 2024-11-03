@@ -595,6 +595,7 @@ def test_ensure_axis_map_type_success(
     is_96_channel: bool,
     expected_axis_map: AxisMapType,
 ) -> None:
+    """Check that axis map type validation returns the correct shape."""
     res = subject.ensure_axis_map_type(axis_map, robot_type, is_96_channel)
     assert res == expected_axis_map
 
@@ -634,6 +635,7 @@ def test_ensure_axis_map_type_failure(
     is_96_channel: bool,
     error_message: str,
 ) -> None:
+    """Check that axis_map validation occurs for the given scenarios."""
     with pytest.raises(subject.IncorrectAxisError, match=error_message):
         subject.ensure_axis_map_type(axis_map, robot_type, is_96_channel)
 
@@ -656,5 +658,6 @@ def test_ensure_axis_map_type_failure(
 def test_ensure_only_gantry_axis_map_type(
     axis_map: AxisMapType, robot_type: RobotType, error_message: str
 ) -> None:
+    """Check that gantry axis_map validation occurs for the given scenarios."""
     with pytest.raises(subject.IncorrectAxisError, match=error_message):
         subject.ensure_only_gantry_axis_map_type(axis_map, robot_type)
