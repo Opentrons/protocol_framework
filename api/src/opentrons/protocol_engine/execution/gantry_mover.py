@@ -89,7 +89,7 @@ _HARDWARE_AXIS_TO_MOTOR_AXIS: Dict[HardwareAxis, MotorAxis] = {
     HardwareAxis.Z_R: MotorAxis.RIGHT_Z,
     HardwareAxis.Z_G: MotorAxis.EXTENSION_Z,
     HardwareAxis.G: MotorAxis.EXTENSION_JAW,
-    HardwareAxis.Q: MotorAxis.CLAMP_JAW_96_CHANNEL,
+    HardwareAxis.Q: MotorAxis.AXIS_96_CHANNEL_CAM,
 }
 
 # The height of the bottom of the pipette nozzle at home position without any tips.
@@ -578,10 +578,8 @@ class VirtualGantryMover(GantryMover):
         """Get the maximum allowed z-height for mount."""
         pipette = self._state_view.pipettes.get_by_mount(mount)
         if self._state_view.config.robot_type == "OT-2 Standard":
-            instrument_height = (
-                self._state_view.pipettes.get_instrument_max_height_ot2(pipette.id)
-                if pipette
-                else VIRTUAL_MAX_OT3_HEIGHT
+            instrument_height = self._state_view.pipettes.get_instrument_max_height_ot2(
+                pipette.id
             )
         else:
             instrument_height = VIRTUAL_MAX_OT3_HEIGHT
