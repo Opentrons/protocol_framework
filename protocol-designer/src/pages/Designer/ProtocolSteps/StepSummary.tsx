@@ -1,22 +1,24 @@
 import { useSelector } from 'react-redux'
 import { Trans, useTranslation } from 'react-i18next'
-
+import first from 'lodash/first'
+import flatten from 'lodash/flatten'
+import last from 'lodash/last'
 import {
   ALIGN_CENTER,
-  BORDERS,
-  COLORS,
   DIRECTION_COLUMN,
   Flex,
-  FLEX_MAX_CONTENT,
+  ListItem,
   SPACING,
   StyledText,
   Tag,
 } from '@opentrons/components'
 import { getModuleDisplayName } from '@opentrons/shared-data'
-
-import { getModuleEntities } from '../../../step-forms/selectors'
+import {
+  getLabwareEntities,
+  getModuleEntities,
+} from '../../../step-forms/selectors'
 import { getLabwareNicknamesById } from '../../../ui/labware/selectors'
-
+import { LINE_CLAMP_TEXT_STYLE } from '../../../atoms'
 import type { FormData } from '../../../form-types'
 
 interface StyledTransProps {
@@ -24,11 +26,19 @@ interface StyledTransProps {
   tagText?: string
   values?: object
 }
+
 function StyledTrans(props: StyledTransProps): JSX.Element {
   const { i18nKey, tagText, values } = props
   const { t } = useTranslation(['protocol_steps', 'application'])
   return (
-    <Flex gridGap={SPACING.spacing4} alignItems={ALIGN_CENTER}>
+    <Flex
+      gridGap={SPACING.spacing4}
+      alignItems={ALIGN_CENTER}
+      css={`
+        flex-wrap: wrap;
+        word-break: break-word;
+      `}
+    >
       <Trans
         t={t}
         i18nKey={i18nKey}
@@ -43,16 +53,35 @@ function StyledTrans(props: StyledTransProps): JSX.Element {
   )
 }
 
+const getWellsForStepSummary = (
+  targetWells: string[],
+  labwareWells: string[]
+): string => {
+  if (targetWells.length === 1) {
+    return targetWells[0]
+  }
+  const firstElementIndexOffset = labwareWells.indexOf(targetWells[0])
+  const isInOrder = targetWells.every(
+    (targetWell, i) =>
+      labwareWells.indexOf(targetWell) === firstElementIndexOffset + i
+  )
+  return isInOrder
+    ? `${first(targetWells)}-${last(targetWells)}`
+    : `${targetWells.length} wells`
+}
+
 interface StepSummaryProps {
   currentStep: FormData | null
+  stepDetails?: string
 }
 
 export function StepSummary(props: StepSummaryProps): JSX.Element | null {
-  const { currentStep } = props
+  const { currentStep, stepDetails } = props
   const { t } = useTranslation(['protocol_steps', 'application'])
 
   const labwareNicknamesById = useSelector(getLabwareNicknamesById)
 
+  const labwareEntities = useSelector(getLabwareEntities)
   const modules = useSelector(getModuleEntities)
   if (currentStep?.stepType == null) {
     return null
@@ -62,13 +91,28 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
   let stepSummaryContent: JSX.Element | null = null
   switch (stepType) {
     case 'mix':
-      const { labware: mixLabwareId, volume: mixVolume, times } = currentStep
+      const {
+        labware: mixLabwareId,
+        volume: mixVolume,
+        times,
+        wells: mix_wells,
+        labware: mixLabware,
+      } = currentStep
       const mixLabwareDisplayName = labwareNicknamesById[mixLabwareId]
+      const mixWellsDisplay = getWellsForStepSummary(
+        mix_wells as string[],
+        flatten(labwareEntities[mixLabware].def.ordering)
+      )
+
       stepSummaryContent = (
         <StyledTrans
           i18nKey="protocol_steps:mix_step"
           tagText={`${mixVolume} ${t('application:units.microliter')}`}
-          values={{ labware: mixLabwareDisplayName, times }}
+          values={{
+            labware: mixLabwareDisplayName,
+            times,
+            wells: mixWellsDisplay,
+          }}
         />
       )
       break
@@ -104,6 +148,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         lidOpen,
         thermocyclerFormType,
         lidOpenHold,
+        blockTargetTempHold,
         profileTargetLidTemp,
         profileVolume,
       } = currentStep
@@ -148,7 +193,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
             <Flex gridGap={SPACING.spacing20}>
               <StyledTrans
                 i18nKey="protocol_steps:thermocycler_module.thermocycler_profile.end_hold.block"
-                tagText={`${profileTargetLidTemp}${t(
+                tagText={`${blockTargetTempHold}${t(
                   'application:units.degrees'
                 )}`}
               />
@@ -171,9 +216,6 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         pauseTime,
         pauseTemperature,
       } = currentStep
-      const pauseModuleDisplayName = getModuleDisplayName(
-        modules[pauseModuleId].model
-      )
       switch (pauseAction) {
         case 'untilResume':
           stepSummaryContent = (
@@ -183,6 +225,9 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
           )
           break
         case 'untilTemperature':
+          const pauseModuleDisplayName = getModuleDisplayName(
+            modules[pauseModuleId].model
+          )
           stepSummaryContent = (
             <StyledTrans
               i18nKey="protocol_steps:pause.untilTemperature"
@@ -254,13 +299,29 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
       } else {
         moveLiquidType = 'transfer'
       }
-      const { aspirate_labware, dispense_labware, volume } = currentStep
+      const {
+        aspirate_labware,
+        aspirate_wells,
+        dispense_wells,
+        dispense_labware,
+        volume,
+      } = currentStep
       const sourceLabwareName = labwareNicknamesById[aspirate_labware]
       const destinationLabwareName = labwareNicknamesById[dispense_labware]
+      const aspirateWellsDisplay = getWellsForStepSummary(
+        aspirate_wells as string[],
+        flatten(labwareEntities[aspirate_labware]?.def.ordering)
+      )
+      const dispenseWellsDisplay = getWellsForStepSummary(
+        dispense_wells as string[],
+        flatten(labwareEntities[dispense_labware]?.def.ordering)
+      )
       stepSummaryContent = (
         <StyledTrans
           i18nKey={`protocol_steps:move_liquid.${moveLiquidType}`}
           values={{
+            sourceWells: aspirateWellsDisplay,
+            destinationWells: dispenseWellsDisplay,
             source: sourceLabwareName,
             destination: destinationLabwareName,
           }}
@@ -272,8 +333,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
     case 'heaterShaker':
       const {
         latchOpen,
-        heaterShakerTimerMinutes,
-        heaterShakerTimerSeconds,
+        heaterShakerTimer,
         moduleId: heaterShakerModuleId,
         targetHeaterShakerTemperature,
         targetSpeed,
@@ -287,11 +347,15 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
             <StyledTrans
               i18nKey="protocol_steps:heater_shaker.active.temperature"
               values={{ module: moduleDisplayName }}
-              tagText={`${targetHeaterShakerTemperature ?? '-'}${t(
-                'application:units.degrees'
-              )}`}
+              tagText={
+                targetHeaterShakerTemperature
+                  ? `${targetHeaterShakerTemperature}${t(
+                      'application:units.degrees'
+                    )}`
+                  : t('protocol_steps:heater_shaker.active.ambient')
+              }
             />
-            {targetSpeed != null ? (
+            {targetSpeed ? (
               <StyledTrans
                 i18nKey="protocol_steps:heater_shaker.active.shake"
                 tagText={`${targetSpeed}${t('application:units.rpm')}`}
@@ -299,11 +363,10 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
             ) : null}
           </Flex>
           <Flex gridGap={SPACING.spacing20}>
-            {heaterShakerTimerMinutes != null &&
-            heaterShakerTimerSeconds != null ? (
+            {heaterShakerTimer ? (
               <StyledTrans
                 i18nKey="protocol_steps:heater_shaker.active.time"
-                tagText={`${heaterShakerTimerMinutes}:${heaterShakerTimerSeconds}`}
+                tagText={heaterShakerTimer}
               />
             ) : null}
             <StyledTrans
@@ -322,15 +385,29 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
       stepSummaryContent = null
   }
 
-  return stepSummaryContent != null ? (
+  return stepSummaryContent != null || stepDetails != null ? (
     <Flex
-      backgroundColor={COLORS.grey30}
-      padding={SPACING.spacing12}
-      borderRadius={BORDERS.borderRadius4}
-      width={FLEX_MAX_CONTENT}
-      minWidth="100%"
+      flexDirection={DIRECTION_COLUMN}
+      gridGap={SPACING.spacing4}
+      width="100%"
     >
-      {stepSummaryContent}
+      {stepSummaryContent != null ? (
+        <ListItem type="noActive">
+          <Flex padding={SPACING.spacing12}>{stepSummaryContent}</Flex>
+        </ListItem>
+      ) : null}
+      {stepDetails != null && stepDetails !== '' ? (
+        <ListItem type="noActive">
+          <Flex padding={SPACING.spacing12}>
+            <StyledText
+              desktopStyle="bodyDefaultRegular"
+              css={LINE_CLAMP_TEXT_STYLE(3)}
+            >
+              {stepDetails}
+            </StyledText>
+          </Flex>
+        </ListItem>
+      ) : null}
     </Flex>
   ) : null
 }

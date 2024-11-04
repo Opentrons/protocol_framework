@@ -1,4 +1,8 @@
-import { getLabwareDisplayName } from '@opentrons/shared-data'
+import {
+  getLabwareDisplayName,
+  getLabwareStackCountAndLocation,
+} from '@opentrons/shared-data'
+
 import type {
   LoadLabwareRunTimeCommand,
   RunTimeCommand,
@@ -10,6 +14,7 @@ export interface LocationInfoNames {
   slotName: string
   labwareName: string
   labwareNickname?: string
+  labwareQuantity: number
   adapterName?: string
   moduleModel?: ModuleModel
   adapterId?: string
@@ -30,11 +35,11 @@ export function getLocationInfoNames(
     (command): command is LoadModuleRunTimeCommand =>
       command.commandType === 'loadModule'
   )
-  if (loadLabwareCommand == null) {
+  if (loadLabwareCommands == null || loadLabwareCommand == null) {
     console.warn(
       `could not find the load labware command assosciated with thie labwareId: ${labwareId}`
     )
-    return { slotName: '', labwareName: '' }
+    return { slotName: '', labwareName: '', labwareQuantity: 0 }
   }
 
   const labwareName =
@@ -43,14 +48,21 @@ export function getLocationInfoNames(
       : ''
   const labwareNickname = loadLabwareCommand.params.displayName
 
-  const labwareLocation = loadLabwareCommand.params.location
+  const { labwareLocation, labwareQuantity } = getLabwareStackCountAndLocation(
+    labwareId,
+    loadLabwareCommands
+  )
 
   if (labwareLocation === 'offDeck') {
-    return { slotName: 'Off deck', labwareName }
+    return { slotName: 'Off deck', labwareName, labwareQuantity }
   } else if ('slotName' in labwareLocation) {
-    return { slotName: labwareLocation.slotName, labwareName }
+    return { slotName: labwareLocation.slotName, labwareName, labwareQuantity }
   } else if ('addressableAreaName' in labwareLocation) {
-    return { slotName: labwareLocation.addressableAreaName, labwareName }
+    return {
+      slotName: labwareLocation.addressableAreaName,
+      labwareName,
+      labwareQuantity,
+    }
   } else if ('moduleId' in labwareLocation) {
     const loadModuleCommandUnderLabware = loadModuleCommands?.find(
       command => command.result?.moduleId === labwareLocation.moduleId
@@ -62,9 +74,11 @@ export function getLocationInfoNames(
             loadModuleCommandUnderLabware?.params.location.slotName ?? '',
           labwareName,
           moduleModel: loadModuleCommandUnderLabware?.params.model,
+          labwareQuantity,
         }
-      : { slotName: '', labwareName: '' }
+      : { slotName: '', labwareName: '', labwareQuantity }
   } else {
+    // adapt this to return the adapter only if the role of this labware is adapter -- otherwise, keep parsing through until you find out how many identical labware there are
     const loadedAdapterCommand = loadLabwareCommands?.find(command =>
       command.result != null
         ? command.result?.labwareId === labwareLocation.labwareId
@@ -74,7 +88,7 @@ export function getLocationInfoNames(
       console.warn(
         `expected to find an adapter under the labware but could not with labwareId ${labwareLocation.labwareId}`
       )
-      return { slotName: '', labwareName: labwareName }
+      return { slotName: '', labwareName: labwareName, labwareQuantity }
     } else if (
       loadedAdapterCommand?.params.location !== 'offDeck' &&
       'slotName' in loadedAdapterCommand?.params.location
@@ -86,6 +100,7 @@ export function getLocationInfoNames(
         adapterName:
           loadedAdapterCommand?.result?.definition.metadata.displayName,
         adapterId: loadedAdapterCommand?.result?.labwareId,
+        labwareQuantity,
       }
     } else if (
       loadedAdapterCommand?.params.location !== 'offDeck' &&
@@ -98,6 +113,7 @@ export function getLocationInfoNames(
         adapterName:
           loadedAdapterCommand?.result?.definition.metadata.displayName,
         adapterId: loadedAdapterCommand?.result?.labwareId,
+        labwareQuantity,
       }
     } else if (
       loadedAdapterCommand?.params.location !== 'offDeck' &&
@@ -118,11 +134,12 @@ export function getLocationInfoNames(
               loadedAdapterCommand.result?.definition.metadata.displayName,
             adapterId: loadedAdapterCommand?.result?.labwareId,
             moduleModel: loadModuleCommandUnderAdapter.params.model,
+            labwareQuantity,
           }
-        : { slotName: '', labwareName }
+        : { slotName: '', labwareName, labwareQuantity }
     } else {
       //  shouldn't hit this
-      return { slotName: '', labwareName }
+      return { slotName: '', labwareName, labwareQuantity }
     }
   }
 }

@@ -8,6 +8,7 @@ from .exceptions import (
     InvalidSpecificationForRobotTypeError,
     InvalidLoadPipetteSpecsError,
     TipNotAttachedError,
+    PickUpTipTipNotAttachedError,
     TipAttachedError,
     CommandDoesNotExistError,
     LabwareNotLoadedError,
@@ -71,7 +72,11 @@ from .exceptions import (
     CommandNotAllowedError,
     InvalidLiquidHeightFound,
     LiquidHeightUnknownError,
-    InvalidWellDefinitionError,
+    IncompleteLabwareDefinitionError,
+    IncompleteWellDefinitionError,
+    OperationLocationNotInWellError,
+    InvalidDispenseVolumeError,
+    StorageLimitReachedError,
 )
 
 from .error_occurrence import ErrorOccurrence, ProtocolCommandFailedError
@@ -85,6 +90,7 @@ __all__ = [
     "InvalidSpecificationForRobotTypeError",
     "InvalidLoadPipetteSpecsError",
     "TipNotAttachedError",
+    "PickUpTipTipNotAttachedError",
     "TipAttachedError",
     "CommandDoesNotExistError",
     "LabwareNotLoadedError",
@@ -151,5 +157,9 @@ __all__ = [
     "CommandNotAllowedError",
     "InvalidLiquidHeightFound",
     "LiquidHeightUnknownError",
-    "InvalidWellDefinitionError",
+    "IncompleteLabwareDefinitionError",
+    "IncompleteWellDefinitionError",
+    "OperationLocationNotInWellError",
+    "InvalidDispenseVolumeError",
+    "StorageLimitReachedError",
 ]

@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 import {
@@ -13,6 +12,9 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
+import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+
+import type { FC } from 'react'
 import type { RobotType } from '@opentrons/shared-data'
 
 interface SlotInformationProps {
@@ -25,7 +27,7 @@ interface SlotInformationProps {
   fixtures?: string[]
 }
 
-export const SlotInformation: React.FC<SlotInformationProps> = ({
+export const SlotInformation: FC<SlotInformationProps> = ({
   location,
   robotType,
   liquids = [],
@@ -50,11 +52,19 @@ export const SlotInformation: React.FC<SlotInformationProps> = ({
       </Flex>
       <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
         {liquids.length > 1 ? (
-          <ListItem type="noActive">
+          <ListItem type="noActive" width="max-content">
             <ListItemDescriptor
-              type="mini"
-              content={liquids.join(', ')}
-              description={t('liquid')}
+              type="default"
+              content={
+                <StyledText
+                  desktopStyle="bodyDefaultRegular"
+                  textAlign={TYPOGRAPHY.textAlignRight}
+                  css={LINE_CLAMP_TEXT_STYLE(2)}
+                >
+                  {liquids.join(', ')}
+                </StyledText>
+              }
+              description={<Flex width="7.40625rem">{t('liquid')}</Flex>}
             />
           </ListItem>
         ) : (
@@ -113,20 +123,16 @@ function StackInfo({ title, stackInformation }: StackInfoProps): JSX.Element {
   return (
     <ListItem type="noActive">
       <ListItemDescriptor
-        type="mini"
+        type="default"
         content={
-          stackInformation != null ? (
-            <StyledText
-              desktopStyle="bodyDefaultRegular"
-              textAlign={TYPOGRAPHY.textAlignRight}
-            >
-              {stackInformation}
-            </StyledText>
-          ) : (
-            t('none')
-          )
+          <StyledText
+            desktopStyle="bodyDefaultRegular"
+            textAlign={TYPOGRAPHY.textAlignRight}
+          >
+            {stackInformation ?? t('none')}
+          </StyledText>
         }
-        description={title}
+        description={<Flex width="7.40625rem">{title}</Flex>}
       />
     </ListItem>
   )

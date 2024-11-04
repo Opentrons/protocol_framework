@@ -1,10 +1,16 @@
 """Protocol engine exceptions."""
 
+from __future__ import annotations
+
 from logging import getLogger
-from typing import Any, Dict, Optional, Union, Iterator, Sequence
+from typing import Any, Dict, Final, Optional, Union, Iterator, Sequence, TYPE_CHECKING
 
 from opentrons_shared_data.errors import ErrorCodes
 from opentrons_shared_data.errors.exceptions import EnumeratedError, PythonException
+
+if TYPE_CHECKING:
+    from opentrons.protocol_engine.types import TipGeometry
+
 
 log = getLogger(__name__)
 
@@ -130,6 +136,21 @@ class TipNotAttachedError(ProtocolEngineError):
     ) -> None:
         """Build a PipetteNotAttachedError."""
         super().__init__(ErrorCodes.UNEXPECTED_TIP_REMOVAL, message, details, wrapping)
+
+
+class PickUpTipTipNotAttachedError(TipNotAttachedError):
+    """Raised from TipHandler.pick_up_tip().
+
+    This is like TipNotAttachedError except that it carries some extra information
+    about the attempted operation.
+    """
+
+    tip_geometry: Final[TipGeometry]
+    """The tip geometry that would have been on the pipette, had the operation succeeded."""
+
+    def __init__(self, tip_geometry: TipGeometry) -> None:
+        super().__init__()
+        self.tip_geometry = tip_geometry
 
 
 class TipAttachedError(ProtocolEngineError):
@@ -952,7 +973,7 @@ class InvalidAspirateVolumeError(ProtocolEngineError):
         """Build a InvalidPipettingVolumeError."""
         message = (
             f"Cannot aspirate {attempted_aspirate_volume} µL when only"
-            f" {available_volume} is available."
+            f" {available_volume} is available in the tip."
         )
         details = {
             "attempted_aspirate_volume": attempted_aspirate_volume,
@@ -1071,8 +1092,8 @@ class TipNotEmptyError(ProtocolEngineError):
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
 
 
-class InvalidWellDefinitionError(ProtocolEngineError):
-    """Raised when an InnerWellGeometry definition is invalid."""
+class IncompleteLabwareDefinitionError(ProtocolEngineError):
+    """Raised when a labware definition lacks innerLabwareGeometry in general or for a specific well_id."""
 
     def __init__(
         self,
@@ -1080,5 +1101,44 @@ class InvalidWellDefinitionError(ProtocolEngineError):
         details: Optional[Dict[str, Any]] = None,
         wrapping: Optional[Sequence[EnumeratedError]] = None,
     ) -> None:
-        """Build an InvalidWellDefinitionError."""
+        """Build an IncompleteLabwareDefinitionError."""
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
+class IncompleteWellDefinitionError(ProtocolEngineError):
+    """Raised when a well definition lacks a geometryDefinitionId."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build an IncompleteWellDefinitionError."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
+class OperationLocationNotInWellError(ProtocolEngineError):
+    """Raised when a calculated operation location is not within a well."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build an OperationLocationNotInWellError."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
+class StorageLimitReachedError(ProtocolEngineError):
+    """Raised to indicate that a file cannot be created due to storage limitations."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        detail: Optional[Dict[str, str]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build an StorageLimitReached."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, detail, wrapping)

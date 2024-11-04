@@ -11,6 +11,7 @@ from opentrons_shared_data.labware.labware_definition import (
     SphericalSegment,
     ConicalFrustum,
     CuboidalFrustum,
+    SquaredConeSegment,
 )
 
 
@@ -127,6 +128,15 @@ def _volume_from_height_spherical(
     return volume
 
 
+def _volume_from_height_squared_cone(
+    target_height: float, segment: SquaredConeSegment
+) -> float:
+    """Find the volume given a height within a squared cone segment."""
+    heights = segment.height_to_volume_table.keys()
+    best_fit_height = min(heights, key=lambda x: abs(x - target_height))
+    return segment.height_to_volume_table[best_fit_height]
+
+
 def _height_from_volume_circular(
     volume: float,
     total_frustum_height: float,
@@ -197,30 +207,52 @@ def _height_from_volume_spherical(
     return height
 
 
+def _height_from_volume_squared_cone(
+    target_volume: float, segment: SquaredConeSegment
+) -> float:
+    """Find the height given a volume within a squared cone segment."""
+    volumes = segment.volume_to_height_table.keys()
+    best_fit_volume = min(volumes, key=lambda x: abs(x - target_volume))
+    return segment.volume_to_height_table[best_fit_volume]
+
+
 def _get_segment_capacity(segment: WellSegment) -> float:
+    section_height = segment.topHeight - segment.bottomHeight
     match segment:
         case SphericalSegment():
-            return _volume_from_height_spherical(
-                target_height=segment.topHeight,
-                radius_of_curvature=segment.radiusOfCurvature,
+            return (
+                _volume_from_height_spherical(
+                    target_height=segment.topHeight,
+                    radius_of_curvature=segment.radiusOfCurvature,
+                )
+                * segment.count
             )
         case CuboidalFrustum():
-            section_height = segment.topHeight - segment.bottomHeight
-            return _volume_from_height_rectangular(
-                target_height=section_height,
-                bottom_length=segment.bottomYDimension,
-                bottom_width=segment.bottomXDimension,
-                top_length=segment.topYDimension,
-                top_width=segment.topXDimension,
-                total_frustum_height=section_height,
+            return (
+                _volume_from_height_rectangular(
+                    target_height=section_height,
+                    bottom_length=segment.bottomYDimension,
+                    bottom_width=segment.bottomXDimension,
+                    top_length=segment.topYDimension,
+                    top_width=segment.topXDimension,
+                    total_frustum_height=section_height,
+                )
+                * segment.count
             )
         case ConicalFrustum():
-            section_height = segment.topHeight - segment.bottomHeight
-            return _volume_from_height_circular(
-                target_height=section_height,
-                total_frustum_height=section_height,
-                bottom_radius=(segment.bottomDiameter / 2),
-                top_radius=(segment.topDiameter / 2),
+            return (
+                _volume_from_height_circular(
+                    target_height=section_height,
+                    total_frustum_height=section_height,
+                    bottom_radius=(segment.bottomDiameter / 2),
+                    top_radius=(segment.topDiameter / 2),
+                )
+                * segment.count
+            )
+        case SquaredConeSegment():
+            return (
+                _volume_from_height_squared_cone(section_height, segment)
+                * segment.count
             )
         case _:
             # TODO: implement volume calculations for truncated circular and rounded rectangular segments
@@ -252,6 +284,7 @@ def height_at_volume_within_section(
     section_height: float,
 ) -> float:
     """Calculate a height within a bounded section according to geometry."""
+    target_volume_relative = target_volume_relative / section.count
     match section:
         case SphericalSegment():
             return _height_from_volume_spherical(
@@ -275,6 +308,8 @@ def height_at_volume_within_section(
                 top_width=section.topXDimension,
                 top_length=section.topYDimension,
             )
+        case SquaredConeSegment():
+            return _height_from_volume_squared_cone(target_volume_relative, section)
         case _:
             raise NotImplementedError(
                 "Height from volume calculation not yet implemented for this well shape."
@@ -289,25 +324,39 @@ def volume_at_height_within_section(
     """Calculate a volume within a bounded section according to geometry."""
     match section:
         case SphericalSegment():
-            return _volume_from_height_spherical(
-                target_height=target_height_relative,
-                radius_of_curvature=section.radiusOfCurvature,
+            return (
+                _volume_from_height_spherical(
+                    target_height=target_height_relative,
+                    radius_of_curvature=section.radiusOfCurvature,
+                )
+                * section.count
             )
         case ConicalFrustum():
-            return _volume_from_height_circular(
-                target_height=target_height_relative,
-                total_frustum_height=section_height,
-                bottom_radius=(section.bottomDiameter / 2),
-                top_radius=(section.topDiameter / 2),
+            return (
+                _volume_from_height_circular(
+                    target_height=target_height_relative,
+                    total_frustum_height=section_height,
+                    bottom_radius=(section.bottomDiameter / 2),
+                    top_radius=(section.topDiameter / 2),
+                )
+                * section.count
             )
         case CuboidalFrustum():
-            return _volume_from_height_rectangular(
-                target_height=target_height_relative,
-                total_frustum_height=section_height,
-                bottom_width=section.bottomXDimension,
-                bottom_length=section.bottomYDimension,
-                top_width=section.topXDimension,
-                top_length=section.topYDimension,
+            return (
+                _volume_from_height_rectangular(
+                    target_height=target_height_relative,
+                    total_frustum_height=section_height,
+                    bottom_width=section.bottomXDimension,
+                    bottom_length=section.bottomYDimension,
+                    top_width=section.topXDimension,
+                    top_length=section.topYDimension,
+                )
+                * section.count
+            )
+        case SquaredConeSegment():
+            return (
+                _volume_from_height_squared_cone(target_height_relative, section)
+                * section.count
             )
         case _:
             # TODO(cm): this would be the NEST-96 2uL wells referenced in EXEC-712
@@ -375,18 +424,22 @@ def _find_height_in_partial_frustum(
     bottom_section_volume = 0.0
     for section, capacity in zip(sorted_well, volumetric_capacity):
         section_top_height, section_volume = capacity
-        if bottom_section_volume < target_volume < section_volume:
+        if (
+            bottom_section_volume
+            < target_volume
+            < (bottom_section_volume + section_volume)
+        ):
             relative_target_volume = target_volume - bottom_section_volume
-            relative_section_height = section.topHeight - section.bottomHeight
+            section_height = section.topHeight - section.bottomHeight
             partial_height = height_at_volume_within_section(
                 section=section,
                 target_volume_relative=relative_target_volume,
-                section_height=relative_section_height,
+                section_height=section_height,
             )
             return partial_height + section.bottomHeight
         # bottom section volume should always be the volume enclosed in the previously
         # viewed section
-        bottom_section_volume = section_volume
+        bottom_section_volume += section_volume
 
     # if we've looked through all sections and can't find the target volume, raise an error
     raise InvalidLiquidHeightFound(
@@ -399,7 +452,7 @@ def find_height_at_well_volume(
 ) -> float:
     """Find the height within a well, at a known volume."""
     volumetric_capacity = get_well_volumetric_capacity(well_geometry)
-    max_volume = volumetric_capacity[-1][1]
+    max_volume = sum(row[1] for row in volumetric_capacity)
     if target_volume < 0 or target_volume > max_volume:
         raise InvalidLiquidHeightFound("Invalid target volume.")
 

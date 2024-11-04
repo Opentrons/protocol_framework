@@ -3,6 +3,7 @@ import type {
   LabwareWellShapeProperties,
   LabwareWellGroupMetadata,
   LabwareBrand,
+  LoadedLabware,
 } from '@opentrons/shared-data'
 
 export interface LabwareDefAndDate {
@@ -20,6 +21,7 @@ export type LabwareFilter =
   | 'aluminumBlock'
   | 'customLabware'
   | 'adapter'
+  | 'lid'
 
 export type LabwareSort = 'alphabetical' | 'reverse'
 
@@ -35,3 +37,5 @@ export interface LabwareWellGroupProperties {
   metadata: LabwareWellGroupMetadata
   brand: LabwareBrand | null
 }
+
+export type LoadedLabwares = LoadedLabware[] | Record<string, LoadedLabware>

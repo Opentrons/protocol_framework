@@ -1,8 +1,6 @@
 import styled from 'styled-components'
 import { Flex } from '../../primitives'
 import {
-  BORDERS,
-  COLORS,
   CURSOR_DEFAULT,
   CURSOR_POINTER,
   Icon,
@@ -12,8 +10,17 @@ import {
   JUSTIFY_START,
   ALIGN_CENTER,
   FLEX_MAX_CONTENT,
-} from '../..'
-import type { IconName } from '../..'
+} from '../../index'
+import {
+  black90,
+  blue30,
+  blue50,
+  grey30,
+  grey40,
+  white,
+} from '../../helix-design-system/colors'
+import { borderRadius8 } from '../../helix-design-system/borders'
+import type { IconName } from '../../index'
 
 interface EmptySelectorButtonProps {
   onClick: () => void
@@ -29,27 +36,15 @@ export function EmptySelectorButton(
 ): JSX.Element {
   const { onClick, text, iconName, textAlignment, disabled = false } = props
 
-  const StyledButton = styled.button`
-    border: none;
-    width: ${FLEX_MAX_CONTENT};
-    height: ${FLEX_MAX_CONTENT};
-    cursor: ${disabled ? CURSOR_DEFAULT : CURSOR_POINTER};
-    &:focus-visible {
-      outline: 2px solid ${COLORS.white};
-      box-shadow: 0 0 0 4px ${COLORS.blue50};
-      border-radius: ${BORDERS.borderRadius8};
-    }
-  `
-
   return (
-    <StyledButton onClick={onClick}>
+    <StyledButton onClick={onClick} disabled={disabled}>
       <Flex
         gridGap={SPACING.spacing4}
         padding={SPACING.spacing12}
-        backgroundColor={disabled ? COLORS.grey30 : COLORS.blue30}
-        color={disabled ? COLORS.grey40 : COLORS.black90}
-        borderRadius={BORDERS.borderRadius8}
-        border={`2px dashed ${disabled ? COLORS.grey40 : COLORS.blue50}`}
+        backgroundColor={disabled ? grey30 : blue30}
+        color={disabled ? grey40 : black90}
+        borderRadius={borderRadius8}
+        border={`2px dashed ${disabled ? grey40 : blue50}`}
         width="100%"
         height="100%"
         alignItems={ALIGN_CENTER}
@@ -70,3 +65,19 @@ export function EmptySelectorButton(
     </StyledButton>
   )
 }
+
+interface ButtonProps {
+  disabled: boolean
+}
+
+const StyledButton = styled.button<ButtonProps>`
+  border: none;
+  width: ${FLEX_MAX_CONTENT};
+  height: ${FLEX_MAX_CONTENT};
+  cursor: ${({ disabled }) => (disabled ? CURSOR_DEFAULT : CURSOR_POINTER)};
+  &:focus-visible {
+    outline: 2px solid ${white};
+    box-shadow: 0 0 0 4px ${blue50};
+    border-radius: ${borderRadius8};
+  }
+`

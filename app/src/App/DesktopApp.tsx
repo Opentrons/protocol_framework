@@ -14,6 +14,7 @@ import NiceModal from '@ebay/nice-modal-react'
 import { LocalizationProvider } from '/app/LocalizationProvider'
 import { Alerts } from '/app/organisms/Desktop/Alerts'
 import { Breadcrumbs } from '/app/organisms/Desktop/Breadcrumbs'
+import { SystemLanguagePreferenceModal } from '/app/organisms/Desktop/SystemLanguagePreferenceModal'
 import { ToasterOven } from '/app/organisms/ToasterOven'
 import { CalibrationDashboard } from '/app/pages/Desktop/Devices/CalibrationDashboard'
 import { DeviceDetails } from '/app/pages/Desktop/Devices/DeviceDetails'
@@ -37,6 +38,7 @@ import { useRobot, useIsFlex } from '/app/redux-resources/robots'
 import { ProtocolTimeline } from '/app/pages/Desktop/Protocols/ProtocolDetails/ProtocolTimeline'
 import { PortalRoot as ModalPortalRoot } from './portal'
 import { DesktopAppFallback } from './DesktopAppFallback'
+import { ReactQueryDevtools } from './tools'
 
 import type { RouteProps } from './types'
 
@@ -107,6 +109,8 @@ export const DesktopApp = (): JSX.Element => {
     <NiceModal.Provider>
       <LocalizationProvider>
         <ErrorBoundary FallbackComponent={DesktopAppFallback}>
+          <ReactQueryDevtools />
+          <SystemLanguagePreferenceModal />
           <Navbar routes={desktopRoutes} />
           <ToasterOven>
             <EmergencyStopContext.Provider

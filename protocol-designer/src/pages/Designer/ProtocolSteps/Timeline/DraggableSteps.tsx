@@ -14,7 +14,7 @@ import { selectors as stepFormSelectors } from '../../../../step-forms'
 import { stepIconsByType } from '../../../../form-types'
 import { StepContainer } from './StepContainer'
 import { ConnectedStepInfo } from './ConnectedStepInfo'
-import type { DragLayerMonitor, DropTargetOptions } from 'react-dnd'
+import type { DragLayerMonitor, DropTargetMonitor } from 'react-dnd'
 import type { StepIdType } from '../../../../form-types'
 import type { ConnectedStepItemProps } from '../../../../containers/ConnectedStepItem'
 
@@ -44,7 +44,7 @@ function DragDropStep(props: DragDropStepProps): JSX.Element {
     [orderedStepIds]
   )
 
-  const [{ handlerId }, drop] = useDrop(
+  const [{ handlerId, hovered }, drop] = useDrop(
     () => ({
       accept: DND_TYPES.STEP_ITEM,
       canDrop: () => {
@@ -57,8 +57,9 @@ function DragDropStep(props: DragDropStepProps): JSX.Element {
           moveStep(draggedId, overIndex)
         }
       },
-      collect: (monitor: DropTargetOptions) => ({
+      collect: (monitor: DropTargetMonitor) => ({
         handlerId: monitor.getHandlerId(),
+        hovered: monitor.isOver(),
       }),
     }),
     [orderedStepIds]
@@ -71,7 +72,11 @@ function DragDropStep(props: DragDropStepProps): JSX.Element {
       style={{ opacity: isDragging ? 0.3 : 1 }}
       data-handler-id={handlerId}
     >
-      <ConnectedStepInfo stepNumber={stepNumber} stepId={stepId} />
+      <ConnectedStepInfo
+        stepNumber={stepNumber}
+        stepId={stepId}
+        dragHovered={hovered}
+      />
     </Box>
   )
 }

@@ -33,14 +33,16 @@ export function StepsInfo({ savedStepForms }: StepsInfoProps): JSX.Element {
         ) : (
           <ListItem type="noActive" key="ProtocolOverview_Step">
             <ListItemDescriptor
-              type="default"
+              type="large"
               description={
-                <StyledText
-                  desktopStyle="bodyDefaultRegular"
-                  color={COLORS.grey60}
-                >
-                  {t('number_of_steps')}
-                </StyledText>
+                <Flex minWidth="13.75rem">
+                  <StyledText
+                    desktopStyle="bodyDefaultRegular"
+                    color={COLORS.grey60}
+                  >
+                    {t('number_of_steps')}
+                  </StyledText>
+                </Flex>
               }
               content={
                 <StyledText desktopStyle="bodyDefaultRegular">

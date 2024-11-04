@@ -9,7 +9,7 @@ from .pipetting_common import (
     PipetteIdMixin,
     AspirateVolumeMixin,
     FlowRateMixin,
-    WellLocationMixin,
+    LiquidHandlingWellLocationMixin,
     BaseLiquidHandlingResult,
     DestinationPositionResult,
 )
@@ -24,7 +24,7 @@ from ..errors.error_occurrence import ErrorOccurrence
 
 from opentrons.hardware_control import HardwareControlAPI
 
-from ..state.update_types import StateUpdate
+from ..state.update_types import StateUpdate, CLEAR
 from ..types import WellLocation, WellOrigin, CurrentWell, DeckPoint
 
 if TYPE_CHECKING:
@@ -38,7 +38,7 @@ AspirateCommandType = Literal["aspirate"]
 
 
 class AspirateParams(
-    PipetteIdMixin, AspirateVolumeMixin, FlowRateMixin, WellLocationMixin
+    PipetteIdMixin, AspirateVolumeMixin, FlowRateMixin, LiquidHandlingWellLocationMixin
 ):
     """Parameters required to aspirate from a specific well."""
 
@@ -52,7 +52,7 @@ class AspirateResult(BaseLiquidHandlingResult, DestinationPositionResult):
 
 
 _ExecuteReturn = Union[
-    SuccessData[AspirateResult, None],
+    SuccessData[AspirateResult],
     DefinedErrorData[OverpressureError],
 ]
 
@@ -118,6 +118,7 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
             well_name=well_name,
             well_location=params.wellLocation,
             current_well=current_well,
+            operation_volume=-params.volume,
         )
         deck_point = DeckPoint.construct(x=position.x, y=position.y, z=position.z)
         state_update.set_pipette_location(
@@ -135,6 +136,11 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
                 command_note_adder=self._command_note_adder,
             )
         except PipetteOverpressureError as e:
+            state_update.set_liquid_operated(
+                labware_id=labware_id,
+                well_name=well_name,
+                volume_added=CLEAR,
+            )
             return DefinedErrorData(
                 public=OverpressureError(
                     id=self._model_utils.generate_id(),
@@ -151,12 +157,16 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
                 state_update=state_update,
             )
         else:
+            state_update.set_liquid_operated(
+                labware_id=labware_id,
+                well_name=well_name,
+                volume_added=-volume_aspirated,
+            )
             return SuccessData(
                 public=AspirateResult(
                     volume=volume_aspirated,
                     position=deck_point,
                 ),
-                private=None,
                 state_update=state_update,
             )
 

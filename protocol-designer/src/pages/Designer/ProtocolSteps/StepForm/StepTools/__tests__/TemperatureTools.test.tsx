@@ -40,6 +40,7 @@ describe('TemperatureTools', () => {
         dirtyFields: [],
         focusedField: null,
       },
+      visibleFormErrors: [],
       toolboxStep: 1,
       propsForFields: {
         moduleId: {
@@ -70,6 +71,7 @@ describe('TemperatureTools', () => {
           value: null,
         },
       },
+      showFormErrors: false,
     }
 
     vi.mocked(getTemperatureModuleIds).mockReturnValue(['mockId'])

@@ -5,12 +5,20 @@ import typing
 
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.hardware_control.types import DoorState
-from opentrons.protocol_engine.error_recovery_policy import ErrorRecoveryPolicy
+from opentrons.protocol_engine.execution.error_recovery_hardware_state_synchronizer import (
+    ErrorRecoveryHardwareStateSynchronizer,
+)
 from opentrons.util.async_helpers import async_context_manager_in_thread
+
 from opentrons_shared_data.robot import load as load_robot
 
+from .actions.action_dispatcher import ActionDispatcher
+from .error_recovery_policy import ErrorRecoveryPolicy
+from .execution.door_watcher import DoorWatcher
+from .execution.hardware_stopper import HardwareStopper
+from .plugins import PluginStarter
 from .protocol_engine import ProtocolEngine
-from .resources import DeckDataProvider, ModuleDataProvider
+from .resources import DeckDataProvider, ModuleDataProvider, FileProvider, ModelUtils
 from .state.config import Config
 from .state.state import StateStore
 from .types import PostRunHardwareState, DeckConfigurationType
@@ -26,6 +34,7 @@ async def create_protocol_engine(
     error_recovery_policy: ErrorRecoveryPolicy,
     load_fixed_trash: bool = False,
     deck_configuration: typing.Optional[DeckConfigurationType] = None,
+    file_provider: typing.Optional[FileProvider] = None,
     notify_publishers: typing.Optional[typing.Callable[[], None]] = None,
 ) -> ProtocolEngine:
     """Create a ProtocolEngine instance.
@@ -37,6 +46,7 @@ async def create_protocol_engine(
             See documentation on `ErrorRecoveryPolicy`.
         load_fixed_trash: Automatically load fixed trash labware in engine.
         deck_configuration: The initial deck configuration the engine will be instantiated with.
+        file_provider: Provides access to robot server file writing procedures for protocol output.
         notify_publishers: Notifies robot server publishers of internal state change.
     """
     deck_data = DeckDataProvider(config.deck_type)
@@ -47,6 +57,7 @@ async def create_protocol_engine(
 
     module_calibration_offsets = ModuleDataProvider.load_module_calibrations()
     robot_definition = load_robot(config.robot_type)
+
     state_store = StateStore(
         config=config,
         deck_definition=deck_definition,
@@ -58,10 +69,28 @@ async def create_protocol_engine(
         deck_configuration=deck_configuration,
         notify_publishers=notify_publishers,
     )
+    hardware_state_synchronizer = ErrorRecoveryHardwareStateSynchronizer(
+        hardware_api, state_store
+    )
+    action_dispatcher = ActionDispatcher(state_store)
+    action_dispatcher.add_handler(hardware_state_synchronizer)
+    plugin_starter = PluginStarter(state_store, action_dispatcher)
+    model_utils = ModelUtils()
+    hardware_stopper = HardwareStopper(hardware_api, state_store)
+    door_watcher = DoorWatcher(state_store, hardware_api, action_dispatcher)
+    module_data_provider = ModuleDataProvider()
+    file_provider = file_provider or FileProvider()
 
     return ProtocolEngine(
-        state_store=state_store,
         hardware_api=hardware_api,
+        state_store=state_store,
+        action_dispatcher=action_dispatcher,
+        plugin_starter=plugin_starter,
+        model_utils=model_utils,
+        hardware_stopper=hardware_stopper,
+        door_watcher=door_watcher,
+        module_data_provider=module_data_provider,
+        file_provider=file_provider,
     )
 
 
@@ -70,6 +99,7 @@ def create_protocol_engine_in_thread(
     hardware_api: HardwareControlAPI,
     config: Config,
     deck_configuration: typing.Optional[DeckConfigurationType],
+    file_provider: typing.Optional[FileProvider],
     error_recovery_policy: ErrorRecoveryPolicy,
     drop_tips_after_run: bool,
     post_run_hardware_state: PostRunHardwareState,
@@ -97,6 +127,7 @@ def create_protocol_engine_in_thread(
     with async_context_manager_in_thread(
         _protocol_engine(
             hardware_api,
+            file_provider,
             config,
             deck_configuration,
             error_recovery_policy,
@@ -114,6 +145,7 @@ def create_protocol_engine_in_thread(
 @contextlib.asynccontextmanager
 async def _protocol_engine(
     hardware_api: HardwareControlAPI,
+    file_provider: typing.Optional[FileProvider],
     config: Config,
     deck_configuration: typing.Optional[DeckConfigurationType],
     error_recovery_policy: ErrorRecoveryPolicy,
@@ -123,6 +155,7 @@ async def _protocol_engine(
 ) -> typing.AsyncGenerator[ProtocolEngine, None]:
     protocol_engine = await create_protocol_engine(
         hardware_api=hardware_api,
+        file_provider=file_provider,
         config=config,
         error_recovery_policy=error_recovery_policy,
         load_fixed_trash=load_fixed_trash,

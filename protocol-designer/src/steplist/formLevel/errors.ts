@@ -15,7 +15,7 @@ import {
 import { getPipetteCapacity } from '../../pipettes/pipetteData'
 import { canPipetteUseLabware } from '../../utils'
 import { getWellRatio } from '../utils'
-import { getTimeFromPauseForm } from '../utils/getTimeFromPauseForm'
+import { getTimeFromForm } from '../utils/getTimeFromForm'
 
 import type { LabwareDefinition2, PipetteV2Specs } from '@opentrons/shared-data'
 import type { LabwareEntities, PipetteEntity } from '@opentrons/step-generation'
@@ -44,21 +44,28 @@ export type FormErrorKey =
   | 'PROFILE_LID_TEMPERATURE_REQUIRED'
   | 'BLOCK_TEMPERATURE_HOLD_REQUIRED'
   | 'LID_TEMPERATURE_HOLD_REQUIRED'
+  | 'PAUSE_TIME_REQUIRED'
+  | 'PAUSE_TEMP_REQUIRED'
+  | 'LABWARE_TO_MOVE_REQUIRED'
+  | 'NEW_LABWARE_LOCATION_REQUIRED'
+
 export interface FormError {
   title: string
   body?: React.ReactNode
   dependentFields: StepFieldName[]
+  showAtField?: boolean
+  showAtForm?: boolean
 }
 const INCOMPATIBLE_ASPIRATE_LABWARE: FormError = {
-  title: 'Selected aspirate labware is incompatible with selected pipette',
+  title: 'Selected aspirate labware is incompatible with pipette',
   dependentFields: ['aspirate_labware', 'pipette'],
 }
 const INCOMPATIBLE_DISPENSE_LABWARE: FormError = {
-  title: 'Selected dispense labware is incompatible with selected pipette',
+  title: 'Selected dispense labware is incompatible with pipette',
   dependentFields: ['dispense_labware', 'pipette'],
 }
 const INCOMPATIBLE_LABWARE: FormError = {
-  title: 'Selected labware is incompatible with selected pipette',
+  title: 'Selected labware is incompatible with pipette',
   dependentFields: ['labware', 'pipette'],
 }
 const PAUSE_TYPE_REQUIRED: FormError = {
@@ -112,31 +119,91 @@ const MODULE_ID_REQUIRED: FormError = {
 const TARGET_TEMPERATURE_REQUIRED: FormError = {
   title: 'Temperature is required',
   dependentFields: ['setTemperature', 'targetTemperature'],
+  showAtForm: false,
+  showAtField: true,
 }
 const PROFILE_VOLUME_REQUIRED: FormError = {
   title: 'Volume is required',
   dependentFields: ['thermocyclerFormType', 'profileVolume'],
+  showAtForm: false,
+  showAtField: true,
 }
 const PROFILE_LID_TEMPERATURE_REQUIRED: FormError = {
   title: 'Temperature is required',
   dependentFields: ['thermocyclerFormType', 'profileTargetLidTemp'],
+  showAtForm: false,
+  showAtField: true,
 }
 const LID_TEMPERATURE_REQUIRED: FormError = {
   title: 'Temperature is required',
   dependentFields: ['lidIsActive', 'lidTargetTemp'],
+  showAtForm: false,
+  showAtField: true,
 }
 const BLOCK_TEMPERATURE_REQUIRED: FormError = {
   title: 'Temperature is required',
   dependentFields: ['blockIsActive', 'blockTargetTemp'],
+  showAtForm: false,
+  showAtField: true,
 }
 const BLOCK_TEMPERATURE_HOLD_REQUIRED: FormError = {
   title: 'Temperature is required',
   dependentFields: ['blockIsActiveHold', 'blockTargetTempHold'],
+  showAtForm: false,
+  showAtField: true,
 }
 const LID_TEMPERATURE_HOLD_REQUIRED: FormError = {
   title: 'Temperature is required',
   dependentFields: ['lidIsActiveHold', 'lidTargetTempHold'],
+  showAtForm: false,
+  showAtField: true,
 }
+const SHAKE_SPEED_REQUIRED: FormError = {
+  title: 'Speed required',
+  dependentFields: ['setShake', 'targetSpeed'],
+  showAtForm: false,
+  showAtField: true,
+}
+const SHAKE_TIME_REQUIRED: FormError = {
+  title: 'Duration required',
+  dependentFields: ['heaterShakerSetTimer', 'heaterShakerTimer'],
+  showAtForm: false,
+  showAtField: true,
+}
+const PAUSE_TEMP_REQUIRED: FormError = {
+  title: 'Pause temperature required',
+  dependentFields: ['pauseTemperature', 'pauseAction'],
+  showAtForm: false,
+  showAtField: true,
+}
+const PAUSE_TIME_REQUIRED: FormError = {
+  title: 'Pause duration required',
+  dependentFields: ['pauseTime', 'pauseAction'],
+  showAtForm: false,
+  showAtField: true,
+}
+const HS_TEMPERATURE_REQUIRED: FormError = {
+  title: 'Temperature required',
+  dependentFields: [
+    'targetHeaterShakerTemperature',
+    'setHeaterShakerTemperature',
+  ],
+  showAtForm: false,
+  showAtField: true,
+}
+const LABWARE_TO_MOVE_REQUIRED: FormError = {
+  title: 'Labware to move required',
+  dependentFields: ['labware'],
+  showAtForm: false,
+  showAtField: true,
+}
+const NEW_LABWARE_LOCATION_REQUIRED: FormError = {
+  title: 'New location required',
+  dependentFields: ['newLocation'],
+  showAtForm: false,
+  showAtField: true,
+}
+
 export interface HydratedFormData {
   [key: string]: any
 }
@@ -198,7 +265,13 @@ export const pauseForTimeOrUntilTold = (
   const { pauseAction, moduleId, pauseTemperature } = fields
 
   if (pauseAction === PAUSE_UNTIL_TIME) {
-    const { hours, minutes, seconds } = getTimeFromPauseForm(fields)
+    const { hours, minutes, seconds } = getTimeFromForm(
+      fields,
+      'pauseTime',
+      'pauseSeconds',
+      'pauseMinutes',
+      'pauseSeconds'
+    )
     // user selected pause for amount of time
     const totalSeconds = hours * 3600 + minutes * 60 + seconds
     return totalSeconds <= 0 ? TIME_PARAM_REQUIRED : null
@@ -341,6 +414,55 @@ export const lidTemperatureHoldRequired = (
   return lidIsActiveHold === true && !lidTargetTempHold
     ? LID_TEMPERATURE_HOLD_REQUIRED
     : null
+}
+export const shakeSpeedRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { targetSpeed, setShake } = fields
+  return setShake && !targetSpeed ? SHAKE_SPEED_REQUIRED : null
+}
+export const shakeTimeRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { heaterShakerTimer, heaterShakerSetTimer } = fields
+  return heaterShakerSetTimer && !heaterShakerTimer ? SHAKE_TIME_REQUIRED : null
+}
+export const temperatureRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { setHeaterShakerTemperature, targetHeaterShakerTemperature } = fields
+  return setHeaterShakerTemperature && !targetHeaterShakerTemperature
+    ? HS_TEMPERATURE_REQUIRED
+    : null
+}
+export const pauseTimeRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { pauseTime, pauseAction } = fields
+  return pauseAction === PAUSE_UNTIL_TIME && !pauseTime
+    ? PAUSE_TIME_REQUIRED
+    : null
+}
+export const pauseTemperatureRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { pauseTemperature, pauseAction } = fields
+  return pauseAction === PAUSE_UNTIL_TEMP && !pauseTemperature
+    ? PAUSE_TEMP_REQUIRED
+    : null
+}
+export const labwareToMoveRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { labware } = fields
+  return labware == null ? LABWARE_TO_MOVE_REQUIRED : null
+}
+export const newLabwareLocationRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { newLocation } = fields
+  console.log(fields)
+  return newLocation == null ? NEW_LABWARE_LOCATION_REQUIRED : null
 }
 export const engageHeightRangeExceeded = (
   fields: HydratedFormData

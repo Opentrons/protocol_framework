@@ -18,6 +18,7 @@ import {
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import { getLabwareEntities } from '../../step-forms/selectors'
 import * as wellContentsSelectors from '../../top-selectors/well-contents'
+import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
 
 import type { LiquidInfo } from './LiquidToolbox'
 
@@ -80,8 +81,16 @@ export function LiquidCard(props: LiquidCardProps): JSX.Element {
       >
         <LiquidIcon color={color ?? ''} size="medium" />
         <Flex flexDirection={DIRECTION_COLUMN} width="12.375rem">
-          <StyledText desktopStyle="bodyDefaultSemiBold">{name}</StyledText>
-          <StyledText desktopStyle="bodyDefaultRegular">
+          <StyledText
+            desktopStyle="bodyDefaultSemiBold"
+            css={LINE_CLAMP_TEXT_STYLE(3)}
+          >
+            {name}
+          </StyledText>
+          <StyledText
+            desktopStyle="bodyDefaultRegular"
+            css={LINE_CLAMP_TEXT_STYLE(3)}
+          >
             {info.liquidIndex != null
               ? liquidsWithDescriptions[info.liquidIndex].description
               : null}

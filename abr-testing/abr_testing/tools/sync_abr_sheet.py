@@ -7,6 +7,8 @@ import pandas as pd
 import csv
 import sys
 import os
+import time
+import traceback
 from typing import Dict, Tuple, Any, List
 from statistics import mean, StatisticsError
 
@@ -27,76 +29,94 @@ def determine_lifetime(abr_google_sheet: Any) -> None:
     )
     # Goes through dataframe per robot
     for index, run in df_sheet_data.iterrows():
-        end_time = run["End_Time"]
-        robot = run["Robot"]
-        robot_lifetime = (
-            float(run["Robot Lifetime (%)"]) if run["Robot Lifetime (%)"] != "" else 0
+        max_retries = 5
+        retries = 0
+        while retries < max_retries:
+            try:
+                update_df(abr_google_sheet, lifetime_index, df_sheet_data, dict(run))
+                break
+            except Exception as e:
+                if "Quota exceeded for quota metric" in str(e):
+                    retries += 1
+                    print(
+                        f"Read/write limit reached on attempt: {retries}, pausing then retrying..."
+                    )
+                    time.sleep(65)
+                else:
+                    print("unrecoverable error:", e)
+                    traceback.print_exc()
+                    sys.exit(1)
+
+
+def update_df(
+    abr_google_sheet: Any, lifetime_index: int, df_sheet_data: Any, run: Dict[Any, Any]
+) -> None:
+    """Update google sheets with new run log data."""
+    end_time = run["End_Time"]
+    robot = run["Robot"]
+    robot_lifetime = (
+        float(run["Robot Lifetime (%)"]) if run["Robot Lifetime (%)"] != "" else 0
+    )
+    if robot_lifetime < 1 and len(run["Run_ID"]) > 1:
+        # Get Robot % Lifetime
+        robot_runs_before = df_sheet_data[
+            (df_sheet_data["End_Time"] <= end_time) & (df_sheet_data["Robot"] == robot)
+        ]
+        robot_percent_lifetime = (
+            (robot_runs_before["Run_Time (min)"].sum() / 60) / 3750 * 100
         )
-        if robot_lifetime < 1 and len(run["Run_ID"]) > 1:
-            # Get Robot % Lifetime
-            robot_runs_before = df_sheet_data[
+        # Get Left Pipette % Lifetime
+        left_pipette = run["Left Mount"]
+        if len(left_pipette) > 1:
+            left_pipette_runs_before = df_sheet_data[
                 (df_sheet_data["End_Time"] <= end_time)
-                & (df_sheet_data["Robot"] == robot)
+                & (
+                    (df_sheet_data["Left Mount"] == left_pipette)
+                    | (df_sheet_data["Right Mount"] == left_pipette)
+                )
             ]
-            robot_percent_lifetime = (
-                (robot_runs_before["Run_Time (min)"].sum() / 60) / 3750 * 100
+            left_pipette_percent_lifetime = (
+                (left_pipette_runs_before["Run_Time (min)"].sum() / 60) / 1248 * 100
             )
-            # Get Left Pipette % Lifetime
-            left_pipette = run["Left Mount"]
-            if len(left_pipette) > 1:
-                left_pipette_runs_before = df_sheet_data[
-                    (df_sheet_data["End_Time"] <= end_time)
-                    & (
-                        (df_sheet_data["Left Mount"] == left_pipette)
-                        | (df_sheet_data["Right Mount"] == left_pipette)
-                    )
-                ]
-                left_pipette_percent_lifetime = (
-                    (left_pipette_runs_before["Run_Time (min)"].sum() / 60) / 1248 * 100
+        else:
+            left_pipette_percent_lifetime = ""
+        # Get Right Pipette % Lifetime
+        right_pipette = run["Right Mount"]
+        if len(right_pipette) > 1:
+            right_pipette_runs_before = df_sheet_data[
+                (df_sheet_data["End_Time"] <= end_time)
+                & (
+                    (df_sheet_data["Left Mount"] == right_pipette)
+                    | (df_sheet_data["Right Mount"] == right_pipette)
                 )
-            else:
-                left_pipette_percent_lifetime = ""
-            # Get Right Pipette % Lifetime
-            right_pipette = run["Right Mount"]
-            if len(right_pipette) > 1:
-                right_pipette_runs_before = df_sheet_data[
-                    (df_sheet_data["End_Time"] <= end_time)
-                    & (
-                        (df_sheet_data["Left Mount"] == right_pipette)
-                        | (df_sheet_data["Right Mount"] == right_pipette)
-                    )
-                ]
-                right_pipette_percent_lifetime = (
-                    (right_pipette_runs_before["Run_Time (min)"].sum() / 60)
-                    / 1248
-                    * 100
-                )
-            else:
-                right_pipette_percent_lifetime = ""
-            # Get Gripper % Lifetime
-            gripper = run["Extension"]
-            if len(gripper) > 1:
-                gripper_runs_before = df_sheet_data[
-                    (df_sheet_data["End_Time"] <= end_time)
-                    & (df_sheet_data["Extension"] == gripper)
-                ]
-                gripper_percent_lifetime = (
-                    (gripper_runs_before["Run_Time (min)"].sum() / 60) / 3750 * 100
-                )
-            else:
-                gripper_percent_lifetime = ""
-            run_id = run["Run_ID"]
-            row_num = abr_google_sheet.get_row_index_with_value(run_id, 2)
-            update_list = [
-                [robot_percent_lifetime],
-                [left_pipette_percent_lifetime],
-                [right_pipette_percent_lifetime],
-                [gripper_percent_lifetime],
             ]
-            abr_google_sheet.batch_update_cells(
-                update_list, lifetime_index, row_num, "0"
+            right_pipette_percent_lifetime = (
+                (right_pipette_runs_before["Run_Time (min)"].sum() / 60) / 1248 * 100
             )
-            print(f"Updated row {row_num} for run: {run_id}")
+        else:
+            right_pipette_percent_lifetime = ""
+        # Get Gripper % Lifetime
+        gripper = run["Extension"]
+        if len(gripper) > 1:
+            gripper_runs_before = df_sheet_data[
+                (df_sheet_data["End_Time"] <= end_time)
+                & (df_sheet_data["Extension"] == gripper)
+            ]
+            gripper_percent_lifetime = (
+                (gripper_runs_before["Run_Time (min)"].sum() / 60) / 3750 * 100
+            )
+        else:
+            gripper_percent_lifetime = ""
+        run_id = run["Run_ID"]
+        row_num = abr_google_sheet.get_row_index_with_value(run_id, 2)
+        update_list = [
+            [robot_percent_lifetime],
+            [left_pipette_percent_lifetime],
+            [right_pipette_percent_lifetime],
+            [gripper_percent_lifetime],
+        ]
+        abr_google_sheet.batch_update_cells(update_list, lifetime_index, row_num, "0")
+        print(f"Updated row {row_num} for run: {run_id}")
 
 
 def compare_run_to_temp_data(
@@ -182,6 +202,30 @@ def connect_and_download(
     return file_paths, credentials_path
 
 
+def run(
+    storage_directory: str, abr_data_sheet_url: str, abr_room_conditions_sheet: str
+) -> None:
+    """Connect to storage and google sheets and update."""
+    google_sheets_to_download = {
+        "ABR-run-data": abr_data_sheet_url,
+        "ABR Ambient Conditions": abr_room_conditions_sheet,
+    }
+    # Download google sheets.
+
+    file_paths, credentials_path = connect_and_download(
+        google_sheets_to_download, storage_directory
+    )
+    # Read csvs.
+    abr_data = read_csv_as_dict(file_paths[0])
+    temp_data = read_csv_as_dict(file_paths[1])
+    # Compare robot and timestamps.
+    abr_google_sheet = google_sheets_tool.google_sheet(
+        credentials_path, "ABR-run-data", 0
+    )
+    determine_lifetime(abr_google_sheet)
+    compare_run_to_temp_data(abr_data, temp_data, abr_google_sheet)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Adds average robot ambient conditions to run sheet."
@@ -205,21 +249,7 @@ if __name__ == "__main__":
         help="Path to long term storage directory for run logs.",
     )
     args = parser.parse_args()
-    google_sheets_to_download = {
-        "ABR-run-data": args.abr_data_sheet,
-        "ABR Ambient Conditions": args.room_conditions_sheet,
-    }
-    storage_directory = args.storage_directory
-    # Download google sheets.
-    file_paths, credentials_path = connect_and_download(
-        google_sheets_to_download, storage_directory
-    )
-    # TODO: read csvs.
-    abr_data = read_csv_as_dict(file_paths[0])
-    temp_data = read_csv_as_dict(file_paths[1])
-    # TODO: compare robot and timestamps.
-    abr_google_sheet = google_sheets_tool.google_sheet(
-        credentials_path, "ABR-run-data", 0
-    )
-    determine_lifetime(abr_google_sheet)
-    compare_run_to_temp_data(abr_data, temp_data, abr_google_sheet)
+    storage_directory = args.storage_directory[0]
+    abr_data_sheet_url = args.abr_data_sheet[0]
+    room_conditions_sheet_url = args.room_conditions_sheet[0]
+    run(storage_directory, abr_data_sheet_url, room_conditions_sheet_url)

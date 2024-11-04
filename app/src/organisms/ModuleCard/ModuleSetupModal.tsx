@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { createPortal } from 'react-dom'
-import code from '/app/assets/images/module_instruction_code.png'
+import helpCenterQRCode from '/app/assets/images/module_instruction_code.png'
+import absorbanceReaderManualQRCode from '/app/assets/images/absorbance_reader_instruction_manual_code.png'
 import {
   ALIGN_FLEX_END,
   DIRECTION_COLUMN,
@@ -17,14 +18,17 @@ import {
 import { getTopPortalEl } from '/app/App/portal'
 
 const MODULE_SETUP_URL = 'https://support.opentrons.com/s/modules'
+const ABSORBANCE_READER_MANUAL_URL =
+  'https://insights.opentrons.com/hubfs/Absorbance%20Plate%20Reader%20Instruction%20Manual.pdf'
 
 interface ModuleSetupModalProps {
   close: () => void
   moduleDisplayName: string
+  isAbsorbanceReader?: boolean
 }
 
 export const ModuleSetupModal = (props: ModuleSetupModalProps): JSX.Element => {
-  const { moduleDisplayName } = props
+  const { moduleDisplayName, isAbsorbanceReader } = props
   const { t, i18n } = useTranslation(['protocol_setup', 'shared', 'branded'])
 
   return createPortal(
@@ -41,12 +45,18 @@ export const ModuleSetupModal = (props: ModuleSetupModalProps): JSX.Element => {
             width="50%"
           >
             <LegacyStyledText as="p" marginBottom={SPACING.spacing16}>
-              {t('branded:modal_instructions')}
+              {isAbsorbanceReader
+                ? t('module_instructions_manual')
+                : t('branded:modal_instructions')}
             </LegacyStyledText>
             <Link
               external
               css={TYPOGRAPHY.linkPSemiBold}
-              href={MODULE_SETUP_URL}
+              href={
+                isAbsorbanceReader
+                  ? ABSORBANCE_READER_MANUAL_URL
+                  : MODULE_SETUP_URL
+              }
               target="_blank"
               rel="noopener noreferrer"
               marginBottom={SPACING.spacing16}
@@ -61,7 +71,15 @@ export const ModuleSetupModal = (props: ModuleSetupModalProps): JSX.Element => {
               />
             </Link>
           </Flex>
-          <img width="192px" height="194px" src={code} />
+          <img
+            width="192px"
+            height="194px"
+            src={
+              isAbsorbanceReader
+                ? absorbanceReaderManualQRCode
+                : helpCenterQRCode
+            }
+          />
         </Flex>
         <PrimaryButton onClick={props.close} alignSelf={ALIGN_FLEX_END}>
           {i18n.format(t('shared:close'), 'capitalize')}

@@ -29,7 +29,7 @@ class SetRailLightsResult(BaseModel):
 
 
 class SetRailLightsImplementation(
-    AbstractCommandImpl[SetRailLightsParams, SuccessData[SetRailLightsResult, None]]
+    AbstractCommandImpl[SetRailLightsParams, SuccessData[SetRailLightsResult]]
 ):
     """setRailLights command implementation."""
 
@@ -38,10 +38,12 @@ class SetRailLightsImplementation(
 
     async def execute(
         self, params: SetRailLightsParams
-    ) -> SuccessData[SetRailLightsResult, None]:
+    ) -> SuccessData[SetRailLightsResult]:
         """Dispatch a set lights command setting the state of the rail lights."""
         await self._rail_lights.set_rail_lights(params.on)
-        return SuccessData(public=SetRailLightsResult(), private=None)
+        return SuccessData(
+            public=SetRailLightsResult(),
+        )
 
 
 class SetRailLights(

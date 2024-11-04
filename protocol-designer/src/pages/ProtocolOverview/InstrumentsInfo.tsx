@@ -1,15 +1,16 @@
 import { useTranslation } from 'react-i18next'
 
 import {
-  Flex,
-  StyledText,
   Btn,
+  COLORS,
   DIRECTION_COLUMN,
-  SPACING,
+  Flex,
   JUSTIFY_SPACE_BETWEEN,
-  TYPOGRAPHY,
   ListItem,
   ListItemDescriptor,
+  SPACING,
+  StyledText,
+  TYPOGRAPHY,
 } from '@opentrons/components'
 import { getPipetteSpecsV2, FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 
@@ -39,7 +40,7 @@ export function InstrumentsInfo({
     equipment => equipment?.name === 'gripper'
   )
 
-  const pipetteInfo = (pipette?: PipetteOnDeck): JSX.Element | string => {
+  const pipetteInfo = (pipette?: PipetteOnDeck): JSX.Element => {
     const pipetteName =
       pipette != null
         ? getPipetteSpecsV2(pipette.name as PipetteName)?.displayName
@@ -49,7 +50,9 @@ export function InstrumentsInfo({
       : t('na')
 
     if (pipetteName === t('na') || tipsInfo === t('na')) {
-      return t('na')
+      return (
+        <StyledText desktopStyle="bodyDefaultRegular">{t('na')}</StyledText>
+      )
     }
 
     return (
@@ -92,35 +95,77 @@ export function InstrumentsInfo({
       <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
         <ListItem type="noActive" key={`ProtocolOverview_robotType`}>
           <ListItemDescriptor
-            type="default"
-            description={t('robotType')}
+            type="large"
+            description={
+              <Flex minWidth="13.75rem">
+                <StyledText
+                  desktopStyle="bodyDefaultRegular"
+                  color={COLORS.grey60}
+                >
+                  {t('robotType')}
+                </StyledText>
+              </Flex>
+            }
             content={
-              robotType === FLEX_ROBOT_TYPE
-                ? t('shared:opentrons_flex')
-                : t('shared:ot2')
+              <StyledText desktopStyle="bodyDefaultRegular">
+                {robotType === FLEX_ROBOT_TYPE
+                  ? t('shared:opentrons_flex')
+                  : t('shared:ot2')}
+              </StyledText>
             }
           />
         </ListItem>
         <ListItem type="noActive" key={`ProtocolOverview_left`}>
           <ListItemDescriptor
-            type="default"
-            description={t('left_pip')}
+            type="large"
+            description={
+              <Flex minWidth="13.75rem">
+                <StyledText
+                  desktopStyle="bodyDefaultRegular"
+                  color={COLORS.grey60}
+                >
+                  {t('left_pip')}
+                </StyledText>
+              </Flex>
+            }
             content={pipetteInfo(leftPipette)}
           />
         </ListItem>
         <ListItem type="noActive" key={`ProtocolOverview_right`}>
           <ListItemDescriptor
-            type="default"
-            description={t('right_pip')}
+            type="large"
+            description={
+              <Flex minWidth="13.75rem">
+                <StyledText
+                  desktopStyle="bodyDefaultRegular"
+                  color={COLORS.grey60}
+                >
+                  {t('right_pip')}
+                </StyledText>
+              </Flex>
+            }
             content={pipetteInfo(rightPipette)}
           />
         </ListItem>
         {robotType === FLEX_ROBOT_TYPE ? (
           <ListItem type="noActive" key={`ProtocolOverview_gripper`}>
             <ListItemDescriptor
-              type="default"
-              description={t('extension')}
-              content={isGripperAttached ? t('gripper') : t('na')}
+              type="large"
+              description={
+                <Flex minWidth="13.75rem">
+                  <StyledText
+                    desktopStyle="bodyDefaultRegular"
+                    color={COLORS.grey60}
+                  >
+                    {t('extension')}
+                  </StyledText>
+                </Flex>
+              }
+              content={
+                <StyledText desktopStyle="bodyDefaultRegular">
+                  {isGripperAttached ? t('gripper') : t('na')}
+                </StyledText>
+              }
             />
           </ListItem>
         ) : null}

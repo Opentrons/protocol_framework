@@ -1,5 +1,8 @@
 import { describe, it, vi, expect, beforeEach } from 'vitest'
-import { getLabwareDisplayName } from '@opentrons/shared-data'
+import {
+  getLabwareDisplayName,
+  getLabwareStackCountAndLocation,
+} from '@opentrons/shared-data'
 import { getLocationInfoNames } from '../getLocationInfoNames'
 import type { ModuleModel } from '@opentrons/shared-data'
 
@@ -154,11 +157,16 @@ vi.mock('@opentrons/shared-data')
 describe('getLocationInfoNames', () => {
   beforeEach(() => {
     vi.mocked(getLabwareDisplayName).mockReturnValue(LABWARE_DISPLAY_NAME)
+    vi.mocked(getLabwareStackCountAndLocation).mockReturnValue({
+      labwareLocation: { slotName: SLOT },
+      labwareQuantity: 1,
+    })
   })
   it('returns labware name and slot number for labware id on the deck', () => {
     const expected = {
       slotName: SLOT,
       labwareName: LABWARE_DISPLAY_NAME,
+      labwareQuantity: 1,
     }
     expect(
       getLocationInfoNames(LABWARE_ID, MOCK_LOAD_LABWARE_COMMANDS as any)
@@ -169,7 +177,12 @@ describe('getLocationInfoNames', () => {
       slotName: SLOT,
       labwareName: LABWARE_DISPLAY_NAME,
       moduleModel: MOCK_MODEL,
+      labwareQuantity: 1,
     }
+    vi.mocked(getLabwareStackCountAndLocation).mockReturnValue({
+      labwareLocation: { moduleId: '12345' },
+      labwareQuantity: 1,
+    })
     expect(getLocationInfoNames(LABWARE_ID, MOCK_MOD_COMMANDS as any)).toEqual(
       expected
     )
@@ -181,7 +194,12 @@ describe('getLocationInfoNames', () => {
       moduleModel: MOCK_MODEL,
       adapterName: ADAPTER_DISPLAY_NAME,
       adapterId: ADAPTER_ID,
+      labwareQuantity: 1,
     }
+    vi.mocked(getLabwareStackCountAndLocation).mockReturnValue({
+      labwareLocation: { labwareId: ADAPTER_ID },
+      labwareQuantity: 1,
+    })
     expect(
       getLocationInfoNames(LABWARE_ID, MOCK_ADAPTER_MOD_COMMANDS as any)
     ).toEqual(expected)
@@ -192,7 +210,12 @@ describe('getLocationInfoNames', () => {
       labwareName: LABWARE_DISPLAY_NAME,
       adapterName: ADAPTER_DISPLAY_NAME,
       adapterId: ADAPTER_ID,
+      labwareQuantity: 1,
     }
+    vi.mocked(getLabwareStackCountAndLocation).mockReturnValue({
+      labwareLocation: { labwareId: ADAPTER_ID },
+      labwareQuantity: 1,
+    })
     expect(
       getLocationInfoNames(LABWARE_ID, MOCK_ADAPTER_COMMANDS as any)
     ).toEqual(expected)
@@ -203,7 +226,12 @@ describe('getLocationInfoNames', () => {
       labwareName: LABWARE_DISPLAY_NAME,
       adapterName: ADAPTER_DISPLAY_NAME,
       adapterId: ADAPTER_ID,
+      labwareQuantity: 1,
     }
+    vi.mocked(getLabwareStackCountAndLocation).mockReturnValue({
+      labwareLocation: { labwareId: ADAPTER_ID },
+      labwareQuantity: 1,
+    })
     expect(
       getLocationInfoNames(LABWARE_ID, MOCK_ADAPTER_EXTENSION_COMMANDS as any)
     ).toEqual(expected)

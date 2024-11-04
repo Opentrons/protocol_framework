@@ -8,8 +8,8 @@ import type {
   ProtocolsOnDeviceSortKey,
   QuickTransfersOnDeviceSortKey,
   OnDeviceDisplaySettings,
-  Language,
 } from './types'
+import type { Language } from '/app/i18n'
 import type { ProtocolSort } from '/app/redux/protocol-storage'
 
 export interface SelectOption {
@@ -159,7 +159,7 @@ export const getUserId: (state: State) => string = createSelector(
 
 export const getAppLanguage: (state: State) => Language | null = createSelector(
   getConfig,
-  config => config?.language.appLanguage ?? 'en'
+  config => config?.language.appLanguage ?? null
 )
 
 export const getStoredSystemLanguage: (

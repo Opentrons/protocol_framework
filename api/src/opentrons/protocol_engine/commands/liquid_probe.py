@@ -11,6 +11,7 @@ from opentrons.protocol_engine.errors.exceptions import (
     MustHomeError,
     PipetteNotReadyToAspirateError,
     TipNotEmptyError,
+    IncompleteLabwareDefinitionError,
 )
 from opentrons.types import MountType
 from opentrons_shared_data.errors.exceptions import (
@@ -85,10 +86,10 @@ class TryLiquidProbeResult(DestinationPositionResult):
 
 
 _LiquidProbeExecuteReturn = Union[
-    SuccessData[LiquidProbeResult, None],
+    SuccessData[LiquidProbeResult],
     DefinedErrorData[LiquidNotFoundError],
 ]
-_TryLiquidProbeExecuteReturn = SuccessData[TryLiquidProbeResult, None]
+_TryLiquidProbeExecuteReturn = SuccessData[TryLiquidProbeResult]
 
 
 class _ExecuteCommonResult(NamedTuple):
@@ -205,6 +206,13 @@ class LiquidProbeImplementation(
             self._state_view, self._movement, self._pipetting, params
         )
         if isinstance(z_pos_or_error, PipetteLiquidNotFoundError):
+            state_update.set_liquid_probed(
+                labware_id=params.labwareId,
+                well_name=params.wellName,
+                height=update_types.CLEAR,
+                volume=update_types.CLEAR,
+                last_probed=self._model_utils.get_timestamp(),
+            )
             return DefinedErrorData(
                 public=LiquidNotFoundError(
                     id=self._model_utils.generate_id(),
@@ -220,11 +228,27 @@ class LiquidProbeImplementation(
                 state_update=state_update,
             )
         else:
+            try:
+                well_volume: float | update_types.ClearType = (
+                    self._state_view.geometry.get_well_volume_at_height(
+                        labware_id=params.labwareId,
+                        well_name=params.wellName,
+                        height=z_pos_or_error,
+                    )
+                )
+            except IncompleteLabwareDefinitionError:
+                well_volume = update_types.CLEAR
+            state_update.set_liquid_probed(
+                labware_id=params.labwareId,
+                well_name=params.wellName,
+                height=z_pos_or_error,
+                volume=well_volume,
+                last_probed=self._model_utils.get_timestamp(),
+            )
             return SuccessData(
                 public=LiquidProbeResult(
                     z_position=z_pos_or_error, position=deck_point
                 ),
-                private=None,
                 state_update=state_update,
             )
 
@@ -239,11 +263,13 @@ class TryLiquidProbeImplementation(
         state_view: StateView,
         movement: MovementHandler,
         pipetting: PipettingHandler,
+        model_utils: ModelUtils,
         **kwargs: object,
     ) -> None:
         self._state_view = state_view
         self._movement = movement
         self._pipetting = pipetting
+        self._model_utils = model_utils
 
     async def execute(self, params: _CommonParams) -> _TryLiquidProbeExecuteReturn:
         """Execute a `tryLiquidProbe` command.
@@ -256,17 +282,31 @@ class TryLiquidProbeImplementation(
             self._state_view, self._movement, self._pipetting, params
         )
 
-        z_pos = (
-            None
-            if isinstance(z_pos_or_error, PipetteLiquidNotFoundError)
-            else z_pos_or_error
+        if isinstance(z_pos_or_error, PipetteLiquidNotFoundError):
+            z_pos = None
+            well_volume: float | update_types.ClearType = update_types.CLEAR
+        else:
+            z_pos = z_pos_or_error
+            try:
+                well_volume = self._state_view.geometry.get_well_volume_at_height(
+                    labware_id=params.labwareId, well_name=params.wellName, height=z_pos
+                )
+            except IncompleteLabwareDefinitionError:
+                well_volume = update_types.CLEAR
+
+        state_update.set_liquid_probed(
+            labware_id=params.labwareId,
+            well_name=params.wellName,
+            height=z_pos if z_pos is not None else update_types.CLEAR,
+            volume=well_volume,
+            last_probed=self._model_utils.get_timestamp(),
         )
+
         return SuccessData(
             public=TryLiquidProbeResult(
                 z_position=z_pos,
                 position=deck_point,
             ),
-            private=None,
             state_update=state_update,
         )
 

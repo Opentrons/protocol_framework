@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { connect } from 'react-redux'
 import { useConditionalConfirm } from '@opentrons/components'
+import { getModuleDisplayName } from '@opentrons/shared-data'
+
 import { actions } from '../../../../steplist'
 import { actions as stepsActions } from '../../../../ui/steps'
 import {
@@ -17,7 +19,6 @@ import {
   DELETE_STEP_FORM,
 } from '../../../../components/modals/ConfirmDeleteModal'
 import { AutoAddPauseUntilTempStepModal } from '../../../../components/modals/AutoAddPauseUntilTempStepModal'
-import { AutoAddPauseUntilHeaterShakerTempStepModal } from '../../../../components/modals/AutoAddPauseUntilHeaterShakerTempStepModal'
 import { getDirtyFields, makeSingleEditFieldProps } from './utils'
 import { StepFormToolbox } from './StepFormToolbox'
 
@@ -74,9 +75,12 @@ function StepFormManager(props: StepFormManagerProps): JSX.Element | null {
     if (fieldName === focusedField) {
       setFocusedField(null)
     }
-    if (!dirtyFields.includes(fieldName)) {
-      setDirtyFields([...dirtyFields, fieldName])
-    }
+    setDirtyFields(prevDirtyFields => {
+      if (!prevDirtyFields.includes(fieldName)) {
+        return [...prevDirtyFields, fieldName]
+      }
+      return prevDirtyFields
+    })
   }
   const stepId = formData?.id
   const handleDelete = (): void => {
@@ -139,7 +143,6 @@ function StepFormManager(props: StepFormManagerProps): JSX.Element | null {
   ) {
     handleSave = confirmAddPauseUntilHeaterShakerTempStep
   }
-
   return (
     <>
       {/* TODO: update these modals to match new modal design */}
@@ -159,20 +162,25 @@ function StepFormManager(props: StepFormManagerProps): JSX.Element | null {
           onContinueClick={confirmClose}
         />
       )}
-      {showAddPauseUntilTempStepModal && (
+      {showAddPauseUntilTempStepModal ||
+      showAddPauseUntilHeaterShakerTempStepModal ? (
         <AutoAddPauseUntilTempStepModal
-          displayTemperature={formData?.targetTemperature ?? '?'}
+          displayTemperature={
+            showAddPauseUntilTempStepModal
+              ? formData?.targetTemperature
+              : formData?.targetHeaterShakerTemperature ?? '?'
+          }
+          displayModule={
+            formData.moduleId != null
+              ? getModuleDisplayName(
+                  invariantContext.moduleEntities[formData.moduleId].model
+                )
+              : ''
+          }
           handleCancelClick={saveStepForm}
-          handleContinueClick={confirmAddPauseUntilTempStep}
+          handleContinueClick={handleSave}
         />
-      )}
-      {showAddPauseUntilHeaterShakerTempStepModal && (
-        <AutoAddPauseUntilHeaterShakerTempStepModal
-          displayTemperature={formData?.targetHeaterShakerTemperature ?? '?'}
-          handleCancelClick={saveStepForm}
-          handleContinueClick={confirmAddPauseUntilHeaterShakerTempStep}
-        />
-      )}
+      ) : null}
       <StepFormToolbox
         {...{
           canSave,
