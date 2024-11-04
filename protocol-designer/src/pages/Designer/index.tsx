@@ -18,6 +18,7 @@ import { getDeckSetupForActiveItem } from '../../top-selectors/labware-locations
 import { generateNewProtocol } from '../../labware-ingred/actions'
 import { DefineLiquidsModal, ProtocolNavBar } from '../../organisms'
 import { selectDesignerTab } from '../../file-data/actions'
+import { analyticsEvent } from '../../analytics/actions'
 import { getDesignerTab, getFileMetadata } from '../../file-data/selectors'
 import { DeckSetupContainer } from './DeckSetup'
 import { selectors } from '../../labware-ingred/selectors'
@@ -27,6 +28,7 @@ import { ProtocolSteps } from './ProtocolSteps'
 
 import type { CutoutId } from '@opentrons/shared-data'
 import type { DeckSlot } from '@opentrons/step-generation'
+import type { AnalyticsEvent } from '../../analytics/mixpanel'
 
 export interface OpenSlot {
   cutoutId: CutoutId
@@ -39,6 +41,9 @@ export function Designer(): JSX.Element {
     'protocol_steps',
     'shared',
   ])
+  const [analyticsStartTime, setAnalyticsStartTime] = useState<Date | null>(
+    null
+  )
   const { bakeToast, makeSnackbar } = useKitchen()
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -62,6 +67,15 @@ export function Designer(): JSX.Element {
     ae => ae.name === 'trashBin' || ae.name === 'wasteChute'
   )
 
+  const handleAnalyticsEndTime = (): void => {
+    const duration = new Date().getTime() - (analyticsStartTime?.getTime() ?? 0)
+    const deckSetupDuration: AnalyticsEvent = {
+      name: 'deckSetupDuration',
+      properties: { duration: `${duration / 1000} seconds` },
+    }
+    dispatch(analyticsEvent(deckSetupDuration))
+  }
+
   const startingDeckTab = {
     text: t('protocol_starting_deck'),
     isActive: tab === 'startingDeck',
@@ -75,6 +89,7 @@ export function Designer(): JSX.Element {
     onClick: () => {
       if (hasTrashEntity) {
         dispatch(selectDesignerTab({ tab: 'protocolSteps' }))
+        handleAnalyticsEndTime()
       } else {
         makeSnackbar(t('trash_required') as string)
       }
@@ -125,6 +140,7 @@ export function Designer(): JSX.Element {
     if (tab === 'startingDeck') {
       //  ensure that the starting deck page is always showing the initial deck setup
       dispatch(selectTerminalItem('__initial_setup__'))
+      setAnalyticsStartTime(new Date())
     }
   }, [tab])
 

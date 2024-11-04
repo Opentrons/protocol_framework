@@ -1,5 +1,5 @@
-import * as React from 'react'
 import * as Yup from 'yup'
+import { useEffect, useState } from 'react'
 import reduce from 'lodash/reduce'
 import omit from 'lodash/omit'
 import uniq from 'lodash/uniq'
@@ -154,18 +154,16 @@ const validationSchema: any = Yup.object().shape({
 export function CreateNewProtocolWizard(): JSX.Element | null {
   const navigate = useNavigate()
   const showWizard = useSelector(getNewProtocolModal)
-  const [analyticsStartTime] = React.useState<Date>(new Date())
+  const [analyticsStartTime] = useState<Date>(new Date())
   const customLabware = useSelector(
     labwareDefSelectors.getCustomLabwareDefsByURI
   )
-  const [currentStepIndex, setCurrentStepIndex] = React.useState<number>(0)
-  const [wizardSteps, setWizardSteps] = React.useState<WizardStep[]>(
-    WIZARD_STEPS
-  )
+  const [currentStepIndex, setCurrentStepIndex] = useState<number>(0)
+  const [wizardSteps, setWizardSteps] = useState<WizardStep[]>(WIZARD_STEPS)
 
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!showWizard) {
       navigate('/overview')
     }

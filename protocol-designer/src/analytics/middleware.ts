@@ -36,6 +36,15 @@ import type { AnalyticsEventAction } from './actions'
 import type { AnalyticsEvent } from './mixpanel'
 import type { RenameStepAction } from '../labware-ingred/actions'
 import type { SetFeatureFlagAction } from '../feature-flags/actions'
+import type { CreatePipettesAction } from '../step-forms/actions'
+import type { NormalizedPipetteById } from '@opentrons/step-generation'
+
+interface TransformedPipetteInfo {
+  [pipetteId: string]: {
+    name: string
+    numberOfTipracks: number
+  }
+}
 
 // Converts Redux actions to analytics events (read: Mixpanel events).
 // Returns null if there is no analytics event associated with the action,
@@ -53,7 +62,7 @@ export const reduxActionToAnalyticsEvent = (
       a.payload.id
     ]
     const robotTimeline = getRobotStateTimeline(state)
-    const { errors, timeline } = robotTimeline
+    const { timeline } = robotTimeline
     const commandAndRobotState = timeline.filter(t => t.warnings != null)
     const warnings =
       commandAndRobotState.length > 0
@@ -85,14 +94,6 @@ export const reduxActionToAnalyticsEvent = (
         additionalProperties.__pipetteName =
           pipetteEntities[stepArgs?.pipette].name
       }
-
-      if (errors != null) {
-        const errorTypes = errors.map(error => error.type)
-        return {
-          name: 'timelineErrors',
-          properties: { errorTypes },
-        }
-      }
       if (warnings.length > 0) {
         return {
           name: 'timelineWarnings',
@@ -105,6 +106,17 @@ export const reduxActionToAnalyticsEvent = (
       return {
         name: `${modifiedStepName}Step`,
         properties: { ...stepArgs, ...additionalProperties },
+      }
+    }
+  }
+  if (action.type === 'COMPUTE_ROBOT_STATE_TIMELINE_SUCCESS') {
+    const robotTimeline = getRobotStateTimeline(state)
+    const { errors } = robotTimeline
+    if (errors != null) {
+      const errorTypes = errors.map(error => error.type)
+      return {
+        name: 'timelineErrors',
+        properties: { errorTypes },
       }
     }
   }
@@ -300,6 +312,29 @@ export const reduxActionToAnalyticsEvent = (
         name: 'allowAllTipracks',
         properties: {},
       }
+    }
+  }
+  if (action.type === 'CREATE_PIPETTES') {
+    const a: CreatePipettesAction = action
+
+    const getTransformPipetteInfo = (
+      payload: NormalizedPipetteById
+    ): TransformedPipetteInfo => {
+      return Object.entries(payload).reduce(
+        (acc: TransformedPipetteInfo, [pipetteId, { name, tiprackDefURI }]) => {
+          acc[pipetteId] = {
+            name,
+            numberOfTipracks: tiprackDefURI.length,
+          }
+          return acc
+        },
+        {}
+      )
+    }
+    const properties = getTransformPipetteInfo(a.payload)
+    return {
+      name: 'numberOfTipracksPerPipette',
+      properties,
     }
   }
   if (action.type === 'ANALYTICS_EVENT') {
