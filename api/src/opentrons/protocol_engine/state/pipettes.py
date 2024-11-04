@@ -11,6 +11,8 @@ from typing import (
     Tuple,
 )
 
+from typing_extensions import assert_never
+
 from opentrons_shared_data.pipette import pipette_definition
 from opentrons.config.defaults_ot2 import Z_RETRACT_DISTANCE
 from opentrons.hardware_control.dev_types import PipetteDict
@@ -321,9 +323,7 @@ class PipetteStore(HasState[PipetteState], HandlesActions):
         elif state_update.pipette_aspirated_fluid.type == "unknown":
             self._update_unknown(state_update.pipette_aspirated_fluid)
         else:
-            LOG.error(
-                f"Unknown aspirated fluid update type {state_update.pipette_aspirated_fluid.type}"
-            )
+            assert_never(state_update.pipette_aspirated_fluid.type)
 
     def _update_aspirated(
         self, update: update_types.PipetteAspiratedFluidUpdate
