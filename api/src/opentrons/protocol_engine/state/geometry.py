@@ -726,8 +726,6 @@ class GeometryView:
             slot_name = self.get_ancestor_slot_name(below_labware_id)
         elif isinstance(labware.location, AddressableAreaLocation):
             area_name = labware.location.addressableAreaName
-            # TODO we might want to eventually return some sort of staging slot name when we're ready to work through
-            #   the linting nightmare it will create
             if self._labware.is_absorbance_reader_lid(labware_id):
                 raise errors.LocationIsLidDockSlotError(
                     "Cannot get ancestor slot name for labware on lid dock slot."
