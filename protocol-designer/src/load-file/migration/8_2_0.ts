@@ -2,6 +2,7 @@ import { OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import { PAUSE_UNTIL_TIME } from '../../constants'
 
 import type { ProtocolFile } from '@opentrons/shared-data'
+import type { PauseForm } from '../../form-types'
 import type { DesignerApplicationData } from './utils/getLoadLiquidCommands'
 
 const getTimeFromIndividualUnits = (
@@ -38,7 +39,7 @@ export const migrateFile = (
         pauseAction,
       } = form
       const pauseFormIndividualTimeUnitsRemoved = Object.keys(
-        form as Object
+        form as PauseForm
       ).reduce(
         (accInner, key) =>
           !['pauseSecond', 'pauseMinute', 'pauseHour'].includes(key)
@@ -121,7 +122,7 @@ export const migrateFile = (
         appData.robot.model === OT2_ROBOT_TYPE
       ) {
         const moduleLocationUpdateThermocyclerOT2Slot = Object.keys(
-          moduleLocationUpdate as Object
+          moduleLocationUpdate as Record<string, string>
         ).reduce((acc, key) => {
           return moduleLocationUpdate[key] === 'span7_8_10_11'
             ? { ...acc, [key]: '7' }
