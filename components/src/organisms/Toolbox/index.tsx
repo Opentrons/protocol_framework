@@ -112,11 +112,11 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
               {secondaryHeaderButton != null ? secondaryHeaderButton : null}
               {onCloseClick != null && closeButton != null ? (
                 <Btn
+                  disabled={disableCloseButton}
                   onClick={onCloseClick}
                   textDecoration={textDecorationUnderline}
                   data-testid="Toolbox_closeButton"
                   whiteSpace={NO_WRAP}
-                  disable={disableCloseButton}
                 >
                   {closeButton}
                 </Btn>
