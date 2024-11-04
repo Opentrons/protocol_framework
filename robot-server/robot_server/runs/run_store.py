@@ -574,7 +574,10 @@ class RunStore:
                 raise RunNotFoundError(run_id=run_id)
 
             select_count = sqlalchemy.select(sqlalchemy.func.count()).where(
-                run_command_errors_table.c.run_id == run_id
+                and_(
+                    run_command_table.c.run_id == run_id,
+                    run_command_table.c.command_error is not None,
+                )
             )
             count_result: int = transaction.execute(select_count).scalar_one()
 
@@ -583,15 +586,18 @@ class RunStore:
             actual_cursor = max(0, min(actual_cursor, count_result - 1))
             select_slice = (
                 sqlalchemy.select(
-                    run_command_errors_table.c.index_in_run,
-                    run_command_errors_table.c.command,
+                    run_command_table.c.index_in_run,
+                    run_command_table.c.command_error,
                 )
                 .where(
-                    run_command_errors_table.c.run_id == run_id,
-                    run_command_errors_table.c.index_in_run >= actual_cursor,
-                    run_command_errors_table.c.index_in_run < actual_cursor + length,
+                    and_(
+                        run_command_table.c.run_id == run_id,
+                        run_command_table.c.index_in_run >= actual_cursor,
+                        run_command_table.c.index_in_run < actual_cursor + length,
+                        run_command_table.c.command_error is not None,
+                    )
                 )
-                .order_by(run_command_errors_table.c.index_in_run)
+                .order_by(run_command_table.c.index_in_run)
             )
             slice_result = transaction.execute(select_slice).all()
 
