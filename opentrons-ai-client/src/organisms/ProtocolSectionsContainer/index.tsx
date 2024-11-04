@@ -48,7 +48,7 @@ export function ProtocolSectionsContainer(): JSX.Element | null {
         {
           stepNumber: INSTRUMENTS_STEP,
           title: 'instruments_title',
-          Component: () => <InstrumentsSection />,
+          Component: InstrumentsSection,
         },
         {
           stepNumber: MODULES_STEP,
