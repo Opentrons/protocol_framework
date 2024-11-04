@@ -100,6 +100,5 @@ async def test_tip_attached_error(
             pipette_tip_state=PipetteTipStateUpdate(
                 pipette_id="abc", tip_geometry=None
             ),
-            pipette_aspirated_fluid=PipetteUnknownFluidUpdate(pipette_id="abc"),
         ),
     )

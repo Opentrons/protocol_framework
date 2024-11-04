@@ -75,9 +75,6 @@ class DropTipInPlaceImplementation(
                 pipette_id=params.pipetteId, tip_geometry=None
             )
             state_update.set_fluid_unknown(pipette_id=params.pipetteId)
-            state_update_if_false_positive.set_fluid_unknown(
-                pipette_id=params.pipetteId
-            )
             error = TipPhysicallyAttachedError(
                 id=self._model_utils.generate_id(),
                 createdAt=self._model_utils.get_timestamp(),

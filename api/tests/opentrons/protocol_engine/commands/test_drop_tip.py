@@ -306,8 +306,5 @@ async def test_tip_attached_error(
                 pipette_id="abc",
                 tip_geometry=None,
             ),
-            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
-                pipette_id="abc"
-            ),
         ),
     )
