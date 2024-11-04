@@ -18,7 +18,7 @@
   "continue": "Continue",
   "continue_run_now": "Continue run now",
   "continue_to_drop_tip": "Continue to drop tip",
-  "do_you_need_to_blowout": "First, do you need to blowout aspirated liquid?",
+  "do_you_need_to_blowout": "First, do you need to blow out aspirated liquid?",
   "door_open_gripper_home": "The robot door must be closed for the gripper to home its Z-axis before you can continue manually moving labware.",
   "ensure_lw_is_accurately_placed": "Ensure labware is accurately placed in the slot to prevent further errors.",
   "error": "Error",
