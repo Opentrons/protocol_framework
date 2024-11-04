@@ -125,8 +125,8 @@ class RunStore:
         run_id: str,
         summary: StateSummary,
         commands: List[Command],
-        command_errors: List[ErrorOccurrence],
         run_time_parameters: List[RunTimeParameter],
+        command_errors: Optional[List[ErrorOccurrence]] = None,
     ) -> RunResource:
         """Update the run's state summary and commands list.
 
@@ -161,8 +161,6 @@ class RunStore:
         )
         insert_command = sqlalchemy.insert(run_command_table)
 
-        insert_command_errors = sqlalchemy.insert(run_command_errors_table)
-
         select_run_resource = sqlalchemy.select(*_run_columns).where(
             run_table.c.id == run_id
         )
@@ -191,6 +189,16 @@ class RunStore:
                         else CommandIntent.PROTOCOL,
                     },
                 )
+                if command_errors:
+                    insert_command_errors = sqlalchemy.insert(run_command_errors_table)
+                    transaction.execute(
+                        insert_command_errors,
+                        {
+                            "run_id": run_id,
+                            "index_in_run": command_index,
+                            "command_error": pydantic_list_to_json(command_errors),
+                        },
+                    )
 
             run_row = transaction.execute(select_run_resource).one()
             action_rows = transaction.execute(select_actions).all()

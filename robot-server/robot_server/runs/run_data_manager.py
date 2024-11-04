@@ -366,20 +366,15 @@ class RunDataManager:
         next_current = current if current is False else True
 
         if next_current is False:
-            (
-                commands,
-                command_errors,
-                state_summary,
-                parameters,
-            ) = await self._run_orchestrator_store.clear()
+            run_result = await self._run_orchestrator_store.clear()
             run_resource: Union[
                 RunResource, BadRunResource
             ] = self._run_store.update_run_state(
                 run_id=run_id,
-                summary=state_summary,
-                commands=commands,
-                command_errors=command_errors,
-                run_time_parameters=parameters,
+                summary=run_result.state_summary,
+                commands=run_result.commands,
+                command_errors=run_result.command_errors,
+                run_time_parameters=run_result.parameters,
             )
             self._runs_publisher.publish_pre_serialized_commands_notification(run_id)
         else:
