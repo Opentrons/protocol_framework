@@ -1262,9 +1262,9 @@ class GeometryView:
         current_location: OnDeckLabwareLocation,
     ) -> None:
         """Check for potential collision of tips against labware to be lifted."""
-        # TODO(cb, 2024-01-22): Remove the 1 and 8 channel special case once we are doing X axis validation
         pipettes = self._pipettes.get_all()
         for pipette in pipettes:
+            # TODO(cb, 2024-01-22): Remove the 1 and 8 channel special case once we are doing X axis validation
             if self._pipettes.get_channels(pipette.id) in [1, 8]:
                 return
 
