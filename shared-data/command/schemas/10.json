@@ -308,7 +308,7 @@
   "definitions": {
     "AirGapInPlaceParams": {
       "title": "AirGapInPlaceParams",
-      "description": "Payload required to aspirate in place.",
+      "description": "Payload required to air gap in place.",
       "type": "object",
       "properties": {
         "flowRate": {
