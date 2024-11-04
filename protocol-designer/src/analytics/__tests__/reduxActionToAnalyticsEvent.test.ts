@@ -134,9 +134,6 @@ describe('reduxActionToAnalyticsEvent', () => {
         },
       },
     })
-    vi.mocked(getRobotStateTimeline).mockReturnValue({
-      timeline: [],
-    })
     vi.mocked(getPipetteEntities).mockReturnValue({
       // @ts-expect-error 'some_pipette_spec_name' isn't a valid pipette type
       pipetteId: { name: 'some_pipette_spec_name' },

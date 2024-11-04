@@ -20,7 +20,9 @@ import { FIXED_TRASH_ID } from '../constants'
 import { trackEvent } from './mixpanel'
 import { getHasOptedIn } from './selectors'
 import { flattenNestedProperties } from './utils/flattenNestedProperties'
+
 import type { Middleware } from 'redux'
+import type { NormalizedPipetteById } from '@opentrons/step-generation'
 import type {
   AddressableAreaName,
   LoadLabwareCreateCommand,
@@ -32,13 +34,11 @@ import type { BaseState } from '../types'
 import type { FormData, StepIdType, StepType } from '../form-types'
 import type { StepArgsAndErrors } from '../steplist'
 import type { SaveStepFormAction } from '../ui/steps/actions/thunks'
-import type { AnalyticsEventAction } from './actions'
-import type { AnalyticsEvent } from './mixpanel'
 import type { RenameStepAction } from '../labware-ingred/actions'
 import type { SetFeatureFlagAction } from '../feature-flags/actions'
 import type { CreatePipettesAction } from '../step-forms/actions'
-import type { NormalizedPipetteById } from '@opentrons/step-generation'
-
+import type { AnalyticsEventAction } from './actions'
+import type { AnalyticsEvent } from './mixpanel'
 interface TransformedPipetteInfo {
   [pipetteId: string]: {
     name: string
@@ -61,13 +61,6 @@ export const reduxActionToAnalyticsEvent = (
     const argsAndErrors: StepArgsAndErrors = getArgsAndErrorsByStepId(state)[
       a.payload.id
     ]
-    const robotTimeline = getRobotStateTimeline(state)
-    const { timeline } = robotTimeline
-    const commandAndRobotState = timeline.filter(t => t.warnings != null)
-    const warnings =
-      commandAndRobotState.length > 0
-        ? commandAndRobotState.flatMap(state => state.warnings ?? [])
-        : []
 
     const { stepArgs } = argsAndErrors
 
@@ -94,12 +87,6 @@ export const reduxActionToAnalyticsEvent = (
         additionalProperties.__pipetteName =
           pipetteEntities[stepArgs?.pipette].name
       }
-      if (warnings.length > 0) {
-        return {
-          name: 'timelineWarnings',
-          properties: { warnings },
-        }
-      }
 
       const stepName = stepArgs.commandCreatorFnName
       const modifiedStepName = stepName === 'delay' ? 'pause' : stepName
@@ -111,12 +98,23 @@ export const reduxActionToAnalyticsEvent = (
   }
   if (action.type === 'COMPUTE_ROBOT_STATE_TIMELINE_SUCCESS') {
     const robotTimeline = getRobotStateTimeline(state)
-    const { errors } = robotTimeline
+    const { errors, timeline } = robotTimeline
+    const commandAndRobotState = timeline.filter(t => t.warnings != null)
+    const warnings =
+      commandAndRobotState.length > 0
+        ? commandAndRobotState.flatMap(state => state.warnings ?? [])
+        : []
     if (errors != null) {
       const errorTypes = errors.map(error => error.type)
       return {
         name: 'timelineErrors',
         properties: { errorTypes },
+      }
+    }
+    if (warnings.length > 0) {
+      return {
+        name: 'timelineWarnings',
+        properties: { warnings },
       }
     }
   }
