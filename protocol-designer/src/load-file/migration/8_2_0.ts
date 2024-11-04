@@ -1,6 +1,8 @@
+import { OT2_ROBOT_TYPE } from '@opentrons/shared-data'
+import { PAUSE_UNTIL_TIME } from '../../constants'
+
 import type { ProtocolFile } from '@opentrons/shared-data'
 import type { DesignerApplicationData } from './utils/getLoadLiquidCommands'
-import { PAUSE_UNTIL_TIME } from '../../constants'
 
 const getTimeFromIndividualUnits = (
   seconds: any,
@@ -111,6 +113,33 @@ export const migrateFile = (
     return acc
   }, {})
 
+  const updatedInitialStep = Object.values(savedStepForms).reduce(
+    (acc, form) => {
+      const { id, moduleLocationUpdate } = form
+      if (
+        id === '__INITIAL_DECK_SETUP_STEP__' &&
+        appData.robot.model === OT2_ROBOT_TYPE
+      ) {
+        const moduleLocationUpdateThermocyclerOT2Slot = Object.keys(
+          moduleLocationUpdate as Object
+        ).reduce((acc, key) => {
+          return moduleLocationUpdate[key] === 'span7_8_10_11'
+            ? { ...acc, [key]: '7' }
+            : { ...acc, [key]: moduleLocationUpdate[key] }
+        }, {})
+        return {
+          ...acc,
+          [id]: {
+            ...form,
+            moduleLocationUpdate: moduleLocationUpdateThermocyclerOT2Slot,
+          },
+        }
+      }
+      return acc
+    },
+    {}
+  )
+
   return {
     ...appData,
     designerApplication: {
@@ -120,6 +149,7 @@ export const migrateFile = (
         savedStepForms: {
           ...designerApplication.data.savedStepForms,
           ...savedStepsWithConsolidatedTimeField,
+          ...updatedInitialStep,
         },
       },
     },
