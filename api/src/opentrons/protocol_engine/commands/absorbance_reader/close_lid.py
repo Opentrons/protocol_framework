@@ -75,9 +75,9 @@ class CloseLidImpl(AbstractCommandImpl[CloseLidParams, SuccessData[CloseLidResul
                     "Could not reach the Hardware API for Opentrons Plate Reader Module."
                 )
 
-        # If the lid is already ON, no-op losing lid
         if hardware_lid_status is AbsorbanceReaderLidStatus.ON:
-            # The lid is already On, so we can no-op and return the lids current location data
+            # The lid is already ON, so we can no-op closing it
+            # and return the lids current location data
             assert isinstance(loaded_lid.location, AddressableAreaLocation)
             new_location = loaded_lid.location
             new_offset_id = self._equipment.find_applicable_labware_offset_id(
