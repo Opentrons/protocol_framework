@@ -2,6 +2,8 @@ import {
   getModuleDisplayName,
   getModuleType,
   getOccludedSlotCountForModule,
+  THERMOCYCLER_MODULE_V1,
+  THERMOCYCLER_MODULE_V2,
 } from '@opentrons/shared-data'
 import { getLabwareLocation } from './getLabwareLocation'
 
@@ -50,7 +52,10 @@ export function getLabwareDisplayLocation(
   // Module location without adapter
   else if (moduleModel != null && adapterName == null) {
     if (params.detailLevel === 'slot-only') {
-      return t('slot', { slot_name: slotName })
+      return moduleModel === THERMOCYCLER_MODULE_V1 ||
+        moduleModel === THERMOCYCLER_MODULE_V2
+        ? t('slot', { slot_name: 'A1+B1' })
+        : t('slot', { slot_name: slotName })
     } else {
       return isOnDevice
         ? `${getModuleDisplayName(moduleModel)}, ${slotName}`
