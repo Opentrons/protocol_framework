@@ -19,7 +19,7 @@ from opentrons.protocol_engine.types import (
     LabwareOffsetCreate,
     LabwareOffsetVector,
 )
-from opentrons.types import DeckSlotName, Point
+from opentrons.types import DeckSlotName, Point, StagingSlotName
 from opentrons.hardware_control.nozzle_manager import NozzleMap
 
 
@@ -190,9 +190,15 @@ class LabwareCore(AbstractLabware[WellCore]):
     def get_deck_slot(self) -> Optional[DeckSlotName]:
         """Get the deck slot the labware is in, if on deck."""
         try:
-            return self._engine_client.state.geometry.get_ancestor_slot_name(
+            # CASEY NOTE: this function bubbles up to PAPI - currently we return a deck slot name.
+            # what happens when we do get_deck_slot on a staging slot labware? what do we want to have happen?
+            # for now I'm converting to column 3
+            ancestor = self._engine_client.state.geometry.get_ancestor_slot_name(
                 self.labware_id
             )
+            if isinstance(ancestor, StagingSlotName):
+                ancestor = DeckSlotName.from_primitive(ancestor.name[:1] + "3")
+            return ancestor
         except (
             LabwareNotOnDeckError,
             ModuleNotOnDeckError,

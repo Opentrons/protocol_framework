@@ -709,10 +709,12 @@ class GeometryView:
         assert isinstance(labware_location, AddressableAreaLocation)
         return labware_location.addressableAreaName
 
-    def get_ancestor_slot_name(self, labware_id: str) -> DeckSlotName:
+    def get_ancestor_slot_name(
+        self, labware_id: str
+    ) -> Union[DeckSlotName, StagingSlotName]:
         """Get the slot name of the labware or the module that the labware is on."""
         labware = self._labware.get(labware_id)
-        slot_name: DeckSlotName
+        slot_name: Union[DeckSlotName, StagingSlotName]
 
         if isinstance(labware.location, DeckSlotLocation):
             slot_name = labware.location.slotName
@@ -730,12 +732,15 @@ class GeometryView:
                 raise errors.LocationIsLidDockSlotError(
                     "Cannot get ancestor slot name for labware on lid dock slot."
                 )
-            if fixture_validation.is_staging_slot(area_name):
-                raise errors.LocationIsStagingSlotError(
-                    "Cannot get ancestor slot name for labware on staging slot."
-                )
-                raise errors.LocationIs
-            slot_name = DeckSlotName.from_primitive(area_name)
+            elif fixture_validation.is_staging_slot(area_name):
+                slot_name = StagingSlotName.from_primitive(area_name)
+                # CASEY NOTE: Remove these errors
+                # raise errors.LocationIsStagingSlotError(
+                #     "Cannot get ancestor slot name for labware on staging slot."
+                # )
+                # raise errors.LocationIs
+            else:
+                slot_name = DeckSlotName.from_primitive(area_name)
         elif labware.location == OFF_DECK_LOCATION:
             raise errors.LabwareNotOnDeckError(
                 f"Labware {labware_id} does not have a slot associated with it"
@@ -829,7 +834,9 @@ class GeometryView:
         )
 
     def get_extra_waypoints(
-        self, location: Optional[CurrentPipetteLocation], to_slot: DeckSlotName
+        self,
+        location: Optional[CurrentPipetteLocation],
+        to_slot: Union[DeckSlotName, StagingSlotName],
     ) -> List[Tuple[float, float]]:
         """Get extra waypoints for movement if thermocycler needs to be dodged."""
         if location is not None:
@@ -888,8 +895,10 @@ class GeometryView:
         return maybe_labware or maybe_module or maybe_fixture or None
 
     @staticmethod
-    def get_slot_column(slot_name: DeckSlotName) -> int:
+    def get_slot_column(slot_name: Union[DeckSlotName, StagingSlotName]) -> int:
         """Get the column number for the specified slot."""
+        if isinstance(slot_name, StagingSlotName):
+            return 4
         row_col_name = slot_name.to_ot3_equivalent()
         slot_name_match = WELL_NAME_PATTERN.match(row_col_name.value)
         assert (
@@ -1170,7 +1179,13 @@ class GeometryView:
                         )
 
                 assert isinstance(
-                    ancestor, (DeckSlotLocation, ModuleLocation, OnLabwareLocation)
+                    ancestor,
+                    (
+                        DeckSlotLocation,
+                        ModuleLocation,
+                        OnLabwareLocation,
+                        AddressableAreaLocation,
+                    ),
                 ), "No gripper offsets for off-deck labware"
                 return (
                     direct_parent_offset.pickUpOffset
@@ -1217,7 +1232,13 @@ class GeometryView:
                         )
 
                 assert isinstance(
-                    ancestor, (DeckSlotLocation, ModuleLocation, OnLabwareLocation)
+                    ancestor,
+                    (
+                        DeckSlotLocation,
+                        ModuleLocation,
+                        OnLabwareLocation,
+                        AddressableAreaLocation,
+                    ),
                 ), "No gripper offsets for off-deck labware"
                 return (
                     direct_parent_offset.dropOffset
@@ -1293,6 +1314,7 @@ class GeometryView:
                 DeckSlotLocation,
                 ModuleLocation,
                 AddressableAreaLocation,
+                OnLabwareLocation,
             ),
         ), "No gripper offsets for off-deck labware"
 

@@ -32,7 +32,7 @@ from opentrons.protocol_engine.commands.calibration.calibrate_module import (
 from opentrons.protocol_engine.state.module_substates.absorbance_reader_substate import (
     AbsorbanceReaderMeasureMode,
 )
-from opentrons.types import DeckSlotName, MountType
+from opentrons.types import DeckSlotName, MountType, StagingSlotName
 from ..errors import ModuleNotConnectedError
 
 from ..types import (
@@ -1124,8 +1124,8 @@ class ModuleView(HasState[ModuleState]):
 
     def should_dodge_thermocycler(
         self,
-        from_slot: DeckSlotName,
-        to_slot: DeckSlotName,
+        from_slot: Union[DeckSlotName, StagingSlotName],
+        to_slot: Union[DeckSlotName, StagingSlotName],
     ) -> bool:
         """Decide if the requested path would cross the thermocycler, if installed.
 
