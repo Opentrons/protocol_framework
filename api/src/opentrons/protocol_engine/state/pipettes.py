@@ -176,9 +176,6 @@ class PipetteStore(HasState[PipetteState], HandlesActions):
                 attached_tip = state_update.pipette_tip_state.tip_geometry
 
                 self._state.attached_tip_by_id[pipette_id] = attached_tip
-                self._state.pipette_contents_by_id[
-                    pipette_id
-                ] = fluid_stack.FluidStack()
 
                 static_config = self._state.static_config_by_id.get(pipette_id)
                 if static_config:
@@ -205,9 +202,6 @@ class PipetteStore(HasState[PipetteState], HandlesActions):
 
             else:
                 pipette_id = state_update.pipette_tip_state.pipette_id
-                self._state.pipette_contents_by_id[
-                    pipette_id
-                ] = fluid_stack.FluidStack()
                 self._state.attached_tip_by_id[pipette_id] = None
 
                 static_config = self._state.static_config_by_id.get(pipette_id)
