@@ -4,7 +4,8 @@ import { ControlledEmptySelectorButtonGroup } from '../index'
 import { describe, it, expect } from 'vitest'
 import { fireEvent, screen } from '@testing-library/react'
 import { FormProvider, useForm } from 'react-hook-form'
-import { MODULES_FIELD_NAME, type DisplayModules } from '../../../organisms/ModulesSection'
+import { MODULES_FIELD_NAME } from '../../../organisms/ModulesSection'
+import type { DisplayModules } from '../../../organisms/ModulesSection'
 
 const modulesMock: DisplayModules[] = [
   {
