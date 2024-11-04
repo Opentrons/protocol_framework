@@ -3,18 +3,12 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import {
-  ALIGN_CENTER,
   ALIGN_END,
-  Btn,
   COLORS,
   DIRECTION_COLUMN,
   Flex,
   INFO_TOAST,
-  Icon,
-  JUSTIFY_SPACE_BETWEEN,
   SPACING,
-  SecondaryButton,
-  Tabs,
   ToggleGroup,
   useOnClickOutside,
 } from '@opentrons/components'
@@ -22,7 +16,7 @@ import { selectTerminalItem } from '../../ui/steps/actions/actions'
 import { useKitchen } from '../../organisms/Kitchen/hooks'
 import { getDeckSetupForActiveItem } from '../../top-selectors/labware-locations'
 import { generateNewProtocol } from '../../labware-ingred/actions'
-import { DefineLiquidsModal, ProtocolMetadataNav } from '../../organisms'
+import { DefineLiquidsModal, ProtocolNavBar } from '../../organisms'
 import { selectDesignerTab } from '../../file-data/actions'
 import { getDesignerTab, getFileMetadata } from '../../file-data/selectors'
 import { DeckSetupContainer } from './DeckSetup'
@@ -156,41 +150,16 @@ export function Designer(): JSX.Element {
         />
       ) : null}
       <Flex flexDirection={DIRECTION_COLUMN}>
-        <Flex
-          justifyContent={JUSTIFY_SPACE_BETWEEN}
-          padding={SPACING.spacing12}
-        >
-          {zoomIn.slot != null ? null : (
-            <Tabs tabs={[startingDeckTab, protocolStepTab]} />
-          )}
-          <ProtocolMetadataNav
-            isAddingHardwareOrLabware={
-              zoomIn.slot != null && zoomIn.cutout != null
-            }
-          />
-          <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
-            <Btn
-              alignItems={ALIGN_CENTER}
-              onClick={() => {
-                showLiquidOverflowMenu(true)
-              }}
-            >
-              <Icon size="1.5rem" name="water-drop" data-testid="water-drop" />
-            </Btn>
-            <SecondaryButton
-              onClick={() => {
-                if (hasTrashEntity) {
-                  navigate('/overview')
-                  dispatch(selectTerminalItem('__initial_setup__'))
-                } else {
-                  makeSnackbar(t('trash_required') as string)
-                }
-              }}
-            >
-              {t('shared:done')}
-            </SecondaryButton>
-          </Flex>
-        </Flex>
+        <ProtocolNavBar
+          hasZoomInSlot={zoomIn.slot != null}
+          isAddingHardwareOrLabware={
+            zoomIn.slot != null && zoomIn.cutout != null
+          }
+          hasTrashEntity={hasTrashEntity}
+          showLiquidOverflowMenu={showLiquidOverflowMenu}
+          tabs={[startingDeckTab, protocolStepTab]}
+        />
+
         {tab === 'startingDeck' ? (
           <Flex
             flexDirection={DIRECTION_COLUMN}

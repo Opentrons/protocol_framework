@@ -16,7 +16,7 @@ import {
 import {
   AssignLiquidsModal,
   DefineLiquidsModal,
-  ProtocolMetadataNav,
+  ProtocolNavBar,
 } from '../../organisms'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import { LiquidsOverflowMenu } from '../Designer/LiquidsOverflowMenu'
@@ -69,7 +69,7 @@ export function Liquids(): JSX.Element {
       <Flex flexDirection={DIRECTION_COLUMN}>
         <Flex padding={SPACING.spacing12}>
           <Flex justifyContent={JUSTIFY_SPACE_BETWEEN} width="100%">
-            <ProtocolMetadataNav />
+            <ProtocolNavBar />
             <PrimaryButton
               onClick={() => {
                 showLiquidOverflowMenu(true)

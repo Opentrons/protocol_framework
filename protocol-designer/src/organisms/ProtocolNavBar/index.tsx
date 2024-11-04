@@ -1,0 +1,121 @@
+import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
+import styled from 'styled-components'
+
+import {
+  ALIGN_CENTER,
+  COLORS,
+  DIRECTION_COLUMN,
+  Flex,
+  JUSTIFY_SPACE_BETWEEN,
+  SecondaryButton,
+  SPACING,
+  StyledText,
+  Tabs,
+  TYPOGRAPHY,
+} from '@opentrons/components'
+import { getFileMetadata } from '../../file-data/selectors'
+import { useKitchen } from '../Kitchen/hooks'
+import { selectTerminalItem } from '../../ui/steps/actions/actions'
+import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { LiquidButton } from './LiquidButton'
+
+import type { TabProps } from '@opentrons/components'
+
+interface ProtocolNavBarProps {
+  hasZoomInSlot?: boolean
+  tabs?: TabProps[]
+  hasTrashEntity?: boolean
+  showLiquidOverflowMenu?: (liquidOverflowMenu: boolean) => void
+  isAddingHardwareOrLabware?: boolean
+}
+
+export function ProtocolNavBar({
+  hasZoomInSlot,
+  isAddingHardwareOrLabware = false,
+  tabs = [],
+  hasTrashEntity,
+  showLiquidOverflowMenu,
+}: ProtocolNavBarProps): JSX.Element {
+  const { t } = useTranslation('starting_deck_state')
+  const metadata = useSelector(getFileMetadata)
+  const { makeSnackbar } = useKitchen()
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+
+  return (
+    <NavContainer>
+      {hasZoomInSlot ? null : <Tabs tabs={tabs} />}
+
+      <MetadataContainer isAddingHardwareOrLabware={isAddingHardwareOrLabware}>
+        <StyledText
+          desktopStyle="bodyDefaultSemiBold"
+          css={LINE_CLAMP_TEXT_STYLE(1)}
+        >
+          {metadata?.protocolName != null && metadata?.protocolName !== ''
+            ? metadata?.protocolName
+            : t('untitled_protocol')}
+        </StyledText>
+        <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
+          {isAddingHardwareOrLabware
+            ? t('add_hardware_labware')
+            : t('edit_protocol')}
+        </StyledText>
+      </MetadataContainer>
+
+      <ButtonGroup>
+        {showLiquidOverflowMenu != null ? (
+          <LiquidButton showLiquidOverflowMenu={showLiquidOverflowMenu} />
+        ) : null}
+
+        <SecondaryButton
+          onClick={() => {
+            if (hasTrashEntity) {
+              navigate('/overview')
+              dispatch(selectTerminalItem('__initial_setup__'))
+            } else {
+              makeSnackbar(t('trash_required') as string)
+            }
+          }}
+        >
+          {t('shared:done')}
+        </SecondaryButton>
+      </ButtonGroup>
+    </NavContainer>
+  )
+}
+
+const NavContainer = styled(Flex)`
+  padding: ${SPACING.spacing12};
+  width: 100%;
+  justify-content: ${JUSTIFY_SPACE_BETWEEN};
+  align-items: ${ALIGN_CENTER};
+`
+
+const MetadataContainer = styled(Flex)<{ isAddingHardwareOrLabware: boolean }>`
+  flex-direction: ${DIRECTION_COLUMN};
+  text-align: ${({ isAddingHardwareOrLabware }) =>
+    isAddingHardwareOrLabware === true
+      ? TYPOGRAPHY.textAlignLeft
+      : TYPOGRAPHY.textAlignCenter};
+
+  // For screens between 600px and 767px, set width to 88px
+  @media only screen and (max-width: 767px) {
+    width: 88px;
+  }
+
+  // For screens between 768px and 1023px, set width to 256px
+  @media only screen and (min-width: 768px) and (max-width: 1023px) {
+    width: 256px;
+  }
+
+  // For screens larger than or equal to 1024px, set width to 400px
+  @media only screen and (min-width: 1024px) {
+    width: 400px;
+  }
+`
+
+const ButtonGroup = styled(Flex)`
+  grid-gap: ${SPACING.spacing8};
+`

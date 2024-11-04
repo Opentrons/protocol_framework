@@ -4,7 +4,7 @@ import { fireEvent, screen } from '@testing-library/react'
 import { i18n } from '../../../assets/localization'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { selectors as labwareIngredSelectors } from '../../../labware-ingred/selectors'
-import { AssignLiquidsModal, ProtocolMetadataNav } from '../../../organisms'
+import { AssignLiquidsModal, ProtocolNavBar } from '../../../organisms'
 import { LiquidsOverflowMenu } from '../../Designer/LiquidsOverflowMenu'
 import { Liquids } from '..'
 import type { NavigateFunction } from 'react-router-dom'
@@ -41,9 +41,7 @@ describe('Liquids', () => {
     vi.mocked(AssignLiquidsModal).mockReturnValue(
       <div>mock AssignLiquidsModal</div>
     )
-    vi.mocked(ProtocolMetadataNav).mockReturnValue(
-      <div>mock ProtocolMetadataNav</div>
-    )
+    vi.mocked(ProtocolNavBar).mockReturnValue(<div>mock ProtocolNavBar</div>)
     vi.mocked(LiquidsOverflowMenu).mockReturnValue(
       <div>mock LiquidsOverflowMenu</div>
     )
@@ -56,7 +54,7 @@ describe('Liquids', () => {
 
   it('renders nav and assign liquids modal', () => {
     render()
-    screen.getByText('mock ProtocolMetadataNav')
+    screen.getByText('mock ProtocolNavBar')
     screen.getByText('mock AssignLiquidsModal')
   })
 
