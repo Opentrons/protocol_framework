@@ -41,10 +41,10 @@ export function RobotCoordinateSpaceWithRef(
         viewBoxOriginY + PADDING * 5
       } ${deckXDimension + PADDING * 2} ${deckYDimension - PADDING * 10}`
     } else {
-      const PADDING = 20
-      wholeDeckViewBox = `${viewBoxOriginX + PADDING} ${
+      const PADDING = 10
+      wholeDeckViewBox = `${viewBoxOriginX + PADDING * 2} ${
         viewBoxOriginY - PADDING
-      } ${deckXDimension + PADDING * 2} ${deckYDimension + PADDING * 2}`
+      } ${deckXDimension + PADDING * 4} ${deckYDimension + PADDING * 3}`
     }
   }
   return (
