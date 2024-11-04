@@ -21,7 +21,10 @@ export interface DisplayModules {
   type: ModuleType
   model: ModuleModel
   name: string
-  adapter?: string
+  adapter?: {
+    name: string
+    value: string
+  }
 }
 
 export const MODULES_FIELD_NAME = 'modules'

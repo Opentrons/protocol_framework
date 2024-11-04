@@ -111,15 +111,21 @@ export function ModuleListItemGroup(): JSX.Element | null {
                             currentOption: {
                               name:
                                 getDefDisplayName(
-                                  currentModule.adapter as string
+                                  currentModule?.adapter?.value as string
                                 ) ?? 'Choose an adapter',
-                              value: currentModule.adapter,
+                              value: currentModule?.adapter?.value,
                             },
                             onClick: (value: string) => {
                               field.onChange(
                                 field.value.map((m: DisplayModules) =>
                                   m.type === module.type
-                                    ? { ...m, adapter: value }
+                                    ? {
+                                        ...m,
+                                        adapter: {
+                                          name: getDefDisplayName(value),
+                                          value,
+                                        },
+                                      }
                                     : m
                                 )
                               )

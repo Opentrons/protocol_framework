@@ -68,9 +68,9 @@ export function generatePromptPreviewModulesItems(
   if (modules === undefined || modules?.length === 0) return []
 
   const items = modules?.map(module =>
-    module.adapter === null || module.adapter === ''
-      ? t(module.name)
-      : `${t(module.name)} with ${t(module.adapter)}`
+    module.adapter === undefined || module.adapter?.name === ''
+      ? module.name
+      : `${module.name} with ${module.adapter.name}`
   )
 
   return items.filter(Boolean)
