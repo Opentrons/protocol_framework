@@ -6,7 +6,6 @@ from abc import ABC, abstractmethod
 
 import anyio
 
-from api.src.opentrons.protocol_engine.errors.error_occurrence import ErrorOccurrence
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons import protocol_reader
 from opentrons.legacy_broker import LegacyBroker
@@ -24,6 +23,7 @@ from opentrons.protocol_engine import (
     StateSummary,
     Command,
     commands as pe_commands,
+    ErrorOccurrence
 )
 from opentrons.protocols.parse import PythonParseMode
 from opentrons.util.async_helpers import asyncio_yield
@@ -57,8 +57,6 @@ class RunResult(NamedTuple):
     commands: List[Command]
     state_summary: StateSummary
     parameters: List[RunTimeParameter]
-    command_errors: Optional[List[ErrorOccurrence]] = None
-
 
 class AbstractRunner(ABC):
     """An interface to manage and control a protocol run.

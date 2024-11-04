@@ -295,7 +295,6 @@ class RunOrchestratorStore:
         return RunResult(
             state_summary=run_data,
             commands=commands,
-            command_errors=command_errors,
             parameters=run_time_parameters,
         )
 

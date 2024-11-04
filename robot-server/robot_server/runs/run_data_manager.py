@@ -207,7 +207,6 @@ class RunDataManager:
                 run_id=prev_run_id,
                 summary=prev_run_result.state_summary,
                 commands=prev_run_result.commands,
-                command_errors=prev_run_result.command_errors,
                 run_time_parameters=prev_run_result.parameters,
             )
 
@@ -373,7 +372,6 @@ class RunDataManager:
                 run_id=run_id,
                 summary=run_result.state_summary,
                 commands=run_result.commands,
-                command_errors=run_result.command_errors,
                 run_time_parameters=run_result.parameters,
             )
             self._runs_publisher.publish_pre_serialized_commands_notification(run_id)
@@ -424,7 +422,7 @@ class RunDataManager:
     def get_command_error_slice(
         self, run_id: str, cursor: int, length: int
     ) -> CommandErrorSlice:
-        """Get a slice of run commands.
+        """Get a slice of run commands errors.
 
         Args:
             run_id: ID of the run.

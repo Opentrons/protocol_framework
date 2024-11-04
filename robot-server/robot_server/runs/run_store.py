@@ -16,6 +16,7 @@ from opentrons.protocol_engine import (
     CommandSlice,
     CommandIntent,
     ErrorOccurrence,
+    CommandErrorSlice,
 )
 from opentrons.protocol_engine.commands import Command
 from opentrons.protocol_engine.types import RunTimeParameter
@@ -30,7 +31,6 @@ from robot_server.persistence.database import sqlite_rowid
 from robot_server.persistence.tables import (
     run_table,
     run_command_table,
-    run_command_errors_table,
     action_table,
     run_csv_rtp_table,
 )
@@ -126,7 +126,6 @@ class RunStore:
         summary: StateSummary,
         commands: List[Command],
         run_time_parameters: List[RunTimeParameter],
-        command_errors: Optional[List[ErrorOccurrence]] = None,
     ) -> RunResource:
         """Update the run's state summary and commands list.
 
@@ -187,18 +186,11 @@ class RunStore:
                         "command_intent": str(command.intent.value)
                         if command.intent
                         else CommandIntent.PROTOCOL,
+                        "command_error": pydantic_to_json(command.error)
+                        if command.error
+                        else None,
                     },
                 )
-                if command_errors:
-                    insert_command_errors = sqlalchemy.insert(run_command_errors_table)
-                    transaction.execute(
-                        insert_command_errors,
-                        {
-                            "run_id": run_id,
-                            "index_in_run": command_index,
-                            "command_error": pydantic_list_to_json(command_errors),
-                        },
-                    )
 
             run_row = transaction.execute(select_run_resource).one()
             action_rows = transaction.execute(select_actions).all()
@@ -554,6 +546,65 @@ class RunStore:
                 )
             commands_result = transaction.scalars(select_commands).all()
         return commands_result
+
+    def get_commands_errors_slice(
+        self,
+        run_id: str,
+        length: int,
+        cursor: Optional[int],
+    ) -> CommandErrorSlice:
+        """Get a slice of run commands errors from the store.
+
+        Args:
+            run_id: Run ID to pull commands from.
+            length: Number of commands to return.
+            cursor: The starting index of the slice in the whole collection.
+                If `None`, up to `length` elements at the end of the collection will
+                be returned.
+
+        Returns:
+            A collection of command errors as well as the actual cursor used and
+            the total length of the collection.
+
+        Raises:
+            RunNotFoundError: The given run ID was not found.
+        """
+        with self._sql_engine.begin() as transaction:
+            if not self._run_exists(run_id, transaction):
+                raise RunNotFoundError(run_id=run_id)
+
+            select_count = sqlalchemy.select(sqlalchemy.func.count()).where(
+                run_command_errors_table.c.run_id == run_id
+            )
+            count_result: int = transaction.execute(select_count).scalar_one()
+
+            actual_cursor = cursor if cursor is not None else count_result - length
+            # Clamp to [0, count_result).
+            actual_cursor = max(0, min(actual_cursor, count_result - 1))
+            select_slice = (
+                sqlalchemy.select(
+                    run_command_errors_table.c.index_in_run,
+                    run_command_errors_table.c.command,
+                )
+                .where(
+                    run_command_errors_table.c.run_id == run_id,
+                    run_command_errors_table.c.index_in_run >= actual_cursor,
+                    run_command_errors_table.c.index_in_run < actual_cursor + length,
+                )
+                .order_by(run_command_errors_table.c.index_in_run)
+            )
+            slice_result = transaction.execute(select_slice).all()
+
+        sliced_commands: List[Command] = [
+            json_to_pydantic(Command, row.command)  # type: ignore[arg-type]
+            for row in slice_result
+        ]
+
+        return CommandErrorSlice(
+            cursor=actual_cursor,
+            total_length=count_result,
+            commands_errors=sliced_commands,
+        )
 
     @lru_cache(maxsize=_CACHE_ENTRIES)
     def get_command(self, run_id: str, command_id: str) -> Command:
