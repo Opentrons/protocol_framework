@@ -147,7 +147,6 @@ def test_read(
         configured_wavelengths=subject._initialized_value,
         measure_mode=AbsorbanceReaderMeasureMode("single"),
         reference_wavelength=None,
-        lid_id="pr_lid_labware",
     )
     decoy.when(
         mock_engine_client.state.modules.get_absorbance_reader_substate(

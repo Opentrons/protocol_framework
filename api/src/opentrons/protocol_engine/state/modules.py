@@ -67,7 +67,6 @@ from ..actions import (
     Action,
     SucceedCommandAction,
     AddModuleAction,
-    AddAbsorbanceReaderLidAction,
 )
 from ._abstract_store import HasState, HandlesActions
 from .module_substates import (
@@ -234,11 +233,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 requested_model=None,
                 module_live_data=action.module_live_data,
             )
-        elif isinstance(action, AddAbsorbanceReaderLidAction):
-            self._update_absorbance_reader_lid_id(
-                module_id=action.module_id,
-                lid_id=action.lid_id,
-            )
 
     def _handle_command(self, command: Command) -> None:
         if isinstance(command.result, LoadModuleResult):
@@ -304,29 +298,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             ),
         ):
             self._handle_absorbance_reader_commands(command)
-
-    def _update_absorbance_reader_lid_id(
-        self,
-        module_id: str,
-        lid_id: str,
-    ) -> None:
-        abs_substate = self._state.substate_by_module_id.get(module_id)
-        assert isinstance(
-            abs_substate, AbsorbanceReaderSubState
-        ), f"{module_id} is not an absorbance plate reader."
-
-        prev_state: AbsorbanceReaderSubState = abs_substate
-        self._state.substate_by_module_id[module_id] = AbsorbanceReaderSubState(
-            module_id=AbsorbanceReaderId(module_id),
-            configured=prev_state.configured,
-            measured=prev_state.measured,
-            is_lid_on=prev_state.is_lid_on,
-            data=prev_state.data,
-            measure_mode=prev_state.measure_mode,
-            configured_wavelengths=prev_state.configured_wavelengths,
-            reference_wavelength=prev_state.reference_wavelength,
-            lid_id=lid_id,
-        )
 
     def _add_module_substate(  # noqa: C901
         self,
@@ -406,7 +377,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 measure_mode=None,
                 configured_wavelengths=None,
                 reference_wavelength=None,
-                lid_id=lid_labware_id,
             )
 
     def _update_additional_slots_occupied_by_thermocycler(
@@ -616,7 +586,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         configured_wavelengths = absorbance_reader_substate.configured_wavelengths
         reference_wavelength = absorbance_reader_substate.reference_wavelength
         is_lid_on = absorbance_reader_substate.is_lid_on
-        lid_id = absorbance_reader_substate.lid_id
         data = absorbance_reader_substate.data
 
         if isinstance(command.result, absorbance_reader.InitializeResult):
@@ -625,7 +594,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 configured=True,
                 measured=False,
                 is_lid_on=is_lid_on,
-                lid_id=lid_id,
                 measure_mode=AbsorbanceReaderMeasureMode(command.params.measureMode),
                 configured_wavelengths=command.params.sampleWavelengths,
                 reference_wavelength=command.params.referenceWavelength,
@@ -637,7 +605,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 configured=configured,
                 measured=True,
                 is_lid_on=is_lid_on,
-                lid_id=lid_id,
                 measure_mode=measure_mode,
                 configured_wavelengths=configured_wavelengths,
                 reference_wavelength=reference_wavelength,
@@ -650,7 +617,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 configured=configured,
                 measured=True,
                 is_lid_on=False,
-                lid_id=lid_id,
                 measure_mode=measure_mode,
                 configured_wavelengths=configured_wavelengths,
                 reference_wavelength=reference_wavelength,
@@ -663,7 +629,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 configured=configured,
                 measured=True,
                 is_lid_on=True,
-                lid_id=lid_id,
                 measure_mode=measure_mode,
                 configured_wavelengths=configured_wavelengths,
                 reference_wavelength=reference_wavelength,

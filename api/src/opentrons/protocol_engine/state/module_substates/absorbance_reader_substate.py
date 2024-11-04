@@ -21,7 +21,6 @@ class AbsorbanceReaderSubState:
     configured_wavelengths: Optional[List[int]]
     measure_mode: Optional[AbsorbanceReaderMeasureMode]
     reference_wavelength: Optional[int]
-    lid_id: Optional[str]
 
     def raise_if_lid_status_not_expected(self, lid_on_expected: bool) -> None:
         """Raise if the lid status is not correct."""
