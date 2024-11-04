@@ -165,7 +165,6 @@ class PipetteStore(HasState[PipetteState], HandlesActions):
             self._state.liquid_presence_detection_by_id[pipette_id] = (
                 state_update.loaded_pipette.liquid_presence_detection or False
             )
-            self._state.pipette_contents_by_id[pipette_id] = fluid_stack.FluidStack()
             self._state.movement_speed_by_id[pipette_id] = None
             self._state.attached_tip_by_id[pipette_id] = None
 
