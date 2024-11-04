@@ -463,7 +463,7 @@ class StateUpdate:
         )
 
     def set_fluid_unknown(self, pipette_id: str) -> None:
-        """Update record fo fluid held inside a pipette. See `PipetteUnknownFluidUpdate`."""
+        """Update record of fluid held inside a pipette. See `PipetteUnknownFluidUpdate`."""
         self.pipette_aspirated_fluid = PipetteUnknownFluidUpdate(
             type="unknown", pipette_id=pipette_id
         )
