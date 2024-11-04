@@ -1,80 +1,62 @@
-import { versionForProject } from '../scripts/git-version.mjs'
-import pkg from './package.json'
-import path from 'path'
 import { defineConfig } from 'vite'
+import path from 'path'
 import react from '@vitejs/plugin-react'
-import postCssImport from 'postcss-import'
-import postCssApply from 'postcss-apply'
-import postColorModFunction from 'postcss-color-mod-function'
-import postCssPresetEnv from 'postcss-preset-env'
-import lostCss from 'lost'
-import type { UserConfig } from 'vite'
+import { builtinModules } from 'module'
+import pkg from './package.json'
 
-export default defineConfig(
-  async (): Promise<UserConfig> => {
-    const project = process.env.OPENTRONS_PROJECT ?? 'robot-stack'
-    const version = await versionForProject(project)
-    return {
-      publicDir: false,
-      build: {
-        // Relative to the root
-        ssr: 'src/index.ts',
-        outDir: 'lib',
-        commonjsOptions: {
-          transformMixedEsModules: true,
-          esmExternals: true,
-        },
+export default defineConfig({
+  publicDir: false,
+  base: '',
+  build: {
+    target: 'node16', // Target Node environment
+    outDir: 'lib',
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'src/index.ts'),
+        cli: path.resolve(__dirname, 'src/cli.ts'),
       },
-      plugins: [
-        react({
-          include: '**/*.tsx',
-          babel: {
-            // Use babel.config.js files
-            configFile: true,
-          },
-        }),
-      ],
-      optimizeDeps: {
-        esbuildOptions: {
-          target: 'CommonJs',
-        },
+      output: {
+        // Define naming conventions for the output files
+        entryFileNames: '[name].js', // No hashes in entry files
+        chunkFileNames: '[name].js', // No hashes in chunk files
+        assetFileNames: '[name][extname]', // Keep original asset names
       },
-      css: {
-        postcss: {
-          plugins: [
-            postCssImport({ root: 'src/' }),
-            postCssApply(),
-            postColorModFunction(),
-            postCssPresetEnv({ stage: 0 }),
-            lostCss(),
-          ],
-        },
-      },
-      define: {
-        'process.env': process.env,
-        global: 'globalThis',
-        _PKG_VERSION_: JSON.stringify(version),
-        _PKG_BUGS_URL_: JSON.stringify(pkg.bugs.url),
-        _OPENTRONS_PROJECT_: JSON.stringify(project),
-      },
-      resolve: {
-        alias: {
-          '@opentrons/components/styles': path.resolve(
-            '../components/src/index.module.css'
-          ),
-          '@opentrons/components': path.resolve('../components/src/index.ts'),
-          '@opentrons/shared-data': path.resolve('../shared-data/js/index.ts'),
-          '@opentrons/step-generation': path.resolve(
-            '../step-generation/src/index.ts'
-          ),
-          '@opentrons/discovery-client': path.resolve(
-            '../discovery-client/src/index.ts'
-          ),
-          '@opentrons/usb-bridge/node-client': path.resolve(
-            '../usb-bridge/node-client/src/index.ts'
-          ),
-        },
-      },
-    }
-  }
-)
+      external: [...builtinModules],
+    },
+    commonjsOptions: {
+      transformMixedEsModules: true,
+      esmExternals: true,
+    },
+  },
+  plugins: [
+    react({
+      include: '**/*.tsx',
+      babel: { configFile: true },
+    }),
+  ],
+  define: {
+    _PKG_VERSION_: JSON.stringify(pkg.version),
+    _PKG_BUGS_URL_: JSON.stringify(pkg.bugs.url),
+    _OPENTRONS_PROJECT_: JSON.stringify(
+      process.env.OPENTRONS_PROJECT ?? 'robot-stack'
+    ),
+  },
+  resolve: {
+    alias: {
+      '@opentrons/components/styles': path.resolve(
+        '../components/src/index.module.css'
+      ),
+      '@opentrons/components': path.resolve('../components/src/index.ts'),
+      '@opentrons/shared-data': path.resolve('../shared-data/js/index.ts'),
+      '@opentrons/step-generation': path.resolve(
+        '../step-generation/src/index.ts'
+      ),
+      '@opentrons/discovery-client': path.resolve(
+        '../discovery-client/src/index.ts'
+      ),
+      '@opentrons/usb-bridge/node-client': path.resolve(
+        '../usb-bridge/node-client/src/index.ts'
+      ),
+    },
+  },
+})

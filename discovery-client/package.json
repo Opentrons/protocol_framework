@@ -1,12 +1,13 @@
 {
   "name": "@opentrons/discovery-client",
+  "type": "module",
   "version": "0.0.0-dev",
   "description": "Node.js client for discovering Opentrons robots on the network",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "source": "src/index.ts",
   "bin": {
-    "discovery": "bin/index.js",
+    "discovery": "bin/main.js",
     "discovery-ssh": "bin/discovery-ssh"
   },
   "repository": {
