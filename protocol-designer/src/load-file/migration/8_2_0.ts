@@ -1,5 +1,6 @@
 import type { ProtocolFile } from '@opentrons/shared-data'
 import type { DesignerApplicationData } from './utils/getLoadLiquidCommands'
+import { PAUSE_UNTIL_TIME } from '../../constants'
 
 const getTimeFromIndividualUnits = (
   seconds: any,
@@ -26,16 +27,31 @@ export const migrateFile = (
     savedStepForms
   ).reduce((acc, form) => {
     if (form.stepType === 'pause') {
-      const { id, pauseHour, pauseMinute, pauseSecond, pauseTime } = form
+      const {
+        id,
+        pauseHour,
+        pauseMinute,
+        pauseSecond,
+        pauseTime,
+        pauseAction,
+      } = form
       const pauseFormIndividualTimeUnitsRemoved = Object.keys(
         form as Object
       ).reduce(
-        (acc, key) =>
+        (accInner, key) =>
           !['pauseSecond', 'pauseMinute', 'pauseHour'].includes(key)
-            ? { ...acc, [key]: form[key] }
-            : acc,
+            ? { ...accInner, [key]: form[key] }
+            : accInner,
         { pauseTime }
       )
+
+      if (pauseAction !== PAUSE_UNTIL_TIME) {
+        return {
+          ...acc,
+          [id]: { ...pauseFormIndividualTimeUnitsRemoved, pauseTime: null },
+        }
+      }
+
       return pauseTime != null
         ? { ...acc, [id]: pauseFormIndividualTimeUnitsRemoved }
         : {
@@ -55,18 +71,29 @@ export const migrateFile = (
         heaterShakerTimerMinutes,
         heaterShakerTimerSeconds,
         heaterShakerTimer,
+        heaterShakerSetTimer,
       } = form
+
       const heaterShakerFormIndividualTimeUnitsRemoved = Object.keys(
         form as Object
       ).reduce(
-        (acc, key) =>
+        (accInner, key) =>
           !['heaterShakerTimerMinutes', 'heaterShakerTimerSeconds'].includes(
             key
           )
-            ? { ...acc, [key]: form[key] }
-            : acc,
+            ? { ...accInner, [key]: form[key] }
+            : accInner,
         { heaterShakerTimer }
       )
+      if (!heaterShakerSetTimer) {
+        return {
+          ...acc,
+          [id]: {
+            ...heaterShakerFormIndividualTimeUnitsRemoved,
+            heaterShakerTimer: null,
+          },
+        }
+      }
 
       return heaterShakerTimer != null
         ? { ...acc, [id]: heaterShakerFormIndividualTimeUnitsRemoved }
