@@ -734,11 +734,6 @@ class GeometryView:
                 )
             elif fixture_validation.is_staging_slot(area_name):
                 slot_name = StagingSlotName.from_primitive(area_name)
-                # CASEY NOTE: Remove these errors
-                # raise errors.LocationIsStagingSlotError(
-                #     "Cannot get ancestor slot name for labware on staging slot."
-                # )
-                # raise errors.LocationIs
             else:
                 slot_name = DeckSlotName.from_primitive(area_name)
         elif labware.location == OFF_DECK_LOCATION:

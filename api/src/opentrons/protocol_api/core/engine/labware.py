@@ -190,13 +190,11 @@ class LabwareCore(AbstractLabware[WellCore]):
     def get_deck_slot(self) -> Optional[DeckSlotName]:
         """Get the deck slot the labware is in, if on deck."""
         try:
-            # CASEY NOTE: this function bubbles up to PAPI - currently we return a deck slot name.
-            # what happens when we do get_deck_slot on a staging slot labware? what do we want to have happen?
-            # for now I'm converting to column 3
             ancestor = self._engine_client.state.geometry.get_ancestor_slot_name(
                 self.labware_id
             )
             if isinstance(ancestor, StagingSlotName):
+                # TODO: (chb, 2024-11-04): Do we want to change this PAPI function to be able to return Staging Area Slots? For now returning the cutout that both have as an ancestor.
                 ancestor = DeckSlotName.from_primitive(ancestor.name[:1] + "3")
             return ancestor
         except (
