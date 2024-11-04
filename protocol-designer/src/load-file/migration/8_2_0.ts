@@ -2,12 +2,12 @@ import type { ProtocolFile } from '@opentrons/shared-data'
 import type { DesignerApplicationData } from './utils/getLoadLiquidCommands'
 
 const getTimeFromIndividualUnits = (
-  seconds: string,
-  minutes: string,
-  hours?: string
+  seconds: any,
+  minutes: any,
+  hours?: any
 ): string => {
-  const hoursString = hours ? `${hours}:` : ''
-  return `${hoursString}${minutes}:${seconds}`
+  const hoursString = hours !== undefined ? `${hours ?? 0}:` : ''
+  return `${hoursString}${minutes ?? 0}:${seconds ?? 0}`
 }
 
 export const migrateFile = (
@@ -43,9 +43,9 @@ export const migrateFile = (
             [id]: {
               ...pauseFormIndividualTimeUnitsRemoved,
               pauseTime: getTimeFromIndividualUnits(
-                pauseSecond as string,
-                pauseMinute as string,
-                pauseHour as string
+                pauseSecond,
+                pauseMinute,
+                pauseHour
               ),
             },
           }
@@ -75,8 +75,8 @@ export const migrateFile = (
             [id]: {
               ...heaterShakerFormIndividualTimeUnitsRemoved,
               heaterShakerTimer: getTimeFromIndividualUnits(
-                heaterShakerTimerSeconds as string,
-                heaterShakerTimerMinutes as string
+                heaterShakerTimerSeconds,
+                heaterShakerTimerMinutes
               ),
             },
           }
