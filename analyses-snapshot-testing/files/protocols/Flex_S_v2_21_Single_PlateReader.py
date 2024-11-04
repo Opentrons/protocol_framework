@@ -439,13 +439,13 @@ def add_parameters(parameters):
     parameters.add_str(
         display_name="Well Plate Position",
         variable_name="well_plate_position",
-        default="C1",
+        default="B1",
         description="Select the position of the well plate",
         choices=position_choices,
     )
 
-PLATE_READER_SLOT = "D3"
-HELLMA_PLATE_SLOT = "C3"
+PLATE_READER_SLOT = "C3"
+HELLMA_PLATE_SLOT = "D3"
 
 
 
@@ -490,7 +490,7 @@ def comment_tip_rack_status(ctx, tip_rack):
 
 
 def run(ctx):
-    trash = ctx.load_trash_bin("A3")  # must load trash bin
+    trash = ctx.load_trash_bin("B3")  # must load trash bin
     # get the key from the parameters
     tip_config = find_partial_tip_config(ctx.params.partial_tip_config_key)
     pipette_load_name = ctx.params.pipette_load_name
@@ -541,38 +541,42 @@ def run(ctx):
 
     # load the plate reader
     plate_reader = ctx.load_module("absorbanceReaderV1", PLATE_READER_SLOT)
-    hellma_plate = ctx.load_labware("hellma_reference_plate", HELLMA_PLATE_SLOT)
+    # hellma_plate = ctx.load_labware("hellma_reference_plate", HELLMA_PLATE_SLOT)
 
-    # move the labware to the plate reader
-    # initialize plate reader
+
     wavelength_a = 450
     wavelength_b = 650
-    plate_reader.close_lid() # must call before initializing
 
-    plate_reader.initialize("singleMeasure", [wavelength_a])
-    plate_reader.open_lid()
-    ctx.move_labware(hellma_plate, plate_reader, use_gripper=True)
-    plate_reader.close_lid()
-    result = plate_reader.read()
-    msg = f"result of singleMeasure: {result}"
-    ctx.comment(msg=msg)
-    plate_reader.open_lid()
-    ctx.move_labware(hellma_plate, HELLMA_PLATE_SLOT, use_gripper=True)
+    # baseline with helma plate
+  
+    # plate_reader.close_lid() # must call before initializing
+
+
+    # plate_reader.initialize("singleMeasure", [wavelength_a])
+    # plate_reader.open_lid()
+    # # ctx.move_labware(hellma_plate, plate_reader, use_gripper=True)
+    # plate_reader.close_lid()
+    # result = plate_reader.read()
+    # msg = f"result of singleMeasure: {result}"
+    # ctx.comment(msg=msg)
+    # plate_reader.open_lid()
+    # ctx.move_labware(hellma_plate, HELLMA_PLATE_SLOT, use_gripper=True)
 
     # TODO is there an error trying to move to the plate reader when the lid is closed?
     # think so, lid detection seems de-scoped
 
+    plate_reader.open_lid()
     ctx.move_labware(well, plate_reader, use_gripper=True)
-    ctx.pick_up_tip()
-    ctx.aspirate(volume, reservoir_a.wells()[0])
+    # ctx.pick_up_tip()
+    # ctx.aspirate(volume, reservoir_a.wells()[0])
     # dispense to the plate located on the plate reader
     # so that we LPC on the plate reader???
-    ctx.dispense(volume, well.wells()[0])
-    ctx.drop_tip()
+    # ctx.dispense(volume, well.wells()[0])
+    # ctx.drop_tip()
 
     plate_reader.close_lid()
     # need "multiMeasure"
-    plate_reader.initialize("multiMeasure", [wavelength_a, wavelength_b])
+    plate_reader.initialize("multi", [wavelength_a, wavelength_b])
     result = plate_reader.read()
     msg = f"result of multiMeasure: {result}"
     ctx.comment(msg=msg)
