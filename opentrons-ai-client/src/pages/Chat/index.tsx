@@ -3,12 +3,14 @@ import { DIRECTION_COLUMN, Flex, SPACING } from '@opentrons/components'
 
 import { useAtom } from 'jotai'
 import { useRef, useEffect } from 'react'
-import { chatDataAtom, feedbackModalAtom } from '../../resources/atoms'
+import {
+  chatDataAtom,
+  feedbackModalAtom,
+  scrollToBottomAtom,
+} from '../../resources/atoms'
 import { ChatDisplay } from '../../molecules/ChatDisplay'
 import { ChatFooter } from '../../molecules/ChatFooter'
-import { PromptGuide } from '../../molecules/PromptGuide'
 import styled from 'styled-components'
-import { Footer } from '../../molecules/Footer'
 import { FeedbackModal } from '../../molecules/FeedbackModal'
 
 export interface InputType {
@@ -25,6 +27,7 @@ export function Chat(): JSX.Element | null {
   const [chatData] = useAtom(chatDataAtom)
   const scrollRef = useRef<HTMLSpanElement | null>(null)
   const [showFeedbackModal] = useAtom(feedbackModalAtom)
+  const [scrollToBottom] = useAtom(scrollToBottomAtom)
 
   useEffect(() => {
     if (scrollRef.current != null)
@@ -33,7 +36,7 @@ export function Chat(): JSX.Element | null {
         block: 'nearest',
         inline: 'nearest',
       })
-  }, [chatData.length])
+  }, [chatData.length, scrollToBottom])
 
   return (
     <FormProvider {...methods}>
@@ -41,7 +44,6 @@ export function Chat(): JSX.Element | null {
         padding={`${SPACING.spacing40} ${SPACING.spacing40} ${SPACING.spacing20}`}
         flexDirection={DIRECTION_COLUMN}
         gridGap={SPACING.spacing12}
-        height="50vh"
         width="100%"
       >
         <Flex
@@ -49,8 +51,6 @@ export function Chat(): JSX.Element | null {
           flexDirection={DIRECTION_COLUMN}
           gridGap={SPACING.spacing24}
         >
-          <PromptGuide />
-
           <ChatDataContainer>
             {chatData.length > 0
               ? chatData.map((chat, index) => (
@@ -62,10 +62,9 @@ export function Chat(): JSX.Element | null {
                 ))
               : null}
           </ChatDataContainer>
-          <span ref={scrollRef} />
         </Flex>
         <ChatFooter />
-        <Footer></Footer>
+        <span ref={scrollRef} />
         {showFeedbackModal ? <FeedbackModal /> : null}
       </Flex>
     </FormProvider>

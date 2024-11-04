@@ -22,8 +22,13 @@ import {
 
 import type { ChatData } from '../../resources/types'
 import { useAtom } from 'jotai'
-import { feedbackModalAtom } from '../../resources/atoms'
-import { delay } from 'lodash'
+import {
+  chatDataAtom,
+  feedbackModalAtom,
+  scrollToBottomAtom,
+} from '../../resources/atoms'
+import { delay, set } from 'lodash'
+import { useFormContext } from 'react-hook-form'
 
 interface ChatDisplayProps {
   chat: ChatData
@@ -51,8 +56,19 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
   const { t } = useTranslation('protocol_generator')
   const [isCopied, setIsCopied] = useState<boolean>(false)
   const [, setShowFeedbackModal] = useAtom(feedbackModalAtom)
-  const { role, reply } = chat
+  const { setValue } = useFormContext()
+  const [chatdata] = useAtom(chatDataAtom)
+  const [scrollToBottom, setScrollToBottom] = useAtom(scrollToBottomAtom)
+  const { role, reply, requestId } = chat
   const isUser = role === 'user'
+
+  const setInputFieldToCorrespondingRequest = (): void => {
+    const prompt = chatdata.find(
+      chat => chat.role === 'user' && chat.requestId === requestId
+    )?.reply
+    setScrollToBottom(!scrollToBottom)
+    setValue('userPrompt', prompt)
+  }
 
   const handleFileDownload = (): void => {
     const lastCodeBlock = document.querySelector(`#${chatId}`)
@@ -97,7 +113,9 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
       </Flex>
       {/* text should be markdown so this component will have a package or function to parse markdown */}
       <Flex
-        padding={SPACING.spacing20}
+        padding={`${SPACING.spacing40} ${SPACING.spacing40} ${
+          isUser ? SPACING.spacing40 : SPACING.spacing12
+        } ${SPACING.spacing40}`}
         backgroundColor={isUser ? COLORS.blue30 : COLORS.grey30}
         data-testid={`ChatDisplay_from_${isUser ? 'user' : 'backend'}`}
         borderRadius={SPACING.spacing12}
@@ -129,7 +147,7 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
           >
             <HoverShadow
               onClick={() => {
-                setShowFeedbackModal(true)
+                setInputFieldToCorrespondingRequest()
               }}
             >
               <StyledIcon size={SPACING.spacing20} name={'reload'} />
