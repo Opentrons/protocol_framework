@@ -54,7 +54,27 @@
   },
   "innerLabwareGeometry": {
     "cuboidalWell": {
-      "sections": []
+      "sections": [
+        {
+          "shape": "cuboidal",
+          "topXDimension": 107.25,
+          "topYDimension": 8,
+          "bottomXDimension": 101.25,
+          "bottomYDimension": 1.66,
+          "topHeight": 2,
+          "bottomHeight": 8,
+          "yCount": 8
+        },
+        {
+          "shape": "cuboidal",
+          "topXDimension": 107.5,
+          "topYDimension": 71.25,
+          "bottomXDimension": 107.25,
+          "bottomYDimension": 71.0,
+          "topHeight": 39.22,
+          "bottomHeight": 2
+        }
+      ]
     }
   }
 }

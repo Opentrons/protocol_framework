@@ -40,7 +40,7 @@ export function InstrumentsInfo({
     equipment => equipment?.name === 'gripper'
   )
 
-  const pipetteInfo = (pipette?: PipetteOnDeck): JSX.Element | string => {
+  const pipetteInfo = (pipette?: PipetteOnDeck): JSX.Element => {
     const pipetteName =
       pipette != null
         ? getPipetteSpecsV2(pipette.name as PipetteName)?.displayName
@@ -50,7 +50,9 @@ export function InstrumentsInfo({
       : t('na')
 
     if (pipetteName === t('na') || tipsInfo === t('na')) {
-      return t('na')
+      return (
+        <StyledText desktopStyle="bodyDefaultRegular">{t('na')}</StyledText>
+      )
     }
 
     return (
@@ -96,7 +98,6 @@ export function InstrumentsInfo({
             type="large"
             description={
               <Flex minWidth="13.75rem">
-                {' '}
                 <StyledText
                   desktopStyle="bodyDefaultRegular"
                   color={COLORS.grey60}
@@ -127,11 +128,7 @@ export function InstrumentsInfo({
                 </StyledText>
               </Flex>
             }
-            content={
-              <StyledText desktopStyle="bodyDefaultRegular">
-                {pipetteInfo(leftPipette)}
-              </StyledText>
-            }
+            content={pipetteInfo(leftPipette)}
           />
         </ListItem>
         <ListItem type="noActive" key={`ProtocolOverview_right`}>
@@ -147,11 +144,7 @@ export function InstrumentsInfo({
                 </StyledText>
               </Flex>
             }
-            content={
-              <StyledText desktopStyle="bodyDefaultRegular">
-                {pipetteInfo(rightPipette)}
-              </StyledText>
-            }
+            content={pipetteInfo(rightPipette)}
           />
         </ListItem>
         {robotType === FLEX_ROBOT_TYPE ? (

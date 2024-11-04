@@ -1,22 +1,20 @@
 import type * as React from 'react'
 import styled, { css } from 'styled-components'
-import type { FlattenSimpleInterpolation } from 'styled-components'
 import { Flex } from '../../primitives'
+import { COLORS, BORDERS } from '../../helix-design-system'
+import { RESPONSIVENESS, SPACING } from '../../ui-style-constants'
 import {
-  ALIGN_CENTER,
-  BORDERS,
-  COLORS,
   CURSOR_DEFAULT,
-  CURSOR_NOT_ALLOWED,
   CURSOR_POINTER,
+  CURSOR_NOT_ALLOWED,
   DIRECTION_ROW,
+  ALIGN_CENTER,
   Icon,
-  RESPONSIVENESS,
-  SPACING,
   StyledText,
-} from '../..'
-import type { IconName } from '../..'
+} from '../../index'
+import type { IconName } from '../../icons'
 import type { StyleProps } from '../../primitives'
+import type { FlattenSimpleInterpolation } from 'styled-components'
 
 interface RadioButtonProps extends StyleProps {
   buttonLabel: string | React.ReactNode
@@ -29,7 +27,7 @@ interface RadioButtonProps extends StyleProps {
   radioButtonType?: 'large' | 'small'
   subButtonLabel?: string
   id?: string
-  maxLines?: number | null
+  maxLines?: number
   //  used for mouseEnter and mouseLeave
   setNoHover?: () => void
   setHovered?: () => void
@@ -52,11 +50,10 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
       : `RadioButtonId_${buttonValue}`,
     largeDesktopBorderRadius = false,
     iconName,
-    maxLines = null,
+    maxLines = 1,
     setHovered,
     setNoHover,
   } = props
-
   const isLarge = radioButtonType === 'large'
 
   const AVAILABLE_BUTTON_STYLE = css`
@@ -78,20 +75,6 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
     }
   `
 
-  const DISABLED_BUTTON_STYLE = css`
-    background-color: ${COLORS.grey35};
-    color: ${COLORS.grey50};
-
-    &:hover,
-    &:active {
-      background-color: ${COLORS.grey35};
-    }
-
-    @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-      cursor: ${CURSOR_NOT_ALLOWED};
-    }
-  `
-
   const SUBBUTTON_LABEL_STYLE = css`
     color: ${disabled
       ? COLORS.grey50
@@ -99,6 +82,15 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
       ? COLORS.white
       : COLORS.grey60};
   `
+
+  const getButtonStyle = (
+    isSelected: boolean,
+    disabled: boolean
+  ): FlattenSimpleInterpolation => {
+    if (disabled) return DISABLED_BUTTON_STYLE
+    if (isSelected) return SELECTED_BUTTON_STYLE
+    return AVAILABLE_BUTTON_STYLE
+  }
 
   return (
     <Flex
@@ -119,19 +111,17 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
         value={buttonValue}
       />
       <SettingButtonLabel
-        isSelected={isSelected}
-        disabled={disabled}
-        largeDesktopBorderRadius={largeDesktopBorderRadius}
+        tabIndex={0}
         isLarge={isLarge}
         maxLines={maxLines}
-        selectedButtonStyle={SELECTED_BUTTON_STYLE}
-        availableButtonStyle={AVAILABLE_BUTTON_STYLE}
-        disabledButtonStyle={DISABLED_BUTTON_STYLE}
-        tabIndex={0}
+        largeDesktopBorderRadius={largeDesktopBorderRadius}
+        disabled={disabled}
+        isSelected={isSelected}
         role="label"
         htmlFor={id}
         onMouseEnter={setHovered}
         onMouseLeave={setNoHover}
+        css={getButtonStyle(isSelected, disabled)}
       >
         <Flex
           flexDirection={DIRECTION_ROW}
@@ -174,47 +164,53 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
   )
 }
 
+const DISABLED_BUTTON_STYLE = css`
+  background-color: ${COLORS.grey35};
+  color: ${COLORS.grey50};
+
+  &:hover,
+  &:active {
+    background-color: ${COLORS.grey35};
+  }
+
+  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+    cursor: ${CURSOR_NOT_ALLOWED};
+  }
+`
+
 const SettingButton = styled.input`
   display: none;
 `
 
-const SettingButtonLabel = styled.label<{
-  isSelected?: boolean
-  disabled?: boolean
-  largeDesktopBorderRadius?: boolean
-  isLarge?: boolean
+interface SettingsButtonLabelProps {
+  isSelected: boolean
+  disabled: boolean
+  largeDesktopBorderRadius: boolean
+  isLarge: boolean
   maxLines?: number | null
-  selectedButtonStyle: FlattenSimpleInterpolation
-  availableButtonStyle: FlattenSimpleInterpolation
-  disabledButtonStyle: FlattenSimpleInterpolation
-}>`
-  border-radius: ${props =>
-    !(props.largeDesktopBorderRadius ?? false)
-      ? BORDERS.borderRadius40
-      : BORDERS.borderRadius8};
+}
+
+const SettingButtonLabel = styled.label<SettingsButtonLabelProps>`
+  border-radius: ${({ largeDesktopBorderRadius }) =>
+    !largeDesktopBorderRadius ? BORDERS.borderRadius40 : BORDERS.borderRadius8};
   cursor: ${CURSOR_POINTER};
-  padding: ${SPACING?.spacing12} ${SPACING?.spacing16};
+  padding: ${SPACING.spacing12} ${SPACING.spacing16};
   width: 100%;
 
-  ${props =>
-    props.isSelected === true
-      ? props.selectedButtonStyle
-      : props.availableButtonStyle}
-  ${props => props.disabled === true && props.disabledButtonStyle}
-
-&:focus-visible {
-    outline: 2px solid ${COLORS?.blue55};
+  ${({ disabled }) => disabled && DISABLED_BUTTON_STYLE}
+  &:focus-visible {
+    outline: 2px solid ${COLORS.blue55};
   }
 
-  @media ${RESPONSIVENESS?.touchscreenMediaQuerySpecs} {
+  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
     cursor: ${CURSOR_DEFAULT};
-    padding: ${props =>
-      props.isLarge === true ? SPACING?.spacing24 : SPACING?.spacing20};
-    border-radius: ${BORDERS?.borderRadius16};
-    display: ${props => (props.maxLines != null ? '-webkit-box' : undefined)};
-    -webkit-line-clamp: ${props => props.maxLines ?? undefined};
-    -webkit-box-orient: ${props =>
-      props.maxLines != null ? 'vertical' : undefined};
+    padding: ${({ largeDesktopBorderRadius }) =>
+      largeDesktopBorderRadius ? SPACING.spacing24 : SPACING.spacing20};
+    border-radius: ${BORDERS.borderRadius16};
+    display: ${({ maxLines }) => (maxLines != null ? '-webkit-box' : 'none')};
+    -webkit-line-clamp: ${({ maxLines }) => maxLines ?? 'none'};
+    -webkit-box-orient: ${({ maxLines }) =>
+      maxLines != null ? 'vertical' : 'none'};
     word-wrap: break-word;
   }
 `

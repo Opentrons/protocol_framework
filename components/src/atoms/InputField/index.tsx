@@ -85,6 +85,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
       tabIndex = 0,
       showDeleteIcon = false,
       hasBackgroundError = false,
+      onDelete,
       ...inputProps
     } = props
     const hasError = props.error != null
@@ -307,7 +308,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
               {showDeleteIcon ? (
                 <Flex
                   alignSelf={TEXT_ALIGN_RIGHT}
-                  onClick={props.onDelete}
+                  onClick={onDelete}
                   cursor="pointer"
                 >
                   <Icon name="close" size="1.75rem" />

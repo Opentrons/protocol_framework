@@ -176,7 +176,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
         backgroundColor={COLORS.white}
         borderRadius={BORDERS.borderRadius12}
         width="100%"
-        height={zoomIn.slot != null ? '75vh' : '65vh'}
+        height={zoomIn.slot != null ? '75vh' : '70vh'}
         flexDirection={DIRECTION_COLUMN}
         padding={SPACING.spacing40}
       >
@@ -187,11 +187,12 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
           justifyContent={JUSTIFY_CENTER}
         >
           <RobotCoordinateSpaceWithRef
-            height={zoomIn.slot != null ? '100%' : '80%'}
+            height={zoomIn.slot != null ? '100%' : '95%'}
             width="100%"
             deckDef={deckDef}
             viewBox={viewBox}
             outline="auto"
+            zoomed={zoomIn.slot != null}
           >
             {() => (
               <>
