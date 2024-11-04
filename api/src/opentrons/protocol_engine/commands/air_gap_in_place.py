@@ -37,7 +37,7 @@ AirGapInPlaceCommandType = Literal["airGapInPlace"]
 
 
 class AirGapInPlaceParams(PipetteIdMixin, AspirateVolumeMixin, FlowRateMixin):
-    """Payload required to aspirate in place."""
+    """Payload required to air gap in place."""
 
     pass
 
