@@ -16,8 +16,7 @@ import {
   buildPickUpTips,
   buildIgnorePolicyRules,
   isAssumeFalsePositiveResumeKind,
-  UPDATE_ESTIMATORS_EXCEPT_PLUNGERS,
-  HOME_GRIPPER_Z,
+  HOME_EXCEPT_PLUNGERS,
 } from '../useRecoveryCommands'
 import { RECOVERY_MAP, ERROR_KINDS } from '../../constants'
 import { getErrorKind } from '/app/organisms/ErrorRecoveryFlows/utils'
@@ -281,11 +280,11 @@ describe('useRecoveryCommands', () => {
     const { result } = renderHook(() => useRecoveryCommands(props))
 
     await act(async () => {
-      await result.current.updatePositionEstimatorsAndHomeGripper()
+      await result.current.homeExceptPlungers()
     })
 
     expect(mockChainRunCommands).toHaveBeenCalledWith(
-      [UPDATE_ESTIMATORS_EXCEPT_PLUNGERS, HOME_GRIPPER_Z],
+      [HOME_EXCEPT_PLUNGERS],
       false
     )
   })

@@ -20,7 +20,7 @@ export function useHomeGripper({
 
   useLayoutEffect(() => {
     const { handleMotionRouting, goBackPrevStep } = routeUpdateActions
-    const { updatePositionEstimatorsAndHomeGripper } = recoveryCommands
+    const { homeExceptPlungers } = recoveryCommands
 
     if (!hasHomedOnce) {
       if (isManualGripperStep) {
@@ -28,16 +28,12 @@ export function useHomeGripper({
           void goBackPrevStep()
         } else {
           void handleMotionRouting(true)
-            .then(() => updatePositionEstimatorsAndHomeGripper())
-            .finally(() => {
-              handleMotionRouting(false)
+            .then(() => homeExceptPlungers())
+            .then(() => handleMotionRouting(false))
+            .then(() => {
               setHasHomedOnce(true)
             })
         }
-      }
-    } else {
-      if (!isManualGripperStep && hasHomedOnce) {
-        setHasHomedOnce(false)
       }
     }
   }, [step, hasHomedOnce, isDoorOpen, isManualGripperStep])

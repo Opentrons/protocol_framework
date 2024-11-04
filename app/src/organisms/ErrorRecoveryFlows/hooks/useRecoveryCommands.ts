@@ -67,7 +67,7 @@ export interface UseRecoveryCommandsResult {
   /* A non-terminal recovery command */
   releaseGripperJaws: () => Promise<CommandData[]>
   /* A non-terminal recovery command */
-  updatePositionEstimatorsAndHomeGripper: () => Promise<CommandData[]>
+  homeExceptPlungers: () => Promise<CommandData[]>
   /* A non-terminal recovery command */
   moveLabwareWithoutPause: () => Promise<CommandData[]>
 }
@@ -291,13 +291,8 @@ export function useRecoveryCommands({
     return chainRunRecoveryCommands([RELEASE_GRIPPER_JAW])
   }, [chainRunRecoveryCommands])
 
-  const updatePositionEstimatorsAndHomeGripper = useCallback((): Promise<
-    CommandData[]
-  > => {
-    return chainRunRecoveryCommands([
-      UPDATE_ESTIMATORS_EXCEPT_PLUNGERS,
-      HOME_GRIPPER_Z,
-    ])
+  const homeExceptPlungers = useCallback((): Promise<CommandData[]> => {
+    return chainRunRecoveryCommands([HOME_EXCEPT_PLUNGERS])
   }, [chainRunRecoveryCommands])
 
   const moveLabwareWithoutPause = useCallback((): Promise<CommandData[]> => {
@@ -318,7 +313,7 @@ export function useRecoveryCommands({
     homePipetteZAxes,
     pickUpTips,
     releaseGripperJaws,
-    updatePositionEstimatorsAndHomeGripper,
+    homeExceptPlungers,
     moveLabwareWithoutPause,
     skipFailedCommand,
     ignoreErrorKindThisRun,
@@ -357,9 +352,11 @@ export const UPDATE_ESTIMATORS_EXCEPT_PLUNGERS: CreateCommand = {
   params: { axes: ['x', 'y', 'extensionZ'] },
 }
 
-export const HOME_GRIPPER_Z: CreateCommand = {
+export const HOME_EXCEPT_PLUNGERS: CreateCommand = {
   commandType: 'home',
-  params: { axes: ['extensionZ'] },
+  params: {
+    axes: ['extensionJaw', 'extensionZ', 'leftZ', 'rightZ', 'x', 'y'],
+  },
 }
 
 const buildMoveLabwareWithoutPause = (
