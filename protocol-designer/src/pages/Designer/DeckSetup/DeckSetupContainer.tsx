@@ -67,6 +67,7 @@ const OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST: string[] = [
   'fixedTrash',
 ]
 export const lightFill = COLORS.grey35
+const darkFill = COLORS.grey60
 
 export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   const { tab } = props
@@ -213,6 +214,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                           key={addressableArea.id}
                           cutoutId={cutoutId}
                           deckDefinition={deckDef}
+                          slotClipColor={darkFill}
                           showExpansion={cutoutId === 'cutoutA1'}
                           fixtureBaseColor={lightFill}
                         />
@@ -228,6 +230,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                             key={fixture.id}
                             cutoutId={fixture.location as StagingAreaLocation}
                             deckDefinition={deckDef}
+                            slotClipColor={darkFill}
                             fixtureBaseColor={lightFill}
                           />
                         )
@@ -284,6 +287,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                               fixture.location as typeof WASTE_CHUTE_CUTOUT
                             }
                             deckDefinition={deckDef}
+                            slotClipColor={darkFill}
                             fixtureBaseColor={lightFill}
                           />
                         )
