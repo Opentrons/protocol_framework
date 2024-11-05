@@ -71,6 +71,8 @@ export function useDeckMapUtils({
   const deckConfig = getSimplestDeckConfigForProtocol(protocolAnalysis)
   const deckDef = getDeckDefFromRobotType(robotType)
 
+  // TODO(jh, 11-05-24): Revisit this logic along with deckmap interfaces after deck map redesign.
+
   const currentModulesInfo = useMemo(
     () =>
       getRunCurrentModulesInfo({
@@ -96,12 +98,17 @@ export function useDeckMapUtils({
     [runRecord, labwareDefinitionsByUri]
   )
 
+  const { updatedModules, remainingLabware } = useMemo(
+    () => updateLabwareInModules({ runCurrentModules, currentLabwareInfo }),
+    [runCurrentModules, currentLabwareInfo]
+  )
+
   const runCurrentLabware = useMemo(
     () =>
       getRunCurrentLabwareOnDeck({
         failedLabwareUtils,
         runRecord,
-        currentLabwareInfo,
+        currentLabwareInfo: remainingLabware,
       }),
     [failedLabwareUtils, currentLabwareInfo]
   )
@@ -137,7 +144,7 @@ export function useDeckMapUtils({
 
   return {
     deckConfig,
-    modulesOnDeck: runCurrentModules.map(
+    modulesOnDeck: updatedModules.map(
       ({ moduleModel, moduleLocation, innerProps, nestedLabwareDef }) => ({
         moduleModel,
         moduleLocation,
@@ -149,7 +156,7 @@ export function useDeckMapUtils({
       labwareLocation,
       definition,
     })),
-    highlightLabwareEventuallyIn: [...runCurrentModules, ...runCurrentLabware]
+    highlightLabwareEventuallyIn: [...updatedModules, ...runCurrentLabware]
       .map(el => el.highlight)
       .filter(maybeSlot => maybeSlot != null) as string[],
     kind: 'intervention',
@@ -458,4 +465,41 @@ export function getIsLabwareMatch(
   } else {
     return slotLocation === slotName
   }
+}
+
+// If any labware share a slot with a module, the labware should be nested within the module for rendering purposes.
+// This prevents issues such as TC nested labware rendering in
+export function updateLabwareInModules({
+  runCurrentModules,
+  currentLabwareInfo,
+}: {
+  runCurrentModules: ReturnType<typeof getRunCurrentModulesOnDeck>
+  currentLabwareInfo: ReturnType<typeof getRunCurrentLabwareInfo>
+}): {
+  updatedModules: ReturnType<typeof getRunCurrentModulesOnDeck>
+  remainingLabware: ReturnType<typeof getRunCurrentLabwareInfo>
+} {
+  const usedSlots = new Set<string>()
+
+  const updatedModules = runCurrentModules.map(moduleInfo => {
+    const labwareInSameLoc = currentLabwareInfo.find(
+      lw => moduleInfo.moduleLocation.slotName === lw.slotName
+    )
+
+    if (labwareInSameLoc != null) {
+      usedSlots.add(labwareInSameLoc.slotName)
+      return {
+        ...moduleInfo,
+        nestedLabwareDef: labwareInSameLoc.labwareDef,
+      }
+    } else {
+      return moduleInfo
+    }
+  })
+
+  const remainingLabware = currentLabwareInfo.filter(
+    lw => !usedSlots.has(lw.slotName)
+  )
+
+  return { updatedModules, remainingLabware }
 }

@@ -17,6 +17,7 @@ import {
   getRunCurrentModulesInfo,
   getRunCurrentLabwareOnDeck,
   getRunCurrentModulesOnDeck,
+  updateLabwareInModules,
 } from '../useDeckMapUtils'
 
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
@@ -493,5 +494,163 @@ describe('getIsLabwareMatch', () => {
     } as any
     const result = getIsLabwareMatch(slotName, {} as any, pickUpTipLabware)
     expect(result).toBe(false)
+  })
+})
+
+describe('updateLabwareInModules', () => {
+  const mockLabwareDef: LabwareDefinition2 = {
+    ...(fixture96Plate as LabwareDefinition2),
+    metadata: {
+      displayName: 'Mock Labware Definition',
+      displayCategory: 'wellPlate',
+      displayVolumeUnits: 'mL',
+    },
+  }
+
+  const mockModule = {
+    moduleModel: 'temperatureModuleV2',
+    moduleLocation: { slotName: 'A1' },
+    innerProps: {},
+    nestedLabwareDef: null,
+    highlight: null,
+  } as any
+
+  const mockLabware = {
+    labwareDef: mockLabwareDef,
+    labwareLocation: { slotName: 'A1' },
+    slotName: 'A1',
+  }
+
+  it('should update module with nested labware when they share the same slot', () => {
+    const result = updateLabwareInModules({
+      runCurrentModules: [mockModule],
+      currentLabwareInfo: [mockLabware],
+    })
+
+    expect(result.updatedModules).toEqual([
+      {
+        ...mockModule,
+        nestedLabwareDef: mockLabwareDef,
+      },
+    ])
+    expect(result.remainingLabware).toEqual([])
+  })
+
+  it('should keep labware separate when slots do not match', () => {
+    const labwareInDifferentSlot = {
+      ...mockLabware,
+      labwareLocation: { slotName: 'B1' },
+      slotName: 'B1',
+    }
+
+    const result = updateLabwareInModules({
+      runCurrentModules: [mockModule],
+      currentLabwareInfo: [labwareInDifferentSlot],
+    })
+
+    expect(result.updatedModules).toEqual([mockModule])
+    expect(result.remainingLabware).toEqual([labwareInDifferentSlot])
+  })
+
+  it('should handle multiple modules and labware', () => {
+    const mockModuleB1 = {
+      ...mockModule,
+      moduleLocation: { slotName: 'B1' },
+    }
+
+    const labwareB1 = {
+      ...mockLabware,
+      labwareLocation: { slotName: 'B1' },
+      slotName: 'B1',
+    }
+
+    const labwareC1 = {
+      ...mockLabware,
+      labwareLocation: { slotName: 'C1' },
+      slotName: 'C1',
+    }
+
+    const result = updateLabwareInModules({
+      runCurrentModules: [mockModule, mockModuleB1],
+      currentLabwareInfo: [mockLabware, labwareB1, labwareC1],
+    })
+
+    expect(result.updatedModules).toEqual([
+      {
+        ...mockModule,
+        nestedLabwareDef: mockLabwareDef,
+      },
+      {
+        ...mockModuleB1,
+        nestedLabwareDef: mockLabwareDef,
+      },
+    ])
+    expect(result.remainingLabware).toEqual([labwareC1])
+  })
+
+  it('should handle empty modules array', () => {
+    const result = updateLabwareInModules({
+      runCurrentModules: [],
+      currentLabwareInfo: [mockLabware],
+    })
+
+    expect(result.updatedModules).toEqual([])
+    expect(result.remainingLabware).toEqual([mockLabware])
+  })
+
+  it('should handle empty labware array', () => {
+    const result = updateLabwareInModules({
+      runCurrentModules: [mockModule],
+      currentLabwareInfo: [],
+    })
+
+    expect(result.updatedModules).toEqual([mockModule])
+    expect(result.remainingLabware).toEqual([])
+  })
+
+  it('should handle multiple labware in same slot, nesting only one with module', () => {
+    const labwareA1Second = {
+      ...mockLabware,
+      labwareDef: {
+        ...mockLabwareDef,
+        metadata: {
+          ...mockLabwareDef.metadata,
+          displayName: 'Second Labware',
+        },
+      },
+    }
+
+    const result = updateLabwareInModules({
+      runCurrentModules: [mockModule],
+      currentLabwareInfo: [mockLabware, labwareA1Second],
+    })
+
+    expect(result.updatedModules).toEqual([
+      {
+        ...mockModule,
+        nestedLabwareDef: mockLabwareDef,
+      },
+    ])
+    expect(result.remainingLabware).toEqual([])
+  })
+
+  it('should preserve module properties when updating with nested labware', () => {
+    const moduleWithProperties = {
+      ...mockModule,
+      innerProps: { lidMotorState: 'open' },
+      highlight: 'someHighlight',
+    }
+
+    const result = updateLabwareInModules({
+      runCurrentModules: [moduleWithProperties],
+      currentLabwareInfo: [mockLabware],
+    })
+
+    expect(result.updatedModules).toEqual([
+      {
+        ...moduleWithProperties,
+        nestedLabwareDef: mockLabwareDef,
+      },
+    ])
   })
 })
