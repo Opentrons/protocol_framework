@@ -620,24 +620,24 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
             f"software thinks there is {vial_volume} uL of liquid in the vial"
         )
 
-        average_aspirate_evaporation_ul = 0.0
-        average_dispense_evaporation_ul = 0.0
-        # if not cfg.blank:
-        #     average_aspirate_evaporation_ul = 0.0
-        #     average_dispense_evaporation_ul = 0.0
-        # else:
-        #     hw_api.set_status_bar_state(StatusBarState.SOFTWARE_ERROR)
-        #     (
-        #         average_aspirate_evaporation_ul,
-        #         average_dispense_evaporation_ul,
-        #     ) = _calculate_evaporation(
-        #         cfg,
-        #         resources,
-        #         recorder,
-        #         liquid_tracker,
-        #         resources.test_report,
-        #         labware_on_scale,
-        #     )
+        # average_aspirate_evaporation_ul = 0.0
+        # average_dispense_evaporation_ul = 0.0
+        if not cfg.blank:
+            average_aspirate_evaporation_ul = 0.0
+            average_dispense_evaporation_ul = 0.0
+        else:
+            hw_api.set_status_bar_state(StatusBarState.SOFTWARE_ERROR)
+            (
+                average_aspirate_evaporation_ul,
+                average_dispense_evaporation_ul,
+            ) = _calculate_evaporation(
+                cfg,
+                resources,
+                recorder,
+                liquid_tracker,
+                resources.test_report,
+                labware_on_scale,
+            )
         hw_api.set_status_bar_state(StatusBarState.IDLE)
         ui.print_info("dropping tip")
         if not cfg.same_tip:
