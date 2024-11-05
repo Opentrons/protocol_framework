@@ -1247,7 +1247,7 @@
         "rightPlunger",
         "extensionZ",
         "extensionJaw",
-        "clampJaw96Channel"
+        "axis96ChannelCam"
       ],
       "type": "string"
     },
