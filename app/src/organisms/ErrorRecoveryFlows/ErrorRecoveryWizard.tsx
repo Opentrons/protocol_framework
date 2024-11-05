@@ -82,7 +82,7 @@ export function ErrorRecoveryWizard(
     recoveryCommands,
     routeUpdateActions,
   } = props
-  const errorKind = getErrorKind(failedCommand?.byRunRecord ?? null)
+  const errorKind = getErrorKind(failedCommand)
 
   useInitialPipetteHome({
     hasLaunchedRecovery,

@@ -87,6 +87,7 @@ export function useERUtils({
   runStatus,
   showTakeover,
   allRunDefs,
+  unvalidatedFailedCommand,
   labwareDefinitionsByUri,
 }: ERUtilsProps): ERUtilsResults {
   const { data: attachedInstruments } = useInstrumentsQuery()
@@ -100,7 +101,6 @@ export function useERUtils({
     cursor: 0,
     pageLength: 999,
   })
-  const failedCommandByRunRecord = failedCommand?.byRunRecord ?? null
 
   const stepCounts = useRunningStepCounts(runId, runCommands)
 
@@ -120,7 +120,7 @@ export function useERUtils({
   )
 
   const recoveryToastUtils = useRecoveryToasts({
-    currentStepCount: stepCounts.currentStepNumber,
+    stepCounts,
     selectedRecoveryOption: currentRecoveryOptionUtils.selectedRecoveryOption,
     isOnDevice,
     commandTextData: protocolAnalysis,
@@ -152,7 +152,7 @@ export function useERUtils({
   })
 
   const failedLabwareUtils = useFailedLabwareUtils({
-    failedCommandByRunRecord,
+    failedCommand,
     protocolAnalysis,
     failedPipetteInfo,
     runRecord,
@@ -161,7 +161,8 @@ export function useERUtils({
 
   const recoveryCommands = useRecoveryCommands({
     runId,
-    failedCommandByRunRecord,
+    failedCommand,
+    unvalidatedFailedCommand,
     failedLabwareUtils,
     routeUpdateActions,
     recoveryToastUtils,

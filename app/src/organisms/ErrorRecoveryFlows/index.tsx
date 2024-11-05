@@ -109,17 +109,21 @@ export function useErrorRecoveryFlows(
 export interface ErrorRecoveryFlowsProps {
   runId: string
   runStatus: RunStatus | null
-  failedCommandByRunRecord: FailedCommand | null
+  /* In some parts of Error Recovery, such as "retry failed command" during a generic error flow, we want to utilize
+   * information derived from the failed command from the run record even if there is no matching command in protocol analysis.
+   * Using a failed command that is not matched to a protocol analysis command is unsafe in most circumstances (ie, in
+   * non-generic recovery flows. Prefer using failedCommandBySource in most circumstances. */
+  unvalidatedFailedCommand: FailedCommand | null
   protocolAnalysis: CompletedProtocolAnalysis | null
 }
 
 export function ErrorRecoveryFlows(
   props: ErrorRecoveryFlowsProps
 ): JSX.Element | null {
-  const { protocolAnalysis, runStatus, failedCommandByRunRecord } = props
+  const { protocolAnalysis, runStatus, unvalidatedFailedCommand } = props
 
   const failedCommandBySource = useRetainedFailedCommandBySource(
-    failedCommandByRunRecord,
+    unvalidatedFailedCommand,
     protocolAnalysis
   )
 
