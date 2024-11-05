@@ -265,13 +265,7 @@ export const pauseForTimeOrUntilTold = (
   const { pauseAction, moduleId, pauseTemperature } = fields
 
   if (pauseAction === PAUSE_UNTIL_TIME) {
-    const { hours, minutes, seconds } = getTimeFromForm(
-      fields,
-      'pauseTime',
-      'pauseSeconds',
-      'pauseMinutes',
-      'pauseSeconds'
-    )
+    const { hours, minutes, seconds } = getTimeFromForm(fields, 'pauseTime')
     // user selected pause for amount of time
     const totalSeconds = hours * 3600 + minutes * 60 + seconds
     return totalSeconds <= 0 ? TIME_PARAM_REQUIRED : null

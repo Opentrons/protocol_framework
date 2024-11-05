@@ -423,6 +423,21 @@ class TipGeometry:
     volume: float
 
 
+class FluidKind(str, Enum):
+    """A kind of fluid that can be inside a pipette."""
+
+    LIQUID = "LIQUID"
+    AIR = "AIR"
+
+
+@dataclass(frozen=True)
+class AspiratedFluid:
+    """Fluid inside a pipette."""
+
+    kind: FluidKind
+    volume: float
+
+
 class MovementAxis(str, Enum):
     """Axis on which to issue a relative movement."""
 

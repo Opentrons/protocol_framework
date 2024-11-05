@@ -25,7 +25,14 @@ from ..errors.error_occurrence import ErrorOccurrence
 from opentrons.hardware_control import HardwareControlAPI
 
 from ..state.update_types import StateUpdate, CLEAR
-from ..types import WellLocation, WellOrigin, CurrentWell, DeckPoint
+from ..types import (
+    WellLocation,
+    WellOrigin,
+    CurrentWell,
+    DeckPoint,
+    AspiratedFluid,
+    FluidKind,
+)
 
 if TYPE_CHECKING:
     from ..execution import MovementHandler, PipettingHandler
@@ -141,6 +148,7 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
                 well_name=well_name,
                 volume_added=CLEAR,
             )
+            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
             return DefinedErrorData(
                 public=OverpressureError(
                     id=self._model_utils.generate_id(),
@@ -161,6 +169,10 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
                 labware_id=labware_id,
                 well_name=well_name,
                 volume_added=-volume_aspirated,
+            )
+            state_update.set_fluid_aspirated(
+                pipette_id=params.pipetteId,
+                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=volume_aspirated),
             )
             return SuccessData(
                 public=AspirateResult(

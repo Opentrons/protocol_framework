@@ -1,4 +1,4 @@
-"""Aspirate in place command request, result, and implementation models."""
+"""AirGap in place command request, result, and implementation models."""
 
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Type, Union
@@ -24,8 +24,8 @@ from .command import (
 )
 from ..errors.error_occurrence import ErrorOccurrence
 from ..errors.exceptions import PipetteNotReadyToAspirateError
-from ..state.update_types import StateUpdate, CLEAR
-from ..types import CurrentWell, AspiratedFluid, FluidKind
+from ..state.update_types import StateUpdate
+from ..types import AspiratedFluid, FluidKind
 
 if TYPE_CHECKING:
     from ..execution import PipettingHandler, GantryMover
@@ -33,31 +33,31 @@ if TYPE_CHECKING:
     from ..state.state import StateView
     from ..notes import CommandNoteAdder
 
-AspirateInPlaceCommandType = Literal["aspirateInPlace"]
+AirGapInPlaceCommandType = Literal["airGapInPlace"]
 
 
-class AspirateInPlaceParams(PipetteIdMixin, AspirateVolumeMixin, FlowRateMixin):
-    """Payload required to aspirate in place."""
+class AirGapInPlaceParams(PipetteIdMixin, AspirateVolumeMixin, FlowRateMixin):
+    """Payload required to air gap in place."""
 
     pass
 
 
-class AspirateInPlaceResult(BaseLiquidHandlingResult):
-    """Result data from the execution of a AspirateInPlace command."""
+class AirGapInPlaceResult(BaseLiquidHandlingResult):
+    """Result data from the execution of a AirGapInPlace command."""
 
     pass
 
 
 _ExecuteReturn = Union[
-    SuccessData[AspirateInPlaceResult],
+    SuccessData[AirGapInPlaceResult],
     DefinedErrorData[OverpressureError],
 ]
 
 
-class AspirateInPlaceImplementation(
-    AbstractCommandImpl[AspirateInPlaceParams, _ExecuteReturn]
+class AirGapInPlaceImplementation(
+    AbstractCommandImpl[AirGapInPlaceParams, _ExecuteReturn]
 ):
-    """AspirateInPlace command implementation."""
+    """AirGapInPlace command implementation."""
 
     def __init__(
         self,
@@ -76,12 +76,12 @@ class AspirateInPlaceImplementation(
         self._model_utils = model_utils
         self._gantry_mover = gantry_mover
 
-    async def execute(self, params: AspirateInPlaceParams) -> _ExecuteReturn:
-        """Aspirate without moving the pipette.
+    async def execute(self, params: AirGapInPlaceParams) -> _ExecuteReturn:
+        """Air gap without moving the pipette.
 
         Raises:
             TipNotAttachedError: if no tip is attached to the pipette.
-            PipetteNotReadyToAspirateError: pipette plunger is not ready.
+            PipetteNotReadyToAirGapError: pipette plunger is not ready.
         """
         ready_to_aspirate = self._pipetting.get_is_ready_to_aspirate(
             pipette_id=params.pipetteId,
@@ -89,13 +89,12 @@ class AspirateInPlaceImplementation(
 
         if not ready_to_aspirate:
             raise PipetteNotReadyToAspirateError(
-                "Pipette cannot aspirate in place because of a previous blow out."
+                "Pipette cannot air gap in place because of a previous blow out."
                 " The first aspirate following a blow-out must be from a specific well"
                 " so the plunger can be reset in a known safe position."
             )
 
         state_update = StateUpdate()
-        current_location = self._state_view.pipettes.get_current_location()
 
         try:
             current_position = await self._gantry_mover.get_position(params.pipetteId)
@@ -106,16 +105,6 @@ class AspirateInPlaceImplementation(
                 command_note_adder=self._command_note_adder,
             )
         except PipetteOverpressureError as e:
-            if (
-                isinstance(current_location, CurrentWell)
-                and current_location.pipette_id == params.pipetteId
-            ):
-                state_update.set_liquid_operated(
-                    labware_id=current_location.labware_id,
-                    well_name=current_location.well_name,
-                    volume_added=CLEAR,
-                )
-            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
             return DefinedErrorData(
                 public=OverpressureError(
                     id=self._model_utils.generate_id(),
@@ -142,42 +131,30 @@ class AspirateInPlaceImplementation(
         else:
             state_update.set_fluid_aspirated(
                 pipette_id=params.pipetteId,
-                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=volume),
+                fluid=AspiratedFluid(kind=FluidKind.AIR, volume=volume),
             )
-            if (
-                isinstance(current_location, CurrentWell)
-                and current_location.pipette_id == params.pipetteId
-            ):
-                state_update.set_liquid_operated(
-                    labware_id=current_location.labware_id,
-                    well_name=current_location.well_name,
-                    volume_added=-volume,
-                )
-
             return SuccessData(
-                public=AspirateInPlaceResult(volume=volume),
+                public=AirGapInPlaceResult(volume=volume),
                 state_update=state_update,
             )
 
 
-class AspirateInPlace(
-    BaseCommand[AspirateInPlaceParams, AspirateInPlaceResult, OverpressureError]
+class AirGapInPlace(
+    BaseCommand[AirGapInPlaceParams, AirGapInPlaceResult, OverpressureError]
 ):
-    """AspirateInPlace command model."""
+    """AirGapInPlace command model."""
 
-    commandType: AspirateInPlaceCommandType = "aspirateInPlace"
-    params: AspirateInPlaceParams
-    result: Optional[AspirateInPlaceResult]
+    commandType: AirGapInPlaceCommandType = "airGapInPlace"
+    params: AirGapInPlaceParams
+    result: Optional[AirGapInPlaceResult]
 
-    _ImplementationCls: Type[
-        AspirateInPlaceImplementation
-    ] = AspirateInPlaceImplementation
+    _ImplementationCls: Type[AirGapInPlaceImplementation] = AirGapInPlaceImplementation
 
 
-class AspirateInPlaceCreate(BaseCommandCreate[AspirateInPlaceParams]):
-    """AspirateInPlace command request model."""
+class AirGapInPlaceCreate(BaseCommandCreate[AirGapInPlaceParams]):
+    """AirGapInPlace command request model."""
 
-    commandType: AspirateInPlaceCommandType = "aspirateInPlace"
-    params: AspirateInPlaceParams
+    commandType: AirGapInPlaceCommandType = "airGapInPlace"
+    params: AirGapInPlaceParams
 
-    _CommandCls: Type[AspirateInPlace] = AspirateInPlace
+    _CommandCls: Type[AirGapInPlace] = AirGapInPlace

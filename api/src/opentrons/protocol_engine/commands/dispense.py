@@ -112,6 +112,7 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
                 well_name=well_name,
                 volume_added=CLEAR,
             )
+            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
             return DefinedErrorData(
                 public=OverpressureError(
                     id=self._model_utils.generate_id(),
@@ -128,11 +129,17 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
                 state_update=state_update,
             )
         else:
+            volume_added = (
+                self._state_view.pipettes.get_liquid_dispensed_by_ejecting_volume(
+                    pipette_id=params.pipetteId, volume=volume
+                )
+            )
             state_update.set_liquid_operated(
                 labware_id=labware_id,
                 well_name=well_name,
-                volume_added=volume,
+                volume_added=volume_added if volume_added is not None else CLEAR,
             )
+            state_update.set_fluid_ejected(pipette_id=params.pipetteId, volume=volume)
             return SuccessData(
                 public=DispenseResult(volume=volume, position=deck_point),
                 state_update=state_update,

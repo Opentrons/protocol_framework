@@ -3,6 +3,7 @@ from opentrons.protocol_engine.state.update_types import (
     LoadPipetteUpdate,
     PipetteConfigUpdate,
     StateUpdate,
+    PipetteUnknownFluidUpdate,
 )
 import pytest
 from decoy import Decoy
@@ -101,6 +102,7 @@ async def test_load_pipette_implementation(
                 serial_number="some-serial-number",
                 config=config_data,
             ),
+            pipette_aspirated_fluid=PipetteUnknownFluidUpdate(pipette_id="some id"),
         ),
     )
 
@@ -166,6 +168,7 @@ async def test_load_pipette_implementation_96_channel(
                 serial_number="some id",
                 config=config_data,
             ),
+            pipette_aspirated_fluid=PipetteUnknownFluidUpdate(pipette_id="pipette-id"),
         ),
     )
 

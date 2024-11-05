@@ -104,6 +104,19 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             pipette_id=self._pipette_id, speed=speed
         )
 
+    def air_gap_in_place(self, volume: float, flow_rate: float) -> None:
+        """Aspirate a given volume of air from the current location of the pipette.
+
+        Args:
+            volume: The volume of air to aspirate, in microliters.
+            folw_rate: The flow rate of air into the pipette, in microliters/s
+        """
+        self._engine_client.execute_command(
+            cmd.AirGapInPlaceParams(
+                pipetteId=self._pipette_id, volume=volume, flowRate=flow_rate
+            )
+        )
+
     def aspirate(
         self,
         location: Location,

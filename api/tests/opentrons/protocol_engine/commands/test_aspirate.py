@@ -29,7 +29,12 @@ from opentrons.protocol_engine.execution import (
     PipettingHandler,
 )
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
-from opentrons.protocol_engine.types import CurrentWell, LoadedPipette
+from opentrons.protocol_engine.types import (
+    CurrentWell,
+    LoadedPipette,
+    AspiratedFluid,
+    FluidKind,
+)
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.protocol_engine.notes import CommandNoteAdder
 
@@ -114,6 +119,9 @@ async def test_aspirate_implementation_no_prep(
                 well_name="A3",
                 volume_added=-50,
             ),
+            pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                pipette_id="abc", fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50)
+            ),
         ),
     )
 
@@ -186,6 +194,9 @@ async def test_aspirate_implementation_with_prep(
                 labware_id="123",
                 well_name="A3",
                 volume_added=-50,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                pipette_id="abc", fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50)
             ),
         ),
     )
@@ -327,6 +338,9 @@ async def test_overpressure_error(
                 well_name=well_name,
                 volume_added=update_types.CLEAR,
             ),
+            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                pipette_id=pipette_id
+            ),
         ),
     )
 
@@ -391,6 +405,9 @@ async def test_aspirate_implementation_meniscus(
                 labware_id="123",
                 well_name="A3",
                 volume_added=-50,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                pipette_id="abc", fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50)
             ),
         ),
     )

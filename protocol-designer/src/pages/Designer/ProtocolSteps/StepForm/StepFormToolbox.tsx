@@ -100,13 +100,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     getFormLevelErrorsForUnsavedForm
   )
   const timeline = useSelector(getRobotStateTimeline)
-  const [toolboxStep, setToolboxStep] = useState<number>(
-    // progress to step 2 if thermocycler form is populated
-    formData.thermocyclerFormType === 'thermocyclerProfile' ||
-      formData.thermocyclerFormType === 'thermocyclerState'
-      ? 1
-      : 0
-  )
+  const [toolboxStep, setToolboxStep] = useState<number>(0)
   const [
     showFormErrorsAndWarnings,
     setShowFormErrorsAndWarnings,

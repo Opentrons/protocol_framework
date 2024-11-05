@@ -14,6 +14,8 @@ from opentrons.protocol_engine.types import (
     FlowRates,
     CurrentWell,
     TipGeometry,
+    AspiratedFluid,
+    FluidKind,
 )
 from opentrons.protocol_engine.actions import (
     SetPipetteMovementSpeedAction,
@@ -30,6 +32,7 @@ from opentrons.protocol_engine.state.pipettes import (
 from opentrons.protocol_engine.resources.pipette_data_provider import (
     LoadedStaticPipetteData,
 )
+from opentrons.protocol_engine.state.fluid_stack import FluidStack
 
 from .command_fixtures import (
     create_load_pipette_command,
@@ -62,7 +65,7 @@ def test_sets_initial_state(subject: PipetteStore) -> None:
 
     assert result == PipetteState(
         pipettes_by_id={},
-        aspirated_volume_by_id={},
+        pipette_contents_by_id={},
         current_location=None,
         current_deck_point=CurrentDeckPoint(mount=None, deck_point=None),
         attached_tip_by_id={},
@@ -223,12 +226,15 @@ def test_handles_load_pipette(
         config=config,
         serial_number="pipette-serial",
     )
+    contents_update = update_types.PipetteUnknownFluidUpdate(pipette_id="pipette-id")
 
     subject.handle_action(
         SucceedCommandAction(
             command=dummy_command,
             state_update=update_types.StateUpdate(
-                loaded_pipette=load_pipette_update, pipette_config=config_update
+                loaded_pipette=load_pipette_update,
+                pipette_config=config_update,
+                pipette_aspirated_fluid=contents_update,
             ),
         )
     )
@@ -240,7 +246,7 @@ def test_handles_load_pipette(
         pipetteName=PipetteNameType.P300_SINGLE,
         mount=MountType.LEFT,
     )
-    assert result.aspirated_volume_by_id["pipette-id"] is None
+    assert result.pipette_contents_by_id["pipette-id"] is None
     assert result.movement_speed_by_id["pipette-id"] is None
     assert result.attached_tip_by_id["pipette-id"] is None
 
@@ -270,7 +276,10 @@ def test_handles_pick_up_and_drop_tip(subject: PipetteStore) -> None:
                     pipette_name=PipetteNameType.P300_SINGLE,
                     mount=MountType.LEFT,
                     liquid_presence_detection=None,
-                )
+                ),
+                pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                    pipette_id="abc"
+                ),
             ),
         )
     )
@@ -282,14 +291,17 @@ def test_handles_pick_up_and_drop_tip(subject: PipetteStore) -> None:
                 pipette_tip_state=update_types.PipetteTipStateUpdate(
                     pipette_id="abc",
                     tip_geometry=TipGeometry(volume=42, length=101, diameter=8.0),
-                )
+                ),
+                pipette_aspirated_fluid=update_types.PipetteEmptyFluidUpdate(
+                    pipette_id="abc"
+                ),
             ),
         )
     )
     assert subject.state.attached_tip_by_id["abc"] == TipGeometry(
         volume=42, length=101, diameter=8.0
     )
-    assert subject.state.aspirated_volume_by_id["abc"] == 0
+    assert subject.state.pipette_contents_by_id["abc"] == FluidStack()
 
     subject.handle_action(
         SucceedCommandAction(
@@ -297,12 +309,15 @@ def test_handles_pick_up_and_drop_tip(subject: PipetteStore) -> None:
             state_update=update_types.StateUpdate(
                 pipette_tip_state=update_types.PipetteTipStateUpdate(
                     pipette_id="abc", tip_geometry=None
-                )
+                ),
+                pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                    pipette_id="abc"
+                ),
             ),
         )
     )
     assert subject.state.attached_tip_by_id["abc"] is None
-    assert subject.state.aspirated_volume_by_id["abc"] is None
+    assert subject.state.pipette_contents_by_id["abc"] is None
 
 
 def test_handles_drop_tip_in_place(subject: PipetteStore) -> None:
@@ -330,7 +345,10 @@ def test_handles_drop_tip_in_place(subject: PipetteStore) -> None:
                     pipette_name=PipetteNameType.P300_SINGLE,
                     mount=MountType.LEFT,
                     liquid_presence_detection=None,
-                )
+                ),
+                pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                    pipette_id="xyz"
+                ),
             ),
         )
     )
@@ -341,14 +359,17 @@ def test_handles_drop_tip_in_place(subject: PipetteStore) -> None:
                 pipette_tip_state=update_types.PipetteTipStateUpdate(
                     pipette_id="xyz",
                     tip_geometry=TipGeometry(volume=42, length=101, diameter=8.0),
-                )
+                ),
+                pipette_aspirated_fluid=update_types.PipetteEmptyFluidUpdate(
+                    pipette_id="xyz"
+                ),
             ),
         )
     )
     assert subject.state.attached_tip_by_id["xyz"] == TipGeometry(
         volume=42, length=101, diameter=8.0
     )
-    assert subject.state.aspirated_volume_by_id["xyz"] == 0
+    assert subject.state.pipette_contents_by_id["xyz"] == FluidStack()
 
     subject.handle_action(
         SucceedCommandAction(
@@ -356,12 +377,15 @@ def test_handles_drop_tip_in_place(subject: PipetteStore) -> None:
             state_update=update_types.StateUpdate(
                 pipette_tip_state=update_types.PipetteTipStateUpdate(
                     pipette_id="xyz", tip_geometry=None
-                )
+                ),
+                pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                    pipette_id="xyz"
+                ),
             ),
         )
     )
     assert subject.state.attached_tip_by_id["xyz"] is None
-    assert subject.state.aspirated_volume_by_id["xyz"] is None
+    assert subject.state.pipette_contents_by_id["xyz"] is None
 
 
 def test_handles_unsafe_drop_tip_in_place(subject: PipetteStore) -> None:
@@ -389,7 +413,10 @@ def test_handles_unsafe_drop_tip_in_place(subject: PipetteStore) -> None:
                     pipette_name=PipetteNameType.P300_SINGLE,
                     mount=MountType.LEFT,
                     liquid_presence_detection=None,
-                )
+                ),
+                pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                    pipette_id="xyz"
+                ),
             ),
         )
     )
@@ -400,14 +427,17 @@ def test_handles_unsafe_drop_tip_in_place(subject: PipetteStore) -> None:
                 pipette_tip_state=update_types.PipetteTipStateUpdate(
                     pipette_id="xyz",
                     tip_geometry=TipGeometry(volume=42, length=101, diameter=8.0),
-                )
+                ),
+                pipette_aspirated_fluid=update_types.PipetteEmptyFluidUpdate(
+                    pipette_id="xyz"
+                ),
             ),
         )
     )
     assert subject.state.attached_tip_by_id["xyz"] == TipGeometry(
         volume=42, length=101, diameter=8.0
     )
-    assert subject.state.aspirated_volume_by_id["xyz"] == 0
+    assert subject.state.pipette_contents_by_id["xyz"] == FluidStack()
 
     subject.handle_action(
         SucceedCommandAction(
@@ -415,31 +445,55 @@ def test_handles_unsafe_drop_tip_in_place(subject: PipetteStore) -> None:
             state_update=update_types.StateUpdate(
                 pipette_tip_state=update_types.PipetteTipStateUpdate(
                     pipette_id="xyz", tip_geometry=None
-                )
+                ),
+                pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                    pipette_id="xyz"
+                ),
             ),
         )
     )
     assert subject.state.attached_tip_by_id["xyz"] is None
-    assert subject.state.aspirated_volume_by_id["xyz"] is None
+    assert subject.state.pipette_contents_by_id["xyz"] is None
 
 
 @pytest.mark.parametrize(
-    "aspirate_command",
+    "aspirate_command,aspirate_update",
     [
-        create_aspirate_command(pipette_id="pipette-id", volume=42, flow_rate=1.23),
-        create_aspirate_in_place_command(
-            pipette_id="pipette-id", volume=42, flow_rate=1.23
+        (
+            create_aspirate_command(pipette_id="pipette-id", volume=42, flow_rate=1.23),
+            update_types.StateUpdate(
+                pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                    pipette_id="pipette-id",
+                    fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=42),
+                )
+            ),
+        ),
+        (
+            create_aspirate_in_place_command(
+                pipette_id="pipette-id", volume=42, flow_rate=1.23
+            ),
+            update_types.StateUpdate(
+                pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                    pipette_id="pipette-id",
+                    fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=42),
+                )
+            ),
         ),
     ],
 )
 def test_aspirate_adds_volume(
-    subject: PipetteStore, aspirate_command: cmd.Command
+    subject: PipetteStore,
+    aspirate_command: cmd.Command,
+    aspirate_update: update_types.StateUpdate,
 ) -> None:
     """It should add volume to pipette after an aspirate."""
     load_command = create_load_pipette_command(
         pipette_id="pipette-id",
         pipette_name=PipetteNameType.P300_SINGLE,
         mount=MountType.LEFT,
+    )
+    pick_up_tip_command = create_pick_up_tip_command(
+        pipette_id="pipette-id", tip_volume=42, tip_length=101, tip_diameter=8.0
     )
 
     subject.handle_action(
@@ -451,32 +505,76 @@ def test_aspirate_adds_volume(
                     pipette_name=PipetteNameType.P300_SINGLE,
                     mount=MountType.LEFT,
                     liquid_presence_detection=None,
-                )
+                ),
+                pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                    pipette_id="pipette-id"
+                ),
             ),
         )
     )
-    subject.handle_action(SucceedCommandAction(command=aspirate_command))
+    subject.handle_action(
+        SucceedCommandAction(
+            command=pick_up_tip_command,
+            state_update=update_types.StateUpdate(
+                pipette_tip_state=update_types.PipetteTipStateUpdate(
+                    pipette_id="pipette-id",
+                    tip_geometry=TipGeometry(volume=42, length=101, diameter=8.0),
+                ),
+                pipette_aspirated_fluid=update_types.PipetteEmptyFluidUpdate(
+                    pipette_id="pipette-id"
+                ),
+            ),
+        )
+    )
+    subject.handle_action(
+        SucceedCommandAction(
+            command=aspirate_command,
+            state_update=aspirate_update,
+        )
+    )
 
-    assert subject.state.aspirated_volume_by_id["pipette-id"] == 42
+    assert subject.state.pipette_contents_by_id["pipette-id"] == FluidStack(
+        _fluid_stack=[AspiratedFluid(kind=FluidKind.LIQUID, volume=42)]
+    )
 
-    subject.handle_action(SucceedCommandAction(command=aspirate_command))
+    subject.handle_action(
+        SucceedCommandAction(command=aspirate_command, state_update=aspirate_update)
+    )
 
-    assert subject.state.aspirated_volume_by_id["pipette-id"] == 84
+    assert subject.state.pipette_contents_by_id["pipette-id"] == FluidStack(
+        _fluid_stack=[AspiratedFluid(kind=FluidKind.LIQUID, volume=84)]
+    )
 
 
 @pytest.mark.parametrize(
-    "dispense_command",
+    "dispense_command,dispense_update",
     [
-        create_dispense_command(pipette_id="pipette-id", volume=21, flow_rate=1.23),
-        create_dispense_in_place_command(
-            pipette_id="pipette-id",
-            volume=21,
-            flow_rate=1.23,
+        (
+            create_dispense_command(pipette_id="pipette-id", volume=21, flow_rate=1.23),
+            update_types.StateUpdate(
+                pipette_aspirated_fluid=update_types.PipetteEjectedFluidUpdate(
+                    pipette_id="pipette-id", volume=21
+                )
+            ),
+        ),
+        (
+            create_dispense_in_place_command(
+                pipette_id="pipette-id",
+                volume=21,
+                flow_rate=1.23,
+            ),
+            update_types.StateUpdate(
+                pipette_aspirated_fluid=update_types.PipetteEjectedFluidUpdate(
+                    pipette_id="pipette-id", volume=21
+                )
+            ),
         ),
     ],
 )
 def test_dispense_subtracts_volume(
-    subject: PipetteStore, dispense_command: cmd.Command
+    subject: PipetteStore,
+    dispense_command: cmd.Command,
+    dispense_update: update_types.StateUpdate,
 ) -> None:
     """It should subtract volume from pipette after a dispense."""
     load_command = create_load_pipette_command(
@@ -484,6 +582,10 @@ def test_dispense_subtracts_volume(
         pipette_name=PipetteNameType.P300_SINGLE,
         mount=MountType.LEFT,
     )
+    pick_up_tip_command = create_pick_up_tip_command(
+        pipette_id="pipette-id", tip_volume=47, tip_length=101, tip_diameter=8.0
+    )
+
     aspirate_command = create_aspirate_command(
         pipette_id="pipette-id",
         volume=42,
@@ -499,18 +601,51 @@ def test_dispense_subtracts_volume(
                     pipette_name=PipetteNameType.P300_SINGLE,
                     mount=MountType.LEFT,
                     liquid_presence_detection=None,
+                ),
+                pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                    pipette_id="pipette-id"
+                ),
+            ),
+        )
+    )
+    subject.handle_action(
+        SucceedCommandAction(
+            command=pick_up_tip_command,
+            state_update=update_types.StateUpdate(
+                pipette_tip_state=update_types.PipetteTipStateUpdate(
+                    pipette_id="pipette-id",
+                    tip_geometry=TipGeometry(volume=47, length=101, diameter=8.0),
+                ),
+                pipette_aspirated_fluid=update_types.PipetteEmptyFluidUpdate(
+                    pipette_id="pipette-id"
+                ),
+            ),
+        )
+    )
+    subject.handle_action(
+        SucceedCommandAction(
+            command=aspirate_command,
+            state_update=update_types.StateUpdate(
+                pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                    pipette_id="pipette-id",
+                    fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=42),
                 )
             ),
         )
     )
-    subject.handle_action(SucceedCommandAction(command=aspirate_command))
-    subject.handle_action(SucceedCommandAction(command=dispense_command))
+    subject.handle_action(
+        SucceedCommandAction(command=dispense_command, state_update=dispense_update)
+    )
 
-    assert subject.state.aspirated_volume_by_id["pipette-id"] == 21
+    assert subject.state.pipette_contents_by_id["pipette-id"] == FluidStack(
+        _fluid_stack=[AspiratedFluid(kind=FluidKind.LIQUID, volume=21)]
+    )
 
-    subject.handle_action(SucceedCommandAction(command=dispense_command))
+    subject.handle_action(
+        SucceedCommandAction(command=dispense_command, state_update=dispense_update)
+    )
 
-    assert subject.state.aspirated_volume_by_id["pipette-id"] == 0
+    assert subject.state.pipette_contents_by_id["pipette-id"] == FluidStack()
 
 
 @pytest.mark.parametrize(
@@ -530,6 +665,10 @@ def test_blow_out_clears_volume(
         pipette_name=PipetteNameType.P300_SINGLE,
         mount=MountType.LEFT,
     )
+    pick_up_tip_command = create_pick_up_tip_command(
+        pipette_id="pipette-id", tip_volume=47, tip_length=101, tip_diameter=8.0
+    )
+
     aspirate_command = create_aspirate_command(
         pipette_id="pipette-id",
         volume=42,
@@ -549,10 +688,43 @@ def test_blow_out_clears_volume(
             ),
         )
     )
-    subject.handle_action(SucceedCommandAction(command=aspirate_command))
-    subject.handle_action(SucceedCommandAction(command=blow_out_command))
+    subject.handle_action(
+        SucceedCommandAction(
+            command=pick_up_tip_command,
+            state_update=update_types.StateUpdate(
+                pipette_tip_state=update_types.PipetteTipStateUpdate(
+                    pipette_id="pipette-id",
+                    tip_geometry=TipGeometry(volume=47, length=101, diameter=8.0),
+                ),
+                pipette_aspirated_fluid=update_types.PipetteEmptyFluidUpdate(
+                    pipette_id="pipette-id"
+                ),
+            ),
+        )
+    )
+    subject.handle_action(
+        SucceedCommandAction(
+            command=aspirate_command,
+            state_update=update_types.StateUpdate(
+                pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                    pipette_id="pipette-id",
+                    fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=42),
+                )
+            ),
+        )
+    )
+    subject.handle_action(
+        SucceedCommandAction(
+            command=blow_out_command,
+            state_update=update_types.StateUpdate(
+                pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                    pipette_id="pipette-id"
+                )
+            ),
+        )
+    )
 
-    assert subject.state.aspirated_volume_by_id["pipette-id"] is None
+    assert subject.state.pipette_contents_by_id["pipette-id"] is None
 
 
 def test_set_movement_speed(subject: PipetteStore) -> None:
@@ -645,14 +817,30 @@ def test_add_pipette_config(
 
 
 @pytest.mark.parametrize(
-    "previous",
+    "previous_cmd,previous_state",
     [
-        create_blow_out_command(pipette_id="pipette-id", flow_rate=1.0),
-        create_dispense_command(pipette_id="pipette-id", volume=10, flow_rate=1.0),
+        (
+            create_blow_out_command(pipette_id="pipette-id", flow_rate=1.0),
+            update_types.StateUpdate(
+                pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                    pipette_id="pipette-id"
+                )
+            ),
+        ),
+        (
+            create_dispense_command(pipette_id="pipette-id", volume=10, flow_rate=1.0),
+            update_types.StateUpdate(
+                pipette_aspirated_fluid=update_types.PipetteEjectedFluidUpdate(
+                    pipette_id="pipette-id", volume=10
+                )
+            ),
+        ),
     ],
 )
 def test_prepare_to_aspirate_marks_pipette_ready(
-    subject: PipetteStore, previous: cmd.Command
+    subject: PipetteStore,
+    previous_cmd: cmd.Command,
+    previous_state: update_types.StateUpdate,
 ) -> None:
     """It should mark a pipette as ready to aspirate."""
     load_pipette_command = create_load_pipette_command(
@@ -672,7 +860,10 @@ def test_prepare_to_aspirate_marks_pipette_ready(
                     pipette_name=PipetteNameType.P50_MULTI_FLEX,
                     mount=MountType.LEFT,
                     liquid_presence_detection=None,
-                )
+                ),
+                pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                    pipette_id="pipette-id"
+                ),
             ),
         )
     )
@@ -683,19 +874,29 @@ def test_prepare_to_aspirate_marks_pipette_ready(
                 pipette_tip_state=update_types.PipetteTipStateUpdate(
                     pipette_id="pipette-id",
                     tip_geometry=TipGeometry(volume=42, length=101, diameter=8.0),
-                )
+                ),
+                pipette_aspirated_fluid=update_types.PipetteEmptyFluidUpdate(
+                    pipette_id="xyz"
+                ),
             ),
         )
     )
 
     subject.handle_action(
-        SucceedCommandAction(
-            command=previous,
-        )
+        SucceedCommandAction(command=previous_cmd, state_update=previous_state)
     )
 
     prepare_to_aspirate_command = create_prepare_to_aspirate_command(
         pipette_id="pipette-id"
     )
-    subject.handle_action(SucceedCommandAction(command=prepare_to_aspirate_command))
-    assert subject.state.aspirated_volume_by_id["pipette-id"] == 0.0
+    subject.handle_action(
+        SucceedCommandAction(
+            command=prepare_to_aspirate_command,
+            state_update=update_types.StateUpdate(
+                pipette_aspirated_fluid=update_types.PipetteEmptyFluidUpdate(
+                    pipette_id="pipette-id"
+                )
+            ),
+        )
+    )
+    assert subject.state.pipette_contents_by_id["pipette-id"] == FluidStack()
