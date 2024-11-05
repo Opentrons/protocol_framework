@@ -41,3 +41,11 @@ class AbstractRobot(ABC):
     @abstractmethod
     def move_axes_relative(self, axis_map: AxisMapType, speed: Optional[float]) -> None:
         ...
+
+    @abstractmethod
+    def release_grip(self) -> None:
+        ...
+
+    @abstractmethod
+    def close_gripper(self, force: Optional[float] = None) -> None:
+        ...

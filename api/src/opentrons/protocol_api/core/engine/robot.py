@@ -167,3 +167,11 @@ class RobotCore(AbstractRobot):
         self._engine_client.execute_command(
             cmd.robot.MoveAxesRelativeParams(axis_map=axis_engine_map, speed=speed)
         )
+
+    def release_grip(self) -> None:
+        self._engine_client.execute_command(cmd.robot.openGripperJawParams())
+
+    def close_gripper(self, force: Optional[float] = None) -> None:
+        self._engine_client.execute_command(
+            cmd.robot.closeGripperJawParams(force=force)
+        )

@@ -416,6 +416,8 @@ Command = Annotated[
         robot.MoveTo,
         robot.MoveAxesRelative,
         robot.MoveAxesTo,
+        robot.openGripperJaw,
+        robot.closeGripperJaw,
     ],
     Field(discriminator="commandType"),
 ]
@@ -499,6 +501,8 @@ CommandParams = Union[
     robot.MoveAxesRelativeParams,
     robot.MoveAxesToParams,
     robot.MoveToParams,
+    robot.openGripperJawParams,
+    robot.closeGripperJawParams,
 ]
 
 CommandType = Union[
@@ -580,6 +584,8 @@ CommandType = Union[
     robot.MoveAxesRelativeCommandType,
     robot.MoveAxesToCommandType,
     robot.MoveToCommandType,
+    robot.openGripperJawCommandType,
+    robot.closeGripperJawCommandType,
 ]
 
 CommandCreate = Annotated[
@@ -662,6 +668,8 @@ CommandCreate = Annotated[
         robot.MoveAxesRelativeCreate,
         robot.MoveAxesToCreate,
         robot.MoveToCreate,
+        robot.openGripperJawCreate,
+        robot.closeGripperJawCreate,
     ],
     Field(discriminator="commandType"),
 ]
@@ -745,6 +753,8 @@ CommandResult = Union[
     robot.MoveAxesRelativeResult,
     robot.MoveAxesToResult,
     robot.MoveToResult,
+    robot.openGripperJawResult,
+    robot.closeGripperJawResult,
 ]
 
 
