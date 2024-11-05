@@ -1046,8 +1046,15 @@ def test_get_errors_slice() -> None:
     error_3 = ErrorOccurrence.construct(id="error-id-3")  # type: ignore[call-arg]
     error_4 = ErrorOccurrence.construct(id="error-id-4")  # type: ignore[call-arg]
 
+    command_1 = create_failed_command(command_id="command-id-1", error=error_1)
+    command_2 = create_failed_command(command_id="command-id-2", error=error_2)
+    command_3 = create_failed_command(command_id="command-id-3", error=error_3)
+    command_4 = create_failed_command(command_id="command-id-4", error=error_4)
+    command_5 = create_running_command(command_id="command-id-5")
+    command_6 = create_queued_command(command_id="command-id-6")
+
     subject = get_command_view(
-        failed_command_errors=[error_1, error_2, error_3, error_4]
+        commands=[command_1, command_2, command_3, command_4, command_5, command_6]
     )
 
     result = subject.get_errors_slice(cursor=1, length=3)

@@ -706,7 +706,12 @@ class CommandView(HasState[CommandState]):
 
     def get_all_errors(self) -> List[ErrorOccurrence]:
         """Get the run's full error list, if there was none, returns an empty list."""
-        return self._state.failed_command_errors
+        command_errors = self._state.command_history.get_all_commands()
+        return [
+            command_error.error
+            for command_error in command_errors
+            if command_error.error is not None
+        ]
 
     def get_has_entered_recovery_mode(self) -> bool:
         """Get whether the run has entered recovery mode."""

@@ -23,7 +23,6 @@ from opentrons.protocol_engine import (
     StateSummary,
     Command,
     commands as pe_commands,
-    ErrorOccurrence
 )
 from opentrons.protocols.parse import PythonParseMode
 from opentrons.util.async_helpers import asyncio_yield
@@ -57,6 +56,7 @@ class RunResult(NamedTuple):
     commands: List[Command]
     state_summary: StateSummary
     parameters: List[RunTimeParameter]
+
 
 class AbstractRunner(ABC):
     """An interface to manage and control a protocol run.
