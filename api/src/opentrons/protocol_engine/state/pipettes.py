@@ -14,6 +14,7 @@ from typing import (
 from typing_extensions import assert_never
 
 from opentrons_shared_data.pipette import pipette_definition
+from opentrons_shared_data.labware.utils import well_ordinals_from_well_name
 from opentrons.config.defaults_ot2 import Z_RETRACT_DISTANCE
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons.hardware_control import CriticalPoint
@@ -666,6 +667,10 @@ class PipetteView(HasState[PipetteState]):
         """Get the primary nozzle, if any, related to the given pipette's nozzle configuration."""
         nozzle_map = self._state.nozzle_configuration_by_id[pipette_id]
         return nozzle_map.starting_nozzle
+
+    def get_nozzle_configuration(self, pipette_id: str) -> NozzleMap:
+        """Get the nozzle map of the pipette."""
+        return self._state.nozzle_configuration_by_id[pipette_id]
 
     def _get_critical_point_offset_without_tip(
         self, pipette_id: str, critical_point: Optional[CriticalPoint]

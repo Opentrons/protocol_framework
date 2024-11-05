@@ -1,4 +1,5 @@
 """Geometry state getters."""
+
 import enum
 from numpy import array, dot, double as npdouble
 from numpy.typing import NDArray
@@ -8,6 +9,7 @@ from functools import cached_property
 
 from opentrons.types import Point, DeckSlotName, StagingSlotName, MountType
 
+from opentrons_shared_data.errors.exceptions import InvalidStoredData
 from opentrons_shared_data.labware.constants import WELL_NAME_PATTERN
 from opentrons_shared_data.deck.types import CutoutFixture
 from opentrons_shared_data.pipette import PIPETTE_X_SPAN
@@ -61,6 +63,7 @@ from .frustum_helpers import (
     find_volume_at_well_height,
     find_height_at_well_volume,
 )
+from ._well_math import wells_covered_by_pipette_configuration, nozzles_per_well
 
 
 SLOT_WIDTH = 128
@@ -1517,3 +1520,46 @@ class GeometryView:
                 raise errors.InvalidDispenseVolumeError(
                     f"Attempting to dispense {volume}µL of liquid into a well that can only hold {well_volumetric_capacity}µL (well {well_name} in labware_id: {labware_id})"
                 )
+
+    def get_wells_covered_by_pipette_focused_on_well(
+        self, labware_id: str, focused_on_well_name: str, pipette_id: str
+    ) -> list[str]:
+        """Get a flat list of wells that are covered by a pipette when moved to a specified well.
+
+        When you move a pipette in a multichannel configuration  to a specific well - here called
+        "focused on" the well, for lack of a better option - the pipette will operate on other wells as well.
+
+        For instance, a pipette with a COLUMN configuration that is focused on well A1 of an SBS standard labware
+        will also "cover", under this definition, wells B1-H1. That same pipette, when focused on well C5, will "cover"
+        wells C5-H5.
+
+        This math only works, and may only be applied, if one of the following is true:
+        - The pipette is in a SINGLE configuration
+        - The pipette is in a non-SINGLE configuration, and the labware is an SBS-format 96 or 384 well plate (and is so
+          marked in its definition's parameters.format key, as 96Standard or 384Standard)
+
+        If all of the following do not apply, regardless of the nozzle configuration of the pipette this function will
+        return only the labware covered by the primary well.
+        """
+        pipette_nozzle_map = self._pipettes.get_nozzle_configuration(pipette_id)
+        labware_columns = [
+            column for column in self._labware.get_definition(labware_id).ordering
+        ]
+        try:
+            return list(
+                wells_covered_by_pipette_configuration(
+                    pipette_nozzle_map, focused_on_well_name, labware_columns
+                )
+            )
+        except InvalidStoredData:
+            return [focused_on_well_name]
+
+    def get_nozzles_per_well(
+        self, labware_id: str, focused_on_well_name: str, pipette_id: str
+    ) -> int:
+        """Get the number of nozzles that will interact with each well."""
+        return nozzles_per_well(
+            self._pipettes.get_nozzle_configuration(pipette_id),
+            focused_on_well_name,
+            self._labware.get_definition(labware_id).ordering,
+        )

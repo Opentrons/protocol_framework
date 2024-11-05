@@ -145,7 +145,9 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
         except PipetteOverpressureError as e:
             state_update.set_liquid_operated(
                 labware_id=labware_id,
-                well_name=well_name,
+                well_names=self._state_view.geometry.get_wells_covered_by_pipette_focused_on_well(
+                    labware_id, well_name, pipette_id
+                ),
                 volume_added=CLEAR,
             )
             state_update.set_fluid_unknown(pipette_id=params.pipetteId)
@@ -167,8 +169,13 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
         else:
             state_update.set_liquid_operated(
                 labware_id=labware_id,
-                well_name=well_name,
-                volume_added=-volume_aspirated,
+                well_names=self._state_view.geometry.get_wells_covered_by_pipette_focused_on_well(
+                    labware_id, well_name, pipette_id
+                ),
+                volume_added=-volume_aspirated
+                * self._state_view.geometry.get_nozzles_per_well(
+                    labware_id, well_name, pipette_id
+                ),
             )
             state_update.set_fluid_aspirated(
                 pipette_id=params.pipetteId,
