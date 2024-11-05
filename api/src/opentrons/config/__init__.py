@@ -221,6 +221,16 @@ CONFIG_ELEMENTS = (
         "relative path it will be relative to log_dir"
         "The location of the file to save serial logs to",
     ),
+    ConfigElement(
+        "can_log_file",
+        "CAN Log File",
+        Path("logs") / "can.log",
+        ConfigElementType.FILE,
+        "The location of the file to save CAN logs to. If this is"
+        " an absolute path, it will be used directly. If it is a "
+        "relative path it will be relative to log_dir"
+        "The location of the file to save CAN logs to",
+    ),
     # Unlike other config elements, the wifi keys dir is still in
     # /data/user_storage/opentrons_data because these paths are fed directly to
     # NetworkManager and stored in connections files there. To change this
@@ -580,7 +590,7 @@ def write_config(config_data: Dict[str, Path], path: Optional[Path] = None) -> N
     valid_names = [ce.name for ce in CONFIG_ELEMENTS]
     try:
         os.makedirs(path, exist_ok=True)
-        with (path / _CONFIG_FILENAME).open("w") as base_f:
+        with (path / _CONFIG_FILENAME).open("w+") as base_f:
             json.dump(
                 {k: str(v) for k, v in config_data.items() if k in valid_names},
                 base_f,
