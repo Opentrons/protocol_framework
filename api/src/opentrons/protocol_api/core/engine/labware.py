@@ -194,8 +194,8 @@ class LabwareCore(AbstractLabware[WellCore]):
                 self.labware_id
             )
             if isinstance(ancestor, StagingSlotName):
-                # TODO: (chb, 2024-11-04): Do we want to change this PAPI function to be able to return Staging Area Slots? For now returning the cutout that both have as an ancestor.
-                ancestor = DeckSlotName.from_primitive(ancestor.name[:1] + "3")
+                # The only use case for get_deck_slot is with a legacy OT-2 function which resolves to a numerical deck slot, so we can ignore staging area slots for now
+                return None
             return ancestor
         except (
             LabwareNotOnDeckError,

@@ -125,7 +125,7 @@ def check_safe_for_pipette_movement(  # noqa: C901
     ancestor = engine_state.geometry.get_ancestor_slot_name(labware_id)
     if isinstance(ancestor, StagingSlotName):
         raise LocationIsStagingSlotError(
-            "Cannot preform pipette ations on labware in Staging Area Slot."
+            "Cannot perform pipette actions on labware in Staging Area Slot."
         )
     labware_slot = ancestor
 

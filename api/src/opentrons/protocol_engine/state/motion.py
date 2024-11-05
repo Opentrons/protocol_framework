@@ -334,7 +334,7 @@ class MotionView:
         labware_slot = self._geometry.get_ancestor_slot_name(labware_id)
         if isinstance(labware_slot, StagingSlotName):
             raise errors.LocationIsStagingSlotError(
-                "Cannot preform Touch Tip on labware in Staging Area Slot."
+                "Cannot perform Touch Tip on labware in Staging Area Slot."
             )
         next_to_module = self._modules.is_edge_move_unsafe(mount, labware_slot)
         edge_path_type = self._labware.get_edge_path_type(
