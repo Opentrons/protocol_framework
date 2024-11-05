@@ -50,7 +50,7 @@ export type ERUtilsProps = Omit<ErrorRecoveryFlowsProps, 'failedCommand'> & {
   isOnDevice: boolean
   robotType: RobotType
   failedCommand: ReturnType<typeof useRetainedFailedCommandBySource>
-  showTakeover: boolean
+  isActiveUser: UseRecoveryTakeoverResult['isActiveUser']
   allRunDefs: LabwareDefinition2[]
   labwareDefinitionsByUri: LabwareDefinitionsByUri | null
 }
@@ -85,7 +85,7 @@ export function useERUtils({
   isOnDevice,
   robotType,
   runStatus,
-  showTakeover,
+  isActiveUser,
   allRunDefs,
   unvalidatedFailedCommand,
   labwareDefinitionsByUri,
@@ -193,7 +193,7 @@ export function useERUtils({
   )
 
   useCleanupRecoveryState({
-    isTakeover: showTakeover,
+    isActiveUser,
     setRM,
     stashedMapRef: routeUpdateActions.stashedMapRef,
   })

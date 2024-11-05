@@ -160,7 +160,7 @@ export function ErrorRecoveryFlows(
     toggleERWizAsActiveUser,
     isOnDevice,
     robotType,
-    showTakeover,
+    isActiveUser,
     failedCommand: failedCommandBySource,
     allRunDefs,
     labwareDefinitionsByUri,
