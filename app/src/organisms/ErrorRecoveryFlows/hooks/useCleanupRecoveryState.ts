@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { RECOVERY_MAP } from '../constants'
 
@@ -22,17 +22,15 @@ export function useCleanupRecoveryState({
 }: UseCleanupProps): void {
   const [wasActiveUser, setWasActiveUser] = useState(false)
 
-  useEffect(() => {
-    if (isActiveUser) {
-      setWasActiveUser(true)
-    } else if (wasActiveUser) {
-      setWasActiveUser(false)
+  if (isActiveUser && !wasActiveUser) {
+    setWasActiveUser(true)
+  } else if (!isActiveUser && wasActiveUser) {
+    setWasActiveUser(false)
 
-      stashedMapRef.current = null
-      setRM({
-        route: RECOVERY_MAP.OPTION_SELECTION.ROUTE,
-        step: RECOVERY_MAP.OPTION_SELECTION.STEPS.SELECT,
-      })
-    }
-  }, [isActiveUser])
+    stashedMapRef.current = null
+    setRM({
+      route: RECOVERY_MAP.OPTION_SELECTION.ROUTE,
+      step: RECOVERY_MAP.OPTION_SELECTION.STEPS.SELECT,
+    })
+  }
 }
