@@ -27,7 +27,7 @@ import {
   feedbackModalAtom,
   scrollToBottomAtom,
 } from '../../resources/atoms'
-import { delay, set } from 'lodash'
+import { delay } from 'lodash'
 import { useFormContext } from 'react-hook-form'
 
 interface ChatDisplayProps {
