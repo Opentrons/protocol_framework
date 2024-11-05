@@ -1,6 +1,6 @@
 import { describe, it, vi, beforeEach, expect } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
-import { fireEvent, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { i18n } from '../../../assets/localization'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { selectors as labwareIngredSelectors } from '../../../labware-ingred/selectors'
