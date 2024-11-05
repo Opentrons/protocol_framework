@@ -1,12 +1,12 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import flatMap from 'lodash/flatMap'
 import { animated, useSpring, easings } from '@react-spring/web'
 import {
   getDeckDefFromRobotType,
   getModuleDef2,
   getPositionFromSlotId,
 } from '@opentrons/shared-data'
+import { LabwareRender } from '../Labware'
 
 import { COLORS } from '../../helix-design-system'
 import { IDENTITY_AFFINE_TRANSFORM, multiplyMatrices } from '../utils'
@@ -14,7 +14,6 @@ import { BaseDeck } from '../BaseDeck'
 
 import type {
   LoadedLabware,
-  LabwareWell,
   LoadedModule,
   Coordinates,
   LabwareDefinition2,
@@ -127,7 +126,6 @@ function getLabwareCoordinates({
   }
 }
 
-const OUTLINE_THICKNESS_MM = 3
 const SPLASH_Y_BUFFER_MM = 10
 
 interface MoveLabwareOnDeckProps extends StyleProps {
@@ -212,7 +210,9 @@ export function MoveLabwareOnDeck(
     loop: true,
   })
 
-  if (deckDef == null) return null
+  if (deckDef == null) {
+    return null
+  }
 
   return (
     <BaseDeck
@@ -229,30 +229,7 @@ export function MoveLabwareOnDeck(
         <g
           transform={`translate(${movedLabwareDef.cornerOffsetFromSlot.x}, ${movedLabwareDef.cornerOffsetFromSlot.y})`}
         >
-          <rect
-            x={OUTLINE_THICKNESS_MM}
-            y={OUTLINE_THICKNESS_MM}
-            strokeWidth={OUTLINE_THICKNESS_MM}
-            stroke={COLORS.blue50}
-            fill={COLORS.white}
-            width={
-              movedLabwareDef.dimensions.xDimension - 2 * OUTLINE_THICKNESS_MM
-            }
-            height={
-              movedLabwareDef.dimensions.yDimension - 2 * OUTLINE_THICKNESS_MM
-            }
-            rx={3 * OUTLINE_THICKNESS_MM}
-          />
-          {flatMap(
-            movedLabwareDef.ordering,
-            (row: string[], i: number, c: string[][]) =>
-              row.map(wellName => (
-                <Well
-                  key={wellName}
-                  wellDef={movedLabwareDef.wells[wellName]}
-                />
-              ))
-          )}
+          <LabwareRender definition={movedLabwareDef} highlight={true} />
           <AnimatedG style={{ opacity: springProps.splashOpacity }}>
             <path
               d="M158.027 111.537L154.651 108.186M145.875 113L145.875 109.253M161 99.3038L156.864 99.3038M11.9733 10.461L15.3495 13.8128M24.1255 9L24.1254 12.747M9 22.6962L13.1357 22.6962"
@@ -272,30 +249,3 @@ export function MoveLabwareOnDeck(
  * These animated components needs to be split out because react-spring and styled-components don't play nice
  * @see https://github.com/pmndrs/react-spring/issues/1515 */
 const AnimatedG = styled(animated.g as any)``
-
-interface WellProps {
-  wellDef: LabwareWell
-}
-function Well(props: WellProps): JSX.Element {
-  const { wellDef } = props
-  const { x, y } = wellDef
-
-  return wellDef.shape === 'rectangular' ? (
-    <rect
-      fill={COLORS.white}
-      stroke={COLORS.black90}
-      x={x - wellDef.xDimension / 2}
-      y={y - wellDef.yDimension / 2}
-      width={wellDef.xDimension}
-      height={wellDef.yDimension}
-    />
-  ) : (
-    <circle
-      fill={COLORS.white}
-      stroke={COLORS.black90}
-      cx={x}
-      cy={y}
-      r={wellDef.diameter / 2}
-    />
-  )
-}
