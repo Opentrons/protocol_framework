@@ -1,16 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import {
-  ALIGN_CENTER,
   DIRECTION_COLUMN,
   Flex,
-  Icon,
-  JUSTIFY_SPACE_BETWEEN,
-  PrimaryButton,
-  SPACING,
-  StyledText,
   useOnClickOutside,
 } from '@opentrons/components'
 import {
@@ -22,7 +15,6 @@ import { selectors as labwareIngredSelectors } from '../../labware-ingred/select
 import { LiquidsOverflowMenu } from '../Designer/LiquidsOverflowMenu'
 
 export function Liquids(): JSX.Element {
-  const { t } = useTranslation('starting_deck_state')
   const navigate = useNavigate()
   const selectedLabware = useSelector(
     labwareIngredSelectors.getSelectedLabwareId
@@ -67,23 +59,10 @@ export function Liquids(): JSX.Element {
       ) : null}
 
       <Flex flexDirection={DIRECTION_COLUMN}>
-        <Flex padding={SPACING.spacing12}>
-          <Flex justifyContent={JUSTIFY_SPACE_BETWEEN} width="100%">
-            <ProtocolNavBar />
-            <PrimaryButton
-              onClick={() => {
-                showLiquidOverflowMenu(true)
-              }}
-            >
-              <Flex alignItems={ALIGN_CENTER} gridGap={SPACING.spacing8}>
-                <Icon size="1rem" name="liquid" />
-                <StyledText desktopStyle="bodyDefaultRegular">
-                  {t('liquids')}
-                </StyledText>
-              </Flex>
-            </PrimaryButton>
-          </Flex>
-        </Flex>
+        <ProtocolNavBar
+          liquidPage
+          showLiquidOverflowMenu={showLiquidOverflowMenu}
+        />
         <AssignLiquidsModal />
       </Flex>
     </>

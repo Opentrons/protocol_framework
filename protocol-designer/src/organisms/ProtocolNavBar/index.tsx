@@ -16,9 +16,9 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { getFileMetadata } from '../../file-data/selectors'
-import { useKitchen } from '../Kitchen/hooks'
 import { selectTerminalItem } from '../../ui/steps/actions/actions'
 import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { useKitchen } from '../Kitchen/hooks'
 import { LiquidButton } from './LiquidButton'
 
 import type { TabProps } from '@opentrons/components'
@@ -29,6 +29,7 @@ interface ProtocolNavBarProps {
   hasTrashEntity?: boolean
   showLiquidOverflowMenu?: (liquidOverflowMenu: boolean) => void
   isAddingHardwareOrLabware?: boolean
+  liquidPage?: boolean
 }
 
 export function ProtocolNavBar({
@@ -37,6 +38,7 @@ export function ProtocolNavBar({
   tabs = [],
   hasTrashEntity,
   showLiquidOverflowMenu,
+  liquidPage = false,
 }: ProtocolNavBarProps): JSX.Element {
   const { t } = useTranslation('starting_deck_state')
   const metadata = useSelector(getFileMetadata)
@@ -69,18 +71,20 @@ export function ProtocolNavBar({
           <LiquidButton showLiquidOverflowMenu={showLiquidOverflowMenu} />
         ) : null}
 
-        <SecondaryButton
-          onClick={() => {
-            if (hasTrashEntity) {
-              navigate('/overview')
-              dispatch(selectTerminalItem('__initial_setup__'))
-            } else {
-              makeSnackbar(t('trash_required') as string)
-            }
-          }}
-        >
-          {t('shared:done')}
-        </SecondaryButton>
+        {liquidPage ? null : (
+          <SecondaryButton
+            onClick={() => {
+              if (hasTrashEntity) {
+                navigate('/overview')
+                dispatch(selectTerminalItem('__initial_setup__'))
+              } else {
+                makeSnackbar(t('trash_required') as string)
+              }
+            }}
+          >
+            {t('shared:done')}
+          </SecondaryButton>
+        )}
       </ButtonGroup>
     </NavContainer>
   )
