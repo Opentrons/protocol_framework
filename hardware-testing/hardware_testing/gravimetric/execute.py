@@ -619,22 +619,25 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
         ui.print_info(
             f"software thinks there is {vial_volume} uL of liquid in the vial"
         )
-        if not cfg.blank:
-            average_aspirate_evaporation_ul = 0.0
-            average_dispense_evaporation_ul = 0.0
-        else:
-            hw_api.set_status_bar_state(StatusBarState.SOFTWARE_ERROR)
-            (
-                average_aspirate_evaporation_ul,
-                average_dispense_evaporation_ul,
-            ) = _calculate_evaporation(
-                cfg,
-                resources,
-                recorder,
-                liquid_tracker,
-                resources.test_report,
-                labware_on_scale,
-            )
+
+        average_aspirate_evaporation_ul = 0.0
+        average_dispense_evaporation_ul = 0.0
+        # if not cfg.blank:
+        #     average_aspirate_evaporation_ul = 0.0
+        #     average_dispense_evaporation_ul = 0.0
+        # else:
+        #     hw_api.set_status_bar_state(StatusBarState.SOFTWARE_ERROR)
+        #     (
+        #         average_aspirate_evaporation_ul,
+        #         average_dispense_evaporation_ul,
+        #     ) = _calculate_evaporation(
+        #         cfg,
+        #         resources,
+        #         recorder,
+        #         liquid_tracker,
+        #         resources.test_report,
+        #         labware_on_scale,
+        #     )
         hw_api.set_status_bar_state(StatusBarState.IDLE)
         ui.print_info("dropping tip")
         if not cfg.same_tip:
@@ -669,7 +672,40 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
             trial_disp_dict: Dict[int, List[float]] = {
                 trial: [] for trial in range(cfg.trials)
             }
+            liquidflag = 1 
             for channel in trials[volume].keys():
+                #----------------all channel liquid -------------
+
+                if liquidflag != 1:
+                    ui.print_title("{} channel FIND LIQUID HEIGHT ".format(channel))
+                    #setup_channel_offset = _get_channel_offset(cfg, channel=0)
+                    first_tip_location = first_tip.top().move(setup_channel_offset)
+                    _pick_up_tip(resources.ctx, resources.pipette, cfg, location=first_tip_location)
+                    mnt = OT3Mount.LEFT if cfg.pipette_mount == "left" else OT3Mount.RIGHT
+                    resources.ctx._core.get_hardware().retract(mnt)
+                    ui.print_info("moving to scale")
+                    well = labware_on_scale["A1"]
+                    _liquid_height = _get_liquid_height(resources, cfg, well)
+                    height_below_top = well.depth - _liquid_height
+                    ui.print_info(f"liquid is {height_below_top} mm below top of vial")
+                    liquid_tracker.set_start_volume_from_liquid_height(
+                        well, _liquid_height, name="Water"
+                    )
+                    vial_volume = liquid_tracker.get_volume(well)
+                    ui.print_info(
+                        f"software thinks there is {vial_volume} uL of liquid in the vial"
+                    )
+                    hw_api.set_status_bar_state(StatusBarState.IDLE)
+                    ui.print_info("dropping tip")
+                    if not cfg.same_tip:
+                        _drop_tip(
+                            resources.pipette,
+                            return_tip=False,
+                            minimum_z_height=_minimum_z_height(cfg),
+                        )  # always trash calibration tips
+                    #----------------all liquid end -------------------
+
+
                 channel_offset = _get_channel_offset(cfg, channel)
                 actual_asp_list_channel = []
                 actual_disp_list_channel = []
@@ -826,6 +862,8 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                         raise RuntimeError(
                             f"Trial with volume {volume} on channel {channel} did not pass spec"
                         )
+                liquidflag += 1 
+                input("请在#2针管盒G1放一根针管校准使用.")
             for trial in range(cfg.trials):
                 trial_asp_list = trial_asp_dict[trial]
                 trial_disp_list = trial_disp_dict[trial]
