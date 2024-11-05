@@ -602,7 +602,7 @@ class RunStore:
             slice_result = transaction.execute(select_slice).all()
 
         sliced_commands: List[ErrorOccurrence] = [
-            json_to_pydantic(ErrorOccurrence, row.command) for row in slice_result
+            json_to_pydantic(ErrorOccurrence, row.command_error) for row in slice_result
         ]
 
         return CommandErrorSlice(
