@@ -41,6 +41,11 @@ from ..module import (
 from .exceptions import InvalidMagnetEngageHeightError
 
 
+# Valid wavelength range for absorbance reader
+ABS_WAVELENGTH_MIN = 350
+ABS_WAVELENGTH_MAX = 1000
+
+
 class ModuleCore(AbstractModuleCore):
     """Module core logic implementation for Python protocols.
     Args:
@@ -595,18 +600,23 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
             )
 
         if reference_wavelength is not None and (
-            reference_wavelength < 350 or reference_wavelength > 1000
+            reference_wavelength < ABS_WAVELENGTH_MIN
+            or reference_wavelength > ABS_WAVELENGTH_MAX
         ):
             raise ValueError(
                 f"Unsupported reference wavelength: ({reference_wavelength}) needs"
-                f" to between 350 and 1000 nm."
+                f" to between {ABS_WAVELENGTH_MIN} and {ABS_WAVELENGTH_MAX} nm."
             )
 
         for wavelength in wavelengths:
-            if not isinstance(wavelength, int) or wavelength < 350 or wavelength > 1000:
+            if (
+                not isinstance(wavelength, int)
+                or wavelength < ABS_WAVELENGTH_MIN
+                or wavelength > ABS_WAVELENGTH_MAX
+            ):
                 raise ValueError(
                     f"Unsupported sample wavelength: ({wavelength}) needs"
-                    f" to between 350 and 1000 nm."
+                    f" to between {ABS_WAVELENGTH_MIN} and {ABS_WAVELENGTH_MAX} nm."
                 )
 
         self._engine_client.execute_command(
