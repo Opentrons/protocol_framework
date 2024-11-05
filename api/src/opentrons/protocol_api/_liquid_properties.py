@@ -534,5 +534,7 @@ def build_transfer_properties(
     return TransferProperties(
         _aspirate=build_aspirate_properties(by_tip_type_setting.aspirate),
         _dispense=build_single_dispense_properties(by_tip_type_setting.singleDispense),
-        _multi_dispense=build_multi_dispense_properties(by_tip_type_setting.multiDispense),
+        _multi_dispense=build_multi_dispense_properties(
+            by_tip_type_setting.multiDispense
+        ),
     )
