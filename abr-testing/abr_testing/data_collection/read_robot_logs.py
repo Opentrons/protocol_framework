@@ -6,7 +6,7 @@ saved in a local directory.
 """
 import csv
 import subprocess
-from datetime import datetime, timezone
+from datetime import datetime
 import os
 from abr_testing.data_collection.error_levels import ERROR_LEVELS_PATH
 from typing import List, Dict, Any, Tuple, Set, Optional
@@ -110,7 +110,7 @@ def identify_labware_ids(
     file_results: Dict[str, Any], labware_name: Optional[str]
 ) -> List[str]:
     """Determine what type of labware is being picked up."""
-    list_of_labware_ids = []
+    list_of_labware_ids: List[str] = []
     if labware_name:
         labwares = file_results.get("labware", "")
         list_of_labware_ids = []
@@ -342,9 +342,10 @@ def hs_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
             )
     if temp_time is not None and deactivate_time is None:
         # If heater shaker module is not deactivated, protocol completedAt time stamp used.
-        commands = file_results.get("commands")
-        default = commands[len(commands) - 1].get("completedAt")
-        protocol_end = datetime.strptime(file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z")
+        default = commandData[len(commandData) - 1].get("completedAt")
+        protocol_end = datetime.strptime(
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
+        )
         temp_duration = (protocol_end - temp_time).total_seconds()
         hs_temps[hs_temp] = hs_temps.get(hs_temp, 0.0) + temp_duration
     hs_latch_sets = hs_latch_count / 2  # one set of open/close
@@ -390,9 +391,10 @@ def temperature_module_commands(file_results: Dict[str, Any]) -> Dict[str, Any]:
                 tm_temps[tm_temp] = tm_temps.get(tm_temp, 0.0) + temp_duration
     if temp_time is not None and deactivate_time is None:
         # If temperature module is not deactivated, protocol completedAt time stamp used.
-        commands = file_results.get("commands")
-        default = commands[len(commands) - 1].get("completedAt")
-        protocol_end = datetime.strptime(file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z")
+        default = commandData[len(commandData) - 1].get("completedAt")
+        protocol_end = datetime.strptime(
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
+        )
         temp_duration = (protocol_end - temp_time).total_seconds()
         tm_temps[tm_temp] = tm_temps.get(tm_temp, 0.0) + temp_duration
     tm_total_temp_time = sum(tm_temps.values())
@@ -474,16 +476,18 @@ def thermocycler_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
                 block_temps[block_temp] = block_temps.get(block_temp, 0.0) + block_time
     if block_on_time is not None and block_off_time is None:
         # If thermocycler block not deactivated protocol completedAt time stamp used
-        commands = file_results.get("commands")
-        default = commands[len(commands) - 1].get("completedAt")
-        protocol_end = datetime.strptime(file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z")
+        default = commandData[len(commandData) - 1].get("completedAt")
+        protocol_end = datetime.strptime(
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
+        )
         temp_duration = (protocol_end - block_on_time).total_seconds()
 
     if lid_on_time is not None and lid_off_time is None:
         # If thermocycler lid not deactivated protocol completedAt time stamp used
-        commands = file_results.get("commands")
-        default = commands[len(commands) - 1].get("completedAt")
-        protocol_end = datetime.strptime(file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z")
+        default = commandData[len(commandData) - 1].get("completedAt")
+        protocol_end = datetime.strptime(
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
+        )
         temp_duration = (protocol_end - lid_on_time).total_seconds()
         lid_temps[lid_temp] = block_temps.get(lid_temp, 0.0) + temp_duration
 

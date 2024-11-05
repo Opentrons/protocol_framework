@@ -9,7 +9,7 @@ import argparse
 from datetime import datetime
 from abr_testing.automation import google_sheets_tool
 from abr_testing.data_collection import read_robot_logs
-from typing import Any, Tuple, List, Dict, Union, NoReturn, Optional
+from typing import Any, Tuple, List, Dict, Union, NoReturn
 from abr_testing.tools import plate_reader
 
 
@@ -241,7 +241,7 @@ def parse_results_volume(
         "Right Pipette Total Aspirates",
         "Right Pipette Total Dispenses",
         "Gripper Pick Ups",
-        "Gripper Pick Ups of None",
+        "Gripper Pick Ups of opentrons_tough_pcr_auto_sealing_lid",
         "Total Liquid Probes",
         "Average Liquid Probe Time (sec)",
     ]
@@ -326,7 +326,7 @@ def main(
     save: bool,
     storage_directory: str = os.curdir,
     google_sheet_name: str = "",
-    parameters: List[str] = None
+    parameters: List[str] = [],
 ) -> None:
     """Main module control."""
     sys.exit = mock_exit  # Replace sys.exit with the mock function
@@ -350,7 +350,7 @@ def main(
                 if parameters:
                     print(f"Parameter: {parameters[0]}\n")
                     csv_params = {}
-                    csv_params['parameters_csv'] = parameters[0]
+                    csv_params["parameters_csv"] = parameters[0]
                     rtp_json = json.dumps(csv_params)
                     ctx.invoke(
                         analyze,
@@ -377,12 +377,12 @@ def main(
             else:
                 if parameters:
                     csv_params = {}
-                    csv_params['parameters_csv'] = parameters[0]
+                    csv_params["parameters_csv"] = parameters[0]
                     rtp_json = json.dumps(csv_params)
                     ctx.invoke(
                         analyze,
                         files=[protocol_file_path],
-                        rtp_files = rtp_json,
+                        rtp_files=rtp_json,
                         json_output=None,
                         human_json_output=None,
                         log_output=error_output,
@@ -464,13 +464,13 @@ if __name__ == "__main__":
         "protocol_file_path",
         metavar="PROTOCOL_FILE_PATH",
         type=str,
-        nargs='*',
+        nargs="*",
         help="Path to protocol file",
     )
     args = parser.parse_args()
     storage_directory = args.storage_directory[0]
     sheet_name = args.sheet_name[0]
-    protocol_file_path: Path = Path(args.protocol_file_path[0])
+    protocol_file_path: str = args.protocol_file_path[0]
     parameters: List[str] = args.protocol_file_path[1:]
     print(parameters)
     SETUP = True
@@ -502,15 +502,15 @@ if __name__ == "__main__":
         set_api_level(protocol_file_path)
         if parameters:
             main(
-                protocol_file_path,
+                Path(protocol_file_path),
                 True,
                 storage_directory,
                 sheet_name,
-                parameters=parameters
+                parameters=parameters,
             )
         else:
             main(
-                protocol_file_path=protocol_file_path,
+                protocol_file_path=Path(protocol_file_path),
                 save=True,
                 storage_directory=storage_directory,
                 google_sheet_name=sheet_name,
