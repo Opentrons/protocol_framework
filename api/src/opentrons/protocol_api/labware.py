@@ -282,7 +282,7 @@ class Well:
         :param float volume: The volume of liquid to load, in µL.
 
         .. note::
-            In API Version 2.22 and above, use `load_empty()` to mark a well as empty at the beginning of a protocol.
+            In API version 2.22 and later, use :py:meth:`~.Well.load_empty()` to mark a well as empty at the beginning of a protocol, rather than using this method with ``volume=0``.
         """
         self._core.load_liquid(
             liquid=liquid,
