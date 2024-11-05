@@ -16,7 +16,6 @@ def _host_config(level_value: int) -> Dict[str, Any]:
     serial_log_filename = CONFIG["serial_log_file"]
     api_log_filename = CONFIG["api_log_file"]
     sensor_log_filename = CONFIG["sensor_log_file"]
-    can_log_filename = CONFIG["can_log_file"]
     return {
         "version": 1,
         "disable_existing_loggers": False,
@@ -37,15 +36,7 @@ def _host_config(level_value: int) -> Dict[str, Any]:
                 "class": "logging.handlers.RotatingFileHandler",
                 "formatter": "basic",
                 "filename": serial_log_filename,
-                "maxBytes": 1000000,
-                "level": logging.DEBUG,
-                "backupCount": 3,
-            },
-            "can": {
-                "class": "logging.handlers.RotatingFileHandler",
-                "formatter": "basic",
-                "filename": can_log_filename,
-                "maxBytes": 1000000,
+                "maxBytes": 5000000,
                 "level": logging.DEBUG,
                 "backupCount": 3,
             },
@@ -81,7 +72,7 @@ def _host_config(level_value: int) -> Dict[str, Any]:
                 "propagate": False,
             },
             "opentrons_hardware.drivers.can_bus.can_messenger": {
-                "handlers": ["can"],
+                "handlers": ["serial"],
                 "level": logging.DEBUG,
                 "propagate": False,
             },
@@ -124,12 +115,6 @@ def _buildroot_config(level_value: int) -> Dict[str, Any]:
                 "formatter": "message_only",
                 "SYSLOG_IDENTIFIER": "opentrons-api-serial",
             },
-            "can": {
-                "class": "systemd.journal.JournalHandler",
-                "level": logging.DEBUG,
-                "formatter": "message_only",
-                "SYSLOG_IDENTIFIER": "opentrons-api-serial",
-            },
             "can_serial": {
                 "class": "systemd.journal.JournalHandler",
                 "level": logging.DEBUG,
@@ -166,8 +151,7 @@ def _buildroot_config(level_value: int) -> Dict[str, Any]:
                 "level": level_value,
             },
             "opentrons_hardware.drivers.can_bus.can_messenger": {
-                # "handlers": ["can_serial"],
-                "handlers": ["can"],
+                "handlers": ["can_serial"],
                 "level": logging.DEBUG,
                 "propagate": False,
             },
