@@ -929,8 +929,8 @@ class TransferPlan:
                 )
             return volume
 
+    @staticmethod
     def _create_volume_gradient(
-        self,
         min_v: float,
         max_v: float,
         total: int,
@@ -947,8 +947,9 @@ class TransferPlan:
 
         return [_map_volume(i) for i in range(total)]
 
+    @staticmethod
     def _check_valid_volume_parameters(
-        self, disposal_volume: float, air_gap: float, max_volume: float
+        disposal_volume: float, air_gap: float, max_volume: float
     ) -> None:
         if air_gap >= max_volume:
             raise ValueError(

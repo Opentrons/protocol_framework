@@ -2,6 +2,9 @@ from __future__ import annotations
 import logging
 from contextlib import ExitStack
 from typing import Any, List, Optional, Sequence, Union, cast, Dict
+
+from opentrons_shared_data.robot.types import RobotTypeEnum
+
 from opentrons.protocol_engine.errors.exceptions import TipNotAttachedError
 from opentrons_shared_data.errors.exceptions import (
     CommandPreconditionViolated,
@@ -15,7 +18,7 @@ from opentrons.legacy_commands import commands as cmds
 
 from opentrons.legacy_commands import publisher
 from opentrons.protocols.advanced_control.mix import mix_from_kwargs
-from opentrons.protocols.advanced_control import transfers
+from opentrons.protocols.advanced_control.transfers import transfer as v1_transfer
 
 from opentrons.protocols.api_support.deck_type import NoTrashDefinedError
 from opentrons.protocols.api_support.types import APIVersion
@@ -36,10 +39,11 @@ from .core.legacy.legacy_instrument_core import LegacyInstrumentCore
 from .config import Clearances
 from .disposal_locations import TrashBin, WasteChute
 from ._nozzle_layout import NozzleLayout
-from . import labware, validation
+from . import labware, validation, LiquidClass
+from ..config import feature_flags
+from ..types import TransferTipPolicyType
 
-
-AdvancedLiquidHandling = transfers.AdvancedLiquidHandling
+AdvancedLiquidHandling = v1_transfer.AdvancedLiquidHandling
 
 _DEFAULT_ASPIRATE_CLEARANCE = 1.0
 _DEFAULT_DISPENSE_CLEARANCE = 1.0
@@ -1279,6 +1283,45 @@ class InstrumentContext(publisher.CommandPublisher):
 
         return self.transfer(volume, source, dest, **kwargs)
 
+
+    def transfer_liquid(
+        self,
+        liquid_class: LiquidClass,
+        volume: Union[float, Sequence[float]],
+        source: AdvancedLiquidHandling,
+        dest: AdvancedLiquidHandling,
+        trash_location: Union[types.Location, TrashBin, WasteChute] = True,
+        new_tip: TransferTipPolicyType = "once",
+    ) -> InstrumentContext:
+        """Transfer liquid from source to dest using the specified liquid class properties."""
+        if not feature_flags.allow_liquid_classes(
+                robot_type=RobotTypeEnum.robot_literal_to_enum(self._protocol_core.robot_type)
+        ):
+            raise NotImplementedError("This method is not implemented.")
+
+        # 1. Figure out tip locations to pick up from
+        # 2. Disambiguate src and dest locations
+        # 3. Wrap the above info in a dataclass that stores 1-to-1 transfer info
+
+
+        transfers = [
+            SingleTransfer(
+                pick_up_tip=PickUpTipInfo(pick_up_new=True, tip_location=tip_loc1),
+                source_well=src_well_location1,
+                dest_well=dest_well_location1,
+                drop_tip=DropTipInfo(drop_tip=True, location=trash_location),
+            ),
+            SingleTransfer(...),
+            ...,
+        ]
+
+        # This is for same volume aspirate-dispense pairs
+        self._core.transfer(
+            liquid_class=liquid_class,
+            volume=volume,
+            transfers=transfers,
+        )
+
     @publisher.publish(command=cmds.transfer)
     @requires_version(2, 0)
     def transfer(  # noqa: C901
@@ -1396,9 +1439,9 @@ class InstrumentContext(publisher.CommandPublisher):
         mix_strategy, mix_opts = mix_from_kwargs(kwargs)
 
         if trash:
-            drop_tip = transfers.DropTipStrategy.TRASH
+            drop_tip = v1_transfer.DropTipStrategy.TRASH
         else:
-            drop_tip = transfers.DropTipStrategy.RETURN
+            drop_tip = v1_transfer.DropTipStrategy.RETURN
 
         new_tip = kwargs.get("new_tip")
         if isinstance(new_tip, str):
@@ -1420,19 +1463,19 @@ class InstrumentContext(publisher.CommandPublisher):
 
         if blow_out and not blowout_location:
             if self.current_volume:
-                blow_out_strategy = transfers.BlowOutStrategy.SOURCE
+                blow_out_strategy = v1_transfer.BlowOutStrategy.SOURCE
             else:
-                blow_out_strategy = transfers.BlowOutStrategy.TRASH
+                blow_out_strategy = v1_transfer.BlowOutStrategy.TRASH
         elif blow_out and blowout_location:
             if blowout_location == "source well":
-                blow_out_strategy = transfers.BlowOutStrategy.SOURCE
+                blow_out_strategy = v1_transfer.BlowOutStrategy.SOURCE
             elif blowout_location == "destination well":
-                blow_out_strategy = transfers.BlowOutStrategy.DEST
+                blow_out_strategy = v1_transfer.BlowOutStrategy.DEST
             elif blowout_location == "trash":
-                blow_out_strategy = transfers.BlowOutStrategy.TRASH
+                blow_out_strategy = v1_transfer.BlowOutStrategy.TRASH
 
         if new_tip != types.TransferTipPolicy.NEVER:
-            tr, next_tip = labware.next_available_tip(
+            _, next_tip = labware.next_available_tip(
                 self.starting_tip,
                 self.tip_racks,
                 active_channels,
@@ -1444,9 +1487,9 @@ class InstrumentContext(publisher.CommandPublisher):
 
         touch_tip = None
         if kwargs.get("touch_tip"):
-            touch_tip = transfers.TouchTipStrategy.ALWAYS
+            touch_tip = v1_transfer.TouchTipStrategy.ALWAYS
 
-        default_args = transfers.Transfer()
+        default_args = v1_transfer.Transfer()
 
         disposal = kwargs.get("disposal_volume")
         if disposal is None:
@@ -1459,7 +1502,7 @@ class InstrumentContext(publisher.CommandPublisher):
                 f"working volume, {max_volume}uL"
             )
 
-        transfer_args = transfers.Transfer(
+        transfer_args = v1_transfer.Transfer(
             new_tip=new_tip or default_args.new_tip,
             air_gap=air_gap,
             carryover=kwargs.get("carryover") or default_args.carryover,
@@ -1472,10 +1515,10 @@ class InstrumentContext(publisher.CommandPublisher):
             blow_out_strategy=blow_out_strategy or default_args.blow_out_strategy,
             touch_tip_strategy=(touch_tip or default_args.touch_tip_strategy),
         )
-        transfer_options = transfers.TransferOptions(
+        transfer_options = v1_transfer.TransferOptions(
             transfer=transfer_args, mix=mix_opts
         )
-        plan = transfers.TransferPlan(
+        plan = v1_transfer.TransferPlan(
             volume,
             source,
             dest,
@@ -1488,9 +1531,10 @@ class InstrumentContext(publisher.CommandPublisher):
         self._execute_transfer(plan)
         return self
 
-    def _execute_transfer(self, plan: transfers.TransferPlan) -> None:
-        for cmd in plan:
-            getattr(self, cmd["method"])(*cmd["args"], **cmd["kwargs"])
+    def _execute_transfer(self, plan: v1_transfer.TransferPlan) -> None:
+        with self._core.liquid_class_transfer(my_acq_class):
+            for cmd in plan:
+                getattr(self, cmd["method"])(*cmd["args"], **cmd["kwargs"])
 
     @requires_version(2, 0)
     def delay(self, *args: Any, **kwargs: Any) -> None:

@@ -1,7 +1,8 @@
 from __future__ import annotations
 import enum
 from math import sqrt, isclose
-from typing import TYPE_CHECKING, Any, NamedTuple, Iterator, Union, List, Optional
+from typing import TYPE_CHECKING, Any, NamedTuple, Iterator, Union, List, Optional, \
+    Literal
 
 from opentrons_shared_data.robot.types import RobotType
 
@@ -423,6 +424,8 @@ class TransferTipPolicy(enum.Enum):
     NEVER = enum.auto()
     ALWAYS = enum.auto()
 
+
+TransferTipPolicyType = Literal["once", "never", "always"]
 
 DeckLocation = Union[int, str]
 ALLOWED_PRIMARY_NOZZLES = ["A1", "H1", "A12", "H12"]

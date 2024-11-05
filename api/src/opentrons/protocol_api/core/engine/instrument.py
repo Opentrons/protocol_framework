@@ -86,6 +86,8 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         self._liquid_presence_detection = bool(
             self._engine_client.state.pipettes.get_liquid_presence_detection(pipette_id)
         )
+        self._current_liquid_class = None
+        self._current_trasnfer_id = None
 
     @property
     def pipette_id(self) -> str:
