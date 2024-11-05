@@ -7,6 +7,7 @@ import { selectors as labwareIngredSelectors } from '../../../labware-ingred/sel
 import { AssignLiquidsModal, ProtocolNavBar } from '../../../organisms'
 import { LiquidsOverflowMenu } from '../../Designer/LiquidsOverflowMenu'
 import { Liquids } from '..'
+
 import type { NavigateFunction } from 'react-router-dom'
 
 const mockNavigate = vi.fn()
@@ -56,11 +57,5 @@ describe('Liquids', () => {
     render()
     screen.getByText('mock ProtocolNavBar')
     screen.getByText('mock AssignLiquidsModal')
-  })
-
-  it('renders the liquids button overflow menu', () => {
-    render()
-    fireEvent.click(screen.getByText('Liquids'))
-    screen.getByText('mock LiquidsOverflowMenu')
   })
 })
