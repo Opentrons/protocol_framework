@@ -863,7 +863,8 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                             f"Trial with volume {volume} on channel {channel} did not pass spec"
                         )
                 liquidflag += 1 
-                input("请在#2针管盒G1放一根针管校准使用.")
+                if len(trials[volume].keys()) +1 != liquidflag:
+                    input("请在#2针管盒G1放一根针管校准使用.")
             for trial in range(cfg.trials):
                 trial_asp_list = trial_asp_dict[trial]
                 trial_disp_list = trial_disp_dict[trial]
