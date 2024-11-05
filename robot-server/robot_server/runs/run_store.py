@@ -601,9 +601,8 @@ class RunStore:
             )
             slice_result = transaction.execute(select_slice).all()
 
-        sliced_commands: List[Command] = [
-            json_to_pydantic(Command, row.command)  # type: ignore[arg-type]
-            for row in slice_result
+        sliced_commands: List[ErrorOccurrence] = [
+            json_to_pydantic(ErrorOccurrence, row.command) for row in slice_result
         ]
 
         return CommandErrorSlice(

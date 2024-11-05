@@ -287,7 +287,6 @@ class RunOrchestratorStore:
 
         run_data = self.run_orchestrator.get_state_summary()
         commands = self.run_orchestrator.get_all_commands()
-        command_errors = self.run_orchestrator.get_command_errors()
         run_time_parameters = self.run_orchestrator.get_run_time_parameters()
 
         self._run_orchestrator = None
