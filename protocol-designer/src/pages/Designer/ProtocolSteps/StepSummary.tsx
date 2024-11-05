@@ -14,6 +14,7 @@ import {
 } from '@opentrons/components'
 import { getModuleDisplayName } from '@opentrons/shared-data'
 import {
+  getAdditionalEquipmentEntities,
   getLabwareEntities,
   getModuleEntities,
 } from '../../../step-forms/selectors'
@@ -80,6 +81,9 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
   const { t } = useTranslation(['protocol_steps', 'application'])
 
   const labwareNicknamesById = useSelector(getLabwareNicknamesById)
+  const additionalEquipmentEntities = useSelector(
+    getAdditionalEquipmentEntities
+  )
 
   const labwareEntities = useSelector(getLabwareEntities)
   const modules = useSelector(getModuleEntities)
@@ -316,14 +320,18 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         dispense_wells as string[],
         flatten(labwareEntities[dispense_labware]?.def.ordering)
       )
+
+      const isTrashBin =
+        additionalEquipmentEntities[dispense_labware]?.name === 'trashBin'
+
       stepSummaryContent = (
         <StyledTrans
           i18nKey={`protocol_steps:move_liquid.${moveLiquidType}`}
           values={{
             sourceWells: aspirateWellsDisplay,
-            destinationWells: dispenseWellsDisplay,
+            destinationWells: isTrashBin ? '' : dispenseWellsDisplay,
             source: sourceLabwareName,
-            destination: destinationLabwareName,
+            destination: isTrashBin ? 'Trash bin' : destinationLabwareName,
           }}
           tagText={`${volume} ${t('application:units.microliter')}`}
         />
