@@ -362,6 +362,7 @@ class CommandStore(HasState[CommandState], HandlesActions):
             notes=action.notes,
         )
         self._state.failed_command = self._state.command_history.get(action.command_id)
+        self._state.command_history.append_failed_command_id(action.command_id)
 
         if (
             prev_entry.command.intent in (CommandIntent.PROTOCOL, None)
@@ -701,10 +702,10 @@ class CommandView(HasState[CommandState]):
 
     def get_all_errors(self) -> List[ErrorOccurrence]:
         """Get the run's full error list, if there was none, returns an empty list."""
-        command_errors = self._state.command_history.get_all_commands()
+        failed_commands = self._state.command_history.get_all_failed_commands()
         return [
             command_error.error
-            for command_error in command_errors
+            for command_error in failed_commands
             if command_error.error is not None
         ]
 

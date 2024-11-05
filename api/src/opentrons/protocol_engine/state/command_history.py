@@ -24,6 +24,9 @@ class CommandHistory:
     _all_command_ids: List[str]
     """All command IDs, in insertion order."""
 
+    _all_failed_command_ids: List[str]
+    """All failed command IDs, in insertion order."""
+
     _all_command_ids_but_fixit_command_ids: List[str]
     """All command IDs besides fixit command intents, in insertion order."""
 
@@ -99,6 +102,13 @@ class CommandHistory:
         return [
             self._commands_by_id[command_id].command
             for command_id in self._all_command_ids
+        ]
+
+    def get_all_failed_commands(self) -> List[Command]:
+        """Get all failed commands."""
+        return [
+            self._commands_by_id[command_id].command
+            for command_id in self._all_failed_command_ids
         ]
 
     def get_filtered_command_ids(self, include_fixit_commands: bool) -> List[str]:
@@ -250,6 +260,10 @@ class CommandHistory:
             if command_entry.command.intent != CommandIntent.FIXIT:
                 self._all_command_ids_but_fixit_command_ids.append(command_id)
         self._commands_by_id[command_id] = command_entry
+
+    def append_failed_command_id(self, command_id: str) -> None:
+        """Create or update a failed command id."""
+        self._all_failed_command_ids.append(command_id)
 
     def _add_to_queue(self, command_id: str) -> None:
         """Add new ID to the queued."""
