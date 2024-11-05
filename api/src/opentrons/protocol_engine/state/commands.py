@@ -228,9 +228,6 @@ class CommandState:
     This value can be used to generate future hashes.
     """
 
-    failed_command_errors: List[ErrorOccurrence]
-    """List of command errors that occurred during run execution."""
-
     has_entered_error_recovery: bool
     """Whether the run has entered error recovery."""
 
@@ -269,7 +266,6 @@ class CommandStore(HasState[CommandState], HandlesActions):
             run_started_at=None,
             latest_protocol_command_hash=None,
             stopped_by_estop=False,
-            failed_command_errors=[],
             error_recovery_policy=error_recovery_policy,
             has_entered_error_recovery=False,
         )
@@ -366,7 +362,6 @@ class CommandStore(HasState[CommandState], HandlesActions):
             notes=action.notes,
         )
         self._state.failed_command = self._state.command_history.get(action.command_id)
-        self._state.failed_command_errors.append(public_error_occurrence)
 
         if (
             prev_entry.command.intent in (CommandIntent.PROTOCOL, None)

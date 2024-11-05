@@ -193,7 +193,7 @@ def test_command_failure(error_recovery_type: ErrorRecoveryType) -> None:
     )
 
     assert subject_view.get("command-id") == expected_failed_command
-    assert subject.state.failed_command_errors == [expected_error_occurrence]
+    assert subject_view.get_all_errors() == [expected_error_occurrence]
 
 
 def test_command_failure_clears_queues() -> None:
@@ -255,7 +255,7 @@ def test_command_failure_clears_queues() -> None:
     assert subject_view.get_running_command_id() is None
     assert subject_view.get_queue_ids() == OrderedSet()
     assert subject_view.get_next_to_execute() is None
-    assert subject.state.failed_command_errors == [expected_error_occurance]
+    assert subject_view.get_all_errors() == [expected_error_occurance]
 
 
 def test_setup_command_failure_only_clears_setup_command_queue() -> None:
@@ -555,7 +555,7 @@ def test_door_during_error_recovery() -> None:
     subject.handle_action(play)
     assert subject_view.get_status() == EngineStatus.AWAITING_RECOVERY
     assert subject_view.get_next_to_execute() == "command-id-2"
-    assert subject.state.failed_command_errors == [expected_error_occurance]
+    assert subject_view.get_all_errors() == [expected_error_occurance]
 
 
 @pytest.mark.parametrize("close_door_before_queueing", [False, True])
@@ -732,7 +732,7 @@ def test_error_recovery_type_tracking() -> None:
         id="c2-error", createdAt=datetime(year=2023, month=3, day=3), error=exception
     )
 
-    assert subject.state.failed_command_errors == [
+    assert view.get_all_errors() == [
         error_occurrence_1,
         error_occurrence_2,
     ]
