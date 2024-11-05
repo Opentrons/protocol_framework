@@ -2,7 +2,7 @@
 
 Inside a pipette's tip, there can be a mix of kinds of fluids - here, "fluid" means "liquid" (i.e. a protocol-relevant
 working liquid that is aspirated or dispensed from wells) or "air" (i.e. because there was an air gap). Since sometimes
-you want air gaps in different places - physicall-ybelow liquid to prevent dripping, physically-above liquid to provide
+you want air gaps in different places - physically-below liquid to prevent dripping, physically-above liquid to provide
 extra room to push the plunger - we need to support some notion of at least phsyical ordinal position of air and liquid,
 and we do so as a logical stack because that's physically relevant.
 """
