@@ -468,7 +468,7 @@ export function getIsLabwareMatch(
 }
 
 // If any labware share a slot with a module, the labware should be nested within the module for rendering purposes.
-// This prevents issues such as TC nested labware rendering in
+// This prevents issues such as TC nested labware rendering in "B1" instead of the special-cased location.
 export function updateLabwareInModules({
   runCurrentModules,
   currentLabwareInfo,
