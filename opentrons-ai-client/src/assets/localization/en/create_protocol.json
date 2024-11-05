@@ -36,5 +36,20 @@
   "thermocycler_module_v2": "Thermocycler Module GEN2",
   "magnetic_module_v1": "Magnetic Block GEN1",
   "labware_liquids_title": "Labware & Liquids",
-  "steps_title": "Steps"
+  "steps_title": "Steps",
+  "adapter": "Adapter",
+  "add_labware": "Add labware",
+  "add_liquid": "Add liquid",
+  "aluminumBlock": "Aluminum block",
+  "reservoir": "Reservoir",
+  "tipRack": "Tip rack",
+  "tubeRack": "Tube rack",
+  "wellPlate": "Well plate",
+  "no_labwares_added_yet": "No labware added yet",
+  "labwares_quantity_label": "quantity",
+  "labwares_remove_label": "remove",
+  "labwares_save_label": "Save",
+  "labwares_cancel_label": "Cancel",
+  "search_for_labware_placeholder": "Search for labware...",
+  "add_opentrons_labware": "Add Opentrons labware"
 }
