@@ -155,22 +155,18 @@ export function UpdateProtocol(): JSX.Element {
   }
 
   function processDataAndNavigateToChat(): void {
-    const userPrompt = `Modify the following Python code using the Opentrons Python Protocol API v2. Ensure that the new labware and pipettes are compatible with the Flex robot. Ensure that you perform the correct Type of Update use the Details of Changes.
+    const introText = t('modify_intro')
+    const originalCodeText =
+      t('modify_python_code') + `\`\`\`python\n` + pythonText + `\n\`\`\`\n\n`
+    const updateTypeText =
+      t('modify_type_of_update') + updateType?.value + `\n\n`
+    const detailsText = t('modify_details_of_change') + detailsValue + '\n'
 
-    Original Python Code:
-    \`\`\`python
-    ${pythonText}
-    \`\`\`
+    const chatPrompt = `${introText}${originalCodeText}${updateTypeText}${detailsText}`
 
-    Type of update:
-    - ${updateType?.value}
+    console.log(chatPrompt)
 
-    Details of Changes:
-    - ${detailsValue}
-  `
-    console.log(userPrompt)
-
-    setChatPrompt(chatData => userPrompt)
+    setChatPrompt(chatData => chatPrompt)
     navigate('/chat')
   }
 
