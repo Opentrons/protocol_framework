@@ -31,7 +31,7 @@ _default_aspirate: Dict[str, AspirateSettings] = {
         air_gap=None,
         submerge_mm=-3.0,
         retract_mm=3.0,
-        delay=1.0,
+        delay=2.0,
     ),
     _ETHANOL_70: AspirateSettings(
         z_speed=100,
@@ -60,7 +60,7 @@ _default_dispense: Dict[str, DispenseSettings] = {
         push_out=None,
         submerge_mm=3.0,
         retract_mm=3.0,
-        delay=0.5,
+        delay=1.0,
         blow_out=False,
     ),
     _ETHANOL_70: DispenseSettings(
@@ -99,7 +99,7 @@ _defaults: Dict[
                             z_speed=None,
                             flow_rate=57,
                             break_off=_default_accel_p50_ul_sec_sec,
-                            push_out=7.0,
+                            push_out=11.7,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=None,
@@ -118,7 +118,7 @@ _defaults: Dict[
                         dispense=DispenseSettings(
                             z_speed=None,
                             flow_rate=15.0,
-                            break_off=500,
+                            break_off=_default_accel_p50_ul_sec_sec,
                             push_out=3.0,
                             submerge_mm=None,
                             retract_mm=None,
@@ -138,7 +138,7 @@ _defaults: Dict[
                         dispense=DispenseSettings(
                             z_speed=None,
                             flow_rate=15.0,
-                            break_off=500,
+                            break_off=_default_accel_p50_ul_sec_sec,
                             push_out=3.0,
                             submerge_mm=None,
                             retract_mm=None,
@@ -180,7 +180,7 @@ _defaults: Dict[
                         dispense=DispenseSettings(
                             z_speed=None,
                             flow_rate=50.0,
-                            break_off=700,
+                            break_off=_default_accel_p50_ul_sec_sec,
                             push_out=2,
                             submerge_mm=None,
                             retract_mm=None,
@@ -200,7 +200,7 @@ _defaults: Dict[
                         dispense=DispenseSettings(
                             z_speed=None,
                             flow_rate=50.0,
-                            break_off=700,
+                            break_off=_default_accel_p50_ul_sec_sec,
                             push_out=2,
                             submerge_mm=None,
                             retract_mm=None,
@@ -242,7 +242,7 @@ _defaults: Dict[
                         dispense=DispenseSettings(
                             z_speed=None,
                             flow_rate=50.0,
-                            break_off=200,
+                            break_off=_default_accel_p50_ul_sec_sec,
                             push_out=2.5,
                             submerge_mm=None,
                             retract_mm=None,
@@ -262,7 +262,7 @@ _defaults: Dict[
                         dispense=DispenseSettings(
                             z_speed=None,
                             flow_rate=50.0,
-                            break_off=200,
+                            break_off=_default_accel_p50_ul_sec_sec,
                             push_out=2.5,
                             submerge_mm=None,
                             retract_mm=None,
@@ -308,8 +308,8 @@ _defaults: Dict[
                         dispense=DispenseSettings(
                             z_speed=None,
                             flow_rate=50.0,
-                            break_off=2000,
-                            push_out=5.5,  # 8uL is minimum (and best performer?)
+                            break_off=_default_accel_p1000_ul_sec_sec,
+                            push_out=12,  # 8uL is minimum (and best performer?)
                             submerge_mm=None,
                             retract_mm=None,
                             delay=1.0,
@@ -328,7 +328,7 @@ _defaults: Dict[
                         dispense=DispenseSettings(
                             z_speed=None,
                             flow_rate=50.0,
-                            break_off=2000,
+                            break_off=_default_accel_p1000_ul_sec_sec,
                             push_out=5.5,  # 8uL is minimum (and best performer?)
                             submerge_mm=None,
                             retract_mm=None,
@@ -370,8 +370,8 @@ _defaults: Dict[
                         dispense=DispenseSettings(
                             z_speed=None,
                             flow_rate=50,
-                            break_off=500,
-                            push_out=5.5,
+                            break_off=_default_accel_p1000_ul_sec_sec,
+                            push_out=12,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=1.0,
@@ -390,7 +390,7 @@ _defaults: Dict[
                         dispense=DispenseSettings(
                             z_speed=None,
                             flow_rate=50,
-                            break_off=500,
+                            break_off=_default_accel_p1000_ul_sec_sec,
                             push_out=5.5,
                             submerge_mm=None,
                             retract_mm=None,
@@ -432,8 +432,8 @@ _defaults: Dict[
                         dispense=DispenseSettings(
                             z_speed=None,
                             flow_rate=50,
-                            break_off=500,
-                            push_out=5.0,
+                            break_off=_default_accel_p1000_ul_sec_sec,
+                            push_out=12.0,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=1.0,
@@ -452,7 +452,7 @@ _defaults: Dict[
                         dispense=DispenseSettings(
                             z_speed=None,
                             flow_rate=50,
-                            break_off=500,
+                            break_off=_default_accel_p1000_ul_sec_sec,
                             push_out=5.0,
                             submerge_mm=None,
                             retract_mm=None,
@@ -491,7 +491,7 @@ _defaults: Dict[
                     _GLYCEROL_50: LiquidClassSettings(  # glycerol-50
                         aspirate=AspirateSettings(
                             z_speed=None,
-                            flow_rate=10.0,
+                            flow_rate=10,
                             air_gap=0.0,
                             submerge_mm=None,
                             retract_mm=None,
@@ -499,9 +499,9 @@ _defaults: Dict[
                         ),
                         dispense=DispenseSettings(
                             z_speed=None,
-                            flow_rate=15.0,
-                            break_off=100,
-                            push_out=7.0,
+                            flow_rate=50,
+                            break_off=_default_accel_p1000_ul_sec_sec,
+                            push_out=20,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=0.5,
@@ -562,8 +562,8 @@ _defaults: Dict[
                         dispense=DispenseSettings(
                             z_speed=None,
                             flow_rate=50,
-                            break_off=100,
-                            push_out=6.0,
+                            break_off=_default_accel_p1000_ul_sec_sec,
+                            push_out=20,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=0.5,
@@ -623,9 +623,9 @@ _defaults: Dict[
                         ),
                         dispense=DispenseSettings(
                             z_speed=None,
-                            flow_rate=100,
-                            break_off=100,
-                            push_out=8.0,
+                            flow_rate=50,
+                            break_off=_default_accel_p1000_ul_sec_sec,
+                            push_out=20,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=0.5,
@@ -683,20 +683,20 @@ _defaults: Dict[
                     _GLYCEROL_50: LiquidClassSettings(  # glycerol-50
                         aspirate=AspirateSettings(
                             z_speed=None,
-                            flow_rate=15.0,
+                            flow_rate=10,
                             air_gap=0.0,
                             submerge_mm=None,
                             retract_mm=None,
-                            delay=0.5,
+                            delay=0.7,
                         ),
                         dispense=DispenseSettings(
                             z_speed=None,
-                            flow_rate=15,
+                            flow_rate=250,
                             break_off=_default_accel_p1000_ul_sec_sec,
-                            push_out=0.0,
+                            push_out=35,
                             submerge_mm=None,
                             retract_mm=None,
-                            delay=1.0,
+                            delay=0.5,
                             blow_out=None,
                         ),
                     ),
@@ -749,13 +749,13 @@ _defaults: Dict[
                             air_gap=0.0,
                             submerge_mm=None,
                             retract_mm=None,
-                            delay=1.0,
+                            delay=0.7,
                         ),
                         dispense=DispenseSettings(
                             z_speed=None,
-                            flow_rate=200,
+                            flow_rate=250,
                             break_off=_default_accel_p1000_ul_sec_sec,
-                            push_out=0.0,
+                            push_out=35,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=0.5,
@@ -811,13 +811,13 @@ _defaults: Dict[
                             air_gap=0.0,
                             submerge_mm=None,
                             retract_mm=None,
-                            delay=1.0,
+                            delay=0.7,
                         ),
                         dispense=DispenseSettings(
                             z_speed=None,
-                            flow_rate=200,
+                            flow_rate=250,
                             break_off=_default_accel_p1000_ul_sec_sec,
-                            push_out=0.0,
+                            push_out=35,
                             submerge_mm=None,
                             retract_mm=None,
                             delay=0.5,
