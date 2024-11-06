@@ -126,11 +126,9 @@ export function SlotHover(props: SlotHoverProps): JSX.Element | null {
           opacity: hoverOpacity,
           flex: '1',
           onMouseEnter: () => {
-            // setHover(slotId)
             debouncedSetHover(slotId)
           },
           onMouseLeave: () => {
-            // setHover(null)
             debouncedSetHover(null)
           },
         }}
@@ -154,12 +152,10 @@ export function SlotHover(props: SlotHoverProps): JSX.Element | null {
           opacity: hoverOpacity,
           flex: '1',
           onMouseEnter: () => {
-            // setHover(slotId)
             debouncedSetHover(slotId)
           },
           onMouseLeave: () => {
-            // setHover(null)
-            debouncedSetHover(slotId)
+            debouncedSetHover(null)
           },
         }}
       >
