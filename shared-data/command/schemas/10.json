@@ -1621,8 +1621,16 @@
       "properties": {
         "liquidId": {
           "title": "Liquidid",
-          "description": "Unique identifier of the liquid to load.",
-          "type": "string"
+          "description": "Unique identifier of the liquid to load. If this is the sentinel value EMPTY, all values of volumeByWell must be 0.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "enum": ["EMPTY"],
+              "type": "string"
+            }
+          ]
         },
         "labwareId": {
           "title": "Labwareid",
@@ -1631,7 +1639,7 @@
         },
         "volumeByWell": {
           "title": "Volumebywell",
-          "description": "Volume of liquid, in \u00b5L, loaded into each well by name, in this labware.",
+          "description": "Volume of liquid, in \u00b5L, loaded into each well by name, in this labware. If the liquid id is the sentinel value EMPTY, all volumes must be 0.",
           "type": "object",
           "additionalProperties": {
             "type": "number"

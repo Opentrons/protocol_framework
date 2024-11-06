@@ -1,5 +1,4 @@
 import { useSelector } from 'react-redux'
-import { FixtureRender } from './FixtureRender'
 import { LabwareRender, Module } from '@opentrons/components'
 import {
   getModuleDef2,
@@ -10,6 +9,7 @@ import { getOnlyLatestDefs } from '../../../labware-defs'
 import { getCustomLabwareDefsByURI } from '../../../labware-defs/selectors'
 import { ModuleLabel } from './ModuleLabel'
 import { LabwareLabel } from '../LabwareLabel'
+import { FixtureRender } from './FixtureRender'
 import type {
   CoordinateTuple,
   DeckDefinition,

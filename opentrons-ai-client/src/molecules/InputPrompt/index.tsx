@@ -15,7 +15,12 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { SendButton } from '../../atoms/SendButton'
-import { chatDataAtom, chatHistoryAtom, tokenAtom } from '../../resources/atoms'
+import {
+  chatDataAtom,
+  chatHistoryAtom,
+  chatPromptAtom,
+  tokenAtom,
+} from '../../resources/atoms'
 import { useApiCall } from '../../resources/hooks'
 import { calcTextAreaHeight } from '../../resources/utils/utils'
 import {
@@ -29,13 +34,18 @@ import type { ChatData } from '../../resources/types'
 
 export function InputPrompt(): JSX.Element {
   const { t } = useTranslation('protocol_generator')
-  const { register, watch, reset } = useFormContext()
+  const { register, watch, reset, setValue } = useFormContext()
+  const [chatPromptAtomValue] = useAtom(chatPromptAtom)
   const [, setChatData] = useAtom(chatDataAtom)
   const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom)
   const [token] = useAtom(tokenAtom)
   const [submitted, setSubmitted] = useState<boolean>(false)
   const userPrompt = watch('userPrompt') ?? ''
   const { data, isLoading, callApi } = useApiCall()
+
+  useEffect(() => {
+    setValue('userPrompt', chatPromptAtomValue)
+  }, [chatPromptAtomValue, setValue])
 
   const handleClick = async (): Promise<void> => {
     const userInput: ChatData = {

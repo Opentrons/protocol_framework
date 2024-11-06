@@ -67,7 +67,7 @@ const OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST: string[] = [
   'fixedTrash',
 ]
 export const lightFill = COLORS.grey35
-const darkFill = COLORS.grey60
+export const darkFill = COLORS.grey60
 
 export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   const { tab } = props
@@ -180,6 +180,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
         height={zoomIn.slot != null ? '75vh' : '70vh'}
         flexDirection={DIRECTION_COLUMN}
         padding={SPACING.spacing40}
+        maxHeight="39.375rem" // this is to block deck view from enlarging
       >
         <Flex
           width="100%"
