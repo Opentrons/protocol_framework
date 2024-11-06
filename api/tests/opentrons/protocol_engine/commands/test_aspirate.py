@@ -29,7 +29,12 @@ from opentrons.protocol_engine.execution import (
     PipettingHandler,
 )
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
-from opentrons.protocol_engine.types import CurrentWell, LoadedPipette
+from opentrons.protocol_engine.types import (
+    CurrentWell,
+    LoadedPipette,
+    AspiratedFluid,
+    FluidKind,
+)
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.protocol_engine.notes import CommandNoteAdder
 
@@ -103,13 +108,20 @@ async def test_aspirate_implementation_no_prep(
 
     assert result == SuccessData(
         public=AspirateResult(volume=50, position=DeckPoint(x=1, y=2, z=3)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="abc",
                 new_location=update_types.Well(labware_id="123", well_name="A3"),
                 new_deck_point=DeckPoint(x=1, y=2, z=3),
-            )
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id="123",
+                well_name="A3",
+                volume_added=-50,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                pipette_id="abc", fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50)
+            ),
         ),
     )
 
@@ -172,13 +184,20 @@ async def test_aspirate_implementation_with_prep(
 
     assert result == SuccessData(
         public=AspirateResult(volume=50, position=DeckPoint(x=1, y=2, z=3)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="abc",
                 new_location=update_types.Well(labware_id="123", well_name="A3"),
                 new_deck_point=DeckPoint(x=1, y=2, z=3),
-            )
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id="123",
+                well_name="A3",
+                volume_added=-50,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                pipette_id="abc", fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50)
+            ),
         ),
     )
 
@@ -313,7 +332,15 @@ async def test_overpressure_error(
                     labware_id=labware_id, well_name=well_name
                 ),
                 new_deck_point=DeckPoint(x=position.x, y=position.y, z=position.z),
-            )
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id=labware_id,
+                well_name=well_name,
+                volume_added=update_types.CLEAR,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                pipette_id=pipette_id
+            ),
         ),
     )
 
@@ -329,14 +356,10 @@ async def test_aspirate_implementation_meniscus(
 ) -> None:
     """Aspirate should update WellVolumeOffset when called with WellOrigin.MENISCUS."""
     location = LiquidHandlingWellLocation(
-        origin=WellOrigin.MENISCUS, offset=WellOffset(x=0, y=0, z=-1)
-    )
-    updated_location = LiquidHandlingWellLocation(
         origin=WellOrigin.MENISCUS,
         offset=WellOffset(x=0, y=0, z=-1),
         volumeOffset="operationVolume",
     )
-
     data = AspirateParams(
         pipetteId="abc",
         labwareId="123",
@@ -353,7 +376,7 @@ async def test_aspirate_implementation_meniscus(
             pipette_id="abc",
             labware_id="123",
             well_name="A3",
-            well_location=updated_location,
+            well_location=location,
             current_well=None,
             operation_volume=-50,
         ),
@@ -372,12 +395,19 @@ async def test_aspirate_implementation_meniscus(
 
     assert result == SuccessData(
         public=AspirateResult(volume=50, position=DeckPoint(x=1, y=2, z=3)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="abc",
                 new_location=update_types.Well(labware_id="123", well_name="A3"),
                 new_deck_point=DeckPoint(x=1, y=2, z=3),
-            )
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id="123",
+                well_name="A3",
+                volume_added=-50,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                pipette_id="abc", fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50)
+            ),
         ),
     )

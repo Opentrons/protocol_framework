@@ -15,6 +15,8 @@ type HintKey =  // normal hints
   | 'custom_labware_with_modules'
   | 'export_v8_1_protocol_7_3'
   | 'change_magnet_module_model'
+  | 'unused_hardware'
+  | 'no_commands'
 // DEPRECATED HINTS (keep a record to avoid name collisions with old persisted dismissal states)
 // 'export_v4_protocol'
 // | 'export_v4_protocol_3_18'

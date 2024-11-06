@@ -44,8 +44,7 @@ class DropTipInPlaceResult(BaseModel):
 
 
 _ExecuteReturn = (
-    SuccessData[DropTipInPlaceResult, None]
-    | DefinedErrorData[TipPhysicallyAttachedError]
+    SuccessData[DropTipInPlaceResult] | DefinedErrorData[TipPhysicallyAttachedError]
 )
 
 
@@ -66,7 +65,6 @@ class DropTipInPlaceImplementation(
     async def execute(self, params: DropTipInPlaceParams) -> _ExecuteReturn:
         """Drop a tip using the requested pipette."""
         state_update = update_types.StateUpdate()
-
         try:
             await self._tip_handler.drop_tip(
                 pipette_id=params.pipetteId, home_after=params.homeAfter
@@ -76,6 +74,7 @@ class DropTipInPlaceImplementation(
             state_update_if_false_positive.update_pipette_tip_state(
                 pipette_id=params.pipetteId, tip_geometry=None
             )
+            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
             error = TipPhysicallyAttachedError(
                 id=self._model_utils.generate_id(),
                 createdAt=self._model_utils.get_timestamp(),
@@ -93,12 +92,11 @@ class DropTipInPlaceImplementation(
                 state_update_if_false_positive=state_update_if_false_positive,
             )
         else:
+            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
             state_update.update_pipette_tip_state(
                 pipette_id=params.pipetteId, tip_geometry=None
             )
-            return SuccessData(
-                public=DropTipInPlaceResult(), private=None, state_update=state_update
-            )
+            return SuccessData(public=DropTipInPlaceResult(), state_update=state_update)
 
 
 class DropTipInPlace(

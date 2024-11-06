@@ -86,7 +86,7 @@ class TipPhysicallyMissingError(ErrorOccurrence):
 
 
 _ExecuteReturn = Union[
-    SuccessData[PickUpTipResult, None],
+    SuccessData[PickUpTipResult],
     DefinedErrorData[TipPhysicallyMissingError],
 ]
 
@@ -109,7 +109,7 @@ class PickUpTipImplementation(AbstractCommandImpl[PickUpTipParams, _ExecuteRetur
 
     async def execute(
         self, params: PickUpTipParams
-    ) -> Union[SuccessData[PickUpTipResult, None], _ExecuteReturn]:
+    ) -> Union[SuccessData[PickUpTipResult], _ExecuteReturn]:
         """Move to and pick up a tip using the requested pipette."""
         pipette_id = params.pipetteId
         labware_id = params.labwareId
@@ -146,9 +146,11 @@ class PickUpTipImplementation(AbstractCommandImpl[PickUpTipParams, _ExecuteRetur
                 pipette_id=pipette_id,
                 tip_geometry=e.tip_geometry,
             )
+            state_update_if_false_positive.set_fluid_empty(pipette_id=pipette_id)
             state_update.mark_tips_as_used(
                 pipette_id=pipette_id, labware_id=labware_id, well_name=well_name
             )
+            state_update.set_fluid_unknown(pipette_id=pipette_id)
             return DefinedErrorData(
                 public=TipPhysicallyMissingError(
                     id=self._model_utils.generate_id(),
@@ -172,6 +174,7 @@ class PickUpTipImplementation(AbstractCommandImpl[PickUpTipParams, _ExecuteRetur
             state_update.mark_tips_as_used(
                 pipette_id=pipette_id, labware_id=labware_id, well_name=well_name
             )
+            state_update.set_fluid_empty(pipette_id=pipette_id)
             return SuccessData(
                 public=PickUpTipResult(
                     tipVolume=tip_geometry.volume,
@@ -179,7 +182,6 @@ class PickUpTipImplementation(AbstractCommandImpl[PickUpTipParams, _ExecuteRetur
                     tipDiameter=tip_geometry.diameter,
                     position=deck_point,
                 ),
-                private=None,
                 state_update=state_update,
             )
 

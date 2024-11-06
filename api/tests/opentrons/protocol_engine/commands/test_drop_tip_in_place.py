@@ -19,6 +19,7 @@ from opentrons.protocol_engine.resources.model_utils import ModelUtils
 from opentrons.protocol_engine.state.update_types import (
     PipetteTipStateUpdate,
     StateUpdate,
+    PipetteUnknownFluidUpdate,
 )
 
 
@@ -49,9 +50,11 @@ async def test_success(
 
     assert result == SuccessData(
         public=DropTipInPlaceResult(),
-        private=None,
         state_update=StateUpdate(
-            pipette_tip_state=PipetteTipStateUpdate(pipette_id="abc", tip_geometry=None)
+            pipette_tip_state=PipetteTipStateUpdate(
+                pipette_id="abc", tip_geometry=None
+            ),
+            pipette_aspirated_fluid=PipetteUnknownFluidUpdate(pipette_id="abc"),
         ),
     )
 
@@ -90,8 +93,12 @@ async def test_tip_attached_error(
             createdAt=datetime(year=1, month=2, day=3),
             wrappedErrors=[matchers.Anything()],
         ),
-        state_update=StateUpdate(),
+        state_update=StateUpdate(
+            pipette_aspirated_fluid=PipetteUnknownFluidUpdate(pipette_id="abc")
+        ),
         state_update_if_false_positive=StateUpdate(
-            pipette_tip_state=PipetteTipStateUpdate(pipette_id="abc", tip_geometry=None)
+            pipette_tip_state=PipetteTipStateUpdate(
+                pipette_id="abc", tip_geometry=None
+            ),
         ),
     )

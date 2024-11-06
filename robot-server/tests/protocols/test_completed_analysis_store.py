@@ -8,6 +8,7 @@ import pytest
 from sqlalchemy.engine import Engine
 from decoy import Decoy
 
+from robot_server.data_files.models import DataFileSource
 from robot_server.persistence.tables import (
     analysis_table,
     analysis_primitive_type_rtp_table,
@@ -21,7 +22,10 @@ from opentrons.protocol_reader import (
     ProtocolSource,
     JsonProtocolConfig,
 )
-from robot_server.data_files.data_files_store import DataFilesStore, DataFileInfo
+from robot_server.data_files.data_files_store import (
+    DataFilesStore,
+    DataFileInfo,
+)
 from robot_server.protocols.analysis_memcache import MemoryCache
 from robot_server.protocols.analysis_models import (
     CompletedAnalysis,
@@ -326,6 +330,7 @@ async def test_store_and_get_csv_rtps_by_analysis_id(
             id="file-id",
             name="my_csv_file.csv",
             file_hash="file-hash",
+            source=DataFileSource.UPLOADED,
             created_at=datetime(year=2024, month=1, day=1, tzinfo=timezone.utc),
         )
     )
@@ -460,6 +465,7 @@ async def test_make_room_and_add_handles_rtp_tables_correctly(
             id="file-id",
             name="my_csv_file.csv",
             file_hash="file-hash",
+            source=DataFileSource.UPLOADED,
             created_at=datetime(year=2024, month=1, day=1, tzinfo=timezone.utc),
         )
     )

@@ -46,10 +46,11 @@ import type { DeleteModalType } from '../../../../components/modals/ConfirmDelet
 export interface ConnectedStepInfoProps {
   stepId: StepIdType
   stepNumber: number
+  dragHovered?: boolean
 }
 
 export function ConnectedStepInfo(props: ConnectedStepInfoProps): JSX.Element {
-  const { stepId, stepNumber } = props
+  const { stepId, stepNumber, dragHovered = false } = props
   const { t } = useTranslation('application')
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
   const stepIds = useSelector(getOrderedStepIds)
@@ -215,6 +216,7 @@ export function ConnectedStepInfo(props: ConnectedStepInfoProps): JSX.Element {
         title={`${stepNumber}. ${
           step.stepName || t(`stepType.${step.stepType}`)
         }`}
+        dragHovered={dragHovered}
       />
     </>
   )

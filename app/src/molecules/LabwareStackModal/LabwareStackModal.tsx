@@ -32,6 +32,8 @@ import {
   THERMOCYCLER_MODULE_TYPE,
 } from '@opentrons/shared-data'
 import tiprackAdapter from '/app/assets/images/labware/opentrons_flex_96_tiprack_adapter.png'
+import tcLid from '/app/assets/images/labware/opentrons_tough_pcr_auto_sealing_lid.png'
+import deckRiser from '/app/assets/images/labware/opentrons_flex_deck_riser.png'
 
 import type { RobotType, RunTimeCommand } from '@opentrons/shared-data'
 
@@ -58,6 +60,13 @@ const LIST_ITEM_STYLE = css`
   justify-content: ${JUSTIFY_SPACE_BETWEEN};
 `
 
+const ADAPTER_LOAD_NAMES_TO_SHOW_IMAGE: { [key: string]: string } = {
+  opentrons_flex_96_tiprack_adapter: tiprackAdapter,
+  opentrons_flex_deck_riser: deckRiser,
+}
+const LABWARE_LOAD_NAMES_TO_SHOW_IMAGE: { [key: string]: string } = {
+  opentrons_tough_pcr_auto_sealing_lid: tcLid,
+}
 interface LabwareStackModalProps {
   labwareIdTop: string
   commands: RunTimeCommand[] | null
@@ -87,6 +96,7 @@ export const LabwareStackModal = (
     moduleModel,
     labwareName,
     labwareNickname,
+    labwareQuantity,
   } = getLocationInfoNames(labwareIdTop, commands)
 
   const topDefinition = getSlotLabwareDefinition(labwareIdTop, commands)
@@ -106,7 +116,25 @@ export const LabwareStackModal = (
     moduleModel != null ? getModuleDisplayName(moduleModel) : null ?? ''
   const isAdapterForTiprack =
     adapterDef?.parameters.loadName === 'opentrons_flex_96_tiprack_adapter'
-  const tiprackAdapterImg = <img src={tiprackAdapter} css={IMAGE_STYLE} />
+
+  const labwareImg =
+    topDefinition.parameters.loadName in LABWARE_LOAD_NAMES_TO_SHOW_IMAGE ? (
+      <img
+        src={
+          LABWARE_LOAD_NAMES_TO_SHOW_IMAGE[topDefinition.parameters.loadName]
+        }
+        css={IMAGE_STYLE}
+      />
+    ) : null
+
+  const adapterImg =
+    adapterDef != null &&
+    adapterDef.parameters.loadName in ADAPTER_LOAD_NAMES_TO_SHOW_IMAGE ? (
+      <img
+        src={ADAPTER_LOAD_NAMES_TO_SHOW_IMAGE[adapterDef.parameters.loadName]}
+        css={IMAGE_STYLE}
+      />
+    ) : null
   const moduleImg =
     moduleModel != null ? (
       <img src={getModuleImage(moduleModel, true)} css={IMAGE_STYLE} />
@@ -139,25 +167,33 @@ export const LabwareStackModal = (
             <LabwareStackLabel
               isOnDevice
               text={labwareName}
-              subText={labwareNickname}
+              subText={
+                labwareQuantity > 1
+                  ? t('labware_quantity', { quantity: labwareQuantity })
+                  : labwareNickname
+              }
             />
-            <Flex css={IMAGE_CONTAINER_STYLE}>
-              <LabwareStackRender
-                definitionTop={topDefinition}
-                definitionBottom={adapterDef}
-                highlightBottom={false}
-                highlightTop={adapterDef != null && !isAdapterForTiprack}
-              />
-            </Flex>
+            {labwareImg != null ? (
+              <Flex css={IMAGE_CONTAINER_STYLE}>{labwareImg}</Flex>
+            ) : (
+              <Flex css={IMAGE_CONTAINER_STYLE}>
+                <LabwareStackRender
+                  definitionTop={topDefinition}
+                  definitionBottom={adapterDef}
+                  highlightBottom={false}
+                  highlightTop={adapterDef != null && !isAdapterForTiprack}
+                />
+              </Flex>
+            )}
           </Flex>
-          <Divider marginY={SPACING.spacing16} />
         </>
         {adapterDef != null ? (
           <>
+            <Divider marginY={SPACING.spacing16} />
             <Flex css={LIST_ITEM_STYLE}>
               <LabwareStackLabel text={adapterName ?? ''} isOnDevice />
-              {isAdapterForTiprack ? (
-                <Flex css={IMAGE_CONTAINER_STYLE}>{tiprackAdapterImg}</Flex>
+              {adapterImg != null ? (
+                <Flex css={IMAGE_CONTAINER_STYLE}>{adapterImg}</Flex>
               ) : (
                 <Flex css={IMAGE_CONTAINER_STYLE}>
                   <LabwareStackRender
@@ -169,16 +205,16 @@ export const LabwareStackModal = (
                 </Flex>
               )}
             </Flex>
-            {moduleModel != null ? (
-              <Divider marginY={SPACING.spacing16} />
-            ) : null}
           </>
         ) : null}
         {moduleModel != null ? (
-          <Flex css={LIST_ITEM_STYLE}>
-            <LabwareStackLabel text={moduleDisplayName} isOnDevice />
-            <Flex css={IMAGE_CONTAINER_STYLE}>{moduleImg}</Flex>
-          </Flex>
+          <>
+            <Divider marginY={SPACING.spacing16} />
+            <Flex css={LIST_ITEM_STYLE}>
+              <LabwareStackLabel text={moduleDisplayName} isOnDevice />
+              <Flex css={IMAGE_CONTAINER_STYLE}>{moduleImg}</Flex>
+            </Flex>
+          </>
         ) : null}
       </Flex>
     </OddModal>
@@ -200,24 +236,35 @@ export const LabwareStackModal = (
         <Flex flexDirection={DIRECTION_COLUMN}>
           <>
             <Flex css={LIST_ITEM_STYLE}>
-              <LabwareStackLabel text={labwareName} subText={labwareNickname} />
-              <Flex css={IMAGE_CONTAINER_STYLE}>
-                <LabwareStackRender
-                  definitionTop={topDefinition}
-                  definitionBottom={adapterDef}
-                  highlightBottom={false}
-                  highlightTop={adapterDef != null && !isAdapterForTiprack}
-                />
-              </Flex>
+              <LabwareStackLabel
+                text={labwareName}
+                subText={
+                  labwareQuantity > 1
+                    ? t('labware_quantity', { quantity: labwareQuantity })
+                    : labwareNickname
+                }
+              />
+              {labwareImg != null ? (
+                <Flex css={IMAGE_CONTAINER_STYLE}>{labwareImg}</Flex>
+              ) : (
+                <Flex css={IMAGE_CONTAINER_STYLE}>
+                  <LabwareStackRender
+                    definitionTop={topDefinition}
+                    definitionBottom={adapterDef}
+                    highlightBottom={false}
+                    highlightTop={adapterDef != null && !isAdapterForTiprack}
+                  />
+                </Flex>
+              )}
             </Flex>
-            <Divider marginY={SPACING.spacing16} />
           </>
           {adapterDef != null ? (
             <>
+              <Divider marginY={SPACING.spacing16} />
               <Flex css={LIST_ITEM_STYLE}>
                 <LabwareStackLabel text={adapterName ?? ''} />
-                {isAdapterForTiprack ? (
-                  <Flex css={IMAGE_CONTAINER_STYLE}>{tiprackAdapterImg}</Flex>
+                {adapterImg != null ? (
+                  <Flex css={IMAGE_CONTAINER_STYLE}>{adapterImg}</Flex>
                 ) : (
                   <Flex css={IMAGE_CONTAINER_STYLE}>
                     <LabwareStackRender
@@ -229,16 +276,16 @@ export const LabwareStackModal = (
                   </Flex>
                 )}
               </Flex>
-              {moduleModel != null ? (
-                <Divider marginY={SPACING.spacing16} />
-              ) : null}
             </>
           ) : null}
           {moduleModel != null ? (
-            <Flex css={LIST_ITEM_STYLE}>
-              <LabwareStackLabel text={moduleDisplayName} />
-              <Flex css={IMAGE_CONTAINER_STYLE}>{moduleImg}</Flex>
-            </Flex>
+            <>
+              <Divider marginY={SPACING.spacing16} />
+              <Flex css={LIST_ITEM_STYLE}>
+                <LabwareStackLabel text={moduleDisplayName} />
+                <Flex css={IMAGE_CONTAINER_STYLE}>{moduleImg}</Flex>
+              </Flex>
+            </>
           ) : null}
         </Flex>
       </Box>
@@ -253,31 +300,23 @@ interface LabwareStackLabelProps {
 }
 function LabwareStackLabel(props: LabwareStackLabelProps): JSX.Element {
   const { text, subText, isOnDevice = false } = props
-  return isOnDevice ? (
+  return (
     <Flex
       flexDirection={DIRECTION_COLUMN}
       gridGap={SPACING.spacing4}
-      width="28rem"
+      width={isOnDevice ? '28rem' : '14.75rem'}
       flex="0 0 auto"
-      justifyContent={JUSTIFY_CENTER}
+      justifyContent={isOnDevice ? JUSTIFY_CENTER : undefined}
     >
-      <StyledText oddStyle="bodyTextBold">{text}</StyledText>
+      <StyledText desktopStyle="bodyLargeSemiBold" oddStyle="bodyTextBold">
+        {text}
+      </StyledText>
       {subText != null ? (
-        <StyledText oddStyle="bodyTextRegular" color={COLORS.grey60}>
-          {subText}
-        </StyledText>
-      ) : null}
-    </Flex>
-  ) : (
-    <Flex
-      flexDirection={DIRECTION_COLUMN}
-      gridGap={SPACING.spacing4}
-      width="14.75rem"
-      flex="0 0 auto"
-    >
-      <StyledText desktopStyle="bodyLargeSemiBold">{text}</StyledText>
-      {subText != null ? (
-        <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
+        <StyledText
+          desktopStyle="bodyDefaultRegular"
+          oddStyle="bodyTextRegular"
+          color={COLORS.grey60}
+        >
           {subText}
         </StyledText>
       ) : null}

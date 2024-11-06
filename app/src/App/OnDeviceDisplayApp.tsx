@@ -55,6 +55,7 @@ import { updateBrightness } from '/app/redux/shell'
 import { SLEEP_NEVER_MS } from '/app/local-resources/config'
 import { useProtocolReceiptToast, useSoftwareUpdatePoll } from './hooks'
 import { ODDTopLevelRedirects } from './ODDTopLevelRedirects'
+import { ReactQueryDevtools } from '/app/App/tools'
 
 import { OnDeviceDisplayAppFallback } from './OnDeviceDisplayAppFallback'
 
@@ -183,6 +184,7 @@ export const OnDeviceDisplayApp = (): JSX.Element => {
   // TODO (sb:6/12/23) Create a notification manager to set up preference and order of takeover modals
   return (
     <ApiHostProvider hostname="127.0.0.1">
+      <ReactQueryDevtools />
       <InitialLoadingScreen>
         <LocalizationProvider>
           <ErrorBoundary FallbackComponent={OnDeviceDisplayAppFallback}>
@@ -191,9 +193,9 @@ export const OnDeviceDisplayApp = (): JSX.Element => {
                 <SleepScreen />
               ) : (
                 <>
-                  <EstopTakeover />
                   <IncompatibleModuleTakeover isOnDevice={true} />
                   <MaintenanceRunTakeover>
+                    <EstopTakeover />
                     <FirmwareUpdateTakeover />
                     <NiceModal.Provider>
                       <ToasterOven>

@@ -69,6 +69,7 @@ describe('MagnetTools', () => {
           value: 10,
         },
       },
+      showFormErrors: false,
     }
     vi.mocked(getMagneticLabwareOptions).mockReturnValue([
       { name: 'mock labware in mock module in slot abc', value: 'mockValue' },

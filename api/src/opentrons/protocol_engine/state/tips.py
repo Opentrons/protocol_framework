@@ -6,12 +6,7 @@ from typing import Dict, Optional, List, Union
 from opentrons.protocol_engine.state import update_types
 
 from ._abstract_store import HasState, HandlesActions
-from ..actions import Action, SucceedCommandAction, ResetTipsAction, get_state_updates
-from ..commands import (
-    Command,
-    LoadLabwareResult,
-)
-from ..commands.configuring_common import PipetteConfigUpdateResultMixin
+from ..actions import Action, ResetTipsAction, get_state_updates
 
 from opentrons.hardware_control.nozzle_manager import NozzleMap
 
@@ -66,19 +61,7 @@ class TipStore(HasState[TipState], HandlesActions):
         for state_update in get_state_updates(action):
             self._handle_state_update(state_update)
 
-        if isinstance(action, SucceedCommandAction):
-            if isinstance(action.private_result, PipetteConfigUpdateResultMixin):
-                pipette_id = action.private_result.pipette_id
-                config = action.private_result.config
-                self._state.pipette_info_by_pipette_id[pipette_id] = _PipetteInfo(
-                    channels=config.channels,
-                    active_channels=config.channels,
-                    nozzle_map=config.nozzle_map,
-                )
-
-            self._handle_succeeded_command(action.command)
-
-        elif isinstance(action, ResetTipsAction):
+        if isinstance(action, ResetTipsAction):
             labware_id = action.labware_id
 
             for well_name in self._state.tips_by_labware_id[labware_id].keys():
@@ -86,23 +69,16 @@ class TipStore(HasState[TipState], HandlesActions):
                     well_name
                 ] = TipRackWellState.CLEAN
 
-    def _handle_succeeded_command(self, command: Command) -> None:
-        if (
-            isinstance(command.result, LoadLabwareResult)
-            and command.result.definition.parameters.isTiprack
-        ):
-            labware_id = command.result.labwareId
-            definition = command.result.definition
-            self._state.tips_by_labware_id[labware_id] = {
-                well_name: TipRackWellState.CLEAN
-                for column in definition.ordering
-                for well_name in column
-            }
-            self._state.column_by_labware_id[labware_id] = [
-                column for column in definition.ordering
-            ]
-
     def _handle_state_update(self, state_update: update_types.StateUpdate) -> None:
+        if state_update.pipette_config != update_types.NO_CHANGE:
+            self._state.pipette_info_by_pipette_id[
+                state_update.pipette_config.pipette_id
+            ] = _PipetteInfo(
+                channels=state_update.pipette_config.config.channels,
+                active_channels=state_update.pipette_config.config.channels,
+                nozzle_map=state_update.pipette_config.config.nozzle_map,
+            )
+
         if state_update.tips_used != update_types.NO_CHANGE:
             self._set_used_tips(
                 pipette_id=state_update.tips_used.pipette_id,
@@ -118,6 +94,19 @@ class TipStore(HasState[TipState], HandlesActions):
                 state_update.pipette_nozzle_map.nozzle_map.tip_count
             )
             pipette_info.nozzle_map = state_update.pipette_nozzle_map.nozzle_map
+
+        if state_update.loaded_labware != update_types.NO_CHANGE:
+            labware_id = state_update.loaded_labware.labware_id
+            definition = state_update.loaded_labware.definition
+            if definition.parameters.isTiprack:
+                self._state.tips_by_labware_id[labware_id] = {
+                    well_name: TipRackWellState.CLEAN
+                    for column in definition.ordering
+                    for well_name in column
+                }
+                self._state.column_by_labware_id[labware_id] = [
+                    column for column in definition.ordering
+                ]
 
     def _set_used_tips(  # noqa: C901
         self, pipette_id: str, well_name: str, labware_id: str

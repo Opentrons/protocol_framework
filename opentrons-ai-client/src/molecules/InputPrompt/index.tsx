@@ -50,6 +50,10 @@ export function InputPrompt(): JSX.Element {
     setValue('userPrompt', chatPromptAtomValue)
   }, [chatPromptAtomValue, setValue])
 
+  useEffect(() => {
+    setValue('userPrompt', chatPromptAtomValue)
+  }, [chatPromptAtomValue, setValue])
+
   const handleClick = async (): Promise<void> => {
     setRequestId(uuidv4())
     const userInput: ChatData = {

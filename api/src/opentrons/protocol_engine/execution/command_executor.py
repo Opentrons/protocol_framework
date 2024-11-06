@@ -192,7 +192,6 @@ class CommandExecutor:
                 self._action_dispatcher.dispatch(
                     SucceedCommandAction(
                         command=succeeded_command,
-                        private_result=result.private,
                         state_update=result.state_update,
                     ),
                 )

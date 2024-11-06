@@ -49,4 +49,8 @@ describe('StepContainer', () => {
     render(props)
     screen.getByText('Final deck state')
   })
+  it('renders the divider if hover targets that step', () => {
+    render({ ...props, dragHovered: true })
+    screen.getByTestId('divider')
+  })
 })

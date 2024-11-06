@@ -18,6 +18,7 @@ import {
   TYPOGRAPHY,
   StyledText,
   DIRECTION_ROW,
+  OVERFLOW_AUTO,
 } from '@opentrons/components'
 
 import type { ChatData } from '../../resources/types'
@@ -120,6 +121,7 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
         data-testid={`ChatDisplay_from_${isUser ? 'user' : 'backend'}`}
         borderRadius={SPACING.spacing12}
         width="100%"
+        overflowY={OVERFLOW_AUTO}
         flexDirection={DIRECTION_COLUMN}
         gridGap={SPACING.spacing16}
         position={POSITION_RELATIVE}

@@ -567,6 +567,7 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
 
     _sync_module_hardware: SynchronousAdapter[hw_modules.AbsorbanceReader]
     _initialized_value: Optional[List[int]] = None
+    _ready_to_initialize: bool = False
 
     def initialize(
         self,
@@ -575,6 +576,11 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
         reference_wavelength: Optional[int] = None,
     ) -> None:
         """Initialize the Absorbance Reader by taking zero reading."""
+        if not self._ready_to_initialize:
+            raise CannotPerformModuleAction(
+                "Cannot perform Initialize action on Absorbance Reader without calling `.close_lid()` first."
+            )
+
         # TODO: check that the wavelengths are within the supported wavelengths
         self._engine_client.execute_command(
             cmd.absorbance_reader.InitializeParams(
@@ -586,7 +592,7 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
         )
         self._initialized_value = wavelengths
 
-    def read(self, filename: Optional[str]) -> Dict[int, Dict[str, float]]:
+    def read(self, filename: Optional[str] = None) -> Dict[int, Dict[str, float]]:
         """Initiate a read on the Absorbance Reader, and return the results. During Analysis, this will return a measurement of zero for all wells."""
         wavelengths = self._engine_client.state.modules.get_absorbance_reader_substate(
             self.module_id
@@ -633,6 +639,7 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
                 moduleId=self.module_id,
             )
         )
+        self._ready_to_initialize = True
 
     def open_lid(self) -> None:
         """Close the Absorbance Reader's lid."""

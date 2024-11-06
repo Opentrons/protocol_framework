@@ -31,6 +31,14 @@ from .set_rail_lights import (
     SetRailLightsResult,
 )
 
+from .air_gap_in_place import (
+    AirGapInPlace,
+    AirGapInPlaceParams,
+    AirGapInPlaceCreate,
+    AirGapInPlaceResult,
+    AirGapInPlaceCommandType,
+)
+
 from .aspirate import (
     Aspirate,
     AspirateParams,
@@ -141,7 +149,6 @@ from .load_pipette import (
     LoadPipetteCreate,
     LoadPipetteResult,
     LoadPipetteCommandType,
-    LoadPipettePrivateResult,
 )
 
 from .move_labware import (
@@ -272,7 +279,6 @@ from .configure_for_volume import (
     ConfigureForVolumeCreate,
     ConfigureForVolumeResult,
     ConfigureForVolumeCommandType,
-    ConfigureForVolumePrivateResult,
 )
 
 from .prepare_to_aspirate import (
@@ -322,6 +328,7 @@ from .liquid_probe import (
 
 Command = Annotated[
     Union[
+        AirGapInPlace,
         Aspirate,
         AspirateInPlace,
         Comment,
@@ -394,11 +401,13 @@ Command = Annotated[
         unsafe.UpdatePositionEstimators,
         unsafe.UnsafeEngageAxes,
         unsafe.UnsafeUngripLabware,
+        unsafe.UnsafePlaceLabware,
     ],
     Field(discriminator="commandType"),
 ]
 
 CommandParams = Union[
+    AirGapInPlaceParams,
     AspirateParams,
     AspirateInPlaceParams,
     CommentParams,
@@ -471,9 +480,11 @@ CommandParams = Union[
     unsafe.UpdatePositionEstimatorsParams,
     unsafe.UnsafeEngageAxesParams,
     unsafe.UnsafeUngripLabwareParams,
+    unsafe.UnsafePlaceLabwareParams,
 ]
 
 CommandType = Union[
+    AirGapInPlaceCommandType,
     AspirateCommandType,
     AspirateInPlaceCommandType,
     CommentCommandType,
@@ -546,10 +557,12 @@ CommandType = Union[
     unsafe.UpdatePositionEstimatorsCommandType,
     unsafe.UnsafeEngageAxesCommandType,
     unsafe.UnsafeUngripLabwareCommandType,
+    unsafe.UnsafePlaceLabwareCommandType,
 ]
 
 CommandCreate = Annotated[
     Union[
+        AirGapInPlaceCreate,
         AspirateCreate,
         AspirateInPlaceCreate,
         CommentCreate,
@@ -622,11 +635,13 @@ CommandCreate = Annotated[
         unsafe.UpdatePositionEstimatorsCreate,
         unsafe.UnsafeEngageAxesCreate,
         unsafe.UnsafeUngripLabwareCreate,
+        unsafe.UnsafePlaceLabwareCreate,
     ],
     Field(discriminator="commandType"),
 ]
 
 CommandResult = Union[
+    AirGapInPlaceResult,
     AspirateResult,
     AspirateInPlaceResult,
     CommentResult,
@@ -699,17 +714,9 @@ CommandResult = Union[
     unsafe.UpdatePositionEstimatorsResult,
     unsafe.UnsafeEngageAxesResult,
     unsafe.UnsafeUngripLabwareResult,
+    unsafe.UnsafePlaceLabwareResult,
 ]
 
-# todo(mm, 2024-06-12): Ideally, command return types would have specific
-# CommandPrivateResults paired with specific CommandResults. For example,
-# a TouchTipResult can never be paired with a LoadPipettePrivateResult in practice,
-# and ideally our types would reflect that.
-CommandPrivateResult = Union[
-    None,
-    LoadPipettePrivateResult,
-    ConfigureForVolumePrivateResult,
-]
 
 # All `DefinedErrorData`s that implementations will actually return in practice.
 CommandDefinedErrorData = Union[

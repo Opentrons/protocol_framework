@@ -55,6 +55,9 @@ from opentrons.protocol_engine.types import (
     LoadedPipette,
     TipGeometry,
     ModuleDefinition,
+    ProbedHeightInfo,
+    LoadedVolumeInfo,
+    WellLiquidInfo,
 )
 from opentrons.protocol_engine.commands import (
     CommandStatus,
@@ -1539,9 +1542,13 @@ def test_get_well_position_with_meniscus_offset(
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
-    decoy.when(
-        mock_well_view.get_last_measured_liquid_height("labware-id", "B2")
-    ).then_return(70.5)
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
+        WellLiquidInfo(
+            probed_volume=None,
+            probed_height=ProbedHeightInfo(height=70.5, last_probed=datetime.now()),
+            loaded_volume=None,
+        )
+    )
     decoy.when(
         mock_pipette_view.get_current_tip_lld_settings(pipette_id="pipette-id")
     ).then_return(0.5)
@@ -1561,6 +1568,68 @@ def test_get_well_position_with_meniscus_offset(
         y=slot_pos[1] - 2 + well_def.y + 3,
         z=slot_pos[2] + 3 + well_def.z + 4 + 70.5,
     )
+
+
+def test_get_well_position_with_volume_offset_raises_error(
+    decoy: Decoy,
+    well_plate_def: LabwareDefinition,
+    mock_labware_view: LabwareView,
+    mock_well_view: WellView,
+    mock_addressable_area_view: AddressableAreaView,
+    mock_pipette_view: PipetteView,
+    subject: GeometryView,
+) -> None:
+    """Calling get_well_position with any volume offset should raise an error when there's no innerLabwareGeometry."""
+    labware_data = LoadedLabware(
+        id="labware-id",
+        loadName="load-name",
+        definitionUri="definition-uri",
+        location=DeckSlotLocation(slotName=DeckSlotName.SLOT_4),
+        offsetId="offset-id",
+    )
+    calibration_offset = LabwareOffsetVector(x=1, y=-2, z=3)
+    slot_pos = Point(4, 5, 6)
+    well_def = well_plate_def.wells["B2"]
+
+    decoy.when(mock_labware_view.get("labware-id")).then_return(labware_data)
+    decoy.when(mock_labware_view.get_definition("labware-id")).then_return(
+        well_plate_def
+    )
+    decoy.when(mock_labware_view.get_labware_offset_vector("labware-id")).then_return(
+        calibration_offset
+    )
+    decoy.when(
+        mock_addressable_area_view.get_addressable_area_position(DeckSlotName.SLOT_4.id)
+    ).then_return(slot_pos)
+    decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
+        well_def
+    )
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
+        WellLiquidInfo(
+            loaded_volume=None,
+            probed_height=ProbedHeightInfo(height=45.0, last_probed=datetime.now()),
+            probed_volume=None,
+        )
+    )
+    decoy.when(
+        mock_pipette_view.get_current_tip_lld_settings(pipette_id="pipette-id")
+    ).then_return(0.5)
+    decoy.when(mock_labware_view.get_well_geometry("labware-id", "B2")).then_raise(
+        errors.IncompleteLabwareDefinitionError("Woops!")
+    )
+
+    with pytest.raises(errors.IncompleteLabwareDefinitionError):
+        subject.get_well_position(
+            labware_id="labware-id",
+            well_name="B2",
+            well_location=LiquidHandlingWellLocation(
+                origin=WellOrigin.MENISCUS,
+                offset=WellOffset(x=2, y=3, z=4),
+                volumeOffset="operationVolume",
+            ),
+            operation_volume=-1245.833,
+            pipette_id="pipette-id",
+        )
 
 
 def test_get_well_position_with_meniscus_and_literal_volume_offset(
@@ -1597,9 +1666,13 @@ def test_get_well_position_with_meniscus_and_literal_volume_offset(
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
-    decoy.when(
-        mock_well_view.get_last_measured_liquid_height("labware-id", "B2")
-    ).then_return(45.0)
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
+        WellLiquidInfo(
+            loaded_volume=None,
+            probed_height=ProbedHeightInfo(height=45.0, last_probed=datetime.now()),
+            probed_volume=None,
+        )
+    )
     labware_def = _load_labware_definition_data()
     assert labware_def.innerLabwareGeometry is not None
     inner_well_def = labware_def.innerLabwareGeometry["welldefinition1111"]
@@ -1663,9 +1736,13 @@ def test_get_well_position_with_meniscus_and_float_volume_offset(
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
-    decoy.when(
-        mock_well_view.get_last_measured_liquid_height("labware-id", "B2")
-    ).then_return(45.0)
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
+        WellLiquidInfo(
+            loaded_volume=None,
+            probed_height=ProbedHeightInfo(height=45.0, last_probed=datetime.now()),
+            probed_volume=None,
+        )
+    )
     labware_def = _load_labware_definition_data()
     assert labware_def.innerLabwareGeometry is not None
     inner_well_def = labware_def.innerLabwareGeometry["welldefinition1111"]
@@ -1728,9 +1805,13 @@ def test_get_well_position_raises_validation_error(
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
-    decoy.when(
-        mock_well_view.get_last_measured_liquid_height("labware-id", "B2")
-    ).then_return(40.0)
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
+        WellLiquidInfo(
+            loaded_volume=None,
+            probed_height=ProbedHeightInfo(height=40.0, last_probed=datetime.now()),
+            probed_volume=None,
+        )
+    )
     labware_def = _load_labware_definition_data()
     assert labware_def.innerLabwareGeometry is not None
     inner_well_def = labware_def.innerLabwareGeometry["welldefinition1111"]
@@ -1753,6 +1834,76 @@ def test_get_well_position_raises_validation_error(
             operation_volume=-100.0,
             pipette_id="pipette-id",
         )
+
+
+def test_get_meniscus_height(
+    decoy: Decoy,
+    well_plate_def: LabwareDefinition,
+    mock_labware_view: LabwareView,
+    mock_well_view: WellView,
+    mock_addressable_area_view: AddressableAreaView,
+    mock_pipette_view: PipetteView,
+    subject: GeometryView,
+) -> None:
+    """It should be able to get the position of a well meniscus in a labware."""
+    labware_data = LoadedLabware(
+        id="labware-id",
+        loadName="load-name",
+        definitionUri="definition-uri",
+        location=DeckSlotLocation(slotName=DeckSlotName.SLOT_4),
+        offsetId="offset-id",
+    )
+    calibration_offset = LabwareOffsetVector(x=1, y=-2, z=3)
+    slot_pos = Point(4, 5, 6)
+    well_def = well_plate_def.wells["B2"]
+
+    decoy.when(mock_labware_view.get("labware-id")).then_return(labware_data)
+    decoy.when(mock_labware_view.get_definition("labware-id")).then_return(
+        well_plate_def
+    )
+    decoy.when(mock_labware_view.get_labware_offset_vector("labware-id")).then_return(
+        calibration_offset
+    )
+    decoy.when(
+        mock_addressable_area_view.get_addressable_area_position(DeckSlotName.SLOT_4.id)
+    ).then_return(slot_pos)
+    decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
+        well_def
+    )
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
+        WellLiquidInfo(
+            loaded_volume=LoadedVolumeInfo(
+                volume=2000.0, last_loaded=datetime.now(), operations_since_load=0
+            ),
+            probed_height=None,
+            probed_volume=None,
+        )
+    )
+    labware_def = _load_labware_definition_data()
+    assert labware_def.innerLabwareGeometry is not None
+    inner_well_def = labware_def.innerLabwareGeometry["welldefinition1111"]
+    decoy.when(mock_labware_view.get_well_geometry("labware-id", "B2")).then_return(
+        inner_well_def
+    )
+    decoy.when(
+        mock_pipette_view.get_current_tip_lld_settings(pipette_id="pipette-id")
+    ).then_return(0.5)
+
+    result = subject.get_well_position(
+        labware_id="labware-id",
+        well_name="B2",
+        well_location=WellLocation(
+            origin=WellOrigin.MENISCUS,
+            offset=WellOffset(x=2, y=3, z=4),
+        ),
+        pipette_id="pipette-id",
+    )
+
+    assert result == Point(
+        x=slot_pos[0] + 1 + well_def.x + 2,
+        y=slot_pos[1] - 2 + well_def.y + 3,
+        z=slot_pos[2] + 3 + well_def.z + 4 + 39.2423,
+    )
 
 
 def test_get_relative_well_location(
@@ -2786,7 +2937,6 @@ def test_get_offset_location_deck_slot(
                 version=nice_labware_definition.version,
             ),
         ),
-        private_result=None,
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="labware-id-1",
@@ -2831,7 +2981,6 @@ def test_get_offset_location_module(
                 model=tempdeck_v2_def.model,
             ),
         ),
-        private_result=None,
     )
     load_labware = SucceedCommandAction(
         command=LoadLabware(
@@ -2851,7 +3000,6 @@ def test_get_offset_location_module(
                 version=nice_labware_definition.version,
             ),
         ),
-        private_result=None,
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="labware-id-1",
@@ -2900,7 +3048,6 @@ def test_get_offset_location_module_with_adapter(
                 model=tempdeck_v2_def.model,
             ),
         ),
-        private_result=None,
     )
     load_adapter = SucceedCommandAction(
         command=LoadLabware(
@@ -2920,7 +3067,6 @@ def test_get_offset_location_module_with_adapter(
                 version=nice_adapter_definition.version,
             ),
         ),
-        private_result=None,
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="adapter-id-1",
@@ -2949,7 +3095,6 @@ def test_get_offset_location_module_with_adapter(
                 version=nice_labware_definition.version,
             ),
         ),
-        private_result=None,
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="labware-id-1",
@@ -2998,7 +3143,6 @@ def test_get_offset_fails_with_off_deck_labware(
                 version=nice_labware_definition.version,
             ),
         ),
-        private_result=None,
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="labware-id-1",
@@ -3133,9 +3277,13 @@ def test_validate_dispense_volume_into_well_meniscus(
     decoy.when(mock_labware_view.get_well_geometry("labware-id", "A1")).then_return(
         inner_well_def
     )
-    decoy.when(
-        mock_well_view.get_last_measured_liquid_height("labware-id", "A1")
-    ).then_return(40.0)
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
+        WellLiquidInfo(
+            loaded_volume=None,
+            probed_height=ProbedHeightInfo(height=40.0, last_probed=datetime.now()),
+            probed_volume=None,
+        )
+    )
 
     with pytest.raises(errors.InvalidDispenseVolumeError):
         subject.validate_dispense_volume_into_well(

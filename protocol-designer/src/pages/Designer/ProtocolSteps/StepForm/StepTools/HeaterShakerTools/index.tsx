@@ -16,10 +16,17 @@ import {
   ToggleExpandStepFormField,
   ToggleStepFormField,
 } from '../../../../../../molecules'
+import { getFormErrorsMappedToField, getFormLevelError } from '../../utils'
 import type { StepFormProps } from '../../types'
 
 export function HeaterShakerTools(props: StepFormProps): JSX.Element {
-  const { propsForFields, formData } = props
+  const {
+    propsForFields,
+    formData,
+    showFormErrors = false,
+    focusedField = null,
+    visibleFormErrors,
+  } = props
   const { t } = useTranslation(['application', 'form', 'protocol_steps'])
   const moduleLabwareOptions = useSelector(getHeaterShakerLabwareOptions)
 
@@ -28,6 +35,8 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
       propsForFields.moduleId.updateValue(moduleLabwareOptions[0].value)
     }
   }, [])
+
+  const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
   return (
     <Flex flexDirection={DIRECTION_COLUMN}>
@@ -82,6 +91,12 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
           offLabel={t(
             'form:step_edit_form.field.heaterShaker.temperature.toggleOff'
           )}
+          formLevelError={getFormLevelError(
+            showFormErrors,
+            'targetHeaterShakerTemperature',
+            mappedErrorsToField,
+            focusedField
+          )}
         />
         <ToggleExpandStepFormField
           {...propsForFields.targetSpeed}
@@ -94,6 +109,12 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
           onLabel={t('form:step_edit_form.field.heaterShaker.shaker.toggleOn')}
           offLabel={t(
             'form:step_edit_form.field.heaterShaker.shaker.toggleOff'
+          )}
+          formLevelError={getFormLevelError(
+            showFormErrors,
+            'targetSpeed',
+            mappedErrorsToField,
+            focusedField
           )}
         />
         <ToggleStepFormField
@@ -121,6 +142,12 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
           isSelected={formData.heaterShakerSetTimer === true}
           units={t('application:units.time')}
           toggleElement="checkbox"
+          formLevelError={getFormLevelError(
+            showFormErrors,
+            'heaterShakerTimer',
+            mappedErrorsToField,
+            focusedField
+          )}
         />
       </Flex>
     </Flex>

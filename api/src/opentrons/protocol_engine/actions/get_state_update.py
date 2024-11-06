@@ -1,5 +1,6 @@
 # noqa: D100
-
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
 from .actions import (
     Action,
@@ -9,7 +10,9 @@ from .actions import (
 )
 from ..commands.command import DefinedErrorData
 from ..error_recovery_policy import ErrorRecoveryType
-from ..state.update_types import StateUpdate
+
+if TYPE_CHECKING:
+    from ..state.update_types import StateUpdate
 
 
 def get_state_updates(action: Action) -> list[StateUpdate]:

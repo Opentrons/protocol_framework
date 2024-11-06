@@ -33,7 +33,6 @@ export function OffDeckLabwareList(
           {...labwareItem}
           isFlex={isFlex}
           commands={commands}
-          nestedLabwareInfo={null}
           showLabwareSVG
         />
       ))}

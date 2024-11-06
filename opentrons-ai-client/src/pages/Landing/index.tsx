@@ -16,9 +16,9 @@ import { useTranslation } from 'react-i18next'
 import { useIsMobile } from '../../resources/hooks/useIsMobile'
 import { useNavigate } from 'react-router-dom'
 import { useTrackEvent } from '../../resources/hooks/useTrackEvent'
+import { useAtom } from 'jotai'
 import { headerWithMeterAtom } from '../../resources/atoms'
 import { useEffect } from 'react'
-import { useAtom } from 'jotai'
 
 export function Landing(): JSX.Element | null {
   const navigate = useNavigate()
@@ -57,6 +57,7 @@ export function Landing(): JSX.Element | null {
         justifyContent={JUSTIFY_CENTER}
         width="100%"
         maxWidth="548px"
+        minHeight="600px"
         gridGap={SPACING.spacing16}
         textAlign={TEXT_ALIGN_CENTER}
       >
