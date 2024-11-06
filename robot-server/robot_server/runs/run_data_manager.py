@@ -366,6 +366,8 @@ class RunDataManager:
 
         if next_current is False:
             run_result = await self._run_orchestrator_store.clear()
+            state_summary = run_result.state_summary
+            parameters = run_result.parameters
             run_resource: Union[
                 RunResource, BadRunResource
             ] = self._run_store.update_run_state(

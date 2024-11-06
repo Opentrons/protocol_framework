@@ -176,6 +176,7 @@ class RunStore:
             transaction.execute(update_run)
             transaction.execute(delete_existing_commands)
             for command_index, command in enumerate(commands):
+                print(command.error)
                 transaction.execute(
                     insert_command,
                     {

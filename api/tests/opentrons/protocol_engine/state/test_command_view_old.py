@@ -34,13 +34,12 @@ from opentrons.protocol_engine.state.commands import (
     QueueStatus,
 )
 
-from opentrons.protocol_engine.state.command_history import CommandEntry
+from opentrons.protocol_engine.state.command_history import CommandEntry, CommandHistory
 
 from opentrons.protocol_engine.errors import ProtocolCommandFailedError, ErrorOccurrence
 
 from opentrons_shared_data.errors.codes import ErrorCodes
 
-from opentrons.protocol_engine.state.command_history import CommandHistory
 from opentrons.protocol_engine.state.update_types import StateUpdate
 
 from .command_fixtures import (
@@ -100,6 +99,8 @@ def get_command_view(  # noqa: C901
                 command_id=command.id,
                 command_entry=CommandEntry(index=index, command=command),
             )
+            if command.error:
+                command_history.append_failed_command_id(command.id)
 
     state = CommandState(
         command_history=command_history,

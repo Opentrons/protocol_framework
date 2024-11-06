@@ -50,6 +50,7 @@ class CommandHistory:
 
     def __init__(self) -> None:
         self._all_command_ids = []
+        self._all_failed_command_ids = []
         self._all_command_ids_but_fixit_command_ids = []
         self._queued_command_ids = OrderedSet()
         self._queued_setup_command_ids = OrderedSet()
