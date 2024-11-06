@@ -151,7 +151,10 @@ function installDevtools(): Promise<Logger> {
     })
       .then(() => log.debug('Devtools extensions installed'))
       .catch((error: unknown) => {
-        log.warn('Failed to install devtools extensions', { error })
+        log.warn('Failed to install devtools extensions', {
+          forceReinstall,
+          error,
+        })
       })
   } else {
     log.warn('could not resolve electron dev tools installer')
