@@ -1,4 +1,5 @@
 """Tests for the InstrumentContext public interface."""
+
 import inspect
 import pytest
 from collections import OrderedDict
@@ -16,7 +17,6 @@ from opentrons.protocol_engine.errors.error_occurrence import (
 
 from opentrons.legacy_broker import LegacyBroker
 
-from opentrons.protocol_engine.errors.exceptions import TipNotAttachedError
 from tests.opentrons.protocol_api.partial_tip_configurations import (
     PipetteReliantNozzleConfigSpec,
     PIPETTE_RELIANT_TEST_SPECS,
@@ -26,11 +26,6 @@ from tests.opentrons.protocol_api.partial_tip_configurations import (
     InstrumentCoreNozzleConfigSpec,
     INSTRUMENT_CORE_NOZZLE_LAYOUT_TEST_SPECS,
     ExpectedCoreArgs,
-)
-from tests.opentrons.protocol_engine.pipette_fixtures import (
-    NINETY_SIX_COLS,
-    NINETY_SIX_MAP,
-    NINETY_SIX_ROWS,
 )
 from opentrons.protocols.api_support import instrument as mock_instrument_support
 from opentrons.protocols.api_support.types import APIVersion
@@ -1490,59 +1485,6 @@ def test_measure_liquid_height(
     assert pcfe.value is errorToRaise
 
 
-def test_96_tip_config_valid(
-    decoy: Decoy, mock_instrument_core: InstrumentCore, subject: InstrumentContext
-) -> None:
-    """It should error when there's no tips on the correct corner nozzles."""
-    nozzle_map = NozzleMap.build(
-        physical_nozzles=NINETY_SIX_MAP,
-        physical_rows=NINETY_SIX_ROWS,
-        physical_columns=NINETY_SIX_COLS,
-        starting_nozzle="A5",
-        back_left_nozzle="A5",
-        front_right_nozzle="H5",
-        valid_nozzle_maps=ValidNozzleMaps(maps={"Column12": NINETY_SIX_COLS["5"]}),
-    )
-    decoy.when(mock_instrument_core.get_nozzle_map()).then_return(nozzle_map)
-    decoy.when(mock_instrument_core.get_active_channels()).then_return(96)
-    with pytest.raises(TipNotAttachedError):
-        subject._96_tip_config_valid()
-
-
-def test_96_tip_config_invalid(
-    decoy: Decoy, mock_instrument_core: InstrumentCore, subject: InstrumentContext
-) -> None:
-    """It should return True when there are tips on the correct corner nozzles."""
-    nozzle_map = NozzleMap.build(
-        physical_nozzles=NINETY_SIX_MAP,
-        physical_rows=NINETY_SIX_ROWS,
-        physical_columns=NINETY_SIX_COLS,
-        starting_nozzle="A1",
-        back_left_nozzle="A1",
-        front_right_nozzle="H12",
-        valid_nozzle_maps=ValidNozzleMaps(
-            maps={
-                "Full": sum(
-                    [
-                        NINETY_SIX_ROWS["A"],
-                        NINETY_SIX_ROWS["B"],
-                        NINETY_SIX_ROWS["C"],
-                        NINETY_SIX_ROWS["D"],
-                        NINETY_SIX_ROWS["E"],
-                        NINETY_SIX_ROWS["F"],
-                        NINETY_SIX_ROWS["G"],
-                        NINETY_SIX_ROWS["H"],
-                    ],
-                    [],
-                )
-            }
-        ),
-    )
-    decoy.when(mock_instrument_core.get_nozzle_map()).then_return(nozzle_map)
-    decoy.when(mock_instrument_core.get_active_channels()).then_return(96)
-    assert subject._96_tip_config_valid() is True
-
-
 @pytest.mark.parametrize(
     "api_version",
     versions_between(
@@ -1628,6 +1570,9 @@ def test_mix_with_lpd(
     decoy.when(mock_instrument_core.get_dispense_flow_rate(1.23)).then_return(5.67)
     decoy.when(mock_instrument_core.has_tip()).then_return(True)
     decoy.when(mock_instrument_core.get_current_volume()).then_return(0.0)
+    decoy.when(mock_instrument_core.nozzle_configuration_valid_for_lld()).then_return(
+        True
+    )
 
     subject.liquid_presence_detection = True
     subject.mix(repetitions=10, volume=10.0, location=input_location, rate=1.23)

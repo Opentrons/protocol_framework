@@ -59,14 +59,13 @@ from opentrons.hardware_control.types import (
     EstopStateNotification,
     TipStateType,
 )
-from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType
 from opentrons.hardware_control.errors import InvalidCriticalPoint
 from opentrons.hardware_control.ot3api import OT3API
 from opentrons.hardware_control import ThreadManager
 
 from opentrons.hardware_control.backends.ot3simulator import OT3Simulator
 from opentrons_hardware.firmware_bindings.constants import NodeId
-from opentrons.types import Point, Mount
+from opentrons.types import Point, Mount, NozzleConfigurationType
 
 from opentrons_hardware.hardware_control.motion_planning.types import Move
 

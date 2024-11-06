@@ -1,7 +1,6 @@
 """Utilities for doing coverage math on wells."""
 
 from typing import Iterator
-from typing_extensions import assert_never
 from opentrons_shared_data.errors.exceptions import (
     InvalidStoredData,
     InvalidProtocolData,

@@ -1,4 +1,5 @@
 """Basic pipette data state and store."""
+
 from __future__ import annotations
 
 import dataclasses
@@ -14,15 +15,13 @@ from typing import (
 from typing_extensions import assert_never
 
 from opentrons_shared_data.pipette import pipette_definition
-from opentrons_shared_data.labware.utils import well_ordinals_from_well_name
 from opentrons.config.defaults_ot2 import Z_RETRACT_DISTANCE
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons.hardware_control import CriticalPoint
 from opentrons.hardware_control.nozzle_manager import (
-    NozzleConfigurationType,
     NozzleMap,
 )
-from opentrons.types import MountType, Mount as HwMount, Point
+from opentrons.types import MountType, Mount as HwMount, Point, NozzleConfigurationType
 
 from . import update_types, fluid_stack
 from .. import errors
@@ -762,3 +761,14 @@ class PipetteView(HasState[PipetteState]):
             raise errors.PipetteNotLoadedError(
                 f"Pipette {pipette_id} not found; unable to determine if pipette liquid presence detection enabled."
             ) from e
+
+    def get_nozzle_configuration_supports_lld(self, pipette_id: str) -> bool:
+        """Determine if the current partial tip configuration supports LLD."""
+        nozzle_map = self.get_nozzle_configuration(pipette_id)
+        if (
+            nozzle_map.physical_nozzle_count == 96
+            and nozzle_map.back_left != nozzle_map.full_instrument_back_left
+            and nozzle_map.front_right != nozzle_map.full_instrument_front_right
+        ):
+            return False
+        return True

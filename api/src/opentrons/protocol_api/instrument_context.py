@@ -2,7 +2,6 @@ from __future__ import annotations
 import logging
 from contextlib import ExitStack
 from typing import Any, List, Optional, Sequence, Union, cast, Dict
-from opentrons.protocol_engine.errors.exceptions import TipNotAttachedError
 from opentrons_shared_data.errors.exceptions import (
     CommandPreconditionViolated,
     CommandParameterLimitViolated,
@@ -28,7 +27,6 @@ from opentrons.protocols.api_support.util import (
     APIVersionError,
     UnsupportedAPIError,
 )
-from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType
 
 from .core.common import InstrumentCore, ProtocolCore
 from .core.engine import ENGINE_CORE_API_VERSION
@@ -259,7 +257,7 @@ class InstrumentContext(publisher.CommandPublisher):
             self.api_version >= APIVersion(2, 20)
             and well is not None
             and self.liquid_presence_detection
-            and self._96_tip_config_valid()
+            and self._core.nozzle_configuration_valid_for_lld()
             and self._core.get_current_volume() == 0
         ):
             self.require_liquid_presence(well=well)
@@ -946,7 +944,7 @@ class InstrumentContext(publisher.CommandPublisher):
         if location is None:
             if (
                 nozzle_map is not None
-                and nozzle_map.configuration != NozzleConfigurationType.FULL
+                and nozzle_map.configuration != types.NozzleConfigurationType.FULL
                 and self.starting_tip is not None
             ):
                 # Disallowing this avoids concerning the system with the direction
@@ -1882,19 +1880,6 @@ class InstrumentContext(publisher.CommandPublisher):
         else:
             return self._protocol_core.get_last_location()
 
-    def _96_tip_config_valid(self) -> bool:
-        n_map = self._core.get_nozzle_map()
-        channels = self._core.get_active_channels()
-        if channels == 96:
-            if (
-                n_map.back_left != n_map.full_instrument_back_left
-                and n_map.front_right != n_map.full_instrument_front_right
-            ):
-                raise TipNotAttachedError(
-                    "Either the front right or the back left nozzle must have a tip attached to do LLD."
-                )
-        return True
-
     def __repr__(self) -> str:
         return "<{}: {} in {}>".format(
             self.__class__.__name__,
@@ -2156,7 +2141,6 @@ class InstrumentContext(publisher.CommandPublisher):
             The pressure sensors for the Flex 8-channel pipette are on channels 1 and 8 (positions A1 and H1). For the Flex 96-channel pipette, the pressure sensors are on channels 1 and 96 (positions A1 and H12). Other channels on multi-channel pipettes do not have sensors and cannot detect liquid.
         """
         loc = well.top()
-        self._96_tip_config_valid()
         return self._core.detect_liquid_presence(well._core, loc)
 
     @requires_version(2, 20)
@@ -2169,7 +2153,6 @@ class InstrumentContext(publisher.CommandPublisher):
             The pressure sensors for the Flex 8-channel pipette are on channels 1 and 8 (positions A1 and H1). For the Flex 96-channel pipette, the pressure sensors are on channels 1 and 96 (positions A1 and H12). Other channels on multi-channel pipettes do not have sensors and cannot detect liquid.
         """
         loc = well.top()
-        self._96_tip_config_valid()
         self._core.liquid_probe_with_recovery(well._core, loc)
 
     @requires_version(2, 20)
@@ -2184,7 +2167,6 @@ class InstrumentContext(publisher.CommandPublisher):
         """
 
         loc = well.top()
-        self._96_tip_config_valid()
         height = self._core.liquid_probe_without_recovery(well._core, loc)
         return height
 

@@ -1,8 +1,10 @@
 """Tip state tracking."""
+
 from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, Optional, List, Union
 
+from opentrons.types import NozzleMapInterface
 from opentrons.protocol_engine.state import update_types
 
 from ._abstract_store import HasState, HandlesActions
@@ -135,7 +137,7 @@ class TipView(HasState[TipState]):
         labware_id: str,
         num_tips: int,
         starting_tip_name: Optional[str],
-        nozzle_map: Optional[NozzleMap],
+        nozzle_map: Optional[NozzleMapInterface],
     ) -> Optional[str]:
         """Get the next available clean tip. Does not support use of a starting tip if the pipette used is in a partial configuration."""
         wells = self._state.tips_by_labware_id.get(labware_id, {})
@@ -192,10 +194,7 @@ class TipView(HasState[TipState]):
                 return None
             else:
                 # In the case of an 8ch pipette where a column has mixed state tips we may simply progress to the next column in our search
-                if (
-                    nozzle_map is not None
-                    and len(nozzle_map.full_instrument_map_store) == 8
-                ):
+                if nozzle_map is not None and nozzle_map.physical_nozzle_count == 8:
                     return None
 
                 # In the case of a 96ch we can attempt to index in by singular rows and columns assuming that indexed direction is safe
@@ -325,7 +324,7 @@ class TipView(HasState[TipState]):
             return None
 
         if starting_tip_name is None and nozzle_map is not None and columns:
-            num_channels = len(nozzle_map.full_instrument_map_store)
+            num_channels = nozzle_map.physical_nozzle_count
             num_nozzle_cols = len(nozzle_map.columns)
             num_nozzle_rows = len(nozzle_map.rows)
             # Each pipette's cluster search is determined by the point of entry for a given pipette/configuration:

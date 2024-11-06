@@ -20,7 +20,6 @@ from typing import (
 from opentrons.protocol_api.labware import Labware, Well
 from opentrons import types
 from opentrons.protocols.api_support.types import APIVersion
-from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType
 
 
 AdvancedLiquidHandling = Union[
@@ -435,7 +434,7 @@ class TransferPlan:
         # then avoid iterating through its Wells.
         # ii. if using single channel pipettes, flatten a multi-dimensional
         # list of Wells into a 1 dimensional list of Wells
-        pipette_configuration_type = NozzleConfigurationType.FULL
+        pipette_configuration_type = types.NozzleConfigurationType.FULL
         normalized_sources: List[Union[Well, types.Location]]
         normalized_dests: List[Union[Well, types.Location]]
         if self._api_version >= _PARTIAL_TIP_SUPPORT_ADDED:
@@ -444,7 +443,7 @@ class TransferPlan:
             )
         if (
             self._instr.channels > 1
-            and pipette_configuration_type == NozzleConfigurationType.FULL
+            and pipette_configuration_type == types.NozzleConfigurationType.FULL
         ):
             normalized_sources, normalized_dests = self._multichannel_transfer(
                 srcs, dsts
