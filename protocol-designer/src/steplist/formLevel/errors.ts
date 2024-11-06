@@ -619,7 +619,7 @@ export const newLabwareLocationRequired = (
   fields: HydratedFormData
 ): FormError | null => {
   const { newLocation } = fields
-  return newLocation == null && newLocation?.slotName == null
+  return newLocation == null || newLocation.slotName == null
     ? NEW_LABWARE_LOCATION_REQUIRED
     : null
 }
