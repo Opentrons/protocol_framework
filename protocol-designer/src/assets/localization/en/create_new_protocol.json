@@ -13,7 +13,7 @@
   "incompatible_tip_body": "Using a pipette with an incompatible tip rack may result reduce pipette accuracy and collisions. We strongly recommend that you do not pair a pipette with an incompatible tip rack.",
   "incompatible_tips": "Incompatible tips",
   "labware_name": "Labware name",
-  "left_right": "Left+Right",
+  "left_right": "Left + Right",
   "modules_added": "Modules added",
   "name": "Name",
   "need_gripper": "Do you want to move labware automatically with the gripper?",
