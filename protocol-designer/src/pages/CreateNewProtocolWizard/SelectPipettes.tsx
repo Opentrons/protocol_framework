@@ -192,7 +192,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                 <StyledText desktopStyle="headingSmallBold">
                   {t('pipette_type')}
                 </StyledText>
-                <Flex gridGap={SPACING.spacing4}>
+                <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
                   {PIPETTE_TYPES[robotType].map(type => {
                     return type.value === '96' &&
                       (pipettesByMount.left.pipetteName != null ||
