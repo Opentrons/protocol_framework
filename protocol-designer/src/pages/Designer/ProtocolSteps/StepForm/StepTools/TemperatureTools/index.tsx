@@ -6,9 +6,7 @@ import {
   COLORS,
   DIRECTION_COLUMN,
   Flex,
-  ListItem,
   SPACING,
-  StyledText,
 } from '@opentrons/components'
 import { getTemperatureLabwareOptions } from '../../../../../../ui/modules/selectors'
 import {
@@ -34,30 +32,11 @@ export function TemperatureTools(props: StepFormProps): JSX.Element {
 
   return (
     <Flex flexDirection={DIRECTION_COLUMN}>
-      {moduleLabwareOptions.length > 1 ? (
-        <DropdownStepFormField
-          {...propsForFields.moduleId}
-          options={moduleLabwareOptions}
-          title={t('protocol_steps:module')}
-        />
-      ) : (
-        <Flex
-          flexDirection={DIRECTION_COLUMN}
-          padding={SPACING.spacing12}
-          gridGap={SPACING.spacing8}
-        >
-          <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
-            {t('protocol_steps:module')}
-          </StyledText>
-          <ListItem type="noActive">
-            <Flex padding={SPACING.spacing12}>
-              <StyledText desktopStyle="bodyDefaultRegular">
-                {moduleLabwareOptions[0].name}
-              </StyledText>
-            </Flex>
-          </ListItem>
-        </Flex>
-      )}
+      <DropdownStepFormField
+        {...propsForFields.moduleId}
+        options={moduleLabwareOptions}
+        title={t('protocol_steps:module')}
+      />
       <Box borderBottom={`1px solid ${COLORS.grey30}`} />
       <Flex padding={`${SPACING.spacing16} ${SPACING.spacing16} 0`}>
         <ToggleExpandStepFormField
