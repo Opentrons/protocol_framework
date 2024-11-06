@@ -150,12 +150,14 @@ class DropTipImplementation(AbstractCommandImpl[DropTipParams, _ExecuteReturn]):
             state_update_if_false_positive.update_pipette_tip_state(
                 pipette_id=params.pipetteId, tip_geometry=None
             )
+            state_update.set_fluid_unknown(pipette_id=pipette_id)
             return DefinedErrorData(
                 public=error,
                 state_update=state_update,
                 state_update_if_false_positive=state_update_if_false_positive,
             )
         else:
+            state_update.set_fluid_unknown(pipette_id=pipette_id)
             state_update.update_pipette_tip_state(
                 pipette_id=params.pipetteId, tip_geometry=None
             )

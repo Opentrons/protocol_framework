@@ -35,18 +35,18 @@ export function RobotCoordinateSpaceWithRef(
       {}
     )
 
+    const PADDING = deckDef.otId === 'ot2_standard' ? 5 : 10
     if (deckDef.otId === 'ot2_standard') {
-      const PADDING = 5
       wholeDeckViewBox = `${viewBoxOriginX - PADDING} ${
         viewBoxOriginY + PADDING * 5
       } ${deckXDimension + PADDING * 2} ${deckYDimension - PADDING * 10}`
     } else {
-      const PADDING = 20
-      wholeDeckViewBox = `${viewBoxOriginX - PADDING} ${
-        viewBoxOriginY + PADDING
-      } ${deckXDimension + PADDING * 2} ${deckYDimension + PADDING * 2}`
+      wholeDeckViewBox = `${viewBoxOriginX + PADDING * 2} ${
+        viewBoxOriginY - PADDING
+      } ${deckXDimension + PADDING * 4} ${deckYDimension + PADDING * 3}`
     }
   }
+
   return (
     <Svg
       viewBox={zoomed ? viewBox : wholeDeckViewBox}

@@ -1,5 +1,5 @@
-import * as React from 'react'
 import values from 'lodash/values'
+import { Fragment, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Module } from '@opentrons/components'
@@ -28,7 +28,9 @@ import { DeckItemHover } from './DeckItemHover'
 import { SlotOverflowMenu } from './SlotOverflowMenu'
 import { HoveredItems } from './HoveredItems'
 import { SelectedHoveredItems } from './SelectedHoveredItems'
+import { getAdjacentLabware } from './utils'
 
+import type { ComponentProps, Dispatch, SetStateAction } from 'react'
 import type { ModuleTemporalProperties } from '@opentrons/step-generation'
 import type {
   AddressableArea,
@@ -55,7 +57,7 @@ interface DeckSetupDetailsProps extends DeckSetupTabType {
   hoveredFixture: Fixture | null
   hoveredLabware: string | null
   hoveredModule: ModuleModel | null
-  setHover: React.Dispatch<React.SetStateAction<string | null>>
+  setHover: Dispatch<SetStateAction<string | null>>
   showGen1MultichannelCollisionWarnings: boolean
   stagingAreaCutoutIds: CutoutId[]
   selectedZoomInSlot?: DeckSlotId
@@ -83,9 +85,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
   )
   const selectedSlotInfo = useSelector(selectors.getZoomedInSlotInfo)
   const { selectedSlot } = selectedSlotInfo
-  const [menuListId, setShowMenuListForId] = React.useState<DeckSlotId | null>(
-    null
-  )
+  const [menuListId, setShowMenuListForId] = useState<DeckSlotId | null>(null)
   const dispatch = useDispatch<any>()
 
   const {
@@ -100,7 +100,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
     deckDef,
   })
   //  initiate the slot's info
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch(
       editSlotInfo({
         createdNestedLabwareForSlot,
@@ -132,6 +132,15 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
     ? getSlotsWithCollisions(deckDef, allModules)
     : []
 
+  const adjacentLabware =
+    preSelectedFixture != null && selectedSlot.cutout != null
+      ? getAdjacentLabware(
+          preSelectedFixture,
+          selectedSlot.cutout,
+          activeDeckSetup.labware
+        )
+      : null
+
   return (
     <>
       {/* all modules */}
@@ -146,7 +155,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
         const moduleDef = getModuleDef2(moduleOnDeck.model)
         const getModuleInnerProps = (
           moduleState: ModuleTemporalProperties['moduleState']
-        ): React.ComponentProps<typeof Module>['innerProps'] => {
+        ): ComponentProps<typeof Module>['innerProps'] => {
           if (moduleState.type === THERMOCYCLER_MODULE_TYPE) {
             let lidMotorState = 'unknown'
             if (tab === 'startingDeck' || moduleState.lidOpen) {
@@ -186,7 +195,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
           zDimension: labwareLoadedOnModule?.def.dimensions.zDimension ?? 0,
         }
         return moduleOnDeck.slot !== selectedSlot.slot ? (
-          <React.Fragment key={moduleOnDeck.id}>
+          <Fragment key={moduleOnDeck.id}>
             <Module
               key={moduleOnDeck.id}
               x={slotPosition[0]}
@@ -238,7 +247,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
                 />
               ) : null}
             </Module>
-          </React.Fragment>
+          </Fragment>
         ) : null
       })}
 
@@ -276,7 +285,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
         })
         .map(addressableArea => {
           return (
-            <React.Fragment key={addressableArea.id}>
+            <Fragment key={addressableArea.id}>
               <DeckItemHover
                 isSelected={selectedZoomInSlot != null}
                 hover={hover}
@@ -291,7 +300,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
                 itemId={addressableArea.id}
                 tab={tab}
               />
-            </React.Fragment>
+            </Fragment>
           )
         })}
       {/* all labware on deck NOT those in modules */}
@@ -299,10 +308,10 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
         if (
           labware.slot === 'offDeck' ||
           allModules.some(m => m.id === labware.slot) ||
-          allLabware.some(lab => lab.id === labware.slot)
+          allLabware.some(lab => lab.id === labware.slot) ||
+          labware.id === adjacentLabware?.id
         )
           return null
-
         const slotPosition = getPositionFromSlotId(labware.slot, deckDef)
         const slotBoundingBox = getAddressableAreaFromSlotId(
           labware.slot,
@@ -313,7 +322,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
           return null
         }
         return labware.slot !== selectedSlot.slot ? (
-          <React.Fragment key={labware.id}>
+          <Fragment key={labware.id}>
             <LabwareOnDeck
               x={slotPosition[0]}
               y={slotPosition[1]}
@@ -331,7 +340,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
               itemId={labware.slot}
               tab={tab}
             />
-          </React.Fragment>
+          </Fragment>
         ) : null
       })}
 
@@ -376,7 +385,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
             ? slotForOnTheDeck
             : allModules.find(module => module.id === slotForOnTheDeck)?.slot
         return (
-          <React.Fragment key={labware.id}>
+          <Fragment key={labware.id}>
             <LabwareOnDeck
               x={slotPosition[0]}
               y={slotPosition[1]}
@@ -394,7 +403,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
               itemId={slotOnDeck ?? ''}
               tab={tab}
             />
-          </React.Fragment>
+          </Fragment>
         )
       })}
 

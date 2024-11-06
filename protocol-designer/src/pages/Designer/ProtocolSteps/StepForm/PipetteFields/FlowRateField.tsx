@@ -59,7 +59,8 @@ export function FlowRateField(props: FlowRateFieldProps): JSX.Element {
   let errorMessage: string | null = null
   if (
     (!isPristine && passThruProps.value !== undefined && flowRateNum === 0) ||
-    outOfBounds
+    outOfBounds ||
+    (isPristine && flowRateNum === 0)
   ) {
     errorMessage = i18n.format(
       t('step_edit_form.field.flow_rate.error_out_of_bounds', {
@@ -71,10 +72,10 @@ export function FlowRateField(props: FlowRateFieldProps): JSX.Element {
   }
 
   useEffect(() => {
-    if (isPristine && errorMessage != null) {
+    if (isPristine && passThruProps.value == null) {
       passThruProps.updateValue(defaultFlowRate)
     }
-  }, [])
+  }, [isPristine, passThruProps])
 
   return (
     <InputStepFormField
