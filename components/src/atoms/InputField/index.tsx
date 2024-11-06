@@ -73,12 +73,17 @@ export interface InputFieldProps {
   size?: 'medium' | 'small'
   /** react useRef to control input field instead of react event */
   ref?: React.MutableRefObject<HTMLInputElement | null>
+  /** optional IconName to display icon aligned to left of input field */
   leftIcon?: IconName
+  /** if true, show delete icon aligned to right of input field */
   showDeleteIcon?: boolean
+  /** callback passed to optional delete icon onClick */
   onDelete?: () => void
+  /** if true, style the background of input field to error state */
   hasBackgroundError?: boolean
+  /** optional prop to override input field border radius */
   borderRadius?: string
-  height?: string
+  /** optional prop to override input field padding */
   padding?: string
 }
 
