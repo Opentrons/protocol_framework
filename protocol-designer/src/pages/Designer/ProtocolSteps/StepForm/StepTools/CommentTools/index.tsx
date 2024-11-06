@@ -35,6 +35,7 @@ export function CommentTools(props: StepFormProps): JSX.Element {
   )
 }
 
+//  TODO: use TextArea component when we make it
 const StyledTextArea = styled.textarea`
   width: 100%;
   height: 7rem;
