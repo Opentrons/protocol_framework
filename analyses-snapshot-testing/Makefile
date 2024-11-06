@@ -94,10 +94,10 @@ build-base-image:
 .PHONY: build-base-image-ci
 build-base-image-ci:
 	@echo "Building the base image $(BASE_IMAGE_NAME) with cache for CI"
-	docker build --cache-from type=local,src=/tmp/.buildx-base-cache \
+	docker buildx build --cache-from type=local,src=/tmp/.buildx-base-cache \
 	             --cache-to type=local,dest=/tmp/.buildx-base-cache,mode=max \
 	             --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) \
-	             -f citools/Dockerfile.base -t $(BASE_IMAGE_NAME) citools/.
+	             -f citools/Dockerfile.base -t $(BASE_IMAGE_NAME) citools/. --load
 
 .PHONY: build-opentrons-analysis
 build-opentrons-analysis: build-base-image
@@ -109,12 +109,12 @@ build-opentrons-analysis: build-base-image
 .PHONY: build-opentrons-analysis-ci
 build-opentrons-analysis-ci:
 	@echo "Building docker image for $(ANALYSIS_REF) with cache for CI"
-	docker build --cache-from type=local,src=/tmp/.buildx-analysis-cache \
+	docker buildx build --cache-from type=local,src=/tmp/.buildx-analysis-cache \
 	             --cache-to type=local,dest=/tmp/.buildx-analysis-cache,mode=max \
 	             --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) \
 	             --build-arg ANALYSIS_REF=$(ANALYSIS_REF) \
 	             --build-arg CACHEBUST=$(CACHEBUST) \
-	             -t opentrons-analysis:$(ANALYSIS_REF) -f citools/Dockerfile.analyze citools/.
+	             -t opentrons-analysis:$(ANALYSIS_REF) -f citools/Dockerfile.analyze citools/. --load
 
 .PHONY: local-build
 local-build: build-base-image
