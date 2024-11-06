@@ -133,7 +133,6 @@ class RunStore:
             run_id: The run to update
             summary: The run's equipment and status summary.
             commands: The run's commands.
-            command_errors:  The run's commands errors.
             run_time_parameters: The run's run time parameters, if any.
 
         Returns:
