@@ -129,10 +129,7 @@ export const getVisibleFormErrors = (args: {
     )
 
     const isPageImplicated = error.page != null ? page === error.page : true
-    console.log({
-      isPageImplicated,
-      dependentFieldsAreNotFocused,
-    })
+
     return isPageImplicated && dependentFieldsAreNotFocused && showErrors
   })
 }

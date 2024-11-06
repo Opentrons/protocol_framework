@@ -81,8 +81,6 @@ export function MixTools(props: StepFormProps): JSX.Element {
 
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
-  console.log({ visibleFormErrors, mappedErrorsToField, formData })
-
   return toolboxStep === 0 ? (
     <Flex flexDirection={DIRECTION_COLUMN}>
       <PipetteField {...propsForFields.pipette} />
