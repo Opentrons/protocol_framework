@@ -96,7 +96,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     'protocol_steps',
   ])
   const { makeSnackbar } = useKitchen()
-  const toolsComponentRef = useRef<null | HTMLDivElement>(null)
+  const toolsComponentRef = useRef<HTMLDivElement | null>(null)
 
   const formWarningsForSelectedStep = useSelector(
     getFormWarningsForSelectedStep

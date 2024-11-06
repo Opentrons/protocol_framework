@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 
 import {
+  ALIGN_CENTER,
   BORDERS,
   COLORS,
   DIRECTION_COLUMN,
@@ -103,7 +104,7 @@ export const WellSelectionField = (
         padding={SPACING.spacing16}
         gridGap={SPACING.spacing8}
       >
-        <Flex gridGap={SPACING.spacing8}>
+        <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
           <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
             {i18n.format(label, 'capitalize')}
           </StyledText>

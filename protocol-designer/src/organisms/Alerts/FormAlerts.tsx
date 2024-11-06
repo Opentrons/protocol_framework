@@ -77,7 +77,7 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
     focusedField,
     dirtyFields: dirtyFields ?? [],
     errors: formLevelErrorsForUnsavedForm,
-    page: page,
+    page,
     showErrors: showFormErrorsAndWarnings,
   })
 
