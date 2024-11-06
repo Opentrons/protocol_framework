@@ -1242,6 +1242,19 @@ class GeometryView:
                     + extra_offset
                 )
 
+    # todo(mm, 2024-11-05): This may be incorrect because it does not take the following
+    # offsets into account:
+    #
+    # * The pickup offset in the definition of the parent of the gripped labware.
+    # * The "additional offset" or "user offset", e.g. the `pickUpOffset` and `dropOffset`
+    #   params in the `moveLabware` command.
+    #
+    # For robustness, we should combine this with `get_gripper_labware_movement_waypoints()`.
+    #
+    # We should also be more explicit about which offsets act to move the gripper paddles
+    # relative to the gripped labware, and which offsets act to change how the gripped
+    # labware sits atop its parent. Those have different effects on how far the gripped
+    # labware juts beyond the paddles while it's in transit.
     def check_gripper_labware_tip_collision(
         self,
         gripper_homed_position_z: float,
