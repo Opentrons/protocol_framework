@@ -59,6 +59,19 @@ jobs:
         with:
           ref: ${{ env.SNAPSHOT_REF }}
 
+      - name: Are the analyses snapshots in my PR branch in sync with the target branch?
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin ${{ env.PR_TARGET_BRANCH }}
+          DIFF_OUTPUT=$(git diff HEAD origin/${{ env.PR_TARGET_BRANCH }} -- analyses-snapshot-testing/tests/__snapshots__/analyses_snapshot_test)
+          if [ -n "$DIFF_OUTPUT" ]; then
+            echo "Analyses snapshots do NOT match ${{ env.PR_TARGET_BRANCH }} snapshots."
+            echo "Is this becasue you have not pulled and merged ${{ env.PR_TARGET_BRANCH }}?"
+            echo "Or is this because you have already updated your snapshots and are all good 😊?"
+          else
+            echo "Analyses snapshots match ${{ env.PR_TARGET_BRANCH }} snapshots."
+          fi
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
