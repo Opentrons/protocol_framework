@@ -8,6 +8,7 @@ import type {
   RunTimeCommand,
   RunTimeParameter,
   NozzleLayoutConfig,
+  OnDeckLabwareLocation,
 } from '@opentrons/shared-data'
 import type { ResourceLink, ErrorDetails } from '../types'
 export * from './commands/types'
@@ -60,6 +61,7 @@ export interface LegacyGoodRunData {
 export interface KnownGoodRunData extends LegacyGoodRunData {
   ok: true
   runTimeParameters: RunTimeParameter[]
+  outputFileIds: string[]
 }
 
 export interface KnownInvalidRunData extends LegacyGoodRunData {
@@ -98,7 +100,7 @@ export interface RunsLinks {
 }
 
 export interface RunCommandLink {
-  current: CommandLinkNoMeta
+  lastCompleted: CommandLinkNoMeta
 }
 
 export interface CommandLinkNoMeta {
@@ -111,12 +113,14 @@ export interface GetRunsParams {
 }
 
 export interface Runs {
-  data: RunData[]
+  data: readonly RunData[]
   links: RunsLinks
 }
 
 export interface RunCurrentStateData {
+  estopEngaged: boolean
   activeNozzleLayouts: Record<string, NozzleLayoutValues> // keyed by pipetteId
+  placeLabwareState?: PlaceLabwareState
 }
 
 export const RUN_ACTION_TYPE_PLAY: 'play' = 'play'
@@ -124,12 +128,15 @@ export const RUN_ACTION_TYPE_PAUSE: 'pause' = 'pause'
 export const RUN_ACTION_TYPE_STOP: 'stop' = 'stop'
 export const RUN_ACTION_TYPE_RESUME_FROM_RECOVERY: 'resume-from-recovery' =
   'resume-from-recovery'
+export const RUN_ACTION_TYPE_RESUME_FROM_RECOVERY_ASSUMING_FALSE_POSITIVE: 'resume-from-recovery-assuming-false-positive' =
+  'resume-from-recovery-assuming-false-positive'
 
 export type RunActionType =
   | typeof RUN_ACTION_TYPE_PLAY
   | typeof RUN_ACTION_TYPE_PAUSE
   | typeof RUN_ACTION_TYPE_STOP
   | typeof RUN_ACTION_TYPE_RESUME_FROM_RECOVERY
+  | typeof RUN_ACTION_TYPE_RESUME_FROM_RECOVERY_ASSUMING_FALSE_POSITIVE
 
 export interface RunAction {
   id: string
@@ -171,7 +178,11 @@ export type RunError = RunCommandError
  * Error Policy
  */
 
-export type IfMatchType = 'ignoreAndContinue' | 'failRun' | 'waitForRecovery'
+export type IfMatchType =
+  | 'assumeFalsePositiveAndContinue'
+  | 'ignoreAndContinue'
+  | 'failRun'
+  | 'waitForRecovery'
 
 export interface ErrorRecoveryPolicy {
   policyRules: Array<{
@@ -200,4 +211,10 @@ export interface NozzleLayoutValues {
   startingNozzle: string
   activeNozzles: string[]
   config: NozzleLayoutConfig
+}
+
+export interface PlaceLabwareState {
+  labwareId: string
+  location: OnDeckLabwareLocation
+  shouldPlaceDown: boolean
 }

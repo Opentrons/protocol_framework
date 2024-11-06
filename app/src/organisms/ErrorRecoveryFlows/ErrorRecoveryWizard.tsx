@@ -29,7 +29,7 @@ import {
 import { RecoveryInProgress } from './RecoveryInProgress'
 import { getErrorKind } from './utils'
 import { RECOVERY_MAP } from './constants'
-import { useHomeGripperZAxis } from './hooks'
+import { useHomeGripper } from './hooks'
 
 import type { LabwareDefinition2, RobotType } from '@opentrons/shared-data'
 import type { RecoveryRoute, RouteStep, RecoveryContentProps } from './types'
@@ -90,7 +90,7 @@ export function ErrorRecoveryWizard(
     routeUpdateActions,
   })
 
-  useHomeGripperZAxis(props)
+  useHomeGripper(props)
 
   return <ErrorRecoveryComponent errorKind={errorKind} {...props} />
 }
@@ -188,7 +188,7 @@ export function ErrorRecoveryContent(props: RecoveryContentProps): JSX.Element {
     return <RecoveryInProgress {...props} />
   }
 
-  const buildResumeRun = (): JSX.Element => {
+  const buildRetryStep = (): JSX.Element => {
     return <RetryStep {...props} />
   }
 
@@ -246,7 +246,7 @@ export function ErrorRecoveryContent(props: RecoveryContentProps): JSX.Element {
     case RECOVERY_MAP.ERROR_WHILE_RECOVERING.ROUTE:
       return buildRecoveryError()
     case RECOVERY_MAP.RETRY_STEP.ROUTE:
-      return buildResumeRun()
+      return buildRetryStep()
     case RECOVERY_MAP.CANCEL_RUN.ROUTE:
       return buildCancelRun()
     case RECOVERY_MAP.DROP_TIP_FLOWS.ROUTE:

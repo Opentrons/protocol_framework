@@ -3,7 +3,6 @@ import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import {
-  ALIGN_CENTER,
   Banner,
   DIRECTION_COLUMN,
   Flex,
@@ -12,10 +11,12 @@ import {
 } from '@opentrons/components'
 import { getRobotStateTimeline } from '../../file-data/selectors'
 import { ErrorContents } from './ErrorContents'
+
+import type { StyleProps } from '@opentrons/components'
 import type { CommandCreatorError } from '@opentrons/step-generation'
 import type { MakeAlert } from './types'
 
-function TimelineAlertsComponent(): JSX.Element {
+function TimelineAlertsComponent(props: StyleProps): JSX.Element | null {
   const { t } = useTranslation('alert')
 
   const timeline = useSelector(getRobotStateTimeline)
@@ -27,17 +28,17 @@ function TimelineAlertsComponent(): JSX.Element {
     })
   )
 
+  if (timelineErrors.length === 0) {
+    return null
+  }
+
   const makeAlert: MakeAlert = (alertType, data, key) => (
     <Banner
       type={alertType === 'error' ? 'error' : 'warning'}
       key={`${alertType}:${key}`}
-      width="50%"
+      width="100%"
     >
-      <Flex
-        flexDirection={DIRECTION_COLUMN}
-        gridGap={SPACING.spacing4}
-        alignItems={ALIGN_CENTER}
-      >
+      <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
         <StyledText desktopStyle="bodyDefaultSemiBold">{data.title}</StyledText>
         <StyledText desktopStyle="bodyDefaultRegular">
           {data.description}
@@ -47,7 +48,9 @@ function TimelineAlertsComponent(): JSX.Element {
   )
 
   return (
-    <>{timelineErrors.map((error, key) => makeAlert('error', error, key))}</>
+    <Flex {...props}>
+      {timelineErrors.map((error, key) => makeAlert('error', error, key))}
+    </Flex>
   )
 }
 

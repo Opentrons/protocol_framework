@@ -10,7 +10,7 @@ import { renderWithProviders } from '/app/__testing-utils__'
 import { i18n } from '/app/i18n'
 import { CommandText } from '../CommandText'
 import { mockCommandTextData } from '../__fixtures__'
-import { getCommandTextData } from '../utils/getCommandTextData'
+import { getCommandTextData } from '/app/local-resources/commands/utils'
 
 import type {
   AspirateInPlaceRunTimeCommand,
@@ -444,7 +444,7 @@ describe('CommandText', () => {
       />,
       { i18nInstance: i18n }
     )
-    screen.getByText('Dropping tip in place')
+    screen.getByText('Dropping tip in D3')
   })
   it('renders correct text for pickUpTip', () => {
     const command = mockCommandTextData.commands.find(

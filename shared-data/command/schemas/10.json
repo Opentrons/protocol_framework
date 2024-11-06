@@ -4,6 +4,7 @@
   "discriminator": {
     "propertyName": "commandType",
     "mapping": {
+      "airGapInPlace": "#/definitions/AirGapInPlaceCreate",
       "aspirate": "#/definitions/AspirateCreate",
       "aspirateInPlace": "#/definitions/AspirateInPlaceCreate",
       "comment": "#/definitions/CommentCreate",
@@ -76,10 +77,14 @@
       "unsafe/dropTipInPlace": "#/definitions/UnsafeDropTipInPlaceCreate",
       "unsafe/updatePositionEstimators": "#/definitions/UpdatePositionEstimatorsCreate",
       "unsafe/engageAxes": "#/definitions/UnsafeEngageAxesCreate",
-      "unsafe/ungripLabware": "#/definitions/UnsafeUngripLabwareCreate"
+      "unsafe/ungripLabware": "#/definitions/UnsafeUngripLabwareCreate",
+      "unsafe/placeLabware": "#/definitions/UnsafePlaceLabwareCreate"
     }
   },
   "oneOf": [
+    {
+      "$ref": "#/definitions/AirGapInPlaceCreate"
+    },
     {
       "$ref": "#/definitions/AspirateCreate"
     },
@@ -295,12 +300,76 @@
     },
     {
       "$ref": "#/definitions/UnsafeUngripLabwareCreate"
+    },
+    {
+      "$ref": "#/definitions/UnsafePlaceLabwareCreate"
     }
   ],
   "definitions": {
+    "AirGapInPlaceParams": {
+      "title": "AirGapInPlaceParams",
+      "description": "Payload required to air gap in place.",
+      "type": "object",
+      "properties": {
+        "flowRate": {
+          "title": "Flowrate",
+          "description": "Speed in \u00b5L/s configured for the pipette",
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "volume": {
+          "title": "Volume",
+          "description": "The amount of liquid to aspirate, in \u00b5L. Must not be greater than the remaining available amount, which depends on the pipette (see `loadPipette`), its configuration (see `configureForVolume`), the tip (see `pickUpTip`), and the amount you've aspirated so far. There is some tolerance for floating point rounding errors.",
+          "minimum": 0,
+          "type": "number"
+        },
+        "pipetteId": {
+          "title": "Pipetteid",
+          "description": "Identifier of pipette to use for liquid handling.",
+          "type": "string"
+        }
+      },
+      "required": ["flowRate", "volume", "pipetteId"]
+    },
+    "CommandIntent": {
+      "title": "CommandIntent",
+      "description": "Run intent for a given command.\n\nProps:\n    PROTOCOL: the command is part of the protocol run itself.\n    SETUP: the command is part of the setup phase of a run.",
+      "enum": ["protocol", "setup", "fixit"],
+      "type": "string"
+    },
+    "AirGapInPlaceCreate": {
+      "title": "AirGapInPlaceCreate",
+      "description": "AirGapInPlace command request model.",
+      "type": "object",
+      "properties": {
+        "commandType": {
+          "title": "Commandtype",
+          "default": "airGapInPlace",
+          "enum": ["airGapInPlace"],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/AirGapInPlaceParams"
+        },
+        "intent": {
+          "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/CommandIntent"
+            }
+          ]
+        },
+        "key": {
+          "title": "Key",
+          "description": "A key value, unique in this run, that can be used to track the same logical command across multiple runs of the same protocol. If a value is not provided, one will be generated.",
+          "type": "string"
+        }
+      },
+      "required": ["params"]
+    },
     "WellOrigin": {
       "title": "WellOrigin",
-      "description": "Origin of WellLocation offset.\n\nProps:\n    TOP: the top-center of the well\n    BOTTOM: the bottom-center of the well\n    CENTER: the middle-center of the well",
+      "description": "Origin of WellLocation offset.\n\nProps:\n    TOP: the top-center of the well\n    BOTTOM: the bottom-center of the well\n    CENTER: the middle-center of the well\n    MENISCUS: the meniscus-center of the well",
       "enum": ["top", "bottom", "center", "meniscus"],
       "type": "string"
     },
@@ -326,9 +395,9 @@
         }
       }
     },
-    "WellLocation": {
-      "title": "WellLocation",
-      "description": "A relative location in reference to a well's location.",
+    "LiquidHandlingWellLocation": {
+      "title": "LiquidHandlingWellLocation",
+      "description": "A relative location in reference to a well's location.\n\nTo be used with commands that handle liquids.",
       "type": "object",
       "properties": {
         "origin": {
@@ -341,6 +410,20 @@
         },
         "offset": {
           "$ref": "#/definitions/WellOffset"
+        },
+        "volumeOffset": {
+          "title": "Volumeoffset",
+          "description": "A volume of liquid, in \u00b5L, to offset the z-axis offset. When \"operationVolume\" is specified, this volume is pulled from the command volume parameter.",
+          "default": 0.0,
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": ["operationVolume"],
+              "type": "string"
+            }
+          ]
         }
       }
     },
@@ -364,7 +447,7 @@
           "description": "Relative well location at which to perform the operation",
           "allOf": [
             {
-              "$ref": "#/definitions/WellLocation"
+              "$ref": "#/definitions/LiquidHandlingWellLocation"
             }
           ]
         },
@@ -387,12 +470,6 @@
         }
       },
       "required": ["labwareId", "wellName", "flowRate", "volume", "pipetteId"]
-    },
-    "CommandIntent": {
-      "title": "CommandIntent",
-      "description": "Run intent for a given command.\n\nProps:\n    PROTOCOL: the command is part of the protocol run itself.\n    SETUP: the command is part of the setup phase of a run.",
-      "enum": ["protocol", "setup", "fixit"],
-      "type": "string"
     },
     "AspirateCreate": {
       "title": "AspirateCreate",
@@ -800,7 +877,7 @@
           "description": "Relative well location at which to perform the operation",
           "allOf": [
             {
-              "$ref": "#/definitions/WellLocation"
+              "$ref": "#/definitions/LiquidHandlingWellLocation"
             }
           ]
         },
@@ -918,6 +995,30 @@
         }
       },
       "required": ["params"]
+    },
+    "WellLocation": {
+      "title": "WellLocation",
+      "description": "A relative location in reference to a well's location.",
+      "type": "object",
+      "properties": {
+        "origin": {
+          "default": "top",
+          "allOf": [
+            {
+              "$ref": "#/definitions/WellOrigin"
+            }
+          ]
+        },
+        "offset": {
+          "$ref": "#/definitions/WellOffset"
+        },
+        "volumeOffset": {
+          "title": "Volumeoffset",
+          "description": "A volume of liquid, in \u00b5L, to offset the z-axis offset.",
+          "default": 0.0,
+          "type": "number"
+        }
+      }
     },
     "BlowOutParams": {
       "title": "BlowOutParams",
@@ -1520,8 +1621,16 @@
       "properties": {
         "liquidId": {
           "title": "Liquidid",
-          "description": "Unique identifier of the liquid to load.",
-          "type": "string"
+          "description": "Unique identifier of the liquid to load. If this is the sentinel value EMPTY, all values of volumeByWell must be 0.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "enum": ["EMPTY"],
+              "type": "string"
+            }
+          ]
         },
         "labwareId": {
           "title": "Labwareid",
@@ -1530,7 +1639,7 @@
         },
         "volumeByWell": {
           "title": "Volumebywell",
-          "description": "Volume of liquid, in \u00b5L, loaded into each well by name, in this labware.",
+          "description": "Volume of liquid, in \u00b5L, loaded into each well by name, in this labware. If the liquid id is the sentinel value EMPTY, all volumes must be 0.",
           "type": "object",
           "additionalProperties": {
             "type": "number"
@@ -2410,11 +2519,40 @@
       },
       "required": ["params"]
     },
+    "PickUpTipWellOrigin": {
+      "title": "PickUpTipWellOrigin",
+      "description": "The origin of a PickUpTipWellLocation offset.\n\nProps:\n    TOP: the top-center of the well\n    BOTTOM: the bottom-center of the well\n    CENTER: the middle-center of the well",
+      "enum": ["top", "bottom", "center"],
+      "type": "string"
+    },
+    "PickUpTipWellLocation": {
+      "title": "PickUpTipWellLocation",
+      "description": "A relative location in reference to a well's location.\n\nTo be used for picking up tips.",
+      "type": "object",
+      "properties": {
+        "origin": {
+          "default": "top",
+          "allOf": [
+            {
+              "$ref": "#/definitions/PickUpTipWellOrigin"
+            }
+          ]
+        },
+        "offset": {
+          "$ref": "#/definitions/WellOffset"
+        }
+      }
+    },
     "PickUpTipParams": {
       "title": "PickUpTipParams",
       "description": "Payload needed to move a pipette to a specific well.",
       "type": "object",
       "properties": {
+        "pipetteId": {
+          "title": "Pipetteid",
+          "description": "Identifier of pipette to use for liquid handling.",
+          "type": "string"
+        },
         "labwareId": {
           "title": "Labwareid",
           "description": "Identifier of labware to use.",
@@ -2427,20 +2565,15 @@
         },
         "wellLocation": {
           "title": "Welllocation",
-          "description": "Relative well location at which to perform the operation",
+          "description": "Relative well location at which to pick up the tip.",
           "allOf": [
             {
-              "$ref": "#/definitions/WellLocation"
+              "$ref": "#/definitions/PickUpTipWellLocation"
             }
           ]
-        },
-        "pipetteId": {
-          "title": "Pipetteid",
-          "description": "Identifier of pipette to use for liquid handling.",
-          "type": "string"
         }
       },
-      "required": ["labwareId", "wellName", "pipetteId"]
+      "required": ["pipetteId", "labwareId", "wellName"]
     },
     "PickUpTipCreate": {
       "title": "PickUpTipCreate",
@@ -4174,6 +4307,11 @@
           "title": "Moduleid",
           "description": "Unique ID of the Absorbance Reader.",
           "type": "string"
+        },
+        "fileName": {
+          "title": "Filename",
+          "description": "Optional file name to use when storing the results of a measurement.",
+          "type": "string"
         }
       },
       "required": ["moduleId"]
@@ -4656,6 +4794,67 @@
         },
         "params": {
           "$ref": "#/definitions/UnsafeUngripLabwareParams"
+        },
+        "intent": {
+          "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/CommandIntent"
+            }
+          ]
+        },
+        "key": {
+          "title": "Key",
+          "description": "A key value, unique in this run, that can be used to track the same logical command across multiple runs of the same protocol. If a value is not provided, one will be generated.",
+          "type": "string"
+        }
+      },
+      "required": ["params"]
+    },
+    "UnsafePlaceLabwareParams": {
+      "title": "UnsafePlaceLabwareParams",
+      "description": "Payload required for an UnsafePlaceLabware command.",
+      "type": "object",
+      "properties": {
+        "labwareId": {
+          "title": "Labwareid",
+          "description": "The id of the labware to place.",
+          "type": "string"
+        },
+        "location": {
+          "title": "Location",
+          "description": "Where to place the labware.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/DeckSlotLocation"
+            },
+            {
+              "$ref": "#/definitions/ModuleLocation"
+            },
+            {
+              "$ref": "#/definitions/OnLabwareLocation"
+            },
+            {
+              "$ref": "#/definitions/AddressableAreaLocation"
+            }
+          ]
+        }
+      },
+      "required": ["labwareId", "location"]
+    },
+    "UnsafePlaceLabwareCreate": {
+      "title": "UnsafePlaceLabwareCreate",
+      "description": "UnsafePlaceLabware command request model.",
+      "type": "object",
+      "properties": {
+        "commandType": {
+          "title": "Commandtype",
+          "default": "unsafe/placeLabware",
+          "enum": ["unsafe/placeLabware"],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/UnsafePlaceLabwareParams"
         },
         "intent": {
           "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",

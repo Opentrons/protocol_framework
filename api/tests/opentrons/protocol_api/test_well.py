@@ -8,6 +8,8 @@ from opentrons.protocol_api.core.common import WellCore
 from opentrons.protocol_api._liquid import Liquid
 from opentrons.types import Point, Location
 
+from . import versions_at_or_above
+
 
 @pytest.fixture
 def mock_well_core(decoy: Decoy) -> WellCore:
@@ -103,12 +105,11 @@ def test_well_center(decoy: Decoy, mock_well_core: WellCore, subject: Well) -> N
 
 def test_well_meniscus(decoy: Decoy, mock_well_core: WellCore, subject: Well) -> None:
     """It should get a Location representing the meniscus of the well."""
-    decoy.when(mock_well_core.get_meniscus(z_offset=4.2)).then_return(Point(1, 2, 3))
-
     result = subject.meniscus(4.2)
 
     assert isinstance(result, Location)
-    assert result.point == Point(1, 2, 3)
+    assert result.point == Point(0, 0, 4.2)
+    assert result.is_meniscus is True
     assert result.labware.as_well() is subject
 
 
@@ -139,6 +140,13 @@ def test_load_liquid(decoy: Decoy, mock_well_core: WellCore, subject: Well) -> N
         ),
         times=1,
     )
+
+
+@pytest.mark.parametrize("api_version", versions_at_or_above(APIVersion(2, 22)))
+def test_load_empty(decoy: Decoy, mock_well_core: WellCore, subject: Well) -> None:
+    """It should mark a location as empty."""
+    subject.load_empty()
+    decoy.verify(mock_well_core.load_empty(), times=1)
 
 
 def test_diameter(decoy: Decoy, mock_well_core: WellCore, subject: Well) -> None:

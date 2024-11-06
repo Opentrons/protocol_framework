@@ -75,7 +75,6 @@ async def test_move_to_addressable_area_implementation_non_gen1(
 
     assert result == SuccessData(
         public=MoveToAddressableAreaResult(position=DeckPoint(x=9, y=8, z=7)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="abc",
@@ -139,7 +138,6 @@ async def test_move_to_addressable_area_implementation_with_gen1(
 
     assert result == SuccessData(
         public=MoveToAddressableAreaResult(position=DeckPoint(x=9, y=8, z=7)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="abc",

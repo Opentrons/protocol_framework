@@ -9,6 +9,8 @@ import { StepContainer } from '../StepContainer'
 import { StepOverflowMenu } from '../StepOverflowMenu'
 
 vi.mock('../../../../../step-forms/selectors')
+vi.mock('../../../../../ui/steps/actions/actions')
+vi.mock('../../../../../ui/steps/selectors')
 vi.mock('../StepOverflowMenu')
 
 const render = (props: React.ComponentProps<typeof StepContainer>) => {
@@ -46,5 +48,9 @@ describe('StepContainer', () => {
     props.title = 'Final deck state'
     render(props)
     screen.getByText('Final deck state')
+  })
+  it('renders the divider if hover targets that step', () => {
+    render({ ...props, dragHovered: true })
+    screen.getByTestId('divider')
   })
 })

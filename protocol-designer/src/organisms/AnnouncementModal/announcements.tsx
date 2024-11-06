@@ -302,7 +302,7 @@ export const useAnnouncements = (): Announcement[] => {
       ),
     },
     {
-      announcementKey: 'redesign9.0',
+      announcementKey: 'redesign8.2',
       image: <Flex />,
       heading: t('announcements.redesign.body1'),
       message: (
@@ -317,19 +317,13 @@ export const useAnnouncements = (): Announcement[] => {
                   {t('announcements.redesign.body3')}
                 </StyledText>
               </li>
-
-              <li>
-                <StyledText desktopStyle="bodyDefaultRegular">
-                  {t('announcements.redesign.body4')}
-                </StyledText>
-              </li>
             </ul>
           </Flex>
           <StyledText desktopStyle="bodyDefaultRegular">
             <Trans
               t={t}
               components={{ strong: <strong /> }}
-              i18nKey={'announcements.redesign.body5'}
+              i18nKey={'announcements.redesign.body4'}
             />
           </StyledText>
         </Flex>

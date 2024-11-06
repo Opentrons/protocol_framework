@@ -26,7 +26,7 @@ import {
 } from '@opentrons/components'
 import { useCreateLiveCommandMutation } from '@opentrons/react-api-client'
 import {
-  getLabwareDisplayName,
+  getTopLabwareInfo,
   getModuleDisplayName,
   getModuleType,
   HEATERSHAKER_MODULE_TYPE,
@@ -37,6 +37,7 @@ import {
   THERMOCYCLER_MODULE_V2,
 } from '@opentrons/shared-data'
 
+import { getLocationInfoNames } from '/app/transformations/commands'
 import { ToggleButton } from '/app/atoms/buttons'
 import { Divider } from '/app/atoms/structure'
 import { SecureLabwareModal } from './SecureLabwareModal'
@@ -47,14 +48,10 @@ import type {
   RunTimeCommand,
   ModuleType,
   LabwareDefinition2,
-  LoadModuleRunTimeCommand,
   LoadLabwareRunTimeCommand,
 } from '@opentrons/shared-data'
 import type { ModuleRenderInfoForProtocol } from '/app/resources/runs'
-import type {
-  LabwareSetupItem,
-  NestedLabwareInfo,
-} from '/app/transformations/commands'
+import type { LabwareSetupItem } from '/app/transformations/commands'
 import type { ModuleTypesThatRequireExtraAttention } from '../utils/getModuleTypesThatRequireExtraAttention'
 
 const LabwareRow = styled.div`
@@ -73,7 +70,6 @@ interface LabwareListItemProps extends LabwareSetupItem {
   extraAttentionModules: ModuleTypesThatRequireExtraAttention[]
   isFlex: boolean
   commands: RunTimeCommand[]
-  nestedLabwareInfo: NestedLabwareInfo | null
   showLabwareSVG?: boolean
 }
 
@@ -82,37 +78,48 @@ export function LabwareListItem(
 ): JSX.Element | null {
   const {
     attachedModuleInfo,
-    nickName,
+    nickName: bottomLabwareNickname,
     initialLocation,
-    definition,
     moduleModel,
-    moduleLocation,
     extraAttentionModules,
     isFlex,
     commands,
-    nestedLabwareInfo,
     showLabwareSVG,
+    labwareId: bottomLabwareId,
   } = props
+  const loadLabwareCommands = commands?.filter(
+    (command): command is LoadLabwareRunTimeCommand =>
+      command.commandType === 'loadLabware'
+  )
+
+  const { topLabwareId, topLabwareDefinition } = getTopLabwareInfo(
+    bottomLabwareId ?? '',
+    loadLabwareCommands
+  )
+  const {
+    slotName,
+    labwareName,
+    labwareNickname,
+    labwareQuantity,
+    adapterName: bottomLabwareName,
+  } = getLocationInfoNames(topLabwareId, commands)
+
+  const isStacked =
+    labwareQuantity > 1 ||
+    bottomLabwareId !== topLabwareId ||
+    moduleModel != null
+
   const { i18n, t } = useTranslation('protocol_setup')
   const [
     secureLabwareModalType,
     setSecureLabwareModalType,
   ] = useState<ModuleType | null>(null)
-  const labwareDisplayName = getLabwareDisplayName(definition)
   const { createLiveCommand } = useCreateLiveCommandMutation()
   const [isLatchLoading, setIsLatchLoading] = useState<boolean>(false)
   const [isLatchClosed, setIsLatchClosed] = useState<boolean>(false)
 
-  let slotInfo: string | null = null
-
-  if (initialLocation !== 'offDeck' && 'slotName' in initialLocation) {
-    slotInfo = initialLocation.slotName
-  } else if (
-    initialLocation !== 'offDeck' &&
-    'addressableAreaName' in initialLocation
-  ) {
-    slotInfo = initialLocation.addressableAreaName
-  } else if (initialLocation === 'offDeck') {
+  let slotInfo: string | null = slotName
+  if (initialLocation === 'offDeck') {
     slotInfo = i18n.format(t('off_deck'), 'upperCase')
   }
 
@@ -126,50 +133,20 @@ export function LabwareListItem(
     | HeaterShakerOpenLatchCreateCommand
     | HeaterShakerCloseLatchCreateCommand
 
-  if (initialLocation !== 'offDeck' && 'labwareId' in initialLocation) {
-    const loadedAdapter = commands.find(
-      (command): command is LoadLabwareRunTimeCommand =>
-        command.commandType === 'loadLabware' &&
-        command.result?.labwareId === initialLocation.labwareId
-    )
-    const loadedAdapterLocation = loadedAdapter?.params.location
-
-    if (loadedAdapterLocation != null && loadedAdapterLocation !== 'offDeck') {
-      if ('slotName' in loadedAdapterLocation) {
-        slotInfo = loadedAdapterLocation.slotName
-      } else if ('moduleId' in loadedAdapterLocation) {
-        const module = commands.find(
-          (command): command is LoadModuleRunTimeCommand =>
-            command.commandType === 'loadModule' &&
-            command.result?.moduleId === loadedAdapterLocation.moduleId
-        )
-        if (module != null) {
-          slotInfo = module.params.location.slotName
-          moduleDisplayName = getModuleDisplayName(module.params.model)
-        }
-      }
-    }
-  }
-  if (
-    initialLocation !== 'offDeck' &&
-    'moduleId' in initialLocation &&
-    moduleLocation != null &&
-    moduleModel != null
-  ) {
-    const moduleName = getModuleDisplayName(moduleModel)
+  if (moduleModel != null) {
     moduleType = getModuleType(moduleModel)
+    moduleDisplayName = getModuleDisplayName(moduleModel)
+
     const moduleTypeNeedsAttention = extraAttentionModules.find(
       extraAttentionModType => extraAttentionModType === moduleType
     )
-    let moduleSlotName = moduleLocation.slotName
-    if (moduleType === THERMOCYCLER_MODULE_TYPE) {
-      moduleSlotName = isFlex ? TC_MODULE_LOCATION_OT3 : TC_MODULE_LOCATION_OT2
-    }
-    slotInfo = moduleSlotName
-    moduleDisplayName = moduleName
+
     switch (moduleTypeNeedsAttention) {
       case MAGNETIC_MODULE_TYPE:
       case THERMOCYCLER_MODULE_TYPE:
+        if (moduleType === THERMOCYCLER_MODULE_TYPE) {
+          slotInfo = isFlex ? TC_MODULE_LOCATION_OT3 : TC_MODULE_LOCATION_OT2
+        }
         if (moduleModel !== THERMOCYCLER_MODULE_V2) {
           secureLabwareInstructions = (
             <Btn
@@ -213,6 +190,8 @@ export function LabwareListItem(
         )
         const matchingHeaterShaker =
           attachedModuleInfo != null &&
+          initialLocation !== 'offDeck' &&
+          'moduleId' in initialLocation &&
           attachedModuleInfo[initialLocation.moduleId] != null
             ? attachedModuleInfo[initialLocation.moduleId].attachedModuleMatch
             : null
@@ -282,53 +261,55 @@ export function LabwareListItem(
             {slotInfo}
           </StyledText>
         )}
-        {nestedLabwareInfo != null || moduleDisplayName != null ? (
-          <DeckInfoLabel iconName="stacked" />
-        ) : null}
+        {isStacked ? <DeckInfoLabel iconName="stacked" /> : null}
       </Flex>
       <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
-        {nestedLabwareInfo != null &&
-        nestedLabwareInfo?.sharedSlotId === slotInfo ? (
-          <>
-            <Flex>
-              <Flex
-                flexDirection={DIRECTION_COLUMN}
-                justifyContent={JUSTIFY_CENTER}
-                marginLeft={SPACING.spacing8}
-                marginRight={SPACING.spacing24}
+        <>
+          <Flex>
+            {showLabwareSVG && topLabwareDefinition != null ? (
+              <StandaloneLabware definition={topLabwareDefinition} />
+            ) : null}
+            <Flex
+              flexDirection={DIRECTION_COLUMN}
+              justifyContent={JUSTIFY_CENTER}
+              marginLeft={SPACING.spacing8}
+              marginRight={SPACING.spacing24}
+            >
+              <StyledText desktopStyle="bodyDefaultSemiBold">
+                {labwareName}
+              </StyledText>
+              <StyledText
+                desktopStyle="bodyDefaultRegular"
+                color={COLORS.grey60}
               >
-                <StyledText desktopStyle="bodyDefaultSemiBold">
-                  {nestedLabwareInfo.nestedLabwareDisplayName}
-                </StyledText>
-                <StyledText
-                  desktopStyle="bodyDefaultRegular"
-                  color={COLORS.grey60}
-                >
-                  {nestedLabwareInfo.nestedLabwareNickName}
-                </StyledText>
-              </Flex>
+                {labwareQuantity > 1
+                  ? t('labware_quantity', { quantity: labwareQuantity })
+                  : labwareNickname}
+              </StyledText>
             </Flex>
+          </Flex>
+        </>
+        {bottomLabwareName != null ? (
+          <>
             <Divider marginY="0" />
+            <Flex
+              flexDirection={DIRECTION_COLUMN}
+              justifyContent={JUSTIFY_CENTER}
+              marginLeft={SPACING.spacing8}
+              marginRight={SPACING.spacing24}
+            >
+              <StyledText desktopStyle="bodyDefaultSemiBold">
+                {bottomLabwareName}
+              </StyledText>
+              <StyledText
+                desktopStyle="bodyDefaultRegular"
+                color={COLORS.grey60}
+              >
+                {bottomLabwareNickname}
+              </StyledText>
+            </Flex>
           </>
         ) : null}
-        <Flex>
-          {showLabwareSVG ? (
-            <StandaloneLabware definition={definition} />
-          ) : null}
-          <Flex
-            flexDirection={DIRECTION_COLUMN}
-            justifyContent={JUSTIFY_CENTER}
-            marginLeft={SPACING.spacing8}
-            marginRight={SPACING.spacing24}
-          >
-            <StyledText desktopStyle="bodyDefaultSemiBold">
-              {labwareDisplayName}
-            </StyledText>
-            <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
-              {nickName}
-            </StyledText>
-          </Flex>
-        </Flex>
         {moduleDisplayName != null ? (
           <>
             <Divider marginY="0" />
@@ -371,9 +352,7 @@ export function LabwareListItem(
                     marginTop="3px"
                   >
                     <ToggleButton
-                      label={`heater_shaker_${
-                        moduleLocation?.slotName ?? ''
-                      }_latch_toggle`}
+                      label={`heater_shaker_${slotInfo ?? ''}_latch_toggle`}
                       size={SIZE_AUTO}
                       disabled={
                         !isCorrectHeaterShakerAttached || isLatchLoading

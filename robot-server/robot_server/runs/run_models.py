@@ -21,6 +21,7 @@ from opentrons.protocol_engine import (
     CommandNote,
 )
 from opentrons.protocol_engine.types import (
+    OnDeckLabwareLocation,
     RunTimeParameter,
     PrimitiveRunTimeParamValuesType,
     CSVRunTimeParamFilesType,
@@ -146,6 +147,10 @@ class Run(ResourceModel):
             " if none are specified in the request."
         ),
     )
+    outputFileIds: List[str] = Field(
+        ...,
+        description="File IDs of files output during a protocol run.",
+    )
     protocolId: Optional[str] = Field(
         None,
         description=(
@@ -222,6 +227,10 @@ class BadRun(ResourceModel):
             " specified either in the run creation request or default values from the protocol"
             " if none are specified in the request."
         ),
+    )
+    outputFileIds: List[str] = Field(
+        ...,
+        description="File IDs of files output during a protocol run.",
     )
     protocolId: Optional[str] = Field(
         None,
@@ -307,10 +316,24 @@ class ActiveNozzleLayout(BaseModel):
     )
 
 
+class PlaceLabwareState(BaseModel):
+    """Details the labware being placed by the gripper."""
+
+    labwareId: str = Field(..., description="The ID of the labware to place.")
+    location: OnDeckLabwareLocation = Field(
+        ..., description="The location the labware should be in."
+    )
+    shouldPlaceDown: bool = Field(
+        ..., description="Whether the gripper should place down the labware."
+    )
+
+
 class RunCurrentState(BaseModel):
     """Current details about a run."""
 
-    activeNozzleLayouts: Dict[str, ActiveNozzleLayout] = Field(..., description="")
+    estopEngaged: bool = Field(..., description="")
+    activeNozzleLayouts: Dict[str, ActiveNozzleLayout] = Field(...)
+    placeLabwareState: Optional[PlaceLabwareState] = Field(None)
 
 
 class CommandLinkNoMeta(BaseModel):

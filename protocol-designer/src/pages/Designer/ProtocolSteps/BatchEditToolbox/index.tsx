@@ -69,7 +69,6 @@ export const BatchEditToolbox = (): JSX.Element | null => {
       return (
         <Toolbox
           position={POSITION_RELATIVE}
-          height="calc(100vh - 64px)"
           title={
             <StyledText desktopStyle="bodyLargeSemiBold">
               {t('protocol_steps:batch_edit')}
@@ -91,7 +90,7 @@ export const BatchEditToolbox = (): JSX.Element | null => {
           {stepType === 'moveLiquid' ? (
             <BatchEditMoveLiquidTools propsForFields={propsForFields} />
           ) : (
-            <BatchEditMixTools />
+            <BatchEditMixTools propsForFields={propsForFields} />
           )}
         </Toolbox>
       )

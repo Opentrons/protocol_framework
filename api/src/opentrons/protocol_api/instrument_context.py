@@ -60,6 +60,8 @@ _DISPOSAL_LOCATION_OFFSET_ADDED_IN = APIVersion(2, 18)
 """The version after which offsets for deck configured trash containers and changes to alternating tip drop behavior were introduced."""
 _PARTIAL_NOZZLE_CONFIGURATION_SINGLE_ROW_PARTIAL_COLUMN_ADDED_IN = APIVersion(2, 20)
 """The version after which partial nozzle configurations of single, row, and partial column layouts became available."""
+_AIR_GAP_TRACKING_ADDED_IN = APIVersion(2, 22)
+"""The version after which air gaps should be implemented with a separate call instead of an aspirate for better liquid volume tracking."""
 
 
 class InstrumentContext(publisher.CommandPublisher):
@@ -217,8 +219,9 @@ class InstrumentContext(publisher.CommandPublisher):
             )
         )
 
-        well: Optional[labware.Well] = None
         move_to_location: types.Location
+        well: Optional[labware.Well] = None
+        is_meniscus: Optional[bool] = None
         last_location = self._get_last_location_by_api_version()
         try:
             target = validation.validate_location(
@@ -232,17 +235,13 @@ class InstrumentContext(publisher.CommandPublisher):
                 "knows where it is."
             ) from e
 
-        if isinstance(target, validation.WellTarget):
-            move_to_location = target.location or target.well.bottom(
-                z=self._well_bottom_clearances.aspirate
-            )
-            well = target.well
-        if isinstance(target, validation.PointTarget):
-            move_to_location = target.location
         if isinstance(target, (TrashBin, WasteChute)):
             raise ValueError(
                 "Trash Bin and Waste Chute are not acceptable location parameters for Aspirate commands."
             )
+        move_to_location, well, is_meniscus = self._handle_aspirate_target(
+            target=target
+        )
         if self.api_version >= APIVersion(2, 11):
             instrument.validate_takes_liquid(
                 location=move_to_location,
@@ -282,6 +281,7 @@ class InstrumentContext(publisher.CommandPublisher):
                 rate=rate,
                 flow_rate=flow_rate,
                 in_place=target.in_place,
+                is_meniscus=is_meniscus,
             )
 
         return self
@@ -384,6 +384,7 @@ class InstrumentContext(publisher.CommandPublisher):
             )
         )
         well: Optional[labware.Well] = None
+        is_meniscus: Optional[bool] = None
         last_location = self._get_last_location_by_api_version()
 
         try:
@@ -402,6 +403,7 @@ class InstrumentContext(publisher.CommandPublisher):
             well = target.well
             if target.location:
                 move_to_location = target.location
+                is_meniscus = target.location.is_meniscus
             elif well.parent._core.is_fixed_trash():
                 move_to_location = target.well.top()
             else:
@@ -467,6 +469,7 @@ class InstrumentContext(publisher.CommandPublisher):
                 flow_rate=flow_rate,
                 in_place=target.in_place,
                 push_out=push_out,
+                is_meniscus=is_meniscus,
             )
 
         return self
@@ -752,7 +755,12 @@ class InstrumentContext(publisher.CommandPublisher):
             ``pipette.air_gap(height=2)``. If you call ``air_gap`` with a single,
             unnamed argument, it will always be interpreted as a volume.
 
+        .. note::
 
+           Before API version 2.22, this function was implemented as an aspirate, and
+           dispensing into a well would add the air gap volume to the liquid tracked in
+           the well. At or above API version 2.22, air gap volume is not counted as liquid
+           when dispensing into a well.
         """
         if not self._core.has_tip():
             raise UnexpectedTipRemovalError("air_gap", self.name, self.mount)
@@ -764,7 +772,12 @@ class InstrumentContext(publisher.CommandPublisher):
             raise RuntimeError("No previous Well cached to perform air gap")
         target = loc.labware.as_well().top(height)
         self.move_to(target, publish=False)
-        self.aspirate(volume)
+        if self.api_version >= _AIR_GAP_TRACKING_ADDED_IN:
+            c_vol = self._core.get_available_volume() if volume is None else volume
+            flow_rate = self._core.get_aspirate_flow_rate()
+            self._core.air_gap_in_place(c_vol, flow_rate)
+        else:
+            self.aspirate(volume)
         return self
 
     @publisher.publish(command=cmds.return_tip)
@@ -2190,6 +2203,26 @@ class InstrumentContext(publisher.CommandPublisher):
                         "Partial column configuration is only supported on 8-Channel pipettes."
                     )
             # SINGLE, QUADRANT and ALL are supported by all pipettes
+
+    def _handle_aspirate_target(
+        self, target: validation.ValidTarget
+    ) -> tuple[types.Location, Optional[labware.Well], Optional[bool]]:
+        move_to_location: types.Location
+        well: Optional[labware.Well] = None
+        is_meniscus: Optional[bool] = None
+        if isinstance(target, validation.WellTarget):
+            well = target.well
+            if target.location:
+                move_to_location = target.location
+                is_meniscus = target.location.is_meniscus
+
+            else:
+                move_to_location = target.well.bottom(
+                    z=self._well_bottom_clearances.aspirate
+                )
+        if isinstance(target, validation.PointTarget):
+            move_to_location = target.location
+        return (move_to_location, well, is_meniscus)
 
 
 class AutoProbeDisable:

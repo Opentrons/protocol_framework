@@ -72,6 +72,9 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
         """Sets the speed at which the robot's gantry moves."""
         self._default_speed = speed
 
+    def air_gap_in_place(self, volume: float, flow_rate: float) -> None:
+        assert False, "Air gap tracking only available in API version 2.22 and later"
+
     def aspirate(
         self,
         location: types.Location,
@@ -80,6 +83,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
         rate: float,
         flow_rate: float,
         in_place: bool,
+        is_meniscus: Optional[bool] = None,
     ) -> None:
         """Aspirate a given volume of liquid from the specified location.
         Args:
@@ -122,6 +126,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
         flow_rate: float,
         in_place: bool,
         push_out: Optional[float],
+        is_meniscus: Optional[bool] = None,
     ) -> None:
         """Dispense a given volume of liquid into the specified location.
         Args:

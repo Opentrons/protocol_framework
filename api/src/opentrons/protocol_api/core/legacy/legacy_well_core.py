@@ -106,10 +106,6 @@ class LegacyWellCore(AbstractWellCore):
         """Get the coordinate of the well's center."""
         return self._geometry.center()
 
-    def get_meniscus(self, z_offset: float) -> Point:
-        """This will never be called because it was added in API 2.21."""
-        assert False, "get_meniscus only supported in API 2.21 & later"
-
     def load_liquid(
         self,
         liquid: Liquid,
@@ -117,6 +113,10 @@ class LegacyWellCore(AbstractWellCore):
     ) -> None:
         """Load liquid into a well."""
         raise APIVersionError(api_element="Loading a liquid")
+
+    def load_empty(self) -> None:
+        """Mark a well as empty."""
+        assert False, "load_empty only supported on engine core"
 
     def from_center_cartesian(self, x: float, y: float, z: float) -> Point:
         """Gets point in deck coordinates based on percentage of the radius of each axis."""

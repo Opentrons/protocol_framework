@@ -13,20 +13,19 @@ import {
   useHoverTooltip,
 } from '@opentrons/components'
 import { getWellsDepth, getWellDimension } from '@opentrons/shared-data'
+import { TipPositionModal, ZTipPositionModal } from '../../../../../organisms'
 import { getIsDelayPositionField } from '../../../../../form-types'
+import { getDefaultMmFromBottom } from '../../../../../organisms/TipPositionModal/utils'
 import { selectors as stepFormSelectors } from '../../../../../step-forms'
-import { TipPositionModal } from '../../../../../components/StepEditForm/fields/TipPositionField/TipPositionModal'
-import { getDefaultMmFromBottom } from '../../../../../components/StepEditForm/fields/TipPositionField/utils'
-import { ZTipPositionModal } from '../../../../../components/StepEditForm/fields/TipPositionField/ZTipPositionModal'
 import type {
   TipXOffsetFields,
   TipYOffsetFields,
   TipZOffsetFields,
 } from '../../../../../form-types'
+import type { PositionSpecs } from '../../../../../organisms'
 import type { FieldPropsByName } from '../types'
-import type { PositionSpecs } from '../../../../../components/StepEditForm/fields/TipPositionField/TipPositionModal'
 interface PositionFieldProps {
-  prefix: 'aspirate' | 'dispense'
+  prefix: 'aspirate' | 'dispense' | 'mix'
   propsForFields: FieldPropsByName
   zField: TipZOffsetFields
   xField?: TipXOffsetFields
@@ -91,6 +90,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
   }
   const isDelayPositionField = getIsDelayPositionField(zName)
   let zValue: string | number = '0'
+
   const mmFromBottom = typeof rawZValue === 'number' ? rawZValue : null
   if (wellDepthMm !== null) {
     // show default value for field in parens if no mmFromBottom value is selected
@@ -145,6 +145,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
         wellYWidthMm={wellYWidthMm}
         isIndeterminate={isIndeterminate}
         specs={specs}
+        prefix={prefix}
       />
     )
   }

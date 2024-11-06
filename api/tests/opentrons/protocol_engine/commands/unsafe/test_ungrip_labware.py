@@ -22,7 +22,7 @@ async def test_ungrip_labware_implementation(
 
     result = await subject.execute(params=UnsafeUngripLabwareParams())
 
-    assert result == SuccessData(public=UnsafeUngripLabwareResult(), private=None)
+    assert result == SuccessData(public=UnsafeUngripLabwareResult())
 
     decoy.verify(
         await ot3_hardware_api.ungrip(),

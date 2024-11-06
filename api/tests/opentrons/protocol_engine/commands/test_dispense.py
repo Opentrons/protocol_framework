@@ -6,9 +6,15 @@ from decoy import Decoy, matchers
 
 from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
 
-from opentrons.protocol_engine import WellLocation, WellOrigin, WellOffset, DeckPoint
+from opentrons.protocol_engine import (
+    LiquidHandlingWellLocation,
+    WellOrigin,
+    WellOffset,
+    DeckPoint,
+)
 from opentrons.protocol_engine.execution import MovementHandler, PipettingHandler
 from opentrons.protocol_engine.state import update_types
+from opentrons.protocol_engine.state.state import StateView
 from opentrons.types import Point
 
 from opentrons.protocol_engine.commands.command import SuccessData, DefinedErrorData
@@ -23,13 +29,17 @@ from opentrons.protocol_engine.commands.pipetting_common import OverpressureErro
 
 @pytest.fixture
 def subject(
+    state_view: StateView,
     movement: MovementHandler,
     pipetting: PipettingHandler,
     model_utils: ModelUtils,
 ) -> DispenseImplementation:
     """Get the implementation subject."""
     return DispenseImplementation(
-        movement=movement, pipetting=pipetting, model_utils=model_utils
+        state_view=state_view,
+        movement=movement,
+        pipetting=pipetting,
+        model_utils=model_utils,
     )
 
 
@@ -38,9 +48,10 @@ async def test_dispense_implementation(
     movement: MovementHandler,
     pipetting: PipettingHandler,
     subject: DispenseImplementation,
+    state_view: StateView,
 ) -> None:
     """It should move to the target location and then dispense."""
-    well_location = WellLocation(
+    well_location = LiquidHandlingWellLocation(
         origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1)
     )
 
@@ -67,12 +78,16 @@ async def test_dispense_implementation(
             pipette_id="pipette-id-abc123", volume=50, flow_rate=1.23, push_out=None
         )
     ).then_return(42)
+    decoy.when(
+        state_view.pipettes.get_liquid_dispensed_by_ejecting_volume(
+            pipette_id="pipette-id-abc123", volume=42
+        )
+    ).then_return(34)
 
     result = await subject.execute(data)
 
     assert result == SuccessData(
         public=DispenseResult(volume=42, position=DeckPoint(x=1, y=2, z=3)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="pipette-id-abc123",
@@ -81,6 +96,14 @@ async def test_dispense_implementation(
                     well_name="A3",
                 ),
                 new_deck_point=DeckPoint.construct(x=1, y=2, z=3),
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id="labware-id-abc123",
+                well_name="A3",
+                volume_added=34,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteEjectedFluidUpdate(
+                pipette_id="pipette-id-abc123", volume=42
             ),
         ),
     )
@@ -97,7 +120,7 @@ async def test_overpressure_error(
     pipette_id = "pipette-id"
     labware_id = "labware-id"
     well_name = "well-name"
-    well_location = WellLocation(
+    well_location = LiquidHandlingWellLocation(
         origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1)
     )
 
@@ -150,6 +173,14 @@ async def test_overpressure_error(
                     well_name="well-name",
                 ),
                 new_deck_point=DeckPoint.construct(x=1, y=2, z=3),
+            ),
+            liquid_operated=update_types.LiquidOperatedUpdate(
+                labware_id="labware-id",
+                well_name="well-name",
+                volume_added=update_types.CLEAR,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                pipette_id="pipette-id"
             ),
         ),
     )

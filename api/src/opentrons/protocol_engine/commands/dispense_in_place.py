@@ -21,10 +21,13 @@ from .command import (
     DefinedErrorData,
 )
 from ..errors.error_occurrence import ErrorOccurrence
+from ..state.update_types import StateUpdate, CLEAR
+from ..types import CurrentWell
 
 if TYPE_CHECKING:
     from ..execution import PipettingHandler, GantryMover
     from ..resources import ModelUtils
+    from ..state.state import StateView
 
 
 DispenseInPlaceCommandType = Literal["dispenseInPlace"]
@@ -46,7 +49,7 @@ class DispenseInPlaceResult(BaseLiquidHandlingResult):
 
 
 _ExecuteReturn = Union[
-    SuccessData[DispenseInPlaceResult, None],
+    SuccessData[DispenseInPlaceResult],
     DefinedErrorData[OverpressureError],
 ]
 
@@ -59,17 +62,22 @@ class DispenseInPlaceImplementation(
     def __init__(
         self,
         pipetting: PipettingHandler,
+        state_view: StateView,
         gantry_mover: GantryMover,
         model_utils: ModelUtils,
         **kwargs: object,
     ) -> None:
         self._pipetting = pipetting
+        self._state_view = state_view
         self._gantry_mover = gantry_mover
         self._model_utils = model_utils
 
     async def execute(self, params: DispenseInPlaceParams) -> _ExecuteReturn:
         """Dispense without moving the pipette."""
+        state_update = StateUpdate()
+        current_location = self._state_view.pipettes.get_current_location()
         try:
+            current_position = await self._gantry_mover.get_position(params.pipetteId)
             volume = await self._pipetting.dispense_in_place(
                 pipette_id=params.pipetteId,
                 volume=params.volume,
@@ -77,7 +85,16 @@ class DispenseInPlaceImplementation(
                 push_out=params.pushOut,
             )
         except PipetteOverpressureError as e:
-            current_position = await self._gantry_mover.get_position(params.pipetteId)
+            if (
+                isinstance(current_location, CurrentWell)
+                and current_location.pipette_id == params.pipetteId
+            ):
+                state_update.set_liquid_operated(
+                    labware_id=current_location.labware_id,
+                    well_name=current_location.well_name,
+                    volume_added=CLEAR,
+                )
+            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
             return DefinedErrorData(
                 public=OverpressureError(
                     id=self._model_utils.generate_id(),
@@ -99,10 +116,27 @@ class DispenseInPlaceImplementation(
                         }
                     ),
                 ),
+                state_update=state_update,
             )
         else:
+            state_update.set_fluid_ejected(pipette_id=params.pipetteId, volume=volume)
+            if (
+                isinstance(current_location, CurrentWell)
+                and current_location.pipette_id == params.pipetteId
+            ):
+                volume_added = (
+                    self._state_view.pipettes.get_liquid_dispensed_by_ejecting_volume(
+                        pipette_id=params.pipetteId, volume=volume
+                    )
+                )
+                state_update.set_liquid_operated(
+                    labware_id=current_location.labware_id,
+                    well_name=current_location.well_name,
+                    volume_added=volume_added if volume_added is not None else CLEAR,
+                )
             return SuccessData(
-                public=DispenseInPlaceResult(volume=volume), private=None
+                public=DispenseInPlaceResult(volume=volume),
+                state_update=state_update,
             )
 
 

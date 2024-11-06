@@ -125,28 +125,36 @@ class WellCore(AbstractWellCore):
             well_location=WellLocation(origin=WellOrigin.CENTER),
         )
 
-    def get_meniscus(self, z_offset: float) -> Point:
-        """Get the coordinate of the well's meniscus, with a z-offset."""
-        return self._engine_client.state.geometry.get_well_position(
-            well_name=self._name,
-            labware_id=self._labware_id,
-            well_location=WellLocation(
-                origin=WellOrigin.MENISCUS,
-                offset=WellOffset(x=0, y=0, z=z_offset),
-            ),
-        )
-
     def load_liquid(
         self,
         liquid: Liquid,
         volume: float,
     ) -> None:
-        """Load liquid into a well."""
+        """Load liquid into a well.
+
+        If the well is known to be empty, use ``load_empty()`` instead of calling this with a 0.0 volume.
+        """
         self._engine_client.execute_command(
             cmd.LoadLiquidParams(
                 labwareId=self._labware_id,
                 liquidId=liquid._id,
                 volumeByWell={self._name: volume},
+            )
+        )
+
+    def load_empty(
+        self,
+    ) -> None:
+        """Inform the system that a well is known to be empty.
+
+        This should be done early in the protocol, at the same time as a load_liquid command might
+        be used.
+        """
+        self._engine_client.execute_command(
+            cmd.LoadLiquidParams(
+                labwareId=self._labware_id,
+                liquidId="EMPTY",
+                volumeByWell={self._name: 0.0},
             )
         )
 

@@ -72,16 +72,16 @@ class AbstractWellCore(ABC):
         """Get the coordinate of the well's center."""
 
     @abstractmethod
-    def get_meniscus(self, z_offset: float) -> Point:
-        """Get the coordinate of the well's meniscus, with an z-offset."""
-
-    @abstractmethod
     def load_liquid(
         self,
         liquid: Liquid,
         volume: float,
     ) -> None:
         """Load liquid into a well."""
+
+    @abstractmethod
+    def load_empty(self) -> None:
+        """Mark a well as containing no liquid."""
 
     @abstractmethod
     def from_center_cartesian(self, x: float, y: float, z: float) -> Point:

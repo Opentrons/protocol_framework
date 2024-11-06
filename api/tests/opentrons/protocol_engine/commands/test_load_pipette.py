@@ -3,6 +3,7 @@ from opentrons.protocol_engine.state.update_types import (
     LoadPipetteUpdate,
     PipetteConfigUpdate,
     StateUpdate,
+    PipetteUnknownFluidUpdate,
 )
 import pytest
 from decoy import Decoy
@@ -22,7 +23,6 @@ from opentrons.protocol_engine.commands.command import SuccessData
 from opentrons.protocol_engine.commands.load_pipette import (
     LoadPipetteParams,
     LoadPipetteResult,
-    LoadPipettePrivateResult,
     LoadPipetteImplementation,
 )
 from ..pipette_fixtures import get_default_nozzle_map
@@ -90,9 +90,6 @@ async def test_load_pipette_implementation(
 
     assert result == SuccessData(
         public=LoadPipetteResult(pipetteId="some id"),
-        private=LoadPipettePrivateResult(
-            pipette_id="some id", serial_number="some-serial-number", config=config_data
-        ),
         state_update=StateUpdate(
             loaded_pipette=LoadPipetteUpdate(
                 pipette_name=PipetteNameType.P300_SINGLE,
@@ -105,6 +102,7 @@ async def test_load_pipette_implementation(
                 serial_number="some-serial-number",
                 config=config_data,
             ),
+            pipette_aspirated_fluid=PipetteUnknownFluidUpdate(pipette_id="some id"),
         ),
     )
 
@@ -158,9 +156,6 @@ async def test_load_pipette_implementation_96_channel(
 
     assert result == SuccessData(
         public=LoadPipetteResult(pipetteId="pipette-id"),
-        private=LoadPipettePrivateResult(
-            pipette_id="pipette-id", serial_number="some id", config=config_data
-        ),
         state_update=StateUpdate(
             loaded_pipette=LoadPipetteUpdate(
                 pipette_name=PipetteNameType.P1000_96,
@@ -173,6 +168,7 @@ async def test_load_pipette_implementation_96_channel(
                 serial_number="some id",
                 config=config_data,
             ),
+            pipette_aspirated_fluid=PipetteUnknownFluidUpdate(pipette_id="pipette-id"),
         ),
     )
 

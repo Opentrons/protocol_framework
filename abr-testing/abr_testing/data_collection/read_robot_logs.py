@@ -13,7 +13,6 @@ from typing import List, Dict, Any, Tuple, Set, Optional
 import time as t
 import json
 import requests
-import sys
 from abr_testing.tools import plate_reader
 
 
@@ -111,6 +110,7 @@ def identify_labware_ids(
     file_results: Dict[str, Any], labware_name: Optional[str]
 ) -> List[str]:
     """Determine what type of labware is being picked up."""
+    list_of_labware_ids: List[str] = []
     if labware_name:
         labwares = file_results.get("labware", "")
         list_of_labware_ids = []
@@ -342,8 +342,9 @@ def hs_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
             )
     if temp_time is not None and deactivate_time is None:
         # If heater shaker module is not deactivated, protocol completedAt time stamp used.
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - temp_time).total_seconds()
         hs_temps[hs_temp] = hs_temps.get(hs_temp, 0.0) + temp_duration
@@ -390,8 +391,9 @@ def temperature_module_commands(file_results: Dict[str, Any]) -> Dict[str, Any]:
                 tm_temps[tm_temp] = tm_temps.get(tm_temp, 0.0) + temp_duration
     if temp_time is not None and deactivate_time is None:
         # If temperature module is not deactivated, protocol completedAt time stamp used.
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - temp_time).total_seconds()
         tm_temps[tm_temp] = tm_temps.get(tm_temp, 0.0) + temp_duration
@@ -474,15 +476,17 @@ def thermocycler_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
                 block_temps[block_temp] = block_temps.get(block_temp, 0.0) + block_time
     if block_on_time is not None and block_off_time is None:
         # If thermocycler block not deactivated protocol completedAt time stamp used
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - block_on_time).total_seconds()
-        block_temps[block_temp] = block_temps.get(block_temp, 0.0) + temp_duration
+
     if lid_on_time is not None and lid_off_time is None:
         # If thermocycler lid not deactivated protocol completedAt time stamp used
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - lid_on_time).total_seconds()
         lid_temps[lid_temp] = block_temps.get(lid_temp, 0.0) + temp_duration
@@ -695,7 +699,7 @@ def get_calibration_offsets(
         print(f"Connected to {ip}")
     except Exception:
         print(f"ERROR: Failed to read IP address: {ip}")
-        sys.exit()
+        pass
     health_data = response.json()
     robot_name = health_data.get("name", "")
     api_version = health_data.get("api_version", "")

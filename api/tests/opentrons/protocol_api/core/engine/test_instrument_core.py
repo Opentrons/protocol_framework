@@ -16,8 +16,11 @@ from opentrons.protocol_engine import (
     LoadedPipette,
     MotorAxis,
     WellLocation,
+    LiquidHandlingWellLocation,
+    PickUpTipWellLocation,
     WellOffset,
     WellOrigin,
+    PickUpTipWellOrigin,
     DropTipWellLocation,
     DropTipWellOrigin,
 )
@@ -258,12 +261,16 @@ def test_pick_up_tip(
     )
 
     decoy.when(
-        mock_engine_client.state.geometry.get_relative_well_location(
+        mock_engine_client.state.geometry.get_relative_pick_up_tip_well_location(
             labware_id="labware-id",
             well_name="well-name",
             absolute_point=Point(1, 2, 3),
         )
-    ).then_return(WellLocation(origin=WellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)))
+    ).then_return(
+        PickUpTipWellLocation(
+            origin=PickUpTipWellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)
+        )
+    )
 
     subject.pick_up_tip(
         location=location,
@@ -283,8 +290,8 @@ def test_pick_up_tip(
             pipette_id="abc123",
             labware_id="labware-id",
             well_name="well-name",
-            well_location=WellLocation(
-                origin=WellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)
+            well_location=PickUpTipWellLocation(
+                origin=PickUpTipWellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)
             ),
         ),
         mock_engine_client.execute_command(
@@ -292,8 +299,8 @@ def test_pick_up_tip(
                 pipetteId="abc123",
                 labwareId="labware-id",
                 wellName="well-name",
-                wellLocation=WellLocation(
-                    origin=WellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)
+                wellLocation=PickUpTipWellLocation(
+                    origin=PickUpTipWellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)
                 ),
             )
         ),
@@ -491,10 +498,17 @@ def test_aspirate_from_well(
     )
 
     decoy.when(
-        mock_engine_client.state.geometry.get_relative_well_location(
-            labware_id="123abc", well_name="my cool well", absolute_point=Point(1, 2, 3)
+        mock_engine_client.state.geometry.get_relative_liquid_handling_well_location(
+            labware_id="123abc",
+            well_name="my cool well",
+            absolute_point=Point(1, 2, 3),
+            is_meniscus=None,
         )
-    ).then_return(WellLocation(origin=WellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)))
+    ).then_return(
+        LiquidHandlingWellLocation(
+            origin=WellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)
+        )
+    )
 
     subject.aspirate(
         location=location,
@@ -520,7 +534,7 @@ def test_aspirate_from_well(
                 pipetteId="abc123",
                 labwareId="123abc",
                 wellName="my cool well",
-                wellLocation=WellLocation(
+                wellLocation=LiquidHandlingWellLocation(
                     origin=WellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)
                 ),
                 volume=12.34,
@@ -531,7 +545,7 @@ def test_aspirate_from_well(
     )
 
 
-def test_aspirate_from_location(
+def test_aspirate_from_coordinates(
     decoy: Decoy,
     mock_engine_client: EngineClient,
     mock_protocol_core: ProtocolCore,
@@ -561,6 +575,72 @@ def test_aspirate_from_location(
         mock_engine_client.execute_command(
             cmd.AspirateInPlaceParams(
                 pipetteId="abc123",
+                volume=12.34,
+                flowRate=7.8,
+            )
+        ),
+        mock_protocol_core.set_last_location(location=location, mount=Mount.LEFT),
+    )
+
+
+def test_aspirate_from_meniscus(
+    decoy: Decoy,
+    mock_engine_client: EngineClient,
+    mock_protocol_core: ProtocolCore,
+    subject: InstrumentCore,
+) -> None:
+    """It should aspirate from a well."""
+    location = Location(point=Point(1, 2, 3), labware=None)
+
+    well_core = WellCore(
+        name="my cool well", labware_id="123abc", engine_client=mock_engine_client
+    )
+
+    decoy.when(
+        mock_engine_client.state.geometry.get_relative_liquid_handling_well_location(
+            labware_id="123abc",
+            well_name="my cool well",
+            absolute_point=Point(1, 2, 3),
+            is_meniscus=True,
+        )
+    ).then_return(
+        LiquidHandlingWellLocation(
+            origin=WellOrigin.MENISCUS, offset=WellOffset(x=3, y=2, z=1), volumeOffset=0
+        )
+    )
+
+    subject.aspirate(
+        location=location,
+        well_core=well_core,
+        volume=12.34,
+        rate=5.6,
+        flow_rate=7.8,
+        in_place=False,
+        is_meniscus=True,
+    )
+
+    decoy.verify(
+        pipette_movement_conflict.check_safe_for_pipette_movement(
+            engine_state=mock_engine_client.state,
+            pipette_id="abc123",
+            labware_id="123abc",
+            well_name="my cool well",
+            well_location=LiquidHandlingWellLocation(
+                origin=WellOrigin.MENISCUS,
+                offset=WellOffset(x=3, y=2, z=1),
+                volumeOffset="operationVolume",
+            ),
+        ),
+        mock_engine_client.execute_command(
+            cmd.AspirateParams(
+                pipetteId="abc123",
+                labwareId="123abc",
+                wellName="my cool well",
+                wellLocation=LiquidHandlingWellLocation(
+                    origin=WellOrigin.MENISCUS,
+                    offset=WellOffset(x=3, y=2, z=1),
+                    volumeOffset="operationVolume",
+                ),
                 volume=12.34,
                 flowRate=7.8,
             )
@@ -715,10 +795,17 @@ def test_dispense_to_well(
     decoy.when(mock_protocol_core.api_version).then_return(MAX_SUPPORTED_VERSION)
 
     decoy.when(
-        mock_engine_client.state.geometry.get_relative_well_location(
-            labware_id="123abc", well_name="my cool well", absolute_point=Point(1, 2, 3)
+        mock_engine_client.state.geometry.get_relative_liquid_handling_well_location(
+            labware_id="123abc",
+            well_name="my cool well",
+            absolute_point=Point(1, 2, 3),
+            is_meniscus=None,
         )
-    ).then_return(WellLocation(origin=WellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)))
+    ).then_return(
+        LiquidHandlingWellLocation(
+            origin=WellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)
+        )
+    )
 
     subject.dispense(
         location=location,
@@ -745,7 +832,7 @@ def test_dispense_to_well(
                 pipetteId="abc123",
                 labwareId="123abc",
                 wellName="my cool well",
-                wellLocation=WellLocation(
+                wellLocation=LiquidHandlingWellLocation(
                     origin=WellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)
                 ),
                 volume=12.34,

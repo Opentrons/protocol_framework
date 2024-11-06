@@ -1350,7 +1350,14 @@
       },
       "id": "UUID",
       "key": "4cca9753dc59d176eee1522349363a75",
-      "notes": [],
+      "notes": [
+        {
+          "longMessage": "Handling this command failure with FAIL_RUN.",
+          "noteKind": "debugErrorRecovery",
+          "shortMessage": "Handling this command failure with FAIL_RUN.",
+          "source": "execution"
+        }
+      ],
       "params": {
         "labwareId": "UUID",
         "newLocation": {

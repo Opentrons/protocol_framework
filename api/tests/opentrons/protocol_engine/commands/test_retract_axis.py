@@ -25,7 +25,6 @@ async def test_retract_axis_implementation(
 
     assert result == SuccessData(
         public=RetractAxisResult(),
-        private=None,
         state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),
     )
     decoy.verify(await movement.retract_axis(axis=MotorAxis.Y))

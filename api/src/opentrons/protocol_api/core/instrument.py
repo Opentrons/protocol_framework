@@ -25,6 +25,14 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         ...
 
     @abstractmethod
+    def air_gap_in_place(self, volume: float, flow_rate: float) -> None:
+        """Aspirate a given volume of air from the current location of the pipette.
+        Args:
+            volume: The volume of air to aspirate, in microliters.
+            flow_rate: The flow rate of air into the pipette, in microliters.
+        """
+
+    @abstractmethod
     def aspirate(
         self,
         location: types.Location,
@@ -33,6 +41,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         rate: float,
         flow_rate: float,
         in_place: bool,
+        is_meniscus: Optional[bool] = None,
     ) -> None:
         """Aspirate a given volume of liquid from the specified location.
         Args:
@@ -55,6 +64,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         flow_rate: float,
         in_place: bool,
         push_out: Optional[float],
+        is_meniscus: Optional[bool] = None,
     ) -> None:
         """Dispense a given volume of liquid into the specified location.
         Args:

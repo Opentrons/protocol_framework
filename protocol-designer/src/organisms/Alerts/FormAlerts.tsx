@@ -28,12 +28,14 @@ import type { ProfileFormError } from '../../steplist/formLevel/profileErrors'
 import type { MakeAlert } from './types'
 
 interface FormAlertsProps {
+  showFormErrorsAndWarnings: boolean
   focusedField?: StepFieldName | null
   dirtyFields?: StepFieldName[]
 }
 
-function FormAlertsComponent(props: FormAlertsProps): JSX.Element {
-  const { focusedField, dirtyFields } = props
+function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
+  const { showFormErrorsAndWarnings, focusedField, dirtyFields } = props
+
   const { t } = useTranslation('alert')
   const dispatch = useDispatch()
   const formLevelErrorsForUnsavedForm = useSelector(
@@ -95,7 +97,7 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element {
   }
 
   const makeAlert: MakeAlert = (alertType, data, key) => (
-    <Flex padding={`${SPACING.spacing16} ${SPACING.spacing16} 0`}>
+    <Flex>
       <Banner
         type={alertType === 'error' ? 'error' : 'warning'}
         key={`${alertType}:${key}`}
@@ -104,22 +106,28 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element {
             ? makeHandleCloseWarning(data.dismissId)
             : undefined
         }
+        width="100%"
+        iconMarginLeft={SPACING.spacing4}
       >
         <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
           <StyledText desktopStyle="bodyDefaultSemiBold">
             {data.title}
           </StyledText>
-          <StyledText desktopStyle="bodyDefaultRegular">
-            {data.description}
-          </StyledText>
+          {data.description != null ? (
+            <StyledText desktopStyle="bodyDefaultRegular">
+              {data.description}
+            </StyledText>
+          ) : null}
         </Flex>
       </Banner>
     </Flex>
   )
+
   const formErrors = [
     ...visibleFormErrors.map(error => ({
       title: error.title,
-      description: error.body || null,
+      description: error.body ?? null,
+      showAtForm: error.showAtForm ?? true,
     })),
     ...visibleDynamicFieldFormErrors.map(error => ({
       title: error.title,
@@ -151,15 +159,31 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element {
       )
     }
   }
-  return (
-    <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
-      {formErrors.map((error, key) => makeAlert('error', error, key))}
-      {formWarnings.map((warning, key) => makeAlert('warning', warning, key))}
+
+  if (showFormErrorsAndWarnings) {
+    return [...formErrors, ...formWarnings].length > 0 ? (
+      <Flex
+        flexDirection={DIRECTION_COLUMN}
+        gridGap={SPACING.spacing4}
+        padding={`${SPACING.spacing16} ${SPACING.spacing16} 0`}
+      >
+        {formErrors.map((error, key) => makeAlert('error', error, key))}
+        {formWarnings.map((warning, key) => makeAlert('warning', warning, key))}
+      </Flex>
+    ) : null
+  }
+
+  return timelineWarnings.length > 0 ? (
+    <Flex
+      flexDirection={DIRECTION_COLUMN}
+      gridGap={SPACING.spacing4}
+      padding={`${SPACING.spacing16} ${SPACING.spacing16} 0`}
+    >
       {timelineWarnings.map((warning, key) =>
         makeAlert('warning', warning, key)
       )}
     </Flex>
-  )
+  ) : null
 }
 
 export const FormAlerts = memo(FormAlertsComponent)

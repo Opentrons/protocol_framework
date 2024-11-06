@@ -205,12 +205,27 @@ class WellOrigin(str, Enum):
         TOP: the top-center of the well
         BOTTOM: the bottom-center of the well
         CENTER: the middle-center of the well
+        MENISCUS: the meniscus-center of the well
     """
 
     TOP = "top"
     BOTTOM = "bottom"
     CENTER = "center"
     MENISCUS = "meniscus"
+
+
+class PickUpTipWellOrigin(str, Enum):
+    """The origin of a PickUpTipWellLocation offset.
+
+    Props:
+        TOP: the top-center of the well
+        BOTTOM: the bottom-center of the well
+        CENTER: the middle-center of the well
+    """
+
+    TOP = "top"
+    BOTTOM = "bottom"
+    CENTER = "center"
 
 
 class DropTipWellOrigin(str, Enum):
@@ -243,6 +258,34 @@ class WellLocation(BaseModel):
     """A relative location in reference to a well's location."""
 
     origin: WellOrigin = WellOrigin.TOP
+    offset: WellOffset = Field(default_factory=WellOffset)
+    volumeOffset: float = Field(
+        default=0.0,
+        description="""A volume of liquid, in µL, to offset the z-axis offset.""",
+    )
+
+
+class LiquidHandlingWellLocation(BaseModel):
+    """A relative location in reference to a well's location.
+
+    To be used with commands that handle liquids.
+    """
+
+    origin: WellOrigin = WellOrigin.TOP
+    offset: WellOffset = Field(default_factory=WellOffset)
+    volumeOffset: Union[float, Literal["operationVolume"]] = Field(
+        default=0.0,
+        description="""A volume of liquid, in µL, to offset the z-axis offset. When "operationVolume" is specified, this volume is pulled from the command volume parameter.""",
+    )
+
+
+class PickUpTipWellLocation(BaseModel):
+    """A relative location in reference to a well's location.
+
+    To be used for picking up tips.
+    """
+
+    origin: PickUpTipWellOrigin = PickUpTipWellOrigin.TOP
     offset: WellOffset = Field(default_factory=WellOffset)
 
 
@@ -312,20 +355,46 @@ class CurrentWell:
     well_name: str
 
 
-class LiquidHeightInfo(BaseModel):
-    """Payload required to store recent measured liquid heights."""
+class LoadedVolumeInfo(BaseModel):
+    """A well's liquid volume, initialized by a LoadLiquid, updated by Aspirate and Dispense."""
 
-    height: float
-    last_measured: datetime
+    volume: Optional[float] = None
+    last_loaded: datetime
+    operations_since_load: int
 
 
-class LiquidHeightSummary(BaseModel):
-    """Payload for liquid state height in StateSummary."""
+class ProbedHeightInfo(BaseModel):
+    """A well's liquid height, initialized by a LiquidProbe, cleared by Aspirate and Dispense."""
+
+    height: Optional[float] = None
+    last_probed: datetime
+
+
+class ProbedVolumeInfo(BaseModel):
+    """A well's liquid volume, initialized by a LiquidProbe, updated by Aspirate and Dispense."""
+
+    volume: Optional[float] = None
+    last_probed: datetime
+    operations_since_probe: int
+
+
+class WellInfoSummary(BaseModel):
+    """Payload for a well's liquid info in StateSummary."""
 
     labware_id: str
     well_name: str
-    height: float
-    last_measured: datetime
+    loaded_volume: Optional[float] = None
+    probed_height: Optional[float] = None
+    probed_volume: Optional[float] = None
+
+
+@dataclass
+class WellLiquidInfo:
+    """Tracked and sensed information about liquid in a well."""
+
+    probed_height: Optional[ProbedHeightInfo]
+    loaded_volume: Optional[LoadedVolumeInfo]
+    probed_volume: Optional[ProbedVolumeInfo]
 
 
 @dataclass(frozen=True)
@@ -351,6 +420,21 @@ class TipGeometry:
 
     length: float
     diameter: float
+    volume: float
+
+
+class FluidKind(str, Enum):
+    """A kind of fluid that can be inside a pipette."""
+
+    LIQUID = "LIQUID"
+    AIR = "AIR"
+
+
+@dataclass(frozen=True)
+class AspiratedFluid:
+    """Fluid inside a pipette."""
+
+    kind: FluidKind
     volume: float
 
 
@@ -742,6 +826,10 @@ class HexColor(BaseModel):
         if not match:
             raise ValueError("Color is not a valid hex color.")
         return v
+
+
+EmptyLiquidId = Literal["EMPTY"]
+LiquidId = str | EmptyLiquidId
 
 
 class Liquid(BaseModel):
