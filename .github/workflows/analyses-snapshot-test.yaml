@@ -78,24 +78,12 @@ jobs:
       - name: Cache Base Image Layers
         uses: actions/cache@v4
         with:
-          path: /tmp/.buildx-base-cache
+          path: /tmp/.buildx-cache
           key: ${{ runner.os }}-docker-${{ env.BASE_IMAGE_NAME }}
           restore-keys: |
             ${{ runner.os }}-docker-
 
-      - name: Build Base Docker Image with Makefile
-        working-directory: analyses-snapshot-testing
-        run: make build-base-image-ci
-
-      - name: Cache Analysis Image Layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-analysis-cache
-          key: ${{ runner.os }}-docker-analysis-${{ env.ANALYSIS_REF }}
-          restore-keys: |
-            ${{ runner.os }}-docker-analysis-
-
-      - name: Build Analysis Docker Image with Makefile
+      - name: Build Images with Makefile
         working-directory: analyses-snapshot-testing
         run: make build-opentrons-analysis-ci
 
