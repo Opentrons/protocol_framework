@@ -30,8 +30,7 @@ export function ThermocyclerTools(props: StepFormProps): JSX.Element {
   const { t } = useTranslation('form')
 
   const [contentType, setContentType] = useState<ThermocyclerContentType>(
-    (formData.thermocyclerFormType as ThermocyclerContentType) ??
-      'thermocyclerState'
+    formData.thermocyclerFormType as ThermocyclerContentType
   )
 
   if (toolboxStep === 0) {

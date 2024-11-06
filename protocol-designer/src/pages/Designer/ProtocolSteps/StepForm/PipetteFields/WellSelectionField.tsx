@@ -1,7 +1,9 @@
 import { createPortal } from 'react-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
+
 import {
+  ALIGN_CENTER,
   BORDERS,
   COLORS,
   DIRECTION_COLUMN,
@@ -14,6 +16,7 @@ import {
   useHoverTooltip,
 } from '@opentrons/components'
 import { COLUMN } from '@opentrons/shared-data'
+
 import {
   actions as stepsActions,
   getSelectedStepId,
@@ -23,6 +26,7 @@ import { selectors as stepFormSelectors } from '../../../../../step-forms'
 import { SelectWellsModal } from '../../../../../organisms'
 import { getMainPagePortalEl } from '../../../../../components/portals/MainPageModalPortal'
 import { getNozzleType } from '../utils'
+
 import type { FieldProps } from '../types'
 
 export type WellSelectionFieldProps = FieldProps & {

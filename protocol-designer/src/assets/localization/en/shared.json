@@ -104,6 +104,7 @@
   "ot2": "Opentrons OT-2",
   "overwrite_labware": "Overwrite labware",
   "overwrite": "Click Overwrite to replace the existing labware with the new labware.",
+  "part": "Part {{current}} / {{max}}",
   "pipette": "Pipette",
   "pd_version": "Protocol designer version",
   "primary_order": "Primary order",

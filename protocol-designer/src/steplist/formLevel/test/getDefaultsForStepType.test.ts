@@ -166,7 +166,7 @@ describe('getDefaultsForStepType', () => {
   describe('thermocycler step', () => {
     it('should get the correct defaults', () => {
       expect(getDefaultsForStepType('thermocycler')).toEqual({
-        thermocyclerFormType: null,
+        thermocyclerFormType: 'thermocyclerState',
         moduleId: null,
         blockIsActive: false,
         blockTargetTemp: null,

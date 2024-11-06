@@ -2,7 +2,12 @@ import * as React from 'react'
 import styled, { css } from 'styled-components'
 
 import { Flex } from '../../primitives'
-import { ALIGN_CENTER, DIRECTION_COLUMN, TEXT_ALIGN_RIGHT } from '../../styles'
+import {
+  ALIGN_CENTER,
+  DIRECTION_COLUMN,
+  DIRECTION_ROW,
+  TEXT_ALIGN_RIGHT,
+} from '../../styles'
 import { BORDERS, COLORS } from '../../helix-design-system'
 import { Icon } from '../../icons'
 import { RESPONSIVENESS, SPACING, TYPOGRAPHY } from '../../ui-style-constants'
@@ -256,7 +261,11 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
       >
         <Flex flexDirection={DIRECTION_COLUMN} width="100%">
           {title != null ? (
-            <Flex gridGap={SPACING.spacing8}>
+            <Flex
+              flexDirection={DIRECTION_ROW}
+              gridGap={SPACING.spacing8}
+              alignItems={ALIGN_CENTER}
+            >
               <StyledText
                 desktopStyle="bodyDefaultRegular"
                 htmlFor={props.id}

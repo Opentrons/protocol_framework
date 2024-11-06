@@ -10,10 +10,10 @@ from opentrons.types import Point
 from opentrons.hardware_control import API as HardwareAPI
 
 from opentrons.protocol_engine.execution import PipettingHandler, GantryMover
-from opentrons.protocol_engine.commands.aspirate_in_place import (
-    AspirateInPlaceParams,
-    AspirateInPlaceResult,
-    AspirateInPlaceImplementation,
+from opentrons.protocol_engine.commands.air_gap_in_place import (
+    AirGapInPlaceParams,
+    AirGapInPlaceResult,
+    AirGapInPlaceImplementation,
 )
 from opentrons.protocol_engine.commands.command import SuccessData, DefinedErrorData
 from opentrons.protocol_engine.errors.exceptions import PipetteNotReadyToAspirateError
@@ -57,9 +57,9 @@ def subject(
     mock_command_note_adder: CommandNoteAdder,
     model_utils: ModelUtils,
     gantry_mover: GantryMover,
-) -> AspirateInPlaceImplementation:
+) -> AirGapInPlaceImplementation:
     """Get the impelementation subject."""
-    return AspirateInPlaceImplementation(
+    return AirGapInPlaceImplementation(
         pipetting=pipetting,
         hardware_api=hardware_api,
         state_view=state_store,
@@ -85,19 +85,19 @@ def subject(
         (CurrentAddressableArea("pipette-id-abc", "addressable-area-1"), None, None),
     ],
 )
-async def test_aspirate_in_place_implementation(
+async def test_air_gap_in_place_implementation(
     decoy: Decoy,
     pipetting: PipettingHandler,
     state_store: StateStore,
     hardware_api: HardwareAPI,
     mock_command_note_adder: CommandNoteAdder,
-    subject: AspirateInPlaceImplementation,
+    subject: AirGapInPlaceImplementation,
     location: CurrentPipetteLocation | None,
     stateupdateLabware: str,
     stateupdateWell: str,
 ) -> None:
     """It should aspirate in place."""
-    data = AspirateInPlaceParams(
+    data = AirGapInPlaceParams(
         pipetteId="pipette-id-abc",
         volume=123,
         flowRate=1.234,
@@ -124,40 +124,35 @@ async def test_aspirate_in_place_implementation(
 
     if isinstance(location, CurrentWell):
         assert result == SuccessData(
-            public=AspirateInPlaceResult(volume=123),
+            public=AirGapInPlaceResult(volume=123),
             state_update=update_types.StateUpdate(
-                liquid_operated=update_types.LiquidOperatedUpdate(
-                    labware_id=stateupdateLabware,
-                    well_name=stateupdateWell,
-                    volume_added=-123,
-                ),
                 pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
                     pipette_id="pipette-id-abc",
-                    fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=123),
-                ),
+                    fluid=AspiratedFluid(kind=FluidKind.AIR, volume=123),
+                )
             ),
         )
     else:
         assert result == SuccessData(
-            public=AspirateInPlaceResult(volume=123),
+            public=AirGapInPlaceResult(volume=123),
             state_update=update_types.StateUpdate(
                 pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
                     pipette_id="pipette-id-abc",
-                    fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=123),
+                    fluid=AspiratedFluid(kind=FluidKind.AIR, volume=123),
                 )
             ),
         )
 
 
-async def test_handle_aspirate_in_place_request_not_ready_to_aspirate(
+async def test_handle_air_gap_in_place_request_not_ready_to_aspirate(
     decoy: Decoy,
     pipetting: PipettingHandler,
     state_store: StateStore,
     hardware_api: HardwareAPI,
-    subject: AspirateInPlaceImplementation,
+    subject: AirGapInPlaceImplementation,
 ) -> None:
     """Should raise an exception for not ready to aspirate."""
-    data = AspirateInPlaceParams(
+    data = AirGapInPlaceParams(
         pipetteId="pipette-id-abc",
         volume=123,
         flowRate=1.234,
@@ -171,7 +166,7 @@ async def test_handle_aspirate_in_place_request_not_ready_to_aspirate(
 
     with pytest.raises(
         PipetteNotReadyToAspirateError,
-        match="Pipette cannot aspirate in place because of a previous blow out."
+        match="Pipette cannot air gap in place because of a previous blow out."
         " The first aspirate following a blow-out must be from a specific well"
         " so the plunger can be reset in a known safe position.",
     ):
@@ -181,11 +176,11 @@ async def test_handle_aspirate_in_place_request_not_ready_to_aspirate(
 async def test_aspirate_raises_volume_error(
     decoy: Decoy,
     pipetting: PipettingHandler,
-    subject: AspirateInPlaceImplementation,
+    subject: AirGapInPlaceImplementation,
     mock_command_note_adder: CommandNoteAdder,
 ) -> None:
     """Should raise an assertion error for volume larger than working volume."""
-    data = AspirateInPlaceParams(
+    data = AirGapInPlaceParams(
         pipetteId="abc",
         volume=50,
         flowRate=1.23,
@@ -226,7 +221,7 @@ async def test_overpressure_error(
     decoy: Decoy,
     gantry_mover: GantryMover,
     pipetting: PipettingHandler,
-    subject: AspirateInPlaceImplementation,
+    subject: AirGapInPlaceImplementation,
     model_utils: ModelUtils,
     mock_command_note_adder: CommandNoteAdder,
     state_store: StateStore,
@@ -242,7 +237,7 @@ async def test_overpressure_error(
     error_id = "error-id"
     error_timestamp = datetime(year=2020, month=1, day=2)
 
-    data = AspirateInPlaceParams(
+    data = AirGapInPlaceParams(
         pipetteId=pipette_id,
         volume=50,
         flowRate=1.23,
@@ -276,16 +271,7 @@ async def test_overpressure_error(
                 wrappedErrors=[matchers.Anything()],
                 errorInfo={"retryLocation": (position.x, position.y, position.z)},
             ),
-            state_update=update_types.StateUpdate(
-                liquid_operated=update_types.LiquidOperatedUpdate(
-                    labware_id=stateupdateLabware,
-                    well_name=stateupdateWell,
-                    volume_added=update_types.CLEAR,
-                ),
-                pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
-                    pipette_id="pipette-id"
-                ),
-            ),
+            state_update=update_types.StateUpdate(),
         )
     else:
         assert result == DefinedErrorData(
@@ -294,10 +280,5 @@ async def test_overpressure_error(
                 createdAt=error_timestamp,
                 wrappedErrors=[matchers.Anything()],
                 errorInfo={"retryLocation": (position.x, position.y, position.z)},
-            ),
-            state_update=update_types.StateUpdate(
-                pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
-                    pipette_id="pipette-id"
-                )
             ),
         )

@@ -173,7 +173,7 @@ export function getDefaultsForStepType(
         profileItemsById: {},
         profileTargetLidTemp: null,
         profileVolume: null,
-        thermocyclerFormType: null,
+        thermocyclerFormType: 'thermocyclerState',
       }
 
     default:
