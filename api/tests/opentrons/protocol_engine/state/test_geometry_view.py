@@ -2750,7 +2750,7 @@ def test_get_stacked_labware_total_nominal_offset_slot_specific(
         DeckSlotLocation(slotName=DeckSlotName.SLOT_C1)
     )
     decoy.when(
-        mock_labware_view.get_labware_gripper_offsets(
+        mock_labware_view.get_child_gripper_offsets(
             labware_id="adapter-id", slot_name=DeckSlotName.SLOT_C1
         )
     ).then_return(
@@ -2802,12 +2802,12 @@ def test_get_stacked_labware_total_nominal_offset_default(
         DeckSlotLocation(slotName=DeckSlotName.SLOT_4)
     )
     decoy.when(
-        mock_labware_view.get_labware_gripper_offsets(
+        mock_labware_view.get_child_gripper_offsets(
             labware_id="adapter-id", slot_name=DeckSlotName.SLOT_C1
         )
     ).then_return(None)
     decoy.when(
-        mock_labware_view.get_labware_gripper_offsets(
+        mock_labware_view.get_child_gripper_offsets(
             labware_id="adapter-id", slot_name=None
         )
     ).then_return(

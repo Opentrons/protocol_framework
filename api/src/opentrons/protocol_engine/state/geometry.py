@@ -1321,11 +1321,11 @@ class GeometryView:
             module_loc = self._modules.get_location(parent_location.moduleId)
             slot_name = module_loc.slotName
 
-        slot_based_offset = self._labware.get_labware_gripper_offsets(
+        slot_based_offset = self._labware.get_child_gripper_offsets(
             labware_id=labware_id, slot_name=slot_name.to_ot3_equivalent()
         )
 
-        return slot_based_offset or self._labware.get_labware_gripper_offsets(
+        return slot_based_offset or self._labware.get_child_gripper_offsets(
             labware_id=labware_id, slot_name=None
         )
 

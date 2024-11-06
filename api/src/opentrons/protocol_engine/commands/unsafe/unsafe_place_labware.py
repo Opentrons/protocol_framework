@@ -84,10 +84,14 @@ class UnsafePlaceLabwareImplementation(
                 "Cannot place labware when gripper is not gripping."
             )
 
-        # Allow propagation of LabwareNotLoadedError.
         labware_id = params.labwareId
+        # Allow propagation of LabwareNotLoadedError.
         definition_uri = self._state_view.labware.get(labware_id).definitionUri
-        final_offsets = self._state_view.labware.get_labware_gripper_offsets(
+
+        # todo(mm, 2024-11-06): This is only correct in the special case of an
+        # absorbance reader lid. Its definition currently puts the offsets for *itself*
+        # in the property that's normally meant for offsets for its *children.*
+        final_offsets = self._state_view.labware.get_child_gripper_offsets(
             labware_id, None
         )
         drop_offset = cast(Point, final_offsets.dropOffset) if final_offsets else None

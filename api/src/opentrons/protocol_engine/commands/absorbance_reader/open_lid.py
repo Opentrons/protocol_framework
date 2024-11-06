@@ -106,7 +106,9 @@ class OpenLidImpl(AbstractCommandImpl[OpenLidParams, SuccessData[OpenLidResult]]
                 mod_substate.module_id
             )
 
-            lid_gripper_offsets = self._state_view.labware.get_labware_gripper_offsets(
+            # The lid's labware definition stores gripper offsets for itself in the
+            # space normally meant for offsets for labware stacked atop it.
+            lid_gripper_offsets = self._state_view.labware.get_child_gripper_offsets(
                 loaded_lid.id, None
             )
             if lid_gripper_offsets is None:

@@ -928,19 +928,24 @@ class LabwareView(HasState[LabwareState]):
             else None
         )
 
-    def get_labware_gripper_offsets(
+    def get_child_gripper_offsets(
         self,
         labware_id: str,
         slot_name: Optional[DeckSlotName],
     ) -> Optional[LabwareMovementOffsetData]:
-        """Get the labware's gripper offsets of the specified type.
+        """Get the offsets that a labware says should be applied to children stacked atop it.
+
+        Params:
+            labware_id: The ID of a parent labware (atop which another labware, the child, will be stacked).
+            slot_name: The ancestor slot that the parent labware is ultimately loaded into,
+                       perhaps after going through a module in the middle.
 
         Returns:
-            If `slot_name` is provided, returns the gripper offsets that the labware definition
+            If `slot_name` is provided, returns the gripper offsets that the parent labware definition
             specifies just for that slot, or `None` if the labware definition doesn't have an
             exact match.
 
-            If `slot_name` is `None`, returns the gripper offsets that the labware
+            If `slot_name` is `None`, returns the gripper offsets that the parent labware
             definition designates as "default," or `None` if it doesn't designate any as such.
         """
         parsed_offsets = self.get_definition(labware_id).gripperOffsets
