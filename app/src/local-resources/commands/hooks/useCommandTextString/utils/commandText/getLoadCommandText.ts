@@ -61,11 +61,11 @@ export const getLoadCommandText = ({
       })
       const labwareName = command.result?.definition.metadata.displayName
       // use in preposition for modules and slots, on for labware and adapters
-      let displayLocation = `${t('in')} ${location}`
+      let displayLocation = t('in_location', { location })
       if (command.params.location === 'offDeck') {
         displayLocation = location
       } else if ('labwareId' in command.params.location) {
-        displayLocation = `${t('on')} ${location}`
+        displayLocation = t('on_location', { location })
       }
 
       return t('load_labware_to_display_location', {
