@@ -82,6 +82,10 @@ export function PauseTools(props: StepFormProps): JSX.Element {
 
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
+  const formLevelErrorsWithoutField = visibleFormErrors.filter(
+    error => error.dependentFields.length === 0
+  )
+
   return (
     <>
       <Flex flexDirection={DIRECTION_COLUMN}>
@@ -131,102 +135,133 @@ export function PauseTools(props: StepFormProps): JSX.Element {
               largeDesktopBorderRadius
               disabled={!pauseUntilModuleEnabled}
             />
+            {formLevelErrorsWithoutField.map(error => (
+              <StyledText
+                key={error.title}
+                desktopStyle="bodyDefaultRegular"
+                color={COLORS.red50}
+              >
+                {error.title}
+              </StyledText>
+            ))}
           </Flex>
-          <Divider marginY="0" />
-          <Flex
-            flexDirection={DIRECTION_COLUMN}
-            gridGap={SPACING.spacing12}
-            paddingX={SPACING.spacing16}
-          >
-            {pauseAction === PAUSE_UNTIL_TIME ? (
+          {pauseAction != null ? (
+            <>
+              {' '}
+              <Divider marginY="0" />
               <Flex
                 flexDirection={DIRECTION_COLUMN}
                 gridGap={SPACING.spacing12}
+                paddingX={SPACING.spacing16}
               >
-                <Flex
-                  flexDirection={DIRECTION_COLUMN}
-                  gridGap={SPACING.spacing4}
-                >
-                  <InputStepFormField
-                    {...propsForFields.pauseTime}
-                    title={t('form:step_edit_form.field.pauseAction.duration')}
-                    value={propsForFields.pauseTime.value as string}
-                    updateValue={propsForFields.pauseTime.updateValue}
-                    errorToShow={propsForFields.pauseTime.errorToShow}
-                    units={t('application:units.time_hms')}
-                    padding="0"
-                    showTooltip={false}
-                    formLevelError={getFormLevelError(
-                      'pauseTime',
-                      mappedErrorsToField
-                    )}
-                  />
-                </Flex>
+                {pauseAction === PAUSE_UNTIL_TIME ? (
+                  <Flex
+                    flexDirection={DIRECTION_COLUMN}
+                    gridGap={SPACING.spacing12}
+                  >
+                    <Flex
+                      flexDirection={DIRECTION_COLUMN}
+                      gridGap={SPACING.spacing4}
+                    >
+                      <InputStepFormField
+                        {...propsForFields.pauseTime}
+                        title={t(
+                          'form:step_edit_form.field.pauseAction.duration'
+                        )}
+                        value={propsForFields.pauseTime.value as string}
+                        updateValue={propsForFields.pauseTime.updateValue}
+                        errorToShow={propsForFields.pauseTime.errorToShow}
+                        units={t('application:units.time_hms')}
+                        padding="0"
+                        showTooltip={false}
+                        formLevelError={getFormLevelError(
+                          'pauseTime',
+                          mappedErrorsToField
+                        )}
+                      />
+                    </Flex>
+                  </Flex>
+                ) : null}
+                {pauseAction === PAUSE_UNTIL_TEMP ? (
+                  <>
+                    <Flex flexDirection={DIRECTION_COLUMN}>
+                      <StyledText desktopStyle="captionRegular">
+                        {i18n.format(
+                          t(
+                            'form:step_edit_form.field.moduleActionLabware.label'
+                          ),
+                          'capitalize'
+                        )}
+                      </StyledText>
+                      <DropdownMenu
+                        filterOptions={moduleOptions}
+                        onClick={value => {
+                          propsForFields.moduleId.updateValue(value)
+                        }}
+                        currentOption={
+                          moduleOptions.find(
+                            option =>
+                              option.value === propsForFields.moduleId.value
+                          ) ?? { name: '', value: '' }
+                        }
+                        dropdownType="neutral"
+                        width="100%"
+                        error={getFormLevelError(
+                          'moduleId',
+                          mappedErrorsToField
+                        )}
+                      />
+                    </Flex>
+                    <Flex
+                      flexDirection={DIRECTION_COLUMN}
+                      gridGap={SPACING.spacing4}
+                    >
+                      <InputStepFormField
+                        {...propsForFields.pauseTemperature}
+                        title={t('application:temperature')}
+                        updateValue={
+                          propsForFields.pauseTemperature.updateValue
+                        }
+                        errorToShow={
+                          propsForFields.pauseTemperature.errorToShow
+                        }
+                        padding="0"
+                        showTooltip={false}
+                        formLevelError={getFormLevelError(
+                          'pauseTemperature',
+                          mappedErrorsToField
+                        )}
+                      />
+                    </Flex>
+                  </>
+                ) : null}
               </Flex>
-            ) : null}
-            {pauseAction === PAUSE_UNTIL_TEMP ? (
-              <>
-                <Flex flexDirection={DIRECTION_COLUMN}>
-                  <StyledText desktopStyle="captionRegular">
-                    {i18n.format(
-                      t('form:step_edit_form.field.moduleActionLabware.label'),
-                      'capitalize'
-                    )}
-                  </StyledText>
-                  <DropdownMenu
-                    filterOptions={moduleOptions}
-                    onClick={value => {
-                      propsForFields.moduleId.updateValue(value)
-                    }}
-                    currentOption={
-                      moduleOptions.find(
-                        option => option.value === propsForFields.moduleId.value
-                      ) ?? { name: '', value: '' }
-                    }
-                    dropdownType="neutral"
-                    width="100%"
-                    error={getFormLevelError('moduleId', mappedErrorsToField)}
-                  />
-                </Flex>
-                <Flex
-                  flexDirection={DIRECTION_COLUMN}
-                  gridGap={SPACING.spacing4}
+              <Flex
+                flexDirection={DIRECTION_COLUMN}
+                gridGap={SPACING.spacing4}
+                paddingX={SPACING.spacing16}
+              >
+                <StyledText
+                  desktopStyle="bodyDefaultRegular"
+                  color={COLORS.grey60}
                 >
-                  <InputStepFormField
-                    {...propsForFields.pauseTemperature}
-                    title={t('application:temperature')}
-                    updateValue={propsForFields.pauseTemperature.updateValue}
-                    errorToShow={propsForFields.pauseTemperature.errorToShow}
-                    padding="0"
-                    showTooltip={false}
-                    formLevelError={getFormLevelError(
-                      'pauseTemperature',
-                      mappedErrorsToField
-                    )}
-                  />
-                </Flex>
-              </>
-            ) : null}
-          </Flex>
-          <Flex
-            flexDirection={DIRECTION_COLUMN}
-            gridGap={SPACING.spacing4}
-            paddingX={SPACING.spacing16}
-          >
-            <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
-              {i18n.format(
-                t('form:step_edit_form.field.pauseMessage.label'),
-                'capitalize'
-              )}
-            </StyledText>
-            <StyledTextArea
-              value={propsForFields.pauseMessage.value as string}
-              onChange={(e: ChangeEvent<any>) => {
-                propsForFields.pauseMessage.updateValue(e.currentTarget.value)
-              }}
-              height="7rem"
-            />
-          </Flex>
+                  {i18n.format(
+                    t('form:step_edit_form.field.pauseMessage.label'),
+                    'capitalize'
+                  )}
+                </StyledText>
+                <StyledTextArea
+                  value={propsForFields.pauseMessage.value as string}
+                  onChange={(e: ChangeEvent<any>) => {
+                    propsForFields.pauseMessage.updateValue(
+                      e.currentTarget.value
+                    )
+                  }}
+                  height="7rem"
+                />
+              </Flex>
+            </>
+          ) : null}
         </Flex>
       </Flex>
     </>

@@ -174,6 +174,12 @@ const SHAKE_TIME_REQUIRED: FormError = {
   showAtForm: false,
   showAtField: true,
 }
+const PAUSE_ACTION_REQUIRED: FormError = {
+  title: 'Pause type required',
+  dependentFields: [],
+  showAtForm: false,
+  showAtField: true,
+}
 const PAUSE_MODULE_REQUIRED: FormError = {
   title: 'Select a module',
   dependentFields: ['moduleId', 'pauseAction'],
@@ -566,6 +572,12 @@ export const temperatureRequired = (
   return setHeaterShakerTemperature && !targetHeaterShakerTemperature
     ? HS_TEMPERATURE_REQUIRED
     : null
+}
+export const pauseActionRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { pauseAction } = fields
+  return pauseAction == null ? PAUSE_ACTION_REQUIRED : null
 }
 export const pauseTimeRequired = (
   fields: HydratedFormData

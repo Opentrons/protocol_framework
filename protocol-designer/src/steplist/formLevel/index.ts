@@ -41,6 +41,7 @@ import {
   mixLabwareRequired,
   volumeRequired,
   timesRequired,
+  pauseActionRequired,
 } from './errors'
 
 import {
@@ -101,6 +102,7 @@ const stepFormHelperMap: Partial<Record<StepType, FormHelpers>> = {
   },
   pause: {
     getErrors: composeErrors(
+      pauseActionRequired,
       pauseTimeRequired,
       pauseTemperatureRequired,
       pauseModuleRequired
