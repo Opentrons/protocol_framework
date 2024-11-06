@@ -15,7 +15,6 @@ from opentrons.protocol_engine import (
     CommandErrorSlice,
     CommandPointer,
     Command,
-    ErrorOccurrence,
 )
 from opentrons.protocol_engine.types import (
     PrimitiveRunTimeParamValuesType,
@@ -438,9 +437,9 @@ class RunDataManager:
             return self._run_orchestrator_store.get_command_error_slice(
                 cursor=cursor, length=length
             )
-
-        # TODO(tz, 8-5-2024): Change this to return to error list from the DB when we implement https://opentrons.atlassian.net/browse/EXEC-655.
-        raise RunNotCurrentError()
+        return self._run_store.get_commands_errors_slice(
+            run_id=run_id, cursor=cursor, length=length
+        )
 
     def get_current_command(self, run_id: str) -> Optional[CommandPointer]:
         """Get the "current" command, if any.
@@ -499,13 +498,11 @@ class RunDataManager:
 
         return self._run_store.get_command(run_id=run_id, command_id=command_id)
 
-    def get_command_errors(self, run_id: str) -> list[ErrorOccurrence]:
+    def get_command_errors_count(self, run_id: str) -> int:
         """Get all command errors."""
         if run_id == self._run_orchestrator_store.current_run_id:
-            return self._run_orchestrator_store.get_command_errors()
-
-        # TODO(tz, 8-5-2024): Change this to return the error list from the DB when we implement https://opentrons.atlassian.net/browse/EXEC-655.
-        raise RunNotCurrentError()
+            return len(self._run_orchestrator_store.get_command_errors())
+        return self._run_store.get_command_errors_count(run_id)
 
     def get_nozzle_maps(self, run_id: str) -> Dict[str, NozzleMap]:
         """Get current nozzle maps keyed by pipette id."""

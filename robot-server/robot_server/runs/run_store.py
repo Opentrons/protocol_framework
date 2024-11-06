@@ -175,7 +175,6 @@ class RunStore:
             transaction.execute(update_run)
             transaction.execute(delete_existing_commands)
             for command_index, command in enumerate(commands):
-                print(command.error)
                 transaction.execute(
                     insert_command,
                     {
@@ -546,6 +545,31 @@ class RunStore:
                 )
             commands_result = transaction.scalars(select_commands).all()
         return commands_result
+
+    def get_command_errors_count(self, run_id: str) -> int:
+        """Get run commands errors count from the store.
+
+        Args:
+            run_id: Run ID to pull commands from.
+
+        Returns:
+            The number of commands errors.
+
+        Raises:
+            RunNotFoundError: The given run ID was not found.
+        """
+        with self._sql_engine.begin() as transaction:
+            if not self._run_exists(run_id, transaction):
+                raise RunNotFoundError(run_id=run_id)
+
+            select_count = sqlalchemy.select(sqlalchemy.func.count()).where(
+                and_(
+                    run_command_table.c.run_id == run_id,
+                    run_command_table.c.command_error is not None,
+                )
+            )
+            errors_count: int = transaction.execute(select_count).scalar_one()
+            return errors_count
 
     def get_commands_errors_slice(
         self,

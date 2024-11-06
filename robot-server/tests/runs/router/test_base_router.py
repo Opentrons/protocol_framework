@@ -769,13 +769,7 @@ async def test_get_run_commands_errors(
         )
     ).then_raise(RunNotCurrentError("oh no!"))
 
-    error = pe_errors.ErrorOccurrence(
-        id="error-id",
-        errorType="PrettyBadError",
-        createdAt=datetime(year=2024, month=4, day=4),
-        detail="Things are not looking good.",
-    )
-    decoy.when(mock_run_data_manager.get_command_errors("run-id")).then_return([error])
+    decoy.when(mock_run_data_manager.get_command_errors_count("run-id")).then_return(1)
 
     with pytest.raises(ApiError):
         result = await get_run_commands_error(
@@ -797,7 +791,7 @@ async def test_get_run_commands_errors_raises_no_run(
         createdAt=datetime(year=2024, month=4, day=4),
         detail="Things are not looking good.",
     )
-    decoy.when(mock_run_data_manager.get_command_errors("run-id")).then_return([error])
+    decoy.when(mock_run_data_manager.get_command_errors_count("run-id")).then_return(1)
 
     command_error_slice = CommandErrorSlice(
         cursor=1, total_length=3, commands_errors=[error]
@@ -841,10 +835,7 @@ async def test_get_run_commands_errors_defualt_cursor(
     expected_cursor_result: int,
 ) -> None:
     """It should return a list of all commands errors in a run."""
-    print(error_list)
-    decoy.when(mock_run_data_manager.get_command_errors("run-id")).then_return(
-        error_list
-    )
+    decoy.when(mock_run_data_manager.get_command_errors_count("run-id")).then_return(1)
 
     command_error_slice = CommandErrorSlice(
         cursor=expected_cursor_result, total_length=3, commands_errors=error_list
