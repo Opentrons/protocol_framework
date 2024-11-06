@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import {
@@ -6,10 +5,8 @@ import {
   COLORS,
   DIRECTION_COLUMN,
   Flex,
-  ListItem,
   RadioButton,
   SPACING,
-  StyledText,
 } from '@opentrons/components'
 import {
   getTemperatureLabwareOptions,
@@ -19,6 +16,7 @@ import {
   DropdownStepFormField,
   InputStepFormField,
 } from '../../../../../../molecules'
+import type { ChangeEvent } from 'react'
 import type { StepFormProps } from '../../types'
 
 export function TemperatureTools(props: StepFormProps): JSX.Element {
@@ -28,38 +26,13 @@ export function TemperatureTools(props: StepFormProps): JSX.Element {
   const temperatureModuleIds = useSelector(getTemperatureModuleIds)
   const { setTemperature, moduleId } = formData
 
-  React.useEffect(() => {
-    if (moduleLabwareOptions.length === 1) {
-      propsForFields.moduleId.updateValue(moduleLabwareOptions[0].value)
-    }
-  }, [])
-
   return (
     <Flex flexDirection={DIRECTION_COLUMN}>
-      {moduleLabwareOptions.length > 1 ? (
-        <DropdownStepFormField
-          {...propsForFields.moduleId}
-          options={moduleLabwareOptions}
-          title={t('protocol_steps:module')}
-        />
-      ) : (
-        <Flex
-          flexDirection={DIRECTION_COLUMN}
-          padding={SPACING.spacing12}
-          gridGap={SPACING.spacing8}
-        >
-          <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
-            {t('protocol_steps:module')}
-          </StyledText>
-          <ListItem type="noActive">
-            <Flex padding={SPACING.spacing12}>
-              <StyledText desktopStyle="bodyDefaultRegular">
-                {moduleLabwareOptions[0].name}
-              </StyledText>
-            </Flex>
-          </ListItem>
-        </Flex>
-      )}
+      <DropdownStepFormField
+        {...propsForFields.moduleId}
+        options={moduleLabwareOptions}
+        title={t('protocol_steps:module')}
+      />
       <Box borderBottom={`1px solid ${COLORS.grey30}`} />
       {temperatureModuleIds != null
         ? temperatureModuleIds.map(id =>
@@ -73,7 +46,7 @@ export function TemperatureTools(props: StepFormProps): JSX.Element {
                   <RadioButton
                     width="100%"
                     largeDesktopBorderRadius
-                    onChange={(e: React.ChangeEvent<any>) => {
+                    onChange={(e: ChangeEvent<any>) => {
                       propsForFields.setTemperature.updateValue(
                         e.currentTarget.value
                       )
@@ -96,7 +69,7 @@ export function TemperatureTools(props: StepFormProps): JSX.Element {
                   <RadioButton
                     width="100%"
                     largeDesktopBorderRadius
-                    onChange={(e: React.ChangeEvent<any>) => {
+                    onChange={(e: ChangeEvent<any>) => {
                       propsForFields.setTemperature.updateValue(
                         e.currentTarget.value
                       )

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useEffect } from 'react'
 import {
   COLORS,
   DIRECTION_COLUMN,
@@ -36,9 +37,15 @@ export function DropdownStepFormField(
   const { t } = useTranslation('tooltip')
   const availableOptionId = options.find(opt => opt.value === value)
 
+  useEffect(() => {
+    if (options.length === 1) {
+      updateValue(options[0].value)
+    }
+  }, [])
+
   return (
     <Flex padding={addPadding ? SPACING.spacing16 : 0}>
-      {options.length > 1 ? (
+      {options.length > 1 || options.length === 0 ? (
         <DropdownMenu
           tooltipText={tooltipContent != null ? t(`${tooltipContent}`) : null}
           width={width}
