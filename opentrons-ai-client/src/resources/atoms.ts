@@ -11,6 +11,9 @@ import type {
 /** ChatDataAtom is for chat data (user prompt and response from OpenAI API) */
 export const chatDataAtom = atom<ChatData[]>([])
 
+/** ChatPromptAtom is for the prefilled userprompt when landing on the chat page */
+export const chatPromptAtom = atom<string>('')
+
 export const chatHistoryAtom = atom<Chat[]>([])
 
 export const tokenAtom = atom<string | null>(null)

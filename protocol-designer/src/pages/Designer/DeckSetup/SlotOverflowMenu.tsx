@@ -1,5 +1,5 @@
-import * as React from 'react'
 import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 import styled from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -20,15 +20,25 @@ import {
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
 
 import { deleteModule } from '../../../step-forms/actions'
-import { EditNickNameModal } from '../../../organisms'
+import {
+  ConfirmDeleteStagingAreaModal,
+  EditNickNameModal,
+} from '../../../organisms'
 import { deleteDeckFixture } from '../../../step-forms/actions/additionalItems'
 import {
   deleteContainer,
   duplicateLabware,
   openIngredientSelector,
 } from '../../../labware-ingred/actions'
+import { getStagingAreaAddressableAreas } from '../../../utils'
 import { selectors as labwareIngredSelectors } from '../../../labware-ingred/selectors'
-import type { CoordinateTuple, DeckSlotId } from '@opentrons/shared-data'
+import type { MouseEvent, SetStateAction } from 'react'
+import type {
+  CoordinateTuple,
+  CutoutId,
+  DeckSlotId,
+} from '@opentrons/shared-data'
+import type { LabwareOnDeck } from '../../../step-forms'
 import type { ThunkDispatch } from '../../../types'
 
 const ROBOT_BOTTOM_HALF_SLOTS = [
@@ -55,7 +65,7 @@ const TOP_SLOT_Y_POSITION_2_BUTTONS = 35
 interface SlotOverflowMenuProps {
   //   can be off-deck id or deck slot
   location: DeckSlotId | string
-  setShowMenuList: (value: React.SetStateAction<boolean>) => void
+  setShowMenuList: (value: SetStateAction<boolean>) => void
   addEquipment: (slotId: string) => void
   menuListSlotPosition?: CoordinateTuple
 }
@@ -71,14 +81,14 @@ export function SlotOverflowMenu(
   const { t } = useTranslation('starting_deck_state')
   const navigate = useNavigate()
   const dispatch = useDispatch<ThunkDispatch<any>>()
-  const [showNickNameModal, setShowNickNameModal] = React.useState<boolean>(
+  const [showDeleteLabwareModal, setShowDeleteLabwareModal] = useState<boolean>(
     false
   )
+  const [showNickNameModal, setShowNickNameModal] = useState<boolean>(false)
   const overflowWrapperRef = useOnClickOutside<HTMLDivElement>({
     onClickOutside: () => {
-      if (!showNickNameModal) {
-        setShowMenuList(false)
-      }
+      if (showNickNameModal || showDeleteLabwareModal) return
+      setShowMenuList(false)
     },
   })
   const deckSetup = useSelector(getDeckSetupForActiveItem)
@@ -111,6 +121,20 @@ export function SlotOverflowMenu(
   const fixturesOnSlot = Object.values(additionalEquipmentOnDeck).filter(
     ae => ae.location?.split('cutout')[1] === location
   )
+  const stagingAreaCutout = fixturesOnSlot.find(
+    fixture => fixture.name === 'stagingArea'
+  )?.location
+
+  let matchingLabware: LabwareOnDeck | null = null
+  if (stagingAreaCutout != null) {
+    const stagingAreaAddressableAreaName = getStagingAreaAddressableAreas([
+      stagingAreaCutout,
+    ] as CutoutId[])
+    matchingLabware =
+      Object.values(deckSetupLabware).find(
+        lw => lw.slot === stagingAreaAddressableAreaName[0]
+      ) ?? null
+  }
 
   const hasNoItems =
     moduleOnSlot == null && labwareOnSlot == null && fixturesOnSlot.length === 0
@@ -132,7 +156,12 @@ export function SlotOverflowMenu(
     if (nestedLabwareOnSlot != null) {
       dispatch(deleteContainer({ labwareId: nestedLabwareOnSlot.id }))
     }
+    // clear labware on staging area 4th column slot
+    if (matchingLabware != null) {
+      dispatch(deleteContainer({ labwareId: matchingLabware.id }))
+    }
   }
+
   const showDuplicateBtn =
     (labwareOnSlot != null &&
       !isLabwareAnAdapter &&
@@ -179,6 +208,19 @@ export function SlotOverflowMenu(
           }}
         />
       ) : null}
+      {showDeleteLabwareModal ? (
+        <ConfirmDeleteStagingAreaModal
+          onClose={() => {
+            setShowDeleteLabwareModal(false)
+            setShowMenuList(false)
+          }}
+          onConfirm={() => {
+            handleClear()
+            setShowDeleteLabwareModal(false)
+            setShowMenuList(false)
+          }}
+        />
+      ) : null}
       <Flex
         whiteSpace={NO_WRAP}
         ref={overflowWrapperRef}
@@ -186,7 +228,7 @@ export function SlotOverflowMenu(
         boxShadow="0px 1px 3px rgba(0, 0, 0, 0.2)"
         backgroundColor={COLORS.white}
         flexDirection={DIRECTION_COLUMN}
-        onClick={(e: React.MouseEvent) => {
+        onClick={(e: MouseEvent) => {
           e.preventDefault()
           e.stopPropagation()
         }}
@@ -206,7 +248,7 @@ export function SlotOverflowMenu(
         {showEditAndLiquidsBtns ? (
           <>
             <MenuButton
-              onClick={(e: React.MouseEvent) => {
+              onClick={(e: MouseEvent) => {
                 setShowNickNameModal(true)
                 e.preventDefault()
                 e.stopPropagation()
@@ -254,9 +296,15 @@ export function SlotOverflowMenu(
         ) : null}
         <MenuButton
           disabled={hasNoItems}
-          onClick={() => {
-            handleClear()
-            setShowMenuList(false)
+          onClick={(e: MouseEvent) => {
+            if (matchingLabware != null) {
+              setShowDeleteLabwareModal(true)
+              e.preventDefault()
+              e.stopPropagation()
+            } else {
+              handleClear()
+              setShowMenuList(false)
+            }
           }}
         >
           <StyledText desktopStyle="bodyDefaultRegular">
