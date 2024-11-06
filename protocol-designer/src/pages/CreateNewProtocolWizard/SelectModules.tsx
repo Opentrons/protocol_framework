@@ -258,6 +258,7 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                       return (
                         <ListItem type="noActive" key={`${module.model}`}>
                           <ListItemCustomize
+                            forceDirection
                             dropdown={
                               MOAM_MODULE_TYPES.includes(module.type) &&
                               robotType === FLEX_ROBOT_TYPE
