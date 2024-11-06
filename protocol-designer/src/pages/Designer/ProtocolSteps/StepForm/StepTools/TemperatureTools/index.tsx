@@ -19,10 +19,12 @@ import {
   DropdownStepFormField,
   InputStepFormField,
 } from '../../../../../../molecules'
+import { getFormErrorsMappedToField, getFormLevelError } from '../../utils'
+
 import type { StepFormProps } from '../../types'
 
 export function TemperatureTools(props: StepFormProps): JSX.Element {
-  const { propsForFields, formData } = props
+  const { propsForFields, formData, visibleFormErrors } = props
   const { t } = useTranslation(['application', 'form', 'protocol_steps'])
   const moduleLabwareOptions = useSelector(getTemperatureLabwareOptions)
   const temperatureModuleIds = useSelector(getTemperatureModuleIds)
@@ -33,6 +35,8 @@ export function TemperatureTools(props: StepFormProps): JSX.Element {
       propsForFields.moduleId.updateValue(moduleLabwareOptions[0].value)
     }
   }, [])
+
+  const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
   return (
     <Flex flexDirection={DIRECTION_COLUMN}>
@@ -90,6 +94,10 @@ export function TemperatureTools(props: StepFormProps): JSX.Element {
                     {...propsForFields.targetTemperature}
                     title={'Temperature'}
                     units={t('units.degrees')}
+                    errorToShow={getFormLevelError(
+                      'targetTemperature',
+                      mappedErrorsToField
+                    )}
                   />
                 )}
                 <Flex padding={`0 ${SPACING.spacing16}`} width="100%">

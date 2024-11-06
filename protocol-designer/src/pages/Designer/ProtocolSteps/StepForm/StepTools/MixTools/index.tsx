@@ -1,6 +1,5 @@
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
 import {
   DIRECTION_COLUMN,
   Divider,
@@ -37,16 +36,24 @@ import {
 } from '../../PipetteFields'
 import {
   getBlowoutLocationOptionsForForm,
+  getFormErrorsMappedToField,
+  getFormLevelError,
   getLabwareFieldForPositioningField,
 } from '../../utils'
 import type { StepFormProps } from '../../types'
 
 export function MixTools(props: StepFormProps): JSX.Element {
-  const { propsForFields, formData, toolboxStep, visibleFormErrors } = props
+  const {
+    propsForFields,
+    formData,
+    toolboxStep,
+    visibleFormErrors,
+    tab,
+    setTab,
+  } = props
   const pipettes = useSelector(getPipetteEntities)
   const enableReturnTip = useSelector(getEnableReturnTip)
   const labwares = useSelector(getLabwareEntities)
-  const [tab, setTab] = useState<'aspirate' | 'dispense'>('aspirate')
   const { t, i18n } = useTranslation(['application', 'form'])
   const aspirateTab = {
     text: i18n.format(t('aspirate'), 'capitalize'),
@@ -63,6 +70,7 @@ export function MixTools(props: StepFormProps): JSX.Element {
       setTab('dispense')
     },
   }
+
   const is96Channel =
     propsForFields.pipette.value != null &&
     pipettes[String(propsForFields.pipette.value)].name === 'p1000_96'
@@ -70,6 +78,10 @@ export function MixTools(props: StepFormProps): JSX.Element {
     labwares[String(propsForFields.pickUpTip_location.value)] != null
   const userSelectedDropTipLocation =
     labwares[String(propsForFields.dropTip_location.value)] != null
+
+  const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
+
+  console.log({ visibleFormErrors, mappedErrorsToField, formData })
 
   return toolboxStep === 0 ? (
     <Flex flexDirection={DIRECTION_COLUMN}>
@@ -81,7 +93,10 @@ export function MixTools(props: StepFormProps): JSX.Element {
         pipetteId={propsForFields.pipette.value}
       />
       <Divider marginY="0" />
-      <LabwareField {...propsForFields.labware} />
+      <LabwareField
+        {...propsForFields.labware}
+        errorToShow={getFormLevelError('labware', mappedErrorsToField)}
+      />
       <Divider marginY="0" />
       <Divider marginY="0" />
       <WellSelectionField
@@ -91,17 +106,22 @@ export function MixTools(props: StepFormProps): JSX.Element {
         nozzles={String(propsForFields.nozzles.value) ?? null}
         hasFormError={
           visibleFormErrors?.some(error =>
-            error.dependentFields.includes('labware')
+            error.dependentFields.includes('wells')
           ) ?? false
         }
+        errorToShow={getFormLevelError('wells', mappedErrorsToField)}
       />
       <Divider marginY="0" />
-      <VolumeField {...propsForFields.volume} />
+      <VolumeField
+        {...propsForFields.volume}
+        errorToShow={getFormLevelError('volume', mappedErrorsToField)}
+      />
       <Divider marginY="0" />
       <InputStepFormField
         {...propsForFields.times}
         units={t('units.times')}
         title={t('protocol_steps:mix_repetitions')}
+        errorToShow={getFormLevelError('times', mappedErrorsToField)}
       />
       <Divider marginY="0" />
       <ChangeTipField
@@ -214,6 +234,10 @@ export function MixTools(props: StepFormProps): JSX.Element {
               title={t('protocol_steps:delay_duration')}
               {...propsForFields[`${tab}_delay_seconds`]}
               units={t('application:units.seconds')}
+              errorToShow={getFormLevelError(
+                `${tab}_delay_checkbox`,
+                mappedErrorsToField
+              )}
             />
           ) : null}
         </CheckboxExpandStepFormField>
@@ -238,6 +262,10 @@ export function MixTools(props: StepFormProps): JSX.Element {
                     options={getBlowoutLocationOptionsForForm({
                       stepType: formData.stepType,
                     })}
+                    errorToShow={getFormLevelError(
+                      'blowout_location',
+                      mappedErrorsToField
+                    )}
                   />
                   <FlowRateField
                     key="blowout_flowRate"

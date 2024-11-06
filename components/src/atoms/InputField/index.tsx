@@ -72,6 +72,9 @@ export interface InputFieldProps {
   showDeleteIcon?: boolean
   onDelete?: () => void
   hasBackgroundError?: boolean
+  borderRadius?: string
+  height?: string
+  padding?: string
 }
 
 export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
@@ -86,6 +89,8 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
       showDeleteIcon = false,
       hasBackgroundError = false,
       onDelete,
+      borderRadius,
+      padding,
       ...inputProps
     } = props
     const hasError = props.error != null
@@ -107,8 +112,10 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
     const INPUT_FIELD = css`
       display: flex;
       background-color: ${hasBackgroundError ? COLORS.red30 : COLORS.white};
-      border-radius: ${BORDERS.borderRadius4};
-      padding: ${SPACING.spacing8};
+      border-radius: ${borderRadius != null
+        ? borderRadius
+        : BORDERS.borderRadius4};
+      padding: ${padding != null ? padding : SPACING.spacing8};
       border: ${hasBackgroundError
         ? 'none'
         : `1px ${BORDERS.styleSolid}
@@ -271,7 +278,12 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
               ) : null}
             </Flex>
           ) : null}
-          <Flex width="100%" flexDirection={DIRECTION_COLUMN} css={OUTER_CSS}>
+          <Flex
+            width="100%"
+            flexDirection={DIRECTION_COLUMN}
+            css={OUTER_CSS}
+            onClick={!props.disabled ? props.onClick : null}
+          >
             <Flex
               tabIndex={tabIndex}
               css={INPUT_FIELD}
@@ -326,7 +338,10 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
             </StyledText>
           ) : null}
           {hasError ? (
-            <StyledText desktopStyle="captionRegular" css={ERROR_TEXT_STYLE}>
+            <StyledText
+              desktopStyle="bodyDefaultRegular"
+              css={ERROR_TEXT_STYLE}
+            >
               {props.error}
             </StyledText>
           ) : null}

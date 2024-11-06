@@ -99,6 +99,7 @@ export function FlowRateField(props: FlowRateFieldProps): JSX.Element {
         max: maxFlowRate,
         unit: t('application:units.microliterPerSec'),
       })}
+      placeholder={String(defaultFlowRate)}
     />
   )
 }

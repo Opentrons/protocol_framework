@@ -72,6 +72,8 @@ describe('TemperatureTools', () => {
         },
       },
       showFormErrors: false,
+      tab: 'aspirate',
+      setTab: vi.fn(),
     }
 
     vi.mocked(getTemperatureModuleIds).mockReturnValue(['mockId'])

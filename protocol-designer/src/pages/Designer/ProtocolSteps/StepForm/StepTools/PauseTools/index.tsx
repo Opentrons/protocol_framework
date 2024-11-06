@@ -37,8 +37,6 @@ export function PauseTools(props: StepFormProps): JSX.Element {
   const {
     propsForFields,
     visibleFormErrors,
-    focusedField,
-    showFormErrors,
     setShowFormErrorsAndWarnings,
   } = props
 
@@ -159,10 +157,8 @@ export function PauseTools(props: StepFormProps): JSX.Element {
                     padding="0"
                     showTooltip={false}
                     formLevelError={getFormLevelError(
-                      showFormErrors,
                       'pauseTime',
-                      mappedErrorsToField,
-                      focusedField
+                      mappedErrorsToField
                     )}
                   />
                 </Flex>
@@ -189,6 +185,7 @@ export function PauseTools(props: StepFormProps): JSX.Element {
                     }
                     dropdownType="neutral"
                     width="100%"
+                    error={getFormLevelError('moduleId', mappedErrorsToField)}
                   />
                 </Flex>
                 <Flex
@@ -203,10 +200,8 @@ export function PauseTools(props: StepFormProps): JSX.Element {
                     padding="0"
                     showTooltip={false}
                     formLevelError={getFormLevelError(
-                      showFormErrors,
                       'pauseTemperature',
-                      mappedErrorsToField,
-                      focusedField
+                      mappedErrorsToField
                     )}
                   />
                 </Flex>

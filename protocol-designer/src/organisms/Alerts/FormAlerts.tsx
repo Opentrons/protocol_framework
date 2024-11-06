@@ -22,6 +22,7 @@ import {
 } from '../../pages/Designer/ProtocolSteps/StepForm/utils'
 import { WarningContents } from './WarningContents'
 
+import type { ReactNode } from 'react'
 import type { ProfileItem } from '@opentrons/step-generation'
 import type { StepFieldName } from '../../form-types'
 import type { ProfileFormError } from '../../steplist/formLevel/profileErrors'
@@ -31,10 +32,16 @@ interface FormAlertsProps {
   showFormErrorsAndWarnings: boolean
   focusedField?: StepFieldName | null
   dirtyFields?: StepFieldName[]
+  page: number
+}
+
+interface WarningType {
+  title: string
+  description: ReactNode | null
 }
 
 function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
-  const { showFormErrorsAndWarnings, focusedField, dirtyFields } = props
+  const { showFormErrorsAndWarnings, focusedField, dirtyFields, page } = props
 
   const { t } = useTranslation('alert')
   const dispatch = useDispatch()
@@ -70,6 +77,8 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
     focusedField,
     dirtyFields: dirtyFields ?? [],
     errors: formLevelErrorsForUnsavedForm,
+    page: page,
+    showErrors: showFormErrorsAndWarnings,
   })
 
   const profileItemsById: Record<string, ProfileItem> | null | undefined =
@@ -123,21 +132,32 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
     </Flex>
   )
 
+  const filteredFormErrorsForBanner = visibleFormErrors.reduce<WarningType[]>(
+    (acc, error) => {
+      return error.showAtForm ?? true
+        ? [
+            ...acc,
+            {
+              title: error.title,
+              description: error.body ?? null,
+            },
+          ]
+        : acc
+    },
+    []
+  )
+
   const formErrors = [
-    ...visibleFormErrors.map(error => ({
-      title: error.title,
-      description: error.body ?? null,
-      showAtForm: error.showAtForm ?? true,
-    })),
+    ...filteredFormErrorsForBanner,
     ...visibleDynamicFieldFormErrors.map(error => ({
       title: error.title,
-      description: error.body || null,
+      description: error.body ?? null,
     })),
   ]
 
   const formWarnings = visibleFormWarnings.map(warning => ({
     title: warning.title,
-    description: warning.body || null,
+    description: warning.body ?? null,
     dismissId: warning.type,
   }))
 
