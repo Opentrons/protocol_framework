@@ -8,13 +8,11 @@ import {
 import { getPipetteNameOnMount } from '../getPipetteNameOnMount'
 import { getLiquidDisplayName } from '../getLiquidDisplayName'
 
-import { getLabwareName } from '/app/local-resources/labware'
 import {
-  getModuleModel,
-  getModuleDisplayLocation,
-} from '/app/local-resources/modules'
+  getLabwareName,
+  getLabwareDisplayLocation,
+} from '/app/local-resources/labware'
 
-import type { LoadLabwareRunTimeCommand } from '@opentrons/shared-data'
 import type { GetCommandText } from '../..'
 
 export const getLoadCommandText = ({
@@ -53,103 +51,27 @@ export const getLoadCommandText = ({
       })
     }
     case 'loadLabware': {
-      if (
-        command.params.location !== 'offDeck' &&
-        'moduleId' in command.params.location
-      ) {
-        const moduleModel =
-          commandTextData != null
-            ? getModuleModel(
-                commandTextData.modules ?? [],
-                command.params.location.moduleId
-              )
-            : null
-        const moduleName =
-          moduleModel != null ? getModuleDisplayName(moduleModel) : ''
-
-        return t('load_labware_info_protocol_setup', {
-          count:
-            moduleModel != null
-              ? getOccludedSlotCountForModule(
-                  getModuleType(moduleModel),
-                  robotType
-                )
-              : 1,
-          labware: command.result?.definition.metadata.displayName,
-          slot_name:
-            commandTextData != null
-              ? getModuleDisplayLocation(
-                  commandTextData.modules ?? [],
-                  command.params.location.moduleId
-                )
-              : null,
-          module_name: moduleName,
-        })
-      } else if (
-        command.params.location !== 'offDeck' &&
-        'labwareId' in command.params.location
-      ) {
-        const labwareId = command.params.location.labwareId
-        const labwareName = command.result?.definition.metadata.displayName
-        const matchingAdapter = commandTextData?.commands.find(
-          (command): command is LoadLabwareRunTimeCommand =>
-            command.commandType === 'loadLabware' &&
-            command.result?.labwareId === labwareId
-        )
-        const adapterName =
-          matchingAdapter?.result?.definition.metadata.displayName
-        const adapterLoc = matchingAdapter?.params.location
-        if (adapterLoc === 'offDeck') {
-          return t('load_labware_info_protocol_setup_adapter_off_deck', {
-            labware: labwareName,
-            adapter_name: adapterName,
-          })
-        } else if (adapterLoc != null && 'slotName' in adapterLoc) {
-          return t('load_labware_info_protocol_setup_adapter', {
-            labware: labwareName,
-            adapter_name: adapterName,
-            slot_name: adapterLoc?.slotName,
-          })
-        } else if (adapterLoc != null && 'moduleId' in adapterLoc) {
-          const moduleModel =
-            commandTextData != null
-              ? getModuleModel(
-                  commandTextData.modules ?? [],
-                  adapterLoc?.moduleId ?? ''
-                )
-              : null
-          const moduleName =
-            moduleModel != null ? getModuleDisplayName(moduleModel) : ''
-          return t('load_labware_info_protocol_setup_adapter_module', {
-            labware: labwareName,
-            adapter_name: adapterName,
-            module_name: moduleName,
-            slot_name:
-              commandTextData != null
-                ? getModuleDisplayLocation(
-                    commandTextData.modules ?? [],
-                    adapterLoc?.moduleId ?? ''
-                  )
-                : null,
-          })
-        } else {
-          //  shouldn't reach here, adapter shouldn't have location  type labwareId
-          return ''
-        }
-      } else {
-        const labware =
-          command.result?.definition.metadata.displayName ??
-          command.params.displayName
-        return command.params.location === 'offDeck'
-          ? t('load_labware_info_protocol_setup_off_deck', { labware })
-          : t('load_labware_info_protocol_setup_no_module', {
-              labware,
-              slot_name:
-                'addressableAreaName' in command.params.location
-                  ? command.params.location.addressableAreaName
-                  : command.params.location.slotName,
-            })
+      const location = getLabwareDisplayLocation({
+        location: command.params.location,
+        robotType,
+        allRunDefs,
+        loadedLabwares: commandTextData?.labware ?? [],
+        loadedModules: commandTextData?.modules ?? [],
+        t,
+      })
+      const labwareName = command.result?.definition.metadata.displayName
+      // use in preposition for modules and slots, on for labware and adapters
+      let displayLocation = `${t('in')} ${location}`
+      if (command.params.location === 'offDeck') {
+        displayLocation = location
+      } else if ('labwareId' in command.params.location) {
+        displayLocation = `${t('on')} ${location}`
       }
+
+      return t('load_labware_to_display_location', {
+        labware: labwareName,
+        display_location: displayLocation,
+      })
     }
     case 'reloadLabware': {
       const { labwareId } = command.params
