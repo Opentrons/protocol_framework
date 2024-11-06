@@ -14,33 +14,15 @@ import {
   getAllDefinitions,
   getLabwareDisplayName,
 } from '@opentrons/shared-data'
-import React from 'react'
 import { LabwareDiagram } from '../../molecules/LabwareDiagram'
-
-export interface DisplayLabware {
-  labwareURI: string
-  count: number
-}
-
-export const ORDERED_CATEGORIES: string[] = [
-  'tipRack',
-  'tubeRack',
-  'wellPlate',
-  'reservoir',
-  'aluminumBlock',
-  'adapter',
-]
-
-export const LABWARES_FIELD_NAME = 'labwares'
+import type { DisplayLabware } from '../../organisms/LabwareLiquidsSection'
+import { LABWARES_FIELD_NAME } from '../../organisms/LabwareLiquidsSection'
 
 export function ControlledLabwareListItems(): JSX.Element | null {
   const { t } = useTranslation('create_protocol')
   const { watch } = useFormContext()
 
   const labwares: DisplayLabware[] = watch(LABWARES_FIELD_NAME) ?? []
-  const [selectedLabwares, setSelectedLabwares] = React.useState<string[]>(
-    labwares.map(lw => lw.labwareURI)
-  )
 
   const defs = getAllDefinitions()
 
@@ -84,9 +66,6 @@ export function ControlledLabwareListItems(): JSX.Element | null {
                     label={t('labwares_quantity_label')}
                     linkText={t('labwares_remove_label')}
                     onClick={() => {
-                      setSelectedLabwares(
-                        selectedLabwares.filter(lw => lw !== labware.labwareURI)
-                      )
                       field.onChange(labwares.filter(lw => lw !== labware))
                     }}
                     header={getLabwareDisplayName(labwareDef)}

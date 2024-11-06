@@ -19,17 +19,14 @@ import type {
   LabwareDefinition2,
 } from '@opentrons/shared-data'
 import { getLabwareDefURI, getAllDefinitions } from '@opentrons/shared-data'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { reduce } from 'lodash'
 import { ListButtonCheckbox } from '../../atoms/ListButtonCheckbox/ListButtonCheckbox'
+import type { DisplayLabware } from '../LabwareLiquidsSection'
+import { LABWARES_FIELD_NAME } from '../LabwareLiquidsSection'
 
-export interface DisplayLabware {
-  labwareURI: string
-  count: number
-}
-
-export const ORDERED_CATEGORIES: string[] = [
+const ORDERED_CATEGORIES: string[] = [
   'tipRack',
   'tubeRack',
   'wellPlate',
@@ -37,8 +34,6 @@ export const ORDERED_CATEGORIES: string[] = [
   'aluminumBlock',
   'adapter',
 ]
-
-export const LABWARES_FIELD_NAME = 'labwares'
 
 export function LabwareModal({
   displayLabwareModal,
@@ -94,6 +89,12 @@ export function LabwareModal({
     [labwareByCategory, searchTerm]
   )
 
+  useEffect(() => {
+    if (displayLabwareModal) {
+      setSelectedLabwares(labwares.map(lw => lw.labwareURI))
+    }
+  }, [displayLabwareModal])
+
   const handleCategoryClick = (category: string): void => {
     setSelectedCategory(selectedCategory === category ? null : category)
   }
@@ -130,6 +131,8 @@ export function LabwareModal({
                   flexDirection={DIRECTION_COLUMN}
                   gridGap={SPACING.spacing4}
                   paddingTop={SPACING.spacing8}
+                  overflowY="auto"
+                  maxHeight="500px"
                 >
                   {ORDERED_CATEGORIES.map(category => {
                     const isPopulated = populatedCategories[category]

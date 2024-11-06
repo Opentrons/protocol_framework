@@ -29,7 +29,8 @@ export interface CreateProtocolFormData {
     flexGripper: string
   }
   modules: DisplayModules[]
-  labware: DisplayLabware[]
+  labwares: DisplayLabware[]
+  liquids: string[]
 }
 
 const TOTAL_STEPS = 5
@@ -47,6 +48,8 @@ export function CreateProtocol(): JSX.Element | null {
         description: '',
       },
       instruments: {},
+      modules: [],
+      labwares: [],
     },
   })
 
