@@ -664,8 +664,9 @@ export const dispenseWellsRequired = (
   const { dispense_wells, dispense_labware } = fields
   return (dispense_wells == null || dispense_wells.length === 0) &&
     !(
-      dispense_labware.name === 'wasteChute' ||
-      dispense_labware.name === 'trashBin'
+      dispense_labware != null &&
+      (dispense_labware.name === 'wasteChute' ||
+        dispense_labware.name === 'trashBin')
     )
     ? DISPENSE_WELLS_REQUIRED
     : null
