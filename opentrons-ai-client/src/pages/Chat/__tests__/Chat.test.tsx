@@ -23,9 +23,8 @@ describe('Chat', () => {
     vi.mocked(ChatFooter).mockReturnValue(<div>mock ChatFooter</div>)
   })
 
-  it('should render prompt guide and text', () => {
+  it('should render footer', () => {
     render()
-    screen.getByText('mock PromptGuide')
     screen.getByText('mock ChatFooter')
   })
 
