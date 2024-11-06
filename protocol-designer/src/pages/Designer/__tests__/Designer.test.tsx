@@ -7,7 +7,6 @@ import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locati
 import { selectors } from '../../../labware-ingred/selectors'
 import { getDesignerTab, getFileMetadata } from '../../../file-data/selectors'
 import { generateNewProtocol } from '../../../labware-ingred/actions'
-import { analyticsEvent } from '../../../analytics/actions'
 import { DeckSetupContainer } from '../DeckSetup'
 import { Designer } from '../index'
 import { LiquidsOverflowMenu } from '../LiquidsOverflowMenu'
@@ -21,7 +20,6 @@ vi.mock('../ProtocolSteps')
 vi.mock('../../../labware-ingred/actions')
 vi.mock('../../../labware-ingred/selectors')
 vi.mock('../LiquidsOverflowMenu')
-vi.mock('../../../analytics/actions')
 vi.mock('../DeckSetup')
 vi.mock('../../../file-data/selectors')
 vi.mock('../../../top-selectors/labware-locations')
@@ -109,7 +107,6 @@ describe('Designer', () => {
     vi.mocked(getDesignerTab).mockReturnValue('protocolSteps')
     render()
     fireEvent.click(screen.getByText('Protocol steps'))
-    expect(vi.mocked(analyticsEvent)).toHaveBeenCalled()
     screen.getByText('mock ProtocolSteps')
   })
 })

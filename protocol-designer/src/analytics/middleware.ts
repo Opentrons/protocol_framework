@@ -89,10 +89,45 @@ export const reduxActionToAnalyticsEvent = (
       }
 
       const stepName = stepArgs.commandCreatorFnName
-      const modifiedStepName = stepName === 'delay' ? 'pause' : stepName
-      return {
-        name: `${modifiedStepName}Step`,
-        properties: { ...stepArgs, ...additionalProperties },
+      const modifiedStepName =
+        stepName === 'delay' || stepName === 'waitForTemperature'
+          ? 'pause'
+          : stepName
+
+      if (
+        modifiedStepName === 'engageMagnet' ||
+        modifiedStepName === 'disengageMagnet'
+      ) {
+        return {
+          name: `magnetStep`,
+          properties: { type: modifiedStepName },
+        }
+      } else if (
+        modifiedStepName === 'deactivateTemperature' ||
+        modifiedStepName === 'setTemperature'
+      ) {
+        return {
+          name: `temperatureStep`,
+          properties: { type: modifiedStepName },
+        }
+      } else if (
+        modifiedStepName === 'thermocyclerProfile' ||
+        modifiedStepName === 'thermocyclerState'
+      ) {
+        return {
+          name: 'thermocyclerStep',
+          properties: { type: modifiedStepName },
+        }
+      } else if (modifiedStepName === 'heaterShaker') {
+        return {
+          name: 'heaterShakerStep',
+          properties: {},
+        }
+      } else {
+        return {
+          name: `${modifiedStepName}Step`,
+          properties: { ...stepArgs, ...additionalProperties },
+        }
       }
     }
   }
