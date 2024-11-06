@@ -67,7 +67,7 @@ const OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST: string[] = [
   'fixedTrash',
 ]
 export const lightFill = COLORS.grey35
-const darkFill = COLORS.grey60
+export const darkFill = COLORS.grey60
 
 export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   const { tab } = props
