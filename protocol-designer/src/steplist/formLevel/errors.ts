@@ -131,36 +131,42 @@ const PROFILE_VOLUME_REQUIRED: FormError = {
   dependentFields: ['thermocyclerFormType', 'profileVolume'],
   showAtForm: false,
   showAtField: true,
+  page: 1,
 }
 const PROFILE_LID_TEMPERATURE_REQUIRED: FormError = {
   title: 'Temperature required',
   dependentFields: ['thermocyclerFormType', 'profileTargetLidTemp'],
   showAtForm: false,
   showAtField: true,
+  page: 1,
 }
 const LID_TEMPERATURE_REQUIRED: FormError = {
   title: 'Temperature required',
   dependentFields: ['lidIsActive', 'lidTargetTemp'],
   showAtForm: false,
   showAtField: true,
+  page: 1,
 }
 const BLOCK_TEMPERATURE_REQUIRED: FormError = {
   title: 'Temperature required',
   dependentFields: ['blockIsActive', 'blockTargetTemp'],
   showAtForm: false,
   showAtField: true,
+  page: 1,
 }
 const BLOCK_TEMPERATURE_HOLD_REQUIRED: FormError = {
   title: 'Temperature required',
   dependentFields: ['blockIsActiveHold', 'blockTargetTempHold'],
   showAtForm: false,
   showAtField: true,
+  page: 1,
 }
 const LID_TEMPERATURE_HOLD_REQUIRED: FormError = {
   title: 'Temperature required',
   dependentFields: ['lidIsActiveHold', 'lidTargetTempHold'],
   showAtForm: false,
   showAtField: true,
+  page: 1,
 }
 const SHAKE_SPEED_REQUIRED: FormError = {
   title: 'Speed required',
