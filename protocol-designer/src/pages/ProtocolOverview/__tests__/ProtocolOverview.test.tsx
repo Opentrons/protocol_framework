@@ -14,8 +14,6 @@ import { getDismissedHints } from '../../../tutorial/selectors'
 import { MaterialsListModal } from '../../../organisms/MaterialsListModal'
 import { selectors as labwareIngredSelectors } from '../../../labware-ingred/selectors'
 import { ProtocolOverview } from '../index'
-import { DeckThumbnail } from '../DeckThumbnail'
-import { OffDeckThumbnail } from '../OffdeckThumbnail'
 import { ProtocolMetadata } from '../ProtocolMetadata'
 import { InstrumentsInfo } from '../InstrumentsInfo'
 import { LiquidDefinitions } from '../LiquidDefinitions'
@@ -24,8 +22,6 @@ import { StartingDeck } from '../StartingDeck'
 
 import type { NavigateFunction } from 'react-router-dom'
 
-vi.mock('../OffdeckThumbnail')
-vi.mock('../DeckThumbnail')
 vi.mock('../../../step-forms/selectors')
 vi.mock('../../../tutorial/selectors')
 vi.mock('../../../file-data/selectors')
@@ -82,10 +78,10 @@ describe('ProtocolOverview', () => {
     vi.mocked(MaterialsListModal).mockReturnValue(
       <div>mock MaterialsListModal</div>
     )
-    vi.mocked(DeckThumbnail).mockReturnValue(<div>mock DeckThumbnail</div>)
-    vi.mocked(OffDeckThumbnail).mockReturnValue(
-      <div>mock OffdeckThumbnail</div>
-    )
+    // vi.mocked(DeckThumbnail).mockReturnValue(<div>mock DeckThumbnail</div>)
+    // vi.mocked(OffDeckThumbnail).mockReturnValue(
+    //   <div>mock OffdeckThumbnail</div>
+    // )
     vi.mocked(LiquidDefinitions).mockReturnValue(
       <div>mock LiquidDefinitions</div>
     )
@@ -116,6 +112,7 @@ describe('ProtocolOverview', () => {
     //  steps
     screen.getByText('mock StepsInfo')
 
+    // starting deck
     screen.getByText('mock StartingDeck')
   })
 
@@ -125,18 +122,4 @@ describe('ProtocolOverview', () => {
     fireEvent.click(button)
     expect(mockNavigate).toHaveBeenCalledWith('/designer')
   })
-
-  // ToDo (kk: 2024/11/05) add starting deck test and add the followings
-  // it('should render the deck thumbnail and offdeck thumbnail', () => {
-  //   render()
-  //   screen.getByText('mock DeckThumbnail')
-  //   fireEvent.click(screen.getByText('Off-deck'))
-  //   screen.getByText('mock OffdeckThumbnail')
-  // })
-
-  // it('render mock materials list modal when clicking materials list', () => {
-  //   render()
-  //   fireEvent.click(screen.getByText('Materials list'))
-  //   screen.getByText('mock MaterialsListModal')
-  // })
 })

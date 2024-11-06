@@ -44,11 +44,6 @@ export function StartingDeck({
 
   const [deckView, setDeckView] = useState<string>(leftString)
 
-  console.log('leftString', leftString)
-  console.log('rightString', rightString)
-  console.log('hover', hover)
-  console.log(isOffDeckHover)
-
   return (
     <>
       <Flex justifyContent={JUSTIFY_SPACE_BETWEEN} alignItems={ALIGN_CENTER}>
