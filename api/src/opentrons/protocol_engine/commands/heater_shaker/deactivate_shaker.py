@@ -26,9 +26,7 @@ class DeactivateShakerResult(BaseModel):
 
 
 class DeactivateShakerImpl(
-    AbstractCommandImpl[
-        DeactivateShakerParams, SuccessData[DeactivateShakerResult, None]
-    ]
+    AbstractCommandImpl[DeactivateShakerParams, SuccessData[DeactivateShakerResult]]
 ):
     """Execution implementation of a Heater-Shaker's deactivate shaker command."""
 
@@ -43,7 +41,7 @@ class DeactivateShakerImpl(
 
     async def execute(
         self, params: DeactivateShakerParams
-    ) -> SuccessData[DeactivateShakerResult, None]:
+    ) -> SuccessData[DeactivateShakerResult]:
         """Deactivate shaker for a Heater-Shaker."""
         # Allow propagation of ModuleNotLoadedError and WrongModuleTypeError.
         hs_module_substate = self._state_view.modules.get_heater_shaker_module_substate(
@@ -60,7 +58,9 @@ class DeactivateShakerImpl(
         if hs_hardware_module is not None:
             await hs_hardware_module.deactivate_shaker()
 
-        return SuccessData(public=DeactivateShakerResult(), private=None)
+        return SuccessData(
+            public=DeactivateShakerResult(),
+        )
 
 
 class DeactivateShaker(

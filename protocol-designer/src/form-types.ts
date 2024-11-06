@@ -187,9 +187,6 @@ export type PauseForm = AnnotationFields & {
     | typeof PAUSE_UNTIL_RESUME
     | typeof PAUSE_UNTIL_TIME
     | typeof PAUSE_UNTIL_TEMP
-  pauseHour?: string
-  pauseMinute?: string
-  pauseSecond?: string
   pauseMessage?: string
   pauseTemperature?: string
   pauseTime?: string
@@ -364,8 +361,7 @@ export interface HydratedTemperatureFormData {
 }
 export interface HydratedHeaterShakerFormData {
   heaterShakerSetTimer: 'true' | 'false' | null
-  heaterShakerTimerMinutes: string | null
-  heaterShakerTimerSeconds: string | null
+  heaterShakerTimer: string | null
   id: string
   latchOpen: boolean
   moduleId: string

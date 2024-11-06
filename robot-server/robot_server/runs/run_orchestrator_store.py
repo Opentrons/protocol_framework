@@ -207,6 +207,7 @@ class RunOrchestratorStore:
             run_id: The run resource the run orchestrator is assigned to.
             labware_offsets: Labware offsets to create the run with.
             deck_configuration: A mapping of fixtures to cutout fixtures the deck will be loaded with.
+            file_provider: Wrapper to let the engine read/write data files.
             notify_publishers: Utilized by the engine to notify publishers of state changes.
             protocol: The protocol to load the runner with, if any.
             run_time_param_values: Any runtime parameter values to set.
@@ -310,9 +311,9 @@ class RunOrchestratorStore:
         """Stop the run."""
         await self.run_orchestrator.stop()
 
-    def resume_from_recovery(self) -> None:
+    def resume_from_recovery(self, reconcile_false_positive: bool) -> None:
         """Resume the run from recovery mode."""
-        self.run_orchestrator.resume_from_recovery()
+        self.run_orchestrator.resume_from_recovery(reconcile_false_positive)
 
     async def finish(self, error: Optional[Exception]) -> None:
         """Finish the run."""
@@ -335,8 +336,12 @@ class RunOrchestratorStore:
         return self.run_orchestrator.get_run_time_parameters()
 
     def get_current_command(self) -> Optional[CommandPointer]:
-        """Get the current running command."""
+        """Get the current running command, if any."""
         return self.run_orchestrator.get_current_command()
+
+    def get_most_recently_finalized_command(self) -> Optional[CommandPointer]:
+        """Get the most recently finalized command, if any."""
+        return self.run_orchestrator.get_most_recently_finalized_command()
 
     def get_command_slice(
         self, cursor: Optional[int], length: int, include_fixit_commands: bool

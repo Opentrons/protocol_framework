@@ -56,6 +56,7 @@ const labwareDisplayCategoryFilters: LabwareFilter[] = [
   'adapter',
   'aluminumBlock',
   'customLabware',
+  'lid',
   'reservoir',
   'tipRack',
   'tubeRack',

@@ -6,14 +6,27 @@ import {
   StyledText,
 } from '@opentrons/components'
 import { InputStepFormField } from '../../../../../../molecules'
+import { getFormErrorsMappedToField, getFormLevelError } from '../../utils'
 
+import type { StepFormErrors } from '../../../../../../steplist'
 import type { FieldPropsByName } from '../../types'
 
 interface ProfileSettingsProps {
   propsForFields: FieldPropsByName
+  showFormErrors: boolean
+  visibleFormErrors: StepFormErrors
+  focusedField?: string | null
 }
 export function ProfileSettings(props: ProfileSettingsProps): JSX.Element {
-  const { propsForFields } = props
+  const {
+    propsForFields,
+    showFormErrors,
+    visibleFormErrors,
+    focusedField,
+  } = props
+
+  const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
+
   const { i18n, t } = useTranslation(['application', 'form'])
   return (
     <Flex
@@ -30,6 +43,12 @@ export function ProfileSettings(props: ProfileSettingsProps): JSX.Element {
         units={t('units.microliter')}
         padding="0"
         showTooltip={false}
+        formLevelError={getFormLevelError(
+          showFormErrors,
+          'profileVolume',
+          mappedErrorsToField,
+          focusedField
+        )}
       />
       <InputStepFormField
         {...propsForFields.profileTargetLidTemp}
@@ -40,6 +59,12 @@ export function ProfileSettings(props: ProfileSettingsProps): JSX.Element {
         units={t('units.degrees')}
         padding="0"
         showTooltip={false}
+        formLevelError={getFormLevelError(
+          showFormErrors,
+          'profileTargetLidTemp',
+          mappedErrorsToField,
+          focusedField
+        )}
       />
     </Flex>
   )

@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next'
-import { css } from 'styled-components'
 import {
   ALIGN_CENTER,
   DIRECTION_COLUMN,
@@ -8,10 +7,10 @@ import {
   LiquidIcon,
   ListItem,
   ListItemDescriptor,
-  OVERFLOW_HIDDEN,
   SPACING,
   StyledText,
 } from '@opentrons/components'
+import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
 
 import type { AllIngredGroupFields } from '../../labware-ingred/types'
 
@@ -36,21 +35,32 @@ export function LiquidDefinitions({
               key={`${liquid.name}_${liquid.displayColor}_${index}`}
             >
               <ListItemDescriptor
-                type="default"
+                type="large"
                 description={
-                  <Flex alignItems={ALIGN_CENTER} gridGap={SPACING.spacing8}>
+                  <Flex
+                    alignItems={ALIGN_CENTER}
+                    gridGap={SPACING.spacing8}
+                    minWidth="13.75rem"
+                    width="13.75rem"
+                  >
                     <LiquidIcon color={liquid.displayColor} />
                     <StyledText
                       desktopStyle="bodyDefaultRegular"
-                      overflowWrap="anywhere"
                       id="liquid-name"
-                      css={LIQUID_DEFINITION_TEXT}
+                      css={LINE_CLAMP_TEXT_STYLE(3)}
                     >
                       {liquid.name}
                     </StyledText>
                   </Flex>
                 }
-                content={liquid.description ?? t('na')}
+                content={
+                  <StyledText
+                    desktopStyle="bodyDefaultRegular"
+                    css={LINE_CLAMP_TEXT_STYLE(10)}
+                  >
+                    {liquid.description ?? t('na')}
+                  </StyledText>
+                }
               />
             </ListItem>
           ))
@@ -61,11 +71,3 @@ export function LiquidDefinitions({
     </Flex>
   )
 }
-
-const LIQUID_DEFINITION_TEXT = css`
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: ${OVERFLOW_HIDDEN};
-  text-overflow: ellipsis;
-`

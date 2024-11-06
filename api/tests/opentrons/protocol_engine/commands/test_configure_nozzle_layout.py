@@ -145,7 +145,6 @@ async def test_configure_nozzle_layout_implementation(
 
     assert result == SuccessData(
         public=ConfigureNozzleLayoutResult(),
-        private=None,
         state_update=StateUpdate(
             pipette_nozzle_map=PipetteNozzleMapUpdate(
                 pipette_id="pipette-id",

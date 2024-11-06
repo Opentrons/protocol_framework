@@ -28,12 +28,19 @@ import {
 import { InputStepFormField } from '../../../../../../molecules'
 import { getInitialDeckSetup } from '../../../../../../step-forms/selectors'
 import { selectors as uiModuleSelectors } from '../../../../../../ui/modules'
+import { getFormErrorsMappedToField, getFormLevelError } from '../../utils'
 
 import type { ChangeEvent } from 'react'
 import type { StepFormProps } from '../../types'
 
 export function PauseTools(props: StepFormProps): JSX.Element {
-  const { propsForFields } = props
+  const {
+    propsForFields,
+    visibleFormErrors,
+    focusedField,
+    showFormErrors,
+    setShowFormErrorsAndWarnings,
+  } = props
 
   const tempModuleLabwareOptions = useSelector(
     uiModuleSelectors.getTemperatureLabwareOptions
@@ -75,6 +82,8 @@ export function PauseTools(props: StepFormProps): JSX.Element {
 
   const { pauseAction } = props.formData
 
+  const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
+
   return (
     <>
       <Flex flexDirection={DIRECTION_COLUMN}>
@@ -88,6 +97,7 @@ export function PauseTools(props: StepFormProps): JSX.Element {
             <RadioButton
               onChange={(e: ChangeEvent<any>) => {
                 propsForFields.pauseAction.updateValue(e.currentTarget.value)
+                setShowFormErrorsAndWarnings?.(false)
               }}
               buttonLabel={t(
                 'form:step_edit_form.field.pauseAction.options.untilResume'
@@ -101,6 +111,7 @@ export function PauseTools(props: StepFormProps): JSX.Element {
             <RadioButton
               onChange={(e: ChangeEvent<any>) => {
                 propsForFields.pauseAction.updateValue(e.currentTarget.value)
+                setShowFormErrorsAndWarnings?.(false)
               }}
               buttonLabel={t(
                 'form:step_edit_form.field.pauseAction.options.untilTime'
@@ -112,6 +123,7 @@ export function PauseTools(props: StepFormProps): JSX.Element {
             <RadioButton
               onChange={(e: ChangeEvent<any>) => {
                 propsForFields.pauseAction.updateValue(e.currentTarget.value)
+                setShowFormErrorsAndWarnings?.(false)
               }}
               buttonLabel={t(
                 'form:step_edit_form.field.pauseAction.options.untilTemperature'
@@ -139,12 +151,19 @@ export function PauseTools(props: StepFormProps): JSX.Element {
                 >
                   <InputStepFormField
                     {...propsForFields.pauseTime}
-                    title={t('application:time')}
+                    title={t('form:step_edit_form.field.pauseAction.duration')}
                     value={propsForFields.pauseTime.value as string}
                     updateValue={propsForFields.pauseTime.updateValue}
                     errorToShow={propsForFields.pauseTime.errorToShow}
+                    units={t('application:units.time_hms')}
                     padding="0"
                     showTooltip={false}
+                    formLevelError={getFormLevelError(
+                      showFormErrors,
+                      'pauseTime',
+                      mappedErrorsToField,
+                      focusedField
+                    )}
                   />
                 </Flex>
               </Flex>
@@ -183,6 +202,12 @@ export function PauseTools(props: StepFormProps): JSX.Element {
                     errorToShow={propsForFields.pauseTemperature.errorToShow}
                     padding="0"
                     showTooltip={false}
+                    formLevelError={getFormLevelError(
+                      showFormErrors,
+                      'pauseTemperature',
+                      mappedErrorsToField,
+                      focusedField
+                    )}
                   />
                 </Flex>
               </>
@@ -193,7 +218,7 @@ export function PauseTools(props: StepFormProps): JSX.Element {
             gridGap={SPACING.spacing4}
             paddingX={SPACING.spacing16}
           >
-            <StyledText desktopStyle="captionRegular">
+            <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
               {i18n.format(
                 t('form:step_edit_form.field.pauseMessage.label'),
                 'capitalize'

@@ -205,9 +205,9 @@ class RunOrchestrator:
                 post_run_hardware_state=PostRunHardwareState.STAY_ENGAGED_IN_PLACE,
             )
 
-    def resume_from_recovery(self) -> None:
+    def resume_from_recovery(self, reconcile_false_positive: bool) -> None:
         """Resume the run from recovery."""
-        self._protocol_engine.resume_from_recovery()
+        self._protocol_engine.resume_from_recovery(reconcile_false_positive)
 
     async def finish(
         self,
@@ -256,6 +256,22 @@ class RunOrchestrator:
     def get_current_command(self) -> Optional[CommandPointer]:
         """Get the "current" command, if any."""
         return self._protocol_engine.state_view.commands.get_current()
+
+    def get_most_recently_finalized_command(self) -> Optional[CommandPointer]:
+        """Get the most recently finalized command, if any."""
+        most_recently_finalized_command = (
+            self._protocol_engine.state_view.commands.get_most_recently_finalized_command()
+        )
+        return (
+            CommandPointer(
+                command_id=most_recently_finalized_command.command.id,
+                command_key=most_recently_finalized_command.command.key,
+                created_at=most_recently_finalized_command.command.createdAt,
+                index=most_recently_finalized_command.index,
+            )
+            if most_recently_finalized_command
+            else None
+        )
 
     def get_command_slice(
         self, cursor: Optional[int], length: int, include_fixit_commands: bool

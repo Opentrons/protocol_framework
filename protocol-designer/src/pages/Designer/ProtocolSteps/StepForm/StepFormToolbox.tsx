@@ -2,7 +2,6 @@ import { useState } from 'react'
 import get from 'lodash/get'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
-
 import {
   ALIGN_CENTER,
   Btn,
@@ -11,11 +10,11 @@ import {
   Icon,
   POSITION_RELATIVE,
   PrimaryButton,
-  SPACING,
   SecondaryButton,
+  SPACING,
   StyledText,
-  TYPOGRAPHY,
   Toolbox,
+  TYPOGRAPHY,
 } from '@opentrons/components'
 import { stepIconsByType } from '../../../../form-types'
 import { FormAlerts } from '../../../../organisms'
@@ -24,7 +23,7 @@ import { RenameStepModal } from '../../../../organisms/RenameStepModal'
 import { getFormWarningsForSelectedStep } from '../../../../dismiss/selectors'
 import { getTimelineWarningsForSelectedStep } from '../../../../top-selectors/timelineWarnings'
 import { getRobotStateTimeline } from '../../../../file-data/selectors'
-import { BUTTON_LINK_STYLE } from '../../../../atoms'
+import { BUTTON_LINK_STYLE, LINE_CLAMP_TEXT_STYLE } from '../../../../atoms'
 import {
   CommentTools,
   HeaterShakerTools,
@@ -36,10 +35,16 @@ import {
   TemperatureTools,
   ThermocyclerTools,
 } from './StepTools'
-import { getSaveStepSnackbarText } from './utils'
+import {
+  getSaveStepSnackbarText,
+  getVisibleFormErrors,
+  getVisibleFormWarnings,
+  capitalizeFirstLetter,
+} from './utils'
 import type { StepFieldName } from '../../../../steplist/fieldLevel'
 import type { FormData, StepType } from '../../../../form-types'
 import type { FieldPropsByName, FocusHandlers, StepFormProps } from './types'
+import { getFormLevelErrorsForUnsavedForm } from '../../../../step-forms/selectors'
 
 type StepFormMap = {
   [K in StepType]?: React.ComponentType<StepFormProps> | null
@@ -91,14 +96,25 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   const timelineWarningsForSelectedStep = useSelector(
     getTimelineWarningsForSelectedStep
   )
-  const timeline = useSelector(getRobotStateTimeline)
-  const [toolboxStep, setToolboxStep] = useState<number>(
-    // progress to step 2 if thermocycler form is populated
-    formData.thermocyclerFormType === 'thermocyclerProfile' ||
-      formData.thermocyclerFormType === 'thermocyclerState'
-      ? 1
-      : 0
+  const formLevelErrorsForUnsavedForm = useSelector(
+    getFormLevelErrorsForUnsavedForm
   )
+  const timeline = useSelector(getRobotStateTimeline)
+  const [toolboxStep, setToolboxStep] = useState<number>(0)
+  const [
+    showFormErrorsAndWarnings,
+    setShowFormErrorsAndWarnings,
+  ] = useState<boolean>(false)
+  const visibleFormWarnings = getVisibleFormWarnings({
+    focusedField,
+    dirtyFields: dirtyFields ?? [],
+    errors: formWarningsForSelectedStep,
+  })
+  const visibleFormErrors = getVisibleFormErrors({
+    focusedField,
+    dirtyFields: dirtyFields ?? [],
+    errors: formLevelErrorsForUnsavedForm,
+  })
   const [isRename, setIsRename] = useState<boolean>(false)
   const icon = stepIconsByType[formData.stepType]
 
@@ -122,22 +138,26 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     formData.stepType === 'mix' ||
     formData.stepType === 'thermocycler'
   const numWarnings =
-    formWarningsForSelectedStep.length + timelineWarningsForSelectedStep.length
+    visibleFormWarnings.length + timelineWarningsForSelectedStep.length
   const numErrors = timeline.errors?.length ?? 0
 
   const handleSaveClick = (): void => {
-    handleSave()
-    makeSnackbar(
-      getSaveStepSnackbarText({
-        numWarnings,
-        numErrors,
-        stepTypeDisplayName: i18n.format(
-          t(`stepType.${formData.stepType}`),
-          'capitalize'
-        ),
-        t,
-      }) as string
-    )
+    if (canSave) {
+      handleSave()
+      makeSnackbar(
+        getSaveStepSnackbarText({
+          numWarnings,
+          numErrors,
+          stepTypeDisplayName: i18n.format(
+            t(`stepType.${formData.stepType}`),
+            'capitalize'
+          ),
+          t,
+        })
+      )
+    } else {
+      setShowFormErrorsAndWarnings(true)
+    }
   }
 
   return (
@@ -155,7 +175,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
         subHeader={
           isMultiStepToolbox ? (
             <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
-              {t('shared:step', { current: toolboxStep + 1, max: 2 })}
+              {t('shared:part', { current: toolboxStep + 1, max: 2 })}
             </StyledText>
           ) : null
         }
@@ -195,9 +215,6 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
                     }
                   : handleSaveClick
               }
-              disabled={
-                isMultiStepToolbox && toolboxStep === 0 ? false : !canSave
-              }
               width="100%"
             >
               {isMultiStepToolbox && toolboxStep === 0
@@ -206,23 +223,33 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
             </PrimaryButton>
           </Flex>
         }
-        height="calc(100vh - 64px)"
         title={
           <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
-            <Icon size="1rem" name={icon} />
-            <StyledText desktopStyle="bodyLargeSemiBold">
-              {i18n.format(t(formData.stepName), 'capitalize')}
+            <Icon size="1rem" name={icon} minWidth="1rem" />
+            <StyledText
+              desktopStyle="bodyLargeSemiBold"
+              css={LINE_CLAMP_TEXT_STYLE(2)}
+            >
+              {capitalizeFirstLetter(String(formData.stepName))}
             </StyledText>
           </Flex>
         }
       >
-        <FormAlerts focusedField={focusedField} dirtyFields={dirtyFields} />
+        <FormAlerts
+          focusedField={focusedField}
+          dirtyFields={dirtyFields}
+          showFormErrorsAndWarnings={showFormErrorsAndWarnings}
+        />
         <ToolsComponent
           {...{
             formData,
             propsForFields,
             focusHandlers,
             toolboxStep,
+            visibleFormErrors,
+            showFormErrors: showFormErrorsAndWarnings,
+            focusedField,
+            setShowFormErrorsAndWarnings,
           }}
         />
       </Toolbox>

@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from ..errors import StorageLimitReachedError
 
 
-MAXIMUM_CSV_FILE_LIMIT = 40
+MAXIMUM_CSV_FILE_LIMIT = 400
 
 
 class GenericCsvTransform:

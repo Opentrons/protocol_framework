@@ -118,7 +118,6 @@ export const transfer: CommandCreator<TransferArgs> = (
     // bail out before doing anything else
     errors.push(
       errorCreators.pipetteDoesNotExist({
-        actionName,
         pipette: args.pipette,
       })
     )
@@ -264,7 +263,7 @@ export const transfer: CommandCreator<TransferArgs> = (
             ? [
                 curryCommandCreator(configureForVolume, {
                   pipetteId: args.pipette,
-                  volume: args.volume,
+                  volume: chunksPerSubTransfer,
                 }),
               ]
             : []

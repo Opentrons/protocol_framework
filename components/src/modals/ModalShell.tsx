@@ -2,8 +2,10 @@ import type * as React from 'react'
 import styled from 'styled-components'
 import {
   ALIGN_CENTER,
+  ALIGN_END,
   CURSOR_DEFAULT,
   JUSTIFY_CENTER,
+  JUSTIFY_END,
   OVERFLOW_AUTO,
   POSITION_ABSOLUTE,
   POSITION_RELATIVE,
@@ -15,6 +17,7 @@ import { styleProps } from '../primitives'
 
 import type { StyleProps } from '../primitives'
 
+export type Position = 'center' | 'bottomRight'
 export interface ModalShellProps extends StyleProps {
   /** Modal content */
   children: React.ReactNode
@@ -28,6 +31,12 @@ export interface ModalShellProps extends StyleProps {
   fullPage?: boolean
   /** Optional zIndex for the overlay */
   zIndexOverlay?: number
+  /** Optional position to make the modal appear at the center or bottom right */
+  position?: Position
+  /** Optional visible overlay */
+  showOverlay?: boolean
+  /** Optional remove padding */
+  noPadding?: boolean
 }
 
 /**
@@ -49,11 +58,15 @@ export function ModalShell(props: ModalShellProps): JSX.Element {
     fullPage = false,
     children,
     zIndexOverlay = 1,
+    position = 'center',
+    showOverlay = true,
+    noPadding = false,
     ...styleProps
   } = props
 
   return (
     <Overlay
+      showOverlay={showOverlay}
       zIndex={zIndexOverlay}
       aria-label="BackgroundOverlay_ModalShell"
       onClick={(e: React.MouseEvent) => {
@@ -61,7 +74,7 @@ export function ModalShell(props: ModalShellProps): JSX.Element {
         if (onOutsideClick != null) onOutsideClick(e)
       }}
     >
-      <ContentArea zIndex={zIndex}>
+      <ContentArea zIndex={zIndex} position={position} noPadding={noPadding}>
         <ModalArea
           aria-label="ModalShell_ModalArea"
           isFullPage={fullPage}
@@ -78,22 +91,31 @@ export function ModalShell(props: ModalShellProps): JSX.Element {
     </Overlay>
   )
 }
-const Overlay = styled.div<{ zIndex: string | number }>`
+const Overlay = styled.div<{ zIndex: string | number; showOverlay: boolean }>`
   position: ${POSITION_ABSOLUTE};
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
   z-index: ${({ zIndex }) => zIndex};
-  background-color: ${COLORS.black90}${COLORS.opacity40HexCode};
+  background-color: ${({ showOverlay }) =>
+    showOverlay
+      ? `${COLORS.black90}${COLORS.opacity40HexCode}`
+      : COLORS.transparent};
   cursor: ${CURSOR_DEFAULT};
 `
 
-const ContentArea = styled.div<{ zIndex: string | number }>`
+const ContentArea = styled.div<{
+  zIndex: string | number
+  position: Position
+  noPadding: boolean
+}>`
   display: flex;
   position: ${POSITION_ABSOLUTE};
-  align-items: ${ALIGN_CENTER};
-  justify-content: ${JUSTIFY_CENTER};
+  align-items: ${({ position }) =>
+    position === 'center' ? ALIGN_CENTER : ALIGN_END};
+  justify-content: ${({ position }) =>
+    position === 'center' ? JUSTIFY_CENTER : JUSTIFY_END};
   top: 0;
   right: 0;
   bottom: 0;
@@ -101,7 +123,7 @@ const ContentArea = styled.div<{ zIndex: string | number }>`
   width: 100%;
   height: 100%;
   z-index: ${({ zIndex }) => zIndex};
-  padding: ${SPACING.spacing16};
+  padding: ${({ noPadding }) => (noPadding ? 0 : SPACING.spacing16)};
 `
 
 const ModalArea = styled.div<

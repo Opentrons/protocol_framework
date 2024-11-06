@@ -2,7 +2,12 @@ import * as React from 'react'
 import styled, { css } from 'styled-components'
 
 import { Flex } from '../../primitives'
-import { ALIGN_CENTER, DIRECTION_COLUMN, TEXT_ALIGN_RIGHT } from '../../styles'
+import {
+  ALIGN_CENTER,
+  DIRECTION_COLUMN,
+  DIRECTION_ROW,
+  TEXT_ALIGN_RIGHT,
+} from '../../styles'
 import { BORDERS, COLORS } from '../../helix-design-system'
 import { Icon } from '../../icons'
 import { RESPONSIVENESS, SPACING, TYPOGRAPHY } from '../../ui-style-constants'
@@ -71,6 +76,7 @@ export interface InputFieldProps {
   leftIcon?: IconName
   showDeleteIcon?: boolean
   onDelete?: () => void
+  hasBackgroundError?: boolean
 }
 
 export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
@@ -83,6 +89,8 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
       tooltipText,
       tabIndex = 0,
       showDeleteIcon = false,
+      hasBackgroundError = false,
+      onDelete,
       ...inputProps
     } = props
     const hasError = props.error != null
@@ -103,11 +111,13 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
 
     const INPUT_FIELD = css`
       display: flex;
-      background-color: ${COLORS.white};
+      background-color: ${hasBackgroundError ? COLORS.red30 : COLORS.white};
       border-radius: ${BORDERS.borderRadius4};
       padding: ${SPACING.spacing8};
-      border: 1px ${BORDERS.styleSolid}
-        ${hasError ? COLORS.red50 : COLORS.grey50};
+      border: ${hasBackgroundError
+        ? 'none'
+        : `1px ${BORDERS.styleSolid}
+        ${hasError ? COLORS.red50 : COLORS.grey50}`};
       font-size: ${TYPOGRAPHY.fontSizeP};
       width: 100%;
       height: ${size === 'small' ? '2rem' : '2.75rem'};
@@ -244,7 +254,11 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
       >
         <Flex flexDirection={DIRECTION_COLUMN} width="100%">
           {title != null ? (
-            <Flex gridGap={SPACING.spacing8}>
+            <Flex
+              flexDirection={DIRECTION_ROW}
+              gridGap={SPACING.spacing8}
+              alignItems={ALIGN_CENTER}
+            >
               <StyledText
                 desktopStyle="bodyDefaultRegular"
                 htmlFor={props.id}
@@ -303,7 +317,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
               {showDeleteIcon ? (
                 <Flex
                   alignSelf={TEXT_ALIGN_RIGHT}
-                  onClick={props.onDelete}
+                  onClick={onDelete}
                   cursor="pointer"
                 >
                   <Icon name="close" size="1.75rem" />
@@ -321,10 +335,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
             </StyledText>
           ) : null}
           {hasError ? (
-            <StyledText
-              desktopStyle="bodyDefaultRegular"
-              css={ERROR_TEXT_STYLE}
-            >
+            <StyledText desktopStyle="captionRegular" css={ERROR_TEXT_STYLE}>
               {props.error}
             </StyledText>
           ) : null}
@@ -335,6 +346,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
 )
 
 const StyledInput = styled.input`
+  background-color: transparent;
   &::placeholder {
     color: ${COLORS.grey40};
   }

@@ -52,11 +52,10 @@
       "body6": "All protocols require {{app}} version <strong>7.3.0 or later</strong> to run."
     },
     "redesign": {
-      "body1": "Welcome to Protocol Designer 9.0.0!",
-      "body2": "We’re excited to release the new Opentrons Protocol Designer, now with a fresh redesign! Enjoy the same functionality with some powerful new features:",
-      "body3": "Easily group multiple steps together, name the group, and keep your protocols organized with step grouping.",
-      "body4": "Add multiple Heater-Shaker Modules and Magnetic Blocks to the deck (Flex only).",
-      "body5": "All protocols now require Opentrons App version <strong>8.0.0+</strong> to run."
+      "body1": "Welcome to Protocol Designer 8.2.0!",
+      "body2": "We’re excited to release the new Opentrons Protocol Designer, now with a fresh redesign!  Enjoy the same functionality with the added ability to:",
+      "body3": "Add multiple Heater-Shaker Modules and Magnetic Blocks to the deck (Flex only).",
+      "body4": "All protocols now require Opentrons App version <strong>8.0.0+</strong> to run."
     }
   },
   "labware_selection": {
@@ -77,7 +76,7 @@
   "tip_position": {
     "title": "Tip Positioning",
     "caption": "between {{min}} and {{max}}",
-    "warning": "One or more position offset values are close to the edge of the well and might collide with it",
+    "warning": "Tip position is close to the edge of the well and may cause collisions.",
     "radio_button": {
       "default": "{{defaultMmFromBottom}} mm from the bottom center (default)",
       "blowout": "0 mm from the top center (default)",
@@ -85,15 +84,15 @@
       "custom": "Custom"
     },
     "body": {
-      "blowout_z_offset": "Change from where in the well the robot emits blowout",
-      "aspirate_mmFromBottom": "Change from where in the well the robot aspirates",
-      "dispense_mmFromBottom": "Change from where in the well the robot dispenses",
-      "mix_mmFromBottom": "Change from where in the well the robot aspirates and dispenses during the mix",
-      "aspirate_touchTip_mmFromBottom": "Change from where in the well the robot performs touch tip",
-      "dispense_touchTip_mmFromBottom": "Change from where in the well the robot performs touch tip",
-      "mix_touchTip_mmFromBottom": "Change from where in the well the robot performs touch tip",
-      "aspirate_delay_mmFromBottom": "Change from where in the well the robot delays after aspirating",
-      "dispense_delay_mmFromBottom": "Change from where in the well the robot delays after dispensing"
+      "blowout_z_offset": "Change where in the well the robot performs the blowout.",
+      "aspirate_mmFromBottom": "Change where in the well the robot aspirates from.",
+      "dispense_mmFromBottom": "Change where in the well the robot dispenses from.",
+      "mix_mmFromBottom": "Change from where in the well the robot aspirates and dispenses during the mix.",
+      "aspirate_touchTip_mmFromBottom": "Change from where in the well the robot performs the touch tip.",
+      "dispense_touchTip_mmFromBottom": "Change from where in the well the robot performs the touch tip.",
+      "mix_touchTip_mmFromBottom": "Change from where in the well the robot performs the touch tip.",
+      "aspirate_delay_mmFromBottom": "Change from where in the well the robot delays after aspirating.",
+      "dispense_delay_mmFromBottom": "Change from where in the well the robot delays after dispensing."
     },
     "field_titles": {
       "z_position": "Z position",
@@ -255,7 +254,14 @@
     "body2": "Build a pause later if you want your protocol to proceed to the next steps while the temperature module ramps up to {{temperature}}°C.",
     "heater_shaker_pause_later": "Build a pause later if you want your protocol to proceed to the next steps while the Heater-Shaker module goes to {{temperature}}°C",
     "now_button": "Pause protocol now",
-    "later_button": "I will build a pause later"
+    "later_button": "I will build a pause later",
+    "redesign": {
+      "title": "Pause protocol until {{module}} is at {{temp}}˚C",
+      "body1": "Build a pause step to wait until {{module}} reaches {{temp}}˚C before continuing to the next step.",
+      "body2": "Build a pause step later if you want your protocol to proceed to the next step while the {{module}} goes to {{temp}}˚C",
+      "build_pause_later": "Build pause later",
+      "pause_protocol": "Pause protocol"
+    }
   },
   "step_notes": {
     "title": "Step Notes"

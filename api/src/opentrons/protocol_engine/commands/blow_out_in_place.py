@@ -19,6 +19,7 @@ from .command import (
     SuccessData,
 )
 from ..errors.error_occurrence import ErrorOccurrence
+from ..state import update_types
 
 from opentrons.hardware_control import HardwareControlAPI
 
@@ -45,7 +46,7 @@ class BlowOutInPlaceResult(BaseModel):
 
 
 _ExecuteReturn = Union[
-    SuccessData[BlowOutInPlaceResult, None],
+    SuccessData[BlowOutInPlaceResult],
     DefinedErrorData[OverpressureError],
 ]
 
@@ -72,12 +73,14 @@ class BlowOutInPlaceImplementation(
 
     async def execute(self, params: BlowOutInPlaceParams) -> _ExecuteReturn:
         """Blow-out without moving the pipette."""
+        state_update = update_types.StateUpdate()
         try:
             current_position = await self._gantry_mover.get_position(params.pipetteId)
             await self._pipetting.blow_out_in_place(
                 pipette_id=params.pipetteId, flow_rate=params.flowRate
             )
         except PipetteOverpressureError as e:
+            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
             return DefinedErrorData(
                 public=OverpressureError(
                     id=self._model_utils.generate_id(),
@@ -97,9 +100,11 @@ class BlowOutInPlaceImplementation(
                         )
                     },
                 ),
+                state_update=state_update,
             )
         else:
-            return SuccessData(public=BlowOutInPlaceResult(), private=None)
+            state_update.set_fluid_empty(pipette_id=params.pipetteId)
+            return SuccessData(public=BlowOutInPlaceResult(), state_update=state_update)
 
 
 class BlowOutInPlace(

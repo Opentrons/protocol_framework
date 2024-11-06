@@ -10,6 +10,7 @@ import {
   getInitialDeckSetup,
   getSavedStepForms,
 } from '../../../step-forms/selectors'
+import { getDismissedHints } from '../../../tutorial/selectors'
 import { MaterialsListModal } from '../../../organisms/MaterialsListModal'
 import { selectors as labwareIngredSelectors } from '../../../labware-ingred/selectors'
 import { ProtocolOverview } from '../index'
@@ -25,11 +26,13 @@ import type { NavigateFunction } from 'react-router-dom'
 vi.mock('../OffdeckThumbnail')
 vi.mock('../DeckThumbnail')
 vi.mock('../../../step-forms/selectors')
+vi.mock('../../../tutorial/selectors')
 vi.mock('../../../file-data/selectors')
 vi.mock('../../../organisms/MaterialsListModal')
 vi.mock('../../../labware-ingred/selectors')
+vi.mock('../../../load-file/actions')
+vi.mock('../../../feature-flags/selectors')
 vi.mock('../../../organisms')
-vi.mock('../../../labware-ingred/selectors')
 vi.mock('../ProtocolMetadata')
 vi.mock('../LiquidDefinitions')
 vi.mock('../InstrumentsInfo')
@@ -60,6 +63,7 @@ describe('ProtocolOverview', () => {
     vi.mocked(labwareIngredSelectors.allIngredientGroupFields).mockReturnValue(
       {}
     )
+    vi.mocked(getDismissedHints).mockReturnValue([])
     vi.mocked(getRobotType).mockReturnValue(FLEX_ROBOT_TYPE)
     vi.mocked(getInitialDeckSetup).mockReturnValue({
       pipettes: {},

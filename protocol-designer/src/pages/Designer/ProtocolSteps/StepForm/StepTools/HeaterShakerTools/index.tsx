@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
@@ -6,57 +5,38 @@ import {
   COLORS,
   DIRECTION_COLUMN,
   Flex,
-  ListItem,
   SPACING,
   StyledText,
 } from '@opentrons/components'
 import { getHeaterShakerLabwareOptions } from '../../../../../../ui/modules/selectors'
 import {
-  CheckboxExpandStepFormField,
   DropdownStepFormField,
-  InputStepFormField,
   ToggleExpandStepFormField,
   ToggleStepFormField,
 } from '../../../../../../molecules'
+import { getFormErrorsMappedToField, getFormLevelError } from '../../utils'
 import type { StepFormProps } from '../../types'
 
 export function HeaterShakerTools(props: StepFormProps): JSX.Element {
-  const { propsForFields, formData } = props
+  const {
+    propsForFields,
+    formData,
+    showFormErrors = false,
+    focusedField = null,
+    visibleFormErrors,
+  } = props
   const { t } = useTranslation(['application', 'form', 'protocol_steps'])
   const moduleLabwareOptions = useSelector(getHeaterShakerLabwareOptions)
 
-  useEffect(() => {
-    if (moduleLabwareOptions.length === 1) {
-      propsForFields.moduleId.updateValue(moduleLabwareOptions[0].value)
-    }
-  }, [])
+  const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
   return (
     <Flex flexDirection={DIRECTION_COLUMN}>
-      {moduleLabwareOptions.length > 1 ? (
-        <DropdownStepFormField
-          {...propsForFields.moduleId}
-          options={moduleLabwareOptions}
-          title={t('protocol_steps:module')}
-        />
-      ) : (
-        <Flex
-          flexDirection={DIRECTION_COLUMN}
-          padding={SPACING.spacing12}
-          gridGap={SPACING.spacing8}
-        >
-          <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
-            {t('protocol_steps:module')}
-          </StyledText>
-          <ListItem type="noActive">
-            <Flex padding={SPACING.spacing12}>
-              <StyledText desktopStyle="bodyDefaultRegular">
-                {moduleLabwareOptions[0].name}
-              </StyledText>
-            </Flex>
-          </ListItem>
-        </Flex>
-      )}
+      <DropdownStepFormField
+        {...propsForFields.moduleId}
+        options={moduleLabwareOptions}
+        title={t('protocol_steps:module')}
+      />
       <Box borderBottom={`1px solid ${COLORS.grey30}`} />
       <Flex
         flexDirection={DIRECTION_COLUMN}
@@ -84,18 +64,30 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
           offLabel={t(
             'form:step_edit_form.field.heaterShaker.temperature.toggleOff'
           )}
+          formLevelError={getFormLevelError(
+            showFormErrors,
+            'targetHeaterShakerTemperature',
+            mappedErrorsToField,
+            focusedField
+          )}
         />
         <ToggleExpandStepFormField
           {...propsForFields.targetSpeed}
           toggleValue={propsForFields.setShake.value}
           toggleUpdateValue={propsForFields.setShake.updateValue}
           title={t('form:step_edit_form.field.heaterShaker.shaker.setShake')}
-          fieldTitle={t('protocol_steps:shake')}
+          fieldTitle={t('protocol_steps:speed')}
           isSelected={formData.setShake === true}
           units={t('units.rpm')}
           onLabel={t('form:step_edit_form.field.heaterShaker.shaker.toggleOn')}
           offLabel={t(
             'form:step_edit_form.field.heaterShaker.shaker.toggleOff'
+          )}
+          formLevelError={getFormLevelError(
+            showFormErrors,
+            'targetSpeed',
+            mappedErrorsToField,
+            focusedField
           )}
         />
         <ToggleStepFormField
@@ -112,25 +104,24 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
               : null
           }
         />
-        <CheckboxExpandStepFormField
+        <ToggleExpandStepFormField
+          {...propsForFields.heaterShakerTimer}
+          toggleValue={propsForFields.heaterShakerSetTimer.value}
+          toggleUpdateValue={propsForFields.heaterShakerSetTimer.updateValue}
           title={t(
             'form:step_edit_form.field.heaterShaker.timer.heaterShakerSetTimer'
           )}
-          checkboxValue={propsForFields.heaterShakerSetTimer.value}
-          isChecked={propsForFields.heaterShakerSetTimer.value === true}
-          checkboxUpdateValue={propsForFields.heaterShakerSetTimer.updateValue}
-        >
-          {/* TODO: wire up the new timer with the combined field */}
-          {formData.heaterShakerSetTimer === true ? (
-            <InputStepFormField
-              showTooltip={false}
-              padding="0"
-              title={t('protocol_steps:time')}
-              {...propsForFields.heaterShakerTimerMinutes}
-              units="HH:MM:SS"
-            />
-          ) : null}
-        </CheckboxExpandStepFormField>
+          fieldTitle={t('form:step_edit_form.field.heaterShaker.duration')}
+          isSelected={formData.heaterShakerSetTimer === true}
+          units={t('application:units.time')}
+          toggleElement="checkbox"
+          formLevelError={getFormLevelError(
+            showFormErrors,
+            'heaterShakerTimer',
+            mappedErrorsToField,
+            focusedField
+          )}
+        />
       </Flex>
     </Flex>
   )

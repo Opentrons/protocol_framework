@@ -4,21 +4,17 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { format } from 'date-fns'
 import { css } from 'styled-components'
-import { createPortal } from 'react-dom'
 
 import {
   ALIGN_CENTER,
   Btn,
   DIRECTION_COLUMN,
+  EndUserAgreementFooter,
   Flex,
-  JUSTIFY_END,
   JUSTIFY_FLEX_END,
   JUSTIFY_SPACE_BETWEEN,
   LargeButton,
-  Modal,
   NO_WRAP,
-  PrimaryButton,
-  SecondaryButton,
   SPACING,
   StyledText,
   ToggleGroup,
@@ -41,8 +37,8 @@ import {
   getUnusedTrash,
 } from '../../components/FileSidebar/utils'
 import { MaterialsListModal } from '../../organisms/MaterialsListModal'
-import { BUTTON_LINK_STYLE } from '../../atoms'
-import { getMainPagePortalEl } from '../../components/portals/MainPageModalPortal'
+import { BUTTON_LINK_STYLE, LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { useBlockingHint } from '../../organisms/BlockingHintModal/useBlockingHint'
 import {
   EditProtocolMetadataModal,
   EditInstrumentsModal,
@@ -82,6 +78,7 @@ export function ProtocolOverview(): JSX.Element {
     'alert',
     'shared',
     'starting_deck_State',
+    'modules',
   ])
   const navigate = useNavigate()
   const [
@@ -120,8 +117,8 @@ export function ProtocolOverview(): JSX.Element {
 
   useEffect(() => {
     if (formValues?.created == null) {
-      console.warn(
-        'formValues was refreshed while on the overview page, redirecting to landing page'
+      console.log(
+        'formValues was possibly refreshed while on the overview page, redirecting to landing page'
       )
       navigate('/')
     }
@@ -203,20 +200,33 @@ export function ProtocolOverview(): JSX.Element {
     fixtureWithoutStep.wasteChute ||
     fixtureWithoutStep.stagingAreaSlots.length > 0
 
-  const warning =
-    hasWarning &&
-    getWarningContent({
-      noCommands,
-      pipettesWithoutStep,
-      modulesWithoutStep,
-      gripperWithoutStep,
-      fixtureWithoutStep,
-      t,
-    })
+  const warning = hasWarning
+    ? getWarningContent({
+        noCommands,
+        pipettesWithoutStep,
+        modulesWithoutStep,
+        gripperWithoutStep,
+        fixtureWithoutStep,
+        t,
+      })
+    : null
 
   const cancelModal = (): void => {
     setShowExportWarningModal(false)
   }
+
+  const confirmExport = (): void => {
+    setShowExportWarningModal(false)
+    dispatch(loadFileActions.saveProtocolFile())
+  }
+
+  const exportWarningModal = useBlockingHint({
+    hintKey: warning?.hintKey ?? null,
+    enabled: showExportWarningModal && warning?.hintKey != null,
+    content: warning?.content,
+    handleCancel: cancelModal,
+    handleContinue: confirmExport,
+  })
 
   return (
     <Fragment>
@@ -234,35 +244,7 @@ export function ProtocolOverview(): JSX.Element {
           }}
         />
       ) : null}
-      {showExportWarningModal &&
-        createPortal(
-          <Modal
-            title={warning && warning.heading}
-            onClose={cancelModal}
-            footer={
-              <Flex
-                justifyContent={JUSTIFY_END}
-                gridGap={SPACING.spacing8}
-                padding={SPACING.spacing12}
-              >
-                <SecondaryButton onClick={cancelModal}>
-                  {t('shared:cancel')}
-                </SecondaryButton>
-                <PrimaryButton
-                  onClick={() => {
-                    setShowExportWarningModal(false)
-                    dispatch(loadFileActions.saveProtocolFile())
-                  }}
-                >
-                  {t('alert:continue_with_export')}
-                </PrimaryButton>
-              </Flex>
-            }
-          >
-            {warning && warning.content}
-          </Modal>,
-          getMainPagePortalEl()
-        )}
+      {exportWarningModal}
       {showMaterialsListModal ? (
         <MaterialsListModal
           hardware={Object.values(modulesOnDeck)}
@@ -290,7 +272,7 @@ export function ProtocolOverview(): JSX.Element {
           <Flex flex="1">
             <StyledText
               desktopStyle="displayBold"
-              css={PROTOCOL_NAME_TEXT_STYLE}
+              css={LINE_CLAMP_TEXT_STYLE(3)}
             >
               {protocolName != null && protocolName !== ''
                 ? protocolName
@@ -316,7 +298,7 @@ export function ProtocolOverview(): JSX.Element {
             <LargeButton
               buttonText={t('export_protocol')}
               onClick={() => {
-                if (hasWarning) {
+                if (warning != null) {
                   setShowExportWarningModal(true)
                 } else {
                   dispatch(loadFileActions.saveProtocolFile())
@@ -412,18 +394,10 @@ export function ProtocolOverview(): JSX.Element {
           </Flex>
         </Flex>
       </Flex>
+      <EndUserAgreementFooter />
     </Fragment>
   )
 }
-
-const PROTOCOL_NAME_TEXT_STYLE = css`
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-wrap: break-word;
-  -webkit-line-clamp: 3;
-`
 
 const MIN_OVERVIEW_WIDTH = '64rem'
 const COLUMN_GRID_GAP = '5rem'

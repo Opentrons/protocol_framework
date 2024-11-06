@@ -84,7 +84,6 @@ async def test_set_and_wait_for_shake_speed(
         public=heater_shaker.SetAndWaitForShakeSpeedResult(
             pipetteRetracted=expect_pipette_retracted
         ),
-        private=None,
         state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR)
         if expect_pipette_retracted
         else update_types.StateUpdate(),

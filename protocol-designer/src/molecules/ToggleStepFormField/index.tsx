@@ -52,31 +52,33 @@ export function ToggleStepFormField(
           <Flex
             justifyContent={JUSTIFY_SPACE_BETWEEN}
             alignItems={ALIGN_CENTER}
-            {...targetProps}
           >
             <StyledText desktopStyle="bodyDefaultRegular">{title}</StyledText>
             <Flex alignItems={ALIGN_CENTER} gridGap={SPACING.spacing4}>
+              {tooltipContent != null ? (
+                <Tooltip tooltipProps={tooltipProps}>{tooltipContent}</Tooltip>
+              ) : null}
               <StyledText
                 desktopStyle="bodyDefaultRegular"
                 color={COLORS.grey60}
+                {...targetProps}
               >
                 {isSelected ? onLabel : offLabel}
               </StyledText>
-              <ToggleButton
-                disabled={isDisabled}
-                onClick={() => {
-                  toggleUpdateValue(!toggleValue)
-                }}
-                label={isSelected ? onLabel : offLabel}
-                toggledOn={isSelected}
-              />
+              {isDisabled ? null : (
+                <ToggleButton
+                  disabled={isDisabled}
+                  onClick={() => {
+                    toggleUpdateValue(!toggleValue)
+                  }}
+                  label={isSelected ? onLabel : offLabel}
+                  toggledOn={isSelected}
+                />
+              )}
             </Flex>
           </Flex>
         </Flex>
       </ListItem>
-      {tooltipContent != null ? (
-        <Tooltip tooltipProps={tooltipProps}>{tooltipContent}</Tooltip>
-      ) : null}
     </>
   )
 }

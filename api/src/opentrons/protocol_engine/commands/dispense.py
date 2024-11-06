@@ -8,7 +8,7 @@ from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
 from pydantic import Field
 
 from ..types import DeckPoint
-from ..state.update_types import StateUpdate
+from ..state.update_types import StateUpdate, CLEAR
 from .pipetting_common import (
     PipetteIdMixin,
     DispenseVolumeMixin,
@@ -54,7 +54,7 @@ class DispenseResult(BaseLiquidHandlingResult, DestinationPositionResult):
 
 
 _ExecuteReturn = Union[
-    SuccessData[DispenseResult, None],
+    SuccessData[DispenseResult],
     DefinedErrorData[OverpressureError],
 ]
 
@@ -107,6 +107,12 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
                 push_out=params.pushOut,
             )
         except PipetteOverpressureError as e:
+            state_update.set_liquid_operated(
+                labware_id=labware_id,
+                well_name=well_name,
+                volume_added=CLEAR,
+            )
+            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
             return DefinedErrorData(
                 public=OverpressureError(
                     id=self._model_utils.generate_id(),
@@ -123,9 +129,19 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
                 state_update=state_update,
             )
         else:
+            volume_added = (
+                self._state_view.pipettes.get_liquid_dispensed_by_ejecting_volume(
+                    pipette_id=params.pipetteId, volume=volume
+                )
+            )
+            state_update.set_liquid_operated(
+                labware_id=labware_id,
+                well_name=well_name,
+                volume_added=volume_added if volume_added is not None else CLEAR,
+            )
+            state_update.set_fluid_ejected(pipette_id=params.pipetteId, volume=volume)
             return SuccessData(
                 public=DispenseResult(volume=volume, position=deck_point),
-                private=None,
                 state_update=state_update,
             )
 

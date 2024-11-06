@@ -126,7 +126,6 @@ async def test_manual_move_labware_implementation(
         public=MoveLabwareResult(
             offsetId="wowzers-a-new-offset-id",
         ),
-        private=None,
         state_update=update_types.StateUpdate(
             labware_location=update_types.LabwareLocationUpdate(
                 labware_id="my-cool-labware-id",
@@ -192,7 +191,6 @@ async def test_move_labware_implementation_on_labware(
         public=MoveLabwareResult(
             offsetId="wowzers-a-new-offset-id",
         ),
-        private=None,
         state_update=update_types.StateUpdate(
             labware_location=update_types.LabwareLocationUpdate(
                 labware_id="my-cool-labware-id",
@@ -280,7 +278,6 @@ async def test_gripper_move_labware_implementation(
         public=MoveLabwareResult(
             offsetId="wowzers-a-new-offset-id",
         ),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.CLEAR,
             labware_location=update_types.LabwareLocationUpdate(
@@ -516,7 +513,6 @@ async def test_gripper_move_to_waste_chute_implementation(
         public=MoveLabwareResult(
             offsetId="wowzers-a-new-offset-id",
         ),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.CLEAR,
             labware_location=update_types.LabwareLocationUpdate(
@@ -801,5 +797,40 @@ async def test_move_labware_raises_when_moving_fixed_trash_labware(
     with pytest.raises(
         errors.LabwareMovementNotAllowedError,
         match="Cannot move fixed trash labware 'My cool labware'.",
+    ):
+        await subject.execute(data)
+
+
+async def test_labware_raises_when_moved_onto_itself(
+    decoy: Decoy,
+    subject: MoveLabwareImplementation,
+    state_view: StateView,
+) -> None:
+    """It should raise when the OnLabwareLocation has the same labware ID as the labware being moved."""
+    data = MoveLabwareParams(
+        labwareId="the-same-labware-id",
+        newLocation=OnLabwareLocation(labwareId="a-cool-labware-id"),
+        strategy=LabwareMovementStrategy.MANUAL_MOVE_WITH_PAUSE,
+    )
+
+    decoy.when(state_view.labware.get(labware_id="the-same-labware-id")).then_return(
+        LoadedLabware(
+            id="the-same-labware-id",
+            loadName="load-name",
+            definitionUri="opentrons-test/load-name/1",
+            location=DeckSlotLocation(slotName=DeckSlotName.SLOT_4),
+            offsetId=None,
+        )
+    )
+
+    decoy.when(
+        state_view.geometry.ensure_location_not_occupied(
+            location=OnLabwareLocation(labwareId="a-cool-labware-id"),
+        )
+    ).then_return(OnLabwareLocation(labwareId="the-same-labware-id"))
+
+    with pytest.raises(
+        errors.LabwareMovementNotAllowedError,
+        match="Cannot move a labware onto itself.",
     ):
         await subject.execute(data)
