@@ -27,6 +27,10 @@ import { getSystemLanguage } from '/app/redux/shell'
 import type { DropdownOption } from '@opentrons/components'
 import type { Dispatch } from '/app/redux/types'
 
+type ArrayElement<
+  ArrayType extends readonly unknown[]
+> = ArrayType extends readonly (infer ElementType)[] ? ElementType : never
+
 export function SystemLanguagePreferenceModal(): JSX.Element | null {
   const { i18n, t } = useTranslation(['app_settings', 'shared', 'branded'])
   const enableLocalization = useFeatureFlag('enableLocalization')
@@ -83,7 +87,9 @@ export function SystemLanguagePreferenceModal(): JSX.Element | null {
   useEffect(() => {
     if (systemLanguage != null) {
       // prefer match entire locale, then match just language e.g. zh-Hant and zh-CN
-      const matchSystemLanguage: () => string | null = () => {
+      const matchSystemLanguage: () => ArrayElement<
+        typeof LANGUAGES
+      > | null = () => {
         try {
           return (
             LANGUAGES.find(lng => lng.value === systemLanguage) ??
@@ -91,7 +97,8 @@ export function SystemLanguagePreferenceModal(): JSX.Element | null {
               lng =>
                 new Intl.Locale(lng.value).language ===
                 new Intl.Locale(systemLanguage).language
-            )
+            ) ??
+            null
           )
         } catch (error: unknown) {
           // Sometimes the language that we get from the shell will not be something
