@@ -78,10 +78,6 @@ describe('ProtocolOverview', () => {
     vi.mocked(MaterialsListModal).mockReturnValue(
       <div>mock MaterialsListModal</div>
     )
-    // vi.mocked(DeckThumbnail).mockReturnValue(<div>mock DeckThumbnail</div>)
-    // vi.mocked(OffDeckThumbnail).mockReturnValue(
-    //   <div>mock OffdeckThumbnail</div>
-    // )
     vi.mocked(LiquidDefinitions).mockReturnValue(
       <div>mock LiquidDefinitions</div>
     )
