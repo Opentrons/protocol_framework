@@ -507,7 +507,7 @@ export const targetTemperatureRequired = (
   fields: HydratedFormData
 ): FormError | null => {
   const { setTemperature, targetTemperature } = fields
-  return setTemperature === 'true' && !targetTemperature
+  return setTemperature && !targetTemperature
     ? TARGET_TEMPERATURE_REQUIRED
     : null
 }

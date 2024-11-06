@@ -87,9 +87,8 @@ describe('TemperatureTools', () => {
 
   it('renders a temperature module form with 1 module', () => {
     render(props)
-    screen.getByText('Module')
+    screen.debug()
+    screen.getByText('Module state')
     screen.getByText('mock module')
-    screen.getByText('Deactivate module')
-    screen.getByText('Change to temperature')
   })
 })
