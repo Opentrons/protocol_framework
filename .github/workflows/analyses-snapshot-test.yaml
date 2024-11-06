@@ -46,6 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BASE_IMAGE_NAME: opentrons-python-base:3.10
+      CACHE_DIR: /tmp/.buildx-cache
       ANALYSIS_REF: ${{ github.event.inputs.ANALYSIS_REF || github.head_ref || 'edge' }}
       SNAPSHOT_REF: ${{ github.event.inputs.SNAPSHOT_REF || github.head_ref || 'edge' }}
       # If we're running because of workflow_dispatch, use the user input to decide
@@ -78,14 +79,14 @@ jobs:
       - name: Cache Base Image Layers
         uses: actions/cache@v4
         with:
-          path: /tmp/.buildx-cache
+          path: ${{ env.CACHE_DIR }}
           key: ${{ runner.os }}-docker-${{ env.BASE_IMAGE_NAME }}
           restore-keys: |
             ${{ runner.os }}-docker-
 
       - name: Build Images with Makefile
         working-directory: analyses-snapshot-testing
-        run: make build-opentrons-analysis-ci
+        run: make build-all-ci
 
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
