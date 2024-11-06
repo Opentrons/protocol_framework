@@ -619,7 +619,7 @@ export const newLabwareLocationRequired = (
   fields: HydratedFormData
 ): FormError | null => {
   const { newLocation } = fields
-  return newLocation == null || newLocation.slotName == null
+  return newLocation == null && newLocation.slotName == null
     ? NEW_LABWARE_LOCATION_REQUIRED
     : null
 }
@@ -661,8 +661,12 @@ export const aspirateWellsRequired = (
 export const dispenseWellsRequired = (
   fields: HydratedFormData
 ): FormError | null => {
-  const { dispense_wells } = fields
-  return dispense_wells == null || dispense_wells.length === 0
+  const { dispense_wells, dispense_labware } = fields
+  return (dispense_wells == null || dispense_wells.length === 0) &&
+    !(
+      dispense_labware.name === 'wasteChute' ||
+      dispense_labware.name === 'trashBin'
+    )
     ? DISPENSE_WELLS_REQUIRED
     : null
 }
