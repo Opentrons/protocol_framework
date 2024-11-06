@@ -55,7 +55,7 @@ async def prepare_active_subdirectory(prepared_root: Path) -> Path:
             # Subdirectory "7" was previously used on our edge branch for an in-dev
             # schema that was never released to the public. It may be present on
             # internal robots.
-            v6_to_v7.Migration6to7(subdirectory="7"),
+            v6_to_v7.Migration6to7(subdirectory="7.1"),
             v7_to_v8.Migration7to8(subdirectory=LATEST_VERSION_DIRECTORY),
         ],
         temp_file_prefix="temp-",
