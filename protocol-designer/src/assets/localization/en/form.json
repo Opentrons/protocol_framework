@@ -281,6 +281,7 @@
       "columns_aspirate_wells": "Source columns",
       "columns_dispense_wells": "Destination columns",
       "columns_mix_wells": "Select columns",
+      "columns_wells": "Mix wells",
       "wells": "wells",
       "wells_aspirate_wells": "Select source wells",
       "wells_dispense_wells": "Select destination wells",
