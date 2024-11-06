@@ -241,6 +241,7 @@ def parse_results_volume(
         "Right Pipette Total Aspirates",
         "Right Pipette Total Dispenses",
         "Gripper Pick Ups",
+        "Gripper Pick Ups of opentrons_tough_pcr_auto_sealing_lid",
         "Total Liquid Probes",
         "Average Liquid Probe Time (sec)",
     ]
@@ -302,6 +303,7 @@ def parse_results_volume(
     total_time_row.append(str(end_time - start_time))
 
     for metric in metrics:
+        print(f"Dictionary: {metric}\n\n")
         for cmd in metric.keys():
             values_row.append(str(metric[cmd]))
     return (
@@ -320,15 +322,16 @@ def parse_results_volume(
 
 
 def main(
-    protocol_file_path_name: str,
+    protocol_file_path: Path,
     save: bool,
     storage_directory: str = os.curdir,
     google_sheet_name: str = "",
+    parameters: List[str] = [],
 ) -> None:
     """Main module control."""
     sys.exit = mock_exit  # Replace sys.exit with the mock function
     # Read file path from arguments
-    protocol_file_path = Path(protocol_file_path_name)
+    # protocol_file_path = Path(protocol_file_path_name)
     protocol_name = protocol_file_path.stem
     print("Simulating", protocol_name)
     file_date = datetime.now()
@@ -344,26 +347,58 @@ def main(
                 )
                 json_file_output = open(json_file_path, "wb+")
                 # log_output_file = f"{protocol_name}_log"
-                ctx.invoke(
-                    analyze,
-                    files=[protocol_file_path],
-                    json_output=json_file_output,
-                    human_json_output=None,
-                    log_output=error_output,
-                    log_level="ERROR",
-                    check=False,
-                )
+                if parameters:
+                    print(f"Parameter: {parameters[0]}\n")
+                    csv_params = {}
+                    csv_params["parameters_csv"] = parameters[0]
+                    rtp_json = json.dumps(csv_params)
+                    ctx.invoke(
+                        analyze,
+                        files=[protocol_file_path],
+                        rtp_files=rtp_json,
+                        json_output=json_file_output,
+                        human_json_output=None,
+                        log_output=error_output,
+                        log_level="ERROR",
+                        check=False,
+                    )
+
+                else:
+                    ctx.invoke(
+                        analyze,
+                        files=[protocol_file_path],
+                        json_output=json_file_output,
+                        human_json_output=None,
+                        log_output=error_output,
+                        log_level="ERROR",
+                        check=False,
+                    )
                 json_file_output.close()
             else:
-                ctx.invoke(
-                    analyze,
-                    files=[protocol_file_path],
-                    json_output=None,
-                    human_json_output=None,
-                    log_output=error_output,
-                    log_level="ERROR",
-                    check=True,
-                )
+                if parameters:
+                    csv_params = {}
+                    csv_params["parameters_csv"] = parameters[0]
+                    rtp_json = json.dumps(csv_params)
+                    ctx.invoke(
+                        analyze,
+                        files=[protocol_file_path],
+                        rtp_files=rtp_json,
+                        json_output=None,
+                        human_json_output=None,
+                        log_output=error_output,
+                        log_level="ERROR",
+                        check=True,
+                    )
+                else:
+                    ctx.invoke(
+                        analyze,
+                        files=[protocol_file_path],
+                        json_output=None,
+                        human_json_output=None,
+                        log_output=error_output,
+                        log_level="ERROR",
+                        check=True,
+                    )
 
     except SystemExit as e:
         print(f"SystemExit caught with code: {e}")
@@ -395,6 +430,7 @@ def main(
             credentials_path, google_sheet_name, 0
         )
         google_sheet.write_to_row([])
+
         for row in parse_results_volume(
             json_file_path,
             protocol_name,
@@ -428,13 +464,15 @@ if __name__ == "__main__":
         "protocol_file_path",
         metavar="PROTOCOL_FILE_PATH",
         type=str,
-        nargs=1,
+        nargs="*",
         help="Path to protocol file",
     )
     args = parser.parse_args()
     storage_directory = args.storage_directory[0]
     sheet_name = args.sheet_name[0]
     protocol_file_path: str = args.protocol_file_path[0]
+    parameters: List[str] = args.protocol_file_path[1:]
+    print(parameters)
     SETUP = True
     while SETUP:
         print(
@@ -445,7 +483,7 @@ if __name__ == "__main__":
             choice = ""
             while not choice:
                 choice = input(
-                    "Remove air_gap commands to ensure accurate results? (Y/N): "
+                    "Remove air_gap commands to ensure accurate results: (continue)? (Y/N): "
                 )
                 if choice.upper() == "Y":
                     SETUP = False
@@ -462,11 +500,20 @@ if __name__ == "__main__":
     # Change api level
     if CLEAN_PROTOCOL:
         set_api_level(protocol_file_path)
-        main(
-            protocol_file_path,
-            True,
-            storage_directory,
-            sheet_name,
-        )
+        if parameters:
+            main(
+                Path(protocol_file_path),
+                True,
+                storage_directory,
+                sheet_name,
+                parameters=parameters,
+            )
+        else:
+            main(
+                protocol_file_path=Path(protocol_file_path),
+                save=True,
+                storage_directory=storage_directory,
+                google_sheet_name=sheet_name,
+            )
     else:
         sys.exit(0)

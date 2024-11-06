@@ -1,10 +1,10 @@
-import * as React from 'react'
 import { createPortal } from 'react-dom'
+import { useEffect, useState, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   ALIGN_CENTER,
   BORDERS,
-  Btn,
+  Box,
   COLORS,
   CURSOR_DEFAULT,
   CURSOR_POINTER,
@@ -75,9 +75,9 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
     isStepAfterError = false,
     dragHovered = false,
   } = props
-  const [top, setTop] = React.useState<number>(0)
-  const menuRootRef = React.useRef<HTMLDivElement | null>(null)
-  const [stepOverflowMenu, setStepOverflowMenu] = React.useState<boolean>(false)
+  const [top, setTop] = useState<number>(0)
+  const menuRootRef = useRef<HTMLDivElement | null>(null)
+  const [stepOverflowMenu, setStepOverflowMenu] = useState<boolean>(false)
   const isStartingOrEndingState =
     title === STARTING_DECK_STATE || title === FINAL_DECK_STATE
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
@@ -124,7 +124,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
     setTop(top)
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     global.addEventListener('click', handleClick)
     return () => {
       global.removeEventListener('click', handleClick)
@@ -200,7 +200,8 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
         gridGap={SPACING.spacing4}
         flexDirection={DIRECTION_COLUMN}
       >
-        <Btn
+        <Box
+          role="button"
           onDoubleClick={onDoubleClick}
           onClick={onClick}
           padding={SPACING.spacing12}
@@ -250,7 +251,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
               />
             ) : null}
           </Flex>
-        </Btn>
+        </Box>
         {dragHovered ? (
           <Divider
             marginY="0"

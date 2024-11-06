@@ -10,11 +10,11 @@ import {
   Icon,
   POSITION_RELATIVE,
   PrimaryButton,
-  SPACING,
   SecondaryButton,
+  SPACING,
   StyledText,
-  TYPOGRAPHY,
   Toolbox,
+  TYPOGRAPHY,
 } from '@opentrons/components'
 import { stepIconsByType } from '../../../../form-types'
 import { FormAlerts } from '../../../../organisms'
@@ -100,13 +100,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     getFormLevelErrorsForUnsavedForm
   )
   const timeline = useSelector(getRobotStateTimeline)
-  const [toolboxStep, setToolboxStep] = useState<number>(
-    // progress to step 2 if thermocycler form is populated
-    formData.thermocyclerFormType === 'thermocyclerProfile' ||
-      formData.thermocyclerFormType === 'thermocyclerState'
-      ? 1
-      : 0
-  )
+  const [toolboxStep, setToolboxStep] = useState<number>(0)
   const [
     showFormErrorsAndWarnings,
     setShowFormErrorsAndWarnings,
@@ -159,7 +153,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
             'capitalize'
           ),
           t,
-        }) as string
+        })
       )
     } else {
       setShowFormErrorsAndWarnings(true)
@@ -181,7 +175,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
         subHeader={
           isMultiStepToolbox ? (
             <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
-              {t('shared:step', { current: toolboxStep + 1, max: 2 })}
+              {t('shared:part', { current: toolboxStep + 1, max: 2 })}
             </StyledText>
           ) : null
         }

@@ -1,5 +1,6 @@
 import some from 'lodash/some'
 import {
+  ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
   FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
   HEATERSHAKER_MODULE_TYPE,
@@ -55,20 +56,21 @@ export function getModuleModelsBySlot(
 ): ModuleModel[] {
   const FLEX_MIDDLE_SLOTS = ['B2', 'C2', 'A2', 'D2']
   const OT2_MIDDLE_SLOTS = ['2', '5', '8', '11']
+  const FILTERED_MODULES = enableAbsorbanceReader
+    ? FLEX_MODULE_MODELS
+    : FLEX_MODULE_MODELS.filter(model => model !== ABSORBANCE_READER_V1)
 
-  let moduleModels: ModuleModel[] = enableAbsorbanceReader
-    ? FLEX_MODULE_MODELS.filter(model => model !== 'absorbanceReaderV1')
-    : FLEX_MODULE_MODELS
+  let moduleModels: ModuleModel[] = FILTERED_MODULES
 
   switch (robotType) {
     case FLEX_ROBOT_TYPE: {
       if (slot !== 'B1' && !FLEX_MIDDLE_SLOTS.includes(slot)) {
-        moduleModels = FLEX_MODULE_MODELS.filter(
+        moduleModels = FILTERED_MODULES.filter(
           model => model !== THERMOCYCLER_MODULE_V2
         )
       }
       if (FLEX_MIDDLE_SLOTS.includes(slot)) {
-        moduleModels = FLEX_MODULE_MODELS.filter(
+        moduleModels = FILTERED_MODULES.filter(
           model => model === MAGNETIC_BLOCK_V1
         )
       }

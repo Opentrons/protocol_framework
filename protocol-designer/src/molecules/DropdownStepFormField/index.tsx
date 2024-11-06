@@ -1,5 +1,13 @@
 import { useTranslation } from 'react-i18next'
-import { DropdownMenu, Flex, SPACING } from '@opentrons/components'
+import {
+  COLORS,
+  DIRECTION_COLUMN,
+  DropdownMenu,
+  Flex,
+  ListItem,
+  SPACING,
+  StyledText,
+} from '@opentrons/components'
 import type { Options } from '@opentrons/components'
 import type { FieldProps } from '../../pages/Designer/ProtocolSteps/StepForm/types'
 
@@ -30,22 +38,41 @@ export function DropdownStepFormField(
 
   return (
     <Flex padding={addPadding ? SPACING.spacing16 : 0}>
-      <DropdownMenu
-        tooltipText={tooltipContent != null ? t(`${tooltipContent}`) : null}
-        width={width}
-        error={errorToShow}
-        dropdownType="neutral"
-        filterOptions={options}
-        title={title}
-        onBlur={onFieldBlur}
-        onFocus={onFieldFocus}
-        currentOption={
-          availableOptionId ?? { name: 'Choose option', value: '' }
-        }
-        onClick={value => {
-          updateValue(value)
-        }}
-      />
+      {options.length > 1 ? (
+        <DropdownMenu
+          tooltipText={tooltipContent != null ? t(`${tooltipContent}`) : null}
+          width={width}
+          error={errorToShow}
+          dropdownType="neutral"
+          filterOptions={options}
+          title={title}
+          onBlur={onFieldBlur}
+          onFocus={onFieldFocus}
+          currentOption={
+            availableOptionId ?? { name: 'Choose option', value: '' }
+          }
+          onClick={value => {
+            updateValue(value)
+          }}
+        />
+      ) : (
+        <Flex
+          gridGap={SPACING.spacing8}
+          flexDirection={DIRECTION_COLUMN}
+          width="100%"
+        >
+          <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
+            {title}
+          </StyledText>
+          <ListItem type="noActive">
+            <Flex padding={SPACING.spacing12}>
+              <StyledText desktopStyle="bodyDefaultRegular">
+                {options[0].name}
+              </StyledText>
+            </Flex>
+          </ListItem>
+        </Flex>
+      )}
     </Flex>
   )
 }

@@ -93,7 +93,7 @@
         }
       },
       "location": {
-        "dropTip": "drop tip location",
+        "dropTip": "Tip drop location",
         "label": "location",
         "pickUp": "pick up tip"
       },
@@ -278,8 +278,8 @@
     "tipRack": "tip rack",
     "wellSelectionLabel": {
       "columns": "columns",
-      "columns_aspirate_wells": "Select source columns",
-      "columns_dispense_wells": "Select destination columns",
+      "columns_aspirate_wells": "Source columns",
+      "columns_dispense_wells": "Destination columns",
       "columns_mix_wells": "Select columns",
       "wells": "wells",
       "wells_aspirate_wells": "Select source wells",
