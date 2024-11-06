@@ -48,7 +48,7 @@ class BlowOutResult(DestinationPositionResult):
 
 
 _ExecuteReturn = Union[
-    SuccessData[BlowOutResult, None],
+    SuccessData[BlowOutResult],
     DefinedErrorData[OverpressureError],
 ]
 
@@ -93,6 +93,7 @@ class BlowOutImplementation(AbstractCommandImpl[BlowOutParams, _ExecuteReturn]):
                 pipette_id=params.pipetteId, flow_rate=params.flowRate
             )
         except PipetteOverpressureError as e:
+            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
             return DefinedErrorData(
                 public=OverpressureError(
                     id=self._model_utils.generate_id(),
@@ -112,11 +113,12 @@ class BlowOutImplementation(AbstractCommandImpl[BlowOutParams, _ExecuteReturn]):
                         )
                     },
                 ),
+                state_update=state_update,
             )
         else:
+            state_update.set_fluid_empty(pipette_id=params.pipetteId)
             return SuccessData(
                 public=BlowOutResult(position=deck_point),
-                private=None,
                 state_update=state_update,
             )
 

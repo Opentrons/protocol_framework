@@ -23,7 +23,7 @@ async def test_wait_for_resume_implementation(
 
     result = await subject.execute(data)
 
-    assert result == SuccessData(public=WaitForResumeResult(), private=None)
+    assert result == SuccessData(public=WaitForResumeResult())
     decoy.verify(await run_control.wait_for_resume(), times=1)
 
 

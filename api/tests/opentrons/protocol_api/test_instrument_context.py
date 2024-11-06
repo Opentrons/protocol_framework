@@ -62,6 +62,7 @@ from opentrons.types import Location, Mount, Point
 from opentrons_shared_data.errors.exceptions import (
     CommandPreconditionViolated,
 )
+from . import versions_at_or_above, versions_between
 
 
 @pytest.fixture(autouse=True)
@@ -1542,7 +1543,12 @@ def test_96_tip_config_invalid(
     assert subject._96_tip_config_valid() is True
 
 
-@pytest.mark.parametrize("api_version", [APIVersion(2, 21)])
+@pytest.mark.parametrize(
+    "api_version",
+    versions_between(
+        low_exclusive_bound=APIVersion(2, 13), high_inclusive_bound=APIVersion(2, 21)
+    ),
+)
 def test_mix_no_lpd(
     decoy: Decoy,
     mock_instrument_core: InstrumentCore,
@@ -1593,7 +1599,7 @@ def test_mix_no_lpd(
 
 
 @pytest.mark.ot3_only
-@pytest.mark.parametrize("api_version", [APIVersion(2, 21)])
+@pytest.mark.parametrize("api_version", versions_at_or_above(APIVersion(2, 21)))
 def test_mix_with_lpd(
     decoy: Decoy,
     mock_instrument_core: InstrumentCore,
@@ -1641,3 +1647,60 @@ def test_mix_with_lpd(
         ignore_extra_args=True,
         times=1,
     )
+
+
+@pytest.mark.parametrize(
+    "api_version",
+    versions_between(
+        low_exclusive_bound=APIVersion(2, 13), high_inclusive_bound=APIVersion(2, 21)
+    ),
+)
+def test_air_gap_uses_aspirate(
+    decoy: Decoy,
+    mock_instrument_core: InstrumentCore,
+    mock_protocol_core: ProtocolCore,
+    subject: InstrumentContext,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """It should use its own aspirate function to aspirate air."""
+    mock_well = decoy.mock(cls=Well)
+    top_location = Location(point=Point(9, 9, 14), labware=mock_well)
+    last_location = Location(point=Point(9, 9, 9), labware=mock_well)
+    mock_aspirate = decoy.mock(func=subject.aspirate)
+    mock_move_to = decoy.mock(func=subject.move_to)
+    monkeypatch.setattr(subject, "aspirate", mock_aspirate)
+    monkeypatch.setattr(subject, "move_to", mock_move_to)
+
+    decoy.when(mock_instrument_core.has_tip()).then_return(True)
+    decoy.when(mock_protocol_core.get_last_location()).then_return(last_location)
+    decoy.when(mock_well.top(z=5.0)).then_return(top_location)
+    subject.air_gap(volume=10, height=5)
+
+    decoy.verify(mock_move_to(top_location, publish=False))
+    decoy.verify(mock_aspirate(10))
+
+
+@pytest.mark.parametrize("api_version", versions_at_or_above(APIVersion(2, 22)))
+def test_air_gap_uses_air_gap(
+    decoy: Decoy,
+    mock_instrument_core: InstrumentCore,
+    mock_protocol_core: ProtocolCore,
+    subject: InstrumentContext,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """It should use its own aspirate function to aspirate air."""
+    mock_well = decoy.mock(cls=Well)
+    top_location = Location(point=Point(9, 9, 14), labware=mock_well)
+    last_location = Location(point=Point(9, 9, 9), labware=mock_well)
+    mock_move_to = decoy.mock(func=subject.move_to)
+    monkeypatch.setattr(subject, "move_to", mock_move_to)
+
+    decoy.when(mock_instrument_core.has_tip()).then_return(True)
+    decoy.when(mock_protocol_core.get_last_location()).then_return(last_location)
+    decoy.when(mock_well.top(z=5.0)).then_return(top_location)
+    decoy.when(mock_instrument_core.get_aspirate_flow_rate()).then_return(11)
+
+    subject.air_gap(volume=10, height=5)
+
+    decoy.verify(mock_move_to(top_location, publish=False))
+    decoy.verify(mock_instrument_core.air_gap_in_place(10, 11))

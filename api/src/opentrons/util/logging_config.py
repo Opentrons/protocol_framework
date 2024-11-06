@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 from opentrons.config import CONFIG, ARCHITECTURE, SystemArchitecture
 
-if ARCHITECTURE is SystemArchitecture.BUILDROOT:
+if ARCHITECTURE is SystemArchitecture.YOCTO:
     from opentrons_hardware.sensors import SENSOR_LOG_NAME
 else:
     # we don't use the sensor log on ot2 or host
@@ -36,7 +36,7 @@ def _host_config(level_value: int) -> Dict[str, Any]:
                 "class": "logging.handlers.RotatingFileHandler",
                 "formatter": "basic",
                 "filename": serial_log_filename,
-                "maxBytes": 5000000,
+                "maxBytes": 1000000,
                 "level": logging.DEBUG,
                 "backupCount": 3,
             },

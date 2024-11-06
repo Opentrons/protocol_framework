@@ -566,9 +566,12 @@ class ProtocolEngine:
             description=(description or ""),
             displayColor=color,
         )
+        validated_liquid = self._state_store.liquid.validate_liquid_allowed(
+            liquid=liquid
+        )
 
-        self._action_dispatcher.dispatch(AddLiquidAction(liquid=liquid))
-        return liquid
+        self._action_dispatcher.dispatch(AddLiquidAction(liquid=validated_liquid))
+        return validated_liquid
 
     def add_addressable_area(self, addressable_area_name: str) -> None:
         """Add an addressable area to state."""

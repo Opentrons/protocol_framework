@@ -220,7 +220,7 @@ class _TestCommandDefinedError(ErrorOccurrence):
 
 
 _TestCommandReturn = Union[
-    SuccessData[_TestCommandResult, None],
+    SuccessData[_TestCommandResult],
     DefinedErrorData[_TestCommandDefinedError],
 ]
 
@@ -263,7 +263,7 @@ async def test_execute(
         _ImplementationCls: Type[_TestCommandImpl] = TestCommandImplCls
 
     command_params = _TestCommandParams()
-    command_result = SuccessData(public=_TestCommandResult(), private=None)
+    command_result = SuccessData(public=_TestCommandResult())
 
     queued_command = cast(
         Command,
@@ -362,9 +362,7 @@ async def test_execute(
 
     decoy.verify(
         action_dispatcher.dispatch(
-            SucceedCommandAction(
-                private_result=None, command=expected_completed_command
-            )
+            SucceedCommandAction(command=expected_completed_command)
         ),
     )
 

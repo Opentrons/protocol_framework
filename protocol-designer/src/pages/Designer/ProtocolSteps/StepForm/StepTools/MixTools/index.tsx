@@ -150,6 +150,7 @@ export function MixTools(props: StepFormProps): JSX.Element {
       <Divider marginY="0" />
       <Flex padding={SPACING.spacing16} width="100%">
         <FlowRateField
+          key={`${tab}_flowRate`}
           {...propsForFields[`${tab}_flowRate`]}
           pipetteId={formData.pipette}
           flowRateType={tab}
@@ -239,6 +240,7 @@ export function MixTools(props: StepFormProps): JSX.Element {
                     })}
                   />
                   <FlowRateField
+                    key="blowout_flowRate"
                     {...propsForFields.blowout_flowRate}
                     pipetteId={formData.pipette}
                     flowRateType="blowout"

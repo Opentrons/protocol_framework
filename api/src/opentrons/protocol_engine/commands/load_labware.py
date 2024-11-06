@@ -88,7 +88,7 @@ class LoadLabwareResult(BaseModel):
 
 
 class LoadLabwareImplementation(
-    AbstractCommandImpl[LoadLabwareParams, SuccessData[LoadLabwareResult, None]]
+    AbstractCommandImpl[LoadLabwareParams, SuccessData[LoadLabwareResult]]
 ):
     """Load labware command implementation."""
 
@@ -100,7 +100,7 @@ class LoadLabwareImplementation(
 
     async def execute(
         self, params: LoadLabwareParams
-    ) -> SuccessData[LoadLabwareResult, None]:
+    ) -> SuccessData[LoadLabwareResult]:
         """Load definition and calibration data necessary for a labware."""
         # TODO (tz, 8-15-2023): extend column validation to column 1 when working
         # on https://opentrons.atlassian.net/browse/RSS-258 and completing
@@ -167,7 +167,6 @@ class LoadLabwareImplementation(
                 definition=loaded_labware.definition,
                 offsetId=loaded_labware.offsetId,
             ),
-            private=None,
             state_update=state_update,
         )
 

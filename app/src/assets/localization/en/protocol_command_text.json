@@ -5,6 +5,7 @@
   "absorbance_reader_read": "Reading plate in Absorbance Reader",
   "adapter_in_mod_in_slot": "{{adapter}} on {{module}} in {{slot}}",
   "adapter_in_slot": "{{adapter}} in {{slot}}",
+  "air_gap_in_place": "Air gapping {{volume}} µL",
   "aspirate": "Aspirating {{volume}} µL from well {{well_name}} of {{labware}} in {{labware_location}} at {{flow_rate}} µL/sec",
   "aspirate_in_place": "Aspirating {{volume}} µL in place at {{flow_rate}} µL/sec ",
   "blowout": "Blowing out at well {{well_name}} of {{labware}} in {{labware_location}} at {{flow_rate}} µL/sec",

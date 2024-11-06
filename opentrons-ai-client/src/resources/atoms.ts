@@ -32,3 +32,5 @@ export const createProtocolAtom = atom<createProtocolAtomProps>({
   currentStep: 0,
   focusStep: 0,
 })
+
+export const displayExitConfirmModalAtom = atom<boolean>(false)

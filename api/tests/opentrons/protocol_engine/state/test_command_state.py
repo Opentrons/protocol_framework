@@ -838,6 +838,58 @@ def test_recovery_target_tracking() -> None:
     assert subject_view.get_has_entered_recovery_mode() is True
 
 
+@pytest.mark.parametrize(
+    "ending_action",
+    [
+        actions.StopAction(from_estop=False),
+        actions.StopAction(from_estop=True),
+        actions.FinishAction(set_run_status=False),
+        actions.FinishAction(
+            set_run_status=True,
+            error_details=actions.FinishErrorDetails(
+                error=Exception("blimey"),
+                error_id="error-id",
+                created_at=datetime.now(),
+            ),
+        ),
+    ],
+)
+def test_recovery_target_clears_when_run_ends(ending_action: actions.Action) -> None:
+    """There should never be an error recovery target when the run is done."""
+    subject = CommandStore(
+        config=_make_config(),
+        error_recovery_policy=_placeholder_error_recovery_policy,
+        is_door_open=False,
+    )
+    subject_view = CommandView(subject.state)
+
+    # Setup: Put the run in error recovery mode.
+    queue = actions.QueueCommandAction(
+        "c1",
+        created_at=datetime.now(),
+        request=commands.CommentCreate(params=commands.CommentParams(message="")),
+        request_hash=None,
+    )
+    subject.handle_action(queue)
+    run = actions.RunCommandAction(command_id="c1", started_at=datetime.now())
+    subject.handle_action(run)
+    fail = actions.FailCommandAction(
+        command_id="c1",
+        error_id="c1-error",
+        failed_at=datetime.now(),
+        error=PythonException(RuntimeError()),
+        notes=[],
+        type=ErrorRecoveryType.WAIT_FOR_RECOVERY,
+        running_command=subject_view.get("c1"),
+    )
+    subject.handle_action(fail)
+
+    # Test: Assert that the ending action clears the recovery target.
+    assert subject_view.get_recovery_target() is not None
+    subject.handle_action(ending_action)
+    assert subject_view.get_recovery_target() is None
+
+
 def test_final_state_after_estop() -> None:
     """Test the final state of the run after it's E-stopped."""
     subject = CommandStore(

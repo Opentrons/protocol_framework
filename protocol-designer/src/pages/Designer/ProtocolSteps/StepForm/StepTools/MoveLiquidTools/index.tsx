@@ -128,7 +128,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         nozzles={String(propsForFields.nozzles.value) ?? null}
         hasFormError={
           visibleFormErrors?.some(error =>
-            error.dependentFields.includes('aspirate_labware')
+            error.dependentFields.includes('aspirate_wells')
           ) ?? false
         }
       />
@@ -208,6 +208,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
       <Divider marginY="0" />
       <Flex padding={SPACING.spacing16} width="100%">
         <FlowRateField
+          key={`${addFieldNamePrefix('flowRate')}_flowRateField`}
           {...propsForFields[addFieldNamePrefix('flowRate')]}
           pipetteId={formData.pipette}
           flowRateType={tab}
@@ -363,6 +364,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
                   })}
                 />
                 <FlowRateField
+                  key="blowout_flowRate"
                   {...propsForFields.blowout_flowRate}
                   pipetteId={formData.pipette}
                   flowRateType="blowout"

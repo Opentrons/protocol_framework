@@ -122,7 +122,7 @@ class WellGroup(TypedDict, total=False):
 
 
 class LabwareDefinition(TypedDict):
-    schemaVersion: Literal[2]
+    schemaVersion: Literal[2, 3]
     version: int
     namespace: str
     metadata: LabwareMetadata
