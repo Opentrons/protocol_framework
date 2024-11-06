@@ -1,28 +1,25 @@
 import {
-  ALIGN_CENTER,
   COLORS,
   DIRECTION_COLUMN,
   DISPLAY_FLEX,
   EmptySelectorButton,
   Flex,
   InfoScreen,
-  InputField,
   JUSTIFY_FLEX_END,
   LargeButton,
-  Link,
   SPACING,
   StyledText,
-  TYPOGRAPHY,
 } from '@opentrons/components'
-import { Controller, useFormContext } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { useAtom } from 'jotai'
 import { createProtocolAtom } from '../../resources/atoms'
 import { MODULES_STEP } from '../ProtocolSectionsContainer'
 import { useState } from 'react'
 import { LabwareModal } from '../LabwareModal'
 import { ControlledLabwareListItems } from '../../molecules/ControlledLabwareListItems'
+import { ControlledAddLiquidInputs } from '../../molecules/ControlledAddLiquidInputs'
 
 export interface DisplayLabware {
   labwareURI: string
@@ -105,62 +102,7 @@ export function LabwareLiquidsSection(): JSX.Element | null {
         iconName="plus"
       />
 
-      <Controller
-        name={LIQUIDS_FIELD_NAME}
-        defaultValue={['']}
-        rules={{
-          required: true,
-          validate: value => value.length > 0 && value[0] !== '',
-        }}
-        render={({ field }) => {
-          return (
-            <>
-              {liquids.map((liquid, index) => (
-                <Flex
-                  key={index}
-                  alignItems={ALIGN_CENTER}
-                  gap={SPACING.spacing8}
-                >
-                  <InputField
-                    name={`liquid-${index + 1}`}
-                    title={`${t('liquid')} ${index + 1}`}
-                    caption={index === 0 && t('add_liquid_caption')}
-                    value={
-                      liquids[index] === '' ? '' : liquids[index] ?? liquid
-                    }
-                    onChange={e => {
-                      const newLiquids = [...liquids]
-                      newLiquids[index] = e.target.value
-                      field.onChange(newLiquids)
-                    }}
-                    onBlur={field.onBlur}
-                  />
-                  {index >= 1 && (
-                    <Link
-                      role="button"
-                      onClick={() => {
-                        field.onChange(liquids.filter((_, i) => i !== index))
-                      }}
-                      css={css`
-                        width: 10%;
-                        text-decoration: ${TYPOGRAPHY.textDecorationUnderline};
-                        color: ${COLORS.grey60};
-                        &:hover {
-                          color: ${COLORS.grey40};
-                        }
-                      `}
-                    >
-                      <StyledText desktopStyle="bodyDefaultRegular">
-                        {t('remove_liquid')}
-                      </StyledText>
-                    </Link>
-                  )}
-                </Flex>
-              ))}
-            </>
-          )
-        }}
-      />
+      <ControlledAddLiquidInputs />
 
       <ButtonContainer>
         <LargeButton

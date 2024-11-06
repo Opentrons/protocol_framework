@@ -29,6 +29,10 @@ export function ControlledLabwareListItems(): JSX.Element | null {
   return (
     <Controller
       name={LABWARES_FIELD_NAME}
+      rules={{
+        required: true,
+        validate: value => value.length > 0,
+      }}
       render={({ field }) => {
         return (
           <>
@@ -66,7 +70,12 @@ export function ControlledLabwareListItems(): JSX.Element | null {
                     label={t('labwares_quantity_label')}
                     linkText={t('labwares_remove_label')}
                     onClick={() => {
-                      field.onChange(labwares.filter(lw => lw !== labware))
+                      field.onChange(
+                        labwares.filter(lw => lw !== labware),
+                        {
+                          shouldValidate: true,
+                        }
+                      )
                     }}
                     header={getLabwareDisplayName(labwareDef)}
                     leftHeaderItem={

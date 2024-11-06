@@ -58,7 +58,10 @@ export function LabwareModal({
 
   const defs = getAllDefinitions()
 
-  const labwareByCategory = React.useMemo(() => {
+  const labwareByCategory: Record<
+    string,
+    LabwareDefinition2[]
+  > = React.useMemo(() => {
     return reduce<LabwareDefByDefURI, Record<string, LabwareDefinition2[]>>(
       defs,
       (acc, def: typeof defs[keyof typeof defs]) => {
@@ -78,7 +81,7 @@ export function LabwareModal({
       ORDERED_CATEGORIES.reduce((acc, category) => {
         return category in labwareByCategory &&
           labwareByCategory[category].some(lw =>
-            searchFilter(lw.metadata.displayName)
+            searchFilter(lw.metadata.displayName as string)
           )
           ? {
               ...acc,
@@ -115,7 +118,7 @@ export function LabwareModal({
                   </StyledText>
                   <InputField
                     value={searchTerm}
-                    onChange={e => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setSearchTerm(e.target.value)
                     }}
                     placeholder={t('search_for_labware_placeholder')}
@@ -153,13 +156,13 @@ export function LabwareModal({
                             >
                               {labwareByCategory[category]?.map(
                                 (labwareDef, index) => {
-                                  const labwareURI = getLabwareDefURI(
+                                  const labwareURI: string = getLabwareDefURI(
                                     labwareDef
                                   )
                                   const loadName =
                                     labwareDef.parameters.loadName
                                   const isMatch = searchFilter(
-                                    labwareDef.metadata.displayName
+                                    labwareDef.metadata.displayName as string
                                   )
                                   if (isMatch) {
                                     return (
@@ -223,12 +226,16 @@ export function LabwareModal({
                 <PrimaryButton
                   onClick={() => {
                     setDisplayLabwareModal(false)
-                    setValue(LABWARES_FIELD_NAME, [
-                      ...selectedLabwares.map(labwareURI => ({
-                        labwareURI,
-                        count: 1,
-                      })),
-                    ])
+                    setValue(
+                      LABWARES_FIELD_NAME,
+                      [
+                        ...selectedLabwares.map(labwareURI => ({
+                          labwareURI,
+                          count: 1,
+                        })),
+                      ],
+                      { shouldValidate: true }
+                    )
                     setSelectedCategory(null)
                   }}
                 >

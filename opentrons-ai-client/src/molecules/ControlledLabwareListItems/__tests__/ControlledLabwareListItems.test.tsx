@@ -35,7 +35,7 @@ const render = (): ReturnType<typeof renderWithProviders> => {
 }
 
 describe('ControlledLabwareListItems', () => {
-  it('should render if displayControlledLabwareListItems is true', () => {
+  it('should render ControlledLabwareListItems', () => {
     render()
 
     expect(
