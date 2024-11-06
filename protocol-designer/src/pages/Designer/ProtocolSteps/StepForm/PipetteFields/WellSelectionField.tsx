@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 
 import {
-  ALIGN_CENTER,
   BORDERS,
   COLORS,
   DIRECTION_COLUMN,
