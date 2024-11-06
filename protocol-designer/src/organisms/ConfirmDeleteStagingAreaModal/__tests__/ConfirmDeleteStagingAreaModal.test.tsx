@@ -3,9 +3,10 @@ import { describe, it, beforeEach, vi, expect } from 'vitest'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { i18n } from '../../../assets/localization'
 import { ConfirmDeleteStagingAreaModal } from '..'
+import type { ComponentProps } from 'react'
 
 const render = (
-  props: React.ComponentProps<typeof ConfirmDeleteStagingAreaModal>
+  props: ComponentProps<typeof ConfirmDeleteStagingAreaModal>
 ) => {
   return renderWithProviders(<ConfirmDeleteStagingAreaModal {...props} />, {
     i18nInstance: i18n,
@@ -13,7 +14,7 @@ const render = (
 }
 
 describe('ConfirmDeleteStagingAreaModal', () => {
-  let props: React.ComponentProps<typeof ConfirmDeleteStagingAreaModal>
+  let props: ComponentProps<typeof ConfirmDeleteStagingAreaModal>
 
   beforeEach(() => {
     props = {
