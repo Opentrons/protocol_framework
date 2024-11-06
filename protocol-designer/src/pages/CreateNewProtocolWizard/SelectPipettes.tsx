@@ -225,6 +225,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                 <Flex
                   flexDirection={DIRECTION_COLUMN}
                   gridGap={SPACING.spacing12}
+                  flexWrap={WRAP}
                 >
                   <StyledText desktopStyle="headingSmallBold">
                     {t('pipette_gen')}
@@ -256,7 +257,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                   <StyledText desktopStyle="headingSmallBold">
                     {t('pipette_vol')}
                   </StyledText>
-                  <Flex gridGap={SPACING.spacing4}>
+                  <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
                     {PIPETTE_VOLUMES[robotType]?.map(volume => {
                       if (
                         robotType === FLEX_ROBOT_TYPE &&
