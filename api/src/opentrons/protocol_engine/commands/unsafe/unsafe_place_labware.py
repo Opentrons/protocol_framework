@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from pydantic import BaseModel, Field
-from typing import TYPE_CHECKING, Optional, Type, cast
+from typing import TYPE_CHECKING, Optional, Type
 from typing_extensions import Literal
 
 from opentrons.hardware_control.types import Axis, OT3Mount
@@ -94,7 +94,15 @@ class UnsafePlaceLabwareImplementation(
         final_offsets = self._state_view.labware.get_child_gripper_offsets(
             labware_id, None
         )
-        drop_offset = cast(Point, final_offsets.dropOffset) if final_offsets else None
+        drop_offset = (
+            Point(
+                final_offsets.dropOffset.x,
+                final_offsets.dropOffset.y,
+                final_offsets.dropOffset.z,
+            )
+            if final_offsets
+            else None
+        )
 
         if isinstance(params.location, DeckSlotLocation):
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
