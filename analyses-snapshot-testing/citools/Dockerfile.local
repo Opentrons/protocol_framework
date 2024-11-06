@@ -1,10 +1,6 @@
-# Use Python 3.10, same as the app
-FROM python:3.10-slim-bullseye
+ARG BASE_IMAGE_NAME=opentrons-python-base:3.10
 
-# Update packages and install required dependencies
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y git libsystemd-dev
+FROM ${BASE_IMAGE_NAME}
 
 # Set the working directory in the container
 WORKDIR /opentrons
@@ -12,7 +8,6 @@ WORKDIR /opentrons
 # Copy everything from the build context into the /opentrons directory
 # root directory .dockerignore file is respected
 COPY . /opentrons
-
 
 # Install required packages from the copied code
 RUN python -m pip install -U ./shared-data/python

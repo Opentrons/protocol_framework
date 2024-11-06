@@ -1,3 +1,15 @@
+BASE_IMAGE_NAME ?= opentrons-python-base:3.10
+CACHEBUST := $(shell date +%s)
+ANALYSIS_REF ?= edge
+PROTOCOL_NAMES ?= all
+OVERRIDE_PROTOCOL_NAMES ?= all
+OPENTRONS_VERSION ?= edge
+
+export OPENTRONS_VERSION # used for server
+export ANALYSIS_REF # used for analysis and snapshot test
+export PROTOCOL_NAMES # used for the snapshot test
+export OVERRIDE_PROTOCOL_NAMES # used for the snapshot test
+
 ifeq ($(CI), true)
 	PYTHON=python
 else
@@ -29,11 +41,11 @@ lint: black-check ruff-check mypy
 
 .PHONY: format
 format: 
-	@echo runnning black
+	@echo "Running black"
 	$(MAKE) black
-	@echo running ruff
+	@echo "Running ruff"
 	$(MAKE) ruff
-	@echo formatting the readme with yarn prettier
+	@echo "Formatting the readme with yarn prettier"
 	$(MAKE) format-readme
 
 .PHONY: test-ci
@@ -54,19 +66,11 @@ teardown:
 
 .PHONY: format-readme
 format-readme:
-	yarn prettier --ignore-path .eslintignore --write analyses-snapshot-testing/**/*.md
+	yarn prettier --ignore-path .eslintignore --write analyses-snapshot-testing/**/*.md .github/workflows/analyses-snapshot-test.yaml
 
 .PHONY: install-pipenv
 install-pipenv:
 	$(PYTHON) -m pip install -U pipenv
-
-ANALYSIS_REF ?= edge
-PROTOCOL_NAMES ?= all
-OVERRIDE_PROTOCOL_NAMES ?= all
-
-export ANALYSIS_REF
-export PROTOCOL_NAMES
-export OVERRIDE_PROTOCOL_NAMES
 
 .PHONY: snapshot-test
 snapshot-test:
@@ -82,30 +86,54 @@ snapshot-test-update:
 	@echo "OVERRIDE_PROTOCOL_NAMES is $(OVERRIDE_PROTOCOL_NAMES)"
 	$(PYTHON) -m pipenv run pytest -k analyses_snapshot_test --snapshot-update
 
-CACHEBUST := $(shell date +%s)
+.PHONY: build-base-image
+build-base-image:
+	@echo "Building the base image $(BASE_IMAGE_NAME)"
+	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) -f citools/Dockerfile.base -t $(BASE_IMAGE_NAME) citools/.
+
+.PHONY: build-base-image-ci
+build-base-image-ci:
+	@echo "Building the base image $(BASE_IMAGE_NAME) with cache for CI"
+	docker build --cache-from type=local,src=/tmp/.buildx-base-cache \
+	             --cache-to type=local,dest=/tmp/.buildx-base-cache,mode=max \
+	             --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) \
+	             -f citools/Dockerfile.base -t $(BASE_IMAGE_NAME) citools/.
 
 .PHONY: build-opentrons-analysis
-build-opentrons-analysis:
+build-opentrons-analysis: build-base-image
 	@echo "Building docker image for $(ANALYSIS_REF)"
 	@echo "The image will be named opentrons-analysis:$(ANALYSIS_REF)"
 	@echo "If you want to build a different version, run 'make build-opentrons-analysis ANALYSIS_REF=<version>'"
-	@echo "Cache is always busted to ensure latest version of the code is used"
-	docker build --build-arg ANALYSIS_REF=$(ANALYSIS_REF) --build-arg CACHEBUST=$(CACHEBUST) -t opentrons-analysis:$(ANALYSIS_REF) citools/.
+	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) --build-arg ANALYSIS_REF=$(ANALYSIS_REF) --build-arg CACHEBUST=$(CACHEBUST) -t opentrons-analysis:$(ANALYSIS_REF) -f citools/Dockerfile.analyze citools/.
+
+.PHONY: build-opentrons-analysis-ci
+build-opentrons-analysis-ci:
+	@echo "Building docker image for $(ANALYSIS_REF) with cache for CI"
+	docker build --cache-from type=local,src=/tmp/.buildx-analysis-cache \
+	             --cache-to type=local,dest=/tmp/.buildx-analysis-cache,mode=max \
+	             --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) \
+	             --build-arg ANALYSIS_REF=$(ANALYSIS_REF) \
+	             --build-arg CACHEBUST=$(CACHEBUST) \
+	             -t opentrons-analysis:$(ANALYSIS_REF) -f citools/Dockerfile.analyze citools/.
+
+.PHONY: local-build
+local-build: build-base-image
+	@echo "Building docker image for your local opentrons code"
+	@echo "The image will be named opentrons-analysis:local"
+	@echo "For a fresh build, run 'make local-build NO_CACHE=1'"
+	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) $(BUILD_FLAGS) -t opentrons-analysis:local -f citools/Dockerfile.local .. || true
+	@echo "Build complete"
 
 .PHONY: generate-protocols
 generate-protocols:
 	$(PYTHON) -m pipenv run python -m automation.data.protocol_registry
 
-
-OPENTRONS_VERSION ?= edge
-export OPENTRONS_VERSION
-
 .PHONY: build-rs
-build-rs:
+build-rs: build-base-image
 	@echo "Building docker image for opentrons-robot-server:$(OPENTRONS_VERSION)"
 	@echo "Cache is always busted to ensure latest version of the code is used"
 	@echo "If you want to build a different version, run 'make build-rs OPENTRONS_VERSION=chore_release-8.0.0'"
-	docker build --build-arg OPENTRONS_VERSION=$(OPENTRONS_VERSION) --build-arg CACHEBUST=$(CACHEBUST) -t opentrons-robot-server:$(OPENTRONS_VERSION) -f citools/Dockerfile.server .
+	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) --build-arg OPENTRONS_VERSION=$(OPENTRONS_VERSION) --build-arg CACHEBUST=$(CACHEBUST) -t opentrons-robot-server:$(OPENTRONS_VERSION) -f citools/Dockerfile.server .
 
 .PHONY: run-flex
 run-flex:
@@ -118,29 +146,3 @@ run-ot2:
 	@echo "Running opentrons-robot-server:$(OPENTRONS_VERSION)"
 	@echo "If you want to run a different version, run 'make run-ot2 OPENTRONS_VERSION=chore_release-8.0.0'"
 	docker run -p 31950:31950 --env-file ../robot-server/dev.env opentrons-robot-server:$(OPENTRONS_VERSION)
-
-BUILD_FLAGS := $(if $(NO_CACHE),--no-cache)
-
-.PHONY: local-build
-local-build:
-	@echo "Building docker image for your local opentrons code"
-	@echo "The image will be named opentrons-analysis:local"
-	@echo "For a fresh build, run 'make local-build NO_CACHE=1'"
-	docker build $(BUILD_FLAGS) -t opentrons-analysis:local -f citools/Dockerfile.local .. || true
-	@echo "Build complete"
-
-.PHONY: local-snapshot-test
-local-snapshot-test:
-	@echo "Running against local opentrons-analysis:local"
-	@echo "You must run this command like 'make local-snapshot-test ANALYSIS_REF=local'"
-	@echo "This is because the test suite reads the ANALYSIS_REF environment variable."
-	@echo "And uses it to determine which image to run against."
-	@echo "ANALYSIS_REF is $(ANALYSIS_REF)"
-	@if [ "$(ANALYSIS_REF)" = "local" ]; then \
-		echo "ANALYSIS_REF is correctly set to 'local'"; \
-	else \
-		echo "Warning: ANALYSIS_REF is not set to 'local'"; \
-	fi
-	@echo "PROTOCOL_NAMES is $(PROTOCOL_NAMES)"
-	@echo "OVERRIDE_PROTOCOL_NAMES is $(OVERRIDE_PROTOCOL_NAMES)"
-	$(PYTHON) -m pipenv run pytest -k analyses_snapshot_test -vv
