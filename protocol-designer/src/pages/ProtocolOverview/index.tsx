@@ -3,11 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { format } from 'date-fns'
-import { css } from 'styled-components'
 
 import {
   ALIGN_CENTER,
-  Btn,
   DIRECTION_COLUMN,
   EndUserAgreementFooter,
   Flex,
@@ -17,8 +15,6 @@ import {
   NO_WRAP,
   SPACING,
   StyledText,
-  ToggleGroup,
-  TYPOGRAPHY,
   WRAP,
 } from '@opentrons/components'
 import { OT2_ROBOT_TYPE } from '@opentrons/shared-data'
@@ -37,20 +33,18 @@ import {
   getUnusedTrash,
 } from '../../components/FileSidebar/utils'
 import { MaterialsListModal } from '../../organisms/MaterialsListModal'
-import { BUTTON_LINK_STYLE, LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { LINE_CLAMP_TEXT_STYLE, COLUMN_STYLE } from '../../atoms'
 import { useBlockingHint } from '../../organisms/BlockingHintModal/useBlockingHint'
 import {
   EditProtocolMetadataModal,
   EditInstrumentsModal,
-  SlotDetailsContainer,
 } from '../../organisms'
-import { DeckThumbnail } from './DeckThumbnail'
-import { OffDeckThumbnail } from './OffdeckThumbnail'
 import { getWarningContent } from './UnusedModalContent'
 import { ProtocolMetadata } from './ProtocolMetadata'
 import { InstrumentsInfo } from './InstrumentsInfo'
 import { LiquidDefinitions } from './LiquidDefinitions'
 import { StepsInfo } from './StepsInfo'
+import { StartingDeck } from './StartingDeck'
 
 import type { CreateCommand } from '@opentrons/shared-data'
 import type { DeckSlot } from '@opentrons/step-generation'
@@ -110,10 +104,6 @@ export function ProtocolOverview(): JSX.Element {
   )
   const leftString = t('starting_deck_state:onDeck')
   const rightString = t('starting_deck_state:offDeck')
-
-  const [deckView, setDeckView] = useState<
-    typeof leftString | typeof rightString
-  >(leftString)
 
   useEffect(() => {
     if (formValues?.created == null) {
@@ -336,61 +326,15 @@ export function ProtocolOverview(): JSX.Element {
             css={COLUMN_STYLE}
             gridGap={SPACING.spacing12}
           >
-            <Flex
-              justifyContent={JUSTIFY_SPACE_BETWEEN}
-              alignItems={ALIGN_CENTER}
-            >
-              <Flex gridGap="1.875rem" alignItems={ALIGN_CENTER}>
-                <StyledText desktopStyle="headingSmallBold">
-                  {t('starting_deck')}
-                </StyledText>
-                <Flex padding={SPACING.spacing4}>
-                  <Btn
-                    data-testid="Materials_list"
-                    textDecoration={TYPOGRAPHY.textDecorationUnderline}
-                    onClick={() => {
-                      setShowMaterialsListModal(true)
-                    }}
-                    css={BUTTON_LINK_STYLE}
-                  >
-                    <StyledText desktopStyle="bodyDefaultRegular">
-                      {t('materials_list')}
-                    </StyledText>
-                  </Btn>
-                </Flex>
-              </Flex>
-              <ToggleGroup
-                selectedValue={deckView}
-                leftText={leftString}
-                rightText={rightString}
-                leftClick={() => {
-                  setDeckView(leftString)
-                }}
-                rightClick={() => {
-                  setDeckView(rightString)
-                }}
-              />
-            </Flex>
-            <Flex
-              flexDirection={DIRECTION_COLUMN}
-              gridGap={SPACING.spacing32}
-              alignItems={ALIGN_CENTER}
-            >
-              {deckView === leftString ? (
-                <DeckThumbnail hoverSlot={hover} setHoverSlot={setHover} />
-              ) : (
-                <OffDeckThumbnail
-                  hover={hover}
-                  setHover={setHover}
-                  width="100%"
-                />
-              )}
-              <SlotDetailsContainer
-                robotType={robotType}
-                slot={isOffDeckHover ? 'offDeck' : hover}
-                offDeckLabwareId={isOffDeckHover ? hover : null}
-              />
-            </Flex>
+            <StartingDeck
+              setShowMaterialsListModal={setShowMaterialsListModal}
+              leftString={leftString}
+              rightString={rightString}
+              robotType={robotType}
+              isOffDeckHover={isOffDeckHover}
+              hover={hover}
+              setHover={setHover}
+            />
           </Flex>
         </Flex>
       </Flex>
@@ -398,11 +342,3 @@ export function ProtocolOverview(): JSX.Element {
     </Fragment>
   )
 }
-
-const MIN_OVERVIEW_WIDTH = '64rem'
-const COLUMN_GRID_GAP = '5rem'
-const COLUMN_STYLE = css`
-  flex-direction: ${DIRECTION_COLUMN};
-  min-width: calc((${MIN_OVERVIEW_WIDTH} - ${COLUMN_GRID_GAP}) * 0.5);
-  flex: 1;
-`

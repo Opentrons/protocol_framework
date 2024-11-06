@@ -22,6 +22,7 @@ export function LiquidDefinitions({
   allIngredientGroupFields,
 }: LiquidDefinitionsProps): JSX.Element {
   const { t } = useTranslation('protocol_overview')
+
   return (
     <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
       <StyledText desktopStyle="headingSmallBold">
@@ -58,7 +59,9 @@ export function LiquidDefinitions({
                     desktopStyle="bodyDefaultRegular"
                     css={LINE_CLAMP_TEXT_STYLE(10)}
                   >
-                    {liquid.description ?? t('na')}
+                    {liquid.description != null && liquid.description !== ''
+                      ? liquid.description
+                      : t('na')}
                   </StyledText>
                 }
               />
