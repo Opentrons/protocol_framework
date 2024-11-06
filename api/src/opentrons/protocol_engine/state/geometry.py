@@ -1203,6 +1203,7 @@ class GeometryView:
                 extra_offset = LabwareOffsetVector(x=0, y=0, z=0)
                 if (
                     isinstance(ancestor, ModuleLocation)
+                    # todo(mm, 2024-11-06): Do not access private module state; only use public ModuleView methods.
                     and self._modules._state.requested_model_by_id[ancestor.moduleId]
                     == ModuleModel.THERMOCYCLER_MODULE_V2
                     and labware_validation.validate_definition_is_lid(current_labware)
