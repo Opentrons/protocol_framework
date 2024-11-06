@@ -6,6 +6,7 @@ from click import Context
 from opentrons.cli import analyze
 import json
 import argparse
+import traceback
 from datetime import datetime
 from abr_testing.automation import google_sheets_tool
 from abr_testing.data_collection import read_robot_logs
@@ -327,6 +328,7 @@ def main(
     storage_directory: str = os.curdir,
     google_sheet_name: str = "",
     parameters: List[str] = [],
+    exit=None,
 ) -> None:
     """Main module control."""
     sys.exit = mock_exit  # Replace sys.exit with the mock function
@@ -412,10 +414,11 @@ def main(
                     pass
                 else:
                     print(errors)
-                    sys.exit(1)
+                    raise
             except FileNotFoundError:
                 print("error simulating ...")
-                sys.exit()
+                raise
+        open_file.close
     if save:
         try:
             credentials_path = os.path.join(storage_directory, "credentials.json")
@@ -501,19 +504,25 @@ if __name__ == "__main__":
     if CLEAN_PROTOCOL:
         set_api_level(protocol_file_path)
         if parameters:
-            main(
-                Path(protocol_file_path),
-                True,
-                storage_directory,
-                sheet_name,
-                parameters=parameters,
-            )
+            try:
+                main(
+                    Path(protocol_file_path),
+                    True,
+                    storage_directory,
+                    sheet_name,
+                    parameters=parameters,
+                )
+            except:
+                sys.exit(1)
         else:
-            main(
-                protocol_file_path=Path(protocol_file_path),
-                save=True,
-                storage_directory=storage_directory,
-                google_sheet_name=sheet_name,
-            )
+            try:
+                main(
+                    protocol_file_path=Path(protocol_file_path),
+                    save=True,
+                    storage_directory=storage_directory,
+                    google_sheet_name=sheet_name,
+                )
+            except:
+                sys.exit(1)
     else:
         sys.exit(0)
