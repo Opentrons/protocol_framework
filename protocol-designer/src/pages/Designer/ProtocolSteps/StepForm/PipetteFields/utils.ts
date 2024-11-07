@@ -96,7 +96,7 @@ export function getDisabledPathMap(
     dispense_wells,
     isDisposalLocation
   )
-  console.log('well ratio: ', wellRatio)
+
   let disabledPathMap: Partial<Record<PathOption, string>> = {}
 
   // changeTip is lowest priority disable reasoning

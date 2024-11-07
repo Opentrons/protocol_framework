@@ -332,7 +332,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
           }
           values={{
             sourceWells: aspirateWellsDisplay,
-            destinationWells: isDisposalLocation ? '' : dispenseWellsDisplay,
+            destinationWells: dispenseWellsDisplay,
             source: sourceLabwareName,
             destination: isDisposalLocation
               ? t(`shared:${disposalName}`)
