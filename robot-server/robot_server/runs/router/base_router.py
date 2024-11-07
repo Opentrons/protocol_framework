@@ -659,6 +659,9 @@ async def get_current_state(  # noqa: C901
                         and hw_mod.serial_number == mod.serialNumber
                     ):
                         location = mod.location
+                        # TODO: Not the best location for this, we should
+                        # remove this once we are no longer defining the plate reader lid
+                        # as a labware.
                         labware_uri = "opentrons/opentrons_flex_lid_absorbance_plate_reader_module/1"
                         place_labware = PlaceLabwareState(
                             location=location,
