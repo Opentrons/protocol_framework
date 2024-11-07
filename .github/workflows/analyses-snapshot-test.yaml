@@ -87,6 +87,12 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: List docker images
+        run: docker images
+
+      - name: List buildx images
+        run: docker buildx images
+
       - name: Build analysis image
         uses: docker/build-push-action@v6
         with:
@@ -96,7 +102,7 @@ jobs:
           load: true
           tags: opentrons-analysis:${{ env.ANALYSIS_REF }}
           build-args: |
-            BASE_IMAGE_NAME=${{ steps.build_base_image.outputs.imageid }}
+            BASE_IMAGE_NAME=${{ env.BASE_IMAGE_NAME }}
             ANALYSIS_REF=${{ env.ANALYSIS_REF }}
             CACHEBUST=$(date +%s)
           cache-from: type=gha
