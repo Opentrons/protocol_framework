@@ -6,9 +6,7 @@ import { renderWithProviders } from '../../../../__testing-utils__'
 import {
   FLEX_ROBOT_TYPE,
   HEATERSHAKER_MODULE_V1,
-  fixture12Trough,
   fixture24Tuberack,
-  fixture96Plate,
   getDeckDefFromRobotType,
 } from '@opentrons/shared-data'
 import { Module } from '@opentrons/components'
@@ -20,6 +18,7 @@ import { FixtureRender } from '../FixtureRender'
 import { SelectedHoveredItems } from '../SelectedHoveredItems'
 import type * as OpentronsComponents from '@opentrons/components'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
+
 vi.mock('../../../../step-forms/selectors')
 vi.mock('../FixtureRender')
 vi.mock('../../../../labware-ingred/selectors')
@@ -151,11 +150,9 @@ describe('SelectedHoveredItems', () => {
     render(props)
     screen.getByText('mock FixtureRender')
     expect(screen.getAllByText('mock LabwareOnDeck')).toHaveLength(2)
-    expect(
-      screen.getAllByText(
-        'Opentrons screwcap 2mL tuberack'
-      )
-    ).toHaveLength(2)
+    expect(screen.getAllByText('Opentrons screwcap 2mL tuberack')).toHaveLength(
+      2
+    )
   })
   it('renders nothing when there is a hovered module but selected fixture', () => {
     props.hoveredModule = HEATERSHAKER_MODULE_V1
