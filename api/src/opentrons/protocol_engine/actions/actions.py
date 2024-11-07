@@ -26,6 +26,7 @@ from ..types import (
     LabwareOffsetCreate,
     ModuleDefinition,
     Liquid,
+    LiquidClassRecord,
     DeckConfigurationType,
     AddressableAreaLocation,
 )
@@ -225,6 +226,14 @@ class AddLiquidAction:
 
 
 @dataclasses.dataclass(frozen=True)
+class AddLiquidClassAction:
+    """Store a single liquid class record into the engine."""
+
+    liquid_class_id: str
+    liquid_class_record: LiquidClassRecord
+
+
+@dataclasses.dataclass(frozen=True)
 class SetDeckConfigurationAction:
     """See `ProtocolEngine.set_deck_configuration()`."""
 
@@ -307,6 +316,7 @@ Action = Union[
     SetDeckConfigurationAction,
     AddAddressableAreaAction,
     AddLiquidAction,
+    AddLiquidClassAction,
     ResetTipsAction,
     SetPipetteMovementSpeedAction,
     AddAbsorbanceReaderLidAction,

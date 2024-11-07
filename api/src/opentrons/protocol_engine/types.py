@@ -36,7 +36,9 @@ from opentrons.hardware_control.types import (
 from opentrons.hardware_control.modules import (
     ModuleType as ModuleType,
 )
-
+from opentrons_shared_data.liquid_classes.liquid_class_definition import (
+    ByTipTypeSetting,
+)
 from opentrons_shared_data.pipette.types import (  # noqa: F401
     # convenience re-export of LabwareUri type
     LabwareUri as LabwareUri,
@@ -839,6 +841,27 @@ class Liquid(BaseModel):
     displayName: str
     description: str
     displayColor: Optional[HexColor]
+
+
+class LiquidClassRecord(ByTipTypeSetting, frozen=True):
+    """LiquidClassRecord is our internal representation of an (immutable) liquid class.
+
+    Inside the Protocol Engine, a liquid class is the tuple (name, pipette, tip, transfer properties).
+    We consider two liquid classes to be the same if every entry in that tuple is the same; and 2 liquid
+    classes are different if any entry in the tuple is different.
+
+    This class defines the tuple via inheritance so that we can reuse the definitions from shared_data.
+    """
+
+    liquidClassName: str = Field(
+        ...,
+        description="Identifier for the liquid of this liquid class, e.g. glycerol50.",
+    )
+    pipetteModel: str = Field(
+        ...,
+        description="Identifier for the pipette of this liquid class.",
+    )
+    # The other fields like tiprack ID, aspirate properties, etc. are pulled in from ByTipTypeSetting.
 
 
 class SpeedRange(NamedTuple):
