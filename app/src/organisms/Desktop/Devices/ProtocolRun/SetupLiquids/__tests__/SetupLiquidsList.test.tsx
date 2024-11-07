@@ -87,6 +87,7 @@ describe('SetupLiquidsList', () => {
     vi.mocked(getLocationInfoNames).mockReturnValue({
       labwareName: 'mock labware name',
       slotName: '4',
+      labwareQuantity: 1,
     })
     mockTrackEvent = vi.fn()
     vi.mocked(useTrackEvent).mockReturnValue(mockTrackEvent)

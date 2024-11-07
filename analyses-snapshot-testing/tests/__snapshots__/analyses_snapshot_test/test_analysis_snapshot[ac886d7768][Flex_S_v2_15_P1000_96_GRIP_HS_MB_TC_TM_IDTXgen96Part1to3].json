@@ -15103,7 +15103,14 @@
       },
       "id": "UUID",
       "key": "c3eacf39e9a35058cac9f69100549344",
-      "notes": [],
+      "notes": [
+        {
+          "longMessage": "Handling this command failure with FAIL_RUN.",
+          "noteKind": "debugErrorRecovery",
+          "shortMessage": "Handling this command failure with FAIL_RUN.",
+          "source": "execution"
+        }
+      ],
       "params": {
         "forceDirect": false,
         "labwareId": "UUID",

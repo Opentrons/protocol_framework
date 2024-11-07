@@ -18,6 +18,7 @@ from .command import (
     SuccessData,
 )
 from ..errors.error_occurrence import ErrorOccurrence
+from ..state import update_types
 
 if TYPE_CHECKING:
     from ..execution import PipettingHandler, GantryMover
@@ -40,7 +41,7 @@ class PrepareToAspirateResult(BaseModel):
 
 
 _ExecuteReturn = Union[
-    SuccessData[PrepareToAspirateResult, None],
+    SuccessData[PrepareToAspirateResult],
     DefinedErrorData[OverpressureError],
 ]
 
@@ -64,11 +65,13 @@ class PrepareToAspirateImplementation(
     async def execute(self, params: PrepareToAspirateParams) -> _ExecuteReturn:
         """Prepare the pipette to aspirate."""
         current_position = await self._gantry_mover.get_position(params.pipetteId)
+        state_update = update_types.StateUpdate()
         try:
             await self._pipetting_handler.prepare_for_aspirate(
                 pipette_id=params.pipetteId,
             )
         except PipetteOverpressureError as e:
+            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
             return DefinedErrorData(
                 public=OverpressureError(
                     id=self._model_utils.generate_id(),
@@ -90,9 +93,13 @@ class PrepareToAspirateImplementation(
                         }
                     ),
                 ),
+                state_update=state_update,
             )
         else:
-            return SuccessData(public=PrepareToAspirateResult(), private=None)
+            state_update.set_fluid_empty(pipette_id=params.pipetteId)
+            return SuccessData(
+                public=PrepareToAspirateResult(), state_update=state_update
+            )
 
 
 class PrepareToAspirate(

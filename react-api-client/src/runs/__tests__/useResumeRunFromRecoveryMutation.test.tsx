@@ -9,22 +9,22 @@ import { useResumeRunFromRecoveryMutation } from '..'
 import { RUN_ID_1, mockResumeFromRecoveryAction } from '../__fixtures__'
 
 import type { HostConfig, Response, RunAction } from '@opentrons/api-client'
-import type { UsePlayRunMutationOptions } from '../usePlayRunMutation'
+import type { UseResumeRunFromRecoveryMutationOptions } from '../useResumeRunFromRecoveryMutation'
 
 vi.mock('@opentrons/api-client')
 vi.mock('../../api/useHost')
 
 const HOST_CONFIG: HostConfig = { hostname: 'localhost' }
 
-describe('usePlayRunMutation hook', () => {
+describe('useResumeRunFromRecoveryMutation hook', () => {
   let wrapper: React.FunctionComponent<
-    { children: React.ReactNode } & UsePlayRunMutationOptions
+    { children: React.ReactNode } & UseResumeRunFromRecoveryMutationOptions
   >
 
   beforeEach(() => {
     const queryClient = new QueryClient()
     const clientProvider: React.FunctionComponent<
-      { children: React.ReactNode } & UsePlayRunMutationOptions
+      { children: React.ReactNode } & UseResumeRunFromRecoveryMutationOptions
     > = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     )

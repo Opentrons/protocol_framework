@@ -5,9 +5,9 @@ import traceback
 from pathlib import Path
 
 
-def run(file_to_simulate: str) -> None:
+def run(file_to_simulate: Path) -> None:
     """Simulate protocol and raise errors."""
-    protocol_name = Path(file_to_simulate).stem
+    protocol_name = file_to_simulate.stem
     try:
         simulation_metrics.main(file_to_simulate, False)
     except Exception:
@@ -29,6 +29,6 @@ if __name__ == "__main__":
             if file.endswith(".py"):  # If it's a Python file
                 if file in exclude:
                     continue
-                file_path = os.path.join(root, file)
-                print(f"Simulating protocol: {file_path}")
+                file_path = Path(os.path.join(root, file))
+                print(f"Simulating protocol: {file_path.stem}")
                 run(file_path)

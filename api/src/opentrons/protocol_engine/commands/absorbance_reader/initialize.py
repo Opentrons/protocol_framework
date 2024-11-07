@@ -37,7 +37,7 @@ class InitializeResult(BaseModel):
 
 
 class InitializeImpl(
-    AbstractCommandImpl[InitializeParams, SuccessData[InitializeResult, None]]
+    AbstractCommandImpl[InitializeParams, SuccessData[InitializeResult]]
 ):
     """Execution implementation of initializing an Absorbance Reader."""
 
@@ -50,9 +50,7 @@ class InitializeImpl(
         self._state_view = state_view
         self._equipment = equipment
 
-    async def execute(
-        self, params: InitializeParams
-    ) -> SuccessData[InitializeResult, None]:
+    async def execute(self, params: InitializeParams) -> SuccessData[InitializeResult]:
         """Initiate a single absorbance measurement."""
         abs_reader_substate = self._state_view.modules.get_absorbance_reader_substate(
             module_id=params.moduleId
@@ -105,7 +103,6 @@ class InitializeImpl(
 
         return SuccessData(
             public=InitializeResult(),
-            private=None,
         )
 
 

@@ -104,6 +104,19 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             pipette_id=self._pipette_id, speed=speed
         )
 
+    def air_gap_in_place(self, volume: float, flow_rate: float) -> None:
+        """Aspirate a given volume of air from the current location of the pipette.
+
+        Args:
+            volume: The volume of air to aspirate, in microliters.
+            folw_rate: The flow rate of air into the pipette, in microliters/s
+        """
+        self._engine_client.execute_command(
+            cmd.AirGapInPlaceParams(
+                pipetteId=self._pipette_id, volume=volume, flowRate=flow_rate
+            )
+        )
+
     def aspirate(
         self,
         location: Location,
@@ -153,6 +166,8 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                 absolute_point=location.point,
                 is_meniscus=is_meniscus,
             )
+            if well_location.origin == WellOrigin.MENISCUS:
+                well_location.volumeOffset = "operationVolume"
             pipette_movement_conflict.check_safe_for_pipette_movement(
                 engine_state=self._engine_client.state,
                 pipette_id=self._pipette_id,

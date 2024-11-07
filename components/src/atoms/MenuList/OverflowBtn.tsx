@@ -16,7 +16,7 @@ export const OverflowBtn: (
     props: OverflowBtnProps,
     ref: React.ForwardedRef<HTMLInputElement>
   ): JSX.Element => {
-    const { fillColor } = props
+    const { fillColor, ...restProps } = props
     return (
       <Btn
         css={css`
@@ -56,7 +56,7 @@ export const OverflowBtn: (
             background-color: transparent;
           }
         `}
-        {...props}
+        {...restProps}
         ref={ref}
       >
         <svg

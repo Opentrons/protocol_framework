@@ -68,6 +68,7 @@
     "uuid": "3.2.1"
   },
   "devDependencies": {
+    "@tanstack/react-query-devtools": "5.59.16",
     "@types/classnames": "2.2.5",
     "@types/file-saver": "2.0.1",
     "@types/jszip": "3.1.7",

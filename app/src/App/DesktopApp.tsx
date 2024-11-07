@@ -38,6 +38,7 @@ import { useRobot, useIsFlex } from '/app/redux-resources/robots'
 import { ProtocolTimeline } from '/app/pages/Desktop/Protocols/ProtocolDetails/ProtocolTimeline'
 import { PortalRoot as ModalPortalRoot } from './portal'
 import { DesktopAppFallback } from './DesktopAppFallback'
+import { ReactQueryDevtools } from './tools'
 
 import type { RouteProps } from './types'
 
@@ -108,6 +109,7 @@ export const DesktopApp = (): JSX.Element => {
     <NiceModal.Provider>
       <LocalizationProvider>
         <ErrorBoundary FallbackComponent={DesktopAppFallback}>
+          <ReactQueryDevtools />
           <SystemLanguagePreferenceModal />
           <Navbar routes={desktopRoutes} />
           <ToasterOven>

@@ -42,7 +42,7 @@ class UnsafeDropTipInPlaceResult(BaseModel):
 
 class UnsafeDropTipInPlaceImplementation(
     AbstractCommandImpl[
-        UnsafeDropTipInPlaceParams, SuccessData[UnsafeDropTipInPlaceResult, None]
+        UnsafeDropTipInPlaceParams, SuccessData[UnsafeDropTipInPlaceResult]
     ]
 ):
     """Unsafe drop tip in place command implementation."""
@@ -60,7 +60,7 @@ class UnsafeDropTipInPlaceImplementation(
 
     async def execute(
         self, params: UnsafeDropTipInPlaceParams
-    ) -> SuccessData[UnsafeDropTipInPlaceResult, None]:
+    ) -> SuccessData[UnsafeDropTipInPlaceResult]:
         """Drop a tip using the requested pipette, even if the plunger position is not known."""
         ot3_hardware_api = ensure_ot3_hardware(self._hardware_api)
         pipette_location = self._state_view.motion.get_pipette_location(
@@ -77,9 +77,10 @@ class UnsafeDropTipInPlaceImplementation(
         state_update.update_pipette_tip_state(
             pipette_id=params.pipetteId, tip_geometry=None
         )
+        state_update.set_fluid_unknown(pipette_id=params.pipetteId)
 
         return SuccessData(
-            public=UnsafeDropTipInPlaceResult(), private=None, state_update=state_update
+            public=UnsafeDropTipInPlaceResult(), state_update=state_update
         )
 
 

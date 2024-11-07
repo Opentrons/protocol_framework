@@ -56,6 +56,5 @@ async def test_open_lid(
     )
     assert result == SuccessData(
         public=expected_result,
-        private=None,
         state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),
     )

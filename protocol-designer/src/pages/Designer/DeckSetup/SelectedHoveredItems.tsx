@@ -1,5 +1,4 @@
 import { useSelector } from 'react-redux'
-import { FixtureRender } from './FixtureRender'
 import { LabwareRender, Module } from '@opentrons/components'
 import {
   getModuleDef2,
@@ -8,8 +7,11 @@ import {
 import { selectors } from '../../../labware-ingred/selectors'
 import { getOnlyLatestDefs } from '../../../labware-defs'
 import { getCustomLabwareDefsByURI } from '../../../labware-defs/selectors'
+import { getInitialDeckSetup } from '../../../step-forms/selectors'
+import { LabwareOnDeck } from '../../../components/DeckSetup/LabwareOnDeck'
 import { ModuleLabel } from './ModuleLabel'
 import { LabwareLabel } from '../LabwareLabel'
+import { FixtureRender } from './FixtureRender'
 import type {
   CoordinateTuple,
   DeckDefinition,
@@ -48,11 +50,45 @@ export const SelectedHoveredItems = (
   } = selectedSlotInfo
   const customLabwareDefs = useSelector(getCustomLabwareDefsByURI)
   const defs = getOnlyLatestDefs()
-
+  const deckSetup = useSelector(getInitialDeckSetup)
+  const { labware, modules } = deckSetup
+  const matchingSelectedLabwareOnDeck = Object.values(labware).find(labware => {
+    const moduleUnderLabware = Object.values(modules).find(
+      mod => mod.id === labware.slot
+    )
+    const matchingSlot =
+      moduleUnderLabware != null ? moduleUnderLabware.slot : labware.slot
+    return (
+      matchingSlot === selectedSlot.slot &&
+      labware.labwareDefURI === selectedLabwareDefUri
+    )
+  })
+  const matchingSelectedNestedLabwareOnDeck = Object.values(labware).find(
+    lw => {
+      const adapterUnderLabware = Object.values(labware).find(
+        lab => lab.id === lw.slot
+      )
+      if (adapterUnderLabware == null) {
+        return
+      }
+      const moduleUnderLabware = Object.values(modules).find(
+        mod => mod.id === adapterUnderLabware.slot
+      )
+      const matchingSlot =
+        moduleUnderLabware != null
+          ? moduleUnderLabware.slot
+          : adapterUnderLabware.slot
+      return (
+        lw.labwareDefURI === selectedNestedLabwareDefUri &&
+        matchingSlot === selectedSlot.slot
+      )
+    }
+  )
   const hoveredLabwareDef =
     hoveredLabware != null
       ? defs[hoveredLabware] ?? customLabwareDefs[hoveredLabware] ?? null
       : null
+
   const orientation =
     slotPosition != null
       ? inferModuleOrientationFromXCoordinate(slotPosition[0])
@@ -64,7 +100,8 @@ export const SelectedHoveredItems = (
     selectedLabwareDefUri != null &&
     (hoveredLabware == null || hoveredLabware !== selectedLabwareDefUri)
   ) {
-    const def = defs[selectedLabwareDefUri]
+    const def =
+      defs[selectedLabwareDefUri] ?? customLabwareDefs[selectedLabwareDefUri]
     const selectedLabwareLabel = {
       text: def.metadata.displayName,
       isSelected: true,
@@ -72,10 +109,9 @@ export const SelectedHoveredItems = (
     }
     labwareInfos.push(selectedLabwareLabel)
   }
-  if (selectedNestedLabwareDefUri != null && hoveredLabware == null) {
-    const def = defs[selectedNestedLabwareDefUri]
+  if (matchingSelectedNestedLabwareOnDeck != null && hoveredLabware == null) {
     const selectedNestedLabwareLabel = {
-      text: def.metadata.displayName,
+      text: matchingSelectedNestedLabwareOnDeck.def.metadata.displayName,
       isSelected: true,
       isLast: hoveredLabware == null,
     }
@@ -122,21 +158,23 @@ export const SelectedHoveredItems = (
             orientation={orientation}
           >
             <>
-              {selectedLabwareDefUri != null &&
+              {matchingSelectedLabwareOnDeck != null &&
               selectedModuleModel != null &&
               hoveredLabware == null ? (
-                <g transform={`translate(0, 0)`}>
-                  <LabwareRender definition={defs[selectedLabwareDefUri]} />
-                </g>
+                <LabwareOnDeck
+                  labwareOnDeck={matchingSelectedLabwareOnDeck}
+                  x={0}
+                  y={0}
+                />
               ) : null}
-              {selectedNestedLabwareDefUri != null &&
+              {matchingSelectedNestedLabwareOnDeck != null &&
               selectedModuleModel != null &&
               hoveredLabware == null ? (
-                <g transform={`translate(0, 0)`}>
-                  <LabwareRender
-                    definition={defs[selectedNestedLabwareDefUri]}
-                  />
-                </g>
+                <LabwareOnDeck
+                  labwareOnDeck={matchingSelectedNestedLabwareOnDeck}
+                  x={0}
+                  y={0}
+                />
               ) : null}
               {hoveredLabwareDef != null && selectedModuleModel != null ? (
                 <g transform={`translate(0, 0)`}>
@@ -157,41 +195,47 @@ export const SelectedHoveredItems = (
           ) : null}
         </>
       ) : null}
-      {selectedLabwareDefUri != null &&
+      {matchingSelectedLabwareOnDeck != null &&
       slotPosition != null &&
       selectedModuleModel == null &&
       hoveredLabware == null ? (
         <>
-          <g transform={`translate(${slotPosition[0]}, ${slotPosition[1]})`}>
-            <LabwareRender definition={defs[selectedLabwareDefUri]} />
-          </g>
+          <LabwareOnDeck
+            x={slotPosition[0]}
+            y={slotPosition[1]}
+            labwareOnDeck={matchingSelectedLabwareOnDeck}
+          />
           {selectedNestedLabwareDefUri == null ? (
             <LabwareLabel
               isLast={true}
               isSelected={true}
-              labwareDef={defs[selectedLabwareDefUri]}
+              labwareDef={matchingSelectedLabwareOnDeck.def}
               position={slotPosition}
             />
           ) : null}
         </>
       ) : null}
-      {selectedNestedLabwareDefUri != null &&
+      {matchingSelectedNestedLabwareOnDeck != null &&
       slotPosition != null &&
       selectedModuleModel == null &&
       hoveredLabware == null ? (
         <>
-          <g transform={`translate(${slotPosition[0]}, ${slotPosition[1]})`}>
-            <LabwareRender definition={defs[selectedNestedLabwareDefUri]} />
-          </g>
-          {selectedLabwareDefUri != null ? (
+          <LabwareOnDeck
+            x={slotPosition[0]}
+            y={slotPosition[1]}
+            labwareOnDeck={matchingSelectedNestedLabwareOnDeck}
+          />
+          {matchingSelectedLabwareOnDeck != null ? (
             <LabwareLabel
               isLast={false}
               isSelected={true}
-              labwareDef={defs[selectedLabwareDefUri]}
+              labwareDef={matchingSelectedLabwareOnDeck.def}
               position={slotPosition}
               nestedLabwareInfo={[
                 {
-                  text: defs[selectedNestedLabwareDefUri].metadata.displayName,
+                  text:
+                    matchingSelectedNestedLabwareOnDeck.def.metadata
+                      .displayName,
                   isSelected: true,
                   isLast: true,
                 },

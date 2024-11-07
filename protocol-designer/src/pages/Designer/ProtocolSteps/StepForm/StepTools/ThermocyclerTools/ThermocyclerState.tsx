@@ -10,8 +10,10 @@ import {
   ToggleExpandStepFormField,
   ToggleStepFormField,
 } from '../../../../../../molecules'
+import { getFormErrorsMappedToField, getFormLevelError } from '../../utils'
 
 import type { FormData } from '../../../../../../form-types'
+import type { StepFormErrors } from '../../../../../../steplist'
 import type { FieldPropsByName } from '../../types'
 
 interface ThermocyclerStateProps {
@@ -19,11 +21,22 @@ interface ThermocyclerStateProps {
   formData: FormData
   propsForFields: FieldPropsByName
   isHold?: boolean
+  visibleFormErrors: StepFormErrors
+  showFormErrors?: boolean
+  focusedField?: string | null
 }
 
 export function ThermocyclerState(props: ThermocyclerStateProps): JSX.Element {
-  const { title, propsForFields, formData, isHold = false } = props
+  const {
+    title,
+    propsForFields,
+    formData,
+    isHold = false,
+    visibleFormErrors,
+  } = props
   const { i18n, t } = useTranslation(['application', 'form'])
+
+  const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
   const {
     blockFieldActive,
@@ -68,6 +81,7 @@ export function ThermocyclerState(props: ThermocyclerStateProps): JSX.Element {
         isSelected={formData[blockFieldActive] === true}
         onLabel={t('form:step_edit_form.field.heaterShaker.shaker.toggleOn')}
         offLabel={t('form:step_edit_form.field.heaterShaker.shaker.toggleOff')}
+        formLevelError={getFormLevelError(blockTempField, mappedErrorsToField)}
       />
       <ToggleExpandStepFormField
         {...propsForFields[lidTempField]}
@@ -81,6 +95,7 @@ export function ThermocyclerState(props: ThermocyclerStateProps): JSX.Element {
         offLabel={t(
           'form:step_edit_form.field.thermocyclerState.lid.toggleOff'
         )}
+        formLevelError={getFormLevelError(lidTempField, mappedErrorsToField)}
       />
       <ToggleStepFormField
         isDisabled={propsForFields[lidPositionField].disabled}

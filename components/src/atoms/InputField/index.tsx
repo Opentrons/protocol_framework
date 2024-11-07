@@ -2,7 +2,12 @@ import * as React from 'react'
 import styled, { css } from 'styled-components'
 
 import { Flex } from '../../primitives'
-import { ALIGN_CENTER, DIRECTION_COLUMN, TEXT_ALIGN_RIGHT } from '../../styles'
+import {
+  ALIGN_CENTER,
+  DIRECTION_COLUMN,
+  DIRECTION_ROW,
+  TEXT_ALIGN_RIGHT,
+} from '../../styles'
 import { BORDERS, COLORS } from '../../helix-design-system'
 import { Icon } from '../../icons'
 import { RESPONSIVENESS, SPACING, TYPOGRAPHY } from '../../ui-style-constants'
@@ -68,10 +73,18 @@ export interface InputFieldProps {
   size?: 'medium' | 'small'
   /** react useRef to control input field instead of react event */
   ref?: React.MutableRefObject<HTMLInputElement | null>
+  /** optional IconName to display icon aligned to left of input field */
   leftIcon?: IconName
+  /** if true, show delete icon aligned to right of input field */
   showDeleteIcon?: boolean
+  /** callback passed to optional delete icon onClick */
   onDelete?: () => void
+  /** if true, style the background of input field to error state */
   hasBackgroundError?: boolean
+  /** optional prop to override input field border radius */
+  borderRadius?: string
+  /** optional prop to override input field padding */
+  padding?: string
 }
 
 export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
@@ -85,6 +98,9 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
       tabIndex = 0,
       showDeleteIcon = false,
       hasBackgroundError = false,
+      onDelete,
+      borderRadius,
+      padding,
       ...inputProps
     } = props
     const hasError = props.error != null
@@ -106,8 +122,10 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
     const INPUT_FIELD = css`
       display: flex;
       background-color: ${hasBackgroundError ? COLORS.red30 : COLORS.white};
-      border-radius: ${BORDERS.borderRadius4};
-      padding: ${SPACING.spacing8};
+      border-radius: ${borderRadius != null
+        ? borderRadius
+        : BORDERS.borderRadius4};
+      padding: ${padding != null ? padding : SPACING.spacing8};
       border: ${hasBackgroundError
         ? 'none'
         : `1px ${BORDERS.styleSolid}
@@ -248,7 +266,11 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
       >
         <Flex flexDirection={DIRECTION_COLUMN} width="100%">
           {title != null ? (
-            <Flex gridGap={SPACING.spacing8}>
+            <Flex
+              flexDirection={DIRECTION_ROW}
+              gridGap={SPACING.spacing8}
+              alignItems={ALIGN_CENTER}
+            >
               <StyledText
                 desktopStyle="bodyDefaultRegular"
                 htmlFor={props.id}
@@ -270,7 +292,12 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
               ) : null}
             </Flex>
           ) : null}
-          <Flex width="100%" flexDirection={DIRECTION_COLUMN} css={OUTER_CSS}>
+          <Flex
+            width="100%"
+            flexDirection={DIRECTION_COLUMN}
+            css={OUTER_CSS}
+            onClick={!props.disabled ? props.onClick : null}
+          >
             <Flex
               tabIndex={tabIndex}
               css={INPUT_FIELD}
@@ -307,7 +334,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
               {showDeleteIcon ? (
                 <Flex
                   alignSelf={TEXT_ALIGN_RIGHT}
-                  onClick={props.onDelete}
+                  onClick={onDelete}
                   cursor="pointer"
                 >
                   <Icon name="close" size="1.75rem" />
@@ -325,7 +352,10 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
             </StyledText>
           ) : null}
           {hasError ? (
-            <StyledText desktopStyle="captionRegular" css={ERROR_TEXT_STYLE}>
+            <StyledText
+              desktopStyle="bodyDefaultRegular"
+              css={ERROR_TEXT_STYLE}
+            >
               {props.error}
             </StyledText>
           ) : null}

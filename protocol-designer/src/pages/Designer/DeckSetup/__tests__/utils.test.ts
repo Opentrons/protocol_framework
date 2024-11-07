@@ -44,7 +44,7 @@ describe('getModuleModelsBySlot', () => {
     ])
   })
   it('renders all flex modules for B1', () => {
-    expect(getModuleModelsBySlot(false, FLEX_ROBOT_TYPE, 'B1')).toEqual(
+    expect(getModuleModelsBySlot(true, FLEX_ROBOT_TYPE, 'B1')).toEqual(
       FLEX_MODULE_MODELS
     )
   })
@@ -52,7 +52,7 @@ describe('getModuleModelsBySlot', () => {
     const noTC = FLEX_MODULE_MODELS.filter(
       model => model !== THERMOCYCLER_MODULE_V2
     )
-    expect(getModuleModelsBySlot(false, FLEX_ROBOT_TYPE, 'C1')).toEqual(noTC)
+    expect(getModuleModelsBySlot(true, FLEX_ROBOT_TYPE, 'C1')).toEqual(noTC)
   })
 })
 

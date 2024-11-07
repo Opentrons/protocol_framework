@@ -1,15 +1,15 @@
-import type * as React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { fireEvent, screen } from '@testing-library/react'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { i18n } from '../../../assets/localization'
 import { AutoAddPauseUntilTempStepModal } from '../AutoAddPauseUntilTempStepModal'
-import { TEMPERATURE_MODULE_TYPE } from '@opentrons/shared-data'
+
+import type { ComponentProps } from 'react'
 
 vi.mock('../../../feature-flags/selectors')
 
 const render = (
-  props: React.ComponentProps<typeof AutoAddPauseUntilTempStepModal>
+  props: ComponentProps<typeof AutoAddPauseUntilTempStepModal>
 ) => {
   return renderWithProviders(<AutoAddPauseUntilTempStepModal {...props} />, {
     i18nInstance: i18n,
@@ -17,28 +17,29 @@ const render = (
 }
 
 describe('AutoAddPauseUntilTempStepModal ', () => {
-  let props: React.ComponentProps<typeof AutoAddPauseUntilTempStepModal>
+  let props: ComponentProps<typeof AutoAddPauseUntilTempStepModal>
   beforeEach(() => {
     props = {
       displayTemperature: '10',
       handleCancelClick: vi.fn(),
       handleContinueClick: vi.fn(),
-      moduleType: TEMPERATURE_MODULE_TYPE,
+      displayModule: 'mock module',
     }
   })
   it('should render the correct text with 10 C temp and buttons are clickable', () => {
     render(props)
-    screen.getByText('Pause protocol until temperature module is at 10°C?')
+    screen.getByText('Pause protocol until mock module is at 10˚C')
     screen.getByText(
-      'Pause protocol now to wait until module reaches 10°C before continuing on to the next step.'
+      'Build a pause step to wait until mock module reaches 10˚C before continuing to the next step.'
     )
     screen.getByText(
-      'Build a pause later if you want your protocol to proceed to the next steps while the temperature module ramps up to 10°C.'
+      'Build a pause step later if you want your protocol to proceed to the next step while the mock module goes to 10˚C'
     )
+
     const cancelBtn = screen.getByRole('button', {
-      name: 'I will build a pause later',
+      name: 'Build pause later',
     })
-    const contBtn = screen.getByRole('button', { name: 'Pause protocol now' })
+    const contBtn = screen.getByRole('button', { name: 'Pause protocol' })
     fireEvent.click(cancelBtn)
     expect(props.handleCancelClick).toHaveBeenCalled()
     fireEvent.click(contBtn)
