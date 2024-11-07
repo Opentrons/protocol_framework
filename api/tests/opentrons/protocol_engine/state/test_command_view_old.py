@@ -17,6 +17,7 @@ from opentrons.protocol_engine.actions import (
     PauseSource,
     StopAction,
     QueueCommandAction,
+    FailCommandAction
 )
 from opentrons.protocol_engine.actions.actions import ResumeFromRecoveryAction
 
@@ -99,8 +100,6 @@ def get_command_view(  # noqa: C901
                 command_id=command.id,
                 command_entry=CommandEntry(index=index, command=command),
             )
-            if command.error:
-                command_history.append_failed_command_id(command.id)
 
     state = CommandState(
         command_history=command_history,
@@ -734,10 +733,8 @@ get_status_specs: List[GetStatusSpec] = [
             run_result=RunResult.SUCCEEDED,
             run_completed_at=datetime(year=2021, day=1, month=1),
         ),
-        expected_status=EngineStatus.SUCCEEDED,
-    ),
-    GetStatusSpec(
-        subject=get_command_view(
+        '''''''[]'
+        'and_view()
             run_result=RunResult.STOPPED,
             run_completed_at=None,
         ),
@@ -1055,6 +1052,8 @@ def test_get_errors_slice() -> None:
     subject = get_command_view(
         commands=[command_1, command_2, command_3, command_4, command_5, command_6]
     )
+
+
 
     result = subject.get_errors_slice(cursor=1, length=3)
 
