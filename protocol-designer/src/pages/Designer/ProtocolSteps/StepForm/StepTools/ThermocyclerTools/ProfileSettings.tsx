@@ -18,12 +18,7 @@ interface ProfileSettingsProps {
   focusedField?: string | null
 }
 export function ProfileSettings(props: ProfileSettingsProps): JSX.Element {
-  const {
-    propsForFields,
-    showFormErrors,
-    visibleFormErrors,
-    focusedField,
-  } = props
+  const { propsForFields, visibleFormErrors } = props
 
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
@@ -43,12 +38,7 @@ export function ProfileSettings(props: ProfileSettingsProps): JSX.Element {
         units={t('units.microliter')}
         padding="0"
         showTooltip={false}
-        formLevelError={getFormLevelError(
-          showFormErrors,
-          'profileVolume',
-          mappedErrorsToField,
-          focusedField
-        )}
+        formLevelError={getFormLevelError('profileVolume', mappedErrorsToField)}
       />
       <InputStepFormField
         {...propsForFields.profileTargetLidTemp}
@@ -60,10 +50,8 @@ export function ProfileSettings(props: ProfileSettingsProps): JSX.Element {
         padding="0"
         showTooltip={false}
         formLevelError={getFormLevelError(
-          showFormErrors,
           'profileTargetLidTemp',
-          mappedErrorsToField,
-          focusedField
+          mappedErrorsToField
         )}
       />
     </Flex>

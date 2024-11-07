@@ -72,6 +72,8 @@ describe('TemperatureTools', () => {
         },
       },
       showFormErrors: false,
+      tab: 'aspirate',
+      setTab: vi.fn(),
     }
 
     vi.mocked(getTemperatureModuleIds).mockReturnValue(['mockId'])
@@ -85,9 +87,7 @@ describe('TemperatureTools', () => {
 
   it('renders a temperature module form with 1 module', () => {
     render(props)
-    screen.getByText('Module')
+    screen.getByText('Module state')
     screen.getByText('mock module')
-    screen.getByText('Deactivate module')
-    screen.getByText('Change to temperature')
   })
 })

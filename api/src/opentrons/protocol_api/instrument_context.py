@@ -60,6 +60,8 @@ _DISPOSAL_LOCATION_OFFSET_ADDED_IN = APIVersion(2, 18)
 """The version after which offsets for deck configured trash containers and changes to alternating tip drop behavior were introduced."""
 _PARTIAL_NOZZLE_CONFIGURATION_SINGLE_ROW_PARTIAL_COLUMN_ADDED_IN = APIVersion(2, 20)
 """The version after which partial nozzle configurations of single, row, and partial column layouts became available."""
+_AIR_GAP_TRACKING_ADDED_IN = APIVersion(2, 22)
+"""The version after which air gaps should be implemented with a separate call instead of an aspirate for better liquid volume tracking."""
 
 
 class InstrumentContext(publisher.CommandPublisher):
@@ -753,7 +755,12 @@ class InstrumentContext(publisher.CommandPublisher):
             ``pipette.air_gap(height=2)``. If you call ``air_gap`` with a single,
             unnamed argument, it will always be interpreted as a volume.
 
+        .. note::
 
+           Before API version 2.22, this function was implemented as an aspirate, and
+           dispensing into a well would add the air gap volume to the liquid tracked in
+           the well. At or above API version 2.22, air gap volume is not counted as liquid
+           when dispensing into a well.
         """
         if not self._core.has_tip():
             raise UnexpectedTipRemovalError("air_gap", self.name, self.mount)
@@ -765,7 +772,12 @@ class InstrumentContext(publisher.CommandPublisher):
             raise RuntimeError("No previous Well cached to perform air gap")
         target = loc.labware.as_well().top(height)
         self.move_to(target, publish=False)
-        self.aspirate(volume)
+        if self.api_version >= _AIR_GAP_TRACKING_ADDED_IN:
+            c_vol = self._core.get_available_volume() if volume is None else volume
+            flow_rate = self._core.get_aspirate_flow_rate()
+            self._core.air_gap_in_place(c_vol, flow_rate)
+        else:
+            self.aspirate(volume)
         return self
 
     @publisher.publish(command=cmds.return_tip)

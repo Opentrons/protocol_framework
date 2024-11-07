@@ -9,6 +9,7 @@ from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     TouchTipProperties as SharedDataTouchTipProperties,
     MixProperties as SharedDataMixProperties,
     BlowoutProperties as SharedDataBlowoutProperties,
+    ByTipTypeSetting as SharedByTipTypeSetting,
     Submerge as SharedDataSubmerge,
     RetractAspirate as SharedDataRetractAspirate,
     RetractDispense as SharedDataRetractDispense,
@@ -361,6 +362,30 @@ class MultiDispenseProperties(BaseLiquidHandlingProperties):
         return self._disposal_by_volume
 
 
+# TODO (spp, 2024-10-17): create PAPI-equivalent types for all the properties
+#  and have validation on value updates with user-facing error messages
+@dataclass
+class TransferProperties:
+    _aspirate: AspirateProperties
+    _dispense: SingleDispenseProperties
+    _multi_dispense: Optional[MultiDispenseProperties]
+
+    @property
+    def aspirate(self) -> AspirateProperties:
+        """Aspirate properties."""
+        return self._aspirate
+
+    @property
+    def dispense(self) -> SingleDispenseProperties:
+        """Single dispense properties."""
+        return self._dispense
+
+    @property
+    def multi_dispense(self) -> Optional[MultiDispenseProperties]:
+        """Multi dispense properties."""
+        return self._multi_dispense
+
+
 def _build_delay_properties(
     delay_properties: SharedDataDelayProperties,
 ) -> DelayProperties:
@@ -500,4 +525,16 @@ def build_multi_dispense_properties(
         _conditioning_by_volume=multi_dispense_properties.conditioningByVolume,
         _disposal_by_volume=multi_dispense_properties.disposalByVolume,
         _delay=_build_delay_properties(multi_dispense_properties.delay),
+    )
+
+
+def build_transfer_properties(
+    by_tip_type_setting: SharedByTipTypeSetting,
+) -> TransferProperties:
+    return TransferProperties(
+        _aspirate=build_aspirate_properties(by_tip_type_setting.aspirate),
+        _dispense=build_single_dispense_properties(by_tip_type_setting.singleDispense),
+        _multi_dispense=build_multi_dispense_properties(
+            by_tip_type_setting.multiDispense
+        ),
     )

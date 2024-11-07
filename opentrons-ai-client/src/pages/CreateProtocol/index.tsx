@@ -11,14 +11,23 @@ import { useForm, FormProvider } from 'react-hook-form'
 import { createProtocolAtom, headerWithMeterAtom } from '../../resources/atoms'
 import { useAtom } from 'jotai'
 import { ProtocolSectionsContainer } from '../../organisms/ProtocolSectionsContainer'
-import { OTHER } from '../../organisms/ApplicationSection'
+import { generatePromptPreviewData } from '../../resources/utils/createProtocolUtils'
+import type { DisplayModules } from '../../organisms/ModulesSection'
 
-interface CreateProtocolFormData {
+export interface CreateProtocolFormData {
   application: {
     scientificApplication: string
     otherApplication?: string
     description: string
   }
+  instruments: {
+    robot: string
+    pipettes: string
+    leftPipette: string
+    rightPipette: string
+    flexGripper: string
+  }
+  modules: DisplayModules[]
 }
 
 const TOTAL_STEPS = 5
@@ -26,7 +35,7 @@ const TOTAL_STEPS = 5
 export function CreateProtocol(): JSX.Element | null {
   const { t } = useTranslation('create_protocol')
   const [, setHeaderWithMeterAtom] = useAtom(headerWithMeterAtom)
-  const [{ currentStep }] = useAtom(createProtocolAtom)
+  const [{ currentStep }, setCreateProtocolAtom] = useAtom(createProtocolAtom)
 
   const methods = useForm<CreateProtocolFormData>({
     defaultValues: {
@@ -35,6 +44,7 @@ export function CreateProtocol(): JSX.Element | null {
         otherApplication: '',
         description: '',
       },
+      instruments: {},
     },
   })
 
@@ -49,35 +59,20 @@ export function CreateProtocol(): JSX.Element | null {
     })
   }, [currentStep])
 
-  function generatePromptPreviewApplicationItems(): string[] {
-    const {
-      application: { scientificApplication, otherApplication, description },
-    } = methods.watch()
+  useEffect(() => {
+    return () => {
+      setHeaderWithMeterAtom({
+        displayHeaderWithMeter: false,
+        progress: 0,
+      })
 
-    const scientificOrOtherApplication =
-      scientificApplication === OTHER
-        ? otherApplication
-        : scientificApplication !== ''
-        ? t(scientificApplication)
-        : ''
-
-    return [
-      scientificOrOtherApplication !== '' && scientificOrOtherApplication,
-      description !== '' && description,
-    ].filter(Boolean)
-  }
-
-  function generatePromptPreviewData(): Array<{
-    title: string
-    items: string[]
-  }> {
-    return [
-      {
-        title: t('application_title'),
-        items: generatePromptPreviewApplicationItems(),
-      },
-    ]
-  }
+      methods.reset()
+      setCreateProtocolAtom({
+        currentStep: 0,
+        focusStep: 0,
+      })
+    }
+  }, [])
 
   return (
     <FormProvider {...methods}>
@@ -87,13 +82,14 @@ export function CreateProtocol(): JSX.Element | null {
         gap={SPACING.spacing32}
         margin={`${SPACING.spacing16} ${SPACING.spacing16}`}
         height="100%"
+        width="100%"
       >
         <ProtocolSectionsContainer />
         <PromptPreview
           handleSubmit={function (): void {
             throw new Error('Function not implemented.')
           }}
-          promptPreviewData={generatePromptPreviewData()}
+          promptPreviewData={generatePromptPreviewData(methods.watch, t)}
         />
       </Flex>
     </FormProvider>

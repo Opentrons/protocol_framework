@@ -22,7 +22,7 @@ export function LabwareField(props: FieldProps): JSX.Element {
       {...props}
       name={name}
       options={allOptions}
-      title={t(`select_${name}`)}
+      title={t(`${name}`)}
     />
   )
 }

@@ -25,7 +25,7 @@ from .command import (
 from ..errors.error_occurrence import ErrorOccurrence
 from ..errors.exceptions import PipetteNotReadyToAspirateError
 from ..state.update_types import StateUpdate, CLEAR
-from ..types import CurrentWell
+from ..types import CurrentWell, AspiratedFluid, FluidKind
 
 if TYPE_CHECKING:
     from ..execution import PipettingHandler, GantryMover
@@ -115,6 +115,7 @@ class AspirateInPlaceImplementation(
                     well_name=current_location.well_name,
                     volume_added=CLEAR,
                 )
+            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
             return DefinedErrorData(
                 public=OverpressureError(
                     id=self._model_utils.generate_id(),
@@ -139,6 +140,10 @@ class AspirateInPlaceImplementation(
                 state_update=state_update,
             )
         else:
+            state_update.set_fluid_aspirated(
+                pipette_id=params.pipetteId,
+                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=volume),
+            )
             if (
                 isinstance(current_location, CurrentWell)
                 and current_location.pipette_id == params.pipetteId
@@ -148,6 +153,7 @@ class AspirateInPlaceImplementation(
                     well_name=current_location.well_name,
                     volume_added=-volume,
                 )
+
             return SuccessData(
                 public=AspirateInPlaceResult(volume=volume),
                 state_update=state_update,

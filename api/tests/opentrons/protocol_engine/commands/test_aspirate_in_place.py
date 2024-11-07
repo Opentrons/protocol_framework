@@ -25,6 +25,8 @@ from opentrons.protocol_engine.types import (
     CurrentWell,
     CurrentPipetteLocation,
     CurrentAddressableArea,
+    AspiratedFluid,
+    FluidKind,
 )
 from opentrons.protocol_engine.state import update_types
 
@@ -128,12 +130,22 @@ async def test_aspirate_in_place_implementation(
                     labware_id=stateupdateLabware,
                     well_name=stateupdateWell,
                     volume_added=-123,
-                )
+                ),
+                pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                    pipette_id="pipette-id-abc",
+                    fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=123),
+                ),
             ),
         )
     else:
         assert result == SuccessData(
             public=AspirateInPlaceResult(volume=123),
+            state_update=update_types.StateUpdate(
+                pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                    pipette_id="pipette-id-abc",
+                    fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=123),
+                )
+            ),
         )
 
 
@@ -269,7 +281,10 @@ async def test_overpressure_error(
                     labware_id=stateupdateLabware,
                     well_name=stateupdateWell,
                     volume_added=update_types.CLEAR,
-                )
+                ),
+                pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                    pipette_id="pipette-id"
+                ),
             ),
         )
     else:
@@ -279,5 +294,10 @@ async def test_overpressure_error(
                 createdAt=error_timestamp,
                 wrappedErrors=[matchers.Anything()],
                 errorInfo={"retryLocation": (position.x, position.y, position.z)},
+            ),
+            state_update=update_types.StateUpdate(
+                pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                    pipette_id="pipette-id"
+                )
             ),
         )

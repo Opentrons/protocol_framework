@@ -4,7 +4,11 @@ import { renderWithProviders } from '../../../__testing-utils__'
 import { i18n } from '../../../i18n'
 import { CreateProtocol } from '..'
 import { Provider } from 'jotai'
-import { fillApplicationSectionAndClickConfirm } from '../../../resources/utils/createProtocolTestUtils'
+import {
+  fillApplicationSectionAndClickConfirm,
+  fillInstrumentsSectionAndClickConfirm,
+  fillModulesSectionAndClickConfirm,
+} from '../../../resources/utils/createProtocolTestUtils'
 
 const render = (): ReturnType<typeof renderWithProviders> => {
   return renderWithProviders(
@@ -38,7 +42,7 @@ describe('CreateProtocol', () => {
 
     const previewItems = screen.getAllByTestId('Tag_default')
 
-    expect(previewItems).toHaveLength(2)
+    expect(previewItems).toHaveLength(4)
     expect(previewItems[0]).toHaveTextContent('Basic aliquoting')
     expect(previewItems[1]).toHaveTextContent('Test description')
   })
@@ -80,5 +84,55 @@ describe('CreateProtocol', () => {
     await fillApplicationSectionAndClickConfirm()
 
     expect(screen.getByTestId('accordion-ot-check')).toBeInTheDocument()
+  })
+
+  it('should display the Prompt preview correctly for Instruments section', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+
+    const previewItems = screen.getAllByTestId('Tag_default')
+
+    expect(previewItems).toHaveLength(6)
+    expect(previewItems[0]).toHaveTextContent('Basic aliquoting')
+    expect(previewItems[1]).toHaveTextContent('Test description')
+    expect(previewItems[2]).toHaveTextContent('Opentrons Flex')
+    expect(previewItems[3]).toHaveTextContent('Flex 1-Channel 50 μL')
+    expect(previewItems[4]).toHaveTextContent('Flex 8-Channel 50 μL')
+  })
+
+  it('should open the Modules section when the Instruments section is completed', async () => {
+    render()
+
+    expect(screen.getByRole('button', { name: 'Application' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    )
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Modules' })).toHaveAttribute(
+        'aria-expanded',
+        'true'
+      )
+    })
+  })
+
+  it('should display the Prompt preview correctly for Modules section', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+
+    const previewItems = screen.getAllByTestId('Tag_default')
+
+    expect(previewItems).toHaveLength(7)
+    expect(previewItems[6]).toHaveTextContent(
+      'Heater-Shaker Module GEN1 with Opentrons 96 Deep Well Heater-Shaker Adapter'
+    )
   })
 })

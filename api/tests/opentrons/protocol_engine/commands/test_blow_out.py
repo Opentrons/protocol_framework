@@ -84,7 +84,10 @@ async def test_blow_out_implementation(
                     well_name="C6",
                 ),
                 new_deck_point=DeckPoint(x=1, y=2, z=3),
-            )
+            ),
+            pipette_aspirated_fluid=update_types.PipetteEmptyFluidUpdate(
+                pipette_id="pipette-id"
+            ),
         ),
     )
 
@@ -144,5 +147,18 @@ async def test_overpressure_error(
             createdAt=error_timestamp,
             wrappedErrors=[matchers.Anything()],
             errorInfo={"retryLocation": (1, 2, 3)},
+        ),
+        state_update=update_types.StateUpdate(
+            pipette_location=update_types.PipetteLocationUpdate(
+                pipette_id="pipette-id",
+                new_location=update_types.Well(
+                    labware_id="labware-id",
+                    well_name="C6",
+                ),
+                new_deck_point=DeckPoint(x=1, y=2, z=3),
+            ),
+            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                pipette_id="pipette-id"
+            ),
         ),
     )
