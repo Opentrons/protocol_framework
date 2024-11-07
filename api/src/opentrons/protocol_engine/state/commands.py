@@ -362,7 +362,6 @@ class CommandStore(HasState[CommandState], HandlesActions):
             notes=action.notes,
         )
         self._state.failed_command = self._state.command_history.get(action.command_id)
-        self._state.command_history.append_failed_command_id(action.command_id)
 
         if (
             prev_entry.command.intent in (CommandIntent.PROTOCOL, None)

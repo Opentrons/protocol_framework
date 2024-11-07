@@ -253,6 +253,7 @@ class CommandHistory:
         self._remove_queue_id(command.id)
         self._remove_setup_queue_id(command.id)
         self._set_most_recently_completed_command_id(command.id)
+        self._all_failed_command_ids.append(command.id)
 
     def _add(self, command_id: str, command_entry: CommandEntry) -> None:
         """Create or update a command entry."""
@@ -261,10 +262,6 @@ class CommandHistory:
             if command_entry.command.intent != CommandIntent.FIXIT:
                 self._all_command_ids_but_fixit_command_ids.append(command_id)
         self._commands_by_id[command_id] = command_entry
-
-    def append_failed_command_id(self, command_id: str) -> None:
-        """Create or update a failed command id."""
-        self._all_failed_command_ids.append(command_id)
 
     def _add_to_queue(self, command_id: str) -> None:
         """Add new ID to the queued."""
