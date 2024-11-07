@@ -28,7 +28,7 @@ import type { DropdownOption } from '@opentrons/components'
 import type { Dispatch } from '/app/redux/types'
 
 type ArrayElement<
-  ArrayType extends ReadonlyArray<unknown>
+  ArrayType extends readonly unknown[]
 > = ArrayType extends ReadonlyArray<infer ElementType> ? ElementType : never
 
 export function SystemLanguagePreferenceModal(): JSX.Element | null {
