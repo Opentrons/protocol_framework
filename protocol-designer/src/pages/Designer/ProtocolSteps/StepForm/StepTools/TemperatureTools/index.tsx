@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import {
@@ -21,12 +20,6 @@ export function TemperatureTools(props: StepFormProps): JSX.Element {
   const { propsForFields, formData, visibleFormErrors } = props
   const { t } = useTranslation(['application', 'form', 'protocol_steps'])
   const moduleLabwareOptions = useSelector(getTemperatureLabwareOptions)
-
-  React.useEffect(() => {
-    if (moduleLabwareOptions.length === 1) {
-      propsForFields.moduleId.updateValue(moduleLabwareOptions[0].value)
-    }
-  }, [])
 
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
