@@ -44,13 +44,11 @@ class LiquidHandlingPropertyByVolume:
 
     def get_for_volume(self, volume: float) -> float:
         validated_volume = validation.ensure_positive_float(volume)
-        return float(
-            interp(
-                float(validated_volume),
-                list(self._properties_by_volume.keys()),
-                list(self._properties_by_volume.values()),
-            )
-        )
+        # numpy interp does not automatically sort the points used for interpolation, so
+        # here we are sorting them by the keys (volume) and then using zip to get two
+        # tuples in the correct order
+        sorted_volumes, sorted_values = zip(*sorted(self._properties_by_volume.items()))
+        return float(interp(validated_volume, sorted_volumes, sorted_values))
 
     def set_for_volume(self, volume: float, value: float) -> None:
         validated_volume = validation.ensure_positive_float(volume)
@@ -60,7 +58,7 @@ class LiquidHandlingPropertyByVolume:
         try:
             del self._properties_by_volume[volume]
         except KeyError:
-            raise ValueError(f"No value set for volume {volume} uL")
+            raise KeyError(f"No value set for volume {volume} uL")
 
 
 @dataclass

@@ -1,5 +1,5 @@
 """Tests for LiquidClass properties and related functions."""
-
+import pytest
 from opentrons_shared_data import load_shared_data
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     LiquidClassSchemaV1,
@@ -10,6 +10,7 @@ from opentrons.protocol_api._liquid_properties import (
     build_aspirate_properties,
     build_single_dispense_properties,
     build_multi_dispense_properties,
+    LiquidHandlingPropertyByVolume,
 )
 
 
@@ -176,3 +177,27 @@ def test_build_multi_dispense_settings_none(
     """It should return None if there are no multi dispense properties in the model."""
     transfer_settings = minimal_liquid_class_def2.byPipette[0].byTipType[0]
     assert build_multi_dispense_properties(transfer_settings.multiDispense) is None
+
+
+def test_liquid_handling_property_by_volume() -> None:
+    """It should create a class that can interpolate values and add and delete new points."""
+    subject = LiquidHandlingPropertyByVolume({"default": 42, "5": 50, "10.0": 250})
+    assert subject.properties_by_volume == {"default": 42, 5.0: 50, 10.0: 250}
+    assert subject.default == 42.0
+    assert subject.get_for_volume(7) == 130.0
+
+    subject.set_for_volume(volume=7, value=175.5)
+    assert subject.properties_by_volume == {
+        "default": 42,
+        5.0: 50,
+        10.0: 250,
+        7.0: 175.5,
+    }
+    assert subject.get_for_volume(7) == 175.5
+
+    subject.delete_for_volume(7)
+    assert subject.properties_by_volume == {"default": 42, 5.0: 50, 10.0: 250}
+    assert subject.get_for_volume(7) == 130.0
+
+    with pytest.raises(KeyError, match="No value set for volume"):
+        subject.delete_for_volume(7)
