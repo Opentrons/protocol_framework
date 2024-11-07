@@ -93,14 +93,14 @@ build-base-image:
 	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) -f citools/Dockerfile.base -t $(BASE_IMAGE_NAME) citools/.
 
 .PHONY: build-opentrons-analysis
-build-opentrons-analysis: build-base-image
+build-opentrons-analysis:
 	@echo "Building docker image for $(ANALYSIS_REF)"
 	@echo "The image will be named opentrons-analysis:$(ANALYSIS_REF)"
 	@echo "If you want to build a different version, run 'make build-opentrons-analysis ANALYSIS_REF=<version>'"
 	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) --build-arg ANALYSIS_REF=$(ANALYSIS_REF) --build-arg CACHEBUST=$(CACHEBUST) -t opentrons-analysis:$(ANALYSIS_REF) -f citools/Dockerfile.analyze citools/.
 
 .PHONY: local-build
-local-build: build-base-image
+local-build:
 	@echo "Building docker image for your local opentrons code"
 	@echo "The image will be named opentrons-analysis:local"
 	@echo "For a fresh build, run 'make local-build NO_CACHE=1'"
@@ -112,7 +112,7 @@ generate-protocols:
 	$(PYTHON) -m pipenv run python -m automation.data.protocol_registry
 
 .PHONY: build-rs
-build-rs: build-base-image
+build-rs:
 	@echo "Building docker image for opentrons-robot-server:$(OPENTRONS_VERSION)"
 	@echo "Cache is always busted to ensure latest version of the code is used"
 	@echo "If you want to build a different version, run 'make build-rs OPENTRONS_VERSION=chore_release-8.0.0'"

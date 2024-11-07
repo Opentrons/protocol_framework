@@ -18,7 +18,10 @@
 
 > This ALWAYS gets the remote code pushed to Opentrons/opentrons for the specified ANALYSIS_REF
 
-`make build-opentrons-analysis ANALYSIS_REF=chore_release-8.0.0`
+- build the base image
+  - `make build-base-image`
+- build the opentrons-analysis image
+  - `make build-opentrons-analysis ANALYSIS_REF=release`
 
 ## Running the tests locally
 
@@ -51,16 +54,25 @@
 
 ```shell
 cd analyses-snapshot-testing \
-&& make build-rs OPENTRONS_VERSION=chore_release-8.0.0 \
-&& make run-rs OPENTRONS_VERSION=chore_release-8.0.0`
+&& make build-base-image \
+&& make build-rs OPENTRONS_VERSION=release \
+&& make run-rs OPENTRONS_VERSION=release`
 ```
 
 ### Default OPENTRONS_VERSION=edge in the Makefile so you can omit it if you want latest edge
 
-`cd analyses-snapshot-testing && make build-rs && make run-rs`
+```shell
+cd analyses-snapshot-testing \
+&& make build-base-image \
+&& make build-rs \
+&& make run-rs
+```
 
 ## Running the Analyses Battery against your local code
 
+> This copies in your local code to the container and runs the analyses battery against it.
+
+1. `make build-base-image`
 1. `make build-local`
 1. `make local-snapshot-test`
 
