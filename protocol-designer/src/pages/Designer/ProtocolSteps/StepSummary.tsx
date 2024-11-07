@@ -292,17 +292,6 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
       break
     case 'moveLiquid':
       let moveLiquidType
-      if (
-        currentStep.dispense_wells.length > currentStep.aspirate_wells.length
-      ) {
-        moveLiquidType = 'distribute'
-      } else if (
-        currentStep.dispense_wells.length < currentStep.aspirate_wells.length
-      ) {
-        moveLiquidType = 'consolidate'
-      } else {
-        moveLiquidType = 'transfer'
-      }
       const {
         aspirate_labware,
         aspirate_wells,
@@ -321,17 +310,33 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         flatten(labwareEntities[dispense_labware]?.def.ordering)
       )
 
-      const isTrashBin =
-        additionalEquipmentEntities[dispense_labware]?.name === 'trashBin'
+      const disposalName = additionalEquipmentEntities[dispense_labware]?.name
+
+      const isDisposalLocation =
+        disposalName === 'wasteChute' || disposalName === 'trashBin'
+
+      if (currentStep.path === 'single') {
+        moveLiquidType = 'transfer'
+      } else if (currentStep.path === 'multiAspirate') {
+        moveLiquidType = 'consolidate'
+      } else {
+        moveLiquidType = 'distribute'
+      }
 
       stepSummaryContent = (
         <StyledTrans
-          i18nKey={`protocol_steps:move_liquid.${moveLiquidType}`}
+          i18nKey={
+            isDisposalLocation
+              ? `protocol_steps:move_liquid.${moveLiquidType}_disposal`
+              : `protocol_steps:move_liquid.${moveLiquidType}`
+          }
           values={{
             sourceWells: aspirateWellsDisplay,
-            destinationWells: isTrashBin ? '' : dispenseWellsDisplay,
+            destinationWells: isDisposalLocation ? '' : dispenseWellsDisplay,
             source: sourceLabwareName,
-            destination: isTrashBin ? 'Trash bin' : destinationLabwareName,
+            destination: isDisposalLocation
+              ? t(`shared:${disposalName}`)
+              : destinationLabwareName,
           }}
           tagText={`${volume} ${t('application:units.microliter')}`}
         />
