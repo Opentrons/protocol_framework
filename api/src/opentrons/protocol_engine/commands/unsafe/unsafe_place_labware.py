@@ -1,11 +1,13 @@
 """Place labware payload, result, and implementaiton."""
 
 from __future__ import annotations
-from pydantic import BaseModel, Field
 from typing import TYPE_CHECKING, Optional, Type
 from typing_extensions import Literal
 
-from opentrons.calibration_storage.helpers import details_from_uri
+from opentrons_shared_data.labware.types import LabwareUri
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
+from pydantic import BaseModel, Field
+
 from opentrons.hardware_control.types import Axis, OT3Mount
 from opentrons.motion_planning.waypoints import get_gripper_labware_placement_waypoints
 from opentrons.protocol_engine.errors.exceptions import (
@@ -16,14 +18,12 @@ from opentrons.types import Point
 
 from ...types import (
     DeckSlotLocation,
-    LoadedLabware,
     ModuleModel,
     OnDeckLabwareLocation,
 )
 from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ...errors.error_occurrence import ErrorOccurrence
 from ...resources import ensure_ot3_hardware
-from ...state.update_types import StateUpdate
 
 from opentrons.hardware_control import HardwareControlAPI, OT3HardwareControlAPI
 
@@ -94,36 +94,17 @@ class UnsafePlaceLabwareImplementation(
             params.location,
         )
 
-        # TODO: We need a way to create temporary labware for moving around,
-        # the labware should get deleted once its used.
-        details = details_from_uri(params.labwareURI)
-        labware = await self._equipment.load_labware(
-            load_name=details.load_name,
-            namespace=details.namespace,
-            version=details.version,
-            location=location,
-            labware_id=None,
+        definition = self._state_view.labware.get_definition_by_uri(
+            # todo(mm, 2024-11-07): This is an unsafe cast from untrusted input.
+            # We need a str -> LabwareUri parse/validate function.
+            LabwareUri(params.labwareURI)
         )
 
-        self._state_view.labware._state.definitions_by_uri[
-            params.labwareURI
-        ] = labware.definition
-        self._state_view.labware._state.labware_by_id[
-            labware.labware_id
-        ] = LoadedLabware.construct(
-            id=labware.labware_id,
-            location=location,
-            loadName=labware.definition.parameters.loadName,
-            definitionUri=params.labwareURI,
-            offsetId=labware.offsetId,
-        )
-
-        labware_id = labware.labware_id
         # todo(mm, 2024-11-06): This is only correct in the special case of an
         # absorbance reader lid. Its definition currently puts the offsets for *itself*
         # in the property that's normally meant for offsets for its *children.*
         final_offsets = self._state_view.labware.get_child_gripper_offsets(
-            labware_id, None
+            labware_definition=definition, slot_name=None
         )
         drop_offset = (
             Point(
@@ -148,30 +129,19 @@ class UnsafePlaceLabwareImplementation(
                     module.id
                 )
 
-        new_offset_id = self._equipment.find_applicable_labware_offset_id(
-            labware_definition_uri=params.labwareURI,
-            labware_location=location,
-        )
-
         # NOTE: When the estop is pressed, the gantry loses position,
         # so the robot needs to home x, y to sync.
         await ot3api.home(axes=[Axis.Z_L, Axis.Z_R, Axis.Z_G, Axis.X, Axis.Y])
-        state_update = StateUpdate()
 
         # Place the labware down
-        await self._start_movement(ot3api, labware_id, location, drop_offset)
+        await self._start_movement(ot3api, definition, location, drop_offset)
 
-        state_update.set_labware_location(
-            labware_id=labware_id,
-            new_location=location,
-            new_offset_id=new_offset_id,
-        )
-        return SuccessData(public=UnsafePlaceLabwareResult(), state_update=state_update)
+        return SuccessData(public=UnsafePlaceLabwareResult())
 
     async def _start_movement(
         self,
         ot3api: OT3HardwareControlAPI,
-        labware_id: str,
+        labware_definition: LabwareDefinition,
         location: OnDeckLabwareLocation,
         drop_offset: Optional[Point],
     ) -> None:
@@ -181,7 +151,7 @@ class UnsafePlaceLabwareImplementation(
         )
 
         to_labware_center = self._state_view.geometry.get_labware_grip_point(
-            labware_id=labware_id, location=location
+            labware_definition=labware_definition, location=location
         )
 
         movement_waypoints = get_gripper_labware_placement_waypoints(

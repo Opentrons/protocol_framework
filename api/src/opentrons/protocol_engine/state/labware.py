@@ -13,6 +13,7 @@ from typing import (
     NamedTuple,
     cast,
     Union,
+    overload,
 )
 
 from opentrons.protocol_engine.state import update_types
@@ -630,10 +631,26 @@ class LabwareView(HasState[LabwareState]):
         definition = self.get_definition(labware_id)
         return definition.parameters.loadName
 
-    def get_dimensions(self, labware_id: str) -> Dimensions:
+    @overload
+    def get_dimensions(self, *, labware_definition: LabwareDefinition) -> Dimensions:
+        pass
+
+    @overload
+    def get_dimensions(self, *, labware_id: str) -> Dimensions:
+        pass
+
+    def get_dimensions(
+        self,
+        *,
+        labware_definition: LabwareDefinition | None = None,
+        labware_id: str | None = None,
+    ) -> Dimensions:
         """Get the labware's dimensions."""
-        definition = self.get_definition(labware_id)
-        dims = definition.dimensions
+        if labware_definition is None:
+            assert labware_id is not None  # From our @overloads.
+            labware_definition = self.get_definition(labware_id)
+
+        dims = labware_definition.dimensions
 
         return Dimensions(
             x=dims.xDimension,
@@ -642,10 +659,9 @@ class LabwareView(HasState[LabwareState]):
         )
 
     def get_labware_overlap_offsets(
-        self, labware_id: str, below_labware_name: str
+        self, definition: LabwareDefinition, below_labware_name: str
     ) -> OverlapOffset:
         """Get the labware's overlap with requested labware's load name."""
-        definition = self.get_definition(labware_id)
         if below_labware_name in definition.stackingOffsetWithLabware.keys():
             stacking_overlap = definition.stackingOffsetWithLabware.get(
                 below_labware_name, OverlapOffset(x=0, y=0, z=0)
@@ -659,10 +675,9 @@ class LabwareView(HasState[LabwareState]):
         )
 
     def get_module_overlap_offsets(
-        self, labware_id: str, module_model: ModuleModel
+        self, definition: LabwareDefinition, module_model: ModuleModel
     ) -> OverlapOffset:
         """Get the labware's overlap with requested module model."""
-        definition = self.get_definition(labware_id)
         stacking_overlap = definition.stackingOffsetWithModule.get(
             str(module_model.value)
         )
@@ -928,9 +943,30 @@ class LabwareView(HasState[LabwareState]):
             else None
         )
 
+    def get_absorbance_reader_lid_definition(self) -> LabwareDefinition:
+        # TODO
+        raise NotImplementedError
+
+    @overload
     def get_child_gripper_offsets(
         self,
-        labware_id: str,
+        *,
+        labware_definition: LabwareDefinition,
+        slot_name: Optional[DeckSlotName],
+    ) -> Optional[LabwareMovementOffsetData]:
+        pass
+
+    @overload
+    def get_child_gripper_offsets(
+        self, *, labware_id: str, slot_name: Optional[DeckSlotName]
+    ) -> Optional[LabwareMovementOffsetData]:
+        pass
+
+    def get_child_gripper_offsets(
+        self,
+        *,
+        labware_definition: Optional[LabwareDefinition] = None,
+        labware_id: Optional[str] = None,
         slot_name: Optional[DeckSlotName],
     ) -> Optional[LabwareMovementOffsetData]:
         """Get the grip offsets that a labware says should be applied to children stacked atop it.
@@ -948,7 +984,13 @@ class LabwareView(HasState[LabwareState]):
             If `slot_name` is `None`, returns the gripper offsets that the parent labware
             definition designates as "default," or `None` if it doesn't designate any as such.
         """
-        parsed_offsets = self.get_definition(labware_id).gripperOffsets
+        if labware_id is not None:
+            labware_definition = self.get_definition(labware_id)
+        else:
+            # Should be ensured by our @overloads.
+            assert labware_definition is not None
+
+        parsed_offsets = labware_definition.gripperOffsets
         offset_key = slot_name.id if slot_name else "default"
 
         if parsed_offsets is None or offset_key not in parsed_offsets:
@@ -963,20 +1005,22 @@ class LabwareView(HasState[LabwareState]):
                 ),
             )
 
-    def get_grip_force(self, labware_id: str) -> float:
+    def get_grip_force(self, labware_definition: LabwareDefinition) -> float:
         """Get the recommended grip force for gripping labware using gripper."""
-        recommended_force = self.get_definition(labware_id).gripForce
+        recommended_force = labware_definition.gripForce
         return (
             recommended_force if recommended_force is not None else LABWARE_GRIP_FORCE
         )
 
-    def get_grip_height_from_labware_bottom(self, labware_id: str) -> float:
+    def get_grip_height_from_labware_bottom(
+        self, labware_definition: LabwareDefinition
+    ) -> float:
         """Get the recommended grip height from labware bottom, if present."""
-        recommended_height = self.get_definition(labware_id).gripHeightFromLabwareBottom
+        recommended_height = labware_definition.gripHeightFromLabwareBottom
         return (
             recommended_height
             if recommended_height is not None
-            else self.get_dimensions(labware_id).z / 2
+            else self.get_dimensions(labware_definition=labware_definition).z / 2
         )
 
     @staticmethod
@@ -1019,7 +1063,7 @@ class LabwareView(HasState[LabwareState]):
     def _max_z_of_well(well_defn: WellDefinition) -> float:
         return well_defn.z + well_defn.depth
 
-    def get_well_bbox(self, labware_id: str) -> Dimensions:
+    def get_well_bbox(self, labware_definition: LabwareDefinition) -> Dimensions:
         """Get the bounding box implied by the wells.
 
         The bounding box of the labware that is implied by the wells is that required
@@ -1030,14 +1074,13 @@ class LabwareView(HasState[LabwareState]):
         This is used for the specific purpose of finding the reasonable uncertainty bounds of
         where and how a gripper will interact with a labware.
         """
-        defn = self.get_definition(labware_id)
         max_x: Optional[float] = None
         min_x: Optional[float] = None
         max_y: Optional[float] = None
         min_y: Optional[float] = None
         max_z: Optional[float] = None
 
-        for well in defn.wells.values():
+        for well in labware_definition.wells.values():
             well_max_x = self._max_x_of_well(well)
             well_min_x = self._min_x_of_well(well)
             well_max_y = self._max_y_of_well(well)

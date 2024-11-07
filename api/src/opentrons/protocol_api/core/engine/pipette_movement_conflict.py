@@ -287,8 +287,10 @@ def check_safe_for_tip_pickup_and_return(
         is_96_ch_tiprack_adapter = engine_state.labware.get_has_quirk(
             labware_id=tiprack_parent.labwareId, quirk="tiprackAdapterFor96Channel"
         )
-        tiprack_height = engine_state.labware.get_dimensions(labware_id).z
-        adapter_height = engine_state.labware.get_dimensions(tiprack_parent.labwareId).z
+        tiprack_height = engine_state.labware.get_dimensions(labware_id=labware_id).z
+        adapter_height = engine_state.labware.get_dimensions(
+            labware_id=tiprack_parent.labwareId
+        ).z
         if is_partial_config and tiprack_height < adapter_height:
             raise PartialTipMovementNotAllowedError(
                 f"{tiprack_name} cannot be on an adapter taller than the tip rack"
