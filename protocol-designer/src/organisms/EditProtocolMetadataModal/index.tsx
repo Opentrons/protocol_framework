@@ -50,6 +50,7 @@ export function EditProtocolMetadataModal(
 
   return createPortal(
     <Modal
+      marginLeft="0"
       title={t('shared:edit_protocol_metadata')}
       type="info"
       closeOnOutsideClick
