@@ -8,6 +8,9 @@ from opentrons.hardware_control.types import DoorState
 from opentrons.protocol_engine.execution.error_recovery_hardware_state_synchronizer import (
     ErrorRecoveryHardwareStateSynchronizer,
 )
+from opentrons.protocol_engine.resources.labware_data_provider import (
+    LabwareDataProvider,
+)
 from opentrons.util.async_helpers import async_context_manager_in_thread
 
 from opentrons_shared_data.robot import load as load_robot
@@ -81,7 +84,7 @@ async def create_protocol_engine(
     module_data_provider = ModuleDataProvider()
     file_provider = file_provider or FileProvider()
 
-    return ProtocolEngine(
+    pe = ProtocolEngine(
         hardware_api=hardware_api,
         state_store=state_store,
         action_dispatcher=action_dispatcher,
@@ -92,6 +95,15 @@ async def create_protocol_engine(
         module_data_provider=module_data_provider,
         file_provider=file_provider,
     )
+
+    # FIX BEFORE MERGE: Something less implicit than this
+    pe.add_labware_definition(
+        await LabwareDataProvider().get_labware_definition(
+            "opentrons_flex_lid_absorbance_plate_reader_module", "opentrons", 1
+        )
+    )
+
+    return pe
 
 
 @contextlib.contextmanager

@@ -940,8 +940,10 @@ class LabwareView(HasState[LabwareState]):
         )
 
     def get_absorbance_reader_lid_definition(self) -> LabwareDefinition:
-        # TODO
-        raise NotImplementedError
+        # FIX BEFORE MERGE: Avoid hard-coding URI
+        return self._state.definitions_by_uri[
+            "opentrons/opentrons_flex_lid_absorbance_plate_reader_module/1"
+        ]
 
     @overload
     def get_child_gripper_offsets(
