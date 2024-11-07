@@ -1,8 +1,16 @@
 from __future__ import annotations
 import enum
 from math import sqrt, isclose
-from typing import TYPE_CHECKING, Any, NamedTuple, Iterator, Union, List, Optional, \
-    Literal
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    NamedTuple,
+    Iterator,
+    Union,
+    List,
+    Optional,
+    Literal,
+)
 
 from opentrons_shared_data.robot.types import RobotType
 

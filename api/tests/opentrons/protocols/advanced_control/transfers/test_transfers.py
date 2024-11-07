@@ -3,7 +3,8 @@ import pytest
 from typing import TypedDict
 
 from opentrons.types import Mount, TransferTipPolicy
-from opentrons.protocols.advanced_control import transfers as tx
+from opentrons.protocols.advanced_control.transfers import transfer as tx
+from opentrons.protocols.advanced_control.common import MixStrategy
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.hardware_control import ThreadManagedHardware
 from opentrons.protocol_api.protocol_context import ProtocolContext
@@ -633,7 +634,7 @@ def test_touchtip_mix(_instr_labware: InstrLabware) -> None:
         transfer=options.transfer._replace(
             new_tip=TransferTipPolicy.NEVER,
             touch_tip_strategy=tx.TouchTipStrategy.ALWAYS,
-            mix_strategy=tx.MixStrategy.AFTER,
+            mix_strategy=MixStrategy.AFTER,
         )
     )
 
@@ -759,7 +760,7 @@ def test_all_options(_instr_labware: InstrLabware) -> None:
             new_tip=TransferTipPolicy.ONCE,
             drop_tip_strategy=tx.DropTipStrategy.RETURN,
             touch_tip_strategy=tx.TouchTipStrategy.ALWAYS,
-            mix_strategy=tx.MixStrategy.AFTER,
+            mix_strategy=MixStrategy.AFTER,
         ),
         pick_up_tip=options.pick_up_tip._replace(presses=4, increment=2),
         touch_tip=options.touch_tip._replace(speed=1.6),
