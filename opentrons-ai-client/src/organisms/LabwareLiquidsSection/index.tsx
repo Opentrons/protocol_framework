@@ -19,7 +19,7 @@ import { LABWARE_LIQUIDS_STEP } from '../ProtocolSectionsContainer'
 import { useState } from 'react'
 import { LabwareModal } from '../LabwareModal'
 import { ControlledLabwareListItems } from '../../molecules/ControlledLabwareListItems'
-import { ControlledAddInputFields } from '../../molecules/ControlledAddInputFields'
+import { ControlledAddTextAreaFields } from '../../molecules/ControlledAddTextAreaFields'
 
 export interface DisplayLabware {
   labwareURI: string
@@ -105,9 +105,10 @@ export function LabwareLiquidsSection(): JSX.Element | null {
         iconName="plus"
       />
 
-      <ControlledAddInputFields
+      <ControlledAddTextAreaFields
         fieldName={LIQUIDS_FIELD_NAME}
         name={t('liquid').toLowerCase()}
+        textAreaHeight="57px"
       />
 
       <ButtonContainer>

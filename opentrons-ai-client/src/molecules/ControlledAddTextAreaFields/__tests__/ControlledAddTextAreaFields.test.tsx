@@ -2,7 +2,7 @@ import { fireEvent, screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { i18n } from '../../../i18n'
-import { ControlledAddInputFields } from '..'
+import { ControlledAddTextAreaFields } from '..'
 import { FormProvider, useForm } from 'react-hook-form'
 
 const TestFormProviderComponent = ({
@@ -20,7 +20,7 @@ const TestFormProviderComponent = ({
 
   return (
     <FormProvider {...methods}>
-      <ControlledAddInputFields fieldName={''} name={''} />
+      <ControlledAddTextAreaFields fieldName={''} name={''} />
 
       {liquids.map((liquid, index) => (
         <p key={index}>{`liquid ${index + 1}: ${liquid}`}</p>
@@ -35,7 +35,7 @@ const render = (): ReturnType<typeof renderWithProviders> => {
   })
 }
 
-describe('ControlledAddInputFields', () => {
+describe('ControlledAddTextAreaFields', () => {
   it('should render the first input when rendered', () => {
     render()
 

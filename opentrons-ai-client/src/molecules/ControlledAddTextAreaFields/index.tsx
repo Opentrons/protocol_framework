@@ -2,7 +2,6 @@ import {
   Flex,
   ALIGN_CENTER,
   SPACING,
-  InputField,
   Link,
   TYPOGRAPHY,
   COLORS,
@@ -11,16 +10,19 @@ import {
 import { Controller, useFormContext } from 'react-hook-form'
 import { css } from 'styled-components'
 import { useTranslation } from 'react-i18next'
+import { TextAreaField } from '../../atoms/TextAreaField'
 
-export interface ControlledAddInputFieldsProps {
+export interface ControlledAddTextAreaFieldsProps {
   fieldName: string
   name: string
+  textAreaHeight?: string
 }
 
-export function ControlledAddInputFields({
+export function ControlledAddTextAreaFields({
   fieldName,
   name,
-}: ControlledAddInputFieldsProps): JSX.Element {
+  textAreaHeight,
+}: ControlledAddTextAreaFieldsProps): JSX.Element {
   const { t } = useTranslation('create_protocol')
   const { watch } = useFormContext()
 
@@ -42,7 +44,7 @@ export function ControlledAddInputFields({
                 alignItems={ALIGN_CENTER}
                 gap={SPACING.spacing8}
               >
-                <InputField
+                <TextAreaField
                   name={`${name}-${index + 1}`}
                   title={`${t(name)} ${index + 1}`}
                   caption={index === 0 && t(`add_${name}_caption`)}
@@ -53,6 +55,7 @@ export function ControlledAddInputFields({
                     field.onChange(newValues)
                   }}
                   onBlur={field.onBlur}
+                  height={textAreaHeight}
                 />
                 {index >= 1 && (
                   <Link

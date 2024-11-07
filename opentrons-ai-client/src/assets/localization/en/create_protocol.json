@@ -70,6 +70,7 @@
   "paste_from_document_input_caption_2": "Use right pipette to transfer 15 uL of mastermix from source well to destination well. Use the same pipette tip for all transfers.",
   "paste_from_document_input_caption_3": "Use left pipette to transfer 10 ul of sample from the source to destination well. Mix the sample and mastermix of 25 ul total volume 9 times. Blow out to `destination well`. Use a new tip for each transfer.",
   "add_step": "Add step",
+  "remove_step": "Remove",
   "step": "Step",
   "add_step_caption": "Example: \"Transfer 10 μL from each of the wells in the source labware to the same wells in the destination labware. Use a new tip for each transfer."
 }

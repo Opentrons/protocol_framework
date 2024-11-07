@@ -4,14 +4,13 @@ import {
   DISPLAY_FLEX,
   EmptySelectorButton,
   Flex,
-  InputField,
   JUSTIFY_FLEX_END,
   LargeButton,
   SPACING,
   StyledText,
   Tabs,
 } from '@opentrons/components'
-import { useFormContext } from 'react-hook-form'
+import { Controller, useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { useAtom } from 'jotai'
@@ -19,7 +18,8 @@ import { createProtocolAtom } from '../../resources/atoms'
 import { STEPS_STEP } from '../ProtocolSectionsContainer'
 import { useState } from 'react'
 import { COLUMN } from '@opentrons/shared-data'
-import { ControlledAddInputFields } from '../../molecules/ControlledAddInputFields'
+import { ControlledAddTextAreaFields } from '../../molecules/ControlledAddTextAreaFields'
+import { TextAreaField } from '../../atoms/TextAreaField'
 
 export const STEPS_FIELD_NAME = 'steps'
 
@@ -60,6 +60,7 @@ export function StepsSection(): JSX.Element | null {
             text: t('add_individual_step'),
             onClick: () => {
               setIsIndividualStep(true)
+              setValue(STEPS_FIELD_NAME, [''])
             },
             isActive: isIndividualStep,
             disabled: false,
@@ -68,6 +69,7 @@ export function StepsSection(): JSX.Element | null {
             text: t('paste_from_document'),
             onClick: () => {
               setIsIndividualStep(false)
+              setValue(STEPS_FIELD_NAME, [''])
             },
             isActive: !isIndividualStep,
             disabled: false,
@@ -92,9 +94,10 @@ export function StepsSection(): JSX.Element | null {
               iconName="plus"
             />
 
-            <ControlledAddInputFields
+            <ControlledAddTextAreaFields
               fieldName={STEPS_FIELD_NAME}
               name={t('step').toLowerCase()}
+              textAreaHeight="163px"
             />
           </>
         ) : (
@@ -111,7 +114,29 @@ export function StepsSection(): JSX.Element | null {
               gap={SPACING.spacing4}
               color={COLORS.grey60}
             >
-              <InputField title={t('paste_from_document_input_title')} />
+              <Controller
+                name={STEPS_FIELD_NAME}
+                rules={{
+                  required: true,
+                  validate: (value: string) => {
+                    return value.length > 0 && value[0] !== ''
+                  },
+                }}
+                render={({ field }) => (
+                  <TextAreaField
+                    height="180px"
+                    title={t('paste_from_document_input_title')}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                      const value = e.target.value
+                      const splitByNumberedLines = value.split(/\n(?=\d+\.)/)
+                      field.onChange(splitByNumberedLines)
+                      console.log(splitByNumberedLines)
+                    }}
+                    value={field.value.join('\n')}
+                    onBlur={field.onBlur}
+                  />
+                )}
+              />
               <StyledText desktopStyle="bodyDefaultRegular">
                 {t('paste_from_document_input_caption_1')}
               </StyledText>
