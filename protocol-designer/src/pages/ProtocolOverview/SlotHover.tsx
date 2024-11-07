@@ -27,7 +27,7 @@ import type {
 
 import type { Dispatch, SetStateAction } from 'react'
 
-const DEBOUNCE_DURATION_MS = 300
+const DEBOUNCE_DURATION_MS = 600
 
 interface SlotHoverProps {
   hover: string | null
