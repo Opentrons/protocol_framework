@@ -90,9 +90,6 @@ jobs:
       - name: List docker images
         run: docker images
 
-      - name: List buildx images
-        run: docker buildx images
-
       - name: Build analysis image
         uses: docker/build-push-action@v6
         with:
