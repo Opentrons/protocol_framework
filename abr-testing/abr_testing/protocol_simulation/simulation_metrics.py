@@ -265,6 +265,7 @@ def parse_results_volume(
         "Right Pipette Total Dispenses",
         "Gripper Pick Ups",
         "Gripper Pick Ups of opentrons_tough_pcr_auto_sealing_lid",
+        "Gripper Pick Ups of opentrons_tough_pcr_auto_sealing_lid",
         "Total Liquid Probes",
         "Average Liquid Probe Time (sec)",
     ]
@@ -326,6 +327,7 @@ def parse_results_volume(
     total_time_row.append(str(end_time - start_time))
 
     for metric in metrics:
+        print(f"Dictionary: {metric}\n\n")
         print(f"Dictionary: {metric}\n\n")
         for cmd in metric.keys():
             values_row.append(str(metric[cmd]))
@@ -459,6 +461,7 @@ def main(
         )
         google_sheet.write_to_row([])
 
+
         for row in parse_results_volume(
             json_file_path,
             protocol_name,
@@ -511,6 +514,8 @@ if __name__ == "__main__":
     storage_directory = args.storage_directory[0]
     sheet_name = args.sheet_name[0]
     protocol_file_path: str = args.protocol_file_path[0]
+    parameters: List[str] = args.protocol_file_path[1:]
+    print(parameters)
     SETUP = True
     while SETUP:
         print(
@@ -521,6 +526,7 @@ if __name__ == "__main__":
             choice = ""
             while not choice:
                 choice = input(
+                    "Remove air_gap commands to ensure accurate results: (continue)? (Y/N): "
                     "Remove air_gap commands to ensure accurate results: (continue)? (Y/N): "
                 )
                 if choice.upper() == "Y":
