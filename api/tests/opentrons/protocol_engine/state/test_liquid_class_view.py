@@ -63,6 +63,4 @@ def test_get_all(
     subject: LiquidClassView, liquid_class_record: LiquidClassRecord
 ) -> None:
     """Should get all LiquidClassRecords in the store."""
-    assert subject.get_all() == frozendict.frozendict(
-        {"liquid-class-id": liquid_class_record}
-    )
+    assert subject.get_all() == {"liquid-class-id": liquid_class_record}

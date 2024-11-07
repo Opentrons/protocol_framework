@@ -74,6 +74,6 @@ class LiquidClassView(HasState[LiquidClassState]):
             frozen_liquid_class_record
         )
 
-    def get_all(self) -> frozendict.frozendict[str, LiquidClassRecord]:
+    def get_all(self) -> Dict[str, LiquidClassRecord]:
         """Get all the LiquidClassRecords in the store."""
-        return frozendict.frozendict(self._state.liquid_class_record_by_id)
+        return self._state.liquid_class_record_by_id.copy()
