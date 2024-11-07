@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import get from 'lodash/get'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
@@ -40,10 +40,16 @@ import {
   getVisibleFormErrors,
   getVisibleFormWarnings,
   capitalizeFirstLetter,
+  getIsErrorOnCurrentPage,
 } from './utils'
 import type { StepFieldName } from '../../../../steplist/fieldLevel'
 import type { FormData, StepType } from '../../../../form-types'
-import type { FieldPropsByName, FocusHandlers, StepFormProps } from './types'
+import type {
+  FieldPropsByName,
+  FocusHandlers,
+  LiquidHandlingTab,
+  StepFormProps,
+} from './types'
 import { getFormLevelErrorsForUnsavedForm } from '../../../../step-forms/selectors'
 
 type StepFormMap = {
@@ -90,6 +96,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     'protocol_steps',
   ])
   const { makeSnackbar } = useKitchen()
+  const toolsComponentRef = useRef<HTMLDivElement | null>(null)
+
   const formWarningsForSelectedStep = useSelector(
     getFormWarningsForSelectedStep
   )
@@ -105,6 +113,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     showFormErrorsAndWarnings,
     setShowFormErrorsAndWarnings,
   ] = useState<boolean>(false)
+  const [tab, setTab] = useState<LiquidHandlingTab>('aspirate')
   const visibleFormWarnings = getVisibleFormWarnings({
     focusedField,
     dirtyFields: dirtyFields ?? [],
@@ -114,6 +123,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     focusedField,
     dirtyFields: dirtyFields ?? [],
     errors: formLevelErrorsForUnsavedForm,
+    page: toolboxStep,
+    showErrors: showFormErrorsAndWarnings,
   })
   const [isRename, setIsRename] = useState<boolean>(false)
   const icon = stepIconsByType[formData.stepType]
@@ -121,6 +132,13 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   const ToolsComponent: typeof STEP_FORM_MAP[keyof typeof STEP_FORM_MAP] = get(
     STEP_FORM_MAP,
     formData.stepType
+  )
+
+  const isAspirateError = formLevelErrorsForUnsavedForm.some(
+    error => error.tab === 'aspirate' && error.page === toolboxStep
+  )
+  const isDispenseError = formLevelErrorsForUnsavedForm.some(
+    error => error.tab === 'dispense' && error.page === toolboxStep
   )
 
   if (!ToolsComponent) {
@@ -141,6 +159,19 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     visibleFormWarnings.length + timelineWarningsForSelectedStep.length
   const numErrors = timeline.errors?.length ?? 0
 
+  const isErrorOnCurrentPage = getIsErrorOnCurrentPage({
+    errors: formLevelErrorsForUnsavedForm,
+    page: toolboxStep,
+  })
+  const handleScrollToTop = (): void => {
+    if (toolsComponentRef.current) {
+      toolsComponentRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    }
+  }
+
   const handleSaveClick = (): void => {
     if (canSave) {
       handleSave()
@@ -157,6 +188,27 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
       )
     } else {
       setShowFormErrorsAndWarnings(true)
+      if (tab === 'aspirate' && isDispenseError && !isAspirateError) {
+        setTab('dispense')
+      }
+      if (tab === 'dispense' && isAspirateError && !isDispenseError) {
+        setTab('aspirate')
+      }
+      handleScrollToTop()
+    }
+  }
+
+  const handleContinue = (): void => {
+    if (isMultiStepToolbox && toolboxStep === 0) {
+      if (!isErrorOnCurrentPage) {
+        setToolboxStep(1)
+        setShowFormErrorsAndWarnings(false)
+      } else {
+        setShowFormErrorsAndWarnings(true)
+        handleScrollToTop()
+      }
+    } else {
+      handleSaveClick()
     }
   }
 
@@ -202,21 +254,13 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
                 width="100%"
                 onClick={() => {
                   setToolboxStep(0)
+                  setShowFormErrorsAndWarnings(false)
                 }}
               >
                 {i18n.format(t('shared:back'), 'capitalize')}
               </SecondaryButton>
             ) : null}
-            <PrimaryButton
-              onClick={
-                isMultiStepToolbox && toolboxStep === 0
-                  ? () => {
-                      setToolboxStep(1)
-                    }
-                  : handleSaveClick
-              }
-              width="100%"
-            >
+            <PrimaryButton onClick={handleContinue} width="100%">
               {isMultiStepToolbox && toolboxStep === 0
                 ? i18n.format(t('shared:continue'), 'capitalize')
                 : t('shared:save')}
@@ -235,23 +279,28 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
           </Flex>
         }
       >
-        <FormAlerts
-          focusedField={focusedField}
-          dirtyFields={dirtyFields}
-          showFormErrorsAndWarnings={showFormErrorsAndWarnings}
-        />
-        <ToolsComponent
-          {...{
-            formData,
-            propsForFields,
-            focusHandlers,
-            toolboxStep,
-            visibleFormErrors,
-            showFormErrors: showFormErrorsAndWarnings,
-            focusedField,
-            setShowFormErrorsAndWarnings,
-          }}
-        />
+        <div ref={toolsComponentRef}>
+          <FormAlerts
+            focusedField={focusedField}
+            dirtyFields={dirtyFields}
+            showFormErrorsAndWarnings={showFormErrorsAndWarnings}
+            page={toolboxStep}
+          />
+          <ToolsComponent
+            {...{
+              formData,
+              propsForFields,
+              focusHandlers,
+              toolboxStep,
+              visibleFormErrors,
+              showFormErrors: showFormErrorsAndWarnings,
+              focusedField,
+              setShowFormErrorsAndWarnings,
+              tab,
+              setTab,
+            }}
+          />
+        </div>
       </Toolbox>
     </>
   )

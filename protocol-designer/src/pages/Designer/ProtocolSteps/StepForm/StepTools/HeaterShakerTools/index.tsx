@@ -18,13 +18,7 @@ import { getFormErrorsMappedToField, getFormLevelError } from '../../utils'
 import type { StepFormProps } from '../../types'
 
 export function HeaterShakerTools(props: StepFormProps): JSX.Element {
-  const {
-    propsForFields,
-    formData,
-    showFormErrors = false,
-    focusedField = null,
-    visibleFormErrors,
-  } = props
+  const { propsForFields, formData, visibleFormErrors } = props
   const { t } = useTranslation(['application', 'form', 'protocol_steps'])
   const moduleLabwareOptions = useSelector(getHeaterShakerLabwareOptions)
 
@@ -65,10 +59,8 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
             'form:step_edit_form.field.heaterShaker.temperature.toggleOff'
           )}
           formLevelError={getFormLevelError(
-            showFormErrors,
             'targetHeaterShakerTemperature',
-            mappedErrorsToField,
-            focusedField
+            mappedErrorsToField
           )}
         />
         <ToggleExpandStepFormField
@@ -83,12 +75,7 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
           offLabel={t(
             'form:step_edit_form.field.heaterShaker.shaker.toggleOff'
           )}
-          formLevelError={getFormLevelError(
-            showFormErrors,
-            'targetSpeed',
-            mappedErrorsToField,
-            focusedField
-          )}
+          formLevelError={getFormLevelError('targetSpeed', mappedErrorsToField)}
         />
         <ToggleStepFormField
           isDisabled={propsForFields.latchOpen.disabled}
@@ -116,10 +103,8 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
           units={t('application:units.time')}
           toggleElement="checkbox"
           formLevelError={getFormLevelError(
-            showFormErrors,
             'heaterShakerTimer',
-            mappedErrorsToField,
-            focusedField
+            mappedErrorsToField
           )}
         />
       </Flex>
