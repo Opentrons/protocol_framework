@@ -90,7 +90,7 @@ describe('SelectedHoveredItems', () => {
     screen.getByText('mock FixtureRender')
     screen.getByText('mock LabwareOnDeck')
     expect(screen.queryByText('mock Module')).not.toBeInTheDocument()
-    screen.getByText('Opentrons screwcap 2mL tuberack')
+    screen.getByText('Fixture Opentrons Universal Flat Heater-Shaker Adapter')
   })
   it('renders a selected module', () => {
     vi.mocked(selectors.getZoomedInSlotInfo).mockReturnValue({
@@ -150,9 +150,11 @@ describe('SelectedHoveredItems', () => {
     render(props)
     screen.getByText('mock FixtureRender')
     expect(screen.getAllByText('mock LabwareOnDeck')).toHaveLength(2)
-    expect(screen.getAllByText('Opentrons screwcap 2mL tuberack')).toHaveLength(
-      2
-    )
+    expect(
+      screen.getAllByText(
+        'Fixture Opentrons Universal Flat Heater-Shaker Adapter'
+      )
+    ).toHaveLength(3)
   })
   it('renders nothing when there is a hovered module but selected fixture', () => {
     props.hoveredModule = HEATERSHAKER_MODULE_V1
