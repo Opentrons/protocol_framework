@@ -8,6 +8,8 @@ export interface ChatData {
   reply: string
   /** for testing purpose will be removed and this is not used in the app */
   fake?: boolean
+  /** uuid to map the chat prompt request to the response from the LLM */
+  requestId: string
 }
 
 export interface Chat {

@@ -59,6 +59,23 @@ export function generatePromptPreviewInstrumentItems(
   return items.filter(Boolean)
 }
 
+export function generatePromptPreviewModulesItems(
+  watch: UseFormWatch<CreateProtocolFormData>,
+  t: any
+): string[] {
+  const { modules } = watch()
+
+  if (modules === undefined || modules?.length === 0) return []
+
+  const items = modules?.map(module =>
+    module.adapter === undefined || module.adapter?.name === ''
+      ? module.name
+      : `${module.name} with ${module.adapter.name}`
+  )
+
+  return items.filter(Boolean)
+}
+
 export function generatePromptPreviewData(
   watch: UseFormWatch<CreateProtocolFormData>,
   t: any
@@ -74,6 +91,10 @@ export function generatePromptPreviewData(
     {
       title: t('instruments_title'),
       items: generatePromptPreviewInstrumentItems(watch, t),
+    },
+    {
+      title: t('modules_title'),
+      items: generatePromptPreviewModulesItems(watch, t),
     },
   ]
 }

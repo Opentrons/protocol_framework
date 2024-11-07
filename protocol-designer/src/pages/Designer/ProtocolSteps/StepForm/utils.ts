@@ -104,20 +104,33 @@ export const getDirtyFields = (
   // exclude form "metadata" (not really fields)
   return without(dirtyFields, 'stepType', 'id')
 }
+
+export const getIsErrorOnCurrentPage = (args: {
+  errors: StepFormErrors
+  page: number
+}): boolean => {
+  const { errors, page = 0 } = args
+  return errors.some(error => error.page == null || error.page === page)
+}
+
 export const getVisibleFormErrors = (args: {
   focusedField?: string | null
   dirtyFields: string[]
   errors: StepFormErrors
+  showErrors?: boolean
+  page: number
 }): StepFormErrors => {
-  const { focusedField, dirtyFields, errors } = args
+  const { focusedField, errors, page = 0, showErrors } = args
+
   return errors.filter(error => {
     const dependentFieldsAreNotFocused = !error.dependentFields.includes(
       // @ts-expect-error(sa, 2021-6-22): focusedField might be undefined
       focusedField
     )
-    const dependentFieldsAreDirty =
-      difference(error.dependentFields, dirtyFields).length === 0
-    return dependentFieldsAreNotFocused && dependentFieldsAreDirty
+
+    const isPageImplicated = error.page != null ? page === error.page : true
+
+    return isPageImplicated && dependentFieldsAreNotFocused && showErrors
   })
 }
 export const getVisibleFormWarnings = (args: {
@@ -353,14 +366,10 @@ export const getFormErrorsMappedToField = (
 }
 
 export const getFormLevelError = (
-  showFormErrors: boolean,
   fieldName: string,
-  mappedErrorsToField: ErrorMappedToField,
-  focusedField?: string | null
+  mappedErrorsToField: ErrorMappedToField
 ): string | null => {
-  return showFormErrors &&
-    focusedField !== fieldName &&
-    mappedErrorsToField[fieldName] &&
+  return mappedErrorsToField[fieldName] &&
     mappedErrorsToField[fieldName].showAtField
     ? mappedErrorsToField[fieldName].title
     : null

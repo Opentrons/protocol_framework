@@ -11,10 +11,15 @@ import type {
 /** ChatDataAtom is for chat data (user prompt and response from OpenAI API) */
 export const chatDataAtom = atom<ChatData[]>([])
 
-/** ChatPromptAtom is for the prefilled userprompt when landing on the chat page */
+/** ChatPromptAtom is for the prefilled userprompt when navigating to the chat page from existing/new protocol pages */
 export const chatPromptAtom = atom<string>('')
 
+/** Scroll to bottom of chat atom */
+export const scrollToBottomAtom = atom<boolean>(false)
+
 export const chatHistoryAtom = atom<Chat[]>([])
+
+export const feedbackModalAtom = atom<boolean>(false)
 
 export const tokenAtom = atom<string | null>(null)
 

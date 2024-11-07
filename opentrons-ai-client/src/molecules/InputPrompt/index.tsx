@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import styled, { css } from 'styled-components'
 import { useFormContext } from 'react-hook-form'
 import { useAtom } from 'jotai'
+import { v4 as uuidv4 } from 'uuid'
 
 import {
   ALIGN_CENTER,
@@ -42,13 +43,21 @@ export function InputPrompt(): JSX.Element {
   const [submitted, setSubmitted] = useState<boolean>(false)
   const userPrompt = watch('userPrompt') ?? ''
   const { data, isLoading, callApi } = useApiCall()
+  const [requestId, setRequestId] = useState<string>(uuidv4())
+
+  // This is to autofill the input field for when we navigate to the chat page from the existing/new protocol generator pages
+  useEffect(() => {
+    setValue('userPrompt', chatPromptAtomValue)
+  }, [chatPromptAtomValue, setValue])
 
   useEffect(() => {
     setValue('userPrompt', chatPromptAtomValue)
   }, [chatPromptAtomValue, setValue])
 
   const handleClick = async (): Promise<void> => {
+    setRequestId(uuidv4())
     const userInput: ChatData = {
+      requestId,
       role: 'user',
       reply: userPrompt,
     }
@@ -100,6 +109,7 @@ export function InputPrompt(): JSX.Element {
     if (submitted && data != null && !isLoading) {
       const { role, reply } = data as ChatData
       const assistantResponse: ChatData = {
+        requestId,
         role,
         reply,
       }
@@ -166,6 +176,7 @@ const LegacyStyledTextarea = styled.textarea`
   font-size: ${TYPOGRAPHY.fontSize20};
   line-height: ${TYPOGRAPHY.lineHeight24};
   padding: 1.2rem 0;
+  font-size: 1rem;
 
   ::placeholder {
     position: absolute;

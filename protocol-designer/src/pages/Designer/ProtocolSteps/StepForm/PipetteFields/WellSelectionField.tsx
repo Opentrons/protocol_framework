@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import {
   ALIGN_CENTER,
+  BORDERS,
   COLORS,
   DIRECTION_COLUMN,
   Flex,
@@ -101,8 +102,7 @@ export const WellSelectionField = (
       <Flex
         flexDirection={DIRECTION_COLUMN}
         padding={SPACING.spacing16}
-        id="hello"
-        gridGap={SPACING.spacing4}
+        gridGap={SPACING.spacing8}
       >
         <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
           <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
@@ -123,10 +123,12 @@ export const WellSelectionField = (
           disabled={disabled ?? labwareId != null}
           readOnly
           name={name}
-          error={errorToShow}
-          value={primaryWellCount}
+          value={primaryWellCount ?? errorToShow}
           onClick={handleOpen}
           hasBackgroundError={hasFormError}
+          size="medium"
+          borderRadius={BORDERS.borderRadius8}
+          padding={SPACING.spacing12}
         />
       </Flex>
       {createPortal(
