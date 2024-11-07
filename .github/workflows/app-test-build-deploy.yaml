@@ -318,12 +318,12 @@ jobs:
         if: startsWith(matrix.os, 'windows') && contains(needs.determine-build-type.outputs.type, 'release')
         shell: cmd
         env:
-          SM_HOST: ${{ secrets.SM_HOST }}
+          SM_HOST: ${{ secrets.SM_HOST_V2 }}
           SM_CLIENT_CERT_FILE: "D:\\Certificate_pkcs12.p12"
-          SM_CLIENT_CERT_PASSWORD: ${{secrets.SM_CLIENT_CERT_PASSWORD}}
-          SM_API_KEY: ${{secrets.SM_API_KEY}}
+          SM_CLIENT_CERT_PASSWORD: ${{secrets.SM_CLIENT_CERT_PASSWORD_V2}}
+          SM_API_KEY: ${{secrets.SM_API_KEY_V2}}
         run: |
-          curl -X GET  https://one.digicert.com/signingmanager/api-ui/v1/releases/Keylockertools-windows-x64.msi/download -H "x-api-key:${{secrets.SM_API_KEY}}" -o Keylockertools-windows-x64.msi
+          curl -X GET  https://one.digicert.com/signingmanager/api-ui/v1/releases/Keylockertools-windows-x64.msi/download -H "x-api-key:${{secrets.SM_API_KEY_V2}}" -o Keylockertools-windows-x64.msi
           msiexec /i Keylockertools-windows-x64.msi /quiet /qn
           smksp_registrar.exe list
           smctl.exe keypair ls
@@ -348,18 +348,14 @@ jobs:
           OT_APP_MIXPANEL_ID: ${{ secrets.OT_APP_MIXPANEL_ID }}
           OT_APP_INTERCOM_ID: ${{ secrets.OT_APP_INTERCOM_ID }}
           WINDOWS_SIGN: ${{ format('{0}', contains(needs.determine-build-type.outputs.type, 'release')) }}
-          SM_HOST: ${{secrets.SM_HOST}}
-          SM_CLIENT_CERT_FILE: "D:\\Certificate_pkcs12.p12"
-          SM_CLIENT_CERT_PASSWORD: ${{secrets.SM_CLIENT_CERT_PASSWORD}}
-          SM_API_KEY: ${{secrets.SM_API_KEY}}
-          SM_CODE_SIGNING_CERT_SHA1_HASH: ${{secrets.SM_CODE_SIGNING_CERT_SHA1_HASH}}
-          SM_KEYPAIR_ALIAS: ${{secrets.SM_KEYPAIR_ALIAS}}
+          SM_CODE_SIGNING_CERT_SHA1_HASH: ${{secrets.SM_CODE_SIGNING_CERT_SHA1_HASH_V2}}
+          SM_KEYPAIR_ALIAS: ${{secrets.SM_KEYPAIR_ALIAS_V2}}
           WINDOWS_CSC_FILEPATH: "D:\\opentrons_labworks_inc.crt"
-          CSC_LINK: ${{ secrets.OT_APP_CSC_MACOS }}
-          CSC_KEY_PASSWORD: ${{ secrets.OT_APP_CSC_KEY_MACOS }}
-          APPLE_ID: ${{ secrets.OT_APP_APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.OT_APP_APPLE_ID_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.OT_APP_APPLE_TEAM_ID }}
+          CSC_LINK: ${{ secrets.OT_APP_CSC_MACOS_V2 }}
+          CSC_KEY_PASSWORD: ${{ secrets.OT_APP_CSC_KEY_MACOS_V2 }}
+          APPLE_ID: ${{ secrets.OT_APP_APPLE_ID_V2 }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.OT_APP_APPLE_ID_PASSWORD_V2 }}
+          APPLE_TEAM_ID: ${{ secrets.OT_APP_APPLE_TEAM_ID_V2 }}
           HOST_PYTHON: python
           OPENTRONS_PROJECT: ${{ steps.project.outputs.project }}
           OT_APP_DEPLOY_BUCKET: ${{ steps.project.outputs.bucket }}
