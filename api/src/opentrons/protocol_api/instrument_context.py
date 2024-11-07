@@ -2177,8 +2177,8 @@ class InstrumentContext(publisher.CommandPublisher):
 
         loc = well.top()
         self._96_tip_config_valid()
-        meniscus = self._core.liquid_probe_without_recovery(well._core, loc)
-        return meniscus - well.bottom().point.z
+        height = self._core.liquid_probe_without_recovery(well._core, loc)
+        return height
 
     def _raise_if_configuration_not_supported_by_pipette(
         self, style: NozzleLayout
