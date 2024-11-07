@@ -50,7 +50,10 @@ import type {
   LiquidHandlingTab,
   StepFormProps,
 } from './types'
-import { getFormLevelErrorsForUnsavedForm } from '../../../../step-forms/selectors'
+import {
+  getDynamicFieldFormErrorsForUnsavedForm,
+  getFormLevelErrorsForUnsavedForm,
+} from '../../../../step-forms/selectors'
 
 type StepFormMap = {
   [K in StepType]?: React.ComponentType<StepFormProps> | null
@@ -107,6 +110,13 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   const formLevelErrorsForUnsavedForm = useSelector(
     getFormLevelErrorsForUnsavedForm
   )
+  const dynamicFormLevelErrorsForUnsavedForm = useSelector(
+    getDynamicFieldFormErrorsForUnsavedForm
+  ).map(error => ({
+    title: error.title,
+    body: error.body,
+    dependentFields: error.dependentProfileFields,
+  }))
   const timeline = useSelector(getRobotStateTimeline)
   const [toolboxStep, setToolboxStep] = useState<number>(0)
   const [
@@ -122,7 +132,10 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   const visibleFormErrors = getVisibleFormErrors({
     focusedField,
     dirtyFields: dirtyFields ?? [],
-    errors: formLevelErrorsForUnsavedForm,
+    errors: [
+      ...formLevelErrorsForUnsavedForm,
+      ...dynamicFormLevelErrorsForUnsavedForm,
+    ],
     page: toolboxStep,
     showErrors: showFormErrorsAndWarnings,
   })
