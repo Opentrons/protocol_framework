@@ -1,5 +1,7 @@
+from copy import copy
 from dataclasses import dataclass
-from typing import Optional, Dict, Sequence
+from numpy import interp
+from typing import Optional, Dict, Sequence, Union
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     AspirateProperties as SharedDataAspirateProperties,
@@ -18,9 +20,45 @@ from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     Coordinate,
 )
 
-# TODO replace this with a class that can extrapolate given volumes to the correct float,
-#   also figure out how we want people to be able to set this
-LiquidHandlingPropertyByVolume = Dict[str, float]
+
+class LiquidHandlingPropertyByVolume:
+    def __init__(self, properties_by_volume: Dict[str, float]) -> None:
+        self._default = properties_by_volume.pop("default")
+        self._properties_by_volume: Dict[float, float] = {
+            float(volume): value for volume, value in properties_by_volume.items()
+        }
+
+    @property
+    def default(self) -> float:
+        return self._default
+
+    @property
+    def properties_by_volume(self) -> Dict[Union[float, str], float]:
+        props_by_volume_copy: Dict[Union[float, str], float] = copy(
+            self._properties_by_volume  # type: ignore[arg-type]
+        )
+        props_by_volume_copy["default"] = self._default
+        return props_by_volume_copy
+
+    def get_for_volume(self, volume: float) -> float:
+        # TODO positive float validation (including catching +/-inf and NaN)
+        return float(
+            interp(
+                float(volume),
+                list(self._properties_by_volume.keys()),
+                list(self._properties_by_volume.values()),
+            )
+        )
+
+    def set_for_volume(self, volume: float, value: float) -> None:
+        # TODO positive float validation (including catching +/-inf and NaN)
+        self._properties_by_volume[volume] = value
+
+    def delete_for_volume(self, volume: float) -> None:
+        try:
+            del self._properties_by_volume[volume]
+        except KeyError:
+            raise ValueError(f"No value set for volume {volume} uL")
 
 
 @dataclass
@@ -164,7 +202,6 @@ class BlowoutProperties:
 
     @location.setter
     def location(self, new_location: str) -> None:
-        # TODO blowout location validation
         self._location = BlowoutLocation(new_location)
 
     @property
@@ -191,7 +228,6 @@ class SubmergeRetractCommon:
 
     @position_reference.setter
     def position_reference(self, new_position: str) -> None:
-        # TODO validation for position reference
         self._position_reference = PositionReference(new_position)
 
     @property
@@ -461,7 +497,9 @@ def _build_retract_aspirate(
         _position_reference=retract_aspirate.positionReference,
         _offset=retract_aspirate.offset,
         _speed=retract_aspirate.speed,
-        _air_gap_by_volume=retract_aspirate.airGapByVolume,
+        _air_gap_by_volume=LiquidHandlingPropertyByVolume(
+            retract_aspirate.airGapByVolume
+        ),
         _touch_tip=_build_touch_tip_properties(retract_aspirate.touchTip),
         _delay=_build_delay_properties(retract_aspirate.delay),
     )
@@ -474,7 +512,9 @@ def _build_retract_dispense(
         _position_reference=retract_dispense.positionReference,
         _offset=retract_dispense.offset,
         _speed=retract_dispense.speed,
-        _air_gap_by_volume=retract_dispense.airGapByVolume,
+        _air_gap_by_volume=LiquidHandlingPropertyByVolume(
+            retract_dispense.airGapByVolume
+        ),
         _blowout=_build_blowout_properties(retract_dispense.blowout),
         _touch_tip=_build_touch_tip_properties(retract_dispense.touchTip),
         _delay=_build_delay_properties(retract_dispense.delay),
@@ -489,7 +529,9 @@ def build_aspirate_properties(
         _retract=_build_retract_aspirate(aspirate_properties.retract),
         _position_reference=aspirate_properties.positionReference,
         _offset=aspirate_properties.offset,
-        _flow_rate_by_volume=aspirate_properties.flowRateByVolume,
+        _flow_rate_by_volume=LiquidHandlingPropertyByVolume(
+            aspirate_properties.flowRateByVolume
+        ),
         _pre_wet=aspirate_properties.preWet,
         _mix=_build_mix_properties(aspirate_properties.mix),
         _delay=_build_delay_properties(aspirate_properties.delay),
@@ -504,9 +546,13 @@ def build_single_dispense_properties(
         _retract=_build_retract_dispense(single_dispense_properties.retract),
         _position_reference=single_dispense_properties.positionReference,
         _offset=single_dispense_properties.offset,
-        _flow_rate_by_volume=single_dispense_properties.flowRateByVolume,
+        _flow_rate_by_volume=LiquidHandlingPropertyByVolume(
+            single_dispense_properties.flowRateByVolume
+        ),
         _mix=_build_mix_properties(single_dispense_properties.mix),
-        _push_out_by_volume=single_dispense_properties.pushOutByVolume,
+        _push_out_by_volume=LiquidHandlingPropertyByVolume(
+            single_dispense_properties.pushOutByVolume
+        ),
         _delay=_build_delay_properties(single_dispense_properties.delay),
     )
 
@@ -521,9 +567,15 @@ def build_multi_dispense_properties(
         _retract=_build_retract_dispense(multi_dispense_properties.retract),
         _position_reference=multi_dispense_properties.positionReference,
         _offset=multi_dispense_properties.offset,
-        _flow_rate_by_volume=multi_dispense_properties.flowRateByVolume,
-        _conditioning_by_volume=multi_dispense_properties.conditioningByVolume,
-        _disposal_by_volume=multi_dispense_properties.disposalByVolume,
+        _flow_rate_by_volume=LiquidHandlingPropertyByVolume(
+            multi_dispense_properties.flowRateByVolume
+        ),
+        _conditioning_by_volume=LiquidHandlingPropertyByVolume(
+            multi_dispense_properties.conditioningByVolume
+        ),
+        _disposal_by_volume=LiquidHandlingPropertyByVolume(
+            multi_dispense_properties.disposalByVolume
+        ),
         _delay=_build_delay_properties(multi_dispense_properties.delay),
     )
 
