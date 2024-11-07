@@ -20,6 +20,8 @@ from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     Coordinate,
 )
 
+from . import validation
+
 
 class LiquidHandlingPropertyByVolume:
     def __init__(self, properties_by_volume: Dict[str, float]) -> None:
@@ -41,18 +43,18 @@ class LiquidHandlingPropertyByVolume:
         return props_by_volume_copy
 
     def get_for_volume(self, volume: float) -> float:
-        # TODO positive float validation (including catching +/-inf and NaN)
+        validated_volume = validation.ensure_positive_float(volume)
         return float(
             interp(
-                float(volume),
+                float(validated_volume),
                 list(self._properties_by_volume.keys()),
                 list(self._properties_by_volume.values()),
             )
         )
 
     def set_for_volume(self, volume: float, value: float) -> None:
-        # TODO positive float validation (including catching +/-inf and NaN)
-        self._properties_by_volume[volume] = value
+        validated_volume = validation.ensure_positive_float(volume)
+        self._properties_by_volume[validated_volume] = value
 
     def delete_for_volume(self, volume: float) -> None:
         try:
@@ -73,10 +75,10 @@ class DelayProperties:
 
     @enabled.setter
     def enabled(self, enable: bool) -> None:
-        # TODO insert bool validation here
-        if enable and self._duration is None:
+        validated_enable = validation.ensure_boolean(enable)
+        if validated_enable and self._duration is None:
             raise ValueError("duration must be set before enabling delay.")
-        self._enabled = enable
+        self._enabled = validated_enable
 
     @property
     def duration(self) -> Optional[float]:
@@ -84,8 +86,8 @@ class DelayProperties:
 
     @duration.setter
     def duration(self, new_duration: float) -> None:
-        # TODO insert positive float validation here
-        self._duration = new_duration
+        validated_duration = validation.ensure_positive_float(new_duration)
+        self._duration = validated_duration
 
 
 @dataclass
@@ -102,14 +104,14 @@ class TouchTipProperties:
 
     @enabled.setter
     def enabled(self, enable: bool) -> None:
-        # TODO insert bool validation here
-        if enable and (
+        validated_enable = validation.ensure_boolean(enable)
+        if validated_enable and (
             self._z_offset is None or self._mm_to_edge is None or self._speed is None
         ):
             raise ValueError(
                 "z_offset, mm_to_edge and speed must be set before enabling touch tip."
             )
-        self._enabled = enable
+        self._enabled = validated_enable
 
     @property
     def z_offset(self) -> Optional[float]:
@@ -117,8 +119,8 @@ class TouchTipProperties:
 
     @z_offset.setter
     def z_offset(self, new_offset: float) -> None:
-        # TODO validation for float
-        self._z_offset = new_offset
+        validated_offset = validation.ensure_float(new_offset)
+        self._z_offset = validated_offset
 
     @property
     def mm_to_edge(self) -> Optional[float]:
@@ -126,8 +128,8 @@ class TouchTipProperties:
 
     @mm_to_edge.setter
     def mm_to_edge(self, new_mm: float) -> None:
-        # TODO validation for float
-        self._z_offset = new_mm
+        validated_mm = validation.ensure_float(new_mm)
+        self._z_offset = validated_mm
 
     @property
     def speed(self) -> Optional[float]:
@@ -135,8 +137,8 @@ class TouchTipProperties:
 
     @speed.setter
     def speed(self, new_speed: float) -> None:
-        # TODO insert positive float validation here
-        self._speed = new_speed
+        validated_speed = validation.ensure_positive_float(new_speed)
+        self._speed = validated_speed
 
 
 @dataclass
@@ -152,10 +154,10 @@ class MixProperties:
 
     @enabled.setter
     def enabled(self, enable: bool) -> None:
-        # TODO insert bool validation here
-        if enable and (self._repetitions is None or self._volume is None):
+        validated_enable = validation.ensure_boolean(enable)
+        if validated_enable and (self._repetitions is None or self._volume is None):
             raise ValueError("repetitions and volume must be set before enabling mix.")
-        self._enabled = enable
+        self._enabled = validated_enable
 
     @property
     def repetitions(self) -> Optional[int]:
@@ -163,8 +165,8 @@ class MixProperties:
 
     @repetitions.setter
     def repetitions(self, new_repetitions: int) -> None:
-        # TODO validations for positive int
-        self._repetitions = new_repetitions
+        validated_repetitions = validation.ensure_positive_int(new_repetitions)
+        self._repetitions = validated_repetitions
 
     @property
     def volume(self) -> Optional[float]:
@@ -172,8 +174,8 @@ class MixProperties:
 
     @volume.setter
     def volume(self, new_volume: float) -> None:
-        # TODO validations for volume float
-        self._volume = new_volume
+        validated_volume = validation.ensure_positive_float(new_volume)
+        self._volume = validated_volume
 
 
 @dataclass
@@ -189,12 +191,12 @@ class BlowoutProperties:
 
     @enabled.setter
     def enabled(self, enable: bool) -> None:
-        # TODO insert bool validation here
-        if enable and (self._location is None or self._flow_rate is None):
+        validated_enable = validation.ensure_boolean(enable)
+        if validated_enable and (self._location is None or self._flow_rate is None):
             raise ValueError(
                 "location and flow_rate must be set before enabling blowout."
             )
-        self._enabled = enable
+        self._enabled = validated_enable
 
     @property
     def location(self) -> Optional[BlowoutLocation]:
@@ -210,8 +212,8 @@ class BlowoutProperties:
 
     @flow_rate.setter
     def flow_rate(self, new_flow_rate: float) -> None:
-        # TODO validations for positive float
-        self._flow_rate = new_flow_rate
+        validated_flow_rate = validation.ensure_positive_float(new_flow_rate)
+        self._flow_rate = validated_flow_rate
 
 
 @dataclass
@@ -236,8 +238,8 @@ class SubmergeRetractCommon:
 
     @offset.setter
     def offset(self, new_offset: Sequence[float]) -> None:
-        # TODO validate valid coordinates
-        self._offset = Coordinate(x=new_offset[0], y=new_offset[1], z=new_offset[2])
+        x, y, z = validation.validate_coordinates(new_offset)
+        self._offset = Coordinate(x=x, y=y, z=z)
 
     @property
     def speed(self) -> float:
@@ -245,8 +247,8 @@ class SubmergeRetractCommon:
 
     @speed.setter
     def speed(self, new_speed: float) -> None:
-        # TODO insert positive float validation here
-        self._speed = new_speed
+        validated_speed = validation.ensure_positive_float(new_speed)
+        self._speed = validated_speed
 
     @property
     def delay(self) -> DelayProperties:
@@ -312,7 +314,6 @@ class BaseLiquidHandlingProperties:
 
     @position_reference.setter
     def position_reference(self, new_position: str) -> None:
-        # TODO validation for position reference
         self._position_reference = PositionReference(new_position)
 
     @property
@@ -321,8 +322,8 @@ class BaseLiquidHandlingProperties:
 
     @offset.setter
     def offset(self, new_offset: Sequence[float]) -> None:
-        # TODO validate valid coordinates
-        self._offset = Coordinate(x=new_offset[0], y=new_offset[1], z=new_offset[2])
+        x, y, z = validation.validate_coordinates(new_offset)
+        self._offset = Coordinate(x=x, y=y, z=z)
 
     @property
     def flow_rate_by_volume(self) -> LiquidHandlingPropertyByVolume:
@@ -346,8 +347,8 @@ class AspirateProperties(BaseLiquidHandlingProperties):
 
     @pre_wet.setter
     def pre_wet(self, new_setting: bool) -> None:
-        # TODO boolean validation
-        self._pre_wet = new_setting
+        validated_setting = validation.ensure_boolean(new_setting)
+        self._pre_wet = validated_setting
 
     @property
     def retract(self) -> RetractAspirate:
@@ -398,8 +399,6 @@ class MultiDispenseProperties(BaseLiquidHandlingProperties):
         return self._disposal_by_volume
 
 
-# TODO (spp, 2024-10-17): create PAPI-equivalent types for all the properties
-#  and have validation on value updates with user-facing error messages
 @dataclass
 class TransferProperties:
     _aspirate: AspirateProperties
