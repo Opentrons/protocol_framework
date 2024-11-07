@@ -15,11 +15,11 @@ import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { useAtom } from 'jotai'
 import { createProtocolAtom } from '../../resources/atoms'
-import { MODULES_STEP } from '../ProtocolSectionsContainer'
+import { LABWARE_LIQUIDS_STEP } from '../ProtocolSectionsContainer'
 import { useState } from 'react'
 import { LabwareModal } from '../LabwareModal'
 import { ControlledLabwareListItems } from '../../molecules/ControlledLabwareListItems'
-import { ControlledAddLiquidInputs } from '../../molecules/ControlledAddLiquidInputs'
+import { ControlledAddInputFields } from '../../molecules/ControlledAddInputFields'
 
 export interface DisplayLabware {
   labwareURI: string
@@ -43,7 +43,10 @@ export function LabwareLiquidsSection(): JSX.Element | null {
   const liquids: string[] = watch(LIQUIDS_FIELD_NAME) ?? []
 
   function handleConfirmButtonClick(): void {
-    const step = currentStep > MODULES_STEP ? currentStep : MODULES_STEP + 1
+    const step =
+      currentStep > LABWARE_LIQUIDS_STEP
+        ? currentStep
+        : LABWARE_LIQUIDS_STEP + 1
 
     setCreateProtocolAtom({
       currentStep: step,
@@ -102,7 +105,10 @@ export function LabwareLiquidsSection(): JSX.Element | null {
         iconName="plus"
       />
 
-      <ControlledAddLiquidInputs />
+      <ControlledAddInputFields
+        fieldName={LIQUIDS_FIELD_NAME}
+        name={t('liquid').toLowerCase()}
+      />
 
       <ButtonContainer>
         <LargeButton

@@ -10,19 +10,25 @@ import {
 } from '@opentrons/components'
 import { Controller, useFormContext } from 'react-hook-form'
 import { css } from 'styled-components'
-import { LIQUIDS_FIELD_NAME } from '../../organisms/LabwareLiquidsSection'
 import { useTranslation } from 'react-i18next'
 
-export function ControlledAddLiquidInputs(): JSX.Element {
+export interface ControlledAddInputFieldsProps {
+  fieldName: string
+  name: string
+}
+
+export function ControlledAddInputFields({
+  fieldName,
+  name,
+}: ControlledAddInputFieldsProps): JSX.Element {
   const { t } = useTranslation('create_protocol')
   const { watch } = useFormContext()
 
-  const liquids: string[] = watch(LIQUIDS_FIELD_NAME) ?? ['']
+  const values: string[] = watch(fieldName) ?? ['']
 
   return (
     <Controller
-      name={LIQUIDS_FIELD_NAME}
-      defaultValue={['']}
+      name={fieldName}
       rules={{
         required: true,
         validate: value => value.length > 0 && value[0] !== '',
@@ -30,21 +36,21 @@ export function ControlledAddLiquidInputs(): JSX.Element {
       render={({ field }) => {
         return (
           <>
-            {liquids.map((liquid, index) => (
+            {values.map((value, index) => (
               <Flex
                 key={index}
                 alignItems={ALIGN_CENTER}
                 gap={SPACING.spacing8}
               >
                 <InputField
-                  name={`liquid-${index + 1}`}
-                  title={`${t('liquid')} ${index + 1}`}
-                  caption={index === 0 && t('add_liquid_caption')}
-                  value={liquids[index] === '' ? '' : liquids[index] ?? liquid}
+                  name={`${name}-${index + 1}`}
+                  title={`${t(name)} ${index + 1}`}
+                  caption={index === 0 && t(`add_${name}_caption`)}
+                  value={values[index] === '' ? '' : values[index] ?? value}
                   onChange={e => {
-                    const newLiquids = [...liquids]
-                    newLiquids[index] = e.target.value
-                    field.onChange(newLiquids)
+                    const newValues = [...values]
+                    newValues[index] = e.target.value
+                    field.onChange(newValues)
                   }}
                   onBlur={field.onBlur}
                 />
@@ -52,7 +58,7 @@ export function ControlledAddLiquidInputs(): JSX.Element {
                   <Link
                     role="button"
                     onClick={() => {
-                      field.onChange(liquids.filter((_, i) => i !== index))
+                      field.onChange(values.filter((_, i) => i !== index))
                     }}
                     css={css`
                       width: 10%;
@@ -64,7 +70,7 @@ export function ControlledAddLiquidInputs(): JSX.Element {
                     `}
                   >
                     <StyledText desktopStyle="bodyDefaultRegular">
-                      {t('remove_liquid')}
+                      {t(`remove_${name}`)}
                     </StyledText>
                   </Link>
                 )}

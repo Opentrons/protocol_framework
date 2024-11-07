@@ -31,6 +31,7 @@ export interface CreateProtocolFormData {
   modules: DisplayModules[]
   labwares: DisplayLabware[]
   liquids: string[]
+  steps: string[]
 }
 
 const TOTAL_STEPS = 5
@@ -50,6 +51,8 @@ export function CreateProtocol(): JSX.Element | null {
       instruments: {},
       modules: [],
       labwares: [],
+      liquids: [''],
+      steps: [''],
     },
   })
 
