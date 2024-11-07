@@ -30,7 +30,7 @@
   "robot_type": "What kind of robot do you have?",
   "show_all_tips": "Show more tip types",
   "show_default_tips": "Show default tips",
-  "show_tips": "Show incompatible tips",
+  "show_tips": "Show more tip types",
   "slots_limit_reached": "Slots limit reached",
   "staging_area_has_labware": "This staging area slot has labware",
   "staging_area_will_delete_labware": "The staging area slot that you are about to delete has labware placed on it. If you make these changes to your protocol starting deck, the labware will be deleted as well.",
