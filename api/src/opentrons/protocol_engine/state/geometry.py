@@ -1203,6 +1203,7 @@ class GeometryView:
                 extra_offset = LabwareOffsetVector(x=0, y=0, z=0)
                 if (
                     isinstance(ancestor, ModuleLocation)
+                    # todo(mm, 2024-11-06): Do not access private module state; only use public ModuleView methods.
                     and self._modules._state.requested_model_by_id[ancestor.moduleId]
                     == ModuleModel.THERMOCYCLER_MODULE_V2
                     and labware_validation.validate_definition_is_lid(current_labware)
@@ -1241,6 +1242,19 @@ class GeometryView:
                     + extra_offset
                 )
 
+    # todo(mm, 2024-11-05): This may be incorrect because it does not take the following
+    # offsets into account:
+    #
+    # * The pickup offset in the definition of the parent of the gripped labware.
+    # * The "additional offset" or "user offset", e.g. the `pickUpOffset` and `dropOffset`
+    #   params in the `moveLabware` command.
+    #
+    # For robustness, we should combine this with `get_gripper_labware_movement_waypoints()`.
+    #
+    # We should also be more explicit about which offsets act to move the gripper paddles
+    # relative to the gripped labware, and which offsets act to change how the gripped
+    # labware sits atop its parent. Those have different effects on how far the gripped
+    # labware juts beyond the paddles while it's in transit.
     def check_gripper_labware_tip_collision(
         self,
         gripper_homed_position_z: float,
@@ -1321,11 +1335,11 @@ class GeometryView:
             module_loc = self._modules.get_location(parent_location.moduleId)
             slot_name = module_loc.slotName
 
-        slot_based_offset = self._labware.get_labware_gripper_offsets(
+        slot_based_offset = self._labware.get_child_gripper_offsets(
             labware_id=labware_id, slot_name=slot_name.to_ot3_equivalent()
         )
 
-        return slot_based_offset or self._labware.get_labware_gripper_offsets(
+        return slot_based_offset or self._labware.get_child_gripper_offsets(
             labware_id=labware_id, slot_name=None
         )
 

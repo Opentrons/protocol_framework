@@ -1530,10 +1530,9 @@ def test_get_labware_gripper_offsets(
     )
 
     assert (
-        subject.get_labware_gripper_offsets(labware_id="plate-id", slot_name=None)
-        is None
+        subject.get_child_gripper_offsets(labware_id="plate-id", slot_name=None) is None
     )
-    assert subject.get_labware_gripper_offsets(
+    assert subject.get_child_gripper_offsets(
         labware_id="adapter-plate-id", slot_name=DeckSlotName.SLOT_D1
     ) == LabwareMovementOffsetData(
         pickUpOffset=LabwareOffsetVector(x=0, y=0, z=0),
@@ -1570,13 +1569,13 @@ def test_get_labware_gripper_offsets_default_no_slots(
     )
 
     assert (
-        subject.get_labware_gripper_offsets(
+        subject.get_child_gripper_offsets(
             labware_id="labware-id", slot_name=DeckSlotName.SLOT_D1
         )
         is None
     )
 
-    assert subject.get_labware_gripper_offsets(
+    assert subject.get_child_gripper_offsets(
         labware_id="labware-id", slot_name=None
     ) == LabwareMovementOffsetData(
         pickUpOffset=LabwareOffsetVector(x=1, y=2, z=3),
