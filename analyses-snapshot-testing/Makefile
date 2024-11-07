@@ -99,31 +99,6 @@ build-opentrons-analysis: build-base-image
 	@echo "If you want to build a different version, run 'make build-opentrons-analysis ANALYSIS_REF=<version>'"
 	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) --build-arg ANALYSIS_REF=$(ANALYSIS_REF) --build-arg CACHEBUST=$(CACHEBUST) -t opentrons-analysis:$(ANALYSIS_REF) -f citools/Dockerfile.analyze citools/.
 
-
-
-.PHONY: build-base-image-ci
-build-base-image-ci:
-	@echo "Building the base image $(BASE_IMAGE_NAME) with cache for CI"
-	docker buildx build --cache-from type=local,src=$(CACHE_DIR) \
-	                    --cache-to type=local,dest=$(CACHE_DIR),mode=max \
-	                    --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) \
-	                    -f citools/Dockerfile.base -t $(BASE_IMAGE_NAME) citools/ --output=type=docker
-
-.PHONY: build-opentrons-analysis-ci
-build-opentrons-analysis-ci:
-	@echo "Building docker image for $(ANALYSIS_REF) with cache for CI"
-	docker buildx build --cache-from type=local,src=$(CACHE_DIR) \
-	                    --cache-to type=local,dest=$(CACHE_DIR),mode=max \
-	                    --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) \
-	                    --build-arg ANALYSIS_REF=$(ANALYSIS_REF) \
-	                    --build-arg CACHEBUST=$(CACHEBUST) \
-	                    -t opentrons-analysis:$(ANALYSIS_REF) -f citools/Dockerfile.analyze citools/ --output=type=docker
-
-.PHONY: build-all-ci
-build-all-ci: build-base-image-ci build-opentrons-analysis-ci
-	@echo "Built both base and analysis images with shared cache"
-
-
 .PHONY: local-build
 local-build: build-base-image
 	@echo "Building docker image for your local opentrons code"
