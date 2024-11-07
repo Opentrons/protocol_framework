@@ -87,23 +87,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: List docker images
-        run: docker images
-
       - name: Build analysis image
-        uses: docker/build-push-action@v6
-        with:
-          context: analyses-snapshot-testing/citools
-          file: analyses-snapshot-testing/citools/Dockerfile.analyze
-          push: false
-          load: true
-          tags: opentrons-analysis:${{ env.ANALYSIS_REF }}
-          build-args: |
-            BASE_IMAGE_NAME=${{ env.BASE_IMAGE_NAME }}
-            ANALYSIS_REF=${{ env.ANALYSIS_REF }}
-            CACHEBUST=$(date +%s)
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        working-directory: analyses-snapshot-testing
+        run: make build-opentrons-analysis BASE_IMAGE_NAME=${{ env.BASE_IMAGE_NAME }} ANALYSIS_REF=${{ env.ANALYSIS_REF }} CACHEBUST=${{ github.run_number }}
 
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
