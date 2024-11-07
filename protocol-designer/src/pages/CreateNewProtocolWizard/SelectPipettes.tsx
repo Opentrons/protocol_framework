@@ -177,6 +177,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
             handleGoBack()
           }}
           disabled={isDisabled}
+          tooltipOnDisabled={t('add_pipette_to_continue')}
         >
           {page === 'add' ? (
             <Flex
