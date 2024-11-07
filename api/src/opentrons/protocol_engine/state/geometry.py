@@ -1243,11 +1243,15 @@ class GeometryView:
                 )
 
     # todo(mm, 2024-11-05): This may be incorrect because it does not take the following
-    # offsets into account:
+    # offsets into account, which *are* taken into account for the actual gripper movement:
     #
     # * The pickup offset in the definition of the parent of the gripped labware.
     # * The "additional offset" or "user offset", e.g. the `pickUpOffset` and `dropOffset`
     #   params in the `moveLabware` command.
+    #
+    # And this *does* take these extra offsets into account:
+    #
+    # * The labware's Labware Position Check offset
     #
     # For robustness, we should combine this with `get_gripper_labware_movement_waypoints()`.
     #
@@ -1270,6 +1274,9 @@ class GeometryView:
 
             tip = self._pipettes.get_attached_tip(pipette.id)
             if tip:
+                # NOTE: This call to get_labware_highest_z() uses the labware's LPC offset,
+                # which is an inconsistency between this and the actual gripper movement.
+                # See the todo comment above this function.
                 labware_top_z_when_gripped = gripper_homed_position_z + (
                     self.get_labware_highest_z(labware_id=labware_id)
                     - self.get_labware_grip_point(
