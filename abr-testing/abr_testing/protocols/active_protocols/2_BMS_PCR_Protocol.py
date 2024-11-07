@@ -5,10 +5,9 @@ from opentrons.protocol_api.module_contexts import (
     ThermocyclerContext,
     TemperatureModuleContext,
 )
-from opentrons.protocol_api import SINGLE
+from opentrons.protocol_api import SINGLE, Well
 from abr_testing.protocols import helpers
-from opentrons.hardware_control.modules.types import ThermocyclerStep
-from typing import List
+from typing import List, Dict
 
 
 metadata = {
@@ -20,32 +19,28 @@ requirements = {"robotType": "OT-3", "apiLevel": "2.20"}
 
 def add_parameters(parameters: ParameterContext) -> None:
     """Parameters."""
-    helpers.create_pipette_mount_parameter(parameters)
+    helpers.create_single_pipette_mount_parameter(parameters)
     helpers.create_disposable_lid_parameter(parameters)
-    parameters.add_csv_file(
-        display_name="Samples",
-        variable_name="samples_csv",
-        description="Asp/ disp volumes.",
-    )
+    helpers.create_csv_parameter(parameters)
 
 
 def run(ctx: ProtocolContext) -> None:
     """Protocol."""
     pipette_mount = ctx.params.pipette_mount  # type: ignore[attr-defined]
     disposable_lid = ctx.params.disposable_lid  # type: ignore[attr-defined]
-    parsed_csv = ctx.params.csv_data.parse_as_csv()  # type: ignore[attr-defined]
+    parsed_csv = ctx.params.parameters_csv.parse_as_csv()  # type: ignore[attr-defined]
     rxn_vol = 50
     real_mode = True
     # DECK SETUP AND LABWARE
 
     tc_mod: ThermocyclerContext = ctx.load_module(
-        "thermocyclerModuleV2"
+        helpers.tc_str
     )  # type: ignore[assignment]
 
     tc_mod.open_lid()
     tc_mod.set_lid_temperature(105)
     temp_mod: TemperatureModuleContext = ctx.load_module(
-        "temperature module gen2", location="D3"
+        helpers.temp_str, location="D3"
     )  # type: ignore[assignment]
     reagent_rack = temp_mod.load_labware(
         "opentrons_24_aluminumblock_nest_1.5ml_snapcap"
@@ -77,41 +72,38 @@ def run(ctx: ProtocolContext) -> None:
     )
     p50.configure_nozzle_layout(style=SINGLE, start="A1", tip_racks=tiprack_50)
     ctx.load_trash_bin("A3")
-    mmx_liq = ctx.define_liquid(
-        name="Mastermix", description="Mastermix", display_color="#008000"
-    )
-    water_liq = ctx.define_liquid(
-        name="Water", description="Water", display_color="#A52A2A"
-    )
-    dna_liq = ctx.define_liquid(name="DNA", description="DNA", display_color="#A52A2A")
-
-    # mapping
 
     temp_mod.set_temperature(4)
 
-    water = reagent_rack["B1"]
-    water.load_liquid(liquid=water_liq, volume=1500)
-    #
-    mmx_pic = reagent_rack.rows()[0]
-    for mmx_well in mmx_pic:
-        mmx_well.load_liquid(liquid=mmx_liq, volume=1500)
-
-    dna_pic = source_plate.wells()
-    for dna_well in dna_pic:
-        dna_well.load_liquid(liquid=dna_liq, volume=50)
-
+    # LOAD LIQUIDS
+    water: Well = reagent_rack["B1"]
+    mmx_pic: List[Well] = reagent_rack.rows()[0]
+    dna_pic: List[Well] = source_plate.wells()
+    liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
+        "Water": [{"well": water, "volume": 1500.0}],
+        "Mastermix": [{"well": mmx_pic, "volume": 1500.0}],
+        "DNA": [{"well": dna_pic, "volume": 50.0}],
+    }
+    helpers.load_wells_with_custom_liquids(ctx, liquid_vols_and_wells)
+    wells_to_probe = [[water], mmx_pic, dna_pic]
+    wells_to_probe_flattened = [
+        well for list_of_wells in wells_to_probe for well in list_of_wells
+    ]
+    helpers.find_liquid_height_of_all_wells(ctx, p50, wells_to_probe_flattened)
     # adding water
     ctx.comment("\n\n----------ADDING WATER----------\n")
     p50.pick_up_tip()
     # p50.aspirate(40, water) # prewet
     # p50.dispense(40, water)
+    parsed_csv = parsed_csv[1:]
     num_of_rows = len(parsed_csv)
-    for row in range(num_of_rows):
-        water_vol = row[1]
+    for row_index in range(num_of_rows):
+        row_values = parsed_csv[row_index]
+        water_vol = row_values[1]
         if water_vol.lower() == "x":
             continue
-        water_vol = int(row[1])
-        dest_well = row[0]
+        water_vol = int(water_vol)
+        dest_well = row_values[0]
         if water_vol == 0:
             break
 
@@ -119,13 +111,12 @@ def run(ctx: ProtocolContext) -> None:
         p50.aspirate(water_vol, water)
         p50.dispense(water_vol, dest_plate[dest_well], rate=0.5)
         p50.configure_for_volume(50)
-
         # p50.blow_out()
     p50.drop_tip()
 
     # adding Mastermix
     ctx.comment("\n\n----------ADDING MASTERMIX----------\n")
-    for i, row in enumerate(csv_lines):
+    for i, row in enumerate(parsed_csv):
         p50.pick_up_tip()
         mmx_vol = row[3]
         if mmx_vol.lower() == "x":
@@ -156,14 +147,12 @@ def run(ctx: ProtocolContext) -> None:
         p50.touch_tip()
         p50.configure_for_volume(50)
         p50.drop_tip()
-
     if p50.has_tip:
         p50.drop_tip()
 
     # adding DNA
     ctx.comment("\n\n----------ADDING DNA----------\n")
-    for row in csv_lines:
-
+    for row in parsed_csv:
         dna_vol = row[2]
         if dna_vol.lower() == "x":
             continue
@@ -186,34 +175,34 @@ def run(ctx: ProtocolContext) -> None:
         )
         p50.drop_tip()
         p50.configure_for_volume(50)
+        wells_to_probe_flattened.append(dest_plate[dest_well])
 
     ctx.comment("\n\n-----------Running PCR------------\n")
 
     if real_mode:
-
-        profile1: List[ThermocyclerStep] = [
-            {"temperature": 95, "hold_time_minutes": 2},
-        ]
-        profile2: List[ThermocyclerStep] = [
-            {"temperature": 98, "hold_time_seconds": 10},
-            {"temperature": 58, "hold_time_seconds": 10},
-            {"temperature": 72, "hold_time_seconds": 30},
-        ]
-        profile3: List[ThermocyclerStep] = [{"temperature": 72, "hold_time_minutes": 5}]
         if disposable_lid:
             lid_on_plate, unused_lids, used_lids = helpers.use_disposable_lid_with_tc(
                 ctx, unused_lids, used_lids, dest_plate, tc_mod
             )
         else:
             tc_mod.close_lid()
-        tc_mod.execute_profile(steps=profile1, repetitions=1, block_max_volume=50)
-        tc_mod.execute_profile(steps=profile2, repetitions=30, block_max_volume=50)
-        tc_mod.execute_profile(steps=profile3, repetitions=1, block_max_volume=50)
+        helpers.perform_pcr(
+            ctx,
+            tc_mod,
+            initial_denature_time_sec=120,
+            denaturation_time_sec=10,
+            anneal_time_sec=10,
+            extension_time_sec=30,
+            cycle_repetitions=30,
+            final_extension_time_min=5,
+        )
+
         tc_mod.set_block_temperature(4)
 
-    tc_mod.open_lid()
-    if disposable_lid:
-        if len(used_lids) <= 1:
-            ctx.move_labware(lid_on_plate, "C2", use_gripper=True)
-        else:
-            ctx.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
+        tc_mod.open_lid()
+        if disposable_lid:
+            if len(used_lids) <= 1:
+                ctx.move_labware(lid_on_plate, "C2", use_gripper=True)
+            else:
+                ctx.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
+        helpers.find_liquid_height_of_all_wells(ctx, p50, wells_to_probe_flattened)

@@ -16,6 +16,7 @@ from opentrons.protocol_api.module_contexts import (
 
 import numpy as np
 from abr_testing.protocols import helpers
+from typing import Dict
 
 metadata = {
     "author": "Zach Galluzzo <zachary.galluzzo@opentrons.com>",
@@ -57,29 +58,25 @@ waste_vol = 0
 # Start protocol
 def add_parameters(parameters: ParameterContext) -> None:
     """Parameters."""
-    parameters.add_csv_file(
-        variable_name="parameters_csv",
-        display_name="Parameters CSV File",
-        description="CSV file containing parameters for this protocol",
-    )
+    helpers.create_dot_bottom_parameter(parameters)
+    helpers.create_single_pipette_mount_parameter(parameters)
+    helpers.create_hs_speed_parameter(parameters)
 
 
 def run(ctx: ProtocolContext) -> None:
     """Protocol."""
     dry_run = False
     inc_lysis = True
-    mount = "left"
     res_type = "nest_12_reservoir_15ml"
     TIP_TRASH = False
     num_samples = 48
-    wash_vol = 150
-    lysis_vol = 140
-    stop_vol = 100
-    elution_vol = dnase_vol = 50
-    # default="\protocols\csv_parameters\9_parameters.csv",
-    csv_params = ctx.params.parameters_csv.parse_as_csv()  # type: ignore[attr-defined]
-    heater_shaker_speed = int(csv_params[1][0])
-    dot_bottom = csv_params[1][1]
+    wash_vol = 150.0
+    lysis_vol = 140.0
+    stop_vol = 100.0
+    elution_vol = dnase_vol = 50.0
+    heater_shaker_speed = ctx.params.heater_shaker_speed  # type: ignore[attr-defined]
+    dot_bottom = ctx.params.dot_bottom  # type: ignore[attr-defined]
+    pipette_mount = ctx.params.pipette_mount  # type: ignore[attr-defined]
 
     # Protocol Parameters
     deepwell_type = "nest_96_wellplate_2ml_deep"
@@ -95,28 +92,25 @@ def run(ctx: ProtocolContext) -> None:
         lysis_time = 0.25
         drybeads = elute_time = 0.25
         bind_time = wash_time = dnase_time = stop_time = 0.25
-    bead_vol = 20
+    bead_vol = 20.0
     ctx.load_trash_bin("A3")
     h_s: HeaterShakerContext = ctx.load_module(helpers.hs_str, "D1")  # type: ignore[assignment]
-    h_s_adapter = h_s.load_adapter("opentrons_96_deep_well_adapter")
-    sample_plate = h_s_adapter.load_labware(deepwell_type, "Sample Plate")
+    sample_plate, h_s_adapter = helpers.load_hs_adapter_and_labware(
+        deepwell_type, h_s, "Sample Plate"
+    )
     h_s.close_labware_latch()
     temp: TemperatureModuleContext = ctx.load_module(
         helpers.temp_str, "D3"
     )  # type: ignore[assignment]
-    temp_block = temp.load_adapter("opentrons_96_well_aluminum_block")
-    elutionplate = temp_block.load_labware(
-        "armadilo_96_wellplate_200ul_pcr_full_skirt", "Elution Plate"
+    elutionplate, temp_adapter = helpers.load_temp_adapter_and_labware(
+        "armadillo_96_wellplate_200ul_pcr_full_skirt", temp, "Elution Plate"
     )
     temp.set_temperature(4)
     magblock: MagneticBlockContext = ctx.load_module(
         helpers.mag_str, "C1"
     )  # type: ignore[assignment]
-    waste = (
-        ctx.load_labware("nest_1_reservoir_195ml", "B3", "Liquid Waste")
-        .wells()[0]
-        .top()
-    )
+    waste_reservoir = ctx.load_labware("nest_1_reservoir_195ml", "B3", "Liquid Waste")
+    waste = waste_reservoir.wells()[0].top()
     res1 = ctx.load_labware(res_type, "D2", "reagent reservoir 1")
     num_cols = math.ceil(num_samples / 8)
 
@@ -134,7 +128,11 @@ def run(ctx: ProtocolContext) -> None:
     tips_sn = tips200.wells()[:num_samples]
 
     # load P1000M pipette
-    m1000 = ctx.load_instrument("flex_8channel_1000", mount)
+    m1000 = ctx.load_instrument(
+        "flex_8channel_1000",
+        pipette_mount,
+        tip_racks=[tips200, tips201, tips202, tips203],
+    )
 
     # Load Liquid Locations in Reservoir
     elution_solution = elutionplate.rows()[0][:num_cols]
@@ -159,51 +157,24 @@ def run(ctx: ProtocolContext) -> None:
     elution_samps = elutionplate.wells()[: (8 * num_cols)]
     dnase1_ = elutionplate.wells()[(8 * num_cols) : (16 * num_cols)]
 
-    colors = helpers.liquid_colors
-
-    locations = [lysis_, wash1, wash2, wash3, wash4, wash5, stopreaction]
-    vols = [lysis_vol, wash_vol, wash_vol, wash_vol, wash_vol, wash_vol, stop_vol]
-    liquids = ["Lysis", "Wash 1", "Wash 2", "Wash 3", "Wash 4", "Wash 5", "Stop"]
-
-    dnase_liq = ctx.define_liquid(
-        name="DNAse", description="DNAse", display_color="#C0C0C0"
-    )
-    eluate = ctx.define_liquid(
-        name="Elution Buffer", description="Elution Buffer", display_color="#00FF00"
-    )
-    bead = ctx.define_liquid(name="Beads", description="Beads", display_color="#FFA500")
-    sample = ctx.define_liquid(
-        name="Sample", description="Cell Pellet", display_color="#FFC0CB"
-    )
-
     # Add liquids to non-reservoir labware
-    for i in beads_:
-        i.load_liquid(liquid=bead, volume=bead_vol)
-    for i in cells_:
-        i.load_liquid(liquid=sample, volume=0)
-    for i in dnase1_:
-        i.load_liquid(liquid=dnase_liq, volume=dnase_vol)
-    for i in elution_samps:
-        i.load_liquid(liquid=eluate, volume=elution_vol)
+    liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
+        "Beads": [{"well": beads_, "volume": bead_vol}],
+        "Sample": [{"well": cells_, "volume": 0.0}],
+        "DNAse": [{"well": dnase1_, "volume": dnase_vol}],
+        "Elution Buffer": [{"well": elution_samps, "volume": elution_vol}],
+        "Lysis": [{"well": lysis_, "volume": lysis_vol}],
+        "Wash 1": [{"well": wash1, "volume": wash_vol}],
+        "Wash 2": [{"well": wash2, "volume": wash_vol}],
+        "Wash 3": [{"well": wash3, "volume": wash_vol}],
+        "Wash 4": [{"well": wash4, "volume": wash_vol}],
+        "Wash 5": [{"well": wash5, "volume": wash_vol}],
+        "Stop": [{"well": stopreaction, "volume": stop_vol}],
+    }
 
-    delete = len(colors) - len(liquids)
-
-    if delete >= 1:
-        for color_del in range(delete):
-            colors.pop(-1)
-
-    def liquids_(liq: str, location: Well, color: str, vol: float) -> None:
-        """Define Liquids."""
-        sampnum = 8 * (math.ceil(num_samples / 8))
-        # Volume Calculation
-        extra_samples = math.ceil(1500 / vol)
-
-        v = vol * (sampnum + extra_samples)
-        loaded_liq = ctx.define_liquid(name=liq, description=liq, display_color=color)
-        location.load_liquid(liquid=loaded_liq, volume=v)
-
-    for x, (ll, l, c, v) in enumerate(zip(liquids, locations, colors, vols)):
-        liquids_(ll, l, c, v)
+    flattened_list_of_wells = helpers.find_liquid_height_of_loaded_liquids(
+        ctx, liquid_vols_and_wells, m1000
+    )
 
     m1000.flow_rate.aspirate = 50
     m1000.flow_rate.dispense = 150
@@ -389,7 +360,7 @@ def run(ctx: ProtocolContext) -> None:
         helpers.set_hs_speed(ctx, h_s, heater_shaker_speed, bind_time, True)
 
         # Transfer from H-S plate to Magdeck plate
-        helpers.move_labware_from_hs_to_mag_block(ctx, sample_plate, h_s, magblock)
+        helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
 
         for bindi in np.arange(
             settling_time, 0, -0.5
@@ -422,7 +393,6 @@ def run(ctx: ProtocolContext) -> None:
         vol_per_trans = vol / num_trans
         for i, m in enumerate(samples_m):
             src = source
-            m1000.require_liquid_presence(src)
             for n in range(num_trans):
                 m1000.aspirate(vol_per_trans, src)
                 m1000.air_gap(10)
@@ -436,7 +406,7 @@ def run(ctx: ProtocolContext) -> None:
         helpers.set_hs_speed(ctx, h_s, heater_shaker_speed, wash_time, True)
 
         # Transfer from H-S plate to Magdeck plate
-        helpers.move_labware_from_hs_to_mag_block(ctx, sample_plate, h_s, magblock)
+        helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
 
         for washi in np.arange(
             settling_time, 0, -0.5
@@ -502,7 +472,7 @@ def run(ctx: ProtocolContext) -> None:
         helpers.set_hs_speed(ctx, h_s, heater_shaker_speed, stop_time, True)
 
         # Transfer from H-S plate to Magdeck plate
-        helpers.move_labware_from_hs_to_mag_block(ctx, sample_plate, h_s, magblock)
+        helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
 
         for stop in np.arange(settling_time, 0, -0.5):
             ctx.delay(
@@ -545,7 +515,7 @@ def run(ctx: ProtocolContext) -> None:
         helpers.set_hs_speed(ctx, h_s, heater_shaker_speed, elute_time, True)
 
         # Transfer from H-S plate to Magdeck plate
-        helpers.move_labware_from_hs_to_mag_block(ctx, sample_plate, h_s, magblock)
+        helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
 
         for elutei in np.arange(settling_time, 0, -0.5):
             ctx.delay(
@@ -585,3 +555,6 @@ def run(ctx: ProtocolContext) -> None:
             msg="There are " + str(beaddry) + " minutes left in the drying step.",
         )
     elute(elution_vol)
+
+    flattened_list_of_wells.append(waste_reservoir["A1"])
+    helpers.find_liquid_height_of_all_wells(ctx, m1000, flattened_list_of_wells)

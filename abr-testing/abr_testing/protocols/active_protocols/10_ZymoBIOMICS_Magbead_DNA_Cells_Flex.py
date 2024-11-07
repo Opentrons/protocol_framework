@@ -1,7 +1,7 @@
 """Flex ZymoBIOMICS Magbead DNA Extraction: Cells."""
 import math
 from opentrons import types
-from typing import List, Union
+from typing import List, Dict
 from opentrons import protocol_api
 from opentrons.protocol_api import Well, InstrumentContext
 import numpy as np
@@ -51,7 +51,7 @@ drop_count = 0
 def add_parameters(parameters: protocol_api.ParameterContext) -> None:
     """Define parameters."""
     helpers.create_hs_speed_parameter(parameters)
-    helpers.create_pipette_mount_parameter(parameters)
+    helpers.create_single_pipette_mount_parameter(parameters)
     helpers.create_dot_bottom_parameter(parameters)
 
 
@@ -100,25 +100,23 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
     binding_buffer_vol = bind_vol + bead_vol
     ctx.load_trash_bin("A3")
     h_s: HeaterShakerContext = ctx.load_module(helpers.hs_str, "D1")  # type: ignore[assignment]
-    h_s_adapter = h_s.load_adapter("opentrons_96_deep_well_adapter")
-    sample_plate = h_s_adapter.load_labware(deepwell_type, "Samples")
+    labware_name = "Samples"
+    sample_plate, h_s_adapter = helpers.load_hs_adapter_and_labware(
+        deepwell_type, h_s, labware_name
+    )
     h_s.close_labware_latch()
 
     temp: TemperatureModuleContext = ctx.load_module(
         helpers.temp_str, "D3"
     )  # type: ignore[assignment]
-    temp_block = temp.load_adapter("opentrons_96_well_aluminum_block")
-    elutionplate = temp_block.load_labware(
-        "opentrons_96_wellplate_200ul_pcr_full_skirt", "Elution Plate"
+    elutionplate, temp_adapter = helpers.load_temp_adapter_and_labware(
+        "armadillo_96_wellplate_200ul_pcr_full_skirt", temp, "Elution Plate"
     )
     magblock: MagneticBlockContext = ctx.load_module(
         helpers.mag_str, "C1"
     )  # type: ignore[assignment]
-    waste = (
-        ctx.load_labware("nest_1_reservoir_195ml", "B3", "Liquid Waste")
-        .wells()[0]
-        .top()
-    )
+    waste_reservoir = ctx.load_labware("nest_1_reservoir_195ml", "B3", "Liquid Waste")
+    waste = waste_reservoir.wells()[0].top()
     res1 = ctx.load_labware(res_type, "D2", "reagent reservoir 1")
     res2 = ctx.load_labware(res_type, "C2", "reagent reservoir 2")
     num_cols = math.ceil(num_samples / 8)
@@ -130,7 +128,9 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
     tips = [*tips1000.wells()[num_samples:96], *tips1001.wells(), *tips1002.wells()]
     tips_sn = tips1000.wells()[:num_samples]
     # load instruments
-    m1000 = ctx.load_instrument("flex_8channel_1000", mount)
+    m1000 = ctx.load_instrument(
+        "flex_8channel_1000", mount, tip_racks=[tips1000, tips1001, tips1002]
+    )
 
     """
     Here is where you can define the locations of your reagents.
@@ -148,100 +148,21 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
     # Redefine per well for liquid definitions
     samps = sample_plate.wells()[: (8 * num_cols)]
 
-    colors = helpers.liquid_colors
-
-    locations: List[Union[List[Well], Well]] = [
-        lysis_,
-        lysis_,
-        binding_buffer,
-        binding_buffer,
-        bind2_res,
-        wash1,
-        wash2,
-        wash3,
-        elution_solution,
-    ]
-    vols = [
-        lysis_vol,
-        PK_vol,
-        bead_vol,
-        bind_vol,
-        bind2_vol,
-        wash1_vol,
-        wash2_vol,
-        wash3_vol,
-        elution_vol,
-    ]
-    liquids = [
-        "Lysis",
-        "PK",
-        "Beads",
-        "Binding",
-        "Binding 2",
-        "Wash 1",
-        "Wash 2",
-        "Wash 3",
-        "Final Elution",
-    ]
-
-    # Defining liquids per sample well
-    samples = ctx.define_liquid(
-        name="Samples", description="Samples", display_color="#C0C0C0"
+    liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
+        "Lysis": [{"well": lysis_, "volume": lysis_vol}],
+        "PK": [{"well": lysis_, "volume": PK_vol}],
+        "Beads": [{"well": binding_buffer, "volume": bead_vol}],
+        "Binding": [{"well": binding_buffer, "volume": bind_vol}],
+        "Binding 2": [{"well": bind2_res, "volume": bind2_vol}],
+        "Wash 1": [{"well": wash1_vol, "volume": wash1}],
+        "Wash 2": [{"well": wash2_vol, "volume": wash2}],
+        "Wash 3": [{"well": wash3_vol, "volume": wash3}],
+        "Final Elution": [{"well": elution_solution, "volume": elution_vol}],
+        "Samples": [{"well": samps, "volume": 0}],
+    }
+    flattened_list_of_wells = helpers.find_liquid_height_of_loaded_liquids(
+        ctx, liquid_vols_and_wells, m1000
     )
-    for i in samps:
-        i.load_liquid(liquid=samples, volume=0)
-
-    delete = len(colors) - len(liquids)
-
-    if delete >= 1:
-        for i_del in range(delete):
-            colors.pop(-1)
-
-    def add_liquid(
-        liq_type: str, wells: Union[Well, List[Well]], color: str, vol: float
-    ) -> None:
-        """Assigns colored liquid to wells based on type and location."""
-        total_samples = math.ceil(num_samples / 8) * 8
-
-        # Calculate extra sample volume based on liquid type
-        extra_samples = math.ceil(
-            1500
-            / (
-                lysis_vol
-                if liq_type == "PK"
-                else bind_vol
-                if liq_type == "Beads"
-                else vol
-            )
-        )
-
-        # Define liquid
-        liquid = ctx.define_liquid(
-            name=liq_type, description=liq_type, display_color=color
-        )
-
-        # Assign liquid to each well
-        if isinstance(wells, list):
-            samples_per_well = [sample_max // len(wells)] * (
-                total_samples // (sample_max // len(wells))
-            )
-            remainder = total_samples % (sample_max // len(wells))
-
-            if remainder:
-                samples_per_well.append(remainder)
-
-            for sample_count, well in zip(samples_per_well, wells):
-                well.load_liquid(
-                    liquid=liquid, volume=vol * (sample_count + extra_samples)
-                )
-        else:
-            wells.load_liquid(
-                liquid=liquid, volume=vol * (total_samples + extra_samples)
-            )
-
-    # Apply function for each liquid configuration
-    for liq, well, color, vol in zip(liquids, locations, colors, vols):
-        add_liquid(liq, well, color, vol)
 
     m1000.flow_rate.aspirate = 300
     m1000.flow_rate.dispense = 300
@@ -447,7 +368,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         helpers.set_hs_speed(ctx, h_s, heater_shaker_speed * 0.9, bind_time_1, True)
 
         # Transfer from H-S plate to Magdeck plate
-        helpers.move_labware_from_hs_to_mag_block(ctx, sample_plate, h_s, magblock)
+        helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
 
         for bindi in np.arange(
             settling_time + 1, 0, -0.5
@@ -494,7 +415,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         helpers.set_hs_speed(ctx, h_s, heater_shaker_speed, bind_time_2, True)
 
         # Transfer from H-S plate to Magdeck plate
-        helpers.move_labware_from_hs_to_mag_block(ctx, sample_plate, h_s, magblock)
+        helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
 
         for bindi in np.arange(
             settling_time + 1, 0, -0.5
@@ -550,7 +471,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
         helpers.set_hs_speed(ctx, h_s, heater_shaker_speed * 0.9, wash_time, True)
 
-        helpers.move_labware_from_hs_to_mag_block(ctx, sample_plate, h_s, magblock)
+        helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
 
         for washi in np.arange(
             settling_time, 0, -0.5
@@ -578,7 +499,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         helpers.set_hs_speed(ctx, h_s, heater_shaker_speed * 0.9, wash_time, True)
 
         # Transfer back to magnet
-        helpers.move_labware_from_hs_to_mag_block(ctx, sample_plate, h_s, magblock)
+        helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
 
         for elutei in np.arange(settling_time, 0, -0.5):
             ctx.delay(
@@ -616,3 +537,5 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         )
     elute(elution_vol)
     h_s.deactivate_heater()
+    flattened_list_of_wells.extend([waste_reservoir["A1"], elutionplate["A1"]])
+    helpers.find_liquid_height_of_all_wells(ctx, m1000, flattened_list_of_wells)

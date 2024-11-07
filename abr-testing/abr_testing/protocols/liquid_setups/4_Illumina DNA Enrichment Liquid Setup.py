@@ -18,16 +18,20 @@ requirements = {
 
 def run(protocol: protocol_api.ProtocolContext) -> None:
     """Protocol."""
-    source_reservoir, p1000 = load_common_liquid_setup_labware_and_instruments(protocol)
+    (
+        source_reservoir,
+        tip_rack,
+        p1000,
+    ) = load_common_liquid_setup_labware_and_instruments(protocol)
 
     reservoir_1 = protocol.load_labware(
         "nest_96_wellplate_2ml_deep", "D2", "Reservoir 1"
     )  # Reservoir
     reservoir_2 = protocol.load_labware(
-        "thermoscientificnunc_96_wellplate_1300ul", "D3", "Reservoir 2"
+        "thermoscientificnunc_96_wellplate_1300ul", "D3", "Sample Plate 2"
     )  # Reservoir
     sample_plate_1 = protocol.load_labware(
-        "armadillo_96_wellplate_200ul_pcr_full_skirt", "C3", "Sample Plate"
+        "armadillo_96_wellplate_200ul_pcr_full_skirt", "C3", "Sample Plate 1"
     )  # Sample Plate
     reagent_plate_1 = protocol.load_labware(
         "armadillo_96_wellplate_200ul_pcr_full_skirt", "B3", "Reagent Plate"

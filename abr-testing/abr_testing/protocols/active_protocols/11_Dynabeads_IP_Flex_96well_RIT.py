@@ -6,7 +6,7 @@ from opentrons.protocol_api.module_contexts import (
     MagneticBlockContext,
 )
 from abr_testing.protocols import helpers
-from typing import List, Union
+from typing import List, Dict, Union
 
 metadata = {
     "protocolName": "Immunoprecipitation by Dynabeads - (Reagents in 15 mL tubes)",
@@ -23,7 +23,7 @@ requirements = {
 def add_parameters(parameters: ParameterContext) -> None:
     """Define parameters."""
     helpers.create_hs_speed_parameter(parameters)
-    helpers.create_pipette_mount_parameter(parameters)
+    helpers.create_two_pipette_mount_parameters(parameters)
     helpers.create_dot_bottom_parameter(parameters)
 
 
@@ -53,6 +53,8 @@ def run(ctx: ProtocolContext) -> None:
     # defining variables inside def run
     heater_shaker_speed = ctx.params.heater_shaker_speed  # type: ignore[attr-defined]
     ASP_HEIGHT = ctx.params.dot_bottom  # type: ignore[attr-defined]
+    single_channel_mount = ctx.params.pipette_mount_1  # type: ignore[attr-defined]
+    eight_channel_mount = ctx.params.pipette_mount_2  # type: ignore[attr-defined]
     MIX_SPEED = heater_shaker_speed
     MIX_SEC = 10
 
@@ -82,20 +84,23 @@ def run(ctx: ProtocolContext) -> None:
         "opentrons_flex_96_tiprack_1000ul", "C2", "reused tips"
     )
     tips_reused_loc = tips_reused.wells()[:95]
-    p1000 = ctx.load_instrument("flex_8channel_1000", "right", tip_racks=[tips])
-    p1000_single = ctx.load_instrument("flex_1channel_1000", "left", tip_racks=[tips])
+    p1000 = ctx.load_instrument(
+        "flex_8channel_1000", eight_channel_mount, tip_racks=[tips]
+    )
+    p1000_single = ctx.load_instrument(
+        "flex_1channel_1000", single_channel_mount, tip_racks=[tips]
+    )
     h_s: HeaterShakerContext = ctx.load_module(helpers.hs_str, "D1")  # type: ignore[assignment]
-    h_s_adapter = h_s.load_adapter("opentrons_96_deep_well_adapter")
-    working_plate = h_s_adapter.load_labware(
-        "nest_96_wellplate_2ml_deep", "working plate"
+    working_plate, h_s_adapter = helpers.load_hs_adapter_and_labware(
+        "nest_96_wellplate_2ml_deep", h_s, "Working Plate"
     )
 
     if READY_FOR_SDSPAGE == 0:
         temp: TemperatureModuleContext = ctx.load_module(
             helpers.temp_str, "D3"
         )  # type: ignore[assignment]
-        final_plate = temp.load_labware(
-            "opentrons_96_deep_well_adapter_nest_wellplate_2ml_deep", "final plate"
+        final_plate, temp_adapter = helpers.load_temp_adapter_and_labware(
+            "nest_96_wellplate_2ml_deep", temp, "Final Plate"
         )
     mag: MagneticBlockContext = ctx.load_module(helpers.mag_str, "C1")  # type: ignore[assignment]
 
@@ -110,6 +115,19 @@ def run(ctx: ProtocolContext) -> None:
     working_wells = working_plate.wells()[: NUM_COL * 8]  # 6
     if READY_FOR_SDSPAGE == 0:
         final_cols = final_plate.rows()[0][:NUM_COL]
+    # Define Liquids
+    liquid_vols_and_wells: Dict[
+        str, List[Dict[str, Union[Well, List[Well], float]]]
+    ] = {
+        "Beads": [{"well": beads, "volume": 4900}],
+        "AB": [{"well": ab, "volume": 4900}],
+        "Elution": [{"well": elu, "volume": 4900}],
+        "Wash": [{"well": wash, "volume": 750}],
+        "Samples": [{"well": samples, "volume": 250}],
+    }
+    flattened_wells = helpers.find_liquid_height_of_loaded_liquids(
+        ctx, liquid_vols_and_wells, p1000_single
+    )
 
     def transfer_plate_to_plate(
         vol1: float, start: List[Well], end: List[Well], liquid: int
@@ -197,7 +215,7 @@ def run(ctx: ProtocolContext) -> None:
     h_s.close_labware_latch()
     transfer_well_to_plate(BEADS_VOL, beads, working_wells, 2)
 
-    helpers.move_labware_from_hs_to_mag_block(ctx, working_plate, h_s, mag)
+    helpers.move_labware_from_hs_to_destination(ctx, working_plate, h_s, mag)
 
     ctx.delay(minutes=MAG_DELAY_MIN)
     discard(BEADS_VOL * 1.1, working_cols)
@@ -214,7 +232,7 @@ def run(ctx: ProtocolContext) -> None:
     ctx.delay(seconds=INCUBATION_MIN * 60)
     h_s.deactivate_shaker()
 
-    helpers.move_labware_from_hs_to_mag_block(ctx, working_plate, h_s, mag)
+    helpers.move_labware_from_hs_to_destination(ctx, working_plate, h_s, mag)
 
     ctx.delay(minutes=MAG_DELAY_MIN)
     vol_total = SAMPLE_VOL + AB_VOL
@@ -226,7 +244,7 @@ def run(ctx: ProtocolContext) -> None:
 
         transfer_well_to_plate(WASH_VOL, wash, working_cols, 5)
         helpers.set_hs_speed(ctx, h_s, MIX_SPEED, MIX_SEC / 60, True)
-        helpers.move_labware_from_hs_to_mag_block(ctx, working_plate, h_s, mag)
+        helpers.move_labware_from_hs_to_destination(ctx, working_plate, h_s, mag)
         ctx.delay(minutes=MAG_DELAY_MIN)
         discard(WASH_VOL * 1.1, working_cols)
 
@@ -246,7 +264,9 @@ def run(ctx: ProtocolContext) -> None:
         helpers.set_hs_speed(ctx, h_s, MIX_SPEED, (MIX_SEC / 60) + 2, True)
 
         temp.set_temperature(4)
-        helpers.move_labware_from_hs_to_mag_block(ctx, working_plate, h_s, mag)
+        helpers.move_labware_from_hs_to_destination(ctx, working_plate, h_s, mag)
         ctx.delay(minutes=MAG_DELAY_MIN)
         transfer_plate_to_plate(ELUTION_VOL * 1.1, working_cols, final_cols, 6)
         temp.deactivate()
+    flattened_wells.append(waste)
+    helpers.find_liquid_height_of_all_wells(ctx, p1000_single, flattened_wells)

@@ -14,7 +14,6 @@ from opentrons.protocol_api.module_contexts import (
     MagneticBlockContext,
     ThermocyclerContext,
 )
-from opentrons.hardware_control.modules.types import ThermocyclerStep
 from typing import List, Tuple, Optional
 
 metadata = {
@@ -51,6 +50,7 @@ def add_parameters(parameters: ParameterContext) -> None:
         default=False,
     )
     helpers.create_disposable_lid_parameter(parameters)
+    helpers.create_two_pipette_mount_parameters(parameters)
     parameters.add_int(
         variable_name="num_samples",
         display_name="number of samples",
@@ -83,6 +83,8 @@ def run(ctx: ProtocolContext) -> None:
     USE_GRIPPER = True
     trash_tips = ctx.params.trash_tips  # type: ignore[attr-defined]
     dry_run = ctx.params.dry_run  # type: ignore[attr-defined]
+    pipette_1000_mount = ctx.params.pipette_mount_1  # type: ignore[attr-defined]
+    pipette_50_mount = ctx.params.pipette_mount_2  # type: ignore[attr-defined]
     REUSE_ETOH_TIPS = False
     REUSE_RSB_TIPS = (
         False  # Reuse tips for RSB buffer (adding RSB, mixing, and transferring)
@@ -124,9 +126,10 @@ def run(ctx: ProtocolContext) -> None:
     temp_mod: TemperatureModuleContext = ctx.load_module(
         helpers.temp_str, "B3"
     )  # type: ignore[assignment]
-    temp_adapter = temp_mod.load_adapter("opentrons_96_well_aluminum_block")
-    temp_plate = temp_adapter.load_labware(
-        "opentrons_96_wellplate_200ul_pcr_full_skirt", "Temp Module Reservoir Plate"
+    temp_plate, temp_adapter = helpers.load_temp_adapter_and_labware(
+        "armadillo_96_wellplate_200ul_pcr_full_skirt",
+        temp_mod,
+        "Temp Module Reservoir Plate",
     )
 
     if not dry_run:
@@ -163,8 +166,8 @@ def run(ctx: ProtocolContext) -> None:
     global tt_50
     global tt_200
 
-    p200 = ctx.load_instrument("flex_8channel_1000", "left")
-    p50 = ctx.load_instrument("flex_8channel_50", "right")
+    p200 = ctx.load_instrument("flex_8channel_1000", pipette_1000_mount)
+    p50 = ctx.load_instrument("flex_8channel_50", pipette_50_mount)
 
     Available_on_deck_slots = ["A2", "A3", "B3"]
     Available_off_deck_slots = ["A4", "B4"]
@@ -198,114 +201,76 @@ def run(ctx: ProtocolContext) -> None:
         p200.starting_tip = tip200_reuse.wells()[(len(RemoveSup_tip)) * 8]
 
     # Load Reagent Locations in Reservoirs
-
-    # Sample Plate
-    sample_liq = ctx.define_liquid(
-        name="Samples",
-        description="DNA sample of known quantity",
-        display_color="#C0C0C0",
-    )
-    for well in sample_plate.wells()[: 8 * num_cols]:
-        well.load_liquid(liquid=sample_liq, volume=sample_vol)
-
-    Final_liq = ctx.define_liquid(
-        name="Final Library", description="Final Library", display_color="#FFA500"
-    )
-    for well in sample_plate_2.wells()[: 8 * num_cols]:
-        well.load_liquid(liquid=Final_liq, volume=elution_vol_2)
-
-    # Cold Res
-
+    lib_amplification_wells: List[Well] = temp_plate.columns()[num_cols + 3]
+    amplification_res = lib_amplification_wells[0]
     adapters = temp_plate.rows()[0][:num_cols]  # used for filling liquids
-    adapter_liq = ctx.define_liquid(
-        name="Adapters",
-        description="Adapters to ligate onto DNA insert.",
-        display_color="#A52A2A",
-    )
-    for well in temp_plate.wells()[: 8 * num_cols]:
-        well.load_liquid(liquid=adapter_liq, volume=adapter_vol * 2)
-
     end_repair_cols: List[Well] = temp_plate.columns()[
         num_cols
     ]  # used for filling liquids
     er_res = end_repair_cols[0]
-    er_liq = ctx.define_liquid(
-        name="End Repair", description="End Repair mix", display_color="#FF00FF"
-    )
-    for well in end_repair_cols:
-        well.load_liquid(
-            liquid=er_liq, volume=(end_repair_vol * num_cols) + (0.1 * end_repair_vol)
-        )
-
     frag: List[Well] = temp_plate.columns()[num_cols + 1]
     frag_res = frag[0]
-    frag_liq = ctx.define_liquid(
-        name="Fragmentation", description="Fragmentation mix", display_color="#00FFFF"
-    )
-    for well in frag:
-        well.load_liquid(
-            liquid=frag_liq, volume=(frag_vol * num_cols) + (0.1 * frag_vol)
-        )
-
     ligation: List[Well] = temp_plate.columns()[num_cols + 2]
     ligation_res = ligation[0]
-    ligation_liq = ctx.define_liquid(
-        name="Ligation", description="Ligation Mix", display_color="#008000"
-    )
-    for well in ligation:
-        well.load_liquid(
-            liquid=ligation_liq, volume=(ligation_vol * num_cols) + (0.1 * ligation_vol)
-        )
-
-    lib_amplification_wells: List[Well] = temp_plate.columns()[num_cols + 3]
-    amplification_res = lib_amplification_wells[0]
-    amp_liq = ctx.define_liquid(
-        name="Amplification", description="Amplification Mix", display_color="#0000FF"
-    )
-    for well in lib_amplification_wells:
-        well.load_liquid(
-            liquid=amp_liq,
-            volume=(amplification_vol * num_cols) + (0.1 * amplification_vol),
-        )
-
     # Room Temp Res (deepwell)
     bead = reservoir.columns()[0]
     bead_res = bead[0]
-    bead_liq = ctx.define_liquid(
-        name="Ampure Beads", description="Ampure Beads", display_color="#800080"
-    )
-    for well in bead:
-        well.load_liquid(
-            liquid=bead_liq, volume=(bead_vol * num_cols) + (0.1 * bead_vol * num_cols)
-        )
-
     rsb = reservoir.columns()[3]
     rsb_res = rsb[0]
-    rsb_liq = ctx.define_liquid(
-        name="RSB", description="Resuspension buffer", display_color="#FFFF00"
-    )
-    for well in rsb:
-        well.load_liquid(
-            liquid=rsb_liq, volume=(rsb_vol * num_cols) + (0.1 * rsb_vol * num_cols)
-        )
-
     etoh1 = reservoir.columns()[4]
     etoh1_res = etoh1[0]
-    etoh_liq = ctx.define_liquid(
-        name="Ethanol 80%", description="Fresh 80% Ethanol", display_color="#FF00FF"
-    )
-    for well in etoh1:
-        well.load_liquid(
-            liquid=etoh_liq, volume=(etoh_vol * num_cols) + (0.1 * etoh_vol * num_cols)
-        )
-
     etoh2 = reservoir.columns()[5]
     etoh2_res = etoh2[0]
-    for well in etoh2:
-        well.load_liquid(
-            liquid=etoh_liq, volume=(etoh_vol * num_cols) + (0.1 * etoh_vol * num_cols)
-        )
 
+    liquid_vols_and_wells = {
+        "Samples": [
+            {"well": sample_plate.wells()[: 8 * num_cols], "volume": sample_vol}
+        ],
+        "Final Library": [
+            {"well": sample_plate_2.wells()[: 8 * num_cols], "volume": elution_vol_2}
+        ],
+        "Adapters": [{"well": adapters, "volume": adapter_vol * 2.0}],
+        "End Repair Mix": [
+            {
+                "well": end_repair_cols,
+                "volume": (end_repair_vol * num_cols) + (0.1 * end_repair_vol),
+            }
+        ],
+        "Fragmentation Mix": [
+            {"well": frag, "volume": (frag_vol * num_cols) + (0.1 * frag_vol)}
+        ],
+        "Ligation Mix": [
+            {
+                "well": ligation,
+                "volume": (ligation_vol * num_cols) + (0.1 * ligation_vol),
+            }
+        ],
+        "Amplification Mix": [
+            {
+                "well": lib_amplification_wells,
+                "volume": (amplification_vol * num_cols) + (0.1 * amplification_vol),
+            }
+        ],
+        "Ampure Beads": [
+            {
+                "well": bead,
+                "volume": (bead_vol * num_cols) + (0.1 * bead_vol * num_cols),
+            }
+        ],
+        "Resuspension Buffer": [
+            {"well": rsb, "volume": (rsb_vol * num_cols) + (0.1 * rsb_vol * num_cols)}
+        ],
+        "Ethanol 80%": [
+            {
+                "well": etoh1,
+                "volume": (etoh_vol * num_cols) + (0.1 * etoh_vol * num_cols),
+            },
+            {
+                "well": etoh2,
+                "volume": (etoh_vol * num_cols) + (0.1 * etoh_vol * num_cols),
+            },
+        ],
+    }
     waste1 = reservoir.columns()[6]
     waste1_res = waste1[0]
 
@@ -660,25 +625,15 @@ def run(ctx: ProtocolContext) -> None:
         else:
             tc_mod.close_lid()
         if not dry_run:
-            profile_PCR_1: List[ThermocyclerStep] = [
-                {"temperature": 98, "hold_time_seconds": 45}
-            ]
-            tc_mod.execute_profile(
-                steps=profile_PCR_1, repetitions=1, block_max_volume=50
-            )
-            profile_PCR_2: List[ThermocyclerStep] = [
-                {"temperature": 98, "hold_time_seconds": 15},
-                {"temperature": 60, "hold_time_seconds": 30},
-                {"temperature": 72, "hold_time_seconds": 30},
-            ]
-            tc_mod.execute_profile(
-                steps=profile_PCR_2, repetitions=PCRCYCLES, block_max_volume=50
-            )
-            profile_PCR_3: List[ThermocyclerStep] = [
-                {"temperature": 72, "hold_time_minutes": 1}
-            ]
-            tc_mod.execute_profile(
-                steps=profile_PCR_3, repetitions=1, block_max_volume=50
+            helpers.perform_pcr(
+                ctx,
+                tc_mod,
+                initial_denature_time_sec=45,
+                denaturation_time_sec=15,
+                anneal_time_sec=30,
+                extension_time_sec=30,
+                cycle_repetitions=PCRCYCLES,
+                final_extension_time_min=1,
             )
             tc_mod.set_block_temperature(4)
         tc_mod.open_lid()
@@ -1246,9 +1201,18 @@ def run(ctx: ProtocolContext) -> None:
         # Set Block Temp for Final Plate
         tc_mod.set_block_temperature(4)
 
+    tiptrack(tip50, None, reuse=False)
+    p50.return_tip()
+    probed_wells = helpers.find_liquid_height_of_loaded_liquids(
+        ctx, liquid_vols_and_wells, p50
+    )
+
     unused_lids, used_lids = Fragmentation(unused_lids, used_lids)
     unused_lids, used_lids = end_repair(unused_lids, used_lids)
     unused_lids, used_lids = index_ligation(unused_lids, used_lids)
     lib_cleanup()
     unused_lids, used_lids = lib_amplification(unused_lids, used_lids)
     lib_cleanup_2()
+    probed_wells.append(waste1_res)
+    probed_wells.append(waste2_res)
+    helpers.find_liquid_height_of_all_wells(ctx, p50, probed_wells)

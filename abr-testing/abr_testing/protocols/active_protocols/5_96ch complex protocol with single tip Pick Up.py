@@ -14,7 +14,6 @@ from opentrons.protocol_api.module_contexts import (
 )
 from abr_testing.protocols import helpers
 from typing import List
-from opentrons.hardware_control.modules.types import ThermocyclerStep
 
 metadata = {
     "protocolName": "96ch protocol with modules gripper moves and SINGLE tip pickup",
@@ -68,9 +67,9 @@ def run(ctx: ProtocolContext) -> None:
     h_s.open_labware_latch()
 
     temperature_module_adapter = temperature_module.load_adapter(
-        helpers.temp_adapter_str
+        "opentrons_96_well_aluminum_block"
     )
-    h_s_adapter = h_s.load_adapter(helpers.hs_adapter_str)
+    h_s_adapter = h_s.load_adapter("opentrons_96_pcr_adapter")
 
     adapters = [temperature_module_adapter, h_s_adapter]
 
@@ -356,30 +355,17 @@ def run(ctx: ProtocolContext) -> None:
             thermocycler.set_lid_temperature(105)
             # Close lid
             thermocycler.close_lid()
-            # hold at 95° for 3 minutes
-            profile_TAG: List[ThermocyclerStep] = [
-                {"temperature": 95, "hold_time_minutes": 3}
-            ]
-            thermocycler.execute_profile(
-                steps=profile_TAG, repetitions=1, block_max_volume=50
+            helpers.perform_pcr(
+                ctx,
+                thermocycler,
+                initial_denature_time_sec=45,
+                denaturation_time_sec=30,
+                anneal_time_sec=30,
+                extension_time_sec=10,
+                cycle_repetitions=30,
+                final_extension_time_min=5,
             )
-            # 30x cycles of: 70° for 30s 72° for 30s 95° for 10s
-            profile_TAG2: List[ThermocyclerStep] = [
-                {"temperature": 70, "hold_time_seconds": 30},
-                {"temperature": 72, "hold_time_seconds": 30},
-                {"temperature": 95, "hold_time_seconds": 10},
-            ]
-            thermocycler.execute_profile(
-                steps=profile_TAG2, repetitions=30, block_max_volume=50
-            )
-            # hold at 72° for 5min
-            profile_TAG3: List[ThermocyclerStep] = [
-                {"temperature": 72, "hold_time_minutes": 5}
-            ]
-            thermocycler.execute_profile(
-                steps=profile_TAG3, repetitions=1, block_max_volume=50
-            )
-            # # Cool to 4°
+            # Cool to 4°
             thermocycler.set_block_temperature(4)
             thermocycler.set_lid_temperature(105)
             # Open lid

@@ -2,7 +2,6 @@
 from opentrons.protocol_api import (
     ParameterContext,
     ProtocolContext,
-    Labware,
 )
 from opentrons.protocol_api.module_contexts import (
     ThermocyclerContext,
@@ -48,16 +47,14 @@ def add_parameters(parameters: ParameterContext) -> None:
             {"display_name": "1.8", "value": 1.8},
             {"display_name": "1.9", "value": 1.9},
             {"display_name": "2", "value": 2},
-            
-            
         ],
         default=2,
     )
     parameters.add_bool(
-        variable_name = "negative",
-        display_name = "Negative",
-        description = "Turn on to make offset negative.",
-        default = False
+        variable_name="negative",
+        display_name="Negative",
+        description="Turn on to make offset negative.",
+        default=False,
     )
 
 
@@ -66,7 +63,7 @@ def run(protocol: ProtocolContext) -> None:
     # Load Parameters
     lids_in_stack = protocol.params.lids_in_a_stack  # type: ignore[attr-defined]
     x_offset = protocol.params.x_offset  # type: ignore[attr-defined]
-    negative = protocol.params.negative # type: ignore[attr-defined]
+    negative = protocol.params.negative  # type: ignore[attr-defined]
     if negative:
         x_offset = x_offset * -1
     # Thermocycler
@@ -83,13 +80,13 @@ def run(protocol: ProtocolContext) -> None:
     lid_stack_3 = helpers.load_disposable_lids(protocol, lids_in_stack, ["B2"])
     lid_stack_4 = helpers.load_disposable_lids(protocol, lids_in_stack, ["C3"])
     lid_stack_5 = helpers.load_disposable_lids(protocol, lids_in_stack, ["B3"])
-    
+
     drop_offset = {"x": x_offset, "y": 0, "z": 0}
     slot = 0
     lids = [lid_stack_1, lid_stack_2, lid_stack_3, lid_stack_4, lid_stack_5]
     for lid_list in lids:
         lid_to_move = lid_list[0]
-        
+
         lid_to_move_back_to = lid_list[1]
         protocol.comment(f"Offset {x_offset}, Lid # {slot+1}")
         # move lid to plate in thermocycler
@@ -97,4 +94,3 @@ def run(protocol: ProtocolContext) -> None:
             lid_to_move, plate_in_cycler, use_gripper=True, drop_offset=drop_offset
         )
         protocol.move_labware(lid_to_move, lid_to_move_back_to, use_gripper=True)
-

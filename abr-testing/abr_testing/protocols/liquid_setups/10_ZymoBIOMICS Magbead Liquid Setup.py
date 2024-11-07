@@ -20,7 +20,11 @@ requirements = {
 def run(protocol: protocol_api.ProtocolContext) -> None:
     """Protocol."""
     # Initiate Labware
-    source_reservoir, p1000 = load_common_liquid_setup_labware_and_instruments(protocol)
+    (
+        source_reservoir,
+        tip_rack,
+        p1000,
+    ) = load_common_liquid_setup_labware_and_instruments(protocol)
 
     res1 = protocol.load_labware("nest_12_reservoir_15ml", "C3", "R1")
     res2 = protocol.load_labware("nest_12_reservoir_15ml", "B3", "R2")

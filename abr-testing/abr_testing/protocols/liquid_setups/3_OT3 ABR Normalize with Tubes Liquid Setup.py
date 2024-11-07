@@ -5,7 +5,7 @@ from abr_testing.protocols.helpers import (
 )
 
 metadata = {
-    "protocolName": "DVT1ABR1 Liquids: Simple Normalize Long",
+    "protocolName": "DVT1ABR3 Liquids: Flex Normalize with Tubes",
     "author": "Rhyann clarke <rhyann.clarke@opentrons.com>",
     "source": "Protocol Library",
 }
@@ -24,16 +24,17 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
         tip_rack,
         p1000,
     ) = load_common_liquid_setup_labware_and_instruments(protocol)
-    reservoir = protocol.load_labware("nest_12_reservoir_15ml", "D2", "Reservoir")
+    reagent_tube = protocol.load_labware(
+        "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical", "D3", "Reagent Tube"
+    )
+    p1000.configure_nozzle_layout(
+        style=protocol_api.SINGLE, start="H1", tip_racks=[tip_rack]
+    )
     # Transfer Liquid
-    vol = 5400 / 8
-    columns = ["A1", "A2", "A3", "A4", "A5"]
-    for i in columns:
-        p1000.transfer(
-            vol,
-            source=source_reservoir["A1"].bottom(z=0.5),
-            dest=reservoir[i].top(),
-            blowout=True,
-            blowout_location="source well",
-            trash=False,
-        )
+    p1000.transfer(
+        4000,
+        source_reservoir["A1"],
+        reagent_tube["A1"].top(),
+        blowout=True,
+        blowout_location="source well",
+    )
