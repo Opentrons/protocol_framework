@@ -26,9 +26,11 @@ from opentrons.motion_planning.adjacent_slots_getters import (
     get_west_slot,
     get_adjacent_staging_slot,
 )
+from opentrons.protocol_engine.actions.get_state_update import get_state_updates
 from opentrons.protocol_engine.commands.calibration.calibrate_module import (
     CalibrateModuleResult,
 )
+from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.module_substates.absorbance_reader_substate import (
     AbsorbanceReaderMeasureMode,
 )
@@ -234,7 +236,13 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 module_live_data=action.module_live_data,
             )
 
+        for state_update in get_state_updates(action):
+            self._handle_state_update(state_update)
+
     def _handle_command(self, command: Command) -> None:
+        # todo(mm, 2024-11-04): Delete this function. Port these isinstance()
+        # checks to the update_types.StateUpdate mechanism.
+
         if isinstance(command.result, LoadModuleResult):
             slot_name = command.params.location.slotName
             self._add_module_substate(
@@ -291,13 +299,39 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         if isinstance(
             command.result,
             (
-                absorbance_reader.CloseLidResult,
-                absorbance_reader.OpenLidResult,
                 absorbance_reader.InitializeResult,
                 absorbance_reader.ReadAbsorbanceResult,
             ),
         ):
             self._handle_absorbance_reader_commands(command)
+
+    def _handle_state_update(self, state_update: update_types.StateUpdate) -> None:
+        if state_update.absorbance_reader_lid != update_types.NO_CHANGE:
+            module_id = state_update.absorbance_reader_lid.module_id
+            is_lid_on = state_update.absorbance_reader_lid.is_lid_on
+
+            # Get current values:
+            absorbance_reader_substate = self._state.substate_by_module_id[module_id]
+            assert isinstance(
+                absorbance_reader_substate, AbsorbanceReaderSubState
+            ), f"{module_id} is not an absorbance plate reader."
+            configured = absorbance_reader_substate.configured
+            measure_mode = absorbance_reader_substate.measure_mode
+            configured_wavelengths = absorbance_reader_substate.configured_wavelengths
+            reference_wavelength = absorbance_reader_substate.reference_wavelength
+            is_lid_on = absorbance_reader_substate.is_lid_on
+            data = absorbance_reader_substate.data
+
+            self._state.substate_by_module_id[module_id] = AbsorbanceReaderSubState(
+                module_id=AbsorbanceReaderId(module_id),
+                configured=configured,
+                measured=True,
+                is_lid_on=is_lid_on,
+                measure_mode=measure_mode,
+                configured_wavelengths=configured_wavelengths,
+                reference_wavelength=reference_wavelength,
+                data=data,
+            )
 
     def _add_module_substate(  # noqa: C901
         self,
@@ -570,8 +604,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         command: Union[
             absorbance_reader.Initialize,
             absorbance_reader.ReadAbsorbance,
-            absorbance_reader.CloseLid,
-            absorbance_reader.OpenLid,
         ],
     ) -> None:
         module_id = command.params.moduleId
@@ -609,30 +641,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 configured_wavelengths=configured_wavelengths,
                 reference_wavelength=reference_wavelength,
                 data=command.result.data,
-            )
-
-        elif isinstance(command.result, absorbance_reader.OpenLidResult):
-            self._state.substate_by_module_id[module_id] = AbsorbanceReaderSubState(
-                module_id=AbsorbanceReaderId(module_id),
-                configured=configured,
-                measured=True,
-                is_lid_on=False,
-                measure_mode=measure_mode,
-                configured_wavelengths=configured_wavelengths,
-                reference_wavelength=reference_wavelength,
-                data=data,
-            )
-
-        elif isinstance(command.result, absorbance_reader.CloseLidResult):
-            self._state.substate_by_module_id[module_id] = AbsorbanceReaderSubState(
-                module_id=AbsorbanceReaderId(module_id),
-                configured=configured,
-                measured=True,
-                is_lid_on=True,
-                measure_mode=measure_mode,
-                configured_wavelengths=configured_wavelengths,
-                reference_wavelength=reference_wavelength,
-                data=data,
             )
 
 

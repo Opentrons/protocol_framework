@@ -53,46 +53,41 @@ class CloseLidImpl(AbstractCommandImpl[CloseLidParams, SuccessData[CloseLidResul
 
     async def execute(self, params: CloseLidParams) -> SuccessData[CloseLidResult]:
         """Execute the close lid command."""
+        state_update = StateUpdate()
         mod_substate = self._state_view.modules.get_absorbance_reader_substate(
             module_id=params.moduleId
         )
 
-        # lid should currently be on the module
-        assert mod_substate.lid_id is not None
-        loaded_lid = self._state_view.labware.get(mod_substate.lid_id)
-        assert labware_validation.is_absorbance_reader_lid(loaded_lid.loadName)
-
         hardware_lid_status = AbsorbanceReaderLidStatus.OFF
-        # If the lid is closed, if the lid is open No-op out
         if not self._state_view.config.use_virtual_modules:
             abs_reader = self._equipment.get_module_hardware_api(mod_substate.module_id)
 
             if abs_reader is not None:
-                result = await abs_reader.get_current_lid_status()
-                hardware_lid_status = result
+                hardware_lid_status = await abs_reader.get_current_lid_status()
             else:
                 raise CannotPerformModuleAction(
                     "Could not reach the Hardware API for Opentrons Plate Reader Module."
                 )
 
         if hardware_lid_status is AbsorbanceReaderLidStatus.ON:
-            # The lid is already ON, so we can no-op closing it
-            # and return the lids current location data
-            assert isinstance(loaded_lid.location, AddressableAreaLocation)
-            new_location = loaded_lid.location
-            new_offset_id = self._equipment.find_applicable_labware_offset_id(
-                labware_definition_uri=loaded_lid.definitionUri,
-                labware_location=loaded_lid.location,
+            # The lid is already physically ON, so we can no-op physically closing it
+            state_update.set_absorbance_reader_lid(
+                module_id=mod_substate.module_id, is_lid_on=True
             )
         else:
             # Allow propagation of ModuleNotAttachedError.
             _ = self._equipment.get_module_hardware_api(mod_substate.module_id)
+
+            lid_definition = (
+                self._state_view.labware.get_absorbance_reader_lid_definition()
+            )
 
             current_location = self._state_view.modules.absorbance_reader_dock_location(
                 params.moduleId
             )
 
             # we need to move the lid onto the module reader
+            # todo(mm, 2024-11-05): Should this be get_connected_model() instead of get_requested_model()?
             absorbance_model = self._state_view.modules.get_requested_model(
                 params.moduleId
             )
@@ -110,33 +105,25 @@ class CloseLidImpl(AbstractCommandImpl[CloseLidParams, SuccessData[CloseLidResul
             # The lid's labware definition stores gripper offsets for itself in the
             # space normally meant for offsets for labware stacked atop it.
             lid_gripper_offsets = self._state_view.labware.get_child_gripper_offsets(
-                loaded_lid.id, None
+                labware_definition=lid_definition,
+                slot_name=None,
             )
             if lid_gripper_offsets is None:
                 raise ValueError(
                     "Gripper Offset values for Absorbance Reader Lid labware must not be None."
                 )
 
-            # Skips gripper moves when using virtual gripper
             await self._labware_movement.move_labware_with_gripper(
-                labware_id=loaded_lid.id,
+                labware_definition=lid_definition,
                 current_location=current_location,
                 new_location=new_location,
                 user_offset_data=lid_gripper_offsets,
                 post_drop_slide_offset=None,
             )
-
-            new_offset_id = self._equipment.find_applicable_labware_offset_id(
-                labware_definition_uri=loaded_lid.definitionUri,
-                labware_location=new_location,
+            state_update.set_absorbance_reader_lid(
+                module_id=mod_substate.module_id,
+                is_lid_on=True,
             )
-
-        state_update = StateUpdate()
-        state_update.set_labware_location(
-            labware_id=loaded_lid.id,
-            new_location=new_location,
-            new_offset_id=new_offset_id,
-        )
 
         return SuccessData(
             public=CloseLidResult(),
