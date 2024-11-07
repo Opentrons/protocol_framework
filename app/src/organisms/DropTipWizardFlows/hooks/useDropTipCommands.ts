@@ -109,35 +109,38 @@ export function useDropTipCommands({
     isPredefinedLocation: boolean
   ): Promise<void> => {
     return new Promise((resolve, reject) => {
-      const addressableAreaFromConfig = getAddressableAreaFromConfig(
-        addressableArea,
-        deckConfig,
-        instrumentModelSpecs.channels,
-        robotType
-      )
+      Promise.resolve()
+        .then(() => {
+          const addressableAreaFromConfig = getAddressableAreaFromConfig(
+            addressableArea,
+            deckConfig,
+            instrumentModelSpecs.channels,
+            robotType
+          )
 
-      if (addressableAreaFromConfig == null) {
-        throw new Error('invalid addressable area.')
-      }
+          if (addressableAreaFromConfig == null) {
+            throw new Error('invalid addressable area.')
+          }
 
-      const moveToAACommand = buildMoveToAACommand(
-        addressableAreaFromConfig,
-        pipetteId,
-        isPredefinedLocation,
-        issuedCommandsType
-      )
+          const moveToAACommand = buildMoveToAACommand(
+            addressableAreaFromConfig,
+            pipetteId,
+            isPredefinedLocation,
+            issuedCommandsType
+          )
 
-      return chainRunCommands(
-        isFlex
-          ? [
-              ENGAGE_AXES,
-              UPDATE_ESTIMATORS_EXCEPT_PLUNGERS,
-              Z_HOME,
-              moveToAACommand,
-            ]
-          : [Z_HOME, moveToAACommand],
-        false
-      )
+          return chainRunCommands(
+            isFlex
+              ? [
+                  ENGAGE_AXES,
+                  UPDATE_ESTIMATORS_EXCEPT_PLUNGERS,
+                  Z_HOME,
+                  moveToAACommand,
+                ]
+              : [Z_HOME, moveToAACommand],
+            false
+          )
+        })
         .then((commandData: CommandData[]) => {
           const error = commandData[0].data.error
           if (error != null) {
