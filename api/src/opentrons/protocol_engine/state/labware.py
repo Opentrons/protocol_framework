@@ -933,7 +933,7 @@ class LabwareView(HasState[LabwareState]):
         labware_id: str,
         slot_name: Optional[DeckSlotName],
     ) -> Optional[LabwareMovementOffsetData]:
-        """Get the offsets that a labware says should be applied to children stacked atop it.
+        """Get the grip offsets that a labware says should be applied to children stacked atop it.
 
         Params:
             labware_id: The ID of a parent labware (atop which another labware, the child, will be stacked).
