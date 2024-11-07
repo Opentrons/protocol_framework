@@ -2,9 +2,7 @@
 
 Summary of changes from schema 7:
 
-- Adds a new command_intent to store the commands intent in the commands table
-- Adds a new source to store the data files origin in the data_files table
-- Adds the `boolean_setting` table.
+- Adds a new command_error to store the commands error in the commands table
 """
 
 import json
@@ -36,7 +34,6 @@ class Migration7to8(Migration):  # noqa: D101
 
         dest_db_file = dest_dir / DB_FILE
 
-        # Append the new column to existing protocols and data_files in v6 database
         with ExitStack() as exit_stack:
             dest_engine = exit_stack.enter_context(sql_engine_ctx(dest_db_file))
 
@@ -45,9 +42,9 @@ class Migration7to8(Migration):  # noqa: D101
             dest_transaction = exit_stack.enter_context(dest_engine.begin())
 
             def add_column(
-                engine: sqlalchemy.engine.Engine,
-                table_name: str,
-                column: Any,
+                    engine: sqlalchemy.engine.Engine,
+                    table_name: str,
+                    column: Any,
             ) -> None:
                 column_type = column.type.compile(engine.dialect)
                 engine.execute(
@@ -69,9 +66,9 @@ def _migrate_command_table_with_new_command_error_col(
     dest_transaction: sqlalchemy.engine.Connection,
 ) -> None:
     """Add a new 'command_intent' column to run_command_table table."""
-    select_commands = sqlalchemy.select(schema_8.run_command_table).order_by(
-        sqlite_rowid
-    )
+    commands_table = schema_8.run_command_table
+    select_commands = sqlalchemy.select(commands_table).order_by(sqlite_rowid)
+
     for row in dest_transaction.execute(select_commands).all():
         data = json.loads(row.command)
         new_command_error = (
@@ -81,6 +78,10 @@ def _migrate_command_table_with_new_command_error_col(
             else json.dumps(data["error"])
         )
 
-        dest_transaction.execute(
-            f"UPDATE run_command SET command_error='{new_command_error}' WHERE row_id={row.row_id}"
+        update_commands = (
+            sqlalchemy.update(schema_8.run_command_table)
+            .where(schema_8.run_command_table.c.row_id == row.row_id)
+            .values(command_error=new_command_error)
         )
+
+        dest_transaction.execute(update_commands)
