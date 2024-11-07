@@ -8,6 +8,30 @@ By installing and using Opentrons software, you agree to the Opentrons End-User 
 
 ---
 
+## Opentrons App Changes in 8.2.0
+
+Welcome to the v8.2.0 release of the Opentrons App! This release adds support for the Opentrons Absorbance Plate Reader Module, as well as other features.
+
+### New Features
+
+- Run protocols that use the Absorbance Plate Reader and check the status of the module on the robot details screen for your Flex.
+- Run protocols that use the new Opentrons Tough PCR Auto-Sealing Lid with the Thermocycler Module GEN2. Stacks of these lids appear in a consolidated view when setting up labware.
+
+### Improved Features
+
+- Error recovery now works in more situations and has more options.
+  - Recover from gripper errors.
+  - Recover from failure to drop tips.
+  - Indicate that an error was improperly detected and skip similar errors later in the run.
+  - Choose from more options of where to drop tips as part of recovery.
+  - Disable error recovery entirely, if your application requires it. Runs will fail on any error.
+
+### Bug Fixes
+
+- Fixed an app crash when performing certain error recovery steps with Python API version 2.15 protocols.
+
+---
+
 ## Opentrons App Changes in 8.1.0
 
 Welcome to the v8.1.0 release of the Opentrons App!

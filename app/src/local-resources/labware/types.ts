@@ -21,6 +21,7 @@ export type LabwareFilter =
   | 'aluminumBlock'
   | 'customLabware'
   | 'adapter'
+  | 'lid'
 
 export type LabwareSort = 'alphabetical' | 'reverse'
 

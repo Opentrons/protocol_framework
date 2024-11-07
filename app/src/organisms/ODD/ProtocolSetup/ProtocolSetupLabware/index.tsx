@@ -25,10 +25,11 @@ import {
   FLEX_ROBOT_TYPE,
   getDeckDefFromRobotType,
   getLabwareDefURI,
-  getLabwareDisplayName,
+  getTopLabwareInfo,
   getModuleDisplayName,
   HEATERSHAKER_MODULE_TYPE,
-  parseInitialLoadedLabwareByAdapter,
+  TC_MODULE_LOCATION_OT3,
+  THERMOCYCLER_MODULE_TYPE,
 } from '@opentrons/shared-data'
 import {
   useCreateLiveCommandMutation,
@@ -38,8 +39,8 @@ import {
 import { FloatingActionButton, SmallButton } from '/app/atoms/buttons'
 import { ODDBackButton } from '/app/molecules/ODDBackButton'
 import {
+  getLocationInfoNames,
   getLabwareSetupItemGroups,
-  getNestedLabwareInfo,
 } from '/app/transformations/commands'
 import {
   getAttachedProtocolModuleMatches,
@@ -56,15 +57,12 @@ import type {
   HeaterShakerCloseLatchCreateCommand,
   HeaterShakerOpenLatchCreateCommand,
   LabwareDefinition2,
-  LabwareLocation,
   LoadLabwareRunTimeCommand,
+  LabwareLocation,
   RunTimeCommand,
 } from '@opentrons/shared-data'
 import type { HeaterShakerModule, Modules } from '@opentrons/api-client'
-import type {
-  LabwareSetupItem,
-  NestedLabwareInfo,
-} from '/app/transformations/commands'
+import type { LabwareSetupItem } from '/app/transformations/commands'
 import type { SetupScreens } from '../types'
 import type { AttachedProtocolModuleMatch } from '/app/transformations/analysis'
 
@@ -121,9 +119,6 @@ export function ProtocolSetupLabware({
     protocolModulesInfo,
     deckConfig
   )
-  const initialLoadedLabwareByAdapter = parseInitialLoadedLabwareByAdapter(
-    mostRecentAnalysis?.commands ?? []
-  )
 
   const handleLabwareClick = (
     labwareDef: LabwareDefinition2,
@@ -152,7 +147,7 @@ export function ProtocolSetupLabware({
       }
     }
   }
-  const selectedLabwareIsTopOfStack = mostRecentAnalysis?.commands.some(
+  const selectedLabwareIsStacked = mostRecentAnalysis?.commands.some(
     command =>
       command.commandType === 'loadLabware' &&
       command.result?.labwareId === selectedLabware?.id &&
@@ -164,7 +159,7 @@ export function ProtocolSetupLabware({
   return (
     <>
       {showLabwareDetailsModal &&
-      !selectedLabwareIsTopOfStack &&
+      !selectedLabwareIsStacked &&
       selectedLabware != null ? (
         <SingleLabwareModal
           selectedLabware={selectedLabware}
@@ -214,7 +209,6 @@ export function ProtocolSetupLabware({
             deckDef={deckDef}
             attachedProtocolModuleMatches={attachedProtocolModuleMatches}
             handleLabwareClick={handleLabwareClick}
-            initialLoadedLabwareByAdapter={initialLoadedLabwareByAdapter}
           />
         ) : (
           <>
@@ -239,17 +233,14 @@ export function ProtocolSetupLabware({
                   'labwareId' in labware.initialLocation &&
                   item.labwareId === labware.initialLocation.labwareId
               )
-              return mostRecentAnalysis != null && labwareOnAdapter == null ? (
+              return mostRecentAnalysis?.commands != null &&
+                labwareOnAdapter == null ? (
                 <RowLabware
                   key={i}
                   labware={labware}
                   attachedProtocolModules={attachedProtocolModuleMatches}
                   refetchModules={moduleQuery.refetch}
-                  commands={mostRecentAnalysis?.commands}
-                  nestedLabwareInfo={getNestedLabwareInfo(
-                    labware,
-                    mostRecentAnalysis.commands
-                  )}
+                  commands={mostRecentAnalysis.commands}
                 />
               ) : null
             })}
@@ -257,7 +248,7 @@ export function ProtocolSetupLabware({
         )}
         {showLabwareDetailsModal &&
         selectedLabware != null &&
-        selectedLabwareIsTopOfStack ? (
+        selectedLabwareIsStacked ? (
           <LabwareStackModal
             labwareIdTop={selectedLabware?.id}
             commands={mostRecentAnalysis?.commands ?? null}
@@ -421,18 +412,37 @@ interface RowLabwareProps {
   labware: LabwareSetupItem
   attachedProtocolModules: AttachedProtocolModuleMatch[]
   refetchModules: UseQueryResult<Modules>['refetch']
-  nestedLabwareInfo: NestedLabwareInfo | null
-  commands?: RunTimeCommand[]
+  commands: RunTimeCommand[]
 }
 
 function RowLabware({
   labware,
   attachedProtocolModules,
   refetchModules,
-  nestedLabwareInfo,
   commands,
 }: RowLabwareProps): JSX.Element | null {
-  const { definition, initialLocation, nickName } = labware
+  const {
+    initialLocation,
+    nickName: bottomLabwareNickname,
+    labwareId: bottomLabwareId,
+  } = labware
+  const loadLabwareCommands = commands?.filter(
+    (command): command is LoadLabwareRunTimeCommand =>
+      command.commandType === 'loadLabware'
+  )
+
+  const { topLabwareId } = getTopLabwareInfo(
+    bottomLabwareId ?? '',
+    loadLabwareCommands
+  )
+  const {
+    slotName: slot,
+    labwareName: topLabwareName,
+    labwareNickname: topLabwareNickname,
+    labwareQuantity: topLabwareQuantity,
+    adapterName,
+  } = getLocationInfoNames(topLabwareId, commands)
+
   const { t, i18n } = useTranslation([
     'protocol_command_text',
     'protocol_setup',
@@ -451,47 +461,21 @@ function RowLabware({
     matchedModule.attachedModuleMatch.moduleType === HEATERSHAKER_MODULE_TYPE
       ? matchedModule.attachedModuleMatch
       : null
+  const isStacked =
+    topLabwareQuantity > 1 || adapterName != null || matchedModule != null
 
-  let slotName: string = ''
-  let location: JSX.Element | string | null = null
+  let slotName: string = slot
+  let location: JSX.Element = <DeckInfoLabel deckLabel={slotName} />
   if (initialLocation === 'offDeck') {
     location = (
       <DeckInfoLabel deckLabel={i18n.format(t('off_deck'), 'upperCase')} />
     )
-  } else if ('slotName' in initialLocation) {
-    slotName = initialLocation.slotName
-    location = <DeckInfoLabel deckLabel={initialLocation.slotName} />
-  } else if ('addressableAreaName' in initialLocation) {
-    slotName = initialLocation.addressableAreaName
-    location = <DeckInfoLabel deckLabel={initialLocation.addressableAreaName} />
-  } else if (labware.moduleLocation != null) {
-    location = (
-      <>
-        <DeckInfoLabel deckLabel={labware.moduleLocation.slotName} />
-      </>
-    )
-  } else if ('labwareId' in initialLocation) {
-    const adapterId = initialLocation.labwareId
-    const adapterLocation = commands?.find(
-      (command): command is LoadLabwareRunTimeCommand =>
-        command.commandType === 'loadLabware' &&
-        command.result?.labwareId === adapterId
-    )?.params.location
-
-    if (adapterLocation != null && adapterLocation !== 'offDeck') {
-      if ('slotName' in adapterLocation) {
-        slotName = adapterLocation.slotName
-        location = <DeckInfoLabel deckLabel={adapterLocation.slotName} />
-      } else if ('moduleId' in adapterLocation) {
-        const moduleUnderAdapter = attachedProtocolModules.find(
-          module => module.moduleId === adapterLocation.moduleId
-        )
-        if (moduleUnderAdapter != null) {
-          slotName = moduleUnderAdapter.slotName
-          location = <DeckInfoLabel deckLabel={moduleUnderAdapter.slotName} />
-        }
-      }
-    }
+  } else if (
+    matchedModule != null &&
+    matchedModule.attachedModuleMatch?.moduleType === THERMOCYCLER_MODULE_TYPE
+  ) {
+    slotName = TC_MODULE_LOCATION_OT3
+    location = <DeckInfoLabel deckLabel={slotName} />
   }
   return (
     <Flex
@@ -503,9 +487,7 @@ function RowLabware({
     >
       <Flex gridGap={SPACING.spacing4} width="7.6875rem">
         {location}
-        {nestedLabwareInfo != null || matchedModule != null ? (
-          <DeckInfoLabel iconName="stacked" />
-        ) : null}
+        {isStacked ? <DeckInfoLabel iconName="stacked" /> : null}
       </Flex>
       <Flex
         alignSelf={ALIGN_FLEX_START}
@@ -520,14 +502,17 @@ function RowLabware({
             gridGap={SPACING.spacing4}
           >
             <LegacyStyledText as="p" fontWeight={TYPOGRAPHY.fontWeightSemiBold}>
-              {getLabwareDisplayName(definition)}
+              {topLabwareName}
             </LegacyStyledText>
             <LegacyStyledText color={COLORS.grey60} as="p">
-              {nickName}
+              {topLabwareQuantity > 1
+                ? t('protocol_setup:labware_quantity', {
+                    quantity: topLabwareQuantity,
+                  })
+                : topLabwareNickname}
             </LegacyStyledText>
           </Flex>
-          {nestedLabwareInfo != null &&
-          nestedLabwareInfo?.sharedSlotId === slotName ? (
+          {adapterName != null ? (
             <>
               <Box
                 borderBottom={`1px solid ${COLORS.grey60}`}
@@ -539,10 +524,10 @@ function RowLabware({
                   as="p"
                   fontWeight={TYPOGRAPHY.fontWeightSemiBold}
                 >
-                  {nestedLabwareInfo.nestedLabwareDisplayName}
+                  {adapterName}
                 </LegacyStyledText>
                 <LegacyStyledText as="p" color={COLORS.grey60}>
-                  {nestedLabwareInfo.nestedLabwareNickName}
+                  {bottomLabwareNickname}
                 </LegacyStyledText>
               </Flex>
             </>

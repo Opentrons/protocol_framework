@@ -117,6 +117,9 @@ EXPECTED_STATEMENTS_LATEST = [
     CREATE UNIQUE INDEX ix_run_run_id_index_in_run ON run_command (run_id, index_in_run)
     """,
     """
+    CREATE INDEX ix_data_files_source ON data_files (source)
+    """,
+    """
     CREATE INDEX ix_protocol_protocol_kind ON protocol (protocol_kind)
     """,
     """
@@ -128,7 +131,9 @@ EXPECTED_STATEMENTS_LATEST = [
         name VARCHAR NOT NULL,
         file_hash VARCHAR NOT NULL,
         created_at DATETIME NOT NULL,
-        PRIMARY KEY (id)
+        source VARCHAR(9) NOT NULL,
+        PRIMARY KEY (id),
+        CONSTRAINT datafilesourcesqlenum CHECK (source IN ('uploaded', 'generated'))
     )
     """,
     """

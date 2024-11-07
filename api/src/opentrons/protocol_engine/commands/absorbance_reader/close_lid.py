@@ -37,9 +37,7 @@ class CloseLidResult(BaseModel):
     """Result data from closing the lid on an aborbance reading."""
 
 
-class CloseLidImpl(
-    AbstractCommandImpl[CloseLidParams, SuccessData[CloseLidResult, None]]
-):
+class CloseLidImpl(AbstractCommandImpl[CloseLidParams, SuccessData[CloseLidResult]]):
     """Execution implementation of closing the lid on an Absorbance Reader."""
 
     def __init__(
@@ -53,9 +51,7 @@ class CloseLidImpl(
         self._equipment = equipment
         self._labware_movement = labware_movement
 
-    async def execute(
-        self, params: CloseLidParams
-    ) -> SuccessData[CloseLidResult, None]:
+    async def execute(self, params: CloseLidParams) -> SuccessData[CloseLidResult]:
         """Execute the close lid command."""
         mod_substate = self._state_view.modules.get_absorbance_reader_substate(
             module_id=params.moduleId
@@ -142,7 +138,6 @@ class CloseLidImpl(
 
         return SuccessData(
             public=CloseLidResult(),
-            private=None,
             state_update=state_update,
         )
 

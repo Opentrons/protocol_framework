@@ -20,10 +20,16 @@ export interface FieldProps {
 export type FieldPropsByName = Record<StepFieldName, FieldProps>
 
 // Shared props across all step forms
+export type LiquidHandlingTab = 'aspirate' | 'dispense'
 export interface StepFormProps {
   formData: FormData
   focusHandlers: FocusHandlers
   propsForFields: FieldPropsByName
   toolboxStep: number
   visibleFormErrors: StepFormErrors
+  showFormErrors: boolean
+  focusedField?: string | null
+  setShowFormErrorsAndWarnings?: React.Dispatch<React.SetStateAction<boolean>>
+  tab: LiquidHandlingTab
+  setTab: React.Dispatch<React.SetStateAction<LiquidHandlingTab>>
 }

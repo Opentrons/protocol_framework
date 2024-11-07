@@ -25,6 +25,7 @@ import type {
   StepType,
   PathOption,
 } from '../../../../form-types'
+import type { FormError } from '../../../../steplist/formLevel'
 import type { NozzleType } from '../../../../types'
 import type { FieldProps, FieldPropsByName, FocusHandlers } from './types'
 
@@ -103,20 +104,33 @@ export const getDirtyFields = (
   // exclude form "metadata" (not really fields)
   return without(dirtyFields, 'stepType', 'id')
 }
+
+export const getIsErrorOnCurrentPage = (args: {
+  errors: StepFormErrors
+  page: number
+}): boolean => {
+  const { errors, page = 0 } = args
+  return errors.some(error => error.page == null || error.page === page)
+}
+
 export const getVisibleFormErrors = (args: {
   focusedField?: string | null
   dirtyFields: string[]
   errors: StepFormErrors
+  showErrors?: boolean
+  page: number
 }): StepFormErrors => {
-  const { focusedField, dirtyFields, errors } = args
+  const { focusedField, errors, page = 0, showErrors } = args
+
   return errors.filter(error => {
     const dependentFieldsAreNotFocused = !error.dependentFields.includes(
       // @ts-expect-error(sa, 2021-6-22): focusedField might be undefined
       focusedField
     )
-    const dependentFieldsAreDirty =
-      difference(error.dependentFields, dirtyFields).length === 0
-    return dependentFieldsAreNotFocused && dependentFieldsAreDirty
+
+    const isPageImplicated = error.page != null ? page === error.page : true
+
+    return isPageImplicated && dependentFieldsAreNotFocused && showErrors
   })
 }
 export const getVisibleFormWarnings = (args: {
@@ -325,3 +339,38 @@ export const getSaveStepSnackbarText = (
 
 export const capitalizeFirstLetter = (stepName: string): string =>
   `${stepName.charAt(0).toUpperCase()}${stepName.slice(1)}`
+
+type ErrorMappedToField = Record<string, FormError>
+
+export const getFormErrorsMappedToField = (
+  formErrors: StepFormErrors
+): ErrorMappedToField => {
+  return formErrors.reduce<ErrorMappedToField>((acc, error) => {
+    const { dependentFields } = error
+    for (const field of dependentFields) {
+      const { showAtField, showAtForm, title } = error
+      if (showAtField == null || showAtForm == null) {
+        console.error(
+          `${title} should wire up where to show error (at form and/or field)`
+        )
+      }
+      // map each field to only one one error
+      acc[field] = {
+        ...error,
+        showAtField: error.showAtField ?? true,
+        showAtForm: error.showAtForm ?? true,
+      }
+    }
+    return acc
+  }, {})
+}
+
+export const getFormLevelError = (
+  fieldName: string,
+  mappedErrorsToField: ErrorMappedToField
+): string | null => {
+  return mappedErrorsToField[fieldName] &&
+    mappedErrorsToField[fieldName].showAtField
+    ? mappedErrorsToField[fieldName].title
+    : null
+}

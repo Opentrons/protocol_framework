@@ -67,6 +67,10 @@ export interface DropdownMenuProps {
   onFocus?: React.FocusEventHandler<HTMLButtonElement>
   /** blur handler */
   onBlur?: React.FocusEventHandler<HTMLButtonElement>
+  /** optional disabled */
+  disabled?: boolean
+  /** force direction for pd after release this will be fixed and remove */
+  forceDirection?: boolean
 }
 
 // TODO: (smb: 4/15/22) refactor this to use html select for accessibility
@@ -83,8 +87,10 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
     tooltipText,
     tabIndex = 0,
     error,
+    disabled = false,
     onFocus,
     onBlur,
+    forceDirection = false,
   } = props
   const [targetProps, tooltipProps] = useHoverTooltip()
   const [showDropdownMenu, setShowDropdownMenu] = React.useState<boolean>(false)
@@ -102,6 +108,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
   })
 
   React.useEffect(() => {
+    if (forceDirection) return
     const handlePositionCalculation = (): void => {
       const dropdownRect = dropDownMenuWrapperRef.current?.getBoundingClientRect()
       if (dropdownRect != null) {
@@ -165,10 +172,12 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
 
   const DROPDOWN_STYLE = css`
     flex-direction: ${DIRECTION_ROW};
+    color: ${disabled ? COLORS.grey40 : COLORS.black90};
     background-color: ${COLORS.white};
     cursor: ${isDisabled ? CURSOR_DEFAULT : CURSOR_POINTER};
     padding: ${SPACING.spacing8} ${SPACING.spacing12};
-    border: 1px ${BORDERS.styleSolid} ${defaultBorderColor};
+    border: 1px ${BORDERS.styleSolid}
+      ${disabled ? COLORS.grey35 : defaultBorderColor};
     border-radius: ${dropdownType === 'rounded'
       ? BORDERS.borderRadiusFull
       : BORDERS.borderRadius4};
@@ -178,7 +187,8 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
     height: 2.25rem;
 
     &:hover {
-      border: 1px ${BORDERS.styleSolid} ${hoverBorderColor};
+      border: 1px ${BORDERS.styleSolid}
+        ${disabled ? COLORS.grey35 : hoverBorderColor};
     }
 
     &:active {
@@ -190,11 +200,6 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
       outline: 2px ${BORDERS.styleSolid} ${COLORS.blue50};
       outline-offset: 2px;
     }
-
-    &:disabled {
-      background-color: ${COLORS.transparent};
-      color: ${COLORS.grey40};
-    }
   `
   return (
     <Flex
@@ -203,8 +208,15 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
       gridGap={SPACING.spacing4}
     >
       {title !== null ? (
-        <Flex gridGap={SPACING.spacing8} paddingBottom={SPACING.spacing8}>
-          <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
+        <Flex
+          gridGap={SPACING.spacing8}
+          paddingBottom={SPACING.spacing8}
+          alignItems={ALIGN_CENTER}
+        >
+          <StyledText
+            desktopStyle="captionRegular"
+            color={disabled ? COLORS.grey35 : COLORS.grey60}
+          >
             {title}
           </StyledText>
           {tooltipText != null ? (
@@ -272,7 +284,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
             {filterOptions.map((option, index) => (
               <React.Fragment key={`${option.name}-${index}`}>
                 <MenuItem
-                  disabled={option.disabled}
+                  disabled={disabled ?? option.disabled}
                   zIndex={3}
                   key={`${option.name}-${index}`}
                   onClick={() => {

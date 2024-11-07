@@ -7,6 +7,7 @@ import {
   getRelevantWellName,
   getRelevantFailedLabwareCmdFrom,
   useRelevantFailedLwLocations,
+  useInitialSelectedLocationsFrom,
 } from '../useFailedLabwareUtils'
 import { DEFINED_ERROR_TYPES } from '../../constants'
 
@@ -239,5 +240,24 @@ describe('useRelevantFailedLwLocations', () => {
 
     expect(result.current.currentLoc).toStrictEqual({ slotName: 'D1' })
     expect(result.current.newLoc).toStrictEqual({ slotName: 'C2' })
+  })
+})
+
+describe('useInitialSelectedLocationsFrom', () => {
+  it('updates result if the relevant command changes', () => {
+    const cmd = { commandType: 'pickUpTip', params: { wellName: 'A1' } } as any
+    const cmd2 = { commandType: 'pickUpTip', params: { wellName: 'A2' } } as any
+
+    const { result, rerender } = renderHook((cmd: any) =>
+      useInitialSelectedLocationsFrom(cmd)
+    )
+
+    rerender(cmd)
+
+    expect(result.current).toStrictEqual({ A1: null })
+
+    rerender(cmd2)
+
+    expect(result.current).toStrictEqual({ A2: null })
   })
 })

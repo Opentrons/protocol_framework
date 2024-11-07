@@ -83,6 +83,12 @@
         },
         "bottomHeight": {
           "type": "number"
+        },
+        "xCount": {
+          "type": "integer"
+        },
+        "yCount": {
+          "type": "integer"
         }
       }
     },
@@ -112,6 +118,12 @@
         },
         "bottomHeight": {
           "type": "number"
+        },
+        "xCount": {
+          "type": "integer"
+        },
+        "yCount": {
+          "type": "integer"
         }
       }
     },
@@ -149,6 +161,12 @@
         },
         "bottomHeight": {
           "type": "number"
+        },
+        "xCount": {
+          "type": "integer"
+        },
+        "yCount": {
+          "type": "integer"
         }
       }
     },
@@ -187,6 +205,12 @@
         },
         "bottomHeight": {
           "type": "number"
+        },
+        "xCount": {
+          "type": "integer"
+        },
+        "yCount": {
+          "type": "integer"
         }
       }
     },
@@ -225,6 +249,12 @@
         },
         "bottomHeight": {
           "type": "number"
+        },
+        "xCount": {
+          "type": "integer"
+        },
+        "yCount": {
+          "type": "integer"
         }
       }
     },

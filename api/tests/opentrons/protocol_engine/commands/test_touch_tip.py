@@ -124,7 +124,6 @@ async def test_touch_tip_implementation(
 
     assert result == SuccessData(
         public=TouchTipResult(position=DeckPoint(x=4, y=5, z=6)),
-        private=None,
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="abc",

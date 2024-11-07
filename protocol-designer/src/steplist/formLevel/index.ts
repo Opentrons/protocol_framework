@@ -3,7 +3,6 @@ import {
   incompatibleAspirateLabware,
   incompatibleDispenseLabware,
   incompatibleLabware,
-  pauseForTimeOrUntilTold,
   wellRatioMoveLiquid,
   magnetActionRequired,
   engageHeightRequired,
@@ -20,6 +19,29 @@ import {
   shakeSpeedRequired,
   temperatureRequired,
   shakeTimeRequired,
+  pauseTimeRequired,
+  pauseTemperatureRequired,
+  newLabwareLocationRequired,
+  labwareToMoveRequired,
+  pauseModuleRequired,
+  aspirateLabwareRequired,
+  dispenseLabwareRequired,
+  aspirateMixVolumeRequired,
+  aspirateMixTimesRequired,
+  aspirateDelayDurationRequired,
+  aspirateAirGapVolumeRequired,
+  dispenseMixTimesRequired,
+  dispenseDelayDurationRequired,
+  dispenseAirGapVolumeRequired,
+  dispenseMixVolumeRequired,
+  blowoutLocationRequired,
+  aspirateWellsRequired,
+  dispenseWellsRequired,
+  mixWellsRequired,
+  mixLabwareRequired,
+  volumeRequired,
+  timesRequired,
+  pauseActionRequired,
 } from './errors'
 
 import {
@@ -62,20 +84,52 @@ const stepFormHelperMap: Partial<Record<StepType, FormHelpers>> = {
     ),
   },
   mix: {
-    getErrors: composeErrors(incompatibleLabware, volumeTooHigh),
+    getErrors: composeErrors(
+      incompatibleLabware,
+      volumeTooHigh,
+      mixWellsRequired,
+      mixLabwareRequired,
+      volumeRequired,
+      timesRequired,
+      aspirateDelayDurationRequired,
+      dispenseDelayDurationRequired,
+      blowoutLocationRequired
+    ),
     getWarnings: composeWarnings(
       belowPipetteMinimumVolume,
       mixTipPositionInTube
     ),
   },
   pause: {
-    getErrors: composeErrors(pauseForTimeOrUntilTold),
+    getErrors: composeErrors(
+      pauseActionRequired,
+      pauseTimeRequired,
+      pauseTemperatureRequired,
+      pauseModuleRequired
+    ),
+  },
+  moveLabware: {
+    getErrors: composeErrors(labwareToMoveRequired, newLabwareLocationRequired),
   },
   moveLiquid: {
     getErrors: composeErrors(
       incompatibleAspirateLabware,
       incompatibleDispenseLabware,
-      wellRatioMoveLiquid
+      wellRatioMoveLiquid,
+      volumeRequired,
+      aspirateLabwareRequired,
+      dispenseLabwareRequired,
+      aspirateMixTimesRequired,
+      aspirateMixVolumeRequired,
+      aspirateDelayDurationRequired,
+      aspirateAirGapVolumeRequired,
+      dispenseMixTimesRequired,
+      dispenseMixVolumeRequired,
+      dispenseDelayDurationRequired,
+      dispenseAirGapVolumeRequired,
+      blowoutLocationRequired,
+      aspirateWellsRequired,
+      dispenseWellsRequired
     ),
     getWarnings: composeWarnings(
       belowPipetteMinimumVolume,

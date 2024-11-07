@@ -22,6 +22,7 @@ import {
 } from '@opentrons/components'
 import {
   ABSORBANCE_READER_TYPE,
+  ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
   getCutoutIdForSlotName,
   getDeckDefFromRobotType,
@@ -160,7 +161,6 @@ export function ModulesListItem({
   displayName,
   slotName,
   attachedModuleMatch,
-  heaterShakerModuleFromProtocol,
   isFlex,
   calibrationStatus,
   conflictedFixture,
@@ -172,9 +172,9 @@ export function ModulesListItem({
     attachedModuleMatch != null
       ? t('module_connected')
       : t('module_not_connected')
-  const [showModuleSetupModal, setShowModuleSetupModal] = useState<Boolean>(
-    false
-  )
+  const [showModuleSetupModal, setShowModuleSetupModal] = useState<
+    string | null
+  >(null)
   const [
     showLocationConflictModal,
     setShowLocationConflictModal,
@@ -204,7 +204,10 @@ export function ModulesListItem({
   })
 
   let subText: JSX.Element | null = null
-  if (moduleModel === HEATERSHAKER_MODULE_V1) {
+  if (
+    moduleModel === HEATERSHAKER_MODULE_V1 ||
+    moduleModel === ABSORBANCE_READER_V1
+  ) {
     subText = (
       <Btn
         marginLeft={SPACING.spacing20}
@@ -217,7 +220,7 @@ export function ModulesListItem({
         `}
         marginTop={SPACING.spacing4}
         onClick={() => {
-          setShowModuleSetupModal(true)
+          setShowModuleSetupModal(displayName)
         }}
       >
         <Flex flexDirection={DIRECTION_ROW}>
@@ -328,14 +331,13 @@ export function ModulesListItem({
         padding={SPACING.spacing16}
         backgroundColor={COLORS.white}
       >
-        {showModuleSetupModal && heaterShakerModuleFromProtocol != null ? (
+        {showModuleSetupModal != null ? (
           <ModuleSetupModal
             close={() => {
-              setShowModuleSetupModal(false)
+              setShowModuleSetupModal(null)
             }}
-            moduleDisplayName={
-              heaterShakerModuleFromProtocol.moduleDef.displayName
-            }
+            moduleDisplayName={showModuleSetupModal}
+            isAbsorbanceReader={moduleModel === ABSORBANCE_READER_V1}
           />
         ) : null}
         <Flex

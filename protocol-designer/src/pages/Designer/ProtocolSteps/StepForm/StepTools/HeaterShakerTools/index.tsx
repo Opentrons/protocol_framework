@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
@@ -6,7 +5,6 @@ import {
   COLORS,
   DIRECTION_COLUMN,
   Flex,
-  ListItem,
   SPACING,
   StyledText,
 } from '@opentrons/components'
@@ -16,45 +14,23 @@ import {
   ToggleExpandStepFormField,
   ToggleStepFormField,
 } from '../../../../../../molecules'
+import { getFormErrorsMappedToField, getFormLevelError } from '../../utils'
 import type { StepFormProps } from '../../types'
 
 export function HeaterShakerTools(props: StepFormProps): JSX.Element {
-  const { propsForFields, formData } = props
+  const { propsForFields, formData, visibleFormErrors } = props
   const { t } = useTranslation(['application', 'form', 'protocol_steps'])
   const moduleLabwareOptions = useSelector(getHeaterShakerLabwareOptions)
 
-  useEffect(() => {
-    if (moduleLabwareOptions.length === 1) {
-      propsForFields.moduleId.updateValue(moduleLabwareOptions[0].value)
-    }
-  }, [])
+  const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
   return (
     <Flex flexDirection={DIRECTION_COLUMN}>
-      {moduleLabwareOptions.length > 1 ? (
-        <DropdownStepFormField
-          {...propsForFields.moduleId}
-          options={moduleLabwareOptions}
-          title={t('protocol_steps:module')}
-        />
-      ) : (
-        <Flex
-          flexDirection={DIRECTION_COLUMN}
-          padding={SPACING.spacing12}
-          gridGap={SPACING.spacing8}
-        >
-          <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
-            {t('protocol_steps:module')}
-          </StyledText>
-          <ListItem type="noActive">
-            <Flex padding={SPACING.spacing12}>
-              <StyledText desktopStyle="bodyDefaultRegular">
-                {moduleLabwareOptions[0].name}
-              </StyledText>
-            </Flex>
-          </ListItem>
-        </Flex>
-      )}
+      <DropdownStepFormField
+        {...propsForFields.moduleId}
+        options={moduleLabwareOptions}
+        title={t('protocol_steps:module')}
+      />
       <Box borderBottom={`1px solid ${COLORS.grey30}`} />
       <Flex
         flexDirection={DIRECTION_COLUMN}
@@ -82,6 +58,10 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
           offLabel={t(
             'form:step_edit_form.field.heaterShaker.temperature.toggleOff'
           )}
+          formLevelError={getFormLevelError(
+            'targetHeaterShakerTemperature',
+            mappedErrorsToField
+          )}
         />
         <ToggleExpandStepFormField
           {...propsForFields.targetSpeed}
@@ -95,6 +75,7 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
           offLabel={t(
             'form:step_edit_form.field.heaterShaker.shaker.toggleOff'
           )}
+          formLevelError={getFormLevelError('targetSpeed', mappedErrorsToField)}
         />
         <ToggleStepFormField
           isDisabled={propsForFields.latchOpen.disabled}
@@ -121,6 +102,10 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
           isSelected={formData.heaterShakerSetTimer === true}
           units={t('application:units.time')}
           toggleElement="checkbox"
+          formLevelError={getFormLevelError(
+            'heaterShakerTimer',
+            mappedErrorsToField
+          )}
         />
       </Flex>
     </Flex>

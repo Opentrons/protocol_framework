@@ -284,7 +284,10 @@ export function CreateNewProtocolWizard(): JSX.Element | null {
     if (stagingAreas.length > 0) {
       stagingAreas.forEach((_, index) => {
         return dispatch(
-          createDeckFixture('stagingArea', STAGING_AREA_CUTOUTS[index])
+          createDeckFixture(
+            'stagingArea',
+            STAGING_AREA_CUTOUTS.reverse()[index]
+          )
         )
       })
     }

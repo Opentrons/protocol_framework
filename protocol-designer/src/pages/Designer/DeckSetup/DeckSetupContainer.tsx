@@ -67,6 +67,7 @@ const OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST: string[] = [
   'fixedTrash',
 ]
 export const lightFill = COLORS.grey35
+export const darkFill = COLORS.grey60
 
 export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   const { tab } = props
@@ -176,9 +177,10 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
         backgroundColor={COLORS.white}
         borderRadius={BORDERS.borderRadius12}
         width="100%"
-        height={zoomIn.slot != null ? '75vh' : '65vh'}
+        height={zoomIn.slot != null ? '75vh' : '70vh'}
         flexDirection={DIRECTION_COLUMN}
         padding={SPACING.spacing40}
+        maxHeight="39.375rem" // this is to block deck view from enlarging
       >
         <Flex
           width="100%"
@@ -187,11 +189,12 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
           justifyContent={JUSTIFY_CENTER}
         >
           <RobotCoordinateSpaceWithRef
-            height={zoomIn.slot != null ? '100%' : '80%'}
+            height={zoomIn.slot != null ? '100%' : '95%'}
             width="100%"
             deckDef={deckDef}
             viewBox={viewBox}
             outline="auto"
+            zoomed={zoomIn.slot != null}
           >
             {() => (
               <>
@@ -212,6 +215,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                           key={addressableArea.id}
                           cutoutId={cutoutId}
                           deckDefinition={deckDef}
+                          slotClipColor={darkFill}
                           showExpansion={cutoutId === 'cutoutA1'}
                           fixtureBaseColor={lightFill}
                         />
@@ -227,6 +231,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                             key={fixture.id}
                             cutoutId={fixture.location as StagingAreaLocation}
                             deckDefinition={deckDef}
+                            slotClipColor={darkFill}
                             fixtureBaseColor={lightFill}
                           />
                         )
@@ -283,6 +288,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                               fixture.location as typeof WASTE_CHUTE_CUTOUT
                             }
                             deckDefinition={deckDef}
+                            slotClipColor={darkFill}
                             fixtureBaseColor={lightFill}
                           />
                         )

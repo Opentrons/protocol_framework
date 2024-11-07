@@ -1,10 +1,16 @@
 """Protocol engine exceptions."""
 
+from __future__ import annotations
+
 from logging import getLogger
-from typing import Any, Dict, Optional, Union, Iterator, Sequence
+from typing import Any, Dict, Final, Optional, Union, Iterator, Sequence, TYPE_CHECKING
 
 from opentrons_shared_data.errors import ErrorCodes
 from opentrons_shared_data.errors.exceptions import EnumeratedError, PythonException
+
+if TYPE_CHECKING:
+    from opentrons.protocol_engine.types import TipGeometry
+
 
 log = getLogger(__name__)
 
@@ -132,6 +138,21 @@ class TipNotAttachedError(ProtocolEngineError):
         super().__init__(ErrorCodes.UNEXPECTED_TIP_REMOVAL, message, details, wrapping)
 
 
+class PickUpTipTipNotAttachedError(TipNotAttachedError):
+    """Raised from TipHandler.pick_up_tip().
+
+    This is like TipNotAttachedError except that it carries some extra information
+    about the attempted operation.
+    """
+
+    tip_geometry: Final[TipGeometry]
+    """The tip geometry that would have been on the pipette, had the operation succeeded."""
+
+    def __init__(self, tip_geometry: TipGeometry) -> None:
+        super().__init__()
+        self.tip_geometry = tip_geometry
+
+
 class TipAttachedError(ProtocolEngineError):
     """Raised when a tip shouldn't be attached, but is."""
 
@@ -221,6 +242,19 @@ class LiquidDoesNotExistError(ProtocolEngineError):
     ) -> None:
         """Build a LiquidDoesNotExistError."""
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
+class InvalidLiquidError(ProtocolEngineError):
+    """Raised when attempting to add a liquid with an invalid property."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build an InvalidLiquidError."""
+        super().__init__(ErrorCodes.INVALID_PROTOCOL_DATA, message, details, wrapping)
 
 
 class LabwareDefinitionDoesNotExistError(ProtocolEngineError):

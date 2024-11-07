@@ -1,5 +1,6 @@
 import some from 'lodash/some'
 import {
+  ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
   FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
   HEATERSHAKER_MODULE_TYPE,
@@ -12,6 +13,7 @@ import {
 } from '@opentrons/shared-data'
 
 import { getOnlyLatestDefs } from '../../../labware-defs'
+import { getStagingAreaAddressableAreas } from '../../../utils'
 import {
   FLEX_MODULE_MODELS,
   OT2_MODULE_MODELS,
@@ -28,7 +30,12 @@ import type {
   ModuleModel,
   RobotType,
 } from '@opentrons/shared-data'
-import type { InitialDeckSetup } from '../../../step-forms'
+import type {
+  AllTemporalPropertiesForTimelineFrame,
+  InitialDeckSetup,
+  LabwareOnDeck,
+} from '../../../step-forms'
+import type { Fixture } from './constants'
 
 const OT2_TC_SLOTS = ['7', '8', '10', '11']
 const FLEX_TC_SLOTS = ['A1', 'B1']
@@ -55,20 +62,21 @@ export function getModuleModelsBySlot(
 ): ModuleModel[] {
   const FLEX_MIDDLE_SLOTS = ['B2', 'C2', 'A2', 'D2']
   const OT2_MIDDLE_SLOTS = ['2', '5', '8', '11']
+  const FILTERED_MODULES = enableAbsorbanceReader
+    ? FLEX_MODULE_MODELS
+    : FLEX_MODULE_MODELS.filter(model => model !== ABSORBANCE_READER_V1)
 
-  let moduleModels: ModuleModel[] = enableAbsorbanceReader
-    ? FLEX_MODULE_MODELS.filter(model => model !== 'absorbanceReaderV1')
-    : FLEX_MODULE_MODELS
+  let moduleModels: ModuleModel[] = FILTERED_MODULES
 
   switch (robotType) {
     case FLEX_ROBOT_TYPE: {
       if (slot !== 'B1' && !FLEX_MIDDLE_SLOTS.includes(slot)) {
-        moduleModels = FLEX_MODULE_MODELS.filter(
+        moduleModels = FILTERED_MODULES.filter(
           model => model !== THERMOCYCLER_MODULE_V2
         )
       }
       if (FLEX_MIDDLE_SLOTS.includes(slot)) {
-        moduleModels = FLEX_MODULE_MODELS.filter(
+        moduleModels = FILTERED_MODULES.filter(
           model => model === MAGNETIC_BLOCK_V1
         )
       }
@@ -252,4 +260,23 @@ export function animateZoom(props: AnimateZoomProps): void {
     }
   }
   requestAnimationFrame(animate)
+}
+
+export const getAdjacentLabware = (
+  fixture: Fixture,
+  cutout: CutoutId,
+  labware: AllTemporalPropertiesForTimelineFrame['labware']
+): LabwareOnDeck | null => {
+  let adjacentLabware: LabwareOnDeck | null = null
+  if (fixture === 'stagingArea' || fixture === 'wasteChuteAndStagingArea') {
+    const stagingAreaAddressableAreaName = getStagingAreaAddressableAreas([
+      cutout,
+    ])
+
+    adjacentLabware =
+      Object.values(labware).find(
+        lw => lw.slot === stagingAreaAddressableAreaName[0]
+      ) ?? null
+  }
+  return adjacentLabware
 }

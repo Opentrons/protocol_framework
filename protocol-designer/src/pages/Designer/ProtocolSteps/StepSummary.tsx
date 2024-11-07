@@ -148,6 +148,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         lidOpen,
         thermocyclerFormType,
         lidOpenHold,
+        blockTargetTempHold,
         profileTargetLidTemp,
         profileVolume,
       } = currentStep
@@ -192,7 +193,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
             <Flex gridGap={SPACING.spacing20}>
               <StyledTrans
                 i18nKey="protocol_steps:thermocycler_module.thermocycler_profile.end_hold.block"
-                tagText={`${profileTargetLidTemp}${t(
+                tagText={`${blockTargetTempHold}${t(
                   'application:units.degrees'
                 )}`}
               />
@@ -215,9 +216,6 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         pauseTime,
         pauseTemperature,
       } = currentStep
-      const pauseModuleDisplayName = getModuleDisplayName(
-        modules[pauseModuleId].model
-      )
       switch (pauseAction) {
         case 'untilResume':
           stepSummaryContent = (
@@ -227,6 +225,9 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
           )
           break
         case 'untilTemperature':
+          const pauseModuleDisplayName = getModuleDisplayName(
+            modules[pauseModuleId].model
+          )
           stepSummaryContent = (
             <StyledTrans
               i18nKey="protocol_steps:pause.untilTemperature"

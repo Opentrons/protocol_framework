@@ -26,6 +26,7 @@ interface ToggleExpandStepFormFieldProps extends FieldProps {
   offLabel?: string
   caption?: string
   toggleElement?: 'toggle' | 'checkbox'
+  formLevelError?: string | null
 }
 export function ToggleExpandStepFormField(
   props: ToggleExpandStepFormFieldProps
@@ -45,7 +46,7 @@ export function ToggleExpandStepFormField(
   } = props
 
   const resetFieldValue = (): void => {
-    restProps.updateValue('null')
+    restProps.updateValue(null)
   }
 
   const onToggleUpdateValue = (): void => {

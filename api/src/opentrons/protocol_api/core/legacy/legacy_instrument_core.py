@@ -72,6 +72,9 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
         """Sets the speed at which the robot's gantry moves."""
         self._default_speed = speed
 
+    def air_gap_in_place(self, volume: float, flow_rate: float) -> None:
+        assert False, "Air gap tracking only available in API version 2.22 and later"
+
     def aspirate(
         self,
         location: types.Location,

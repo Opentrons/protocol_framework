@@ -24,6 +24,7 @@ import {
   closeBrokerConnection,
 } from './notifications'
 import { setUserDataPath } from './early'
+import { registerResourceMonitor } from './monitor'
 
 import type { OTLogger } from './log'
 import type { BrowserWindow } from 'electron'
@@ -135,6 +136,7 @@ function startUp(): void {
     registerConfig(dispatch),
     registerDiscovery(dispatch),
     registerRobotSystemUpdate(dispatch),
+    registerResourceMonitor(dispatch),
     registerAppRestart(),
     registerUpdateBrightness(),
     registerNotify(dispatch, mainWindow),
@@ -195,7 +197,10 @@ function installDevtools(): void {
 
   log.debug('Installing devtools')
 
-  install(extensions, forceReinstall)
+  install(extensions, {
+    loadExtensionOptions: { allowFileAccess: true },
+    forceDownload: forceReinstall,
+  })
     .then(() => log.debug('Devtools extensions installed'))
     .catch((error: unknown) => {
       log.warn('Failed to install devtools extensions', {

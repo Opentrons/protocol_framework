@@ -24,7 +24,6 @@ async def test_home_implementation(decoy: Decoy, movement: MovementHandler) -> N
 
     assert result == SuccessData(
         public=HomeResult(),
-        private=None,
         state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),
     )
     decoy.verify(await movement.home(axes=[MotorAxis.X, MotorAxis.Y]))
@@ -40,7 +39,6 @@ async def test_home_all_implementation(decoy: Decoy, movement: MovementHandler) 
 
     assert result == SuccessData(
         public=HomeResult(),
-        private=None,
         state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),
     )
     decoy.verify(await movement.home(axes=None))
@@ -63,7 +61,6 @@ async def test_home_with_invalid_position(
     result = await subject.execute(data)
     assert result == SuccessData(
         public=HomeResult(),
-        private=None,
         state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),
     )
 
@@ -76,7 +73,6 @@ async def test_home_with_invalid_position(
     result = await subject.execute(data)
     assert result == SuccessData(
         public=HomeResult(),
-        private=None,
         state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),
     )
 

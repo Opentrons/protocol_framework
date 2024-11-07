@@ -45,7 +45,7 @@ async def test_close_labware_latch(
     result = await subject.execute(data)
     decoy.verify(await heater_shaker_hardware.close_labware_latch(), times=1)
     assert result == SuccessData(
-        public=heater_shaker.CloseLabwareLatchResult(), private=None
+        public=heater_shaker.CloseLabwareLatchResult(),
     )
 
 
@@ -77,5 +77,5 @@ async def test_close_labware_latch_virtual(
     result = await subject.execute(data)
 
     assert result == SuccessData(
-        public=heater_shaker.CloseLabwareLatchResult(), private=None
+        public=heater_shaker.CloseLabwareLatchResult(),
     )

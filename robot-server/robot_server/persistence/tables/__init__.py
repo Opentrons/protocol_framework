@@ -16,6 +16,7 @@ from .schema_7 import (
     PrimitiveParamSQLEnum,
     ProtocolKindSQLEnum,
     BooleanSettingKey,
+    DataFileSourceSQLEnum,
 )
 
 
@@ -34,4 +35,5 @@ __all__ = [
     "PrimitiveParamSQLEnum",
     "ProtocolKindSQLEnum",
     "BooleanSettingKey",
+    "DataFileSourceSQLEnum",
 ]

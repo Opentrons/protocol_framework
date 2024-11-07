@@ -2,11 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { connect } from 'react-redux'
 import { useConditionalConfirm } from '@opentrons/components'
-import {
-  getModuleDisplayName,
-  HEATERSHAKER_MODULE_TYPE,
-  TEMPERATURE_MODULE_TYPE,
-} from '@opentrons/shared-data'
+import { getModuleDisplayName } from '@opentrons/shared-data'
 
 import { actions } from '../../steplist'
 import { actions as stepsActions } from '../../ui/steps'
@@ -188,12 +184,6 @@ const StepEditFormManager = (
           }
           handleCancelClick={saveStepForm}
           handleContinueClick={handleSave}
-          // TODO (nd: 10/21/2024) can remove this prop once redesign FF removed
-          moduleType={
-            showAddPauseUntilTempStepModal
-              ? TEMPERATURE_MODULE_TYPE
-              : HEATERSHAKER_MODULE_TYPE
-          }
         />
       ) : null}
       <StepEditFormComponent
