@@ -883,12 +883,21 @@ class ModuleView(HasState[ModuleState]):
         """Get the specified module's dimensions."""
         return self.get_definition(module_id).dimensions
 
-    def get_nominal_module_offset(
+    def get_nominal_offset_to_child(
         self,
         module_id: str,
+        # todo(mm, 2024-11-07): A method of one view taking a sibling view as an argument
+        # is unusual, and may be bug-prone if the order in which the views are updated
+        # matters. If we need to compute something that depends on module info and
+        # addressable area info, can we do that computation in GeometryView instead of
+        # here?
         addressable_areas: AddressableAreaView,
     ) -> LabwareOffsetVector:
-        """Get the module's nominal offset vector computed with slot transform."""
+        """Get the nominal offset from a module's location to its child labware's location.
+
+        Includes the slot-specific transform. Does not include the child's
+        Labware Position Check offset.
+        """
         if (
             self.state.deck_type == DeckType.OT2_STANDARD
             or self.state.deck_type == DeckType.OT2_SHORT_TRASH
@@ -996,7 +1005,7 @@ class ModuleView(HasState[ModuleState]):
         default_lw_offset_point = self.get_definition(module_id).labwareOffset.z
         z_difference = module_height - default_lw_offset_point
 
-        nominal_transformed_lw_offset_z = self.get_nominal_module_offset(
+        nominal_transformed_lw_offset_z = self.get_nominal_offset_to_child(
             module_id=module_id, addressable_areas=addressable_areas
         ).z
         calibration_offset = self.get_module_calibration_offset(module_id)

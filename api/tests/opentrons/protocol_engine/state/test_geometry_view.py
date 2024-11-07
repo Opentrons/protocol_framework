@@ -378,7 +378,7 @@ def test_get_labware_parent_position_on_module(
     )
 
     decoy.when(
-        mock_module_view.get_nominal_module_offset(
+        mock_module_view.get_nominal_offset_to_child(
             module_id="module-id",
             addressable_areas=mock_addressable_area_view,
         )
@@ -446,7 +446,7 @@ def test_get_labware_parent_position_on_labware(
         ot2_standard_deck_def
     )
     decoy.when(
-        mock_module_view.get_nominal_module_offset(
+        mock_module_view.get_nominal_offset_to_child(
             module_id="module-id",
             addressable_areas=mock_addressable_area_view,
         )
@@ -637,7 +637,7 @@ def test_get_module_labware_highest_z(
         ot2_standard_deck_def
     )
     decoy.when(
-        mock_module_view.get_nominal_module_offset(
+        mock_module_view.get_nominal_offset_to_child(
             module_id="module-id",
             addressable_areas=mock_addressable_area_view,
         )
@@ -1116,7 +1116,7 @@ def test_get_highest_z_in_slot_with_labware_stack_on_module(
         DeckSlotLocation(slotName=DeckSlotName.SLOT_3)
     )
     decoy.when(
-        mock_module_view.get_nominal_module_offset(
+        mock_module_view.get_nominal_offset_to_child(
             module_id="module-id",
             addressable_areas=mock_addressable_area_view,
         )
@@ -1333,7 +1333,7 @@ def test_get_module_labware_well_position(
         ot2_standard_deck_def
     )
     decoy.when(
-        mock_module_view.get_nominal_module_offset(
+        mock_module_view.get_nominal_offset_to_child(
             module_id="module-id",
             addressable_areas=mock_addressable_area_view,
         )
@@ -2341,7 +2341,7 @@ def test_get_labware_grip_point_for_labware_on_module(
         ot2_standard_deck_def
     )
     decoy.when(
-        mock_module_view.get_nominal_module_offset(
+        mock_module_view.get_nominal_offset_to_child(
             module_id="module-id",
             addressable_areas=mock_addressable_area_view,
         )

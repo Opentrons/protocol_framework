@@ -302,7 +302,7 @@ class GeometryView:
             return LabwareOffsetVector(x=0, y=0, z=0)
         elif isinstance(labware_location, ModuleLocation):
             module_id = labware_location.moduleId
-            module_offset = self._modules.get_nominal_module_offset(
+            module_offset = self._modules.get_nominal_offset_to_child(
                 module_id=module_id, addressable_areas=self._addressable_areas
             )
             module_model = self._modules.get_connected_model(module_id)
