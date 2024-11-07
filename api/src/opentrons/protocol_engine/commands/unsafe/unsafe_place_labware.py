@@ -72,7 +72,7 @@ class UnsafePlaceLabwareImplementation(
     ) -> SuccessData[UnsafePlaceLabwareResult]:
         """Place Labware.
 
-        This command is used only when ethe gripper is in the middle of moving
+        This command is used only when the gripper is in the middle of moving
         labware but is interrupted before completing the move. (i.e., the e-stop
         is pressed, get into error recovery, etc).
 
