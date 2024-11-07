@@ -1,13 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
-import {
-  Box,
-  COLORS,
-  DIRECTION_COLUMN,
-  Flex,
-  SPACING,
-  StyledText,
-} from '@opentrons/components'
+import { Box, COLORS, DIRECTION_COLUMN, Flex } from '@opentrons/components'
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import { getRobotType } from '../../../../../../file-data/selectors'
 import { CheckboxStepFormField } from '../../../../../../molecules'
@@ -32,9 +25,6 @@ export function MoveLabwareTools(props: StepFormProps): JSX.Element {
   )
 
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
-  const formLevelErrorsWithoutField = visibleFormErrors.filter(
-    error => error.dependentFields.length === 0
-  )
 
   return (
     <Flex flexDirection={DIRECTION_COLUMN}>
@@ -68,19 +58,6 @@ export function MoveLabwareTools(props: StepFormProps): JSX.Element {
         labware={String(propsForFields.labware.value)}
         errorToShow={getFormLevelError('newLocation', mappedErrorsToField)}
       />
-      {formLevelErrorsWithoutField.length > 0 ? (
-        <Flex paddingX={SPACING.spacing16}>
-          {formLevelErrorsWithoutField.map((error, i) => (
-            <StyledText
-              key={`${error.title}_${i}`}
-              desktopStyle="bodyDefaultRegular"
-              color={COLORS.red50}
-            >
-              {error.title}
-            </StyledText>
-          ))}
-        </Flex>
-      ) : null}
     </Flex>
   )
 }
