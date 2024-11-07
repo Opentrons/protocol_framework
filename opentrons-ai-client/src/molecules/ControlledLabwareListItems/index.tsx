@@ -36,7 +36,7 @@ export function ControlledLabwareListItems(): JSX.Element | null {
       render={({ field }) => {
         return (
           <>
-            {labwares.map(labware => {
+            {labwares.map((labware, index) => {
               const labwareDef = defs[labware.labwareURI]
               const dropdownProps = {
                 currentOption: {
@@ -63,7 +63,7 @@ export function ControlledLabwareListItems(): JSX.Element | null {
               return (
                 <ListItem
                   type="noActive"
-                  key={`${labwareDef.parameters.loadName}`}
+                  key={`${index}_${labwareDef.parameters.loadName}`}
                 >
                   <ListItemCustomize
                     dropdown={dropdownProps}

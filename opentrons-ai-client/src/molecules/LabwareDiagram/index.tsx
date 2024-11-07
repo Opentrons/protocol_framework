@@ -8,7 +8,7 @@ export function LabwareDiagram({
 }: {
   def: LabwareDefinition2
 }): JSX.Element | undefined {
-  const labwareSrc: string = labwareImages[def.parameters.loadName][0] ?? ''
+  const labwareSrc: string = labwareImages[def.parameters.loadName]?.[0] ?? ''
 
   if (labwareSrc === '') {
     return
