@@ -151,7 +151,7 @@ describe('SelectPipettes', () => {
     expect(vi.mocked(createCustomTiprackDef)).toHaveBeenCalled()
 
     //  change all tip setting
-    fireEvent.click(screen.getByText('Show all tips'))
+    fireEvent.click(screen.getByText('Show more tip types'))
     screen.getByText('mock incompatible tips modal')
   })
 })
