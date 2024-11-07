@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from typing import TYPE_CHECKING, Optional, Type, cast
 from typing_extensions import Literal
 
+from opentrons.calibration_storage.helpers import details_from_uri
 from opentrons.hardware_control.types import Axis, OT3Mount
 from opentrons.motion_planning.waypoints import get_gripper_labware_placement_waypoints
 from opentrons.protocol_engine.errors.exceptions import (
@@ -13,7 +14,12 @@ from opentrons.protocol_engine.errors.exceptions import (
 )
 from opentrons.types import Point
 
-from ...types import DeckSlotLocation, ModuleModel, OnDeckLabwareLocation
+from ...types import (
+    DeckSlotLocation,
+    LoadedLabware,
+    ModuleModel,
+    OnDeckLabwareLocation,
+)
 from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ...errors.error_occurrence import ErrorOccurrence
 from ...resources import ensure_ot3_hardware
@@ -32,7 +38,7 @@ UnsafePlaceLabwareCommandType = Literal["unsafe/placeLabware"]
 class UnsafePlaceLabwareParams(BaseModel):
     """Payload required for an UnsafePlaceLabware command."""
 
-    labwareId: str = Field(..., description="The id of the labware to place.")
+    labwareURI: str = Field(..., description="Labware URI for labware.")
     location: OnDeckLabwareLocation = Field(
         ..., description="Where to place the labware."
     )
@@ -66,13 +72,13 @@ class UnsafePlaceLabwareImplementation(
     ) -> SuccessData[UnsafePlaceLabwareResult]:
         """Place Labware.
 
-        This command is used only when the gripper is in the middle of moving
+        This command is used only when ethe gripper is in the middle of moving
         labware but is interrupted before completing the move. (i.e., the e-stop
         is pressed, get into error recovery, etc).
 
         Unlike the `moveLabware` command, where you pick a source and destination
-        location, this command takes the labwareId to be moved and location to
-        move it to.
+        location, this command takes the labwareURI of the labware to be moved
+        and location to move it to.
 
         """
         ot3api = ensure_ot3_hardware(self._hardware_api)
@@ -84,9 +90,35 @@ class UnsafePlaceLabwareImplementation(
                 "Cannot place labware when gripper is not gripping."
             )
 
-        # Allow propagation of LabwareNotLoadedError.
-        labware_id = params.labwareId
-        definition_uri = self._state_view.labware.get(labware_id).definitionUri
+        location = self._state_view.geometry.ensure_valid_gripper_location(
+            params.location,
+        )
+
+        # TODO: We need a way to create temporary labware for moving around,
+        # the labware should get deleted once its used.
+        details = details_from_uri(params.labwareURI)
+        labware = await self._equipment.load_labware(
+            load_name=details.load_name,
+            namespace=details.namespace,
+            version=details.version,
+            location=location,
+            labware_id=None,
+        )
+
+        self._state_view.labware._state.definitions_by_uri[
+            params.labwareURI
+        ] = labware.definition
+        self._state_view.labware._state.labware_by_id[
+            labware.labware_id
+        ] = LoadedLabware.construct(
+            id=labware.labware_id,
+            location=location,
+            loadName=labware.definition.parameters.loadName,
+            definitionUri=params.labwareURI,
+            offsetId=labware.offsetId,
+        )
+
+        labware_id = labware.labware_id
         final_offsets = self._state_view.labware.get_labware_gripper_offsets(
             labware_id, None
         )
@@ -97,10 +129,6 @@ class UnsafePlaceLabwareImplementation(
                 params.location.slotName.id
             )
 
-        location = self._state_view.geometry.ensure_valid_gripper_location(
-            params.location,
-        )
-
         # This is an absorbance reader, move the lid to its dock (staging area).
         if isinstance(location, DeckSlotLocation):
             module = self._state_view.modules.get_by_slot(location.slotName)
@@ -110,7 +138,7 @@ class UnsafePlaceLabwareImplementation(
                 )
 
         new_offset_id = self._equipment.find_applicable_labware_offset_id(
-            labware_definition_uri=definition_uri,
+            labware_definition_uri=params.labwareURI,
             labware_location=location,
         )
 
