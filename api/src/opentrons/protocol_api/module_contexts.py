@@ -1028,12 +1028,12 @@ class AbsorbanceReaderContext(ModuleContext):
               one sample wavelength and an optional reference wavelength.
             - In multiple measurement mode, :py:meth:`.AbsorbanceReaderContext.read` uses
               a list of up to six sample wavelengths.
-        :param wavelengths: A list of wavelengths, in mm, to measure.
+        :param wavelengths: A list of wavelengths, in nm, to measure.
 
             - Each item in the list must be an integer between 350 and 1000.
             - The list must contain only one item when initializing a single measurement.
             - The list can contain one to six items when initializing a multiple measurement.
-        :param reference_wavelength: An optional reference wavelength, in mm. If provided,
+        :param reference_wavelength: An optional reference wavelength, in nm. If provided,
             :py:meth:`.AbsorbanceReaderContext.read` will read at the reference
             wavelength and then subtract the reference wavelength values from the
             measurement wavelength values. Can only be used with single measurements.
