@@ -75,7 +75,8 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push base image
+      - name: Build base image
+        id: build_base_image
         uses: docker/build-push-action@v6
         with:
           context: analyses-snapshot-testing/citools
@@ -93,11 +94,11 @@ jobs:
           file: analyses-snapshot-testing/citools/Dockerfile.analyze
           push: false
           load: true
-          tags: opentrons-analysis:${{ env.ANALYSIS_REF }} # Name the image for local use
+          tags: opentrons-analysis:${{ env.ANALYSIS_REF }}
           build-args: |
-            BASE_IMAGE_NAME=${{ env.BASE_IMAGE_NAME }}
+            BASE_IMAGE_NAME=${{ steps.build_base_image.outputs.imageid }}
             ANALYSIS_REF=${{ env.ANALYSIS_REF }}
-            CACHEBUST=$(date +%s) # Always clone the latest code
+            CACHEBUST=$(date +%s)
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
