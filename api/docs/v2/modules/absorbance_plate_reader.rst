@@ -6,9 +6,9 @@
 Absorbance Plate Reader Module
 ******************************
 
-The Absorbance Plate Reader Module is an on-deck microplate spectrophotometer that works with the Flex robot only. The module uses light absorbance to determine sample concentrations in 96-well plates. 
+The Absorbance Plate Reader Module is an on-deck microplate spectrophotometer that works with the Flex robot only. The module uses light absorbance to determine sample concentrations in 96-well plates.
 
-The Absorbance Plate Reader is represented in code by a :py:class:`.AbsorbanceReaderContext` object, which has methods for moving the module lid with the gripper, initializing the module, and performing a read at a single wavelength or multiple wavelengths. With the Python Protocol API, you can process plate reader data immediately in your protocol or export it to a CSV for post-run use.
+The Absorbance Plate Reader is represented in code by a :py:class:`.AbsorbanceReaderContext` object, which has methods for moving the module lid with the Flex Gripper, initializing the module, and performing a read at a single wavelength or multiple wavelengths. With the Python Protocol API, you can process plate reader data immediately in your protocol or export it to a CSV for post-run use.
 
 This page explains the actions necessary for using the Absorbance Plate Reader. These combine to form the typical reader workflow:
 
@@ -37,12 +37,32 @@ The Absorbance Plate Reader can only be loaded in slots A3–D3. If you try to l
 Lid Control
 ===========
 
-TK
+Flex uses the gripper to move the lid between its two positions.
+
+  - :py:meth:`~.AbsorbanceReaderContext.open_lid()` moves the lid to the righthand side of the caddy, in deck column 4.
+  - :py:meth:`~.AbsorbanceReaderContext.close_lid()` moves the lid onto the detection unit, in deck column 3.
+
+If you call ``open_lid()`` or ``close_lid()`` and the lid is already in the corresponding position, the method will succeed immediately. You need to call ``close_lid()`` before initializing the reader, even if the reader was in the closed position at the start of the protocol.
+
+.. warning::
+    Do not move the lid manually, during or outside of a protocol. The API does not allow manual lid movement because there is a risk of damaging the module.
 
 Initialization
 ==============
 
-TK
+Initializing the reader prepares it to read a plate later in your protocol. The :py:meth:`.AbsorbanceReaderContext.initialize` method accepts parameters for the number of readings you want to take, the wavelengths to read, and whether you want to compare the reading to a reference wavelength.
+
+The module uses these parameters immediately to perform the physical initialization. Additionally, the API preserves these values and uses them when you read the plate later in your protocol.
+
+Let's take a look at examples of how to combine these parameters to prepare different types of readings. The simplest reading measures one wavelength, with no reference wavelength::
+
+    pr_mod.initialize(
+        mode="single",
+        wavelengths=[400]
+    )
+
+Now the reader is prepared to read at 400 nm. Note that the ``wavelengths`` parameter always takes a list of integer wavelengths, even when only reading a single wavelength.
+
 
 Reading and Using Data
 ======================
