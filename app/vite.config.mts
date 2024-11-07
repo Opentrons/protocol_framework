@@ -46,7 +46,10 @@ export default defineConfig(
         },
       },
       define: {
-        'process.env': process.env,
+        'process.env': {
+          NODE_ENV: process.env.NODE_ENV,
+          OT_APP_MIXPANEL_ID: process.env.OT_APP_MIXPANEL_ID,
+        },
         global: 'globalThis',
         _PKG_VERSION_: JSON.stringify(version),
         _OPENTRONS_PROJECT_: JSON.stringify(project),
