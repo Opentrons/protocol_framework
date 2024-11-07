@@ -78,8 +78,8 @@ jobs:
       - name: Build and push base image
         uses: docker/build-push-action@v6
         with:
-          context: ./citools
-          file: ./citools/Dockerfile.base
+          context: analyses-snapshot-testing/citools
+          file: analyses-snapshot-testing/citools/Dockerfile.base
           push: false
           load: true
           tags: ${{ env.BASE_IMAGE_NAME }}
@@ -89,8 +89,8 @@ jobs:
       - name: Build analysis image
         uses: docker/build-push-action@v6
         with:
-          context: ./citools
-          file: ./citools/Dockerfile.analyze
+          context: analyses-snapshot-testing/citools
+          file: analyses-snapshot-testing/citools/Dockerfile.analyze
           push: false
           load: true
           tags: opentrons-analysis:${{ env.ANALYSIS_REF }} # Name the image for local use
