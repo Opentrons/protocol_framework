@@ -331,6 +331,15 @@ jobs:
           smksp_cert_sync.exe
           smctl.exe healthcheck --all
 
+      # Do the frontend dist bundle
+      - name: 'bundle ${{matrix.variant}} frontend'
+        env:
+          OT_APP_MIXPANEL_ID: ${{ secrets.OT_APP_MIXPANEL_ID }}
+          OT_APP_INTERCOM_ID: ${{ secrets.OT_APP_INTERCOM_ID }}
+          OPENTRONS_PROJECT: ${{ steps.project.outputs.project }}
+        run: |
+          make -C app dist
+
       # build the desktop app and deploy it
       - name: 'build ${{matrix.variant}} app for ${{ matrix.os }}'
         if: matrix.target == 'desktop'
