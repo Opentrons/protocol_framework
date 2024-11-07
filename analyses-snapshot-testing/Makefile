@@ -1,10 +1,9 @@
 BASE_IMAGE_NAME ?= opentrons-python-base:3.10
-CACHEBUST := $(shell date +%s)
+CACHEBUST ?= $(shell date +%s)
 ANALYSIS_REF ?= edge
 PROTOCOL_NAMES ?= all
 OVERRIDE_PROTOCOL_NAMES ?= all
 OPENTRONS_VERSION ?= edge
-CACHE_DIR := /tmp/.buildx-cache
 
 export OPENTRONS_VERSION # used for server
 export ANALYSIS_REF # used for analysis and snapshot test
