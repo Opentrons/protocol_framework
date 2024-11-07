@@ -30,10 +30,10 @@ def test_build_aspirate_settings() -> None:
     assert aspirate_properties.retract.position_reference.value == "well-top"
     assert aspirate_properties.retract.offset == Coordinate(x=0, y=0, z=5)
     assert aspirate_properties.retract.speed == 100
-    assert aspirate_properties.retract.air_gap_by_volume == {
-        "default": 2,
-        "5": 3,
-        "10": 4,
+    assert aspirate_properties.retract.air_gap_by_volume.properties_by_volume == {
+        "default": 2.0,
+        5.0: 3.0,
+        10.0: 4.0,
     }
     assert aspirate_properties.retract.touch_tip.enabled is True
     assert aspirate_properties.retract.touch_tip.z_offset == 2
@@ -44,10 +44,10 @@ def test_build_aspirate_settings() -> None:
 
     assert aspirate_properties.position_reference.value == "well-bottom"
     assert aspirate_properties.offset == Coordinate(x=0, y=0, z=-5)
-    assert aspirate_properties.flow_rate_by_volume == {
-        "default": 50,
-        "10": 40,
-        "20": 30,
+    assert aspirate_properties.flow_rate_by_volume.properties_by_volume == {
+        "default": 50.0,
+        10.0: 40.0,
+        20.0: 30.0,
     }
     assert aspirate_properties.pre_wet is True
     assert aspirate_properties.mix.enabled is True
@@ -77,11 +77,14 @@ def test_build_single_dispense_settings() -> None:
     assert single_dispense_properties.retract.position_reference.value == "well-top"
     assert single_dispense_properties.retract.offset == Coordinate(x=0, y=0, z=5)
     assert single_dispense_properties.retract.speed == 100
-    assert single_dispense_properties.retract.air_gap_by_volume == {
-        "default": 2,
-        "5": 3,
-        "10": 4,
-    }
+    assert (
+        single_dispense_properties.retract.air_gap_by_volume.properties_by_volume
+        == {
+            "default": 2.0,
+            5.0: 3.0,
+            10.0: 4.0,
+        }
+    )
     assert single_dispense_properties.retract.touch_tip.enabled is True
     assert single_dispense_properties.retract.touch_tip.z_offset == 2
     assert single_dispense_properties.retract.touch_tip.mm_to_edge == 1
@@ -95,18 +98,18 @@ def test_build_single_dispense_settings() -> None:
 
     assert single_dispense_properties.position_reference.value == "well-bottom"
     assert single_dispense_properties.offset == Coordinate(x=0, y=0, z=-5)
-    assert single_dispense_properties.flow_rate_by_volume == {
-        "default": 50,
-        "10": 40,
-        "20": 30,
+    assert single_dispense_properties.flow_rate_by_volume.properties_by_volume == {
+        "default": 50.0,
+        10.0: 40.0,
+        20.0: 30.0,
     }
     assert single_dispense_properties.mix.enabled is True
     assert single_dispense_properties.mix.repetitions == 3
     assert single_dispense_properties.mix.volume == 15
-    assert single_dispense_properties.push_out_by_volume == {
-        "default": 5,
-        "10": 7,
-        "20": 10,
+    assert single_dispense_properties.push_out_by_volume.properties_by_volume == {
+        "default": 5.0,
+        10.0: 7.0,
+        20.0: 10.0,
     }
     assert single_dispense_properties.delay.enabled is True
     assert single_dispense_properties.delay.duration == 2.5
@@ -133,10 +136,10 @@ def test_build_multi_dispense_settings() -> None:
     assert multi_dispense_properties.retract.position_reference.value == "well-top"
     assert multi_dispense_properties.retract.offset == Coordinate(x=0, y=0, z=5)
     assert multi_dispense_properties.retract.speed == 100
-    assert multi_dispense_properties.retract.air_gap_by_volume == {
-        "default": 2,
-        "5": 3,
-        "10": 4,
+    assert multi_dispense_properties.retract.air_gap_by_volume.properties_by_volume == {
+        "default": 2.0,
+        5.0: 3.0,
+        10.0: 4.0,
     }
     assert multi_dispense_properties.retract.touch_tip.enabled is True
     assert multi_dispense_properties.retract.touch_tip.z_offset == 2
@@ -150,18 +153,18 @@ def test_build_multi_dispense_settings() -> None:
 
     assert multi_dispense_properties.position_reference.value == "well-bottom"
     assert multi_dispense_properties.offset == Coordinate(x=0, y=0, z=-5)
-    assert multi_dispense_properties.flow_rate_by_volume == {
-        "default": 50,
-        "10": 40,
-        "20": 30,
+    assert multi_dispense_properties.flow_rate_by_volume.properties_by_volume == {
+        "default": 50.0,
+        10.0: 40.0,
+        20.0: 30.0,
     }
-    assert multi_dispense_properties.conditioning_by_volume == {
-        "default": 10,
-        "5": 5,
+    assert multi_dispense_properties.conditioning_by_volume.properties_by_volume == {
+        "default": 10.0,
+        5.0: 5.0,
     }
-    assert multi_dispense_properties.disposal_by_volume == {
-        "default": 2,
-        "5": 3,
+    assert multi_dispense_properties.disposal_by_volume.properties_by_volume == {
+        "default": 2.0,
+        5.0: 3.0,
     }
     assert multi_dispense_properties.delay.enabled is True
     assert multi_dispense_properties.delay.duration == 1
