@@ -46,7 +46,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BASE_IMAGE_NAME: opentrons-python-base:3.10
-      CACHE_DIR: /tmp/.buildx-cache
       ANALYSIS_REF: ${{ github.event.inputs.ANALYSIS_REF || github.head_ref || 'edge' }}
       SNAPSHOT_REF: ${{ github.event.inputs.SNAPSHOT_REF || github.head_ref || 'edge' }}
       # If we're running because of workflow_dispatch, use the user input to decide
@@ -76,17 +75,31 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Cache Base Image Layers
-        uses: actions/cache@v4
+      - name: Build and push base image
+        uses: docker/build-push-action@v6
         with:
-          path: ${{ env.CACHE_DIR }}
-          key: ${{ runner.os }}-docker-${{ env.BASE_IMAGE_NAME }}
-          restore-keys: |
-            ${{ runner.os }}-docker-
+          context: ./citools
+          file: ./citools/Dockerfile.base
+          push: false
+          load: true
+          tags: ${{ env.BASE_IMAGE_NAME }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Build Images with Makefile
-        working-directory: analyses-snapshot-testing
-        run: make build-all-ci
+      - name: Build analysis image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./citools
+          file: ./citools/Dockerfile.analyze
+          push: false
+          load: true
+          tags: opentrons-analysis:${{ env.ANALYSIS_REF }} # Name the image for local use
+          build-args: |
+            BASE_IMAGE_NAME=${{ env.BASE_IMAGE_NAME }}
+            ANALYSIS_REF=${{ env.ANALYSIS_REF }}
+            CACHEBUST=$(date +%s) # Always clone the latest code
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
