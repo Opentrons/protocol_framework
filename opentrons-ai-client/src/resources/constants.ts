@@ -1,7 +1,8 @@
 // ToDo (kk:05/29/2024) this should be switched by env var
 export const STAGING_END_POINT =
   'https://staging.opentrons.ai/api/chat/completion'
-export const STAGING_FEEDBACK_END_POINT = 'https://staging.opentrons.ai/api/chat/feedback'
+export const STAGING_FEEDBACK_END_POINT =
+  'https://staging.opentrons.ai/api/chat/feedback'
 export const PROD_END_POINT = 'https://opentrons.ai/api/chat/completion'
 export const PROD_FEEDBACK_END_POINT = 'https://opentrons.ai/api/chat/feedback'
 
@@ -21,6 +22,7 @@ export const LOCAL_AUTH0_CLIENT_ID = 'PcuD1wEutfijyglNeRBi41oxsKJ1HtKw'
 export const LOCAL_AUTH0_AUDIENCE = 'sandbox-ai-api'
 export const LOCAL_AUTH0_DOMAIN = 'identity.auth-dev.opentrons.com'
 export const LOCAL_END_POINT = 'http://localhost:8000/api/chat/completion'
-export const LOCAL_FEEDBACK_END_POINT = 'http://localhost:8000/api/chat/feedback'
+export const LOCAL_FEEDBACK_END_POINT =
+  'http://localhost:8000/api/chat/feedback'
 
 export const CLIENT_MAX_WIDTH = '1440px'
