@@ -638,7 +638,6 @@ class OT3Controller(FlexBackend):
         if not target:
             return None, False
         move_target = MoveTarget.build(position=target, max_speed=speed)
-        log.info(f"The origin: {origin} and {target} position at speed: {speed}")
         try:
             _, movelist = self._move_manager.plan_motion(
                 origin=origin, target_list=[move_target]
@@ -647,7 +646,9 @@ class OT3Controller(FlexBackend):
             log.debug(f"Not moving because move was zero length {str(zme)}")
             return None, False
         moves = movelist[0]
-        log.info(f"move: machine {target} from {origin} requires {moves}")
+        log.debug(
+            f"move: machine coordinates {target} from origin: machine coordinates {origin} at speed: {speed} requires {moves}"
+        )
 
         ordered_nodes = self._motor_nodes()
         if nodes_in_moves_only:
