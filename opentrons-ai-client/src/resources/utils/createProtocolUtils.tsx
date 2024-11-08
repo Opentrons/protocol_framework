@@ -100,6 +100,17 @@ export function generatePromptPreviewLabwareLiquidsItems(
   return items.filter(Boolean)
 }
 
+export function generatePromptPreviewStepsItems(
+  watch: UseFormWatch<CreateProtocolFormData>,
+  t: any
+): string[] {
+  const { steps } = watch()
+
+  if (steps === undefined || steps?.length === 0) return []
+
+  return steps.filter(Boolean)
+}
+
 export function generatePromptPreviewData(
   watch: UseFormWatch<CreateProtocolFormData>,
   t: any
@@ -123,6 +134,10 @@ export function generatePromptPreviewData(
     {
       title: t('labware_liquids_title'),
       items: generatePromptPreviewLabwareLiquidsItems(watch, t),
+    },
+    {
+      title: t('steps_title'),
+      items: generatePromptPreviewStepsItems(watch, t),
     },
   ]
 }

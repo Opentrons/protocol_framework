@@ -130,7 +130,6 @@ export function StepsSection(): JSX.Element | null {
                       const value = e.target.value
                       const splitByNumberedLines = value.split(/\n(?=\d+\.)/)
                       field.onChange(splitByNumberedLines)
-                      console.log(splitByNumberedLines)
                     }}
                     value={field.value.join('\n')}
                     onBlur={field.onBlur}

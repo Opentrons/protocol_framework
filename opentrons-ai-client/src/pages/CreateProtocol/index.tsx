@@ -97,6 +97,7 @@ export function CreateProtocol(): JSX.Element | null {
           handleSubmit={function (): void {
             throw new Error('Function not implemented.')
           }}
+          isSubmitButtonEnabled={currentStep === TOTAL_STEPS + 1}
           promptPreviewData={generatePromptPreviewData(methods.watch, t)}
         />
       </Flex>
