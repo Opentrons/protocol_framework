@@ -83,7 +83,6 @@ class OpenLidImpl(AbstractCommandImpl[OpenLidParams, SuccessData[OpenLidResult]]
                 self._state_view.labware.get_absorbance_reader_lid_definition()
             )
 
-            # todo(mm, 2024-11-05): Should this be get_connected_model() instead of get_requested_model()?
             absorbance_model = self._state_view.modules.get_requested_model(
                 params.moduleId
             )

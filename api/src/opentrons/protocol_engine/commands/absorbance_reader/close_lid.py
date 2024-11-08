@@ -87,7 +87,6 @@ class CloseLidImpl(AbstractCommandImpl[CloseLidParams, SuccessData[CloseLidResul
             )
 
             # we need to move the lid onto the module reader
-            # todo(mm, 2024-11-05): Should this be get_connected_model() instead of get_requested_model()?
             absorbance_model = self._state_view.modules.get_requested_model(
                 params.moduleId
             )
