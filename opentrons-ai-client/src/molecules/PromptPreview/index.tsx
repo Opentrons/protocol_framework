@@ -80,6 +80,7 @@ export function PromptPreview({
               title={section.title}
               items={section.items}
               itemMaxWidth={index <= 1 ? '33.33%' : '100%'}
+              oneItemPerRow={index === 4}
             />
           )
       )}

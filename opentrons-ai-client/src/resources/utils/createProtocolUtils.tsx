@@ -107,6 +107,7 @@ export function generatePromptPreviewStepsItems(
   const { steps } = watch()
 
   if (steps === undefined || steps?.length === 0) return []
+  if (typeof steps === 'string') return [steps]
 
   return steps.filter(Boolean)
 }

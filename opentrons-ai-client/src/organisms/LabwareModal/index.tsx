@@ -5,7 +5,6 @@ import {
   JUSTIFY_FLEX_END,
   ListButton,
   ListButtonAccordion,
-  ListButtonAccordionContainer,
   Modal,
   PrimaryButton,
   SecondaryButton,
@@ -149,7 +148,7 @@ export function LabwareModal({
                             handleCategoryClick(category)
                           }}
                         >
-                          <ListButtonAccordionContainer id={`${category}`}>
+                          <Flex id={`${category}`} width={'100%'}>
                             <ListButtonAccordion
                               mainHeadline={t(`${category}`)}
                               isExpanded={category === selectedCategory}
@@ -201,7 +200,7 @@ export function LabwareModal({
                                 }
                               )}
                             </ListButtonAccordion>
-                          </ListButtonAccordionContainer>
+                          </Flex>
                         </ListButton>
                       )
                     }

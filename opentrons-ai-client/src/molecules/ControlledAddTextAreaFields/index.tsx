@@ -48,10 +48,12 @@ export function ControlledAddTextAreaFields({
                   name={`${name}-${index + 1}`}
                   title={`${t(name)} ${index + 1}`}
                   caption={index === 0 && t(`add_${name}_caption`)}
-                  value={values[index] === '' ? '' : values[index] ?? value}
+                  value={value.replace(`${t(name)} ${index + 1}: `, '')}
                   onChange={e => {
                     const newValues = [...values]
-                    newValues[index] = e.target.value
+                    newValues[index] = `${t(name)} ${index + 1}: ${
+                      e.target.value
+                    }`
                     field.onChange(newValues)
                   }}
                   onBlur={field.onBlur}
@@ -64,7 +66,7 @@ export function ControlledAddTextAreaFields({
                       field.onChange(values.filter((_, i) => i !== index))
                     }}
                     css={css`
-                      width: 10%;
+                      justify-content: flex-end;
                       text-decoration: ${TYPOGRAPHY.textDecorationUnderline};
                       color: ${COLORS.grey60};
                       &:hover {

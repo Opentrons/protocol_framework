@@ -351,6 +351,7 @@ export const TextAreaField = React.forwardRef<
 const StyledTextArea = styled.textarea`
   background-color: transparent;
   width: 100%;
+  min-height: 3.75rem;
   resize: vertical;
   white-space: pre-wrap;
   &::placeholder {

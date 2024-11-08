@@ -10,7 +10,7 @@ import {
   StyledText,
   Tabs,
 } from '@opentrons/components'
-import { Controller, useFormContext } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { useAtom } from 'jotai'
@@ -19,7 +19,7 @@ import { STEPS_STEP } from '../ProtocolSectionsContainer'
 import { useState } from 'react'
 import { COLUMN } from '@opentrons/shared-data'
 import { ControlledAddTextAreaFields } from '../../molecules/ControlledAddTextAreaFields'
-import { TextAreaField } from '../../atoms/TextAreaField'
+import { ControlledTextAreaField } from '../../atoms/ControlledTextAreaField'
 
 export const STEPS_FIELD_NAME = 'steps'
 
@@ -114,27 +114,12 @@ export function StepsSection(): JSX.Element | null {
               gap={SPACING.spacing4}
               color={COLORS.grey60}
             >
-              <Controller
+              <ControlledTextAreaField
                 name={STEPS_FIELD_NAME}
+                height="180px"
                 rules={{
                   required: true,
-                  validate: (value: string) => {
-                    return value.length > 0 && value[0] !== ''
-                  },
                 }}
-                render={({ field }) => (
-                  <TextAreaField
-                    height="180px"
-                    title={t('paste_from_document_input_title')}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                      const value = e.target.value
-                      const splitByNumberedLines = value.split(/\n(?=\d+\.)/)
-                      field.onChange(splitByNumberedLines)
-                    }}
-                    value={field.value.join('\n')}
-                    onBlur={field.onBlur}
-                  />
-                )}
               />
               <StyledText desktopStyle="bodyDefaultRegular">
                 {t('paste_from_document_input_caption_1')}
