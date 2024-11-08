@@ -134,6 +134,11 @@ export function getLabwareLocation(
           moduleModel,
           adapterName,
         }
+      } else if ('labwareId' in adapter.location) {
+        return getLabwareLocation({
+          ...params,
+          location: adapter.location,
+        })
       } else {
         return null
       }

@@ -109,58 +109,59 @@ export function useDropTipCommands({
     isPredefinedLocation: boolean
   ): Promise<void> => {
     return new Promise((resolve, reject) => {
-      const addressableAreaFromConfig = getAddressableAreaFromConfig(
-        addressableArea,
-        deckConfig,
-        instrumentModelSpecs.channels,
-        robotType
-      )
+      Promise.resolve()
+        .then(() => {
+          const addressableAreaFromConfig = getAddressableAreaFromConfig(
+            addressableArea,
+            deckConfig,
+            instrumentModelSpecs.channels,
+            robotType
+          )
 
-      if (addressableAreaFromConfig != null) {
-        const moveToAACommand = buildMoveToAACommand(
-          addressableAreaFromConfig,
-          pipetteId,
-          isPredefinedLocation,
-          issuedCommandsType
-        )
-        return chainRunCommands(
-          isFlex
-            ? [
-                ENGAGE_AXES,
-                UPDATE_ESTIMATORS_EXCEPT_PLUNGERS,
-                Z_HOME,
-                moveToAACommand,
-              ]
-            : [Z_HOME, moveToAACommand],
-          false
-        )
-          .then((commandData: CommandData[]) => {
-            const error = commandData[0].data.error
-            if (error != null) {
-              setErrorDetails({
-                runCommandError: error,
-                message: `Error moving to position: ${error.detail}`,
-              })
-            }
-          })
-          .then(resolve)
-          .catch(error => {
-            if (
-              fixitCommandTypeUtils != null &&
-              issuedCommandsType === 'fixit'
-            ) {
-              fixitCommandTypeUtils.errorOverrides.generalFailure()
-            }
+          if (addressableAreaFromConfig == null) {
+            throw new Error('invalid addressable area.')
+          }
 
-            reject(
-              new Error(`Error issuing move to addressable area: ${error}`)
-            )
-          })
-      } else {
-        setErrorDetails({
-          message: `Error moving to position: invalid addressable area.`,
+          const moveToAACommand = buildMoveToAACommand(
+            addressableAreaFromConfig,
+            pipetteId,
+            isPredefinedLocation,
+            issuedCommandsType
+          )
+
+          return chainRunCommands(
+            isFlex
+              ? [
+                  ENGAGE_AXES,
+                  UPDATE_ESTIMATORS_EXCEPT_PLUNGERS,
+                  Z_HOME,
+                  moveToAACommand,
+                ]
+              : [Z_HOME, moveToAACommand],
+            false
+          )
         })
-      }
+        .then((commandData: CommandData[]) => {
+          const error = commandData[0].data.error
+          if (error != null) {
+            // eslint-disable-next-line @typescript-eslint/no-throw-literal
+            throw error
+          }
+          resolve()
+        })
+        .catch(error => {
+          if (fixitCommandTypeUtils != null && issuedCommandsType === 'fixit') {
+            fixitCommandTypeUtils.errorOverrides.generalFailure()
+          } else {
+            setErrorDetails({
+              runCommandError: error,
+              message: error.detail
+                ? `Error moving to position: ${error.detail}`
+                : 'Error moving to position: invalid addressable area.',
+            })
+          }
+          reject(error)
+        })
     })
   }
 

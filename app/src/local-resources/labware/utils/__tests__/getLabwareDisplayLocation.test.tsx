@@ -125,7 +125,7 @@ describe('getLabwareDisplayLocation with translations', () => {
       },
     })
 
-    screen.getByText('Mock Adapter in D1')
+    screen.getByText('Mock Adapter in Slot D1')
   })
 
   it('should return a slot-only location when detailLevel is "slot-only"', () => {
@@ -168,6 +168,6 @@ describe('getLabwareDisplayLocation with translations', () => {
       },
     })
 
-    screen.getByText('Mock Adapter on Temperature Module in 2')
+    screen.getByText('Mock Adapter on Temperature Module in Slot 2')
   })
 })
