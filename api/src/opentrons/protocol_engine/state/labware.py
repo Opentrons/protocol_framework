@@ -842,7 +842,6 @@ class LabwareView(HasState[LabwareState]):
         labware_definition: LabwareDefinition,
     ) -> None:
         """Raise an error if the labware is not compatible with the plate reader."""
-        # TODO: (ba, 2024-11-1): the plate reader lid should not be a labware.
         load_name = labware_definition.parameters.loadName
         number_of_wells = len(labware_definition.wells)
         if number_of_wells != 96:
