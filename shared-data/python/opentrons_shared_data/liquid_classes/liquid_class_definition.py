@@ -3,7 +3,6 @@
 from enum import Enum
 from typing import TYPE_CHECKING, Literal, Union, Optional, Dict, Any, Sequence
 
-from docutils.nodes import description
 from pydantic import (
     BaseModel,
     validator,
