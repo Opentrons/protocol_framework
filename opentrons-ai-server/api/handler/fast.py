@@ -247,7 +247,10 @@ async def redoc_html() -> HTMLResponse:
 
 
 @app.post(
-    "/api/chat/feedback", response_model=Union[FeedbackResponse, ErrorResponse], summary="Feedback", description="Send feedback to the team."
+    "/api/chat/feedback",
+    response_model=Union[FeedbackResponse, ErrorResponse],
+    summary="Feedback",
+    description="Send feedback to the team.",
 )
 async def feedback(request: Request, auth_result: Any = Security(auth.verify)) -> FeedbackResponse:  # noqa: B008
     """

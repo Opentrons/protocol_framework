@@ -34,6 +34,7 @@ def test_get_feedback_good_auth(client: Client) -> None:
     assert response.status_code == 200, "Feedback with good auth should return HTTP 200"
     FeedbackResponse.model_validate(response.json())
 
+
 @pytest.mark.live
 def test_get_bad_endpoint_with_good_auth(client: Client) -> None:
     """Test a nonexistent endpoint with good authentication."""
