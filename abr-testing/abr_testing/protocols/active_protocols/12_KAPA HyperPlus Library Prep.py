@@ -156,7 +156,6 @@ def run(ctx: ProtocolContext) -> None:
 
     trash = ctx.load_waste_chute()
     unused_lids: List[Labware] = []
-    used_lids:List[Labware] = []
     # Load TC Lids
     if disposable_lid:
         unused_lids = helpers.load_disposable_lids(ctx, 5, ["C3"])
@@ -655,7 +654,7 @@ def run(ctx: ProtocolContext) -> None:
         return unused_lids, used_lids
 
     def mix_beads(
-        pip: InstrumentContext, res: Well, vol: int, reps: int, col: int
+        pip: InstrumentContext, res: Well, vol: float, reps: int, col: int
     ) -> None:
         """Mix beads function."""
         # Multiplier tells
