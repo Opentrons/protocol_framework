@@ -1,8 +1,9 @@
 """The interface that implements InstrumentContext."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Generic, List, NamedTuple, Optional, TypeVar
+from typing import Any, Generic, List, NamedTuple, Optional, TypeVar, Dict
 
 from opentrons_shared_data.labware.types import (
     LabwareUri,
@@ -11,6 +12,7 @@ from opentrons_shared_data.labware.types import (
 )
 
 from opentrons.types import DeckSlotName, Point, NozzleMapInterface
+from .._liquid import Liquid
 
 from .well import WellCoreType
 
@@ -128,6 +130,14 @@ class AbstractLabware(ABC, Generic[WellCoreType]):
     @abstractmethod
     def get_deck_slot(self) -> Optional[DeckSlotName]:
         """Get the deck slot the labware or its parent is in, if any."""
+
+    @abstractmethod
+    def load_liquid(self, volumes: Dict[str, float], liquid: Liquid) -> None:
+        """Load liquid into wells of the labware."""
+
+    @abstractmethod
+    def load_empty(self, wells: List[str]) -> None:
+        """Mark wells of the labware as empty."""
 
 
 LabwareCoreType = TypeVar("LabwareCoreType", bound=AbstractLabware[Any])
