@@ -10,6 +10,7 @@ from typing import (
     List,
     Optional,
     Protocol,
+    Dict,
 )
 
 from opentrons_shared_data.robot.types import RobotType
