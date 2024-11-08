@@ -939,8 +939,11 @@ class LabwareView(HasState[LabwareState]):
         )
 
     def get_absorbance_reader_lid_definition(self) -> LabwareDefinition:
+        """Return the special labware definition for the plate reader lid.
+
+        See todo comments in `create_protocol_engine().
+        """
         # NOTE: This needs to stay in sync with create_protocol_engine().
-        # See todo comments there.
         return self._state.definitions_by_uri[
             "opentrons/opentrons_flex_lid_absorbance_plate_reader_module/1"
         ]

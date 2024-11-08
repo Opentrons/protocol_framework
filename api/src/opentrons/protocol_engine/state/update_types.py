@@ -418,6 +418,7 @@ class StateUpdate:
         )
 
     def set_absorbance_reader_lid(self, module_id: str, is_lid_on: bool) -> None:
+        """Update an absorbance reader's lid location. See `AbsorbanceReaderLidUpdate`."""
         self.absorbance_reader_lid = AbsorbanceReaderLidUpdate(
             module_id=module_id, is_lid_on=is_lid_on
         )

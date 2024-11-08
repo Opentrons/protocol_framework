@@ -332,7 +332,7 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 data=data,
             )
 
-    def _add_module_substate(  # noqa: C901
+    def _add_module_substate(
         self,
         module_id: str,
         serial_number: Optional[str],
@@ -607,7 +607,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         configured_wavelengths = absorbance_reader_substate.configured_wavelengths
         reference_wavelength = absorbance_reader_substate.reference_wavelength
         is_lid_on = absorbance_reader_substate.is_lid_on
-        data = absorbance_reader_substate.data
 
         if isinstance(command.result, absorbance_reader.InitializeResult):
             self._state.substate_by_module_id[module_id] = AbsorbanceReaderSubState(

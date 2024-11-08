@@ -10,7 +10,6 @@ from ...errors.error_occurrence import ErrorOccurrence
 from ...errors import CannotPerformModuleAction
 from opentrons.protocol_engine.types import AddressableAreaLocation
 
-from opentrons.protocol_engine.resources import labware_validation
 from ...state.update_types import StateUpdate
 
 

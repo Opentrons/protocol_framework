@@ -5,7 +5,6 @@ from typing_extensions import Literal
 from pydantic import BaseModel, Field
 
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
-from ..errors import ModuleNotLoadedError
 from ..errors.error_occurrence import ErrorOccurrence
 from ..types import (
     DeckSlotLocation,
@@ -17,7 +16,6 @@ from opentrons.types import DeckSlotName
 
 from opentrons.protocol_engine.resources import deck_configuration_provider
 
-from opentrons.drivers.types import AbsorbanceReaderLidStatus
 
 if TYPE_CHECKING:
     from ..state.state import StateView

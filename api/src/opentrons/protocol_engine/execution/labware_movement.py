@@ -105,7 +105,7 @@ class LabwareMovementHandler:
     ) -> None:
         ...
 
-    async def move_labware_with_gripper(
+    async def move_labware_with_gripper(  # noqa: C901
         self,
         *,
         labware_id: str | None = None,

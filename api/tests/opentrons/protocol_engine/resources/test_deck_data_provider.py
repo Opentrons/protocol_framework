@@ -10,8 +10,6 @@ from opentrons.types import DeckSlotName
 from opentrons.protocol_engine.types import (
     DeckSlotLocation,
     DeckType,
-    DeckConfigurationType,
-    AddressableAreaLocation,
 )
 from opentrons.protocol_engine.resources import (
     LabwareDataProvider,
