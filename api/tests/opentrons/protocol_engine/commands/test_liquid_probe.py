@@ -1,6 +1,10 @@
 """Test LiquidProbe commands."""
+
 from datetime import datetime
 from typing import Type, Union
+
+from decoy import matchers, Decoy
+import pytest
 
 from opentrons.protocol_engine.errors.exceptions import (
     MustHomeError,
@@ -11,8 +15,6 @@ from opentrons.protocol_engine.errors.exceptions import (
 from opentrons_shared_data.errors.exceptions import (
     PipetteLiquidNotFoundError,
 )
-from decoy import matchers, Decoy
-import pytest
 
 from opentrons.protocol_engine.commands.pipetting_common import LiquidNotFoundError
 from opentrons.protocol_engine.state.state import StateView
@@ -37,7 +39,6 @@ from opentrons.protocol_engine.execution import (
 )
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
 
-
 EitherImplementationType = Union[
     Type[LiquidProbeImplementation], Type[TryLiquidProbeImplementation]
 ]
@@ -61,7 +62,7 @@ def types(
 
 @pytest.fixture
 def implementation_type(
-    types: tuple[EitherImplementationType, object, object]
+    types: tuple[EitherImplementationType, object, object],
 ) -> EitherImplementationType:
     """Return an implementation type. Kept in sync with the params and result types."""
     return types[0]
@@ -145,6 +146,9 @@ async def test_liquid_probe_implementation(
             height=15.0,
         ),
     ).then_return(30.0)
+    decoy.when(
+        state_view.pipettes.get_nozzle_configuration_supports_lld("abc")
+    ).then_return(True)
 
     timestamp = datetime(year=2020, month=1, day=2)
     decoy.when(model_utils.get_timestamp()).then_return(timestamp)
@@ -219,7 +223,9 @@ async def test_liquid_not_found_error(
             well_location=well_location,
         ),
     ).then_raise(PipetteLiquidNotFoundError())
-
+    decoy.when(
+        state_view.pipettes.get_nozzle_configuration_supports_lld(pipette_id)
+    ).then_return(True)
     decoy.when(model_utils.generate_id()).then_return(error_id)
     decoy.when(model_utils.get_timestamp()).then_return(error_timestamp)
 
@@ -278,7 +284,9 @@ async def test_liquid_probe_tip_checking(
         wellName=well_name,
         wellLocation=well_location,
     )
-
+    decoy.when(
+        state_view.pipettes.get_nozzle_configuration_supports_lld(pipette_id)
+    ).then_return(True)
     decoy.when(state_view.pipettes.get_aspirated_volume(pipette_id)).then_raise(
         TipNotAttachedError()
     )
@@ -306,7 +314,9 @@ async def test_liquid_probe_plunger_preparedness_checking(
         wellName=well_name,
         wellLocation=well_location,
     )
-
+    decoy.when(
+        state_view.pipettes.get_nozzle_configuration_supports_lld(pipette_id)
+    ).then_return(True)
     decoy.when(state_view.pipettes.get_aspirated_volume(pipette_id)).then_return(None)
     with pytest.raises(PipetteNotReadyToAspirateError):
         await subject.execute(data)
@@ -336,12 +346,17 @@ async def test_liquid_probe_volume_checking(
     decoy.when(
         state_view.pipettes.get_aspirated_volume(pipette_id=pipette_id),
     ).then_return(123)
+    decoy.when(
+        state_view.pipettes.get_nozzle_configuration_supports_lld(pipette_id)
+    ).then_return(True)
+
     with pytest.raises(TipNotEmptyError):
         await subject.execute(data)
 
     decoy.when(
         state_view.pipettes.get_aspirated_volume(pipette_id=pipette_id),
     ).then_return(None)
+
     with pytest.raises(PipetteNotReadyToAspirateError):
         await subject.execute(data)
 
@@ -373,5 +388,8 @@ async def test_liquid_probe_location_checking(
             mount=MountType.LEFT,
         ),
     ).then_return(False)
+    decoy.when(
+        state_view.pipettes.get_nozzle_configuration_supports_lld(pipette_id)
+    ).then_return(True)
     with pytest.raises(MustHomeError):
         await subject.execute(data)

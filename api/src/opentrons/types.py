@@ -1,7 +1,16 @@
 from __future__ import annotations
 import enum
 from math import sqrt, isclose
-from typing import TYPE_CHECKING, Any, NamedTuple, Iterator, Union, List, Optional
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    NamedTuple,
+    Iterator,
+    Union,
+    List,
+    Optional,
+    Protocol,
+)
 
 from opentrons_shared_data.robot.types import RobotType
 
@@ -426,3 +435,84 @@ class TransferTipPolicy(enum.Enum):
 
 DeckLocation = Union[int, str]
 ALLOWED_PRIMARY_NOZZLES = ["A1", "H1", "A12", "H12"]
+
+
+class NozzleConfigurationType(enum.Enum):
+    """Short names for types of nozzle configurations.
+
+    Represents the current nozzle configuration stored in a NozzleMap.
+    """
+
+    COLUMN = "COLUMN"
+    ROW = "ROW"
+    SINGLE = "SINGLE"
+    FULL = "FULL"
+    SUBRECT = "SUBRECT"
+
+
+class NozzleMapInterface(Protocol):
+    """
+    A NozzleMap instance represents a specific configuration of active nozzles on a pipette.
+
+    It exposes properties of the configuration like the configuration's front-right, front-left,
+    back-left and starting nozzles as well as a map of all the nozzles active in the configuration.
+
+    Because NozzleMaps represent configurations directly, the properties of the NozzleMap may not
+    match the properties of the physical pipette. For instance, a NozzleMap for a single channel
+    configuration of an 8-channel pipette - say, A1 only - will have its front left, front right,
+    and active channels all be A1, while the physical configuration would have the front right
+    channel be H1.
+    """
+
+    @property
+    def starting_nozzle(self) -> str:
+        """The nozzle that automated operations that count nozzles should start at."""
+        ...
+
+    @property
+    def rows(self) -> dict[str, list[str]]:
+        """A map of all the rows active in this configuration."""
+        ...
+
+    @property
+    def columns(self) -> dict[str, list[str]]:
+        """A map of all the columns active in this configuration."""
+        ...
+
+    @property
+    def back_left(self) -> str:
+        """The backest, leftest (i.e. back if it's a column, left if it's a row) nozzle of the configuration.
+
+        Note: This is the value relevant for this particular configuration, and it may not represent the back left nozzle
+        of the underlying physical pipette. For instance, the back-left nozzle of a configuration representing nozzles
+        D7 to H12 of a 96-channel pipette is D7, which is not the back-left nozzle of the physical pipette (A1).
+        """
+        ...
+
+    @property
+    def configuration(self) -> NozzleConfigurationType:
+        """The kind of configuration represented by this nozzle map."""
+        ...
+
+    @property
+    def front_right(self) -> str:
+        """The frontest, rightest (i.e. front if it's a column, right if it's a row) nozzle of the configuration.
+
+        Note: This is the value relevant for this configuration, not the physical pipette. See the note on back_left.
+        """
+        ...
+
+    @property
+    def tip_count(self) -> int:
+        """The total number of active nozzles in the configuration, and thus the number of tips that will be picked up."""
+        ...
+
+    @property
+    def physical_nozzle_count(self) -> int:
+        """The number of actual physical nozzles on the pipette, regardless of configuration."""
+        ...
+
+    @property
+    def active_nozzles(self) -> list[str]:
+        """An unstructured list of all nozzles active in the configuration."""
+        ...

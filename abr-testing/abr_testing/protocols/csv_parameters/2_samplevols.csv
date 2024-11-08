@@ -1,0 +1,25 @@
+Destination Well,Water Transfer Volume (ul),DNA Transfer Volume (ul),Mastermix Volume (ul),Mastermix Source Tube
+A1,3,7,40,A1
+B1,0,10,40,A1
+C1,10,0,40,A1
+D1,3,7,40,A1
+E1,2,8,40,A2
+F1,1,9,40,A2
+G1,5,5,40,A2
+H1,3,7,40,A3
+A2,3,7,40,A3
+B2,3,7,40,A3
+C2,3,7,40,A3
+D2,3,7,40,A3
+E2,3,7,40,A3
+F2,3,7,40,A3
+G2,3,7,40,A3
+H2,3,7,40,A3
+A3,3,7,40,A3
+B3,3,7,40,A3
+C3,3,7,45,A3
+D3,3,7,45,A3
+E3,3,5,45,A3
+F3,3,5,45,A3
+G3,3,5,45,A6
+H3,3,4,45,A5

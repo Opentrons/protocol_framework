@@ -45,7 +45,6 @@ from opentrons.config.types import (
     LiquidProbeSettings,
 )
 from opentrons.drivers.rpi_drivers.types import USBPort, PortGroup
-from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType
 from opentrons_shared_data.errors.exceptions import (
     EnumeratedError,
     PythonException,
@@ -943,8 +942,8 @@ class OT3API(
         ):
             # move toward home until a safe distance
             await self._backend.tip_action(
-                origin={Axis.Q: current_pos_float},
-                targets=[({Axis.Q: self._config.safe_home_distance}, 400)],
+                origin=current_pos_float,
+                targets=[(self._config.safe_home_distance, 400)],
             )
 
             # update current position
@@ -1439,6 +1438,10 @@ class OT3API(
         check_motion_bounds(to_check, target_position, bounds, check_bounds)
         self._log.info(f"Move: deck {target_position} becomes machine {machine_pos}")
         origin = await self._backend.update_position()
+
+        if self._gantry_load == GantryLoad.HIGH_THROUGHPUT:
+            origin[Axis.Q] = self._backend.gear_motor_position or 0.0
+
         async with contextlib.AsyncExitStack() as stack:
             if acquire_lock:
                 await stack.enter_async_context(self._motion_lock)
@@ -1826,7 +1829,7 @@ class OT3API(
         if (
             self.gantry_load == GantryLoad.HIGH_THROUGHPUT
             and instrument.nozzle_manager.current_configuration.configuration
-            == NozzleConfigurationType.FULL
+            == top_types.NozzleConfigurationType.FULL
         ):
             spec = self._pipette_handler.plan_ht_pick_up_tip(
                 instrument.nozzle_manager.current_configuration.tip_count
@@ -2156,8 +2159,8 @@ class OT3API(
         # only move tip motors if they are not already below the sensor
         if tip_motor_pos_float < tip_presence_check_target:
             await self._backend.tip_action(
-                origin={Axis.Q: tip_motor_pos_float},
-                targets=[({Axis.Q: tip_presence_check_target}, 400)],
+                origin=tip_motor_pos_float,
+                targets=[(tip_presence_check_target, 400)],
             )
         try:
             yield
@@ -2228,11 +2231,11 @@ class OT3API(
             gear_origin_float = self._backend.gear_motor_position or 0.0
 
             move_targets = [
-                ({Axis.Q: move_segment.distance}, move_segment.speed or 400)
+                (move_segment.distance, move_segment.speed or 400)
                 for move_segment in pipette_spec
             ]
             await self._backend.tip_action(
-                origin={Axis.Q: gear_origin_float}, targets=move_targets
+                origin=gear_origin_float, targets=move_targets
             )
             await self.home_gear_motors()
 

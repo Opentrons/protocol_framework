@@ -1,4 +1,5 @@
 """Tests for pipette state accessors in the protocol_engine state store."""
+
 from collections import OrderedDict
 from typing import cast, Dict, List, Optional, Tuple, NamedTuple
 
@@ -12,7 +13,7 @@ from opentrons_shared_data.pipette.pipette_definition import ValidNozzleMaps
 
 from opentrons.config.defaults_ot2 import Z_RETRACT_DISTANCE
 from opentrons.hardware_control import CriticalPoint
-from opentrons.types import MountType, Mount as HwMount, Point
+from opentrons.types import MountType, Mount as HwMount, Point, NozzleConfigurationType
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons.protocol_engine import errors
 from opentrons.protocol_engine.types import (
@@ -33,7 +34,7 @@ from opentrons.protocol_engine.state.pipettes import (
     PipetteBoundingBoxOffsets,
 )
 from opentrons.protocol_engine.state import fluid_stack
-from opentrons.hardware_control.nozzle_manager import NozzleMap, NozzleConfigurationType
+from opentrons.hardware_control.nozzle_manager import NozzleMap
 from opentrons.protocol_engine.errors import TipNotAttachedError, PipetteNotLoadedError
 
 from ..pipette_fixtures import (
@@ -977,3 +978,137 @@ def test_get_pipette_bounds_at_location(
         )
         == pipette_bounds_result
     )
+
+
+@pytest.mark.parametrize(
+    "nozzle_map,allowed",
+    [
+        (
+            NozzleMap.build(
+                physical_nozzles=NINETY_SIX_MAP,
+                physical_rows=NINETY_SIX_ROWS,
+                physical_columns=NINETY_SIX_COLS,
+                starting_nozzle="A1",
+                back_left_nozzle="A1",
+                front_right_nozzle="H12",
+                valid_nozzle_maps=ValidNozzleMaps(
+                    maps={
+                        "Full": sum(
+                            [
+                                NINETY_SIX_ROWS["A"],
+                                NINETY_SIX_ROWS["B"],
+                                NINETY_SIX_ROWS["C"],
+                                NINETY_SIX_ROWS["D"],
+                                NINETY_SIX_ROWS["E"],
+                                NINETY_SIX_ROWS["F"],
+                                NINETY_SIX_ROWS["G"],
+                                NINETY_SIX_ROWS["H"],
+                            ],
+                            [],
+                        )
+                    }
+                ),
+            ),
+            True,
+        ),
+        (
+            NozzleMap.build(
+                physical_nozzles=NINETY_SIX_MAP,
+                physical_rows=NINETY_SIX_ROWS,
+                physical_columns=NINETY_SIX_COLS,
+                starting_nozzle="A1",
+                back_left_nozzle="A1",
+                front_right_nozzle="H1",
+                valid_nozzle_maps=ValidNozzleMaps(
+                    maps={"Column1": NINETY_SIX_COLS["1"]}
+                ),
+            ),
+            True,
+        ),
+        (
+            NozzleMap.build(
+                physical_nozzles=NINETY_SIX_MAP,
+                physical_rows=NINETY_SIX_ROWS,
+                physical_columns=NINETY_SIX_COLS,
+                starting_nozzle="A12",
+                back_left_nozzle="A12",
+                front_right_nozzle="H12",
+                valid_nozzle_maps=ValidNozzleMaps(
+                    maps={"Column12": NINETY_SIX_COLS["12"]}
+                ),
+            ),
+            True,
+        ),
+        (
+            NozzleMap.build(
+                physical_nozzles=NINETY_SIX_MAP,
+                physical_rows=NINETY_SIX_ROWS,
+                physical_columns=NINETY_SIX_COLS,
+                starting_nozzle="A1",
+                back_left_nozzle="A1",
+                front_right_nozzle="A1",
+                valid_nozzle_maps=ValidNozzleMaps(maps={"Single": ["A1"]}),
+            ),
+            True,
+        ),
+        (
+            NozzleMap.build(
+                physical_nozzles=OrderedDict((("A1", Point(0.0, 1.0, 2.0)),)),
+                physical_rows=OrderedDict((("1", ["A1"]),)),
+                physical_columns=OrderedDict((("A", ["A1"]),)),
+                starting_nozzle="A1",
+                back_left_nozzle="A1",
+                front_right_nozzle="A1",
+                valid_nozzle_maps=ValidNozzleMaps(maps={"Single": ["A1"]}),
+            ),
+            True,
+        ),
+        (
+            NozzleMap.build(
+                physical_nozzles=EIGHT_CHANNEL_MAP,
+                physical_rows=EIGHT_CHANNEL_ROWS,
+                physical_columns=EIGHT_CHANNEL_COLS,
+                starting_nozzle="A1",
+                back_left_nozzle="A1",
+                front_right_nozzle="H1",
+                valid_nozzle_maps=ValidNozzleMaps(
+                    maps={"Full": EIGHT_CHANNEL_COLS["1"]}
+                ),
+            ),
+            True,
+        ),
+        (
+            NozzleMap.build(
+                physical_nozzles=EIGHT_CHANNEL_MAP,
+                physical_rows=EIGHT_CHANNEL_ROWS,
+                physical_columns=EIGHT_CHANNEL_COLS,
+                starting_nozzle="A1",
+                back_left_nozzle="A1",
+                front_right_nozzle="A1",
+                valid_nozzle_maps=ValidNozzleMaps(maps={"Full": ["A1"]}),
+            ),
+            True,
+        ),
+        (
+            NozzleMap.build(
+                physical_nozzles=NINETY_SIX_MAP,
+                physical_rows=NINETY_SIX_ROWS,
+                physical_columns=NINETY_SIX_COLS,
+                starting_nozzle="A5",
+                back_left_nozzle="A5",
+                front_right_nozzle="H5",
+                valid_nozzle_maps=ValidNozzleMaps(
+                    maps={"Column12": NINETY_SIX_COLS["5"]}
+                ),
+            ),
+            False,
+        ),
+    ],
+)
+def test_lld_config_validation(nozzle_map: NozzleMap, allowed: bool) -> None:
+    """It should validate partial tip configurations for LLD."""
+    pipette_id = "pipette-id"
+    subject = get_pipette_view(
+        nozzle_layout_by_id={pipette_id: nozzle_map},
+    )
+    assert subject.get_nozzle_configuration_supports_lld(pipette_id) == allowed

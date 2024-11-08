@@ -7,6 +7,7 @@ import {
   InfoScreen,
   JUSTIFY_FLEX_END,
   Modal,
+  OVERFLOW_AUTO,
   PrimaryButton,
   SecondaryButton,
   SPACING,
@@ -59,9 +60,11 @@ export function ThermocyclerProfileModal(
 
   return (
     <Modal
+      marginLeft="0"
       zIndexOverlay={11} // toolbox zIndex is set to 10
       title={t('form:step_edit_form.field.thermocyclerProfile.edit')}
       width="45rem"
+      marginLeft="0"
       childrenPadding={SPACING.spacing24}
       footer={
         <Flex
@@ -89,7 +92,11 @@ export function ThermocyclerProfileModal(
         </Flex>
       }
     >
-      <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing24}>
+      <Flex
+        flexDirection={DIRECTION_COLUMN}
+        gridGap={SPACING.spacing24}
+        maxHeight="31.875rem"
+      >
         <Flex justifyContent={JUSTIFY_FLEX_END} gridGap={SPACING.spacing4}>
           <EmptySelectorButton
             text={t('form:step_edit_form.field.thermocyclerProfile.add_cycle')}
@@ -115,7 +122,12 @@ export function ThermocyclerProfileModal(
           />
         </Flex>
         {steps.length > 0 || showCreateNewStep || showCreateNewCycle ? (
-          <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
+          <Flex
+            flexDirection={DIRECTION_COLUMN}
+            gridGap={SPACING.spacing4}
+            maxHeight="28.375rem"
+            overflowY={OVERFLOW_AUTO}
+          >
             {steps.map(step => {
               return step.type === 'profileStep' ? (
                 <ThermocyclerStep

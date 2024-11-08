@@ -12,6 +12,7 @@ interface InputStepFormFieldProps extends FieldProps {
   showTooltip?: boolean
   caption?: string
   formLevelError?: string | null
+  placeholder?: string
 }
 
 export function InputStepFormField(
@@ -33,6 +34,7 @@ export function InputStepFormField(
     formLevelError,
     setIsPristine,
     type,
+    placeholder,
     ...otherProps
   } = props
   const { t } = useTranslation('tooltip')
@@ -59,6 +61,7 @@ export function InputStepFormField(
         }}
         value={value ? String(value) : null}
         units={units}
+        placeholder={placeholder}
       />
     </Flex>
   )

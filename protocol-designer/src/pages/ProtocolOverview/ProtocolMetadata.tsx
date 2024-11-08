@@ -14,7 +14,7 @@ import {
 
 import { BUTTON_LINK_STYLE } from '../../atoms'
 
-const REQUIRED_APP_VERSION = '8.0.0'
+const REQUIRED_APP_VERSION = '8.2.0'
 
 type MetadataInfo = Array<{
   author?: string

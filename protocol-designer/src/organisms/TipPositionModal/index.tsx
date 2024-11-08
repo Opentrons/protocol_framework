@@ -239,8 +239,9 @@ export function TipPositionModal(
 
   return createPortal(
     <Modal
+      marginLeft="0"
       type="info"
-      width="594px"
+      width="37.125rem"
       closeOnOutsideClick
       title={t('shared:tip_position', { prefix })}
       onClose={handleCancel}
