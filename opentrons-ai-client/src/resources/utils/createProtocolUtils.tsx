@@ -10,6 +10,7 @@ import {
   OPENTRONS_OT2,
   OPENTRONS_FLEX,
   FLEX_GRIPPER,
+  NO_PIPETTES,
 } from '../../organisms/InstrumentsSection'
 import type { UseFormWatch } from 'react-hook-form'
 import type { CreateProtocolFormData } from '../../pages/CreateProtocol'
@@ -49,8 +50,11 @@ export function generatePromptPreviewInstrumentItems(
 
   if (pipettes === TWO_PIPETTES || robot === OPENTRONS_OT2) {
     leftPipette !== '' &&
+      leftPipette !== NO_PIPETTES &&
       items.push(getPipetteSpecsV2(leftPipette as PipetteName)?.displayName)
+
     rightPipette !== '' &&
+      rightPipette !== NO_PIPETTES &&
       items.push(getPipetteSpecsV2(rightPipette as PipetteName)?.displayName)
   } else {
     items.push(pipettes !== '' && t(pipettes))

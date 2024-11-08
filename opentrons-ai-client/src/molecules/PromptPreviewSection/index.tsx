@@ -24,9 +24,10 @@ const SectionHeading = styled(StyledText)`
   margin-bottom: ${SPACING.spacing8};
 `
 
-const TagsContainer = styled(Flex)<{
+const TagsContainer = styled.div<{
   oneItemPerRow: boolean
 }>`
+  display: flex;
   grid-gap: ${SPACING.spacing4};
   flex-wrap: ${WRAP};
   justify-content: flex-start;

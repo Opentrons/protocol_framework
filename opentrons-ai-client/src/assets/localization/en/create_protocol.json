@@ -72,5 +72,6 @@
   "add_step": "Add step",
   "remove_step": "Remove",
   "step": "Step",
-  "add_step_caption": "Example: \"Transfer 10 μL from each of the wells in the source labware to the same wells in the destination labware. Use a new tip for each transfer."
+  "add_step_caption": "Example: \"Transfer 10 μL from each of the wells in the source labware to the same wells in the destination labware. Use a new tip for each transfer.",
+  "none": "None"
 }

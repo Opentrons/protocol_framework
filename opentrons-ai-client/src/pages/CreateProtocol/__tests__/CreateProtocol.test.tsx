@@ -167,4 +167,44 @@ describe('CreateProtocol', () => {
     )
     expect(previewItems[8]).toHaveTextContent('Test liquid')
   })
+
+  it('should open the Steps section when the Labware & Liquids section is completed', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+    await fillLabwareLiquidsSectionAndClickConfirm()
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Steps' })).toHaveAttribute(
+        'aria-expanded',
+        'true'
+      )
+    })
+  })
+
+  it('should display the Prompt preview correctly for Steps section', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+    await fillLabwareLiquidsSectionAndClickConfirm()
+
+    const textArea = screen.getByRole('textbox')
+    fireEvent.change(textArea, { target: { value: 'Test step' } })
+
+    expect(screen.getByRole('button', { name: 'Submit prompt' })).toBeDisabled()
+
+    const confirmButton = screen.getByText('Confirm')
+    fireEvent.click(confirmButton)
+
+    const previewItems = screen.getAllByTestId('Tag_default')
+
+    expect(previewItems).toHaveLength(10)
+    expect(previewItems[9]).toHaveTextContent('Test step')
+
+    expect(screen.getByRole('button', { name: 'Submit prompt' })).toBeEnabled()
+  })
 })
