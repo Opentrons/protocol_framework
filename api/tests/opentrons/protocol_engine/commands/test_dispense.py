@@ -77,13 +77,13 @@ async def test_dispense_implementation(
     decoy.when(
         state_view.geometry.get_nozzles_per_well(
             labware_id="labware-id-abc123",
-            focused_on_well_name="A3",
+            target_well_name="A3",
             pipette_id="pipette-id-abc123",
         )
     ).then_return(2)
 
     decoy.when(
-        state_view.geometry.get_wells_covered_by_pipette_focused_on_well(
+        state_view.geometry.get_wells_covered_by_pipette_with_active_well(
             "labware-id-abc123", "A3", "pipette-id-abc123"
         )
     ).then_return(["A3", "A4"])
@@ -157,13 +157,13 @@ async def test_overpressure_error(
     decoy.when(
         state_view.geometry.get_nozzles_per_well(
             labware_id=labware_id,
-            focused_on_well_name=well_name,
+            target_well_name=well_name,
             pipette_id=pipette_id,
         )
     ).then_return(2)
 
     decoy.when(
-        state_view.geometry.get_wells_covered_by_pipette_focused_on_well(
+        state_view.geometry.get_wells_covered_by_pipette_with_active_well(
             labware_id, well_name, pipette_id
         )
     ).then_return(["A3", "A4"])

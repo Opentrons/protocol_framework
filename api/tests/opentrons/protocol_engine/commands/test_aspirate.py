@@ -88,13 +88,13 @@ async def test_aspirate_implementation_no_prep(
     decoy.when(
         state_view.geometry.get_nozzles_per_well(
             labware_id="123",
-            focused_on_well_name="A3",
+            target_well_name="A3",
             pipette_id="abc",
         )
     ).then_return(2)
 
     decoy.when(
-        state_view.geometry.get_wells_covered_by_pipette_focused_on_well(
+        state_view.geometry.get_wells_covered_by_pipette_with_active_well(
             "123", "A3", "abc"
         )
     ).then_return(["A3", "A4"])
@@ -174,13 +174,13 @@ async def test_aspirate_implementation_with_prep(
     decoy.when(
         state_view.geometry.get_nozzles_per_well(
             labware_id="123",
-            focused_on_well_name="A3",
+            target_well_name="A3",
             pipette_id="abc",
         )
     ).then_return(2)
 
     decoy.when(
-        state_view.geometry.get_wells_covered_by_pipette_focused_on_well(
+        state_view.geometry.get_wells_covered_by_pipette_with_active_well(
             "123", "A3", "abc"
         )
     ).then_return(["A3", "A4"])
@@ -267,13 +267,13 @@ async def test_aspirate_raises_volume_error(
     decoy.when(
         state_view.geometry.get_nozzles_per_well(
             labware_id="123",
-            focused_on_well_name="A3",
+            target_well_name="A3",
             pipette_id="abc",
         )
     ).then_return(2)
 
     decoy.when(
-        state_view.geometry.get_wells_covered_by_pipette_focused_on_well(
+        state_view.geometry.get_wells_covered_by_pipette_with_active_well(
             "123", "A3", "abc"
         )
     ).then_return(["A3", "A4"])
@@ -336,13 +336,13 @@ async def test_overpressure_error(
     decoy.when(
         state_view.geometry.get_nozzles_per_well(
             labware_id="labware-id",
-            focused_on_well_name="well-name",
+            target_well_name="well-name",
             pipette_id="pipette-id",
         )
     ).then_return(2)
 
     decoy.when(
-        state_view.geometry.get_wells_covered_by_pipette_focused_on_well(
+        state_view.geometry.get_wells_covered_by_pipette_with_active_well(
             "labware-id", "well-name", "pipette-id"
         )
     ).then_return(["A3", "A4"])
@@ -430,13 +430,13 @@ async def test_aspirate_implementation_meniscus(
     decoy.when(
         state_view.geometry.get_nozzles_per_well(
             labware_id="123",
-            focused_on_well_name="A3",
+            target_well_name="A3",
             pipette_id="abc",
         )
     ).then_return(2)
 
     decoy.when(
-        state_view.geometry.get_wells_covered_by_pipette_focused_on_well(
+        state_view.geometry.get_wells_covered_by_pipette_with_active_well(
             "123", "A3", "abc"
         )
     ).then_return(["A3", "A4"])

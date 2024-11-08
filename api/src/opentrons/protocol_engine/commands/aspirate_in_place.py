@@ -112,7 +112,7 @@ class AspirateInPlaceImplementation(
             ):
                 state_update.set_liquid_operated(
                     labware_id=current_location.labware_id,
-                    well_names=self._state_view.geometry.get_wells_covered_by_pipette_focused_on_well(
+                    well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
                         current_location.labware_id,
                         current_location.well_name,
                         params.pipetteId,
@@ -154,7 +154,7 @@ class AspirateInPlaceImplementation(
             ):
                 state_update.set_liquid_operated(
                     labware_id=current_location.labware_id,
-                    well_names=self._state_view.geometry.get_wells_covered_by_pipette_focused_on_well(
+                    well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
                         current_location.labware_id,
                         current_location.well_name,
                         params.pipetteId,

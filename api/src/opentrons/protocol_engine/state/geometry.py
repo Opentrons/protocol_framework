@@ -1521,16 +1521,16 @@ class GeometryView:
                     f"Attempting to dispense {volume}µL of liquid into a well that can only hold {well_volumetric_capacity}µL (well {well_name} in labware_id: {labware_id})"
                 )
 
-    def get_wells_covered_by_pipette_focused_on_well(
-        self, labware_id: str, focused_on_well_name: str, pipette_id: str
+    def get_wells_covered_by_pipette_with_active_well(
+        self, labware_id: str, target_well_name: str, pipette_id: str
     ) -> list[str]:
         """Get a flat list of wells that are covered by a pipette when moved to a specified well.
 
-        When you move a pipette in a multichannel configuration  to a specific well - here called
-        "focused on" the well, for lack of a better option - the pipette will operate on other wells as well.
+        When you move a pipette in a multichannel configuration  to a specific well - the target well -
+        the pipette will operate on other wells as well.
 
-        For instance, a pipette with a COLUMN configuration that is focused on well A1 of an SBS standard labware
-        will also "cover", under this definition, wells B1-H1. That same pipette, when focused on well C5, will "cover"
+        For instance, a pipette with a COLUMN configuration with well A1 of an SBS standard labware target
+        will also "cover", under this definition, wells B1-H1. That same pipette, when C5 is the target well, will "cover"
         wells C5-H5.
 
         This math only works, and may only be applied, if one of the following is true:
@@ -1548,18 +1548,18 @@ class GeometryView:
         try:
             return list(
                 wells_covered_by_pipette_configuration(
-                    pipette_nozzle_map, focused_on_well_name, labware_columns
+                    pipette_nozzle_map, target_well_name, labware_columns
                 )
             )
         except InvalidStoredData:
-            return [focused_on_well_name]
+            return [target_well_name]
 
     def get_nozzles_per_well(
-        self, labware_id: str, focused_on_well_name: str, pipette_id: str
+        self, labware_id: str, target_well_name: str, pipette_id: str
     ) -> int:
         """Get the number of nozzles that will interact with each well."""
         return nozzles_per_well(
             self._pipettes.get_nozzle_configuration(pipette_id),
-            focused_on_well_name,
+            target_well_name,
             self._labware.get_definition(labware_id).ordering,
         )

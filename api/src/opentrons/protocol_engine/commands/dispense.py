@@ -110,7 +110,7 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
         except PipetteOverpressureError as e:
             state_update.set_liquid_operated(
                 labware_id=labware_id,
-                well_names=self._state_view.geometry.get_wells_covered_by_pipette_focused_on_well(
+                well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
                     labware_id, well_name, params.pipetteId
                 ),
                 volume_added=CLEAR,
@@ -143,7 +143,7 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
                 )
             state_update.set_liquid_operated(
                 labware_id=labware_id,
-                well_names=self._state_view.geometry.get_wells_covered_by_pipette_focused_on_well(
+                well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
                     labware_id, well_name, params.pipetteId
                 ),
                 volume_added=volume_added if volume_added is not None else CLEAR,
