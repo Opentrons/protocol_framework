@@ -593,7 +593,7 @@ def test_ensure_positive_float(value: Union[int, float]) -> None:
 
 @pytest.mark.parametrize("value", [-1, -1.0, float("inf"), float("-inf"), float("nan")])
 def test_ensure_positive_float_raises(value: Union[int, float]) -> None:
-    """It should return a positive float."""
+    """It should raise if value is not a positive float."""
     with pytest.raises(ValueError, match="(non-infinite|positive float)"):
         subject.ensure_positive_float(value)
 
@@ -605,7 +605,7 @@ def test_ensure_positive_int() -> None:
 
 @pytest.mark.parametrize("value", [1.0, -1.0, -1])
 def test_ensure_positive_int_raises(value: Union[int, float]) -> None:
-    """It should return a positive integer."""
+    """It should raise if value is not a positive integer."""
     with pytest.raises(ValueError, match="integer"):
         subject.ensure_positive_int(value)  # type: ignore[arg-type]
 
@@ -617,6 +617,6 @@ def test_validate_coordinates() -> None:
 
 @pytest.mark.parametrize("value", [[1, 2.0], [1, 2.0, 3.3, 4.2], ["1", 2, 3]])
 def test_validate_coordinates_raises(value: Sequence[Union[int, float, str]]) -> None:
-    """It should return a positive integer."""
-    with pytest.raises(ValueError, match="(length 3|must be floats)"):
+    """It should raise if value is not a valid sequence of three numbers."""
+    with pytest.raises(ValueError, match="(exactly three|must be floats)"):
         subject.validate_coordinates(value)  # type: ignore[arg-type]

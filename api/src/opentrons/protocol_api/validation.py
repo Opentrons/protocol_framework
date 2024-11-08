@@ -521,7 +521,7 @@ def ensure_positive_int(value: int) -> int:
 def validate_coordinates(value: Sequence[float]) -> Tuple[float, float, float]:
     """Ensure value is a valid sequence of 3 floats and return a tuple of 3 floats."""
     if len(value) != 3:
-        raise ValueError("Coordinates must be a sequence of length 3")
+        raise ValueError("Coordinates must be a sequence of exactly three numbers")
     if not all(isinstance(v, (float, int)) for v in value):
         raise ValueError("All values in coordinates must be floats.")
     return float(value[0]), float(value[1]), float(value[2])
