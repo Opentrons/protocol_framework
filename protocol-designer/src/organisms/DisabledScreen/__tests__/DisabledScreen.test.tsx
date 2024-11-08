@@ -34,7 +34,7 @@ describe('DisabledScreen', () => {
     )
     expect(
       screen.getByText(
-        'Resize your browser to at least 600px wide and 650px tall to continue editing your protocol'
+        'Resize your browser to at least 768px wide and 650px tall to continue editing your protocol'
       )
     ).toHaveStyle(`color: ${COLORS.white}`)
   })
