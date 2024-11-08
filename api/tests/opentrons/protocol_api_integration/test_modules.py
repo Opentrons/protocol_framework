@@ -23,7 +23,8 @@ def test_absorbance_reader_labware_load_conflict() -> None:
 
     # Should raise after closing the lid again.
     module.close_lid()  # type: ignore[union-attr]
-    module.load_labware("opentrons_96_wellplate_200ul_pcr_full_skirt")
+    with pytest.raises(Exception):
+        module.load_labware("opentrons_96_wellplate_200ul_pcr_full_skirt")
 
 
 def test_absorbance_reader_labware_move_conflict() -> None:
