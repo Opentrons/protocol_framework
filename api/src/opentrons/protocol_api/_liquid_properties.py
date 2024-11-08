@@ -51,9 +51,13 @@ class LiquidHandlingPropertyByVolume:
     def get_for_volume(self, volume: float) -> float:
         """Get a value by volume for this property. Volumes not defined will be interpolated between set volumes."""
         validated_volume = validation.ensure_positive_float(volume)
-        return float(
-            interp(validated_volume, self._sorted_volumes, self._sorted_values)
-        )
+        try:
+            return self._properties_by_volume[validated_volume]
+        except KeyError:
+            # If volume is not defined in dictionary, do a piecewise interpolation with existing sorted values
+            return float(
+                interp(validated_volume, self._sorted_volumes, self._sorted_values)
+            )
 
     def set_for_volume(self, volume: float, value: float) -> None:
         """Add a new volume and value for the property for the interpolation curve."""
