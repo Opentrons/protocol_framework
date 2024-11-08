@@ -68,7 +68,7 @@ This example can be extended by adding a reference wavelength::
         mode="single", wavelengths=[400], reference_wavelength=[567]
     )
 
-When configured this way, the module will read twice. In the :ref:`output data <plate-reader-output>`, the values read for ``reference_wavelength`` will be subtracted from the values read for the single member of ``wavelengths``. This is useful for normalization, or to correct for background interference in wavelength measurements.
+When configured this way, the module will read twice. In the :ref:`output data <plate-reader-data>`, the values read for ``reference_wavelength`` will be subtracted from the values read for the single member of ``wavelengths``. This is useful for normalization, or to correct for background interference in wavelength measurements.
 
 The reader can also be initialized to take multiple measurements. When ``mode="multi"``, the ``wavelengths`` list can have up to six elements. This will initialize the reader to read at three wavelengths::
 
@@ -77,10 +77,33 @@ The reader can also be initialized to take multiple measurements. When ``mode="m
 You can't use a reference wavelength when performing multiple measurements.
 
 
-Reading and Using Data
-======================
+Reading a Plate
+===============
 
-TK
+Use :py:meth:`.AbsorbanceReaderContext.read` to have the module read the plate, using the parameters that you specified during initialization::
 
-.. _plate-reader-output:
+    pr_data = pr_mod.read()
 
+.. versionadded:: 2.21
+
+The ``read()`` method returns the results in a dictionary, which the above example saves to the variable ``pr_data``.
+
+If you need to access this data after the conclusion of your protocol, add the ``export_filename`` parameter to instruct the API to output a CSV file, which is available in the Opentrons App by going to your Flex and viewing Recent Protocol Runs::
+
+    pr_data = pr_mod.read(export_filename="plate_data")
+
+In this example, the API both saves the data to a variable and outputs a CSV file. If you only need the data post-run, you can omit the variable assignment.
+
+.. _plate-reader-data:
+
+Using Plate Reader Data
+=======================
+
+There are two ways to use output data from the Absorbance Plate Reader:
+
+- Within your protocol as a nested dictionary object.
+- Outside of your protocol, as a tabular CSV file.
+
+The two data formats are structured differently, even though they contain the same information.
+
+The dictionary object returned by ``read()`` has two nested levels. The keys at the top level are the wavelengths you provided to ``initialize()``. The keys at the second level are string names of each of the 96 wells, ``"A1"`` through ``"H12"``. The values at the second level are the measured values for each wells. These values are floating point numbers between 0.0 and 4.0, representing unitless optical density.
