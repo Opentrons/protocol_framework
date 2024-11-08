@@ -1134,7 +1134,7 @@ class Labware:
         has not been named in a call to :py:meth:`~Labware.load_empty`, :py:meth:`~Labware.load_liquid`, or
         :py:meth:`~Labware.load_liquid_by_well`, the volume it contains is unknown and the well's liquid will not be tracked.
 
-        For example, to load 10µL of a liquid named ``water`` (defined with :py:meth:`~ProtocolContext.load_liquid`)
+        For example, to load 10µL of a liquid named ``water`` (defined with :py:meth:`~ProtocolContext.define_liquid`)
         into all the wells of a labware, you could call ``labware.load_liquid(labware.wells(), 10, water)``.
 
         If you want to load different volumes of liquid into different wells, use :py:meth:`~Labware.load_liquid_by_well`.
@@ -1147,7 +1147,7 @@ class Labware:
         :param volume: The volume of liquid to load into each well, in 10µL.
         :type volume: float
 
-        :param liquid: The liquid to load into each well, previously defined by :py:meth:`~ProtocolContext.load_liquid`
+        :param liquid: The liquid to load into each well, previously defined by :py:meth:`~ProtocolContext.define_liquid`
         :type liquid: Liquid
         """
         well_names: List[str] = []
@@ -1181,7 +1181,7 @@ class Labware:
         has not been named in a call to :py:meth:`~Labware.load_empty`, :py:meth:`~Labware.load_liquid`, or
         :py:meth:`~Labware.load_liquid_by_well`, the volume it contains is unknown and the well's liquid will not be tracked.
 
-        For example, to load a decreasing amount of of a liquid named ``water`` (defined with :py:meth:`~ProtocolContext.load_liquid`)
+        For example, to load a decreasing amount of of a liquid named ``water`` (defined with :py:meth:`~ProtocolContext.define_liquid`)
         into each successive well of a row, you could call
         ``labware.load_liquid_by_well({'A1': 1000, 'A2': 950, 'A3': 900, ..., 'A12': 600}, water)``
 
@@ -1192,7 +1192,7 @@ class Labware:
         :param volumes: A dictionary of well names (or :py:class:`Well` objects, for instance from ``labware['A1']``)
         :type wells: Dict[Union[str, Well], float]
 
-        :param liquid: The liquid to load into each well, previously defined by :py:meth:`~ProtocolContext.load_liquid`
+        :param liquid: The liquid to load into each well, previously defined by :py:meth:`~ProtocolContext.define_liquid`
         :type liquid: Liquid
         """
         verified_volumes: Dict[str, float] = {}
