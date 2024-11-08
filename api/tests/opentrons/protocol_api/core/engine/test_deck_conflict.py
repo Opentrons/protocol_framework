@@ -896,9 +896,9 @@ def test_valid_96_pipette_movement_for_tiprack_and_adapter(
 ) -> None:
     """It should raise appropriate error for unsuitable tiprack parent when moving 96 channel to it."""
     decoy.when(mock_state_view.pipettes.get_channels("pipette-id")).then_return(96)
-    decoy.when(mock_state_view.labware.get_dimensions("adapter-id")).then_return(
-        Dimensions(x=0, y=0, z=100)
-    )
+    decoy.when(
+        mock_state_view.labware.get_dimensions(labware_id="adapter-id")
+    ).then_return(Dimensions(x=0, y=0, z=100))
     decoy.when(mock_state_view.labware.get_display_name("labware-id")).then_return(
         "A cool tiprack"
     )
@@ -908,9 +908,9 @@ def test_valid_96_pipette_movement_for_tiprack_and_adapter(
     decoy.when(mock_state_view.labware.get_location("labware-id")).then_return(
         tiprack_parent
     )
-    decoy.when(mock_state_view.labware.get_dimensions("labware-id")).then_return(
-        tiprack_dim
-    )
+    decoy.when(
+        mock_state_view.labware.get_dimensions(labware_id="labware-id")
+    ).then_return(tiprack_dim)
     decoy.when(
         mock_state_view.labware.get_has_quirk(
             labware_id="adapter-id", quirk="tiprackAdapterFor96Channel"
