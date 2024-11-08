@@ -566,7 +566,7 @@ class RunStore:
             select_count = sqlalchemy.select(sqlalchemy.func.count()).where(
                 and_(
                     run_command_table.c.run_id == run_id,
-                    run_command_table.c.command_error is not None,
+                    run_command_table.c.command_status == "failed",
                 )
             )
             errors_count: int = transaction.execute(select_count).scalar_one()
@@ -601,7 +601,7 @@ class RunStore:
             select_count = sqlalchemy.select(sqlalchemy.func.count()).where(
                 and_(
                     run_command_table.c.run_id == run_id,
-                    run_command_table.c.command_error is not None,
+                    run_command_table.c.command_status == "failed",
                 )
             )
             count_result: int = transaction.execute(select_count).scalar_one()

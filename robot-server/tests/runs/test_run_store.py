@@ -107,7 +107,7 @@ def protocol_commands_errors() -> List[pe_commands.Command]:
         pe_commands.WaitForResume(
             id="pause-1",
             key="command-key",
-            status=pe_commands.CommandStatus.SUCCEEDED,
+            status=pe_commands.CommandStatus.FAILED,
             createdAt=datetime(year=2021, month=1, day=1),
             params=pe_commands.WaitForResumeParams(message="hello world"),
             result=pe_commands.WaitForResumeResult(),
@@ -122,7 +122,7 @@ def protocol_commands_errors() -> List[pe_commands.Command]:
         pe_commands.WaitForResume(
             id="pause-2",
             key="command-key",
-            status=pe_commands.CommandStatus.SUCCEEDED,
+            status=pe_commands.CommandStatus.FAILED,
             createdAt=datetime(year=2022, month=2, day=2),
             params=pe_commands.WaitForResumeParams(message="hey world"),
             result=pe_commands.WaitForResumeResult(),
@@ -360,6 +360,7 @@ async def test_update_run_state_command_with_errors(
         length=len(protocol_commands_errors),
         cursor=0,
     )
+    print(command_errors_result)
 
     assert command_errors_result.commands_errors == [
         item.error for item in protocol_commands_errors
