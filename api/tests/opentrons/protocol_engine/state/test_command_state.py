@@ -1178,15 +1178,6 @@ def test_get_errors_slice() -> None:
         type=ErrorRecoveryType.CONTINUE_WITH_ERROR,
     )
     subject.handle_action(fail_2_setup)
-    fail_3_setup = actions.FailCommandAction(
-        command_id="command-id-3",
-        running_command=subject_view.get("command-id-3"),
-        error_id="error-id-2",
-        failed_at=datetime(year=2023, month=3, day=3),
-        error=errors.ProtocolEngineError(message="oh hell no"),
-        notes=[],
-        type=ErrorRecoveryType.FAIL_RUN,
-    )
 
     result = subject_view.get_errors_slice(cursor=1, length=3)
 

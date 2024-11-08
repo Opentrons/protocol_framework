@@ -107,6 +107,7 @@ EXPECTED_STATEMENTS_LATEST = [
         command VARCHAR NOT NULL,
         command_intent VARCHAR NOT NULL,
         command_error VARCHAR,
+        command_status VARCHAR NOT NULL,
         PRIMARY KEY (row_id),
         FOREIGN KEY(run_id) REFERENCES run (id)
     )
@@ -124,7 +125,7 @@ EXPECTED_STATEMENTS_LATEST = [
     CREATE INDEX ix_protocol_protocol_kind ON protocol (protocol_kind)
     """,
     """
-    CREATE INDEX ix_run_command_command_error ON run_command (command_error)
+    CREATE INDEX ix_run_run_id_index_in_run_command_status ON run_command (run_id, index_in_run, command_status)
     """,
     """
     CREATE INDEX ix_run_command_command_intent ON run_command (command_intent)
