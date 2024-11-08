@@ -24,9 +24,9 @@ def _user_input_value_for_attribute(attribute: str, default: Optional[Any]) -> f
         assert default is not None
         return default
     try:
-        if isinstance(default, float) or isinstance(default, int):
+        if type_str == "float":
             return float(_inp.strip())
-        elif isinstance(default, bool):
+        else:
             return bool(_inp.strip()[0].lower() == "y")
     except ValueError as e:
         print(e)

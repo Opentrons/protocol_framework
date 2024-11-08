@@ -62,6 +62,13 @@ def _get_approach_submerge_retract_heights(
     blank: bool,
     channel_count: int,
 ) -> Tuple[float, float, float]:
+    if aspirate:
+        liq_submerge = liquid_class.aspirate.submerge_mm
+        liq_retract = liquid_class.aspirate.retract_mm
+    else:
+        liq_submerge = liquid_class.dispense.submerge_mm
+        liq_retract = liquid_class.dispense.retract_mm
+
     liquid_before, liquid_after = liquid_tracker.get_before_and_after_heights(
         well,
         aspirate=aspirate if aspirate else 0,
@@ -72,12 +79,7 @@ def _get_approach_submerge_retract_heights(
         # force the pipette to move above the well
         liquid_before = well.depth + (well.depth - liquid_before)
         liquid_after = well.depth + (well.depth - liquid_after)
-    if aspirate:
-        liq_submerge = liquid_class.aspirate.submerge_mm
-        liq_retract = liquid_class.aspirate.retract_mm
-    else:
-        liq_submerge = liquid_class.dispense.submerge_mm
-        liq_retract = liquid_class.dispense.retract_mm
+
     if dispense and liq_submerge > 0:
         # guarantee NON-contact dispensing does not touch liquid
         submerge = liquid_after + liq_submerge
@@ -213,22 +215,37 @@ def _pipette_with_liquid_settings(  # noqa: C901
         # aspirate specified volume
         callbacks.on_aspirating()
         pipette.aspirate(aspirate)
+        # delay
+        ctx.delay(liquid_class.aspirate.delay)
         # update liquid-height tracker
         liquid_tracker.update_affected_wells(
             well, aspirate=aspirate, channels=channel_count
         )
-        # delay
-        ctx.delay(liquid_class.aspirate.delay)
 
     def _aspirate_on_retract() -> None:
+        if liquid_class.aspirate.retract_delay and liquid_class.aspirate.submerge_mm < 0:
+            # NOTE: residual liquid on outside of tip will drop down to bottom of tip
+            #       after retracting from liquid. If we air-gap too soon before
+            #       said liquid slides down to bottom of tip, the air-gap we create
+            #       will be encased by liquid at the bottom after the residual liquid
+            #       does eventually slide down. So instead, wait for it to slide down,
+            #       then air-gap, thus pulling it also up into the pipette. To reduce
+            #       the residual volume, the aspirate submerge depth is reduced.
+            ctx.delay(seconds=liquid_class.aspirate.retract_delay)
         # add trailing-air-gap
-        if not blank:
-            pipette.air_gap(liquid_class.aspirate.air_gap, height=0)
+        air_gap = liquid_class.aspirate.air_gap
+        if not blank and air_gap > 0:
+            pipette.flow_rate.aspirate = max(air_gap, 1)  # 1 second (minimum)
+            pipette.aspirate(liquid_class.aspirate.air_gap)
+            pipette.flow_rate.aspirate = liquid_class.aspirate.flow_rate
 
     def _dispense_on_approach() -> None:
         # remove trailing-air-gap
-        if not blank:
+        air_gap = liquid_class.aspirate.air_gap
+        if not blank and air_gap > 0:
+            pipette.flow_rate.dispense = max(air_gap, 1)  # 1 second (minimum)
             pipette.dispense(liquid_class.aspirate.air_gap)
+            pipette.flow_rate.dispense = liquid_class.dispense.flow_rate
 
     def _dispense_on_submerge() -> None:
         callbacks.on_dispensing()
@@ -237,24 +254,62 @@ def _pipette_with_liquid_settings(  # noqa: C901
         #        would remain at the higher default "flow-acceleration"
         #        from shared-data
         default_flow_accel = float(hw_pipette.flow_acceleration)
-        if liquid_class.dispense.break_off:
-            hw_pipette.flow_acceleration = liquid_class.dispense.break_off
         try:
-            push_out = liquid_class.dispense.push_out
+            push_out: Optional[float] = liquid_class.dispense.push_out
+            break_off: Optional[float] = liquid_class.dispense.break_off_ul
             assert (
                 push_out is None or push_out <= _get_max_blow_out_ul()
             ), f"push-out ({push_out}) cannot exceed {_get_max_blow_out_ul()}"
-            pipette.dispense(dispense, push_out=push_out)
+            if not break_off:
+                if liquid_class.dispense.break_off_flow_acceleration:
+                    hw_pipette.flow_acceleration = liquid_class.dispense.break_off_flow_acceleration
+                pipette.dispense(dispense, push_out=push_out)
+            else:
+                assert push_out is not None, \
+                    "push-out must be specified when setting a break-off volume"
+                if break_off == push_out:
+                    break_off = push_out + 0.1
+
+                def _break_off_cfg() -> None:
+                    pipette.flow_rate.dispense = liquid_class.dispense.break_off_flow_rate
+                    pipette.flow_rate.blow_out = liquid_class.dispense.break_off_flow_rate
+                    hw_api.set_flow_rate(hw_mount, blow_out=liquid_class.dispense.break_off_flow_rate)
+                    if liquid_class.dispense.break_off_flow_acceleration:
+                        hw_pipette.flow_acceleration = liquid_class.dispense.break_off_flow_acceleration
+
+                if break_off < push_out:
+                    # 1) dispense w/ push-out (minus break-out ul)
+                    _reduced_push_out_ul = push_out - break_off
+                    pipette.dispense(dispense, push_out=_reduced_push_out_ul)
+                    # 2) blow-out using break-off ul and speed
+                    _break_off_cfg()
+                    hw_api.blow_out(OT3Mount.LEFT, push_out)  # NOTE: volume is absolute below "bottom"
+                elif break_off > push_out:
+                    # 1) dispense a reduced amount
+                    _remaining_ul = break_off - push_out
+                    pipette.dispense(dispense - _remaining_ul)
+                    # 1) dispense remaininng liquid plus push-out
+                    _break_off_cfg()
+                    pipette.dispense(_remaining_ul, push_out=push_out)
         finally:
             hw_pipette.flow_acceleration = default_flow_accel
+            pipette.flow_rate.dispense = liquid_class.dispense.flow_rate
+            hw_api.set_flow_rate(hw_mount, blow_out=liquid_class.dispense.flow_rate)  # FIXME: is this correct?
+        # delay
+        _delay_seconds = liquid_class.dispense.delay
+        if liquid_class.dispense.submerge_mm >= 0:
+            # NOTE: include retract delay if dispense is non-contact
+            _delay_seconds = max(_delay_seconds, liquid_class.dispense.retract_delay)
+        ctx.delay(_delay_seconds)
         # update liquid-height tracker
         liquid_tracker.update_affected_wells(
             well, dispense=dispense, channels=channel_count
         )
-        # delay
-        ctx.delay(liquid_class.dispense.delay)
 
     def _dispense_on_retract() -> None:
+        if liquid_class.dispense.retract_delay and liquid_class.dispense.submerge_mm < 0:
+            # NOTE: if non-contact dispense, the "retract" delay should have already happened
+            ctx.delay(seconds=liquid_class.dispense.retract_delay)
         # NOTE: both the plunger reset or tje trailing-air-gap
         #       pull remaining droplets inside the tip upwards
         if pipette.current_volume <= 0:
@@ -270,7 +325,7 @@ def _pipette_with_liquid_settings(  # noqa: C901
     # PHASE 1: APPROACH
     pipette.flow_rate.aspirate = liquid_class.aspirate.flow_rate
     pipette.flow_rate.dispense = liquid_class.dispense.flow_rate
-    pipette.flow_rate.blow_out = liquid_class.dispense.flow_rate
+    pipette.flow_rate.blow_out = liquid_class.dispense.flow_rate  # FIXME: is this correct?
 
     pipette.move_to(well.bottom(approach_mm).move(channel_offset))
     _aspirate_on_approach() if aspirate or mix else _dispense_on_approach()
