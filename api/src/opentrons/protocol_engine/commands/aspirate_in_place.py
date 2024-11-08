@@ -112,7 +112,11 @@ class AspirateInPlaceImplementation(
             ):
                 state_update.set_liquid_operated(
                     labware_id=current_location.labware_id,
-                    well_name=current_location.well_name,
+                    well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+                        current_location.labware_id,
+                        current_location.well_name,
+                        params.pipetteId,
+                    ),
                     volume_added=CLEAR,
                 )
             state_update.set_fluid_unknown(pipette_id=params.pipetteId)
@@ -150,8 +154,17 @@ class AspirateInPlaceImplementation(
             ):
                 state_update.set_liquid_operated(
                     labware_id=current_location.labware_id,
-                    well_name=current_location.well_name,
-                    volume_added=-volume,
+                    well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+                        current_location.labware_id,
+                        current_location.well_name,
+                        params.pipetteId,
+                    ),
+                    volume_added=-volume
+                    * self._state_view.geometry.get_nozzles_per_well(
+                        current_location.labware_id,
+                        current_location.well_name,
+                        params.pipetteId,
+                    ),
                 )
 
             return SuccessData(

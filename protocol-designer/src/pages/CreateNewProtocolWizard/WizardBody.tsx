@@ -13,6 +13,8 @@ import {
   SPACING,
   StyledText,
   TYPOGRAPHY,
+  Tooltip,
+  useHoverTooltip,
 } from '@opentrons/components'
 import temporaryImg from '../../assets/images/placeholder_image_delete.png'
 import { BUTTON_LINK_STYLE } from '../../atoms'
@@ -26,6 +28,7 @@ interface WizardBodyProps {
   goBack?: () => void
   subHeader?: string
   imgSrc?: string
+  tooltipOnDisabled?: string
 }
 export function WizardBody(props: WizardBodyProps): JSX.Element {
   const {
@@ -37,8 +40,12 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
     proceed,
     disabled = false,
     imgSrc,
+    tooltipOnDisabled,
   } = props
   const { t } = useTranslation('shared')
+  const [targetProps, tooltipProps] = useHoverTooltip({
+    placement: 'top',
+  })
 
   return (
     <Flex
@@ -88,12 +95,17 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
               </StyledText>
             </Btn>
           ) : null}
-          <LargeButton
-            ariaDisabled={disabled}
-            onClick={proceed}
-            iconName="arrow-right"
-            buttonText={t('shared:confirm')}
-          />
+          <Flex {...targetProps}>
+            <LargeButton
+              disabled={disabled}
+              onClick={proceed}
+              iconName="arrow-right"
+              buttonText={t('shared:confirm')}
+            />
+          </Flex>
+          {tooltipOnDisabled != null ? (
+            <Tooltip tooltipProps={tooltipProps}>{tooltipOnDisabled}</Tooltip>
+          ) : null}
         </Flex>
       </Flex>
       <StyledImg

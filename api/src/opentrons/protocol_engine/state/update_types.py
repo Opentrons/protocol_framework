@@ -206,7 +206,7 @@ class LiquidOperatedUpdate:
     """An update from operating a liquid."""
 
     labware_id: str
-    well_name: str
+    well_names: list[str]
     volume_added: float | ClearType
 
 
@@ -441,12 +441,12 @@ class StateUpdate:
         )
 
     def set_liquid_operated(
-        self, labware_id: str, well_name: str, volume_added: float | ClearType
+        self, labware_id: str, well_names: list[str], volume_added: float | ClearType
     ) -> None:
         """Update liquid volumes in well state. See `OperateLiquidUpdate`."""
         self.liquid_operated = LiquidOperatedUpdate(
             labware_id=labware_id,
-            well_name=well_name,
+            well_names=well_names,
             volume_added=volume_added,
         )
 
