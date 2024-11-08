@@ -28,6 +28,12 @@ import {
   STAGING_END_POINT,
   PROD_END_POINT,
   LOCAL_END_POINT,
+  LOCAL_UPDATE_PROTOCOL_END_POINT,
+  PROD_UPDATE_PROTOCOL_END_POINT,
+  STAGING_UPDATE_PROTOCOL_END_POINT,
+  LOCAL_CREATE_PROTOCOL_END_POINT,
+  PROD_CREATE_PROTOCOL_END_POINT,
+  STAGING_CREATE_PROTOCOL_END_POINT,
 } from '../../resources/constants'
 
 import type { AxiosRequestConfig } from 'axios'
@@ -47,14 +53,12 @@ export function InputPrompt(): JSX.Element {
 
   // This is to autofill the input field for when we navigate to the chat page from the existing/new protocol generator pages
   useEffect(() => {
-    setValue('userPrompt', chatPromptAtomValue)
-  }, [chatPromptAtomValue, setValue])
+    setValue('userPrompt', chatPromptAtomValue.prompt)
+  }, [chatPromptAtomValue.prompt, setValue])
 
-  useEffect(() => {
-    setValue('userPrompt', chatPromptAtomValue)
-  }, [chatPromptAtomValue, setValue])
-
-  const handleClick = async (): Promise<void> => {
+  const handleClick = async (
+    isUpdateOrCreate: boolean = false
+  ): Promise<void> => {
     setRequestId(uuidv4())
     const userInput: ChatData = {
       requestId,
@@ -70,18 +74,9 @@ export function InputPrompt(): JSX.Element {
         'Content-Type': 'application/json',
       }
 
-      const getEndpoint = (): string => {
-        switch (process.env.NODE_ENV) {
-          case 'production':
-            return PROD_END_POINT
-          case 'development':
-            return LOCAL_END_POINT
-          default:
-            return STAGING_END_POINT
-        }
-      }
-
-      const url = getEndpoint()
+      const url = isUpdateOrCreate
+        ? getCreateOrUpdateEndpoint(chatPromptAtomValue.isNewProtocol)
+        : getEndpoint()
 
       const config = {
         url,
@@ -140,6 +135,43 @@ export function InputPrompt(): JSX.Element {
       </Flex>
     </StyledForm>
   )
+}
+
+const getEndpoint = (): string => {
+  switch (process.env.NODE_ENV) {
+    case 'production':
+      return PROD_END_POINT
+    case 'development':
+      return LOCAL_END_POINT
+    default:
+      return STAGING_END_POINT
+  }
+}
+
+const getCreateOrUpdateEndpoint = (isCreateNewProtocol: boolean): string => {
+  return isCreateNewProtocol ? getCreateEndpoint() : getUpdateEndpoint()
+}
+
+const getCreateEndpoint = (): string => {
+  switch (process.env.NODE_ENV) {
+    case 'production':
+      return PROD_CREATE_PROTOCOL_END_POINT
+    case 'development':
+      return LOCAL_CREATE_PROTOCOL_END_POINT
+    default:
+      return STAGING_CREATE_PROTOCOL_END_POINT
+  }
+}
+
+const getUpdateEndpoint = (): string => {
+  switch (process.env.NODE_ENV) {
+    case 'production':
+      return PROD_UPDATE_PROTOCOL_END_POINT
+    case 'development':
+      return LOCAL_UPDATE_PROTOCOL_END_POINT
+    default:
+      return STAGING_UPDATE_PROTOCOL_END_POINT
+  }
 }
 
 const StyledForm = styled.form`

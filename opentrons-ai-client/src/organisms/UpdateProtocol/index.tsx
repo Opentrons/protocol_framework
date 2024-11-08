@@ -166,7 +166,7 @@ export function UpdateProtocol(): JSX.Element {
 
     console.log(chatPrompt)
 
-    setChatPrompt(chatData => chatPrompt)
+    setChatPrompt({ prompt: chatPrompt, isNewProtocol: false })
     navigate('/chat')
   }
 
