@@ -67,7 +67,7 @@ describe('ControlledLabwareListItems', () => {
       screen.getByText('(Retired) Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL')
     ).toBeInTheDocument()
 
-    const removeButton = screen.getAllByText('remove')[0]
+    const removeButton = screen.getAllByText('Remove')[0]
     fireEvent.click(removeButton)
 
     await waitFor(() => {

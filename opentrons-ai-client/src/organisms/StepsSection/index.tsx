@@ -60,7 +60,7 @@ export function StepsSection(): JSX.Element | null {
             text: t('add_individual_step'),
             onClick: () => {
               setIsIndividualStep(true)
-              setValue(STEPS_FIELD_NAME, [''])
+              setValue(STEPS_FIELD_NAME, [''], { shouldValidate: true })
             },
             isActive: isIndividualStep,
             disabled: false,
@@ -69,7 +69,7 @@ export function StepsSection(): JSX.Element | null {
             text: t('paste_from_document'),
             onClick: () => {
               setIsIndividualStep(false)
-              setValue(STEPS_FIELD_NAME, [''])
+              setValue(STEPS_FIELD_NAME, [], { shouldValidate: true })
             },
             isActive: !isIndividualStep,
             disabled: false,

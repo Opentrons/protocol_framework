@@ -4,6 +4,7 @@ import { renderWithProviders } from '../../../__testing-utils__'
 import { i18n } from '../../../i18n'
 import { ControlledAddTextAreaFields } from '..'
 import { FormProvider, useForm } from 'react-hook-form'
+import { LIQUIDS_FIELD_NAME } from '../../../organisms/LabwareLiquidsSection'
 
 const TestFormProviderComponent = ({
   liquidsMock = [''],
@@ -20,10 +21,13 @@ const TestFormProviderComponent = ({
 
   return (
     <FormProvider {...methods}>
-      <ControlledAddTextAreaFields fieldName={''} name={''} />
+      <ControlledAddTextAreaFields
+        fieldName={LIQUIDS_FIELD_NAME}
+        name={'liquid'}
+      />
 
       {liquids.map((liquid, index) => (
-        <p key={index}>{`liquid ${index + 1}: ${liquid}`}</p>
+        <p key={index}>{liquid}</p>
       ))}
     </FormProvider>
   )
@@ -54,11 +58,11 @@ describe('ControlledAddTextAreaFields', () => {
 
     fireEvent.change(input, { target: { value: 'New liquid' } })
 
-    expect(screen.getByText('liquid 1: New liquid')).toBeInTheDocument()
+    expect(screen.getByText('Liquid 1: New liquid')).toBeInTheDocument()
   })
 
   it('should display another input if present in the form state', () => {
-    const liquidsMock = ['10 abcd', '20 efgh']
+    const liquidsMock = ['Liquid 1: 10 abcd', 'Liquid 2: 20 efgh']
     renderWithProviders(
       <TestFormProviderComponent liquidsMock={liquidsMock} />,
       {
@@ -66,12 +70,12 @@ describe('ControlledAddTextAreaFields', () => {
       }
     )
 
-    expect(screen.getByText('liquid 1: 10 abcd')).toBeInTheDocument()
-    expect(screen.getByText('liquid 2: 20 efgh')).toBeInTheDocument()
+    expect(screen.getByText('Liquid 1: 10 abcd')).toBeInTheDocument()
+    expect(screen.getByText('Liquid 2: 20 efgh')).toBeInTheDocument()
   })
 
   it('should remove the second input when the user clicks the remove button', () => {
-    const liquidsMock = ['10 abcd', '20 efgh']
+    const liquidsMock = ['Liquid 1: 10 abcd', 'Liquid 2: 20 efgh']
     renderWithProviders(
       <TestFormProviderComponent liquidsMock={liquidsMock} />,
       {
@@ -79,13 +83,13 @@ describe('ControlledAddTextAreaFields', () => {
       }
     )
 
-    expect(screen.getByText('liquid 2: 20 efgh')).toBeInTheDocument()
+    expect(screen.getByText('Liquid 2: 20 efgh')).toBeInTheDocument()
 
     const removeButton = screen.getByText('Remove')
 
     fireEvent.click(removeButton)
 
-    expect(screen.queryByText('liquid 2: 20 efgh')).not.toBeInTheDocument()
+    expect(screen.queryByText('Liquid 2: 20 efgh')).not.toBeInTheDocument()
     expect(screen.queryByText('Liquid 2')).not.toBeInTheDocument()
   })
 })

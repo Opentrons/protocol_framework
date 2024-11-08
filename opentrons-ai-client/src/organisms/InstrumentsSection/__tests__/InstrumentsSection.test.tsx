@@ -79,9 +79,8 @@ describe('ApplicationSection', () => {
   it('should enable confirm button when all fields are filled', async () => {
     render()
 
-    const confirmButton = screen.getByRole('button')
     await waitFor(() => {
-      expect(confirmButton).not.toBeEnabled()
+      expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled()
     })
 
     const leftMount = screen.getAllByText('Choose pipette')[0]
@@ -93,7 +92,7 @@ describe('ApplicationSection', () => {
     fireEvent.click(screen.getByText('Flex 8-Channel 50 μL'))
 
     await waitFor(() => {
-      expect(confirmButton).toBeEnabled()
+      expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled()
     })
   })
 
