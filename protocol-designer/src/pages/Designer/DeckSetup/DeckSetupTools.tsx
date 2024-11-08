@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import isEqual from 'lodash/isEqual'
 import { useDispatch, useSelector } from 'react-redux'
@@ -97,25 +97,15 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
   } = selectedSlotInfo
   const { slot, cutout } = selectedSlot
 
-  const [
-    initialSelectedSlotInfo,
-    setInitialSelectedSlotInfo,
-  ] = useState<ZoomedIntoSlotInfoState | null>(null)
+  const initialSelectedSlotInfoRef = useRef<ZoomedIntoSlotInfoState>(
+    selectedSlotInfo
+  )
 
+  // Set the initial snapshot if it hasn’t been set and `selectedSlotInfo` is fully populated
   useEffect(() => {
-    // Check if initialSelectedSlotInfo is null and if selectedSlotInfo is
-    // fully populated since component rerenders
-    // TODO: need to optimize this better, find out why component rerenders
-    if (
-      initialSelectedSlotInfo == null &&
-      (selectedFixture ||
-        selectedLabwareDefUri ||
-        selectedModuleModel ||
-        selectedNestedLabwareDefUri)
-    ) {
-      setInitialSelectedSlotInfo(selectedSlotInfo)
-    }
-  }, [selectedSlotInfo, initialSelectedSlotInfo])
+    // Deep clone selectedSlotInfo if necessary to avoid mutations
+    initialSelectedSlotInfoRef.current = { ...selectedSlotInfo }
+  }, [])
 
   const [changeModuleWarningInfo, displayModuleWarning] = useState<boolean>(
     false
@@ -259,10 +249,14 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     handleResetToolbox()
     setSelectedHardware(null)
   }
-
+  console.log(
+    isEqual(selectedSlotInfo, initialSelectedSlotInfoRef.current),
+    selectedSlotInfo,
+    initialSelectedSlotInfoRef.current
+  )
   const handleConfirm = (): void => {
     //  only update info if user changed what was previously selected
-    if (!isEqual(selectedSlotInfo, initialSelectedSlotInfo)) {
+    if (!isEqual(selectedSlotInfo, initialSelectedSlotInfoRef.current)) {
       //  clear entities first before recreating them
       handleClear()
 
