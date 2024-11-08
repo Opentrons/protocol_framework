@@ -56,15 +56,31 @@ The module uses these parameters immediately to perform the physical initializat
 
 Let's take a look at examples of how to combine these parameters to prepare different types of readings. The simplest reading measures one wavelength, with no reference wavelength::
 
-    pr_mod.initialize(
-        mode="single",
-        wavelengths=[400]
-    )
+    pr_mod.initialize(mode="single", wavelengths=[400])
+
+.. versionadded:: 2.21
 
 Now the reader is prepared to read at 400 nm. Note that the ``wavelengths`` parameter always takes a list of integer wavelengths, even when only reading a single wavelength.
+
+This example can be extended by adding a reference wavelength::
+
+    pr_mod.initialize(
+        mode="single", wavelengths=[400], reference_wavelength=[567]
+    )
+
+When configured this way, the module will read twice. In the :ref:`output data <plate-reader-output>`, the values read for ``reference_wavelength`` will be subtracted from the values read for the single member of ``wavelengths``. This is useful for normalization, or to correct for background interference in wavelength measurements.
+
+The reader can also be initialized to take multiple measurements. When ``mode="multi"``, the ``wavelengths`` list can have up to six elements. This will initialize the reader to read at three wavelengths::
+
+    pr_mod.initialize(mode="multi", wavelengths=[400, 500, 600])
+
+You can't use a reference wavelength when performing multiple measurements.
 
 
 Reading and Using Data
 ======================
 
 TK
+
+.. _plate-reader-output:
+
