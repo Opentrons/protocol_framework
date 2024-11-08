@@ -31,7 +31,7 @@ def test_build_aspirate_settings() -> None:
     assert aspirate_properties.retract.position_reference.value == "well-top"
     assert aspirate_properties.retract.offset == Coordinate(x=0, y=0, z=5)
     assert aspirate_properties.retract.speed == 100
-    assert aspirate_properties.retract.air_gap_by_volume.properties_by_volume == {
+    assert aspirate_properties.retract.air_gap_by_volume.as_dict() == {
         "default": 2.0,
         5.0: 3.0,
         10.0: 4.0,
@@ -45,7 +45,7 @@ def test_build_aspirate_settings() -> None:
 
     assert aspirate_properties.position_reference.value == "well-bottom"
     assert aspirate_properties.offset == Coordinate(x=0, y=0, z=-5)
-    assert aspirate_properties.flow_rate_by_volume.properties_by_volume == {
+    assert aspirate_properties.flow_rate_by_volume.as_dict() == {
         "default": 50.0,
         10.0: 40.0,
         20.0: 30.0,
@@ -78,14 +78,11 @@ def test_build_single_dispense_settings() -> None:
     assert single_dispense_properties.retract.position_reference.value == "well-top"
     assert single_dispense_properties.retract.offset == Coordinate(x=0, y=0, z=5)
     assert single_dispense_properties.retract.speed == 100
-    assert (
-        single_dispense_properties.retract.air_gap_by_volume.properties_by_volume
-        == {
-            "default": 2.0,
-            5.0: 3.0,
-            10.0: 4.0,
-        }
-    )
+    assert single_dispense_properties.retract.air_gap_by_volume.as_dict() == {
+        "default": 2.0,
+        5.0: 3.0,
+        10.0: 4.0,
+    }
     assert single_dispense_properties.retract.touch_tip.enabled is True
     assert single_dispense_properties.retract.touch_tip.z_offset == 2
     assert single_dispense_properties.retract.touch_tip.mm_to_edge == 1
@@ -99,7 +96,7 @@ def test_build_single_dispense_settings() -> None:
 
     assert single_dispense_properties.position_reference.value == "well-bottom"
     assert single_dispense_properties.offset == Coordinate(x=0, y=0, z=-5)
-    assert single_dispense_properties.flow_rate_by_volume.properties_by_volume == {
+    assert single_dispense_properties.flow_rate_by_volume.as_dict() == {
         "default": 50.0,
         10.0: 40.0,
         20.0: 30.0,
@@ -107,7 +104,7 @@ def test_build_single_dispense_settings() -> None:
     assert single_dispense_properties.mix.enabled is True
     assert single_dispense_properties.mix.repetitions == 3
     assert single_dispense_properties.mix.volume == 15
-    assert single_dispense_properties.push_out_by_volume.properties_by_volume == {
+    assert single_dispense_properties.push_out_by_volume.as_dict() == {
         "default": 5.0,
         10.0: 7.0,
         20.0: 10.0,
@@ -137,7 +134,7 @@ def test_build_multi_dispense_settings() -> None:
     assert multi_dispense_properties.retract.position_reference.value == "well-top"
     assert multi_dispense_properties.retract.offset == Coordinate(x=0, y=0, z=5)
     assert multi_dispense_properties.retract.speed == 100
-    assert multi_dispense_properties.retract.air_gap_by_volume.properties_by_volume == {
+    assert multi_dispense_properties.retract.air_gap_by_volume.as_dict() == {
         "default": 2.0,
         5.0: 3.0,
         10.0: 4.0,
@@ -154,16 +151,16 @@ def test_build_multi_dispense_settings() -> None:
 
     assert multi_dispense_properties.position_reference.value == "well-bottom"
     assert multi_dispense_properties.offset == Coordinate(x=0, y=0, z=-5)
-    assert multi_dispense_properties.flow_rate_by_volume.properties_by_volume == {
+    assert multi_dispense_properties.flow_rate_by_volume.as_dict() == {
         "default": 50.0,
         10.0: 40.0,
         20.0: 30.0,
     }
-    assert multi_dispense_properties.conditioning_by_volume.properties_by_volume == {
+    assert multi_dispense_properties.conditioning_by_volume.as_dict() == {
         "default": 10.0,
         5.0: 5.0,
     }
-    assert multi_dispense_properties.disposal_by_volume.properties_by_volume == {
+    assert multi_dispense_properties.disposal_by_volume.as_dict() == {
         "default": 2.0,
         5.0: 3.0,
     }
@@ -182,12 +179,12 @@ def test_build_multi_dispense_settings_none(
 def test_liquid_handling_property_by_volume() -> None:
     """It should create a class that can interpolate values and add and delete new points."""
     subject = LiquidHandlingPropertyByVolume({"default": 42, "5": 50, "10.0": 250})
-    assert subject.properties_by_volume == {"default": 42, 5.0: 50, 10.0: 250}
+    assert subject.as_dict() == {"default": 42, 5.0: 50, 10.0: 250}
     assert subject.default == 42.0
     assert subject.get_for_volume(7) == 130.0
 
     subject.set_for_volume(volume=7, value=175.5)
-    assert subject.properties_by_volume == {
+    assert subject.as_dict() == {
         "default": 42,
         5.0: 50,
         10.0: 250,
@@ -196,7 +193,7 @@ def test_liquid_handling_property_by_volume() -> None:
     assert subject.get_for_volume(7) == 175.5
 
     subject.delete_for_volume(7)
-    assert subject.properties_by_volume == {"default": 42, 5.0: 50, 10.0: 250}
+    assert subject.as_dict() == {"default": 42, 5.0: 50, 10.0: 250}
     assert subject.get_for_volume(7) == 130.0
 
     with pytest.raises(KeyError, match="No value set for volume"):

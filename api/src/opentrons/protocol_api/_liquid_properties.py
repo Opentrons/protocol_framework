@@ -1,7 +1,7 @@
 from copy import copy
 from dataclasses import dataclass
 from numpy import interp
-from typing import Optional, Dict, Sequence, Union
+from typing import Optional, Dict, Sequence, Union, Tuple
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     AspirateProperties as SharedDataAspirateProperties,
@@ -29,13 +29,19 @@ class LiquidHandlingPropertyByVolume:
         self._properties_by_volume: Dict[float, float] = {
             float(volume): value for volume, value in properties_by_volume.items()
         }
+        # Volumes need to be sorted for proper interpolation of non-defined volumes, and the
+        # corresponding values need to be in the same order for them to be interpolated correctly
+        self._sorted_volumes: Tuple[float, ...] = ()
+        self._sorted_values: Tuple[float, ...] = ()
+        self._sort_volume_and_values()
 
     @property
     def default(self) -> float:
+        """Get the default value not associated with any volume for this property."""
         return self._default
 
-    @property
-    def properties_by_volume(self) -> Dict[Union[float, str], float]:
+    def as_dict(self) -> Dict[Union[float, str], float]:
+        """Get a dictionary representation of all set volumes and values along with the default."""
         props_by_volume_copy: Dict[Union[float, str], float] = copy(
             self._properties_by_volume  # type: ignore[arg-type]
         )
@@ -43,22 +49,31 @@ class LiquidHandlingPropertyByVolume:
         return props_by_volume_copy
 
     def get_for_volume(self, volume: float) -> float:
+        """Get a value by volume for this property. Volumes not defined will be interpolated between set volumes."""
         validated_volume = validation.ensure_positive_float(volume)
-        # numpy interp does not automatically sort the points used for interpolation, so
-        # here we are sorting them by the keys (volume) and then using zip to get two
-        # tuples in the correct order
-        sorted_volumes, sorted_values = zip(*sorted(self._properties_by_volume.items()))
-        return float(interp(validated_volume, sorted_volumes, sorted_values))
+        return float(
+            interp(validated_volume, self._sorted_volumes, self._sorted_values)
+        )
 
     def set_for_volume(self, volume: float, value: float) -> None:
+        """Add a new volume and value for the property for the interpolation curve."""
         validated_volume = validation.ensure_positive_float(volume)
         self._properties_by_volume[validated_volume] = value
+        self._sort_volume_and_values()
 
     def delete_for_volume(self, volume: float) -> None:
+        """Remove an existing volume and value from the property."""
         try:
             del self._properties_by_volume[volume]
+            self._sort_volume_and_values()
         except KeyError:
             raise KeyError(f"No value set for volume {volume} uL")
+
+    def _sort_volume_and_values(self) -> None:
+        """Sort volume in increasing order along with corresponding values in matching order."""
+        self._sorted_volumes, self._sorted_values = zip(
+            *sorted(self._properties_by_volume.items())
+        )
 
 
 @dataclass
