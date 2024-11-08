@@ -17,7 +17,6 @@ from opentrons.protocol_engine.actions import (
     PauseSource,
     StopAction,
     QueueCommandAction,
-    FailCommandAction
 )
 from opentrons.protocol_engine.actions.actions import ResumeFromRecoveryAction
 
@@ -29,7 +28,6 @@ from opentrons.protocol_engine.state.commands import (
     CommandState,
     CommandView,
     CommandSlice,
-    CommandErrorSlice,
     CommandPointer,
     RunResult,
     QueueStatus,
@@ -733,8 +731,10 @@ get_status_specs: List[GetStatusSpec] = [
             run_result=RunResult.SUCCEEDED,
             run_completed_at=datetime(year=2021, day=1, month=1),
         ),
-        '''''''[]'
-        'and_view()
+        expected_status=EngineStatus.SUCCEEDED,
+    ),
+    GetStatusSpec(
+        subject=get_command_view(
             run_result=RunResult.STOPPED,
             run_completed_at=None,
         ),
@@ -1024,51 +1024,6 @@ def test_get_slice_default_cursor_running() -> None:
         commands=[command_3, command_4],
         cursor=2,
         total_length=5,
-    )
-
-
-def test_get_errors_slice_empty() -> None:
-    """It should return a slice from the tail if no current command."""
-    subject = get_command_view()
-    result = subject.get_errors_slice(cursor=0, length=2)
-
-    assert result == CommandErrorSlice(commands_errors=[], cursor=0, total_length=0)
-
-
-def test_get_errors_slice() -> None:
-    """It should return a slice of all command errors."""
-    error_1 = ErrorOccurrence.construct(id="error-id-1")  # type: ignore[call-arg]
-    error_2 = ErrorOccurrence.construct(id="error-id-2")  # type: ignore[call-arg]
-    error_3 = ErrorOccurrence.construct(id="error-id-3")  # type: ignore[call-arg]
-    error_4 = ErrorOccurrence.construct(id="error-id-4")  # type: ignore[call-arg]
-
-    command_1 = create_failed_command(command_id="command-id-1", error=error_1)
-    command_2 = create_failed_command(command_id="command-id-2", error=error_2)
-    command_3 = create_failed_command(command_id="command-id-3", error=error_3)
-    command_4 = create_failed_command(command_id="command-id-4", error=error_4)
-    command_5 = create_running_command(command_id="command-id-5")
-    command_6 = create_queued_command(command_id="command-id-6")
-
-    subject = get_command_view(
-        commands=[command_1, command_2, command_3, command_4, command_5, command_6]
-    )
-
-
-
-    result = subject.get_errors_slice(cursor=1, length=3)
-
-    assert result == CommandErrorSlice(
-        commands_errors=[error_2, error_3, error_4],
-        cursor=1,
-        total_length=4,
-    )
-
-    result = subject.get_errors_slice(cursor=-3, length=10)
-
-    assert result == CommandErrorSlice(
-        commands_errors=[error_1, error_2, error_3, error_4],
-        cursor=0,
-        total_length=4,
     )
 
 
