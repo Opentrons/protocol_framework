@@ -7,6 +7,7 @@ import { Provider } from 'jotai'
 import {
   fillApplicationSectionAndClickConfirm,
   fillInstrumentsSectionAndClickConfirm,
+  fillModulesSectionAndClickConfirm,
 } from '../../../resources/utils/createProtocolTestUtils'
 
 const render = (): ReturnType<typeof renderWithProviders> => {
@@ -118,5 +119,20 @@ describe('CreateProtocol', () => {
         'true'
       )
     })
+  })
+
+  it('should display the Prompt preview correctly for Modules section', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+
+    const previewItems = screen.getAllByTestId('Tag_default')
+
+    expect(previewItems).toHaveLength(7)
+    expect(previewItems[6]).toHaveTextContent(
+      'Heater-Shaker Module GEN1 with Opentrons 96 Deep Well Heater-Shaker Adapter'
+    )
   })
 })

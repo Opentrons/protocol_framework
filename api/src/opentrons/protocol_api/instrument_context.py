@@ -14,7 +14,7 @@ from opentrons.legacy_commands import commands as cmds
 
 from opentrons.legacy_commands import publisher
 from opentrons.protocols.advanced_control.mix import mix_from_kwargs
-from opentrons.protocols.advanced_control import transfers
+from opentrons.protocols.advanced_control.transfers import transfer as v1_transfer
 
 from opentrons.protocols.api_support.deck_type import NoTrashDefinedError
 from opentrons.protocols.api_support.types import APIVersion
@@ -36,8 +36,7 @@ from .disposal_locations import TrashBin, WasteChute
 from ._nozzle_layout import NozzleLayout
 from . import labware, validation
 
-
-AdvancedLiquidHandling = transfers.AdvancedLiquidHandling
+AdvancedLiquidHandling = v1_transfer.AdvancedLiquidHandling
 
 _DEFAULT_ASPIRATE_CLEARANCE = 1.0
 _DEFAULT_DISPENSE_CLEARANCE = 1.0
@@ -1406,9 +1405,9 @@ class InstrumentContext(publisher.CommandPublisher):
         mix_strategy, mix_opts = mix_from_kwargs(kwargs)
 
         if trash:
-            drop_tip = transfers.DropTipStrategy.TRASH
+            drop_tip = v1_transfer.DropTipStrategy.TRASH
         else:
-            drop_tip = transfers.DropTipStrategy.RETURN
+            drop_tip = v1_transfer.DropTipStrategy.RETURN
 
         new_tip = kwargs.get("new_tip")
         if isinstance(new_tip, str):
@@ -1430,19 +1429,19 @@ class InstrumentContext(publisher.CommandPublisher):
 
         if blow_out and not blowout_location:
             if self.current_volume:
-                blow_out_strategy = transfers.BlowOutStrategy.SOURCE
+                blow_out_strategy = v1_transfer.BlowOutStrategy.SOURCE
             else:
-                blow_out_strategy = transfers.BlowOutStrategy.TRASH
+                blow_out_strategy = v1_transfer.BlowOutStrategy.TRASH
         elif blow_out and blowout_location:
             if blowout_location == "source well":
-                blow_out_strategy = transfers.BlowOutStrategy.SOURCE
+                blow_out_strategy = v1_transfer.BlowOutStrategy.SOURCE
             elif blowout_location == "destination well":
-                blow_out_strategy = transfers.BlowOutStrategy.DEST
+                blow_out_strategy = v1_transfer.BlowOutStrategy.DEST
             elif blowout_location == "trash":
-                blow_out_strategy = transfers.BlowOutStrategy.TRASH
+                blow_out_strategy = v1_transfer.BlowOutStrategy.TRASH
 
         if new_tip != types.TransferTipPolicy.NEVER:
-            tr, next_tip = labware.next_available_tip(
+            _, next_tip = labware.next_available_tip(
                 self.starting_tip,
                 self.tip_racks,
                 active_channels,
@@ -1454,9 +1453,9 @@ class InstrumentContext(publisher.CommandPublisher):
 
         touch_tip = None
         if kwargs.get("touch_tip"):
-            touch_tip = transfers.TouchTipStrategy.ALWAYS
+            touch_tip = v1_transfer.TouchTipStrategy.ALWAYS
 
-        default_args = transfers.Transfer()
+        default_args = v1_transfer.Transfer()
 
         disposal = kwargs.get("disposal_volume")
         if disposal is None:
@@ -1469,7 +1468,7 @@ class InstrumentContext(publisher.CommandPublisher):
                 f"working volume, {max_volume}uL"
             )
 
-        transfer_args = transfers.Transfer(
+        transfer_args = v1_transfer.Transfer(
             new_tip=new_tip or default_args.new_tip,
             air_gap=air_gap,
             carryover=kwargs.get("carryover") or default_args.carryover,
@@ -1482,10 +1481,10 @@ class InstrumentContext(publisher.CommandPublisher):
             blow_out_strategy=blow_out_strategy or default_args.blow_out_strategy,
             touch_tip_strategy=(touch_tip or default_args.touch_tip_strategy),
         )
-        transfer_options = transfers.TransferOptions(
+        transfer_options = v1_transfer.TransferOptions(
             transfer=transfer_args, mix=mix_opts
         )
-        plan = transfers.TransferPlan(
+        plan = v1_transfer.TransferPlan(
             volume,
             source,
             dest,
@@ -1498,7 +1497,7 @@ class InstrumentContext(publisher.CommandPublisher):
         self._execute_transfer(plan)
         return self
 
-    def _execute_transfer(self, plan: transfers.TransferPlan) -> None:
+    def _execute_transfer(self, plan: v1_transfer.TransferPlan) -> None:
         for cmd in plan:
             getattr(self, cmd["method"])(*cmd["args"], **cmd["kwargs"])
 

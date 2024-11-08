@@ -55,7 +55,8 @@
       "body1": "Welcome to Protocol Designer 8.2.0!",
       "body2": "We’re excited to release the new Opentrons Protocol Designer, now with a fresh redesign!  Enjoy the same functionality with the added ability to:",
       "body3": "Add multiple Heater-Shaker Modules and Magnetic Blocks to the deck (Flex only).",
-      "body4": "All protocols now require Opentrons App version <strong>8.0.0+</strong> to run."
+      "body4": "All protocols now require Opentrons App version <strong>8.2.0+</strong> to run.",
+      "body5": "For more information, see the <link1>Protocol Designer Instruction Manual</link1>."
     }
   },
   "labware_selection": {

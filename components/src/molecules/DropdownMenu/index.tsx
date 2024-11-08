@@ -69,6 +69,8 @@ export interface DropdownMenuProps {
   onBlur?: React.FocusEventHandler<HTMLButtonElement>
   /** optional disabled */
   disabled?: boolean
+  /** force direction for pd after release this will be fixed and remove */
+  forceDirection?: boolean
 }
 
 // TODO: (smb: 4/15/22) refactor this to use html select for accessibility
@@ -88,6 +90,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
     disabled = false,
     onFocus,
     onBlur,
+    forceDirection = false,
   } = props
   const [targetProps, tooltipProps] = useHoverTooltip()
   const [showDropdownMenu, setShowDropdownMenu] = React.useState<boolean>(false)
@@ -105,6 +108,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
   })
 
   React.useEffect(() => {
+    if (forceDirection) return
     const handlePositionCalculation = (): void => {
       const dropdownRect = dropDownMenuWrapperRef.current?.getBoundingClientRect()
       if (dropdownRect != null) {
@@ -204,7 +208,11 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
       gridGap={SPACING.spacing4}
     >
       {title !== null ? (
-        <Flex gridGap={SPACING.spacing8} paddingBottom={SPACING.spacing8}>
+        <Flex
+          gridGap={SPACING.spacing8}
+          paddingBottom={SPACING.spacing8}
+          alignItems={ALIGN_CENTER}
+        >
           <StyledText
             desktopStyle="captionRegular"
             color={disabled ? COLORS.grey35 : COLORS.grey60}

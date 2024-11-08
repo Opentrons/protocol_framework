@@ -2,6 +2,7 @@
   "add_details": "Add step details",
   "advanced_settings": "Advanced pipetting settings",
   "air_gap_volume": "Air gap volume",
+  "aspirate_labware": "Source labware",
   "aspirate": "Aspirate",
   "aspirated": "Aspirated",
   "batch_edit_steps": "Batch edit steps",
@@ -16,6 +17,7 @@
   "delay_position": "Delay position from bottom",
   "delete_steps": "Delete steps",
   "delete": "Delete step",
+  "dispense_labware": "Destination labware",
   "dispense": "Dispense",
   "dispensed": "Dispensed",
   "disposal_volume": "Disposal volume",
@@ -67,11 +69,13 @@
   "multiAspirate": "Consolidate path",
   "multiDispense": "Distribute path",
   "new_location": "New location",
+  "off_deck": "Off-Deck",
   "pause": {
     "untilResume": "Pausing until manually told to resume",
     "untilTemperature": "<text>Pausing until</text><semiBoldText>{{module}}</semiBoldText><text>reaches</text><tag/>",
     "untilTime": "<text>Pausing for</text><tag/>"
   },
+  "pipette": "Pipette",
   "protocol_steps": "Protocol steps",
   "protocol_timeline": "Protocol timeline",
   "rename": "Rename",
@@ -124,10 +128,12 @@
     }
   },
   "time": "Time",
+  "tiprack": "Tiprack",
   "tip_position": "{{prefix}} tip position",
   "touch_tip_position": "Touch tip position from top",
   "valid_range": "Valid range between {{min}} - {{max}} {{unit}}",
   "view_details": "View details",
+  "volume_per_well": "Volume per well",
   "well_name": "Well {{wellName}}",
   "well_order_title": "{{prefix}} well order",
   "well_position": "Well position (x,y,z): "

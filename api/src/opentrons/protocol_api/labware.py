@@ -280,11 +280,19 @@ class Well:
 
         :param Liquid liquid: The liquid to load into the well.
         :param float volume: The volume of liquid to load, in µL.
+
+        .. note::
+            In API version 2.22 and later, use :py:meth:`~.Well.load_empty()` to mark a well as empty at the beginning of a protocol, rather than using this method with ``volume=0``.
         """
         self._core.load_liquid(
             liquid=liquid,
             volume=volume,
         )
+
+    @requires_version(2, 22)
+    def load_empty(self) -> None:
+        """Mark a well as empty."""
+        self._core.load_empty()
 
     def _from_center_cartesian(self, x: float, y: float, z: float) -> Point:
         """

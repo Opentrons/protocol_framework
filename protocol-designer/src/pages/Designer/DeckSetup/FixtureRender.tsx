@@ -1,4 +1,5 @@
 import { Fragment } from 'react'
+import { useSelector } from 'react-redux'
 import {
   COLORS,
   FlexTrash,
@@ -7,7 +8,11 @@ import {
   WasteChuteFixture,
   WasteChuteStagingAreaFixture,
 } from '@opentrons/components'
-import { lightFill } from './DeckSetupContainer'
+import { getPositionFromSlotId } from '@opentrons/shared-data'
+import { getInitialDeckSetup } from '../../../step-forms/selectors'
+import { LabwareOnDeck as LabwareOnDeckComponent } from '../../../components/DeckSetup/LabwareOnDeck'
+import { lightFill, darkFill } from './DeckSetupContainer'
+import { getAdjacentLabware } from './utils'
 import type { TrashCutoutId, StagingAreaLocation } from '@opentrons/components'
 import type {
   CutoutId,
@@ -25,16 +30,34 @@ interface FixtureRenderProps {
 }
 export const FixtureRender = (props: FixtureRenderProps): JSX.Element => {
   const { fixture, cutout, deckDef, robotType } = props
+  const deckSetup = useSelector(getInitialDeckSetup)
+  const { labware } = deckSetup
+  const adjacentLabware = getAdjacentLabware(fixture, cutout, labware)
+
+  const renderLabwareOnDeck = (): JSX.Element | null => {
+    if (!adjacentLabware) return null
+    const slotPosition = getPositionFromSlotId(adjacentLabware.slot, deckDef)
+    return (
+      <LabwareOnDeckComponent
+        x={slotPosition != null ? slotPosition[0] : 0}
+        y={slotPosition != null ? slotPosition[1] : 0}
+        labwareOnDeck={adjacentLabware}
+      />
+    )
+  }
 
   switch (fixture) {
     case 'stagingArea': {
       return (
-        <StagingAreaFixture
-          key={`fixtureRender_${fixture}`}
-          cutoutId={cutout as StagingAreaLocation}
-          deckDefinition={deckDef}
-          fixtureBaseColor={lightFill}
-        />
+        <Fragment key={`fixtureRender_${fixture}_${adjacentLabware?.id ?? 0}`}>
+          <StagingAreaFixture
+            cutoutId={cutout as StagingAreaLocation}
+            deckDefinition={deckDef}
+            slotClipColor={darkFill}
+            fixtureBaseColor={lightFill}
+          />
+          {renderLabwareOnDeck()}
+        </Fragment>
       )
     }
     case 'trashBin': {
@@ -67,12 +90,14 @@ export const FixtureRender = (props: FixtureRenderProps): JSX.Element => {
     }
     case 'wasteChuteAndStagingArea': {
       return (
-        <WasteChuteStagingAreaFixture
-          key={`fixtureRender_${fixture}`}
-          cutoutId={cutout as typeof WASTE_CHUTE_CUTOUT}
-          deckDefinition={deckDef}
-          fixtureBaseColor={lightFill}
-        />
+        <Fragment key={`fixtureRender_${fixture}_${adjacentLabware?.id ?? 0}`}>
+          <WasteChuteStagingAreaFixture
+            cutoutId={cutout as typeof WASTE_CHUTE_CUTOUT}
+            deckDefinition={deckDef}
+            fixtureBaseColor={lightFill}
+          />
+          {renderLabwareOnDeck()}
+        </Fragment>
       )
     }
   }

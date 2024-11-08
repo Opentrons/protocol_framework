@@ -28,6 +28,13 @@
   "flex_gripper": "Flex Gripper",
   "flex_gripper_no_label": "No, do not use the Flex Gripper",
   "modules_title": "Modules",
+  "no_modules_added_yet": "No modules added yet",
+  "modules_remove_label": "remove",
+  "modules_adapter_label": "Adapter",
+  "heater_shaker_module_v1": "Heater-Shaker Module GEN1",
+  "temperature_module_v2": "Temperature Module GEN2",
+  "thermocycler_module_v2": "Thermocycler Module GEN2",
+  "magnetic_module_v1": "Magnetic Block GEN1",
   "labware_liquids_title": "Labware & Liquids",
   "steps_title": "Steps"
 }

@@ -828,6 +828,10 @@ class HexColor(BaseModel):
         return v
 
 
+EmptyLiquidId = Literal["EMPTY"]
+LiquidId = str | EmptyLiquidId
+
+
 class Liquid(BaseModel):
     """Payload required to create a liquid."""
 
