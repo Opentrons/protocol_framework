@@ -64,7 +64,6 @@ export function ThermocyclerProfileModal(
       zIndexOverlay={11} // toolbox zIndex is set to 10
       title={t('form:step_edit_form.field.thermocyclerProfile.edit')}
       width="45rem"
-      marginLeft="0"
       childrenPadding={SPACING.spacing24}
       footer={
         <Flex
