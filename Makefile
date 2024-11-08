@@ -228,7 +228,7 @@ lint-js-prettier:
 
 .PHONY: lint-json
 lint-json:
-	yarn eslint --max-warnings 0 --ext .json .
+	yarn eslint --ignore-pattern "abr-testing/protocols/" --max-warnings 0 --ext .json .
 
 .PHONY: lint-css
 lint-css:

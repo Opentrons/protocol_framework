@@ -15,13 +15,21 @@ const ALL_CHANGE_TIP_VALUES: ChangeTipOptions[] = [
 type ChangeTipFieldProps = FieldProps & DisabledChangeTipArgs
 
 export function ChangeTipField(props: ChangeTipFieldProps): JSX.Element {
-  const { aspirateWells, dispenseWells, path, stepType, value } = props
+  const {
+    aspirateWells,
+    dispenseWells,
+    path,
+    stepType,
+    value,
+    isDisposalLocation,
+  } = props
   const { t } = useTranslation(['protocol_steps', 'form'])
   const disabledOptions = getDisabledChangeTipOptions({
     aspirateWells,
     dispenseWells,
     path,
     stepType,
+    isDisposalLocation,
   })
 
   const options = ALL_CHANGE_TIP_VALUES.map(value => ({

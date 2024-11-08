@@ -9,18 +9,18 @@ from typing import (
     Callable,
     Generator,
     Iterator,
-    Iterable,
     Sequence,
     Tuple,
     TypedDict,
     TypeAlias,
     TYPE_CHECKING,
-    TypeVar,
 )
 from opentrons.protocol_api.labware import Labware, Well
 from opentrons import types
 from opentrons.protocols.api_support.types import APIVersion
-from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType
+
+from . import common as tx_commons
+from ..common import Mix, MixOpts, MixStrategy
 
 
 AdvancedLiquidHandling = Union[
@@ -42,13 +42,6 @@ if TYPE_CHECKING:
 
 _PARTIAL_TIP_SUPPORT_ADDED = APIVersion(2, 18)
 """The version after which partial tip support and nozzle maps were made available."""
-
-
-class MixStrategy(enum.Enum):
-    BOTH = enum.auto()
-    BEFORE = enum.auto()
-    AFTER = enum.auto()
-    NEVER = enum.auto()
 
 
 class DropTipStrategy(enum.Enum):
@@ -239,34 +232,6 @@ PickUpTipOpts.presses.__doc__ = ":py:class:`int`"
 PickUpTipOpts.increment.__doc__ = ":py:class:`int`"
 
 
-class MixOpts(NamedTuple):
-    """
-    Options to customize behavior of mix.
-
-    These options will be passed to
-    :py:meth:`InstrumentContext.mix` when it is called during the
-    transfer.
-    """
-
-    repetitions: Optional[int] = None
-    volume: Optional[float] = None
-    rate: Optional[float] = None
-
-
-MixOpts.repetitions.__doc__ = ":py:class:`int`"
-MixOpts.volume.__doc__ = ":py:class:`float`"
-MixOpts.rate.__doc__ = ":py:class:`float`"
-
-
-class Mix(NamedTuple):
-    """
-    Options to control mix behavior before aspirate and after dispense.
-    """
-
-    mix_before: MixOpts = MixOpts()
-    mix_after: MixOpts = MixOpts()
-
-
 Mix.mix_before.__doc__ = """
     Options applied to mix before aspirate.
     See :py:class:`.Mix.MixOpts`.
@@ -435,7 +400,7 @@ class TransferPlan:
         # then avoid iterating through its Wells.
         # ii. if using single channel pipettes, flatten a multi-dimensional
         # list of Wells into a 1 dimensional list of Wells
-        pipette_configuration_type = NozzleConfigurationType.FULL
+        pipette_configuration_type = types.NozzleConfigurationType.FULL
         normalized_sources: List[Union[Well, types.Location]]
         normalized_dests: List[Union[Well, types.Location]]
         if self._api_version >= _PARTIAL_TIP_SUPPORT_ADDED:
@@ -444,7 +409,7 @@ class TransferPlan:
             )
         if (
             self._instr.channels > 1
-            and pipette_configuration_type == NozzleConfigurationType.FULL
+            and pipette_configuration_type == types.NozzleConfigurationType.FULL
         ):
             normalized_sources, normalized_dests = self._multichannel_transfer(
                 srcs, dsts
@@ -534,12 +499,12 @@ class TransferPlan:
         """
         # reform source target lists
         sources, dests = self._extend_source_target_lists(self._sources, self._dests)
-        self._check_valid_volume_parameters(
+        tx_commons.check_valid_volume_parameters(
             disposal_volume=self._strategy.disposal_volume,
             air_gap=self._strategy.air_gap,
             max_volume=self._instr.max_volume,
         )
-        plan_iter = self._expand_for_volume_constraints(
+        plan_iter = tx_commons.expand_for_volume_constraints(
             self._volumes,
             zip(sources, dests),
             self._instr.max_volume
@@ -626,7 +591,7 @@ class TransferPlan:
 
         """
 
-        self._check_valid_volume_parameters(
+        tx_commons.check_valid_volume_parameters(
             disposal_volume=self._strategy.disposal_volume,
             air_gap=self._strategy.air_gap,
             max_volume=self._instr.max_volume,
@@ -637,7 +602,7 @@ class TransferPlan:
         # recommend users to specify a disposal vol when using distribute.
         # First method keeps distribute consistent with current behavior while
         # the other maintains consistency in default behaviors of all functions
-        plan_iter = self._expand_for_volume_constraints(
+        plan_iter = tx_commons.expand_for_volume_constraints(
             self._volumes,
             self._dests,
             # todo(mm, 2021-03-09): Is it right for this to be
@@ -686,29 +651,6 @@ class TransferPlan:
                 )
         yield from self._new_tip_action()
 
-    Target = TypeVar("Target")
-
-    @staticmethod
-    def _expand_for_volume_constraints(
-        volumes: Iterable[float], targets: Iterable[Target], max_volume: float
-    ) -> Generator[Tuple[float, "Target"], None, None]:
-        """Split a sequence of proposed transfers if necessary to keep each
-        transfer under the given max volume.
-        """
-        # A final defense against an infinite loop.
-        # Raising a proper exception with a helpful message is left to calling code,
-        # because it has more context about what the user is trying to do.
-        assert max_volume > 0
-        for volume, target in zip(volumes, targets):
-            while volume > max_volume * 2:
-                yield max_volume, target
-                volume -= max_volume
-
-            if volume > max_volume:
-                volume /= 2
-                yield volume, target
-            yield volume, target
-
     def _plan_consolidate(self) -> Generator[TransferStep, None, None]:
         """
         * **Source/ Dest:** Many sources to one destination
@@ -752,7 +694,7 @@ class TransferPlan:
         #     air_gap=self._strategy.air_gap,
         #     max_volume=self._instr.max_volume,
         # )
-        plan_iter = self._expand_for_volume_constraints(
+        plan_iter = tx_commons.expand_for_volume_constraints(
             # todo(mm, 2021-03-09): Is it right to use _instr.max_volume here?
             # Why don't we account for tip max volume, disposal volume, or air
             # gap?
@@ -929,8 +871,8 @@ class TransferPlan:
                 )
             return volume
 
+    @staticmethod
     def _create_volume_gradient(
-        self,
         min_v: float,
         max_v: float,
         total: int,
@@ -946,22 +888,6 @@ class TransferPlan:
             return (rel_y * diff_vol) + min_v
 
         return [_map_volume(i) for i in range(total)]
-
-    def _check_valid_volume_parameters(
-        self, disposal_volume: float, air_gap: float, max_volume: float
-    ) -> None:
-        if air_gap >= max_volume:
-            raise ValueError(
-                "The air gap must be less than the maximum volume of the pipette"
-            )
-        elif disposal_volume >= max_volume:
-            raise ValueError(
-                "The disposal volume must be less than the maximum volume of the pipette"
-            )
-        elif disposal_volume + air_gap >= max_volume:
-            raise ValueError(
-                "The sum of the air gap and disposal volume must be less than the maximum volume of the pipette"
-            )
 
     def _check_valid_well_list(
         self, well_list: List[Any], id: str, old_well_list: List[Any]

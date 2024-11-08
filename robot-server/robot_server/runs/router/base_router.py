@@ -596,7 +596,7 @@ async def get_current_state(  # noqa: C901
         nozzle_layouts = {
             pipetteId: ActiveNozzleLayout.construct(
                 startingNozzle=nozzle_map.starting_nozzle,
-                activeNozzles=list(nozzle_map.map_store.keys()),
+                activeNozzles=nozzle_map.active_nozzles,
                 config=NozzleLayoutConfig(nozzle_map.configuration.value.lower()),
             )
             for pipetteId, nozzle_map in active_nozzle_maps.items()

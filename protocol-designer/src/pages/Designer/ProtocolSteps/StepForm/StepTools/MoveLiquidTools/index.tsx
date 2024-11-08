@@ -182,6 +182,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         pipette={formData.pipette}
         volume={formData.volume}
         tipRack={formData.tipRack}
+        isDisposalLocation={isDisposalLocation}
       />
       <Divider marginY="0" />
       <ChangeTipField
@@ -190,6 +191,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         dispenseWells={formData.dispense_wells}
         path={formData.path}
         stepType={formData.stepType}
+        isDisposalLocation={isDisposalLocation}
       />
       <Divider marginY="0" />
       {enableReturnTip ? (

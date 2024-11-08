@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import get from 'lodash/get'
 import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   ALIGN_CENTER,
   Btn,
@@ -24,6 +24,11 @@ import { getFormWarningsForSelectedStep } from '../../../../dismiss/selectors'
 import { getTimelineWarningsForSelectedStep } from '../../../../top-selectors/timelineWarnings'
 import { getRobotStateTimeline } from '../../../../file-data/selectors'
 import { BUTTON_LINK_STYLE, LINE_CLAMP_TEXT_STYLE } from '../../../../atoms'
+import { analyticsEvent } from '../../../../analytics/actions'
+import {
+  getFormLevelErrorsForUnsavedForm,
+  getDynamicFieldFormErrorsForUnsavedForm,
+} from '../../../../step-forms/selectors'
 import {
   CommentTools,
   HeaterShakerTools,
@@ -44,13 +49,13 @@ import {
 } from './utils'
 import type { StepFieldName } from '../../../../steplist/fieldLevel'
 import type { FormData, StepType } from '../../../../form-types'
+import type { AnalyticsEvent } from '../../../../analytics/mixpanel'
 import type {
   FieldPropsByName,
   FocusHandlers,
   LiquidHandlingTab,
   StepFormProps,
 } from './types'
-import { getFormLevelErrorsForUnsavedForm } from '../../../../step-forms/selectors'
 
 type StepFormMap = {
   [K in StepType]?: React.ComponentType<StepFormProps> | null
@@ -95,9 +100,10 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     'shared',
     'protocol_steps',
   ])
+  const dispatch = useDispatch()
   const { makeSnackbar } = useKitchen()
   const toolsComponentRef = useRef<HTMLDivElement | null>(null)
-
+  const [analyticsStartTime] = useState<Date>(new Date())
   const formWarningsForSelectedStep = useSelector(
     getFormWarningsForSelectedStep
   )
@@ -107,6 +113,13 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   const formLevelErrorsForUnsavedForm = useSelector(
     getFormLevelErrorsForUnsavedForm
   )
+  const dynamicFormLevelErrorsForUnsavedForm = useSelector(
+    getDynamicFieldFormErrorsForUnsavedForm
+  ).map(error => ({
+    title: error.title,
+    body: error.body,
+    dependentFields: error.dependentProfileFields,
+  }))
   const timeline = useSelector(getRobotStateTimeline)
   const [toolboxStep, setToolboxStep] = useState<number>(0)
   const [
@@ -122,7 +135,10 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   const visibleFormErrors = getVisibleFormErrors({
     focusedField,
     dirtyFields: dirtyFields ?? [],
-    errors: formLevelErrorsForUnsavedForm,
+    errors: [
+      ...formLevelErrorsForUnsavedForm,
+      ...dynamicFormLevelErrorsForUnsavedForm,
+    ],
     page: toolboxStep,
     showErrors: showFormErrorsAndWarnings,
   })
@@ -174,6 +190,14 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
 
   const handleSaveClick = (): void => {
     if (canSave) {
+      const duration = new Date().getTime() - analyticsStartTime.getTime()
+      const stepDuration: AnalyticsEvent = {
+        name: 'stepDuration',
+        properties: {
+          stepType: formData.stepType,
+          duration: `${duration / 1000} seconds`,
+        },
+      }
       handleSave()
       makeSnackbar(
         getSaveStepSnackbarText({
@@ -186,6 +210,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
           t,
         })
       )
+      dispatch(analyticsEvent(stepDuration))
     } else {
       setShowFormErrorsAndWarnings(true)
       if (tab === 'aspirate' && isDispenseError && !isAspirateError) {
