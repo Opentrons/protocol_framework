@@ -9,6 +9,9 @@ AbsorbanceReaderLidId = NewType("AbsorbanceReaderLidId", str)
 AbsorbanceReaderMeasureMode = NewType("AbsorbanceReaderMeasureMode", str)
 
 
+# todo(mm, 2024-11-08): frozen=True is getting pretty painful because ModuleStore has
+# no type-safe way to modify just a single attribute. Consider unfreezing this
+# (taking care to ensure that consumers of ModuleView still only get a read-only view).
 @dataclass(frozen=True)
 class AbsorbanceReaderSubState:
     """Absorbance-Plate-Reader-specific state."""

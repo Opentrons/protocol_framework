@@ -319,7 +319,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             measure_mode = absorbance_reader_substate.measure_mode
             configured_wavelengths = absorbance_reader_substate.configured_wavelengths
             reference_wavelength = absorbance_reader_substate.reference_wavelength
-            is_lid_on = absorbance_reader_substate.is_lid_on
             data = absorbance_reader_substate.data
 
             self._state.substate_by_module_id[module_id] = AbsorbanceReaderSubState(
