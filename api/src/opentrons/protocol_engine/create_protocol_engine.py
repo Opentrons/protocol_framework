@@ -96,7 +96,12 @@ async def create_protocol_engine(
         file_provider=file_provider,
     )
 
-    # FIX BEFORE MERGE: Something less implicit than this
+    # todo(mm, 2024-11-08): This is a quick hack to support the absorbance reader, which
+    # expects the engine to have this special labware definition available. It would be
+    # cleaner for the `loadModule` command to do this I/O and insert the definition
+    # into state. That gets easier after https://opentrons.atlassian.net/browse/EXEC-756.
+    #
+    # NOTE: This needs to stay in sync with LabwareView.get_absorbance_reader_lid_definition().
     pe.add_labware_definition(
         await LabwareDataProvider().get_labware_definition(
             "opentrons_flex_lid_absorbance_plate_reader_module", "opentrons", 1
