@@ -72,6 +72,7 @@ _PIPETTE_NAMES_MAP = {
     "flex_1channel_1000": PipetteNameType.P1000_SINGLE_FLEX,
     "flex_8channel_1000": PipetteNameType.P1000_MULTI_FLEX,
     "flex_96channel_1000": PipetteNameType.P1000_96,
+    "flex_96channel_200": PipetteNameType.P200_96,
 }
 
 
@@ -111,7 +112,7 @@ def ensure_mount_for_pipette(
     mount: Union[str, Mount, None], pipette: PipetteNameType
 ) -> Mount:
     """Ensure that an input value represents a valid mount, and is valid for the given pipette."""
-    if pipette == PipetteNameType.P1000_96:
+    if pipette in [PipetteNameType.P1000_96, PipetteNameType.P200_96]:
         # Always validate the raw mount input, even if the pipette is a 96-channel and we're not going
         # to use the mount value.
         if mount is not None:
