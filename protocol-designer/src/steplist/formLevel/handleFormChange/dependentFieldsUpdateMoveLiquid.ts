@@ -537,18 +537,17 @@ function updatePatchOnWellRatioChange(
   const appliedPatch = { ...rawForm, ...patch }
   const isDisposalLocation =
     rawForm.dispense_labware?.includes('wasteChute') ||
-    rawForm.dispense_labware?.includes('trashBin') ||
-    false
+    rawForm.dispense_labware?.includes('trashBin')
 
   const prevWellRatio = getWellRatio(
     rawForm.aspirate_wells as string[],
     rawForm.dispense_wells as string[],
-    isDisposalLocation
+    isDisposalLocation as boolean
   )
   const nextWellRatio = getWellRatio(
     appliedPatch.aspirate_wells as string[],
     appliedPatch.dispense_wells as string[],
-    isDisposalLocation
+    isDisposalLocation as boolean
   )
 
   if (nextWellRatio == null || prevWellRatio == null) {
