@@ -81,6 +81,7 @@ import {
   useModuleCalibrationStatus,
   useProtocolAnalysisErrors,
 } from '/app/resources/runs'
+import { useScrollPosition } from '/app/local-resources/dom-utils'
 
 import type { Run } from '@opentrons/api-client'
 import type { CutoutFixtureId, CutoutId } from '@opentrons/shared-data'
@@ -129,14 +130,7 @@ function PrepareToRun({
   const { t, i18n } = useTranslation(['protocol_setup', 'shared'])
   const navigate = useNavigate()
   const { makeSnackbar } = useToaster()
-  const scrollRef = React.useRef<HTMLDivElement>(null)
-  const [isScrolled, setIsScrolled] = React.useState<boolean>(false)
-  const observer = new IntersectionObserver(([entry]) => {
-    setIsScrolled(!entry.isIntersecting)
-  })
-  if (scrollRef.current != null) {
-    observer.observe(scrollRef.current)
-  }
+  const { scrollRef, isScrolled } = useScrollPosition()
 
   const protocolId = runRecord?.data?.protocolId ?? null
   const { data: protocolRecord } = useProtocolQuery(protocolId, {

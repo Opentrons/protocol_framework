@@ -26,21 +26,10 @@ import { QuickTransferDetails } from '..'
 import { Deck } from '../Deck'
 import { Hardware } from '../Hardware'
 import { Labware } from '../Labware'
+import { useScrollPosition } from '/app/local-resources/dom-utils'
 
 import type { HostConfig } from '@opentrons/api-client'
 
-// Mock IntersectionObserver
-class IntersectionObserver {
-  observe = vi.fn()
-  disconnect = vi.fn()
-  unobserve = vi.fn()
-}
-
-Object.defineProperty(window, 'IntersectionObserver', {
-  writable: true,
-  configurable: true,
-  value: IntersectionObserver,
-})
 vi.mock('/app/organisms/ODD/ProtocolSetup/ProtocolSetupParameters')
 vi.mock('@opentrons/api-client')
 vi.mock('@opentrons/react-api-client')
@@ -55,6 +44,7 @@ vi.mock('../Deck')
 vi.mock('../Hardware')
 vi.mock('../Labware')
 vi.mock('/app/redux/config')
+vi.mock('/app/local-resources/dom-utils')
 
 const MOCK_HOST_CONFIG = {} as HostConfig
 const mockCreateRun = vi.fn((id: string) => {})
@@ -125,6 +115,10 @@ describe('ODDQuickTransferDetails', () => {
       },
     } as any)
     when(vi.mocked(useHost)).calledWith().thenReturn(MOCK_HOST_CONFIG)
+    vi.mocked(useScrollPosition).mockReturnValue({
+      isScrolled: false,
+      scrollRef: {} as any,
+    })
   })
   afterEach(() => {
     vi.resetAllMocks()
