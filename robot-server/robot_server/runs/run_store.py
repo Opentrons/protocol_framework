@@ -188,6 +188,7 @@ class RunStore:
                         "command_error": pydantic_to_json(command.error)
                         if command.error
                         else None,
+                        "command_status": command.status.value,
                     },
                 )
 

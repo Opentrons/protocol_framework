@@ -209,6 +209,7 @@ run_command_table = sqlalchemy.Table(
     sqlalchemy.Column("command", sqlalchemy.String, nullable=False),
     sqlalchemy.Column("command_intent", sqlalchemy.String, nullable=False, index=True),
     sqlalchemy.Column("command_error", sqlalchemy.String, nullable=True),
+    sqlalchemy.Column("command_status", sqlalchemy.String, nullable=False),
     sqlalchemy.Index(
         "ix_run_run_id_command_id",  # An arbitrary name for the index.
         "run_id",
@@ -222,9 +223,10 @@ run_command_table = sqlalchemy.Table(
         unique=True,
     ),
     sqlalchemy.Index(
-        "ix_run_id_command_error",  # An arbitrary name for the index.
+        "ix_run_run_id_index_in_run_command_status",  # An arbitrary name for the index.
         "run_id",
-        "command_error",
+        "index_in_run",
+        "command_status",
     ),
 )
 
