@@ -65,6 +65,7 @@ describe('LiquidsLabwareDetailsModal', () => {
     vi.mocked(getLocationInfoNames).mockReturnValue({
       labwareName: 'mock labware name',
       slotName: '5',
+      labwareQuantity: 1,
     })
     vi.mocked(getSlotLabwareDefinition).mockReturnValue(mockDefinition)
     vi.mocked(getLiquidsByIdForLabware).mockReturnValue({

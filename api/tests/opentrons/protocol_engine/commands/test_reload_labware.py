@@ -66,7 +66,6 @@ async def test_reload_labware_implementation(
             labwareId="my-labware-id",
             offsetId="labware-offset-id",
         ),
-        private=None,
         state_update=StateUpdate(
             labware_location=LabwareLocationUpdate(
                 labware_id="my-labware-id",

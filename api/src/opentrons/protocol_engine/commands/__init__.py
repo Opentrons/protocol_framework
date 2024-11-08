@@ -38,8 +38,15 @@ from .command_unions import (
     CommandCreate,
     CommandResult,
     CommandType,
-    CommandPrivateResult,
     CommandDefinedErrorData,
+)
+
+from .air_gap_in_place import (
+    AirGapInPlace,
+    AirGapInPlaceParams,
+    AirGapInPlaceCreate,
+    AirGapInPlaceResult,
+    AirGapInPlaceCommandType,
 )
 
 from .aspirate import (
@@ -153,7 +160,6 @@ from .load_pipette import (
     LoadPipetteCreate,
     LoadPipetteResult,
     LoadPipetteCommandType,
-    LoadPipettePrivateResult,
 )
 
 from .move_labware import (
@@ -357,6 +363,12 @@ __all__ = [
     "hash_protocol_command_params",
     # command schema generation
     "generate_command_schema",
+    # air gap command models
+    "AirGapInPlace",
+    "AirGapInPlaceCreate",
+    "AirGapInPlaceParams",
+    "AirGapInPlaceResult",
+    "AirGapInPlaceCommandType",
     # aspirate command models
     "Aspirate",
     "AspirateCreate",

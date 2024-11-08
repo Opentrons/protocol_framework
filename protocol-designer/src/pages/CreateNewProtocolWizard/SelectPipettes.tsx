@@ -177,6 +177,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
             handleGoBack()
           }}
           disabled={isDisabled}
+          tooltipOnDisabled={t('add_pipette_to_continue')}
         >
           {page === 'add' ? (
             <Flex
@@ -192,7 +193,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                 <StyledText desktopStyle="headingSmallBold">
                   {t('pipette_type')}
                 </StyledText>
-                <Flex gridGap={SPACING.spacing4}>
+                <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
                   {PIPETTE_TYPES[robotType].map(type => {
                     return type.value === '96' &&
                       (pipettesByMount.left.pipetteName != null ||
@@ -225,6 +226,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                 <Flex
                   flexDirection={DIRECTION_COLUMN}
                   gridGap={SPACING.spacing12}
+                  flexWrap={WRAP}
                 >
                   <StyledText desktopStyle="headingSmallBold">
                     {t('pipette_gen')}
@@ -256,7 +258,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                   <StyledText desktopStyle="headingSmallBold">
                     {t('pipette_vol')}
                   </StyledText>
-                  <Flex gridGap={SPACING.spacing4}>
+                  <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
                     {PIPETTE_VOLUMES[robotType]?.map(volume => {
                       if (
                         robotType === FLEX_ROBOT_TYPE &&
@@ -365,10 +367,11 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                                 />
                               )
                             )}
-                          </Box>
-                          <Flex gridGap={SPACING.spacing4}>
                             <StyledLabel>
-                              <StyledText desktopStyle="bodyDefaultRegular">
+                              <StyledText
+                                desktopStyle="bodyDefaultRegular"
+                                padding={SPACING.spacing4}
+                              >
                                 {t('add_custom_tips')}
                               </StyledText>
                               <input
@@ -397,14 +400,17 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                                   TYPOGRAPHY.textDecorationUnderline
                                 }
                               >
-                                <StyledText desktopStyle="bodyDefaultRegular">
+                                <StyledText
+                                  desktopStyle="bodyDefaultRegular"
+                                  padding={SPACING.spacing4}
+                                >
                                   {allowAllTipracks
                                     ? t('show_default_tips')
                                     : t('show_all_tips')}
                                 </StyledText>
                               </Btn>
                             )}
-                          </Flex>
+                          </Box>
                         </Flex>
                       </Flex>
                     )

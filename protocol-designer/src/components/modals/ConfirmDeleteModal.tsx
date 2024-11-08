@@ -1,10 +1,8 @@
 import type * as React from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
 import {
   ALIGN_FLEX_END,
-  AlertModal,
   AlertPrimaryButton,
   COLORS,
   Flex,
@@ -14,10 +12,7 @@ import {
   SecondaryButton,
   StyledText,
 } from '@opentrons/components'
-import { getEnableRedesign } from '../../feature-flags/selectors'
-import { getMainPagePortalEl } from '../portals/MainPageModalPortal'
 import { getTopPortalEl } from '../portals/TopPortal'
-import modalStyles from './modal.module.css'
 
 export const DELETE_PROFILE_CYCLE: 'deleteProfileCycle' = 'deleteProfileCycle'
 export const CLOSE_STEP_FORM_WITH_CHANGES: 'closeStepFormWithChanges' =
@@ -52,59 +47,36 @@ export function ConfirmDeleteModal(props: Props): JSX.Element {
     t(`confirm_delete_modal.${modalType}.confirm_button`, t('button:continue')),
     'capitalize'
   )
-  const buttons = [
-    { title: cancelCopy, children: cancelCopy, onClick: onCancelClick },
-    {
-      title: continueCopy,
-      children: continueCopy,
-      className: modalStyles.long_button,
-      onClick: onContinueClick,
-    },
-  ]
-  const enableRedesign = useSelector(getEnableRedesign)
-  return enableRedesign
-    ? createPortal(
-        <Modal
-          title={t(`confirm_delete_modal.${modalType}.title`)}
-          titleElement1={
-            <Icon name="alert-circle" color={COLORS.yellow50} size="1.25rem" />
-          }
-          footer={
-            <Flex
-              padding={`0 ${SPACING.spacing24} ${SPACING.spacing24}`}
-              gridGap={SPACING.spacing8}
-              justifyContent={ALIGN_FLEX_END}
-            >
-              <SecondaryButton onClick={onCancelClick}>
-                <StyledText desktopStyle="bodyDefaultSemiBold">
-                  {cancelCopy}
-                </StyledText>
-              </SecondaryButton>
-              <AlertPrimaryButton onClick={onContinueClick}>
-                <StyledText desktopStyle="bodyDefaultSemiBold">
-                  {continueCopy}
-                </StyledText>
-              </AlertPrimaryButton>
-            </Flex>
-          }
+
+  return createPortal(
+    <Modal
+      title={t(`confirm_delete_modal.${modalType}.title`)}
+      titleElement1={
+        <Icon name="alert-circle" color={COLORS.yellow50} size="1.25rem" />
+      }
+      footer={
+        <Flex
+          padding={`0 ${SPACING.spacing24} ${SPACING.spacing24}`}
+          gridGap={SPACING.spacing8}
+          justifyContent={ALIGN_FLEX_END}
         >
-          <StyledText desktopStyle="bodyDefaultRegular">
-            {t(`confirm_delete_modal.${modalType}.body`)}
-          </StyledText>
-        </Modal>,
-        getTopPortalEl()
-      )
-    : createPortal(
-        <AlertModal
-          alertOverlay
-          restrictOuterScroll={false}
-          buttons={buttons}
-          onCloseClick={onCancelClick}
-          className={modalStyles.modal}
-          heading={t(`confirm_delete_modal.${modalType}.title`)}
-        >
-          <p>{t(`confirm_delete_modal.${modalType}.body`)}</p>
-        </AlertModal>,
-        getMainPagePortalEl()
-      )
+          <SecondaryButton onClick={onCancelClick}>
+            <StyledText desktopStyle="bodyDefaultSemiBold">
+              {cancelCopy}
+            </StyledText>
+          </SecondaryButton>
+          <AlertPrimaryButton onClick={onContinueClick}>
+            <StyledText desktopStyle="bodyDefaultSemiBold">
+              {continueCopy}
+            </StyledText>
+          </AlertPrimaryButton>
+        </Flex>
+      }
+    >
+      <StyledText desktopStyle="bodyDefaultRegular">
+        {t(`confirm_delete_modal.${modalType}.body`)}
+      </StyledText>
+    </Modal>,
+    getTopPortalEl()
+  )
 }

@@ -9,7 +9,6 @@ from opentrons import types
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons.protocols.api_support.util import FlowRates
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
-from opentrons.hardware_control.nozzle_manager import NozzleMap
 
 from ..disposal_locations import TrashBin, WasteChute
 from .well import WellCoreType
@@ -23,6 +22,14 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
     @abstractmethod
     def set_default_speed(self, speed: float) -> None:
         ...
+
+    @abstractmethod
+    def air_gap_in_place(self, volume: float, flow_rate: float) -> None:
+        """Aspirate a given volume of air from the current location of the pipette.
+        Args:
+            volume: The volume of air to aspirate, in microliters.
+            flow_rate: The flow rate of air into the pipette, in microliters.
+        """
 
     @abstractmethod
     def aspirate(
@@ -222,7 +229,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         ...
 
     @abstractmethod
-    def get_nozzle_map(self) -> NozzleMap:
+    def get_nozzle_map(self) -> types.NozzleMapInterface:
         ...
 
     @abstractmethod
@@ -326,6 +333,10 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
     ) -> float:
         """Do a liquid probe to find the level of the liquid in the well."""
         ...
+
+    @abstractmethod
+    def nozzle_configuration_valid_for_lld(self) -> bool:
+        """Check if the nozzle configuration currently supports LLD."""
 
 
 InstrumentCoreType = TypeVar("InstrumentCoreType", bound=AbstractInstrument[Any])

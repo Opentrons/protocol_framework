@@ -1205,7 +1205,14 @@
       },
       "id": "UUID",
       "key": "2c37ad797da7df791b57a7843a203e88",
-      "notes": [],
+      "notes": [
+        {
+          "longMessage": "Handling this command failure with FAIL_RUN.",
+          "noteKind": "debugErrorRecovery",
+          "shortMessage": "Handling this command failure with FAIL_RUN.",
+          "source": "execution"
+        }
+      ],
       "params": {
         "configurationParams": {
           "backLeftNozzle": "A1",

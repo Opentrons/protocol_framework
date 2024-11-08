@@ -19,8 +19,7 @@ from opentrons.protocol_engine.types import (
     LabwareOffsetCreate,
     LabwareOffsetVector,
 )
-from opentrons.types import DeckSlotName, Point
-from opentrons.hardware_control.nozzle_manager import NozzleMap
+from opentrons.types import DeckSlotName, Point, NozzleMapInterface
 
 
 from ..labware import AbstractLabware, LabwareLoadParams
@@ -158,7 +157,7 @@ class LabwareCore(AbstractLabware[WellCore]):
         self,
         num_tips: int,
         starting_tip: Optional[WellCore],
-        nozzle_map: Optional[NozzleMap],
+        nozzle_map: Optional[NozzleMapInterface],
     ) -> Optional[str]:
         return self._engine_client.state.tips.get_next_tip(
             labware_id=self._labware_id,

@@ -35,7 +35,7 @@ class MoveToWellResult(DestinationPositionResult):
 
 
 class MoveToWellImplementation(
-    AbstractCommandImpl[MoveToWellParams, SuccessData[MoveToWellResult, None]]
+    AbstractCommandImpl[MoveToWellParams, SuccessData[MoveToWellResult]]
 ):
     """Move to well command implementation."""
 
@@ -45,9 +45,7 @@ class MoveToWellImplementation(
         self._state_view = state_view
         self._movement = movement
 
-    async def execute(
-        self, params: MoveToWellParams
-    ) -> SuccessData[MoveToWellResult, None]:
+    async def execute(self, params: MoveToWellParams) -> SuccessData[MoveToWellResult]:
         """Move the requested pipette to the requested well."""
         pipette_id = params.pipetteId
         labware_id = params.labwareId
@@ -83,7 +81,6 @@ class MoveToWellImplementation(
 
         return SuccessData(
             public=MoveToWellResult(position=deck_point),
-            private=None,
             state_update=state_update,
         )
 

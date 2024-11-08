@@ -10,8 +10,16 @@ from opentrons.protocol_reader import FileHasher, FileReaderWriter, BufferedFile
 
 from robot_server.service.json_api import MultiBodyMeta, SimpleEmptyBody
 
-from robot_server.data_files.data_files_store import DataFilesStore, DataFileInfo
-from robot_server.data_files.models import DataFile, FileIdNotFoundError, FileInUseError
+from robot_server.data_files.data_files_store import (
+    DataFilesStore,
+    DataFileInfo,
+)
+from robot_server.data_files.models import (
+    DataFile,
+    DataFileSource,
+    FileIdNotFoundError,
+    FileInUseError,
+)
 from robot_server.data_files.router import (
     upload_data_file,
     get_data_file_info_by_id,
@@ -84,6 +92,7 @@ async def test_upload_new_data_file(
         id="data-file-id",
         name="abc.csv",
         createdAt=datetime(year=2024, month=6, day=18),
+        source=DataFileSource.UPLOADED,
     )
     assert result.status_code == 201
     decoy.verify(
@@ -97,6 +106,7 @@ async def test_upload_new_data_file(
                 name="abc.csv",
                 file_hash="abc123",
                 created_at=datetime(year=2024, month=6, day=18),
+                source=DataFileSource.UPLOADED,
             )
         ),
     )
@@ -127,6 +137,7 @@ async def test_upload_existing_data_file(
             name="abc.csv",
             file_hash="abc123",
             created_at=datetime(year=2023, month=6, day=18),
+            source=DataFileSource.UPLOADED,
         )
     )
 
@@ -146,6 +157,7 @@ async def test_upload_existing_data_file(
         id="existing-file-id",
         name="abc.csv",
         createdAt=datetime(year=2023, month=6, day=18),
+        source=DataFileSource.UPLOADED,
     )
 
 
@@ -183,6 +195,7 @@ async def test_upload_new_data_file_path(
         id="data-file-id",
         name="abc.csv",
         createdAt=datetime(year=2024, month=6, day=18),
+        source=DataFileSource.UPLOADED,
     )
     decoy.verify(
         await file_reader_writer.write(
@@ -194,6 +207,7 @@ async def test_upload_new_data_file_path(
                 name="abc.csv",
                 file_hash="abc123",
                 created_at=datetime(year=2024, month=6, day=18),
+                source=DataFileSource.UPLOADED,
             )
         ),
     )
@@ -270,6 +284,7 @@ async def test_get_data_file_info(
             name="abc.xyz",
             file_hash="123",
             created_at=datetime(year=2024, month=7, day=15),
+            source=DataFileSource.UPLOADED,
         )
     )
 
@@ -282,6 +297,7 @@ async def test_get_data_file_info(
         id="qwerty",
         name="abc.xyz",
         createdAt=datetime(year=2024, month=7, day=15),
+        source=DataFileSource.UPLOADED,
     )
 
 
@@ -317,6 +333,7 @@ async def test_get_data_file(
             name="abc.xyz",
             file_hash="123",
             created_at=datetime(year=2024, month=7, day=15),
+            source=DataFileSource.UPLOADED,
         )
     )
 
@@ -358,12 +375,14 @@ async def test_get_all_data_file_info(
                 name="abc.xyz",
                 file_hash="123",
                 created_at=datetime(year=2024, month=7, day=15),
+                source=DataFileSource.UPLOADED,
             ),
             DataFileInfo(
                 id="hfhcjdeowjfie",
                 name="mcd.kfc",
                 file_hash="124",
                 created_at=datetime(year=2024, month=7, day=22),
+                source=DataFileSource.UPLOADED,
             ),
         ]
     )
@@ -376,11 +395,13 @@ async def test_get_all_data_file_info(
             id="qwerty",
             name="abc.xyz",
             createdAt=datetime(year=2024, month=7, day=15),
+            source=DataFileSource.UPLOADED,
         ),
         DataFile(
             id="hfhcjdeowjfie",
             name="mcd.kfc",
             createdAt=datetime(year=2024, month=7, day=22),
+            source=DataFileSource.UPLOADED,
         ),
     ]
     assert result.content.meta == MultiBodyMeta(cursor=0, totalLength=2)

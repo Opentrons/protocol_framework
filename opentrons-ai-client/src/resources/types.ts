@@ -8,6 +8,8 @@ export interface ChatData {
   reply: string
   /** for testing purpose will be removed and this is not used in the app */
   fake?: boolean
+  /** uuid to map the chat prompt request to the response from the LLM */
+  requestId: string
 }
 
 export interface Chat {
@@ -35,10 +37,37 @@ export interface Mixpanel {
   analytics: {
     hasOptedIn: boolean
   }
+  isInitialized: boolean
 }
 
 export interface AnalyticsEvent {
   name: string
   properties: Record<string, unknown>
   superProperties?: Record<string, unknown>
+}
+
+export interface HeaderWithMeterAtomProps {
+  displayHeaderWithMeter: boolean
+  progress: number
+}
+
+export interface createProtocolAtomProps {
+  currentStep: number
+  focusStep: number
+}
+
+export interface PromptData {
+  /** assistant: ChatGPT API, user: user */
+  role: Role
+  /** content gathered from the user selection */
+  data: {
+    applicationSection: {
+      application: string
+      description: string
+    }
+    instrumentsSection: {
+      robot: string
+      instruments: string[]
+    }
+  }
 }

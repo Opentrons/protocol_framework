@@ -1,8 +1,10 @@
 """In-memory storage of ProtocolEngine instances."""
+
 import asyncio
 import logging
-from typing import List, Optional, Callable, Dict
+from typing import List, Optional, Callable, Mapping
 
+from opentrons.types import NozzleMapInterface
 from opentrons.protocol_engine.errors.exceptions import EStopActivatedError
 from opentrons.protocol_engine.types import (
     PostRunHardwareState,
@@ -16,7 +18,6 @@ from opentrons_shared_data.robot.types import RobotTypeEnum
 
 from opentrons.config import feature_flags
 from opentrons.hardware_control import HardwareControlAPI
-from opentrons.hardware_control.nozzle_manager import NozzleMap
 from opentrons.hardware_control.types import (
     EstopState,
     HardwareEvent,
@@ -207,6 +208,7 @@ class RunOrchestratorStore:
             run_id: The run resource the run orchestrator is assigned to.
             labware_offsets: Labware offsets to create the run with.
             deck_configuration: A mapping of fixtures to cutout fixtures the deck will be loaded with.
+            file_provider: Wrapper to let the engine read/write data files.
             notify_publishers: Utilized by the engine to notify publishers of state changes.
             protocol: The protocol to load the runner with, if any.
             run_time_param_values: Any runtime parameter values to set.
@@ -310,9 +312,9 @@ class RunOrchestratorStore:
         """Stop the run."""
         await self.run_orchestrator.stop()
 
-    def resume_from_recovery(self) -> None:
+    def resume_from_recovery(self, reconcile_false_positive: bool) -> None:
         """Resume the run from recovery mode."""
-        self.run_orchestrator.resume_from_recovery()
+        self.run_orchestrator.resume_from_recovery(reconcile_false_positive)
 
     async def finish(self, error: Optional[Exception]) -> None:
         """Finish the run."""
@@ -326,7 +328,7 @@ class RunOrchestratorStore:
         """Get loaded labware definitions."""
         return self.run_orchestrator.get_loaded_labware_definitions()
 
-    def get_nozzle_maps(self) -> Dict[str, NozzleMap]:
+    def get_nozzle_maps(self) -> Mapping[str, NozzleMapInterface]:
         """Get the current nozzle map keyed by pipette id."""
         return self.run_orchestrator.get_nozzle_maps()
 

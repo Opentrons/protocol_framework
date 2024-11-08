@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple, Union, Iterator, cast
 
 from opentrons.hardware_control import nozzle_manager
 
-from opentrons.types import Point
+from opentrons.types import Point, NozzleConfigurationType
 
 from opentrons_shared_data.pipette.load_data import load_definition
 from opentrons_shared_data.pipette.types import (
@@ -258,7 +258,7 @@ H1: Dict[str, List[str]] = {"H1": ["H1"]}
     ],
 )
 def test_single_pipettes_always_full(
-    pipette_details: Tuple[PipetteModelType, PipetteVersionType]
+    pipette_details: Tuple[PipetteModelType, PipetteVersionType],
 ) -> None:
     config = load_definition(
         pipette_details[0], PipetteChannelType.SINGLE_CHANNEL, pipette_details[1]
@@ -266,22 +266,13 @@ def test_single_pipettes_always_full(
     subject = nozzle_manager.NozzleConfigurationManager.build_from_config(
         config, ValidNozzleMaps(maps=A1)
     )
-    assert (
-        subject.current_configuration.configuration
-        == nozzle_manager.NozzleConfigurationType.FULL
-    )
+    assert subject.current_configuration.configuration == NozzleConfigurationType.FULL
 
     subject.update_nozzle_configuration("A1", "A1", "A1")
-    assert (
-        subject.current_configuration.configuration
-        == nozzle_manager.NozzleConfigurationType.FULL
-    )
+    assert subject.current_configuration.configuration == NozzleConfigurationType.FULL
 
     subject.reset_to_default_configuration()
-    assert (
-        subject.current_configuration.configuration
-        == nozzle_manager.NozzleConfigurationType.FULL
-    )
+    assert subject.current_configuration.configuration == NozzleConfigurationType.FULL
 
 
 @pytest.mark.parametrize(
@@ -295,7 +286,7 @@ def test_single_pipettes_always_full(
     ],
 )
 def test_single_pipette_map_entries(
-    pipette_details: Tuple[PipetteModelType, PipetteVersionType]
+    pipette_details: Tuple[PipetteModelType, PipetteVersionType],
 ) -> None:
     config = load_definition(
         pipette_details[0], PipetteChannelType.SINGLE_CHANNEL, pipette_details[1]
@@ -332,7 +323,7 @@ def test_single_pipette_map_entries(
     ],
 )
 def test_single_pipette_map_geometry(
-    pipette_details: Tuple[PipetteModelType, PipetteVersionType]
+    pipette_details: Tuple[PipetteModelType, PipetteVersionType],
 ) -> None:
     config = load_definition(
         pipette_details[0], PipetteChannelType.SINGLE_CHANNEL, pipette_details[1]
@@ -365,7 +356,7 @@ def test_single_pipette_map_geometry(
     ],
 )
 def test_multi_config_identification(
-    pipette_details: Tuple[PipetteModelType, PipetteVersionType]
+    pipette_details: Tuple[PipetteModelType, PipetteVersionType],
 ) -> None:
     config = load_definition(
         pipette_details[0], PipetteChannelType.EIGHT_CHANNEL, pipette_details[1]
@@ -375,55 +366,43 @@ def test_multi_config_identification(
         ValidNozzleMaps(maps=EIGHT_CHANNEL_FULL | A1_D1 | A1 | H1),
     )
 
-    assert (
-        subject.current_configuration.configuration
-        == nozzle_manager.NozzleConfigurationType.FULL
-    )
+    assert subject.current_configuration.configuration == NozzleConfigurationType.FULL
 
     subject.update_nozzle_configuration("A1", "H1", "A1")
-    assert (
-        subject.current_configuration.configuration
-        == nozzle_manager.NozzleConfigurationType.FULL
-    )
+    assert subject.current_configuration.configuration == NozzleConfigurationType.FULL
 
     subject.reset_to_default_configuration()
-    assert (
-        subject.current_configuration.configuration
-        == nozzle_manager.NozzleConfigurationType.FULL
-    )
+    assert subject.current_configuration.configuration == NozzleConfigurationType.FULL
 
     subject.update_nozzle_configuration("A1", "D1", "A1")
     assert (
         cast(
-            nozzle_manager.NozzleConfigurationType,
+            NozzleConfigurationType,
             subject.current_configuration.configuration,
         )
-        == nozzle_manager.NozzleConfigurationType.COLUMN
+        == NozzleConfigurationType.COLUMN
     )
 
     subject.update_nozzle_configuration("A1", "A1", "A1")
     assert (
         cast(
-            nozzle_manager.NozzleConfigurationType,
+            NozzleConfigurationType,
             subject.current_configuration.configuration,
         )
-        == nozzle_manager.NozzleConfigurationType.SINGLE
+        == NozzleConfigurationType.SINGLE
     )
 
     subject.update_nozzle_configuration("H1", "H1", "H1")
     assert (
         cast(
-            nozzle_manager.NozzleConfigurationType,
+            NozzleConfigurationType,
             subject.current_configuration.configuration,
         )
-        == nozzle_manager.NozzleConfigurationType.SINGLE
+        == NozzleConfigurationType.SINGLE
     )
 
     subject.reset_to_default_configuration()
-    assert (
-        subject.current_configuration.configuration
-        == nozzle_manager.NozzleConfigurationType.FULL
-    )
+    assert subject.current_configuration.configuration == NozzleConfigurationType.FULL
 
 
 @pytest.mark.parametrize(
@@ -437,7 +416,7 @@ def test_multi_config_identification(
     ],
 )
 def test_multi_config_map_entries(
-    pipette_details: Tuple[PipetteModelType, PipetteVersionType]
+    pipette_details: Tuple[PipetteModelType, PipetteVersionType],
 ) -> None:
     config = load_definition(
         pipette_details[0], PipetteChannelType.EIGHT_CHANNEL, pipette_details[1]
@@ -503,7 +482,7 @@ def assert_offset_in_center_of(
     ],
 )
 def test_multi_config_geometry(
-    pipette_details: Tuple[PipetteModelType, PipetteVersionType]
+    pipette_details: Tuple[PipetteModelType, PipetteVersionType],
 ) -> None:
     config = load_definition(
         pipette_details[0], PipetteChannelType.EIGHT_CHANNEL, pipette_details[1]
@@ -554,7 +533,7 @@ def test_multi_config_geometry(
     "pipette_details", [(PipetteModelType.p1000, PipetteVersionType(major=3, minor=5))]
 )
 def test_96_config_identification(
-    pipette_details: Tuple[PipetteModelType, PipetteVersionType]
+    pipette_details: Tuple[PipetteModelType, PipetteVersionType],
 ) -> None:
     config = load_definition(
         pipette_details[0], PipetteChannelType.NINETY_SIX_CHANNEL, pipette_details[1]
@@ -577,97 +556,91 @@ def test_96_config_identification(
         ),
     )
 
-    assert (
-        subject.current_configuration.configuration
-        == nozzle_manager.NozzleConfigurationType.FULL
-    )
+    assert subject.current_configuration.configuration == NozzleConfigurationType.FULL
     subject.update_nozzle_configuration("A1", "H12")
-    assert (
-        subject.current_configuration.configuration
-        == nozzle_manager.NozzleConfigurationType.FULL
-    )
+    assert subject.current_configuration.configuration == NozzleConfigurationType.FULL
     subject.update_nozzle_configuration("A1", "H1")
     assert (
         cast(
-            nozzle_manager.NozzleConfigurationType,
+            NozzleConfigurationType,
             subject.current_configuration.configuration,
         )
-        == nozzle_manager.NozzleConfigurationType.COLUMN
+        == NozzleConfigurationType.COLUMN
     )
     subject.update_nozzle_configuration("A12", "H12")
     assert (
         cast(
-            nozzle_manager.NozzleConfigurationType,
+            NozzleConfigurationType,
             subject.current_configuration.configuration,
         )
-        == nozzle_manager.NozzleConfigurationType.COLUMN
+        == NozzleConfigurationType.COLUMN
     )
 
     subject.update_nozzle_configuration("A1", "A12")
     assert (
         cast(
-            nozzle_manager.NozzleConfigurationType,
+            NozzleConfigurationType,
             subject.current_configuration.configuration,
         )
-        == nozzle_manager.NozzleConfigurationType.ROW
+        == NozzleConfigurationType.ROW
     )
     subject.update_nozzle_configuration("H1", "H12")
     assert (
         cast(
-            nozzle_manager.NozzleConfigurationType,
+            NozzleConfigurationType,
             subject.current_configuration.configuration,
         )
-        == nozzle_manager.NozzleConfigurationType.ROW
+        == NozzleConfigurationType.ROW
     )
 
     subject.update_nozzle_configuration("E1", "H6")
     assert (
         cast(
-            nozzle_manager.NozzleConfigurationType,
+            NozzleConfigurationType,
             subject.current_configuration.configuration,
         )
-        == nozzle_manager.NozzleConfigurationType.SUBRECT
+        == NozzleConfigurationType.SUBRECT
     )
     subject.update_nozzle_configuration("E7", "H12")
     assert (
         cast(
-            nozzle_manager.NozzleConfigurationType,
+            NozzleConfigurationType,
             subject.current_configuration.configuration,
         )
-        == nozzle_manager.NozzleConfigurationType.SUBRECT
+        == NozzleConfigurationType.SUBRECT
     )
 
     subject.update_nozzle_configuration("A1", "B12")
     assert (
         cast(
-            nozzle_manager.NozzleConfigurationType,
+            NozzleConfigurationType,
             subject.current_configuration.configuration,
         )
-        == nozzle_manager.NozzleConfigurationType.SUBRECT
+        == NozzleConfigurationType.SUBRECT
     )
     subject.update_nozzle_configuration("G1", "H12")
     assert (
         cast(
-            nozzle_manager.NozzleConfigurationType,
+            NozzleConfigurationType,
             subject.current_configuration.configuration,
         )
-        == nozzle_manager.NozzleConfigurationType.SUBRECT
+        == NozzleConfigurationType.SUBRECT
     )
     subject.update_nozzle_configuration("A1", "H3")
     assert (
         cast(
-            nozzle_manager.NozzleConfigurationType,
+            NozzleConfigurationType,
             subject.current_configuration.configuration,
         )
-        == nozzle_manager.NozzleConfigurationType.SUBRECT
+        == NozzleConfigurationType.SUBRECT
     )
     subject.update_nozzle_configuration("A10", "H12")
     assert (
         cast(
-            nozzle_manager.NozzleConfigurationType,
+            NozzleConfigurationType,
             subject.current_configuration.configuration,
         )
-        == nozzle_manager.NozzleConfigurationType.SUBRECT
+        == NozzleConfigurationType.SUBRECT
     )
 
 
@@ -675,7 +648,7 @@ def test_96_config_identification(
     "pipette_details", [(PipetteModelType.p1000, PipetteVersionType(major=3, minor=5))]
 )
 def test_96_config_map_entries(
-    pipette_details: Tuple[PipetteModelType, PipetteVersionType]
+    pipette_details: Tuple[PipetteModelType, PipetteVersionType],
 ) -> None:
     config = load_definition(
         pipette_details[0], PipetteChannelType.NINETY_SIX_CHANNEL, pipette_details[1]
@@ -1012,7 +985,7 @@ def test_96_config_map_entries(
     "pipette_details", [(PipetteModelType.p1000, PipetteVersionType(major=3, minor=5))]
 )
 def test_96_config_geometry(
-    pipette_details: Tuple[PipetteModelType, PipetteVersionType]
+    pipette_details: Tuple[PipetteModelType, PipetteVersionType],
 ) -> None:
     config = load_definition(
         pipette_details[0], PipetteChannelType.NINETY_SIX_CHANNEL, pipette_details[1]

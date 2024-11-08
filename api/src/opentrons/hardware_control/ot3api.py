@@ -45,7 +45,6 @@ from opentrons.config.types import (
     LiquidProbeSettings,
 )
 from opentrons.drivers.rpi_drivers.types import USBPort, PortGroup
-from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType
 from opentrons_shared_data.errors.exceptions import (
     EnumeratedError,
     PythonException,
@@ -1826,7 +1825,7 @@ class OT3API(
         if (
             self.gantry_load == GantryLoad.HIGH_THROUGHPUT
             and instrument.nozzle_manager.current_configuration.configuration
-            == NozzleConfigurationType.FULL
+            == top_types.NozzleConfigurationType.FULL
         ):
             spec = self._pipette_handler.plan_ht_pick_up_tip(
                 instrument.nozzle_manager.current_configuration.tip_count

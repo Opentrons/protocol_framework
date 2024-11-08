@@ -45,7 +45,7 @@ async def test_engage_axes_implementation(
 
     result = await subject.execute(data)
 
-    assert result == SuccessData(public=UnsafeEngageAxesResult(), private=None)
+    assert result == SuccessData(public=UnsafeEngageAxesResult())
 
     decoy.verify(
         await ot3_hardware_api.engage_axes([Axis.Z_L, Axis.P_L, Axis.X, Axis.Y]),

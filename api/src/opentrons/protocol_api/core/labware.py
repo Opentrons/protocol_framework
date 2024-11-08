@@ -10,8 +10,7 @@ from opentrons_shared_data.labware.types import (
     LabwareDefinition as LabwareDefinitionDict,
 )
 
-from opentrons.types import DeckSlotName, Point
-from opentrons.hardware_control.nozzle_manager import NozzleMap
+from opentrons.types import DeckSlotName, Point, NozzleMapInterface
 
 from .well import WellCoreType
 
@@ -114,7 +113,7 @@ class AbstractLabware(ABC, Generic[WellCoreType]):
         self,
         num_tips: int,
         starting_tip: Optional[WellCoreType],
-        nozzle_map: Optional[NozzleMap],
+        nozzle_map: Optional[NozzleMapInterface],
     ) -> Optional[str]:
         """Get the name of the next available tip(s) in the rack, if available."""
 

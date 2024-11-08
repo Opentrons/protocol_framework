@@ -82,7 +82,7 @@ def module_helper(
                 y = one_module["moduleOffset"]["offset"].get("y", "")
                 z = one_module["moduleOffset"]["offset"].get("z", "")
             except KeyError:
-                pass
+                continue
             if mod_serial in module_sheet_serials and modified in module_modify_dates:
                 continue
             module_row = (
@@ -363,3 +363,4 @@ if __name__ == "__main__":
     folder_name = args.folder_name[0]
     google_sheet_name = args.google_sheet_name[0]
     email = args.email[0]
+    run(storage_directory, folder_name, google_sheet_name, email)

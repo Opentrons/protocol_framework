@@ -42,7 +42,7 @@ export function EstopMissingModal({
       <TouchscreenModal robotName={robotName} closeModal={closeModal} />
     ) : (
       <>
-        {isDismissedModal === false ? (
+        {!isDismissedModal ? (
           <DesktopModal
             robotName={robotName}
             closeModal={closeModal}
@@ -81,7 +81,7 @@ function TouchscreenModal({
           {t('connect_the_estop_to_continue')}
         </LegacyStyledText>
         <LegacyStyledText as="p">
-          {t('estop_missing_description', { robotName: robotName })}
+          {t('estop_missing_description', { robotName })}
         </LegacyStyledText>
       </Flex>
     </OddModal>
@@ -121,7 +121,7 @@ function DesktopModal({
           {t('connect_the_estop_to_continue')}
         </LegacyStyledText>
         <LegacyStyledText>
-          {t('estop_missing_description', { robotName: robotName })}
+          {t('estop_missing_description', { robotName })}
         </LegacyStyledText>
       </Flex>
     </Modal>
