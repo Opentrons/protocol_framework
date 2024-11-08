@@ -20,6 +20,7 @@ from .._folder_migrator import Migration
 from ..file_and_directory_names import (
     DB_FILE,
 )
+from ..tables.schema_8 import CommandStatusSQLEnum
 
 
 class Migration7to8(Migration):  # noqa: D101
@@ -84,7 +85,7 @@ def _migrate_command_table_with_new_command_error_col_and_command_status(
             else json.dumps(data["error"])
         )
         # parse json as enum
-        new_command_status = data["status"]
+        new_command_status = CommandStatusSQLEnum(data["status"])
 
         update_commands = (
             sqlalchemy.update(schema_8.run_command_table)

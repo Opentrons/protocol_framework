@@ -44,6 +44,7 @@ from robot_server.protocols.protocol_store import ProtocolNotFoundError
 
 from .action_models import RunAction, RunActionType
 from .run_models import RunNotFoundError
+from ..persistence.tables.schema_8 import CommandStatusSQLEnum
 
 log = logging.getLogger(__name__)
 
@@ -188,7 +189,7 @@ class RunStore:
                         "command_error": pydantic_to_json(command.error)
                         if command.error
                         else None,
-                        "command_status": command.status.value,
+                        "command_status": CommandStatusSQLEnum(command.status.value),
                     },
                 )
 

@@ -107,9 +107,10 @@ EXPECTED_STATEMENTS_LATEST = [
         command VARCHAR NOT NULL,
         command_intent VARCHAR NOT NULL,
         command_error VARCHAR,
-        command_status VARCHAR NOT NULL,
+        command_status VARCHAR(9) NOT NULL,
         PRIMARY KEY (row_id),
-        FOREIGN KEY(run_id) REFERENCES run (id)
+        FOREIGN KEY(run_id) REFERENCES run (id),
+        CONSTRAINT commandstatussqlenum CHECK (command_status IN ('queued', 'running', 'succeeded', 'failed'))
     )
     """,
     """

@@ -30,6 +30,15 @@ class DataFileSourceSQLEnum(enum.Enum):
     GENERATED = "generated"
 
 
+class CommandStatusSQLEnum(enum.Enum):
+    """Command status sql enum."""
+
+    QUEUED = "queued"
+    RUNNING = "running"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+
+
 protocol_table = sqlalchemy.Table(
     "protocol",
     metadata,
@@ -209,7 +218,16 @@ run_command_table = sqlalchemy.Table(
     sqlalchemy.Column("command", sqlalchemy.String, nullable=False),
     sqlalchemy.Column("command_intent", sqlalchemy.String, nullable=False, index=True),
     sqlalchemy.Column("command_error", sqlalchemy.String, nullable=True),
-    sqlalchemy.Column("command_status", sqlalchemy.String, nullable=False),
+    sqlalchemy.Column(
+        "command_status",
+        sqlalchemy.Enum(
+            CommandStatusSQLEnum,
+            values_callable=lambda obj: [e.value for e in obj],
+            validate_strings=True,
+            create_constraint=True,
+        ),
+        nullable=False,
+    ),
     sqlalchemy.Index(
         "ix_run_run_id_command_id",  # An arbitrary name for the index.
         "run_id",
