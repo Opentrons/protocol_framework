@@ -38,7 +38,7 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     well1 = 8120 / 8
     well2 = 6400 / 8
     well3_7 = 8550 / 8
-    sample_vol = 60
+    sample_vol = 100
 
     # Reservoir
     p1000.transfer(
@@ -97,12 +97,12 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
         volume=[sample_vol, sample_vol, sample_vol, sample_vol, sample_vol, sample_vol],
         source=source_reservoir["A1"].bottom(z=0.2),
         dest=[
-            sample_plate["A7"].top(),
-            sample_plate["A8"].top(),
-            sample_plate["A9"].top(),
-            sample_plate["A10"].top(),
-            sample_plate["A11"].top(),
-            sample_plate["A12"].top(),
+            sample_plate["A1"].top(),
+            sample_plate["A2"].top(),
+            sample_plate["A3"].top(),
+            sample_plate["A4"].top(),
+            sample_plate["A5"].top(),
+            sample_plate["A6"].top(),
         ],
         blow_out=True,
         blowout_location="source well",

@@ -67,13 +67,13 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
     res_type = "nest_12_reservoir_15ml"
 
     num_samples = 8
-    wash1_vol = 500
-    wash2_vol = wash3_vol = 900
-    lysis_vol = 200
-    sample_vol = 10  # Sample should be pelleted tissue/bacteria/cells
-    bind_vol = 600
-    bind2_vol = 500
-    elution_vol = 75
+    wash1_vol = 500.0
+    wash2_vol = wash3_vol = 900.0
+    lysis_vol = 200.0
+    sample_vol = 10.0  # Sample should be pelleted tissue/bacteria/cells
+    bind_vol = 600.0
+    bind2_vol = 500.0
+    elution_vol = 75.0
 
     # Protocol Parameters
     deepwell_type = "nest_96_wellplate_2ml_deep"

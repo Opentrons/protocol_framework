@@ -371,7 +371,7 @@ def find_liquid_height_of_loaded_liquids(
         well
         for items in liquid_vols_and_wells.values()
         for entry in items
-        if isinstance(entry["well"], (Well, list)) and entry["volume"] != 0
+        if isinstance(entry["well"], (Well, list)) and entry["volume"] != 0.0
         # Ensure "well" is Well or list of Well
         for well in (
             entry["well"] if isinstance(entry["well"], list) else [entry["well"]]

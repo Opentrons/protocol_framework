@@ -119,11 +119,11 @@ def run(ctx: ProtocolContext) -> None:
     liquid_vols_and_wells: Dict[
         str, List[Dict[str, Union[Well, List[Well], float]]]
     ] = {
-        "Beads": [{"well": beads, "volume": 4900}],
-        "AB": [{"well": ab, "volume": 4900}],
-        "Elution": [{"well": elu, "volume": 4900}],
-        "Wash": [{"well": wash, "volume": 750}],
-        "Samples": [{"well": samples, "volume": 250}],
+        "Beads": [{"well": beads, "volume": 4900.0}],
+        "AB": [{"well": ab, "volume": 4900.0}],
+        "Elution": [{"well": elu, "volume": 4900.0}],
+        "Wash": [{"well": wash, "volume": 750.0}],
+        "Samples": [{"well": samples, "volume": 250.0}],
     }
     flattened_wells = helpers.find_liquid_height_of_loaded_liquids(
         ctx, liquid_vols_and_wells, p1000_single

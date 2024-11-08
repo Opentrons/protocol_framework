@@ -69,13 +69,13 @@ def run(ctx: ProtocolContext) -> None:
     res_type = "nest_12_reservoir_22ml"
 
     num_samples = 8
-    wash1_vol = 600
-    wash2_vol = 600
-    wash3_vol = 600
-    AL_vol = 230
-    sample_vol = 180
-    bind_vol = 320
-    elution_vol = 100
+    wash1_vol = 600.0
+    wash2_vol = 600.0
+    wash3_vol = 600.0
+    AL_vol = 230.0
+    sample_vol = 180.0
+    bind_vol = 320.0
+    elution_vol = 100.0
 
     # Protocol Parameters
     deepwell_type = "nest_96_wellplate_2ml_deep"

@@ -85,11 +85,11 @@ def run(ctx: ProtocolContext) -> None:
     dry_run = ctx.params.dry_run  # type: ignore[attr-defined]
     pipette_1000_mount = ctx.params.pipette_mount_1  # type: ignore[attr-defined]
     pipette_50_mount = ctx.params.pipette_mount_2  # type: ignore[attr-defined]
-    REUSE_ETOH_TIPS = False
+    REUSE_ETOH_TIPS = True
     REUSE_RSB_TIPS = (
-        False  # Reuse tips for RSB buffer (adding RSB, mixing, and transferring)
+        True  # Reuse tips for RSB buffer (adding RSB, mixing, and transferring)
     )
-    REUSE_REMOVE_TIPS = False  # Reuse tips for supernatant removal
+    REUSE_REMOVE_TIPS = True  # Reuse tips for supernatant removal
     num_samples = ctx.params.num_samples  # type: ignore[attr-defined]
     PCRCYCLES = ctx.params.PCR_CYCLES  # type: ignore[attr-defined]
     disposable_lid = ctx.params.disposable_lid  # type: ignore[attr-defined]
@@ -102,22 +102,22 @@ def run(ctx: ProtocolContext) -> None:
     num_cols = math.ceil(num_samples / 8)
 
     # Pre-set parameters
-    sample_vol = 35
-    frag_vol = 15
-    end_repair_vol = 10
-    adapter_vol = 5
-    ligation_vol = 45
-    amplification_vol = 30
-    bead_vol_1 = 88
-    bead_vol_2 = 50
+    sample_vol = 35.0
+    frag_vol = 15.0
+    end_repair_vol = 10.0
+    adapter_vol = 5.0
+    ligation_vol = 45.0
+    amplification_vol = 30.0
+    bead_vol_1 = 88.0
+    bead_vol_2 = 50.0
     bead_vol = bead_vol_1 + bead_vol_2
-    bead_inc = 2
-    rsb_vol_1 = 25
-    rsb_vol_2 = 20
+    bead_inc = 2.0
+    rsb_vol_1 = 25.0
+    rsb_vol_2 = 20.0
     rsb_vol = rsb_vol_1 + rsb_vol_2
-    elution_vol = 20
-    elution_vol_2 = 17
-    etoh_vol = 400
+    elution_vol = 20.0
+    elution_vol_2 = 17.0
+    etoh_vol = 400.0
 
     # Importing Labware, Modules and Instruments
     magblock: MagneticBlockContext = ctx.load_module(
@@ -139,24 +139,27 @@ def run(ctx: ProtocolContext) -> None:
     tc_mod.open_lid()
 
     FLP_plate = magblock.load_labware(
-        "opentrons_96_wellplate_200ul_pcr_full_skirt", "FLP Plate"
+        "armadillo_96_wellplate_200ul_pcr_full_skirt", "FLP Plate"
     )
     samples_flp = FLP_plate.rows()[0][:num_cols]
 
     sample_plate = ctx.load_labware(
-        "opentrons_96_wellplate_200ul_pcr_full_skirt", "D1", "Sample Pate"
+        "armadillo_96_wellplate_200ul_pcr_full_skirt", "D1", "Sample Pate"
     )
 
     sample_plate_2 = ctx.load_labware(
-        "opentrons_96_wellplate_200ul_pcr_full_skirt", "B2", "Sample Pate"
+        "armadillo_96_wellplate_200ul_pcr_full_skirt", "B2", "Sample Pate"
     )
     samples_2 = sample_plate_2.rows()[0][:num_cols]
     samples = sample_plate.rows()[0][:num_cols]
     reservoir = ctx.load_labware("nest_96_wellplate_2ml_deep", "C2")
 
     trash = ctx.load_waste_chute()
+    unused_lids: List[Labware] = []
+    used_lids:List[Labware] = []
     # Load TC Lids
-    unused_lids = helpers.load_disposable_lids(ctx, 5, ["C3"])
+    if disposable_lid:
+        unused_lids = helpers.load_disposable_lids(ctx, 5, ["C3"])
     # Import Global Variables
 
     global tip50
