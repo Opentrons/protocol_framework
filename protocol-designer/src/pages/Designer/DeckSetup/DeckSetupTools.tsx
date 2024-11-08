@@ -97,15 +97,11 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
   } = selectedSlotInfo
   const { slot, cutout } = selectedSlot
 
+  //  TODO: fix the bug where selectedSlotInfo isn't initializing correctly
+  //  RQA-3526
   const initialSelectedSlotInfoRef = useRef<ZoomedIntoSlotInfoState>(
     selectedSlotInfo
   )
-
-  // Set the initial snapshot if it hasn’t been set and `selectedSlotInfo` is fully populated
-  useEffect(() => {
-    // Deep clone selectedSlotInfo if necessary to avoid mutations
-    initialSelectedSlotInfoRef.current = { ...selectedSlotInfo }
-  }, [])
 
   const [changeModuleWarningInfo, displayModuleWarning] = useState<boolean>(
     false
@@ -249,11 +245,6 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     handleResetToolbox()
     setSelectedHardware(null)
   }
-  console.log(
-    isEqual(selectedSlotInfo, initialSelectedSlotInfoRef.current),
-    selectedSlotInfo,
-    initialSelectedSlotInfoRef.current
-  )
   const handleConfirm = (): void => {
     //  only update info if user changed what was previously selected
     if (!isEqual(selectedSlotInfo, initialSelectedSlotInfoRef.current)) {
