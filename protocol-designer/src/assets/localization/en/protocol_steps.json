@@ -69,6 +69,7 @@
   "multiAspirate": "Consolidate path",
   "multiDispense": "Distribute path",
   "new_location": "New location",
+  "off_deck": "Off-Deck",
   "pause": {
     "untilResume": "Pausing until manually told to resume",
     "untilTemperature": "<text>Pausing until</text><semiBoldText>{{module}}</semiBoldText><text>reaches</text><tag/>",

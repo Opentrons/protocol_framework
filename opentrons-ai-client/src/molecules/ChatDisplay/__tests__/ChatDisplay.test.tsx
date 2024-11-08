@@ -5,9 +5,24 @@ import { renderWithProviders } from '../../../__testing-utils__'
 import { i18n } from '../../../i18n'
 
 import { ChatDisplay } from '../index'
+import { useForm, FormProvider } from 'react-hook-form'
+
+const RenderChatDisplay = (props: React.ComponentProps<typeof ChatDisplay>) => {
+  const methods = useForm({
+    defaultValues: {},
+  })
+
+  return (
+    <FormProvider {...methods}>
+      <ChatDisplay {...props} />
+    </FormProvider>
+  )
+}
 
 const render = (props: React.ComponentProps<typeof ChatDisplay>) => {
-  return renderWithProviders(<ChatDisplay {...props} />, { i18nInstance: i18n })
+  return renderWithProviders(<RenderChatDisplay {...props} />, {
+    i18nInstance: i18n,
+  })
 }
 
 describe('ChatDisplay', () => {
@@ -18,6 +33,7 @@ describe('ChatDisplay', () => {
       chat: {
         role: 'assistant',
         reply: 'mock text from the backend',
+        requestId: '12351234',
       },
       chatId: 'mockId',
     }
@@ -35,6 +51,7 @@ describe('ChatDisplay', () => {
       chat: {
         role: 'user',
         reply: 'mock text from user input',
+        requestId: '12351234',
       },
       chatId: 'mockId',
     }

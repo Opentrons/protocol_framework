@@ -17,7 +17,6 @@ export function LabwareField(props: FieldProps): JSX.Element {
       ? [...options, ...disposalOptions]
       : [...options]
 
-  console.log('name', name)
   return (
     <DropdownStepFormField
       {...props}

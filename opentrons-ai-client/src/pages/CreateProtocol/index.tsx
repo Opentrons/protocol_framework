@@ -12,6 +12,7 @@ import { createProtocolAtom, headerWithMeterAtom } from '../../resources/atoms'
 import { useAtom } from 'jotai'
 import { ProtocolSectionsContainer } from '../../organisms/ProtocolSectionsContainer'
 import { generatePromptPreviewData } from '../../resources/utils/createProtocolUtils'
+import type { DisplayModules } from '../../organisms/ModulesSection'
 
 export interface CreateProtocolFormData {
   application: {
@@ -26,6 +27,7 @@ export interface CreateProtocolFormData {
     rightPipette: string
     flexGripper: string
   }
+  modules: DisplayModules[]
 }
 
 const TOTAL_STEPS = 5
@@ -33,7 +35,7 @@ const TOTAL_STEPS = 5
 export function CreateProtocol(): JSX.Element | null {
   const { t } = useTranslation('create_protocol')
   const [, setHeaderWithMeterAtom] = useAtom(headerWithMeterAtom)
-  const [{ currentStep }] = useAtom(createProtocolAtom)
+  const [{ currentStep }, setCreateProtocolAtom] = useAtom(createProtocolAtom)
 
   const methods = useForm<CreateProtocolFormData>({
     defaultValues: {
@@ -56,6 +58,21 @@ export function CreateProtocol(): JSX.Element | null {
       progress: calculateProgress(),
     })
   }, [currentStep])
+
+  useEffect(() => {
+    return () => {
+      setHeaderWithMeterAtom({
+        displayHeaderWithMeter: false,
+        progress: 0,
+      })
+
+      methods.reset()
+      setCreateProtocolAtom({
+        currentStep: 0,
+        focusStep: 0,
+      })
+    }
+  }, [])
 
   return (
     <FormProvider {...methods}>

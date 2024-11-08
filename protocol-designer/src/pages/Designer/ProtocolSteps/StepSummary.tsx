@@ -272,6 +272,14 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
     case 'moveLabware':
       const { labware, newLocation, useGripper } = currentStep
       const labwareName = labwareNicknamesById[labware]
+      let newLocationName = newLocation
+      if (newLocation in modules) {
+        newLocationName = getModuleDisplayName(modules[newLocation].model)
+      } else if (newLocation in labwareEntities) {
+        newLocationName = labwareNicknamesById[newLocation]
+      } else if (newLocation === 'offDeck') {
+        newLocationName = t('off_deck')
+      }
       stepSummaryContent = (
         <StyledTrans
           i18nKey={
@@ -282,7 +290,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
           values={{
             labware: labwareName,
           }}
-          tagText={newLocation}
+          tagText={newLocationName}
         />
       )
       break

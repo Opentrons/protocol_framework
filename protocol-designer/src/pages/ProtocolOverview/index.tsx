@@ -8,6 +8,7 @@ import { css } from 'styled-components'
 import {
   ALIGN_CENTER,
   Btn,
+  COLORS,
   DIRECTION_COLUMN,
   EndUserAgreementFooter,
   Flex,
@@ -294,6 +295,10 @@ export function ProtocolOverview(): JSX.Element {
               }}
               whiteSpace={NO_WRAP}
               height="3.5rem"
+              // ToDo (kk:2024/11/07 this will be updated in the future)
+              css={css`
+                border: 2px solid ${COLORS.blue50};
+              `}
             />
             <LargeButton
               buttonText={t('export_protocol')}
@@ -306,6 +311,7 @@ export function ProtocolOverview(): JSX.Element {
               }}
               iconName="arrow-right"
               whiteSpace={NO_WRAP}
+              height="3.5rem"
             />
           </Flex>
         </Flex>
