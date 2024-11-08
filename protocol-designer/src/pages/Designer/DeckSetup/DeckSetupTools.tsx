@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import isEqual from 'lodash/isEqual'
 import { useDispatch, useSelector } from 'react-redux'
@@ -97,11 +97,25 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
   } = selectedSlotInfo
   const { slot, cutout } = selectedSlot
 
-  const selectedSlotInfoRef = useRef<ZoomedIntoSlotInfoState>(selectedSlotInfo)
-  //  initialize the selectedSlotInfoRef
+  const [
+    initialSelectedSlotInfo,
+    setInitialSelectedSlotInfo,
+  ] = useState<ZoomedIntoSlotInfoState | null>(null)
+
   useEffect(() => {
-    selectedSlotInfoRef.current = selectedSlotInfo
-  }, [selectedSlotInfo])
+    // Check if initialSelectedSlotInfo is null and if selectedSlotInfo is
+    // fully populated since component rerenders
+    // TODO: need to optimize this better, find out why component rerenders
+    if (
+      initialSelectedSlotInfo == null &&
+      (selectedFixture ||
+        selectedLabwareDefUri ||
+        selectedModuleModel ||
+        selectedNestedLabwareDefUri)
+    ) {
+      setInitialSelectedSlotInfo(selectedSlotInfo)
+    }
+  }, [selectedSlotInfo, initialSelectedSlotInfo])
 
   const [changeModuleWarningInfo, displayModuleWarning] = useState<boolean>(
     false
@@ -248,7 +262,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
 
   const handleConfirm = (): void => {
     //  only update info if user changed what was previously selected
-    if (!isEqual(selectedSlotInfo, selectedSlotInfoRef.current)) {
+    if (!isEqual(selectedSlotInfo, initialSelectedSlotInfo)) {
       //  clear entities first before recreating them
       handleClear()
 
