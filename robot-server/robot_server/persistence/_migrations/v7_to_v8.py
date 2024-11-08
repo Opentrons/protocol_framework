@@ -42,9 +42,9 @@ class Migration7to8(Migration):  # noqa: D101
             dest_transaction = exit_stack.enter_context(dest_engine.begin())
 
             def add_column(
-                    engine: sqlalchemy.engine.Engine,
-                    table_name: str,
-                    column: Any,
+                engine: sqlalchemy.engine.Engine,
+                table_name: str,
+                column: Any,
             ) -> None:
                 column_type = column.type.compile(engine.dialect)
                 engine.execute(
