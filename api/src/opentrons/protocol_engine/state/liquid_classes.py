@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Any, Dict
+from typing import Dict
 
-import frozendict
 from typing_extensions import Optional
 
 from ._abstract_store import HandlesActions, HasState
@@ -21,9 +20,7 @@ class LiquidClassState:
     # We use the bidirectional map to see if we've already assigned an ID to a liquid class when the
     # engine is asked to store a new liquid class.
     liquid_class_record_by_id: Dict[str, LiquidClassRecord]
-    frozen_liquid_class_record_to_id: Dict[frozendict.frozendict[str, Any], str]
-    # We can't use the LiquidClassRecord directly as a lookup key because it contains lots of fields
-    # that are unhashable. That's why we have to convert it to a frozendict instead.
+    liquid_class_record_to_id: Dict[LiquidClassRecord, str]
 
 
 class LiquidClassStore(HasState[LiquidClassState], HandlesActions):
@@ -34,7 +31,7 @@ class LiquidClassStore(HasState[LiquidClassState], HandlesActions):
     def __init__(self) -> None:
         self._state = LiquidClassState(
             liquid_class_record_by_id={},
-            frozen_liquid_class_record_to_id={},
+            liquid_class_record_to_id={},
         )
 
     def handle_action(self, action: Action) -> None:
@@ -44,12 +41,8 @@ class LiquidClassStore(HasState[LiquidClassState], HandlesActions):
             self._state.liquid_class_record_by_id[
                 action.liquid_class_id
             ] = action.liquid_class_record
-
-            frozen_liquid_class_record = frozendict.deepfreeze(
-                action.liquid_class_record.dict()
-            )
-            self._state.frozen_liquid_class_record_to_id[
-                frozen_liquid_class_record
+            self._state.liquid_class_record_to_id[
+                action.liquid_class_record
             ] = action.liquid_class_id
 
 
@@ -69,10 +62,7 @@ class LiquidClassView(HasState[LiquidClassState]):
         self, liquid_class_record: LiquidClassRecord
     ) -> Optional[str]:
         """See if the given LiquidClassRecord if already in the store, and if so, return its identifier."""
-        frozen_liquid_class_record = frozendict.deepfreeze(liquid_class_record.dict())
-        return self._state.frozen_liquid_class_record_to_id.get(
-            frozen_liquid_class_record
-        )
+        return self._state.liquid_class_record_to_id.get(liquid_class_record)
 
     def get_all(self) -> Dict[str, LiquidClassRecord]:
         """Get all the LiquidClassRecords in the store."""

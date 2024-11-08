@@ -1,10 +1,10 @@
 """Liquid view tests."""
-import frozendict
 import pytest
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     LiquidClassSchemaV1,
 )
+
 from opentrons.protocol_engine.state.liquid_classes import (
     LiquidClassState,
     LiquidClassView,
@@ -32,13 +32,9 @@ def liquid_class_record(
 @pytest.fixture
 def subject(liquid_class_record: LiquidClassRecord) -> LiquidClassView:
     """The LiquidClassView test subject."""
-    frozen_liquid_class_record = frozendict.deepfreeze(liquid_class_record.dict())
-
     state = LiquidClassState(
         liquid_class_record_by_id={"liquid-class-id": liquid_class_record},
-        frozen_liquid_class_record_to_id={
-            frozen_liquid_class_record: "liquid-class-id"
-        },
+        liquid_class_record_to_id={liquid_class_record: "liquid-class-id"},
     )
     return LiquidClassView(state)
 
@@ -50,7 +46,7 @@ def test_get_by_id(
     assert subject.get_by_id("liquid-class-id") == liquid_class_record
 
 
-def test_get_by_frozen_liquid_class_record(
+def test_get_by_liquid_class_record(
     subject: LiquidClassView, liquid_class_record: LiquidClassRecord
 ) -> None:
     """Should look up existing ID given a LiquidClassRecord."""

@@ -1,5 +1,4 @@
 """Liquid state store tests."""
-import frozendict
 import pytest
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
@@ -30,6 +29,7 @@ def test_handles_add_liquid_class(
         singleDispense=by_tip_type_0.singleDispense,
         multiDispense=by_tip_type_0.multiDispense,
     )
+
     subject.handle_action(
         AddLiquidClassAction(
             liquid_class_id="liquid-class-id",
@@ -43,12 +43,10 @@ def test_handles_add_liquid_class(
         == liquid_class_record
     )
 
-    assert len(subject.state.frozen_liquid_class_record_to_id) == 1
-    # Make sure that LiquidClassRecords are hashable, and that we can query for LiquidClassRecords if
-    # we look them up as a frozendict.
-    frozen_liquid_class_record = frozendict.deepfreeze(liquid_class_record.dict())
+    assert len(subject.state.liquid_class_record_to_id) == 1
+    # Make sure that LiquidClassRecords are hashable, and that we can query for LiquidClassRecords by value:
     assert (
-        subject.state.frozen_liquid_class_record_to_id[frozen_liquid_class_record]
+        subject.state.liquid_class_record_to_id[liquid_class_record]
         == "liquid-class-id"
     )
     # If this fails with an error like "TypeError: unhashable type: AspirateProperties", then you broke something.

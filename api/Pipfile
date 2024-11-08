@@ -10,7 +10,6 @@ anyio = "==3.7.1"
 opentrons-shared-data = { editable = true, path = "../shared-data/python" }
 opentrons = { editable = true, path = "." }
 opentrons-hardware = { editable = true, path = "./../hardware", extras=["FLEX"] }
-frozendict = "==2.4.6"
 numpy = "==1.22.3"
 packaging = "==21.3"
 pyusb = "==1.2.1"
