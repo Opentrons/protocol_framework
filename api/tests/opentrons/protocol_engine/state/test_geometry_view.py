@@ -1,15 +1,18 @@
 """Test state getters for retrieving geometry views of state."""
 import inspect
 import json
+from datetime import datetime
+from math import isclose
+from typing import cast, List, Tuple, Optional, NamedTuple, Dict
+from unittest.mock import sentinel
+
+import pytest
+from decoy import Decoy
+
 from opentrons.protocol_engine.state.update_types import (
     LoadedLabwareUpdate,
     StateUpdate,
 )
-import pytest
-from math import isclose
-from decoy import Decoy
-from typing import cast, List, Tuple, Optional, NamedTuple, Dict
-from datetime import datetime
 
 from opentrons_shared_data.deck.types import DeckDefinitionV5
 from opentrons_shared_data.deck import load as load_deck
@@ -2284,14 +2287,6 @@ def test_get_labware_grip_point_on_labware(
     subject: GeometryView,
 ) -> None:
     """It should get the grip point of a labware on another labware."""
-    decoy.when(mock_labware_view.get(labware_id="labware-id")).then_return(
-        LoadedLabware(
-            id="labware-id",
-            loadName="above-name",
-            definitionUri="1234",
-            location=OnLabwareLocation(labwareId="below-id"),
-        )
-    )
     decoy.when(mock_labware_view.get(labware_id="below-id")).then_return(
         LoadedLabware(
             id="below-id",
@@ -2301,14 +2296,16 @@ def test_get_labware_grip_point_on_labware(
         )
     )
 
-    decoy.when(mock_labware_view.get_dimensions("below-id")).then_return(
+    decoy.when(mock_labware_view.get_dimensions(labware_id="below-id")).then_return(
         Dimensions(x=1000, y=1001, z=11)
     )
     decoy.when(
-        mock_labware_view.get_grip_height_from_labware_bottom("labware-id")
+        mock_labware_view.get_grip_height_from_labware_bottom(
+            labware_definition=sentinel.definition
+        )
     ).then_return(100)
     decoy.when(
-        mock_labware_view.get_labware_overlap_offsets("labware-id", "below-name")
+        mock_labware_view.get_labware_overlap_offsets(sentinel.definition, "below-name")
     ).then_return(OverlapOffset(x=0, y=1, z=6))
 
     decoy.when(
@@ -2316,7 +2313,8 @@ def test_get_labware_grip_point_on_labware(
     ).then_return(Point(x=5, y=9, z=10))
 
     grip_point = subject.get_labware_grip_point(
-        labware_id="labware-id", location=OnLabwareLocation(labwareId="below-id")
+        labware_definition=sentinel.definition,
+        location=OnLabwareLocation(labwareId="below-id"),
     )
 
     assert grip_point == Point(5, 10, 115.0)
