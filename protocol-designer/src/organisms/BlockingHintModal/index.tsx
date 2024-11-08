@@ -74,7 +74,7 @@ export function BlockingHintModal(props: HintProps): JSX.Element {
               {t('shared:cancel')}
             </SecondaryButton>
             <PrimaryButton onClick={onContinueClick}>
-              {i18n.format(t('shared:continue'), 'capitalize')}
+              {i18n.format(t('shared:continue_with_export'), 'capitalize')}
             </PrimaryButton>
           </Flex>
         </Flex>
