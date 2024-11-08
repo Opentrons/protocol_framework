@@ -714,7 +714,8 @@ class ProtocolContext(CommandPublisher):
                 f"Expected labware of type 'Labware' but got {type(labware)}."
             )
 
-        # Ensure that when moving to an absorbance reader than the lid is open
+        # Ensure that when moving to an absorbance reader that the lid is open
+        # todo(mm, 2024-11-08): Unify this with opentrons.protocol_api.core.engine.deck_conflict.
         if isinstance(new_location, AbsorbanceReaderContext):
             if new_location.is_lid_on():
                 raise CommandPreconditionViolated(
