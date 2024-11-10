@@ -140,8 +140,9 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
 
   return createPortal(
     <Modal
+      marginLeft="0"
       type="info"
-      width="594px"
+      width="37.125rem"
       closeOnOutsideClick
       title={t(`shared:tip_position_${name}`)}
       onClose={handleCancel}
