@@ -71,3 +71,33 @@ test:
 .PHONY: test-cov
 test-cov:
 	make -C .. test-js-protocol-designer tests=$(tests) test_opts="$(test_opts)" cov_opts="$(cov_opts)"
+
+CYPRESS_GLOB := "cypress/**/*.{js,ts,md}"
+
+.PHONY: cy-lint-check
+cy-lint-check: cy-lint-eslint-check cy-lint-prettier-check
+	@echo "Cypress lint check completed."
+
+.PHONY: cy-lint-fix
+cy-lint-fix: cy-lint-eslint-fix cy-lint-prettier-fix
+	@echo "Cypress lint fix applied."
+
+.PHONY: cy-lint-eslint-check
+cy-lint-eslint-check:
+	yarn eslint --ignore-path ../.eslintignore $(CYPRESS_GLOB)
+	@echo "Cypress ESLint check completed."
+
+.PHONY: cy-lint-eslint-fix
+cy-lint-eslint-fix:
+	yarn eslint --fix --ignore-pattern ../.eslintignore $(CYPRESS_GLOB)
+	@echo "Cypress ESLint fix applied."
+
+.PHONY: cy-lint-prettier-check
+cy-lint-prettier-check:
+	yarn prettier --ignore-path ../.eslintignore --check $(CYPRESS_GLOB)
+	@echo "Cypress Prettier check completed."
+
+.PHONY: cy-lint-prettier-fix
+cy-lint-prettier-fix:
+	yarn prettier --ignore-path ../.eslintignore --write $(CYPRESS_GLOB)
+	@echo "Cypress Prettier fix applied."
