@@ -21,7 +21,7 @@ _default_accel_p50_ul_sec_sec = 1200
 _default_accel_p1000_ul_sec_sec = 24000
 _default_accel_96ch_ul_sec_sec = 16000
 
-_default_blow_out_flow_rate= 20
+_default_blow_out_flow_rate= 10
 
 # dispense settings are constant across volumes
 _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]] = {
