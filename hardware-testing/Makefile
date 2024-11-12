@@ -99,6 +99,7 @@ test-photometric-multi:
 test-photometric:
 	$(python) -m hardware_testing.gravimetric --photometric --simulate --pipette 1000 --channels 96 --tip 50 --trials 1
 	$(python) -m hardware_testing.gravimetric --photometric --simulate --pipette 1000 --channels 96 --tip 200 --trials 1
+	$(python) -m hardware_testing.gravimetric --photometric --simulate --pipette 200 --channels 96 --tip 50 --trials 1
 
 .PHONY: test-gravimetric-single
 test-gravimetric-single:
@@ -121,6 +122,7 @@ test-gravimetric-multi:
 .PHONY: test-gravimetric-96
 test-gravimetric-96:
 	$(python) -m hardware_testing.gravimetric --simulate --pipette 1000 --channels 96 --trials 2 --no-blank
+	$(python) -m hardware_testing.gravimetric --simulate --pipette 200 --channels 96 --trials 2 --no-blank
 
 .PHONY: test-gravimetric
 test-gravimetric:
