@@ -4,7 +4,12 @@ import { renderWithProviders } from '../../../__testing-utils__'
 import { i18n } from '../../../i18n'
 import { CreateProtocol } from '..'
 import { Provider } from 'jotai'
-import { fillApplicationSectionAndClickConfirm } from '../../../resources/utils/createProtocolTestUtils'
+import {
+  fillApplicationSectionAndClickConfirm,
+  fillInstrumentsSectionAndClickConfirm,
+  fillLabwareLiquidsSectionAndClickConfirm,
+  fillModulesSectionAndClickConfirm,
+} from '../../../resources/utils/createProtocolTestUtils'
 
 const render = (): ReturnType<typeof renderWithProviders> => {
   return renderWithProviders(
@@ -38,7 +43,7 @@ describe('CreateProtocol', () => {
 
     const previewItems = screen.getAllByTestId('Tag_default')
 
-    expect(previewItems).toHaveLength(2)
+    expect(previewItems).toHaveLength(4)
     expect(previewItems[0]).toHaveTextContent('Basic aliquoting')
     expect(previewItems[1]).toHaveTextContent('Test description')
   })
@@ -80,5 +85,126 @@ describe('CreateProtocol', () => {
     await fillApplicationSectionAndClickConfirm()
 
     expect(screen.getByTestId('accordion-ot-check')).toBeInTheDocument()
+  })
+
+  it('should display the Prompt preview correctly for Instruments section', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+
+    const previewItems = screen.getAllByTestId('Tag_default')
+
+    expect(previewItems).toHaveLength(6)
+    expect(previewItems[0]).toHaveTextContent('Basic aliquoting')
+    expect(previewItems[1]).toHaveTextContent('Test description')
+    expect(previewItems[2]).toHaveTextContent('Opentrons Flex')
+    expect(previewItems[3]).toHaveTextContent('Flex 1-Channel 50 μL')
+    expect(previewItems[4]).toHaveTextContent('Flex 8-Channel 50 μL')
+  })
+
+  it('should open the Modules section when the Instruments section is completed', async () => {
+    render()
+
+    expect(screen.getByRole('button', { name: 'Application' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    )
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Modules' })).toHaveAttribute(
+        'aria-expanded',
+        'true'
+      )
+    })
+  })
+
+  it('should display the Prompt preview correctly for Modules section', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+
+    const previewItems = screen.getAllByTestId('Tag_default')
+
+    expect(previewItems).toHaveLength(7)
+    expect(previewItems[6]).toHaveTextContent(
+      'Heater-Shaker Module GEN1 with Opentrons 96 Deep Well Heater-Shaker Adapter'
+    )
+  })
+
+  it('should open the Labware & Liquids section when the Modules section is completed', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: 'Labware & Liquids' })
+      ).toHaveAttribute('aria-expanded', 'true')
+    })
+  })
+
+  it('should display the Prompt preview correctly for Labware & Liquids section', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+    await fillLabwareLiquidsSectionAndClickConfirm()
+
+    const previewItems = screen.getAllByTestId('Tag_default')
+
+    expect(previewItems).toHaveLength(9)
+    expect(previewItems[7]).toHaveTextContent(
+      'Opentrons Flex 96 Tip Rack 1000 µL'
+    )
+    expect(previewItems[8]).toHaveTextContent('Test liquid')
+  })
+
+  it('should open the Steps section when the Labware & Liquids section is completed', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+    await fillLabwareLiquidsSectionAndClickConfirm()
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Steps' })).toHaveAttribute(
+        'aria-expanded',
+        'true'
+      )
+    })
+  })
+
+  it('should display the Prompt preview correctly for Steps section', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+    await fillLabwareLiquidsSectionAndClickConfirm()
+
+    const textArea = screen.getByRole('textbox')
+    fireEvent.change(textArea, { target: { value: 'Test step' } })
+
+    expect(screen.getByRole('button', { name: 'Submit prompt' })).toBeDisabled()
+
+    const confirmButton = screen.getByText('Confirm')
+    fireEvent.click(confirmButton)
+
+    const previewItems = screen.getAllByTestId('Tag_default')
+
+    expect(previewItems).toHaveLength(10)
+    expect(previewItems[9]).toHaveTextContent('Test step')
+
+    expect(screen.getByRole('button', { name: 'Submit prompt' })).toBeEnabled()
   })
 })

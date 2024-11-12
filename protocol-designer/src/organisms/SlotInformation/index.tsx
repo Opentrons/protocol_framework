@@ -64,7 +64,7 @@ export const SlotInformation: FC<SlotInformationProps> = ({
                   {liquids.join(', ')}
                 </StyledText>
               }
-              description={t('liquid')}
+              description={<Flex width="7.40625rem">{t('liquid')}</Flex>}
             />
           </ListItem>
         ) : (

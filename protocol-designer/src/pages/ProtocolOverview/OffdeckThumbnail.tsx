@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import {
@@ -23,9 +22,11 @@ import { getInitialDeckSetup } from '../../step-forms/selectors'
 import { wellFillFromWellContents } from '../../components/labware'
 import { SlotHover } from './SlotHover'
 
+import type { Dispatch, SetStateAction } from 'react'
+
 interface OffDeckThumbnailProps {
   hover: string | null
-  setHover: React.Dispatch<React.SetStateAction<string | null>>
+  setHover: Dispatch<SetStateAction<string | null>>
   width?: string
 }
 export function OffDeckThumbnail(props: OffDeckThumbnailProps): JSX.Element {

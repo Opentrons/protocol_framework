@@ -2,7 +2,6 @@ from __future__ import annotations
 import logging
 from contextlib import ExitStack
 from typing import Any, List, Optional, Sequence, Union, cast, Dict
-from opentrons.protocol_engine.errors.exceptions import TipNotAttachedError
 from opentrons_shared_data.errors.exceptions import (
     CommandPreconditionViolated,
     CommandParameterLimitViolated,
@@ -15,7 +14,7 @@ from opentrons.legacy_commands import commands as cmds
 
 from opentrons.legacy_commands import publisher
 from opentrons.protocols.advanced_control.mix import mix_from_kwargs
-from opentrons.protocols.advanced_control import transfers
+from opentrons.protocols.advanced_control.transfers import transfer as v1_transfer
 
 from opentrons.protocols.api_support.deck_type import NoTrashDefinedError
 from opentrons.protocols.api_support.types import APIVersion
@@ -28,7 +27,6 @@ from opentrons.protocols.api_support.util import (
     APIVersionError,
     UnsupportedAPIError,
 )
-from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType
 
 from .core.common import InstrumentCore, ProtocolCore
 from .core.engine import ENGINE_CORE_API_VERSION
@@ -38,8 +36,7 @@ from .disposal_locations import TrashBin, WasteChute
 from ._nozzle_layout import NozzleLayout
 from . import labware, validation
 
-
-AdvancedLiquidHandling = transfers.AdvancedLiquidHandling
+AdvancedLiquidHandling = v1_transfer.AdvancedLiquidHandling
 
 _DEFAULT_ASPIRATE_CLEARANCE = 1.0
 _DEFAULT_DISPENSE_CLEARANCE = 1.0
@@ -60,6 +57,8 @@ _DISPOSAL_LOCATION_OFFSET_ADDED_IN = APIVersion(2, 18)
 """The version after which offsets for deck configured trash containers and changes to alternating tip drop behavior were introduced."""
 _PARTIAL_NOZZLE_CONFIGURATION_SINGLE_ROW_PARTIAL_COLUMN_ADDED_IN = APIVersion(2, 20)
 """The version after which partial nozzle configurations of single, row, and partial column layouts became available."""
+_AIR_GAP_TRACKING_ADDED_IN = APIVersion(2, 22)
+"""The version after which air gaps should be implemented with a separate call instead of an aspirate for better liquid volume tracking."""
 
 
 class InstrumentContext(publisher.CommandPublisher):
@@ -257,7 +256,7 @@ class InstrumentContext(publisher.CommandPublisher):
             self.api_version >= APIVersion(2, 20)
             and well is not None
             and self.liquid_presence_detection
-            and self._96_tip_config_valid()
+            and self._core.nozzle_configuration_valid_for_lld()
             and self._core.get_current_volume() == 0
         ):
             self.require_liquid_presence(well=well)
@@ -753,7 +752,12 @@ class InstrumentContext(publisher.CommandPublisher):
             ``pipette.air_gap(height=2)``. If you call ``air_gap`` with a single,
             unnamed argument, it will always be interpreted as a volume.
 
+        .. note::
 
+           Before API version 2.22, this function was implemented as an aspirate, and
+           dispensing into a well would add the air gap volume to the liquid tracked in
+           the well. At or above API version 2.22, air gap volume is not counted as liquid
+           when dispensing into a well.
         """
         if not self._core.has_tip():
             raise UnexpectedTipRemovalError("air_gap", self.name, self.mount)
@@ -765,7 +769,12 @@ class InstrumentContext(publisher.CommandPublisher):
             raise RuntimeError("No previous Well cached to perform air gap")
         target = loc.labware.as_well().top(height)
         self.move_to(target, publish=False)
-        self.aspirate(volume)
+        if self.api_version >= _AIR_GAP_TRACKING_ADDED_IN:
+            c_vol = self._core.get_available_volume() if volume is None else volume
+            flow_rate = self._core.get_aspirate_flow_rate()
+            self._core.air_gap_in_place(c_vol, flow_rate)
+        else:
+            self.aspirate(volume)
         return self
 
     @publisher.publish(command=cmds.return_tip)
@@ -934,7 +943,7 @@ class InstrumentContext(publisher.CommandPublisher):
         if location is None:
             if (
                 nozzle_map is not None
-                and nozzle_map.configuration != NozzleConfigurationType.FULL
+                and nozzle_map.configuration != types.NozzleConfigurationType.FULL
                 and self.starting_tip is not None
             ):
                 # Disallowing this avoids concerning the system with the direction
@@ -1396,9 +1405,9 @@ class InstrumentContext(publisher.CommandPublisher):
         mix_strategy, mix_opts = mix_from_kwargs(kwargs)
 
         if trash:
-            drop_tip = transfers.DropTipStrategy.TRASH
+            drop_tip = v1_transfer.DropTipStrategy.TRASH
         else:
-            drop_tip = transfers.DropTipStrategy.RETURN
+            drop_tip = v1_transfer.DropTipStrategy.RETURN
 
         new_tip = kwargs.get("new_tip")
         if isinstance(new_tip, str):
@@ -1420,19 +1429,19 @@ class InstrumentContext(publisher.CommandPublisher):
 
         if blow_out and not blowout_location:
             if self.current_volume:
-                blow_out_strategy = transfers.BlowOutStrategy.SOURCE
+                blow_out_strategy = v1_transfer.BlowOutStrategy.SOURCE
             else:
-                blow_out_strategy = transfers.BlowOutStrategy.TRASH
+                blow_out_strategy = v1_transfer.BlowOutStrategy.TRASH
         elif blow_out and blowout_location:
             if blowout_location == "source well":
-                blow_out_strategy = transfers.BlowOutStrategy.SOURCE
+                blow_out_strategy = v1_transfer.BlowOutStrategy.SOURCE
             elif blowout_location == "destination well":
-                blow_out_strategy = transfers.BlowOutStrategy.DEST
+                blow_out_strategy = v1_transfer.BlowOutStrategy.DEST
             elif blowout_location == "trash":
-                blow_out_strategy = transfers.BlowOutStrategy.TRASH
+                blow_out_strategy = v1_transfer.BlowOutStrategy.TRASH
 
         if new_tip != types.TransferTipPolicy.NEVER:
-            tr, next_tip = labware.next_available_tip(
+            _, next_tip = labware.next_available_tip(
                 self.starting_tip,
                 self.tip_racks,
                 active_channels,
@@ -1444,9 +1453,9 @@ class InstrumentContext(publisher.CommandPublisher):
 
         touch_tip = None
         if kwargs.get("touch_tip"):
-            touch_tip = transfers.TouchTipStrategy.ALWAYS
+            touch_tip = v1_transfer.TouchTipStrategy.ALWAYS
 
-        default_args = transfers.Transfer()
+        default_args = v1_transfer.Transfer()
 
         disposal = kwargs.get("disposal_volume")
         if disposal is None:
@@ -1459,7 +1468,7 @@ class InstrumentContext(publisher.CommandPublisher):
                 f"working volume, {max_volume}uL"
             )
 
-        transfer_args = transfers.Transfer(
+        transfer_args = v1_transfer.Transfer(
             new_tip=new_tip or default_args.new_tip,
             air_gap=air_gap,
             carryover=kwargs.get("carryover") or default_args.carryover,
@@ -1472,10 +1481,10 @@ class InstrumentContext(publisher.CommandPublisher):
             blow_out_strategy=blow_out_strategy or default_args.blow_out_strategy,
             touch_tip_strategy=(touch_tip or default_args.touch_tip_strategy),
         )
-        transfer_options = transfers.TransferOptions(
+        transfer_options = v1_transfer.TransferOptions(
             transfer=transfer_args, mix=mix_opts
         )
-        plan = transfers.TransferPlan(
+        plan = v1_transfer.TransferPlan(
             volume,
             source,
             dest,
@@ -1488,7 +1497,7 @@ class InstrumentContext(publisher.CommandPublisher):
         self._execute_transfer(plan)
         return self
 
-    def _execute_transfer(self, plan: transfers.TransferPlan) -> None:
+    def _execute_transfer(self, plan: v1_transfer.TransferPlan) -> None:
         for cmd in plan:
             getattr(self, cmd["method"])(*cmd["args"], **cmd["kwargs"])
 
@@ -1870,19 +1879,6 @@ class InstrumentContext(publisher.CommandPublisher):
         else:
             return self._protocol_core.get_last_location()
 
-    def _96_tip_config_valid(self) -> bool:
-        n_map = self._core.get_nozzle_map()
-        channels = self._core.get_active_channels()
-        if channels == 96:
-            if (
-                n_map.back_left != n_map.full_instrument_back_left
-                and n_map.front_right != n_map.full_instrument_front_right
-            ):
-                raise TipNotAttachedError(
-                    "Either the front right or the back left nozzle must have a tip attached to do LLD."
-                )
-        return True
-
     def __repr__(self) -> str:
         return "<{}: {} in {}>".format(
             self.__class__.__name__,
@@ -2144,7 +2140,6 @@ class InstrumentContext(publisher.CommandPublisher):
             The pressure sensors for the Flex 8-channel pipette are on channels 1 and 8 (positions A1 and H1). For the Flex 96-channel pipette, the pressure sensors are on channels 1 and 96 (positions A1 and H12). Other channels on multi-channel pipettes do not have sensors and cannot detect liquid.
         """
         loc = well.top()
-        self._96_tip_config_valid()
         return self._core.detect_liquid_presence(well._core, loc)
 
     @requires_version(2, 20)
@@ -2157,7 +2152,6 @@ class InstrumentContext(publisher.CommandPublisher):
             The pressure sensors for the Flex 8-channel pipette are on channels 1 and 8 (positions A1 and H1). For the Flex 96-channel pipette, the pressure sensors are on channels 1 and 96 (positions A1 and H12). Other channels on multi-channel pipettes do not have sensors and cannot detect liquid.
         """
         loc = well.top()
-        self._96_tip_config_valid()
         self._core.liquid_probe_with_recovery(well._core, loc)
 
     @requires_version(2, 20)
@@ -2172,7 +2166,6 @@ class InstrumentContext(publisher.CommandPublisher):
         """
 
         loc = well.top()
-        self._96_tip_config_valid()
         height = self._core.liquid_probe_without_recovery(well._core, loc)
         return height
 

@@ -24,7 +24,6 @@ from opentrons_shared_data.errors.exceptions import (
 
 from ...disposal_locations import TrashBin, WasteChute
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
-from opentrons.hardware_control.nozzle_manager import NozzleMap
 
 from ..instrument import AbstractInstrument
 
@@ -82,6 +81,9 @@ class LegacyInstrumentCoreSimulator(AbstractInstrument[LegacyWellCore]):
 
     def set_default_speed(self, speed: float) -> None:
         self._default_speed = speed
+
+    def air_gap_in_place(self, volume: float, flow_rate: float) -> None:
+        assert False, "Air gap tracking only available in API version 2.22 and later"
 
     def aspirate(
         self,
@@ -474,7 +476,7 @@ class LegacyInstrumentCoreSimulator(AbstractInstrument[LegacyWellCore]):
         """This will never be called because it was added in API 2.16."""
         assert False, "get_active_channels only supported in API 2.16 & later"
 
-    def get_nozzle_map(self) -> NozzleMap:
+    def get_nozzle_map(self) -> types.NozzleMapInterface:
         """This will never be called because it was added in API 2.18."""
         assert False, "get_nozzle_map only supported in API 2.18 & later"
 
@@ -501,3 +503,7 @@ class LegacyInstrumentCoreSimulator(AbstractInstrument[LegacyWellCore]):
     ) -> float:
         """This will never be called because it was added in API 2.20."""
         assert False, "liquid_probe_without_recovery only supported in API 2.20 & later"
+
+    def nozzle_configuration_valid_for_lld(self) -> bool:
+        """Check if the nozzle configuration currently supports LLD."""
+        return False

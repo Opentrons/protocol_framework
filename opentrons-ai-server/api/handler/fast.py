@@ -17,12 +17,14 @@ from pydantic import BaseModel, Field, conint
 from starlette.middleware.base import BaseHTTPMiddleware
 from uvicorn.protocols.utils import get_path_with_query_string
 
+from api.domain.fake_responses import FakeResponse, get_fake_response
 from api.domain.openai_predict import OpenAIPredict
 from api.handler.custom_logging import setup_logging
 from api.integration.auth import VerifyToken
 from api.models.chat_request import ChatRequest
 from api.models.chat_response import ChatResponse
 from api.models.empty_request_error import EmptyRequestError
+from api.models.feedback_response import FeedbackResponse
 from api.models.internal_server_error import InternalServerError
 from api.settings import Settings
 
@@ -187,7 +189,10 @@ async def create_chat_completion(
             )
 
         if body.fake:
-            return ChatResponse(reply="Fake response", fake=body.fake)
+            if body.fake_key is not None:
+                fake: FakeResponse = get_fake_response(body.fake_key)
+                return ChatResponse(reply=fake.chat_response.reply, fake=fake.chat_response.fake)
+            return ChatResponse(reply="Default fake response.  ", fake=body.fake)
         response: Union[str, None] = openai.predict(prompt=body.message, chat_completion_message_params=body.history)
 
         if response is None or response == "":
@@ -243,6 +248,37 @@ async def timeout_endpoint(request: Request, seconds: conint(ge=1, le=300) = Que
 @app.get("/api/redoc", include_in_schema=False)
 async def redoc_html() -> HTMLResponse:
     return get_redoc_html(openapi_url="/api/openapi.json", title="Opentrons API Documentation")
+
+
+@app.post(
+    "/api/chat/feedback",
+    response_model=Union[FeedbackResponse, ErrorResponse],
+    summary="Feedback",
+    description="Send feedback to the team.",
+)
+async def feedback(request: Request, auth_result: Any = Security(auth.verify)) -> FeedbackResponse:  # noqa: B008
+    """
+    Send feedback to the team.
+
+    - **request**: The HTTP request containing the feedback message.
+    - **returns**: A feedback response or an error message.
+    """
+    logger.info("POST /api/feedback")
+    try:
+        body = await request.json()
+        if "feedbackText" not in body.keys() or body["feedbackText"] == "":
+            logger.info("Feedback empty")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=EmptyRequestError(message="Request body is empty"))
+        logger.info(f"Feedback received: {body}")
+        feedbackText = body["feedbackText"]
+        # todo: Store feedback text in a database
+        return FeedbackResponse(reply=f"Feedback Received: {feedbackText}", fake=False)
+
+    except Exception as e:
+        logger.exception("Error processing feedback")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=InternalServerError(exception_object=e).model_dump()
+        ) from e
 
 
 @app.get("/api/doc", include_in_schema=False)

@@ -6,6 +6,10 @@ import { ApplicationSection } from '../../organisms/ApplicationSection'
 import { createProtocolAtom } from '../../resources/atoms'
 import { useAtom } from 'jotai'
 import { useFormContext } from 'react-hook-form'
+import { InstrumentsSection } from '../InstrumentsSection'
+import { ModulesSection } from '../ModulesSection'
+import { LabwareLiquidsSection } from '../LabwareLiquidsSection'
+import { StepsSection } from '../StepsSection'
 
 export const APPLICATION_STEP = 0
 export const INSTRUMENTS_STEP = 1
@@ -46,22 +50,22 @@ export function ProtocolSectionsContainer(): JSX.Element | null {
         {
           stepNumber: INSTRUMENTS_STEP,
           title: 'instruments_title',
-          Component: () => <Flex>Content</Flex>,
+          Component: InstrumentsSection,
         },
         {
           stepNumber: MODULES_STEP,
           title: 'modules_title',
-          Component: () => <Flex>Content</Flex>,
+          Component: ModulesSection,
         },
         {
           stepNumber: LABWARE_LIQUIDS_STEP,
           title: 'labware_liquids_title',
-          Component: () => <Flex>Content</Flex>,
+          Component: LabwareLiquidsSection,
         },
         {
           stepNumber: STEPS_STEP,
           title: 'steps_title',
-          Component: () => <Flex>Content</Flex>,
+          Component: StepsSection,
         },
       ].map(({ stepNumber, title, Component }) => (
         <Accordion
@@ -73,7 +77,7 @@ export function ProtocolSectionsContainer(): JSX.Element | null {
           }}
           isCompleted={displayCheckmark(stepNumber)}
         >
-          <Component />
+          {focusStep === stepNumber && <Component />}
         </Accordion>
       ))}
     </ProtocolSections>

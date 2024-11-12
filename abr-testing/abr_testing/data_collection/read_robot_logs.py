@@ -110,6 +110,7 @@ def identify_labware_ids(
     file_results: Dict[str, Any], labware_name: Optional[str]
 ) -> List[str]:
     """Determine what type of labware is being picked up."""
+    list_of_labware_ids: List[str] = []
     if labware_name:
         labwares = file_results.get("labware", "")
         list_of_labware_ids = []
@@ -210,6 +211,42 @@ def instrument_commands(
         "Average Liquid Probe Time (sec)": avg_liquid_probe_time_sec,
     }
     return pipette_dict
+
+
+def liquid_height_commands(
+    file_results: Dict[str, Any], all_heights_list: List[List[Any]]
+) -> List[List[Any]]:
+    """Record found liquid heights during a protocol."""
+    commandData = file_results.get("commands", "")
+    robot = file_results.get("robot_name", "")
+    run_id = file_results.get("run_id", "")
+    for command in commandData:
+        commandType = command["commandType"]
+        if commandType == "comment":
+            result = command["params"].get("message", "")
+            try:
+                result_str = "'" + result.split("result: {")[1] + "'"
+                entries = result_str.split(", (")
+                comment_time = command["completedAt"]
+                for entry in entries:
+                    height = float(entry.split(": ")[1].split("'")[0].split("}")[0])
+                    labware_type = str(
+                        entry.split(",")[0].replace("'", "").replace("(", "")
+                    )
+                    well_location = str(entry.split(", ")[1].split(" ")[0])
+                    slot_location = str(entry.split("slot ")[1].split(")")[0])
+                    labware_name = str(entry.split("of ")[1].split(" on")[0])
+                    all_heights_list[0].append(robot)
+                    all_heights_list[1].append(run_id)
+                    all_heights_list[2].append(comment_time)
+                    all_heights_list[3].append(labware_type)
+                    all_heights_list[4].append(labware_name)
+                    all_heights_list[5].append(slot_location)
+                    all_heights_list[6].append(well_location)
+                    all_heights_list[7].append(height)
+            except (IndexError, ValueError):
+                continue
+    return all_heights_list
 
 
 def plate_reader_commands(
@@ -341,8 +378,9 @@ def hs_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
             )
     if temp_time is not None and deactivate_time is None:
         # If heater shaker module is not deactivated, protocol completedAt time stamp used.
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - temp_time).total_seconds()
         hs_temps[hs_temp] = hs_temps.get(hs_temp, 0.0) + temp_duration
@@ -389,8 +427,9 @@ def temperature_module_commands(file_results: Dict[str, Any]) -> Dict[str, Any]:
                 tm_temps[tm_temp] = tm_temps.get(tm_temp, 0.0) + temp_duration
     if temp_time is not None and deactivate_time is None:
         # If temperature module is not deactivated, protocol completedAt time stamp used.
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - temp_time).total_seconds()
         tm_temps[tm_temp] = tm_temps.get(tm_temp, 0.0) + temp_duration
@@ -473,15 +512,17 @@ def thermocycler_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
                 block_temps[block_temp] = block_temps.get(block_temp, 0.0) + block_time
     if block_on_time is not None and block_off_time is None:
         # If thermocycler block not deactivated protocol completedAt time stamp used
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - block_on_time).total_seconds()
-        block_temps[block_temp] = block_temps.get(block_temp, 0.0) + temp_duration
+
     if lid_on_time is not None and lid_off_time is None:
         # If thermocycler lid not deactivated protocol completedAt time stamp used
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - lid_on_time).total_seconds()
         lid_temps[lid_temp] = block_temps.get(lid_temp, 0.0) + temp_duration

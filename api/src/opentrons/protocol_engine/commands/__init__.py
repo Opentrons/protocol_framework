@@ -20,6 +20,7 @@ from . import temperature_module
 from . import thermocycler
 from . import calibration
 from . import unsafe
+from . import robot
 
 from .hash_command_params import hash_protocol_command_params
 from .generate_command_schema import generate_command_schema
@@ -39,6 +40,14 @@ from .command_unions import (
     CommandResult,
     CommandType,
     CommandDefinedErrorData,
+)
+
+from .air_gap_in_place import (
+    AirGapInPlace,
+    AirGapInPlaceParams,
+    AirGapInPlaceCreate,
+    AirGapInPlaceResult,
+    AirGapInPlaceCommandType,
 )
 
 from .aspirate import (
@@ -355,6 +364,12 @@ __all__ = [
     "hash_protocol_command_params",
     # command schema generation
     "generate_command_schema",
+    # air gap command models
+    "AirGapInPlace",
+    "AirGapInPlaceCreate",
+    "AirGapInPlaceParams",
+    "AirGapInPlaceResult",
+    "AirGapInPlaceCommandType",
     # aspirate command models
     "Aspirate",
     "AspirateCreate",
@@ -538,6 +553,7 @@ __all__ = [
     "LoadLiquidParams",
     "LoadLiquidResult",
     "LoadLiquidCommandType",
+    # hardware control command models
     # hardware module command bundles
     "absorbance_reader",
     "heater_shaker",
@@ -548,6 +564,7 @@ __all__ = [
     "calibration",
     # unsafe command bundle
     "unsafe",
+    "robot",
     # configure pipette volume command bundle
     "ConfigureForVolume",
     "ConfigureForVolumeCreate",

@@ -22,6 +22,7 @@ from . import thermocycler
 
 from . import calibration
 from . import unsafe
+from . import robot
 
 from .set_rail_lights import (
     SetRailLights,
@@ -29,6 +30,14 @@ from .set_rail_lights import (
     SetRailLightsCreate,
     SetRailLightsParams,
     SetRailLightsResult,
+)
+
+from .air_gap_in_place import (
+    AirGapInPlace,
+    AirGapInPlaceParams,
+    AirGapInPlaceCreate,
+    AirGapInPlaceResult,
+    AirGapInPlaceCommandType,
 )
 
 from .aspirate import (
@@ -320,6 +329,7 @@ from .liquid_probe import (
 
 Command = Annotated[
     Union[
+        AirGapInPlace,
         Aspirate,
         AspirateInPlace,
         Comment,
@@ -393,11 +403,15 @@ Command = Annotated[
         unsafe.UnsafeEngageAxes,
         unsafe.UnsafeUngripLabware,
         unsafe.UnsafePlaceLabware,
+        robot.MoveTo,
+        robot.MoveAxesRelative,
+        robot.MoveAxesTo,
     ],
     Field(discriminator="commandType"),
 ]
 
 CommandParams = Union[
+    AirGapInPlaceParams,
     AspirateParams,
     AspirateInPlaceParams,
     CommentParams,
@@ -471,9 +485,13 @@ CommandParams = Union[
     unsafe.UnsafeEngageAxesParams,
     unsafe.UnsafeUngripLabwareParams,
     unsafe.UnsafePlaceLabwareParams,
+    robot.MoveAxesRelativeParams,
+    robot.MoveAxesToParams,
+    robot.MoveToParams,
 ]
 
 CommandType = Union[
+    AirGapInPlaceCommandType,
     AspirateCommandType,
     AspirateInPlaceCommandType,
     CommentCommandType,
@@ -547,10 +565,14 @@ CommandType = Union[
     unsafe.UnsafeEngageAxesCommandType,
     unsafe.UnsafeUngripLabwareCommandType,
     unsafe.UnsafePlaceLabwareCommandType,
+    robot.MoveAxesRelativeCommandType,
+    robot.MoveAxesToCommandType,
+    robot.MoveToCommandType,
 ]
 
 CommandCreate = Annotated[
     Union[
+        AirGapInPlaceCreate,
         AspirateCreate,
         AspirateInPlaceCreate,
         CommentCreate,
@@ -624,11 +646,15 @@ CommandCreate = Annotated[
         unsafe.UnsafeEngageAxesCreate,
         unsafe.UnsafeUngripLabwareCreate,
         unsafe.UnsafePlaceLabwareCreate,
+        robot.MoveAxesRelativeCreate,
+        robot.MoveAxesToCreate,
+        robot.MoveToCreate,
     ],
     Field(discriminator="commandType"),
 ]
 
 CommandResult = Union[
+    AirGapInPlaceResult,
     AspirateResult,
     AspirateInPlaceResult,
     CommentResult,
@@ -702,6 +728,9 @@ CommandResult = Union[
     unsafe.UnsafeEngageAxesResult,
     unsafe.UnsafeUngripLabwareResult,
     unsafe.UnsafePlaceLabwareResult,
+    robot.MoveAxesRelativeResult,
+    robot.MoveAxesToResult,
+    robot.MoveToResult,
 ]
 
 

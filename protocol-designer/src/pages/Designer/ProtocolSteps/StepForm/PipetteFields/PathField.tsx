@@ -6,6 +6,7 @@ import {
   Flex,
   RadioButton,
   SPACING,
+  TOOLTIP_TOP_START,
   Tooltip,
   useHoverTooltip,
 } from '@opentrons/components'
@@ -62,19 +63,23 @@ interface PathButtonProps {
 
 function PathButton(props: PathButtonProps): JSX.Element {
   const { disabled, onClick, id, path, selected, subtitle } = props
-  const [targetProps, tooltipProps] = useHoverTooltip()
+  const [targetProps, tooltipProps] = useHoverTooltip({
+    placement: TOOLTIP_TOP_START,
+  })
   const { t } = useTranslation(['form', 'protocol_steps'])
   // TODO: update the tooltip and images
   const tooltip = (
-    <Tooltip tooltipProps={tooltipProps}>
-      <Box>{t(`step_edit_form.field.path.title.${path}`)}</Box>
-      <img src={PATH_ANIMATION_IMAGES[path]} />
-      <Box>{subtitle}</Box>
+    <Tooltip tooltipProps={tooltipProps} maxWidth="24.5rem">
+      <Flex gridGap={SPACING.spacing8} flexDirection={DIRECTION_COLUMN}>
+        <Box>{t(`step_edit_form.field.path.title.${path}`)}</Box>
+        <img src={PATH_ANIMATION_IMAGES[path]} width="361px" />
+        <Box>{subtitle}</Box>
+      </Flex>
     </Tooltip>
   )
 
   return (
-    <Flex {...targetProps} width="100%" key={id}>
+    <Flex {...targetProps} key={id}>
       {tooltip}
       <RadioButton
         width="100%"
@@ -111,6 +116,7 @@ export function PathField(props: PathFieldProps): JSX.Element {
     value,
     updateValue,
     tipRack,
+    isDisposalLocation,
   } = props
   const { t } = useTranslation('form')
   const pipetteEntities = useSelector(stepFormSelectors.getPipetteEntities)
@@ -124,6 +130,7 @@ export function PathField(props: PathFieldProps): JSX.Element {
       pipette,
       volume,
       tipRack,
+      isDisposalLocation,
     },
     pipetteEntities,
     t

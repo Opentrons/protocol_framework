@@ -423,6 +423,21 @@ class TipGeometry:
     volume: float
 
 
+class FluidKind(str, Enum):
+    """A kind of fluid that can be inside a pipette."""
+
+    LIQUID = "LIQUID"
+    AIR = "AIR"
+
+
+@dataclass(frozen=True)
+class AspiratedFluid:
+    """Fluid inside a pipette."""
+
+    kind: FluidKind
+    volume: float
+
+
 class MovementAxis(str, Enum):
     """Axis on which to issue a relative movement."""
 
@@ -442,6 +457,7 @@ class MotorAxis(str, Enum):
     RIGHT_PLUNGER = "rightPlunger"
     EXTENSION_Z = "extensionZ"
     EXTENSION_JAW = "extensionJaw"
+    AXIS_96_CHANNEL_CAM = "axis96ChannelCam"
 
 
 # TODO(mc, 2022-01-18): use opentrons_shared_data.module.types.ModuleModel
@@ -811,6 +827,10 @@ class HexColor(BaseModel):
         if not match:
             raise ValueError("Color is not a valid hex color.")
         return v
+
+
+EmptyLiquidId = Literal["EMPTY"]
+LiquidId = str | EmptyLiquidId
 
 
 class Liquid(BaseModel):
