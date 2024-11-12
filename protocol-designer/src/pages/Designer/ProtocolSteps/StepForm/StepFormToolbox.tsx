@@ -157,6 +157,28 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     error => error.tab === 'dispense' && error.page === toolboxStep
   )
 
+  const visibleFormWarningsTypes = visibleFormWarnings.map(
+    warning => warning.type
+  )
+  const visibleFormErrorsTypes = visibleFormErrors.map(error => error.title)
+
+  useEffect(() => {
+    if (visibleFormWarningsTypes.length > 0) {
+      const formWarningsEvent: AnalyticsEvent = {
+        name: 'formWarnings',
+        properties: { visibleFormWarningsTypes },
+      }
+      dispatch(analyticsEvent(formWarningsEvent))
+    }
+    if (visibleFormErrorsTypes.length > 0) {
+      const formErrorsEvent: AnalyticsEvent = {
+        name: 'formErrors',
+        properties: { visibleFormErrorsTypes },
+      }
+      dispatch(analyticsEvent(formErrorsEvent))
+    }
+  }, [visibleFormWarningsTypes, visibleFormErrorsTypes])
+
   if (!ToolsComponent) {
     // early-exit if step form doesn't exist, this is a good check for when new steps
     // are added
@@ -236,28 +258,6 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
       handleSaveClick()
     }
   }
-
-  const visibleFormWarningsTypes = visibleFormWarnings.map(
-    warning => warning.type
-  )
-  const visibleFormErrorsTypes = visibleFormErrors.map(error => error.title)
-
-  useEffect(() => {
-    if (visibleFormWarningsTypes.length > 0) {
-      const formWarningsEvent: AnalyticsEvent = {
-        name: 'formWarnings',
-        properties: { visibleFormWarningsTypes },
-      }
-      dispatch(analyticsEvent(formWarningsEvent))
-    }
-    if (visibleFormErrorsTypes.length > 0) {
-      const formErrorsEvent: AnalyticsEvent = {
-        name: 'formErrors',
-        properties: { visibleFormErrorsTypes },
-      }
-      dispatch(analyticsEvent(formErrorsEvent))
-    }
-  }, [visibleFormWarningsTypes, visibleFormErrorsTypes])
 
   return (
     <>

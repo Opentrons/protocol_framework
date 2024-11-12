@@ -23,7 +23,13 @@ import { getHasOptedIn } from './selectors'
 import { flattenNestedProperties } from './utils/flattenNestedProperties'
 
 import type { Middleware } from 'redux'
-import type { NormalizedPipetteById } from '@opentrons/step-generation'
+import type {
+  ConsolidateArgs,
+  DistributeArgs,
+  MixArgs,
+  NormalizedPipetteById,
+  TransferArgs,
+} from '@opentrons/step-generation'
 import type {
   AddressableAreaName,
   LoadLabwareCreateCommand,
@@ -48,6 +54,9 @@ const PIPETTING_ARGS_FILTER_LIST = [
   'blowoutFlowRateUlSec',
   'blowoutOffsetFromTopMm',
   'touchTipMmFromBottom',
+  'aspirateAirGapVolume',
+  'aspirateFlowRateUlSec',
+  'dispenseFlowRateUlSec',
 ]
 
 interface TransformedPipetteInfo {
@@ -137,13 +146,35 @@ export const reduxActionToAnalyticsEvent = (
       } else if (
         modifiedStepName === 'transfer' ||
         modifiedStepName === 'consolidate' ||
-        modifiedStepName === 'distribute' ||
-        modifiedStepName === 'mix'
+        modifiedStepName === 'distribute'
       ) {
-        const stepArgModified = omit(stepArgs, PIPETTING_ARGS_FILTER_LIST)
+        const stepArgModified = omit(
+          stepArgs as TransferArgs | ConsolidateArgs | DistributeArgs,
+          PIPETTING_ARGS_FILTER_LIST
+        )
         return {
           name: `${modifiedStepName}Step`,
-          properties: { ...stepArgModified, ...additionalProperties },
+          properties: {
+            ...stepArgModified,
+            aspirateAirGap: stepArgModified.aspirateAirGapVolume,
+            aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
+            dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
+            ...additionalProperties,
+          },
+        }
+      } else if (modifiedStepName === 'mix') {
+        const stepArgModified = omit(
+          stepArgs as MixArgs,
+          PIPETTING_ARGS_FILTER_LIST
+        )
+        return {
+          name: `mixStep`,
+          properties: {
+            ...stepArgModified,
+            aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
+            dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
+            ...additionalProperties,
+          },
         }
       } else {
         return {
