@@ -25,6 +25,7 @@ export function ConfirmDeleteStagingAreaModal(
   return createPortal(
     <HandleEnter onEnter={onConfirm}>
       <Modal
+        marginLeft="0"
         zIndexOverlay={11}
         title={t('staging_area_has_labware')}
         type="info"

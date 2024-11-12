@@ -174,6 +174,7 @@ export function EditInstrumentsModal(
   return createPortal(
     <HandleEnter onEnter={handleOnSave}>
       <Modal
+        marginLeft="0"
         title={
           page === 'add'
             ? t('shared:edit_pipette')
