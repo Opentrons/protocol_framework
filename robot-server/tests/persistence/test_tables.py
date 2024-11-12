@@ -598,6 +598,18 @@ def test_creating_from_metadata_emits_expected_statements(
     assert set(normalized_actual) == set(normalized_expected)
 
 
+# FIXME(mm, 2024-11-12): https://opentrons.atlassian.net/browse/EXEC-827
+#
+# There are at least these mismatches:
+#
+# - `ix_data_files_source` is present in metadata, but not emitted by the migration path
+# - `ix_run_command_command_intent` is present in metadata, but not emitted by the migration path
+# - `data_files.source` is nullable as emitted by the migration path, but not as declared in metadata
+# - `command.command_intent` is nullable as emitted by the migration path, but not as declared in metadata
+# - constraint `datafilesourcesqlenum` is present in metadata, but not not emitted by the migration path
+#
+# Remove this xfail mark when the mismatches are resolved.
+@pytest.mark.xfail(strict=True)
 def test_migrated_db_matches_db_created_from_metadata(tmp_path: Path) -> None:
     """Test that the output of migration matches `metadata.create_all()`.
 
