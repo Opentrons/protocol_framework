@@ -101,7 +101,6 @@ if __name__ == "__main__":
         "__init__.py",
         "helpers.py",
         "shared_vars_and_funcs.py",
-        "9_parameters.csv",
     ]
     print("Simulating Protocols")
     file_dict, labware_defs = get_files()

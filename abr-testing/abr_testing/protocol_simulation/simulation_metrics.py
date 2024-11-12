@@ -267,7 +267,6 @@ def parse_results_volume(
         "Right Pipette Total Dispenses",
         "Gripper Pick Ups",
         "Gripper Pick Ups of opentrons_tough_pcr_auto_sealing_lid",
-        "Gripper Pick Ups of opentrons_tough_pcr_auto_sealing_lid",
         "Total Liquid Probes",
         "Average Liquid Probe Time (sec)",
     ]
@@ -329,7 +328,6 @@ def parse_results_volume(
     total_time_row.append(str(end_time - start_time))
 
     for metric in metrics:
-        print(f"Dictionary: {metric}\n\n")
         print(f"Dictionary: {metric}\n\n")
         for cmd in metric.keys():
             values_row.append(str(metric[cmd]))
@@ -529,7 +527,6 @@ if __name__ == "__main__":
             choice = ""
             while not choice:
                 choice = input(
-                    "Remove air_gap commands to ensure accurate results: (continue)? (Y/N): "
                     "Remove air_gap commands to ensure accurate results: (continue)? (Y/N): "
                 )
                 if choice.upper() == "Y":
