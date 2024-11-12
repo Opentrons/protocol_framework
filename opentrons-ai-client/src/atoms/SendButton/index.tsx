@@ -89,7 +89,7 @@ export function SendButton({
       justifyContent={JUSTIFY_SPACE_AROUND}
       paddingX="20px"
       width={isLoading ? 'wrap' : '4.25rem'}
-      height="3.75rem"
+      height="4.25rem"
       disabled={disabled || isLoading}
       onClick={handleClick}
       aria-label="play"
