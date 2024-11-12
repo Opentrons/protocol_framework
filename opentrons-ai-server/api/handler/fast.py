@@ -235,7 +235,7 @@ async def update_protocol(
         if body.fake:
             return ChatResponse(reply="Fake response", fake=body.fake)
 
-        response: Union[str, None] = openai.predict(prompt=body.protocol_text, chat_completion_message_params=None)
+        response: Union[str, None] = openai.predict(prompt=body.protocol_text, chat_completion_message_params=body.model_dump())
 
         if response is None or response == "":
             return ChatResponse(reply="No response was generated", fake=body.fake)
