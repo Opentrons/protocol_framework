@@ -13,17 +13,26 @@ import {
   DropdownMenu,
 } from '@opentrons/components'
 import type { DropdownOption } from '@opentrons/components'
+import type { UpdateOptions } from '../../resources/types'
 import { UploadInput } from '../../molecules/UploadInput'
 import { useEffect, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { FileUpload } from '../../molecules/FileUpload'
 import { useNavigate } from 'react-router-dom'
-import { chatPromptAtom, headerWithMeterAtom } from '../../resources/atoms'
+import {
+  chatPromptAtom,
+  headerWithMeterAtom,
+  updatePromptAtom,
+} from '../../resources/atoms'
 import { CSSTransition } from 'react-transition-group'
 import { useAtom } from 'jotai'
 
-const updateOptions: DropdownOption[] = [
+interface UpdateOptionsDropdown extends DropdownOption {
+  value: UpdateOptions
+}
+
+const updateOptions: UpdateOptionsDropdown[] = [
   {
     name: 'Adapt Python protocol from OT-2 to Flex',
     value: 'adapt_python_protocol',
@@ -95,6 +104,7 @@ export function UpdateProtocol(): JSX.Element {
   const [headerState, setHeaderWithMeterAtom] = useAtom(headerWithMeterAtom)
   const [updateType, setUpdateType] = useState<DropdownOption | null>(null)
   const [detailsValue, setDetailsValue] = useState<string>('')
+  const [, setUpdatePromptAtom] = useAtom(updatePromptAtom)
   const [fileValue, setFile] = useState<File | null>(null)
   const [pythonText, setPythonTextValue] = useState<string>('')
   const [errorText, setErrorText] = useState<string | null>(null)
@@ -166,6 +176,15 @@ export function UpdateProtocol(): JSX.Element {
 
     console.log(chatPrompt)
 
+    setUpdatePromptAtom({
+      protocol_text: pythonText,
+      regenerate: false,
+      update: true,
+      update_type: (updateType?.value ?? 'other') as UpdateOptions,
+      update_details: detailsValue,
+      fake: false,
+      fake_id: 0,
+    })
     setChatPrompt({ prompt: chatPrompt, isNewProtocol: false })
     navigate('/chat')
   }

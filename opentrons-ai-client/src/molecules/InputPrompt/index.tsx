@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled, { css } from 'styled-components'
 import { useFormContext } from 'react-hook-form'
@@ -21,6 +21,7 @@ import {
   chatHistoryAtom,
   chatPromptAtom,
   tokenAtom,
+  updatePromptAtom,
 } from '../../resources/atoms'
 import { useApiCall } from '../../resources/hooks'
 import { calcTextAreaHeight } from '../../resources/utils/utils'
@@ -43,18 +44,17 @@ export function InputPrompt(): JSX.Element {
   const { t } = useTranslation('protocol_generator')
   const { register, watch, reset, setValue } = useFormContext()
   const [chatPromptAtomValue] = useAtom(chatPromptAtom)
+  const [updatePrompt] = useAtom(updatePromptAtom)
   const [, setChatData] = useAtom(chatDataAtom)
   const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom)
   const [token] = useAtom(tokenAtom)
   const [submitted, setSubmitted] = useState<boolean>(false)
   const userPrompt = watch('userPrompt') ?? ''
+  const [sendAutoFilledPrompt, setSendAutoFilledPrompt] = useState<boolean>(
+    false
+  )
   const { data, isLoading, callApi } = useApiCall()
   const [requestId, setRequestId] = useState<string>(uuidv4())
-
-  // This is to autofill the input field for when we navigate to the chat page from the existing/new protocol generator pages
-  useEffect(() => {
-    setValue('userPrompt', chatPromptAtomValue.prompt)
-  }, [chatPromptAtomValue.prompt, setValue])
 
   const handleClick = async (
     isUpdateOrCreate: boolean = false
@@ -76,18 +76,21 @@ export function InputPrompt(): JSX.Element {
 
       const url = isUpdateOrCreate
         ? getCreateOrUpdateEndpoint(chatPromptAtomValue.isNewProtocol)
-        : getEndpoint()
+        : getChatEndpoint()
 
       const config = {
         url,
         method: 'POST',
         headers,
-        data: {
-          message: userPrompt,
-          history: chatHistory,
-          fake: false,
-        },
+        data: isUpdateOrCreate
+          ? getUpdateOrCreatePrompt()
+          : {
+              message: userPrompt,
+              history: chatHistory,
+              fake: false,
+            },
       }
+
       setChatHistory(chatHistory => [
         ...chatHistory,
         { role: 'user', content: userPrompt },
@@ -98,6 +101,10 @@ export function InputPrompt(): JSX.Element {
       console.error(`error: ${err.message}`)
       throw err
     }
+  }
+
+  const getUpdateOrCreatePrompt = (): any => {
+    return chatPromptAtomValue.isNewProtocol ? updatePrompt : updatePrompt // to do: add the create prompt
   }
 
   useEffect(() => {
@@ -116,6 +123,20 @@ export function InputPrompt(): JSX.Element {
       setSubmitted(false)
     }
   }, [data, isLoading, submitted])
+
+  // This is to autofill the input field for when we navigate to the chat page from the existing/new protocol generator pages
+  useEffect(() => {
+    setValue('userPrompt', chatPromptAtomValue.prompt)
+    setSendAutoFilledPrompt(true)
+  }, [])
+  const watchUserPrompt = watch('userPrompt')
+
+  useEffect(() => {
+    if (sendAutoFilledPrompt) {
+      handleClick(true)
+      setSendAutoFilledPrompt(false)
+    }
+  }, [watchUserPrompt])
 
   return (
     <StyledForm id="User_Prompt">
@@ -137,7 +158,11 @@ export function InputPrompt(): JSX.Element {
   )
 }
 
-const getEndpoint = (): string => {
+const getCreateOrUpdateEndpoint = (isCreateNewProtocol: boolean): string => {
+  return isCreateNewProtocol ? getCreateEndpoint() : getUpdateEndpoint()
+}
+
+const getChatEndpoint = (): string => {
   switch (process.env.NODE_ENV) {
     case 'production':
       return PROD_END_POINT
@@ -146,10 +171,6 @@ const getEndpoint = (): string => {
     default:
       return STAGING_END_POINT
   }
-}
-
-const getCreateOrUpdateEndpoint = (isCreateNewProtocol: boolean): string => {
-  return isCreateNewProtocol ? getCreateEndpoint() : getUpdateEndpoint()
 }
 
 const getCreateEndpoint = (): string => {

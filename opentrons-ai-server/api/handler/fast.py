@@ -23,10 +23,10 @@ from api.handler.custom_logging import setup_logging
 from api.integration.auth import VerifyToken
 from api.models.chat_request import ChatRequest
 from api.models.chat_response import ChatResponse
-from api.models.empty_request_error import EmptyRequestError
-from api.models.update_protocol import UpdateProtocol
 from api.models.create_protocol import CreateProtocol
+from api.models.empty_request_error import EmptyRequestError
 from api.models.internal_server_error import InternalServerError
+from api.models.update_protocol import UpdateProtocol
 from api.settings import Settings
 
 settings: Settings = Settings()
@@ -207,6 +207,7 @@ async def create_chat_completion(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=InternalServerError(exception_object=e).model_dump()
         ) from e
 
+
 @tracer.wrap()
 @app.post(
     "/api/chat/updateProtocol",
@@ -225,14 +226,15 @@ async def update_protocol(
     """
     logger.info("POST /api/chat/updateProtocol", extra={"body": body.model_dump(), "auth_result": auth_result})
     try:
-        if not body.message or body.message == "":
+        if not body.protocol_text or body.protocol_text == "":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=EmptyRequestError(message="Request body is empty").model_dump()
             )
 
         if body.fake:
             return ChatResponse(reply="Fake response", fake=body.fake)
-        response: Union[str, None] = openai.predict(prompt=body.message, chat_completion_message_params=body.history)
+
+        response: Union[str, None] = openai.predict(prompt=body.protocol_text, chat_completion_message_params=None)
 
         if response is None or response == "":
             return ChatResponse(reply="No response was generated", fake=body.fake)
@@ -244,7 +246,8 @@ async def update_protocol(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=InternalServerError(exception_object=e).model_dump()
         ) from e
-    
+
+
 @tracer.wrap()
 @app.post(
     "/api/chat/createProtocol",
@@ -282,7 +285,7 @@ async def create_protocol(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=InternalServerError(exception_object=e).model_dump()
         ) from e
-    
+
 
 @app.get(
     "/health",
