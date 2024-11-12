@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import {
   ALIGN_CENTER,
   BORDERS,
+  Box,
   COLORS,
   DIRECTION_COLUMN,
   DeckFromLayers,
@@ -53,6 +54,7 @@ import type {
 } from '@opentrons/step-generation'
 import type { DeckSetupTabType } from '../types'
 import type { Fixture } from './constants'
+import { TimelineToolbox } from '../ProtocolSteps/Timeline'
 
 const WASTE_CHUTE_SPACE = 30
 const DETAILS_HOVER_SPACE = 60
@@ -171,16 +173,30 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
     aa => isAddressableAreaStandardSlot(aa.id, deckDef)
   )
 
+  let height = '100%'
+  if (zoomIn.slot != null) {
+    height = '75vh'
+  } else if (tab === 'protocolSteps') {
+    height = '70vh'
+  }
   return (
     <Flex>
+      {tab === 'startingDeck' ? (
+        <Flex width="20%">
+          {/* {hoverSlot != null ? ( */}
+          <SlotDetailsContainer robotType={robotType} slot={'A1'} />
+          {/* ) : null} */}
+        </Flex>
+      ) : null}
+
       <Flex
         backgroundColor={COLORS.white}
         borderRadius={BORDERS.borderRadius12}
-        width="100%"
-        height={zoomIn.slot != null ? '75vh' : '70vh'}
+        width={zoomIn.slot != null || tab === 'protocolSteps' ? '100%' : '60%'}
+        height={height}
         flexDirection={DIRECTION_COLUMN}
         padding={SPACING.spacing40}
-        maxHeight="39.375rem" // this is to block deck view from enlarging
+        // maxHeight="39.375rem" // this is to block deck view from enlarging
       >
         <Flex
           width="100%"
@@ -318,17 +334,13 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                   robotType={robotType}
                   show4thColumn={stagingAreaFixtures.length > 0}
                 />
-                {hoverSlot != null ? (
-                  <SlotDetailsContainer
-                    robotType={robotType}
-                    slot={hoverSlot}
-                  />
-                ) : null}
               </>
             )}
           </RobotCoordinateSpaceWithRef>
         </Flex>
       </Flex>
+      {/* phantom container to make the side space equal */}
+      {tab === 'startingDeck' ? <Box width="20%" /> : null}
       {zoomIn.slot != null && zoomIn.cutout != null ? (
         <DeckSetupTools
           onDeckProps={{
