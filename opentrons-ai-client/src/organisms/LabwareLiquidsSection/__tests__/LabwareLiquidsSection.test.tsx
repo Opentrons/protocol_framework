@@ -44,7 +44,7 @@ describe('LabwareLiquidsSection', () => {
 
     fireEvent.click(screen.getByText('Tip rack'))
     fireEvent.click(
-      await screen.findByText('Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL')
+      await screen.findByText('Opentrons Flex 96 Tip Rack 1000 µL')
     )
     fireEvent.click(screen.getByText('Save'))
 
@@ -61,7 +61,7 @@ describe('LabwareLiquidsSection', () => {
 
   //     fireEvent.click(screen.getByText('Tip rack'))
   //     fireEvent.click(
-  //       await screen.findByText('Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL')
+  //       await screen.findByText('Opentrons Flex 96 Tip Rack 1000 µL')
   //     )
   //     fireEvent.click(screen.getByText('Save'))
 
