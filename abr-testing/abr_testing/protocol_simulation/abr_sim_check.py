@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Union
 import traceback
 
+
 def run(
     file_dict: Dict[str, Dict[str, Union[str, Path]]], labware_defs: List[Path]
 ) -> None:
@@ -89,6 +90,7 @@ def get_files() -> Tuple[Dict[str, Dict[str, Union[str, Path]]], List[Path]]:
                             )
                         )
     return (file_dict, labware_defs)
+
 
 if __name__ == "__main__":
     # Directory to search
