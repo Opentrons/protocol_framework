@@ -9,6 +9,8 @@ import {
   SPACING,
   DIRECTION_COLUMN,
   COLORS,
+  Icon,
+  ALIGN_CENTER,
 } from '@opentrons/components'
 import { WellOrderModal } from '../../../../../organisms'
 import type { WellOrderOption } from '../../../../../form-types'
@@ -73,7 +75,10 @@ export function WellsOrderField(props: WellsOrderFieldProps): JSX.Element {
           type="noActive"
           width="100%"
           padding={SPACING.spacing12}
+          gridGap={SPACING.spacing8}
+          alignItems={ALIGN_CENTER}
         >
+          <Icon name="well-order" size="1.25rem" />
           <StyledText desktopStyle="bodyDefaultRegular">
             {t(`step_edit_form.field.well_order.option.${firstValue}`)}
             {', '}
