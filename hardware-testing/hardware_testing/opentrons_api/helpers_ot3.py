@@ -111,13 +111,13 @@ def _create_fake_pipette_id(mount: OT3Mount, model: Optional[str]) -> Optional[s
     assert len(items) == 3
     match items[0]:
         case "p1000":
-            size="P1K"
+            size = "P1K"
             version = 35
         case "p50":
-            size="P50"
+            size = "P50"
             version = 35
         case "p200":
-            size="P2H"
+            size = "P2H"
             version = 30
     channels = "S" if items[1] == "single" else "M"
     date = datetime.now().strftime("%y%m%d")
