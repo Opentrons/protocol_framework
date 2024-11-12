@@ -76,12 +76,54 @@ describe('ApplicationSection', () => {
     ).not.toBeInTheDocument()
   })
 
+  it('should be able to select only one pipette, and the other as none', async () => {
+    render()
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled()
+    })
+
+    const leftMount = screen.getAllByText('Choose pipette')[0]
+    fireEvent.click(leftMount)
+    fireEvent.click(screen.getByText('Flex 1-Channel 50 μL'))
+
+    const rightMount = screen.getByText('Choose pipette')
+    fireEvent.click(rightMount)
+    fireEvent.click(screen.getByText('None'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Flex 1-Channel 50 μL')).toBeInTheDocument()
+    })
+    expect(screen.getByText('None')).toBeInTheDocument()
+
+    expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled()
+  })
+
+  it('should not be able to select two pipettes with none value', async () => {
+    render()
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled()
+    })
+
+    const leftMount = screen.getAllByText('Choose pipette')[0]
+    fireEvent.click(leftMount)
+    fireEvent.click(screen.getByText('None'))
+
+    const rightMount = screen.getByText('Choose pipette')
+    fireEvent.click(rightMount)
+    fireEvent.click(screen.getAllByText('None')[1])
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled()
+    })
+  })
+
   it('should enable confirm button when all fields are filled', async () => {
     render()
 
-    const confirmButton = screen.getByRole('button')
     await waitFor(() => {
-      expect(confirmButton).not.toBeEnabled()
+      expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled()
     })
 
     const leftMount = screen.getAllByText('Choose pipette')[0]
@@ -93,7 +135,7 @@ describe('ApplicationSection', () => {
     fireEvent.click(screen.getByText('Flex 8-Channel 50 μL'))
 
     await waitFor(() => {
-      expect(confirmButton).toBeEnabled()
+      expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled()
     })
   })
 

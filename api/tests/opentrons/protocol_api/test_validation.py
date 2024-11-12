@@ -1,5 +1,5 @@
 """Tests for Protocol API input validation."""
-from typing import ContextManager, List, Type, Union, Optional, Dict, Any
+from typing import ContextManager, List, Type, Union, Optional, Dict, Sequence, Any
 from contextlib import nullcontext as do_not_raise
 
 from decoy import Decoy
@@ -13,7 +13,16 @@ from opentrons_shared_data.labware.labware_definition import (
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.robot.types import RobotType
 
-from opentrons.types import Mount, DeckSlotName, StagingSlotName, Location, Point
+from opentrons.types import (
+    Mount,
+    DeckSlotName,
+    AxisType,
+    AxisMapType,
+    StringAxisMap,
+    StagingSlotName,
+    Location,
+    Point,
+)
 from opentrons.hardware_control.modules.types import (
     ModuleModel,
     MagneticModuleModel,
@@ -456,7 +465,7 @@ def test_validate_well_no_location(decoy: Decoy) -> None:
     assert result == expected_result
 
 
-def test_validate_coordinates(decoy: Decoy) -> None:
+def test_validate_well_coordinates(decoy: Decoy) -> None:
     """Should return a WellTarget with no location."""
     input_location = Location(point=Point(x=1, y=1, z=2), labware=None)
     expected_result = subject.PointTarget(location=input_location, in_place=False)
@@ -559,3 +568,157 @@ def test_validate_last_location_with_labware(decoy: Decoy) -> None:
     result = subject.validate_location(location=None, last_location=input_last_location)
 
     assert result == subject.PointTarget(location=input_last_location, in_place=True)
+
+
+def test_ensure_boolean() -> None:
+    """It should return a boolean value."""
+    assert subject.ensure_boolean(False) is False
+
+
+@pytest.mark.parametrize("value", [0, "False", "f", 0.0])
+def test_ensure_boolean_raises(value: Union[str, int, float]) -> None:
+    """It should raise if the value is not a boolean."""
+    with pytest.raises(ValueError, match="must be a boolean"):
+        subject.ensure_boolean(value)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("value", [-1.23, -1, 0, 0.0, 1, 1.23])
+def test_ensure_float(value: Union[int, float]) -> None:
+    """It should return a float value."""
+    assert subject.ensure_float(value) == float(value)
+
+
+def test_ensure_float_raises() -> None:
+    """It should raise if the value is not a float or an integer."""
+    with pytest.raises(ValueError, match="must be a floating point"):
+        subject.ensure_float("1.23")  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("value", [0, 0.1, 1, 1.0])
+def test_ensure_positive_float(value: Union[int, float]) -> None:
+    """It should return a positive float."""
+    assert subject.ensure_positive_float(value) == float(value)
+
+
+@pytest.mark.parametrize("value", [-1, -1.0, float("inf"), float("-inf"), float("nan")])
+def test_ensure_positive_float_raises(value: Union[int, float]) -> None:
+    """It should raise if value is not a positive float."""
+    with pytest.raises(ValueError, match="(non-infinite|positive float)"):
+        subject.ensure_positive_float(value)
+
+
+def test_ensure_positive_int() -> None:
+    """It should return a positive int."""
+    assert subject.ensure_positive_int(42) == 42
+
+
+@pytest.mark.parametrize("value", [1.0, -1.0, -1])
+def test_ensure_positive_int_raises(value: Union[int, float]) -> None:
+    """It should raise if value is not a positive integer."""
+    with pytest.raises(ValueError, match="integer"):
+        subject.ensure_positive_int(value)  # type: ignore[arg-type]
+
+
+def test_validate_coordinates() -> None:
+    """It should validate the coordinates and return them as a tuple."""
+    assert subject.validate_coordinates([1, 2.0, 3.3]) == (1.0, 2.0, 3.3)
+
+
+@pytest.mark.parametrize("value", [[1, 2.0], [1, 2.0, 3.3, 4.2], ["1", 2, 3]])
+def test_validate_coordinates_raises(value: Sequence[Union[int, float, str]]) -> None:
+    """It should raise if value is not a valid sequence of three numbers."""
+    with pytest.raises(ValueError, match="(exactly three|must be floats)"):
+        subject.validate_coordinates(value)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    argnames=["axis_map", "robot_type", "is_96_channel", "expected_axis_map"],
+    argvalues=[
+        (
+            {"x": 100, "Y": 50, "z_g": 80},
+            "OT-3 Standard",
+            True,
+            {AxisType.X: 100, AxisType.Y: 50, AxisType.Z_G: 80},
+        ),
+        ({"z_r": 80}, "OT-2 Standard", False, {AxisType.Z_R: 80}),
+        (
+            {"Z_L": 19, "P_L": 20},
+            "OT-2 Standard",
+            False,
+            {AxisType.Z_L: 19, AxisType.P_L: 20},
+        ),
+        ({"Q": 5}, "OT-3 Standard", True, {AxisType.Q: 5}),
+    ],
+)
+def test_ensure_axis_map_type_success(
+    axis_map: Union[AxisMapType, StringAxisMap],
+    robot_type: RobotType,
+    is_96_channel: bool,
+    expected_axis_map: AxisMapType,
+) -> None:
+    """Check that axis map type validation returns the correct shape."""
+    res = subject.ensure_axis_map_type(axis_map, robot_type, is_96_channel)
+    assert res == expected_axis_map
+
+
+@pytest.mark.parametrize(
+    argnames=["axis_map", "robot_type", "is_96_channel", "error_message"],
+    argvalues=[
+        (
+            {AxisType.X: 100, "y": 50},
+            "OT-3 Standard",
+            True,
+            "Please provide an `axis_map` with only string or only AxisType keys",
+        ),
+        (
+            {AxisType.Z_R: 60},
+            "OT-3 Standard",
+            True,
+            "A 96 channel is attached. You cannot move the `Z_R` mount.",
+        ),
+        (
+            {"Z_G": 19, "P_L": 20},
+            "OT-2 Standard",
+            False,
+            "An OT-2 Robot only accepts the following axes ",
+        ),
+        (
+            {"Q": 5},
+            "OT-3 Standard",
+            False,
+            "A 96 channel is not attached. The clamp `Q` motor does not exist.",
+        ),
+    ],
+)
+def test_ensure_axis_map_type_failure(
+    axis_map: Union[AxisMapType, StringAxisMap],
+    robot_type: RobotType,
+    is_96_channel: bool,
+    error_message: str,
+) -> None:
+    """Check that axis_map validation occurs for the given scenarios."""
+    with pytest.raises(subject.IncorrectAxisError, match=error_message):
+        subject.ensure_axis_map_type(axis_map, robot_type, is_96_channel)
+
+
+@pytest.mark.parametrize(
+    argnames=["axis_map", "robot_type", "error_message"],
+    argvalues=[
+        (
+            {AxisType.X: 100, AxisType.P_L: 50},
+            "OT-3 Standard",
+            "A critical point only accepts Flex gantry axes which are ",
+        ),
+        (
+            {AxisType.Z_G: 60},
+            "OT-2 Standard",
+            "A critical point only accepts OT-2 gantry axes which are ",
+        ),
+    ],
+)
+def test_ensure_only_gantry_axis_map_type(
+    axis_map: AxisMapType, robot_type: RobotType, error_message: str
+) -> None:
+    """Check that gantry axis_map validation occurs for the given scenarios."""
+    with pytest.raises(subject.IncorrectAxisError, match=error_message):
+        subject.ensure_only_gantry_axis_map_type(axis_map, robot_type)

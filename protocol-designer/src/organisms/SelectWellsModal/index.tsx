@@ -101,6 +101,7 @@ export const SelectWellsModal = (
 
   return (
     <Modal
+      marginLeft="0"
       width="42.0625rem"
       zIndex={15}
       zIndexOverlay={11}

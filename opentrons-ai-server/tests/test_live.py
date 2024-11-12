@@ -1,5 +1,6 @@
 import pytest
 from api.models.chat_response import ChatResponse
+from api.models.feedback_response import FeedbackResponse
 
 from tests.helpers.client import Client
 
@@ -24,6 +25,14 @@ def test_get_chat_completion_bad_auth(client: Client) -> None:
     """Test the chat completion endpoint with bad authentication."""
     response = client.get_chat_completion("How do I load a pipette?", bad_auth=True)
     assert response.status_code == 401, "Chat completion with bad auth should return HTTP 401"
+
+
+@pytest.mark.live
+def test_get_feedback_good_auth(client: Client) -> None:
+    """Test the feedback endpoint with good authentication."""
+    response = client.get_feedback("How do I load tipracks for my 8 channel pipette on an OT2?", fake=True)
+    assert response.status_code == 200, "Feedback with good auth should return HTTP 200"
+    FeedbackResponse.model_validate(response.json())
 
 
 @pytest.mark.live

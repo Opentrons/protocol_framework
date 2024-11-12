@@ -7,6 +7,7 @@ import { Provider } from 'jotai'
 import {
   fillApplicationSectionAndClickConfirm,
   fillInstrumentsSectionAndClickConfirm,
+  fillLabwareLiquidsSectionAndClickConfirm,
   fillModulesSectionAndClickConfirm,
 } from '../../../resources/utils/createProtocolTestUtils'
 
@@ -134,5 +135,76 @@ describe('CreateProtocol', () => {
     expect(previewItems[6]).toHaveTextContent(
       'Heater-Shaker Module GEN1 with Opentrons 96 Deep Well Heater-Shaker Adapter'
     )
+  })
+
+  it('should open the Labware & Liquids section when the Modules section is completed', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: 'Labware & Liquids' })
+      ).toHaveAttribute('aria-expanded', 'true')
+    })
+  })
+
+  it('should display the Prompt preview correctly for Labware & Liquids section', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+    await fillLabwareLiquidsSectionAndClickConfirm()
+
+    const previewItems = screen.getAllByTestId('Tag_default')
+
+    expect(previewItems).toHaveLength(9)
+    expect(previewItems[7]).toHaveTextContent(
+      'Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL'
+    )
+    expect(previewItems[8]).toHaveTextContent('Test liquid')
+  })
+
+  it('should open the Steps section when the Labware & Liquids section is completed', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+    await fillLabwareLiquidsSectionAndClickConfirm()
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Steps' })).toHaveAttribute(
+        'aria-expanded',
+        'true'
+      )
+    })
+  })
+
+  it('should display the Prompt preview correctly for Steps section', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+    await fillLabwareLiquidsSectionAndClickConfirm()
+
+    const textArea = screen.getByRole('textbox')
+    fireEvent.change(textArea, { target: { value: 'Test step' } })
+
+    expect(screen.getByRole('button', { name: 'Submit prompt' })).toBeDisabled()
+
+    const confirmButton = screen.getByText('Confirm')
+    fireEvent.click(confirmButton)
+
+    const previewItems = screen.getAllByTestId('Tag_default')
+
+    expect(previewItems).toHaveLength(10)
+    expect(previewItems[9]).toHaveTextContent('Test step')
+
+    expect(screen.getByRole('button', { name: 'Submit prompt' })).toBeEnabled()
   })
 })

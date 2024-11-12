@@ -8,7 +8,7 @@ from datetime import datetime
 from decoy import Decoy
 from pathlib import Path
 
-from opentrons.types import DeckSlotName, Point
+from opentrons.types import DeckSlotName, Point, NozzleConfigurationType
 from opentrons.protocol_engine import (
     LabwareOffsetCreate,
     types as pe_types,
@@ -18,7 +18,7 @@ from opentrons.protocol_engine import (
 )
 from opentrons.protocol_reader import ProtocolSource, JsonProtocolConfig
 
-from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType, NozzleMap
+from opentrons.hardware_control.nozzle_manager import NozzleMap
 
 from robot_server.data_files.data_files_store import (
     DataFilesStore,

@@ -57,6 +57,8 @@ describe('ApplicationSection', () => {
   it('should enable confirm button when all fields are filled', async () => {
     render()
 
+    expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled()
+
     const applicationDropdown = screen.getByText('Select an option')
     fireEvent.click(applicationDropdown)
 
@@ -66,9 +68,8 @@ describe('ApplicationSection', () => {
     const describeInput = screen.getByRole('textbox')
     fireEvent.change(describeInput, { target: { value: 'Test description' } })
 
-    const confirmButton = screen.getByRole('button')
     await waitFor(() => {
-      expect(confirmButton).toBeEnabled()
+      expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled()
     })
   })
 
