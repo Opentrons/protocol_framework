@@ -24,6 +24,11 @@ BASE_DIRECTORY = "/userfs/data/testing_data/resonance_finder/"
 SAVE_NAME = "resonance_finder_"
 
 CYCLES = 1
+START_FREQ = 10
+FREQ_INC = 50
+FREQ_STEPS = 50
+
+PAUSE = False
 
 AXIS_MICROSTEP = {"X": 16, "Y": 16, "L": 16, "R": 16}
 
@@ -37,7 +42,7 @@ AXIS_FSTEP_CONVERT = {
 
 TEST_LIST: Dict[str, list] = {}
 
-ACCEL = 1000
+ACCEL = 600
 START_CURRENT = 1.5
 TEST_PARAMETERS: Dict[GantryLoad, Dict[str, Dict[str, Dict[str, float]]]] = {
     GantryLoad.LOW_THROUGHPUT: {
@@ -139,8 +144,8 @@ GANTRY_LOAD_MAP = {"LOW": GantryLoad.LOW_THROUGHPUT, "HIGH": GantryLoad.HIGH_THR
 
 DELAY = 0
 
-step_x = 500
-step_y = 300
+step_x = 530
+step_y = 375
 xy_home_offset = 5
 step_z = 200
 
@@ -281,8 +286,8 @@ async def _single_axis_move(
 
         # check if we moved to correct position with encoder
         move_pos = await api.encoder_current_position_ot3(mount=MOUNT)
-        print("NEG MOVE - inital_pos: " + str(inital_pos))
-        print("NEG MOVE - mov_pos: " + str(move_pos))
+        # print("NEG MOVE - inital_pos: " + str(inital_pos))
+        # print("NEG MOVE - mov_pos: " + str(move_pos))
         delta_move_pos = get_pos_delta(move_pos, inital_pos)
         # print("delta_move_pos: " + str(delta_move_pos))
         delta_move_axis = delta_move_pos[AXIS_MAP[axis]]
@@ -319,8 +324,8 @@ async def _single_axis_move(
         await api.move_rel(mount=MOUNT, delta=move_distance, speed=cur_speed)
 
         final_pos = await api.encoder_current_position_ot3(mount=MOUNT)
-        print("POS MOVE - inital_pos: " + str(inital_pos))
-        print("POS MOVE - final_pos: " + str(final_pos))
+        # print("POS MOVE - inital_pos: " + str(inital_pos))
+        # print("POS MOVE - final_pos: " + str(final_pos))
         delta_pos = get_pos_delta(final_pos, inital_pos)
         # print("delta_pos: " + str(delta_pos))
         delta_pos_axis = delta_pos[AXIS_MAP[axis]]
@@ -429,6 +434,9 @@ async def _main(is_simulating: bool) -> None:
                     print("Current: " + str(p["CURRENT"]))
                     print("Error: " + str(run_avg_error))
 
+                    if PAUSE:
+                        input("Press Enter to run next frequency...")
+
     except KeyboardInterrupt:
         await api.disengage_axes([Axis.X, Axis.Y, Axis.Z_L, Axis.Z_R])
     finally:
@@ -445,15 +453,14 @@ def parameter_range(test_load: GantryLoad, test_axis: str, p_type: str) -> np.nd
     return np.arange(start, stop, step)
 
 
-START_FREQ = 10
-FREQ_INC = 50
+
 
 
 def speed_range_from_freq(test_axis: str) -> np.ndarray:
     """Find a range of speeds from a step frequency."""
     freq_range = np.arange(
         START_FREQ * AXIS_MICROSTEP[test_axis],
-        50000 * AXIS_MICROSTEP[test_axis],
+        (START_FREQ+(FREQ_STEPS*FREQ_INC)) * AXIS_MICROSTEP[test_axis],
         FREQ_INC * AXIS_MICROSTEP[test_axis],
     )
 
@@ -469,9 +476,11 @@ def make_test_list(test_axis: list, test_load: GantryLoad) -> Dict[str, list]:
     # make dictionary with axes to test as keys
     for axis_t in test_axis:
         axis_test_list = []
-        for current_t in parameter_range(test_load, axis_t, "CURRENT"):
-            for speed_t in speed_range_from_freq(axis_t):
-                axis_test_list.append({"CURRENT": current_t, "SPEED": speed_t})
+        # for current_t in parameter_range(test_load, axis_t, "CURRENT"):
+        #     for speed_t in speed_range_from_freq(axis_t):
+        #         axis_test_list.append({"CURRENT": current_t, "SPEED": speed_t})
+        for speed_t in speed_range_from_freq(axis_t):
+                axis_test_list.append({"CURRENT": START_CURRENT, "SPEED": speed_t})
 
         complete_test_list[axis_t] = axis_test_list
 
@@ -486,25 +495,36 @@ def update_test_parameters(ptype: str, psub: str, value: float) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Drives an axis back and forth at a step frequency for a number cycles. Sweeps through a range of frequencies by a set increment")
     parser.add_argument("--simulate", action="store_true")
-    parser.add_argument("--axis", type=str, default="Y")
-    parser.add_argument("--cycles", type=int, default=CYCLES)
-    parser.add_argument("--load", type=str, default="LOW")
-    parser.add_argument("--delay", type=int, default=0)
-    parser.add_argument("--start", type=int, default=START_FREQ)
-    parser.add_argument("--inc", type=int, default=FREQ_INC)
-    parser.add_argument("--accel", type=int, default=ACCEL)
-    parser.add_argument("--current", type=float, default=START_CURRENT)
+    parser.add_argument("--axis", type=str, default="Y", help="The Axis to test: X, Y, L, R")
+    parser.add_argument("--cycles", type=int, default=CYCLES,
+                        help="The number of movement cycles at each frequency, Default = 1")
+    parser.add_argument("--load", type=str, default="LOW",
+                        help="Gantry Load, Default = LOW, set to HIGH for 96ch")
+    parser.add_argument("--delay", type=int, default=0, help="Seconds of delay between cycles. Default = 0")
+    parser.add_argument("--pause", action="store_true", help="adds a pause between each frequency step")
+    parser.add_argument("--start", type=int, default=START_FREQ,
+                        help="Steps/s, The starting step frequency of the test run, Default = 10 Steps/s")
+    parser.add_argument("--inc", type=int, default=FREQ_INC,
+                        help="Steps/s, The increment in step frequency between each set of cycles, Default = 50 Steps/s")
+    parser.add_argument("--steps", type=int, default=FREQ_STEPS,
+                        help="The number of frequency steps to test, Default = 50")
+    parser.add_argument("--accel", type=int, default=ACCEL,
+                        help="mm/s^2, the acceleration of the axis. Default = 600mm/s^2")
+    parser.add_argument("--current", type=float, default=START_CURRENT,
+                        help="A, The current of the axis. Default = 1.5A")
 
     args = parser.parse_args()
     CYCLES = args.cycles
 
     AXIS = args.axis
-    LOAD = GANTRY_LOAD_MAP[args.load]
+    LOAD = GANTRY_LOAD_MAP["LOW"]
     DELAY = args.delay
+    PAUSE = args.pause
     START_FREQ = args.start
     FREQ_INC = args.inc
+    FREQ_STEPS = args.steps
     ACCEL = args.accel
     START_CURRENT = args.current
     update_test_parameters("CURRENT", "MIN", START_CURRENT)
