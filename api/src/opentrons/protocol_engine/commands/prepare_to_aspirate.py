@@ -9,6 +9,7 @@ from typing_extensions import Literal
 from .pipetting_common import (
     OverpressureError,
     PipetteIdMixin,
+    prepare_for_aspirate
 )
 from .command import (
     AbstractCommandImpl,
@@ -62,44 +63,27 @@ class PrepareToAspirateImplementation(
         self._model_utils = model_utils
         self._gantry_mover = gantry_mover
 
-    async def execute(self, params: PrepareToAspirateParams) -> _ExecuteReturn:
-        """Prepare the pipette to aspirate."""
-        current_position = await self._gantry_mover.get_position(params.pipetteId)
-        state_update = update_types.StateUpdate()
-        try:
-            await self._pipetting_handler.prepare_for_aspirate(
-                pipette_id=params.pipetteId,
-            )
-        except PipetteOverpressureError as e:
-            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
+    def _transform_result(self, result: SuccessData[None]) -> SuccessData[PrepareToAspirateResult]:
+        return SuccessData(public=PrepareToAspirateResult(), state_update=result.state_update)
+
+    def _transform_error_with(self, current_position: Point) -> Callable[[DefinedErrorData[OverpressureError]], DefinedErrorData[OverpressureError]]:
+        def _transform_error(self, error: DefinedErrorData[OverpressureError]) -> DefinedErrorData[OverpressureError]:
             return DefinedErrorData(
-                public=OverpressureError(
-                    id=self._model_utils.generate_id(),
-                    createdAt=self._model_utils.get_timestamp(),
-                    wrappedErrors=[
-                        ErrorOccurrence.from_failed(
-                            id=self._model_utils.generate_id(),
-                            createdAt=self._model_utils.get_timestamp(),
-                            error=e,
-                        )
-                    ],
-                    errorInfo=(
-                        {
-                            "retryLocation": (
+                public=error.copy(update={errorInfo: {"retryLocation": (
                                 current_position.x,
                                 current_position.y,
                                 current_position.z,
-                            )
-                        }
-                    ),
-                ),
-                state_update=state_update,
+                            )}}, deep=True),
+                state_update=error.state_update
             )
-        else:
-            state_update.set_fluid_empty(pipette_id=params.pipetteId)
-            return SuccessData(
-                public=PrepareToAspirateResult(), state_update=state_update
-            )
+        return _transform_error
+
+
+    async def execute(self, params: PrepareToAspirateParams) -> _ExecuteReturn:
+        """Prepare the pipette to aspirate."""
+        error_transformer = self._transform_error_with(await self._gantry_mover.get_position(params.pipetteId))
+        prepare_result = await prepare_for_aspirate(params.pipetteId, self._pipetting, self._model_utils)
+        return prepare_result.and_then(self._transform_result).or_else(error_transformer)
 
 
 class PrepareToAspirate(

@@ -1,11 +1,20 @@
 """Common pipetting command base models."""
+from __future__ import annotations
 from opentrons_shared_data.errors import ErrorCodes
 from pydantic import BaseModel, Field
-from typing import Literal, Optional, Tuple, TypedDict
+from typing import Literal, Optional, Tuple, TypedDict, TYPE_CHECKING
 
 from opentrons.protocol_engine.errors.error_occurrence import ErrorOccurrence
+from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
+from .command import DefinedResult
+from opentrons.protoco_engine.state.update_types import StateUpdate
 
 from ..types import WellLocation, LiquidHandlingWellLocation, DeckPoint
+
+if TYPE_CHECKING:
+    from ..execution.pipetting import PipettingHandler
+    from ..resources import ModelUtils
+
 
 
 class PipetteIdMixin(BaseModel):
@@ -201,3 +210,43 @@ class TipPhysicallyAttachedError(ErrorOccurrence):
 
     errorCode: str = ErrorCodes.TIP_DROP_FAILED.value.code
     detail: str = ErrorCodes.TIP_DROP_FAILED.value.detail
+
+
+async def prepare_for_aspirate(
+        self,
+        pipette_id: str,
+        pipetting: PipettingHandler,
+        model_utils: ModelUtils
+) -> DefinedResult[None, OverpressureError]:
+    state_update = update_types.StateUpdate()
+    try:
+        await pipetting.prepare_for_aspirate(pipette_id)
+    except PipetteOverpressureError as e:
+        state_update.set_fluid_unknown(pipette_id=pipette_id)
+        return DefinedResult.from_error(DefinedErrorData(
+                public=OverpressureError(
+                    id=self._model_utils.generate_id(),
+                    createdAt=self._model_utils.get_timestamp(),
+                    wrappedErrors=[
+                        ErrorOccurrence.from_failed(
+                            id=self._model_utils.generate_id(),
+                            createdAt=self._model_utils.get_timestamp(),
+                            error=e,
+                        )
+                    ],
+                    errorInfo=(
+                        {
+                            "retryLocation": (
+                                current_position.x,
+                                current_position.y,
+                                current_position.z,
+                            )
+                        }
+                    ),
+                ),
+                state_update=state_update,
+            )
+        )
+    else:
+        state_update.set_fluid_empty(pipette_id=pipette_id)
+        return DefinedResult.from_result(SuccessData(state_update=state_update))

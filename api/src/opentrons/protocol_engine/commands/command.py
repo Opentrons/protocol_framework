@@ -6,7 +6,7 @@ from __future__ import annotations
 import dataclasses
 from abc import ABC, abstractmethod
 from datetime import datetime
-from enum import Enum
+import enum
 from typing import (
     TYPE_CHECKING,
     Generic,
@@ -15,6 +15,7 @@ from typing import (
     List,
     Type,
     Union,
+    Callable, Coroutine, Awaitable, Literal
 )
 
 from pydantic import BaseModel, Field
@@ -41,7 +42,7 @@ _ErrorT = TypeVar("_ErrorT", bound=ErrorOccurrence)
 _ErrorT_co = TypeVar("_ErrorT_co", bound=ErrorOccurrence, covariant=True)
 
 
-class CommandStatus(str, Enum):
+class CommandStatus(str, enum.Enum):
     """Command execution status."""
 
     QUEUED = "queued"
@@ -50,7 +51,7 @@ class CommandStatus(str, Enum):
     FAILED = "failed"
 
 
-class CommandIntent(str, Enum):
+class CommandIntent(str, enum.Enum):
     """Run intent for a given command.
 
     Props:
@@ -240,6 +241,91 @@ class BaseCommand(
             ],
         ]
     ]
+
+class IsErrorValue(Exception):
+    pass
+
+class _NothingEnum(enum.Enum):
+    _NOTHING = enum.auto()
+
+NOTHING: Final = _NothingEnum._NOTHING
+NothingT: TypeAlias = Literal[_NothingEnum._NOTHING]
+
+_ResultT_co_general = TypeVar("_ResultT_co_general", covariant=True)
+_ErrorT_co_general = TypeVar("_ErrorT_co_general", covariant=True)
+
+@dataclasses.dataclass
+class Maybe(Generic[_ResultT_co_general, _ErrorT_co_general]):
+
+    _contents: tuple[_ResultT_co_general, NothingT] | tuple[NothingT, _ErrorT_co_general]
+
+    @classmethod
+    def from_result(cls: Type[Self], result: _ResultT_co_general) -> Self:
+        return cls(_contents=(result, NOTHING))
+
+    @classmethod
+    def from_error(cls: Type[Self], error: _ErrorT_co_general) -> Self:
+        return cls(_contents=(NOTHING, result))
+
+    def result_or_panic(self) -> _ResultT_co_general:
+        match self._contents:
+            case (result, NOTHING):
+                return result
+            case _:
+                raise IsErrorValue()
+
+    def unwrap(self) -> _ResultT_co_general | _ErrorT_co_general:
+        match self._contents:
+            case (result, NOTHING):
+                return result
+            case (NOTHING, error):
+                return error
+
+
+    @contextlib.contextmanager
+    def some(self) -> Iterator[_ResultT_co_general]:
+        match self._contents:
+            case (result, NOTHING):
+                yield result
+            case _:
+                raise StopIteration()
+
+
+
+
+    _SecondResultT_co_general = TypeVar("_SecondResultT_co_general", covariant=True)
+    _SecondErrorT_co_general = TypeVar("_SecondErrorT_co_general", covariant=True)
+    def and_then(self, functor: Callable[[_ResultT_co_general], Maybe[_SecondResultT_co_general | _SecondErrorT_co_general]]) -> Maybe[_SecondResultT_co_general, _ErrorT_co_general | _SecondErrorT_co_general]:
+        match self._contents:
+            case (result, NOTHING):
+                return functor(result)
+            case _:
+                return self
+
+    def or_else(self, functor: Callable[[_ErrorT_co_general], Maybe[_SecondResultT_co_general, _SecondErrorT_co_general]]) -> Maybe[_SecondResultT_co_general, _SecondErrorT_co_general]:
+        match self._contents:
+            case (NOTHING, error):
+                return functor(error)
+            case _:
+                return self
+
+    def and_then_async(self, functor: Coroutine[[_ResultT_co_general], Maybe[_SecondResultT_co_general | _SecondErrorT_co_general]]) -> Awaitable[Maybe[_SecondResultT_co_general, _ErrorT_co_general | _SecondErrorT_co_general]]:
+        match self._contents:
+            case (result, NOTHING):
+                return await functor(result)
+            case _:
+                return self
+
+    def or_else_async(self, functor: Coroutine[[_ErrorT_co_general], Maybe[_SecondResultT_co_general, _SecondErrorT_co_general]]) -> Awaitable[Maybe[_SecondResultT_co_general, _SecondErrorT_co_general]]:
+        match self._contents:
+            case (NOTHING, error):
+                return await functor(error)
+            case _:
+                return self
+
+@dataclasses.dataclass
+class DefinedResult(Generic[_ResultT_co, _ErrorT_co], Maybe[SuccessData[_ResultT_co], DefinedErrorData[_ErrorT_co]]):
+    pass
 
 
 _ExecuteReturnT_co = TypeVar(
