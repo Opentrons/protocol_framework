@@ -78,7 +78,6 @@ from .exceptions import (
     InvalidDispenseVolumeError,
     StorageLimitReachedError,
     InvalidLiquidError,
-    LiquidClassDoesNotExistError,
 )
 
 from .error_occurrence import ErrorOccurrence, ProtocolCommandFailedError
@@ -165,5 +164,4 @@ __all__ = [
     "OperationLocationNotInWellError",
     "InvalidDispenseVolumeError",
     "StorageLimitReachedError",
-    "LiquidClassDoesNotExistError",
 ]

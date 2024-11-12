@@ -1155,15 +1155,3 @@ class StorageLimitReachedError(ProtocolEngineError):
     ) -> None:
         """Build an StorageLimitReached."""
         super().__init__(ErrorCodes.GENERAL_ERROR, message, detail, wrapping)
-
-
-class LiquidClassDoesNotExistError(ProtocolEngineError):
-    """Raised when referencing a liquid class that has not been loaded."""
-
-    def __init__(
-        self,
-        message: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
-        wrapping: Optional[Sequence[EnumeratedError]] = None,
-    ) -> None:
-        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)

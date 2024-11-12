@@ -62,14 +62,9 @@ class LiquidClassView(HasState[LiquidClassState]):
     def __init__(self, state: LiquidClassState) -> None:
         self._state = state
 
-    def get(self, liquid_class_id: str) -> LiquidClassRecord:
+    def get(self, liquid_class_id: str) -> Optional[LiquidClassRecord]:
         """Get the LiquidClassRecord with the given identifier."""
-        try:
-            return self._state.liquid_class_record_by_id[liquid_class_id]
-        except KeyError as e:
-            raise errors.LiquidClassDoesNotExistError(
-                f"Liquid class ID {liquid_class_id} not found."
-            ) from e
+        return self._state.liquid_class_record_by_id.get(liquid_class_id)
 
     def get_id_for_liquid_class_record(
         self, liquid_class_record: LiquidClassRecord
