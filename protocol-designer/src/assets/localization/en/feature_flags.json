@@ -27,9 +27,5 @@
   "OT_PD_ENABLE_HOT_KEYS_DISPLAY": {
     "title": "Timeline editing tips",
     "description": "Show tips for working with steps next to the protocol timeline"
-  },
-  "OT_PD_ENABLE_STEP_GROUPING": {
-    "title": "Enable step grouping",
-    "description": "You can group steps together."
   }
 }
