@@ -18,6 +18,10 @@ export const useBlockingHint = (args: HintProps): JSX.Element | null => {
   const { enabled, hintKey, handleCancel, handleContinue, content } = args
   const dismissedHints = useSelector(getDismissedHints)
   const isDismissed = hintKey != null && dismissedHints.includes(hintKey)
+
+  if (enabled && hintKey == null) {
+    handleContinue()
+  }
   if (isDismissed) {
     if (enabled) {
       handleContinue()

@@ -94,6 +94,7 @@ export function Landing(): JSX.Element {
         />
       ) : null}
       <Flex
+        data-cy="landing-page"
         backgroundColor={COLORS.grey20}
         flexDirection={DIRECTION_COLUMN}
         alignItems={ALIGN_CENTER}
@@ -141,7 +142,7 @@ export function Landing(): JSX.Element {
               {t('edit_existing')}
             </StyledText>
           </Flex>
-          <input type="file" onChange={loadFile}></input>
+          <input type="file" onChange={loadFile} />
         </StyledLabel>
       </Flex>
       <EndUserAgreementFooter />
