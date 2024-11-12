@@ -894,7 +894,10 @@ class ProtocolContext(CommandPublisher):
             mount, checked_instrument_name
         )
 
-        is_96_channel = checked_instrument_name == PipetteNameType.P1000_96
+        is_96_channel = checked_instrument_name in [
+            PipetteNameType.P1000_96,
+            PipetteNameType.P200_96,
+        ]
 
         tip_racks = tip_racks or []
 
