@@ -11,6 +11,7 @@ interface FlowRateFieldProps extends FieldProps {
   volume: unknown
   tiprack: unknown
   pipetteId?: string | null
+  showTooltip?: boolean
 }
 
 export function FlowRateField(props: FlowRateFieldProps): JSX.Element {

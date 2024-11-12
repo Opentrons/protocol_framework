@@ -228,6 +228,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         stepType={formData.stepType}
         isDisposalLocation={isDisposalLocation}
         padding={`0 ${SPACING.spacing16}`}
+        tooltipContent={null}
       />
       <Divider marginY="0" />
       <VolumeField
@@ -237,10 +238,13 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
       />
       {enableReturnTip ? (
         <>
-          <PickUpTipField {...propsForFields.pickUpTip_location} />
+          <Divider marginY="0" />
+          <PickUpTipField
+            {...propsForFields.pickUpTip_location}
+            padding={`0 ${SPACING.spacing16}`}
+          />
           {userSelectedPickUpTipLocation ? (
             <>
-              <Divider marginY="0" />
               <TipWellSelectionField
                 {...propsForFields.pickUpTip_wellNames}
                 nozzles={String(propsForFields.nozzles.value) ?? null}
@@ -255,6 +259,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
       <DropTipField
         {...propsForFields.dropTip_location}
         padding={`0 ${SPACING.spacing16}`}
+        tooltipContent={null}
       />
       {userSelectedDropTipLocation && enableReturnTip ? (
         <>
@@ -287,6 +292,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           flowRateType={tab}
           volume={propsForFields.volume?.value ?? 0}
           tiprack={propsForFields.tipRack.value}
+          showTooltip={false}
         />
       </Flex>
       <Divider marginY="0" />

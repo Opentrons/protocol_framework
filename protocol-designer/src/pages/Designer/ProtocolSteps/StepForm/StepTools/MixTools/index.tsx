@@ -164,6 +164,7 @@ export function MixTools(props: StepFormProps): JSX.Element {
       <DropTipField
         {...propsForFields.dropTip_location}
         padding={`0 ${SPACING.spacing16}`}
+        tooltipContent={null}
       />
       {userSelectedDropTipLocation && enableReturnTip ? (
         <>
