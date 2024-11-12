@@ -90,7 +90,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
     color = COLORS.white
   }
   if (hovered && !selected) {
-    backgroundColor = COLORS.blue30
+    backgroundColor = isStartingOrEndingState ? COLORS.blue30 : COLORS.grey30
     color = COLORS.black90
   }
   if (hasError) {
@@ -204,7 +204,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
           role="button"
           onDoubleClick={onDoubleClick}
           onClick={onClick}
-          padding={SPACING.spacing12}
+          padding={`${SPACING.spacing8} ${SPACING.spacing12}`}
           borderRadius={BORDERS.borderRadius8}
           width="100%"
           backgroundColor={backgroundColor}
@@ -225,10 +225,10 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
             >
               {iconName && (
                 <Icon
-                  size="1rem"
+                  size="1.25rem"
                   name={iconName}
                   color={iconColor ?? color}
-                  minWidth="1rem"
+                  minWidth="1.25rem"
                 />
               )}
               <StyledText
