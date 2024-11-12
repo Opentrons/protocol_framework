@@ -87,6 +87,7 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
         <Flex
           alignSelf={goBack != null ? 'auto' : ALIGN_END}
           justifyContent={JUSTIFY_SPACE_BETWEEN}
+          height="3.5rem"
         >
           {goBack != null ? (
             <Btn onClick={goBack} css={BUTTON_LINK_STYLE}>
