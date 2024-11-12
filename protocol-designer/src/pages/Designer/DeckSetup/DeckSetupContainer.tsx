@@ -179,7 +179,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
         width="100%"
         height={zoomIn.slot != null ? '75vh' : '70vh'}
         flexDirection={DIRECTION_COLUMN}
-        padding={SPACING.spacing40}
+        paddingY={SPACING.spacing40}
         maxHeight="39.375rem" // this is to block deck view from enlarging
       >
         <Flex
