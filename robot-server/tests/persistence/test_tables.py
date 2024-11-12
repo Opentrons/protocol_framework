@@ -569,9 +569,11 @@ def _normalize_statement(statement: str) -> str:
 def test_creating_from_metadata_emits_expected_statements(
     metadata: sqlalchemy.MetaData, expected_statements: List[str]
 ) -> None:
-    """Test that fresh databases are created with the expected statements.
+    """Test that each schema compiles down to the expected SQL statements.
 
     This is a snapshot test to help catch accidental changes to our SQL schema.
+    For example, we might refactor the way we define the schema on the Python side,
+    but we probably expect the way that it compiles down to SQL to stay stable.
 
     Based on:
     https://docs.sqlalchemy.org/en/14/faq/metadata_schema.html#faq-ddl-as-string
@@ -597,6 +599,15 @@ def test_creating_from_metadata_emits_expected_statements(
 
 
 def test_migrated_db_matches_db_created_from_metadata(tmp_path: Path) -> None:
+    """Test that the output of migration matches `metadata.create_all()`.
+
+    In other words, constructing the database by going through our migration system
+    should have the same final result as if we created the database directly from
+    the latest schema version.
+
+    This prevents migrations from sneaking in arbitrary changes and causing the actual
+    database to not exactly match what our SQLAlchemy `metadata` object declares.
+    """
     migration_orchestrator = make_migration_orchestrator(prepared_root=tmp_path)
     active_subdirectory = migration_orchestrator.migrate_to_latest()
 
