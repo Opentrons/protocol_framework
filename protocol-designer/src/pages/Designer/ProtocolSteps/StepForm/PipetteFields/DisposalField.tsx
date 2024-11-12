@@ -92,7 +92,7 @@ export function DisposalField(props: DisposalFieldProps): JSX.Element {
             {...propsForFields.blowout_location}
             options={disposalDestinationOptions}
             title={t('protocol_steps:blowout_location')}
-            addPadding={false}
+            padding="0"
             width="16.5rem"
           />
           <FlowRateField

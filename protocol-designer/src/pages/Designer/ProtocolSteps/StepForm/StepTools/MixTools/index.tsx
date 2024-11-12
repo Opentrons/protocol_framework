@@ -82,20 +82,29 @@ export function MixTools(props: StepFormProps): JSX.Element {
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
   return toolboxStep === 0 ? (
-    <Flex flexDirection={DIRECTION_COLUMN}>
-      <PipetteField {...propsForFields.pipette} />
+    <Flex
+      flexDirection={DIRECTION_COLUMN}
+      gridGap={SPACING.spacing12}
+      paddingY={SPACING.spacing16}
+    >
+      <PipetteField
+        {...propsForFields.pipette}
+        padding={`0 ${SPACING.spacing16}`}
+      />
       {is96Channel ? <PartialTipField {...propsForFields.nozzles} /> : null}
       <Divider marginY="0" />
       <TiprackField
         {...propsForFields.tipRack}
         pipetteId={propsForFields.pipette.value}
+        padding={`0 ${SPACING.spacing16}`}
       />
       <Divider marginY="0" />
       <LabwareField
         {...propsForFields.labware}
         errorToShow={getFormLevelError('labware', mappedErrorsToField)}
+        padding={`0 ${SPACING.spacing16}`}
+        tooltipContent={null}
       />
-      <Divider marginY="0" />
       <Divider marginY="0" />
       <WellSelectionField
         {...propsForFields.wells}
@@ -108,11 +117,13 @@ export function MixTools(props: StepFormProps): JSX.Element {
           ) ?? false
         }
         errorToShow={getFormLevelError('wells', mappedErrorsToField)}
+        padding={`0 ${SPACING.spacing16}`}
       />
       <Divider marginY="0" />
       <VolumeField
         {...propsForFields.volume}
         errorToShow={getFormLevelError('volume', mappedErrorsToField)}
+        padding={`0 ${SPACING.spacing16}`}
       />
       <Divider marginY="0" />
       <InputStepFormField
@@ -120,6 +131,8 @@ export function MixTools(props: StepFormProps): JSX.Element {
         units={t('units.times')}
         title={t('protocol_steps:mix_repetitions')}
         errorToShow={getFormLevelError('times', mappedErrorsToField)}
+        padding={`0 ${SPACING.spacing16}`}
+        showTooltip={false}
       />
       <Divider marginY="0" />
       <ChangeTipField
@@ -128,8 +141,9 @@ export function MixTools(props: StepFormProps): JSX.Element {
         dispenseWells={formData.dispense_wells}
         path={formData.path}
         stepType={formData.stepType}
+        padding={`0 ${SPACING.spacing16}`}
+        tooltipContent={null}
       />
-      <Divider marginY="0" />
       {enableReturnTip ? (
         <>
           <PickUpTipField {...propsForFields.pickUpTip_location} />
@@ -147,7 +161,10 @@ export function MixTools(props: StepFormProps): JSX.Element {
         </>
       ) : null}
       <Divider marginY="0" />
-      <DropTipField {...propsForFields.dropTip_location} />
+      <DropTipField
+        {...propsForFields.dropTip_location}
+        padding={`0 ${SPACING.spacing16}`}
+      />
       {userSelectedDropTipLocation && enableReturnTip ? (
         <>
           <Divider marginY="0" />
@@ -161,12 +178,17 @@ export function MixTools(props: StepFormProps): JSX.Element {
       ) : null}
     </Flex>
   ) : (
-    <Flex flexDirection={DIRECTION_COLUMN} width="100%">
-      <Flex padding={SPACING.spacing16}>
+    <Flex
+      flexDirection={DIRECTION_COLUMN}
+      width="100%"
+      paddingY={SPACING.spacing16}
+      gridGap={SPACING.spacing12}
+    >
+      <Flex padding={`0 ${SPACING.spacing16}`}>
         <Tabs tabs={[aspirateTab, dispenseTab]} />
       </Flex>
       <Divider marginY="0" />
-      <Flex padding={SPACING.spacing16} width="100%">
+      <Flex padding={`0 ${SPACING.spacing16}`} width="100%">
         <FlowRateField
           key={`${tab}_flowRate`}
           {...propsForFields[`${tab}_flowRate`]}
@@ -191,6 +213,7 @@ export function MixTools(props: StepFormProps): JSX.Element {
             secondValue={formData.mix_wellOrder_second}
             firstName={'mix_wellOrder_first'}
             secondName={'mix_wellOrder_second'}
+            padding={`0 ${SPACING.spacing16}`}
           />
           <Divider marginY="0" />
           <PositionField
@@ -202,13 +225,14 @@ export function MixTools(props: StepFormProps): JSX.Element {
             labwareId={
               formData[getLabwareFieldForPositioningField('mix_mmFromBottom')]
             }
+            padding={`0 ${SPACING.spacing16}`}
           />
           <Divider marginY="0" />
         </>
       ) : null}
       <Flex
         flexDirection={DIRECTION_COLUMN}
-        padding={SPACING.spacing12}
+        padding={`0 ${SPACING.spacing16}`}
         gridGap={SPACING.spacing8}
       >
         <StyledText desktopStyle="bodyDefaultSemiBold">
@@ -223,6 +247,9 @@ export function MixTools(props: StepFormProps): JSX.Element {
           isChecked={propsForFields[`${tab}_delay_checkbox`].value === true}
           checkboxUpdateValue={
             propsForFields[`${tab}_delay_checkbox`].updateValue
+          }
+          tooltipText={
+            propsForFields[`${tab}_delay_checkbox`].tooltipContent ?? null
           }
         >
           {formData[`${tab}_delay_checkbox`] === true ? (
@@ -249,6 +276,9 @@ export function MixTools(props: StepFormProps): JSX.Element {
               checkboxValue={propsForFields.blowout_checkbox.value}
               isChecked={propsForFields.blowout_checkbox.value === true}
               checkboxUpdateValue={propsForFields.blowout_checkbox.updateValue}
+              tooltipText={
+                propsForFields.blowout_checkbox.tooltipContent ?? null
+              }
             >
               {formData.blowout_checkbox === true ? (
                 <Flex
@@ -264,6 +294,7 @@ export function MixTools(props: StepFormProps): JSX.Element {
                       'blowout_location',
                       mappedErrorsToField
                     )}
+                    padding="0"
                   />
                   <FlowRateField
                     key="blowout_flowRate"
@@ -290,6 +321,9 @@ export function MixTools(props: StepFormProps): JSX.Element {
               isChecked={propsForFields.mix_touchTip_checkbox.value === true}
               checkboxUpdateValue={
                 propsForFields.mix_touchTip_checkbox.updateValue
+              }
+              tooltipText={
+                propsForFields.mix_touchTip_checkbox.tooltipContent ?? null
               }
             >
               {formData.mix_touchTip_checkbox === true ? (

@@ -206,6 +206,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
       flexDirection={DIRECTION_COLUMN}
       ref={dropDownMenuWrapperRef}
       gridGap={SPACING.spacing4}
+      width={width}
     >
       {title !== null ? (
         <Flex
@@ -214,7 +215,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
           alignItems={ALIGN_CENTER}
         >
           <StyledText
-            desktopStyle="captionRegular"
+            desktopStyle="bodyDefaultRegular"
             color={disabled ? COLORS.grey35 : COLORS.grey60}
           >
             {title}
