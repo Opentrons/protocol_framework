@@ -60,7 +60,7 @@ def subject(
 
 @pytest.fixture
 def protocol_commands() -> List[pe_commands.Command]:
-    """Get a StateSummary value object."""
+    """Get protocol commands list."""
     return [
         pe_commands.WaitForResume(
             id="pause-1",
@@ -102,7 +102,7 @@ def protocol_commands() -> List[pe_commands.Command]:
 
 @pytest.fixture
 def protocol_commands_errors() -> List[pe_commands.Command]:
-    """Get a StateSummary value object."""
+    """Get protocol commands errors list."""
     return [
         pe_commands.WaitForResume(
             id="pause-1",

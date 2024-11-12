@@ -1104,7 +1104,7 @@ def test_get_state_update_for_false_positive() -> None:
 
 
 def test_get_errors_slice_empty() -> None:
-    """It should return a slice from the tail if no current command."""
+    """It should return an empty error list."""
     subject = CommandStore(
         config=_make_config(),
         error_recovery_policy=_placeholder_error_recovery_policy,
@@ -1125,11 +1125,6 @@ def test_get_errors_slice() -> None:
     )
 
     subject_view = CommandView(subject.state)
-
-    # error_1 = ErrorOccurrence.construct(id="error-id-1")  # type: ignore[call-arg]
-    # error_2 = ErrorOccurrence.construct(id="error-id-2")  # type: ignore[call-arg]
-    # error_3 = ErrorOccurrence.construct(id="error-id-3")  # type: ignore[call-arg]
-    # error_4 = ErrorOccurrence.construct(id="error-id-4")  # type: ignore[call-arg]
 
     queue_1 = actions.QueueCommandAction(
         request=commands.WaitForResumeCreate(

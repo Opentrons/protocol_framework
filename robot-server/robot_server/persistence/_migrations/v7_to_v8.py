@@ -3,6 +3,7 @@
 Summary of changes from schema 7:
 
 - Adds a new command_error to store the commands error in the commands table
+- Adds a new command_status to store the commands status in the commands table
 """
 
 import json
