@@ -11,6 +11,7 @@ import {
   StyledText,
 } from '@opentrons/components'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface SendButtonProps {
   handleClick: () => void
@@ -18,18 +19,20 @@ interface SendButtonProps {
   isLoading?: boolean
 }
 
-const progressTexts = [
-  'Initializing...',
-  'Processing...',
-  'Generating...',
-  'Finalizing...',
-]
-
 export function SendButton({
   handleClick,
   disabled = false,
   isLoading = false,
 }: SendButtonProps): JSX.Element {
+  const { t } = useTranslation('protocol_generator')
+
+  const progressTexts = [
+    t('progressInitializing'),
+    t('progressProcessing'),
+    t('progressGenerating'),
+    t('progressFinalizing'),
+  ]
+
   const playButtonStyle = css`
     -webkit-tap-highlight-color: transparent;
     &:focus {
