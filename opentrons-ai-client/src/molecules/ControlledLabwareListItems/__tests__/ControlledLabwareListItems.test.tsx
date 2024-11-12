@@ -10,11 +10,11 @@ const TestFormProviderComponent = () => {
     defaultValues: {
       labwares: [
         {
-          labwareURI: 'opentrons/eppendorf_96_tiprack_1000ul_eptips/1',
+          labwareURI: 'opentrons/opentrons_flex_96_tiprack_1000ul/1',
           count: 1,
         },
         {
-          labwareURI: 'opentrons/eppendorf_96_tiprack_10ul_eptips/1',
+          labwareURI: 'opentrons/opentrons_flex_96_tiprack_50ul/1',
           count: 1,
         },
       ],
@@ -39,10 +39,10 @@ describe('ControlledLabwareListItems', () => {
     render()
 
     expect(
-      screen.getByText('(Retired) Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL')
+      screen.getByText('Opentrons Flex 96 Tip Rack 1000 µL')
     ).toBeInTheDocument()
     expect(
-      screen.getByText('(Retired) Eppendorf epT.I.P.S. 96 Tip Rack 10 µL')
+      screen.getByText('Opentrons Flex 96 Tip Rack 50 µL')
     ).toBeInTheDocument()
   })
 
@@ -64,7 +64,7 @@ describe('ControlledLabwareListItems', () => {
     render()
 
     expect(
-      screen.getByText('(Retired) Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL')
+      screen.getByText('Opentrons Flex 96 Tip Rack 1000 µL')
     ).toBeInTheDocument()
 
     const removeButton = screen.getAllByText('Remove')[0]
@@ -72,7 +72,7 @@ describe('ControlledLabwareListItems', () => {
 
     await waitFor(() => {
       expect(
-        screen.queryByText('(Retired) Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL')
+        screen.queryByText('Opentrons Flex 96 Tip Rack 1000 µL')
       ).not.toBeInTheDocument()
     })
   })

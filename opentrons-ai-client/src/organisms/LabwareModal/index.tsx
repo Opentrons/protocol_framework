@@ -13,9 +13,7 @@ import {
 } from '@opentrons/components'
 import { useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import {
-  getLabwareDefURI,
-} from '@opentrons/shared-data'
+import { getLabwareDefURI } from '@opentrons/shared-data'
 import React, { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { reduce } from 'lodash'

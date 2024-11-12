@@ -163,7 +163,7 @@ describe('CreateProtocol', () => {
 
     expect(previewItems).toHaveLength(9)
     expect(previewItems[7]).toHaveTextContent(
-      'Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL'
+      'Opentrons Flex 96 Tip Rack 1000 µL'
     )
     expect(previewItems[8]).toHaveTextContent('Test liquid')
   })
