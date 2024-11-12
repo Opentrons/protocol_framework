@@ -1,11 +1,15 @@
 """Tests for SQL tables."""
 
 
+from pathlib import Path
 from typing import List, cast
 
 import pytest
 import sqlalchemy
 
+from robot_server.persistence.database import sql_engine_ctx
+from robot_server.persistence.file_and_directory_names import DB_FILE
+from robot_server.persistence.persistence_directory import make_migration_orchestrator
 from robot_server.persistence.tables import (
     metadata as latest_metadata,
     schema_3,
@@ -562,7 +566,7 @@ def _normalize_statement(statement: str) -> str:
         (schema_2.metadata, EXPECTED_STATEMENTS_V2),
     ],
 )
-def test_creating_tables_emits_expected_statements(
+def test_creating_from_metadata_emits_expected_statements(
     metadata: sqlalchemy.MetaData, expected_statements: List[str]
 ) -> None:
     """Test that fresh databases are created with the expected statements.
@@ -583,6 +587,33 @@ def test_creating_tables_emits_expected_statements(
     engine = sqlalchemy.create_mock_engine("sqlite://", record_statement)
     metadata.create_all(cast(sqlalchemy.engine.Engine, engine))
 
+    normalized_actual = [_normalize_statement(s) for s in actual_statements]
+    normalized_expected = [_normalize_statement(s) for s in expected_statements]
+
+    # Compare ignoring order. SQLAlchemy appears to emit CREATE INDEX statements in a
+    # nondeterministic order that varies across runs. Although statement order
+    # theoretically matters, it's unlikely to matter in practice for our purposes here.
+    assert set(normalized_actual) == set(normalized_expected)
+
+
+def test_migrated_db_matches_db_created_from_metadata(tmp_path: Path) -> None:
+    migration_orchestrator = make_migration_orchestrator(prepared_root=tmp_path)
+    active_subdirectory = migration_orchestrator.migrate_to_latest()
+
+    expected_statements = EXPECTED_STATEMENTS_LATEST
+
+    with sql_engine_ctx(
+        active_subdirectory / DB_FILE
+    ) as sql_engine, sql_engine.begin() as transaction:
+        actual_statements = (
+            transaction.execute(
+                sqlalchemy.text("SELECT sql FROM sqlite_schema WHERE sql IS NOT NULL")
+            )
+            .scalars()
+            .all()
+        )
+
+    # breakpoint()
     normalized_actual = [_normalize_statement(s) for s in actual_statements]
     normalized_expected = [_normalize_statement(s) for s in expected_statements]
 
