@@ -47,11 +47,7 @@ export function InputPrompt(): JSX.Element {
 
   // This is to autofill the input field for when we navigate to the chat page from the existing/new protocol generator pages
   useEffect(() => {
-    setValue('userPrompt', chatPromptAtomValue)
-  }, [chatPromptAtomValue, setValue])
-
-  useEffect(() => {
-    setValue('userPrompt', chatPromptAtomValue)
+    setValue('userPrompt', chatPromptAtomValue.prompt)
   }, [chatPromptAtomValue, setValue])
 
   const handleClick = async (): Promise<void> => {
