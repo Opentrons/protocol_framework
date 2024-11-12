@@ -163,15 +163,11 @@ export function Designer(): JSX.Element {
         {tab === 'startingDeck' ? (
           <Flex
             flexDirection={DIRECTION_COLUMN}
-            backgroundColor={
-              tab === 'startingDeck' && deckView === rightString
-                ? COLORS.white
-                : COLORS.grey10
-            }
+            backgroundColor={COLORS.grey10}
             padding={zoomIn.slot != null ? '0' : SPACING.spacing80}
             height="calc(100vh - 64px)"
           >
-            <Flex flexDirection={DIRECTION_COLUMN}>
+            <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing24}>
               {zoomIn.slot == null ? (
                 <Flex alignSelf={ALIGN_END}>
                   <ToggleGroup
