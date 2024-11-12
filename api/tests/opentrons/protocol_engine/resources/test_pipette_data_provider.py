@@ -65,6 +65,13 @@ def test_get_virtual_pipette_static_config(
         back_left_corner_offset=Point(0, 0, 10.45),
         front_right_corner_offset=Point(0, 0, 10.45),
         pipette_lld_settings={},
+        plunger_positions={
+            "top": 19.5,
+            "bottom": -8.5,
+            "blow_out": -13.0,
+            "drop_tip": -27.0,
+        },
+        shaft_ul_per_mm=0.785,
     )
 
 
@@ -94,6 +101,13 @@ def test_configure_virtual_pipette_for_volume(
         back_left_corner_offset=Point(-8.0, -22.0, -259.15),
         front_right_corner_offset=Point(-8.0, -22.0, -259.15),
         pipette_lld_settings={"t50": {"minHeight": 1.0, "minVolume": 0.0}},
+        plunger_positions={
+            "top": 0.0,
+            "bottom": 71.5,
+            "blow_out": 76.5,
+            "drop_tip": 90.5,
+        },
+        shaft_ul_per_mm=0.785,
     )
     subject_instance.configure_virtual_pipette_for_volume(
         "my-pipette", 1, result1.model
@@ -120,6 +134,13 @@ def test_configure_virtual_pipette_for_volume(
         back_left_corner_offset=Point(-8.0, -22.0, -259.15),
         front_right_corner_offset=Point(-8.0, -22.0, -259.15),
         pipette_lld_settings={"t50": {"minHeight": 1.0, "minVolume": 0.0}},
+        plunger_positions={
+            "top": 0.0,
+            "bottom": 61.5,
+            "blow_out": 76.5,
+            "drop_tip": 90.5,
+        },
+        shaft_ul_per_mm=0.785,
     )
 
 
@@ -149,6 +170,13 @@ def test_load_virtual_pipette_by_model_string(
         back_left_corner_offset=Point(-16.0, 43.15, 35.52),
         front_right_corner_offset=Point(16.0, -43.15, 35.52),
         pipette_lld_settings={},
+        plunger_positions={
+            "top": 19.5,
+            "bottom": -14.5,
+            "blow_out": -19.0,
+            "drop_tip": -33.4,
+        },
+        shaft_ul_per_mm=9.621,
     )
 
 
@@ -247,6 +275,7 @@ def pipette_dict(
             "t1000": {"minHeight": 0.5, "minVolume": 0},
         },
         "plunger_positions": {"top": 100, "bottom": 20, "blow_out": 10, "drop_tip": 0},
+        "shaft_ul_per_mm": 5.0,
     }
 
 
@@ -293,6 +322,8 @@ def test_get_pipette_static_config(
             "t200": {"minHeight": 0.5, "minVolume": 0},
             "t1000": {"minHeight": 0.5, "minVolume": 0},
         },
+        plunger_positions={"top": 100, "bottom": 20, "blow_out": 10, "drop_tip": 0},
+        shaft_ul_per_mm=5.0,
     )
 
 

@@ -1,14 +1,8 @@
 from typing import Optional, Dict, Union
 from opentrons.hardware_control import SyncHardwareAPI
-from opentrons_shared_data.pipette.pipette_definition import SupportedTipsDefinition
 
 from opentrons.types import Mount, MountType, Point, AxisType, AxisMapType
 from opentrons_shared_data.pipette import types as pip_types
-from opentrons_shared_data.pipette.ul_per_mm import (
-    piecewise_volume_conversion,
-    PIPETTING_FUNCTION_FALLBACK_VERSION,
-    PIPETTING_FUNCTION_LATEST_VERSION,
-)
 from opentrons.protocol_api._types import PipetteActionTypes, PlungerPositionTypes
 from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
@@ -48,31 +42,6 @@ class RobotCore(AbstractRobot):
     def _convert_to_engine_mount(self, axis_map: AxisMapType) -> Dict[MotorAxis, float]:
         return {_AXIS_TYPE_TO_MOTOR_AXIS[ax]: dist for ax, dist in axis_map.items()}
 
-    def _ul_per_mm_conversion(
-        self,
-        pipette_settings: SupportedTipsDefinition,
-        ul: float,
-        action: PipetteActionTypes,
-    ) -> float:
-        if action == PipetteActionTypes.ASPIRATE_ACTION:
-            fallback = pipette_settings.aspirate.default[
-                PIPETTING_FUNCTION_FALLBACK_VERSION
-            ]
-            sequence = pipette_settings.aspirate.default.get(
-                PIPETTING_FUNCTION_LATEST_VERSION, fallback
-            )
-        elif action == PipetteActionTypes.BLOWOUT_ACTION:
-            # TODO in followup work we should support handling blow out actions for volume.
-            return 1.0
-        else:
-            fallback = pipette_settings.aspirate.default[
-                PIPETTING_FUNCTION_FALLBACK_VERSION
-            ]
-            sequence = pipette_settings.dispense.default.get(
-                PIPETTING_FUNCTION_LATEST_VERSION, fallback
-            )
-        return piecewise_volume_conversion(ul, sequence)
-
     def get_pipette_type_from_engine(
         self, mount: Union[Mount, str]
     ) -> Optional[pip_types.PipetteNameType]:
@@ -90,31 +59,39 @@ class RobotCore(AbstractRobot):
     def get_plunger_position_from_name(
         self, mount: Mount, position_name: PlungerPositionTypes
     ) -> float:
-        maybe_pipette_state = self._sync_hardware_api.get_attached_instrument(mount)
-        if not maybe_pipette_state:
+        engine_mount = MountType[mount.name]
+        maybe_pipette = self._engine_client.state.pipettes.get_by_mount(engine_mount)
+        if not maybe_pipette:
             return 0.0
-        return maybe_pipette_state["plunger_positions"][position_name.value]  # type: ignore[no-any-return]
+        return self._engine_client.state.pipettes.lookup_plunger_position_name(
+            maybe_pipette.id, position_name.value
+        )
 
     def get_plunger_position_from_volume(
         self, mount: Mount, volume: float, action: PipetteActionTypes, robot_type: str
     ) -> float:
-        maybe_pipette_state = self._sync_hardware_api.get_attached_instrument(mount)
-        if not maybe_pipette_state:
-            return 0.0
-        converted_working_volume = pip_types.PipetteTipType.check_and_return_type(
-            maybe_pipette_state["working_volume"], maybe_pipette_state["max_volume"]
+        engine_mount = MountType[mount.name]
+        maybe_pipette = self._engine_client.state.pipettes.get_by_mount(engine_mount)
+        if not maybe_pipette:
+            raise RuntimeError(
+                f"Cannot load plunger position as no pipette is attached to {mount}"
+            )
+        convert_volume = (
+            self._engine_client.state.pipettes.lookup_volume_to_mm_conversion(
+                maybe_pipette.id, volume, action.value
+            )
         )
-        tip_settings = maybe_pipette_state["supported_tips"][converted_working_volume]
-        plunger_bottom = maybe_pipette_state["plunger_positions"]["bottom"]
-
-        convert_volume = self._ul_per_mm_conversion(tip_settings, volume, action)
-
+        plunger_bottom = (
+            self._engine_client.state.pipettes.lookup_plunger_position_name(
+                maybe_pipette.id, "bottom"
+            )
+        )
         mm = volume / convert_volume
         if robot_type == "OT-2 Standard":
             position = plunger_bottom + mm
         else:
             position = plunger_bottom - mm
-        return round(position, 6)  # type: ignore[no-any-return]
+        return round(position, 6)
 
     def move_to(self, mount: Mount, destination: Point, speed: Optional[float]) -> None:
         engine_mount = MountType[mount.name]

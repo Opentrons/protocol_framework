@@ -10,11 +10,15 @@ from typing import (
     Mapping,
     Optional,
     Tuple,
+    cast,
 )
 
 from typing_extensions import assert_never
 
 from opentrons_shared_data.pipette import pipette_definition
+from opentrons_shared_data.pipette.ul_per_mm import calculate_ul_per_mm
+from opentrons_shared_data.pipette.types import UlPerMmAction
+
 from opentrons.config.defaults_ot2 import Z_RETRACT_DISTANCE
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons.hardware_control import CriticalPoint
@@ -99,6 +103,8 @@ class StaticPipetteConfig:
     bounding_nozzle_offsets: BoundingNozzlesOffsets
     default_nozzle_map: NozzleMap  # todo(mm, 2024-10-14): unused, remove?
     lld_settings: Optional[Dict[str, Dict[str, float]]]
+    plunger_positions: Dict[str, float]
+    shaft_ul_per_mm: float
 
 
 @dataclasses.dataclass
@@ -288,6 +294,8 @@ class PipetteStore(HasState[PipetteState], HandlesActions):
                 ),
                 default_nozzle_map=config.nozzle_map,
                 lld_settings=config.pipette_lld_settings,
+                plunger_positions=config.plunger_positions,
+                shaft_ul_per_mm=config.shaft_ul_per_mm,
             )
             self._state.flow_rates_by_id[
                 state_update.pipette_config.pipette_id
@@ -772,3 +780,31 @@ class PipetteView(HasState[PipetteState]):
         ):
             return False
         return True
+
+    def lookup_volume_to_mm_conversion(
+        self, pipette_id: str, volume: float, action: str
+    ) -> float:
+        """Get the volumn to mm conversion for a pipette."""
+        try:
+            lookup_volume = self.get_working_volume(pipette_id)
+        except errors.TipAttachedError:
+            lookup_volume = self.get_maximum_volume(pipette_id)
+
+        pipette_config = self.get_config(pipette_id)
+        lookup_table_from_config = pipette_config.tip_configuration_lookup_table
+        try:
+            tip_settings = lookup_table_from_config[lookup_volume]
+        except KeyError:
+            tip_settings = list(lookup_table_from_config.values())[0]
+        return calculate_ul_per_mm(
+            volume,
+            cast(UlPerMmAction, action),
+            tip_settings,
+            shaft_ul_per_mm=pipette_config.shaft_ul_per_mm,
+        )
+
+    def lookup_plunger_position_name(
+        self, pipette_id: str, position_name: str
+    ) -> float:
+        """Get the plunger position provided for the given pipette id."""
+        return self.get_config(pipette_id).plunger_positions[position_name]

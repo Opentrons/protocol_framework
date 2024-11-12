@@ -266,6 +266,7 @@ class PipetteHandlerProvider(Generic[MountType]):
                 "blow_out": instr.plunger_positions.blow_out,
                 "drop_tip": instr.plunger_positions.drop_tip,
             }
+            result["shaft_ul_per_mm"] = instr.config.shaft_ul_per_mm
         return cast(PipetteDict, result)
 
     @property

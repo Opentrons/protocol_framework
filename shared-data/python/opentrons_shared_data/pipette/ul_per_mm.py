@@ -14,7 +14,7 @@ def calculate_ul_per_mm(
     ul: float,
     action: UlPerMmAction,
     active_tip_settings: SupportedTipsDefinition,
-    requested_pipetting_version: PipetteFunctionKeyType,
+    requested_pipetting_version: Optional[PipetteFunctionKeyType] = None,
     shaft_ul_per_mm: Optional[float] = None,
 ) -> float:
     if action == "aspirate":

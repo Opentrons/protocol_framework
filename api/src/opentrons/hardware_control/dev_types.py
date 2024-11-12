@@ -101,6 +101,7 @@ class PipetteDict(InstrumentDict):
     current_nozzle_map: NozzleMap
     lld_settings: Optional[Dict[str, Dict[str, float]]]
     plunger_positions: Dict[str, float]
+    shaft_ul_per_mm: float
 
 
 class PipetteStateDict(TypedDict):
