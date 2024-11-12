@@ -6,11 +6,39 @@ from click import Context
 from opentrons.cli import analyze
 import json
 import argparse
+import traceback
 from datetime import datetime
 from abr_testing.automation import google_sheets_tool
 from abr_testing.data_collection import read_robot_logs
 from typing import Any, Tuple, List, Dict, Union, NoReturn
 from abr_testing.tools import plate_reader
+
+
+def build_parser() -> Any:
+    """Builds argument parser."""
+    parser = argparse.ArgumentParser(description="Read run logs on google drive.")
+    parser.add_argument(
+        "storage_directory",
+        metavar="STORAGE_DIRECTORY",
+        type=str,
+        nargs=1,
+        help="Path to long term storage directory for run logs.",
+    )
+    parser.add_argument(
+        "sheet_name",
+        metavar="SHEET_NAME",
+        type=str,
+        nargs=1,
+        help="Name of sheet to upload results to",
+    )
+    parser.add_argument(
+        "protocol_file_path",
+        metavar="PROTOCOL_FILE_PATH",
+        type=str,
+        nargs="*",
+        help="Path to protocol file(s)",
+    )
+    return parser
 
 
 def set_api_level(protocol_file_path: str) -> None:
@@ -19,7 +47,6 @@ def set_api_level(protocol_file_path: str) -> None:
         file_contents = file.readlines()
     # Look for current'apiLevel:'
     for i, line in enumerate(file_contents):
-        print(line)
         if "apiLevel" in line:
             print(f"The current API level of this protocol is: {line}")
             change = (
@@ -27,12 +54,10 @@ def set_api_level(protocol_file_path: str) -> None:
                 .strip()
                 .upper()
             )
-
             if change == "Y":
                 api_level = input("Protocol API Level to Simulate with: ")
                 # Update new API level
                 file_contents[i] = f"apiLevel: {api_level}\n"
-                print(f"Updated line: {file_contents[i]}")
             break
     with open(protocol_file_path, "w") as file:
         file.writelines(file_contents)
@@ -241,6 +266,8 @@ def parse_results_volume(
         "Right Pipette Total Aspirates",
         "Right Pipette Total Dispenses",
         "Gripper Pick Ups",
+        "Gripper Pick Ups of opentrons_tough_pcr_auto_sealing_lid",
+        "Gripper Pick Ups of opentrons_tough_pcr_auto_sealing_lid",
         "Total Liquid Probes",
         "Average Liquid Probe Time (sec)",
     ]
@@ -302,6 +329,8 @@ def parse_results_volume(
     total_time_row.append(str(end_time - start_time))
 
     for metric in metrics:
+        print(f"Dictionary: {metric}\n\n")
+        print(f"Dictionary: {metric}\n\n")
         for cmd in metric.keys():
             values_row.append(str(metric[cmd]))
     return (
@@ -320,21 +349,24 @@ def parse_results_volume(
 
 
 def main(
-    protocol_file_path_name: str,
+    protocol_file_path: Path,
     save: bool,
     storage_directory: str = os.curdir,
     google_sheet_name: str = "",
+    parameters: str = "",
+    extra_files: List[Path] = [],
 ) -> None:
     """Main module control."""
     sys.exit = mock_exit  # Replace sys.exit with the mock function
-    # Read file path from arguments
-    protocol_file_path = Path(protocol_file_path_name)
-    protocol_name = protocol_file_path.stem
-    print("Simulating", protocol_name)
+    # Simulation run date
     file_date = datetime.now()
     file_date_formatted = file_date.strftime("%Y-%m-%d_%H-%M-%S")
     error_output = f"{storage_directory}\\test_debug"
-    # Run protocol simulation
+    protocol_name = protocol_file_path.stem
+    protocol_files = [protocol_file_path]
+    if extra_files != []:
+        protocol_files += extra_files
+    print("Simulating....")
     try:
         with Context(analyze) as ctx:
             if save:
@@ -344,29 +376,62 @@ def main(
                 )
                 json_file_output = open(json_file_path, "wb+")
                 # log_output_file = f"{protocol_name}_log"
-                ctx.invoke(
-                    analyze,
-                    files=[protocol_file_path],
-                    json_output=json_file_output,
-                    human_json_output=None,
-                    log_output=error_output,
-                    log_level="ERROR",
-                    check=False,
-                )
+                if parameters:
+                    csv_params = {}
+                    csv_params["parameters_csv"] = parameters
+                    rtp_json = json.dumps(csv_params)
+                    ctx.invoke(
+                        analyze,
+                        files=protocol_files,
+                        rtp_files=rtp_json,
+                        json_output=json_file_output,
+                        human_json_output=None,
+                        log_output=error_output,
+                        log_level="ERROR",
+                        check=False,
+                    )
+
+                else:
+                    ctx.invoke(
+                        analyze,
+                        files=protocol_files,
+                        json_output=json_file_output,
+                        human_json_output=None,
+                        log_output=error_output,
+                        log_level="ERROR",
+                        check=False,
+                    )
                 json_file_output.close()
             else:
-                ctx.invoke(
-                    analyze,
-                    files=[protocol_file_path],
-                    json_output=None,
-                    human_json_output=None,
-                    log_output=error_output,
-                    log_level="ERROR",
-                    check=True,
-                )
-
+                if parameters:
+                    csv_params = {}
+                    csv_params["parameters_csv"] = parameters
+                    rtp_json = json.dumps(csv_params)
+                    ctx.invoke(
+                        analyze,
+                        files=protocol_files,
+                        rtp_files=rtp_json,
+                        json_output=None,
+                        human_json_output=None,
+                        log_output=error_output,
+                        log_level="ERROR",
+                        check=True,
+                    )
+                else:
+                    ctx.invoke(
+                        analyze,
+                        files=protocol_files,
+                        json_output=None,
+                        human_json_output=None,
+                        log_output=error_output,
+                        log_level="ERROR",
+                        check=True,
+                    )
+        print("done!")
     except SystemExit as e:
         print(f"SystemExit caught with code: {e}")
+        if e != 0:
+            traceback.print_exc
     finally:
         # Reset sys.exit to the original behavior
         sys.exit = original_exit
@@ -376,11 +441,12 @@ def main(
                 if not errors:
                     pass
                 else:
-                    print(errors)
-                    sys.exit(1)
+                    print(f"Error:\n{errors}")
+                    raise
             except FileNotFoundError:
                 print("error simulating ...")
-                sys.exit()
+                raise
+        open_file.close
     if save:
         try:
             credentials_path = os.path.join(storage_directory, "credentials.json")
@@ -395,6 +461,7 @@ def main(
             credentials_path, google_sheet_name, 0
         )
         google_sheet.write_to_row([])
+
         for row in parse_results_volume(
             json_file_path,
             protocol_name,
@@ -407,34 +474,51 @@ def main(
             google_sheet.write_to_row(row)
 
 
+def check_params(protocol_path: str) -> str:
+    """Check if protocol requires supporting files."""
+    print("checking for parameters")
+    with open(protocol_path, "r") as f:
+        lines = f.readlines()
+        file_as_str = "".join(lines)
+        if (
+            "parameters.add_csv_file" in file_as_str
+            or "helpers.create_csv_parameter" in file_as_str
+        ):
+            params = ""
+            while not params:
+                name = Path(protocol_file_path).stem
+                params = input(
+                    f"Protocol {name} needs a CSV parameter file. Please enter the path: "
+                )
+                if os.path.exists(params):
+                    return params
+                else:
+                    params = ""
+                    print("Invalid file path")
+        return ""
+
+
+def get_extra_files(protocol_file_path: str) -> tuple[str, List[Path]]:
+    """Get supporting files for protocol simulation if needed."""
+    params = check_params(protocol_file_path)
+    needs_files = input("Does your protocol utilize custom labware? (y/n): ")
+    labware_files = []
+    if needs_files == "y":
+        num_labware = input("How many custom labware?: ")
+        for labware_num in range(int(num_labware)):
+            path = input("Enter custom labware definition: ")
+            labware_files.append(Path(path))
+    return (params, labware_files)
+
+
 if __name__ == "__main__":
     CLEAN_PROTOCOL = True
-    parser = argparse.ArgumentParser(description="Read run logs on google drive.")
-    parser.add_argument(
-        "storage_directory",
-        metavar="STORAGE_DIRECTORY",
-        type=str,
-        nargs=1,
-        help="Path to long term storage directory for run logs.",
-    )
-    parser.add_argument(
-        "sheet_name",
-        metavar="SHEET_NAME",
-        type=str,
-        nargs=1,
-        help="Name of sheet to upload results to",
-    )
-    parser.add_argument(
-        "protocol_file_path",
-        metavar="PROTOCOL_FILE_PATH",
-        type=str,
-        nargs=1,
-        help="Path to protocol file",
-    )
-    args = parser.parse_args()
+    args = build_parser().parse_args()
     storage_directory = args.storage_directory[0]
     sheet_name = args.sheet_name[0]
     protocol_file_path: str = args.protocol_file_path[0]
+    parameters: List[str] = args.protocol_file_path[1:]
+    print(parameters)
     SETUP = True
     while SETUP:
         print(
@@ -445,7 +529,8 @@ if __name__ == "__main__":
             choice = ""
             while not choice:
                 choice = input(
-                    "Remove air_gap commands to ensure accurate results? (Y/N): "
+                    "Remove air_gap commands to ensure accurate results: (continue)? (Y/N): "
+                    "Remove air_gap commands to ensure accurate results: (continue)? (Y/N): "
                 )
                 if choice.upper() == "Y":
                     SETUP = False
@@ -462,11 +547,18 @@ if __name__ == "__main__":
     # Change api level
     if CLEAN_PROTOCOL:
         set_api_level(protocol_file_path)
-        main(
-            protocol_file_path,
-            True,
-            storage_directory,
-            sheet_name,
-        )
+        params, extra_files = get_extra_files(protocol_file_path)
+        try:
+            main(
+                protocol_file_path=Path(protocol_file_path),
+                save=True,
+                storage_directory=storage_directory,
+                google_sheet_name=sheet_name,
+                parameters=params,
+                extra_files=extra_files,
+            )
+        except Exception as e:
+            traceback.print_exc()
+            sys.exit(str(e))
     else:
         sys.exit(0)
