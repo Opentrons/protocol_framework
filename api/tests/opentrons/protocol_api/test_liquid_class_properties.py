@@ -198,3 +198,7 @@ def test_liquid_handling_property_by_volume() -> None:
 
     with pytest.raises(KeyError, match="No value set for volume"):
         subject.delete_for_volume(7)
+
+    # Test bounds
+    assert subject.get_for_volume(1) == 50.0
+    assert subject.get_for_volume(1000) == 250.0

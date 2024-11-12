@@ -1,4 +1,3 @@
-from copy import copy
 from dataclasses import dataclass
 from numpy import interp
 from typing import Optional, Dict, Sequence, Union, Tuple
@@ -25,9 +24,11 @@ from . import validation
 
 class LiquidHandlingPropertyByVolume:
     def __init__(self, properties_by_volume: Dict[str, float]) -> None:
-        self._default = properties_by_volume.pop("default")
+        self._default = properties_by_volume["default"]
         self._properties_by_volume: Dict[float, float] = {
-            float(volume): value for volume, value in properties_by_volume.items()
+            float(volume): value
+            for volume, value in properties_by_volume.items()
+            if volume != "default"
         }
         # Volumes need to be sorted for proper interpolation of non-defined volumes, and the
         # corresponding values need to be in the same order for them to be interpolated correctly
@@ -42,11 +43,7 @@ class LiquidHandlingPropertyByVolume:
 
     def as_dict(self) -> Dict[Union[float, str], float]:
         """Get a dictionary representation of all set volumes and values along with the default."""
-        props_by_volume_copy: Dict[Union[float, str], float] = copy(
-            self._properties_by_volume  # type: ignore[arg-type]
-        )
-        props_by_volume_copy["default"] = self._default
-        return props_by_volume_copy
+        return self._properties_by_volume | {"default": self._default}
 
     def get_for_volume(self, volume: float) -> float:
         """Get a value by volume for this property. Volumes not defined will be interpolated between set volumes."""
