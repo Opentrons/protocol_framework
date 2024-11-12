@@ -179,7 +179,6 @@ export function UpdateProtocol(): JSX.Element {
     setUpdatePromptAtom({
       protocol_text: pythonText,
       regenerate: false,
-      update: true,
       update_type: (updateType?.value ?? 'other') as UpdateOptions,
       update_details: detailsValue,
       fake: false,

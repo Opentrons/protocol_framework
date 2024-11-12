@@ -20,7 +20,6 @@ export const updatePromptAtom = atom<UpdatePrompt>(
   {
     protocol_text: '',
     regenerate: false,
-    update: true,
     update_type: 'adapt_python_protocol',
     update_details: '',
     fake: false,
