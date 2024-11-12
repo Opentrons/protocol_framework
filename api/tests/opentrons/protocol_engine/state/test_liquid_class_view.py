@@ -43,7 +43,7 @@ def test_get_by_id(
     subject: LiquidClassView, liquid_class_record: LiquidClassRecord
 ) -> None:
     """Should look up LiquidClassRecord by ID."""
-    assert subject.get_by_id("liquid-class-id") == liquid_class_record
+    assert subject.get("liquid-class-id") == liquid_class_record
 
 
 def test_get_by_liquid_class_record(

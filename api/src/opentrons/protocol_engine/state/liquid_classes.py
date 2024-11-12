@@ -54,7 +54,7 @@ class LiquidClassView(HasState[LiquidClassState]):
     def __init__(self, state: LiquidClassState) -> None:
         self._state = state
 
-    def get_by_id(self, liquid_class_id: str) -> LiquidClassRecord:
+    def get(self, liquid_class_id: str) -> LiquidClassRecord:
         """Get the LiquidClassRecord with the given identifier."""
         return self._state.liquid_class_record_by_id[liquid_class_id]
 
