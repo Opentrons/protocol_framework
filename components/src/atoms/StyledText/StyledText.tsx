@@ -31,6 +31,14 @@ const helixProductStyleMap = {
       }
     `,
   },
+  headingLargeSemiBold: {
+    as: 'h2',
+    style: css`
+      @media not (${RESPONSIVENESS.touchscreenMediaQuerySpecs}) {
+        font: ${HELIX_TYPOGRAPHY.fontStyleBodyDefaultSemiBold};
+      }
+    `,
+  },
   headingMediumBold: {
     as: 'h3',
     style: css`

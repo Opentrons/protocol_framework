@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 import {
   ALIGN_CENTER,
+  COLORS,
   DeckInfoLabel,
   DIRECTION_COLUMN,
   Flex,
@@ -46,7 +47,7 @@ export const SlotInformation: FC<SlotInformationProps> = ({
     >
       <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
         {isOffDeck ? null : <DeckInfoLabel deckLabel={location} />}
-        <StyledText desktopStyle="headingSmallBold">
+        <StyledText desktopStyle="headingLargeSemiBold">
           {t(isOffDeck ? 'labware_detail' : 'slot_detail')}
         </StyledText>
       </Flex>
@@ -132,7 +133,13 @@ function StackInfo({ title, stackInformation }: StackInfoProps): JSX.Element {
             {stackInformation ?? t('none')}
           </StyledText>
         }
-        description={<Flex width="7.40625rem">{title}</Flex>}
+        description={
+          <Flex width="7.40625rem">
+            <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
+              {title}
+            </StyledText>
+          </Flex>
+        }
       />
     </ListItem>
   )
