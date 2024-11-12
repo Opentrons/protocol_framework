@@ -33,6 +33,7 @@
 }
 
 .content_container {
+  min-height: 100vh;
   width: 100%;
   padding: var(--spacing-5);
   margin: 0;
@@ -70,7 +71,6 @@
   }
 
   .content_container {
-    height: 100vh;
     padding-top: var(--spacing-7);
     padding-right: var(--spacing-7);
 
