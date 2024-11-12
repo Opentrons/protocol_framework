@@ -624,7 +624,6 @@ def test_migrated_db_matches_db_created_from_metadata(tmp_path: Path) -> None:
             .all()
         )
 
-    # breakpoint()
     normalized_actual = [_normalize_statement(s) for s in actual_statements]
     normalized_expected = [_normalize_statement(s) for s in expected_statements]
 
