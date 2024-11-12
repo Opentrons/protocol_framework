@@ -588,11 +588,7 @@ export const WASTE_CHUTE_STAGING_AREA_FIXTURES: CutoutFixtureId[] = [
   STAGING_AREA_SLOT_WITH_WASTE_CHUTE_RIGHT_ADAPTER_NO_COVER_FIXTURE,
 ]
 
-export const LOW_VOLUME_PIPETTES = [
-  'p50_single_flex',
-  'p50_multi_flex',
-  'p200_96',
-]
+export const LOW_VOLUME_PIPETTES = ['p50_single_flex', 'p50_multi_flex']
 
 // robot server loads absorbance reader lid as a labware but it is not
 // user addressable so we need to hide it where we show labware in the app
