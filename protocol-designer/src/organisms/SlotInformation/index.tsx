@@ -47,7 +47,7 @@ export const SlotInformation: FC<SlotInformationProps> = ({
     >
       <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
         {isOffDeck ? null : <DeckInfoLabel deckLabel={location} />}
-        <StyledText desktopStyle="headingLargeSemiBold">
+        <StyledText desktopStyle="bodyLargeSemiBold">
           {t(isOffDeck ? 'labware_detail' : 'slot_detail')}
         </StyledText>
       </Flex>
