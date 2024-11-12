@@ -9,14 +9,6 @@ import lostCss from 'lost'
 import { versionForProject } from '../scripts/git-version.mjs'
 import type { UserConfig } from 'vite'
 
-const testAliases: Record<string, unknown> | { 'file-saver': string } =
-  process.env.CYPRESS === '1'
-    ? {
-        'file-saver':
-          path.resolve(__dirname, 'cypress/mocks/file-saver.js') ?? '',
-      }
-    : {}
-
 // eslint-disable-next-line import/no-default-export
 export default defineConfig(
   async (): Promise<UserConfig> => {
@@ -68,7 +60,6 @@ export default defineConfig(
           '@opentrons/step-generation': path.resolve(
             '../step-generation/src/index.ts'
           ),
-          ...testAliases,
         },
       },
       server: {

@@ -36,62 +36,38 @@ declare global {
 }
 
 // Only Header, Home, and Settings page actions are here
-// Due to their simplicity
+// due to their simplicity
 // Create and Import page actions are in their respective files
 
-//
-// Content
-//
-
-export enum GeneralContent {
-  // General Content
-  SiteTitle = 'Opentrons Protocol Designer',
-  Opentrons = 'Opentrons',
-  CharSet = 'UTF-8',
-  Header = 'Protocol Designer',
-  CreateNew = 'Create new',
-  Import = 'Import',
+export const content = {
+  siteTitle: 'Opentrons Protocol Designer',
+  opentrons: 'Opentrons',
+  charSet: 'UTF-8',
+  header: 'Protocol Designer',
+  createNew: 'Create new',
+  import: 'Import',
+  welcome: 'Welcome to Protocol Designer!',
+  createProtocol: 'Create a protocol',
+  editProtocol: 'Edit existing protocol',
+  appSettings: 'App settings',
+  privacy: 'Privacy',
+  shareSessions: 'Share sessions with Opentrons',
 }
 
-export enum HomeContent {
-  Welcome = 'Welcome to Protocol Designer!',
-  CreateProtocol = 'Create a protocol',
-  EditProtocol = 'Edit existing protocol',
+export const locators = {
+  import: 'Import',
+  createNew: 'Create new',
+  settingsDataTestid: 'SettingsIconButton',
+  createProtocol: 'Create a protocol',
+  editProtocol: 'label',
+  settings: 'Settings',
+  privacyPolicy: 'a[href="https://opentrons.com/privacy-policy"]',
+  eula: 'a[href="https://opentrons.com/eula"]',
+  privacyToggle: 'Settings_hotKeys',
+  analyticsToggleTestId: 'analyticsToggle',
 }
 
-//
-// Locators
-//
-
-// Naming Convention:
-// Enum Name specifies the page or page section
-// Enum Values specify the locator string
-
-// https://docs.cypress.io/app/core-concepts/best-practices#Selecting-Elements
-// best practice is to first use a simple cy.contains()
-// this sometimes requires a .first() or .last() to be added
-// that may prove brittle, but we will give it a go
-// next try aria-* attributes
-// finally add a data-testid attribute (then use getByTestId custom command)
-
-export enum HeaderLocators {
-  Import = 'Import',
-  CreateNew = 'Create new',
-  SettingsDataTestid = 'SettingsIconButton',
-}
-
-export enum HomeLocators {
-  CreateProtocol = 'Create a protocol',
-  EditProtocol = 'label',
-  Settings = 'SettingsIconButton',
-  PrivacyPolicy = 'a[href="https://opentrons.com/privacy-policy"]',
-  EULA = 'a[href="https://opentrons.com/eula"]',
-}
-
-//
 // General Custom Commands
-//
-
 Cypress.Commands.add(
   'getByTestId',
   (testId: string): Cypress.Chainable<JQuery<HTMLElement>> => {
@@ -106,81 +82,62 @@ Cypress.Commands.add(
   }
 )
 
-//
 // Header Verifications
-//
-
 const verifyUniversal = (): void => {
-  cy.title().should('equal', GeneralContent.SiteTitle)
-  cy.document()
-    .should('have.property', 'charset')
-    .and('eq', GeneralContent.CharSet)
-  cy.contains(GeneralContent.Opentrons).should('be.visible')
-  cy.contains(GeneralContent.Header).should('be.visible')
-  cy.contains(HeaderLocators.Import).should('be.visible')
-  // settings and create new are NOT present on #/createNew
+  cy.title().should('equal', content.siteTitle)
+  cy.document().should('have.property', 'charset').and('eq', content.charSet)
+  cy.contains(content.opentrons).should('be.visible')
+  cy.contains(content.header).should('be.visible')
+  cy.contains(locators.import).should('be.visible')
 }
 
 Cypress.Commands.add('verifyFullHeader', () => {
   verifyUniversal()
-  cy.contains(HeaderLocators.CreateNew).should('be.visible')
-  cy.getByTestId(HeaderLocators.SettingsDataTestid).should('be.visible')
+  cy.contains(locators.createNew).should('be.visible')
+  cy.getByTestId(locators.settingsDataTestid).should('be.visible')
 })
 
 Cypress.Commands.add('verifyCreateNewHeader', () => {
   verifyUniversal()
 })
 
-//
 // Home Page
-//
-
 Cypress.Commands.add('verifyHomePage', () => {
-  cy.contains('Welcome to Protocol Designer!')
-  cy.contains('button', 'Create a protocol').should('be.visible')
-  cy.contains('label', 'Edit existing protocol').should('be.visible')
-  cy.getByTestId('SettingsIconButton').should('be.visible')
-  cy.get('a[href="https://opentrons.com/privacy-policy"]')
-    .should('exist')
-    .and('be.visible')
-  cy.get('a[href="https://opentrons.com/eula"]')
-    .should('exist')
-    .and('be.visible')
+  cy.contains(content.welcome)
+  cy.contains('button', content.createProtocol).should('be.visible')
+  cy.contains('label', content.editProtocol).should('be.visible')
+  cy.getByTestId(locators.settingsDataTestid).should('be.visible')
+  cy.get(locators.privacyPolicy).should('exist').and('be.visible')
+  cy.get(locators.eula).should('exist').and('be.visible')
 })
 
 Cypress.Commands.add('clickCreateNew', () => {
-  cy.contains(HomeLocators.CreateProtocol).click()
+  cy.contains(locators.createProtocol).click()
 })
 
-//
 // Header Import
-//
-
 Cypress.Commands.add('importProtocol', (protocolFilePath: string) => {
-  cy.contains('Import').click()
-  cy.get('input[type="file"]')
-    .last()
+  cy.contains(content.import).click()
+  cy.get('[data-cy="landing-page"]')
+    .find('input[type=file]')
     .selectFile(protocolFilePath, { force: true })
 })
 
-//
 // Settings Page Actions
-//
-
 Cypress.Commands.add('openSettingsPage', () => {
-  cy.getByTestId('SettingsIconButton').click()
+  cy.getByTestId(locators.settingsDataTestid).click()
 })
 
 Cypress.Commands.add('verifySettingsPage', () => {
   cy.verifyFullHeader()
-  cy.contains('Settings').should('exist').should('be.visible')
-  cy.contains('App settings').should('exist').should('be.visible')
-  cy.contains('Privacy').should('exist').should('be.visible')
-  cy.contains('Share sessions with Opentrons')
+  cy.contains(locators.settings).should('exist').should('be.visible')
+  cy.contains(content.appSettings).should('exist').should('be.visible')
+  cy.contains(content.privacy).should('exist').should('be.visible')
+  cy.contains(content.shareSessions).should('exist').should('be.visible')
+  cy.getByAriaLabel(locators.privacyToggle).should('exist').should('be.visible')
+  cy.getByTestId(locators.analyticsToggleTestId)
     .should('exist')
     .should('be.visible')
-  cy.getByAriaLabel('Settings_hotKeys').should('exist').should('be.visible')
-  cy.getByTestId('analyticsToggle').should('exist').should('be.visible')
 })
 
 /// /////////////////////////////////////////////////////////////////

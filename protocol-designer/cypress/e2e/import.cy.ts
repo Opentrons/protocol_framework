@@ -1,14 +1,24 @@
 import { TestFilePath, getTestFile } from '../support/testFiles'
-import { verifyOldProtocolModal } from '../support/import'
+import {
+  verifyOldProtocolModal,
+  verifyImportProtocolPage,
+} from '../support/import'
 
 describe('The Import Page', () => {
   beforeEach(() => {
     cy.visit('/')
   })
 
-  it('successfully loads', () => {
-    const protocol = getTestFile(TestFilePath.DoItAllV8)
+  it('successfully loads a protocol exported on a previous version', () => {
+    const protocol = getTestFile(TestFilePath.DoItAllV7)
     cy.importProtocol(protocol.path)
     verifyOldProtocolModal()
+    verifyImportProtocolPage(protocol)
+  })
+
+  it('successfully loads a protocol exported on the current version', () => {
+    const protocol = getTestFile(TestFilePath.DoItAllV8)
+    cy.importProtocol(protocol.path)
+    verifyImportProtocolPage(protocol)
   })
 })

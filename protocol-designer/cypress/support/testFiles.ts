@@ -1,33 +1,5 @@
-import fs from 'fs'
 import path from 'path'
-import type {
-  ProtocolFileV3,
-  ProtocolFileV4,
-  ProtocolFileV5,
-  ProtocolFileV6,
-  ProtocolFileV7,
-  ProtocolFileV8,
-} from '@opentrons/shared-data'
-
 import { isEnumValue } from './utils'
-
-const loadFileContent = (filePath: string): any => {
-  try {
-    const fileExtension = path.extname(filePath)
-    if (fileExtension === '.json') {
-      const rawContent = fs.readFileSync(filePath, 'utf8')
-      try {
-        return JSON.parse(rawContent)
-      } catch (parseError) {
-        return rawContent
-      }
-    } else {
-      return fs.readFileSync(filePath, 'utf8')
-    }
-  } catch (error) {
-    return `Error loading file: ${error.message}`
-  }
-}
 
 // ////////////////////////////////////////////
 // This is the data section where we map all the protocol files
@@ -71,28 +43,21 @@ export enum TestFilePath {
   TransferSettingsV5 = 'fixtures/protocol/5/transferSettings.json',
   Mix_5_0_X = 'fixtures/protocol/5/mix_5_0_x.json',
   Example_1_1_0V5 = 'fixtures/protocol/5/example_1_1_0MigratedFromV1_0_0.json',
+  ThermocyclerOnOt2V7 = 'fixtures/protocol/7/thermocyclerOnOt2V7.json',
+  ThermocyclerOnOt2V7MigratedToV8 = 'fixtures/protocol/8/thermocyclerOnOt2V7MigratedToV8.json',
   // cypress fixtures
   GarbageTextFile = 'cypress/fixtures/garbage.txt',
   Generic96TipRack200ul = 'cypress/fixtures/generic_96_tiprack_200ul.json',
   InvalidLabware = 'cypress/fixtures/invalid_labware.json',
   InvalidTipRack = 'cypress/fixtures/invalid_tip_rack.json',
   InvalidTipRackTxt = 'cypress/fixtures/invalid_tip_rack.txt',
-  InvalidJson = 'cypress/fixtures/invalid_json.json',
+  InvalidJson = 'cypress/fixtures/invalid_json.txt', // a file with invalid JSON may not have .json extension because cy.readfile will not read it.
 }
-
-export type TestProtocol =
-  | ProtocolFileV3
-  | ProtocolFileV4
-  | ProtocolFileV5
-  | ProtocolFileV6
-  | ProtocolFileV7
-  | ProtocolFileV8
-
-export type TestFileOther = string
 
 export interface TestFile {
   path: string
-  protocolContent: TestProtocol | TestFileOther
+  downloadsFolder: string
+  basename: string
 }
 
 export const getTestFile = (id: TestFilePath): TestFile => {
@@ -100,27 +65,9 @@ export const getTestFile = (id: TestFilePath): TestFile => {
     throw new Error(`Invalid file path: ${id as string}`)
   }
 
-  const filePath = id.valueOf()
-  const content = loadFileContent(filePath)
-  const fileExtension = path.extname(id)
-
-  let typedContent: TestProtocol | TestFileOther
-
-  if (fileExtension === '.json') {
-    if (typeof content === 'object') {
-      // TODO: logic here to cast to the correct protocol version
-      typedContent = content
-    } else {
-      typedContent = content as string
-    }
-  } else if (fileExtension === '.txt') {
-    typedContent = content as string
-  } else {
-    typedContent = content
-  }
-
   return {
-    path: filePath,
-    protocolContent: typedContent,
+    path: id.valueOf(),
+    basename: path.basename(id.valueOf()),
+    downloadsFolder: Cypress.config('downloadsFolder'),
   }
 }
