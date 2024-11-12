@@ -508,6 +508,7 @@ def get_extra_files(protocol_file_path: str) -> tuple[str, List[Path]]:
             labware_files.append(Path(path))
     return (params, labware_files)
 
+
 if __name__ == "__main__":
     CLEAN_PROTOCOL = True
     args = build_parser().parse_args()
