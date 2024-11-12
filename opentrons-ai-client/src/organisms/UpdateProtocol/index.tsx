@@ -181,7 +181,7 @@ export function UpdateProtocol(): JSX.Element {
       regenerate: false,
       update_type: (updateType?.value ?? 'other') as UpdateOptions,
       update_details: detailsValue,
-      fake: false,
+      fake: true,
       fake_id: 0,
     })
     setChatPrompt({ prompt: chatPrompt, isNewProtocol: false })

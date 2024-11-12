@@ -49,7 +49,7 @@ export function InputPrompt(): JSX.Element {
   const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom)
   const [token] = useAtom(tokenAtom)
   const [submitted, setSubmitted] = useState<boolean>(false)
-  const userPrompt = watch('userPrompt') ?? ''
+  const watchUserPrompt = watch('userPrompt') ?? ''
   const [sendAutoFilledPrompt, setSendAutoFilledPrompt] = useState<boolean>(
     false
   )
@@ -59,11 +59,12 @@ export function InputPrompt(): JSX.Element {
   const handleClick = async (
     isUpdateOrCreate: boolean = false
   ): Promise<void> => {
-    setRequestId(uuidv4())
+    setRequestId(uuidv4() + getPreFixText(isUpdateOrCreate))
+
     const userInput: ChatData = {
       requestId,
       role: 'user',
-      reply: userPrompt,
+      reply: watchUserPrompt,
     }
     reset()
     setChatData(chatData => [...chatData, userInput])
@@ -85,7 +86,7 @@ export function InputPrompt(): JSX.Element {
         data: isUpdateOrCreate
           ? getUpdateOrCreatePrompt()
           : {
-              message: userPrompt,
+              message: watchUserPrompt,
               history: chatHistory,
               fake: false,
             },
@@ -93,7 +94,7 @@ export function InputPrompt(): JSX.Element {
 
       setChatHistory(chatHistory => [
         ...chatHistory,
-        { role: 'user', content: userPrompt },
+        { role: 'user', content: watchUserPrompt },
       ])
       await callApi(config as AxiosRequestConfig)
       setSubmitted(true)
@@ -126,10 +127,11 @@ export function InputPrompt(): JSX.Element {
 
   // This is to autofill the input field for when we navigate to the chat page from the existing/new protocol generator pages
   useEffect(() => {
-    setValue('userPrompt', chatPromptAtomValue.prompt)
-    setSendAutoFilledPrompt(true)
+    if (chatPromptAtomValue.prompt !== '') {
+      setValue('userPrompt', chatPromptAtomValue.prompt)
+      setSendAutoFilledPrompt(true)
+    }
   }, [])
-  const watchUserPrompt = watch('userPrompt')
 
   useEffect(() => {
     if (sendAutoFilledPrompt) {
@@ -142,12 +144,12 @@ export function InputPrompt(): JSX.Element {
     <StyledForm id="User_Prompt">
       <Flex css={CONTAINER_STYLE}>
         <LegacyStyledTextarea
-          rows={calcTextAreaHeight(userPrompt as string)}
+          rows={calcTextAreaHeight(watchUserPrompt as string)}
           placeholder={t('type_your_prompt')}
           {...register('userPrompt')}
         />
         <SendButton
-          disabled={userPrompt.length === 0}
+          disabled={watchUserPrompt.length === 0}
           isLoading={isLoading}
           handleClick={() => {
             handleClick()
@@ -156,6 +158,18 @@ export function InputPrompt(): JSX.Element {
       </Flex>
     </StyledForm>
   )
+
+  function getPreFixText(isUpdateOrCreate: boolean): string {
+    let appendCreateOrUpdate = ''
+    if (isUpdateOrCreate) {
+      if (chatPromptAtomValue.isNewProtocol) {
+        appendCreateOrUpdate = 'NewProtocol'
+      } else {
+        appendCreateOrUpdate = 'UpdateProtocol'
+      }
+    }
+    return appendCreateOrUpdate
+  }
 }
 
 const getCreateOrUpdateEndpoint = (isCreateNewProtocol: boolean): string => {
