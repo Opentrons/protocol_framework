@@ -42,15 +42,17 @@ VOLUMES_3MM_TOP_BOTTOM = {
     "corning_48_wellplate_1.6ml_flat": [1327.0, 790.63, 268.9, 0.0],
     "opentrons_24_tuberack_nest_0.5ml_screwcap": [795.4, 21.95, 0.0],
     "opentrons_24_tuberack_nest_1.5ml_screwcap": [19.5, 735.89, 1750.8, 0.0],
-    #"opentrons_24_tuberack_nest_1.5ml_screwcap": [19.5],
-    #"opentrons_24_tuberack_nest_1.5ml_snapcap": [27.7],
     "opentrons_24_tuberack_nest_1.5ml_snapcap": [27.7, 1650.6, 619.18, 0.0],
     "opentrons_24_tuberack_nest_2ml_screwcap": [2104.9, 66.6, 0.0],
     "opentrons_24_tuberack_nest_2ml_snapcap": [2148.5, 69.6, 0.0],
     "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical": [56267.2, 158.1, 0.0],
-    "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical": [57720.5,163.9, 0.0],
+    "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical": [169.5, 57720.5, 0.0],
     "nest_1_reservoir_195ml": [14034.2, 172301.9, 0.0],
-    "axygen_1_reservoir_90ml": [23136.9, 72854.8, 0.0]
+    "axygen_1_reservoir_90ml": [23136.9, 72854.8, 0.0],
+    "agilent_1_reservoir_290ml": [15652.9, 141945.59, 268813.8],
+    "opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap": [26.6, 593.7, 1629.9],
+    "corning_384_wellplate_112ul_flat": [23.2, 50.1, 80.0   ],
+    "biorad_384_wellplate_50ul": [28.7, 8.0, 0.0]
 }
 
 SAME_TIP = True  # this is fine when using Ethanol (b/c it evaporates)
@@ -162,7 +164,7 @@ def _setup(
     if tube_volume == 15:
         # Replace volumes with 15 ml volumes
         VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [17.3,7090.6, 16077.5,  0.0]
-        VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] = [15956.6, 40.8, 0.0]
+        VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] = [42.2, 15956.6, 0.0]
     volumes = VOLUMES_3MM_TOP_BOTTOM[labware.load_name]
     total_volume_to_aspirate = 0.0
     for one_vols in volumes:
@@ -467,7 +469,7 @@ def run(ctx: ProtocolContext) -> None:
         if tube_volume == 15:
             # Replace volumes with 15 ml volumes
             VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [17.3,7090.6, 16077.5,  0.0]
-            VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] = [15956.6, 40.8, 0.0]
+            VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] = [42.2, 15956.6, 0.0]
         volumes = VOLUMES_3MM_TOP_BOTTOM[labware.load_name]
     except KeyError:
         volumes = [0.0, 0.0, 0.0]
