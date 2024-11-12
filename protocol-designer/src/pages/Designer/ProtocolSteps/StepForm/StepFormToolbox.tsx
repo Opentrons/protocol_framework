@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import get from 'lodash/get'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
@@ -236,6 +236,28 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
       handleSaveClick()
     }
   }
+
+  const visibleFormWarningsTypes = visibleFormWarnings.map(
+    warning => warning.type
+  )
+  const visibleFormErrorsTypes = visibleFormErrors.map(error => error.title)
+
+  useEffect(() => {
+    if (visibleFormWarningsTypes.length > 0) {
+      const formWarningsEvent: AnalyticsEvent = {
+        name: 'formWarnings',
+        properties: { visibleFormWarningsTypes },
+      }
+      dispatch(analyticsEvent(formWarningsEvent))
+    }
+    if (visibleFormErrorsTypes.length > 0) {
+      const formErrorsEvent: AnalyticsEvent = {
+        name: 'formErrors',
+        properties: { visibleFormErrorsTypes },
+      }
+      dispatch(analyticsEvent(formErrorsEvent))
+    }
+  }, [visibleFormWarningsTypes, visibleFormErrorsTypes])
 
   return (
     <>

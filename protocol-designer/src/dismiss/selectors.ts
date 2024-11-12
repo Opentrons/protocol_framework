@@ -33,6 +33,7 @@ export const getFormWarningsForSelectedStep: Selector<
     const formWarnings = warnings.filter(
       w => !dismissedWarnings.includes(w.type)
     )
+    console.log(formWarnings)
     return formWarnings
   }
 )

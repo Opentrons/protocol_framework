@@ -1,4 +1,5 @@
 import uniq from 'lodash/uniq'
+import omit from 'lodash/omit'
 import {
   FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
   MOVABLE_TRASH_ADDRESSABLE_AREAS,
@@ -39,6 +40,16 @@ import type { SetFeatureFlagAction } from '../feature-flags/actions'
 import type { CreatePipettesAction } from '../step-forms/actions'
 import type { AnalyticsEventAction } from './actions'
 import type { AnalyticsEvent } from './mixpanel'
+
+const PIPETTING_ARGS_FILTER_LIST = [
+  'touchTipAfterAspirateOffsetMmFromBottom',
+  'touchTipAfterDispenseOffsetMmFromBottom',
+  'commandCreatorFnName',
+  'blowoutFlowRateUlSec',
+  'blowoutOffsetFromTopMm',
+  'touchTipMmFromBottom',
+]
+
 interface TransformedPipetteInfo {
   [pipetteId: string]: {
     name: string
@@ -122,6 +133,17 @@ export const reduxActionToAnalyticsEvent = (
         return {
           name: 'heaterShakerStep',
           properties: {},
+        }
+      } else if (
+        modifiedStepName === 'transfer' ||
+        modifiedStepName === 'consolidate' ||
+        modifiedStepName === 'distribute' ||
+        modifiedStepName === 'mix'
+      ) {
+        const stepArgModified = omit(stepArgs, PIPETTING_ARGS_FILTER_LIST)
+        return {
+          name: `${modifiedStepName}Step`,
+          properties: { ...stepArgModified, ...additionalProperties },
         }
       } else {
         return {
