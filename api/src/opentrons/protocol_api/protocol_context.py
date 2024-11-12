@@ -185,7 +185,14 @@ class ProtocolContext(CommandPublisher):
         self._commands: List[str] = []
         self._params: Parameters = Parameters()
         self._unsubscribe_commands: Optional[Callable[[], None]] = None
-        self._robot = RobotContext(self._core)
+        try:
+            self._robot: Optional[RobotContext] = RobotContext(
+                core=self._core.load_robot(),
+                protocol_core=self._core,
+                api_version=self._api_version,
+            )
+        except APIVersionError:
+            self._robot = None
         self.clear_commands()
 
     @property
@@ -211,12 +218,14 @@ class ProtocolContext(CommandPublisher):
         return self._api_version
 
     @property
-    @requires_version(2, 21)
+    @requires_version(2, 22)
     def robot(self) -> RobotContext:
         """The :py:class:`.RobotContext` for the protocol.
 
         :meta private:
         """
+        if self._core.robot_type != "OT-3 Standard" or not self._robot:
+            raise RobotTypeError("The RobotContext is only available on Flex robots.")
         return self._robot
 
     @property
@@ -228,7 +237,9 @@ class ProtocolContext(CommandPublisher):
             "This function will be deprecated in later versions."
             "Please use with caution."
         )
-        return self._robot.hardware
+        if self._robot:
+            return self._robot.hardware
+        return HardwareManager(hardware=self._core.get_hardware())
 
     @property
     @requires_version(2, 0)

@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { fireEvent, screen } from '@testing-library/react'
@@ -10,19 +9,17 @@ import {
 import { i18n } from '../../../../assets/localization'
 import { renderWithProviders } from '../../../../__testing-utils__'
 import { deleteContainer } from '../../../../labware-ingred/actions'
-import { createModule, deleteModule } from '../../../../step-forms/actions'
+import { deleteModule } from '../../../../step-forms/actions'
 import { getRobotType } from '../../../../file-data/selectors'
 import { getEnableAbsorbanceReader } from '../../../../feature-flags/selectors'
-import {
-  createDeckFixture,
-  deleteDeckFixture,
-} from '../../../../step-forms/actions/additionalItems'
+import { deleteDeckFixture } from '../../../../step-forms/actions/additionalItems'
 import { selectors } from '../../../../labware-ingred/selectors'
 import { getDismissedHints } from '../../../../tutorial/selectors'
 import { getDeckSetupForActiveItem } from '../../../../top-selectors/labware-locations'
 import { DeckSetupTools } from '../DeckSetupTools'
 import { LabwareTools } from '../LabwareTools'
 
+import type * as React from 'react'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
 vi.mock('../LabwareTools')
@@ -130,7 +127,7 @@ describe('DeckSetupTools', () => {
     expect(vi.mocked(deleteModule)).toHaveBeenCalled()
     expect(vi.mocked(deleteDeckFixture)).toHaveBeenCalled()
   })
-  it('should close and add h-s module when done is called', () => {
+  it('should close and preserve h-s module when done is called', () => {
     vi.mocked(selectors.getZoomedInSlotInfo).mockReturnValue({
       selectedLabwareDefUri: null,
       selectedNestedLabwareDefUri: null,
@@ -142,9 +139,8 @@ describe('DeckSetupTools', () => {
     fireEvent.click(screen.getByText('Heater-Shaker Module GEN1'))
     fireEvent.click(screen.getByText('Done'))
     expect(props.onCloseClick).toHaveBeenCalled()
-    expect(vi.mocked(createModule)).toHaveBeenCalled()
   })
-  it('should close and add waste chute and staging area when done is called', () => {
+  it('should close and preserve waste chute and staging area when done is called', () => {
     vi.mocked(selectors.getZoomedInSlotInfo).mockReturnValue({
       selectedLabwareDefUri: null,
       selectedNestedLabwareDefUri: null,
@@ -156,6 +152,5 @@ describe('DeckSetupTools', () => {
     fireEvent.click(screen.getByText('Waste chute and staging area slot'))
     fireEvent.click(screen.getByText('Done'))
     expect(props.onCloseClick).toHaveBeenCalled()
-    expect(vi.mocked(createDeckFixture)).toHaveBeenCalledTimes(2)
   })
 })

@@ -40,6 +40,7 @@ export function EditNickNameModal(props: EditNickNameModalProps): JSX.Element {
   return createPortal(
     <HandleEnter onEnter={saveNickname}>
       <Modal
+        marginLeft="0"
         title={t('rename_labware')}
         type="info"
         onClose={onClose}
