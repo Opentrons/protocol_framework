@@ -197,6 +197,7 @@ def mock_send_stop_threshold() -> Iterator[mock.AsyncMock]:
 
 @pytest.fixture
 def mock_move_group_run() -> Iterator[mock.AsyncMock]:
+
     with mock.patch(
         "opentrons.hardware_control.backends.ot3controller.MoveGroupRunner.run",
         autospec=True,

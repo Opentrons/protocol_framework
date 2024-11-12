@@ -10,6 +10,7 @@ from typing import (
     List,
     Optional,
     Protocol,
+    Dict,
 )
 
 from opentrons_shared_data.robot.types import RobotType
@@ -260,6 +261,70 @@ class OT3MountType(str, enum.Enum):
     LEFT = "left"
     RIGHT = "right"
     GRIPPER = "gripper"
+
+
+class AxisType(enum.Enum):
+    X = "X"  # gantry
+    Y = "Y"
+    Z_L = "Z_L"  # left pipette mount Z
+    Z_R = "Z_R"  # right pipette mount Z
+    Z_G = "Z_G"  # gripper mount Z
+    P_L = "P_L"  # left pipette plunger
+    P_R = "P_R"  # right pipette plunger
+    Q = "Q"  # hi-throughput pipette tiprack grab
+    G = "G"  # gripper grab
+
+    @classmethod
+    def axis_for_mount(cls, mount: Mount) -> "AxisType":
+        map_axis_to_mount = {
+            Mount.LEFT: cls.Z_L,
+            Mount.RIGHT: cls.Z_R,
+            Mount.EXTENSION: cls.Z_G,
+        }
+        return map_axis_to_mount[mount]
+
+    @classmethod
+    def mount_for_axis(cls, axis: "AxisType") -> Mount:
+        map_mount_to_axis = {
+            cls.Z_L: Mount.LEFT,
+            cls.Z_R: Mount.RIGHT,
+            cls.Z_G: Mount.EXTENSION,
+        }
+        return map_mount_to_axis[axis]
+
+    @classmethod
+    def ot2_axes(cls) -> List["AxisType"]:
+        return [
+            AxisType.X,
+            AxisType.Y,
+            AxisType.Z_L,
+            AxisType.Z_R,
+            AxisType.P_L,
+            AxisType.P_R,
+        ]
+
+    @classmethod
+    def flex_gantry_axes(cls) -> List["AxisType"]:
+        return [
+            AxisType.X,
+            AxisType.Y,
+            AxisType.Z_L,
+            AxisType.Z_R,
+            AxisType.Z_G,
+        ]
+
+    @classmethod
+    def ot2_gantry_axes(cls) -> List["AxisType"]:
+        return [
+            AxisType.X,
+            AxisType.Y,
+            AxisType.Z_L,
+            AxisType.Z_R,
+        ]
+
+
+AxisMapType = Dict[AxisType, float]
+StringAxisMap = Dict[str, float]
 
 
 # TODO(mc, 2020-11-09): this makes sense in shared-data or other common
