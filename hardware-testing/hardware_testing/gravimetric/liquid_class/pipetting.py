@@ -240,10 +240,14 @@ def _pipette_with_liquid_settings(  # noqa: C901
             pipette.flow_rate.aspirate = liquid_class.aspirate.flow_rate
 
     def _dispense_on_approach() -> None:
-        # remove trailing-air-gap
-        air_gap = liquid_class.aspirate.air_gap
-        if not blank and air_gap > 0:
-            pipette.flow_rate.dispense = max(air_gap, 1)  # 1 second (minimum)
+        # remove trailing-air-gap if:
+        #  1) not a "blank" trial
+        #  2) currently holds an air-gap
+        #  3) contact dispensing (below meniscus)
+        has_air_gap = liquid_class.aspirate.air_gap > 0
+        is_dispensing_below_meniscus = liquid_class.dispense.submerge_mm <= 0
+        if not blank and has_air_gap and is_dispensing_below_meniscus:
+            pipette.flow_rate.dispense = max(liquid_class.aspirate.air_gap, 1)  # 1 second (minimum)
             pipette.dispense(liquid_class.aspirate.air_gap)
             pipette.flow_rate.dispense = liquid_class.dispense.flow_rate
 
@@ -263,7 +267,7 @@ def _pipette_with_liquid_settings(  # noqa: C901
             if not break_off:
                 if liquid_class.dispense.break_off_flow_acceleration:
                     hw_pipette.flow_acceleration = liquid_class.dispense.break_off_flow_acceleration
-                pipette.dispense(dispense, push_out=push_out)
+                pipette.dispense(push_out=push_out)
             else:
                 assert push_out is not None, \
                     "push-out must be specified when setting a break-off volume"
@@ -280,14 +284,14 @@ def _pipette_with_liquid_settings(  # noqa: C901
                 if break_off < push_out:
                     # 1) dispense w/ push-out (minus break-out ul)
                     _reduced_push_out_ul = push_out - break_off
-                    pipette.dispense(dispense, push_out=_reduced_push_out_ul)
+                    pipette.dispense(push_out=_reduced_push_out_ul)
                     # 2) blow-out using break-off ul and speed
                     _break_off_cfg()
                     hw_api.blow_out(OT3Mount.LEFT, push_out)  # NOTE: volume is absolute below "bottom"
                 elif break_off > push_out:
                     # 1) dispense a reduced amount
                     _remaining_ul = break_off - push_out
-                    pipette.dispense(dispense - _remaining_ul)
+                    pipette.dispense(pipette.current_volume - _remaining_ul)
                     # 1) dispense remaininng liquid plus push-out
                     _break_off_cfg()
                     pipette.dispense(_remaining_ul, push_out=push_out)
@@ -313,10 +317,13 @@ def _pipette_with_liquid_settings(  # noqa: C901
         # NOTE: both the plunger reset or tje trailing-air-gap
         #       pull remaining droplets inside the tip upwards
         if pipette.current_volume <= 0:
+            # NOTE: yes, liquid would get pulled up
             if liquid_class.dispense.blow_out:
                 callbacks.on_blowing_out()
                 pipette.blow_out()
+            pipette.flow_rate.aspirate = min(liquid_class.dispense.push_out, 1)
             pipette.prepare_to_aspirate()
+            pipette.flow_rate.aspirate = liquid_class.aspirate.flow_rate
         else:
             pipette.air_gap(liquid_class.aspirate.air_gap, height=0)
         if touch_tip:
