@@ -16,6 +16,7 @@ export interface FieldProps {
   errorToShow?: string | null
   isIndeterminate?: boolean
   tooltipContent?: string | null
+  padding?: string
 }
 export type FieldPropsByName = Record<StepFieldName, FieldProps>
 

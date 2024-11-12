@@ -27,6 +27,7 @@ export function TemperatureTools(props: StepFormProps): JSX.Element {
     <Flex flexDirection={DIRECTION_COLUMN}>
       <DropdownStepFormField
         {...propsForFields.moduleId}
+        tooltipContent={null}
         options={moduleLabwareOptions}
         title={t('protocol_steps:module')}
       />

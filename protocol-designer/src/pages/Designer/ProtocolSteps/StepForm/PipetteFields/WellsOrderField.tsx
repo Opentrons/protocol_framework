@@ -22,6 +22,7 @@ export interface WellsOrderFieldProps {
   updateSecondWellOrder: FieldProps['updateValue']
   firstValue?: WellOrderOption | null
   secondValue?: WellOrderOption | null
+  padding?: string
 }
 
 export function WellsOrderField(props: WellsOrderFieldProps): JSX.Element {
@@ -33,6 +34,7 @@ export function WellsOrderField(props: WellsOrderFieldProps): JSX.Element {
     prefix,
     updateFirstWellOrder,
     updateSecondWellOrder,
+    padding,
   } = props
   const { t, i18n } = useTranslation(['form', 'modal', 'protocol_steps'])
   const [isModalOpen, setModalOpen] = useState(false)
@@ -58,7 +60,7 @@ export function WellsOrderField(props: WellsOrderFieldProps): JSX.Element {
       </Tooltip>
       <Flex
         {...targetProps}
-        padding={SPACING.spacing16}
+        padding={padding}
         gridGap={SPACING.spacing8}
         flexDirection={DIRECTION_COLUMN}
       >
