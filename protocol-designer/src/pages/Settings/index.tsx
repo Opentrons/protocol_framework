@@ -16,7 +16,7 @@ import {
   StyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { AnnouncementModal } from '../../organisms'
+import { AnnouncementModal, DOC_URL } from '../../organisms'
 import {
   actions as analyticsActions,
   selectors as analyticsSelectors,
@@ -133,13 +133,27 @@ export function Settings(): JSX.Element {
                 padding={`${SPACING.spacing16} ${SPACING.spacing24}`}
                 justifyContent={JUSTIFY_SPACE_BETWEEN}
               >
-                <StyledText desktopStyle="bodyDefaultSemiBold">
-                  {t('shared:pd_version')}
-                </StyledText>
-                <Flex gridGap={SPACING.spacing12}>
+                <Flex flexDirection={DIRECTION_COLUMN}>
+                  <StyledText desktopStyle="bodyDefaultSemiBold">
+                    {t('shared:pd_version')}
+                  </StyledText>
                   <StyledText desktopStyle="bodyDefaultRegular">
                     {process.env.OT_PD_VERSION}
                   </StyledText>
+                </Flex>
+                <Flex gridGap={SPACING.spacing16} alignItems={ALIGN_CENTER}>
+                  <LinkComponent
+                    css={BUTTON_LINK_STYLE}
+                    textDecoration={TYPOGRAPHY.textDecorationUnderline}
+                    href={DOC_URL}
+                    external
+                    padding={SPACING.spacing4}
+                  >
+                    <StyledText desktopStyle="bodyDefaultRegular">
+                      {t('shared:software_manual')}
+                    </StyledText>
+                  </LinkComponent>
+
                   <Btn
                     css={BUTTON_LINK_STYLE}
                     textDecoration={TYPOGRAPHY.textDecorationUnderline}
@@ -147,9 +161,10 @@ export function Settings(): JSX.Element {
                       setShowAnnouncementModal(true)
                     }}
                     data-testid="AnnouncementModal_viewReleaseNotesButton"
+                    padding={SPACING.spacing4}
                   >
                     <StyledText desktopStyle="bodyDefaultRegular">
-                      {t('shared:view_release_notes')}
+                      {t('shared:release_notes')}
                     </StyledText>
                   </Btn>
                 </Flex>

@@ -1,4 +1,5 @@
 """Test aspirate-in-place commands."""
+
 from datetime import datetime
 
 import pytest
@@ -102,7 +103,19 @@ async def test_aspirate_in_place_implementation(
         volume=123,
         flowRate=1.234,
     )
+    decoy.when(
+        state_store.geometry.get_nozzles_per_well(
+            labware_id=stateupdateLabware,
+            target_well_name=stateupdateWell,
+            pipette_id="pipette-id-abc",
+        )
+    ).then_return(2)
 
+    decoy.when(
+        state_store.geometry.get_wells_covered_by_pipette_with_active_well(
+            stateupdateLabware, stateupdateWell, "pipette-id-abc"
+        )
+    ).then_return(["A3", "A4"])
     decoy.when(
         pipetting.get_is_ready_to_aspirate(
             pipette_id="pipette-id-abc",
@@ -128,8 +141,8 @@ async def test_aspirate_in_place_implementation(
             state_update=update_types.StateUpdate(
                 liquid_operated=update_types.LiquidOperatedUpdate(
                     labware_id=stateupdateLabware,
-                    well_name=stateupdateWell,
-                    volume_added=-123,
+                    well_names=["A3", "A4"],
+                    volume_added=-246,
                 ),
                 pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
                     pipette_id="pipette-id-abc",
@@ -241,7 +254,19 @@ async def test_overpressure_error(
 
     error_id = "error-id"
     error_timestamp = datetime(year=2020, month=1, day=2)
+    decoy.when(
+        state_store.geometry.get_nozzles_per_well(
+            labware_id=stateupdateLabware,
+            target_well_name=stateupdateWell,
+            pipette_id="pipette-id",
+        )
+    ).then_return(2)
 
+    decoy.when(
+        state_store.geometry.get_wells_covered_by_pipette_with_active_well(
+            stateupdateLabware, stateupdateWell, "pipette-id"
+        )
+    ).then_return(["A3", "A4"])
     data = AspirateInPlaceParams(
         pipetteId=pipette_id,
         volume=50,
@@ -279,7 +304,7 @@ async def test_overpressure_error(
             state_update=update_types.StateUpdate(
                 liquid_operated=update_types.LiquidOperatedUpdate(
                     labware_id=stateupdateLabware,
-                    well_name=stateupdateWell,
+                    well_names=["A3", "A4"],
                     volume_added=update_types.CLEAR,
                 ),
                 pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(

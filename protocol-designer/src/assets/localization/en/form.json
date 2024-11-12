@@ -176,6 +176,12 @@
       "step_notes": {
         "label": "Step Notes"
       },
+      "temperature": {
+        "caption": "Valid range is 4 – 95˚C",
+        "setTemperature": "Temperature",
+        "toggleOff": "Deactivate",
+        "toggleOn": "Set"
+      },
       "thermocyclerAction": {
         "options": {
           "profile": "Program a Thermocycler profile",
@@ -268,6 +274,7 @@
     },
     "mixRepetitions": "repetitions",
     "mixVolumeLabel": "mix volume",
+    "moduleState": "Module state",
     "multiDispenseOptionsLabel": "multi-dispense options",
     "section": {
       "dropTip": "drop tip",
@@ -281,6 +288,7 @@
       "columns_aspirate_wells": "Source columns",
       "columns_dispense_wells": "Destination columns",
       "columns_mix_wells": "Select columns",
+      "columns_wells": "Mix wells",
       "wells": "wells",
       "wells_aspirate_wells": "Select source wells",
       "wells_dispense_wells": "Select destination wells",

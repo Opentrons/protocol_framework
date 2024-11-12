@@ -1,11 +1,12 @@
-import type * as React from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 import {
+  COLORS,
   DIRECTION_COLUMN,
   Flex,
   JUSTIFY_CENTER,
   JUSTIFY_SPACE_AROUND,
+  Link as LinkComponent,
   SPACING,
   StyledText,
 } from '@opentrons/components'
@@ -19,14 +20,16 @@ import thermocyclerGen2 from '../../assets/images/modules/thermocycler_gen2.png'
 import liquidEnhancements from '../../assets/images/announcements/liquid-enhancements.gif'
 import opentronsFlex from '../../assets/images/OpentronsFlex.png'
 import deckConfigutation from '../../assets/images/deck_configuration.png'
+import { DOC_URL } from '../KnowledgeLink'
+import type { ReactNode } from 'react'
 
 import styles from './AnnouncementModal.module.css'
 
 export interface Announcement {
   announcementKey: string
-  image: React.ReactNode | null
+  image: ReactNode | null
   heading: string
-  message: React.ReactNode
+  message: ReactNode
 }
 
 const batchEditStyles = css`
@@ -323,7 +326,22 @@ export const useAnnouncements = (): Announcement[] => {
             <Trans
               t={t}
               components={{ strong: <strong /> }}
-              i18nKey={'announcements.redesign.body4'}
+              i18nKey="announcements.redesign.body4"
+            />
+          </StyledText>
+          <StyledText desktopStyle="bodyDefaultRegular">
+            <Trans
+              t={t}
+              components={{
+                link1: (
+                  <LinkComponent
+                    external
+                    href={DOC_URL}
+                    color={COLORS.blue50}
+                  />
+                ),
+              }}
+              i18nKey="announcements.redesign.body5"
             />
           </StyledText>
         </Flex>

@@ -121,32 +121,34 @@ package dist-posix dist-osx dist-linux dist-win: export BUILD_ID := $(build_id)
 package dist-posix dist-osx dist-linux dist-win: export NO_PYTHON := $(if $(no_python_bundle),true,false)
 package dist-posix dist-osx dist-linux dist-win: export USE_HARD_LINKS := false
 
+# Note: these depend on make -C app dist having been run; do not do this automatically because we separate these
+# tasks in CI and even if you have a file dep it's easy to accidentally make the dist run.
 .PHONY: package
-package: package-deps
+package:
 	$(builder) --dir
 
 .PHONY: dist-posix
-dist-posix: package-deps
+dist-posix: clean lib
 	$(builder) --linux --mac
 	$(MAKE) _dist-collect-artifacts
 
 .PHONY: dist-osx
-dist-osx: package-deps
+dist-osx: clean lib
 	$(builder) --mac --x64
 	$(MAKE) _dist-collect-artifacts
 
 .PHONY: dist-linux
-dist-linux: package-deps
+dist-linux:  clean lib
 	$(builder) --linux
 	$(MAKE) _dist-collect-artifacts
 
 .PHONY: dist-win
-dist-win: package-deps
+dist-win: clean lib
 	$(builder) --win --x64
 	$(MAKE) _dist-collect-artifacts
 
 .PHONY: dist-ot3
-dist-ot3: package-deps
+dist-ot3: clean lib
 	NO_PYTHON=true $(builder) --linux --arm64 --dir
 	cd dist/linux-arm64-unpacked
 

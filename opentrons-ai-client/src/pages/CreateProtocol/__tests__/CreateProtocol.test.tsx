@@ -7,6 +7,8 @@ import { Provider } from 'jotai'
 import {
   fillApplicationSectionAndClickConfirm,
   fillInstrumentsSectionAndClickConfirm,
+  fillLabwareLiquidsSectionAndClickConfirm,
+  fillModulesSectionAndClickConfirm,
 } from '../../../resources/utils/createProtocolTestUtils'
 
 const render = (): ReturnType<typeof renderWithProviders> => {
@@ -118,5 +120,51 @@ describe('CreateProtocol', () => {
         'true'
       )
     })
+  })
+
+  it('should display the Prompt preview correctly for Modules section', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+
+    const previewItems = screen.getAllByTestId('Tag_default')
+
+    expect(previewItems).toHaveLength(7)
+    expect(previewItems[6]).toHaveTextContent(
+      'Heater-Shaker Module GEN1 with Opentrons 96 Deep Well Heater-Shaker Adapter'
+    )
+  })
+
+  it('should open the Labware & Liquids section when the Modules section is completed', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: 'Labware & Liquids' })
+      ).toHaveAttribute('aria-expanded', 'true')
+    })
+  })
+
+  it('should display the Prompt preview correctly for Labware & Liquids section', async () => {
+    render()
+
+    await fillApplicationSectionAndClickConfirm()
+    await fillInstrumentsSectionAndClickConfirm()
+    await fillModulesSectionAndClickConfirm()
+    await fillLabwareLiquidsSectionAndClickConfirm()
+
+    const previewItems = screen.getAllByTestId('Tag_default')
+
+    expect(previewItems).toHaveLength(9)
+    expect(previewItems[7]).toHaveTextContent(
+      'Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL'
+    )
+    expect(previewItems[8]).toHaveTextContent('Test liquid')
   })
 })

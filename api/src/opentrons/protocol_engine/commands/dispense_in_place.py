@@ -1,4 +1,5 @@
 """Dispense-in-place command request, result, and implementation models."""
+
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Type, Union
 from typing_extensions import Literal
@@ -91,7 +92,11 @@ class DispenseInPlaceImplementation(
             ):
                 state_update.set_liquid_operated(
                     labware_id=current_location.labware_id,
-                    well_name=current_location.well_name,
+                    well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+                        current_location.labware_id,
+                        current_location.well_name,
+                        params.pipetteId,
+                    ),
                     volume_added=CLEAR,
                 )
             state_update.set_fluid_unknown(pipette_id=params.pipetteId)
@@ -129,9 +134,19 @@ class DispenseInPlaceImplementation(
                         pipette_id=params.pipetteId, volume=volume
                     )
                 )
+                if volume_added is not None:
+                    volume_added *= self._state_view.geometry.get_nozzles_per_well(
+                        current_location.labware_id,
+                        current_location.well_name,
+                        params.pipetteId,
+                    )
                 state_update.set_liquid_operated(
                     labware_id=current_location.labware_id,
-                    well_name=current_location.well_name,
+                    well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+                        current_location.labware_id,
+                        current_location.well_name,
+                        params.pipetteId,
+                    ),
                     volume_added=volume_added if volume_added is not None else CLEAR,
                 )
             return SuccessData(
