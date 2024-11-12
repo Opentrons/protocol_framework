@@ -10,60 +10,14 @@ import {
 } from '@opentrons/components'
 import { useAtom } from 'jotai'
 import { useTranslation } from 'react-i18next'
-import { feedbackModalAtom, tokenAtom } from '../../resources/atoms'
+import { feedbackModalAtom } from '../../resources/atoms'
 import { useState } from 'react'
-import type { AxiosRequestConfig } from 'axios'
-import {
-  STAGING_FEEDBACK_END_POINT,
-  PROD_FEEDBACK_END_POINT,
-  LOCAL_FEEDBACK_END_POINT,
-} from '../../resources/constants'
-import { useApiCall } from '../../resources/hooks'
 
 export function FeedbackModal(): JSX.Element {
   const { t } = useTranslation('protocol_generator')
 
   const [feedbackValue, setFeedbackValue] = useState<string>('')
   const [, setShowFeedbackModal] = useAtom(feedbackModalAtom)
-  const [token] = useAtom(tokenAtom)
-  const { callApi } = useApiCall()
-
-  const handleSendFeedback = async (): Promise<void> => {
-    try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      }
-
-      const getEndpoint = (): string => {
-        switch (process.env.NODE_ENV) {
-          case 'production':
-            return PROD_FEEDBACK_END_POINT
-          case 'development':
-            return LOCAL_FEEDBACK_END_POINT
-          default:
-            return STAGING_FEEDBACK_END_POINT
-        }
-      }
-
-      const url = getEndpoint()
-
-      const config = {
-        url,
-        method: 'POST',
-        headers,
-        data: {
-          feedbackText: feedbackValue,
-          fake: false,
-        },
-      }
-      await callApi(config as AxiosRequestConfig)
-      setShowFeedbackModal(false)
-    } catch (err: any) {
-      console.error(`error: ${err.message}`)
-      throw err
-    }
-  }
 
   return (
     <Modal
@@ -87,9 +41,8 @@ export function FeedbackModal(): JSX.Element {
             </StyledText>
           </SecondaryButton>
           <PrimaryButton
-            disabled={feedbackValue === ''}
-            onClick={async () => {
-              await handleSendFeedback()
+            onClick={() => {
+              setShowFeedbackModal(false)
             }}
           >
             <StyledText desktopStyle="bodyDefaultSemiBold">
