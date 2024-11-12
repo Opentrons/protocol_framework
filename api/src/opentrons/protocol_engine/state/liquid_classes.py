@@ -4,14 +4,13 @@ from __future__ import annotations
 
 import dataclasses
 from typing import Dict
-
 from typing_extensions import Optional
 
-from . import update_types
-from ._abstract_store import HandlesActions, HasState
 from .. import errors
 from ..actions import Action, get_state_updates
 from ..types import LiquidClassRecord
+from . import update_types
+from ._abstract_store import HasState, HandlesActions
 
 
 @dataclasses.dataclass
