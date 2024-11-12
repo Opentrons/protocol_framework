@@ -80,9 +80,9 @@ export function WellsOrderField(props: WellsOrderFieldProps): JSX.Element {
         >
           <Icon name="well-order" size="1.25rem" />
           <StyledText desktopStyle="bodyDefaultRegular">
-            {t(`step_edit_form.field.well_order.option.${firstValue}`)}
-            {', '}
-            {t(`step_edit_form.field.well_order.option.${secondValue}`)}
+            {`${t(`step_edit_form.field.well_order.option.${firstValue}`)}, ${t(
+              `step_edit_form.field.well_order.option.${secondValue}`
+            )}`}
           </StyledText>
         </ListButton>
       </Flex>
