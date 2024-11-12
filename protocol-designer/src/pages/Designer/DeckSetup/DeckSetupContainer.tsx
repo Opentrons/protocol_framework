@@ -6,6 +6,7 @@ import {
   Box,
   COLORS,
   DIRECTION_COLUMN,
+  DIRECTION_ROW,
   DeckFromLayers,
   Flex,
   FlexTrash,
@@ -34,6 +35,7 @@ import { getHasGen1MultiChannelPipette } from '../../../step-forms'
 import { SlotDetailsContainer } from '../../../organisms'
 import { selectZoomedIntoSlot } from '../../../labware-ingred/actions'
 import { selectors } from '../../../labware-ingred/selectors'
+import { useIsDeckSetupWindowSizeSmall } from '../../../organisms/SlotDetailsContainer/utils'
 import { DeckSetupDetails } from './DeckSetupDetails'
 import {
   animateZoom,
@@ -54,7 +56,6 @@ import type {
 } from '@opentrons/step-generation'
 import type { DeckSetupTabType } from '../types'
 import type { Fixture } from './constants'
-import { TimelineToolbox } from '../ProtocolSteps/Timeline'
 
 const WASTE_CHUTE_SPACE = 30
 const DETAILS_HOVER_SPACE = 60
@@ -74,6 +75,7 @@ export const darkFill = COLORS.grey60
 export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   const { tab } = props
   const activeDeckSetup = useSelector(getDeckSetupForActiveItem)
+  const isDeckMapSmall = useIsDeckSetupWindowSizeSmall()
   const dispatch = useDispatch<any>()
   const zoomIn = useSelector(selectors.getZoomedInSlot)
   const _disableCollisionWarnings = useSelector(getDisableModuleRestrictions)
@@ -178,14 +180,19 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
     height = '75vh'
   } else if (tab === 'protocolSteps') {
     height = '70vh'
+  } else if (isDeckMapSmall) {
+    height = '55vh'
   }
   return (
-    <Flex>
+    <Flex
+      flexDirection={isDeckMapSmall ? DIRECTION_COLUMN : DIRECTION_ROW}
+      alignItems={isDeckMapSmall ? ALIGN_CENTER : 'auto'}
+    >
       {tab === 'startingDeck' ? (
         <Flex width="20%">
-          {/* {hoverSlot != null ? ( */}
-          <SlotDetailsContainer robotType={robotType} slot={'A1'} />
-          {/* ) : null} */}
+          {hoverSlot != null && !isDeckMapSmall ? (
+            <SlotDetailsContainer robotType={robotType} slot={hoverSlot} />
+          ) : null}
         </Flex>
       ) : null}
 
@@ -196,7 +203,6 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
         height={height}
         flexDirection={DIRECTION_COLUMN}
         padding={SPACING.spacing40}
-        // maxHeight="39.375rem" // this is to block deck view from enlarging
       >
         <Flex
           width="100%"
@@ -357,6 +363,13 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
           }}
           setHoveredLabware={setHoveredLabware}
         />
+      ) : null}
+      {tab === 'startingDeck' && isDeckMapSmall ? (
+        <Flex width="100%" paddingTop={SPACING.spacing20}>
+          {hoverSlot != null ? (
+            <SlotDetailsContainer robotType={robotType} slot={hoverSlot} />
+          ) : null}
+        </Flex>
       ) : null}
     </Flex>
   )

@@ -13,6 +13,7 @@ import {
 } from '@opentrons/components'
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { useIsDeckSetupWindowSizeSmall } from '../SlotDetailsContainer/utils'
 
 import type { FC } from 'react'
 import type { RobotType } from '@opentrons/shared-data'
@@ -92,10 +93,15 @@ interface StackInfoListProps {
 
 function StackInfoList({ title, items }: StackInfoListProps): JSX.Element {
   const pathLocation = useLocation()
+  const isDeckMapSmall = useIsDeckSetupWindowSizeSmall()
   return (
     <Flex
       flexDirection={DIRECTION_COLUMN}
-      width={pathLocation.pathname === '/designer' ? '15.8125rem' : '100%'}
+      width={
+        pathLocation.pathname === '/designer' && !isDeckMapSmall
+          ? '15.8125rem'
+          : '100%'
+      }
       gridGap={SPACING.spacing4}
     >
       {items.length > 0 ? (
