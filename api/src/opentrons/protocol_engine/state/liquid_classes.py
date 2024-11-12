@@ -7,9 +7,10 @@ from typing import Dict
 
 from typing_extensions import Optional
 
+from . import update_types
 from ._abstract_store import HandlesActions, HasState
-from ..actions import Action
-from ..actions.actions import AddLiquidClassAction
+from .. import errors
+from ..actions import Action, get_state_updates
 from ..types import LiquidClassRecord
 
 
@@ -36,14 +37,22 @@ class LiquidClassStore(HasState[LiquidClassState], HandlesActions):
 
     def handle_action(self, action: Action) -> None:
         """Update the state in response to the action."""
-        if isinstance(action, AddLiquidClassAction):
-            # We're just a data store. All the validation and ID generation happens in the command implementation.
-            self._state.liquid_class_record_by_id[
-                action.liquid_class_id
-            ] = action.liquid_class_record
-            self._state.liquid_class_record_to_id[
-                action.liquid_class_record
-            ] = action.liquid_class_id
+        for state_update in get_state_updates(action):
+            if state_update.liquid_class_loaded != update_types.NO_CHANGE:
+                self._handle_liquid_class_loaded_update(
+                    state_update.liquid_class_loaded
+                )
+
+    def _handle_liquid_class_loaded_update(
+        self, state_update: update_types.LiquidClassLoadedUpdate
+    ) -> None:
+        # We're just a data store. All the validation and ID generation happens in the command implementation.
+        self._state.liquid_class_record_by_id[
+            state_update.liquid_class_id
+        ] = state_update.liquid_class_record
+        self._state.liquid_class_record_to_id[
+            state_update.liquid_class_record
+        ] = state_update.liquid_class_id
 
 
 class LiquidClassView(HasState[LiquidClassState]):
@@ -56,7 +65,12 @@ class LiquidClassView(HasState[LiquidClassState]):
 
     def get(self, liquid_class_id: str) -> LiquidClassRecord:
         """Get the LiquidClassRecord with the given identifier."""
-        return self._state.liquid_class_record_by_id[liquid_class_id]
+        try:
+            return self._state.liquid_class_record_by_id[liquid_class_id]
+        except KeyError as e:
+            raise errors.LiquidClassDoesNotExistError(
+                f"Liquid class ID {liquid_class_id} not found."
+            ) from e
 
     def get_id_for_liquid_class_record(
         self, liquid_class_record: LiquidClassRecord

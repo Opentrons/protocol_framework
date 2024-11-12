@@ -4,7 +4,9 @@ import pytest
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     LiquidClassSchemaV1,
 )
-from opentrons.protocol_engine.actions.actions import AddLiquidClassAction
+from opentrons.protocol_engine import actions
+from opentrons.protocol_engine.commands import Comment
+from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.liquid_classes import LiquidClassStore
 from opentrons.protocol_engine.types import LiquidClassRecord
 
@@ -31,9 +33,15 @@ def test_handles_add_liquid_class(
     )
 
     subject.handle_action(
-        AddLiquidClassAction(
-            liquid_class_id="liquid-class-id",
-            liquid_class_record=liquid_class_record,
+        actions.SucceedCommandAction(
+            # TODO(dc): this is a placeholder command, LoadLiquidClassCommand coming soon
+            command=Comment.construct(),  # type: ignore[call-arg]
+            state_update=update_types.StateUpdate(
+                liquid_class_loaded=update_types.LiquidClassLoadedUpdate(
+                    liquid_class_id="liquid-class-id",
+                    liquid_class_record=liquid_class_record,
+                ),
+            ),
         )
     )
 
