@@ -769,6 +769,7 @@ class OT3Controller:
             FirmwarePipetteName.p50_multi: "P50M",
             FirmwarePipetteName.p1000_96: "P1KH",
             FirmwarePipetteName.p50_96: "P50H",
+            FirmwarePipetteName.p200_96: "P2HH",
         }
         return lookup_name[pipette_name]
 

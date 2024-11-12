@@ -31,6 +31,7 @@ NAME_LOOKUP: Dict[str, PipetteName] = {
     "P50M": PipetteName.p50_multi,
     "P1KH": PipetteName.p1000_96,
     "P50H": PipetteName.p50_96,
+    "P2HH": PipetteName.p200_96,
 }
 
 SERIAL_FORMAT_MSG = (

@@ -767,7 +767,11 @@ class ProtocolContext(CommandPublisher):
         # TODO (spp: 2023-08-30): disallow loading Flex pipettes on OT-2 by checking robotType
         instrument_name = validation.ensure_lowercase_name(instrument_name)
         checked_instrument_name = validation.ensure_pipette_name(instrument_name)
-        is_96_channel = checked_instrument_name == PipetteNameType.P1000_96
+
+        is_96_channel = checked_instrument_name in [
+            PipetteNameType.P1000_96,
+            PipetteNameType.P200_96,
+        ]
 
         checked_mount = Mount.LEFT if is_96_channel else validation.ensure_mount(mount)
 

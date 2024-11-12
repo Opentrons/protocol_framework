@@ -59,6 +59,7 @@ class PipetteModelType(enum.Enum):
     p10 = "p10"
     p20 = "p20"
     p50 = "p50"
+    p200 = "p200"
     p300 = "p300"
     p1000 = "p1000"
 
