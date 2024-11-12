@@ -116,6 +116,7 @@ export function PathField(props: PathFieldProps): JSX.Element {
     value,
     updateValue,
     tipRack,
+    isDisposalLocation,
   } = props
   const { t } = useTranslation('form')
   const pipetteEntities = useSelector(stepFormSelectors.getPipetteEntities)
@@ -129,6 +130,7 @@ export function PathField(props: PathFieldProps): JSX.Element {
       pipette,
       volume,
       tipRack,
+      isDisposalLocation,
     },
     pipetteEntities,
     t

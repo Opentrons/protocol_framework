@@ -1,5 +1,9 @@
 import { css } from 'styled-components'
-import { COLORS, OVERFLOW_HIDDEN } from '@opentrons/components'
+import {
+  COLORS,
+  DIRECTION_COLUMN,
+  OVERFLOW_HIDDEN,
+} from '@opentrons/components'
 import type { FlattenSimpleInterpolation } from 'styled-components'
 
 export const BUTTON_LINK_STYLE = css`
@@ -19,4 +23,12 @@ export const LINE_CLAMP_TEXT_STYLE = (
   word-wrap: break-word;
   -webkit-line-clamp: ${lineClamp};
   word-break: break-all; // for a non word case like aaaaaaaa
+`
+
+const MIN_OVERVIEW_WIDTH = '64rem'
+const COLUMN_GRID_GAP = '5rem'
+export const COLUMN_STYLE = css`
+  flex-direction: ${DIRECTION_COLUMN};
+  min-width: calc((${MIN_OVERVIEW_WIDTH} - ${COLUMN_GRID_GAP}) * 0.5);
+  flex: 1;
 `

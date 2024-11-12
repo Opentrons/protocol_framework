@@ -118,6 +118,7 @@ export const migrateFile = (
     (acc, form) => {
       const { id, moduleLocationUpdate } = form
       if (
+        moduleLocationUpdate != null &&
         id === '__INITIAL_DECK_SETUP_STEP__' &&
         appData.robot.model === OT2_ROBOT_TYPE
       ) {

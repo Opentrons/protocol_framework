@@ -95,6 +95,7 @@ const NavContainer = styled(Flex)`
   width: 100%;
   justify-content: ${JUSTIFY_SPACE_BETWEEN};
   align-items: ${ALIGN_CENTER};
+  box-shadow: 0px 1px 3px 0px ${COLORS.black90}${COLORS.opacity20HexCode};
 `
 
 const MetadataContainer = styled(Flex)<{ isAddingHardwareOrLabware: boolean }>`

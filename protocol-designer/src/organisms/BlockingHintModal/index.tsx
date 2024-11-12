@@ -48,6 +48,7 @@ export function BlockingHintModal(props: HintProps): JSX.Element {
 
   return createPortal(
     <Modal
+      marginLeft="0"
       type="warning"
       zIndexOverlay={15}
       title={t(`hint.${hintKey}.title`)}
@@ -73,7 +74,7 @@ export function BlockingHintModal(props: HintProps): JSX.Element {
               {t('shared:cancel')}
             </SecondaryButton>
             <PrimaryButton onClick={onContinueClick}>
-              {i18n.format(t('shared:continue'), 'capitalize')}
+              {i18n.format(t('shared:continue_with_export'), 'capitalize')}
             </PrimaryButton>
           </Flex>
         </Flex>

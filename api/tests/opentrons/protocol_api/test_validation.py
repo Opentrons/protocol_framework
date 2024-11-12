@@ -13,7 +13,16 @@ from opentrons_shared_data.labware.labware_definition import (
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.robot.types import RobotType
 
-from opentrons.types import Mount, DeckSlotName, StagingSlotName, Location, Point
+from opentrons.types import (
+    Mount,
+    DeckSlotName,
+    AxisType,
+    AxisMapType,
+    StringAxisMap,
+    StagingSlotName,
+    Location,
+    Point,
+)
 from opentrons.hardware_control.modules.types import (
     ModuleModel,
     MagneticModuleModel,
@@ -620,3 +629,96 @@ def test_validate_coordinates_raises(value: Sequence[Union[int, float, str]]) ->
     """It should raise if value is not a valid sequence of three numbers."""
     with pytest.raises(ValueError, match="(exactly three|must be floats)"):
         subject.validate_coordinates(value)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    argnames=["axis_map", "robot_type", "is_96_channel", "expected_axis_map"],
+    argvalues=[
+        (
+            {"x": 100, "Y": 50, "z_g": 80},
+            "OT-3 Standard",
+            True,
+            {AxisType.X: 100, AxisType.Y: 50, AxisType.Z_G: 80},
+        ),
+        ({"z_r": 80}, "OT-2 Standard", False, {AxisType.Z_R: 80}),
+        (
+            {"Z_L": 19, "P_L": 20},
+            "OT-2 Standard",
+            False,
+            {AxisType.Z_L: 19, AxisType.P_L: 20},
+        ),
+        ({"Q": 5}, "OT-3 Standard", True, {AxisType.Q: 5}),
+    ],
+)
+def test_ensure_axis_map_type_success(
+    axis_map: Union[AxisMapType, StringAxisMap],
+    robot_type: RobotType,
+    is_96_channel: bool,
+    expected_axis_map: AxisMapType,
+) -> None:
+    """Check that axis map type validation returns the correct shape."""
+    res = subject.ensure_axis_map_type(axis_map, robot_type, is_96_channel)
+    assert res == expected_axis_map
+
+
+@pytest.mark.parametrize(
+    argnames=["axis_map", "robot_type", "is_96_channel", "error_message"],
+    argvalues=[
+        (
+            {AxisType.X: 100, "y": 50},
+            "OT-3 Standard",
+            True,
+            "Please provide an `axis_map` with only string or only AxisType keys",
+        ),
+        (
+            {AxisType.Z_R: 60},
+            "OT-3 Standard",
+            True,
+            "A 96 channel is attached. You cannot move the `Z_R` mount.",
+        ),
+        (
+            {"Z_G": 19, "P_L": 20},
+            "OT-2 Standard",
+            False,
+            "An OT-2 Robot only accepts the following axes ",
+        ),
+        (
+            {"Q": 5},
+            "OT-3 Standard",
+            False,
+            "A 96 channel is not attached. The clamp `Q` motor does not exist.",
+        ),
+    ],
+)
+def test_ensure_axis_map_type_failure(
+    axis_map: Union[AxisMapType, StringAxisMap],
+    robot_type: RobotType,
+    is_96_channel: bool,
+    error_message: str,
+) -> None:
+    """Check that axis_map validation occurs for the given scenarios."""
+    with pytest.raises(subject.IncorrectAxisError, match=error_message):
+        subject.ensure_axis_map_type(axis_map, robot_type, is_96_channel)
+
+
+@pytest.mark.parametrize(
+    argnames=["axis_map", "robot_type", "error_message"],
+    argvalues=[
+        (
+            {AxisType.X: 100, AxisType.P_L: 50},
+            "OT-3 Standard",
+            "A critical point only accepts Flex gantry axes which are ",
+        ),
+        (
+            {AxisType.Z_G: 60},
+            "OT-2 Standard",
+            "A critical point only accepts OT-2 gantry axes which are ",
+        ),
+    ],
+)
+def test_ensure_only_gantry_axis_map_type(
+    axis_map: AxisMapType, robot_type: RobotType, error_message: str
+) -> None:
+    """Check that gantry axis_map validation occurs for the given scenarios."""
+    with pytest.raises(subject.IncorrectAxisError, match=error_message):
+        subject.ensure_only_gantry_axis_map_type(axis_map, robot_type)
