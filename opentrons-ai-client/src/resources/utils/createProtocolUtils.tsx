@@ -1,5 +1,4 @@
 import {
-  getAllDefinitions,
   getLabwareDisplayName,
   getPipetteSpecsV2,
 } from '@opentrons/shared-data'
@@ -14,6 +13,7 @@ import {
 } from '../../organisms/InstrumentsSection'
 import type { UseFormWatch } from 'react-hook-form'
 import type { CreateProtocolFormData } from '../../pages/CreateProtocol'
+import { getAllDefinitions } from './labware'
 
 export function generatePromptPreviewApplicationItems(
   watch: UseFormWatch<CreateProtocolFormData>,

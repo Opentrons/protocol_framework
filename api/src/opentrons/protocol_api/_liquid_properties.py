@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Optional, Dict, Sequence
+from numpy import interp
+from typing import Optional, Dict, Sequence, Union, Tuple
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     AspirateProperties as SharedDataAspirateProperties,
@@ -18,9 +19,62 @@ from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     Coordinate,
 )
 
-# TODO replace this with a class that can extrapolate given volumes to the correct float,
-#   also figure out how we want people to be able to set this
-LiquidHandlingPropertyByVolume = Dict[str, float]
+from . import validation
+
+
+class LiquidHandlingPropertyByVolume:
+    def __init__(self, properties_by_volume: Dict[str, float]) -> None:
+        self._default = properties_by_volume["default"]
+        self._properties_by_volume: Dict[float, float] = {
+            float(volume): value
+            for volume, value in properties_by_volume.items()
+            if volume != "default"
+        }
+        # Volumes need to be sorted for proper interpolation of non-defined volumes, and the
+        # corresponding values need to be in the same order for them to be interpolated correctly
+        self._sorted_volumes: Tuple[float, ...] = ()
+        self._sorted_values: Tuple[float, ...] = ()
+        self._sort_volume_and_values()
+
+    @property
+    def default(self) -> float:
+        """Get the default value not associated with any volume for this property."""
+        return self._default
+
+    def as_dict(self) -> Dict[Union[float, str], float]:
+        """Get a dictionary representation of all set volumes and values along with the default."""
+        return self._properties_by_volume | {"default": self._default}
+
+    def get_for_volume(self, volume: float) -> float:
+        """Get a value by volume for this property. Volumes not defined will be interpolated between set volumes."""
+        validated_volume = validation.ensure_positive_float(volume)
+        try:
+            return self._properties_by_volume[validated_volume]
+        except KeyError:
+            # If volume is not defined in dictionary, do a piecewise interpolation with existing sorted values
+            return float(
+                interp(validated_volume, self._sorted_volumes, self._sorted_values)
+            )
+
+    def set_for_volume(self, volume: float, value: float) -> None:
+        """Add a new volume and value for the property for the interpolation curve."""
+        validated_volume = validation.ensure_positive_float(volume)
+        self._properties_by_volume[validated_volume] = value
+        self._sort_volume_and_values()
+
+    def delete_for_volume(self, volume: float) -> None:
+        """Remove an existing volume and value from the property."""
+        try:
+            del self._properties_by_volume[volume]
+            self._sort_volume_and_values()
+        except KeyError:
+            raise KeyError(f"No value set for volume {volume} uL")
+
+    def _sort_volume_and_values(self) -> None:
+        """Sort volume in increasing order along with corresponding values in matching order."""
+        self._sorted_volumes, self._sorted_values = zip(
+            *sorted(self._properties_by_volume.items())
+        )
 
 
 @dataclass
@@ -35,10 +89,10 @@ class DelayProperties:
 
     @enabled.setter
     def enabled(self, enable: bool) -> None:
-        # TODO insert bool validation here
-        if enable and self._duration is None:
+        validated_enable = validation.ensure_boolean(enable)
+        if validated_enable and self._duration is None:
             raise ValueError("duration must be set before enabling delay.")
-        self._enabled = enable
+        self._enabled = validated_enable
 
     @property
     def duration(self) -> Optional[float]:
@@ -46,8 +100,8 @@ class DelayProperties:
 
     @duration.setter
     def duration(self, new_duration: float) -> None:
-        # TODO insert positive float validation here
-        self._duration = new_duration
+        validated_duration = validation.ensure_positive_float(new_duration)
+        self._duration = validated_duration
 
 
 @dataclass
@@ -64,14 +118,14 @@ class TouchTipProperties:
 
     @enabled.setter
     def enabled(self, enable: bool) -> None:
-        # TODO insert bool validation here
-        if enable and (
+        validated_enable = validation.ensure_boolean(enable)
+        if validated_enable and (
             self._z_offset is None or self._mm_to_edge is None or self._speed is None
         ):
             raise ValueError(
                 "z_offset, mm_to_edge and speed must be set before enabling touch tip."
             )
-        self._enabled = enable
+        self._enabled = validated_enable
 
     @property
     def z_offset(self) -> Optional[float]:
@@ -79,8 +133,8 @@ class TouchTipProperties:
 
     @z_offset.setter
     def z_offset(self, new_offset: float) -> None:
-        # TODO validation for float
-        self._z_offset = new_offset
+        validated_offset = validation.ensure_float(new_offset)
+        self._z_offset = validated_offset
 
     @property
     def mm_to_edge(self) -> Optional[float]:
@@ -88,8 +142,8 @@ class TouchTipProperties:
 
     @mm_to_edge.setter
     def mm_to_edge(self, new_mm: float) -> None:
-        # TODO validation for float
-        self._z_offset = new_mm
+        validated_mm = validation.ensure_float(new_mm)
+        self._z_offset = validated_mm
 
     @property
     def speed(self) -> Optional[float]:
@@ -97,8 +151,8 @@ class TouchTipProperties:
 
     @speed.setter
     def speed(self, new_speed: float) -> None:
-        # TODO insert positive float validation here
-        self._speed = new_speed
+        validated_speed = validation.ensure_positive_float(new_speed)
+        self._speed = validated_speed
 
 
 @dataclass
@@ -114,10 +168,10 @@ class MixProperties:
 
     @enabled.setter
     def enabled(self, enable: bool) -> None:
-        # TODO insert bool validation here
-        if enable and (self._repetitions is None or self._volume is None):
+        validated_enable = validation.ensure_boolean(enable)
+        if validated_enable and (self._repetitions is None or self._volume is None):
             raise ValueError("repetitions and volume must be set before enabling mix.")
-        self._enabled = enable
+        self._enabled = validated_enable
 
     @property
     def repetitions(self) -> Optional[int]:
@@ -125,8 +179,8 @@ class MixProperties:
 
     @repetitions.setter
     def repetitions(self, new_repetitions: int) -> None:
-        # TODO validations for positive int
-        self._repetitions = new_repetitions
+        validated_repetitions = validation.ensure_positive_int(new_repetitions)
+        self._repetitions = validated_repetitions
 
     @property
     def volume(self) -> Optional[float]:
@@ -134,8 +188,8 @@ class MixProperties:
 
     @volume.setter
     def volume(self, new_volume: float) -> None:
-        # TODO validations for volume float
-        self._volume = new_volume
+        validated_volume = validation.ensure_positive_float(new_volume)
+        self._volume = validated_volume
 
 
 @dataclass
@@ -151,12 +205,12 @@ class BlowoutProperties:
 
     @enabled.setter
     def enabled(self, enable: bool) -> None:
-        # TODO insert bool validation here
-        if enable and (self._location is None or self._flow_rate is None):
+        validated_enable = validation.ensure_boolean(enable)
+        if validated_enable and (self._location is None or self._flow_rate is None):
             raise ValueError(
                 "location and flow_rate must be set before enabling blowout."
             )
-        self._enabled = enable
+        self._enabled = validated_enable
 
     @property
     def location(self) -> Optional[BlowoutLocation]:
@@ -164,7 +218,6 @@ class BlowoutProperties:
 
     @location.setter
     def location(self, new_location: str) -> None:
-        # TODO blowout location validation
         self._location = BlowoutLocation(new_location)
 
     @property
@@ -173,8 +226,8 @@ class BlowoutProperties:
 
     @flow_rate.setter
     def flow_rate(self, new_flow_rate: float) -> None:
-        # TODO validations for positive float
-        self._flow_rate = new_flow_rate
+        validated_flow_rate = validation.ensure_positive_float(new_flow_rate)
+        self._flow_rate = validated_flow_rate
 
 
 @dataclass
@@ -191,7 +244,6 @@ class SubmergeRetractCommon:
 
     @position_reference.setter
     def position_reference(self, new_position: str) -> None:
-        # TODO validation for position reference
         self._position_reference = PositionReference(new_position)
 
     @property
@@ -200,8 +252,8 @@ class SubmergeRetractCommon:
 
     @offset.setter
     def offset(self, new_offset: Sequence[float]) -> None:
-        # TODO validate valid coordinates
-        self._offset = Coordinate(x=new_offset[0], y=new_offset[1], z=new_offset[2])
+        x, y, z = validation.validate_coordinates(new_offset)
+        self._offset = Coordinate(x=x, y=y, z=z)
 
     @property
     def speed(self) -> float:
@@ -209,8 +261,8 @@ class SubmergeRetractCommon:
 
     @speed.setter
     def speed(self, new_speed: float) -> None:
-        # TODO insert positive float validation here
-        self._speed = new_speed
+        validated_speed = validation.ensure_positive_float(new_speed)
+        self._speed = validated_speed
 
     @property
     def delay(self) -> DelayProperties:
@@ -276,7 +328,6 @@ class BaseLiquidHandlingProperties:
 
     @position_reference.setter
     def position_reference(self, new_position: str) -> None:
-        # TODO validation for position reference
         self._position_reference = PositionReference(new_position)
 
     @property
@@ -285,8 +336,8 @@ class BaseLiquidHandlingProperties:
 
     @offset.setter
     def offset(self, new_offset: Sequence[float]) -> None:
-        # TODO validate valid coordinates
-        self._offset = Coordinate(x=new_offset[0], y=new_offset[1], z=new_offset[2])
+        x, y, z = validation.validate_coordinates(new_offset)
+        self._offset = Coordinate(x=x, y=y, z=z)
 
     @property
     def flow_rate_by_volume(self) -> LiquidHandlingPropertyByVolume:
@@ -310,8 +361,8 @@ class AspirateProperties(BaseLiquidHandlingProperties):
 
     @pre_wet.setter
     def pre_wet(self, new_setting: bool) -> None:
-        # TODO boolean validation
-        self._pre_wet = new_setting
+        validated_setting = validation.ensure_boolean(new_setting)
+        self._pre_wet = validated_setting
 
     @property
     def retract(self) -> RetractAspirate:
@@ -362,8 +413,6 @@ class MultiDispenseProperties(BaseLiquidHandlingProperties):
         return self._disposal_by_volume
 
 
-# TODO (spp, 2024-10-17): create PAPI-equivalent types for all the properties
-#  and have validation on value updates with user-facing error messages
 @dataclass
 class TransferProperties:
     _aspirate: AspirateProperties
@@ -461,7 +510,9 @@ def _build_retract_aspirate(
         _position_reference=retract_aspirate.positionReference,
         _offset=retract_aspirate.offset,
         _speed=retract_aspirate.speed,
-        _air_gap_by_volume=retract_aspirate.airGapByVolume,
+        _air_gap_by_volume=LiquidHandlingPropertyByVolume(
+            retract_aspirate.airGapByVolume
+        ),
         _touch_tip=_build_touch_tip_properties(retract_aspirate.touchTip),
         _delay=_build_delay_properties(retract_aspirate.delay),
     )
@@ -474,7 +525,9 @@ def _build_retract_dispense(
         _position_reference=retract_dispense.positionReference,
         _offset=retract_dispense.offset,
         _speed=retract_dispense.speed,
-        _air_gap_by_volume=retract_dispense.airGapByVolume,
+        _air_gap_by_volume=LiquidHandlingPropertyByVolume(
+            retract_dispense.airGapByVolume
+        ),
         _blowout=_build_blowout_properties(retract_dispense.blowout),
         _touch_tip=_build_touch_tip_properties(retract_dispense.touchTip),
         _delay=_build_delay_properties(retract_dispense.delay),
@@ -489,7 +542,9 @@ def build_aspirate_properties(
         _retract=_build_retract_aspirate(aspirate_properties.retract),
         _position_reference=aspirate_properties.positionReference,
         _offset=aspirate_properties.offset,
-        _flow_rate_by_volume=aspirate_properties.flowRateByVolume,
+        _flow_rate_by_volume=LiquidHandlingPropertyByVolume(
+            aspirate_properties.flowRateByVolume
+        ),
         _pre_wet=aspirate_properties.preWet,
         _mix=_build_mix_properties(aspirate_properties.mix),
         _delay=_build_delay_properties(aspirate_properties.delay),
@@ -504,9 +559,13 @@ def build_single_dispense_properties(
         _retract=_build_retract_dispense(single_dispense_properties.retract),
         _position_reference=single_dispense_properties.positionReference,
         _offset=single_dispense_properties.offset,
-        _flow_rate_by_volume=single_dispense_properties.flowRateByVolume,
+        _flow_rate_by_volume=LiquidHandlingPropertyByVolume(
+            single_dispense_properties.flowRateByVolume
+        ),
         _mix=_build_mix_properties(single_dispense_properties.mix),
-        _push_out_by_volume=single_dispense_properties.pushOutByVolume,
+        _push_out_by_volume=LiquidHandlingPropertyByVolume(
+            single_dispense_properties.pushOutByVolume
+        ),
         _delay=_build_delay_properties(single_dispense_properties.delay),
     )
 
@@ -521,9 +580,15 @@ def build_multi_dispense_properties(
         _retract=_build_retract_dispense(multi_dispense_properties.retract),
         _position_reference=multi_dispense_properties.positionReference,
         _offset=multi_dispense_properties.offset,
-        _flow_rate_by_volume=multi_dispense_properties.flowRateByVolume,
-        _conditioning_by_volume=multi_dispense_properties.conditioningByVolume,
-        _disposal_by_volume=multi_dispense_properties.disposalByVolume,
+        _flow_rate_by_volume=LiquidHandlingPropertyByVolume(
+            multi_dispense_properties.flowRateByVolume
+        ),
+        _conditioning_by_volume=LiquidHandlingPropertyByVolume(
+            multi_dispense_properties.conditioningByVolume
+        ),
+        _disposal_by_volume=LiquidHandlingPropertyByVolume(
+            multi_dispense_properties.disposalByVolume
+        ),
         _delay=_build_delay_properties(multi_dispense_properties.delay),
     )
 

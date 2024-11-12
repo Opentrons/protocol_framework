@@ -23,7 +23,7 @@ import {
   tokenAtom,
 } from '../../resources/atoms'
 import { useApiCall } from '../../resources/hooks'
-import { calcTextAreaHeight } from '../../resources/utils/utils'
+import { calcTextAreaHeight } from '../../resources/utils'
 import {
   STAGING_END_POINT,
   PROD_END_POINT,

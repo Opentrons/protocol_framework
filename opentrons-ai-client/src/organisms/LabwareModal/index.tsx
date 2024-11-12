@@ -13,17 +13,18 @@ import {
 } from '@opentrons/components'
 import { useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import type {
-  LabwareDefByDefURI,
-  LabwareDefinition2,
-} from '@opentrons/shared-data'
-import { getLabwareDefURI, getAllDefinitions } from '@opentrons/shared-data'
+import { getLabwareDefURI } from '@opentrons/shared-data'
 import React, { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { reduce } from 'lodash'
 import { ListButtonCheckbox } from '../../atoms/ListButtonCheckbox/ListButtonCheckbox'
-import type { DisplayLabware } from '../LabwareLiquidsSection'
 import { LABWARES_FIELD_NAME } from '../LabwareLiquidsSection'
+import { getAllDefinitions } from '../../resources/utils'
+import type { DisplayLabware } from '../LabwareLiquidsSection'
+import type {
+  LabwareDefByDefURI,
+  LabwareDefinition2,
+} from '@opentrons/shared-data'
 
 const ORDERED_CATEGORIES: string[] = [
   'tipRack',
