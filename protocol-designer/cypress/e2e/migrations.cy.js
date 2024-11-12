@@ -3,77 +3,82 @@ import cloneDeep from 'lodash/cloneDeep'
 import { expectDeepEqual } from '@opentrons/shared-data/js/cypressUtils'
 const semver = require('semver')
 
-// TODO: (sa 2022-03-31: change these migration fixtures to v6 protocols once the liquids key is added to PD protocols
-// https://github.com/Opentrons/opentrons/issues/9852
 describe('Protocol fixtures migrate and match snapshots', () => {
   beforeEach(() => {
     cy.visit('/')
-    cy.closeAnnouncementModal()
   })
 
-  // TODO (nd 09/25/2024): update fixtures and uncomment test cases once migration work is complete
   const testCases = [
-    // {
-    //   title: 'example_1_1_0 (schema 1, PD version 1.1.1) -> PD 8.1.x, schema 8',
-    //   importFixture: '../../fixtures/protocol/1/example_1_1_0.json',
-    //   expectedExportFixture:
-    //     '../../fixtures/protocol/8/example_1_1_0MigratedToV8.json',
-    //   unusedPipettes: true,
-    //   migrationModal: 'newLabwareDefs',
-    // },
-    // {
-    //   title: 'doItAllV3 (schema 3, PD version 4.0.0) -> PD 8.1.x, schema 8',
-    //   importFixture: '../../fixtures/protocol/4/doItAllV3.json',
-    //   expectedExportFixture:
-    //     '../../fixtures/protocol/8/doItAllV3MigratedToV8.json',
-    //   unusedPipettes: false,
-    //   migrationModal: 'v8.1',
-    // },
-    // {
-    //   title: 'doItAllV4 (schema 4, PD version 4.0.0) -> PD 8.1.x, schema 8',
-    //   importFixture: '../../fixtures/protocol/4/doItAllV4.json',
-    //   expectedExportFixture:
-    //     '../../fixtures/protocol/8/doItAllV4MigratedToV8.json',
-    //   unusedPipettes: false,
-    //   migrationModal: 'v8.1',
-    // },
-    // {
-    //   title:
-    //     'doItAll78MigratedToV8 (schema 7, PD version 8.0.0) -> should migrate to 8.1.x, schema 8',
-    //   importFixture: '../../fixtures/protocol/7/doItAllV7.json',
-    //   expectedExportFixture:
-    //     '../../fixtures/protocol/8/doItAllV7MigratedToV8.json',
-    //   unusedPipettes: false,
-    //   migrationModal: 'v8.1',
-    // },
-    // {
-    //   title:
-    //     '96-channel full and column schema 8 -> should migrate to 8.1.x, schema 8',
-    //   importFixture:
-    //     '../../fixtures/protocol/8/ninetySixChannelFullAndColumn.json',
-    //   expectedExportFixture:
-    //     '../../fixtures/protocol/8/ninetySixChannelFullAndColumn.json',
-    //   migrationModal: null,
-    //   unusedPipettes: false,
-    // },
-    // {
-    //   title:
-    //     'doItAllV8 flex robot -> reimported, should migrate to 8.1.x, schema 8',
-    //   importFixture: '../../fixtures/protocol/8/doItAllV8.json',
-    //   expectedExportFixture: '../../fixtures/protocol/8/doItAllV8.json',
-    //   migrationModal: null,
-    //   unusedPipettes: false,
-    // },
-    // {
-    //   title:
-    //     'new advanced settings with multi temp => reimported, should not migrate and stay at 8.1.x, schema 8',
-    //   importFixture:
-    //     '../../fixtures/protocol/8/newAdvancedSettingsAndMultiTemp.json',
-    //   expectedExportFixture:
-    //     '../../fixtures/protocol/8/newAdvancedSettingsAndMultiTemp.json',
-    //   migrationModal: null,
-    //   unusedPipettes: false,
-    // },
+    {
+      title: 'example_1_1_0 (schema 1, PD version 1.1.1) -> PD 8.2.x, schema 8',
+      importFixture: '../../fixtures/protocol/1/example_1_1_0.json',
+      expectedExportFixture:
+        '../../fixtures/protocol/8/example_1_1_0MigratedToV8.json',
+      unusedHardware: true,
+      migrationModal: 'newLabwareDefs',
+    },
+    {
+      title: 'doItAllV3 (schema 3, PD version 4.0.0) -> PD 8.2.x, schema 8',
+      importFixture: '../../fixtures/protocol/4/doItAllV3.json',
+      expectedExportFixture:
+        '../../fixtures/protocol/8/doItAllV3MigratedToV8.json',
+      unusedHardware: false,
+      migrationModal: 'v8.1',
+    },
+    {
+      title: 'doItAllV4 (schema 4, PD version 4.0.0) -> PD 8.2.x, schema 8',
+      importFixture: '../../fixtures/protocol/4/doItAllV4.json',
+      expectedExportFixture:
+        '../../fixtures/protocol/8/doItAllV4MigratedToV8.json',
+      unusedHardware: false,
+      migrationModal: 'v8.1',
+    },
+    {
+      title:
+        'doItAllv7MigratedToV8 (schema 7, PD version 8.0.0) -> should migrate to 8.2.x, schema 8',
+      importFixture: '../../fixtures/protocol/7/doItAllV7.json',
+      expectedExportFixture:
+        '../../fixtures/protocol/8/doItAllV7MigratedToV8.json',
+      unusedHardware: false,
+      migrationModal: 'v8.1',
+    },
+    {
+      title:
+        '96-channel full and column schema 8 -> should migrate to 8.2.x, schema 8',
+      importFixture:
+        '../../fixtures/protocol/8/ninetySixChannelFullAndColumn.json',
+      expectedExportFixture:
+        '../../fixtures/protocol/8/ninetySixChannelFullAndColumn.json',
+      migrationModal: null,
+      unusedHardware: false,
+    },
+    {
+      title:
+        'doItAllV8 flex robot -> reimported, should migrate to 8.2.x, schema 8',
+      importFixture: '../../fixtures/protocol/8/doItAllV8.json',
+      expectedExportFixture: '../../fixtures/protocol/8/doItAllV8.json',
+      migrationModal: null,
+      unusedHardware: false,
+    },
+    {
+      title:
+        'new advanced settings with multi temp => reimported, should not migrate and stay at 8.2.x, schema 8',
+      importFixture:
+        '../../fixtures/protocol/8/newAdvancedSettingsAndMultiTemp.json',
+      expectedExportFixture:
+        '../../fixtures/protocol/8/newAdvancedSettingsAndMultiTemp.json',
+      migrationModal: null,
+      unusedHardware: false,
+    },
+    {
+      title:
+        'thermocycler on Ot2 (schema 7, PD version 7.0.0) -> should migrate to 8.2.x, schema 8',
+      importFixture: '../../fixtures/protocol/7/thermocyclerOnOt2V7.json',
+      expectedExportFixture:
+        '../../fixtures/protocol/8/thermocyclerOnOt2V7MigratedToV8.json',
+      migrationModal: 'v8.1',
+      unusedHardware: true,
+    },
   ]
 
   testCases.forEach(
@@ -81,7 +86,7 @@ describe('Protocol fixtures migrate and match snapshots', () => {
       title,
       importFixture,
       expectedExportFixture,
-      unusedPipettes,
+      unusedHardware,
       migrationModal,
     }) => {
       it(title, () => {
@@ -91,12 +96,14 @@ describe('Protocol fixtures migrate and match snapshots', () => {
           // Also, the latest version v4 of cypress-file-upload is too implicit to allow us to
           // use the JSON.stringify workaround, so we're stuck on 3.5.3,
           // see https://github.com/abramenal/cypress-file-upload/issues/175
-          cy.get('input[type=file]').upload({
-            fileContent: JSON.stringify(fileContent),
-            fileName: 'fixture.json',
-            mimeType: 'application/json',
-            encoding: 'utf8',
-          })
+          cy.get('[data-cy="landing-page"]')
+            .find('input[type=file]')
+            .upload({
+              fileContent: JSON.stringify(fileContent),
+              fileName: 'fixture.json',
+              mimeType: 'application/json',
+              encoding: 'utf8',
+            })
           // wait until computation is done before proceeding, with generous timeout
           cy.get('[data-test="ComputingSpinner"]', { timeout: 30000 }).should(
             'not.exist'
@@ -110,40 +117,31 @@ describe('Protocol fixtures migrate and match snapshots', () => {
                 'The default dispense height is now 1 mm from the bottom of the well'
               )
               .should('exist')
-            cy.get('button').contains('ok', { matchCase: false }).click()
+            cy.get('button').contains('Confirm', { matchCase: false }).click()
           } else if (migrationModal === 'newLabwareDefs') {
             cy.get('div')
               .contains('Update protocol to use new labware definitions')
               .should('exist')
-            cy.get('button')
-              .contains('update protocol', { matchCase: false })
-              .click()
+            cy.get('button').contains('Confirm', { matchCase: false }).click()
           } else if (migrationModal === 'noBehaviorChange') {
             cy.get('div')
               .contains(
                 'We have added new features since the last time this protocol was updated, but have not made any changes to existing protocol behavior'
               )
               .should('exist')
-            cy.get('button').contains('ok', { matchCase: false }).click()
+            cy.get('button').contains('Confirm', { matchCase: false }).click()
           }
         }
 
         cy.fixture(expectedExportFixture).then(expectedExportProtocol => {
           cy.get('button').contains('Export').click()
 
-          if (unusedPipettes) {
-            cy.get('div').contains('Unused pipette').should('exist')
-            cy.get('button')
-              .contains('continue with export', { matchCase: false })
-              .click()
+          if (unusedHardware) {
+            cy.get('div')
+              .contains('Protocol has unused hardware')
+              .should('exist')
+            cy.get('button').contains('continue', { matchCase: false }).click()
           }
-
-          cy.get('div')
-            .contains(
-              'This protocol can only run on app and robot server version 7.3.0 or higher'
-            )
-            .should('exist')
-          cy.get('button').contains('continue', { matchCase: false }).click()
 
           cy.window()
             .its('__lastSavedFileBlob__')
@@ -165,7 +163,6 @@ describe('Protocol fixtures migrate and match snapshots', () => {
                 f.designerApplication.data._internalAppBuildDate = 'Foo Date'
                 f.designerApplication.version = 'x.x.x'
 
-                //  NOTE: trash stubs can be removed post-8.0.0 release
                 //  currently stubbed because of the newly created trash id for movable trash support
                 Object.values(
                   f.designerApplication.data.savedStepForms
