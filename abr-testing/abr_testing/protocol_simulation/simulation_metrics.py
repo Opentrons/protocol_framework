@@ -13,7 +13,9 @@ from abr_testing.data_collection import read_robot_logs
 from typing import Any, Tuple, List, Dict, Union, NoReturn
 from abr_testing.tools import plate_reader
 
-def build_parser():
+
+def build_parser() -> Any:
+    """Builds argument parser."""
     parser = argparse.ArgumentParser(description="Read run logs on google drive.")
     parser.add_argument(
         "storage_directory",
@@ -347,11 +349,12 @@ def parse_results_volume(
 
 
 def main(
-    protocol_file_path: str,
+    protocol_file_path: Path,
     save: bool,
     storage_directory: str = os.curdir,
     google_sheet_name: str = "",
-    exit=None,
+    parameters: str = "",
+    extra_files: List[Path] = [],
 ) -> None:
     """Main module control."""
     sys.exit = mock_exit  # Replace sys.exit with the mock function
@@ -359,11 +362,11 @@ def main(
     file_date = datetime.now()
     file_date_formatted = file_date.strftime("%Y-%m-%d_%H-%M-%S")
     error_output = f"{storage_directory}\\test_debug"
-    # Ask user for complimentary files
-    all_files = get_extra_files(protocol_file_path)
-    protocol_files = all_files[0]
-    parameters = all_files[1][0]
-    protocol_name = protocol_files[0].stem
+    protocol_name = protocol_file_path.stem
+    protocol_files = [protocol_file_path]
+    if extra_files != []:
+        protocol_files += extra_files
+    print("Simulating....")
     try:
         with Context(analyze) as ctx:
             if save:
@@ -374,9 +377,8 @@ def main(
                 json_file_output = open(json_file_path, "wb+")
                 # log_output_file = f"{protocol_name}_log"
                 if parameters:
-                    print(f"Parameter: {parameters[0]}\n")
                     csv_params = {}
-                    csv_params["parameters_csv"] = parameters[0]
+                    csv_params["parameters_csv"] = parameters
                     rtp_json = json.dumps(csv_params)
                     ctx.invoke(
                         analyze,
@@ -390,7 +392,6 @@ def main(
                     )
 
                 else:
-                    print("simulate")
                     ctx.invoke(
                         analyze,
                         files=protocol_files,
@@ -400,13 +401,11 @@ def main(
                         log_level="ERROR",
                         check=False,
                     )
-                    print("done")
                 json_file_output.close()
-                print("closed")
             else:
                 if parameters:
                     csv_params = {}
-                    csv_params["parameters_csv"] = parameters[0]
+                    csv_params["parameters_csv"] = parameters
                     rtp_json = json.dumps(csv_params)
                     ctx.invoke(
                         analyze,
@@ -428,9 +427,11 @@ def main(
                         log_level="ERROR",
                         check=True,
                     )
-
+        print("done!")
     except SystemExit as e:
         print(f"SystemExit caught with code: {e}")
+        if e != 0:
+            traceback.print_exc
     finally:
         # Reset sys.exit to the original behavior
         sys.exit = original_exit
@@ -440,7 +441,7 @@ def main(
                 if not errors:
                     pass
                 else:
-                    print("Error")
+                    print(f"Error:\n{errors}")
                     raise
             except FileNotFoundError:
                 print("error simulating ...")
@@ -461,7 +462,6 @@ def main(
         )
         google_sheet.write_to_row([])
 
-
         for row in parse_results_volume(
             json_file_path,
             protocol_name,
@@ -473,39 +473,42 @@ def main(
             print(str(row))
             google_sheet.write_to_row(row)
 
-def check_params(protocol_path):
+
+def check_params(protocol_path: str) -> str:
+    """Check if protocol requires supporting files."""
+    print("checking for parameters")
     with open(protocol_path, "r") as f:
         lines = f.readlines()
-
         file_as_str = "".join(lines)
-        if "parameters.add_csv_file" in file_as_str:
+        if (
+            "parameters.add_csv_file" in file_as_str
+            or "helpers.create_csv_parameter" in file_as_str
+        ):
             params = ""
             while not params:
+                name = Path(protocol_file_path).stem
                 params = input(
-                    f"Protocol {Path(file).stem} needs a CSV parameter file. Please enter the path (s to skip): "
+                    f"Protocol {name} needs a CSV parameter file. Please enter the path: "
                 )
-                if params != "s":
-                    if os.path.exists(params):
-                        return params
-                    else:
-                        params = ""
-                        print("Invalid file path")
-                else:
-                    print("Skipping...")
+                if os.path.exists(params):
                     return params
+                else:
+                    params = ""
+                    print("Invalid file path")
+        return ""
 
 
-def get_extra_files(protocol_file_path: List[str]) -> List[List[Path]]:
+def get_extra_files(protocol_file_path: str) -> tuple[str, List[Path]]:
+    """Get supporting files for protocol simulation if needed."""
     params = check_params(protocol_file_path)
     needs_files = input("Does your protocol utilize custom labware? (y/n): ")
-    file_path = [Path(protocol_file_path)]
     labware_files = []
-    if needs_files == 'y':
-        num_labware = input('How many custom labware?: ')
+    if needs_files == "y":
+        num_labware = input("How many custom labware?: ")
         for labware_num in range(int(num_labware)):
             path = input("Enter custom labware definition: ")
             labware_files.append(Path(path))
-    return [(file_path + labware_files), [params]]
+    return (params, labware_files)
 
 
 if __name__ == "__main__":
@@ -544,14 +547,18 @@ if __name__ == "__main__":
     # Change api level
     if CLEAN_PROTOCOL:
         set_api_level(protocol_file_path)
+        params, extra_files = get_extra_files(protocol_file_path)
         try:
             main(
-                protocol_file_path=protocol_file_path,
+                protocol_file_path=Path(protocol_file_path),
                 save=True,
                 storage_directory=storage_directory,
                 google_sheet_name=sheet_name,
+                parameters=params,
+                extra_files=extra_files,
             )
-        except:
-            sys.exit(1)
+        except Exception as e:
+            traceback.print_exc()
+            sys.exit(str(e))
     else:
         sys.exit(0)
