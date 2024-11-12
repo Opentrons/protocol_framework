@@ -8,7 +8,10 @@ import {
   LegacyStyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { getModuleDisplayName } from '@opentrons/shared-data'
+import {
+  getModuleDisplayName,
+  ABSORBANCE_READER_TYPE,
+} from '@opentrons/shared-data'
 
 import { formatLastCalibrated } from './utils'
 import { ModuleCalibrationOverflowMenu } from './ModuleCalibrationOverflowMenu'
@@ -41,42 +44,51 @@ export function ModuleCalibrationItems({
         </tr>
       </thead>
       <tbody css={BODY_STYLE}>
-        {attachedModules.map(attachedModule => (
-          <StyledTableRow key={attachedModule.id}>
-            <StyledTableCell>
-              <LegacyStyledText as="p">
-                {getModuleDisplayName(attachedModule.moduleModel)}
-              </LegacyStyledText>
-            </StyledTableCell>
-            <StyledTableCell>
-              <LegacyStyledText as="p">
-                {attachedModule.serialNumber}
-              </LegacyStyledText>
-            </StyledTableCell>
-            <StyledTableCell>
-              <LegacyStyledText as="p">
-                {attachedModule.moduleOffset?.last_modified != null
-                  ? formatLastCalibrated(
-                      attachedModule.moduleOffset?.last_modified
-                    )
-                  : t('not_calibrated_short')}
-              </LegacyStyledText>
-            </StyledTableCell>
-            <StyledTableCell>
-              <ModuleCalibrationOverflowMenu
-                isCalibrated={
-                  attachedModule.moduleOffset?.last_modified != null
-                }
-                attachedModule={attachedModule}
-                updateRobotStatus={updateRobotStatus}
-                formattedPipetteOffsetCalibrations={
-                  formattedPipetteOffsetCalibrations
-                }
-                robotName={robotName}
-              />
-            </StyledTableCell>
-          </StyledTableRow>
-        ))}
+        {attachedModules.map(attachedModule => {
+          const noCalibrationCopy =
+            attachedModule.moduleType === ABSORBANCE_READER_TYPE
+              ? t('no_calibration_required')
+              : t('not_calibrated_short')
+
+          return (
+            <StyledTableRow key={attachedModule.id}>
+              <StyledTableCell>
+                <LegacyStyledText as="p">
+                  {getModuleDisplayName(attachedModule.moduleModel)}
+                </LegacyStyledText>
+              </StyledTableCell>
+              <StyledTableCell>
+                <LegacyStyledText as="p">
+                  {attachedModule.serialNumber}
+                </LegacyStyledText>
+              </StyledTableCell>
+              <StyledTableCell>
+                <LegacyStyledText as="p">
+                  {attachedModule.moduleOffset?.last_modified != null
+                    ? formatLastCalibrated(
+                        attachedModule.moduleOffset?.last_modified
+                      )
+                    : noCalibrationCopy}
+                </LegacyStyledText>
+              </StyledTableCell>
+              <StyledTableCell>
+                {attachedModule.moduleType !== ABSORBANCE_READER_TYPE ? (
+                  <ModuleCalibrationOverflowMenu
+                    isCalibrated={
+                      attachedModule.moduleOffset?.last_modified != null
+                    }
+                    attachedModule={attachedModule}
+                    updateRobotStatus={updateRobotStatus}
+                    formattedPipetteOffsetCalibrations={
+                      formattedPipetteOffsetCalibrations
+                    }
+                    robotName={robotName}
+                  />
+                ) : null}
+              </StyledTableCell>
+            </StyledTableRow>
+          )
+        })}
       </tbody>
     </StyledTable>
   )
