@@ -240,6 +240,7 @@ run_command_table = sqlalchemy.Table(
         "index_in_run",
         unique=True,
     ),
+    # TODO(tz, 12-11-2024): change index to command_error when partial index is supported.
     sqlalchemy.Index(
         "ix_run_run_id_index_in_run_command_status",  # An arbitrary name for the index.
         "run_id",
