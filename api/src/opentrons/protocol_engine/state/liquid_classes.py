@@ -6,6 +6,7 @@ import dataclasses
 from typing import Dict
 from typing_extensions import Optional
 
+from .. import errors
 from ..actions import Action, get_state_updates
 from ..types import LiquidClassRecord
 from . import update_types
@@ -61,9 +62,14 @@ class LiquidClassView(HasState[LiquidClassState]):
     def __init__(self, state: LiquidClassState) -> None:
         self._state = state
 
-    def get(self, liquid_class_id: str) -> Optional[LiquidClassRecord]:
+    def get(self, liquid_class_id: str) -> LiquidClassRecord:
         """Get the LiquidClassRecord with the given identifier."""
-        return self._state.liquid_class_record_by_id.get(liquid_class_id)
+        try:
+            return self._state.liquid_class_record_by_id[liquid_class_id]
+        except KeyError as e:
+            raise errors.LiquidClassDoesNotExistError(
+                f"Liquid class ID {liquid_class_id} not found."
+            ) from e
 
     def get_id_for_liquid_class_record(
         self, liquid_class_record: LiquidClassRecord
