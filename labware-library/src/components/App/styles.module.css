@@ -70,6 +70,7 @@
   }
 
   .content_container {
+    height: 100vh;
     padding-top: var(--spacing-7);
     padding-right: var(--spacing-7);
 
