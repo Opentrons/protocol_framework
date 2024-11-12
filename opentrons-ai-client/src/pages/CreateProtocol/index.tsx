@@ -8,12 +8,21 @@ import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
 import { PromptPreview } from '../../molecules/PromptPreview'
 import { useForm, FormProvider } from 'react-hook-form'
-import { createProtocolAtom, headerWithMeterAtom } from '../../resources/atoms'
+import {
+  chatPromptAtom,
+  createProtocolAtom,
+  headerWithMeterAtom,
+} from '../../resources/atoms'
 import { useAtom } from 'jotai'
 import { ProtocolSectionsContainer } from '../../organisms/ProtocolSectionsContainer'
-import { generatePromptPreviewData } from '../../resources/utils/createProtocolUtils'
+import {
+  generateChatPrompt,
+  generatePromptPreviewData,
+} from '../../resources/utils/createProtocolUtils'
 import type { DisplayModules } from '../../organisms/ModulesSection'
 import type { DisplayLabware } from '../../organisms/LabwareLiquidsSection'
+import { useNavigate } from 'react-router-dom'
+import { useTrackEvent } from '../../resources/hooks/useTrackEvent'
 
 export interface CreateProtocolFormData {
   application: {
@@ -40,6 +49,9 @@ export function CreateProtocol(): JSX.Element | null {
   const { t } = useTranslation('create_protocol')
   const [, setHeaderWithMeterAtom] = useAtom(headerWithMeterAtom)
   const [{ currentStep }, setCreateProtocolAtom] = useAtom(createProtocolAtom)
+  const [, setChatPrompt] = useAtom(chatPromptAtom)
+  const navigate = useNavigate()
+  const trackEvent = useTrackEvent()
 
   const methods = useForm<CreateProtocolFormData>({
     defaultValues: {
@@ -94,8 +106,22 @@ export function CreateProtocol(): JSX.Element | null {
       >
         <ProtocolSectionsContainer />
         <PromptPreview
-          handleSubmit={function (): void {
-            throw new Error('Function not implemented.')
+          handleSubmit={() => {
+            const chatPromptData = generateChatPrompt(methods.getValues(), t)
+
+            setChatPrompt({
+              prompt: chatPromptData,
+              isNewProtocol: true,
+            })
+
+            trackEvent({
+              name: 'submit-prompt',
+              properties: {
+                prompt: chatPromptData,
+              },
+            })
+
+            navigate('/chat')
           }}
           isSubmitButtonEnabled={currentStep === TOTAL_STEPS}
           promptPreviewData={generatePromptPreviewData(methods.watch, t)}

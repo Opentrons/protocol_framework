@@ -146,3 +146,72 @@ export function generatePromptPreviewData(
     },
   ]
 }
+
+export function generateChatPrompt(
+  values: CreateProtocolFormData,
+  t: any
+): string {
+  const defs = getAllDefinitions()
+
+  let prompt = ''
+
+  prompt += t('create_protocol_prompt_robot', {
+    robotType: t(values.instruments.robot),
+  })
+  prompt += `${t('application_title')}: ${t(
+    values.application.scientificApplication
+  )}\n`
+  prompt += `${t('description')}: ${values.application.description}\n\n`
+
+  prompt += `${t('pipette_mounts')}:\n`
+  if (values.instruments.pipettes === TWO_PIPETTES) {
+    if (values.instruments.leftPipette !== NO_PIPETTES) {
+      prompt += `- ${
+        getPipetteSpecsV2(values.instruments.leftPipette as PipetteName)
+          ?.displayName
+      } ${t('mounted_left')}\n`
+    }
+    if (values.instruments.rightPipette !== NO_PIPETTES) {
+      prompt += `- ${
+        getPipetteSpecsV2(values.instruments.rightPipette as PipetteName)
+          ?.displayName
+      } ${t('mounted_right')}\n`
+    }
+  } else {
+    prompt += `- ${t(values.instruments.pipettes)}\n`
+  }
+
+  if (values.instruments.flexGripper === FLEX_GRIPPER) {
+    prompt += `- ${t('with_flex_gripper')}\n`
+  }
+
+  prompt += `\n${t('modules_title')}:\n ${values.modules
+    .map(
+      module =>
+        `- ${module.name}${
+          module.adapter?.name != null && ` with ${module.adapter.name}`
+        }`
+    )
+    .join('\n')}\n`
+
+  prompt += `\n${t('labware_section_title')}: \n${values.labwares
+    .map(
+      labware =>
+        `- ${getLabwareDisplayName(defs[labware.labwareURI])} x ${
+          labware.count
+        }`
+    )
+    .join('\n')}\n`
+
+  prompt += `\n${t('liquid_section_title')}: \n${values.liquids
+    .map(liquid => `- ${liquid}`)
+    .join('\n')}\n`
+
+  prompt += `\n${t('steps_section_title')}: \n${
+    Array.isArray(values.steps)
+      ? values.steps.map(step => `- ${step}`).join('\n')
+      : values.steps
+  }\n`
+
+  return prompt
+}

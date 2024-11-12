@@ -3,6 +3,7 @@ import { atom } from 'jotai'
 import type {
   Chat,
   ChatData,
+  ChatPromptAtomProps,
   createProtocolAtomProps,
   HeaderWithMeterAtomProps,
   Mixpanel,
@@ -12,7 +13,10 @@ import type {
 export const chatDataAtom = atom<ChatData[]>([])
 
 /** ChatPromptAtom is for the prefilled userprompt when navigating to the chat page from existing/new protocol pages */
-export const chatPromptAtom = atom<string>('')
+export const chatPromptAtom = atom<ChatPromptAtomProps>({
+  prompt: '',
+  isNewProtocol: true,
+})
 
 /** Scroll to bottom of chat atom */
 export const scrollToBottomAtom = atom<boolean>(false)
