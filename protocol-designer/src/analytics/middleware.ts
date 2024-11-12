@@ -159,6 +159,7 @@ export const reduxActionToAnalyticsEvent = (
             aspirateAirGap: stepArgModified.aspirateAirGapVolume,
             aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
             dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
+            blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
             ...additionalProperties,
           },
         }
@@ -173,6 +174,7 @@ export const reduxActionToAnalyticsEvent = (
             ...stepArgModified,
             aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
             dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
+            blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
             ...additionalProperties,
           },
         }
