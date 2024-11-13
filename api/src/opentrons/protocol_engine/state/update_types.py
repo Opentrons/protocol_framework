@@ -295,7 +295,7 @@ class StateUpdate:
 
     liquid_class_loaded: LiquidClassLoadedUpdate | NoChangeType = NO_CHANGE
 
-# These convenience functions let the caller avoid the boilerplate of constructing a
+    # These convenience functions let the caller avoid the boilerplate of constructing a
     # complicated dataclass tree.
 
     @typing.overload
