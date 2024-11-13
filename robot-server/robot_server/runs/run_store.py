@@ -17,6 +17,7 @@ from opentrons.protocol_engine import (
     CommandIntent,
     ErrorOccurrence,
     CommandErrorSlice,
+    CommandStatus,
 )
 from opentrons.protocol_engine.commands import Command
 from opentrons.protocol_engine.types import RunTimeParameter
@@ -190,7 +191,7 @@ class RunStore:
                         if command.error
                         else None,
                         "command_status": _convert_commands_status_to_sql_command_status(
-                            command.status.value
+                            command.status
                         ),
                     },
                 )
@@ -817,16 +818,14 @@ def _convert_state_to_sql_values(
 
 
 def _convert_commands_status_to_sql_command_status(
-    status: str,
+    status: CommandStatus,
 ) -> CommandStatusSQLEnum:
     match status:
-        case "queued":
+        case CommandStatus.QUEUED:
             return CommandStatusSQLEnum.QUEUED
-        case "running":
+        case CommandStatus.RUNNING:
             return CommandStatusSQLEnum.RUNNING
-        case "failed":
+        case CommandStatus.FAILED:
             return CommandStatusSQLEnum.FAILED
-        case "succeeded":
+        case CommandStatus.SUCCEEDED:
             return CommandStatusSQLEnum.SUCCEEDED
-        case _:
-            assert False, "command status is unknown"
