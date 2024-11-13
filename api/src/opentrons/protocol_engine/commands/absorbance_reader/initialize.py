@@ -70,7 +70,10 @@ class InitializeImpl(
                 supported_wavelengths
             )
             if unsupported_wavelengths:
-                raise ValueError(f"Unsupported wavelengths: {unsupported_wavelengths}")
+                raise ValueError(
+                    f"Unsupported wavelengths: {unsupported_wavelengths}, "
+                    f" use {supported_wavelengths} instead."
+                )
 
             if params.measureMode == "single":
                 if sample_wavelengths_len != 1:
