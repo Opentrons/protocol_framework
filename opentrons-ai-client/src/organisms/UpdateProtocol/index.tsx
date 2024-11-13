@@ -21,12 +21,12 @@ import { Trans, useTranslation } from 'react-i18next'
 import { FileUpload } from '../../molecules/FileUpload'
 import { useNavigate } from 'react-router-dom'
 import {
-  chatPromptAtom,
   headerWithMeterAtom,
-  updatePromptAtom,
+  updateProtocolChatAtom,
 } from '../../resources/atoms'
 import { CSSTransition } from 'react-transition-group'
 import { useAtom } from 'jotai'
+import { useTrackEvent } from '../../resources/hooks/useTrackEvent'
 
 interface UpdateOptionsDropdown extends DropdownOption {
   value: UpdateOptions
@@ -97,14 +97,14 @@ const isValidProtocolFileName = (protocolFileName: string): boolean => {
 
 export function UpdateProtocol(): JSX.Element {
   const navigate = useNavigate()
+  const trackEvent = useTrackEvent()
   const { t }: { t: (key: string) => string } = useTranslation(
     'protocol_generator'
   )
-  const [, setChatPrompt] = useAtom(chatPromptAtom)
   const [headerState, setHeaderWithMeterAtom] = useAtom(headerWithMeterAtom)
   const [updateType, setUpdateType] = useState<DropdownOption | null>(null)
   const [detailsValue, setDetailsValue] = useState<string>('')
-  const [, setUpdatePromptAtom] = useAtom(updatePromptAtom)
+  const [, setUpdatePromptAtom] = useAtom(updateProtocolChatAtom)
   const [fileValue, setFile] = useState<File | null>(null)
   const [pythonText, setPythonTextValue] = useState<string>('')
   const [errorText, setErrorText] = useState<string | null>(null)
@@ -177,14 +177,22 @@ export function UpdateProtocol(): JSX.Element {
     console.log(chatPrompt)
 
     setUpdatePromptAtom({
+      prompt: chatPrompt,
       protocol_text: pythonText,
       regenerate: false,
       update_type: (updateType?.value ?? 'other') as UpdateOptions,
       update_details: detailsValue,
-      fake: true,
+      fake: false,
       fake_id: 0,
     })
-    setChatPrompt({ prompt: chatPrompt, isNewProtocol: false })
+
+    trackEvent({
+      name: 'submit-prompt',
+      properties: {
+        prompt: chatPrompt,
+      },
+    })
+
     navigate('/chat')
   }
 

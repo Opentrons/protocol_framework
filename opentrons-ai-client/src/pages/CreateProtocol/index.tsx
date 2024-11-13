@@ -11,6 +11,7 @@ import { useForm, FormProvider } from 'react-hook-form'
 import {
   chatPromptAtom,
   createProtocolAtom,
+  createProtocolChatAtom,
   headerWithMeterAtom,
 } from '../../resources/atoms'
 import { useAtom } from 'jotai'
@@ -49,7 +50,7 @@ export function CreateProtocol(): JSX.Element | null {
   const { t } = useTranslation('create_protocol')
   const [, setHeaderWithMeterAtom] = useAtom(headerWithMeterAtom)
   const [{ currentStep }, setCreateProtocolAtom] = useAtom(createProtocolAtom)
-  const [, setChatPrompt] = useAtom(chatPromptAtom)
+  const [, setCreateProtocolChatAtom] = useAtom(createProtocolChatAtom)
   const navigate = useNavigate()
   const trackEvent = useTrackEvent()
 
@@ -107,12 +108,11 @@ export function CreateProtocol(): JSX.Element | null {
         <ProtocolSectionsContainer />
         <PromptPreview
           handleSubmit={() => {
-            const chatPromptData = generateChatPrompt(methods.getValues(), t)
-
-            setChatPrompt({
-              prompt: chatPromptData,
-              isNewProtocol: true,
-            })
+            const chatPromptData = generateChatPrompt(
+              methods.getValues(),
+              t,
+              setCreateProtocolChatAtom
+            )
 
             trackEvent({
               name: 'submit-prompt',

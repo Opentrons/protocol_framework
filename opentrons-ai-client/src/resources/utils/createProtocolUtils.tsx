@@ -14,6 +14,7 @@ import {
 import type { UseFormWatch } from 'react-hook-form'
 import type { CreateProtocolFormData } from '../../pages/CreateProtocol'
 import { getAllDefinitions } from './labware'
+import { CreatePrompt } from '../types'
 
 export function generatePromptPreviewApplicationItems(
   watch: UseFormWatch<CreateProtocolFormData>,
@@ -149,7 +150,10 @@ export function generatePromptPreviewData(
 
 export function generateChatPrompt(
   values: CreateProtocolFormData,
-  t: any
+  t: any,
+  setCreateProtocolChatAtom: (
+    args_0: CreatePrompt | ((prev: CreatePrompt) => CreatePrompt)
+  ) => void
 ): string {
   const defs = getAllDefinitions()
 
@@ -213,5 +217,20 @@ export function generateChatPrompt(
       : values.steps
   }\n`
 
+  setCreateProtocolChatAtom({
+    prompt,
+    scientific_application_type: values.application.scientificApplication,
+    description: values.application.description,
+    robots: values.instruments.robot,
+    mounts:
+      values.instruments.pipettes === TWO_PIPETTES ? ['left', 'right'] : [],
+    flexGripper: values.instruments.flexGripper === FLEX_GRIPPER,
+    modules: values.modules.map(module => module.name),
+    labware: values.labwares.map(labware => labware.labwareURI),
+    liquids: values.liquids,
+    steps: Array.isArray(values.steps) ? values.steps : [values.steps],
+    fake: false,
+    fake_id: 0,
+  })
   return prompt
 }
