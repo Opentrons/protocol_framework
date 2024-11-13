@@ -1,5 +1,6 @@
 {
   "add_details": "Add step details",
+  "all": "All",
   "advanced_settings": "Advanced pipetting settings",
   "air_gap_volume": "Air gap volume",
   "aspirate_labware": "Source labware",
@@ -11,6 +12,7 @@
   "blowout_location": "Blowout location",
   "blowout_position": "Blowout position from bottom",
   "change_tips": "Change tips",
+  "column": "Column",
   "default_flow_rate": "The default flow rate is {{flowRate}}",
   "default_tip_option": "Default - get next tip",
   "delay_duration": "Delay duration",

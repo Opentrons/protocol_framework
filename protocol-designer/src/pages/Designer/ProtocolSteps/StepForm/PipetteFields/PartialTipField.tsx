@@ -25,11 +25,11 @@ export function PartialTipField(props: FieldProps): JSX.Element {
 
   const options = [
     {
-      name: 'All',
+      name: t('all'),
       value: ALL,
     },
     {
-      name: 'Column',
+      name: t('column'),
       value: COLUMN,
       disabled: tipracksNotOnAdapter.length === 0,
     },
