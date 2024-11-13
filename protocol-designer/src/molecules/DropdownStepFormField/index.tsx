@@ -28,7 +28,7 @@ export function DropdownStepFormField(
     title,
     errorToShow,
     tooltipContent,
-    padding,
+    padding = `0 ${SPACING.spacing16}`,
     width = '17.5rem',
     onFieldFocus,
     onFieldBlur,

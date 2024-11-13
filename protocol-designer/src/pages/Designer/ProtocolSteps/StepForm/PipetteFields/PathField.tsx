@@ -122,7 +122,7 @@ export function PathField(props: PathFieldProps): JSX.Element {
     updateValue,
     tipRack,
     isDisposalLocation,
-    padding,
+    padding = `0 ${SPACING.spacing16}`,
     title,
   } = props
   const { t } = useTranslation('form')
@@ -143,10 +143,7 @@ export function PathField(props: PathFieldProps): JSX.Element {
     t
   )
   return (
-    <Flex
-      padding={padding ?? SPACING.spacing16}
-      flexDirection={DIRECTION_COLUMN}
-    >
+    <Flex padding={padding} flexDirection={DIRECTION_COLUMN}>
       {title != null ? (
         <StyledText
           desktopStyle="bodyDefaultRegular"

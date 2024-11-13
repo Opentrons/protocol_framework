@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
-import { Box, COLORS, DIRECTION_COLUMN, Flex } from '@opentrons/components'
+import { DIRECTION_COLUMN, Divider, Flex, SPACING } from '@opentrons/components'
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import { getRobotType } from '../../../../../../file-data/selectors'
 import { CheckboxStepFormField } from '../../../../../../molecules'
@@ -27,7 +27,11 @@ export function MoveLabwareTools(props: StepFormProps): JSX.Element {
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
   return (
-    <Flex flexDirection={DIRECTION_COLUMN}>
+    <Flex
+      flexDirection={DIRECTION_COLUMN}
+      gridGap={SPACING.spacing12}
+      paddingY={SPACING.spacing16}
+    >
       {robotType === FLEX_ROBOT_TYPE ? (
         <>
           <CheckboxStepFormField
@@ -43,14 +47,14 @@ export function MoveLabwareTools(props: StepFormProps): JSX.Element {
                 : null
             }
           />
-          <Box borderBottom={`1px solid ${COLORS.grey30}`} />
+          <Divider marginY="0" />
         </>
       ) : null}
       <MoveLabwareField
         {...propsForFields.labware}
         errorToShow={getFormLevelError('labware', mappedErrorsToField)}
       />
-      <Box borderBottom={`1px solid ${COLORS.grey30}`} />
+      <Divider marginY="0" />
       <LabwareLocationField
         {...propsForFields.newLocation}
         useGripper={propsForFields.useGripper.value === true}

@@ -124,38 +124,26 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
       gridGap={SPACING.spacing12}
       paddingY={SPACING.spacing16}
     >
-      <PipetteField
-        {...propsForFields.pipette}
-        padding={`0 ${SPACING.spacing16}`}
-      />
+      <PipetteField {...propsForFields.pipette} />
       {is96Channel ? (
         <>
           <Divider marginY="0" />
-          <PartialTipField
-            {...propsForFields.nozzles}
-            padding={`0 ${SPACING.spacing16}`}
-          />
+          <PartialTipField {...propsForFields.nozzles} />
         </>
       ) : null}
       <Divider marginY="0" />
       <TiprackField
         {...propsForFields.tipRack}
         pipetteId={propsForFields.pipette.value}
-        padding={`0 ${SPACING.spacing16}`}
       />
       <Divider marginY="0" />
-      <Flex
-        flexDirection={DIRECTION_COLUMN}
-        gridGap={SPACING.spacing12}
-        padding={`0 ${SPACING.spacing16}`}
-      >
+      <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
         <LabwareField
           {...propsForFields.aspirate_labware}
           errorToShow={getFormLevelError(
             'aspirate_labware',
             mappedErrorsToField
           )}
-          padding="0"
         />
         <WellSelectionField
           {...propsForFields.aspirate_wells}
@@ -168,22 +156,16 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
             ) ?? false
           }
           errorToShow={getFormLevelError('aspirate_wells', mappedErrorsToField)}
-          padding="0"
         />
       </Flex>
       <Divider marginY="0" />
-      <Flex
-        flexDirection={DIRECTION_COLUMN}
-        gridGap={SPACING.spacing12}
-        padding={`0 ${SPACING.spacing16}`}
-      >
+      <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
         <LabwareField
           {...propsForFields.dispense_labware}
           errorToShow={getFormLevelError(
             'dispense_labware',
             mappedErrorsToField
           )}
-          padding="0"
         />
         {isDisposalLocation ? null : (
           <WellSelectionField
@@ -200,7 +182,6 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
               'dispense_wells',
               mappedErrorsToField
             )}
-            padding="0"
           />
         )}
       </Flex>
@@ -216,7 +197,6 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         volume={formData.volume}
         tipRack={formData.tipRack}
         isDisposalLocation={isDisposalLocation}
-        padding={`0 ${SPACING.spacing16}`}
         title={t('pipette_path')}
       />
       <Divider marginY="0" />
@@ -227,22 +207,17 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         path={formData.path}
         stepType={formData.stepType}
         isDisposalLocation={isDisposalLocation}
-        padding={`0 ${SPACING.spacing16}`}
         tooltipContent={null}
       />
       <Divider marginY="0" />
       <VolumeField
         {...propsForFields.volume}
         errorToShow={getFormLevelError('volume', mappedErrorsToField)}
-        padding={`0 ${SPACING.spacing16}`}
       />
       {enableReturnTip ? (
         <>
           <Divider marginY="0" />
-          <PickUpTipField
-            {...propsForFields.pickUpTip_location}
-            padding={`0 ${SPACING.spacing16}`}
-          />
+          <PickUpTipField {...propsForFields.pickUpTip_location} />
           {userSelectedPickUpTipLocation ? (
             <>
               <TipWellSelectionField
@@ -258,7 +233,6 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
       <Divider marginY="0" />
       <DropTipField
         {...propsForFields.dropTip_location}
-        padding={`0 ${SPACING.spacing16}`}
         tooltipContent={null}
       />
       {userSelectedDropTipLocation && enableReturnTip ? (
@@ -284,17 +258,15 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         <Tabs tabs={[aspirateTab, dispenseTab]} />
       </Flex>
       <Divider marginY="0" />
-      <Flex padding={`0 ${SPACING.spacing16}`} width="100%">
-        <FlowRateField
-          key={`${addFieldNamePrefix('flowRate')}_flowRateField`}
-          {...propsForFields[addFieldNamePrefix('flowRate')]}
-          pipetteId={formData.pipette}
-          flowRateType={tab}
-          volume={propsForFields.volume?.value ?? 0}
-          tiprack={propsForFields.tipRack.value}
-          showTooltip={false}
-        />
-      </Flex>
+      <FlowRateField
+        key={`${addFieldNamePrefix('flowRate')}_flowRateField`}
+        {...propsForFields[addFieldNamePrefix('flowRate')]}
+        pipetteId={formData.pipette}
+        flowRateType={tab}
+        volume={propsForFields.volume?.value ?? 0}
+        tiprack={propsForFields.tipRack.value}
+        showTooltip={false}
+      />
       <Divider marginY="0" />
       {hideWellOrderField ? null : (
         <WellsOrderField
@@ -309,7 +281,6 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           secondValue={formData[addFieldNamePrefix('wellOrder_second')]}
           firstName={addFieldNamePrefix('wellOrder_first')}
           secondName={addFieldNamePrefix('wellOrder_second')}
-          padding={`0 ${SPACING.spacing16}`}
         />
       )}
       <Divider marginY="0" />
@@ -326,7 +297,6 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
             )
           ]
         }
-        padding={`0 ${SPACING.spacing16}`}
       />
       <Divider marginY="0" />
       <Flex
@@ -459,6 +429,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
                     path: formData.path,
                     stepType: formData.stepType,
                   })}
+                  padding="0"
                 />
                 <FlowRateField
                   key="blowout_flowRate"
@@ -467,6 +438,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
                   flowRateType="blowout"
                   volume={propsForFields.volume?.value ?? 0}
                   tiprack={propsForFields.tipRack.value}
+                  padding="0"
                 />
                 <BlowoutOffsetField
                   {...propsForFields.blowout_z_offset}

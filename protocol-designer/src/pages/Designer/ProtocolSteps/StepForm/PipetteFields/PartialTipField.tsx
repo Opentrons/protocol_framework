@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { ALL, COLUMN } from '@opentrons/shared-data'
-import { Flex, DropdownMenu } from '@opentrons/components'
+import { Flex, DropdownMenu, SPACING } from '@opentrons/components'
 import { getInitialDeckSetup } from '../../../../../step-forms/selectors'
 import type { FieldProps } from '../types'
 
@@ -11,7 +11,7 @@ export function PartialTipField(props: FieldProps): JSX.Element {
     value: dropdownItem,
     updateValue,
     errorToShow,
-    padding,
+    padding = `0 ${SPACING.spacing16}`,
     tooltipContent,
   } = props
   const { t } = useTranslation('protocol_steps')
@@ -45,7 +45,7 @@ export function PartialTipField(props: FieldProps): JSX.Element {
   return (
     <Flex padding={padding}>
       <DropdownMenu
-        width="17.5rem"
+        width="100%"
         error={errorToShow}
         dropdownType="neutral"
         filterOptions={options}

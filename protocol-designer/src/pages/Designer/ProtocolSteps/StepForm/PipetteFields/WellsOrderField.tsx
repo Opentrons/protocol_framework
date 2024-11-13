@@ -34,7 +34,7 @@ export function WellsOrderField(props: WellsOrderFieldProps): JSX.Element {
     prefix,
     updateFirstWellOrder,
     updateSecondWellOrder,
-    padding,
+    padding = `0 ${SPACING.spacing16}`,
   } = props
   const { t, i18n } = useTranslation(['form', 'modal', 'protocol_steps'])
   const [isModalOpen, setModalOpen] = useState(false)

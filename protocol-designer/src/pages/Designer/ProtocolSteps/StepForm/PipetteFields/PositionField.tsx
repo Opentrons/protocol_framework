@@ -42,7 +42,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
     xField,
     yField,
     prefix,
-    padding,
+    padding = `0 ${SPACING.spacing16}`,
   } = props
   const {
     name: zName,

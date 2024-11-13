@@ -18,7 +18,12 @@ interface TiprackFieldProps extends FieldProps {
   pipetteId?: unknown
 }
 export function TiprackField(props: TiprackFieldProps): JSX.Element {
-  const { value, updateValue, pipetteId, padding } = props
+  const {
+    value,
+    updateValue,
+    pipetteId,
+    padding = `0 ${SPACING.spacing16}`,
+  } = props
   const { t } = useTranslation('protocol_steps')
   const pipetteEntities = useSelector(getPipetteEntities)
   const options = useSelector(getTiprackOptions)

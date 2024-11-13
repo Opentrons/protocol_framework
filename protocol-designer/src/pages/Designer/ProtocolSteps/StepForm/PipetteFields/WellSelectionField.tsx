@@ -51,7 +51,7 @@ export const WellSelectionField = (
     errorToShow,
     tooltipContent,
     hasFormError,
-    padding,
+    padding = `0 ${SPACING.spacing16}`,
   } = props
   const { t, i18n } = useTranslation(['form', 'tooltip'])
   const dispatch = useDispatch()
@@ -103,7 +103,7 @@ export const WellSelectionField = (
     <>
       <Flex
         flexDirection={DIRECTION_COLUMN}
-        padding={padding ?? SPACING.spacing16}
+        padding={padding}
         gridGap={SPACING.spacing8}
       >
         <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
