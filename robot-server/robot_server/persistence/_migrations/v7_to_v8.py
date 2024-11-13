@@ -86,7 +86,9 @@ def _migrate_command_table_with_new_command_error_col_and_command_status(
             else json.dumps(data["error"])
         )
         # parse json as enum
-        new_command_status = CommandStatusSQLEnum(data["status"])
+        new_command_status = _convert_commands_status_to_sql_command_status(
+            data["status"].value
+        )
         commands_to_update.append(
             {
                 "_id": row.row_id,
@@ -107,3 +109,19 @@ def _migrate_command_table_with_new_command_error_col_and_command_status(
             )
         )
         dest_transaction.execute(update_commands, commands_to_update)
+
+
+def _convert_commands_status_to_sql_command_status(
+    status: str,
+) -> CommandStatusSQLEnum:
+    match status:
+        case "queued":
+            return CommandStatusSQLEnum.QUEUED
+        case "running":
+            return CommandStatusSQLEnum.RUNNING
+        case "failed":
+            return CommandStatusSQLEnum.FAILED
+        case "succeeded":
+            return CommandStatusSQLEnum.SUCCEEDED
+        case _:
+            assert False, "command status is unknown"

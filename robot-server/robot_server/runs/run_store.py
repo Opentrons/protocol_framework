@@ -189,7 +189,9 @@ class RunStore:
                         "command_error": pydantic_to_json(command.error)
                         if command.error
                         else None,
-                        "command_status": CommandStatusSQLEnum(command.status.value),
+                        "command_status": _convert_commands_status_to_sql_command_status(
+                            command.status.value
+                        ),
                     },
                 )
 
@@ -812,3 +814,19 @@ def _convert_state_to_sql_values(
         "_updated_at": utc_now(),
         "run_time_parameters": pydantic_list_to_json(run_time_parameters),
     }
+
+
+def _convert_commands_status_to_sql_command_status(
+    status: str,
+) -> CommandStatusSQLEnum:
+    match status:
+        case "queued":
+            return CommandStatusSQLEnum.QUEUED
+        case "running":
+            return CommandStatusSQLEnum.RUNNING
+        case "failed":
+            return CommandStatusSQLEnum.FAILED
+        case "succeeded":
+            return CommandStatusSQLEnum.SUCCEEDED
+        case _:
+            assert False, "command status is unknown"
