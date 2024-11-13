@@ -176,7 +176,7 @@ export function Delay(props: DelayProps): JSX.Element {
       <ChildNavigation
         header={
           kind === 'aspirate'
-            ? t('delay_before_aspirating')
+            ? t('delay_after_aspirating')
             : t('delay_before_dispensing')
         }
         buttonText={i18n.format(setSaveOrContinueButtonText, 'capitalize')}

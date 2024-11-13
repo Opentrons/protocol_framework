@@ -12,6 +12,7 @@ from opentrons.protocol_engine.errors.exceptions import (
     PipetteNotReadyToAspirateError,
     TipNotEmptyError,
     IncompleteLabwareDefinitionError,
+    TipNotAttachedError,
 )
 from opentrons.types import MountType
 from opentrons_shared_data.errors.exceptions import (
@@ -111,6 +112,10 @@ async def _execute_common(
     pipette_id = params.pipetteId
     labware_id = params.labwareId
     well_name = params.wellName
+    if not state_view.pipettes.get_nozzle_configuration_supports_lld(pipette_id):
+        raise TipNotAttachedError(
+            "Either the front right or back left nozzle must have a tip attached to probe liquid height."
+        )
 
     state_update = update_types.StateUpdate()
 

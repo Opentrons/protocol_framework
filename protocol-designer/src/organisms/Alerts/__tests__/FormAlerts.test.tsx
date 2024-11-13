@@ -38,6 +38,7 @@ describe('FormAlerts', () => {
       focusedField: null,
       dirtyFields: [],
       showFormErrorsAndWarnings: false,
+      page: 0,
     }
     vi.mocked(getFormLevelErrorsForUnsavedForm).mockReturnValue([])
     vi.mocked(getFormWarningsForSelectedStep).mockReturnValue([])

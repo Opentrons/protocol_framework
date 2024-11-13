@@ -1,5 +1,5 @@
-import * as React from 'react'
 import * as Yup from 'yup'
+import { useEffect, useState } from 'react'
 import reduce from 'lodash/reduce'
 import omit from 'lodash/omit'
 import uniq from 'lodash/uniq'
@@ -154,17 +154,16 @@ const validationSchema: any = Yup.object().shape({
 export function CreateNewProtocolWizard(): JSX.Element | null {
   const navigate = useNavigate()
   const showWizard = useSelector(getNewProtocolModal)
+  const [analyticsStartTime] = useState<Date>(new Date())
   const customLabware = useSelector(
     labwareDefSelectors.getCustomLabwareDefsByURI
   )
-  const [currentStepIndex, setCurrentStepIndex] = React.useState<number>(0)
-  const [wizardSteps, setWizardSteps] = React.useState<WizardStep[]>(
-    WIZARD_STEPS
-  )
+  const [currentStepIndex, setCurrentStepIndex] = useState<number>(0)
+  const [wizardSteps, setWizardSteps] = useState<WizardStep[]>(WIZARD_STEPS)
 
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!showWizard) {
       navigate('/overview')
     }
@@ -381,6 +380,7 @@ export function CreateNewProtocolWizard(): JSX.Element | null {
         proceed={proceed}
         goBack={goBack}
         setWizardSteps={setWizardSteps}
+        analyticsStartTime={analyticsStartTime}
       />
     </Box>
   ) : null
@@ -392,6 +392,7 @@ interface CreateFileFormProps {
   goBack: () => void
   proceed: () => void
   setWizardSteps: React.Dispatch<React.SetStateAction<WizardStep[]>>
+  analyticsStartTime: Date
 }
 
 function CreateFileForm(props: CreateFileFormProps): JSX.Element {
@@ -401,6 +402,7 @@ function CreateFileForm(props: CreateFileFormProps): JSX.Element {
     proceed,
     goBack,
     setWizardSteps,
+    analyticsStartTime,
   } = props
   const { ...formProps } = useForm<WizardFormState>({
     defaultValues: initialFormState,
@@ -449,6 +451,7 @@ function CreateFileForm(props: CreateFileFormProps): JSX.Element {
                   createProtocolFile(formProps.getValues())
                 }}
                 goBack={goBack}
+                analyticsStartTime={analyticsStartTime}
               />
             )
           default:

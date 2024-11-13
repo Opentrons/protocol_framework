@@ -51,7 +51,7 @@ export function RunHeaderModalContainer(
         <ErrorRecoveryFlows
           runStatus={runStatus}
           runId={runId}
-          failedCommandByRunRecord={recoveryModalUtils.failedCommand}
+          unvalidatedFailedCommand={recoveryModalUtils.failedCommand}
           protocolAnalysis={robotProtocolAnalysis}
         />
       ) : null}

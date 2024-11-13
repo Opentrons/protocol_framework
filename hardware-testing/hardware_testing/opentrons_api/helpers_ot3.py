@@ -109,9 +109,17 @@ def _create_fake_pipette_id(mount: OT3Mount, model: Optional[str]) -> Optional[s
         return None
     items = model.split("_")
     assert len(items) == 3
-    size = "P1K" if items[0] == "p1000" else "P50"
+    match items[0]:
+        case "p1000":
+            size = "P1K"
+            version = 35
+        case "p50":
+            size = "P50"
+            version = 35
+        case "p200":
+            size = "P2H"
+            version = 30
     channels = "S" if items[1] == "single" else "M"
-    version = 35  # model names don't have a version so just fake a 3.5 version
     date = datetime.now().strftime("%y%m%d")
     unique_number = 1 if mount == OT3Mount.LEFT else 2
     return f"{size}{channels}{version}{date}A0{unique_number}"
@@ -619,16 +627,13 @@ async def move_tip_motor_relative_ot3(
     if not api.hardware_pipettes[OT3Mount.LEFT.to_mount()]:
         raise RuntimeError("No pipette found on LEFT mount")
 
-    current_gear_pos_float = api._backend.gear_motor_position or 0.0
-    current_gear_pos_dict = {Axis.Q: current_gear_pos_float}
-    target_pos_dict = {Axis.Q: current_gear_pos_float + distance}
+    current_gear_pos = api._backend.gear_motor_position or 0.0
+    target_pos = current_gear_pos + distance
 
     if speed is not None and distance < 0:
         speed *= -1
 
-    _move_coro = api._backend.tip_action(
-        current_gear_pos_dict, [(target_pos_dict, speed or 400)]
-    )
+    _move_coro = api._backend.tip_action(current_gear_pos, [(target_pos, speed or 400)])
     if motor_current is None:
         await _move_coro
     else:
@@ -662,7 +667,7 @@ async def move_gripper_jaw_relative_ot3(api: OT3API, delta: float) -> None:
 
 def get_endstop_position_ot3(api: OT3API, mount: OT3Mount) -> Dict[Axis, float]:
     """Get the endstop's position per mount."""
-    carriage_pos = api._deck_from_machine(api._backend.home_position())
+    carriage_pos = api.get_deck_from_machine(api._backend.home_position())
     pos_at_home = api._effector_pos_from_carriage_pos(
         OT3Mount.from_mount(mount), carriage_pos, None
     )

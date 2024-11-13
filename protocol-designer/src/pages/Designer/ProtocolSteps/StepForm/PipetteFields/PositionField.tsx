@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import {
+  ALIGN_CENTER,
   COLORS,
   DIRECTION_COLUMN,
   Flex,
+  Icon,
   InputField,
   ListButton,
   SPACING,
@@ -31,10 +33,19 @@ interface PositionFieldProps {
   xField?: TipXOffsetFields
   yField?: TipYOffsetFields
   labwareId?: string | null
+  padding?: string
 }
 
 export function PositionField(props: PositionFieldProps): JSX.Element {
-  const { labwareId, propsForFields, zField, xField, yField, prefix } = props
+  const {
+    labwareId,
+    propsForFields,
+    zField,
+    xField,
+    yField,
+    prefix,
+    padding = `0 ${SPACING.spacing16}`,
+  } = props
   const {
     name: zName,
     value: rawZValue,
@@ -157,7 +168,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
       {yField != null && xField != null ? (
         <Flex
           {...targetProps}
-          padding={SPACING.spacing16}
+          padding={padding}
           gridGap={SPACING.spacing8}
           flexDirection={DIRECTION_COLUMN}
         >
@@ -173,20 +184,22 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
             onClick={() => {
               handleOpen(true)
             }}
+            gridGap={SPACING.spacing8}
+            alignItems={ALIGN_CENTER}
           >
+            <Icon name="tip-position" size="1.25rem" />
             <StyledText desktopStyle="bodyDefaultRegular">
-              {t('protocol_steps:well_position')}
-              {`${
-                propsForFields[xField].value != null
-                  ? Number(propsForFields[xField].value)
-                  : 0
-              }${t('units.millimeter')}, 
-                  ${
-                    propsForFields[yField].value != null
-                      ? Number(propsForFields[yField].value)
-                      : 0
-                  }${t('units.millimeter')},
-                  ${mmFromBottom ?? 0}${t('units.millimeter')}`}
+              {t('protocol_steps:well_position', {
+                x:
+                  propsForFields[xField].value != null
+                    ? Number(propsForFields[xField].value)
+                    : 0,
+                y:
+                  propsForFields[yField].value != null
+                    ? Number(propsForFields[yField].value)
+                    : 0,
+                z: mmFromBottom ?? 0,
+              })}
             </StyledText>
           </ListButton>
         </Flex>
@@ -206,6 +219,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
           isIndeterminate={isIndeterminate}
           units={t('units.millimeter')}
           id={`TipPositionField_${zName}`}
+          padding={padding}
         />
       )}
     </>

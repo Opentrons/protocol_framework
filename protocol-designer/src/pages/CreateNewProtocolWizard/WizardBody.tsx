@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import {
   ALIGN_END,
+  ALIGN_CENTER,
   BORDERS,
   Btn,
   COLORS,
@@ -13,6 +14,8 @@ import {
   SPACING,
   StyledText,
   TYPOGRAPHY,
+  Tooltip,
+  useHoverTooltip,
 } from '@opentrons/components'
 import temporaryImg from '../../assets/images/placeholder_image_delete.png'
 import { BUTTON_LINK_STYLE } from '../../atoms'
@@ -26,6 +29,7 @@ interface WizardBodyProps {
   goBack?: () => void
   subHeader?: string
   imgSrc?: string
+  tooltipOnDisabled?: string
 }
 export function WizardBody(props: WizardBodyProps): JSX.Element {
   const {
@@ -37,8 +41,12 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
     proceed,
     disabled = false,
     imgSrc,
+    tooltipOnDisabled,
   } = props
   const { t } = useTranslation('shared')
+  const [targetProps, tooltipProps] = useHoverTooltip({
+    placement: 'top',
+  })
 
   return (
     <Flex
@@ -80,20 +88,28 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
         <Flex
           alignSelf={goBack != null ? 'auto' : ALIGN_END}
           justifyContent={JUSTIFY_SPACE_BETWEEN}
+          alignItems={ALIGN_CENTER}
         >
           {goBack != null ? (
-            <Btn onClick={goBack} css={BUTTON_LINK_STYLE}>
+            <Btn onClick={goBack} css={BUTTON_LINK_STYLE} height="1.5rem">
               <StyledText desktopStyle="bodyLargeSemiBold">
                 {t('go_back')}
               </StyledText>
             </Btn>
           ) : null}
-          <LargeButton
-            ariaDisabled={disabled}
-            onClick={proceed}
-            iconName="arrow-right"
-            buttonText={t('shared:confirm')}
-          />
+          <Flex {...targetProps}>
+            <LargeButton
+              disabled={disabled}
+              onClick={proceed}
+              iconName="arrow-right"
+              buttonText={t('shared:confirm')}
+              height="3.5rem"
+              width="8.5625rem"
+            />
+          </Flex>
+          {tooltipOnDisabled != null ? (
+            <Tooltip tooltipProps={tooltipProps}>{tooltipOnDisabled}</Tooltip>
+          ) : null}
         </Flex>
       </Flex>
       <StyledImg

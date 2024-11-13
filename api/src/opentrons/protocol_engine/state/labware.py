@@ -13,6 +13,7 @@ from typing import (
     NamedTuple,
     cast,
     Union,
+    overload,
 )
 
 from opentrons.protocol_engine.state import update_types
@@ -79,6 +80,10 @@ _RIGHT_SIDE_SLOTS = {
     DeckSlotName.SLOT_C3,
     DeckSlotName.SLOT_D3,
 }
+
+
+# The max height of the labware that can fit in a plate reader
+_PLATE_READER_MAX_LABWARE_Z_MM = 16
 
 
 class LabwareLoadParams(NamedTuple):
@@ -227,10 +232,11 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
             if labware_location_update.new_location:
                 new_location = labware_location_update.new_location
 
-                if isinstance(
-                    new_location, AddressableAreaLocation
-                ) and fixture_validation.is_gripper_waste_chute(
-                    new_location.addressableAreaName
+                if isinstance(new_location, AddressableAreaLocation) and (
+                    fixture_validation.is_gripper_waste_chute(
+                        new_location.addressableAreaName
+                    )
+                    or fixture_validation.is_trash(new_location.addressableAreaName)
                 ):
                     # If a labware has been moved into a waste chute it's been chuted away and is now technically off deck
                     new_location = OFF_DECK_LOCATION
@@ -625,10 +631,26 @@ class LabwareView(HasState[LabwareState]):
         definition = self.get_definition(labware_id)
         return definition.parameters.loadName
 
-    def get_dimensions(self, labware_id: str) -> Dimensions:
+    @overload
+    def get_dimensions(self, *, labware_definition: LabwareDefinition) -> Dimensions:
+        pass
+
+    @overload
+    def get_dimensions(self, *, labware_id: str) -> Dimensions:
+        pass
+
+    def get_dimensions(
+        self,
+        *,
+        labware_definition: LabwareDefinition | None = None,
+        labware_id: str | None = None,
+    ) -> Dimensions:
         """Get the labware's dimensions."""
-        definition = self.get_definition(labware_id)
-        dims = definition.dimensions
+        if labware_definition is None:
+            assert labware_id is not None  # From our @overloads.
+            labware_definition = self.get_definition(labware_id)
+
+        dims = labware_definition.dimensions
 
         return Dimensions(
             x=dims.xDimension,
@@ -637,10 +659,9 @@ class LabwareView(HasState[LabwareState]):
         )
 
     def get_labware_overlap_offsets(
-        self, labware_id: str, below_labware_name: str
+        self, definition: LabwareDefinition, below_labware_name: str
     ) -> OverlapOffset:
         """Get the labware's overlap with requested labware's load name."""
-        definition = self.get_definition(labware_id)
         if below_labware_name in definition.stackingOffsetWithLabware.keys():
             stacking_overlap = definition.stackingOffsetWithLabware.get(
                 below_labware_name, OverlapOffset(x=0, y=0, z=0)
@@ -654,10 +675,9 @@ class LabwareView(HasState[LabwareState]):
         )
 
     def get_module_overlap_offsets(
-        self, labware_id: str, module_model: ModuleModel
+        self, definition: LabwareDefinition, module_model: ModuleModel
     ) -> OverlapOffset:
         """Get the labware's overlap with requested module model."""
-        definition = self.get_definition(labware_id)
         stacking_overlap = definition.stackingOffsetWithModule.get(
             str(module_model.value)
         )
@@ -817,6 +837,24 @@ class LabwareView(HasState[LabwareState]):
                     f"Labware {labware.loadName} is already present at {location}."
                 )
 
+    def raise_if_labware_incompatible_with_plate_reader(
+        self,
+        labware_definition: LabwareDefinition,
+    ) -> None:
+        """Raise an error if the labware is not compatible with the plate reader."""
+        load_name = labware_definition.parameters.loadName
+        number_of_wells = len(labware_definition.wells)
+        if number_of_wells != 96:
+            raise errors.LabwareMovementNotAllowedError(
+                f"Cannot move '{load_name}' into plate reader because the"
+                f" labware contains {number_of_wells} wells where 96 wells is expected."
+            )
+        elif labware_definition.dimensions.zDimension > _PLATE_READER_MAX_LABWARE_Z_MM:
+            raise errors.LabwareMovementNotAllowedError(
+                f"Cannot move '{load_name}' into plate reader because the"
+                f" maximum allowed labware height is {_PLATE_READER_MAX_LABWARE_Z_MM}mm."
+            )
+
     def raise_if_labware_cannot_be_stacked(  # noqa: C901
         self, top_labware_definition: LabwareDefinition, bottom_labware_id: str
     ) -> None:
@@ -900,22 +938,60 @@ class LabwareView(HasState[LabwareState]):
             else None
         )
 
-    def get_labware_gripper_offsets(
+    def get_absorbance_reader_lid_definition(self) -> LabwareDefinition:
+        """Return the special labware definition for the plate reader lid.
+
+        See todo comments in `create_protocol_engine().
+        """
+        # NOTE: This needs to stay in sync with create_protocol_engine().
+        return self._state.definitions_by_uri[
+            "opentrons/opentrons_flex_lid_absorbance_plate_reader_module/1"
+        ]
+
+    @overload
+    def get_child_gripper_offsets(
         self,
-        labware_id: str,
+        *,
+        labware_definition: LabwareDefinition,
         slot_name: Optional[DeckSlotName],
     ) -> Optional[LabwareMovementOffsetData]:
-        """Get the labware's gripper offsets of the specified type.
+        pass
+
+    @overload
+    def get_child_gripper_offsets(
+        self, *, labware_id: str, slot_name: Optional[DeckSlotName]
+    ) -> Optional[LabwareMovementOffsetData]:
+        pass
+
+    def get_child_gripper_offsets(
+        self,
+        *,
+        labware_definition: Optional[LabwareDefinition] = None,
+        labware_id: Optional[str] = None,
+        slot_name: Optional[DeckSlotName],
+    ) -> Optional[LabwareMovementOffsetData]:
+        """Get the grip offsets that a labware says should be applied to children stacked atop it.
+
+        Params:
+            labware_id: The ID of a parent labware (atop which another labware, the child, will be stacked).
+            slot_name: The ancestor slot that the parent labware is ultimately loaded into,
+                       perhaps after going through a module in the middle.
 
         Returns:
-            If `slot_name` is provided, returns the gripper offsets that the labware definition
+            If `slot_name` is provided, returns the gripper offsets that the parent labware definition
             specifies just for that slot, or `None` if the labware definition doesn't have an
             exact match.
 
-            If `slot_name` is `None`, returns the gripper offsets that the labware
+            If `slot_name` is `None`, returns the gripper offsets that the parent labware
             definition designates as "default," or `None` if it doesn't designate any as such.
         """
-        parsed_offsets = self.get_definition(labware_id).gripperOffsets
+        if labware_id is not None:
+            labware_definition = self.get_definition(labware_id)
+        else:
+            # Should be ensured by our @overloads.
+            assert labware_definition is not None
+
+        parsed_offsets = labware_definition.gripperOffsets
         offset_key = slot_name.id if slot_name else "default"
 
         if parsed_offsets is None or offset_key not in parsed_offsets:
@@ -930,20 +1006,22 @@ class LabwareView(HasState[LabwareState]):
                 ),
             )
 
-    def get_grip_force(self, labware_id: str) -> float:
+    def get_grip_force(self, labware_definition: LabwareDefinition) -> float:
         """Get the recommended grip force for gripping labware using gripper."""
-        recommended_force = self.get_definition(labware_id).gripForce
+        recommended_force = labware_definition.gripForce
         return (
             recommended_force if recommended_force is not None else LABWARE_GRIP_FORCE
         )
 
-    def get_grip_height_from_labware_bottom(self, labware_id: str) -> float:
+    def get_grip_height_from_labware_bottom(
+        self, labware_definition: LabwareDefinition
+    ) -> float:
         """Get the recommended grip height from labware bottom, if present."""
-        recommended_height = self.get_definition(labware_id).gripHeightFromLabwareBottom
+        recommended_height = labware_definition.gripHeightFromLabwareBottom
         return (
             recommended_height
             if recommended_height is not None
-            else self.get_dimensions(labware_id).z / 2
+            else self.get_dimensions(labware_definition=labware_definition).z / 2
         )
 
     @staticmethod
@@ -986,7 +1064,7 @@ class LabwareView(HasState[LabwareState]):
     def _max_z_of_well(well_defn: WellDefinition) -> float:
         return well_defn.z + well_defn.depth
 
-    def get_well_bbox(self, labware_id: str) -> Dimensions:
+    def get_well_bbox(self, labware_definition: LabwareDefinition) -> Dimensions:
         """Get the bounding box implied by the wells.
 
         The bounding box of the labware that is implied by the wells is that required
@@ -997,14 +1075,13 @@ class LabwareView(HasState[LabwareState]):
         This is used for the specific purpose of finding the reasonable uncertainty bounds of
         where and how a gripper will interact with a labware.
         """
-        defn = self.get_definition(labware_id)
         max_x: Optional[float] = None
         min_x: Optional[float] = None
         max_y: Optional[float] = None
         min_y: Optional[float] = None
         max_z: Optional[float] = None
 
-        for well in defn.wells.values():
+        for well in labware_definition.wells.values():
             well_max_x = self._max_x_of_well(well)
             well_min_x = self._min_x_of_well(well)
             well_max_y = self._max_y_of_well(well)

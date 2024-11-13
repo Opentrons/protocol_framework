@@ -16,10 +16,12 @@ export interface FieldProps {
   errorToShow?: string | null
   isIndeterminate?: boolean
   tooltipContent?: string | null
+  padding?: string // needed to accommodate full-width divider in toolbox
 }
 export type FieldPropsByName = Record<StepFieldName, FieldProps>
 
 // Shared props across all step forms
+export type LiquidHandlingTab = 'aspirate' | 'dispense'
 export interface StepFormProps {
   formData: FormData
   focusHandlers: FocusHandlers
@@ -29,4 +31,6 @@ export interface StepFormProps {
   showFormErrors: boolean
   focusedField?: string | null
   setShowFormErrorsAndWarnings?: React.Dispatch<React.SetStateAction<boolean>>
+  tab: LiquidHandlingTab
+  setTab: React.Dispatch<React.SetStateAction<LiquidHandlingTab>>
 }

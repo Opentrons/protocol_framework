@@ -125,7 +125,7 @@ describe('CurrentRunningProtocolCommand', () => {
     })
     render(props)
 
-    screen.getByText('Step ?/?')
+    screen.getByText('Step: N/A')
   })
 
   // ToDo (kj:04/10/2023) once we fix the track event stuff, we can implement tests

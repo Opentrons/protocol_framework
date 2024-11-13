@@ -4,8 +4,8 @@ from opentrons.calibration_storage import helpers
 from opentrons.protocols.geometry.labware_geometry import LabwareGeometry
 from opentrons.protocols.api_support.tip_tracker import TipTracker
 
-from opentrons.types import DeckSlotName, Location, Point
-from opentrons.hardware_control.nozzle_manager import NozzleMap
+from opentrons.types import DeckSlotName, Location, Point, NozzleMapInterface
+
 from opentrons_shared_data.labware.types import LabwareParameters, LabwareDefinition
 
 from ..labware import AbstractLabware, LabwareLoadParams
@@ -138,6 +138,11 @@ class LegacyLabwareCore(AbstractLabware[LegacyWellCore]):
     def is_adapter(self) -> bool:
         return False  # Adapters were introduced in v2.15 and not supported in legacy protocols
 
+    def is_lid(self) -> bool:
+        return (
+            False  # Lids were introduced in v2.21 and not supported in legacy protocols
+        )
+
     def is_fixed_trash(self) -> bool:
         """Whether the labware is fixed trash."""
         return "fixedTrash" in self.get_quirks()
@@ -157,7 +162,7 @@ class LegacyLabwareCore(AbstractLabware[LegacyWellCore]):
         self,
         num_tips: int,
         starting_tip: Optional[LegacyWellCore],
-        nozzle_map: Optional[NozzleMap],
+        nozzle_map: Optional[NozzleMapInterface],
     ) -> Optional[str]:
         if nozzle_map is not None:
             raise ValueError(

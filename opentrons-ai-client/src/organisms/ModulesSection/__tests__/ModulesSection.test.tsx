@@ -7,7 +7,9 @@ import { ModulesSection } from '..'
 
 const TestFormProviderComponent = () => {
   const methods = useForm({
-    defaultValues: {},
+    defaultValues: {
+      modules: [],
+    },
   })
 
   return (
@@ -78,19 +80,11 @@ describe('ModulesSection', () => {
     })
   })
 
-  it('should enable confirm button when all fields are filled', async () => {
+  it('should render with Confirm button enabled, modules are not required', async () => {
     render()
 
-    const confirmButton = screen.getByRole('button', { name: 'Confirm' })
     await waitFor(() => {
-      expect(confirmButton).not.toBeEnabled()
-    })
-
-    const moduleButton = screen.getByText('Heater-Shaker Module GEN1')
-    fireEvent.click(moduleButton)
-
-    await waitFor(() => {
-      expect(confirmButton).toBeEnabled()
+      expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled()
     })
   })
 })

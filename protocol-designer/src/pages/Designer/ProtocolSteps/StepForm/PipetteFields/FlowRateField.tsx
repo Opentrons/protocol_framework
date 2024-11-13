@@ -1,6 +1,7 @@
 import { useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { SPACING } from '@opentrons/components'
 import { selectors as stepFormSelectors } from '../../../../../step-forms'
 import { getMatchingTipLiquidSpecs } from '../../../../../utils'
 import { InputStepFormField } from '../../../../../molecules'
@@ -11,6 +12,7 @@ interface FlowRateFieldProps extends FieldProps {
   volume: unknown
   tiprack: unknown
   pipetteId?: string | null
+  showTooltip?: boolean
 }
 
 export function FlowRateField(props: FlowRateFieldProps): JSX.Element {
@@ -21,6 +23,7 @@ export function FlowRateField(props: FlowRateFieldProps): JSX.Element {
     tiprack,
     name,
     tooltipContent,
+    padding = `0 ${SPACING.spacing16}`,
     ...passThruProps
   } = props
   const { t, i18n } = useTranslation(['form', 'application', 'protocol_steps'])
@@ -80,19 +83,13 @@ export function FlowRateField(props: FlowRateFieldProps): JSX.Element {
   return (
     <InputStepFormField
       {...passThruProps}
-      padding="0"
+      padding={padding}
       type="number"
       setIsPristine={setIsPristine}
       errorToShow={errorMessage}
       key={`${flowRateType}_FlowRateInput`}
       title={title}
-      tooltipContent={
-        Number(passThruProps.value) === defaultFlowRate
-          ? tooltipContent
-          : t('protocol_steps:default_flow_rate', {
-              flowRate: defaultFlowRate,
-            })
-      }
+      showTooltip={false}
       name={name}
       units={t('application:units.microliterPerSec')}
       caption={t('protocol_steps:valid_range', {
@@ -100,6 +97,7 @@ export function FlowRateField(props: FlowRateFieldProps): JSX.Element {
         max: maxFlowRate,
         unit: t('application:units.microliterPerSec'),
       })}
+      placeholder={String(defaultFlowRate)}
     />
   )
 }

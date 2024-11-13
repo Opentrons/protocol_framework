@@ -118,7 +118,7 @@ def _fix_pass_step_for_buffer(
             #   will be the same
             duration=float64(abs(distance[movers[0]] / speed[movers[0]])),
             present_nodes=tool_nodes,
-            stop_condition=MoveStopCondition.sensor_report,
+            stop_condition=MoveStopCondition.sync_line,
             sensor_type_pass=sensor_type,
             sensor_id_pass=sensor_id,
             sensor_binding_flags=binding_flags,
@@ -456,6 +456,14 @@ async def capacitive_probe(
     async with AsyncExitStack() as binding_stack:
         for listener in listeners.values():
             await binding_stack.enter_async_context(listener)
+        for sensor in capacitive_sensors.values():
+            await binding_stack.enter_async_context(
+                sensor_driver.bind_output(
+                    can_messenger=messenger,
+                    sensor=sensor,
+                    binding=[SensorOutputBinding.sync],
+                )
+            )
         positions = await runner.run(can_messenger=messenger)
         await finalize_logs(messenger, tool, listeners, capacitive_sensors)
 

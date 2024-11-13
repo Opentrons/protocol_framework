@@ -43,9 +43,13 @@ class PersistenceResetter:
         await file.write_text(encoding="utf-8", data=_RESET_MARKER_FILE_CONTENTS)
 
 
-async def prepare_active_subdirectory(prepared_root: Path) -> Path:
-    """Return the active persistence subdirectory after preparing it, if necessary."""
-    migration_orchestrator = MigrationOrchestrator(
+def make_migration_orchestrator(prepared_root: Path) -> MigrationOrchestrator:
+    """Return a `MigrationOrchestrator` configured for robot-server production use.
+
+    Production code should not use this directly.
+    This is currently exposed only for tests.
+    """
+    return MigrationOrchestrator(
         root=prepared_root,
         migrations=[
             up_to_3.MigrationUpTo3(subdirectory="3"),
@@ -60,6 +64,11 @@ async def prepare_active_subdirectory(prepared_root: Path) -> Path:
         ],
         temp_file_prefix="temp-",
     )
+
+
+async def prepare_active_subdirectory(prepared_root: Path) -> Path:
+    """Return the active persistence subdirectory after preparing it, if necessary."""
+    migration_orchestrator = make_migration_orchestrator(prepared_root)
 
     await to_thread.run_sync(migration_orchestrator.clean_up_stray_temp_files)
     subdirectory = await to_thread.run_sync(migration_orchestrator.migrate_to_latest)

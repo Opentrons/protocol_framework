@@ -59,7 +59,7 @@ export const constructLabwareDefURI = (
 // Load names of "retired" labware
 // TODO(mc, 2019-12-3): how should this correspond to LABWAREV2_DO_NOT_LIST?
 // see shared-data/js/getLabware.js
-const RETIRED_LABWARE = [
+export const RETIRED_LABWARE = [
   'geb_96_tiprack_10ul',
   'geb_96_tiprack_1000ul',
   'opentrons_1_trash_850ml_fixed',

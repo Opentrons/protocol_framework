@@ -12,11 +12,12 @@ import {
   Icon,
   JUSTIFY_SPACE_BETWEEN,
   Link as LinkComponent,
+  ListItem,
   SPACING,
   StyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { AnnouncementModal } from '../../organisms'
+import { AnnouncementModal, DOC_URL } from '../../organisms'
 import {
   actions as analyticsActions,
   selectors as analyticsSelectors,
@@ -127,19 +128,32 @@ export function Settings(): JSX.Element {
               <StyledText desktopStyle="bodyLargeSemiBold">
                 {t('shared:app_settings')}
               </StyledText>
-              <Flex
-                borderRadius={BORDERS.borderRadius4}
-                backgroundColor={COLORS.grey10}
-                padding={`${SPACING.spacing16} ${SPACING.spacing24}`}
+              <ListItem
+                padding={SPACING.spacing16}
                 justifyContent={JUSTIFY_SPACE_BETWEEN}
+                type="noActive"
               >
-                <StyledText desktopStyle="bodyDefaultSemiBold">
-                  {t('shared:pd_version')}
-                </StyledText>
-                <Flex gridGap={SPACING.spacing12}>
+                <Flex flexDirection={DIRECTION_COLUMN}>
+                  <StyledText desktopStyle="bodyDefaultSemiBold">
+                    {t('shared:pd_version')}
+                  </StyledText>
                   <StyledText desktopStyle="bodyDefaultRegular">
                     {process.env.OT_PD_VERSION}
                   </StyledText>
+                </Flex>
+                <Flex gridGap={SPACING.spacing16} alignItems={ALIGN_CENTER}>
+                  <LinkComponent
+                    css={BUTTON_LINK_STYLE}
+                    textDecoration={TYPOGRAPHY.textDecorationUnderline}
+                    href={DOC_URL}
+                    external
+                    padding={SPACING.spacing4}
+                  >
+                    <StyledText desktopStyle="bodyDefaultRegular">
+                      {t('shared:software_manual')}
+                    </StyledText>
+                  </LinkComponent>
+
                   <Btn
                     css={BUTTON_LINK_STYLE}
                     textDecoration={TYPOGRAPHY.textDecorationUnderline}
@@ -147,24 +161,23 @@ export function Settings(): JSX.Element {
                       setShowAnnouncementModal(true)
                     }}
                     data-testid="AnnouncementModal_viewReleaseNotesButton"
+                    padding={SPACING.spacing4}
                   >
                     <StyledText desktopStyle="bodyDefaultRegular">
-                      {t('shared:view_release_notes')}
+                      {t('shared:release_notes')}
                     </StyledText>
                   </Btn>
                 </Flex>
-              </Flex>
+              </ListItem>
             </Flex>
             <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
               <StyledText desktopStyle="bodyLargeSemiBold">
                 {t('shared:user_settings')}
               </StyledText>
-              <Flex
-                borderRadius={BORDERS.borderRadius4}
-                backgroundColor={COLORS.grey10}
-                padding={`${SPACING.spacing16} ${SPACING.spacing24}`}
+              <ListItem
+                padding={SPACING.spacing16}
                 justifyContent={JUSTIFY_SPACE_BETWEEN}
-                alignItems={ALIGN_CENTER}
+                type="noActive"
               >
                 <Flex flexDirection={DIRECTION_COLUMN}>
                   <StyledText desktopStyle="bodyDefaultSemiBold">
@@ -193,13 +206,11 @@ export function Settings(): JSX.Element {
                       : t('shared:no_hints_to_restore')}
                   </StyledText>
                 </Btn>
-              </Flex>
-              <Flex
-                borderRadius={BORDERS.borderRadius4}
-                backgroundColor={COLORS.grey10}
-                padding={`${SPACING.spacing16} ${SPACING.spacing24}`}
+              </ListItem>
+              <ListItem
+                padding={SPACING.spacing16}
                 justifyContent={JUSTIFY_SPACE_BETWEEN}
-                alignItems={ALIGN_CENTER}
+                type="noActive"
               >
                 <Flex flexDirection={DIRECTION_COLUMN}>
                   <StyledText desktopStyle="bodyDefaultSemiBold">
@@ -220,19 +231,17 @@ export function Settings(): JSX.Element {
                     })
                   }}
                 />
-              </Flex>
+              </ListItem>
             </Flex>
             <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
               <StyledText desktopStyle="bodyLargeSemiBold">
                 {t('shared:privacy')}
               </StyledText>
-              <Flex
-                borderRadius={BORDERS.borderRadius4}
-                backgroundColor={COLORS.grey10}
-                padding={`${SPACING.spacing16} ${SPACING.spacing24}`}
+              <ListItem
+                padding={SPACING.spacing16}
                 justifyContent={JUSTIFY_SPACE_BETWEEN}
-                alignItems={ALIGN_CENTER}
-                gridGap={SPACING.spacing80}
+                type="noActive"
+                gridGap={SPACING.spacing40}
               >
                 <Flex flexDirection={DIRECTION_COLUMN}>
                   <StyledText desktopStyle="bodyDefaultSemiBold">
@@ -279,7 +288,7 @@ export function Settings(): JSX.Element {
                     height="1rem"
                   />
                 </Btn>
-              </Flex>
+              </ListItem>
             </Flex>
           </Flex>
           {prereleaseModeEnabled ? (
@@ -287,16 +296,15 @@ export function Settings(): JSX.Element {
               <StyledText desktopStyle="bodyLargeSemiBold">
                 {t('shared:developer_ff')}
               </StyledText>
-              <Flex
-                borderRadius={BORDERS.borderRadius4}
-                backgroundColor={COLORS.grey10}
-                padding={`${SPACING.spacing16} ${SPACING.spacing24}`}
+              <ListItem
+                type="noActive"
+                padding={SPACING.spacing16}
                 justifyContent={JUSTIFY_SPACE_BETWEEN}
                 flexDirection={DIRECTION_COLUMN}
                 gridGap={SPACING.spacing16}
               >
                 {prereleaseFlagRows}
-              </Flex>
+              </ListItem>
             </Flex>
           ) : null}
         </Flex>

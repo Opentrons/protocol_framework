@@ -7,7 +7,6 @@ import {
   getRelevantWellName,
   getRelevantFailedLabwareCmdFrom,
   useRelevantFailedLwLocations,
-  useInitialSelectedLocationsFrom,
 } from '../useFailedLabwareUtils'
 import { DEFINED_ERROR_TYPES } from '../../constants'
 
@@ -93,7 +92,7 @@ describe('getRelevantFailedLabwareCmdFrom', () => {
       },
     }
     const result = getRelevantFailedLabwareCmdFrom({
-      failedCommandByRunRecord: failedLiquidProbeCommand,
+      failedCommand: { byRunRecord: failedLiquidProbeCommand } as any,
     })
     expect(result).toEqual(failedLiquidProbeCommand)
   })
@@ -118,11 +117,13 @@ describe('getRelevantFailedLabwareCmdFrom', () => {
 
     overpressureErrorKinds.forEach(([commandType, errorType]) => {
       const result = getRelevantFailedLabwareCmdFrom({
-        failedCommandByRunRecord: {
-          ...failedCommand,
-          commandType,
-          error: { isDefined: true, errorType },
-        },
+        failedCommand: {
+          byRunRecord: {
+            ...failedCommand,
+            commandType,
+            error: { isDefined: true, errorType },
+          },
+        } as any,
         runCommands,
       })
       expect(result).toBe(pickUpTipCommand)
@@ -139,27 +140,33 @@ describe('getRelevantFailedLabwareCmdFrom', () => {
       },
     }
     const result = getRelevantFailedLabwareCmdFrom({
-      failedCommandByRunRecord: failedGripperCommand,
+      failedCommand: { byRunRecord: failedGripperCommand } as any,
     })
     expect(result).toEqual(failedGripperCommand)
   })
 
   it('should return null for GENERAL_ERROR error kind', () => {
     const result = getRelevantFailedLabwareCmdFrom({
-      failedCommandByRunRecord: {
-        ...failedCommand,
-        error: { errorType: 'literally anything else' },
-      },
+      failedCommand: {
+        byRunRecord: {
+          ...failedCommand,
+          error: {
+            errorType: 'literally anything else',
+          },
+        },
+      } as any,
     })
     expect(result).toBeNull()
   })
 
   it('should return null for unhandled error kinds', () => {
     const result = getRelevantFailedLabwareCmdFrom({
-      failedCommandByRunRecord: {
-        ...failedCommand,
-        error: { errorType: 'SOME_UNHANDLED_ERROR' },
-      },
+      failedCommand: {
+        byRunRecord: {
+          ...failedCommand,
+          error: { errorType: 'SOME_UNHANDLED_ERROR' },
+        },
+      } as any,
     })
     expect(result).toBeNull()
   })
@@ -240,24 +247,5 @@ describe('useRelevantFailedLwLocations', () => {
 
     expect(result.current.currentLoc).toStrictEqual({ slotName: 'D1' })
     expect(result.current.newLoc).toStrictEqual({ slotName: 'C2' })
-  })
-})
-
-describe('useInitialSelectedLocationsFrom', () => {
-  it('updates result if the relevant command changes', () => {
-    const cmd = { commandType: 'pickUpTip', params: { wellName: 'A1' } } as any
-    const cmd2 = { commandType: 'pickUpTip', params: { wellName: 'A2' } } as any
-
-    const { result, rerender } = renderHook((cmd: any) =>
-      useInitialSelectedLocationsFrom(cmd)
-    )
-
-    rerender(cmd)
-
-    expect(result.current).toStrictEqual({ A1: null })
-
-    rerender(cmd2)
-
-    expect(result.current).toStrictEqual({ A2: null })
   })
 })

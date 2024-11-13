@@ -3,18 +3,49 @@ import { atom } from 'jotai'
 import type {
   Chat,
   ChatData,
+  CreatePrompt,
   createProtocolAtomProps,
   HeaderWithMeterAtomProps,
   Mixpanel,
+  UpdatePrompt,
 } from './types'
 
 /** ChatDataAtom is for chat data (user prompt and response from OpenAI API) */
 export const chatDataAtom = atom<ChatData[]>([])
 
-/** ChatPromptAtom is for the prefilled userprompt when landing on the chat page */
-export const chatPromptAtom = atom<string>('')
+/** CreateProtocolChatAtom is for the prefilled userprompt when navigating to the chat page from Create New protocol page */
+export const createProtocolChatAtom = atom<CreatePrompt>({
+  prompt: '',
+  scientific_application_type: '',
+  description: '',
+  robots: 'opentrons_flex',
+  mounts: [],
+  flexGripper: false,
+  modules: [],
+  labware: [],
+  liquids: [],
+  steps: [],
+  fake: false,
+  fake_id: 0,
+})
+
+/** CreateProtocolChatAtom is for the prefilled userprompt when navigating to the chat page from Update Protocol page */
+export const updateProtocolChatAtom = atom<UpdatePrompt>({
+  prompt: '',
+  protocol_text: '',
+  regenerate: false,
+  update_type: 'adapt_python_protocol',
+  update_details: '',
+  fake: false,
+  fake_id: 0,
+})
+
+/** Scroll to bottom of chat atom */
+export const scrollToBottomAtom = atom<boolean>(false)
 
 export const chatHistoryAtom = atom<Chat[]>([])
+
+export const feedbackModalAtom = atom<boolean>(false)
 
 export const tokenAtom = atom<string | null>(null)
 
