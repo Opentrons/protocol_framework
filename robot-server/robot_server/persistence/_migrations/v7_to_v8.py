@@ -74,8 +74,12 @@ def _add_missing_indexes(dest_transaction: sqlalchemy.engine.Connection) -> None
     dest_transaction.execute(
         "CREATE UNIQUE INDEX ix_run_run_id_command_status_index_in_run ON run_command (run_id, command_status, index_in_run);"
     )
-    dest_transaction.execute("CREATE INDEX ix_run_command_command_intent ON run_command (command_intent);")
-    dest_transaction.execute("CREATE INDEX ix_data_files_source ON data_files (source);")
+    dest_transaction.execute(
+        "CREATE INDEX ix_run_command_command_intent ON run_command (command_intent);"
+    )
+    dest_transaction.execute(
+        "CREATE INDEX ix_data_files_source ON data_files (source);"
+    )
 
 
 def _migrate_command_table_with_new_command_error_col_and_command_status(
