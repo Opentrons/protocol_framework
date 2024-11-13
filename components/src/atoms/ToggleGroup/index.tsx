@@ -21,9 +21,7 @@ export const ToggleGroup = (props: ToggleGroupProps): JSX.Element => {
   return (
     <Flex css={BUTTON_GROUP_STYLES} key="toggleGroup">
       <PrimaryButton
-        css={
-          selectedValue === leftText ? ACTIVE_STYLE(true) : DEFAULT_STYLE(false)
-        }
+        css={selectedValue === leftText ? ACTIVE_STYLE : DEFAULT_STYLE}
         key={leftText}
         onClick={leftClick}
         data-testid="toggleGroup_leftButton"
@@ -31,11 +29,7 @@ export const ToggleGroup = (props: ToggleGroupProps): JSX.Element => {
         <StyledText desktopStyle="bodyDefaultRegular">{leftText}</StyledText>
       </PrimaryButton>
       <PrimaryButton
-        css={
-          selectedValue === rightText
-            ? ACTIVE_STYLE(false)
-            : DEFAULT_STYLE(true)
-        }
+        css={selectedValue === rightText ? ACTIVE_STYLE : DEFAULT_STYLE}
         key={rightText}
         onClick={rightClick}
         data-testid="toggleGroup_rightButton"
@@ -85,17 +79,15 @@ const BUTTON_GROUP_STYLES = css`
   }
 `
 
-const ACTIVE_STYLE = (isLeft: boolean): FlattenInterpolation<any> => css`
+const ACTIVE_STYLE = css`
   background-color: ${COLORS.blue50};
   color: ${COLORS.white};
   pointer-events: none;
   border: 1px ${COLORS.blue50} solid;
-  ${isLeft ? 'border-right: none;' : 'border-left: none;'}
 `
 
-const DEFAULT_STYLE = (isLeft: boolean): FlattenInterpolation<any> => css`
+const DEFAULT_STYLE = css`
   background-color: ${COLORS.white};
   color: ${COLORS.black90};
   border: 1px ${COLORS.grey30} solid;
-  ${isLeft ? 'border-left: none;' : 'border-right: none;'}
 `
