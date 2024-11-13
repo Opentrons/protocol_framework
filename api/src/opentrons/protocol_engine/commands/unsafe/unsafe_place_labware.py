@@ -131,6 +131,9 @@ class UnsafePlaceLabwareImplementation(
 
         # NOTE: When the estop is pressed, the gantry loses position, lets use
         # the encoders to sync position.
+        # Ideally, we'd do a full home, but this command is used when
+        # the gripper is holding the plate reader, and a full home would
+        # bang it into the right window.
         await ot3api.home(axes=[Axis.Z_L, Axis.Z_R, Axis.Z_G])
         await ot3api.engage_axes([Axis.X, Axis.Y])
         await ot3api.update_axis_position_estimations([Axis.X, Axis.Y])
