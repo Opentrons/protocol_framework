@@ -251,7 +251,11 @@ data_files_table = sqlalchemy.Table(
             DataFileSourceSQLEnum,
             values_callable=lambda obj: [e.value for e in obj],
             validate_strings=True,
-            create_constraint=True,
+            # create_constraint=False to match the underlying SQL, which omits
+            # the constraint because of a bug in the migration that introduced this
+            # column. This is not intended to ever have values other than those in
+            # DataFileSourceSQLEnum.
+            create_constraint=False,
         ),
         # nullable=True to match the underlying SQL, which is nullable because of a bug
         # in the migration that introduced this column. This is not intended to ever be
