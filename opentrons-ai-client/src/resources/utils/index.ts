@@ -19,3 +19,5 @@ export const isLocalhost = (): boolean => {
     host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.')
   )
 }
+
+export * from './labware'

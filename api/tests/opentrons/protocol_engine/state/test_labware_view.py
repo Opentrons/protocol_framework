@@ -686,19 +686,14 @@ def test_get_dimensions(well_plate_def: LabwareDefinition) -> None:
 
 def test_get_labware_overlap_offsets() -> None:
     """It should get the labware overlap offsets."""
-    subject = get_labware_view(
-        labware_by_id={"plate-id": plate},
-        definitions_by_uri={
-            "some-plate-uri": LabwareDefinition.construct(  # type: ignore[call-arg]
-                stackingOffsetWithLabware={
-                    "bottom-labware-name": SharedDataOverlapOffset(x=1, y=2, z=3)
-                }
-            )
-        },
-    )
-
+    subject = get_labware_view()
     result = subject.get_labware_overlap_offsets(
-        labware_id="plate-id", below_labware_name="bottom-labware-name"
+        definition=LabwareDefinition.construct(  # type: ignore[call-arg]
+            stackingOffsetWithLabware={
+                "bottom-labware-name": SharedDataOverlapOffset(x=1, y=2, z=3)
+            }
+        ),
+        below_labware_name="bottom-labware-name",
     )
 
     assert result == OverlapOffset(x=1, y=2, z=3)
@@ -777,15 +772,12 @@ def test_get_module_overlap_offsets(
     """It should get the labware overlap offsets."""
     subject = get_labware_view(
         deck_definition=spec_deck_definition,
-        labware_by_id={"plate-id": plate},
-        definitions_by_uri={
-            "some-plate-uri": LabwareDefinition.construct(  # type: ignore[call-arg]
-                stackingOffsetWithModule=stacking_offset_with_module
-            )
-        },
     )
     result = subject.get_module_overlap_offsets(
-        labware_id="plate-id", module_model=module_model
+        definition=LabwareDefinition.construct(  # type: ignore[call-arg]
+            stackingOffsetWithModule=stacking_offset_with_module
+        ),
+        module_model=module_model,
     )
 
     assert result == expected_offset
@@ -1530,10 +1522,9 @@ def test_get_labware_gripper_offsets(
     )
 
     assert (
-        subject.get_labware_gripper_offsets(labware_id="plate-id", slot_name=None)
-        is None
+        subject.get_child_gripper_offsets(labware_id="plate-id", slot_name=None) is None
     )
-    assert subject.get_labware_gripper_offsets(
+    assert subject.get_child_gripper_offsets(
         labware_id="adapter-plate-id", slot_name=DeckSlotName.SLOT_D1
     ) == LabwareMovementOffsetData(
         pickUpOffset=LabwareOffsetVector(x=0, y=0, z=0),
@@ -1570,13 +1561,13 @@ def test_get_labware_gripper_offsets_default_no_slots(
     )
 
     assert (
-        subject.get_labware_gripper_offsets(
+        subject.get_child_gripper_offsets(
             labware_id="labware-id", slot_name=DeckSlotName.SLOT_D1
         )
         is None
     )
 
-    assert subject.get_labware_gripper_offsets(
+    assert subject.get_child_gripper_offsets(
         labware_id="labware-id", slot_name=None
     ) == LabwareMovementOffsetData(
         pickUpOffset=LabwareOffsetVector(x=1, y=2, z=3),
@@ -1589,16 +1580,10 @@ def test_get_grip_force(
     reservoir_def: LabwareDefinition,
 ) -> None:
     """It should get the grip force, if present, from labware definition or return default."""
-    subject = get_labware_view(
-        labware_by_id={"flex-tiprack-id": flex_tiprack, "reservoir-id": reservoir},
-        definitions_by_uri={
-            "some-flex-tiprack-uri": flex_50uL_tiprack,
-            "some-reservoir-uri": reservoir_def,
-        },
-    )
+    subject = get_labware_view()
 
-    assert subject.get_grip_force("flex-tiprack-id") == 16  # from definition
-    assert subject.get_grip_force("reservoir-id") == 15  # default
+    assert subject.get_grip_force(flex_50uL_tiprack) == 16  # from definition
+    assert subject.get_grip_force(reservoir_def) == 15  # default
 
 
 def test_get_grip_height_from_labware_bottom(
@@ -1606,20 +1591,11 @@ def test_get_grip_height_from_labware_bottom(
     reservoir_def: LabwareDefinition,
 ) -> None:
     """It should get the grip height, if present, from labware definition or return default."""
-    subject = get_labware_view(
-        labware_by_id={"plate-id": plate, "reservoir-id": reservoir},
-        definitions_by_uri={
-            "some-plate-uri": well_plate_def,
-            "some-reservoir-uri": reservoir_def,
-        },
-    )
-
+    subject = get_labware_view()
     assert (
-        subject.get_grip_height_from_labware_bottom("plate-id") == 12.2
+        subject.get_grip_height_from_labware_bottom(well_plate_def) == 12.2
     )  # from definition
-    assert (
-        subject.get_grip_height_from_labware_bottom("reservoir-id") == 15.7
-    )  # default
+    assert subject.get_grip_height_from_labware_bottom(reservoir_def) == 15.7  # default
 
 
 @pytest.mark.parametrize(
@@ -1638,18 +1614,7 @@ def test_calculates_well_bounding_box(
 ) -> None:
     """It should be able to calculate well bounding boxes."""
     definition = LabwareDefinition.parse_obj(load_definition(labware_to_check, 1))
-    labware = LoadedLabware(
-        id="test-labware-id",
-        loadName=labware_to_check,
-        location=DeckSlotLocation(slotName=DeckSlotName.SLOT_1),
-        definitionUri="test-labware-uri",
-        offsetId=None,
-        displayName="Fancy Plate Name",
-    )
-    subject = get_labware_view(
-        labware_by_id={"test-labware-id": labware},
-        definitions_by_uri={"test-labware-uri": definition},
-    )
-    assert subject.get_well_bbox("test-labware-id").x == pytest.approx(well_bbox.x)
-    assert subject.get_well_bbox("test-labware-id").y == pytest.approx(well_bbox.y)
-    assert subject.get_well_bbox("test-labware-id").z == pytest.approx(well_bbox.z)
+    subject = get_labware_view()
+    assert subject.get_well_bbox(definition).x == pytest.approx(well_bbox.x)
+    assert subject.get_well_bbox(definition).y == pytest.approx(well_bbox.y)
+    assert subject.get_well_bbox(definition).z == pytest.approx(well_bbox.z)

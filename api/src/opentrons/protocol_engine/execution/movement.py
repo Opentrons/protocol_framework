@@ -4,9 +4,10 @@ from __future__ import annotations
 import logging
 from typing import Optional, List, Union
 
-from opentrons.types import Point, MountType
+from opentrons.types import Point, MountType, StagingSlotName
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons_shared_data.errors.exceptions import PositionUnknownError
+from opentrons.protocol_engine.errors import LocationIsStagingSlotError
 
 from ..types import (
     WellLocation,
@@ -93,9 +94,13 @@ class MovementHandler:
             self._state_store.modules.get_heater_shaker_movement_restrictors()
         )
 
-        dest_slot_int = self._state_store.geometry.get_ancestor_slot_name(
-            labware_id
-        ).as_int()
+        ancestor = self._state_store.geometry.get_ancestor_slot_name(labware_id)
+        if isinstance(ancestor, StagingSlotName):
+            raise LocationIsStagingSlotError(
+                "Cannot move to well on labware in Staging Area Slot."
+            )
+
+        dest_slot_int = ancestor.as_int()
 
         self._hs_movement_flagger.raise_if_movement_restricted(
             hs_movement_restrictors=hs_movement_restrictors,

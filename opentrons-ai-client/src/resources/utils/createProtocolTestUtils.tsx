@@ -62,9 +62,7 @@ export async function fillLabwareLiquidsSectionAndClickConfirm(): Promise<void> 
   fireEvent.click(addButton)
 
   fireEvent.click(screen.getByText('Tip rack'))
-  fireEvent.click(
-    await screen.findByText('Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL')
-  )
+  fireEvent.click(await screen.findByText('Opentrons Flex 96 Tip Rack 1000 µL'))
   fireEvent.click(screen.getByText('Save'))
 
   fireEvent.change(screen.getByRole('textbox'), {

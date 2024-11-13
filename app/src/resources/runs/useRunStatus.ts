@@ -1,9 +1,7 @@
-import { useRef } from 'react'
 import {
   RUN_ACTION_TYPE_PLAY,
   RUN_STATUS_IDLE,
   RUN_STATUS_RUNNING,
-  RUN_STATUSES_TERMINAL,
 } from '@opentrons/api-client'
 import { useNotifyRunQuery } from './useNotifyRunQuery'
 import { DEFAULT_STATUS_REFETCH_INTERVAL } from './constants'
@@ -15,14 +13,8 @@ export function useRunStatus(
   runId: string | null,
   options?: UseQueryOptions<Run>
 ): RunStatus | null {
-  const lastRunStatus = useRef<RunStatus | null>(null)
-
   const { data } = useNotifyRunQuery(runId ?? null, {
     refetchInterval: DEFAULT_STATUS_REFETCH_INTERVAL,
-    enabled:
-      lastRunStatus.current == null ||
-      !(RUN_STATUSES_TERMINAL as RunStatus[]).includes(lastRunStatus.current),
-    onSuccess: data => (lastRunStatus.current = data?.data?.status ?? null),
     ...options,
   })
 

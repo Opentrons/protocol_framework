@@ -83,7 +83,7 @@ describe('Delay', () => {
 
   it('renders the first delay screen, continue, and back buttons', () => {
     render(props)
-    screen.getByText('Delay before aspirating')
+    screen.getByText('Delay after aspirating')
     screen.getByTestId('ChildNavigation_Primary_Button')
     screen.getByText('Enabled')
     screen.getByText('Disabled')

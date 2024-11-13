@@ -36,7 +36,7 @@ export function ChooseDeckLocation({
     )?.id
 
     if (deckSlot != null) {
-      void moveToAddressableArea(deckSlot).then(() => {
+      void moveToAddressableArea(deckSlot, false).then(() => {
         proceedWithConditionalClose()
       })
     }

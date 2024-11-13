@@ -73,7 +73,6 @@ export function LabwareMapView(props: LabwareMapViewProps): JSX.Element {
             }
           : undefined,
       highlightLabware: true,
-      highlightShadowLabware: isLabwareStacked,
       moduleChildren: null,
       stacked: isLabwareStacked,
     }

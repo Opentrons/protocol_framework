@@ -16,7 +16,7 @@ export interface FailedCommandBySource {
  * In order to reduce misuse, bundle the failedCommand into "run" and "analysis" versions.
  */
 export function useRetainedFailedCommandBySource(
-  failedCommandByRunRecord: ErrorRecoveryFlowsProps['failedCommandByRunRecord'],
+  failedCommandByRunRecord: ErrorRecoveryFlowsProps['unvalidatedFailedCommand'],
   protocolAnalysis: ErrorRecoveryFlowsProps['protocolAnalysis']
 ): FailedCommandBySource | null {
   // In some cases, Error Recovery (by the app definition) persists when Error Recovery (by the server definition) does

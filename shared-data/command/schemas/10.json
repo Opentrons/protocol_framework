@@ -4817,9 +4817,9 @@
       "description": "Payload required for an UnsafePlaceLabware command.",
       "type": "object",
       "properties": {
-        "labwareId": {
-          "title": "Labwareid",
-          "description": "The id of the labware to place.",
+        "labwareURI": {
+          "title": "Labwareuri",
+          "description": "Labware URI for labware.",
           "type": "string"
         },
         "location": {
@@ -4841,7 +4841,7 @@
           ]
         }
       },
-      "required": ["labwareId", "location"]
+      "required": ["labwareURI", "location"]
     },
     "UnsafePlaceLabwareCreate": {
       "title": "UnsafePlaceLabwareCreate",

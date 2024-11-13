@@ -6,9 +6,7 @@ import { RECOVERY_MAP } from '/app/organisms/ErrorRecoveryFlows/constants'
 
 describe('useHomeGripper', () => {
   const mockRecoveryCommands = {
-    updatePositionEstimatorsAndHomeGripper: vi
-      .fn()
-      .mockResolvedValue(undefined),
+    homeExceptPlungers: vi.fn().mockResolvedValue(undefined),
   }
 
   const mockRouteUpdateActions = {
@@ -45,9 +43,7 @@ describe('useHomeGripper', () => {
     expect(mockRouteUpdateActions.handleMotionRouting).toHaveBeenCalledWith(
       true
     )
-    expect(
-      mockRecoveryCommands.updatePositionEstimatorsAndHomeGripper
-    ).toHaveBeenCalled()
+    expect(mockRecoveryCommands.homeExceptPlungers).toHaveBeenCalled()
     expect(mockRouteUpdateActions.handleMotionRouting).toHaveBeenCalledWith(
       false
     )
@@ -64,9 +60,7 @@ describe('useHomeGripper', () => {
     })
 
     expect(mockRouteUpdateActions.goBackPrevStep).toHaveBeenCalled()
-    expect(
-      mockRecoveryCommands.updatePositionEstimatorsAndHomeGripper
-    ).not.toHaveBeenCalled()
+    expect(mockRecoveryCommands.homeExceptPlungers).not.toHaveBeenCalled()
   })
 
   it('should not home again if already homed once', async () => {
@@ -83,18 +77,14 @@ describe('useHomeGripper', () => {
       await new Promise(resolve => setTimeout(resolve, 0))
     })
 
-    expect(
-      mockRecoveryCommands.updatePositionEstimatorsAndHomeGripper
-    ).toHaveBeenCalledTimes(1)
+    expect(mockRecoveryCommands.homeExceptPlungers).toHaveBeenCalledTimes(1)
 
     rerender()
 
-    expect(
-      mockRecoveryCommands.updatePositionEstimatorsAndHomeGripper
-    ).toHaveBeenCalledTimes(1)
+    expect(mockRecoveryCommands.homeExceptPlungers).toHaveBeenCalledTimes(1)
   })
 
-  it('should reset hasHomedOnce when step changes to non-manual gripper step and back', async () => {
+  it('should only reset hasHomedOnce when step changes to non-manual gripper step', async () => {
     const { rerender } = renderHook(
       ({ recoveryMap }) => {
         useHomeGripper({
@@ -113,9 +103,7 @@ describe('useHomeGripper', () => {
       await new Promise(resolve => setTimeout(resolve, 0))
     })
 
-    expect(
-      mockRecoveryCommands.updatePositionEstimatorsAndHomeGripper
-    ).toHaveBeenCalledTimes(1)
+    expect(mockRecoveryCommands.homeExceptPlungers).toHaveBeenCalledTimes(1)
 
     rerender({ recoveryMap: { step: 'SOME_OTHER_STEP' } as any })
 
@@ -123,14 +111,14 @@ describe('useHomeGripper', () => {
       await new Promise(resolve => setTimeout(resolve, 0))
     })
 
+    expect(mockRecoveryCommands.homeExceptPlungers).toHaveBeenCalledTimes(1)
+
     rerender({ recoveryMap: mockRecoveryMap })
 
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 0))
     })
 
-    expect(
-      mockRecoveryCommands.updatePositionEstimatorsAndHomeGripper
-    ).toHaveBeenCalledTimes(2)
+    expect(mockRecoveryCommands.homeExceptPlungers).toHaveBeenCalledTimes(1)
   })
 })
