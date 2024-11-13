@@ -775,12 +775,12 @@ class OT3API(
         """
         Function to update motor estimation for a set of axes
         """
+        if axes is None:
+            axes = [ax for ax in Axis]
 
-        if axes:
-            checked_axes = [ax for ax in axes if ax in Axis]
-        else:
-            checked_axes = [ax for ax in Axis]
-        await self._backend.update_motor_estimation(checked_axes)
+        axes = [ax for ax in axes if self._backend.axis_is_present(ax)]
+
+        await self._backend.update_motor_estimation(axes)
 
     # Global actions API
     def pause(self, pause_type: PauseType) -> None:
