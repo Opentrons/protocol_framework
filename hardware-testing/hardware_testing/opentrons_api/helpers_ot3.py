@@ -101,7 +101,14 @@ def _create_fake_pipette_id(mount: OT3Mount, model: Optional[str]) -> Optional[s
         return None
     items = model.split("_")
     assert len(items) == 3
-    size = "P1K" if items[0] == "p1000" else "P50"
+    if items[0] == "p1000":
+        size = "P1K"
+    elif items[0] == "p50":
+        size = "P50"
+    elif items[0] == "p200":
+        size = "P2H"
+    else:
+        raise RuntimeError("invalid pipette size")
     channels = "S" if items[1] == "single" else "M"
     version = items[2].upper().replace(".", "")
     date = datetime.now().strftime("%y%m%d")
