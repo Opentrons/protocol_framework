@@ -24,7 +24,6 @@ interface PromptPreviewProps {
 const PromptPreviewContainer = styled(Flex)`
   flex-direction: ${DIRECTION_COLUMN};
   width: 100%;
-  max-width: 516px;
   height: ${SIZE_AUTO};
   padding-top: ${SPACING.spacing8};
   background-color: ${COLORS.transparent};

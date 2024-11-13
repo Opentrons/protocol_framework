@@ -1,11 +1,12 @@
 import {
+  COLORS,
   Flex,
   JUSTIFY_SPACE_EVENLY,
   POSITION_RELATIVE,
   SPACING,
 } from '@opentrons/components'
 import { useTranslation } from 'react-i18next'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { PromptPreview } from '../../molecules/PromptPreview'
 import { useForm, FormProvider } from 'react-hook-form'
 import {
@@ -94,6 +95,42 @@ export function CreateProtocol(): JSX.Element | null {
     }
   }, [])
 
+  const [rightWidth, setRightWidth] = useState(50)
+  const [isResizing, setIsResizing] = useState(false)
+
+  function handleMouseDown(): void {
+    setIsResizing(true)
+  }
+
+  function handleMouseMove(e: MouseEvent): void {
+    if (isResizing) {
+      const newWidth =
+        ((window.innerWidth - e.clientX) / window.innerWidth) * 100
+      if (newWidth >= 10 && newWidth <= 90) {
+        setRightWidth(newWidth)
+      }
+    }
+  }
+
+  function handleMouseUp(): void {
+    setIsResizing(false)
+  }
+
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener('mousemove', handleMouseMove)
+      window.addEventListener('mouseup', handleMouseUp)
+    } else {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isResizing])
+
   return (
     <FormProvider {...methods}>
       <Flex
@@ -104,28 +141,76 @@ export function CreateProtocol(): JSX.Element | null {
         height="100%"
         width="100%"
       >
-        <ProtocolSectionsContainer />
-        <PromptPreview
-          handleSubmit={() => {
-            const chatPromptData = generateChatPrompt(methods.getValues(), t)
-
-            setChatPrompt({
-              prompt: chatPromptData,
-              isNewProtocol: true,
-            })
-
-            trackEvent({
-              name: 'submit-prompt',
-              properties: {
-                prompt: chatPromptData,
-              },
-            })
-
-            navigate('/chat')
+        <div style={{ flex: 1, height: '100%' }}>
+          <ProtocolSectionsContainer />
+        </div>
+        <div
+          style={{
+            width: '3px',
+            cursor: 'col-resize',
+            backgroundColor: COLORS.grey30,
+            height: '100%',
+            position: 'relative',
           }}
-          isSubmitButtonEnabled={currentStep === TOTAL_STEPS}
-          promptPreviewData={generatePromptPreviewData(methods.watch, t)}
-        />
+          onMouseDown={handleMouseDown}
+        >
+          <div
+            style={{
+              width: '16px',
+              height: '24px',
+              backgroundColor: COLORS.grey30,
+              borderRadius: '16px',
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '3px',
+            }}
+          >
+            <div
+              style={{
+                width: '2px',
+                height: '10px',
+                borderRadius: '12px',
+                backgroundColor: COLORS.white,
+              }}
+            />
+            <div
+              style={{
+                width: '2px',
+                height: '10px',
+                borderRadius: '12px',
+                backgroundColor: COLORS.white,
+              }}
+            />
+          </div>
+        </div>
+        <div style={{ width: `${rightWidth}%`, height: '100%' }}>
+          <PromptPreview
+            handleSubmit={() => {
+              const chatPromptData = generateChatPrompt(methods.getValues(), t)
+
+              setChatPrompt({
+                prompt: chatPromptData,
+                isNewProtocol: true,
+              })
+
+              trackEvent({
+                name: 'submit-prompt',
+                properties: {
+                  prompt: chatPromptData,
+                },
+              })
+
+              navigate('/chat')
+            }}
+            isSubmitButtonEnabled={currentStep === TOTAL_STEPS}
+            promptPreviewData={generatePromptPreviewData(methods.watch, t)}
+          />
+        </div>
       </Flex>
     </FormProvider>
   )
