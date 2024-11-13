@@ -50,7 +50,7 @@
     "engage": "<semiBoldText>{{module}}</semiBoldText><text>engaged to</text><tag/>"
   },
   "max_disposal_volume": "Max {{vol}} {{unit}}",
-  "mix_times": "Mix repititions",
+  "mix_times": "Mix repetitions",
   "mix_volume": "Mix volume",
   "mix": "Mix",
   "mix_step": "<text>Mixing</text><tag/><text>{{times}} times in</text><semiBoldText>{{wells}} of {{labware}}</semiBoldText>",
@@ -138,5 +138,5 @@
   "volume_per_well": "Volume per well",
   "well_name": "Well {{wellName}}",
   "well_order_title": "{{prefix}} well order",
-  "well_position": "Well position (x,y,z): "
+  "well_position": "Well position: X {{x}} Y {{y}} Z {{z}} (mm)"
 }

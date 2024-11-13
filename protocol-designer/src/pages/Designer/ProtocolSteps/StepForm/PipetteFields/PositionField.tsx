@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import {
+  ALIGN_CENTER,
   COLORS,
   DIRECTION_COLUMN,
   Flex,
+  Icon,
   InputField,
   ListButton,
   SPACING,
@@ -173,20 +175,22 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
             onClick={() => {
               handleOpen(true)
             }}
+            gridGap={SPACING.spacing8}
+            alignItems={ALIGN_CENTER}
           >
+            <Icon name="tip-position" size="1.25rem" />
             <StyledText desktopStyle="bodyDefaultRegular">
-              {t('protocol_steps:well_position')}
-              {`${
-                propsForFields[xField].value != null
-                  ? Number(propsForFields[xField].value)
-                  : 0
-              }${t('units.millimeter')}, 
-                  ${
-                    propsForFields[yField].value != null
-                      ? Number(propsForFields[yField].value)
-                      : 0
-                  }${t('units.millimeter')},
-                  ${mmFromBottom ?? 0}${t('units.millimeter')}`}
+              {t('protocol_steps:well_position', {
+                x:
+                  propsForFields[xField].value != null
+                    ? Number(propsForFields[xField].value)
+                    : 0,
+                y:
+                  propsForFields[yField].value != null
+                    ? Number(propsForFields[yField].value)
+                    : 0,
+                z: mmFromBottom ?? 0,
+              })}
             </StyledText>
           </ListButton>
         </Flex>

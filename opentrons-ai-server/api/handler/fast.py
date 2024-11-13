@@ -23,9 +23,11 @@ from api.handler.custom_logging import setup_logging
 from api.integration.auth import VerifyToken
 from api.models.chat_request import ChatRequest
 from api.models.chat_response import ChatResponse
+from api.models.create_protocol import CreateProtocol
 from api.models.empty_request_error import EmptyRequestError
 from api.models.feedback_response import FeedbackResponse
 from api.models.internal_server_error import InternalServerError
+from api.models.update_protocol import UpdateProtocol
 from api.settings import Settings
 
 settings: Settings = Settings()
@@ -202,6 +204,87 @@ async def create_chat_completion(
 
     except Exception as e:
         logger.exception("Error processing chat completion")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=InternalServerError(exception_object=e).model_dump()
+        ) from e
+
+
+@tracer.wrap()
+@app.post(
+    "/api/chat/updateProtocol",
+    response_model=Union[ChatResponse, ErrorResponse],
+    summary="Updates protocol",
+    description="Generate a chat response based on the provided prompt that will update an existing protocol with the required changes.",
+)
+async def update_protocol(
+    body: UpdateProtocol, auth_result: Any = Security(auth.verify)  # noqa: B008
+) -> Union[ChatResponse, ErrorResponse]:  # noqa: B008
+    """
+    Generate an updated protocolusing OpenAI.
+
+    - **request**: The HTTP request containing the existing protocol and other relevant parameters.
+    - **returns**: A chat response or an error message.
+    """
+    logger.info("POST /api/chat/updateProtocol", extra={"body": body.model_dump(), "auth_result": auth_result})
+    try:
+        if not body.protocol_text or body.protocol_text == "":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=EmptyRequestError(message="Request body is empty").model_dump()
+            )
+
+        if body.fake:
+            return ChatResponse(reply="Fake response", fake=body.fake)
+
+        response: Union[str, None] = openai.predict(prompt=body.prompt, chat_completion_message_params=None)
+
+        if response is None or response == "":
+            return ChatResponse(reply="No response was generated", fake=body.fake)
+
+        return ChatResponse(reply=response, fake=body.fake)
+
+    except Exception as e:
+        logger.exception("Error processing protocol update")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=InternalServerError(exception_object=e).model_dump()
+        ) from e
+
+
+@tracer.wrap()
+@app.post(
+    "/api/chat/createProtocol",
+    response_model=Union[ChatResponse, ErrorResponse],
+    summary="Creates protocol",
+    description="Generate a chat response based on the provided prompt that will create a new protocol with the required changes.",
+)
+async def create_protocol(
+    body: CreateProtocol, auth_result: Any = Security(auth.verify)  # noqa: B008
+) -> Union[ChatResponse, ErrorResponse]:  # noqa: B008
+    """
+    Generate an updated protocolusing OpenAI.
+
+    - **request**: The HTTP request containing the chat message.
+    - **returns**: A chat response or an error message.
+    """
+    logger.info("POST /api/chat/createProtocol", extra={"body": body.model_dump(), "auth_result": auth_result})
+    try:
+
+        if not body.prompt or body.prompt == "":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=EmptyRequestError(message="Request body is empty").model_dump()
+            )
+
+        if body.fake:
+            return ChatResponse(reply="Fake response", fake=body.fake)
+
+        response: Union[str, None] = openai.predict(prompt=str(body.model_dump()), chat_completion_message_params=None)
+
+        if response is None or response == "":
+            return ChatResponse(reply="No response was generated", fake=body.fake)
+
+        return ChatResponse(reply=response, fake=body.fake)
+
+    except Exception as e:
+        logger.exception("Error processing protocol creation")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=InternalServerError(exception_object=e).model_dump()
         ) from e

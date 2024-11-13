@@ -1,5 +1,5 @@
 """Tests for Protocol API input validation."""
-from typing import ContextManager, List, Type, Union, Optional, Dict, Any
+from typing import ContextManager, List, Type, Union, Optional, Dict, Sequence, Any
 from contextlib import nullcontext as do_not_raise
 
 from decoy import Decoy
@@ -465,7 +465,7 @@ def test_validate_well_no_location(decoy: Decoy) -> None:
     assert result == expected_result
 
 
-def test_validate_coordinates(decoy: Decoy) -> None:
+def test_validate_well_coordinates(decoy: Decoy) -> None:
     """Should return a WellTarget with no location."""
     input_location = Location(point=Point(x=1, y=1, z=2), labware=None)
     expected_result = subject.PointTarget(location=input_location, in_place=False)
@@ -568,6 +568,67 @@ def test_validate_last_location_with_labware(decoy: Decoy) -> None:
     result = subject.validate_location(location=None, last_location=input_last_location)
 
     assert result == subject.PointTarget(location=input_last_location, in_place=True)
+
+
+def test_ensure_boolean() -> None:
+    """It should return a boolean value."""
+    assert subject.ensure_boolean(False) is False
+
+
+@pytest.mark.parametrize("value", [0, "False", "f", 0.0])
+def test_ensure_boolean_raises(value: Union[str, int, float]) -> None:
+    """It should raise if the value is not a boolean."""
+    with pytest.raises(ValueError, match="must be a boolean"):
+        subject.ensure_boolean(value)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("value", [-1.23, -1, 0, 0.0, 1, 1.23])
+def test_ensure_float(value: Union[int, float]) -> None:
+    """It should return a float value."""
+    assert subject.ensure_float(value) == float(value)
+
+
+def test_ensure_float_raises() -> None:
+    """It should raise if the value is not a float or an integer."""
+    with pytest.raises(ValueError, match="must be a floating point"):
+        subject.ensure_float("1.23")  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("value", [0, 0.1, 1, 1.0])
+def test_ensure_positive_float(value: Union[int, float]) -> None:
+    """It should return a positive float."""
+    assert subject.ensure_positive_float(value) == float(value)
+
+
+@pytest.mark.parametrize("value", [-1, -1.0, float("inf"), float("-inf"), float("nan")])
+def test_ensure_positive_float_raises(value: Union[int, float]) -> None:
+    """It should raise if value is not a positive float."""
+    with pytest.raises(ValueError, match="(non-infinite|positive float)"):
+        subject.ensure_positive_float(value)
+
+
+def test_ensure_positive_int() -> None:
+    """It should return a positive int."""
+    assert subject.ensure_positive_int(42) == 42
+
+
+@pytest.mark.parametrize("value", [1.0, -1.0, -1])
+def test_ensure_positive_int_raises(value: Union[int, float]) -> None:
+    """It should raise if value is not a positive integer."""
+    with pytest.raises(ValueError, match="integer"):
+        subject.ensure_positive_int(value)  # type: ignore[arg-type]
+
+
+def test_validate_coordinates() -> None:
+    """It should validate the coordinates and return them as a tuple."""
+    assert subject.validate_coordinates([1, 2.0, 3.3]) == (1.0, 2.0, 3.3)
+
+
+@pytest.mark.parametrize("value", [[1, 2.0], [1, 2.0, 3.3, 4.2], ["1", 2, 3]])
+def test_validate_coordinates_raises(value: Sequence[Union[int, float, str]]) -> None:
+    """It should raise if value is not a valid sequence of three numbers."""
+    with pytest.raises(ValueError, match="(exactly three|must be floats)"):
+        subject.validate_coordinates(value)  # type: ignore[arg-type]
 
 
 @pytest.mark.parametrize(

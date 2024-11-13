@@ -29,6 +29,7 @@ describe('RetryStepInfo', () => {
         resumeRun: mockResumeRun,
       } as any,
       errorKind: ERROR_KINDS.GENERAL_ERROR,
+      stepCounts: { hasRunDiverged: false },
     } as any
   })
 

@@ -406,7 +406,7 @@ def test_get_module_offset_for_ot2_standard(
         },
     )
     assert (
-        subject.get_nominal_module_offset("module-id", get_addressable_area_view())
+        subject.get_nominal_offset_to_child("module-id", get_addressable_area_view())
         == expected_offset
     )
 
@@ -470,7 +470,7 @@ def test_get_module_offset_for_ot3_standard(
         },
     )
 
-    result_offset = subject.get_nominal_module_offset(
+    result_offset = subject.get_nominal_offset_to_child(
         "module-id",
         get_addressable_area_view(
             deck_configuration=None,

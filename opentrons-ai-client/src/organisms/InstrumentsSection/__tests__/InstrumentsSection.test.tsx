@@ -47,7 +47,7 @@ describe('ApplicationSection', () => {
     render()
 
     const pipettesRadioButton = screen.getByLabelText(
-      '96-Channel 1000µL pipette'
+      '96-Channel 1000uL pipette'
     )
     fireEvent.click(pipettesRadioButton)
 

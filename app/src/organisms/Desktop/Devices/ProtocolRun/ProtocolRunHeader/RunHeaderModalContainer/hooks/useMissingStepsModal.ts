@@ -4,13 +4,22 @@ import { useConditionalConfirm } from '@opentrons/components'
 
 import { useIsHeaterShakerInProtocol } from '/app/organisms/ModuleCard/hooks'
 import { isAnyHeaterShakerShaking } from '../modals'
-import { getMissingSetupSteps } from '/app/redux/protocol-runs'
+import {
+  getMissingSetupSteps,
+  MODULE_SETUP_STEP_KEY,
+  ROBOT_CALIBRATION_STEP_KEY,
+} from '/app/redux/protocol-runs'
 
 import type { UseConditionalConfirmResult } from '@opentrons/components'
 import type { RunStatus, AttachedModule } from '@opentrons/api-client'
 import type { ConfirmMissingStepsModalProps } from '../modals'
 import type { State } from '/app/redux/types'
 import type { StepKey } from '/app/redux/protocol-runs'
+
+const UNCONFIRMABLE_MISSING_STEPS = new Set<StepKey>([
+  ROBOT_CALIBRATION_STEP_KEY,
+  MODULE_SETUP_STEP_KEY,
+])
 
 interface UseMissingStepsModalProps {
   runStatus: RunStatus | null
@@ -47,9 +56,14 @@ export function useMissingStepsModal({
     !isHeaterShakerShaking &&
     (runStatus === RUN_STATUS_IDLE || runStatus === RUN_STATUS_STOPPED)
 
+  // Certain steps are not confirmed by the app, so don't include these in the modal.
+  const reportableMissingSetupSteps = missingSetupSteps.filter(
+    step => !UNCONFIRMABLE_MISSING_STEPS.has(step)
+  )
+
   const conditionalConfirmUtils = useConditionalConfirm(
     handleProceedToRunClick,
-    missingSetupSteps.length !== 0
+    reportableMissingSetupSteps.length !== 0
   )
 
   const modalProps: ConfirmMissingStepsModalProps = {
@@ -59,7 +73,7 @@ export function useMissingStepsModal({
         ? conditionalConfirmUtils.confirm()
         : handleProceedToRunClick()
     },
-    missingSteps: missingSetupSteps,
+    missingSteps: reportableMissingSetupSteps,
   }
 
   return conditionalConfirmUtils.showConfirmation

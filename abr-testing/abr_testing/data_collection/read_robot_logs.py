@@ -213,6 +213,42 @@ def instrument_commands(
     return pipette_dict
 
 
+def liquid_height_commands(
+    file_results: Dict[str, Any], all_heights_list: List[List[Any]]
+) -> List[List[Any]]:
+    """Record found liquid heights during a protocol."""
+    commandData = file_results.get("commands", "")
+    robot = file_results.get("robot_name", "")
+    run_id = file_results.get("run_id", "")
+    for command in commandData:
+        commandType = command["commandType"]
+        if commandType == "comment":
+            result = command["params"].get("message", "")
+            try:
+                result_str = "'" + result.split("result: {")[1] + "'"
+                entries = result_str.split(", (")
+                comment_time = command["completedAt"]
+                for entry in entries:
+                    height = float(entry.split(": ")[1].split("'")[0].split("}")[0])
+                    labware_type = str(
+                        entry.split(",")[0].replace("'", "").replace("(", "")
+                    )
+                    well_location = str(entry.split(", ")[1].split(" ")[0])
+                    slot_location = str(entry.split("slot ")[1].split(")")[0])
+                    labware_name = str(entry.split("of ")[1].split(" on")[0])
+                    all_heights_list[0].append(robot)
+                    all_heights_list[1].append(run_id)
+                    all_heights_list[2].append(comment_time)
+                    all_heights_list[3].append(labware_type)
+                    all_heights_list[4].append(labware_name)
+                    all_heights_list[5].append(slot_location)
+                    all_heights_list[6].append(well_location)
+                    all_heights_list[7].append(height)
+            except (IndexError, ValueError):
+                continue
+    return all_heights_list
+
+
 def plate_reader_commands(
     file_results: Dict[str, Any], hellma_plate_standards: List[Dict[str, Any]]
 ) -> Dict[str, object]:

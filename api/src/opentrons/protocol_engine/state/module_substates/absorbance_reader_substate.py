@@ -9,6 +9,9 @@ AbsorbanceReaderLidId = NewType("AbsorbanceReaderLidId", str)
 AbsorbanceReaderMeasureMode = NewType("AbsorbanceReaderMeasureMode", str)
 
 
+# todo(mm, 2024-11-08): frozen=True is getting pretty painful because ModuleStore has
+# no type-safe way to modify just a single attribute. Consider unfreezing this
+# (taking care to ensure that consumers of ModuleView still only get a read-only view).
 @dataclass(frozen=True)
 class AbsorbanceReaderSubState:
     """Absorbance-Plate-Reader-specific state."""
@@ -21,7 +24,6 @@ class AbsorbanceReaderSubState:
     configured_wavelengths: Optional[List[int]]
     measure_mode: Optional[AbsorbanceReaderMeasureMode]
     reference_wavelength: Optional[int]
-    lid_id: Optional[str]
 
     def raise_if_lid_status_not_expected(self, lid_on_expected: bool) -> None:
         """Raise if the lid status is not correct."""

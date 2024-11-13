@@ -9,6 +9,7 @@ import {
   Flex,
   JUSTIFY_CENTER,
   LabwareRender,
+  Box,
 } from '@opentrons/components'
 import {
   FLEX_ROBOT_TYPE,
@@ -130,60 +131,62 @@ export function SetupLiquidsMap(
       alignItems={ALIGN_CENTER}
       justifyContent={JUSTIFY_CENTER}
     >
-      <BaseDeck
-        deckConfig={deckConfig}
-        deckLayerBlocklist={deckLayerBlocklist}
-        robotType={robotType}
-        labwareOnDeck={[]}
-        modulesOnDeck={modulesOnDeck}
-      >
-        {map(labwareRenderInfo, ({ x, y }, labwareId) => {
-          const {
-            topLabwareId,
-            topLabwareDefinition,
-            topLabwareDisplayName,
-          } = getTopLabwareInfo(labwareId, loadLabwareCommands)
-          const wellFill = getWellFillFromLabwareId(
-            topLabwareId ?? '',
-            liquids,
-            labwareByLiquidId
-          )
-          const labwareHasLiquid = !isEmpty(wellFill)
-          return topLabwareDefinition != null ? (
-            <Fragment key={`LabwareSetup_Labware_${topLabwareId}_${x}${y}`}>
-              <g
-                transform={`translate(${x},${y})`}
-                onMouseEnter={() => {
-                  setHoverLabwareId(topLabwareId)
-                }}
-                onMouseLeave={() => {
-                  setHoverLabwareId('')
-                }}
-                onClick={() => {
-                  if (labwareHasLiquid) {
-                    setLiquidDetailsLabwareId(topLabwareId)
-                  }
-                }}
-                cursor={labwareHasLiquid ? 'pointer' : ''}
-              >
-                <LabwareRender
-                  definition={topLabwareDefinition}
-                  wellFill={labwareHasLiquid ? wellFill : undefined}
-                  highlight={labwareId === hoverLabwareId && labwareHasLiquid}
-                />
-                <LabwareInfoOverlay
-                  definition={topLabwareDefinition}
-                  labwareId={topLabwareId}
-                  displayName={topLabwareDisplayName ?? null}
-                  runId={runId}
-                  hover={labwareId === hoverLabwareId && labwareHasLiquid}
-                  labwareHasLiquid={labwareHasLiquid}
-                />
-              </g>
-            </Fragment>
-          ) : null
-        })}
-      </BaseDeck>
+      <Box margin="0 auto" maxWidth="46.25rem" width="100%">
+        <BaseDeck
+          deckConfig={deckConfig}
+          deckLayerBlocklist={deckLayerBlocklist}
+          robotType={robotType}
+          labwareOnDeck={[]}
+          modulesOnDeck={modulesOnDeck}
+        >
+          {map(labwareRenderInfo, ({ x, y }, labwareId) => {
+            const {
+              topLabwareId,
+              topLabwareDefinition,
+              topLabwareDisplayName,
+            } = getTopLabwareInfo(labwareId, loadLabwareCommands)
+            const wellFill = getWellFillFromLabwareId(
+              topLabwareId ?? '',
+              liquids,
+              labwareByLiquidId
+            )
+            const labwareHasLiquid = !isEmpty(wellFill)
+            return topLabwareDefinition != null ? (
+              <Fragment key={`LabwareSetup_Labware_${topLabwareId}_${x}${y}`}>
+                <g
+                  transform={`translate(${x},${y})`}
+                  onMouseEnter={() => {
+                    setHoverLabwareId(topLabwareId)
+                  }}
+                  onMouseLeave={() => {
+                    setHoverLabwareId('')
+                  }}
+                  onClick={() => {
+                    if (labwareHasLiquid) {
+                      setLiquidDetailsLabwareId(topLabwareId)
+                    }
+                  }}
+                  cursor={labwareHasLiquid ? 'pointer' : ''}
+                >
+                  <LabwareRender
+                    definition={topLabwareDefinition}
+                    wellFill={labwareHasLiquid ? wellFill : undefined}
+                    highlight={labwareId === hoverLabwareId && labwareHasLiquid}
+                  />
+                  <LabwareInfoOverlay
+                    definition={topLabwareDefinition}
+                    labwareId={topLabwareId}
+                    displayName={topLabwareDisplayName ?? null}
+                    runId={runId}
+                    hover={labwareId === hoverLabwareId && labwareHasLiquid}
+                    labwareHasLiquid={labwareHasLiquid}
+                  />
+                </g>
+              </Fragment>
+            ) : null
+          })}
+        </BaseDeck>
+      </Box>
       {liquidDetailsLabwareId != null && (
         <LiquidsLabwareDetailsModal
           labwareId={liquidDetailsLabwareId}

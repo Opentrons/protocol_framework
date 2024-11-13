@@ -125,7 +125,7 @@ def run(ctx: ProtocolContext) -> None:
         "Wash": [{"well": wash, "volume": 750.0}],
         "Samples": [{"well": samples, "volume": 250.0}],
     }
-    flattened_wells = helpers.find_liquid_height_of_loaded_liquids(
+    helpers.find_liquid_height_of_loaded_liquids(
         ctx, liquid_vols_and_wells, p1000_single
     )
 
@@ -268,5 +268,6 @@ def run(ctx: ProtocolContext) -> None:
         ctx.delay(minutes=MAG_DELAY_MIN)
         transfer_plate_to_plate(ELUTION_VOL * 1.1, working_cols, final_cols, 6)
         temp.deactivate()
-    flattened_wells.append(waste)
-    helpers.find_liquid_height_of_all_wells(ctx, p1000_single, flattened_wells)
+    end_wells_to_probe = [reagent_res["A1"], reagent_res["B1"], reagent_res["C1"]]
+    end_wells_to_probe.extend(wash_res.wells())
+    helpers.find_liquid_height_of_all_wells(ctx, p1000_single, end_wells_to_probe)

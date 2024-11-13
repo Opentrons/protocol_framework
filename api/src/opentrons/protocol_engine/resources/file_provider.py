@@ -66,7 +66,7 @@ class PlateReaderData(BaseModel):
                 row.append(str(measurement.data[f"{plate_alpharows[i]}{j+1}"]))
             rows.append(row)
         for i in range(3):
-            rows.append([""])
+            rows.append([])
         rows.append(["", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"])
         for i in range(8):
             row = [plate_alpharows[i]]
@@ -74,7 +74,7 @@ class PlateReaderData(BaseModel):
                 row.append("")
             rows.append(row)
         for i in range(3):
-            rows.append([""])
+            rows.append([])
         rows.append(
             [
                 "",
@@ -86,7 +86,7 @@ class PlateReaderData(BaseModel):
             ]
         )
         for i in range(3):
-            rows.append([""])
+            rows.append([])
         rows.append(
             [
                 "",
@@ -100,7 +100,7 @@ class PlateReaderData(BaseModel):
         )
         rows.append(["1", "Sample 1", "", "", "", "1", "", "", "", "", "", ""])
         for i in range(3):
-            rows.append([""])
+            rows.append([])
 
         # end of file metadata
         rows.append(["Protocol"])
@@ -109,13 +109,17 @@ class PlateReaderData(BaseModel):
         if self.reference_wavelength is not None:
             rows.append(["Reference Wavelength (nm)", str(self.reference_wavelength)])
         rows.append(["Serial No.", self.serial_number])
-        rows.append(["Measurement started at", str(self.start_time)])
-        rows.append(["Measurement finished at", str(self.finish_time)])
+        rows.append(
+            ["Measurement started at", self.start_time.strftime("%m %d %H:%M:%S %Y")]
+        )
+        rows.append(
+            ["Measurement finished at", self.finish_time.strftime("%m %d %H:%M:%S %Y")]
+        )
 
         # Ensure the filename adheres to ruleset contains the wavelength for a given measurement
         if filename.endswith(".csv"):
             filename = filename[:-4]
-        filename = filename + "_" + str(measurement.wavelength) + ".csv"
+        filename = filename + str(measurement.wavelength) + "nm.csv"
 
         return GenericCsvTransform.build(
             filename=filename,

@@ -39,7 +39,7 @@ describe('StepsSection', () => {
 
     expect(
       screen.getByText(
-        'Give step-by-step instructions on how to handle liquids, with quantities in microliters (µL) and exact source and destination locations within labware. Always err on the side of providing extra information!'
+        'Give step-by-step instructions on how to handle liquids, with quantities in microliters (uL) and exact source and destination locations within labware. Always err on the side of providing extra information!'
       )
     ).toBeInTheDocument()
     expect(screen.getByText('Add individual steps')).toBeInTheDocument()

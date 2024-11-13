@@ -71,7 +71,11 @@ export function TwoColTextAndFailedStepNextStep(
             leftColBodyText
           )}
         </Flex>
-        <FailedStepNextStep {...props} />
+        {!props.stepCounts.hasRunDiverged ? (
+          <FailedStepNextStep {...props} />
+        ) : (
+          <Flex />
+        )}
       </TwoColumn>
       <RecoveryFooterButtons
         primaryBtnOnClick={primaryBtnOnClick}

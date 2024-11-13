@@ -451,6 +451,10 @@ def run(ctx: ProtocolContext) -> None:
                 )
                 p200.pick_up_tip()
 
+    tiptrack(tip50, None, reuse=False)
+    p50.return_tip()
+    helpers.find_liquid_height_of_loaded_liquids(ctx, liquid_vols_and_wells, p50)
+
     def TipSwap(tipvol: int) -> None:
         """Tip swap."""
         if tipvol == 50:
@@ -1203,18 +1207,11 @@ def run(ctx: ProtocolContext) -> None:
         # Set Block Temp for Final Plate
         tc_mod.set_block_temperature(4)
 
-    tiptrack(tip50, None, reuse=False)
-    p50.return_tip()
-    probed_wells = helpers.find_liquid_height_of_loaded_liquids(
-        ctx, liquid_vols_and_wells, p50
-    )
-
     unused_lids, used_lids = Fragmentation(unused_lids, used_lids)
     unused_lids, used_lids = end_repair(unused_lids, used_lids)
     unused_lids, used_lids = index_ligation(unused_lids, used_lids)
     lib_cleanup()
     unused_lids, used_lids = lib_amplification(unused_lids, used_lids)
     lib_cleanup_2()
-    probed_wells.append(waste1_res)
-    probed_wells.append(waste2_res)
-    helpers.find_liquid_height_of_all_wells(ctx, p50, probed_wells)
+    end_probed_wells = [waste1_res, waste2_res]
+    helpers.find_liquid_height_of_all_wells(ctx, p50, end_probed_wells)

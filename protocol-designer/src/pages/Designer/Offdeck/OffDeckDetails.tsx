@@ -9,7 +9,7 @@ import {
   Flex,
   JUSTIFY_CENTER,
   LabwareRender,
-  OVERFLOW_SCROLL,
+  OVERFLOW_AUTO,
   RobotWorkSpace,
   SPACING,
   StyledText,
@@ -74,7 +74,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
         borderRadius={SPACING.spacing12}
         padding={`${SPACING.spacing16} ${SPACING.spacing40}`}
         backgroundColor={COLORS.grey20}
-        overflowY={OVERFLOW_SCROLL}
+        overflowY={OVERFLOW_AUTO}
         flexDirection={DIRECTION_COLUMN}
       >
         <Flex
