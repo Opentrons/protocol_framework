@@ -5,8 +5,6 @@ import { PrimaryButton } from '../../atoms/buttons/PrimaryButton'
 import { spacing8 } from '../../ui-style-constants/spacing'
 import { StyledText } from '../StyledText'
 
-import type { FlattenInterpolation } from 'styled-components'
-
 interface ToggleGroupProps {
   leftText: string
   rightText: string
