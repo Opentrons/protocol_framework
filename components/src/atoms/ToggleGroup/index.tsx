@@ -5,6 +5,8 @@ import { PrimaryButton } from '../../atoms/buttons/PrimaryButton'
 import { spacing8 } from '../../ui-style-constants/spacing'
 import { StyledText } from '../StyledText'
 
+import type { FlattenInterpolation } from 'styled-components'
+
 interface ToggleGroupProps {
   leftText: string
   rightText: string
@@ -19,7 +21,9 @@ export const ToggleGroup = (props: ToggleGroupProps): JSX.Element => {
   return (
     <Flex css={BUTTON_GROUP_STYLES} key="toggleGroup">
       <PrimaryButton
-        css={selectedValue === leftText ? ACTIVE_STYLE : DEFAULT_STYLE}
+        css={
+          selectedValue === leftText ? ACTIVE_STYLE(true) : DEFAULT_STYLE(false)
+        }
         key={leftText}
         onClick={leftClick}
         data-testid="toggleGroup_leftButton"
@@ -27,7 +31,11 @@ export const ToggleGroup = (props: ToggleGroupProps): JSX.Element => {
         <StyledText desktopStyle="bodyDefaultRegular">{leftText}</StyledText>
       </PrimaryButton>
       <PrimaryButton
-        css={selectedValue === rightText ? ACTIVE_STYLE : DEFAULT_STYLE}
+        css={
+          selectedValue === rightText
+            ? ACTIVE_STYLE(false)
+            : DEFAULT_STYLE(true)
+        }
         key={rightText}
         onClick={rightClick}
         data-testid="toggleGroup_rightButton"
@@ -77,14 +85,17 @@ const BUTTON_GROUP_STYLES = css`
   }
 `
 
-const ACTIVE_STYLE = css`
+const ACTIVE_STYLE = (isLeft: boolean): FlattenInterpolation<any> => css`
   background-color: ${COLORS.blue50};
   color: ${COLORS.white};
   pointer-events: none;
+  border: 1px ${COLORS.blue50} solid;
+  ${isLeft ? 'border-right: none;' : 'border-left: none;'}
 `
 
-const DEFAULT_STYLE = css`
+const DEFAULT_STYLE = (isLeft: boolean): FlattenInterpolation<any> => css`
   background-color: ${COLORS.white};
   color: ${COLORS.black90};
-  outline: 1px ${COLORS.grey30} solid;
+  border: 1px ${COLORS.grey30} solid;
+  ${isLeft ? 'border-left: none;' : 'border-right: none;'}
 `
