@@ -253,7 +253,6 @@ data_files_table = sqlalchemy.Table(
             validate_strings=True,
             create_constraint=True,
         ),
-        index=True,
         nullable=False,
     ),
 )

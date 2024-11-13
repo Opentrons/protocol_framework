@@ -121,9 +121,6 @@ EXPECTED_STATEMENTS_LATEST = [
     CREATE UNIQUE INDEX ix_run_run_id_index_in_run ON run_command (run_id, index_in_run)
     """,
     """
-    CREATE INDEX ix_data_files_source ON data_files (source)
-    """,
-    """
     CREATE INDEX ix_protocol_protocol_kind ON protocol (protocol_kind)
     """,
     """
@@ -605,7 +602,6 @@ def test_creating_from_metadata_emits_expected_statements(
 #
 # There are at least these mismatches:
 #
-# - `ix_data_files_source` is present in metadata, but not emitted by the migration path
 # - `ix_run_command_command_intent` is present in metadata, but not emitted by the migration path
 # - `data_files.source` is nullable as emitted by the migration path, but not as declared in metadata
 # - `command.command_intent` is nullable as emitted by the migration path, but not as declared in metadata
