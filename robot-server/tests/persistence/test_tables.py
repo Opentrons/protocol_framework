@@ -594,9 +594,6 @@ def test_creating_from_metadata_emits_expected_statements(
     assert set(normalized_actual) == set(normalized_expected)
 
 
-# FIXME(mm, 2024-11-12): https://opentrons.atlassian.net/browse/EXEC-827
-# Remove this xfail mark when the mismatches are resolved.
-@pytest.mark.xfail(strict=True)
 def test_migrated_db_matches_db_created_from_metadata(tmp_path: Path) -> None:
     """Test that the output of migration matches `metadata.create_all()`.
 
