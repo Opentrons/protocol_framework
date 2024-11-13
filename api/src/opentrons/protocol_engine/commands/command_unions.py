@@ -136,6 +136,14 @@ from .load_liquid import (
     LoadLiquidCommandType,
 )
 
+from .load_liquid_class import (
+    LoadLiquidClass,
+    LoadLiquidClassParams,
+    LoadLiquidClassCreate,
+    LoadLiquidClassResult,
+    LoadLiquidClassCommandType,
+)
+
 from .load_module import (
     LoadModule,
     LoadModuleParams,
@@ -347,6 +355,7 @@ Command = Annotated[
         LoadLabware,
         ReloadLabware,
         LoadLiquid,
+        LoadLiquidClass,
         LoadModule,
         LoadPipette,
         MoveLabware,
@@ -429,6 +438,7 @@ CommandParams = Union[
     LoadLabwareParams,
     ReloadLabwareParams,
     LoadLiquidParams,
+    LoadLiquidClassParams,
     LoadModuleParams,
     LoadPipetteParams,
     MoveLabwareParams,
@@ -509,6 +519,7 @@ CommandType = Union[
     LoadLabwareCommandType,
     ReloadLabwareCommandType,
     LoadLiquidCommandType,
+    LoadLiquidClassCommandType,
     LoadModuleCommandType,
     LoadPipetteCommandType,
     MoveLabwareCommandType,
@@ -590,6 +601,7 @@ CommandCreate = Annotated[
         LoadLabwareCreate,
         ReloadLabwareCreate,
         LoadLiquidCreate,
+        LoadLiquidClassCreate,
         LoadModuleCreate,
         LoadPipetteCreate,
         MoveLabwareCreate,
@@ -672,6 +684,7 @@ CommandResult = Union[
     LoadLabwareResult,
     ReloadLabwareResult,
     LoadLiquidResult,
+    LoadLiquidClassResult,
     LoadModuleResult,
     LoadPipetteResult,
     MoveLabwareResult,
