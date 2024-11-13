@@ -87,7 +87,7 @@ def _migrate_command_table_with_new_command_error_col_and_command_status(
         )
         # parse json as enum
         new_command_status = _convert_commands_status_to_sql_command_status(
-            data["status"].value
+            data["status"]
         )
         commands_to_update.append(
             {
