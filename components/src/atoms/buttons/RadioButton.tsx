@@ -10,10 +10,13 @@ import {
   CURSOR_POINTER,
   DIRECTION_ROW,
   Icon,
+  OVERFLOW_HIDDEN,
   RESPONSIVENESS,
   SPACING,
   StyledText,
 } from '../..'
+
+import type { FlattenSimpleInterpolation } from 'styled-components'
 import type { IconName } from '../..'
 import type { StyleProps } from '../../primitives'
 
@@ -28,7 +31,7 @@ interface RadioButtonProps extends StyleProps {
   radioButtonType?: 'large' | 'small'
   subButtonLabel?: string
   id?: string
-  maxLines?: number | null
+  maxLines?: number
   //  used for mouseEnter and mouseLeave
   setNoHover?: () => void
   setHovered?: () => void
@@ -51,7 +54,7 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
       : `RadioButtonId_${buttonValue}`,
     largeDesktopBorderRadius = false,
     iconName,
-    maxLines = null,
+    maxLines = 1,
     setHovered,
     setNoHover,
   } = props
@@ -118,6 +121,7 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
       -webkit-line-clamp: ${maxLines ?? undefined};
       -webkit-box-orient: ${maxLines != null ? 'vertical' : undefined};
       word-wrap: break-word;
+      word-break: break-all;
     }
   `
 
