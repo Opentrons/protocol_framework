@@ -71,8 +71,8 @@ class InitializeImpl(
             )
             if unsupported_wavelengths:
                 raise ValueError(
-                    f"Unsupported wavelengths: {unsupported_wavelengths}, "
-                    f" use {supported_wavelengths} instead."
+                    f"Unsupported wavelengths: {unsupported_wavelengths}. "
+                    f" Use one of {supported_wavelengths} instead."
                 )
 
             if params.measureMode == "single":
