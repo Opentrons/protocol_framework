@@ -9,11 +9,21 @@ import lostCss from 'lost'
 
 export default defineConfig({
   build: {
-    // Relative to the root
     ssr: 'src/index.ts',
     outDir: 'lib',
-    // do not delete the outdir, typescript types might live there and we dont want to delete them
-    emptyOutDir: false,
+    emptyOutDir: false, // Keep the outDir to avoid removing TS types
+    lib: {
+      entry: 'src/index.ts',
+      formats: ['es', 'cjs'],
+      fileName: (format) => (format === 'es' ? 'index.mjs' : 'index.cjs'),
+    },
+    rollupOptions: {
+      external: ['react', 'react-dom', 'styled-components'], // Avoid bundling dependencies
+      output: {
+        assetFileNames: '[name].[ext]', // Ensure asset names are kept clean
+        entryFileNames: '[name].js', // Ensure only compiled JS is output
+      },
+    },
     commonjsOptions: {
       transformMixedEsModules: true,
       esmExternals: true,
@@ -23,7 +33,6 @@ export default defineConfig({
     react({
       include: '**/*.tsx',
       babel: {
-        // Use babel.config.js files
         configFile: true,
       },
     }),
@@ -32,6 +41,7 @@ export default defineConfig({
     esbuildOptions: {
       target: 'es2020',
     },
+    exclude: ['styled-components'],
   },
   css: {
     postcss: {
@@ -45,8 +55,11 @@ export default defineConfig({
     },
   },
   define: {
-    'process.env': process.env,
-    global: 'globalThis',
+    'process.env': {
+      NODE_ENV: process.env.NODE_ENV,
+      OPENTRONS_PROJECT: process.env.OPENTRONS_PROJECT,
+    },
+    global: 'globalThis', // Ensure compatibility with global variables
   },
   resolve: {
     alias: {

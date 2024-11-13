@@ -9,7 +9,10 @@
     "composite": true,
     "rootDir": "src",
     "outDir": "lib",
+    "declarationDir": "lib",
+    "noEmit": false,
+    "jsx": "preserve"           
   },
   "include": ["typings", "src"],
-  "exclude": ["**/*.stories.tsx"]
+  "exclude": ["**/*.stories.tsx", "dist"]
 }
