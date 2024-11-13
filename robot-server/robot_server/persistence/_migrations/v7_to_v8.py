@@ -14,7 +14,7 @@ from typing import Any
 
 import sqlalchemy
 
-from ..database import sql_engine_ctx, sqlite_rowid
+from ..database import sql_engine_ctx
 from ..tables import schema_8
 from .._folder_migrator import Migration
 
@@ -75,8 +75,8 @@ def _migrate_command_table_with_new_command_error_col_and_command_status(
 ) -> None:
     """Add a new 'command_intent' column to run_command_table table."""
     commands_table = schema_8.run_command_table
-    select_commands = sqlalchemy.select(commands_table).order_by(sqlite_rowid)
-
+    select_commands = sqlalchemy.select(commands_table)
+    commands_to_update = []
     for row in dest_transaction.execute(select_commands).all():
         data = json.loads(row.command)
         new_command_error = (
@@ -87,11 +87,22 @@ def _migrate_command_table_with_new_command_error_col_and_command_status(
         )
         # parse json as enum
         new_command_status = CommandStatusSQLEnum(data["status"])
-
-        update_commands = (
-            sqlalchemy.update(schema_8.run_command_table)
-            .where(schema_8.run_command_table.c.row_id == row.row_id)
-            .values(command_error=new_command_error, command_status=new_command_status)
+        commands_to_update.append(
+            {
+                "command_error": new_command_error,
+                "command_status": new_command_status,
+                "_id": row.row_id,
+            }
         )
 
-        dest_transaction.execute(update_commands)
+    update_commands = (
+        sqlalchemy.update(schema_8.run_command_table)
+        .where(schema_8.run_command_table.c.row_id == sqlalchemy.bindparam("_id"))
+        .values(
+            {
+                "command_error": sqlalchemy.bindparam("command_error"),
+                "command_status": sqlalchemy.bindparam("command_status"),
+            }
+        )
+    )
+    dest_transaction.execute(update_commands, commands_to_update)
