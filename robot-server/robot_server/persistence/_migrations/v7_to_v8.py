@@ -73,7 +73,7 @@ class Migration7to8(Migration):  # noqa: D101
 def _migrate_command_table_with_new_command_error_col_and_command_status(
     dest_transaction: sqlalchemy.engine.Connection,
 ) -> None:
-    """Add a new 'command_intent' column to run_command_table table."""
+    """Add a new 'command_error' and 'command_status' column to run_command_table table."""
     commands_table = schema_8.run_command_table
     select_commands = sqlalchemy.select(commands_table)
     commands_to_update = []
@@ -89,20 +89,14 @@ def _migrate_command_table_with_new_command_error_col_and_command_status(
         new_command_status = CommandStatusSQLEnum(data["status"])
         commands_to_update.append(
             {
+                "row_id": row.row_id,
                 "command_error": new_command_error,
                 "command_status": new_command_status,
-                "_id": row.row_id,
             }
         )
 
-    update_commands = (
-        sqlalchemy.update(schema_8.run_command_table)
-        .where(schema_8.run_command_table.c.row_id == sqlalchemy.bindparam("_id"))
-        .values(
-            {
-                "command_error": sqlalchemy.bindparam("command_error"),
-                "command_status": sqlalchemy.bindparam("command_status"),
-            }
+    if len(commands_to_update) > 0:
+        update_commands = sqlalchemy.update(commands_table).values(
+            commands_to_update
         )
-    )
-    dest_transaction.execute(update_commands, commands_to_update)
+        dest_transaction.execute(update_commands)
