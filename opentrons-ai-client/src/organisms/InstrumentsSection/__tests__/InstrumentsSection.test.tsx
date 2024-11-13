@@ -120,7 +120,7 @@ describe('ApplicationSection', () => {
     })
   })
 
-  it('should enable confirm button when all fields are filled', async () => {
+  it('should update the form state to valid when all fields are filled', async () => {
     render()
 
     await waitFor(() => {

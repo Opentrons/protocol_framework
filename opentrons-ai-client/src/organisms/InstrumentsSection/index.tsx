@@ -15,7 +15,6 @@ import {
   getAllPipetteNames,
   getPipetteSpecsV2,
   OT2_PIPETTES,
-  OT2_ROBOT_TYPE,
   OT3_PIPETTES,
 } from '@opentrons/shared-data'
 
@@ -81,7 +80,7 @@ export function InstrumentsSection(): JSX.Element | null {
   const pipetteOptions = useMemo(() => {
     const allPipetteOptions = getAllPipetteNames('maxVolume', 'channels')
       .filter(name =>
-        (robotType === OT2_ROBOT_TYPE ? OT2_PIPETTES : OT3_PIPETTES).includes(
+        (robotType === OPENTRONS_OT2 ? OT2_PIPETTES : OT3_PIPETTES).includes(
           name
         )
       )
