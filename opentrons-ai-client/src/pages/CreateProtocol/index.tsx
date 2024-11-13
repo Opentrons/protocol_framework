@@ -9,7 +9,6 @@ import { useEffect } from 'react'
 import { PromptPreview } from '../../molecules/PromptPreview'
 import { useForm, FormProvider } from 'react-hook-form'
 import {
-  chatPromptAtom,
   createProtocolAtom,
   createProtocolChatAtom,
   headerWithMeterAtom,
