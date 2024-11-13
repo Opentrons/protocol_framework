@@ -95,14 +95,15 @@ def _migrate_command_table_with_new_command_error_col_and_command_status(
             }
         )
 
-    update_commands = (
-        sqlalchemy.update(commands_table)
-        .where(commands_table.c.row_id == sqlalchemy.bindparam("_id"))
-        .values(
-            {
-                "command_error": sqlalchemy.bindparam("command_error"),
-                "command_status": sqlalchemy.bindparam("command_status"),
-            }
+    if len(commands_to_update) > 0:
+        update_commands = (
+            sqlalchemy.update(commands_table)
+            .where(commands_table.c.row_id == sqlalchemy.bindparam("_id"))
+            .values(
+                {
+                    "command_error": sqlalchemy.bindparam("command_error"),
+                    "command_status": sqlalchemy.bindparam("command_status"),
+                }
+            )
         )
-    )
-    dest_transaction.execute(update_commands, commands_to_update)
+        dest_transaction.execute(update_commands, commands_to_update)
