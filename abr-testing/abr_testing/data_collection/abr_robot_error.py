@@ -125,15 +125,20 @@ def compare_lpc_to_historical_data(
         & (df_lpc_data["Robot"] == robot)
         & (df_lpc_data["Module"] == labware_dict["Module"])
         & (df_lpc_data["Adapter"] == labware_dict["Adapter"])
-        & (df_lpc_data["Run Ending Error"] < 1)
+        & (df_lpc_data["Run Ending Error"])
+        < 1
     ]
     # Converts coordinates to floats and finds averages.
-    x_float = [float(value) for value in relevant_lpc["X"]]
-    y_float = [float(value) for value in relevant_lpc["Y"]]
-    z_float = [float(value) for value in relevant_lpc["Z"]]
-    current_x = round(labware_dict["X"], 2)
-    current_y = round(labware_dict["Y"], 2)
-    current_z = round(labware_dict["Z"], 2)
+    try:
+        x_float = [float(value) for value in relevant_lpc["X"]]
+        y_float = [float(value) for value in relevant_lpc["Y"]]
+        z_float = [float(value) for value in relevant_lpc["Z"]]
+        current_x = round(labware_dict["X"], 2)
+        current_y = round(labware_dict["Y"], 2)
+        current_z = round(labware_dict["Z"], 2)
+    except (ValueError):
+        x_float, y_float, z_float = [0.0], [0.0], [0.0]
+        current_x, current_y, current_z = 0.0, 0.0, 0.0
     try:
         avg_x = round(mean(x_float), 2)
         avg_y = round(mean(y_float), 2)
@@ -258,7 +263,7 @@ def get_error_runs_from_robot(ip: str) -> List[str]:
 
 def get_robot_state(
     ip: str, reported_string: str
-) -> Tuple[Any, Any, Any, List[str], str]:
+) -> Tuple[Any, Any, Any, List[str], List[str], str]:
     """Get robot status in case of non run error."""
     description = dict()
     # Get instruments attached to robot
@@ -274,10 +279,11 @@ def get_robot_state(
         f"http://{ip}:31950/health", headers={"opentrons-version": "3"}
     )
     health_data = response.json()
-    parent = health_data.get("name", "")
+    print(f"health data {health_data}")
+    robot = health_data.get("name", "")
     # Create summary name
-    description["robot_name"] = parent
-    summary = parent + "_" + reported_string
+    description["robot_name"] = robot
+    summary = robot + "_" + reported_string
     affects_version = health_data.get("api_version", "")
     description["affects_version"] = affects_version
     # Instruments Attached
@@ -297,6 +303,12 @@ def get_robot_state(
         description[module["moduleType"]] = module
     components = ["Flex-RABR"]
     components = match_error_to_component("RABR", reported_string, components)
+    if "alpha" in affects_version:
+        components.append("flex internal releases")
+    labels = [robot]
+    if "8.2" in affects_version:
+        labels.append("8_2_0")
+    parent = affects_version + " Bugs"
     print(components)
     end_time = datetime.now()
     print(end_time)
@@ -317,13 +329,14 @@ def get_robot_state(
         parent,
         affects_version,
         components,
+        labels,
         whole_description_str,
     )
 
 
 def get_run_error_info_from_robot(
     ip: str, one_run: str, storage_directory: str
-) -> Tuple[str, str, str, List[str], str, str]:
+) -> Tuple[str, str, str, List[str], List[str], str, str]:
     """Get error information from robot to fill out ticket."""
     description = dict()
     # get run information
@@ -339,16 +352,19 @@ def get_run_error_info_from_robot(
     error_code = error_dict["Error_Code"]
     error_instrument = error_dict["Error_Instrument"]
     # JIRA Ticket Fields
-
+    robot = results.get("robot_name", "")
     failure_level = "Level " + str(error_level) + " Failure"
 
     components = [failure_level, "Flex-RABR"]
     components = match_error_to_component("RABR", str(error_type), components)
-    print(components)
     affects_version = results["API_Version"]
-    parent = results.get("robot_name", "")
-    print(parent)
-    summary = parent + "_" + str(one_run) + "_" + str(error_code) + "_" + error_type
+    if "alpha" in affects_version:
+        components.append("flex internal releases")
+    labels = [robot]
+    if "8.2" in affects_version:
+        labels.append("8_2_0")
+    parent = affects_version + " Bugs"
+    summary = robot + "_" + str(one_run) + "_" + str(error_code) + "_" + error_type
     # Description of error
     description["protocol_name"] = results["protocol"]["metadata"].get(
         "protocolName", ""
@@ -430,6 +446,7 @@ Please confirm with the ABR-LPC sheet and re-LPC."
         parent,
         affects_version,
         components,
+        labels,
         whole_description_str,
         saved_file_path,
     )
@@ -503,18 +520,20 @@ if __name__ == "__main__":
         one_run = error_runs[-1]  # Most recent run with error.
         (
             summary,
-            robot,
+            parent,
             affects_version,
             components,
+            labels,
             whole_description_str,
             run_log_file_path,
         ) = get_run_error_info_from_robot(ip, one_run, storage_directory)
     else:
         (
             summary,
-            robot,
+            parent,
             affects_version,
             components,
+            labels,
             whole_description_str,
         ) = get_robot_state(ip, run_or_other)
     # Get Calibration Data
@@ -525,16 +544,8 @@ if __name__ == "__main__":
     print(f"Making ticket for {summary}.")
     # TODO: make argument or see if I can get rid of with using board_id.
     project_key = "RABR"
-    print(robot)
-    try:
-        parent_key = project_key + "-" + robot.split("ABR")[1]
-    except IndexError:
-        parent_key = ""
-
-    # Grab all previous issues
-    all_issues = ticket.issues_on_board(project_key)
-
     # TODO: read board to see if ticket for run id already exists.
+    all_issues = ticket.issues_on_board(project_key)
     # CREATE TICKET
     issue_key, raw_issue_url = ticket.create_ticket(
         summary,
@@ -546,7 +557,8 @@ if __name__ == "__main__":
         "Medium",
         components,
         affects_version,
-        parent_key,
+        labels,
+        parent,
     )
     # Link Tickets
     to_link = ticket.match_issues(all_issues, summary)
