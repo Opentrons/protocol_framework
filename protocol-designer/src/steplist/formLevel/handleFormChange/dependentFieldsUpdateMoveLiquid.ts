@@ -248,7 +248,40 @@ const updatePatchOnPipetteChange = (
         'dispense_mix_volume',
         'disposalVolume_volume',
         'aspirate_mmFromBottom',
-        'dispense_mmFromBottom'
+        'dispense_mmFromBottom',
+        'nozzles',
+        'tipRack'
+      ),
+      aspirate_airGap_volume: airGapVolume,
+      dispense_airGap_volume: airGapVolume,
+    }
+  }
+
+  return patch
+}
+
+const updatePatchOnTiprackChange = (
+  patch: FormPatch,
+  rawForm: FormData,
+  pipetteEntities: PipetteEntities
+): FormPatch => {
+  if (fieldHasChanged(rawForm, patch, 'tipRack')) {
+    const pipette = patch.pipette
+    let airGapVolume: string | null = null
+
+    if (typeof pipette === 'string' && pipette in pipetteEntities) {
+      const minVolume = getMinPipetteVolume(pipetteEntities[pipette])
+      airGapVolume = minVolume.toString()
+    }
+
+    return {
+      ...patch,
+      ...getDefaultFields(
+        'aspirate_flowRate',
+        'dispense_flowRate',
+        'aspirate_mix_volume',
+        'dispense_mix_volume',
+        'disposalVolume_volume'
       ),
       aspirate_airGap_volume: airGapVolume,
       dispense_airGap_volume: airGapVolume,
@@ -662,5 +695,7 @@ export function dependentFieldsUpdateMoveLiquid(
     chainPatch => updatePatchBlowoutFields(chainPatch, rawForm),
     chainPatch =>
       clampDispenseAirGapVolume(chainPatch, rawForm, pipetteEntities),
+    chainPatch =>
+      updatePatchOnTiprackChange(chainPatch, rawForm, pipetteEntities),
   ])
 }
