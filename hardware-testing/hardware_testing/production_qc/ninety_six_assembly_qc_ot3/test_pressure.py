@@ -1,8 +1,8 @@
 """Test Pressure."""
 from asyncio import sleep
-from typing import List, Union
 from hardware_testing.drivers.sealed_pressure_fixture import SerialDriver as SealedPressureDriver
 from hardware_testing.opentrons_api import helpers_ot3
+from typing import List, Union, Literal
 
 from opentrons_hardware.firmware_bindings.constants import SensorId
 
@@ -112,7 +112,7 @@ def check_value(test_value: float, test_name: str) -> CSVResult:
         return CSVResult.PASS
     else:
         return CSVResult.FAIL
-    
+
 async def calibrate_to_pressue_fixture(api: OT3API, sensor:SealedPressureDriver, fixture_pos:Point):
     """move to suitable height for readding air pressure"""
     global REACHED_PRESSURE
@@ -161,7 +161,9 @@ async def _partial_pick_up(api: OT3API, position: Point, current: float) -> None
     await api.prepare_for_aspirate(OT3Mount.LEFT)
     await api.home_z(OT3Mount.LEFT)
 
-async def run(api: OT3API, report: CSVReport, section: str) -> None:
+async def run(
+    api: OT3API, report: CSVReport, section: str, pipette: Literal[200, 1000]
+) -> None:
     """Run."""
     await api.home_z(OT3Mount.LEFT)
     slot_5 = helpers_ot3.get_slot_calibration_square_position_ot3(5)
@@ -172,7 +174,7 @@ async def run(api: OT3API, report: CSVReport, section: str) -> None:
         pressure_sensor = SealedPressureDriver()
         pressure_sensor.init(9600)
 
-    # move to slot 
+    # move to slot
     ui.get_user_ready(f"Place tip tack 50ul at slot - {SLOT_FOR_PICK_UP_TIP}")
     #await api.add_tip(OT3Mount.LEFT, helpers_ot3.get_default_tip_length(TIP_VOLUME))
 
@@ -180,7 +182,7 @@ async def run(api: OT3API, report: CSVReport, section: str) -> None:
     await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, tip_rack_pos + Point(z=30))
     await helpers_ot3.jog_mount_ot3(api, OT3Mount.LEFT)
     tip_rack_actual_pos = await api.gantry_position(OT3Mount.LEFT)
-    
+
     for probe in InstrumentProbeType:
         await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, tip_rack_pos + Point(z=50))
         sensor_id = sensor_id_for_instrument(probe)
@@ -275,7 +277,7 @@ async def run(api: OT3API, report: CSVReport, section: str) -> None:
             await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, fixture_pos._replace(z=fixture_pos.z + 50))
         if not api.is_simulator:
             ui.get_user_ready("REMOVE tip")
-        
+
         trash_nominal = helpers_ot3.get_slot_calibration_square_position_ot3(12) + Point(z=40)
         # center the 96ch of the 1-well labware
         trash_nominal += OFFSET_FOR_1_WELL_LABWARE
