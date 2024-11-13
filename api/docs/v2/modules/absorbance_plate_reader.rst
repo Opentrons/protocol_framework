@@ -140,4 +140,4 @@ Additional information, starting with one blank labware grid, is output at the e
 
 Each output file for your protocol is available in the Opentrons App by going to your Flex and viewing Recent Protocol Runs. After downloading the file from your Flex, you can read it with any software that reads CSV files, and you can write additional code to parse and act upon its contents. 
 
-You can also select the output CSV as the value of a CSV runtime parameter in a subsequent protocol. When you :ref:`parse the CSV data <rtp-csv-data>`, make sure to set ``detect_dialect=False`` when parsing the CSV, or the API will raise an error.
+You can also select the output CSV as the value of a CSV runtime parameter in a subsequent protocol. When you :ref:`parse the CSV data <rtp-csv-data>`, make sure to set ``detect_dialect=False``, or the API will raise an error.
