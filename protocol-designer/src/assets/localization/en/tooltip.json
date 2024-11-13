@@ -60,6 +60,7 @@
       "mix_mmFromBottom": "Adjust tip position",
       "mix_touchTip_checkbox": "Touch tip to each side of the well after dispensing",
       "mix_touchTip_mmFromBottom": "Distance from the bottom of the well",
+      "newLocation": "New location to move the selected labware",
       "nozzles": "Partial pickup requires a tip rack directly on the deck. Full rack pickup requires the Flex 96 Tip Rack Adapter.",
       "pipette": "Select the pipette you want to use",
       "preWetTip": "Pre-wet by aspirating and dispensing 2/3 of the tip’s max volume",

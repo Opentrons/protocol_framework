@@ -89,13 +89,7 @@ export function FlowRateField(props: FlowRateFieldProps): JSX.Element {
       errorToShow={errorMessage}
       key={`${flowRateType}_FlowRateInput`}
       title={title}
-      tooltipContent={
-        Number(passThruProps.value) === defaultFlowRate
-          ? tooltipContent
-          : t('protocol_steps:default_flow_rate', {
-              flowRate: defaultFlowRate,
-            })
-      }
+      showTooltip={false}
       name={name}
       units={t('application:units.microliterPerSec')}
       caption={t('protocol_steps:valid_range', {
