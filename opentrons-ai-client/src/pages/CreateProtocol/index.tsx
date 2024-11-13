@@ -49,7 +49,9 @@ const TOTAL_STEPS = 5
 export function CreateProtocol(): JSX.Element | null {
   const { t } = useTranslation('create_protocol')
   const [, setHeaderWithMeterAtom] = useAtom(headerWithMeterAtom)
-  const [{ currentStep }, setCreateProtocolAtom] = useAtom(createProtocolAtom)
+  const [{ currentSection }, setCreateProtocolAtom] = useAtom(
+    createProtocolAtom
+  )
   const [, setCreateProtocolChatAtom] = useAtom(createProtocolChatAtom)
   const [, setUpdateProtocolChatAtom] = useAtom(updateProtocolChatAtom)
   const navigate = useNavigate()
@@ -71,7 +73,7 @@ export function CreateProtocol(): JSX.Element | null {
   })
 
   function calculateProgress(): number {
-    return currentStep > 0 ? currentStep / TOTAL_STEPS : 0
+    return currentSection > 0 ? currentSection / TOTAL_STEPS : 0
   }
 
   // Reset the update protocol chat atom when navigating to the create protocol page
@@ -92,7 +94,7 @@ export function CreateProtocol(): JSX.Element | null {
       displayHeaderWithMeter: true,
       progress: calculateProgress(),
     })
-  }, [currentStep])
+  }, [currentSection])
 
   useEffect(() => {
     return () => {
@@ -103,8 +105,8 @@ export function CreateProtocol(): JSX.Element | null {
 
       methods.reset()
       setCreateProtocolAtom({
-        currentStep: 0,
-        focusStep: 0,
+        currentSection: 0,
+        focusSection: 0,
       })
     }
   }, [])
@@ -137,7 +139,7 @@ export function CreateProtocol(): JSX.Element | null {
 
             navigate('/chat')
           }}
-          isSubmitButtonEnabled={currentStep === TOTAL_STEPS}
+          isSubmitButtonEnabled={currentSection === TOTAL_STEPS}
           promptPreviewData={generatePromptPreviewData(methods.watch, t)}
         />
       </Flex>
