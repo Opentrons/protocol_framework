@@ -787,7 +787,7 @@ class PipetteView(HasState[PipetteState]):
         """Get the volumn to mm conversion for a pipette."""
         try:
             lookup_volume = self.get_working_volume(pipette_id)
-        except errors.TipAttachedError:
+        except errors.TipNotAttachedError:
             lookup_volume = self.get_maximum_volume(pipette_id)
 
         pipette_config = self.get_config(pipette_id)
