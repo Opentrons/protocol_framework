@@ -109,7 +109,7 @@ EXPECTED_STATEMENTS_LATEST = [
         index_in_run INTEGER NOT NULL,
         command_id VARCHAR NOT NULL,
         command VARCHAR NOT NULL,
-        command_intent VARCHAR NOT NULL,
+        command_intent VARCHAR,
         PRIMARY KEY (row_id),
         FOREIGN KEY(run_id) REFERENCES run (id)
     )
@@ -595,11 +595,6 @@ def test_creating_from_metadata_emits_expected_statements(
 
 
 # FIXME(mm, 2024-11-12): https://opentrons.atlassian.net/browse/EXEC-827
-#
-# There are at least these mismatches:
-#
-# - `command.command_intent` is nullable as emitted by the migration path, but not as declared in metadata
-#
 # Remove this xfail mark when the mismatches are resolved.
 @pytest.mark.xfail(strict=True)
 def test_migrated_db_matches_db_created_from_metadata(tmp_path: Path) -> None:

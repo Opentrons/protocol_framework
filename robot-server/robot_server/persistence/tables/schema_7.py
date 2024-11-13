@@ -207,7 +207,14 @@ run_command_table = sqlalchemy.Table(
     sqlalchemy.Column("index_in_run", sqlalchemy.Integer, nullable=False),
     sqlalchemy.Column("command_id", sqlalchemy.String, nullable=False),
     sqlalchemy.Column("command", sqlalchemy.String, nullable=False),
-    sqlalchemy.Column("command_intent", sqlalchemy.String, nullable=False),
+    sqlalchemy.Column(
+        "command_intent",
+        sqlalchemy.String,
+        # nullable=True to match the underlying SQL, which is nullable because of a bug
+        # in the migration that introduced this column. This is not intended to ever be
+        # null in practice.
+        nullable=True,
+    ),
     sqlalchemy.Index(
         "ix_run_run_id_command_id",  # An arbitrary name for the index.
         "run_id",
