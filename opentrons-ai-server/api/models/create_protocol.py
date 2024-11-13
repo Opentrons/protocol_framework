@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class CreateProtocol(BaseModel):
+    prompt: str = Field(..., description="Prompt")
     scientific_application_type: str = Field(..., description="Scientific application type")
     description: str = Field(..., description="Description of the protocol")
     robots: Literal["opentrons_flex", "opentrons_ot2"] = Field(..., description="List of required robots")

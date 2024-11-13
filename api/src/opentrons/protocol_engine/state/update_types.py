@@ -13,6 +13,7 @@ from opentrons.protocol_engine.types import (
     LabwareLocation,
     TipGeometry,
     AspiratedFluid,
+    LiquidClassRecord,
 )
 from opentrons.types import MountType
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
@@ -253,6 +254,14 @@ class AbsorbanceReaderLidUpdate:
 
 
 @dataclasses.dataclass
+class LiquidClassLoadedUpdate:
+    """The state update from loading a liquid class."""
+
+    liquid_class_id: str
+    liquid_class_record: LiquidClassRecord
+
+
+@dataclasses.dataclass
 class StateUpdate:
     """Represents an update to perform on engine state."""
 
@@ -283,6 +292,8 @@ class StateUpdate:
     liquid_operated: LiquidOperatedUpdate | NoChangeType = NO_CHANGE
 
     absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
+
+    liquid_class_loaded: LiquidClassLoadedUpdate | NoChangeType = NO_CHANGE
 
     # These convenience functions let the caller avoid the boilerplate of constructing a
     # complicated dataclass tree.

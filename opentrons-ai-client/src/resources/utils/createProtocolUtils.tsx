@@ -14,6 +14,7 @@ import {
 import type { UseFormWatch } from 'react-hook-form'
 import type { CreateProtocolFormData } from '../../pages/CreateProtocol'
 import { getAllDefinitions } from './labware'
+import type { CreatePrompt } from '../types'
 
 export function generatePromptPreviewApplicationItems(
   watch: UseFormWatch<CreateProtocolFormData>,
@@ -149,69 +150,103 @@ export function generatePromptPreviewData(
 
 export function generateChatPrompt(
   values: CreateProtocolFormData,
-  t: any
+  t: any,
+  setCreateProtocolChatAtom: (
+    args_0: CreatePrompt | ((prev: CreatePrompt) => CreatePrompt)
+  ) => void
 ): string {
   const defs = getAllDefinitions()
 
-  let prompt = ''
-
-  prompt += t('create_protocol_prompt_robot', {
-    robotType: t(values.instruments.robot),
-  })
-  prompt += `${t('application_title')}: ${t(
-    values.application.scientificApplication
-  )}\n`
-  prompt += `${t('description')}: ${values.application.description}\n\n`
-
-  prompt += `${t('pipette_mounts')}:\n`
-  if (values.instruments.pipettes === TWO_PIPETTES) {
-    if (values.instruments.leftPipette !== NO_PIPETTES) {
-      prompt += `- ${
-        getPipetteSpecsV2(values.instruments.leftPipette as PipetteName)
-          ?.displayName
-      } ${t('mounted_left')}\n`
-    }
-    if (values.instruments.rightPipette !== NO_PIPETTES) {
-      prompt += `- ${
-        getPipetteSpecsV2(values.instruments.rightPipette as PipetteName)
-          ?.displayName
-      } ${t('mounted_right')}\n`
-    }
-  } else {
-    prompt += `- ${t(values.instruments.pipettes)}\n`
-  }
-
-  if (values.instruments.flexGripper === FLEX_GRIPPER) {
-    prompt += `- ${t('with_flex_gripper')}\n`
-  }
-
-  prompt += `\n${t('modules_title')}:\n ${values.modules
+  const robotType = t(values.instruments.robot)
+  const scientificApplication = t(values.application.scientificApplication)
+  const description = values.application.description
+  const pipetteMounts =
+    values.instruments.pipettes === TWO_PIPETTES
+      ? [
+          values.instruments.leftPipette !== NO_PIPETTES &&
+            `- ${
+              getPipetteSpecsV2(values.instruments.leftPipette as PipetteName)
+                ?.displayName
+            } ${t('mounted_left')}`,
+          values.instruments.rightPipette !== NO_PIPETTES &&
+            `- ${
+              getPipetteSpecsV2(values.instruments.rightPipette as PipetteName)
+                ?.displayName
+            } ${t('mounted_right')}`,
+        ]
+          .filter(Boolean)
+          .join('\n')
+      : `- ${t(values.instruments.pipettes)}`
+  const flexGripper =
+    values.instruments.flexGripper === FLEX_GRIPPER
+      ? `\n- ${t('with_flex_gripper')}`
+      : ''
+  const modules = values.modules
     .map(
       module =>
         `- ${module.name}${
-          module.adapter?.name != null && ` with ${module.adapter.name}`
+          module.adapter?.name != null ? ` with ${module.adapter.name}` : ''
         }`
     )
-    .join('\n')}\n`
-
-  prompt += `\n${t('labware_section_title')}: \n${values.labwares
+    .join('\n')
+  const labwares = values.labwares
     .map(
       labware =>
         `- ${getLabwareDisplayName(defs[labware.labwareURI])} x ${
           labware.count
         }`
     )
-    .join('\n')}\n`
+    .join('\n')
+  const liquids = values.liquids.map(liquid => `- ${liquid}`).join('\n')
+  const steps = Array.isArray(values.steps)
+    ? values.steps.map(step => `- ${step}`).join('\n')
+    : values.steps
 
-  prompt += `\n${t('liquid_section_title')}: \n${values.liquids
-    .map(liquid => `- ${liquid}`)
-    .join('\n')}\n`
+  const prompt = `${t('create_protocol_prompt_robot', { robotType })}\n${t(
+    'application_title'
+  )}: ${scientificApplication}\n\n${t('description')}: ${description}\n\n${t(
+    'pipette_mounts'
+  )}:\n\n${pipetteMounts}\n${flexGripper}\n\n${t(
+    'modules_title'
+  )}:\n${modules}\n\n${t('labware_section_title')}:\n${labwares}\n\n${t(
+    'liquid_section_title'
+  )}:\n${liquids}\n\n${t('steps_section_title')}:\n${steps}\n`
 
-  prompt += `\n${t('steps_section_title')}: \n${
-    Array.isArray(values.steps)
-      ? values.steps.map(step => `- ${step}`).join('\n')
-      : values.steps
-  }\n`
+  const mounts: string[] =
+    values.instruments.pipettes === TWO_PIPETTES
+      ? [
+          values.instruments.leftPipette !== NO_PIPETTES
+            ? `left pipette ${values.instruments.leftPipette}`
+            : '',
+          values.instruments.rightPipette !== NO_PIPETTES
+            ? `right pipette ${values.instruments.rightPipette}`
+            : '',
+        ].filter(Boolean)
+      : [values.instruments.pipettes]
+
+  setCreateProtocolChatAtom({
+    prompt,
+    scientific_application_type: values.application.scientificApplication,
+    description,
+    robots: values.instruments.robot,
+    mounts,
+    flexGripper: values.instruments.flexGripper === FLEX_GRIPPER,
+    modules: values.modules.map(
+      module =>
+        `${module.model}${
+          module.adapter?.name != null
+            ? `, adapter ${module.adapter?.value}`
+            : ''
+        }`
+    ),
+    labware: values.labwares.map(
+      labware => `${labware.labwareURI}, quantity: ${labware.count}`
+    ),
+    liquids: values.liquids,
+    steps: Array.isArray(values.steps) ? values.steps : [values.steps],
+    fake: false,
+    fake_id: 0,
+  })
 
   return prompt
 }

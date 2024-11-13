@@ -235,7 +235,7 @@ async def update_protocol(
         if body.fake:
             return ChatResponse(reply="Fake response", fake=body.fake)
 
-        response: Union[str, None] = openai.predict(prompt=body.protocol_text, chat_completion_message_params=None)
+        response: Union[str, None] = openai.predict(prompt=body.prompt, chat_completion_message_params=None)
 
         if response is None or response == "":
             return ChatResponse(reply="No response was generated", fake=body.fake)
@@ -267,14 +267,15 @@ async def create_protocol(
     """
     logger.info("POST /api/chat/createProtocol", extra={"body": body.model_dump(), "auth_result": auth_result})
     try:
-        # todo renable with correct model
-        # if not body.message or body.message == "":
-        #     raise HTTPException(
-        #         status_code=status.HTTP_400_BAD_REQUEST, detail=EmptyRequestError(message="Request body is empty").model_dump()
-        #     )
+
+        if not body.prompt or body.prompt == "":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=EmptyRequestError(message="Request body is empty").model_dump()
+            )
 
         if body.fake:
             return ChatResponse(reply="Fake response", fake=body.fake)
+
         response: Union[str, None] = openai.predict(prompt=str(body.model_dump()), chat_completion_message_params=None)
 
         if response is None or response == "":
