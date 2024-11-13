@@ -63,8 +63,9 @@ export function AddMetadata(props: AddMetadataProps): JSX.Element | null {
               {...register('fields.name')}
               type="text"
               value={watch('fields.name')}
-              min={undefined}
-              max={undefined}
+              min={''}
+              max={''}
+              autoFocus
             />
           </Flex>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
@@ -81,8 +82,8 @@ export function AddMetadata(props: AddMetadataProps): JSX.Element | null {
               {...register('fields.organizationOrAuthor')}
               type="text"
               value={watch('fields.organizationOrAuthor')}
-              min={undefined}
-              max={undefined}
+              min={''}
+              max={''}
             />
           </Flex>
         </Flex>
