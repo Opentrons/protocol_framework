@@ -14,7 +14,7 @@ metadata = {
     "protocolName": "PCR Protocol with TC Auto Sealing Lid",
     "author": "Rami Farawi <ndiehl@opentrons.com",
 }
-requirements = {"robotType": "OT-3", "apiLevel": "2.20"}
+requirements = {"robotType": "OT-3", "apiLevel": "2.21"}
 
 
 def add_parameters(parameters: ParameterContext) -> None:
