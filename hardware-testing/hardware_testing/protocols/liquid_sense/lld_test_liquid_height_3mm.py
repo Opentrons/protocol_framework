@@ -51,8 +51,9 @@ VOLUMES_3MM_TOP_BOTTOM = {
     "axygen_1_reservoir_90ml": [23136.9, 72854.8, 0.0],
     "agilent_1_reservoir_290ml": [15652.9, 141945.59, 268813.8],
     "opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap": [26.6, 593.7, 1629.9],
-    "corning_384_wellplate_112ul_flat": [23.2, 50.1, 80.0   ],
-    "biorad_384_wellplate_50ul": [28.7, 8.0, 0.0]
+    "corning_384_wellplate_112ul_flat": [23.2, 50.1, 80.0],
+    "biorad_384_wellplate_50ul": [28.7, 8.0, 0.0],
+    "usascientific_12_reservoir_22ml": [63.7, 10947.7, 21111.5]
 }
 
 SAME_TIP = True  # this is fine when using Ethanol (b/c it evaporates)
@@ -80,7 +81,7 @@ SLOT_DIAL = "B3"
 ###########################################
 
 
-metadata = {"protocolName": "lld-test-liquid-height-3mm"}
+metadata = {"protocolName": "lld-test-liquid-height-3mm-384"}
 requirements = {"robotType": "Flex", "apiLevel": "2.20"}
 
 
@@ -175,6 +176,8 @@ def _setup(
         RESERVOIR = "nest_1_reservoir_195ml"
 
     reservoir = ctx.load_labware(RESERVOIR, SLOT_RESERVOIR)
+    if len(labware.wells()) > 96:
+        LIQUID_TIP_SIZE = 50
     liquid_rack_name = f"opentrons_flex_96_tiprack_{LIQUID_TIP_SIZE}uL"
     liquid_rack = ctx.load_labware(liquid_rack_name, SLOT_LIQUID_TIPRACK)
 
@@ -339,7 +342,7 @@ def _test_for_finding_liquid_height(
         total_vol_in_tube = 0.0
         if volume:
             # transfer over and over until all volume is moved
-            if volume < 50000:
+            if volume < 15650:
                 need_to_transfer_per_ch = volume / liquid_pipette.channels
                 # set flow-rates
                 liquid_pipette.flow_rate.aspirate = min(
