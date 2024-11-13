@@ -131,12 +131,30 @@ const updatePatchOnPipetteChannelChange = (
 
 const updatePatchOnPipetteChange = (
   patch: FormPatch,
-  rawForm: FormData,
-  pipetteEntities: PipetteEntities
+  rawForm: FormData
 ): FormPatch => {
   // when pipette ID is changed (to another ID, or to null),
   // set any flow rates to null
   if (fieldHasChanged(rawForm, patch, 'pipette')) {
+    return {
+      ...patch,
+      ...getDefaultFields(
+        'aspirate_flowRate',
+        'dispense_flowRate',
+        'tipRack',
+        'nozzles'
+      ),
+    }
+  }
+
+  return patch
+}
+
+const updatePatchOnTiprackChange = (
+  patch: FormPatch,
+  rawForm: FormData
+): FormPatch => {
+  if (fieldHasChanged(rawForm, patch, 'tipRack')) {
     return {
       ...patch,
       ...getDefaultFields('aspirate_flowRate', 'dispense_flowRate'),
@@ -168,7 +186,7 @@ export function dependentFieldsUpdateMix(
         labwareEntities,
         pipetteEntities
       ),
-    chainPatch =>
-      updatePatchOnPipetteChange(chainPatch, rawForm, pipetteEntities),
+    chainPatch => updatePatchOnPipetteChange(chainPatch, rawForm),
+    chainPatch => updatePatchOnTiprackChange(chainPatch, rawForm),
   ])
 }
