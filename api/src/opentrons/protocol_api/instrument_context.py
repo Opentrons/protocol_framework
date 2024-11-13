@@ -1,12 +1,14 @@
 from __future__ import annotations
 import logging
 from contextlib import ExitStack
-from typing import Any, List, Optional, Sequence, Union, cast, Dict
+from typing import Any, List, Optional, Sequence, Union, cast, Dict, Literal
 from opentrons_shared_data.errors.exceptions import (
     CommandPreconditionViolated,
     CommandParameterLimitViolated,
     UnexpectedTipRemovalError,
 )
+from opentrons_shared_data.robot.types import RobotTypeEnum
+
 from opentrons.legacy_broker import LegacyBroker
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons import types
@@ -15,7 +17,7 @@ from opentrons.legacy_commands import commands as cmds
 from opentrons.legacy_commands import publisher
 from opentrons.protocols.advanced_control.mix import mix_from_kwargs
 from opentrons.protocols.advanced_control.transfers import transfer as v1_transfer
-
+from opentrons.protocols.advanced_control.transfers.common import AdvancedLiquidHandling
 from opentrons.protocols.api_support.deck_type import NoTrashDefinedError
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocols.api_support import instrument
@@ -34,9 +36,10 @@ from .core.legacy.legacy_instrument_core import LegacyInstrumentCore
 from .config import Clearances
 from .disposal_locations import TrashBin, WasteChute
 from ._nozzle_layout import NozzleLayout
+from ._liquid import LiquidClass
 from . import labware, validation
+from ..config import feature_flags
 
-AdvancedLiquidHandling = v1_transfer.AdvancedLiquidHandling
 
 _DEFAULT_ASPIRATE_CLEARANCE = 1.0
 _DEFAULT_DISPENSE_CLEARANCE = 1.0
@@ -1500,6 +1503,23 @@ class InstrumentContext(publisher.CommandPublisher):
     def _execute_transfer(self, plan: v1_transfer.TransferPlan) -> None:
         for cmd in plan:
             getattr(self, cmd["method"])(*cmd["args"], **cmd["kwargs"])
+
+    def transfer_liquid(
+        self,
+        liquid_class: LiquidClass,
+        volume: Union[float, Sequence[float]],
+        source: AdvancedLiquidHandling,
+        dest: AdvancedLiquidHandling,
+        trash_location: Union[types.Location, TrashBin, WasteChute] = True,
+        new_tip: Optional[Literal["once", "always", "never"]] = "once",
+    ) -> InstrumentContext:
+        """Transfer liquid from source to dest using the specified liquid class properties."""
+        if not feature_flags.allow_liquid_classes(
+                robot_type=RobotTypeEnum.robot_literal_to_enum(self._protocol_core.robot_type)
+        ):
+            raise NotImplementedError("This method is not implemented.")
+
+
 
     @requires_version(2, 0)
     def delay(self, *args: Any, **kwargs: Any) -> None:

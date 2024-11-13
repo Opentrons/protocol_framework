@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from typing import Optional, TYPE_CHECKING, cast, Union
 from opentrons.protocols.api_support.types import APIVersion
 
@@ -42,6 +43,7 @@ from ...disposal_locations import TrashBin, WasteChute
 
 if TYPE_CHECKING:
     from .protocol import ProtocolCore
+    from opentrons.protocol_api._liquid import LiquidClass
 
 
 _DISPENSE_VOLUME_VALIDATION_ADDED_IN = APIVersion(2, 17)
@@ -85,6 +87,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         self._liquid_presence_detection = bool(
             self._engine_client.state.pipettes.get_liquid_presence_detection(pipette_id)
         )
+        self._current_liquid_class: Optional[LiquidClass] = None
 
     @property
     def pipette_id(self) -> str:
@@ -940,3 +943,13 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         return self._engine_client.state.pipettes.get_nozzle_configuration_supports_lld(
             self.pipette_id
         )
+
+    @contextlib.contextmanager
+    def load_liquid_class(self, liquid_class: LiquidClass):
+        """Load a liquid class into the engine."""
+        try:
+            # TODO: issue a loadLiquidClass command
+            self._current_liquid_class = liquid_class
+            yield
+        finally:
+            self._current_liquid_class = None

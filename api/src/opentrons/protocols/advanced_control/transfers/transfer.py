@@ -23,14 +23,6 @@ from . import common as tx_commons
 from ..common import Mix, MixOpts, MixStrategy
 
 
-AdvancedLiquidHandling = Union[
-    Well,
-    types.Location,
-    Sequence[Union[Well, types.Location]],
-    Sequence[Sequence[Well]],
-]
-
-
 class TransferStep(TypedDict):
     method: str
     args: Optional[List[Any]]
@@ -374,8 +366,8 @@ class TransferPlan:
     def __init__(
         self,
         volume: Union[float, Sequence[float]],
-        srcs: AdvancedLiquidHandling,
-        dsts: AdvancedLiquidHandling,
+        srcs: tx_commons.AdvancedLiquidHandling,
+        dsts: tx_commons.AdvancedLiquidHandling,
         # todo(mm, 2021-03-10):
         # Refactor to not need an InstrumentContext, so we can more
         # easily test this class's logic on its own.
@@ -908,7 +900,7 @@ class TransferPlan:
         return False
 
     def _multichannel_transfer(
-        self, s: AdvancedLiquidHandling, d: AdvancedLiquidHandling
+        self, s: tx_commons.AdvancedLiquidHandling, d: tx_commons.AdvancedLiquidHandling
     ) -> Tuple[List[Union[Well, types.Location]], List[Union[Well, types.Location]]]:
         # TODO: add a check for container being multi-channel compatible?
         # Helper function for multi-channel use-case

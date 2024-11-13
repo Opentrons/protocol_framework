@@ -1,5 +1,15 @@
 """Common functions between v1 transfer and liquid-class-based transfer."""
-from typing import Iterable, Generator, Tuple, TypeVar
+from typing import Iterable, Generator, Tuple, TypeVar, Union, Sequence
+from opentrons import types
+from opentrons.protocol_api import Well
+
+AdvancedLiquidHandling = Union[
+    Well,
+    types.Location,
+    Sequence[Union[Well, types.Location]],
+    Sequence[Sequence[Well]],
+]
+
 
 Target = TypeVar("Target")
 
