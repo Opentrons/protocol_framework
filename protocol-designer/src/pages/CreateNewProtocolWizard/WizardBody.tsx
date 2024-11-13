@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import {
   ALIGN_END,
+  ALIGN_CENTER,
   BORDERS,
   Btn,
   COLORS,
@@ -87,9 +88,10 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
         <Flex
           alignSelf={goBack != null ? 'auto' : ALIGN_END}
           justifyContent={JUSTIFY_SPACE_BETWEEN}
+          alignItems={ALIGN_CENTER}
         >
           {goBack != null ? (
-            <Btn onClick={goBack} css={BUTTON_LINK_STYLE}>
+            <Btn onClick={goBack} css={BUTTON_LINK_STYLE} height="1.5rem">
               <StyledText desktopStyle="bodyLargeSemiBold">
                 {t('go_back')}
               </StyledText>
@@ -101,6 +103,8 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
               onClick={proceed}
               iconName="arrow-right"
               buttonText={t('shared:confirm')}
+              height="3.5rem"
+              width="8.5625rem"
             />
           </Flex>
           {tooltipOnDisabled != null ? (
