@@ -39,8 +39,6 @@ class Migration7to8(Migration):  # noqa: D101
         with ExitStack() as exit_stack:
             dest_engine = exit_stack.enter_context(sql_engine_ctx(dest_db_file))
 
-            # schema_8.metadata.create_all(dest_engine)
-
             dest_transaction = exit_stack.enter_context(dest_engine.begin())
 
             def add_column(
@@ -65,9 +63,19 @@ class Migration7to8(Migration):  # noqa: D101
                 schema_8.run_command_table.c.command_status,
             )
 
+            _add_missing_indexes(dest_transaction=dest_transaction)
+
             _migrate_command_table_with_new_command_error_col_and_command_status(
                 dest_transaction=dest_transaction
             )
+
+
+def _add_missing_indexes(dest_transaction: sqlalchemy.engine.Connection) -> None:
+    dest_transaction.execute(
+        "CREATE UNIQUE INDEX ix_run_run_id_command_status_index_in_run ON run_command (run_id, command_status, index_in_run);"
+    )
+    dest_transaction.execute("CREATE INDEX ix_run_command_command_intent ON run_command (command_intent);")
+    dest_transaction.execute("CREATE INDEX ix_data_files_source ON data_files (source);")
 
 
 def _migrate_command_table_with_new_command_error_col_and_command_status(
