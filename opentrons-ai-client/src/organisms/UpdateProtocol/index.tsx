@@ -21,6 +21,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { FileUpload } from '../../molecules/FileUpload'
 import { useNavigate } from 'react-router-dom'
 import {
+  createProtocolChatAtom,
   headerWithMeterAtom,
   updateProtocolChatAtom,
 } from '../../resources/atoms'
@@ -105,9 +106,28 @@ export function UpdateProtocol(): JSX.Element {
   const [updateType, setUpdateType] = useState<DropdownOption | null>(null)
   const [detailsValue, setDetailsValue] = useState<string>('')
   const [, setUpdatePromptAtom] = useAtom(updateProtocolChatAtom)
+  const [, setCreateProtocolChatAtom] = useAtom(createProtocolChatAtom)
   const [fileValue, setFile] = useState<File | null>(null)
   const [pythonText, setPythonTextValue] = useState<string>('')
   const [errorText, setErrorText] = useState<string | null>(null)
+
+  // Reset the create protocol chat atom when navigating to the update protocol page
+  useEffect(() => {
+    setCreateProtocolChatAtom({
+      prompt: '',
+      scientific_application_type: '',
+      description: '',
+      robots: 'opentrons_flex',
+      mounts: [],
+      flexGripper: false,
+      modules: [],
+      labware: [],
+      liquids: [],
+      steps: [],
+      fake: false,
+      fake_id: 0,
+    })
+  }, [])
 
   useEffect(() => {
     let progress = 0.0
