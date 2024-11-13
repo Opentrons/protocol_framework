@@ -39,7 +39,7 @@ class Migration7to8(Migration):  # noqa: D101
         with ExitStack() as exit_stack:
             dest_engine = exit_stack.enter_context(sql_engine_ctx(dest_db_file))
 
-            schema_8.metadata.create_all(dest_engine)
+            # schema_8.metadata.create_all(dest_engine)
 
             dest_transaction = exit_stack.enter_context(dest_engine.begin())
 
