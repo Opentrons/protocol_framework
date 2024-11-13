@@ -101,7 +101,7 @@ def run(protocol: protocol_api.ProtocolContext):
     HELLMA_PLATE_SLOT = "C2"
     PLATE_READER_SLOT = "D3"
     
-    plate_reader = protocol.load_module("absorbanceReaderV1", PLATE_READER_SLOT)
+    plate_reader: AbsorbanceReaderContext  = cast(AbsorbanceReaderContext, protocol.load_module("absorbanceReaderV1", PLATE_READER_SLOT))
     hellma_plate = protocol.load_labware("hellma_reference_plate", HELLMA_PLATE_SLOT)
     tiprack_1000 = protocol.load_labware(load_name='opentrons_flex_96_tiprack_50ul', location="A2")
     trash_labware = protocol.load_trash_bin("A3")
