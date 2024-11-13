@@ -542,7 +542,7 @@ EXPECTED_STATEMENTS_V2 = [
 
 
 def _normalize_statement(statement: str) -> str:
-    """Fix up the formatting of a SQL statement for easier comparison."""
+    """Fix up the internal formatting of a single SQL statement for easier comparison."""
     lines = statement.splitlines()
 
     # Remove whitespace at the beginning and end of each line.
@@ -551,7 +551,10 @@ def _normalize_statement(statement: str) -> str:
     # Filter out blank lines.
     lines = [line for line in lines if line != ""]
 
-    return "\n".join(lines)
+    # Normalize line breaks to spaces. When we ask SQLite for its schema, it appears
+    # inconsistent in whether it uses spaces or line breaks to separate tokens.
+    # That may have to do with whether `ALTER TABLE` has been used on the table.
+    return " ".join(lines)
 
 
 @pytest.mark.parametrize(
