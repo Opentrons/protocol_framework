@@ -10,13 +10,11 @@ import {
   CURSOR_POINTER,
   DIRECTION_ROW,
   Icon,
-  OVERFLOW_HIDDEN,
   RESPONSIVENESS,
   SPACING,
   StyledText,
 } from '../..'
 
-import type { FlattenSimpleInterpolation } from 'styled-components'
 import type { IconName } from '../..'
 import type { StyleProps } from '../../primitives'
 
