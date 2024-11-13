@@ -481,11 +481,10 @@ const updatePatchOnPipetteChannelChange = (
   const multiToSingle =
     (prevChannels === 8 || prevChannels === 96) && nextChannels === 1
 
+  const pipetteId: string = appliedPatch.pipette as string
+
   if (patch.pipette === null || singleToMulti) {
     // reset all well selection
-    // @ts-expect-error(sa, 2021-6-14): appliedPatch.pipette does not exist. Address in #3161
-    const pipetteId: string = appliedPatch.pipette
-
     update = {
       aspirate_wells: getDefaultWells({
         // @ts-expect-error(sa, 2021-6-14): appliedPatch.aspirate_labware does not exist. Address in #3161
@@ -514,8 +513,6 @@ const updatePatchOnPipetteChannelChange = (
     const sourceLabwareDef = sourceLabware.def
     const destLabware = labwareEntities[destLabwareId]
 
-    // @ts-expect-error(sa, 2021-6-14): appliedPatch.pipette does not exist. Address in #3161
-    const pipetteId: string = appliedPatch.pipette
     update = {
       aspirate_wells: getAllWellsFromPrimaryWells(
         appliedPatch.aspirate_wells as string[],
