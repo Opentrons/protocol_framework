@@ -166,6 +166,10 @@ test-liquid-sense:
 .PHONY: test-integration
 test-integration: test-production-qc test-examples test-scripts test-gravimetric
 
+.PHONY: test-stacker
+test-stacker:
+	$(python) -m hardware_testing.modules.flex_stacker_evt_qc --simulate
+
 .PHONY: lint
 lint:
 	$(python) -m mypy hardware_testing tests
