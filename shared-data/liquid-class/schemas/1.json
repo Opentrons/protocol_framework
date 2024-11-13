@@ -144,6 +144,13 @@
       },
       "required": ["default"]
     },
+    "correctionByVolume": {
+      "type": "object",
+      "description": "Settings for volume correction keyed by by target aspiration/dispense volume.",
+      "patternProperties": {
+        "d+": { "type": "number" }
+      }
+    },
     "mix": {
       "type": "object",
       "description": "Mixing properties.",
@@ -310,6 +317,9 @@
         "flowRateByVolume": {
           "$ref": "#/definitions/flowRateByVolume"
         },
+        "correctionByVolume": {
+          "$ref": "#/definitions/correctionByVolume"
+        },
         "preWet": {
           "type": "boolean",
           "description": "Whether to perform a pre-wet action."
@@ -327,6 +337,7 @@
         "positionReference",
         "offset",
         "flowRateByVolume",
+        "correctionByVolume",
         "preWet",
         "mix",
         "delay"
@@ -352,6 +363,9 @@
         "flowRateByVolume": {
           "$ref": "#/definitions/flowRateByVolume"
         },
+        "correctionByVolume": {
+          "$ref": "#/definitions/correctionByVolume"
+        },
         "mix": {
           "$ref": "#/definitions/mix"
         },
@@ -368,6 +382,7 @@
         "positionReference",
         "offset",
         "flowRateByVolume",
+        "correctionByVolume",
         "mix",
         "pushOutByVolume",
         "delay"
@@ -393,6 +408,9 @@
         "flowRateByVolume": {
           "$ref": "#/definitions/flowRateByVolume"
         },
+        "correctionByVolume": {
+          "$ref": "#/definitions/correctionByVolume"
+        },
         "conditioningByVolume": {
           "$ref": "#/definitions/conditioningByVolume"
         },
@@ -409,6 +427,7 @@
         "positionReference",
         "offset",
         "flowRateByVolume",
+        "correctionByVolume",
         "mix",
         "conditioningByVolume",
         "disposalByVolume",
