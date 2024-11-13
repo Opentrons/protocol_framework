@@ -17,7 +17,11 @@ import {
   getFileMetadata,
   getRobotStateTimeline,
 } from '../file-data/selectors'
-import { FIXED_TRASH_ID } from '../constants'
+import {
+  DEFAULT_MM_FROM_BOTTOM_ASPIRATE,
+  DEFAULT_MM_FROM_BOTTOM_DISPENSE,
+  FIXED_TRASH_ID,
+} from '../constants'
 import { trackEvent } from './mixpanel'
 import { getHasOptedIn } from './selectors'
 import { flattenNestedProperties } from './utils/flattenNestedProperties'
@@ -160,6 +164,33 @@ export const reduxActionToAnalyticsEvent = (
             aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
             dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
             blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
+            aspirateOffsetFromBottomMm:
+              stepArgModified.aspirateOffsetFromBottomMm ===
+              DEFAULT_MM_FROM_BOTTOM_ASPIRATE
+                ? 'default'
+                : stepArgModified.aspirateOffsetFromBottomMm,
+            dispenseOffsetFromBottomMm:
+              stepArgModified.dispenseOffsetFromBottomMm ===
+              DEFAULT_MM_FROM_BOTTOM_DISPENSE
+                ? 'default'
+                : stepArgModified.dispenseOffsetFromBottomMm,
+            aspirateXOffset:
+              stepArgModified.aspirateXOffset === 0
+                ? 'default'
+                : stepArgModified.aspirateXOffset,
+            aspirateYOffset:
+              stepArgModified.aspirateYOffset === 0
+                ? 'default'
+                : stepArgModified.aspirateYOffset,
+            dispenseXOffset:
+              stepArgModified.dispenseXOffset === 0
+                ? 'default'
+                : stepArgModified.dispenseXOffset,
+            dispenseYOffset:
+              stepArgModified.dispenseYOffset === 0
+                ? 'default'
+                : stepArgModified.dispenseYOffset,
+
             ...additionalProperties,
           },
         }
@@ -175,6 +206,32 @@ export const reduxActionToAnalyticsEvent = (
             aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
             dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
             blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
+            aspirateOffsetFromBottomMm:
+              stepArgModified.aspirateOffsetFromBottomMm ===
+              DEFAULT_MM_FROM_BOTTOM_ASPIRATE
+                ? 'default'
+                : stepArgModified.aspirateOffsetFromBottomMm,
+            dispenseOffsetFromBottomMm:
+              stepArgModified.dispenseOffsetFromBottomMm ===
+              DEFAULT_MM_FROM_BOTTOM_DISPENSE
+                ? 'default'
+                : stepArgModified.dispenseOffsetFromBottomMm,
+            aspirateXOffset:
+              stepArgModified.aspirateXOffset === 0
+                ? 'default'
+                : stepArgModified.aspirateXOffset,
+            aspirateYOffset:
+              stepArgModified.aspirateYOffset === 0
+                ? 'default'
+                : stepArgModified.aspirateYOffset,
+            dispenseXOffset:
+              stepArgModified.dispenseXOffset === 0
+                ? 'default'
+                : stepArgModified.dispenseXOffset,
+            dispenseYOffset:
+              stepArgModified.dispenseYOffset === 0
+                ? 'default'
+                : stepArgModified.dispenseYOffset,
             ...additionalProperties,
           },
         }
