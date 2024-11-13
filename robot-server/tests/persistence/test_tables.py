@@ -129,7 +129,7 @@ EXPECTED_STATEMENTS_LATEST = [
         name VARCHAR NOT NULL,
         file_hash VARCHAR NOT NULL,
         created_at DATETIME NOT NULL,
-        source VARCHAR(9) NOT NULL,
+        source VARCHAR(9),
         PRIMARY KEY (id),
         CONSTRAINT datafilesourcesqlenum CHECK (source IN ('uploaded', 'generated'))
     )
@@ -599,7 +599,6 @@ def test_creating_from_metadata_emits_expected_statements(
 #
 # There are at least these mismatches:
 #
-# - `data_files.source` is nullable as emitted by the migration path, but not as declared in metadata
 # - `command.command_intent` is nullable as emitted by the migration path, but not as declared in metadata
 # - constraint `datafilesourcesqlenum` is present in metadata, but not not emitted by the migration path
 #

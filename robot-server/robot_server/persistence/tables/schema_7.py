@@ -253,7 +253,10 @@ data_files_table = sqlalchemy.Table(
             validate_strings=True,
             create_constraint=True,
         ),
-        nullable=False,
+        # nullable=True to match the underlying SQL, which is nullable because of a bug
+        # in the migration that introduced this column. This is not intended to ever be
+        # null in practice.
+        nullable=True,
     ),
 )
 
