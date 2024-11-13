@@ -89,14 +89,20 @@ def _migrate_command_table_with_new_command_error_col_and_command_status(
         new_command_status = CommandStatusSQLEnum(data["status"])
         commands_to_update.append(
             {
-                "row_id": row.row_id,
+                "_id": row.row_id,
                 "command_error": new_command_error,
                 "command_status": new_command_status,
             }
         )
 
-    if len(commands_to_update) > 0:
-        update_commands = sqlalchemy.update(commands_table).values(
-            commands_to_update
+    update_commands = (
+        sqlalchemy.update(commands_table)
+        .where(commands_table.c.row_id == sqlalchemy.bindparam("_id"))
+        .values(
+            {
+                "command_error": sqlalchemy.bindparam("command_error"),
+                "command_status": sqlalchemy.bindparam("command_status"),
+            }
         )
-        dest_transaction.execute(update_commands)
+    )
+    dest_transaction.execute(update_commands, commands_to_update)

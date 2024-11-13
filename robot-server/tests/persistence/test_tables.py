@@ -126,7 +126,7 @@ EXPECTED_STATEMENTS_LATEST = [
     CREATE INDEX ix_protocol_protocol_kind ON protocol (protocol_kind)
     """,
     """
-    CREATE INDEX ix_run_run_id_index_in_run_command_status ON run_command (run_id, index_in_run, command_status)
+    CREATE UNIQUE INDEX ix_run_run_id_command_status_index_in_run ON run_command (run_id, command_status, index_in_run)
     """,
     """
     CREATE INDEX ix_run_command_command_intent ON run_command (command_intent)
