@@ -50,7 +50,7 @@ export type ERUtilsProps = Omit<ErrorRecoveryFlowsProps, 'failedCommand'> & {
   isOnDevice: boolean
   robotType: RobotType
   failedCommand: ReturnType<typeof useRetainedFailedCommandBySource>
-  showTakeover: boolean
+  isActiveUser: UseRecoveryTakeoverResult['isActiveUser']
   allRunDefs: LabwareDefinition2[]
   labwareDefinitionsByUri: LabwareDefinitionsByUri | null
 }
@@ -85,8 +85,9 @@ export function useERUtils({
   isOnDevice,
   robotType,
   runStatus,
-  showTakeover,
+  isActiveUser,
   allRunDefs,
+  unvalidatedFailedCommand,
   labwareDefinitionsByUri,
 }: ERUtilsProps): ERUtilsResults {
   const { data: attachedInstruments } = useInstrumentsQuery()
@@ -100,7 +101,6 @@ export function useERUtils({
     cursor: 0,
     pageLength: 999,
   })
-  const failedCommandByRunRecord = failedCommand?.byRunRecord ?? null
 
   const stepCounts = useRunningStepCounts(runId, runCommands)
 
@@ -120,7 +120,7 @@ export function useERUtils({
   )
 
   const recoveryToastUtils = useRecoveryToasts({
-    currentStepCount: stepCounts.currentStepNumber,
+    stepCounts,
     selectedRecoveryOption: currentRecoveryOptionUtils.selectedRecoveryOption,
     isOnDevice,
     commandTextData: protocolAnalysis,
@@ -152,7 +152,7 @@ export function useERUtils({
   })
 
   const failedLabwareUtils = useFailedLabwareUtils({
-    failedCommandByRunRecord,
+    failedCommand,
     protocolAnalysis,
     failedPipetteInfo,
     runRecord,
@@ -161,7 +161,8 @@ export function useERUtils({
 
   const recoveryCommands = useRecoveryCommands({
     runId,
-    failedCommandByRunRecord,
+    failedCommand,
+    unvalidatedFailedCommand,
     failedLabwareUtils,
     routeUpdateActions,
     recoveryToastUtils,
@@ -192,7 +193,7 @@ export function useERUtils({
   )
 
   useCleanupRecoveryState({
-    isTakeover: showTakeover,
+    isActiveUser,
     setRM,
     stashedMapRef: routeUpdateActions.stashedMapRef,
   })

@@ -459,6 +459,7 @@ class MotorAxis(str, Enum):
     RIGHT_PLUNGER = "rightPlunger"
     EXTENSION_Z = "extensionZ"
     EXTENSION_JAW = "extensionJaw"
+    AXIS_96_CHANNEL_CAM = "axis96ChannelCam"
 
 
 # TODO(mc, 2022-01-18): use opentrons_shared_data.module.types.ModuleModel

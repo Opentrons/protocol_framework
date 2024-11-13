@@ -1,12 +1,12 @@
 """Manage current and historical run data."""
+
 from datetime import datetime
-from typing import List, Optional, Callable, Union, Dict
+from typing import List, Optional, Callable, Union, Mapping
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.errors.exceptions import InvalidStoredData, EnumeratedError
 
-from opentrons.hardware_control.nozzle_manager import NozzleMap
-
+from opentrons.types import NozzleMapInterface
 from opentrons.protocol_engine import (
     EngineStatus,
     LabwareOffsetCreate,
@@ -509,7 +509,7 @@ class RunDataManager:
         # TODO(tz, 8-5-2024): Change this to return the error list from the DB when we implement https://opentrons.atlassian.net/browse/EXEC-655.
         raise RunNotCurrentError()
 
-    def get_nozzle_maps(self, run_id: str) -> Dict[str, NozzleMap]:
+    def get_nozzle_maps(self, run_id: str) -> Mapping[str, NozzleMapInterface]:
         """Get current nozzle maps keyed by pipette id."""
         if run_id == self._run_orchestrator_store.current_run_id:
             return self._run_orchestrator_store.get_nozzle_maps()

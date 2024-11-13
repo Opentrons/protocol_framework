@@ -207,7 +207,7 @@ class LiquidOperatedUpdate:
     """An update from operating a liquid."""
 
     labware_id: str
-    well_name: str
+    well_names: list[str]
     volume_added: float | ClearType
 
 
@@ -243,6 +243,14 @@ class PipetteEmptyFluidUpdate:
 
     pipette_id: str
     type: typing.Literal["empty"] = "empty"
+
+
+@dataclasses.dataclass
+class AbsorbanceReaderLidUpdate:
+    """An update to an absorbance reader's lid location."""
+
+    module_id: str
+    is_lid_on: bool
 
 
 @dataclasses.dataclass
@@ -283,9 +291,11 @@ class StateUpdate:
 
     liquid_operated: LiquidOperatedUpdate | NoChangeType = NO_CHANGE
 
+    absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
+
     liquid_class_loaded: LiquidClassLoadedUpdate | NoChangeType = NO_CHANGE
 
-    # These convenience functions let the caller avoid the boilerplate of constructing a
+# These convenience functions let the caller avoid the boilerplate of constructing a
     # complicated dataclass tree.
 
     @typing.overload
@@ -452,12 +462,12 @@ class StateUpdate:
         )
 
     def set_liquid_operated(
-        self, labware_id: str, well_name: str, volume_added: float | ClearType
+        self, labware_id: str, well_names: list[str], volume_added: float | ClearType
     ) -> None:
         """Update liquid volumes in well state. See `OperateLiquidUpdate`."""
         self.liquid_operated = LiquidOperatedUpdate(
             labware_id=labware_id,
-            well_name=well_name,
+            well_names=well_names,
             volume_added=volume_added,
         )
 
@@ -483,4 +493,10 @@ class StateUpdate:
         """Update record fo fluid held inside a pipette. See `PipetteEmptyFluidUpdate`."""
         self.pipette_aspirated_fluid = PipetteEmptyFluidUpdate(
             type="empty", pipette_id=pipette_id
+        )
+
+    def set_absorbance_reader_lid(self, module_id: str, is_lid_on: bool) -> None:
+        """Update an absorbance reader's lid location. See `AbsorbanceReaderLidUpdate`."""
+        self.absorbance_reader_lid = AbsorbanceReaderLidUpdate(
+            module_id=module_id, is_lid_on=is_lid_on
         )

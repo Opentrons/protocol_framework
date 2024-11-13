@@ -56,3 +56,22 @@ export async function fillModulesSectionAndClickConfirm(): Promise<void> {
   })
   fireEvent.click(confirmButton)
 }
+
+export async function fillLabwareLiquidsSectionAndClickConfirm(): Promise<void> {
+  const addButton = screen.getByText('Add Opentrons labware')
+  fireEvent.click(addButton)
+
+  fireEvent.click(screen.getByText('Tip rack'))
+  fireEvent.click(await screen.findByText('Opentrons Flex 96 Tip Rack 1000 µL'))
+  fireEvent.click(screen.getByText('Save'))
+
+  fireEvent.change(screen.getByRole('textbox'), {
+    target: { value: 'Test liquid' },
+  })
+
+  const confirmButton = screen.getByText('Confirm')
+  await waitFor(() => {
+    expect(confirmButton).toBeEnabled()
+  })
+  fireEvent.click(confirmButton)
+}

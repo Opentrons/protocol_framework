@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
-from opentrons.types import MountType, Point
+from opentrons.types import MountType, Point, StagingSlotName
 from opentrons.hardware_control.types import CriticalPoint
 from opentrons.motion_planning.adjacent_slots_getters import (
     get_east_west_slots,
@@ -277,9 +277,13 @@ class MotionView:
         current_location = self._pipettes.get_current_location()
         if current_location is not None:
             if isinstance(current_location, CurrentWell):
-                pipette_deck_slot = self._geometry.get_ancestor_slot_name(
+                ancestor = self._geometry.get_ancestor_slot_name(
                     current_location.labware_id
-                ).as_int()
+                )
+                if isinstance(ancestor, StagingSlotName):
+                    # Staging Area Slots cannot intersect with the h/s
+                    return False
+                pipette_deck_slot = ancestor.as_int()
             else:
                 pipette_deck_slot = (
                     self._addressable_areas.get_addressable_area_base_slot(
@@ -299,9 +303,13 @@ class MotionView:
         current_location = self._pipettes.get_current_location()
         if current_location is not None:
             if isinstance(current_location, CurrentWell):
-                pipette_deck_slot = self._geometry.get_ancestor_slot_name(
+                ancestor = self._geometry.get_ancestor_slot_name(
                     current_location.labware_id
-                ).as_int()
+                )
+                if isinstance(ancestor, StagingSlotName):
+                    # Staging Area Slots cannot intersect with the h/s
+                    return False
+                pipette_deck_slot = ancestor.as_int()
             else:
                 pipette_deck_slot = (
                     self._addressable_areas.get_addressable_area_base_slot(
@@ -324,6 +332,10 @@ class MotionView:
         """Get a list of touch points for a touch tip operation."""
         mount = self._pipettes.get_mount(pipette_id)
         labware_slot = self._geometry.get_ancestor_slot_name(labware_id)
+        if isinstance(labware_slot, StagingSlotName):
+            raise errors.LocationIsStagingSlotError(
+                "Cannot perform Touch Tip on labware in Staging Area Slot."
+            )
         next_to_module = self._modules.is_edge_move_unsafe(mount, labware_slot)
         edge_path_type = self._labware.get_edge_path_type(
             labware_id, well_name, mount, labware_slot, next_to_module

@@ -596,12 +596,13 @@ async def get_current_state(  # noqa: C901
         nozzle_layouts = {
             pipetteId: ActiveNozzleLayout.construct(
                 startingNozzle=nozzle_map.starting_nozzle,
-                activeNozzles=list(nozzle_map.map_store.keys()),
+                activeNozzles=nozzle_map.active_nozzles,
                 config=NozzleLayoutConfig(nozzle_map.configuration.value.lower()),
             )
             for pipetteId, nozzle_map in active_nozzle_maps.items()
         }
 
+        run = run_data_manager.get(run_id=runId)
         current_command = run_data_manager.get_current_command(run_id=runId)
         last_completed_command = run_data_manager.get_last_completed_command(
             run_id=runId
@@ -636,11 +637,14 @@ async def get_current_state(  # noqa: C901
         if isinstance(command, MoveLabware):
             location = command.params.newLocation
             if isinstance(location, DeckSlotLocation):
-                place_labware = PlaceLabwareState(
-                    location=location,
-                    labwareId=command.params.labwareId,
-                    shouldPlaceDown=False,
-                )
+                for labware in run.labware:
+                    if labware.id == command.params.labwareId:
+                        place_labware = PlaceLabwareState(
+                            location=location,
+                            labwareURI=labware.definitionUri,
+                            shouldPlaceDown=False,
+                        )
+                        break
         # Handle absorbance reader lid
         elif isinstance(command, (OpenLid, CloseLid)):
             for mod in run.modules:
@@ -655,10 +659,13 @@ async def get_current_state(  # noqa: C901
                         and hw_mod.serial_number == mod.serialNumber
                     ):
                         location = mod.location
-                        labware_id = f"{mod.model}Lid{location.slotName}"
+                        # TODO: Not the best location for this, we should
+                        # remove this once we are no longer defining the plate reader lid
+                        # as a labware.
+                        labware_uri = "opentrons/opentrons_flex_lid_absorbance_plate_reader_module/1"
                         place_labware = PlaceLabwareState(
                             location=location,
-                            labwareId=labware_id,
+                            labwareURI=labware_uri,
                             shouldPlaceDown=estop_engaged,
                         )
                         break

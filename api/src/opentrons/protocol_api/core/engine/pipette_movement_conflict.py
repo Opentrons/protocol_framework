@@ -9,6 +9,7 @@ from typing import (
 )
 
 from opentrons_shared_data.errors.exceptions import MotionPlanningFailureError
+from opentrons.protocol_engine.errors import LocationIsStagingSlotError
 from opentrons_shared_data.module import FLEX_TC_LID_COLLISION_ZONE
 
 from opentrons.hardware_control import CriticalPoint
@@ -63,7 +64,7 @@ _FLEX_TC_LID_FRONT_RIGHT_PT = Point(
 )
 
 
-def check_safe_for_pipette_movement(
+def check_safe_for_pipette_movement(  # noqa: C901
     engine_state: StateView,
     pipette_id: str,
     labware_id: str,
@@ -121,8 +122,12 @@ def check_safe_for_pipette_movement(
             f"Requested motion with the {primary_nozzle} nozzle partial configuration"
             f" is outside of robot bounds for the pipette."
         )
-
-    labware_slot = engine_state.geometry.get_ancestor_slot_name(labware_id)
+    ancestor = engine_state.geometry.get_ancestor_slot_name(labware_id)
+    if isinstance(ancestor, StagingSlotName):
+        raise LocationIsStagingSlotError(
+            "Cannot perform pipette actions on labware in Staging Area Slot."
+        )
+    labware_slot = ancestor
 
     surrounding_slots = adjacent_slots_getters.get_surrounding_slots(
         slot=labware_slot.as_int(), robot_type=engine_state.config.robot_type
@@ -282,8 +287,10 @@ def check_safe_for_tip_pickup_and_return(
         is_96_ch_tiprack_adapter = engine_state.labware.get_has_quirk(
             labware_id=tiprack_parent.labwareId, quirk="tiprackAdapterFor96Channel"
         )
-        tiprack_height = engine_state.labware.get_dimensions(labware_id).z
-        adapter_height = engine_state.labware.get_dimensions(tiprack_parent.labwareId).z
+        tiprack_height = engine_state.labware.get_dimensions(labware_id=labware_id).z
+        adapter_height = engine_state.labware.get_dimensions(
+            labware_id=tiprack_parent.labwareId
+        ).z
         if is_partial_config and tiprack_height < adapter_height:
             raise PartialTipMovementNotAllowedError(
                 f"{tiprack_name} cannot be on an adapter taller than the tip rack"

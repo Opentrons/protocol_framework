@@ -214,7 +214,7 @@ export interface NozzleLayoutValues {
 }
 
 export interface PlaceLabwareState {
-  labwareId: string
+  labwareURI: string
   location: OnDeckLabwareLocation
   shouldPlaceDown: boolean
 }

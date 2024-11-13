@@ -27,6 +27,7 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { ODD_FOCUS_VISIBLE } from '/app/atoms/buttons/constants'
+import { useScrollPosition } from '/app/local-resources/dom-utils'
 
 import { useNetworkConnection } from '/app/resources/networking/hooks/useNetworkConnection'
 import { getLocalRobot } from '/app/redux/discovery'
@@ -92,15 +93,7 @@ export function Navigation(props: NavigationProps): JSX.Element {
     setShowNavMenu(openMenu)
   }
 
-  const scrollRef = React.useRef<HTMLDivElement>(null)
-  const [isScrolled, setIsScrolled] = React.useState<boolean>(false)
-
-  const observer = new IntersectionObserver(([entry]) => {
-    setIsScrolled(!entry.isIntersecting)
-  })
-  if (scrollRef.current != null) {
-    observer.observe(scrollRef.current)
-  }
+  const { scrollRef, isScrolled } = useScrollPosition()
 
   const navBarScrollRef = React.useRef<HTMLDivElement>(null)
   React.useEffect(() => {

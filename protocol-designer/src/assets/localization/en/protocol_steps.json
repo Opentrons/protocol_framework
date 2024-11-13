@@ -50,7 +50,7 @@
     "engage": "<semiBoldText>{{module}}</semiBoldText><text>engaged to</text><tag/>"
   },
   "max_disposal_volume": "Max {{vol}} {{unit}}",
-  "mix_times": "Mix repititions",
+  "mix_times": "Mix repetitions",
   "mix_volume": "Mix volume",
   "mix": "Mix",
   "mix_step": "<text>Mixing</text><tag/><text>{{times}} times in</text><semiBoldText>{{wells}} of {{labware}}</semiBoldText>",
@@ -63,12 +63,15 @@
   "move_liquid": {
     "consolidate": "<text>Consolidating</text><tag/><text>from</text><semiBoldText>{{sourceWells}} of {{source}}</semiBoldText><text>to</text><semiBoldText>{{destinationWells}} of {{destination}}</semiBoldText>",
     "distribute": "<text>Distributing</text><tag/><text>from</text><semiBoldText>{{sourceWells}} of {{source}}</semiBoldText><text>to</text><semiBoldText>{{destinationWells}} of {{destination}}</semiBoldText>",
-    "transfer": "<text>Transferring</text><tag/><text>from</text><semiBoldText>{{sourceWells}} of {{source}}</semiBoldText><text>to</text><semiBoldText>{{destinationWells}} of {{destination}}</semiBoldText>"
+    "transfer": "<text>Transferring</text><tag/><text>from</text><semiBoldText>{{sourceWells}} of {{source}}</semiBoldText><text>to</text><semiBoldText>{{destinationWells}} of {{destination}}</semiBoldText>",
+    "consolidate_disposal": "<text>Consolidating</text><tag/><text>from</text><semiBoldText>{{sourceWells}} of {{source}}</semiBoldText><text>to</text><semiBoldText>{{destination}}</semiBoldText>",
+    "transfer_disposal": "<text>Transferring</text><tag/><text>from</text><semiBoldText>{{sourceWells}} of {{source}}</semiBoldText><text>to</text><semiBoldText>{{destination}}</semiBoldText>"
   },
   "multi_dispense_options": "Distribute options",
   "multiAspirate": "Consolidate path",
   "multiDispense": "Distribute path",
   "new_location": "New location",
+  "off_deck": "Off-Deck",
   "pause": {
     "untilResume": "Pausing until manually told to resume",
     "untilTemperature": "<text>Pausing until</text><semiBoldText>{{module}}</semiBoldText><text>reaches</text><tag/>",
@@ -135,5 +138,5 @@
   "volume_per_well": "Volume per well",
   "well_name": "Well {{wellName}}",
   "well_order_title": "{{prefix}} well order",
-  "well_position": "Well position (x,y,z): "
+  "well_position": "Well position: X {{x}} Y {{y}} Z {{z}} (mm)"
 }

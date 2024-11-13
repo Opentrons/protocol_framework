@@ -177,6 +177,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
             handleGoBack()
           }}
           disabled={isDisabled}
+          tooltipOnDisabled={t('add_pipette_to_continue')}
         >
           {page === 'add' ? (
             <Flex
@@ -366,10 +367,11 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                                 />
                               )
                             )}
-                          </Box>
-                          <Flex gridGap={SPACING.spacing4}>
                             <StyledLabel>
-                              <StyledText desktopStyle="bodyDefaultRegular">
+                              <StyledText
+                                desktopStyle="bodyDefaultRegular"
+                                padding={SPACING.spacing4}
+                              >
                                 {t('add_custom_tips')}
                               </StyledText>
                               <input
@@ -398,14 +400,17 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                                   TYPOGRAPHY.textDecorationUnderline
                                 }
                               >
-                                <StyledText desktopStyle="bodyDefaultRegular">
+                                <StyledText
+                                  desktopStyle="bodyDefaultRegular"
+                                  padding={SPACING.spacing4}
+                                >
                                   {allowAllTipracks
                                     ? t('show_default_tips')
                                     : t('show_all_tips')}
                                 </StyledText>
                               </Btn>
                             )}
-                          </Flex>
+                          </Box>
                         </Flex>
                       </Flex>
                     )

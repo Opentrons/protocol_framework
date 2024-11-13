@@ -53,7 +53,7 @@ export const mockPickUpTipLabware: LoadedLabware = {
 
 // TODO: jh(08-07-24): update the "byAnalysis" mockFailedCommand.
 export const mockRecoveryContentProps: RecoveryContentProps = {
-  failedCommandByRunRecord: mockFailedCommand,
+  unvalidatedFailedCommand: mockFailedCommand,
   failedCommand: {
     byRunRecord: mockFailedCommand,
     byAnalysis: mockFailedCommand,

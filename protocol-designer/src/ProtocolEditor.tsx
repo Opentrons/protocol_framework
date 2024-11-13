@@ -15,7 +15,6 @@ function ProtocolEditorComponent(): JSX.Element {
       style={{ width: '100%', height: '100vh', overflow: OVERFLOW_AUTO }}
     >
       <TopPortalRoot />
-
       <Flex flexDirection={DIRECTION_COLUMN}>
         {!isValidSize && <DisabledScreen />}
         <HashRouter>

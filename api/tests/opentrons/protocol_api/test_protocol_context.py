@@ -49,6 +49,8 @@ from opentrons.protocol_api.disposal_locations import TrashBin, WasteChute
 from opentrons.protocols.api_support.deck_type import (
     NoTrashDefinedError,
 )
+from opentrons.protocol_engine.errors import LabwareMovementNotAllowedError
+from opentrons.protocol_engine.clients import SyncClient as EngineClient
 
 
 @pytest.fixture(autouse=True)
@@ -99,6 +101,12 @@ def mock_fixed_trash(decoy: Decoy) -> Labware:
 def api_version() -> APIVersion:
     """The API version under test."""
     return MAX_SUPPORTED_VERSION
+
+
+@pytest.fixture
+def mock_engine_client(decoy: Decoy) -> EngineClient:
+    """Get a mock ProtocolEngine synchronous client."""
+    return decoy.mock(cls=EngineClient)
 
 
 @pytest.fixture
@@ -942,6 +950,74 @@ def test_move_labware_off_deck_raises(
 
     with pytest.raises(APIVersionError):
         subject.move_labware(labware=movable_labware, new_location=OFF_DECK)
+
+
+def test_move_labware_to_trash_raises(
+    subject: ProtocolContext,
+    decoy: Decoy,
+    mock_core: ProtocolCore,
+    mock_core_map: LoadedCoreMap,
+    mock_engine_client: EngineClient,
+) -> None:
+    """It should raise an LabwareMovementNotAllowedError if using move_labware to move something that is not a lid to a TrashBin."""
+    mock_labware_core = decoy.mock(cls=LabwareCore)
+    trash_location = TrashBin(
+        location=DeckSlotName.SLOT_D3,
+        addressable_area_name="moveableTrashD3",
+        api_version=MAX_SUPPORTED_VERSION,
+        engine_client=mock_engine_client,
+    )
+
+    decoy.when(mock_labware_core.get_well_columns()).then_return([])
+
+    movable_labware = Labware(
+        core=mock_labware_core,
+        api_version=MAX_SUPPORTED_VERSION,
+        protocol_core=mock_core,
+        core_map=mock_core_map,
+    )
+
+    with pytest.raises(LabwareMovementNotAllowedError):
+        subject.move_labware(labware=movable_labware, new_location=trash_location)
+
+
+def test_move_lid_to_trash_passes(
+    decoy: Decoy,
+    mock_core: ProtocolCore,
+    mock_core_map: LoadedCoreMap,
+    subject: ProtocolContext,
+    mock_engine_client: EngineClient,
+) -> None:
+    """It should move a lid labware into a trashbin successfully."""
+    mock_labware_core = decoy.mock(cls=LabwareCore)
+    trash_location = TrashBin(
+        location=DeckSlotName.SLOT_D3,
+        addressable_area_name="moveableTrashD3",
+        api_version=MAX_SUPPORTED_VERSION,
+        engine_client=mock_engine_client,
+    )
+
+    decoy.when(mock_labware_core.get_well_columns()).then_return([])
+    decoy.when(mock_labware_core.is_lid()).then_return(True)
+
+    movable_labware = Labware(
+        core=mock_labware_core,
+        api_version=MAX_SUPPORTED_VERSION,
+        protocol_core=mock_core,
+        core_map=mock_core_map,
+    )
+
+    subject.move_labware(labware=movable_labware, new_location=trash_location)
+    decoy.verify(
+        mock_core.move_labware(
+            labware_core=mock_labware_core,
+            new_location=trash_location,
+            use_gripper=False,
+            pause_for_manual_move=True,
+            pick_up_offset=None,
+            drop_offset=None,
+        )
+    )
 
 
 def test_load_trash_bin(

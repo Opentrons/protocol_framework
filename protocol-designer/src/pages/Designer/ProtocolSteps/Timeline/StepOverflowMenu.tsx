@@ -13,6 +13,7 @@ import {
   POSITION_ABSOLUTE,
   SPACING,
 } from '@opentrons/components'
+import { analyticsEvent } from '../../../../analytics/actions'
 import { actions as stepsActions } from '../../../../ui/steps'
 import {
   hoverOnStep,
@@ -27,6 +28,7 @@ import {
 import type { ThunkDispatch } from 'redux-thunk'
 import type { BaseState } from '../../../../types'
 import type { StepIdType } from '../../../../form-types'
+import type { AnalyticsEvent } from '../../../../analytics/mixpanel'
 
 interface StepOverflowMenuProps {
   stepId: string
@@ -80,6 +82,11 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
     }
   }
 
+  const selectViewDetailsEvent: AnalyticsEvent = {
+    name: 'openStepDetails',
+    properties: {},
+  }
+
   return (
     <>
       <Flex
@@ -131,6 +138,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
                   setStepOverflowMenu(false)
                   dispatch(hoverOnStep(stepId))
                   dispatch(toggleViewSubstep(stepId))
+                  dispatch(analyticsEvent(selectViewDetailsEvent))
                 }}
               >
                 {t('view_details')}

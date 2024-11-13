@@ -19,6 +19,7 @@ from .instrument import InstrumentCoreType
 from .labware import LabwareCoreType, LabwareLoadParams
 from .module import ModuleCoreType
 from .._liquid import Liquid, LiquidClass
+from .robot import AbstractRobot
 from .._types import OffDeckType
 from ..disposal_locations import TrashBin, WasteChute
 
@@ -104,6 +105,7 @@ class AbstractProtocol(
             ModuleCoreType,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ],
         use_gripper: bool,
         pause_for_manual_move: bool,
@@ -256,3 +258,7 @@ class AbstractProtocol(
         self, labware_core: LabwareCoreType
     ) -> Union[str, LabwareCoreType, ModuleCoreType, OffDeckType]:
         """Get labware parent location."""
+
+    @abstractmethod
+    def load_robot(self) -> AbstractRobot:
+        """Load a Robot Core context into a protocol"""

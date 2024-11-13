@@ -36,6 +36,7 @@ export const OPENTRONS_FLEX = 'opentrons_flex'
 export const OPENTRONS_OT2 = 'opentrons_ot2'
 export const _96_CHANNEL_1000UL_PIPETTE = '96_channel_1000ul_pipette'
 export const TWO_PIPETTES = 'two_pipettes'
+export const NO_PIPETTES = 'none'
 
 export function InstrumentsSection(): JSX.Element | null {
   const { t } = useTranslation('create_protocol')
@@ -98,7 +99,8 @@ export function InstrumentsSection(): JSX.Element | null {
         value: name,
         name: getPipetteSpecsV2(name)?.displayName ?? '',
       }))
-    return allPipetteOptions.filter(o => o.value !== 'p1000_96')
+      .filter(o => o.value !== 'p1000_96')
+    return [{ name: t('none'), value: NO_PIPETTES }, ...allPipetteOptions]
   }, [robotType])
 
   function handleConfirmButtonClick(): void {
@@ -153,7 +155,12 @@ export function InstrumentsSection(): JSX.Element | null {
               name={LEFT_PIPETTE_FIELD_NAME}
               options={pipetteOptions}
               placeholder={t('choose_pipette_placeholder')}
-              rules={{ required: true }}
+              rules={{
+                required: true,
+                validate: (value: string) =>
+                  value !== NO_PIPETTES ||
+                  watch(RIGHT_PIPETTE_FIELD_NAME) !== NO_PIPETTES,
+              }}
             />
             <ControlledDropdownMenu
               width="100%"
@@ -162,7 +169,9 @@ export function InstrumentsSection(): JSX.Element | null {
               name={RIGHT_PIPETTE_FIELD_NAME}
               options={pipetteOptions}
               placeholder={t('choose_pipette_placeholder')}
-              rules={{ required: true }}
+              rules={{
+                required: true,
+              }}
             />
           </PipettesDropdown>
         )}

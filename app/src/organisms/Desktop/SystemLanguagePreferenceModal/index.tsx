@@ -27,6 +27,10 @@ import { getSystemLanguage } from '/app/redux/shell'
 import type { DropdownOption } from '@opentrons/components'
 import type { Dispatch } from '/app/redux/types'
 
+type ArrayElement<
+  ArrayType extends readonly unknown[]
+> = ArrayType extends ReadonlyArray<infer ElementType> ? ElementType : never
+
 export function SystemLanguagePreferenceModal(): JSX.Element | null {
   const { i18n, t } = useTranslation(['app_settings', 'shared', 'branded'])
   const enableLocalization = useFeatureFlag('enableLocalization')
@@ -83,13 +87,31 @@ export function SystemLanguagePreferenceModal(): JSX.Element | null {
   useEffect(() => {
     if (systemLanguage != null) {
       // prefer match entire locale, then match just language e.g. zh-Hant and zh-CN
-      const matchedSystemLanguageOption =
-        LANGUAGES.find(lng => lng.value === systemLanguage) ??
-        LANGUAGES.find(
-          lng =>
-            new Intl.Locale(lng.value).language ===
-            new Intl.Locale(systemLanguage).language
-        )
+      const matchSystemLanguage: () => ArrayElement<
+        typeof LANGUAGES
+      > | null = () => {
+        try {
+          return (
+            LANGUAGES.find(lng => lng.value === systemLanguage) ??
+            LANGUAGES.find(
+              lng =>
+                new Intl.Locale(lng.value).language ===
+                new Intl.Locale(systemLanguage).language
+            ) ??
+            null
+          )
+        } catch (error: unknown) {
+          // Sometimes the language that we get from the shell will not be something
+          // js i18n can understand. Specifically, some linux systems will have their
+          // locale set to "C" (https://www.gnu.org/software/libc/manual/html_node/Standard-Locales.html)
+          // and that will cause Intl.Locale to throw. In this case, we'll treat it as
+          // unset and fall back to our default.
+          console.log(`Failed to search languages: ${error}`)
+          return null
+        }
+      }
+      const matchedSystemLanguageOption = matchSystemLanguage()
+
       if (matchedSystemLanguageOption != null) {
         // initial current option: set to detected system language
         setCurrentOption(matchedSystemLanguageOption)

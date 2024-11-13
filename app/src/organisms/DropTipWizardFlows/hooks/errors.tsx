@@ -43,7 +43,11 @@ export function useDropTipCommandErrors(
       })
     } else {
       const messageText = message ?? ''
-      setErrorDetails({ header, message: messageText, type })
+      setErrorDetails({
+        header: header ?? t('cant_safely_drop_tips'),
+        message: messageText ?? t('remove_the_tips_manually'),
+        type,
+      })
     }
   }
 }

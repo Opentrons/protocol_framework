@@ -254,7 +254,7 @@ export function checkForRobotUpdate(
         })
       })
       .then(() =>
-        cleanupReleaseFiles(cacheDirForMachineFiles(target), CURRENT_VERSION)
+        cleanupReleaseFiles(cacheDirForMachine(target), CURRENT_VERSION)
       )
   }
 

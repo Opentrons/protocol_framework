@@ -85,7 +85,7 @@ export function RecoverySplash(props: RecoverySplashProps): JSX.Element | null {
     resumePausedRecovery,
   } = props
   const { t } = useTranslation('error_recovery')
-  const errorKind = getErrorKind(failedCommand?.byRunRecord ?? null)
+  const errorKind = getErrorKind(failedCommand)
   const title = useErrorName(errorKind)
   const { makeToast } = useToaster()
 
