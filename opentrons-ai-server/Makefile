@@ -133,3 +133,8 @@ run-shell:
 .PHONY: shell
 shell:
 	docker exec -it $(CONTAINER_NAME) /bin/bash]
+
+.PHONY: test-googlesheet
+test-googlesheet:
+	@echo "Loading environment variables from .env and running test-googlesheet"
+	pipenv run python -m api.integration.google_sheets

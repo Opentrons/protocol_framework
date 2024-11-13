@@ -34,11 +34,14 @@ class Settings(BaseSettings):
     dd_trace_enabled: str = "false"
     cpu: str = "1028"
     memory: str = "2048"
+    google_sheet_id: str = "harcoded_default_from_settings"
+    google_sheet_worksheet: str = "Sheet1"
 
     # Secrets
     # These come from environment variables in the local and deployed execution environments
     openai_api_key: SecretStr = SecretStr("default_openai_api_key")
     huggingface_api_key: SecretStr = SecretStr("default_huggingface_api_key")
+    google_credentials_json: SecretStr = SecretStr("default_google_credentials_json")
 
     @property
     def json_logging(self) -> bool:
