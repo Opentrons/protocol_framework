@@ -352,7 +352,9 @@ class OT3API(
     def _reset_last_mount(self) -> None:
         self._last_moved_mount = None
 
-    def _deck_from_machine(self, machine_pos: Dict[Axis, float]) -> Dict[Axis, float]:
+    def get_deck_from_machine(
+        self, machine_pos: Dict[Axis, float]
+    ) -> Dict[Axis, float]:
         return deck_from_machine(
             machine_pos=machine_pos,
             attitude=self._robot_calibration.deck_calibration.attitude,
@@ -942,8 +944,8 @@ class OT3API(
         ):
             # move toward home until a safe distance
             await self._backend.tip_action(
-                origin={Axis.Q: current_pos_float},
-                targets=[({Axis.Q: self._config.safe_home_distance}, 400)],
+                origin=current_pos_float,
+                targets=[(self._config.safe_home_distance, 400)],
             )
 
             # update current position
@@ -1020,14 +1022,14 @@ class OT3API(
 
     async def _cache_current_position(self) -> Dict[Axis, float]:
         """Cache current position from backend and return in absolute deck coords."""
-        self._current_position = self._deck_from_machine(
+        self._current_position = self.get_deck_from_machine(
             await self._backend.update_position()
         )
         return self._current_position
 
     async def _cache_encoder_position(self) -> Dict[Axis, float]:
         """Cache encoder position from backend and return in absolute deck coords."""
-        self._encoder_position = self._deck_from_machine(
+        self._encoder_position = self.get_deck_from_machine(
             await self._backend.update_encoder_position()
         )
         if self.has_gripper():
@@ -1227,7 +1229,9 @@ class OT3API(
                     message=f"{axis} is not present", detail={"axis": str(axis)}
                 )
 
+        self._log.info(f"Attempting to move {position} with speed {speed}.")
         if not self._backend.check_encoder_status(list(position.keys())):
+            self._log.info("Calling home in move_axes")
             await self.home()
         self._assert_motor_ok(list(position.keys()))
 
@@ -1438,6 +1442,10 @@ class OT3API(
         check_motion_bounds(to_check, target_position, bounds, check_bounds)
         self._log.info(f"Move: deck {target_position} becomes machine {machine_pos}")
         origin = await self._backend.update_position()
+
+        if self._gantry_load == GantryLoad.HIGH_THROUGHPUT:
+            origin[Axis.Q] = self._backend.gear_motor_position or 0.0
+
         async with contextlib.AsyncExitStack() as stack:
             if acquire_lock:
                 await stack.enter_async_context(self._motion_lock)
@@ -2155,8 +2163,8 @@ class OT3API(
         # only move tip motors if they are not already below the sensor
         if tip_motor_pos_float < tip_presence_check_target:
             await self._backend.tip_action(
-                origin={Axis.Q: tip_motor_pos_float},
-                targets=[({Axis.Q: tip_presence_check_target}, 400)],
+                origin=tip_motor_pos_float,
+                targets=[(tip_presence_check_target, 400)],
             )
         try:
             yield
@@ -2227,11 +2235,11 @@ class OT3API(
             gear_origin_float = self._backend.gear_motor_position or 0.0
 
             move_targets = [
-                ({Axis.Q: move_segment.distance}, move_segment.speed or 400)
+                (move_segment.distance, move_segment.speed or 400)
                 for move_segment in pipette_spec
             ]
             await self._backend.tip_action(
-                origin={Axis.Q: gear_origin_float}, targets=move_targets
+                origin=gear_origin_float, targets=move_targets
             )
             await self.home_gear_motors()
 
@@ -2556,7 +2564,7 @@ class OT3API(
         mount: Union[top_types.Mount, OT3Mount],
         critical_point: Optional[CriticalPoint] = None,
     ) -> float:
-        carriage_pos = self._deck_from_machine(self._backend.home_position())
+        carriage_pos = self.get_deck_from_machine(self._backend.home_position())
         pos_at_home = self._effector_pos_from_carriage_pos(
             OT3Mount.from_mount(mount), carriage_pos, critical_point
         )
@@ -2658,7 +2666,7 @@ class OT3API(
         )
         machine_pos = await self._backend.update_position()
         machine_pos[Axis.by_mount(mount)] = end_z
-        deck_end_z = self._deck_from_machine(machine_pos)[Axis.by_mount(mount)]
+        deck_end_z = self.get_deck_from_machine(machine_pos)[Axis.by_mount(mount)]
         offset = offset_for_mount(
             mount,
             top_types.Point(*self._config.left_mount_offset),

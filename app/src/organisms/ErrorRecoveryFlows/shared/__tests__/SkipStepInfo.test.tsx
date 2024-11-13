@@ -28,6 +28,7 @@ describe('SkipStepInfo', () => {
       currentRecoveryOptionUtils: {
         selectedRecoveryOption: RECOVERY_MAP.SKIP_STEP_WITH_SAME_TIPS.ROUTE,
       } as any,
+      stepCounts: { hasRunDiverged: false },
     } as any
   })
 

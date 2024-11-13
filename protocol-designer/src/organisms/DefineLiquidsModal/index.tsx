@@ -169,8 +169,9 @@ export function DefineLiquidsModal(
       }}
     >
       <Modal
+        marginLeft="0"
         zIndexOverlay={15}
-        width="42.0625rem"
+        width="37.125rem"
         title={
           selectedIngredFields != null ? (
             <Flex gridGap={SPACING.spacing8}>

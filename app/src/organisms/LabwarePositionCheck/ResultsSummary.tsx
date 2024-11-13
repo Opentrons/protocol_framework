@@ -29,6 +29,7 @@ import {
   SPACING,
   LegacyStyledText,
   TYPOGRAPHY,
+  DIRECTION_ROW,
 } from '@opentrons/components'
 import { PythonLabwareOffsetSnippet } from '/app/molecules/PythonLabwareOffsetSnippet'
 import {
@@ -373,16 +374,18 @@ export const TerseOffsetTable = (props: OffsetTableProps): JSX.Element => {
           return (
             <TerseTableRow key={index}>
               <TerseTableDatum>
-                <DeckInfoLabel deckLabel={location.slotName} />
-                {location.moduleModel != null ? (
-                  <DeckInfoLabel
-                    iconName={
-                      MODULE_ICON_NAME_BY_TYPE[
-                        getModuleType(location.moduleModel)
-                      ]
-                    }
-                  />
-                ) : null}
+                <Flex flexDirection={DIRECTION_ROW} gridGap={SPACING.spacing4}>
+                  <DeckInfoLabel deckLabel={location.slotName} />
+                  {location.moduleModel != null ? (
+                    <DeckInfoLabel
+                      iconName={
+                        MODULE_ICON_NAME_BY_TYPE[
+                          getModuleType(location.moduleModel)
+                        ]
+                      }
+                    />
+                  ) : null}
+                </Flex>
               </TerseTableDatum>
               <TerseTableDatum>
                 <LegacyStyledText

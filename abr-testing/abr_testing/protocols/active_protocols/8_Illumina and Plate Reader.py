@@ -77,6 +77,7 @@ def plate_reader_actions(
     """Plate reader single and multi wavelength readings."""
     wavelengths = [450, 650]
     # Single Wavelength Readings
+    plate_reader.close_lid()
     for wavelength in wavelengths:
         plate_reader.initialize("single", [wavelength], reference_wavelength=wavelength)
         plate_reader.open_lid()
@@ -156,14 +157,13 @@ def run(protocol: ProtocolContext) -> None:
     p50 = protocol.load_instrument(
         "flex_8channel_50", "right", tip_racks=[tiprack_50_1, tiprack_50_2]
     )
-
-    plate_reader_actions(protocol, plate_reader, hellma_plate)
     # reagent
     AMPure = reservoir["A1"]
     SMB = reservoir["A2"]
 
     EtOH = reservoir["A4"]
     RSB = reservoir["A5"]
+
     Liquid_trash_well_1 = reservoir["A9"]
     Liquid_trash_well_2 = reservoir["A10"]
     Liquid_trash_well_3 = reservoir["A11"]
@@ -181,6 +181,8 @@ def run(protocol: ProtocolContext) -> None:
     ET2 = reagent_plate.wells_by_name()["A5"]
     PPC = reagent_plate.wells_by_name()["A6"]
     EPM = reagent_plate.wells_by_name()["A7"]
+    # Load Liquids
+    plate_reader_actions(protocol, plate_reader, hellma_plate)
 
     # tip and sample tracking
     if COLUMNS == 1:

@@ -30,7 +30,11 @@ let mockMakeToast: Mock
 
 const DEFAULT_PROPS: BuildToast = {
   isOnDevice: false,
-  currentStepCount: 1,
+  stepCounts: {
+    currentStepNumber: 1,
+    hasRunDiverged: false,
+    totalStepCount: 1,
+  },
   selectedRecoveryOption: RECOVERY_MAP.RETRY_SAME_TIPS.ROUTE,
   commandTextData: { commands: [] } as any,
   robotType: FLEX_ROBOT_TYPE,
@@ -187,13 +191,11 @@ describe('getStepNumber', () => {
   })
 
   it('should handle a falsy currentStepCount', () => {
-    expect(getStepNumber(RECOVERY_MAP.RETRY_SAME_TIPS.ROUTE, null)).toBe('?')
+    expect(getStepNumber(RECOVERY_MAP.RETRY_SAME_TIPS.ROUTE, null)).toBe(null)
   })
 
   it('should handle unknown recovery option', () => {
-    expect(getStepNumber('UNKNOWN_OPTION' as any, 3)).toBe(
-      'HANDLE RECOVERY TOAST OPTION EXPLICITLY.'
-    )
+    expect(getStepNumber('UNKNOWN_OPTION' as any, 3)).toBeNull()
   })
 })
 
@@ -234,17 +236,17 @@ describe('useRecoveryFullCommandText', () => {
     expect(result.current).toBeNull()
   })
 
-  it('should return stepNumber if it is a string', () => {
+  it('should return null if there is no current step count', () => {
     const { result } = renderHook(() =>
       useRecoveryFullCommandText({
         robotType: FLEX_ROBOT_TYPE,
-        stepNumber: '?',
+        stepNumber: null,
         commandTextData: { commands: [] } as any,
         allRunDefs: [],
       })
     )
 
-    expect(result.current).toBe('?')
+    expect(result.current).toBeNull()
   })
 
   it('should truncate TC command', () => {

@@ -27,7 +27,7 @@ def test_liquid_class_creation_and_property_fetching(
     assert (
         glycerol_50.get_for(
             pipette_left.name, tiprack.load_name
-        ).dispense.flow_rate_by_volume["default"]
+        ).dispense.flow_rate_by_volume.default
         == 50
     )
     assert (

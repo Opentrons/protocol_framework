@@ -149,7 +149,7 @@ export function TouchTip(props: TouchTipProps): JSX.Element {
       <ChildNavigation
         header={
           kind === 'aspirate'
-            ? t('touch_tip_before_aspirating')
+            ? t('touch_tip_after_aspirating')
             : t('touch_tip_before_dispensing')
         }
         buttonText={i18n.format(setSaveOrContinueButtonText, 'capitalize')}

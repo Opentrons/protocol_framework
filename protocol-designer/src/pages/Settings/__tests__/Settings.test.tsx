@@ -42,7 +42,7 @@ describe('Settings', () => {
     screen.getByText('App settings')
     screen.getByText('Protocol designer version')
     screen.getByText('fake_PD_version')
-    screen.getAllByText('View release notes')
+    screen.getAllByText('Release notes')
     screen.getByText('User settings')
     screen.getByText('Hints')
     screen.getByText('Reset all hints and tips notifications')
@@ -56,6 +56,7 @@ describe('Settings', () => {
     screen.debug()
     screen.getByRole('link', { name: 'privacy policy' })
     screen.getByRole('link', { name: 'EULA' })
+    screen.getByRole('link', { name: 'Software manual' })
   })
   it('renders the announcement modal when view release notes button is clicked', () => {
     vi.mocked(AnnouncementModal).mockReturnValue(
