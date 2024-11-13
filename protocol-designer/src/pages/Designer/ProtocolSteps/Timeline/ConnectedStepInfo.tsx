@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useConditionalConfirm } from '@opentrons/components'
 import * as timelineWarningSelectors from '../../../../top-selectors/timelineWarnings'
@@ -33,7 +34,6 @@ import {
   nonePressed,
 } from './utils'
 
-import type * as React from 'react'
 import type { ThunkDispatch } from 'redux-thunk'
 import type {
   HoverOnStepAction,
@@ -52,6 +52,9 @@ export interface ConnectedStepInfoProps {
 export function ConnectedStepInfo(props: ConnectedStepInfoProps): JSX.Element {
   const { stepId, stepNumber, dragHovered = false } = props
   const { t } = useTranslation('application')
+  const [openedOverflowMenuId, setOpenedOverflowMenuId] = useState<
+    string | null
+  >(null)
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
   const stepIds = useSelector(getOrderedStepIds)
   const step = useSelector(stepFormSelectors.getSavedStepForms)[stepId]
@@ -203,6 +206,8 @@ export function ConnectedStepInfo(props: ConnectedStepInfoProps): JSX.Element {
         />
       )}
       <StepContainer
+        openedOverflowMenuId={openedOverflowMenuId}
+        setOpenedOverflowMenuId={setOpenedOverflowMenuId}
         hasError={hasError}
         isStepAfterError={stepAfterError}
         stepId={stepId}
