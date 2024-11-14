@@ -1,9 +1,9 @@
 """Structures to represent changes that commands want to make to engine state."""
 
-
 import dataclasses
 import enum
 import typing
+from typing_extensions import Self
 from datetime import datetime
 
 from opentrons.hardware_control.nozzle_manager import NozzleMap
@@ -275,9 +275,13 @@ class StateUpdate:
 
     pipette_tip_state: PipetteTipStateUpdate | NoChangeType = NO_CHANGE
 
-    pipette_aspirated_fluid: PipetteAspiratedFluidUpdate | PipetteEjectedFluidUpdate | PipetteUnknownFluidUpdate | PipetteEmptyFluidUpdate | NoChangeType = (
-        NO_CHANGE
-    )
+    pipette_aspirated_fluid: (
+        PipetteAspiratedFluidUpdate
+        | PipetteEjectedFluidUpdate
+        | PipetteUnknownFluidUpdate
+        | PipetteEmptyFluidUpdate
+        | NoChangeType
+    ) = NO_CHANGE
 
     labware_location: LabwareLocationUpdate | NoChangeType = NO_CHANGE
 
@@ -300,35 +304,35 @@ class StateUpdate:
 
     @typing.overload
     def set_pipette_location(
-        self,
+        self: Self,
         *,
         pipette_id: str,
         new_labware_id: str,
         new_well_name: str,
         new_deck_point: DeckPoint,
-    ) -> None:
+    ) -> Self:
         """Schedule a pipette's location to be set to a well."""
 
     @typing.overload
     def set_pipette_location(
-        self,
+        self: Self,
         *,
         pipette_id: str,
         new_addressable_area_name: str,
         new_deck_point: DeckPoint,
-    ) -> None:
+    ) -> Self:
         """Schedule a pipette's location to be set to an addressable area."""
         pass
 
     def set_pipette_location(  # noqa: D102
-        self,
+        self: Self,
         *,
         pipette_id: str,
         new_labware_id: str | NoChangeType = NO_CHANGE,
         new_well_name: str | NoChangeType = NO_CHANGE,
         new_addressable_area_name: str | NoChangeType = NO_CHANGE,
         new_deck_point: DeckPoint,
-    ) -> None:
+    ) -> Self:
         if new_addressable_area_name != NO_CHANGE:
             self.pipette_location = PipetteLocationUpdate(
                 pipette_id=pipette_id,
@@ -347,33 +351,36 @@ class StateUpdate:
                 new_location=Well(labware_id=new_labware_id, well_name=new_well_name),
                 new_deck_point=new_deck_point,
             )
+        return self
 
-    def clear_all_pipette_locations(self) -> None:
+    def clear_all_pipette_locations(self) -> Self:
         """Mark all pipettes as having an unknown location."""
         self.pipette_location = CLEAR
+        return self
 
     def set_labware_location(
-        self,
+        self: Self,
         *,
         labware_id: str,
         new_location: LabwareLocation,
         new_offset_id: str | None,
-    ) -> None:
+    ) -> Self:
         """Set a labware's location. See `LabwareLocationUpdate`."""
         self.labware_location = LabwareLocationUpdate(
             labware_id=labware_id,
             new_location=new_location,
             offset_id=new_offset_id,
         )
+        return self
 
     def set_loaded_labware(
-        self,
+        self: Self,
         definition: LabwareDefinition,
         labware_id: str,
         offset_id: typing.Optional[str],
         display_name: typing.Optional[str],
         location: LabwareLocation,
-    ) -> None:
+    ) -> Self:
         """Add a new labware to state. See `LoadedLabwareUpdate`."""
         self.loaded_labware = LoadedLabwareUpdate(
             definition=definition,
@@ -382,14 +389,15 @@ class StateUpdate:
             new_location=location,
             display_name=display_name,
         )
+        return self
 
     def set_load_pipette(
-        self,
+        self: Self,
         pipette_id: str,
         pipette_name: PipetteNameType,
         mount: MountType,
         liquid_presence_detection: typing.Optional[bool],
-    ) -> None:
+    ) -> Self:
         """Add a new pipette to state. See `LoadPipetteUpdate`."""
         self.loaded_pipette = LoadPipetteUpdate(
             pipette_id=pipette_id,
@@ -397,61 +405,69 @@ class StateUpdate:
             mount=mount,
             liquid_presence_detection=liquid_presence_detection,
         )
+        return self
 
     def update_pipette_config(
-        self,
+        self: Self,
         pipette_id: str,
         config: pipette_data_provider.LoadedStaticPipetteData,
         serial_number: str,
-    ) -> None:
+    ) -> Self:
         """Update a pipette's config. See `PipetteConfigUpdate`."""
         self.pipette_config = PipetteConfigUpdate(
             pipette_id=pipette_id, config=config, serial_number=serial_number
         )
+        return self
 
-    def update_pipette_nozzle(self, pipette_id: str, nozzle_map: NozzleMap) -> None:
+    def update_pipette_nozzle(
+        self: Self, pipette_id: str, nozzle_map: NozzleMap
+    ) -> Self:
         """Update a pipette's nozzle map. See `PipetteNozzleMapUpdate`."""
         self.pipette_nozzle_map = PipetteNozzleMapUpdate(
             pipette_id=pipette_id, nozzle_map=nozzle_map
         )
+        return self
 
     def update_pipette_tip_state(
-        self, pipette_id: str, tip_geometry: typing.Optional[TipGeometry]
-    ) -> None:
+        self: Self, pipette_id: str, tip_geometry: typing.Optional[TipGeometry]
+    ) -> Self:
         """Update a pipette's tip state. See `PipetteTipStateUpdate`."""
         self.pipette_tip_state = PipetteTipStateUpdate(
             pipette_id=pipette_id, tip_geometry=tip_geometry
         )
+        return self
 
     def mark_tips_as_used(
-        self, pipette_id: str, labware_id: str, well_name: str
-    ) -> None:
+        self: Self, pipette_id: str, labware_id: str, well_name: str
+    ) -> Self:
         """Mark tips in a tip rack as used. See `TipsUsedUpdate`."""
         self.tips_used = TipsUsedUpdate(
             pipette_id=pipette_id, labware_id=labware_id, well_name=well_name
         )
+        return self
 
     def set_liquid_loaded(
-        self,
+        self: Self,
         labware_id: str,
         volumes: typing.Dict[str, float],
         last_loaded: datetime,
-    ) -> None:
+    ) -> Self:
         """Add liquid volumes to well state. See `LoadLiquidUpdate`."""
         self.liquid_loaded = LiquidLoadedUpdate(
             labware_id=labware_id,
             volumes=volumes,
             last_loaded=last_loaded,
         )
+        return self
 
     def set_liquid_probed(
-        self,
+        self: Self,
         labware_id: str,
         well_name: str,
         last_probed: datetime,
         height: float | ClearType,
         volume: float | ClearType,
-    ) -> None:
+    ) -> Self:
         """Add a liquid height and volume to well state. See `ProbeLiquidUpdate`."""
         self.liquid_probed = LiquidProbedUpdate(
             labware_id=labware_id,
@@ -460,43 +476,53 @@ class StateUpdate:
             volume=volume,
             last_probed=last_probed,
         )
+        return self
 
     def set_liquid_operated(
-        self, labware_id: str, well_names: list[str], volume_added: float | ClearType
-    ) -> None:
+        self: Self,
+        labware_id: str,
+        well_names: list[str],
+        volume_added: float | ClearType,
+    ) -> Self:
         """Update liquid volumes in well state. See `OperateLiquidUpdate`."""
         self.liquid_operated = LiquidOperatedUpdate(
             labware_id=labware_id,
             well_names=well_names,
             volume_added=volume_added,
         )
+        return self
 
-    def set_fluid_aspirated(self, pipette_id: str, fluid: AspiratedFluid) -> None:
+    def set_fluid_aspirated(self: Self, pipette_id: str, fluid: AspiratedFluid) -> Self:
         """Update record of fluid held inside a pipette. See `PipetteAspiratedFluidUpdate`."""
         self.pipette_aspirated_fluid = PipetteAspiratedFluidUpdate(
             type="aspirated", pipette_id=pipette_id, fluid=fluid
         )
+        return self
 
-    def set_fluid_ejected(self, pipette_id: str, volume: float) -> None:
+    def set_fluid_ejected(self: Self, pipette_id: str, volume: float) -> Self:
         """Update record of fluid held inside a pipette. See `PipetteEjectedFluidUpdate`."""
         self.pipette_aspirated_fluid = PipetteEjectedFluidUpdate(
             type="ejected", pipette_id=pipette_id, volume=volume
         )
+        return self
 
-    def set_fluid_unknown(self, pipette_id: str) -> None:
+    def set_fluid_unknown(self: Self, pipette_id: str) -> Self:
         """Update record of fluid held inside a pipette. See `PipetteUnknownFluidUpdate`."""
         self.pipette_aspirated_fluid = PipetteUnknownFluidUpdate(
             type="unknown", pipette_id=pipette_id
         )
+        return self
 
-    def set_fluid_empty(self, pipette_id: str) -> None:
+    def set_fluid_empty(self: Self, pipette_id: str) -> Self:
         """Update record fo fluid held inside a pipette. See `PipetteEmptyFluidUpdate`."""
         self.pipette_aspirated_fluid = PipetteEmptyFluidUpdate(
             type="empty", pipette_id=pipette_id
         )
+        return self
 
-    def set_absorbance_reader_lid(self, module_id: str, is_lid_on: bool) -> None:
+    def set_absorbance_reader_lid(self: Self, module_id: str, is_lid_on: bool) -> Self:
         """Update an absorbance reader's lid location. See `AbsorbanceReaderLidUpdate`."""
         self.absorbance_reader_lid = AbsorbanceReaderLidUpdate(
             module_id=module_id, is_lid_on=is_lid_on
         )
+        return self
