@@ -58,23 +58,23 @@ The module uses these parameters immediately to perform the physical initializat
 
 Let's take a look at examples of how to combine these parameters to prepare different types of readings. The simplest reading measures one wavelength, with no reference wavelength::
 
-    pr_mod.initialize(mode="single", wavelengths=[400])
+    pr_mod.initialize(mode="single", wavelengths=[450])
 
 .. versionadded:: 2.21
 
-Now the reader is prepared to read at 400 nm. Note that the ``wavelengths`` parameter always takes a list of integer wavelengths, even when only reading a single wavelength.
+Now the reader is prepared to read at 450 nm. Note that the ``wavelengths`` parameter always takes a list of integer wavelengths, even when only reading a single wavelength.
 
 This example can be extended by adding a reference wavelength::
 
     pr_mod.initialize(
-        mode="single", wavelengths=[400], reference_wavelength=[567]
+        mode="single", wavelengths=[450], reference_wavelength=[562]
     )
 
 When configured this way, the module will read twice. In the :ref:`output data <plate-reader-data>`, the values read for ``reference_wavelength`` will be subtracted from the values read for the single member of ``wavelengths``. This is useful for normalization, or to correct for background interference in wavelength measurements.
 
 The reader can also be initialized to take multiple measurements. When ``mode="multi"``, the ``wavelengths`` list can have up to six elements. This example will initialize the reader to read at three wavelengths::
 
-    pr_mod.initialize(mode="multi", wavelengths=[400, 500, 600])
+    pr_mod.initialize(mode="multi", wavelengths=[450, 562, 600])
 
 You can't use a reference wavelength when performing multiple measurements.
 
@@ -116,20 +116,20 @@ The dictionary object returned by ``read()`` has two nested levels. The keys at 
 The nested dictionary structure allows you to access results by index later in your protocol. This example initializes a multiple read and then accesses different portions of the results::
 
     # initializing and reading
-    pr_mod.initialize(mode="multi", wavelengths=[500, 600])
+    pr_mod.initialize(mode="multi", wavelengths=[450, 600])
     pr_mod.open_lid()
     protocol.move_labware(plate, pr_mod, use_gripper=True)
     pr_mod.close_lid()
     pr_data = pr_mod.read()
 
     # accessing results
-    pr_data[500]["A1"]   # value for well A1 at 500 nm
+    pr_data[450]["A1"]   # value for well A1 at 450 nm
     pr_data[600]["H12"]  # value for well H12 at 600 nm
-    pr_data[500]         # dict of all wells at 500 nm
+    pr_data[450]         # dict of all wells at 450 nm
 
-You can write additional code to transform this data in any way that you need. For example, you could use a list comprehension to create a list of only the 500 nm values for column 1, ordered by well from A1 to H1::
+You can write additional code to transform this data in any way that you need. For example, you could use a list comprehension to create a list of only the 450 nm values for column 1, ordered by well from A1 to H1::
 
-    [pr_data[500][w.well_name] for w in plate.columns()[0]]
+    [pr_data[450][w.well_name] for w in plate.columns()[0]]
 
 CSV data
 --------

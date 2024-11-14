@@ -1030,7 +1030,9 @@ class AbsorbanceReaderContext(ModuleContext):
               a list of up to six sample wavelengths.
         :param wavelengths: A list of wavelengths, in nm, to measure.
 
-            - Each item in the list must be an integer between 350 and 1000.
+            - In the default hardware configuration, each wavelength must be one of
+            ``450``, ``562``, ``600``, or ``650``. In custom hardware configurations,
+            the module may accept other integers between 350 and 1000.
             - The list must contain only one item when initializing a single measurement.
             - The list can contain one to six items when initializing a multiple measurement.
         :param reference_wavelength: An optional reference wavelength, in nm. If provided,
@@ -1067,9 +1069,9 @@ class AbsorbanceReaderContext(ModuleContext):
             will write a CSV file for each measurement in the read operation. File
             names will use the value of this parameter, the measurement wavelength
             supplied in :py:meth:`~.AbsorbanceReaderContext.initialize`, and a
-            ``.csv`` extension. For example, when reading at wavelengths 450 and 531
+            ``.csv`` extension. For example, when reading at wavelengths 450 and 562
             with ``export_filename="my_data"``, there will be two output files:
-            ``my_data_450.csv`` and ``my_data_531.csv``.
+            ``my_data_450.csv`` and ``my_data_562.csv``.
 
         :returns: A dictionary of wavelengths to dictionary of values ordered by well name.
         """
