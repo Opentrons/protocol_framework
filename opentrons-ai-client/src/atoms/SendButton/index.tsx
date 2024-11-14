@@ -67,11 +67,14 @@ export function SendButton({
     if (isLoading) {
       const interval = setInterval(() => {
         setProgressIndex(prevIndex => {
-          const newIndex = (prevIndex + 1) % progressTexts.length
+          let newIndex = prevIndex + 1
+          if (newIndex > progressTexts.length - 1) {
+            newIndex = progressTexts.length - 1
+          }
           setButtonText(progressTexts[newIndex])
           return newIndex
         })
-      }, 5000)
+      }, 10000)
 
       return () => {
         setProgressIndex(0)
