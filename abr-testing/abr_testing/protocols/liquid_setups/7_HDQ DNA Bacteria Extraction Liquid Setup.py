@@ -22,7 +22,6 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     # Deck Setup
     (
         source_reservoir,
-        tip_rack,
         p1000,
     ) = load_common_liquid_setup_labware_and_instruments(protocol)
 
@@ -48,7 +47,6 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     well12 = res1["A12"].top()
     # Volumes
     wash = 600
-    al_and_pk = 468
     binding = 320
     beads = 230
     pk = 230
