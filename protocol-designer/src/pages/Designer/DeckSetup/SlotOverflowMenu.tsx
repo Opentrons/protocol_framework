@@ -1,10 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import {
-  ALIGN_FLEX_START,
   BORDERS,
   COLORS,
   CURSOR_AUTO,
@@ -12,12 +11,12 @@ import {
   DIRECTION_COLUMN,
   Divider,
   Flex,
-  JUSTIFY_FLEX_START,
   NO_WRAP,
   POSITION_ABSOLUTE,
   RobotCoordsForeignDiv,
   SPACING,
   StyledText,
+  TEXT_ALIGN_LEFT,
   useOnClickOutside,
 } from '@opentrons/components'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
@@ -296,7 +295,7 @@ export function SlotOverflowMenu(
             </StyledText>
           </MenuButton>
         ) : null}
-        <Divider marginY="0" />
+        <Divider marginY="0" data-testid="Divider_clear" />
         <MenuButton
           disabled={hasNoItems}
           onClick={(e: MouseEvent) => {
@@ -340,7 +339,7 @@ export function SlotOverflowMenu(
 
 const MenuButton = styled.button`
   background-color: ${COLORS.transparent};
-  text-align: left;
+  text-align: ${TEXT_ALIGN_LEFT}};
   border-radius: inherit;
   cursor: ${CURSOR_POINTER};
   padding: ${SPACING.spacing8} ${SPACING.spacing12};
