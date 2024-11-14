@@ -1,24 +1,20 @@
 """Prepare to aspirate command request, result, and implementation models."""
 
 from __future__ import annotations
-from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
 from pydantic import BaseModel
 from typing import TYPE_CHECKING, Optional, Type, Union
 from typing_extensions import Literal
 
-from .pipetting_common import (
-    OverpressureError,
-    PipetteIdMixin,
-)
+from .pipetting_common import OverpressureError, PipetteIdMixin, prepare_for_aspirate
 from .command import (
     AbstractCommandImpl,
     BaseCommand,
     BaseCommandCreate,
     DefinedErrorData,
     SuccessData,
+    Maybe,
 )
 from ..errors.error_occurrence import ErrorOccurrence
-from ..state import update_types
 
 if TYPE_CHECKING:
     from ..execution import PipettingHandler, GantryMover
@@ -46,6 +42,11 @@ _ExecuteReturn = Union[
 ]
 
 
+_ExecuteMaybe = Maybe[
+    SuccessData[PrepareToAspirateResult], DefinedErrorData[OverpressureError]
+]
+
+
 class PrepareToAspirateImplementation(
     AbstractCommandImpl[PrepareToAspirateParams, _ExecuteReturn]
 ):
@@ -62,44 +63,29 @@ class PrepareToAspirateImplementation(
         self._model_utils = model_utils
         self._gantry_mover = gantry_mover
 
+    def _transform_result(self, result: SuccessData[BaseModel]) -> _ExecuteMaybe:
+        return _ExecuteMaybe.from_result(
+            SuccessData(
+                public=PrepareToAspirateResult(), state_update=result.state_update
+            )
+        )
+
     async def execute(self, params: PrepareToAspirateParams) -> _ExecuteReturn:
         """Prepare the pipette to aspirate."""
         current_position = await self._gantry_mover.get_position(params.pipetteId)
-        state_update = update_types.StateUpdate()
-        try:
-            await self._pipetting_handler.prepare_for_aspirate(
-                pipette_id=params.pipetteId,
-            )
-        except PipetteOverpressureError as e:
-            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
-            return DefinedErrorData(
-                public=OverpressureError(
-                    id=self._model_utils.generate_id(),
-                    createdAt=self._model_utils.get_timestamp(),
-                    wrappedErrors=[
-                        ErrorOccurrence.from_failed(
-                            id=self._model_utils.generate_id(),
-                            createdAt=self._model_utils.get_timestamp(),
-                            error=e,
-                        )
-                    ],
-                    errorInfo=(
-                        {
-                            "retryLocation": (
-                                current_position.x,
-                                current_position.y,
-                                current_position.z,
-                            )
-                        }
-                    ),
-                ),
-                state_update=state_update,
-            )
-        else:
-            state_update.set_fluid_empty(pipette_id=params.pipetteId)
-            return SuccessData(
-                public=PrepareToAspirateResult(), state_update=state_update
-            )
+        prepare_result = await prepare_for_aspirate(
+            pipette_id=params.pipetteId,
+            pipetting=self._pipetting_handler,
+            model_utils=self._model_utils,
+            location_if_error={
+                "retryLocation": (
+                    current_position.x,
+                    current_position.y,
+                    current_position.z,
+                )
+            },
+        )
+        return prepare_result.and_then(self._transform_result).unwrap()
 
 
 class PrepareToAspirate(

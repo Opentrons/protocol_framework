@@ -95,7 +95,11 @@ export function generatePromptPreviewLabwareLiquidsItems(
   const defs = getAllDefinitions()
 
   labwares?.forEach(labware => {
-    items.push(getLabwareDisplayName(defs[labware.labwareURI]) as string)
+    items.push(
+      `${labware.count} x ${
+        getLabwareDisplayName(defs[labware.labwareURI]) as string
+      }`
+    )
   })
 
   liquids?.forEach(liquid => {

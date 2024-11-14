@@ -34,14 +34,19 @@ def subject(
 
 
 async def test_prepare_to_aspirate_implementation(
-    decoy: Decoy, subject: PrepareToAspirateImplementation, pipetting: PipettingHandler
+    decoy: Decoy,
+    gantry_mover: GantryMover,
+    subject: PrepareToAspirateImplementation,
+    pipetting: PipettingHandler,
 ) -> None:
     """A PrepareToAspirate command should have an executing implementation."""
     data = PrepareToAspirateParams(pipetteId="some id")
+    position = Point(x=1, y=2, z=3)
 
     decoy.when(await pipetting.prepare_for_aspirate(pipette_id="some id")).then_return(
         None
     )
+    decoy.when(await gantry_mover.get_position("some id")).then_return(position)
 
     result = await subject.execute(data)
     assert result == SuccessData(

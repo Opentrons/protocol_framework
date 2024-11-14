@@ -4,7 +4,7 @@ import type {
   Chat,
   ChatData,
   CreatePrompt,
-  createProtocolAtomProps,
+  CreateProtocolAtomProps,
   HeaderWithMeterAtomProps,
   Mixpanel,
   UpdatePrompt,
@@ -69,9 +69,9 @@ export const headerWithMeterAtom = atom<HeaderWithMeterAtomProps>({
   progress: 0,
 })
 
-export const createProtocolAtom = atom<createProtocolAtomProps>({
-  currentStep: 0,
-  focusStep: 0,
+export const createProtocolAtom = atom<CreateProtocolAtomProps>({
+  currentSection: 0,
+  focusSection: 0,
 })
 
 export const displayExitConfirmModalAtom = atom<boolean>(false)

@@ -229,10 +229,18 @@ export function LabwareModal({
                     setValue(
                       LABWARES_FIELD_NAME,
                       [
-                        ...selectedLabwares.map(labwareURI => ({
-                          labwareURI,
-                          count: 1,
-                        })),
+                        ...selectedLabwares.map(labwareURI => {
+                          const existingLabware = labwares.find(
+                            lw => lw.labwareURI === labwareURI
+                          )
+                          return {
+                            labwareURI,
+                            count:
+                              existingLabware != null
+                                ? existingLabware.count
+                                : 1,
+                          }
+                        }),
                       ],
                       { shouldValidate: true }
                     )
