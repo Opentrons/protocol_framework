@@ -31,7 +31,10 @@ import { SelectedHoveredItems } from './SelectedHoveredItems'
 import { getAdjacentLabware } from './utils'
 
 import type { ComponentProps, Dispatch, SetStateAction } from 'react'
-import type { ModuleTemporalProperties } from '@opentrons/step-generation'
+import type {
+  ModuleTemporalProperties,
+  ThermocyclerModuleState,
+} from '@opentrons/step-generation'
 import type {
   AddressableArea,
   AddressableAreaName,
@@ -194,6 +197,10 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
           yDimension: labwareLoadedOnModule?.def.dimensions.yDimension ?? 0,
           zDimension: labwareLoadedOnModule?.def.dimensions.zDimension ?? 0,
         }
+        const isLabwareOccludedByThermocyclerLid =
+          moduleOnDeck.type === 'thermocyclerModuleType' &&
+          (moduleOnDeck.moduleState as ThermocyclerModuleState).lidOpen ===
+            false
         return moduleOnDeck.slot !== selectedSlot.slot ? (
           <Fragment key={moduleOnDeck.id}>
             <Module
@@ -208,7 +215,8 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
               targetSlotId={slotId}
               targetDeckId={deckDef.otId}
             >
-              {labwareLoadedOnModule != null ? (
+              {labwareLoadedOnModule != null &&
+              !isLabwareOccludedByThermocyclerLid ? (
                 <>
                   <LabwareOnDeck
                     x={0}
