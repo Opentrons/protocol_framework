@@ -231,7 +231,10 @@ export function generateChatPrompt(
   setCreateProtocolChatAtom({
     prompt,
     regenerate: false,
-    scientific_application_type: values.application.scientificApplication,
+    scientific_application_type:
+      values.application.scientificApplication === OTHER
+        ? values.application.otherApplication
+        : values.application.scientificApplication,
     description,
     robots: values.instruments.robot,
     mounts,

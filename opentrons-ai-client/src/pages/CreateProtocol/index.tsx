@@ -31,7 +31,7 @@ import { ResizeBar } from '../../atoms/ResizeBar'
 export interface CreateProtocolFormData {
   application: {
     scientificApplication: string
-    otherApplication?: string
+    otherApplication: string
     description: string
   }
   instruments: {
