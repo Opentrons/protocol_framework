@@ -49,7 +49,7 @@ from hardware_testing.drivers import mitutoyo_digimatic_indicator
 
 global pipette_flow_rate
 global pipette_action
-test_volume = 1000
+test_volume = 50
 hms = "%H:%M:%S"
 
 @dataclass
@@ -133,9 +133,9 @@ def getch():
 
 async def sensor_task(can_driver: AbstractCanDriver) -> None:
     try:
-        sensor_run = SensorRun(SensorType.pressure, "Alt P-Sensor", bool(0), 1.0, "left")
+        sensor_run = SensorRun(SensorType.pressure, "Alt P-Sensor", bool(0), 1.0, "right")
         print(sensor_run)
-        p_thread = await handle_pressure_sensor(sensor_run, can_driver, NodeId.pipette_left)
+        p_thread = await handle_pressure_sensor(sensor_run, can_driver, NodeId.pipette_right)
         sensor_command, to_csv = await asyncio.get_event_loop().run_in_executor(
             None, p_thread
         )
@@ -168,12 +168,15 @@ async def handle_pressure_sensor(
     global pipette_flow_rate
     pipette_action = "making csv"
     pipette_flow_rate = 20
-    while True:
+    start_time = time.time()
+    delta_time = 0
+    while delta_time < 300:
+        delta_time = time.time() - start_time
         data = await s_driver.read(messenger, pressure, offset=False, timeout=10)
-        curr_time = time.perf_counter() - start_time
+        # curr_time = time.perf_counter() - start_time
         if isinstance(data, SensorDataType):
-            print(f'time: {curr_time}, Pressure: {data.to_float()}')
-            csv.write_dict({"time": curr_time,
+            print(f'time: {delta_time}, Pressure: {data.to_float()}')
+            csv.write_dict({"time": delta_time,
                             "data": data.to_float(),
                             "flow_rate": args.flow_rate,
                             "action": pipette_action,
@@ -181,28 +184,32 @@ async def handle_pressure_sensor(
                             })
     await messenger.stop()
 
-async def _main() -> None:
+async def _main(is_simulating: bool) -> None:
     today = datetime.date.today()
     start_time = time.perf_counter()
+    api = await build_async_ot3_hardware_api(is_simulating=False)
+    await api.add_tip(mount, 53)
+    await api.prepare_for_aspirate(mount)
     async with build.driver(build_settings(args)) as driver:
         loop = asyncio.get_event_loop()
         # loop.run_in_executor(None, sensor_task, driver)
         task = loop.create_task(sensor_task(driver))
+        await asyncio.sleep(10)
+        await api.aspirate(mount, test_volume)
         try:
             pipette_flow_rate = 20
             await task
-
         except KeyboardInterrupt:
-            pass
+            quit()
         except asyncio.CancelledError:
-            pass
+            quit()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--simulate", action="store_true")
-    parser.add_argument("--mount", type=str, choices=["left", "right"], default="left")
+    parser.add_argument("--mount", type=str, choices=["left", "right"], default="right")
     parser.add_argument("--flow_rate", type=int, default = 20)
-    parser.add_argument("--test_volume", type=float, default = 1000)
+    parser.add_argument("--test_volume", type=float, default = 50)
     add_can_args(parser)
     args = parser.parse_args()
     if args.mount == "left":
@@ -210,4 +217,4 @@ if __name__ == "__main__":
     else:
         mount = OT3Mount.RIGHT
 
-    asyncio.run(_main(), debug = True)
+    asyncio.run(_main(args.simulate,), debug = True)
