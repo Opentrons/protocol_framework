@@ -117,3 +117,21 @@ The live-test target will run tests against any environment. The default is loca
 
 1. alter the `Pipfile` to the new pinned version
 1. run `make setup` to update the `Pipfile.lock`
+
+## Google Sheets Integration
+
+1. Create a Google Cloud Platform project
+1. Enable the Google Sheets and Drive API
+1. Go to APIs & Services > Library and enable the Google Sheets API.
+1. Go to APIs & Services > Credentials and create a Service Account. This account will be used by your application to access the Google Sheets API.
+1. After creating the Service Account, click on it in the Credentials section, go to the Keys tab, and create a JSON key. This will download a JSON file with credentials for your Service Account.
+1. Open the JSON file and store its content securely. You’ll set this JSON content as an environment variable.
+1. Configure Access to the Google Sheet
+1. Open the Google Sheet you want to access.
+1. Click Share and add the Service Account email (found in the JSON file under "client_email") as a collaborator, typically with Editor access. This allows the Service Account to interact with the sheet.
+
+### Test that the credentials work with a direct call to the Integration
+
+```shell
+make test-googlesheet
+```

@@ -1,76 +1,73 @@
-import asyncio
 import json
 import random
+import re
 
 import gspread
 import structlog
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
+from google.oauth2.service_account import Credentials
+from gspread import SpreadsheetNotFound  # type: ignore
+from gspread.client import Client as GspreadClient
 
 from api.settings import Settings
 
 
 class GoogleSheetsClient:
-    SCOPES = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive.file"]
+    SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.logger = structlog.stdlib.get_logger(settings.logger_name)
-        self.client = self._initialize_client()
+        self.client: GspreadClient = self._initialize_client()
 
-    def _initialize_client(self) -> gspread.Client:
-        """Initialize the gspread client with credentials loaded from environment."""
-        creds = self._get_credentials()
-        return gspread.authorize(creds)
+    def _initialize_client(self) -> GspreadClient:
+        """Initialize the gspread client with Service Account credentials loaded from the environment."""
+        creds: Credentials = self._get_credentials()
+        return gspread.authorize(creds)  # type: ignore
 
     def _get_credentials(self) -> Credentials:
+        """Load Service Account credentials from an environment variable."""
         google_credentials_json = self.settings.google_credentials_json.get_secret_value()
         if not google_credentials_json:
-            raise EnvironmentError("Missing GOOGLE_SHEETS_CREDENTIALS")
+            raise EnvironmentError("Missing GOOGLE_SHEETS_CREDENTIALS environment variable.")
 
         creds_info = json.loads(google_credentials_json)
-        creds = Credentials.from_authorized_user_info(creds_info, self.SCOPES)
-
-        # Refresh credentials if expired
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-
-        if not creds or not creds.valid:
-            raise EnvironmentError("Invalid or expired Google Sheets credentials.")
-
+        creds: Credentials = Credentials.from_service_account_info(info=creds_info, scopes=self.SCOPES)  # type: ignore
         return creds
 
-    async def append_feedback_to_sheet(self, user_id: str, feedback: str) -> None:
+    def sanitize_for_google_sheets(self, input_text: str) -> str:
+        """Sanitize input to remove JavaScript and HTML tags, and prevent formulas."""
+        script_pattern = re.compile(r'(javascript:[^"]*|<script.*?>.*?</script>|on\w+=".*?"|on\w+=\'.*?\')', re.IGNORECASE)
+        sanitized_text = re.sub(script_pattern, "", input_text)
+        sanitized_text = re.sub(r"(<.*?>|&lt;.*?&gt;)", "", sanitized_text)
+        sanitized_text = re.sub(r"^\s*=\s*", "", sanitized_text)
+        return sanitized_text.strip()
+
+    def append_feedback_to_sheet(self, user_id: str, feedback: str) -> None:
         """Append a row of feedback to the Google Sheet."""
         try:
             sheet_id = self.settings.google_sheet_id
             worksheet_name = self.settings.google_sheet_worksheet
+            spreadsheet = self.client.open_by_key(sheet_id)
+            worksheet = spreadsheet.worksheet(worksheet_name)
 
-            # Open the spreadsheet and worksheet asynchronously
-            spreadsheet = await asyncio.to_thread(self.client.open_by_key, sheet_id)
-            worksheet = await asyncio.to_thread(spreadsheet.worksheet, worksheet_name)
+            feedback = self.sanitize_for_google_sheets(feedback)
 
-            # Append the row asynchronously
-            await asyncio.to_thread(worksheet.append_row, [user_id, feedback])
-
+            worksheet.append_row([user_id, feedback])
             self.logger.info("Feedback successfully appended to Google Sheet.")
-        except gspread.SpreadsheetNotFound:
+        except SpreadsheetNotFound:
             self.logger.error("Spreadsheet not found or not accessible.")
         except Exception:
             self.logger.error("Error appending feedback to Google Sheet.", exc_info=True)
 
-    async def run_sample_feedback(self):
-        """Run a sample feedback append with random data, for testing purposes."""
-        user_id = str(random.randint(100000, 999999))
-        feedback = f"This is a random feedback with ID {user_id}."
-        await self.append_feedback_to_sheet(user_id, feedback)
 
-
+# Example usage
 def main() -> None:
-    """Main function to test the GoogleSheetsClient class."""
+    """Run an example appending feedback to Google Sheets."""
     settings = Settings()
     google_sheets_client = GoogleSheetsClient(settings)
-    asyncio.run(google_sheets_client.run_sample_feedback())
+    user_id = str(random.randint(100000, 999999))
+    feedback = f"This is a test feedback for user {user_id}."
+    google_sheets_client.append_feedback_to_sheet(user_id, feedback)
 
 
 if __name__ == "__main__":

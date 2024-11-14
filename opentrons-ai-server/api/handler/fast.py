@@ -1,14 +1,14 @@
 import asyncio
 import os
 import time
-from typing import Any, Awaitable, Callable, List, Literal, Union
+from typing import Annotated, Any, Awaitable, Callable, List, Literal, Union
 
 import structlog
 from asgi_correlation_id import CorrelationIdMiddleware
 from asgi_correlation_id.context import correlation_id
 from ddtrace import tracer
 from ddtrace.contrib.asgi.middleware import TraceMiddleware
-from fastapi import FastAPI, HTTPException, Query, Request, Response, Security, status
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Request, Response, Security, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
@@ -21,13 +21,16 @@ from api.domain.fake_responses import FakeResponse, get_fake_response
 from api.domain.openai_predict import OpenAIPredict
 from api.handler.custom_logging import setup_logging
 from api.integration.auth import VerifyToken
+from api.integration.google_sheets import GoogleSheetsClient
 from api.models.chat_request import ChatRequest
 from api.models.chat_response import ChatResponse
 from api.models.create_protocol import CreateProtocol
 from api.models.empty_request_error import EmptyRequestError
+from api.models.feedback_request import FeedbackRequest
 from api.models.feedback_response import FeedbackResponse
 from api.models.internal_server_error import InternalServerError
 from api.models.update_protocol import UpdateProtocol
+from api.models.user import User
 from api.settings import Settings
 
 settings: Settings = Settings()
@@ -38,6 +41,7 @@ logger = structlog.stdlib.get_logger(settings.logger_name)
 
 auth: VerifyToken = VerifyToken()
 openai: OpenAIPredict = OpenAIPredict(settings)
+google_sheets_client = GoogleSheetsClient(settings)
 
 
 # Initialize FastAPI app with metadata
@@ -175,7 +179,7 @@ class CorsHeadersResponse(BaseModel):
     description="Generate a chat response based on the provided prompt.",
 )
 async def create_chat_completion(
-    body: ChatRequest, auth_result: Any = Security(auth.verify)  # noqa: B008
+    body: ChatRequest, user: Annotated[User, Security(auth.verify)]
 ) -> Union[ChatResponse, ErrorResponse]:  # noqa: B008
     """
     Generate a chat completion response using OpenAI.
@@ -183,7 +187,7 @@ async def create_chat_completion(
     - **request**: The HTTP request containing the chat message.
     - **returns**: A chat response or an error message.
     """
-    logger.info("POST /api/chat/completion", extra={"body": body.model_dump(), "auth_result": auth_result})
+    logger.info("POST /api/chat/completion", extra={"body": body.model_dump(), "user": user})
     try:
         if not body.message or body.message == "":
             raise HTTPException(
@@ -198,9 +202,9 @@ async def create_chat_completion(
         response: Union[str, None] = openai.predict(prompt=body.message, chat_completion_message_params=body.history)
 
         if response is None or response == "":
-            return ChatResponse(reply="No response was generated", fake=body.fake)
+            return ChatResponse(reply="No response was generated", fake=bool(body.fake))
 
-        return ChatResponse(reply=response, fake=body.fake)
+        return ChatResponse(reply=response, fake=bool(body.fake))
 
     except Exception as e:
         logger.exception("Error processing chat completion")
@@ -217,15 +221,15 @@ async def create_chat_completion(
     description="Generate a chat response based on the provided prompt that will update an existing protocol with the required changes.",
 )
 async def update_protocol(
-    body: UpdateProtocol, auth_result: Any = Security(auth.verify)  # noqa: B008
+    body: UpdateProtocol, user: Annotated[User, Security(auth.verify)]
 ) -> Union[ChatResponse, ErrorResponse]:  # noqa: B008
     """
-    Generate an updated protocolusing OpenAI.
+    Generate an updated protocol using OpenAI.
 
     - **request**: The HTTP request containing the existing protocol and other relevant parameters.
     - **returns**: A chat response or an error message.
     """
-    logger.info("POST /api/chat/updateProtocol", extra={"body": body.model_dump(), "auth_result": auth_result})
+    logger.info("POST /api/chat/updateProtocol", extra={"body": body.model_dump(), "user": user})
     try:
         if not body.protocol_text or body.protocol_text == "":
             raise HTTPException(
@@ -233,14 +237,14 @@ async def update_protocol(
             )
 
         if body.fake:
-            return ChatResponse(reply="Fake response", fake=body.fake)
+            return ChatResponse(reply="Fake response", fake=bool(body.fake))
 
         response: Union[str, None] = openai.predict(prompt=body.prompt, chat_completion_message_params=None)
 
         if response is None or response == "":
-            return ChatResponse(reply="No response was generated", fake=body.fake)
+            return ChatResponse(reply="No response was generated", fake=bool(body.fake))
 
-        return ChatResponse(reply=response, fake=body.fake)
+        return ChatResponse(reply=response, fake=bool(body.fake))
 
     except Exception as e:
         logger.exception("Error processing protocol update")
@@ -257,15 +261,15 @@ async def update_protocol(
     description="Generate a chat response based on the provided prompt that will create a new protocol with the required changes.",
 )
 async def create_protocol(
-    body: CreateProtocol, auth_result: Any = Security(auth.verify)  # noqa: B008
+    body: CreateProtocol, user: Annotated[User, Security(auth.verify)]
 ) -> Union[ChatResponse, ErrorResponse]:  # noqa: B008
     """
-    Generate an updated protocolusing OpenAI.
+    Generate an updated protocol using OpenAI.
 
     - **request**: The HTTP request containing the chat message.
     - **returns**: A chat response or an error message.
     """
-    logger.info("POST /api/chat/createProtocol", extra={"body": body.model_dump(), "auth_result": auth_result})
+    logger.info("POST /api/chat/createProtocol", extra={"body": body.model_dump(), "user": user})
     try:
 
         if not body.prompt or body.prompt == "":
@@ -279,9 +283,9 @@ async def create_protocol(
         response: Union[str, None] = openai.predict(prompt=str(body.model_dump()), chat_completion_message_params=None)
 
         if response is None or response == "":
-            return ChatResponse(reply="No response was generated", fake=body.fake)
+            return ChatResponse(reply="No response was generated", fake=bool(body.fake))
 
-        return ChatResponse(reply=response, fake=body.fake)
+        return ChatResponse(reply=response, fake=bool(body.fake))
 
     except Exception as e:
         logger.exception("Error processing protocol creation")
@@ -339,23 +343,19 @@ async def redoc_html() -> HTMLResponse:
     summary="Feedback",
     description="Send feedback to the team.",
 )
-async def feedback(request: Request, auth_result: Any = Security(auth.verify)) -> FeedbackResponse:  # noqa: B008
-    """
-    Send feedback to the team.
-
-    - **request**: The HTTP request containing the feedback message.
-    - **returns**: A feedback response or an error message.
-    """
+async def feedback(
+    body: FeedbackRequest, user: Annotated[User, Security(auth.verify)], background_tasks: BackgroundTasks
+) -> FeedbackResponse:
     logger.info("POST /api/feedback")
     try:
-        body = await request.json()
-        if "feedbackText" not in body.keys() or body["feedbackText"] == "":
-            logger.info("Feedback empty")
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=EmptyRequestError(message="Request body is empty"))
-        logger.info(f"Feedback received: {body}")
-        feedbackText = body["feedbackText"]
-        # todo: Store feedback text in a database
-        return FeedbackResponse(reply=f"Feedback Received: {feedbackText}", fake=False)
+        if body.fake:
+            return FeedbackResponse(reply="Fake response", fake=bool(body.fake))
+        feedback_text = body.feedbackText
+        logger.info("Feedback received", user_id=user.sub, feedback=feedback_text)
+        background_tasks.add_task(google_sheets_client.append_feedback_to_sheet, user_id=str(user.sub), feedback=feedback_text)
+        return FeedbackResponse(
+            reply=f"Feedback Received and sanitized: {google_sheets_client.sanitize_for_google_sheets(feedback_text)}", fake=False
+        )
 
     except Exception as e:
         logger.exception("Error processing feedback")
