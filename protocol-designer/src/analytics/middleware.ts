@@ -51,6 +51,7 @@ import type { CreatePipettesAction } from '../step-forms/actions'
 import type { AnalyticsEventAction } from './actions'
 import type { AnalyticsEvent } from './mixpanel'
 
+const DEFAULT_VALUE = 'default'
 const PIPETTING_ARGS_FILTER_LIST = [
   'touchTipAfterAspirateOffsetMmFromBottom',
   'touchTipAfterDispenseOffsetMmFromBottom',
@@ -118,131 +119,131 @@ export const reduxActionToAnalyticsEvent = (
           ? 'pause'
           : stepName
 
-      if (
-        modifiedStepName === 'engageMagnet' ||
-        modifiedStepName === 'disengageMagnet'
-      ) {
-        return {
-          name: `magnetStep`,
-          properties: { type: modifiedStepName },
+      switch (modifiedStepName) {
+        case 'engageMagnet':
+        case 'disengageMagnet': {
+          return {
+            name: `magnetStep`,
+            properties: { type: modifiedStepName },
+          }
         }
-      } else if (
-        modifiedStepName === 'deactivateTemperature' ||
-        modifiedStepName === 'setTemperature'
-      ) {
-        return {
-          name: `temperatureStep`,
-          properties: { type: modifiedStepName },
+        case 'setTemperature':
+        case 'deactivateTemperature': {
+          return {
+            name: `temperatureStep`,
+            properties: { type: modifiedStepName },
+          }
         }
-      } else if (
-        modifiedStepName === 'thermocyclerProfile' ||
-        modifiedStepName === 'thermocyclerState'
-      ) {
-        return {
-          name: 'thermocyclerStep',
-          properties: { type: modifiedStepName },
+        case 'thermocyclerProfile':
+        case 'thermocyclerState': {
+          return {
+            name: 'thermocyclerStep',
+            properties: { type: modifiedStepName },
+          }
         }
-      } else if (modifiedStepName === 'heaterShaker') {
-        return {
-          name: 'heaterShakerStep',
-          properties: {},
+        case 'heaterShaker': {
+          return {
+            name: 'heaterShakerStep',
+            properties: {},
+          }
         }
-      } else if (
-        modifiedStepName === 'transfer' ||
-        modifiedStepName === 'consolidate' ||
-        modifiedStepName === 'distribute'
-      ) {
-        const stepArgModified = omit(
-          stepArgs as TransferArgs | ConsolidateArgs | DistributeArgs,
-          PIPETTING_ARGS_FILTER_LIST
-        )
-        return {
-          name: `${modifiedStepName}Step`,
-          properties: {
-            ...stepArgModified,
-            aspirateAirGap: stepArgModified.aspirateAirGapVolume,
-            aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
-            dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
-            blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
-            aspirateOffsetFromBottomMm:
-              stepArgModified.aspirateOffsetFromBottomMm ===
-              DEFAULT_MM_FROM_BOTTOM_ASPIRATE
-                ? 'default'
-                : stepArgModified.aspirateOffsetFromBottomMm,
-            dispenseOffsetFromBottomMm:
-              stepArgModified.dispenseOffsetFromBottomMm ===
-              DEFAULT_MM_FROM_BOTTOM_DISPENSE
-                ? 'default'
-                : stepArgModified.dispenseOffsetFromBottomMm,
-            aspirateXOffset:
-              stepArgModified.aspirateXOffset === 0
-                ? 'default'
-                : stepArgModified.aspirateXOffset,
-            aspirateYOffset:
-              stepArgModified.aspirateYOffset === 0
-                ? 'default'
-                : stepArgModified.aspirateYOffset,
-            dispenseXOffset:
-              stepArgModified.dispenseXOffset === 0
-                ? 'default'
-                : stepArgModified.dispenseXOffset,
-            dispenseYOffset:
-              stepArgModified.dispenseYOffset === 0
-                ? 'default'
-                : stepArgModified.dispenseYOffset,
+        case 'transfer':
+        case 'consolidate':
+        case 'distribute': {
+          const stepArgModified = omit(
+            stepArgs as TransferArgs | ConsolidateArgs | DistributeArgs,
+            PIPETTING_ARGS_FILTER_LIST
+          )
+          return {
+            name: `${modifiedStepName}Step`,
+            properties: {
+              ...stepArgModified,
+              aspirateAirGap: stepArgModified.aspirateAirGapVolume,
+              aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
+              dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
+              blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
+              aspirateOffsetFromBottomMm:
+                stepArgModified.aspirateOffsetFromBottomMm ===
+                DEFAULT_MM_FROM_BOTTOM_ASPIRATE
+                  ? DEFAULT_VALUE
+                  : stepArgModified.aspirateOffsetFromBottomMm,
+              dispenseOffsetFromBottomMm:
+                stepArgModified.dispenseOffsetFromBottomMm ===
+                DEFAULT_MM_FROM_BOTTOM_DISPENSE
+                  ? DEFAULT_VALUE
+                  : stepArgModified.dispenseOffsetFromBottomMm,
+              aspirateXOffset:
+                stepArgModified.aspirateXOffset === 0
+                  ? DEFAULT_VALUE
+                  : stepArgModified.aspirateXOffset,
+              aspirateYOffset:
+                stepArgModified.aspirateYOffset === 0
+                  ? DEFAULT_VALUE
+                  : stepArgModified.aspirateYOffset,
+              dispenseXOffset:
+                stepArgModified.dispenseXOffset === 0
+                  ? DEFAULT_VALUE
+                  : stepArgModified.dispenseXOffset,
+              dispenseYOffset:
+                stepArgModified.dispenseYOffset === 0
+                  ? DEFAULT_VALUE
+                  : stepArgModified.dispenseYOffset,
 
-            ...additionalProperties,
-          },
+              ...additionalProperties,
+            },
+          }
         }
-      } else if (modifiedStepName === 'mix') {
-        const stepArgModified = omit(
-          stepArgs as MixArgs,
-          PIPETTING_ARGS_FILTER_LIST
-        )
-        return {
-          name: `mixStep`,
-          properties: {
-            ...stepArgModified,
-            aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
-            dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
-            blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
-            aspirateOffsetFromBottomMm:
-              stepArgModified.aspirateOffsetFromBottomMm ===
-              DEFAULT_MM_FROM_BOTTOM_ASPIRATE
-                ? 'default'
-                : stepArgModified.aspirateOffsetFromBottomMm,
-            dispenseOffsetFromBottomMm:
-              stepArgModified.dispenseOffsetFromBottomMm ===
-              DEFAULT_MM_FROM_BOTTOM_DISPENSE
-                ? 'default'
-                : stepArgModified.dispenseOffsetFromBottomMm,
-            aspirateXOffset:
-              stepArgModified.aspirateXOffset === 0
-                ? 'default'
-                : stepArgModified.aspirateXOffset,
-            aspirateYOffset:
-              stepArgModified.aspirateYOffset === 0
-                ? 'default'
-                : stepArgModified.aspirateYOffset,
-            dispenseXOffset:
-              stepArgModified.dispenseXOffset === 0
-                ? 'default'
-                : stepArgModified.dispenseXOffset,
-            dispenseYOffset:
-              stepArgModified.dispenseYOffset === 0
-                ? 'default'
-                : stepArgModified.dispenseYOffset,
-            ...additionalProperties,
-          },
+        case 'mix': {
+          const stepArgModified = omit(
+            stepArgs as MixArgs,
+            PIPETTING_ARGS_FILTER_LIST
+          )
+          return {
+            name: `mixStep`,
+            properties: {
+              ...stepArgModified,
+              aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
+              dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
+              blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
+              aspirateOffsetFromBottomMm:
+                stepArgModified.aspirateOffsetFromBottomMm ===
+                DEFAULT_MM_FROM_BOTTOM_ASPIRATE
+                  ? DEFAULT_VALUE
+                  : stepArgModified.aspirateOffsetFromBottomMm,
+              dispenseOffsetFromBottomMm:
+                stepArgModified.dispenseOffsetFromBottomMm ===
+                DEFAULT_MM_FROM_BOTTOM_DISPENSE
+                  ? DEFAULT_VALUE
+                  : stepArgModified.dispenseOffsetFromBottomMm,
+              aspirateXOffset:
+                stepArgModified.aspirateXOffset === 0
+                  ? DEFAULT_VALUE
+                  : stepArgModified.aspirateXOffset,
+              aspirateYOffset:
+                stepArgModified.aspirateYOffset === 0
+                  ? DEFAULT_VALUE
+                  : stepArgModified.aspirateYOffset,
+              dispenseXOffset:
+                stepArgModified.dispenseXOffset === 0
+                  ? DEFAULT_VALUE
+                  : stepArgModified.dispenseXOffset,
+              dispenseYOffset:
+                stepArgModified.dispenseYOffset === 0
+                  ? DEFAULT_VALUE
+                  : stepArgModified.dispenseYOffset,
+              ...additionalProperties,
+            },
+          }
         }
-      } else {
-        return {
-          name: `${modifiedStepName}Step`,
-          properties: { ...stepArgs, ...additionalProperties },
-        }
+        default:
+          return {
+            name: `${modifiedStepName}Step`,
+            properties: { ...stepArgs, ...additionalProperties },
+          }
       }
     }
   }
+
   if (action.type === 'COMPUTE_ROBOT_STATE_TIMELINE_SUCCESS') {
     const robotTimeline = getRobotStateTimeline(state)
     const { errors, timeline } = robotTimeline

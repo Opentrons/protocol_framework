@@ -13,6 +13,7 @@ import {
 import { InputField } from '../../components/modals/CreateFileWizard/InputField'
 import { HandleEnter } from '../../atoms/HandleEnter'
 import { analyticsEvent } from '../../analytics/actions'
+import { ONBOARDING_FLOW_DURATION_EVENT } from '../../analytics/constants'
 import { WizardBody } from './WizardBody'
 
 import type { AnalyticsEvent } from '../../analytics/mixpanel'
@@ -33,7 +34,7 @@ export function AddMetadata(props: AddMetadataProps): JSX.Element | null {
   const handleProceed = (): void => {
     const duration = new Date().getTime() - analyticsStartTime.getTime()
     const onboardingDuration: AnalyticsEvent = {
-      name: 'onboardingFlowDuration',
+      name: ONBOARDING_FLOW_DURATION_EVENT,
       properties: { duration: `${duration / 1000} seconds` },
     }
     dispatch(analyticsEvent(onboardingDuration))

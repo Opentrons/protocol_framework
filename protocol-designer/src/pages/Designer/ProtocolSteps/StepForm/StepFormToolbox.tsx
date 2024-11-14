@@ -30,6 +30,10 @@ import {
   getDynamicFieldFormErrorsForUnsavedForm,
 } from '../../../../step-forms/selectors'
 import {
+  FORM_ERRORS_EVENT,
+  FORM_WARNINGS_EVENT,
+} from '../../../../analytics/constants'
+import {
   CommentTools,
   HeaterShakerTools,
   MagnetTools,
@@ -165,14 +169,14 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   useEffect(() => {
     if (visibleFormWarningsTypes.length > 0) {
       const formWarningsEvent: AnalyticsEvent = {
-        name: 'formWarnings',
+        name: FORM_WARNINGS_EVENT,
         properties: { visibleFormWarningsTypes },
       }
       dispatch(analyticsEvent(formWarningsEvent))
     }
     if (visibleFormErrorsTypes.length > 0) {
       const formErrorsEvent: AnalyticsEvent = {
-        name: 'formErrors',
+        name: FORM_ERRORS_EVENT,
         properties: { visibleFormErrorsTypes },
       }
       dispatch(analyticsEvent(formErrorsEvent))

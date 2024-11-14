@@ -19,6 +19,7 @@ import {
   hoverOnStep,
   toggleViewSubstep,
 } from '../../../../ui/steps/actions/actions'
+import { OPEN_STEP_DETAILS_EVENT } from '../../../../analytics/constants'
 import {
   getBatchEditFormHasUnsavedChanges,
   getCurrentFormHasUnsavedChanges,
@@ -83,7 +84,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
   }
 
   const selectViewDetailsEvent: AnalyticsEvent = {
-    name: 'openStepDetails',
+    name: OPEN_STEP_DETAILS_EVENT,
     properties: {},
   }
 
