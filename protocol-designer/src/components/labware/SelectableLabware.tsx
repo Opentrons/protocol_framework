@@ -229,6 +229,7 @@ export const SelectableLabware = (props: Props): JSX.Element => {
                 )(event)
               }
             }}
+            canHighlightLabels={false}
           />
         )}
       </WellTooltip>
