@@ -148,7 +148,12 @@ class DestinationPositionResult(BaseModel):
 
 
 class ErrorLocationInfo(TypedDict):
-    """Holds a retry location for in-place error recovery."""
+    """Holds a retry location for in-place error recovery.
+
+    This is appropriate to pass to a `moveToCoordinates` command,
+    assuming the pipette has not been configured with a different nozzle layout
+    in the meantime.
+    """
 
     retryLocation: Tuple[float, float, float]
 
@@ -201,3 +206,5 @@ class TipPhysicallyAttachedError(ErrorOccurrence):
 
     errorCode: str = ErrorCodes.TIP_DROP_FAILED.value.code
     detail: str = ErrorCodes.TIP_DROP_FAILED.value.detail
+
+    errorInfo: ErrorLocationInfo
