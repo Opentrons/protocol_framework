@@ -233,10 +233,7 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
           </StyledText>
         }
         confirmButtonText={t('shared:done')}
-        onConfirmClick={() => {
-          dispatch(deselectAllWells())
-          onClose()
-        }}
+        onConfirmClick={onClose}
         onCloseClick={handleClearSelectedWells}
         height="calc(100vh - 64px)"
         closeButton={
