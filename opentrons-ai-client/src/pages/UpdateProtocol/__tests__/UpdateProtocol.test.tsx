@@ -122,4 +122,53 @@ describe('Update Protocol', () => {
     })
     expect(mockNavigate).toHaveBeenCalledWith('/chat')
   })
+
+  it('should call trackEvent when submit prompt button is clicked', async () => {
+    render()
+
+    // upload file
+    const blobParts: BlobPart[] = [
+      'x = 1\n',
+      'x = 2\n',
+      'x = 3\n',
+      'x = 4\n',
+      'print("x is 1.")\n',
+    ]
+    const file = new File(blobParts, 'test-file.py', { type: 'text/python' })
+    fireEvent.drop(screen.getByTestId('file_drop_zone'), {
+      dataTransfer: {
+        files: [file],
+      },
+    })
+
+    // input description
+    const describeInput = screen.getByRole('textbox')
+    fireEvent.change(describeInput, { target: { value: 'Test description' } })
+
+    expect(screen.getByDisplayValue('Test description')).toBeInTheDocument()
+
+    // select update type
+    const applicationDropdown = screen.getByText('Select an option')
+    fireEvent.click(applicationDropdown)
+
+    const basicOtherOption = screen.getByText('Other')
+    fireEvent.click(basicOtherOption)
+
+    const submitPromptButton = screen.getByText('Submit prompt')
+    await waitFor(() => {
+      expect(submitPromptButton).toBeEnabled()
+    })
+
+    fireEvent.click(submitPromptButton)
+
+    await waitFor(() => {
+      expect(mockUseTrackEvent).toHaveBeenCalledWith({
+        name: 'submit-prompt',
+        properties: {
+          isCreateOrUpdate: 'update',
+          prompt: expect.any(String),
+        },
+      })
+    })
+  })
 })

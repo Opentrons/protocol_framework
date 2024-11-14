@@ -207,6 +207,7 @@ export function CreateProtocol(): JSX.Element | null {
     trackEvent({
       name: 'submit-prompt',
       properties: {
+        isCreateOrUpdate: 'create',
         prompt: chatPromptData,
       },
     })

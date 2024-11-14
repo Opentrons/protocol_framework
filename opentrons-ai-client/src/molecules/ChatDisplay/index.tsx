@@ -33,6 +33,7 @@ import {
 } from '../../resources/atoms'
 import { delay } from 'lodash'
 import { useFormContext } from 'react-hook-form'
+import { useTrackEvent } from '../../resources/hooks/useTrackEvent'
 
 interface ChatDisplayProps {
   chat: ChatData
@@ -58,6 +59,7 @@ const StyledIcon = styled(Icon)`
 
 export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
   const { t } = useTranslation('protocol_generator')
+  const trackEvent = useTrackEvent()
   const [isCopied, setIsCopied] = useState<boolean>(false)
   const [, setRegenerateProtocol] = useAtom(regenerateProtocolAtom)
   const [createProtocolChat] = useAtom(createProtocolChatAtom)
@@ -96,6 +98,10 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
     }
     setScrollToBottom(!scrollToBottom)
     setValue('userPrompt', prompt)
+    trackEvent({
+      name: 'regenerate-protocol',
+      properties: {},
+    })
   }
 
   const handleFileDownload = (): void => {
@@ -112,6 +118,11 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
     a.download = 'OpentronsAI.py'
     a.click()
     window.URL.revokeObjectURL(url)
+
+    trackEvent({
+      name: 'download-protocol',
+      properties: {},
+    })
   }
 
   const handleClickCopy = async (): Promise<void> => {
@@ -119,6 +130,10 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
     const code = lastCodeBlock?.textContent ?? ''
     await navigator.clipboard.writeText(code)
     setIsCopied(true)
+    trackEvent({
+      name: 'copy-protocol',
+      properties: {},
+    })
   }
 
   useEffect(() => {

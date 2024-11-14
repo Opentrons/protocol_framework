@@ -224,6 +224,7 @@ export function UpdateProtocol(): JSX.Element {
     trackEvent({
       name: 'submit-prompt',
       properties: {
+        isCreateOrUpdate: 'update',
         prompt: chatPrompt,
       },
     })
