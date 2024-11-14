@@ -18,8 +18,8 @@ interface ListItemCustomizeProps {
   label?: string
   dropdown?: DropdownMenuProps
   tag?: TagProps
-  /** temporary prop for dropdown menu  */
-  forceDirection?: boolean
+  /** optional placement of the menu */
+  menuPlacement?: 'auto' | 'top' | 'bottom'
 }
 
 export function ListItemCustomize(props: ListItemCustomizeProps): JSX.Element {
@@ -31,7 +31,7 @@ export function ListItemCustomize(props: ListItemCustomizeProps): JSX.Element {
     linkText,
     dropdown,
     tag,
-    forceDirection = false,
+    menuPlacement = 'auto',
   } = props
   return (
     <Flex width="100%" alignItems={ALIGN_CENTER} padding={SPACING.spacing12}>
@@ -53,7 +53,7 @@ export function ListItemCustomize(props: ListItemCustomizeProps): JSX.Element {
           </StyledText>
         ) : null}
         {dropdown != null ? (
-          <DropdownMenu {...dropdown} forceDirection={forceDirection} />
+          <DropdownMenu {...dropdown} menuPlacement={menuPlacement} />
         ) : null}
         {tag != null ? <Tag {...tag} /> : null}
       </Flex>

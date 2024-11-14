@@ -31,6 +31,7 @@ export function MoveLabwareTools(props: StepFormProps): JSX.Element {
       flexDirection={DIRECTION_COLUMN}
       gridGap={SPACING.spacing12}
       paddingY={SPACING.spacing16}
+      height="100%"
     >
       {robotType === FLEX_ROBOT_TYPE ? (
         <>

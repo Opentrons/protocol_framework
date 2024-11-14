@@ -304,7 +304,11 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
           </Flex>
         }
       >
-        <div ref={toolsComponentRef}>
+        <div
+          ref={toolsComponentRef}
+          id="stepFormTools"
+          style={{ height: '100%' }}
+        >
           <FormAlerts
             focusedField={focusedField}
             dirtyFields={dirtyFields}
