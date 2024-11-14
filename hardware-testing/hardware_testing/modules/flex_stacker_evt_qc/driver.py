@@ -47,11 +47,13 @@ class FlexStacker:
 
     def __init__(self, port: str, simulating: bool = False) -> None:
         """Constructor."""
-        self._serial = serial.Serial(port, baudrate=STACKER_FREQ)
         self._simulating = simulating
+        if not self._simulating:
+            self._serial = serial.Serial(port, baudrate=STACKER_FREQ)
 
     def _send_and_recv(self, msg: str, guard_ret: str = "") -> str:
         """Internal utility to send a command and receive the response."""
+        assert self._simulating
         self._serial.write(msg.encode())
         ret = self._serial.readline()
         if guard_ret:
@@ -87,4 +89,5 @@ class FlexStacker:
 
     def __del__(self) -> None:
         """Close serial port."""
-        self._serial.close()
+        if not self._simulating:
+            self._serial.close()
