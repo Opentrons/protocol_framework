@@ -386,6 +386,7 @@ def _run_trial(
         blank=trial.blank,
         mode=trial.mode,
         clear_accuracy_function=trial.cfg.nominal_plunger,
+        pose_for_camera=trial.cfg.interactive,
     )
     if not trial.recorder.is_simulator:
         trial.pipette._retract()  # retract to top of gantry
@@ -414,6 +415,7 @@ def _run_trial(
         blank=trial.blank,
         mode=trial.mode,
         clear_accuracy_function=trial.cfg.nominal_plunger,
+        pose_for_camera=trial.cfg.interactive,
     )
     if not trial.recorder.is_simulator:
         trial.pipette._retract()  # retract to top of gantry
@@ -656,9 +658,11 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
             first_tip = _next_tip_for_channel(cfg, resources, 0, total_tips)
             setup_channel_offset = _get_channel_offset(cfg, channel=0)
             first_tip_location = first_tip.top().move(setup_channel_offset)
+            resources.pipette._retract()
             _pick_up_tip(
                 resources.ctx, resources.pipette, cfg, location=first_tip_location
             )
+            resources.pipette._retract()
             ui.print_info("moving to scale")
         if cfg.jog or cfg.only_lld_once:
             liq_height = _get_liquid_height(
@@ -698,12 +702,14 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
         # drop that first "setup" tip
         if not cfg.same_tip and resources.pipette.has_tip:
             ui.print_info("dropping tip")
+            resources.pipette._retract()
             _drop_tip(
                 resources.pipette,
                 return_tip=False,
                 minimum_z_height=_minimum_z_height(cfg),
                 offset=_get_channel_offset(cfg, 0),
             )  # always trash calibration tips
+            resources.pipette._retract()
         calibration_tip_in_use = False
 
         # RUN TRIALS
@@ -751,6 +757,7 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                     )
                     next_tip_location = next_tip.top().move(channel_offset)
                     if not cfg.same_tip:
+                        resources.pipette._retract()
                         _pick_up_tip(
                             resources.ctx,
                             resources.pipette,
@@ -807,6 +814,7 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                             _minimum_z_height(cfg),
                             _get_channel_offset(cfg, run_trial.channel),
                         )
+                        resources.pipette._retract()
 
                 ui.print_header(f"{volume} uL channel {channel + 1} CALCULATIONS")
                 aspirate_average, aspirate_cv, aspirate_d = _calculate_stats(

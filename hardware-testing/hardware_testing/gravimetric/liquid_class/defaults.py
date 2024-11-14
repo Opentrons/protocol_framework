@@ -41,7 +41,7 @@ _default_aspirate: Dict[str, AspirateSettings] = {
         air_gap=None,
         submerge_mm=-3.0,
         retract_mm=3.0,
-        retract_delay=0.5,
+        retract_delay=0.0,
         delay=0.2,
     ),
 }
@@ -79,10 +79,10 @@ _default_dispense: Dict[str, DispenseSettings] = {
         break_off_flow_rate=10.0,  # arbitrary non-zero default
         break_off_ul=0.0,
         push_out=None,
-        submerge_mm=3.0,  # non-contact is hard b/c clings to outside when exiting tip
+        submerge_mm=3.0,  # NOTE: P50S uses "0.0" b/c not fast enough for non-contact
         retract_mm=3.0,
         retract_delay=0.5,
-        delay=0.2,
+        delay=0.2,  # NOTE: P50S uses "0.0"
         blow_out=False,
     ),
 }
@@ -158,15 +158,15 @@ _defaults: Dict[
                         ),
                         dispense=DispenseSettings(
                             z_speed=None,
-                            flow_rate=125.0,
+                            flow_rate=30.0,
                             break_off_flow_acceleration=_default_accel_p50_ul_sec_sec,
                             break_off_flow_rate=None,
                             break_off_ul=None,
-                            push_out=5.0,
-                            submerge_mm=None,
+                            push_out=0.5,
+                            submerge_mm=0.0,  # NOTE: P50S cannot do non-contact w/ Ethanol
                             retract_mm=None,
                             retract_delay=None,
-                            delay=None,
+                            delay=0.0,  # NOTE: reduce time for Ethanol to slide back up tip
                             blow_out=None,
                         ),
                     ),
@@ -232,15 +232,15 @@ _defaults: Dict[
                         ),
                         dispense=DispenseSettings(
                             z_speed=None,
-                            flow_rate=125.0,
+                            flow_rate=30.0,
                             break_off_flow_acceleration=_default_accel_p50_ul_sec_sec,
                             break_off_flow_rate=None,
                             break_off_ul=None,
-                            push_out=5.0,
-                            submerge_mm=None,
+                            push_out=1.0,
+                            submerge_mm=0.0,  # NOTE: P50S cannot do non-contact w/ Ethanol
                             retract_mm=None,
                             retract_delay=None,
-                            delay=None,
+                            delay=0.0,  # NOTE: reduce time for Ethanol to slide back up tip
                             blow_out=None,
                         ),
                     ),
@@ -297,7 +297,7 @@ _defaults: Dict[
                     _ETHANOL_80: LiquidClassSettings(  # ethanol-70
                         aspirate=AspirateSettings(
                             z_speed=None,
-                            flow_rate=50.0,
+                            flow_rate=30.0,
                             air_gap=5.0,
                             submerge_mm=None,
                             retract_mm=None,
@@ -306,15 +306,15 @@ _defaults: Dict[
                         ),
                         dispense=DispenseSettings(
                             z_speed=None,
-                            flow_rate=125.0,
+                            flow_rate=30.0,
                             break_off_flow_acceleration=_default_accel_p50_ul_sec_sec,
                             break_off_flow_rate=None,
                             break_off_ul=None,
-                            push_out=5.0,
-                            submerge_mm=None,
+                            push_out=0.5,
+                            submerge_mm=0.0,  # NOTE: P50S cannot do non-contact w/ Ethanol
                             retract_mm=None,
                             retract_delay=None,
-                            delay=None,
+                            delay=0.0,  # NOTE: reduce time for Ethanol to slide back up tip
                             blow_out=None,
                         ),
                     ),

@@ -134,6 +134,7 @@ def _pipette_with_liquid_settings(  # noqa: C901
     touch_tip: bool = False,
     mode: str = "",
     clear_accuracy_function: bool = False,
+    pose_for_camera: bool = False,
 ) -> None:
     """Run a pipette given some Pipetting Liquid Settings."""
     # FIXME: stop using hwapi, and get those functions into core software
@@ -164,6 +165,11 @@ def _pipette_with_liquid_settings(  # noqa: C901
         blank,
         channel_count,
     )
+    if pose_for_camera:
+        retract_mm = well.depth
+        approach_mm = max(approach_mm, retract_mm)
+        if dispense and liquid_class.dispense.submerge_mm > 2:
+            submerge_mm = well.depth
 
     # SET Z SPEEDS DURING SUBMERGE/RETRACT
     if aspirate or mix:
@@ -245,8 +251,12 @@ def _pipette_with_liquid_settings(  # noqa: C901
         #  2) currently holds an air-gap
         #  3) contact dispensing (below meniscus)
         has_air_gap = liquid_class.aspirate.air_gap > 0
-        is_dispensing_below_meniscus = liquid_class.dispense.submerge_mm <= 0
-        if not blank and has_air_gap and is_dispensing_below_meniscus:
+        # NOTE: it is preferable to INCLUDE the air-gap with the actual dispense
+        #       during a NON-CONTACT dispense, b/c the liquid will first exit
+        #       the tip at a faster speed, reducing the chance of the liquid
+        #       adhering to outside of tip.
+        likely_a_contact_dispense = liquid_class.dispense.submerge_mm <= 1
+        if not blank and has_air_gap and likely_a_contact_dispense:
             pipette.flow_rate.dispense = max(liquid_class.aspirate.air_gap, 1)  # 1 second (minimum)
             pipette.dispense(liquid_class.aspirate.air_gap)
             pipette.flow_rate.dispense = liquid_class.dispense.flow_rate
@@ -369,6 +379,7 @@ def mix_with_liquid_class(
     touch_tip: bool = False,
     mode: str = "",
     clear_accuracy_function: bool = False,
+    pose_for_camera: bool = False,
 ) -> None:
     """Mix with liquid class."""
     _pipette_with_liquid_settings(
@@ -385,6 +396,7 @@ def mix_with_liquid_class(
         touch_tip=touch_tip,
         mode=mode,
         clear_accuracy_function=clear_accuracy_function,
+        pose_for_camera=pose_for_camera,
     )
 
 
@@ -402,6 +414,7 @@ def aspirate_with_liquid_class(
     touch_tip: bool = False,
     mode: str = "",
     clear_accuracy_function: bool = False,
+    pose_for_camera: bool = False,
 ) -> None:
     """Aspirate with liquid class."""
     _pipette_with_liquid_settings(
@@ -418,6 +431,7 @@ def aspirate_with_liquid_class(
         touch_tip=touch_tip,
         mode=mode,
         clear_accuracy_function=clear_accuracy_function,
+        pose_for_camera=pose_for_camera,
     )
 
 
@@ -435,6 +449,7 @@ def dispense_with_liquid_class(
     touch_tip: bool = False,
     mode: str = "",
     clear_accuracy_function: bool = False,
+    pose_for_camera: bool = False,
 ) -> None:
     """Dispense with liquid class."""
     _pipette_with_liquid_settings(
@@ -451,4 +466,5 @@ def dispense_with_liquid_class(
         touch_tip=touch_tip,
         mode=mode,
         clear_accuracy_function=clear_accuracy_function,
+        pose_for_camera=pose_for_camera,
     )
