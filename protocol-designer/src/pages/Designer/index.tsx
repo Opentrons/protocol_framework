@@ -158,6 +158,7 @@ export function Designer(): JSX.Element {
           hasTrashEntity={hasTrashEntity}
           showLiquidOverflowMenu={showLiquidOverflowMenu}
           tabs={[startingDeckTab, protocolStepTab]}
+          isOffDeck={deckView !== leftString}
         />
 
         {tab === 'startingDeck' ? (
