@@ -12,8 +12,10 @@ from ..state import update_types
 from ..types import DropTipWellLocation, DeckPoint
 from .pipetting_common import (
     PipetteIdMixin,
-    DestinationPositionResult,
     TipPhysicallyAttachedError,
+)
+from .movement_common import (
+    DestinationPositionResult,
 )
 from .command import (
     AbstractCommandImpl,

@@ -12,6 +12,8 @@ from ..types import DeckPoint, AddressableOffsetVector
 from ..resources import fixture_validation
 from .pipetting_common import (
     PipetteIdMixin,
+)
+from .movement_common import (
     MovementMixin,
     DestinationPositionResult,
 )

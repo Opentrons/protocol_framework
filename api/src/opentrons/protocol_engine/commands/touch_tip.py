@@ -12,6 +12,8 @@ from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, Succes
 from ..errors.error_occurrence import ErrorOccurrence
 from .pipetting_common import (
     PipetteIdMixin,
+)
+from .movement_common import (
     WellLocationMixin,
     DestinationPositionResult,
 )

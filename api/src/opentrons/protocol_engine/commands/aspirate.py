@@ -9,8 +9,10 @@ from .pipetting_common import (
     PipetteIdMixin,
     AspirateVolumeMixin,
     FlowRateMixin,
-    LiquidHandlingWellLocationMixin,
     BaseLiquidHandlingResult,
+)
+from .movement_common import (
+    LiquidHandlingWellLocationMixin,
     DestinationPositionResult,
 )
 from .command import (

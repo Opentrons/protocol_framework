@@ -9,7 +9,7 @@ from ..state import update_types
 from ..types import MovementAxis, DeckPoint
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ..errors.error_occurrence import ErrorOccurrence
-from .pipetting_common import DestinationPositionResult
+from .movement_common import DestinationPositionResult
 
 if TYPE_CHECKING:
     from ..execution import MovementHandler

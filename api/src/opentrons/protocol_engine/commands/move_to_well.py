@@ -6,6 +6,8 @@ from typing_extensions import Literal
 from ..types import DeckPoint
 from .pipetting_common import (
     PipetteIdMixin,
+)
+from .movement_common import (
     WellLocationMixin,
     MovementMixin,
     DestinationPositionResult,

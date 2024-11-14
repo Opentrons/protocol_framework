@@ -11,6 +11,8 @@ from .pipetting_common import (
     OverpressureError,
     PipetteIdMixin,
     FlowRateMixin,
+)
+from .movement_common import (
     WellLocationMixin,
     DestinationPositionResult,
 )

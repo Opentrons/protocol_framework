@@ -23,6 +23,8 @@ from ..types import DeckPoint
 from .pipetting_common import (
     LiquidNotFoundError,
     PipetteIdMixin,
+)
+from .movement_common import (
     WellLocationMixin,
     DestinationPositionResult,
 )

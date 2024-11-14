@@ -12,6 +12,8 @@ from ..state import update_types
 from ..types import PickUpTipWellLocation, DeckPoint
 from .pipetting_common import (
     PipetteIdMixin,
+)
+from .movement_common import (
     DestinationPositionResult,
 )
 from .command import (

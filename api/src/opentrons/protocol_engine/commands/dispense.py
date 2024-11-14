@@ -14,10 +14,12 @@ from .pipetting_common import (
     PipetteIdMixin,
     DispenseVolumeMixin,
     FlowRateMixin,
-    LiquidHandlingWellLocationMixin,
     BaseLiquidHandlingResult,
-    DestinationPositionResult,
     OverpressureError,
+)
+from .movement_common import (
+    LiquidHandlingWellLocationMixin,
+    DestinationPositionResult,
 )
 from .command import (
     AbstractCommandImpl,
