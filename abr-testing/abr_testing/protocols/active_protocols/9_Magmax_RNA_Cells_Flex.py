@@ -25,7 +25,7 @@ metadata = {
 
 requirements = {
     "robotType": "OT-3",
-    "apiLevel": "2.20",
+    "apiLevel": "2.21",
 }
 """
 Slot A1: Tips 200

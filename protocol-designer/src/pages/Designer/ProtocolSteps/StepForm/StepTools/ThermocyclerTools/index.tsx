@@ -83,7 +83,11 @@ export function ThermocyclerTools(props: StepFormProps): JSX.Element {
     )
   } else {
     return (
-      <Flex flexDirection={DIRECTION_COLUMN}>
+      <Flex
+        flexDirection={DIRECTION_COLUMN}
+        gridGap={SPACING.spacing12}
+        paddingY={SPACING.spacing16}
+      >
         <ProfileSettings
           propsForFields={propsForFields}
           showFormErrors={showFormErrors}

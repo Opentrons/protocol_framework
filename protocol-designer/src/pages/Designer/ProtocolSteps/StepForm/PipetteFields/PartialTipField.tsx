@@ -2,12 +2,18 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { ALL, COLUMN } from '@opentrons/shared-data'
-import { Flex, SPACING, DropdownMenu } from '@opentrons/components'
+import { Flex, DropdownMenu, SPACING } from '@opentrons/components'
 import { getInitialDeckSetup } from '../../../../../step-forms/selectors'
 import type { FieldProps } from '../types'
 
 export function PartialTipField(props: FieldProps): JSX.Element {
-  const { value: dropdownItem, updateValue, errorToShow } = props
+  const {
+    value: dropdownItem,
+    updateValue,
+    errorToShow,
+    padding = `0 ${SPACING.spacing16}`,
+    tooltipContent,
+  } = props
   const { t } = useTranslation('protocol_steps')
   const deckSetup = useSelector(getInitialDeckSetup)
   const tipracks = Object.values(deckSetup.labware).filter(
@@ -19,15 +25,13 @@ export function PartialTipField(props: FieldProps): JSX.Element {
 
   const options = [
     {
-      name: 'all',
+      name: t('all'),
       value: ALL,
-      tooltipText: t(`step_edit_form.field.nozzles.option_tooltip.ALL`),
     },
     {
-      name: 'column',
+      name: t('column'),
       value: COLUMN,
       disabled: tipracksNotOnAdapter.length === 0,
-      tooltipText: t(`step_edit_form.field.nozzles.option_tooltip.COLUMN`),
     },
   ]
 
@@ -39,9 +43,9 @@ export function PartialTipField(props: FieldProps): JSX.Element {
   }, [selectedValue])
 
   return (
-    <Flex padding={SPACING.spacing16}>
+    <Flex padding={padding}>
       <DropdownMenu
-        width="17.5rem"
+        width="100%"
         error={errorToShow}
         dropdownType="neutral"
         filterOptions={options}
@@ -51,6 +55,7 @@ export function PartialTipField(props: FieldProps): JSX.Element {
           updateValue(value)
           setSelectedValue(value)
         }}
+        tooltipText={tooltipContent}
       />
     </Flex>
   )

@@ -41,7 +41,7 @@ export function ProfileStepsSummary(
       <Flex
         flexDirection={DIRECTION_COLUMN}
         gridGap={SPACING.spacing12}
-        padding={SPACING.spacing16}
+        padding={`0 ${SPACING.spacing16}`}
       >
         <StyledText desktopStyle="bodyDefaultSemiBold">
           {i18n.format(

@@ -9,7 +9,7 @@ import type { FieldProps } from '../types'
 
 export function LabwareField(props: FieldProps): JSX.Element {
   const { name } = props
-  const { t } = useTranslation('protocol_steps')
+  const { i18n, t } = useTranslation('protocol_steps')
   const disposalOptions = useSelector(getDisposalOptions)
   const options = useSelector(getLabwareOptions)
   const allOptions =
@@ -22,7 +22,7 @@ export function LabwareField(props: FieldProps): JSX.Element {
       {...props}
       name={name}
       options={allOptions}
-      title={t(`${name}`)}
+      title={i18n.format(t(`${name}`), 'capitalize')}
     />
   )
 }
