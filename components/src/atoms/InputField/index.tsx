@@ -2,7 +2,12 @@ import * as React from 'react'
 import styled, { css } from 'styled-components'
 
 import { Flex } from '../../primitives'
-import { ALIGN_CENTER, DIRECTION_COLUMN, TEXT_ALIGN_RIGHT } from '../../styles'
+import {
+  ALIGN_CENTER,
+  DIRECTION_COLUMN,
+  NO_WRAP,
+  TEXT_ALIGN_RIGHT,
+} from '../../styles'
 import { BORDERS, COLORS } from '../../helix-design-system'
 import { Icon } from '../../icons'
 import { RESPONSIVENESS, SPACING, TYPOGRAPHY } from '../../ui-style-constants'
@@ -233,6 +238,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
         font-weight: ${TYPOGRAPHY.fontWeightRegular};
         line-height: ${TYPOGRAPHY.lineHeight28};
         justify-content: ${textAlign};
+        white-space: ${NO_WRAP};
       }
     `
 
