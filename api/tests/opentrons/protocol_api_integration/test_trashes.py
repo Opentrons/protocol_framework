@@ -1,46 +1,42 @@
 """Tests for the APIs around waste chutes and trash bins."""
 
 
-from opentrons import protocol_api, simulate
+from opentrons import protocol_api
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocols.api_support.util import UnsupportedAPIError
 
 import contextlib
 from typing import ContextManager, Optional, Type
-from typing_extensions import Literal
 import re
 
 import pytest
 
 
 @pytest.mark.parametrize(
-    ("version", "robot_type", "expected_trash_class"),
+    ("protocol", "expected_trash_class"),
     [
-        ("2.13", "OT-2", protocol_api.Labware),
-        ("2.14", "OT-2", protocol_api.Labware),
-        ("2.15", "OT-2", protocol_api.Labware),
+        (("2.13", "OT-2"), protocol_api.Labware),
+        (("2.14", "OT-2"), protocol_api.Labware),
+        (("2.15", "OT-2"), protocol_api.Labware),
         pytest.param(
-            "2.15",
-            "Flex",
+            ("2.15", "Flex"),
             protocol_api.Labware,
             marks=pytest.mark.ot3_only,  # Simulating a Flex protocol requires a Flex hardware API.
         ),
         pytest.param(
-            "2.16",
-            "OT-2",
+            ("2.16", "OT-2"),
             protocol_api.TrashBin,
         ),
         pytest.param(
-            "2.16",
-            "Flex",
+            ("2.16", "Flex"),
             None,
             marks=pytest.mark.ot3_only,  # Simulating a Flex protocol requires a Flex hardware API.
         ),
     ],
+    indirect=["protocol"],
 )
 def test_fixed_trash_presence(
-    robot_type: Literal["OT-2", "Flex"],
-    version: str,
+    protocol: protocol_api.ProtocolContext,
     expected_trash_class: Optional[Type[object]],
 ) -> None:
     """Test the presence of the fixed trash.
@@ -49,9 +45,10 @@ def test_fixed_trash_presence(
     For those that do, ProtocolContext.fixed_trash and InstrumentContext.trash_container
     should point to it. The type of the object depends on the API version.
     """
-    protocol = simulate.get_protocol_api(version=version, robot_type=robot_type)
     instrument = protocol.load_instrument(
-        "p300_single_gen2" if robot_type == "OT-2" else "flex_1channel_50",
+        "p300_single_gen2"
+        if protocol._core.robot_type == "OT-2 Standard"
+        else "flex_1channel_50",
         mount="left",
     )
 
@@ -72,9 +69,9 @@ def test_fixed_trash_presence(
 
 
 @pytest.mark.ot3_only  # Simulating a Flex protocol requires a Flex hardware API.
-def test_trash_search() -> None:
+@pytest.mark.parametrize("protocol", [("2.16", "Flex")], indirect=True)
+def test_trash_search(protocol: protocol_api.ProtocolContext) -> None:
     """Test the automatic trash search for protocols without a fixed trash."""
-    protocol = simulate.get_protocol_api(version="2.16", robot_type="Flex")
     instrument = protocol.load_instrument("flex_1channel_50", mount="left")
 
     # By default, there should be no trash.
@@ -109,40 +106,36 @@ def test_trash_search() -> None:
 
 
 @pytest.mark.parametrize(
-    ("version", "robot_type", "expect_load_to_succeed"),
+    ("protocol", "expect_load_to_succeed"),
     [
         pytest.param(
-            "2.13",
-            "OT-2",
+            ("2.13", "OT-2"),
             False,
             # This xfail (the system does let you load a labware onto slot 12, and does not raise)
             # is surprising to me. It may be be a bug in old PAPI versions.
             marks=pytest.mark.xfail(strict=True, raises=pytest.fail.Exception),
         ),
-        ("2.14", "OT-2", False),
-        ("2.15", "OT-2", False),
+        (("2.14", "OT-2"), False),
+        (("2.15", "OT-2"), False),
         pytest.param(
-            "2.15",
-            "Flex",
+            ("2.15", "Flex"),
             False,
             marks=pytest.mark.ot3_only,  # Simulating a Flex protocol requires a Flex hardware API.
         ),
         pytest.param(
-            "2.16",
-            "OT-2",
+            ("2.16", "OT-2"),
             False,
         ),
         pytest.param(
-            "2.16",
-            "Flex",
+            ("2.16", "Flex"),
             True,
             marks=pytest.mark.ot3_only,  # Simulating a Flex protocol requires a Flex hardware API.
         ),
     ],
+    indirect=["protocol"],
 )
 def test_fixed_trash_load_conflicts(
-    robot_type: Literal["Flex", "OT-2"],
-    version: str,
+    protocol: protocol_api.ProtocolContext,
     expect_load_to_succeed: bool,
 ) -> None:
     """Test loading something onto the location historically used for the fixed trash.
@@ -150,14 +143,12 @@ def test_fixed_trash_load_conflicts(
     In configurations where there is a fixed trash, this should be disallowed.
     In configurations without a fixed trash, this should be allowed.
     """
-    protocol = simulate.get_protocol_api(version=version, robot_type=robot_type)
-
     if expect_load_to_succeed:
         expected_error: ContextManager[object] = contextlib.nullcontext()
     else:
         # If we're expecting an error, it'll be a LocationIsOccupied for 2.15 and below, otherwise
         # it will fail with an IncompatibleAddressableAreaError, since slot 12 will not be in the deck config
-        if APIVersion.from_string(version) < APIVersion(2, 16):
+        if protocol.api_version < APIVersion(2, 16):
             error_name = "LocationIsOccupiedError"
         else:
             error_name = "IncompatibleAddressableAreaError"
