@@ -22,6 +22,7 @@
       "loadLabware": "#/definitions/LoadLabwareCreate",
       "reloadLabware": "#/definitions/ReloadLabwareCreate",
       "loadLiquid": "#/definitions/LoadLiquidCreate",
+      "loadLiquidClass": "#/definitions/LoadLiquidClassCreate",
       "loadModule": "#/definitions/LoadModuleCreate",
       "loadPipette": "#/definitions/LoadPipetteCreate",
       "moveLabware": "#/definitions/MoveLabwareCreate",
@@ -138,6 +139,9 @@
     },
     {
       "$ref": "#/definitions/LoadLiquidCreate"
+    },
+    {
+      "$ref": "#/definitions/LoadLiquidClassCreate"
     },
     {
       "$ref": "#/definitions/LoadModuleCreate"
@@ -1691,6 +1695,905 @@
       },
       "required": ["params"]
     },
+    "PositionReference": {
+      "title": "PositionReference",
+      "description": "Positional reference for liquid handling operations.",
+      "enum": ["well-bottom", "well-top", "well-center", "liquid-meniscus"]
+    },
+    "Coordinate": {
+      "title": "Coordinate",
+      "description": "Three-dimensional coordinates.",
+      "type": "object",
+      "properties": {
+        "x": {
+          "title": "X",
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "y": {
+          "title": "Y",
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "z": {
+          "title": "Z",
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": ["x", "y", "z"]
+    },
+    "DelayParams": {
+      "title": "DelayParams",
+      "description": "Parameters for delay.",
+      "type": "object",
+      "properties": {
+        "duration": {
+          "title": "Duration",
+          "description": "Duration of delay, in seconds.",
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "number",
+              "minimum": 0.0
+            }
+          ]
+        }
+      },
+      "required": ["duration"]
+    },
+    "DelayProperties": {
+      "title": "DelayProperties",
+      "description": "Shared properties for delay..",
+      "type": "object",
+      "properties": {
+        "enable": {
+          "title": "Enable",
+          "description": "Whether delay is enabled.",
+          "type": "boolean"
+        },
+        "params": {
+          "title": "Params",
+          "description": "Parameters for the delay function.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/DelayParams"
+            }
+          ]
+        }
+      },
+      "required": ["enable"]
+    },
+    "Submerge": {
+      "title": "Submerge",
+      "description": "Shared properties for the submerge function before aspiration or dispense.",
+      "type": "object",
+      "properties": {
+        "positionReference": {
+          "description": "Position reference for submerge.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/PositionReference"
+            }
+          ]
+        },
+        "offset": {
+          "title": "Offset",
+          "description": "Relative offset for submerge.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Coordinate"
+            }
+          ]
+        },
+        "speed": {
+          "title": "Speed",
+          "description": "Speed of submerging, in millimeters per second.",
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "number",
+              "minimum": 0.0
+            }
+          ]
+        },
+        "delay": {
+          "title": "Delay",
+          "description": "Delay settings for submerge.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/DelayProperties"
+            }
+          ]
+        }
+      },
+      "required": ["positionReference", "offset", "speed", "delay"]
+    },
+    "opentrons_shared_data__liquid_classes__liquid_class_definition__TouchTipParams": {
+      "title": "TouchTipParams",
+      "description": "Parameters for touch-tip.",
+      "type": "object",
+      "properties": {
+        "zOffset": {
+          "title": "Zoffset",
+          "description": "Offset from the top of the well for touch-tip, in millimeters.",
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "mmToEdge": {
+          "title": "Mmtoedge",
+          "description": "Offset away from the the well edge, in millimeters.",
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "speed": {
+          "title": "Speed",
+          "description": "Touch-tip speed, in millimeters per second.",
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "number",
+              "minimum": 0.0
+            }
+          ]
+        }
+      },
+      "required": ["zOffset", "mmToEdge", "speed"]
+    },
+    "TouchTipProperties": {
+      "title": "TouchTipProperties",
+      "description": "Shared properties for the touch-tip function.",
+      "type": "object",
+      "properties": {
+        "enable": {
+          "title": "Enable",
+          "description": "Whether touch-tip is enabled.",
+          "type": "boolean"
+        },
+        "params": {
+          "title": "Params",
+          "description": "Parameters for the touch-tip function.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/opentrons_shared_data__liquid_classes__liquid_class_definition__TouchTipParams"
+            }
+          ]
+        }
+      },
+      "required": ["enable"]
+    },
+    "RetractAspirate": {
+      "title": "RetractAspirate",
+      "description": "Shared properties for the retract function after aspiration.",
+      "type": "object",
+      "properties": {
+        "positionReference": {
+          "description": "Position reference for retract after aspirate.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/PositionReference"
+            }
+          ]
+        },
+        "offset": {
+          "title": "Offset",
+          "description": "Relative offset for retract after aspirate.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Coordinate"
+            }
+          ]
+        },
+        "speed": {
+          "title": "Speed",
+          "description": "Speed of retraction, in millimeters per second.",
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "number",
+              "minimum": 0.0
+            }
+          ]
+        },
+        "airGapByVolume": {
+          "title": "Airgapbyvolume",
+          "description": "Settings for air gap keyed by target aspiration volume.",
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "number",
+                "minimum": 0.0
+              }
+            ]
+          }
+        },
+        "touchTip": {
+          "title": "Touchtip",
+          "description": "Touch tip settings for retract after aspirate.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/TouchTipProperties"
+            }
+          ]
+        },
+        "delay": {
+          "title": "Delay",
+          "description": "Delay settings for retract after aspirate.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/DelayProperties"
+            }
+          ]
+        }
+      },
+      "required": [
+        "positionReference",
+        "offset",
+        "speed",
+        "airGapByVolume",
+        "touchTip",
+        "delay"
+      ]
+    },
+    "MixParams": {
+      "title": "MixParams",
+      "description": "Parameters for mix.",
+      "type": "object",
+      "properties": {
+        "repetitions": {
+          "title": "Repetitions",
+          "description": "Number of mixing repetitions.",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "volume": {
+          "title": "Volume",
+          "description": "Volume used for mixing, in microliters.",
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": ["repetitions", "volume"]
+    },
+    "MixProperties": {
+      "title": "MixProperties",
+      "description": "Mixing properties.",
+      "type": "object",
+      "properties": {
+        "enable": {
+          "title": "Enable",
+          "description": "Whether mix is enabled.",
+          "type": "boolean"
+        },
+        "params": {
+          "title": "Params",
+          "description": "Parameters for the mix function.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/MixParams"
+            }
+          ]
+        }
+      },
+      "required": ["enable"]
+    },
+    "AspirateProperties": {
+      "title": "AspirateProperties",
+      "description": "Properties specific to the aspirate function.",
+      "type": "object",
+      "properties": {
+        "submerge": {
+          "title": "Submerge",
+          "description": "Submerge settings for aspirate.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Submerge"
+            }
+          ]
+        },
+        "retract": {
+          "title": "Retract",
+          "description": "Pipette retract settings after an aspirate.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/RetractAspirate"
+            }
+          ]
+        },
+        "positionReference": {
+          "description": "Position reference for aspiration.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/PositionReference"
+            }
+          ]
+        },
+        "offset": {
+          "title": "Offset",
+          "description": "Relative offset for aspiration.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Coordinate"
+            }
+          ]
+        },
+        "flowRateByVolume": {
+          "title": "Flowratebyvolume",
+          "description": "Settings for flow rate keyed by target aspiration volume.",
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "number",
+                "minimum": 0.0
+              }
+            ]
+          }
+        },
+        "preWet": {
+          "title": "Prewet",
+          "description": "Whether to perform a pre-wet action.",
+          "type": "boolean"
+        },
+        "mix": {
+          "title": "Mix",
+          "description": "Mixing settings for before an aspirate",
+          "allOf": [
+            {
+              "$ref": "#/definitions/MixProperties"
+            }
+          ]
+        },
+        "delay": {
+          "title": "Delay",
+          "description": "Delay settings after an aspirate",
+          "allOf": [
+            {
+              "$ref": "#/definitions/DelayProperties"
+            }
+          ]
+        }
+      },
+      "required": [
+        "submerge",
+        "retract",
+        "positionReference",
+        "offset",
+        "flowRateByVolume",
+        "preWet",
+        "mix",
+        "delay"
+      ]
+    },
+    "BlowoutLocation": {
+      "title": "BlowoutLocation",
+      "description": "Location for blowout during a transfer function.",
+      "enum": ["source", "destination", "trash"]
+    },
+    "BlowoutParams": {
+      "title": "BlowoutParams",
+      "description": "Parameters for blowout.",
+      "type": "object",
+      "properties": {
+        "location": {
+          "description": "Location well or trash entity for blow out.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/BlowoutLocation"
+            }
+          ]
+        },
+        "flowRate": {
+          "title": "Flowrate",
+          "description": "Flow rate for blow out, in microliters per second.",
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "number",
+              "minimum": 0.0
+            }
+          ]
+        }
+      },
+      "required": ["location", "flowRate"]
+    },
+    "BlowoutProperties": {
+      "title": "BlowoutProperties",
+      "description": "Blowout properties.",
+      "type": "object",
+      "properties": {
+        "enable": {
+          "title": "Enable",
+          "description": "Whether blow-out is enabled.",
+          "type": "boolean"
+        },
+        "params": {
+          "title": "Params",
+          "description": "Parameters for the blowout function.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/BlowoutParams"
+            }
+          ]
+        }
+      },
+      "required": ["enable"]
+    },
+    "RetractDispense": {
+      "title": "RetractDispense",
+      "description": "Shared properties for the retract function after dispense.",
+      "type": "object",
+      "properties": {
+        "positionReference": {
+          "description": "Position reference for retract after dispense.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/PositionReference"
+            }
+          ]
+        },
+        "offset": {
+          "title": "Offset",
+          "description": "Relative offset for retract after dispense.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Coordinate"
+            }
+          ]
+        },
+        "speed": {
+          "title": "Speed",
+          "description": "Speed of retraction, in millimeters per second.",
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "number",
+              "minimum": 0.0
+            }
+          ]
+        },
+        "airGapByVolume": {
+          "title": "Airgapbyvolume",
+          "description": "Settings for air gap keyed by target aspiration volume.",
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "number",
+                "minimum": 0.0
+              }
+            ]
+          }
+        },
+        "blowout": {
+          "title": "Blowout",
+          "description": "Blowout properties for retract after dispense.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/BlowoutProperties"
+            }
+          ]
+        },
+        "touchTip": {
+          "title": "Touchtip",
+          "description": "Touch tip settings for retract after dispense.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/TouchTipProperties"
+            }
+          ]
+        },
+        "delay": {
+          "title": "Delay",
+          "description": "Delay settings for retract after dispense.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/DelayProperties"
+            }
+          ]
+        }
+      },
+      "required": [
+        "positionReference",
+        "offset",
+        "speed",
+        "airGapByVolume",
+        "blowout",
+        "touchTip",
+        "delay"
+      ]
+    },
+    "SingleDispenseProperties": {
+      "title": "SingleDispenseProperties",
+      "description": "Properties specific to the single-dispense function.",
+      "type": "object",
+      "properties": {
+        "submerge": {
+          "title": "Submerge",
+          "description": "Submerge settings for single dispense.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Submerge"
+            }
+          ]
+        },
+        "retract": {
+          "title": "Retract",
+          "description": "Pipette retract settings after a single dispense.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/RetractDispense"
+            }
+          ]
+        },
+        "positionReference": {
+          "description": "Position reference for single dispense.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/PositionReference"
+            }
+          ]
+        },
+        "offset": {
+          "title": "Offset",
+          "description": "Relative offset for single dispense.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Coordinate"
+            }
+          ]
+        },
+        "flowRateByVolume": {
+          "title": "Flowratebyvolume",
+          "description": "Settings for flow rate keyed by target dispense volume.",
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "number",
+                "minimum": 0.0
+              }
+            ]
+          }
+        },
+        "mix": {
+          "title": "Mix",
+          "description": "Mixing settings for after a dispense",
+          "allOf": [
+            {
+              "$ref": "#/definitions/MixProperties"
+            }
+          ]
+        },
+        "pushOutByVolume": {
+          "title": "Pushoutbyvolume",
+          "description": "Settings for pushout keyed by target dispense volume.",
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "number",
+                "minimum": 0.0
+              }
+            ]
+          }
+        },
+        "delay": {
+          "title": "Delay",
+          "description": "Delay after dispense, in seconds.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/DelayProperties"
+            }
+          ]
+        }
+      },
+      "required": [
+        "submerge",
+        "retract",
+        "positionReference",
+        "offset",
+        "flowRateByVolume",
+        "mix",
+        "pushOutByVolume",
+        "delay"
+      ]
+    },
+    "MultiDispenseProperties": {
+      "title": "MultiDispenseProperties",
+      "description": "Properties specific to the multi-dispense function.",
+      "type": "object",
+      "properties": {
+        "submerge": {
+          "title": "Submerge",
+          "description": "Submerge settings for multi-dispense.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Submerge"
+            }
+          ]
+        },
+        "retract": {
+          "title": "Retract",
+          "description": "Pipette retract settings after a multi-dispense.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/RetractDispense"
+            }
+          ]
+        },
+        "positionReference": {
+          "description": "Position reference for multi-dispense.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/PositionReference"
+            }
+          ]
+        },
+        "offset": {
+          "title": "Offset",
+          "description": "Relative offset for single multi-dispense.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Coordinate"
+            }
+          ]
+        },
+        "flowRateByVolume": {
+          "title": "Flowratebyvolume",
+          "description": "Settings for flow rate keyed by target dispense volume.",
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "number",
+                "minimum": 0.0
+              }
+            ]
+          }
+        },
+        "conditioningByVolume": {
+          "title": "Conditioningbyvolume",
+          "description": "Settings for conditioning volume keyed by target dispense volume.",
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "number",
+                "minimum": 0.0
+              }
+            ]
+          }
+        },
+        "disposalByVolume": {
+          "title": "Disposalbyvolume",
+          "description": "Settings for disposal volume keyed by target dispense volume.",
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "number",
+                "minimum": 0.0
+              }
+            ]
+          }
+        },
+        "delay": {
+          "title": "Delay",
+          "description": "Delay settings after each dispense",
+          "allOf": [
+            {
+              "$ref": "#/definitions/DelayProperties"
+            }
+          ]
+        }
+      },
+      "required": [
+        "submerge",
+        "retract",
+        "positionReference",
+        "offset",
+        "flowRateByVolume",
+        "conditioningByVolume",
+        "disposalByVolume",
+        "delay"
+      ]
+    },
+    "LiquidClassRecord": {
+      "title": "LiquidClassRecord",
+      "description": "LiquidClassRecord is our internal representation of an (immutable) liquid class.\n\nConceptually, a liquid class record is the tuple (name, pipette, tip, transfer properties).\nWe consider two liquid classes to be the same if every entry in that tuple is the same; and liquid\nclasses are different if any entry in the tuple is different.\n\nThis class defines the tuple via inheritance so that we can reuse the definitions from shared_data.",
+      "type": "object",
+      "properties": {
+        "tiprack": {
+          "title": "Tiprack",
+          "description": "The name of tiprack whose tip will be used when handling this specific liquid class with this pipette",
+          "type": "string"
+        },
+        "aspirate": {
+          "title": "Aspirate",
+          "description": "Aspirate parameters for this tip type.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/AspirateProperties"
+            }
+          ]
+        },
+        "singleDispense": {
+          "title": "Singledispense",
+          "description": "Single dispense parameters for this tip type.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/SingleDispenseProperties"
+            }
+          ]
+        },
+        "multiDispense": {
+          "title": "Multidispense",
+          "description": "Optional multi-dispense parameters for this tip type.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/MultiDispenseProperties"
+            }
+          ]
+        },
+        "liquidClassName": {
+          "title": "Liquidclassname",
+          "description": "Identifier for the liquid of this liquid class, e.g. glycerol50.",
+          "type": "string"
+        },
+        "pipetteModel": {
+          "title": "Pipettemodel",
+          "description": "Identifier for the pipette of this liquid class.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tiprack",
+        "aspirate",
+        "singleDispense",
+        "liquidClassName",
+        "pipetteModel"
+      ]
+    },
+    "LoadLiquidClassParams": {
+      "title": "LoadLiquidClassParams",
+      "description": "The liquid class transfer properties to store.",
+      "type": "object",
+      "properties": {
+        "liquidClassId": {
+          "title": "Liquidclassid",
+          "description": "Unique identifier for the liquid class to store. If you do not supply a liquidClassId, we will generate one.",
+          "type": "string"
+        },
+        "liquidClassRecord": {
+          "title": "Liquidclassrecord",
+          "description": "The liquid class to store.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/LiquidClassRecord"
+            }
+          ]
+        }
+      },
+      "required": ["liquidClassRecord"]
+    },
+    "LoadLiquidClassCreate": {
+      "title": "LoadLiquidClassCreate",
+      "description": "Load Liquid Class command creation request.",
+      "type": "object",
+      "properties": {
+        "commandType": {
+          "title": "Commandtype",
+          "default": "loadLiquidClass",
+          "enum": ["loadLiquidClass"],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/LoadLiquidClassParams"
+        },
+        "intent": {
+          "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/CommandIntent"
+            }
+          ]
+        },
+        "key": {
+          "title": "Key",
+          "description": "A key value, unique in this run, that can be used to track the same logical command across multiple runs of the same protocol. If a value is not provided, one will be generated.",
+          "type": "string"
+        }
+      },
+      "required": ["params"]
+    },
     "ModuleModel": {
       "title": "ModuleModel",
       "description": "All available modules' models.",
@@ -2716,7 +3619,7 @@
       },
       "required": ["params"]
     },
-    "TouchTipParams": {
+    "opentrons__protocol_engine__commands__touch_tip__TouchTipParams": {
       "title": "TouchTipParams",
       "description": "Payload needed to touch a pipette tip the sides of a specific well.",
       "type": "object",
@@ -2771,7 +3674,7 @@
           "type": "string"
         },
         "params": {
-          "$ref": "#/definitions/TouchTipParams"
+          "$ref": "#/definitions/opentrons__protocol_engine__commands__touch_tip__TouchTipParams"
         },
         "intent": {
           "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
