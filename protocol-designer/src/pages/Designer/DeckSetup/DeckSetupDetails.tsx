@@ -2,7 +2,7 @@ import values from 'lodash/values'
 import { Fragment, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { Module, ThermocyclerVizProps } from '@opentrons/components'
+import { Module } from '@opentrons/components'
 import { MODULES_WITH_COLLISION_ISSUES } from '@opentrons/step-generation'
 import {
   getAddressableAreaFromSlotId,
@@ -31,6 +31,7 @@ import { SelectedHoveredItems } from './SelectedHoveredItems'
 import { getAdjacentLabware } from './utils'
 
 import type { ComponentProps, Dispatch, SetStateAction } from 'react'
+import type { ThermocyclerVizProps } from '@opentrons/components'
 import type {
   ModuleTemporalProperties,
   ThermocyclerModuleState,
