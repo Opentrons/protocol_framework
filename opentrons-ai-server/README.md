@@ -60,6 +60,15 @@ In the deployed environments the FastAPI server is run in a docker container. To
 Now the API is running at <http://localhost:8000>
 View the API docs in a browser at <http://localhost:8000/docs>
 
+##### Docker shell
+
+1. make clean
+1. make build
+1. make run-shell
+1. make shell
+
+Now you are in the docker container and can inspect the environment and such.
+
 #### Direct API Interaction and Authentication
 
 > There is only 1 endpoint with the potential to call the OpenAI API. This is the `/api/chat/completion` endpoint. This endpoint requires authentication and the steps are outlined below. In the POST request body setting `"fake": true` will short circuit the handling of the call. The OpenAI API will not be hit. Instead, a hard coded response is returned. We plan to extend this capability to allow for live local testing of the UI without calling the OpenAI API.
