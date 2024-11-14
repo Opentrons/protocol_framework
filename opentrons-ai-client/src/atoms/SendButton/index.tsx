@@ -71,13 +71,13 @@ export function SendButton({
           if (newIndex > progressTexts.length - 1) {
             newIndex = progressTexts.length - 1
           }
-          setButtonText(progressTexts[newIndex])
           return newIndex
         })
       }, 10000)
 
       return () => {
         setProgressIndex(0)
+        setButtonText(progressTexts[0])
         clearInterval(interval)
       }
     }
