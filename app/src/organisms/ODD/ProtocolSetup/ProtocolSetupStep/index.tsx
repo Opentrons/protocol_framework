@@ -17,7 +17,7 @@ import {
 } from '@opentrons/components'
 import { useToaster } from '../../../ToasterOven'
 
-const CSV_FILE_MAX_LENGTH = 15
+const CSV_FILE_MAX_LENGTH = 18 // truncated text + three dots
 
 export type ProtocolSetupStepStatus =
   | 'ready'
