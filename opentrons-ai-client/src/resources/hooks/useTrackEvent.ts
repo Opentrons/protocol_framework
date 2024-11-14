@@ -12,6 +12,5 @@ export function useTrackEvent(): (e: AnalyticsEvent) => void {
   const [mixpanel] = useAtom(mixpanelAtom)
   return event => {
     trackEvent(event, mixpanel?.analytics?.hasOptedIn ?? false)
-    console.log('tracking event', event)
   }
 }
