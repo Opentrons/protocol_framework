@@ -20,11 +20,21 @@ const DROP_TIP_IN_PLACE = 'dropTipInPlace'
 const LOAD_PIPETTE = 'loadPipette'
 const FIXIT_INTENT = 'fixit'
 
+const LEFT_PIPETTE = {
+  mount: LEFT,
+  state: { tipDetected: true },
+  instrumentType: 'pipette',
+  ok: true,
+}
+const RIGHT_PIPETTE = {
+  mount: RIGHT,
+  state: { tipDetected: true },
+  instrumentType: 'pipette',
+  ok: true,
+}
+
 const mockAttachedInstruments = {
-  data: [
-    { mount: LEFT, state: { tipDetected: true } },
-    { mount: RIGHT, state: { tipDetected: true } },
-  ],
+  data: [LEFT_PIPETTE, RIGHT_PIPETTE],
   meta: { cursor: 0, totalLength: 2 },
 }
 
@@ -184,5 +194,46 @@ describe('getPipettesWithTipAttached', () => {
 
     const result = await getPipettesWithTipAttached(DEFAULT_PARAMS)
     expect(result).toEqual([mockAttachedInstruments.data[0]])
+  })
+
+  it('returns all valid attached pipettes when an error occurs', async () => {
+    vi.mocked(getCommands).mockRejectedValueOnce(
+      new Error('Example network error')
+    )
+
+    const result = await getPipettesWithTipAttached(DEFAULT_PARAMS)
+
+    expect(result).toEqual([LEFT_PIPETTE, RIGHT_PIPETTE])
+  })
+
+  it('filters out not ok pipettes', async () => {
+    vi.mocked(getCommands).mockRejectedValueOnce(new Error('Network error'))
+
+    const mockInvalidPipettes = {
+      data: [
+        LEFT_PIPETTE,
+        {
+          ...RIGHT_PIPETTE,
+          ok: false,
+        },
+      ],
+      meta: { cursor: 0, totalLength: 2 },
+    }
+
+    const params = {
+      ...DEFAULT_PARAMS,
+      attachedInstruments: mockInvalidPipettes as any,
+    }
+
+    const result = await getPipettesWithTipAttached(params)
+
+    expect(result).toEqual([
+      {
+        mount: LEFT,
+        state: { tipDetected: true },
+        instrumentType: 'pipette',
+        ok: true,
+      },
+    ])
   })
 })
