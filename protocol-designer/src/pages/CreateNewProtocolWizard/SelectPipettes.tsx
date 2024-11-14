@@ -182,7 +182,6 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
           {page === 'add' ? (
             <Flex
               flexDirection={DIRECTION_COLUMN}
-              height="41.5vh"
               overflowY={OVERFLOW_AUTO}
               gridGap={SPACING.spacing32}
             >

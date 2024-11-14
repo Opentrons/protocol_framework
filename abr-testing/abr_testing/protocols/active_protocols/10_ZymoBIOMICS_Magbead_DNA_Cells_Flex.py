@@ -17,7 +17,7 @@ metadata = {
     "protocolName": "Flex ZymoBIOMICS Magbead DNA Extraction: Cells",
 }
 
-requirements = {"robotType": "OT-3", "apiLevel": "2.20"}
+requirements = {"robotType": "OT-3", "apiLevel": "2.21"}
 """
 Slot A1: Tips 1000
 Slot A2: Tips 1000

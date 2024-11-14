@@ -23,6 +23,8 @@ const TestFormProviderComponent = () => {
       ) : (
         <p>{steps}</p>
       )}
+
+      <p>{`form is ${methods.formState.isValid ? 'valid' : 'invalid'}`}</p>
     </FormProvider>
   )
 }
@@ -113,17 +115,17 @@ describe('StepsSection', () => {
     expect(screen.getAllByText('description test')[1]).toBeInTheDocument()
   })
 
-  it('should enable the confirm button when steps have been added', async () => {
+  it('should update form state to valid when steps have been added', async () => {
     render()
 
-    expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled()
+    expect(screen.getByText('form is invalid')).toBeInTheDocument()
 
     fireEvent.change(screen.getByRole('textbox'), {
       target: { value: 'description test' },
     })
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled()
+      expect(screen.getByText('form is valid')).toBeInTheDocument()
     })
   })
 })

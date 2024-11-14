@@ -4,16 +4,16 @@ export const STAGING_END_POINT =
 export const STAGING_FEEDBACK_END_POINT =
   'https://staging.opentrons.ai/api/chat/feedback'
 export const STAGING_CREATE_PROTOCOL_END_POINT =
-  'http://staging.opentrons.ai/api/chat/createProtocol'
+  'https://staging.opentrons.ai/api/chat/createProtocol'
 export const STAGING_UPDATE_PROTOCOL_END_POINT =
-  'http://staging.opentrons.ai/api/chat/updateProtocol'
+  'https://staging.opentrons.ai/api/chat/updateProtocol'
 
 export const PROD_END_POINT = 'https://opentrons.ai/api/chat/completion'
 export const PROD_FEEDBACK_END_POINT = 'https://opentrons.ai/api/chat/feedback'
 export const PROD_CREATE_PROTOCOL_END_POINT =
-  'http://opentrons.ai/api/chat/createProtocol'
+  'https://opentrons.ai/api/chat/createProtocol'
 export const PROD_UPDATE_PROTOCOL_END_POINT =
-  'http://opentrons.ai/api/chat/updateProtocol'
+  'https://opentrons.ai/api/chat/updateProtocol'
 
 // auth0 domain
 export const AUTH0_DOMAIN = 'identity.auth.opentrons.com'

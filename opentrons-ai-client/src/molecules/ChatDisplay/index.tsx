@@ -26,10 +26,14 @@ import { useAtom } from 'jotai'
 import {
   chatDataAtom,
   feedbackModalAtom,
+  regenerateProtocolAtom,
   scrollToBottomAtom,
+  createProtocolChatAtom,
+  updateProtocolChatAtom,
 } from '../../resources/atoms'
 import { delay } from 'lodash'
 import { useFormContext } from 'react-hook-form'
+import { useTrackEvent } from '../../resources/hooks/useTrackEvent'
 
 interface ChatDisplayProps {
   chat: ChatData
@@ -55,7 +59,11 @@ const StyledIcon = styled(Icon)`
 
 export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
   const { t } = useTranslation('protocol_generator')
+  const trackEvent = useTrackEvent()
   const [isCopied, setIsCopied] = useState<boolean>(false)
+  const [, setRegenerateProtocol] = useAtom(regenerateProtocolAtom)
+  const [createProtocolChat] = useAtom(createProtocolChatAtom)
+  const [updateProtocolChat] = useAtom(updateProtocolChatAtom)
   const [, setShowFeedbackModal] = useAtom(feedbackModalAtom)
   const { setValue } = useFormContext()
   const [chatdata] = useAtom(chatDataAtom)
@@ -64,11 +72,36 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
   const isUser = role === 'user'
 
   const setInputFieldToCorrespondingRequest = (): void => {
-    const prompt = chatdata.find(
-      chat => chat.role === 'user' && chat.requestId === requestId
-    )?.reply
+    let prompt = ''
+    if (
+      requestId.includes('NewProtocol') ||
+      requestId.includes('UpdateProtocol')
+    ) {
+      setRegenerateProtocol({
+        isCreateOrUpdateProtocol: true,
+        regenerate: true,
+      })
+      if (createProtocolChat.prompt !== '') {
+        prompt = createProtocolChat.prompt
+      } else {
+        prompt = updateProtocolChat.prompt
+      }
+    } else {
+      setRegenerateProtocol({
+        isCreateOrUpdateProtocol: false,
+        regenerate: true,
+      })
+      prompt =
+        chatdata.find(
+          chat => chat.role === 'user' && chat.requestId === requestId
+        )?.reply ?? ''
+    }
     setScrollToBottom(!scrollToBottom)
     setValue('userPrompt', prompt)
+    trackEvent({
+      name: 'regenerate-protocol',
+      properties: {},
+    })
   }
 
   const handleFileDownload = (): void => {
@@ -85,6 +118,11 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
     a.download = 'OpentronsAI.py'
     a.click()
     window.URL.revokeObjectURL(url)
+
+    trackEvent({
+      name: 'download-protocol',
+      properties: {},
+    })
   }
 
   const handleClickCopy = async (): Promise<void> => {
@@ -92,6 +130,10 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
     const code = lastCodeBlock?.textContent ?? ''
     await navigator.clipboard.writeText(code)
     setIsCopied(true)
+    trackEvent({
+      name: 'copy-protocol',
+      properties: {},
+    })
   }
 
   useEffect(() => {

@@ -4,7 +4,6 @@ import {
   DIRECTION_COLUMN,
   DIRECTION_ROW,
   Flex,
-  InputField,
   JUSTIFY_CENTER,
   JUSTIFY_END,
   LargeButton,
@@ -21,13 +20,16 @@ import { Trans, useTranslation } from 'react-i18next'
 import { FileUpload } from '../../molecules/FileUpload'
 import { useNavigate } from 'react-router-dom'
 import {
+  chatHistoryAtom,
   createProtocolChatAtom,
   headerWithMeterAtom,
   updateProtocolChatAtom,
+  chatDataAtom,
 } from '../../resources/atoms'
 import { CSSTransition } from 'react-transition-group'
 import { useAtom } from 'jotai'
 import { useTrackEvent } from '../../resources/hooks/useTrackEvent'
+import { TextAreaField } from '../../atoms/TextAreaField'
 
 interface UpdateOptionsDropdown extends DropdownOption {
   value: UpdateOptions
@@ -105,16 +107,19 @@ export function UpdateProtocol(): JSX.Element {
   const [headerState, setHeaderWithMeterAtom] = useAtom(headerWithMeterAtom)
   const [updateType, setUpdateType] = useState<DropdownOption | null>(null)
   const [detailsValue, setDetailsValue] = useState<string>('')
-  const [, setUpdatePromptAtom] = useAtom(updateProtocolChatAtom)
+  const [, setUpdateProtocolChatAtom] = useAtom(updateProtocolChatAtom)
   const [, setCreateProtocolChatAtom] = useAtom(createProtocolChatAtom)
+  const [, setChatHistoryAtom] = useAtom(chatHistoryAtom)
+  const [, setChatData] = useAtom(chatDataAtom)
   const [fileValue, setFile] = useState<File | null>(null)
   const [pythonText, setPythonTextValue] = useState<string>('')
   const [errorText, setErrorText] = useState<string | null>(null)
 
-  // Reset the create protocol chat atom when navigating to the update protocol page
+  // Reset the chat data atom and protocol atoms when navigating to the update protocol page
   useEffect(() => {
     setCreateProtocolChatAtom({
       prompt: '',
+      regenerate: false,
       scientific_application_type: '',
       description: '',
       robots: 'opentrons_flex',
@@ -127,6 +132,17 @@ export function UpdateProtocol(): JSX.Element {
       fake: false,
       fake_id: 0,
     })
+    setUpdateProtocolChatAtom({
+      prompt: '',
+      protocol_text: '',
+      regenerate: false,
+      update_type: 'adapt_python_protocol',
+      update_details: '',
+      fake: false,
+      fake_id: 0,
+    })
+    setChatHistoryAtom([])
+    setChatData([])
   }, [])
 
   useEffect(() => {
@@ -156,7 +172,7 @@ export function UpdateProtocol(): JSX.Element {
     setHeaderWithMeterAtom,
   ])
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
+  const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>): void => {
     setDetailsValue(event.target.value)
   }
 
@@ -171,7 +187,6 @@ export function UpdateProtocol(): JSX.Element {
 
       if (typeof text === 'string' && text !== '') {
         setErrorText(null)
-        console.log('File read successfully:\n', text)
         setPythonTextValue(text)
       } else {
         setErrorText(t('file_length_error'))
@@ -196,7 +211,7 @@ export function UpdateProtocol(): JSX.Element {
 
     console.log(chatPrompt)
 
-    setUpdatePromptAtom({
+    setUpdateProtocolChatAtom({
       prompt: chatPrompt,
       protocol_text: pythonText,
       regenerate: false,
@@ -209,6 +224,7 @@ export function UpdateProtocol(): JSX.Element {
     trackEvent({
       name: 'submit-prompt',
       properties: {
+        isCreateOrUpdate: 'update',
         prompt: chatPrompt,
       },
     })
@@ -310,10 +326,10 @@ export function UpdateProtocol(): JSX.Element {
           />
         </Flex>
         <BodyText>{t('provide_details_of_changes')}</BodyText>
-        <InputField
+        <TextAreaField
           value={detailsValue}
           onChange={handleInputChange}
-          size="medium"
+          height="160px"
         />
         <Flex
           paddingTop="40px"
