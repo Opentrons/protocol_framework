@@ -244,10 +244,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
                 {capitalizeFirstLetterAfterNumber(title)}
               </StyledText>
             </Flex>
-            {selected &&
-            !isStartingOrEndingState &&
-            openedOverflowMenuId != null &&
-            openedOverflowMenuId !== stepId ? (
+            {selected && !isStartingOrEndingState ? (
               <OverflowBtn
                 data-testid={`StepContainer_${stepId}`}
                 fillColor={COLORS.white}
@@ -257,13 +254,11 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
                   if (setOpenedOverflowMenuId != null) {
                     if (openedOverflowMenuId === stepId) {
                       setOpenedOverflowMenuId(null)
-                    } else if (openedOverflowMenuId == null) {
-                      setOpenedOverflowMenuId(stepId ?? null)
-                      handleOverflowClick(e)
                     } else {
                       setOpenedOverflowMenuId(stepId ?? null)
                     }
                   }
+                  handleOverflowClick(e)
                 }}
               />
             ) : null}
