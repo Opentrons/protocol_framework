@@ -13,6 +13,8 @@ const TestFormProviderComponent = () => {
   return (
     <FormProvider {...methods}>
       <ApplicationSection />
+
+      <p>{`form is ${methods.formState.isValid ? 'valid' : 'invalid'}`}</p>
     </FormProvider>
   )
 }
@@ -33,7 +35,6 @@ describe('ApplicationSection', () => {
     expect(
       screen.getByText('Describe what you are trying to do')
     ).toBeInTheDocument()
-    expect(screen.getByText('Confirm')).toBeInTheDocument()
   })
 
   it('should not render other application dropdown if Other option is not selected', () => {
@@ -54,10 +55,10 @@ describe('ApplicationSection', () => {
     expect(screen.getByText('Other application')).toBeInTheDocument()
   })
 
-  it('should enable confirm button when all fields are filled', async () => {
+  it('should update the form state to valid when all fields are filled', async () => {
     render()
 
-    expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled()
+    expect(screen.getByText('form is invalid')).toBeInTheDocument()
 
     const applicationDropdown = screen.getByText('Select an option')
     fireEvent.click(applicationDropdown)
@@ -69,14 +70,13 @@ describe('ApplicationSection', () => {
     fireEvent.change(describeInput, { target: { value: 'Test description' } })
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled()
+      expect(screen.getByText('form is valid')).toBeInTheDocument()
     })
   })
 
-  it('should disable confirm button when all fields are not filled', () => {
+  it('should update the form state to invalid when not all fields are filled', () => {
     render()
 
-    const confirmButton = screen.getByRole('button')
-    expect(confirmButton).toBeDisabled()
+    expect(screen.getByText('form is invalid')).toBeInTheDocument()
   })
 })

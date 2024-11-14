@@ -84,9 +84,9 @@ export interface HeaderWithMeterAtomProps {
   progress: number
 }
 
-export interface createProtocolAtomProps {
-  currentStep: number
-  focusStep: number
+export interface CreateProtocolAtomProps {
+  currentSection: number
+  focusSection: number
 }
 
 export interface PromptData {

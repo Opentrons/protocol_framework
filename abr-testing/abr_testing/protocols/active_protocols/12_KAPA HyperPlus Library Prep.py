@@ -21,7 +21,7 @@ metadata = {
     "author": "Your Name <your.email@example.com>",
 }
 
-requirements = {"robotType": "Flex", "apiLevel": "2.20"}
+requirements = {"robotType": "Flex", "apiLevel": "2.21"}
 
 tt_50 = 0
 tt_200 = 0

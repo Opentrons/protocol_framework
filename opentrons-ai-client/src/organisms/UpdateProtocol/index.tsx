@@ -4,7 +4,6 @@ import {
   DIRECTION_COLUMN,
   DIRECTION_ROW,
   Flex,
-  InputField,
   JUSTIFY_CENTER,
   JUSTIFY_END,
   LargeButton,
@@ -28,6 +27,7 @@ import {
 import { CSSTransition } from 'react-transition-group'
 import { useAtom } from 'jotai'
 import { useTrackEvent } from '../../resources/hooks/useTrackEvent'
+import { TextAreaField } from '../../atoms/TextAreaField'
 
 interface UpdateOptionsDropdown extends DropdownOption {
   value: UpdateOptions
@@ -156,7 +156,7 @@ export function UpdateProtocol(): JSX.Element {
     setHeaderWithMeterAtom,
   ])
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
+  const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>): void => {
     setDetailsValue(event.target.value)
   }
 
@@ -171,7 +171,6 @@ export function UpdateProtocol(): JSX.Element {
 
       if (typeof text === 'string' && text !== '') {
         setErrorText(null)
-        console.log('File read successfully:\n', text)
         setPythonTextValue(text)
       } else {
         setErrorText(t('file_length_error'))
@@ -193,8 +192,6 @@ export function UpdateProtocol(): JSX.Element {
     const detailsText = t('modify_details_of_change') + detailsValue + '\n'
 
     const chatPrompt = `${introText}${originalCodeText}${updateTypeText}${detailsText}`
-
-    console.log(chatPrompt)
 
     setUpdatePromptAtom({
       prompt: chatPrompt,
@@ -310,10 +307,10 @@ export function UpdateProtocol(): JSX.Element {
           />
         </Flex>
         <BodyText>{t('provide_details_of_changes')}</BodyText>
-        <InputField
+        <TextAreaField
           value={detailsValue}
           onChange={handleInputChange}
-          size="medium"
+          height="160px"
         />
         <Flex
           paddingTop="40px"

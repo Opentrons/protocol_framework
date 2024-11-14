@@ -109,7 +109,7 @@ EXPECTED_STATEMENTS_LATEST = [
         index_in_run INTEGER NOT NULL,
         command_id VARCHAR NOT NULL,
         command VARCHAR NOT NULL,
-        command_intent VARCHAR NOT NULL,
+        command_intent VARCHAR,
         PRIMARY KEY (row_id),
         FOREIGN KEY(run_id) REFERENCES run (id)
     )
@@ -121,13 +121,7 @@ EXPECTED_STATEMENTS_LATEST = [
     CREATE UNIQUE INDEX ix_run_run_id_index_in_run ON run_command (run_id, index_in_run)
     """,
     """
-    CREATE INDEX ix_data_files_source ON data_files (source)
-    """,
-    """
     CREATE INDEX ix_protocol_protocol_kind ON protocol (protocol_kind)
-    """,
-    """
-    CREATE INDEX ix_run_command_command_intent ON run_command (command_intent)
     """,
     """
     CREATE TABLE data_files (
@@ -135,9 +129,8 @@ EXPECTED_STATEMENTS_LATEST = [
         name VARCHAR NOT NULL,
         file_hash VARCHAR NOT NULL,
         created_at DATETIME NOT NULL,
-        source VARCHAR(9) NOT NULL,
-        PRIMARY KEY (id),
-        CONSTRAINT datafilesourcesqlenum CHECK (source IN ('uploaded', 'generated'))
+        source VARCHAR(9),
+        PRIMARY KEY (id)
     )
     """,
     """
@@ -542,7 +535,7 @@ EXPECTED_STATEMENTS_V2 = [
 
 
 def _normalize_statement(statement: str) -> str:
-    """Fix up the formatting of a SQL statement for easier comparison."""
+    """Fix up the internal formatting of a single SQL statement for easier comparison."""
     lines = statement.splitlines()
 
     # Remove whitespace at the beginning and end of each line.
@@ -551,7 +544,10 @@ def _normalize_statement(statement: str) -> str:
     # Filter out blank lines.
     lines = [line for line in lines if line != ""]
 
-    return "\n".join(lines)
+    # Normalize line breaks to spaces. When we ask SQLite for its schema, it appears
+    # inconsistent in whether it uses spaces or line breaks to separate tokens.
+    # That may have to do with whether `ALTER TABLE` has been used on the table.
+    return " ".join(lines)
 
 
 @pytest.mark.parametrize(
@@ -598,18 +594,6 @@ def test_creating_from_metadata_emits_expected_statements(
     assert set(normalized_actual) == set(normalized_expected)
 
 
-# FIXME(mm, 2024-11-12): https://opentrons.atlassian.net/browse/EXEC-827
-#
-# There are at least these mismatches:
-#
-# - `ix_data_files_source` is present in metadata, but not emitted by the migration path
-# - `ix_run_command_command_intent` is present in metadata, but not emitted by the migration path
-# - `data_files.source` is nullable as emitted by the migration path, but not as declared in metadata
-# - `command.command_intent` is nullable as emitted by the migration path, but not as declared in metadata
-# - constraint `datafilesourcesqlenum` is present in metadata, but not not emitted by the migration path
-#
-# Remove this xfail mark when the mismatches are resolved.
-@pytest.mark.xfail(strict=True)
 def test_migrated_db_matches_db_created_from_metadata(tmp_path: Path) -> None:
     """Test that the output of migration matches `metadata.create_all()`.
 
