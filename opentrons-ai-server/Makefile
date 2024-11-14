@@ -75,6 +75,12 @@ deploy: gen-requirements
 	@echo "Deploying to environment: $(ENV)"
 	python -m pipenv run python deploy.py --env $(ENV) $(if $(TAG),--tag $(TAG),)
 
+.PHONY: dry-deploy
+dry-deploy: gen-requirements
+	@echo "Dry run deploying to environment: $(ENV)"
+	@echo "Data is retrieved from AWS but no changes are made"
+	python -m pipenv run python deploy.py --dry --env $(ENV) $(if $(TAG),--tag $(TAG),)
+
 .PHONY: prompted-deploy
 prompted-deploy: gen-requirements
 	python -m pipenv run python deploy.py

@@ -135,3 +135,30 @@ The live-test target will run tests against any environment. The default is loca
 ```shell
 make test-googlesheet
 ```
+
+## Add Secrets or Environment Variables
+
+1. Define the new secret or environment variable in the `api/settings.py` file.
+1. Add the new secret or environment variable to your local `.env` file.
+1. Test locally.
+1. Log into the AWS console and navigate to the Secrets Manager.
+1. Environment variables are added into the json secret named ENV_VARIABLES_SECRET_NAME in deploy.py for a given environment.
+1. Environment variables MUST be named the same as the property in the Settings class.
+1. Secret names MUST be the same as the property in the Settings class but with \_ replaced with - and prefixed with the environment name-.
+1. The deploy script will load the environment variables from the secret and set them in the container definition.
+1. The deploy script will map the secrets from Settings and match them to the container secrets.
+1. If any secrets are missing, the deploy script with retrieve the secret ARN and set the secret in the container definition.
+
+## AWS Deployment
+
+Locally test the deployment script like so:
+
+```shell
+AWS_PROFILE=robotics_ai_staging make dry-deploy ENV=staging
+```
+
+Locally deploy to the staging environment like so:
+
+```shell
+AWS_PROFILE=robotics_ai_staging make deploy ENV=staging
+```
