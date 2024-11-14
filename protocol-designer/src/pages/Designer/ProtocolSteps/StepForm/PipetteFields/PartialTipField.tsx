@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
+import { capitalize } from 'lodash'
 import { ALL, COLUMN } from '@opentrons/shared-data'
 import { Flex, DropdownMenu, SPACING } from '@opentrons/components'
 import { getInitialDeckSetup } from '../../../../../step-forms/selectors'
@@ -34,7 +35,7 @@ export function PartialTipField(props: FieldProps): JSX.Element {
       disabled: tipracksNotOnAdapter.length === 0,
     },
   ]
-
+  const [selectedOption, setSelectedOption] = useState(options[0])
   const [selectedValue, setSelectedValue] = useState(
     dropdownItem || options[0].value
   )
@@ -50,9 +51,10 @@ export function PartialTipField(props: FieldProps): JSX.Element {
         dropdownType="neutral"
         filterOptions={options}
         title={t('select_nozzles')}
-        currentOption={options[0]}
+        currentOption={selectedOption}
         onClick={value => {
           updateValue(value)
+          setSelectedOption({ name: capitalize(value), value: value })
           setSelectedValue(value)
         }}
         tooltipText={tooltipContent}
