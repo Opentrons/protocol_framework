@@ -47,7 +47,7 @@ import type { BaseState } from '../../../../types'
 
 const STARTING_DECK_STATE = 'Starting deck state'
 const FINAL_DECK_STATE = 'Final deck state'
-
+const PX_HEIGHT_TO_TOP_OF_CONTAINER = 32
 export interface StepContainerProps {
   title: string
   iconName: IconName
@@ -112,8 +112,8 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
       menuRootRef.current?.contains(event.target)
     )
 
-    if (wasOutside && setOpenedOverflowMenuId) {
-      setOpenedOverflowMenuId(null)
+    if (wasOutside) {
+      setOpenedOverflowMenuId?.(null)
     }
   }
 
@@ -125,8 +125,8 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
     const spaceBelow = screenHeight - buttonRect.bottom
     const top =
       spaceBelow > rootHeight
-        ? buttonRect.bottom - 32
-        : buttonRect.top - rootHeight + 32
+        ? buttonRect.bottom - PX_HEIGHT_TO_TOP_OF_CONTAINER
+        : buttonRect.top - rootHeight + PX_HEIGHT_TO_TOP_OF_CONTAINER
 
     setTop(top)
   }
@@ -180,7 +180,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
     showConfirmation: showDeleteConfirmation,
     cancel: cancelDelete,
   } = useConditionalConfirm(handleDelete, true)
-  console.log(openedOverflowMenuId, stepId)
+
   return (
     <>
       {showDeleteConfirmation && (
@@ -251,13 +251,12 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
                 onClick={(e: ReactMouseEvent) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  if (setOpenedOverflowMenuId != null) {
-                    if (openedOverflowMenuId === stepId) {
-                      setOpenedOverflowMenuId(null)
-                    } else {
-                      setOpenedOverflowMenuId(stepId ?? null)
-                    }
+                  if (openedOverflowMenuId === stepId) {
+                    setOpenedOverflowMenuId?.(null)
+                  } else {
+                    setOpenedOverflowMenuId?.(stepId ?? null)
                   }
+
                   handleOverflowClick(e)
                 }}
               />
