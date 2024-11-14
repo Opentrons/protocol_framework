@@ -83,10 +83,11 @@ class AspirateInPlaceImplementation(
             TipNotAttachedError: if no tip is attached to the pipette.
             PipetteNotReadyToAspirateError: pipette plunger is not ready.
         """
+        state_update = StateUpdate()
+
         ready_to_aspirate = self._pipetting.get_is_ready_to_aspirate(
             pipette_id=params.pipetteId,
         )
-
         if not ready_to_aspirate:
             raise PipetteNotReadyToAspirateError(
                 "Pipette cannot aspirate in place because of a previous blow out."
@@ -94,11 +95,10 @@ class AspirateInPlaceImplementation(
                 " so the plunger can be reset in a known safe position."
             )
 
-        state_update = StateUpdate()
         current_location = self._state_view.pipettes.get_current_location()
+        current_position = await self._gantry_mover.get_position(params.pipetteId)
 
         try:
-            current_position = await self._gantry_mover.get_position(params.pipetteId)
             volume = await self._pipetting.aspirate_in_place(
                 pipette_id=params.pipetteId,
                 volume=params.volume,

@@ -76,8 +76,8 @@ class DispenseInPlaceImplementation(
         """Dispense without moving the pipette."""
         state_update = StateUpdate()
         current_location = self._state_view.pipettes.get_current_location()
+        current_position = await self._gantry_mover.get_position(params.pipetteId)
         try:
-            current_position = await self._gantry_mover.get_position(params.pipetteId)
             volume = await self._pipetting.dispense_in_place(
                 pipette_id=params.pipetteId,
                 volume=params.volume,
