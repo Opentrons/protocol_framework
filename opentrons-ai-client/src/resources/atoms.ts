@@ -42,7 +42,10 @@ export const updateProtocolChatAtom = atom<UpdatePrompt>({
 })
 
 /** Regenerate protocol atom */
-export const regenerateProtocolAtom = atom<{ isCreateOrUpdateProtocol: boolean; regenerate: boolean }>({
+export const regenerateProtocolAtom = atom<{
+  isCreateOrUpdateProtocol: boolean
+  regenerate: boolean
+}>({
   isCreateOrUpdateProtocol: false,
   regenerate: false,
 })
