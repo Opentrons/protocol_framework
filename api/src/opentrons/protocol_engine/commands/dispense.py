@@ -4,11 +4,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Type, Union
 from typing_extensions import Literal
 
-from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
 
 from pydantic import Field
 
-from ..types import DeckPoint
 from ..state.update_types import StateUpdate, CLEAR
 from .pipetting_common import (
     PipetteIdMixin,
@@ -16,10 +14,12 @@ from .pipetting_common import (
     FlowRateMixin,
     BaseLiquidHandlingResult,
     OverpressureError,
+    dispense_in_place,
 )
 from .movement_common import (
     LiquidHandlingWellLocationMixin,
     DestinationPositionResult,
+    move_to_well,
 )
 from .command import (
     AbstractCommandImpl,
@@ -28,7 +28,6 @@ from .command import (
     DefinedErrorData,
     SuccessData,
 )
-from ..errors.error_occurrence import ErrorOccurrence
 
 if TYPE_CHECKING:
     from ..execution import MovementHandler, PipettingHandler
@@ -80,7 +79,6 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
 
     async def execute(self, params: DispenseParams) -> _ExecuteReturn:
         """Move to and dispense to the requested well."""
-        state_update = StateUpdate()
         well_location = params.wellLocation
         labware_id = params.labwareId
         well_name = params.wellName
@@ -88,72 +86,76 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
 
         # TODO(pbm, 10-15-24): call self._state_view.geometry.validate_dispense_volume_into_well()
 
-        position = await self._movement.move_to_well(
+        move_result = await move_to_well(
+            movement=self._movement,
             pipette_id=params.pipetteId,
             labware_id=labware_id,
             well_name=well_name,
             well_location=well_location,
         )
-        deck_point = DeckPoint.construct(x=position.x, y=position.y, z=position.z)
-        state_update.set_pipette_location(
+        dispense_result = await dispense_in_place(
             pipette_id=params.pipetteId,
-            new_labware_id=labware_id,
-            new_well_name=well_name,
-            new_deck_point=deck_point,
+            volume=volume,
+            flow_rate=params.flowRate,
+            push_out=params.pushOut,
+            location_if_error={
+                "retryLocation": (
+                    move_result.public.position.x,
+                    move_result.public.position.y,
+                    move_result.public.position.z,
+                )
+            },
+            pipetting=self._pipetting,
+            model_utils=self._model_utils,
         )
 
-        try:
-            volume = await self._pipetting.dispense_in_place(
-                pipette_id=params.pipetteId,
-                volume=volume,
-                flow_rate=params.flowRate,
-                push_out=params.pushOut,
-            )
-        except PipetteOverpressureError as e:
-            state_update.set_liquid_operated(
-                labware_id=labware_id,
-                well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
-                    labware_id, well_name, params.pipetteId
-                ),
-                volume_added=CLEAR,
-            )
-            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
+        if isinstance(dispense_result, DefinedErrorData):
             return DefinedErrorData(
-                public=OverpressureError(
-                    id=self._model_utils.generate_id(),
-                    createdAt=self._model_utils.get_timestamp(),
-                    wrappedErrors=[
-                        ErrorOccurrence.from_failed(
-                            id=self._model_utils.generate_id(),
-                            createdAt=self._model_utils.get_timestamp(),
-                            error=e,
-                        )
-                    ],
-                    errorInfo={"retryLocation": (position.x, position.y, position.z)},
+                public=dispense_result.public,
+                state_update=(
+                    StateUpdate.reduce(
+                        move_result.state_update, dispense_result.state_update
+                    ).set_liquid_operated(
+                        labware_id=labware_id,
+                        well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+                            labware_id, well_name, params.pipetteId
+                        ),
+                        volume_added=CLEAR,
+                    )
                 ),
-                state_update=state_update,
+                state_update_if_false_positive=StateUpdate.reduce(
+                    move_result.state_update,
+                    dispense_result.state_update_if_false_positive,
+                ),
             )
         else:
             volume_added = (
                 self._state_view.pipettes.get_liquid_dispensed_by_ejecting_volume(
-                    pipette_id=params.pipetteId, volume=volume
+                    pipette_id=params.pipetteId, volume=dispense_result.public.volume
                 )
             )
             if volume_added is not None:
                 volume_added *= self._state_view.geometry.get_nozzles_per_well(
                     labware_id, well_name, params.pipetteId
                 )
-            state_update.set_liquid_operated(
-                labware_id=labware_id,
-                well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
-                    labware_id, well_name, params.pipetteId
-                ),
-                volume_added=volume_added if volume_added is not None else CLEAR,
-            )
-            state_update.set_fluid_ejected(pipette_id=params.pipetteId, volume=volume)
             return SuccessData(
-                public=DispenseResult(volume=volume, position=deck_point),
-                state_update=state_update,
+                public=DispenseResult(
+                    volume=dispense_result.public.volume,
+                    position=move_result.public.position,
+                ),
+                state_update=(
+                    StateUpdate.reduce(
+                        move_result.state_update, dispense_result.state_update
+                    ).set_liquid_operated(
+                        labware_id=labware_id,
+                        well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+                            labware_id, well_name, params.pipetteId
+                        ),
+                        volume_added=volume_added
+                        if volume_added is not None
+                        else CLEAR,
+                    )
+                ),
             )
 
 

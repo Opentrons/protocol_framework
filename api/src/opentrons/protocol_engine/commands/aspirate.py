@@ -1,7 +1,7 @@
 """Aspirate command request, result, and implementation models."""
+
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Type, Union
-from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
 from typing_extensions import Literal
 
 from .pipetting_common import (
@@ -10,10 +10,12 @@ from .pipetting_common import (
     AspirateVolumeMixin,
     FlowRateMixin,
     BaseLiquidHandlingResult,
+    aspirate_in_place,
 )
 from .movement_common import (
     LiquidHandlingWellLocationMixin,
     DestinationPositionResult,
+    move_to_well,
 )
 from .command import (
     AbstractCommandImpl,
@@ -22,7 +24,6 @@ from .command import (
     DefinedErrorData,
     SuccessData,
 )
-from ..errors.error_occurrence import ErrorOccurrence
 
 from opentrons.hardware_control import HardwareControlAPI
 
@@ -31,9 +32,6 @@ from ..types import (
     WellLocation,
     WellOrigin,
     CurrentWell,
-    DeckPoint,
-    AspiratedFluid,
-    FluidKind,
 )
 
 if TYPE_CHECKING:
@@ -101,7 +99,6 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
         )
 
         current_well = None
-        state_update = StateUpdate()
 
         if not ready_to_aspirate:
             await self._movement.move_to_well(
@@ -121,7 +118,8 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
                 well_name=well_name,
             )
 
-        position = await self._movement.move_to_well(
+        move_result = await move_to_well(
+            movement=self._movement,
             pipette_id=pipette_id,
             labware_id=labware_id,
             well_name=well_name,
@@ -129,66 +127,61 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
             current_well=current_well,
             operation_volume=-params.volume,
         )
-        deck_point = DeckPoint.construct(x=position.x, y=position.y, z=position.z)
-        state_update.set_pipette_location(
-            pipette_id=pipette_id,
-            new_labware_id=labware_id,
-            new_well_name=well_name,
-            new_deck_point=deck_point,
-        )
 
-        try:
-            volume_aspirated = await self._pipetting.aspirate_in_place(
-                pipette_id=pipette_id,
-                volume=params.volume,
-                flow_rate=params.flowRate,
-                command_note_adder=self._command_note_adder,
-            )
-        except PipetteOverpressureError as e:
-            state_update.set_liquid_operated(
-                labware_id=labware_id,
-                well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
-                    labware_id, well_name, pipette_id
-                ),
-                volume_added=CLEAR,
-            )
-            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
+        aspirate_result = await aspirate_in_place(
+            pipette_id=pipette_id,
+            volume=params.volume,
+            flow_rate=params.flowRate,
+            location_if_error={
+                "retryLocation": (
+                    move_result.public.position.x,
+                    move_result.public.position.y,
+                    move_result.public.position.z,
+                )
+            },
+            command_note_adder=self._command_note_adder,
+            pipetting=self._pipetting,
+            model_utils=self._model_utils,
+        )
+        if isinstance(aspirate_result, DefinedErrorData):
             return DefinedErrorData(
-                public=OverpressureError(
-                    id=self._model_utils.generate_id(),
-                    createdAt=self._model_utils.get_timestamp(),
-                    wrappedErrors=[
-                        ErrorOccurrence.from_failed(
-                            id=self._model_utils.generate_id(),
-                            createdAt=self._model_utils.get_timestamp(),
-                            error=e,
-                        )
-                    ],
-                    errorInfo={"retryLocation": (position.x, position.y, position.z)},
+                public=aspirate_result.public,
+                state_update=StateUpdate.reduce(
+                    move_result.state_update, aspirate_result.state_update
+                ).set_liquid_operated(
+                    labware_id=labware_id,
+                    well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+                        labware_id,
+                        well_name,
+                        params.pipetteId,
+                    ),
+                    volume_added=CLEAR,
                 ),
-                state_update=state_update,
+                state_update_if_false_positive=StateUpdate.reduce(
+                    move_result.state_update,
+                    aspirate_result.state_update_if_false_positive,
+                ),
             )
         else:
-            state_update.set_liquid_operated(
-                labware_id=labware_id,
-                well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
-                    labware_id, well_name, pipette_id
-                ),
-                volume_added=-volume_aspirated
-                * self._state_view.geometry.get_nozzles_per_well(
-                    labware_id, well_name, pipette_id
-                ),
-            )
-            state_update.set_fluid_aspirated(
-                pipette_id=params.pipetteId,
-                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=volume_aspirated),
-            )
             return SuccessData(
                 public=AspirateResult(
-                    volume=volume_aspirated,
-                    position=deck_point,
+                    volume=aspirate_result.public.volume,
+                    position=move_result.public.position,
                 ),
-                state_update=state_update,
+                state_update=StateUpdate.reduce(
+                    move_result.state_update, aspirate_result.state_update
+                ).set_liquid_operated(
+                    labware_id=labware_id,
+                    well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+                        labware_id, well_name, pipette_id
+                    ),
+                    volume_added=-aspirate_result.public.volume
+                    * self._state_view.geometry.get_nozzles_per_well(
+                        labware_id,
+                        well_name,
+                        params.pipetteId,
+                    ),
+                ),
             )
 
 

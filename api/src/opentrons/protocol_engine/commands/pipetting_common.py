@@ -6,14 +6,16 @@ from pydantic import BaseModel, Field
 from typing import Literal, Tuple, TypedDict, TYPE_CHECKING
 
 from opentrons.protocol_engine.errors.error_occurrence import ErrorOccurrence
+from opentrons.protocol_engine.types import AspiratedFluid, FluidKind
 from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
-from .command import Maybe, DefinedErrorData, SuccessData
+from .command import DefinedErrorData, SuccessData
 from opentrons.protocol_engine.state.update_types import StateUpdate
 
 
 if TYPE_CHECKING:
     from ..execution.pipetting import PipettingHandler
     from ..resources import ModelUtils
+    from ..notes import CommandNoteAdder
 
 
 class PipetteIdMixin(BaseModel):
@@ -125,42 +127,153 @@ class TipPhysicallyAttachedError(ErrorOccurrence):
     detail: str = ErrorCodes.TIP_DROP_FAILED.value.detail
 
 
-PrepareForAspirateReturn = Maybe[
-    SuccessData[BaseModel], DefinedErrorData[OverpressureError]
-]
-
-
 async def prepare_for_aspirate(
     pipette_id: str,
     pipetting: PipettingHandler,
     model_utils: ModelUtils,
     location_if_error: ErrorLocationInfo,
-) -> PrepareForAspirateReturn:
+) -> SuccessData[BaseModel] | DefinedErrorData[OverpressureError]:
     """Execute pipetting.prepare_for_aspirate, handle errors, and marshal success."""
-    state_update = StateUpdate()
     try:
         await pipetting.prepare_for_aspirate(pipette_id)
     except PipetteOverpressureError as e:
-        state_update.set_fluid_unknown(pipette_id=pipette_id)
-        return PrepareForAspirateReturn.from_error(
-            DefinedErrorData(
-                public=OverpressureError(
-                    id=model_utils.generate_id(),
-                    createdAt=model_utils.get_timestamp(),
-                    wrappedErrors=[
-                        ErrorOccurrence.from_failed(
-                            id=model_utils.generate_id(),
-                            createdAt=model_utils.get_timestamp(),
-                            error=e,
-                        )
-                    ],
-                    errorInfo=location_if_error,
-                ),
-                state_update=state_update,
-            )
+        return DefinedErrorData(
+            public=OverpressureError(
+                id=model_utils.generate_id(),
+                createdAt=model_utils.get_timestamp(),
+                wrappedErrors=[
+                    ErrorOccurrence.from_failed(
+                        id=model_utils.generate_id(),
+                        createdAt=model_utils.get_timestamp(),
+                        error=e,
+                    )
+                ],
+                errorInfo=location_if_error,
+            ),
+            state_update=StateUpdate().set_fluid_unknown(pipette_id=pipette_id),
         )
     else:
-        state_update.set_fluid_empty(pipette_id=pipette_id)
-        return PrepareForAspirateReturn.from_result(
-            SuccessData(public=BaseModel(), state_update=state_update)
+        return SuccessData(
+            public=BaseModel(),
+            state_update=StateUpdate().set_fluid_empty(pipette_id=pipette_id),
+        )
+
+
+async def aspirate_in_place(
+    pipette_id: str,
+    volume: float,
+    flow_rate: float,
+    location_if_error: ErrorLocationInfo,
+    command_note_adder: CommandNoteAdder,
+    pipetting: PipettingHandler,
+    model_utils: ModelUtils,
+) -> SuccessData[BaseLiquidHandlingResult] | DefinedErrorData[OverpressureError]:
+    """Execute an aspirate in place microoperation."""
+    try:
+        volume_aspirated = await pipetting.aspirate_in_place(
+            pipette_id=pipette_id,
+            volume=volume,
+            flow_rate=flow_rate,
+            command_note_adder=command_note_adder,
+        )
+    except PipetteOverpressureError as e:
+        return DefinedErrorData(
+            public=OverpressureError(
+                id=model_utils.generate_id(),
+                createdAt=model_utils.get_timestamp(),
+                wrappedErrors=[
+                    ErrorOccurrence.from_failed(
+                        id=model_utils.generate_id(),
+                        createdAt=model_utils.get_timestamp(),
+                        error=e,
+                    )
+                ],
+                errorInfo=location_if_error,
+            ),
+            state_update=StateUpdate().set_fluid_unknown(pipette_id=pipette_id),
+        )
+    else:
+        return SuccessData(
+            public=BaseLiquidHandlingResult(
+                volume=volume_aspirated,
+            ),
+            state_update=StateUpdate().set_fluid_aspirated(
+                pipette_id=pipette_id,
+                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=volume_aspirated),
+            ),
+        )
+
+
+async def dispense_in_place(
+    pipette_id: str,
+    volume: float,
+    flow_rate: float,
+    push_out: float | None,
+    location_if_error: ErrorLocationInfo,
+    pipetting: PipettingHandler,
+    model_utils: ModelUtils,
+) -> SuccessData[BaseLiquidHandlingResult] | DefinedErrorData[OverpressureError]:
+    """Dispense-in-place as a microoperation."""
+    try:
+        volume = await pipetting.dispense_in_place(
+            pipette_id=pipette_id,
+            volume=volume,
+            flow_rate=flow_rate,
+            push_out=push_out,
+        )
+    except PipetteOverpressureError as e:
+        return DefinedErrorData(
+            public=OverpressureError(
+                id=model_utils.generate_id(),
+                createdAt=model_utils.get_timestamp(),
+                wrappedErrors=[
+                    ErrorOccurrence.from_failed(
+                        id=model_utils.generate_id(),
+                        createdAt=model_utils.get_timestamp(),
+                        error=e,
+                    )
+                ],
+                errorInfo=location_if_error,
+            ),
+            state_update=StateUpdate().set_fluid_unknown(pipette_id=pipette_id),
+        )
+    else:
+        return SuccessData(
+            public=BaseLiquidHandlingResult(volume=volume),
+            state_update=StateUpdate().set_fluid_ejected(
+                pipette_id=pipette_id, volume=volume
+            ),
+        )
+
+
+async def blow_out_in_place(
+    pipette_id: str,
+    flow_rate: float,
+    location_if_error: ErrorLocationInfo,
+    pipetting: PipettingHandler,
+    model_utils: ModelUtils,
+) -> SuccessData[BaseModel] | DefinedErrorData[OverpressureError]:
+    """Execute a blow-out-in-place micro-operation."""
+    try:
+        await pipetting.blow_out_in_place(pipette_id=pipette_id, flow_rate=flow_rate)
+    except PipetteOverpressureError as e:
+        return DefinedErrorData(
+            public=OverpressureError(
+                id=model_utils.generate_id(),
+                createdAt=model_utils.get_timestamp(),
+                wrappedErrors=[
+                    ErrorOccurrence.from_failed(
+                        id=model_utils.generate_id(),
+                        createdAt=model_utils.get_timestamp(),
+                        error=e,
+                    )
+                ],
+                errorInfo=location_if_error,
+            ),
+            state_update=StateUpdate().set_fluid_unknown(pipette_id=pipette_id),
+        )
+    else:
+        return SuccessData(
+            public=BaseModel(),
+            state_update=StateUpdate().set_fluid_empty(pipette_id=pipette_id),
         )

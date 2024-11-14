@@ -1,21 +1,17 @@
 """Blow-out command request, result, and implementation models."""
+
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Type, Union
-from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
 from typing_extensions import Literal
 
 
-from ..state.update_types import StateUpdate
-from ..types import DeckPoint
 from .pipetting_common import (
     OverpressureError,
     PipetteIdMixin,
     FlowRateMixin,
+    blow_out_in_place,
 )
-from .movement_common import (
-    WellLocationMixin,
-    DestinationPositionResult,
-)
+from .movement_common import WellLocationMixin, DestinationPositionResult, move_to_well
 from .command import (
     AbstractCommandImpl,
     BaseCommand,
@@ -24,6 +20,7 @@ from .command import (
     SuccessData,
 )
 from ..errors.error_occurrence import ErrorOccurrence
+from ..state.update_types import StateUpdate
 
 from opentrons.hardware_control import HardwareControlAPI
 
@@ -75,53 +72,43 @@ class BlowOutImplementation(AbstractCommandImpl[BlowOutParams, _ExecuteReturn]):
 
     async def execute(self, params: BlowOutParams) -> _ExecuteReturn:
         """Move to and blow-out the requested well."""
-        state_update = StateUpdate()
-
-        x, y, z = await self._movement.move_to_well(
+        move_result = await move_to_well(
+            movement=self._movement,
             pipette_id=params.pipetteId,
             labware_id=params.labwareId,
             well_name=params.wellName,
             well_location=params.wellLocation,
         )
-        deck_point = DeckPoint.construct(x=x, y=y, z=z)
-        state_update.set_pipette_location(
+        blow_out_result = await blow_out_in_place(
             pipette_id=params.pipetteId,
-            new_labware_id=params.labwareId,
-            new_well_name=params.wellName,
-            new_deck_point=deck_point,
+            flow_rate=params.flowRate,
+            location_if_error={
+                "retryLocation": (
+                    move_result.public.position.x,
+                    move_result.public.position.y,
+                    move_result.public.position.z,
+                )
+            },
+            pipetting=self._pipetting,
+            model_utils=self._model_utils,
         )
-        try:
-            await self._pipetting.blow_out_in_place(
-                pipette_id=params.pipetteId, flow_rate=params.flowRate
-            )
-        except PipetteOverpressureError as e:
-            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
+        if isinstance(blow_out_result, DefinedErrorData):
             return DefinedErrorData(
-                public=OverpressureError(
-                    id=self._model_utils.generate_id(),
-                    createdAt=self._model_utils.get_timestamp(),
-                    wrappedErrors=[
-                        ErrorOccurrence.from_failed(
-                            id=self._model_utils.generate_id(),
-                            createdAt=self._model_utils.get_timestamp(),
-                            error=e,
-                        )
-                    ],
-                    errorInfo={
-                        "retryLocation": (
-                            x,
-                            y,
-                            z,
-                        )
-                    },
+                public=blow_out_result.public,
+                state_update=StateUpdate.reduce(
+                    move_result.state_update, blow_out_result.state_update
                 ),
-                state_update=state_update,
+                state_update_if_false_positive=StateUpdate.reduce(
+                    move_result.state_update,
+                    blow_out_result.state_update_if_false_positive,
+                ),
             )
         else:
-            state_update.set_fluid_empty(pipette_id=params.pipetteId)
             return SuccessData(
-                public=BlowOutResult(position=deck_point),
-                state_update=state_update,
+                public=BlowOutResult(position=move_result.public.position),
+                state_update=StateUpdate.reduce(
+                    move_result.state_update, blow_out_result.state_update
+                ),
             )
 
 
