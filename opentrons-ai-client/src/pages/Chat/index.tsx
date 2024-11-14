@@ -12,7 +12,6 @@ import { ChatDisplay } from '../../molecules/ChatDisplay'
 import { ChatFooter } from '../../molecules/ChatFooter'
 import styled from 'styled-components'
 import { FeedbackModal } from '../../molecules/FeedbackModal'
-import { useNavigate } from 'react-router-dom'
 
 export interface InputType {
   userPrompt: string
@@ -29,13 +28,6 @@ export function Chat(): JSX.Element | null {
   const scrollRef = useRef<HTMLSpanElement | null>(null)
   const [showFeedbackModal] = useAtom(feedbackModalAtom)
   const [scrollToBottom] = useAtom(scrollToBottomAtom)
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    if (chatData.length === 0) {
-      navigate('/')
-    }
-  }, [])
 
   useEffect(() => {
     if (scrollRef.current != null)
