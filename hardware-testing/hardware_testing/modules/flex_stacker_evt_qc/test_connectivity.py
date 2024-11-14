@@ -1,12 +1,4 @@
-# Validate USB communication works
-# EX: Just send and receive a simple status GCODE, perhaps M119 for limit switch status.
-# Validate EEPROM can be read and written
-# EX: Write random data to EEPROM, read data back out and check validity
-# We can flash the serial number as the EEPROM check or do the serial number just after the FW has been flashed
-# Validate MCU LED works
-# EX: This could just be validating it is flashing with the “heartbeat”
 """Test Connectivity."""
-import asyncio
 from typing import List, Union
 
 from hardware_testing.data import ui
@@ -19,18 +11,6 @@ from hardware_testing.data.csv_report import (
 
 from .driver import FlexStacker, HardwareRevision
 
-import logging
-
-LOG = logging.getLogger
-
-LOG = logging.getLogger(__name__)
-
-loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-for logger in loggers:
-    logger.setLevel(logging.CRITICAL)
-
-LOG.setLevel(logging.CRITICAL)
-
 
 def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
     """Build CSV Lines."""
@@ -41,7 +21,7 @@ def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
     ]
 
 
-def test_gcode(driver: FlexStacker, report: CSVReport):
+def test_gcode(driver: FlexStacker, report: CSVReport) -> None:
     """Send and receive response for GCODE M115."""
     success = True
     info = driver.get_device_info()
@@ -56,7 +36,7 @@ def test_gcode(driver: FlexStacker, report: CSVReport):
     )
 
 
-def test_eeprom(driver: FlexStacker, report: CSVReport):
+def test_eeprom(driver: FlexStacker, report: CSVReport) -> None:
     """Set serial number and make sure device info is updated accordingly."""
     success = True
     if not driver._simulating:
@@ -75,7 +55,7 @@ def test_eeprom(driver: FlexStacker, report: CSVReport):
     )
 
 
-def test_leds(driver: FlexStacker, report: CSVReport):
+def test_leds(driver: FlexStacker, report: CSVReport) -> None:
     """Prompt tester to verify the status led is blinking."""
     if not driver._simulating:
         is_blinking = ui.get_user_answer("Is the status LED blinking?")
@@ -86,7 +66,7 @@ def test_leds(driver: FlexStacker, report: CSVReport):
     )
 
 
-def run(driver: FlexStacker, report: CSVReport, section: str):
+def run(driver: FlexStacker, report: CSVReport, section: str) -> None:
     """Run."""
     ui.print_header("USB Communication")
     test_gcode(driver, report)

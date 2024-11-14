@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Tuple
 
 from hardware_testing.data import ui
-from hardware_testing.opentrons_api import helpers_ot3
 from hardware_testing.data.csv_report import CSVReport
 
 from .config import TestSection, TestConfig, build_report, TESTS
@@ -20,7 +19,6 @@ from .driver import FlexStacker
 
 def build_stacker_report(is_simulating: bool) -> Tuple[CSVReport, FlexStacker]:
     """Report setup for FLEX Stacker qc script."""
-
     test_name = Path(__file__).parent.name.replace("_", "-")
     ui.print_title(test_name.upper())
 

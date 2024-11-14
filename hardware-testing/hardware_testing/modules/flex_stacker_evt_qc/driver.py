@@ -1,6 +1,7 @@
+"""FLEX Stacker Driver."""
 from dataclasses import dataclass
-import serial
-from serial.tools.list_ports import comports
+import serial  # type: ignore[import]
+from serial.tools.list_ports import comports  # type: ignore[import]
 import re
 from enum import Enum
 
@@ -30,6 +31,7 @@ class FlexStacker:
 
     @classmethod
     def build(cls, port: str = "") -> "FlexStacker":
+        """Build FLEX Stacker driver."""
         if not port:
             for i in comports():
                 if i.vid == STACKER_VID and i.pid == STACKER_PID:
@@ -40,14 +42,16 @@ class FlexStacker:
 
     @classmethod
     def build_simulator(cls, port: str = "") -> "FlexStacker":
+        """Build FLEX Stacker simulator."""
         return cls(port, simulating=True)
 
     def __init__(self, port: str, simulating: bool = False) -> None:
+        """Constructor."""
         self._serial = serial.Serial(port, baudrate=STACKER_FREQ)
         self._simulating = simulating
 
     def _send_and_recv(self, msg: str, guard_ret: str = "") -> str:
-        """Internal utility to send a command and receive the response"""
+        """Internal utility to send a command and receive the response."""
         self._serial.write(msg.encode())
         ret = self._serial.readline()
         if guard_ret:
@@ -76,9 +80,11 @@ class FlexStacker:
         )
 
     def set_serial_number(self, sn: str) -> None:
+        """Set Serial Number."""
         if self._simulating:
             return
         self._send_and_recv(f"M996 {sn}\n", "M996 OK")
 
     def __del__(self) -> None:
+        """Close serial port."""
         self._serial.close()
