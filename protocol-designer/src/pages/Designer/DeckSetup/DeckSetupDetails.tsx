@@ -2,7 +2,7 @@ import values from 'lodash/values'
 import { Fragment, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { Module } from '@opentrons/components'
+import { Module, ThermocyclerVizProps } from '@opentrons/components'
 import { MODULES_WITH_COLLISION_ISSUES } from '@opentrons/step-generation'
 import {
   getAddressableAreaFromSlotId,
@@ -198,9 +198,23 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
           zDimension: labwareLoadedOnModule?.def.dimensions.zDimension ?? 0,
         }
         const isLabwareOccludedByThermocyclerLid =
-          moduleOnDeck.type === 'thermocyclerModuleType' &&
+          moduleOnDeck.type === THERMOCYCLER_MODULE_TYPE &&
           (moduleOnDeck.moduleState as ThermocyclerModuleState).lidOpen ===
             false
+
+        const tempInnerProps = getModuleInnerProps(moduleOnDeck.moduleState)
+        const innerProps =
+          moduleOnDeck.type === THERMOCYCLER_MODULE_TYPE
+            ? {
+                ...tempInnerProps,
+                lidMotorState:
+                  (tempInnerProps as ThermocyclerVizProps).lidMotorState !==
+                  'closed'
+                    ? 'open'
+                    : 'closed',
+              }
+            : tempInnerProps
+
         return moduleOnDeck.slot !== selectedSlot.slot ? (
           <Fragment key={moduleOnDeck.id}>
             <Module
@@ -211,7 +225,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
               orientation={inferModuleOrientationFromXCoordinate(
                 slotPosition[0]
               )}
-              innerProps={getModuleInnerProps(moduleOnDeck.moduleState)}
+              innerProps={innerProps}
               targetSlotId={slotId}
               targetDeckId={deckDef.otId}
             >

@@ -32,7 +32,6 @@ import type {
   ModuleDefinition,
   ThermocyclerModuleModel,
 } from '@opentrons/shared-data'
-import type { ThermocyclerVizProps } from './Thermocycler'
 
 export * from './Thermocycler'
 
@@ -190,15 +189,12 @@ export const Module = (props: Props): JSX.Element => {
   } else if (moduleType === MAGNETIC_MODULE_TYPE) {
     moduleViz = <MagneticModule />
   } else if (moduleType === THERMOCYCLER_MODULE_TYPE) {
-    const thermocyclerProps: ThermocyclerVizProps = {
+    const thermocyclerProps = {
+      lidMotorState: 'open' as const,
       ...innerProps,
-      lidMotorState:
-        (innerProps as React.ComponentProps<typeof Thermocycler>)
-          .lidMotorState !== 'closed'
-          ? 'open'
-          : 'closed',
       model: def.model as ThermocyclerModuleModel,
     }
+
     moduleViz = <Thermocycler {...thermocyclerProps} />
   } else if (moduleType === HEATERSHAKER_MODULE_TYPE) {
     moduleViz = (
