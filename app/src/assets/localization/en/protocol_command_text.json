@@ -78,6 +78,7 @@
   "tc_starting_extended_profile_cycle": "{{repetitions}} repetitions of the following steps:",
   "tc_starting_profile": "Running thermocycler profile with {{stepCount}} steps:",
   "touch_tip": "Touching tip",
+  "trash_bin": "Trash Bin",
   "trash_bin_in_slot": "Trash Bin in {{slot_name}}",
   "turning_rail_lights_off": "Turning rail lights off",
   "turning_rail_lights_on": "Turning rail lights on",
