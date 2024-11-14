@@ -115,6 +115,7 @@ export function UpdateProtocol(): JSX.Element {
   useEffect(() => {
     setCreateProtocolChatAtom({
       prompt: '',
+      regenerate: false,
       scientific_application_type: '',
       description: '',
       robots: 'opentrons_flex',

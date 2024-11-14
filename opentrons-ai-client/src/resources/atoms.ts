@@ -16,6 +16,7 @@ export const chatDataAtom = atom<ChatData[]>([])
 /** CreateProtocolChatAtom is for the prefilled userprompt when navigating to the chat page from Create New protocol page */
 export const createProtocolChatAtom = atom<CreatePrompt>({
   prompt: '',
+  regenerate: false,
   scientific_application_type: '',
   description: '',
   robots: 'opentrons_flex',
@@ -38,6 +39,12 @@ export const updateProtocolChatAtom = atom<UpdatePrompt>({
   update_details: '',
   fake: false,
   fake_id: 0,
+})
+
+/** Regenerate protocol atom */
+export const regenerateProtocolAtom = atom<{ isCreateOrUpdateProtocol: boolean; regenerate: boolean }>({
+  isCreateOrUpdateProtocol: false,
+  regenerate: false,
 })
 
 /** Scroll to bottom of chat atom */
