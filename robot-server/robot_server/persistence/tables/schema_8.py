@@ -217,7 +217,7 @@ run_command_table = sqlalchemy.Table(
     sqlalchemy.Column("index_in_run", sqlalchemy.Integer, nullable=False),
     sqlalchemy.Column("command_id", sqlalchemy.String, nullable=False),
     sqlalchemy.Column("command", sqlalchemy.String, nullable=False),
-    sqlalchemy.Column("command_intent", sqlalchemy.String, index=True),
+    sqlalchemy.Column("command_intent", sqlalchemy.String, nullable=True),
     sqlalchemy.Column("command_error", sqlalchemy.String, nullable=True),
     sqlalchemy.Column(
         "command_status",
@@ -225,9 +225,9 @@ run_command_table = sqlalchemy.Table(
             CommandStatusSQLEnum,
             values_callable=lambda obj: [e.value for e in obj],
             validate_strings=True,
+            nullable=False,
             create_constraint=True,
         ),
-        nullable=False,
     ),
     sqlalchemy.Index(
         "ix_run_run_id_command_id",  # An arbitrary name for the index.
