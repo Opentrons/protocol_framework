@@ -252,7 +252,7 @@ def get_error_runs_from_robot(ip: str) -> List[str]:
         f"http://{ip}:31950/runs", headers={"opentrons-version": "3"}
     )
     run_data = response.json()
-    run_list = run_data["data"]
+    run_list = run_data.get("data", [])
     for run in run_list:
         run_id = run["id"]
         num_of_errors = len(run["errors"])
