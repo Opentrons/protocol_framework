@@ -67,24 +67,10 @@ GRAVIMETRIC_CFG = {
         96: gravimetric_ot3_p1000_96,
     },
 }
-CAVITY_GRAVIMETRIC_CFG = {
-    50: {
-        1: {
-            20: gravimetric_cavity_ot3_p50_single,
-            50: gravimetric_cavity_ot3_p50_single
-        },
-    },
-    1000: {
-        96: gravimetric_ot3_p1000_96,
-    },
-}
 
 GRAVIMETRIC_CFG_INCREMENT = {
     50: {
-        1: {
-            20: gravimetric_ot3_p50_single,
-            50: gravimetric_ot3_p50_single
-        },
+        1: {20: gravimetric_ot3_p50_single, 50: gravimetric_ot3_p50_single},
         8: {50: gravimetric_ot3_p50_multi_50ul_tip_increment},
     },
     200: {
@@ -123,7 +109,11 @@ PHOTOMETRIC_CFG = {
         },
     },
     200: {
-        96: {50: photometric_ot3_p200_96, 200: photometric_ot3_p200_96},
+        96: {
+            20: photometric_ot3_p200_96,
+            50: photometric_ot3_p200_96,
+            200: photometric_ot3_p200_96,
+        },
     },
     1000: {
         1: {
@@ -136,7 +126,11 @@ PHOTOMETRIC_CFG = {
             200: photometric_ot3_p1000_multi,
             1000: photometric_ot3_p1000_multi,
         },
-        96: {20: photometric_ot3_p1000_96, 50: photometric_ot3_p1000_96, 200: photometric_ot3_p1000_96},
+        96: {
+            20: photometric_ot3_p1000_96,
+            50: photometric_ot3_p1000_96,
+            200: photometric_ot3_p1000_96,
+        },
     },
 }
 
@@ -187,6 +181,7 @@ class RunArgs:
             labware_dir = Path(__file__).parent.parent / "labware"
             custom_def_uris = [
                 "radwag_pipette_calibration_vial",
+                "opentrons_flex_96_tiprack_20ul_adp",
                 "opentrons_flex_96_tiprack_50ul_adp",
                 "opentrons_flex_96_tiprack_200ul_adp",
                 "opentrons_flex_96_tiprack_1000ul_adp",

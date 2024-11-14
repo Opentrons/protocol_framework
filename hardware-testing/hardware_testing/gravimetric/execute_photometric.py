@@ -47,6 +47,7 @@ _DYE_MAP: Dict[str, Dict[str, float]] = {
     "B": {"min": 10, "max": 49.99},
     "C": {"min": 2, "max": 9.999},
     "D": {"min": 1, "max": 1.999},
+    "E": {"min": 0, "max": 0.9999},
 }
 _MIN_START_VOLUME_UL = {1: 500, 8: 3000, 96: 30000}
 _MIN_END_VOLUME_UL = {1: 400, 8: 3000, 96: 10000}

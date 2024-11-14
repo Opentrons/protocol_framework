@@ -6,10 +6,7 @@ metadata = {"protocolName": "gravimetric-cavity-ot3-p50-single"}
 requirements = {"robotType": "Flex", "apiLevel": "2.15"}
 
 SLOT_SCALE = 4
-SLOTS_TIPRACK = {
-    20: [2, 3, 5, 6, 7, 8, 9, 10],
-    50: [2, 3, 5, 6, 7, 8, 9, 10]
-}
+SLOTS_TIPRACK = {20: [2, 3, 5, 6, 7, 8, 9, 10], 50: [2, 3, 5, 6, 7, 8, 9, 10]}
 LABWARE_ON_SCALE = "radwag_pipette_calibration_vial"
 
 
@@ -28,7 +25,7 @@ def run(ctx: ProtocolContext) -> None:
         pipette.dispense(10, vial["A1"].top())
         pipette.drop_tip(home_after=False)
         ctx.move_labware(
-                rack,
-                new_location=OffDeckType.OFF_DECK,
-                use_gripper=False,
-            )
+            rack,
+            new_location=OffDeckType.OFF_DECK,
+            use_gripper=False,
+        )

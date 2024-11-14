@@ -1,5 +1,6 @@
 """Photometric OT3 P1000."""
 from opentrons.protocol_api import ProtocolContext
+from opentrons.protocol_api._types import OffDeckType
 
 metadata = {"protocolName": "photometric-ot3-p1000-96"}
 requirements = {"robotType": "Flex", "apiLevel": "2.15"}
@@ -18,15 +19,6 @@ PHOTOPLATE_LABWARE = "corning_96_wellplate_360ul_flat"
 
 def run(ctx: ProtocolContext) -> None:
     """Run."""
-    tipracks = [
-        # FIXME: use official tip-racks once available
-        ctx.load_labware(
-            f"opentrons_flex_96_tiprack_{size}uL_adp", slot, namespace="custom_beta"
-        )
-        for size, slots in SLOTS_TIPRACK.items()
-        for slot in slots
-        if size == 50  # only calibrate 50ul tips for 96ch test
-    ]
     reservoir = ctx.load_labware(RESERVOIR_LABWARE, SLOT_RESERVOIR)
     plate = ctx.load_labware(PHOTOPLATE_LABWARE, SLOT_PLATE)
     pipette = ctx.load_instrument("flex_96channel_1000", "left")
