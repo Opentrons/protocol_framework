@@ -1,14 +1,12 @@
 """Common functions between v1 transfer and liquid-class-based transfer."""
-from typing import Iterable, Generator, Tuple, TypeVar, Union, Sequence
-from opentrons import types
-from opentrons.protocol_api import Well
+import enum
+from typing import Iterable, Generator, Tuple, TypeVar, Union, Sequence, TYPE_CHECKING
 
-AdvancedLiquidHandling = Union[
-    Well,
-    types.Location,
-    Sequence[Union[Well, types.Location]],
-    Sequence[Sequence[Well]],
-]
+
+class TransferTipPolicyV2(enum.Enum):
+    ONCE = "once"
+    NEVER = "never"
+    ALWAYS = "always"
 
 
 Target = TypeVar("Target")

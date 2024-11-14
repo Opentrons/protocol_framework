@@ -17,7 +17,6 @@ from opentrons.legacy_commands import commands as cmds
 from opentrons.legacy_commands import publisher
 from opentrons.protocols.advanced_control.mix import mix_from_kwargs
 from opentrons.protocols.advanced_control.transfers import transfer as v1_transfer
-from opentrons.protocols.advanced_control.transfers.common import AdvancedLiquidHandling
 from opentrons.protocols.api_support.deck_type import NoTrashDefinedError
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocols.api_support import instrument
@@ -39,7 +38,7 @@ from ._nozzle_layout import NozzleLayout
 from ._liquid import LiquidClass
 from . import labware, validation
 from ..config import feature_flags
-
+from ..protocols.advanced_control.transfers.common import TransferTipPolicyV2
 
 _DEFAULT_ASPIRATE_CLEARANCE = 1.0
 _DEFAULT_DISPENSE_CLEARANCE = 1.0
@@ -62,6 +61,8 @@ _PARTIAL_NOZZLE_CONFIGURATION_SINGLE_ROW_PARTIAL_COLUMN_ADDED_IN = APIVersion(2,
 """The version after which partial nozzle configurations of single, row, and partial column layouts became available."""
 _AIR_GAP_TRACKING_ADDED_IN = APIVersion(2, 22)
 """The version after which air gaps should be implemented with a separate call instead of an aspirate for better liquid volume tracking."""
+
+AdvancedLiquidHandling = v1_transfer.AdvancedLiquidHandling
 
 
 class InstrumentContext(publisher.CommandPublisher):
@@ -1511,15 +1512,52 @@ class InstrumentContext(publisher.CommandPublisher):
         source: AdvancedLiquidHandling,
         dest: AdvancedLiquidHandling,
         trash_location: Union[types.Location, TrashBin, WasteChute] = True,
-        new_tip: Optional[Literal["once", "always", "never"]] = "once",
+        new_tip: Literal["once", "always", "never"] = "once",
     ) -> InstrumentContext:
         """Transfer liquid from source to dest using the specified liquid class properties."""
         if not feature_flags.allow_liquid_classes(
-                robot_type=RobotTypeEnum.robot_literal_to_enum(self._protocol_core.robot_type)
+            robot_type=RobotTypeEnum.robot_literal_to_enum(
+                self._protocol_core.robot_type
+            )
         ):
             raise NotImplementedError("This method is not implemented.")
 
+        flat_sources_list = validation.ensure_valid_flat_wells_list(source)
+        flat_dest_list = validation.ensure_valid_flat_wells_list(dest)
 
+        if len(flat_sources_list) != len(flat_dest_list):
+            raise ValueError(
+                "Sources and destinations should be of the same length in order to perform a transfer."
+                " To transfer liquid from one source to many destinations, use 'distribute_liquid',"
+                " to transfer liquid onto one destinations from many sources, use 'consolidate_liquid'."
+            )
+
+        valid_new_tip = validation.ensure_new_tip_policy(new_tip)
+        if valid_new_tip == TransferTipPolicyV2.NEVER:
+            if self._last_tip_picked_up_from is None:
+                raise RuntimeError(
+                    "Pipette has no tip attached to perform transfer."
+                    " Either do a pick_up_tip beforehand or specify a new_tip parameter"
+                    " of 'once' or 'always'."
+                )
+            else:
+                tiprack = self._last_tip_picked_up_from.parent
+        else:
+            tiprack, well = labware.next_available_tip(
+                starting_tip=self.starting_tip,
+                tip_racks=self.tip_racks,
+                channels=self.active_channels,
+                nozzle_map=self._core.get_nozzle_map(),
+            )
+        if self.current_volume != 0:
+            raise RuntimeError(
+                "A transfer on a liquid class cannot start with liquid already in the tip."
+                " Ensure that all previously aspirated liquid is dispensed before starting"
+                " a new transfer."
+            )
+        liquid_class_props = liquid_class.get_for(
+            pipette=self.name, tiprack=tiprack.name
+        )
 
     @requires_version(2, 0)
     def delay(self, *args: Any, **kwargs: Any) -> None:

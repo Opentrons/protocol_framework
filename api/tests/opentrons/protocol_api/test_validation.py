@@ -6,6 +6,7 @@ from decoy import Decoy
 import pytest
 import re
 
+from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
 from opentrons_shared_data.labware.labware_definition import (
     LabwareRole,
     Parameters as LabwareDefinitionParameters,
@@ -13,6 +14,9 @@ from opentrons_shared_data.labware.labware_definition import (
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.robot.types import RobotType
 
+from opentrons.protocols.advanced_control.transfers.transfer_liquid import (
+    AdvancedLiquidHandling,
+)
 from opentrons.types import (
     Mount,
     DeckSlotName,
@@ -35,6 +39,11 @@ from opentrons.protocols.models import LabwareDefinition
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocols.api_support.util import APIVersionError
 from opentrons.protocol_api import validation as subject, Well, Labware
+
+
+def get_mock_well() -> Well:
+    """Return a mocked out Well object."""
+    return decoy.mock(cls=Well)
 
 
 @pytest.mark.parametrize(
@@ -722,3 +731,102 @@ def test_ensure_only_gantry_axis_map_type(
     """Check that gantry axis_map validation occurs for the given scenarios."""
     with pytest.raises(subject.IncorrectAxisError, match=error_message):
         subject.ensure_only_gantry_axis_map_type(axis_map, robot_type)
+
+
+@pytest.mark.parametrize(
+    ["value", "expected_result"],
+    [
+        ("once", TransferTipPolicyV2.ONCE),
+        ("NEVER", TransferTipPolicyV2.NEVER),
+        ("alWaYs", TransferTipPolicyV2.ALWAYS),
+    ],
+)
+def test_ensure_new_tip_policy(
+    value: str, expected_result: TransferTipPolicyV2
+) -> None:
+    """It should return the expected tip policy."""
+    assert subject.ensure_new_tip_policy(value) == expected_result
+
+
+def test_ensure_new_tip_policy_raises() -> None:
+    """It should raise ValueError for invalid new_tip value."""
+    with pytest.raises(ValueError, match="is invalid value for 'new_tip'"):
+        subject.ensure_new_tip_policy("blah")
+
+
+@pytest.mark.parametrize(
+    ["target", "expected_raise"],
+    [
+        (
+            "a",
+            pytest.raises(
+                ValueError, match="'a' is not a valid location for transfer. Expected"
+            ),
+        ),
+        (
+            ["a"],
+            pytest.raises(
+                ValueError, match="'a' is not a valid location for transfer. Should be"
+            ),
+        ),
+        (
+            [["a"]],
+            pytest.raises(
+                ValueError, match="'a' is not a valid location for transfer. Should be"
+            ),
+        ),
+        (
+            [Location(point=Point(x=1, y=1, z=2), labware=None), "a"],
+            pytest.raises(
+                ValueError, match="'a' is not a valid location for transfer. Should be"
+            ),
+        ),
+        (
+            [[Location(point=Point(x=1, y=1, z=2), labware=None)], ["a"]],
+            pytest.raises(
+                ValueError, match="'a' is not a valid location for transfer. Should be"
+            ),
+        ),
+        (Location(point=Point(x=1, y=1, z=2), labware=None), do_not_raise()),
+        ([Location(point=Point(x=1, y=1, z=2), labware=None)], do_not_raise()),
+        ([[Location(point=Point(x=1, y=1, z=2), labware=None)]], do_not_raise()),
+    ],
+)
+def test_ensure_valid_flat_wells_list_raises_for_invalid_targets(
+    target: Any,
+    expected_raise: ContextManager[Any],
+) -> None:
+    """It should raise an error if target location is invalid."""
+    with expected_raise:
+        subject.ensure_valid_flat_wells_list(target)
+
+
+sample_location1 = Location(point=Point(x=1, y=1, z=2), labware=None)
+sample_location2 = Location(point=Point(x=2, y=1, z=2), labware=None)
+
+
+@pytest.mark.parametrize(
+    ["target", "expected_result"],
+    [
+        (sample_location1, [sample_location1]),
+        ([sample_location1, sample_location2], [sample_location1, sample_location2]),
+        (
+            [
+                [sample_location1, sample_location1],
+                [sample_location2, sample_location2],
+            ],
+            [sample_location1, sample_location1, sample_location2, sample_location2],
+        ),
+    ],
+)
+def test_ensure_valid_flat_wells_list(
+    target: Union[
+        Well,
+        Location,
+        Sequence[Union[Well, Location]],
+        Sequence[Sequence[Well]],
+    ],
+    expected_result: Sequence[Union[Well, Location]],
+) -> None:
+    """It should convert the locations to flat lists correctly."""
+    assert subject.ensure_valid_flat_wells_list(target) == expected_result

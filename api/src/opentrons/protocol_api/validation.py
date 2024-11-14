@@ -21,6 +21,7 @@ from opentrons_shared_data.robot.types import RobotType
 from opentrons.protocols.api_support.types import APIVersion, ThermocyclerStep
 from opentrons.protocols.api_support.util import APIVersionError
 from opentrons.protocols.models import LabwareDefinition
+from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
 from opentrons.types import (
     Mount,
     DeckSlotName,
@@ -41,6 +42,7 @@ from opentrons.hardware_control.modules.types import (
 )
 
 from .disposal_locations import TrashBin, WasteChute
+
 
 if TYPE_CHECKING:
     from .labware import Well
@@ -634,3 +636,55 @@ def validate_coordinates(value: Sequence[float]) -> Tuple[float, float, float]:
     if not all(isinstance(v, (float, int)) for v in value):
         raise ValueError("All values in coordinates must be floats.")
     return float(value[0]), float(value[1]), float(value[2])
+
+
+def ensure_new_tip_policy(value: str) -> TransferTipPolicyV2:
+    """Ensure that new_tip value is a valid TransferTipPolicy value."""
+    try:
+        return TransferTipPolicyV2(value.lower())
+    except ValueError:
+        raise ValueError(
+            f"'{value}' is invalid value for 'new_tip'."
+            f" Acceptable value is either 'never', 'once' or 'always'."
+        )
+
+
+def _verify_each_list_element_is_valid_location(
+    locations: Sequence[Union[Well, Location]]
+) -> None:
+    from .labware import Well
+
+    for loc in locations:
+        if not (isinstance(loc, Well) or isinstance(loc, Location)):
+            raise ValueError(
+                f"'{loc}' is not a valid location for transfer. Should be of type 'Well' or 'Location'"
+            )
+
+
+def ensure_valid_flat_wells_list(
+    target: Union[
+        Well,
+        Location,
+        Sequence[Union[Well, Location]],
+        Sequence[Sequence[Well]],
+    ],
+) -> Sequence[Union[Well, Location]]:
+    """Ensure that the given target(s) for a liquid transfer are valid and in a flat list."""
+    from .labware import Well
+
+    if isinstance(target, Well) or isinstance(target, Location):
+        return [target]
+    elif isinstance(target, List):
+        if isinstance(target[0], List):
+            for sub_list in target:
+                _verify_each_list_element_is_valid_location(sub_list)
+            return [loc for sub_list in target for loc in sub_list]
+
+        _verify_each_list_element_is_valid_location(target)
+        return target
+    else:
+        raise ValueError(
+            f"'{target}' is not a valid location for transfer."
+            f" Expected locations are of type 'Well', 'Location'"
+            f" or a one- or two-dimensional list of 'Well' or 'Location'."
+        )
