@@ -34,7 +34,8 @@ class GoogleSheetsClient:
         creds: Credentials = Credentials.from_service_account_info(info=creds_info, scopes=self.SCOPES)  # type: ignore
         return creds
 
-    def sanitize_for_google_sheets(self, input_text: str) -> str:
+    @staticmethod
+    def sanitize_for_google_sheets(input_text: str) -> str:
         """Sanitize input to remove JavaScript and HTML tags, and prevent formulas."""
         script_pattern = re.compile(r'(javascript:[^"]*|<script.*?>.*?</script>|on\w+=".*?"|on\w+=\'.*?\')', re.IGNORECASE)
         sanitized_text = re.sub(script_pattern, "", input_text)

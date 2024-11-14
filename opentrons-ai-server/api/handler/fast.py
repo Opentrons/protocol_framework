@@ -26,6 +26,7 @@ from api.models.chat_request import ChatRequest
 from api.models.chat_response import ChatResponse
 from api.models.create_protocol import CreateProtocol
 from api.models.empty_request_error import EmptyRequestError
+from api.models.error_response import ErrorResponse
 from api.models.feedback_request import FeedbackRequest
 from api.models.feedback_response import FeedbackResponse
 from api.models.internal_server_error import InternalServerError
@@ -149,10 +150,6 @@ if tracing_middleware is not None:
 class Status(BaseModel):
     status: Literal["ok", "error"]
     version: str
-
-
-class ErrorResponse(BaseModel):
-    message: str
 
 
 class HealthResponse(BaseModel):

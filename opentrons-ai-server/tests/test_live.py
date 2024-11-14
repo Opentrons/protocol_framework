@@ -1,6 +1,6 @@
 import pytest
-from api.handler.fast import ErrorResponse
 from api.models.chat_response import ChatResponse
+from api.models.error_response import ErrorResponse
 from api.models.feedback_response import FeedbackResponse
 
 from tests.helpers.client import Client
