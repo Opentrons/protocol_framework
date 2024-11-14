@@ -75,6 +75,7 @@ GRAVIMETRIC_CFG_INCREMENT = {
     },
     200: {
         96: {
+            20: gravimetric_ot3_p200_96,
             50: gravimetric_ot3_p200_96,
             200: gravimetric_ot3_p200_96,
         },

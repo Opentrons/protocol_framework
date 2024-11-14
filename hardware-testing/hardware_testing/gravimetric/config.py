@@ -114,12 +114,23 @@ LIQUID_PROBE_SETTINGS: Dict[int, Dict[int, Dict[int, Dict[str, int]]]] = {
     },
     200: {
         96: {
+            20: {
+                "max_z_distance": 20,
+                "min_z_distance": 5,
+                "mount_speed": 5,
+                "plunger_speed": 10,
+                "sensor_threshold_pascals": 15,
+            },
             50: {
+                "max_z_distance": 20,
+                "min_z_distance": 5,
                 "mount_speed": 5,
                 "plunger_speed": 20,
                 "sensor_threshold_pascals": 15,
             },
             200: {
+                "max_z_distance": 20,
+                "min_z_distance": 5,
                 "mount_speed": 5,
                 "plunger_speed": 20,
                 "sensor_threshold_pascals": 15,
@@ -174,6 +185,13 @@ LIQUID_PROBE_SETTINGS: Dict[int, Dict[int, Dict[int, Dict[str, int]]]] = {
             },
         },
         96: {
+            20: {
+                "max_z_distance": 20,
+                "min_z_distance": 5,
+                "mount_speed": 5,
+                "plunger_speed": 10,
+                "sensor_threshold_pascals": 15,
+            },
             50: {
                 "max_z_distance": 20,
                 "min_z_distance": 5,
@@ -246,6 +264,7 @@ QC_VOLUMES_G: Dict[int, Dict[int, List[Tuple[int, List[float]]]]] = {
     },
     96: {
         200: [
+            (20, [0.5, 1.0]),  # T20
             (50, [1.0, 50.0]),  # T50
             (200, [200.0]),  # T200
         ],
