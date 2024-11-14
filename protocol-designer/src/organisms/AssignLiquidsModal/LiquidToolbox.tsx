@@ -53,7 +53,7 @@ interface LiquidToolboxProps {
 }
 export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
   const { onClose } = props
-  const { t } = useTranslation(['liquids', 'shared', 'form'])
+  const { t } = useTranslation(['liquids', 'form', 'shared'])
   const dispatch = useDispatch()
   const [showDefineLiquidModal, setDefineLiquidModal] = useState<boolean>(false)
   const liquids = useSelector(labwareIngredSelectors.allIngredientNamesIds)

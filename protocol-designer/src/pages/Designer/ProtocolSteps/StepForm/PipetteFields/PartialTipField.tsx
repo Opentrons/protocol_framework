@@ -32,6 +32,10 @@ export function PartialTipField(props: FieldProps): JSX.Element {
       name: t('column'),
       value: COLUMN,
       disabled: tipracksNotOnAdapter.length === 0,
+      tooltipText:
+        tipracksNotOnAdapter.length === 0
+          ? t('form:step_edit_form.field.nozzles.option_tooltip.COLUMN')
+          : undefined,
     },
   ]
 
@@ -50,7 +54,9 @@ export function PartialTipField(props: FieldProps): JSX.Element {
         dropdownType="neutral"
         filterOptions={options}
         title={t('select_nozzles')}
-        currentOption={options[0]}
+        currentOption={
+          options.find(option => option.value === selectedValue) ?? options[0]
+        }
         onClick={value => {
           updateValue(value)
           setSelectedValue(value)

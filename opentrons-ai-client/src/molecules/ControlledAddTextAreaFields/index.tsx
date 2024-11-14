@@ -63,7 +63,13 @@ export function ControlledAddTextAreaFields({
                   <Link
                     role="button"
                     onClick={() => {
-                      field.onChange(values.filter((_, i) => i !== index))
+                      const newValues = values
+                        .filter((_, i) => i !== index)
+                        .map(
+                          (value, i) =>
+                            `${t(name)} ${i + 1}: ${value.split(': ')[1]}`
+                        )
+                      field.onChange(newValues)
                     }}
                     css={css`
                       justify-content: flex-end;

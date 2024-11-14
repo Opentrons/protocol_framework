@@ -58,7 +58,7 @@ describe('StepOverflowMenu', () => {
       stepId: moveLiquidStepId,
       top: 0,
       menuRootRef: { current: null },
-      setStepOverflowMenu: vi.fn(),
+      setOpenedOverflowMenuId: vi.fn(),
       multiSelectItemIds: [],
       handleEdit: vi.fn(),
       confirmDelete: mockConfirm,
