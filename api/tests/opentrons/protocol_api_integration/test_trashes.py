@@ -56,7 +56,8 @@ def test_fixed_trash_presence(
         with pytest.raises(
             UnsupportedAPIError,
             match=re.escape(
-                "Error 4002 API_REMOVED (UnsupportedAPIError): Fixed Trash is not available after API version 2.16. You are currently using API version 2.16. Fixed trash is no longer supported on Flex protocols."
+                "Error 4002 API_REMOVED (UnsupportedAPIError): Fixed Trash is not available after API version 2.16."
+                " You are currently using API version 2.16. Fixed trash is no longer supported on Flex protocols."
             ),
         ):
             protocol.fixed_trash
@@ -78,7 +79,8 @@ def test_trash_search(protocol: protocol_api.ProtocolContext) -> None:
     with pytest.raises(
         UnsupportedAPIError,
         match=re.escape(
-            "Error 4002 API_REMOVED (UnsupportedAPIError): Fixed Trash is not available after API version 2.16. You are currently using API version 2.16. Fixed trash is no longer supported on Flex protocols."
+            "Error 4002 API_REMOVED (UnsupportedAPIError): Fixed Trash is not available after API version 2.16."
+            " You are currently using API version 2.16. Fixed trash is no longer supported on Flex protocols."
         ),
     ):
         protocol.fixed_trash
@@ -92,7 +94,8 @@ def test_trash_search(protocol: protocol_api.ProtocolContext) -> None:
     with pytest.raises(
         UnsupportedAPIError,
         match=re.escape(
-            "Error 4002 API_REMOVED (UnsupportedAPIError): Fixed Trash is not available after API version 2.16. You are currently using API version 2.16. Fixed trash is no longer supported on Flex protocols."
+            "Error 4002 API_REMOVED (UnsupportedAPIError): Fixed Trash is not available after API version 2.16."
+            " You are currently using API version 2.16. Fixed trash is no longer supported on Flex protocols."
         ),
     ):
         protocol.fixed_trash
