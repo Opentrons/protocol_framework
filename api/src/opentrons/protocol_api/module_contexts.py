@@ -1031,8 +1031,8 @@ class AbsorbanceReaderContext(ModuleContext):
         :param wavelengths: A list of wavelengths, in nm, to measure.
 
             - In the default hardware configuration, each wavelength must be one of
-            ``450``, ``562``, ``600``, or ``650``. In custom hardware configurations,
-            the module may accept other integers between 350 and 1000.
+              ``450``, ``562``, ``600``, or ``650``. In custom hardware configurations,
+              the module may accept other integers between 350 and 1000.
             - The list must contain only one item when initializing a single measurement.
             - The list can contain one to six items when initializing a multiple measurement.
         :param reference_wavelength: An optional reference wavelength, in nm. If provided,
