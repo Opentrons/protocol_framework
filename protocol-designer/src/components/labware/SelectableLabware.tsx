@@ -131,6 +131,7 @@ export const SelectableLabware = (props: Props): JSX.Element => {
     rect
   ) => {
     const wells = _wellsFromSelected(_getWellsFromRect(rect))
+    console.log(wells)
     const areWellsAlreadySelected = Object.keys(wells).every(
       well => well in selectedPrimaryWells
     )
