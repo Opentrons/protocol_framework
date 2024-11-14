@@ -22,6 +22,7 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     # Deck Setup
     (
         source_reservoir,
+        tip_rack,
         p1000,
     ) = load_common_liquid_setup_labware_and_instruments(protocol)
 
