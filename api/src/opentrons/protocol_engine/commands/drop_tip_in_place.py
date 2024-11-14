@@ -104,7 +104,7 @@ class DropTipInPlaceImplementation(
 
 
 class DropTipInPlace(
-    BaseCommand[DropTipInPlaceParams, DropTipInPlaceResult, ErrorOccurrence]
+    BaseCommand[DropTipInPlaceParams, DropTipInPlaceResult, TipPhysicallyAttachedError]
 ):
     """Drop tip in place command model."""
 

@@ -166,7 +166,7 @@ class DropTipImplementation(AbstractCommandImpl[DropTipParams, _ExecuteReturn]):
             )
 
 
-class DropTip(BaseCommand[DropTipParams, DropTipResult, ErrorOccurrence]):
+class DropTip(BaseCommand[DropTipParams, DropTipResult, TipPhysicallyAttachedError]):
     """Drop tip command model."""
 
     commandType: DropTipCommandType = "dropTip"
