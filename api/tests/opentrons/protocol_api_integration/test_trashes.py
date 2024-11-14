@@ -13,7 +13,7 @@ import pytest
 
 
 @pytest.mark.parametrize(
-    ("protocol", "expected_trash_class"),
+    ("simulated_protocol_context", "expected_trash_class"),
     [
         (("2.13", "OT-2"), protocol_api.Labware),
         (("2.14", "OT-2"), protocol_api.Labware),
@@ -33,10 +33,10 @@ import pytest
             marks=pytest.mark.ot3_only,  # Simulating a Flex protocol requires a Flex hardware API.
         ),
     ],
-    indirect=["protocol"],
+    indirect=["simulated_protocol_context"],
 )
 def test_fixed_trash_presence(
-    protocol: protocol_api.ProtocolContext,
+    simulated_protocol_context: protocol_api.ProtocolContext,
     expected_trash_class: Optional[Type[object]],
 ) -> None:
     """Test the presence of the fixed trash.
@@ -45,9 +45,9 @@ def test_fixed_trash_presence(
     For those that do, ProtocolContext.fixed_trash and InstrumentContext.trash_container
     should point to it. The type of the object depends on the API version.
     """
-    instrument = protocol.load_instrument(
+    instrument = simulated_protocol_context.load_instrument(
         "p300_single_gen2"
-        if protocol._core.robot_type == "OT-2 Standard"
+        if simulated_protocol_context._core.robot_type == "OT-2 Standard"
         else "flex_1channel_50",
         mount="left",
     )
@@ -60,20 +60,24 @@ def test_fixed_trash_presence(
                 " You are currently using API version 2.16. Fixed trash is no longer supported on Flex protocols."
             ),
         ):
-            protocol.fixed_trash
+            simulated_protocol_context.fixed_trash
         with pytest.raises(Exception, match="No trash container has been defined"):
             instrument.trash_container
 
     else:
-        assert isinstance(protocol.fixed_trash, expected_trash_class)
-        assert instrument.trash_container is protocol.fixed_trash
+        assert isinstance(simulated_protocol_context.fixed_trash, expected_trash_class)
+        assert instrument.trash_container is simulated_protocol_context.fixed_trash
 
 
 @pytest.mark.ot3_only  # Simulating a Flex protocol requires a Flex hardware API.
-@pytest.mark.parametrize("protocol", [("2.16", "Flex")], indirect=True)
-def test_trash_search(protocol: protocol_api.ProtocolContext) -> None:
+@pytest.mark.parametrize(
+    "simulated_protocol_context", [("2.16", "Flex")], indirect=True
+)
+def test_trash_search(simulated_protocol_context: protocol_api.ProtocolContext) -> None:
     """Test the automatic trash search for protocols without a fixed trash."""
-    instrument = protocol.load_instrument("flex_1channel_50", mount="left")
+    instrument = simulated_protocol_context.load_instrument(
+        "flex_1channel_50", mount="left"
+    )
 
     # By default, there should be no trash.
     with pytest.raises(
@@ -83,12 +87,12 @@ def test_trash_search(protocol: protocol_api.ProtocolContext) -> None:
             " You are currently using API version 2.16. Fixed trash is no longer supported on Flex protocols."
         ),
     ):
-        protocol.fixed_trash
+        simulated_protocol_context.fixed_trash
     with pytest.raises(Exception, match="No trash container has been defined"):
         instrument.trash_container
 
-    loaded_first = protocol.load_trash_bin("A1")
-    loaded_second = protocol.load_trash_bin("B1")
+    loaded_first = simulated_protocol_context.load_trash_bin("A1")
+    loaded_second = simulated_protocol_context.load_trash_bin("B1")
 
     # After loading some trashes, there should still be no protocol.fixed_trash...
     with pytest.raises(
@@ -98,7 +102,7 @@ def test_trash_search(protocol: protocol_api.ProtocolContext) -> None:
             " You are currently using API version 2.16. Fixed trash is no longer supported on Flex protocols."
         ),
     ):
-        protocol.fixed_trash
+        simulated_protocol_context.fixed_trash
     # ...but instrument.trash_container should automatically update to point to
     # the first trash that we loaded.
     assert instrument.trash_container is loaded_first
@@ -109,7 +113,7 @@ def test_trash_search(protocol: protocol_api.ProtocolContext) -> None:
 
 
 @pytest.mark.parametrize(
-    ("protocol", "expect_load_to_succeed"),
+    ("simulated_protocol_context", "expect_load_to_succeed"),
     [
         pytest.param(
             ("2.13", "OT-2"),
@@ -135,10 +139,10 @@ def test_trash_search(protocol: protocol_api.ProtocolContext) -> None:
             marks=pytest.mark.ot3_only,  # Simulating a Flex protocol requires a Flex hardware API.
         ),
     ],
-    indirect=["protocol"],
+    indirect=["simulated_protocol_context"],
 )
 def test_fixed_trash_load_conflicts(
-    protocol: protocol_api.ProtocolContext,
+    simulated_protocol_context: protocol_api.ProtocolContext,
     expect_load_to_succeed: bool,
 ) -> None:
     """Test loading something onto the location historically used for the fixed trash.
@@ -151,7 +155,7 @@ def test_fixed_trash_load_conflicts(
     else:
         # If we're expecting an error, it'll be a LocationIsOccupied for 2.15 and below, otherwise
         # it will fail with an IncompatibleAddressableAreaError, since slot 12 will not be in the deck config
-        if protocol.api_version < APIVersion(2, 16):
+        if simulated_protocol_context.api_version < APIVersion(2, 16):
             error_name = "LocationIsOccupiedError"
         else:
             error_name = "IncompatibleAddressableAreaError"
@@ -163,4 +167,6 @@ def test_fixed_trash_load_conflicts(
         )
 
     with expected_error:
-        protocol.load_labware("opentrons_96_wellplate_200ul_pcr_full_skirt", 12)
+        simulated_protocol_context.load_labware(
+            "opentrons_96_wellplate_200ul_pcr_full_skirt", 12
+        )

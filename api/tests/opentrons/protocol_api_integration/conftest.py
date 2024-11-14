@@ -8,7 +8,7 @@ from opentrons import simulate, protocol_api
 
 
 @pytest.fixture
-def protocol(
+def simulated_protocol_context(
     request: SubRequest,
 ) -> Generator[protocol_api.ProtocolContext, None, None]:
     """Return a protocol context with requested version and robot."""
