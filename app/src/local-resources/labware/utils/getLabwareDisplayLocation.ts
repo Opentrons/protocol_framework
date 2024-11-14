@@ -4,6 +4,8 @@ import {
   getOccludedSlotCountForModule,
   THERMOCYCLER_MODULE_V1,
   THERMOCYCLER_MODULE_V2,
+  TRASH_BIN_FIXTURE,
+  WASTE_CHUTE_ADDRESSABLE_AREAS,
 } from '@opentrons/shared-data'
 import { getLabwareLocation } from './getLabwareLocation'
 
@@ -12,6 +14,7 @@ import type {
   LocationSlotOnlyParams,
   LocationFullParams,
 } from './getLabwareLocation'
+import type { AddressableAreaName } from '@opentrons/shared-data'
 
 export interface DisplayLocationSlotOnlyParams extends LocationSlotOnlyParams {
   t: TFunction
@@ -98,11 +101,9 @@ function handleSpecialSlotNames(
   slotName: string,
   t: TFunction
 ): { odd: string; desktop: string } {
-  const nameLc = slotName.toLowerCase()
-
-  if (nameLc.includes('wastechute')) {
+  if (WASTE_CHUTE_ADDRESSABLE_AREAS.includes(slotName as AddressableAreaName)) {
     return { odd: t('waste_chute'), desktop: t('waste_chute') }
-  } else if (nameLc.includes('trashbin')) {
+  } else if (slotName === TRASH_BIN_FIXTURE) {
     return { odd: t('trash_bin'), desktop: t('trash_bin') }
   } else {
     return {
