@@ -285,7 +285,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
             {filterOptions.map((option, index) => (
               <React.Fragment key={`${option.name}-${index}`}>
                 <MenuItem
-                  disabled={disabled ?? option.disabled}
+                  disabled={option.disabled}
                   zIndex={3}
                   key={`${option.name}-${index}`}
                   onClick={() => {

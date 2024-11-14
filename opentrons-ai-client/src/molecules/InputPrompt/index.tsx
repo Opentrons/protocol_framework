@@ -44,10 +44,12 @@ import type {
   CreatePrompt,
   UpdatePrompt,
 } from '../../resources/types'
+import { useTrackEvent } from '../../resources/hooks/useTrackEvent'
 
 export function InputPrompt(): JSX.Element {
   const { t } = useTranslation('protocol_generator')
   const { register, watch, reset, setValue } = useFormContext()
+  const trackEvent = useTrackEvent()
 
   const [updateProtocol] = useAtom(updateProtocolChatAtom)
   const [createProtocol] = useAtom(createProtocolChatAtom)
@@ -138,6 +140,12 @@ export function InputPrompt(): JSX.Element {
         { role: 'user', content: watchUserPrompt },
       ])
       await callApi(config as AxiosRequestConfig)
+      trackEvent({
+        name: 'chat-submitted',
+        properties: {
+          chat: watchUserPrompt,
+        },
+      })
       setSubmitted(true)
     } catch (err: any) {
       console.error(`error: ${err.message}`)
@@ -182,6 +190,13 @@ export function InputPrompt(): JSX.Element {
         { role: 'assistant', content: reply },
       ])
       setChatData(chatData => [...chatData, assistantResponse])
+      trackEvent({
+        name: 'generated-protocol',
+        properties: {
+          createOrUpdate: isNewProtocol ? 'create' : 'update',
+          protocol: reply,
+        },
+      })
       setSubmitted(false)
     }
   }, [data, isLoading, submitted])

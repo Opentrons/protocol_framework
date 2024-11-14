@@ -13,7 +13,7 @@ import {
 } from '../../organisms/InstrumentsSection'
 import type { UseFormWatch } from 'react-hook-form'
 import type { CreateProtocolFormData } from '../../pages/CreateProtocol'
-import { getAllDefinitions } from './labware'
+import { getOnlyLatestDefs } from './labware'
 import type { CreatePrompt } from '../types'
 
 export function generatePromptPreviewApplicationItems(
@@ -92,7 +92,7 @@ export function generatePromptPreviewLabwareLiquidsItems(
   const { labwares, liquids } = watch()
 
   const items: string[] = []
-  const defs = getAllDefinitions()
+  const defs = getOnlyLatestDefs()
 
   labwares?.forEach(labware => {
     items.push(
@@ -159,7 +159,7 @@ export function generateChatPrompt(
     args_0: CreatePrompt | ((prev: CreatePrompt) => CreatePrompt)
   ) => void
 ): string {
-  const defs = getAllDefinitions()
+  const defs = getOnlyLatestDefs()
 
   const robotType = t(values.instruments.robot)
   const scientificApplication = t(values.application.scientificApplication)
@@ -231,7 +231,10 @@ export function generateChatPrompt(
   setCreateProtocolChatAtom({
     prompt,
     regenerate: false,
-    scientific_application_type: values.application.scientificApplication,
+    scientific_application_type:
+      values.application.scientificApplication === OTHER
+        ? values.application.otherApplication
+        : values.application.scientificApplication,
     description,
     robots: values.instruments.robot,
     mounts,

@@ -31,7 +31,7 @@ import { ResizeBar } from '../../atoms/ResizeBar'
 export interface CreateProtocolFormData {
   application: {
     scientificApplication: string
-    otherApplication?: string
+    otherApplication: string
     description: string
   }
   instruments: {
@@ -207,6 +207,7 @@ export function CreateProtocol(): JSX.Element | null {
     trackEvent({
       name: 'submit-prompt',
       properties: {
+        isCreateOrUpdate: 'create',
         prompt: chatPromptData,
       },
     })
