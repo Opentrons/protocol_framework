@@ -217,7 +217,7 @@ run_command_table = sqlalchemy.Table(
     sqlalchemy.Column("index_in_run", sqlalchemy.Integer, nullable=False),
     sqlalchemy.Column("command_id", sqlalchemy.String, nullable=False),
     sqlalchemy.Column("command", sqlalchemy.String, nullable=False),
-    sqlalchemy.Column("command_intent", sqlalchemy.String, nullable=False, index=True),
+    sqlalchemy.Column("command_intent", sqlalchemy.String, index=True),
     sqlalchemy.Column("command_error", sqlalchemy.String, nullable=True),
     sqlalchemy.Column(
         "command_status",
