@@ -2,8 +2,8 @@ import type * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import {
-  ALIGN_END,
   ALIGN_CENTER,
+  ALIGN_END,
   BORDERS,
   Btn,
   COLORS,
@@ -11,10 +11,11 @@ import {
   Flex,
   JUSTIFY_SPACE_BETWEEN,
   LargeButton,
+  OVERFLOW_SCROLL,
   SPACING,
   StyledText,
-  TYPOGRAPHY,
   Tooltip,
+  TYPOGRAPHY,
   useHoverTooltip,
 } from '@opentrons/components'
 import temporaryImg from '../../assets/images/placeholder_image_delete.png'
@@ -56,13 +57,19 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
     >
       <Flex
         width="60%"
-        padding={`${SPACING.spacing40} ${SPACING.spacing80} ${SPACING.spacing80} ${SPACING.spacing80}`}
+        padding={SPACING.spacing80}
         flexDirection={DIRECTION_COLUMN}
         backgroundColor={COLORS.white}
         borderRadius={BORDERS.borderRadius16}
         justifyContent={JUSTIFY_SPACE_BETWEEN}
+        gridGap={SPACING.spacing24}
       >
-        <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
+        <Flex
+          flexDirection={DIRECTION_COLUMN}
+          gridGap={SPACING.spacing8}
+          height="100%"
+          overflowY={OVERFLOW_SCROLL}
+        >
           <StyledText
             color={COLORS.grey60}
             desktopStyle="bodyDefaultSemiBold"

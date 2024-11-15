@@ -3,22 +3,30 @@ import pytest
 from decoy import Decoy
 from opentrons_shared_data.robot.types import RobotTypeEnum
 
-from opentrons import simulate
+from opentrons.protocol_api import ProtocolContext
 from opentrons.config import feature_flags as ff
 
 
 @pytest.mark.ot2_only
+@pytest.mark.parametrize(
+    "simulated_protocol_context", [("2.20", "OT-2")], indirect=True
+)
 def test_liquid_class_creation_and_property_fetching(
-    decoy: Decoy, mock_feature_flags: None
+    decoy: Decoy,
+    mock_feature_flags: None,
+    simulated_protocol_context: ProtocolContext,
 ) -> None:
     """It should create the liquid class and provide access to its properties."""
     decoy.when(ff.allow_liquid_classes(RobotTypeEnum.OT2)).then_return(True)
-    protocol_context = simulate.get_protocol_api(version="2.20", robot_type="OT-2")
-    pipette_left = protocol_context.load_instrument("p20_single_gen2", mount="left")
-    pipette_right = protocol_context.load_instrument("p300_multi", mount="right")
-    tiprack = protocol_context.load_labware("opentrons_96_tiprack_20ul", "1")
+    pipette_left = simulated_protocol_context.load_instrument(
+        "p20_single_gen2", mount="left"
+    )
+    pipette_right = simulated_protocol_context.load_instrument(
+        "p300_multi", mount="right"
+    )
+    tiprack = simulated_protocol_context.load_labware("opentrons_96_tiprack_20ul", "1")
 
-    glycerol_50 = protocol_context.define_liquid_class("fixture_glycerol50")
+    glycerol_50 = simulated_protocol_context.define_liquid_class("fixture_glycerol50")
 
     assert glycerol_50.name == "fixture_glycerol50"
     assert glycerol_50.display_name == "Glycerol 50%"
@@ -50,11 +58,13 @@ def test_liquid_class_creation_and_property_fetching(
         glycerol_50.display_name = "bar"  # type: ignore
 
     with pytest.raises(ValueError, match="Liquid class definition not found"):
-        protocol_context.define_liquid_class("non-existent-liquid")
+        simulated_protocol_context.define_liquid_class("non-existent-liquid")
 
 
-def test_liquid_class_feature_flag() -> None:
+@pytest.mark.parametrize(
+    "simulated_protocol_context", [("2.20", "OT-2")], indirect=True
+)
+def test_liquid_class_feature_flag(simulated_protocol_context: ProtocolContext) -> None:
     """It should raise a not implemented error without the allowLiquidClass flag set."""
-    protocol_context = simulate.get_protocol_api(version="2.20", robot_type="OT-2")
     with pytest.raises(NotImplementedError):
-        protocol_context.define_liquid_class("fixture_glycerol50")
+        simulated_protocol_context.define_liquid_class("fixture_glycerol50")
