@@ -120,6 +120,7 @@ export interface Runs {
 export interface RunCurrentStateData {
   estopEngaged: boolean
   activeNozzleLayouts: Record<string, NozzleLayoutValues> // keyed by pipetteId
+  tipStates: Record<string, TipStates> // keyed by pipetteId
   placeLabwareState?: PlaceLabwareState
 }
 
@@ -217,4 +218,8 @@ export interface PlaceLabwareState {
   labwareURI: string
   location: OnDeckLabwareLocation
   shouldPlaceDown: boolean
+}
+
+export interface TipStates {
+  hasTip: boolean
 }
