@@ -25,7 +25,11 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
   return (
-    <Flex flexDirection={DIRECTION_COLUMN}>
+    <Flex
+      flexDirection={DIRECTION_COLUMN}
+      gridGap={SPACING.spacing12}
+      paddingY={SPACING.spacing16}
+    >
       <DropdownStepFormField
         {...propsForFields.moduleId}
         options={moduleLabwareOptions}
@@ -34,8 +38,8 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
       <Box borderBottom={`1px solid ${COLORS.grey30}`} />
       <Flex
         flexDirection={DIRECTION_COLUMN}
-        padding={SPACING.spacing12}
-        gridGap={SPACING.spacing8}
+        gridGap={SPACING.spacing4}
+        paddingX={SPACING.spacing16}
       >
         <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
           {t('protocol_steps:heater_shaker_settings')}

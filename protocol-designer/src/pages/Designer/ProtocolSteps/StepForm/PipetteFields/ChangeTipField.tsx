@@ -12,9 +12,10 @@ const ALL_CHANGE_TIP_VALUES: ChangeTipOptions[] = [
   'perDest',
   'never',
 ]
-type ChangeTipFieldProps = FieldProps & DisabledChangeTipArgs
 
-export function ChangeTipField(props: ChangeTipFieldProps): JSX.Element {
+export function ChangeTipField(
+  props: FieldProps & DisabledChangeTipArgs
+): JSX.Element {
   const {
     aspirateWells,
     dispenseWells,
@@ -43,7 +44,8 @@ export function ChangeTipField(props: ChangeTipFieldProps): JSX.Element {
       {...props}
       options={options}
       value={value}
-      title={t('change_tips')}
+      title={t('tip_handling')}
+      width="100%"
     />
   )
 }

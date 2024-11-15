@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import isEqual from 'lodash/isEqual'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   ALIGN_CENTER,
@@ -61,7 +60,6 @@ import { LabwareTools } from './LabwareTools'
 
 import type { ModuleModel } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../../types'
-import type { ZoomedIntoSlotInfoState } from '../../../labware-ingred/types'
 import type { Fixture } from './constants'
 
 interface DeckSetupToolsProps {
@@ -96,12 +94,6 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     selectedNestedLabwareDefUri,
   } = selectedSlotInfo
   const { slot, cutout } = selectedSlot
-
-  //  TODO: fix the bug where selectedSlotInfo isn't initializing correctly
-  //  RQA-3526
-  const initialSelectedSlotInfoRef = useRef<ZoomedIntoSlotInfoState>(
-    selectedSlotInfo
-  )
 
   const [changeModuleWarningInfo, displayModuleWarning] = useState<boolean>(
     false
@@ -230,11 +222,18 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
         )
       }
       //  clear labware from slot
-      if (createdLabwareForSlot != null) {
+      if (
+        createdLabwareForSlot != null &&
+        createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri
+      ) {
         dispatch(deleteContainer({ labwareId: createdLabwareForSlot.id }))
       }
       //  clear nested labware from slot
-      if (createdNestedLabwareForSlot != null) {
+      if (
+        createdNestedLabwareForSlot != null &&
+        createdNestedLabwareForSlot.labwareDefURI !==
+          selectedNestedLabwareDefUri
+      ) {
         dispatch(deleteContainer({ labwareId: createdNestedLabwareForSlot.id }))
       }
       // clear labware on staging area 4th column slot
@@ -246,63 +245,68 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     setSelectedHardware(null)
   }
   const handleConfirm = (): void => {
-    //  only update info if user changed what was previously selected
-    if (!isEqual(selectedSlotInfo, initialSelectedSlotInfoRef.current)) {
-      //  clear entities first before recreating them
-      handleClear()
+    //  clear entities first before recreating them
+    handleClear()
 
-      if (selectedFixture != null && cutout != null) {
-        //  create fixture(s)
-        if (selectedFixture === 'wasteChuteAndStagingArea') {
-          dispatch(createDeckFixture('wasteChute', cutout))
-          dispatch(createDeckFixture('stagingArea', cutout))
-        } else {
-          dispatch(createDeckFixture(selectedFixture, cutout))
-        }
+    if (selectedFixture != null && cutout != null) {
+      //  create fixture(s)
+      if (selectedFixture === 'wasteChuteAndStagingArea') {
+        dispatch(createDeckFixture('wasteChute', cutout))
+        dispatch(createDeckFixture('stagingArea', cutout))
+      } else {
+        dispatch(createDeckFixture(selectedFixture, cutout))
       }
-      if (selectedModuleModel != null) {
-        //  create module
-        dispatch(
-          createModule({
-            slot,
-            type: getModuleType(selectedModuleModel),
-            model: selectedModuleModel,
-          })
-        )
-      }
-      if (selectedModuleModel == null && selectedLabwareDefUri != null) {
-        //  create adapter + labware on deck
-        dispatch(
-          createContainer({
-            slot,
-            labwareDefURI:
-              selectedNestedLabwareDefUri == null
-                ? selectedLabwareDefUri
-                : selectedNestedLabwareDefUri,
-            adapterUnderLabwareDefURI:
-              selectedNestedLabwareDefUri == null
-                ? undefined
-                : selectedLabwareDefUri,
-          })
-        )
-      }
-      if (selectedModuleModel != null && selectedLabwareDefUri != null) {
-        //   create adapter + labware on module
-        dispatch(
-          createContainerAboveModule({
-            slot,
-            labwareDefURI: selectedLabwareDefUri,
-            nestedLabwareDefURI: selectedNestedLabwareDefUri ?? undefined,
-          })
-        )
-      }
-      handleResetToolbox()
-      dispatch(selectZoomedIntoSlot({ slot: null, cutout: null }))
-      onCloseClick()
-    } else {
-      dispatch(selectZoomedIntoSlot({ slot: null, cutout: null }))
-      onCloseClick()
     }
+    if (selectedModuleModel != null) {
+      //  create module
+      dispatch(
+        createModule({
+          slot,
+          type: getModuleType(selectedModuleModel),
+          model: selectedModuleModel,
+        })
+      )
+    }
+    if (
+      selectedModuleModel == null &&
+      selectedLabwareDefUri != null &&
+      (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
+        (selectedNestedLabwareDefUri != null &&
+          selectedNestedLabwareDefUri !==
+            createdNestedLabwareForSlot?.labwareDefURI))
+    ) {
+      //  create adapter + labware on deck
+      dispatch(
+        createContainer({
+          slot,
+          labwareDefURI:
+            selectedNestedLabwareDefUri == null
+              ? selectedLabwareDefUri
+              : selectedNestedLabwareDefUri,
+          adapterUnderLabwareDefURI:
+            selectedNestedLabwareDefUri == null
+              ? undefined
+              : selectedLabwareDefUri,
+        })
+      )
+    }
+    if (
+      selectedModuleModel != null &&
+      selectedLabwareDefUri != null &&
+      createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri
+    ) {
+      //   create adapter + labware on module
+      dispatch(
+        createContainerAboveModule({
+          slot,
+          labwareDefURI: selectedLabwareDefUri,
+          nestedLabwareDefURI: selectedNestedLabwareDefUri ?? undefined,
+        })
+      )
+    }
+    handleResetToolbox()
+    dispatch(selectZoomedIntoSlot({ slot: null, cutout: null }))
+    onCloseClick()
   }
   return (
     <>
@@ -363,7 +367,11 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
           </Btn>
         }
         closeButton={<Icon size="2rem" name="close" />}
-        onCloseClick={onCloseClick}
+        onCloseClick={() => {
+          onCloseClick()
+          dispatch(selectZoomedIntoSlot({ slot: null, cutout: null }))
+          handleResetToolbox()
+        }}
         onConfirmClick={handleConfirm}
         confirmButtonText={t('done')}
       >

@@ -1,16 +1,16 @@
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
-import styled from 'styled-components'
+
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
+  COLORS,
   DIRECTION_COLUMN,
   Flex,
+  InputField,
   SPACING,
   StyledText,
-  BORDERS,
-  TYPOGRAPHY,
 } from '@opentrons/components'
-import { InputField } from '../../components/modals/CreateFileWizard/InputField'
+import { DescriptionField } from '../../atoms'
 import { HandleEnter } from '../../atoms/HandleEnter'
 import { analyticsEvent } from '../../analytics/actions'
 import { WizardBody } from './WizardBody'
@@ -56,24 +56,34 @@ export function AddMetadata(props: AddMetadataProps): JSX.Element | null {
       >
         <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing16}>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
-            <StyledText desktopStyle="captionRegular">{t('name')}</StyledText>
-            {/* TODO(ja, 8/9/24): add new input field */}
-            <InputField autoFocus register={register} fieldName="fields.name" />
+            <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
+              {t('name')}
+            </StyledText>
+            <InputField
+              {...register('fields.name')}
+              type="text"
+              value={watch('fields.name')}
+              min={''}
+              max={''}
+              autoFocus
+            />
           </Flex>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
-            <StyledText desktopStyle="captionRegular">
+            <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
               {t('description')}
             </StyledText>
             <DescriptionField {...register('fields.description')} />
           </Flex>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
-            <StyledText desktopStyle="captionRegular">
+            <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
               {t('author_org')}
             </StyledText>
-            {/* TODO(ja, 8/9/24): add new input field */}
             <InputField
-              fieldName="fields.organizationOrAuthor"
-              register={register}
+              {...register('fields.organizationOrAuthor')}
+              type="text"
+              value={watch('fields.organizationOrAuthor')}
+              min={''}
+              max={''}
             />
           </Flex>
         </Flex>
@@ -81,13 +91,3 @@ export function AddMetadata(props: AddMetadataProps): JSX.Element | null {
     </HandleEnter>
   )
 }
-
-const DescriptionField = styled.textarea`
-  min-height: 5rem;
-  width: 100%;
-  border: ${BORDERS.lineBorder};
-  border-radius: ${BORDERS.borderRadius4};
-  padding: ${SPACING.spacing8};
-  font-size: ${TYPOGRAPHY.fontSizeP};
-  resize: none;
-`

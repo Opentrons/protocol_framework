@@ -77,7 +77,7 @@ export function NavigationBar(): JSX.Element | null {
                 {t('import')}
               </StyledText>
             </Flex>
-            <input type="file" onChange={loadFile}></input>
+            <input type="file" onChange={loadFile} />
           </StyledLabel>
           {location.pathname === '/createNew' ? null : <SettingsIcon />}
         </Flex>

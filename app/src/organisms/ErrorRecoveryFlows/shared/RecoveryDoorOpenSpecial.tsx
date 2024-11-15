@@ -46,7 +46,7 @@ export function RecoveryDoorOpenSpecial({
     switch (selectedRecoveryOption) {
       case RECOVERY_MAP.MANUAL_REPLACE_AND_RETRY.ROUTE:
       case RECOVERY_MAP.MANUAL_MOVE_AND_SKIP.ROUTE:
-        return t('door_open_gripper_home')
+        return t('door_open_robot_home')
       default: {
         console.error(
           `Unhandled special-cased door open subtext on route ${selectedRecoveryOption}.`

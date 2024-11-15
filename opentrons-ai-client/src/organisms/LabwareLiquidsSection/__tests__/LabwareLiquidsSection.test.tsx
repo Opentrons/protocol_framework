@@ -1,4 +1,4 @@
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { i18n } from '../../../i18n'
@@ -15,6 +15,8 @@ const TestFormProviderComponent = () => {
   return (
     <FormProvider {...methods}>
       <LabwareLiquidsSection />
+
+      <p>{`form is ${methods.formState.isValid ? 'valid' : 'invalid'}`}</p>
     </FormProvider>
   )
 }
@@ -31,7 +33,6 @@ describe('LabwareLiquidsSection', () => {
 
     expect(screen.getByText('Add Opentrons labware')).toBeInTheDocument()
     expect(screen.getByText('No labware added yet')).toBeInTheDocument()
-    expect(screen.getByText('Confirm')).toBeInTheDocument()
   })
 
   it('should not display the no labware added message if labwares have been added', async () => {
@@ -44,27 +45,34 @@ describe('LabwareLiquidsSection', () => {
 
     fireEvent.click(screen.getByText('Tip rack'))
     fireEvent.click(
-      await screen.findByText('Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL')
+      await screen.findByText('Opentrons Flex 96 Tip Rack 1000 µL')
     )
     fireEvent.click(screen.getByText('Save'))
 
     expect(screen.queryByText('No labware added yet')).not.toBeInTheDocument()
   })
 
-  //   it('should enable the confirm button when labwares have been added', async () => {
-  //     render()
+  it('should update form state to valid when labwares and liquids have been added', async () => {
+    render()
 
-  //     expect(screen.getByText('Confirm')).toBeDisabled()
+    await waitFor(() => {
+      expect(screen.getByText('form is invalid')).toBeInTheDocument()
+    })
+    const addButton = screen.getByText('Add Opentrons labware')
+    fireEvent.click(addButton)
 
-  //     const addButton = screen.getByText('Add Opentrons labware')
-  //     fireEvent.click(addButton)
+    fireEvent.click(screen.getByText('Tip rack'))
+    fireEvent.click(
+      await screen.findByText('Opentrons Flex 96 Tip Rack 1000 µL')
+    )
+    fireEvent.click(screen.getByText('Save'))
 
-  //     fireEvent.click(screen.getByText('Tip rack'))
-  //     fireEvent.click(
-  //       await screen.findByText('Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL')
-  //     )
-  //     fireEvent.click(screen.getByText('Save'))
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: 'test liquid' },
+    })
 
-  //     expect(screen.getByText('Confirm')).toBeEnabled()
-  //   })
+    await waitFor(() => {
+      expect(screen.getByText('form is valid')).toBeInTheDocument()
+    })
+  })
 })

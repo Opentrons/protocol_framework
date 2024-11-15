@@ -1,11 +1,19 @@
 """Common pipetting command base models."""
+from __future__ import annotations
 from opentrons_shared_data.errors import ErrorCodes
 from pydantic import BaseModel, Field
-from typing import Literal, Optional, Tuple, TypedDict
+from typing import Literal, Optional, Tuple, TypedDict, TYPE_CHECKING
 
 from opentrons.protocol_engine.errors.error_occurrence import ErrorOccurrence
+from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
+from .command import Maybe, DefinedErrorData, SuccessData
+from opentrons.protocol_engine.state.update_types import StateUpdate
 
 from ..types import WellLocation, LiquidHandlingWellLocation, DeckPoint
+
+if TYPE_CHECKING:
+    from ..execution.pipetting import PipettingHandler
+    from ..resources import ModelUtils
 
 
 class PipetteIdMixin(BaseModel):
@@ -201,3 +209,44 @@ class TipPhysicallyAttachedError(ErrorOccurrence):
 
     errorCode: str = ErrorCodes.TIP_DROP_FAILED.value.code
     detail: str = ErrorCodes.TIP_DROP_FAILED.value.detail
+
+
+PrepareForAspirateReturn = Maybe[
+    SuccessData[BaseModel], DefinedErrorData[OverpressureError]
+]
+
+
+async def prepare_for_aspirate(
+    pipette_id: str,
+    pipetting: PipettingHandler,
+    model_utils: ModelUtils,
+    location_if_error: ErrorLocationInfo,
+) -> PrepareForAspirateReturn:
+    """Execute pipetting.prepare_for_aspirate, handle errors, and marshal success."""
+    state_update = StateUpdate()
+    try:
+        await pipetting.prepare_for_aspirate(pipette_id)
+    except PipetteOverpressureError as e:
+        state_update.set_fluid_unknown(pipette_id=pipette_id)
+        return PrepareForAspirateReturn.from_error(
+            DefinedErrorData(
+                public=OverpressureError(
+                    id=model_utils.generate_id(),
+                    createdAt=model_utils.get_timestamp(),
+                    wrappedErrors=[
+                        ErrorOccurrence.from_failed(
+                            id=model_utils.generate_id(),
+                            createdAt=model_utils.get_timestamp(),
+                            error=e,
+                        )
+                    ],
+                    errorInfo=location_if_error,
+                ),
+                state_update=state_update,
+            )
+        )
+    else:
+        state_update.set_fluid_empty(pipette_id=pipette_id)
+        return PrepareForAspirateReturn.from_result(
+            SuccessData(public=BaseModel(), state_update=state_update)
+        )

@@ -105,6 +105,7 @@ class AbstractProtocol(
             ModuleCoreType,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ],
         use_gripper: bool,
         pause_for_manual_move: bool,

@@ -203,21 +203,17 @@ export function ProtocolOverview(): JSX.Element {
       })
     : null
 
-  const cancelModal = (): void => {
-    setShowExportWarningModal(false)
-  }
-
-  const confirmExport = (): void => {
-    setShowExportWarningModal(false)
-    dispatch(loadFileActions.saveProtocolFile())
-  }
-
   const exportWarningModal = useBlockingHint({
     hintKey: warning?.hintKey ?? null,
-    enabled: showExportWarningModal && warning?.hintKey != null,
+    enabled: showExportWarningModal,
     content: warning?.content,
-    handleCancel: cancelModal,
-    handleContinue: confirmExport,
+    handleCancel: () => {
+      setShowExportWarningModal(false)
+    },
+    handleContinue: () => {
+      setShowExportWarningModal(false)
+      dispatch(loadFileActions.saveProtocolFile())
+    },
   })
 
   return (
@@ -294,11 +290,7 @@ export function ProtocolOverview(): JSX.Element {
             <LargeButton
               buttonText={t('export_protocol')}
               onClick={() => {
-                if (warning != null) {
-                  setShowExportWarningModal(true)
-                } else {
-                  dispatch(loadFileActions.saveProtocolFile())
-                }
+                setShowExportWarningModal(true)
               }}
               iconName="arrow-right"
               whiteSpace={NO_WRAP}

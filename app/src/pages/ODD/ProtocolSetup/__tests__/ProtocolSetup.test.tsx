@@ -64,22 +64,11 @@ import {
 } from '/app/resources/runs'
 import { mockConnectableRobot } from '/app/redux/discovery/__fixtures__'
 import { mockRunTimeParameterData } from '/app/organisms/ODD/ProtocolSetup/__fixtures__'
+import { useScrollPosition } from '/app/local-resources/dom-utils'
 
 import type { UseQueryResult } from 'react-query'
 import type * as SharedData from '@opentrons/shared-data'
 import type { NavigateFunction } from 'react-router-dom'
-// Mock IntersectionObserver
-class IntersectionObserver {
-  observe = vi.fn()
-  disconnect = vi.fn()
-  unobserve = vi.fn()
-}
-
-Object.defineProperty(window, 'IntersectionObserver', {
-  writable: true,
-  configurable: true,
-  value: IntersectionObserver,
-})
 
 let mockNavigate = vi.fn()
 
@@ -125,6 +114,7 @@ vi.mock('../ConfirmSetupStepsCompleteModal')
 vi.mock('/app/redux-resources/analytics')
 vi.mock('/app/redux-resources/robots')
 vi.mock('/app/resources/modules')
+vi.mock('/app/local-resources/dom-utils')
 
 const render = (path = '/') => {
   return renderWithProviders(
@@ -334,6 +324,10 @@ describe('ProtocolSetup', () => {
     when(vi.mocked(useTrackProtocolRunEvent))
       .calledWith(RUN_ID, ROBOT_NAME)
       .thenReturn({ trackProtocolRunEvent: mockTrackProtocolRunEvent })
+    vi.mocked(useScrollPosition).mockReturnValue({
+      isScrolled: false,
+      scrollRef: {} as any,
+    })
   })
 
   it('should render text, image, and buttons', () => {

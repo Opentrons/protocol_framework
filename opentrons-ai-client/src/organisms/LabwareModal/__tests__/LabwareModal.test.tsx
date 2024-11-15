@@ -73,7 +73,7 @@ describe('LabwareModal', () => {
     render()
 
     expect(
-      screen.queryByText('Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL')
+      screen.queryByText('Opentrons Flex 96 Tip Rack 1000 µL')
     ).not.toBeInTheDocument()
 
     const categoryButton = screen.getByText('Tip rack')
@@ -81,7 +81,7 @@ describe('LabwareModal', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText('Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL')
+        screen.getByText('Opentrons Flex 96 Tip Rack 1000 µL')
       ).toBeInTheDocument()
     })
   })
@@ -94,7 +94,7 @@ describe('LabwareModal', () => {
     categoryButton.click()
 
     const labware = await screen.findByLabelText(
-      'Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL'
+      'Opentrons Flex 96 Tip Rack 1000 µL'
     )
     expect(labware).not.toBeChecked()
 
@@ -111,10 +111,10 @@ describe('LabwareModal', () => {
     categoryButton.click()
 
     const labware1 = await screen.findByLabelText(
-      'Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL'
+      'Opentrons Flex 96 Tip Rack 1000 µL'
     )
     const labware2 = await screen.findByLabelText(
-      'Eppendorf epT.I.P.S. 96 Tip Rack 10 µL'
+      'Opentrons Flex 96 Tip Rack 50 µL'
     )
 
     labware1.click()
@@ -132,7 +132,7 @@ describe('LabwareModal', () => {
     categoryButton.click()
 
     const labware = await screen.findByLabelText(
-      'Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL'
+      'Opentrons Flex 96 Tip Rack 1000 µL'
     )
     labware.click()
     labware.click()
@@ -152,7 +152,7 @@ describe('LabwareModal', () => {
     categoryButton.click()
 
     const labware1 = await screen.findByLabelText(
-      'Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL'
+      'Opentrons Flex 96 Tip Rack 1000 µL'
     )
     labware1.click()
 
@@ -180,7 +180,7 @@ describe('LabwareModal', () => {
     categoryButton.click()
 
     const labware1 = await screen.findByLabelText(
-      'Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL'
+      'Opentrons Flex 96 Tip Rack 1000 µL'
     )
     labware1.click()
 
@@ -191,7 +191,7 @@ describe('LabwareModal', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText('opentrons/eppendorf_96_tiprack_1000ul_eptips/1')
+        screen.getByText('opentrons/opentrons_flex_96_tiprack_1000ul/1')
       ).toBeInTheDocument()
     })
   })
@@ -208,7 +208,7 @@ describe('LabwareModal', () => {
     categoryButton.click()
 
     const labware1 = await screen.findByLabelText(
-      'Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL'
+      'Opentrons Flex 96 Tip Rack 1000 µL'
     )
     labware1.click()
 
@@ -219,7 +219,7 @@ describe('LabwareModal', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText('opentrons/eppendorf_96_tiprack_1000ul_eptips/1')
+        screen.getByText('opentrons/opentrons_flex_96_tiprack_1000ul/1')
       ).toBeInTheDocument()
     })
 
@@ -230,7 +230,7 @@ describe('LabwareModal', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText('opentrons/eppendorf_96_tiprack_1000ul_eptips/1')
+        screen.getByText('opentrons/opentrons_flex_96_tiprack_1000ul/1')
       ).toBeInTheDocument()
     })
   })
@@ -241,7 +241,7 @@ describe('LabwareModal', () => {
 
     const searchInput = screen.getByPlaceholderText('Search for labware...')
     fireEvent.change(searchInput, {
-      target: { value: 'Eppendorf epT.I.P.S. 96 Tip Rack 10 µL' },
+      target: { value: 'Opentrons Flex 96 Tip Rack 50 µL' },
     })
 
     const categoryButton = screen.getByText('Tip rack')
@@ -249,12 +249,12 @@ describe('LabwareModal', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText('Eppendorf epT.I.P.S. 96 Tip Rack 10 µL')
+        screen.getByText('Opentrons Flex 96 Tip Rack 50 µL')
       ).toBeInTheDocument()
     })
 
     expect(
-      screen.queryByText('Eppendorf epT.I.P.S. 96 Tip Rack 1000 µL')
+      screen.queryByText('Opentrons Flex 96 Tip Rack 1000 µL')
     ).not.toBeInTheDocument()
   })
 })

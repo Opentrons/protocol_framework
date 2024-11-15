@@ -2,10 +2,12 @@ import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
+  COLORS,
   DIRECTION_COLUMN,
   Flex,
   RadioButton,
   SPACING,
+  StyledText,
   TOOLTIP_TOP_START,
   Tooltip,
   useHoverTooltip,
@@ -49,7 +51,10 @@ const ALL_PATH_OPTIONS: Array<{ name: PathOption; image: string }> = [
   },
 ]
 
-type PathFieldProps = FieldProps & ValuesForPath
+type PathFieldPropsIntersection = FieldProps & ValuesForPath
+interface PathFieldProps extends PathFieldPropsIntersection {
+  title?: string
+}
 
 interface PathButtonProps {
   disabled: boolean
@@ -117,6 +122,8 @@ export function PathField(props: PathFieldProps): JSX.Element {
     updateValue,
     tipRack,
     isDisposalLocation,
+    padding = `0 ${SPACING.spacing16}`,
+    title,
   } = props
   const { t } = useTranslation('form')
   const pipetteEntities = useSelector(stepFormSelectors.getPipetteEntities)
@@ -136,30 +143,40 @@ export function PathField(props: PathFieldProps): JSX.Element {
     t
   )
   return (
-    <Flex
-      flexDirection={DIRECTION_COLUMN}
-      gridGap={SPACING.spacing8}
-      padding={SPACING.spacing16}
-      width="100%"
-    >
-      {ALL_PATH_OPTIONS.map(option => {
-        const { name } = option
-        return (
-          <PathButton
-            id={`PathButton_${name}`}
-            key={name}
-            selected={name === value}
-            path={name}
-            disabled={disabledPathMap !== null && name in disabledPathMap}
-            subtitle={getSubtitle(name, disabledPathMap)}
-            onClick={() => {
-              updateValue(name)
-            }}
-          >
-            <img src={option.image} />
-          </PathButton>
-        )
-      })}
+    <Flex padding={padding} flexDirection={DIRECTION_COLUMN}>
+      {title != null ? (
+        <StyledText
+          desktopStyle="bodyDefaultRegular"
+          paddingBottom={SPACING.spacing8}
+          color={COLORS.grey60}
+        >
+          {title}
+        </StyledText>
+      ) : null}
+      <Flex
+        flexDirection={DIRECTION_COLUMN}
+        gridGap={SPACING.spacing4}
+        width="100%"
+      >
+        {ALL_PATH_OPTIONS.map(option => {
+          const { name } = option
+          return (
+            <PathButton
+              id={`PathButton_${name}`}
+              key={name}
+              selected={name === value}
+              path={name}
+              disabled={disabledPathMap !== null && name in disabledPathMap}
+              subtitle={getSubtitle(name, disabledPathMap)}
+              onClick={() => {
+                updateValue(name)
+              }}
+            >
+              <img src={option.image} />
+            </PathButton>
+          )
+        })}
+      </Flex>
     </Flex>
   )
 }

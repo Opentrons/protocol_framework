@@ -282,6 +282,7 @@ class LegacyProtocolCore(
             legacy_module_core.LegacyModuleCore,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ],
         use_gripper: bool,
         pause_for_manual_move: bool,

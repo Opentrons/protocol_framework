@@ -14,7 +14,7 @@ metadata = {
     "protocolName": "PCR Protocol with TC Auto Sealing Lid",
     "author": "Rami Farawi <ndiehl@opentrons.com",
 }
-requirements = {"robotType": "OT-3", "apiLevel": "2.20"}
+requirements = {"robotType": "OT-3", "apiLevel": "2.21"}
 
 
 def add_parameters(parameters: ParameterContext) -> None:
@@ -22,6 +22,7 @@ def add_parameters(parameters: ParameterContext) -> None:
     helpers.create_single_pipette_mount_parameter(parameters)
     helpers.create_disposable_lid_parameter(parameters)
     helpers.create_csv_parameter(parameters)
+    helpers.create_tc_lid_deck_riser_parameter(parameters)
 
 
 def run(ctx: ProtocolContext) -> None:
@@ -29,6 +30,8 @@ def run(ctx: ProtocolContext) -> None:
     pipette_mount = ctx.params.pipette_mount  # type: ignore[attr-defined]
     disposable_lid = ctx.params.disposable_lid  # type: ignore[attr-defined]
     parsed_csv = ctx.params.parameters_csv.parse_as_csv()  # type: ignore[attr-defined]
+    deck_riser = ctx.params.deck_riser  # type: ignore[attr-defined]
+
     rxn_vol = 50
     real_mode = True
     # DECK SETUP AND LABWARE
@@ -60,7 +63,7 @@ def run(ctx: ProtocolContext) -> None:
 
     # Opentrons tough pcr auto sealing lids
     if disposable_lid:
-        unused_lids = helpers.load_disposable_lids(ctx, 3, ["C3"])
+        unused_lids = helpers.load_disposable_lids(ctx, 3, ["C3"], deck_riser)
     used_lids: List[Labware] = []
 
     # LOAD PIPETTES
@@ -205,4 +208,6 @@ def run(ctx: ProtocolContext) -> None:
                 ctx.move_labware(lid_on_plate, "C2", use_gripper=True)
             else:
                 ctx.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
+        p50.drop_tip()
+        p50.configure_nozzle_layout(style=SINGLE, start="A1", tip_racks=tiprack_50)
         helpers.find_liquid_height_of_all_wells(ctx, p50, wells_to_probe_flattened)

@@ -25,7 +25,7 @@ metadata = {
 
 requirements = {
     "robotType": "OT-3",
-    "apiLevel": "2.20",
+    "apiLevel": "2.21",
 }
 """
 Slot A1: Tips 200
@@ -172,9 +172,7 @@ def run(ctx: ProtocolContext) -> None:
         "Stop": [{"well": stopreaction, "volume": stop_vol}],
     }
 
-    flattened_list_of_wells = helpers.find_liquid_height_of_loaded_liquids(
-        ctx, liquid_vols_and_wells, m1000
-    )
+    helpers.find_liquid_height_of_loaded_liquids(ctx, liquid_vols_and_wells, m1000)
 
     m1000.flow_rate.aspirate = 50
     m1000.flow_rate.dispense = 150
@@ -556,5 +554,6 @@ def run(ctx: ProtocolContext) -> None:
         )
     elute(elution_vol)
 
-    flattened_list_of_wells.append(waste_reservoir["A1"])
-    helpers.find_liquid_height_of_all_wells(ctx, m1000, flattened_list_of_wells)
+    end_list_of_wells_to_probe = [waste_reservoir["A1"], res1["A1"]]
+    end_list_of_wells_to_probe.extend(elution_samples_m)
+    helpers.find_liquid_height_of_all_wells(ctx, m1000, end_list_of_wells_to_probe)

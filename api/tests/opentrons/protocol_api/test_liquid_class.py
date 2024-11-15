@@ -22,7 +22,11 @@ def test_get_for_pipette_and_tip(
     """It should get the properties for the specified pipette and tip."""
     liq_class = LiquidClass.create(minimal_liquid_class_def2)
     result = liq_class.get_for("p20_single_gen2", "opentrons_96_tiprack_20ul")
-    assert result.aspirate.flow_rate_by_volume == {"default": 50, "10": 40, "20": 30}
+    assert result.aspirate.flow_rate_by_volume.as_dict() == {
+        "default": 50.0,
+        10.0: 40.0,
+        20.0: 30.0,
+    }
 
 
 def test_get_for_raises_for_incorrect_pipette_or_tip(
