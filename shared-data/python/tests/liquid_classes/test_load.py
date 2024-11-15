@@ -25,10 +25,10 @@ def test_load_liquid_class_schema_v1() -> None:
 def test_load_definition() -> None:
     water_definition = load_definition(name="water", version=1)
     assert type(water_definition) is LiquidClassSchemaV1
-    assert water_definition.byPipette[0].pipetteModel == "p10_single"
+    assert water_definition.byPipette[0].pipetteModel == "flex_1channel_50"
     assert water_definition.byPipette[0].byTipType[0].aspirate.submerge == Submerge(
-        positionReference=PositionReference.LIQUID_MENISCUS,
-        offset=Coordinate(x=0, y=0, z=-5),
+        positionReference=PositionReference.WELL_TOP,
+        offset=Coordinate(x=0, y=0, z=2),
         speed=100,
-        delay=DelayProperties(enable=True, params=DelayParams(duration=1.5)),
+        delay=DelayProperties(enable=False, params=DelayParams(duration=0)),
     )
