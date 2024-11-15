@@ -20,9 +20,11 @@ import { Trans, useTranslation } from 'react-i18next'
 import { FileUpload } from '../../molecules/FileUpload'
 import { useNavigate } from 'react-router-dom'
 import {
+  chatHistoryAtom,
   createProtocolChatAtom,
   headerWithMeterAtom,
   updateProtocolChatAtom,
+  chatDataAtom,
 } from '../../resources/atoms'
 import { CSSTransition } from 'react-transition-group'
 import { useAtom } from 'jotai'
@@ -105,16 +107,19 @@ export function UpdateProtocol(): JSX.Element {
   const [headerState, setHeaderWithMeterAtom] = useAtom(headerWithMeterAtom)
   const [updateType, setUpdateType] = useState<DropdownOption | null>(null)
   const [detailsValue, setDetailsValue] = useState<string>('')
-  const [, setUpdatePromptAtom] = useAtom(updateProtocolChatAtom)
+  const [, setUpdateProtocolChatAtom] = useAtom(updateProtocolChatAtom)
   const [, setCreateProtocolChatAtom] = useAtom(createProtocolChatAtom)
+  const [, setChatHistoryAtom] = useAtom(chatHistoryAtom)
+  const [, setChatData] = useAtom(chatDataAtom)
   const [fileValue, setFile] = useState<File | null>(null)
   const [pythonText, setPythonTextValue] = useState<string>('')
   const [errorText, setErrorText] = useState<string | null>(null)
 
-  // Reset the create protocol chat atom when navigating to the update protocol page
+  // Reset the chat data atom and protocol atoms when navigating to the update protocol page
   useEffect(() => {
     setCreateProtocolChatAtom({
       prompt: '',
+      regenerate: false,
       scientific_application_type: '',
       description: '',
       robots: 'opentrons_flex',
@@ -127,6 +132,17 @@ export function UpdateProtocol(): JSX.Element {
       fake: false,
       fake_id: 0,
     })
+    setUpdateProtocolChatAtom({
+      prompt: '',
+      protocol_text: '',
+      regenerate: false,
+      update_type: 'adapt_python_protocol',
+      update_details: '',
+      fake: false,
+      fake_id: 0,
+    })
+    setChatHistoryAtom([])
+    setChatData([])
   }, [])
 
   useEffect(() => {
@@ -193,7 +209,9 @@ export function UpdateProtocol(): JSX.Element {
 
     const chatPrompt = `${introText}${originalCodeText}${updateTypeText}${detailsText}`
 
-    setUpdatePromptAtom({
+    console.log(chatPrompt)
+
+    setUpdateProtocolChatAtom({
       prompt: chatPrompt,
       protocol_text: pythonText,
       regenerate: false,
@@ -206,6 +224,7 @@ export function UpdateProtocol(): JSX.Element {
     trackEvent({
       name: 'submit-prompt',
       properties: {
+        isCreateOrUpdate: 'update',
         prompt: chatPrompt,
       },
     })

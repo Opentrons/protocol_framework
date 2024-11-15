@@ -19,9 +19,11 @@ import {
   LOCAL_FEEDBACK_END_POINT,
 } from '../../resources/constants'
 import { useApiCall } from '../../resources/hooks'
+import { useTrackEvent } from '../../resources/hooks/useTrackEvent'
 
 export function FeedbackModal(): JSX.Element {
   const { t } = useTranslation('protocol_generator')
+  const trackEvent = useTrackEvent()
 
   const [feedbackValue, setFeedbackValue] = useState<string>('')
   const [, setShowFeedbackModal] = useAtom(feedbackModalAtom)
@@ -58,6 +60,12 @@ export function FeedbackModal(): JSX.Element {
         },
       }
       await callApi(config as AxiosRequestConfig)
+      trackEvent({
+        name: 'feedback-sent',
+        properties: {
+          feedback: feedbackValue,
+        },
+      })
       setShowFeedbackModal(false)
     } catch (err: any) {
       console.error(`error: ${err.message}`)

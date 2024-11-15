@@ -20,6 +20,7 @@ import {
   chatDataAtom,
   chatHistoryAtom,
   createProtocolChatAtom,
+  regenerateProtocolAtom,
   tokenAtom,
   updateProtocolChatAtom,
 } from '../../resources/atoms'
@@ -38,17 +39,26 @@ import {
 } from '../../resources/constants'
 
 import type { AxiosRequestConfig } from 'axios'
-import type { ChatData } from '../../resources/types'
+import type {
+  ChatData,
+  CreatePrompt,
+  UpdatePrompt,
+} from '../../resources/types'
+import { useTrackEvent } from '../../resources/hooks/useTrackEvent'
 
 export function InputPrompt(): JSX.Element {
   const { t } = useTranslation('protocol_generator')
   const { register, watch, reset, setValue } = useFormContext()
+  const trackEvent = useTrackEvent()
 
   const [updateProtocol] = useAtom(updateProtocolChatAtom)
   const [createProtocol] = useAtom(createProtocolChatAtom)
   const isNewProtocol = createProtocol.prompt !== ''
   const [sendAutoFilledPrompt, setSendAutoFilledPrompt] = useState<boolean>(
     false
+  )
+  const [regenerateProtocol, setRegenerateProtocol] = useAtom(
+    regenerateProtocolAtom
   )
 
   const [, setChatData] = useAtom(chatDataAtom)
@@ -78,13 +88,24 @@ export function InputPrompt(): JSX.Element {
     }
   }, [watchUserPrompt])
 
-  const handleClick = async (
-    isUpdateOrCreateRequest: boolean = false
-  ): Promise<void> => {
-    setRequestId(uuidv4() + getPreFixText(isUpdateOrCreateRequest))
+  useEffect(() => {
+    if (regenerateProtocol.regenerate) {
+      handleClick(regenerateProtocol.isCreateOrUpdateProtocol, true)
+      setRegenerateProtocol({
+        isCreateOrUpdateProtocol: false,
+        regenerate: false,
+      })
+    }
+  }, [regenerateProtocol])
 
+  const handleClick = async (
+    isUpdateOrCreateRequest: boolean = false,
+    isRegenerateRequest: boolean = false
+  ): Promise<void> => {
+    const newRequestId = uuidv4() + getPreFixText(isUpdateOrCreateRequest)
+    setRequestId(newRequestId)
     const userInput: ChatData = {
-      requestId,
+      requestId: newRequestId,
       role: 'user',
       reply: watchUserPrompt,
     }
@@ -106,7 +127,7 @@ export function InputPrompt(): JSX.Element {
         method: 'POST',
         headers,
         data: isUpdateOrCreateRequest
-          ? getUpdateOrCreatePrompt()
+          ? getUpdateOrCreatePrompt(isRegenerateRequest)
           : {
               message: watchUserPrompt,
               history: chatHistory,
@@ -119,6 +140,12 @@ export function InputPrompt(): JSX.Element {
         { role: 'user', content: watchUserPrompt },
       ])
       await callApi(config as AxiosRequestConfig)
+      trackEvent({
+        name: 'chat-submitted',
+        properties: {
+          chat: watchUserPrompt,
+        },
+      })
       setSubmitted(true)
     } catch (err: any) {
       console.error(`error: ${err.message}`)
@@ -126,7 +153,11 @@ export function InputPrompt(): JSX.Element {
     }
   }
 
-  const getUpdateOrCreatePrompt = (): any => {
+  const getUpdateOrCreatePrompt = (
+    isRegenerateRequest: boolean
+  ): CreatePrompt | UpdatePrompt => {
+    createProtocol.regenerate = isRegenerateRequest
+    updateProtocol.regenerate = isRegenerateRequest
     return isNewProtocol ? createProtocol : updateProtocol
   }
 
@@ -159,6 +190,13 @@ export function InputPrompt(): JSX.Element {
         { role: 'assistant', content: reply },
       ])
       setChatData(chatData => [...chatData, assistantResponse])
+      trackEvent({
+        name: 'generated-protocol',
+        properties: {
+          createOrUpdate: isNewProtocol ? 'create' : 'update',
+          protocol: reply,
+        },
+      })
       setSubmitted(false)
     }
   }, [data, isLoading, submitted])

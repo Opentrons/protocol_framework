@@ -53,7 +53,7 @@ interface LiquidToolboxProps {
 }
 export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
   const { onClose } = props
-  const { t } = useTranslation(['liquids', 'shared'])
+  const { t } = useTranslation(['liquids', 'form', 'shared'])
   const dispatch = useDispatch()
   const [showDefineLiquidModal, setDefineLiquidModal] = useState<boolean>(false)
   const liquids = useSelector(labwareIngredSelectors.allIngredientNamesIds)
@@ -186,7 +186,7 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
     if (volume == null || volume === '0') {
       volumeErrors = t('generic.error.more_than_zero')
     } else if (parseInt(volume) > selectedWellsMaxVolume) {
-      volumeErrors = t('liquid_placement.volume_exceeded', {
+      volumeErrors = t('form:liquid_placement.volume_exceeded', {
         volume: selectedWellsMaxVolume,
       })
     }

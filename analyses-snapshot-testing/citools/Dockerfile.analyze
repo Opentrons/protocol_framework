@@ -1,10 +1,6 @@
-# Use 3.10 just like the app does
-FROM python:3.10-slim-bullseye
+ARG BASE_IMAGE_NAME=opentrons-python-base:3.10
 
-# Update packages and install git
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y git libsystemd-dev
+FROM ${BASE_IMAGE_NAME}
 
 # Define build arguments
 ARG ANALYSIS_REF=edge
