@@ -36,7 +36,7 @@ export function usePlacePlateReaderLid(
     const location = placeLabware.location
     const loadModuleCommand = buildLoadModuleCommand(location as ModuleLocation)
     const placeLabwareCommand = buildPlaceLabwareCommand(
-      placeLabware.labwareId as string,
+      placeLabware.labwareURI as string,
       location
     )
     commandsToExecute = [loadModuleCommand, placeLabwareCommand]
@@ -72,11 +72,11 @@ const buildLoadModuleCommand = (location: ModuleLocation): CreateCommand => {
 }
 
 const buildPlaceLabwareCommand = (
-  labwareId: string,
+  labwareURI: string,
   location: OnDeckLabwareLocation
 ): CreateCommand => {
   return {
     commandType: 'unsafe/placeLabware' as const,
-    params: { labwareId, location },
+    params: { labwareURI, location },
   }
 }

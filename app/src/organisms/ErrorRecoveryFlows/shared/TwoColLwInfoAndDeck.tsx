@@ -12,7 +12,6 @@ import { RecoverySingleColumnContentWrapper } from './RecoveryContentWrapper'
 import { TwoColumn, DeckMapContent } from '/app/molecules/InterventionModal'
 import { RecoveryFooterButtons } from './RecoveryFooterButtons'
 import { LeftColumnLabwareInfo } from './LeftColumnLabwareInfo'
-import { getSlotNameAndLwLocFrom } from '../hooks/useDeckMapUtils'
 import { RECOVERY_MAP } from '../constants'
 
 import type * as React from 'react'
@@ -46,7 +45,9 @@ export function TwoColLwInfoAndDeck(
     void proceedNextStep()
   }
 
-  const [slot] = getSlotNameAndLwLocFrom(failedLabware?.location ?? null, false)
+  const {
+    displayNameCurrentLoc: slot,
+  } = failedLabwareUtils.failedLabwareLocations
 
   const buildTitle = (): string => {
     switch (selectedRecoveryOption) {

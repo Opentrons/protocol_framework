@@ -4,7 +4,6 @@ import {
   DIRECTION_COLUMN,
   DIRECTION_ROW,
   Flex,
-  InputField,
   JUSTIFY_CENTER,
   JUSTIFY_END,
   LargeButton,
@@ -13,17 +12,30 @@ import {
   DropdownMenu,
 } from '@opentrons/components'
 import type { DropdownOption } from '@opentrons/components'
+import type { UpdateOptions } from '../../resources/types'
 import { UploadInput } from '../../molecules/UploadInput'
 import { useEffect, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { FileUpload } from '../../molecules/FileUpload'
 import { useNavigate } from 'react-router-dom'
-import { chatPromptAtom, headerWithMeterAtom } from '../../resources/atoms'
+import {
+  chatHistoryAtom,
+  createProtocolChatAtom,
+  headerWithMeterAtom,
+  updateProtocolChatAtom,
+  chatDataAtom,
+} from '../../resources/atoms'
 import { CSSTransition } from 'react-transition-group'
 import { useAtom } from 'jotai'
+import { useTrackEvent } from '../../resources/hooks/useTrackEvent'
+import { TextAreaField } from '../../atoms/TextAreaField'
 
-const updateOptions: DropdownOption[] = [
+interface UpdateOptionsDropdown extends DropdownOption {
+  value: UpdateOptions
+}
+
+const updateOptions: UpdateOptionsDropdown[] = [
   {
     name: 'Adapt Python protocol from OT-2 to Flex',
     value: 'adapt_python_protocol',
@@ -88,16 +100,50 @@ const isValidProtocolFileName = (protocolFileName: string): boolean => {
 
 export function UpdateProtocol(): JSX.Element {
   const navigate = useNavigate()
+  const trackEvent = useTrackEvent()
   const { t }: { t: (key: string) => string } = useTranslation(
     'protocol_generator'
   )
-  const [, setChatPrompt] = useAtom(chatPromptAtom)
   const [headerState, setHeaderWithMeterAtom] = useAtom(headerWithMeterAtom)
   const [updateType, setUpdateType] = useState<DropdownOption | null>(null)
   const [detailsValue, setDetailsValue] = useState<string>('')
+  const [, setUpdateProtocolChatAtom] = useAtom(updateProtocolChatAtom)
+  const [, setCreateProtocolChatAtom] = useAtom(createProtocolChatAtom)
+  const [, setChatHistoryAtom] = useAtom(chatHistoryAtom)
+  const [, setChatData] = useAtom(chatDataAtom)
   const [fileValue, setFile] = useState<File | null>(null)
   const [pythonText, setPythonTextValue] = useState<string>('')
   const [errorText, setErrorText] = useState<string | null>(null)
+
+  // Reset the chat data atom and protocol atoms when navigating to the update protocol page
+  useEffect(() => {
+    setCreateProtocolChatAtom({
+      prompt: '',
+      regenerate: false,
+      scientific_application_type: '',
+      description: '',
+      robots: 'opentrons_flex',
+      mounts: [],
+      flexGripper: false,
+      modules: [],
+      labware: [],
+      liquids: [],
+      steps: [],
+      fake: false,
+      fake_id: 0,
+    })
+    setUpdateProtocolChatAtom({
+      prompt: '',
+      protocol_text: '',
+      regenerate: false,
+      update_type: 'adapt_python_protocol',
+      update_details: '',
+      fake: false,
+      fake_id: 0,
+    })
+    setChatHistoryAtom([])
+    setChatData([])
+  }, [])
 
   useEffect(() => {
     let progress = 0.0
@@ -126,7 +172,7 @@ export function UpdateProtocol(): JSX.Element {
     setHeaderWithMeterAtom,
   ])
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
+  const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>): void => {
     setDetailsValue(event.target.value)
   }
 
@@ -141,7 +187,6 @@ export function UpdateProtocol(): JSX.Element {
 
       if (typeof text === 'string' && text !== '') {
         setErrorText(null)
-        console.log('File read successfully:\n', text)
         setPythonTextValue(text)
       } else {
         setErrorText(t('file_length_error'))
@@ -166,7 +211,24 @@ export function UpdateProtocol(): JSX.Element {
 
     console.log(chatPrompt)
 
-    setChatPrompt(chatData => chatPrompt)
+    setUpdateProtocolChatAtom({
+      prompt: chatPrompt,
+      protocol_text: pythonText,
+      regenerate: false,
+      update_type: (updateType?.value ?? 'other') as UpdateOptions,
+      update_details: detailsValue,
+      fake: false,
+      fake_id: 0,
+    })
+
+    trackEvent({
+      name: 'submit-prompt',
+      properties: {
+        isCreateOrUpdate: 'update',
+        prompt: chatPrompt,
+      },
+    })
+
     navigate('/chat')
   }
 
@@ -264,10 +326,10 @@ export function UpdateProtocol(): JSX.Element {
           />
         </Flex>
         <BodyText>{t('provide_details_of_changes')}</BodyText>
-        <InputField
+        <TextAreaField
           value={detailsValue}
           onChange={handleInputChange}
-          size="medium"
+          height="160px"
         />
         <Flex
           paddingTop="40px"

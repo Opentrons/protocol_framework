@@ -206,6 +206,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
       flexDirection={DIRECTION_COLUMN}
       ref={dropDownMenuWrapperRef}
       gridGap={SPACING.spacing4}
+      width={width}
     >
       {title !== null ? (
         <Flex
@@ -214,7 +215,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
           alignItems={ALIGN_CENTER}
         >
           <StyledText
-            desktopStyle="captionRegular"
+            desktopStyle="bodyDefaultRegular"
             color={disabled ? COLORS.grey35 : COLORS.grey60}
           >
             {title}
@@ -284,7 +285,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
             {filterOptions.map((option, index) => (
               <React.Fragment key={`${option.name}-${index}`}>
                 <MenuItem
-                  disabled={disabled ?? option.disabled}
+                  disabled={option.disabled}
                   zIndex={3}
                   key={`${option.name}-${index}`}
                   onClick={() => {

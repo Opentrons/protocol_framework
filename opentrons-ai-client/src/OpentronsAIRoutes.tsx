@@ -1,6 +1,6 @@
 import { Route, Navigate, Routes } from 'react-router-dom'
 import { Landing } from './pages/Landing'
-import { UpdateProtocol } from './organisms/UpdateProtocol'
+import { UpdateProtocol } from './pages/UpdateProtocol'
 
 import type { RouteProps } from './resources/types'
 import { Chat } from './pages/Chat'

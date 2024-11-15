@@ -18,7 +18,12 @@ interface TiprackFieldProps extends FieldProps {
   pipetteId?: unknown
 }
 export function TiprackField(props: TiprackFieldProps): JSX.Element {
-  const { value, updateValue, pipetteId } = props
+  const {
+    value,
+    updateValue,
+    pipetteId,
+    padding = `0 ${SPACING.spacing16}`,
+  } = props
   const { t } = useTranslation('protocol_steps')
   const pipetteEntities = useSelector(getPipetteEntities)
   const options = useSelector(getTiprackOptions)
@@ -48,12 +53,12 @@ export function TiprackField(props: TiprackFieldProps): JSX.Element {
         />
       ) : (
         <Flex
-          padding={SPACING.spacing16}
+          padding={padding ?? SPACING.spacing16}
           gridGap={SPACING.spacing8}
           flexDirection={DIRECTION_COLUMN}
           width="100%"
         >
-          <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
+          <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
             {t('tiprack')}
           </StyledText>
           <ListItem type="noActive">

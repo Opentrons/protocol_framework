@@ -602,6 +602,7 @@ if __name__ == "__main__":
             headers,
             runs_and_lpc,
             headers_lpc,
+            list_of_heights,
         ) = abr_google_drive.create_data_dictionary(
             run_id,
             error_folder_path,
@@ -614,6 +615,15 @@ if __name__ == "__main__":
         start_row = google_sheet.get_index_row() + 1
         google_sheet.batch_update_cells(runs_and_robots, "A", start_row, "0")
         print("Wrote run to ABR-run-data")
+        # Record Liquid Heights Found
+        google_sheet_ldf = google_sheets_tool.google_sheet(
+            credentials_path, google_sheet_name, 4
+        )
+        start_row_lhd = google_sheet_ldf.get_index_row() + 1
+        google_sheet_ldf.batch_update_cells(
+            list_of_heights, "A", start_row_lhd, "1795535088"
+        )
+        print("wrote liquid heights found.")
         # Add LPC to google sheet
         google_sheet_lpc = google_sheets_tool.google_sheet(
             credentials_path, "ABR-LPC", 0

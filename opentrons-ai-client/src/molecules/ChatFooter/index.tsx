@@ -29,7 +29,7 @@ export function ChatFooter(): JSX.Element {
 
 const DISCLAIMER_TEXT_STYLE = css`
   color: ${COLORS.grey55};
-  font-size: ${TYPOGRAPHY.fontSize20};
+  font-size: ${TYPOGRAPHY.fontSizeH3};
   line-height: ${TYPOGRAPHY.lineHeight24};
   text-align: ${TYPOGRAPHY.textAlignCenter};
 `

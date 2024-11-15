@@ -2,6 +2,7 @@ import type * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import {
+  ALIGN_CENTER,
   ALIGN_END,
   BORDERS,
   Btn,
@@ -10,10 +11,11 @@ import {
   Flex,
   JUSTIFY_SPACE_BETWEEN,
   LargeButton,
+  OVERFLOW_SCROLL,
   SPACING,
   StyledText,
-  TYPOGRAPHY,
   Tooltip,
+  TYPOGRAPHY,
   useHoverTooltip,
 } from '@opentrons/components'
 import temporaryImg from '../../assets/images/placeholder_image_delete.png'
@@ -55,13 +57,19 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
     >
       <Flex
         width="60%"
-        padding={`${SPACING.spacing40} ${SPACING.spacing80} ${SPACING.spacing80} ${SPACING.spacing80}`}
+        padding={SPACING.spacing80}
         flexDirection={DIRECTION_COLUMN}
         backgroundColor={COLORS.white}
         borderRadius={BORDERS.borderRadius16}
         justifyContent={JUSTIFY_SPACE_BETWEEN}
+        gridGap={SPACING.spacing24}
       >
-        <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
+        <Flex
+          flexDirection={DIRECTION_COLUMN}
+          gridGap={SPACING.spacing8}
+          height="100%"
+          overflowY={OVERFLOW_SCROLL}
+        >
           <StyledText
             color={COLORS.grey60}
             desktopStyle="bodyDefaultSemiBold"
@@ -87,9 +95,10 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
         <Flex
           alignSelf={goBack != null ? 'auto' : ALIGN_END}
           justifyContent={JUSTIFY_SPACE_BETWEEN}
+          alignItems={ALIGN_CENTER}
         >
           {goBack != null ? (
-            <Btn onClick={goBack} css={BUTTON_LINK_STYLE}>
+            <Btn onClick={goBack} css={BUTTON_LINK_STYLE} height="1.5rem">
               <StyledText desktopStyle="bodyLargeSemiBold">
                 {t('go_back')}
               </StyledText>
@@ -101,6 +110,8 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
               onClick={proceed}
               iconName="arrow-right"
               buttonText={t('shared:confirm')}
+              height="3.5rem"
+              width="8.5625rem"
             />
           </Flex>
           {tooltipOnDisabled != null ? (

@@ -16,8 +16,7 @@ import {
   buildPickUpTips,
   buildIgnorePolicyRules,
   isAssumeFalsePositiveResumeKind,
-  UPDATE_ESTIMATORS_EXCEPT_PLUNGERS,
-  HOME_GRIPPER_Z,
+  HOME_EXCEPT_PLUNGERS,
 } from '../useRecoveryCommands'
 import { RECOVERY_MAP, ERROR_KINDS } from '../../constants'
 import { getErrorKind } from '/app/organisms/ErrorRecoveryFlows/utils'
@@ -56,7 +55,11 @@ describe('useRecoveryCommands', () => {
 
   const props = {
     runId: mockRunId,
-    failedCommandByRunRecord: mockFailedCommand,
+    failedCommand: {
+      byRunRecord: mockFailedCommand,
+      byAnalysis: mockFailedCommand,
+    },
+    unvalidatedFailedCommand: mockFailedCommand,
     failedLabwareUtils: mockFailedLabwareUtils,
     routeUpdateActions: mockRouteUpdateActions,
     recoveryToastUtils: { makeSuccessToast: mockMakeSuccessToast } as any,
@@ -144,24 +147,29 @@ describe('useRecoveryCommands', () => {
     'prepareToAspirate',
   ] as const).forEach(inPlaceCommandType => {
     it(`Should move to retryLocation if failed command is ${inPlaceCommandType} and error is appropriate when retrying`, async () => {
-      const { result } = renderHook(() =>
-        useRecoveryCommands({
-          runId: mockRunId,
-          failedCommandByRunRecord: {
-            ...mockFailedCommand,
-            commandType: inPlaceCommandType,
-            params: {
-              pipetteId: 'mock-pipette-id',
-            },
-            error: {
-              errorType: 'overpressure',
-              errorCode: '3006',
-              isDefined: true,
-              errorInfo: {
-                retryLocation: [1, 2, 3],
-              },
+      const { result } = renderHook(() => {
+        const failedCommand = {
+          ...mockFailedCommand,
+          commandType: inPlaceCommandType,
+          params: {
+            pipetteId: 'mock-pipette-id',
+          },
+          error: {
+            errorType: 'overpressure',
+            errorCode: '3006',
+            isDefined: true,
+            errorInfo: {
+              retryLocation: [1, 2, 3],
             },
           },
+        }
+        return useRecoveryCommands({
+          runId: mockRunId,
+          failedCommand: {
+            byRunRecord: failedCommand,
+            byAnalysis: failedCommand,
+          },
+          unvalidatedFailedCommand: failedCommand,
           failedLabwareUtils: mockFailedLabwareUtils,
           routeUpdateActions: mockRouteUpdateActions,
           recoveryToastUtils: {} as any,
@@ -171,7 +179,7 @@ describe('useRecoveryCommands', () => {
           } as any,
           selectedRecoveryOption: RECOVERY_MAP.RETRY_NEW_TIPS.ROUTE,
         })
-      )
+      })
       await act(async () => {
         await result.current.retryFailedCommand()
       })
@@ -245,7 +253,7 @@ describe('useRecoveryCommands', () => {
 
     const testProps = {
       ...props,
-      failedCommandByRunRecord: mockFailedCmdWithPipetteId,
+      unvalidatedFailedCommand: mockFailedCmdWithPipetteId,
       failedLabwareUtils: {
         ...mockFailedLabwareUtils,
         failedLabware: mockFailedLabware,
@@ -281,11 +289,11 @@ describe('useRecoveryCommands', () => {
     const { result } = renderHook(() => useRecoveryCommands(props))
 
     await act(async () => {
-      await result.current.updatePositionEstimatorsAndHomeGripper()
+      await result.current.homeExceptPlungers()
     })
 
     expect(mockChainRunCommands).toHaveBeenCalledWith(
-      [UPDATE_ESTIMATORS_EXCEPT_PLUNGERS, HOME_GRIPPER_Z],
+      [HOME_EXCEPT_PLUNGERS],
       false
     )
   })
@@ -312,7 +320,7 @@ describe('useRecoveryCommands', () => {
 
     const testProps = {
       ...props,
-      failedCommandByRunRecord: mockFailedCommandWithError,
+      unvalidatedFailedCommand: mockFailedCommandWithError,
     }
 
     const { result, rerender } = renderHook(() =>
@@ -349,7 +357,7 @@ describe('useRecoveryCommands', () => {
 
     const testProps = {
       ...props,
-      failedCommandByRunRecord: mockFailedCommandWithError,
+      unvalidatedFailedCommand: mockFailedCommandWithError,
     }
 
     mockUpdateErrorRecoveryPolicy.mockRejectedValueOnce(

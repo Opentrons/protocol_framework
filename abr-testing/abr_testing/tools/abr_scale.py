@@ -149,6 +149,7 @@ def get_most_recent_run_and_record(
         headers,
         runs_and_lpc,
         headers_lpc,
+        list_of_heights,
     ) = abr_google_drive.create_data_dictionary(
         most_recent_run_id,
         storage_directory,
@@ -163,6 +164,15 @@ def get_most_recent_run_and_record(
     start_row = google_sheet_abr_data.get_index_row() + 1
     google_sheet_abr_data.batch_update_cells(runs_and_robots, "A", start_row, "0")
     print("Wrote run to ABR-run-data")
+    # Add liquid height detection to abr sheet
+    google_sheet_ldf = google_sheets_tool.google_sheet(
+        credentials_path, "ABR-run-data", 4
+    )
+    start_row_lhd = google_sheet_ldf.get_index_row() + 1
+    google_sheet_ldf.batch_update_cells(
+        list_of_heights, "A", start_row_lhd, "1795535088"
+    )
+    print("Wrote found liquid heights to ABR-run-data")
     # Add LPC to google sheet
     google_sheet_lpc = google_sheets_tool.google_sheet(
         credentials_path, "ABR-LPC", tab_number=0

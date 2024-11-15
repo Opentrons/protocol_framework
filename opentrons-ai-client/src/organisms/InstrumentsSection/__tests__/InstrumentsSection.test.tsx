@@ -13,6 +13,8 @@ const TestFormProviderComponent = () => {
   return (
     <FormProvider {...methods}>
       <InstrumentsSection />
+
+      <p>{`form is ${methods.formState.isValid ? 'valid' : 'invalid'}`}</p>
     </FormProvider>
   )
 }
@@ -24,7 +26,7 @@ const render = (): ReturnType<typeof renderWithProviders> => {
 }
 
 describe('ApplicationSection', () => {
-  it('should render robot, pipette, flex gripper radios, mounts dropdowns, and confirm button', async () => {
+  it('should render robot, pipette, flex gripper radios and mounts dropdowns', async () => {
     render()
 
     expect(
@@ -40,14 +42,13 @@ describe('ApplicationSection', () => {
     expect(
       screen.getByText('Do you want to use the Flex Gripper?')
     ).toBeInTheDocument()
-    expect(screen.getByText('Confirm')).toBeInTheDocument()
   })
 
   it('should not render left and right mount dropdowns if 96-Channel 1000µL pipette radio is selected', () => {
     render()
 
     const pipettesRadioButton = screen.getByLabelText(
-      '96-Channel 1000µL pipette'
+      '96-Channel 1000uL pipette'
     )
     fireEvent.click(pipettesRadioButton)
 
@@ -76,12 +77,54 @@ describe('ApplicationSection', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('should enable confirm button when all fields are filled', async () => {
+  it('should be able to select only one pipette, and the other as none', async () => {
     render()
 
-    const confirmButton = screen.getByRole('button')
     await waitFor(() => {
-      expect(confirmButton).not.toBeEnabled()
+      expect(screen.getByText('form is invalid')).toBeInTheDocument()
+    })
+
+    const leftMount = screen.getAllByText('Choose pipette')[0]
+    fireEvent.click(leftMount)
+    fireEvent.click(screen.getByText('Flex 1-Channel 50 μL'))
+
+    const rightMount = screen.getByText('Choose pipette')
+    fireEvent.click(rightMount)
+    fireEvent.click(screen.getByText('None'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Flex 1-Channel 50 μL')).toBeInTheDocument()
+    })
+    expect(screen.getByText('None')).toBeInTheDocument()
+
+    expect(screen.getByText('form is valid')).toBeInTheDocument()
+  })
+
+  it('should not be able to select two pipettes with none value', async () => {
+    render()
+
+    await waitFor(() => {
+      expect(screen.getByText('form is invalid')).toBeInTheDocument()
+    })
+
+    const leftMount = screen.getAllByText('Choose pipette')[0]
+    fireEvent.click(leftMount)
+    fireEvent.click(screen.getByText('None'))
+
+    const rightMount = screen.getByText('Choose pipette')
+    fireEvent.click(rightMount)
+    fireEvent.click(screen.getAllByText('None')[1])
+
+    await waitFor(() => {
+      expect(screen.getByText('form is invalid')).toBeInTheDocument()
+    })
+  })
+
+  it('should update the form state to valid when all fields are filled', async () => {
+    render()
+
+    await waitFor(() => {
+      expect(screen.getByText('form is invalid')).toBeInTheDocument()
     })
 
     const leftMount = screen.getAllByText('Choose pipette')[0]
@@ -93,16 +136,7 @@ describe('ApplicationSection', () => {
     fireEvent.click(screen.getByText('Flex 8-Channel 50 μL'))
 
     await waitFor(() => {
-      expect(confirmButton).toBeEnabled()
-    })
-  })
-
-  it('should disable confirm button when all fields are not filled', async () => {
-    render()
-
-    const confirmButton = screen.getByRole('button')
-    await waitFor(() => {
-      expect(confirmButton).not.toBeEnabled()
+      expect(screen.getByText('form is valid')).toBeInTheDocument()
     })
   })
 })

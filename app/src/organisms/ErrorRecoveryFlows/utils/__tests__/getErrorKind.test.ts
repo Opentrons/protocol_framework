@@ -71,13 +71,17 @@ describe('getErrorKind', () => {
   ])(
     'returns $expectedError for $commandType with errorType $errorType',
     ({ commandType, errorType, expectedError, isDefined = true }) => {
-      const result = getErrorKind({
+      const runRecordFailedCommand = {
         commandType,
         error: {
           isDefined,
           errorType,
         } as RunCommandError,
-      } as RunTimeCommand)
+      } as RunTimeCommand
+
+      const result = getErrorKind({
+        byRunRecord: runRecordFailedCommand,
+      } as any)
       expect(result).toEqual(expectedError)
     }
   )

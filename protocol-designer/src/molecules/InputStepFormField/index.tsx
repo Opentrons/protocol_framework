@@ -28,7 +28,7 @@ export function InputStepFormField(
     title,
     units,
     showTooltip = true,
-    padding = SPACING.spacing16,
+    padding = `0 ${SPACING.spacing16}`,
     tooltipContent,
     caption,
     formLevelError,

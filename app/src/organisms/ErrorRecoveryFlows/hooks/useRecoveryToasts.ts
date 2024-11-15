@@ -10,7 +10,7 @@ import type { UseCommandTextStringParams } from '/app/local-resources/commands'
 
 export type BuildToast = Omit<UseCommandTextStringParams, 'command'> & {
   isOnDevice: boolean
-  currentStepCount: StepCounts['currentStepNumber']
+  stepCounts: StepCounts
   selectedRecoveryOption: CurrentRecoveryOptionUtils['selectedRecoveryOption']
 }
 
@@ -21,15 +21,16 @@ export interface RecoveryToasts {
 
 // Provides methods for rendering success/failure toasts after performing a terminal recovery command.
 export function useRecoveryToasts({
-  currentStepCount,
+  stepCounts,
   isOnDevice,
   selectedRecoveryOption,
   ...rest
 }: BuildToast): RecoveryToasts {
+  const { currentStepNumber, hasRunDiverged } = stepCounts
   const { makeToast } = useToaster()
   const displayType = isOnDevice ? 'odd' : 'desktop'
 
-  const stepNumber = getStepNumber(selectedRecoveryOption, currentStepCount)
+  const stepNumber = getStepNumber(selectedRecoveryOption, currentStepNumber)
 
   const desktopFullCommandText = useRecoveryFullCommandText({
     ...rest,
@@ -46,7 +47,8 @@ export function useRecoveryToasts({
       ? desktopFullCommandText
       : recoveryToastText
   // The "heading" of the toast message. Currently, this text is only present on the desktop toasts.
-  const headingText = displayType === 'desktop' ? recoveryToastText : undefined
+  const headingText =
+    displayType === 'desktop' && !hasRunDiverged ? recoveryToastText : undefined
 
   const makeSuccessToast = (): void => {
     if (selectedRecoveryOption !== RECOVERY_MAP.CANCEL_RUN.ROUTE) {
@@ -73,12 +75,18 @@ export function useRecoveryToastText({
 }): string {
   const { t } = useTranslation('error_recovery')
 
-  const currentStepReturnVal = t('retrying_step_succeeded', {
-    step: stepNumber,
-  }) as string
-  const nextStepReturnVal = t('skipping_to_step_succeeded', {
-    step: stepNumber,
-  }) as string
+  const currentStepReturnVal =
+    stepNumber != null
+      ? t('retrying_step_succeeded', {
+          step: stepNumber,
+        })
+      : t('retrying_step_succeeded_na')
+  const nextStepReturnVal =
+    stepNumber != null
+      ? t('skipping_to_step_succeeded', {
+          step: stepNumber,
+        })
+      : t('skipping_to_step_succeeded_na')
 
   const toastText = handleRecoveryOptionAction(
     selectedRecoveryOption,
@@ -102,7 +110,7 @@ export function useRecoveryFullCommandText(
 ): string | null {
   const { commandTextData, stepNumber } = props
 
-  const relevantCmdIdx = typeof stepNumber === 'number' ? stepNumber : -1
+  const relevantCmdIdx = stepNumber ?? -1
   const relevantCmd = commandTextData?.commands[relevantCmdIdx] ?? null
 
   const { commandText, kind } = useCommandTextString({
@@ -110,8 +118,8 @@ export function useRecoveryFullCommandText(
     command: relevantCmd,
   })
 
-  if (typeof stepNumber === 'string') {
-    return stepNumber
+  if (stepNumber == null) {
+    return null
   }
   // Occurs when the relevantCmd doesn't exist, ex, we "skip" the last command of a run.
   else if (relevantCmd === null) {
@@ -129,12 +137,12 @@ export function useRecoveryFullCommandText(
 // Return the user-facing step number, 0 indexed. If the step number cannot be determined, return '?'.
 export function getStepNumber(
   selectedRecoveryOption: BuildToast['selectedRecoveryOption'],
-  currentStepCount: BuildToast['currentStepCount']
-): number | string {
-  const currentStepReturnVal = currentStepCount ?? '?'
+  currentStepCount: BuildToast['stepCounts']['currentStepNumber']
+): number | null {
+  const currentStepReturnVal = currentStepCount ?? null
   // There is always a next protocol step after a command that can error, therefore, we don't need to handle that.
   const nextStepReturnVal =
-    typeof currentStepCount === 'number' ? currentStepCount + 1 : '?'
+    typeof currentStepCount === 'number' ? currentStepCount + 1 : null
 
   return handleRecoveryOptionAction(
     selectedRecoveryOption,
@@ -149,7 +157,7 @@ function handleRecoveryOptionAction<T>(
   selectedRecoveryOption: CurrentRecoveryOptionUtils['selectedRecoveryOption'],
   currentStepReturnVal: T,
   nextStepReturnVal: T
-): T | string {
+): T | null {
   switch (selectedRecoveryOption) {
     case RECOVERY_MAP.MANUAL_FILL_AND_SKIP.ROUTE:
     case RECOVERY_MAP.SKIP_STEP_WITH_SAME_TIPS.ROUTE:
@@ -163,8 +171,9 @@ function handleRecoveryOptionAction<T>(
     case RECOVERY_MAP.RETRY_STEP.ROUTE:
     case RECOVERY_MAP.MANUAL_REPLACE_AND_RETRY.ROUTE:
       return currentStepReturnVal
-    default:
-      return 'HANDLE RECOVERY TOAST OPTION EXPLICITLY.'
+    default: {
+      return null
+    }
   }
 }
 

@@ -1787,7 +1787,8 @@
         "p1000_single_gen2",
         "p1000_single_flex",
         "p1000_multi_flex",
-        "p1000_96"
+        "p1000_96",
+        "p200_96"
       ],
       "type": "string"
     },
@@ -4829,9 +4830,9 @@
       "description": "Payload required for an UnsafePlaceLabware command.",
       "type": "object",
       "properties": {
-        "labwareId": {
-          "title": "Labwareid",
-          "description": "The id of the labware to place.",
+        "labwareURI": {
+          "title": "Labwareuri",
+          "description": "Labware URI for labware.",
           "type": "string"
         },
         "location": {
@@ -4853,7 +4854,7 @@
           ]
         }
       },
-      "required": ["labwareId", "location"]
+      "required": ["labwareURI", "location"]
     },
     "UnsafePlaceLabwareCreate": {
       "title": "UnsafePlaceLabwareCreate",

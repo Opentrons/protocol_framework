@@ -332,6 +332,7 @@ class ProtocolCore(
             NonConnectedModuleCore,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ],
         use_gripper: bool,
         pause_for_manual_move: bool,
@@ -450,39 +451,9 @@ class ProtocolCore(
             existing_module_ids=list(self._module_cores_by_id.keys()),
         )
 
-        # When the protocol engine is created, we add Module Lids as part of the deck fixed labware
-        # If a valid module exists in the deck config. For analysis, we add the labware here since
-        # deck fixed labware is not created under the same conditions. We also need to inject the Module
-        # lids when the module isnt already on the deck config, like when adding a new
-        # module during a protocol setup.
-        self._load_virtual_module_lid(module_core)
-
         self._module_cores_by_id[module_core.module_id] = module_core
 
         return module_core
-
-    def _load_virtual_module_lid(
-        self, module_core: Union[ModuleCore, NonConnectedModuleCore]
-    ) -> None:
-        if isinstance(module_core, AbsorbanceReaderCore):
-            substate = self._engine_client.state.modules.get_absorbance_reader_substate(
-                module_core.module_id
-            )
-            if substate.lid_id is None:
-                lid = self._engine_client.execute_command_without_recovery(
-                    cmd.LoadLabwareParams(
-                        loadName="opentrons_flex_lid_absorbance_plate_reader_module",
-                        location=ModuleLocation(moduleId=module_core.module_id),
-                        namespace="opentrons",
-                        version=1,
-                        displayName="Absorbance Reader Lid",
-                    )
-                )
-
-                self._engine_client.add_absorbance_reader_lid(
-                    module_id=module_core.module_id,
-                    lid_id=lid.labwareId,
-                )
 
     def _create_non_connected_module_core(
         self, load_module_result: LoadModuleResult
@@ -816,6 +787,7 @@ class ProtocolCore(
             NonConnectedModuleCore,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ],
     ) -> LabwareLocation:
         if isinstance(location, LabwareCore):
@@ -832,6 +804,7 @@ class ProtocolCore(
             NonConnectedModuleCore,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ]
     ) -> NonStackedLocation:
         if isinstance(location, (ModuleCore, NonConnectedModuleCore)):
@@ -845,3 +818,5 @@ class ProtocolCore(
         elif isinstance(location, WasteChute):
             # TODO(mm, 2023-12-06) This will need to determine the appropriate Waste Chute to return, but only move_labware uses this for now
             return AddressableAreaLocation(addressableAreaName="gripperWasteChute")
+        elif isinstance(location, TrashBin):
+            return AddressableAreaLocation(addressableAreaName=location.area_name)

@@ -10,13 +10,11 @@ import {
 import type { DropdownBorder } from '@opentrons/components'
 import { Controller, useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import {
-  getAllDefinitions,
-  getLabwareDisplayName,
-} from '@opentrons/shared-data'
+import { getLabwareDisplayName } from '@opentrons/shared-data'
 import { LabwareDiagram } from '../../molecules/LabwareDiagram'
 import type { DisplayLabware } from '../../organisms/LabwareLiquidsSection'
 import { LABWARES_FIELD_NAME } from '../../organisms/LabwareLiquidsSection'
+import { getOnlyLatestDefs } from '../../resources/utils'
 
 export function ControlledLabwareListItems(): JSX.Element | null {
   const { t } = useTranslation('create_protocol')
@@ -24,7 +22,7 @@ export function ControlledLabwareListItems(): JSX.Element | null {
 
   const labwares: DisplayLabware[] = watch(LABWARES_FIELD_NAME) ?? []
 
-  const defs = getAllDefinitions()
+  const defs = getOnlyLatestDefs()
 
   return (
     <Controller

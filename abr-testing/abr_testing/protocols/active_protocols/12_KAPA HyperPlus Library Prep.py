@@ -21,7 +21,7 @@ metadata = {
     "author": "Your Name <your.email@example.com>",
 }
 
-requirements = {"robotType": "Flex", "apiLevel": "2.20"}
+requirements = {"robotType": "Flex", "apiLevel": "2.21"}
 
 tt_50 = 0
 tt_200 = 0
@@ -50,6 +50,7 @@ def add_parameters(parameters: ParameterContext) -> None:
         default=False,
     )
     helpers.create_disposable_lid_parameter(parameters)
+    helpers.create_tc_lid_deck_riser_parameter(parameters)
     helpers.create_two_pipette_mount_parameters(parameters)
     parameters.add_int(
         variable_name="num_samples",
@@ -85,6 +86,7 @@ def run(ctx: ProtocolContext) -> None:
     dry_run = ctx.params.dry_run  # type: ignore[attr-defined]
     pipette_1000_mount = ctx.params.pipette_mount_1  # type: ignore[attr-defined]
     pipette_50_mount = ctx.params.pipette_mount_2  # type: ignore[attr-defined]
+    deck_riser = ctx.params.deck_riser  # type: ignore[attr-defined]
     REUSE_ETOH_TIPS = True
     REUSE_RSB_TIPS = (
         True  # Reuse tips for RSB buffer (adding RSB, mixing, and transferring)
@@ -158,7 +160,7 @@ def run(ctx: ProtocolContext) -> None:
     unused_lids: List[Labware] = []
     # Load TC Lids
     if disposable_lid:
-        unused_lids = helpers.load_disposable_lids(ctx, 5, ["C3"])
+        unused_lids = helpers.load_disposable_lids(ctx, 5, ["C3"], deck_riser)
     # Import Global Variables
 
     global tip50
@@ -450,6 +452,10 @@ def run(ctx: ProtocolContext) -> None:
                     "Available Off Deck Slots:" + str(len(Available_off_deck_slots))
                 )
                 p200.pick_up_tip()
+
+    tiptrack(tip50, None, reuse=False)
+    p50.return_tip()
+    helpers.find_liquid_height_of_loaded_liquids(ctx, liquid_vols_and_wells, p50)
 
     def TipSwap(tipvol: int) -> None:
         """Tip swap."""
@@ -1203,18 +1209,11 @@ def run(ctx: ProtocolContext) -> None:
         # Set Block Temp for Final Plate
         tc_mod.set_block_temperature(4)
 
-    tiptrack(tip50, None, reuse=False)
-    p50.return_tip()
-    probed_wells = helpers.find_liquid_height_of_loaded_liquids(
-        ctx, liquid_vols_and_wells, p50
-    )
-
     unused_lids, used_lids = Fragmentation(unused_lids, used_lids)
     unused_lids, used_lids = end_repair(unused_lids, used_lids)
     unused_lids, used_lids = index_ligation(unused_lids, used_lids)
     lib_cleanup()
     unused_lids, used_lids = lib_amplification(unused_lids, used_lids)
     lib_cleanup_2()
-    probed_wells.append(waste1_res)
-    probed_wells.append(waste2_res)
-    helpers.find_liquid_height_of_all_wells(ctx, p50, probed_wells)
+    end_probed_wells = [waste1_res, waste2_res]
+    helpers.find_liquid_height_of_all_wells(ctx, p50, end_probed_wells)

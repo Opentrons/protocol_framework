@@ -5,7 +5,6 @@ import {
   JUSTIFY_FLEX_END,
   ListButton,
   ListButtonAccordion,
-  ListButtonAccordionContainer,
   Modal,
   PrimaryButton,
   SecondaryButton,
@@ -14,17 +13,18 @@ import {
 } from '@opentrons/components'
 import { useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import type {
-  LabwareDefByDefURI,
-  LabwareDefinition2,
-} from '@opentrons/shared-data'
-import { getLabwareDefURI, getAllDefinitions } from '@opentrons/shared-data'
+import { getLabwareDefURI } from '@opentrons/shared-data'
 import React, { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { reduce } from 'lodash'
 import { ListButtonCheckbox } from '../../atoms/ListButtonCheckbox/ListButtonCheckbox'
-import type { DisplayLabware } from '../LabwareLiquidsSection'
 import { LABWARES_FIELD_NAME } from '../LabwareLiquidsSection'
+import { getOnlyLatestDefs } from '../../resources/utils'
+import type { DisplayLabware } from '../LabwareLiquidsSection'
+import type {
+  LabwareDefByDefURI,
+  LabwareDefinition2,
+} from '@opentrons/shared-data'
 
 const ORDERED_CATEGORIES: string[] = [
   'tipRack',
@@ -56,7 +56,7 @@ export function LabwareModal({
   const searchFilter = (termToCheck: string): boolean =>
     termToCheck.toLowerCase().includes(searchTerm.toLowerCase())
 
-  const defs = getAllDefinitions()
+  const defs = getOnlyLatestDefs()
 
   const labwareByCategory: Record<
     string,
@@ -149,7 +149,7 @@ export function LabwareModal({
                             handleCategoryClick(category)
                           }}
                         >
-                          <ListButtonAccordionContainer id={`${category}`}>
+                          <Flex id={`${category}`} width={'100%'}>
                             <ListButtonAccordion
                               mainHeadline={t(`${category}`)}
                               isExpanded={category === selectedCategory}
@@ -201,7 +201,7 @@ export function LabwareModal({
                                 }
                               )}
                             </ListButtonAccordion>
-                          </ListButtonAccordionContainer>
+                          </Flex>
                         </ListButton>
                       )
                     }
@@ -229,10 +229,18 @@ export function LabwareModal({
                     setValue(
                       LABWARES_FIELD_NAME,
                       [
-                        ...selectedLabwares.map(labwareURI => ({
-                          labwareURI,
-                          count: 1,
-                        })),
+                        ...selectedLabwares.map(labwareURI => {
+                          const existingLabware = labwares.find(
+                            lw => lw.labwareURI === labwareURI
+                          )
+                          return {
+                            labwareURI,
+                            count:
+                              existingLabware != null
+                                ? existingLabware.count
+                                : 1,
+                          }
+                        }),
                       ],
                       { shouldValidate: true }
                     )

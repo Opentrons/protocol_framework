@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import last from 'lodash/last'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from 'react-query'
@@ -57,6 +57,7 @@ import { Deck } from './Deck'
 import { Hardware } from './Hardware'
 import { Labware } from './Labware'
 import { formatTimeWithUtcLabel } from '/app/resources/runs'
+import { useScrollPosition } from '/app/local-resources/dom-utils'
 
 import type { Protocol } from '@opentrons/api-client'
 import type { Dispatch } from '/app/redux/types'
@@ -321,14 +322,7 @@ export function QuickTransferDetails(): JSX.Element | null {
   })
 
   // Watch for scrolling to toggle dropshadow
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const [isScrolled, setIsScrolled] = useState<boolean>(false)
-  const observer = new IntersectionObserver(([entry]) => {
-    setIsScrolled(!entry.isIntersecting)
-  })
-  if (scrollRef.current != null) {
-    observer.observe(scrollRef.current)
-  }
+  const { scrollRef, isScrolled } = useScrollPosition()
 
   let pinnedTransferIds = useSelector(getPinnedQuickTransferIds) ?? []
   const pinned = pinnedTransferIds.includes(transferId)
