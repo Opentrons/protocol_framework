@@ -79,9 +79,7 @@ export const WellSelectionField = (
   }, [nozzleType, updateValue])
 
   useEffect(() => {
-    setPrimaryWellCount(
-      calculateWellCount
-    )
+    setPrimaryWellCount(calculateWellCount)
   }, [selectedWells])
 
   const getModalKey = (): string => {
