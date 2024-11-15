@@ -1,10 +1,11 @@
 """Touch tip command request, result, and implementation models."""
+
 from __future__ import annotations
 from pydantic import Field
 from typing import TYPE_CHECKING, Optional, Type
 from typing_extensions import Literal
 
-from opentrons.protocol_engine.state import update_types
+from opentrons.types import Point
 
 from ..errors import TouchTipDisabledError, LabwareIsTipRackError
 from ..types import DeckPoint
@@ -16,6 +17,7 @@ from .pipetting_common import (
 from .movement_common import (
     WellLocationMixin,
     DestinationPositionResult,
+    move_to_well,
 )
 
 if TYPE_CHECKING:
@@ -73,8 +75,6 @@ class TouchTipImplementation(
         labware_id = params.labwareId
         well_name = params.wellName
 
-        state_update = update_types.StateUpdate()
-
         if self._state_view.labware.get_has_quirk(labware_id, "touchTipDisabled"):
             raise TouchTipDisabledError(
                 f"Touch tip not allowed on labware {labware_id}"
@@ -83,7 +83,8 @@ class TouchTipImplementation(
         if self._state_view.labware.is_tiprack(labware_id):
             raise LabwareIsTipRackError("Cannot touch tip on tip rack")
 
-        center_point = await self._movement.move_to_well(
+        center_result = await move_to_well(
+            movement=self._movement,
             pipette_id=pipette_id,
             labware_id=labware_id,
             well_name=well_name,
@@ -99,7 +100,11 @@ class TouchTipImplementation(
             labware_id=labware_id,
             well_name=well_name,
             radius=params.radius,
-            center_point=center_point,
+            center_point=Point(
+                center_result.public.position.x,
+                center_result.public.position.y,
+                center_result.public.position.z,
+            ),
         )
 
         final_point = await self._gantry_mover.move_to(
@@ -110,7 +115,7 @@ class TouchTipImplementation(
         final_deck_point = DeckPoint.construct(
             x=final_point.x, y=final_point.y, z=final_point.z
         )
-        state_update.set_pipette_location(
+        state_update = center_result.state_update.set_pipette_location(
             pipette_id=pipette_id,
             new_labware_id=labware_id,
             new_well_name=well_name,

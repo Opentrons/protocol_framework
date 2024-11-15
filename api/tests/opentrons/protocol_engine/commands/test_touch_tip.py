@@ -73,6 +73,11 @@ async def test_touch_tip_implementation(
             labware_id="123",
             well_name="A3",
             well_location=WellLocation(offset=WellOffset(x=1, y=2, z=3)),
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         )
     ).then_return(Point(x=1, y=2, z=3))
 

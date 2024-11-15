@@ -27,6 +27,7 @@ from .pipetting_common import (
 from .movement_common import (
     WellLocationMixin,
     DestinationPositionResult,
+    move_to_well,
 )
 from .command import (
     AbstractCommandImpl,
@@ -119,8 +120,6 @@ async def _execute_common(
             "Either the front right or back left nozzle must have a tip attached to probe liquid height."
         )
 
-    state_update = update_types.StateUpdate()
-
     # May raise TipNotAttachedError.
     aspirated_volume = state_view.pipettes.get_aspirated_volume(pipette_id)
 
@@ -144,18 +143,12 @@ async def _execute_common(
         )
 
     # liquid_probe process start position
-    position = await movement.move_to_well(
+    move_result = await move_to_well(
+        movement=movement,
         pipette_id=pipette_id,
         labware_id=labware_id,
         well_name=well_name,
         well_location=params.wellLocation,
-    )
-    deck_point = DeckPoint.construct(x=position.x, y=position.y, z=position.z)
-    state_update.set_pipette_location(
-        pipette_id=pipette_id,
-        new_labware_id=labware_id,
-        new_well_name=well_name,
-        new_deck_point=deck_point,
     )
 
     try:
@@ -167,11 +160,15 @@ async def _execute_common(
         )
     except PipetteLiquidNotFoundError as exception:
         return _ExecuteCommonResult(
-            z_pos_or_error=exception, state_update=state_update, deck_point=deck_point
+            z_pos_or_error=exception,
+            state_update=move_result.state_update,
+            deck_point=move_result.public.position,
         )
     else:
         return _ExecuteCommonResult(
-            z_pos_or_error=z_pos, state_update=state_update, deck_point=deck_point
+            z_pos_or_error=z_pos,
+            state_update=move_result.state_update,
+            deck_point=move_result.public.position,
         )
 
 

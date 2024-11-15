@@ -54,6 +54,8 @@ async def test_move_to_well_implementation(
             force_direct=True,
             minimum_z_height=4.56,
             speed=7.89,
+            current_well=None,
+            operation_volume=None,
         )
     ).then_return(Point(x=9, y=8, z=7))
 
