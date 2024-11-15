@@ -175,7 +175,8 @@ async def run(
         pressure_sensor.init(9600)
 
     # move to slot
-    ui.get_user_ready(f"Place tip tack 50ul at slot - {SLOT_FOR_PICK_UP_TIP}")
+    if not api.is_simulator:
+        ui.get_user_ready(f"Place tip tack 50ul at slot - {SLOT_FOR_PICK_UP_TIP}")
     #await api.add_tip(OT3Mount.LEFT, helpers_ot3.get_default_tip_length(TIP_VOLUME))
 
     tip_rack_pos = helpers_ot3.get_theoretical_a1_position(SLOT_FOR_PICK_UP_TIP, TIP_RACK_FOR_PICK_UP_TIP)
@@ -202,17 +203,17 @@ async def run(
 
         # SEALED-Pa
         sealed_pa = 0.0
-        if not api.is_simulator:
+        if probe == InstrumentProbeType.PRIMARY:
+            offset_pos = A1_OFFSET
+            fixture_pos = PRIMARY_SEALED_PRESSURE_FIXTURE_POS
+        elif probe == InstrumentProbeType.SECONDARY:
+            offset_pos = H12_OFFSET
+            fixture_pos = SECOND_SEALED_PRESSURE_FIXTURE_POS
+        else:
+            raise NameError("offset position miss")
 
+        if not api.is_simulator:
             # ui.get_user_ready(f"attach {TIP_VOLUME} uL TIP to {probe.name} sensor")
-            if probe == InstrumentProbeType.PRIMARY:
-                offset_pos = A1_OFFSET
-                fixture_pos = PRIMARY_SEALED_PRESSURE_FIXTURE_POS
-            elif probe == InstrumentProbeType.SECONDARY:
-                offset_pos = H12_OFFSET
-                fixture_pos = SECOND_SEALED_PRESSURE_FIXTURE_POS
-            else:
-                raise NameError("offset position miss")
 
             tip_pos = tip_rack_actual_pos + offset_pos
             print(f"Tip pos: {tip_pos}")
@@ -236,6 +237,9 @@ async def run(
             except helpers_ot3.SensorResponseBad:
                 ui.print_error(f"{probe} pressure sensor not working, skipping")
                 break
+        else:
+            await api.add_tip(OT3Mount.LEFT, helpers_ot3.get_default_tip_length(TIP_VOLUME))
+            await api.prepare_for_aspirate(OT3Mount.LEFT)
         print(f"sealed-pa: {sealed_pa}")
         sealed_result = check_value(sealed_pa, "sealed-pa")
         report(section, _get_test_tag(probe, "sealed-pa"), [sealed_pa, sealed_result, REACHED_PRESSURE])

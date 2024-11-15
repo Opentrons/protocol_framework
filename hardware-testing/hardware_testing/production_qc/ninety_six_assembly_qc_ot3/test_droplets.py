@@ -100,14 +100,14 @@ def get_tiprack_partial_nominal(pipette: Literal[200, 1000]) -> Point:
 
 
 async def aspirate_and_wait(
-    api: OT3API, reservoir: Point, pipette: Literal[200, 1000], seconds: int = 30
+    api: OT3API, reservoir: Point, volume: float, seconds: int = 30
 ) -> Tuple[bool, float]:
     """Aspirate and wait."""
     await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, reservoir)
     await api.move_to(
         OT3Mount.LEFT, reservoir + Point(z=DEPTH_INTO_RESERVOIR_FOR_ASPIRATE)
     )
-    await api.aspirate(OT3Mount.LEFT, pipette)
+    await api.aspirate(OT3Mount.LEFT, volume)
     await api.move_to(OT3Mount.LEFT, reservoir + Point(z=HOVER_HEIGHT_MM))
 
     start_time = time()
@@ -133,7 +133,7 @@ async def aspirate_and_wait(
     return result, duration_seconds
 
 
-async def _drop_tip(api: OT3API, trash: Point, pipette: Literal[200, 1000]) -> None:
+async def _drop_tip(api: OT3API, trash: Point) -> None:
     print("drop in trash")
     await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, trash + Point(z=20))
     await api.move_to(OT3Mount.LEFT, trash)
@@ -201,11 +201,14 @@ async def run(
         reservoir_a1_actual = await api.gantry_position(OT3Mount.LEFT)
 
     result = True
-    for test_volume in ASPIRATE_VOLUME:
-        answer = ui.get_user_answer(f"Test {test_volume}uL")
+    for test_volume in [pipette, 5]:
+        if not api.is_simulator:
+            answer = ui.get_user_answer(f"Test {test_volume}uL")
+        else:
+            answer = pipette
         if not answer:
             continue
-        tip_volume = 50 if test_volume<=50 else 1000
+        tip_volume = 50 if test_volume<=50 else pipette
         # PICK-UP 96 TIPS
         ui.print_header("JOG to 96-Tip RACK")
         if not api.is_simulator:
@@ -252,11 +255,11 @@ async def run(
     result, duration = await aspirate_and_wait(
         api,
         reservoir_a1_actual,
-        pipette=pipette,
+        volume=pipette,
         seconds=NUM_SECONDS_TO_WAIT,
     )
     report(section, "droplets-96-tips", [duration, CSVResult.from_bool(result)])
-    await _drop_tip(api, trash_nominal, pipette)
+    await _drop_tip(api, trash_nominal)
 
     # if not api.is_simulator:
     #     ui.get_user_ready(f"REMOVE 96 tip-rack from slot #{TIP_RACK_96_SLOT}")
