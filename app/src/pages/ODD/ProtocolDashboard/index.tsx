@@ -254,7 +254,7 @@ export function ProtocolDashboard(): JSX.Element {
                 {sortedProtocols.map(protocol => {
                   const lastRun = runs.data?.data.find(
                     run => run.protocolId === protocol.id
-                  )?.createdAt
+                  )?.completedAt
 
                   return (
                     <ProtocolCard
