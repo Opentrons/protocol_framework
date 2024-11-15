@@ -82,8 +82,11 @@ class DelayProperties(BaseModel):
         return v
 
 
-class TouchTipParams(BaseModel):
+class LiquidClassTouchTipParams(BaseModel):
     """Parameters for touch-tip."""
+    # Note: Do not call this `TouchTipParams`, because that class name is used by the
+    # unrelated touchTip command in PE. Both classes are exported to things like the
+    # command schema JSON files, so the classes can't have the same name.
 
     zOffset: _Number = Field(
         ...,
@@ -101,14 +104,14 @@ class TouchTipProperties(BaseModel):
     """Shared properties for the touch-tip function."""
 
     enable: bool = Field(..., description="Whether touch-tip is enabled.")
-    params: Optional[TouchTipParams] = Field(
+    params: Optional[LiquidClassTouchTipParams] = Field(
         None, description="Parameters for the touch-tip function."
     )
 
     @validator("params")
     def _validate_params(
-        cls, v: Optional[TouchTipParams], values: Dict[str, Any]
-    ) -> Optional[TouchTipParams]:
+        cls, v: Optional[LiquidClassTouchTipParams], values: Dict[str, Any]
+    ) -> Optional[LiquidClassTouchTipParams]:
         if v is None and values["enable"]:
             raise ValueError(
                 "If enable is true parameters for touch tip must be defined."
