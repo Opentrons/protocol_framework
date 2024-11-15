@@ -139,24 +139,41 @@ describe('useRecoveryCommands', () => {
       false
     )
   })
-  ;([
+
+  const IN_PLACE_COMMANDS = [
     'aspirateInPlace',
     'dispenseInPlace',
     'blowOutInPlace',
     'dropTipInPlace',
     'prepareToAspirate',
-  ] as const).forEach(inPlaceCommandType => {
-    it(`Should move to retryLocation if failed command is ${inPlaceCommandType} and error is appropriate when retrying`, async () => {
+  ] as const
+
+  const ERROR_SCENARIOS = [
+    { type: 'overpressure', code: '3006' },
+    { type: 'tipPhysicallyAttached', code: '3007' },
+  ] as const
+
+  it.each(
+    ERROR_SCENARIOS.flatMap(error =>
+      IN_PLACE_COMMANDS.map(commandType => ({
+        errorType: error.type,
+        errorCode: error.code,
+        commandType,
+      }))
+    )
+  )(
+    'Should move to retryLocation if failed command is $commandType and error is $errorType when retrying',
+    async ({ errorType, errorCode, commandType }) => {
       const { result } = renderHook(() => {
         const failedCommand = {
           ...mockFailedCommand,
-          commandType: inPlaceCommandType,
+          commandType,
           params: {
             pipetteId: 'mock-pipette-id',
           },
           error: {
-            errorType: 'overpressure',
-            errorCode: '3006',
+            errorType,
+            errorCode,
             isDefined: true,
             errorInfo: {
               retryLocation: [1, 2, 3],
@@ -180,9 +197,11 @@ describe('useRecoveryCommands', () => {
           selectedRecoveryOption: RECOVERY_MAP.RETRY_NEW_TIPS.ROUTE,
         })
       })
+
       await act(async () => {
         await result.current.retryFailedCommand()
       })
+
       expect(mockChainRunCommands).toHaveBeenLastCalledWith(
         [
           {
@@ -194,14 +213,14 @@ describe('useRecoveryCommands', () => {
             },
           },
           {
-            commandType: inPlaceCommandType,
+            commandType,
             params: { pipetteId: 'mock-pipette-id' },
           },
         ],
         false
       )
-    })
-  })
+    }
+  )
 
   it('should call resumeRun with runId and show success toast on success', async () => {
     const { result } = renderHook(() => useRecoveryCommands(props))

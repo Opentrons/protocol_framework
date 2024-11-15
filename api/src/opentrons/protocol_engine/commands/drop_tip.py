@@ -145,6 +145,7 @@ class DropTipImplementation(AbstractCommandImpl[DropTipParams, _ExecuteReturn]):
                         error=exception,
                     )
                 ],
+                errorInfo={"retryLocation": position},
             )
             state_update_if_false_positive = update_types.StateUpdate()
             state_update_if_false_positive.update_pipette_tip_state(
@@ -165,7 +166,7 @@ class DropTipImplementation(AbstractCommandImpl[DropTipParams, _ExecuteReturn]):
             )
 
 
-class DropTip(BaseCommand[DropTipParams, DropTipResult, ErrorOccurrence]):
+class DropTip(BaseCommand[DropTipParams, DropTipResult, TipPhysicallyAttachedError]):
     """Drop tip command model."""
 
     commandType: DropTipCommandType = "dropTip"

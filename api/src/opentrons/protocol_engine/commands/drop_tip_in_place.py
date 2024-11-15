@@ -18,7 +18,7 @@ from ..resources.model_utils import ModelUtils
 from ..state import update_types
 
 if TYPE_CHECKING:
-    from ..execution import TipHandler
+    from ..execution import TipHandler, GantryMover
 
 
 DropTipInPlaceCommandType = Literal["dropTipInPlace"]
@@ -57,14 +57,18 @@ class DropTipInPlaceImplementation(
         self,
         tip_handler: TipHandler,
         model_utils: ModelUtils,
+        gantry_mover: GantryMover,
         **kwargs: object,
     ) -> None:
         self._tip_handler = tip_handler
         self._model_utils = model_utils
+        self._gantry_mover = gantry_mover
 
     async def execute(self, params: DropTipInPlaceParams) -> _ExecuteReturn:
         """Drop a tip using the requested pipette."""
         state_update = update_types.StateUpdate()
+
+        retry_location = await self._gantry_mover.get_position(params.pipetteId)
 
         try:
             await self._tip_handler.drop_tip(
@@ -85,6 +89,7 @@ class DropTipInPlaceImplementation(
                         error=exception,
                     )
                 ],
+                errorInfo={"retryLocation": retry_location},
             )
             return DefinedErrorData(
                 public=error,
@@ -99,7 +104,7 @@ class DropTipInPlaceImplementation(
 
 
 class DropTipInPlace(
-    BaseCommand[DropTipInPlaceParams, DropTipInPlaceResult, ErrorOccurrence]
+    BaseCommand[DropTipInPlaceParams, DropTipInPlaceResult, TipPhysicallyAttachedError]
 ):
     """Drop tip in place command model."""
 
