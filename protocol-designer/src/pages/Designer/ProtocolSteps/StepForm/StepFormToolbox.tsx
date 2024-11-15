@@ -122,10 +122,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   }))
   const timeline = useSelector(getRobotStateTimeline)
   const [toolboxStep, setToolboxStep] = useState<number>(0)
-  const [
-    showFormErrorsAndWarnings,
-    setShowFormErrorsAndWarnings,
-  ] = useState<boolean>(false)
+  const [showFormErrors, setShowFormErrors] = useState<boolean>(false)
   const [tab, setTab] = useState<LiquidHandlingTab>('aspirate')
   const visibleFormWarnings = getVisibleFormWarnings({
     focusedField,
@@ -140,7 +137,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
       ...dynamicFormLevelErrorsForUnsavedForm,
     ],
     page: toolboxStep,
-    showErrors: showFormErrorsAndWarnings,
+    showErrors: showFormErrors,
   })
   const [isRename, setIsRename] = useState<boolean>(false)
   const icon = stepIconsByType[formData.stepType]
@@ -187,7 +184,6 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
       })
     }
   }
-
   const handleSaveClick = (): void => {
     if (canSave) {
       const duration = new Date().getTime() - analyticsStartTime.getTime()
@@ -212,7 +208,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
       )
       dispatch(analyticsEvent(stepDuration))
     } else {
-      setShowFormErrorsAndWarnings(true)
+      setShowFormErrors(true)
       if (tab === 'aspirate' && isDispenseError && !isAspirateError) {
         setTab('dispense')
       }
@@ -227,9 +223,9 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     if (isMultiStepToolbox && toolboxStep === 0) {
       if (!isErrorOnCurrentPage) {
         setToolboxStep(1)
-        setShowFormErrorsAndWarnings(false)
+        setShowFormErrors(false)
       } else {
-        setShowFormErrorsAndWarnings(true)
+        setShowFormErrors(true)
         handleScrollToTop()
       }
     } else {
@@ -279,7 +275,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
                 width="100%"
                 onClick={() => {
                   setToolboxStep(0)
-                  setShowFormErrorsAndWarnings(false)
+                  setShowFormErrors(false)
                 }}
               >
                 {i18n.format(t('shared:back'), 'capitalize')}
@@ -312,7 +308,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
           <FormAlerts
             focusedField={focusedField}
             dirtyFields={dirtyFields}
-            showFormErrorsAndWarnings={showFormErrorsAndWarnings}
+            showFormErrors={showFormErrors}
             page={toolboxStep}
           />
           <ToolsComponent
@@ -322,9 +318,9 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
               focusHandlers,
               toolboxStep,
               visibleFormErrors,
-              showFormErrors: showFormErrorsAndWarnings,
+              showFormErrors,
               focusedField,
-              setShowFormErrorsAndWarnings,
+              setShowFormErrors,
               tab,
               setTab,
             }}

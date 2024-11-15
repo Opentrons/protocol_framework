@@ -94,7 +94,6 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         bind_time_1 = bind_time_2 = wash_time = 0.25
         drybeads = 0.5
         lysis_rep_1 = lysis_rep_2 = bead_reps_2 = 1
-    PK_vol = 20.0
     bead_vol = 25.0
     starting_vol = lysis_vol + sample_vol
     binding_buffer_vol = bind_vol + bead_vol
@@ -137,7 +136,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
     """
     lysis_ = res1.wells()[0]
     binding_buffer = res1.wells()[1:4]
-    bind2_res = res1.wells()[4:6]
+    bind2_res = res1.wells()[4:8]
     wash1 = res1.wells()[6:8]
     elution_solution = res1.wells()[-1]
     wash2 = res2.wells()[:6]
@@ -149,16 +148,12 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
     samps = sample_plate.wells()[: (8 * num_cols)]
 
     liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
-        "Lysis": [{"well": lysis_, "volume": lysis_vol}],
-        "PK": [{"well": lysis_, "volume": PK_vol}],
-        "Beads": [{"well": binding_buffer, "volume": bead_vol}],
-        "Binding": [{"well": binding_buffer, "volume": bind_vol}],
-        "Binding 2": [{"well": bind2_res, "volume": bind2_vol}],
-        "Wash 1": [{"well": wash1_vol, "volume": wash1}],
-        "Wash 2": [{"well": wash2_vol, "volume": wash2}],
-        "Wash 3": [{"well": wash3_vol, "volume": wash3}],
-        "Final Elution": [{"well": elution_solution, "volume": elution_vol}],
-        "Samples": [{"well": samps, "volume": 0}],
+        "Lysis and PK": [{"well": lysis_, "volume": 12320.0}],
+        "Beads and Binding": [{"well": binding_buffer, "volume": 11875.0}],
+        "Binding 2": [{"well": bind2_res, "volume": 13500.0}],
+        "Final Elution": [{"well": elution_solution, "volume": 52000}],
+        "Samples": [{"well": samps, "volume": 0.0}],
+        "Reagents": [{"well": res2.wells(), "volume": 9000.0}],
     }
     flattened_list_of_wells = helpers.find_liquid_height_of_loaded_liquids(
         ctx, liquid_vols_and_wells, m1000
