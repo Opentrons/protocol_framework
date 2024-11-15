@@ -26,7 +26,9 @@ HUMIDITY_THRESHOLD = [10, 90]
 def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
     """Build CSV Lines."""
     return [
-        CSVLine(f"environment-{sensor_id.name}-celsius-humidity", [float, float, CSVResult])
+        CSVLine(
+            f"environment-{sensor_id.name}-celsius-humidity", [float, float, CSVResult]
+        )
         for sensor_id in [SensorId.S0, SensorId.S1]
     ]
 
@@ -66,10 +68,15 @@ async def run(
         humidity = _remove_outliers_and_average(humidity_samples)
         print(f"[{sensor_id.name}] Celsius = {round(celsius, 2)} degrees")
         print(f"[{sensor_id.name}] Humidity = {round(humidity, 2)} percent")
-        air_params = air_params & True if TEMPERATURE_THRESHOLD[0] <= celsius <= TEMPERATURE_THRESHOLD[1] and HUMIDITY_THRESHOLD[0] <= humidity <= HUMIDITY_THRESHOLD[1] else False
-    
+        air_params = (
+            air_params & True
+            if TEMPERATURE_THRESHOLD[0] <= celsius <= TEMPERATURE_THRESHOLD[1]
+            and HUMIDITY_THRESHOLD[0] <= humidity <= HUMIDITY_THRESHOLD[1]
+            else False
+        )
+
         report(
             section,
             f"environment-{sensor_id.name}-celsius-humidity",
-            [celsius, humidity, CSVResult.from_bool(air_params)]
+            [celsius, humidity, CSVResult.from_bool(air_params)],
         )

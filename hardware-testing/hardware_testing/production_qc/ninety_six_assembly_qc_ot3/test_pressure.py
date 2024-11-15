@@ -1,6 +1,8 @@
 """Test Pressure."""
 from asyncio import sleep
-from hardware_testing.drivers.sealed_pressure_fixture import SerialDriver as SealedPressureDriver
+from hardware_testing.drivers.sealed_pressure_fixture import (
+    SerialDriver as SealedPressureDriver,
+)
 from hardware_testing.opentrons_api import helpers_ot3
 from typing import List, Union, Literal
 
@@ -24,9 +26,13 @@ from hardware_testing.data.csv_report import (
 
 USE_SEALED_FIXTURE = False
 USE_SEALED_BLOCK = True
-PRIMARY_SEALED_PRESSURE_FIXTURE_POS = Point(362.68, 148.83, 49.4) if USE_SEALED_BLOCK else Point(362.68, 148.83, 44.4) # attached tip
-SECOND_SEALED_PRESSURE_FIXTURE_POS = Point(264.71, 212.81, 49.4) if USE_SEALED_BLOCK else Point(264.71, 212.81, 44.4) # attached tip
-SET_PRESSURE_TARGET = 100 # read air pressure when the force pressure value is over 100
+PRIMARY_SEALED_PRESSURE_FIXTURE_POS = (
+    Point(362.68, 148.83, 49.4) if USE_SEALED_BLOCK else Point(362.68, 148.83, 44.4)
+)  # attached tip
+SECOND_SEALED_PRESSURE_FIXTURE_POS = (
+    Point(264.71, 212.81, 49.4) if USE_SEALED_BLOCK else Point(264.71, 212.81, 44.4)
+)  # attached tip
+SET_PRESSURE_TARGET = 100  # read air pressure when the force pressure value is over 100
 REACHED_PRESSURE = 0
 
 SECONDS_BETWEEN_READINGS = 0.25
@@ -38,7 +44,7 @@ PRESSURE_READINGS = ["open-pa", "sealed-pa", "aspirate-pa", "dispense-pa"]
 SLOT_FOR_PICK_UP_TIP = 5
 TIP_RACK_FOR_PICK_UP_TIP = f"opentrons_flex_96_tiprack_{TIP_VOLUME}ul"
 A1_OFFSET = Point(x=9 * 11, y=-9 * 7)
-H12_OFFSET = Point(x=-9*11, y=9*7)
+H12_OFFSET = Point(x=-9 * 11, y=9 * 7)
 OFFSET_FOR_1_WELL_LABWARE = Point(x=9 * -11 * 0.5, y=9 * 7 * 0.5)
 
 THRESHOLDS = {
@@ -113,7 +119,10 @@ def check_value(test_value: float, test_name: str) -> CSVResult:
     else:
         return CSVResult.FAIL
 
-async def calibrate_to_pressue_fixture(api: OT3API, sensor:SealedPressureDriver, fixture_pos:Point):
+
+async def calibrate_to_pressue_fixture(
+    api: OT3API, sensor: SealedPressureDriver, fixture_pos: Point
+):
     """move to suitable height for readding air pressure"""
     global REACHED_PRESSURE
     await api.move_to(OT3Mount.LEFT, fixture_pos)
@@ -156,10 +165,13 @@ async def _partial_pick_up(api: OT3API, position: Point, current: float) -> None
         position,
         safe_height=position.z + 10,
     )
-    await _partial_pick_up_z_motion(api, current=current, distance=12, speed=3) # change distance and speed, in case collision detected error
+    await _partial_pick_up_z_motion(
+        api, current=current, distance=12, speed=3
+    )  # change distance and speed, in case collision detected error
     await api.add_tip(OT3Mount.LEFT, helpers_ot3.get_default_tip_length(TIP_VOLUME))
     await api.prepare_for_aspirate(OT3Mount.LEFT)
     await api.home_z(OT3Mount.LEFT)
+
 
 async def run(
     api: OT3API, report: CSVReport, section: str, pipette: Literal[200, 1000]
@@ -177,15 +189,19 @@ async def run(
     # move to slot
     if not api.is_simulator:
         ui.get_user_ready(f"Place tip tack 50ul at slot - {SLOT_FOR_PICK_UP_TIP}")
-    #await api.add_tip(OT3Mount.LEFT, helpers_ot3.get_default_tip_length(TIP_VOLUME))
+    # await api.add_tip(OT3Mount.LEFT, helpers_ot3.get_default_tip_length(TIP_VOLUME))
 
-    tip_rack_pos = helpers_ot3.get_theoretical_a1_position(SLOT_FOR_PICK_UP_TIP, TIP_RACK_FOR_PICK_UP_TIP)
+    tip_rack_pos = helpers_ot3.get_theoretical_a1_position(
+        SLOT_FOR_PICK_UP_TIP, TIP_RACK_FOR_PICK_UP_TIP
+    )
     await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, tip_rack_pos + Point(z=30))
     await helpers_ot3.jog_mount_ot3(api, OT3Mount.LEFT)
     tip_rack_actual_pos = await api.gantry_position(OT3Mount.LEFT)
 
     for probe in InstrumentProbeType:
-        await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, tip_rack_pos + Point(z=50))
+        await helpers_ot3.move_to_arched_ot3(
+            api, OT3Mount.LEFT, tip_rack_pos + Point(z=50)
+        )
         sensor_id = sensor_id_for_instrument(probe)
         ui.print_header(f"Sensor: {probe}")
 
@@ -221,14 +237,20 @@ async def run(
             await _partial_pick_up(api, tip_pos, current=0.1)
             await api.prepare_for_aspirate(OT3Mount.LEFT)
             if not (USE_SEALED_FIXTURE or USE_SEALED_BLOCK):
-                 ui.get_user_ready("SEAL tip using your FINGER")
+                ui.get_user_ready("SEAL tip using your FINGER")
             else:
-                await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, fixture_pos._replace(z=fixture_pos.z + 50))
+                await helpers_ot3.move_to_arched_ot3(
+                    api, OT3Mount.LEFT, fixture_pos._replace(z=fixture_pos.z + 50)
+                )
                 ui.get_user_ready("Ready for moving to sealed fixture")
                 if USE_SEALED_FIXTURE:
-                    await calibrate_to_pressue_fixture(api, pressure_sensor, fixture_pos)
+                    await calibrate_to_pressue_fixture(
+                        api, pressure_sensor, fixture_pos
+                    )
                 else:
-                    await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, fixture_pos)
+                    await helpers_ot3.move_to_arched_ot3(
+                        api, OT3Mount.LEFT, fixture_pos
+                    )
 
             try:
                 sealed_pa = await _read_from_sensor(
@@ -238,11 +260,17 @@ async def run(
                 ui.print_error(f"{probe} pressure sensor not working, skipping")
                 break
         else:
-            await api.add_tip(OT3Mount.LEFT, helpers_ot3.get_default_tip_length(TIP_VOLUME))
+            await api.add_tip(
+                OT3Mount.LEFT, helpers_ot3.get_default_tip_length(TIP_VOLUME)
+            )
             await api.prepare_for_aspirate(OT3Mount.LEFT)
         print(f"sealed-pa: {sealed_pa}")
         sealed_result = check_value(sealed_pa, "sealed-pa")
-        report(section, _get_test_tag(probe, "sealed-pa"), [sealed_pa, sealed_result, REACHED_PRESSURE])
+        report(
+            section,
+            _get_test_tag(probe, "sealed-pa"),
+            [sealed_pa, sealed_result, REACHED_PRESSURE],
+        )
 
         # ASPIRATE-Pa
         aspirate_pa = 0.0
@@ -278,17 +306,21 @@ async def run(
             section, _get_test_tag(probe, "dispense-pa"), [dispense_pa, dispense_result]
         )
         if USE_SEALED_FIXTURE or USE_SEALED_BLOCK:
-            await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, fixture_pos._replace(z=fixture_pos.z + 50))
+            await helpers_ot3.move_to_arched_ot3(
+                api, OT3Mount.LEFT, fixture_pos._replace(z=fixture_pos.z + 50)
+            )
         if not api.is_simulator:
             ui.get_user_ready("REMOVE tip")
 
-        trash_nominal = helpers_ot3.get_slot_calibration_square_position_ot3(12) + Point(z=40)
+        trash_nominal = helpers_ot3.get_slot_calibration_square_position_ot3(
+            12
+        ) + Point(z=40)
         # center the 96ch of the 1-well labware
         trash_nominal += OFFSET_FOR_1_WELL_LABWARE
-        await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, trash_nominal + Point(z=20))
+        await helpers_ot3.move_to_arched_ot3(
+            api, OT3Mount.LEFT, trash_nominal + Point(z=20)
+        )
         await api.move_to(OT3Mount.LEFT, trash_nominal)
         await api.drop_tip(OT3Mount.LEFT)
         await api.remove_tip(OT3Mount.LEFT)
         await api.home()
-
-

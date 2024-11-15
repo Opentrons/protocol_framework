@@ -205,20 +205,24 @@ async def run(
         if not api.is_simulator:
             answer = ui.get_user_answer(f"Test {test_volume}uL")
         else:
-            answer = pipette
+            answer = True
         if not answer:
             continue
-        tip_volume = 50 if test_volume<=50 else pipette
+        tip_volume = 50 if test_volume <= 50 else pipette
         # PICK-UP 96 TIPS
         ui.print_header("JOG to 96-Tip RACK")
         if not api.is_simulator:
-            ui.get_user_ready(f"picking up tips, place tip-rack {tip_volume} on slot {TIP_RACK_96_SLOT}")
+            ui.get_user_ready(
+                f"picking up tips, place tip-rack {tip_volume} on slot {TIP_RACK_96_SLOT}"
+            )
         await helpers_ot3.move_to_arched_ot3(
             api, OT3Mount.LEFT, tip_rack_96_a1_nominal + Point(z=30)
         )
         await helpers_ot3.jog_mount_ot3(api, OT3Mount.LEFT)
 
-        await api.pick_up_tip(OT3Mount.LEFT, helpers_ot3.get_default_tip_length(tip_volume))
+        await api.pick_up_tip(
+            OT3Mount.LEFT, helpers_ot3.get_default_tip_length(tip_volume)
+        )
         await api.home_z(OT3Mount.LEFT)
         if not api.is_simulator:
             ui.get_user_ready("about to move to RESERVOIR")
@@ -229,7 +233,7 @@ async def run(
         ret, duration = await aspirate_and_wait(
             api, reservoir_a1_actual, test_volume, seconds=NUM_SECONDS_TO_WAIT
         )
-        result = result&ret
+        result = result & ret
         await api.home_z(OT3Mount.LEFT)
         await _drop_tip(api, trash_nominal)
     report(section, "droplets-96-tips", [duration, CSVResult.from_bool(result)])

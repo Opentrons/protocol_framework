@@ -1101,7 +1101,7 @@ def get_pipette_serial_ot3(pipette: Union[PipetteOT2, PipetteOT3]) -> str:
     elif "96" in model:
         channels = "H"
     else:
-        channels = "M" 
+        channels = "M"
     version = model.split("v")[-1].strip().replace(".", "")
     assert pipette.pipette_id, f"no pipette_id found for pipette: {pipette}"
     if "P" in pipette.pipette_id:
