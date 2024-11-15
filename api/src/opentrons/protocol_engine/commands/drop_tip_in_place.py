@@ -45,9 +45,8 @@ class DropTipInPlaceResult(BaseModel):
 
 _ExecuteReturn = (
     SuccessData[DropTipInPlaceResult]
-    | Union[
-        DefinedErrorData[TipPhysicallyAttachedError], DefinedErrorData[MustHomeError]
-    ]
+    | DefinedErrorData[TipPhysicallyAttachedError]
+    | DefinedErrorData[MustHomeError]
 )
 
 
@@ -102,7 +101,7 @@ class DropTipInPlaceImplementation(
         except pe_MustHomeError as exception:
             state_update_if_false_positive = update_types.StateUpdate()
             state_update_if_false_positive.clear_all_pipette_locations()
-            error = MustHomeError(
+            home_error = MustHomeError(
                 id=self._model_utils.generate_id(),
                 createdAt=self._model_utils.get_timestamp(),
                 wrappedErrors=[
@@ -114,7 +113,7 @@ class DropTipInPlaceImplementation(
                 ],
             )
             return DefinedErrorData(
-                public=error,
+                public=home_error,
                 state_update=state_update,
                 state_update_if_false_positive=state_update_if_false_positive,
             )
@@ -126,7 +125,11 @@ class DropTipInPlaceImplementation(
 
 
 class DropTipInPlace(
-    BaseCommand[DropTipInPlaceParams, DropTipInPlaceResult, TipPhysicallyAttachedError]
+    BaseCommand[
+        DropTipInPlaceParams,
+        DropTipInPlaceResult,
+        TipPhysicallyAttachedError | MustHomeError,
+    ]
 ):
     """Drop tip in place command model."""
 
