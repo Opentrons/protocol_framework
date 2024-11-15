@@ -605,7 +605,6 @@ async def get_current_state(  # noqa: C901
         for pipetteId, nozzle_map in active_nozzle_maps.items()
     }
 
-    run = run_data_manager.get(run_id=runId)
     current_command = run_data_manager.get_current_command(run_id=runId)
     last_completed_command = run_data_manager.get_last_completed_command(run_id=runId)
     links = CurrentStateLinks.construct(
