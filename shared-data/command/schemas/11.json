@@ -1833,8 +1833,8 @@
       },
       "required": ["positionReference", "offset", "speed", "delay"]
     },
-    "opentrons_shared_data__liquid_classes__liquid_class_definition__TouchTipParams": {
-      "title": "TouchTipParams",
+    "LiquidClassTouchTipParams": {
+      "title": "LiquidClassTouchTipParams",
       "description": "Parameters for touch-tip.",
       "type": "object",
       "properties": {
@@ -1894,7 +1894,7 @@
           "description": "Parameters for the touch-tip function.",
           "allOf": [
             {
-              "$ref": "#/definitions/opentrons_shared_data__liquid_classes__liquid_class_definition__TouchTipParams"
+              "$ref": "#/definitions/LiquidClassTouchTipParams"
             }
           ]
         }
@@ -3619,7 +3619,7 @@
       },
       "required": ["params"]
     },
-    "opentrons__protocol_engine__commands__touch_tip__TouchTipParams": {
+    "TouchTipParams": {
       "title": "TouchTipParams",
       "description": "Payload needed to touch a pipette tip the sides of a specific well.",
       "type": "object",
@@ -3674,7 +3674,7 @@
           "type": "string"
         },
         "params": {
-          "$ref": "#/definitions/opentrons__protocol_engine__commands__touch_tip__TouchTipParams"
+          "$ref": "#/definitions/TouchTipParams"
         },
         "intent": {
           "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
