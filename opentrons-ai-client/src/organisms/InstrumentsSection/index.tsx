@@ -1,19 +1,13 @@
 import {
   COLORS,
   DIRECTION_COLUMN,
-  DISPLAY_FLEX,
   Flex,
-  JUSTIFY_FLEX_END,
-  LargeButton,
   SPACING,
   StyledText,
 } from '@opentrons/components'
 import { useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
-import { useAtom } from 'jotai'
-import { createProtocolAtom } from '../../resources/atoms'
-import { INSTRUMENTS_STEP } from '../ProtocolSectionsContainer'
 import { ControlledDropdownMenu } from '../../atoms/ControlledDropdownMenu'
 import { ControlledRadioButtonGroup } from '../../molecules/ControlledRadioButtonGroup'
 import { useMemo } from 'react'
@@ -21,7 +15,6 @@ import {
   getAllPipetteNames,
   getPipetteSpecsV2,
   OT2_PIPETTES,
-  OT2_ROBOT_TYPE,
   OT3_PIPETTES,
 } from '@opentrons/shared-data'
 
@@ -40,11 +33,7 @@ export const NO_PIPETTES = 'none'
 
 export function InstrumentsSection(): JSX.Element | null {
   const { t } = useTranslation('create_protocol')
-  const {
-    formState: { isValid },
-    watch,
-  } = useFormContext()
-  const [{ currentStep }, setCreateProtocolAtom] = useAtom(createProtocolAtom)
+  const { watch } = useFormContext()
   const robotType = watch(ROBOT_FIELD_NAME)
   const isOtherPipettesSelected = watch(PIPETTES_FIELD_NAME) === TWO_PIPETTES
   const isOpentronsOT2Selected = robotType === OPENTRONS_OT2
@@ -91,7 +80,7 @@ export function InstrumentsSection(): JSX.Element | null {
   const pipetteOptions = useMemo(() => {
     const allPipetteOptions = getAllPipetteNames('maxVolume', 'channels')
       .filter(name =>
-        (robotType === OT2_ROBOT_TYPE ? OT2_PIPETTES : OT3_PIPETTES).includes(
+        (robotType === OPENTRONS_OT2 ? OT2_PIPETTES : OT3_PIPETTES).includes(
           name
         )
       )
@@ -102,16 +91,6 @@ export function InstrumentsSection(): JSX.Element | null {
       .filter(o => o.value !== 'p1000_96')
     return [{ name: t('none'), value: NO_PIPETTES }, ...allPipetteOptions]
   }, [robotType])
-
-  function handleConfirmButtonClick(): void {
-    const step =
-      currentStep > INSTRUMENTS_STEP ? currentStep : INSTRUMENTS_STEP + 1
-
-    setCreateProtocolAtom({
-      currentStep: step,
-      focusStep: step,
-    })
-  }
 
   return (
     <Flex
@@ -186,22 +165,9 @@ export function InstrumentsSection(): JSX.Element | null {
           rules={{ required: true }}
         />
       )}
-
-      <ButtonContainer>
-        <LargeButton
-          onClick={handleConfirmButtonClick}
-          disabled={!isValid}
-          buttonText={t('section_confirm_button')}
-        ></LargeButton>
-      </ButtonContainer>
     </Flex>
   )
 }
-
-const ButtonContainer = styled.div`
-  display: ${DISPLAY_FLEX};
-  justify-content: ${JUSTIFY_FLEX_END};
-`
 
 const PipettesDropdown = styled.div<{ isOpentronsOT2Selected?: boolean }>`
   display: flex;

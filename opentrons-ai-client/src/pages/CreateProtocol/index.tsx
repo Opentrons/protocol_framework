@@ -9,6 +9,8 @@ import { useEffect, useRef, useState } from 'react'
 import { PromptPreview } from '../../molecules/PromptPreview'
 import { useForm, FormProvider } from 'react-hook-form'
 import {
+  chatDataAtom,
+  chatHistoryAtom,
   createProtocolAtom,
   createProtocolChatAtom,
   headerWithMeterAtom,
@@ -29,7 +31,7 @@ import { ResizeBar } from '../../atoms/ResizeBar'
 export interface CreateProtocolFormData {
   application: {
     scientificApplication: string
-    otherApplication?: string
+    otherApplication: string
     description: string
   }
   instruments: {
@@ -50,9 +52,13 @@ const TOTAL_STEPS = 5
 export function CreateProtocol(): JSX.Element | null {
   const { t } = useTranslation('create_protocol')
   const [, setHeaderWithMeterAtom] = useAtom(headerWithMeterAtom)
-  const [{ currentStep }, setCreateProtocolAtom] = useAtom(createProtocolAtom)
+  const [{ currentSection }, setCreateProtocolAtom] = useAtom(
+    createProtocolAtom
+  )
   const [, setCreateProtocolChatAtom] = useAtom(createProtocolChatAtom)
   const [, setUpdateProtocolChatAtom] = useAtom(updateProtocolChatAtom)
+  const [, setChatHistoryAtom] = useAtom(chatHistoryAtom)
+  const [, setChatData] = useAtom(chatDataAtom)
   const navigate = useNavigate()
   const trackEvent = useTrackEvent()
   const [leftWidth, setLeftWidth] = useState(50)
@@ -77,8 +83,23 @@ export function CreateProtocol(): JSX.Element | null {
     },
   })
 
-  // Reset the update protocol chat atom when navigating to the create protocol page
+  // Reset the chat data atom and protocol atoms when navigating to the update protocol page
   useEffect(() => {
+    setCreateProtocolChatAtom({
+      prompt: '',
+      regenerate: false,
+      scientific_application_type: '',
+      description: '',
+      robots: 'opentrons_flex',
+      mounts: [],
+      flexGripper: false,
+      modules: [],
+      labware: [],
+      liquids: [],
+      steps: [],
+      fake: false,
+      fake_id: 0,
+    })
     setUpdateProtocolChatAtom({
       prompt: '',
       protocol_text: '',
@@ -88,6 +109,8 @@ export function CreateProtocol(): JSX.Element | null {
       fake: false,
       fake_id: 0,
     })
+    setChatHistoryAtom([])
+    setChatData([])
   }, [])
 
   useEffect(() => {
@@ -95,7 +118,7 @@ export function CreateProtocol(): JSX.Element | null {
       displayHeaderWithMeter: true,
       progress: calculateProgress(),
     })
-  }, [currentStep])
+  }, [currentSection])
 
   useEffect(() => {
     return () => {
@@ -106,8 +129,8 @@ export function CreateProtocol(): JSX.Element | null {
 
       methods.reset()
       setCreateProtocolAtom({
-        currentStep: 0,
-        focusStep: 0,
+        currentSection: 0,
+        focusSection: 0,
       })
     }
   }, [])
@@ -138,7 +161,7 @@ export function CreateProtocol(): JSX.Element | null {
   }, [isResizing])
 
   function calculateProgress(): number {
-    return currentStep > 0 ? currentStep / TOTAL_STEPS : 0
+    return currentSection > 0 ? currentSection / TOTAL_STEPS : 0
   }
 
   function handleMouseDown(
@@ -184,6 +207,7 @@ export function CreateProtocol(): JSX.Element | null {
     trackEvent({
       name: 'submit-prompt',
       properties: {
+        isCreateOrUpdate: 'create',
         prompt: chatPromptData,
       },
     })
@@ -209,7 +233,7 @@ export function CreateProtocol(): JSX.Element | null {
         <div style={{ width: `${100 - leftWidth}%`, height: '100%' }}>
           <PromptPreview
             handleSubmit={handleSubmit}
-            isSubmitButtonEnabled={currentStep === TOTAL_STEPS}
+            isSubmitButtonEnabled={currentSection === TOTAL_STEPS}
             promptPreviewData={generatePromptPreviewData(methods.watch, t)}
           />
         </div>

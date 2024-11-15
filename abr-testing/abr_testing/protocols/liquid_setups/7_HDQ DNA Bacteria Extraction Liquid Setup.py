@@ -35,15 +35,23 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     res1 = protocol.load_labware("nest_12_reservoir_15ml", "D2", "reagent reservoir 1")
     # Label Reservoirs
     well1 = res1["A1"].top()
+    well2 = res1["A2"].top()
     well3 = res1["A3"].top()
     well4 = res1["A4"].top()
+    well5 = res1["A5"].top()
+    well6 = res1["A6"].top()
     well7 = res1["A7"].top()
+    well8 = res1["A8"].top()
+    well9 = res1["A9"].top()
     well10 = res1["A10"].top()
-
+    well11 = res1["A11"].top()
+    well12 = res1["A12"].top()
     # Volumes
     wash = 600
-    al_and_pk = 468
-    beads_and_binding = 552
+    binding = 320
+    beads = 230
+    pk = 230
+    lysis = 230
 
     # Sample Plate
     p1000.transfer(
@@ -65,9 +73,41 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     )
     # Res 1
     p1000.transfer(
-        volume=[beads_and_binding, al_and_pk, wash, wash, wash],
+        volume=[
+            binding,
+            beads,
+            binding,
+            beads,
+            lysis,
+            pk,
+            wash,
+            wash,
+            wash,
+            wash,
+            wash,
+            wash,
+            wash,
+            wash,
+            wash,
+        ],
         source=source_reservoir["A1"].bottom(z=0.5),
-        dest=[well1, well3, well4, well7, well10],
+        dest=[
+            well1,
+            well1,
+            well2,
+            well2,
+            well3,
+            well3,
+            well4,
+            well5,
+            well6,
+            well7,
+            well8,
+            well9,
+            well10,
+            well11,
+            well12,
+        ],
         blowout=True,
         blowout_location="source well",
         trash=False,

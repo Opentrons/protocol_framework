@@ -22,7 +22,7 @@ import { Controller, useFormContext } from 'react-hook-form'
 import { ModuleDiagram } from '../ModelDiagram'
 import { MODULES_FIELD_NAME } from '../../organisms/ModulesSection'
 import type { DisplayModules } from '../../organisms/ModulesSection'
-import { getAllDefinitions } from '../../resources/utils'
+import { getOnlyLatestDefs } from '../../resources/utils'
 import { useTranslation } from 'react-i18next'
 import { useMemo } from 'react'
 
@@ -70,7 +70,7 @@ export function ModuleListItemGroup(): JSX.Element | null {
   const modulesWatch: DisplayModules[] = watch(MODULES_FIELD_NAME) ?? []
 
   const allDefinitionsValues = useMemo(
-    () => Object.values(getAllDefinitions()),
+    () => Object.values(getOnlyLatestDefs()),
     []
   )
 

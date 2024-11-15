@@ -1,11 +1,8 @@
 import {
   COLORS,
   DIRECTION_COLUMN,
-  DISPLAY_FLEX,
   EmptySelectorButton,
   Flex,
-  JUSTIFY_FLEX_END,
-  LargeButton,
   SPACING,
   StyledText,
   Tabs,
@@ -13,9 +10,6 @@ import {
 import { useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
-import { useAtom } from 'jotai'
-import { createProtocolAtom } from '../../resources/atoms'
-import { STEPS_STEP } from '../ProtocolSectionsContainer'
 import { useState } from 'react'
 import { COLUMN } from '@opentrons/shared-data'
 import { ControlledAddTextAreaFields } from '../../molecules/ControlledAddTextAreaFields'
@@ -25,24 +19,10 @@ export const STEPS_FIELD_NAME = 'steps'
 
 export function StepsSection(): JSX.Element | null {
   const { t } = useTranslation('create_protocol')
-  const {
-    formState: { isValid },
-    setValue,
-    watch,
-  } = useFormContext()
-  const [{ currentStep }, setCreateProtocolAtom] = useAtom(createProtocolAtom)
+  const { setValue, watch } = useFormContext()
   const [isIndividualStep, setIsIndividualStep] = useState(true)
 
   const steps = watch(STEPS_FIELD_NAME) ?? []
-
-  function handleConfirmButtonClick(): void {
-    const step = currentStep > STEPS_STEP ? currentStep : STEPS_STEP + 1
-
-    setCreateProtocolAtom({
-      currentStep: step,
-      focusStep: step,
-    })
-  }
 
   return (
     <Flex
@@ -140,22 +120,9 @@ export function StepsSection(): JSX.Element | null {
           </>
         )}
       </Flex>
-
-      <ButtonContainer>
-        <LargeButton
-          onClick={handleConfirmButtonClick}
-          disabled={!isValid}
-          buttonText={t('section_confirm_button')}
-        ></LargeButton>
-      </ButtonContainer>
     </Flex>
   )
 }
-
-const ButtonContainer = styled.div`
-  display: ${DISPLAY_FLEX};
-  justify-content: ${JUSTIFY_FLEX_END};
-`
 
 const ExampleOrderedList = styled.ol`
   margin-left: ${SPACING.spacing20};
