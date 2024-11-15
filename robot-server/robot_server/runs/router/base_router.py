@@ -61,6 +61,7 @@ from ..run_models import (
     RunCurrentState,
     CommandLinkNoMeta,
     NozzleLayoutConfig,
+    TipState,
 )
 from ..run_auto_deleter import RunAutoDeleter
 from ..run_models import Run, BadRun, RunCreate, RunUpdate
@@ -595,7 +596,6 @@ async def get_current_state(  # noqa: C901
         raise RunStopped(detail=str(e)).as_error(status.HTTP_409_CONFLICT)
 
     active_nozzle_maps = run_data_manager.get_nozzle_maps(run_id=runId)
-
     nozzle_layouts = {
         pipetteId: ActiveNozzleLayout.construct(
             startingNozzle=nozzle_map.starting_nozzle,
@@ -603,6 +603,13 @@ async def get_current_state(  # noqa: C901
             config=NozzleLayoutConfig(nozzle_map.configuration.value.lower()),
         )
         for pipetteId, nozzle_map in active_nozzle_maps.items()
+    }
+
+    tip_states = {
+        pipette_id: TipState.construct(hasTip=has_tip)
+        for pipette_id, has_tip in run_data_manager.get_tip_attached(
+            run_id=runId
+        ).items()
     }
 
     current_command = run_data_manager.get_current_command(run_id=runId)
@@ -675,6 +682,7 @@ async def get_current_state(  # noqa: C901
             data=RunCurrentState.construct(
                 estopEngaged=estop_engaged,
                 activeNozzleLayouts=nozzle_layouts,
+                tipStates=tip_states,
                 placeLabwareState=place_labware,
             ),
             links=links,

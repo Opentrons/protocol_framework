@@ -316,6 +316,16 @@ class ActiveNozzleLayout(BaseModel):
     )
 
 
+class TipState(BaseModel):
+    """Information about the tip, if any, currently attached to a pipette."""
+
+    hasTip: bool
+
+    # todo(mm, 2024-11-15): I think the frontend is currently scraping the commands
+    # list to figure out where the current tip came from. Extend this class with that
+    # information so the frontend doesn't have to do that.
+
+
 class PlaceLabwareState(BaseModel):
     """Details the labware being placed by the gripper."""
 
@@ -344,6 +354,7 @@ class RunCurrentState(BaseModel):
     estopEngaged: bool
 
     activeNozzleLayouts: Dict[str, ActiveNozzleLayout]
+    tipStates: Dict[str, TipState]
     placeLabwareState: Optional[PlaceLabwareState]
 
 
