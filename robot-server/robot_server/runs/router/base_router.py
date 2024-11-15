@@ -591,25 +591,23 @@ async def get_current_state(  # noqa: C901
     """
     try:
         run = run_data_manager.get(run_id=runId)
-        active_nozzle_maps = run_data_manager.get_nozzle_maps(run_id=runId)
-
-        nozzle_layouts = {
-            pipetteId: ActiveNozzleLayout.construct(
-                startingNozzle=nozzle_map.starting_nozzle,
-                activeNozzles=list(nozzle_map.map_store.keys()),
-                config=NozzleLayoutConfig(nozzle_map.configuration.value.lower()),
-            )
-            for pipetteId, nozzle_map in active_nozzle_maps.items()
-        }
-
-        run = run_data_manager.get(run_id=runId)
-        current_command = run_data_manager.get_current_command(run_id=runId)
-        last_completed_command = run_data_manager.get_last_completed_command(
-            run_id=runId
-        )
     except RunNotCurrentError as e:
         raise RunStopped(detail=str(e)).as_error(status.HTTP_409_CONFLICT)
 
+    active_nozzle_maps = run_data_manager.get_nozzle_maps(run_id=runId)
+
+    nozzle_layouts = {
+        pipetteId: ActiveNozzleLayout.construct(
+            startingNozzle=nozzle_map.starting_nozzle,
+            activeNozzles=list(nozzle_map.map_store.keys()),
+            config=NozzleLayoutConfig(nozzle_map.configuration.value.lower()),
+        )
+        for pipetteId, nozzle_map in active_nozzle_maps.items()
+    }
+
+    run = run_data_manager.get(run_id=runId)
+    current_command = run_data_manager.get_current_command(run_id=runId)
+    last_completed_command = run_data_manager.get_last_completed_command(run_id=runId)
     links = CurrentStateLinks.construct(
         lastCompleted=CommandLinkNoMeta.construct(
             id=last_completed_command.command_id,
