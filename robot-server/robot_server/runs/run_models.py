@@ -331,7 +331,18 @@ class PlaceLabwareState(BaseModel):
 class RunCurrentState(BaseModel):
     """Current details about a run."""
 
+    # todo(mm, 2024-11-15): Having estopEngaged here is a bit of an odd man out because
+    # it's sensor state that can change on its own at any time, whereas the rest of
+    # these fields are logical state that changes only when commands are run.
+    #
+    # Our current mechanism for anchoring these fields to a specific point in time
+    # (important for avoiding torn-read problems when a client combines this info with
+    # info from other endpoints) is `links.currentCommand`, which is based on the idea
+    # that these fields only change when the current command changes.
+    #
+    # We should see if clients can replace this with `GET /robot/control/estopStatus`.
     estopEngaged: bool
+
     activeNozzleLayouts: Dict[str, ActiveNozzleLayout]
     placeLabwareState: Optional[PlaceLabwareState]
 
