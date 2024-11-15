@@ -333,7 +333,7 @@ class RunCurrentState(BaseModel):
 
     estopEngaged: bool
     activeNozzleLayouts: Dict[str, ActiveNozzleLayout]
-    placeLabwareState: Optional[PlaceLabwareState] = Field(None)
+    placeLabwareState: Optional[PlaceLabwareState]
 
 
 class CommandLinkNoMeta(BaseModel):
