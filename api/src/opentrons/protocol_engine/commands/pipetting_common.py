@@ -178,6 +178,25 @@ class OverpressureError(ErrorOccurrence):
     errorInfo: ErrorLocationInfo
 
 
+class MustHomeError(ErrorOccurrence):
+    """Returned when sensors detect an overpressure error while moving liquid.
+
+    The pipette plunger motion is stopped at the point of the error.
+
+    The next thing to move the plunger must account for the robot not having a valid
+    estimate of its position. It should be a `home`, `unsafe/updatePositionEstimators`,
+    `unsafe/dropTipInPlace`, or `unsafe/blowOutInPlace`.
+    """
+
+    isDefined: bool = True
+
+    errorType: Literal["musthome"] = "musthome"
+
+    # TODO(tz, 15-11-2024): should add a MUST_HOME error code?
+    errorCode: str = ErrorCodes.POSITION_UNKNOWN.value.code
+    detail: str = ErrorCodes.POSITION_UNKNOWN.value.detail
+
+
 class LiquidNotFoundError(ErrorOccurrence):
     """Returned when no liquid is detected during the liquid probe process/move.
 

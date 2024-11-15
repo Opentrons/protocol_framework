@@ -1,7 +1,7 @@
 """Drop tip in place command request, result, and implementation models."""
 from __future__ import annotations
 from pydantic import Field, BaseModel
-from typing import TYPE_CHECKING, Optional, Type
+from typing import TYPE_CHECKING, Optional, Type, Union
 from typing_extensions import Literal
 
 from .command import (
@@ -11,8 +11,8 @@ from .command import (
     DefinedErrorData,
     SuccessData,
 )
-from .pipetting_common import PipetteIdMixin, TipPhysicallyAttachedError
-from ..errors.exceptions import TipAttachedError
+from .pipetting_common import PipetteIdMixin, TipPhysicallyAttachedError, MustHomeError
+from ..errors.exceptions import TipAttachedError, MustHomeError as pe_MustHomeError
 from ..errors.error_occurrence import ErrorOccurrence
 from ..resources.model_utils import ModelUtils
 from ..state import update_types
@@ -44,7 +44,10 @@ class DropTipInPlaceResult(BaseModel):
 
 
 _ExecuteReturn = (
-    SuccessData[DropTipInPlaceResult] | DefinedErrorData[TipPhysicallyAttachedError]
+    SuccessData[DropTipInPlaceResult]
+    | Union[
+        DefinedErrorData[TipPhysicallyAttachedError], DefinedErrorData[MustHomeError]
+    ]
 )
 
 
@@ -68,9 +71,9 @@ class DropTipInPlaceImplementation(
         """Drop a tip using the requested pipette."""
         state_update = update_types.StateUpdate()
 
-        retry_location = await self._gantry_mover.get_position(params.pipetteId)
-
         try:
+            retry_location = await self._gantry_mover.get_position(params.pipetteId)
+
             await self._tip_handler.drop_tip(
                 pipette_id=params.pipetteId, home_after=params.homeAfter
             )
@@ -90,6 +93,25 @@ class DropTipInPlaceImplementation(
                     )
                 ],
                 errorInfo={"retryLocation": retry_location},
+            )
+            return DefinedErrorData(
+                public=error,
+                state_update=state_update,
+                state_update_if_false_positive=state_update_if_false_positive,
+            )
+        except pe_MustHomeError as exception:
+            state_update_if_false_positive = update_types.StateUpdate()
+            state_update_if_false_positive.clear_all_pipette_locations()
+            error = MustHomeError(
+                id=self._model_utils.generate_id(),
+                createdAt=self._model_utils.get_timestamp(),
+                wrappedErrors=[
+                    ErrorOccurrence.from_failed(
+                        id=self._model_utils.generate_id(),
+                        createdAt=self._model_utils.get_timestamp(),
+                        error=exception,
+                    )
+                ],
             )
             return DefinedErrorData(
                 public=error,
