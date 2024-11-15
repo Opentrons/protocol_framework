@@ -331,8 +331,8 @@ class PlaceLabwareState(BaseModel):
 class RunCurrentState(BaseModel):
     """Current details about a run."""
 
-    estopEngaged: bool = Field(..., description="")
-    activeNozzleLayouts: Dict[str, ActiveNozzleLayout] = Field(...)
+    estopEngaged: bool
+    activeNozzleLayouts: Dict[str, ActiveNozzleLayout]
     placeLabwareState: Optional[PlaceLabwareState] = Field(None)
 
 
