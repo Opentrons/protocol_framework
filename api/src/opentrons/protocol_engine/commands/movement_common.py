@@ -2,15 +2,21 @@
 
 from __future__ import annotations
 
-from typing import Optional, Union, TYPE_CHECKING
+from typing import Optional, Union, TYPE_CHECKING, Literal
+
 from pydantic import BaseModel, Field
+
+from opentrons_shared_data.errors import ErrorCodes
+from opentrons_shared_data.errors.exceptions import StallOrCollisionDetectedError
+from ..errors import ErrorOccurrence
 from ..types import WellLocation, LiquidHandlingWellLocation, DeckPoint, CurrentWell
 from ..state.update_types import StateUpdate
-from .command import SuccessData
+from .command import SuccessData, DefinedErrorData
 
 
 if TYPE_CHECKING:
     from ..execution.movement import MovementHandler
+    from ..resources.model_utils import ModelUtils
 
 
 class WellLocationMixin(BaseModel):
@@ -79,6 +85,22 @@ class MovementMixin(BaseModel):
     )
 
 
+class StallOrCollisionError(ErrorOccurrence):
+    """Returned when the machine detects that axis encoders are reading a different position than expected.
+
+    All axes are stopped at the point where the error was encountered.
+
+    The next thing to move the machine must account for the robot not having a valid estimate
+    of its position. It should be a `home` or `unsafe/updatePositionEstimators`.
+    """
+
+    isDefined: bool = True
+    errorType: Literal["stallOrCollision"] = "stallOrCollision"
+
+    errorCode: str = ErrorCodes.STALL_OR_COLLISION_DETECTED.value.code
+    detail: str = ErrorCodes.STALL_OR_COLLISION_DETECTED.value.detail
+
+
 class DestinationPositionResult(BaseModel):
     """Mixin for command results that move a pipette."""
 
@@ -99,11 +121,14 @@ class DestinationPositionResult(BaseModel):
     )
 
 
-MoveToWellOperationReturn = SuccessData[DestinationPositionResult]
+MoveToWellOperationReturn = (
+    SuccessData[DestinationPositionResult] | DefinedErrorData[StallOrCollisionError]
+)
 
 
 async def move_to_well(
     movement: MovementHandler,
+    model_utils: ModelUtils,
     pipette_id: str,
     labware_id: str,
     well_name: str,
@@ -115,26 +140,43 @@ async def move_to_well(
     operation_volume: Optional[float] = None,
 ) -> MoveToWellOperationReturn:
     """Execute a move to well microoperation."""
-    position = await movement.move_to_well(
-        pipette_id=pipette_id,
-        labware_id=labware_id,
-        well_name=well_name,
-        well_location=well_location,
-        current_well=current_well,
-        force_direct=force_direct,
-        minimum_z_height=minimum_z_height,
-        speed=speed,
-        operation_volume=operation_volume,
-    )
-    deck_point = DeckPoint.construct(x=position.x, y=position.y, z=position.z)
-    return SuccessData(
-        public=DestinationPositionResult(
-            position=deck_point,
-        ),
-        state_update=StateUpdate().set_pipette_location(
+    try:
+        position = await movement.move_to_well(
             pipette_id=pipette_id,
-            new_labware_id=labware_id,
-            new_well_name=well_name,
-            new_deck_point=deck_point,
-        ),
-    )
+            labware_id=labware_id,
+            well_name=well_name,
+            well_location=well_location,
+            current_well=current_well,
+            force_direct=force_direct,
+            minimum_z_height=minimum_z_height,
+            speed=speed,
+            operation_volume=operation_volume,
+        )
+    except StallOrCollisionDetectedError as e:
+        return DefinedErrorData(
+            public=StallOrCollisionError(
+                id=model_utils.generate_id(),
+                createdAt=model_utils.get_timestamp(),
+                wrappedErrors=[
+                    ErrorOccurrence.from_failed(
+                        id=model_utils.generate_id(),
+                        createdAt=model_utils.get_timestamp(),
+                        error=e,
+                    )
+                ],
+            ),
+            state_update=StateUpdate().clear_all_pipette_locations(),
+        )
+    else:
+        deck_point = DeckPoint.construct(x=position.x, y=position.y, z=position.z)
+        return SuccessData(
+            public=DestinationPositionResult(
+                position=deck_point,
+            ),
+            state_update=StateUpdate().set_pipette_location(
+                pipette_id=pipette_id,
+                new_labware_id=labware_id,
+                new_well_name=well_name,
+                new_deck_point=deck_point,
+            ),
+        )

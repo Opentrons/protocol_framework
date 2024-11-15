@@ -5,6 +5,8 @@ from datetime import datetime
 import pytest
 from decoy import Decoy, matchers
 
+from opentrons_shared_data.errors.exceptions import StallOrCollisionDetectedError
+
 from opentrons.protocol_engine import (
     DropTipWellLocation,
     DropTipWellOrigin,
@@ -21,11 +23,13 @@ from opentrons.protocol_engine.commands.drop_tip import (
 from opentrons.protocol_engine.commands.pipetting_common import (
     TipPhysicallyAttachedError,
 )
+from opentrons.protocol_engine.commands.movement_common import StallOrCollisionError
 from opentrons.protocol_engine.errors.exceptions import TipAttachedError
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
 from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.execution import MovementHandler, TipHandler
+
 
 from opentrons.types import Point
 
@@ -330,5 +334,73 @@ async def test_tip_attached_error(
                 ),
                 new_deck_point=DeckPoint(x=111, y=222, z=333),
             ),
+        ),
+    )
+
+
+async def test_stall_error(
+    decoy: Decoy,
+    mock_state_view: StateView,
+    mock_movement_handler: MovementHandler,
+    mock_tip_handler: TipHandler,
+    mock_model_utils: ModelUtils,
+) -> None:
+    """A DropTip command should have an execution implementation."""
+    subject = DropTipImplementation(
+        state_view=mock_state_view,
+        movement=mock_movement_handler,
+        tip_handler=mock_tip_handler,
+        model_utils=mock_model_utils,
+    )
+
+    params = DropTipParams(
+        pipetteId="abc",
+        labwareId="123",
+        wellName="A3",
+        wellLocation=DropTipWellLocation(offset=WellOffset(x=1, y=2, z=3)),
+    )
+
+    decoy.when(
+        mock_state_view.pipettes.get_is_partially_configured(pipette_id="abc")
+    ).then_return(False)
+
+    decoy.when(
+        mock_state_view.geometry.get_checked_tip_drop_location(
+            pipette_id="abc",
+            labware_id="123",
+            well_location=DropTipWellLocation(offset=WellOffset(x=1, y=2, z=3)),
+            partially_configured=False,
+        )
+    ).then_return(WellLocation(offset=WellOffset(x=4, y=5, z=6)))
+
+    decoy.when(
+        await mock_movement_handler.move_to_well(
+            pipette_id="abc",
+            labware_id="123",
+            well_name="A3",
+            well_location=WellLocation(offset=WellOffset(x=4, y=5, z=6)),
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
+        )
+    ).then_raise(StallOrCollisionDetectedError())
+
+    decoy.when(mock_model_utils.generate_id()).then_return("error-id")
+    decoy.when(mock_model_utils.get_timestamp()).then_return(
+        datetime(year=1, month=2, day=3)
+    )
+
+    result = await subject.execute(params)
+
+    assert result == DefinedErrorData(
+        public=StallOrCollisionError.construct(
+            id="error-id",
+            createdAt=datetime(year=1, month=2, day=3),
+            wrappedErrors=[matchers.Anything()],
+        ),
+        state_update=update_types.StateUpdate(
+            pipette_location=update_types.CLEAR,
         ),
     )

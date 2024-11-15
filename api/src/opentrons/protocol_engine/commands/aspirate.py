@@ -15,6 +15,7 @@ from .pipetting_common import (
 from .movement_common import (
     LiquidHandlingWellLocationMixin,
     DestinationPositionResult,
+    StallOrCollisionError,
     move_to_well,
 )
 from .command import (
@@ -60,7 +61,7 @@ class AspirateResult(BaseLiquidHandlingResult, DestinationPositionResult):
 
 _ExecuteReturn = Union[
     SuccessData[AspirateResult],
-    DefinedErrorData[OverpressureError],
+    DefinedErrorData[OverpressureError] | DefinedErrorData[StallOrCollisionError],
 ]
 
 
@@ -120,6 +121,7 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
 
         move_result = await move_to_well(
             movement=self._movement,
+            model_utils=self._model_utils,
             pipette_id=pipette_id,
             labware_id=labware_id,
             well_name=well_name,
@@ -127,6 +129,8 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
             current_well=current_well,
             operation_volume=-params.volume,
         )
+        if isinstance(move_result, DefinedErrorData):
+            return move_result
 
         aspirate_result = await aspirate_in_place(
             pipette_id=pipette_id,
@@ -185,7 +189,11 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
             )
 
 
-class Aspirate(BaseCommand[AspirateParams, AspirateResult, OverpressureError]):
+class Aspirate(
+    BaseCommand[
+        AspirateParams, AspirateResult, OverpressureError | StallOrCollisionError
+    ]
+):
     """Aspirate command model."""
 
     commandType: AspirateCommandType = "aspirate"

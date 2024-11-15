@@ -19,6 +19,7 @@ from .pipetting_common import (
 from .movement_common import (
     LiquidHandlingWellLocationMixin,
     DestinationPositionResult,
+    StallOrCollisionError,
     move_to_well,
 )
 from .command import (
@@ -57,7 +58,7 @@ class DispenseResult(BaseLiquidHandlingResult, DestinationPositionResult):
 
 _ExecuteReturn = Union[
     SuccessData[DispenseResult],
-    DefinedErrorData[OverpressureError],
+    DefinedErrorData[OverpressureError] | DefinedErrorData[StallOrCollisionError],
 ]
 
 
@@ -88,11 +89,14 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
 
         move_result = await move_to_well(
             movement=self._movement,
+            model_utils=self._model_utils,
             pipette_id=params.pipetteId,
             labware_id=labware_id,
             well_name=well_name,
             well_location=well_location,
         )
+        if isinstance(move_result, DefinedErrorData):
+            return move_result
         dispense_result = await dispense_in_place(
             pipette_id=params.pipetteId,
             volume=volume,
@@ -159,7 +163,11 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
             )
 
 
-class Dispense(BaseCommand[DispenseParams, DispenseResult, OverpressureError]):
+class Dispense(
+    BaseCommand[
+        DispenseParams, DispenseResult, OverpressureError | StallOrCollisionError
+    ]
+):
     """Dispense command model."""
 
     commandType: DispenseCommandType = "dispense"

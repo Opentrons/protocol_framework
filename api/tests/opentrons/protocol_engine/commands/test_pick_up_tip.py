@@ -1,8 +1,12 @@
 """Test pick up tip commands."""
+
 from datetime import datetime
 
 from decoy import Decoy, matchers
 from unittest.mock import sentinel
+
+
+from opentrons_shared_data.errors.exceptions import StallOrCollisionDetectedError
 
 from opentrons.types import MountType, Point
 
@@ -19,6 +23,7 @@ from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.types import TipGeometry
 
+from opentrons.protocol_engine.commands.movement_common import StallOrCollisionError
 from opentrons.protocol_engine.commands.command import DefinedErrorData, SuccessData
 from opentrons.protocol_engine.commands.pick_up_tip import (
     PickUpTipParams,
@@ -197,5 +202,63 @@ async def test_tip_physically_missing_error(
                 ),
                 new_deck_point=DeckPoint(x=111, y=222, z=333),
             ),
+        ),
+    )
+
+
+async def test_stall_error(
+    decoy: Decoy,
+    state_view: StateView,
+    movement: MovementHandler,
+    tip_handler: TipHandler,
+    model_utils: ModelUtils,
+) -> None:
+    """It should return a TipPhysicallyMissingError if the HW API indicates that."""
+    subject = PickUpTipImplementation(
+        state_view=state_view,
+        movement=movement,
+        tip_handler=tip_handler,
+        model_utils=model_utils,
+    )
+
+    pipette_id = "pipette-id"
+    labware_id = "labware-id"
+    well_name = "well-name"
+    error_id = "error-id"
+    error_created_at = datetime(1234, 5, 6)
+
+    decoy.when(
+        state_view.geometry.convert_pick_up_tip_well_location(
+            well_location=PickUpTipWellLocation(offset=WellOffset())
+        )
+    ).then_return(WellLocation(offset=WellOffset()))
+
+    decoy.when(
+        await movement.move_to_well(
+            pipette_id="pipette-id",
+            labware_id="labware-id",
+            well_name="well-name",
+            well_location=WellLocation(offset=WellOffset()),
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
+        )
+    ).then_raise(StallOrCollisionDetectedError())
+
+    decoy.when(model_utils.generate_id()).then_return(error_id)
+    decoy.when(model_utils.get_timestamp()).then_return(error_created_at)
+
+    result = await subject.execute(
+        PickUpTipParams(pipetteId=pipette_id, labwareId=labware_id, wellName=well_name)
+    )
+
+    assert result == DefinedErrorData(
+        public=StallOrCollisionError.construct(
+            id=error_id, createdAt=error_created_at, wrappedErrors=[matchers.Anything()]
+        ),
+        state_update=update_types.StateUpdate(
+            pipette_location=update_types.CLEAR,
         ),
     )
