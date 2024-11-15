@@ -163,6 +163,16 @@ def create_disposable_lid_parameter(parameters: ParameterContext) -> None:
     )
 
 
+def create_disposable_lid_trash_location(parameters: ParameterContext) -> None:
+    """Create a parameter for lid placement after use."""
+    parameters.add_bool(
+        variable_name="trash_lid",
+        display_name="Trash Disposable Lid",
+        description="True means trash lid, false means keep on deck.",
+        default=True,
+    )
+
+
 def create_tc_lid_deck_riser_parameter(parameters: ParameterContext) -> None:
     """Create parameter for tc lid deck riser."""
     parameters.add_bool(
