@@ -606,15 +606,6 @@ async def get_current_state(  # noqa: C901
     }
 
     current_command = run_data_manager.get_current_command(run_id=runId)
-    last_completed_command = run_data_manager.get_last_completed_command(run_id=runId)
-    links = CurrentStateLinks.construct(
-        lastCompleted=CommandLinkNoMeta.construct(
-            id=last_completed_command.command_id,
-            href=f"/runs/{runId}/commands/{last_completed_command.command_id}",
-        )
-        if last_completed_command is not None
-        else None
-    )
 
     estop_engaged = False
     place_labware = None
@@ -668,6 +659,16 @@ async def get_current_state(  # noqa: C901
                         break
                 if place_labware:
                     break
+
+    last_completed_command = run_data_manager.get_last_completed_command(run_id=runId)
+    links = CurrentStateLinks.construct(
+        lastCompleted=CommandLinkNoMeta.construct(
+            id=last_completed_command.command_id,
+            href=f"/runs/{runId}/commands/{last_completed_command.command_id}",
+        )
+        if last_completed_command is not None
+        else None
+    )
 
     return await PydanticResponse.create(
         content=Body.construct(
