@@ -651,13 +651,20 @@ export const getHydratedUnsavedForm: Selector<
 export const getDynamicFieldFormErrorsForUnsavedForm: Selector<
   BaseState,
   ProfileFormError[]
-> = createSelector(getHydratedUnsavedForm, hydratedForm => {
-  if (!hydratedForm) return []
+> = createSelector(
+  getHydratedUnsavedForm,
+  getInvariantContext,
+  (hydratedForm, invariantContext) => {
+    if (!hydratedForm) return []
 
-  const errors = _dynamicFieldFormErrors(hydratedForm)
+    const errors = [
+      ..._dynamicFieldFormErrors(hydratedForm),
+      ..._dynamicMoveLabwareFieldFormErrors(hydratedForm, invariantContext),
+    ]
 
-  return errors
-})
+    return errors
+  }
+)
 export const getFormLevelErrorsForUnsavedForm: Selector<
   BaseState,
   StepFormErrors

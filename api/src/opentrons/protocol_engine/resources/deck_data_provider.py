@@ -17,11 +17,9 @@ from ..types import (
     DeckSlotLocation,
     DeckType,
     LabwareLocation,
-    AddressableAreaLocation,
     DeckConfigurationType,
 )
 from .labware_data_provider import LabwareDataProvider
-from ..resources import deck_configuration_provider
 
 
 @final
@@ -71,43 +69,6 @@ class DeckDataProvider:
             slot = cast(Optional[str], fixture.get("slot"))
 
             if (
-                deck_configuration is not None
-                and load_name is not None
-                and slot is not None
-                and slot not in DeckSlotName._value2member_map_
-            ):
-                # The provided slot is likely to be an addressable area for Module-required labware Eg: Plate Reader Lid
-                for (
-                    cutout_id,
-                    cutout_fixture_id,
-                    opentrons_module_serial_number,
-                ) in deck_configuration:
-                    provided_addressable_areas = (
-                        deck_configuration_provider.get_provided_addressable_area_names(
-                            cutout_fixture_id=cutout_fixture_id,
-                            cutout_id=cutout_id,
-                            deck_definition=deck_definition,
-                        )
-                    )
-                    if slot in provided_addressable_areas:
-                        addressable_area_location = AddressableAreaLocation(
-                            addressableAreaName=slot
-                        )
-                        definition = await self._labware_data.get_labware_definition(
-                            load_name=load_name,
-                            namespace="opentrons",
-                            version=1,
-                        )
-
-                        labware.append(
-                            DeckFixedLabware(
-                                labware_id=labware_id,
-                                definition=definition,
-                                location=addressable_area_location,
-                            )
-                        )
-
-            elif (
                 load_fixed_trash
                 and load_name is not None
                 and slot is not None

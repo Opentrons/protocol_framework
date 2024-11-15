@@ -172,13 +172,14 @@ export function CurrentRunningProtocolCommand({
   }
   const currentRunStatus = t(`status_${runStatus}`)
 
-  const { currentStepNumber, totalStepCount } = useRunningStepCounts(
-    runId,
-    mostRecentCommandData
-  )
-  const stepCounterCopy = `${t('step')} ${currentStepNumber ?? '?'}/${
-    totalStepCount ?? '?'
-  }`
+  const {
+    currentStepNumber,
+    totalStepCount,
+    hasRunDiverged,
+  } = useRunningStepCounts(runId, mostRecentCommandData)
+  const stepCounterCopy = hasRunDiverged
+    ? `${t('step_na')}`
+    : `${t('step')} ${currentStepNumber ?? '?'}/${totalStepCount ?? '?'}`
 
   const onStop = (): void => {
     if (runStatus === RUN_STATUS_RUNNING) pauseRun()

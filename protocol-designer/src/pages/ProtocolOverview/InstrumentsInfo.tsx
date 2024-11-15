@@ -40,14 +40,17 @@ export function InstrumentsInfo({
     equipment => equipment?.name === 'gripper'
   )
 
+  const has96Channel = leftPipette?.name === 'p1000_96' && rightPipette == null
+
   const pipetteInfo = (pipette?: PipetteOnDeck): JSX.Element => {
     const pipetteName =
       pipette != null
         ? getPipetteSpecsV2(pipette.name as PipetteName)?.displayName
         : t('na')
-    const tipsInfo = pipette?.tiprackLabwareDef
-      ? pipette.tiprackLabwareDef.map(labware => labware.metadata.displayName)
-      : t('na')
+    const tipsInfo =
+      pipette?.tiprackLabwareDef != null
+        ? pipette.tiprackLabwareDef.map(labware => labware.metadata.displayName)
+        : t('na')
 
     if (pipetteName === t('na') || tipsInfo === t('na')) {
       return (
@@ -124,29 +127,31 @@ export function InstrumentsInfo({
                   desktopStyle="bodyDefaultRegular"
                   color={COLORS.grey60}
                 >
-                  {t('left_pip')}
+                  {has96Channel ? t('left_right_mount') : t('left_mount')}
                 </StyledText>
               </Flex>
             }
             content={pipetteInfo(leftPipette)}
           />
         </ListItem>
-        <ListItem type="noActive" key={`ProtocolOverview_right`}>
-          <ListItemDescriptor
-            type="large"
-            description={
-              <Flex minWidth="13.75rem">
-                <StyledText
-                  desktopStyle="bodyDefaultRegular"
-                  color={COLORS.grey60}
-                >
-                  {t('right_pip')}
-                </StyledText>
-              </Flex>
-            }
-            content={pipetteInfo(rightPipette)}
-          />
-        </ListItem>
+        {!has96Channel ? (
+          <ListItem type="noActive" key={`ProtocolOverview_right`}>
+            <ListItemDescriptor
+              type="large"
+              description={
+                <Flex minWidth="13.75rem">
+                  <StyledText
+                    desktopStyle="bodyDefaultRegular"
+                    color={COLORS.grey60}
+                  >
+                    {t('right_mount')}
+                  </StyledText>
+                </Flex>
+              }
+              content={pipetteInfo(rightPipette)}
+            />
+          </ListItem>
+        ) : null}
         {robotType === FLEX_ROBOT_TYPE ? (
           <ListItem type="noActive" key={`ProtocolOverview_gripper`}>
             <ListItemDescriptor

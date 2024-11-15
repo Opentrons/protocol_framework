@@ -109,7 +109,9 @@ export function useRunProgressCopy({
       if (runStatus === RUN_STATUS_IDLE) {
         return `${stepType}:`
       } else if (isTerminalStatus && currentStepNumber == null) {
-        return `${stepType}: N/A`
+        return `${stepType}: ${t('na')}`
+      } else if (hasRunDiverged) {
+        return `${stepType} ${t('na')}:`
       } else {
         const getCountString = (): string => {
           const current = currentStepNumber ?? '?'

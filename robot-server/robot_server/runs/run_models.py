@@ -319,7 +319,7 @@ class ActiveNozzleLayout(BaseModel):
 class PlaceLabwareState(BaseModel):
     """Details the labware being placed by the gripper."""
 
-    labwareId: str = Field(..., description="The ID of the labware to place.")
+    labwareURI: str = Field(..., description="The URI of the labware to place.")
     location: OnDeckLabwareLocation = Field(
         ..., description="The location the labware should be in."
     )

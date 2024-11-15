@@ -19,8 +19,7 @@ from opentrons.protocol_engine.types import (
     LabwareOffsetCreate,
     LabwareOffsetVector,
 )
-from opentrons.types import DeckSlotName, Point
-from opentrons.hardware_control.nozzle_manager import NozzleMap
+from opentrons.types import DeckSlotName, NozzleMapInterface, Point, StagingSlotName
 
 
 from ..labware import AbstractLabware, LabwareLoadParams
@@ -139,6 +138,10 @@ class LabwareCore(AbstractLabware[WellCore]):
         """Whether the labware is an adapter."""
         return LabwareRole.adapter in self._definition.allowedRoles
 
+    def is_lid(self) -> bool:
+        """Whether the labware is a lid."""
+        return LabwareRole.lid in self._definition.allowedRoles
+
     def is_fixed_trash(self) -> bool:
         """Whether the labware is a fixed trash."""
         return self._engine_client.state.labware.is_fixed_trash(
@@ -158,7 +161,7 @@ class LabwareCore(AbstractLabware[WellCore]):
         self,
         num_tips: int,
         starting_tip: Optional[WellCore],
-        nozzle_map: Optional[NozzleMap],
+        nozzle_map: Optional[NozzleMapInterface],
     ) -> Optional[str]:
         return self._engine_client.state.tips.get_next_tip(
             labware_id=self._labware_id,
@@ -186,9 +189,13 @@ class LabwareCore(AbstractLabware[WellCore]):
     def get_deck_slot(self) -> Optional[DeckSlotName]:
         """Get the deck slot the labware is in, if on deck."""
         try:
-            return self._engine_client.state.geometry.get_ancestor_slot_name(
+            ancestor = self._engine_client.state.geometry.get_ancestor_slot_name(
                 self.labware_id
             )
+            if isinstance(ancestor, StagingSlotName):
+                # The only use case for get_deck_slot is with a legacy OT-2 function which resolves to a numerical deck slot, so we can ignore staging area slots for now
+                return None
+            return ancestor
         except (
             LabwareNotOnDeckError,
             ModuleNotOnDeckError,

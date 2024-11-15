@@ -71,6 +71,15 @@
         "slotName": "5"
       },
       "displayName": "NEST 1 Well Reservoir 195 mL"
+    },
+    {
+      "id": "29444782-bdc8-4ad8-92fe-5e28872e85e5:opentrons/opentrons_96_flat_bottom_adapter/1",
+      "loadName": "opentrons_96_flat_bottom_adapter",
+      "definitionUri": "opentrons/opentrons_96_flat_bottom_adapter/1",
+      "location": {
+        "slotName": "2"
+      },
+      "displayName": "Opentrons 96 Flat Bottom Adapter"
     }
   ],
   "modules": [

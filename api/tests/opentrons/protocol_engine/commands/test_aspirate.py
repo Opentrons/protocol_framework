@@ -1,4 +1,5 @@
 """Test aspirate commands."""
+
 from datetime import datetime
 
 from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
@@ -29,7 +30,12 @@ from opentrons.protocol_engine.execution import (
     PipettingHandler,
 )
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
-from opentrons.protocol_engine.types import CurrentWell, LoadedPipette
+from opentrons.protocol_engine.types import (
+    CurrentWell,
+    LoadedPipette,
+    AspiratedFluid,
+    FluidKind,
+)
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.protocol_engine.notes import CommandNoteAdder
 
@@ -80,6 +86,20 @@ async def test_aspirate_implementation_no_prep(
     decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id="abc")).then_return(True)
 
     decoy.when(
+        state_view.geometry.get_nozzles_per_well(
+            labware_id="123",
+            target_well_name="A3",
+            pipette_id="abc",
+        )
+    ).then_return(2)
+
+    decoy.when(
+        state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+            "123", "A3", "abc"
+        )
+    ).then_return(["A3", "A4"])
+
+    decoy.when(
         await movement.move_to_well(
             pipette_id="abc",
             labware_id="123",
@@ -111,8 +131,11 @@ async def test_aspirate_implementation_no_prep(
             ),
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id="123",
-                well_name="A3",
-                volume_added=-50,
+                well_names=["A3", "A4"],
+                volume_added=-100,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                pipette_id="abc", fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50)
             ),
         ),
     )
@@ -149,6 +172,19 @@ async def test_aspirate_implementation_with_prep(
         )
     )
     decoy.when(
+        state_view.geometry.get_nozzles_per_well(
+            labware_id="123",
+            target_well_name="A3",
+            pipette_id="abc",
+        )
+    ).then_return(2)
+
+    decoy.when(
+        state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+            "123", "A3", "abc"
+        )
+    ).then_return(["A3", "A4"])
+    decoy.when(
         await movement.move_to_well(
             pipette_id="abc",
             labware_id="123",
@@ -184,8 +220,11 @@ async def test_aspirate_implementation_with_prep(
             ),
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id="123",
-                well_name="A3",
-                volume_added=-50,
+                well_names=["A3", "A4"],
+                volume_added=-100,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                pipette_id="abc", fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50)
             ),
         ),
     )
@@ -206,6 +245,7 @@ async def test_aspirate_raises_volume_error(
     pipetting: PipettingHandler,
     movement: MovementHandler,
     mock_command_note_adder: CommandNoteAdder,
+    state_view: StateView,
     subject: AspirateImplementation,
 ) -> None:
     """Should raise an assertion error for volume larger than working volume."""
@@ -223,6 +263,20 @@ async def test_aspirate_raises_volume_error(
     )
 
     decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id="abc")).then_return(True)
+
+    decoy.when(
+        state_view.geometry.get_nozzles_per_well(
+            labware_id="123",
+            target_well_name="A3",
+            pipette_id="abc",
+        )
+    ).then_return(2)
+
+    decoy.when(
+        state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+            "123", "A3", "abc"
+        )
+    ).then_return(["A3", "A4"])
 
     decoy.when(
         await movement.move_to_well(
@@ -255,6 +309,7 @@ async def test_overpressure_error(
     subject: AspirateImplementation,
     model_utils: ModelUtils,
     mock_command_note_adder: CommandNoteAdder,
+    state_view: StateView,
 ) -> None:
     """It should return an overpressure error if the hardware API indicates that."""
     pipette_id = "pipette-id"
@@ -277,6 +332,20 @@ async def test_overpressure_error(
         volume=50,
         flowRate=1.23,
     )
+
+    decoy.when(
+        state_view.geometry.get_nozzles_per_well(
+            labware_id="labware-id",
+            target_well_name="well-name",
+            pipette_id="pipette-id",
+        )
+    ).then_return(2)
+
+    decoy.when(
+        state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+            "labware-id", "well-name", "pipette-id"
+        )
+    ).then_return(["A3", "A4"])
 
     decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id=pipette_id)).then_return(
         True
@@ -324,8 +393,11 @@ async def test_overpressure_error(
             ),
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id=labware_id,
-                well_name=well_name,
+                well_names=["A3", "A4"],
                 volume_added=update_types.CLEAR,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                pipette_id=pipette_id
             ),
         ),
     )
@@ -354,6 +426,20 @@ async def test_aspirate_implementation_meniscus(
         volume=50,
         flowRate=1.23,
     )
+
+    decoy.when(
+        state_view.geometry.get_nozzles_per_well(
+            labware_id="123",
+            target_well_name="A3",
+            pipette_id="abc",
+        )
+    ).then_return(2)
+
+    decoy.when(
+        state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+            "123", "A3", "abc"
+        )
+    ).then_return(["A3", "A4"])
 
     decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id="abc")).then_return(True)
 
@@ -389,8 +475,11 @@ async def test_aspirate_implementation_meniscus(
             ),
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id="123",
-                well_name="A3",
-                volume_added=-50,
+                well_names=["A3", "A4"],
+                volume_added=-100,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                pipette_id="abc", fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50)
             ),
         ),
     )

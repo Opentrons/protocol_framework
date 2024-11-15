@@ -1,4 +1,5 @@
 """Dispense command request, result, and implementation models."""
+
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Type, Union
 from typing_extensions import Literal
@@ -109,9 +110,12 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
         except PipetteOverpressureError as e:
             state_update.set_liquid_operated(
                 labware_id=labware_id,
-                well_name=well_name,
+                well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+                    labware_id, well_name, params.pipetteId
+                ),
                 volume_added=CLEAR,
             )
+            state_update.set_fluid_unknown(pipette_id=params.pipetteId)
             return DefinedErrorData(
                 public=OverpressureError(
                     id=self._model_utils.generate_id(),
@@ -128,11 +132,23 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
                 state_update=state_update,
             )
         else:
+            volume_added = (
+                self._state_view.pipettes.get_liquid_dispensed_by_ejecting_volume(
+                    pipette_id=params.pipetteId, volume=volume
+                )
+            )
+            if volume_added is not None:
+                volume_added *= self._state_view.geometry.get_nozzles_per_well(
+                    labware_id, well_name, params.pipetteId
+                )
             state_update.set_liquid_operated(
                 labware_id=labware_id,
-                well_name=well_name,
-                volume_added=volume,
+                well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+                    labware_id, well_name, params.pipetteId
+                ),
+                volume_added=volume_added if volume_added is not None else CLEAR,
             )
+            state_update.set_fluid_ejected(pipette_id=params.pipetteId, volume=volume)
             return SuccessData(
                 public=DispenseResult(volume=volume, position=deck_point),
                 state_update=state_update,

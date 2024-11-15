@@ -3,15 +3,18 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   ALIGN_CENTER,
+  Btn,
   DeckInfoLabel,
   DIRECTION_COLUMN,
   Flex,
+  Icon,
   ModuleIcon,
   RadioButton,
   SPACING,
   StyledText,
   Tabs,
   Toolbox,
+  TYPOGRAPHY,
 } from '@opentrons/components'
 import {
   FLEX_ROBOT_TYPE,
@@ -20,6 +23,7 @@ import {
   MAGNETIC_MODULE_TYPE,
   MAGNETIC_MODULE_V1,
   MAGNETIC_MODULE_V2,
+  MODULE_MODELS,
   OT2_ROBOT_TYPE,
 } from '@opentrons/shared-data'
 
@@ -46,6 +50,8 @@ import { selectors } from '../../../labware-ingred/selectors'
 import { useKitchen } from '../../../organisms/Kitchen/hooks'
 import { getDismissedHints } from '../../../tutorial/selectors'
 import { createContainerAboveModule } from '../../../step-forms/actions/thunks'
+import { ConfirmDeleteStagingAreaModal } from '../../../organisms'
+import { BUTTON_LINK_STYLE } from '../../../atoms'
 import { FIXTURES, MOAM_MODELS } from './constants'
 import { getSlotInformation } from '../utils'
 import { getModuleModelsBySlot, getDeckErrors } from './utils'
@@ -71,6 +77,9 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
   const { makeSnackbar } = useKitchen()
   const selectedSlotInfo = useSelector(selectors.getZoomedInSlotInfo)
   const robotType = useSelector(getRobotType)
+  const [showDeleteLabwareModal, setShowDeleteLabwareModal] = useState<
+    ModuleModel | 'clear' | null
+  >(null)
   const isDismissedModuleHint = useSelector(getDismissedHints).includes(
     'change_magnet_module_model'
   )
@@ -85,6 +94,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     selectedNestedLabwareDefUri,
   } = selectedSlotInfo
   const { slot, cutout } = selectedSlot
+
   const [changeModuleWarningInfo, displayModuleWarning] = useState<boolean>(
     false
   )
@@ -154,6 +164,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     createdModuleForSlot,
     createdLabwareForSlot,
     createFixtureForSlots,
+    matchingLabwareFor4thColumn,
   } = getSlotInformation({ deckSetup, slot })
 
   let fixtures: Fixture[] = []
@@ -211,18 +222,28 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
         )
       }
       //  clear labware from slot
-      if (createdLabwareForSlot != null) {
+      if (
+        createdLabwareForSlot != null &&
+        createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri
+      ) {
         dispatch(deleteContainer({ labwareId: createdLabwareForSlot.id }))
       }
       //  clear nested labware from slot
-      if (createdNestedLabwareForSlot != null) {
+      if (
+        createdNestedLabwareForSlot != null &&
+        createdNestedLabwareForSlot.labwareDefURI !==
+          selectedNestedLabwareDefUri
+      ) {
         dispatch(deleteContainer({ labwareId: createdNestedLabwareForSlot.id }))
+      }
+      // clear labware on staging area 4th column slot
+      if (matchingLabwareFor4thColumn != null) {
+        dispatch(deleteContainer({ labwareId: matchingLabwareFor4thColumn.id }))
       }
     }
     handleResetToolbox()
     setSelectedHardware(null)
   }
-
   const handleConfirm = (): void => {
     //  clear entities first before recreating them
     handleClear()
@@ -246,7 +267,14 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
         })
       )
     }
-    if (selectedModuleModel == null && selectedLabwareDefUri != null) {
+    if (
+      selectedModuleModel == null &&
+      selectedLabwareDefUri != null &&
+      (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
+        (selectedNestedLabwareDefUri != null &&
+          selectedNestedLabwareDefUri !==
+            createdNestedLabwareForSlot?.labwareDefURI))
+    ) {
       //  create adapter + labware on deck
       dispatch(
         createContainer({
@@ -262,7 +290,11 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
         })
       )
     }
-    if (selectedModuleModel != null && selectedLabwareDefUri != null) {
+    if (
+      selectedModuleModel != null &&
+      selectedLabwareDefUri != null &&
+      createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri
+    ) {
       //   create adapter + labware on module
       dispatch(
         createContainerAboveModule({
@@ -278,6 +310,26 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
   }
   return (
     <>
+      {showDeleteLabwareModal != null ? (
+        <ConfirmDeleteStagingAreaModal
+          onClose={() => {
+            setShowDeleteLabwareModal(null)
+          }}
+          onConfirm={() => {
+            if (showDeleteLabwareModal === 'clear') {
+              handleClear()
+              handleResetToolbox()
+            } else if (MODULE_MODELS.includes(showDeleteLabwareModal)) {
+              setSelectedHardware(showDeleteLabwareModal)
+              dispatch(selectFixture({ fixture: null }))
+              dispatch(selectModule({ moduleModel: showDeleteLabwareModal }))
+              dispatch(selectLabware({ labwareDefUri: null }))
+              dispatch(selectNestedLabware({ nestedLabwareDefUri: null }))
+            }
+            setShowDeleteLabwareModal(null)
+          }}
+        />
+      ) : null}
       {changeModuleWarning}
       <Toolbox
         height="calc(100vh - 64px)"
@@ -296,18 +348,31 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
             </StyledText>
           </Flex>
         }
-        closeButton={
-          <StyledText desktopStyle="bodyDefaultRegular">
-            {t('clear')}
-          </StyledText>
+        secondaryHeaderButton={
+          <Btn
+            onClick={() => {
+              if (matchingLabwareFor4thColumn != null) {
+                setShowDeleteLabwareModal('clear')
+              } else {
+                handleClear()
+                handleResetToolbox()
+              }
+            }}
+            css={BUTTON_LINK_STYLE}
+            textDecoration={TYPOGRAPHY.textDecorationUnderline}
+          >
+            <StyledText desktopStyle="bodyDefaultRegular">
+              {t('clear')}
+            </StyledText>
+          </Btn>
         }
+        closeButton={<Icon size="2rem" name="close" />}
         onCloseClick={() => {
-          handleClear()
+          onCloseClick()
+          dispatch(selectZoomedIntoSlot({ slot: null, cutout: null }))
           handleResetToolbox()
         }}
-        onConfirmClick={() => {
-          handleConfirm()
-        }}
+        onConfirmClick={handleConfirm}
         confirmButtonText={t('done')}
       >
         <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing16}>
@@ -407,6 +472,12 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                             !isDismissedModuleHint
                           ) {
                             displayModuleWarning(true)
+                          } else if (
+                            selectedFixture === 'stagingArea' ||
+                            (selectedFixture === 'wasteChuteAndStagingArea' &&
+                              matchingLabwareFor4thColumn != null)
+                          ) {
+                            setShowDeleteLabwareModal(model)
                           } else {
                             setSelectedHardware(model)
                             dispatch(selectFixture({ fixture: null }))

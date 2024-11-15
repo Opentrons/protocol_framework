@@ -7,7 +7,7 @@ import {
   getMultiSelectItemIds,
   actions as stepsActions,
 } from '../../../../../ui/steps'
-import { StepOverflowMenu } from '../StepOverflowMenu'
+import { analyticsEvent } from '../../../../../analytics/actions'
 import {
   getCurrentFormHasUnsavedChanges,
   getCurrentFormIsPresaved,
@@ -18,6 +18,7 @@ import {
   hoverOnStep,
   toggleViewSubstep,
 } from '../../../../../ui/steps/actions/actions'
+import { StepOverflowMenu } from '../StepOverflowMenu'
 import type * as React from 'react'
 import type * as OpentronsComponents from '@opentrons/components'
 
@@ -30,7 +31,7 @@ vi.mock('../../../../../ui/steps/actions/actions')
 vi.mock('../../../../../ui/steps/actions/thunks')
 vi.mock('../../../../../steplist/actions')
 vi.mock('../../../../../feature-flags/selectors')
-
+vi.mock('../../../../../analytics/actions')
 vi.mock('@opentrons/components', async importOriginal => {
   const actual = await importOriginal<typeof OpentronsComponents>()
   return {
@@ -57,7 +58,7 @@ describe('StepOverflowMenu', () => {
       stepId: moveLiquidStepId,
       top: 0,
       menuRootRef: { current: null },
-      setStepOverflowMenu: vi.fn(),
+      setOpenedOverflowMenuId: vi.fn(),
       multiSelectItemIds: [],
       handleEdit: vi.fn(),
       confirmDelete: mockConfirm,
@@ -85,6 +86,7 @@ describe('StepOverflowMenu', () => {
     fireEvent.click(screen.getByText('View details'))
     expect(vi.mocked(hoverOnStep)).toHaveBeenCalled()
     expect(vi.mocked(toggleViewSubstep)).toHaveBeenCalled()
+    expect(vi.mocked(analyticsEvent)).toHaveBeenCalled()
   })
 
   it('renders the multi select overflow menu', () => {

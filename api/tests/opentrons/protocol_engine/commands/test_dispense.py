@@ -1,4 +1,5 @@
 """Test dispense commands."""
+
 from datetime import datetime
 
 import pytest
@@ -48,6 +49,7 @@ async def test_dispense_implementation(
     movement: MovementHandler,
     pipetting: PipettingHandler,
     subject: DispenseImplementation,
+    state_view: StateView,
 ) -> None:
     """It should move to the target location and then dispense."""
     well_location = LiquidHandlingWellLocation(
@@ -73,10 +75,29 @@ async def test_dispense_implementation(
     ).then_return(Point(x=1, y=2, z=3))
 
     decoy.when(
+        state_view.geometry.get_nozzles_per_well(
+            labware_id="labware-id-abc123",
+            target_well_name="A3",
+            pipette_id="pipette-id-abc123",
+        )
+    ).then_return(2)
+
+    decoy.when(
+        state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+            "labware-id-abc123", "A3", "pipette-id-abc123"
+        )
+    ).then_return(["A3", "A4"])
+
+    decoy.when(
         await pipetting.dispense_in_place(
             pipette_id="pipette-id-abc123", volume=50, flow_rate=1.23, push_out=None
         )
     ).then_return(42)
+    decoy.when(
+        state_view.pipettes.get_liquid_dispensed_by_ejecting_volume(
+            pipette_id="pipette-id-abc123", volume=42
+        )
+    ).then_return(34)
 
     result = await subject.execute(data)
 
@@ -93,8 +114,11 @@ async def test_dispense_implementation(
             ),
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id="labware-id-abc123",
-                well_name="A3",
-                volume_added=42,
+                well_names=["A3", "A4"],
+                volume_added=68,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteEjectedFluidUpdate(
+                pipette_id="pipette-id-abc123", volume=42
             ),
         ),
     )
@@ -106,6 +130,7 @@ async def test_overpressure_error(
     pipetting: PipettingHandler,
     subject: DispenseImplementation,
     model_utils: ModelUtils,
+    state_view: StateView,
 ) -> None:
     """It should return an overpressure error if the hardware API indicates that."""
     pipette_id = "pipette-id"
@@ -128,6 +153,20 @@ async def test_overpressure_error(
         volume=50,
         flowRate=1.23,
     )
+
+    decoy.when(
+        state_view.geometry.get_nozzles_per_well(
+            labware_id=labware_id,
+            target_well_name=well_name,
+            pipette_id=pipette_id,
+        )
+    ).then_return(2)
+
+    decoy.when(
+        state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+            labware_id, well_name, pipette_id
+        )
+    ).then_return(["A3", "A4"])
 
     decoy.when(
         await movement.move_to_well(
@@ -167,8 +206,11 @@ async def test_overpressure_error(
             ),
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id="labware-id",
-                well_name="well-name",
+                well_names=["A3", "A4"],
                 volume_added=update_types.CLEAR,
+            ),
+            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                pipette_id="pipette-id"
             ),
         ),
     )

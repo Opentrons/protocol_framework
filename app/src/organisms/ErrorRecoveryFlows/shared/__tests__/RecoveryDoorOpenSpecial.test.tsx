@@ -66,7 +66,7 @@ describe('RecoveryDoorOpenSpecial', () => {
     render(props)
     screen.getByText('Close the robot door')
     screen.getByText(
-      'The robot door must be closed for the gripper to home its Z-axis before you can continue manually moving labware.'
+      'The robot needs to safely move to its home location before you manually move the labware.'
     )
   })
 

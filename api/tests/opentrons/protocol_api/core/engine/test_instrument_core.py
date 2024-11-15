@@ -10,7 +10,6 @@ from opentrons_shared_data.pipette.types import PipetteNameType
 
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.dev_types import PipetteDict
-from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType
 from opentrons.protocol_engine import (
     DeckPoint,
     LoadedPipette,
@@ -51,7 +50,7 @@ from opentrons.protocol_api.core.engine import (
 )
 from opentrons.protocols.api_support.definitions import MAX_SUPPORTED_VERSION
 from opentrons.protocols.api_support.types import APIVersion
-from opentrons.types import Location, Mount, MountType, Point
+from opentrons.types import Location, Mount, MountType, Point, NozzleConfigurationType
 
 from ... import versions_below, versions_at_or_above
 

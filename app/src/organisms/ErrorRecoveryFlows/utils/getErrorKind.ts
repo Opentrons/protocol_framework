@@ -1,18 +1,24 @@
 import { ERROR_KINDS, DEFINED_ERROR_TYPES } from '../constants'
 
-import type { RunTimeCommand } from '@opentrons/shared-data'
 import type { ErrorKind } from '../types'
+import type { FailedCommandBySource } from '/app/organisms/ErrorRecoveryFlows/hooks'
 
 /**
  * Given server-side information about a failed command,
  * decide which UI flow to present to recover from it.
+ *
+ * NOTE IMPORTANT: Any failed command by run record must have an equivalent protocol analysis command or default
+ * to the fallback general error. Prefer using FailedCommandBySource for this reason.
  */
-export function getErrorKind(failedCommand: RunTimeCommand | null): ErrorKind {
-  const commandType = failedCommand?.commandType
-  const errorIsDefined = failedCommand?.error?.isDefined ?? false
-  const errorType = failedCommand?.error?.errorType
+export function getErrorKind(
+  failedCommand: FailedCommandBySource | null
+): ErrorKind {
+  const failedCommandByRunRecord = failedCommand?.byRunRecord ?? null
+  const commandType = failedCommandByRunRecord?.commandType
+  const errorIsDefined = failedCommandByRunRecord?.error?.isDefined ?? false
+  const errorType = failedCommandByRunRecord?.error?.errorType
 
-  if (errorIsDefined) {
+  if (Boolean(errorIsDefined)) {
     if (
       commandType === 'prepareToAspirate' &&
       errorType === DEFINED_ERROR_TYPES.OVERPRESSURE

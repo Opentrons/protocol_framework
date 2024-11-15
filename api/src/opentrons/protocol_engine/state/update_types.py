@@ -8,7 +8,13 @@ from datetime import datetime
 
 from opentrons.hardware_control.nozzle_manager import NozzleMap
 from opentrons.protocol_engine.resources import pipette_data_provider
-from opentrons.protocol_engine.types import DeckPoint, LabwareLocation, TipGeometry
+from opentrons.protocol_engine.types import (
+    DeckPoint,
+    LabwareLocation,
+    TipGeometry,
+    AspiratedFluid,
+    LiquidClassRecord,
+)
 from opentrons.types import MountType
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType
@@ -201,8 +207,58 @@ class LiquidOperatedUpdate:
     """An update from operating a liquid."""
 
     labware_id: str
-    well_name: str
+    well_names: list[str]
     volume_added: float | ClearType
+
+
+@dataclasses.dataclass
+class PipetteAspiratedFluidUpdate:
+    """Represents the pipette aspirating something. Might be air or liquid from a well."""
+
+    pipette_id: str
+    fluid: AspiratedFluid
+    type: typing.Literal["aspirated"] = "aspirated"
+
+
+@dataclasses.dataclass
+class PipetteEjectedFluidUpdate:
+    """Represents the pipette pushing something out. Might be air or liquid."""
+
+    pipette_id: str
+    volume: float
+    type: typing.Literal["ejected"] = "ejected"
+
+
+@dataclasses.dataclass
+class PipetteUnknownFluidUpdate:
+    """Represents the amount of fluid in the pipette becoming unknown."""
+
+    pipette_id: str
+    type: typing.Literal["unknown"] = "unknown"
+
+
+@dataclasses.dataclass
+class PipetteEmptyFluidUpdate:
+    """Sets the pipette to be valid and empty."""
+
+    pipette_id: str
+    type: typing.Literal["empty"] = "empty"
+
+
+@dataclasses.dataclass
+class AbsorbanceReaderLidUpdate:
+    """An update to an absorbance reader's lid location."""
+
+    module_id: str
+    is_lid_on: bool
+
+
+@dataclasses.dataclass
+class LiquidClassLoadedUpdate:
+    """The state update from loading a liquid class."""
+
+    liquid_class_id: str
+    liquid_class_record: LiquidClassRecord
 
 
 @dataclasses.dataclass
@@ -219,6 +275,10 @@ class StateUpdate:
 
     pipette_tip_state: PipetteTipStateUpdate | NoChangeType = NO_CHANGE
 
+    pipette_aspirated_fluid: PipetteAspiratedFluidUpdate | PipetteEjectedFluidUpdate | PipetteUnknownFluidUpdate | PipetteEmptyFluidUpdate | NoChangeType = (
+        NO_CHANGE
+    )
+
     labware_location: LabwareLocationUpdate | NoChangeType = NO_CHANGE
 
     loaded_labware: LoadedLabwareUpdate | NoChangeType = NO_CHANGE
@@ -230,6 +290,10 @@ class StateUpdate:
     liquid_probed: LiquidProbedUpdate | NoChangeType = NO_CHANGE
 
     liquid_operated: LiquidOperatedUpdate | NoChangeType = NO_CHANGE
+
+    absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
+
+    liquid_class_loaded: LiquidClassLoadedUpdate | NoChangeType = NO_CHANGE
 
     # These convenience functions let the caller avoid the boilerplate of constructing a
     # complicated dataclass tree.
@@ -398,11 +462,41 @@ class StateUpdate:
         )
 
     def set_liquid_operated(
-        self, labware_id: str, well_name: str, volume_added: float | ClearType
+        self, labware_id: str, well_names: list[str], volume_added: float | ClearType
     ) -> None:
         """Update liquid volumes in well state. See `OperateLiquidUpdate`."""
         self.liquid_operated = LiquidOperatedUpdate(
             labware_id=labware_id,
-            well_name=well_name,
+            well_names=well_names,
             volume_added=volume_added,
+        )
+
+    def set_fluid_aspirated(self, pipette_id: str, fluid: AspiratedFluid) -> None:
+        """Update record of fluid held inside a pipette. See `PipetteAspiratedFluidUpdate`."""
+        self.pipette_aspirated_fluid = PipetteAspiratedFluidUpdate(
+            type="aspirated", pipette_id=pipette_id, fluid=fluid
+        )
+
+    def set_fluid_ejected(self, pipette_id: str, volume: float) -> None:
+        """Update record of fluid held inside a pipette. See `PipetteEjectedFluidUpdate`."""
+        self.pipette_aspirated_fluid = PipetteEjectedFluidUpdate(
+            type="ejected", pipette_id=pipette_id, volume=volume
+        )
+
+    def set_fluid_unknown(self, pipette_id: str) -> None:
+        """Update record of fluid held inside a pipette. See `PipetteUnknownFluidUpdate`."""
+        self.pipette_aspirated_fluid = PipetteUnknownFluidUpdate(
+            type="unknown", pipette_id=pipette_id
+        )
+
+    def set_fluid_empty(self, pipette_id: str) -> None:
+        """Update record fo fluid held inside a pipette. See `PipetteEmptyFluidUpdate`."""
+        self.pipette_aspirated_fluid = PipetteEmptyFluidUpdate(
+            type="empty", pipette_id=pipette_id
+        )
+
+    def set_absorbance_reader_lid(self, module_id: str, is_lid_on: bool) -> None:
+        """Update an absorbance reader's lid location. See `AbsorbanceReaderLidUpdate`."""
+        self.absorbance_reader_lid = AbsorbanceReaderLidUpdate(
+            module_id=module_id, is_lid_on=is_lid_on
         )

@@ -114,7 +114,7 @@ describe('RunProgressMeter', () => {
   it('should show only the total count of commands in run and not show the meter when protocol is non-deterministic', () => {
     vi.mocked(useCommandQuery).mockReturnValue({ data: null } as any)
     render(props)
-    expect(screen.getByText('Current Step ?/?:')).toBeTruthy()
+    expect(screen.getByText('Current Step N/A:')).toBeTruthy()
     expect(screen.queryByText('MOCK PROGRESS BAR')).toBeFalsy()
   })
   it('should give the correct info when run status is idle', () => {

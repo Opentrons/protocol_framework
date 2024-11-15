@@ -77,6 +77,8 @@ from .exceptions import (
     OperationLocationNotInWellError,
     InvalidDispenseVolumeError,
     StorageLimitReachedError,
+    InvalidLiquidError,
+    LiquidClassDoesNotExistError,
 )
 
 from .error_occurrence import ErrorOccurrence, ProtocolCommandFailedError
@@ -137,6 +139,7 @@ __all__ = [
     "InvalidTargetSpeedError",
     "InvalidBlockVolumeError",
     "InvalidHoldTimeError",
+    "InvalidLiquidError",
     "CannotPerformModuleAction",
     "ResumeFromRecoveryNotAllowedError",
     "PauseNotAllowedError",
@@ -162,4 +165,5 @@ __all__ = [
     "OperationLocationNotInWellError",
     "InvalidDispenseVolumeError",
     "StorageLimitReachedError",
+    "LiquidClassDoesNotExistError",
 ]

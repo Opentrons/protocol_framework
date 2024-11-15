@@ -17,14 +17,14 @@ from typing import TYPE_CHECKING, Any, List, Dict, Optional, Union, Tuple, cast
 
 from opentrons_shared_data.labware.types import LabwareDefinition, LabwareParameters
 
-from opentrons.types import Location, Point
+from opentrons.types import Location, Point, NozzleMapInterface
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocols.api_support.util import (
     requires_version,
     APIVersionError,
     UnsupportedAPIError,
 )
-from opentrons.hardware_control.nozzle_manager import NozzleMap
+
 
 # TODO(mc, 2022-09-02): re-exports provided for backwards compatibility
 # remove when their usage is no longer needed
@@ -280,11 +280,19 @@ class Well:
 
         :param Liquid liquid: The liquid to load into the well.
         :param float volume: The volume of liquid to load, in µL.
+
+        .. note::
+            In API version 2.22 and later, use :py:meth:`~.Well.load_empty()` to mark a well as empty at the beginning of a protocol, rather than using this method with ``volume=0``.
         """
         self._core.load_liquid(
             liquid=liquid,
             volume=volume,
         )
+
+    @requires_version(2, 22)
+    def load_empty(self) -> None:
+        """Mark a well as empty."""
+        self._core.load_empty()
 
     def _from_center_cartesian(self, x: float, y: float, z: float) -> Point:
         """
@@ -932,7 +940,7 @@ class Labware:
         num_tips: int = 1,
         starting_tip: Optional[Well] = None,
         *,
-        nozzle_map: Optional[NozzleMap] = None,
+        nozzle_map: Optional[NozzleMapInterface] = None,
     ) -> Optional[Well]:
         """
         Find the next valid well for pick-up.
@@ -1121,7 +1129,7 @@ def select_tiprack_from_list(
     num_channels: int,
     starting_point: Optional[Well] = None,
     *,
-    nozzle_map: Optional[NozzleMap] = None,
+    nozzle_map: Optional[NozzleMapInterface] = None,
 ) -> Tuple[Labware, Well]:
     try:
         first, rest = split_tipracks(tip_racks)
@@ -1159,7 +1167,7 @@ def next_available_tip(
     tip_racks: List[Labware],
     channels: int,
     *,
-    nozzle_map: Optional[NozzleMap] = None,
+    nozzle_map: Optional[NozzleMapInterface] = None,
 ) -> Tuple[Labware, Well]:
     start = starting_tip
     if start is None:

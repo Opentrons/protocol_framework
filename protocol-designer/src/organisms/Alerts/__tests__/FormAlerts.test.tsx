@@ -37,7 +37,8 @@ describe('FormAlerts', () => {
     props = {
       focusedField: null,
       dirtyFields: [],
-      showFormErrorsAndWarnings: false,
+      showFormErrors: false,
+      page: 0,
     }
     vi.mocked(getFormLevelErrorsForUnsavedForm).mockReturnValue([])
     vi.mocked(getFormWarningsForSelectedStep).mockReturnValue([])
@@ -63,7 +64,6 @@ describe('FormAlerts', () => {
     expect(vi.mocked(dismissTimelineWarning)).toHaveBeenCalled()
   })
   it('renders a form level warning that is dismissible', () => {
-    props.showFormErrorsAndWarnings = true
     vi.mocked(getFormWarningsForSelectedStep).mockReturnValue([
       {
         type: 'TIP_POSITIONED_LOW_IN_TUBE',

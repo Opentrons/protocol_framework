@@ -1,10 +1,11 @@
 """ProtocolEngine-based InstrumentContext core implementation."""
+
 from __future__ import annotations
 
 from typing import Optional, TYPE_CHECKING, cast, Union
 from opentrons.protocols.api_support.types import APIVersion
 
-from opentrons.types import Location, Mount
+from opentrons.types import Location, Mount, NozzleConfigurationType, NozzleMapInterface
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons.protocols.api_support.util import FlowRates, find_value_for_api_version
@@ -32,8 +33,6 @@ from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocols.api_support.definitions import MAX_SUPPORTED_VERSION
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
-from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType
-from opentrons.hardware_control.nozzle_manager import NozzleMap
 from . import overlap_versions, pipette_movement_conflict
 
 from ..instrument import AbstractInstrument
@@ -102,6 +101,19 @@ class InstrumentCore(AbstractInstrument[WellCore]):
     def set_default_speed(self, speed: float) -> None:
         self._engine_client.set_pipette_movement_speed(
             pipette_id=self._pipette_id, speed=speed
+        )
+
+    def air_gap_in_place(self, volume: float, flow_rate: float) -> None:
+        """Aspirate a given volume of air from the current location of the pipette.
+
+        Args:
+            volume: The volume of air to aspirate, in microliters.
+            folw_rate: The flow rate of air into the pipette, in microliters/s
+        """
+        self._engine_client.execute_command(
+            cmd.AirGapInPlaceParams(
+                pipetteId=self._pipette_id, volume=volume, flowRate=flow_rate
+            )
         )
 
     def aspirate(
@@ -724,7 +736,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             self._pipette_id
         )
 
-    def get_nozzle_map(self) -> NozzleMap:
+    def get_nozzle_map(self) -> NozzleMapInterface:
         return self._engine_client.state.tips.get_pipette_nozzle_map(self._pipette_id)
 
     def has_tip(self) -> bool:
@@ -922,3 +934,9 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         self._protocol_core.set_last_location(location=loc, mount=self.get_mount())
 
         return result.z_position
+
+    def nozzle_configuration_valid_for_lld(self) -> bool:
+        """Check if the nozzle configuration currently supports LLD."""
+        return self._engine_client.state.pipettes.get_nozzle_configuration_supports_lld(
+            self.pipette_id
+        )

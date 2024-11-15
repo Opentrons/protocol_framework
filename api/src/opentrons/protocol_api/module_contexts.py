@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import List, Dict, Optional, Union, cast
 
+from opentrons_shared_data.errors.exceptions import CommandPreconditionViolated
+
 from opentrons.protocol_engine.types import ABSMeasureMode
 from opentrons_shared_data.labware.types import LabwareDefinition
 from opentrons_shared_data.module.types import ModuleModel, ModuleType
@@ -159,7 +161,18 @@ class ModuleContext(CommandPublisher):
             load_location = loaded_adapter._core
         else:
             load_location = self._core
+
         name = validation.ensure_lowercase_name(name)
+
+        # todo(mm, 2024-11-08): This check belongs in opentrons.protocol_api.core.engine.deck_conflict.
+        # We're currently doing it here, at the ModuleContext level, for consistency with what
+        # ProtocolContext.load_labware() does. (It should also be moved to the deck_conflict module.)
+        if isinstance(self._core, AbsorbanceReaderCore):
+            if self._core.is_lid_on():
+                raise CommandPreconditionViolated(
+                    f"Cannot load {name} onto the Absorbance Reader Module when its lid is closed."
+                )
+
         labware_core = self._protocol_core.load_labware(
             load_name=name,
             label=label,
