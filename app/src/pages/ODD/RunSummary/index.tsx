@@ -65,11 +65,13 @@ import {
   useRunCreatedAtTimestamp,
   useCloseCurrentRun,
   EMPTY_TIMESTAMP,
+  useCurrentRunCommands,
 } from '/app/resources/runs'
 import {
   useTipAttachmentStatus,
   handleTipsAttachedModal,
 } from '/app/organisms/DropTipWizardFlows'
+import { lastRunCommandPromptedErrorRecovery } from '/app/local-resources/commands'
 
 import type { IconName } from '@opentrons/components'
 import type { OnDeviceRouteParams } from '/app/App/types'
@@ -238,11 +240,21 @@ export function RunSummary(): JSX.Element {
   })
 
   // Determine tip status on initial render only. Error Recovery always handles tip status, so don't show it twice.
+  const runSummaryNoFixit = useCurrentRunCommands({
+    includeFixitCommands: false,
+    pageLength: 1,
+    cursor: null,
+  })
   useEffect(() => {
-    if (isRunCurrent && enteredER === false) {
+    if (
+      isRunCurrent &&
+      runSummaryNoFixit != null &&
+      !lastRunCommandPromptedErrorRecovery(runSummaryNoFixit)
+    ) {
+      console.log('HITTING THIS')
       void determineTipStatus()
     }
-  }, [isRunCurrent, enteredER])
+  }, [runSummaryNoFixit, isRunCurrent])
 
   const returnToQuickTransfer = (): void => {
     closeCurrentRunIfValid(() => {

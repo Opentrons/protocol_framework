@@ -63,7 +63,12 @@ function getCommandsExecutedDuringRun(
   })
 }
 
-const TIP_EXCHANGE_COMMAND_TYPES = ['dropTip', 'dropTipInPlace', 'pickUpTip']
+const TIP_EXCHANGE_COMMAND_TYPES = [
+  'dropTip',
+  'dropTipInPlace',
+  'pickUpTip',
+  'moveToAddressableAreaForDropTip',
+]
 
 function checkPipettesForAttachedTips(
   commands: RunCommandSummary[],
