@@ -44,11 +44,7 @@ export const content = {
   opentrons: 'Opentrons',
   charSet: 'UTF-8',
   header: 'Protocol Designer',
-  createNew: 'Create new',
-  import: 'Import',
   welcome: 'Welcome to Protocol Designer!',
-  createProtocol: 'Create a protocol',
-  editProtocol: 'Edit existing protocol',
   appSettings: 'App settings',
   privacy: 'Privacy',
   shareSessions: 'Share sessions with Opentrons',
@@ -57,9 +53,9 @@ export const content = {
 export const locators = {
   import: 'Import',
   createNew: 'Create new',
-  settingsDataTestid: 'SettingsIconButton',
   createProtocol: 'Create a protocol',
-  editProtocol: 'label',
+  editProtocol: 'Edit existing protocol',
+  settingsDataTestid: 'SettingsIconButton',
   settings: 'Settings',
   privacyPolicy: 'a[href="https://opentrons.com/privacy-policy"]',
   eula: 'a[href="https://opentrons.com/eula"]',
@@ -104,8 +100,8 @@ Cypress.Commands.add('verifyCreateNewHeader', () => {
 // Home Page
 Cypress.Commands.add('verifyHomePage', () => {
   cy.contains(content.welcome)
-  cy.contains('button', content.createProtocol).should('be.visible')
-  cy.contains('label', content.editProtocol).should('be.visible')
+  cy.contains('button', locators.createProtocol).should('be.visible')
+  cy.contains('label', locators.editProtocol).should('be.visible')
   cy.getByTestId(locators.settingsDataTestid).should('be.visible')
   cy.get(locators.privacyPolicy).should('exist').and('be.visible')
   cy.get(locators.eula).should('exist').and('be.visible')
@@ -117,7 +113,7 @@ Cypress.Commands.add('clickCreateNew', () => {
 
 // Header Import
 Cypress.Commands.add('importProtocol', (protocolFilePath: string) => {
-  cy.contains(content.import).click()
+  cy.contains(locators.import).click()
   cy.get('[data-cy="landing-page"]')
     .find('input[type=file]')
     .selectFile(protocolFilePath, { force: true })

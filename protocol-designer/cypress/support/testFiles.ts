@@ -3,7 +3,7 @@ import { isEnumValue } from './utils'
 
 // ////////////////////////////////////////////
 // This is the data section where we map all the protocol files
-// We map to have IDE autocompletion of all the protocol files we have available to test with
+// This allows for IDE . completion and type checking
 // ////////////////////////////////////////////
 
 export enum TestFilePath {
