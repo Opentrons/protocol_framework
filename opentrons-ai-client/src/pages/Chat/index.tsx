@@ -7,6 +7,8 @@ import {
   chatDataAtom,
   feedbackModalAtom,
   scrollToBottomAtom,
+  updateProtocolChatAtom,
+  createProtocolChatAtom,
 } from '../../resources/atoms'
 import { ChatDisplay } from '../../molecules/ChatDisplay'
 import { ChatFooter } from '../../molecules/ChatFooter'
@@ -30,9 +32,12 @@ export function Chat(): JSX.Element | null {
   const [showFeedbackModal] = useAtom(feedbackModalAtom)
   const [scrollToBottom] = useAtom(scrollToBottomAtom)
   const navigate = useNavigate()
+  const [updateProtocolChat] = useAtom(updateProtocolChatAtom)
+  const [createProtocolChat] = useAtom(createProtocolChatAtom)
 
+  // Redirect to home page if there is no prompt (user has refreshed the page)
   useEffect(() => {
-    if (chatData.length === 0) {
+    if (updateProtocolChat.prompt === '' && createProtocolChat.prompt === '') {
       navigate('/')
     }
   }, [])
