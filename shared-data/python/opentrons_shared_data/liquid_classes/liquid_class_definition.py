@@ -84,6 +84,7 @@ class DelayProperties(BaseModel):
 
 class LiquidClassTouchTipParams(BaseModel):
     """Parameters for touch-tip."""
+
     # Note: Do not call this `TouchTipParams`, because that class name is used by the
     # unrelated touchTip command in PE. Both classes are exported to things like the
     # command schema JSON files, so the classes can't have the same name.
