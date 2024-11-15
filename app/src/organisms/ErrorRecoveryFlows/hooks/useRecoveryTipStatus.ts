@@ -1,18 +1,22 @@
 import { useState } from 'react'
 import head from 'lodash/head'
 
-import { useHost } from '@opentrons/react-api-client'
+import { useHost, useRunCurrentState } from '@opentrons/react-api-client'
 import { getPipetteModelSpecs } from '@opentrons/shared-data'
 import { useTipAttachmentStatus } from '/app/organisms/DropTipWizardFlows'
+import { ERROR_KINDS } from '/app/organisms/ErrorRecoveryFlows/constants'
+import { getErrorKind } from '/app/organisms/ErrorRecoveryFlows/utils'
 
 import type { Run, Instruments, PipetteData } from '@opentrons/api-client'
 import type {
   PipetteWithTip,
   TipAttachmentStatusResult,
 } from '/app/organisms/DropTipWizardFlows'
+import type { ERUtilsProps } from '/app/organisms/ErrorRecoveryFlows/hooks/useERUtils'
 
 interface UseRecoveryTipStatusProps {
   runId: string
+  failedCommand: ERUtilsProps['failedCommand']
   failedPipetteInfo: PipetteData | null
   attachedInstruments?: Instruments
   runRecord?: Run
@@ -22,6 +26,7 @@ export type RecoveryTipStatusUtils = TipAttachmentStatusResult & {
   /* Whether the robot is currently determineTipStatus() */
   isLoadingTipStatus: boolean
   runId: string
+  gripperErrorFirstPipetteWithTip: string | null
 }
 
 // Wraps the tip attachment status utils with Error Recovery specific states and values.
@@ -77,11 +82,26 @@ export function useRecoveryTipStatus(
     })
   }
 
+  // TODO(jh, 11-15-24): This is temporary. Collaborate with design a better way to do drop tip wizard for multiple
+  //  pipettes during error recovery. The tip detection logic will shortly be simplified, too!
+  const errorKind = getErrorKind(props.failedCommand)
+  const currentTipStates =
+    useRunCurrentState(props.runId, {
+      enabled: errorKind === ERROR_KINDS.GRIPPER_ERROR,
+    }).data?.data.tipStates ?? null
+
+  const gripperErrorFirstPipetteWithTip =
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    Object.entries(currentTipStates ?? {}).find(
+      ([_, state]) => state.hasTip
+    )?.[0] ?? null
+
   return {
     ...tipAttachmentStatusUtils,
     aPipetteWithTip: failedCommandPipette,
     determineTipStatus: determineTipStatusWithLoading,
     isLoadingTipStatus,
     runId: props.runId,
+    gripperErrorFirstPipetteWithTip,
   }
 }
