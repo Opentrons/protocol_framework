@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import omit from 'lodash/omit'
@@ -72,8 +72,16 @@ export const SelectWellsModal = (
   const [
     selectedPrimaryWells,
     setSelectedPrimaryWells,
-  ] = React.useState<WellGroup>(initialSelectedPrimaryWells)
-  const [highlightedWells, setHighlightedWells] = React.useState<WellGroup>({})
+  ] = useState<WellGroup>(initialSelectedPrimaryWells)
+  const [highlightedWells, setHighlightedWells] = useState<WellGroup>({})
+
+  useEffect(() => {
+    if (Array.isArray(wellFieldData) && wellFieldData.length === 0) {
+      setSelectedPrimaryWells({})
+    } else {
+      setSelectedPrimaryWells(arrayToWellGroup(wellFieldData as string[]))
+    }
+  }, [wellFieldData])
 
   if (!isOpen) return null
 
