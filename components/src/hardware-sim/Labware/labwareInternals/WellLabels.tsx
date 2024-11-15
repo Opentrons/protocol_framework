@@ -19,7 +19,6 @@ export interface WellLabelsProps {
   wellLabelOption: WellLabelOption
   highlightedWellLabels?: HighlightedWellLabels
   wellLabelColor?: string
-  canHighlightLabels?: boolean
 }
 
 const Labels = (props: {
@@ -29,14 +28,8 @@ const Labels = (props: {
   isLetterColumn?: boolean
   highlightedWellLabels?: HighlightedWellLabels
   wellLabelColor?: string
-  canHighlightLabels?: boolean
 }): JSX.Element => {
-  const {
-    wellLabelOption,
-    highlightedWellLabels,
-    wellLabelColor,
-    canHighlightLabels,
-  } = props
+  const { wellLabelOption, highlightedWellLabels, wellLabelColor } = props
   const highlightColor = highlightedWellLabels?.color ?? C_BLUE
   const fillColor = wellLabelColor ?? C_BLACK
   const LETTER_COLUMN_X =
@@ -80,7 +73,7 @@ const Labels = (props: {
                 ? highlightColor
                 : fillColor
             }
-            canHighlight={canHighlightLabels}
+            canHighlight={false}
           >
             {(props.isLetterColumn === true ? /[A-Z]+/g : /\d+/g).exec(
               wellName
@@ -98,7 +91,6 @@ export function WellLabelsComponent(props: WellLabelsProps): JSX.Element {
     wellLabelOption,
     highlightedWellLabels,
     wellLabelColor,
-    canHighlightLabels,
   } = props
   const letterColumn = definition.ordering[0] ?? []
   const numberRow = definition.ordering.map(wellCol => wellCol[0])
@@ -112,7 +104,6 @@ export function WellLabelsComponent(props: WellLabelsProps): JSX.Element {
         highlightedWellLabels={highlightedWellLabels}
         wellLabelColor={wellLabelColor}
         isLetterColumn
-        canHighlightLabels={canHighlightLabels}
       />
       <Labels
         definition={definition}
@@ -120,7 +111,6 @@ export function WellLabelsComponent(props: WellLabelsProps): JSX.Element {
         wellLabelOption={wellLabelOption}
         highlightedWellLabels={highlightedWellLabels}
         wellLabelColor={wellLabelColor}
-        canHighlightLabels={canHighlightLabels}
       />
     </g>
   )

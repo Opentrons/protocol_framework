@@ -61,7 +61,6 @@ export interface LabwareRenderProps {
   onLabwareClick?: () => void
   showBorder?: boolean
   strokeColor?: string
-  canHighlightLabels?: boolean
 }
 
 export const LabwareRender = (props: LabwareRenderProps): JSX.Element => {
@@ -167,7 +166,6 @@ export const LabwareRender = (props: LabwareRenderProps): JSX.Element => {
           wellLabelOption={props.wellLabelOption}
           wellLabelColor={props.wellLabelColor}
           highlightedWellLabels={props.highlightedWellLabels}
-          canHighlightLabels={props.canHighlightLabels}
         />
       ) : null}
     </g>
