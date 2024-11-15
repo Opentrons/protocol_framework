@@ -123,7 +123,7 @@ export function LiquidCard(props: LiquidCardProps): JSX.Element {
           <Flex
             cursor={CURSOR_POINTER}
             onClick={() => {
-              setIsExpanded(!isExpanded)
+              setIsExpanded(prev => !prev)
             }}
           >
             <Icon
