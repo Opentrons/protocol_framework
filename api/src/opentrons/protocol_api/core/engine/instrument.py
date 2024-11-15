@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import contextlib
-from typing import Optional, TYPE_CHECKING, cast, Union
+from typing import Optional, TYPE_CHECKING, cast, Union, Iterator
 from opentrons.protocols.api_support.types import APIVersion
 
 from opentrons.types import Location, Mount, NozzleConfigurationType, NozzleMapInterface
@@ -945,7 +945,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         )
 
     @contextlib.contextmanager
-    def load_liquid_class(self, liquid_class: LiquidClass):
+    def load_liquid_class(self, liquid_class: LiquidClass) -> Iterator[None]:
         """Load a liquid class into the engine."""
         try:
             # TODO: issue a loadLiquidClass command

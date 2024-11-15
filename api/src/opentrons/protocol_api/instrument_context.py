@@ -1222,7 +1222,6 @@ class InstrumentContext(publisher.CommandPublisher):
         self._core.home_plunger()
         return self
 
-    # TODO (spp, 2024-03-08): verify if ok to & change source & dest types to AdvancedLiquidHandling
     @publisher.publish(command=cmds.distribute)
     @requires_version(2, 0)
     def distribute(
@@ -1262,7 +1261,6 @@ class InstrumentContext(publisher.CommandPublisher):
 
         return self.transfer(volume, source, dest, **kwargs)
 
-    # TODO (spp, 2024-03-08): verify if ok to & change source & dest types to AdvancedLiquidHandling
     @publisher.publish(command=cmds.consolidate)
     @requires_version(2, 0)
     def consolidate(
@@ -1511,11 +1509,11 @@ class InstrumentContext(publisher.CommandPublisher):
     def transfer_liquid(
         self,
         liquid_class: LiquidClass,
-        volume: Union[float, Sequence[float]],
+        volume: float,
         source: AdvancedLiquidHandling,
         dest: AdvancedLiquidHandling,
-        trash_location: Optional[Union[types.Location, TrashBin, WasteChute]],
         new_tip: Literal["once", "always", "never"] = "once",
+        trash_location: Optional[Union[types.Location, TrashBin, WasteChute]] = None,
     ) -> InstrumentContext:
         """Transfer liquid from source to dest using the specified liquid class properties."""
         if not feature_flags.allow_liquid_classes(
@@ -1561,21 +1559,26 @@ class InstrumentContext(publisher.CommandPublisher):
         liquid_class_props = liquid_class.get_for(
             pipette=self.name, tiprack=tiprack.name
         )
-
+        checked_trash_location: Union[
+            types.Location, labware.Labware, TrashBin, WasteChute
+        ]
         if trash_location is None:
-            trash_location = (
+            checked_trash_location = (
                 self.trash_container
             )  # Could be a labware or a trash fixture
+        else:
+            checked_trash_location = trash_location
 
-        transfer_steps = v2_transfer.get_transfer_steps(
+        v2_transfer.get_transfer_steps(
             aspirate_properties=liquid_class_props.aspirate,
             single_dispense_properties=liquid_class_props.dispense,
             volume=volume,
             source=flat_sources_list,
             dest=flat_dest_list,
-            trash_location=trash_location,
+            trash_location=checked_trash_location,
             new_tip=valid_new_tip,
         )
+        return self
 
     @requires_version(2, 0)
     def delay(self, *args: Any, **kwargs: Any) -> None:

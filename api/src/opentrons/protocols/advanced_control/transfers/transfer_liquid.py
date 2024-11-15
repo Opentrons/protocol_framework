@@ -1,34 +1,32 @@
 """Steps builder for transfer, consolidate and distribute using liquid class."""
 import dataclasses
 from typing import (
-    TYPE_CHECKING,
-    Union,
-    Sequence,
     Optional,
     Dict,
     Any,
-    Generator,
-    Literal,
+    Sequence,
+    Union,
+    TYPE_CHECKING,
 )
 
 from opentrons.protocol_api._liquid_properties import (
     AspirateProperties,
     SingleDispenseProperties,
-    MultiDispenseProperties,
 )
 from opentrons import types
-from .common import expand_for_volume_constraints, TransferTipPolicyV2
-from opentrons.protocol_api.labware import Labware, Well
+from .common import TransferTipPolicyV2
 
+# from opentrons.protocol_api.labware import Labware, Well
+#
 if TYPE_CHECKING:
-    from opentrons.protocol_api import LiquidClass, TrashBin, WasteChute
-
-AdvancedLiquidHandling = Union[
-    Well,
-    types.Location,
-    Sequence[Union[Well, types.Location]],
-    Sequence[Sequence[Well]],
-]
+    from opentrons.protocol_api import TrashBin, WasteChute, Well, Labware
+#
+# AdvancedLiquidHandling = Union[
+#     Well,
+#     types.Location,
+#     Sequence[Union[Well, types.Location]],
+#     Sequence[Sequence[Well]],
+# ]
 
 
 @dataclasses.dataclass
@@ -41,10 +39,10 @@ def get_transfer_steps(
     aspirate_properties: AspirateProperties,
     single_dispense_properties: SingleDispenseProperties,
     volume: float,
-    source: AdvancedLiquidHandling,
-    dest: AdvancedLiquidHandling,
-    trash_location: Union[types.Location, TrashBin, WasteChute],
+    source: Sequence[Union[Well, types.Location]],
+    dest: Sequence[Union[Well, types.Location]],
+    trash_location: Union[Labware, types.Location, TrashBin, WasteChute],
     new_tip: TransferTipPolicyV2,
-) -> Generator[TransferStep, None, None]:
+) -> None:
     """Return the PAPI function steps to perform for this transfer."""
     # TODO: check for valid volume params of disposal vol, air gap and max volume

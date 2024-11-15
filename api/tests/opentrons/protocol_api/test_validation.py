@@ -14,9 +14,6 @@ from opentrons_shared_data.labware.labware_definition import (
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.robot.types import RobotType
 
-from opentrons.protocols.advanced_control.transfers.transfer_liquid import (
-    AdvancedLiquidHandling,
-)
 from opentrons.types import (
     Mount,
     DeckSlotName,
@@ -39,11 +36,6 @@ from opentrons.protocols.models import LabwareDefinition
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocols.api_support.util import APIVersionError
 from opentrons.protocol_api import validation as subject, Well, Labware
-
-
-def get_mock_well() -> Well:
-    """Return a mocked out Well object."""
-    return decoy.mock(cls=Well)
 
 
 @pytest.mark.parametrize(

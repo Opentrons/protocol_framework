@@ -1,6 +1,6 @@
 """Common functions between v1 transfer and liquid-class-based transfer."""
 import enum
-from typing import Iterable, Generator, Tuple, TypeVar, Union, Sequence, TYPE_CHECKING
+from typing import Iterable, Generator, Tuple, TypeVar
 
 
 class TransferTipPolicyV2(enum.Enum):
