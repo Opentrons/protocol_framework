@@ -208,9 +208,11 @@ export function generateChatPrompt(
 
   const prompt = `${t('create_protocol_prompt_robot', { robotType })}\n${t(
     'application_title'
-  )}: ${scientificApplication}\n\n${t('description')}: ${description}\n\n${t(
+  )}:  \n${scientificApplication}\n\n${t(
+    'description'
+  )}:  \n${description}\n\n${t(
     'pipette_mounts'
-  )}:\n\n${pipetteMounts}\n${flexGripper}\n\n${t(
+  )}:\n\n${pipetteMounts}${flexGripper}\n\n${t(
     'modules_title'
   )}:\n${modules}\n\n${t('labware_section_title')}:\n${labwares}\n\n${t(
     'liquid_section_title'
