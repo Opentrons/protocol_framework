@@ -69,17 +69,18 @@ export const SelectWellsModal = (
     ? arrayToWellGroup(wellFieldData as string[])
     : {}
 
-  const [
-    selectedPrimaryWells,
-    setSelectedPrimaryWells,
-  ] = useState<WellGroup>(initialSelectedPrimaryWells)
+  const [selectedPrimaryWells, setSelectedPrimaryWells] = useState<WellGroup>(
+    initialSelectedPrimaryWells
+  )
   const [highlightedWells, setHighlightedWells] = useState<WellGroup>({})
 
   useEffect(() => {
-    if (Array.isArray(wellFieldData) && wellFieldData.length === 0) {
-      setSelectedPrimaryWells({})
-    } else {
-      setSelectedPrimaryWells(arrayToWellGroup(wellFieldData as string[]))
+    if (Array.isArray(wellFieldData)) {
+      if (wellFieldData.length === 0) {
+        setSelectedPrimaryWells({})
+      } else {
+        setSelectedPrimaryWells(arrayToWellGroup(wellFieldData as string[]))
+      }
     }
   }, [wellFieldData])
 
