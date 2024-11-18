@@ -190,11 +190,10 @@ class MustHomeError(ErrorOccurrence):
 
     isDefined: bool = True
 
-    errorType: Literal["musthome"] = "musthome"
+    errorType: Literal["mustHome"] = "mustHome"
 
-    # TODO(tz, 15-11-2024): should add a MUST_HOME error code?
-    errorCode: str = ErrorCodes.POSITION_UNKNOWN.value.code
-    detail: str = ErrorCodes.POSITION_UNKNOWN.value.detail
+    errorCode: str = ErrorCodes.MUST_HOME_ERROR.value.code
+    detail: str = ErrorCodes.MUST_HOME_ERROR.value.detail
 
 
 class LiquidNotFoundError(ErrorOccurrence):
