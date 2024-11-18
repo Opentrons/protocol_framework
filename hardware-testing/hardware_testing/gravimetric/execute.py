@@ -5,7 +5,7 @@ from typing import Optional, Tuple, List, Dict
 from opentrons.protocol_api import ProtocolContext, Well, Labware, InstrumentContext
 from subprocess import run as run_subprocess
 import subprocess
-from hardware_testing.data import ui
+from hardware_testing.data import ui, dump_data_to_file
 from hardware_testing.data.csv_report import CSVReport
 from hardware_testing.opentrons_api.types import Point, OT3Mount, Axis
 from hardware_testing.drivers import asair_sensor
@@ -216,9 +216,14 @@ def _print_final_results(
                 ui.print_info(f"        avg: {avg}ul")
                 ui.print_info(f"        cv:  {cv}%")
                 ui.print_info(f"        d:   {d}%")
+    test_report.save_to_disk()
     print("aspirate averages")
     for a in aspirate_avgs:
         print(a)
+    asp_avgs_str = "\n".join([str(a) for a in aspirate_avgs])
+    dump_data_to_file(
+        test_report._test_name, test_report._run_id, f"aspirate-volumes-{test_report._tag}.csv", asp_avgs_str
+    )
 
 
 def _next_tip_for_channel(
