@@ -295,6 +295,9 @@ class RunOrchestratorStore:
             state_summary=run_data, commands=commands, parameters=run_time_parameters
         )
 
+    # todo(mm, 2024-11-15): Are all of these pass-through methods helpful?
+    # Can we delete them and make callers just call .run_orchestrator.play(), etc.?
+
     def play(self, deck_configuration: Optional[DeckConfigurationType] = None) -> None:
         """Start or resume the run."""
         self.run_orchestrator.play(deck_configuration=deck_configuration)
@@ -330,6 +333,10 @@ class RunOrchestratorStore:
     def get_nozzle_maps(self) -> Dict[str, NozzleMap]:
         """Get the current nozzle map keyed by pipette id."""
         return self.run_orchestrator.get_nozzle_maps()
+
+    def get_tip_attached(self) -> Dict[str, bool]:
+        """Get current tip state keyed by pipette id."""
+        return self.run_orchestrator.get_tip_attached()
 
     def get_run_time_parameters(self) -> List[RunTimeParameter]:
         """Parameter definitions defined by protocol, if any. Will always be empty before execution."""

@@ -418,6 +418,21 @@ class RunOrchestrator:
         """Get current nozzle maps keyed by pipette id."""
         return self._protocol_engine.state_view.tips.get_pipette_nozzle_maps()
 
+    def get_tip_attached(self) -> Dict[str, bool]:
+        """Get current tip state keyed by pipette id."""
+
+        def has_tip_attached(pipette_id: str) -> bool:
+            return (
+                self._protocol_engine.state_view.pipettes.get_attached_tip(pipette_id)
+                is not None
+            )
+
+        pipette_ids = (
+            pipette.id
+            for pipette in self._protocol_engine.state_view.pipettes.get_all()
+        )
+        return {pipette_id: has_tip_attached(pipette_id) for pipette_id in pipette_ids}
+
     def set_error_recovery_policy(self, policy: ErrorRecoveryPolicy) -> None:
         """Create error recovery policy for the run."""
         self._protocol_engine.set_error_recovery_policy(policy)
