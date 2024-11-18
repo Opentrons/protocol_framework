@@ -17,7 +17,7 @@ def get_run_ids_from_robot(ip: str) -> Set[str]:
             f"http://{ip}:31950/runs", headers={"opentrons-version": "3"}
         )
         run_data = response.json()
-        run_list = run_data.get("data","")
+        run_list = run_data.get("data", "")
     except requests.exceptions.RequestException:
         print(f"Could not connect to robot with IP {ip}")
         run_list = []
