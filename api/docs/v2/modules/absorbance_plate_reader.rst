@@ -49,6 +49,8 @@ You need to call ``close_lid()`` before initializing the reader, even if the rea
 .. warning::
     Do not move the lid manually, during or outside of a protocol. The API does not allow manual lid movement because there is a risk of damaging the module.
 
+.. _absorbance-initialization:
+
 Initialization
 ==============
 
@@ -130,6 +132,8 @@ The nested dictionary structure allows you to access results by index later in y
 You can write additional code to transform this data in any way that you need. For example, you could use a list comprehension to create a list of only the 450 nm values for column 1, ordered by well from A1 to H1::
 
     [pr_data[450][w.well_name] for w in plate.columns()[0]]
+
+.. _absorbance-csv:
 
 CSV data
 --------

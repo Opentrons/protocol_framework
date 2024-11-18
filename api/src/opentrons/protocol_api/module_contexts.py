@@ -1022,6 +1022,8 @@ class AbsorbanceReaderContext(ModuleContext):
     ) -> None:
         """Prepare the Absorbance Plate Reader to read a plate.
 
+        See :ref:`absorbance-initialization` for examples.
+
         :param mode: Either ``"single"`` or ``"multi"``.
 
             - In single measurement mode, :py:meth:`.AbsorbanceReaderContext.read` uses
@@ -1073,6 +1075,8 @@ class AbsorbanceReaderContext(ModuleContext):
             ``.csv`` extension. For example, when reading at wavelengths 450 and 562
             with ``export_filename="my_data"``, there will be two output files:
             ``my_data_450.csv`` and ``my_data_562.csv``.
+
+            See :ref:`absorbance-csv` for information on working with these CSV files.
 
         :returns: A dictionary of wavelengths to dictionary of values ordered by well name.
         """
