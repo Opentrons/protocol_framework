@@ -9,14 +9,12 @@ import { changeFormInput } from '../../../../steplist/actions/actions'
 import { PRESAVED_STEP_ID } from '../../../../steplist/types'
 import { PAUSE_UNTIL_TEMP } from '../../../../constants'
 import { uuid } from '../../../../utils'
-import { selectors as labwareIngredsSelectors } from '../../../../labware-ingred/selectors'
 import { getMultiSelectLastSelected, getSelectedStepId } from '../../selectors'
 import { addStep } from '../actions'
 import {
   actions as tutorialActions,
   selectors as tutorialSelectors,
 } from '../../../../tutorial'
-import * as uiModuleSelectors from '../../../../ui/modules/selectors'
 import * as fileDataSelectors from '../../../../file-data/selectors'
 import type { StepType, StepIdType, FormData } from '../../../../form-types'
 import type { ThunkAction } from '../../../../types'
@@ -25,7 +23,7 @@ import type {
   DuplicateMultipleStepsAction,
   SelectMultipleStepsAction,
 } from '../types'
-export const addAndSelectStepWithHints: (arg: {
+export const addAndSelectStep: (arg: {
   stepType: StepType
 }) => ThunkAction<any> = payload => (dispatch, getState) => {
   const robotStateTimeline = fileDataSelectors.getRobotStateTimeline(getState())
@@ -35,52 +33,6 @@ export const addAndSelectStepWithHints: (arg: {
       robotStateTimeline,
     })
   )
-  const state = getState()
-  const deckHasLiquid = labwareIngredsSelectors.getDeckHasLiquid(state)
-  const magnetModuleHasLabware = uiModuleSelectors.getMagnetModuleHasLabware(
-    state
-  )
-  const temperatureModulesHaveLabware = uiModuleSelectors.getTemperatureModulesHaveLabware(
-    state
-  )
-  const thermocyclerModuleHasLabware = uiModuleSelectors.getThermocyclerModuleHasLabware(
-    state
-  )
-  const temperatureModuleOnDeck = uiModuleSelectors.getTemperatureModuleIds(
-    state
-  )
-  const heaterShakerModuleHasLabware = uiModuleSelectors.getHeaterShakerModuleHasLabware(
-    state
-  )
-
-  const tempHasNoLabware = temperatureModulesHaveLabware.some(
-    module => !module.hasLabware
-  )
-  // TODO: Ian 2019-01-17 move out to centralized step info file - see #2926
-  const stepNeedsLiquid = ['mix', 'moveLiquid'].includes(payload.stepType)
-  const stepMagnetNeedsLabware = ['magnet'].includes(payload.stepType)
-  const stepTemperatureNeedsLabware = ['temperature'].includes(payload.stepType)
-  const stepThermocyclerNeedsLabware = ['thermocycler'].includes(
-    payload.stepType
-  )
-  const stepHeaterShakerNeedsLabware = ['heaterShaker'].includes(
-    payload.stepType
-  )
-
-  const stepModuleMissingLabware =
-    (stepMagnetNeedsLabware && !magnetModuleHasLabware) ||
-    (stepThermocyclerNeedsLabware && !thermocyclerModuleHasLabware) ||
-    (temperatureModuleOnDeck?.length === 0 && stepTemperatureNeedsLabware) ||
-    (stepHeaterShakerNeedsLabware && !heaterShakerModuleHasLabware)
-
-  if (stepNeedsLiquid && !deckHasLiquid) {
-    dispatch(tutorialActions.addHint('add_liquids_and_labware'))
-  }
-  if (stepModuleMissingLabware) {
-    dispatch(tutorialActions.addHint('module_without_labware'))
-  } else if (temperatureModuleOnDeck != null && tempHasNoLabware) {
-    dispatch(tutorialActions.addHint('multiple_modules_without_labware'))
-  }
 }
 export interface ReorderSelectedStepAction {
   type: 'REORDER_SELECTED_STEP'
@@ -187,10 +139,6 @@ export const saveStepForm: () => ThunkAction<any> = () => (
 
   if (tutorialSelectors.shouldShowCoolingHint(initialState)) {
     dispatch(tutorialActions.addHint('thermocycler_lid_passive_cooling'))
-  }
-
-  if (tutorialSelectors.shouldShowBatchEditHint(initialState)) {
-    dispatch(tutorialActions.addHint('protocol_can_enter_batch_edit'))
   }
 
   if (tutorialSelectors.shouldShowWasteChuteHint(initialState)) {

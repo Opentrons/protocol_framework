@@ -112,10 +112,8 @@ export function AddStepButton(): JSX.Element {
     heaterShaker: getIsModuleOnDeck(modules, HEATERSHAKER_MODULE_TYPE),
   }
 
-  const addStep = (
-    stepType: StepType
-  ): ReturnType<typeof stepsActions.addAndSelectStepWithHints> =>
-    dispatch(stepsActions.addAndSelectStepWithHints({ stepType }))
+  const addStep = (stepType: StepType): ReturnType<any> =>
+    dispatch(stepsActions.addAndSelectStep({ stepType }))
 
   const items = getSupportedSteps()
     .filter(stepType => isStepTypeEnabled[stepType])
