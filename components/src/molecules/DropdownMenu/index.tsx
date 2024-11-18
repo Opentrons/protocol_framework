@@ -205,15 +205,11 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
     <Flex
       flexDirection={DIRECTION_COLUMN}
       ref={dropDownMenuWrapperRef}
-      gridGap={SPACING.spacing4}
+      gridGap={SPACING.spacing8}
       width={width}
     >
       {title !== null ? (
-        <Flex
-          gridGap={SPACING.spacing8}
-          paddingBottom={SPACING.spacing8}
-          alignItems={ALIGN_CENTER}
-        >
+        <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
           <StyledText
             desktopStyle="bodyDefaultRegular"
             color={disabled ? COLORS.grey35 : COLORS.grey60}

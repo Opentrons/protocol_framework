@@ -66,6 +66,8 @@ export const TimelineToolbox = (): JSX.Element => {
           {t('protocol_timeline')}
         </StyledText>
       }
+      titlePadding={SPACING.spacing12}
+      childrenPadding={SPACING.spacing12}
       confirmButton={formData != null ? undefined : <AddStepButton />}
     >
       <Flex
