@@ -23,6 +23,8 @@ This page explains the actions necessary for using the Absorbance Plate Reader. 
 Loading and Deck Slots
 ======================
 
+The Absorbance Plate Reader can only be loaded in slots A3–D3. If you try to load it in any other slot, the API will raise an error. The module's caddy is designed such that the detection unit is in deck column 3 and the special staging area for the lid/illumination unit is in deck column 4. You can't load or move other labware on the Absorbance Plate Reader caddy in deck column 4, even while the lid is in the closed position (on top of the detection unit in deck column 3).
+
 The examples in this section will use an Absorbance Plate Reader Module loaded as follows::
 
     pr_mod = protocol.load_module(
@@ -31,8 +33,6 @@ The examples in this section will use an Absorbance Plate Reader Module loaded a
     )
 
 .. versionadded:: 2.21
-
-The Absorbance Plate Reader can only be loaded in slots A3–D3. If you try to load it in any other slot, the API will raise an error. The module's caddy is designed such that the detection unit is in deck column 3 and the special staging area for the lid/illumination unit is in deck column 4. You can't load or move other labware on the Absorbance Plate Reader caddy in deck column 4, even while the lid is in the closed position (on top of the detection unit in deck column 3).
 
 Lid Control
 ===========
@@ -52,7 +52,7 @@ You need to call ``close_lid()`` before initializing the reader, even if the rea
 Initialization
 ==============
 
-Initializing the reader prepares it to read a plate later in your protocol. The :py:meth:`.AbsorbanceReaderContext.initialize` method accepts parameters for the number of readings you want to take, the wavelengths to read, and whether you want to compare the reading to a reference wavelength.
+Initializing the reader prepares it to read a plate later in your protocol. The :py:meth:`.AbsorbanceReaderContext.initialize` method accepts parameters for the number of readings you want to take, the wavelengths to read, and whether you want to compare the reading to a reference wavelength. In the default hardware configuration, the supported wavelengths are 450 nm (blue), 562 nm (green), 600 nm (orange), and 650 nm (red).
 
 The module uses these parameters immediately to perform the physical initialization. Additionally, the API preserves these values and uses them when you read the plate later in your protocol.
 
@@ -111,7 +111,7 @@ The two formats are structured differently, even though they contain the same me
 Dictionary Data
 ---------------
 
-The dictionary object returned by ``read()`` has two nested levels. The keys at the top level are the wavelengths you provided to ``initialize()``. The keys at the second level are string names of each of the 96 wells, ``"A1"`` through ``"H12"``. The values at the second level are the measured values for each wells. These values are floating point numbers between 0.0 and 4.0, representing unitless optical density.
+The dictionary object returned by ``read()`` has two nested levels. The keys at the top level are the wavelengths you provided to ``initialize()``. The keys at the second level are string names of each of the 96 wells, ``"A1"`` through ``"H12"``. The values at the second level are the measured values for each wells. These values are floating point numbers, representing the optical density (OD) of the samples in each well. OD ranges from 0.0 (low sample concentration) to 4.0 (high sample concentration).
 
 The nested dictionary structure allows you to access results by index later in your protocol. This example initializes a multiple read and then accesses different portions of the results::
 
@@ -134,7 +134,7 @@ You can write additional code to transform this data in any way that you need. F
 CSV data
 --------
 
-The CSV exported when specifying ``export_filename`` consists of tabular data followed by additional information. Each measurement produces 9 rows in the CSV file, representing the layout of the well plate that has been read. These rows form a table with numeric labels in the first row and alphabetic labels in the first column, as you would see on physical labware. Each "cell" of the table contains the measured value for the well in the corresponding position on the plate. These values are floating point numbers between 0.0 and 4.0, representing unitless optical density.
+The CSV exported when specifying ``export_filename`` consists of tabular data followed by additional information. Each measurement produces 9 rows in the CSV file, representing the layout of the well plate that has been read. These rows form a table with numeric labels in the first row and alphabetic labels in the first column, as you would see on physical labware. Each "cell" of the table contains the measured OD value for the well (0.0–4.0) in the corresponding position on the plate.
 
 Additional information, starting with one blank labware grid, is output at the end of the file. The last few lines of the file list the sample wavelengths, serial number of the module, and timestamps for when measurement started and finished.
 
