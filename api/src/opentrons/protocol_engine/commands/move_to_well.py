@@ -1,18 +1,20 @@
 """Move to well command request, result, and implementation models."""
+
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Type
 from typing_extensions import Literal
 
-from ..types import DeckPoint
 from .pipetting_common import (
     PipetteIdMixin,
+)
+from .movement_common import (
     WellLocationMixin,
     MovementMixin,
     DestinationPositionResult,
+    move_to_well,
 )
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ..errors.error_occurrence import ErrorOccurrence
-from ..state import update_types
 from ..errors import LabwareIsTipRackError
 
 if TYPE_CHECKING:
@@ -52,8 +54,6 @@ class MoveToWellImplementation(
         well_name = params.wellName
         well_location = params.wellLocation
 
-        state_update = update_types.StateUpdate()
-
         if (
             self._state_view.labware.is_tiprack(labware_id)
             and well_location.volumeOffset
@@ -62,7 +62,8 @@ class MoveToWellImplementation(
                 "Cannot specify a WellLocation with a volumeOffset with movement to a tip rack"
             )
 
-        x, y, z = await self._movement.move_to_well(
+        move_result = await move_to_well(
+            movement=self._movement,
             pipette_id=pipette_id,
             labware_id=labware_id,
             well_name=well_name,
@@ -71,17 +72,10 @@ class MoveToWellImplementation(
             minimum_z_height=params.minimumZHeight,
             speed=params.speed,
         )
-        deck_point = DeckPoint.construct(x=x, y=y, z=z)
-        state_update.set_pipette_location(
-            pipette_id=pipette_id,
-            new_labware_id=labware_id,
-            new_well_name=well_name,
-            new_deck_point=deck_point,
-        )
 
         return SuccessData(
-            public=MoveToWellResult(position=deck_point),
-            state_update=state_update,
+            public=MoveToWellResult(position=move_result.public.position),
+            state_update=move_result.state_update,
         )
 
 

@@ -1,4 +1,5 @@
 """Drop tip command request, result, and implementation models."""
+
 from __future__ import annotations
 
 from pydantic import Field
@@ -8,13 +9,13 @@ from typing_extensions import Literal
 from opentrons.protocol_engine.errors.exceptions import TipAttachedError
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
 
-from ..state import update_types
-from ..types import DropTipWellLocation, DeckPoint
+from ..state.update_types import StateUpdate
+from ..types import DropTipWellLocation
 from .pipetting_common import (
     PipetteIdMixin,
-    DestinationPositionResult,
     TipPhysicallyAttachedError,
 )
+from .movement_common import DestinationPositionResult, move_to_well
 from .command import (
     AbstractCommandImpl,
     BaseCommand,
@@ -95,8 +96,6 @@ class DropTipImplementation(AbstractCommandImpl[DropTipParams, _ExecuteReturn]):
         well_name = params.wellName
         home_after = params.homeAfter
 
-        state_update = update_types.StateUpdate()
-
         if params.alternateDropLocation:
             well_location = self._state_view.geometry.get_next_tip_drop_location(
                 labware_id=labware_id,
@@ -116,18 +115,12 @@ class DropTipImplementation(AbstractCommandImpl[DropTipParams, _ExecuteReturn]):
             partially_configured=is_partially_configured,
         )
 
-        position = await self._movement_handler.move_to_well(
+        move_result = await move_to_well(
+            movement=self._movement_handler,
             pipette_id=pipette_id,
             labware_id=labware_id,
             well_name=well_name,
             well_location=tip_drop_location,
-        )
-        deck_point = DeckPoint.construct(x=position.x, y=position.y, z=position.z)
-        state_update.set_pipette_location(
-            pipette_id=pipette_id,
-            new_labware_id=labware_id,
-            new_well_name=well_name,
-            new_deck_point=deck_point,
         )
 
         try:
@@ -146,24 +139,23 @@ class DropTipImplementation(AbstractCommandImpl[DropTipParams, _ExecuteReturn]):
                     )
                 ],
             )
-            state_update_if_false_positive = update_types.StateUpdate()
-            state_update_if_false_positive.update_pipette_tip_state(
-                pipette_id=params.pipetteId, tip_geometry=None
-            )
-            state_update.set_fluid_unknown(pipette_id=pipette_id)
             return DefinedErrorData(
                 public=error,
-                state_update=state_update,
-                state_update_if_false_positive=state_update_if_false_positive,
+                state_update=StateUpdate.reduce(
+                    StateUpdate(), move_result.state_update
+                ).set_fluid_unknown(pipette_id=pipette_id),
+                state_update_if_false_positive=move_result.state_update.update_pipette_tip_state(
+                    pipette_id=params.pipetteId, tip_geometry=None
+                ),
             )
         else:
-            state_update.set_fluid_unknown(pipette_id=pipette_id)
-            state_update.update_pipette_tip_state(
-                pipette_id=params.pipetteId, tip_geometry=None
-            )
             return SuccessData(
-                public=DropTipResult(position=deck_point),
-                state_update=state_update,
+                public=DropTipResult(position=move_result.public.position),
+                state_update=move_result.state_update.set_fluid_unknown(
+                    pipette_id=pipette_id
+                ).update_pipette_tip_state(
+                    pipette_id=params.pipetteId, tip_geometry=None
+                ),
             )
 
 

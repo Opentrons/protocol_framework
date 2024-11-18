@@ -61,7 +61,7 @@ const BOTTOM_SLOT_Y_POSITION = -70
 const TOP_SLOT_Y_POSITION = 50
 const TOP_SLOT_Y_POSITION_ALL_BUTTONS = 110
 const TOP_SLOT_Y_POSITION_2_BUTTONS = 35
-
+const STAGING_AREA_SLOTS = ['A4', 'B4', 'C4', 'D4']
 interface SlotOverflowMenuProps {
   //   can be off-deck id or deck slot
   location: DeckSlotId | string
@@ -317,7 +317,10 @@ export function SlotOverflowMenu(
 
   return menuListSlotPosition != null ? (
     <RobotCoordsForeignDiv
-      x={menuListSlotPosition[0] + 50}
+      x={
+        menuListSlotPosition[0] +
+        (STAGING_AREA_SLOTS.includes(location) ? -100 : 50)
+      }
       y={menuListSlotPosition[1] - position}
       width="10.75rem"
       height="11.25rem"

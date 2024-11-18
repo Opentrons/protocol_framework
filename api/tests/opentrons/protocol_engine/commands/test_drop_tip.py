@@ -1,4 +1,5 @@
 """Test drop tip commands."""
+
 from datetime import datetime
 
 import pytest
@@ -122,6 +123,11 @@ async def test_drop_tip_implementation(
             labware_id="123",
             well_name="A3",
             well_location=WellLocation(offset=WellOffset(x=4, y=5, z=6)),
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         )
     ).then_return(Point(x=111, y=222, z=333))
 
@@ -203,6 +209,11 @@ async def test_drop_tip_with_alternating_locations(
             labware_id="123",
             well_name="A3",
             well_location=WellLocation(offset=WellOffset(x=4, y=5, z=6)),
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         )
     ).then_return(Point(x=111, y=222, z=333))
 
@@ -269,6 +280,11 @@ async def test_tip_attached_error(
             labware_id="123",
             well_name="A3",
             well_location=WellLocation(offset=WellOffset(x=4, y=5, z=6)),
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         )
     ).then_return(Point(x=111, y=222, z=333))
     decoy.when(
@@ -305,6 +321,14 @@ async def test_tip_attached_error(
             pipette_tip_state=update_types.PipetteTipStateUpdate(
                 pipette_id="abc",
                 tip_geometry=None,
+            ),
+            pipette_location=update_types.PipetteLocationUpdate(
+                pipette_id="abc",
+                new_location=update_types.Well(
+                    labware_id="123",
+                    well_name="A3",
+                ),
+                new_deck_point=DeckPoint(x=111, y=222, z=333),
             ),
         ),
     )

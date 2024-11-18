@@ -133,6 +133,7 @@
     }
   },
   "time": "Time",
+  "timeline": "Timeline",
   "tiprack": "Tiprack",
   "tip_handling": "Tip handling",
   "tip_position": "{{prefix}} tip position",

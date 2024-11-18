@@ -25,6 +25,7 @@ export interface ToolboxProps {
   closeButton?: JSX.Element
   side?: 'left' | 'right'
   horizontalSide?: 'top' | 'bottom'
+  titlePadding?: string
   childrenPadding?: string
   subHeader?: JSX.Element | null
   secondaryHeaderButton?: JSX.Element
@@ -45,6 +46,7 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
     side = 'right',
     horizontalSide = 'bottom',
     confirmButton,
+    titlePadding = SPACING.spacing16,
     childrenPadding = SPACING.spacing16,
     subHeader,
     secondaryHeaderButton,
@@ -97,7 +99,7 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
         justifyContent={JUSTIFY_SPACE_BETWEEN}
       >
         <Flex
-          padding={`${SPACING.spacing20} ${SPACING.spacing16}`}
+          padding={titlePadding}
           flexDirection={DIRECTION_COLUMN}
           borderBottom={`1px solid ${COLORS.grey30}`}
         >

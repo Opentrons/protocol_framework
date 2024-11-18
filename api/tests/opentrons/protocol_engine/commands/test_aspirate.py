@@ -106,6 +106,9 @@ async def test_aspirate_implementation_no_prep(
             well_name="A3",
             well_location=location,
             current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
             operation_volume=-50,
         ),
     ).then_return(Point(x=1, y=2, z=3))
@@ -195,6 +198,9 @@ async def test_aspirate_implementation_with_prep(
                 labware_id="123",
                 well_name="A3",
             ),
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
             operation_volume=-50,
         ),
     ).then_return(Point(x=1, y=2, z=3))
@@ -285,6 +291,9 @@ async def test_aspirate_raises_volume_error(
             well_name="A3",
             well_location=location,
             current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
             operation_volume=-50,
         ),
     ).then_return(Point(1, 2, 3))
@@ -358,6 +367,9 @@ async def test_overpressure_error(
             well_name=well_name,
             well_location=well_location,
             current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
             operation_volume=-50,
         ),
     ).then_return(position)
@@ -398,6 +410,15 @@ async def test_overpressure_error(
             ),
             pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
                 pipette_id=pipette_id
+            ),
+        ),
+        state_update_if_false_positive=update_types.StateUpdate(
+            pipette_location=update_types.PipetteLocationUpdate(
+                pipette_id=pipette_id,
+                new_location=update_types.Well(
+                    labware_id=labware_id, well_name=well_name
+                ),
+                new_deck_point=DeckPoint(x=position.x, y=position.y, z=position.z),
             ),
         ),
     )
@@ -450,6 +471,9 @@ async def test_aspirate_implementation_meniscus(
             well_name="A3",
             well_location=location,
             current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
             operation_volume=-50,
         ),
     ).then_return(Point(x=1, y=2, z=3))

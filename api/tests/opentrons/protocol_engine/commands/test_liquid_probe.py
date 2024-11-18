@@ -127,6 +127,11 @@ async def test_liquid_probe_implementation(
             labware_id="123",
             well_name="A3",
             well_location=location,
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         ),
     ).then_return(Point(x=1, y=2, z=3))
 
@@ -212,6 +217,11 @@ async def test_liquid_not_found_error(
             labware_id=labware_id,
             well_name=well_name,
             well_location=well_location,
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         ),
     ).then_return(position)
 
