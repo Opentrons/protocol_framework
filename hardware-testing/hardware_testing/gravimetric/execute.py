@@ -195,10 +195,13 @@ def _print_stats(mode: str, average: float, cv: float, d: float) -> None:
 def _print_final_results(
     volumes: List[float], channel_count: int, test_report: CSVReport
 ) -> None:
+    aspirate_avgs: List[float] = []
     for vol in volumes:
         ui.print_info(f"  * {vol}ul channel all:")
         for mode in ["aspirate", "dispense"]:
             avg, cv, d = report.get_volume_results_all(test_report, mode, vol)
+            if mode == "aspirate":
+                aspirate_avgs.append(avg)
             ui.print_info(f"    - {mode}:")
             ui.print_info(f"        avg: {avg}ul")
             ui.print_info(f"        cv:  {cv}%")
@@ -213,6 +216,9 @@ def _print_final_results(
                 ui.print_info(f"        avg: {avg}ul")
                 ui.print_info(f"        cv:  {cv}%")
                 ui.print_info(f"        d:   {d}%")
+    print("aspirate averages")
+    for a in aspirate_avgs:
+        print(a)
 
 
 def _next_tip_for_channel(
