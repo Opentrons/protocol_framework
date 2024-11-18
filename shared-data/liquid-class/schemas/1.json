@@ -92,57 +92,44 @@
     "airGapByVolume": {
       "type": "object",
       "description": "Settings for air gap keyed by target aspiration volume.",
-      "properties": {
-        "default": { "$ref": "#/definitions/positiveNumber" }
-      },
+      "minProperties": 1,
       "patternProperties": {
         "d+": { "$ref": "#/definitions/positiveNumber" }
-      },
-      "required": ["default"]
+      }
     },
     "flowRateByVolume": {
       "type": "object",
       "description": "Settings for flow rate keyed by target aspiration/dispense volume.",
-      "properties": {
-        "default": { "$ref": "#/definitions/positiveNumber" }
-      },
+      "minProperties": 1,
       "patternProperties": {
-        "d+": { "$ref": "#/definitions/positiveNumber" }
-      },
-      "required": ["default"]
+        "d+": {
+          "$ref": "#/definitions/positiveNumber"
+        }
+      }
     },
     "pushOutByVolume": {
       "type": "object",
       "description": "Settings for pushout keyed by target aspiration volume.",
-      "properties": {
-        "default": { "$ref": "#/definitions/positiveNumber" }
-      },
+      "minProperties": 1,
       "patternProperties": {
         "d+": { "$ref": "#/definitions/positiveNumber" }
-      },
-      "required": ["default"]
+      }
     },
     "disposalByVolume": {
       "type": "object",
       "description": "Settings for disposal volume keyed by target dispense volume.",
-      "properties": {
-        "default": { "$ref": "#/definitions/positiveNumber" }
-      },
+      "minProperties": 1,
       "patternProperties": {
         "d+": { "$ref": "#/definitions/positiveNumber" }
-      },
-      "required": ["default"]
+      }
     },
     "conditioningByVolume": {
       "type": "object",
       "description": "Settings for conditioning volume keyed by target dispense volume.",
-      "properties": {
-        "default": { "$ref": "#/definitions/positiveNumber" }
-      },
+      "minProperties": 1,
       "patternProperties": {
         "d+": { "$ref": "#/definitions/positiveNumber" }
-      },
-      "required": ["default"]
+      }
     },
     "mix": {
       "type": "object",

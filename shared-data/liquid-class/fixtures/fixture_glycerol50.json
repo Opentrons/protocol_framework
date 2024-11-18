@@ -34,7 +34,6 @@
               },
               "speed": 100,
               "airGapByVolume": {
-                "default": 2,
                 "5": 3,
                 "10": 4
               },
@@ -60,7 +59,7 @@
               "z": -5
             },
             "flowRateByVolume": {
-              "default": 50
+              "10": 50
             },
             "preWet": true,
             "mix": {
@@ -102,7 +101,6 @@
               },
               "speed": 100,
               "airGapByVolume": {
-                "default": 2,
                 "5": 3,
                 "10": 4
               },
@@ -135,7 +133,6 @@
               "z": -5
             },
             "flowRateByVolume": {
-              "default": 50,
               "10": 40,
               "20": 30
             },
@@ -147,7 +144,6 @@
               }
             },
             "pushOutByVolume": {
-              "default": 5,
               "10": 7,
               "20": 10
             },
@@ -183,7 +179,6 @@
               },
               "speed": 100,
               "airGapByVolume": {
-                "default": 2,
                 "5": 3,
                 "10": 4
               },
@@ -212,16 +207,13 @@
               "z": -5
             },
             "flowRateByVolume": {
-              "default": 50,
               "10": 40,
               "20": 30
             },
             "conditioningByVolume": {
-              "default": 10,
               "5": 5
             },
             "disposalByVolume": {
-              "default": 2,
               "5": 3
             },
             "delay": {
