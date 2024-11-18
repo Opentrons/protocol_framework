@@ -58,6 +58,7 @@ const SMALL_MODAL_STYLE = css`
   padding: ${SPACING.spacing32};
   width: 100%;
   overflow-y: ${OVERFLOW_AUTO};
+  user-select: none;
 
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
     padding: ${SPACING.spacing32};
@@ -69,6 +70,7 @@ const LARGE_MODAL_STYLE = css`
   height: 26.75rem;
   width: 100%;
   overflow-y: ${OVERFLOW_AUTO};
+  user-select: none;
 
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
     height: 100%;
