@@ -136,6 +136,8 @@ export function ProtocolDashboard(): JSX.Element {
     }
   }
 
+  console.log('test')
+
   return (
     <>
       {showDeleteConfirmationModal ? (
