@@ -14,7 +14,6 @@ from opentrons.protocol_api.module_contexts import (
     ThermocyclerContext,
     TemperatureModuleContext,
 )
-
 from typing import List, Union, Dict
 from opentrons.hardware_control.modules.types import ThermocyclerStep
 from opentrons_shared_data.errors.exceptions import PipetteLiquidNotFoundError
@@ -222,6 +221,31 @@ def create_hs_speed_parameter(parameters: ParameterContext) -> None:
         minimum=200,
         maximum=3000,
         unit="rpm",
+    )
+
+
+def create_tc_compatible_labware_parameter(parameters: ParameterContext) -> None:
+    """Create parameter for labware type compatible with thermocycler."""
+    parameters.add_str(
+        variable_name="labware_tc_compatible",
+        display_name="Labware Type for Thermocycler",
+        description="labware compatible with thermocycler.",
+        default="biorad_96_wellplate_200ul_pcr",
+        choices=[
+            {
+                "display_name": "Armadillo_200ul",
+                "value": "armadillo_96_wellplate_200ul_pcr_full_skirt",
+            },
+            {"display_name": "Bio-Rad_200ul", "value": "biorad_96_wellplate_200ul_pcr"},
+            {
+                "display_name": "NEST_100ul",
+                "value": "nest_96_wellplate_100ul_pcr_full_skirt",
+            },
+            {
+                "display_name": "Opentrons_200ul",
+                "value": "opentrons_96_wellplate_200ul_pcr_full_skirt",
+            },
+        ],
     )
 
 

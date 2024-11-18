@@ -1,4 +1,5 @@
 import some from 'lodash/some'
+import { useEffect, useState } from 'react'
 import {
   ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
@@ -279,4 +280,37 @@ export const getAdjacentLabware = (
       ) ?? null
   }
   return adjacentLabware
+}
+
+type BreakPoint = 'small' | 'medium' | 'large'
+
+export function useDeckSetupWindowBreakPoint(): BreakPoint {
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  })
+
+  useEffect(() => {
+    const handleResize = (): void => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
+
+  let size: BreakPoint = 'large'
+  if (windowSize.width <= 1024 && windowSize.width > 800) {
+    size = 'medium'
+  } else if (windowSize.width <= 800) {
+    size = 'small'
+  }
+
+  return size
 }

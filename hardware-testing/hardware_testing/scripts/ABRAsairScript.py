@@ -17,7 +17,7 @@ def execute(client: pmk.SSHClient, command: str, args: list) -> Optional[int]:
         stderr_lines: List[str] = []
         time.sleep(25)
 
-        if stderr.channel.recv_ready:
+        if stderr.channel.recv_ready():
             stderr_lines = stderr.readlines()
             if stderr_lines != []:
                 print(f"{args[0]} ERROR: ", stderr_lines)

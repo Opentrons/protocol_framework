@@ -57,6 +57,11 @@ async def test_success(
             labware_id="labware-id",
             well_name="A3",
             well_location=WellLocation(offset=WellOffset(x=1, y=2, z=3)),
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         )
     ).then_return(Point(x=111, y=222, z=333))
 
@@ -137,6 +142,11 @@ async def test_tip_physically_missing_error(
             labware_id="labware-id",
             well_name="well-name",
             well_location=WellLocation(offset=WellOffset()),
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         )
     ).then_return(Point(x=111, y=222, z=333))
     decoy.when(
@@ -176,6 +186,16 @@ async def test_tip_physically_missing_error(
             ),
             pipette_aspirated_fluid=update_types.PipetteEmptyFluidUpdate(
                 pipette_id="pipette-id"
+            ),
+            tips_used=update_types.TipsUsedUpdate(
+                pipette_id="pipette-id", labware_id="labware-id", well_name="well-name"
+            ),
+            pipette_location=update_types.PipetteLocationUpdate(
+                pipette_id="pipette-id",
+                new_location=update_types.Well(
+                    labware_id="labware-id", well_name="well-name"
+                ),
+                new_deck_point=DeckPoint(x=111, y=222, z=333),
             ),
         ),
     )

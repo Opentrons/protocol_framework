@@ -262,5 +262,4 @@ const CodeWrapper = styled(Flex)`
   background-color: ${COLORS.grey20};
   border-radius: ${BORDERS.borderRadius4};
   overflow: auto;
-  border: 1px solid ${COLORS.blue35};
 `

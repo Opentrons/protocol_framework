@@ -56,7 +56,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     propsForFields,
     formData,
     visibleFormErrors,
-    setShowFormErrorsAndWarnings,
+    setShowFormErrors,
     tab,
     setTab,
   } = props
@@ -101,7 +101,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     isActive: tab === 'aspirate',
     onClick: () => {
       setTab('aspirate')
-      setShowFormErrorsAndWarnings?.(false)
+      setShowFormErrors?.(false)
     },
   }
   const dispenseTab = {
@@ -110,7 +110,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     isActive: tab === 'dispense',
     onClick: () => {
       setTab('dispense')
-      setShowFormErrorsAndWarnings?.(false)
+      setShowFormErrors?.(false)
     },
   }
   const hideWellOrderField =

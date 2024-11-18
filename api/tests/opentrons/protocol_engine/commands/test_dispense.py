@@ -71,6 +71,11 @@ async def test_dispense_implementation(
             labware_id="labware-id-abc123",
             well_name="A3",
             well_location=well_location,
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         )
     ).then_return(Point(x=1, y=2, z=3))
 
@@ -174,6 +179,11 @@ async def test_overpressure_error(
             labware_id=labware_id,
             well_name=well_name,
             well_location=well_location,
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         ),
     ).then_return(position)
 
@@ -211,6 +221,16 @@ async def test_overpressure_error(
             ),
             pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
                 pipette_id="pipette-id"
+            ),
+        ),
+        state_update_if_false_positive=update_types.StateUpdate(
+            pipette_location=update_types.PipetteLocationUpdate(
+                pipette_id="pipette-id",
+                new_location=update_types.Well(
+                    labware_id="labware-id",
+                    well_name="well-name",
+                ),
+                new_deck_point=DeckPoint.construct(x=1, y=2, z=3),
             ),
         ),
     )

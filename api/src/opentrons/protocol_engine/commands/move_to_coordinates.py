@@ -8,7 +8,8 @@ from typing_extensions import Literal
 
 from ..state import update_types
 from ..types import DeckPoint
-from .pipetting_common import PipetteIdMixin, MovementMixin, DestinationPositionResult
+from .pipetting_common import PipetteIdMixin
+from .movement_common import MovementMixin, DestinationPositionResult
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ..errors.error_occurrence import ErrorOccurrence
 

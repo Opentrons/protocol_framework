@@ -1,4 +1,5 @@
 """Test blow-out command."""
+
 from datetime import datetime
 from decoy import Decoy, matchers
 
@@ -69,6 +70,11 @@ async def test_blow_out_implementation(
             labware_id="labware-id",
             well_name="C6",
             well_location=location,
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         )
     ).then_return(Point(x=1, y=2, z=3))
 
@@ -136,6 +142,11 @@ async def test_overpressure_error(
             labware_id="labware-id",
             well_name="C6",
             well_location=location,
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         )
     ).then_return(Point(x=1, y=2, z=3))
 
@@ -159,6 +170,16 @@ async def test_overpressure_error(
             ),
             pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
                 pipette_id="pipette-id"
+            ),
+        ),
+        state_update_if_false_positive=update_types.StateUpdate(
+            pipette_location=update_types.PipetteLocationUpdate(
+                pipette_id="pipette-id",
+                new_location=update_types.Well(
+                    labware_id="labware-id",
+                    well_name="C6",
+                ),
+                new_deck_point=DeckPoint(x=1, y=2, z=3),
             ),
         ),
     )

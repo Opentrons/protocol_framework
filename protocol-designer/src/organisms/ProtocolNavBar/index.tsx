@@ -30,6 +30,7 @@ interface ProtocolNavBarProps {
   showLiquidOverflowMenu?: (liquidOverflowMenu: boolean) => void
   isAddingHardwareOrLabware?: boolean
   liquidPage?: boolean
+  isOffDeck?: boolean
 }
 
 export function ProtocolNavBar({
@@ -39,6 +40,7 @@ export function ProtocolNavBar({
   hasTrashEntity,
   showLiquidOverflowMenu,
   liquidPage = false,
+  isOffDeck = false,
 }: ProtocolNavBarProps): JSX.Element {
   const { t } = useTranslation('starting_deck_state')
   const metadata = useSelector(getFileMetadata)
@@ -54,13 +56,18 @@ export function ProtocolNavBar({
         <StyledText
           desktopStyle="bodyDefaultSemiBold"
           css={LINE_CLAMP_TEXT_STYLE(1)}
+          textAlign={isOffDeck && TYPOGRAPHY.textAlignLeft}
         >
           {metadata?.protocolName != null && metadata?.protocolName !== ''
             ? metadata?.protocolName
             : t('untitled_protocol')}
         </StyledText>
-        <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
-          {isAddingHardwareOrLabware
+        <StyledText
+          desktopStyle="bodyDefaultRegular"
+          color={COLORS.grey60}
+          textAlign={isOffDeck && TYPOGRAPHY.textAlignLeft}
+        >
+          {isAddingHardwareOrLabware || isOffDeck
             ? t('add_hardware_labware')
             : t('edit_protocol')}
         </StyledText>

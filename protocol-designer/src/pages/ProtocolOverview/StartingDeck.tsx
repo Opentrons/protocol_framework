@@ -47,7 +47,7 @@ export function StartingDeck({
   return (
     <>
       <Flex justifyContent={JUSTIFY_SPACE_BETWEEN} alignItems={ALIGN_CENTER}>
-        <Flex gridGap="1.875rem" alignItems={ALIGN_CENTER}>
+        <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
           <StyledText desktopStyle="headingSmallBold">
             {t('starting_deck')}
           </StyledText>
