@@ -26,6 +26,41 @@ class StackerInfo:
     sn: str
 
 
+class StackerAxis(Enum):
+    """Stacker Axis."""
+
+    X = "X"
+    Z = "Z"
+    L = "L"
+
+
+class Direction(Enum):
+    """Direction."""
+
+    RETRACT = 0
+    EXTENT = 1
+
+    def opposite(self) -> "Direction":
+        """Get opposite direction."""
+        return Direction.EXTENT if self == Direction.RETRACT else Direction.RETRACT
+
+
+@dataclass
+class MoveParams:
+    """Move Parameters."""
+
+    max_speed: float | None = None
+    acceleration: float | None = None
+    max_speed_discont: float | None = None
+
+    def __str__(self) -> str:
+        """Convert to string."""
+        v = "V:" + str(self.max_speed) if self.max_speed else ""
+        a = "A:" + str(self.acceleration) if self.acceleration else ""
+        d = "D:" + str(self.max_speed_discont) if self.max_speed_discont else ""
+        return f"{v} {a} {d}".strip()
+
+
 class FlexStacker:
     """FLEX Stacker Driver."""
 
@@ -86,6 +121,38 @@ class FlexStacker:
         if self._simulating:
             return
         self._send_and_recv(f"M996 {sn}\n", "M996 OK")
+
+    def get_limit_switch(self, axis: StackerAxis, direction: Direction) -> bool:
+        """Get limit switch status.
+
+        :return: True if limit switch is triggered, False otherwise
+        """
+        if self._simulating:
+            return True
+
+        _LS_RE = re.compile(rf"^M119 .*{axis.name}{direction.name[0]}:(\d) .*\n")
+        res = self._send_and_recv("M119\n", "M119 XE:")
+        match = _LS_RE.match(res)
+        assert match, f"Incorrect Response for limit switch: {res}"
+        return bool(int(match.group(1)))
+
+    def move_in_mm(
+        self, axis: StackerAxis, distance: float, params: MoveParams | None = None
+    ) -> None:
+        """Move axis."""
+        if self._simulating:
+            return
+        self._send_and_recv(f"G0 {axis.name}{distance} {params or ''}\n", "G0 OK")
+
+    def move_to_limit_switch(
+        self, axis: StackerAxis, direction: Direction, params: MoveParams | None = None
+    ) -> None:
+        """Move until limit switch is triggered."""
+        if self._simulating:
+            return
+        self._send_and_recv(
+            f"G5 {axis.name}{direction.value} {params or ''}\n", "G0 OK"
+        )
 
     def __del__(self) -> None:
         """Close serial port."""
