@@ -9,13 +9,13 @@ from typing import Dict
 import numpy as np
 import argparse
 import mark10
-import dash
-from dash import html
-from dash import dcc
-from dash.dependencies import Input, Output
-import plotly.graph_objs as go
-from numpy import random
-import pandas as pd
+# import dash
+# from dash import html
+# from dash import dcc
+# from dash.dependencies import Input, Output
+# import plotly.graph_objs as go
+# from numpy import random
+# import pandas as pd
 import os
 import webbrowser
 import threading
@@ -23,8 +23,8 @@ import threading
 def open_browser():
 	webbrowser.open_new("http://localhost:{}".format(web_port))
 
-app = dash.Dash()
-web_port = 8082
+# app = dash.Dash()
+# web_port = 8082
 
 def find_filename(keyword: str):
     for fname in os.listdir(folder):
@@ -49,7 +49,7 @@ def scan_for_files(folder):
 
 def build_arg_parser():
     arg_parser = argparse.ArgumentParser(description="Motion Parameter Test Script")
-    arg_parser.add_argument("-c", "--cycles", default = 100, help = "number of cycles to execute")
+    arg_parser.add_argument("-c", "--cycles", default = 200, help = "number of cycles to execute")
     arg_parser.add_argument("-a", "--axis", default = AXIS.X, help = "Choose a Axis")
     return arg_parser
 
@@ -61,23 +61,23 @@ def home(axis: AXIS):
         TOTAL_TRAVEL = 110.75
         s.home(AXIS.Z, DIR.POSITIVE_NEGATIVE)
     elif axis == AXIS.L:
-        TOTAL_TRAVEL == 30
+        TOTAL_TRAVEL = 30
         s.home(AXIS.L, DIR.POSITIVE_NEGATIVE)
     else:
         raise("NO AXIS DEFINED!!")
 
-def fg_thread(fg_var, sg_value):
+def fg_func(fg_var, sg_value, trial, axis):
     global motion_active
     motion_active = True
     start_time = time.time()
-    with open(f'SG_test_SG_value_{sg_value}_{time.time()}.csv', 'w', newline ='') as file:
+    with open(f'Axis_{axis}_SG_test_SG_value_{sg_value}_speed_200_0.8Amps_lifetime_unit.csv', 'a', newline ='') as file:
         writer = csv.writer(file)
-        fields = ["Time(s)", "Force(N)", "SG Value"]
-        writer.writerow(fields)
+        # fields = ["Time(s)", "Force(N)", "SG Value"]
+        # writer.writerow(fields)
         while motion_active:
             timer = time.time() - start_time
             fg_reading = fg_var.read_force()
-            data = [timer, fg_reading, sg_value]
+            data = [timer, fg_reading, sg_value, trial]
             writer.writerow(data)
             # timer = time.time() - start_time
             # test_data['Time(s)'] = timer
@@ -96,19 +96,19 @@ if __name__ == '__main__':
     arg_parser = build_arg_parser()
     options = arg_parser.parse_args()
     # Port setup
-    s = stacker.FlexStacker(None).create('COM6')
-    force_gauge = mark10.Mark10(None).create('COM5')
+    s = stacker.FlexStacker(None).create('COM3')
+    force_gauge = mark10.Mark10(None).create('COM7')
     force_gauge.connect()
     force_gauge.read_force()
     # determine what axis to test
-    test_axis = AXIS.X
+    test_axis = AXIS.Z
     # Determine what direction to home first
     if test_axis == AXIS.X:
         direction = DIR.NEGATIVE_HOME
-        total_travel = 202
+        total_travel = 300
     elif test_axis == AXIS.Z:
         direction = DIR.NEGATIVE_HOME
-        total_travel = 113.75
+        total_travel = 203.75
     elif test_axis == AXIS.L:
         direction = DIR.NEGATIVE_HOME
         total_travel = 30
@@ -116,13 +116,16 @@ if __name__ == '__main__':
         raise(f"No AXIS name {test_axis}")
     # Home axis
     # home(test_axis, direction)
-    for c in range(1, 2):
+    sg_value = 19
+    for c in range(1, options.cycles):
+        time.sleep(1)
         s.enable_SG(test_axis, 0, False)
         s.home(test_axis, direction)
-        sg_value = int(input("Enter SG Value: "))
+        # sg_value = int(input("Enter SG Value: "))
         s.enable_SG(test_axis, sg_value, True)
         #print(f'SG Value: {s.read_SG_value(test_axis)}')
-        fg_thread = threading.Thread(target=fg_thread, args=(force_gauge, sg_value, ) )
+        # stop_event = threading.Event()
+        fg_thread = threading.Thread(target=fg_func, args=(force_gauge, sg_value, c, test_axis) )
         fg_thread.start()
         if test_axis == AXIS.X:
             s.move(test_axis, total_travel, DIR.POSITIVE)
@@ -132,5 +135,8 @@ if __name__ == '__main__':
             s.move(test_axis, total_travel, DIR.POSITIVE)
         else:
             raise("NO AXIS DEFINIED OR WRONG AXIS DEFINED")
+        time.sleep(2)
         motion_active = False
+        # stop_event.set()
         fg_thread.join()
+    s.enable_SG(test_axis, 0, False)

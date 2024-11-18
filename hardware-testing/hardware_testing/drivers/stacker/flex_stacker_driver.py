@@ -75,7 +75,7 @@ HOME_CURRENT_X = 1.5
 HOME_CURRENT_Z = 1.5
 HOME_CURRENT_L = 0.5
 MOVE_CURRENT_X = 1.1
-MOVE_CURRENT_Z = 0.6
+MOVE_CURRENT_Z = 0.8
 MOVE_CURRENT_L = 0.5
 MOVE_SPEED_X = 200
 MOVE_SPEED_UPZ = 200
@@ -307,7 +307,7 @@ class FlexStacker():
         elif axis == AXIS.Z:
             current = self.set_default(current, MOVE_CURRENT_Z)
             self.set_run_current(current, AXIS.Z)
-            velocity = self.set_default(velocity, MOVE_SPEED_Z)
+            velocity = self.set_default(velocity, MOVE_SPEED_DOWNZ)
             acceleration = self.set_default(acceleration, MOVE_ACCELERATION_Z)
             msd = self.set_default(msd, MAX_SPEED_DISCONTINUITY_Z)
         elif axis == AXIS.L:
