@@ -9,8 +9,13 @@ import {
   useTipAttachmentStatus,
 } from '/app/organisms/DropTipWizardFlows'
 import { useProtocolDropTipModal } from '../modals'
-import { useCloseCurrentRun, useIsRunCurrent } from '/app/resources/runs'
+import {
+  useCloseCurrentRun,
+  useCurrentRunCommands,
+  useIsRunCurrent,
+} from '/app/resources/runs'
 import { isTerminalRunStatus } from '../../utils'
+import { lastRunCommandPromptedErrorRecovery } from '/app/local-resources/commands'
 
 import type { RobotType } from '@opentrons/shared-data'
 import type { Run, RunStatus } from '@opentrons/api-client'
@@ -102,6 +107,15 @@ export function useRunHeaderDropTip({
       : { showDTWiz: false, dtWizProps: null }
   }
 
+  const runSummaryNoFixit = useCurrentRunCommands(
+    {
+      includeFixitCommands: false,
+      pageLength: 1,
+      cursor: null,
+    },
+    { enabled: isTerminalRunStatus(runStatus) }
+  )
+
   // Manage tip checking
   useEffect(() => {
     // If a user begins a new run without navigating away from the run page, reset tip status.
@@ -111,11 +125,14 @@ export function useRunHeaderDropTip({
       }
       // Only determine tip status when necessary as this can be an expensive operation. Error Recovery handles tips, so don't
       // have to do it here if done during Error Recovery.
-      else if (isTerminalRunStatus(runStatus) && !enteredER) {
+      else if (
+        runSummaryNoFixit != null &&
+        !lastRunCommandPromptedErrorRecovery(runSummaryNoFixit)
+      ) {
         void determineTipStatus()
       }
     }
-  }, [runStatus, robotType, enteredER])
+  }, [runStatus, robotType, runSummaryNoFixit])
 
   // TODO(jh, 08-15-24): The enteredER condition is a hack, because errorCommands are only returned when a run is current.
   // Ideally the run should not need to be current to view errorCommands.

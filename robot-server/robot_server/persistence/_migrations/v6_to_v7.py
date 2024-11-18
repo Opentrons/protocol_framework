@@ -100,16 +100,8 @@ def _migrate_data_files_table_with_new_source_col(
     dest_transaction: sqlalchemy.engine.Connection,
 ) -> None:
     """Add a new 'source' column to data_files table."""
-    select_data_files = sqlalchemy.select(schema_7.data_files_table).order_by(
-        sqlite_rowid
-    )
-    insert_new_data = sqlalchemy.insert(schema_7.data_files_table)
-    for old_row in dest_transaction.execute(select_data_files).all():
-        dest_transaction.execute(
-            insert_new_data,
-            id=old_row.id,
-            name=old_row.name,
-            file_hash=old_row.file_hash,
-            created_at=old_row.created_at,
-            source=DataFileSourceSQLEnum.UPLOADED,
+    dest_transaction.execute(
+        sqlalchemy.update(schema_7.data_files_table).values(
+            {"source": DataFileSourceSQLEnum.UPLOADED}
         )
+    )

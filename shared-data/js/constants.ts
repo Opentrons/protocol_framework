@@ -514,6 +514,7 @@ export const SINGLE_RIGHT_SLOT_FIXTURE: 'singleRightSlot' = 'singleRightSlot'
 export const STAGING_AREA_RIGHT_SLOT_FIXTURE: 'stagingAreaRightSlot' =
   'stagingAreaRightSlot'
 
+export const TRASH_BIN_FIXTURE: 'trashBin' = 'trashBin'
 export const TRASH_BIN_ADAPTER_FIXTURE: 'trashBinAdapter' = 'trashBinAdapter'
 
 export const WASTE_CHUTE_RIGHT_ADAPTER_COVERED_FIXTURE: 'wasteChuteRightAdapterCovered' =
@@ -589,12 +590,6 @@ export const WASTE_CHUTE_STAGING_AREA_FIXTURES: CutoutFixtureId[] = [
 ]
 
 export const LOW_VOLUME_PIPETTES = ['p50_single_flex', 'p50_multi_flex']
-
-// robot server loads absorbance reader lid as a labware but it is not
-// user addressable so we need to hide it where we show labware in the app
-export const NON_USER_ADDRESSABLE_LABWARE = [
-  'opentrons_flex_lid_absorbance_plate_reader_module',
-]
 
 // default hex values for liquid colors
 const electricPurple = '#b925ff'

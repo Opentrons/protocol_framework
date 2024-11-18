@@ -516,6 +516,13 @@ class RunDataManager:
 
         raise RunNotCurrentError()
 
+    def get_tip_attached(self, run_id: str) -> Dict[str, bool]:
+        """Get current tip attached states, keyed by pipette id."""
+        if run_id == self._run_orchestrator_store.current_run_id:
+            return self._run_orchestrator_store.get_tip_attached()
+
+        raise RunNotCurrentError()
+
     def get_all_commands_as_preserialized_list(
         self, run_id: str, include_fixit_commands: bool
     ) -> List[str]:

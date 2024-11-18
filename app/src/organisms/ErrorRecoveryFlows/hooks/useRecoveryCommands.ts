@@ -9,7 +9,7 @@ import {
 } from '@opentrons/react-api-client'
 
 import { useChainRunCommands } from '/app/resources/runs'
-import { ERROR_KINDS, RECOVERY_MAP } from '../constants'
+import { DEFINED_ERROR_TYPES, ERROR_KINDS, RECOVERY_MAP } from '../constants'
 import { getErrorKind } from '/app/organisms/ErrorRecoveryFlows/utils'
 
 import type {
@@ -127,6 +127,7 @@ export function useRecoveryCommands({
       | DispenseInPlaceRunTimeCommand
       | DropTipInPlaceRunTimeCommand
       | PrepareToAspirateRunTimeCommand
+
     const IN_PLACE_COMMAND_TYPES = [
       'aspirateInPlace',
       'dispenseInPlace',
@@ -134,16 +135,25 @@ export function useRecoveryCommands({
       'dropTipInPlace',
       'prepareToAspirate',
     ] as const
+
+    const RETRY_ERROR_TYPES = [
+      DEFINED_ERROR_TYPES.OVERPRESSURE,
+      DEFINED_ERROR_TYPES.TIP_PHYSICALLY_ATTACHED,
+    ] as const
+
     const isInPlace = (
       failedCommand: FailedCommand
     ): failedCommand is InPlaceCommand =>
       IN_PLACE_COMMAND_TYPES.includes(
         (failedCommand as InPlaceCommand).commandType
       )
+
     return unvalidatedFailedCommand != null
       ? isInPlace(unvalidatedFailedCommand)
         ? unvalidatedFailedCommand.error?.isDefined &&
-          unvalidatedFailedCommand.error?.errorType === 'overpressure' &&
+          RETRY_ERROR_TYPES.includes(
+            unvalidatedFailedCommand.error?.errorType
+          ) &&
           // Paranoia: this value comes from the wire and may be unevenly implemented
           typeof unvalidatedFailedCommand.error?.errorInfo?.retryLocation?.at(
             0

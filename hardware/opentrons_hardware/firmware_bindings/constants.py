@@ -462,3 +462,4 @@ class GripperJawState(int, Enum):
     force_controlling_home = 0x1
     force_controlling = 0x2
     position_controlling = 0x3
+    stopped = 0x4

@@ -642,6 +642,7 @@ _gripper_jaw_state_lookup: Dict[FirmwareGripperjawState, GripperJawState] = {
     FirmwareGripperjawState.force_controlling_home: GripperJawState.HOMED_READY,
     FirmwareGripperjawState.force_controlling: GripperJawState.GRIPPING,
     FirmwareGripperjawState.position_controlling: GripperJawState.HOLDING,
+    FirmwareGripperjawState.stopped: GripperJawState.STOPPED,
 }
 
 
