@@ -15,6 +15,7 @@ from ..types import (
     DeckPoint,
     CurrentWell,
     MovementAxis,
+    AddressableOffsetVector,
 )
 from ..state.update_types import StateUpdate
 from .command import SuccessData, DefinedErrorData
@@ -221,5 +222,58 @@ async def move_relative(
             ),
             state_update=StateUpdate().set_pipette_location(
                 pipette_id=pipette_id, new_deck_point=deck_point
+            ),
+        )
+
+
+async def move_to_addressable_area(
+    movement: MovementHandler,
+    model_utils: ModelUtils,
+    pipette_id: str,
+    addressable_area_name: str,
+    offset: AddressableOffsetVector,
+    force_direct: bool = False,
+    minimum_z_height: float | None = None,
+    speed: float | None = None,
+    stay_at_highest_possible_z: bool = False,
+    ignore_tip_configuration: bool | None = True,
+    highest_possible_z_extra_offset: float | None = None,
+) -> SuccessData[DestinationPositionResult] | DefinedErrorData[StallOrCollisionError]:
+    """Move to an addressable area identified by name."""
+    try:
+        x, y, z = await movement.move_to_addressable_area(
+            pipette_id=pipette_id,
+            addressable_area_name=addressable_area_name,
+            offset=offset,
+            force_direct=force_direct,
+            minimum_z_height=minimum_z_height,
+            speed=speed,
+            stay_at_highest_possible_z=stay_at_highest_possible_z,
+            ignore_tip_configuration=ignore_tip_configuration,
+            highest_possible_z_extra_offset=highest_possible_z_extra_offset,
+        )
+    except StallOrCollisionDetectedError as e:
+        return DefinedErrorData(
+            public=StallOrCollisionError(
+                id=model_utils.generate_id(),
+                createdAt=model_utils.get_timestamp(),
+                wrappedErrors=[
+                    ErrorOccurrence.from_failed(
+                        id=model_utils.generate_id(),
+                        createdAt=model_utils.get_timestamp(),
+                        error=e,
+                    )
+                ],
+            ),
+            state_update=StateUpdate().clear_all_pipette_locations(),
+        )
+    else:
+        deck_point = DeckPoint.construct(x=x, y=y, z=z)
+        return SuccessData(
+            public=DestinationPositionResult(position=deck_point),
+            state_update=StateUpdate().set_pipette_location(
+                pipette_id=pipette_id,
+                new_addressable_area_name=addressable_area_name,
+                new_deck_point=deck_point,
             ),
         )
