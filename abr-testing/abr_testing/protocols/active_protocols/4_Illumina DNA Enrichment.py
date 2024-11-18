@@ -1,5 +1,5 @@
 """DVT1ABR4: Illumina DNA Enrichment."""
-from opentrons.protocol_api import ParameterContext, ProtocolContext, Labware
+from opentrons.protocol_api import ParameterContext, ProtocolContext, Labware, Well
 from opentrons import types
 from abr_testing.protocols import helpers
 from opentrons.protocol_api.module_contexts import (
@@ -9,7 +9,7 @@ from opentrons.protocol_api.module_contexts import (
     TemperatureModuleContext,
 )
 from opentrons.hardware_control.modules.types import ThermocyclerStep
-from typing import List
+from typing import List, Dict
 
 
 metadata = {
@@ -83,6 +83,7 @@ def run(protocol: ProtocolContext) -> None:
     heatershaker: HeaterShakerContext = protocol.load_module(
         helpers.hs_str, "1"
     )  # type: ignore[assignment]
+    heatershaker.close_labware_latch()
     sample_plate_2 = heatershaker.load_labware(
         "thermoscientificnunc_96_wellplate_1300ul"
     )
@@ -109,6 +110,7 @@ def run(protocol: ProtocolContext) -> None:
     sample_plate_1 = thermocycler.load_labware(
         "armadillo_96_wellplate_200ul_pcr_full_skirt"
     )
+    thermocycler.open_lid()
     tiprack_200_2 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "8")
     tiprack_50_2 = protocol.load_labware("opentrons_flex_96_tiprack_50ul", "9")
     # ========== FOURTH ROW ==========
@@ -147,7 +149,27 @@ def run(protocol: ProtocolContext) -> None:
     p50 = protocol.load_instrument(
         "flex_8channel_50", "right", tip_racks=[tiprack_50_1, tiprack_50_2]
     )
-
+    reagent_plate.columns()[3]
+    # Load liquids and probe
+    liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
+        "Reagents": [
+            {"well": reagent_plate.columns()[3], "volume": 75.0},
+            {"well": reagent_plate.columns()[4], "volume": 15.0},
+            {"well": reagent_plate.columns()[5], "volume": 20.0},
+            {"well": reagent_plate.columns()[6], "volume": 65.0},
+        ],
+        "AMPure": [{"well": reservoir.columns()[0], "volume": 120.0}],
+        "SMB": [{"well": reservoir.columns()[1], "volume": 750.0}],
+        "EtOH": [{"well": reservoir.columns()[3], "volume": 900.0}],
+        "RSB": [{"well": reservoir.columns()[4], "volume": 96.0}],
+        "Wash": [
+            {"well": sample_plate_2.columns()[9], "volume": 1000.0},
+            {"well": sample_plate_2.columns()[10], "volume": 1000.0},
+            {"well": sample_plate_2.columns()[11], "volume": 1000.0},
+        ],
+        "Samples": [{"well": sample_plate_1.wells(), "volume": 150.0}],
+    }
+    helpers.find_liquid_height_of_loaded_liquids(protocol, liquid_vols_and_wells, p50)
     # tip and sample tracking
     if COLUMNS == 1:
         column_1_list = ["A1"]  # Plate 1
@@ -970,3 +992,10 @@ def run(protocol: ProtocolContext) -> None:
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
+    liquids_to_probe_at_end = [
+        Liquid_trash_well_1,
+        Liquid_trash_well_2,
+        Liquid_trash_well_3,
+        Liquid_trash_well_4,
+    ]
+    helpers.find_liquid_height_of_all_wells(protocol, p50, liquids_to_probe_at_end)

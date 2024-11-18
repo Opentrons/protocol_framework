@@ -5,7 +5,7 @@ from abr_testing.protocols.helpers import (
 )
 
 metadata = {
-    "protocolName": "DVT1ABR4/8: Illumina DNA Enrichment Liquid Set Up",
+    "protocolName": "DRAFT - DVT1ABR4/8: Illumina DNA Enrichment Liquid Set Up",
     "author": "Tony Ngumah <tony.ngumah@opentrons.com>",
     "source": "Protocol Library",
 }
@@ -27,7 +27,7 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     reservoir_1 = protocol.load_labware(
         "nest_96_wellplate_2ml_deep", "D2", "Reservoir 1"
     )  # Reservoir
-    reservoir_2 = protocol.load_labware(
+    sample_plate_2 = protocol.load_labware(
         "thermoscientificnunc_96_wellplate_1300ul", "D3", "Sample Plate 2"
     )  # Reservoir
     sample_plate_1 = protocol.load_labware(
@@ -57,10 +57,10 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
         volume=[120, 750, 900, 96],
         source=source_reservoir["A1"],
         dest=[
-            reservoir_1["A1"].top(),
-            reservoir_1["A2"].top(),
-            reservoir_1["A4"].top(),
-            reservoir_1["A5"].top(),
+            reservoir_1["A1"].top(),  # AMPure
+            reservoir_1["A2"].top(),  # SMB
+            reservoir_1["A4"].top(),  # EtOH
+            reservoir_1["A5"].top(),  # RSB
         ],
         blow_out=True,
         blowout_location="source well",
@@ -68,10 +68,10 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     )
 
     # Reservoir 2 Plate Prep: dispense liquid into columns 1-9 total 3690 ul
-    reservoir_2_wells = reservoir_2.wells()
+    reservoir_2_wells = sample_plate_1.wells()
     list_of_locations = [well_location.top() for well_location in reservoir_2_wells]
     p1000.transfer(
-        volume=[50, 50, 50, 50, 50, 50, 330, 330, 330, 800, 800, 800],
+        volume=[150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150],
         source=source_reservoir["A1"],
         dest=list_of_locations,
         blow_out=True,
@@ -80,9 +80,9 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     )
 
     # Sample Plate Prep: total 303
-    dest_list = [sample_plate_1["A1"], sample_plate_1["A2"], sample_plate_1["A3"]]
+    dest_list = [sample_plate_2["A10"], sample_plate_2["A11"], sample_plate_2["A12"]]
     p1000.transfer(
-        volume=[101, 101, 101],
+        volume=[1000, 1000, 1000],
         source=source_reservoir["A1"],
         dest=dest_list,
         blow_out=True,

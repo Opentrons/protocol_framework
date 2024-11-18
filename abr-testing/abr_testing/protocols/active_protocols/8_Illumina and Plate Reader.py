@@ -1,5 +1,5 @@
 """Illumina DNA Prep and Plate Reader Test."""
-from opentrons.protocol_api import ParameterContext, ProtocolContext, Labware
+from opentrons.protocol_api import ParameterContext, ProtocolContext, Labware, Well
 from abr_testing.protocols import helpers
 from opentrons.protocol_api.module_contexts import (
     AbsorbanceReaderContext,
@@ -10,8 +10,9 @@ from opentrons.protocol_api.module_contexts import (
 )
 from datetime import datetime
 from opentrons.hardware_control.modules.types import ThermocyclerStep
-from typing import List
+from typing import List, Dict
 from opentrons import types
+
 
 metadata = {
     "protocolName": "Illumina DNA Prep and Plate Reader Test",
@@ -126,6 +127,7 @@ def run(protocol: ProtocolContext) -> None:
     sample_plate_2 = heatershaker.load_labware(
         "thermoscientificnunc_96_wellplate_1300ul"
     )
+    heatershaker.close_labware_latch()
     # Magnetic Block
     mag_block: MagneticBlockContext = protocol.load_module(
         helpers.mag_str, "C1"
@@ -136,6 +138,7 @@ def run(protocol: ProtocolContext) -> None:
     sample_plate_1 = thermocycler.load_labware(
         "armadillo_96_wellplate_200ul_pcr_full_skirt"
     )
+    thermocycler.open_lid()
     # Temperature Module
     temp_block: TemperatureModuleContext = protocol.load_module(
         helpers.temp_str, "B3"
@@ -157,6 +160,28 @@ def run(protocol: ProtocolContext) -> None:
     p50 = protocol.load_instrument(
         "flex_8channel_50", "right", tip_racks=[tiprack_50_1, tiprack_50_2]
     )
+
+    # Load liquids and probe
+    liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
+        "Reagents": [
+            {"well": reagent_plate.columns()[3], "volume": 75.0},
+            {"well": reagent_plate.columns()[4], "volume": 15.0},
+            {"well": reagent_plate.columns()[5], "volume": 20.0},
+            {"well": reagent_plate.columns()[6], "volume": 65.0},
+        ],
+        "AMPure": [{"well": reservoir.columns()[0], "volume": 120.0}],
+        "SMB": [{"well": reservoir.columns()[1], "volume": 750.0}],
+        "EtOH": [{"well": reservoir.columns()[3], "volume": 900.0}],
+        "RSB": [{"well": reservoir.columns()[4], "volume": 96.0}],
+        "Wash": [
+            {"well": sample_plate_2.columns()[9], "volume": 1000.0},
+            {"well": sample_plate_2.columns()[10], "volume": 1000.0},
+            {"well": sample_plate_2.columns()[11], "volume": 1000.0},
+        ],
+        "Samples": [{"well": sample_plate_1.wells(), "volume": 150.0}],
+    }
+    helpers.find_liquid_height_of_loaded_liquids(protocol, liquid_vols_and_wells, p50)
+
     # reagent
     AMPure = reservoir["A1"]
     SMB = reservoir["A2"]
@@ -949,3 +974,10 @@ def run(protocol: ProtocolContext) -> None:
                 p200_tips += 1
                 tipcheck()
         plate_reader_actions(protocol, plate_reader, hellma_plate)
+        liquids_to_probe_at_end = [
+            Liquid_trash_well_1,
+            Liquid_trash_well_2,
+            Liquid_trash_well_3,
+            Liquid_trash_well_4,
+        ]
+        helpers.find_liquid_height_of_all_wells(protocol, p50, liquids_to_probe_at_end)
