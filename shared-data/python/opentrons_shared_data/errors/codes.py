@@ -62,6 +62,7 @@ class ErrorCodes(Enum):
     MOTOR_DRIVER_ERROR = _code_from_dict_entry("2016")
     PIPETTE_LIQUID_NOT_FOUND = _code_from_dict_entry("2017")
     TIP_HIT_WELL_BOTTOM = _code_from_dict_entry("2018")
+    MUST_HOME_ERROR = _code_from_dict_entry("2019")
     ROBOTICS_INTERACTION_ERROR = _code_from_dict_entry("3000")
     LABWARE_DROPPED = _code_from_dict_entry("3001")
     LABWARE_NOT_PICKED_UP = _code_from_dict_entry("3002")
@@ -93,7 +94,6 @@ class ErrorCodes(Enum):
     MISSING_CONFIGURATION_DATA = _code_from_dict_entry("4009")
     RUNTIME_PARAMETER_VALUE_REQUIRED = _code_from_dict_entry("4010")
     INCORRECT_API_VERSION = _code_from_dict_entry("4011")
-    MUST_HOME_ERROR = _code_from_dict_entry("4012")
 
     @classmethod
     @lru_cache(25)

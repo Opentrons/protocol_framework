@@ -6,6 +6,7 @@ from decoy import Decoy, matchers
 
 from opentrons.protocol_engine.commands.pipetting_common import (
     TipPhysicallyAttachedError,
+    MustHomeError as Defined_MustHomeError,
 )
 from opentrons.protocol_engine.commands.command import DefinedErrorData, SuccessData
 from opentrons.protocol_engine.commands.drop_tip_in_place import (
@@ -13,9 +14,10 @@ from opentrons.protocol_engine.commands.drop_tip_in_place import (
     DropTipInPlaceResult,
     DropTipInPlaceImplementation,
 )
-from opentrons.protocol_engine.errors.exceptions import TipAttachedError
+from opentrons.protocol_engine.errors.exceptions import TipAttachedError, MustHomeError
 from opentrons.protocol_engine.execution import TipHandler, GantryMover
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
+from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.update_types import (
     PipetteTipStateUpdate,
     StateUpdate,
@@ -76,7 +78,7 @@ async def test_tip_attached_error(
     mock_model_utils: ModelUtils,
     mock_gantry_mover: GantryMover,
 ) -> None:
-    """A DropTip command should have an execution implementation."""
+    """Should handle a tip not attached error."""
     subject = DropTipInPlaceImplementation(
         tip_handler=mock_tip_handler,
         model_utils=mock_model_utils,
@@ -110,4 +112,44 @@ async def test_tip_attached_error(
         state_update_if_false_positive=StateUpdate(
             pipette_tip_state=PipetteTipStateUpdate(pipette_id="abc", tip_geometry=None)
         ),
+    )
+
+
+async def test_must_home_error(
+    decoy: Decoy,
+    mock_tip_handler: TipHandler,
+    mock_model_utils: ModelUtils,
+    mock_gantry_mover: GantryMover,
+) -> None:
+    """Should handle a must home error."""
+    subject = DropTipInPlaceImplementation(
+        tip_handler=mock_tip_handler,
+        model_utils=mock_model_utils,
+        gantry_mover=mock_gantry_mover,
+    )
+
+    params = DropTipInPlaceParams(pipetteId="abc", homeAfter=False)
+
+    decoy.when(await mock_gantry_mover.get_position(pipette_id="abc")).then_return(
+        Point(9, 8, 7)
+    )
+    decoy.when(
+        await mock_tip_handler.drop_tip(pipette_id="abc", home_after=False)
+    ).then_raise(MustHomeError("Egads!"))
+
+    decoy.when(mock_model_utils.generate_id()).then_return("error-id")
+    decoy.when(mock_model_utils.get_timestamp()).then_return(
+        datetime(year=1, month=2, day=3)
+    )
+
+    result = await subject.execute(params)
+    state_update_false_positive = StateUpdate(pipette_location=update_types.CLEAR)
+    assert result == DefinedErrorData(
+        public=Defined_MustHomeError.construct(
+            id="error-id",
+            createdAt=datetime(year=1, month=2, day=3),
+            wrappedErrors=[matchers.Anything()],
+        ),
+        state_update=StateUpdate(),
+        state_update_if_false_positive=state_update_false_positive,
     )
