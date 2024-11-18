@@ -35,7 +35,7 @@ interface ProtocolNavBarProps {
 }
 
 export function ProtocolNavBar({
-  hasZoomInSlot = true,
+  hasZoomInSlot,
   tabs = [],
   hasTrashEntity,
   showLiquidOverflowMenu,
@@ -50,10 +50,10 @@ export function ProtocolNavBar({
   const showProtocolEditButtons = !(hasZoomInSlot || liquidPage)
 
   let metadataText = t('edit_protocol')
-  if (hasZoomInSlot) {
-    metadataText = t('add_hardware_labware')
-  } else if (liquidPage) {
+  if (liquidPage) {
     metadataText = t('add_liquid')
+  } else if (hasZoomInSlot) {
+    metadataText = t('add_hardware_labware')
   }
   return (
     <NavContainer showShadow={!showProtocolEditButtons}>
