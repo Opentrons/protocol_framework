@@ -291,7 +291,7 @@ export function SlotOverflowMenu(
             </StyledText>
           </MenuItem>
         ) : null}
-        <Divider marginY="0" data-testid="Divider_clear" />
+        <Divider marginY="0" />
         <MenuItem
           disabled={hasNoItems}
           onClick={(e: MouseEvent) => {

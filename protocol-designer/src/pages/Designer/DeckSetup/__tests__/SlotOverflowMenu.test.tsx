@@ -119,7 +119,7 @@ describe('SlotOverflowMenu', () => {
     expect(screen.getAllByRole('button')).toHaveLength(3)
     expect(screen.getByRole('button', { name: 'Add liquid' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Clear slot' })).toBeDisabled()
-    screen.getByTestId('Divider_clear')
+    screen.getByTestId('divider')
   })
   it('renders Edit liquid button when there is liquid on the labware', () => {
     vi.mocked(labwareIngredSelectors.getLiquidsByLabwareId).mockReturnValue({
