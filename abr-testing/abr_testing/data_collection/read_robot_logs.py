@@ -220,6 +220,8 @@ def liquid_height_commands(
     commandData = file_results.get("commands", "")
     robot = file_results.get("robot_name", "")
     run_id = file_results.get("run_id", "")
+    list_of_heights = []
+    print(robot)
     for command in commandData:
         commandType = command["commandType"]
         if commandType == "comment":
@@ -236,16 +238,22 @@ def liquid_height_commands(
                     well_location = str(entry.split(", ")[1].split(" ")[0])
                     slot_location = str(entry.split("slot ")[1].split(")")[0])
                     labware_name = str(entry.split("of ")[1].split(" on")[0])
-                    all_heights_list[0].append(robot)
-                    all_heights_list[1].append(run_id)
-                    all_heights_list[2].append(comment_time)
-                    all_heights_list[3].append(labware_type)
-                    all_heights_list[4].append(labware_name)
-                    all_heights_list[5].append(slot_location)
-                    all_heights_list[6].append(well_location)
-                    all_heights_list[7].append(height)
+                    one_entry = {
+                        "Timestamp": comment_time,
+                        "Labware Name": labware_name,
+                        "Labware Type": labware_type,
+                        "Slot Location": slot_location,
+                        "Well Location": well_location,
+                        "Height (mm)": height,
+                    }
+                    list_of_heights.append(one_entry)
+                    print(list_of_heights)
             except (IndexError, ValueError):
                 continue
+    if len(list_of_heights) > 0:
+        all_heights_list[0].append(robot)
+        all_heights_list[1].append(run_id)
+        all_heights_list[2].append(list_of_heights)
     return all_heights_list
 
 

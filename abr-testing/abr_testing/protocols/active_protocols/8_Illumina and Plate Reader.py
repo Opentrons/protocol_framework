@@ -977,7 +977,6 @@ def run(protocol: ProtocolContext) -> None:
         liquids_to_probe_at_end = [
             Liquid_trash_well_1,
             Liquid_trash_well_2,
-            Liquid_trash_well_3,
             Liquid_trash_well_4,
         ]
         helpers.find_liquid_height_of_all_wells(protocol, p50, liquids_to_probe_at_end)

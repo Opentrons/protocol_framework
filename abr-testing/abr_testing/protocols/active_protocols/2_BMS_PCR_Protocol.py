@@ -87,12 +87,7 @@ def run(ctx: ProtocolContext) -> None:
         "Mastermix": [{"well": mmx_pic, "volume": 1500.0}],
         "DNA": [{"well": dna_pic, "volume": 50.0}],
     }
-    helpers.load_wells_with_custom_liquids(ctx, liquid_vols_and_wells)
-    wells_to_probe = [[water], mmx_pic, dna_pic]
-    wells_to_probe_flattened = [
-        well for list_of_wells in wells_to_probe for well in list_of_wells
-    ]
-    helpers.find_liquid_height_of_all_wells(ctx, p50, wells_to_probe_flattened)
+    helpers.find_liquid_height_of_loaded_liquids(ctx, liquid_vols_and_wells, p50)
     # adding water
     ctx.comment("\n\n----------ADDING WATER----------\n")
     p50.pick_up_tip()
@@ -178,7 +173,6 @@ def run(ctx: ProtocolContext) -> None:
         )
         p50.drop_tip()
         p50.configure_for_volume(50)
-        wells_to_probe_flattened.append(dest_plate[dest_well])
 
     ctx.comment("\n\n-----------Running PCR------------\n")
 
@@ -210,4 +204,5 @@ def run(ctx: ProtocolContext) -> None:
                 ctx.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
         p50.drop_tip()
         p50.configure_nozzle_layout(style=SINGLE, start="A1", tip_racks=tiprack_50)
-        helpers.find_liquid_height_of_all_wells(ctx, p50, wells_to_probe_flattened)
+        mmx_pic.append(water)
+        helpers.find_liquid_height_of_all_wells(ctx, p50, mmx_pic)

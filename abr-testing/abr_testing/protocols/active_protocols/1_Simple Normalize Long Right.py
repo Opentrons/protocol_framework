@@ -8,6 +8,7 @@ from opentrons.protocol_api import (
     Well,
 )
 from abr_testing.protocols import helpers
+from typing import List, Dict
 
 metadata = {
     "protocolName": "Simple Normalize Long with LPD and Single Tip",
@@ -114,13 +115,16 @@ def run(protocol: ProtocolContext) -> None:
     liquid_volumes = [675.0, 675.0, 675.0, 675.0, 675.0]
     wells = [Dye_1, Dye_2, Dye_3, Diluent_1, Diluent_2]
     helpers.load_wells_with_water(protocol, wells, liquid_volumes)
-
+    liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
+        "Dye": [{"well": [Dye_1, Dye_2, Dye_3], "volume": 675.0}],
+        "Diluent": [{"well": [Diluent_1, Diluent_2], "volume": 675.0}],
+    }
     current_rack = tiprack_x_1
     # CONFIGURE SINGLE LAYOUT
     p1000.configure_nozzle_layout(
         style=SINGLE, start="H1", tip_racks=[tiprack_x_1, tiprack_x_2, tiprack_x_3]
     )
-    helpers.find_liquid_height_of_all_wells(protocol, p1000, wells)
+    helpers.find_liquid_height_of_loaded_liquids(protocol, liquid_vols_and_wells, p1000)
     sample_quant_csv = """
     sample_plate_1, Sample_well,DYE,DILUENT
     sample_plate_1,A1,0,100
