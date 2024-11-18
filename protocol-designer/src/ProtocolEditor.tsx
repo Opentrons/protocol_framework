@@ -7,8 +7,8 @@ import {
   Flex,
   OVERFLOW_AUTO,
 } from '@opentrons/components'
-import { PortalRoot as TopPortalRoot } from './components/portals/TopPortal'
 import { ProtocolRoutes } from './ProtocolRoutes'
+import { PortalRoot } from './organisms'
 
 function ProtocolEditorComponent(): JSX.Element {
   return (
@@ -18,7 +18,7 @@ function ProtocolEditorComponent(): JSX.Element {
       overflow={OVERFLOW_AUTO}
       id="protocol-editor"
     >
-      <TopPortalRoot />
+      <PortalRoot />
       <Flex flexDirection={DIRECTION_COLUMN}>
         <HashRouter>
           <ProtocolRoutes />

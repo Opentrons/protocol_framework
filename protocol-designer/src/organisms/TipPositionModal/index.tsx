@@ -17,9 +17,9 @@ import {
   InputField,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { getMainPagePortalEl } from '../../components/portals/MainPageModalPortal'
 import { getIsTouchTipField } from '../../form-types'
 import { BUTTON_LINK_STYLE } from '../../atoms'
+import { getMainPagePortalEl } from '../Portal'
 import { TOO_MANY_DECIMALS, PERCENT_RANGE_TO_SHOW_WARNING } from './constants'
 import * as utils from './utils'
 import { TipPositionTopView } from './TipPositionTopView'

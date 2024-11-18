@@ -8,6 +8,7 @@ import {
   COLORS,
   DIRECTION_COLUMN,
   Flex,
+  InputField,
   JUSTIFY_END,
   Modal,
   PrimaryButton,
@@ -16,8 +17,7 @@ import {
   StyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { getTopPortalEl } from '../../components/portals/TopPortal'
-import { InputField } from '../../components/modals/CreateFileWizard/InputField'
+import { getMainPagePortalEl } from '../Portal'
 import { actions, selectors as fileSelectors } from '../../file-data'
 import type { FileMetadataFields } from '../../file-data'
 
@@ -86,8 +86,7 @@ export function EditProtocolMetadataModal(
             <InputField
               placeholder={protocolName}
               autoFocus
-              register={register}
-              fieldName="protocolName"
+              {...register('protocolName')}
             />
           </Flex>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
@@ -104,16 +103,12 @@ export function EditProtocolMetadataModal(
             <StyledText color={COLORS.grey60} desktopStyle="captionRegular">
               {t('author_org')}
             </StyledText>
-            <InputField
-              placeholder={author ?? ''}
-              fieldName="author"
-              register={register}
-            />
+            <InputField placeholder={author ?? ''} {...register('author')} />
           </Flex>
         </Flex>
       </form>
     </Modal>,
-    getTopPortalEl()
+    getMainPagePortalEl()
   )
 }
 

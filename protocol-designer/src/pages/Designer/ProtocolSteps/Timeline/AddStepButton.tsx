@@ -30,12 +30,13 @@ import {
   selectors as stepFormSelectors,
   getIsModuleOnDeck,
 } from '../../../../step-forms'
-import { getEnableComment } from '../../../../feature-flags/selectors'
-import { getMainPagePortalEl } from '../../../../components/portals/MainPageModalPortal'
 import {
   CLOSE_UNSAVED_STEP_FORM,
   ConfirmDeleteModal,
-} from '../../../../components/modals/ConfirmDeleteModal'
+  getMainPagePortalEl,
+} from '../../../../organisms'
+import { getEnableComment } from '../../../../feature-flags/selectors'
+
 import { AddStepOverflowButton } from './AddStepOverflowButton'
 
 import type { MouseEvent } from 'react'
