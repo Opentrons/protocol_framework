@@ -1,22 +1,18 @@
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import styled from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import {
   BORDERS,
   COLORS,
-  CURSOR_AUTO,
-  CURSOR_POINTER,
   DIRECTION_COLUMN,
   Divider,
   Flex,
+  MenuItem,
   NO_WRAP,
   POSITION_ABSOLUTE,
   RobotCoordsForeignDiv,
-  SPACING,
   StyledText,
-  TEXT_ALIGN_LEFT,
   useOnClickOutside,
 } from '@opentrons/components'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
@@ -235,7 +231,7 @@ export function SlotOverflowMenu(
           e.stopPropagation()
         }}
       >
-        <MenuButton
+        <MenuItem
           onClick={() => {
             addEquipment(location)
             setShowMenuList(false)
@@ -246,9 +242,9 @@ export function SlotOverflowMenu(
               ? t(isOffDeckLocation ? 'add_labware' : 'add_hw_lw')
               : t(isOffDeckLocation ? 'edit_labware' : 'edit_hw_lw')}
           </StyledText>
-        </MenuButton>
+        </MenuItem>
         {canRenameLabwareAndEditLiquids ? (
-          <MenuButton
+          <MenuItem
             onClick={(e: MouseEvent) => {
               setShowNickNameModal(true)
               e.preventDefault()
@@ -258,9 +254,9 @@ export function SlotOverflowMenu(
             <StyledText desktopStyle="bodyDefaultRegular">
               {t('rename_lab')}
             </StyledText>
-          </MenuButton>
+          </MenuItem>
         ) : null}
-        <MenuButton
+        <MenuItem
           onClick={() => {
             if (nestedLabwareOnSlot != null) {
               dispatch(openIngredientSelector(nestedLabwareOnSlot.id))
@@ -274,9 +270,9 @@ export function SlotOverflowMenu(
           <StyledText desktopStyle="bodyDefaultRegular">
             {selectionHasLiquids ? t('edit_liquid') : t('add_liquid')}
           </StyledText>
-        </MenuButton>
+        </MenuItem>
         {showDuplicateBtn ? (
-          <MenuButton
+          <MenuItem
             onClick={() => {
               if (
                 labwareOnSlot != null &&
@@ -293,10 +289,10 @@ export function SlotOverflowMenu(
             <StyledText desktopStyle="bodyDefaultRegular">
               {t('duplicate')}
             </StyledText>
-          </MenuButton>
+          </MenuItem>
         ) : null}
         <Divider marginY="0" data-testid="Divider_clear" />
-        <MenuButton
+        <MenuItem
           disabled={hasNoItems}
           onClick={(e: MouseEvent) => {
             if (matchingLabware != null) {
@@ -312,7 +308,7 @@ export function SlotOverflowMenu(
           <StyledText desktopStyle="bodyDefaultRegular">
             {t(isOffDeckLocation ? 'clear_labware' : 'clear_slot')}
           </StyledText>
-        </MenuButton>
+        </MenuItem>
       </Flex>
     </>
   )
@@ -336,20 +332,3 @@ export function SlotOverflowMenu(
     slotOverflowBody
   )
 }
-
-const MenuButton = styled.button`
-  background-color: ${COLORS.transparent};
-  text-align: ${TEXT_ALIGN_LEFT}};
-  border-radius: inherit;
-  cursor: ${CURSOR_POINTER};
-  padding: ${SPACING.spacing8} ${SPACING.spacing12};
-  border: none;
-  border-radius: inherit;
-  &:hover {
-    background-color: ${COLORS.blue10};
-  }
-  &:disabled {
-    color: ${COLORS.grey40};
-    cursor: ${CURSOR_AUTO};
-  }
-`
