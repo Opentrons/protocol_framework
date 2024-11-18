@@ -8,6 +8,7 @@ import {
   COLORS,
   DIRECTION_COLUMN,
   Flex,
+  isntStyleProp,
   JUSTIFY_SPACE_BETWEEN,
   SecondaryButton,
   SPACING,
@@ -21,7 +22,7 @@ import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
 import { useKitchen } from '../Kitchen/hooks'
 import { LiquidButton } from './LiquidButton'
 
-import type { TabProps } from '@opentrons/components'
+import type { StyleProps, TabProps } from '@opentrons/components'
 
 interface ProtocolNavBarProps {
   hasZoomInSlot?: boolean
@@ -105,10 +106,16 @@ const NavContainer = styled(Flex)`
   box-shadow: 0px 1px 3px 0px ${COLORS.black90}${COLORS.opacity20HexCode};
 `
 
-const MetadataContainer = styled(Flex)<{ isAddingHardwareOrLabware: boolean }>`
+interface MetadataProps extends StyleProps {
+  isAddingHardwareOrLabware: boolean
+}
+const MetadataContainer = styled.div.withConfig<MetadataProps>({
+  shouldForwardProp: p => isntStyleProp(p) && p !== 'isAddingHardwareOrLabware',
+})<MetadataProps>`
+  display: flex;
   flex-direction: ${DIRECTION_COLUMN};
-  text-align: ${({ isAddingHardwareOrLabware }) =>
-    isAddingHardwareOrLabware === true
+  text-align: ${props =>
+    props.isAddingHardwareOrLabware === true
       ? TYPOGRAPHY.textAlignLeft
       : TYPOGRAPHY.textAlignCenter};
 
