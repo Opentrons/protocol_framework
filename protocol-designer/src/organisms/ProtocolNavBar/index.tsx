@@ -28,14 +28,12 @@ interface ProtocolNavBarProps {
   tabs?: TabProps[]
   hasTrashEntity?: boolean
   showLiquidOverflowMenu?: (liquidOverflowMenu: boolean) => void
-  isAddingHardwareOrLabware?: boolean
   liquidPage?: boolean
   isOffDeck?: boolean
 }
 
 export function ProtocolNavBar({
-  hasZoomInSlot,
-  isAddingHardwareOrLabware = false,
+  hasZoomInSlot = true,
   tabs = [],
   hasTrashEntity,
   showLiquidOverflowMenu,
@@ -48,11 +46,19 @@ export function ProtocolNavBar({
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  return (
-    <NavContainer>
-      {hasZoomInSlot ? null : <Tabs tabs={tabs} />}
+  const showProtocolEditButtons = !(hasZoomInSlot || liquidPage)
 
-      <MetadataContainer isAddingHardwareOrLabware={isAddingHardwareOrLabware}>
+  let metadataText = t('edit_protocol')
+  if (hasZoomInSlot) {
+    metadataText = t('add_hardware_labware')
+  } else if (liquidPage) {
+    metadataText = t('add_liquid')
+  }
+  return (
+    <NavContainer showShadow={!showProtocolEditButtons}>
+      {showProtocolEditButtons ? <Tabs tabs={tabs} /> : null}
+
+      <MetadataContainer showProtocolEditButtons={showProtocolEditButtons}>
         <StyledText
           desktopStyle="bodyDefaultSemiBold"
           css={LINE_CLAMP_TEXT_STYLE(1)}
@@ -67,9 +73,7 @@ export function ProtocolNavBar({
           color={COLORS.grey60}
           textAlign={isOffDeck && TYPOGRAPHY.textAlignLeft}
         >
-          {isAddingHardwareOrLabware || isOffDeck
-            ? t('add_hardware_labware')
-            : t('edit_protocol')}
+          {metadataText}
         </StyledText>
       </MetadataContainer>
 
@@ -97,20 +101,24 @@ export function ProtocolNavBar({
   )
 }
 
-const NavContainer = styled(Flex)`
+const NavContainer = styled(Flex)<{ showShadow: boolean }>`
+  z-index: 11;
   padding: ${SPACING.spacing12};
   width: 100%;
   justify-content: ${JUSTIFY_SPACE_BETWEEN};
   align-items: ${ALIGN_CENTER};
-  box-shadow: 0px 1px 3px 0px ${COLORS.black90}${COLORS.opacity20HexCode};
+  box-shadow: ${props =>
+    props.showShadow
+      ? `0px 1px 3px 0px ${COLORS.black90}${COLORS.opacity20HexCode}`
+      : 'none'};
 `
 
-const MetadataContainer = styled(Flex)<{ isAddingHardwareOrLabware: boolean }>`
+const MetadataContainer = styled(Flex)<{ showProtocolEditButtons: boolean }>`
   flex-direction: ${DIRECTION_COLUMN};
-  text-align: ${({ isAddingHardwareOrLabware }) =>
-    isAddingHardwareOrLabware === true
-      ? TYPOGRAPHY.textAlignLeft
-      : TYPOGRAPHY.textAlignCenter};
+  text-align: ${({ showProtocolEditButtons }) =>
+    showProtocolEditButtons
+      ? TYPOGRAPHY.textAlignCenter
+      : TYPOGRAPHY.textAlignLeft};
 
   // For screens between 600px and 767px, set width to 88px
   @media only screen and (max-width: 767px) {
