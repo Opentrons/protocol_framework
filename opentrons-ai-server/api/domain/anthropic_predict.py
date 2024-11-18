@@ -106,7 +106,6 @@ class AnthropicPredict:
         try: 
             self._messages.append({"role": "user", "content": PROMPT.format(USER_PROMPT=prompt)})
             response = self.generate_message()
-            
             if response.content[-1].type == "tool_use":
                 tool_use = response.content[-1]
                 self._messages.append(
@@ -207,8 +206,6 @@ def main() -> None:
     from rich.prompt import Prompt
 
     settings = Settings()
-    import code
-    code.interact(local={**locals(), **globals()})
     llm = AnthropicPredict(settings)
     prompt = Prompt.ask("Type a prompt to send to the Anthropic API:")
     completion = llm.predict(prompt)
