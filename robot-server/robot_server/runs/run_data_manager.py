@@ -1,7 +1,7 @@
 """Manage current and historical run data."""
 
 from datetime import datetime
-from typing import List, Optional, Callable, Union, Mapping
+from typing import Dict, List, Optional, Callable, Union, Mapping
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.errors.exceptions import InvalidStoredData, EnumeratedError

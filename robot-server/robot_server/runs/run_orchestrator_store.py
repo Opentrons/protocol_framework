@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import List, Optional, Callable, Mapping
+from typing import Dict, List, Optional, Callable, Mapping
 
 from opentrons.types import NozzleMapInterface
 from opentrons.protocol_engine.errors.exceptions import EStopActivatedError
