@@ -248,7 +248,7 @@ async def test_stall_error(
     model_utils: ModelUtils,
     state_view: StateView,
 ) -> None:
-    """It should return an overpressure error if the hardware API indicates that."""
+    """It should return a stall error if the hardware API indicates that."""
     pipette_id = "pipette-id"
     labware_id = "labware-id"
     well_name = "well-name"
