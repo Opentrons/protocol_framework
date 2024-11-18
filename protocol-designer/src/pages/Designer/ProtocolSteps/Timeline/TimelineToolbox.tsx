@@ -63,7 +63,7 @@ export const TimelineToolbox = (): JSX.Element => {
       width="19.5rem"
       title={
         <StyledText desktopStyle="bodyLargeSemiBold">
-          {t('protocol_timeline')}
+          {t('timeline')}
         </StyledText>
       }
       titlePadding={SPACING.spacing12}
