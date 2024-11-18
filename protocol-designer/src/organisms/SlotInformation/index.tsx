@@ -12,8 +12,15 @@ import {
   StyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
+import {
+  FLEX_ROBOT_TYPE,
+  getModuleDisplayName,
+  OT2_ROBOT_TYPE,
+  THERMOCYCLER_MODULE_V1,
+  THERMOCYCLER_MODULE_V2,
+} from '@opentrons/shared-data'
 import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { useDeckSetupWindowBreakPoint } from '../../pages/Designer/DeckSetup/utils'
 
 import type { FC } from 'react'
 import type { RobotType } from '@opentrons/shared-data'
@@ -38,15 +45,32 @@ export const SlotInformation: FC<SlotInformationProps> = ({
   fixtures = [],
 }) => {
   const { t } = useTranslation('shared')
+  const breakPointSize = useDeckSetupWindowBreakPoint()
+  const pathLocation = useLocation()
   const isOffDeck = location === 'offDeck'
+  let modifiedLocation = location
+  if (
+    robotType === FLEX_ROBOT_TYPE &&
+    modules.includes(getModuleDisplayName(THERMOCYCLER_MODULE_V2))
+  ) {
+    modifiedLocation = 'A1+B1'
+  } else if (
+    robotType === OT2_ROBOT_TYPE &&
+    (modules.includes(getModuleDisplayName(THERMOCYCLER_MODULE_V2)) ||
+      modules.includes(getModuleDisplayName(THERMOCYCLER_MODULE_V1)))
+  ) {
+    modifiedLocation = '7,8,10,11'
+  }
+
   return (
     <Flex
       flexDirection={DIRECTION_COLUMN}
       gridGap={SPACING.spacing12}
+      maxWidth={pathLocation.pathname === '/designer' ? '23.4375rem' : '100%'}
       width="100%"
     >
       <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
-        {isOffDeck ? null : <DeckInfoLabel deckLabel={location} />}
+        {isOffDeck ? null : <DeckInfoLabel deckLabel={modifiedLocation} />}
         <StyledText desktopStyle="bodyLargeSemiBold">
           {t(isOffDeck ? 'labware_detail' : 'slot_detail')}
         </StyledText>
@@ -55,11 +79,16 @@ export const SlotInformation: FC<SlotInformationProps> = ({
         {liquids.length > 1 ? (
           <ListItem type="noActive" width="max-content">
             <ListItemDescriptor
+              changeFlexDirection={breakPointSize === 'medium'}
               type="default"
               content={
                 <StyledText
                   desktopStyle="bodyDefaultRegular"
-                  textAlign={TYPOGRAPHY.textAlignRight}
+                  textAlign={
+                    breakPointSize === 'medium'
+                      ? TYPOGRAPHY.textAlignLeft
+                      : TYPOGRAPHY.textAlignRight
+                  }
                   css={LINE_CLAMP_TEXT_STYLE(2)}
                 >
                   {liquids.join(', ')}
@@ -92,11 +121,10 @@ interface StackInfoListProps {
 }
 
 function StackInfoList({ title, items }: StackInfoListProps): JSX.Element {
-  const pathLocation = useLocation()
   return (
     <Flex
       flexDirection={DIRECTION_COLUMN}
-      width={pathLocation.pathname === '/designer' ? '15.8125rem' : '100%'}
+      width="100%"
       gridGap={SPACING.spacing4}
     >
       {items.length > 0 ? (
@@ -121,20 +149,27 @@ interface StackInfoProps {
 
 function StackInfo({ title, stackInformation }: StackInfoProps): JSX.Element {
   const { t } = useTranslation('shared')
+  const breakPointSize = useDeckSetupWindowBreakPoint()
+
   return (
     <ListItem type="noActive">
       <ListItemDescriptor
+        changeFlexDirection={breakPointSize === 'medium'}
         type="default"
         content={
           <StyledText
             desktopStyle="bodyDefaultRegular"
-            textAlign={TYPOGRAPHY.textAlignRight}
+            textAlign={
+              breakPointSize === 'medium'
+                ? TYPOGRAPHY.textAlignLeft
+                : TYPOGRAPHY.textAlignRight
+            }
           >
             {stackInformation ?? t('none')}
           </StyledText>
         }
         description={
-          <Flex width="7.40625rem">
+          <Flex>
             <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
               {title}
             </StyledText>

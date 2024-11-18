@@ -164,7 +164,7 @@ export function Designer(): JSX.Element {
           <Flex
             flexDirection={DIRECTION_COLUMN}
             backgroundColor={COLORS.grey10}
-            padding={zoomIn.slot != null ? '0' : SPACING.spacing80}
+            padding={zoomIn.slot != null ? '0' : SPACING.spacing40}
             height="calc(100vh - 64px)"
           >
             <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing24}>
