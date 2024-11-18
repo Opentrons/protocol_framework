@@ -435,10 +435,6 @@ def _run_trial(
     if trial.cfg.interactive and not trial.blank:
         ui.get_user_ready("examine tip")
 
-    # NOTE: saving test CSV explicitly AFTER pipetting is complete
-    #       to avoid any unwanted delays
-    # FIXME: see why it takes so long to store CSV data
-    trial.test_report.save_to_disk()
     return volume_aspirate, m_data_aspirate, volume_dispense, m_data_dispense
 
 
@@ -805,6 +801,10 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                         disp_with_evap,
                         liquid_tracker.get_liquid_height(well),
                     )
+                    # NOTE: saving test CSV explicitly AFTER pipetting is complete
+                    #       to avoid any unwanted delays
+                    # FIXME: see why it takes so long to store CSV data
+                    resources.test_report.save_to_disk()
                     ui.print_info("dropping tip")
                     if not cfg.same_tip:
                         resources.pipette._retract()  # retract to top of gantry
@@ -866,6 +866,8 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                     humidity=dispense_humidity_avg,
                     flag="isolated" if cfg.isolate_volumes else "",
                 )
+                # FIXME: see why it takes so long to store CSV data
+                resources.test_report.save_to_disk()
                 actual_asp_list_all.extend(actual_asp_list_channel)
                 actual_disp_list_all.extend(actual_disp_list_channel)
 
@@ -921,6 +923,8 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                     d=dispense_d,
                     flag="isolated" if cfg.isolate_volumes else "",
                 )
+            # FIXME: see why it takes so long to store CSV data
+            resources.test_report.save_to_disk()
 
             ui.print_header(f"{volume} uL channel all CALCULATIONS")
             aspirate_average, aspirate_cv, aspirate_d = _calculate_stats(
@@ -951,6 +955,8 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                 d=dispense_d,
                 flag="isolated" if cfg.isolate_volumes else "",
             )
+            # FIXME: see why it takes so long to store CSV data
+            resources.test_report.save_to_disk()
     finally:
         _return_tip = False if calibration_tip_in_use else cfg.return_tip
         _finish_test(cfg, resources, _return_tip)

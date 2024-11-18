@@ -235,6 +235,7 @@ def _finish_test(
     resources: TestResources,
     return_tip: bool,
 ) -> None:
+    resources.test_report.save_to_disk()
     # there are WAY too many tips on a 96ch pipette
     # so drop them incase something bad happened during the test run
     if resources.pipette.channels == 96 and resources.pipette.has_tip:
