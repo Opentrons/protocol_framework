@@ -8,6 +8,7 @@ from hardware_testing.data.csv_report import CSVReport, CSVSection
 from . import (
     test_connectivity,
     test_z_axis,
+    test_l_axis,
 )
 
 
@@ -16,6 +17,7 @@ class TestSection(enum.Enum):
 
     CONNECTIVITY = "CONNECTIVITY"
     Z_AXIS = "Z_AXIS"
+    L_AXIS = "L_AXIS"
 
 
 @dataclass
@@ -35,6 +37,10 @@ TESTS = [
         TestSection.Z_AXIS,
         test_z_axis.run,
     ),
+    (
+        TestSection.L_AXIS,
+        test_l_axis.run,
+    ),
 ]
 
 
@@ -50,6 +56,10 @@ def build_report(test_name: str) -> CSVReport:
             CSVSection(
                 title=TestSection.Z_AXIS.value,
                 lines=test_z_axis.build_csv_lines(),
+            ),
+            CSVSection(
+                title=TestSection.L_AXIS.value,
+                lines=test_l_axis.build_csv_lines(),
             ),
         ],
     )
