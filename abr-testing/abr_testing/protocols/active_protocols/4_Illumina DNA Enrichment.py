@@ -90,8 +90,8 @@ def run(protocol: ProtocolContext) -> None:
     temp_block: TemperatureModuleContext = protocol.load_module(
         helpers.temp_str, "3"
     )  # type: ignore[assignment]
-    reagent_plate = temp_block.load_labware(
-        "armadillo_96_wellplate_200ul_pcr_full_skirt"
+    reagent_plate, temp_adapter = helpers.load_temp_adapter_and_labware(
+        "armadillo_96_wellplate_200ul_pcr_full_skirt", temp_block, "Reagent Plate"
     )
     # ========== SECOND ROW ==========
     MAG_PLATE_SLOT: MagneticBlockContext = protocol.load_module(
