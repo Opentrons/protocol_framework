@@ -7,9 +7,9 @@ from opentrons.protocol_api import ProtocolContext
 from opentrons.config import feature_flags as ff
 
 
-@pytest.mark.ot2_only
+@pytest.mark.ot3_only
 @pytest.mark.parametrize(
-    "simulated_protocol_context", [("2.20", "OT-2")], indirect=True
+    "simulated_protocol_context", [("2.20", "Flex")], indirect=True
 )
 def test_liquid_class_creation_and_property_fetching(
     decoy: Decoy,
@@ -17,25 +17,26 @@ def test_liquid_class_creation_and_property_fetching(
     simulated_protocol_context: ProtocolContext,
 ) -> None:
     """It should create the liquid class and provide access to its properties."""
-    decoy.when(ff.allow_liquid_classes(RobotTypeEnum.OT2)).then_return(True)
-    pipette_left = simulated_protocol_context.load_instrument(
-        "p20_single_gen2", mount="left"
+    decoy.when(ff.allow_liquid_classes(RobotTypeEnum.FLEX)).then_return(True)
+    pipette_load_name = "flex_8channel_50"
+    simulated_protocol_context.load_instrument(pipette_load_name, mount="left")
+    tiprack = simulated_protocol_context.load_labware(
+        "opentrons_flex_96_tiprack_50ul", "D1"
     )
-    tiprack = simulated_protocol_context.load_labware("opentrons_96_tiprack_20ul", "1")
     water = simulated_protocol_context.define_liquid_class("water")
 
     assert water.name == "water"
     assert water.display_name == "Water"
 
-    # TODO (spp, 2024-10-17): update this to use pipette's load name instead of pipette.name
+    # TODO (spp, 2024-10-17): update this to fetch pipette load name from instrument context
     assert (
         water.get_for(
-            pipette_left.name, tiprack.load_name
+            pipette_load_name, tiprack.load_name
         ).dispense.flow_rate_by_volume.default
         == 50
     )
     assert (
-        water.get_for(pipette_left.name, tiprack.load_name).aspirate.submerge.speed
+        water.get_for(pipette_load_name, tiprack.load_name).aspirate.submerge.speed
         == 100
     )
 
