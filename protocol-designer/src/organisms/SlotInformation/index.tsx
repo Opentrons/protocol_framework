@@ -76,7 +76,10 @@ export const SlotInformation: FC<SlotInformationProps> = ({
         {liquids.length > 1 ? (
           <ListItem type="noActive" width="max-content">
             <ListItemDescriptor
-              changeFlexDirection={breakPointSize === 'medium'}
+              changeFlexDirection={
+                breakPointSize === 'medium' &&
+                pathLocation.pathname === '/designer'
+              }
               type="default"
               content={
                 <StyledText
@@ -147,11 +150,14 @@ interface StackInfoProps {
 function StackInfo({ title, stackInformation }: StackInfoProps): JSX.Element {
   const { t } = useTranslation('shared')
   const breakPointSize = useDeckSetupWindowBreakPoint()
+  const pathLocation = useLocation()
 
   return (
     <ListItem type="noActive">
       <ListItemDescriptor
-        changeFlexDirection={breakPointSize === 'medium'}
+        changeFlexDirection={
+          breakPointSize === 'medium' && pathLocation.pathname === '/designer'
+        }
         type="default"
         content={
           <StyledText
