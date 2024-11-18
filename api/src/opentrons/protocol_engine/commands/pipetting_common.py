@@ -189,7 +189,7 @@ class MustHomeError(ErrorOccurrence):
 
     isDefined: bool = True
 
-    errorType: Literal["mustHome"] = "mustHome"
+    errorType: Literal["MustHomeError"] = "MustHomeError"
 
     errorCode: str = ErrorCodes.MUST_HOME_ERROR.value.code
     detail: str = ErrorCodes.MUST_HOME_ERROR.value.detail
