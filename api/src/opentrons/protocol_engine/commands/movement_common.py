@@ -17,7 +17,7 @@ from ..types import (
     MovementAxis,
     AddressableOffsetVector,
 )
-from ..state.update_types import StateUpdate
+from ..state.update_types import StateUpdate, PipetteLocationUpdate
 from .command import SuccessData, DefinedErrorData
 
 
@@ -275,5 +275,53 @@ async def move_to_addressable_area(
                 pipette_id=pipette_id,
                 new_addressable_area_name=addressable_area_name,
                 new_deck_point=deck_point,
+            ),
+        )
+
+
+async def move_to_coordinates(
+    movement: MovementHandler,
+    model_utils: ModelUtils,
+    pipette_id: str,
+    deck_coordinates: DeckPoint,
+    direct: bool,
+    additional_min_travel_z: float | None,
+    speed: float | None = None,
+) -> SuccessData[DestinationPositionResult] | DefinedErrorData[StallOrCollisionError]:
+    """Move to a set of coordinates."""
+    try:
+        x, y, z = await movement.move_to_coordinates(
+            pipette_id=pipette_id,
+            deck_coordinates=deck_coordinates,
+            direct=direct,
+            additional_min_travel_z=additional_min_travel_z,
+            speed=speed,
+        )
+    except StallOrCollisionDetectedError as e:
+        return DefinedErrorData(
+            public=StallOrCollisionError(
+                id=model_utils.generate_id(),
+                createdAt=model_utils.get_timestamp(),
+                wrappedErrors=[
+                    ErrorOccurrence.from_failed(
+                        id=model_utils.generate_id(),
+                        createdAt=model_utils.get_timestamp(),
+                        error=e,
+                    )
+                ],
+            ),
+            state_update=StateUpdate().clear_all_pipette_locations(),
+        )
+    else:
+        deck_point = DeckPoint.construct(x=x, y=y, z=z)
+
+        return SuccessData(
+            public=DestinationPositionResult(position=DeckPoint(x=x, y=y, z=z)),
+            state_update=StateUpdate(
+                pipette_location=PipetteLocationUpdate(
+                    pipette_id=pipette_id,
+                    new_location=None,
+                    new_deck_point=deck_point,
+                )
             ),
         )
