@@ -322,6 +322,11 @@ class StateUpdate:
 
     # These convenience functions let the caller avoid the boilerplate of constructing a
     # complicated dataclass tree.
+    @typing.overload
+    def set_pipette_location(
+        self: Self, *, pipette_id: str, new_deck_point: DeckPoint
+    ) -> Self:
+        """Schedule a pipette's coordinates to be changed while preserving its logical location."""
 
     @typing.overload
     def set_pipette_location(
@@ -362,10 +367,13 @@ class StateUpdate:
                 ),
                 new_deck_point=new_deck_point,
             )
+        elif new_labware_id == NO_CHANGE or new_well_name == NO_CHANGE:
+            self.pipette_location = PipetteLocationUpdate(
+                pipette_id=pipette_id,
+                new_location=NO_CHANGE,
+                new_deck_point=new_deck_point,
+            )
         else:
-            # These asserts should always pass because of the overloads.
-            assert new_labware_id != NO_CHANGE
-            assert new_well_name != NO_CHANGE
 
             self.pipette_location = PipetteLocationUpdate(
                 pipette_id=pipette_id,

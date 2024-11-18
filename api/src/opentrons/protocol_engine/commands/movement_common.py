@@ -9,7 +9,13 @@ from pydantic import BaseModel, Field
 from opentrons_shared_data.errors import ErrorCodes
 from opentrons_shared_data.errors.exceptions import StallOrCollisionDetectedError
 from ..errors import ErrorOccurrence
-from ..types import WellLocation, LiquidHandlingWellLocation, DeckPoint, CurrentWell
+from ..types import (
+    WellLocation,
+    LiquidHandlingWellLocation,
+    DeckPoint,
+    CurrentWell,
+    MovementAxis,
+)
 from ..state.update_types import StateUpdate
 from .command import SuccessData, DefinedErrorData
 
@@ -178,5 +184,42 @@ async def move_to_well(
                 new_labware_id=labware_id,
                 new_well_name=well_name,
                 new_deck_point=deck_point,
+            ),
+        )
+
+
+async def move_relative(
+    movement: MovementHandler,
+    model_utils: ModelUtils,
+    pipette_id: str,
+    axis: MovementAxis,
+    distance: float,
+) -> SuccessData[DestinationPositionResult] | DefinedErrorData[StallOrCollisionError]:
+    """Move by a fixed displacement from the current position."""
+    try:
+        position = await movement.move_relative(pipette_id, axis, distance)
+    except StallOrCollisionDetectedError as e:
+        return DefinedErrorData(
+            public=StallOrCollisionError(
+                id=model_utils.generate_id(),
+                createdAt=model_utils.get_timestamp(),
+                wrappedErrors=[
+                    ErrorOccurrence.from_failed(
+                        id=model_utils.generate_id(),
+                        createdAt=model_utils.get_timestamp(),
+                        error=e,
+                    )
+                ],
+            ),
+            state_update=StateUpdate().clear_all_pipette_locations(),
+        )
+    else:
+        deck_point = DeckPoint.construct(x=position.x, y=position.y, z=position.z)
+        return SuccessData(
+            public=DestinationPositionResult(
+                position=deck_point,
+            ),
+            state_update=StateUpdate().set_pipette_location(
+                pipette_id=pipette_id, new_deck_point=deck_point
             ),
         )
