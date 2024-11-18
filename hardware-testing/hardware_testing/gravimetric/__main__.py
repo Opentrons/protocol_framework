@@ -390,7 +390,7 @@ def build_gravimetric_cfg(
     isolate_volumes: List[float],
     extra: bool,
     jog: bool,
-    only_lld_once: bool,
+    lld_every_tip: bool,
     same_tip: bool,
     ignore_fail: bool,
     mode: str,
@@ -421,7 +421,7 @@ def build_gravimetric_cfg(
         kind=ConfigType.gravimetric,
         extra=extra,
         jog=jog,
-        only_lld_once=only_lld_once,
+        lld_every_tip=lld_every_tip,
         same_tip=same_tip,
         ignore_fail=ignore_fail,
         mode=mode,
@@ -440,7 +440,7 @@ def build_photometric_cfg(
     refill: bool,
     extra: bool,
     jog: bool,
-    only_lld_once: bool,
+    lld_every_tip: bool,
     same_tip: bool,
     ignore_fail: bool,
     pipette_channels: int,
@@ -472,7 +472,7 @@ def build_photometric_cfg(
         kind=ConfigType.photometric,
         extra=extra,
         jog=jog,
-        only_lld_once=only_lld_once,
+        lld_every_tip=lld_every_tip,
         same_tip=same_tip,
         ignore_fail=ignore_fail,
         photoplate_column_offset=photoplate_column_offset,
@@ -500,7 +500,7 @@ def _main(
             args.refill,
             args.extra,
             args.jog,
-            args.only_lld_once,
+            args.lld_every_tip,
             args.same_tip,
             args.ignore_fail,
             args.channels,
@@ -527,7 +527,7 @@ def _main(
             args.isolate_volumes if args.isolate_volumes else [],
             args.extra,
             args.jog,
-            args.only_lld_once,
+            args.lld_every_tip,
             args.same_tip,
             args.ignore_fail,
             args.mode,
@@ -594,7 +594,7 @@ if __name__ == "__main__":
     parser.add_argument("--isolate-volumes", nargs="+", type=float, default=None)
     parser.add_argument("--extra", action="store_true")
     parser.add_argument("--jog", action="store_true")
-    parser.add_argument("--only-lld-once", action="store_true")
+    parser.add_argument("--lld-every-tip", action="store_true")
     parser.add_argument("--same-tip", action="store_true")
     parser.add_argument("--ignore-fail", action="store_true")
     parser.add_argument("--photoplate-col-offset", nargs="+", type=int, default=[1])

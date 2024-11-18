@@ -351,7 +351,7 @@ def _run_trial(
 
     # center channel over well
     trial.pipette.move_to(trial.well.top(config.VIAL_SAFE_Z_OFFSET).move(trial.channel_offset))
-    if not trial.cfg.only_lld_once:
+    if trial.cfg.lld_every_tip:
         liq_height = _get_liquid_height(
             trial.ctx,
             trial.pipette,
@@ -661,7 +661,7 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
         _MEASUREMENTS = list()
     try:
         well = labware_on_scale["A1"]
-        if cfg.jog or cfg.blank or cfg.only_lld_once:
+        if cfg.jog or cfg.blank or not cfg.lld_every_tip:
             first_tip = _next_tip_for_channel(cfg, resources, 0, total_tips)
             setup_channel_offset = _get_channel_offset(cfg, channel=0)
             first_tip_location = first_tip.top().move(setup_channel_offset)
@@ -671,7 +671,7 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
             )
             resources.pipette._retract()
             ui.print_info("moving to scale")
-        if cfg.jog or cfg.only_lld_once:
+        if cfg.jog or not cfg.lld_every_tip:
             liq_height = _get_liquid_height(
                 resources.ctx,
                 resources.pipette,
