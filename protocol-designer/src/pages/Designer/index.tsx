@@ -151,11 +151,10 @@ export function Designer(): JSX.Element {
       ) : null}
       <Flex flexDirection={DIRECTION_COLUMN}>
         <ProtocolNavBar
-          hasZoomInSlot={zoomIn.slot != null && zoomIn.cutout != null}
+          hasZoomInSlot={zoomIn.slot != null || zoomIn.cutout != null}
           hasTrashEntity={hasTrashEntity}
           showLiquidOverflowMenu={showLiquidOverflowMenu}
           tabs={[startingDeckTab, protocolStepTab]}
-          isOffDeck={deckView !== leftString}
         />
 
         {tab === 'startingDeck' ? (

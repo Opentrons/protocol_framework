@@ -5,14 +5,17 @@ import styled from 'styled-components'
 
 import {
   ALIGN_CENTER,
+  ALIGN_FLEX_START,
   COLORS,
   DIRECTION_COLUMN,
   Flex,
+  JUSTIFY_FLEX_END,
   JUSTIFY_SPACE_BETWEEN,
   SecondaryButton,
   SPACING,
   StyledText,
   Tabs,
+  TEXT_ALIGN_LEFT,
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { getFileMetadata } from '../../file-data/selectors'
@@ -29,7 +32,6 @@ interface ProtocolNavBarProps {
   hasTrashEntity?: boolean
   showLiquidOverflowMenu?: (liquidOverflowMenu: boolean) => void
   liquidPage?: boolean
-  isOffDeck?: boolean
 }
 
 export function ProtocolNavBar({
@@ -38,7 +40,6 @@ export function ProtocolNavBar({
   hasTrashEntity,
   showLiquidOverflowMenu,
   liquidPage = false,
-  isOffDeck = false,
 }: ProtocolNavBarProps): JSX.Element {
   const { t } = useTranslation('starting_deck_state')
   const metadata = useSelector(getFileMetadata)
@@ -62,17 +63,12 @@ export function ProtocolNavBar({
         <StyledText
           desktopStyle="bodyDefaultSemiBold"
           css={LINE_CLAMP_TEXT_STYLE(1)}
-          textAlign={isOffDeck && TYPOGRAPHY.textAlignLeft}
         >
           {metadata?.protocolName != null && metadata?.protocolName !== ''
             ? metadata?.protocolName
             : t('untitled_protocol')}
         </StyledText>
-        <StyledText
-          desktopStyle="bodyDefaultRegular"
-          color={COLORS.grey60}
-          textAlign={isOffDeck && TYPOGRAPHY.textAlignLeft}
-        >
+        <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
           {metadataText}
         </StyledText>
       </MetadataContainer>
