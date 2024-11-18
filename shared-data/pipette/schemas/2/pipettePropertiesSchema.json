@@ -7,7 +7,7 @@
     },
     "displayCategory": {
       "type": "string",
-      "enum": ["GEN1", "GEN2", "FLEX"]
+      "enum": ["GEN1", "GEN2", "FLEX", "PEAK"]
     },
     "positiveNumber": {
       "type": "number",

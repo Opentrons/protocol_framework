@@ -216,6 +216,7 @@ PipetteName = Literal[
     "p1000_single_gen2",
     "p1000_single_flex",
     "p1000_multi_flex",
+    "p1000_multi_peak",
     "p1000_96",
     "p200_96",
 ]
@@ -242,6 +243,7 @@ class PipetteNameType(str, enum.Enum):
     P1000_SINGLE_GEN2 = "p1000_single_gen2"
     P1000_SINGLE_FLEX = "p1000_single_flex"
     P1000_MULTI_FLEX = "p1000_multi_flex"
+    P1000_MULTI_PEAK = "p1000_multi_peak"
     P1000_96 = "p1000_96"
     P200_96 = "p200_96"
 
@@ -250,7 +252,7 @@ class PipetteNameType(str, enum.Enum):
 # a huge number of them
 PipetteModel = NewType("PipetteModel", str)
 
-DisplayCategory = Literal["GEN1", "GEN2", "FLEX"]
+DisplayCategory = Literal["GEN1", "GEN2", "FLEX", "PEAK"]
 
 # todo(mm, 2022-03-18):
 # The JSON schema defines this as any string, not as an enum of string literals.
