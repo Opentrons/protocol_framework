@@ -50,6 +50,10 @@ def test_build_aspirate_settings() -> None:
         10.0: 40.0,
         20.0: 30.0,
     }
+    assert aspirate_properties.correction_by_volume.as_dict() == {
+        1.0: -2.5,
+        10.0: 3,
+    }
     assert aspirate_properties.pre_wet is True
     assert aspirate_properties.mix.enabled is True
     assert aspirate_properties.mix.repetitions == 3
@@ -100,6 +104,10 @@ def test_build_single_dispense_settings() -> None:
         "default": 50.0,
         10.0: 40.0,
         20.0: 30.0,
+    }
+    assert single_dispense_properties.correction_by_volume.as_dict() == {
+        2.0: -1.5,
+        20.0: 2,
     }
     assert single_dispense_properties.mix.enabled is True
     assert single_dispense_properties.mix.repetitions == 3
@@ -155,6 +163,10 @@ def test_build_multi_dispense_settings() -> None:
         "default": 50.0,
         10.0: 40.0,
         20.0: 30.0,
+    }
+    assert multi_dispense_properties.correction_by_volume.as_dict() == {
+        3.0: -0.5,
+        30.0: 1,
     }
     assert multi_dispense_properties.conditioning_by_volume.as_dict() == {
         "default": 10.0,
