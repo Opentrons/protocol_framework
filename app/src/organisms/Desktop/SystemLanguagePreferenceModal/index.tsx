@@ -46,9 +46,12 @@ export function SystemLanguagePreferenceModal(): JSX.Element | null {
   const storedSystemLanguage = useSelector(getStoredSystemLanguage)
 
   const showBootModal = appLanguage == null && systemLanguage != null
+
+  // only show update modal if we support the language their system has updated to
   const showUpdateModal =
     appLanguage != null &&
     systemLanguage != null &&
+    LANGUAGES.find(language => language.value === systemLanguage) != null &&
     storedSystemLanguage != null &&
     systemLanguage !== storedSystemLanguage
 
