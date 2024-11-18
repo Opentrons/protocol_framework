@@ -15,7 +15,8 @@ import {
 import {
   FLEX_ROBOT_TYPE,
   getModuleDisplayName,
-  OT2_ROBOT_TYPE,
+  TC_MODULE_LOCATION_OT2,
+  TC_MODULE_LOCATION_OT3,
   THERMOCYCLER_MODULE_V1,
   THERMOCYCLER_MODULE_V2,
 } from '@opentrons/shared-data'
@@ -48,19 +49,15 @@ export const SlotInformation: FC<SlotInformationProps> = ({
   const breakPointSize = useDeckSetupWindowBreakPoint()
   const pathLocation = useLocation()
   const isOffDeck = location === 'offDeck'
-  let modifiedLocation = location
-  if (
-    robotType === FLEX_ROBOT_TYPE &&
-    modules.includes(getModuleDisplayName(THERMOCYCLER_MODULE_V2))
-  ) {
-    modifiedLocation = 'A1+B1'
-  } else if (
-    robotType === OT2_ROBOT_TYPE &&
-    (modules.includes(getModuleDisplayName(THERMOCYCLER_MODULE_V2)) ||
-      modules.includes(getModuleDisplayName(THERMOCYCLER_MODULE_V1)))
-  ) {
-    modifiedLocation = '7,8,10,11'
-  }
+  const tcDisplayLocation =
+    robotType === FLEX_ROBOT_TYPE
+      ? TC_MODULE_LOCATION_OT3
+      : TC_MODULE_LOCATION_OT2
+  const modifiedLocation =
+    modules.includes(getModuleDisplayName(THERMOCYCLER_MODULE_V2)) ||
+    modules.includes(getModuleDisplayName(THERMOCYCLER_MODULE_V1))
+      ? tcDisplayLocation
+      : location
 
   return (
     <Flex

@@ -210,6 +210,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
           height="100%"
           alignItems={ALIGN_CENTER}
           justifyContent={JUSTIFY_CENTER}
+          gridGap={SPACING.spacing12}
         >
           <Box width="20%">
             {hoverSlot != null &&
