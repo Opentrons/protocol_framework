@@ -69,7 +69,7 @@
     "consolidate_disposal": "<text>Consolidating</text><tag/><text>from</text><semiBoldText>{{sourceWells}} of {{source}}</semiBoldText><text>to</text><semiBoldText>{{destination}}</semiBoldText>",
     "transfer_disposal": "<text>Transferring</text><tag/><text>from</text><semiBoldText>{{sourceWells}} of {{source}}</semiBoldText><text>to</text><semiBoldText>{{destination}}</semiBoldText>"
   },
-  "multi_dispense_options": "Distribute options",
+  "multi_dispense_options": "Disposal volume",
   "multiAspirate": "Consolidate path",
   "multiDispense": "Distribute path",
   "new_location": "New location",
