@@ -5,17 +5,15 @@ import styled from 'styled-components'
 
 import {
   ALIGN_CENTER,
-  ALIGN_FLEX_START,
   COLORS,
   DIRECTION_COLUMN,
   Flex,
-  JUSTIFY_FLEX_END,
+  isntStyleProp,
   JUSTIFY_SPACE_BETWEEN,
   SecondaryButton,
   SPACING,
   StyledText,
   Tabs,
-  TEXT_ALIGN_LEFT,
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { getFileMetadata } from '../../file-data/selectors'
@@ -24,7 +22,7 @@ import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
 import { useKitchen } from '../Kitchen/hooks'
 import { LiquidButton } from './LiquidButton'
 
-import type { TabProps } from '@opentrons/components'
+import type { StyleProps, TabProps } from '@opentrons/components'
 
 interface ProtocolNavBarProps {
   hasZoomInSlot?: boolean
@@ -109,10 +107,16 @@ const NavContainer = styled(Flex)<{ showShadow: boolean }>`
       : 'none'};
 `
 
-const MetadataContainer = styled(Flex)<{ showProtocolEditButtons: boolean }>`
+interface MetadataProps extends StyleProps {
+  showProtocolEditButtons: boolean
+}
+const MetadataContainer = styled.div.withConfig<MetadataProps>({
+  shouldForwardProp: p => isntStyleProp(p) && p !== 'showProtocolEditButtons',
+})<MetadataProps>`
+  display: flex;
   flex-direction: ${DIRECTION_COLUMN};
-  text-align: ${({ showProtocolEditButtons }) =>
-    showProtocolEditButtons
+  text-align: ${props =>
+    props.showProtocolEditButtons === true
       ? TYPOGRAPHY.textAlignCenter
       : TYPOGRAPHY.textAlignLeft};
 
