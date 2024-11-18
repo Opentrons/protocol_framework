@@ -43,6 +43,8 @@ class Settings(BaseSettings):
     huggingface_api_key: SecretStr = SecretStr("default_huggingface_api_key")
     google_credentials_json: SecretStr = SecretStr("default_google_credentials_json")
     datadog_api_key: SecretStr = SecretStr("default_datadog_api_key")
+    anthropic_api_key: SecretStr = SecretStr("default_anthropic_api_key")
+
 
     @property
     def json_logging(self) -> bool:
