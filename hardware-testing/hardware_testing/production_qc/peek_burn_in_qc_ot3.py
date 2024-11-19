@@ -21,8 +21,8 @@ from hardware_testing.opentrons_api import helpers_ot3
 from hardware_testing.data import ui
 
 DEFAULT_TRIALS = 10 # The number of trials each current speed check does
-DEFAULT_CYCLES = 30 # The number of burn-in cycles
-TRIALS_PER_CYCLE = 1000 # number of plunger cycles in one burn in cycle
+DEFAULT_CYCLES = 4 # The number of burn-in cycles
+TRIALS_PER_CYCLE = 500 # number of plunger cycles in one burn in cycle
 STALL_THRESHOLD_MM = 0.1
 TEST_ACCELERATION = 1500  # used during gravimetric tests
 
@@ -38,28 +38,28 @@ assert (
     MUST_PASS_CURRENT < DEFAULT_CURRENT
 ), "must-pass current must be less than default current"
 
-# TEST_SPEEDS = [
-#     90,
-#     80,
-#     70,
-#     60
-# ]
+TEST_SPEEDS = [
+    90,
+    80,
+    70,
+    60
+]
 
-TEST_SPEEDS = [80, 70]
+# TEST_SPEEDS = [80, 70]
 
-# PLUNGER_CURRENTS_SPEED = {
-#     0.3: TEST_SPEEDS,
-#     0.35: TEST_SPEEDS,
-#     0.4: TEST_SPEEDS,
-#     0.45: TEST_SPEEDS,
-#     0.5: TEST_SPEEDS,
-#     0.55: TEST_SPEEDS,
-#     0.6: TEST_SPEEDS,
-#     1: TEST_SPEEDS,
-# }
+PLUNGER_CURRENTS_SPEED = {
+    0.3: TEST_SPEEDS,
+    0.35: TEST_SPEEDS,
+    0.4: TEST_SPEEDS,
+    0.45: TEST_SPEEDS,
+    0.5: TEST_SPEEDS,
+    0.55: TEST_SPEEDS,
+    0.6: TEST_SPEEDS,
+    1: TEST_SPEEDS,
+}
 
-PLUNGER_CURRENTS_SPEED = {0.4: TEST_SPEEDS,
-                          1: TEST_SPEEDS}
+# PLUNGER_CURRENTS_SPEED = {0.4: TEST_SPEEDS,
+#                           1: TEST_SPEEDS}
 
 MAX_SPEED = max(TEST_SPEEDS)
 MAX_CURRENT = max(max(list(PLUNGER_CURRENTS_SPEED.keys())), 1.0)
