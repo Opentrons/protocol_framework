@@ -804,10 +804,10 @@ def minimal_liquid_class_def2() -> LiquidClassSchemaV1:
         namespace="test-fixture-2",
         byPipette=[
             ByPipetteSetting(
-                pipetteModel="p20_single_gen2",
+                pipetteModel="flex_1channel_50",
                 byTipType=[
                     ByTipTypeSetting(
-                        tiprack="opentrons_96_tiprack_20ul",
+                        tiprack="opentrons_flex_96_tiprack_50ul",
                         aspirate=AspirateProperties(
                             submerge=Submerge(
                                 positionReference=PositionReference.LIQUID_MENISCUS,
