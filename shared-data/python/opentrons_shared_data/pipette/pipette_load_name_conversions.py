@@ -126,7 +126,6 @@ def get_major_version_from_pipette_name(
         "flex" in pipette_name_tuple
         or "gen3" in pipette_name_tuple
         or "96" in pipette_name_tuple
-        or "peek" in pipette_name_tuple
     ):
         return 3
     elif "gen2" in pipette_name_tuple:
@@ -200,7 +199,6 @@ def generation_from_string(pipette_name_list: List[str]) -> PipetteGenerationTyp
         or "3." in pipette_name_list[-1]
         or pipette_name_list == ["p1000", "96"]
         or pipette_name_list == ["p200", "96"]
-        or "peek" in pipette_name_list
     ):
         return PipetteGenerationType.FLEX
     elif "gen2" in pipette_name_list or "2." in pipette_name_list[-1]:
