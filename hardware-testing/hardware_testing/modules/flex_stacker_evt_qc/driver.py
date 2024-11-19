@@ -33,6 +33,10 @@ class StackerAxis(Enum):
     Z = "Z"
     L = "L"
 
+    def __str__(self) -> str:
+        """Name."""
+        return self.name
+
 
 class Direction(Enum):
     """Direction."""
@@ -40,9 +44,17 @@ class Direction(Enum):
     RETRACT = 0
     EXTENT = 1
 
+    def __str__(self) -> str:
+        """Convert to tag for clear logging."""
+        return "negative" if self == Direction.RETRACT else "positive"
+
     def opposite(self) -> "Direction":
         """Get opposite direction."""
         return Direction.EXTENT if self == Direction.RETRACT else Direction.RETRACT
+    
+    def distance(self, distance: float) -> float:
+        """Get signed distance, where retract direction is negative."""
+        return distance * -1 if self == Direction.RETRACT else distance
 
 
 @dataclass
@@ -130,10 +142,38 @@ class FlexStacker:
         if self._simulating:
             return True
 
-        _LS_RE = re.compile(rf"^M119 .*{axis.name}{direction.name[0]}:(\d) .*\n")
+        _LS_RE = re.compile(rf"^M119 .*{axis.name}{direction.name[0]}:(\d) .* OK\n")
         res = self._send_and_recv("M119\n", "M119 XE:")
         match = _LS_RE.match(res)
         assert match, f"Incorrect Response for limit switch: {res}"
+        return bool(int(match.group(1)))
+
+    def get_platform_sensor(self, direction: Direction) -> bool:
+        """Get platform sensor status.
+
+        :return: True if platform is present, False otherwise
+        """
+        if self._simulating:
+            return True
+
+        _LS_RE = re.compile(rf"^M121 .*{direction.name[0]}:(\d) .* OK\n")
+        res = self._send_and_recv("M121\n", "M119 E:")
+        match = _LS_RE.match(res)
+        assert match, f"Incorrect Response for platform sensor: {res}"
+        return bool(int(match.group(1)))
+    
+    def get_hopper_door_closed(self) -> bool:
+        """Get whether or not door is closed.
+
+        :return: True if door is closed, False otherwise
+        """
+        if self._simulating:
+            return True
+
+        _LS_RE = re.compile(r"^M122 (\d) OK\n")
+        res = self._send_and_recv("M122\n", "M122 ")
+        match = _LS_RE.match(res)
+        assert match, f"Incorrect Response for hopper door switch: {res}"
         return bool(int(match.group(1)))
 
     def move_in_mm(
