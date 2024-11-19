@@ -289,9 +289,9 @@
   "plungerPositionsConfigurations": {
     "default": {
       "top": 0.0,
-      "bottom": 65.5,
-      "blowout": 70.5,
-      "drop": 86.5
+      "bottom": 71.5,
+      "blowout": 76.5,
+      "drop": 91.5
     }
   },
   "availableSensors": {
@@ -309,9 +309,9 @@
   },
   "backCompatNames": [],
   "channels": 8,
-  "shaftDiameter": 5.0,
-  "shaftULperMM": 19.6349,
-  "backlashDistance": 1.0,
+  "shaftDiameter": 4.5,
+  "shaftULperMM": 15.904,
+  "backlashDistance": 0.1,
   "quirks": [],
   "plungerHomingConfigurations": {
     "current": 1.0,
