@@ -67,7 +67,6 @@ def subject(
 async def test_aspirate_implementation_no_prep(
     decoy: Decoy,
     state_view: StateView,
-    hardware_api: HardwareControlAPI,
     movement: MovementHandler,
     pipetting: PipettingHandler,
     subject: AspirateImplementation,
@@ -151,7 +150,6 @@ async def test_aspirate_implementation_no_prep(
 async def test_aspirate_implementation_with_prep(
     decoy: Decoy,
     state_view: StateView,
-    hardware_api: HardwareControlAPI,
     movement: MovementHandler,
     pipetting: PipettingHandler,
     mock_command_note_adder: CommandNoteAdder,
@@ -414,15 +412,6 @@ async def test_overpressure_error(
             ),
             pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
                 pipette_id=pipette_id
-            ),
-        ),
-        state_update_if_false_positive=update_types.StateUpdate(
-            pipette_location=update_types.PipetteLocationUpdate(
-                pipette_id=pipette_id,
-                new_location=update_types.Well(
-                    labware_id=labware_id, well_name=well_name
-                ),
-                new_deck_point=DeckPoint(x=position.x, y=position.y, z=position.z),
             ),
         ),
     )
