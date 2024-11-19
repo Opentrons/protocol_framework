@@ -1587,6 +1587,7 @@ class OT3API(
 
     async def _home(self, axes: Sequence[Axis]) -> None:
         """Home one axis at a time."""
+        await self._backend.update_motor_status()
         for axis in axes:
             try:
                 if axis == Axis.G:
