@@ -25,10 +25,10 @@ def run(protocol: protocol_api.ProtocolContext):
     # Load labware
     plate = protocol.load_labware('corning_96_wellplate_360ul_flat', '1')
     tip_rack = protocol.load_labware('opentrons_96_tiprack_300ul', '2')
-    
+
     # Load pipette
     pipette = protocol.load_instrument('p300_single', 'left', tip_racks=[tip_rack])
-    
+
     # Perform operations
     for _ in range(100):
         pipette.pick_up_tip()
@@ -63,10 +63,10 @@ def run(protocol: protocol_api.ProtocolContext):
     # Load labware
     plate = protocol.load_labware('corning_96_wellplate_360ul_flat', '1')
     tip_rack = protocol.load_labware('opentrons_96_tiprack_300ul', '2')
-    
+
     # Load pipette
     pipette = protocol.load_instrument('p300_multi', 'right', tip_racks=[tip_rack])
-    
+
     # Perform operations
     for i in range(20):
         pipette.pick_up_tip()
@@ -100,10 +100,10 @@ def run(protocol: protocol_api.ProtocolContext):
     plate = protocol.load_labware('corning_96_wellplate_360ul_flat', '1')
     tip_rack1 = protocol.load_labware('opentrons_96_tiprack_300ul', '2')
     tip_rack2 = protocol.load_labware('opentrons_96_tiprack_300ul', '3')
-    
+
     # Load pipette
     pipette = protocol.load_instrument('p300_multi', 'right', tip_racks=[tip_rack1, tip_rack2])
-    
+
     # Perform operations within available columns range
     for i in range(12):  # Restrict to 12 columns
         pipette.pick_up_tip()
@@ -135,10 +135,10 @@ def run(protocol: protocol_api.ProtocolContext):
     # Load labware
     plate = protocol.load_labware('corning_96_wellplate_360ul_flat', '1')
     tip_rack = protocol.load_labware('opentrons_96_tiprack_300ul', '2')
-    
+
     # Load pipette
     pipette = protocol.load_instrument('p300_single', 'left', tip_racks=[tip_rack])
-    
+
     # Perform operations
     for row in range(8):
         for col in range(12):
@@ -163,10 +163,10 @@ def run(protocol: protocol_api.ProtocolContext):
     plate = protocol.load_labware('corning_96_wellplate_360ul_flat', '1')
     tip_rack1 = protocol.load_labware('opentrons_96_tiprack_300ul', '2')
     tip_rack2 = protocol.load_labware('opentrons_96_tiprack_300ul', '3')
-    
+
     # Load pipette
     pipette = protocol.load_instrument('p300_single', 'left', tip_racks=[tip_rack1, tip_rack2])
-    
+
     # Perform operations (same as above)
 ```
 
@@ -221,10 +221,10 @@ def run(protocol: protocol_api.ProtocolContext):
     # Load labware
     plate = protocol.load_labware('corning_96_wellplate_360ul_flat', '1')
     tip_rack = protocol.load_labware('opentrons_96_tiprack_300ul', '2')
-    
+
     # Load pipette
     pipette = protocol.load_instrument('p300_multi', 'right', tip_racks=[tip_rack])
-    
+
     # Perform operations
     for i in range(20):  # Exceeds available columns
         pipette.pick_up_tip()
@@ -255,10 +255,10 @@ def run(protocol: protocol_api.ProtocolContext):
     plate = protocol.load_labware('corning_96_wellplate_360ul_flat', '1')
     tip_rack1 = protocol.load_labware('opentrons_96_tiprack_300ul', '2')
     tip_rack2 = protocol.load_labware('opentrons_96_tiprack_300ul', '3')
-    
+
     # Load pipette
     pipette = protocol.load_instrument('p300_multi', 'right', tip_racks=[tip_rack1, tip_rack2])
-    
+
     # Perform operations within available columns range
     for i in range(12):  # Valid column indices for a 96-well plate
         pipette.pick_up_tip()
@@ -314,7 +314,6 @@ def run(protocol: protocol_api.ProtocolContext):
 
 ---
 
-
 ## Example when using serial dilution protocol
 
 Below protocol produces `OutofTips` error, since it excauts all tips by using `plate.rows()`:
@@ -344,14 +343,14 @@ def run(protocol: protocol_api.ProtocolContext):
     for row in plate.rows():
         # Transfer and mix solution from reservoir to first well
         p300.transfer(100, reservoir['A2'], row[0], mix_after=(3, 50), new_tip='always')
-        
+
         # Serial dilution within the row
         p300.transfer(100, row[:11], row[1:], mix_after=(3, 50), new_tip='always')
 
 ```
 
-
 Correct way is follows:
+
 ```python
 from opentrons import protocol_api
 

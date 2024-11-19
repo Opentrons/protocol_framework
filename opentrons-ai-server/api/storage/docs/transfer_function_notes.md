@@ -1,4 +1,3 @@
-
 <Transfer function notes>
 
 **Introduction**
@@ -139,7 +138,6 @@ The `new_tip` parameter controls tip usage during transfers.
 
 **Important Note:** Do not use `new_tip='once'` inside a loop; instead, pass lists of wells to the `transfer` function and let it handle the iteration.
 
-
 ---
 
 **Avoiding Unnecessary Loops**
@@ -221,7 +219,6 @@ for i in range(13):  # Exceeds available columns (0-11)
 for i in range(12):  # Valid column indices for a 96-well plate
     pipette.transfer(volume, source_columns[i], dest_columns[i])
 ```
-
 
 ---
 
@@ -648,8 +645,7 @@ def run(protocol):
         dest_well = dest_plate.wells_by_name()[transfer['Destination Well']]
         volume = float(transfer['Volume'])
         pipette.transfer(volume, source_well, dest_well, new_tip='always')
-        
-```
 
+```
 
 </Transfer function notes>

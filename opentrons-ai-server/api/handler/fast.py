@@ -17,9 +17,9 @@ from pydantic import BaseModel, Field, conint
 from starlette.middleware.base import BaseHTTPMiddleware
 from uvicorn.protocols.utils import get_path_with_query_string
 
+from api.domain.anthropic_predict import AnthropicPredict
 from api.domain.fake_responses import FakeResponse, get_fake_response
 from api.domain.openai_predict import OpenAIPredict
-from api.domain.anthropic_predict import AnthropicPredict
 from api.handler.custom_logging import setup_logging
 from api.integration.auth import VerifyToken
 from api.integration.google_sheets import GoogleSheetsClient
@@ -45,8 +45,6 @@ auth: VerifyToken = VerifyToken()
 openai: OpenAIPredict = OpenAIPredict(settings)
 google_sheets_client = GoogleSheetsClient(settings)
 claude: AnthropicPredict = AnthropicPredict(settings)
-
-MODEL = 'claude'
 
 # Initialize FastAPI app with metadata
 app = FastAPI(
@@ -199,11 +197,12 @@ async def create_chat_completion(
                 fake: FakeResponse = get_fake_response(body.fake_key)
                 return ChatResponse(reply=fake.chat_response.reply, fake=fake.chat_response.fake)
             return ChatResponse(reply="Default fake response.  ", fake=body.fake)
-        if MODEL == 'openai':
+
+        if "openai" in settings.model.lower():
             response: Union[str, None] = openai.predict(prompt=body.message, chat_completion_message_params=body.history)
         else:
             response: Union[str, None] = claude.predict(prompt=body.message)
-            
+
         if response is None or response == "":
             return ChatResponse(reply="No response was generated", fake=bool(body.fake))
 
@@ -242,7 +241,7 @@ async def update_protocol(
         if body.fake:
             return ChatResponse(reply="Fake response", fake=bool(body.fake))
 
-        if MODEL == 'openai':
+        if "openai" in settings.model.lower():
             response: Union[str, None] = openai.predict(prompt=body.prompt, chat_completion_message_params=None)
         else:
             response: Union[str, None] = claude.predict(prompt=body.prompt)
@@ -285,7 +284,8 @@ async def create_protocol(
 
         if body.fake:
             return ChatResponse(reply="Fake response", fake=body.fake)
-        if MODEL == 'openai':
+
+        if "openai" in settings.model.lower():
             response: Union[str, None] = openai.predict(prompt=str(body.model_dump()), chat_completion_message_params=None)
         else:
             response: Union[str, None] = claude.predict(prompt=str(body.model_dump()))

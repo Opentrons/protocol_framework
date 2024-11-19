@@ -7,20 +7,24 @@ Robot: OT-2
 API: 2.15
 
 Modules:
+
 - No modules
 
 Labware:
+
 - Source labware: Opentrons Tough 96 Well Plate 200 uL PCR Full Skirt in slot 4
 - Destination Labware: NEST 2 mL 96-Well Deep Well Plate, V Bottom in slot 9
 - Tiprack: Opentrons OT-2 96 Tip Rack 300 uL in slot 1
 
 Pipette mount:
+
 - P300 Multi Channel is mounted on the right
 
 Commands:
+
 1. Transfer 50 uL of sample from each column of the source plate into the corresponding columns of the destination deep well plate.
-Change tips for each transfer.
-</description>
+   Change tips for each transfer.
+   </description>
 
 <protocol>
 # metadata
@@ -31,11 +35,10 @@ metadata = {
     'apiLevel': '2.15'
 }
 
-def run(protocol):
-    # labware
-    tiprack = protocol.load_labware('opentrons_96_tiprack_300ul', 1)
-    source = protocol.load_labware('opentrons_96_wellplate_200ul_pcr_full_skirt', 4)
-    destination = protocol.load_labware('nest_96_wellplate_2ml_deep', 9)
+def run(protocol): # labware
+tiprack = protocol.load_labware('opentrons_96_tiprack_300ul', 1)
+source = protocol.load_labware('opentrons_96_wellplate_200ul_pcr_full_skirt', 4)
+destination = protocol.load_labware('nest_96_wellplate_2ml_deep', 9)
 
     # pipettes
     p300m = protocol.load_instrument('p300_multi_gen2', mount="right", tip_racks=[tiprack])
@@ -47,48 +50,52 @@ def run(protocol):
 
     # commands
     p300m.transfer(TRANSFER_VOL, SRC_COLS, DEST_COLS, new_tip='always')
-</protocol>
 
+</protocol>
 
 [2] Example
 <description>
 Metadata:
+
 - Application: Reagent transfer
 - Robot: OT-2
 - API: 2.15
 
 Labware:
-- Source Labware 1: NEST 1 Well Reservoir 195 mL  is positioned in slot 7
+
+- Source Labware 1: NEST 1 Well Reservoir 195 mL is positioned in slot 7
 - Destination Labware 1: Corning 96 Well Plate 360 uL Flat is positioned in slot 1
 - Destination Labware 2: Corning 96 Well Plate 360 uL Flat is positioned in slot 2
 - Tiprack 1: Opentrons 96 Tip Rack 300 uL is positioned in slot 10
 
 Pipette Mount:
+
 - Left Mount: P300 Multi-Channel GEN2
 
 Commands:
+
 1. Using P300 Multi-channel pipette on the left mount, transfer 50 uL of reagent from first column in the source labware 1
-to all the columns in destination labware 1. Keep the same set of tips for this entire set of transfers within this step.
-2. Using P300 Multi-channel pipette on the left mount, transfer 100 uL from first column in the source labware 1 
-to each column in destination labware 2. Keep the same set of tips for this entire set of transfers within this step.
-</description>
+   to all the columns in destination labware 1. Keep the same set of tips for this entire set of transfers within this step.
+2. Using P300 Multi-channel pipette on the left mount, transfer 100 uL from first column in the source labware 1
+   to each column in destination labware 2. Keep the same set of tips for this entire set of transfers within this step.
+   </description>
 
 <protocol>
 from opentrons import protocol_api
 
 # metadata
+
 metadata = {
-    "protocolName": "Reagent Transfer protocol",
-    "author": "Opentrons Generative AI",
-    "description": "Transfer reagents from multile source labware to multiple destination labware",
-    "apiLevel": "2.15"
+"protocolName": "Reagent Transfer protocol",
+"author": "Opentrons Generative AI",
+"description": "Transfer reagents from multile source labware to multiple destination labware",
+"apiLevel": "2.15"
 }
 
-def run(protocol: protocol_api.ProtocolContext):
-    # labware
-    source_1 = protocol.load_labware("nest_1_reservoir_195ml", location=7)
-    destination_1 = protocol.load_labware("corning_96_wellplate_360ul_flat", location=1)
-    destination_2 = protocol.load_labware("corning_96_wellplate_360ul_flat", location=2)
+def run(protocol: protocol_api.ProtocolContext): # labware
+source_1 = protocol.load_labware("nest_1_reservoir_195ml", location=7)
+destination_1 = protocol.load_labware("corning_96_wellplate_360ul_flat", location=1)
+destination_2 = protocol.load_labware("corning_96_wellplate_360ul_flat", location=2)
 
     tiprack300 = protocol.load_labware("opentrons_96_tiprack_300ul", location=10)
 
@@ -106,28 +113,32 @@ def run(protocol: protocol_api.ProtocolContext):
 
     p300m.transfer(transfer_vol_1, source_wells_1, destination_wells_1, new_tip="once")
     p300m.transfer(transfer_vol_2, source_wells_1, destination_wells_2, new_tip="once")
-</protocol>
 
+</protocol>
 
 [3] Example
 <description>
+
 - Application: Reagent transfer
 - Robot: OT-2
 - API: 2.15
 
 Labware:
+
 - Source Labware: Thermo Scientific Nunc 96 Well Plate 2000 uL in slot 7
 - Destination Labware: Opentrons 24 Well Aluminum Block with NEST 0.5 mL Screwcap in slot 3
 - Tiprack: Opentrons 96 Filter Tip Rack 1000 uL in slot 4
 
 Pipette mount:
+
 - P1000 Single-Channel GEN2 is mounted on the left
 
 Commands:
+
 1. Using P1000 Single-Channel GEN2 pipette on left mount, transfer 195.0 uL of reagent
-  from H10, F12, D7, B1, C8  wells in source labware
-  to first well in the destination labware. Use  a new tip for each transfer.
-</description>
+   from H10, F12, D7, B1, C8 wells in source labware
+   to first well in the destination labware. Use a new tip for each transfer.
+   </description>
 
 <protocol>
 metadata = {
@@ -155,17 +166,19 @@ def run(protocol):
     # commands
     for src in SRC_WELLS:
         p1000s.transfer(TRANSFER_VOL, source.wells_by_name()[src], DEST_WELL, new_tip="always")
-</protocol>
 
+</protocol>
 
 [4] Example
 <description>
 Metadata and requirements:
+
 - Application: Reagent transfer
 - Robot: Flex
 - API: 2.15
 
 Labware:
+
 - Source Labware 1: Corning 96 Well Plate 360 uL Flat is positioned in slot C1
 - Source Labware 1: Corning 96 Well Plate 360 uL Flat is positioned in slot C2
 - Destination Labware 1: Corning 96 Well Plate 360 uL Flat is positioned in slot D1
@@ -174,31 +187,35 @@ Labware:
 - Tiprack 2: Opentrons Flex 96 Filter Tip Rack 50 uL is positioned in slot A2
 
 Pipette Mount:
+
 - Flex 1-Channel 1000 uL Pipette is mounted on the left side
 - Flex 1-Channel 50 uL Pipette is mounted on the right side
 
 Commands:
+
 1. Using Flex 1-Channel 1000 uL Pipette on left mount, transfer 50 uL from wells A1, A2 in source labware 1
-  to B6, B7 in source labware 2. Reuse the same tip for each transfer.
+   to B6, B7 in source labware 2. Reuse the same tip for each transfer.
 2. Using Flex 1-Channel 50 uL Pipette on right mount, transfer 15 uL from wells C4, C6 in source labware 2
-  to A3, A4 in source labware 1. Reuse the same tip for each transfer.
+   to A3, A4 in source labware 1. Reuse the same tip for each transfer.
 3. Using Flex 1-Channel 50 uL Pipette on right mount, transfer 10 uL from wells B6, B7 in source labware 2
-  to A1, B1 in destination labware 1. Use a new tip each time for each transfer.
+   to A1, B1 in destination labware 1. Use a new tip each time for each transfer.
 4. Using Flex 1-Channel 50 uL Pipette on right mount, transfer 10 uL from wells C4, C6 in source labware 2
-  to A1, B1  in destination labware 2. Use a new tip each time for each transfer.
-</description>
+   to A1, B1 in destination labware 2. Use a new tip each time for each transfer.
+   </description>
 
 <protocol>
 from opentrons import protocol_api
 
 # metadata
+
 metadata = {
-    'protocolName': 'Reagent Transfer',
-    'author': 'Opentrons Generative AI',
+'protocolName': 'Reagent Transfer',
+'author': 'Opentrons Generative AI',
 }
 requirements = {"robotType": "Flex", "apiLevel": "2.15"}
 
 # protocol run function
+
 def run(protocol: protocol_api.ProtocolContext):
 
     # labware
@@ -228,41 +245,45 @@ def run(protocol: protocol_api.ProtocolContext):
     transfer_vol_2 = 15
     transfer_vol_3 = 10
     transfer_vol_4 = 10
-    
+
     # commands
     p1000s.transfer(transfer_vol_1, source_wells_1, destination_wells_1, new_tip="once")
     p50s.transfer(transfer_vol_2, source_wells_2, destination_wells_2, new_tip="once")
     p50s.transfer(transfer_vol_3, source_wells_3, destination_wells_3, new_tip="always")
     p50s.transfer(transfer_vol_4, source_wells_4, destination_wells_4, new_tip="always")
-</protocol>
 
+</protocol>
 
 [5] Example
 <description>
 Metadata and requirements:
+
 - Application: Reagent transfer
 - Robot: Flex
 - API: 2.15
 
 Labware:
+
 - Source Labware: Opentrons 96 Flat Bottom Adapter with NEST 96 Well Plate 200 uL Flat on slot D1
 - Destination Labware: Opentrons 96 Flat Bottom Adapter with NEST 96 Well Plate 200 uL Flat on slot C2
 - Tiprack: Opentrons Flex 96 Filter Tip Rack 50 uL on slot C1
 
 Pipette Mount:
+
 - Flex 8-Channel 50 uL Pipette is mounted on the right side
 
 Commands:
-1. Using Flex 8-Channel 50 uL Pipette on right mount, transfer 8 uL of reagent from 4, 3, 6, 1, 11 columns in source labware 
-to 5, 9, 1, 10, 2 columns in the destination labware. Using the same tip for all transfers.
-</description>
+
+1. Using Flex 8-Channel 50 uL Pipette on right mount, transfer 8 uL of reagent from 4, 3, 6, 1, 11 columns in source labware
+   to 5, 9, 1, 10, 2 columns in the destination labware. Using the same tip for all transfers.
+   </description>
 
 <protocol>
 from opentrons import protocol_api
 
 metadata = {
-    'protocolName': 'Reagent Transfer',
-    'author': 'Opentrons Generative AI',
+'protocolName': 'Reagent Transfer',
+'author': 'Opentrons Generative AI',
 }
 
 requirements = {"robotType": "Flex", "apiLevel": "2.15"}
@@ -287,39 +308,45 @@ def run(protocol: protocol_api.ProtocolContext):
     for src_col, dest_col in zip(src_cols, dest_cols):
         p50m.transfer(transfer_vol, source.columns()[src_col], destination.columns()[dest_col], new_tip="never")
     p50m.drop_tip()
+
 </protocol>
-
-
 
 [6] Example
 <description>
 Metadata:
+
 - Author: Bob
 - Protocol Name: PCR
 
 Requirements:
+
 - `requirements = {"robotType": "OT-2", "apiLevel": "2.15"}`
 
 Modules:
+
 - The thermocycler module is located in slot 7.
 - The sample temperature module is positioned in slot 1.
 - The mastermix temperature module is positioned in slot 3.
 
 Labware:
+
 - The source sample labware, an Opentrons Tough 96 Well Plate 200 uL PCR Full Skirt, is placed on the temperature module in slot 1.
 - The source mastermix labware, an Opentrons Tough 96 Well Plate 200 uL PCR Full Skirt, is placed on the temperature module in slot 3.
 - The destination labware, an Opentrons Tough 96 Well Plate 200 uL PCR Full Skirt, is placed on the thermocycler module in slot 7.
 - A 20 uL filter tip rack is used in slot 4.
 
 Pipette Mount:
+
 - A P20 Multi-Channel Gen2 pipette is mounted on the left side.
 
 Well Allocation:
+
 - Sample source wells: the first 64 wells column-wise in the sample source plate.
 - Mastermix source wells: the first 64 wells column-wise in the mastermix plate.
 - Destination wells: the first 64 wells column-wise in the thermocycler.
 
 Commands:
+
 1. Set the total number of samples to 64.
 2. Open the thermocycler lid.
 3. Set the thermocycler block temperature to 6C.
@@ -327,42 +354,40 @@ Commands:
 5. Set the sample temperature module to 4C.
 6. Set the mastermix temperature module to 10C.
 7. Transfer 7 uL of mastermix from the mastermix source wells to the destination wells. Use the same pipette tip for all transfers.
-8. Transfer 5 uL of the sample from the source to the destination. Mix the sample and mastermix for a total volume of 12 uL 9 times. 
-Blow out to `destination well` after each transfer. Use a new tip for each transfer.
+8. Transfer 5 uL of the sample from the source to the destination. Mix the sample and mastermix for a total volume of 12 uL 9 times.
+   Blow out to `destination well` after each transfer. Use a new tip for each transfer.
 9. Close the thermocycler lid.
 10. Execute the thermocycler with the following profile:
     - 74C for 65 seconds for 1 cycle, block max volume is sample and mastermix volume
 11. Execute the thermocycler with the following profile:
-    - 60C for 7 seconds, 84C for 19 seconds, 57C for 44 seconds for 13 cycles,  block max volume is sample and mastermix volume
+    - 60C for 7 seconds, 84C for 19 seconds, 57C for 44 seconds for 13 cycles, block max volume is sample and mastermix volume
 12. Execute the thermocycler with the following profile:
-    - 75C for 480 seconds for 1 cycle,  block max volume is sample and mastermix volume
+    - 75C for 480 seconds for 1 cycle, block max volume is sample and mastermix volume
 13. Hold the thermocycler block at 4C.
 14. Open the thermocycler lid.
 15. Deactivate the mastermix temperature module.
 16. Deactivate the sample temperature module.
-</description>
+    </description>
 
 <protocol>
 import math
 from opentrons import protocol_api
 
 metadata = {
-    'protocol_name': 'QIAGEN OneStep RT-PCR Kit PCR Amplification',
-    'author': 'chatGPT',
-    'description': 'Amplification using QIAGEN OneStep RT-PCR Kit with 13 cycles',
-    'apiLevel': '2.15'
+'protocol_name': 'QIAGEN OneStep RT-PCR Kit PCR Amplification',
+'author': 'chatGPT',
+'description': 'Amplification using QIAGEN OneStep RT-PCR Kit with 13 cycles',
+'apiLevel': '2.15'
 }
 
-
-def run(protocol: protocol_api.ProtocolContext):
-    # Sample preparation parameters
-    number_of_samples = 64
-    sample_volume_ul = 5  # Volume in microliters
-    master_mix_volume_ul = 7  # Volume in microliters
-    mixing_cycles = 9
-    total_mix_volume_ul = sample_volume_ul + master_mix_volume_ul
-    master_mix_temperature_c = 10  # Temperature in Celsius
-    sample_temperature_c = 4  # Temperature in Celsius
+def run(protocol: protocol_api.ProtocolContext): # Sample preparation parameters
+number_of_samples = 64
+sample_volume_ul = 5 # Volume in microliters
+master_mix_volume_ul = 7 # Volume in microliters
+mixing_cycles = 9
+total_mix_volume_ul = sample_volume_ul + master_mix_volume_ul
+master_mix_temperature_c = 10 # Temperature in Celsius
+sample_temperature_c = 4 # Temperature in Celsius
 
     # Thermocycler parameters
     lid_temperature_c = 55  # Lid temperature in Celsius
@@ -456,41 +481,50 @@ def run(protocol: protocol_api.ProtocolContext):
     # Commands 15 & 16: Deactivate temperature modules
     master_mix_temperature_module.deactivate()
     sample_temperature_module.deactivate()
+
 </protocol>
 
 [7] Example
 <description>
 Metadata:
+
 - Author: Bob
 - ProtocolName: PCR
 
 Requirements:
+
 - requirements = {"robotType": "Flex", "apiLevel": "2.15"}
 
 Modules:
+
 - Thermocycler module GEN 2 is present on slot A1+B1
 - Temperature module GEN 2 is placed on slot D1
 - Mastermix temperature module GEN 2 is placed on slot D3
 
 Adapter:
+
 - Opentrons 96 Well Aluminum Block adapter is placed on the temperature module GEN 2
 - Opentrons 96 Well Aluminum Block adapter is placed on the mastermix temperature module GEN 2
 
 Labware:
+
 - Source labware: `Opentrons Tough 96 Well Plate 200 uL PCR Full Skirt` placed on the temperature module
 - Source mastermix labware: `Opentrons Tough 96 Well Plate 200 uL PCR Full Skirt` placed on temperature module
 - Destination labware: `Opentrons Tough 96 Well Plate 200 uL PCR Full Skirt`, placed on C3
 - Load three `opentrons_flex_96_filtertiprack_50ul` tip racks on `opentrons_flex_96_tiprack_adapter` adapters in slots A2, B2, and C2
 
 Pipette mount:
+
 - `Flex 96-Channel 1000 uL Pipette` is mounted on the left side
 
 Well Allocation:
+
 - source well: A1 well of source labware
 - destination well: A1 well of destination labware
 - mastermix well: A1 well of mastermix labware
 
 Commands:
+
 1. Set the thermocycler block temperature to 22 C.
 2. Open the thermocycler lid.
 3. Set the thermocycler lid temperature to 95 C.
@@ -498,22 +532,28 @@ Commands:
 5. Set master mix temperature module to 10 C.
 6. Transfer 20 uL of liquid from 5 mm below the top surface of mastermix well to 2 mm above the bottom of destination well. Use the same tip for each transfer.
 7. Transfer 20 ul of liquid from 3 mm above the source well bottom to destination well 7 mm beneath the top surface. Flow rate is at half the default.
-Mix the sample and mastermix of 40 ul total volume 5 times. Remove the tip slowly out of the well at 5 mm/s speed. Use the same tip for each transfer.
+   Mix the sample and mastermix of 40 ul total volume 5 times. Remove the tip slowly out of the well at 5 mm/s speed. Use the same tip for each transfer.
 8. Move the destination labware to the thermocycler using gripper.
 9. Close the thermocycler lid.
 10. Execute the thermocycle using the following profile:
-   - 74 degree C for 65 seconds for 1 cycle, block max volume is sample and mastermix volume
+
+- 74 degree C for 65 seconds for 1 cycle, block max volume is sample and mastermix volume
+
 11. Execute the thermocycle using the following profile:
-   - 60 degree C for 7 seconds, 84 degree C for 19 seconds, 57 degree C for 44 seconds for 25 cycles, block max volume is sample and mastermix volume
+
+- 60 degree C for 7 seconds, 84 degree C for 19 seconds, 57 degree C for 44 seconds for 25 cycles, block max volume is sample and mastermix volume
+
 12. Execute the thermocycle using the following profile:
-   - 75 degree C for 480 seconds for 1 cycle, block max volume is sample and mastermix volume
+
+- 75 degree C for 480 seconds for 1 cycle, block max volume is sample and mastermix volume
+
 13. Hold thermocycler block at 4 C.
 14. Open thermocycler lid.
 15. Move the destination labware from thermocycler back to its original slot C3 using gripper.
 16. Pause the protocol and tell the user to pick up the destination plate, seal it and refrigerate it at 4 C.
 17. Deactivate the temperature modules.
 18. Deactivate the mastermix temperature modules.
-</description>
+    </description>
 
 <protocol>
 from opentrons import protocol_api
@@ -525,13 +565,12 @@ metadata = {
 
 requirements = {"robotType": "Flex", "apiLevel": "2.15"}
 
-def run(protocol: protocol_api.ProtocolContext):
-    # Sample parameters
-    sample_volume_ul = 20
-    master_mix_volume_ul = 20
-    mix_cycles = 5
-    total_mix_volume_ul = sample_volume_ul + master_mix_volume_ul
-    return_slot = 'C3'
+def run(protocol: protocol_api.ProtocolContext): # Sample parameters
+sample_volume_ul = 20
+master_mix_volume_ul = 20
+mix_cycles = 5
+total_mix_volume_ul = sample_volume_ul + master_mix_volume_ul
+return_slot = 'C3'
 
     master_mix_temperature_c = 10
     sample_temperature_c = 37
@@ -640,41 +679,48 @@ def run(protocol: protocol_api.ProtocolContext):
     # Deactivate temperature modules at the end of the protocol
     master_mix_temperature_module.deactivate()
     sample_temperature_module.deactivate()
+
 </protocol>
 
+## Common rules for transfer
 
-
-## Common rules for transfer 
 ================= COMMON RULES for TRANSFER =================
 
 - when we allocate wells for source and destination, we need to pay attention to pipette type.
-For example, see the command below
+  For example, see the command below
+
 ```
 Sample source wells: the first 64 well column-wise in the sample source plate.
 ```
 
-- <Multi-channel> pipette (eg.,  Flex 8-Channel 1000 uL Pipette), given the number of wells
- we need to estimate the columns and use method `labware.columns()` to access the columns.
- For example,
- ```python
- number_of_columns = math.ceil([number_of_samples] / 8)
- source_wells = labware.columns()[:number_of_columns]
- ```
+- <Multi-channel> pipette (eg., Flex 8-Channel 1000 uL Pipette), given the number of wells
+  we need to estimate the columns and use method `labware.columns()` to access the columns.
+  For example,
+
+```python
+number_of_columns = math.ceil([number_of_samples] / 8)
+source_wells = labware.columns()[:number_of_columns]
+```
 
 - <Single or one channel> pipette (eg., Flex 1-Channel 1000 uL Pipette),
-we use `labware.wells()`. For example,
+  we use `labware.wells()`. For example,
+
 ```python
 source_wells = labware.wells()[:[number_of_samples]]
 ```
+
 - If prompt says row-wise, we need to use `rows()`
 - If prompt does not mention column-wise, we use `wells()` since it is default.
 - If the number of samples are not specified, then use all wells.
+
 ```python
 source_wells = sample_plate.wells()
 ```
+
 - If `blowout_location` location is mentioned explicitly, then incorporate to transfer method.
 - Avoid using `for` with transfer
-the following is incorrect:
+  the following is incorrect:
+
 ```python
 source_columns = [source_labware.columns_by_name()[str(index)] for index in [3, 2, 5, 1, 10]]
 destination_columns = [source_labware.columns_by_name()[str(index)] for index in [4, 8, 1, 9, 2]]
@@ -685,6 +731,7 @@ for src, dest in zip(source_columns, destination_columns):
 ```
 
 The correct:
+
 ```python
 source_columns = [source_labware.columns_by_name()[str(index)] for index in [3, 2, 5, 1, 10]]
 destination_columns = [source_labware.columns_by_name()[str(index)] for index in [4, 8, 1, 9, 2]]
@@ -692,8 +739,6 @@ destination_columns = [source_labware.columns_by_name()[str(index)] for index in
 # Transfer reagents
 pipette.transfer(14.0, source_columns, destination_columns, new_tip='always')
 ```
-
-
 
 ## Other Examples with More Explanation
 
@@ -833,7 +878,6 @@ def run(protocol: protocol_api.ProtocolContext):
 
 By using the `transfer` method effectively, we can simplify the protocol code and make it more readable. The method automatically handles the pairing and iteration over wells, so explicit loops are unnecessary. Additionally, specifying `new_tip='once'` optimizes the protocol by reducing tip usage when appropriate.
 
-
 ## Best Practices for Optimizing the transfer Method in Pipetting Automation
 
 1. **Optimizing `transfer` Usage Without Loops**
@@ -843,7 +887,8 @@ By using the `transfer` method effectively, we can simplify the protocol code an
 
    **Example:**
 
-   - *Inefficient Code (Excerpt-1):*
+   - _Inefficient Code (Excerpt-1):_
+
      ```python
      for source_well, destination_well in zip(source_wells, destination_wells):
          pipette.pick_up_tip()
@@ -851,7 +896,7 @@ By using the `transfer` method effectively, we can simplify the protocol code an
          pipette.drop_tip()
      ```
 
-   - *Optimized Code (Excerpt-2):*
+   - _Optimized Code (Excerpt-2):_
      ```python
      pipette.transfer(TRANSFER_VOL, source_wells, destination_wells, new_tip='always')
      ```
@@ -862,12 +907,14 @@ By using the `transfer` method effectively, we can simplify the protocol code an
    - **Solution**: Use the `transfer` method without a `for` loop to ensure the same tip is used throughout.
 
    **Incorrect Usage:**
+
    ```python
    for src, dest in zip(source_columns, destination_columns):
        pipette.transfer(transfer_vol, src, dest, new_tip='once')
    ```
 
    **Correct Usage:**
+
    ```python
    pipette.transfer(transfer_vol, source_columns, destination_columns, new_tip='once')
    ```
@@ -885,6 +932,7 @@ By using the `transfer` method effectively, we can simplify the protocol code an
    - **Guideline**: For multi-channel pipettes (e.g., P20 Multi-Channel Gen2), utilize the `columns` method to access labware columns effectively.
 
      **Example:**
+
      ```python
      source_columns = source_plate.columns()
      destination_columns = destination_plate.columns()
@@ -893,6 +941,7 @@ By using the `transfer` method effectively, we can simplify the protocol code an
 ---
 
 ### Another Example
+
 ```python
 "from opentrons import protocol_api
 
@@ -933,8 +982,8 @@ def run(protocol: protocol_api.ProtocolContext):
     p1000s.transfer(transfer_vol_2, source_wells_1, destination_wells_1, new_tip="always")
 ```
 
-
 #### another example
+
 ```python
 from opentrons import protocol_api
 
@@ -977,7 +1026,7 @@ def run(protocol: protocol_api.ProtocolContext):
     destination_wells_2 = [source_1.wells_by_name()[wells] for wells in ['A3', 'A4']]
     destination_wells_3 = [destination_1.wells_by_name()[wells] for wells in ['A1', 'B1']]
     destination_wells_4 = [destination_2.wells_by_name()[wells] for wells in ['A1', 'B1']]
-    
+
     # commands
     p1000s.transfer(transfer_vol_1, source_wells_1, destination_wells_1, new_tip="once")
     p50s.transfer(transfer_vol_2, source_wells_2, destination_wells_2, new_tip="once")
@@ -985,8 +1034,8 @@ def run(protocol: protocol_api.ProtocolContext):
     p50s.transfer(transfer_vol_4, source_wells_4, destination_wells_4, new_tip="always")
 ```
 
-
 ### pcr example
+
 ```python
 import math
 from opentrons import protocol_api
@@ -1102,8 +1151,7 @@ def run(protocol: protocol_api.ProtocolContext):
     master_mix_temperature_module.deactivate()
     sample_temperature_module.deactivate()
 
-``` 
-
+```
 
 ### Liquid transfer with Heater Shaker module
 
@@ -1111,28 +1159,33 @@ def run(protocol: protocol_api.ProtocolContext):
 Write a protocol using the Opentrons Python Protocol API v2.19 for Opentrons Flex robot for the following description:
 
 Metadata:
+
 - Author: User
 - ProtocolName: Liquid Transfer with Heater Shaker
 - Description: Transfer liquids between reservoir, PCR plate, and heater shaker module's plate.
 
 Requirements:
+
 - requirements = {"robotType": "Flex", "apiLevel": "2.19"}
 
 Labware:
+
 - Trash: Load a trash bin in slot A3
 - Heater Shaker Module: Load in slot D1 with a Corning 96 Well Plate 360 µL Flat
 - Reservoir: NEST 1 Well Reservoir 195 mL in slot C1
 - PCR Plate: NEST 96 Well Plate 200 µL Flat in slot D2
-- Tipracks: 
+- Tipracks:
   - Opentrons Flex 96 Tiprack 200 µL in slot A2
   - Opentrons Flex 96 Tiprack 1000 µL in slot B2
   - Opentrons Flex 96 Tiprack 50 µL in slot C2
-  All tipracks should use the Opentrons Flex 96 Tiprack Adapter
+    All tipracks should use the Opentrons Flex 96 Tiprack Adapter
 
 Pipette:
+
 - Flex 96-Channel 1000 µL pipette mounted on the left
 
 Steps:
+
 1. Open the Heater Shaker Module's labware latch
 2. Pause the protocol and prompt the user to load the Corning 96 well plate
 3. Close the Heater Shaker Module's labware latch
@@ -1142,10 +1195,10 @@ Steps:
 7. Deactivate the shaker
 
 Notes:
+
 - Use new tips for each transfer
 - The protocol includes comments and pauses for user interaction
-</description>
-
+  </description>
 
 <protocol>
 
@@ -1169,12 +1222,12 @@ def run(protocol: protocol_api.ProtocolContext):
 
     # Load modules
     heater_shaker = protocol.load_module('heaterShakerModuleV1', 'D1')
-    
+
     # Load labware
     heater_shaker_plate = heater_shaker.load_labware('corning_96_wellplate_360ul_flat')
     reservoir = protocol.load_labware('nest_1_reservoir_195ml', 'C1')
     pcr_plate = protocol.load_labware('nest_96_wellplate_200ul_flat', 'D2')
-    
+
     # Load tipracks with adapters
     tiprack_200 = protocol.load_labware('opentrons_flex_96_tiprack_200ul', 'A2', adapter='opentrons_flex_96_tiprack_adapter')
     tiprack_1000 = protocol.load_labware('opentrons_flex_96_tiprack_1000ul', 'B2', adapter='opentrons_flex_96_tiprack_adapter')
@@ -1208,5 +1261,3 @@ def run(protocol: protocol_api.ProtocolContext):
 ```
 
 </protocol>
-
-
