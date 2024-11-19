@@ -776,7 +776,7 @@ class OT3API(
         """
         Function to update motor estimation for a set of axes
         """
-
+        await self._backend.update_motor_status()
         if axes:
             checked_axes = [ax for ax in axes if ax in Axis]
         else:
@@ -1587,7 +1587,6 @@ class OT3API(
 
     async def _home(self, axes: Sequence[Axis]) -> None:
         """Home one axis at a time."""
-        await self._backend.update_motor_status()
         for axis in axes:
             try:
                 if axis == Axis.G:
