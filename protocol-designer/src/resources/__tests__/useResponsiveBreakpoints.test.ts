@@ -5,44 +5,46 @@ import { useResponsiveBreakpoints } from '../useResponsiveBreakpoints'
 describe('useResponsiveBreakpoints', () => {
   const resizeWindow = (width: number) => {
     window.innerWidth = width
-    act(() => {
-      window.dispatchEvent(new Event('resize'))
-    })
+    window.dispatchEvent(new Event('resize'))
   }
 
-  it('should return "xl" when width is greater than or equal to 1440', () => {
+  it('should return "xs" when width is less than BREAKPOINT_SM_WIDTH', () => {
     const { result } = renderHook(() => useResponsiveBreakpoints())
-    resizeWindow(1440)
-    expect(result.current).toBe('xl')
-  })
-
-  it('should return "lg" when width is between 1280 and 1439', () => {
-    const { result } = renderHook(() => useResponsiveBreakpoints())
-    resizeWindow(1280)
-    expect(result.current).toBe('lg')
-    resizeWindow(1439)
-    expect(result.current).toBe('lg')
-  })
-
-  it('should return "md" when width is between 1024 and 1279', () => {
-    const { result } = renderHook(() => useResponsiveBreakpoints())
-    resizeWindow(1024)
-    expect(result.current).toBe('md')
-    resizeWindow(1279)
-    expect(result.current).toBe('md')
-  })
-
-  it('should return "sm" when width is between 768 and 1023', () => {
-    const { result } = renderHook(() => useResponsiveBreakpoints())
-    resizeWindow(768)
-    expect(result.current).toBe('sm')
-    resizeWindow(1023)
-    expect(result.current).toBe('sm')
-  })
-
-  it('should return "xs" when width is less than 768', () => {
-    const { result } = renderHook(() => useResponsiveBreakpoints())
-    resizeWindow(767)
+    act(() => {
+      resizeWindow(900)
+    })
     expect(result.current).toBe('xs')
+  })
+
+  it('should return "sm" when width is between BREAKPOINT_SM_WIDTH and BREAKPOINT_MD_WIDTH', () => {
+    const { result } = renderHook(() => useResponsiveBreakpoints())
+    act(() => {
+      resizeWindow(1000)
+    })
+    expect(result.current).toBe('sm')
+  })
+
+  it('should return "md" when width is between BREAKPOINT_MD_WIDTH and BREAKPOINT_LG_WIDTH', () => {
+    const { result } = renderHook(() => useResponsiveBreakpoints())
+    act(() => {
+      resizeWindow(1120)
+    })
+    expect(result.current).toBe('md')
+  })
+
+  it('should return "lg" when width is between BREAKPOINT_LG_WIDTH and BREAKPOINT_XL_WIDTH', () => {
+    const { result } = renderHook(() => useResponsiveBreakpoints())
+    act(() => {
+      resizeWindow(1200)
+    })
+    expect(result.current).toBe('lg')
+  })
+
+  it('should return "xl" when width is greater than BREAKPOINT_XL_WIDTH', () => {
+    const { result } = renderHook(() => useResponsiveBreakpoints())
+    act(() => {
+      resizeWindow(1500)
+    })
+    expect(result.current).toBe('xl')
   })
 })

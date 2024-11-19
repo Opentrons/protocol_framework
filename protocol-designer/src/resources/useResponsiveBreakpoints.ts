@@ -3,9 +3,10 @@ import { useEffect, useState } from 'react'
 type ResponsiveType = 'xl' | 'lg' | 'md' | 'sm' | 'xs'
 
 const BREAKPOINT_XL_WIDTH = 1440
-const BREAKPOINT_LG_WIDTH = 1280
-const BREAKPOINT_MD_WIDTH = 1024
-const BREAKPOINT_SM_WIDTH = 768
+const BREAKPOINT_LG_WIDTH = 1160
+const BREAKPOINT_MD_WIDTH = 1106
+const BREAKPOINT_SM_WIDTH = 978
+
 export const useResponsiveBreakpoints = (): ResponsiveType => {
   const [responsiveType, setResponsiveType] = useState<ResponsiveType>('xl')
 
@@ -18,7 +19,7 @@ export const useResponsiveBreakpoints = (): ResponsiveType => {
         setResponsiveType('sm')
       } else if (width < BREAKPOINT_LG_WIDTH) {
         setResponsiveType('md')
-      } else if (width < BREAKPOINT_XL_WIDTH) {
+      } else if (width <= BREAKPOINT_XL_WIDTH) {
         setResponsiveType('lg')
       } else {
         setResponsiveType('xl')

@@ -2,114 +2,127 @@ import { css } from 'styled-components'
 
 import {
   ALIGN_CENTER,
-  // ALIGN_FLEX_END,
-  // JUSTIFY_CENTER,
-  JUSTIFY_FLEX_END,
+  COLORS,
+  DropdownMenu,
   Flex,
+  JUSTIFY_FLEX_END,
+  JUSTIFY_FLEX_START,
+  JUSTIFY_SPACE_BETWEEN,
   Link,
   SPACING,
   StyledText,
-  TYPOGRAPHY,
-  COLORS,
-  DropdownMenu,
   Tag,
+  TYPOGRAPHY,
+  WRAP,
 } from '@opentrons/components'
 
 import { useResponsiveBreakpoints } from '../../resources/useResponsiveBreakpoints'
-
 import type { DropdownMenuProps, TagProps } from '@opentrons/components'
 
-// This component is a temporary solution to the problem of having a list item with a dropdown menu
 interface PDListItemCustomizeProps {
   header: string
-  //  this is either an image or an icon
   leftHeaderItem?: JSX.Element
   onClick?: () => void
   linkText?: string
-  //  these are the middle prop options
   label?: string
   dropdown?: DropdownMenuProps
   tag?: TagProps
-  /** temporary prop for dropdown menu  */
   forceDirection?: boolean
 }
 
-export function PDListItemCustomize(
-  props: PDListItemCustomizeProps
-): JSX.Element {
-  const {
-    header,
-    leftHeaderItem,
-    onClick,
-    label,
-    linkText,
-    dropdown,
-    tag,
-    forceDirection = false,
-  } = props
+export function PDListItemCustomize({
+  header,
+  leftHeaderItem,
+  onClick,
+  linkText,
+  label,
+  dropdown,
+  tag,
+  forceDirection = false,
+}: PDListItemCustomizeProps): JSX.Element {
+  const responsiveType = useResponsiveBreakpoints()
+  const isLargeScreen = responsiveType === 'xl' || responsiveType === 'lg'
+  const flexSize = responsiveType === 'xl' ? '0 0 1.5' : '0 0 1'
+
+  const renderDropdownAndTag = (): JSX.Element => (
+    <>
+      {label != null && (
+        <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
+          {label}
+        </StyledText>
+      )}
+      {dropdown != null && (
+        <Flex paddingBottom={SPACING.spacing8}>
+          <DropdownMenu {...dropdown} forceDirection={forceDirection} />
+        </Flex>
+      )}
+      {tag != null && <Tag {...tag} />}
+    </>
+  )
+
+  const renderLinkButton = (): JSX.Element | null =>
+    onClick != null && linkText != null ? (
+      <Link
+        role="button"
+        onClick={onClick}
+        css={css`
+          padding: ${SPACING.spacing4};
+          text-decoration: ${TYPOGRAPHY.textDecorationUnderline};
+          color: ${COLORS.grey60};
+          &:hover {
+            color: ${COLORS.grey40};
+          }
+        `}
+      >
+        <StyledText desktopStyle="bodyDefaultRegular">{linkText}</StyledText>
+      </Link>
+    ) : null
+
   return (
     <Flex
       width="100%"
       alignItems={ALIGN_CENTER}
       padding={SPACING.spacing12}
       gridGap={SPACING.spacing16}
+      justifyContent={JUSTIFY_SPACE_BETWEEN}
+      flexWrap={isLargeScreen ? undefined : WRAP}
     >
       <Flex
         gridGap={SPACING.spacing16}
         alignItems={ALIGN_CENTER}
-        id="1"
-        css={css`
-          outline: 1px solid red;
-        `}
-        flex="0 0 16.6875rem"
+        flex={flexSize}
+        width="100%"
       >
-        {leftHeaderItem != null ? (
-          <Flex size="3.75rem">{leftHeaderItem}</Flex>
-        ) : null}
+        {leftHeaderItem != null && <Flex size="3.75rem">{leftHeaderItem}</Flex>}
         <StyledText desktopStyle="bodyDefaultSemiBold">{header}</StyledText>
       </Flex>
+
       <Flex
-        // width={onClick != null && linkText != null ? '40%' : '50%'}
-        flex="0 0 16.6875rem"
-        gridGap={SPACING.spacing8}
+        flexWrap={isLargeScreen ? undefined : WRAP}
         alignItems={ALIGN_CENTER}
-        justifyContent={JUSTIFY_FLEX_END}
-        id="2"
-        css={css`
-          outline: 1px solid red;
-        `}
+        justifyContent={
+          responsiveType === 'md' || responsiveType === 'sm'
+            ? JUSTIFY_SPACE_BETWEEN
+            : JUSTIFY_FLEX_END
+        }
+        width="100%"
+        gridGap={SPACING.spacing16}
       >
-        {label != null ? (
-          <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
-            {label}
-          </StyledText>
-        ) : null}
-        {dropdown != null ? (
-          <DropdownMenu {...dropdown} forceDirection={forceDirection} />
-        ) : null}
-        {tag != null ? <Tag {...tag} /> : null}
-      </Flex>
-      {onClick != null && linkText != null ? (
-        <Flex flex="0 0 3.75rem">
-          <Link
-            role="button"
-            onClick={onClick}
-            css={css`
-              padding: ${SPACING.spacing4};
-              text-decoration: ${TYPOGRAPHY.textDecorationUnderline};
-              color: ${COLORS.grey60};
-              &:hover {
-                color: ${COLORS.grey40};
-              }
-              outline: 1px solid red;
-            `}
+        {responsiveType !== 'xs' && (
+          <Flex
+            flex={flexSize}
+            gridGap={SPACING.spacing8}
+            alignItems={ALIGN_CENTER}
+            justifyContent={
+              isLargeScreen ? JUSTIFY_FLEX_END : JUSTIFY_FLEX_START
+            }
+            width="max-content"
           >
-            <StyledText desktopStyle="bodyDefaultRegular">
-              {linkText}
-            </StyledText>
-          </Link>
-        </Flex>
-      ) : null}
+            {renderDropdownAndTag()}
+          </Flex>
+        )}
+        {renderLinkButton()}
+      </Flex>
     </Flex>
   )
 }
