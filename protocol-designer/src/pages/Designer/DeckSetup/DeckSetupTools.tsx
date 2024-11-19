@@ -52,11 +52,11 @@ import { getDismissedHints } from '../../../tutorial/selectors'
 import { createContainerAboveModule } from '../../../step-forms/actions/thunks'
 import { ConfirmDeleteStagingAreaModal } from '../../../organisms'
 import { BUTTON_LINK_STYLE } from '../../../atoms'
-import { FIXTURES, MOAM_MODELS } from './constants'
 import { getSlotInformation } from '../utils'
-import { getModuleModelsBySlot, getDeckErrors } from './utils'
-import { MagnetModuleChangeContent } from './MagnetModuleChangeContent'
+import { ALL_ORDERED_CATEGORIES, FIXTURES, MOAM_MODELS } from './constants'
 import { LabwareTools } from './LabwareTools'
+import { MagnetModuleChangeContent } from './MagnetModuleChangeContent'
+import { getModuleModelsBySlot, getDeckErrors } from './utils'
 
 import type { ModuleModel } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../../types'
@@ -70,6 +70,8 @@ interface DeckSetupToolsProps {
     setHoveredFixture: (fixture: Fixture | null) => void
   } | null
 }
+
+export type CategoryExpand = Record<string, boolean>
 
 export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
   const { onCloseClick, setHoveredLabware, onDeckProps } = props
@@ -117,6 +119,32 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
   const [tab, setTab] = useState<'hardware' | 'labware'>(
     moduleModels?.length === 0 || slot === 'offDeck' ? 'labware' : 'hardware'
   )
+  const allCategoriesExpanded = ALL_ORDERED_CATEGORIES.reduce<CategoryExpand>(
+    (acc, category) => {
+      return { ...acc, [category]: true }
+    },
+    {}
+  )
+  const allCategoriesCollapsed = ALL_ORDERED_CATEGORIES.reduce<CategoryExpand>(
+    (acc, category) => {
+      return { ...acc, [category]: false }
+    },
+    {}
+  )
+  const [
+    areCategoriesExpanded,
+    setAreCategoriesExpanded,
+  ] = useState<CategoryExpand>(allCategoriesCollapsed)
+  const [searchTerm, setSearchTerm] = useState<string>('')
+
+  useEffect(() => {
+    if (searchTerm !== '') {
+      setAreCategoriesExpanded(allCategoriesExpanded)
+    } else {
+      setAreCategoriesExpanded(allCategoriesCollapsed)
+    }
+  }, [searchTerm])
+
   const hasMagneticModule = Object.values(deckSetup.modules).some(
     module => module.type === MAGNETIC_MODULE_TYPE
   )
@@ -124,6 +152,12 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     Object.values(deckSetup.modules).find(module => module.slot === slot)
       ?.model === MAGNETIC_MODULE_V1
 
+  const handleCollapseAllCategories = (): void => {
+    setAreCategoriesExpanded(allCategoriesCollapsed)
+  }
+  const handleResetSearchTerm = (): void => {
+    setSearchTerm('')
+  }
   const changeModuleWarning = useBlockingHint({
     hintKey: 'change_magnet_module_model',
     handleCancel: () => {
@@ -207,6 +241,11 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     )
   }
 
+  const handleResetLabwareTools = (): void => {
+    handleCollapseAllCategories()
+    handleResetSearchTerm()
+  }
+
   const handleClear = (): void => {
     onDeckProps?.setHoveredModule(null)
     onDeckProps?.setHoveredFixture(null)
@@ -242,7 +281,11 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       }
     }
     handleResetToolbox()
+    handleResetLabwareTools()
     setSelectedHardware(null)
+    if (selectedHardware != null) {
+      setTab('hardware')
+    }
   }
   const handleConfirm = (): void => {
     //  clear entities first before recreating them
@@ -548,7 +591,15 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
               )}
             </Flex>
           ) : (
-            <LabwareTools setHoveredLabware={setHoveredLabware} slot={slot} />
+            <LabwareTools
+              setHoveredLabware={setHoveredLabware}
+              slot={slot}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              areCategoriesExpanded={areCategoriesExpanded}
+              setAreCategoriesExpanded={setAreCategoriesExpanded}
+              handleReset={handleResetLabwareTools}
+            />
           )}
         </Flex>
       </Toolbox>

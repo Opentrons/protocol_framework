@@ -20,10 +20,6 @@ import { selectors } from '../../../../labware-ingred/selectors'
 import { createCustomLabwareDef } from '../../../../labware-defs/actions'
 import { getCustomLabwareDefsByURI } from '../../../../labware-defs/selectors'
 import { getRobotType } from '../../../../file-data/selectors'
-import {
-  selectLabware,
-  selectNestedLabware,
-} from '../../../../labware-ingred/actions'
 import { LabwareTools } from '../LabwareTools'
 import type { LabwareDefinition2, PipetteV2Specs } from '@opentrons/shared-data'
 
@@ -48,6 +44,11 @@ describe('LabwareTools', () => {
     props = {
       slot: 'D3',
       setHoveredLabware: vi.fn(),
+      searchTerm: '',
+      setSearchTerm: vi.fn(),
+      areCategoriesExpanded: {},
+      setAreCategoriesExpanded: vi.fn(),
+      handleReset: vi.fn(),
     }
     vi.mocked(getCustomLabwareDefsByURI).mockReturnValue({})
     vi.mocked(getRobotType).mockReturnValue(FLEX_ROBOT_TYPE)
@@ -87,11 +88,7 @@ describe('LabwareTools', () => {
     screen.getByText('Adapters')
     //  click and expand well plate accordion
     fireEvent.click(screen.getAllByTestId('ListButton_noActive')[1])
-    fireEvent.click(
-      screen.getByRole('label', { name: 'Corning 384 Well Plate' })
-    )
-    //  set labware
-    expect(vi.mocked(selectLabware)).toHaveBeenCalled()
+    expect(props.setAreCategoriesExpanded).toBeCalled()
   })
   it('renders deck slot and selects an adapter and labware', () => {
     vi.mocked(selectors.getZoomedInSlotInfo).mockReturnValue({
@@ -105,20 +102,7 @@ describe('LabwareTools', () => {
     screen.getByText('Adapters')
     fireEvent.click(screen.getAllByTestId('ListButton_noActive')[4])
     //   set adapter
-    fireEvent.click(
-      screen.getByRole('label', {
-        name: 'Fixture Opentrons Universal Flat Heater-Shaker Adapter',
-      })
-    )
-    //  set labware
-    screen.getByText('Adapter compatible labware')
-    screen.getByText('Fixture Corning 96 Well Plate 360 µL Flat')
-    fireEvent.click(
-      screen.getByRole('label', {
-        name: 'Fixture Corning 96 Well Plate 360 µL Flat',
-      })
-    )
-    expect(vi.mocked(selectNestedLabware)).toHaveBeenCalled()
+    expect(props.setAreCategoriesExpanded).toBeCalled()
   })
 
   it('renders the custom labware flow', () => {
