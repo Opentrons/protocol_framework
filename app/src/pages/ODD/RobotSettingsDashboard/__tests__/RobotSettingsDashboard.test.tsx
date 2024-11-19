@@ -113,7 +113,7 @@ describe('RobotSettingsDashboard', () => {
     screen.getByText('Robot System Version')
     screen.getByText('Network Settings')
     screen.getByText('Status LEDs')
-    screen.getByText('Error Recovery Mode')
+    screen.getByText('Recovery mode')
     screen.getByText(
       'Control the strip of color lights on the front of the robot.'
     )

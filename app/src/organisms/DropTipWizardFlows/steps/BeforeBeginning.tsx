@@ -235,6 +235,10 @@ const CONTAINER_STYLE = css`
   display: ${DISPLAY_FLEX};
   flex-direction: ${DIRECTION_COLUMN};
   grid-gap: ${SPACING.spacing16};
+
+  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+    grid-gap: ${SPACING.spacing8};
+  }
 `
 
 const ODD_MEDIUM_BUTTON_STYLE = css`

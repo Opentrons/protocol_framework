@@ -63,6 +63,7 @@ const SMALL_MODAL_STYLE = css`
     padding: ${SPACING.spacing32};
     height: 100%;
     overflow: ${OVERFLOW_HIDDEN};
+    user-select: none;
   }
 `
 const LARGE_MODAL_STYLE = css`
@@ -73,5 +74,6 @@ const LARGE_MODAL_STYLE = css`
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
     height: 100%;
     overflow: ${OVERFLOW_HIDDEN};
+    user-select: none;
   }
 `
