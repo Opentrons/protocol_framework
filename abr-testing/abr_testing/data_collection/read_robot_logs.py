@@ -238,13 +238,15 @@ def liquid_height_commands(
                     well_location = str(entry.split(", ")[1].split(" ")[0])
                     slot_location = str(entry.split("slot ")[1].split(")")[0])
                     labware_name = str(entry.split("of ")[1].split(" on")[0])
+                    if labware_name == "Liquid Waste":
+                        liquid_waste_height = height
                     one_entry = {
                         "Timestamp": comment_time,
                         "Labware Name": labware_name,
                         "Labware Type": labware_type,
                         "Slot Location": slot_location,
                         "Well Location": well_location,
-                        "Height (mm)": height,
+                        "All Heights (mm)": height,
                     }
                     list_of_heights.append(one_entry)
             except (IndexError, ValueError):
@@ -253,6 +255,7 @@ def liquid_height_commands(
         all_heights_list[0].append(robot)
         all_heights_list[1].append(run_id)
         all_heights_list[2].append(list_of_heights)
+        all_heights_list[3].append(liquid_waste_height)
     return all_heights_list
 
 
