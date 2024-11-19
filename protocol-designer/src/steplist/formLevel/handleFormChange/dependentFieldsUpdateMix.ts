@@ -175,7 +175,7 @@ const updatePatchOnNozzleChange = (
   ) {
     return {
       ...patch,
-      ...getDefaultFields('aspirate_wells', 'dispense_wells'),
+      ...getDefaultFields('wells'),
     }
   }
   return patch
