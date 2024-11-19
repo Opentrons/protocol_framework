@@ -974,6 +974,11 @@ def run(protocol: ProtocolContext) -> None:
                 p200_tips += 1
                 tipcheck()
         plate_reader_actions(protocol, plate_reader, hellma_plate)
+        
+        reservoir.label = "Liquid Waste"
+        Liquid_trash_well_1 = reservoir["A9"]
+        Liquid_trash_well_2 = reservoir["A10"]
+        Liquid_trash_well_4 = reservoir["A12"]
         liquids_to_probe_at_end = [
             Liquid_trash_well_1,
             Liquid_trash_well_2,

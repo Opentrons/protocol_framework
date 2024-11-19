@@ -20,7 +20,7 @@ from typing import Dict
 
 metadata = {
     "author": "Zach Galluzzo <zachary.galluzzo@opentrons.com>",
-    "protocolName": "Thermo MagMax RNA Extraction: Cells Multi-Channel",
+    "protocolName": "Thermo MagMax RNA Extraction: Cells Multi-Channel"
 }
 
 requirements = {

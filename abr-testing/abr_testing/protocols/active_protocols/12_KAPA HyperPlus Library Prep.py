@@ -1215,5 +1215,14 @@ def run(ctx: ProtocolContext) -> None:
     lib_cleanup()
     unused_lids, used_lids = lib_amplification(unused_lids, used_lids)
     lib_cleanup_2()
+    
+    # Probe liquid waste
+    reservoir.label = "Liquid Waste"
+    waste1 = reservoir.columns()[6]
+    waste1_res = waste1[0]
+
+    waste2 = reservoir.columns()[7]
+    waste2_res = waste2[0]
+
     end_probed_wells = [waste1_res, waste2_res]
     helpers.find_liquid_height_of_all_wells(ctx, p50, end_probed_wells)

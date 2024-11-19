@@ -68,7 +68,7 @@ def run(ctx: ProtocolContext) -> None:
     reagent_res = ctx.load_labware(
         "opentrons_15_tuberack_nest_15ml_conical", "C3", "reagents"
     )
-    waste_res = ctx.load_labware("nest_1_reservoir_290ml", "D2", "waste")
+    waste_res = ctx.load_labware("nest_1_reservoir_290ml", "D2", "Liquid Waste")
 
     tips = ctx.load_labware("opentrons_flex_96_tiprack_1000ul", "B3")
     tips_sample = ctx.load_labware(
@@ -268,6 +268,6 @@ def run(ctx: ProtocolContext) -> None:
         ctx.delay(minutes=MAG_DELAY_MIN)
         transfer_plate_to_plate(ELUTION_VOL * 1.1, working_cols, final_cols, 6)
         temp.deactivate()
-    end_wells_to_probe = [reagent_res["A1"], reagent_res["B1"], reagent_res["C1"]]
+    end_wells_to_probe = [waste["A1"], reagent_res["A1"], reagent_res["B1"], reagent_res["C1"]]
     end_wells_to_probe.extend(wash_res.wells())
     helpers.find_liquid_height_of_all_wells(ctx, p1000_single, end_wells_to_probe)

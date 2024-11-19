@@ -222,6 +222,7 @@ def liquid_height_commands(
     run_id = file_results.get("run_id", "")
     list_of_heights = []
     print(robot)
+    liquid_waste_height = 0.0
     for command in commandData:
         commandType = command["commandType"]
         if commandType == "comment":
@@ -239,7 +240,7 @@ def liquid_height_commands(
                     slot_location = str(entry.split("slot ")[1].split(")")[0])
                     labware_name = str(entry.split("of ")[1].split(" on")[0])
                     if labware_name == "Liquid Waste":
-                        liquid_waste_height = height
+                        liquid_waste_height += height
                     one_entry = {
                         "Timestamp": comment_time,
                         "Labware Name": labware_name,
