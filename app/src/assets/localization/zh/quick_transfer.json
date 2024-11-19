@@ -4,7 +4,6 @@
   "add_or_remove": "添加或移除",
   "advanced_setting_disabled": "此移液的高级设置已禁用",
   "advanced_settings": "高级设置",
-  "air_gap_before_aspirating": "在吸液前设置空气间隙",
   "air_gap_before_dispensing": "在分液前设置空气间隙",
   "air_gap_capacity_error": "移液器空间已满，无法添加空气间隙。",
   "air_gap_value": "{{volume}} µL",

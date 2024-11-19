@@ -5,7 +5,7 @@
   "advanced_setting_disabled": "Advanced setting disabled for this transfer",
   "advanced_settings": "Advanced settings",
   "air_gap": "Air gap",
-  "air_gap_before_aspirating": "Air gap before aspirating",
+  "air_gap_after_aspirating": "Air gap after aspirating",
   "air_gap_before_dispensing": "Air gap before dispensing",
   "air_gap_capacity_error": "The tip is too full to add an air gap.",
   "air_gap_value": "{{volume}} µL",
