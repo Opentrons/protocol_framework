@@ -624,8 +624,8 @@
   "plungerPositionsConfigurations": {
     "default": {
       "top": 0.5,
-      "bottom": 68.5,
-      "blowout": 73.5,
+      "bottom": 67.5,
+      "blowout": 72.5,
       "drop": 80
     }
   },
@@ -649,7 +649,7 @@
   "channels": 96,
   "shaftDiameter": 2,
   "shaftULperMM": 3.14159,
-  "backlashDistance": 3.0,
+  "backlashDistance": 0.3,
   "quirks": [],
   "plungerHomingConfigurations": {
     "current": 0.8,
