@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from opentrons.calibration_storage import helpers
 from opentrons.protocols.geometry.labware_geometry import LabwareGeometry
@@ -8,6 +8,7 @@ from opentrons.types import DeckSlotName, Location, Point, NozzleMapInterface
 
 from opentrons_shared_data.labware.types import LabwareParameters, LabwareDefinition
 
+from ..._liquid import Liquid
 from ..labware import AbstractLabware, LabwareLoadParams
 from .legacy_well_core import LegacyWellCore
 from .well_geometry import WellGeometry
@@ -220,3 +221,11 @@ class LegacyLabwareCore(AbstractLabware[LegacyWellCore]):
         """Get the deck slot the labware is in, if in a deck slot."""
         slot = self._geometry.parent.labware.first_parent()
         return DeckSlotName.from_primitive(slot) if slot is not None else None
+
+    def load_liquid(self, volumes: Dict[str, float], liquid: Liquid) -> None:
+        """Load liquid into wells of the labware."""
+        assert False, "load_liquid only supported in API version 2.22 & later"
+
+    def load_empty(self, wells: List[str]) -> None:
+        """Mark wells of the labware as empty."""
+        assert False, "load_empty only supported in API version 2.22 & later"
