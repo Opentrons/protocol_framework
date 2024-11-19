@@ -669,6 +669,24 @@ export function updatePatchBlowoutFields(
 
   return patch
 }
+
+const updatePatchOnNozzleChange = (
+  patch: FormPatch,
+  rawForm: FormData,
+  pipetteEntities: PipetteEntities
+): FormPatch => {
+  if (
+    Object.values(pipetteEntities).find(pip => pip.spec.channels === 96) &&
+    fieldHasChanged(rawForm, patch, 'nozzles')
+  ) {
+    return {
+      ...patch,
+      ...getDefaultFields('aspirate_wells', 'dispense_wells'),
+    }
+  }
+  return patch
+}
+
 export function dependentFieldsUpdateMoveLiquid(
   originalPatch: FormPatch,
   rawForm: FormData, // raw = NOT hydrated
@@ -706,5 +724,7 @@ export function dependentFieldsUpdateMoveLiquid(
       clampDispenseAirGapVolume(chainPatch, rawForm, pipetteEntities),
     chainPatch =>
       updatePatchOnTiprackChange(chainPatch, rawForm, pipetteEntities),
+    chainPatch =>
+      updatePatchOnNozzleChange(chainPatch, rawForm, pipetteEntities),
   ])
 }

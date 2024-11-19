@@ -65,24 +65,22 @@ export const SelectWellsModal = (
     (labwareId != null ? labwareEntities[labwareId]?.def : null) ?? null
   const pipette = pipetteId != null ? pipetteEntities[pipetteId] : null
 
-  const initialSelectedPrimaryWells = Array.isArray(wellFieldData)
-    ? arrayToWellGroup(wellFieldData as string[])
-    : {}
-
   const [selectedPrimaryWells, setSelectedPrimaryWells] = useState<WellGroup>(
-    initialSelectedPrimaryWells
+    Array.isArray(wellFieldData)
+      ? arrayToWellGroup(wellFieldData as string[])
+      : {}
   )
-  const [highlightedWells, setHighlightedWells] = useState<WellGroup>({})
-
   useEffect(() => {
     if (Array.isArray(wellFieldData)) {
-      if (wellFieldData.length === 0) {
-        setSelectedPrimaryWells({})
-      } else {
-        setSelectedPrimaryWells(arrayToWellGroup(wellFieldData as string[]))
-      }
+      setSelectedPrimaryWells(
+        wellFieldData.length === 0
+          ? {}
+          : arrayToWellGroup(wellFieldData as string[])
+      )
     }
   }, [wellFieldData])
+
+  const [highlightedWells, setHighlightedWells] = useState<WellGroup>({})
 
   if (!isOpen) return null
 

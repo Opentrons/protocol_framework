@@ -164,6 +164,23 @@ const updatePatchOnTiprackChange = (
   return patch
 }
 
+const updatePatchOnNozzleChange = (
+  patch: FormPatch,
+  rawForm: FormData,
+  pipetteEntities: PipetteEntities
+): FormPatch => {
+  if (
+    Object.values(pipetteEntities).find(pip => pip.spec.channels === 96) &&
+    fieldHasChanged(rawForm, patch, 'nozzles')
+  ) {
+    return {
+      ...patch,
+      ...getDefaultFields('aspirate_wells', 'dispense_wells'),
+    }
+  }
+  return patch
+}
+
 export function dependentFieldsUpdateMix(
   originalPatch: FormPatch,
   rawForm: FormData, // raw = NOT hydrated
@@ -188,5 +205,7 @@ export function dependentFieldsUpdateMix(
       ),
     chainPatch => updatePatchOnPipetteChange(chainPatch, rawForm),
     chainPatch => updatePatchOnTiprackChange(chainPatch, rawForm),
+    chainPatch =>
+      updatePatchOnNozzleChange(chainPatch, rawForm, pipetteEntities),
   ])
 }
