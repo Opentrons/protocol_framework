@@ -16,7 +16,7 @@ from opentrons.protocol_api._liquid_properties import (
 
 def test_build_aspirate_settings() -> None:
     """It should convert the shared data aspirate settings to the PAPI type."""
-    fixture_data = load_shared_data("liquid-class/fixtures/fixture_glycerol50.json")
+    fixture_data = load_shared_data("liquid-class/fixtures/1/fixture_glycerol50.json")
     liquid_class_model = LiquidClassSchemaV1.parse_raw(fixture_data)
     aspirate_data = liquid_class_model.byPipette[0].byTipType[0].aspirate
 
@@ -55,7 +55,7 @@ def test_build_aspirate_settings() -> None:
 
 def test_build_single_dispense_settings() -> None:
     """It should convert the shared data single dispense settings to the PAPI type."""
-    fixture_data = load_shared_data("liquid-class/fixtures/fixture_glycerol50.json")
+    fixture_data = load_shared_data("liquid-class/fixtures/1/fixture_glycerol50.json")
     liquid_class_model = LiquidClassSchemaV1.parse_raw(fixture_data)
     single_dispense_data = liquid_class_model.byPipette[0].byTipType[0].singleDispense
 
@@ -107,7 +107,7 @@ def test_build_single_dispense_settings() -> None:
 
 def test_build_multi_dispense_settings() -> None:
     """It should convert the shared data multi dispense settings to the PAPI type."""
-    fixture_data = load_shared_data("liquid-class/fixtures/fixture_glycerol50.json")
+    fixture_data = load_shared_data("liquid-class/fixtures/1/fixture_glycerol50.json")
     liquid_class_model = LiquidClassSchemaV1.parse_raw(fixture_data)
     multi_dispense_data = liquid_class_model.byPipette[0].byTipType[0].multiDispense
 
