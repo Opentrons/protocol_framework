@@ -45,7 +45,7 @@ VOLUMES_3MM_TOP_BOTTOM = {
     "opentrons_24_tuberack_nest_1.5ml_snapcap": [27.7, 1650.6, 619.18, 0.0],
     "opentrons_24_tuberack_nest_2ml_screwcap": [2104.9, 66.6, 0.0],
     "opentrons_24_tuberack_nest_2ml_snapcap": [2148.5, 69.6, 0.0],
-    "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical": [56267.2, 158.1, 0.0],
+    "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical": [115.0, 26117.4, 56110.3, 0.0],
     "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical": [169.5, 57720.5, 0.0],
     "nest_1_reservoir_195ml": [14034.2, 172301.9, 0.0],
     "axygen_1_reservoir_90ml": [23136.9, 72854.8, 0.0],
@@ -53,7 +53,8 @@ VOLUMES_3MM_TOP_BOTTOM = {
     "opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap": [26.6, 593.7, 1629.9],
     "corning_384_wellplate_112ul_flat": [23.2, 50.1, 80.0],
     "biorad_384_wellplate_50ul": [28.7, 8.0, 0.0],
-    "usascientific_12_reservoir_22ml": [63.7, 10947.7, 21111.5]
+    "usascientific_12_reservoir_22ml": [63.7, 10947.7, 21111.5],
+    "opentrons_24_tuberack_eppendorf_2ml_safelock_snapcap": [63.0, 2237.8, 0.0]
 }
 
 SAME_TIP = True  # this is fine when using Ethanol (b/c it evaporates)
@@ -81,7 +82,7 @@ SLOT_DIAL = "B3"
 ###########################################
 
 
-metadata = {"protocolName": "lld-test-liquid-height-3mm-384"}
+metadata = {"protocolName": "lld-test-liquid-height-3mm-19nov"}
 requirements = {"robotType": "Flex", "apiLevel": "2.20"}
 
 
