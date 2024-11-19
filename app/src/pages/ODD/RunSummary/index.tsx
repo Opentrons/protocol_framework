@@ -243,15 +243,14 @@ export function RunSummary(): JSX.Element {
   const runSummaryNoFixit = useCurrentRunCommands({
     includeFixitCommands: false,
     pageLength: 1,
-    cursor: null,
   })
   useEffect(() => {
     if (
       isRunCurrent &&
       runSummaryNoFixit != null &&
+      runSummaryNoFixit.length > 0 &&
       !lastRunCommandPromptedErrorRecovery(runSummaryNoFixit)
     ) {
-      console.log('HITTING THIS')
       void determineTipStatus()
     }
   }, [runSummaryNoFixit, isRunCurrent])
