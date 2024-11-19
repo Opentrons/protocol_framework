@@ -50,7 +50,7 @@ export function useCurrentlyRecoveringFrom(
     isFetching: isAllCommandsFetching,
   } = useNotifyAllCommandsQuery(
     runId,
-    { cursor: null, pageLength: 0 }, // pageLength 0 because we only care about the links.
+    { pageLength: 0 }, // pageLength 0 because we only care about the links.
     {
       enabled: isRunInRecoveryMode,
       refetchInterval: ALL_COMMANDS_POLL_MS,

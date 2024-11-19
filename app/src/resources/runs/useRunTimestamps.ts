@@ -30,7 +30,7 @@ export function useRunTimestamps(runId: string | null): RunTimestamps {
   const runCommands =
     useRunCommands(
       runId,
-      { cursor: null, pageLength: 1 },
+      { pageLength: 1 },
       {
         enabled:
           runStatus === RUN_STATUS_SUCCEEDED ||

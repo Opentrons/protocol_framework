@@ -146,7 +146,6 @@ describe('RunningProtocol', () => {
       .thenReturn(mockRobotSideAnalysis)
     when(vi.mocked(useNotifyAllCommandsQuery))
       .calledWith(RUN_ID, {
-        cursor: null,
         pageLength: 1,
       })
       .thenReturn(mockUseAllCommandsResponseNonDeterministic)
