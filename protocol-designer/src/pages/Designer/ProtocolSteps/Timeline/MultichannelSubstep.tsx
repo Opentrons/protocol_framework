@@ -28,6 +28,7 @@ interface MultichannelSubstepProps {
   substepIndex: number
   selectSubstep: (substepIdentifier: SubstepIdentifier) => void
   highlighted?: boolean
+  isSameLabware?: boolean
 }
 
 export function MultichannelSubstep(
@@ -40,6 +41,7 @@ export function MultichannelSubstep(
     substepIndex,
     ingredNames,
     trashName,
+    isSameLabware,
   } = props
   const { t } = useTranslation('application')
   const [collapsed, setCollapsed] = useState<Boolean>(true)
@@ -110,6 +112,7 @@ export function MultichannelSubstep(
                     dest={row.dest}
                     stepId={stepId}
                     substepIndex={substepIndex}
+                    isSameLabware={isSameLabware}
                   />
                 )
               })}

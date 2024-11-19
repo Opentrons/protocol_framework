@@ -331,6 +331,7 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
                                 liquidColor: selectLiquidColor,
                               }}
                               onClick={field.onChange}
+                              menuPlacement="bottom"
                             />
                           )
                         }}

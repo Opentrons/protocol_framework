@@ -36,7 +36,7 @@
   "staging_area_has_labware": "This staging area slot has labware",
   "staging_area_will_delete_labware": "The staging area slot that you are about to delete has labware placed on it. If you make these changes to your protocol starting deck, the labware will be deleted as well.",
   "stagingArea": "Staging area",
-  "swap_pipettes": "Swap pipettes",
+  "swap_pipette_mounts": "Swap pipette mounts",
   "tell_us": "Tell us about your protocol",
   "trash_required": "A trash entity is required",
   "trashBin": "Trash Bin",

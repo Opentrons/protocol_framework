@@ -373,7 +373,7 @@ export function CreateNewProtocolWizard(): JSX.Element | null {
   }
 
   return showWizard ? (
-    <Box backgroundColor={COLORS.grey20} height="calc(100vh - 48px)">
+    <Box backgroundColor={COLORS.grey10} height="calc(100vh - 48px)">
       <CreateFileForm
         currentWizardStep={currentWizardStep}
         createProtocolFile={createProtocolFile}

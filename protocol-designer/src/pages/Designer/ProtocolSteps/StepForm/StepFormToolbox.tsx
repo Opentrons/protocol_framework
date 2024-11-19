@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import get from 'lodash/get'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
@@ -30,6 +30,10 @@ import {
   getDynamicFieldFormErrorsForUnsavedForm,
 } from '../../../../step-forms/selectors'
 import {
+  FORM_ERRORS_EVENT,
+  FORM_WARNINGS_EVENT,
+} from '../../../../analytics/constants'
+import {
   CommentTools,
   HeaterShakerTools,
   MagnetTools,
@@ -50,6 +54,7 @@ import {
 import type { StepFieldName } from '../../../../steplist/fieldLevel'
 import type { FormData, StepType } from '../../../../form-types'
 import type { AnalyticsEvent } from '../../../../analytics/mixpanel'
+import type { FormWarningType } from '../../../../steplist'
 import type {
   FieldPropsByName,
   FocusHandlers,
@@ -153,6 +158,29 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   const isDispenseError = formLevelErrorsForUnsavedForm.some(
     error => error.tab === 'dispense' && error.page === toolboxStep
   )
+
+  const visibleFormWarningsTypes = visibleFormWarnings.map(
+    warning => warning.type
+  )
+  const visibleFormErrorsTypes = visibleFormErrors.map(error => error.title)
+
+  useEffect(() => {
+    const dispatchAnalyticsEvent = (
+      eventName: string,
+      eventProperties: FormWarningType[] | string[]
+    ): void => {
+      if (eventProperties.length > 0) {
+        const event: AnalyticsEvent = {
+          name: eventName,
+          properties: { eventProperties },
+        }
+        dispatch(analyticsEvent(event))
+      }
+    }
+
+    dispatchAnalyticsEvent(FORM_WARNINGS_EVENT, visibleFormWarningsTypes)
+    dispatchAnalyticsEvent(FORM_ERRORS_EVENT, visibleFormErrorsTypes)
+  }, [visibleFormWarningsTypes, visibleFormErrorsTypes])
 
   if (!ToolsComponent) {
     // early-exit if step form doesn't exist, this is a good check for when new steps
@@ -300,7 +328,11 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
           </Flex>
         }
       >
-        <div ref={toolsComponentRef}>
+        <div
+          ref={toolsComponentRef}
+          id="stepFormTools"
+          style={{ height: '100%' }}
+        >
           <FormAlerts
             focusedField={focusedField}
             dirtyFields={dirtyFields}

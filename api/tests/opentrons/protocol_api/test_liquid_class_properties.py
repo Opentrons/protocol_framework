@@ -45,11 +45,7 @@ def test_build_aspirate_settings() -> None:
 
     assert aspirate_properties.position_reference.value == "well-bottom"
     assert aspirate_properties.offset == Coordinate(x=0, y=0, z=-5)
-    assert aspirate_properties.flow_rate_by_volume.as_dict() == {
-        "default": 50.0,
-        10.0: 40.0,
-        20.0: 30.0,
-    }
+    assert aspirate_properties.flow_rate_by_volume.as_dict() == {"default": 50.0}
     assert aspirate_properties.pre_wet is True
     assert aspirate_properties.mix.enabled is True
     assert aspirate_properties.mix.repetitions == 3

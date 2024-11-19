@@ -34,7 +34,7 @@
     "heaterShaker": "heater-shaker",
     "magnet": "magnet",
     "mix": "mix",
-    "moveLabware": "move labware",
+    "moveLabware": "move",
     "moveLiquid": "transfer",
     "pause": "pause",
     "profile_settings": "profile settings",

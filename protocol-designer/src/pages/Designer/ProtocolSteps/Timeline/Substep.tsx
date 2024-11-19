@@ -39,6 +39,7 @@ interface SubstepProps {
   source?: SubstepWellData
   dest?: SubstepWellData
   selectSubstep?: (substepIdentifier: SubstepIdentifier) => void
+  isSameLabware?: boolean
 }
 
 function SubstepComponent(props: SubstepProps): JSX.Element {
@@ -51,6 +52,7 @@ function SubstepComponent(props: SubstepProps): JSX.Element {
     dest,
     trashName,
     selectSubstep: propSelectSubstep,
+    isSameLabware,
   } = props
   const { t } = useTranslation(['application', 'protocol_steps', 'shared'])
   const compactedSourcePreIngreds = source
@@ -77,7 +79,7 @@ function SubstepComponent(props: SubstepProps): JSX.Element {
     />
   )
 
-  const isMix = source?.well === dest?.well
+  const isMix = source?.well === dest?.well && isSameLabware
 
   return (
     <Flex
@@ -166,43 +168,45 @@ function SubstepComponent(props: SubstepProps): JSX.Element {
             </Flex>
           </ListItem>
           <ListItem type="noActive">
-            <Flex
-              gridGap={SPACING.spacing4}
-              padding={SPACING.spacing12}
-              justifyContent={JUSTIFY_SPACE_BETWEEN}
-              width="100%"
-              alignItems={ALIGN_CENTER}
-            >
-              {ingredIds.length > 0 ? (
-                <Flex gridGap={SPACING.spacing4} alignItems={ALIGN_CENTER}>
-                  <LiquidIcon color={color} size="medium" />
-                  <StyledText desktopStyle="bodyDefaultRegular">
-                    {ingredIds.map(groupId => ingredNames[groupId]).join(',')}
-                  </StyledText>
-                </Flex>
-              ) : null}
-              {dest != null || trashName != null ? (
-                <Flex gridGap={SPACING.spacing4} alignItems={ALIGN_CENTER}>
-                  <StyledText desktopStyle="bodyDefaultRegular">
-                    {t('protocol_steps:dispensed')}
-                  </StyledText>
-                  {volumeTag}
-                  <StyledText desktopStyle="bodyDefaultRegular">
-                    {t('protocol_steps:into')}
-                  </StyledText>
+            {dest !== undefined ? (
+              <Flex
+                gridGap={SPACING.spacing4}
+                padding={SPACING.spacing12}
+                justifyContent={JUSTIFY_SPACE_BETWEEN}
+                width="100%"
+                alignItems={ALIGN_CENTER}
+              >
+                {ingredIds.length > 0 ? (
+                  <Flex gridGap={SPACING.spacing4} alignItems={ALIGN_CENTER}>
+                    <LiquidIcon color={color} size="medium" />
+                    <StyledText desktopStyle="bodyDefaultRegular">
+                      {ingredIds.map(groupId => ingredNames[groupId]).join(',')}
+                    </StyledText>
+                  </Flex>
+                ) : null}
+                {dest != null || trashName != null ? (
+                  <Flex gridGap={SPACING.spacing4} alignItems={ALIGN_CENTER}>
+                    <StyledText desktopStyle="bodyDefaultRegular">
+                      {t('protocol_steps:dispensed')}
+                    </StyledText>
+                    {volumeTag}
+                    <StyledText desktopStyle="bodyDefaultRegular">
+                      {t('protocol_steps:into')}
+                    </StyledText>
 
-                  <DeckInfoLabel
-                    deckLabel={
-                      dest?.well != null
-                        ? t('protocol_steps:well_name', {
-                            wellName: dest.well,
-                          })
-                        : t(`shared:${trashName}`)
-                    }
-                  />
-                </Flex>
-              ) : null}
-            </Flex>
+                    <DeckInfoLabel
+                      deckLabel={
+                        dest?.well != null
+                          ? t('protocol_steps:well_name', {
+                              wellName: dest.well,
+                            })
+                          : t(`shared:${trashName}`)
+                      }
+                    />
+                  </Flex>
+                ) : null}
+              </Flex>
+            ) : null}
           </ListItem>
         </>
       )}

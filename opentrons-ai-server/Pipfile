@@ -20,6 +20,7 @@ asgi-correlation-id = "==4.3.3"
 gspread = "==6.1.4"
 google-auth = "==2.36.0"
 google-auth-oauthlib = "==1.2.1"
+anthropic = "*"
 
 [dev-packages]
 docker = "==7.1.0"

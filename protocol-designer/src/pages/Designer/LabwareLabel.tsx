@@ -1,5 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import { DeckLabelSet } from '@opentrons/components'
+import { getDesignerTab } from '../../file-data/selectors'
 import type { DeckLabelProps } from '@opentrons/components'
 import type {
   CoordinateTuple,
@@ -22,16 +24,20 @@ export const LabwareLabel = (props: ModuleLabelProps): JSX.Element => {
     nestedLabwareInfo = [],
   } = props
   const labelContainerRef = useRef<HTMLDivElement>(null)
+  const designerTab = useSelector(getDesignerTab)
   const [labelContainerHeight, setLabelContainerHeight] = useState(0)
 
-  const deckLabels = [
-    ...nestedLabwareInfo,
-    {
-      text: labwareDef.metadata.displayName,
-      isSelected: isSelected,
-      isLast: isLast,
-    },
-  ]
+  const deckLabels =
+    designerTab === 'startingDeck'
+      ? [
+          ...nestedLabwareInfo,
+          {
+            text: labwareDef.metadata.displayName,
+            isSelected: isSelected,
+            isLast: isLast,
+          },
+        ]
+      : []
 
   useEffect(() => {
     if (labelContainerRef.current) {
