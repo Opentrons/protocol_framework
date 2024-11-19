@@ -74,8 +74,8 @@ export function useErrorRecoveryFlows(
   const isValidERStatus = (status: RunStatus | null): boolean => {
     return (
       status !== null &&
-      VALID_ER_RUN_STATUSES.includes(status) &&
-      (status === RUN_STATUS_AWAITING_RECOVERY || hasSeenAwaitingRecovery)
+      (status === RUN_STATUS_AWAITING_RECOVERY ||
+        (VALID_ER_RUN_STATUSES.includes(status) && hasSeenAwaitingRecovery))
     )
   }
 
