@@ -168,8 +168,15 @@ export function getRecoveryOptions(errorKind: ErrorKind): RecoveryRoute[] {
       return GRIPPER_ERROR_OPTIONS
     case ERROR_KINDS.GENERAL_ERROR:
       return GENERAL_ERROR_OPTIONS
+    case ERROR_KINDS.STALL_OR_COLLISION:
+      return STALL_OR_COLLISION_OPTIONS
   }
 }
+
+export const STALL_OR_COLLISION_OPTIONS: RecoveryRoute[] = [
+  RECOVERY_MAP.HOME_AND_RETRY.ROUTE,
+  RECOVERY_MAP.CANCEL_RUN.ROUTE,
+]
 
 export const NO_LIQUID_DETECTED_OPTIONS: RecoveryRoute[] = [
   RECOVERY_MAP.MANUAL_FILL_AND_SKIP.ROUTE,

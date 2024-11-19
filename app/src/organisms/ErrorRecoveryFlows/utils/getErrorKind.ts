@@ -54,6 +54,8 @@ export function getErrorKind(
       errorType === DEFINED_ERROR_TYPES.GRIPPER_MOVEMENT
     ) {
       return ERROR_KINDS.GRIPPER_ERROR
+    } else if (errorType === 'stallOrCollision') {
+      return ERROR_KINDS.STALL_OR_COLLISION
     }
   }
 
