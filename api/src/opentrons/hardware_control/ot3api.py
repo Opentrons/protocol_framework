@@ -1333,7 +1333,7 @@ class OT3API(
         except ZeroLengthMoveError as zero_length_error:
             self._log.info(f"{str(zero_length_error)}, ignoring")
             return
-        self._log.info(
+        self._log.info( 
             f"move: deck {target_position} becomes machine {machine_pos} from {origin} "
             f"requiring {moves}"
         )
@@ -1990,6 +1990,7 @@ class OT3API(
                 target_down = target_position_from_relative(
                     mount, top_types.Point(z=press.distance), self._current_position
                 )
+                #input("5-1111")
                 await self._move(target_down, speed=press.speed, expect_stalls=True)
             if press.distance < 0:
                 # we expect a stall has happened during a downward movement into the tiprack, so
@@ -2049,38 +2050,46 @@ class OT3API(
             and instrument.nozzle_manager.current_configuration.configuration
             == NozzleConfigurationType.FULL
         ):
+            #input("11111")
             spec = self._pipette_handler.plan_ht_pick_up_tip(
                 instrument.nozzle_manager.current_configuration.tip_count
             )
+            #input("22222")
             if spec.z_distance_to_tiprack:
                 await self.move_rel(
                     realmount, top_types.Point(z=spec.z_distance_to_tiprack)
                 )
+            #input("3333")
             await self._tip_motor_action(realmount, spec.tip_action_moves)
         else:
+            #input("44444")
             spec = self._pipette_handler.plan_lt_pick_up_tip(
                 realmount,
                 instrument.nozzle_manager.current_configuration.tip_count,
                 presses,
                 increment,
             )
+            #input("55555")
             await self._force_pick_up_tip(realmount, spec)
 
         # neighboring tips tend to get stuck in the space between
         # the volume chamber and the drop-tip sleeve on p1000.
         # This extra shake ensures those tips are removed
+        #input("6666")
         for rel_point, speed in spec.shake_off_moves:
             await self.move_rel(realmount, rel_point, speed=speed)
 
         # fixme: really only need this during labware position check so user
         # can verify if a tip is properly attached
+        #input("7777")
         if spec.ending_z_retract_distance:
             await self.move_rel(
                 realmount, top_types.Point(z=spec.ending_z_retract_distance)
             )
-
+        #input("8888")
         add_tip_to_instr()
 
+        #input("9999")
         if prep_after:
             await self.prepare_for_aspirate(realmount)
 
