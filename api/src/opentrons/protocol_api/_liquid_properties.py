@@ -62,9 +62,9 @@ class LiquidHandlingPropertyByVolume:
         """Remove an existing volume and value from the property."""
         try:
             del self._properties_by_volume[volume]
-            self._sort_volume_and_values()
         except KeyError:
             raise KeyError(f"No value set for volume {volume} uL")
+        self._sort_volume_and_values()
 
     def _sort_volume_and_values(self) -> None:
         """Sort volume in increasing order along with corresponding values in matching order."""

@@ -23,7 +23,6 @@ def test_get_for_pipette_and_tip(
     liq_class = LiquidClass.create(minimal_liquid_class_def2)
     result = liq_class.get_for("p20_single_gen2", "opentrons_96_tiprack_20ul")
     assert result.aspirate.flow_rate_by_volume.as_dict() == {
-        "default": 50.0,
         10.0: 40.0,
         20.0: 30.0,
     }
