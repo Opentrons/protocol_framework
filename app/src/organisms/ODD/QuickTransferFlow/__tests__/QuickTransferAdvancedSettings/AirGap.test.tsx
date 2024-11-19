@@ -74,7 +74,7 @@ describe('AirGap', () => {
 
   it('renders the first air gap screen, continue, and back buttons', () => {
     render(props)
-    screen.getByText('Air gap before aspirating')
+    screen.getByText('Air gap after aspirating')
     screen.getByTestId('ChildNavigation_Primary_Button')
     screen.getByText('Enabled')
     screen.getByText('Disabled')
