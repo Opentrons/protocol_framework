@@ -29,7 +29,7 @@ import type { ProfileFormError } from '../../steplist/formLevel/profileErrors'
 import type { MakeAlert } from './types'
 
 interface FormAlertsProps {
-  showFormErrorsAndWarnings: boolean
+  showFormErrors: boolean
   focusedField?: StepFieldName | null
   dirtyFields?: StepFieldName[]
   page: number
@@ -41,7 +41,7 @@ interface WarningType {
 }
 
 function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
-  const { showFormErrorsAndWarnings, focusedField, dirtyFields, page } = props
+  const { showFormErrors, focusedField, dirtyFields, page } = props
 
   const { t } = useTranslation('alert')
   const dispatch = useDispatch()
@@ -78,7 +78,7 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
     dirtyFields: dirtyFields ?? [],
     errors: formLevelErrorsForUnsavedForm,
     page,
-    showErrors: showFormErrorsAndWarnings,
+    showErrors: showFormErrors,
   })
 
   const profileItemsById: Record<string, ProfileItem> | null | undefined =
@@ -180,28 +180,19 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
     }
   }
 
-  if (showFormErrorsAndWarnings) {
-    return [...formErrors, ...formWarnings].length > 0 ? (
-      <Flex
-        flexDirection={DIRECTION_COLUMN}
-        gridGap={SPACING.spacing4}
-        padding={`${SPACING.spacing16} ${SPACING.spacing16} 0`}
-      >
-        {formErrors.map((error, key) => makeAlert('error', error, key))}
-        {formWarnings.map((warning, key) => makeAlert('warning', warning, key))}
-      </Flex>
-    ) : null
-  }
-
-  return timelineWarnings.length > 0 ? (
+  return [...formErrors, ...timelineWarnings, ...formWarnings].length > 0 ? (
     <Flex
       flexDirection={DIRECTION_COLUMN}
       gridGap={SPACING.spacing4}
       padding={`${SPACING.spacing16} ${SPACING.spacing16} 0`}
     >
+      {showFormErrors
+        ? formErrors.map((error, key) => makeAlert('error', error, key))
+        : null}
       {timelineWarnings.map((warning, key) =>
         makeAlert('warning', warning, key)
       )}
+      {formWarnings.map((warning, key) => makeAlert('warning', warning, key))}
     </Flex>
   ) : null
 }

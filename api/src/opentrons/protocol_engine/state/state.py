@@ -25,6 +25,7 @@ from .labware import LabwareState, LabwareStore, LabwareView
 from .pipettes import PipetteState, PipetteStore, PipetteView
 from .modules import ModuleState, ModuleStore, ModuleView
 from .liquids import LiquidState, LiquidView, LiquidStore
+from .liquid_classes import LiquidClassState, LiquidClassStore, LiquidClassView
 from .tips import TipState, TipView, TipStore
 from .wells import WellState, WellView, WellStore
 from .geometry import GeometryView
@@ -49,6 +50,7 @@ class State:
     pipettes: PipetteState
     modules: ModuleState
     liquids: LiquidState
+    liquid_classes: LiquidClassState
     tips: TipState
     wells: WellState
     files: FileState
@@ -64,6 +66,7 @@ class StateView(HasState[State]):
     _pipettes: PipetteView
     _modules: ModuleView
     _liquid: LiquidView
+    _liquid_classes: LiquidClassView
     _tips: TipView
     _wells: WellView
     _geometry: GeometryView
@@ -100,6 +103,11 @@ class StateView(HasState[State]):
     def liquid(self) -> LiquidView:
         """Get state view selectors for liquid state."""
         return self._liquid
+
+    @property
+    def liquid_classes(self) -> LiquidClassView:
+        """Get state view selectors for liquid class state."""
+        return self._liquid_classes
 
     @property
     def tips(self) -> TipView:
@@ -148,6 +156,7 @@ class StateView(HasState[State]):
             wells=self._wells.get_all(),
             hasEverEnteredErrorRecovery=self._commands.get_has_entered_recovery_mode(),
             files=self._state.files.file_ids,
+            # TODO(dc): Do we want to just dump all the liquid classes into the summary?
         )
 
 
@@ -213,6 +222,7 @@ class StateStore(StateView, ActionHandler):
             module_calibration_offsets=module_calibration_offsets,
         )
         self._liquid_store = LiquidStore()
+        self._liquid_class_store = LiquidClassStore()
         self._tip_store = TipStore()
         self._well_store = WellStore()
         self._file_store = FileStore()
@@ -224,6 +234,7 @@ class StateStore(StateView, ActionHandler):
             self._labware_store,
             self._module_store,
             self._liquid_store,
+            self._liquid_class_store,
             self._tip_store,
             self._well_store,
             self._file_store,
@@ -342,6 +353,7 @@ class StateStore(StateView, ActionHandler):
             pipettes=self._pipette_store.state,
             modules=self._module_store.state,
             liquids=self._liquid_store.state,
+            liquid_classes=self._liquid_class_store.state,
             tips=self._tip_store.state,
             wells=self._well_store.state,
             files=self._file_store.state,
@@ -359,6 +371,7 @@ class StateStore(StateView, ActionHandler):
         self._pipettes = PipetteView(state.pipettes)
         self._modules = ModuleView(state.modules)
         self._liquid = LiquidView(state.liquids)
+        self._liquid_classes = LiquidClassView(state.liquid_classes)
         self._tips = TipView(state.tips)
         self._wells = WellView(state.wells)
         self._files = FileView(state.files)
@@ -391,6 +404,7 @@ class StateStore(StateView, ActionHandler):
         self._pipettes._state = next_state.pipettes
         self._modules._state = next_state.modules
         self._liquid._state = next_state.liquids
+        self._liquid_classes._state = next_state.liquid_classes
         self._tips._state = next_state.tips
         self._wells._state = next_state.wells
         self._change_notifier.notify()
