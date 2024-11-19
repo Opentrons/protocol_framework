@@ -1,8 +1,14 @@
 import * as React from 'react'
+import { useSelector } from 'react-redux'
+import map from 'lodash/map'
+import reduce from 'lodash/reduce'
 import { css } from 'styled-components'
 import { createPortal } from 'react-dom'
 import { Popper, Reference, Manager } from 'react-popper'
 import { getMainPagePortalEl } from '../../organisms'
+import { selectors } from '../../labware-ingred/selectors'
+import { formatVolume } from '../../pages/Designer/ProtocolSteps/Timeline/utils'
+import { swatchColors } from '../DefineLiquidsModal/swatchColors'
 import type { LocationLiquidState } from '@opentrons/step-generation'
 import type { WellIngredientNames } from '../../steplist/types'
 
@@ -72,9 +78,17 @@ export const WellTooltip = (props: WellTooltipProps): JSX.Element => {
     tooltipX,
     tooltipY,
     tooltipOffset,
-    // tooltipWellIngreds,
+    tooltipWellIngreds,
     tooltipWellName,
   } = tooltipState
+
+  const liquidDisplayColors = useSelector(selectors.getLiquidDisplayColors)
+  const totalLiquidVolume = reduce(
+    tooltipWellIngreds,
+    (acc, ingred) => acc + ingred.volume,
+    0
+  )
+  const hasMultipleIngreds = Object.keys(tooltipWellIngreds ?? {}).length > 1
 
   return (
     <>
@@ -133,11 +147,91 @@ export const WellTooltip = (props: WellTooltipProps): JSX.Element => {
                     position: absolute;
                   `}
                 >
-                  {/* <PillTooltipContents
-                    well={tooltipWellName || ''}
-                    ingredNames={ingredNames}
-                    ingreds={tooltipWellIngreds || {}}
-                  /> */}
+                  <div
+                    css={css`
+                      margin: 0.5em;
+                      max-width: 20rem;
+                    `}
+                  >
+                    <table>
+                      <tbody>
+                        {map(tooltipWellIngreds || {}, (ingred, groupId) => (
+                          <tr
+                            key={groupId}
+                            css={css`
+                              min-width: 180px;
+                            `}
+                          >
+                            <td>
+                              <div
+                                css={css`
+                                  height: 2em;
+                                  width: 2em;
+                                  border-radius: 50%;
+                                  margin-right: 1em;
+                                `}
+                                style={{
+                                  backgroundColor:
+                                    liquidDisplayColors[Number(groupId)] ??
+                                    swatchColors(groupId),
+                                }}
+                              />
+                            </td>
+                            <td
+                              css={css`
+                                text-align: left;
+                                padding-right: 1em;
+                              `}
+                            >
+                              {props.ingredNames[groupId]}
+                            </td>
+                            {hasMultipleIngreds && (
+                              <td
+                                css={css`
+                                  text-align: right;
+                                  padding-right: 1em;
+                                `}
+                              >
+                                {/* @ts-expect-error(sa, 2021-6-20): TODO IMMEDIATELY, this could either be single channel OR multi channel volume data */}
+                                {formatPercentage(
+                                  ingred.volume,
+                                  totalLiquidVolume
+                                )}
+                              </td>
+                            )}
+                            <td
+                              css={css`
+                                text-align: right;
+                              `}
+                            >
+                              {formatVolume(ingred.volume, 2)}µl
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {hasMultipleIngreds && (
+                      <React.Fragment>
+                        <div
+                          css={css`
+                            height: 1px;
+                            width: 100%;
+                            background-color: var(--c-light-gray);
+                            margin: 1em 0;
+                          `}
+                        />
+                        <div
+                          css={css`
+                            display: flex;
+                            justify-content: space-between;
+                          `}
+                        >
+                          <span>{`${tooltipWellName} Total Volume`}</span>
+                          <span>{formatVolume(totalLiquidVolume, 2)}µl</span>
+                        </div>
+                      </React.Fragment>
+                    )}
+                  </div>
                   <div
                     css={css`
                       position: absolute;
