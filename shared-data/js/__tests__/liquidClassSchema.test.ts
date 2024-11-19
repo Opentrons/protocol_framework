@@ -6,8 +6,14 @@ import glob from 'glob'
 import { describe, expect, it } from 'vitest'
 import liquidClassSchemaV1 from '../../liquid-class/schemas/1.json'
 
-const fixtureV1Glob = path.join(__dirname, '../../liquid-class/fixtures/1/*.json')
-const defV1Glob = path.join(__dirname, '../../liquid-class/definitions/3/*.json')
+const fixtureV1Glob = path.join(
+  __dirname,
+  '../../liquid-class/fixtures/1/*.json'
+)
+const defV1Glob = path.join(
+  __dirname,
+  '../../liquid-class/definitions/3/*.json'
+)
 
 const ajv = new Ajv({ allErrors: true, jsonPointers: true })
 
