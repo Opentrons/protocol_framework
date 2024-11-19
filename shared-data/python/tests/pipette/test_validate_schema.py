@@ -22,7 +22,7 @@ def iterate_models() -> Iterator[PipetteModel]:
         "single_channel": "single",
         "ninety_six_channel": "96",
         "eight_channel": "multi",
-        "eight_channel_peek": "multiemulsify",
+        "eight_channel_emulsify": "multiemulsify",
     }
     defn_root = get_shared_data_root() / "pipette" / "definitions" / "2" / "liquid"
     assert os.listdir(defn_root), "A path is wrong"
@@ -64,7 +64,7 @@ def test_pick_up_configs_configuration_by_nozzle_map_keys() -> None:
         "single_channel": "single",
         "ninety_six_channel": "96",
         "eight_channel": "multi",
-        "eight_channel_peek": "multiemulsify",
+        "eight_channel_emulsify": "multiemulsify",
     }
     assert os.listdir(paths_to_validate), "You have a path wrong"
     for channel_dir in os.listdir(paths_to_validate):
@@ -107,7 +107,7 @@ def test_pick_up_configs_configuration_ordered_from_smallest_to_largest() -> Non
         "single_channel": "single",
         "ninety_six_channel": "96",
         "eight_channel": "multi",
-        "eight_channel_peek": "multiemulsify",
+        "eight_channel_emulsify": "multiemulsify",
     }
     assert os.listdir(paths_to_validate), "You have a path wrong"
     for channel_dir in os.listdir(paths_to_validate):
