@@ -247,7 +247,6 @@ def liquid_height_commands(
                         "Height (mm)": height,
                     }
                     list_of_heights.append(one_entry)
-                    print(list_of_heights)
             except (IndexError, ValueError):
                 continue
     if len(list_of_heights) > 0:
