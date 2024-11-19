@@ -87,10 +87,29 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
     selectedModuleModel,
     selectedNestedLabwareDefUri,
   } = zoomedInSlotInfo
-  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(
-    null
-  )
+  const allOrderedCategories = [CUSTOM_CATEGORY, ...ORDERED_CATEGORIES]
+  const allCategoriesExpanded = allOrderedCategories.reduce<
+    Record<string, boolean>
+  >((acc, category) => {
+    return { ...acc, [category]: true }
+  }, {})
+  const allCategoriesCollapsed = allOrderedCategories.reduce<
+    Record<string, boolean>
+  >((acc, category) => {
+    return { ...acc, [category]: false }
+  }, {})
+  const [areCategoriesExpanded, setAreCategoriesExpanded] = React.useState<
+    Record<string, boolean>
+  >(allCategoriesCollapsed)
   const [searchTerm, setSearchTerm] = React.useState<string>('')
+
+  React.useEffect(() => {
+    if (searchTerm !== '') {
+      setAreCategoriesExpanded(allCategoriesExpanded)
+    } else {
+      setAreCategoriesExpanded(allCategoriesCollapsed)
+    }
+  }, [searchTerm])
 
   const searchFilter = (termToCheck: string): boolean =>
     termToCheck.toLowerCase().includes(searchTerm.toLowerCase())
@@ -186,13 +205,22 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
 
   const populatedCategories: { [category: string]: boolean } = React.useMemo(
     () =>
-      ORDERED_CATEGORIES.reduce((acc, category) => {
+      allOrderedCategories.reduce((acc, category) => {
         const isDeckLocationCategory =
           slot === 'offDeck' ? category !== 'adapter' : true
+        if (category === 'custom') {
+          return {
+            ...acc,
+            [category]: Object.values(customLabwareDefs).some(def =>
+              searchFilter(def.metadata.displayName)
+            ),
+          }
+        }
         return category in labwareByCategory &&
           isDeckLocationCategory &&
-          labwareByCategory[category].some(lw =>
-            searchFilter(lw.metadata.displayName)
+          labwareByCategory[category].some(
+            lw =>
+              searchFilter(lw.metadata.displayName) && !getIsLabwareFiltered(lw)
           )
           ? {
               ...acc,
@@ -204,8 +232,13 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
       }, {}),
     [labwareByCategory, getIsLabwareFiltered, searchTerm]
   )
-  const handleCategoryClick = (category: string): void => {
-    setSelectedCategory(selectedCategory === category ? null : category)
+
+  const handleCategoryClick = (category: string, expand?: boolean): void => {
+    const updatedExpandState = {
+      ...areCategoriesExpanded,
+      [category]: expand ?? !areCategoriesExpanded[category],
+    }
+    setAreCategoriesExpanded(updatedExpandState)
   }
 
   return (
@@ -225,6 +258,7 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
           showDeleteIcon
           onDelete={() => {
             setSearchTerm('')
+            setAreCategoriesExpanded(allCategoriesCollapsed)
           }}
         />
         {moduleType != null ||
@@ -253,7 +287,7 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
         gridGap={SPACING.spacing4}
         paddingTop={SPACING.spacing8}
       >
-        {customLabwareURIs.length === 0 ? null : (
+        {populatedCategories[CUSTOM_CATEGORY] ? (
           <ListButton
             key={`ListButton_${CUSTOM_CATEGORY}`}
             type="noActive"
@@ -264,33 +298,37 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
             <ListButtonAccordionContainer id={`${CUSTOM_CATEGORY}_${slot}`}>
               <ListButtonAccordion
                 mainHeadline={t(`${CUSTOM_CATEGORY}`)}
-                isExpanded={CUSTOM_CATEGORY === selectedCategory}
+                isExpanded={areCategoriesExpanded[CUSTOM_CATEGORY]}
               >
-                {customLabwareURIs.map((labwareURI, index) => (
-                  <ListButtonRadioButton
-                    key={`${index}_${labwareURI}`}
-                    id={`${index}_${labwareURI}`}
-                    buttonText={
-                      customLabwareDefs[labwareURI].metadata.displayName
-                    }
-                    setNoHover={() => {
-                      setHoveredLabware(null)
-                    }}
-                    setHovered={() => {
-                      setHoveredLabware(labwareURI)
-                    }}
-                    buttonValue={labwareURI}
-                    onChange={e => {
-                      e.stopPropagation()
-                      dispatch(selectLabware({ labwareDefUri: labwareURI }))
-                    }}
-                    isSelected={labwareURI === selectedLabwareDefUri}
-                  />
-                ))}
+                {customLabwareURIs.map((labwareURI, index) =>
+                  searchFilter(
+                    customLabwareDefs[labwareURI].metadata.displayName
+                  ) ? (
+                    <ListButtonRadioButton
+                      key={`${index}_${labwareURI}`}
+                      id={`${index}_${labwareURI}`}
+                      buttonText={
+                        customLabwareDefs[labwareURI].metadata.displayName
+                      }
+                      setNoHover={() => {
+                        setHoveredLabware(null)
+                      }}
+                      setHovered={() => {
+                        setHoveredLabware(labwareURI)
+                      }}
+                      buttonValue={labwareURI}
+                      onChange={e => {
+                        e.stopPropagation()
+                        dispatch(selectLabware({ labwareDefUri: labwareURI }))
+                      }}
+                      isSelected={labwareURI === selectedLabwareDefUri}
+                    />
+                  ) : null
+                )}
               </ListButtonAccordion>
             </ListButtonAccordionContainer>
           </ListButton>
-        )}
+        ) : null}
         {ORDERED_CATEGORIES.map(category => {
           const isPopulated = populatedCategories[category]
           if (isPopulated) {
@@ -305,144 +343,136 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
                 <ListButtonAccordionContainer id={`${category}_${slot}`}>
                   <ListButtonAccordion
                     mainHeadline={t(`${category}`)}
-                    isExpanded={category === selectedCategory}
+                    isExpanded={areCategoriesExpanded[category]}
                   >
                     {labwareByCategory[category]?.map((labwareDef, index) => {
-                      const isFiltered = getIsLabwareFiltered(labwareDef)
                       const labwareURI = getLabwareDefURI(labwareDef)
                       const loadName = labwareDef.parameters.loadName
-                      const isMatch = searchFilter(
-                        labwareDef.metadata.displayName
-                      )
-                      if (!isFiltered && isMatch) {
-                        return (
-                          <React.Fragment
-                            key={`${index}_${category}_${loadName}`}
-                          >
-                            <ListButtonRadioButton
-                              setNoHover={() => {
-                                setHoveredLabware(null)
-                              }}
-                              setHovered={() => {
-                                setHoveredLabware(labwareURI)
-                              }}
-                              id={`${index}_${category}_${loadName}`}
-                              buttonText={labwareDef.metadata.displayName}
-                              buttonValue={labwareURI}
-                              onChange={e => {
-                                e.stopPropagation()
-                                dispatch(
-                                  selectLabware({
-                                    labwareDefUri:
-                                      labwareURI === selectedLabwareDefUri
-                                        ? null
-                                        : labwareURI,
-                                  })
-                                )
-                                // reset the nested labware def uri in case it is not compatible
-                                dispatch(
-                                  selectNestedLabware({
-                                    nestedLabwareDefUri: null,
-                                  })
-                                )
-                              }}
-                              isSelected={labwareURI === selectedLabwareDefUri}
-                            />
 
-                            {labwareURI === selectedLabwareDefUri &&
-                              getLabwareCompatibleWithAdapter(loadName)
-                                ?.length > 0 && (
-                                <ListButtonAccordionContainer
-                                  id={`nestedAccordionContainer_${loadName}`}
+                      return searchFilter(labwareDef.metadata.displayName) ? (
+                        <React.Fragment
+                          key={`${index}_${category}_${loadName}`}
+                        >
+                          <ListButtonRadioButton
+                            setNoHover={() => {
+                              setHoveredLabware(null)
+                            }}
+                            setHovered={() => {
+                              setHoveredLabware(labwareURI)
+                            }}
+                            id={`${index}_${category}_${loadName}`}
+                            buttonText={labwareDef.metadata.displayName}
+                            buttonValue={labwareURI}
+                            onChange={e => {
+                              e.stopPropagation()
+                              dispatch(
+                                selectLabware({
+                                  labwareDefUri:
+                                    labwareURI === selectedLabwareDefUri
+                                      ? null
+                                      : labwareURI,
+                                })
+                              )
+                              // reset the nested labware def uri in case it is not compatible
+                              dispatch(
+                                selectNestedLabware({
+                                  nestedLabwareDefUri: null,
+                                })
+                              )
+                            }}
+                            isSelected={labwareURI === selectedLabwareDefUri}
+                          />
+
+                          {labwareURI === selectedLabwareDefUri &&
+                            getLabwareCompatibleWithAdapter(loadName)?.length >
+                              0 && (
+                              <ListButtonAccordionContainer
+                                id={`nestedAccordionContainer_${loadName}`}
+                              >
+                                <ListButtonAccordion
+                                  key={`${index}_${category}_${loadName}_accordion`}
+                                  isNested
+                                  mainHeadline={t('adapter_compatible_lab')}
+                                  isExpanded={
+                                    labwareURI === selectedLabwareDefUri
+                                  }
                                 >
-                                  <ListButtonAccordion
-                                    key={`${index}_${category}_${loadName}_accordion`}
-                                    isNested
-                                    mainHeadline={t('adapter_compatible_lab')}
-                                    isExpanded={
-                                      labwareURI === selectedLabwareDefUri
-                                    }
-                                  >
-                                    {has96Channel &&
-                                    loadName === ADAPTER_96_CHANNEL
-                                      ? permittedTipracks.map(
-                                          (tiprackDefUri, index) => {
-                                            const nestedDef =
-                                              defs[tiprackDefUri]
-                                            return (
-                                              <ListButtonRadioButton
-                                                setNoHover={() => {
-                                                  setHoveredLabware(null)
-                                                }}
-                                                setHovered={() => {
-                                                  setHoveredLabware(
-                                                    tiprackDefUri
-                                                  )
-                                                }}
-                                                key={`${index}_${category}_${loadName}_${tiprackDefUri}`}
-                                                id={`${index}_${category}_${loadName}_${tiprackDefUri}`}
-                                                buttonText={
-                                                  nestedDef?.metadata
-                                                    .displayName ?? ''
-                                                }
-                                                buttonValue={tiprackDefUri}
-                                                onChange={e => {
-                                                  e.stopPropagation()
-                                                  dispatch(
-                                                    selectNestedLabware({
-                                                      nestedLabwareDefUri: tiprackDefUri,
-                                                    })
-                                                  )
-                                                }}
-                                                isSelected={
-                                                  tiprackDefUri ===
-                                                  selectedNestedLabwareDefUri
-                                                }
-                                              />
-                                            )
-                                          }
-                                        )
-                                      : getLabwareCompatibleWithAdapter(
-                                          loadName
-                                        ).map(nestedDefUri => {
-                                          const nestedDef = defs[nestedDefUri]
-
+                                  {has96Channel &&
+                                  loadName === ADAPTER_96_CHANNEL
+                                    ? permittedTipracks.map(
+                                        (tiprackDefUri, index) => {
+                                          const nestedDef = defs[tiprackDefUri]
                                           return (
                                             <ListButtonRadioButton
                                               setNoHover={() => {
                                                 setHoveredLabware(null)
                                               }}
                                               setHovered={() => {
-                                                setHoveredLabware(nestedDefUri)
+                                                setHoveredLabware(tiprackDefUri)
                                               }}
-                                              key={`${index}_${category}_${loadName}_${nestedDefUri}`}
-                                              id={`${index}_${category}_${loadName}_${nestedDefUri}`}
+                                              key={`${index}_${category}_${loadName}_${tiprackDefUri}`}
+                                              id={`${index}_${category}_${loadName}_${tiprackDefUri}`}
                                               buttonText={
                                                 nestedDef?.metadata
                                                   .displayName ?? ''
                                               }
-                                              buttonValue={nestedDefUri}
+                                              buttonValue={tiprackDefUri}
                                               onChange={e => {
                                                 e.stopPropagation()
                                                 dispatch(
                                                   selectNestedLabware({
-                                                    nestedLabwareDefUri: nestedDefUri,
+                                                    nestedLabwareDefUri: tiprackDefUri,
                                                   })
                                                 )
                                               }}
                                               isSelected={
-                                                nestedDefUri ===
+                                                tiprackDefUri ===
                                                 selectedNestedLabwareDefUri
                                               }
                                             />
                                           )
-                                        })}
-                                  </ListButtonAccordion>
-                                </ListButtonAccordionContainer>
-                              )}
-                          </React.Fragment>
-                        )
-                      }
+                                        }
+                                      )
+                                    : getLabwareCompatibleWithAdapter(
+                                        loadName
+                                      ).map(nestedDefUri => {
+                                        const nestedDef = defs[nestedDefUri]
+
+                                        return (
+                                          <ListButtonRadioButton
+                                            setNoHover={() => {
+                                              setHoveredLabware(null)
+                                            }}
+                                            setHovered={() => {
+                                              setHoveredLabware(nestedDefUri)
+                                            }}
+                                            key={`${index}_${category}_${loadName}_${nestedDefUri}`}
+                                            id={`${index}_${category}_${loadName}_${nestedDefUri}`}
+                                            buttonText={
+                                              nestedDef?.metadata.displayName ??
+                                              ''
+                                            }
+                                            buttonValue={nestedDefUri}
+                                            onChange={e => {
+                                              e.stopPropagation()
+                                              dispatch(
+                                                selectNestedLabware({
+                                                  nestedLabwareDefUri: nestedDefUri,
+                                                })
+                                              )
+                                            }}
+                                            isSelected={
+                                              nestedDefUri ===
+                                              selectedNestedLabwareDefUri
+                                            }
+                                          />
+                                        )
+                                      })}
+                                </ListButtonAccordion>
+                              </ListButtonAccordionContainer>
+                            )}
+                        </React.Fragment>
+                      ) : null
                     })}
                   </ListButtonAccordion>
                 </ListButtonAccordionContainer>
@@ -464,8 +494,8 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
             data-testid="customLabwareInput"
             type="file"
             onChange={e => {
-              setSelectedCategory(CUSTOM_CATEGORY)
               dispatch(createCustomLabwareDef(e))
+              handleCategoryClick(CUSTOM_CATEGORY, true)
             }}
           />
         </StyledLabel>
