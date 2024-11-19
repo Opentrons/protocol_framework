@@ -31,6 +31,7 @@ Welcome to the v8.2.0 release of the Opentrons App! This release adds support fo
 - Fixed an app crash when performing certain error recovery steps with Python API version 2.15 protocols.
 
 ### Known Issues
+
 - If you attach an Absorbance Plate Reader to _any_ Flex on your local network, you must update all copies of the Opentrons App on the same network to at least v8.1.0.
 
 ---
