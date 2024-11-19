@@ -2690,6 +2690,7 @@
         "p1000_single_gen2",
         "p1000_single_flex",
         "p1000_multi_flex",
+        "p1000_multipeek",
         "p1000_96",
         "p200_96"
       ],
