@@ -1,10 +1,10 @@
 import * as React from 'react'
+import { css } from 'styled-components'
 import { createPortal } from 'react-dom'
 import { Popper, Reference, Manager } from 'react-popper'
 import { getMainPagePortalEl } from '../../organisms'
 import type { LocationLiquidState } from '@opentrons/step-generation'
 import type { WellIngredientNames } from '../../steplist/types'
-import { css } from 'styled-components'
 
 const DEFAULT_TOOLTIP_OFFSET = 22
 const WELL_BORDER_WIDTH = 4

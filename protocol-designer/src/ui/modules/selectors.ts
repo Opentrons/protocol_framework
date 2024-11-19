@@ -4,7 +4,6 @@ import {
   getLabwareDisplayName,
   MAGNETIC_MODULE_TYPE,
   TEMPERATURE_MODULE_TYPE,
-  THERMOCYCLER_MODULE_TYPE,
   HEATERSHAKER_MODULE_TYPE,
 } from '@opentrons/shared-data'
 import { getInitialDeckSetup } from '../../step-forms/selectors'
@@ -13,12 +12,9 @@ import {
   getModuleLabwareOptions,
   getLabwareOnModule,
   getModuleOnDeckByType,
-  getModuleHasLabware,
   getMagnetLabwareEngageHeight as getMagnetLabwareEngageHeightUtil,
   getModulesOnDeckByType,
-  getModulesHaveLabware,
 } from './utils'
-import type { ModuleAndLabware } from './utils'
 import type { Options } from '@opentrons/components'
 import type { Selector } from '../../types'
 import type { LabwareNamesByModuleId } from '../../steplist/types'

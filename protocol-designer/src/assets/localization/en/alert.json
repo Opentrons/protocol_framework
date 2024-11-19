@@ -29,36 +29,6 @@
   },
   "hint": {
     "dont_show_again": "Don't show me again",
-    "add_liquids_and_labware": {
-      "title": "Your labware has no liquids in it",
-      "summary": "In {{deck_setup_step}}, hover on labware to add liquids.",
-      "step1": "Add liquids",
-      "step2": "Watch liquids move as you build your protocol"
-    },
-    "deck_setup_explanation": {
-      "title": "Setting up your protocol",
-      "body1": "If you look to your left you will see the Protocol Timeline, and that the \"Starting Deck State\" step is listed first.",
-      "body2": "Before you can build a protocol that tells the robot how to move liquid around, you'll need to tell the Protocol Designer where all of your labware is on the deck, and which liquids start in which wells. As you add steps to your protocol the Protocol Designer will move liquid from the starting positions you defined in the Starting Deck State to new positions.",
-      "body3": "Hover on empty slots in the deck to add labware. Hover on labware to add liquid to the wells."
-    },
-    "custom_labware_with_modules": {
-      "title": "Cannot verify compatibility of custom labware",
-      "body": "The Protocol Designer cannot confirm whether or not custom labware is compatible with any module. Proceed if you are confident your custom labware will fit."
-    },
-    "module_without_labware": {
-      "title": "Missing labware",
-      "body": "Your module has no labware on it. We recommend you add labware before proceeding."
-    },
-    "multiple_modules_without_labware": {
-      "title": "Missing labware",
-      "body": "One or more module has no labware on it. We recommend you add labware before proceeding"
-    },
-    "export_v8_1_protocol_7_3": {
-      "title": "Robot and app update may be required",
-      "body1": "This protocol can only run on app and robot server version",
-      "body2": "7.3.0 or higher",
-      "body3": ". Please ensure your robot is updated to the correct version."
-    },
     "unused_hardware": {
       "title": "Protocol has unused hardware"
     },
@@ -75,25 +45,6 @@
       "body1b": ". When entering a temperature lower than the previous temperature, keep in mind the following:",
       "li1": "If the Thermocycler lid is closed it may take a very long time to reach a cooler temperature.",
       "li2": "If the room temperature in your lab is higher than the temperature you have defined, the lid will never reach it. This will stall your protocol indefinitely."
-    },
-    "protocol_can_enter_batch_edit": {
-      "title": "Editing multiple steps",
-      "body1": "Now that your protocol has multiple steps, you can try using Protocol Designer’s batch edit features.",
-
-      "body2": "To select multiple steps:",
-      "li1a": "Hold ",
-      "strong_li1": "SHIFT + Click ",
-      "li1b": "to select a range of steps",
-
-      "li2a": "Use ",
-      "strong_li2": "CTRL + Click (PC) or ⌘ + Click (Mac) ",
-      "li2b": "to select a single additional step.",
-
-      "body3a": "To delete or duplicate multiple steps:",
-      "body3b": "Use the control bar at the top of the Protocol Timeline.",
-
-      "body4a": "To batch edit Transfer or Mix advanced settings:",
-      "body4b": "Only include Transfer or Mix steps in your selection."
     },
     "waste_chute_warning": {
       "title": "Disposing labware",

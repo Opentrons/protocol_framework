@@ -11,8 +11,9 @@ type HintKey =
   | 'change_magnet_module_model'
   | 'unused_hardware'
   | 'no_commands'
+
 // DEPRECATED HINTS (keep a record to avoid name collisions with old persisted dismissal states)
-// 'export_v4_protocol'
+// | 'export_v4_protocol'
 // | 'export_v4_protocol_3_18'
 // | 'export_v5_protocol_3_20'
 // | 'export_v6_protocol_6_10'

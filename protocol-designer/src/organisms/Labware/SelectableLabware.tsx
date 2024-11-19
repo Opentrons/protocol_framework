@@ -24,7 +24,7 @@ import type { WellIngredientNames } from '../../steplist/types'
 import type { GenericRect } from '../../collision-types'
 import type { NozzleType } from '../../types'
 
-export interface Props {
+export interface SelectableLabwareProps {
   labwareProps: Omit<
     React.ComponentProps<typeof SingleLabware>,
     'selectedWells'
@@ -50,7 +50,9 @@ const getChannelsFromNozleType = (nozzleType: NozzleType): ChannelType => {
   }
 }
 
-export const SelectableLabware = (props: Props): JSX.Element => {
+export const SelectableLabware = (
+  props: SelectableLabwareProps
+): JSX.Element => {
   const {
     labwareProps,
     selectedPrimaryWells,

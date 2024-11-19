@@ -43,29 +43,4 @@ describe('addAndSelectStep', () => {
       ],
     ])
   })
-  it('should dispatch addStep thunk, and also ADD_HINT "add_liquids_and_labware" if we\'re adding a step that uses liquid but have no liquids on the deck', () => {
-    const stepType: StepType = 'moveLiquid'
-    const payload = {
-      stepType,
-    }
-    vi.mocked(labwareIngredSelectors.getDeckHasLiquid).mockReturnValue(false) // no liquid!
-
-    addAndSelectStep(payload)(dispatch, getState)
-    expect(vi.mocked(addHint).mock.calls).toEqual([['add_liquids_and_labware']])
-    expect(dispatch.mock.calls).toEqual([
-      [
-        {
-          type: 'ADD_STEP',
-          payload: {
-            id: PRESAVED_STEP_ID,
-            stepType: 'moveLiquid',
-          },
-          meta: {
-            robotStateTimeline: 'mockGetRobotStateTimelineValue',
-          },
-        },
-      ],
-      ['addHintReturnValue'],
-    ])
-  })
 })
