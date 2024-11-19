@@ -50,7 +50,6 @@ function getCommandsExecutedDuringRun(
   runId: string
 ): Promise<CommandsData> {
   return getCommands(host, runId, {
-    cursor: null,
     pageLength: 0,
     includeFixitCommands: true,
   }).then(response => {
@@ -58,7 +57,6 @@ function getCommandsExecutedDuringRun(
     return getCommands(host, runId, {
       cursor: 0,
       pageLength: totalLength,
-      includeFixitCommands: null,
     }).then(response => response.data)
   })
 }

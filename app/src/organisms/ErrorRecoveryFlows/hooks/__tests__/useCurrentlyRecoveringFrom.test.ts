@@ -55,7 +55,7 @@ describe('useCurrentlyRecoveringFrom', () => {
 
     expect(vi.mocked(useNotifyAllCommandsQuery)).toHaveBeenCalledWith(
       MOCK_RUN_ID,
-      { cursor: null, pageLength: 0 },
+      { pageLength: 0 },
       { enabled: false, refetchInterval: 5000 }
     )
     expect(vi.mocked(useCommandQuery)).toHaveBeenCalledWith(
