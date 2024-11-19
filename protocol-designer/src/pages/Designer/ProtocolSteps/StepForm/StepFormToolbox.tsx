@@ -54,6 +54,7 @@ import {
 import type { StepFieldName } from '../../../../steplist/fieldLevel'
 import type { FormData, StepType } from '../../../../form-types'
 import type { AnalyticsEvent } from '../../../../analytics/mixpanel'
+import type { FormWarningType } from '../../../../steplist'
 import type {
   FieldPropsByName,
   FocusHandlers,
@@ -167,20 +168,21 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   const visibleFormErrorsTypes = visibleFormErrors.map(error => error.title)
 
   useEffect(() => {
-    if (visibleFormWarningsTypes.length > 0) {
-      const formWarningsEvent: AnalyticsEvent = {
-        name: FORM_WARNINGS_EVENT,
-        properties: { visibleFormWarningsTypes },
+    const dispatchAnalyticsEvent = (
+      eventName: string,
+      eventProperties: FormWarningType[] | string[]
+    ): void => {
+      if (eventProperties.length > 0) {
+        const event: AnalyticsEvent = {
+          name: eventName,
+          properties: { eventProperties },
+        }
+        dispatch(analyticsEvent(event))
       }
-      dispatch(analyticsEvent(formWarningsEvent))
     }
-    if (visibleFormErrorsTypes.length > 0) {
-      const formErrorsEvent: AnalyticsEvent = {
-        name: FORM_ERRORS_EVENT,
-        properties: { visibleFormErrorsTypes },
-      }
-      dispatch(analyticsEvent(formErrorsEvent))
-    }
+
+    dispatchAnalyticsEvent(FORM_WARNINGS_EVENT, visibleFormWarningsTypes)
+    dispatchAnalyticsEvent(FORM_ERRORS_EVENT, visibleFormErrorsTypes)
   }, [visibleFormWarningsTypes, visibleFormErrorsTypes])
 
   if (!ToolsComponent) {
