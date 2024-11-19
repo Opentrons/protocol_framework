@@ -355,6 +355,7 @@ def _update_all_models(configuration_to_update: List[str]) -> None:
         "single_channel": "single",
         "ninety_six_channel": "96",
         "eight_channel": "multi",
+        "eight_channel_peek": "multipeek",
     }
 
     for channel_dir in os.listdir(paths_to_validate):
