@@ -68,7 +68,7 @@ def scan_for_files(folder):
 def build_arg_parser():
     arg_parser = argparse.ArgumentParser(description="Motion Parameter Test Script")
     arg_parser.add_argument("-c", "--cycles", default = 200, help = "number of cycles to execute")
-    arg_parser.add_argument("-a", "--axis", default = 'x', help = "Choose a Axis")
+    arg_parser.add_argument("-a", "--axis", default = 'z', help = "Choose a Axis")
     arg_parser.add_argument("-f", "--force_gauge", default = True, help = "Force gauge")
     return arg_parser
 
@@ -77,7 +77,7 @@ def home(axis: AXIS):
         TOTAL_TRAVEL = 202
         s.home(AXIS.X, DIR.POSITIVE_HOME)
     elif axis == AXIS.Z:
-        TOTAL_TRAVEL = 110.75
+        TOTAL_TRAVEL = 210.75
         s.home(AXIS.Z, DIR.POSITIVE_NEGATIVE)
     elif axis == AXIS.L:
         TOTAL_TRAVEL = 30
@@ -85,7 +85,7 @@ def home(axis: AXIS):
     else:
         raise("NO AXIS DEFINED!!")
 
-def fg_func(fg_var, sg_value, trial, axis):
+def fg_func(fg_var, sg_value, trial, axis, timer):
     global motion_active
     motion_active = True
     timer.start()
@@ -93,12 +93,12 @@ def fg_func(fg_var, sg_value, trial, axis):
     with open(f'Axis_{axis}_SG_test_SG_value_{sg_value}_speed_200_0.8Amps_lifetime_unit.csv', 'a', newline ='') as file:
         writer = csv.writer(file)
         if trial == 1:
-            fields = ["Time(s)", "Force(N)", "SG Value"]
+            fields = ["Time(s)", "Force(N)", "SG Value", "Trials"]
             writer.writerow(fields)
         while motion_active:
-            timer = timer_elasped_time()
+            t = timer.elasped_time()
             fg_reading = fg_var.read_force()
-            data = [timer, fg_reading, sg_value, trial]
+            data = [t, fg_reading, sg_value, trial]
             writer.writerow(data)
             file.flush()
         file.close()
@@ -112,18 +112,18 @@ if __name__ == '__main__':
     # datadata = pd.read_csv(folder + file_name, skiprows = detail_rows)
     arg_parser = build_arg_parser()
     options = arg_parser.parse_args()
-    timer = Timer()
+    t = Timer()
     # Port setup
-    s = stacker.FlexStacker(None).create('COM3')
-    force_gauge = mark10.Mark10(None).create('COM7')
+    s = stacker.FlexStacker(None).create('COM6')
+    force_gauge = mark10.Mark10(None).create('COM9')
     force_gauge.connect()
     force_gauge.read_force()
     # determine what axis to test
-    if axis.lower() == 'x':
+    if options.axis.lower() == 'x':
+        test_axis = AXIS.X
+    elif options.axis.lower() == 'z':
         test_axis = AXIS.Z
-    elif axis.lower() == 'z':
-        test_axis = AXIS.Z
-    elif axis.lower() == 'l':
+    elif options.axis.lower() == 'l':
         test_axis = AXIS.L
     # Determine what direction to home first
     if test_axis == AXIS.X:
@@ -147,10 +147,11 @@ if __name__ == '__main__':
         s.enable_SG(test_axis, sg_value, True)
         #print(f'SG Value: {s.read_SG_value(test_axis)}')
         # stop_event = threading.Event()
-        if args.force_gauge:
-            fg_thread = threading.Thread(target=fg_func,
-                                    args=(force_gauge, sg_value, c, test_axis) )
-            fg_thread.start()
+
+        fg_thread = threading.Thread(target=fg_func,
+                                args=(force_gauge, sg_value, c, test_axis,
+                                t) )
+        fg_thread.start()
         if test_axis == AXIS.X:
             s.move(test_axis, total_travel, DIR.POSITIVE)
         elif test_axis == AXIS.Z:
@@ -160,8 +161,7 @@ if __name__ == '__main__':
         else:
             raise("NO AXIS DEFINIED OR WRONG AXIS DEFINED")
         time.sleep(2)
-        if args.force_gauge:
-            motion_active = False
-            # stop_event.set()
-            fg_thread.join()
+        motion_active = False
+        # stop_event.set()
+        fg_thread.join()
     s.enable_SG(test_axis, 0, False)
