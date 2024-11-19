@@ -406,9 +406,6 @@ class Labware:
     def __getitem__(self, key: str) -> Well:
         return self.wells_by_name()[key]
 
-    def __contains__(self, key: str) -> bool:
-        return key in self.wells_by_name()
-
     @property
     @requires_version(2, 0)
     def uri(self) -> str:
@@ -1153,7 +1150,7 @@ class Labware:
         well_names: List[str] = []
         for well in wells:
             if isinstance(well, str):
-                if well not in self:
+                if well not in self.wells_by_name():
                     raise KeyError(
                         f"{well} is not a well in labware {self.name}. The elements of wells should name wells in this labware."
                     )
@@ -1202,7 +1199,7 @@ class Labware:
         verified_volumes: Dict[str, float] = {}
         for well, volume in volumes.items():
             if isinstance(well, str):
-                if well not in self:
+                if well not in self.wells_by_name():
                     raise KeyError(
                         f"{well} is not a well in {self.name}. The keys of volumes should name wells in this labware"
                     )
@@ -1241,7 +1238,7 @@ class Labware:
         well_names: List[str] = []
         for well in wells:
             if isinstance(well, str):
-                if well not in self:
+                if well not in self.wells_by_name():
                     raise KeyError(
                         f"{well} is not a well in {self.name}. The elements of wells should name wells in this labware."
                     )
