@@ -53,28 +53,24 @@ export function PipettingSubsteps(props: PipettingSubstepsProps): JSX.Element {
             substepIndex={groupKey}
             selectSubstep={selectSubstep}
             ingredNames={ingredNames}
+            isSameLabware={isSameLabware}
           />
         )
       })
-    : substeps.rows.map(
-        (row, substepIndex) => (
-          console.log(row.volume),
-          (
-            <Substep
-              trashName={trashName}
-              key={substepIndex}
-              selectSubstep={selectSubstep}
-              stepId={substeps.parentStepId}
-              substepIndex={substepIndex}
-              ingredNames={ingredNames}
-              volume={row.volume}
-              source={row.source}
-              dest={row.dest}
-              isSameLabware={isSameLabware}
-            />
-          )
-        )
-      )
+    : substeps.rows.map((row, substepIndex) => (
+        <Substep
+          trashName={trashName}
+          key={substepIndex}
+          selectSubstep={selectSubstep}
+          stepId={substeps.parentStepId}
+          substepIndex={substepIndex}
+          ingredNames={ingredNames}
+          volume={row.volume}
+          source={row.source}
+          dest={row.dest}
+          isSameLabware={isSameLabware}
+        />
+      ))
 
   return (
     <Flex
