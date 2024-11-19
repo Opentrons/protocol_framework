@@ -1,8 +1,8 @@
 {
   "$otSharedSchema": "#/pipette/schemas/2/pipettePropertiesSchema.json",
-  "displayName": "Peak 8-Channel 1000 μL",
+  "displayName": "FLEX 8-Channel PEEK 1000 μL",
   "model": "p1000",
-  "displayCategory": "PEAK",
+  "displayCategory": "FLEX",
   "validNozzleMaps": {
     "maps": {
       "SingleA1": ["A1"],
