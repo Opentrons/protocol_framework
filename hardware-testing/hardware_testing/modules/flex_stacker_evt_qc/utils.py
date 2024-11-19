@@ -1,3 +1,4 @@
+"""Utility functions for the Flex Stacker EVT QC module."""
 from hardware_testing.data import ui
 from hardware_testing.data.csv_report import (
     CSVReport,
@@ -20,7 +21,7 @@ def test_limit_switches_per_direction(
     # first make sure switch is not already triggered by moving in the opposite direction
     if driver.get_limit_switch(axis, direction):
         print(f"{direction} switch already triggered, moving away...\n")
-        SAFE_DISTANCE = 10 # mm
+        SAFE_DISTANCE = 10  # mm
         driver.move_in_mm(axis, direction.opposite().distance(SAFE_DISTANCE))
 
     # move until the limit switch is reached
@@ -30,7 +31,8 @@ def test_limit_switches_per_direction(
     opposite_result = not driver.get_limit_switch(axis, direction.opposite())
     print(f"{direction} switch triggered: {result}")
     print(f"{direction.opposite()} switch untriggered: {opposite_result}")
-    report(section,
-           f"limit-switch-trigger-{direction}-untrigger-{direction.opposite()}",
-           [result, opposite_result, CSVResult.from_bool(result and opposite_result)]
-        )
+    report(
+        section,
+        f"limit-switch-trigger-{direction}-untrigger-{direction.opposite()}",
+        [result, opposite_result, CSVResult.from_bool(result and opposite_result)],
+    )

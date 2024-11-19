@@ -51,7 +51,7 @@ class Direction(Enum):
     def opposite(self) -> "Direction":
         """Get opposite direction."""
         return Direction.EXTENT if self == Direction.RETRACT else Direction.RETRACT
-    
+
     def distance(self, distance: float) -> float:
         """Get signed distance, where retract direction is negative."""
         return distance * -1 if self == Direction.RETRACT else distance
@@ -161,7 +161,7 @@ class FlexStacker:
         match = _LS_RE.match(res)
         assert match, f"Incorrect Response for platform sensor: {res}"
         return bool(int(match.group(1)))
-    
+
     def get_hopper_door_closed(self) -> bool:
         """Get whether or not door is closed.
 
