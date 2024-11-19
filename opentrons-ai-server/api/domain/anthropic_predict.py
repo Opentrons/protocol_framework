@@ -27,7 +27,7 @@ class AnthropicPredict:
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": DOCUMENTS.format(doc_content=self.get_docs()), "cache_control": {"type": "ephemeral"}}
+                    {"type": "text", "text": DOCUMENTS.format(doc_content=self.get_docs()), "cache_control": {"type": "ephemeral"}}  # type: ignore
                 ],
             }
         ]
@@ -84,7 +84,7 @@ class AnthropicPredict:
             system=self.system_prompt,
             max_tokens=max_tokens,
             messages=self._messages,
-            tools=self.tools,
+            tools=self.tools,  # type: ignore
             extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
         )
 
@@ -107,7 +107,7 @@ class AnthropicPredict:
             if response.content[-1].type == "tool_use":
                 tool_use = response.content[-1]
                 self._messages.append({"role": "assistant", "content": response.content})
-                result = self.handle_tool_use(tool_use.name, tool_use.input)
+                result = self.handle_tool_use(tool_use.name, tool_use.input)  # type: ignore
                 self._messages.append(
                     {
                         "role": "user",
@@ -121,7 +121,7 @@ class AnthropicPredict:
                     }
                 )
                 follow_up = self.generate_message()
-                response_text = follow_up.content[0].text
+                response_text = follow_up.content[0].text  # type: ignore
                 self._messages.append({"role": "assistant", "content": response_text})
                 return response_text
 
@@ -154,7 +154,7 @@ class AnthropicPredict:
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": DOCUMENTS.format(doc_content=self.get_docs()), "cache_control": {"type": "ephemeral"}}
+                    {"type": "text", "text": DOCUMENTS.format(doc_content=self.get_docs()), "cache_control": {"type": "ephemeral"}}  # type: ignore
                 ],
             }
         ]
@@ -175,9 +175,9 @@ class AnthropicPredict:
         response_data = response.json()
         if "error_message" in response_data:
             logger.error("Simulation error", extra={"error": response_data["error_message"]})
-            return response_data["error_message"]
+            return str(response_data["error_message"])
         elif "protocol_name" in response_data:
-            return response_data["run_status"]
+            return str(response_data["run_status"])
         else:
             logger.error("Unexpected response", extra={"response": response_data})
             return "Unexpected response"

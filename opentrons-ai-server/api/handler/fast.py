@@ -1,7 +1,7 @@
 import asyncio
 import os
 import time
-from typing import Annotated, Any, Awaitable, Callable, List, Literal, Union
+from typing import Annotated, Any, Awaitable, Callable, List, Literal, Optional, Union
 
 import structlog
 from asgi_correlation_id import CorrelationIdMiddleware
@@ -198,10 +198,11 @@ async def create_chat_completion(
                 return ChatResponse(reply=fake.chat_response.reply, fake=fake.chat_response.fake)
             return ChatResponse(reply="Default fake response.  ", fake=body.fake)
 
+        response: Optional[str] = None
         if "openai" in settings.model.lower():
-            response: Union[str, None] = openai.predict(prompt=body.message, chat_completion_message_params=body.history)
+            response = openai.predict(prompt=body.message, chat_completion_message_params=body.history)
         else:
-            response: Union[str, None] = claude.predict(prompt=body.message)
+            response = claude.predict(prompt=body.message)
 
         if response is None or response == "":
             return ChatResponse(reply="No response was generated", fake=bool(body.fake))
@@ -241,10 +242,11 @@ async def update_protocol(
         if body.fake:
             return ChatResponse(reply="Fake response", fake=bool(body.fake))
 
+        response: Optional[str] = None
         if "openai" in settings.model.lower():
-            response: Union[str, None] = openai.predict(prompt=body.prompt, chat_completion_message_params=None)
+            response = openai.predict(prompt=body.prompt, chat_completion_message_params=None)
         else:
-            response: Union[str, None] = claude.predict(prompt=body.prompt)
+            response = claude.predict(prompt=body.prompt)
 
         if response is None or response == "":
             return ChatResponse(reply="No response was generated", fake=bool(body.fake))
@@ -285,10 +287,11 @@ async def create_protocol(
         if body.fake:
             return ChatResponse(reply="Fake response", fake=body.fake)
 
+        response: Optional[str] = None
         if "openai" in settings.model.lower():
-            response: Union[str, None] = openai.predict(prompt=str(body.model_dump()), chat_completion_message_params=None)
+            response = openai.predict(prompt=str(body.model_dump()), chat_completion_message_params=None)
         else:
-            response: Union[str, None] = claude.predict(prompt=str(body.model_dump()))
+            response = claude.predict(prompt=str(body.model_dump()))
 
         if response is None or response == "":
             return ChatResponse(reply="No response was generated", fake=bool(body.fake))
