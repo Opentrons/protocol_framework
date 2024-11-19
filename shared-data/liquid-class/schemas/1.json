@@ -396,7 +396,6 @@
         "positionReference",
         "offset",
         "flowRateByVolume",
-        "mix",
         "conditioningByVolume",
         "disposalByVolume",
         "delay"
