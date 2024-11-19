@@ -1166,7 +1166,11 @@ class Labware:
                 well_names.append(well.well_name)
             else:
                 raise TypeError(
-                    "The elements of wells should be Well instances or well names."
+                    f"Unexpected type for element {repr(well)}. The elements of wells should be Well instances or well names."
+                )
+            if not isinstance(volume, (float, int)):
+                raise TypeError(
+                    f"Unexpected type for volume {repr(volume)}. Volume should be a number in microliters."
                 )
         self._core.load_liquid({well_name: volume for well_name in well_names}, liquid)
 
@@ -1211,7 +1215,11 @@ class Labware:
                 verified_volumes[well.well_name] = volume
             else:
                 raise TypeError(
-                    "The elements of wells should be Well instances or well names."
+                    f"Unexpected type for well name {repr(well)}. The keys of volumes should be Well instances or well names."
+                )
+            if not isinstance(volume, (float, int)):
+                raise TypeError(
+                    f"Unexpected type for volume {repr(volume)}. The values of volumes should be numbers in microliters."
                 )
         self._core.load_liquid(verified_volumes, liquid)
 
@@ -1235,18 +1243,18 @@ class Labware:
             if isinstance(well, str):
                 if well not in self:
                     raise KeyError(
-                        "The elements of wells should name wells in this labware."
+                        f"{well} is not a well in {self.name}. The elements of wells should name wells in this labware."
                     )
                 well_names.append(well)
             elif isinstance(well, Well):
                 if well.parent is not self:
                     raise KeyError(
-                        "The elements of wells should be wells of this labware."
+                        f"{well.well_name} is not a well in {self.name}. The elements of wells should be wells of this labware."
                     )
                 well_names.append(well.well_name)
             else:
                 raise TypeError(
-                    "The elements of wells should be Well instances or well names."
+                    f"Unexpected type for well name {repr(well)}. The elements of wells should be Well instances or well names."
                 )
         self._core.load_empty(well_names)
 

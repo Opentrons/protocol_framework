@@ -467,6 +467,8 @@ def test_load_liquid_rejects_invalid_inputs(
     with pytest.raises(TypeError):
         subject.load_liquid([2], 10, mock_liquid)  # type: ignore[list-item]
 
+    with pytest.raises(TypeError):
+        subject.load_liquid(["A1"], "A1", mock_liquid)  # type: ignore[arg-type]
     mock_liquid = decoy.mock(cls=Liquid)
 
     subject.load_liquid(["A1", subject["B1"]], 10, mock_liquid)
@@ -586,6 +588,9 @@ def test_load_liquid_by_well_rejects_invalid_inputs(
 
     with pytest.raises(TypeError):
         subject.load_liquid_by_well({2: 10}, mock_liquid)  # type: ignore[dict-item]
+
+    with pytest.raises(TypeError):
+        subject.load_liquid_by_well({"A1": "A3"}, mock_liquid)  # type: ignore[dict-item]
 
 
 @pytest.mark.parametrize("api_version", versions_at_or_above(APIVersion(2, 22)))
