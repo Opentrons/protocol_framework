@@ -161,6 +161,7 @@ function StackInfo({ title, stackInformation }: StackInfoProps): JSX.Element {
                 ? TYPOGRAPHY.textAlignLeft
                 : TYPOGRAPHY.textAlignRight
             }
+            css={LINE_CLAMP_TEXT_STYLE(2)}
           >
             {stackInformation ?? t('none')}
           </StyledText>
