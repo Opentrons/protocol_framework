@@ -349,7 +349,8 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
                       const labwareURI = getLabwareDefURI(labwareDef)
                       const loadName = labwareDef.parameters.loadName
 
-                      return searchFilter(labwareDef.metadata.displayName) ? (
+                      return searchFilter(labwareDef.metadata.displayName) &&
+                        !getIsLabwareFiltered(labwareDef) ? (
                         <React.Fragment
                           key={`${index}_${category}_${loadName}`}
                         >
