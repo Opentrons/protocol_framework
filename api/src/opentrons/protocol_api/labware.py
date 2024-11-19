@@ -1155,13 +1155,13 @@ class Labware:
             if isinstance(well, str):
                 if well not in self:
                     raise KeyError(
-                        "The elements of wells should name wells in this labware."
+                        f"{well} is not a well in labware {self.name}. The elements of wells should name wells in this labware."
                     )
                 well_names.append(well)
             elif isinstance(well, Well):
                 if well.parent is not self:
                     raise KeyError(
-                        "The elements of wells should be wells of this labware."
+                        f"{well.well_name} is not a well in labware {self.name}. The elements of wells should be wells of this labware."
                     )
                 well_names.append(well.well_name)
             else:
@@ -1200,13 +1200,13 @@ class Labware:
             if isinstance(well, str):
                 if well not in self:
                     raise KeyError(
-                        "The keys of volumes should name wells in this labware"
+                        f"{well} is not a well in {self.name}. The keys of volumes should name wells in this labware"
                     )
                 verified_volumes[well] = volume
             elif isinstance(well, Well):
                 if well.parent is not self:
                     raise KeyError(
-                        "The keys of volumes should be wells of this labware"
+                        f"{well.well_name} is not a well in {self.name}. The keys of volumes should be wells of this labware"
                     )
                 verified_volumes[well.well_name] = volume
             else:
