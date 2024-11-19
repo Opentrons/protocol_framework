@@ -80,11 +80,11 @@ describe('LabwareTools', () => {
   it('renders an empty slot with all the labware options', () => {
     render(props)
     screen.getByText('Add labware')
-    screen.getByText('Tube rack')
-    screen.getByText('Well plate')
-    screen.getByText('Reservoir')
-    screen.getByText('Aluminum block')
-    screen.getByText('Adapter')
+    screen.getByText('Tube racks')
+    screen.getByText('Well plates')
+    screen.getByText('Reservoirs')
+    screen.getByText('Aluminum blocks')
+    screen.getByText('Adapters')
     //  click and expand well plate accordion
     fireEvent.click(screen.getAllByTestId('ListButton_noActive')[1])
     fireEvent.click(
@@ -102,7 +102,7 @@ describe('LabwareTools', () => {
       selectedSlot: { slot: 'D3', cutout: 'cutoutD3' },
     })
     render(props)
-    screen.getByText('Adapter')
+    screen.getByText('Adapters')
     fireEvent.click(screen.getAllByTestId('ListButton_noActive')[4])
     //   set adapter
     fireEvent.click(
