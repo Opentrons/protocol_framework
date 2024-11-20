@@ -2,7 +2,10 @@
 from typing import Dict, Iterable, List, Set, Tuple, TypeVar, cast, Sequence, Optional
 from typing_extensions import Literal
 from logging import getLogger
-from opentrons.config.defaults_ot3 import DEFAULT_CALIBRATION_AXIS_MAX_SPEED
+from opentrons.config.defaults_ot3 import (
+    DEFAULT_CALIBRATION_AXIS_MAX_SPEED,
+    DEFAULT_EMULSIFYING_PIPETTE_AXIS_MAX_SPEED,
+)
 from opentrons.config.types import OT3MotionSettings, OT3CurrentSettings, GantryLoad
 from opentrons.hardware_control.types import (
     Axis,
@@ -296,6 +299,31 @@ def get_system_constraints_for_plunger_acceleration(
                 old_constraints["max_speed_discontinuity"][axis_kind],
                 old_constraints["direction_change_speed_discontinuity"][axis_kind],
                 old_constraints["default_max_speed"][axis_kind],
+            )
+    return new_constraints
+
+
+def get_system_constraints_for_emulsifying_pipette(
+    config: OT3MotionSettings,
+    gantry_load: GantryLoad,
+    mount: OT3Mount,
+) -> "SystemConstraints[Axis]":
+    old_constraints = config.by_gantry_load(gantry_load)
+    new_constraints = {}
+    axis_kinds = set([k for _, v in old_constraints.items() for k in v.keys()])
+    for axis_kind in axis_kinds:
+        for axis in Axis.of_kind(axis_kind):
+            if axis == Axis.of_main_tool_actuator(mount):
+                _max_speed = float(DEFAULT_EMULSIFYING_PIPETTE_AXIS_MAX_SPEED)
+            else:
+                _max_speed = old_constraints["max_speed"][axis_kind]
+            new_constraints[axis] = AxisConstraints.build(
+                max_acceleration=old_constraints["max_acceleration"][axis_kind],
+                max_speed_discont=old_constraints["max_speed_discontinuity"][axis_kind],
+                max_direction_change_speed_discont=old_constraints[
+                    "direction_change_speed_discontinuity"
+                ][axis_kind],
+                max_speed=_max_speed,
             )
     return new_constraints
 
