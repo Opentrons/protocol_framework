@@ -14,6 +14,7 @@ from typing import Any
 
 import sqlalchemy
 
+from ._util import add_column
 from ..database import sql_engine_ctx
 from ..tables import schema_8
 from .._folder_migrator import Migration
@@ -40,16 +41,6 @@ class Migration7to8(Migration):  # noqa: D101
             dest_engine = exit_stack.enter_context(sql_engine_ctx(dest_db_file))
 
             dest_transaction = exit_stack.enter_context(dest_engine.begin())
-
-            def add_column(
-                engine: sqlalchemy.engine.Engine,
-                table_name: str,
-                column: Any,
-            ) -> None:
-                column_type = column.type.compile(engine.dialect)
-                engine.execute(
-                    f"ALTER TABLE {table_name} ADD COLUMN {column.key} {column_type}"
-                )
 
             add_column(
                 dest_engine,
