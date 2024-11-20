@@ -992,7 +992,7 @@ def run(protocol: ProtocolContext) -> None:
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
-    reservoir.label = "Liquid Waste"
+    reservoir.label = "Liquid Waste"  # type: ignore[attr-defined]
     Liquid_trash_well_1 = reservoir["A9"]
     Liquid_trash_well_2 = reservoir["A10"]
     Liquid_trash_well_4 = reservoir["A12"]

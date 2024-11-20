@@ -268,6 +268,11 @@ def run(ctx: ProtocolContext) -> None:
         ctx.delay(minutes=MAG_DELAY_MIN)
         transfer_plate_to_plate(ELUTION_VOL * 1.1, working_cols, final_cols, 6)
         temp.deactivate()
-    end_wells_to_probe = [waste["A1"], reagent_res["A1"], reagent_res["B1"], reagent_res["C1"]]
+    end_wells_to_probe = [
+        waste_res["A1"],
+        reagent_res["A1"],
+        reagent_res["B1"],
+        reagent_res["C1"],
+    ]
     end_wells_to_probe.extend(wash_res.wells())
     helpers.find_liquid_height_of_all_wells(ctx, p1000_single, end_wells_to_probe)

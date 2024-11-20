@@ -1215,9 +1215,9 @@ def run(ctx: ProtocolContext) -> None:
     lib_cleanup()
     unused_lids, used_lids = lib_amplification(unused_lids, used_lids)
     lib_cleanup_2()
-    
+
     # Probe liquid waste
-    reservoir.label = "Liquid Waste"
+    reservoir.label = "Liquid Waste"  # type: ignore[attr-defined]
     waste1 = reservoir.columns()[6]
     waste1_res = waste1[0]
 
