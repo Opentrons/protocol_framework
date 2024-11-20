@@ -27,6 +27,7 @@ SERIAL_RE = re.compile(RAW_SERIAL_STRING)
 NAME_LOOKUP: Dict[str, PipetteName] = {
     "P1KS": PipetteName.p1000_single,
     "P1KM": PipetteName.p1000_multi,
+    "P1KP": PipetteName.p1000_multi_emulsify,
     "P50S": PipetteName.p50_single,
     "P50M": PipetteName.p50_multi,
     "P1KH": PipetteName.p1000_96,
