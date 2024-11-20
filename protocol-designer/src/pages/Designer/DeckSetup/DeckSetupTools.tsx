@@ -119,18 +119,14 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
   const [tab, setTab] = useState<'hardware' | 'labware'>(
     moduleModels?.length === 0 || slot === 'offDeck' ? 'labware' : 'hardware'
   )
-  const allCategoriesExpanded = ALL_ORDERED_CATEGORIES.reduce<CategoryExpand>(
-    (acc, category) => {
-      return { ...acc, [category]: true }
-    },
-    {}
-  )
-  const allCategoriesCollapsed = ALL_ORDERED_CATEGORIES.reduce<CategoryExpand>(
-    (acc, category) => {
-      return { ...acc, [category]: false }
-    },
-    {}
-  )
+
+  const setAllCategories = (state: boolean): Record<string, boolean> =>
+    ALL_ORDERED_CATEGORIES.reduce<Record<string, boolean>>(
+      (acc, category) => ({ ...acc, [category]: state }),
+      {}
+    )
+  const allCategoriesExpanded = setAllCategories(true)
+  const allCategoriesCollapsed = setAllCategories(false)
   const [
     areCategoriesExpanded,
     setAreCategoriesExpanded,
