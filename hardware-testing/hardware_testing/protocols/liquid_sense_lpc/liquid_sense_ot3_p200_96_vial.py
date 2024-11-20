@@ -10,6 +10,7 @@ SLOT_DIAL = 9
 SLOTS_TIPRACK = {
     50: [3],
     200: [3],
+    20: [3]
 }
 
 LABWARE_ON_SCALE = "radwag_pipette_calibration_vial"

@@ -76,6 +76,9 @@ LIQUID_SENSE_CFG: Dict[int, Dict[int, Any]] = {
         1: liquid_sense_ot3_p50_single_vial,
         8: liquid_sense_ot3_p50_multi_vial,
     },
+    20: {
+        96: liquid_sense_ot3_p200_96_vial
+    },
     200: {
         96: liquid_sense_ot3_p200_96_vial,
     },
@@ -196,7 +199,7 @@ class RunArgs:
             elif args.pipette == 50:
                 tip_volumes = [50]
             else:
-                tip_volumes = [50, 200]
+                tip_volumes = [50, 200, 20]
         else:
             tip_volumes = [args.tip]
 
