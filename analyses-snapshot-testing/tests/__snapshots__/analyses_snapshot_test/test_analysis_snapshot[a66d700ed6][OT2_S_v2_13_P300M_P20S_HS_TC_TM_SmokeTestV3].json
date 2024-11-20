@@ -14092,6 +14092,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [],
   "metadata": {
     "author": "Opentrons Engineering <engineering@opentrons.com>",
