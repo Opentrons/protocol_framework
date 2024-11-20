@@ -60,9 +60,7 @@
               "z": -5
             },
             "flowRateByVolume": {
-              "default": 50,
-              "10": 40,
-              "20": 30
+              "default": 50
             },
             "preWet": true,
             "mix": {

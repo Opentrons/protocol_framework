@@ -37,7 +37,7 @@ describe('StepCreationButton', () => {
     const addStep = screen.getByRole('button', { name: '+ Add Step' })
     fireEvent.click(addStep)
     screen.getByText('comment')
-    screen.getByText('move labware')
+    screen.getByText('move')
     screen.getByText('transfer')
     screen.getByText('mix')
     screen.getByText('pause')

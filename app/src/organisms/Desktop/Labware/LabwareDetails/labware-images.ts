@@ -59,6 +59,8 @@ import universal_flat_adapter from '/app/assets/images/labware/universal_flat_ad
 import flat_bottom_aluminum from '/app/assets/images/labware/flat_bottom_aluminum.png'
 import opentrons_96_aluminumblock_side_view from '/app/assets/images/labware/opentrons_96_aluminumblock_side_view.jpg'
 import opentrons_96_deep_well_temp_mod_adapter_img from '/app/assets/images/labware/opentrons_96_deep_well_temp_mod_adapter.png'
+import opentrons_flex_deck_riser_img from '/app/assets/images/labware/opentrons_flex_deck_riser.png'
+
 export const labwareImages: Record<string, string[]> = {
   agilent_1_reservoir_290ml: [agilent_1_reservoir_290ml_side_view],
   axygen_1_reservoir_90ml: [axygen_1_reservoir_90ml_side_view],
@@ -254,4 +256,5 @@ export const labwareImages: Record<string, string[]> = {
   opentrons_96_deep_well_temp_mod_adapter: [
     opentrons_96_deep_well_temp_mod_adapter_img,
   ],
+  opentrons_flex_deck_riser: [opentrons_flex_deck_riser_img],
 }

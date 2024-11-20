@@ -104,7 +104,7 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
               </StyledText>
             </Btn>
           ) : null}
-          <Flex {...targetProps}>
+          <Flex {...targetProps} maxHeight="3.5rem">
             <LargeButton
               disabled={disabled}
               onClick={proceed}
@@ -119,12 +119,14 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
           ) : null}
         </Flex>
       </Flex>
-      <StyledImg
-        //    TODO(ja, 8/7/24): delete this and add real images!!
-        src={imgSrc ?? temporaryImg}
-        width="40%"
-        height="100%"
-      />
+      <Flex>
+        <StyledImg
+          //    TODO(ja, 8/7/24): delete this and add real images!!
+          src={imgSrc ?? temporaryImg}
+          width="100%"
+          height="100%"
+        />
+      </Flex>
     </Flex>
   )
 }

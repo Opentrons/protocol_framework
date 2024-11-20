@@ -108,7 +108,7 @@ describe('SlotOverflowMenu', () => {
     expect(vi.mocked(deleteDeckFixture)).toHaveBeenCalled()
     expect(props.setShowMenuList).toHaveBeenCalled()
   })
-  it('renders 2 buttons when there is nothing on the slot', () => {
+  it('renders 3 buttons when there is nothing on the slot', () => {
     props.location = 'A1'
     render(props)
     fireEvent.click(
@@ -116,7 +116,10 @@ describe('SlotOverflowMenu', () => {
     )
     expect(props.addEquipment).toHaveBeenCalled()
     expect(props.setShowMenuList).toHaveBeenCalled()
-    expect(screen.getAllByRole('button')).toHaveLength(2)
+    expect(screen.getAllByRole('button')).toHaveLength(3)
+    expect(screen.getByRole('button', { name: 'Add liquid' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Clear slot' })).toBeDisabled()
+    screen.getByTestId('divider')
   })
   it('renders Edit liquid button when there is liquid on the labware', () => {
     vi.mocked(labwareIngredSelectors.getLiquidsByLabwareId).mockReturnValue({

@@ -72,8 +72,10 @@ class LiquidHandlingPropertyByVolume:
 
     def _sort_volume_and_values(self) -> None:
         """Sort volume in increasing order along with corresponding values in matching order."""
-        self._sorted_volumes, self._sorted_values = zip(
-            *sorted(self._properties_by_volume.items())
+        self._sorted_volumes, self._sorted_values = (
+            zip(*sorted(self._properties_by_volume.items()))
+            if len(self._properties_by_volume) > 0
+            else [(), ()]
         )
 
 
