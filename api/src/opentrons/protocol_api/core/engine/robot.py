@@ -1,12 +1,15 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, Union
 from opentrons.hardware_control import SyncHardwareAPI
 
 from opentrons.types import Mount, MountType, Point, AxisType, AxisMapType
+from opentrons_shared_data.pipette import types as pip_types
+from opentrons.protocol_api._types import PipetteActionTypes, PlungerPositionTypes
 from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocol_engine.types import DeckPoint, MotorAxis
 
 from opentrons.protocol_api.core.robot import AbstractRobot
+
 
 _AXIS_TYPE_TO_MOTOR_AXIS = {
     AxisType.X: MotorAxis.X,
@@ -39,11 +42,56 @@ class RobotCore(AbstractRobot):
     def _convert_to_engine_mount(self, axis_map: AxisMapType) -> Dict[MotorAxis, float]:
         return {_AXIS_TYPE_TO_MOTOR_AXIS[ax]: dist for ax, dist in axis_map.items()}
 
-    def get_pipette_type_from_engine(self, mount: Mount) -> Optional[str]:
+    def get_pipette_type_from_engine(
+        self, mount: Union[Mount, str]
+    ) -> Optional[pip_types.PipetteNameType]:
         """Get the pipette attached to the given mount."""
-        engine_mount = MountType[mount.name]
+        if isinstance(mount, Mount):
+            engine_mount = MountType[mount.name]
+        else:
+            if mount.lower() == "right":
+                engine_mount = MountType.RIGHT
+            else:
+                engine_mount = MountType.LEFT
         maybe_pipette = self._engine_client.state.pipettes.get_by_mount(engine_mount)
         return maybe_pipette.pipetteName if maybe_pipette else None
+
+    def get_plunger_position_from_name(
+        self, mount: Mount, position_name: PlungerPositionTypes
+    ) -> float:
+        engine_mount = MountType[mount.name]
+        maybe_pipette = self._engine_client.state.pipettes.get_by_mount(engine_mount)
+        if not maybe_pipette:
+            return 0.0
+        return self._engine_client.state.pipettes.lookup_plunger_position_name(
+            maybe_pipette.id, position_name.value
+        )
+
+    def get_plunger_position_from_volume(
+        self, mount: Mount, volume: float, action: PipetteActionTypes, robot_type: str
+    ) -> float:
+        engine_mount = MountType[mount.name]
+        maybe_pipette = self._engine_client.state.pipettes.get_by_mount(engine_mount)
+        if not maybe_pipette:
+            raise RuntimeError(
+                f"Cannot load plunger position as no pipette is attached to {mount}"
+            )
+        convert_volume = (
+            self._engine_client.state.pipettes.lookup_volume_to_mm_conversion(
+                maybe_pipette.id, volume, action.value
+            )
+        )
+        plunger_bottom = (
+            self._engine_client.state.pipettes.lookup_plunger_position_name(
+                maybe_pipette.id, "bottom"
+            )
+        )
+        mm = volume / convert_volume
+        if robot_type == "OT-2 Standard":
+            position = plunger_bottom + mm
+        else:
+            position = plunger_bottom - mm
+        return round(position, 6)
 
     def move_to(self, mount: Mount, destination: Point, speed: Optional[float]) -> None:
         engine_mount = MountType[mount.name]
