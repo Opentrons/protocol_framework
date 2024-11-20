@@ -63,7 +63,11 @@ export const SlotInformation: FC<SlotInformationProps> = ({
     <Flex
       flexDirection={DIRECTION_COLUMN}
       gridGap={SPACING.spacing12}
-      maxWidth={pathLocation.pathname === '/designer' ? '23.4375rem' : '100%'}
+      maxWidth={
+        pathLocation.pathname === '/designer' && !isOffDeck
+          ? '23.4375rem'
+          : '100%'
+      }
       width="100%"
     >
       <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
