@@ -94,13 +94,13 @@ describe('useRecoveryToasts', () => {
 
     result.current.makeSuccessToast()
     expect(mockMakeToast).toHaveBeenCalledWith(
-      'Retrying step 1 succeeded.',
+      'test command',
       'success',
       expect.objectContaining({
         closeButton: true,
         disableTimeout: true,
         displayType: 'desktop',
-        heading: expect.any(String),
+        heading: 'Retrying step 1 succeeded.',
       })
     )
   })
@@ -209,8 +209,8 @@ describe('useRecoveryFullCommandText', () => {
     const { result } = renderHook(() =>
       useRecoveryFullCommandText({
         robotType: FLEX_ROBOT_TYPE,
-        stepNumber: 0,
-        commandTextData: { commands: [TEST_COMMAND] } as any,
+        stepNumber: 1,
+        commandTextData: { commands: [TEST_COMMAND, {}] } as any,
         allRunDefs: [],
       })
     )
@@ -259,7 +259,7 @@ describe('useRecoveryFullCommandText', () => {
     const { result } = renderHook(() =>
       useRecoveryFullCommandText({
         robotType: FLEX_ROBOT_TYPE,
-        stepNumber: 0,
+        stepNumber: 1,
         commandTextData: {
           commands: [TC_COMMAND],
         } as any,
@@ -279,9 +279,9 @@ describe('useRecoveryFullCommandText', () => {
     const { result } = renderHook(() =>
       useRecoveryFullCommandText({
         robotType: FLEX_ROBOT_TYPE,
-        stepNumber: 0,
+        stepNumber: 1,
         commandTextData: {
-          commands: [TC_COMMAND],
+          commands: [TC_COMMAND, {}],
         } as any,
         allRunDefs: [],
       })
