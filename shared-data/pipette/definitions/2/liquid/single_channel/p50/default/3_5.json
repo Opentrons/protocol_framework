@@ -17,7 +17,7 @@
       },
       "defaultFlowAcceleration": 1200.0,
       "defaultTipLength": 52.0,
-      "defaultReturnTipHeight": 0.2,
+      "defaultReturnTipHeight": 0.71,
       "aspirate": {
         "default": {
           "1": [
@@ -140,8 +140,8 @@
   "minVolume": 5,
   "defaultTipracks": [
     "opentrons/opentrons_flex_96_tiprack_50ul/1",
-    "opentrons/opentrons_flex_96_filtertiprack_50ul/1",
     "opentrons/opentrons_flex_96_tiprack_20ul/1",
+    "opentrons/opentrons_flex_96_filtertiprack_50ul/1",
     "opentrons/opentrons_flex_96_filtertiprack_20ul/1"
   ]
 }
