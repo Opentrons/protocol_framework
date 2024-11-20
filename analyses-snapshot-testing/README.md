@@ -79,7 +79,6 @@ cd analyses-snapshot-testing \
 `make setup` - install the requirements
 `make snapshot-test-local` - this target builds the base image, builds the local code into the base image, then runs the analyses battery against the image you just created
 
-> make sure to run `make build-local` after you make changes to the code to update the image!!!
 
 You have the option to specify one or many protocols to run the analyses on. This is also described above [Running the tests against specific protocols](#running-the-tests-against-specific-protocols)
 
