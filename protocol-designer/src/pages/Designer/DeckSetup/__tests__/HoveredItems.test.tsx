@@ -11,6 +11,7 @@ import {
 import { LabwareRender, Module } from '@opentrons/components'
 import { selectors } from '../../../../labware-ingred/selectors'
 import { getCustomLabwareDefsByURI } from '../../../../labware-defs/selectors'
+import { getDesignerTab } from '../../../../file-data/selectors'
 import { FixtureRender } from '../FixtureRender'
 import { HoveredItems } from '../HoveredItems'
 import type * as OpentronsComponents from '@opentrons/components'
@@ -18,6 +19,7 @@ import type * as OpentronsComponents from '@opentrons/components'
 vi.mock('../FixtureRender')
 vi.mock('../../../../labware-ingred/selectors')
 vi.mock('../../../../labware-defs/selectors')
+vi.mock('../../../../file-data/selectors')
 vi.mock('@opentrons/components', async importOriginal => {
   const actual = await importOriginal<typeof OpentronsComponents>()
   return {
@@ -54,6 +56,7 @@ describe('HoveredItems', () => {
     vi.mocked(FixtureRender).mockReturnValue(<div>mock FixtureRender</div>)
     vi.mocked(LabwareRender).mockReturnValue(<div>mock LabwareRender</div>)
     vi.mocked(Module).mockReturnValue(<div>mock Module</div>)
+    vi.mocked(getDesignerTab).mockReturnValue('startingDeck')
   })
   it('renders a hovered fixture', () => {
     render(props)

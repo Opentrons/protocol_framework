@@ -35,6 +35,11 @@ import { LINE_CLAMP_TEXT_STYLE } from '../../../../atoms'
 import { StepOverflowMenu } from './StepOverflowMenu'
 import { capitalizeFirstLetterAfterNumber } from './utils'
 
+import type {
+  SetStateAction,
+  Dispatch,
+  MouseEvent as ReactMouseEvent,
+} from 'react'
 import type { ThunkDispatch } from 'redux-thunk'
 import type { IconName } from '@opentrons/components'
 import type { StepIdType } from '../../../../form-types'
@@ -42,16 +47,18 @@ import type { BaseState } from '../../../../types'
 
 const STARTING_DECK_STATE = 'Starting deck state'
 const FINAL_DECK_STATE = 'Final deck state'
-
+const PX_HEIGHT_TO_TOP_OF_CONTAINER = 32
 export interface StepContainerProps {
   title: string
   iconName: IconName
+  openedOverflowMenuId?: string | null
+  setOpenedOverflowMenuId?: Dispatch<SetStateAction<string | null>>
   stepId?: string
   iconColor?: string
-  onClick?: (event: React.MouseEvent) => void
-  onDoubleClick?: (event: React.MouseEvent) => void
-  onMouseEnter?: (event: React.MouseEvent) => void
-  onMouseLeave?: (event: React.MouseEvent) => void
+  onClick?: (event: ReactMouseEvent) => void
+  onDoubleClick?: (event: ReactMouseEvent) => void
+  onMouseEnter?: (event: ReactMouseEvent) => void
+  onMouseLeave?: (event: ReactMouseEvent) => void
   selected?: boolean
   hovered?: boolean
   hasError?: boolean
@@ -74,10 +81,11 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
     hasError = false,
     isStepAfterError = false,
     dragHovered = false,
+    setOpenedOverflowMenuId,
+    openedOverflowMenuId,
   } = props
   const [top, setTop] = useState<number>(0)
   const menuRootRef = useRef<HTMLDivElement | null>(null)
-  const [stepOverflowMenu, setStepOverflowMenu] = useState<boolean>(false)
   const isStartingOrEndingState =
     title === STARTING_DECK_STATE || title === FINAL_DECK_STATE
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
@@ -104,22 +112,21 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
       menuRootRef.current?.contains(event.target)
     )
 
-    if (wasOutside && stepOverflowMenu) {
-      setStepOverflowMenu(false)
+    if (wasOutside) {
+      setOpenedOverflowMenuId?.(null)
     }
   }
 
-  const handleOverflowClick = (event: React.MouseEvent): void => {
-    const { clientY } = event
-
+  const handleOverflowClick = (event: ReactMouseEvent): void => {
+    const buttonRect = event.currentTarget.getBoundingClientRect()
     const screenHeight = window.innerHeight
-    const rootHeight = menuRootRef.current
-      ? menuRootRef.current.offsetHeight
-      : 0
+    const rootHeight = menuRootRef.current?.offsetHeight || 0
+
+    const spaceBelow = screenHeight - buttonRect.bottom
     const top =
-      screenHeight - clientY > rootHeight
-        ? clientY + 5
-        : clientY - rootHeight - 5
+      spaceBelow > rootHeight
+        ? buttonRect.bottom - PX_HEIGHT_TO_TOP_OF_CONTAINER
+        : buttonRect.top - rootHeight + PX_HEIGHT_TO_TOP_OF_CONTAINER
 
     setTop(top)
   }
@@ -135,7 +142,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
     if (stepId != null) {
       dispatch(populateForm(stepId))
     }
-    setStepOverflowMenu(false)
+    setOpenedOverflowMenuId?.(null)
   }
 
   const onDeleteClickAction = (): void => {
@@ -168,7 +175,6 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
       )
     }
   }
-
   const {
     confirm: confirmDelete,
     showConfirmation: showDeleteConfirmation,
@@ -242,10 +248,15 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
               <OverflowBtn
                 data-testid={`StepContainer_${stepId}`}
                 fillColor={COLORS.white}
-                onClick={(e: React.MouseEvent) => {
+                onClick={(e: ReactMouseEvent) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  setStepOverflowMenu(prev => !prev)
+                  if (openedOverflowMenuId === stepId) {
+                    setOpenedOverflowMenuId?.(null)
+                  } else {
+                    setOpenedOverflowMenuId?.(stepId ?? null)
+                  }
+
                   handleOverflowClick(e)
                 }}
               />
@@ -262,10 +273,12 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
           />
         ) : null}
       </Flex>
-      {stepOverflowMenu && stepId != null
+      {stepId != null &&
+      openedOverflowMenuId === stepId &&
+      setOpenedOverflowMenuId != null
         ? createPortal(
             <StepOverflowMenu
-              setStepOverflowMenu={setStepOverflowMenu}
+              setOpenedOverflowMenuId={setOpenedOverflowMenuId}
               stepId={stepId}
               menuRootRef={menuRootRef}
               top={top}

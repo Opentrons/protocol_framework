@@ -17,6 +17,7 @@ import {
   hoverOnStep,
   toggleViewSubstep,
 } from '../../../../ui/steps/actions/actions'
+import { OPEN_STEP_DETAILS_EVENT } from '../../../../analytics/constants'
 import {
   getBatchEditFormHasUnsavedChanges,
   getCurrentFormHasUnsavedChanges,
@@ -32,7 +33,7 @@ interface StepOverflowMenuProps {
   stepId: string
   menuRootRef: React.MutableRefObject<HTMLDivElement | null>
   top: number
-  setStepOverflowMenu: React.Dispatch<React.SetStateAction<boolean>>
+  setOpenedOverflowMenuId: React.Dispatch<React.SetStateAction<string | null>>
   handleEdit: () => void
   confirmDelete: () => void
   confirmMultiDelete: () => void
@@ -44,7 +45,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
     stepId,
     menuRootRef,
     top,
-    setStepOverflowMenu,
+    setOpenedOverflowMenuId,
     handleEdit,
     confirmDelete,
     confirmMultiDelete,
@@ -81,7 +82,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
   }
 
   const selectViewDetailsEvent: AnalyticsEvent = {
-    name: 'openStepDetails',
+    name: OPEN_STEP_DETAILS_EVENT,
     properties: {},
   }
 
@@ -91,7 +92,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
         ref={menuRootRef}
         zIndex={12}
         top={top}
-        left="19.5rem"
+        left="18.75rem"
         position={POSITION_ABSOLUTE}
         whiteSpace={NO_WRAP}
         borderRadius={BORDERS.borderRadius8}
@@ -109,7 +110,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
               disabled={batchEditFormHasUnstagedChanges}
               onClick={() => {
                 duplicateMultipleSteps()
-                setStepOverflowMenu(false)
+                setOpenedOverflowMenuId(null)
               }}
             >
               {t('duplicate_steps')}
@@ -118,7 +119,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
             <MenuItem
               onClick={() => {
                 confirmMultiDelete()
-                setStepOverflowMenu(false)
+                setOpenedOverflowMenuId(null)
               }}
             >
               {t('delete_steps')}
@@ -133,7 +134,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
               <MenuItem
                 disabled={formData != null}
                 onClick={() => {
-                  setStepOverflowMenu(false)
+                  setOpenedOverflowMenuId(null)
                   dispatch(hoverOnStep(stepId))
                   dispatch(toggleViewSubstep(stepId))
                   dispatch(analyticsEvent(selectViewDetailsEvent))
@@ -146,7 +147,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
               disabled={singleEditFormHasUnsavedChanges}
               onClick={() => {
                 duplicateStep(stepId)
-                setStepOverflowMenu(false)
+                setOpenedOverflowMenuId(null)
               }}
             >
               {t('duplicate')}
@@ -155,7 +156,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
             <MenuItem
               onClick={() => {
                 confirmDelete()
-                setStepOverflowMenu(false)
+                setOpenedOverflowMenuId(null)
               }}
             >
               {t('delete')}

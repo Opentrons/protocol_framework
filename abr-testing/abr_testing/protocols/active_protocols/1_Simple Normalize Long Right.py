@@ -121,8 +121,6 @@ def run(protocol: ProtocolContext) -> None:
         style=SINGLE, start="H1", tip_racks=[tiprack_x_1, tiprack_x_2, tiprack_x_3]
     )
     helpers.find_liquid_height_of_all_wells(protocol, p1000, wells)
-    tiprack_x_1.reset()
-
     sample_quant_csv = """
     sample_plate_1, Sample_well,DYE,DILUENT
     sample_plate_1,A1,0,100

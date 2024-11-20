@@ -34,17 +34,7 @@ export function RobotCoordinateSpaceWithRef(
       (acc, deckSlot) => ({ ...acc, [deckSlot.id]: deckSlot }),
       {}
     )
-
-    const PADDING = deckDef.otId === 'ot2_standard' ? 5 : 10
-    if (deckDef.otId === 'ot2_standard') {
-      wholeDeckViewBox = `${viewBoxOriginX - PADDING} ${
-        viewBoxOriginY + PADDING * 5
-      } ${deckXDimension + PADDING * 2} ${deckYDimension - PADDING * 10}`
-    } else {
-      wholeDeckViewBox = `${viewBoxOriginX + PADDING * 2} ${
-        viewBoxOriginY - PADDING
-      } ${deckXDimension + PADDING * 4} ${deckYDimension + PADDING * 3}`
-    }
+    wholeDeckViewBox = `${viewBoxOriginX} ${viewBoxOriginY} ${deckXDimension} ${deckYDimension}`
   }
 
   return (

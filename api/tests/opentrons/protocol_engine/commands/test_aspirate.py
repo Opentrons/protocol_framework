@@ -2,11 +2,15 @@
 
 from datetime import datetime
 
-from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
+from opentrons_shared_data.errors.exceptions import (
+    PipetteOverpressureError,
+    StallOrCollisionDetectedError,
+)
 from decoy import matchers, Decoy
 import pytest
 
 from opentrons.protocol_engine.commands.pipetting_common import OverpressureError
+from opentrons.protocol_engine.commands.movement_common import StallOrCollisionError
 from opentrons.protocol_engine.state import update_types
 from opentrons.types import MountType, Point
 from opentrons.protocol_engine import (
@@ -106,6 +110,9 @@ async def test_aspirate_implementation_no_prep(
             well_name="A3",
             well_location=location,
             current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
             operation_volume=-50,
         ),
     ).then_return(Point(x=1, y=2, z=3))
@@ -195,6 +202,9 @@ async def test_aspirate_implementation_with_prep(
                 labware_id="123",
                 well_name="A3",
             ),
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
             operation_volume=-50,
         ),
     ).then_return(Point(x=1, y=2, z=3))
@@ -285,6 +295,9 @@ async def test_aspirate_raises_volume_error(
             well_name="A3",
             well_location=location,
             current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
             operation_volume=-50,
         ),
     ).then_return(Point(1, 2, 3))
@@ -358,6 +371,9 @@ async def test_overpressure_error(
             well_name=well_name,
             well_location=well_location,
             current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
             operation_volume=-50,
         ),
     ).then_return(position)
@@ -398,6 +414,15 @@ async def test_overpressure_error(
             ),
             pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
                 pipette_id=pipette_id
+            ),
+        ),
+        state_update_if_false_positive=update_types.StateUpdate(
+            pipette_location=update_types.PipetteLocationUpdate(
+                pipette_id=pipette_id,
+                new_location=update_types.Well(
+                    labware_id=labware_id, well_name=well_name
+                ),
+                new_deck_point=DeckPoint(x=position.x, y=position.y, z=position.z),
             ),
         ),
     )
@@ -450,6 +475,9 @@ async def test_aspirate_implementation_meniscus(
             well_name="A3",
             well_location=location,
             current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
             operation_volume=-50,
         ),
     ).then_return(Point(x=1, y=2, z=3))
@@ -482,4 +510,64 @@ async def test_aspirate_implementation_meniscus(
                 pipette_id="abc", fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50)
             ),
         ),
+    )
+
+
+async def test_stall_error(
+    decoy: Decoy,
+    movement: MovementHandler,
+    pipetting: PipettingHandler,
+    subject: AspirateImplementation,
+    model_utils: ModelUtils,
+    state_view: StateView,
+) -> None:
+    """It should return an overpressure error if the hardware API indicates that."""
+    pipette_id = "pipette-id"
+    labware_id = "labware-id"
+    well_name = "well-name"
+    well_location = LiquidHandlingWellLocation(
+        origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1)
+    )
+
+    error_id = "error-id"
+    error_timestamp = datetime(year=2020, month=1, day=2)
+    decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id=pipette_id)).then_return(
+        True
+    )
+
+    data = AspirateParams(
+        pipetteId=pipette_id,
+        labwareId=labware_id,
+        wellName=well_name,
+        wellLocation=well_location,
+        volume=50,
+        flowRate=1.23,
+    )
+
+    decoy.when(
+        await movement.move_to_well(
+            pipette_id=pipette_id,
+            labware_id=labware_id,
+            well_name=well_name,
+            well_location=well_location,
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=-50,
+        ),
+    ).then_raise(StallOrCollisionDetectedError())
+
+    decoy.when(model_utils.generate_id()).then_return(error_id)
+    decoy.when(model_utils.get_timestamp()).then_return(error_timestamp)
+
+    result = await subject.execute(data)
+
+    assert result == DefinedErrorData(
+        public=StallOrCollisionError.construct(
+            id=error_id,
+            createdAt=error_timestamp,
+            wrappedErrors=[matchers.Anything()],
+        ),
+        state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),
     )

@@ -88,6 +88,7 @@ def subject(
 )
 async def test_aspirate_in_place_implementation(
     decoy: Decoy,
+    gantry_mover: GantryMover,
     pipetting: PipettingHandler,
     state_store: StateStore,
     hardware_api: HardwareAPI,
@@ -131,6 +132,10 @@ async def test_aspirate_in_place_implementation(
         )
     ).then_return(123)
 
+    decoy.when(await gantry_mover.get_position("pipette-id-abc")).then_return(
+        Point(1, 2, 3)
+    )
+
     decoy.when(state_store.pipettes.get_current_location()).then_return(location)
 
     result = await subject.execute(params=data)
@@ -164,6 +169,7 @@ async def test_aspirate_in_place_implementation(
 
 async def test_handle_aspirate_in_place_request_not_ready_to_aspirate(
     decoy: Decoy,
+    gantry_mover: GantryMover,
     pipetting: PipettingHandler,
     state_store: StateStore,
     hardware_api: HardwareAPI,
@@ -175,7 +181,9 @@ async def test_handle_aspirate_in_place_request_not_ready_to_aspirate(
         volume=123,
         flowRate=1.234,
     )
-
+    decoy.when(await gantry_mover.get_position("pipette-id-abc")).then_return(
+        Point(1, 2, 3)
+    )
     decoy.when(
         pipetting.get_is_ready_to_aspirate(
             pipette_id="pipette-id-abc",
@@ -196,6 +204,7 @@ async def test_aspirate_raises_volume_error(
     pipetting: PipettingHandler,
     subject: AspirateInPlaceImplementation,
     mock_command_note_adder: CommandNoteAdder,
+    gantry_mover: GantryMover,
 ) -> None:
     """Should raise an assertion error for volume larger than working volume."""
     data = AspirateInPlaceParams(
@@ -203,7 +212,7 @@ async def test_aspirate_raises_volume_error(
         volume=50,
         flowRate=1.23,
     )
-
+    decoy.when(await gantry_mover.get_position("abc")).then_return(Point(x=1, y=2, z=3))
     decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id="abc")).then_return(True)
 
     decoy.when(

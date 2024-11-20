@@ -260,7 +260,7 @@ describe('CreateProtocol', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/chat')
     expect(mockUseTrackEvent).toHaveBeenCalledWith({
       name: 'submit-prompt',
-      properties: { prompt: expect.any(String) },
+      properties: { isCreateOrUpdate: 'create', prompt: expect.any(String) },
     })
   })
 })

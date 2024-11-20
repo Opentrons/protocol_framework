@@ -1,10 +1,12 @@
 """Test touch tip commands."""
+
 import pytest
 from decoy import Decoy
 
 from opentrons.hardware_control.types import CriticalPoint
 from opentrons.motion_planning import Waypoint
 from opentrons.protocol_engine import WellLocation, WellOffset, DeckPoint, errors
+from opentrons.protocol_engine.resources import ModelUtils
 from opentrons.protocol_engine.execution import MovementHandler, GantryMover
 from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.state import StateView
@@ -25,6 +27,12 @@ def mock_state_view(decoy: Decoy) -> StateView:
 
 
 @pytest.fixture
+def mock_model_utils(decoy: Decoy) -> ModelUtils:
+    """Get a mock ModelUtils."""
+    return decoy.mock(cls=ModelUtils)
+
+
+@pytest.fixture
 def mock_movement_handler(decoy: Decoy) -> MovementHandler:
     """Get a mock MovementHandler."""
     return decoy.mock(cls=MovementHandler)
@@ -41,12 +49,14 @@ def subject(
     mock_state_view: StateView,
     mock_movement_handler: MovementHandler,
     mock_gantry_mover: GantryMover,
+    mock_model_utils: ModelUtils,
 ) -> TouchTipImplementation:
     """Get the test subject."""
     return TouchTipImplementation(
         state_view=mock_state_view,
         movement=mock_movement_handler,
         gantry_mover=mock_gantry_mover,
+        model_utils=mock_model_utils,
     )
 
 
@@ -73,6 +83,11 @@ async def test_touch_tip_implementation(
             labware_id="123",
             well_name="A3",
             well_location=WellLocation(offset=WellOffset(x=1, y=2, z=3)),
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         )
     ).then_return(Point(x=1, y=2, z=3))
 

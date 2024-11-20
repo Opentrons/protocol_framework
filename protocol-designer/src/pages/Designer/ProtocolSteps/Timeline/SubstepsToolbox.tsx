@@ -5,7 +5,6 @@ import {
   Flex,
   Icon,
   PrimaryButton,
-  SPACING,
   StyledText,
   Toolbox,
 } from '@opentrons/components'
@@ -62,7 +61,6 @@ export function SubstepsToolbox(
     substeps.substepType === THERMOCYCLER_PROFILE ? (
     <Toolbox
       width={FLEX_MAX_CONTENT}
-      childrenPadding="0"
       closeButton={<Icon size="2rem" name="close" />}
       onCloseClick={handleClose}
       confirmButton={
@@ -81,7 +79,7 @@ export function SubstepsToolbox(
         </StyledText>
       }
     >
-      <Flex padding={SPACING.spacing12}>
+      <Flex>
         {substeps.substepType === THERMOCYCLER_PROFILE ? (
           <ThermocyclerProfileSubsteps key="substeps" stepId={stepId} />
         ) : (

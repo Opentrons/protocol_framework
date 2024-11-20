@@ -48,7 +48,11 @@ def create_data_dictionary(
         file_path = os.path.join(storage_directory, filename)
         if file_path.endswith(".json"):
             with open(file_path) as file:
-                file_results = json.load(file)
+                try:
+                    file_results = json.load(file)
+                except json.decoder.JSONDecodeError:
+                    print(f"Skipped file {file_path} bc no data.")
+                    continue
         else:
             continue
         if not isinstance(file_results, dict):

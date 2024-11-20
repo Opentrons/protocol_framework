@@ -182,7 +182,6 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
           {page === 'add' ? (
             <Flex
               flexDirection={DIRECTION_COLUMN}
-              height="41.5vh"
               overflowY={OVERFLOW_AUTO}
               gridGap={SPACING.spacing32}
             >
@@ -466,7 +465,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                         transform="rotate(90deg)"
                       />
                       <StyledText desktopStyle="captionSemiBold">
-                        {t('swap_pipettes')}
+                        {t('swap_pipette_mounts')}
                       </StyledText>
                     </Flex>
                   </Btn>

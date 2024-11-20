@@ -1,9 +1,19 @@
 import { FeedbackModal } from '..'
 import { renderWithProviders } from '../../../__testing-utils__'
-import { screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
 import { i18n } from '../../../i18n'
 import { feedbackModalAtom } from '../../../resources/atoms'
+
+const mockUseTrackEvent = vi.fn()
+
+vi.mock('../../../resources/hooks/useTrackEvent', () => ({
+  useTrackEvent: () => mockUseTrackEvent,
+}))
+
+vi.mock('../../../hooks/useTrackEvent', () => ({
+  useTrackEvent: () => mockUseTrackEvent,
+}))
 
 const initialValues: Array<[any, any]> = [[feedbackModalAtom, true]]
 
@@ -32,5 +42,27 @@ describe('FeedbackModal', () => {
     cancelButton.click()
     // check if the feedbackModalAtom is set to false
     expect(feedbackModalAtom.read).toBe(false)
+  })
+
+  it('should track event when feedback is sent', async () => {
+    render()
+    const feedbackInput = screen.getByRole('textbox')
+    fireEvent.change(feedbackInput, {
+      target: { value: 'This is a test feedback' },
+    })
+    const sendFeedbackButton = screen.getByRole('button', {
+      name: 'Send feedback',
+    })
+
+    fireEvent.click(sendFeedbackButton)
+
+    await waitFor(() => {
+      expect(mockUseTrackEvent).toHaveBeenCalledWith({
+        name: 'feedback-sent',
+        properties: {
+          feedback: 'This is a test feedback',
+        },
+      })
+    })
   })
 })

@@ -1,20 +1,15 @@
-import { useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { getModuleDisplayName } from '@opentrons/shared-data'
-import { RobotCoordsForeignObject } from '@opentrons/components'
 import * as wellContentsSelectors from '../../top-selectors/well-contents'
-import { getAdditionalEquipmentEntities } from '../../step-forms/selectors'
 import { selectors } from '../../labware-ingred/selectors'
 import { selectors as uiLabwareSelectors } from '../../ui/labware'
 import { getDeckSetupForActiveItem } from '../../top-selectors/labware-locations'
 import { SlotInformation } from '../../organisms/SlotInformation'
-import { getXPosition } from './utils'
 
 import type { DeckSlotId, RobotType } from '@opentrons/shared-data'
 import type { ContentsByWell } from '../../labware-ingred/types'
 
-const SLOT_DETAIL_Y_POSITION = '-10'
 interface SlotDetailContainerProps {
   robotType: RobotType
   slot: DeckSlotId | null
@@ -26,17 +21,12 @@ export function SlotDetailsContainer(
 ): JSX.Element | null {
   const { robotType, slot, offDeckLabwareId } = props
   const { t } = useTranslation('shared')
-  const location = useLocation()
   const deckSetup = useSelector(getDeckSetupForActiveItem)
   const allWellContentsForActiveItem = useSelector(
     wellContentsSelectors.getAllWellContentsForActiveItem
   )
   const nickNames = useSelector(uiLabwareSelectors.getLabwareNicknamesById)
   const allIngredNamesIds = useSelector(selectors.allIngredientNamesIds)
-  const additionalEquipment = useSelector(getAdditionalEquipmentEntities)
-  const hasStagingArea = Object.values(additionalEquipment).some(
-    item => item.name === 'stagingArea'
-  )
 
   if (slot == null || (slot === 'offDeck' && offDeckLabwareId == null)) {
     return null
@@ -108,24 +98,7 @@ export function SlotDetailsContainer(
     }
   }
 
-  return location.pathname === '/designer' && slot !== 'offDeck' ? (
-    <RobotCoordsForeignObject
-      width="15.8125rem"
-      height="26.75rem"
-      x={getXPosition(slot, robotType, hasStagingArea)}
-      y={SLOT_DETAIL_Y_POSITION}
-    >
-      <SlotInformation
-        location={slot}
-        robotType={robotType}
-        modules={moduleDisplayName != null ? [moduleDisplayName] : []}
-        labwares={labwares}
-        fixtures={fixtureDisplayNames}
-        liquids={liquidNamesOnLabware}
-        adapters={adapters}
-      />
-    </RobotCoordsForeignObject>
-  ) : (
+  return (
     <SlotInformation
       location={slot}
       robotType={robotType}

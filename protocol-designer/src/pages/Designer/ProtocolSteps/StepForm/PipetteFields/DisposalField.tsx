@@ -100,6 +100,7 @@ export function DisposalField(props: DisposalFieldProps): JSX.Element {
             pipetteId={pipette}
             flowRateType="blowout"
             volume={propsForFields.volume?.value ?? 0}
+            padding="0"
             tiprack={propsForFields.tipRack.value}
           />
           <BlowoutOffsetField
