@@ -27,7 +27,7 @@
   "duplicate": "Duplicate step",
   "edit_step": "Edit step",
   "engage_height": "Engage height",
-  "final_deck_state": "Ending deck",
+  "ending_deck": "Ending deck",
   "flow_type_title": "{{type}} flow rate",
   "from": "from",
   "heater_shaker": {
@@ -104,7 +104,7 @@
   "shake": "Shake",
   "single": "Single path",
   "speed": "Speed",
-  "starting_deck_state": "Starting deck",
+  "starting_deck": "Starting deck",
   "step_substeps": "{{stepType}} details",
   "temperature": "Temperature",
   "temperature_module": {
