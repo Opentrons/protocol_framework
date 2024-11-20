@@ -49,6 +49,7 @@ def get_all_pipette_models() -> Iterator[PipetteModel]:
         "single_channel": "single",
         "ninety_six_channel": "96",
         "eight_channel": "multi",
+        "eight_channel_emulsify": "multi_emulsify",
     }
     assert os.listdir(paths_to_validate), "You have a path wrong"
     for channel_dir in os.listdir(paths_to_validate):
