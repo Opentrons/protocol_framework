@@ -115,7 +115,9 @@ export function SlotOverflowMenu(
     labwareOnSlot?.def.allowedRoles?.includes('adapter') ?? false
 
   const isTiprackAdapter =
-    labwareOnSlot?.id.includes('tiprack') && isLabwareAnAdapter
+    labwareOnSlot?.def.parameters.quirks?.includes(
+      'tiprackAdapterFor96Channel'
+    ) ?? false
 
   const nestedLabwareOnSlot = Object.values(deckSetupLabware).find(
     lw => lw.slot === labwareOnSlot?.id
