@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useLayoutEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import {
@@ -65,13 +65,15 @@ export function useErrorRecoveryFlows(
   runStatus: RunStatus | null
 ): UseErrorRecoveryResult {
   const [isERActive, setIsERActive] = useState(false)
-  const [hasSeenAwaitingRecovery, setHasSeenAwaitingRecovery] = useState(false)
   const failedCommand = useCurrentlyRecoveringFrom(runId, runStatus)
 
   // The complexity of this logic exists to persist Error Recovery screens past the server's definition of Error Recovery.
   // Ex, show a "cancelling run" modal in Error Recovery flows despite the robot no longer being in a recoverable state.
 
-  const isValidERStatus = (status: RunStatus | null): boolean => {
+  const isValidERStatus = (
+    status: RunStatus | null,
+    hasSeenAwaitingRecovery: boolean
+  ): boolean => {
     return (
       status !== null &&
       (status === RUN_STATUS_AWAITING_RECOVERY ||
@@ -81,31 +83,20 @@ export function useErrorRecoveryFlows(
 
   // If client accesses a valid ER runs status besides AWAITING_RECOVERY but accesses it outside of Error Recovery flows,
   // don't show ER.
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (runStatus != null) {
       const isAwaitingRecovery =
         VALID_ER_RUN_STATUSES.includes(runStatus) &&
-        runStatus !== RUN_STATUS_STOP_REQUESTED
+        runStatus !== RUN_STATUS_STOP_REQUESTED &&
+        failedCommand != null // Prevents one render cycle of an unknown failed command.
 
-      if (isAwaitingRecovery && !hasSeenAwaitingRecovery) {
-        setHasSeenAwaitingRecovery(true)
+      if (isAwaitingRecovery) {
+        setIsERActive(isValidERStatus(runStatus, true))
       } else if (INVALID_ER_RUN_STATUSES.includes(runStatus)) {
-        setHasSeenAwaitingRecovery(false)
+        setIsERActive(isValidERStatus(runStatus, false))
       }
     }
-  }, [runStatus, hasSeenAwaitingRecovery])
-
-  // Manage isERActive state, the condition that actually renders Error Recovery.
-  useEffect(() => {
-    const shouldBeActive =
-      isValidERStatus(runStatus) &&
-      // The failedCommand is null when a stop is requested, but we still want to persist Error Recovery in specific circumstances.
-      (failedCommand !== null || runStatus === RUN_STATUS_STOP_REQUESTED)
-
-    if (shouldBeActive !== isERActive) {
-      setIsERActive(shouldBeActive)
-    }
-  }, [runStatus, failedCommand, hasSeenAwaitingRecovery, isERActive])
+  }, [runStatus, failedCommand])
 
   return {
     isERActive,
