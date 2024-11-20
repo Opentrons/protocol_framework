@@ -12,7 +12,7 @@ const fixtureV1Glob = path.join(
 )
 const defV1Glob = path.join(
   __dirname,
-  '../../liquid-class/definitions/3/*.json'
+  '../../liquid-class/definitions/1/*.json'
 )
 
 const ajv = new Ajv({ allErrors: true, jsonPointers: true })

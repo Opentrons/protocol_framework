@@ -166,7 +166,7 @@ def test_build_multi_dispense_settings_none(
 
 def test_liquid_handling_property_by_volume() -> None:
     """It should create a class that can interpolate values and add and delete new points."""
-    subject = LiquidHandlingPropertyByVolume({"5": 50, "10.0": 250})
+    subject = LiquidHandlingPropertyByVolume([(5.0, 50.0), (10.0, 250.0)])
     assert subject.as_dict() == {5.0: 50, 10.0: 250}
     assert subject.get_for_volume(7) == 130.0
 

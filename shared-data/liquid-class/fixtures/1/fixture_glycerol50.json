@@ -33,10 +33,10 @@
                 "z": 5
               },
               "speed": 100,
-              "airGapByVolume": {
-                "5": 3,
-                "10": 4
-              },
+              "airGapByVolume": [
+                [5.0, 3.0],
+                [10.0, 4.0]
+              ],
               "touchTip": {
                 "enable": true,
                 "params": {
@@ -58,9 +58,7 @@
               "y": 0,
               "z": -5
             },
-            "flowRateByVolume": {
-              "10": 50
-            },
+            "flowRateByVolume": [[10.0, 50.0]],
             "preWet": true,
             "mix": {
               "enable": true,
@@ -100,10 +98,10 @@
                 "z": 5
               },
               "speed": 100,
-              "airGapByVolume": {
-                "5": 3,
-                "10": 4
-              },
+              "airGapByVolume": [
+                [5.0, 3.0],
+                [10.0, 4.0]
+              ],
               "blowout": {
                 "enable": true,
                 "params": {
@@ -132,10 +130,10 @@
               "y": 0,
               "z": -5
             },
-            "flowRateByVolume": {
-              "10": 40,
-              "20": 30
-            },
+            "flowRateByVolume": [
+              [10.0, 40.0],
+              [20.0, 30.0]
+            ],
             "mix": {
               "enable": true,
               "params": {
@@ -143,10 +141,10 @@
                 "volume": 15
               }
             },
-            "pushOutByVolume": {
-              "10": 7,
-              "20": 10
-            },
+            "pushOutByVolume": [
+              [10.0, 7.0],
+              [20.0, 10.0]
+            ],
             "delay": {
               "enable": true,
               "params": {
@@ -178,10 +176,10 @@
                 "z": 5
               },
               "speed": 100,
-              "airGapByVolume": {
-                "5": 3,
-                "10": 4
-              },
+              "airGapByVolume": [
+                [5.0, 3.0],
+                [10.0, 4.0]
+              ],
               "touchTip": {
                 "enable": true,
                 "params": {
@@ -206,16 +204,12 @@
               "y": 0,
               "z": -5
             },
-            "flowRateByVolume": {
-              "10": 40,
-              "20": 30
-            },
-            "conditioningByVolume": {
-              "5": 5
-            },
-            "disposalByVolume": {
-              "5": 3
-            },
+            "flowRateByVolume": [
+              [10.0, 40.0],
+              [20.0, 30.0]
+            ],
+            "conditioningByVolume": [[5.0, 5.0]],
+            "disposalByVolume": [[5.0, 3.0]],
             "delay": {
               "enable": true,
               "params": {

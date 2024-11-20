@@ -23,9 +23,9 @@ from . import validation
 
 
 class LiquidHandlingPropertyByVolume:
-    def __init__(self, properties_by_volume: Dict[str, float]) -> None:
+    def __init__(self, by_volume_property: Sequence[Tuple[float, float]]) -> None:
         self._properties_by_volume: Dict[float, float] = {
-            float(volume): value for volume, value in properties_by_volume.items()
+            float(volume): value for volume, value in by_volume_property
         }
         # Volumes need to be sorted for proper interpolation of non-defined volumes, and the
         # corresponding values need to be in the same order for them to be interpolated correctly
