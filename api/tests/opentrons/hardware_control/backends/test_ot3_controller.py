@@ -374,6 +374,8 @@ async def test_home_execute(
         **config
     ) as mock_runner:
         present_axes = set(ax for ax in axes if controller.axis_is_present(ax))
+        controller.set_pressure_sensor_available(Axis.P_L, True)
+        controller.set_pressure_sensor_available(Axis.P_R, True)
 
         # nothing has been homed
         assert not controller._motor_status
@@ -485,6 +487,8 @@ async def test_home_only_present_devices(
     homed_position = {}
 
     controller._position = starting_position
+    controller.set_pressure_sensor_available(Axis.P_L, True)
+    controller.set_pressure_sensor_available(Axis.P_R, True)
 
     mock_move_group_run.side_effect = move_group_run_side_effect_home(controller, axes)
 
