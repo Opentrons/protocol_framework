@@ -78,7 +78,7 @@ async def test_aspirate_implementation_no_prep(
     )
 
     data = AspirateParams(
-        pipetteId="abc",
+        pipetteId=pipette_id,
         labwareId="123",
         wellName="A3",
         wellLocation=location,
@@ -86,25 +86,27 @@ async def test_aspirate_implementation_no_prep(
         flowRate=1.23,
     )
 
-    decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id="abc")).then_return(True)
+    decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id=pipette_id)).then_return(
+        True
+    )
 
     decoy.when(
         state_view.geometry.get_nozzles_per_well(
             labware_id="123",
             target_well_name="A3",
-            pipette_id="abc",
+            pipette_id=pipette_id,
         )
     ).then_return(2)
 
     decoy.when(
         state_view.geometry.get_wells_covered_by_pipette_with_active_well(
-            "123", "A3", "abc"
+            "123", "A3", pipette_id
         )
     ).then_return(["A3", "A4"])
 
     decoy.when(
         await movement.move_to_well(
-            pipette_id="abc",
+            pipette_id=pipette_id,
             labware_id="123",
             well_name="A3",
             well_location=location,
@@ -118,7 +120,7 @@ async def test_aspirate_implementation_no_prep(
 
     decoy.when(
         await pipetting.aspirate_in_place(
-            pipette_id="abc",
+            pipette_id=pipette_id,
             volume=50,
             flow_rate=1.23,
             command_note_adder=mock_command_note_adder,
@@ -131,7 +133,7 @@ async def test_aspirate_implementation_no_prep(
         public=AspirateResult(volume=50, position=DeckPoint(x=1, y=2, z=3)),
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
-                pipette_id="abc",
+                pipette_id=pipette_id,
                 new_location=update_types.Well(labware_id="123", well_name="A3"),
                 new_deck_point=DeckPoint(x=1, y=2, z=3),
             ),
@@ -141,7 +143,8 @@ async def test_aspirate_implementation_no_prep(
                 volume_added=-100,
             ),
             pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
-                pipette_id="abc", fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50)
+                pipette_id=pipette_id,
+                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50),
             ),
         ),
     )
@@ -156,102 +159,97 @@ async def test_aspirate_implementation_with_prep(
     subject: AspirateImplementation,
 ) -> None:
     """An Aspirate should have an execution implementation with preparing to aspirate."""
+    pipette_id = "pipette-id"
+    labware_id = "labware-id"
+    well_name = "well-name"
     location = LiquidHandlingWellLocation(
         origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1)
     )
-
-    data = AspirateParams(
-        pipetteId="abc",
-        labwareId="123",
-        wellName="A3",
+    volume = 50
+    flow_rate = 1.23
+    params = AspirateParams(
+        pipetteId=pipette_id,
+        labwareId=labware_id,
+        wellName=well_name,
         wellLocation=location,
-        volume=50,
-        flowRate=1.23,
+        volume=volume,
+        flowRate=flow_rate,
     )
 
-    decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id="abc")).then_return(False)
-
-    decoy.when(state_view.pipettes.get(pipette_id="abc")).then_return(
-        LoadedPipette.construct(  # type:ignore[call-arg]
-            mount=MountType.LEFT
-        )
+    decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id=pipette_id)).then_return(
+        False
     )
+
     decoy.when(
         state_view.geometry.get_nozzles_per_well(
-            labware_id="123",
-            target_well_name="A3",
-            pipette_id="abc",
+            labware_id=labware_id,
+            target_well_name=well_name,
+            pipette_id=pipette_id,
         )
     ).then_return(2)
 
     decoy.when(
         state_view.geometry.get_wells_covered_by_pipette_with_active_well(
-            "123", "A3", "abc"
+            labware_id, well_name, pipette_id
         )
     ).then_return(["A3", "A4"])
 
     decoy.when(
         await movement.move_to_well(
-            pipette_id="abc",
-            labware_id="123",
-            well_name="A3",
-            well_location=location,
-            current_well=CurrentWell(
-                pipette_id="abc",
-                labware_id="123",
-                well_name="A3",
-            ),
-            force_direct=False,
-            minimum_z_height=None,
-            speed=None,
-            operation_volume=-50,
+            pipette_id=pipette_id,
+            labware_id=labware_id,
+            well_name=well_name,
+            well_location=LiquidHandlingWellLocation(origin=WellOrigin.TOP),
         ),
     ).then_return(Point(x=1, y=2, z=3))
 
     decoy.when(
         await movement.move_to_well(
-            pipette_id="abc",
-            labware_id="123",
-            well_name="A3",
+            pipette_id=pipette_id,
+            labware_id=labware_id,
+            well_name=well_name,
             well_location=location,
             current_well=CurrentWell(
-                pipette_id="abc",
-                labware_id="123",
-                well_name="A3",
+                pipette_id=pipette_id,
+                labware_id=labware_id,
+                well_name=well_name,
             ),
             force_direct=False,
             minimum_z_height=None,
             speed=None,
-            operation_volume=-50,
+            operation_volume=-volume,
         ),
     ).then_return(Point(x=1, y=2, z=3))
 
     decoy.when(
         await pipetting.aspirate_in_place(
-            pipette_id="abc",
-            volume=50,
-            flow_rate=1.23,
+            pipette_id=pipette_id,
+            volume=volume,
+            flow_rate=flow_rate,
             command_note_adder=mock_command_note_adder,
         ),
-    ).then_return(50)
+    ).then_return(volume)
 
-    result = await subject.execute(data)
+    result = await subject.execute(params)
 
     assert result == SuccessData(
         public=AspirateResult(volume=50, position=DeckPoint(x=1, y=2, z=3)),
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
-                pipette_id="abc",
-                new_location=update_types.Well(labware_id="123", well_name="A3"),
+                pipette_id=pipette_id,
+                new_location=update_types.Well(
+                    labware_id=labware_id, well_name=well_name
+                ),
                 new_deck_point=DeckPoint(x=1, y=2, z=3),
             ),
             liquid_operated=update_types.LiquidOperatedUpdate(
-                labware_id="123",
+                labware_id=labware_id,
                 well_names=["A3", "A4"],
                 volume_added=-100,
             ),
             pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
-                pipette_id="abc", fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50)
+                pipette_id=pipette_id,
+                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50),
             ),
         ),
     )
@@ -271,7 +269,7 @@ async def test_aspirate_raises_volume_error(
     )
 
     data = AspirateParams(
-        pipetteId="abc",
+        pipetteId=pipette_id,
         labwareId="123",
         wellName="A3",
         wellLocation=location,
@@ -279,25 +277,27 @@ async def test_aspirate_raises_volume_error(
         flowRate=1.23,
     )
 
-    decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id="abc")).then_return(True)
+    decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id=pipette_id)).then_return(
+        True
+    )
 
     decoy.when(
         state_view.geometry.get_nozzles_per_well(
             labware_id="123",
             target_well_name="A3",
-            pipette_id="abc",
+            pipette_id=pipette_id,
         )
     ).then_return(2)
 
     decoy.when(
         state_view.geometry.get_wells_covered_by_pipette_with_active_well(
-            "123", "A3", "abc"
+            "123", "A3", pipette_id
         )
     ).then_return(["A3", "A4"])
 
     decoy.when(
         await movement.move_to_well(
-            pipette_id="abc",
+            pipette_id=pipette_id,
             labware_id="123",
             well_name="A3",
             well_location=location,
@@ -311,7 +311,7 @@ async def test_aspirate_raises_volume_error(
 
     decoy.when(
         await pipetting.aspirate_in_place(
-            pipette_id="abc",
+            pipette_id=pipette_id,
             volume=50,
             flow_rate=1.23,
             command_note_adder=mock_command_note_adder,
@@ -442,7 +442,7 @@ async def test_aspirate_implementation_meniscus(
         volumeOffset="operationVolume",
     )
     data = AspirateParams(
-        pipetteId="abc",
+        pipetteId=pipette_id,
         labwareId="123",
         wellName="A3",
         wellLocation=location,
@@ -454,21 +454,23 @@ async def test_aspirate_implementation_meniscus(
         state_view.geometry.get_nozzles_per_well(
             labware_id="123",
             target_well_name="A3",
-            pipette_id="abc",
+            pipette_id=pipette_id,
         )
     ).then_return(2)
 
     decoy.when(
         state_view.geometry.get_wells_covered_by_pipette_with_active_well(
-            "123", "A3", "abc"
+            "123", "A3", pipette_id
         )
     ).then_return(["A3", "A4"])
 
-    decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id="abc")).then_return(True)
+    decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id=pipette_id)).then_return(
+        True
+    )
 
     decoy.when(
         await movement.move_to_well(
-            pipette_id="abc",
+            pipette_id=pipette_id,
             labware_id="123",
             well_name="A3",
             well_location=location,
@@ -482,7 +484,7 @@ async def test_aspirate_implementation_meniscus(
 
     decoy.when(
         await pipetting.aspirate_in_place(
-            pipette_id="abc",
+            pipette_id=pipette_id,
             volume=50,
             flow_rate=1.23,
             command_note_adder=mock_command_note_adder,
@@ -495,7 +497,7 @@ async def test_aspirate_implementation_meniscus(
         public=AspirateResult(volume=50, position=DeckPoint(x=1, y=2, z=3)),
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
-                pipette_id="abc",
+                pipette_id=pipette_id,
                 new_location=update_types.Well(labware_id="123", well_name="A3"),
                 new_deck_point=DeckPoint(x=1, y=2, z=3),
             ),
@@ -505,7 +507,8 @@ async def test_aspirate_implementation_meniscus(
                 volume_added=-100,
             ),
             pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
-                pipette_id="abc", fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50)
+                pipette_id=pipette_id,
+                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50),
             ),
         ),
     )
