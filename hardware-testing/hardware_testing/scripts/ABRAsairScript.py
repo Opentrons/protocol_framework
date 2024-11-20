@@ -2,6 +2,7 @@
 import sys
 import paramiko as pmk
 import time
+import json
 import multiprocessing
 from typing import Optional, List, Any
 
@@ -69,11 +70,10 @@ def run(file_name: str) -> List[Any]:
     robot_ips = []
     robot_names = []
     with open(file_name) as file:
-        for line in file.readlines():
-            info = line.split(",")
-            if "Y" in info[2]:
-                robot_ips.append(info[0])
-                robot_names.append(info[1])
+        file_dict = json.load(file)
+        robot_dict = file_dict.get('ip_address_list')
+        robot_ips = list(robot_dict.keys())
+        robot_names = list(robot_dict.values())
     print("Executing Script on All Robots:")
     # Launch the processes for each robot.
     processes = []
