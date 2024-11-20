@@ -232,7 +232,9 @@ run_command_table = sqlalchemy.Table(
             CommandStatusSQLEnum,
             values_callable=lambda obj: [e.value for e in obj],
             validate_strings=True,
-            nullable=False,
+            # nullable=True because it was easier for the migration to add the column
+            # this way. This is not intended to ever be null in practice.
+            nullable=True,
             create_constraint=True,
         ),
     ),
