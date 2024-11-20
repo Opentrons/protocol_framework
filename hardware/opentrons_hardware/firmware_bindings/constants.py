@@ -359,7 +359,7 @@ class PipetteName(int, Enum):
     p1000_96 = 0x04
     p50_96 = 0x05
     p200_96 = 0x06
-    p1000_multi_emulsify = 0x07
+    p1000_multi_em = 0x07
     unknown = 0xFFFF
 
 
