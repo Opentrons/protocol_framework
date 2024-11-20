@@ -71,7 +71,7 @@ def run(file_name: str) -> List[Any]:
     robot_names = []
     with open(file_name) as file:
         file_dict = json.load(file)
-        robot_dict = file_dict.get('ip_address_list')
+        robot_dict = file_dict.get("ip_address_list")
         robot_ips = list(robot_dict.keys())
         robot_names = list(robot_dict.values())
     print("Executing Script on All Robots:")
@@ -89,10 +89,8 @@ if __name__ == "__main__":
     # Wait for all processes to finish.
     file_name = sys.argv[1]
     processes = run(file_name)
-
     for process in processes:
         process.start()
         time.sleep(20)
-
     for process in processes:
         process.join()
