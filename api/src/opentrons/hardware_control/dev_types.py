@@ -100,6 +100,8 @@ class PipetteDict(InstrumentDict):
     pipette_bounding_box_offsets: PipetteBoundingBoxOffsetDefinition
     current_nozzle_map: NozzleMap
     lld_settings: Optional[Dict[str, Dict[str, float]]]
+    plunger_positions: Dict[str, float]
+    shaft_ul_per_mm: float
 
 
 class PipetteStateDict(TypedDict):
