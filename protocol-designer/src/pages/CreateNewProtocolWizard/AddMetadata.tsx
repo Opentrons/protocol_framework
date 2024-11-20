@@ -11,8 +11,8 @@ import {
   StyledText,
 } from '@opentrons/components'
 import {
-  DescriptionField,
-  DescriptionFieldContainer,
+  // DescriptionField,
+  // DescriptionFieldContainer,
   TextAreaField,
 } from '../../atoms'
 import { HandleEnter } from '../../atoms/HandleEnter'
