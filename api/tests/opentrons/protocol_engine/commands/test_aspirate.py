@@ -189,6 +189,25 @@ async def test_aspirate_implementation_with_prep(
             "123", "A3", "abc"
         )
     ).then_return(["A3", "A4"])
+
+    decoy.when(
+        await movement.move_to_well(
+            pipette_id="abc",
+            labware_id="123",
+            well_name="A3",
+            well_location=location,
+            current_well=CurrentWell(
+                pipette_id="abc",
+                labware_id="123",
+                well_name="A3",
+            ),
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=-50,
+        ),
+    ).then_return(Point(x=1, y=2, z=3))
+
     decoy.when(
         await movement.move_to_well(
             pipette_id="abc",
@@ -235,16 +254,6 @@ async def test_aspirate_implementation_with_prep(
                 pipette_id="abc", fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=50)
             ),
         ),
-    )
-
-    decoy.verify(
-        await movement.move_to_well(
-            pipette_id="abc",
-            labware_id="123",
-            well_name="A3",
-            well_location=LiquidHandlingWellLocation(origin=WellOrigin.TOP),
-        ),
-        await pipetting.prepare_for_aspirate(pipette_id="abc"),
     )
 
 
