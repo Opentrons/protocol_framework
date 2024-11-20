@@ -98,13 +98,23 @@ build-opentrons-analysis:
 	@echo "If you want to build a different version, run 'make build-opentrons-analysis ANALYSIS_REF=<version>'"
 	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) --build-arg ANALYSIS_REF=$(ANALYSIS_REF) --build-arg CACHEBUST=$(CACHEBUST) -t opentrons-analysis:$(ANALYSIS_REF) -f citools/Dockerfile.analyze citools/.
 
-.PHONY: local-build
-local-build:
+LOCAL_IMAGE_NAME ?= opentrons-analysis:local
+
+.PHONY: build-local
+build-local:
 	@echo "Building docker image for your local opentrons code"
 	@echo "The image will be named opentrons-analysis:local"
 	@echo "For a fresh build, run 'make local-build NO_CACHE=1'"
-	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) $(BUILD_FLAGS) -t opentrons-analysis:local -f citools/Dockerfile.local .. || true
+	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) $(BUILD_FLAGS) -t $(LOCAL_IMAGE_NAME) -f citools/Dockerfile.local .. || true
 	@echo "Build complete"
+
+.PHONY: snapshot-test-local
+snapshot-test-local:
+	export ANALYSIS_REF=$(LOCAL_IMAGE_NAME)
+	@echo "ANALYSIS_REF is $(ANALYSIS_REF)"
+	@echo "PROTOCOL_NAMES is $(PROTOCOL_NAMES)"
+	@echo "OVERRIDE_PROTOCOL_NAMES is $(OVERRIDE_PROTOCOL_NAMES)"
+	$(PYTHON) -m pipenv run pytest -k analyses_snapshot_test -vv 
 
 .PHONY: generate-protocols
 generate-protocols:
