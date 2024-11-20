@@ -543,29 +543,30 @@ const updatePatchOnPipetteChannelChange = (
     const sourceLabwareId: string = appliedPatch.aspirate_labware as string
     const destLabwareId: string = appliedPatch.dispense_labware as string
     const sourceLabware = labwareEntities[sourceLabwareId]
-    const sourceLabwareDef = sourceLabware.def
     const destLabware = labwareEntities[destLabwareId]
 
-    update = {
-      aspirate_wells: getAllWellsFromPrimaryWells(
-        appliedPatch.aspirate_wells as string[],
-        sourceLabwareDef,
-        channels as 8 | 96
-      ),
-      dispense_wells:
-        destLabwareId.includes('trashBin') ||
-        destLabwareId.includes('wasteChute')
-          ? getDefaultWells({
-              labwareId: destLabwareId,
-              pipetteId,
-              labwareEntities,
-              pipetteEntities,
-            })
-          : getAllWellsFromPrimaryWells(
-              appliedPatch.dispense_wells as string[],
-              destLabware.def,
-              channels as 8 | 96
-            ),
+    if (sourceLabwareId != null && destLabwareId != null) {
+      update = {
+        aspirate_wells: getAllWellsFromPrimaryWells(
+          appliedPatch.aspirate_wells as string[],
+          sourceLabware.def,
+          channels as 8 | 96
+        ),
+        dispense_wells:
+          destLabwareId.includes('trashBin') ||
+          destLabwareId.includes('wasteChute')
+            ? getDefaultWells({
+                labwareId: destLabwareId,
+                pipetteId,
+                labwareEntities,
+                pipetteEntities,
+              })
+            : getAllWellsFromPrimaryWells(
+                appliedPatch.dispense_wells as string[],
+                destLabware.def,
+                channels as 8 | 96
+              ),
+      }
     }
   }
 

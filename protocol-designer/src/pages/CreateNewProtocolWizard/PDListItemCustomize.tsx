@@ -27,7 +27,6 @@ interface PDListItemCustomizeProps {
   label?: string
   dropdown?: DropdownMenuProps
   tag?: TagProps
-  forceDirection?: boolean
 }
 
 export function PDListItemCustomize({
@@ -38,7 +37,6 @@ export function PDListItemCustomize({
   label,
   dropdown,
   tag,
-  forceDirection = false,
 }: PDListItemCustomizeProps): JSX.Element {
   const responsiveType = useResponsiveBreakpoints()
   const isLargeScreen = responsiveType === 'xl' || responsiveType === 'lg'
@@ -53,7 +51,7 @@ export function PDListItemCustomize({
       )}
       {dropdown != null && (
         <Flex paddingBottom={SPACING.spacing8}>
-          <DropdownMenu {...dropdown} forceDirection={forceDirection} />
+          <DropdownMenu {...dropdown} menuPlacement="bottom" />
         </Flex>
       )}
       {tag != null && <Tag {...tag} />}
