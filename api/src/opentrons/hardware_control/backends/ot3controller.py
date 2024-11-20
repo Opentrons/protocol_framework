@@ -915,6 +915,7 @@ class OT3Controller(FlexBackend):
         lookup_name = {
             FirmwarePipetteName.p1000_single: "P1KS",
             FirmwarePipetteName.p1000_multi: "P1KM",
+            FirmwarePipetteName.p1000_multi_emulsify: "P1KP",
             FirmwarePipetteName.p50_single: "P50S",
             FirmwarePipetteName.p50_multi: "P50M",
             FirmwarePipetteName.p1000_96: "P1KH",
