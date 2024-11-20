@@ -103,18 +103,27 @@ LOCAL_IMAGE_NAME ?= opentrons-analysis:local
 .PHONY: build-local
 build-local:
 	@echo "Building docker image for your local opentrons code"
-	@echo "The image will be named opentrons-analysis:local"
-	@echo "For a fresh build, run 'make local-build NO_CACHE=1'"
-	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) $(BUILD_FLAGS) -t $(LOCAL_IMAGE_NAME) -f citools/Dockerfile.local .. || true
+	@echo "The image name is set with variable LOCAL_IMAGE_NAME and is $(LOCAL_IMAGE_NAME)"
+	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) -t $(LOCAL_IMAGE_NAME) -f citools/Dockerfile.local .. || true
 	@echo "Build complete"
 
 .PHONY: snapshot-test-local
+snapshot-test-local: ANALYSIS_REF=$(LOCAL_IMAGE_NAME)
 snapshot-test-local:
-	export ANALYSIS_REF=$(LOCAL_IMAGE_NAME)
-	@echo "ANALYSIS_REF is $(ANALYSIS_REF)"
+	@echo "This target is overriding the ANALYSIS_REF to the local image name: $(LOCAL_IMAGE_NAME)"
+	@echo "ANALYSIS_REF is $(ANALYSIS_REF). This is the image used in the test."
 	@echo "PROTOCOL_NAMES is $(PROTOCOL_NAMES)"
 	@echo "OVERRIDE_PROTOCOL_NAMES is $(OVERRIDE_PROTOCOL_NAMES)"
-	$(PYTHON) -m pipenv run pytest -k analyses_snapshot_test -vv 
+	$(PYTHON) -m pipenv run pytest -k analyses_snapshot_test -vv
+
+.PHONY: snapshot-test-update-local
+snapshot-test-update-local: ANALYSIS_REF=$(LOCAL_IMAGE_NAME)
+snapshot-test-update-local:
+	@echo "This target is overriding the ANALYSIS_REF to the local image name: $(LOCAL_IMAGE_NAME)"
+	@echo "ANALYSIS_REF is $(ANALYSIS_REF). This is the image used in the test."
+	@echo "PROTOCOL_NAMES is $(PROTOCOL_NAMES)"
+	@echo "OVERRIDE_PROTOCOL_NAMES is $(OVERRIDE_PROTOCOL_NAMES)"
+	$(PYTHON) -m pipenv run pytest -k analyses_snapshot_test --snapshot-update
 
 .PHONY: generate-protocols
 generate-protocols:

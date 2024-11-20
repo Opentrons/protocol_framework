@@ -81,8 +81,12 @@ cd analyses-snapshot-testing \
 `make build-local` - on top of the base, copy in the local code and build
 `make snapshot-test-local` - run the analyses battery against the image you just created
 
-> make sure to run `make build-local` after you make changes to the code to update the image
+> make sure to run `make build-local` after you make changes to the code to update the image!!!
 
 You have the option to specify one or many protocols to run the analyses on. This is also described above [Running the tests against specific protocols](#running-the-tests-against-specific-protocols)
 
 - `make snapshot-test-local PROTOCOL_NAMES=Flex_S_v2_19_Illumina_DNA_PCR_Free OVERRIDE_PROTOCOL_NAMES=none`
+
+### Updating the snapshots locally
+
+- `make snapshot-test-update-local`
