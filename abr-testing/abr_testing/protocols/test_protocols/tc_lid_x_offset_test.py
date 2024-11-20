@@ -56,6 +56,8 @@ def add_parameters(parameters: ParameterContext) -> None:
         description="Turn on to make offset negative.",
         default=False,
     )
+    helpers.create_disposable_lid_trash_location(parameters)
+
 
 
 def run(protocol: ProtocolContext) -> None:
@@ -64,6 +66,8 @@ def run(protocol: ProtocolContext) -> None:
     lids_in_stack = protocol.params.lids_in_a_stack  # type: ignore[attr-defined]
     x_offset = protocol.params.x_offset  # type: ignore[attr-defined]
     negative = protocol.params.negative  # type: ignore[attr-defined]
+    trash_lid = protocol.params.trash_lid # type: ignore[attr-defined]
+    
     if negative:
         x_offset = x_offset * -1
     # Thermocycler
@@ -73,6 +77,7 @@ def run(protocol: ProtocolContext) -> None:
     plate_in_cycler = thermocycler.load_labware(
         "armadillo_96_wellplate_200ul_pcr_full_skirt"
     )
+    trash_bin = protocol.load_trash_bin("A3")
     thermocycler.open_lid()
     # Load Lids
     lid_stack_1 = helpers.load_disposable_lids(protocol, lids_in_stack, ["D2"])
@@ -86,11 +91,12 @@ def run(protocol: ProtocolContext) -> None:
     lids = [lid_stack_1, lid_stack_2, lid_stack_3, lid_stack_4, lid_stack_5]
     for lid_list in lids:
         lid_to_move = lid_list[0]
-
-        lid_to_move_back_to = lid_list[1]
         protocol.comment(f"Offset {x_offset}, Lid # {slot+1}")
         # move lid to plate in thermocycler
         protocol.move_labware(
             lid_to_move, plate_in_cycler, use_gripper=True, drop_offset=drop_offset
         )
-        protocol.move_labware(lid_to_move, lid_to_move_back_to, use_gripper=True)
+        if trash_lid:
+            protocol.move_labware(lid_to_move, trash_bin, use_gripper=True)
+        else:
+            protocol.move_labware(lid_to_move, lid_list[1], use_gripper = True)

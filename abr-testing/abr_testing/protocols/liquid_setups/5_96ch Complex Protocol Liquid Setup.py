@@ -5,7 +5,7 @@ from abr_testing.protocols.helpers import (
 )
 
 metadata = {
-    "protocolName": "DVT2ABR5 and 6 Liquids: 96ch Complex Protocol",
+    "protocolName": "DVT2ABR5 Liquids: 96ch Complex Protocol",
     "author": "Rhyann clarke <rhyann.clarke@opentrons.com>",
     "source": "Protocol Library",
 }

@@ -36,7 +36,6 @@ def run(ctx: ProtocolContext) -> None:
     """Protocol."""
     dot_bottom = ctx.params.dot_bottom  # type: ignore[attr-defined]
 
-    USE_GRIPPER = True
     dry_run = False
     tip_mixing = False
 
@@ -223,11 +222,8 @@ def run(ctx: ProtocolContext) -> None:
         pip.return_tip()
 
     # Mix, then heat
-    h_s.set_and_wait_for_shake_speed(1800)
-    ctx.delay(
-        minutes=10 if not dry_run else 0.25,
-        msg="Please wait 10 minutes to allow for proper lysis mixing.",
-    )
+    ctx.comment("Lysis Mixing")
+    helpers.set_hs_speed(ctx, h_s, 1800, 10, False)
     if not dry_run:
         h_s.set_and_wait_for_temperature(55)
     ctx.delay(
@@ -247,21 +243,11 @@ def run(ctx: ProtocolContext) -> None:
         pip.home()
 
     # Shake for binding incubation
-    h_s.set_and_wait_for_shake_speed(rpm=1800)
-    ctx.delay(
-        minutes=10 if not dry_run else 0.25,
-        msg="Please allow 10 minutes for the beads to bind the DNA.",
-    )
-    h_s.deactivate_shaker()
+    ctx.comment("Binding incubation")
+    helpers.set_hs_speed(ctx, h_s, 1800, 10, True)
 
-    h_s.open_labware_latch()
     # Transfer plate to magnet
-    ctx.move_labware(
-        sample_plate,
-        magblock,
-        use_gripper=USE_GRIPPER,
-    )
-    h_s.close_labware_latch()
+    helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
 
     ctx.delay(
         minutes=settling_time,
@@ -292,10 +278,7 @@ def run(ctx: ProtocolContext) -> None:
         pip.dispense(wash_vol, samples_m)
         if not tip_mixing:
             pip.return_tip()
-
-        h_s.set_and_wait_for_shake_speed(rpm=1800)
-        ctx.delay(minutes=5 if not dry_run else 0.25)
-        h_s.deactivate_shaker()
+        helpers.set_hs_speed(ctx, h_s, 1800, 5, True)
 
         # Transfer plate to magnet
         helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
@@ -338,12 +321,7 @@ def run(ctx: ProtocolContext) -> None:
         pip.return_tip()
         pip.home()
 
-    h_s.set_and_wait_for_shake_speed(rpm=2000)
-    ctx.delay(
-        minutes=5 if not dry_run else 0.25,
-        msg="Please wait 5 minutes to allow dna to elute from beads.",
-    )
-    h_s.deactivate_shaker()
+    helpers.set_hs_speed(ctx, h_s, 2000, 5, True)
 
     # Transfer plate to magnet
     helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
