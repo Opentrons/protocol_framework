@@ -81,6 +81,7 @@ export function AddMetadata(props: AddMetadataProps): JSX.Element | null {
               {...register('fields.description')}
               value={watch('fields.description')}
               height="6.8125rem"
+              resize="none"
             />
             {/* <DescriptionFieldContainer>
               <DescriptionField {...register('fields.description')} />

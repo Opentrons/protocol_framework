@@ -85,6 +85,8 @@ export interface TextAreaFieldProps {
   padding?: string
   /** optional prop to override textarea field height */
   height?: string
+  /** optional prop to override textarea field resize */
+  resize?: 'none' | 'vertical' | 'horizontal' | 'both'
 }
 
 export const TextAreaField = forwardRef<
@@ -104,6 +106,7 @@ export const TextAreaField = forwardRef<
       borderRadius,
       padding,
       height,
+      resize = 'vertical',
       ...textAreaProps
     } = props
     const hasError = props.error != null
@@ -267,6 +270,7 @@ export const TextAreaField = forwardRef<
                 </Flex>
               ) : null}
               <StyledTextArea
+                resize={resize}
                 {...textAreaProps}
                 css={TEXTAREA_FIELD}
                 data-testid={props.id}
@@ -314,11 +318,15 @@ export const TextAreaField = forwardRef<
   }
 )
 
-const StyledTextArea = styled.textarea`
+interface StyledTextAreaProps {
+  resize: 'none' | 'vertical' | 'horizontal' | 'both'
+}
+
+const StyledTextArea = styled.textarea<StyledTextAreaProps>`
   background-color: transparent;
   width: 100%;
   min-height: 4.75rem;
-  resize: none;
+  resize: ${({ resize }) => resize};
   white-space: pre-wrap;
   &::placeholder {
     color: ${COLORS.grey40};
