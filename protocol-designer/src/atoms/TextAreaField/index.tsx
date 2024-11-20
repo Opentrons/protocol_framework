@@ -202,7 +202,6 @@ export const TextAreaField = React.forwardRef<
       <Flex
         width="100%"
         alignItems={ALIGN_CENTER}
-        lineHeight={1}
         fontSize={TYPOGRAPHY.fontSizeP}
         fontWeight={TYPOGRAPHY.fontWeightRegular}
         color={props.error != null ? COLOR_WARNING_DARK : COLORS.black90}
