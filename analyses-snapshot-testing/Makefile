@@ -3,12 +3,12 @@ CACHEBUST ?= $(shell date +%s)
 ANALYSIS_REF ?= edge
 PROTOCOL_NAMES ?= all
 OVERRIDE_PROTOCOL_NAMES ?= all
-OPENTRONS_VERSION ?= edge
+LOCAL_IMAGE_TAG ?= local
+ANALYZER_IMAGE_NAME ?= opentrons-analysis
 
-export OPENTRONS_VERSION # used for server
-export ANALYSIS_REF # used for analysis and snapshot test
-export PROTOCOL_NAMES # used for the snapshot test
-export OVERRIDE_PROTOCOL_NAMES # used for the snapshot test
+export ANALYSIS_REF # tag, branch or commit for the opentrons repository. Used as the image tag for the analyzer image
+export PROTOCOL_NAMES # tell the test which protocols to run
+export OVERRIDE_PROTOCOL_NAMES # tell the test which override protocols to run
 
 ifeq ($(CI), true)
 	PYTHON=python
@@ -93,34 +93,34 @@ build-base-image:
 
 .PHONY: build-opentrons-analysis
 build-opentrons-analysis:
-	@echo "Building docker image for $(ANALYSIS_REF)"
-	@echo "The image will be named opentrons-analysis:$(ANALYSIS_REF)"
-	@echo "If you want to build a different version, run 'make build-opentrons-analysis ANALYSIS_REF=<version>'"
-	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) --build-arg ANALYSIS_REF=$(ANALYSIS_REF) --build-arg CACHEBUST=$(CACHEBUST) -t opentrons-analysis:$(ANALYSIS_REF) -f citools/Dockerfile.analyze citools/.
-
-LOCAL_IMAGE_NAME ?= opentrons-analysis:local
+	@echo "Building docker image for opentrons repository reference$(ANALYSIS_REF)"
+	@echo "The image will be named $(ANALYZER_IMAGE_NAME):$(ANALYSIS_REF)"
+	@echo "If you want to build a different version, run 'make build-opentrons-analysis ANALYSIS_REF=<tag, branch, or commit>'"
+	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) --build-arg ANALYSIS_REF=$(ANALYSIS_REF) --build-arg CACHEBUST=$(CACHEBUST) -t $(ANALYZER_IMAGE_NAME):$(ANALYSIS_REF) -f citools/Dockerfile.analyze citools/.
 
 .PHONY: build-local
 build-local:
 	@echo "Building docker image for your local opentrons code"
-	@echo "The image name is set with variable LOCAL_IMAGE_NAME and is $(LOCAL_IMAGE_NAME)"
-	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) -t $(LOCAL_IMAGE_NAME) -f citools/Dockerfile.local .. || true
+	@echo "This image will be named $(ANALYZER_IMAGE_NAME):$(LOCAL_IMAGE_TAG)"
+	docker build --build-arg BASE_IMAGE_NAME=$(BASE_IMAGE_NAME) -t $(ANALYZER_IMAGE_NAME):$(LOCAL_IMAGE_TAG) -f citools/Dockerfile.local ..
 	@echo "Build complete"
 
 .PHONY: snapshot-test-local
-snapshot-test-local: ANALYSIS_REF=$(LOCAL_IMAGE_NAME)
-snapshot-test-local:
-	@echo "This target is overriding the ANALYSIS_REF to the local image name: $(LOCAL_IMAGE_NAME)"
-	@echo "ANALYSIS_REF is $(ANALYSIS_REF). This is the image used in the test."
+snapshot-test-local: ANALYSIS_REF=$(LOCAL_IMAGE_TAG)
+snapshot-test-local: build-base-image build-local
+	@echo "This target is overriding the ANALYSIS_REF to the LOCAL_IMAGE_TAG: $(LOCAL_IMAGE_TAG)"
+	@echo "ANALYSIS_REF is $(ANALYSIS_REF). The the test maps this env variable to the image tag."
+	@echo "The image the test will use is $(ANALYZER_IMAGE_NAME):$(LOCAL_IMAGE_TAG)"
 	@echo "PROTOCOL_NAMES is $(PROTOCOL_NAMES)"
 	@echo "OVERRIDE_PROTOCOL_NAMES is $(OVERRIDE_PROTOCOL_NAMES)"
 	$(PYTHON) -m pipenv run pytest -k analyses_snapshot_test -vv
 
 .PHONY: snapshot-test-update-local
-snapshot-test-update-local: ANALYSIS_REF=$(LOCAL_IMAGE_NAME)
-snapshot-test-update-local:
-	@echo "This target is overriding the ANALYSIS_REF to the local image name: $(LOCAL_IMAGE_NAME)"
-	@echo "ANALYSIS_REF is $(ANALYSIS_REF). This is the image used in the test."
+snapshot-test-update-local: ANALYSIS_REF=$(LOCAL_IMAGE_TAG)
+snapshot-test-update-local: build-base-image build-local
+	@echo "This target is overriding the ANALYSIS_REF to the LOCAL_IMAGE_TAG: $(LOCAL_IMAGE_TAG)"
+	@echo "ANALYSIS_REF is $(ANALYSIS_REF). The the test maps this env variable to the image tag."
+	@echo "The image the test will use is $(ANALYZER_IMAGE_NAME):$(LOCAL_IMAGE_TAG)"
 	@echo "PROTOCOL_NAMES is $(PROTOCOL_NAMES)"
 	@echo "OVERRIDE_PROTOCOL_NAMES is $(OVERRIDE_PROTOCOL_NAMES)"
 	$(PYTHON) -m pipenv run pytest -k analyses_snapshot_test --snapshot-update
@@ -128,6 +128,11 @@ snapshot-test-update-local:
 .PHONY: generate-protocols
 generate-protocols:
 	$(PYTHON) -m pipenv run python -m automation.data.protocol_registry
+
+# Tools for running the robot server in a container
+
+OPENTRONS_VERSION ?= edge
+export OPENTRONS_VERSION # used for the robot server image as the tag, branch or commit for the opentrons repository
 
 .PHONY: build-rs
 build-rs:

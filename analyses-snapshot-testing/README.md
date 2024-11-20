@@ -77,9 +77,7 @@ cd analyses-snapshot-testing \
 `cd <OPENTRONS_REPO_ROOT>/analyses-snapshot-testing` - navigate to the analyses-snapshot-testing directory
 `pyenv local 3.13.0` - set the local python version to 3.13.0
 `make setup` - install the requirements
-`make build-base-image` - build the base image for the analyses battery
-`make build-local` - on top of the base, copy in the local code and build
-`make snapshot-test-local` - run the analyses battery against the image you just created
+`make snapshot-test-local` - this target builds the base image, builds the local code into the base image, then runs the analyses battery against the image you just created
 
 > make sure to run `make build-local` after you make changes to the code to update the image!!!
 
@@ -89,4 +87,4 @@ You have the option to specify one or many protocols to run the analyses on. Thi
 
 ### Updating the snapshots locally
 
-- `make snapshot-test-update-local`
+- `make snapshot-test-update-local` - this target builds the base image, builds the local code into the base image, then runs the analyses battery against the image you just created, updating the snapshots by passing the `--update-snapshots` flag to the test
