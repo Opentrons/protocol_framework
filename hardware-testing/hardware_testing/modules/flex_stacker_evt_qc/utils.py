@@ -21,8 +21,8 @@ def test_limit_switches_per_direction(
     # first make sure switch is not already triggered by moving in the opposite direction
     if driver.get_limit_switch(axis, direction):
         print(f"{direction} switch already triggered, moving away...\n")
-        SAFE_DISTANCE = 10  # mm
-        driver.move_in_mm(axis, direction.opposite().distance(SAFE_DISTANCE))
+        SAFE_DISTANCE_MM = 10
+        driver.move_in_mm(axis, direction.opposite().distance(SAFE_DISTANCE_MM))
 
     # move until the limit switch is reached
     print(f"moving towards {direction} limit switch...\n")
