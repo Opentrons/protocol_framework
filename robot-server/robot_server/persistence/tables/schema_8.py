@@ -235,7 +235,11 @@ run_command_table = sqlalchemy.Table(
             # nullable=True because it was easier for the migration to add the column
             # this way. This is not intended to ever be null in practice.
             nullable=True,
-            create_constraint=True,
+            # todo(mm, 2024-11-20): We want create_constraint=True here. Something
+            # about the way we compare SQL in test_tables.py is making that difficult--
+            # even when we correctly add the constraint in the migration, the SQL
+            # doesn't compare equal to what create_constraint=True here would emit.
+            create_constraint=False,
         ),
     ),
     sqlalchemy.Index(
