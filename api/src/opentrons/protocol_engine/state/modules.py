@@ -1268,7 +1268,10 @@ class ModuleView(HasState[ModuleState]):
                 row = chr(ord("A") + i // 12)  # Convert index to row (A-H)
                 col = (i % 12) + 1  # Convert index to column (1-12)
                 well_key = f"{row}{col}"
-                well_map[well_key] = value
+                truncated_value = float(
+                    "{:.5}".format(str(value))
+                )  # Truncate the returned value to the third decimal place
+                well_map[well_key] = truncated_value
             return well_map
         else:
             raise ValueError(
