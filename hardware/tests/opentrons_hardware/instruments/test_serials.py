@@ -44,7 +44,7 @@ from opentrons_hardware.firmware_bindings.constants import PipetteName
             "P1KPV30",
             PipetteName.p1000_multi_em,
             30,
-            b"\x00"*16,
+            b"\x00" * 16,
         ),
     ],
 )
