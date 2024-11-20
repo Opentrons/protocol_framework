@@ -27,6 +27,7 @@ import {
   getSelectedStepId,
   getHoveredStepId,
   getSelectedTerminalItemId,
+  getHoveredTerminalItemId,
 } from '../../../ui/steps/selectors'
 import { DeckSetupContainer } from '../DeckSetup'
 import { OffDeck } from '../Offdeck'
@@ -43,6 +44,7 @@ export function ProtocolSteps(): JSX.Element {
   const { i18n, t } = useTranslation('starting_deck_state')
   const formData = useSelector(getUnsavedForm)
   const selectedTerminalItem = useSelector(getSelectedTerminalItemId)
+  const hoveredTerminalItem = useSelector(getHoveredTerminalItemId)
   const isMultiSelectMode = useSelector(getIsMultiSelectMode)
   const selectedSubstep = useSelector(getSelectedSubstep)
   const enableHoyKeyDisplay = useSelector(getEnableHotKeysDisplay)
@@ -91,13 +93,18 @@ export function ProtocolSteps(): JSX.Element {
             <TimelineAlerts justifyContent={JUSTIFY_CENTER} width="100%" />
           ) : null}
           <Flex justifyContent={JUSTIFY_SPACE_BETWEEN}>
-            {currentStep != null || selectedTerminalItem != null ? (
+            {currentStep != null && hoveredTerminalItem == null ? (
               <StyledText desktopStyle="headingSmallBold">
-                {currentStep != null
-                  ? i18n.format(currentStep.stepName, 'capitalize')
-                  : t(selectedTerminalItem)}
+                {i18n.format(currentStep.stepName, 'capitalize')}
               </StyledText>
             ) : null}
+            {(hoveredTerminalItem != null || selectedTerminalItem != null) &&
+            currentHoveredStepId == null ? (
+              <StyledText desktopStyle="headingSmallBold">
+                {t(hoveredTerminalItem ?? selectedTerminalItem)}
+              </StyledText>
+            ) : null}
+
             <ToggleGroup
               selectedValue={deckView}
               leftText={leftString}
