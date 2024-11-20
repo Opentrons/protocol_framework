@@ -179,14 +179,12 @@ export function InterventionModal({
 }
 
 const ICON_STYLE = css`
-  width: ${SPACING.spacing16};
-  height: ${SPACING.spacing16};
+  width: ${SPACING.spacing32};
+  height: ${SPACING.spacing32};
   margin: ${SPACING.spacing4};
   cursor: ${CURSOR_POINTER};
 
   @media (${RESPONSIVENESS.touchscreenMediaQuerySpecs}) {
-    width: ${SPACING.spacing32};
-    height: ${SPACING.spacing32};
     margin: ${SPACING.spacing12};
   }
 `
