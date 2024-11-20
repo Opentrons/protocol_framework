@@ -8,7 +8,6 @@ import {
   EmptySelectorButton,
   Flex,
   ListItem,
-  ListItemCustomize,
   SPACING,
   StyledText,
   TYPOGRAPHY,
@@ -22,6 +21,7 @@ import {
   getNumSlotsAvailable,
 } from './utils'
 import { HandleEnter } from '../../atoms/HandleEnter'
+import { PDListItemCustomize as ListItemCustomize } from './PDListItemCustomize'
 
 import type { DropdownBorder } from '@opentrons/components'
 import type { AdditionalEquipment, WizardTileProps } from './types'
@@ -158,7 +158,6 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
                 return (
                   <ListItem type="noActive" key={ae}>
                     <ListItemCustomize
-                      menuPlacement="bottom"
                       linkText={t('remove')}
                       onClick={() => {
                         setValue(

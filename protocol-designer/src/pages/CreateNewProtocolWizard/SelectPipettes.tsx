@@ -465,7 +465,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                         transform="rotate(90deg)"
                       />
                       <StyledText desktopStyle="captionSemiBold">
-                        {t('swap_pipettes')}
+                        {t('swap_pipette_mounts')}
                       </StyledText>
                     </Flex>
                   </Btn>

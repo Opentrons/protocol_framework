@@ -252,7 +252,7 @@ export function EditInstrumentsModal(
                         transform="rotate(90deg)"
                       />
                       <StyledText desktopStyle="captionSemiBold">
-                        {t('swap')}
+                        {t('swap_pipette_mounts')}
                       </StyledText>
                     </Flex>
                   </Btn>
