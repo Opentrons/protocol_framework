@@ -630,7 +630,7 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
         "P50SV3520231024A11": "D"
     }
     unit_tag: str = UNITS.get(get_pipette_unique_name(resources.pipette), "S")
-    meta_data: List[str] = [resources.test_report._run_id, f"P{cfg.pipette_volume}S", unit_tag, str(cfg.tip_volume)]
+    meta_data: List[str] = [resources.test_report._run_id, cfg.liquid, f"P{cfg.pipette_volume}S", unit_tag, str(cfg.tip_volume)]
     simplified_results_for_calibration_test: List[List[str]] = []
 
     total_tips = len(
