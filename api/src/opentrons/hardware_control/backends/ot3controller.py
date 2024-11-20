@@ -388,6 +388,10 @@ class OT3Controller(FlexBackend):
         pip_node = axis_to_node(pipette_axis)
         self._pressure_sensor_available[pip_node] = available
 
+    def get_pressure_sensor_available(self, pipette_axis: Axis) -> bool:
+        pip_node = axis_to_node(pipette_axis)
+        return self._pressure_sensor_available[pip_node]
+
     def update_constraints_for_calibration_with_gantry_load(
         self,
         gantry_load: GantryLoad,

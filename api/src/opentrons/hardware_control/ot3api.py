@@ -655,6 +655,10 @@ class OT3API(
                 mount, self.gantry_load
             )
 
+    def get_pressure_sensor_available(self, mount: OT3Mount) -> bool:
+        pip_axis = Axis.of_main_tool_actuator(mount)
+        return self._backend.get_pressure_sensor_available(pip_axis)
+
     def _set_pressure_sensor_available(
         self,
         mount: OT3Mount,

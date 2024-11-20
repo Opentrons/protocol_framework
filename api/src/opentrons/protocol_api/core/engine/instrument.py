@@ -860,6 +860,11 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         self._engine_client.execute_command(cmd.HomeParams(axes=[z_axis]))
 
     def detect_liquid_presence(self, well_core: WellCore, loc: Location) -> bool:
+        if not self._sync_hardware_api.pressure_sensor_available(
+            mount=self.get_mount()
+        ):
+            raise ValueError("Liquid Presence Detection not available.")
+
         labware_id = well_core.labware_id
         well_name = well_core.get_name()
         well_location = WellLocation(

@@ -65,6 +65,9 @@ class FlexBackend(Protocol):
     ) -> None:
         ...
 
+    def get_pressure_sensor_available(self, pipette_axis: Axis) -> bool:
+        ...
+
     def update_constraints_for_gantry_load(self, gantry_load: GantryLoad) -> None:
         ...
 
