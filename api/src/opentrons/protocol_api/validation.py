@@ -649,30 +649,27 @@ def ensure_new_tip_policy(value: str) -> TransferTipPolicyV2:
         )
 
 
-def _verify_each_list_element_is_valid_location(
-    locations: Sequence[Union[Well, Location]]
-) -> None:
+def _verify_each_list_element_is_valid_location(locations: Sequence[Well]) -> None:
     from .labware import Well
 
     for loc in locations:
-        if not (isinstance(loc, Well) or isinstance(loc, Location)):
+        if not isinstance(loc, Well):
             raise ValueError(
-                f"'{loc}' is not a valid location for transfer. Should be of type 'Well' or 'Location'"
+                f"'{loc}' is not a valid location for transfer. Location should be of type 'Well'."
             )
 
 
 def ensure_valid_flat_wells_list(
     target: Union[
         Well,
-        Location,
-        Sequence[Union[Well, Location]],
+        Sequence[Well],
         Sequence[Sequence[Well]],
     ],
-) -> Sequence[Union[Well, Location]]:
+) -> Sequence[Well]:
     """Ensure that the given target(s) for a liquid transfer are valid and in a flat list."""
     from .labware import Well
 
-    if isinstance(target, Well) or isinstance(target, Location):
+    if isinstance(target, Well):
         return [target]
     elif isinstance(target, List):
         if isinstance(target[0], List):

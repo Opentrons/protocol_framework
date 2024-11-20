@@ -1024,6 +1024,8 @@ class InstrumentContext(publisher.CommandPublisher):
         instrument.validate_tiprack(self.name, tip_rack, _log)
 
         move_to_location = move_to_location or well.top()
+
+        # prep_after should be true for transfer
         prep_after = (
             prep_after
             if prep_after is not None
@@ -1510,8 +1512,12 @@ class InstrumentContext(publisher.CommandPublisher):
         self,
         liquid_class: LiquidClass,
         volume: float,
-        source: AdvancedLiquidHandling,
-        dest: AdvancedLiquidHandling,
+        source: Union[
+            labware.Well, Sequence[labware.Well], Sequence[Sequence[labware.Well]]
+        ],
+        dest: Union[
+            labware.Well, Sequence[labware.Well], Sequence[Sequence[labware.Well]]
+        ],
         new_tip: Literal["once", "always", "never"] = "once",
         trash_location: Optional[Union[types.Location, TrashBin, WasteChute]] = None,
     ) -> InstrumentContext:
@@ -1523,6 +1529,7 @@ class InstrumentContext(publisher.CommandPublisher):
         ):
             raise NotImplementedError("This method is not implemented.")
 
+        # TODO: verify source/dest is not trash bin/waste chute
         flat_sources_list = validation.ensure_valid_flat_wells_list(source)
         flat_dest_list = validation.ensure_valid_flat_wells_list(dest)
 
@@ -1556,6 +1563,7 @@ class InstrumentContext(publisher.CommandPublisher):
                 " Ensure that all previously aspirated liquid is dispensed before starting"
                 " a new transfer."
             )
+        # TODO (spp, 2024-11-18): verify that all tipracks being used will be the same
         liquid_class_props = liquid_class.get_for(
             pipette=self.name, tiprack=tiprack.name
         )
@@ -1569,16 +1577,19 @@ class InstrumentContext(publisher.CommandPublisher):
         else:
             checked_trash_location = trash_location
 
-        v2_transfer.get_transfer_steps(
+        command_builder = v2_transfer.ComplexCommandBuilder()
+        command_builder.build_transfer_steps(
             aspirate_properties=liquid_class_props.aspirate,
-            single_dispense_properties=liquid_class_props.dispense,
-            volume=volume,
-            source=flat_sources_list,
-            dest=flat_dest_list,
-            trash_location=checked_trash_location,
-            new_tip=valid_new_tip,
-        )
+            single_dispense_properties=liquid_class_props.dispense, volume=volume,
+            source=flat_sources_list, dest=flat_dest_list,
+            trash_location=checked_trash_location, new_tip=valid_new_tip,
+            instrument_info=)
+        # self._execute_transfer(plan_steps)
         return self
+
+    def _execute_transfer_liquid(self, plan: v1_transfer.TransferPlan) -> None:
+        for cmd in plan:
+            getattr(self, cmd["method"])(**cmd["kwargs"])
 
     @requires_version(2, 0)
     def delay(self, *args: Any, **kwargs: Any) -> None:
@@ -1603,6 +1614,13 @@ class InstrumentContext(publisher.CommandPublisher):
             # Preserve that allowed way to call this method for the very remote chance
             # that a protocol out in the wild does it, for some reason.
             pass
+
+    def _delay(self, seconds: float) -> None:
+        """Call a protocol core delay.
+
+        *** For internal use only.***
+        """
+        self._protocol_core.delay(seconds=seconds, msg=None)
 
     @requires_version(2, 0)
     def move_to(

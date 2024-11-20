@@ -758,30 +758,17 @@ def test_ensure_new_tip_policy_raises() -> None:
         (
             ["a"],
             pytest.raises(
-                ValueError, match="'a' is not a valid location for transfer. Should be"
+                ValueError,
+                match="'a' is not a valid location for transfer. Location should be of type 'Well'.",
             ),
         ),
         (
             [["a"]],
             pytest.raises(
-                ValueError, match="'a' is not a valid location for transfer. Should be"
+                ValueError,
+                match="'a' is not a valid location for transfer. Location should be of type 'Well'.",
             ),
         ),
-        (
-            [Location(point=Point(x=1, y=1, z=2), labware=None), "a"],
-            pytest.raises(
-                ValueError, match="'a' is not a valid location for transfer. Should be"
-            ),
-        ),
-        (
-            [[Location(point=Point(x=1, y=1, z=2), labware=None)], ["a"]],
-            pytest.raises(
-                ValueError, match="'a' is not a valid location for transfer. Should be"
-            ),
-        ),
-        (Location(point=Point(x=1, y=1, z=2), labware=None), do_not_raise()),
-        ([Location(point=Point(x=1, y=1, z=2), labware=None)], do_not_raise()),
-        ([[Location(point=Point(x=1, y=1, z=2), labware=None)]], do_not_raise()),
     ],
 )
 def test_ensure_valid_flat_wells_list_raises_for_invalid_targets(
@@ -793,32 +780,36 @@ def test_ensure_valid_flat_wells_list_raises_for_invalid_targets(
         subject.ensure_valid_flat_wells_list(target)
 
 
-sample_location1 = Location(point=Point(x=1, y=1, z=2), labware=None)
-sample_location2 = Location(point=Point(x=2, y=1, z=2), labware=None)
+def test_ensure_valid_flat_wells_list_raises_for_mixed_targets(decoy: Decoy) -> None:
+    """It should raise appropriate error if target has mixed valid and invalid wells."""
+    target1 = [decoy.mock(cls=Well), "a"]
+    with pytest.raises(
+        ValueError,
+        match="'a' is not a valid location for transfer. Location should be of type 'Well'.",
+    ):
+        subject.ensure_valid_flat_wells_list(target1)  # type: ignore[arg-type]
+
+    target2 = [[decoy.mock(cls=Well)], ["a"]]
+    with pytest.raises(
+        ValueError,
+        match="'a' is not a valid location for transfer. Location should be of type 'Well'.",
+    ):
+        subject.ensure_valid_flat_wells_list(target2)  # type: ignore[arg-type]
 
 
-@pytest.mark.parametrize(
-    ["target", "expected_result"],
-    [
-        (sample_location1, [sample_location1]),
-        ([sample_location1, sample_location2], [sample_location1, sample_location2]),
-        (
-            [
-                [sample_location1, sample_location1],
-                [sample_location2, sample_location2],
-            ],
-            [sample_location1, sample_location1, sample_location2, sample_location2],
-        ),
-    ],
-)
-def test_ensure_valid_flat_wells_list(
-    target: Union[
-        Well,
-        Location,
-        Sequence[Union[Well, Location]],
-        Sequence[Sequence[Well]],
-    ],
-    expected_result: Sequence[Union[Well, Location]],
-) -> None:
+def test_ensure_valid_flat_wells_list(decoy: Decoy) -> None:
     """It should convert the locations to flat lists correctly."""
-    assert subject.ensure_valid_flat_wells_list(target) == expected_result
+    target1 = decoy.mock(cls=Well)
+    target2 = decoy.mock(cls=Well)
+
+    assert subject.ensure_valid_flat_wells_list(target1) == [target1]
+    assert subject.ensure_valid_flat_wells_list([target1, target2]) == [
+        target1,
+        target2,
+    ]
+    assert subject.ensure_valid_flat_wells_list(
+        [
+            [target1, target1],
+            [target2, target2],
+        ]
+    ) == [target1, target1, target2, target2]

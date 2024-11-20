@@ -11,7 +11,7 @@
           "tiprack": "opentrons_96_tiprack_20ul",
           "aspirate": {
             "submerge": {
-              "positionReference": "liquid-meniscus",
+              "positionReference": "liquid-meniscus",   # The starting point
               "offset": {
                 "x": 0,
                 "y": 0,
