@@ -1,4 +1,7 @@
 {
+  "__end__": "Ending deck",
+  "__initial_setup__": "Starting deck",
+  "__presaved_step__": "Unsaved step",
   "adapter_compatible_lab": "Adapter compatible labware",
   "adapter": "Adapters",
   "add_fixture": "Add a fixture",

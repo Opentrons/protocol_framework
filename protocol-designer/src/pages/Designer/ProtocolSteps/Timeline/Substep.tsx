@@ -132,24 +132,25 @@ function SubstepComponent(props: SubstepProps): JSX.Element {
         </ListItem>
       ) : (
         <>
-          <ListItem type="noActive">
-            <Flex
-              gridGap={SPACING.spacing4}
-              padding={SPACING.spacing12}
-              justifyContent={JUSTIFY_SPACE_BETWEEN}
-              width="100%"
-              alignItems={ALIGN_CENTER}
-            >
-              {ingredIds.length > 0 ? (
-                <Flex gridGap={SPACING.spacing4} alignItems={ALIGN_CENTER}>
-                  <LiquidIcon color={color} size="medium" />
+          {source != null ? (
+            <ListItem type="noActive">
+              <Flex
+                gridGap={SPACING.spacing4}
+                padding={SPACING.spacing12}
+                justifyContent={JUSTIFY_SPACE_BETWEEN}
+                width="100%"
+                alignItems={ALIGN_CENTER}
+              >
+                {ingredIds.length > 0 ? (
+                  <Flex gridGap={SPACING.spacing4} alignItems={ALIGN_CENTER}>
+                    <LiquidIcon color={color} size="medium" />
 
-                  <StyledText desktopStyle="bodyDefaultRegular">
-                    {ingredIds.map(groupId => ingredNames[groupId]).join(',')}
-                  </StyledText>
-                </Flex>
-              ) : null}
-              {source != null ? (
+                    <StyledText desktopStyle="bodyDefaultRegular">
+                      {ingredIds.map(groupId => ingredNames[groupId]).join(',')}
+                    </StyledText>
+                  </Flex>
+                ) : null}
+
                 <Flex gridGap={SPACING.spacing4} alignItems={ALIGN_CENTER}>
                   <StyledText desktopStyle="bodyDefaultRegular">
                     {t('protocol_steps:aspirated')}
@@ -164,11 +165,11 @@ function SubstepComponent(props: SubstepProps): JSX.Element {
                     })}
                   />
                 </Flex>
-              ) : null}
-            </Flex>
-          </ListItem>
-          <ListItem type="noActive">
-            {dest !== undefined ? (
+              </Flex>
+            </ListItem>
+          ) : null}
+          {dest != null ? (
+            <ListItem type="noActive">
               <Flex
                 gridGap={SPACING.spacing4}
                 padding={SPACING.spacing12}
@@ -206,8 +207,8 @@ function SubstepComponent(props: SubstepProps): JSX.Element {
                   </Flex>
                 ) : null}
               </Flex>
-            ) : null}
-          </ListItem>
+            </ListItem>
+          ) : null}
         </>
       )}
     </Flex>
