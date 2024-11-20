@@ -9,7 +9,6 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import type { FlattenSimpleInterpolation } from 'styled-components'
-import type { CSSProperties } from 'react'
 
 export const BUTTON_LINK_STYLE = css`
   color: ${COLORS.grey60};
