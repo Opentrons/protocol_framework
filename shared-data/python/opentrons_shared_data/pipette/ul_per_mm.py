@@ -17,12 +17,17 @@ def calculate_ul_per_mm(
     requested_pipetting_version: Optional[PipetteFunctionKeyType] = None,
     shaft_ul_per_mm: Optional[float] = None,
 ) -> float:
+    assumed_requested_pipetting_version = (
+        requested_pipetting_version
+        if requested_pipetting_version
+        else PIPETTING_FUNCTION_LATEST_VERSION
+    )
     if action == "aspirate":
         fallback = active_tip_settings.aspirate.default[
             PIPETTING_FUNCTION_FALLBACK_VERSION
         ]
         sequence = active_tip_settings.aspirate.default.get(
-            requested_pipetting_version, fallback
+            assumed_requested_pipetting_version, fallback
         )
     elif action == "blowout" and shaft_ul_per_mm:
         return shaft_ul_per_mm
@@ -31,7 +36,7 @@ def calculate_ul_per_mm(
             PIPETTING_FUNCTION_FALLBACK_VERSION
         ]
         sequence = active_tip_settings.dispense.default.get(
-            requested_pipetting_version, fallback
+            assumed_requested_pipetting_version, fallback
         )
     return piecewise_volume_conversion(ul, sequence)
 
