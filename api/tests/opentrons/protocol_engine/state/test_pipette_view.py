@@ -291,6 +291,13 @@ def test_get_pipette_working_volume(
                 default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
                 pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
                 lld_settings={},
+                plunger_positions={
+                    "top": 0.0,
+                    "bottom": 5.0,
+                    "blow_out": 19.0,
+                    "drop_tip": 20.0,
+                },
+                shaft_ul_per_mm=5.0,
             )
         },
     )
@@ -322,6 +329,13 @@ def test_get_pipette_working_volume_raises_if_tip_volume_is_none(
                 default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
                 pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
                 lld_settings={},
+                plunger_positions={
+                    "top": 0.0,
+                    "bottom": 5.0,
+                    "blow_out": 19.0,
+                    "drop_tip": 20.0,
+                },
+                shaft_ul_per_mm=5.0,
             )
         },
     )
@@ -364,6 +378,13 @@ def test_get_pipette_available_volume(
                 default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
                 pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
                 lld_settings={},
+                plunger_positions={
+                    "top": 0.0,
+                    "bottom": 5.0,
+                    "blow_out": 19.0,
+                    "drop_tip": 20.0,
+                },
+                shaft_ul_per_mm=5.0,
             ),
             "pipette-id-none": StaticPipetteConfig(
                 min_volume=1,
@@ -380,6 +401,13 @@ def test_get_pipette_available_volume(
                 default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
                 pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
                 lld_settings={},
+                plunger_positions={
+                    "top": 0.0,
+                    "bottom": 5.0,
+                    "blow_out": 19.0,
+                    "drop_tip": 20.0,
+                },
+                shaft_ul_per_mm=5.0,
             ),
         },
     )
@@ -492,6 +520,13 @@ def test_get_static_config(
         default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
         pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
         lld_settings={},
+        plunger_positions={
+            "top": 0.0,
+            "bottom": 5.0,
+            "blow_out": 19.0,
+            "drop_tip": 20.0,
+        },
+        shaft_ul_per_mm=5.0,
     )
 
     subject = get_pipette_view(
@@ -543,6 +578,13 @@ def test_get_nominal_tip_overlap(
         default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
         pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
         lld_settings={},
+        plunger_positions={
+            "top": 0.0,
+            "bottom": 5.0,
+            "blow_out": 19.0,
+            "drop_tip": 20.0,
+        },
+        shaft_ul_per_mm=5.0,
     )
 
     subject = get_pipette_view(static_config_by_id={"pipette-id": config})
@@ -967,6 +1009,13 @@ def test_get_pipette_bounds_at_location(
                 bounding_nozzle_offsets=_SAMPLE_NOZZLE_BOUNDS_OFFSETS,
                 pipette_bounding_box_offsets=bounding_box_offsets,
                 lld_settings={},
+                plunger_positions={
+                    "top": 0.0,
+                    "bottom": 5.0,
+                    "blow_out": 19.0,
+                    "drop_tip": 20.0,
+                },
+                shaft_ul_per_mm=5.0,
             )
         },
     )

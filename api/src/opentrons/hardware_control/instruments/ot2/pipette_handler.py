@@ -260,6 +260,13 @@ class PipetteHandlerProvider(Generic[MountType]):
                 "pipette_bounding_box_offsets"
             ] = instr.config.pipette_bounding_box_offsets
             result["lld_settings"] = instr.config.lld_settings
+            result["plunger_positions"] = {
+                "top": instr.plunger_positions.top,
+                "bottom": instr.plunger_positions.bottom,
+                "blow_out": instr.plunger_positions.blow_out,
+                "drop_tip": instr.plunger_positions.drop_tip,
+            }
+            result["shaft_ul_per_mm"] = instr.config.shaft_ul_per_mm
         return cast(PipetteDict, result)
 
     @property
