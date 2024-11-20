@@ -20,6 +20,7 @@ from .helpers import (
     _sense_liquid_height,
     _pick_up_tip,
     _drop_tip,
+    get_pipette_unique_name
 )
 from .trial import (
     build_gravimetric_trials,
@@ -195,13 +196,10 @@ def _print_stats(mode: str, average: float, cv: float, d: float) -> None:
 def _print_final_results(
     volumes: List[float], channel_count: int, test_report: CSVReport
 ) -> None:
-    aspirate_avgs: List[float] = []
     for vol in volumes:
         ui.print_info(f"  * {vol}ul channel all:")
         for mode in ["aspirate", "dispense"]:
             avg, cv, d = report.get_volume_results_all(test_report, mode, vol)
-            if mode == "aspirate":
-                aspirate_avgs.append(avg)
             ui.print_info(f"    - {mode}:")
             ui.print_info(f"        avg: {avg}ul")
             ui.print_info(f"        cv:  {cv}%")
@@ -217,13 +215,6 @@ def _print_final_results(
                 ui.print_info(f"        cv:  {cv}%")
                 ui.print_info(f"        d:   {d}%")
     test_report.save_to_disk()
-    print("aspirate averages")
-    for a in aspirate_avgs:
-        print(a)
-    asp_avgs_str = "\n".join([str(a) for a in aspirate_avgs])
-    dump_data_to_file(
-        test_report._test_name, test_report._run_id, f"aspirate-volumes-{test_report._tag}.csv", asp_avgs_str
-    )
 
 
 def _next_tip_for_channel(
@@ -628,6 +619,20 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
     labware_on_scale = _load_labware(resources.ctx, cfg)
     liquid_tracker = LiquidTracker(resources.ctx)
 
+    UNITS = {
+        "P1KSV3520230101A01": "A",
+        "P1KSV3620231024A08": "B",
+        "P1KSV3620240304A05": "C",
+        "P1KSV3520230810A07": "D",
+        "P50SV3520230812A17": "A",
+        "P50SV3520230724A01": "B",
+        "P50SV3520230724A02": "C",
+        "P50SV3520231024A11": "D"
+    }
+    unit_tag: str = UNITS.get(get_pipette_unique_name(resources.pipette), "S")
+    meta_data: List[str] = [resources.test_report._run_id, f"P{cfg.pipette_volume}S", unit_tag, str(cfg.tip_volume)]
+    simplified_results_for_calibration_test: List[List[str]] = []
+
     total_tips = len(
         [tip for chnl_tips in resources.tips.values() for tip in chnl_tips]
     )
@@ -745,6 +750,8 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
             trial_disp_dict: Dict[int, List[float]] = {
                 trial: [] for trial in range(cfg.trials)
             }
+            # CREATE new line entry for this volume to be tested (line includes all trials)
+            simplified_results_for_calibration_test.append(meta_data + [str(volume)])
             for channel in trials[volume].keys():
                 channel_offset = _get_channel_offset(cfg, channel)
                 actual_asp_list_channel = []
@@ -816,6 +823,9 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                     #       to avoid any unwanted delays
                     # FIXME: see why it takes so long to store CSV data
                     resources.test_report.save_to_disk()
+
+                    simplified_results_for_calibration_test[-1].append(str(round(asp_with_evap, 2)))
+
                     ui.print_info("dropping tip")
                     if not cfg.same_tip:
                         resources.pipette._retract()  # retract to top of gantry
@@ -976,4 +986,15 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
         volumes=resources.test_volumes,
         channel_count=len(channels_to_test),
         test_report=resources.test_report,
+    )
+    csv_data_str = "\n".join([
+        "\t".join(csv_line)
+        for csv_line in simplified_results_for_calibration_test
+    ])
+    print(csv_data_str)
+    dump_data_to_file(
+        resources.test_report._test_name,
+        resources.test_report._run_id,
+        f"aspirate-volumes-{resources.test_report._tag}.csv",
+        csv_data_str
     )
