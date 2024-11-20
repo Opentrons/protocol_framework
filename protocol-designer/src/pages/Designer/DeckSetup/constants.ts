@@ -56,6 +56,8 @@ export const ORDERED_CATEGORIES: string[] = [
   'aluminumBlock',
   'adapter',
 ]
+export const CUSTOM_CATEGORY = 'custom'
+export const ALL_ORDERED_CATEGORIES = [CUSTOM_CATEGORY, ...ORDERED_CATEGORIES]
 
 export const RECOMMENDED_LABWARE_BY_MODULE: { [K in ModuleType]: string[] } = {
   [TEMPERATURE_MODULE_TYPE]: [
