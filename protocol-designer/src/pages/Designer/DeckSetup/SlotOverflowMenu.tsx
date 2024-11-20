@@ -113,9 +113,14 @@ export function SlotOverflowMenu(
   const isLabwareTiprack = labwareOnSlot?.def.parameters.isTiprack ?? false
   const isLabwareAnAdapter =
     labwareOnSlot?.def.allowedRoles?.includes('adapter') ?? false
+
+  const isTiprackAdapter =
+    labwareOnSlot?.id.includes('tiprack') && isLabwareAnAdapter
+
   const nestedLabwareOnSlot = Object.values(deckSetupLabware).find(
     lw => lw.slot === labwareOnSlot?.id
   )
+
   const fixturesOnSlot = Object.values(additionalEquipmentOnDeck).filter(
     ae => ae.location?.split('cutout')[1] === location
   )
@@ -170,8 +175,9 @@ export function SlotOverflowMenu(
     (labwareOnSlot != null &&
       !isLabwareAnAdapter &&
       !isLabwareTiprack &&
+      !isTiprackAdapter &&
       nestedLabwareOnSlot == null) ||
-    nestedLabwareOnSlot != null
+    (nestedLabwareOnSlot != null && !isTiprackAdapter)
 
   let position = ROBOT_BOTTOM_HALF_SLOTS.includes(location)
     ? BOTTOM_SLOT_Y_POSITION
