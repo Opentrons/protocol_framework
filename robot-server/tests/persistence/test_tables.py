@@ -44,9 +44,6 @@ EXPECTED_STATEMENTS_LATEST = [
     )
     """,
     """
-    CREATE INDEX ix_protocol_protocol_kind ON protocol (protocol_kind),
-    """
-    """
     CREATE TABLE analysis (
         id VARCHAR NOT NULL,
         protocol_id VARCHAR NOT NULL,
@@ -729,8 +726,7 @@ def test_creating_from_metadata_emits_expected_statements(
 
     normalized_actual = [_normalize_statement(s) for s in actual_statements]
     normalized_expected = [_normalize_statement(s) for s in expected_statements]
-    print(set(normalized_actual))
-    print(set(normalized_expected))
+
     # Compare ignoring order. SQLAlchemy appears to emit CREATE INDEX statements in a
     # nondeterministic order that varies across runs. Although statement order
     # theoretically matters, it's unlikely to matter in practice for our purposes here.
