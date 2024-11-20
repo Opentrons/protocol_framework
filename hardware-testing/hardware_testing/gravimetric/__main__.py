@@ -182,6 +182,7 @@ class RunArgs:
             API_LEVEL,  # type: ignore[attr-defined]
             is_simulating=args.simulate,
             pipette_left=PIPETTE_MODEL_NAME[args.pipette][args.channels],
+            pipette_right=PIPETTE_MODEL_NAME[args.pipette][args.channels] if args.channels < 96 else None,
             extra_labware=custom_defs,
         )
         for offset in LABWARE_OFFSETS:
@@ -207,7 +208,7 @@ class RunArgs:
             _ctx,
             args.channels,
             args.pipette,
-            "left",
+            args.mount,
             args.increment,
             args.photometric,
             args.gantry_speed if not args.photometric else None,
@@ -399,7 +400,7 @@ def build_gravimetric_cfg(
     """Build."""
     return GravimetricConfig(
         name=run_args.name,
-        pipette_mount="left",
+        pipette_mount=run_args.pipette.mount,
         pipette_volume=run_args.pipette_volume,
         pipette_channels=run_args.pipette_channels,
         tip_volume=tip_volume,
@@ -452,7 +453,7 @@ def build_photometric_cfg(
     """Run."""
     return PhotometricConfig(
         name=run_args.name,
-        pipette_mount="left",
+        pipette_mount=run_args.pipette.mount,
         pipette_volume=run_args.pipette_volume,
         pipette_channels=pipette_channels,
         increment=False,
@@ -572,6 +573,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Pipette Testing")
     parser.add_argument("--simulate", action="store_true")
     parser.add_argument("--pipette", type=int, choices=[50, 1000], required=True)
+    parser.add_argument("--mount", type=str, choices=["left", "right"], default="left")
     parser.add_argument("--channels", type=int, choices=[1, 8, 96], default=1)
     parser.add_argument("--tip", type=int, choices=[0, 50, 200, 1000], default=0)
     parser.add_argument("--trials", type=int, default=0)
