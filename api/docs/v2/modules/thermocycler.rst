@@ -15,7 +15,7 @@ The examples in this section will use a Thermocycler Module GEN2 loaded as follo
 .. code-block:: python
 
     tc_mod = protocol.load_module(module_name="thermocyclerModuleV2")
-    plate = tc_mod.load_labware(name="nest_96_wellplate_100ul_pcr_full_skirt")
+    plate = tc_mod.load_labware(name="opentrons_96_wellplate_200ul_pcr_full_skirt")
 
 .. versionadded:: 2.13
 
@@ -196,6 +196,7 @@ The following code sample shows how to perform these steps, using the riser and 
 
 When you're finished with a lid, use the gripper to dispose of it in either the waste chute or a trash bin::
 
+    tc_mod.open_lid()
     protocol.move_labware(labware=lid_3, new_location=trash, use_gripper=True)
 
 .. versionadded:: 2.16
