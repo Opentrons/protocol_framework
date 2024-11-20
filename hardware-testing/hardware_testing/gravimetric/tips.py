@@ -186,15 +186,17 @@ def get_tips(
     pipette: InstrumentContext,
     tip_volume: int,
     all_channels: bool = True,
+    reverse: bool = False,
 ) -> Dict[int, List[Well]]:
     """Get tips."""
+    ret = {}
     if pipette.channels == 1:
-        return {0: get_tips_for_single(ctx, tip_volume, pipette.mount)}
+        ret = {0: get_tips_for_single(ctx, tip_volume, pipette.mount)}
     elif pipette.channels == 8:
         if all_channels:
-            return {0: get_tips_for_all_channels_on_multi(ctx, tip_volume)}
+            ret = {0: get_tips_for_all_channels_on_multi(ctx, tip_volume)}
         else:
-            return {
+            ret = {
                 channel: get_tips_for_individual_channel_on_multi(
                     ctx, channel, tip_volume, int(pipette.max_volume), pipette.mount
                 )
@@ -202,9 +204,9 @@ def get_tips(
             }
     elif pipette.channels == 96:
         if all_channels:
-            return {0: get_tips_for_96_channel(ctx)}
+            ret = {0: get_tips_for_96_channel(ctx)}
         else:
-            raise NotImplementedError(
+            ret = NotImplementedError(
                 "no support for individual channel testing on the 96ch pipette"
             )
     else:
@@ -213,3 +215,8 @@ def get_tips(
             f"pipette.channels={pipette.channels}, "
             f"all_channels={all_channels}"
         )
+
+    if reverse:
+        for key in ret.keys():
+            ret[key].reverse()
+    return ret

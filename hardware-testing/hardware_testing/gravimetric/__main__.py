@@ -151,6 +151,7 @@ class RunArgs:
     test_report: report.CSVReport
     liquid: str
     dilution: float
+    reverse_tips: bool
 
     @classmethod
     def _get_protocol_context(cls, args: argparse.Namespace) -> ProtocolContext:
@@ -372,6 +373,7 @@ class RunArgs:
             test_report=report,
             liquid=args.liquid,
             dilution=args.dilution,
+            reverse_tips=args.reverse_tips
         )
 
 
@@ -545,19 +547,22 @@ def _main(
         or union_cfg.pipette_channels == 96
         or args.photometric
     )
+    _tip_racks = helpers._load_tipracks(
+        run_args.ctx, union_cfg, use_adapters=args.channels == 96
+    )
+    _tips = get_tips(
+        run_args.ctx,
+        run_args.pipette,
+        tip,
+        all_channels=all_channels_same_time,
+        reverse=run_args.reverse_tips
+    )
     test_resources = TestResources(
         ctx=run_args.ctx,
         pipette=run_args.pipette,
-        tipracks=helpers._load_tipracks(
-            run_args.ctx, union_cfg, use_adapters=args.channels == 96
-        ),
+        tipracks=_tip_racks,
         test_volumes=volumes,
-        tips=get_tips(
-            run_args.ctx,
-            run_args.pipette,
-            tip,
-            all_channels=all_channels_same_time,
-        ),
+        tips=_tips,
         env_sensor=run_args.environment_sensor,
         recorder=run_args.recorder,
         test_report=run_args.test_report,
@@ -611,6 +616,7 @@ if __name__ == "__main__":
         default="water",
     )
     parser.add_argument("--dilution", type=float, default=1.0)
+    parser.add_argument("--reverse-tips", action="store_true")
     args = parser.parse_args()
     run_args = RunArgs.build_run_args(args)
     config.NUM_BLANK_TRIALS = args.blank_trials
