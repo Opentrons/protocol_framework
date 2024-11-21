@@ -512,6 +512,8 @@ class InstrumentContext(publisher.CommandPublisher):
             ``pipette.mix(1, location=wellplate['A1'])`` is a valid call, but
             ``pipette.mix(1, wellplate['A1'])`` is not.
 
+        .. versionchanged:: 2.21
+            Does not repeatedly check for liquid presence.
         """
         _log.debug(
             "mixing {}uL with {} repetitions in {} at rate={}".format(
