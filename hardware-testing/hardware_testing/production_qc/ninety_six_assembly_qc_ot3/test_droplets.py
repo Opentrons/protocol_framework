@@ -202,18 +202,18 @@ async def run(
 
     result = True
     for test_volume in [pipette, 5]:
+        tip_volume = 50 if test_volume <= 50 else pipette
         if not api.is_simulator:
             answer = ui.get_user_answer(f"Test {test_volume}uL")
         else:
             answer = True
         if not answer:
             continue
-        tip_volume = 50 if test_volume <= 50 else pipette
         # PICK-UP 96 TIPS
         ui.print_header("JOG to 96-Tip RACK")
         if not api.is_simulator:
             ui.get_user_ready(
-                f"picking up tips, place tip-rack {tip_volume} on slot {TIP_RACK_96_SLOT}"
+                f"picking up tips, place tip-rack {tip_volume}ul on slot {TIP_RACK_96_SLOT}"
             )
         await helpers_ot3.move_to_arched_ot3(
             api, OT3Mount.LEFT, tip_rack_96_a1_nominal + Point(z=30)
@@ -238,32 +238,32 @@ async def run(
         await _drop_tip(api, trash_nominal)
     report(section, "droplets-96-tips", [duration, CSVResult.from_bool(result)])
 
-    # PICK-UP 96 TIPS
-    ui.print_header("JOG to 96-Tip RACK")
-    if not api.is_simulator:
-        ui.get_user_ready(f"ADD 96 tip-rack to slot #{TIP_RACK_96_SLOT}")
-    await helpers_ot3.move_to_arched_ot3(
-        api, OT3Mount.LEFT, tip_rack_96_a1_nominal + Point(z=30)
-    )
-    await helpers_ot3.jog_mount_ot3(api, OT3Mount.LEFT)
-    print("picking up tips")
-    await api.pick_up_tip(OT3Mount.LEFT, helpers_ot3.get_default_tip_length(pipette))
-    await api.home_z(OT3Mount.LEFT)
-    if not api.is_simulator:
-        ui.get_user_ready("about to move to RESERVOIR")
+    # # PICK-UP 96 TIPS
+    # ui.print_header("JOG to 96-Tip RACK")
+    # if not api.is_simulator:
+    #     ui.get_user_ready(f"ADD 96 tip-rack to slot #{TIP_RACK_96_SLOT}")
+    # await helpers_ot3.move_to_arched_ot3(
+    #     api, OT3Mount.LEFT, tip_rack_96_a1_nominal + Point(z=30)
+    # )
+    # await helpers_ot3.jog_mount_ot3(api, OT3Mount.LEFT)
+    # print("picking up tips")
+    # await api.pick_up_tip(OT3Mount.LEFT, helpers_ot3.get_default_tip_length(pipette))
+    # await api.home_z(OT3Mount.LEFT)
+    # if not api.is_simulator:
+    #     ui.get_user_ready("about to move to RESERVOIR")
 
-    # TEST DROPLETS for 96 TIPS
-    ui.print_header("96 Tips: ASPIRATE and WAIT")
-    await _find_reservoir_pos()
-    assert reservoir_a1_actual
-    result, duration = await aspirate_and_wait(
-        api,
-        reservoir_a1_actual,
-        volume=pipette,
-        seconds=NUM_SECONDS_TO_WAIT,
-    )
-    report(section, "droplets-96-tips", [duration, CSVResult.from_bool(result)])
-    await _drop_tip(api, trash_nominal)
+    # # TEST DROPLETS for 96 TIPS
+    # ui.print_header("96 Tips: ASPIRATE and WAIT")
+    # await _find_reservoir_pos()
+    # assert reservoir_a1_actual
+    # result, duration = await aspirate_and_wait(
+    #     api,
+    #     reservoir_a1_actual,
+    #     volume=pipette,
+    #     seconds=NUM_SECONDS_TO_WAIT,
+    # )
+    # report(section, "droplets-96-tips", [duration, CSVResult.from_bool(result)])
+    # await _drop_tip(api, trash_nominal)
 
     # if not api.is_simulator:
     #     ui.get_user_ready(f"REMOVE 96 tip-rack from slot #{TIP_RACK_96_SLOT}")

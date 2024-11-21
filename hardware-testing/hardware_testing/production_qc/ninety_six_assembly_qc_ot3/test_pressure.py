@@ -166,7 +166,7 @@ async def _partial_pick_up(api: OT3API, position: Point, current: float) -> None
         safe_height=position.z + 10,
     )
     await _partial_pick_up_z_motion(
-        api, current=current, distance=12, speed=3
+        api, current=current, distance=12, speed=5
     )  # change distance and speed, in case collision detected error
     await api.add_tip(OT3Mount.LEFT, helpers_ot3.get_default_tip_length(TIP_VOLUME))
     await api.prepare_for_aspirate(OT3Mount.LEFT)
