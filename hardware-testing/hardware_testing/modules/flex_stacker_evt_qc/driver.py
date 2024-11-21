@@ -26,6 +26,53 @@ class StackerInfo:
     sn: str
 
 
+class StackerAxis(Enum):
+    """Stacker Axis."""
+
+    X = "X"
+    Z = "Z"
+    L = "L"
+
+    def __str__(self) -> str:
+        """Name."""
+        return self.name
+
+
+class Direction(Enum):
+    """Direction."""
+
+    RETRACT = 0
+    EXTENT = 1
+
+    def __str__(self) -> str:
+        """Convert to tag for clear logging."""
+        return "negative" if self == Direction.RETRACT else "positive"
+
+    def opposite(self) -> "Direction":
+        """Get opposite direction."""
+        return Direction.EXTENT if self == Direction.RETRACT else Direction.RETRACT
+
+    def distance(self, distance: float) -> float:
+        """Get signed distance, where retract direction is negative."""
+        return distance * -1 if self == Direction.RETRACT else distance
+
+
+@dataclass
+class MoveParams:
+    """Move Parameters."""
+
+    max_speed: float | None = None
+    acceleration: float | None = None
+    max_speed_discont: float | None = None
+
+    def __str__(self) -> str:
+        """Convert to string."""
+        v = "V:" + str(self.max_speed) if self.max_speed else ""
+        a = "A:" + str(self.acceleration) if self.acceleration else ""
+        d = "D:" + str(self.max_speed_discont) if self.max_speed_discont else ""
+        return f"{v} {a} {d}".strip()
+
+
 class FlexStacker:
     """FLEX Stacker Driver."""
 
@@ -86,6 +133,66 @@ class FlexStacker:
         if self._simulating:
             return
         self._send_and_recv(f"M996 {sn}\n", "M996 OK")
+
+    def get_limit_switch(self, axis: StackerAxis, direction: Direction) -> bool:
+        """Get limit switch status.
+
+        :return: True if limit switch is triggered, False otherwise
+        """
+        if self._simulating:
+            return True
+
+        _LS_RE = re.compile(rf"^M119 .*{axis.name}{direction.name[0]}:(\d) .* OK\n")
+        res = self._send_and_recv("M119\n", "M119 XE:")
+        match = _LS_RE.match(res)
+        assert match, f"Incorrect Response for limit switch: {res}"
+        return bool(int(match.group(1)))
+
+    def get_platform_sensor(self, direction: Direction) -> bool:
+        """Get platform sensor status.
+
+        :return: True if platform is present, False otherwise
+        """
+        if self._simulating:
+            return True
+
+        _LS_RE = re.compile(rf"^M121 .*{direction.name[0]}:(\d) .* OK\n")
+        res = self._send_and_recv("M121\n", "M119 E:")
+        match = _LS_RE.match(res)
+        assert match, f"Incorrect Response for platform sensor: {res}"
+        return bool(int(match.group(1)))
+
+    def get_hopper_door_closed(self) -> bool:
+        """Get whether or not door is closed.
+
+        :return: True if door is closed, False otherwise
+        """
+        if self._simulating:
+            return True
+
+        _LS_RE = re.compile(r"^M122 (\d) OK\n")
+        res = self._send_and_recv("M122\n", "M122 ")
+        match = _LS_RE.match(res)
+        assert match, f"Incorrect Response for hopper door switch: {res}"
+        return bool(int(match.group(1)))
+
+    def move_in_mm(
+        self, axis: StackerAxis, distance: float, params: MoveParams | None = None
+    ) -> None:
+        """Move axis."""
+        if self._simulating:
+            return
+        self._send_and_recv(f"G0 {axis.name}{distance} {params or ''}\n", "G0 OK")
+
+    def move_to_limit_switch(
+        self, axis: StackerAxis, direction: Direction, params: MoveParams | None = None
+    ) -> None:
+        """Move until limit switch is triggered."""
+        if self._simulating:
+            return
+        self._send_and_recv(
+            f"G5 {axis.name}{direction.value} {params or ''}\n", "G0 OK"
+        )
 
     def __del__(self) -> None:
         """Close serial port."""
