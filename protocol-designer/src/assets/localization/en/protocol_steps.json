@@ -120,8 +120,8 @@
     "substep_settings": "<text>Set block temperature to</text><tagTemperature/><text>for</text><tagDuration/>",
     "thermocycler_profile": {
       "end_hold": {
-        "block": "<text>End at thermocycler block</text><tag/>",
-        "lid_position": "<text>Thermocycler lid</text><tag/>"
+        "block": "<text>End with block at</text><tag/>",
+        "lid_position": "<text>and lid</text><tag/>"
       },
       "lid_temperature": "<text>and lid temperature at</text><tag/>",
       "volume": "<text>Run thermocycler profile with</text><tag/>"
