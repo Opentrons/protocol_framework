@@ -14,6 +14,8 @@
   "clear_slot": "Clear slot",
   "clear": "Clear",
   "command_click_to_multi_select": "^/⌘ + click to select multiple",
+  "mac_command_click_to_multi_select": "⌘ + click to select multiple",
+  "windows_command_click_to_multi_select": "^ + click to select multiple",
   "convert_gen1_to_gen2": "To convert engage heights from GEN1 to GEN2, divide your engage height by 2.",
   "convert_gen2_to_gen1": "To convert engage heights from GEN2 to GEN1, multiply your engage height by 2.",
   "custom": "Custom labware definitions",

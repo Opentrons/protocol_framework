@@ -62,6 +62,15 @@ export function ProtocolSteps(): JSX.Element {
       : null
 
   const stepDetails = currentStep?.stepDetails ?? null
+
+  let commandText = t('command_click_to_multi_select')
+
+  if (navigator.userAgent.includes('Mac')) {
+    commandText = t('mac_command_click_to_multi_select')
+  } else if (navigator.userAgent.includes('Windows')) {
+    commandText = t('windows_command_click_to_multi_select')
+  }
+
   return (
     <Flex
       backgroundColor={COLORS.grey10}
@@ -142,11 +151,7 @@ export function ProtocolSteps(): JSX.Element {
               type="default"
               shrinkToContent
             />
-            <Tag
-              text={t('command_click_to_multi_select')}
-              type="default"
-              shrinkToContent
-            />
+            <Tag text={commandText} type="default" shrinkToContent />
           </Flex>
         ) : null}
       </Flex>
