@@ -134,6 +134,10 @@ This table lists the correspondence between Protocol API versions and robot soft
 Changes in API Versions
 =======================
 
+Version 2.21
+------------
+- :ref:`Liquid presence detection <lpd>` now only checks on the first aspiration of the :py:meth:`.mix` cycle. 
+
 Version 2.20
 ------------
 
