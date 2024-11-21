@@ -80,6 +80,10 @@ class ReadAbsorbanceImpl(
             raise CannotPerformModuleAction(
                 "Cannot perform Read action on Absorbance Reader without calling `.initialize(...)` first."
             )
+        if abs_reader_substate.is_lid_on is False:
+            raise CannotPerformModuleAction(
+                "Cannot perform Read action on Absorbance Reader with the lid open. Try calling `.close_lid()` first."
+            )
 
         # TODO: we need to return a file ID and increase the file count even when a moduel is not attached
         if (
