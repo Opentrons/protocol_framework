@@ -355,8 +355,8 @@ export const HOME_PIPETTE_Z_AXES: CreateCommand = {
 }
 
 export const RELEASE_GRIPPER_JAW: CreateCommand = {
-  commandType: 'home',
-  params: { axes: ['extensionJaw'] },
+  commandType: 'unsafe/ungripLabware',
+  params: {},
   intent: 'fixit',
 }
 
