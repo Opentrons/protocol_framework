@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
+import { useLayoutEffect, useState } from 'react'
 import {
   ALIGN_CENTER,
   ALIGN_END,
@@ -23,7 +24,6 @@ import three from '../../assets/images/onboarding_animation_3.webm'
 import four from '../../assets/images/onboarding_animation_4.webm'
 import five from '../../assets/images/onboarding_animation_5.webm'
 import six from '../../assets/images/onboarding_animation_6.webm'
-
 import { BUTTON_LINK_STYLE } from '../../atoms'
 
 interface WizardBodyProps {
@@ -61,6 +61,16 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
   const [targetProps, tooltipProps] = useHoverTooltip({
     placement: 'top',
   })
+  const [asset, setAsset] = useState<string | null>(null)
+  const [loaded, setLoaded] = useState(false)
+
+  useLayoutEffect(() => {
+    const videoAsset = ONBOARDING_ANIMATIONS[stepNumber]
+    setLoaded(false)
+    setAsset(videoAsset)
+    const timeout = setTimeout(() => setLoaded(true), 100)
+    return () => clearTimeout(timeout)
+  }, [stepNumber])
 
   return (
     <Flex
@@ -132,7 +142,14 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
           ) : null}
         </Flex>
       </Flex>
-      <Flex width="40%">
+
+      <Flex
+        width="40%"
+        css={css`
+          opacity: ${loaded ? 1 : 0};
+          transition: opacity 0.5s ease-in-out;
+        `}
+      >
         <video
           preload="auto"
           css={css`
@@ -140,15 +157,13 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
             height: 100%;
             object-fit: cover;
             border-radius: ${BORDERS.borderRadius16};
-            opacity: 1;
-            transition: 'opacity 0.3s ease-in-out';
           `}
           autoPlay={true}
           loop={false}
           controls={false}
           aria-label={`onboarding animation for page ${stepNumber}`}
         >
-          <source src={ONBOARDING_ANIMATIONS[stepNumber]} />
+          <source src={asset ?? ''} type="video/mp4" />
         </video>
       </Flex>
     </Flex>
