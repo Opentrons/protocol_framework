@@ -776,7 +776,7 @@ class OT3API(
         """
         Function to update motor estimation for a set of axes
         """
-
+        await self._backend.update_motor_status()
         if axes:
             checked_axes = [ax for ax in axes if ax in Axis]
         else:

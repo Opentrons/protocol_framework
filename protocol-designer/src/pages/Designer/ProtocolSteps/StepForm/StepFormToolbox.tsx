@@ -254,8 +254,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
         setShowFormErrors(false)
       } else {
         setShowFormErrors(true)
-        handleScrollToTop()
       }
+      handleScrollToTop()
     } else {
       handleSaveClick()
     }
@@ -304,6 +304,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
                 onClick={() => {
                   setToolboxStep(0)
                   setShowFormErrors(false)
+                  handleScrollToTop()
                 }}
               >
                 {i18n.format(t('shared:back'), 'capitalize')}

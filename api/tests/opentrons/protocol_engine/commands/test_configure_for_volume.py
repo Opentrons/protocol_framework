@@ -63,6 +63,13 @@ async def test_configure_for_volume_implementation(
         back_left_corner_offset=Point(10, 20, 30),
         front_right_corner_offset=Point(40, 50, 60),
         pipette_lld_settings={},
+        plunger_positions={
+            "top": 0.0,
+            "bottom": 5.0,
+            "blow_out": 19.0,
+            "drop_tip": 20.0,
+        },
+        shaft_ul_per_mm=5.0,
     )
 
     decoy.when(
