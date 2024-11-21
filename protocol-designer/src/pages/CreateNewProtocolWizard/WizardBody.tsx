@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 import ReactPlayer from 'react-player/lazy'
-import { useState } from 'react'
+import { useState, useLayoutEffect } from 'react'
 import {
   ALIGN_CENTER,
   ALIGN_END,
@@ -63,6 +63,13 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
     placement: 'top',
   })
   const [isBuffering, setIsBuffering] = useState(false)
+  const [currentVideoUrl, setCurrentVideoUrl] = useState(
+    ONBOARDING_ANIMATIONS[stepNumber]
+  )
+
+  useLayoutEffect(() => {
+    setCurrentVideoUrl(ONBOARDING_ANIMATIONS[stepNumber])
+  }, [stepNumber])
 
   const handleBuffer = (): void => {
     setIsBuffering(true)
@@ -158,7 +165,7 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
           <ReactPlayer
             width="100%"
             height="100%"
-            url={ONBOARDING_ANIMATIONS[stepNumber]}
+            url={currentVideoUrl}
             playing={true}
             controls={false}
             onBuffer={handleBuffer}
