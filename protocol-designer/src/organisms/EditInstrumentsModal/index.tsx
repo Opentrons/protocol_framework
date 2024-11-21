@@ -594,4 +594,7 @@ const StyledLabel = styled.label`
   input[type='file'] {
     display: none;
   }
+  &:hover {
+    color: ${COLORS.blue50};
+  }
 `
