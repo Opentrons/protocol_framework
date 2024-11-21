@@ -565,11 +565,13 @@ export function EditInstrumentsModal(
                                 TYPOGRAPHY.textDecorationUnderline
                               }
                             >
-                              <StyledText desktopStyle="bodyDefaultRegular">
-                                {allowAllTipracks
-                                  ? t('show_default_tips')
-                                  : t('show_all_tips')}
-                              </StyledText>
+                              <StyledLabel>
+                                <StyledText desktopStyle="bodyDefaultRegular">
+                                  {allowAllTipracks
+                                    ? t('show_default_tips')
+                                    : t('show_all_tips')}
+                                </StyledText>
+                              </StyledLabel>{' '}
                             </Btn>
                           )}
                         </Flex>
