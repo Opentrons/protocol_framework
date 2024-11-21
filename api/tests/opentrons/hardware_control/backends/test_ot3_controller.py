@@ -1435,9 +1435,8 @@ async def test_pressure_disable(
         "opentrons.hardware_control.backends.ot3controller.MoveGroupRunner",
         spec=MoveGroupRunner,
         **config
-    ) as mock_runner:
+    ):
         with mock.patch.object(controller, "_monitor_overpressure") as monitor:
-            present_axes = set(ax for ax in axes if controller.axis_is_present(ax))
             controller.set_pressure_sensor_available(Axis.P_L, pipette_has_sensor)
             controller.set_pressure_sensor_available(Axis.P_R, True)
 
