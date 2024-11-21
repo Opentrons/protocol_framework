@@ -615,7 +615,6 @@ class RunStore:
             actual_cursor = max(0, min(actual_cursor, count_result - 1))
             select_slice = (
                 sqlalchemy.select(
-                    run_command_table.c.index_in_run,
                     run_command_table.c.command_error,
                 )
                 .where(
