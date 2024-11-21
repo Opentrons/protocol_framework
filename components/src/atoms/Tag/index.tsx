@@ -1,12 +1,7 @@
 import { css } from 'styled-components'
 import { BORDERS, COLORS } from '../../helix-design-system'
 import { Flex } from '../../primitives'
-import {
-  ALIGN_CENTER,
-  DIRECTION_ROW,
-  FLEX_MAX_CONTENT,
-  FLEX_MIN_CONTENT,
-} from '../../styles'
+import { ALIGN_CENTER, DIRECTION_ROW, FLEX_MAX_CONTENT } from '../../styles'
 import { RESPONSIVENESS, SPACING, TYPOGRAPHY } from '../../ui-style-constants'
 import { Icon } from '../../icons'
 import { LegacyStyledText } from '../StyledText'
