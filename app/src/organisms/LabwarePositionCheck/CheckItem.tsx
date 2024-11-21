@@ -156,6 +156,13 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
     t as TFunction,
     i18n
   )
+  const slotOnlyDisplayLocation = getDisplayLocation(
+    location,
+    labwareDefs,
+    t as TFunction,
+    i18n,
+    true
+  )
   const labwareDisplayName = getLabwareDisplayName(labwareDef)
 
   let placeItemInstruction: JSX.Element = (
@@ -445,7 +452,7 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
         <JogToWell
           header={t('check_item_in_location', {
             item: isTiprack ? t('tip_rack') : t('labware'),
-            location: displayLocation,
+            location: slotOnlyDisplayLocation,
           })}
           body={
             <Trans
@@ -483,7 +490,7 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
           {...props}
           header={t('prepare_item_in_location', {
             item: isTiprack ? t('tip_rack') : t('labware'),
-            location: displayLocation,
+            location: slotOnlyDisplayLocation,
           })}
           body={
             <UnorderedList
