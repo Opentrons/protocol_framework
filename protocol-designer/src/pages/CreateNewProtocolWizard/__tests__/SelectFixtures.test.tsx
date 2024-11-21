@@ -8,7 +8,6 @@ import { renderWithProviders } from '../../../__testing-utils__'
 import { SelectFixtures } from '../SelectFixtures'
 import type { WizardFormState, WizardTileProps } from '../types'
 
-vi.mock('react-player/lazy')
 const render = (props: React.ComponentProps<typeof SelectFixtures>) => {
   return renderWithProviders(<SelectFixtures {...props} />, {
     i18nInstance: i18n,

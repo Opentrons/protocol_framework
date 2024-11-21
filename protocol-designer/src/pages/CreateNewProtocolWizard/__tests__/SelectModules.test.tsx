@@ -10,7 +10,7 @@ import { SelectModules } from '../SelectModules'
 import type { WizardFormState, WizardTileProps } from '../types'
 
 vi.mock('../../../feature-flags/selectors')
-vi.mock('react-player/lazy')
+
 const render = (props: React.ComponentProps<typeof SelectModules>) => {
   return renderWithProviders(<SelectModules {...props} />, {
     i18nInstance: i18n,

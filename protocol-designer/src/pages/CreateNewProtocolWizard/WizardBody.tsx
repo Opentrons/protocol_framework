@@ -62,7 +62,7 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
     placement: 'top',
   })
   const [asset, setAsset] = useState<string | null>(null)
-  const [loaded, setLoaded] = useState(false)
+  const [loaded, setLoaded] = useState<boolean>(false)
 
   useLayoutEffect(() => {
     const videoAsset = ONBOARDING_ANIMATIONS[stepNumber]
