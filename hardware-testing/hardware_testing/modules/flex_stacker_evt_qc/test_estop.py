@@ -41,9 +41,6 @@ def axis_at_limit(driver: FlexStacker, axis: StackerAxis) -> Direction:
 
 def run(driver: FlexStacker, report: CSVReport, section: str) -> None:
     """Run."""
-    if not driver._simulating and driver.get_estop():
-        raise RuntimeError("E-Stop is either triggered/not attached.")
-
     x_limit = axis_at_limit(driver, StackerAxis.X)
     z_limit = axis_at_limit(driver, StackerAxis.Z)
     l_limit = axis_at_limit(driver, StackerAxis.L)
