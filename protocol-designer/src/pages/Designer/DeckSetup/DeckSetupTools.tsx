@@ -18,6 +18,7 @@ import {
 } from '@opentrons/components'
 import {
   FLEX_ROBOT_TYPE,
+  FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
   getModuleDisplayName,
   getModuleType,
   MAGNETIC_MODULE_TYPE,
@@ -58,7 +59,7 @@ import { LabwareTools } from './LabwareTools'
 import { MagnetModuleChangeContent } from './MagnetModuleChangeContent'
 import { getModuleModelsBySlot, getDeckErrors } from './utils'
 
-import type { ModuleModel } from '@opentrons/shared-data'
+import type { AddressableAreaName, ModuleModel } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../../types'
 import type { Fixture } from './constants'
 
@@ -268,15 +269,22 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
         dispatch(deleteContainer({ labwareId: createdNestedLabwareForSlot.id }))
       }
       // clear labware on staging area 4th column slot
-      if (matchingLabwareFor4thColumn != null) {
+      if (matchingLabwareFor4thColumn != null && !keepExistingLabware) {
         dispatch(deleteContainer({ labwareId: matchingLabwareFor4thColumn.id }))
       }
-      //  clear fixture(s) from slot and zoom out
+      //  clear fixture(s) from slot
       if (createFixtureForSlots != null && createFixtureForSlots.length > 0) {
         createFixtureForSlots.forEach(fixture =>
           dispatch(deleteDeckFixture(fixture.id))
         )
-        dispatch(selectZoomedIntoSlot({ slot: null, cutout: null }))
+        // zoom out if you're clearing a staging area slot directly from a 4th column
+        if (
+          FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS.includes(
+            slot as AddressableAreaName
+          )
+        ) {
+          dispatch(selectZoomedIntoSlot({ slot: null, cutout: null }))
+        }
       }
     }
     handleResetToolbox()
