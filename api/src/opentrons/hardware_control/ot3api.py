@@ -32,7 +32,6 @@ from opentrons_shared_data.pipette.types import (
 )
 from opentrons_shared_data.pipette import (
     pipette_load_name_conversions as pipette_load_name,
-    pipette_definition,
 )
 from opentrons_shared_data.robot.types import RobotType
 
@@ -635,8 +634,8 @@ class OT3API(
             self._feature_flags.use_old_aspiration_functions,
         )
         self._pipette_handler.hardware_instruments[mount] = p
-        if config is not None:
-            self._confirm_pipette_motion_constraints(mount, instrument_config=config)
+        if not self.is_simulator:
+            self._confirm_pipette_motion_constraints(mount)
         # TODO (lc 12-5-2022) Properly support backwards compatibility
         # when applicable
         return skipped
@@ -644,10 +643,8 @@ class OT3API(
     def _confirm_pipette_motion_constraints(
         self,
         mount: OT3Mount,
-        instrument_config: pipette_definition.PipetteConfigurations,
     ) -> None:
-        display_name = instrument_config.display_name
-        if display_name == "FLEX 8-Channel Emulsifying 1000 μL":
+        if self._pipette_handler.get_pipette(mount).is_high_speed_pipette():
             self._backend.update_constraints_for_emulsifying_pipette(
                 mount, self.gantry_load
             )
