@@ -9297,6 +9297,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [],
   "metadata": {
     "author": "Rami Farawi <ndiehl@opentrons.com",
