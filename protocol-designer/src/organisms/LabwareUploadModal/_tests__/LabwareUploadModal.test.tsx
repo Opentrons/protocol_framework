@@ -29,7 +29,7 @@ describe('LabwareUploadModal', () => {
     )
     screen.getByText('Invalid file type')
     fireEvent.click(
-      screen.getByTestId('ModalHeader_icon_close_Incompatible file type')
+      screen.getByTestId('ModalHeader_icon_close_Invalid file type')
     )
     expect(vi.mocked(dismissLabwareUploadMessage)).toHaveBeenCalled()
   })
