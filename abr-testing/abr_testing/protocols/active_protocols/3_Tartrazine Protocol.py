@@ -86,6 +86,7 @@ def run(ctx: ProtocolContext) -> None:
         ctx.move_labware(sample_plate, plate_reader, use_gripper=True)
         sample_plate_name = "sample plate_" + str(i + 1)
         csv_string = sample_plate_name + "_" + str(datetime.now())
+        plate_reader.close_lid()
         result = plate_reader.read(csv_string)
         for wavelength in result:
             dict_of_wells = result[wavelength]
