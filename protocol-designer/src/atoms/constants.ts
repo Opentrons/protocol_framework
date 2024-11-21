@@ -1,11 +1,8 @@
-import styled, { css } from 'styled-components'
+import { css } from 'styled-components'
 import {
-  BORDERS,
   COLORS,
   DIRECTION_COLUMN,
   OVERFLOW_HIDDEN,
-  SPACING,
-  TYPOGRAPHY,
 } from '@opentrons/components'
 import type { FlattenSimpleInterpolation } from 'styled-components'
 
