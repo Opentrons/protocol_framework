@@ -1,17 +1,17 @@
 import styled from 'styled-components'
 import { Flex } from '../../primitives'
 import {
+  ALIGN_CENTER,
   BORDERS,
   COLORS,
   CURSOR_DEFAULT,
   CURSOR_POINTER,
+  FLEX_MAX_CONTENT,
   Icon,
-  SPACING,
-  StyledText,
   JUSTIFY_CENTER,
   JUSTIFY_START,
-  ALIGN_CENTER,
-  FLEX_MAX_CONTENT,
+  SPACING,
+  StyledText,
 } from '../../index'
 import type { IconName } from '../../index'
 interface EmptySelectorButtonProps {
