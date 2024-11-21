@@ -198,6 +198,7 @@ from opentrons_shared_data.errors.exceptions import (
     PipetteLiquidNotFoundError,
     CommunicationError,
     PythonException,
+    UnsupportedHardwareCommand,
 )
 
 from .subsystem_manager import SubsystemManager
@@ -1502,6 +1503,11 @@ class OT3Controller(FlexBackend):
     ) -> float:
         head_node = axis_to_node(Axis.by_mount(mount))
         tool = sensor_node_for_pipette(OT3Mount(mount.value))
+        if tool not in self._pipettes_to_monitor_pressure([tool]):
+            raise UnsupportedHardwareCommand(
+                "Liquid Presence Detection not available on this pipette."
+            )
+
         positions = await liquid_probe(
             messenger=self._messenger,
             tool=tool,
