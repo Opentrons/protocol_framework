@@ -2,7 +2,7 @@
 import numpy as np
 from hypothesis import given, assume, strategies as st
 from hypothesis.extra import numpy as hynp
-from typing import Iterator, List, Tuple
+from typing import Iterator, List, Tuple, Dict
 
 from opentrons_hardware.hardware_control.motion_planning import move_manager
 from opentrons_hardware.hardware_control.motion_planning.types import (
@@ -11,7 +11,6 @@ from opentrons_hardware.hardware_control.motion_planning.types import (
     MoveTarget,
     SystemConstraints,
     vectorize,
-    CoordinateValue
 )
 
 SIXAXES = ["X", "Y", "Z", "A", "B", "C"]
@@ -211,38 +210,42 @@ def test_close_move_plan(
     )
 
     assert converged, f"Failed to converge: {blend_log}"
-    
 
-def test_pipette_high_speed_motion(
-) -> None:
+
+def test_pipette_high_speed_motion() -> None:
     """Test that updated motion constraint doesn't get overridden by motion planning."""
-    origin: Coordinates = {}
+    origin: Dict[str, int] = {
+        "X": 499,
+        "Y": 499,
+        "Z": 499,
+        "A": 499,
+        "B": 499,
+        "C": 499,
+    }
     target_list = []
     axis_kinds = ["X", "Y", "Z", "A", "B", "C"]
     constraints: SystemConstraints[str] = {}
     for axis_kind in axis_kinds:
-        origin[axis_kind] = 499
         constraints[axis_kind] = AxisConstraints.build(
             max_acceleration=500,
             max_speed_discont=500,
             max_direction_change_speed_discont=500,
             max_speed=500,
         )
-        target_list.append(
-            MoveTarget.build(
-                {axis_kind: origin[axis_kind]}, 500
-            )
-        )
+        origin_mapping: Dict[str, float] = {axis_kind: float(origin[axis_kind])}
+        target_list.append(MoveTarget.build(origin_mapping, 500))
 
     set_axis_kind = "A"
     dummy_em_pipette_max_speed = 90.0
     manager = move_manager.MoveManager(constraints=constraints)
 
     new_axis_constraint = AxisConstraints.build(
-        max_acceleration=constraints[set_axis_kind].max_acceleration,
-        max_speed_discont=constraints[set_axis_kind].max_speed_discont,
-        max_direction_change_speed_discont=constraints[set_axis_kind].max_direction_change_speed_discont,
-        max_speed=dummy_em_pipette_max_speed,
+        max_acceleration=float(constraints[set_axis_kind].max_acceleration),
+        max_speed_discont=float(constraints[set_axis_kind].max_speed_discont),
+        max_direction_change_speed_discont=float(
+            constraints[set_axis_kind].max_direction_change_speed_discont
+        ),
+        max_speed=90.0,
     )
     new_constraints = {}
 
@@ -264,4 +267,3 @@ def test_pipette_high_speed_motion(
             top_set_axis_speed = unit_vector[set_axis_kind] * block.final_speed
             if top_set_axis_speed != 0:
                 assert abs(top_set_axis_speed) == dummy_em_pipette_max_speed
-
