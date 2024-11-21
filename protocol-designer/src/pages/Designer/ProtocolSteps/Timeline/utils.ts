@@ -1,8 +1,6 @@
 import round from 'lodash/round'
-import omitBy from 'lodash/omitBy'
 import uniq from 'lodash/uniq'
 import { UAParser } from 'ua-parser-js'
-import type { WellIngredientVolumeData } from '../../../../steplist'
 import type { StepIdType } from '../../../../form-types'
 
 export const capitalizeFirstLetterAfterNumber = (title: string): string =>

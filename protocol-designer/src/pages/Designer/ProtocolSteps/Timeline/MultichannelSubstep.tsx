@@ -17,7 +17,6 @@ import type { AdditionalEquipmentName } from '@opentrons/step-generation'
 import type {
   StepItemSourceDestRow,
   SubstepIdentifier,
-  WellIngredientNames,
 } from '../../../../steplist'
 
 interface MultichannelSubstepProps {
