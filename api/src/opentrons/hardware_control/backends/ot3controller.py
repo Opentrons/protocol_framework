@@ -50,6 +50,7 @@ from .ot3utils import (
     get_system_constraints,
     get_system_constraints_for_calibration,
     get_system_constraints_for_plunger_acceleration,
+    get_system_constraints_for_emulsifying_pipette,
 )
 from .tip_presence_manager import TipPresenceManager
 
@@ -391,6 +392,18 @@ class OT3Controller(FlexBackend):
         )
         log.debug(
             f"Set system constraints for calibration: {self._move_manager.get_constraints()}"
+        )
+
+    def update_constraints_for_emulsifying_pipette(
+        self, mount: OT3Mount, gantry_load: GantryLoad
+    ) -> None:
+        self._move_manager.update_constraints(
+            get_system_constraints_for_emulsifying_pipette(
+                self._configuration.motion_settings, gantry_load, mount
+            )
+        )
+        log.debug(
+            f"Set system constraints for emulsifying pipette: {self._move_manager.get_constraints()}"
         )
 
     def update_constraints_for_gantry_load(self, gantry_load: GantryLoad) -> None:

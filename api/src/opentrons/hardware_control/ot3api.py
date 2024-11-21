@@ -634,9 +634,20 @@ class OT3API(
             self._feature_flags.use_old_aspiration_functions,
         )
         self._pipette_handler.hardware_instruments[mount] = p
+        if self._pipette_handler.has_pipette(mount):
+            self._confirm_pipette_motion_constraints(mount)
         # TODO (lc 12-5-2022) Properly support backwards compatibility
         # when applicable
         return skipped
+
+    def _confirm_pipette_motion_constraints(
+        self,
+        mount: OT3Mount,
+    ) -> None:
+        if self._pipette_handler.get_pipette(mount).is_high_speed_pipette():
+            self._backend.update_constraints_for_emulsifying_pipette(
+                mount, self.gantry_load
+            )
 
     async def cache_gripper(self, instrument_data: AttachedGripper) -> bool:
         """Set up gripper based on scanned information."""
