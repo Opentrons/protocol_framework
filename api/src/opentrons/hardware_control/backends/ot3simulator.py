@@ -234,6 +234,11 @@ class OT3Simulator(FlexBackend):
     ) -> None:
         self._sim_gantry_load = gantry_load
 
+    def update_constraints_for_emulsifying_pipette(
+        self, mount: OT3Mount, gantry_load: GantryLoad
+    ) -> None:
+        pass
+
     def update_constraints_for_plunger_acceleration(
         self, mount: OT3Mount, acceleration: float, gantry_load: GantryLoad
     ) -> None:

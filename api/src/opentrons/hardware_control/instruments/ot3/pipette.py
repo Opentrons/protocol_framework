@@ -41,6 +41,7 @@ from opentrons_shared_data.pipette.types import (
     UlPerMmAction,
     PipetteName,
     PipetteModel,
+    Quirks,
 )
 from opentrons_shared_data.pipette import (
     load_data as load_pipette_data,
@@ -224,6 +225,9 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
     @property
     def push_out_volume(self) -> float:
         return self._active_tip_settings.default_push_out_volume
+
+    def is_high_speed_pipette(self) -> bool:
+        return Quirks.highSpeed in self._config.quirks
 
     def act_as(self, name: PipetteName) -> None:
         """Reconfigure to act as ``name``. ``name`` must be either the
