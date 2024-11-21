@@ -9,9 +9,6 @@ Summary of changes from schema 3:
 from pathlib import Path
 from contextlib import ExitStack
 import shutil
-from typing import Any
-
-import sqlalchemy
 
 from ._util import add_column
 from ..database import sql_engine_ctx

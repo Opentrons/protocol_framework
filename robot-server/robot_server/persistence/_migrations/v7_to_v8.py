@@ -10,7 +10,6 @@ import json
 from pathlib import Path
 from contextlib import ExitStack
 import shutil
-from typing import Any
 
 import sqlalchemy
 
