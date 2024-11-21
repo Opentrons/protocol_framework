@@ -11,6 +11,7 @@ from ..types import (
     LoadedModule,
     LoadedPipette,
     Liquid,
+    LiquidClassRecordWithId,
     WellInfoSummary,
 )
 
@@ -32,3 +33,4 @@ class StateSummary(BaseModel):
     liquids: List[Liquid] = Field(default_factory=list)
     wells: List[WellInfoSummary] = Field(default_factory=list)
     files: List[str] = Field(default_factory=list)
+    liquidClasses: List[LiquidClassRecordWithId] = Field(default_factory=list)

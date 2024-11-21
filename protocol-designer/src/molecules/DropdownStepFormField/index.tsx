@@ -15,7 +15,6 @@ import type { FieldProps } from '../../pages/Designer/ProtocolSteps/StepForm/typ
 export interface DropdownStepFormFieldProps extends FieldProps {
   options: Options
   title: string
-  addPadding?: boolean
   width?: string
 }
 
@@ -29,7 +28,7 @@ export function DropdownStepFormField(
     title,
     errorToShow,
     tooltipContent,
-    addPadding = true,
+    padding = `0 ${SPACING.spacing16}`,
     width = '17.5rem',
     onFieldFocus,
     onFieldBlur,
@@ -44,7 +43,7 @@ export function DropdownStepFormField(
   }, [])
 
   return (
-    <Flex padding={addPadding ? SPACING.spacing16 : 0}>
+    <Flex padding={padding ?? SPACING.spacing16}>
       {options.length > 1 || options.length === 0 ? (
         <DropdownMenu
           tooltipText={tooltipContent != null ? t(`${tooltipContent}`) : null}
@@ -68,7 +67,7 @@ export function DropdownStepFormField(
           flexDirection={DIRECTION_COLUMN}
           width="100%"
         >
-          <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
+          <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
             {title}
           </StyledText>
           <ListItem type="noActive">

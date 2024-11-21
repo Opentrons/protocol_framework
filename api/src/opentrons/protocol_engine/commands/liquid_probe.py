@@ -23,8 +23,12 @@ from ..types import DeckPoint
 from .pipetting_common import (
     LiquidNotFoundError,
     PipetteIdMixin,
+)
+from .movement_common import (
     WellLocationMixin,
     DestinationPositionResult,
+    StallOrCollisionError,
+    move_to_well,
 )
 from .command import (
     AbstractCommandImpl,
@@ -88,9 +92,11 @@ class TryLiquidProbeResult(DestinationPositionResult):
 
 _LiquidProbeExecuteReturn = Union[
     SuccessData[LiquidProbeResult],
-    DefinedErrorData[LiquidNotFoundError],
+    DefinedErrorData[LiquidNotFoundError] | DefinedErrorData[StallOrCollisionError],
 ]
-_TryLiquidProbeExecuteReturn = SuccessData[TryLiquidProbeResult]
+_TryLiquidProbeExecuteReturn = (
+    SuccessData[TryLiquidProbeResult] | DefinedErrorData[StallOrCollisionError]
+)
 
 
 class _ExecuteCommonResult(NamedTuple):
@@ -107,8 +113,9 @@ async def _execute_common(
     state_view: StateView,
     movement: MovementHandler,
     pipetting: PipettingHandler,
+    model_utils: ModelUtils,
     params: _CommonParams,
-) -> _ExecuteCommonResult:
+) -> _ExecuteCommonResult | DefinedErrorData[StallOrCollisionError]:
     pipette_id = params.pipetteId
     labware_id = params.labwareId
     well_name = params.wellName
@@ -116,8 +123,6 @@ async def _execute_common(
         raise TipNotAttachedError(
             "Either the front right or back left nozzle must have a tip attached to probe liquid height."
         )
-
-    state_update = update_types.StateUpdate()
 
     # May raise TipNotAttachedError.
     aspirated_volume = state_view.pipettes.get_aspirated_volume(pipette_id)
@@ -142,20 +147,16 @@ async def _execute_common(
         )
 
     # liquid_probe process start position
-    position = await movement.move_to_well(
+    move_result = await move_to_well(
+        movement=movement,
+        model_utils=model_utils,
         pipette_id=pipette_id,
         labware_id=labware_id,
         well_name=well_name,
         well_location=params.wellLocation,
     )
-    deck_point = DeckPoint.construct(x=position.x, y=position.y, z=position.z)
-    state_update.set_pipette_location(
-        pipette_id=pipette_id,
-        new_labware_id=labware_id,
-        new_well_name=well_name,
-        new_deck_point=deck_point,
-    )
-
+    if isinstance(move_result, DefinedErrorData):
+        return move_result
     try:
         z_pos = await pipetting.liquid_probe_in_place(
             pipette_id=pipette_id,
@@ -165,11 +166,15 @@ async def _execute_common(
         )
     except PipetteLiquidNotFoundError as exception:
         return _ExecuteCommonResult(
-            z_pos_or_error=exception, state_update=state_update, deck_point=deck_point
+            z_pos_or_error=exception,
+            state_update=move_result.state_update,
+            deck_point=move_result.public.position,
         )
     else:
         return _ExecuteCommonResult(
-            z_pos_or_error=z_pos, state_update=state_update, deck_point=deck_point
+            z_pos_or_error=z_pos,
+            state_update=move_result.state_update,
+            deck_point=move_result.public.position,
         )
 
 
@@ -207,9 +212,16 @@ class LiquidProbeImplementation(
             MustHomeError: as an undefined error, if the plunger is not in a valid
                 position.
         """
-        z_pos_or_error, state_update, deck_point = await _execute_common(
-            self._state_view, self._movement, self._pipetting, params
+        result = await _execute_common(
+            state_view=self._state_view,
+            movement=self._movement,
+            pipetting=self._pipetting,
+            model_utils=self._model_utils,
+            params=params,
         )
+        if isinstance(result, DefinedErrorData):
+            return result
+        z_pos_or_error, state_update, deck_point = result
         if isinstance(z_pos_or_error, PipetteLiquidNotFoundError):
             state_update.set_liquid_probed(
                 labware_id=params.labwareId,
@@ -283,9 +295,16 @@ class TryLiquidProbeImplementation(
         found, `tryLiquidProbe` returns a success result with `z_position=null` instead
         of a defined error.
         """
-        z_pos_or_error, state_update, deck_point = await _execute_common(
-            self._state_view, self._movement, self._pipetting, params
+        result = await _execute_common(
+            state_view=self._state_view,
+            movement=self._movement,
+            pipetting=self._pipetting,
+            model_utils=self._model_utils,
+            params=params,
         )
+        if isinstance(result, DefinedErrorData):
+            return result
+        z_pos_or_error, state_update, deck_point = result
 
         if isinstance(z_pos_or_error, PipetteLiquidNotFoundError):
             z_pos = None
@@ -317,7 +336,11 @@ class TryLiquidProbeImplementation(
 
 
 class LiquidProbe(
-    BaseCommand[LiquidProbeParams, LiquidProbeResult, LiquidNotFoundError]
+    BaseCommand[
+        LiquidProbeParams,
+        LiquidProbeResult,
+        LiquidNotFoundError | StallOrCollisionError,
+    ]
 ):
     """The model for a full `liquidProbe` command."""
 
@@ -329,7 +352,7 @@ class LiquidProbe(
 
 
 class TryLiquidProbe(
-    BaseCommand[TryLiquidProbeParams, TryLiquidProbeResult, ErrorOccurrence]
+    BaseCommand[TryLiquidProbeParams, TryLiquidProbeResult, StallOrCollisionError]
 ):
     """The model for a full `tryLiquidProbe` command."""
 

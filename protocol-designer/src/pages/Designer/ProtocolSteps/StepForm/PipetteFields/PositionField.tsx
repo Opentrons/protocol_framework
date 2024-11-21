@@ -33,10 +33,19 @@ interface PositionFieldProps {
   xField?: TipXOffsetFields
   yField?: TipYOffsetFields
   labwareId?: string | null
+  padding?: string
 }
 
 export function PositionField(props: PositionFieldProps): JSX.Element {
-  const { labwareId, propsForFields, zField, xField, yField, prefix } = props
+  const {
+    labwareId,
+    propsForFields,
+    zField,
+    xField,
+    yField,
+    prefix,
+    padding = `0 ${SPACING.spacing16}`,
+  } = props
   const {
     name: zName,
     value: rawZValue,
@@ -159,7 +168,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
       {yField != null && xField != null ? (
         <Flex
           {...targetProps}
-          padding={SPACING.spacing16}
+          padding={padding}
           gridGap={SPACING.spacing8}
           flexDirection={DIRECTION_COLUMN}
         >
@@ -210,6 +219,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
           isIndeterminate={isIndeterminate}
           units={t('units.millimeter')}
           id={`TipPositionField_${zName}`}
+          padding={padding}
         />
       )}
     </>

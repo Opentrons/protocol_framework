@@ -81,10 +81,11 @@ const ACTIVE_STYLE = css`
   background-color: ${COLORS.blue50};
   color: ${COLORS.white};
   pointer-events: none;
+  border: 1px ${COLORS.blue50} solid;
 `
 
 const DEFAULT_STYLE = css`
   background-color: ${COLORS.white};
   color: ${COLORS.black90};
-  outline: 1px ${COLORS.grey30} solid;
+  border: 1px ${COLORS.grey30} solid;
 `

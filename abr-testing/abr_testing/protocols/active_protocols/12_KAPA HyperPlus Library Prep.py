@@ -21,7 +21,7 @@ metadata = {
     "author": "Your Name <your.email@example.com>",
 }
 
-requirements = {"robotType": "Flex", "apiLevel": "2.20"}
+requirements = {"robotType": "Flex", "apiLevel": "2.21"}
 
 tt_50 = 0
 tt_200 = 0
@@ -50,6 +50,7 @@ def add_parameters(parameters: ParameterContext) -> None:
         default=False,
     )
     helpers.create_disposable_lid_parameter(parameters)
+    helpers.create_tc_lid_deck_riser_parameter(parameters)
     helpers.create_two_pipette_mount_parameters(parameters)
     parameters.add_int(
         variable_name="num_samples",
@@ -85,6 +86,7 @@ def run(ctx: ProtocolContext) -> None:
     dry_run = ctx.params.dry_run  # type: ignore[attr-defined]
     pipette_1000_mount = ctx.params.pipette_mount_1  # type: ignore[attr-defined]
     pipette_50_mount = ctx.params.pipette_mount_2  # type: ignore[attr-defined]
+    deck_riser = ctx.params.deck_riser  # type: ignore[attr-defined]
     REUSE_ETOH_TIPS = True
     REUSE_RSB_TIPS = (
         True  # Reuse tips for RSB buffer (adding RSB, mixing, and transferring)
@@ -158,7 +160,7 @@ def run(ctx: ProtocolContext) -> None:
     unused_lids: List[Labware] = []
     # Load TC Lids
     if disposable_lid:
-        unused_lids = helpers.load_disposable_lids(ctx, 5, ["C3"])
+        unused_lids = helpers.load_disposable_lids(ctx, 5, ["C3"], deck_riser)
     # Import Global Variables
 
     global tip50

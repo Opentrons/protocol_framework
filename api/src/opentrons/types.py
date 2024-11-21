@@ -293,6 +293,11 @@ class AxisType(enum.Enum):
         return map_mount_to_axis[axis]
 
     @classmethod
+    def plunger_axis_for_mount(cls, mount: Mount) -> "AxisType":
+        map_plunger_axis_mount = {Mount.LEFT: cls.P_L, Mount.RIGHT: cls.P_R}
+        return map_plunger_axis_mount[mount]
+
+    @classmethod
     def ot2_axes(cls) -> List["AxisType"]:
         return [
             AxisType.X,

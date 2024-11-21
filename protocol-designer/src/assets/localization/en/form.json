@@ -284,6 +284,7 @@
     },
     "tipRack": "tip rack",
     "wellSelectionLabel": {
+      "choose_wells": "Choose wells",
       "columns": "columns",
       "columns_aspirate_wells": "Source columns",
       "columns_dispense_wells": "Destination columns",

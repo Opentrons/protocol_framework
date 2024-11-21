@@ -9,7 +9,7 @@ metadata = {
     "source": "Protocol Library",
 }
 
-requirements = {"robotType": "Flex", "apiLevel": "2.20"}
+requirements = {"robotType": "Flex", "apiLevel": "2.21"}
 
 # SCRIPT SETTINGS
 ABR_TEST = True
@@ -340,5 +340,4 @@ def run(ctx: ProtocolContext) -> None:
         )
 
         current += 1
-    print(wells_with_liquids)
     helpers.find_liquid_height_of_all_wells(ctx, p50, wells_with_liquids)

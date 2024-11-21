@@ -15,6 +15,8 @@ const TestFormProviderComponent = () => {
   return (
     <FormProvider {...methods}>
       <ModulesSection />
+
+      <p>{`form is ${methods.formState.isValid ? 'valid' : 'invalid'}`}</p>
     </FormProvider>
   )
 }
@@ -26,12 +28,11 @@ const render = (): ReturnType<typeof renderWithProviders> => {
 }
 
 describe('ModulesSection', () => {
-  it('should render modules buttons, no modules added yet, and confirm button', async () => {
+  it('should render modules buttons and no modules added yet', async () => {
     render()
 
-    expect(screen.getAllByRole('button').length).toBe(5)
+    expect(screen.getAllByRole('button').length).toBe(4)
     expect(screen.getByText('No modules added yet')).toBeInTheDocument()
-    expect(screen.getByText('Confirm')).toBeInTheDocument()
   })
 
   it('should render a list item with the selected module if user clicks the module button', () => {
@@ -71,20 +72,11 @@ describe('ModulesSection', () => {
     expect(screen.getAllByText('Heater-Shaker Module GEN1').length).toBe(1)
   })
 
-  it('should disable confirm button when all fields are not filled', async () => {
-    render()
-
-    const confirmButton = screen.getByRole('button', { name: 'Confirm' })
-    await waitFor(() => {
-      expect(confirmButton).not.toBeEnabled()
-    })
-  })
-
-  it('should render with Confirm button enabled, modules are not required', async () => {
+  it('should render with form state valid, modules are not required', async () => {
     render()
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled()
+      expect(screen.getByText('form is valid')).toBeInTheDocument()
     })
   })
 })

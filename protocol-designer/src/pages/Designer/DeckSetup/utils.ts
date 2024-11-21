@@ -1,4 +1,5 @@
 import some from 'lodash/some'
+import { useEffect, useState } from 'react'
 import {
   ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
@@ -117,18 +118,16 @@ export const getLabwareIsRecommended = (
 ): boolean => {
   //  special-casing the thermocycler module V2 recommended labware since the thermocyclerModuleTypes
   //  have different recommended labware
-  const moduleType = moduleModel != null ? getModuleType(moduleModel) : null
-  if (moduleModel === THERMOCYCLER_MODULE_V2) {
-    return (
-      def.parameters.loadName === 'opentrons_96_wellplate_200ul_pcr_full_skirt'
-    )
-  } else {
-    return moduleType != null
-      ? RECOMMENDED_LABWARE_BY_MODULE[moduleType].includes(
-          def.parameters.loadName
-        )
-      : false
+  if (moduleModel == null) {
+    // permissive early exit if no module passed
+    return true
   }
+  const moduleType = getModuleType(moduleModel)
+  return moduleModel === THERMOCYCLER_MODULE_V2
+    ? def.parameters.loadName === 'opentrons_96_wellplate_200ul_pcr_full_skirt'
+    : RECOMMENDED_LABWARE_BY_MODULE[moduleType].includes(
+        def.parameters.loadName
+      )
 }
 
 export const getLabwareCompatibleWithAdapter = (
@@ -279,4 +278,37 @@ export const getAdjacentLabware = (
       ) ?? null
   }
   return adjacentLabware
+}
+
+type BreakPoint = 'small' | 'medium' | 'large'
+
+export function useDeckSetupWindowBreakPoint(): BreakPoint {
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  })
+
+  useEffect(() => {
+    const handleResize = (): void => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
+
+  let size: BreakPoint = 'large'
+  if (windowSize.width <= 1024 && windowSize.width > 800) {
+    size = 'medium'
+  } else if (windowSize.width <= 800) {
+    size = 'small'
+  }
+
+  return size
 }

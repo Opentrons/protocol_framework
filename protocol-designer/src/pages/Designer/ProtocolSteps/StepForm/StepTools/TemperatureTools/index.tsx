@@ -24,14 +24,19 @@ export function TemperatureTools(props: StepFormProps): JSX.Element {
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
   return (
-    <Flex flexDirection={DIRECTION_COLUMN}>
+    <Flex
+      flexDirection={DIRECTION_COLUMN}
+      gridGap={SPACING.spacing12}
+      paddingY={SPACING.spacing16}
+    >
       <DropdownStepFormField
         {...propsForFields.moduleId}
+        tooltipContent={null}
         options={moduleLabwareOptions}
         title={t('protocol_steps:module')}
       />
       <Box borderBottom={`1px solid ${COLORS.grey30}`} />
-      <Flex padding={`${SPACING.spacing16} ${SPACING.spacing16} 0`}>
+      <Flex padding={`0 ${SPACING.spacing16}`}>
         <ToggleExpandStepFormField
           {...propsForFields.targetTemperature}
           toggleValue={propsForFields.setTemperature.value}

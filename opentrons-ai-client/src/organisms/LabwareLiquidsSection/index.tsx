@@ -1,21 +1,14 @@
 import {
   COLORS,
   DIRECTION_COLUMN,
-  DISPLAY_FLEX,
   EmptySelectorButton,
   Flex,
   InfoScreen,
-  JUSTIFY_FLEX_END,
-  LargeButton,
   SPACING,
   StyledText,
 } from '@opentrons/components'
 import { useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import styled from 'styled-components'
-import { useAtom } from 'jotai'
-import { createProtocolAtom } from '../../resources/atoms'
-import { LABWARE_LIQUIDS_STEP } from '../ProtocolSectionsContainer'
 import { useState } from 'react'
 import { LabwareModal } from '../LabwareModal'
 import { ControlledLabwareListItems } from '../../molecules/ControlledLabwareListItems'
@@ -31,28 +24,11 @@ export const LIQUIDS_FIELD_NAME = 'liquids'
 
 export function LabwareLiquidsSection(): JSX.Element | null {
   const { t } = useTranslation('create_protocol')
-  const {
-    formState: { isValid },
-    setValue,
-    watch,
-  } = useFormContext()
-  const [{ currentStep }, setCreateProtocolAtom] = useAtom(createProtocolAtom)
+  const { setValue, watch } = useFormContext()
   const [displayLabwareModal, setDisplayLabwareModal] = useState(false)
 
   const labwares: DisplayLabware[] = watch(LABWARES_FIELD_NAME) ?? []
   const liquids: string[] = watch(LIQUIDS_FIELD_NAME) ?? []
-
-  function handleConfirmButtonClick(): void {
-    const step =
-      currentStep > LABWARE_LIQUIDS_STEP
-        ? currentStep
-        : LABWARE_LIQUIDS_STEP + 1
-
-    setCreateProtocolAtom({
-      currentStep: step,
-      focusStep: step,
-    })
-  }
 
   return (
     <Flex
@@ -110,19 +86,6 @@ export function LabwareLiquidsSection(): JSX.Element | null {
         name={t('liquid').toLowerCase()}
         textAreaHeight="57px"
       />
-
-      <ButtonContainer>
-        <LargeButton
-          onClick={handleConfirmButtonClick}
-          disabled={!isValid}
-          buttonText={t('section_confirm_button')}
-        ></LargeButton>
-      </ButtonContainer>
     </Flex>
   )
 }
-
-const ButtonContainer = styled.div`
-  display: ${DISPLAY_FLEX};
-  justify-content: ${JUSTIFY_FLEX_END};
-`

@@ -1,4 +1,5 @@
 """Tests for the InstrumentContext public interface."""
+
 import pytest
 from decoy import Decoy
 
@@ -7,8 +8,6 @@ from opentrons.protocol_api import MAX_SUPPORTED_VERSION, Labware, Well
 from opentrons.protocol_api.core.common import WellCore
 from opentrons.protocol_api._liquid import Liquid
 from opentrons.types import Point, Location
-
-from . import versions_at_or_above
 
 
 @pytest.fixture
@@ -140,13 +139,6 @@ def test_load_liquid(decoy: Decoy, mock_well_core: WellCore, subject: Well) -> N
         ),
         times=1,
     )
-
-
-@pytest.mark.parametrize("api_version", versions_at_or_above(APIVersion(2, 22)))
-def test_load_empty(decoy: Decoy, mock_well_core: WellCore, subject: Well) -> None:
-    """It should mark a location as empty."""
-    subject.load_empty()
-    decoy.verify(mock_well_core.load_empty(), times=1)
 
 
 def test_diameter(decoy: Decoy, mock_well_core: WellCore, subject: Well) -> None:

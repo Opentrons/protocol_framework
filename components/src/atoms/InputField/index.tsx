@@ -63,8 +63,8 @@ export interface InputFieldProps {
   /** if true, clear out value and add '-' placeholder */
   isIndeterminate?: boolean
   /** if input type is number, these are the min and max values */
-  max?: number
-  min?: number
+  max?: number | string
+  min?: number | string
   /** horizontal text alignment for title, input, and (sub)captions */
   textAlign?:
     | typeof TYPOGRAPHY.textAlignLeft

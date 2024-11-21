@@ -7,11 +7,14 @@ import {
   chatDataAtom,
   feedbackModalAtom,
   scrollToBottomAtom,
+  updateProtocolChatAtom,
+  createProtocolChatAtom,
 } from '../../resources/atoms'
 import { ChatDisplay } from '../../molecules/ChatDisplay'
 import { ChatFooter } from '../../molecules/ChatFooter'
 import styled from 'styled-components'
 import { FeedbackModal } from '../../molecules/FeedbackModal'
+import { useNavigate } from 'react-router-dom'
 
 export interface InputType {
   userPrompt: string
@@ -28,6 +31,16 @@ export function Chat(): JSX.Element | null {
   const scrollRef = useRef<HTMLSpanElement | null>(null)
   const [showFeedbackModal] = useAtom(feedbackModalAtom)
   const [scrollToBottom] = useAtom(scrollToBottomAtom)
+  const navigate = useNavigate()
+  const [updateProtocolChat] = useAtom(updateProtocolChatAtom)
+  const [createProtocolChat] = useAtom(createProtocolChatAtom)
+
+  // Redirect to home page if there is no prompt (user has refreshed the page)
+  useEffect(() => {
+    if (updateProtocolChat.prompt === '' && createProtocolChat.prompt === '') {
+      navigate('/')
+    }
+  }, [])
 
   useEffect(() => {
     if (scrollRef.current != null)

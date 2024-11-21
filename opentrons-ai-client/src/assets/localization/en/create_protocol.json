@@ -17,7 +17,7 @@
   "opentrons_ot2_label": "Opentrons OT-2",
   "opentrons_ot2": "Opentrons OT-2",
   "instruments_pipettes_title": "What pipettes would you like to use?",
-  "two_pipettes_label": "Two pipettes",
+  "two_pipettes_label": "1-Channel or 8-Channel pipettes",
   "right_pipette_label": "Right mount",
   "left_pipette_label": "Left mount",
   "choose_pipette_placeholder": "Choose pipette",

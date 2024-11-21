@@ -119,6 +119,13 @@ def test_get_next_tip_returns_none(
             back_left_corner_offset=Point(0, 0, 0),
             front_right_corner_offset=Point(0, 0, 0),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
     subject.handle_action(
@@ -177,6 +184,13 @@ def test_get_next_tip_returns_first_tip(
             back_left_corner_offset=Point(0, 0, 0),
             front_right_corner_offset=Point(0, 0, 0),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
     subject.handle_action(
@@ -229,6 +243,13 @@ def test_get_next_tip_used_starting_tip(
             back_left_corner_offset=Point(0, 0, 0),
             front_right_corner_offset=Point(0, 0, 0),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
     subject.handle_action(
@@ -314,6 +335,13 @@ def test_get_next_tip_skips_picked_up_tip(
             back_left_corner_offset=Point(0, 0, 0),
             front_right_corner_offset=Point(0, 0, 0),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
     subject.handle_action(
@@ -377,6 +405,13 @@ def test_get_next_tip_with_starting_tip(
             back_left_corner_offset=Point(x=1, y=2, z=3),
             front_right_corner_offset=Point(x=4, y=5, z=6),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
     subject.handle_action(
@@ -444,6 +479,13 @@ def test_get_next_tip_with_starting_tip_8_channel(
             back_left_corner_offset=Point(0, 0, 0),
             front_right_corner_offset=Point(0, 0, 0),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
     subject.handle_action(
@@ -514,6 +556,13 @@ def test_get_next_tip_with_1_channel_followed_by_8_channel(
             back_left_corner_offset=Point(0, 0, 0),
             front_right_corner_offset=Point(0, 0, 0),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
     subject.handle_action(
@@ -545,6 +594,13 @@ def test_get_next_tip_with_1_channel_followed_by_8_channel(
             back_left_corner_offset=Point(0, 0, 0),
             front_right_corner_offset=Point(0, 0, 0),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
     subject.handle_action(
@@ -615,6 +671,13 @@ def test_get_next_tip_with_starting_tip_out_of_tips(
             back_left_corner_offset=Point(0, 0, 0),
             front_right_corner_offset=Point(0, 0, 0),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
     subject.handle_action(
@@ -685,6 +748,13 @@ def test_get_next_tip_with_column_and_starting_tip(
             back_left_corner_offset=Point(0, 0, 0),
             front_right_corner_offset=Point(0, 0, 0),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
     subject.handle_action(
@@ -734,6 +804,13 @@ def test_reset_tips(
             back_left_corner_offset=Point(x=1, y=2, z=3),
             front_right_corner_offset=Point(x=4, y=5, z=6),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
 
@@ -796,6 +873,13 @@ def test_handle_pipette_config_action(
             back_left_corner_offset=Point(x=1, y=2, z=3),
             front_right_corner_offset=Point(x=4, y=5, z=6),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
     subject.handle_action(
@@ -929,6 +1013,13 @@ def test_active_channels(
             back_left_corner_offset=Point(x=1, y=2, z=3),
             front_right_corner_offset=Point(x=4, y=5, z=6),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
     subject.handle_action(
@@ -989,6 +1080,13 @@ def test_next_tip_uses_active_channels(
             back_left_corner_offset=Point(x=1, y=2, z=3),
             front_right_corner_offset=Point(x=4, y=5, z=6),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
     subject.handle_action(
@@ -1087,6 +1185,13 @@ def test_next_tip_automatic_tip_tracking_with_partial_configurations(
             back_left_corner_offset=Point(x=1, y=2, z=3),
             front_right_corner_offset=Point(x=4, y=5, z=6),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
     subject.handle_action(
@@ -1239,6 +1344,13 @@ def test_next_tip_automatic_tip_tracking_tiprack_limits(
             back_left_corner_offset=Point(x=1, y=2, z=3),
             front_right_corner_offset=Point(x=4, y=5, z=6),
             pipette_lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         ),
     )
     subject.handle_action(

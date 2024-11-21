@@ -25,7 +25,7 @@ export function ThermocyclerTools(props: StepFormProps): JSX.Element {
     showFormErrors = true,
     visibleFormErrors,
     focusedField,
-    setShowFormErrorsAndWarnings,
+    setShowFormErrors,
   } = props
   const { t } = useTranslation('form')
 
@@ -49,7 +49,7 @@ export function ThermocyclerTools(props: StepFormProps): JSX.Element {
           onChange={() => {
             setContentType('thermocyclerState')
             propsForFields.thermocyclerFormType.updateValue('thermocyclerState')
-            setShowFormErrorsAndWarnings?.(false)
+            setShowFormErrors?.(false)
           }}
           isSelected={contentType === 'thermocyclerState'}
         />
@@ -64,7 +64,7 @@ export function ThermocyclerTools(props: StepFormProps): JSX.Element {
             propsForFields.thermocyclerFormType.updateValue(
               'thermocyclerProfile'
             )
-            setShowFormErrorsAndWarnings?.(false)
+            setShowFormErrors?.(false)
           }}
           isSelected={contentType === 'thermocyclerProfile'}
         />
@@ -83,7 +83,11 @@ export function ThermocyclerTools(props: StepFormProps): JSX.Element {
     )
   } else {
     return (
-      <Flex flexDirection={DIRECTION_COLUMN}>
+      <Flex
+        flexDirection={DIRECTION_COLUMN}
+        gridGap={SPACING.spacing12}
+        paddingY={SPACING.spacing16}
+      >
         <ProfileSettings
           propsForFields={propsForFields}
           showFormErrors={showFormErrors}
