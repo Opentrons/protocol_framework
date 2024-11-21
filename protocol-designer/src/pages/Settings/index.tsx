@@ -52,7 +52,7 @@ export function Settings(): JSX.Element {
     : analyticsActions.optIn
 
   const prereleaseModeEnabled = flags.PRERELEASE_MODE === true
-  const pdVersion = process.env.OT_PD_VERSION?.split('-')[0]
+  const pdVersion = process.env.OT_PD_VERSION
 
   const allFlags = Object.keys(flags) as FlagTypes[]
 
