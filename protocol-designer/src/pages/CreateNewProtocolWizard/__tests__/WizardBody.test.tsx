@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { fireEvent, screen } from '@testing-library/react'
@@ -37,6 +36,6 @@ describe('WizardBody', () => {
     expect(props.proceed).toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: 'Go back' }))
     expect(props.goBack).toHaveBeenCalled()
-    screen.getByRole('img', { name: '' })
+    screen.getByLabelText('onboarding animation for page 1')
   })
 })
