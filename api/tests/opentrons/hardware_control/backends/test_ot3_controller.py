@@ -1417,3 +1417,32 @@ async def test_controller_move(
 
         assert position == expected_pos
         assert gear_position == gear_position
+
+
+
+@pytest.mark.parametrize(argnames=["axes", "pipette_has_sensor"], argvalues=[[[Axis.P_L, Axis.P_R], True], [[Axis.P_L, Axis.P_R], False]])
+async def test_pressure_disable(
+    controller: OT3Controller,
+    axes: List[Axis],
+    mock_present_devices: None,
+    mock_check_overpressure: None,
+    pipette_has_sensor: bool,
+) -> None:
+    config = {"run.side_effect": move_group_run_side_effect_home(controller, axes)}
+    with mock.patch(  # type: ignore [call-overload]
+        "opentrons.hardware_control.backends.ot3controller.MoveGroupRunner",
+        spec=MoveGroupRunner,
+        **config
+    ) as mock_runner:
+        with mock.patch.object(controller, "_monitor_overpressure") as monitor:
+            present_axes = set(ax for ax in axes if controller.axis_is_present(ax))
+            controller.set_pressure_sensor_available(Axis.P_L, pipette_has_sensor)
+            controller.set_pressure_sensor_available(Axis.P_R, True)
+
+            await controller.home(axes, GantryLoad.LOW_THROUGHPUT)
+
+            if pipette_has_sensor:
+                monitor.assert_called_once_with([NodeId.pipette_left, NodeId.pipette_right])
+            else:
+                monitor.assert_called_once_with([NodeId.pipette_right])
+
