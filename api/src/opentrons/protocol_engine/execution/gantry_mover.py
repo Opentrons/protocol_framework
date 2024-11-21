@@ -340,10 +340,6 @@ class HardwareGantryMover(GantryMover):
                     mount, refresh=True
                 )
                 log.info(f"The current position of the robot is: {current_position}.")
-                converted_current_position_deck = self._hardware_api.get_deck_from_machine(
-                    current_position
-                )
-                log.info(f"The current position of the robot is: {current_position}.")
                 converted_current_position_deck = (
                     self._hardware_api.get_deck_from_machine(current_position)
                 )
@@ -549,68 +545,6 @@ class VirtualGantryMover(GantryMover):
         tip = self._state_view.pipettes.get_attached_tip(pipette_id=pipette_id)
         tip_length = tip.length if tip is not None else 0
         return instrument_height - tip_length
-
-    def get_max_travel_z_from_mount(self, mount: MountType) -> float:
-        """Get the maximum allowed z-height for mount."""
-        pipette = self._state_view.pipettes.get_by_mount(mount)
-        if self._state_view.config.robot_type == "OT-2 Standard":
-            instrument_height = (
-                self._state_view.pipettes.get_instrument_max_height_ot2(pipette.id)
-                if pipette
-                else VIRTUAL_MAX_OT2_HEIGHT
-            )
-        else:
-            instrument_height = VIRTUAL_MAX_OT3_HEIGHT
-        if pipette:
-            tip = self._state_view.pipettes.get_attached_tip(pipette_id=pipette.id)
-            tip_length = tip.length if tip is not None else 0.0
-        else:
-            tip_length = 0.0
-        return instrument_height - tip_length
-
-    async def move_axes(
-        self,
-        axis_map: Dict[MotorAxis, float],
-        critical_point: Optional[Dict[MotorAxis, float]] = None,
-        speed: Optional[float] = None,
-        relative_move: bool = False,
-    ) -> Dict[MotorAxis, float]:
-        """Move the give axes map. No-op in virtual implementation."""
-        mount = self.pick_mount_from_axis_map(axis_map)
-        current_position = await self.get_position_from_mount(mount)
-        updated_position = {}
-        if relative_move:
-            updated_position[MotorAxis.X] = (
-                axis_map.get(MotorAxis.X, 0.0) + current_position[0]
-            )
-            updated_position[MotorAxis.Y] = (
-                axis_map.get(MotorAxis.Y, 0.0) + current_position[1]
-            )
-            if mount == Mount.RIGHT:
-                updated_position[MotorAxis.RIGHT_Z] = (
-                    axis_map.get(MotorAxis.RIGHT_Z, 0.0) + current_position[2]
-                )
-            elif mount == Mount.EXTENSION:
-                updated_position[MotorAxis.EXTENSION_Z] = (
-                    axis_map.get(MotorAxis.EXTENSION_Z, 0.0) + current_position[2]
-                )
-            else:
-                updated_position[MotorAxis.LEFT_Z] = (
-                    axis_map.get(MotorAxis.LEFT_Z, 0.0) + current_position[2]
-                )
-        else:
-            critical_point = critical_point or {}
-            updated_position = {
-                ax: pos - critical_point.get(ax, 0.0) for ax, pos in axis_map.items()
-            }
-        return updated_position
-
-    async def move_mount_to(
-        self, mount: Mount, waypoints: List[Waypoint], speed: Optional[float]
-    ) -> Point:
-        """Move the hardware mount to a waypoint. No-op in virtual implementation."""
-        assert len(waypoints) > 0, "Must have at least one waypoint"
-        return waypoints[-1].position
 
     def get_max_travel_z_from_mount(self, mount: MountType) -> float:
         """Get the maximum allowed z-height for mount."""

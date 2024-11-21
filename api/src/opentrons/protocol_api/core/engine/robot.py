@@ -1,6 +1,5 @@
 from typing import Optional, Dict, Union
 from opentrons.hardware_control import SyncHardwareAPI
-from opentrons_shared_data.pipette.pipette_definition import SupportedTipsDefinition
 
 from opentrons.types import Mount, MountType, Point, AxisType, AxisMapType
 from opentrons_shared_data.pipette import types as pip_types
@@ -10,7 +9,6 @@ from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocol_engine.types import DeckPoint, MotorAxis
 
 from opentrons.protocol_api.core.robot import AbstractRobot
-
 
 
 _AXIS_TYPE_TO_MOTOR_AXIS = {
@@ -93,7 +91,7 @@ class RobotCore(AbstractRobot):
             position = plunger_bottom + mm
         else:
             position = plunger_bottom - mm
-        return round(position, 6)  # type: ignore[no-any-return]
+        return round(position, 6)
 
     def move_to(self, mount: Mount, destination: Point, speed: Optional[float]) -> None:
         engine_mount = MountType[mount.name]
