@@ -6203,6 +6203,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [
     {
       "description": "water for ER testing",
