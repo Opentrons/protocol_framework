@@ -634,7 +634,7 @@ class OT3API(
             self._feature_flags.use_old_aspiration_functions,
         )
         self._pipette_handler.hardware_instruments[mount] = p
-        if not self.is_simulator:
+        if self._pipette_handler.has_pipette(mount):
             self._confirm_pipette_motion_constraints(mount)
         # TODO (lc 12-5-2022) Properly support backwards compatibility
         # when applicable
