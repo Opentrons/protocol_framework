@@ -43,7 +43,7 @@ describe('Settings', () => {
     screen.getByText('Protocol designer version')
     screen.getByText('fake_PD_version')
     screen.getAllByText('Release notes')
-    screen.getByText('User settings')
+    screen.getByText('User Settings')
     screen.getByText('Hints')
     screen.getByText('Show all hints and tips notifications again')
     screen.getByText('Timeline editing guidance')
@@ -82,7 +82,7 @@ describe('Settings', () => {
     })
 
     render()
-    screen.getByText('Developer feature flags')
+    screen.getByText('Developer Feature Flags')
     screen.getByText('Use prerelease mode')
     screen.getByText('Show in-progress features for testing & internal use')
     screen.getByText('Disable module placement restrictions')

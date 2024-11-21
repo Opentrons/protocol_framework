@@ -25,7 +25,7 @@ describe('LabwareUploadModal', () => {
   it('renders modal for not json', () => {
     render()
     screen.getByText(
-      'Protocol Designer only accepts custom JSON labware definitions made with our Labware Creator.  Upload a valid file to continue.'
+      'Protocol Designer only accepts custom JSON labware definitions made with our Labware Creator. Upload a valid file to continue.'
     )
     screen.getByText('Invalid file type')
     fireEvent.click(
