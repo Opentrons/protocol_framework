@@ -20,6 +20,7 @@ vi.mock('../../../feature-flags/selectors')
 vi.mock('../../../organisms')
 vi.mock('../../../labware-defs/actions')
 vi.mock('../utils')
+vi.mock('react-player/lazy')
 const mockLocation = vi.fn()
 
 vi.mock('react-router-dom', async importOriginal => {
