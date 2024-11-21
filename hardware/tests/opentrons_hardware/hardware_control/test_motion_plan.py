@@ -11,6 +11,7 @@ from opentrons_hardware.hardware_control.motion_planning.types import (
     MoveTarget,
     SystemConstraints,
     vectorize,
+    CoordinateValue
 )
 
 SIXAXES = ["X", "Y", "Z", "A", "B", "C"]
@@ -210,3 +211,57 @@ def test_close_move_plan(
     )
 
     assert converged, f"Failed to converge: {blend_log}"
+    
+
+def test_pipette_high_speed_motion(
+) -> None:
+    """Test that updated motion constraint doesn't get overridden by motion planning."""
+    origin: Coordinates = {}
+    target_list = []
+    axis_kinds = ["X", "Y", "Z", "A", "B", "C"]
+    constraints: SystemConstraints[str] = {}
+    for axis_kind in axis_kinds:
+        origin[axis_kind] = 499
+        constraints[axis_kind] = AxisConstraints.build(
+            max_acceleration=500,
+            max_speed_discont=500,
+            max_direction_change_speed_discont=500,
+            max_speed=500,
+        )
+        target_list.append(
+            MoveTarget.build(
+                {axis_kind: origin[axis_kind]}, 500
+            )
+        )
+
+    set_axis_kind = "A"
+    dummy_em_pipette_max_speed = 90.0
+    manager = move_manager.MoveManager(constraints=constraints)
+
+    new_axis_constraint = AxisConstraints.build(
+        max_acceleration=constraints[set_axis_kind].max_acceleration,
+        max_speed_discont=constraints[set_axis_kind].max_speed_discont,
+        max_direction_change_speed_discont=constraints[set_axis_kind].max_direction_change_speed_discont,
+        max_speed=dummy_em_pipette_max_speed,
+    )
+    new_constraints = {}
+
+    for axis_kind in constraints.keys():
+        if axis_kind == set_axis_kind:
+            new_constraints[axis_kind] = new_axis_constraint
+        else:
+            new_constraints[axis_kind] = constraints[axis_kind]
+
+    manager.update_constraints(constraints=new_constraints)
+    converged, blend_log = manager.plan_motion(
+        origin=origin,
+        target_list=target_list,
+        iteration_limit=20,
+    )
+    for move in blend_log[0]:
+        unit_vector = move.unit_vector
+        for block in move.blocks:
+            top_set_axis_speed = unit_vector[set_axis_kind] * block.final_speed
+            if top_set_axis_speed != 0:
+                assert abs(top_set_axis_speed) == dummy_em_pipette_max_speed
+
