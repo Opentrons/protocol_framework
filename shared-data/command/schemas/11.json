@@ -82,7 +82,9 @@
       "unsafe/placeLabware": "#/definitions/UnsafePlaceLabwareCreate",
       "robot/moveAxesRelative": "#/definitions/MoveAxesRelativeCreate",
       "robot/moveAxesTo": "#/definitions/MoveAxesToCreate",
-      "robot/moveTo": "#/definitions/MoveToCreate"
+      "robot/moveTo": "#/definitions/MoveToCreate",
+      "robot/openGripperJaw": "#/definitions/openGripperJawCreate",
+      "robot/closeGripperJaw": "#/definitions/closeGripperJawCreate"
     }
   },
   "oneOf": [
@@ -319,6 +321,12 @@
     },
     {
       "$ref": "#/definitions/MoveToCreate"
+    },
+    {
+      "$ref": "#/definitions/openGripperJawCreate"
+    },
+    {
+      "$ref": "#/definitions/closeGripperJawCreate"
     }
   ],
   "definitions": {
@@ -5943,6 +5951,84 @@
         },
         "params": {
           "$ref": "#/definitions/MoveToParams"
+        },
+        "intent": {
+          "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/CommandIntent"
+            }
+          ]
+        },
+        "key": {
+          "title": "Key",
+          "description": "A key value, unique in this run, that can be used to track the same logical command across multiple runs of the same protocol. If a value is not provided, one will be generated.",
+          "type": "string"
+        }
+      },
+      "required": ["params"]
+    },
+    "openGripperJawParams": {
+      "title": "openGripperJawParams",
+      "description": "Payload required to release a gripper.",
+      "type": "object",
+      "properties": {}
+    },
+    "openGripperJawCreate": {
+      "title": "openGripperJawCreate",
+      "description": "openGripperJaw command request model.",
+      "type": "object",
+      "properties": {
+        "commandType": {
+          "title": "Commandtype",
+          "default": "robot/openGripperJaw",
+          "enum": ["robot/openGripperJaw"],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/openGripperJawParams"
+        },
+        "intent": {
+          "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/CommandIntent"
+            }
+          ]
+        },
+        "key": {
+          "title": "Key",
+          "description": "A key value, unique in this run, that can be used to track the same logical command across multiple runs of the same protocol. If a value is not provided, one will be generated.",
+          "type": "string"
+        }
+      },
+      "required": ["params"]
+    },
+    "closeGripperJawParams": {
+      "title": "closeGripperJawParams",
+      "description": "Payload required to close a gripper.",
+      "type": "object",
+      "properties": {
+        "force": {
+          "title": "Force",
+          "description": "The force the gripper should use to hold the jaws, falls to default if none is provided.",
+          "type": "number"
+        }
+      }
+    },
+    "closeGripperJawCreate": {
+      "title": "closeGripperJawCreate",
+      "description": "closeGripperJaw command request model.",
+      "type": "object",
+      "properties": {
+        "commandType": {
+          "title": "Commandtype",
+          "default": "robot/closeGripperJaw",
+          "enum": ["robot/closeGripperJaw"],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/closeGripperJawParams"
         },
         "intent": {
           "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
