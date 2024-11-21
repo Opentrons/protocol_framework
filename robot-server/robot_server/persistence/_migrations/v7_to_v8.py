@@ -64,9 +64,12 @@ class Migration7to8(Migration):  # noqa: D101
 def _add_missing_indexes(dest_transaction: sqlalchemy.engine.Connection) -> None:
     # todo(2024-11-20): Probably add the indexes missing from prior migrations here.
     # https://opentrons.atlassian.net/browse/EXEC-827
-    dest_transaction.execute(
-        "CREATE UNIQUE INDEX ix_run_run_id_command_status_index_in_run ON run_command (run_id, command_status, index_in_run);"
+    index = next(
+        index
+        for index in schema_8.run_command_table.indexes
+        if index.name == "ix_run_run_id_command_status_index_in_run"
     )
+    index.create(dest_transaction)
 
 
 def _migrate_command_table_with_new_command_error_col_and_command_status(
