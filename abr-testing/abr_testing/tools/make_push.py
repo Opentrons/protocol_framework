@@ -8,7 +8,7 @@ global folders
 folders = [
     "abr-testing",
     "hardware-testing",
-    "all",
+    "abr-testing + hardware-testing",
     "other",
 ]
 
@@ -28,7 +28,7 @@ def main(folder_to_push: str, robot_to_push: str) -> int:
     robot_ip_path = ""
     push_cmd = ""
     folder_int = int(folder_to_push)
-    if folders[folder_int].lower() == "all":
+    if folders[folder_int].lower() == "abr-testing + hardware-testing":
         if robot_to_push.lower() == "all":
             robot_ip_path = input("Path to robot ips: ")
             with open(robot_ip_path, "r") as ip_file:
@@ -39,7 +39,7 @@ def main(folder_to_push: str, robot_to_push: str) -> int:
         else:
             robot_ips = [robot_to_push]
         for folder_name in folders[:-2]:
-            # Push all folders to all robots
+            # Push abr-testing and hardware-testing folders to all robots
             for robot in robot_ips:
                 print_proc = multiprocessing.Process(
                     target=print, args=(f"Pushing {folder_name} to {robot}!\n\n",)
@@ -52,7 +52,7 @@ def main(folder_to_push: str, robot_to_push: str) -> int:
                 )
                 process.start()
                 process.join()
-                print_proc = multiprocessing.Process(target=print, args=("Done!\n\n"))
+                print_proc = multiprocessing.Process(target=print, args=("Done!\n\n",))
                 print_proc.start()
                 print_proc.join()
     else:
