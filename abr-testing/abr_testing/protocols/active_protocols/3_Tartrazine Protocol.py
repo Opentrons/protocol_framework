@@ -106,7 +106,7 @@ def run(ctx: ProtocolContext) -> None:
             except ZeroDivisionError:
                 cv = 0.0
             cv_percent = cv * 100
-            cv_dict[sample_plate_name] = cv_percent
+            cv_dict[sample_plate_name] = {"CV": cv_percent, "Mean": avg, "SD": standard_deviation}
         msg = f"result: {result}"
         all_percent_error_dict[sample_plate_name] = percent_error_dict
         ctx.comment(msg=msg)
@@ -117,4 +117,4 @@ def run(ctx: ProtocolContext) -> None:
     # Print percent error dictionary
     ctx.comment("Percent Error: " + str(all_percent_error_dict))
     # Print cv dictionary
-    ctx.comment("CV: " + str(cv_dict))
+    ctx.comment("Plate Reader Result: " + str(cv_dict))
