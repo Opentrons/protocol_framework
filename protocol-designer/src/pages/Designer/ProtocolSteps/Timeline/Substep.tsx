@@ -12,7 +12,7 @@ import {
   StyledText,
   Tag,
 } from '@opentrons/components'
-import { compactPreIngreds, formatVolume } from './utils'
+import { formatVolume } from './utils'
 import type { AdditionalEquipmentName } from '@opentrons/step-generation'
 
 import type { SubstepIdentifier, SubstepWellData } from '../../../../steplist'
@@ -44,13 +44,8 @@ function SubstepComponent(props: SubstepProps): JSX.Element {
     'protocol_steps',
     'shared',
   ])
-  const compactedSourcePreIngreds = source
-    ? compactPreIngreds(source.preIngreds)
-    : {}
 
   const selectSubstep = propSelectSubstep ?? noop
-
-  const ingredIds: string[] = Object.keys(compactedSourcePreIngreds)
 
   const volumeTag = (
     <Tag

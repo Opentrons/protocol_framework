@@ -29,31 +29,6 @@ export const formatPercentage = (part: number, total: number): string => {
   return `${round((part / total) * 100, PERCENTAGE_DECIMALS_ALLOWED)}%`
 }
 
-export const compactPreIngreds = (
-  preIngreds: WellIngredientVolumeData
-): Partial<
-  | {
-      [ingredId: string]:
-        | {
-            volume: number
-          }
-        | undefined
-    }
-  | {
-      [well: string]:
-        | {
-            [ingredId: string]: {
-              volume: number
-            }
-          }
-        | undefined
-    }
-> => {
-  return omitBy(preIngreds, ingred => {
-    return typeof ingred?.volume === 'number' && ingred.volume <= 0
-  })
-}
-
 export const getMetaSelectedSteps = (
   multiSelectItemIds: StepIdType[] | null,
   stepId: StepIdType,
