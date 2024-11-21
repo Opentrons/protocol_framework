@@ -361,6 +361,8 @@ async def test_update_run_state_command_with_errors(
         cursor=0,
     )
 
+    print(command_errors_result)
+
     assert command_errors_result.commands_errors == [
         item.error for item in protocol_commands_errors
     ]
