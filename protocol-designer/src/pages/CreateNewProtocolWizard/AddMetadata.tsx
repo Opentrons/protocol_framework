@@ -1,16 +1,18 @@
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
+import styled from 'styled-components'
 
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
+  BORDERS,
   COLORS,
   DIRECTION_COLUMN,
   Flex,
   InputField,
   SPACING,
   StyledText,
+  TYPOGRAPHY,
 } from '@opentrons/components'
-import { DescriptionField } from '../../atoms'
 import { HandleEnter } from '../../atoms/HandleEnter'
 import { analyticsEvent } from '../../analytics/actions'
 import { ONBOARDING_FLOW_DURATION_EVENT } from '../../analytics/constants'
@@ -92,3 +94,13 @@ export function AddMetadata(props: AddMetadataProps): JSX.Element | null {
     </HandleEnter>
   )
 }
+
+export const DescriptionField = styled.textarea`
+  min-height: 5rem;
+  width: 100%;
+  border: 1px ${BORDERS.styleSolid} ${COLORS.grey50};
+  border-radius: ${BORDERS.borderRadius4};
+  padding: ${SPACING.spacing8};
+  font-size: ${TYPOGRAPHY.fontSizeP};
+  resize: none;
+`
