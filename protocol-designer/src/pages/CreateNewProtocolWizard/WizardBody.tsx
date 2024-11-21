@@ -64,15 +64,13 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
   })
   const [isBuffering, setIsBuffering] = useState(false)
 
-  const handleBuffer = () => {
+  const handleBuffer = (): void => {
     setIsBuffering(true)
-    console.log('Buffering...')
   }
 
-  const handlePlay = () => {
+  const handlePlay = (): void => {
     if (isBuffering) {
       setIsBuffering(false)
-      console.log('Buffering ended.')
     }
   }
 

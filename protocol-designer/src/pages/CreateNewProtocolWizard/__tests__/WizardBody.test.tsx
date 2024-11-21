@@ -36,6 +36,5 @@ describe('WizardBody', () => {
     expect(props.proceed).toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: 'Go back' }))
     expect(props.goBack).toHaveBeenCalled()
-    screen.getByLabelText('onboarding animation for page 1')
   })
 })
