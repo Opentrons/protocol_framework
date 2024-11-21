@@ -316,9 +316,9 @@ def get_system_constraints_for_emulsifying_pipette(
             if axis == Axis.of_main_tool_actuator(mount):
                 _max_speed = float(DEFAULT_EMULSIFYING_PIPETTE_AXIS_MAX_SPEED)
             else:
-                _max_speed = old_constraints["max_speed"][axis_kind]
+                _max_speed = old_constraints["default_max_speed"][axis_kind]
             new_constraints[axis] = AxisConstraints.build(
-                max_acceleration=old_constraints["max_acceleration"][axis_kind],
+                max_acceleration=old_constraints["acceleration"][axis_kind],
                 max_speed_discont=old_constraints["max_speed_discontinuity"][axis_kind],
                 max_direction_change_speed_discont=old_constraints[
                     "direction_change_speed_discontinuity"
