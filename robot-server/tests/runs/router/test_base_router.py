@@ -157,6 +157,7 @@ async def test_create_run(
         labwareOffsets=[],
         status=pe_types.EngineStatus.IDLE,
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -245,6 +246,7 @@ async def test_create_protocol_run(
         labwareOffsets=[],
         status=pe_types.EngineStatus.IDLE,
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -413,6 +415,7 @@ async def test_get_run_data_from_url(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -461,6 +464,7 @@ async def test_get_run() -> None:
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -508,6 +512,7 @@ async def test_get_runs_not_empty(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -525,6 +530,7 @@ async def test_get_runs_not_empty(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -605,6 +611,7 @@ async def test_update_run_to_not_current(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -641,6 +648,7 @@ async def test_update_current_none_noop(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )

@@ -69,6 +69,11 @@ class FlexBackend(Protocol):
     ) -> None:
         ...
 
+    def update_constraints_for_emulsifying_pipette(
+        self, mount: OT3Mount, gantry_load: GantryLoad
+    ) -> None:
+        ...
+
     def update_constraints_for_plunger_acceleration(
         self, mount: OT3Mount, acceleration: float, gantry_load: GantryLoad
     ) -> None:

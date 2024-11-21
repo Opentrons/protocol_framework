@@ -1,6 +1,6 @@
 {
   "$otSharedSchema": "#/pipette/schemas/2/pipettePropertiesSchema.json",
-  "displayName": "FLEX 8-Channel Emulsifying 1000 μL",
+  "displayName": "FLEX 8-Channel EM 1000 μL",
   "model": "p1000",
   "displayCategory": "FLEX",
   "validNozzleMaps": {
@@ -312,7 +312,7 @@
   "shaftDiameter": 4.5,
   "shaftULperMM": 15.904,
   "backlashDistance": 0.1,
-  "quirks": [],
+  "quirks": ["highSpeed"],
   "plungerHomingConfigurations": {
     "current": 1.0,
     "speed": 30

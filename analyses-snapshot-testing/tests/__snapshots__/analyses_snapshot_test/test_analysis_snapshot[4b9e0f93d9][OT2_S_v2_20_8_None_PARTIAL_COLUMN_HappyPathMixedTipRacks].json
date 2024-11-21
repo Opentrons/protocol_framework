@@ -19714,6 +19714,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [],
   "metadata": {
     "description": "OT-2 protocol with 1ch and 8ch pipette partial/single tip configurations. Mixing tipracks and using separate tipracks. ",
