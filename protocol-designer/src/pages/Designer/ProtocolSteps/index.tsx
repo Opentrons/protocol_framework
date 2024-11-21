@@ -126,13 +126,29 @@ export function ProtocolSteps(): JSX.Element {
           </Flex>
         </Flex>
         {enableHoyKeyDisplay ? (
-          <Box position={POSITION_FIXED} left="21rem" bottom="0.75rem">
-            <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
-              <Tag text={t('double_click_to_edit')} type="default" />
-              <Tag text={t('shift_click_to_select_all')} type="default" />
-              <Tag text={t('command_click_to_multi_select')} type="default" />
-            </Flex>
-          </Box>
+          <Flex
+            position={POSITION_FIXED}
+            left="21rem"
+            bottom="0.75rem"
+            gridGap={SPACING.spacing6}
+            flexDirection={DIRECTION_COLUMN}
+          >
+            <Tag
+              text={t('double_click_to_edit')}
+              type="default"
+              shrinkToContent
+            />
+            <Tag
+              text={t('shift_click_to_select_all')}
+              type="default"
+              shrinkToContent
+            />
+            <Tag
+              text={t('command_click_to_multi_select')}
+              type="default"
+              shrinkToContent
+            />
+          </Flex>
         ) : null}
       </Flex>
       {formData == null && selectedSubstep ? (
