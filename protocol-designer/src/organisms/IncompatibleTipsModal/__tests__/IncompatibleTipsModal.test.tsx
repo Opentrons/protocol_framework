@@ -26,7 +26,7 @@ describe('IncompatibleTipsModal', () => {
     render(props)
     screen.getByText('Incompatible tips')
     screen.getByText(
-      'Protocol Designer only accepts custom JSON labware definitions made with our Labware Creator. Upload a valid file to continue.'
+      'Using a pipette with an incompatible tip rack may result reduce pipette accuracy and collisions. We strongly recommend that you do not pair a pipette with an incompatible tip rack.'
     )
     fireEvent.click(screen.getByText('Show more tip types'))
     expect(vi.mocked(setFeatureFlags)).toHaveBeenCalled()
