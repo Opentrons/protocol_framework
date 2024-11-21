@@ -786,7 +786,8 @@ class OT3Controller(FlexBackend):
             for runner, is_gear_move in maybe_runners
             if runner
         ]
-        async with self._monitor_overpressure(pipettes_moving):
+        checked_moving_pipettes = self._pipettes_to_monitor_pressure(pipettes_moving)
+        async with self._monitor_overpressure(checked_moving_pipettes):
             all_positions = await asyncio.gather(*coros)
 
         for positions, handle_gear_move in all_positions:
