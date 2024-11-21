@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
-import ReactPlayer from 'react-player/lazy'
-import { useState } from 'react'
+import { useState, useLayoutEffect } from 'react'
 import {
   ALIGN_CENTER,
   ALIGN_END,
@@ -62,17 +61,16 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
   const [targetProps, tooltipProps] = useHoverTooltip({
     placement: 'top',
   })
-  const [isBuffering, setIsBuffering] = useState(false)
+  const [asset, setAsset] = useState<string | null>(null)
+  const [loaded, setLoaded] = useState(false)
 
-  const handleBuffer = (): void => {
-    setIsBuffering(true)
-  }
-
-  const handlePlay = (): void => {
-    if (isBuffering) {
-      setIsBuffering(false)
-    }
-  }
+  useLayoutEffect(() => {
+    const videoAsset = ONBOARDING_ANIMATIONS[stepNumber]
+    setLoaded(false)
+    setAsset(videoAsset)
+    const timeout = setTimeout(() => setLoaded(true), 100)
+    return () => clearTimeout(timeout)
+  }, [stepNumber])
 
   return (
     <Flex
@@ -144,32 +142,28 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
           ) : null}
         </Flex>
       </Flex>
-      <Flex width="40%">
-        <Flex
+      <Flex
+        width="40%"
+        css={css`
+          opacity: ${loaded ? 1 : 0};
+          transition: opacity 0.5s ease-in-out;
+        `}
+      >
+        <video
+          preload="auto"
           css={css`
             width: 100%;
             height: 100%;
-            overflow: hidden;
-            position: relative;
             object-fit: cover;
             border-radius: ${BORDERS.borderRadius16};
           `}
+          autoPlay={true}
+          loop={false}
+          controls={false}
+          aria-label={`onboarding animation for page ${stepNumber}`}
         >
-          <ReactPlayer
-            width="100%"
-            height="100%"
-            url={ONBOARDING_ANIMATIONS[stepNumber]}
-            playing={true}
-            controls={false}
-            onBuffer={handleBuffer}
-            onPlay={handlePlay}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-            }}
-          />
-        </Flex>
+          <source src={asset ?? ''} type="video/mp4" />
+        </video>
       </Flex>
     </Flex>
   )
