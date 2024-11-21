@@ -1419,8 +1419,10 @@ async def test_controller_move(
         assert gear_position == gear_position
 
 
-
-@pytest.mark.parametrize(argnames=["axes", "pipette_has_sensor"], argvalues=[[[Axis.P_L, Axis.P_R], True], [[Axis.P_L, Axis.P_R], False]])
+@pytest.mark.parametrize(
+    argnames=["axes", "pipette_has_sensor"],
+    argvalues=[[[Axis.P_L, Axis.P_R], True], [[Axis.P_L, Axis.P_R], False]],
+)
 async def test_pressure_disable(
     controller: OT3Controller,
     axes: List[Axis],
@@ -1442,7 +1444,8 @@ async def test_pressure_disable(
             await controller.home(axes, GantryLoad.LOW_THROUGHPUT)
 
             if pipette_has_sensor:
-                monitor.assert_called_once_with([NodeId.pipette_left, NodeId.pipette_right])
+                monitor.assert_called_once_with(
+                    [NodeId.pipette_left, NodeId.pipette_right]
+                )
             else:
                 monitor.assert_called_once_with([NodeId.pipette_right])
-
