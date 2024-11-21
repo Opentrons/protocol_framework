@@ -32,11 +32,11 @@ import { getStagingAreaAddressableAreas } from '../../../utils'
 import { selectors as labwareIngredSelectors } from '../../../labware-ingred/selectors'
 import type { MouseEvent, SetStateAction } from 'react'
 import {
-  AddressableAreaName,
   FLEX_ROBOT_TYPE,
   FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
   getCutoutIdFromAddressableArea,
   getDeckDefFromRobotType,
+  type AddressableAreaName,
   type CoordinateTuple,
   type CutoutId,
   type DeckSlotId,
