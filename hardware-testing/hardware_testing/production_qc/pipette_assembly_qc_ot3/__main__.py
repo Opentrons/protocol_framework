@@ -1156,7 +1156,7 @@ async def _test_diagnostics(
         pressure_pass = await _test_diagnostics_pressure(api, mount, write_cb)
         print(f"pressure: {_bool_to_pass_fail(pressure_pass)}")
     else:
-        print(f"Skipping pressure")
+        print("Skipping pressure")
         pressure_pass = True
     write_cb(["diagnostics-pressure", _bool_to_pass_fail(pressure_pass)])
 
