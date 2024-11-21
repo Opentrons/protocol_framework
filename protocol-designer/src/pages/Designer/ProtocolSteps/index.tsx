@@ -139,7 +139,7 @@ export function ProtocolSteps(): JSX.Element {
               shrinkToContent
             />
             <Tag
-              text={t('shift_click_to_select_all')}
+              text={t('shift_click_to_select_range')}
               type="default"
               shrinkToContent
             />
