@@ -79,7 +79,6 @@ cd analyses-snapshot-testing \
 `make setup` - install the requirements
 `make snapshot-test-local` - this target builds the base image, builds the local code into the base image, then runs the analyses battery against the image you just created
 
-
 You have the option to specify one or many protocols to run the analyses on. This is also described above [Running the tests against specific protocols](#running-the-tests-against-specific-protocols)
 
 - `make snapshot-test-local PROTOCOL_NAMES=Flex_S_v2_19_Illumina_DNA_PCR_Free OVERRIDE_PROTOCOL_NAMES=none`
