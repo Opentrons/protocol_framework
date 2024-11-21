@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from numpy import interp
-from typing import Optional, Dict, Sequence, Union, Tuple
+from typing import Optional, Dict, Sequence, Tuple
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     AspirateProperties as SharedDataAspirateProperties,
@@ -23,12 +23,9 @@ from . import validation
 
 
 class LiquidHandlingPropertyByVolume:
-    def __init__(self, properties_by_volume: Dict[str, float]) -> None:
-        self._default = properties_by_volume["default"]
+    def __init__(self, by_volume_property: Sequence[Tuple[float, float]]) -> None:
         self._properties_by_volume: Dict[float, float] = {
-            float(volume): value
-            for volume, value in properties_by_volume.items()
-            if volume != "default"
+            float(volume): value for volume, value in by_volume_property
         }
         # Volumes need to be sorted for proper interpolation of non-defined volumes, and the
         # corresponding values need to be in the same order for them to be interpolated correctly
@@ -36,18 +33,17 @@ class LiquidHandlingPropertyByVolume:
         self._sorted_values: Tuple[float, ...] = ()
         self._sort_volume_and_values()
 
-    @property
-    def default(self) -> float:
-        """Get the default value not associated with any volume for this property."""
-        return self._default
-
-    def as_dict(self) -> Dict[Union[float, str], float]:
+    def as_dict(self) -> Dict[float, float]:
         """Get a dictionary representation of all set volumes and values along with the default."""
-        return self._properties_by_volume | {"default": self._default}
+        return self._properties_by_volume
 
     def get_for_volume(self, volume: float) -> float:
         """Get a value by volume for this property. Volumes not defined will be interpolated between set volumes."""
         validated_volume = validation.ensure_positive_float(volume)
+        if len(self._properties_by_volume) == 0:
+            raise ValueError(
+                "No properties found for any volumes. Cannot interpolate for the given volume."
+            )
         try:
             return self._properties_by_volume[validated_volume]
         except KeyError:
@@ -66,9 +62,9 @@ class LiquidHandlingPropertyByVolume:
         """Remove an existing volume and value from the property."""
         try:
             del self._properties_by_volume[volume]
-            self._sort_volume_and_values()
         except KeyError:
             raise KeyError(f"No value set for volume {volume} uL")
+        self._sort_volume_and_values()
 
     def _sort_volume_and_values(self) -> None:
         """Sort volume in increasing order along with corresponding values in matching order."""

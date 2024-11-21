@@ -32,7 +32,7 @@ def test_liquid_class_creation_and_property_fetching(
     assert (
         water.get_for(
             pipette_load_name, tiprack.load_name
-        ).dispense.flow_rate_by_volume.default
+        ).dispense.flow_rate_by_volume.get_for_volume(1)
         == 50
     )
     assert (
