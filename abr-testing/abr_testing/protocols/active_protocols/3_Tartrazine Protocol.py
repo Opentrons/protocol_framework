@@ -26,14 +26,12 @@ def add_parameters(parameters: ParameterContext) -> None:
 def run(ctx: ProtocolContext) -> None:
     """Protocol."""
     mount_pos_50ul = ctx.params.pipette_mount  # type: ignore[attr-defined]
-    # TODO: Load plate reader
     # Plate Reader
     plate_reader: AbsorbanceReaderContext = ctx.load_module(
         helpers.abs_mod_str, "A3"
     )  # type: ignore[assignment]
     hs: HeaterShakerContext = ctx.load_module(helpers.hs_str, "A1")  # type: ignore[assignment]
     hs_adapter = hs.load_adapter("opentrons_96_pcr_adapter")
-    # TODO: load tube reservoir, 3 well plates, 3 50 ul tip racks, 1ch 50 ul pipette
     tube_rack = ctx.load_labware(
         "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical", "C2", "Reagent Tube"
     )
@@ -74,11 +72,11 @@ def run(ctx: ProtocolContext) -> None:
             p50.aspirate(10, tartrazine_tube.bottom(z=height))
             p50.air_gap(5)
             p50.dispense(5, well.top())
-            p50.dispense(10, well.bottom(z=1))
+            p50.dispense(10, well.bottom(z=0.5))
             p50.blow_out()
             p50.return_tip()
         helpers.move_labware_to_hs(ctx, sample_plate, hs, hs_adapter)
-        helpers.set_hs_speed(ctx, hs, 1500, 1.0, True)
+        helpers.set_hs_speed(ctx, hs, 1500, 2.0, True)
         hs.open_labware_latch()
         plate_reader.close_lid()
         plate_reader.initialize("single", [450])
@@ -95,21 +93,27 @@ def run(ctx: ProtocolContext) -> None:
             avg = statistics.mean(readings)
             # Check if every average is within +/- 5% of 2.85
             percent_error_dict = {}
+            percent_error_sum = 0.0
             for reading in readings_and_wells:
                 well_name = str(reading[0])
                 measurement = reading[1]
                 percent_error = (measurement - 2.85) / 2.85 * 100
                 percent_error_dict[well_name] = percent_error
+                percent_error_sum += percent_error
+            avg_percent_error = percent_error_sum / 96.0
             standard_deviation = statistics.stdev(readings)
             try:
                 cv = standard_deviation / avg
             except ZeroDivisionError:
                 cv = 0.0
             cv_percent = cv * 100
-            cv_dict[sample_plate_name] = {"CV": cv_percent, "Mean": avg, "SD": standard_deviation}
-        msg = f"result: {result}"
+            cv_dict[sample_plate_name] = {
+                "CV": cv_percent,
+                "Mean": avg,
+                "SD": standard_deviation,
+                "Avg Percent Error": avg_percent_error,
+            }
         all_percent_error_dict[sample_plate_name] = percent_error_dict
-        ctx.comment(msg=msg)
         plate_reader.open_lid()
         ctx.move_labware(sample_plate, deck_locations[i], use_gripper=True)
         i += 1
@@ -117,4 +121,4 @@ def run(ctx: ProtocolContext) -> None:
     # Print percent error dictionary
     ctx.comment("Percent Error: " + str(all_percent_error_dict))
     # Print cv dictionary
-    ctx.comment("Plate Reader Result: " + str(cv_dict))
+    ctx.comment("Plate Reader result: " + str(cv_dict))

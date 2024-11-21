@@ -19,10 +19,7 @@ metadata = {
 }
 
 
-requirements = {
-    "robotType": "Flex",
-    "apiLevel": "2.21",
-}
+requirements = {"robotType": "Flex", "apiLevel": "2.21"}
 
 HELLMA_PLATE_SLOT = "D4"
 PLATE_READER_SLOT = "C3"
@@ -58,14 +55,11 @@ def add_parameters(parameters: ParameterContext) -> None:
     """Add Parameters."""
     helpers.create_hs_speed_parameter(parameters)
     helpers.create_dot_bottom_parameter(parameters)
-    parameters.add_str(
+    parameters.add_bool(
         variable_name="plate_orientation",
         display_name="Hellma Plate Orientation",
-        default="0_deg",
-        choices=[
-            {"display_name": "0 degree Rotation", "value": "0_deg"},
-            {"display_name": "180 degree Rotation", "value": "180_deg"},
-        ],
+        default=True,
+        description="If hellma plate is rotated, set to True.",
     )
 
 
@@ -85,7 +79,7 @@ def plate_reader_actions(
         protocol.move_labware(hellma_plate, plate_reader, use_gripper=True)
         plate_reader.close_lid()
         result = plate_reader.read(str(datetime.now()))
-        msg = f"result: {result}"
+        msg = f"{hellma_plate_name} result: {result}"
         protocol.comment(msg=msg)
         plate_reader.open_lid()
         protocol.move_labware(hellma_plate, HELLMA_PLATE_SLOT, use_gripper=True)
@@ -96,7 +90,7 @@ def plate_reader_actions(
     protocol.move_labware(hellma_plate, plate_reader, use_gripper=True)
     plate_reader.close_lid()
     result = plate_reader.read(str(datetime.now()))
-    msg = f"result {hellma_plate_name}: {result}"
+    msg = f"{hellma_plate_name} result: {result}"
     protocol.comment(msg=msg)
     plate_reader.open_lid()
     protocol.move_labware(hellma_plate, HELLMA_PLATE_SLOT, use_gripper=True)
@@ -108,7 +102,7 @@ def run(protocol: ProtocolContext) -> None:
     # LOAD PARAMETERS
     heater_shaker_speed = protocol.params.heater_shaker_speed  # type: ignore[attr-defined]
     dot_bottom = protocol.params.dot_bottom  # type: ignore[attr-defined]
-    plate_orientation = protocol.params.plate_orientation # type: ignore[attr-defined]
+    plate_orientation = protocol.params.plate_orientation  # type: ignore[attr-defined]
     plate_name_str = "hellma_plate_" + str(plate_orientation)
     global p200_tips
     global p50_tips
