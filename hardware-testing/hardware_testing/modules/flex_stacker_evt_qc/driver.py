@@ -176,6 +176,20 @@ class FlexStacker:
         assert match, f"Incorrect Response for hopper door switch: {res}"
         return bool(int(match.group(1)))
 
+    def get_estop(self) -> bool:
+        """Get E-Stop status.
+
+        :return: True if E-Stop is triggered, False otherwise
+        """
+        if self._simulating:
+            return True
+
+        _LS_RE = re.compile(r"^M112 (\d) OK\n")
+        res = self._send_and_recv("M112\n", "M112 ")
+        match = _LS_RE.match(res)
+        assert match, f"Incorrect Response for E-Stop switch: {res}"
+        return bool(int(match.group(1)))
+
     def move_in_mm(
         self, axis: StackerAxis, distance: float, params: MoveParams | None = None
     ) -> None:
