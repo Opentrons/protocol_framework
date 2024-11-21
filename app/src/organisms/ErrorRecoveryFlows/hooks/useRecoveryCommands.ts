@@ -105,6 +105,7 @@ export function useRecoveryCommands({
   } = useUpdateErrorRecoveryPolicy(runId)
   const { makeSuccessToast } = recoveryToastUtils
 
+  // TODO(jh, 11-21-24): Some commands return a 200 with an error body. We should catch these and propagate the error.
   const chainRunRecoveryCommands = useCallback(
     (
       commands: CreateCommand[],
@@ -354,8 +355,8 @@ export const HOME_PIPETTE_Z_AXES: CreateCommand = {
 }
 
 export const RELEASE_GRIPPER_JAW: CreateCommand = {
-  commandType: 'unsafe/ungripLabware',
-  params: {},
+  commandType: 'home',
+  params: { axes: ['extensionJaw'] },
   intent: 'fixit',
 }
 
