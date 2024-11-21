@@ -38,13 +38,13 @@ def run(ctx: ProtocolContext) -> None:
     tartrazine_tube = tube_rack["A3"]
 
     sample_plate_1 = ctx.load_labware(
-        "armadillo_96_wellplate_200ul_pcr_full_skirt", "D1", "Sample Plate 1"
+        "nest_96_wellplate_200ul_flat", "D1", "Sample Plate 1"
     )
     sample_plate_2 = ctx.load_labware(
-        "armadillo_96_wellplate_200ul_pcr_full_skirt", "C1", "Sample Plate 2"
+        "nest_96_wellplate_200ul_flat", "C1", "Sample Plate 2"
     )
     sample_plate_3 = ctx.load_labware(
-        "armadillo_96_wellplate_200ul_pcr_full_skirt", "B1", "Sample Plate 3"
+        "nest_96_wellplate_200ul_flat", "B1", "Sample Plate 3"
     )
     sample_plate_list = [sample_plate_1, sample_plate_2, sample_plate_3]
     tiprack_50_1 = ctx.load_labware("opentrons_flex_96_tiprack_50ul", "D3")
