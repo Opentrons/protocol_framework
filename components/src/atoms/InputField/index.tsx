@@ -232,13 +232,13 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
       color: ${props.disabled ? COLORS.grey40 : COLORS.grey50};
       font: ${TYPOGRAPHY.bodyTextRegular};
       text-align: ${TYPOGRAPHY.textAlignRight};
+      white-space: ${NO_WRAP};
       @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
         color: ${props.disabled ? COLORS.grey40 : COLORS.grey50};
         font-size: ${TYPOGRAPHY.fontSize22};
         font-weight: ${TYPOGRAPHY.fontWeightRegular};
         line-height: ${TYPOGRAPHY.lineHeight28};
         justify-content: ${textAlign};
-        white-space: ${NO_WRAP};
       }
     `
 
