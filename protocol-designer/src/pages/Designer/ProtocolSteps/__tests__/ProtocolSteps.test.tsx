@@ -104,8 +104,8 @@ describe('ProtocolSteps', () => {
   it('renders the hot keys display', () => {
     render()
     screen.getByText('Double-click to edit')
-    screen.getByText('⇧ + click to select range')
-    screen.getByText('^/⌘ + click to select multiple')
+    screen.getByText('Shift + click to select range')
+    screen.getByText('Command + click to select multiple')
   })
 
   it('renders the current step name', () => {
