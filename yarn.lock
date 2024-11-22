@@ -3403,6 +3403,7 @@
     reselect "4.0.0"
     rxjs "^6.5.1"
     semver "5.7.2"
+    simple-keyboard-layouts "3.4.41"
     styled-components "5.3.6"
     typeface-open-sans "0.0.75"
     uuid "3.2.1"
@@ -20040,6 +20041,11 @@ simple-git@^3.15.1:
     "@kwsites/file-exists" "^1.1.1"
     "@kwsites/promise-deferred" "^1.1.1"
     debug "^4.3.4"
+
+simple-keyboard-layouts@3.4.41:
+  version "3.4.41"
+  resolved "https://registry.yarnpkg.com/simple-keyboard-layouts/-/simple-keyboard-layouts-3.4.41.tgz#eb1504c36626f29b0d5590d419ab39c43d06969a"
+  integrity sha512-vVnPRgZmK9DqbqUxOgZesdAlWkzY1Cvxf8YaFW3SHJHQKuvCkR8VL6TjJyrpM8BkJa3W4ry1i3CsSydlPckAoQ==
 
 simple-swizzle@^0.2.2:
   version "0.2.2"

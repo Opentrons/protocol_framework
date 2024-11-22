@@ -46,11 +46,7 @@ export function SystemLanguagePreferenceModal(): JSX.Element | null {
   const storedSystemLanguage = useSelector(getStoredSystemLanguage)
 
   const showBootModal = appLanguage == null && systemLanguage != null
-  const showUpdateModal =
-    appLanguage != null &&
-    systemLanguage != null &&
-    storedSystemLanguage != null &&
-    systemLanguage !== storedSystemLanguage
+  const [showUpdateModal, setShowUpdateModal] = useState(false)
 
   const title = showUpdateModal
     ? t('system_language_preferences_update')
@@ -120,6 +116,13 @@ export function SystemLanguagePreferenceModal(): JSX.Element | null {
           void i18n.changeLanguage(systemLanguage)
         }
       }
+      // only show update modal if we support the language their system has updated to
+      setShowUpdateModal(
+        appLanguage != null &&
+          matchedSystemLanguageOption != null &&
+          storedSystemLanguage != null &&
+          systemLanguage !== storedSystemLanguage
+      )
     }
   }, [i18n, systemLanguage, showBootModal])
 
