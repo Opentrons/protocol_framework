@@ -873,7 +873,8 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         supported = self._sync_hardware_api.get_pressure_sensor_available(
             mount=self.get_mount()
         )
-        assert isinstance(supported, bool)
+        if not isinstance(supported, bool):
+            return False
         return supported
 
     def detect_liquid_presence(self, well_core: WellCore, loc: Location) -> bool:

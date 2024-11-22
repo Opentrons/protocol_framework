@@ -1702,13 +1702,13 @@ class InstrumentContext(publisher.CommandPublisher):
         When ``True``, the pipette will check for liquid on every aspiration.
         Defaults to ``False``. See :ref:`lpd`.
         """
-        self._raise_if_pressure_not_supported_by_pipette()
         return self._core.get_liquid_presence_detection()
 
     @liquid_presence_detection.setter
     @requires_version(2, 20)
     def liquid_presence_detection(self, enable: bool) -> None:
-        self._raise_if_pressure_not_supported_by_pipette()
+        if enable:
+            self._raise_if_pressure_not_supported_by_pipette()
         self._core.set_liquid_presence_detection(enable)
 
     @property

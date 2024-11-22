@@ -733,6 +733,7 @@ async def test_liquid_probe(
     mock_move_group_run.side_effect = probe_move_group_run_side_effect(
         head_node, tool_node
     )
+    controller._pipettes_to_monitor_pressure = mock.MagicMock(return_value=[sensor_node_for_mount(mount)])
     try:
         await controller.liquid_probe(
             mount=mount,
