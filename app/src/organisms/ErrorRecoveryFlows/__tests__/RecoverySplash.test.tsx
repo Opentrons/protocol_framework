@@ -80,11 +80,14 @@ describe('RecoverySplash', () => {
   let props: React.ComponentProps<typeof RecoverySplash>
   const mockToggleERWiz = vi.fn(() => Promise.resolve())
   const mockProceedToRouteAndStep = vi.fn()
+  const mockHandleMotionRouting = vi.fn(() => Promise.resolve())
   const mockRouteUpdateActions = {
     proceedToRouteAndStep: mockProceedToRouteAndStep,
+    handleMotionRouting: mockHandleMotionRouting,
   } as any
   const mockMakeToast = vi.fn()
   const mockResumeRecovery = vi.fn()
+  const mockHomePipetteZAxes = vi.fn(() => Promise.resolve())
 
   beforeEach(() => {
     props = {
@@ -96,6 +99,7 @@ describe('RecoverySplash', () => {
         resumeRecovery: mockResumeRecovery,
       } as any,
       resumePausedRecovery: true,
+      recoveryCommands: { homePipetteZAxes: mockHomePipetteZAxes } as any,
     }
 
     vi.mocked(StepInfo).mockReturnValue(<div>MOCK STEP INFO</div>)
@@ -161,6 +165,13 @@ describe('RecoverySplash', () => {
     })
     await waitFor(() => {
       expect(mockToggleERWiz).toHaveBeenCalledWith(true, true)
+    })
+
+    expect(mockHandleMotionRouting).toHaveBeenNthCalledWith(1, true)
+    expect(mockHandleMotionRouting).toHaveBeenNthCalledWith(2, false)
+
+    await waitFor(() => {
+      expect(props.recoveryCommands.homePipetteZAxes).toHaveBeenCalled()
     })
   })
 

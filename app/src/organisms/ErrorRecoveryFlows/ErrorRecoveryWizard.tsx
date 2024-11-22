@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 
@@ -75,21 +75,12 @@ export type ErrorRecoveryWizardProps = ErrorRecoveryFlowsProps &
 export function ErrorRecoveryWizard(
   props: ErrorRecoveryWizardProps
 ): JSX.Element {
-  const {
-    hasLaunchedRecovery,
-    failedCommand,
-    recoveryCommands,
-    routeUpdateActions,
-  } = props
-  const errorKind = getErrorKind(failedCommand)
-
-  useInitialPipetteHome({
-    hasLaunchedRecovery,
-    recoveryCommands,
-    routeUpdateActions,
-  })
-
-  return <ErrorRecoveryComponent errorKind={errorKind} {...props} />
+  return (
+    <ErrorRecoveryComponent
+      errorKind={getErrorKind(props.failedCommand)}
+      {...props}
+    />
+  )
 }
 
 export function ErrorRecoveryComponent(
@@ -279,27 +270,4 @@ export function ErrorRecoveryContent(props: RecoveryContentProps): JSX.Element {
     default:
       return buildSelectRecoveryOption()
   }
-}
-interface UseInitialPipetteHomeParams {
-  hasLaunchedRecovery: ErrorRecoveryWizardProps['hasLaunchedRecovery']
-  recoveryCommands: ErrorRecoveryWizardProps['recoveryCommands']
-  routeUpdateActions: ErrorRecoveryWizardProps['routeUpdateActions']
-}
-// Home the Z-axis of all attached pipettes on Error Recovery launch.
-export function useInitialPipetteHome({
-  hasLaunchedRecovery,
-  recoveryCommands,
-  routeUpdateActions,
-}: UseInitialPipetteHomeParams): void {
-  const { homePipetteZAxes } = recoveryCommands
-  const { handleMotionRouting } = routeUpdateActions
-
-  // Synchronously set the recovery route to "robot in motion" before initial render to prevent screen flicker on ER launch.
-  useLayoutEffect(() => {
-    if (hasLaunchedRecovery) {
-      void handleMotionRouting(true)
-        .then(() => homePipetteZAxes())
-        .finally(() => handleMotionRouting(false))
-    }
-  }, [hasLaunchedRecovery])
 }
