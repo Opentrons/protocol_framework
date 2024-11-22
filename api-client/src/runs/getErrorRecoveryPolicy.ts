@@ -10,7 +10,7 @@ export function getErrorRecoveryPolicy(
 ): ResponsePromise<ErrorRecoveryPolicyResponse> {
   return request<ErrorRecoveryPolicyResponse>(
     GET,
-    `/get/${runId}/errorRecoveryPolicy`,
+    `/runs/${runId}/errorRecoveryPolicy`,
     null,
     config
   )
