@@ -73,7 +73,7 @@ function interpretResults(result) {
   } else if (strength > 0.3) {
     return `Moderate ${direction} correlation (>0.3 and <0.7)`
   } else {
-    return `Weak ${direction} correlation (>=0.3)`
+    return `Weak ${direction} correlation (<=0.3)`
   }
 }
 

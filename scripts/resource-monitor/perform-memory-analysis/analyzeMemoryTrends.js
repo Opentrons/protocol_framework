@@ -13,6 +13,7 @@ const {
 } = require('../lib/analysis')
 const {
   AGGREGATED_PROCESSES,
+  AGGREGATED_PROCESS_NAMES,
   BLACKLISTED_PROCESSES,
   MINIMUM_VALID_SAMPLE_SIZE,
   P_VALUE_SIGNIFICANCE_THRESHOLD,
@@ -189,9 +190,16 @@ function analyzeProcessMemoryTrends(data) {
     rangeAverages: calculateRangeAverages(systemMemory, 'systemAvailMemMb'),
   })
 
-  // Filter out any process with a negative correlation
+  // Filter out any process with a negative correlation except for a few key ones.
   for (const [processName, memResults] of results.entries()) {
-    if (memResults.correlation < 0 && processName !== 'odd-available-memory') {
+    if (
+      memResults.correlation < 0 &&
+      processName !== 'odd-available-memory' &&
+      ![
+        AGGREGATED_PROCESS_NAMES.APP_RENDERER,
+        AGGREGATED_PROCESS_NAMES.SERVER_UVICORN,
+      ].includes(processName)
+    ) {
       results.delete(processName)
     }
   }

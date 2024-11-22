@@ -1,3 +1,10 @@
+const AGGREGATED_PROCESS_NAMES = {
+  APP_RENDERER: 'app-renderer-processes',
+  APP_ZYGOTE: 'app-zygote-processes',
+  SERVER_UVICORN: 'robot-server-uvicorn-processes',
+  APP_UTILITY: 'app-utility-processes',
+}
+
 /**
  * @description Several processes we care about execute with a lot of unique sub args determined at
  * runtime. These processes are aggregated using a regex pattern.
@@ -5,19 +12,19 @@
 const AGGREGATED_PROCESSES = [
   {
     pattern: /^\/opt\/opentrons-app\/opentrons --type=renderer/,
-    key: 'app-renderer-processes',
+    key: AGGREGATED_PROCESS_NAMES.APP_RENDERER,
   },
   {
     pattern: /^\/opt\/opentrons-app\/opentrons --type=zygote/,
-    key: 'app-zygote-processes',
+    key: AGGREGATED_PROCESS_NAMES.APP_ZYGOTE,
   },
   {
     pattern: /^python3 -m uvicorn/,
-    key: 'robot-server-uvicorn-processes',
+    key: AGGREGATED_PROCESS_NAMES.SERVER_UVICORN,
   },
   {
     pattern: /^\/opt\/opentrons-app\/opentrons --type=utility/,
-    key: 'app-utility-processes',
+    key: AGGREGATED_PROCESS_NAMES.APP_UTILITY,
   },
 ]
 
@@ -35,6 +42,7 @@ const P_VALUE_SIGNIFICANCE_THRESHOLD = 0.05
 
 module.exports = {
   AGGREGATED_PROCESSES,
+  AGGREGATED_PROCESS_NAMES,
   BLACKLISTED_PROCESSES,
   MINIMUM_VALID_SAMPLE_SIZE,
   P_VALUE_SIGNIFICANCE_THRESHOLD,
