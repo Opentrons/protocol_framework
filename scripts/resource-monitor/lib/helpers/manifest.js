@@ -1,6 +1,6 @@
 const fetch = require('node-fetch')
 
-const APP_MANIFEST = 'https://builds.opentrons.com/app/releases.json'
+const APP_MANIFEST = 'https://builds.opentrons.com/ot3-oe/releases.json'
 
 async function downloadAppManifest() {
   const response = await fetch(APP_MANIFEST)
