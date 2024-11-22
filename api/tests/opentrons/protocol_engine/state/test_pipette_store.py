@@ -220,6 +220,13 @@ def test_handles_load_pipette(
         back_left_corner_offset=Point(x=1, y=2, z=3),
         front_right_corner_offset=Point(x=4, y=5, z=6),
         pipette_lld_settings={},
+        plunger_positions={
+            "top": 0.0,
+            "bottom": 5.0,
+            "blow_out": 19.0,
+            "drop_tip": 20.0,
+        },
+        shaft_ul_per_mm=5.0,
     )
     config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
@@ -772,6 +779,13 @@ def test_add_pipette_config(
         back_left_corner_offset=Point(x=1, y=2, z=3),
         front_right_corner_offset=Point(x=4, y=5, z=6),
         pipette_lld_settings={},
+        plunger_positions={
+            "top": 0.0,
+            "bottom": 5.0,
+            "blow_out": 19.0,
+            "drop_tip": 20.0,
+        },
+        shaft_ul_per_mm=5.0,
     )
 
     subject.handle_action(
@@ -810,6 +824,13 @@ def test_add_pipette_config(
             back_right_corner=Point(x=4, y=2, z=3),
         ),
         lld_settings={},
+        plunger_positions={
+            "top": 0.0,
+            "bottom": 5.0,
+            "blow_out": 19.0,
+            "drop_tip": 20.0,
+        },
+        shaft_ul_per_mm=5.0,
     )
     assert subject.state.flow_rates_by_id["pipette-id"].default_aspirate == {"a": 1.0}
     assert subject.state.flow_rates_by_id["pipette-id"].default_dispense == {"b": 2.0}

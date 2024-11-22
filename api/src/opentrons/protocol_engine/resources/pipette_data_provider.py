@@ -67,6 +67,8 @@ class LoadedStaticPipetteData:
     back_left_corner_offset: Point
     front_right_corner_offset: Point
     pipette_lld_settings: Optional[Dict[str, Dict[str, float]]]
+    plunger_positions: Dict[str, float]
+    shaft_ul_per_mm: float
 
 
 class VirtualPipetteDataProvider:
@@ -252,6 +254,7 @@ class VirtualPipetteDataProvider:
 
         pip_back_left = config.pipette_bounding_box_offsets.back_left_corner
         pip_front_right = config.pipette_bounding_box_offsets.front_right_corner
+        plunger_positions = config.plunger_positions_configurations[liquid_class]
         return LoadedStaticPipetteData(
             model=str(pipette_model),
             display_name=config.display_name,
@@ -280,6 +283,13 @@ class VirtualPipetteDataProvider:
                 pip_front_right[0], pip_front_right[1], pip_front_right[2]
             ),
             pipette_lld_settings=config.lld_settings,
+            plunger_positions={
+                "top": plunger_positions.top,
+                "bottom": plunger_positions.bottom,
+                "blow_out": plunger_positions.blow_out,
+                "drop_tip": plunger_positions.drop_tip,
+            },
+            shaft_ul_per_mm=config.shaft_ul_per_mm,
         )
 
     def get_virtual_pipette_static_config(
@@ -327,6 +337,8 @@ def get_pipette_static_config(
             front_right_offset[0], front_right_offset[1], front_right_offset[2]
         ),
         pipette_lld_settings=pipette_dict["lld_settings"],
+        plunger_positions=pipette_dict["plunger_positions"],
+        shaft_ul_per_mm=pipette_dict["shaft_ul_per_mm"],
     )
 
 

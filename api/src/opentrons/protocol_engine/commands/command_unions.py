@@ -13,6 +13,7 @@ from .pipetting_common import (
     LiquidNotFoundError,
     TipPhysicallyAttachedError,
 )
+from .movement_common import StallOrCollisionError
 
 from . import absorbance_reader
 from . import heater_shaker
@@ -754,6 +755,7 @@ CommandDefinedErrorData = Union[
     DefinedErrorData[OverpressureError],
     DefinedErrorData[LiquidNotFoundError],
     DefinedErrorData[GripperMovementError],
+    DefinedErrorData[StallOrCollisionError],
 ]
 
 

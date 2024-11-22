@@ -77,7 +77,7 @@ export const TimelineToolbox = (): JSX.Element => {
       >
         <TerminalItemStep
           id={START_TERMINAL_ITEM_ID}
-          title={t('starting_deck_state')}
+          title={t('starting_deck')}
         />
         <DraggableSteps
           orderedStepIds={orderedStepIds}
@@ -86,10 +86,7 @@ export const TimelineToolbox = (): JSX.Element => {
           }}
         />
         <PresavedStep />
-        <TerminalItemStep
-          id={END_TERMINAL_ITEM_ID}
-          title={t('final_deck_state')}
-        />
+        <TerminalItemStep id={END_TERMINAL_ITEM_ID} title={t('ending_deck')} />
       </Flex>
     </Toolbox>
   )

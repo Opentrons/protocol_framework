@@ -1940,16 +1940,35 @@
         "airGapByVolume": {
           "title": "Airgapbyvolume",
           "description": "Settings for air gap keyed by target aspiration volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               }
             ]
           }
@@ -2073,16 +2092,35 @@
         "flowRateByVolume": {
           "title": "Flowratebyvolume",
           "description": "Settings for flow rate keyed by target aspiration volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               }
             ]
           }
@@ -2218,16 +2256,35 @@
         "airGapByVolume": {
           "title": "Airgapbyvolume",
           "description": "Settings for air gap keyed by target aspiration volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               }
             ]
           }
@@ -2313,16 +2370,35 @@
         "flowRateByVolume": {
           "title": "Flowratebyvolume",
           "description": "Settings for flow rate keyed by target dispense volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               }
             ]
           }
@@ -2339,16 +2415,35 @@
         "pushOutByVolume": {
           "title": "Pushoutbyvolume",
           "description": "Settings for pushout keyed by target dispense volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               }
             ]
           }
@@ -2417,16 +2512,35 @@
         "flowRateByVolume": {
           "title": "Flowratebyvolume",
           "description": "Settings for flow rate keyed by target dispense volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               }
             ]
           }
@@ -2434,16 +2548,35 @@
         "conditioningByVolume": {
           "title": "Conditioningbyvolume",
           "description": "Settings for conditioning volume keyed by target dispense volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               }
             ]
           }
@@ -2451,16 +2584,35 @@
         "disposalByVolume": {
           "title": "Disposalbyvolume",
           "description": "Settings for disposal volume keyed by target dispense volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               }
             ]
           }
@@ -2690,6 +2842,7 @@
         "p1000_single_gen2",
         "p1000_single_flex",
         "p1000_multi_flex",
+        "p1000_multi_em",
         "p1000_96",
         "p200_96"
       ],

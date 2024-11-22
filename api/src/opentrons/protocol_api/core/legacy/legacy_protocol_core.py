@@ -37,7 +37,6 @@ class LegacyProtocolCore(
         LegacyInstrumentCore,
         LegacyLabwareCore,
         legacy_module_core.LegacyModuleCore,
-        # None,
     ]
 ):
     def __init__(

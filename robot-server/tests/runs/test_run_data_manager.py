@@ -105,6 +105,7 @@ def engine_state_summary() -> StateSummary:
         pipettes=[LoadedPipette.construct(id="some-pipette-id")],  # type: ignore[call-arg]
         modules=[LoadedModule.construct(id="some-module-id")],  # type: ignore[call-arg]
         liquids=[Liquid(id="some-liquid-id", displayName="liquid", description="desc")],
+        liquidClasses=[],
         wells=[],
     )
 
@@ -288,6 +289,7 @@ async def test_create(
         pipettes=engine_state_summary.pipettes,
         modules=engine_state_summary.modules,
         liquids=engine_state_summary.liquids,
+        liquidClasses=engine_state_summary.liquidClasses,
         runTimeParameters=[bool_parameter, file_parameter],
         outputFileIds=engine_state_summary.files,
     )
@@ -395,6 +397,7 @@ async def test_get_current_run(
         pipettes=engine_state_summary.pipettes,
         modules=engine_state_summary.modules,
         liquids=engine_state_summary.liquids,
+        liquidClasses=engine_state_summary.liquidClasses,
         runTimeParameters=run_time_parameters,
         outputFileIds=engine_state_summary.files,
     )
@@ -438,6 +441,7 @@ async def test_get_historical_run(
         pipettes=engine_state_summary.pipettes,
         modules=engine_state_summary.modules,
         liquids=engine_state_summary.liquids,
+        liquidClasses=engine_state_summary.liquidClasses,
         runTimeParameters=run_time_parameters,
         outputFileIds=engine_state_summary.files,
     )
@@ -482,6 +486,7 @@ async def test_get_historical_run_no_data(
         pipettes=[],
         modules=[],
         liquids=[],
+        liquidClasses=[],
         runTimeParameters=run_time_parameters,
         outputFileIds=[],
     )
@@ -503,6 +508,7 @@ async def test_get_all_runs(
         pipettes=[LoadedPipette.construct(id="current-pipette-id")],  # type: ignore[call-arg]
         modules=[LoadedModule.construct(id="current-module-id")],  # type: ignore[call-arg]
         liquids=[Liquid(id="some-liquid-id", displayName="liquid", description="desc")],
+        liquidClasses=[],
         wells=[],
     )
     current_run_time_parameters: List[pe_types.RunTimeParameter] = [
@@ -523,6 +529,7 @@ async def test_get_all_runs(
         pipettes=[LoadedPipette.construct(id="old-pipette-id")],  # type: ignore[call-arg]
         modules=[LoadedModule.construct(id="old-module-id")],  # type: ignore[call-arg]
         liquids=[],
+        liquidClasses=[],
         wells=[],
     )
     historical_run_time_parameters: List[pe_types.RunTimeParameter] = [
@@ -584,6 +591,7 @@ async def test_get_all_runs(
             pipettes=historical_run_data.pipettes,
             modules=historical_run_data.modules,
             liquids=historical_run_data.liquids,
+            liquidClasses=historical_run_data.liquidClasses,
             runTimeParameters=historical_run_time_parameters,
             outputFileIds=historical_run_data.files,
         ),
@@ -601,6 +609,7 @@ async def test_get_all_runs(
             pipettes=current_run_data.pipettes,
             modules=current_run_data.modules,
             liquids=current_run_data.liquids,
+            liquidClasses=current_run_data.liquidClasses,
             runTimeParameters=current_run_time_parameters,
             outputFileIds=current_run_data.files,
         ),
@@ -700,6 +709,7 @@ async def test_update_current(
         pipettes=engine_state_summary.pipettes,
         modules=engine_state_summary.modules,
         liquids=engine_state_summary.liquids,
+        liquidClasses=engine_state_summary.liquidClasses,
         runTimeParameters=run_time_parameters,
         outputFileIds=engine_state_summary.files,
     )
@@ -757,6 +767,7 @@ async def test_update_current_noop(
         pipettes=engine_state_summary.pipettes,
         modules=engine_state_summary.modules,
         liquids=engine_state_summary.liquids,
+        liquidClasses=engine_state_summary.liquidClasses,
         runTimeParameters=run_time_parameters,
         outputFileIds=engine_state_summary.files,
     )

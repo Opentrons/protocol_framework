@@ -16,7 +16,7 @@ export function ListButtonAccordionContainer(
   const { id, children } = props
 
   return (
-    <Flex key={id} flexDirection={DIRECTION_COLUMN}>
+    <Flex key={id} flexDirection={DIRECTION_COLUMN} width="100%">
       {children}
     </Flex>
   )

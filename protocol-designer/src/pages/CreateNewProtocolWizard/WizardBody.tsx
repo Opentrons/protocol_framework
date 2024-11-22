@@ -1,6 +1,6 @@
-import type * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import styled from 'styled-components'
+import { css } from 'styled-components'
+import { useState, useLayoutEffect } from 'react'
 import {
   ALIGN_CENTER,
   ALIGN_END,
@@ -18,7 +18,12 @@ import {
   TYPOGRAPHY,
   useHoverTooltip,
 } from '@opentrons/components'
-import temporaryImg from '../../assets/images/placeholder_image_delete.png'
+import one from '../../assets/images/onboarding_animation_1.webm'
+import two from '../../assets/images/onboarding_animation_2.webm'
+import three from '../../assets/images/onboarding_animation_3.webm'
+import four from '../../assets/images/onboarding_animation_4.webm'
+import five from '../../assets/images/onboarding_animation_5.webm'
+import six from '../../assets/images/onboarding_animation_6.webm'
 import { BUTTON_LINK_STYLE } from '../../atoms'
 
 interface WizardBodyProps {
@@ -29,9 +34,18 @@ interface WizardBodyProps {
   disabled?: boolean
   goBack?: () => void
   subHeader?: string
-  imgSrc?: string
   tooltipOnDisabled?: string
 }
+
+const ONBOARDING_ANIMATIONS: Record<number, string> = {
+  1: one,
+  2: two,
+  3: three,
+  4: four,
+  5: five,
+  6: six,
+}
+
 export function WizardBody(props: WizardBodyProps): JSX.Element {
   const {
     stepNumber,
@@ -41,13 +55,26 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
     subHeader,
     proceed,
     disabled = false,
-    imgSrc,
     tooltipOnDisabled,
   } = props
   const { t } = useTranslation('shared')
   const [targetProps, tooltipProps] = useHoverTooltip({
     placement: 'top',
   })
+  const [asset, setAsset] = useState<string | null>(null)
+  const [loaded, setLoaded] = useState<boolean>(false)
+
+  useLayoutEffect(() => {
+    const videoAsset = ONBOARDING_ANIMATIONS[stepNumber]
+    setLoaded(false)
+    setAsset(videoAsset)
+    const timeout = setTimeout(() => {
+      setLoaded(true)
+    }, 100)
+    return () => {
+      clearTimeout(timeout)
+    }
+  }, [stepNumber])
 
   return (
     <Flex
@@ -104,7 +131,7 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
               </StyledText>
             </Btn>
           ) : null}
-          <Flex {...targetProps}>
+          <Flex {...targetProps} maxHeight="3.5rem">
             <LargeButton
               disabled={disabled}
               onClick={proceed}
@@ -119,17 +146,29 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
           ) : null}
         </Flex>
       </Flex>
-      <StyledImg
-        //    TODO(ja, 8/7/24): delete this and add real images!!
-        src={imgSrc ?? temporaryImg}
+      <Flex
         width="40%"
-        height="100%"
-      />
+        css={css`
+          opacity: ${loaded ? 1 : 0};
+          transition: opacity 0.5s ease-in-out;
+        `}
+      >
+        <video
+          preload="auto"
+          css={css`
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: ${BORDERS.borderRadius16};
+          `}
+          autoPlay={true}
+          loop={false}
+          controls={false}
+          aria-label={`onboarding animation for page ${stepNumber}`}
+        >
+          <source src={asset ?? ''} type="video/mp4" />
+        </video>
+      </Flex>
     </Flex>
   )
 }
-
-const StyledImg = styled.img`
-  border-radius: ${BORDERS.borderRadius16};
-  max-height: 844px;
-`

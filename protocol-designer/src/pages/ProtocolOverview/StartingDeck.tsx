@@ -11,6 +11,7 @@ import {
   Btn,
   TYPOGRAPHY,
   ToggleGroup,
+  Box,
 } from '@opentrons/components'
 
 import { BUTTON_LINK_STYLE } from '../../atoms'
@@ -88,11 +89,13 @@ export function StartingDeck({
         ) : (
           <OffDeckThumbnail hover={hover} setHover={setHover} width="100%" />
         )}
-        <SlotDetailsContainer
-          robotType={robotType}
-          slot={isOffDeckHover ? 'offDeck' : hover}
-          offDeckLabwareId={isOffDeckHover ? hover : null}
-        />
+        <Box width="100%" height="12.5rem">
+          <SlotDetailsContainer
+            robotType={robotType}
+            slot={isOffDeckHover ? 'offDeck' : hover}
+            offDeckLabwareId={isOffDeckHover ? hover : null}
+          />
+        </Box>
       </Flex>
     </>
   )

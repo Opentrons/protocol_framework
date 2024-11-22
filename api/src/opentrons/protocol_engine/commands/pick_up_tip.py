@@ -14,7 +14,11 @@ from ..types import PickUpTipWellLocation
 from .pipetting_common import (
     PipetteIdMixin,
 )
-from .movement_common import DestinationPositionResult, move_to_well
+from .movement_common import (
+    DestinationPositionResult,
+    StallOrCollisionError,
+    move_to_well,
+)
 from .command import (
     AbstractCommandImpl,
     BaseCommand,
@@ -88,7 +92,8 @@ class TipPhysicallyMissingError(ErrorOccurrence):
 
 _ExecuteReturn = Union[
     SuccessData[PickUpTipResult],
-    DefinedErrorData[TipPhysicallyMissingError],
+    DefinedErrorData[TipPhysicallyMissingError]
+    | DefinedErrorData[StallOrCollisionError],
 ]
 
 
@@ -121,11 +126,14 @@ class PickUpTipImplementation(AbstractCommandImpl[PickUpTipParams, _ExecuteRetur
         )
         move_result = await move_to_well(
             movement=self._movement,
+            model_utils=self._model_utils,
             pipette_id=pipette_id,
             labware_id=labware_id,
             well_name=well_name,
             well_location=well_location,
         )
+        if isinstance(move_result, DefinedErrorData):
+            return move_result
 
         try:
             tip_geometry = await self._tip_handler.pick_up_tip(
@@ -194,7 +202,11 @@ class PickUpTipImplementation(AbstractCommandImpl[PickUpTipParams, _ExecuteRetur
 
 
 class PickUpTip(
-    BaseCommand[PickUpTipParams, PickUpTipResult, TipPhysicallyMissingError]
+    BaseCommand[
+        PickUpTipParams,
+        PickUpTipResult,
+        TipPhysicallyMissingError | StallOrCollisionError,
+    ]
 ):
     """Pick up tip command model."""
 

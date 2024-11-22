@@ -17,6 +17,7 @@ import {
   hoverOnStep,
   toggleViewSubstep,
 } from '../../../../ui/steps/actions/actions'
+import { OPEN_STEP_DETAILS_EVENT } from '../../../../analytics/constants'
 import {
   getBatchEditFormHasUnsavedChanges,
   getCurrentFormHasUnsavedChanges,
@@ -63,7 +64,9 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
   const isPipetteStep =
     savedStepFormData.stepType === 'moveLiquid' ||
     savedStepFormData.stepType === 'mix'
-  const isThermocyclerProfile = savedStepFormData.stepType === 'thermocycler'
+  const isThermocyclerProfile =
+    savedStepFormData.stepType === 'thermocycler' &&
+    savedStepFormData.thermocyclerFormType === 'thermocyclerProfile'
 
   const duplicateStep = (
     stepId: StepIdType
@@ -81,7 +84,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
   }
 
   const selectViewDetailsEvent: AnalyticsEvent = {
-    name: 'openStepDetails',
+    name: OPEN_STEP_DETAILS_EVENT,
     properties: {},
   }
 

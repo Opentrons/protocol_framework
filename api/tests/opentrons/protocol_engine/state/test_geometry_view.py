@@ -2611,6 +2611,13 @@ def test_get_next_drop_tip_location(
                 back_right_corner=Point(x=40, y=20, z=60),
             ),
             lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
         )
     )
     decoy.when(mock_pipette_view.get_mount("pip-123")).then_return(pipette_mount)

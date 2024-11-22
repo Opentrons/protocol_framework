@@ -15,7 +15,11 @@ from .pipetting_common import (
     PipetteIdMixin,
     TipPhysicallyAttachedError,
 )
-from .movement_common import DestinationPositionResult, move_to_well
+from .movement_common import (
+    DestinationPositionResult,
+    move_to_well,
+    StallOrCollisionError,
+)
 from .command import (
     AbstractCommandImpl,
     BaseCommand,
@@ -69,7 +73,9 @@ class DropTipResult(DestinationPositionResult):
 
 
 _ExecuteReturn = (
-    SuccessData[DropTipResult] | DefinedErrorData[TipPhysicallyAttachedError]
+    SuccessData[DropTipResult]
+    | DefinedErrorData[TipPhysicallyAttachedError]
+    | DefinedErrorData[StallOrCollisionError]
 )
 
 
@@ -117,11 +123,14 @@ class DropTipImplementation(AbstractCommandImpl[DropTipParams, _ExecuteReturn]):
 
         move_result = await move_to_well(
             movement=self._movement_handler,
+            model_utils=self._model_utils,
             pipette_id=pipette_id,
             labware_id=labware_id,
             well_name=well_name,
             well_location=tip_drop_location,
         )
+        if isinstance(move_result, DefinedErrorData):
+            return move_result
 
         try:
             await self._tip_handler.drop_tip(
@@ -166,7 +175,11 @@ class DropTipImplementation(AbstractCommandImpl[DropTipParams, _ExecuteReturn]):
             )
 
 
-class DropTip(BaseCommand[DropTipParams, DropTipResult, TipPhysicallyAttachedError]):
+class DropTip(
+    BaseCommand[
+        DropTipParams, DropTipResult, TipPhysicallyAttachedError | StallOrCollisionError
+    ]
+):
     """Drop tip command model."""
 
     commandType: DropTipCommandType = "dropTip"
