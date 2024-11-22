@@ -229,8 +229,10 @@ export function useRecoveryCommands({
 
         return updateErrorRecoveryPolicy(ignorePolicyRules, 'append')
           .then(() => Promise.resolve())
-          .catch(() =>
-            Promise.reject(new Error('Failed to update recovery policy.'))
+          .catch((e: Error) =>
+            Promise.reject(
+              new Error(`Failed to update recovery policy: ${e.message}`)
+            )
           )
       } else {
         void proceedToRouteAndStep(RECOVERY_MAP.ERROR_WHILE_RECOVERING.ROUTE)

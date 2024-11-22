@@ -38,7 +38,7 @@ export function useUpdateRecoveryPolicyWithStrategy(
     strategy: UpdateErrorRecoveryPolicyWithStrategy['strategy']
   ) =>
     getErrorRecoveryPolicy(host as HostConfig, runId).then(res => {
-      const existingPolicyRules = res.data.policyRules.map(rule => ({
+      const existingPolicyRules = res.data.data.policyRules.map(rule => ({
         commandType: rule.matchCriteria.command.commandType,
         errorType: rule.matchCriteria.command.error.errorType,
         ifMatch: rule.ifMatch,
@@ -49,7 +49,7 @@ export function useUpdateRecoveryPolicyWithStrategy(
           case 'append':
             return [...existingPolicyRules, newPolicy]
           default: {
-            console.error('Handled policy strategy, using append.')
+            console.error('Unhandled policy strategy, defaulting to append.')
             return [...existingPolicyRules, newPolicy]
           }
         }
