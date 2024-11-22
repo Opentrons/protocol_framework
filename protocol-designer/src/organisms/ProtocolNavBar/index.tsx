@@ -8,6 +8,7 @@ import {
   COLORS,
   DIRECTION_COLUMN,
   Flex,
+  isntStyleProp,
   JUSTIFY_SPACE_BETWEEN,
   SecondaryButton,
   SPACING,
@@ -21,26 +22,22 @@ import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
 import { useKitchen } from '../Kitchen/hooks'
 import { LiquidButton } from './LiquidButton'
 
-import type { TabProps } from '@opentrons/components'
+import type { StyleProps, TabProps } from '@opentrons/components'
 
 interface ProtocolNavBarProps {
   hasZoomInSlot?: boolean
   tabs?: TabProps[]
   hasTrashEntity?: boolean
   showLiquidOverflowMenu?: (liquidOverflowMenu: boolean) => void
-  isAddingHardwareOrLabware?: boolean
   liquidPage?: boolean
-  isOffDeck?: boolean
 }
 
 export function ProtocolNavBar({
   hasZoomInSlot,
-  isAddingHardwareOrLabware = false,
   tabs = [],
   hasTrashEntity,
   showLiquidOverflowMenu,
   liquidPage = false,
-  isOffDeck = false,
 }: ProtocolNavBarProps): JSX.Element {
   const { t } = useTranslation('starting_deck_state')
   const metadata = useSelector(getFileMetadata)
@@ -48,28 +45,29 @@ export function ProtocolNavBar({
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  return (
-    <NavContainer>
-      {hasZoomInSlot ? null : <Tabs tabs={tabs} />}
+  const showProtocolEditButtons = !(hasZoomInSlot || liquidPage)
 
-      <MetadataContainer isAddingHardwareOrLabware={isAddingHardwareOrLabware}>
+  let metadataText = t('edit_protocol')
+  if (liquidPage) {
+    metadataText = t('add_liquid')
+  } else if (hasZoomInSlot) {
+    metadataText = t('add_hardware_labware')
+  }
+  return (
+    <NavContainer showShadow={!showProtocolEditButtons}>
+      {showProtocolEditButtons ? <Tabs tabs={tabs} /> : null}
+
+      <MetadataContainer showProtocolEditButtons={showProtocolEditButtons}>
         <StyledText
           desktopStyle="bodyDefaultSemiBold"
           css={LINE_CLAMP_TEXT_STYLE(1)}
-          textAlign={isOffDeck && TYPOGRAPHY.textAlignLeft}
         >
           {metadata?.protocolName != null && metadata?.protocolName !== ''
             ? metadata?.protocolName
             : t('untitled_protocol')}
         </StyledText>
-        <StyledText
-          desktopStyle="bodyDefaultRegular"
-          color={COLORS.grey60}
-          textAlign={isOffDeck && TYPOGRAPHY.textAlignLeft}
-        >
-          {isAddingHardwareOrLabware || isOffDeck
-            ? t('add_hardware_labware')
-            : t('edit_protocol')}
+        <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
+          {metadataText}
         </StyledText>
       </MetadataContainer>
 
@@ -97,20 +95,30 @@ export function ProtocolNavBar({
   )
 }
 
-const NavContainer = styled(Flex)`
+const NavContainer = styled(Flex)<{ showShadow: boolean }>`
+  z-index: ${props => (props.showShadow === true ? 11 : 0)};
   padding: ${SPACING.spacing12};
   width: 100%;
   justify-content: ${JUSTIFY_SPACE_BETWEEN};
   align-items: ${ALIGN_CENTER};
-  box-shadow: 0px 1px 3px 0px ${COLORS.black90}${COLORS.opacity20HexCode};
+  box-shadow: ${props =>
+    props.showShadow
+      ? `0px 1px 3px 0px ${COLORS.black90}${COLORS.opacity20HexCode}`
+      : 'none'};
 `
 
-const MetadataContainer = styled(Flex)<{ isAddingHardwareOrLabware: boolean }>`
+interface MetadataProps extends StyleProps {
+  showProtocolEditButtons: boolean
+}
+const MetadataContainer = styled.div.withConfig<MetadataProps>({
+  shouldForwardProp: p => isntStyleProp(p) && p !== 'showProtocolEditButtons',
+})<MetadataProps>`
+  display: flex;
   flex-direction: ${DIRECTION_COLUMN};
-  text-align: ${({ isAddingHardwareOrLabware }) =>
-    isAddingHardwareOrLabware === true
-      ? TYPOGRAPHY.textAlignLeft
-      : TYPOGRAPHY.textAlignCenter};
+  text-align: ${props =>
+    props.showProtocolEditButtons === true
+      ? TYPOGRAPHY.textAlignCenter
+      : TYPOGRAPHY.textAlignLeft};
 
   // For screens between 600px and 767px, set width to 88px
   @media only screen and (max-width: 767px) {

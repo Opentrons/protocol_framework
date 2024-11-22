@@ -543,29 +543,30 @@ const updatePatchOnPipetteChannelChange = (
     const sourceLabwareId: string = appliedPatch.aspirate_labware as string
     const destLabwareId: string = appliedPatch.dispense_labware as string
     const sourceLabware = labwareEntities[sourceLabwareId]
-    const sourceLabwareDef = sourceLabware.def
     const destLabware = labwareEntities[destLabwareId]
 
-    update = {
-      aspirate_wells: getAllWellsFromPrimaryWells(
-        appliedPatch.aspirate_wells as string[],
-        sourceLabwareDef,
-        channels as 8 | 96
-      ),
-      dispense_wells:
-        destLabwareId.includes('trashBin') ||
-        destLabwareId.includes('wasteChute')
-          ? getDefaultWells({
-              labwareId: destLabwareId,
-              pipetteId,
-              labwareEntities,
-              pipetteEntities,
-            })
-          : getAllWellsFromPrimaryWells(
-              appliedPatch.dispense_wells as string[],
-              destLabware.def,
-              channels as 8 | 96
-            ),
+    if (sourceLabwareId != null && destLabwareId != null) {
+      update = {
+        aspirate_wells: getAllWellsFromPrimaryWells(
+          appliedPatch.aspirate_wells as string[],
+          sourceLabware.def,
+          channels as 8 | 96
+        ),
+        dispense_wells:
+          destLabwareId.includes('trashBin') ||
+          destLabwareId.includes('wasteChute')
+            ? getDefaultWells({
+                labwareId: destLabwareId,
+                pipetteId,
+                labwareEntities,
+                pipetteEntities,
+              })
+            : getAllWellsFromPrimaryWells(
+                appliedPatch.dispense_wells as string[],
+                destLabware.def,
+                channels as 8 | 96
+              ),
+      }
     }
   }
 
@@ -579,7 +580,9 @@ function updatePatchOnWellRatioChange(
   const appliedPatch = { ...rawForm, ...patch }
   const isDisposalLocation =
     rawForm.dispense_labware?.includes('wasteChute') ||
-    rawForm.dispense_labware?.includes('trashBin')
+    rawForm.dispense_labware?.includes('trashBin') ||
+    rawForm.dispense_labware?.includes('movableTrash') ||
+    rawForm.dispense_labware?.includes('fixedTrash')
 
   const prevWellRatio = getWellRatio(
     rawForm.aspirate_wells as string[],
@@ -669,6 +672,24 @@ export function updatePatchBlowoutFields(
 
   return patch
 }
+
+const updatePatchOnNozzleChange = (
+  patch: FormPatch,
+  rawForm: FormData,
+  pipetteEntities: PipetteEntities
+): FormPatch => {
+  if (
+    Object.values(pipetteEntities).find(pip => pip.spec.channels === 96) &&
+    fieldHasChanged(rawForm, patch, 'nozzles')
+  ) {
+    return {
+      ...patch,
+      ...getDefaultFields('aspirate_wells', 'dispense_wells'),
+    }
+  }
+  return patch
+}
+
 export function dependentFieldsUpdateMoveLiquid(
   originalPatch: FormPatch,
   rawForm: FormData, // raw = NOT hydrated
@@ -706,5 +727,7 @@ export function dependentFieldsUpdateMoveLiquid(
       clampDispenseAirGapVolume(chainPatch, rawForm, pipetteEntities),
     chainPatch =>
       updatePatchOnTiprackChange(chainPatch, rawForm, pipetteEntities),
+    chainPatch =>
+      updatePatchOnNozzleChange(chainPatch, rawForm, pipetteEntities),
   ])
 }

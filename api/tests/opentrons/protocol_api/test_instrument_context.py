@@ -1501,6 +1501,7 @@ def test_mix_no_lpd(
     mock_well = decoy.mock(cls=Well)
 
     bottom_location = Location(point=Point(1, 2, 3), labware=mock_well)
+    top_location = Location(point=Point(3, 2, 1), labware=None)
     input_location = Location(point=Point(2, 2, 2), labware=None)
     last_location = Location(point=Point(9, 9, 9), labware=None)
 
@@ -1516,6 +1517,7 @@ def test_mix_no_lpd(
         mock_validation.validate_location(location=None, last_location=last_location)
     ).then_return(WellTarget(well=mock_well, location=None, in_place=False))
     decoy.when(mock_well.bottom(z=1.0)).then_return(bottom_location)
+    decoy.when(mock_well.top()).then_return(top_location)
     decoy.when(mock_instrument_core.get_aspirate_flow_rate(1.23)).then_return(5.67)
     decoy.when(mock_instrument_core.get_dispense_flow_rate(1.23)).then_return(5.67)
     decoy.when(mock_instrument_core.has_tip()).then_return(True)
@@ -1523,19 +1525,63 @@ def test_mix_no_lpd(
 
     subject.mix(repetitions=10, volume=10.0, location=input_location, rate=1.23)
     decoy.verify(
-        mock_instrument_core.aspirate(),  # type: ignore[call-arg]
-        ignore_extra_args=True,
-        times=10,
-    )
-    decoy.verify(
-        mock_instrument_core.dispense(),  # type: ignore[call-arg]
-        ignore_extra_args=True,
+        mock_instrument_core.aspirate(
+            bottom_location,
+            mock_well._core,
+            10.0,
+            1.23,
+            5.67,
+            False,
+            None,
+        ),
         times=10,
     )
 
+    # Slight differences in dispense push-out logic for 2.14 and 2.15 api levels
+    if subject.api_version < APIVersion(2, 16):
+        decoy.verify(
+            mock_instrument_core.dispense(
+                bottom_location,
+                mock_well._core,
+                10.0,
+                1.23,
+                5.67,
+                False,
+                None,
+                None,
+            ),
+            times=10,
+        )
+    else:
+        decoy.verify(
+            mock_instrument_core.dispense(
+                bottom_location,
+                mock_well._core,
+                10.0,
+                1.23,
+                5.67,
+                False,
+                0.0,
+                None,
+            ),
+            times=9,
+        )
+        decoy.verify(
+            mock_instrument_core.dispense(
+                bottom_location,
+                mock_well._core,
+                10.0,
+                1.23,
+                5.67,
+                False,
+                None,
+                None,
+            ),
+            times=1,
+        )
+
     decoy.verify(
-        mock_instrument_core.liquid_probe_with_recovery(),  # type: ignore[call-arg]
-        ignore_extra_args=True,
+        mock_instrument_core.liquid_probe_with_recovery(mock_well._core, top_location),
         times=0,
     )
 
@@ -1551,6 +1597,7 @@ def test_mix_with_lpd(
     """It should aspirate/dispense to a well several times and do 1 lpd."""
     mock_well = decoy.mock(cls=Well)
     bottom_location = Location(point=Point(1, 2, 3), labware=mock_well)
+    top_location = Location(point=Point(3, 2, 1), labware=None)
     input_location = Location(point=Point(2, 2, 2), labware=None)
     last_location = Location(point=Point(9, 9, 9), labware=None)
 
@@ -1566,6 +1613,7 @@ def test_mix_with_lpd(
         mock_validation.validate_location(location=None, last_location=last_location)
     ).then_return(WellTarget(well=mock_well, location=None, in_place=False))
     decoy.when(mock_well.bottom(z=1.0)).then_return(bottom_location)
+    decoy.when(mock_well.top()).then_return(top_location)
     decoy.when(mock_instrument_core.get_aspirate_flow_rate(1.23)).then_return(5.67)
     decoy.when(mock_instrument_core.get_dispense_flow_rate(1.23)).then_return(5.67)
     decoy.when(mock_instrument_core.has_tip()).then_return(True)
@@ -1577,19 +1625,45 @@ def test_mix_with_lpd(
     subject.liquid_presence_detection = True
     subject.mix(repetitions=10, volume=10.0, location=input_location, rate=1.23)
     decoy.verify(
-        mock_instrument_core.aspirate(),  # type: ignore[call-arg]
-        ignore_extra_args=True,
+        mock_instrument_core.aspirate(
+            bottom_location,
+            mock_well._core,
+            10.0,
+            1.23,
+            5.67,
+            False,
+            None,
+        ),
         times=10,
     )
     decoy.verify(
-        mock_instrument_core.dispense(),  # type: ignore[call-arg]
-        ignore_extra_args=True,
-        times=10,
+        mock_instrument_core.dispense(
+            bottom_location,
+            mock_well._core,
+            10.0,
+            1.23,
+            5.67,
+            False,
+            0.0,
+            None,
+        ),
+        times=9,
     )
-
     decoy.verify(
-        mock_instrument_core.liquid_probe_with_recovery(),  # type: ignore[call-arg]
-        ignore_extra_args=True,
+        mock_instrument_core.dispense(
+            bottom_location,
+            mock_well._core,
+            10.0,
+            1.23,
+            5.67,
+            False,
+            None,
+            None,
+        ),
+        times=1,
+    )
+    decoy.verify(
+        mock_instrument_core.liquid_probe_with_recovery(mock_well._core, top_location),
         times=1,
     )
 

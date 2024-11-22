@@ -11,7 +11,12 @@ from .pipetting_common import (
     FlowRateMixin,
     blow_out_in_place,
 )
-from .movement_common import WellLocationMixin, DestinationPositionResult, move_to_well
+from .movement_common import (
+    WellLocationMixin,
+    DestinationPositionResult,
+    move_to_well,
+    StallOrCollisionError,
+)
 from .command import (
     AbstractCommandImpl,
     BaseCommand,
@@ -19,7 +24,6 @@ from .command import (
     DefinedErrorData,
     SuccessData,
 )
-from ..errors.error_occurrence import ErrorOccurrence
 from ..state.update_types import StateUpdate
 
 from opentrons.hardware_control import HardwareControlAPI
@@ -48,7 +52,7 @@ class BlowOutResult(DestinationPositionResult):
 
 _ExecuteReturn = Union[
     SuccessData[BlowOutResult],
-    DefinedErrorData[OverpressureError],
+    DefinedErrorData[OverpressureError] | DefinedErrorData[StallOrCollisionError],
 ]
 
 
@@ -74,11 +78,14 @@ class BlowOutImplementation(AbstractCommandImpl[BlowOutParams, _ExecuteReturn]):
         """Move to and blow-out the requested well."""
         move_result = await move_to_well(
             movement=self._movement,
+            model_utils=self._model_utils,
             pipette_id=params.pipetteId,
             labware_id=params.labwareId,
             well_name=params.wellName,
             well_location=params.wellLocation,
         )
+        if isinstance(move_result, DefinedErrorData):
+            return move_result
         blow_out_result = await blow_out_in_place(
             pipette_id=params.pipetteId,
             flow_rate=params.flowRate,
@@ -112,7 +119,13 @@ class BlowOutImplementation(AbstractCommandImpl[BlowOutParams, _ExecuteReturn]):
             )
 
 
-class BlowOut(BaseCommand[BlowOutParams, BlowOutResult, ErrorOccurrence]):
+class BlowOut(
+    BaseCommand[
+        BlowOutParams,
+        BlowOutResult,
+        OverpressureError | StallOrCollisionError,
+    ]
+):
     """Blow-out command model."""
 
     commandType: BlowOutCommandType = "blowout"

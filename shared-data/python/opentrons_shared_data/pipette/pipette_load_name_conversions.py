@@ -80,7 +80,7 @@ def channels_from_string(channels: str) -> PipetteChannelType:
     """
     if channels == "96":
         return PipetteChannelType.NINETY_SIX_CHANNEL
-    elif channels == "multi":
+    elif "multi" in channels:
         return PipetteChannelType.EIGHT_CHANNEL
     elif channels == "single":
         return PipetteChannelType.SINGLE_CHANNEL
@@ -287,8 +287,14 @@ def convert_pipette_model(
     # We need to figure out how to default the pipette model as well
     # rather than returning a p1000
     if model and not provided_version:
-        pipette_type, parsed_channels, parsed_version = model.split("_")
-        channels = channels_from_string(parsed_channels)
+        # pipette_type, parsed_channels, parsed_version = model.split("_")
+        exploded = model.split("_")
+        if len(exploded) == 3:
+            (pipette_type, parsed_channels, parsed_version) = exploded
+            channels = channels_from_string(parsed_channels)
+        else:
+            pipette_type, parsed_channels, parsed_oem, parsed_version = exploded
+            channels = channels_from_string(f"{parsed_channels}_{parsed_oem}")
         version = version_from_string(parsed_version)
     elif model and provided_version:
         pipette_type, parsed_channels = model.split("_")

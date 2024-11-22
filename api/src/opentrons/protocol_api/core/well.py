@@ -80,10 +80,6 @@ class AbstractWellCore(ABC):
         """Load liquid into a well."""
 
     @abstractmethod
-    def load_empty(self) -> None:
-        """Mark a well as containing no liquid."""
-
-    @abstractmethod
     def from_center_cartesian(self, x: float, y: float, z: float) -> Point:
         """Gets point in deck coordinates based on percentage of the radius of each axis."""
 

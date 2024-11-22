@@ -25,12 +25,14 @@ describe('RecoveryError', () => {
   let getRecoverOptionCopyMock: Mock
   let handleMotionRoutingMock: Mock
   let homePipetteZAxesMock: Mock
+  let updateSubMapMock: Mock
 
   beforeEach(() => {
     proceedToRouteAndStepMock = vi.fn()
     getRecoverOptionCopyMock = vi.fn()
     handleMotionRoutingMock = vi.fn().mockResolvedValue(undefined)
     homePipetteZAxesMock = vi.fn().mockResolvedValue(undefined)
+    updateSubMapMock = vi.fn()
 
     props = {
       ...mockRecoveryContentProps,
@@ -48,6 +50,7 @@ describe('RecoveryError', () => {
         route: ERROR_WHILE_RECOVERING.ROUTE,
         step: ERROR_WHILE_RECOVERING.STEPS.RECOVERY_ACTION_FAILED,
       },
+      subMapUtils: { subMap: null, updateSubMap: updateSubMapMock },
     }
 
     getRecoverOptionCopyMock.mockReturnValue('Retry step')
@@ -95,7 +98,7 @@ describe('RecoveryError', () => {
     expect(screen.queryAllByText('Continue to drop tip')[0]).toBeInTheDocument()
   })
 
-  it(`renders RecoveryDropTipFlowErrors when step is ${ERROR_WHILE_RECOVERING.STEPS.DROP_TIP_TIP_DROP_FAILED}`, () => {
+  it(`renders RecoveryDropTipFlowErrors when step is ${ERROR_WHILE_RECOVERING.STEPS.DROP_TIP_TIP_DROP_FAILED} and resets the submap`, () => {
     props.recoveryMap.step =
       RECOVERY_MAP.ERROR_WHILE_RECOVERING.STEPS.DROP_TIP_TIP_DROP_FAILED
     render(props)
@@ -107,6 +110,7 @@ describe('RecoveryError', () => {
       )[0]
     ).toBeInTheDocument()
     expect(screen.queryAllByText('Return to menu')[0]).toBeInTheDocument()
+    expect(updateSubMapMock).toHaveBeenCalledWith(null)
   })
 
   it(`calls proceedToRouteAndStep with ${RECOVERY_MAP.OPTION_SELECTION.ROUTE} when the "Return to menu" button is clicked in RecoveryDropTipFlowErrors with step ${ERROR_WHILE_RECOVERING.STEPS.DROP_TIP_GENERAL_ERROR}`, () => {

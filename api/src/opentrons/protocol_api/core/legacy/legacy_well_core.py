@@ -114,10 +114,6 @@ class LegacyWellCore(AbstractWellCore):
         """Load liquid into a well."""
         raise APIVersionError(api_element="Loading a liquid")
 
-    def load_empty(self) -> None:
-        """Mark a well as empty."""
-        assert False, "load_empty only supported on engine core"
-
     def from_center_cartesian(self, x: float, y: float, z: float) -> Point:
         """Gets point in deck coordinates based on percentage of the radius of each axis."""
         return self._geometry.from_center_cartesian(x, y, z)

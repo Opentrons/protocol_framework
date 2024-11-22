@@ -1,5 +1,6 @@
 """ProtocolEngine-based Labware core implementations."""
-from typing import List, Optional, cast
+
+from typing import List, Optional, cast, Dict
 
 from opentrons_shared_data.labware.types import (
     LabwareParameters as LabwareParametersDict,
@@ -22,7 +23,9 @@ from opentrons.protocol_engine.types import (
 from opentrons.types import DeckSlotName, NozzleMapInterface, Point, StagingSlotName
 
 
+from ..._liquid import Liquid
 from ..labware import AbstractLabware, LabwareLoadParams
+
 from .well import WellCore
 
 
@@ -202,3 +205,21 @@ class LabwareCore(AbstractLabware[WellCore]):
             LocationIsStagingSlotError,
         ):
             return None
+
+    def load_liquid(self, volumes: Dict[str, float], liquid: Liquid) -> None:
+        """Load liquid into wells of the labware."""
+        self._engine_client.execute_command(
+            cmd.LoadLiquidParams(
+                labwareId=self._labware_id, liquidId=liquid._id, volumeByWell=volumes
+            )
+        )
+
+    def load_empty(self, wells: List[str]) -> None:
+        """Mark wells of the labware as empty."""
+        self._engine_client.execute_command(
+            cmd.LoadLiquidParams(
+                labwareId=self._labware_id,
+                liquidId="EMPTY",
+                volumeByWell={well: 0.0 for well in wells},
+            )
+        )

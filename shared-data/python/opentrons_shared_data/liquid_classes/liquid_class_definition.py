@@ -1,7 +1,7 @@
 """Python shared data models for liquid class definitions."""
 
 from enum import Enum
-from typing import TYPE_CHECKING, Literal, Union, Optional, Dict, Any, Sequence
+from typing import TYPE_CHECKING, Literal, Union, Optional, Dict, Any, Sequence, Tuple
 
 from pydantic import (
     BaseModel,
@@ -28,8 +28,8 @@ _Number = Union[StrictInt, StrictFloat]
 _NonNegativeNumber = Union[_StrictNonNegativeInt, _StrictNonNegativeFloat]
 """Non-negative JSON number type, written to preserve lack of decimal point."""
 
-LiquidHandlingPropertyByVolume = Dict[str, _NonNegativeNumber]
-"""Settings for liquid class settings keyed by target aspiration/dispense volume."""
+LiquidHandlingPropertyByVolume = Sequence[Tuple[_NonNegativeNumber, _NonNegativeNumber]]
+"""Settings for liquid class settings that are interpolated by volume."""
 
 CorrectionByVolume = Dict[str, _Number]
 """Settings for correctionByVolume, which unlike other `byVolume` properties allows negative values keyed to volume."""

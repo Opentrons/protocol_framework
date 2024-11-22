@@ -252,7 +252,7 @@ export function EditInstrumentsModal(
                         transform="rotate(90deg)"
                       />
                       <StyledText desktopStyle="captionSemiBold">
-                        {t('swap')}
+                        {t('swap_pipette_mounts')}
                       </StyledText>
                     </Flex>
                   </Btn>
@@ -565,11 +565,13 @@ export function EditInstrumentsModal(
                                 TYPOGRAPHY.textDecorationUnderline
                               }
                             >
-                              <StyledText desktopStyle="bodyDefaultRegular">
-                                {allowAllTipracks
-                                  ? t('show_default_tips')
-                                  : t('show_all_tips')}
-                              </StyledText>
+                              <StyledLabel>
+                                <StyledText desktopStyle="bodyDefaultRegular">
+                                  {allowAllTipracks
+                                    ? t('show_default_tips')
+                                    : t('show_all_tips')}
+                                </StyledText>
+                              </StyledLabel>{' '}
                             </Btn>
                           )}
                         </Flex>
@@ -593,5 +595,8 @@ const StyledLabel = styled.label`
   cursor: ${CURSOR_POINTER};
   input[type='file'] {
     display: none;
+  }
+  &:hover {
+    color: ${COLORS.blue50};
   }
 `
