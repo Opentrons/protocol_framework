@@ -68,9 +68,8 @@ def test_load_old_overrides_regression(
         "type": "float",
         "default": 0.1,
     }
-    json.dump(
-        TMPFILE_DATA, open(override_configuration_path / "P20SV222021040709.json", "w")
-    )
+    with open(override_configuration_path / "P20SV222021040709.json", "w") as f:
+        json.dump(TMPFILE_DATA, f)
     configs = mutable_configurations.load_with_mutable_configurations(
         pipette_definition.PipetteModelVersionType(
             pipette_type=types.PipetteModelType.p20,
