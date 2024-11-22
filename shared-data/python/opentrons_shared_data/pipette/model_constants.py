@@ -95,10 +95,7 @@ _MAP_KEY_TO_V2: Dict[str, List[str]] = {
         "liquid_properties",
         "default",
         "supportedTips",
-        # FIX BEFORE MERGE: I do not understand this. Is this right? What is the
-        # intended difference between ##EACHTIP## and ##EACHTIPTYPE##? Why was
-        # ##EACHTIP## raising in the first place?
-        "##EACHTIPTYPE##",
+        "##EACHTIP##",
         "defaultTipLength",
     ],
 }
