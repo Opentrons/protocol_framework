@@ -32,6 +32,9 @@ from opentrons.protocol_engine.errors.exceptions import TipNotAttachedError
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocols.api_support.definitions import MAX_SUPPORTED_VERSION
 from opentrons_shared_data.pipette.types import PipetteNameType
+from opentrons_shared_data.errors.exceptions import (
+    UnsupportedHardwareCommand,
+)
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
 from . import overlap_versions, pipette_movement_conflict
 
@@ -85,6 +88,13 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         self._liquid_presence_detection = bool(
             self._engine_client.state.pipettes.get_liquid_presence_detection(pipette_id)
         )
+        if (
+            self._liquid_presence_detection
+            and not self._pressure_supported_by_pipette()
+        ):
+            raise UnsupportedHardwareCommand(
+                "Pressure sensor not available for this pipette"
+            )
 
     @property
     def pipette_id(self) -> str:
@@ -859,12 +869,14 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         z_axis = self._engine_client.state.pipettes.get_z_axis(self._pipette_id)
         self._engine_client.execute_command(cmd.HomeParams(axes=[z_axis]))
 
-    def detect_liquid_presence(self, well_core: WellCore, loc: Location) -> bool:
-        if not self._sync_hardware_api.pressure_sensor_available(
+    def _pressure_supported_by_pipette(self) -> bool:
+        supported = self._sync_hardware_api.pressure_sensor_available(
             mount=self.get_mount()
-        ):
-            raise ValueError("Liquid Presence Detection not available.")
+        )
+        assert isinstance(supported, bool)
+        return supported
 
+    def detect_liquid_presence(self, well_core: WellCore, loc: Location) -> bool:
         labware_id = well_core.labware_id
         well_name = well_core.get_name()
         well_location = WellLocation(
