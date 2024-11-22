@@ -5,15 +5,18 @@ const BREAKPOINT_WIDTH = 768
 
 export const useScreenSizeCheck = (): boolean => {
   const [isValidSize, setValidSize] = useState<boolean>(
-    window.innerWidth > BREAKPOINT_WIDTH &&
-      window.innerHeight > BREAKPOINT_HEIGHT
+    window.screen.width > BREAKPOINT_WIDTH &&
+      window.screen.height > BREAKPOINT_HEIGHT
   )
 
   useEffect(() => {
     const handleResize = (): void => {
+      // delete this before merging, this is for debugging
+      console.log(window.screen.width)
+      console.log(window.screen.height)
       setValidSize(
-        window.innerWidth > BREAKPOINT_WIDTH &&
-          window.innerHeight > BREAKPOINT_HEIGHT
+        window.screen.width > BREAKPOINT_WIDTH &&
+          window.screen.height > BREAKPOINT_HEIGHT
       )
     }
 
