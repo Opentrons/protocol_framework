@@ -8,7 +8,11 @@ from fastapi import status, APIRouter, Depends
 
 from robot_server.errors.error_responses import ErrorBody
 from robot_server.service.json_api.request import RequestModel
-from robot_server.service.json_api.response import PydanticResponse, SimpleEmptyBody
+from robot_server.service.json_api.response import (
+    PydanticResponse,
+    SimpleBody,
+    SimpleEmptyBody,
+)
 
 from .base_router import RunStopped
 from ..dependencies import get_run_data_manager
@@ -41,11 +45,11 @@ async def put_error_recovery_policy(
     request_body: RequestModel[ErrorRecoveryPolicy],
     run_data_manager: Annotated[RunDataManager, Depends(get_run_data_manager)],
 ) -> PydanticResponse[SimpleEmptyBody]:
-    """Create run polices.
+    """Set a run's error recovery policy.
 
     Arguments:
         runId: Run ID pulled from URL.
-        request_body:  Request body with run policies data.
+        request_body:  Request body with the new run policy.
         run_data_manager: Current and historical run data management.
     """
     rules = request_body.data.policyRules
@@ -56,5 +60,38 @@ async def put_error_recovery_policy(
 
     return await PydanticResponse.create(
         content=SimpleEmptyBody.construct(),
+        status_code=status.HTTP_200_OK,
+    )
+
+
+@PydanticResponse.wrap_route(
+    error_recovery_policy_router.get,
+    path="/runs/{runId}/errorRecoveryPolicy",
+    summary="Get a run's current error recovery policy",
+    description="See `PUT /runs/{runId}/errorRecoveryPolicy`.",
+    responses={
+        status.HTTP_200_OK: {"model": SimpleBody[ErrorRecoveryPolicy]},
+        status.HTTP_409_CONFLICT: {"model": ErrorBody[RunStopped]},
+    },
+)
+async def get_error_recovery_policy(
+    runId: str,
+    run_data_manager: Annotated[RunDataManager, Depends(get_run_data_manager)],
+) -> PydanticResponse[SimpleBody[ErrorRecoveryPolicy]]:
+    """Get a run's current error recovery policy.
+
+    Arguments:
+        runId: Run ID pulled from URL.
+        run_data_manager: Current and historical run data management.
+    """
+    try:
+        rules = run_data_manager.get_error_recovery_rules(run_id=runId)
+    except RunNotCurrentError as e:
+        raise RunStopped(detail=str(e)).as_error(status.HTTP_409_CONFLICT) from e
+
+    return await PydanticResponse.create(
+        content=SimpleBody.construct(
+            data=ErrorRecoveryPolicy.construct(policyRules=rules)
+        ),
         status_code=status.HTTP_200_OK,
     )
