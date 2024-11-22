@@ -29,7 +29,7 @@ from opentrons.protocol_engine.state.pipettes import (
     StaticPipetteConfig,
     BoundingNozzlesOffsets,
     PipetteBoundingBoxOffsets,
-    )
+)
 from opentrons.protocol_engine.state import update_types
 from opentrons.types import MountType, Point
 from opentrons.protocol_engine import WellLocation, WellOrigin, WellOffset, DeckPoint
@@ -61,11 +61,11 @@ EitherImplementation = Union[LiquidProbeImplementation, TryLiquidProbeImplementa
 EitherParamsType = Union[Type[LiquidProbeParams], Type[TryLiquidProbeParams]]
 EitherResultType = Union[Type[LiquidProbeResult], Type[TryLiquidProbeResult]]
 
+
 @pytest.fixture
 def available_sensors() -> AvailableSensorDefinition:
     """Provide a list of sensors."""
     return AvailableSensorDefinition(sensors=["pressure", "capacitive", "environment"])
-
 
 
 @pytest.fixture(
@@ -178,41 +178,40 @@ async def test_liquid_probe_implementation(
         state_view.pipettes.get_nozzle_configuration_supports_lld("abc")
     ).then_return(True)
 
-    decoy.when(
-        state_view.pipettes.get_config("abc")).then_return(
-            StaticPipetteConfig(
-                min_volume=1,
-                max_volume=9001,
-                channels=1,
-                model="blah",
-                display_name="bleh",
-                serial_number="",
-                tip_configuration_lookup_table={9001: supported_tip_fixture},
-                nominal_tip_overlap={},
-                home_position=0,
-                nozzle_offset_z=0,
-                bounding_nozzle_offsets=BoundingNozzlesOffsets(
-                    back_left_offset=Point(x=10, y=20, z=30),
-                    front_right_offset=Point(x=40, y=50, z=60),
-                ),
-                default_nozzle_map=get_default_nozzle_map(PipetteNameType.P1000_96),
-                pipette_bounding_box_offsets=PipetteBoundingBoxOffsets(
-                    back_left_corner=Point(x=10, y=20, z=30),
-                    front_right_corner=Point(x=40, y=50, z=60),
-                    front_left_corner=Point(x=10, y=50, z=60),
-                    back_right_corner=Point(x=40, y=20, z=60),
-                ),
-                lld_settings={},
-                plunger_positions={
-                    "top": 0.0,
-                    "bottom": 5.0,
-                    "blow_out": 19.0,
-                    "drop_tip": 20.0,
-                },
-                shaft_ul_per_mm=5.0,
-                available_sensors=available_sensors,
-            )
+    decoy.when(state_view.pipettes.get_config("abc")).then_return(
+        StaticPipetteConfig(
+            min_volume=1,
+            max_volume=9001,
+            channels=1,
+            model="blah",
+            display_name="bleh",
+            serial_number="",
+            tip_configuration_lookup_table={9001: supported_tip_fixture},
+            nominal_tip_overlap={},
+            home_position=0,
+            nozzle_offset_z=0,
+            bounding_nozzle_offsets=BoundingNozzlesOffsets(
+                back_left_offset=Point(x=10, y=20, z=30),
+                front_right_offset=Point(x=40, y=50, z=60),
+            ),
+            default_nozzle_map=get_default_nozzle_map(PipetteNameType.P1000_96),
+            pipette_bounding_box_offsets=PipetteBoundingBoxOffsets(
+                back_left_corner=Point(x=10, y=20, z=30),
+                front_right_corner=Point(x=40, y=50, z=60),
+                front_left_corner=Point(x=10, y=50, z=60),
+                back_right_corner=Point(x=40, y=20, z=60),
+            ),
+            lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
+            available_sensors=available_sensors,
         )
+    )
 
     timestamp = datetime(year=2020, month=1, day=2)
     decoy.when(model_utils.get_timestamp()).then_return(timestamp)
@@ -271,41 +270,40 @@ async def test_liquid_not_found_error(
     )
 
     decoy.when(state_view.pipettes.get_aspirated_volume(pipette_id)).then_return(0)
-    decoy.when(
-        state_view.pipettes.get_config("pipette-id")).then_return(
-            StaticPipetteConfig(
-                min_volume=1,
-                max_volume=9001,
-                channels=1,
-                model="blah",
-                display_name="bleh",
-                serial_number="",
-                tip_configuration_lookup_table={9001: supported_tip_fixture},
-                nominal_tip_overlap={},
-                home_position=0,
-                nozzle_offset_z=0,
-                bounding_nozzle_offsets=BoundingNozzlesOffsets(
-                    back_left_offset=Point(x=10, y=20, z=30),
-                    front_right_offset=Point(x=40, y=50, z=60),
-                ),
-                default_nozzle_map=get_default_nozzle_map(PipetteNameType.P1000_96),
-                pipette_bounding_box_offsets=PipetteBoundingBoxOffsets(
-                    back_left_corner=Point(x=10, y=20, z=30),
-                    front_right_corner=Point(x=40, y=50, z=60),
-                    front_left_corner=Point(x=10, y=50, z=60),
-                    back_right_corner=Point(x=40, y=20, z=60),
-                ),
-                lld_settings={},
-                plunger_positions={
-                    "top": 0.0,
-                    "bottom": 5.0,
-                    "blow_out": 19.0,
-                    "drop_tip": 20.0,
-                },
-                shaft_ul_per_mm=5.0,
-                available_sensors=available_sensors,
-            )
+    decoy.when(state_view.pipettes.get_config("pipette-id")).then_return(
+        StaticPipetteConfig(
+            min_volume=1,
+            max_volume=9001,
+            channels=1,
+            model="blah",
+            display_name="bleh",
+            serial_number="",
+            tip_configuration_lookup_table={9001: supported_tip_fixture},
+            nominal_tip_overlap={},
+            home_position=0,
+            nozzle_offset_z=0,
+            bounding_nozzle_offsets=BoundingNozzlesOffsets(
+                back_left_offset=Point(x=10, y=20, z=30),
+                front_right_offset=Point(x=40, y=50, z=60),
+            ),
+            default_nozzle_map=get_default_nozzle_map(PipetteNameType.P1000_96),
+            pipette_bounding_box_offsets=PipetteBoundingBoxOffsets(
+                back_left_corner=Point(x=10, y=20, z=30),
+                front_right_corner=Point(x=40, y=50, z=60),
+                front_left_corner=Point(x=10, y=50, z=60),
+                back_right_corner=Point(x=40, y=20, z=60),
+            ),
+            lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
+            available_sensors=available_sensors,
         )
+    )
     decoy.when(
         await movement.move_to_well(
             pipette_id=pipette_id,
@@ -397,41 +395,40 @@ async def test_liquid_probe_tip_checking(
     decoy.when(state_view.pipettes.get_aspirated_volume(pipette_id)).then_raise(
         TipNotAttachedError()
     )
-    decoy.when(
-        state_view.pipettes.get_config("pipette-id")).then_return(
-            StaticPipetteConfig(
-                min_volume=1,
-                max_volume=9001,
-                channels=1,
-                model="blah",
-                display_name="bleh",
-                serial_number="",
-                tip_configuration_lookup_table={9001: supported_tip_fixture},
-                nominal_tip_overlap={},
-                home_position=0,
-                nozzle_offset_z=0,
-                bounding_nozzle_offsets=BoundingNozzlesOffsets(
-                    back_left_offset=Point(x=10, y=20, z=30),
-                    front_right_offset=Point(x=40, y=50, z=60),
-                ),
-                default_nozzle_map=get_default_nozzle_map(PipetteNameType.P1000_96),
-                pipette_bounding_box_offsets=PipetteBoundingBoxOffsets(
-                    back_left_corner=Point(x=10, y=20, z=30),
-                    front_right_corner=Point(x=40, y=50, z=60),
-                    front_left_corner=Point(x=10, y=50, z=60),
-                    back_right_corner=Point(x=40, y=20, z=60),
-                ),
-                lld_settings={},
-                plunger_positions={
-                    "top": 0.0,
-                    "bottom": 5.0,
-                    "blow_out": 19.0,
-                    "drop_tip": 20.0,
-                },
-                shaft_ul_per_mm=5.0,
-                available_sensors=available_sensors,
-            )
+    decoy.when(state_view.pipettes.get_config("pipette-id")).then_return(
+        StaticPipetteConfig(
+            min_volume=1,
+            max_volume=9001,
+            channels=1,
+            model="blah",
+            display_name="bleh",
+            serial_number="",
+            tip_configuration_lookup_table={9001: supported_tip_fixture},
+            nominal_tip_overlap={},
+            home_position=0,
+            nozzle_offset_z=0,
+            bounding_nozzle_offsets=BoundingNozzlesOffsets(
+                back_left_offset=Point(x=10, y=20, z=30),
+                front_right_offset=Point(x=40, y=50, z=60),
+            ),
+            default_nozzle_map=get_default_nozzle_map(PipetteNameType.P1000_96),
+            pipette_bounding_box_offsets=PipetteBoundingBoxOffsets(
+                back_left_corner=Point(x=10, y=20, z=30),
+                front_right_corner=Point(x=40, y=50, z=60),
+                front_left_corner=Point(x=10, y=50, z=60),
+                back_right_corner=Point(x=40, y=20, z=60),
+            ),
+            lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
+            available_sensors=available_sensors,
         )
+    )
     with pytest.raises(TipNotAttachedError):
         await subject.execute(data)
 
@@ -461,41 +458,40 @@ async def test_liquid_probe_plunger_preparedness_checking(
     decoy.when(
         state_view.pipettes.get_nozzle_configuration_supports_lld(pipette_id)
     ).then_return(True)
-    decoy.when(
-        state_view.pipettes.get_config("pipette-id")).then_return(
-            StaticPipetteConfig(
-                min_volume=1,
-                max_volume=9001,
-                channels=1,
-                model="blah",
-                display_name="bleh",
-                serial_number="",
-                tip_configuration_lookup_table={9001: supported_tip_fixture},
-                nominal_tip_overlap={},
-                home_position=0,
-                nozzle_offset_z=0,
-                bounding_nozzle_offsets=BoundingNozzlesOffsets(
-                    back_left_offset=Point(x=10, y=20, z=30),
-                    front_right_offset=Point(x=40, y=50, z=60),
-                ),
-                default_nozzle_map=get_default_nozzle_map(PipetteNameType.P1000_96),
-                pipette_bounding_box_offsets=PipetteBoundingBoxOffsets(
-                    back_left_corner=Point(x=10, y=20, z=30),
-                    front_right_corner=Point(x=40, y=50, z=60),
-                    front_left_corner=Point(x=10, y=50, z=60),
-                    back_right_corner=Point(x=40, y=20, z=60),
-                ),
-                lld_settings={},
-                plunger_positions={
-                    "top": 0.0,
-                    "bottom": 5.0,
-                    "blow_out": 19.0,
-                    "drop_tip": 20.0,
-                },
-                shaft_ul_per_mm=5.0,
-                available_sensors=available_sensors,
-            )
+    decoy.when(state_view.pipettes.get_config("pipette-id")).then_return(
+        StaticPipetteConfig(
+            min_volume=1,
+            max_volume=9001,
+            channels=1,
+            model="blah",
+            display_name="bleh",
+            serial_number="",
+            tip_configuration_lookup_table={9001: supported_tip_fixture},
+            nominal_tip_overlap={},
+            home_position=0,
+            nozzle_offset_z=0,
+            bounding_nozzle_offsets=BoundingNozzlesOffsets(
+                back_left_offset=Point(x=10, y=20, z=30),
+                front_right_offset=Point(x=40, y=50, z=60),
+            ),
+            default_nozzle_map=get_default_nozzle_map(PipetteNameType.P1000_96),
+            pipette_bounding_box_offsets=PipetteBoundingBoxOffsets(
+                back_left_corner=Point(x=10, y=20, z=30),
+                front_right_corner=Point(x=40, y=50, z=60),
+                front_left_corner=Point(x=10, y=50, z=60),
+                back_right_corner=Point(x=40, y=20, z=60),
+            ),
+            lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
+            available_sensors=available_sensors,
         )
+    )
     decoy.when(state_view.pipettes.get_aspirated_volume(pipette_id)).then_return(None)
     with pytest.raises(PipetteNotReadyToAspirateError):
         await subject.execute(data)
@@ -527,41 +523,40 @@ async def test_liquid_probe_volume_checking(
     decoy.when(
         state_view.pipettes.get_aspirated_volume(pipette_id=pipette_id),
     ).then_return(123)
-    decoy.when(
-        state_view.pipettes.get_config("pipette-id")).then_return(
-            StaticPipetteConfig(
-                min_volume=1,
-                max_volume=9001,
-                channels=1,
-                model="blah",
-                display_name="bleh",
-                serial_number="",
-                tip_configuration_lookup_table={9001: supported_tip_fixture},
-                nominal_tip_overlap={},
-                home_position=0,
-                nozzle_offset_z=0,
-                bounding_nozzle_offsets=BoundingNozzlesOffsets(
-                    back_left_offset=Point(x=10, y=20, z=30),
-                    front_right_offset=Point(x=40, y=50, z=60),
-                ),
-                default_nozzle_map=get_default_nozzle_map(PipetteNameType.P1000_96),
-                pipette_bounding_box_offsets=PipetteBoundingBoxOffsets(
-                    back_left_corner=Point(x=10, y=20, z=30),
-                    front_right_corner=Point(x=40, y=50, z=60),
-                    front_left_corner=Point(x=10, y=50, z=60),
-                    back_right_corner=Point(x=40, y=20, z=60),
-                ),
-                lld_settings={},
-                plunger_positions={
-                    "top": 0.0,
-                    "bottom": 5.0,
-                    "blow_out": 19.0,
-                    "drop_tip": 20.0,
-                },
-                shaft_ul_per_mm=5.0,
-                available_sensors=available_sensors,
-            )
+    decoy.when(state_view.pipettes.get_config("pipette-id")).then_return(
+        StaticPipetteConfig(
+            min_volume=1,
+            max_volume=9001,
+            channels=1,
+            model="blah",
+            display_name="bleh",
+            serial_number="",
+            tip_configuration_lookup_table={9001: supported_tip_fixture},
+            nominal_tip_overlap={},
+            home_position=0,
+            nozzle_offset_z=0,
+            bounding_nozzle_offsets=BoundingNozzlesOffsets(
+                back_left_offset=Point(x=10, y=20, z=30),
+                front_right_offset=Point(x=40, y=50, z=60),
+            ),
+            default_nozzle_map=get_default_nozzle_map(PipetteNameType.P1000_96),
+            pipette_bounding_box_offsets=PipetteBoundingBoxOffsets(
+                back_left_corner=Point(x=10, y=20, z=30),
+                front_right_corner=Point(x=40, y=50, z=60),
+                front_left_corner=Point(x=10, y=50, z=60),
+                back_right_corner=Point(x=40, y=20, z=60),
+            ),
+            lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
+            available_sensors=available_sensors,
         )
+    )
     decoy.when(
         state_view.pipettes.get_nozzle_configuration_supports_lld(pipette_id)
     ).then_return(True)
@@ -601,41 +596,40 @@ async def test_liquid_probe_location_checking(
         wellLocation=well_location,
     )
     decoy.when(state_view.pipettes.get_aspirated_volume(pipette_id)).then_return(0)
-    decoy.when(
-        state_view.pipettes.get_config("pipette-id")).then_return(
-            StaticPipetteConfig(
-                min_volume=1,
-                max_volume=9001,
-                channels=1,
-                model="blah",
-                display_name="bleh",
-                serial_number="",
-                tip_configuration_lookup_table={9001: supported_tip_fixture},
-                nominal_tip_overlap={},
-                home_position=0,
-                nozzle_offset_z=0,
-                bounding_nozzle_offsets=BoundingNozzlesOffsets(
-                    back_left_offset=Point(x=10, y=20, z=30),
-                    front_right_offset=Point(x=40, y=50, z=60),
-                ),
-                default_nozzle_map=get_default_nozzle_map(PipetteNameType.P1000_96),
-                pipette_bounding_box_offsets=PipetteBoundingBoxOffsets(
-                    back_left_corner=Point(x=10, y=20, z=30),
-                    front_right_corner=Point(x=40, y=50, z=60),
-                    front_left_corner=Point(x=10, y=50, z=60),
-                    back_right_corner=Point(x=40, y=20, z=60),
-                ),
-                lld_settings={},
-                plunger_positions={
-                    "top": 0.0,
-                    "bottom": 5.0,
-                    "blow_out": 19.0,
-                    "drop_tip": 20.0,
-                },
-                shaft_ul_per_mm=5.0,
-                available_sensors=available_sensors,
-            )
+    decoy.when(state_view.pipettes.get_config("pipette-id")).then_return(
+        StaticPipetteConfig(
+            min_volume=1,
+            max_volume=9001,
+            channels=1,
+            model="blah",
+            display_name="bleh",
+            serial_number="",
+            tip_configuration_lookup_table={9001: supported_tip_fixture},
+            nominal_tip_overlap={},
+            home_position=0,
+            nozzle_offset_z=0,
+            bounding_nozzle_offsets=BoundingNozzlesOffsets(
+                back_left_offset=Point(x=10, y=20, z=30),
+                front_right_offset=Point(x=40, y=50, z=60),
+            ),
+            default_nozzle_map=get_default_nozzle_map(PipetteNameType.P1000_96),
+            pipette_bounding_box_offsets=PipetteBoundingBoxOffsets(
+                back_left_corner=Point(x=10, y=20, z=30),
+                front_right_corner=Point(x=40, y=50, z=60),
+                front_left_corner=Point(x=10, y=50, z=60),
+                back_right_corner=Point(x=40, y=20, z=60),
+            ),
+            lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
+            available_sensors=available_sensors,
         )
+    )
     decoy.when(
         await movement.check_for_valid_position(
             mount=MountType.LEFT,
@@ -672,41 +666,40 @@ async def test_liquid_probe_stall(
     decoy.when(state_view.pipettes.get_aspirated_volume(pipette_id="abc")).then_return(
         0
     )
-    decoy.when(
-        state_view.pipettes.get_config("abc")).then_return(
-            StaticPipetteConfig(
-                min_volume=1,
-                max_volume=9001,
-                channels=1,
-                model="blah",
-                display_name="bleh",
-                serial_number="",
-                tip_configuration_lookup_table={9001: supported_tip_fixture},
-                nominal_tip_overlap={},
-                home_position=0,
-                nozzle_offset_z=0,
-                bounding_nozzle_offsets=BoundingNozzlesOffsets(
-                    back_left_offset=Point(x=10, y=20, z=30),
-                    front_right_offset=Point(x=40, y=50, z=60),
-                ),
-                default_nozzle_map=get_default_nozzle_map(PipetteNameType.P1000_96),
-                pipette_bounding_box_offsets=PipetteBoundingBoxOffsets(
-                    back_left_corner=Point(x=10, y=20, z=30),
-                    front_right_corner=Point(x=40, y=50, z=60),
-                    front_left_corner=Point(x=10, y=50, z=60),
-                    back_right_corner=Point(x=40, y=20, z=60),
-                ),
-                lld_settings={},
-                plunger_positions={
-                    "top": 0.0,
-                    "bottom": 5.0,
-                    "blow_out": 19.0,
-                    "drop_tip": 20.0,
-                },
-                shaft_ul_per_mm=5.0,
-                available_sensors=available_sensors,
-            )
+    decoy.when(state_view.pipettes.get_config("abc")).then_return(
+        StaticPipetteConfig(
+            min_volume=1,
+            max_volume=9001,
+            channels=1,
+            model="blah",
+            display_name="bleh",
+            serial_number="",
+            tip_configuration_lookup_table={9001: supported_tip_fixture},
+            nominal_tip_overlap={},
+            home_position=0,
+            nozzle_offset_z=0,
+            bounding_nozzle_offsets=BoundingNozzlesOffsets(
+                back_left_offset=Point(x=10, y=20, z=30),
+                front_right_offset=Point(x=40, y=50, z=60),
+            ),
+            default_nozzle_map=get_default_nozzle_map(PipetteNameType.P1000_96),
+            pipette_bounding_box_offsets=PipetteBoundingBoxOffsets(
+                back_left_corner=Point(x=10, y=20, z=30),
+                front_right_corner=Point(x=40, y=50, z=60),
+                front_left_corner=Point(x=10, y=50, z=60),
+                back_right_corner=Point(x=40, y=20, z=60),
+            ),
+            lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
+            available_sensors=available_sensors,
         )
+    )
     decoy.when(
         state_view.pipettes.get_nozzle_configuration_supports_lld("abc")
     ).then_return(True)
