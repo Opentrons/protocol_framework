@@ -61,16 +61,6 @@ export function BatchEditMoveLiquidTools(
     const labwareId = propsForFields[labwareField]?.value
     return labwareId ? String(labwareId) : null
   }
-  const getWellOrderFieldValue = (
-    name: string
-  ): WellOrderOption | null | undefined => {
-    const val = propsForFields[name]?.value
-    if (val === 'l2r' || val === 'r2l' || val === 't2b' || val === 'b2t') {
-      return val
-    } else {
-      return null
-    }
-  }
 
   return (
     <Flex
@@ -100,12 +90,12 @@ export function BatchEditMoveLiquidTools(
         updateSecondWellOrder={
           propsForFields[addFieldNamePrefix('wellOrder_second')].updateValue
         }
-        firstValue={getWellOrderFieldValue(
-          addFieldNamePrefix('wellOrder_first')
-        )}
-        secondValue={getWellOrderFieldValue(
-          addFieldNamePrefix('wellOrder_second')
-        )}
+        firstValue={
+          (propsForFields.wellOrder_first.name ?? 't2b') as WellOrderOption
+        }
+        secondValue={
+          (propsForFields.wellOrder_second.name ?? 'l2r') as WellOrderOption
+        }
         firstName={addFieldNamePrefix('wellOrder_first')}
         secondName={addFieldNamePrefix('wellOrder_second')}
       />

@@ -22,6 +22,7 @@ import {
   getBlowoutLocationOptionsForForm,
   getLabwareFieldForPositioningField,
 } from '../StepForm/utils'
+
 import type { WellOrderOption } from '../../../../form-types'
 import type { FieldPropsByName } from '../StepForm/types'
 
@@ -59,17 +60,6 @@ export function BatchEditMixTools(props: BatchEditMixToolsProps): JSX.Element {
     return pipetteId ? String(pipetteId) : null
   }
 
-  const getWellOrderFieldValue = (
-    name: string
-  ): WellOrderOption | null | undefined => {
-    const val = propsForFields[name]?.value
-    if (val === 'l2r' || val === 'r2l' || val === 't2b' || val === 'b2t') {
-      return val
-    } else {
-      return null
-    }
-  }
-
   return (
     <Flex
       flexDirection={DIRECTION_COLUMN}
@@ -101,8 +91,14 @@ export function BatchEditMixTools(props: BatchEditMixToolsProps): JSX.Element {
             updateSecondWellOrder={
               propsForFields.mix_wellOrder_second.updateValue
             }
-            firstValue={getWellOrderFieldValue('mix_wellOrder_first')}
-            secondValue={getWellOrderFieldValue('mix_wellOrder_second')}
+            firstValue={
+              (propsForFields.mix_wellOrder_first.name ??
+                't2b') as WellOrderOption
+            }
+            secondValue={
+              (propsForFields.mix_wellOrder_second.name ??
+                'l2r') as WellOrderOption
+            }
             firstName="mix_wellOrder_first"
             secondName="mix_wellOrder_second"
           />
