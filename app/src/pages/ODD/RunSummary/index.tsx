@@ -69,11 +69,11 @@ import {
 } from '/app/resources/runs'
 import { handleTipsAttachedModal } from '/app/organisms/DropTipWizardFlows'
 import { lastRunCommandPromptedErrorRecovery } from '/app/local-resources/commands'
-import { useTipAttachmentStatus } from '/app/local-resources/instruments'
+import { useTipAttachmentStatus } from '/app/resources/instruments'
 
 import type { IconName } from '@opentrons/components'
 import type { OnDeviceRouteParams } from '/app/App/types'
-import type { PipetteWithTip } from '/app/local-resources/instruments'
+import type { PipetteWithTip } from '/app/resources/instruments'
 
 export function RunSummary(): JSX.Element {
   const { runId } = useParams<

@@ -10,7 +10,7 @@ import { getPipetteModelSpecs } from '@opentrons/shared-data'
 import { useHost } from '@opentrons/react-api-client'
 
 import { mockPipetteInfo } from '/app/redux/pipettes/__fixtures__'
-import { useTipAttachmentStatus } from '../hooks'
+import { useTipAttachmentStatus } from '../useTipAttachmentStatus'
 
 import type { PipetteModelSpecs } from '@opentrons/shared-data'
 import type { PipetteData } from '@opentrons/api-client'
