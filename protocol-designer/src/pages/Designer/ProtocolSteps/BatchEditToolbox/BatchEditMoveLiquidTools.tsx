@@ -63,12 +63,16 @@ export function BatchEditMoveLiquidTools(
   }
 
   return (
-    <Flex flexDirection={DIRECTION_COLUMN} width="100%">
+    <Flex
+      flexDirection={DIRECTION_COLUMN}
+      width="100%"
+      gridGap={SPACING.spacing12}
+    >
       <Flex padding={SPACING.spacing16}>
         <Tabs tabs={[aspirateTab, dispenseTab]} />
       </Flex>
       <Divider marginY="0" />
-      <Flex padding={SPACING.spacing16} width="100%">
+      <Flex width="100%">
         <FlowRateField
           {...propsForFields[addFieldNamePrefix('flowRate')]}
           pipetteId={getPipetteIdForForm()}
@@ -113,7 +117,7 @@ export function BatchEditMoveLiquidTools(
       <Divider marginY="0" />
       <Flex
         flexDirection={DIRECTION_COLUMN}
-        padding={SPACING.spacing12}
+        padding={`0 ${SPACING.spacing16}`}
         gridGap={SPACING.spacing8}
       >
         <StyledText desktopStyle="bodyDefaultSemiBold">
@@ -221,6 +225,7 @@ export function BatchEditMoveLiquidTools(
                     path: propsForFields.path.value as any,
                     stepType: 'moveLiquid',
                   })}
+                  padding="0"
                 />
                 <FlowRateField
                   {...propsForFields.blowout_flowRate}
@@ -228,6 +233,7 @@ export function BatchEditMoveLiquidTools(
                   flowRateType="blowout"
                   volume={propsForFields.volume?.value ?? 0}
                   tiprack={propsForFields.tipRack.value}
+                  padding="0"
                 />
                 <BlowoutOffsetField
                   {...propsForFields.blowout_z_offset}

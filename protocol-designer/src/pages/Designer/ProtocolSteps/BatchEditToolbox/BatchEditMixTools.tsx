@@ -60,12 +60,17 @@ export function BatchEditMixTools(props: BatchEditMixToolsProps): JSX.Element {
   }
 
   return (
-    <Flex flexDirection={DIRECTION_COLUMN} width="100%">
-      <Flex padding={SPACING.spacing16}>
+    <Flex
+      flexDirection={DIRECTION_COLUMN}
+      width="100%"
+      spacing={SPACING.spacing12}
+      gridGap={SPACING.spacing16}
+    >
+      <Flex padding={`${SPACING.spacing16} ${SPACING.spacing16} 0`}>
         <Tabs tabs={[aspirateTab, dispenseTab]} />
       </Flex>
       <Divider marginY="0" />
-      <Flex padding={SPACING.spacing16} width="100%">
+      <Flex width="100%">
         <FlowRateField
           {...propsForFields[`${tab}_flowRate`]}
           pipetteId={getPipetteIdForForm()}
@@ -112,7 +117,7 @@ export function BatchEditMixTools(props: BatchEditMixToolsProps): JSX.Element {
       ) : null}
       <Flex
         flexDirection={DIRECTION_COLUMN}
-        padding={SPACING.spacing12}
+        padding={`0 ${SPACING.spacing16}`}
         gridGap={SPACING.spacing8}
       >
         <StyledText desktopStyle="bodyDefaultSemiBold">
@@ -156,6 +161,7 @@ export function BatchEditMixTools(props: BatchEditMixToolsProps): JSX.Element {
                   options={getBlowoutLocationOptionsForForm({
                     stepType: 'mix',
                   })}
+                  padding="0"
                 />
               ) : null}
             </CheckboxExpandStepFormField>
