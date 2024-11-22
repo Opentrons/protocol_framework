@@ -1095,7 +1095,10 @@ def get_pipette_serial_ot3(pipette: Union[PipetteOT2, PipetteOT3]) -> str:
     """Get pipette serial number."""
     model = pipette.model
     volume = model.split("_")[0].replace("p", "")
-    volume = "1K" if volume == "1000" else volume
+    if volume == "1000":
+        volume = "1K"
+    elif volume == "200":
+        volume = "2H"
     if "single" in model:
         channels = "S"
     elif "96" in model:
