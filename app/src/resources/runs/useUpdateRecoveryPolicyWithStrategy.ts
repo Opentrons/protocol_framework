@@ -6,8 +6,8 @@ import { getErrorRecoveryPolicy } from '@opentrons/api-client'
 
 import type {
   HostConfig,
-  ErrorRecoveryPolicyResponse,
   RecoveryPolicyRulesParams,
+  UpdateErrorRecoveryPolicyResponse,
 } from '@opentrons/api-client'
 
 /**
@@ -26,7 +26,7 @@ export function useUpdateRecoveryPolicyWithStrategy(
 ): (
   newPolicy: UpdateErrorRecoveryPolicyWithStrategy['newPolicy'],
   strategy: UpdateErrorRecoveryPolicyWithStrategy['strategy']
-) => Promise<ErrorRecoveryPolicyResponse> {
+) => Promise<UpdateErrorRecoveryPolicyResponse> {
   const host = useHost()
 
   const {
@@ -38,7 +38,7 @@ export function useUpdateRecoveryPolicyWithStrategy(
     strategy: UpdateErrorRecoveryPolicyWithStrategy['strategy']
   ) =>
     getErrorRecoveryPolicy(host as HostConfig, runId).then(res => {
-      const existingPolicyRules = res.data.data.policyRules.map(rule => ({
+      const existingPolicyRules = res.data.policyRules.map(rule => ({
         commandType: rule.matchCriteria.command.commandType,
         errorType: rule.matchCriteria.command.error.errorType,
         ifMatch: rule.ifMatch,

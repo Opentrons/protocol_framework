@@ -203,7 +203,8 @@ export interface UpdateErrorRecoveryPolicyRequest {
   data: ErrorRecoveryPolicy
 }
 
-export type ErrorRecoveryPolicyResponse = UpdateErrorRecoveryPolicyRequest
+export type UpdateErrorRecoveryPolicyResponse = Record<string, never>
+export type ErrorRecoveryPolicyResponse = ErrorRecoveryPolicy
 
 /**
  * Current Run State Data
