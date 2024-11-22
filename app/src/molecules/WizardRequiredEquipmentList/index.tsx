@@ -155,7 +155,7 @@ function RequiredEquipmentCard(props: RequiredEquipmentCardProps): JSX.Element {
           </Flex>
         ) : null}
         <Flex
-          flex="0 1 70%"
+          flex={imageSrc == null ? '0 1 100%' : '0 1 70%'}
           flexDirection={DIRECTION_COLUMN}
           justifyContent={JUSTIFY_SPACE_AROUND}
         >
