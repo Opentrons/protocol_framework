@@ -23,8 +23,8 @@ import {
   PositionField,
   WellsOrderField,
 } from '../StepForm/PipetteFields'
+import type { WellOrderOption } from '../../../../form-types'
 import type { FieldPropsByName } from '../StepForm/types'
-import { WellOrderOption } from '../../../../form-types'
 
 interface BatchEditMoveLiquidProps {
   propsForFields: FieldPropsByName
