@@ -14,6 +14,7 @@ from opentrons.protocol_engine.errors.exceptions import (
 )
 from opentrons_shared_data.errors.exceptions import (
     PipetteLiquidNotFoundError,
+    StallOrCollisionDetectedError,
 )
 
 from opentrons.protocol_engine.commands.pipetting_common import LiquidNotFoundError
@@ -31,6 +32,7 @@ from opentrons.protocol_engine.commands.liquid_probe import (
     TryLiquidProbeImplementation,
 )
 from opentrons.protocol_engine.commands.command import DefinedErrorData, SuccessData
+from opentrons.protocol_engine.commands.movement_common import StallOrCollisionError
 
 
 from opentrons.protocol_engine.execution import (
@@ -127,6 +129,11 @@ async def test_liquid_probe_implementation(
             labware_id="123",
             well_name="A3",
             well_location=location,
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         ),
     ).then_return(Point(x=1, y=2, z=3))
 
@@ -212,6 +219,11 @@ async def test_liquid_not_found_error(
             labware_id=labware_id,
             well_name=well_name,
             well_location=well_location,
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         ),
     ).then_return(position)
 
@@ -393,3 +405,58 @@ async def test_liquid_probe_location_checking(
     ).then_return(True)
     with pytest.raises(MustHomeError):
         await subject.execute(data)
+
+
+async def test_liquid_probe_stall(
+    decoy: Decoy,
+    movement: MovementHandler,
+    state_view: StateView,
+    pipetting: PipettingHandler,
+    subject: EitherImplementation,
+    params_type: EitherParamsType,
+    model_utils: ModelUtils,
+) -> None:
+    """It should move to the destination and do a liquid probe there."""
+    location = WellLocation(origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1))
+
+    data = params_type(
+        pipetteId="abc",
+        labwareId="123",
+        wellName="A3",
+        wellLocation=location,
+    )
+
+    decoy.when(state_view.pipettes.get_aspirated_volume(pipette_id="abc")).then_return(
+        0
+    )
+    decoy.when(
+        state_view.pipettes.get_nozzle_configuration_supports_lld("abc")
+    ).then_return(True)
+
+    decoy.when(
+        await movement.move_to_well(
+            pipette_id="abc",
+            labware_id="123",
+            well_name="A3",
+            well_location=location,
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
+        ),
+    ).then_raise(StallOrCollisionDetectedError())
+
+    error_id = "error-id"
+    timestamp = datetime(year=2020, month=1, day=2)
+    decoy.when(model_utils.get_timestamp()).then_return(timestamp)
+    decoy.when(model_utils.generate_id()).then_return(error_id)
+
+    result = await subject.execute(data)
+
+    assert result == DefinedErrorData(
+        public=StallOrCollisionError.construct(
+            id=error_id, createdAt=timestamp, wrappedErrors=[matchers.Anything()]
+        ),
+        state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),
+    )

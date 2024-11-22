@@ -3,13 +3,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { SketchPicker } from 'react-color'
 import { yupResolver } from '@hookform/resolvers/yup'
-import styled from 'styled-components'
 import * as Yup from 'yup'
 import { Controller, useForm } from 'react-hook-form'
-import {
-  DEFAULT_LIQUID_COLORS,
-  DEPRECATED_WHALE_GREY,
-} from '@opentrons/shared-data'
+import styled from 'styled-components'
+import { DEFAULT_LIQUID_COLORS } from '@opentrons/shared-data'
 import {
   BORDERS,
   Btn,
@@ -32,7 +29,6 @@ import {
 import * as labwareIngredActions from '../../labware-ingred/actions'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import { swatchColors } from '../../components/swatchColors'
-import { checkColor } from './utils'
 import { HandleEnter } from '../../atoms/HandleEnter'
 import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
 
@@ -49,25 +45,9 @@ interface LiquidEditFormValues {
   [key: string]: unknown
 }
 
-const BLACK = '#000000'
-const WHITE = '#ffffff'
-
-const INVALID_DISPLAY_COLORS = [BLACK, WHITE, DEPRECATED_WHALE_GREY]
-
 const liquidEditFormSchema: any = Yup.object().shape({
   name: Yup.string().required('liquid name is required'),
-  displayColor: Yup.string().test(
-    'disallowed-color',
-    'Invalid display color',
-    value => {
-      if (value == null) {
-        return true
-      }
-      return !INVALID_DISPLAY_COLORS.includes(value)
-        ? !checkColor(value)
-        : false
-    }
-  ),
+  displayColor: Yup.string(),
   description: Yup.string(),
   serialize: Yup.boolean(),
 })
@@ -333,10 +313,10 @@ export function DefineLiquidsModal(
   )
 }
 
-const DescriptionField = styled.textarea`
-  height: 6.875rem;
+export const DescriptionField = styled.textarea`
+  min-height: 5rem;
   width: 100%;
-  border: 1px solid ${COLORS.grey50};
+  border: 1px ${BORDERS.styleSolid} ${COLORS.grey50};
   border-radius: ${BORDERS.borderRadius4};
   padding: ${SPACING.spacing8};
   font-size: ${TYPOGRAPHY.fontSizeP};

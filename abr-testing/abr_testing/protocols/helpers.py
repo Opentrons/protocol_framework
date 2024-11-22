@@ -14,7 +14,6 @@ from opentrons.protocol_api.module_contexts import (
     ThermocyclerContext,
     TemperatureModuleContext,
 )
-
 from typing import List, Union, Dict
 from opentrons.hardware_control.modules.types import ThermocyclerStep
 from opentrons_shared_data.errors.exceptions import PipetteLiquidNotFoundError
@@ -39,12 +38,24 @@ def load_common_liquid_setup_labware_and_instruments(
 
 
 def load_disposable_lids(
-    protocol: ProtocolContext, num_of_lids: int, deck_slot: List[str]
+    protocol: ProtocolContext,
+    num_of_lids: int,
+    deck_slot: List[str],
+    deck_riser: bool = False,
 ) -> List[Labware]:
     """Load Stack of Disposable lids."""
-    unused_lids = [
-        protocol.load_labware("opentrons_tough_pcr_auto_sealing_lid", deck_slot[0])
-    ]
+    if deck_riser:
+        deck_riser_adapter = protocol.load_adapter(
+            "opentrons_flex_deck_riser", deck_slot[0]
+        )
+        unused_lids = [
+            deck_riser_adapter.load_labware("opentrons_tough_pcr_auto_sealing_lid")
+        ]
+    else:
+        unused_lids = [
+            protocol.load_labware("opentrons_tough_pcr_auto_sealing_lid", deck_slot[0])
+        ]
+
     if len(deck_slot) == 1:
         for i in range(num_of_lids - 1):
             unused_lids.append(
@@ -152,6 +163,16 @@ def create_disposable_lid_parameter(parameters: ParameterContext) -> None:
     )
 
 
+def create_tc_lid_deck_riser_parameter(parameters: ParameterContext) -> None:
+    """Create parameter for tc lid deck riser."""
+    parameters.add_bool(
+        variable_name="deck_riser",
+        display_name="Deck Riser",
+        description="True means use deck riser.",
+        default=False,
+    )
+
+
 def create_tip_size_parameter(parameters: ParameterContext) -> None:
     """Create parameter for tip size."""
     parameters.add_str(
@@ -200,6 +221,31 @@ def create_hs_speed_parameter(parameters: ParameterContext) -> None:
         minimum=200,
         maximum=3000,
         unit="rpm",
+    )
+
+
+def create_tc_compatible_labware_parameter(parameters: ParameterContext) -> None:
+    """Create parameter for labware type compatible with thermocycler."""
+    parameters.add_str(
+        variable_name="labware_tc_compatible",
+        display_name="Labware Type for Thermocycler",
+        description="labware compatible with thermocycler.",
+        default="biorad_96_wellplate_200ul_pcr",
+        choices=[
+            {
+                "display_name": "Armadillo_200ul",
+                "value": "armadillo_96_wellplate_200ul_pcr_full_skirt",
+            },
+            {"display_name": "Bio-Rad_200ul", "value": "biorad_96_wellplate_200ul_pcr"},
+            {
+                "display_name": "NEST_100ul",
+                "value": "nest_96_wellplate_100ul_pcr_full_skirt",
+            },
+            {
+                "display_name": "Opentrons_200ul",
+                "value": "opentrons_96_wellplate_200ul_pcr_full_skirt",
+            },
+        ],
     )
 
 
@@ -334,10 +380,10 @@ def find_liquid_height_of_all_wells(
     """Find the liquid height of all wells in protocol."""
     dict_of_labware_heights = {}
     pipette.pick_up_tip()
+    pip_channels = pipette.active_channels
     for well in wells:
         labware_name = well.parent.load_name
         total_number_of_wells_in_plate = len(well.parent.wells())
-        pip_channels = pipette.active_channels
         # if pip_channels is > 1 and total_wells > 12 - only probe 1st row.
         if (
             pip_channels > 1
@@ -349,11 +395,11 @@ def find_liquid_height_of_all_wells(
         elif total_number_of_wells_in_plate <= 12:
             liquid_height_of_well = find_liquid_height(pipette, well)
             dict_of_labware_heights[labware_name, well] = liquid_height_of_well
-    if pip_channels == pipette.channels:
+    if pip_channels != pipette.channels:
+        pipette.drop_tip()
+    else:
         pipette.return_tip()
         pipette.reset_tipracks()
-    else:
-        pipette.drop_tip()
     msg = f"result: {dict_of_labware_heights}"
     protocol.comment(msg=msg)
     return dict_of_labware_heights

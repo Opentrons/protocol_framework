@@ -40886,6 +40886,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [
     {
       "description": "Lysis Buffer",

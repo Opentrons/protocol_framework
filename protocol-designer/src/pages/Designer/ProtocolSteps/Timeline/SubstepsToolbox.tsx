@@ -5,11 +5,9 @@ import {
   Flex,
   Icon,
   PrimaryButton,
-  SPACING,
   StyledText,
   Toolbox,
 } from '@opentrons/components'
-import { selectors as labwareIngredSelectors } from '../../../../labware-ingred/selectors'
 import { getSubsteps } from '../../../../file-data/selectors'
 import { getHoveredSubstep } from '../../../../ui/steps'
 import {
@@ -41,7 +39,6 @@ export function SubstepsToolbox(
   const substeps = useSelector(getSubsteps)[stepId]
   const formData = useSelector(getSavedStepForms)[stepId]
   const hoveredSubstep = useSelector(getHoveredSubstep)
-  const ingredNames = useSelector(labwareIngredSelectors.getLiquidNamesById)
   const highlightSubstep = (payload: SubstepIdentifier): HoverOnSubstepAction =>
     dispatch(hoverOnSubstep(payload))
 
@@ -62,7 +59,6 @@ export function SubstepsToolbox(
     substeps.substepType === THERMOCYCLER_PROFILE ? (
     <Toolbox
       width={FLEX_MAX_CONTENT}
-      childrenPadding="0"
       closeButton={<Icon size="2rem" name="close" />}
       onCloseClick={handleClose}
       confirmButton={
@@ -81,13 +77,12 @@ export function SubstepsToolbox(
         </StyledText>
       }
     >
-      <Flex padding={SPACING.spacing12}>
+      <Flex>
         {substeps.substepType === THERMOCYCLER_PROFILE ? (
           <ThermocyclerProfileSubsteps key="substeps" stepId={stepId} />
         ) : (
           <PipettingSubsteps
             key="substeps"
-            ingredNames={ingredNames}
             substeps={substeps}
             hoveredSubstep={hoveredSubstep}
             selectSubstep={highlightSubstep}

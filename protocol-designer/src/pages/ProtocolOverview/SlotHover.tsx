@@ -1,6 +1,5 @@
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
-import debounce from 'lodash/debounce'
 
 import {
   ALIGN_CENTER,
@@ -26,8 +25,6 @@ import type {
 } from '@opentrons/shared-data'
 
 import type { Dispatch, SetStateAction } from 'react'
-
-const DEBOUNCE_DURATION_MS = 600
 
 interface SlotHoverProps {
   hover: string | null
@@ -56,13 +53,6 @@ export function SlotHover(props: SlotHoverProps): JSX.Element | null {
       slotId as AddressableAreaName,
       deckDef.cutoutFixtures
     ) ?? 'cutoutD1'
-
-  const debouncedSetHover = useCallback(
-    debounce((slotId: string | null) => {
-      setHover(slotId)
-    }, DEBOUNCE_DURATION_MS),
-    [setHover]
-  )
 
   //  return null for TC slots
   if (slotPosition === null || (hasTCOnSlot && tcSlots.includes(slotId)))
@@ -126,10 +116,10 @@ export function SlotHover(props: SlotHoverProps): JSX.Element | null {
           opacity: hoverOpacity,
           flex: '1',
           onMouseEnter: () => {
-            debouncedSetHover(slotId)
+            setHover(slotId)
           },
           onMouseLeave: () => {
-            debouncedSetHover(null)
+            setHover(null)
           },
         }}
       >
@@ -152,10 +142,10 @@ export function SlotHover(props: SlotHoverProps): JSX.Element | null {
           opacity: hoverOpacity,
           flex: '1',
           onMouseEnter: () => {
-            debouncedSetHover(slotId)
+            setHover(slotId)
           },
           onMouseLeave: () => {
-            debouncedSetHover(null)
+            setHover(null)
           },
         }}
       >

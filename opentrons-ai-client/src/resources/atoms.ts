@@ -3,8 +3,8 @@ import { atom } from 'jotai'
 import type {
   Chat,
   ChatData,
-  ChatPromptAtomProps,
-  createProtocolAtomProps,
+  CreatePrompt,
+  CreateProtocolAtomProps,
   HeaderWithMeterAtomProps,
   Mixpanel,
   UpdatePrompt,
@@ -13,19 +13,41 @@ import type {
 /** ChatDataAtom is for chat data (user prompt and response from OpenAI API) */
 export const chatDataAtom = atom<ChatData[]>([])
 
-/** ChatPromptAtom is for the prefilled userprompt when navigating to the chat page from existing/new protocol pages */
-export const chatPromptAtom = atom<ChatPromptAtomProps>({
+/** CreateProtocolChatAtom is for the prefilled userprompt when navigating to the chat page from Create New protocol page */
+export const createProtocolChatAtom = atom<CreatePrompt>({
   prompt: '',
-  isNewProtocol: true,
+  regenerate: false,
+  scientific_application_type: '',
+  description: '',
+  robots: 'opentrons_flex',
+  mounts: [],
+  flexGripper: false,
+  modules: [],
+  labware: [],
+  liquids: [],
+  steps: [],
+  fake: false,
+  fake_id: 0,
 })
 
-export const updatePromptAtom = atom<UpdatePrompt>({
+/** CreateProtocolChatAtom is for the prefilled userprompt when navigating to the chat page from Update Protocol page */
+export const updateProtocolChatAtom = atom<UpdatePrompt>({
+  prompt: '',
   protocol_text: '',
   regenerate: false,
   update_type: 'adapt_python_protocol',
   update_details: '',
   fake: false,
   fake_id: 0,
+})
+
+/** Regenerate protocol atom */
+export const regenerateProtocolAtom = atom<{
+  isCreateOrUpdateProtocol: boolean
+  regenerate: boolean
+}>({
+  isCreateOrUpdateProtocol: false,
+  regenerate: false,
 })
 
 /** Scroll to bottom of chat atom */
@@ -47,9 +69,9 @@ export const headerWithMeterAtom = atom<HeaderWithMeterAtomProps>({
   progress: 0,
 })
 
-export const createProtocolAtom = atom<createProtocolAtomProps>({
-  currentStep: 0,
-  focusStep: 0,
+export const createProtocolAtom = atom<CreateProtocolAtomProps>({
+  currentSection: 0,
+  focusSection: 0,
 })
 
 export const displayExitConfirmModalAtom = atom<boolean>(false)

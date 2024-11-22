@@ -19,9 +19,10 @@ import { SendButton } from '../../atoms/SendButton'
 import {
   chatDataAtom,
   chatHistoryAtom,
-  chatPromptAtom,
+  createProtocolChatAtom,
+  regenerateProtocolAtom,
   tokenAtom,
-  updatePromptAtom,
+  updateProtocolChatAtom,
 } from '../../resources/atoms'
 import { useApiCall } from '../../resources/hooks'
 import { calcTextAreaHeight } from '../../resources/utils'
@@ -38,31 +39,73 @@ import {
 } from '../../resources/constants'
 
 import type { AxiosRequestConfig } from 'axios'
-import type { ChatData } from '../../resources/types'
+import type {
+  ChatData,
+  CreatePrompt,
+  UpdatePrompt,
+} from '../../resources/types'
+import { useTrackEvent } from '../../resources/hooks/useTrackEvent'
 
 export function InputPrompt(): JSX.Element {
   const { t } = useTranslation('protocol_generator')
   const { register, watch, reset, setValue } = useFormContext()
-  const [chatPromptAtomValue] = useAtom(chatPromptAtom)
-  const [updatePrompt] = useAtom(updatePromptAtom)
+  const trackEvent = useTrackEvent()
+
+  const [updateProtocol] = useAtom(updateProtocolChatAtom)
+  const [createProtocol] = useAtom(createProtocolChatAtom)
+  const isNewProtocol = createProtocol.prompt !== ''
+  const [sendAutoFilledPrompt, setSendAutoFilledPrompt] = useState<boolean>(
+    false
+  )
+  const [regenerateProtocol, setRegenerateProtocol] = useAtom(
+    regenerateProtocolAtom
+  )
+
   const [, setChatData] = useAtom(chatDataAtom)
   const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom)
   const [token] = useAtom(tokenAtom)
   const [submitted, setSubmitted] = useState<boolean>(false)
   const watchUserPrompt = watch('userPrompt') ?? ''
-  const [sendAutoFilledPrompt, setSendAutoFilledPrompt] = useState<boolean>(
-    false
-  )
+
   const { data, isLoading, callApi } = useApiCall()
   const [requestId, setRequestId] = useState<string>(uuidv4())
 
-  const handleClick = async (
-    isUpdateOrCreate: boolean = false
-  ): Promise<void> => {
-    setRequestId(uuidv4() + getPreFixText(isUpdateOrCreate))
+  // This is to autofill the input field for when we navigate to the chat page from the existing/new protocol generator pages
+  useEffect(() => {
+    const prefilledPrompt = isNewProtocol
+      ? createProtocol.prompt
+      : updateProtocol.prompt
+    if (prefilledPrompt !== '') {
+      setValue('userPrompt', prefilledPrompt)
+      setSendAutoFilledPrompt(true)
+    }
+  }, [])
 
+  useEffect(() => {
+    if (sendAutoFilledPrompt) {
+      handleClick(true)
+      setSendAutoFilledPrompt(false)
+    }
+  }, [watchUserPrompt])
+
+  useEffect(() => {
+    if (regenerateProtocol.regenerate) {
+      handleClick(regenerateProtocol.isCreateOrUpdateProtocol, true)
+      setRegenerateProtocol({
+        isCreateOrUpdateProtocol: false,
+        regenerate: false,
+      })
+    }
+  }, [regenerateProtocol])
+
+  const handleClick = async (
+    isUpdateOrCreateRequest: boolean = false,
+    isRegenerateRequest: boolean = false
+  ): Promise<void> => {
+    const newRequestId = uuidv4() + getPreFixText(isUpdateOrCreateRequest)
+    setRequestId(newRequestId)
     const userInput: ChatData = {
-      requestId,
+      requestId: newRequestId,
       role: 'user',
       reply: watchUserPrompt,
     }
@@ -75,16 +118,16 @@ export function InputPrompt(): JSX.Element {
         'Content-Type': 'application/json',
       }
 
-      const url = isUpdateOrCreate
-        ? getCreateOrUpdateEndpoint(chatPromptAtomValue.isNewProtocol)
+      const url = isUpdateOrCreateRequest
+        ? getCreateOrUpdateEndpoint()
         : getChatEndpoint()
 
       const config = {
         url,
         method: 'POST',
         headers,
-        data: isUpdateOrCreate
-          ? getUpdateOrCreatePrompt()
+        data: isUpdateOrCreateRequest
+          ? getUpdateOrCreatePrompt(isRegenerateRequest)
           : {
               message: watchUserPrompt,
               history: chatHistory,
@@ -97,6 +140,12 @@ export function InputPrompt(): JSX.Element {
         { role: 'user', content: watchUserPrompt },
       ])
       await callApi(config as AxiosRequestConfig)
+      trackEvent({
+        name: 'chat-submitted',
+        properties: {
+          chat: watchUserPrompt,
+        },
+      })
       setSubmitted(true)
     } catch (err: any) {
       console.error(`error: ${err.message}`)
@@ -104,8 +153,28 @@ export function InputPrompt(): JSX.Element {
     }
   }
 
-  const getUpdateOrCreatePrompt = (): any => {
-    return chatPromptAtomValue.isNewProtocol ? updatePrompt : updatePrompt // to do: add the create prompt
+  const getUpdateOrCreatePrompt = (
+    isRegenerateRequest: boolean
+  ): CreatePrompt | UpdatePrompt => {
+    createProtocol.regenerate = isRegenerateRequest
+    updateProtocol.regenerate = isRegenerateRequest
+    return isNewProtocol ? createProtocol : updateProtocol
+  }
+
+  const getPreFixText = (isUpdateOrCreate: boolean): string => {
+    let appendCreateOrUpdate = ''
+    if (isUpdateOrCreate) {
+      if (isNewProtocol) {
+        appendCreateOrUpdate = 'NewProtocol'
+      } else {
+        appendCreateOrUpdate = 'UpdateProtocol'
+      }
+    }
+    return appendCreateOrUpdate
+  }
+
+  const getCreateOrUpdateEndpoint = (): string => {
+    return isNewProtocol ? getCreateEndpoint() : getUpdateEndpoint()
   }
 
   useEffect(() => {
@@ -121,24 +190,16 @@ export function InputPrompt(): JSX.Element {
         { role: 'assistant', content: reply },
       ])
       setChatData(chatData => [...chatData, assistantResponse])
+      trackEvent({
+        name: 'generated-protocol',
+        properties: {
+          createOrUpdate: isNewProtocol ? 'create' : 'update',
+          protocol: reply,
+        },
+      })
       setSubmitted(false)
     }
   }, [data, isLoading, submitted])
-
-  // This is to autofill the input field for when we navigate to the chat page from the existing/new protocol generator pages
-  useEffect(() => {
-    if (chatPromptAtomValue.prompt !== '') {
-      setValue('userPrompt', chatPromptAtomValue.prompt)
-      setSendAutoFilledPrompt(true)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (sendAutoFilledPrompt) {
-      handleClick(true)
-      setSendAutoFilledPrompt(false)
-    }
-  }, [watchUserPrompt])
 
   return (
     <StyledForm id="User_Prompt">
@@ -158,22 +219,6 @@ export function InputPrompt(): JSX.Element {
       </Flex>
     </StyledForm>
   )
-
-  function getPreFixText(isUpdateOrCreate: boolean): string {
-    let appendCreateOrUpdate = ''
-    if (isUpdateOrCreate) {
-      if (chatPromptAtomValue.isNewProtocol) {
-        appendCreateOrUpdate = 'NewProtocol'
-      } else {
-        appendCreateOrUpdate = 'UpdateProtocol'
-      }
-    }
-    return appendCreateOrUpdate
-  }
-}
-
-const getCreateOrUpdateEndpoint = (isCreateNewProtocol: boolean): string => {
-  return isCreateNewProtocol ? getCreateEndpoint() : getUpdateEndpoint()
 }
 
 const getChatEndpoint = (): string => {

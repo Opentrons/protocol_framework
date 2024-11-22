@@ -10,6 +10,7 @@ import {
 import {
   getSelectedStepId,
   getSelectedSubstep,
+  getSelectedTerminalItemId,
 } from '../../../../ui/steps/selectors'
 import { getDesignerTab } from '../../../../file-data/selectors'
 import { getEnableHotKeysDisplay } from '../../../../feature-flags/selectors'
@@ -60,6 +61,7 @@ describe('ProtocolSteps', () => {
     vi.mocked(DeckSetupContainer).mockReturnValue(
       <div>mock DeckSetupContainer</div>
     )
+    vi.mocked(getSelectedTerminalItemId).mockReturnValue(null)
     vi.mocked(OffDeck).mockReturnValue(<div>mock OffDeck</div>)
     vi.mocked(getUnsavedForm).mockReturnValue(null)
     vi.mocked(getSelectedSubstep).mockReturnValue(null)
@@ -95,8 +97,8 @@ describe('ProtocolSteps', () => {
   it('renders the hot keys display', () => {
     render()
     screen.getByText('Double-click to edit')
-    screen.getByText('Shift + Click to select all')
-    screen.getByText('Command + Click for multi-select')
+    screen.getByText('⇧ + click to select range')
+    screen.getByText('^/⌘ + click to select multiple')
   })
 
   it('renders the current step name', () => {

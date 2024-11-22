@@ -2,6 +2,7 @@
 import sys
 import paramiko as pmk
 import time
+import json
 import multiprocessing
 from typing import Optional, List, Any
 
@@ -17,7 +18,7 @@ def execute(client: pmk.SSHClient, command: str, args: list) -> Optional[int]:
         stderr_lines: List[str] = []
         time.sleep(25)
 
-        if stderr.channel.recv_ready:
+        if stderr.channel.recv_ready():
             stderr_lines = stderr.readlines()
             if stderr_lines != []:
                 print(f"{args[0]} ERROR: ", stderr_lines)
@@ -69,11 +70,10 @@ def run(file_name: str) -> List[Any]:
     robot_ips = []
     robot_names = []
     with open(file_name) as file:
-        for line in file.readlines():
-            info = line.split(",")
-            if "Y" in info[2]:
-                robot_ips.append(info[0])
-                robot_names.append(info[1])
+        file_dict = json.load(file)
+        robot_dict = file_dict.get("ip_address_list")
+        robot_ips = list(robot_dict.keys())
+        robot_names = list(robot_dict.values())
     print("Executing Script on All Robots:")
     # Launch the processes for each robot.
     processes = []
@@ -89,10 +89,8 @@ if __name__ == "__main__":
     # Wait for all processes to finish.
     file_name = sys.argv[1]
     processes = run(file_name)
-
     for process in processes:
         process.start()
         time.sleep(20)
-
     for process in processes:
         process.join()

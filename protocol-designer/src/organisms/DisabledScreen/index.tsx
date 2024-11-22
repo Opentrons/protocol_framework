@@ -23,6 +23,7 @@ export function DisabledScreen(): JSX.Element {
       backgroundColor={`${COLORS.black90}${COLORS.opacity40HexCode}`}
       overflow={OVERFLOW_HIDDEN}
       noPadding
+      zIndexOverlay={15}
     >
       <Flex
         flexDirection={DIRECTION_COLUMN}

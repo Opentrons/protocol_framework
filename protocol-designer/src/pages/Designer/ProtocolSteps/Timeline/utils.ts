@@ -1,8 +1,6 @@
 import round from 'lodash/round'
-import omitBy from 'lodash/omitBy'
 import uniq from 'lodash/uniq'
 import { UAParser } from 'ua-parser-js'
-import type { WellIngredientVolumeData } from '../../../../steplist'
 import type { StepIdType } from '../../../../form-types'
 
 export const capitalizeFirstLetterAfterNumber = (title: string): string =>
@@ -27,31 +25,6 @@ export function formatVolume(
 const PERCENTAGE_DECIMALS_ALLOWED = 1
 export const formatPercentage = (part: number, total: number): string => {
   return `${round((part / total) * 100, PERCENTAGE_DECIMALS_ALLOWED)}%`
-}
-
-export const compactPreIngreds = (
-  preIngreds: WellIngredientVolumeData
-): Partial<
-  | {
-      [ingredId: string]:
-        | {
-            volume: number
-          }
-        | undefined
-    }
-  | {
-      [well: string]:
-        | {
-            [ingredId: string]: {
-              volume: number
-            }
-          }
-        | undefined
-    }
-> => {
-  return omitBy(preIngreds, ingred => {
-    return typeof ingred?.volume === 'number' && ingred.volume <= 0
-  })
 }
 
 export const getMetaSelectedSteps = (

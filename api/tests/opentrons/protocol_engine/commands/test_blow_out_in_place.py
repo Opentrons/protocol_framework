@@ -43,6 +43,7 @@ def subject(
 
 async def test_blow_out_in_place_implementation(
     decoy: Decoy,
+    gantry_mover: GantryMover,
     subject: BlowOutInPlaceImplementation,
     pipetting: PipettingHandler,
 ) -> None:
@@ -51,9 +52,11 @@ async def test_blow_out_in_place_implementation(
         pipetteId="pipette-id",
         flowRate=1.234,
     )
+    decoy.when(await gantry_mover.get_position("pipette-id")).then_return(
+        Point(1, 2, 3)
+    )
 
     result = await subject.execute(data)
-
     assert result == SuccessData(
         public=BlowOutInPlaceResult(),
         state_update=update_types.StateUpdate(

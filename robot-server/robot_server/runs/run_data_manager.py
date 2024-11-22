@@ -66,6 +66,7 @@ def _build_run(
             completedAt=state_summary.completedAt,
             startedAt=state_summary.startedAt,
             liquids=state_summary.liquids,
+            liquidClasses=state_summary.liquidClasses,
             outputFileIds=state_summary.files,
             runTimeParameters=run_time_parameters,
         )
@@ -80,6 +81,7 @@ def _build_run(
             pipettes=[],
             modules=[],
             liquids=[],
+            liquidClasses=[],
             wells=[],
             files=[],
             hasEverEnteredErrorRecovery=False,
@@ -124,6 +126,7 @@ def _build_run(
         completedAt=state.completedAt,
         startedAt=state.startedAt,
         liquids=state.liquids,
+        liquidClasses=state.liquidClasses,
         runTimeParameters=run_time_parameters,
         outputFileIds=state.files,
         hasEverEnteredErrorRecovery=state.hasEverEnteredErrorRecovery,

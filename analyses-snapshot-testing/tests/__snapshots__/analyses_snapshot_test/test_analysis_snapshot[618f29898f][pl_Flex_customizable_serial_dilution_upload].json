@@ -10386,6 +10386,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [
     {
       "description": "Diluent liquid is filled in the reservoir",

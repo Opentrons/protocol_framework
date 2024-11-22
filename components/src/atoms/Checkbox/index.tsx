@@ -13,7 +13,6 @@ import {
 } from '../../styles'
 import { RESPONSIVENESS, SPACING } from '../../ui-style-constants'
 import { StyledText } from '../StyledText'
-import { truncateString } from '../../utils'
 
 export interface CheckboxProps {
   /** checkbox is checked if value is true */
@@ -41,7 +40,6 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
     width = FLEX_MAX_CONTENT,
     type = 'round',
   } = props
-  const truncatedLabel = truncateString(labelText, 25)
 
   const CHECKBOX_STYLE = css`
     width: ${width};
@@ -50,7 +48,7 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
     align-items: ${ALIGN_CENTER};
     flex-direction: ${DIRECTION_ROW};
     color: ${isChecked ? COLORS.white : COLORS.black90};
-    background-color: ${isChecked ? COLORS.blue50 : COLORS.blue35};
+    background-color: ${isChecked ? COLORS.blue50 : COLORS.blue30};
     border-radius: ${type === 'round'
       ? BORDERS.borderRadiusFull
       : BORDERS.borderRadius8};
@@ -69,6 +67,9 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
     &:disabled {
       background-color: ${COLORS.grey35};
       color: ${COLORS.grey50};
+    }
+    &:hover {
+      background-color: ${isChecked ? COLORS.blue55 : COLORS.blue35};
     }
 
     @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
@@ -89,7 +90,7 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
       css={CHECKBOX_STYLE}
     >
       <StyledText desktopStyle="bodyDefaultRegular" oddStyle="bodyTextSemiBold">
-        {truncatedLabel}
+        {labelText}
       </StyledText>
       <Check isChecked={isChecked} />
     </Flex>

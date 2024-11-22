@@ -22,7 +22,7 @@ metadata = {
 
 requirements = {
     "robotType": "OT-3",
-    "apiLevel": "2.20",
+    "apiLevel": "2.21",
 }
 
 
@@ -44,6 +44,7 @@ def add_parameters(parameters: ParameterContext) -> None:
     helpers.create_tip_size_parameter(parameters)
     helpers.create_dot_bottom_parameter(parameters)
     helpers.create_disposable_lid_parameter(parameters)
+    helpers.create_tc_lid_deck_riser_parameter(parameters)
 
 
 def run(ctx: ProtocolContext) -> None:
@@ -51,6 +52,7 @@ def run(ctx: ProtocolContext) -> None:
     b = ctx.params.dot_bottom  # type: ignore[attr-defined]
     TIPRACK_96_NAME = ctx.params.tip_size  # type: ignore[attr-defined]
     disposable_lid = ctx.params.disposable_lid  # type: ignore[attr-defined]
+    deck_riser = ctx.params.deck_riser  # type: ignore[attr-defined]
 
     waste_chute = ctx.load_waste_chute()
 
@@ -61,7 +63,7 @@ def run(ctx: ProtocolContext) -> None:
         helpers.temp_str, "C1"
     )  # type: ignore[assignment]
     if disposable_lid:
-        unused_lids = helpers.load_disposable_lids(ctx, 3, ["A4"])
+        unused_lids = helpers.load_disposable_lids(ctx, 3, ["A4"], deck_riser)
     used_lids: List[Labware] = []
     thermocycler.open_lid()
     h_s.open_labware_latch()

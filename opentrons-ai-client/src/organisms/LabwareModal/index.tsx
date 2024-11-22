@@ -19,7 +19,7 @@ import { createPortal } from 'react-dom'
 import { reduce } from 'lodash'
 import { ListButtonCheckbox } from '../../atoms/ListButtonCheckbox/ListButtonCheckbox'
 import { LABWARES_FIELD_NAME } from '../LabwareLiquidsSection'
-import { getAllDefinitions } from '../../resources/utils'
+import { getOnlyLatestDefs } from '../../resources/utils'
 import type { DisplayLabware } from '../LabwareLiquidsSection'
 import type {
   LabwareDefByDefURI,
@@ -56,7 +56,7 @@ export function LabwareModal({
   const searchFilter = (termToCheck: string): boolean =>
     termToCheck.toLowerCase().includes(searchTerm.toLowerCase())
 
-  const defs = getAllDefinitions()
+  const defs = getOnlyLatestDefs()
 
   const labwareByCategory: Record<
     string,
@@ -229,10 +229,18 @@ export function LabwareModal({
                     setValue(
                       LABWARES_FIELD_NAME,
                       [
-                        ...selectedLabwares.map(labwareURI => ({
-                          labwareURI,
-                          count: 1,
-                        })),
+                        ...selectedLabwares.map(labwareURI => {
+                          const existingLabware = labwares.find(
+                            lw => lw.labwareURI === labwareURI
+                          )
+                          return {
+                            labwareURI,
+                            count:
+                              existingLabware != null
+                                ? existingLabware.count
+                                : 1,
+                          }
+                        }),
                       ],
                       { shouldValidate: true }
                     )
