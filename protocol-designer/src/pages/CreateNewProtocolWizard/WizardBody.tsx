@@ -186,7 +186,7 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
             controls={false}
             aria-label={`onboarding animation for page ${stepNumber}`}
           >
-            <source src={asset ?? ''} type="video/mp4" />
+            <source src={asset ?? ''} type="video/webm" />
           </video>
         ) : (
           <img
