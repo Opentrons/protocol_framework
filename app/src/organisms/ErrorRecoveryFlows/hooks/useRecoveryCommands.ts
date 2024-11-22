@@ -72,6 +72,9 @@ export interface UseRecoveryCommandsResult {
   homeExceptPlungers: () => Promise<CommandData[]>
   /* A non-terminal recovery command */
   moveLabwareWithoutPause: () => Promise<CommandData[]>
+
+  /* Home all attached axes */
+  homeAll: () => Promise<CommandData[]>
 }
 
 // TODO(jh, 07-24-24): Create tighter abstractions for terminal vs. non-terminal commands.
@@ -345,6 +348,12 @@ export const HOME_PIPETTE_Z_AXES: CreateCommand = {
 
 export const RELEASE_GRIPPER_JAW: CreateCommand = {
   commandType: 'unsafe/ungripLabware',
+  params: {},
+  intent: 'fixit',
+}
+
+export const HOME_ALL: CreateCommand = {
+  commandType: 'home',
   params: {},
   intent: 'fixit',
 }
