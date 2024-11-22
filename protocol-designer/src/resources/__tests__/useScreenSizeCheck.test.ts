@@ -1,4 +1,4 @@
-import { describe, it, vi, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useScreenSizeCheck } from '../useScreenSizeCheck'
 
