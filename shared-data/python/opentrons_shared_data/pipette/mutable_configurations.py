@@ -58,6 +58,9 @@ def _edit_non_quirk(
             elif thiskey == "##EACHTIPTYPE##":
                 for key in existing.keys():
                     _do_edit_non_quirk(new_value, existing[key], restkeys)
+            elif thiskey == "##EACHTIP##":
+                for key in existing.keys():
+                    _do_edit_non_quirk(new_value, existing[key], restkeys)
             else:
                 _do_edit_non_quirk(new_value, existing[thiskey], restkeys)
         else:
