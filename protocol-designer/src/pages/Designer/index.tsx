@@ -6,6 +6,7 @@ import {
   ALIGN_END,
   COLORS,
   DIRECTION_COLUMN,
+  FLEX_MAX_CONTENT,
   Flex,
   INFO_TOAST,
   SPACING,
@@ -149,7 +150,7 @@ export function Designer(): JSX.Element {
           }}
         />
       ) : null}
-      <Flex flexDirection={DIRECTION_COLUMN}>
+      <Flex flexDirection={DIRECTION_COLUMN} minHeight={FLEX_MAX_CONTENT}>
         <ProtocolNavBar
           hasZoomInSlot={zoomIn.slot != null || zoomIn.cutout != null}
           hasTrashEntity={hasTrashEntity}

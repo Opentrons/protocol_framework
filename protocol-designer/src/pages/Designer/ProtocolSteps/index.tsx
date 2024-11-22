@@ -5,9 +5,9 @@ import {
   ALIGN_CENTER,
   COLORS,
   DIRECTION_COLUMN,
+  FLEX_MAX_CONTENT,
   Flex,
   JUSTIFY_CENTER,
-  JUSTIFY_FLEX_START,
   JUSTIFY_SPACE_BETWEEN,
   POSITION_FIXED,
   SPACING,
@@ -34,7 +34,10 @@ import { TimelineToolbox, SubstepsToolbox } from './Timeline'
 import { StepForm } from './StepForm'
 import { StepSummary } from './StepSummary'
 import { BatchEditToolbox } from './BatchEditToolbox'
-import { getDesignerTab } from '../../../file-data/selectors'
+import {
+  getDesignerTab,
+  getRobotStateTimeline,
+} from '../../../file-data/selectors'
 import { TimelineAlerts } from '../../../organisms'
 
 const CONTENT_MAX_WIDTH = '46.9375rem'
@@ -64,31 +67,37 @@ export function ProtocolSteps(): JSX.Element {
       ? savedStepForms[currentstepIdForStepSummary]
       : null
 
+  const { errors: timelineErrors } = useSelector(getRobotStateTimeline)
+  const hasTimelineErrors =
+    timelineErrors != null ? timelineErrors.length > 0 : false
+  const showTimelineAlerts =
+    hasTimelineErrors && tab === 'protocolSteps' && formData == null
   const stepDetails = currentStep?.stepDetails ?? null
+
   return (
     <Flex
       backgroundColor={COLORS.grey10}
-      width="100%"
-      gridGap={SPACING.spacing16}
       height="calc(100vh - 4rem)"
-      justifyContent={JUSTIFY_SPACE_BETWEEN}
+      minHeight={FLEX_MAX_CONTENT}
+      width="100%"
       padding={SPACING.spacing12}
+      gridGap={SPACING.spacing16}
+      justifyContent={JUSTIFY_SPACE_BETWEEN}
     >
       <TimelineToolbox />
       <Flex
         alignItems={ALIGN_CENTER}
-        alignSelf={ALIGN_CENTER}
         flexDirection={DIRECTION_COLUMN}
         gridGap={SPACING.spacing16}
         width="100%"
-        justifyContent={JUSTIFY_FLEX_START}
+        paddingTop={showTimelineAlerts ? '0' : SPACING.spacing24}
       >
         <Flex
           flexDirection={DIRECTION_COLUMN}
           gridGap={SPACING.spacing16}
           maxWidth={CONTENT_MAX_WIDTH}
         >
-          {tab === 'protocolSteps' ? (
+          {showTimelineAlerts ? (
             <TimelineAlerts justifyContent={JUSTIFY_CENTER} width="100%" />
           ) : null}
           <Flex justifyContent={JUSTIFY_SPACE_BETWEEN}>
@@ -127,9 +136,6 @@ export function ProtocolSteps(): JSX.Element {
                 currentStep={currentStep}
                 stepDetails={stepDetails}
               />
-            ) : null}
-            {selectedTerminalItem != null && currentHoveredStepId == null ? (
-              <Flex height="4.75rem" width="100%" />
             ) : null}
           </Flex>
         </Flex>
