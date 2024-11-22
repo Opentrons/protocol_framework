@@ -381,10 +381,8 @@ async def test_update_run_state_command_with_errors(
     command_errors_result = subject.get_commands_errors_slice(
         run_id="run-id",
         length=5,
-        cursor=2,
+        cursor=0,
     )
-
-    print(command_errors_result)
 
     assert command_errors_result.commands_errors == [
         item.error for item in commands_with_errors

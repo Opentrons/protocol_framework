@@ -612,21 +612,23 @@ class RunStore:
 
             actual_cursor = cursor if cursor is not None else count_result - length
             # Clamp to [0, count_result).
-            print(actual_cursor)
-            actual_cursor = max(0, min(actual_cursor, count_result - 1))
+            # cursor is 0 based index and row number starts from 1.
+            actual_cursor = max(0, min(actual_cursor, count_result - 1)) + 1
             select_command_errors = (
-                sqlalchemy.select(sqlalchemy.func.row_number().over().label('row_num'), run_command_table)
+                sqlalchemy.select(
+                    sqlalchemy.func.row_number().over().label("row_num"),
+                    run_command_table,
+                )
                 .where(
                     and_(
                         run_command_table.c.run_id == run_id,
-                        run_command_table.c.command_status == CommandStatusSQLEnum.FAILED
+                        run_command_table.c.command_status
+                        == CommandStatusSQLEnum.FAILED,
                     )
                 )
                 .subquery()
             )
-            print(transaction.execute(select_command_errors).all())
-            print(actual_cursor)
-            print(count_result)
+
             select_slice = (
                 sqlalchemy.select(run_command_table.c.command_error)
                 .where(
