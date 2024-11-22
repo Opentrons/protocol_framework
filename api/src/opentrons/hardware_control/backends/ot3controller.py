@@ -198,6 +198,7 @@ from opentrons_shared_data.errors.exceptions import (
     PipetteLiquidNotFoundError,
     CommunicationError,
     PythonException,
+    UnsupportedHardwareCommand,
 )
 
 from .subsystem_manager import SubsystemManager
@@ -363,6 +364,7 @@ class OT3Controller(FlexBackend):
                 self._configuration.motion_settings, GantryLoad.LOW_THROUGHPUT
             )
         )
+        self._pressure_sensor_available: Dict[NodeId, bool] = {}
 
     @asynccontextmanager
     async def restore_system_constraints(self) -> AsyncIterator[None]:
@@ -380,6 +382,16 @@ class OT3Controller(FlexBackend):
         tool = axis_to_node(Axis.of_main_tool_actuator(mount))
         async with grab_pressure(channels, tool, self._messenger):
             yield
+
+    def set_pressure_sensor_available(
+        self, pipette_axis: Axis, available: bool
+    ) -> None:
+        pip_node = axis_to_node(pipette_axis)
+        self._pressure_sensor_available[pip_node] = available
+
+    def get_pressure_sensor_available(self, pipette_axis: Axis) -> bool:
+        pip_node = axis_to_node(pipette_axis)
+        return self._pressure_sensor_available[pip_node]
 
     def update_constraints_for_calibration_with_gantry_load(
         self,
@@ -775,7 +787,8 @@ class OT3Controller(FlexBackend):
             for runner, is_gear_move in maybe_runners
             if runner
         ]
-        async with self._monitor_overpressure(pipettes_moving):
+        checked_moving_pipettes = self._pipettes_to_monitor_pressure(pipettes_moving)
+        async with self._monitor_overpressure(checked_moving_pipettes):
             all_positions = await asyncio.gather(*coros)
 
         for positions, handle_gear_move in all_positions:
@@ -884,7 +897,8 @@ class OT3Controller(FlexBackend):
         moving_pipettes = [
             axis_to_node(ax) for ax in checked_axes if ax in Axis.pipette_axes()
         ]
-        async with self._monitor_overpressure(moving_pipettes):
+        checked_moving_pipettes = self._pipettes_to_monitor_pressure(moving_pipettes)
+        async with self._monitor_overpressure(checked_moving_pipettes):
             positions = await asyncio.gather(*coros)
         # TODO(CM): default gear motor homing routine to have some acceleration
         if Axis.Q in checked_axes:
@@ -898,6 +912,9 @@ class OT3Controller(FlexBackend):
         for position in positions:
             self._handle_motor_status_response(position)
         return axis_convert(self._position, 0.0)
+
+    def _pipettes_to_monitor_pressure(self, pipettes: List[NodeId]) -> List[NodeId]:
+        return [pip for pip in pipettes if self._pressure_sensor_available[pip]]
 
     def _filter_move_group(self, move_group: MoveGroup) -> MoveGroup:
         new_group: MoveGroup = []
@@ -1486,6 +1503,11 @@ class OT3Controller(FlexBackend):
     ) -> float:
         head_node = axis_to_node(Axis.by_mount(mount))
         tool = sensor_node_for_pipette(OT3Mount(mount.value))
+        if tool not in self._pipettes_to_monitor_pressure([tool]):
+            raise UnsupportedHardwareCommand(
+                "Liquid Presence Detection not available on this pipette."
+            )
+
         positions = await liquid_probe(
             messenger=self._messenger,
             tool=tool,
