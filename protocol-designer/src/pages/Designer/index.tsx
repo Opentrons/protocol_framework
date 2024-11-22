@@ -161,10 +161,15 @@ export function Designer(): JSX.Element {
           <Flex
             flexDirection={DIRECTION_COLUMN}
             backgroundColor={COLORS.grey10}
+            gridGap={SPACING.spacing24}
             padding={zoomIn.slot != null ? '0' : SPACING.spacing40}
             height="calc(100vh - 64px)"
           >
-            <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing24}>
+            <Flex
+              flexDirection={DIRECTION_COLUMN}
+              gridGap={SPACING.spacing24}
+              height="100%"
+            >
               {zoomIn.slot == null ? (
                 <Flex alignSelf={ALIGN_END}>
                   <ToggleGroup
