@@ -88,9 +88,9 @@ class MoveParams:
 
     def __str__(self) -> str:
         """Convert to string."""
-        v = "V:" + str(self.max_speed) if self.max_speed else ""
-        a = "A:" + str(self.acceleration) if self.acceleration else ""
-        d = "D:" + str(self.max_speed_discont) if self.max_speed_discont else ""
+        v = "V" + str(self.max_speed) if self.max_speed else ""
+        a = "A" + str(self.acceleration) if self.acceleration else ""
+        d = "D" + str(self.max_speed_discont) if self.max_speed_discont else ""
         return f"{v} {a} {d}".strip()
 
 
@@ -121,7 +121,7 @@ class FlexStacker:
 
     def _send_and_recv(self, msg: str, guard_ret: str = "") -> str:
         """Internal utility to send a command and receive the response."""
-        assert self._simulating
+        assert not self._simulating
         self._serial.write(msg.encode())
         ret = self._serial.readline()
         if guard_ret:
@@ -163,7 +163,7 @@ class FlexStacker:
         if self._simulating:
             return True
 
-        _LS_RE = re.compile(rf"^M119 .*{axis.name}{direction.name[0]}:(\d) .* OK\n")
+        _LS_RE = re.compile(rf"^M119 .*{axis.name}{direction.name[0]}:(\d).* OK\n")
         res = self._send_and_recv("M119\n", "M119 XE:")
         match = _LS_RE.match(res)
         assert match, f"Incorrect Response for limit switch: {res}"
@@ -177,8 +177,8 @@ class FlexStacker:
         if self._simulating:
             return True
 
-        _LS_RE = re.compile(rf"^M121 .*{direction.name[0]}:(\d) .* OK\n")
-        res = self._send_and_recv("M121\n", "M119 E:")
+        _LS_RE = re.compile(rf"^M121 .*{direction.name[0]}:(\d).* OK\n")
+        res = self._send_and_recv("M121\n", "M121 E:")
         match = _LS_RE.match(res)
         assert match, f"Incorrect Response for platform sensor: {res}"
         return bool(int(match.group(1)))
@@ -237,7 +237,7 @@ class FlexStacker:
         if self._simulating:
             return
         self._send_and_recv(
-            f"G5 {axis.name}{direction.value} {params or ''}\n", "G0 OK"
+            f"G5 {axis.name}{direction.value} {params or ''}\n", "G5 OK"
         )
 
     def __del__(self) -> None:
