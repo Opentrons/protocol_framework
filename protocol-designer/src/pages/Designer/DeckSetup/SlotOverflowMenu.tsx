@@ -15,6 +15,12 @@ import {
   StyledText,
   useOnClickOutside,
 } from '@opentrons/components'
+import {
+  FLEX_ROBOT_TYPE,
+  FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
+  getCutoutIdFromAddressableArea,
+  getDeckDefFromRobotType,
+} from '@opentrons/shared-data'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
 
 import { deleteModule } from '../../../step-forms/actions'
@@ -32,10 +38,12 @@ import { getStagingAreaAddressableAreas } from '../../../utils'
 import { selectors as labwareIngredSelectors } from '../../../labware-ingred/selectors'
 import type { MouseEvent, SetStateAction } from 'react'
 import type {
+  AddressableAreaName,
   CoordinateTuple,
   CutoutId,
   DeckSlotId,
 } from '@opentrons/shared-data'
+
 import type { LabwareOnDeck } from '../../../step-forms'
 import type { ThunkDispatch } from '../../../types'
 
@@ -146,6 +154,10 @@ export function SlotOverflowMenu(
   const hasNoItems =
     moduleOnSlot == null && labwareOnSlot == null && fixturesOnSlot.length === 0
 
+  const isStagingSlot = FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS.includes(
+    location as AddressableAreaName
+  )
+
   const handleClear = (): void => {
     //  clear module from slot
     if (moduleOnSlot != null) {
@@ -166,6 +178,21 @@ export function SlotOverflowMenu(
     // clear labware on staging area 4th column slot
     if (matchingLabware != null) {
       dispatch(deleteContainer({ labwareId: matchingLabware.id }))
+    }
+    // delete staging slot if addressable area is on staging slot
+    if (isStagingSlot) {
+      const deckDef = getDeckDefFromRobotType(FLEX_ROBOT_TYPE)
+      const cutoutId = getCutoutIdFromAddressableArea(location, deckDef)
+      const stagingAreaEquipmentId = Object.values(
+        additionalEquipmentOnDeck
+      ).find(({ location }) => location === cutoutId)?.id
+      if (stagingAreaEquipmentId != null) {
+        dispatch(deleteDeckFixture(stagingAreaEquipmentId))
+      } else {
+        console.error(
+          `could not find equipment id for entity in ${location} with cutout id ${cutoutId}`
+        )
+      }
     }
   }
 
@@ -303,7 +330,7 @@ export function SlotOverflowMenu(
         ) : null}
         <Divider marginY="0" />
         <MenuItem
-          disabled={hasNoItems}
+          disabled={hasNoItems && !isStagingSlot}
           onClick={(e: MouseEvent) => {
             if (matchingLabware != null) {
               setShowDeleteLabwareModal(true)
