@@ -48,7 +48,7 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
     align-items: ${ALIGN_CENTER};
     flex-direction: ${DIRECTION_ROW};
     color: ${isChecked ? COLORS.white : COLORS.black90};
-    background-color: ${isChecked ? COLORS.blue50 : COLORS.blue35};
+    background-color: ${isChecked ? COLORS.blue50 : COLORS.blue30};
     border-radius: ${type === 'round'
       ? BORDERS.borderRadiusFull
       : BORDERS.borderRadius8};
@@ -67,6 +67,9 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
     &:disabled {
       background-color: ${COLORS.grey35};
       color: ${COLORS.grey50};
+    }
+    &:hover {
+      background-color: ${isChecked ? COLORS.blue55 : COLORS.blue35};
     }
 
     @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {

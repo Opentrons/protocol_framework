@@ -11,8 +11,8 @@ import {
   DIRECTION_ROW,
   Flex,
   LegacyStyledText,
-  SPACING,
   RadioButton,
+  SPACING,
   truncateString,
   TYPOGRAPHY,
 } from '@opentrons/components'

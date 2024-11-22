@@ -9,7 +9,7 @@ from opentrons_shared_data.deck.types import DeckDefinitionV5
 from opentrons_shared_data.robot.types import RobotDefinition
 
 from opentrons.protocol_engine.error_recovery_policy import ErrorRecoveryPolicy
-from opentrons.protocol_engine.types import ModuleOffsetData
+from opentrons.protocol_engine.types import LiquidClassRecordWithId, ModuleOffsetData
 from opentrons.util.change_notifier import ChangeNotifier
 
 from ..resources import DeckFixedLabware
@@ -156,7 +156,12 @@ class StateView(HasState[State]):
             wells=self._wells.get_all(),
             hasEverEnteredErrorRecovery=self._commands.get_has_entered_recovery_mode(),
             files=self._state.files.file_ids,
-            # TODO(dc): Do we want to just dump all the liquid classes into the summary?
+            liquidClasses=[
+                LiquidClassRecordWithId(
+                    liquidClassId=liquid_class_id, **dict(liquid_class_record)
+                )
+                for liquid_class_id, liquid_class_record in self._liquid_classes.get_all().items()
+            ],
         )
 
 

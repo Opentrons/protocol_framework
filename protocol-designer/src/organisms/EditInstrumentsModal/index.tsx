@@ -89,7 +89,7 @@ export function EditInstrumentsModal(
 ): JSX.Element {
   const { onClose } = props
   const dispatch = useDispatch<ThunkDispatch<any>>()
-  const { t } = useTranslation([
+  const { i18n, t } = useTranslation([
     'create_new_protocol',
     'protocol_overview',
     'shared',
@@ -347,7 +347,7 @@ export function EditInstrumentsModal(
                             desktopStyle="bodyDefaultRegular"
                             color={COLORS.grey60}
                           >
-                            {t('gripper')}
+                            {i18n.format(t('gripper'), 'capitalize')}
                           </StyledText>
                         </Flex>
                         <Btn
@@ -565,11 +565,13 @@ export function EditInstrumentsModal(
                                 TYPOGRAPHY.textDecorationUnderline
                               }
                             >
-                              <StyledText desktopStyle="bodyDefaultRegular">
-                                {allowAllTipracks
-                                  ? t('show_default_tips')
-                                  : t('show_all_tips')}
-                              </StyledText>
+                              <StyledLabel>
+                                <StyledText desktopStyle="bodyDefaultRegular">
+                                  {allowAllTipracks
+                                    ? t('show_default_tips')
+                                    : t('show_all_tips')}
+                                </StyledText>
+                              </StyledLabel>{' '}
                             </Btn>
                           )}
                         </Flex>
@@ -593,5 +595,8 @@ const StyledLabel = styled.label`
   cursor: ${CURSOR_POINTER};
   input[type='file'] {
     display: none;
+  }
+  &:hover {
+    color: ${COLORS.blue50};
   }
 `

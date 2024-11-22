@@ -212,5 +212,6 @@ const SettingButtonLabel = styled.label<SettingsButtonLabelProps>`
     -webkit-box-orient: ${({ maxLines }) =>
       maxLines != null ? 'vertical' : 'none'};
     word-wrap: break-word;
+    word-break: break-all;
   }
 `

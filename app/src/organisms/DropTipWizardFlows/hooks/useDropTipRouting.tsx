@@ -218,7 +218,10 @@ export function getInitialRouteAndStep(
 ): [DropTipFlowsRoute, DropTipFlowsStep] {
   const routeOverride = fixitUtils?.routeOverride
   const initialRoute = routeOverride?.route ?? DT_ROUTES.BEFORE_BEGINNING
-  const initialStep = routeOverride?.step ?? BEFORE_BEGINNING_STEPS[0]
+  const initialStep =
+    routeOverride?.step ??
+    routeOverride?.route?.[0] ??
+    BEFORE_BEGINNING_STEPS[0]
 
   return [initialRoute, initialStep]
 }

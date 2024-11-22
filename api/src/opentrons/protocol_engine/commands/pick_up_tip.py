@@ -87,7 +87,7 @@ class TipPhysicallyMissingError(ErrorOccurrence):
     isDefined: bool = True
     errorType: Literal["tipPhysicallyMissing"] = "tipPhysicallyMissing"
     errorCode: str = ErrorCodes.TIP_PICKUP_FAILED.value.code
-    detail: str = "No tip detected."
+    detail: str = "No Tip Detected"
 
 
 _ExecuteReturn = Union[

@@ -109,6 +109,7 @@ class Quirks(enum.Enum):
     dropTipShake = "dropTipShake"
     doubleDropTip = "doubleDropTip"
     needsUnstick = "needsUnstick"
+    highSpeed = "highSpeed"
 
 
 class AvailableUnits(enum.Enum):

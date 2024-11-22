@@ -147,6 +147,13 @@ class DropTipImplementation(AbstractCommandImpl[DropTipParams, _ExecuteReturn]):
                         error=exception,
                     )
                 ],
+                errorInfo={
+                    "retryLocation": (
+                        move_result.public.position.x,
+                        move_result.public.position.y,
+                        move_result.public.position.z,
+                    )
+                },
             )
             return DefinedErrorData(
                 public=error,
@@ -168,7 +175,11 @@ class DropTipImplementation(AbstractCommandImpl[DropTipParams, _ExecuteReturn]):
             )
 
 
-class DropTip(BaseCommand[DropTipParams, DropTipResult, ErrorOccurrence]):
+class DropTip(
+    BaseCommand[
+        DropTipParams, DropTipResult, TipPhysicallyAttachedError | StallOrCollisionError
+    ]
+):
     """Drop tip command model."""
 
     commandType: DropTipCommandType = "dropTip"

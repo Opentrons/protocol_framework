@@ -44,6 +44,7 @@ def create_data_dictionary(
     headers: List[str] = []
     headers_lpc: List[str] = []
     list_of_heights: List[List[Any]] = [[], [], [], [], [], [], [], []]
+    hellma_plate_orientation = False  # default hellma plate is not rotated.
     for filename in os.listdir(storage_directory):
         file_path = os.path.join(storage_directory, filename)
         if file_path.endswith(".json"):
@@ -67,6 +68,10 @@ def create_data_dictionary(
         if run_id in runs_to_save:
             print(f"started reading run {run_id}.")
             robot = file_results.get("robot_name")
+            parameters = file_results.get("runTimeParameters", "")
+            for parameter in parameters:
+                if parameter["displayName"] == "Hellma Plate Orientation":
+                    hellma_plate_orientation = bool(parameter["value"])
             protocol_name = file_results["protocol"]["metadata"].get("protocolName", "")
             software_version = file_results.get("API_Version", "")
             left_pipette = file_results.get("left", "")
@@ -123,7 +128,7 @@ def create_data_dictionary(
                     file_results, labware_name="opentrons_tough_pcr_auto_sealing_lid"
                 )
                 plate_reader_dict = read_robot_logs.plate_reader_commands(
-                    file_results, hellma_plate_standards
+                    file_results, hellma_plate_standards, hellma_plate_orientation
                 )
                 list_of_heights = read_robot_logs.liquid_height_commands(
                     file_results, list_of_heights

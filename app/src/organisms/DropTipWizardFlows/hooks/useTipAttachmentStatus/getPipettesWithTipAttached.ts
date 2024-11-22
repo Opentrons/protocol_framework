@@ -31,15 +31,17 @@ export function getPipettesWithTipAttached({
     return Promise.resolve([])
   }
 
-  return getCommandsExecutedDuringRun(
-    host as HostConfig,
-    runId
-  ).then(executedCmdData =>
-    checkPipettesForAttachedTips(
-      executedCmdData.data,
-      runRecord.data.pipettes,
-      attachedInstruments.data as PipetteData[]
-    )
+  return (
+    getCommandsExecutedDuringRun(host as HostConfig, runId)
+      .then(executedCmdData =>
+        checkPipettesForAttachedTips(
+          executedCmdData.data,
+          runRecord.data.pipettes,
+          attachedInstruments.data as PipetteData[]
+        )
+      )
+      // If any network error occurs, return all attached pipettes as having tips attached for safety reasons.
+      .catch(() => Promise.resolve(getPipettesDataFrom(attachedInstruments)))
   )
 }
 
@@ -61,7 +63,12 @@ function getCommandsExecutedDuringRun(
   })
 }
 
-const TIP_EXCHANGE_COMMAND_TYPES = ['dropTip', 'dropTipInPlace', 'pickUpTip']
+const TIP_EXCHANGE_COMMAND_TYPES = [
+  'dropTip',
+  'dropTipInPlace',
+  'pickUpTip',
+  'moveToAddressableAreaForDropTip',
+]
 
 function checkPipettesForAttachedTips(
   commands: RunCommandSummary[],
@@ -119,8 +126,10 @@ function checkPipettesForAttachedTips(
   }
 
   // Convert the array of mounts with attached tips to PipetteData with attached tips.
-  const pipettesWithTipAttached = attachedPipettes.filter(attachedPipette =>
-    mountsWithTipAttached.includes(attachedPipette.mount)
+  const pipettesWithTipAttached = attachedPipettes.filter(
+    attachedPipette =>
+      mountsWithTipAttached.includes(attachedPipette.mount) &&
+      attachedPipette.ok
   )
 
   // Preferentially assign the left mount as the first element.
@@ -135,4 +144,14 @@ function checkPipettesForAttachedTips(
   }
 
   return pipettesWithTipAttached
+}
+
+function getPipettesDataFrom(
+  attachedInstruments: Instruments | null
+): PipetteData[] {
+  return attachedInstruments != null
+    ? (attachedInstruments.data.filter(
+        instrument => instrument.instrumentType === 'pipette' && instrument.ok
+      ) as PipetteData[])
+    : []
 }

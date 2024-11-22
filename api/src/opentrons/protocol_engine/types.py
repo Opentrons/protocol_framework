@@ -887,6 +887,15 @@ class LiquidClassRecord(ByTipTypeSetting, frozen=True):
         return hash(dict_to_tuple(self.dict()))
 
 
+class LiquidClassRecordWithId(LiquidClassRecord, frozen=True):
+    """A LiquidClassRecord with its ID, for use in summary lists."""
+
+    liquidClassId: str = Field(
+        ...,
+        description="Unique identifier for this liquid class.",
+    )
+
+
 class SpeedRange(NamedTuple):
     """Minimum and maximum allowed speeds for a shaking module."""
 
