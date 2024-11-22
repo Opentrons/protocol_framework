@@ -68,8 +68,12 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
     const videoAsset = ONBOARDING_ANIMATIONS[stepNumber]
     setLoaded(false)
     setAsset(videoAsset)
-    const timeout = setTimeout(() => setLoaded(true), 100)
-    return () => clearTimeout(timeout)
+    const timeout = setTimeout(() => {
+      setLoaded(true)
+    }, 100)
+    return () => {
+      clearTimeout(timeout)
+    }
   }, [stepNumber])
 
   return (
