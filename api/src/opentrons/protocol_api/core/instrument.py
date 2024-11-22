@@ -254,6 +254,10 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         ...
 
     @abstractmethod
+    def _pressure_supported_by_pipette(self) -> bool:
+        ...
+
+    @abstractmethod
     def set_liquid_presence_detection(self, enable: bool) -> None:
         ...
 

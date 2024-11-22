@@ -583,3 +583,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
     ) -> float:
         """This will never be called because it was added in API 2.20."""
         assert False, "liquid_probe_without_recovery only supported in API 2.20 & later"
+
+    def _pressure_supported_by_pipette(self) -> bool:
+        return False
+

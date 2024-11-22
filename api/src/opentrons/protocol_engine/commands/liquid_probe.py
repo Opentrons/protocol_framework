@@ -16,6 +16,7 @@ from opentrons.protocol_engine.errors.exceptions import (
 from opentrons.types import MountType
 from opentrons_shared_data.errors.exceptions import (
     PipetteLiquidNotFoundError,
+    UnsupportedHardwareCommand,
 )
 
 from ..types import DeckPoint
@@ -113,6 +114,13 @@ async def _execute_common(
     well_name = params.wellName
 
     state_update = update_types.StateUpdate()
+    if (
+        "pressure"
+        not in state_view.pipettes.get_config(pipette_id).available_sensors.sensors
+    ):
+        raise UnsupportedHardwareCommand(
+            "Pressure sensor not available for this pipette"
+        )
 
     # May raise TipNotAttachedError.
     aspirated_volume = state_view.pipettes.get_aspirated_volume(pipette_id)

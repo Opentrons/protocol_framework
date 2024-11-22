@@ -67,6 +67,7 @@ class LoadedStaticPipetteData:
     back_left_corner_offset: Point
     front_right_corner_offset: Point
     pipette_lld_settings: Optional[Dict[str, Dict[str, float]]]
+    available_sensors: pipette_definition.AvailableSensorDefinition
 
 
 class VirtualPipetteDataProvider:
@@ -280,6 +281,8 @@ class VirtualPipetteDataProvider:
                 pip_front_right[0], pip_front_right[1], pip_front_right[2]
             ),
             pipette_lld_settings=config.lld_settings,
+            available_sensors=config.available_sensors
+            or pipette_definition.AvailableSensorDefinition(sensors=[]),
         )
 
     def get_virtual_pipette_static_config(
@@ -298,6 +301,11 @@ def get_pipette_static_config(
     """Get the config for a pipette, given the state/config object from the HW API."""
     back_left_offset = pipette_dict["pipette_bounding_box_offsets"].back_left_corner
     front_right_offset = pipette_dict["pipette_bounding_box_offsets"].front_right_corner
+    available_sensors = (
+        pipette_dict["available_sensors"]
+        if "available_sensors" in pipette_dict.keys()
+        else pipette_definition.AvailableSensorDefinition(sensors=[])
+    )
     return LoadedStaticPipetteData(
         model=pipette_dict["model"],
         display_name=pipette_dict["display_name"],
@@ -327,6 +335,7 @@ def get_pipette_static_config(
             front_right_offset[0], front_right_offset[1], front_right_offset[2]
         ),
         pipette_lld_settings=pipette_dict["lld_settings"],
+        available_sensors=available_sensors,
     )
 
 

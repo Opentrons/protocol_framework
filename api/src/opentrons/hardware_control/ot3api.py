@@ -32,6 +32,7 @@ from opentrons_shared_data.pipette.types import (
 )
 from opentrons_shared_data.pipette import (
     pipette_load_name_conversions as pipette_load_name,
+    pipette_definition,
 )
 from opentrons_shared_data.robot.types import RobotType
 
@@ -633,8 +634,13 @@ class OT3API(
             self._feature_flags.use_old_aspiration_functions,
         )
         self._pipette_handler.hardware_instruments[mount] = p
+
         if self._pipette_handler.has_pipette(mount):
             self._confirm_pipette_motion_constraints(mount)
+
+        if config is not None:
+            self._set_pressure_sensor_available(mount, instrument_config=config)
+
         # TODO (lc 12-5-2022) Properly support backwards compatibility
         # when applicable
         return skipped
@@ -647,6 +653,23 @@ class OT3API(
             self._backend.update_constraints_for_emulsifying_pipette(
                 mount, self.gantry_load
             )
+
+    def get_pressure_sensor_available(self, mount: OT3Mount) -> bool:
+        pip_axis = Axis.of_main_tool_actuator(mount)
+        return self._backend.get_pressure_sensor_available(pip_axis)
+
+    def _set_pressure_sensor_available(
+        self,
+        mount: OT3Mount,
+        instrument_config: pipette_definition.PipetteConfigurations,
+    ) -> None:
+        pressure_sensor_available = (
+            "pressure" in instrument_config.available_sensors.sensors
+        )
+        pip_axis = Axis.of_main_tool_actuator(mount)
+        self._backend.set_pressure_sensor_available(
+            pipette_axis=pip_axis, available=pressure_sensor_available
+        )
 
     async def cache_gripper(self, instrument_data: AttachedGripper) -> bool:
         """Set up gripper based on scanned information."""

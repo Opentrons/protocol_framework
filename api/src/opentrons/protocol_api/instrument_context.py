@@ -7,6 +7,7 @@ from opentrons_shared_data.errors.exceptions import (
     CommandPreconditionViolated,
     CommandParameterLimitViolated,
     UnexpectedTipRemovalError,
+    UnsupportedHardwareCommand,
 )
 from opentrons.legacy_broker import LegacyBroker
 from opentrons.hardware_control.dev_types import PipetteDict
@@ -260,6 +261,7 @@ class InstrumentContext(publisher.CommandPublisher):
             and self._96_tip_config_valid()
             and self._core.get_current_volume() == 0
         ):
+            self._raise_if_pressure_not_supported_by_pipette()
             self.require_liquid_presence(well=well)
 
         with publisher.publish_context(
@@ -1694,6 +1696,8 @@ class InstrumentContext(publisher.CommandPublisher):
     @liquid_presence_detection.setter
     @requires_version(2, 20)
     def liquid_presence_detection(self, enable: bool) -> None:
+        if enable:
+            self._raise_if_pressure_not_supported_by_pipette()
         self._core.set_liquid_presence_detection(enable)
 
     @property
@@ -2143,6 +2147,7 @@ class InstrumentContext(publisher.CommandPublisher):
         .. note::
             The pressure sensors for the Flex 8-channel pipette are on channels 1 and 8 (positions A1 and H1). For the Flex 96-channel pipette, the pressure sensors are on channels 1 and 96 (positions A1 and H12). Other channels on multi-channel pipettes do not have sensors and cannot detect liquid.
         """
+        self._raise_if_pressure_not_supported_by_pipette()
         loc = well.top()
         self._96_tip_config_valid()
         return self._core.detect_liquid_presence(well._core, loc)
@@ -2156,6 +2161,7 @@ class InstrumentContext(publisher.CommandPublisher):
         .. note::
             The pressure sensors for the Flex 8-channel pipette are on channels 1 and 8 (positions A1 and H1). For the Flex 96-channel pipette, the pressure sensors are on channels 1 and 96 (positions A1 and H12). Other channels on multi-channel pipettes do not have sensors and cannot detect liquid.
         """
+        self._raise_if_pressure_not_supported_by_pipette()
         loc = well.top()
         self._96_tip_config_valid()
         self._core.liquid_probe_with_recovery(well._core, loc)
@@ -2170,7 +2176,7 @@ class InstrumentContext(publisher.CommandPublisher):
 
         This is intended for Opentrons internal use only and is not a guaranteed API.
         """
-
+        self._raise_if_pressure_not_supported_by_pipette()
         loc = well.top()
         self._96_tip_config_valid()
         height = self._core.liquid_probe_without_recovery(well._core, loc)
@@ -2191,6 +2197,12 @@ class InstrumentContext(publisher.CommandPublisher):
                         "Partial column configuration is only supported on 8-Channel pipettes."
                     )
             # SINGLE, QUADRANT and ALL are supported by all pipettes
+
+    def _raise_if_pressure_not_supported_by_pipette(self) -> None:
+        if not self._core._pressure_supported_by_pipette():
+            raise UnsupportedHardwareCommand(
+                "Pressure sensor not available for this pipette"
+            )
 
     def _handle_aspirate_target(
         self, target: validation.ValidTarget
