@@ -1,16 +1,14 @@
 import type * as React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { renderHook, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 
 import { renderWithProviders } from '/app/__testing-utils__'
 import { i18n } from '/app/i18n'
 import { mockDropTipWizardContainerProps } from '../__fixtures__'
 import {
   useWizardExitHeader,
-  useSeenBlowoutSuccess,
   DropTipWizardHeader,
 } from '../DropTipWizardHeader'
-import { DT_ROUTES } from '../constants'
 
 import type { Mock } from 'vitest'
 import type { UseWizardExitHeaderProps } from '../DropTipWizardHeader'
@@ -31,22 +29,6 @@ describe('DropTipWizardHeader', () => {
   it('renders appropriate copy and onClick behavior', () => {
     render(props)
     screen.getByText('Drop tips')
-    screen.getByText('Step 1 / 5')
-  })
-})
-
-describe('useSeenBlowoutSuccess', () => {
-  it('should not render step counter when currentRoute is BEFORE_BEGINNING', () => {
-    const { result } = renderHook(() =>
-      useSeenBlowoutSuccess({
-        currentStep: 'SOME_STEP' as any,
-        currentRoute: DT_ROUTES.BEFORE_BEGINNING,
-        currentStepIdx: 0,
-      })
-    )
-
-    expect(result.current.totalSteps).toBe(null)
-    expect(result.current.currentStepNumber).toBe(null)
   })
 })
 
