@@ -34,6 +34,7 @@ import { StepForm } from './StepForm'
 import { StepSummary } from './StepSummary'
 import { BatchEditToolbox } from './BatchEditToolbox'
 import { getDesignerTab } from '../../../file-data/selectors'
+import { useOS } from '../../../resources/useOS'
 import { TimelineAlerts } from '../../../organisms'
 
 const CONTENT_MAX_WIDTH = '46.9375rem'
@@ -63,11 +64,12 @@ export function ProtocolSteps(): JSX.Element {
 
   const stepDetails = currentStep?.stepDetails ?? null
 
+  const os = useOS()
   let commandText = t('command_click_to_multi_select')
-
-  if (navigator.userAgent.includes('Mac')) {
+  if (os === 'MacOS') {
     commandText = t('mac_command_click_to_multi_select')
-  } else if (navigator.userAgent.includes('Windows')) {
+  }
+  if (os === 'Windows') {
     commandText = t('windows_command_click_to_multi_select')
   }
 
