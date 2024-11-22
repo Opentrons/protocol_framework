@@ -23,7 +23,7 @@ import {
   PositionField,
   WellsOrderField,
 } from '../StepForm/PipetteFields'
-import type { WellOrderOption } from '../../../../form-types'
+import { getWellOrderFieldValue } from './utils'
 import type { FieldPropsByName } from '../StepForm/types'
 
 interface BatchEditMoveLiquidProps {
@@ -61,16 +61,6 @@ export function BatchEditMoveLiquidTools(
     const labwareId = propsForFields[labwareField]?.value
     return labwareId ? String(labwareId) : null
   }
-  const getWellOrderFieldValue = (
-    name: string
-  ): WellOrderOption | null | undefined => {
-    const val = propsForFields[name]?.value
-    if (val === 'l2r' || val === 'r2l' || val === 't2b' || val === 'b2t') {
-      return val
-    } else {
-      return null
-    }
-  }
 
   return (
     <Flex flexDirection={DIRECTION_COLUMN} width="100%">
@@ -97,10 +87,14 @@ export function BatchEditMoveLiquidTools(
           propsForFields[addFieldNamePrefix('wellOrder_second')].updateValue
         }
         firstValue={getWellOrderFieldValue(
-          addFieldNamePrefix('wellOrder_first')
+          propsForFields,
+          addFieldNamePrefix('wellOrder_first'),
+          't2b'
         )}
         secondValue={getWellOrderFieldValue(
-          addFieldNamePrefix('wellOrder_second')
+          propsForFields,
+          addFieldNamePrefix('wellOrder_second'),
+          'l2r'
         )}
         firstName={addFieldNamePrefix('wellOrder_first')}
         secondName={addFieldNamePrefix('wellOrder_second')}
