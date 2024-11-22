@@ -194,6 +194,7 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
             width="100%"
             height="100%"
             css={css`
+              object-fit: cover;
               border-radius: ${BORDERS.borderRadius16};
             `}
           />
