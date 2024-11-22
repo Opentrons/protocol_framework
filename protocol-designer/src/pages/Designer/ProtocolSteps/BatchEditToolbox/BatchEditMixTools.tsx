@@ -23,8 +23,8 @@ import {
   getLabwareFieldForPositioningField,
 } from '../StepForm/utils'
 
-import type { FieldPropsByName } from '../StepForm/types'
 import type { WellOrderOption } from '../../../../form-types'
+import type { FieldPropsByName } from '../StepForm/types'
 
 interface BatchEditMixToolsProps {
   propsForFields: FieldPropsByName
