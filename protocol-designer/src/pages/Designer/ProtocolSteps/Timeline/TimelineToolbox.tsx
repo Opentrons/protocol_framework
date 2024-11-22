@@ -69,6 +69,7 @@ export const TimelineToolbox = (): JSX.Element => {
       titlePadding={SPACING.spacing12}
       childrenPadding={SPACING.spacing12}
       confirmButton={formData != null ? undefined : <AddStepButton />}
+      height="calc(100vh - 6rem)"
     >
       <Flex
         flexDirection={DIRECTION_COLUMN}

@@ -12,7 +12,10 @@ import {
   getSelectedSubstep,
   getSelectedTerminalItemId,
 } from '../../../../ui/steps/selectors'
-import { getDesignerTab } from '../../../../file-data/selectors'
+import {
+  getDesignerTab,
+  getRobotStateTimeline,
+} from '../../../../file-data/selectors'
 import { getEnableHotKeysDisplay } from '../../../../feature-flags/selectors'
 import { DeckSetupContainer } from '../../DeckSetup'
 import { OffDeck } from '../../Offdeck'
@@ -57,6 +60,10 @@ const MOCK_STEP_FORMS = {
 describe('ProtocolSteps', () => {
   beforeEach(() => {
     vi.mocked(getDesignerTab).mockReturnValue('protocolSteps')
+    vi.mocked(getRobotStateTimeline).mockReturnValue({
+      timeline: [],
+      errors: [],
+    })
     vi.mocked(TimelineToolbox).mockReturnValue(<div>mock TimelineToolbox</div>)
     vi.mocked(DeckSetupContainer).mockReturnValue(
       <div>mock DeckSetupContainer</div>
