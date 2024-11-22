@@ -200,7 +200,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
         backgroundColor={COLORS.white}
         borderRadius={BORDERS.borderRadius12}
         width="100%"
-        height={tab === 'protocolSteps' ? '70vh' : '100%'}
+        height={tab === 'protocolSteps' ? '65.75vh' : '100%'}
         flexDirection={DIRECTION_COLUMN}
         padding={SPACING.spacing24}
       >
@@ -222,7 +222,9 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
           ) : null}
           <RobotCoordinateSpaceWithRef
             height="100%"
-            width={zoomIn.slot != null ? '100%' : '50%'}
+            width={
+              zoomIn.slot != null || tab === 'protocolSteps' ? '100%' : '50%'
+            }
             deckDef={deckDef}
             viewBox={viewBox}
             outline="auto"
