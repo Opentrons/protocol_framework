@@ -649,42 +649,37 @@ def ensure_new_tip_policy(value: str) -> TransferTipPolicyV2:
         )
 
 
-def _verify_each_list_element_is_valid_location(
-    locations: Sequence[Union[Well, Location]]
-) -> None:
+def _verify_each_list_element_is_valid_location(locations: Sequence[Well]) -> None:
     from .labware import Well
 
     for loc in locations:
-        if not (isinstance(loc, Well) or isinstance(loc, Location)):
+        if not isinstance(loc, Well):
             raise ValueError(
-                f"'{loc}' is not a valid location for transfer. Should be of type 'Well' or 'Location'"
+                f"'{loc}' is not a valid location for transfer."
+                f" Location should be a well instance."
             )
 
 
-def ensure_valid_flat_wells_list(
-    target: Union[
-        Well,
-        Location,
-        Sequence[Union[Well, Location]],
-        Sequence[Sequence[Well]],
-    ],
-) -> Sequence[Union[Well, Location]]:
+def ensure_valid_flat_wells_list_for_transfer_v2(
+    target: Union[Well, Sequence[Well], Sequence[Sequence[Well]]],
+) -> List[Well]:
     """Ensure that the given target(s) for a liquid transfer are valid and in a flat list."""
     from .labware import Well
 
-    if isinstance(target, Well) or isinstance(target, Location):
+    if isinstance(target, Well):
         return [target]
-    elif isinstance(target, List):
-        if isinstance(target[0], List):
-            for sub_list in target:
-                _verify_each_list_element_is_valid_location(sub_list)
-            return [loc for sub_list in target for loc in sub_list]
 
-        _verify_each_list_element_is_valid_location(target)
-        return target
+    if isinstance(target, list) or isinstance(target, tuple):
+        if isinstance(target[0], list) or isinstance(target[0], tuple):
+            for sub_sequence in target:
+                _verify_each_list_element_is_valid_location(sub_sequence)
+            return [loc for sub_sequence in target for loc in sub_sequence]
+        else:
+            _verify_each_list_element_is_valid_location(target)
+            return list(target)
     else:
         raise ValueError(
             f"'{target}' is not a valid location for transfer."
-            f" Expected locations are of type 'Well', 'Location'"
-            f" or a one- or two-dimensional list of 'Well' or 'Location'."
+            f" Location should be a well instance, or a 1-dimensional or"
+            f" 2-dimensional sequence of well instances."
         )

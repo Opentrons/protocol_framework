@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from abc import abstractmethod, ABC
-from typing import Any, Generic, Optional, TypeVar, Union
+from typing import Any, Generic, Optional, TypeVar, Union, List
 
 from opentrons import types
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons.protocols.api_support.util import FlowRates
+from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
-
+from opentrons.protocol_api._liquid import LiquidClass
 from ..disposal_locations import TrashBin, WasteChute
 from .well import WellCoreType
 
@@ -303,6 +304,19 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
             front_right_nozzle: The front right most nozzle in the requested layout.
             back_left_nozzle: The back left most nozzle in the requested layout.
         """
+        ...
+
+    @abstractmethod
+    def transfer_liquid(
+        self,
+        liquid_class: LiquidClass,
+        volume: float,
+        source: List[WellCoreType],
+        dest: List[WellCoreType],
+        new_tip: TransferTipPolicyV2,
+        trash_location: Union[types.Location, TrashBin, WasteChute],
+    ) -> None:
+        """Transfer a liquid from source to dest according to liquid class properties."""
         ...
 
     @abstractmethod

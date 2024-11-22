@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-import contextlib
-from typing import Optional, TYPE_CHECKING, cast, Union, Iterator
-from opentrons.protocols.api_support.types import APIVersion
+from typing import Optional, TYPE_CHECKING, cast, Union, List
 
 from opentrons.types import Location, Mount, NozzleConfigurationType, NozzleMapInterface
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons.protocols.api_support.util import FlowRates, find_value_for_api_version
+from opentrons.protocols.api_support.types import APIVersion
+from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
 from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine import (
     DeckPoint,
@@ -44,7 +44,6 @@ from ...disposal_locations import TrashBin, WasteChute
 if TYPE_CHECKING:
     from .protocol import ProtocolCore
     from opentrons.protocol_api._liquid import LiquidClass
-
 
 _DISPENSE_VOLUME_VALIDATION_ADDED_IN = APIVersion(2, 17)
 
@@ -87,7 +86,6 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         self._liquid_presence_detection = bool(
             self._engine_client.state.pipettes.get_liquid_presence_detection(pipette_id)
         )
-        self._current_liquid_class: Optional[LiquidClass] = None
 
     @property
     def pipette_id(self) -> str:
@@ -944,12 +942,13 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             self.pipette_id
         )
 
-    @contextlib.contextmanager
-    def load_liquid_class(self, liquid_class: LiquidClass) -> Iterator[None]:
-        """Load a liquid class into the engine."""
-        try:
-            # TODO: issue a loadLiquidClass command
-            self._current_liquid_class = liquid_class
-            yield
-        finally:
-            self._current_liquid_class = None
+    def transfer_liquid(
+        self,
+        liquid_class: LiquidClass,
+        volume: float,
+        source: List[WellCore],
+        dest: List[WellCore],
+        new_tip: TransferTipPolicyV2,
+        trash_location: Union[Location, TrashBin, WasteChute],
+    ) -> None:
+        """Execute transfer using liquid class properties."""

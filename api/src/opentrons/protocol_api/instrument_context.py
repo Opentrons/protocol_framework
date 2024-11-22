@@ -17,9 +17,6 @@ from opentrons.legacy_commands import commands as cmds
 from opentrons.legacy_commands import publisher
 from opentrons.protocols.advanced_control.mix import mix_from_kwargs
 from opentrons.protocols.advanced_control.transfers import transfer as v1_transfer
-from opentrons.protocols.advanced_control.transfers import (
-    transfer_liquid as v2_transfer,
-)
 from opentrons.protocols.api_support.deck_type import NoTrashDefinedError
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocols.api_support import instrument
@@ -1510,12 +1507,19 @@ class InstrumentContext(publisher.CommandPublisher):
         self,
         liquid_class: LiquidClass,
         volume: float,
-        source: AdvancedLiquidHandling,
-        dest: AdvancedLiquidHandling,
+        source: Union[
+            labware.Well, Sequence[labware.Well], Sequence[Sequence[labware.Well]]
+        ],
+        dest: Union[
+            labware.Well, Sequence[labware.Well], Sequence[Sequence[labware.Well]]
+        ],
         new_tip: Literal["once", "always", "never"] = "once",
         trash_location: Optional[Union[types.Location, TrashBin, WasteChute]] = None,
     ) -> InstrumentContext:
-        """Transfer liquid from source to dest using the specified liquid class properties."""
+        """Transfer liquid from source to dest using the specified liquid class properties.
+
+        TODO: Add args description.
+        """
         if not feature_flags.allow_liquid_classes(
             robot_type=RobotTypeEnum.robot_literal_to_enum(
                 self._protocol_core.robot_type
@@ -1523,9 +1527,16 @@ class InstrumentContext(publisher.CommandPublisher):
         ):
             raise NotImplementedError("This method is not implemented.")
 
-        flat_sources_list = validation.ensure_valid_flat_wells_list(source)
-        flat_dest_list = validation.ensure_valid_flat_wells_list(dest)
-
+        flat_sources_list = validation.ensure_valid_flat_wells_list_for_transfer_v2(
+            source
+        )
+        flat_dest_list = validation.ensure_valid_flat_wells_list_for_transfer_v2(dest)
+        for well in flat_sources_list + flat_dest_list:
+            instrument.validate_takes_liquid(
+                location=well.top(),
+                reject_module=True,
+                reject_adapter=True,
+            )
         if len(flat_sources_list) != len(flat_dest_list):
             raise ValueError(
                 "Sources and destinations should be of the same length in order to perform a transfer."
@@ -1569,15 +1580,6 @@ class InstrumentContext(publisher.CommandPublisher):
         else:
             checked_trash_location = trash_location
 
-        v2_transfer.get_transfer_steps(
-            aspirate_properties=liquid_class_props.aspirate,
-            single_dispense_properties=liquid_class_props.dispense,
-            volume=volume,
-            source=flat_sources_list,
-            dest=flat_dest_list,
-            trash_location=checked_trash_location,
-            new_tip=valid_new_tip,
-        )
         return self
 
     @requires_version(2, 0)

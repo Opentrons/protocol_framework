@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union, List
 
 from opentrons import types
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons.hardware_control.types import HardwareAction
 from opentrons.protocol_api.core.common import WellCore
+from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
 from opentrons.protocols.api_support import instrument as instrument_support
 from opentrons.protocols.api_support.labware_like import LabwareLike
 from opentrons.protocols.api_support.types import APIVersion
@@ -24,6 +25,7 @@ from opentrons_shared_data.errors.exceptions import (
 
 from ...disposal_locations import TrashBin, WasteChute
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
+from opentrons.protocol_api._liquid import LiquidClass
 
 from ..instrument import AbstractInstrument
 
@@ -471,6 +473,19 @@ class LegacyInstrumentCoreSimulator(AbstractInstrument[LegacyWellCore]):
     ) -> None:
         """This will never be called because it was added in API 2.15."""
         pass
+
+    def transfer_liquid(
+        self,
+        liquid_class: LiquidClass,
+        volume: float,
+        source: List[LegacyWellCore],
+        dest: List[LegacyWellCore],
+        new_tip: TransferTipPolicyV2,
+        trash_location: Union[types.Location, TrashBin, WasteChute],
+    ) -> None:
+        """Transfer a liquid from source to dest according to liquid class properties."""
+        # TODO(spp, 2024-11-20): update the error to include API version
+        assert False, "transfer_liquid is not supported in legacy context"
 
     def get_active_channels(self) -> int:
         """This will never be called because it was added in API 2.16."""

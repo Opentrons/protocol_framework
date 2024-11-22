@@ -1674,9 +1674,9 @@ def test_transfer_liquid_raises_for_invalid_locations(
     decoy.when(
         ff.allow_liquid_classes(RobotTypeEnum.robot_literal_to_enum(robot_type))
     ).then_return(True)
-    decoy.when(mock_validation.ensure_valid_flat_wells_list([mock_well])).then_raise(
-        ValueError("Oh no")
-    )
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
+    ).then_raise(ValueError("Oh no"))
     with pytest.raises(ValueError):
         subject.transfer_liquid(
             liquid_class=test_liq_class,
@@ -1702,12 +1702,12 @@ def test_transfer_liquid_raises_for_unequal_source_and_dest(
     decoy.when(
         ff.allow_liquid_classes(RobotTypeEnum.robot_literal_to_enum(robot_type))
     ).then_return(True)
-    decoy.when(mock_validation.ensure_valid_flat_wells_list(mock_well)).then_return(
-        [mock_well, mock_well]
-    )
-    decoy.when(mock_validation.ensure_valid_flat_wells_list([mock_well])).then_return(
-        [mock_well]
-    )
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2(mock_well)
+    ).then_return([mock_well, mock_well])
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
+    ).then_return([mock_well])
     with pytest.raises(
         ValueError, match="Sources and destinations should be of the same length"
     ):
@@ -1715,6 +1715,39 @@ def test_transfer_liquid_raises_for_unequal_source_and_dest(
             liquid_class=test_liq_class,
             volume=10,
             source=mock_well,
+            dest=[mock_well],
+        )
+
+
+@pytest.mark.parametrize("robot_type", ["OT-2 Standard", "OT-3 Standard"])
+def test_transfer_liquid_raises_for_non_liquid_handling_locations(
+    decoy: Decoy,
+    mock_protocol_core: ProtocolCore,
+    subject: InstrumentContext,
+    mock_feature_flags: None,
+    robot_type: RobotType,
+    minimal_liquid_class_def2: LiquidClassSchemaV1,
+) -> None:
+    """It should raise errors if source and destination are not of same length."""
+    test_liq_class = LiquidClass.create(minimal_liquid_class_def2)
+    mock_well = decoy.mock(cls=Well)
+    decoy.when(mock_protocol_core.robot_type).then_return(robot_type)
+    decoy.when(
+        ff.allow_liquid_classes(RobotTypeEnum.robot_literal_to_enum(robot_type))
+    ).then_return(True)
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
+    ).then_return([mock_well])
+    decoy.when(
+        mock_instrument_support.validate_takes_liquid(
+            mock_well.top(), reject_module=True, reject_adapter=True
+        )
+    ).then_raise(ValueError("Uh oh"))
+    with pytest.raises(ValueError, match="Uh oh"):
+        subject.transfer_liquid(
+            liquid_class=test_liq_class,
+            volume=10,
+            source=[mock_well],
             dest=[mock_well],
         )
 
@@ -1735,9 +1768,9 @@ def test_transfer_liquid_raises_for_bad_tip_policy(
     decoy.when(
         ff.allow_liquid_classes(RobotTypeEnum.robot_literal_to_enum(robot_type))
     ).then_return(True)
-    decoy.when(mock_validation.ensure_valid_flat_wells_list([mock_well])).then_return(
-        [mock_well]
-    )
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
+    ).then_return([mock_well])
     decoy.when(mock_validation.ensure_new_tip_policy("once")).then_raise(
         ValueError("Uh oh")
     )
@@ -1767,9 +1800,9 @@ def test_transfer_liquid_raises_for_no_tip(
     decoy.when(
         ff.allow_liquid_classes(RobotTypeEnum.robot_literal_to_enum(robot_type))
     ).then_return(True)
-    decoy.when(mock_validation.ensure_valid_flat_wells_list([mock_well])).then_return(
-        [mock_well]
-    )
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
+    ).then_return([mock_well])
     decoy.when(mock_validation.ensure_new_tip_policy("never")).then_return(
         TransferTipPolicyV2.NEVER
     )
@@ -1805,9 +1838,9 @@ def test_transfer_liquid_raises_if_tip_has_liquid(
     decoy.when(
         ff.allow_liquid_classes(RobotTypeEnum.robot_literal_to_enum(robot_type))
     ).then_return(True)
-    decoy.when(mock_validation.ensure_valid_flat_wells_list([mock_well])).then_return(
-        [mock_well]
-    )
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
+    ).then_return([mock_well])
     decoy.when(mock_validation.ensure_new_tip_policy("never")).then_return(
         TransferTipPolicyV2.ONCE
     )
