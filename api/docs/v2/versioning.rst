@@ -138,7 +138,7 @@ Changes in API Versions
 
 Version 2.21
 ------------
-- Adds :py:class:`.AbsorbanceReaderContext` to support the :ref:`Absorbance Plate Reader Module <absorbance-plate-reader-module>`. Use the load name ``absorbanceReaderV1`` with :py:meth:`.ProtocolContext.load_module` to add a Heater-Shaker to a protocol.
+- Adds :py:class:`.AbsorbanceReaderContext` to support the :ref:`Absorbance Plate Reader Module <absorbance-plate-reader-module>`. Use the load name ``absorbanceReaderV1`` with :py:meth:`.ProtocolContext.load_module` to add an Absorbance Plate Reader to a protocol.
 - :ref:`Liquid presence detection <lpd>` now only checks on the first aspiration of the :py:meth:`.mix` cycle.
 - Improved the run log output of :py:meth:`.ThermocyclerContext.execute_profile`.
 
