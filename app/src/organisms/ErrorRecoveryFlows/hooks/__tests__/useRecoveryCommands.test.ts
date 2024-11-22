@@ -4,11 +4,13 @@ import { renderHook, act } from '@testing-library/react'
 import {
   useResumeRunFromRecoveryMutation,
   useStopRunMutation,
-  useUpdateErrorRecoveryPolicy,
   useResumeRunFromRecoveryAssumingFalsePositiveMutation,
 } from '@opentrons/react-api-client'
 
-import { useChainRunCommands } from '/app/resources/runs'
+import {
+  useChainRunCommands,
+  useUpdateRecoveryPolicyWithStrategy,
+} from '/app/resources/runs'
 import {
   useRecoveryCommands,
   HOME_PIPETTE_Z_AXES,
@@ -80,9 +82,9 @@ describe('useRecoveryCommands', () => {
     vi.mocked(useChainRunCommands).mockReturnValue({
       chainRunCommands: mockChainRunCommands,
     } as any)
-    vi.mocked(useUpdateErrorRecoveryPolicy).mockReturnValue({
-      mutateAsync: mockUpdateErrorRecoveryPolicy,
-    } as any)
+    vi.mocked(useUpdateRecoveryPolicyWithStrategy).mockReturnValue(
+      mockUpdateErrorRecoveryPolicy as any
+    )
     vi.mocked(
       useResumeRunFromRecoveryAssumingFalsePositiveMutation
     ).mockReturnValue({
@@ -361,7 +363,8 @@ describe('useRecoveryCommands', () => {
     )
 
     expect(mockUpdateErrorRecoveryPolicy).toHaveBeenCalledWith(
-      expectedPolicyRules
+      expectedPolicyRules,
+      'append'
     )
   })
 

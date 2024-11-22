@@ -19,6 +19,7 @@ export { useRunCommandErrors } from './useRunCommandErrors'
 export * from './useCreateLabwareOffsetMutation'
 export * from './useCreateLabwareDefinitionMutation'
 export * from './useUpdateErrorRecoveryPolicy'
+export * from './useErrorRecoveryPolicy'
 
 export type { UsePlayRunMutationResult } from './usePlayRunMutation'
 export type { UsePauseRunMutationResult } from './usePauseRunMutation'

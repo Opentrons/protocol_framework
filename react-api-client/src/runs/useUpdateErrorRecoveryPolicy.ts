@@ -16,7 +16,7 @@ import type {
   HostConfig,
 } from '@opentrons/api-client'
 
-export type UseUpdateErrorRecoveryPolicyResponse = UseMutationResult<
+export type UseErrorRecoveryPolicyResponse = UseMutationResult<
   UpdateErrorRecoveryPolicyResponse,
   AxiosError,
   RecoveryPolicyRulesParams
@@ -37,7 +37,7 @@ export type UseUpdateErrorRecoveryPolicyOptions = UseMutationOptions<
 export function useUpdateErrorRecoveryPolicy(
   runId: string,
   options: UseUpdateErrorRecoveryPolicyOptions = {}
-): UseUpdateErrorRecoveryPolicyResponse {
+): UseErrorRecoveryPolicyResponse {
   const host = useHost()
 
   const mutation = useMutation<

@@ -4,11 +4,13 @@ import head from 'lodash/head'
 import {
   useResumeRunFromRecoveryMutation,
   useStopRunMutation,
-  useUpdateErrorRecoveryPolicy,
   useResumeRunFromRecoveryAssumingFalsePositiveMutation,
 } from '@opentrons/react-api-client'
 
-import { useChainRunCommands } from '/app/resources/runs'
+import {
+  useChainRunCommands,
+  useUpdateRecoveryPolicyWithStrategy,
+} from '/app/resources/runs'
 import { DEFINED_ERROR_TYPES, ERROR_KINDS, RECOVERY_MAP } from '../constants'
 import { getErrorKind } from '/app/organisms/ErrorRecoveryFlows/utils'
 
@@ -23,12 +25,7 @@ import type {
   PrepareToAspirateRunTimeCommand,
   MoveLabwareParams,
 } from '@opentrons/shared-data'
-import type {
-  CommandData,
-  IfMatchType,
-  RecoveryPolicyRulesParams,
-  RunAction,
-} from '@opentrons/api-client'
+import type { CommandData, IfMatchType, RunAction } from '@opentrons/api-client'
 import type { WellGroup } from '@opentrons/components'
 import type { FailedCommand, RecoveryRoute, RouteStep } from '../types'
 import type { UseFailedLabwareUtilsResult } from './useFailedLabwareUtils'
@@ -38,6 +35,7 @@ import type { UseRecoveryAnalyticsResult } from '/app/redux-resources/analytics'
 import type { CurrentRecoveryOptionUtils } from './useRecoveryRouting'
 import type { ErrorRecoveryFlowsProps } from '..'
 import type { FailedCommandBySource } from './useRetainedFailedCommandBySource'
+import type { UpdateErrorRecoveryPolicyWithStrategy } from '/app/resources/runs'
 
 interface UseRecoveryCommandsParams {
   runId: string
@@ -100,9 +98,7 @@ export function useRecoveryCommands({
     mutateAsync: resumeRunFromRecoveryAssumingFalsePositive,
   } = useResumeRunFromRecoveryAssumingFalsePositiveMutation()
   const { stopRun } = useStopRunMutation()
-  const {
-    mutateAsync: updateErrorRecoveryPolicy,
-  } = useUpdateErrorRecoveryPolicy(runId)
+  const updateErrorRecoveryPolicy = useUpdateRecoveryPolicyWithStrategy(runId)
   const { makeSuccessToast } = recoveryToastUtils
 
   // TODO(jh, 11-21-24): Some commands return a 200 with an error body. We should catch these and propagate the error.
@@ -231,10 +227,12 @@ export function useRecoveryCommands({
           ifMatch
         )
 
-        return updateErrorRecoveryPolicy(ignorePolicyRules)
+        return updateErrorRecoveryPolicy(ignorePolicyRules, 'append')
           .then(() => Promise.resolve())
-          .catch(() =>
-            Promise.reject(new Error('Failed to update recovery policy.'))
+          .catch((e: Error) =>
+            Promise.reject(
+              new Error(`Failed to update recovery policy: ${e.message}`)
+            )
           )
       } else {
         void proceedToRouteAndStep(RECOVERY_MAP.ERROR_WHILE_RECOVERING.ROUTE)
@@ -421,12 +419,8 @@ export const buildIgnorePolicyRules = (
   commandType: FailedCommand['commandType'],
   errorType: string,
   ifMatch: IfMatchType
-): RecoveryPolicyRulesParams => {
-  return [
-    {
-      commandType,
-      errorType,
-      ifMatch,
-    },
-  ]
-}
+): UpdateErrorRecoveryPolicyWithStrategy['newPolicy'] => ({
+  commandType,
+  errorType,
+  ifMatch,
+})
