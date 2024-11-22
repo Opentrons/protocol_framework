@@ -94,7 +94,7 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
       clearTimeout(timeout)
     }
   }, [stepNumber])
-  console.log(stepNumber, OT2_GIFS[stepNumber])
+
   return (
     <Flex
       padding={SPACING.spacing16}
