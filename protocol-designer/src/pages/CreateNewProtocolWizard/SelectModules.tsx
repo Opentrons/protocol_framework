@@ -150,6 +150,7 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
   return (
     <HandleEnter onEnter={proceed}>
       <WizardBody
+        robotType={robotType}
         stepNumber={robotType === FLEX_ROBOT_TYPE ? 4 : 3}
         header={t('add_modules')}
         goBack={() => {
