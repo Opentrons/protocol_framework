@@ -12,24 +12,24 @@ import type {
 import type { AxiosError } from 'axios'
 import type {
   RecoveryPolicyRulesParams,
-  UpdateErrorRecoveryPolicyResponse,
+  ErrorRecoveryPolicyResponse,
   HostConfig,
 } from '@opentrons/api-client'
 
-export type UseUpdateErrorRecoveryPolicyResponse = UseMutationResult<
-  UpdateErrorRecoveryPolicyResponse,
+export type UseErrorRecoveryPolicyResponse = UseMutationResult<
+  ErrorRecoveryPolicyResponse,
   AxiosError,
   RecoveryPolicyRulesParams
 > & {
   updateErrorRecoveryPolicy: UseMutateFunction<
-    UpdateErrorRecoveryPolicyResponse,
+    ErrorRecoveryPolicyResponse,
     AxiosError,
     RecoveryPolicyRulesParams
   >
 }
 
 export type UseUpdateErrorRecoveryPolicyOptions = UseMutationOptions<
-  UpdateErrorRecoveryPolicyResponse,
+  ErrorRecoveryPolicyResponse,
   AxiosError,
   RecoveryPolicyRulesParams
 >
@@ -37,11 +37,11 @@ export type UseUpdateErrorRecoveryPolicyOptions = UseMutationOptions<
 export function useUpdateErrorRecoveryPolicy(
   runId: string,
   options: UseUpdateErrorRecoveryPolicyOptions = {}
-): UseUpdateErrorRecoveryPolicyResponse {
+): UseErrorRecoveryPolicyResponse {
   const host = useHost()
 
   const mutation = useMutation<
-    UpdateErrorRecoveryPolicyResponse,
+    ErrorRecoveryPolicyResponse,
     AxiosError,
     RecoveryPolicyRulesParams
   >(

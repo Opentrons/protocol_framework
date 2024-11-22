@@ -6,7 +6,7 @@ import type {
   ErrorRecoveryPolicy,
   IfMatchType,
   UpdateErrorRecoveryPolicyRequest,
-  UpdateErrorRecoveryPolicyResponse,
+  ErrorRecoveryPolicyResponse,
 } from './types'
 import type { RunCommandError, RunTimeCommand } from '@opentrons/shared-data'
 
@@ -20,13 +20,15 @@ export function updateErrorRecoveryPolicy(
   config: HostConfig,
   runId: string,
   policyRules: RecoveryPolicyRulesParams
-): ResponsePromise<UpdateErrorRecoveryPolicyResponse> {
+): ResponsePromise<ErrorRecoveryPolicyResponse> {
   const policy = buildErrorRecoveryPolicyBody(policyRules)
 
-  return request<
-    UpdateErrorRecoveryPolicyResponse,
-    UpdateErrorRecoveryPolicyRequest
-  >(PUT, `/runs/${runId}/errorRecoveryPolicy`, { data: policy }, config)
+  return request<ErrorRecoveryPolicyResponse, UpdateErrorRecoveryPolicyRequest>(
+    PUT,
+    `/runs/${runId}/errorRecoveryPolicy`,
+    { data: policy },
+    config
+  )
 }
 
 function buildErrorRecoveryPolicyBody(
