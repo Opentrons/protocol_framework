@@ -309,6 +309,8 @@ def test_build_mutable_config_using_old_units() -> None:
 
 @pytest.mark.parametrize(
     ("filename", "type", "channels", "version", "file_contents"),
+    # From https://opentrons.atlassian.net/browse/RQA-3676.
+    # These could probably be pared down.
     [
         (
             "P20MV202020121412.json",
@@ -447,6 +449,11 @@ def test_loading_does_not_log_warnings(
     caplog: pytest.LogCaptureFixture,
     override_configuration_path: Path,
 ) -> None:
+    """Make sure load_with_mutable_configurations() doesn't log any exceptions.
+
+    load_with_mutable_configurations() suppresses and logs internal exceptions to
+    protect its caller, but those are still bugs, and we still want tests to catch them.
+    """
     model = pipette_definition.PipetteModelVersionType(type, channels, version)
     (override_configuration_path / filename).write_text(file_contents)
     with caplog.at_level(logging.WARNING):
