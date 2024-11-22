@@ -2158,7 +2158,8 @@ class InstrumentContext(publisher.CommandPublisher):
         .. note::
             The pressure sensors for the Flex 8-channel pipette are on channels 1 and 8 (positions A1 and H1). For the Flex 96-channel pipette, the pressure sensors are on channels 1 and 96 (positions A1 and H12). Other channels on multi-channel pipettes do not have sensors and cannot detect liquid.
         """
-        self._raise_if_pressure_not_supported_by_pipette()
+        # TODO EXEC-1026 put this back once we have the protocol engine pipette config stuff all hooked up
+        # self._raise_if_pressure_not_supported_by_pipette()
         loc = well.top()
         self._core.liquid_probe_with_recovery(well._core, loc)
 
