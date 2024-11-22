@@ -870,12 +870,9 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         self._engine_client.execute_command(cmd.HomeParams(axes=[z_axis]))
 
     def _pressure_supported_by_pipette(self) -> bool:
-        supported = self._sync_hardware_api.get_pressure_sensor_available(
-            mount=self.get_mount()
+        return self._engine_client.state.pipettes.get_pipette_supports_pressure(
+            self.pipette_id
         )
-        if not isinstance(supported, bool):
-            return False
-        return supported
 
     def detect_liquid_presence(self, well_core: WellCore, loc: Location) -> bool:
         labware_id = well_core.labware_id

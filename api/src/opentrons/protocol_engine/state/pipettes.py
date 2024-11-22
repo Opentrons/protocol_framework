@@ -763,6 +763,13 @@ class PipetteView(HasState[PipetteState]):
             pip_front_left_bound,
         )
 
+    def get_pipette_supports_pressure(self, pipette_id: str) -> bool:
+        """Return if this pipette supports a pressure sensor."""
+        return (
+            "pressure"
+            in self._state.static_config_by_id[pipette_id].available_sensors.sensors
+        )
+
     def get_liquid_presence_detection(self, pipette_id: str) -> bool:
         """Determine if liquid presence detection is enabled for this pipette."""
         try:
