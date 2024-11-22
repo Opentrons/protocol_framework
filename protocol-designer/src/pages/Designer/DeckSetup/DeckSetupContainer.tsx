@@ -195,15 +195,14 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   )
 
   return (
-    <Flex>
+    <Flex height="100%">
       <Flex
         backgroundColor={COLORS.white}
         borderRadius={BORDERS.borderRadius12}
         width="100%"
-        height={zoomIn.slot != null ? '75vh' : '70vh'}
+        height={tab === 'protocolSteps' ? '70vh' : '100%'}
         flexDirection={DIRECTION_COLUMN}
         padding={SPACING.spacing24}
-        maxHeight="39.375rem" // this is to block deck view from enlarging
       >
         <Flex
           width="100%"
@@ -212,24 +211,23 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
           justifyContent={JUSTIFY_CENTER}
           gridGap={SPACING.spacing12}
         >
-          <Box width="20%">
-            {hoverSlot != null &&
-            breakPointSize !== 'small' &&
-            LEFT_SLOTS.includes(hoverSlot) ? (
-              <SlotDetailsContainer robotType={robotType} slot={hoverSlot} />
-            ) : null}
-          </Box>
+          {zoomIn.slot == null ? (
+            <Box width="20%">
+              {hoverSlot != null &&
+              breakPointSize !== 'small' &&
+              LEFT_SLOTS.includes(hoverSlot) ? (
+                <SlotDetailsContainer robotType={robotType} slot={hoverSlot} />
+              ) : null}
+            </Box>
+          ) : null}
           <RobotCoordinateSpaceWithRef
-            height={zoomIn.slot != null ? '100%' : '95%'}
-            width={
-              zoomIn.slot != null || tab === 'protocolSteps'
-                ? '100%'
-                : '33.125rem'
-            }
+            height="100%"
+            width={zoomIn.slot != null ? '100%' : '50%'}
             deckDef={deckDef}
             viewBox={viewBox}
             outline="auto"
             zoomed={zoomIn.slot != null}
+            borderRadius={BORDERS.borderRadius12}
           >
             {() => (
               <>
@@ -356,13 +354,15 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
               </>
             )}
           </RobotCoordinateSpaceWithRef>
-          <Box width="20%">
-            {hoverSlot != null &&
-            breakPointSize !== 'small' &&
-            !LEFT_SLOTS.includes(hoverSlot) ? (
-              <SlotDetailsContainer robotType={robotType} slot={hoverSlot} />
-            ) : null}
-          </Box>
+          {zoomIn.slot == null ? (
+            <Box width="20%">
+              {hoverSlot != null &&
+              breakPointSize !== 'small' &&
+              !LEFT_SLOTS.includes(hoverSlot) ? (
+                <SlotDetailsContainer robotType={robotType} slot={hoverSlot} />
+              ) : null}
+            </Box>
+          ) : null}
         </Flex>
       </Flex>
       {zoomIn.slot != null && zoomIn.cutout != null ? (
