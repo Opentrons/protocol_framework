@@ -69,6 +69,7 @@ class LoadedStaticPipetteData:
     pipette_lld_settings: Optional[Dict[str, Dict[str, float]]]
     plunger_positions: Dict[str, float]
     shaft_ul_per_mm: float
+    available_sensors: pipette_definition.AvailableSensorDefinition
 
 
 class VirtualPipetteDataProvider:
@@ -290,6 +291,7 @@ class VirtualPipetteDataProvider:
                 "drop_tip": plunger_positions.drop_tip,
             },
             shaft_ul_per_mm=config.shaft_ul_per_mm,
+            available_sensors=config.available_sensors,
         )
 
     def get_virtual_pipette_static_config(
@@ -339,6 +341,7 @@ def get_pipette_static_config(
         pipette_lld_settings=pipette_dict["lld_settings"],
         plunger_positions=pipette_dict["plunger_positions"],
         shaft_ul_per_mm=pipette_dict["shaft_ul_per_mm"],
+        available_sensors=pipette_dict["available_sensors"],
     )
 
 
