@@ -80,7 +80,7 @@ def test_get_virtual_pipette_static_config(
             "drop_tip": -27.0,
         },
         shaft_ul_per_mm=0.785,
-        available_sensors=available_sensors,
+        available_sensors=AvailableSensorDefinition(sensors=[]),
     )
 
 
@@ -190,7 +190,7 @@ def test_load_virtual_pipette_by_model_string(
             "drop_tip": -33.4,
         },
         shaft_ul_per_mm=9.621,
-        available_sensors=available_sensors,
+        available_sensors=AvailableSensorDefinition(sensors=[]),
     )
 
 
