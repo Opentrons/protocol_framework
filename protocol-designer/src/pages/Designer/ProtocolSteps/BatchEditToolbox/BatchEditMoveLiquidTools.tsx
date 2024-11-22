@@ -23,8 +23,8 @@ import {
   PositionField,
   WellsOrderField,
 } from '../StepForm/PipetteFields'
-import { getWellOrderFieldValue } from './utils'
 import type { FieldPropsByName } from '../StepForm/types'
+import { WellOrderOption } from '../../../../form-types'
 
 interface BatchEditMoveLiquidProps {
   propsForFields: FieldPropsByName
@@ -90,16 +90,12 @@ export function BatchEditMoveLiquidTools(
         updateSecondWellOrder={
           propsForFields[addFieldNamePrefix('wellOrder_second')].updateValue
         }
-        firstValue={getWellOrderFieldValue(
-          propsForFields,
-          addFieldNamePrefix('wellOrder_first'),
-          't2b'
-        )}
-        secondValue={getWellOrderFieldValue(
-          propsForFields,
-          addFieldNamePrefix('wellOrder_second'),
-          'l2r'
-        )}
+        firstValue={
+          (propsForFields.wellOrder_first.name ?? 't2b') as WellOrderOption
+        }
+        secondValue={
+          (propsForFields.wellOrder_second.name ?? 'l2r') as WellOrderOption
+        }
         firstName={addFieldNamePrefix('wellOrder_first')}
         secondName={addFieldNamePrefix('wellOrder_second')}
       />

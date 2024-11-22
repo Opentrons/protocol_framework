@@ -7,7 +7,7 @@ import type {
   DisabledFields,
   MultiselectFieldValues,
 } from '../../../../ui/steps/selectors'
-import type { StepFieldName, WellOrderOption } from '../../../../form-types'
+import type { StepFieldName } from '../../../../form-types'
 import type { FieldPropsByName } from '../StepForm/types'
 export const makeBatchEditFieldProps = (
   fieldValues: MultiselectFieldValues,
@@ -45,17 +45,4 @@ export const makeBatchEditFieldProps = (
     }
     return acc
   }, {})
-}
-
-export const getWellOrderFieldValue = (
-  propsForFields: FieldPropsByName,
-  name: string,
-  fallback: 't2b' | 'l2r'
-): WellOrderOption | null | undefined => {
-  const val = propsForFields[name]?.value ?? fallback
-  if (val === 'l2r' || val === 'r2l' || val === 't2b' || val === 'b2t') {
-    return val
-  } else {
-    return null
-  }
 }
