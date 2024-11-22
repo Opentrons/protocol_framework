@@ -870,7 +870,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         self._engine_client.execute_command(cmd.HomeParams(axes=[z_axis]))
 
     def _pressure_supported_by_pipette(self) -> bool:
-        supported = self._sync_hardware_api.pressure_sensor_available(
+        supported = self._sync_hardware_api.get_pressure_sensor_available(
             mount=self.get_mount()
         )
         assert isinstance(supported, bool)
