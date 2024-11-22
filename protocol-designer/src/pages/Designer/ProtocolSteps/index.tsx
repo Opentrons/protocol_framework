@@ -7,7 +7,6 @@ import {
   DIRECTION_COLUMN,
   Flex,
   JUSTIFY_CENTER,
-  JUSTIFY_FLEX_END,
   JUSTIFY_FLEX_START,
   JUSTIFY_SPACE_BETWEEN,
   POSITION_FIXED,
@@ -26,6 +25,8 @@ import {
   getSelectedSubstep,
   getSelectedStepId,
   getHoveredStepId,
+  getSelectedTerminalItemId,
+  getHoveredTerminalItemId,
 } from '../../../ui/steps/selectors'
 import { DeckSetupContainer } from '../DeckSetup'
 import { OffDeck } from '../Offdeck'
@@ -41,6 +42,8 @@ const CONTENT_MAX_WIDTH = '46.9375rem'
 export function ProtocolSteps(): JSX.Element {
   const { i18n, t } = useTranslation('starting_deck_state')
   const formData = useSelector(getUnsavedForm)
+  const selectedTerminalItem = useSelector(getSelectedTerminalItemId)
+  const hoveredTerminalItem = useSelector(getHoveredTerminalItemId)
   const isMultiSelectMode = useSelector(getIsMultiSelectMode)
   const selectedSubstep = useSelector(getSelectedSubstep)
   const enableHoyKeyDisplay = useSelector(getEnableHotKeysDisplay)
@@ -88,16 +91,19 @@ export function ProtocolSteps(): JSX.Element {
           {tab === 'protocolSteps' ? (
             <TimelineAlerts justifyContent={JUSTIFY_CENTER} width="100%" />
           ) : null}
-          <Flex
-            justifyContent={
-              currentStep != null ? JUSTIFY_SPACE_BETWEEN : JUSTIFY_FLEX_END
-            }
-          >
-            {currentStep != null ? (
+          <Flex justifyContent={JUSTIFY_SPACE_BETWEEN}>
+            {currentStep != null && hoveredTerminalItem == null ? (
               <StyledText desktopStyle="headingSmallBold">
                 {i18n.format(currentStep.stepName, 'capitalize')}
               </StyledText>
             ) : null}
+            {(hoveredTerminalItem != null || selectedTerminalItem != null) &&
+            currentHoveredStepId == null ? (
+              <StyledText desktopStyle="headingSmallBold">
+                {t(hoveredTerminalItem ?? selectedTerminalItem)}
+              </StyledText>
+            ) : null}
+
             <ToggleGroup
               selectedValue={deckView}
               leftText={leftString}
@@ -121,6 +127,9 @@ export function ProtocolSteps(): JSX.Element {
                 currentStep={currentStep}
                 stepDetails={stepDetails}
               />
+            ) : null}
+            {selectedTerminalItem != null && currentHoveredStepId == null ? (
+              <Flex height="4.75rem" width="100%" />
             ) : null}
           </Flex>
         </Flex>
