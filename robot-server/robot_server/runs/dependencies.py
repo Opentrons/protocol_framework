@@ -166,7 +166,7 @@ async def get_run_data_manager(
         ErrorRecoverySettingStore, Depends(get_error_recovery_setting_store)
     ],
 ) -> RunDataManager:
-    """Get a run data manager to keep track of current/historical run data."""
+    """Get a singleton run data manager to keep track of current/historical run data."""
     run_data_manager = _run_data_manager_accessor.get_from(app_state)
 
     if run_data_manager is None:
