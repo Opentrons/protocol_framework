@@ -337,8 +337,17 @@ export const getSaveStepSnackbarText = (
   }
 }
 
-export const capitalizeFirstLetter = (stepName: string): string =>
-  `${stepName.charAt(0).toUpperCase()}${stepName.slice(1)}`
+export const capitalizeFirstLetter = (stepName: string): string => {
+  // Note - check is for heater-shaker
+  if (stepName.includes('-')) {
+    return stepName
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join('-')
+  } else {
+    return `${stepName.charAt(0).toUpperCase()}${stepName.slice(1)}`
+  }
+}
 
 type ErrorMappedToField = Record<string, FormError>
 
