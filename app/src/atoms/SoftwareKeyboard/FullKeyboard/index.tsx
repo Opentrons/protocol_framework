@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 import { getAppLanguage } from '/app/redux/config'
 import {
   customDisplay,
-  pinYinLayoutCandidates,
+  layoutCandidates,
   fullKeyboardLayout,
 } from '../constants'
 import type { KeyboardReactInterface } from 'react-simple-keyboard'
@@ -64,7 +64,7 @@ export function FullKeyboard({
       layoutName={layoutName}
       layout={fullKeyboardLayout}
       layoutCandidates={
-        appLanguage === 'zh-CN' ? pinYinLayoutCandidates : undefined
+        appLanguage != null ? layoutCandidates[appLanguage] : undefined
       }
       display={customDisplay}
       mergeDisplay={true}

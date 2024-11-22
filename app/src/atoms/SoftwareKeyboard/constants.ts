@@ -1,5 +1,11 @@
 import chineseLayout from 'simple-keyboard-layouts/build/layouts/chinese'
 
+type LayoutCandidates =
+  | {
+      [key: string]: string
+    }
+  | undefined
+
 export const customDisplay = {
   '{numbers}': '123',
   '{shift}': 'ABC',
@@ -72,6 +78,11 @@ export const numericalCustom = {
   '{backspace}': 'del',
 }
 
-// @ts-expect-error layout candidates exists but is not on the type
-// in the simple-keyboard-layouts package
-export const pinYinLayoutCandidates = chineseLayout.layoutCandidates
+export const layoutCandidates: {
+  [key: string]: LayoutCandidates
+} = {
+  // @ts-expect-error layout candidates exists but is not on the type
+  // in the simple-keyboard-layouts package
+  'zh-CN': chineseLayout.layoutCandidates,
+  'en-US': undefined,
+}

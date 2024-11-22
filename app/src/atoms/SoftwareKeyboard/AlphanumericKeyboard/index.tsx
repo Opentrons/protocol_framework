@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 import { getAppLanguage } from '/app/redux/config'
 import {
   alphanumericKeyboardLayout,
-  pinYinLayoutCandidates,
+  layoutCandidates,
   customDisplay,
 } from '../constants'
 import type { KeyboardReactInterface } from 'react-simple-keyboard'
@@ -55,7 +55,7 @@ export function AlphanumericKeyboard({
       layoutName={layoutName}
       layout={alphanumericKeyboardLayout}
       layoutCandidates={
-        appLanguage === 'zh-CN' ? pinYinLayoutCandidates : undefined
+        appLanguage != null ? layoutCandidates[appLanguage] : undefined
       }
       display={customDisplay}
       mergeDisplay={true}
