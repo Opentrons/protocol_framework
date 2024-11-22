@@ -95,7 +95,7 @@ _MAP_KEY_TO_V2: Dict[str, List[str]] = {
         "liquid_properties",
         "default",
         "supportedTips",
-        "##EACHTIP##",
+        "##EACHTIPTYPE##",
         "defaultTipLength",
     ],
 }
