@@ -340,7 +340,6 @@ def test_get_pipette_working_volume_raises_if_tip_volume_is_none(
 
 def test_get_pipette_available_volume(
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
-    decoy: Decoy,
     available_sensors: AvailableSensorDefinition,
 ) -> None:
     """It should get the available volume for a pipette."""

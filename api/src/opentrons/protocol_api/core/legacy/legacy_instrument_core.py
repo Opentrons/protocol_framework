@@ -586,4 +586,3 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
 
     def _pressure_supported_by_pipette(self) -> bool:
         return False
-

@@ -414,9 +414,6 @@ async def test_liquid_probe_plunger_preparedness_checking(
         wellLocation=well_location,
     )
 
-    decoy.when(
-        state_view.pipettes.get_nozzle_configuration_supports_lld(pipette_id)
-    ).then_return(True)
     decoy.when(state_view.pipettes.get_config("pipette-id")).then_return(
         StaticPipetteConfig(
             min_volume=1,
@@ -502,9 +499,6 @@ async def test_liquid_probe_volume_checking(
             available_sensors=available_sensors,
         )
     )
-    decoy.when(
-        state_view.pipettes.get_nozzle_configuration_supports_lld(pipette_id)
-    ).then_return(True)
 
     with pytest.raises(TipNotEmptyError):
         await subject.execute(data)
@@ -574,4 +568,3 @@ async def test_liquid_probe_location_checking(
     ).then_return(False)
     with pytest.raises(MustHomeError):
         await subject.execute(data)
-

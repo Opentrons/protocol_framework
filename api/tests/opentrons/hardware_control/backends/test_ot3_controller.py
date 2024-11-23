@@ -1300,6 +1300,7 @@ def test_grip_error_detection(
             hard_min,
         )
 
+
 @pytest.mark.parametrize(
     argnames=["axes", "pipette_has_sensor"],
     argvalues=[[[Axis.P_L, Axis.P_R], True], [[Axis.P_L, Axis.P_R], False]],
@@ -1311,7 +1312,7 @@ async def test_pressure_disable(
     mock_check_overpressure: None,
     pipette_has_sensor: bool,
 ) -> None:
-    config = {"run.side_effect": move_group_run_side_effect_home(controller, axes)}
+    config = {"run.side_effect": move_group_run_side_effect(controller, axes)}
     with mock.patch(  # type: ignore [call-overload]
         "opentrons.hardware_control.backends.ot3controller.MoveGroupRunner",
         spec=MoveGroupRunner,
