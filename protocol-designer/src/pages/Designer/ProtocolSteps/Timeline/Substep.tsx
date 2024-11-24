@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import noop from 'lodash/noop'
 import {
@@ -169,4 +169,4 @@ function SubstepComponent(props: SubstepProps): JSX.Element {
   )
 }
 
-export const Substep = React.memo(SubstepComponent)
+export const Substep = memo(SubstepComponent)
