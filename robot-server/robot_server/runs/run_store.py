@@ -630,20 +630,14 @@ class RunStore:
             )
 
             select_slice = (
-                sqlalchemy.select(run_command_table.c.command_error)
+                sqlalchemy.select(select_command_errors.c.command_error)
                 .where(
                     and_(
                         select_command_errors.c.row_num >= actual_cursor,
                         select_command_errors.c.row_num < actual_cursor + length,
                     )
                 )
-                .join_from(
-                    run_command_table,
-                    select_command_errors,
-                    onclause=run_command_table.c.index_in_run
-                    == select_command_errors.c.index_in_run,
-                )
-                .order_by(run_command_table.c.index_in_run)
+                .order_by(select_command_errors.c.index_in_run)
             )
             slice_result = transaction.execute(select_slice).all()
 
