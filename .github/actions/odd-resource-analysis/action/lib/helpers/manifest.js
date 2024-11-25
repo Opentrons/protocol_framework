@@ -14,7 +14,7 @@ async function downloadAppManifest() {
 function latestValidVersionFromManifest(manifest) {
   const versions = Object.keys(manifest.production)
   const latestValidVersion = versions.findLast(
-    version => manifest.production[version].revoked === false
+    version => !('revoked' in manifest.production[version])
   )
 
   if (latestValidVersion != null) {

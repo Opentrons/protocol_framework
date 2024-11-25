@@ -20,6 +20,11 @@ async function run() {
       projectId: mixpanelProjectId,
     })
 
+    console.log(
+      'ODD Available Memory and Processes with Increasing Memory Trend or Selectively Observed by Version (Rolling 1 Month Analysis Window):'
+    )
+    console.log(JSON.stringify(memoryAnalysis, null, 2))
+
     const outputText =
       'ODD Available Memory and Processes with Increasing Memory Trend or Selectively Observed by Version (Rolling 1 Month Analysis Window):\n' +
       Object.entries(memoryAnalysis)

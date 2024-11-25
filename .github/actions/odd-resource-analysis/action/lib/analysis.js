@@ -1,4 +1,4 @@
-const { sampleCorrelation, tTest } = require('simple-statistics')
+const calculateCorrelation = require('calculate-correlation')
 const { MINIMUM_VALID_SAMPLE_SIZE } = require('./constants')
 
 const P_VALUE_THRESHOLD = 0.05
@@ -9,18 +9,20 @@ const CORRELATION_THRESHOLDS = {
 }
 
 /**
- * @description Calculates one-tailed p-value for correlation coefficient
+ * @description Calculate significance of Pearson correlation coefficient using t-distribution approximation
  * @param {number} correlation Pearson correlation coefficient
  * @param {number} sampleSize Number of samples
  * @returns {number} One-tailed p-value
  */
 function calculatePValue(correlation, sampleSize) {
+  // Convert correlation coefficient to t-statistic
   const t = correlation * Math.sqrt((sampleSize - 2) / (1 - correlation ** 2))
 
-  const twoTailedPValue = tTest([t], 0)
+  // Degrees of freedom
+  const df = sampleSize - 2
 
-  // Convert to one-tailed p-value
-  return twoTailedPValue / 2
+  const x = df / (df + t * t)
+  return 0.5 * Math.pow(x, df / 2)
 }
 
 /**
@@ -59,7 +61,7 @@ function analyzeCorrelation(x, y) {
     }
   }
 
-  const correlation = sampleCorrelation(x, y)
+  const correlation = calculateCorrelation(x, y, { decimals: 4 })
   const pValue = calculatePValue(correlation, lowestSampleSize)
   const isSignificant = pValue < P_VALUE_THRESHOLD
 

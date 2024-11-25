@@ -11,10 +11,12 @@ exports.modules = {
       /* harmony export */ toFormData: () => /* binding */ toFormData,
       /* harmony export */
     })
-    /* harmony import */ var fetch_blob_from_js__WEBPACK_IMPORTED_MODULE_0__ =
-      __webpack_require__(9802)
-    /* harmony import */ var formdata_polyfill_esm_min_js__WEBPACK_IMPORTED_MODULE_1__ =
-      __webpack_require__(3018)
+    /* harmony import */ var fetch_blob_from_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(
+      9802
+    )
+    /* harmony import */ var formdata_polyfill_esm_min_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(
+      3018
+    )
 
     let s = 0
     const S = {
@@ -378,8 +380,7 @@ exports.modules = {
       let contentType
       let filename
       const entryChunks = []
-      const formData =
-        new formdata_polyfill_esm_min_js__WEBPACK_IMPORTED_MODULE_1__ /* .FormData */.fS()
+      const formData = new formdata_polyfill_esm_min_js__WEBPACK_IMPORTED_MODULE_1__ /* .FormData */.fS()
 
       const onPartData = ui8a => {
         entryValue += decoder.decode(ui8a, { stream: true })
@@ -390,12 +391,11 @@ exports.modules = {
       }
 
       const appendFileToFormData = () => {
-        const file =
-          new fetch_blob_from_js__WEBPACK_IMPORTED_MODULE_0__ /* .File */.ZH(
-            entryChunks,
-            filename,
-            { type: contentType }
-          )
+        const file = new fetch_blob_from_js__WEBPACK_IMPORTED_MODULE_0__ /* .File */.ZH(
+          entryChunks,
+          filename,
+          { type: contentType }
+        )
         formData.append(entryName, file)
       }
 

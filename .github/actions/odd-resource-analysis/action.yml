@@ -23,5 +23,5 @@ outputs:
     description: 'JSON string containing the complete analysis results'
 
 runs:
-  using: 'node20'
+  using: 'node16'
   main: 'dist/index.js'

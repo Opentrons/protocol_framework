@@ -82,8 +82,11 @@ function processMixpanelData(data) {
   const systemMemory = []
 
   data.forEach(entry => {
-    const { systemUptimeHrs, systemAvailMemMb, processesDetails } =
-      entry.properties
+    const {
+      systemUptimeHrs,
+      systemAvailMemMb,
+      processesDetails,
+    } = entry.properties
     const uptime = parseFloat(systemUptimeHrs)
 
     // Validate uptime before adding any measurements
@@ -157,8 +160,8 @@ function analyzeProcessMemoryTrends(data) {
     results.set(processName, {
       correlation: analysis.correlation,
       sampleSize: analysis.sampleSize,
-      isSignificant: analysis.isSignificant,
-      rangeAverages: calculateRangeAverages(measurements, 'memRssMb'),
+      interpretation: analysis.interpretation,
+      averageMemoryMbByUptime: calculateRangeAverages(measurements, 'memRssMb'),
     })
   })
 
@@ -171,8 +174,11 @@ function analyzeProcessMemoryTrends(data) {
   results.set('odd-available-memory', {
     correlation: systemAnalysis.correlation,
     sampleSize: systemAnalysis.sampleSize,
-    isSignificant: systemAnalysis.isSignificant,
-    rangeAverages: calculateRangeAverages(systemMemory, 'systemAvailMemMb'),
+    interpretation: systemAnalysis.interpretation,
+    averageMemoryMbByUptime: calculateRangeAverages(
+      systemMemory,
+      'systemAvailMemMb'
+    ),
   })
 
   // Filter out any process with a negative correlation except for a few key ones.
@@ -205,8 +211,8 @@ function analyzeMemoryTrends(mixpanelData) {
     analysis[processName] = {
       correlation: result.correlation.toFixed(4),
       sampleSize: result.sampleSize,
-      interpretation: interpretResults(result),
-      averageMemoryMbByUptime: result.rangeAverages,
+      interpretation: result.interpretation,
+      averageMemoryMbByUptime: result.averageMemoryMbByUptime,
     }
   })
 
