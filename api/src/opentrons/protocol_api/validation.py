@@ -43,7 +43,6 @@ from opentrons.hardware_control.modules.types import (
 
 from .disposal_locations import TrashBin, WasteChute
 
-
 if TYPE_CHECKING:
     from .labware import Well
 
@@ -682,4 +681,35 @@ def ensure_valid_flat_wells_list_for_transfer_v2(
             f"'{target}' is not a valid location for transfer."
             f" Location should be a well instance, or a 1-dimensional or"
             f" 2-dimensional sequence of well instances."
+        )
+
+
+def ensure_valid_trash_location_for_transfer_v2(
+    trash_location: Union[Location, Well, TrashBin, WasteChute]
+) -> Union[Location, Well, TrashBin, WasteChute]:
+    """Ensure that the trash location is valid for v2 transfer."""
+    if (
+        isinstance(trash_location, Well)
+        or isinstance(trash_location, TrashBin)
+        or isinstance(trash_location, WasteChute)
+    ):
+        return trash_location
+    elif isinstance(trash_location, Location):
+        _, maybe_well = trash_location.labware.get_parent_labware_and_well()
+
+        if maybe_well is None:
+            raise TypeError(
+                "If a location is specified as a `types.Location`"
+                " (for instance, as the result of a call to `Well.top()`),"
+                " it must be a location relative to a well,"
+                " since that is where a tip is dropped."
+                f" However, the given location refers to {trash_location.labware}"
+            )
+        return trash_location
+    else:
+        raise TypeError(
+            f"If specified, location should be an instance of"
+            f" `types.Location` (e.g. the return value from `Well.top()`)"
+            f" or `Well` (e.g. `tiprack.wells()[0]`) or an instance of `TrashBin` or `WasteChute`."
+            f" However, it is {trash_location}."
         )

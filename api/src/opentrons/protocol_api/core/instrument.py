@@ -307,14 +307,27 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         ...
 
     @abstractmethod
-    def transfer_liquid(
+    def load_liquid_class(
         self,
         liquid_class: LiquidClass,
+        pipette_load_name: str,
+        tiprack_uri: str,
+    ) -> str:
+        """Load the liquid class properties of given pipette and tiprack into the engine.
+
+        Returns: ID of the liquid class record
+        """
+        ...
+
+    @abstractmethod
+    def transfer_liquid(
+        self,
+        liquid_class_id: str,
         volume: float,
         source: List[WellCoreType],
         dest: List[WellCoreType],
         new_tip: TransferTipPolicyV2,
-        trash_location: Union[types.Location, TrashBin, WasteChute],
+        trash_location: Union[WellCoreType, types.Location, TrashBin, WasteChute],
     ) -> None:
         """Transfer a liquid from source to dest according to liquid class properties."""
         ...

@@ -1863,3 +1863,76 @@ def test_transfer_liquid_raises_if_tip_has_liquid(
             dest=[mock_well],
             new_tip="never",
         )
+
+
+@pytest.mark.parametrize("robot_type", ["OT-2 Standard", "OT-3 Standard"])
+def test_transfer_liquid_delegates_to_engine_core(
+    decoy: Decoy,
+    mock_protocol_core: ProtocolCore,
+    mock_instrument_core: InstrumentCore,
+    subject: InstrumentContext,
+    mock_feature_flags: None,
+    robot_type: RobotType,
+    minimal_liquid_class_def2: LiquidClassSchemaV1,
+) -> None:
+    """It should load liquid class into engine and delegate the transfer execution to core."""
+    test_liq_class = LiquidClass.create(minimal_liquid_class_def2)
+    mock_well = decoy.mock(cls=Well)
+    tip_racks = [decoy.mock(cls=Labware)]
+    trash_location = Location(point=Point(1, 2, 3), labware=mock_well)
+    next_tiprack = decoy.mock(cls=Labware)
+    subject.starting_tip = None
+    subject.tip_racks = tip_racks
+
+    decoy.when(mock_protocol_core.robot_type).then_return(robot_type)
+    decoy.when(
+        ff.allow_liquid_classes(RobotTypeEnum.robot_literal_to_enum(robot_type))
+    ).then_return(True)
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
+    ).then_return([mock_well])
+    decoy.when(mock_validation.ensure_new_tip_policy("never")).then_return(
+        TransferTipPolicyV2.ONCE
+    )
+    decoy.when(mock_instrument_core.get_nozzle_map()).then_return(MOCK_MAP)
+    decoy.when(mock_instrument_core.get_active_channels()).then_return(2)
+    decoy.when(
+        labware.next_available_tip(
+            starting_tip=None,
+            tip_racks=tip_racks,
+            channels=2,
+            nozzle_map=MOCK_MAP,
+        )
+    ).then_return((next_tiprack, decoy.mock(cls=Well)))
+    decoy.when(mock_instrument_core.get_current_volume()).then_return(0)
+    decoy.when(
+        mock_validation.ensure_valid_trash_location_for_transfer_v2(trash_location)
+    ).then_return(trash_location.move(Point(1, 2, 3)))
+    decoy.when(next_tiprack.uri).then_return("tiprack-uri")
+    decoy.when(mock_instrument_core.get_pipette_name()).then_return("pipette-name")
+    decoy.when(
+        mock_instrument_core.load_liquid_class(
+            liquid_class=test_liq_class,
+            pipette_load_name="pipette-name",
+            tiprack_uri="tiprack-uri",
+        )
+    ).then_return("liq-class-id")
+
+    subject.transfer_liquid(
+        liquid_class=test_liq_class,
+        volume=10,
+        source=[mock_well],
+        dest=[mock_well],
+        new_tip="never",
+        trash_location=trash_location,
+    )
+    decoy.verify(
+        mock_instrument_core.transfer_liquid(
+            liquid_class_id="liq-class-id",
+            volume=10,
+            source=[mock_well._core],
+            dest=[mock_well._core],
+            new_tip=TransferTipPolicyV2.ONCE,
+            trash_location=trash_location.move(Point(1, 2, 3)),
+        )
+    )

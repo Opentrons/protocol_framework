@@ -1516,7 +1516,9 @@ class InstrumentContext(publisher.CommandPublisher):
             labware.Well, Sequence[labware.Well], Sequence[Sequence[labware.Well]]
         ],
         new_tip: Literal["once", "always", "never"] = "once",
-        trash_location: Optional[Union[types.Location, TrashBin, WasteChute]] = None,
+        trash_location: Optional[
+            Union[types.Location, labware.Well, TrashBin, WasteChute]
+        ] = None,
     ) -> InstrumentContext:
         """Transfer liquid from source to dest using the specified liquid class properties.
 
@@ -1569,18 +1571,36 @@ class InstrumentContext(publisher.CommandPublisher):
                 " Ensure that all previously aspirated liquid is dispensed before starting"
                 " a new transfer."
             )
-        liquid_class_props = liquid_class.get_for(
-            pipette=self.name, tiprack=tiprack.name
-        )
-        checked_trash_location: Union[
-            types.Location, labware.Labware, TrashBin, WasteChute
-        ]
+
+        _trash_location: Union[types.Location, labware.Well, TrashBin, WasteChute]
         if trash_location is None:
-            checked_trash_location = (
-                self.trash_container
-            )  # Could be a labware or a trash fixture
+            saved_trash = self.trash_container
+            if isinstance(saved_trash, labware.Labware):
+                _trash_location = saved_trash.wells()[0]
+            else:
+                _trash_location = saved_trash
         else:
-            checked_trash_location = trash_location
+            _trash_location = trash_location
+
+        checked_trash_location = validation.ensure_valid_trash_location_for_transfer_v2(
+            trash_location=_trash_location
+        )
+        liquid_class_id = self._core.load_liquid_class(
+            liquid_class=liquid_class,
+            pipette_load_name=self.name,
+            tiprack_uri=tiprack.uri,
+        )
+
+        self._core.transfer_liquid(
+            liquid_class_id=liquid_class_id,
+            volume=volume,
+            source=[well._core for well in flat_sources_list],
+            dest=[well._core for well in flat_dest_list],
+            new_tip=valid_new_tip,
+            trash_location=checked_trash_location._core
+            if isinstance(checked_trash_location, labware.Well)
+            else checked_trash_location,
+        )
 
         return self
 
