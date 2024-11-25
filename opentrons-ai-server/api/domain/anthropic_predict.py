@@ -23,7 +23,7 @@ class AnthropicPredict:
         self.model_name: str = settings.anthropic_model_name
         self.system_prompt: str = SYSTEM_PROMPT
         self.path_docs: Path = ROOT_PATH / "api" / "storage" / "docs"
-        self.cashed_docs: List[MessageParam] = [
+        self.cached_docs: List[MessageParam] = [
             {
                 "role": "user",
                 "content": [
@@ -112,7 +112,7 @@ class AnthropicPredict:
     ) -> str | None:
         """Unified method for creating and updating messages"""
         try:
-            messages: List[MessageParam] = self.cashed_docs.copy()
+            messages: List[MessageParam] = self.cached_docs.copy()
             if history:
                 messages += history
 

@@ -200,7 +200,7 @@ async def create_chat_completion(
 
         response: Optional[str] = None
 
-        if "Write a protocol using" in body.history[0]["content"]:  # type: ignore
+        if body.history and body.history[0].get("content") and "Write a protocol using" in body.history[0]["content"]:  # type: ignore
             protocol_option = "create"
         else:
             protocol_option = "update"
