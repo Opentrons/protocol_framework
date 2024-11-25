@@ -262,6 +262,13 @@ class LiquidClassLoadedUpdate:
 
 
 @dataclasses.dataclass
+class FilesAddedUpdate:
+    """An update that adds a new data file."""
+
+    file_ids: list[str]
+
+
+@dataclasses.dataclass
 class StateUpdate:
     """Represents an update to perform on engine state."""
 
@@ -298,6 +305,8 @@ class StateUpdate:
     absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
 
     liquid_class_loaded: LiquidClassLoadedUpdate | NoChangeType = NO_CHANGE
+
+    files_added: FilesAddedUpdate | NoChangeType = NO_CHANGE
 
     def append(self, other: Self) -> Self:
         """Apply another `StateUpdate` "on top of" this one.
