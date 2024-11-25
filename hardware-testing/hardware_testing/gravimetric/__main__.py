@@ -634,6 +634,15 @@ if __name__ == "__main__":
             ui.get_user_ready("CLOSE the door, and MOVE AWAY from machine")
         ui.print_info("homing...")
         run_args.ctx.home()
+        # NOTE: there is a chance that the pipette has a tip still attached
+        #       from a previous run (eg: previous run ended in error)
+        #       so here we just assume there's a tip and drop the tip no matter what
+        hw_mount = helpers.OT3Mount.LEFT if run_args.pipette.mount == "left" else helpers.OT3Mount.RIGHT
+        hw.add_tip(hw_mount, tip_length=120)  # langer than any tip, to be safe
+        run_args.pipette.move_to(run_args.pipette.trash_container)
+        hw.drop_tip(hw_mount)
+        hw.prepare_for_aspirate(hw_mount)
+        hw.retract(hw_mount)
 
         for tip, volumes in run_args.volumes:
             if args.channels == 96 and not run_args.ctx.is_simulating():
