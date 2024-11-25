@@ -530,7 +530,7 @@ async def test_aspirate_implementation_meniscus(
     )
 
 
-async def test_stall_error(
+async def test_stall_during_final_movement(
     decoy: Decoy,
     movement: MovementHandler,
     pipetting: PipettingHandler,
@@ -538,7 +538,7 @@ async def test_stall_error(
     model_utils: ModelUtils,
     state_view: StateView,
 ) -> None:
-    """It should return an overpressure error if the hardware API indicates that."""
+    """It should propagate a stall error that happens when moving to the final position."""
     pipette_id = "pipette-id"
     labware_id = "labware-id"
     well_name = "well-name"
@@ -587,4 +587,63 @@ async def test_stall_error(
             wrappedErrors=[matchers.Anything()],
         ),
         state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),
+    )
+
+
+async def test_stall_during_preparation(
+    decoy: Decoy,
+    movement: MovementHandler,
+    pipetting: PipettingHandler,
+    subject: AspirateImplementation,
+    model_utils: ModelUtils,
+) -> None:
+    """It should propagate a stall error that happens during the prepare-to-aspirate part."""
+    pipette_id = "pipette-id"
+    labware_id = "labware-id"
+    well_name = "well-name"
+    well_location = LiquidHandlingWellLocation(
+        origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1)
+    )
+
+    error_id = "error-id"
+    error_timestamp = datetime(year=2020, month=1, day=2)
+
+    params = AspirateParams(
+        pipetteId=pipette_id,
+        labwareId=labware_id,
+        wellName=well_name,
+        wellLocation=well_location,
+        volume=50,
+        flowRate=1.23,
+    )
+
+    decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id=pipette_id)).then_return(
+        False
+    )
+
+    decoy.when(
+        await movement.move_to_well(
+            pipette_id=pipette_id,
+            labware_id=labware_id,
+            well_name=well_name,
+            well_location=WellLocation(origin=WellOrigin.TOP),
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
+        ),
+    ).then_raise(StallOrCollisionDetectedError())
+    decoy.when(model_utils.generate_id()).then_return(error_id)
+    decoy.when(model_utils.get_timestamp()).then_return(error_timestamp)
+
+    result = await subject.execute(params)
+    assert result == DefinedErrorData(
+        public=StallOrCollisionError.construct(
+            id=error_id, createdAt=error_timestamp, wrappedErrors=[matchers.Anything()]
+        ),
+        state_update=update_types.StateUpdate(
+            pipette_location=update_types.CLEAR,
+        ),
+        state_update_if_false_positive=update_types.StateUpdate(),
     )
