@@ -1,6 +1,6 @@
 import uuid
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Literal
 
 import requests
 import structlog
@@ -23,7 +23,7 @@ class AnthropicPredict:
         self.model_name: str = settings.anthropic_model_name
         self.system_prompt: str = SYSTEM_PROMPT
         self.path_docs: Path = ROOT_PATH / "api" / "storage" / "docs"
-        self._messages: List[MessageParam] = [
+        self.cashed_docs: List[MessageParam] = [
             {
                 "role": "user",
                 "content": [
@@ -77,19 +77,26 @@ class AnthropicPredict:
         return "\n".join(xml_output)
 
     @tracer.wrap()
-    def generate_message(self, max_tokens: int = 4096) -> Message:
+    def _process_message(
+        self, user_id: str, messages: List[MessageParam], message_type: Literal["create", "update"], max_tokens: int = 4096
+    ) -> Message:
+        """
+        Internal method to handle message processing with different system prompts.
+        For now, system prompt is the same.
+        """
 
-        response = self.client.messages.create(
+        response: Message = self.client.messages.create(
             model=self.model_name,
             system=self.system_prompt,
             max_tokens=max_tokens,
-            messages=self._messages,
+            messages=messages,
             tools=self.tools,  # type: ignore
             extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
+            metadata={"user_id": user_id},
         )
 
         logger.info(
-            "Token usage",
+            f"Token usage: {message_type.capitalize()}",
             extra={
                 "input_tokens": response.usage.input_tokens,
                 "output_tokens": response.usage.output_tokens,
@@ -100,15 +107,23 @@ class AnthropicPredict:
         return response
 
     @tracer.wrap()
-    def predict(self, prompt: str) -> str | None:
+    def process_message(
+        self, user_id: str, prompt: str, history: List[MessageParam] | None = None, message_type: Literal["create", "update"] = "create"
+    ) -> str | None:
+        """Unified method for creating and updating messages"""
         try:
-            self._messages.append({"role": "user", "content": PROMPT.format(USER_PROMPT=prompt)})
-            response = self.generate_message()
+            messages: List[MessageParam] = self.cashed_docs.copy()
+            if history:
+                messages += history
+
+            messages.append({"role": "user", "content": PROMPT.format(USER_PROMPT=prompt)})
+            response = self._process_message(user_id=user_id, messages=messages, message_type=message_type)
+
             if response.content[-1].type == "tool_use":
                 tool_use = response.content[-1]
-                self._messages.append({"role": "assistant", "content": response.content})
+                messages.append({"role": "assistant", "content": response.content})
                 result = self.handle_tool_use(tool_use.name, tool_use.input)  # type: ignore
-                self._messages.append(
+                messages.append(
                     {
                         "role": "user",
                         "content": [
@@ -120,24 +135,25 @@ class AnthropicPredict:
                         ],
                     }
                 )
-                follow_up = self.generate_message()
-                response_text = follow_up.content[0].text  # type: ignore
-                self._messages.append({"role": "assistant", "content": response_text})
-                return response_text
+                follow_up = self._process_message(user_id=user_id, messages=messages, message_type=message_type)
+                return follow_up.content[0].text  # type: ignore
 
             elif response.content[0].type == "text":
-                response_text = response.content[0].text
-                self._messages.append({"role": "assistant", "content": response_text})
-                return response_text
+                return response.content[0].text
 
             logger.error("Unexpected response type")
             return None
-        except IndexError as e:
-            logger.error("Invalid response format", extra={"error": str(e)})
-            return None
         except Exception as e:
-            logger.error("Error in predict method", extra={"error": str(e)})
+            logger.error(f"Error in {message_type} method", extra={"error": str(e)})
             return None
+
+    @tracer.wrap()
+    def create(self, user_id: str, prompt: str, history: List[MessageParam] | None = None) -> str | None:
+        return self.process_message(user_id, prompt, history, "create")
+
+    @tracer.wrap()
+    def update(self, user_id: str, prompt: str, history: List[MessageParam] | None = None) -> str | None:
+        return self.process_message(user_id, prompt, history, "update")
 
     @tracer.wrap()
     def handle_tool_use(self, func_name: str, func_params: Dict[str, Any]) -> str:
@@ -147,17 +163,6 @@ class AnthropicPredict:
 
         logger.error("Unknown tool", extra={"tool": func_name})
         raise ValueError(f"Unknown tool: {func_name}")
-
-    @tracer.wrap()
-    def reset(self) -> None:
-        self._messages = [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": DOCUMENTS.format(doc_content=self.get_docs()), "cache_control": {"type": "ephemeral"}}  # type: ignore
-                ],
-            }
-        ]
 
     @tracer.wrap()
     def simulate_protocol(self, protocol: str) -> str:
@@ -197,8 +202,9 @@ def main() -> None:
 
     settings = Settings()
     llm = AnthropicPredict(settings)
-    prompt = Prompt.ask("Type a prompt to send to the Anthropic API:")
-    completion = llm.predict(prompt)
+    Prompt.ask("Type a prompt to send to the Anthropic API:")
+
+    completion = llm.create(user_id="1", prompt="hi", history=None)
     print(completion)
 
 

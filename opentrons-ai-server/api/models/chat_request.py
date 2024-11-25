@@ -24,9 +24,13 @@ HistoryType = Annotated[
     Field(None, description="Chat history in the form of a list of messages. Type is from OpenAI's ChatCompletionMessageParam"),
 ]
 
+ChatOptions = Literal["update", "create"]
+ChatOptionsType = Annotated[Optional[ChatOptions], Field("create", description="which chat pathway did the user enter: create or update")]
+
 
 class ChatRequest(BaseModel):
     message: str = Field(..., description="The latest message to be processed.")
     history: HistoryType
     fake: bool = Field(True, description="When set to true, the response will be a fake. OpenAI API is not used.")
     fake_key: FakeKeyType
+    chat_options: ChatOptionsType
