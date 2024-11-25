@@ -18,9 +18,9 @@ import { StyledText } from '../StyledText'
 
 import type {
   ChangeEventHandler,
-  ReactNode,
-  MouseEvent,
   FocusEvent,
+  MouseEvent,
+  ReactNode,
 } from 'react'
 import type { IconName } from '../../icons'
 
