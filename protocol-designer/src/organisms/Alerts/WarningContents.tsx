@@ -1,6 +1,4 @@
 import { useTranslation } from 'react-i18next'
-import { START_TERMINAL_ITEM_ID } from '../../steplist'
-import { TerminalItemLink } from './TerminalItemLink'
 
 import type { AlertLevel } from './types'
 
