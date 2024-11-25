@@ -118,18 +118,16 @@ export const getLabwareIsRecommended = (
 ): boolean => {
   //  special-casing the thermocycler module V2 recommended labware since the thermocyclerModuleTypes
   //  have different recommended labware
-  const moduleType = moduleModel != null ? getModuleType(moduleModel) : null
-  if (moduleModel === THERMOCYCLER_MODULE_V2) {
-    return (
-      def.parameters.loadName === 'opentrons_96_wellplate_200ul_pcr_full_skirt'
-    )
-  } else {
-    return moduleType != null
-      ? RECOMMENDED_LABWARE_BY_MODULE[moduleType].includes(
-          def.parameters.loadName
-        )
-      : false
+  if (moduleModel == null) {
+    // permissive early exit if no module passed
+    return true
   }
+  const moduleType = getModuleType(moduleModel)
+  return moduleModel === THERMOCYCLER_MODULE_V2
+    ? def.parameters.loadName === 'opentrons_96_wellplate_200ul_pcr_full_skirt'
+    : RECOMMENDED_LABWARE_BY_MODULE[moduleType].includes(
+        def.parameters.loadName
+      )
 }
 
 export const getLabwareCompatibleWithAdapter = (
@@ -217,15 +215,15 @@ export function zoomInOnCoordinate(props: ZoomInOnCoordinateProps): string {
   const { x, y, deckDef } = props
   const [width, height] = [deckDef.dimensions[0], deckDef.dimensions[1]]
 
-  const zoomFactor = 0.6
+  const zoomFactor = 0.55
   const newWidth = width * zoomFactor
   const newHeight = height * zoomFactor
 
   //  +125 and +50 to get the approximate center of the screen point
-  const newMinX = x - newWidth / 2 + 125
+  const newMinX = x - newWidth / 2 + 20
   const newMinY = y - newHeight / 2 + 50
 
-  return `${newMinX} ${newMinY} ${newWidth} ${newHeight}`
+  return `${newMinX} ${newMinY} ${newWidth} ${newHeight + 70}`
 }
 
 export interface AnimateZoomProps {

@@ -64,7 +64,9 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
   const isPipetteStep =
     savedStepFormData.stepType === 'moveLiquid' ||
     savedStepFormData.stepType === 'mix'
-  const isThermocyclerProfile = savedStepFormData.stepType === 'thermocycler'
+  const isThermocyclerProfile =
+    savedStepFormData.stepType === 'thermocycler' &&
+    savedStepFormData.thermocyclerFormType === 'thermocyclerProfile'
 
   const duplicateStep = (
     stepId: StepIdType

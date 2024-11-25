@@ -307,6 +307,7 @@ async def test_tip_attached_error(
             id="error-id",
             createdAt=datetime(year=1, month=2, day=3),
             wrappedErrors=[matchers.Anything()],
+            errorInfo={"retryLocation": (111, 222, 333)},
         ),
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(

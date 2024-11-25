@@ -18,6 +18,7 @@ from opentrons.protocol_engine import (
     LabwareOffset,
     LabwareOffsetCreate,
     Liquid,
+    LiquidClassRecordWithId,
     CommandNote,
 )
 from opentrons.protocol_engine.types import (
@@ -134,6 +135,10 @@ class Run(ResourceModel):
         ...,
         description="Liquids loaded to the run.",
     )
+    liquidClasses: List[LiquidClassRecordWithId] = Field(
+        ...,
+        description="Liquid classes loaded to the run.",
+    )
     labwareOffsets: List[LabwareOffset] = Field(
         ...,
         description="Labware offsets to apply as labware are loaded.",
@@ -214,6 +219,10 @@ class BadRun(ResourceModel):
     liquids: List[Liquid] = Field(
         ...,
         description="Liquids loaded to the run.",
+    )
+    liquidClasses: List[LiquidClassRecordWithId] = Field(
+        ...,
+        description="Liquid classes loaded to the run.",
     )
     labwareOffsets: List[LabwareOffset] = Field(
         ...,
@@ -316,6 +325,16 @@ class ActiveNozzleLayout(BaseModel):
     )
 
 
+class TipState(BaseModel):
+    """Information about the tip, if any, currently attached to a pipette."""
+
+    hasTip: bool
+
+    # todo(mm, 2024-11-15): I think the frontend is currently scraping the commands
+    # list to figure out where the current tip came from. Extend this class with that
+    # information so the frontend doesn't have to do that.
+
+
 class PlaceLabwareState(BaseModel):
     """Details the labware being placed by the gripper."""
 
@@ -331,9 +350,21 @@ class PlaceLabwareState(BaseModel):
 class RunCurrentState(BaseModel):
     """Current details about a run."""
 
-    estopEngaged: bool = Field(..., description="")
-    activeNozzleLayouts: Dict[str, ActiveNozzleLayout] = Field(...)
-    placeLabwareState: Optional[PlaceLabwareState] = Field(None)
+    # todo(mm, 2024-11-15): Having estopEngaged here is a bit of an odd man out because
+    # it's sensor state that can change on its own at any time, whereas the rest of
+    # these fields are logical state that changes only when commands are run.
+    #
+    # Our current mechanism for anchoring these fields to a specific point in time
+    # (important for avoiding torn-read problems when a client combines this info with
+    # info from other endpoints) is `links.currentCommand`, which is based on the idea
+    # that these fields only change when the current command changes.
+    #
+    # We should see if clients can replace this with `GET /robot/control/estopStatus`.
+    estopEngaged: bool
+
+    activeNozzleLayouts: Dict[str, ActiveNozzleLayout]
+    tipStates: Dict[str, TipState]
+    placeLabwareState: Optional[PlaceLabwareState]
 
 
 class CommandLinkNoMeta(BaseModel):

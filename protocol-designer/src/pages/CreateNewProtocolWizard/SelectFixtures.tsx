@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import without from 'lodash/without'
+import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
   ALIGN_CENTER,
   BORDERS,
@@ -63,6 +64,7 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
   return (
     <HandleEnter onEnter={handleProceed}>
       <WizardBody
+        robotType={FLEX_ROBOT_TYPE}
         stepNumber={5}
         header={t('add_fixtures')}
         subHeader={t('fixtures_replace')}
@@ -158,7 +160,6 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
                 return (
                   <ListItem type="noActive" key={ae}>
                     <ListItemCustomize
-                      menuPlacement="bottom"
                       linkText={t('remove')}
                       onClick={() => {
                         setValue(

@@ -27,7 +27,7 @@
   "duplicate": "Duplicate step",
   "edit_step": "Edit step",
   "engage_height": "Engage height",
-  "final_deck_state": "Final deck state",
+  "ending_deck": "Ending deck",
   "flow_type_title": "{{type}} flow rate",
   "from": "from",
   "heater_shaker": {
@@ -44,7 +44,7 @@
       "open": "open"
     }
   },
-  "heater_shaker_settings": "Heater-shaker settings",
+  "heater_shaker_settings": "Heater-Shaker Settings",
   "in": "in",
   "into": "into",
   "magnetic_module": {
@@ -104,7 +104,7 @@
   "shake": "Shake",
   "single": "Single path",
   "speed": "Speed",
-  "starting_deck_state": "Starting deck state",
+  "starting_deck": "Starting deck",
   "step_substeps": "{{stepType}} details",
   "temperature": "Temperature",
   "temperature_module": {
@@ -120,8 +120,8 @@
     "substep_settings": "<text>Set block temperature to</text><tagTemperature/><text>for</text><tagDuration/>",
     "thermocycler_profile": {
       "end_hold": {
-        "block": "<text>End at thermocycler block</text><tag/>",
-        "lid_position": "<text>Thermocycler lid</text><tag/>"
+        "block": "<text>End with block at</text><tag/>",
+        "lid_position": "<text>and lid</text><tag/>"
       },
       "lid_temperature": "<text>and lid temperature at</text><tag/>",
       "volume": "<text>Run thermocycler profile with</text><tag/>"

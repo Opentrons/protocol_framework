@@ -369,12 +369,6 @@ const buildBlowoutCommands = (
             ),
           },
         },
-        {
-          commandType: 'prepareToAspirate',
-          params: {
-            pipetteId: pipetteId ?? MANAGED_PIPETTE_ID,
-          },
-        },
         Z_HOME,
       ]
     : [

@@ -45,9 +45,9 @@ export const content = {
   charSet: 'UTF-8',
   header: 'Protocol Designer',
   welcome: 'Welcome to Protocol Designer!',
-  appSettings: 'App settings',
+  appSettings: 'App Info',
   privacy: 'Privacy',
-  shareSessions: 'Share sessions with Opentrons',
+  shareSessions: 'Share analytics with Opentrons',
 }
 
 export const locators = {

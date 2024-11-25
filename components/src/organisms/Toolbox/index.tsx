@@ -140,7 +140,6 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
           <Box
             padding={SPACING.spacing16}
             boxShadow={isScrolledToBottom ? 'none' : '0px -4px 12px #0000001a'}
-            zIndex={3}
             width="100%"
             borderTop={`1px solid ${COLORS.grey30}`}
             alignItems={ALIGN_CENTER}

@@ -1,17 +1,22 @@
 import { useTranslation } from 'react-i18next'
 import map from 'lodash/map'
+
 import {
   JUSTIFY_CENTER,
   Flex,
   SPACING,
   PrimaryButton,
   DIRECTION_COLUMN,
+  Tooltip,
+  useHoverTooltip,
 } from '@opentrons/components'
+
 import { useToggleGroup } from '/app/molecules/ToggleGroup/useToggleGroup'
 import { getModuleTypesThatRequireExtraAttention } from '../utils/getModuleTypesThatRequireExtraAttention'
 import {
   useMostRecentCompletedAnalysis,
   useModuleRenderInfoForProtocolById,
+  useRunHasStarted,
 } from '/app/resources/runs'
 import { useIsFlex } from '/app/redux-resources/robots'
 import { useStoredProtocolAnalysis } from '/app/resources/analysis'
@@ -46,6 +51,11 @@ export function SetupLabware(props: SetupLabwareProps): JSX.Element {
     moduleModels
   )
 
+  // TODO(jh, 11-13-24): These disabled tooltips are used throughout setup flows. Let's consolidate them.
+  const [targetProps, tooltipProps] = useHoverTooltip()
+  const runHasStarted = useRunHasStarted(runId)
+  const tooltipText = runHasStarted ? t('protocol_run_started') : null
+
   return (
     <>
       <Flex
@@ -70,10 +80,14 @@ export function SetupLabware(props: SetupLabwareProps): JSX.Element {
           onClick={() => {
             setLabwareConfirmed(true)
           }}
-          disabled={labwareConfirmed}
+          disabled={labwareConfirmed || runHasStarted}
+          {...targetProps}
         >
           {t('confirm_placements')}
         </PrimaryButton>
+        {tooltipText != null ? (
+          <Tooltip tooltipProps={tooltipProps}>{tooltipText}</Tooltip>
+        ) : null}
       </Flex>
     </>
   )

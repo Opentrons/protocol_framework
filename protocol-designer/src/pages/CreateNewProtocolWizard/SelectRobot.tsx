@@ -21,6 +21,7 @@ export function SelectRobot(props: WizardTileProps): JSX.Element {
   return (
     <HandleEnter onEnter={proceed}>
       <WizardBody
+        robotType={robotType}
         stepNumber={1}
         header={t('basics')}
         disabled={false}

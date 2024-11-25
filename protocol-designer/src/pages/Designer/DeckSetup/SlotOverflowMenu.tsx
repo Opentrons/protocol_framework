@@ -15,6 +15,12 @@ import {
   StyledText,
   useOnClickOutside,
 } from '@opentrons/components'
+import {
+  FLEX_ROBOT_TYPE,
+  FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
+  getCutoutIdFromAddressableArea,
+  getDeckDefFromRobotType,
+} from '@opentrons/shared-data'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
 
 import { deleteModule } from '../../../step-forms/actions'
@@ -32,10 +38,12 @@ import { getStagingAreaAddressableAreas } from '../../../utils'
 import { selectors as labwareIngredSelectors } from '../../../labware-ingred/selectors'
 import type { MouseEvent, SetStateAction } from 'react'
 import type {
+  AddressableAreaName,
   CoordinateTuple,
   CutoutId,
   DeckSlotId,
 } from '@opentrons/shared-data'
+
 import type { LabwareOnDeck } from '../../../step-forms'
 import type { ThunkDispatch } from '../../../types'
 
@@ -66,6 +74,7 @@ interface SlotOverflowMenuProps {
   setShowMenuList: (value: SetStateAction<boolean>) => void
   addEquipment: (slotId: string) => void
   menuListSlotPosition?: CoordinateTuple
+  invertY?: true
 }
 export function SlotOverflowMenu(
   props: SlotOverflowMenuProps
@@ -75,6 +84,7 @@ export function SlotOverflowMenu(
     setShowMenuList,
     addEquipment,
     menuListSlotPosition,
+    invertY = false,
   } = props
   const { t } = useTranslation('starting_deck_state')
   const navigate = useNavigate()
@@ -113,9 +123,16 @@ export function SlotOverflowMenu(
   const isLabwareTiprack = labwareOnSlot?.def.parameters.isTiprack ?? false
   const isLabwareAnAdapter =
     labwareOnSlot?.def.allowedRoles?.includes('adapter') ?? false
+
+  const isTiprackAdapter =
+    labwareOnSlot?.def.parameters.quirks?.includes(
+      'tiprackAdapterFor96Channel'
+    ) ?? false
+
   const nestedLabwareOnSlot = Object.values(deckSetupLabware).find(
     lw => lw.slot === labwareOnSlot?.id
   )
+
   const fixturesOnSlot = Object.values(additionalEquipmentOnDeck).filter(
     ae => ae.location?.split('cutout')[1] === location
   )
@@ -136,6 +153,10 @@ export function SlotOverflowMenu(
 
   const hasNoItems =
     moduleOnSlot == null && labwareOnSlot == null && fixturesOnSlot.length === 0
+
+  const isStagingSlot = FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS.includes(
+    location as AddressableAreaName
+  )
 
   const handleClear = (): void => {
     //  clear module from slot
@@ -158,6 +179,21 @@ export function SlotOverflowMenu(
     if (matchingLabware != null) {
       dispatch(deleteContainer({ labwareId: matchingLabware.id }))
     }
+    // delete staging slot if addressable area is on staging slot
+    if (isStagingSlot) {
+      const deckDef = getDeckDefFromRobotType(FLEX_ROBOT_TYPE)
+      const cutoutId = getCutoutIdFromAddressableArea(location, deckDef)
+      const stagingAreaEquipmentId = Object.values(
+        additionalEquipmentOnDeck
+      ).find(({ location }) => location === cutoutId)?.id
+      if (stagingAreaEquipmentId != null) {
+        dispatch(deleteDeckFixture(stagingAreaEquipmentId))
+      } else {
+        console.error(
+          `could not find equipment id for entity in ${location} with cutout id ${cutoutId}`
+        )
+      }
+    }
   }
 
   const showDuplicateBtn =
@@ -170,8 +206,9 @@ export function SlotOverflowMenu(
     (labwareOnSlot != null &&
       !isLabwareAnAdapter &&
       !isLabwareTiprack &&
+      !isTiprackAdapter &&
       nestedLabwareOnSlot == null) ||
-    nestedLabwareOnSlot != null
+    (nestedLabwareOnSlot != null && !isTiprackAdapter)
 
   let position = ROBOT_BOTTOM_HALF_SLOTS.includes(location)
     ? BOTTOM_SLOT_Y_POSITION
@@ -293,7 +330,7 @@ export function SlotOverflowMenu(
         ) : null}
         <Divider marginY="0" />
         <MenuItem
-          disabled={hasNoItems}
+          disabled={hasNoItems && !isStagingSlot}
           onClick={(e: MouseEvent) => {
             if (matchingLabware != null) {
               setShowDeleteLabwareModal(true)
@@ -325,7 +362,7 @@ export function SlotOverflowMenu(
       innerDivProps={{
         style: {
           position: POSITION_ABSOLUTE,
-          transform: 'rotate(180deg) scaleX(-1)',
+          transform: `rotate(180deg) scaleX(-1) ${invertY ? 'scaleY(-1)' : ''}`,
         },
       }}
     >
