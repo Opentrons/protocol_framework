@@ -65,7 +65,7 @@ class Client:
     @timeit
     def get_chat_completion(self, message: str, fake: bool = True, fake_key: Optional[FakeKeys] = None, bad_auth: bool = False) -> Response:
         """Call the /chat/completion endpoint and return the response."""
-        request = ChatRequest(message=message, fake=fake, fake_key=fake_key, history=None)
+        request = ChatRequest(message=message, fake=fake, fake_key=fake_key, history=None, chat_options=None)
         headers = self.standard_headers if not bad_auth else self.invalid_auth_headers
         return self.httpx.post("/chat/completion", headers=headers, json=request.model_dump())
 
