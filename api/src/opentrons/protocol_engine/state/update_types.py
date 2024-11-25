@@ -299,6 +299,19 @@ class StateUpdate:
 
     liquid_class_loaded: LiquidClassLoadedUpdate | NoChangeType = NO_CHANGE
 
+    def append(self, other: Self) -> Self:
+        """Apply another `StateUpdate` "on top of" this one.
+
+        This object is mutated in-place, taking values from `other`.
+        If an attribute in `other` is `NO_CHANGE`, the value in this object is kept.
+        """
+        fields = dataclasses.fields(other)
+        for field in fields:
+            other_value = other.__dict__[field.name]
+            if other_value != NO_CHANGE:
+                self.__dict__[field.name] = other_value
+        return self
+
     @classmethod
     def reduce(cls: typing.Type[Self], *args: Self) -> Self:
         """Fuse multiple state updates into a single one.
@@ -306,19 +319,10 @@ class StateUpdate:
         State updates that are later in the parameter list are preferred to those that are earlier;
         NO_CHANGE is ignored.
         """
-        fields = dataclasses.fields(cls)
-        changes_dicts = [
-            {
-                field.name: update.__dict__[field.name]
-                for field in fields
-                if update.__dict__[field.name] != NO_CHANGE
-            }
-            for update in args
-        ]
-        changes = {}
-        for changes_dict in changes_dicts:
-            changes.update(changes_dict)
-        return cls(**changes)
+        accumulator = cls()
+        for arg in args:
+            accumulator.append(arg)
+        return accumulator
 
     # These convenience functions let the caller avoid the boilerplate of constructing a
     # complicated dataclass tree.
