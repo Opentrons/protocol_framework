@@ -6,8 +6,6 @@ from typing_extensions import Literal, Type
 
 from pydantic import BaseModel, Field
 
-from opentrons.protocol_engine.state import update_types
-
 from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ...errors import CannotPerformModuleAction, StorageLimitReachedError
 from ...errors.error_occurrence import ErrorOccurrence
@@ -18,6 +16,7 @@ from ...resources.file_provider import (
     MAXIMUM_CSV_FILE_LIMIT,
 )
 from ...resources import FileProvider
+from ...state import update_types
 
 if TYPE_CHECKING:
     from opentrons.protocol_engine.state.state import StateView
