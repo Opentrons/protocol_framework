@@ -647,3 +647,95 @@ async def test_stall_during_preparation(
         ),
         state_update_if_false_positive=update_types.StateUpdate(),
     )
+
+
+async def test_overpressure_during_preparation(
+    decoy: Decoy,
+    movement: MovementHandler,
+    pipetting: PipettingHandler,
+    subject: AspirateImplementation,
+    state_view: StateView,
+    model_utils: ModelUtils,
+) -> None:
+    """It should propagate an overpressure error that happens during the prepare-to-aspirate part."""
+    pipette_id = "pipette-id"
+    labware_id = "labware-id"
+    well_name = "well-name"
+    well_location = LiquidHandlingWellLocation(
+        origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1)
+    )
+
+    error_id = "error-id"
+    error_timestamp = datetime(year=2020, month=1, day=2)
+
+    params = AspirateParams(
+        pipetteId=pipette_id,
+        labwareId=labware_id,
+        wellName=well_name,
+        wellLocation=well_location,
+        volume=50,
+        flowRate=1.23,
+    )
+
+    decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id=pipette_id)).then_return(
+        False
+    )
+
+    retry_location = Point(1, 2, 3)
+    decoy.when(
+        state_view.geometry.get_well_position(
+            labware_id=labware_id,
+            well_name=well_name,
+            well_location=well_location,
+            operation_volume=-params.volume,
+            pipette_id=pipette_id,
+        )
+    ).then_return(retry_location)
+
+    prep_location = Point(4, 5, 6)
+    decoy.when(
+        await movement.move_to_well(
+            pipette_id=pipette_id,
+            labware_id=labware_id,
+            well_name=well_name,
+            well_location=WellLocation(origin=WellOrigin.TOP),
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
+        ),
+    ).then_return(prep_location)
+
+    decoy.when(await pipetting.prepare_for_aspirate(pipette_id)).then_raise(
+        PipetteOverpressureError()
+    )
+    decoy.when(model_utils.generate_id()).then_return(error_id)
+    decoy.when(model_utils.get_timestamp()).then_return(error_timestamp)
+
+    result = await subject.execute(params)
+    assert result == DefinedErrorData(
+        public=OverpressureError.construct(
+            id=error_id,
+            createdAt=error_timestamp,
+            wrappedErrors=[matchers.Anything()],
+            errorInfo={
+                "retryLocation": (retry_location.x, retry_location.y, retry_location.z)
+            },
+        ),
+        state_update=update_types.StateUpdate(
+            pipette_location=update_types.PipetteLocationUpdate(
+                pipette_id=pipette_id,
+                new_location=update_types.Well(
+                    labware_id=labware_id, well_name=well_name
+                ),
+                new_deck_point=DeckPoint(
+                    x=prep_location.x, y=prep_location.y, z=prep_location.z
+                ),
+            ),
+            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
+                pipette_id=pipette_id
+            ),
+        ),
+        state_update_if_false_positive=update_types.StateUpdate(),
+    )
