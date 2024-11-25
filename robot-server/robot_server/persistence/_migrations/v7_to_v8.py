@@ -10,10 +10,10 @@ import json
 from pathlib import Path
 from contextlib import ExitStack
 import shutil
-from typing import Any
 
 import sqlalchemy
 
+from ._util import add_column
 from ..database import sql_engine_ctx
 from ..tables import schema_8
 from .._folder_migrator import Migration
@@ -41,16 +41,6 @@ class Migration7to8(Migration):  # noqa: D101
 
             dest_transaction = exit_stack.enter_context(dest_engine.begin())
 
-            def add_column(
-                engine: sqlalchemy.engine.Engine,
-                table_name: str,
-                column: Any,
-            ) -> None:
-                column_type = column.type.compile(engine.dialect)
-                engine.execute(
-                    f"ALTER TABLE {table_name} ADD COLUMN {column.key} {column_type}"
-                )
-
             add_column(
                 dest_engine,
                 schema_8.run_command_table.name,
@@ -73,9 +63,12 @@ class Migration7to8(Migration):  # noqa: D101
 def _add_missing_indexes(dest_transaction: sqlalchemy.engine.Connection) -> None:
     # todo(2024-11-20): Probably add the indexes missing from prior migrations here.
     # https://opentrons.atlassian.net/browse/EXEC-827
-    dest_transaction.execute(
-        "CREATE UNIQUE INDEX ix_run_run_id_command_status_index_in_run ON run_command (run_id, command_status, index_in_run);"
+    index = next(
+        index
+        for index in schema_8.run_command_table.indexes
+        if index.name == "ix_run_run_id_command_status_index_in_run"
     )
+    index.create(dest_transaction)
 
 
 def _migrate_command_table_with_new_command_error_col_and_command_status(

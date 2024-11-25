@@ -11,10 +11,10 @@ import json
 from pathlib import Path
 from contextlib import ExitStack
 import shutil
-from typing import Any
 
 import sqlalchemy
 
+from ._util import add_column
 from ..database import sql_engine_ctx, sqlite_rowid
 from ..tables import schema_7
 from .._folder_migrator import Migration
@@ -43,16 +43,6 @@ class Migration6to7(Migration):  # noqa: D101
             schema_7.metadata.create_all(dest_engine)
 
             dest_transaction = exit_stack.enter_context(dest_engine.begin())
-
-            def add_column(
-                engine: sqlalchemy.engine.Engine,
-                table_name: str,
-                column: Any,
-            ) -> None:
-                column_type = column.type.compile(engine.dialect)
-                engine.execute(
-                    f"ALTER TABLE {table_name} ADD COLUMN {column.key} {column_type}"
-                )
 
             add_column(
                 dest_engine,
