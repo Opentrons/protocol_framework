@@ -83,13 +83,14 @@ export function RecoverySplash(props: RecoverySplashProps): JSX.Element | null {
     runStatus,
     recoveryActionMutationUtils,
     resumePausedRecovery,
+    recoveryCommands,
   } = props
   const { t } = useTranslation('error_recovery')
   const errorKind = getErrorKind(failedCommand)
   const title = useErrorName(errorKind)
   const { makeToast } = useToaster()
 
-  const { proceedToRouteAndStep } = routeUpdateActions
+  const { proceedToRouteAndStep, handleMotionRouting } = routeUpdateActions
   const { reportErrorEvent } = analytics
 
   const buildTitleHeadingDesktop = (): JSX.Element => {
@@ -138,9 +139,16 @@ export function RecoverySplash(props: RecoverySplashProps): JSX.Element | null {
 
   const onLaunchERClick = (): void => {
     const onClick = (): void => {
-      void toggleERWizAsActiveUser(true, true).then(() => {
-        reportErrorEvent(failedCommand?.byRunRecord ?? null, 'launch-recovery')
-      })
+      void toggleERWizAsActiveUser(true, true)
+        .then(() => {
+          reportErrorEvent(
+            failedCommand?.byRunRecord ?? null,
+            'launch-recovery'
+          )
+        })
+        .then(() => handleMotionRouting(true))
+        .then(() => recoveryCommands.homePipetteZAxes())
+        .finally(() => handleMotionRouting(false))
     }
     handleConditionalClick(onClick)
   }

@@ -114,7 +114,8 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
 
   const isDisabled =
     (page === 'add' && pipettesByMount[defaultMount].tiprackDefURI == null) ||
-    noPipette
+    noPipette ||
+    selectedValues.length === 0
 
   const targetPipetteMount =
     pipettesByMount.left.pipetteName == null ||
@@ -170,6 +171,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
       ) : null}
       <HandleEnter onEnter={handleProceed}>
         <WizardBody
+          robotType={robotType}
           stepNumber={2}
           header={page === 'add' ? t('add_pipette') : t('robot_pipettes')}
           subHeader={page === 'add' ? t('which_pipette') : undefined}

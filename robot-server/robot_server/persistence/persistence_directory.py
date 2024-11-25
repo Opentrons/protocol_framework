@@ -11,7 +11,7 @@ from typing_extensions import Final
 from anyio import Path as AsyncPath, to_thread
 
 from ._folder_migrator import MigrationOrchestrator
-from ._migrations import up_to_3, v3_to_v4, v4_to_v5, v5_to_v6, v6_to_v7
+from ._migrations import up_to_3, v3_to_v4, v4_to_v5, v5_to_v6, v6_to_v7, v7_to_v8
 from .file_and_directory_names import LATEST_VERSION_DIRECTORY
 
 _TEMP_PERSISTENCE_DIR_PREFIX: Final = "opentrons-robot-server-"
@@ -59,7 +59,8 @@ def make_migration_orchestrator(prepared_root: Path) -> MigrationOrchestrator:
             # Subdirectory "7" was previously used on our edge branch for an in-dev
             # schema that was never released to the public. It may be present on
             # internal robots.
-            v6_to_v7.Migration6to7(subdirectory=LATEST_VERSION_DIRECTORY),
+            v6_to_v7.Migration6to7(subdirectory="7.1"),
+            v7_to_v8.Migration7to8(subdirectory=LATEST_VERSION_DIRECTORY),
         ],
         temp_file_prefix="temp-",
     )

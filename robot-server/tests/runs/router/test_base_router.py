@@ -1,6 +1,4 @@
 """Tests for base /runs routes."""
-from typing import Dict
-
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons_shared_data.robot.types import RobotTypeEnum
 import pytest
@@ -53,6 +51,7 @@ from robot_server.runs.run_models import (
     ActiveNozzleLayout,
     CommandLinkNoMeta,
     NozzleLayoutConfig,
+    TipState,
 )
 from robot_server.runs.run_orchestrator_store import RunConflictError
 from robot_server.runs.run_data_manager import (
@@ -110,23 +109,6 @@ def labware_offset_create() -> LabwareOffsetCreate:
         location=pe_types.LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
     )
-
-
-@pytest.fixture
-def mock_nozzle_maps() -> Dict[str, NozzleMap]:
-    """Get mock NozzleMaps."""
-    return {
-        "mock-pipette-id": NozzleMap(
-            configuration=NozzleConfigurationType.FULL,
-            columns={"1": ["A1"]},
-            rows={"A": ["A1"]},
-            map_store={"A1": Point(0, 0, 0)},
-            starting_nozzle="A1",
-            valid_map_key="mock-key",
-            full_instrument_map_store={},
-            full_instrument_rows={},
-        )
-    }
 
 
 async def test_create_run(
@@ -777,13 +759,7 @@ async def test_get_run_commands_errors(
         )
     ).then_raise(RunNotCurrentError("oh no!"))
 
-    error = pe_errors.ErrorOccurrence(
-        id="error-id",
-        errorType="PrettyBadError",
-        createdAt=datetime(year=2024, month=4, day=4),
-        detail="Things are not looking good.",
-    )
-    decoy.when(mock_run_data_manager.get_command_errors("run-id")).then_return([error])
+    decoy.when(mock_run_data_manager.get_command_errors_count("run-id")).then_return(1)
 
     with pytest.raises(ApiError):
         result = await get_run_commands_error(
@@ -805,7 +781,7 @@ async def test_get_run_commands_errors_raises_no_run(
         createdAt=datetime(year=2024, month=4, day=4),
         detail="Things are not looking good.",
     )
-    decoy.when(mock_run_data_manager.get_command_errors("run-id")).then_return([error])
+    decoy.when(mock_run_data_manager.get_command_errors_count("run-id")).then_return(1)
 
     command_error_slice = CommandErrorSlice(
         cursor=1, total_length=3, commands_errors=[error]
@@ -849,10 +825,7 @@ async def test_get_run_commands_errors_defualt_cursor(
     expected_cursor_result: int,
 ) -> None:
     """It should return a list of all commands errors in a run."""
-    print(error_list)
-    decoy.when(mock_run_data_manager.get_command_errors("run-id")).then_return(
-        error_list
-    )
+    decoy.when(mock_run_data_manager.get_command_errors_count("run-id")).then_return(1)
 
     command_error_slice = CommandErrorSlice(
         cursor=expected_cursor_result, total_length=3, commands_errors=error_list
@@ -884,7 +857,6 @@ async def test_get_current_state_success(
     decoy: Decoy,
     mock_run_data_manager: RunDataManager,
     mock_hardware_api: HardwareControlAPI,
-    mock_nozzle_maps: Dict[str, NozzleMap],
 ) -> None:
     """It should return different state from the current run.
 
@@ -893,8 +865,23 @@ async def test_get_current_state_success(
     """
     run_id = "test-run-id"
 
+    decoy.when(mock_run_data_manager.get_tip_attached(run_id=run_id)).then_return(
+        {"mock-pipette-id": True}
+    )
+
     decoy.when(mock_run_data_manager.get_nozzle_maps(run_id=run_id)).then_return(
-        mock_nozzle_maps
+        {
+            "mock-pipette-id": NozzleMap(
+                configuration=NozzleConfigurationType.FULL,
+                columns={"1": ["A1"]},
+                rows={"A": ["A1"]},
+                map_store={"A1": Point(0, 0, 0)},
+                starting_nozzle="A1",
+                valid_map_key="mock-key",
+                full_instrument_map_store={},
+                full_instrument_rows={},
+            )
+        }
     )
     command_pointer = CommandPointer(
         command_id="command-id",
@@ -926,6 +913,7 @@ async def test_get_current_state_success(
                 config=NozzleLayoutConfig.FULL,
             )
         },
+        tipStates={"mock-pipette-id": TipState(hasTip=True)},
     )
     assert result.content.links == CurrentStateLinks(
         lastCompleted=CommandLinkNoMeta(
@@ -943,7 +931,7 @@ async def test_get_current_state_run_not_current(
     """It should raise RunStopped when the run is not current."""
     run_id = "non-current-run-id"
 
-    decoy.when(mock_run_data_manager.get_nozzle_maps(run_id=run_id)).then_raise(
+    decoy.when(mock_run_data_manager.get(run_id=run_id)).then_raise(
         RunNotCurrentError("Run is not current")
     )
 

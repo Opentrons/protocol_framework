@@ -36,6 +36,7 @@ from opentrons.protocol_engine import (
     CommandSlice,
     Liquid,
     EngineStatus,
+    ErrorOccurrence,
 )
 from opentrons.types import MountType, DeckSlotName
 
@@ -59,7 +60,7 @@ def subject(
 
 @pytest.fixture
 def protocol_commands() -> List[pe_commands.Command]:
-    """Get a StateSummary value object."""
+    """Get protocol commands list."""
     return [
         pe_commands.WaitForResume(
             id="pause-1",
@@ -95,6 +96,61 @@ def protocol_commands() -> List[pe_commands.Command]:
             params=pe_commands.WaitForResumeParams(message="hello world"),
             result=pe_commands.WaitForResumeResult(),
             intent=pe_commands.CommandIntent.FIXIT,
+        ),
+    ]
+
+
+@pytest.fixture
+def protocol_commands_errors() -> List[pe_commands.Command]:
+    """Get protocol commands errors list."""
+    return [
+        pe_commands.WaitForResume(
+            id="pause-4",
+            key="command-key",
+            status=pe_commands.CommandStatus.SUCCEEDED,
+            createdAt=datetime(year=2022, month=2, day=2),
+            params=pe_commands.WaitForResumeParams(message="hey world"),
+            result=pe_commands.WaitForResumeResult(),
+            intent=pe_commands.CommandIntent.PROTOCOL,
+        ),
+        pe_commands.WaitForResume(
+            id="pause-1",
+            key="command-key",
+            status=pe_commands.CommandStatus.FAILED,
+            createdAt=datetime(year=2021, month=1, day=1),
+            params=pe_commands.WaitForResumeParams(message="hello world"),
+            result=pe_commands.WaitForResumeResult(),
+            intent=pe_commands.CommandIntent.PROTOCOL,
+            error=ErrorOccurrence.construct(
+                id="error-id",
+                createdAt=datetime(2024, 1, 1),
+                errorType="blah-blah",
+                detail="test details",
+            ),
+        ),
+        pe_commands.WaitForResume(
+            id="pause-2",
+            key="command-key",
+            status=pe_commands.CommandStatus.FAILED,
+            createdAt=datetime(year=2022, month=2, day=2),
+            params=pe_commands.WaitForResumeParams(message="hey world"),
+            result=pe_commands.WaitForResumeResult(),
+            intent=pe_commands.CommandIntent.PROTOCOL,
+            error=ErrorOccurrence.construct(
+                id="error-id-2",
+                createdAt=datetime(2024, 1, 1),
+                errorType="blah-blah",
+                detail="test details",
+            ),
+        ),
+        pe_commands.WaitForResume(
+            id="pause-3",
+            key="command-key",
+            status=pe_commands.CommandStatus.SUCCEEDED,
+            createdAt=datetime(year=2022, month=2, day=2),
+            params=pe_commands.WaitForResumeParams(message="hey world"),
+            result=pe_commands.WaitForResumeResult(),
+            intent=pe_commands.CommandIntent.PROTOCOL,
         ),
     ]
 
@@ -287,6 +343,50 @@ async def test_update_run_state(
     mock_runs_publisher.publish_runs_advise_refetch.assert_called_once_with(
         run_id="run-id"
     )
+
+
+async def test_update_run_state_command_with_errors(
+    subject: RunStore,
+    state_summary: StateSummary,
+    protocol_commands_errors: List[pe_commands.Command],
+    run_time_parameters: List[pe_types.RunTimeParameter],
+    mock_runs_publisher: mock.Mock,
+) -> None:
+    """It should be able to update a run state to the store."""
+    commands_with_errors = [
+        command
+        for command in protocol_commands_errors
+        if command.status == pe_commands.CommandStatus.FAILED
+    ]
+    action = RunAction(
+        actionType=RunActionType.PLAY,
+        createdAt=datetime(year=2022, month=2, day=2, tzinfo=timezone.utc),
+        id="action-id",
+    )
+
+    subject.insert(
+        run_id="run-id",
+        protocol_id=None,
+        created_at=datetime(year=2021, month=1, day=1, tzinfo=timezone.utc),
+    )
+
+    subject.update_run_state(
+        run_id="run-id",
+        summary=state_summary,
+        commands=protocol_commands_errors,
+        run_time_parameters=run_time_parameters,
+    )
+
+    subject.insert_action(run_id="run-id", action=action)
+    command_errors_result = subject.get_commands_errors_slice(
+        run_id="run-id",
+        length=5,
+        cursor=0,
+    )
+
+    assert command_errors_result.commands_errors == [
+        item.error for item in commands_with_errors
+    ]
 
 
 async def test_insert_and_get_csv_rtp(

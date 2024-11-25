@@ -137,6 +137,24 @@ describe('getLabwareDisplayLocation with translations', () => {
     screen.getByText('Slot C1')
   })
 
+  it('should special case the slotName if it contains "waste chute"', () => {
+    render({
+      location: { slotName: 'gripperWasteChute' },
+      params: { ...defaultParams, detailLevel: 'slot-only' },
+    })
+
+    screen.getByText('Waste Chute')
+  })
+
+  it('should special case the slotName if it contains "trash bin"', () => {
+    render({
+      location: { slotName: 'trashBin' },
+      params: { ...defaultParams, detailLevel: 'slot-only' },
+    })
+
+    screen.getByText('Trash Bin')
+  })
+
   it('should handle an adapter on module location when the detail level is full', () => {
     const mockLoadedLabwares = [
       {

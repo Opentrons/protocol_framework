@@ -6,6 +6,7 @@ import {
   ALIGN_CENTER,
   DIRECTION_COLUMN,
   DIRECTION_ROW,
+  NO_WRAP,
   TEXT_ALIGN_RIGHT,
 } from '../../styles'
 import { BORDERS, COLORS } from '../../helix-design-system'
@@ -251,6 +252,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
         font-weight: ${TYPOGRAPHY.fontWeightRegular};
         line-height: ${TYPOGRAPHY.lineHeight28};
         justify-content: ${textAlign};
+        white-space: ${NO_WRAP};
       }
     `
 

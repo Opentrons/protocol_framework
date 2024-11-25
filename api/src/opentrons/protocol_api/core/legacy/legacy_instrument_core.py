@@ -611,6 +611,9 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
         """This will never be called because it was added in API 2.20."""
         assert False, "liquid_probe_without_recovery only supported in API 2.20 & later"
 
+    def _pressure_supported_by_pipette(self) -> bool:
+        return False
+
     def nozzle_configuration_valid_for_lld(self) -> bool:
         """Check if the nozzle configuration currently supports LLD."""
         return False

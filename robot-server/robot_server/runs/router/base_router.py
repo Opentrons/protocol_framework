@@ -61,6 +61,7 @@ from ..run_models import (
     RunCurrentState,
     CommandLinkNoMeta,
     NozzleLayoutConfig,
+    TipState,
 )
 from ..run_auto_deleter import RunAutoDeleter
 from ..run_models import Run, BadRun, RunCreate, RunUpdate
@@ -526,14 +527,13 @@ async def get_run_commands_error(
         run_data_manager: Run data retrieval interface.
     """
     try:
-        all_errors = run_data_manager.get_command_errors(run_id=runId)
-        total_length = len(all_errors)
+        all_errors_count = run_data_manager.get_command_errors_count(run_id=runId)
 
         if cursor is None:
-            if len(all_errors) > 0:
+            if all_errors_count > 0:
                 # Get the most recent error,
                 # which we can find just at the end of the list.
-                cursor = total_length - 1
+                cursor = all_errors_count - 1
             else:
                 cursor = 0
 
@@ -591,33 +591,27 @@ async def get_current_state(  # noqa: C901
     """
     try:
         run = run_data_manager.get(run_id=runId)
-        active_nozzle_maps = run_data_manager.get_nozzle_maps(run_id=runId)
-
-        nozzle_layouts = {
-            pipetteId: ActiveNozzleLayout.construct(
-                startingNozzle=nozzle_map.starting_nozzle,
-                activeNozzles=nozzle_map.active_nozzles,
-                config=NozzleLayoutConfig(nozzle_map.configuration.value.lower()),
-            )
-            for pipetteId, nozzle_map in active_nozzle_maps.items()
-        }
-
-        run = run_data_manager.get(run_id=runId)
-        current_command = run_data_manager.get_current_command(run_id=runId)
-        last_completed_command = run_data_manager.get_last_completed_command(
-            run_id=runId
-        )
     except RunNotCurrentError as e:
         raise RunStopped(detail=str(e)).as_error(status.HTTP_409_CONFLICT)
 
-    links = CurrentStateLinks.construct(
-        lastCompleted=CommandLinkNoMeta.construct(
-            id=last_completed_command.command_id,
-            href=f"/runs/{runId}/commands/{last_completed_command.command_id}",
+    active_nozzle_maps = run_data_manager.get_nozzle_maps(run_id=runId)
+    nozzle_layouts = {
+        pipetteId: ActiveNozzleLayout.construct(
+            startingNozzle=nozzle_map.starting_nozzle,
+            activeNozzles=nozzle_map.active_nozzles,
+            config=NozzleLayoutConfig(nozzle_map.configuration.value.lower()),
         )
-        if last_completed_command is not None
-        else None
-    )
+        for pipetteId, nozzle_map in active_nozzle_maps.items()
+    }
+
+    tip_states = {
+        pipette_id: TipState.construct(hasTip=has_tip)
+        for pipette_id, has_tip in run_data_manager.get_tip_attached(
+            run_id=runId
+        ).items()
+    }
+
+    current_command = run_data_manager.get_current_command(run_id=runId)
 
     estop_engaged = False
     place_labware = None
@@ -672,11 +666,22 @@ async def get_current_state(  # noqa: C901
                 if place_labware:
                     break
 
+    last_completed_command = run_data_manager.get_last_completed_command(run_id=runId)
+    links = CurrentStateLinks.construct(
+        lastCompleted=CommandLinkNoMeta.construct(
+            id=last_completed_command.command_id,
+            href=f"/runs/{runId}/commands/{last_completed_command.command_id}",
+        )
+        if last_completed_command is not None
+        else None
+    )
+
     return await PydanticResponse.create(
         content=Body.construct(
             data=RunCurrentState.construct(
                 estopEngaged=estop_engaged,
                 activeNozzleLayouts=nozzle_layouts,
+                tipStates=tip_states,
                 placeLabwareState=place_labware,
             ),
             links=links,

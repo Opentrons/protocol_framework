@@ -105,6 +105,7 @@ class StaticPipetteConfig:
     lld_settings: Optional[Dict[str, Dict[str, float]]]
     plunger_positions: Dict[str, float]
     shaft_ul_per_mm: float
+    available_sensors: pipette_definition.AvailableSensorDefinition
 
 
 @dataclasses.dataclass
@@ -296,6 +297,7 @@ class PipetteStore(HasState[PipetteState], HandlesActions):
                 lld_settings=config.pipette_lld_settings,
                 plunger_positions=config.plunger_positions,
                 shaft_ul_per_mm=config.shaft_ul_per_mm,
+                available_sensors=config.available_sensors,
             )
             self._state.flow_rates_by_id[
                 state_update.pipette_config.pipette_id
@@ -759,6 +761,13 @@ class PipetteView(HasState[PipetteState]):
             pip_front_right_bound,
             pip_back_right_bound,
             pip_front_left_bound,
+        )
+
+    def get_pipette_supports_pressure(self, pipette_id: str) -> bool:
+        """Return if this pipette supports a pressure sensor."""
+        return (
+            "pressure"
+            in self._state.static_config_by_id[pipette_id].available_sensors.sensors
         )
 
     def get_liquid_presence_detection(self, pipette_id: str) -> bool:

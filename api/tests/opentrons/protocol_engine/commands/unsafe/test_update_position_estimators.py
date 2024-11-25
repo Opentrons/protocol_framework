@@ -37,11 +37,6 @@ async def test_update_position_estimators_implementation(
     decoy.when(gantry_mover.motor_axis_to_hardware_axis(MotorAxis.Y)).then_return(
         Axis.Y
     )
-    decoy.when(
-        await ot3_hardware_api.update_axis_position_estimations(
-            [Axis.Z_L, Axis.P_L, Axis.X, Axis.Y]
-        )
-    ).then_return(None)
 
     result = await subject.execute(data)
 
