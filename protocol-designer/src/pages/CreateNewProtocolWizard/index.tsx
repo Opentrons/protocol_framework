@@ -16,7 +16,6 @@ import {
   MAGNETIC_BLOCK_TYPE,
   MAGNETIC_MODULE_TYPE,
   OT2_ROBOT_TYPE,
-  STAGING_AREA_CUTOUTS,
   TEMPERATURE_MODULE_TYPE,
   THERMOCYCLER_MODULE_TYPE,
   WASTE_CHUTE_CUTOUT,
@@ -29,7 +28,10 @@ import * as labwareDefSelectors from '../../labware-defs/selectors'
 import * as labwareDefActions from '../../labware-defs/actions'
 import * as labwareIngredActions from '../../labware-ingred/actions'
 import { actions as steplistActions } from '../../steplist'
-import { INITIAL_DECK_SETUP_STEP_ID } from '../../constants'
+import {
+  INITIAL_DECK_SETUP_STEP_ID,
+  STAGING_AREA_CUTOUTS_ORDERED,
+} from '../../constants'
 import { actions as stepFormActions } from '../../step-forms'
 import { createModuleWithNoSlot } from '../../modules'
 import {
@@ -44,7 +46,6 @@ import { SelectModules } from './SelectModules'
 import { SelectFixtures } from './SelectFixtures'
 import { AddMetadata } from './AddMetadata'
 import { getTrashSlot } from './utils'
-
 import type { ThunkDispatch } from 'redux-thunk'
 import type { NormalizedPipette } from '@opentrons/step-generation'
 import type { BaseState } from '../../types'
@@ -283,10 +284,7 @@ export function CreateNewProtocolWizard(): JSX.Element | null {
     if (stagingAreas.length > 0) {
       stagingAreas.forEach((_, index) => {
         return dispatch(
-          createDeckFixture(
-            'stagingArea',
-            STAGING_AREA_CUTOUTS.reverse()[index]
-          )
+          createDeckFixture('stagingArea', STAGING_AREA_CUTOUTS_ORDERED[index])
         )
       })
     }
