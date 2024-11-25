@@ -1,5 +1,6 @@
 // Analysis is based on one-tailed, Pearson's correlation coefficient.
 
+const { sampleCorrelation } = require('simple-statistics')
 const { MINIMUM_VALID_SAMPLE_SIZE } = require('./constants')
 
 /**
@@ -9,27 +10,7 @@ const { MINIMUM_VALID_SAMPLE_SIZE } = require('./constants')
  * @return {number} The Pearson Correlation.
  */
 function calculatePearsonCorrelation(x, y) {
-  const n = x.length
-  let sum_x = 0
-  let sum_y = 0
-  let sum_xy = 0
-  let sum_x2 = 0
-  let sum_y2 = 0
-
-  for (let i = 0; i < n; i++) {
-    sum_x += x[i]
-    sum_y += y[i]
-    sum_xy += x[i] * y[i]
-    sum_x2 += x[i] * x[i]
-    sum_y2 += y[i] * y[i]
-  }
-
-  const numerator = n * sum_xy - sum_x * sum_y
-  const denominator = Math.sqrt(
-    (n * sum_x2 - sum_x * sum_x) * (n * sum_y2 - sum_y * sum_y)
-  )
-
-  return denominator === 0 ? 0 : numerator / denominator
+  return sampleCorrelation(x, y)
 }
 
 /**
