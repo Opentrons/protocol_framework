@@ -39,6 +39,7 @@ from opentrons.protocol_engine.types import (
     LoadedPipette,
     AspiratedFluid,
     FluidKind,
+    WellLocation,
 )
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.protocol_engine.notes import CommandNoteAdder
@@ -196,16 +197,21 @@ async def test_aspirate_implementation_with_prep(
         state_view.geometry.get_wells_covered_by_pipette_with_active_well(
             labware_id, well_name, pipette_id
         )
-    ).then_return(["A3", "A4"])
+    ).then_return(["covered-well-1", "covered-well-2"])
 
     decoy.when(
         await movement.move_to_well(
             pipette_id=pipette_id,
             labware_id=labware_id,
             well_name=well_name,
-            well_location=LiquidHandlingWellLocation(origin=WellOrigin.TOP),
+            well_location=WellLocation(origin=WellOrigin.TOP),
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         ),
-    ).then_return(Point(x=1, y=2, z=3))
+    ).then_return(Point())
 
     decoy.when(
         await movement.move_to_well(
@@ -248,7 +254,7 @@ async def test_aspirate_implementation_with_prep(
             ),
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id=labware_id,
-                well_names=["A3", "A4"],
+                well_names=["covered-well-1", "covered-well-2"],
                 volume_added=-100,
             ),
             pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
@@ -268,14 +274,16 @@ async def test_aspirate_raises_volume_error(
     subject: AspirateImplementation,
 ) -> None:
     """Should raise an assertion error for volume larger than working volume."""
+    pipette_id = "pipette-id"
+    labware_id = "labware-id"
+    well_name = "well-name"
     location = LiquidHandlingWellLocation(
         origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1)
     )
-
-    data = AspirateParams(
+    params = AspirateParams(
         pipetteId=pipette_id,
-        labwareId="123",
-        wellName="A3",
+        labwareId=labware_id,
+        wellName=well_name,
         wellLocation=location,
         volume=50,
         flowRate=1.23,
@@ -287,23 +295,23 @@ async def test_aspirate_raises_volume_error(
 
     decoy.when(
         state_view.geometry.get_nozzles_per_well(
-            labware_id="123",
-            target_well_name="A3",
+            labware_id=labware_id,
+            target_well_name=well_name,
             pipette_id=pipette_id,
         )
     ).then_return(2)
 
     decoy.when(
         state_view.geometry.get_wells_covered_by_pipette_with_active_well(
-            "123", "A3", pipette_id
+            labware_id, well_name, pipette_id
         )
-    ).then_return(["A3", "A4"])
+    ).then_return(["covered-well-1", "covered-well-2"])
 
     decoy.when(
         await movement.move_to_well(
             pipette_id=pipette_id,
-            labware_id="123",
-            well_name="A3",
+            labware_id=labware_id,
+            well_name=well_name,
             well_location=location,
             current_well=None,
             force_direct=False,
@@ -323,7 +331,7 @@ async def test_aspirate_raises_volume_error(
     ).then_raise(AssertionError("blah blah"))
 
     with pytest.raises(AssertionError):
-        await subject.execute(data)
+        await subject.execute(params)
 
 
 async def test_overpressure_error(
@@ -348,7 +356,7 @@ async def test_overpressure_error(
     error_id = "error-id"
     error_timestamp = datetime(year=2020, month=1, day=2)
 
-    data = AspirateParams(
+    params = AspirateParams(
         pipetteId=pipette_id,
         labwareId=labware_id,
         wellName=well_name,
@@ -359,17 +367,17 @@ async def test_overpressure_error(
 
     decoy.when(
         state_view.geometry.get_nozzles_per_well(
-            labware_id="labware-id",
-            target_well_name="well-name",
-            pipette_id="pipette-id",
+            labware_id=labware_id,
+            target_well_name=well_name,
+            pipette_id=pipette_id,
         )
     ).then_return(2)
 
     decoy.when(
         state_view.geometry.get_wells_covered_by_pipette_with_active_well(
-            "labware-id", "well-name", "pipette-id"
+            labware_id, well_name, pipette_id
         )
-    ).then_return(["A3", "A4"])
+    ).then_return(["covered-well-1", "covered-well-2"])
 
     decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id=pipette_id)).then_return(
         True
@@ -401,7 +409,7 @@ async def test_overpressure_error(
     decoy.when(model_utils.generate_id()).then_return(error_id)
     decoy.when(model_utils.get_timestamp()).then_return(error_timestamp)
 
-    result = await subject.execute(data)
+    result = await subject.execute(params)
 
     assert result == DefinedErrorData(
         public=OverpressureError.construct(
@@ -420,7 +428,7 @@ async def test_overpressure_error(
             ),
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id=labware_id,
-                well_names=["A3", "A4"],
+                well_names=["covered-well-1", "covered-well-2"],
                 volume_added=update_types.CLEAR,
             ),
             pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
@@ -440,15 +448,18 @@ async def test_aspirate_implementation_meniscus(
     mock_command_note_adder: CommandNoteAdder,
 ) -> None:
     """Aspirate should update WellVolumeOffset when called with WellOrigin.MENISCUS."""
+    pipette_id = "pipette-id"
+    labware_id = "labware-id"
+    well_name = "well-name"
     location = LiquidHandlingWellLocation(
         origin=WellOrigin.MENISCUS,
         offset=WellOffset(x=0, y=0, z=-1),
         volumeOffset="operationVolume",
     )
-    data = AspirateParams(
+    params = AspirateParams(
         pipetteId=pipette_id,
-        labwareId="123",
-        wellName="A3",
+        labwareId=labware_id,
+        wellName=well_name,
         wellLocation=location,
         volume=50,
         flowRate=1.23,
@@ -456,17 +467,17 @@ async def test_aspirate_implementation_meniscus(
 
     decoy.when(
         state_view.geometry.get_nozzles_per_well(
-            labware_id="123",
-            target_well_name="A3",
+            labware_id=labware_id,
+            target_well_name=well_name,
             pipette_id=pipette_id,
         )
     ).then_return(2)
 
     decoy.when(
         state_view.geometry.get_wells_covered_by_pipette_with_active_well(
-            "123", "A3", pipette_id
+            labware_id, well_name, pipette_id
         )
-    ).then_return(["A3", "A4"])
+    ).then_return(["covered-well-1", "covered-well-2"])
 
     decoy.when(pipetting.get_is_ready_to_aspirate(pipette_id=pipette_id)).then_return(
         True
@@ -475,8 +486,8 @@ async def test_aspirate_implementation_meniscus(
     decoy.when(
         await movement.move_to_well(
             pipette_id=pipette_id,
-            labware_id="123",
-            well_name="A3",
+            labware_id=labware_id,
+            well_name=well_name,
             well_location=location,
             current_well=None,
             force_direct=False,
@@ -495,19 +506,21 @@ async def test_aspirate_implementation_meniscus(
         ),
     ).then_return(50)
 
-    result = await subject.execute(data)
+    result = await subject.execute(params)
 
     assert result == SuccessData(
         public=AspirateResult(volume=50, position=DeckPoint(x=1, y=2, z=3)),
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id=pipette_id,
-                new_location=update_types.Well(labware_id="123", well_name="A3"),
+                new_location=update_types.Well(
+                    labware_id=labware_id, well_name=well_name
+                ),
                 new_deck_point=DeckPoint(x=1, y=2, z=3),
             ),
             liquid_operated=update_types.LiquidOperatedUpdate(
-                labware_id="123",
-                well_names=["A3", "A4"],
+                labware_id=labware_id,
+                well_names=["covered-well-1", "covered-well-2"],
                 volume_added=-100,
             ),
             pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
@@ -540,7 +553,7 @@ async def test_stall_error(
         True
     )
 
-    data = AspirateParams(
+    params = AspirateParams(
         pipetteId=pipette_id,
         labwareId=labware_id,
         wellName=well_name,
@@ -566,7 +579,7 @@ async def test_stall_error(
     decoy.when(model_utils.generate_id()).then_return(error_id)
     decoy.when(model_utils.get_timestamp()).then_return(error_timestamp)
 
-    result = await subject.execute(data)
+    result = await subject.execute(params)
 
     assert result == DefinedErrorData(
         public=StallOrCollisionError.construct(
