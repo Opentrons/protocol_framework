@@ -196,7 +196,7 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
         if isinstance(action, SucceedCommandAction):
             self._handle_command(action.command)
         elif isinstance(action, AddAddressableAreaAction):
-            self._check_location_is_addressable_area(action.addressable_area)
+            self._add_addressable_area(action.addressable_area)
         elif isinstance(action, SetDeckConfigurationAction):
             current_state = self._state
             if (
@@ -216,22 +216,22 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
         if isinstance(command.result, LoadLabwareResult):
             location = command.params.location
             if isinstance(location, (DeckSlotLocation, AddressableAreaLocation)):
-                self._check_location_is_addressable_area(location)
+                self._add_addressable_area(location)
 
         elif isinstance(command.result, MoveLabwareResult):
             location = command.params.newLocation
             if isinstance(location, (DeckSlotLocation, AddressableAreaLocation)):
-                self._check_location_is_addressable_area(location)
+                self._add_addressable_area(location)
 
         elif isinstance(command.result, LoadModuleResult):
-            self._check_location_is_addressable_area(command.params.location)
+            self._add_addressable_area(command.params.location)
 
         elif isinstance(
             command.result,
             (MoveToAddressableAreaResult, MoveToAddressableAreaForDropTipResult),
         ):
             addressable_area_name = command.params.addressableAreaName
-            self._check_location_is_addressable_area(addressable_area_name)
+            self._add_addressable_area(addressable_area_name)
 
     @staticmethod
     def _get_addressable_areas_from_deck_configuration(
@@ -260,7 +260,7 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
                 )
         return {area.area_name: area for area in addressable_areas}
 
-    def _check_location_is_addressable_area(
+    def _add_addressable_area(
         self, location: Union[DeckSlotLocation, AddressableAreaLocation, str]
     ) -> None:
         if isinstance(location, DeckSlotLocation):
