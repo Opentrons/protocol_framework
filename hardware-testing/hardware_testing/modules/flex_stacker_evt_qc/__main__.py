@@ -14,7 +14,7 @@ from hardware_testing.data import ui
 from hardware_testing.data.csv_report import CSVReport
 
 from .config import TestSection, TestConfig, build_report, TESTS
-from .driver import FlexStacker
+from .driver import FlexStacker, PlatformStatus
 
 
 def build_stacker_report(is_simulating: bool) -> Tuple[CSVReport, FlexStacker]:
@@ -41,6 +41,28 @@ def build_stacker_report(is_simulating: bool) -> Tuple[CSVReport, FlexStacker]:
 async def _main(cfg: TestConfig) -> None:
     # BUILD REPORT
     report, stacker = build_stacker_report(cfg.simulate)
+
+    if not cfg.simulate:
+        # Perform initial checks before starting tests
+        # 1. estop should not be pressed
+        # 2. platform should be removed
+        if stacker.get_estop():
+            ui.print_error("ESTOP is pressed, please release it before starting")
+            ui.get_user_ready("Release ESTOP")
+            if stacker.get_estop():
+                ui.print_error("ESTOP is still pressed, cannot start tests")
+                return
+
+        platform_state = stacker.get_platform_status()
+        if platform_state is PlatformStatus.ERROR:
+            ui.print_error("Platform sensors are not working properly, aborting")
+            return
+        if platform_state is not PlatformStatus.REMOVED:
+            ui.print_error("Platform must be removed from the carrier before starting")
+            ui.get_user_ready("Remove platform from {platform_state.value}")
+            if stacker.get_platform_status() is not PlatformStatus.REMOVED:
+                ui.print_error("Platform is still detected, cannot start tests")
+                return
 
     # RUN TESTS
     for section, test_run in cfg.tests.items():

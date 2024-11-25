@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 import { useState, useLayoutEffect } from 'react'
+import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
   ALIGN_CENTER,
   ALIGN_END,
@@ -25,8 +26,10 @@ import four from '../../assets/images/onboarding_animation_4.webm'
 import five from '../../assets/images/onboarding_animation_5.webm'
 import six from '../../assets/images/onboarding_animation_6.webm'
 import { BUTTON_LINK_STYLE } from '../../atoms'
+import type { RobotType } from '@opentrons/shared-data'
 
 interface WizardBodyProps {
+  robotType: RobotType
   stepNumber: number
   header: string
   children: React.ReactNode
@@ -35,6 +38,21 @@ interface WizardBodyProps {
   goBack?: () => void
   subHeader?: string
   tooltipOnDisabled?: string
+}
+
+const OT2_GIFS: Record<number, string> = {
+  2: new URL(
+    '../../assets/images/onboarding_animation_ot2_2.gif',
+    import.meta.url
+  ).href,
+  3: new URL(
+    '../../assets/images/onboarding_animation_ot2_3.gif',
+    import.meta.url
+  ).href,
+  4: new URL(
+    '../../assets/images/onboarding_animation_ot2_4.gif',
+    import.meta.url
+  ).href,
 }
 
 const ONBOARDING_ANIMATIONS: Record<number, string> = {
@@ -56,6 +74,7 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
     proceed,
     disabled = false,
     tooltipOnDisabled,
+    robotType,
   } = props
   const { t } = useTranslation('shared')
   const [targetProps, tooltipProps] = useHoverTooltip({
@@ -153,21 +172,33 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
           transition: opacity 0.5s ease-in-out;
         `}
       >
-        <video
-          preload="auto"
-          css={css`
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: ${BORDERS.borderRadius16};
-          `}
-          autoPlay={true}
-          loop={false}
-          controls={false}
-          aria-label={`onboarding animation for page ${stepNumber}`}
-        >
-          <source src={asset ?? ''} type="video/mp4" />
-        </video>
+        {robotType === FLEX_ROBOT_TYPE || stepNumber === 1 ? (
+          <video
+            preload="auto"
+            css={css`
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              border-radius: ${BORDERS.borderRadius16};
+            `}
+            autoPlay
+            loop={false}
+            controls={false}
+            aria-label={`onboarding animation for page ${stepNumber}`}
+          >
+            <source src={asset ?? ''} type="video/webm" />
+          </video>
+        ) : (
+          <img
+            src={OT2_GIFS[stepNumber]}
+            width="100%"
+            height="100%"
+            css={css`
+              object-fit: cover;
+              border-radius: ${BORDERS.borderRadius16};
+            `}
+          />
+        )}
       </Flex>
     </Flex>
   )

@@ -89,7 +89,7 @@ export function EditInstrumentsModal(
 ): JSX.Element {
   const { onClose } = props
   const dispatch = useDispatch<ThunkDispatch<any>>()
-  const { t } = useTranslation([
+  const { i18n, t } = useTranslation([
     'create_new_protocol',
     'protocol_overview',
     'shared',
@@ -347,7 +347,7 @@ export function EditInstrumentsModal(
                             desktopStyle="bodyDefaultRegular"
                             color={COLORS.grey60}
                           >
-                            {t('gripper')}
+                            {i18n.format(t('gripper'), 'capitalize')}
                           </StyledText>
                         </Flex>
                         <Btn

@@ -11,12 +11,6 @@ from hardware_testing.data.csv_report import (
 from .driver import FlexStacker, StackerAxis, Direction
 
 
-class LimitSwitchError(Exception):
-    """Limit Switch Error."""
-
-    pass
-
-
 def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
     """Build CSV Lines."""
     return [
@@ -35,12 +29,12 @@ def get_latch_held_switch(driver: FlexStacker) -> bool:
 
 def close_latch(driver: FlexStacker) -> None:
     """Close latch."""
-    driver.move_to_limit_switch(StackerAxis.L, Direction.EXTENT)
+    driver.move_to_limit_switch(StackerAxis.L, Direction.RETRACT)
 
 
 def open_latch(driver: FlexStacker) -> None:
     """Open latch."""
-    driver.move_in_mm(StackerAxis.L, -22)
+    driver.move_in_mm(StackerAxis.L, 22)
 
 
 def run(driver: FlexStacker, report: CSVReport, section: str) -> None:

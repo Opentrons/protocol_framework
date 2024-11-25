@@ -215,15 +215,15 @@ export function zoomInOnCoordinate(props: ZoomInOnCoordinateProps): string {
   const { x, y, deckDef } = props
   const [width, height] = [deckDef.dimensions[0], deckDef.dimensions[1]]
 
-  const zoomFactor = 0.6
+  const zoomFactor = 0.55
   const newWidth = width * zoomFactor
   const newHeight = height * zoomFactor
 
   //  +125 and +50 to get the approximate center of the screen point
-  const newMinX = x - newWidth / 2 + 125
+  const newMinX = x - newWidth / 2 + 20
   const newMinY = y - newHeight / 2 + 50
 
-  return `${newMinX} ${newMinY} ${newWidth} ${newHeight}`
+  return `${newMinX} ${newMinY} ${newWidth} ${newHeight + 70}`
 }
 
 export interface AnimateZoomProps {
