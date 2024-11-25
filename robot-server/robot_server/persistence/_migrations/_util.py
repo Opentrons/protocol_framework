@@ -87,6 +87,9 @@ def add_column(
     """
     column_type = column.type.compile(engine.dialect)
     with engine.begin() as transaction:
+        # todo(mm, 2024-11-25): This text seems like something that SQLAlchemy could generate for us
+        # (maybe: https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.Column.compile),
+        # and that might help us account for indexes and constraints.
         transaction.execute(
             sqlalchemy.text(
                 f"ALTER TABLE {table_name} ADD COLUMN {column.key} {column_type}"
