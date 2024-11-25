@@ -31,8 +31,8 @@ _NonNegativeNumber = Union[_StrictNonNegativeInt, _StrictNonNegativeFloat]
 LiquidHandlingPropertyByVolume = Sequence[Tuple[_NonNegativeNumber, _NonNegativeNumber]]
 """Settings for liquid class settings that are interpolated by volume."""
 
-CorrectionByVolume = Dict[str, _Number]
-"""Settings for correctionByVolume, which unlike other `byVolume` properties allows negative values keyed to volume."""
+CorrectionByVolume = Sequence[Tuple[_NonNegativeNumber, _Number]]
+"""Settings for correctionByVolume, which unlike other `byVolume` properties allows negative values with volume."""
 
 
 class PositionReference(Enum):
@@ -258,7 +258,7 @@ class AspirateProperties(BaseModel):
     )
     correctionByVolume: CorrectionByVolume = Field(
         ...,
-        description="Settings for volume correction keyed by by target aspiration volume."
+        description="Settings for volume correction keyed by by target aspiration volume.",
     )
     preWet: bool = Field(..., description="Whether to perform a pre-wet action.")
     mix: MixProperties = Field(
@@ -286,7 +286,7 @@ class SingleDispenseProperties(BaseModel):
     )
     correctionByVolume: CorrectionByVolume = Field(
         ...,
-        description="Settings for volume correction keyed by by target dispense volume."
+        description="Settings for volume correction keyed by by target dispense volume.",
     )
     mix: MixProperties = Field(..., description="Mixing settings for after a dispense")
     pushOutByVolume: LiquidHandlingPropertyByVolume = Field(
@@ -314,7 +314,7 @@ class MultiDispenseProperties(BaseModel):
     )
     correctionByVolume: CorrectionByVolume = Field(
         ...,
-        description="Settings for volume correction keyed by by target dispense volume."
+        description="Settings for volume correction keyed by by target dispense volume.",
     )
     conditioningByVolume: LiquidHandlingPropertyByVolume = Field(
         ...,

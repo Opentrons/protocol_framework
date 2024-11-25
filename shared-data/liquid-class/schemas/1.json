@@ -431,11 +431,7 @@
         "positionReference",
         "offset",
         "flowRateByVolume",
-<<<<<<< HEAD
         "correctionByVolume",
-        "mix",
-=======
->>>>>>> 46d19118ef5fe7dfdcdbc568240d3274f2ba1996
         "conditioningByVolume",
         "disposalByVolume",
         "delay"

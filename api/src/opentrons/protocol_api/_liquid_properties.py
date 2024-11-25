@@ -23,7 +23,6 @@ from . import validation
 
 
 class LiquidHandlingPropertyByVolume:
-
     def __init__(self, by_volume_property: Sequence[Tuple[float, float]]) -> None:
         self._properties_by_volume: Dict[float, float] = {
             float(volume): value for volume, value in by_volume_property
