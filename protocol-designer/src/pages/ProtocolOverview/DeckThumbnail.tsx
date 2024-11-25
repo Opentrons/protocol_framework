@@ -35,6 +35,7 @@ import type { StagingAreaLocation, TrashCutoutId } from '@opentrons/components'
 import type { CutoutId, DeckSlotId } from '@opentrons/shared-data'
 import type { AdditionalEquipmentEntity } from '@opentrons/step-generation'
 
+const RIGHT_COLUMN_FIXTURE_PADDING = 50 // mm
 const WASTE_CHUTE_SPACE = 30
 const OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST: string[] = [
   'calibrationMarkings',
@@ -99,6 +100,8 @@ export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
   const filteredAddressableAreas = deckDef.locations.addressableAreas.filter(
     aa => isAddressableAreaStandardSlot(aa.id, deckDef)
   )
+  const hasRightColumnFixtures =
+    stagingAreaFixtures.length + wasteChuteFixtures.length > 0
   return (
     <Flex
       width="100%"
@@ -118,7 +121,12 @@ export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
           hasWasteChute
             ? deckDef.cornerOffsetFromOrigin[1] - WASTE_CHUTE_SPACE
             : deckDef.cornerOffsetFromOrigin[1]
-        } ${deckDef.dimensions[0]} ${deckDef.dimensions[1]}`}
+        } ${
+          hasRightColumnFixtures
+            ? deckDef.dimensions[0] + RIGHT_COLUMN_FIXTURE_PADDING
+            : deckDef.dimensions[0]
+        } ${deckDef.dimensions[1]}`}
+        zoomed
       >
         {() => (
           <>
