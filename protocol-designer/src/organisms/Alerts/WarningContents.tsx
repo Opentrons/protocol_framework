@@ -22,7 +22,6 @@ export function WarningContents(
             {t(`timeline.warning.${warningType}.body`, {
               defaultValue: '',
             })}
-            <TerminalItemLink terminalId={START_TERMINAL_ITEM_ID} />
           </>
         )
       default:
