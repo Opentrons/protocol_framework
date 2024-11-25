@@ -16,7 +16,7 @@ from typing import Any
 import sqlalchemy
 
 from ..database import sql_engine_ctx, sqlite_rowid
-from ..tables import DataFileSourceSQLEnum, schema_7
+from ..tables import schema_7
 from .._folder_migrator import Migration
 
 from ..file_and_directory_names import (
@@ -102,6 +102,6 @@ def _migrate_data_files_table_with_new_source_col(
     """Add a new 'source' column to data_files table."""
     dest_transaction.execute(
         sqlalchemy.update(schema_7.data_files_table).values(
-            {"source": DataFileSourceSQLEnum.UPLOADED}
+            {"source": schema_7.DataFileSourceSQLEnum.UPLOADED}
         )
     )
