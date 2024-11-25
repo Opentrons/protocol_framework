@@ -58,6 +58,7 @@ export function SubstepsToolbox(
       substeps.commandCreatorFnName === 'mix')) ||
     substeps.substepType === THERMOCYCLER_PROFILE ? (
     <Toolbox
+      height="calc(100vh - 6rem)"
       width={FLEX_MAX_CONTENT}
       closeButton={<Icon size="2rem" name="close" />}
       onCloseClick={handleClose}

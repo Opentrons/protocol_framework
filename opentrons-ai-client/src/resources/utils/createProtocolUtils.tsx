@@ -182,7 +182,8 @@ export function generateChatPrompt(
           .join('\n')
       : `- ${t(values.instruments.pipettes)}`
   const flexGripper =
-    values.instruments.flexGripper === FLEX_GRIPPER
+    values.instruments.flexGripper === FLEX_GRIPPER &&
+    values.instruments.robot === OPENTRONS_FLEX
       ? `\n- ${t('with_flex_gripper')}`
       : ''
   const modules = values.modules

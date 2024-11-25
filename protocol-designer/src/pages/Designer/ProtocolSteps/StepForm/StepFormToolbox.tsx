@@ -272,6 +272,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
         />
       ) : null}
       <Toolbox
+        height="calc(100vh - 6rem)"
         position={POSITION_RELATIVE}
         subHeader={
           isMultiStepToolbox ? (

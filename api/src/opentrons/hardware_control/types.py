@@ -625,6 +625,8 @@ class GripperJawState(enum.Enum):
     #: the gripper is actively force-control gripping something
     HOLDING = enum.auto()
     #: the gripper is in position-control mode
+    STOPPED = enum.auto()
+    #: the gripper has been homed before but is stopped now
 
 
 class InstrumentProbeType(enum.Enum):

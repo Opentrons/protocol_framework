@@ -1,5 +1,5 @@
 import type * as React from 'react'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { fireEvent, screen } from '@testing-library/react'
 import { fixture96Plate } from '@opentrons/shared-data'
@@ -42,6 +42,8 @@ const render = (props: React.ComponentProps<typeof SlotOverflowMenu>) => {
   })[0]
 }
 
+const MOCK_STAGING_AREA_ID = 'MOCK_STAGING_AREA_ID'
+
 describe('SlotOverflowMenu', () => {
   let props: React.ComponentProps<typeof SlotOverflowMenu>
 
@@ -78,13 +80,21 @@ describe('SlotOverflowMenu', () => {
         },
       },
       additionalEquipmentOnDeck: {
-        fixture: { name: 'stagingArea', id: 'mockId', location: 'cutoutD3' },
+        fixture: {
+          name: 'stagingArea',
+          id: MOCK_STAGING_AREA_ID,
+          location: 'cutoutD3',
+        },
       },
     })
     vi.mocked(EditNickNameModal).mockReturnValue(
       <div>mockEditNickNameModal</div>
     )
     vi.mocked(labwareIngredSelectors.getLiquidsByLabwareId).mockReturnValue({})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   it('should renders all buttons as enabled and clicking on them calls ctas', () => {
@@ -133,5 +143,26 @@ describe('SlotOverflowMenu', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit liquid' }))
     expect(mockNavigate).toHaveBeenCalled()
     expect(vi.mocked(openIngredientSelector)).toHaveBeenCalled()
+  })
+  it('deletes the staging area slot and all labware and modules on top of it', () => {
+    vi.mocked(labwareIngredSelectors.getLiquidsByLabwareId).mockReturnValue({
+      labId2: { well1: { '0': { volume: 10 } } },
+    })
+    render(props)
+    fireEvent.click(screen.getByRole('button', { name: 'Clear slot' }))
+
+    expect(vi.mocked(deleteDeckFixture)).toHaveBeenCalledOnce()
+    expect(vi.mocked(deleteDeckFixture)).toHaveBeenCalledWith(
+      MOCK_STAGING_AREA_ID
+    )
+    expect(vi.mocked(deleteContainer)).toHaveBeenCalledTimes(2)
+    expect(vi.mocked(deleteContainer)).toHaveBeenNthCalledWith(1, {
+      labwareId: 'labId',
+    })
+    expect(vi.mocked(deleteContainer)).toHaveBeenNthCalledWith(2, {
+      labwareId: 'labId2',
+    })
+    expect(vi.mocked(deleteModule)).toHaveBeenCalledOnce()
+    expect(vi.mocked(deleteModule)).toHaveBeenCalledWith('modId')
   })
 })

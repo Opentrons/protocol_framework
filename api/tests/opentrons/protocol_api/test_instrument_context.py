@@ -85,7 +85,7 @@ def mock_instrument_core(decoy: Decoy) -> InstrumentCore:
     """Get a mock instrument implementation core."""
     instrument_core = decoy.mock(cls=InstrumentCore)
     decoy.when(instrument_core.get_mount()).then_return(Mount.LEFT)
-
+    decoy.when(instrument_core._pressure_supported_by_pipette()).then_return(True)
     # we need to add this for the mock of liquid_presence detection to actually work
     # this replaces the mock with a a property again
     instrument_core._liquid_presence_detection = False  # type: ignore[attr-defined]

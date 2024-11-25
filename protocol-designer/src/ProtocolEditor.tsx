@@ -4,11 +4,8 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 import { DIRECTION_COLUMN, Flex, OVERFLOW_AUTO } from '@opentrons/components'
 import { PortalRoot as TopPortalRoot } from './components/portals/TopPortal'
 import { ProtocolRoutes } from './ProtocolRoutes'
-import { useScreenSizeCheck } from './resources/useScreenSizeCheck'
-import { DisabledScreen } from './organisms/DisabledScreen'
 
 function ProtocolEditorComponent(): JSX.Element {
-  const isValidSize = useScreenSizeCheck()
   return (
     <div
       id="protocol-editor"
@@ -16,7 +13,6 @@ function ProtocolEditorComponent(): JSX.Element {
     >
       <TopPortalRoot />
       <Flex flexDirection={DIRECTION_COLUMN}>
-        {!isValidSize && <DisabledScreen />}
         <HashRouter>
           <ProtocolRoutes />
         </HashRouter>

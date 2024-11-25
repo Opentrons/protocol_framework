@@ -2,6 +2,7 @@ import type * as React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { fireEvent, screen } from '@testing-library/react'
+import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import { i18n } from '../../../assets/localization'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { WizardBody } from '../WizardBody'
@@ -24,6 +25,7 @@ describe('WizardBody', () => {
       disabled: false,
       goBack: vi.fn(),
       subHeader: 'mockSubheader',
+      robotType: FLEX_ROBOT_TYPE,
     }
   })
 

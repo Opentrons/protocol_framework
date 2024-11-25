@@ -415,9 +415,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
     >
       {stepSummaryContent != null ? (
         <ListItem type="noActive">
-          <Flex padding={SPACING.spacing12} height="4.75rem">
-            {stepSummaryContent}
-          </Flex>
+          <Flex padding={SPACING.spacing12}>{stepSummaryContent}</Flex>
         </ListItem>
       ) : null}
       {stepDetails != null && stepDetails !== '' ? (

@@ -150,7 +150,7 @@ export const ModuleOverflowMenu = (
               <Fragment key={`${index}_${String(module.moduleType)}`}>
                 <MenuItem
                   onClick={() => item.onClick(item.isSecondary)}
-                  disabled={item.disabledReason || isDisabled}
+                  disabled={item.isSettingDisabled}
                   whiteSpace={NO_WRAP}
                 >
                   {item.setSetting}
