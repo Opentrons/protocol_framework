@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Optional, Type, Union
 from typing_extensions import Literal
 
 from .pipetting_common import (
-    ErrorLocationInfo,
     OverpressureError,
     PipetteIdMixin,
     AspirateVolumeMixin,

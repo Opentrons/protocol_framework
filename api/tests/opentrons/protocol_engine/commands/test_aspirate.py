@@ -12,7 +12,7 @@ import pytest
 from opentrons.protocol_engine.commands.pipetting_common import OverpressureError
 from opentrons.protocol_engine.commands.movement_common import StallOrCollisionError
 from opentrons.protocol_engine.state import update_types
-from opentrons.types import MountType, Point
+from opentrons.types import Point
 from opentrons.protocol_engine import (
     LiquidHandlingWellLocation,
     WellOrigin,
@@ -36,7 +36,6 @@ from opentrons.protocol_engine.execution import (
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
 from opentrons.protocol_engine.types import (
     CurrentWell,
-    LoadedPipette,
     AspiratedFluid,
     FluidKind,
     WellLocation,
