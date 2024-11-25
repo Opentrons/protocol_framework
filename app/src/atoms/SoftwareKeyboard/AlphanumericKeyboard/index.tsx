@@ -1,6 +1,12 @@
 import * as React from 'react'
 import Keyboard from 'react-simple-keyboard'
-import { alphanumericKeyboardLayout, customDisplay } from '../constants'
+import { useSelector } from 'react-redux'
+import { getAppLanguage } from '/app/redux/config'
+import {
+  alphanumericKeyboardLayout,
+  layoutCandidates,
+  customDisplay,
+} from '../constants'
 import type { KeyboardReactInterface } from 'react-simple-keyboard'
 
 import '../index.css'
@@ -19,6 +25,7 @@ export function AlphanumericKeyboard({
   debug = false, // If true, <ENTER> will input a \n
 }: AlphanumericKeyboardProps): JSX.Element {
   const [layoutName, setLayoutName] = React.useState<string>('default')
+  const appLanguage = useSelector(getAppLanguage)
   const onKeyPress = (button: string): void => {
     if (button === '{ABC}') handleShift()
     if (button === '{numbers}') handleNumber()
@@ -47,6 +54,9 @@ export function AlphanumericKeyboard({
       onKeyPress={onKeyPress}
       layoutName={layoutName}
       layout={alphanumericKeyboardLayout}
+      layoutCandidates={
+        appLanguage != null ? layoutCandidates[appLanguage] : undefined
+      }
       display={customDisplay}
       mergeDisplay={true}
       useButtonTag={true}

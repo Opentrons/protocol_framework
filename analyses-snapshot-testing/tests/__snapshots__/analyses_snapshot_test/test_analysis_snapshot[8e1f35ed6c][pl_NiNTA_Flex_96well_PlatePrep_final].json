@@ -18477,6 +18477,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [
     {
       "description": "Equilibration Buffer",

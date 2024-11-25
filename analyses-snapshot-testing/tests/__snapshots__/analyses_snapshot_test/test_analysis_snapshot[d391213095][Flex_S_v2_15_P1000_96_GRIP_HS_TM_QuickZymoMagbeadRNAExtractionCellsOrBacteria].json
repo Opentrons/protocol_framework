@@ -25208,6 +25208,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [],
   "metadata": {
     "author": "Zach Galluzzo <zachary.galluzzo@opentrons.com>",

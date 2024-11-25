@@ -105,6 +105,15 @@ def protocol_commands_errors() -> List[pe_commands.Command]:
     """Get protocol commands errors list."""
     return [
         pe_commands.WaitForResume(
+            id="pause-4",
+            key="command-key",
+            status=pe_commands.CommandStatus.SUCCEEDED,
+            createdAt=datetime(year=2022, month=2, day=2),
+            params=pe_commands.WaitForResumeParams(message="hey world"),
+            result=pe_commands.WaitForResumeResult(),
+            intent=pe_commands.CommandIntent.PROTOCOL,
+        ),
+        pe_commands.WaitForResume(
             id="pause-1",
             key="command-key",
             status=pe_commands.CommandStatus.FAILED,
@@ -133,6 +142,15 @@ def protocol_commands_errors() -> List[pe_commands.Command]:
                 errorType="blah-blah",
                 detail="test details",
             ),
+        ),
+        pe_commands.WaitForResume(
+            id="pause-3",
+            key="command-key",
+            status=pe_commands.CommandStatus.SUCCEEDED,
+            createdAt=datetime(year=2022, month=2, day=2),
+            params=pe_commands.WaitForResumeParams(message="hey world"),
+            result=pe_commands.WaitForResumeResult(),
+            intent=pe_commands.CommandIntent.PROTOCOL,
         ),
     ]
 
@@ -335,6 +353,11 @@ async def test_update_run_state_command_with_errors(
     mock_runs_publisher: mock.Mock,
 ) -> None:
     """It should be able to update a run state to the store."""
+    commands_with_errors = [
+        command
+        for command in protocol_commands_errors
+        if command.status == pe_commands.CommandStatus.FAILED
+    ]
     action = RunAction(
         actionType=RunActionType.PLAY,
         createdAt=datetime(year=2022, month=2, day=2, tzinfo=timezone.utc),
@@ -357,12 +380,12 @@ async def test_update_run_state_command_with_errors(
     subject.insert_action(run_id="run-id", action=action)
     command_errors_result = subject.get_commands_errors_slice(
         run_id="run-id",
-        length=len(protocol_commands_errors),
+        length=5,
         cursor=0,
     )
 
     assert command_errors_result.commands_errors == [
-        item.error for item in protocol_commands_errors
+        item.error for item in commands_with_errors
     ]
 
 

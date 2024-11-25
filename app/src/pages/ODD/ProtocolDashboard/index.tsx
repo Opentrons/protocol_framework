@@ -252,9 +252,10 @@ export function ProtocolDashboard(): JSX.Element {
               </Flex>
               <Flex flexDirection={DIRECTION_COLUMN}>
                 {sortedProtocols.map(protocol => {
-                  const lastRun = runs.data?.data.find(
+                  // Run data is ordered based on timestamp. We want the last time a matching run was ran.
+                  const lastRun = runs.data?.data.findLast(
                     run => run.protocolId === protocol.id
-                  )?.createdAt
+                  )?.completedAt
 
                   return (
                     <ProtocolCard

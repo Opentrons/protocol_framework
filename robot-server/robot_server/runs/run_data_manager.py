@@ -1,7 +1,7 @@
 """Manage current and historical run data."""
 
 from datetime import datetime
-from typing import List, Optional, Callable, Union, Mapping
+from typing import Dict, List, Optional, Callable, Union, Mapping
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.errors.exceptions import InvalidStoredData, EnumeratedError
@@ -65,6 +65,7 @@ def _build_run(
             completedAt=state_summary.completedAt,
             startedAt=state_summary.startedAt,
             liquids=state_summary.liquids,
+            liquidClasses=state_summary.liquidClasses,
             outputFileIds=state_summary.files,
             runTimeParameters=run_time_parameters,
         )
@@ -79,6 +80,7 @@ def _build_run(
             pipettes=[],
             modules=[],
             liquids=[],
+            liquidClasses=[],
             wells=[],
             files=[],
             hasEverEnteredErrorRecovery=False,
@@ -123,6 +125,7 @@ def _build_run(
         completedAt=state.completedAt,
         startedAt=state.startedAt,
         liquids=state.liquids,
+        liquidClasses=state.liquidClasses,
         runTimeParameters=run_time_parameters,
         outputFileIds=state.files,
         hasEverEnteredErrorRecovery=state.hasEverEnteredErrorRecovery,
@@ -508,6 +511,13 @@ class RunDataManager:
         """Get current nozzle maps keyed by pipette id."""
         if run_id == self._run_orchestrator_store.current_run_id:
             return self._run_orchestrator_store.get_nozzle_maps()
+
+        raise RunNotCurrentError()
+
+    def get_tip_attached(self, run_id: str) -> Dict[str, bool]:
+        """Get current tip attached states, keyed by pipette id."""
+        if run_id == self._run_orchestrator_store.current_run_id:
+            return self._run_orchestrator_store.get_tip_attached()
 
         raise RunNotCurrentError()
 

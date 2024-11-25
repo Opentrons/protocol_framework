@@ -81,9 +81,9 @@ def _migrate_command_table_with_new_command_error_col_and_command_status(
     for row in dest_transaction.execute(select_commands).all():
         data = json.loads(row.command)
         new_command_error = (
-            # Account for old_row.command["error"] being NULL.
+            # Account for old_row.command["error"] being null.
             None
-            if "error" not in row.command or data["error"] == None  # noqa: E711
+            if "error" not in row.command or data["error"] is None
             else json.dumps(data["error"])
         )
         # parse json as enum

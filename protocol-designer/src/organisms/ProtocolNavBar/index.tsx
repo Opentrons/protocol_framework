@@ -96,7 +96,7 @@ export function ProtocolNavBar({
 }
 
 const NavContainer = styled(Flex)<{ showShadow: boolean }>`
-  z-index: 11;
+  z-index: ${props => (props.showShadow === true ? 11 : 0)};
   padding: ${SPACING.spacing12};
   width: 100%;
   justify-content: ${JUSTIFY_SPACE_BETWEEN};

@@ -525,7 +525,7 @@ async def test_command_generator(
         index = index + 1
 
 
-async def test_create_error_recovery_policy(
+def test_create_error_recovery_policy(
     decoy: Decoy,
     mock_protocol_engine: ProtocolEngine,
     live_protocol_subject: RunOrchestrator,

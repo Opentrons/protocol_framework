@@ -45,7 +45,7 @@ from robot_server.protocols.protocol_store import ProtocolNotFoundError
 
 from .action_models import RunAction, RunActionType
 from .run_models import RunNotFoundError
-from ..persistence.tables.schema_8 import CommandStatusSQLEnum
+from ..persistence.tables import CommandStatusSQLEnum
 
 log = logging.getLogger(__name__)
 
@@ -612,21 +612,33 @@ class RunStore:
 
             actual_cursor = cursor if cursor is not None else count_result - length
             # Clamp to [0, count_result).
-            actual_cursor = max(0, min(actual_cursor, count_result - 1))
-            select_slice = (
+            # cursor is 0 based index and row number starts from 1.
+            actual_cursor = max(0, min(actual_cursor, count_result - 1)) + 1
+            select_command_errors = (
                 sqlalchemy.select(
-                    run_command_table.c.index_in_run,
-                    run_command_table.c.command_error,
+                    sqlalchemy.func.row_number().over().label("row_num"),
+                    run_command_table,
                 )
                 .where(
                     and_(
                         run_command_table.c.run_id == run_id,
-                        run_command_table.c.index_in_run >= actual_cursor,
-                        run_command_table.c.index_in_run < actual_cursor + length,
-                        run_command_table.c.command_error is not None,
+                        run_command_table.c.command_status
+                        == CommandStatusSQLEnum.FAILED,
                     )
                 )
                 .order_by(run_command_table.c.index_in_run)
+                .subquery()
+            )
+
+            select_slice = (
+                sqlalchemy.select(select_command_errors.c.command_error)
+                .where(
+                    and_(
+                        select_command_errors.c.row_num >= actual_cursor,
+                        select_command_errors.c.row_num < actual_cursor + length,
+                    )
+                )
+                .order_by(select_command_errors.c.index_in_run)
             )
             slice_result = transaction.execute(select_slice).all()
 

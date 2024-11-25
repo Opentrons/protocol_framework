@@ -1,6 +1,12 @@
 import * as React from 'react'
 import { KeyboardReact as Keyboard } from 'react-simple-keyboard'
-import { customDisplay, fullKeyboardLayout } from '../constants'
+import { useSelector } from 'react-redux'
+import { getAppLanguage } from '/app/redux/config'
+import {
+  customDisplay,
+  layoutCandidates,
+  fullKeyboardLayout,
+} from '../constants'
 import type { KeyboardReactInterface } from 'react-simple-keyboard'
 
 import '../index.css'
@@ -19,6 +25,7 @@ export function FullKeyboard({
   debug = false,
 }: FullKeyboardProps): JSX.Element {
   const [layoutName, setLayoutName] = React.useState<string>('default')
+  const appLanguage = useSelector(getAppLanguage)
   const handleShift = (button: string): void => {
     switch (button) {
       case '{shift}':
@@ -56,6 +63,9 @@ export function FullKeyboard({
       onKeyPress={onKeyPress}
       layoutName={layoutName}
       layout={fullKeyboardLayout}
+      layoutCandidates={
+        appLanguage != null ? layoutCandidates[appLanguage] : undefined
+      }
       display={customDisplay}
       mergeDisplay={true}
       useButtonTag={true}
