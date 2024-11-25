@@ -6,17 +6,12 @@ const {
   getPrevValidVersions,
   latestValidVersionFromManifest,
 } = require('./lib/helpers')
-const {
-  calculatePearsonCorrelation,
-  calculatePValueOneTailed,
-  interpretResults,
-} = require('./lib/analysis')
+const { analyzeCorrelation } = require('./lib/analysis')
 const {
   AGGREGATED_PROCESSES,
   AGGREGATED_PROCESS_NAMES,
   BLACKLISTED_PROCESSES,
   MINIMUM_VALID_SAMPLE_SIZE,
-  P_VALUE_SIGNIFICANCE_THRESHOLD,
 } = require('./lib/constants')
 
 const UPTIME_BUCKETS = [
@@ -145,7 +140,6 @@ function processMixpanelData(data) {
  * @param data See `analyzeMemoryTrends`
  */
 function analyzeProcessMemoryTrends(data) {
-  // Create a map containing relevant data for each process
   const [processByName, systemMemory] = processMixpanelData(data)
 
   // Filter out any process that has less than the minimum sample size
@@ -158,35 +152,29 @@ function analyzeProcessMemoryTrends(data) {
   // Calculate correlation coefficient and range averages for each process
   const results = new Map()
   processByName.forEach((measurements, processName) => {
-    const correlation = calculatePearsonCorrelation(
+    const analysis = analyzeCorrelation(
       measurements.map(m => m.uptime),
       measurements.map(m => m.memRssMb)
     )
 
-    const pValue = calculatePValueOneTailed(correlation, measurements.length)
-    const rangeAverages = calculateRangeAverages(measurements, 'memRssMb')
-
     results.set(processName, {
-      correlation,
-      sampleSize: measurements.length,
-      isSignificant: pValue < P_VALUE_SIGNIFICANCE_THRESHOLD,
-      rangeAverages,
+      correlation: analysis.correlation,
+      sampleSize: analysis.sampleSize,
+      isSignificant: analysis.isSignificant,
+      rangeAverages: calculateRangeAverages(measurements, 'memRssMb'),
     })
   })
 
   // Calculate system memory metrics
-  const systemMemoryCorrelation = calculatePearsonCorrelation(
-    systemMemory.map(m => m.systemAvailMemMb),
-    systemMemory.map(m => m.uptime)
+  const systemAnalysis = analyzeCorrelation(
+    systemMemory.map(m => m.uptime),
+    systemMemory.map(m => m.systemAvailMemMb)
   )
-  const systemMemoryPValue = calculatePValueOneTailed(
-    systemMemoryCorrelation,
-    systemMemory.length
-  )
+
   results.set('odd-available-memory', {
-    correlation: systemMemoryCorrelation,
-    sampleSize: systemMemory.length,
-    isSignificant: systemMemoryPValue < P_VALUE_SIGNIFICANCE_THRESHOLD,
+    correlation: systemAnalysis.correlation,
+    sampleSize: systemAnalysis.sampleSize,
+    isSignificant: systemAnalysis.isSignificant,
     rangeAverages: calculateRangeAverages(systemMemory, 'systemAvailMemMb'),
   })
 

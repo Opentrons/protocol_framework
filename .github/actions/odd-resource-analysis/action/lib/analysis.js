@@ -1,65 +1,79 @@
-// Analysis is based on one-tailed, Pearson's correlation coefficient.
-
-const { sampleCorrelation } = require('simple-statistics')
+const { sampleCorrelation, tTest } = require('simple-statistics')
 const { MINIMUM_VALID_SAMPLE_SIZE } = require('./constants')
 
-/**
- *
- * @param x An array of a numbers.
- * @param y An array of numbers.
- * @return {number} The Pearson Correlation.
- */
-function calculatePearsonCorrelation(x, y) {
-  return sampleCorrelation(x, y)
+const P_VALUE_THRESHOLD = 0.05
+
+const CORRELATION_THRESHOLDS = {
+  STRONG: 0.7,
+  MODERATE: 0.3,
 }
 
 /**
- * @description Calculate p-value using t-distribution approximation for a one-tailed test.
- * If there are too few samples, assume no correlation.
- * For positive correlations only.
- * @param correlation The Pearson Correlation
- * @param sampleSize The total number of samples.
- * @return {number} The p-value.
+ * @description Calculates one-tailed p-value for correlation coefficient
+ * @param {number} correlation Pearson correlation coefficient
+ * @param {number} sampleSize Number of samples
+ * @returns {number} One-tailed p-value
  */
-function calculatePValueOneTailed(correlation, sampleSize) {
-  if (sampleSize < MINIMUM_VALID_SAMPLE_SIZE) {
-    return 1
-  }
+function calculatePValue(correlation, sampleSize) {
+  const t = correlation * Math.sqrt((sampleSize - 2) / (1 - correlation ** 2))
 
-  // The t-statistic
-  const t =
-    correlation * Math.sqrt((sampleSize - 2) / (1 - correlation * correlation))
+  const twoTailedPValue = tTest([t], 0)
 
-  // Approximate p-value using t-distribution (one-tailed test)
-  const degreesOfFreedom = sampleSize - 2
-  return 1 - tDistributionCDF(t, degreesOfFreedom)
+  // Convert to one-tailed p-value
+  return twoTailedPValue / 2
 }
 
-// t-distribution CDF approximation
-function tDistributionCDF(t, df) {
-  const x = df / (df + t * t)
-  return 1 - 0.5 * Math.pow(x, df / 2)
+/**
+ * @description Determines correlation strength and direction
+ * @param {number} correlation Pearson correlation coefficient
+ * @returns {string} Human readable interpretation
+ */
+function getCorrelationDescription(correlation) {
+  const strength = Math.abs(correlation)
+  const direction = correlation > 0 ? 'positive' : 'negative'
+
+  if (strength > CORRELATION_THRESHOLDS.STRONG) {
+    return `Strong ${direction} correlation (>${CORRELATION_THRESHOLDS.STRONG})`
+  } else if (strength > CORRELATION_THRESHOLDS.MODERATE) {
+    return `Moderate ${direction} correlation (>${CORRELATION_THRESHOLDS.MODERATE} and <${CORRELATION_THRESHOLDS.STRONG})`
+  }
+  return `Weak ${direction} correlation (<=${CORRELATION_THRESHOLDS.MODERATE})`
 }
 
-function interpretResults(result) {
-  if (!result.isSignificant) {
-    return 'No significant correlation found'
+/**
+ * @description Performs complete correlation analysis including significance testing
+ * @param {Array<number>} x Array of numbers
+ * @param {Array<number>} y Array of numbers
+ * @return {Object} Analysis results including correlation, significance, and interpretation
+ */
+function analyzeCorrelation(x, y) {
+  const lowestSampleSize = Math.min(x.length, y.length)
+
+  if (lowestSampleSize < MINIMUM_VALID_SAMPLE_SIZE) {
+    return {
+      correlation: 0,
+      isSignificant: false,
+      sampleSize: lowestSampleSize,
+      pValue: 1,
+      interpretation: 'Not enough samples for analysis',
+    }
   }
 
-  const strength = Math.abs(result.correlation)
-  const direction = result.correlation > 0 ? 'positive' : 'negative'
+  const correlation = sampleCorrelation(x, y)
+  const pValue = calculatePValue(correlation, lowestSampleSize)
+  const isSignificant = pValue < P_VALUE_THRESHOLD
 
-  if (strength > 0.7) {
-    return `Strong ${direction} correlation (>0.7)`
-  } else if (strength > 0.3) {
-    return `Moderate ${direction} correlation (>0.3 and <0.7)`
-  } else {
-    return `Weak ${direction} correlation (<=0.3)`
+  return {
+    correlation,
+    isSignificant,
+    sampleSize: x.length,
+    pValue,
+    interpretation: isSignificant
+      ? getCorrelationDescription(correlation)
+      : 'No significant correlation found',
   }
 }
 
 module.exports = {
-  calculatePearsonCorrelation,
-  calculatePValueOneTailed,
-  interpretResults,
+  analyzeCorrelation,
 }
