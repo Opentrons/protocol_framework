@@ -5,19 +5,19 @@ const {
   downloadAppManifest,
   getPrevValidVersions,
   latestValidVersionFromManifest,
-} = require('../lib/helpers')
+} = require('./lib/helpers')
 const {
   calculatePearsonCorrelation,
   calculatePValueOneTailed,
   interpretResults,
-} = require('../lib/analysis')
+} = require('./lib/analysis')
 const {
   AGGREGATED_PROCESSES,
   AGGREGATED_PROCESS_NAMES,
   BLACKLISTED_PROCESSES,
   MINIMUM_VALID_SAMPLE_SIZE,
   P_VALUE_SIGNIFICANCE_THRESHOLD,
-} = require('../lib/constants')
+} = require('./lib/constants')
 
 const UPTIME_BUCKETS = [
   { min: 0, max: 20, label: '0-20hrs' },

@@ -15,29 +15,10 @@ jobs:
       - name: Checkout repository
         uses: 'actions/checkout@v4'
 
-      - name: Setup Node.js
-        uses: 'actions/setup-node@v3'
-        with:
-          node-version: '18.19.0'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: |
-          yarn install
-
       - name: Run memory analysis
-        env:
-          MIXPANEL_INGEST_USER: ${{ secrets.MIXPANEL_INGEST_USER }}
-          MIXPANEL_INGEST_SECRET: ${{ secrets.MIXPANEL_INGEST_SECRET }}
-          MIXPANEL_PROJECT_ID: ${{ secrets.OT_APP_MIXPANEL_ID }}
-        run: |
-          OUTPUT=$(node ./scripts/resource-monitor/perform-memory-analysis "$MIXPANEL_INGEST_USER" "$MIXPANEL_INGEST_SECRET" "$MIXPANEL_PROJECT_ID")
-          
-          echo "::group::ODD Memory Usage Results"
-          echo "$OUTPUT"
-          echo "::endgroup::"
-          
-          echo "## ODD Memory Usage Results" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "$OUTPUT" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+        uses: ./.github/actions/odd-resource-analysis
+        with:
+          mixpanel-user: ${{ secrets.MIXPANEL_INGEST_USER }}
+          mixpanel-secret: ${{ secrets.MIXPANEL_INGEST_SECRET }}
+          mixpanel-project-id: ${{ secrets.OT_APP_MIXPANEL_ID }}
+          previous-version-count: '2'
