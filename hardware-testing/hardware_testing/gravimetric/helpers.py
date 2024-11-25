@@ -409,7 +409,7 @@ def _load_pipette(
         return loaded_pipettes[pipette_mount]
 
     try:
-        trash = ctx.load_labware("opentrons_1_trash_3200ml_fixed", "A3")
+        trash = ctx.load_trash_bin("A3")
     except Exception:
         # TODO: handle actual error for when trash is already configured for A3
         trash = ctx.fixed_trash

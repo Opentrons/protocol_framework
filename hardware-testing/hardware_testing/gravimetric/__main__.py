@@ -641,7 +641,7 @@ if __name__ == "__main__":
         hw.add_tip(hw_mount, tip_length=120)  # langer than any tip, to be safe
         run_args.pipette.move_to(run_args.pipette.trash_container)
         hw.drop_tip(hw_mount)
-        hw.prepare_for_aspirate(hw_mount)
+        hw._move_to_plunger_bottom(hw_mount, rate=1.0)
         hw.retract(hw_mount)
 
         for tip, volumes in run_args.volumes:
