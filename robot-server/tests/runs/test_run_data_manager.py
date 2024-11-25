@@ -935,16 +935,30 @@ def test_get_commands_slice_current_run(
     assert expected_command_slice == result
 
 
-def test_get_commands_errors_slice__not_current_run_raises(
+def test_get_commands_errors_slice_historical_run(
     decoy: Decoy,
     subject: RunDataManager,
     mock_run_orchestrator_store: RunOrchestratorStore,
+    mock_run_store: RunStore,
 ) -> None:
     """Should get a sliced command error list from engine store."""
+    expected_commands_errors_result = [
+        ErrorOccurrence.construct(id="error-id")  # type: ignore[call-arg]
+    ]
+
+    command_error_slice = CommandErrorSlice(
+        cursor=1, total_length=3, commands_errors=expected_commands_errors_result
+    )
+
     decoy.when(mock_run_orchestrator_store.current_run_id).then_return("run-not-id")
 
-    with pytest.raises(RunNotCurrentError):
-        subject.get_command_error_slice("run-id", 1, 2)
+    decoy.when(mock_run_store.get_commands_errors_slice("run-id", 2, 1)).then_return(
+        command_error_slice
+    )
+
+    result = subject.get_command_error_slice("run-id", 1, 2)
+
+    assert command_error_slice == result
 
 
 def test_get_commands_errors_slice_current_run(

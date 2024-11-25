@@ -527,14 +527,13 @@ async def get_run_commands_error(
         run_data_manager: Run data retrieval interface.
     """
     try:
-        all_errors = run_data_manager.get_command_errors(run_id=runId)
-        total_length = len(all_errors)
+        all_errors_count = run_data_manager.get_command_errors_count(run_id=runId)
 
         if cursor is None:
-            if len(all_errors) > 0:
+            if all_errors_count > 0:
                 # Get the most recent error,
                 # which we can find just at the end of the list.
-                cursor = total_length - 1
+                cursor = all_errors_count - 1
             else:
                 cursor = 0
 

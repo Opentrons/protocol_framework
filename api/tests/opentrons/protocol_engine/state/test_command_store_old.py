@@ -333,7 +333,6 @@ def test_command_store_handles_pause_action(pause_source: PauseSource) -> None:
         recovery_target=None,
         latest_protocol_command_hash=None,
         stopped_by_estop=False,
-        failed_command_errors=[],
         error_recovery_policy=matchers.Anything(),
         has_entered_error_recovery=False,
     )
@@ -363,7 +362,6 @@ def test_command_store_handles_play_action(pause_source: PauseSource) -> None:
         run_started_at=datetime(year=2021, month=1, day=1),
         latest_protocol_command_hash=None,
         stopped_by_estop=False,
-        failed_command_errors=[],
         error_recovery_policy=matchers.Anything(),
         has_entered_error_recovery=False,
     )
@@ -398,7 +396,6 @@ def test_command_store_handles_finish_action() -> None:
         run_started_at=datetime(year=2021, month=1, day=1),
         latest_protocol_command_hash=None,
         stopped_by_estop=False,
-        failed_command_errors=[],
         error_recovery_policy=matchers.Anything(),
         has_entered_error_recovery=False,
     )
@@ -453,7 +450,6 @@ def test_command_store_handles_stop_action(
         run_started_at=datetime(year=2021, month=1, day=1),
         latest_protocol_command_hash=None,
         stopped_by_estop=from_estop,
-        failed_command_errors=[],
         error_recovery_policy=matchers.Anything(),
         has_entered_error_recovery=False,
     )
@@ -491,7 +487,6 @@ def test_command_store_handles_stop_action_when_awaiting_recovery() -> None:
         run_started_at=datetime(year=2021, month=1, day=1),
         latest_protocol_command_hash=None,
         stopped_by_estop=False,
-        failed_command_errors=[],
         error_recovery_policy=matchers.Anything(),
         has_entered_error_recovery=False,
     )
@@ -525,7 +520,6 @@ def test_command_store_cannot_restart_after_should_stop() -> None:
         run_started_at=None,
         latest_protocol_command_hash=None,
         stopped_by_estop=False,
-        failed_command_errors=[],
         error_recovery_policy=matchers.Anything(),
         has_entered_error_recovery=False,
     )
@@ -672,7 +666,6 @@ def test_command_store_wraps_unknown_errors() -> None:
         recovery_target=None,
         latest_protocol_command_hash=None,
         stopped_by_estop=False,
-        failed_command_errors=[],
         error_recovery_policy=matchers.Anything(),
         has_entered_error_recovery=False,
     )
@@ -742,7 +735,6 @@ def test_command_store_preserves_enumerated_errors() -> None:
         run_started_at=None,
         latest_protocol_command_hash=None,
         stopped_by_estop=False,
-        failed_command_errors=[],
         error_recovery_policy=matchers.Anything(),
         has_entered_error_recovery=False,
     )
@@ -778,7 +770,6 @@ def test_command_store_ignores_stop_after_graceful_finish() -> None:
         run_started_at=datetime(year=2021, month=1, day=1),
         latest_protocol_command_hash=None,
         stopped_by_estop=False,
-        failed_command_errors=[],
         error_recovery_policy=matchers.Anything(),
         has_entered_error_recovery=False,
     )
@@ -814,7 +805,6 @@ def test_command_store_ignores_finish_after_non_graceful_stop() -> None:
         run_started_at=datetime(year=2021, month=1, day=1),
         latest_protocol_command_hash=None,
         stopped_by_estop=False,
-        failed_command_errors=[],
         error_recovery_policy=matchers.Anything(),
         has_entered_error_recovery=False,
     )
@@ -850,7 +840,6 @@ def test_handles_hardware_stopped() -> None:
         run_started_at=None,
         latest_protocol_command_hash=None,
         stopped_by_estop=False,
-        failed_command_errors=[],
         error_recovery_policy=matchers.Anything(),
         has_entered_error_recovery=False,
     )
