@@ -1,4 +1,5 @@
 """FLEX Stacker Driver."""
+from typing import Tuple
 from dataclasses import dataclass
 import serial  # type: ignore[import]
 from serial.tools.list_ports import comports  # type: ignore[import]
@@ -38,6 +39,26 @@ class StackerAxis(Enum):
         return self.name
 
 
+class PlatformStatus(Enum):
+    """Platform Status."""
+
+    REMOVED = 0
+    EXTENTED = 1
+    RETRACTED = 2
+    ERROR = 4
+
+    @classmethod
+    def from_tuple(cls, status: Tuple[int, int]) -> "PlatformStatus":
+        """Get platform status from tuple."""
+        if status == (0, 0):
+            return PlatformStatus.REMOVED
+        if status == (1, 0):
+            return PlatformStatus.EXTENTED
+        if status == (0, 1):
+            return PlatformStatus.RETRACTED
+        return PlatformStatus.ERROR
+
+
 class Direction(Enum):
     """Direction."""
 
@@ -67,9 +88,9 @@ class MoveParams:
 
     def __str__(self) -> str:
         """Convert to string."""
-        v = "V:" + str(self.max_speed) if self.max_speed else ""
-        a = "A:" + str(self.acceleration) if self.acceleration else ""
-        d = "D:" + str(self.max_speed_discont) if self.max_speed_discont else ""
+        v = "V" + str(self.max_speed) if self.max_speed else ""
+        a = "A" + str(self.acceleration) if self.acceleration else ""
+        d = "D" + str(self.max_speed_discont) if self.max_speed_discont else ""
         return f"{v} {a} {d}".strip()
 
 
@@ -100,7 +121,7 @@ class FlexStacker:
 
     def _send_and_recv(self, msg: str, guard_ret: str = "") -> str:
         """Internal utility to send a command and receive the response."""
-        assert self._simulating
+        assert not self._simulating
         self._serial.write(msg.encode())
         ret = self._serial.readline()
         if guard_ret:
@@ -142,7 +163,7 @@ class FlexStacker:
         if self._simulating:
             return True
 
-        _LS_RE = re.compile(rf"^M119 .*{axis.name}{direction.name[0]}:(\d) .* OK\n")
+        _LS_RE = re.compile(rf"^M119 .*{axis.name}{direction.name[0]}:(\d).* OK\n")
         res = self._send_and_recv("M119\n", "M119 XE:")
         match = _LS_RE.match(res)
         assert match, f"Incorrect Response for limit switch: {res}"
@@ -156,11 +177,22 @@ class FlexStacker:
         if self._simulating:
             return True
 
-        _LS_RE = re.compile(rf"^M121 .*{direction.name[0]}:(\d) .* OK\n")
-        res = self._send_and_recv("M121\n", "M119 E:")
+        _LS_RE = re.compile(rf"^M121 .*{direction.name[0]}:(\d).* OK\n")
+        res = self._send_and_recv("M121\n", "M121 E:")
         match = _LS_RE.match(res)
         assert match, f"Incorrect Response for platform sensor: {res}"
         return bool(int(match.group(1)))
+
+    def get_platform_status(self) -> PlatformStatus:
+        """Get platform status."""
+        if self._simulating:
+            return PlatformStatus.REMOVED
+
+        _LS_RE = re.compile(r"^M121 E:(\d) R:(\d) OK\n")
+        res = self._send_and_recv("M121\n", "M121 ")
+        match = _LS_RE.match(res)
+        assert match, f"Incorrect Response for platform status: {res}"
+        return PlatformStatus.from_tuple((int(match.group(1)), int(match.group(2))))
 
     def get_hopper_door_closed(self) -> bool:
         """Get whether or not door is closed.
@@ -205,7 +237,7 @@ class FlexStacker:
         if self._simulating:
             return
         self._send_and_recv(
-            f"G5 {axis.name}{direction.value} {params or ''}\n", "G0 OK"
+            f"G5 {axis.name}{direction.value} {params or ''}\n", "G5 OK"
         )
 
     def __del__(self) -> None:

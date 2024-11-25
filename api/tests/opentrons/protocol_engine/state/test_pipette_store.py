@@ -54,6 +54,14 @@ from ..pipette_fixtures import get_default_nozzle_map
 
 
 @pytest.fixture
+def available_sensors() -> pipette_definition.AvailableSensorDefinition:
+    """Provide a list of sensors."""
+    return pipette_definition.AvailableSensorDefinition(
+        sensors=["pressure", "capacitive", "environment"]
+    )
+
+
+@pytest.fixture
 def subject() -> PipetteStore:
     """Get a PipetteStore test subject for all subsequent tests."""
     return PipetteStore()
@@ -190,6 +198,7 @@ def test_location_state_update(subject: PipetteStore) -> None:
 def test_handles_load_pipette(
     subject: PipetteStore,
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
+    available_sensors: pipette_definition.AvailableSensorDefinition,
 ) -> None:
     """It should add the pipette data to the state."""
     dummy_command = create_succeeded_command()
@@ -227,6 +236,7 @@ def test_handles_load_pipette(
             "drop_tip": 20.0,
         },
         shaft_ul_per_mm=5.0,
+        available_sensors=available_sensors,
     )
     config_update = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id",
@@ -752,6 +762,7 @@ def test_set_movement_speed(subject: PipetteStore) -> None:
 def test_add_pipette_config(
     subject: PipetteStore,
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
+    available_sensors: pipette_definition.AvailableSensorDefinition,
 ) -> None:
     """It should update state from any pipette config private result."""
     command = cmd.LoadPipette.construct(  # type: ignore[call-arg]
@@ -786,6 +797,7 @@ def test_add_pipette_config(
             "drop_tip": 20.0,
         },
         shaft_ul_per_mm=5.0,
+        available_sensors=available_sensors,
     )
 
     subject.handle_action(
@@ -831,6 +843,7 @@ def test_add_pipette_config(
             "drop_tip": 20.0,
         },
         shaft_ul_per_mm=5.0,
+        available_sensors=available_sensors,
     )
     assert subject.state.flow_rates_by_id["pipette-id"].default_aspirate == {"a": 1.0}
     assert subject.state.flow_rates_by_id["pipette-id"].default_dispense == {"b": 2.0}

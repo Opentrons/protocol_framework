@@ -3,7 +3,6 @@ import {
   getModuleDef2,
   getLoadedLabwareDefinitionsByUri,
   getPositionFromSlotId,
-  NON_USER_ADDRESSABLE_LABWARE,
 } from '@opentrons/shared-data'
 import { getModuleInitialLoadInfo } from '../commands'
 import type {
@@ -39,8 +38,7 @@ export const getProtocolModulesInfo = (
         protocolData.commands
           .filter(
             (command): command is LoadLabwareRunTimeCommand =>
-              command.commandType === 'loadLabware' &&
-              !NON_USER_ADDRESSABLE_LABWARE.includes(command.params.loadName)
+              command.commandType === 'loadLabware'
           )
           .find(
             (command: LoadLabwareRunTimeCommand) =>

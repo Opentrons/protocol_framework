@@ -144,4 +144,15 @@ describe('getInitialRouteAndStep', () => {
     expect(initialRoute).toBe(DT_ROUTES.DROP_TIP)
     expect(initialStep).toBe(DT_ROUTES.DROP_TIP[2])
   })
+
+  it('should return the overridden route and first step when fixitUtils.routeOverride.route is provided but routeOverride.step is not provided', () => {
+    const fixitUtils = {
+      routeOverride: { route: DT_ROUTES.DROP_TIP, step: null },
+    } as any
+
+    const [initialRoute, initialStep] = getInitialRouteAndStep(fixitUtils)
+
+    expect(initialRoute).toBe(DT_ROUTES.DROP_TIP)
+    expect(initialStep).toBe(DT_ROUTES.DROP_TIP[0])
+  })
 })
