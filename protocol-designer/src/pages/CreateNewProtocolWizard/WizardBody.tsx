@@ -160,7 +160,7 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
               width="8.5625rem"
             />
           </Flex>
-          {tooltipOnDisabled != null ? (
+          {tooltipOnDisabled != null && disabled ? (
             <Tooltip tooltipProps={tooltipProps}>{tooltipOnDisabled}</Tooltip>
           ) : null}
         </Flex>
