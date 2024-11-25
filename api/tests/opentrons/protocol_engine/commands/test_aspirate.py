@@ -73,14 +73,16 @@ async def test_aspirate_implementation_no_prep(
     mock_command_note_adder: CommandNoteAdder,
 ) -> None:
     """An Aspirate should have an execution implementation without preparing to aspirate."""
+    pipette_id = "pipette-id"
+    labware_id = "labware-id"
+    well_name = "well-name"
     location = LiquidHandlingWellLocation(
         origin=WellOrigin.BOTTOM, offset=WellOffset(x=0, y=0, z=1)
     )
-
-    data = AspirateParams(
+    params = AspirateParams(
         pipetteId=pipette_id,
-        labwareId="123",
-        wellName="A3",
+        labwareId=labware_id,
+        wellName=well_name,
         wellLocation=location,
         volume=50,
         flowRate=1.23,
@@ -92,23 +94,23 @@ async def test_aspirate_implementation_no_prep(
 
     decoy.when(
         state_view.geometry.get_nozzles_per_well(
-            labware_id="123",
-            target_well_name="A3",
+            labware_id=labware_id,
+            target_well_name=well_name,
             pipette_id=pipette_id,
         )
     ).then_return(2)
 
     decoy.when(
         state_view.geometry.get_wells_covered_by_pipette_with_active_well(
-            "123", "A3", pipette_id
+            labware_id, well_name, pipette_id
         )
-    ).then_return(["A3", "A4"])
+    ).then_return(["covered-well-1", "covered-well-2"])
 
     decoy.when(
         await movement.move_to_well(
             pipette_id=pipette_id,
-            labware_id="123",
-            well_name="A3",
+            labware_id=labware_id,
+            well_name=well_name,
             well_location=location,
             current_well=None,
             force_direct=False,
@@ -127,19 +129,21 @@ async def test_aspirate_implementation_no_prep(
         ),
     ).then_return(50)
 
-    result = await subject.execute(data)
+    result = await subject.execute(params)
 
     assert result == SuccessData(
         public=AspirateResult(volume=50, position=DeckPoint(x=1, y=2, z=3)),
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id=pipette_id,
-                new_location=update_types.Well(labware_id="123", well_name="A3"),
+                new_location=update_types.Well(
+                    labware_id=labware_id, well_name=well_name
+                ),
                 new_deck_point=DeckPoint(x=1, y=2, z=3),
             ),
             liquid_operated=update_types.LiquidOperatedUpdate(
-                labware_id="123",
-                well_names=["A3", "A4"],
+                labware_id=labware_id,
+                well_names=["covered-well-1", "covered-well-2"],
                 volume_added=-100,
             ),
             pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
