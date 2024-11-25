@@ -398,7 +398,7 @@ const EditModulesModalComponent = (
                   title={t('alert:module_placement.SLOT_OCCUPIED.title')}
                   //  TODO(Jr, 3/18/24): add decription back: validation.selectedSlot
                   //  when we fix designs in the future
-                  description={''}
+                  description=""
                 />
               ) : null}
             </Box>

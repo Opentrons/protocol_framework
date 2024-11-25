@@ -167,7 +167,7 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
       })}
       className={styles.position_from_bottom_input}
       error={errorText}
-      id={'TipPositionModal_custom_input'}
+      id="TipPositionModal_custom_input"
       isIndeterminate={value === null && isIndeterminate}
       onChange={handleInputFieldChange}
       units="mm"

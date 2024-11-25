@@ -154,13 +154,13 @@ export const MixForm = (props: StepFormProps): JSX.Element => {
                 label={t('form:step_edit_form.field.well_order.label')}
                 firstValue={formData.mix_wellOrder_first}
                 secondValue={formData.mix_wellOrder_second}
-                firstName={'mix_wellOrder_first'}
-                secondName={'mix_wellOrder_second'}
+                firstName="mix_wellOrder_first"
+                secondName="mix_wellOrder_second"
               />
             </div>
             <DelayFields
-              checkboxFieldName={'aspirate_delay_checkbox'}
-              secondsFieldName={'aspirate_delay_seconds'}
+              checkboxFieldName="aspirate_delay_checkbox"
+              secondsFieldName="aspirate_delay_seconds"
               labwareId={
                 formData[
                   getLabwareFieldForPositioningField(
@@ -184,8 +184,8 @@ export const MixForm = (props: StepFormProps): JSX.Element => {
             </div>
             <div className={styles.checkbox_column}>
               <DelayFields
-                checkboxFieldName={'dispense_delay_checkbox'}
-                secondsFieldName={'dispense_delay_seconds'}
+                checkboxFieldName="dispense_delay_checkbox"
+                secondsFieldName="dispense_delay_seconds"
                 propsForFields={propsForFields}
                 labwareId={
                   formData[

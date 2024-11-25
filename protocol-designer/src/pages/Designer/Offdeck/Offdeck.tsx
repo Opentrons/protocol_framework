@@ -49,7 +49,7 @@ export function OffDeck(props: DeckSetupTabType): JSX.Element {
   let labware = (
     <RobotWorkSpace
       key="emptyState"
-      viewBox={`-25 -32 182.5142857143 122.1142857143`}
+      viewBox="-25 -32 182.5142857143 122.1142857143"
     >
       {() => (
         <RobotCoordsForeignDiv>

@@ -144,7 +144,7 @@ export function PipetteFields(props: PipetteFieldsProps): JSX.Element {
           </FormGroup>
           <FormGroup
             disabled={isEmpty(values.left.pipetteName)}
-            key={'leftTiprackModel'}
+            key="leftTiprackModel"
             label={
               has96Channel
                 ? t('pipette_fields.tiprack')
@@ -178,7 +178,7 @@ export function PipetteFields(props: PipetteFieldsProps): JSX.Element {
             </FormGroup>
             <FormGroup
               disabled={isEmpty(values.right.pipetteName)}
-              key={'rightTiprackModel'}
+              key="rightTiprackModel"
               label={t('pipette_fields.right_tiprack')}
               className={formStyles.stacked_row}
             >

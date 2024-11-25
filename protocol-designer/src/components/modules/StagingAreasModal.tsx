@@ -151,7 +151,7 @@ const StagingAreasModalComponent = (
                 title={t(
                   'alert:deck_config_placement.SLOT_OCCUPIED.staging_area'
                 )}
-                description={''}
+                description=""
               />
             ) : null}
           </Box>
