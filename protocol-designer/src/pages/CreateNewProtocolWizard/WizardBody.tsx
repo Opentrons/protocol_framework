@@ -12,7 +12,7 @@ import {
   Flex,
   JUSTIFY_SPACE_BETWEEN,
   LargeButton,
-  OVERFLOW_SCROLL,
+  OVERFLOW_AUTO,
   SPACING,
   StyledText,
   Tooltip,
@@ -114,7 +114,7 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
           flexDirection={DIRECTION_COLUMN}
           gridGap={SPACING.spacing8}
           height="100%"
-          overflowY={OVERFLOW_SCROLL}
+          overflowY={OVERFLOW_AUTO}
         >
           <StyledText
             color={COLORS.grey60}
