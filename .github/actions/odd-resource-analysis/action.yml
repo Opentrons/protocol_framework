@@ -1,6 +1,7 @@
 name: 'ODD Memory Usage Analysis'
-description: 'Analyzes memory usage trends across ODD versions using Mixpanel data. 
-Note that only processes with positive correlation or explicitly whitelisted processes are shown.'
+description: >-
+  Analyzes memory usage trends across ODD versions using Mixpanel data.
+  Note that only processes with positive correlation or explicitly whitelisted processes are shown.
 
 inputs:
   mixpanel-user:

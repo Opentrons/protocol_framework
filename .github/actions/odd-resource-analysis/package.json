@@ -16,6 +16,7 @@
     "simple-statistics": "7.8.7"
   },
   "devDependencies": {
-    "@vercel/ncc": "0.38.3"
+    "@vercel/ncc": "0.38.3",
+    "prettier": "2.7.1"
   }
 }
