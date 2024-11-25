@@ -126,8 +126,6 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
             if isinstance(move_result, DefinedErrorData):
                 return DefinedErrorData(move_result.public, state_update=state_update)
 
-            # TODO: Figure out what to do for state_update_if_false_positive
-
             prepare_result = await prepare_for_aspirate(
                 pipette_id=pipette_id,
                 pipetting=self._pipetting,
@@ -196,7 +194,6 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
             return DefinedErrorData(
                 public=aspirate_result.public, state_update=state_update
             )
-            # TODO: state_update_if_false_positive?
 
         state_update.set_liquid_operated(
             labware_id=labware_id,
