@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from typing import Optional, TYPE_CHECKING, cast, Union, List
-
 from opentrons.types import Location, Mount, NozzleConfigurationType, NozzleMapInterface
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.dev_types import PipetteDict
@@ -28,6 +27,7 @@ from opentrons.protocol_engine.types import (
     PRIMARY_NOZZLE_LITERAL,
     NozzleLayoutConfigurationType,
     AddressableOffsetVector,
+    LiquidClassRecord,
 )
 from opentrons.protocol_engine.errors.exceptions import TipNotAttachedError
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
@@ -36,9 +36,8 @@ from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
 from . import overlap_versions, pipette_movement_conflict
 
-from ..instrument import AbstractInstrument
 from .well import WellCore
-
+from ..instrument import AbstractInstrument
 from ...disposal_locations import TrashBin, WasteChute
 
 if TYPE_CHECKING:
@@ -855,6 +854,45 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             )
         )
 
+    def load_liquid_class(
+        self,
+        liquid_class: LiquidClass,
+        pipette_load_name: str,
+        tiprack_uri: str,
+    ) -> str:
+        """Load a liquid class into the engine and return its ID."""
+        transfer_props = liquid_class.get_for(
+            pipette=pipette_load_name, tiprack=tiprack_uri
+        )
+
+        liquid_class_record = LiquidClassRecord(
+            liquidClassName=liquid_class.name,
+            pipetteModel=self.get_model(),  # TODO: verify this is the correct 'model' to use
+            tiprack=tiprack_uri,
+            aspirate=transfer_props.aspirate.as_schema_v1_model(),
+            singleDispense=transfer_props.dispense.as_schema_v1_model(),
+            multiDispense=transfer_props.multi_dispense.as_schema_v1_model()
+            if transfer_props.multi_dispense
+            else None,
+        )
+        result = self._engine_client.execute_command_without_recovery(
+            cmd.LoadLiquidClassParams(
+                liquidClassRecord=liquid_class_record,
+            )
+        )
+        return result.liquidClassId
+
+    def transfer_liquid(
+        self,
+        liquid_class_id: str,
+        volume: float,
+        source: List[WellCore],
+        dest: List[WellCore],
+        new_tip: TransferTipPolicyV2,
+        trash_location: Union[WellCore, Location, TrashBin, WasteChute],
+    ) -> None:
+        """Execute transfer using liquid class properties."""
+
     def retract(self) -> None:
         """Retract this instrument to the top of the gantry."""
         z_axis = self._engine_client.state.pipettes.get_z_axis(self._pipette_id)
@@ -941,14 +979,3 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         return self._engine_client.state.pipettes.get_nozzle_configuration_supports_lld(
             self.pipette_id
         )
-
-    def transfer_liquid(
-        self,
-        liquid_class: LiquidClass,
-        volume: float,
-        source: List[WellCore],
-        dest: List[WellCore],
-        new_tip: TransferTipPolicyV2,
-        trash_location: Union[Location, TrashBin, WasteChute],
-    ) -> None:
-        """Execute transfer using liquid class properties."""

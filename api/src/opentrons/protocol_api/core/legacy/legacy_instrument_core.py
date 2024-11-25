@@ -556,17 +556,27 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
         """This will never be called because it was added in API 2.16."""
         pass
 
-    def transfer_liquid(
+    def load_liquid_class(
         self,
         liquid_class: LiquidClass,
+        pipette_load_name: str,
+        tiprack_uri: str,
+    ) -> str:
+        """This will never be called because it was added in .."""
+        # TODO(spp, 2024-11-20): update the docstring and error to include API version
+        assert False, "load_liquid_class is not supported in legacy context"
+
+    def transfer_liquid(
+        self,
+        liquid_class_id: str,
         volume: float,
         source: List[LegacyWellCore],
         dest: List[LegacyWellCore],
         new_tip: TransferTipPolicyV2,
-        trash_location: Union[types.Location, TrashBin, WasteChute],
+        trash_location: Union[LegacyWellCore, types.Location, TrashBin, WasteChute],
     ) -> None:
-        """Transfer a liquid from source to dest according to liquid class properties."""
-        # TODO(spp, 2024-11-20): update the error to include API version
+        """This will never be called because it was added in .."""
+        # TODO(spp, 2024-11-20): update the docstring and error to include API version
         assert False, "transfer_liquid is not supported in legacy context"
 
     def get_active_channels(self) -> int:

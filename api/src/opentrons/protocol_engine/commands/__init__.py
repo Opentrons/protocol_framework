@@ -147,6 +147,15 @@ from .load_liquid import (
     LoadLiquidImplementation,
 )
 
+from .load_liquid_class import (
+    LoadLiquidClass,
+    LoadLiquidClassParams,
+    LoadLiquidClassCreate,
+    LoadLiquidClassResult,
+    LoadLiquidClassCommandType,
+    LoadLiquidClassImplementation,
+)
+
 from .load_module import (
     LoadModule,
     LoadModuleParams,
@@ -553,6 +562,13 @@ __all__ = [
     "LoadLiquidParams",
     "LoadLiquidResult",
     "LoadLiquidCommandType",
+    # load liquid class command models
+    "LoadLiquidClass",
+    "LoadLiquidClassParams",
+    "LoadLiquidClassCreate",
+    "LoadLiquidClassResult",
+    "LoadLiquidClassImplementation",
+    "LoadLiquidClassCommandType",
     # hardware control command models
     # hardware module command bundles
     "absorbance_reader",
