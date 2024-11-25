@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Box, Btn, Flex } from '../../primitives'
 import {
   ALIGN_CENTER,
@@ -53,10 +53,8 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
     position = POSITION_FIXED,
   } = props
 
-  const slideOutRef = React.useRef<HTMLDivElement>(null)
-  const [isScrolledToBottom, setIsScrolledToBottom] = React.useState<boolean>(
-    false
-  )
+  const slideOutRef = useRef<HTMLDivElement>(null)
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState<boolean>(false)
   const handleScroll = (): void => {
     if (slideOutRef.current == null) return
     const { scrollTop, scrollHeight, clientHeight } = slideOutRef.current
@@ -67,7 +65,7 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     handleScroll()
   }, [slideOutRef])
 
