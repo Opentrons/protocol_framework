@@ -51,6 +51,7 @@ def test_build_aspirate_settings() -> None:
     assert aspirate_properties.mix.volume == 15
     assert aspirate_properties.delay.enabled is True
     assert aspirate_properties.delay.duration == 2
+    assert aspirate_properties.as_schema_v1_model() == aspirate_data
 
 
 def test_build_single_dispense_settings() -> None:
@@ -103,6 +104,7 @@ def test_build_single_dispense_settings() -> None:
     }
     assert single_dispense_properties.delay.enabled is True
     assert single_dispense_properties.delay.duration == 2.5
+    assert single_dispense_properties.as_schema_v1_model() == single_dispense_data
 
 
 def test_build_multi_dispense_settings() -> None:
@@ -154,6 +156,7 @@ def test_build_multi_dispense_settings() -> None:
     }
     assert multi_dispense_properties.delay.enabled is True
     assert multi_dispense_properties.delay.duration == 1
+    assert multi_dispense_properties.as_schema_v1_model() == multi_dispense_data
 
 
 def test_build_multi_dispense_settings_none(
@@ -169,6 +172,7 @@ def test_liquid_handling_property_by_volume() -> None:
     subject = LiquidHandlingPropertyByVolume([(5.0, 50.0), (10.0, 250.0)])
     assert subject.as_dict() == {5.0: 50, 10.0: 250}
     assert subject.get_for_volume(7) == 130.0
+    assert subject.as_list_of_tuples() == [(5.0, 50.0), (10.0, 250.0)]
 
     subject.set_for_volume(volume=7, value=175.5)
     assert subject.as_dict() == {

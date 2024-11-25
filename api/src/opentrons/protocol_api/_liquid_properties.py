@@ -1,15 +1,19 @@
 from dataclasses import dataclass
 from numpy import interp
-from typing import Optional, Dict, Sequence, Tuple
+from typing import Optional, Dict, Sequence, Tuple, List
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     AspirateProperties as SharedDataAspirateProperties,
     SingleDispenseProperties as SharedDataSingleDispenseProperties,
     MultiDispenseProperties as SharedDataMultiDispenseProperties,
     DelayProperties as SharedDataDelayProperties,
+    DelayParams as SharedDataDelayParams,
     TouchTipProperties as SharedDataTouchTipProperties,
+    LiquidClassTouchTipParams as SharedDataTouchTipParams,
     MixProperties as SharedDataMixProperties,
+    MixParams as SharedDataMixParams,
     BlowoutProperties as SharedDataBlowoutProperties,
+    BlowoutParams as SharedDataBlowoutParams,
     ByTipTypeSetting as SharedByTipTypeSetting,
     Submerge as SharedDataSubmerge,
     RetractAspirate as SharedDataRetractAspirate,
@@ -36,6 +40,10 @@ class LiquidHandlingPropertyByVolume:
     def as_dict(self) -> Dict[float, float]:
         """Get a dictionary representation of all set volumes and values along with the default."""
         return self._properties_by_volume
+
+    def as_list_of_tuples(self) -> List[Tuple[float, float]]:
+        """Get as list of tuples."""
+        return [(k, v) for k, v in self._properties_by_volume.items()]
 
     def get_for_volume(self, volume: float) -> float:
         """Get a value by volume for this property. Volumes not defined will be interpolated between set volumes."""
@@ -101,6 +109,14 @@ class DelayProperties:
         validated_duration = validation.ensure_positive_float(new_duration)
         self._duration = validated_duration
 
+    def as_schema_v1_model(self) -> SharedDataDelayProperties:
+        return SharedDataDelayProperties(
+            enable=self._enabled,
+            params=SharedDataDelayParams(duration=self.duration)
+            if self.duration is not None
+            else None,
+        )
+
 
 @dataclass
 class TouchTipProperties:
@@ -152,6 +168,27 @@ class TouchTipProperties:
         validated_speed = validation.ensure_positive_float(new_speed)
         self._speed = validated_speed
 
+    def _get_schema_v1_params(self) -> Optional[SharedDataTouchTipParams]:
+        """Get the touch tip params in schema v1 shape."""
+        if (
+            self._z_offset is not None
+            and self._mm_to_edge is not None
+            and self._speed is not None
+        ):
+            return SharedDataTouchTipParams(
+                zOffset=self._z_offset,
+                mmToEdge=self._mm_to_edge,
+                speed=self._speed,
+            )
+        else:
+            return None
+
+    def as_schema_v1_model(self) -> SharedDataTouchTipProperties:
+        return SharedDataTouchTipProperties(
+            enable=self._enabled,
+            params=self._get_schema_v1_params(),
+        )
+
 
 @dataclass
 class MixProperties:
@@ -188,6 +225,22 @@ class MixProperties:
     def volume(self, new_volume: float) -> None:
         validated_volume = validation.ensure_positive_float(new_volume)
         self._volume = validated_volume
+
+    def _get_schema_v1_params(self) -> Optional[SharedDataMixParams]:
+        """Get the mix params in schema v1 shape."""
+        if self._repetitions is not None and self._volume is not None:
+            return SharedDataMixParams(
+                repetitions=self._repetitions,
+                volume=self._volume,
+            )
+        else:
+            return None
+
+    def as_schema_v1_model(self) -> SharedDataMixProperties:
+        return SharedDataMixProperties(
+            enable=self._enabled,
+            params=self._get_schema_v1_params(),
+        )
 
 
 @dataclass
@@ -226,6 +279,22 @@ class BlowoutProperties:
     def flow_rate(self, new_flow_rate: float) -> None:
         validated_flow_rate = validation.ensure_positive_float(new_flow_rate)
         self._flow_rate = validated_flow_rate
+
+    def _get_schema_v1_params(self) -> Optional[SharedDataBlowoutParams]:
+        """Get the mix params in schema v1 shape."""
+        if self._location is not None and self._flow_rate is not None:
+            return SharedDataBlowoutParams(
+                location=self._location,
+                flowRate=self._flow_rate,
+            )
+        else:
+            return None
+
+    def as_schema_v1_model(self) -> SharedDataBlowoutProperties:
+        return SharedDataBlowoutProperties(
+            enable=self._enabled,
+            params=self._get_schema_v1_params(),
+        )
 
 
 @dataclass
@@ -271,6 +340,14 @@ class SubmergeRetractCommon:
 class Submerge(SubmergeRetractCommon):
     ...
 
+    def as_schema_v1_model(self) -> SharedDataSubmerge:
+        return SharedDataSubmerge(
+            positionReference=self._position_reference,
+            offset=self._offset,
+            speed=self._speed,
+            delay=self._delay.as_schema_v1_model(),
+        )
+
 
 @dataclass
 class RetractAspirate(SubmergeRetractCommon):
@@ -285,6 +362,16 @@ class RetractAspirate(SubmergeRetractCommon):
     @property
     def touch_tip(self) -> TouchTipProperties:
         return self._touch_tip
+
+    def as_schema_v1_model(self) -> SharedDataRetractAspirate:
+        return SharedDataRetractAspirate(
+            positionReference=self._position_reference,
+            offset=self._offset,
+            speed=self._speed,
+            airGapByVolume=self._air_gap_by_volume.as_list_of_tuples(),
+            touchTip=self._touch_tip.as_schema_v1_model(),
+            delay=self._delay.as_schema_v1_model(),
+        )
 
 
 @dataclass
@@ -305,6 +392,17 @@ class RetractDispense(SubmergeRetractCommon):
     @property
     def blowout(self) -> BlowoutProperties:
         return self._blowout
+
+    def as_schema_v1_model(self) -> SharedDataRetractDispense:
+        return SharedDataRetractDispense(
+            positionReference=self._position_reference,
+            offset=self._offset,
+            speed=self._speed,
+            airGapByVolume=self._air_gap_by_volume.as_list_of_tuples(),
+            blowout=self._blowout.as_schema_v1_model(),
+            touchTip=self._touch_tip.as_schema_v1_model(),
+            delay=self._delay.as_schema_v1_model(),
+        )
 
 
 @dataclass
@@ -370,6 +468,18 @@ class AspirateProperties(BaseLiquidHandlingProperties):
     def mix(self) -> MixProperties:
         return self._mix
 
+    def as_schema_v1_model(self) -> SharedDataAspirateProperties:
+        return SharedDataAspirateProperties(
+            submerge=self._submerge.as_schema_v1_model(),
+            retract=self._retract.as_schema_v1_model(),
+            positionReference=self._position_reference,
+            offset=self._offset,
+            flowRateByVolume=self._flow_rate_by_volume.as_list_of_tuples(),
+            preWet=self._pre_wet,
+            mix=self._mix.as_schema_v1_model(),
+            delay=self._delay.as_schema_v1_model(),
+        )
+
 
 @dataclass
 class SingleDispenseProperties(BaseLiquidHandlingProperties):
@@ -390,6 +500,18 @@ class SingleDispenseProperties(BaseLiquidHandlingProperties):
     def mix(self) -> MixProperties:
         return self._mix
 
+    def as_schema_v1_model(self) -> SharedDataSingleDispenseProperties:
+        return SharedDataSingleDispenseProperties(
+            submerge=self._submerge.as_schema_v1_model(),
+            retract=self._retract.as_schema_v1_model(),
+            positionReference=self._position_reference,
+            offset=self._offset,
+            flowRateByVolume=self._flow_rate_by_volume.as_list_of_tuples(),
+            mix=self._mix.as_schema_v1_model(),
+            pushOutByVolume=self._push_out_by_volume.as_list_of_tuples(),
+            delay=self._delay.as_schema_v1_model(),
+        )
+
 
 @dataclass
 class MultiDispenseProperties(BaseLiquidHandlingProperties):
@@ -409,6 +531,18 @@ class MultiDispenseProperties(BaseLiquidHandlingProperties):
     @property
     def disposal_by_volume(self) -> LiquidHandlingPropertyByVolume:
         return self._disposal_by_volume
+
+    def as_schema_v1_model(self) -> SharedDataMultiDispenseProperties:
+        return SharedDataMultiDispenseProperties(
+            submerge=self._submerge.as_schema_v1_model(),
+            retract=self._retract.as_schema_v1_model(),
+            positionReference=self._position_reference,
+            offset=self._offset,
+            flowRateByVolume=self._flow_rate_by_volume.as_list_of_tuples(),
+            conditioningByVolume=self._conditioning_by_volume.as_list_of_tuples(),
+            disposalByVolume=self._disposal_by_volume.as_list_of_tuples(),
+            delay=self._delay.as_schema_v1_model(),
+        )
 
 
 @dataclass
