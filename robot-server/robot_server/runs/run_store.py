@@ -626,6 +626,7 @@ class RunStore:
                         == CommandStatusSQLEnum.FAILED,
                     )
                 )
+                .order_by(run_command_table.c.index_in_run)
                 .subquery()
             )
 
