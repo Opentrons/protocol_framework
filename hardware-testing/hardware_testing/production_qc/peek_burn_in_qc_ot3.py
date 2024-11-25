@@ -21,8 +21,8 @@ from hardware_testing.opentrons_api import helpers_ot3
 from hardware_testing.data import ui
 
 DEFAULT_TRIALS = 10 # The number of trials each current speed check does
-DEFAULT_CYCLES = 4 # The number of burn-in cycles
-TRIALS_PER_CYCLE = 500 # number of plunger cycles in one burn in cycle
+DEFAULT_CYCLES = 500 # The number of burn-in cycles
+TRIALS_PER_CYCLE = 1 # number of plunger cycles in one burn in cycle
 STALL_THRESHOLD_MM = 0.1
 TEST_ACCELERATION = 1500  # used during gravimetric tests
 
