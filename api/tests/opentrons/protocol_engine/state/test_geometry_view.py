@@ -102,6 +102,14 @@ from ...protocol_runner.test_json_translator import _load_labware_definition_dat
 
 
 @pytest.fixture
+def available_sensors() -> pipette_definition.AvailableSensorDefinition:
+    """Provide a list of sensors."""
+    return pipette_definition.AvailableSensorDefinition(
+        sensors=["pressure", "capacitive", "environment"]
+    )
+
+
+@pytest.fixture
 def mock_labware_view(decoy: Decoy) -> LabwareView:
     """Get a mock in the shape of a LabwareView."""
     return decoy.mock(cls=LabwareView)
@@ -2575,6 +2583,7 @@ def test_get_next_drop_tip_location(
     pipette_mount: MountType,
     expected_locations: List[DropTipWellLocation],
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
+    available_sensors: pipette_definition.AvailableSensorDefinition,
 ) -> None:
     """It should provide the next location to drop tips into within a labware."""
     decoy.when(mock_labware_view.is_fixed_trash(labware_id="abc")).then_return(True)
@@ -2611,6 +2620,14 @@ def test_get_next_drop_tip_location(
                 back_right_corner=Point(x=40, y=20, z=60),
             ),
             lld_settings={},
+            plunger_positions={
+                "top": 0.0,
+                "bottom": 5.0,
+                "blow_out": 19.0,
+                "drop_tip": 20.0,
+            },
+            shaft_ul_per_mm=5.0,
+            available_sensors=available_sensors,
         )
     )
     decoy.when(mock_pipette_view.get_mount("pip-123")).then_return(pipette_mount)

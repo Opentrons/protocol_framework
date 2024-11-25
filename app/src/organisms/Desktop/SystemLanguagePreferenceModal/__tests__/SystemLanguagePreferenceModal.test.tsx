@@ -180,4 +180,16 @@ describe('SystemLanguagePreferenceModal', () => {
       'zh-Hant'
     )
   })
+
+  it('should not open update modal when system language changes to an unsuppported language', () => {
+    vi.mocked(getSystemLanguage).mockReturnValue('es-MX')
+    render()
+
+    expect(screen.queryByRole('button', { name: 'Don’t change' })).toBeNull()
+    expect(
+      screen.queryByRole('button', {
+        name: 'Use system language',
+      })
+    ).toBeNull()
+  })
 })

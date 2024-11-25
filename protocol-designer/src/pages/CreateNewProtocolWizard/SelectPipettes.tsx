@@ -14,6 +14,7 @@ import {
   Box,
   Btn,
   Checkbox,
+  COLORS,
   CURSOR_POINTER,
   DIRECTION_COLUMN,
   DIRECTION_ROW,
@@ -169,6 +170,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
       ) : null}
       <HandleEnter onEnter={handleProceed}>
         <WizardBody
+          robotType={robotType}
           stepNumber={2}
           header={page === 'add' ? t('add_pipette') : t('robot_pipettes')}
           subHeader={page === 'add' ? t('which_pipette') : undefined}
@@ -399,14 +401,16 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                                   TYPOGRAPHY.textDecorationUnderline
                                 }
                               >
-                                <StyledText
-                                  desktopStyle="bodyDefaultRegular"
-                                  padding={SPACING.spacing4}
-                                >
-                                  {allowAllTipracks
-                                    ? t('show_default_tips')
-                                    : t('show_all_tips')}
-                                </StyledText>
+                                <StyledLabel>
+                                  <StyledText
+                                    desktopStyle="bodyDefaultRegular"
+                                    padding={SPACING.spacing4}
+                                  >
+                                    {allowAllTipracks
+                                      ? t('show_default_tips')
+                                      : t('show_all_tips')}
+                                  </StyledText>
+                                </StyledLabel>
                               </Btn>
                             )}
                           </Box>
@@ -556,5 +560,8 @@ const StyledLabel = styled.label`
   cursor: ${CURSOR_POINTER};
   input[type='file'] {
     display: none;
+  }
+  &:hover {
+    color: ${COLORS.blue50};
   }
 `

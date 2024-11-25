@@ -1,12 +1,28 @@
 from abc import abstractmethod, ABC
-from typing import Optional
+from typing import Optional, Union
 
 from opentrons.types import AxisMapType, Mount, Point
+from opentrons_shared_data.pipette.types import PipetteNameType
+from opentrons.protocol_api._types import PlungerPositionTypes, PipetteActionTypes
 
 
 class AbstractRobot(ABC):
     @abstractmethod
-    def get_pipette_type_from_engine(self, mount: Mount) -> Optional[str]:
+    def get_pipette_type_from_engine(
+        self, mount: Union[Mount, str]
+    ) -> Optional[PipetteNameType]:
+        ...
+
+    @abstractmethod
+    def get_plunger_position_from_volume(
+        self, mount: Mount, volume: float, action: PipetteActionTypes, robot_type: str
+    ) -> float:
+        ...
+
+    @abstractmethod
+    def get_plunger_position_from_name(
+        self, mount: Mount, position_name: PlungerPositionTypes
+    ) -> float:
         ...
 
     @abstractmethod

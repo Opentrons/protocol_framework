@@ -6,11 +6,14 @@ import {
   DIRECTION_COLUMN,
   ALIGN_CENTER,
   PrimaryButton,
+  useHoverTooltip,
+  Tooltip,
 } from '@opentrons/components'
 import { useToggleGroup } from '/app/molecules/ToggleGroup/useToggleGroup'
 import { ANALYTICS_LIQUID_SETUP_VIEW_TOGGLE } from '/app/redux/analytics'
 import { SetupLiquidsList } from './SetupLiquidsList'
 import { SetupLiquidsMap } from './SetupLiquidsMap'
+import { useRunHasStarted } from '/app/resources/runs'
 
 import type {
   CompletedProtocolAnalysis,
@@ -38,6 +41,12 @@ export function SetupLiquids({
     t('map_view') as string,
     ANALYTICS_LIQUID_SETUP_VIEW_TOGGLE
   )
+
+  // TODO(jh, 11-13-24): These disabled tooltips are used throughout setup flows. Let's consolidate them.
+  const [targetProps, tooltipProps] = useHoverTooltip()
+  const runHasStarted = useRunHasStarted(runId)
+  const tooltipText = runHasStarted ? t('protocol_run_started') : null
+
   return (
     <Flex
       flexDirection={DIRECTION_COLUMN}
@@ -56,10 +65,14 @@ export function SetupLiquids({
           onClick={() => {
             setLiquidSetupConfirmed(true)
           }}
-          disabled={isLiquidSetupConfirmed}
+          disabled={isLiquidSetupConfirmed || runHasStarted}
+          {...targetProps}
         >
           {t('confirm_locations_and_volumes')}
         </PrimaryButton>
+        {tooltipText != null ? (
+          <Tooltip tooltipProps={tooltipProps}>{tooltipText}</Tooltip>
+        ) : null}
       </Flex>
     </Flex>
   )

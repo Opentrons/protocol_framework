@@ -5,8 +5,10 @@ import { SketchPicker } from 'react-color'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
 import { Controller, useForm } from 'react-hook-form'
+import styled from 'styled-components'
 import { DEFAULT_LIQUID_COLORS } from '@opentrons/shared-data'
 import {
+  BORDERS,
   Btn,
   COLORS,
   DIRECTION_COLUMN,
@@ -28,7 +30,7 @@ import * as labwareIngredActions from '../../labware-ingred/actions'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import { swatchColors } from '../../components/swatchColors'
 import { HandleEnter } from '../../atoms/HandleEnter'
-import { DescriptionField, LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
 
 import type { ColorResult, RGBColor } from 'react-color'
 import type { ThunkDispatch } from 'redux-thunk'
@@ -310,3 +312,13 @@ export function DefineLiquidsModal(
     </HandleEnter>
   )
 }
+
+export const DescriptionField = styled.textarea`
+  min-height: 5rem;
+  width: 100%;
+  border: 1px ${BORDERS.styleSolid} ${COLORS.grey50};
+  border-radius: ${BORDERS.borderRadius4};
+  padding: ${SPACING.spacing8};
+  font-size: ${TYPOGRAPHY.fontSizeP};
+  resize: none;
+`

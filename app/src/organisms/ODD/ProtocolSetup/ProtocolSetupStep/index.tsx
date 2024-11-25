@@ -1,20 +1,23 @@
 import { css } from 'styled-components'
 import {
-  Btn,
-  Flex,
-  Icon,
   ALIGN_CENTER,
   BORDERS,
-  DIRECTION_COLUMN,
-  SPACING,
-  JUSTIFY_END,
-  TEXT_ALIGN_RIGHT,
+  Btn,
   COLORS,
-  TYPOGRAPHY,
-  NO_WRAP,
+  DIRECTION_COLUMN,
+  Flex,
+  Icon,
+  JUSTIFY_END,
   LegacyStyledText,
+  NO_WRAP,
+  SPACING,
+  TEXT_ALIGN_RIGHT,
+  truncateString,
+  TYPOGRAPHY,
 } from '@opentrons/components'
 import { useToaster } from '../../../ToasterOven'
+
+const CSV_FILE_MAX_LENGTH = 18 // truncated text + three dots
 
 export type ProtocolSetupStepStatus =
   | 'ready'
@@ -167,7 +170,9 @@ export function ProtocolSetupStep({
             maxWidth="20rem"
             css={clipDetail ? CLIPPED_TEXT_STYLE : undefined}
           >
-            {detail}
+            {title === 'CSV File' && detail != null
+              ? truncateString(detail, CSV_FILE_MAX_LENGTH)
+              : detail}
             {subDetail != null && detail != null ? <br /> : null}
             {subDetail}
           </LegacyStyledText>

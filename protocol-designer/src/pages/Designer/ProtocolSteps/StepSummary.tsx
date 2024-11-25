@@ -79,7 +79,6 @@ interface StepSummaryProps {
 export function StepSummary(props: StepSummaryProps): JSX.Element | null {
   const { currentStep, stepDetails } = props
   const { t } = useTranslation(['protocol_steps', 'application'])
-
   const labwareNicknamesById = useSelector(getLabwareNicknamesById)
   const additionalEquipmentEntities = useSelector(
     getAdditionalEquipmentEntities
@@ -91,7 +90,6 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
     return null
   }
   const { stepType } = currentStep
-
   let stepSummaryContent: JSX.Element | null = null
   switch (stepType) {
     case 'mix':
@@ -184,16 +182,20 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
           </Flex>
         ) : (
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
-            <StyledTrans
-              i18nKey="protocol_steps:thermocycler_module.thermocycler_profile.volume"
-              tagText={`${profileVolume} ${t('application:units.microliter')}`}
-            />
-            <StyledTrans
-              i18nKey="protocol_steps:thermocycler_module.thermocycler_profile.lid_temperature"
-              tagText={`${profileTargetLidTemp}${t(
-                'application:units.degrees'
-              )}`}
-            />
+            <Flex gridGap={SPACING.spacing20}>
+              <StyledTrans
+                i18nKey="protocol_steps:thermocycler_module.thermocycler_profile.volume"
+                tagText={`${profileVolume} ${t(
+                  'application:units.microliter'
+                )}`}
+              />
+              <StyledTrans
+                i18nKey="protocol_steps:thermocycler_module.thermocycler_profile.lid_temperature"
+                tagText={`${profileTargetLidTemp}${t(
+                  'application:units.degrees'
+                )}`}
+              />
+            </Flex>
             <Flex gridGap={SPACING.spacing20}>
               <StyledTrans
                 i18nKey="protocol_steps:thermocycler_module.thermocycler_profile.end_hold.block"
@@ -405,7 +407,6 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
     default:
       stepSummaryContent = null
   }
-
   return stepSummaryContent != null || stepDetails != null ? (
     <Flex
       flexDirection={DIRECTION_COLUMN}

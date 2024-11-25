@@ -60,12 +60,25 @@ class FlexBackend(Protocol):
     def grab_pressure(self, channels: int, mount: OT3Mount) -> AsyncIterator[None]:
         ...
 
+    def set_pressure_sensor_available(
+        self, pipette_axis: Axis, available: bool
+    ) -> None:
+        ...
+
+    def get_pressure_sensor_available(self, pipette_axis: Axis) -> bool:
+        ...
+
     def update_constraints_for_gantry_load(self, gantry_load: GantryLoad) -> None:
         ...
 
     def update_constraints_for_calibration_with_gantry_load(
         self,
         gantry_load: GantryLoad,
+    ) -> None:
+        ...
+
+    def update_constraints_for_emulsifying_pipette(
+        self, mount: OT3Mount, gantry_load: GantryLoad
     ) -> None:
         ...
 
