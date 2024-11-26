@@ -118,7 +118,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
 
   useEffect(() => {
     handleScrollToBottom()
-  }, [pipetteVolume])
+  }, [pipetteType, pipetteVolume, pipetteGen])
 
   const noPipette =
     (pipettesByMount.left.pipetteName == null ||
