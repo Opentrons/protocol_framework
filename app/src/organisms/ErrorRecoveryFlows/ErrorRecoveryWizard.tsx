@@ -107,10 +107,7 @@ export function ErrorRecoveryComponent(
   const buildTitleHeading = (): JSX.Element => {
     const titleText = hasLaunchedRecovery ? t('recovery_mode') : t('cancel_run')
     return (
-      <StyledText
-        oddStyle="level4HeaderBold"
-        desktopStyle="headingSmallRegular"
-      >
+      <StyledText oddStyle="level4HeaderBold" desktopStyle="bodyLargeSemiBold">
         {titleText}
       </StyledText>
     )

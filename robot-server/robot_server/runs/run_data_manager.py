@@ -143,7 +143,7 @@ class PreSerializedCommandsNotAvailableError(LookupError):
 class RunDataManager:
     """Collaborator to manage current and historical run data.
 
-    Provides a facade to both an EngineStore (current run) and a RunStore
+    Provides a facade to both a RunOrchestratorStore (current run) and a RunStore
     (historical runs). Returns `Run` response models to the router.
 
     Args:
@@ -161,7 +161,14 @@ class RunDataManager:
     ) -> None:
         self._run_orchestrator_store = run_orchestrator_store
         self._run_store = run_store
+
         self._error_recovery_setting_store = error_recovery_setting_store
+        # todo(mm, 2024-11-22): Storing the list of error recovery rules is outside the
+        # responsibilities of this class. It's also clunky for us to store it like this
+        # because we need to remember to clear it whenever the current run changes.
+        # This error recovery mapping stuff probably belongs in RunOrchestratorStore.
+        self._current_run_error_recovery_rules: List[ErrorRecoveryRule] = []
+
         self._task_runner = task_runner
         self._runs_publisher = runs_publisher
 
@@ -213,9 +220,10 @@ class RunDataManager:
             )
 
         error_recovery_is_enabled = self._error_recovery_setting_store.get_is_enabled()
+        self._current_run_error_recovery_rules = _INITIAL_ERROR_RECOVERY_RULES
         initial_error_recovery_policy = (
             error_recovery_mapping.create_error_recovery_policy_from_rules(
-                _INITIAL_ERROR_RECOVERY_RULES, error_recovery_is_enabled
+                self._current_run_error_recovery_rules, error_recovery_is_enabled
             )
         )
 
@@ -539,7 +547,7 @@ class RunDataManager:
     def set_error_recovery_rules(
         self, run_id: str, rules: List[ErrorRecoveryRule]
     ) -> None:
-        """Set the run's error recovery policy.
+        """Set the run's error recovery policy, in robot-server terms.
 
         The input rules get combined with the global error recovery enabled/disabled
         setting, which this method retrieves automatically.
@@ -549,10 +557,19 @@ class RunDataManager:
                 f"Cannot update {run_id} because it is not the current run."
             )
         is_enabled = self._error_recovery_setting_store.get_is_enabled()
+        self._current_run_error_recovery_rules = rules
         mapped_policy = error_recovery_mapping.create_error_recovery_policy_from_rules(
-            rules, is_enabled
+            self._current_run_error_recovery_rules, is_enabled
         )
         self._run_orchestrator_store.set_error_recovery_policy(policy=mapped_policy)
+
+    def get_error_recovery_rules(self, run_id: str) -> List[ErrorRecoveryRule]:
+        """Get the run's error recovery policy."""
+        if run_id != self._run_orchestrator_store.current_run_id:
+            raise RunNotCurrentError(
+                f"Cannot get the error recovery policy of {run_id} because it is not the current run."
+            )
+        return self._current_run_error_recovery_rules
 
     def _get_state_summary(self, run_id: str) -> Union[StateSummary, BadStateSummary]:
         if run_id == self._run_orchestrator_store.current_run_id:

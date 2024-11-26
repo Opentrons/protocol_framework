@@ -136,7 +136,7 @@ describe('RecoverySplash', () => {
     render(props)
 
     const primaryBtn = screen.getByRole('button', {
-      name: 'Launch Recovery Mode',
+      name: 'Launch recovery mode',
     })
     const secondaryBtn = screen.getByRole('button', { name: 'Cancel run' })
 
@@ -183,7 +183,7 @@ describe('RecoverySplash', () => {
 
     render(props)
 
-    clickButtonLabeled('Launch Recovery Mode')
+    clickButtonLabeled('Launch recovery mode')
 
     expect(mockMakeToast).toHaveBeenCalled()
   })

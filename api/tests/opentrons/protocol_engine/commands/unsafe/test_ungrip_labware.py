@@ -1,6 +1,7 @@
 """Test update-position-estimator commands."""
 from decoy import Decoy
 
+from opentrons.hardware_control.types import Axis
 from opentrons.protocol_engine.commands.unsafe.unsafe_ungrip_labware import (
     UnsafeUngripLabwareParams,
     UnsafeUngripLabwareResult,
@@ -25,7 +26,7 @@ async def test_ungrip_labware_implementation(
     assert result == SuccessData(public=UnsafeUngripLabwareResult())
 
     decoy.verify(
-        await ot3_hardware_api.ungrip(),
+        await ot3_hardware_api.home([Axis.G]),
     )
 
 

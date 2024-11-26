@@ -17,7 +17,10 @@ import { useTipAttachmentStatus } from '/app/resources/instruments'
 import type { RobotType } from '@opentrons/shared-data'
 import type { Run, RunStatus } from '@opentrons/api-client'
 import type { PipetteWithTip } from '/app/resources/instruments'
-import type { DropTipWizardFlowsProps } from '/app/organisms/DropTipWizardFlows'
+import type {
+  DropTipWizardFlowsProps,
+  TipAttachmentStatusResult,
+} from '/app/organisms/DropTipWizardFlows'
 import type { UseProtocolDropTipModalResult } from '../modals'
 import type { PipetteDetails } from '/app/resources/maintenance_runs'
 
@@ -35,6 +38,7 @@ export interface UseRunHeaderDropTipParams {
 export interface UseRunHeaderDropTipResult {
   dropTipModalUtils: UseProtocolDropTipModalResult
   dropTipWizardUtils: RunHeaderDropTipWizProps
+  resetTipStatus: TipAttachmentStatusResult['resetTipStatus']
 }
 
 // Handles all the tip related logic during a protocol run on the desktop app.
@@ -104,11 +108,9 @@ export function useRunHeaderDropTip({
     {
       includeFixitCommands: false,
       pageLength: 1,
-      cursor: null,
     },
     { enabled: isTerminalRunStatus(runStatus) }
   )
-
   // Manage tip checking
   useEffect(() => {
     // If a user begins a new run without navigating away from the run page, reset tip status.
@@ -120,7 +122,9 @@ export function useRunHeaderDropTip({
       // have to do it here if done during Error Recovery.
       else if (
         runSummaryNoFixit != null &&
-        !lastRunCommandPromptedErrorRecovery(runSummaryNoFixit)
+        runSummaryNoFixit.length > 0 &&
+        !lastRunCommandPromptedErrorRecovery(runSummaryNoFixit) &&
+        isTerminalRunStatus(runStatus)
       ) {
         void determineTipStatus()
       }
@@ -143,7 +147,11 @@ export function useRunHeaderDropTip({
     }
   }, [runStatus, isRunCurrent, enteredER, initialPipettesWithTipsCount])
 
-  return { dropTipModalUtils, dropTipWizardUtils: buildDTWizUtils() }
+  return {
+    dropTipModalUtils,
+    dropTipWizardUtils: buildDTWizUtils(),
+    resetTipStatus,
+  }
 }
 
 // TODO(jh, 09-12-24): Consolidate this with the same utility that exists elsewhere.

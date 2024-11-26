@@ -12,12 +12,16 @@ export function getDisplayLocation(
   location: LabwareOffsetLocation,
   labwareDefinitions: LabwareDefinition2[],
   t: TFunction,
-  i18n: i18n
+  i18n: i18n,
+  slotOnly?: boolean
 ): string {
   const slotDisplayLocation = i18n.format(
     t('slot_name', { slotName: location.slotName }),
     'titleCase'
   )
+  if (slotOnly) {
+    return slotDisplayLocation
+  }
 
   if ('definitionUri' in location && location.definitionUri != null) {
     const adapterDisplayName = labwareDefinitions.find(

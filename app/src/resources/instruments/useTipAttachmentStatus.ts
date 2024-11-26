@@ -81,7 +81,6 @@ export function useTipAttachmentStatus(
       getCommands(host as HostConfig, runId, {
         includeFixitCommands: false,
         pageLength: 1,
-        cursor: null,
       }),
     ])
       .then(([attachedInstruments, currentState, commandsData]) => {

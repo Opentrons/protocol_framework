@@ -41,7 +41,7 @@ SERIAL_STUB_REGEX = re.compile(r"P[0-9]{1,3}[KSMHV]{1,2}V[0-9]{2}")
 LIQUID_CLASS = LiquidClasses.default
 
 
-def _edit_non_quirk(
+def _edit_non_quirk(  # noqa: C901
     mutable_config_key: str, new_mutable_value: MutableConfig, base_dict: Dict[str, Any]
 ) -> None:
     def _do_edit_non_quirk(
@@ -56,6 +56,9 @@ def _edit_non_quirk(
                 for key in existing.keys():
                     _do_edit_non_quirk(new_value, existing[key], restkeys)
             elif thiskey == "##EACHTIPTYPE##":
+                for key in existing.keys():
+                    _do_edit_non_quirk(new_value, existing[key], restkeys)
+            elif thiskey == "##EACHTIP##":
                 for key in existing.keys():
                     _do_edit_non_quirk(new_value, existing[key], restkeys)
             else:

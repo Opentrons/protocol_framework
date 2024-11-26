@@ -160,7 +160,7 @@ export function AirGap(props: AirGapProps): JSX.Element {
       <ChildNavigation
         header={
           kind === 'aspirate'
-            ? t('air_gap_before_aspirating')
+            ? t('air_gap_after_aspirating')
             : t('air_gap_before_dispensing')
         }
         buttonText={i18n.format(setSaveOrContinueButtonText, 'capitalize')}
