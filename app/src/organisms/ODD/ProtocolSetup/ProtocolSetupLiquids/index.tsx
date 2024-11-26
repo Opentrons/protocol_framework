@@ -153,26 +153,30 @@ export function LiquidsList(props: LiquidsListProps): JSX.Element {
         </Flex>
         <Flex
           flexDirection={DIRECTION_COLUMN}
-          alignItems={TYPOGRAPHY.textAlignCenter}
+          alignItems={TYPOGRAPHY.textAlignLeft}
+          width="31rem"
+          overflow="hidden"
         >
           <StyledText oddStyle="bodyTextSemiBold">
-            {liquid.displayName}
+            {liquid.displayName.length > 33
+              ? `${liquid.displayName.substring(0, 33)}...`
+              : liquid.displayName}
           </StyledText>
         </Flex>
-        <Flex flex="1">
+        <Flex justifyContent={JUSTIFY_SPACE_BETWEEN} width="18.5rem">
           <Flex
             backgroundColor={`${COLORS.black90}${COLORS.opacity20HexCode}`}
             borderRadius={BORDERS.borderRadius8}
             height="2.75rem"
             padding={`${SPACING.spacing8} ${SPACING.spacing12}`}
-            alignItems={TYPOGRAPHY.textAlignCenter}
-            marginLeft="30.825rem"
+            alignItems={TYPOGRAPHY.textAlignLeft}
+            overflow="hidden"
           >
             {getTotalVolumePerLiquidId(liquid.id, labwareByLiquidId)}{' '}
             {MICRO_LITERS}
           </Flex>
+          <Icon name={openItem ? 'chevron-up' : 'chevron-right'} size="3rem" />
         </Flex>
-        <Icon name={openItem ? 'chevron-up' : 'chevron-right'} size="3rem" />
       </Flex>
       {openItem ? (
         <LiquidDetails

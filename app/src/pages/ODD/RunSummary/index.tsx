@@ -147,15 +147,15 @@ export function RunSummary(): JSX.Element {
   const { closeCurrentRun } = useCloseCurrentRun()
   // Close the current run only if it's active and then execute the onSuccess callback. Prefer this wrapper over
   // closeCurrentRun directly, since the callback is swallowed if currentRun is null.
-  const closeCurrentRunIfValid = (onSuccess?: () => void): void => {
+  const closeCurrentRunIfValid = (onSettled?: () => void): void => {
     if (isRunCurrent) {
       closeCurrentRun({
-        onSuccess: () => {
-          onSuccess?.()
+        onSettled: () => {
+          onSettled?.()
         },
       })
     } else {
-      onSuccess?.()
+      onSettled?.()
     }
   }
   const [showRunFailedModal, setShowRunFailedModal] = useState<boolean>(false)
@@ -240,15 +240,14 @@ export function RunSummary(): JSX.Element {
   const runSummaryNoFixit = useCurrentRunCommands({
     includeFixitCommands: false,
     pageLength: 1,
-    cursor: null,
   })
   useEffect(() => {
     if (
       isRunCurrent &&
       runSummaryNoFixit != null &&
+      runSummaryNoFixit.length > 0 &&
       !lastRunCommandPromptedErrorRecovery(runSummaryNoFixit)
     ) {
-      console.log('HITTING THIS')
       void determineTipStatus()
     }
   }, [runSummaryNoFixit, isRunCurrent])

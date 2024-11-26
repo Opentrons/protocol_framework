@@ -27,7 +27,6 @@ export function useDownloadRunLog(
     if (host == null) return
     // first getCommands to get total length of commands
     getCommands(host, runId, {
-      cursor: null,
       pageLength: 0,
       includeFixitCommands: true,
     })

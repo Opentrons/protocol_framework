@@ -200,7 +200,7 @@ export function RobotSettingsList(props: RobotSettingsListProps): JSX.Element {
           settingName={t('app_settings:error_recovery_mode')}
           dataTestId="RobotSettingButton_error_recovery_mode"
           settingInfo={t('app_settings:error_recovery_mode_description')}
-          iconName="recovery"
+          iconName="recovery-alt"
           rightElement={<OnOffToggle isOn={isEREnabled} />}
           onClick={toggleERSettings}
         />
