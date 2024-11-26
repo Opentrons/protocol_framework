@@ -1,5 +1,4 @@
 """ABR Asair Automation Script!"""
-import sys
 import paramiko as pmk
 import time
 import json
@@ -62,19 +61,27 @@ def run_command_on_ip(
         print(f"Error running command on {curr_ip}: {e}")
 
 
-def run(file_name: str) -> List[Any]:
+def run() -> List[Any]:
     """Run asair script module."""
     # Load Robot IPs
     cmd = "nohup python3 -m hardware_testing.scripts.abr_asair_sensor {name} {duration} {frequency}"
     cd = "cd /opt/opentrons-robot-server && "
     robot_ips = []
     robot_names = []
-    with open(file_name) as file:
-        file_dict = json.load(file)
-        robot_dict = file_dict.get("ip_address_list")
-        robot_ips = list(robot_dict.keys())
-        robot_names = list(robot_dict.values())
-    print("Executing Script on All Robots:")
+
+    robot = input("Enter IP of robot (type 'all' to run on all robots): ")
+    if robot.lower() == "all":
+        ip_file = input("Path of IPs.json: ")
+        with open(ip_file) as file:
+            file_dict = json.load(file)
+            robot_dict = file_dict.get("ip_address_list")
+            robot_ips = list(robot_dict.keys())
+            robot_names = list(robot_dict.values())
+    else:
+        robot_name = input("What is the name of the robot? ")
+        robot_ips.append(robot)
+        robot_names.append(robot_name)
+    print("Executing Script on Robot(s):")
     # Launch the processes for each robot.
     processes = []
     for index in range(len(robot_ips)):
@@ -87,8 +94,7 @@ def run(file_name: str) -> List[Any]:
 
 if __name__ == "__main__":
     # Wait for all processes to finish.
-    file_name = sys.argv[1]
-    processes = run(file_name)
+    processes = run()
     for process in processes:
         process.start()
         time.sleep(20)
