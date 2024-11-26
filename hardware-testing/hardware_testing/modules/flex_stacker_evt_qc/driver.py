@@ -117,7 +117,7 @@ class FlexStacker:
         """Constructor."""
         self._simulating = simulating
         if not self._simulating:
-            self._serial = serial.Serial(port, baudrate=STACKER_FREQ)
+            self._serial = serial.Serial(port, baudrate=STACKER_FREQ, timeout=120)
 
     def _send_and_recv(self, msg: str, guard_ret: str = "") -> str:
         """Internal utility to send a command and receive the response."""
