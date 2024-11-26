@@ -159,7 +159,7 @@ class FlexStacker:
         """Stop motor movement."""
         if self._simulating:
             return
-        self._send_and_recv(f"M0\n")
+        self._send_and_recv("M0\n")
 
     def get_limit_switch(self, axis: StackerAxis, direction: Direction) -> bool:
         """Get limit switch status.
