@@ -16,11 +16,11 @@ import { useTipAttachmentStatus } from '/app/resources/instruments'
 
 import type { RobotType } from '@opentrons/shared-data'
 import type { Run, RunStatus } from '@opentrons/api-client'
-import type { PipetteWithTip } from '/app/resources/instruments'
 import type {
-  DropTipWizardFlowsProps,
+  PipetteWithTip,
   TipAttachmentStatusResult,
-} from '/app/organisms/DropTipWizardFlows'
+} from '/app/resources/instruments'
+import type { DropTipWizardFlowsProps } from '/app/organisms/DropTipWizardFlows'
 import type { UseProtocolDropTipModalResult } from '../modals'
 import type { PipetteDetails } from '/app/resources/maintenance_runs'
 
