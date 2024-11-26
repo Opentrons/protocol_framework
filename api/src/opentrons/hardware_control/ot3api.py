@@ -1640,7 +1640,12 @@ class OT3API(
         await self._backend.disengage_axes(which)
 
     async def engage_axes(self, which: List[Axis]) -> None:
-        await self._backend.engage_axes(which)
+        await self._backend.engage_axes(
+            [axis for axis in which if self._backend.axis_is_present(axis)]
+        )
+
+    def axis_is_present(self, axis: Axis) -> bool:
+        return self._backend.axis_is_present(axis)
 
     async def get_limit_switches(self) -> Dict[Axis, bool]:
         res = await self._backend.get_limit_switches()
