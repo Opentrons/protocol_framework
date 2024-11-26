@@ -1,10 +1,8 @@
 """ABR Asair Automation Script!"""
-import sys
 import paramiko as pmk
 import time
 import json
 import multiprocessing
-import argparse
 from typing import Optional, List, Any
 
 
