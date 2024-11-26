@@ -235,6 +235,14 @@ from .pick_up_tip import (
     PickUpTipCommandType,
 )
 
+from .pick_up_next_tip import (
+    PickUpNextTip,
+    PickUpNextTipParams,
+    PickUpNextTipCreate,
+    PickUpNextTipResult,
+    PickUpNextTipCommandType,
+)
+
 from .save_position import (
     SavePosition,
     SavePositionParams,
@@ -509,6 +517,12 @@ __all__ = [
     "PickUpTipParams",
     "PickUpTipResult",
     "PickUpTipCommandType",
+    # pick up next tip command models
+    "PickUpNextTip",
+    "PickUpNextTipCreate",
+    "PickUpNextTipParams",
+    "PickUpNextTipResult",
+    "PickUpNextTipCommandType",
     # save position command models
     "SavePosition",
     "SavePositionParams",

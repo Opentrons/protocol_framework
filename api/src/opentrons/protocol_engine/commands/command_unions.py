@@ -235,6 +235,14 @@ from .pick_up_tip import (
     TipPhysicallyMissingError,
 )
 
+from .pick_up_next_tip import (
+    PickUpNextTip,
+    PickUpNextTipParams,
+    PickUpNextTipCreate,
+    PickUpNextTipResult,
+    PickUpNextTipCommandType,
+)
+
 from .touch_tip import (
     TouchTip,
     TouchTipParams,
@@ -369,6 +377,7 @@ Command = Annotated[
         WaitForResume,
         WaitForDuration,
         PickUpTip,
+        PickUpNextTip,
         SavePosition,
         SetRailLights,
         TouchTip,
@@ -454,6 +463,7 @@ CommandParams = Union[
     WaitForResumeParams,
     WaitForDurationParams,
     PickUpTipParams,
+    PickUpNextTipParams,
     SavePositionParams,
     SetRailLightsParams,
     TouchTipParams,
@@ -537,6 +547,7 @@ CommandType = Union[
     WaitForResumeCommandType,
     WaitForDurationCommandType,
     PickUpTipCommandType,
+    PickUpNextTipCommandType,
     SavePositionCommandType,
     SetRailLightsCommandType,
     TouchTipCommandType,
@@ -621,6 +632,7 @@ CommandCreate = Annotated[
         WaitForResumeCreate,
         WaitForDurationCreate,
         PickUpTipCreate,
+        PickUpNextTipCreate,
         SavePositionCreate,
         SetRailLightsCreate,
         TouchTipCreate,
@@ -706,6 +718,7 @@ CommandResult = Union[
     WaitForResumeResult,
     WaitForDurationResult,
     PickUpTipResult,
+    PickUpNextTipResult,
     SavePositionResult,
     SetRailLightsResult,
     TouchTipResult,
