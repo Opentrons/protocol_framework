@@ -7,6 +7,8 @@ from opentrons.protocol_engine.actions.actions import (
     SetErrorRecoveryPolicyAction,
 )
 
+import exceptiongroup
+
 from opentrons.protocols.models import LabwareDefinition
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.hardware_control.modules import AbstractModule as HardwareModuleAPI
@@ -472,40 +474,56 @@ class ProtocolEngine:
             FinishAction(error_details=error_details, set_run_status=set_run_status)
         )
 
-        # We have a lot of independent things to tear down. If any teardown fails, we want
-        # to continue with the rest, to avoid leaking resources or leaving the engine with a broken
-        # state. We use an AsyncExitStack to avoid a gigantic try/finally tree. Note that execution
-        # order will be backwards because the stack is first-in-last-out.
-        exit_stack = AsyncExitStack()
-        exit_stack.push_async_callback(self._plugin_starter.stop)  # Last step.
-        exit_stack.push_async_callback(
-            # Cleanup after hardware halt and reset the hardware controller
-            self._hardware_stopper.do_stop_and_recover,
-            post_run_hardware_state=post_run_hardware_state,
-            drop_tips_after_run=drop_tips_after_run,
-        )
-        exit_stack.callback(self._door_watcher.stop)
-
-        disengage_before_stopping = (
-            False
-            if post_run_hardware_state == PostRunHardwareState.STAY_ENGAGED_IN_PLACE
-            else True
-        )
-        # Halt any movements immediately
-        exit_stack.push_async_callback(
-            self._hardware_stopper.do_halt,
-            disengage_before_stopping=disengage_before_stopping,
-        )
-        exit_stack.push_async_callback(self._get_queue_worker.join)  # First step.
+        # We have a lot of independent things to tear down. If any teardown fails, we
+        # want to continue with the rest, to avoid leaking resources or leaving the
+        # engine with a broken state. Ideally, we would have symmetric setup and
+        # teardown so we could compose all of these things using an ExitStack--
+        # until then, we need to do this exception bookkeeping manually.
+        cleanup_exceptions: list[Exception] = []
         try:
-            # If any teardown steps failed, this will raise something.
-            await exit_stack.aclose()
-        except Exception as hardware_stopped_exception:
-            _log.exception("Exception during post-run finish steps.")
+            await self._get_queue_worker.join()
+        except Exception as e:
+            cleanup_exceptions.append(e)
+        try:
+            # Halt any movements immediately
+            disengage_before_stopping = (
+                False
+                if post_run_hardware_state == PostRunHardwareState.STAY_ENGAGED_IN_PLACE
+                else True
+            )
+            await self._hardware_stopper.do_halt(
+                disengage_before_stopping=disengage_before_stopping,
+            )
+        except Exception as e:
+            cleanup_exceptions.append(e)
+        try:
+            self._door_watcher.stop()
+        except Exception as e:
+            cleanup_exceptions.append(e)
+        try:
+            await self._hardware_stopper.do_stop_and_recover(
+                post_run_hardware_state=post_run_hardware_state,
+                drop_tips_after_run=drop_tips_after_run,
+            )
+        except Exception as e:
+            cleanup_exceptions.append(e)
+        try:
+            await self._plugin_starter.stop()
+        except Exception as e:
+            cleanup_exceptions.append(e)
+
+        if cleanup_exceptions:
+            cleanup_exception_group = exceptiongroup.ExceptionGroup(
+                "Exception during post-run finish steps.", cleanup_exceptions
+            )
+            _log.error(
+                "Exception during post-run finish steps.",
+                exc_info=cleanup_exception_group,
+            )
             finish_error_details: Optional[FinishErrorDetails] = FinishErrorDetails(
                 error_id=self._model_utils.generate_id(),
                 created_at=self._model_utils.get_timestamp(),
-                error=hardware_stopped_exception,
+                error=cleanup_exception_group,
             )
         else:
             finish_error_details = None
