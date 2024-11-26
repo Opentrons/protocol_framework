@@ -7,8 +7,6 @@ from opentrons.protocol_engine.actions.actions import (
     SetErrorRecoveryPolicyAction,
 )
 
-import exceptiongroup
-
 from opentrons.protocols.models import LabwareDefinition
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.hardware_control.modules import AbstractModule as HardwareModuleAPI
@@ -513,17 +511,19 @@ class ProtocolEngine:
             cleanup_exceptions.append(e)
 
         if cleanup_exceptions:
-            cleanup_exception_group = exceptiongroup.ExceptionGroup(
-                "Exception during post-run finish steps.", cleanup_exceptions
-            )
-            _log.error(
-                "Exception during post-run finish steps.",
-                exc_info=cleanup_exception_group,
-            )
+            for exception in cleanup_exceptions:
+                _log.exception(
+                    "Exception during post-run finish steps.", exc_info=exception
+                )
             finish_error_details: Optional[FinishErrorDetails] = FinishErrorDetails(
                 error_id=self._model_utils.generate_id(),
                 created_at=self._model_utils.get_timestamp(),
-                error=cleanup_exception_group,
+                # Ideally, we would either pass an ExceptionGroup (but that's not
+                # available until Python 3.11 and Pipfile nonsense is preventing me
+                # from adding the backport), or a chain of exceptions with `__context__`
+                # or `__cause__` set (but that's annoying to do without the help of
+                # context managers + ExitStack).
+                error=cleanup_exceptions[-1],
             )
         else:
             finish_error_details = None
