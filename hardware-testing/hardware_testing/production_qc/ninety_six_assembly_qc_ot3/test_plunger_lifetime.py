@@ -2,7 +2,7 @@
 from asyncio import sleep
 from time import time
 from typing import List, Union, Tuple, Optional, Dict, Literal
-
+import argparse
 from opentrons.hardware_control.ot3api import OT3API
 from opentrons.hardware_control.motion_utilities import target_position_from_relative
 
@@ -24,6 +24,8 @@ DEPTH_INTO_RESERVOIR_FOR_DISPENSE = DEPTH_INTO_RESERVOIR_FOR_ASPIRATE
 
 RESERVOIR_LABWARE = "nest_1_reservoir_195ml"
 PLATE_LABWARE = "corning_96_wellplate_360ul_flat"
+DEFAULT_CYCLES = 65000
+DEFAULT_N = 10
 
 TIP_RACK_96_SLOT = 10
 TIP_RACK_PARTIAL_SLOT = 5
@@ -121,13 +123,26 @@ async def aspirate_and_dispense(
     )
     await api.aspirate(OT3Mount.LEFT, volume)
     await api.home_z(OT3Mount.LEFT)
-
-    await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, plate)
-    await api.move_to(
-        OT3Mount.LEFT, plate + Point(z=-9)
-    )
     await api.dispense(OT3Mount.LEFT)
-    await api.home_z(OT3Mount.LEFT)
+    #await api.home_z(OT3Mount.LEFT)
+
+    #await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, plate)
+    # await api.move_to(
+    #     OT3Mount.LEFT, plate + Point(z=-9)
+    # )
+async def bottom_top(api: OT3API) -> None:
+    # MOVE DOWN
+    
+    await helpers_ot3.move_plunger_absolute_ot3(
+        api, OT3Mount.LEFT, blow_out
+    )
+
+    # MOVE UP
+    print(f"moving up {blow_out} mm at {speed} mm/sec")
+    
+    await helpers_ot3.move_plunger_absolute_ot3(
+        api, OT3Mount.LEFT, 0, speed=speed, motor_current=current
+    )
 
 
 async def _drop_tip(api: OT3API, trash: Point) -> None:
@@ -173,7 +188,7 @@ async def _partial_pick_up(
     await api.home_z(OT3Mount.LEFT)
 
 
-async def _run() -> None:
+async def _run(cycles: int, trials: int) -> None:
     """Run."""
     pipette = 200
     pipette_string = "p200_96_v3.0"
@@ -183,16 +198,16 @@ async def _run() -> None:
         pipette_left=pipette_string,
     )
     await api.home()
-
+    _, _, blow_out, _ = helpers_ot3.get_plunger_positions_ot3(api, mount)
     # GATHER NOMINAL POSITIONS
     trash_nominal = get_trash_nominal()
     tip_rack_96_a1_nominal = get_tiprack_96_nominal(pipette)
     # tip_rack_partial_a1_nominal = get_tiprack_partial_nominal()
     reservoir_a1_nominal = get_reservoir_nominal()
-    plate_a1_nominal = get_plate_nominal()
+    #plate_a1_nominal = get_plate_nominal()
  
     reservoir_a1_actual: Optional[Point] = None
-    plate_a1_actual: Optional[Point] = None
+    #plate_a1_actual: Optional[Point] = None
 
     async def _find_reservoir_pos() -> None:
         nonlocal reservoir_a1_actual
@@ -207,26 +222,26 @@ async def _run() -> None:
         await helpers_ot3.jog_mount_ot3(api, OT3Mount.LEFT)
         reservoir_a1_actual = await api.gantry_position(OT3Mount.LEFT)
 
-    async def _find_plate_pos() -> None:
-        nonlocal plate_a1_actual
-        # if reservoir_a1_actual:  # re-find reservoir position for 5ul
-        #     return
-        # SAVE RESERVOIR POSITION
-        ui.print_header("JOG to TOP of PLATE")
-        print("jog tips to the TOP of the PLATE")
-        await helpers_ot3.move_to_arched_ot3(
-            api, OT3Mount.LEFT, plate_a1_nominal + Point(z=50)
-        )
-        await helpers_ot3.jog_mount_ot3(api, OT3Mount.LEFT)
-        plate_a1_actual = await api.gantry_position(OT3Mount.LEFT)
+    # async def _find_plate_pos() -> None:
+    #     nonlocal plate_a1_actual
+    #     # if reservoir_a1_actual:  # re-find reservoir position for 5ul
+    #     #     return
+    #     # SAVE RESERVOIR POSITION
+    #     ui.print_header("JOG to TOP of PLATE")
+    #     print("jog tips to the TOP of the PLATE")
+    #     await helpers_ot3.move_to_arched_ot3(
+    #         api, OT3Mount.LEFT, plate_a1_nominal + Point(z=50)
+    #     )
+    #     await helpers_ot3.jog_mount_ot3(api, OT3Mount.LEFT)
+    #     plate_a1_actual = await api.gantry_position(OT3Mount.LEFT)
 
     result = True
     
-    get_test_volume = input("Input Test Volume(ul)?")
+    get_test_volume = 200 #input("Input Test Volume(ul)?")
     get_test_volume = float(get_test_volume.strip())
 
     tip_rack_pos = None
-    for number in range(1):
+    for number in range(cycles):
         tip_volume = 200
         print(f"Ready to test x{number+1} {get_test_volume} uL")
         
@@ -258,11 +273,11 @@ async def _run() -> None:
         if reservoir_a1_actual is None:
             await _find_reservoir_pos()
             await api.home_z(OT3Mount.LEFT)
-        if plate_a1_actual is None:
-            await _find_plate_pos()
-            await api.home_z(OT3Mount.LEFT)
+        # if plate_a1_actual is None:
+        #     await _find_plate_pos()
+        #     await api.home_z(OT3Mount.LEFT)
         assert reservoir_a1_actual
-        assert plate_a1_actual
+        #assert plate_a1_actual
         await aspirate_and_dispense(
             api, reservoir_a1_actual,plate_a1_actual, get_test_volume, seconds=NUM_SECONDS_TO_WAIT
         )
@@ -270,5 +285,9 @@ async def _run() -> None:
     for cyle in cyles:
 
 if __name__ == "__main__":
-    asyncio.run(_run())
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--cycles", type=int, default=DEFAULT_CYCLES)
+    parser.add_argument("--n", type=int, default=DEFAULT_N)
+    args = parser.parse_args()
+    asyncio.run(_run(args))
 
