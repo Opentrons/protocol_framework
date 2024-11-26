@@ -435,7 +435,7 @@ async def _main(is_simulating: bool, cycles: int, trials: int, continue_after_st
             dut = helpers_ot3.DeviceUnderTest.by_mount(mount)
             helpers_ot3.set_csv_report_meta_data_ot3(api, report, dut)
 
-            for cycle in range(0, cycles+TRIALS_PER_CYCLE, TRIALS_PER_CYCLE):
+            for cycle in range(TRIALS_PER_CYCLE, cycles+TRIALS_PER_CYCLE):
                 await _test_plunger(
                     api, mount, report,
                     cycle=cycle, trials=trials,
