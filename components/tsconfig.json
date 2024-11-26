@@ -9,6 +9,8 @@
     "composite": true,
     "rootDir": "src",
     "outDir": "lib",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
   "include": ["typings", "src"],
   "exclude": ["**/*.stories.tsx"]
