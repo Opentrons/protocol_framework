@@ -94,7 +94,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
   const ref = useRef<HTMLDivElement | null>(null)
 
   const handleScrollToBottom = (): void => {
-    if (ref.current) {
+    if (ref.current != null) {
       ref.current.scrollIntoView({
         behavior: 'smooth',
         block: 'end',

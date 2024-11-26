@@ -1,8 +1,9 @@
 import type * as React from 'react'
+import * as React2 from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, renderHook, screen } from '@testing-library/react'
 import { i18n } from '../../../assets/localization'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { getLabwareDefsByURI } from '../../../labware-defs/selectors'
@@ -21,6 +22,7 @@ vi.mock('../../../organisms')
 vi.mock('../../../labware-defs/actions')
 vi.mock('../utils')
 const mockLocation = vi.fn()
+window.HTMLElement.prototype.scrollIntoView = vi.fn()
 
 vi.mock('react-router-dom', async importOriginal => {
   const actual = await importOriginal<NavigateFunction>()
