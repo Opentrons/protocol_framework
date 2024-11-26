@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled, { css } from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
@@ -24,7 +24,7 @@ import {
   Flex,
   Icon,
   JUSTIFY_SPACE_BETWEEN,
-  OVERFLOW_AUTO,
+  OVERFLOW_SCROLL,
   PRODUCT,
   RadioButton,
   SPACING,
@@ -91,6 +91,16 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
     setPipetteVolume(null)
   }
 
+  const ref = useRef<HTMLDivElement | null>(null)
+
+  const handleScrollToBottom = (): void => {
+    if (ref.current) {
+      ref.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      })
+    }
+  }
   //  initialize pipette name once all fields are filled out
   useEffect(() => {
     if (
@@ -105,6 +115,10 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
       )
     }
   }, [pipetteType, pipetteGen, pipetteVolume, selectedPipetteName])
+
+  useEffect(() => {
+    handleScrollToBottom()
+  }, [pipetteVolume])
 
   const noPipette =
     (pipettesByMount.left.pipetteName == null ||
@@ -185,8 +199,9 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
           {page === 'add' ? (
             <Flex
               flexDirection={DIRECTION_COLUMN}
-              overflowY={OVERFLOW_AUTO}
+              overflowY={OVERFLOW_SCROLL}
               gridGap={SPACING.spacing32}
+              ref={ref}
             >
               <Flex
                 flexDirection={DIRECTION_COLUMN}
