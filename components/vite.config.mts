@@ -16,10 +16,24 @@ export default defineConfig({
     lib: {
       entry: 'src/index.ts',
       formats: ['es', 'cjs'], // Generate both ES Module and CommonJS outputs
-      fileName: (format) => (format === 'es' ? 'index.mjs' : 'index.cjs'),
+      fileName: format => (format === 'es' ? 'index.mjs' : 'index.cjs'),
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'styled-components'], // Ensure peer dependencies are not bundled
+      external: ['react', 'react-dom', 'styled-components'], // Externalize peer dependencies
+      output: {
+        exports: 'named',
+        globals: {
+          'styled-components': 'styled', // Use 'styled' as the global variable name
+        },
+        plugins: [
+          require('@rollup/plugin-commonjs')({
+            include: /node_modules/,
+            namedExports: {
+              'styled-components': ['default'], // Ensure default export is correctly mapped
+            },
+          }),
+        ],
+      },
     },
     target: 'es2017', // Transpile down to a compatible version for Next.js (for Protocol Library)
   },
