@@ -130,18 +130,17 @@ async def aspirate_and_dispense(
     # await api.move_to(
     #     OT3Mount.LEFT, plate + Point(z=-9)
     # )
-async def bottom_top(api: OT3API) -> None:
+async def bottom_top(api: OT3API,blow_out:float) -> None:
     # MOVE DOWN
-    
+    print(f"moving down {blow_out} mm ")
     await helpers_ot3.move_plunger_absolute_ot3(
         api, OT3Mount.LEFT, blow_out
     )
-
     # MOVE UP
-    print(f"moving up {blow_out} mm at {speed} mm/sec")
+    print(f"moving up {blow_out} mm ")
     
     await helpers_ot3.move_plunger_absolute_ot3(
-        api, OT3Mount.LEFT, 0, speed=speed, motor_current=current
+        api, OT3Mount.LEFT, 0
     )
 
 
@@ -198,7 +197,7 @@ async def _run(cycles: int, trials: int) -> None:
         pipette_left=pipette_string,
     )
     await api.home()
-    _, _, blow_out, _ = helpers_ot3.get_plunger_positions_ot3(api, mount)
+    _, _, blow_out, _ = helpers_ot3.get_plunger_positions_ot3(api, OT3Mount.LEFT)
     # GATHER NOMINAL POSITIONS
     trash_nominal = get_trash_nominal()
     tip_rack_96_a1_nominal = get_tiprack_96_nominal(pipette)
