@@ -86,7 +86,7 @@ describe('SelectPipettes', () => {
     fireEvent.click(screen.getByRole('label', { name: '1-Channel' }))
     screen.getByText('Pipette volume')
     // select pip volume
-    fireEvent.click(screen.getByRole('label', { name: '1000 uL' }))
+    fireEvent.click(screen.getByRole('label', { name: '1000 µL' }))
     // select tip
     screen.getByText('Add custom pipette tips')
     screen.getByText('200uL Flex tipracks')
@@ -139,7 +139,7 @@ describe('SelectPipettes', () => {
 
     screen.getByText('Pipette volume')
     // select pip volume
-    fireEvent.click(screen.getByRole('label', { name: '20 uL' }))
+    fireEvent.click(screen.getByRole('label', { name: '20 µL' }))
     // select tip
     screen.getByText('Add custom pipette tips')
     screen.getByText('10uL tipracks')
