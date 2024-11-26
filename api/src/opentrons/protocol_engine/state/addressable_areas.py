@@ -196,7 +196,7 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
         if isinstance(action, SucceedCommandAction):
             self._handle_command(action.command)
         elif isinstance(action, AddAddressableAreaAction):
-            self._add_addressable_area(action.addressable_area)
+            self._add_addressable_area(action.addressable_area_name)
         elif isinstance(action, SetDeckConfigurationAction):
             current_state = self._state
             if (

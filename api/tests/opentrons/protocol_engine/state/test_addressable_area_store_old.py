@@ -308,10 +308,6 @@ def test_add_addressable_area_action(
 ) -> None:
     """It should add the addressable area to the store."""
     simulated_subject.handle_action(
-        AddAddressableAreaAction(
-            addressable_area=AddressableAreaLocation(
-                addressableAreaName="movableTrashA1"
-            )
-        )
+        AddAddressableAreaAction(addressable_area_name="movableTrashA1")
     )
     assert "movableTrashA1" in simulated_subject.state.loaded_addressable_areas_by_name
