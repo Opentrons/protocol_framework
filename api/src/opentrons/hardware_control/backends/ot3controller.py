@@ -415,14 +415,14 @@ class OT3Controller(FlexBackend):
         mount: OT3Mount,
         acceleration: float,
         gantry_load: GantryLoad,
-        em_pipette: bool = False,
+        high_speed_pipette: bool = False,
     ) -> None:
         new_constraints = get_system_constraints_for_plunger_acceleration(
             self._configuration.motion_settings,
             gantry_load,
             mount,
             acceleration,
-            em_pipette,
+            high_speed_pipette,
         )
         self._move_manager.update_constraints(new_constraints)
 

@@ -239,7 +239,7 @@ class OT3Simulator(FlexBackend):
         mount: OT3Mount,
         acceleration: float,
         gantry_load: GantryLoad,
-        em_pipette: bool = False,
+        high_speed_pipette: bool = False,
     ) -> None:
         self._sim_gantry_load = gantry_load
 

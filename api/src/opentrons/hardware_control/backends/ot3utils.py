@@ -284,14 +284,14 @@ def get_system_constraints_for_plunger_acceleration(
     gantry_load: GantryLoad,
     mount: OT3Mount,
     acceleration: float,
-    em_pipette: bool = False,
+    high_speed_pipette: bool = False,
 ) -> "SystemConstraints[Axis]":
     old_constraints = config.by_gantry_load(gantry_load)
     new_constraints = {}
     axis_kinds = set([k for _, v in old_constraints.items() for k in v.keys()])
 
     def _get_axis_max_speed(ax: Axis) -> float:
-        if ax == Axis.of_main_tool_actuator(mount) and em_pipette:
+        if ax == Axis.of_main_tool_actuator(mount) and high_speed_pipette:
             _max_speed = float(DEFAULT_EMULSIFYING_PIPETTE_AXIS_MAX_SPEED)
         else:
             _max_speed = old_constraints["default_max_speed"][axis_kind]

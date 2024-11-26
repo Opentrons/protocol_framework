@@ -82,7 +82,7 @@ class FlexBackend(Protocol):
         mount: OT3Mount,
         acceleration: float,
         gantry_load: GantryLoad,
-        em_pipette: bool = False,
+        high_speed_pipette: bool = False,
     ) -> None:
         ...
 
