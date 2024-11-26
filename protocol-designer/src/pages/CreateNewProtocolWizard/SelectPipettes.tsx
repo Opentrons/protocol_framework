@@ -24,7 +24,7 @@ import {
   Flex,
   Icon,
   JUSTIFY_SPACE_BETWEEN,
-  OVERFLOW_SCROLL,
+  OVERFLOW_AUTO,
   PRODUCT,
   RadioButton,
   SPACING,
@@ -199,7 +199,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
           {page === 'add' ? (
             <Flex
               flexDirection={DIRECTION_COLUMN}
-              overflowY={OVERFLOW_SCROLL}
+              overflowY={OVERFLOW_AUTO}
               gridGap={SPACING.spacing32}
               ref={ref}
             >
