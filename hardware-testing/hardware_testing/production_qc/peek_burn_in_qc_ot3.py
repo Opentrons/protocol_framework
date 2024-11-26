@@ -116,7 +116,7 @@ def _build_csv_report(cycles: int, trials: int) -> CSVReport:
             title=_get_cycling_section_tag(),
             lines=[
                 CSVLine(_get_cycling_test_tag(cycle), [int, CSVResult])
-                for cycle in range(0, cycles+TRIALS_PER_CYCLE, TRIALS_PER_CYCLE)
+                for cycle in range(0, cycles*TRIALS_PER_CYCLE, TRIALS_PER_CYCLE)
             ],
         )
     )
