@@ -2,6 +2,7 @@
 import inspect
 from typing import Optional
 from opentrons.protocol_engine.state.update_types import (
+    AddressableAreaUsedUpdate,
     LoadedLabwareUpdate,
     StateUpdate,
 )
@@ -101,7 +102,8 @@ async def test_load_labware_implementation(
                 offset_id="labware-offset-id",
                 new_location=DeckSlotLocation(slotName=DeckSlotName.SLOT_4),
                 display_name=display_name,
-            )
+            ),
+            addressable_area_used=AddressableAreaUsedUpdate(addressable_area_name="3"),
         ),
     )
 

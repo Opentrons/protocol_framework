@@ -8,9 +8,7 @@ tested together, treating AddressableAreaState as a private implementation detai
 import pytest
 
 from opentrons_shared_data.deck.types import DeckDefinitionV5
-from opentrons_shared_data.labware.labware_definition import Parameters
 
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.types import DeckSlotName
 
 from opentrons.protocol_engine.commands import Command, Comment
@@ -34,7 +32,6 @@ from opentrons.protocol_engine.types import (
 )
 
 from .command_fixtures import (
-    create_load_labware_command,
     create_load_module_command,
     create_move_labware_command,
     create_move_to_addressable_area_command,
@@ -180,34 +177,6 @@ def test_initial_state(
     ("command", "expected_area"),
     (
         (
-            create_load_labware_command(
-                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
-                labware_id="test-labware-id",
-                definition=LabwareDefinition.construct(  # type: ignore[call-arg]
-                    parameters=Parameters.construct(loadName="blah"),  # type: ignore[call-arg]
-                    namespace="bleh",
-                    version=123,
-                ),
-                offset_id="offset-id",
-                display_name="display-name",
-            ),
-            "A1",
-        ),
-        (
-            create_load_labware_command(
-                location=AddressableAreaLocation(addressableAreaName="A4"),
-                labware_id="test-labware-id",
-                definition=LabwareDefinition.construct(  # type: ignore[call-arg]
-                    parameters=Parameters.construct(loadName="blah"),  # type: ignore[call-arg]
-                    namespace="bleh",
-                    version=123,
-                ),
-                offset_id="offset-id",
-                display_name="display-name",
-            ),
-            "A4",
-        ),
-        (
             create_load_module_command(
                 location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
                 module_id="test-module-id",
@@ -278,34 +247,6 @@ def test_addressable_area_usage_in_simulation(
 @pytest.mark.parametrize(
     ("command", "expected_area"),
     (
-        (
-            create_load_labware_command(
-                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
-                labware_id="test-labware-id",
-                definition=LabwareDefinition.construct(  # type: ignore[call-arg]
-                    parameters=Parameters.construct(loadName="blah"),  # type: ignore[call-arg]
-                    namespace="bleh",
-                    version=123,
-                ),
-                offset_id="offset-id",
-                display_name="display-name",
-            ),
-            "A1",
-        ),
-        (
-            create_load_labware_command(
-                location=AddressableAreaLocation(addressableAreaName="C4"),
-                labware_id="test-labware-id",
-                definition=LabwareDefinition.construct(  # type: ignore[call-arg]
-                    parameters=Parameters.construct(loadName="blah"),  # type: ignore[call-arg]
-                    namespace="bleh",
-                    version=123,
-                ),
-                offset_id="offset-id",
-                display_name="display-name",
-            ),
-            "C4",
-        ),
         (
             create_load_module_command(
                 location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),

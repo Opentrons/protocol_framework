@@ -14,7 +14,6 @@ from opentrons.types import Point, DeckSlotName
 
 from ..commands import (
     Command,
-    LoadLabwareResult,
     LoadModuleResult,
     MoveLabwareResult,
     MoveToAddressableAreaResult,
@@ -223,12 +222,7 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
 
     def _handle_command(self, command: Command) -> None:
         """Modify state in reaction to a command."""
-        if isinstance(command.result, LoadLabwareResult):
-            location = command.params.location
-            if isinstance(location, (DeckSlotLocation, AddressableAreaLocation)):
-                self._add_addressable_area(location)
-
-        elif isinstance(command.result, MoveLabwareResult):
+        if isinstance(command.result, MoveLabwareResult):
             location = command.params.newLocation
             if isinstance(location, (DeckSlotLocation, AddressableAreaLocation)):
                 self._add_addressable_area(location)
