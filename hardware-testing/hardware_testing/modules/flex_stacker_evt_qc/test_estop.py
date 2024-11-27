@@ -62,7 +62,7 @@ def run(driver: FlexStacker, report: CSVReport, section: str) -> None:
     report(
         section,
         "x-move-disabled",
-        [CSVResult.from_bool(driver.get_limit_switch(StackerAxis.X, x_limit))],
+        [CSVResult.from_bool(not driver.get_limit_switch(StackerAxis.X, x_limit))],
     )
 
     print("try to move Z axis...")
