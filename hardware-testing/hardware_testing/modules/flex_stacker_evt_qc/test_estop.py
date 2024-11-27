@@ -1,6 +1,6 @@
 """Test E-Stop."""
 
-
+from time import sleep
 from typing import List, Union
 from hardware_testing.data import ui
 from hardware_testing.data.csv_report import (
@@ -48,6 +48,8 @@ def run(driver: FlexStacker, report: CSVReport, section: str) -> None:
     ui.print_header("Trigger E-Stop")
     if not driver._simulating:
         ui.get_user_ready("Trigger the E-Stop")
+        # wait a bit before requesting e-stop state
+        sleep(2)
 
         if not driver.get_estop():
             print("E-Stop is not triggered")
