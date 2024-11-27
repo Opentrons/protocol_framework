@@ -122,6 +122,7 @@ class FlexStacker:
     def _send_and_recv(self, msg: str, guard_ret: str = "") -> str:
         """Internal utility to send a command and receive the response."""
         assert not self._simulating
+        self._serial.flush()
         self._serial.write(msg.encode())
         ret = self._serial.readline()
         if guard_ret:
