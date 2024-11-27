@@ -142,22 +142,6 @@ class WellCore(AbstractWellCore):
             )
         )
 
-    def load_empty(
-        self,
-    ) -> None:
-        """Inform the system that a well is known to be empty.
-
-        This should be done early in the protocol, at the same time as a load_liquid command might
-        be used.
-        """
-        self._engine_client.execute_command(
-            cmd.LoadLiquidParams(
-                labwareId=self._labware_id,
-                liquidId="EMPTY",
-                volumeByWell={self._name: 0.0},
-            )
-        )
-
     def from_center_cartesian(self, x: float, y: float, z: float) -> Point:
         """Gets point in deck coordinates based on percentage of the radius of each axis."""
         well_size = self._engine_client.state.labware.get_well_size(

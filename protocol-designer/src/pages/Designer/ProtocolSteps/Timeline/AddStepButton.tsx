@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
@@ -38,6 +38,7 @@ import {
 } from '../../../../components/modals/ConfirmDeleteModal'
 import { AddStepOverflowButton } from './AddStepOverflowButton'
 
+import type { MouseEvent } from 'react'
 import type { ThunkDispatch } from 'redux-thunk'
 import type { BaseState } from '../../../../types'
 import type { StepType } from '../../../../form-types'
@@ -58,19 +59,17 @@ export function AddStepButton(): JSX.Element {
   )
   const isStepCreationDisabled = useSelector(getIsMultiSelectMode)
   const modules = useSelector(stepFormSelectors.getInitialDeckSetup).modules
-  const [
-    showStepOverflowMenu,
-    setShowStepOverflowMenu,
-  ] = React.useState<boolean>(false)
+  const [showStepOverflowMenu, setShowStepOverflowMenu] = useState<boolean>(
+    false
+  )
   const overflowWrapperRef = useOnClickOutside<HTMLDivElement>({
     onClickOutside: () => {
       setShowStepOverflowMenu(false)
     },
   })
-  const [
-    enqueuedStepType,
-    setEnqueuedStepType,
-  ] = React.useState<StepType | null>(null)
+  const [enqueuedStepType, setEnqueuedStepType] = useState<StepType | null>(
+    null
+  )
 
   const getSupportedSteps = (): Array<
     Exclude<StepType, 'manualIntervention'>
@@ -166,7 +165,7 @@ export function AddStepButton(): JSX.Element {
           boxShadow="0px 1px 3px rgba(0, 0, 0, 0.2)"
           backgroundColor={COLORS.white}
           flexDirection={DIRECTION_COLUMN}
-          onClick={(e: React.MouseEvent) => {
+          onClick={(e: MouseEvent) => {
             e.preventDefault()
             e.stopPropagation()
           }}

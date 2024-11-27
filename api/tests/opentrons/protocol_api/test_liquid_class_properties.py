@@ -16,7 +16,7 @@ from opentrons.protocol_api._liquid_properties import (
 
 def test_build_aspirate_settings() -> None:
     """It should convert the shared data aspirate settings to the PAPI type."""
-    fixture_data = load_shared_data("liquid-class/fixtures/fixture_glycerol50.json")
+    fixture_data = load_shared_data("liquid-class/fixtures/1/fixture_glycerol50.json")
     liquid_class_model = LiquidClassSchemaV1.parse_raw(fixture_data)
     aspirate_data = liquid_class_model.byPipette[0].byTipType[0].aspirate
 
@@ -32,7 +32,6 @@ def test_build_aspirate_settings() -> None:
     assert aspirate_properties.retract.offset == Coordinate(x=0, y=0, z=5)
     assert aspirate_properties.retract.speed == 100
     assert aspirate_properties.retract.air_gap_by_volume.as_dict() == {
-        "default": 2.0,
         5.0: 3.0,
         10.0: 4.0,
     }
@@ -45,11 +44,7 @@ def test_build_aspirate_settings() -> None:
 
     assert aspirate_properties.position_reference.value == "well-bottom"
     assert aspirate_properties.offset == Coordinate(x=0, y=0, z=-5)
-    assert aspirate_properties.flow_rate_by_volume.as_dict() == {
-        "default": 50.0,
-        10.0: 40.0,
-        20.0: 30.0,
-    }
+    assert aspirate_properties.flow_rate_by_volume.as_dict() == {10: 50.0}
     assert aspirate_properties.pre_wet is True
     assert aspirate_properties.mix.enabled is True
     assert aspirate_properties.mix.repetitions == 3
@@ -60,7 +55,7 @@ def test_build_aspirate_settings() -> None:
 
 def test_build_single_dispense_settings() -> None:
     """It should convert the shared data single dispense settings to the PAPI type."""
-    fixture_data = load_shared_data("liquid-class/fixtures/fixture_glycerol50.json")
+    fixture_data = load_shared_data("liquid-class/fixtures/1/fixture_glycerol50.json")
     liquid_class_model = LiquidClassSchemaV1.parse_raw(fixture_data)
     single_dispense_data = liquid_class_model.byPipette[0].byTipType[0].singleDispense
 
@@ -79,7 +74,6 @@ def test_build_single_dispense_settings() -> None:
     assert single_dispense_properties.retract.offset == Coordinate(x=0, y=0, z=5)
     assert single_dispense_properties.retract.speed == 100
     assert single_dispense_properties.retract.air_gap_by_volume.as_dict() == {
-        "default": 2.0,
         5.0: 3.0,
         10.0: 4.0,
     }
@@ -97,7 +91,6 @@ def test_build_single_dispense_settings() -> None:
     assert single_dispense_properties.position_reference.value == "well-bottom"
     assert single_dispense_properties.offset == Coordinate(x=0, y=0, z=-5)
     assert single_dispense_properties.flow_rate_by_volume.as_dict() == {
-        "default": 50.0,
         10.0: 40.0,
         20.0: 30.0,
     }
@@ -105,7 +98,6 @@ def test_build_single_dispense_settings() -> None:
     assert single_dispense_properties.mix.repetitions == 3
     assert single_dispense_properties.mix.volume == 15
     assert single_dispense_properties.push_out_by_volume.as_dict() == {
-        "default": 5.0,
         10.0: 7.0,
         20.0: 10.0,
     }
@@ -115,7 +107,7 @@ def test_build_single_dispense_settings() -> None:
 
 def test_build_multi_dispense_settings() -> None:
     """It should convert the shared data multi dispense settings to the PAPI type."""
-    fixture_data = load_shared_data("liquid-class/fixtures/fixture_glycerol50.json")
+    fixture_data = load_shared_data("liquid-class/fixtures/1/fixture_glycerol50.json")
     liquid_class_model = LiquidClassSchemaV1.parse_raw(fixture_data)
     multi_dispense_data = liquid_class_model.byPipette[0].byTipType[0].multiDispense
 
@@ -135,7 +127,6 @@ def test_build_multi_dispense_settings() -> None:
     assert multi_dispense_properties.retract.offset == Coordinate(x=0, y=0, z=5)
     assert multi_dispense_properties.retract.speed == 100
     assert multi_dispense_properties.retract.air_gap_by_volume.as_dict() == {
-        "default": 2.0,
         5.0: 3.0,
         10.0: 4.0,
     }
@@ -152,16 +143,13 @@ def test_build_multi_dispense_settings() -> None:
     assert multi_dispense_properties.position_reference.value == "well-bottom"
     assert multi_dispense_properties.offset == Coordinate(x=0, y=0, z=-5)
     assert multi_dispense_properties.flow_rate_by_volume.as_dict() == {
-        "default": 50.0,
         10.0: 40.0,
         20.0: 30.0,
     }
     assert multi_dispense_properties.conditioning_by_volume.as_dict() == {
-        "default": 10.0,
         5.0: 5.0,
     }
     assert multi_dispense_properties.disposal_by_volume.as_dict() == {
-        "default": 2.0,
         5.0: 3.0,
     }
     assert multi_dispense_properties.delay.enabled is True
@@ -178,14 +166,12 @@ def test_build_multi_dispense_settings_none(
 
 def test_liquid_handling_property_by_volume() -> None:
     """It should create a class that can interpolate values and add and delete new points."""
-    subject = LiquidHandlingPropertyByVolume({"default": 42, "5": 50, "10.0": 250})
-    assert subject.as_dict() == {"default": 42, 5.0: 50, 10.0: 250}
-    assert subject.default == 42.0
+    subject = LiquidHandlingPropertyByVolume([(5.0, 50.0), (10.0, 250.0)])
+    assert subject.as_dict() == {5.0: 50, 10.0: 250}
     assert subject.get_for_volume(7) == 130.0
 
     subject.set_for_volume(volume=7, value=175.5)
     assert subject.as_dict() == {
-        "default": 42,
         5.0: 50,
         10.0: 250,
         7.0: 175.5,
@@ -193,7 +179,7 @@ def test_liquid_handling_property_by_volume() -> None:
     assert subject.get_for_volume(7) == 175.5
 
     subject.delete_for_volume(7)
-    assert subject.as_dict() == {"default": 42, 5.0: 50, 10.0: 250}
+    assert subject.as_dict() == {5.0: 50, 10.0: 250}
     assert subject.get_for_volume(7) == 130.0
 
     with pytest.raises(KeyError, match="No value set for volume"):

@@ -46193,6 +46193,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [
     {
       "description": "Sample Resuspended in PBS",

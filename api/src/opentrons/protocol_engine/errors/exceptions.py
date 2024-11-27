@@ -786,6 +786,19 @@ class InvalidBlockVolumeError(ProtocolEngineError):
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
 
 
+class InvalidWavelengthError(ProtocolEngineError):
+    """Raised when attempting to set an invalid absorbance wavelength."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build a InvalidWavelengthError."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
 class InvalidHoldTimeError(ProtocolEngineError):
     """An error raised when attempting to set an invalid temperature hold time."""
 
@@ -1159,6 +1172,18 @@ class StorageLimitReachedError(ProtocolEngineError):
 
 class LiquidClassDoesNotExistError(ProtocolEngineError):
     """Raised when referencing a liquid class that has not been loaded."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
+class LiquidClassRedefinitionError(ProtocolEngineError):
+    """Raised when attempting to load a liquid class that conflicts with a liquid class already loaded."""
 
     def __init__(
         self,

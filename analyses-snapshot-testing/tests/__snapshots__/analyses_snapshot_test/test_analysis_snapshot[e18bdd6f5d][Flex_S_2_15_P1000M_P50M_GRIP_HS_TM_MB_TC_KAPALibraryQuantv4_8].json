@@ -34667,6 +34667,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [],
   "metadata": {
     "author": "Opentrons <protocols@opentrons.com>",

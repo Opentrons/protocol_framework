@@ -200,8 +200,9 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
         }
         const isLabwareOccludedByThermocyclerLid =
           moduleOnDeck.type === THERMOCYCLER_MODULE_TYPE &&
-          (moduleOnDeck.moduleState as ThermocyclerModuleState).lidOpen ===
-            false
+          (moduleOnDeck.moduleState as ThermocyclerModuleState).lidOpen !==
+            true &&
+          tab === 'protocolSteps'
 
         const tempInnerProps = getModuleInnerProps(moduleOnDeck.moduleState)
         const innerProps =
@@ -210,9 +211,9 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
                 ...tempInnerProps,
                 lidMotorState:
                   (tempInnerProps as ThermocyclerVizProps).lidMotorState !==
-                  'closed'
-                    ? 'open'
-                    : 'closed',
+                  'open'
+                    ? 'closed'
+                    : 'open',
               }
             : tempInnerProps
 

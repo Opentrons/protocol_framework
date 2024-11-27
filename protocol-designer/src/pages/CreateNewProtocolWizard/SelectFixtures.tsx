@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import without from 'lodash/without'
+import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
   ALIGN_CENTER,
   BORDERS,
@@ -8,7 +9,6 @@ import {
   EmptySelectorButton,
   Flex,
   ListItem,
-  ListItemCustomize,
   SPACING,
   StyledText,
   TYPOGRAPHY,
@@ -22,6 +22,7 @@ import {
   getNumSlotsAvailable,
 } from './utils'
 import { HandleEnter } from '../../atoms/HandleEnter'
+import { PDListItemCustomize as ListItemCustomize } from './PDListItemCustomize'
 
 import type { DropdownBorder } from '@opentrons/components'
 import type { AdditionalEquipment, WizardTileProps } from './types'
@@ -63,6 +64,7 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
   return (
     <HandleEnter onEnter={handleProceed}>
       <WizardBody
+        robotType={FLEX_ROBOT_TYPE}
         stepNumber={5}
         header={t('add_fixtures')}
         subHeader={t('fixtures_replace')}
@@ -158,7 +160,6 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
                 return (
                   <ListItem type="noActive" key={ae}>
                     <ListItemCustomize
-                      forceDirection
                       linkText={t('remove')}
                       onClick={() => {
                         setValue(

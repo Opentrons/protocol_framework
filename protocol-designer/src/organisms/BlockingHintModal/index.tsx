@@ -69,7 +69,7 @@ export function BlockingHintModal(props: HintProps): JSX.Element {
               {t('hint.dont_show_again')}
             </StyledText>
           </Flex>
-          <Flex alingItems={ALIGN_CENTER} gridGap={SPACING.spacing8}>
+          <Flex alignItems={ALIGN_CENTER} gridGap={SPACING.spacing8}>
             <SecondaryButton onClick={onCancelClick}>
               {t('shared:cancel')}
             </SecondaryButton>

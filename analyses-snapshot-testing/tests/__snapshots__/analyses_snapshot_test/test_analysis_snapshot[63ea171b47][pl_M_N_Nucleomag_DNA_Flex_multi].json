@@ -16386,6 +16386,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [
     {
       "description": "Cell Pellet",

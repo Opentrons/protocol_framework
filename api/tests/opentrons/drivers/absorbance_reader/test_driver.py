@@ -124,6 +124,36 @@ async def test_driver_get_device_info(
     mock_interface.get_device_information.assert_called_once()
     mock_interface.reset_mock()
 
+    # Test Device info with updated version format
+    DEVICE_INFO.sn = "OPTMAA00034"
+    DEVICE_INFO.version = "8"
+
+    mock_interface.get_device_information.return_value = (
+        MockErrorCode.NO_ERROR,
+        DEVICE_INFO,
+    )
+
+    info = await connected_driver.get_device_info()
+
+    assert info == {"serial": "OPTMAA00034", "model": "ABS96", "version": "8"}
+    mock_interface.get_device_information.assert_called_once()
+    mock_interface.reset_mock()
+
+    # Test Device info with invalid version format
+    DEVICE_INFO.sn = "OPTMAA00034"
+    DEVICE_INFO.version = "asd"
+
+    mock_interface.get_device_information.return_value = (
+        MockErrorCode.NO_ERROR,
+        DEVICE_INFO,
+    )
+
+    info = await connected_driver.get_device_info()
+
+    assert info == {"serial": "OPTMAA00034", "model": "ABS96", "version": "v0"}
+    mock_interface.get_device_information.assert_called_once()
+    mock_interface.reset_mock()
+
 
 @pytest.mark.parametrize(
     "parts_aligned, module_status",

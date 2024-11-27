@@ -102,9 +102,9 @@ export function TwoColLwInfoAndDeck(
   >['infoProps']['type'] => {
     switch (selectedRecoveryOption) {
       case MANUAL_MOVE_AND_SKIP.ROUTE:
-      case MANUAL_REPLACE_AND_RETRY.ROUTE:
         return 'location-arrow-location'
       default:
+      case MANUAL_REPLACE_AND_RETRY.ROUTE:
         return 'location'
     }
   }

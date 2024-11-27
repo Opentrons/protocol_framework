@@ -80,7 +80,9 @@ def channels_from_string(channels: str) -> PipetteChannelType:
     """
     if channels == "96":
         return PipetteChannelType.NINETY_SIX_CHANNEL
-    elif channels == "multi":
+    elif "multi" in channels:
+        if "em" in channels:
+            return PipetteChannelType.EIGHT_CHANNEL_EM
         return PipetteChannelType.EIGHT_CHANNEL
     elif channels == "single":
         return PipetteChannelType.SINGLE_CHANNEL
@@ -115,6 +117,8 @@ def get_channel_from_pipette_name(pipette_name_tuple: Tuple[str, ...]) -> str:
     elif "96" in pipette_name_tuple:
         return "ninety_six_channel"
     else:
+        if "em" in pipette_name_tuple:
+            return "eight_channel_em"
         return "eight_channel"
 
 
@@ -154,7 +158,6 @@ def version_from_generation(pipette_name_tuple: Tuple[str, ...]) -> PipetteVersi
     )
     model_from_pipette_name = pipette_name_tuple[0]
     channel_from_pipette_name = get_channel_from_pipette_name(pipette_name_tuple)
-
     paths_to_validate = (
         get_shared_data_root() / "pipette" / "definitions" / "2" / "general"
     )
@@ -246,7 +249,12 @@ def convert_pipette_name(
 
     """
     split_pipette_name = name.split("_")
-    channels = channels_from_string(split_pipette_name[1])
+    channels_type = split_pipette_name[1]
+    if len(split_pipette_name) > 2:
+        if split_pipette_name[2] == "em":
+            channels_type = "multi_em"
+
+    channels = channels_from_string(channels_type)
     if provided_version:
         version = version_from_string(provided_version)
     else:
@@ -287,8 +295,14 @@ def convert_pipette_model(
     # We need to figure out how to default the pipette model as well
     # rather than returning a p1000
     if model and not provided_version:
-        pipette_type, parsed_channels, parsed_version = model.split("_")
-        channels = channels_from_string(parsed_channels)
+        # pipette_type, parsed_channels, parsed_version = model.split("_")
+        exploded = model.split("_")
+        if len(exploded) == 3:
+            (pipette_type, parsed_channels, parsed_version) = exploded
+            channels = channels_from_string(parsed_channels)
+        else:
+            pipette_type, parsed_channels, parsed_oem, parsed_version = exploded
+            channels = channels_from_string(f"{parsed_channels}_{parsed_oem}")
         version = version_from_string(parsed_version)
     elif model and provided_version:
         pipette_type, parsed_channels = model.split("_")

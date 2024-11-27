@@ -9,6 +9,7 @@ import { formatLastCalibrated } from '../utils'
 import { ModuleCalibrationItems } from '../ModuleCalibrationItems'
 
 import type { AttachedModule } from '@opentrons/api-client'
+import { ABSORBANCE_READER_TYPE } from '@opentrons/shared-data'
 
 vi.mock('../ModuleCalibrationOverflowMenu')
 
@@ -42,7 +43,7 @@ const mockCalibratedModule = {
     totalCycleCount: 1,
     currentStepIndex: 1,
     totalStepCount: 1,
-  },
+  } as any,
   usbPort: {
     port: 3,
     portGroup: 'left',
@@ -100,5 +101,24 @@ describe('ModuleCalibrationItems', () => {
     }
     render(props)
     screen.getByText(formatLastCalibrated('2023-06-01T14:42:20.131798+00:00'))
+  })
+
+  it('should say no calibration required if module is absorbance reader', () => {
+    const absorbanceReaderAttachedModule = {
+      ...mockCalibratedModule,
+      moduleType: ABSORBANCE_READER_TYPE,
+      moduleOffset: undefined,
+    }
+    props = {
+      ...props,
+      attachedModules: [
+        absorbanceReaderAttachedModule as AttachedModule,
+      ] as AttachedModule[],
+    }
+    render(props)
+    expect(
+      screen.queryByText('mock ModuleCalibrationOverflowMenu')
+    ).not.toBeInTheDocument()
+    screen.getByText('No calibration required')
   })
 })

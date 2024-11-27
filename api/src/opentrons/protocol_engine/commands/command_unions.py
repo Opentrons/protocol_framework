@@ -13,6 +13,7 @@ from .pipetting_common import (
     LiquidNotFoundError,
     TipPhysicallyAttachedError,
 )
+from .movement_common import StallOrCollisionError
 
 from . import absorbance_reader
 from . import heater_shaker
@@ -134,6 +135,14 @@ from .load_liquid import (
     LoadLiquidCreate,
     LoadLiquidResult,
     LoadLiquidCommandType,
+)
+
+from .load_liquid_class import (
+    LoadLiquidClass,
+    LoadLiquidClassParams,
+    LoadLiquidClassCreate,
+    LoadLiquidClassResult,
+    LoadLiquidClassCommandType,
 )
 
 from .load_module import (
@@ -347,6 +356,7 @@ Command = Annotated[
         LoadLabware,
         ReloadLabware,
         LoadLiquid,
+        LoadLiquidClass,
         LoadModule,
         LoadPipette,
         MoveLabware,
@@ -406,6 +416,8 @@ Command = Annotated[
         robot.MoveTo,
         robot.MoveAxesRelative,
         robot.MoveAxesTo,
+        robot.openGripperJaw,
+        robot.closeGripperJaw,
     ],
     Field(discriminator="commandType"),
 ]
@@ -429,6 +441,7 @@ CommandParams = Union[
     LoadLabwareParams,
     ReloadLabwareParams,
     LoadLiquidParams,
+    LoadLiquidClassParams,
     LoadModuleParams,
     LoadPipetteParams,
     MoveLabwareParams,
@@ -488,6 +501,8 @@ CommandParams = Union[
     robot.MoveAxesRelativeParams,
     robot.MoveAxesToParams,
     robot.MoveToParams,
+    robot.openGripperJawParams,
+    robot.closeGripperJawParams,
 ]
 
 CommandType = Union[
@@ -509,6 +524,7 @@ CommandType = Union[
     LoadLabwareCommandType,
     ReloadLabwareCommandType,
     LoadLiquidCommandType,
+    LoadLiquidClassCommandType,
     LoadModuleCommandType,
     LoadPipetteCommandType,
     MoveLabwareCommandType,
@@ -568,6 +584,8 @@ CommandType = Union[
     robot.MoveAxesRelativeCommandType,
     robot.MoveAxesToCommandType,
     robot.MoveToCommandType,
+    robot.openGripperJawCommandType,
+    robot.closeGripperJawCommandType,
 ]
 
 CommandCreate = Annotated[
@@ -590,6 +608,7 @@ CommandCreate = Annotated[
         LoadLabwareCreate,
         ReloadLabwareCreate,
         LoadLiquidCreate,
+        LoadLiquidClassCreate,
         LoadModuleCreate,
         LoadPipetteCreate,
         MoveLabwareCreate,
@@ -649,6 +668,8 @@ CommandCreate = Annotated[
         robot.MoveAxesRelativeCreate,
         robot.MoveAxesToCreate,
         robot.MoveToCreate,
+        robot.openGripperJawCreate,
+        robot.closeGripperJawCreate,
     ],
     Field(discriminator="commandType"),
 ]
@@ -672,6 +693,7 @@ CommandResult = Union[
     LoadLabwareResult,
     ReloadLabwareResult,
     LoadLiquidResult,
+    LoadLiquidClassResult,
     LoadModuleResult,
     LoadPipetteResult,
     MoveLabwareResult,
@@ -731,6 +753,8 @@ CommandResult = Union[
     robot.MoveAxesRelativeResult,
     robot.MoveAxesToResult,
     robot.MoveToResult,
+    robot.openGripperJawResult,
+    robot.closeGripperJawResult,
 ]
 
 
@@ -741,6 +765,7 @@ CommandDefinedErrorData = Union[
     DefinedErrorData[OverpressureError],
     DefinedErrorData[LiquidNotFoundError],
     DefinedErrorData[GripperMovementError],
+    DefinedErrorData[StallOrCollisionError],
 ]
 
 

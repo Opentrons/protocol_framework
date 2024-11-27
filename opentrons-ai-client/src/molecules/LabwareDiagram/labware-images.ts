@@ -611,7 +611,7 @@ export const labwareImages: Record<string, string[]> = {
   ],
   opentrons_flex_deck_riser: [
     new URL(
-      '../../assets/images/labwares/opentrons_flex_deck_riser.jpg',
+      '../../assets/images/labwares/opentrons_flex_deck_riser.png',
       import.meta.url
     ).href,
   ],

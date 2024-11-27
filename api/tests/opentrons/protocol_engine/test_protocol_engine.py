@@ -997,8 +997,7 @@ async def test_estop_noops_if_invalid(
     subject.estop()  # Should not raise.
 
     decoy.verify(
-        action_dispatcher.dispatch(),  # type: ignore
-        ignore_extra_args=True,
+        action_dispatcher.dispatch(expected_action),
         times=0,
     )
     decoy.verify(

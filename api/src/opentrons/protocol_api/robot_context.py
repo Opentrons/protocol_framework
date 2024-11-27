@@ -19,6 +19,7 @@ from . import validation
 from .core.common import ProtocolCore, RobotCore
 from .module_contexts import ModuleContext
 from .labware import Labware
+from ._types import PipetteActionTypes, PlungerPositionTypes
 
 
 class HardwareManager(NamedTuple):
@@ -143,11 +144,13 @@ class RobotContext(publisher.CommandPublisher):
         )
         self._core.move_axes_relative(axis_map, speed)
 
-    def close_gripper_jaw(self, force: float) -> None:
-        raise NotImplementedError()
+    def close_gripper_jaw(self, force: Optional[float] = None) -> None:
+        """Command the gripper closed with some force."""
+        self._core.close_gripper(force)
 
     def open_gripper_jaw(self) -> None:
-        raise NotImplementedError()
+        """Command the gripper open."""
+        self._core.release_grip()
 
     def axis_coordinates_for(
         self,
@@ -200,14 +203,43 @@ class RobotContext(publisher.CommandPublisher):
             raise TypeError("You must specify a location to move to.")
 
     def plunger_coordinates_for_volume(
-        self, mount: Union[Mount, str], volume: float
-    ) -> None:
-        raise NotImplementedError()
+        self, mount: Union[Mount, str], volume: float, action: PipetteActionTypes
+    ) -> AxisMapType:
+        """
+        Build a :py:class:`.types.AxisMapType` for a pipette plunger motor from volume.
+
+        """
+        pipette_name = self._core.get_pipette_type_from_engine(mount)
+        if not pipette_name:
+            raise ValueError(
+                f"Expected a pipette to be attached to provided mount {mount}"
+            )
+        mount = validation.ensure_mount_for_pipette(mount, pipette_name)
+        pipette_axis = AxisType.plunger_axis_for_mount(mount)
+
+        pipette_position = self._core.get_plunger_position_from_volume(
+            mount, volume, action, self._protocol_core.robot_type
+        )
+        return {pipette_axis: pipette_position}
 
     def plunger_coordinates_for_named_position(
-        self, mount: Union[Mount, str], position_name: str
-    ) -> None:
-        raise NotImplementedError()
+        self, mount: Union[Mount, str], position_name: PlungerPositionTypes
+    ) -> AxisMapType:
+        """
+        Build a :py:class:`.types.AxisMapType` for a pipette plunger motor from position_name.
+
+        """
+        pipette_name = self._core.get_pipette_type_from_engine(mount)
+        if not pipette_name:
+            raise ValueError(
+                f"Expected a pipette to be attached to provided mount {mount}"
+            )
+        mount = validation.ensure_mount_for_pipette(mount, pipette_name)
+        pipette_axis = AxisType.plunger_axis_for_mount(mount)
+        pipette_position = self._core.get_plunger_position_from_name(
+            mount, position_name
+        )
+        return {pipette_axis: pipette_position}
 
     def build_axis_map(self, axis_map: StringAxisMap) -> AxisMapType:
         """Take in a :py:class:`.types.StringAxisMap` and output a :py:class:`.types.AxisMapType`.

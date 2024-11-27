@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { DropdownField, FormGroup } from '@opentrons/components'
@@ -8,13 +8,15 @@ import {
 } from '../../../../step-forms/selectors'
 import { getAllTiprackOptions } from '../../../../ui/labware/selectors'
 import { getEnableReturnTip } from '../../../../feature-flags/selectors'
+
+import type { ComponentProps, ChangeEvent } from 'react'
 import type { DropdownOption } from '@opentrons/components'
 import type { StepFormDropdown } from '../StepFormDropdownField'
 
 import styles from '../../StepEditForm.module.css'
 
 export function DropTipField(
-  props: Omit<React.ComponentProps<typeof StepFormDropdown>, 'options'> & {}
+  props: Omit<ComponentProps<typeof StepFormDropdown>, 'options'> & {}
 ): JSX.Element {
   const {
     value: dropdownItem,
@@ -49,7 +51,7 @@ export function DropTipField(
   if (wasteChute != null) options.push(wasteChuteOption)
   if (trashBin != null) options.push(trashOption)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (
       additionalEquipment[String(dropdownItem)] == null &&
       labwareEntities[String(dropdownItem)] == null
@@ -75,7 +77,7 @@ export function DropTipField(
         value={dropdownItem ? String(dropdownItem) : null}
         onBlur={onFieldBlur}
         onFocus={onFieldFocus}
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+        onChange={(e: ChangeEvent<HTMLSelectElement>) => {
           updateValue(e.currentTarget.value)
         }}
       />

@@ -69,8 +69,8 @@ export interface DropdownMenuProps {
   onBlur?: React.FocusEventHandler<HTMLButtonElement>
   /** optional disabled */
   disabled?: boolean
-  /** force direction for pd after release this will be fixed and remove */
-  forceDirection?: boolean
+  /** optional placement of the menu */
+  menuPlacement?: 'auto' | 'top' | 'bottom'
 }
 
 // TODO: (smb: 4/15/22) refactor this to use html select for accessibility
@@ -90,7 +90,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
     disabled = false,
     onFocus,
     onBlur,
-    forceDirection = false,
+    menuPlacement = 'auto',
   } = props
   const [targetProps, tooltipProps] = useHoverTooltip()
   const [showDropdownMenu, setShowDropdownMenu] = React.useState<boolean>(false)
@@ -108,7 +108,11 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
   })
 
   React.useEffect(() => {
-    if (forceDirection) return
+    if (menuPlacement !== 'auto') {
+      setDropdownPosition(menuPlacement)
+      return
+    }
+
     const handlePositionCalculation = (): void => {
       const dropdownRect = dropDownMenuWrapperRef.current?.getBoundingClientRect()
       if (dropdownRect != null) {
@@ -205,15 +209,11 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
     <Flex
       flexDirection={DIRECTION_COLUMN}
       ref={dropDownMenuWrapperRef}
-      gridGap={SPACING.spacing4}
+      gridGap={SPACING.spacing8}
       width={width}
     >
       {title !== null ? (
-        <Flex
-          gridGap={SPACING.spacing8}
-          paddingBottom={SPACING.spacing8}
-          alignItems={ALIGN_CENTER}
-        >
+        <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
           <StyledText
             desktopStyle="bodyDefaultRegular"
             color={disabled ? COLORS.grey35 : COLORS.grey60}
@@ -257,7 +257,10 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
                   : TYPOGRAPHY.pRegular};
               `}
             >
-              <StyledText desktopStyle="captionRegular" css={MENU_TEXT_STYLE}>
+              <StyledText
+                desktopStyle="captionRegular"
+                css={LINE_CLAMP_TEXT_STYLE}
+              >
                 {currentOption.name}
               </StyledText>
             </Flex>
@@ -329,11 +332,12 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
   )
 }
 
-const MENU_TEXT_STYLE = css`
+const LINE_CLAMP_TEXT_STYLE = css`
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: ${OVERFLOW_HIDDEN};
   text-overflow: ellipsis;
   word-wrap: break-word;
   -webkit-line-clamp: 1;
+  word-break: break-all;
 `

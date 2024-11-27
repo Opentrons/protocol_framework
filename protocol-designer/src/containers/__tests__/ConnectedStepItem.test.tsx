@@ -439,7 +439,7 @@ describe('ConnectedStepItem', () => {
     vi.mocked(getSelectedStepId).mockReturnValue(moveLabwareStepId)
     props.stepId = moveLabwareStepId
     render(props)
-    screen.getByText('2. move labware')
+    screen.getByText('2. move')
     screen.getByText('Manually')
     screen.getByText('labware')
     screen.getByText('new location')

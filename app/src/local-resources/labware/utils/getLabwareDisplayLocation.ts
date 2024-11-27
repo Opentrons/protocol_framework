@@ -4,6 +4,8 @@ import {
   getOccludedSlotCountForModule,
   THERMOCYCLER_MODULE_V1,
   THERMOCYCLER_MODULE_V2,
+  TRASH_BIN_FIXTURE,
+  WASTE_CHUTE_ADDRESSABLE_AREAS,
 } from '@opentrons/shared-data'
 import { getLabwareLocation } from './getLabwareLocation'
 
@@ -12,6 +14,7 @@ import type {
   LocationSlotOnlyParams,
   LocationFullParams,
 } from './getLabwareLocation'
+import type { AddressableAreaName } from '@opentrons/shared-data'
 
 export interface DisplayLocationSlotOnlyParams extends LocationSlotOnlyParams {
   t: TFunction
@@ -47,7 +50,8 @@ export function getLabwareDisplayLocation(
   }
   // Simple slot location
   else if (moduleModel == null && adapterName == null) {
-    return isOnDevice ? slotName : t('slot', { slot_name: slotName })
+    const validatedSlotCopy = handleSpecialSlotNames(slotName, t)
+    return isOnDevice ? validatedSlotCopy.odd : validatedSlotCopy.desktop
   }
   // Module location without adapter
   else if (moduleModel != null && adapterName == null) {
@@ -89,5 +93,22 @@ export function getLabwareDisplayLocation(
     }
   } else {
     return ''
+  }
+}
+
+// Sometimes we don't want to show the actual slotName, so we special case the text here.
+function handleSpecialSlotNames(
+  slotName: string,
+  t: TFunction
+): { odd: string; desktop: string } {
+  if (WASTE_CHUTE_ADDRESSABLE_AREAS.includes(slotName as AddressableAreaName)) {
+    return { odd: t('waste_chute'), desktop: t('waste_chute') }
+  } else if (slotName === TRASH_BIN_FIXTURE) {
+    return { odd: t('trash_bin'), desktop: t('trash_bin') }
+  } else {
+    return {
+      odd: slotName,
+      desktop: t('slot', { slot_name: slotName }),
+    }
   }
 }

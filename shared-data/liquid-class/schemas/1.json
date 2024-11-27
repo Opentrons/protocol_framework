@@ -90,59 +90,59 @@
       "additionalProperties": false
     },
     "airGapByVolume": {
-      "type": "object",
+      "type": "array",
       "description": "Settings for air gap keyed by target aspiration volume.",
-      "properties": {
-        "default": { "$ref": "#/definitions/positiveNumber" }
+      "items": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/positiveNumber" },
+        "minItems": 2,
+        "maxItems": 2
       },
-      "patternProperties": {
-        "d+": { "$ref": "#/definitions/positiveNumber" }
-      },
-      "required": ["default"]
+      "minItems": 1
     },
     "flowRateByVolume": {
-      "type": "object",
+      "type": "array",
       "description": "Settings for flow rate keyed by target aspiration/dispense volume.",
-      "properties": {
-        "default": { "$ref": "#/definitions/positiveNumber" }
+      "items": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/positiveNumber" },
+        "minItems": 2,
+        "maxItems": 2
       },
-      "patternProperties": {
-        "d+": { "$ref": "#/definitions/positiveNumber" }
-      },
-      "required": ["default"]
+      "minItems": 1
     },
     "pushOutByVolume": {
-      "type": "object",
+      "type": "array",
       "description": "Settings for pushout keyed by target aspiration volume.",
-      "properties": {
-        "default": { "$ref": "#/definitions/positiveNumber" }
+      "items": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/positiveNumber" },
+        "minItems": 2,
+        "maxItems": 2
       },
-      "patternProperties": {
-        "d+": { "$ref": "#/definitions/positiveNumber" }
-      },
-      "required": ["default"]
+      "minItems": 1
     },
     "disposalByVolume": {
-      "type": "object",
-      "description": "Settings for disposal volume keyed by target dispense volume.",
-      "properties": {
-        "default": { "$ref": "#/definitions/positiveNumber" }
+      "type": "array",
+      "description": "An array of two tuples containing positive numbers.",
+      "items": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/positiveNumber" },
+        "minItems": 2,
+        "maxItems": 2
       },
-      "patternProperties": {
-        "d+": { "$ref": "#/definitions/positiveNumber" }
-      },
-      "required": ["default"]
+      "minItems": 1
     },
     "conditioningByVolume": {
-      "type": "object",
+      "type": "array",
       "description": "Settings for conditioning volume keyed by target dispense volume.",
-      "properties": {
-        "default": { "$ref": "#/definitions/positiveNumber" }
+      "items": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/positiveNumber" },
+        "minItems": 2,
+        "maxItems": 2
       },
-      "patternProperties": {
-        "d+": { "$ref": "#/definitions/positiveNumber" }
-      },
-      "required": ["default"]
+      "minItems": 1
     },
     "mix": {
       "type": "object",
@@ -409,7 +409,6 @@
         "positionReference",
         "offset",
         "flowRateByVolume",
-        "mix",
         "conditioningByVolume",
         "disposalByVolume",
         "delay"

@@ -321,7 +321,6 @@ export function ProtocolSetupParameters({
     </>
   )
 
-  // ToDo (kk:06/18/2024) ff will be removed when we freeze the code
   if (chooseCsvFileScreen != null) {
     children = (
       <ChooseCsvFile

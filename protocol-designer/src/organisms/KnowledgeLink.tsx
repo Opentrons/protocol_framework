@@ -5,7 +5,8 @@ interface KnowledgeLinkProps {
   children: ReactNode
 }
 
-export const DOC_URL = 'https://docs.opentrons.com/protocol-designer/'
+export const DOC_URL =
+  'https://insights.opentrons.com/hubfs/Protocol%20Designer%20Instruction%20Manual.pdf'
 
 export function KnowledgeLink(props: KnowledgeLinkProps): JSX.Element {
   const { children } = props

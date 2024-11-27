@@ -45,8 +45,8 @@ import type { IconName } from '@opentrons/components'
 import type { StepIdType } from '../../../../form-types'
 import type { BaseState } from '../../../../types'
 
-const STARTING_DECK_STATE = 'Starting deck state'
-const FINAL_DECK_STATE = 'Final deck state'
+const STARTING_DECK_STATE = 'Starting deck'
+const FINAL_DECK_STATE = 'Ending deck'
 const PX_HEIGHT_TO_TOP_OF_CONTAINER = 32
 export interface StepContainerProps {
   title: string

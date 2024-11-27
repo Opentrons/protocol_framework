@@ -512,6 +512,7 @@
     }
   ],
   "labware": [],
+  "liquidClasses": [],
   "liquids": [],
   "metadata": {
     "protocolName": "Heater-shaker conflict OT-2"

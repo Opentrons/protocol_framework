@@ -30,7 +30,7 @@ export interface StepFormProps {
   visibleFormErrors: StepFormErrors
   showFormErrors: boolean
   focusedField?: string | null
-  setShowFormErrorsAndWarnings?: React.Dispatch<React.SetStateAction<boolean>>
+  setShowFormErrors?: React.Dispatch<React.SetStateAction<boolean>>
   tab: LiquidHandlingTab
   setTab: React.Dispatch<React.SetStateAction<LiquidHandlingTab>>
 }

@@ -56,7 +56,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     propsForFields,
     formData,
     visibleFormErrors,
-    setShowFormErrorsAndWarnings,
+    setShowFormErrors,
     tab,
     setTab,
   } = props
@@ -101,7 +101,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     isActive: tab === 'aspirate',
     onClick: () => {
       setTab('aspirate')
-      setShowFormErrorsAndWarnings?.(false)
+      setShowFormErrors?.(false)
     },
   }
   const dispenseTab = {
@@ -110,7 +110,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     isActive: tab === 'dispense',
     onClick: () => {
       setTab('dispense')
-      setShowFormErrorsAndWarnings?.(false)
+      setShowFormErrors?.(false)
     },
   }
   const hideWellOrderField =
@@ -186,6 +186,11 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         )}
       </Flex>
       <Divider marginY="0" />
+      <VolumeField
+        {...propsForFields.volume}
+        errorToShow={getFormLevelError('volume', mappedErrorsToField)}
+      />
+      <Divider marginY="0" />
       <PathField
         {...propsForFields.path}
         aspirate_airGap_checkbox={formData.aspirate_airGap_checkbox}
@@ -208,11 +213,6 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         stepType={formData.stepType}
         isDisposalLocation={isDisposalLocation}
         tooltipContent={null}
-      />
-      <Divider marginY="0" />
-      <VolumeField
-        {...propsForFields.volume}
-        errorToShow={getFormLevelError('volume', mappedErrorsToField)}
       />
       {enableReturnTip ? (
         <>

@@ -5,7 +5,7 @@ from typing import Literal, Type, Optional, TYPE_CHECKING
 from pydantic import BaseModel, Field
 from opentrons.types import MountType
 
-from ..pipetting_common import DestinationPositionResult
+from ..movement_common import DestinationPositionResult
 from ..command import (
     AbstractCommandImpl,
     BaseCommand,

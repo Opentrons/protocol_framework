@@ -1,4 +1,5 @@
 """Tests for opentrons.protocol_api.core.engine.LabwareCore."""
+
 from typing import cast
 
 import pytest
@@ -25,7 +26,7 @@ from opentrons.protocol_engine.types import (
     LabwareOffsetLocation,
     LabwareOffsetVector,
 )
-
+from opentrons.protocol_api._liquid import Liquid
 from opentrons.protocol_api.core.labware import LabwareLoadParams
 from opentrons.protocol_api.core.engine import LabwareCore, WellCore
 from opentrons.calibration_storage.helpers import uri_from_details
@@ -80,7 +81,9 @@ def test_get_load_params(subject: LabwareCore) -> None:
             version=42,
             parameters=LabwareDefinitionParameters.construct(loadName="world"),  # type: ignore[call-arg]
             ordering=[],
-            metadata=LabwareDefinitionMetadata.construct(displayName="what a cool labware"),  # type: ignore[call-arg]
+            metadata=LabwareDefinitionMetadata.construct(
+                displayName="what a cool labware"
+            ),  # type: ignore[call-arg]
         )
     ],
 )
@@ -455,3 +458,40 @@ def test_get_deck_slot(
     ).then_raise(LabwareNotOnDeckError("oh no"))
 
     assert subject.get_deck_slot() is None
+
+
+def test_load_liquid(
+    decoy: Decoy, mock_engine_client: EngineClient, subject: LabwareCore
+) -> None:
+    """It should pass loaded liquids to the engine."""
+    mock_liquid = Liquid(
+        _id="liquid-id", name="water", description=None, display_color=None
+    )
+    subject.load_liquid(volumes={"A1": 20, "B1": 30, "C1": 40}, liquid=mock_liquid)
+
+    decoy.verify(
+        mock_engine_client.execute_command(
+            cmd.LoadLiquidParams(
+                labwareId="cool-labware",
+                liquidId="liquid-id",
+                volumeByWell={"A1": 20, "B1": 30, "C1": 40},
+            )
+        ),
+        times=1,
+    )
+
+
+def test_load_empty(
+    decoy: Decoy, mock_engine_client: EngineClient, subject: LabwareCore
+) -> None:
+    """It should pass empty liquids to the engine."""
+    subject.load_empty(wells=["A1", "B1", "C1"])
+    decoy.verify(
+        mock_engine_client.execute_command(
+            cmd.LoadLiquidParams(
+                labwareId="cool-labware",
+                liquidId="EMPTY",
+                volumeByWell={"A1": 0.0, "B1": 0.0, "C1": 0.0},
+            )
+        )
+    )
