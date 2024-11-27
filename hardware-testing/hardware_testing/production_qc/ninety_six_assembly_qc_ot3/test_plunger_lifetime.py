@@ -11,8 +11,10 @@ from hardware_testing.data.csv_report import (
     CSVReport,
     CSVResult,
     CSVLine,
+    CSVSection,
     CSVLineRepeating,
 )
+
 from hardware_testing.opentrons_api import helpers_ot3
 from hardware_testing.opentrons_api.types import OT3Mount, Point, Axis
 import asyncio
@@ -66,6 +68,56 @@ def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
         CSVLine(f"droplets-{name}", [float, CSVResult]) for name in PARTIAL_TESTS.keys()
     ]
     return all_tips_test + partial_tests  # type: ignore[return-value]
+
+def _get_test_tag(
+    cycle: int, trial: int, direction: str, pos: str
+) -> str:
+    return f"cycle-{cycle}-trial-{trial}-{direction}-{pos}"
+
+
+def _get_section_tag(cycle: int) -> str:
+    return f"CYCLE-{cycle}-AMPS"
+
+
+def _get_cycling_test_tag(cycle: int) -> str:
+    return f"cycle-{cycle}"
+
+
+def _get_cycling_section_tag() -> str:
+    return f"CYCLING-RESULTS"
+
+def _build_csv_report(cycles: int, trials: int) -> CSVReport:
+    section_list=[
+        CSVSection(
+            title=_get_section_tag(cycle),
+            lines=[
+                CSVLine(
+                    _get_test_tag(cycle, trial, direction, pos),
+                    [float, float, float, float, bool, CSVResult]
+                )
+                #for speed in sorted(PLUNGER_CURRENTS_SPEED[current], reverse=False)
+                for trial in range(trials)
+                for direction in ["down", "up"]
+                for pos in ["start", "end"]
+            ],
+        )
+        for cycle in range(0, cycles*DEFAULT_N, DEFAULT_N)
+        #for current in sorted(list(PLUNGER_CURRENTS_SPEED.keys()), reverse=False)
+    ]
+    section_list.append(
+        CSVSection(
+            title=_get_cycling_section_tag(),
+            lines=[
+                CSVLine(_get_cycling_test_tag(cycle), [int, CSVResult])
+                for cycle in range(0, cycles*DEFAULT_N, DEFAULT_N)
+            ],
+        )
+    )
+
+
+    _report = CSVReport(test_name="peek-burn-in-qc-ot3", sections=section_list)
+
+    return _report
 
 
 def get_trash_nominal() -> Point:
@@ -128,11 +180,12 @@ async def aspirate_and_dispense(
 
 async def bottom_top(api: OT3API,blow_out:float) -> None:
     # MOVE DOWN
+    await _record_plunger_alignment(api,OT3Mount.LEFT)
     print(f"moving down {blow_out} mm ")
     await helpers_ot3.move_plunger_absolute_ot3(
         api, OT3Mount.LEFT, blow_out
     )
-    await _record_plunger_alignment(api,OT3Mount.LEFT)
+    
     # MOVE UP
     print(f"moving up {blow_out} mm ")
     await helpers_ot3.move_plunger_absolute_ot3(
@@ -220,6 +273,8 @@ async def _run(cycles: int, trials: int) -> None:
         pipette_left=pipette_string,
     )
     await api.home()
+    report = _build_csv_report(cycles=cycles, trials=trials)
+    input("con.......")
     _, _, blow_out, _ = helpers_ot3.get_plunger_positions_ot3(api, OT3Mount.LEFT)
     # GATHER NOMINAL POSITIONS
     trash_nominal = get_trash_nominal()
