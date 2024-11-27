@@ -68,7 +68,7 @@ def run(ctx: ProtocolContext) -> None:
     TIP_TRASH = False
     res_type = "nest_12_reservoir_22ml"
 
-    num_samples = 8
+    num_samples = 48
     wash1_vol = 600.0
     wash2_vol = 600.0
     wash3_vol = 600.0
@@ -303,7 +303,6 @@ def run(ctx: ProtocolContext) -> None:
                         m1000.require_liquid_presence(src)
                         m1000.aspirate(tvol, src.bottom(1))
                         m1000.dispense(tvol, src.bottom(4))
-                m1000.require_liquid_presence(src)
                 m1000.aspirate(tvol, src.bottom(height))
                 m1000.air_gap(10)
                 m1000.dispense(m1000.current_volume, samples_m[i].top())

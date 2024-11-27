@@ -66,7 +66,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
     )
     res_type = "nest_12_reservoir_15ml"
 
-    num_samples = 8
+    num_samples = 48
     wash1_vol = 500.0
     wash2_vol = wash3_vol = 900.0
     lysis_vol = 200.0

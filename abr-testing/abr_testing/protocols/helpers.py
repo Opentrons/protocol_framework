@@ -7,14 +7,13 @@ from opentrons.protocol_api import (
     ParameterContext,
     Well,
 )
-from typing import Tuple
 from opentrons.protocol_api.module_contexts import (
     HeaterShakerContext,
     MagneticBlockContext,
     ThermocyclerContext,
     TemperatureModuleContext,
 )
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Tuple
 from opentrons.hardware_control.modules.types import ThermocyclerStep
 from opentrons_shared_data.errors.exceptions import PipetteLiquidNotFoundError
 
@@ -382,6 +381,18 @@ def load_wells_with_custom_liquids(
                 well.load_liquid(liquid, volume)
 
 
+def comment_height_of_specific_labware(
+    protocol: ProtocolContext, labware_name: str, dict_of_labware_heights: Dict
+) -> None:
+    """Comment height found of specific labware."""
+    total_height = 0.0
+    for key in dict_of_labware_heights.keys():
+        if key[0] == labware_name:
+            height = dict_of_labware_heights[key]
+            total_height += height
+    protocol.comment(f"Liquid Waste Total Height: {total_height}")
+
+
 def find_liquid_height_of_all_wells(
     protocol: ProtocolContext,
     pipette: InstrumentContext,
@@ -392,7 +403,7 @@ def find_liquid_height_of_all_wells(
     pipette.pick_up_tip()
     pip_channels = pipette.active_channels
     for well in wells:
-        labware_name = well.parent.load_name
+        labware_name = well.parent.name
         total_number_of_wells_in_plate = len(well.parent.wells())
         # if pip_channels is > 1 and total_wells > 12 - only probe 1st row.
         if (
@@ -412,6 +423,9 @@ def find_liquid_height_of_all_wells(
         pipette.reset_tipracks()
     msg = f"result: {dict_of_labware_heights}"
     protocol.comment(msg=msg)
+    comment_height_of_specific_labware(
+        protocol, "Liquid Waste", dict_of_labware_heights
+    )
     return dict_of_labware_heights
 
 

@@ -87,7 +87,7 @@ def run(protocol: ProtocolContext) -> None:
     sample_plate_2 = heatershaker.load_labware(
         "thermoscientificnunc_96_wellplate_1300ul"
     )
-    reservoir = protocol.load_labware("nest_96_wellplate_2ml_deep", "2")
+    reservoir = protocol.load_labware("nest_96_wellplate_2ml_deep", "2", "Liquid Waste")
     temp_block: TemperatureModuleContext = protocol.load_module(
         helpers.temp_str, "3"
     )  # type: ignore[assignment]
@@ -452,8 +452,8 @@ def run(protocol: ProtocolContext) -> None:
                 protocol, sample_plate_2, heatershaker, heatershaker
             )
 
-            protocol.comment("--> Repeating 3 washes")
-            washreps = 3
+            protocol.comment("--> Repeating 6 washes")
+            washreps = 6
             washcount = 0
             for wash in range(washreps):
 
@@ -992,10 +992,6 @@ def run(protocol: ProtocolContext) -> None:
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
-    reservoir.label = "Liquid Waste"  # type: ignore[attr-defined]
-    Liquid_trash_well_1 = reservoir["A9"]
-    Liquid_trash_well_2 = reservoir["A10"]
-    Liquid_trash_well_4 = reservoir["A12"]
     liquids_to_probe_at_end = [
         Liquid_trash_well_1,
         Liquid_trash_well_2,

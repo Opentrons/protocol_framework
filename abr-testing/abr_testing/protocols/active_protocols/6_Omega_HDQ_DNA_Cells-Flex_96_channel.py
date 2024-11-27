@@ -338,4 +338,14 @@ def run(ctx: ProtocolContext) -> None:
 
     pip.home()
     pip.reset_tipracks()
+
+    # Empty Plates
+    pip.pick_up_tip()
+    pip.aspirate(1000, samples_m)
+    pip.dispense(1000, liquid_waste["A1"].top())
+    pip.aspirate(1000, wash1_res)
+    pip.dispense(1000, liquid_waste["A1"].top())
+    pip.aspirate(1000, wash2_res)
+    pip.dispense(1000, liquid_waste["A1"].top())
+    pip.return_tip()
     helpers.find_liquid_height_of_all_wells(ctx, pip, [liquid_waste["A1"]])

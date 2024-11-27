@@ -5,7 +5,7 @@ from opentrons.protocol_api.module_contexts import (
     ThermocyclerContext,
     TemperatureModuleContext,
 )
-from opentrons.protocol_api import SINGLE, Well
+from opentrons.protocol_api import SINGLE, Well, ALL
 from abr_testing.protocols import helpers
 from typing import List, Dict
 
@@ -46,17 +46,17 @@ def run(ctx: ProtocolContext) -> None:
         helpers.temp_str, location="D3"
     )  # type: ignore[assignment]
     reagent_rack = temp_mod.load_labware(
-        "opentrons_24_aluminumblock_nest_1.5ml_snapcap"
-    )  # check if 2mL
+        "opentrons_24_aluminumblock_nest_1.5ml_snapcap", "Reagent Rack"
+    )
+    dest_plate_1 = tc_mod.load_labware(
+        "opentrons_96_wellplate_200ul_pcr_full_skirt", "Destination Plate 1"
+    )
 
-    dest_plate = tc_mod.load_labware(
-        "opentrons_96_wellplate_200ul_pcr_full_skirt"
-    )  # do I change this to tough plate if they run pcr?
-
-    source_plate = ctx.load_labware(
-        "opentrons_96_wellplate_200ul_pcr_full_skirt", location="D1"
-    )  # do I change this to their plate?
-
+    source_plate_1 = ctx.load_labware(
+        "opentrons_96_wellplate_200ul_pcr_full_skirt", "D1", "DNA Plate 1"
+    )
+    waste = ctx.load_labware("nest_1_reservoir_195ml", "D2", "Liquid Waste")
+    liquid_waste = waste["A1"]
     tiprack_50 = [
         ctx.load_labware("opentrons_flex_96_tiprack_50ul", slot) for slot in [8, 9]
     ]
@@ -81,7 +81,7 @@ def run(ctx: ProtocolContext) -> None:
     # LOAD LIQUIDS
     water: Well = reagent_rack["B1"]
     mmx_pic: List[Well] = reagent_rack.rows()[0]
-    dna_pic: List[Well] = source_plate.wells()
+    dna_pic: List[Well] = source_plate_1.wells()
     liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
         "Water": [{"well": water, "volume": 1500.0}],
         "Mastermix": [{"well": mmx_pic, "volume": 1500.0}],
@@ -91,8 +91,8 @@ def run(ctx: ProtocolContext) -> None:
     # adding water
     ctx.comment("\n\n----------ADDING WATER----------\n")
     p50.pick_up_tip()
-    # p50.aspirate(40, water) # prewet
-    # p50.dispense(40, water)
+    p50.aspirate(40, water)  # prewet
+    p50.dispense(40, water)
     parsed_csv = parsed_csv[1:]
     num_of_rows = len(parsed_csv)
     for row_index in range(num_of_rows):
@@ -107,9 +107,9 @@ def run(ctx: ProtocolContext) -> None:
 
         p50.configure_for_volume(water_vol)
         p50.aspirate(water_vol, water)
-        p50.dispense(water_vol, dest_plate[dest_well], rate=0.5)
+        p50.dispense(water_vol, dest_plate_1[dest_well], rate=0.5)
         p50.configure_for_volume(50)
-        # p50.blow_out()
+        p50.blow_out()
     p50.drop_tip()
 
     # adding Mastermix
@@ -139,7 +139,7 @@ def run(ctx: ProtocolContext) -> None:
             break
         p50.configure_for_volume(mmx_vol)
         p50.aspirate(mmx_vol, reagent_rack[mmx_tube])
-        p50.dispense(mmx_vol, dest_plate[dest_well].top())
+        p50.dispense(mmx_vol, dest_plate_1[dest_well].top())
         ctx.delay(seconds=2)
         p50.blow_out()
         p50.touch_tip()
@@ -163,13 +163,13 @@ def run(ctx: ProtocolContext) -> None:
         if dna_vol == 0:
             break
         p50.configure_for_volume(dna_vol)
-        p50.aspirate(dna_vol, source_plate[dest_and_source_well])
-        p50.dispense(dna_vol, dest_plate[dest_and_source_well], rate=0.5)
+        p50.aspirate(dna_vol, source_plate_1[dest_and_source_well])
+        p50.dispense(dna_vol, dest_plate_1[dest_and_source_well], rate=0.5)
 
         p50.mix(
             10,
             0.7 * rxn_vol if 0.7 * rxn_vol < 30 else 30,
-            dest_plate[dest_and_source_well],
+            dest_plate_1[dest_and_source_well],
         )
         p50.drop_tip()
         p50.configure_for_volume(50)
@@ -179,7 +179,7 @@ def run(ctx: ProtocolContext) -> None:
     if real_mode:
         if disposable_lid:
             lid_on_plate, unused_lids, used_lids = helpers.use_disposable_lid_with_tc(
-                ctx, unused_lids, used_lids, dest_plate, tc_mod
+                ctx, unused_lids, used_lids, dest_plate_1, tc_mod
             )
         else:
             tc_mod.close_lid()
@@ -206,3 +206,32 @@ def run(ctx: ProtocolContext) -> None:
         p50.configure_nozzle_layout(style=SINGLE, start="A1", tip_racks=tiprack_50)
         mmx_pic.append(water)
         helpers.find_liquid_height_of_all_wells(ctx, p50, mmx_pic)
+    # Empty Destination plate
+    p50.configure_nozzle_layout(ALL, tip_racks=[tiprack_50[1]])
+    first_row = [
+        "A1",
+        "A2",
+        "A3",
+        "A4",
+        "A5",
+        "A6",
+        "A7",
+        "A8",
+        "A9",
+        "A10",
+        "A11",
+        "A12",
+    ]
+    p50.pick_up_tip()
+    for row in first_row:
+        p50.aspirate(50, dest_plate_1[row])
+        p50.dispense(50, liquid_waste.top())
+        p50.aspirate(50, dest_plate_1[row])
+        p50.dispense(50, liquid_waste.top())
+        p50.aspirate(50, dest_plate_1[row])
+        p50.dispense(50, liquid_waste.top())
+        p50.aspirate(50, dest_plate_1[row])
+        p50.dispense(50, liquid_waste.top())
+    p50.return_tip()
+
+    helpers.find_liquid_height_of_all_wells(ctx, p50, [liquid_waste])

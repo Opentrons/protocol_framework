@@ -554,6 +554,5 @@ def run(ctx: ProtocolContext) -> None:
         )
     elute(elution_vol)
 
-    end_list_of_wells_to_probe = [waste_reservoir["A1"], res1["A1"]]
-    end_list_of_wells_to_probe.extend(elution_samples_m)
+    end_list_of_wells_to_probe = [waste_reservoir["A1"]]
     helpers.find_liquid_height_of_all_wells(ctx, m1000, end_list_of_wells_to_probe)

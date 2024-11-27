@@ -59,15 +59,14 @@ def add_parameters(parameters: ParameterContext) -> None:
     helpers.create_disposable_lid_trash_location(parameters)
 
 
-
 def run(protocol: ProtocolContext) -> None:
     """Runs protocol that moves lids and stacks them."""
     # Load Parameters
     lids_in_stack = protocol.params.lids_in_a_stack  # type: ignore[attr-defined]
     x_offset = protocol.params.x_offset  # type: ignore[attr-defined]
     negative = protocol.params.negative  # type: ignore[attr-defined]
-    trash_lid = protocol.params.trash_lid # type: ignore[attr-defined]
-    
+    trash_lid = protocol.params.trash_lid  # type: ignore[attr-defined]
+
     if negative:
         x_offset = x_offset * -1
     # Thermocycler
@@ -99,4 +98,4 @@ def run(protocol: ProtocolContext) -> None:
         if trash_lid:
             protocol.move_labware(lid_to_move, trash_bin, use_gripper=True)
         else:
-            protocol.move_labware(lid_to_move, lid_list[1], use_gripper = True)
+            protocol.move_labware(lid_to_move, lid_list[1], use_gripper=True)

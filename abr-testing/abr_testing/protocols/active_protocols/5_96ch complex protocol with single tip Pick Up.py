@@ -77,6 +77,7 @@ def run(ctx: ProtocolContext) -> None:
 
     source_reservoir = ctx.load_labware(RESERVOIR_NAME, "D2")
     dest_pcr_plate = ctx.load_labware(PCR_PLATE_96_NAME, "C2")
+    liquid_waste = ctx.load_labware("nest_1_reservoir_195ml", "B3", "Liquid Waste")
 
     tip_rack_1 = ctx.load_labware(
         TIPRACK_96_NAME, "A2", adapter=TIPRACK_96_ADAPTER_NAME
@@ -279,12 +280,13 @@ def run(ctx: ProtocolContext) -> None:
                     well_position = f"{row}{col}"
                     pipette_96_channel.pick_up_tip(tip_rack_2)
 
-                    pipette_96_channel.aspirate(5, source_reservoir[well_position])
-                    pipette_96_channel.touch_tip()
+                    pipette_96_channel.aspirate(45, source_reservoir[well_position])
+                    pipette_96_channel.air_gap(5)
 
                     pipette_96_channel.dispense(
-                        5, dest_pcr_plate[well_position].bottom(b)
+                        25, dest_pcr_plate[well_position].bottom(b)
                     )
+                    pipette_96_channel.blow_out(location=liquid_waste["A1"])
                     pipette_96_channel.drop_tip()
                     tip_count += 1
             # leave this dropping in waste chute, do not use get_disposal_preference
@@ -297,23 +299,13 @@ def run(ctx: ProtocolContext) -> None:
             pipette_96_channel.liquid_presence_detection = True
             pipette_96_channel.pick_up_tip(tip_rack_1["A1"])
 
-            pipette_96_channel.aspirate(5, source_reservoir["A1"])
-            pipette_96_channel.touch_tip()
+            pipette_96_channel.aspirate(45, source_reservoir["A1"])
 
             pipette_96_channel.liquid_presence_detection = False
-            pipette_96_channel.air_gap(height=30)
-            pipette_96_channel.blow_out(waste_chute)
+            pipette_96_channel.air_gap(5)
 
-            pipette_96_channel.aspirate(5, source_reservoir["A1"])
-            pipette_96_channel.touch_tip()
-
-            pipette_96_channel.air_gap(height=30)
-            pipette_96_channel.blow_out()
-
-            pipette_96_channel.aspirate(10, source_reservoir["A1"])
-            pipette_96_channel.touch_tip()
-
-            pipette_96_channel.dispense(10, dest_pcr_plate["A1"].bottom(b))
+            pipette_96_channel.dispense(25, dest_pcr_plate["A1"].bottom(b))
+            pipette_96_channel.blow_out(location=liquid_waste["A1"])
             pipette_96_channel.mix(repetitions=5, volume=15)
             pipette_96_channel.return_tip()
 
@@ -374,7 +366,7 @@ def run(ctx: ProtocolContext) -> None:
             thermocycler.open_lid()
             if disposable_lid:
                 if len(used_lids) <= 1:
-                    ctx.move_labware(lid_on_plate, "B3", use_gripper=True)
+                    ctx.move_labware(lid_on_plate, waste_chute, use_gripper=True)
                 else:
                     ctx.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
             thermocycler.deactivate()
