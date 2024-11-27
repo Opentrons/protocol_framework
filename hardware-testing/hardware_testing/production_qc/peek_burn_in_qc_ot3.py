@@ -23,6 +23,7 @@ from hardware_testing.data import ui
 DEFAULT_TRIALS = 10 # The number of trials each current speed check does
 DEFAULT_CYCLES = 4 # The number of burn-in cycles
 TRIALS_PER_CYCLE = 500 # number of plunger cycles in one burn in cycle
+
 STALL_THRESHOLD_MM = 0.1
 TEST_ACCELERATION = 1500  # used during gravimetric tests
 
@@ -33,7 +34,7 @@ DEFAULT_ACCELERATION = DEFAULT_ACCELERATIONS.low_throughput[types.OT3AxisKind.P]
 DEFAULT_CURRENT = DEFAULT_RUN_CURRENT.low_throughput[types.OT3AxisKind.P]
 DEFAULT_SPEED = DEFAULT_MAX_SPEEDS.low_throughput[types.OT3AxisKind.P]
 
-MUST_PASS_CURRENT = 0.5  # the target spec (must pass here)
+MUST_PASS_CURRENT = 0.3  # the target spec (must pass here)
 assert (
     MUST_PASS_CURRENT < DEFAULT_CURRENT
 ), "must-pass current must be less than default current"
