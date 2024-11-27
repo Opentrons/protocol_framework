@@ -41,7 +41,7 @@
   "trash_required": "A trash entity is required",
   "trashBin": "Trash Bin",
   "up_to_3_tipracks": "Up to 3 tip rack types are allowed per pipette",
-  "vol_label": "{{volume}} uL",
+  "vol_label": "{{volume}} µL",
   "wasteChute": "Waste Chute",
   "which_fixtures": "Which fixtures will you be using?",
   "which_modules": "Select modules to use in your protocol.",
