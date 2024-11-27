@@ -21,6 +21,7 @@ vi.mock('../../../organisms')
 vi.mock('../../../labware-defs/actions')
 vi.mock('../utils')
 const mockLocation = vi.fn()
+window.HTMLElement.prototype.scrollIntoView = vi.fn()
 
 vi.mock('react-router-dom', async importOriginal => {
   const actual = await importOriginal<NavigateFunction>()
