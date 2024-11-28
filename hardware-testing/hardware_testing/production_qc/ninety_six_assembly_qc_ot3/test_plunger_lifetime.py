@@ -273,7 +273,66 @@ async def _run(cycles: int, trials: int) -> None:
         pipette_left=pipette_string,
     )
     await api.home()
-    report = _build_csv_report(cycles=cycles, trials=trials)
+    #report = _build_csv_report(cycles=cycles, trials=trials)
+
+
+    #report 
+    test_tag = input("pippete sn:\n\t>> ")
+    test_robot = input("Enter robot ID:\n\t>> ")
+    from . import path as _path
+    path = _path
+    from hardware_testing import data
+    run_id = data.create_run_id()
+    import os,json
+    test_name = "tip-pick-up-lifetime-test"
+    if args.restart_flag:
+        if os.path.exists(path):
+            with open(path, "r") as openfile:
+                complete_dict = json.load(openfile)
+                file_name = complete_dict["csv_name"]
+    else:
+        file_name = data.create_file_name(
+            test_name=test_name,
+            run_id=run_id,
+            tag=test_tag,
+        )
+        header = [
+            "test_name","96_plunger_lifetime",
+            "test_tag",{test_tag}
+            "test_run_id",ru
+            "test_device_id"
+            "test_robot_id"
+            "test_time_utc"
+            "test_operator"
+            "test_version"
+        ]
+        header_str = data.convert_list_to_csv_line(header)
+        data.append_data_to_file(
+            test_name=test_name, run_id=run_id, file_name=file_name, data=header_str
+        )
+
+        header = [
+            "Time (W:H:M:S)",
+            "Test Robot",
+            "Test Pipette",
+            "Tip Rack",
+            "Tip Number",
+            "Total Tip Pick Ups",
+            "Tip Presence - Tip Pick Up (P/F)",
+            "Tip Presence - Tip Eject (P/F)",
+            "Total Failures",
+        ]
+
+
+
+
+
+
+
+
+    
+
+
     input("con.......")
     _, _, blow_out, _ = helpers_ot3.get_plunger_positions_ot3(api, OT3Mount.LEFT)
     # GATHER NOMINAL POSITIONS
