@@ -201,7 +201,7 @@ async def run(
         reservoir_a1_actual = await api.gantry_position(OT3Mount.LEFT)
 
     result = True
-    for test_volume in [pipette, 5]:
+    for test_volume in [1000, 5]: # FIXME: Once the p200 96ch pipette complete function, set ture test_volume
         tip_volume = 50 if test_volume <= 50 else pipette
         if not api.is_simulator:
             answer = ui.get_user_answer(f"Test {test_volume}uL")
