@@ -1,5 +1,6 @@
 """Test Droplets."""
 from asyncio import sleep
+import time
 from time import time
 from typing import List, Union, Tuple, Optional, Dict, Literal
 import argparse
@@ -14,7 +15,11 @@ from hardware_testing.data.csv_report import (
     CSVSection,
     CSVLineRepeating,
 )
+from hardware_testing import data
 
+import os,json
+
+from datetime import datetime
 from hardware_testing.opentrons_api import helpers_ot3
 from hardware_testing.opentrons_api.types import OT3Mount, Point, Axis
 import asyncio
@@ -177,10 +182,18 @@ async def aspirate_and_dispense(
     await asyncio.sleep(1)
     await api.dispense(OT3Mount.LEFT)
     await api.move_rel(OT3Mount.LEFT, Point(z=35))
+def _convert(seconds: float) -> str:
+    weeks, seconds = divmod(seconds, 7 * 24 * 60 * 60)
+    days, seconds = divmod(seconds, 24 * 60 * 60)
+    hours, seconds = divmod(seconds, 60 * 60)
+    minutes, seconds = divmod(seconds, 60)
+
+    return "%02d:%02d:%02d:%02d:%02d" % (weeks, days, hours, minutes, seconds)
 
 async def bottom_top(api: OT3API,blow_out:float) -> None:
     # MOVE DOWN
-    await _record_plunger_alignment(api,OT3Mount.LEFT)
+    passval = await _record_plunger_alignment(api,OT3Mount.LEFT)
+    _convert(time.perf_counter() - elapsed_time - start_time),
     print(f"moving down {blow_out} mm ")
     await helpers_ot3.move_plunger_absolute_ot3(
         api, OT3Mount.LEFT, blow_out
@@ -192,6 +205,8 @@ async def bottom_top(api: OT3API,blow_out:float) -> None:
         api, OT3Mount.LEFT, 0
     )
     await _record_plunger_alignment(api,OT3Mount.LEFT)
+
+
 
 async def _drop_tip(api: OT3API, trash: Point) -> None:
     print("drop in trash")
@@ -263,8 +278,15 @@ async def _record_plunger_alignment(
     print(data)
     return _did_pass
 
+async def savedata(datalist:list):
+    header_str = data.convert_list_to_csv_line(datalist)
+    data.append_data_to_file(
+        test_name=test_name, run_id=run_id, file_name=file_name, data=header_str
+    )
+
 async def _run(cycles: int, trials: int) -> None:
     """Run."""
+    pathjson = "/data/testing_data/lifetimep200h.json"
     pipette = 200
     pipette_string = "p200_96_v3.0"
     # BUILD API
@@ -274,69 +296,112 @@ async def _run(cycles: int, trials: int) -> None:
     )
     await api.home()
     #report = _build_csv_report(cycles=cycles, trials=trials)
-
-
-    #report 
-    test_tag = input("pippete sn:\n\t>> ")
-    test_robot = input("Enter robot ID:\n\t>> ")
-    from . import path as _path
-    path = _path
-    from hardware_testing import data
+    global start_time
+    global elapsed_time
+    start_time = time.perf_counter()
+    elapsed_time = 0.0
+    global run_id
     run_id = data.create_run_id()
-    import os,json
+    #report 
+    test_pip = input("Enter pippete sn:\n\t>> ")
+    test_robot = input("Enter robot ID:\n\t>> ")
+    test_operator = input("Enter test operator:\n\t>> ")
+    global test_name
     test_name = "tip-pick-up-lifetime-test"
+    global file_name
+    cycles_star = 0
+
+
+    
     if args.restart_flag:
-        if os.path.exists(path):
-            with open(path, "r") as openfile:
+        if os.path.exists(pathjson):
+            with open(pathjson, "r") as openfile:
                 complete_dict = json.load(openfile)
                 file_name = complete_dict["csv_name"]
+            
     else:
         file_name = data.create_file_name(
             test_name=test_name,
             run_id=run_id,
-            tag=test_tag,
+            tag=test_pip,
         )
+        with open(pathjson, "w") as outfile:
+            json_object = {"csv_name":file_name}
+            outfile.write(json_object)
+
+
+        data1 = ["test_name","96_plunger_lifetime"]
+        header_str = data.convert_list_to_csv_line(data1)
+        data.append_data_to_file(
+            test_name=test_name, run_id=run_id, file_name=file_name, data=header_str
+        )
+        data1 = [
+            "test_device_id",f"{test_pip}"]
+        data1 = [
+            "test_run_id","run-" + datetime.utcnow().strftime("%y-%m-%d-%H-%M-%S")]
+        header_str = data.convert_list_to_csv_line(data1)
+        data.append_data_to_file(
+            test_name=test_name, run_id=run_id, file_name=file_name, data=header_str
+        )
+
+        data1 = [
+            "test_robot_id",f"{test_robot}"
+        ]
+        header_str = data.convert_list_to_csv_line(data1)
+        data.append_data_to_file(
+            test_name=test_name, run_id=run_id, file_name=file_name, data=header_str
+        )
+
+        data1 = ["test_time_utc",datetime.utcnow().strftime("%y-%m-%d-%H-%M-%S")]
+        header_str = data.convert_list_to_csv_line(data1)
+        data.append_data_to_file(
+            test_name=test_name, run_id=run_id, file_name=file_name, data=header_str
+        )
+
+        data1 = ["test_operator",test_operator]
+        header_str = data.convert_list_to_csv_line(data1)
+        data.append_data_to_file(
+            test_name=test_name, run_id=run_id, file_name=file_name, data=header_str
+        )
+
+        data1 = ["test_version",]
+        header_str = data.convert_list_to_csv_line(data1)
+        data.append_data_to_file(
+            test_name=test_name, run_id=run_id, file_name=file_name, data=header_str
+        )
+
+
+        
+
         header = [
-            "test_name","96_plunger_lifetime",
-            "test_tag",{test_tag}
-            "test_run_id",ru
-            "test_device_id"
-            "test_robot_id"
-            "test_time_utc"
-            "test_operator"
-            "test_version"
+            "Time (W:H:M:S)",
+            "CYCLES",
+            "N",
+            "Direction",
+            "Position",
+            "Current_pos",
+            "Encoder_poses"
+
         ]
         header_str = data.convert_list_to_csv_line(header)
         data.append_data_to_file(
             test_name=test_name, run_id=run_id, file_name=file_name, data=header_str
         )
 
-        header = [
-            "Time (W:H:M:S)",
-            "Test Robot",
-            "Test Pipette",
-            "Tip Rack",
-            "Tip Number",
-            "Total Tip Pick Ups",
-            "Tip Presence - Tip Pick Up (P/F)",
-            "Tip Presence - Tip Eject (P/F)",
-            "Total Failures",
-        ]
+        
 
+    if  args.load_cal:
+        print("Loading calibration data...\n")
+        
+        if os.path.exists(pathjson):
+            with open(pathjson, "r"
+            ) as openfile:
+                calibrated_slot_loc = json.load(openfile)
+                file_name= calibrated_slot_loc["csv_name"]
+                cycles_star = calibrated_slot_loc["cycles_star"]
 
-
-
-
-
-
-
-    
-
-
-    input("con.......")
     _, _, blow_out, _ = helpers_ot3.get_plunger_positions_ot3(api, OT3Mount.LEFT)
     # GATHER NOMINAL POSITIONS
-    trash_nominal = get_trash_nominal()
     tip_rack_96_a1_nominal = get_tiprack_96_nominal(pipette)
     # tip_rack_partial_a1_nominal = get_tiprack_partial_nominal()
     reservoir_a1_nominal = get_reservoir_nominal()
@@ -368,9 +433,9 @@ async def _run(cycles: int, trials: int) -> None:
     #print(f"Ready to test x{number+1} {get_test_volume} uL")
         
     if not api.is_simulator:
-            ui.get_user_ready(
-                f"picking up tips, place tip-rack {tip_volume}ul on slot {TIP_RACK_96_SLOT}, RESERVOIR_SLOT on slot {RESERVOIR_SLOT}"
-            )
+        ui.get_user_ready(
+            f"picking up tips, place tip-rack {tip_volume}ul on slot {TIP_RACK_96_SLOT}, RESERVOIR_SLOT on slot {RESERVOIR_SLOT}"
+        )
     
     
     ui.print_header("JOG to 96-Tip RACK")
@@ -390,21 +455,80 @@ async def _run(cycles: int, trials: int) -> None:
         OT3Mount.LEFT, helpers_ot3.get_default_tip_length(tip_volume)
     )
     await api.home_z(OT3Mount.LEFT)
-    for number in range(cycles):
+    for number in range(cycles_star,cycles):
         
         # PICK-UP 96 TIPS
-        
-        
         if reservoir_a1_actual is None:
             await _find_reservoir_pos()
             await api.home_z(OT3Mount.LEFT)
         assert reservoir_a1_actual
         await aspirate_and_dispense(api, reservoir_a1_actual, get_test_volume)
         for n in range(trials):
-            await bottom_top(api,blow_out)
+            passval = await _record_plunger_alignment(api,OT3Mount.LEFT)
+            time = _convert(time.perf_counter() - elapsed_time - start_time)
+            wlist = []
+            wlist.append(time)
+            wlist.append(number)
+            wlist.append(n)
+            wlist.append("down")
+            wlist.append("start")
+            wlist = wlist + passval
+            print(f"moving down {blow_out} mm ")
+            await helpers_ot3.move_plunger_absolute_ot3(
+                api, OT3Mount.LEFT, blow_out
+            )
+            time = _convert(time.perf_counter() - elapsed_time - start_time)
+            passval = await _record_plunger_alignment(api,OT3Mount.LEFT)
+            wlist = []
+            wlist.append(time)
+            wlist.append(number)
+            wlist.append(n)
+            wlist.append("down")
+            wlist.append("end")
+            wlist = wlist + passval
+
+            # MOVE UP
+            print(f"moving up {blow_out} mm ")
+            time = _convert(time.perf_counter() - elapsed_time - start_time)
+            passval = await _record_plunger_alignment(api,OT3Mount.LEFT)
+            wlist = []
+            wlist.append(time)
+            wlist.append(number)
+            wlist.append(n)
+            wlist.append("up")
+            wlist.append("start")
+            wlist = wlist + passval
+
+            await helpers_ot3.move_plunger_absolute_ot3(
+                api, OT3Mount.LEFT, 0
+            )
+            time = _convert(time.perf_counter() - elapsed_time - start_time)
+            passval = await _record_plunger_alignment(api,OT3Mount.LEFT)
+            wlist = []
+            wlist.append(time)
+            wlist.append(number)
+            wlist.append(n)
+            wlist.append("up")
+            wlist.append("end")
+            wlist = wlist + passval
             print('n',n)
             #input("continue")
-
+        if os.path.exists(path):
+            with open(
+                pathjson, "r"
+            ) as openfile:
+                print("Recording...\n")
+                calibrated_slot_loc = json.load(openfile)
+                complete_dict = {
+                    "cycles_star": number + 1,
+                    "csv_name": file_name,
+                }
+                calibrated_slot_loc.update(complete_dict)
+                with open(
+                    pathjson,
+                    "w",
+                ) as writefile:
+                    json.dump(calibrated_slot_loc, writefile)
         await api.home_z(OT3Mount.LEFT)
     await _drop_tip(api, tip_rack_pos)
 if __name__ == "__main__":
