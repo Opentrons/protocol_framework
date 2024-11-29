@@ -1,7 +1,7 @@
 """Test Droplets."""
 from asyncio import sleep
-import time
-from time import time
+
+#from time import time
 from typing import List, Union, Tuple, Optional, Dict, Literal
 import argparse
 from opentrons.hardware_control.ot3api import OT3API
@@ -193,7 +193,7 @@ def _convert(seconds: float) -> str:
 async def bottom_top(api: OT3API,blow_out:float) -> None:
     # MOVE DOWN
     passval = await _record_plunger_alignment(api,OT3Mount.LEFT)
-    _convert(time.perf_counter() - elapsed_time - start_time),
+    #_convert(time.perf_counter() - elapsed_time - start_time),
     print(f"moving down {blow_out} mm ")
     await helpers_ot3.move_plunger_absolute_ot3(
         api, OT3Mount.LEFT, blow_out
@@ -298,6 +298,7 @@ async def _run(cycles: int, trials: int) -> None:
     #report = _build_csv_report(cycles=cycles, trials=trials)
     global start_time
     global elapsed_time
+    import time
     start_time = time.perf_counter()
     elapsed_time = 0.0
     global run_id
@@ -326,9 +327,11 @@ async def _run(cycles: int, trials: int) -> None:
             tag=test_pip,
         )
         with open(pathjson, "w") as outfile:
-            json_object = {"cycles_star":cycles_star}
-            json_object = {"csv_name":file_name}
-            outfile.write(json_object)
+            json_object = {}
+            json_object["cycles_star"]=cycles_star
+            json_object["csv_name"]=file_name
+            calibrated_slot_loc = json.dumps(json_object, indent=0)
+            outfile.write(calibrated_slot_loc)
 
 
         data1 = ["test_name","96_plunger_lifetime"]
@@ -395,7 +398,7 @@ async def _run(cycles: int, trials: int) -> None:
 
         
 
-    if  args.load_cal:
+    if args.load_cal:
         print("Loading calibration data...\n")
         
         if os.path.exists(pathjson):
@@ -519,7 +522,7 @@ async def _run(cycles: int, trials: int) -> None:
             wlist = wlist + passval
             print('n',n)
             #input("continue")
-        if os.path.exists(path):
+        if os.path.exists(pathjson):
             with open(
                 pathjson, "r"
             ) as openfile:
@@ -541,6 +544,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--cycles", type=int, default=DEFAULT_CYCLES)
     parser.add_argument("--n", type=int, default=DEFAULT_N)
+    parser.add_argument("--load_cal", action="store_true")
+    parser.add_argument("--restart_flag", action="store_true")
     args = parser.parse_args()
     asyncio.run(_run(args.cycles,args.n))
 
