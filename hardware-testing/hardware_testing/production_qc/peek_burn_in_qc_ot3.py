@@ -109,7 +109,7 @@ def _build_csv_report(cycles: int, trials: int) -> CSVReport:
                 for pos in ["start", "end"]
             ],
         )
-        for cycle in range(0, cycles*TRIALS_PER_CYCLE, TRIALS_PER_CYCLE)
+        for cycle in range(0, (cycles+1)*TRIALS_PER_CYCLE, TRIALS_PER_CYCLE)
         for current in sorted(list(PLUNGER_CURRENTS_SPEED.keys()), reverse=False)
     ]
     section_list.append(
