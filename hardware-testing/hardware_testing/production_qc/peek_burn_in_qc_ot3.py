@@ -117,7 +117,7 @@ def _build_csv_report(cycles: int, trials: int) -> CSVReport:
             title=_get_cycling_section_tag(),
             lines=[
                 CSVLine(_get_cycling_test_tag(cycle), [int, CSVResult])
-                for cycle in range(0, cycles*TRIALS_PER_CYCLE, TRIALS_PER_CYCLE)
+                for cycle in range(0, (cycles+1)*TRIALS_PER_CYCLE, TRIALS_PER_CYCLE)
             ],
         )
     )
@@ -454,7 +454,11 @@ async def _main(is_simulating: bool, cycles: int, trials: int, continue_after_st
                     _get_cycling_test_tag(cycle),
                     data,
                 )
-
+            await _test_plunger(
+                    api, mount, report,
+                    cycle=cycle+1, trials=trials,
+                    continue_after_stall=continue_after_stall
+                )
             ui.print_title("DONE")
             report.save_to_disk()
             report.print_results()
