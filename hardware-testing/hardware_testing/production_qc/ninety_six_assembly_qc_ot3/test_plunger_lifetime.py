@@ -294,7 +294,7 @@ async def _run(cycles: int, trials: int) -> None:
         is_simulating=False,
         pipette_left=pipette_string,
     )
-    await api.home()
+    
     #report = _build_csv_report(cycles=cycles, trials=trials)
     global start_time
     global elapsed_time
@@ -326,6 +326,7 @@ async def _run(cycles: int, trials: int) -> None:
             tag=test_pip,
         )
         with open(pathjson, "w") as outfile:
+            json_object = {"cycles_star":cycles_star}
             json_object = {"csv_name":file_name}
             outfile.write(json_object)
 
@@ -335,18 +336,22 @@ async def _run(cycles: int, trials: int) -> None:
         data.append_data_to_file(
             test_name=test_name, run_id=run_id, file_name=file_name, data=header_str
         )
-        data1 = [
-            "test_device_id",f"{test_pip}"]
-        data1 = [
-            "test_run_id","run-" + datetime.utcnow().strftime("%y-%m-%d-%H-%M-%S")]
+
+
+        data1 = ["test_device_id",f"{test_pip}"]
         header_str = data.convert_list_to_csv_line(data1)
         data.append_data_to_file(
             test_name=test_name, run_id=run_id, file_name=file_name, data=header_str
         )
 
-        data1 = [
-            "test_robot_id",f"{test_robot}"
-        ]
+
+        data1 = ["test_run_id",run_id]
+        header_str = data.convert_list_to_csv_line(data1)
+        data.append_data_to_file(
+            test_name=test_name, run_id=run_id, file_name=file_name, data=header_str
+        )
+
+        data1 = ["test_robot_id",f"{test_robot}"]
         header_str = data.convert_list_to_csv_line(data1)
         data.append_data_to_file(
             test_name=test_name, run_id=run_id, file_name=file_name, data=header_str
@@ -399,7 +404,8 @@ async def _run(cycles: int, trials: int) -> None:
                 calibrated_slot_loc = json.load(openfile)
                 file_name= calibrated_slot_loc["csv_name"]
                 cycles_star = calibrated_slot_loc["cycles_star"]
-
+    
+    await api.home()
     _, _, blow_out, _ = helpers_ot3.get_plunger_positions_ot3(api, OT3Mount.LEFT)
     # GATHER NOMINAL POSITIONS
     tip_rack_96_a1_nominal = get_tiprack_96_nominal(pipette)
