@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from subprocess import check_output
 from time import time
-from typing import Tuple, Union, List, Any
+from typing import Tuple, List, Any
 
 from opentrons.config import infer_config_base_dir, IS_ROBOT
 
@@ -19,14 +19,13 @@ def _build_git_description_string() -> str:
     if IS_ROBOT:
         raise RuntimeError("unable to run git describe on robot")
     raw_description = _git("describe")
-    raw_hash = _git("rev-parse", "--short", "HEAD")
     description_split = raw_description.split("-")
-    description = "_".join(description_split)
-    desc_with_hash = description + "-" + raw_hash
+    # separate everything but git hash with an underscore
+    description = "_".join(description_split[:-1]) + "-" + description_split[-1]
     mods = _git("ls-files", "-m").replace("\n", " ")
     if not mods:
-        return desc_with_hash
-    return f"{desc_with_hash}-[{mods}]"
+        return description
+    return f"{description}-[{mods}]"
 
 
 def get_git_description() -> str:
@@ -70,7 +69,7 @@ def create_test_name_from_file(f: str) -> str:
     return os.path.basename(f).replace("_", "-").replace(".py", "")
 
 
-def create_folder_for_test_data(test_name: Union[str, Path]) -> Path:
+def create_folder_for_test_data(test_name: str) -> Path:
     """Create a folder for test data."""
     base = _initialize_testing_data_base_dir()
     test_path = base / test_name
@@ -94,40 +93,34 @@ def create_run_id_and_start_time() -> Tuple[str, float]:
 
 
 def create_file_name(
-    test_name: str, run_id: str, tag: str, extension: str = "csv"
+    test_name: str, run_id: str, tag: str,pipid: str, extension: str = "csv"
 ) -> str:
     """Create a file name, given a test name."""
-    return f"{test_name}_{run_id}_{tag}.{extension}"
+    return f"{test_name}_{run_id}_{tag}_{pipid}.{extension}"
 
 
-def _save_data(
-    test_name: str, run_id: str, file_name: str, data: str, perm: str = "w+"
-) -> Path:
+def _save_data(test_name: str, file_name: str, data: str, perm: str = "w+") -> Path:
     test_path = create_folder_for_test_data(test_name)
-    run_path = create_folder_for_test_data(test_path / run_id)
-    data_path = test_path / run_path / file_name
+    data_path = test_path / file_name
     with open(data_path, perm) as f:
         f.write(data)
     return data_path
 
 
-def dump_data_to_file(test_name: str, run_id: str, file_name: str, data: str) -> Path:
+def dump_data_to_file(test_name: str, file_name: str, data: str) -> Path:
     """Save entire file contents to a file on disk."""
-    return _save_data(test_name, run_id, file_name, data, perm="w+")
+    return _save_data(test_name, file_name, data, perm="w+")
 
 
-def append_data_to_file(test_name: str, run_id: str, file_name: str, data: str) -> Path:
+def append_data_to_file(test_name: str, file_name: str, data: str) -> Path:
     """Append new content to an already existing file on disk."""
-    return _save_data(test_name, run_id, file_name, data, perm="a+")
+    return _save_data(test_name, file_name, data, perm="a+")
 
 
-def insert_data_to_file(
-    test_name: str, run_id: str, file_name: str, data: str, line: int
-) -> None:
+def insert_data_to_file(test_name: str, file_name: str, data: str, line: int) -> None:
     """Insert new data at a specified line."""
     test_path = create_folder_for_test_data(test_name)
-    run_path = create_folder_for_test_data(test_path / run_id)
-    data_path = run_path / file_name
+    data_path = test_path / file_name
     # read data from file, insert line, then overwrite previous file
     with open(data_path, "r") as f:
         contents = f.readlines()
@@ -135,7 +128,6 @@ def insert_data_to_file(
     with open(data_path, "w") as f:
         f.write("".join(contents))
 
-
-def convert_list_to_csv_line(elements: List[Any]) -> str:
-    """Convert list of something into CSV line."""
-    return ",".join(str(elements))
+def convert_list_to_csv_line(data: List[Any]) -> str:
+    """Convert list to csv line."""
+    return ",".join([str(n) for n in data]) + '\n'
