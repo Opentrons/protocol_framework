@@ -456,7 +456,7 @@ async def _main(is_simulating: bool, cycles: int, trials: int, continue_after_st
                 )
             await _test_plunger(
                     api, mount, report,
-                    cycle=cycle+1, trials=trials,
+                    cycle=(cycle+1)*TRIALS_PER_CYCLE, trials=trials,
                     continue_after_stall=continue_after_stall
                 )
             ui.print_title("DONE")
