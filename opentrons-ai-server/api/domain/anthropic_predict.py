@@ -12,7 +12,7 @@ from ddtrace import tracer
 from api.domain.config_anthropic import DOCUMENTS, PROMPT, SYSTEM_PROMPT
 from api.settings import Settings
 
-weave.init("OpentronsAI")
+weave.init("opentronsai/OpentronsAI-Phase-2")
 settings: Settings = Settings()
 logger = structlog.stdlib.get_logger(settings.logger_name)
 ROOT_PATH: Path = Path(Path(__file__)).parent.parent.parent
