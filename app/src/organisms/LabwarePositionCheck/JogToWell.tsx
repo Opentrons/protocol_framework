@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
@@ -11,14 +11,14 @@ import {
   Flex,
   JUSTIFY_SPACE_BETWEEN,
   LabwareRender,
+  LegacyStyledText,
+  ModalShell,
   PipetteRender,
   PrimaryButton,
   RESPONSIVENESS,
   RobotWorkSpace,
   SecondaryButton,
   SPACING,
-  LegacyStyledText,
-  ModalShell,
   TYPOGRAPHY,
   WELL_LABEL_OPTIONS,
 } from '@opentrons/components'
@@ -40,6 +40,7 @@ import { NeedHelpLink } from '/app/molecules/OT2CalibrationNeedHelpLink'
 import { JogControls } from '/app/molecules/JogControls'
 import { LiveOffsetValue } from './LiveOffsetValue'
 
+import type { ReactNode } from 'react'
 import type { PipetteName, LabwareDefinition2 } from '@opentrons/shared-data'
 import type { WellStroke } from '@opentrons/components'
 import type { VectorOffset } from '@opentrons/api-client'
@@ -55,8 +56,8 @@ interface JogToWellProps {
   handleJog: Jog
   pipetteName: PipetteName
   labwareDef: LabwareDefinition2
-  header: React.ReactNode
-  body: React.ReactNode
+  header: ReactNode
+  body: ReactNode
   initialPosition: VectorOffset
   existingOffset: VectorOffset
   shouldUseMetalProbe: boolean
@@ -76,12 +77,12 @@ export const JogToWell = (props: JogToWellProps): JSX.Element | null => {
     shouldUseMetalProbe,
   } = props
 
-  const [joggedPosition, setJoggedPosition] = React.useState<VectorOffset>(
+  const [joggedPosition, setJoggedPosition] = useState<VectorOffset>(
     initialPosition
   )
   const isOnDevice = useSelector(getIsOnDevice)
-  const [showFullJogControls, setShowFullJogControls] = React.useState(false)
-  React.useEffect(() => {
+  const [showFullJogControls, setShowFullJogControls] = useState(false)
+  useEffect(() => {
     //  NOTE: this will perform a "null" jog when the jog controls mount so
     //  if a user reaches the "confirm exit" modal (unmounting this component)
     //  and clicks "go back" we are able so initialize the live offset to whatever

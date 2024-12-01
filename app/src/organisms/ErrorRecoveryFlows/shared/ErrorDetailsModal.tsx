@@ -1,17 +1,17 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { createPortal } from 'react-dom'
 import { css } from 'styled-components'
 
 import {
-  Flex,
-  StyledText,
-  SPACING,
-  COLORS,
-  ModalShell,
-  ModalHeader,
   BORDERS,
+  COLORS,
   DIRECTION_COLUMN,
+  Flex,
+  ModalHeader,
+  ModalShell,
+  SPACING,
+  StyledText,
 } from '@opentrons/components'
 
 import { useErrorName } from '../hooks'
@@ -22,6 +22,7 @@ import { InlineNotification } from '/app/atoms/InlineNotification'
 import { StepInfo } from './StepInfo'
 import { getErrorKind } from '../utils'
 
+import type { ReactNode } from 'react'
 import type { LabwareDefinition2, RobotType } from '@opentrons/shared-data'
 import type { IconProps } from '@opentrons/components'
 import type { OddModalHeaderBaseProps } from '/app/molecules/OddModal/types'
@@ -33,7 +34,7 @@ export function useErrorDetailsModal(): {
   showModal: boolean
   toggleModal: () => void
 } {
-  const [showModal, setShowModal] = React.useState(false)
+  const [showModal, setShowModal] = useState(false)
 
   const toggleModal = (): void => {
     setShowModal(!showModal)
@@ -112,7 +113,7 @@ export function ErrorDetailsModal(props: ErrorDetailsModalProps): JSX.Element {
 }
 
 type ErrorDetailsModalType = ErrorDetailsModalProps & {
-  children: React.ReactNode
+  children: ReactNode
   modalHeader: OddModalHeaderBaseProps
   toggleModal: () => void
   desktopType: DesktopSizeType
