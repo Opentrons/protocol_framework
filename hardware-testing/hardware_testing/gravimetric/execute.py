@@ -389,6 +389,7 @@ def _run_trial(
         mode=trial.mode,
         clear_accuracy_function=trial.cfg.nominal_plunger,
         pose_for_camera=trial.cfg.interactive,
+        pre_wet_count=trial.cfg.pre_wet_count,
     )
     if not trial.recorder.is_simulator:
         trial.pipette._retract()  # retract to top of gantry

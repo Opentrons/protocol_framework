@@ -397,6 +397,7 @@ def build_gravimetric_cfg(
     same_tip: bool,
     ignore_fail: bool,
     mode: str,
+    pre_wet_count: int,
     run_args: RunArgs,
 ) -> GravimetricConfig:
     """Build."""
@@ -430,6 +431,7 @@ def build_gravimetric_cfg(
         mode=mode,
         liquid=run_args.liquid,
         dilution=run_args.dilution,
+        pre_wet_count=pre_wet_count,
     )
 
 
@@ -450,6 +452,7 @@ def build_photometric_cfg(
     photoplate_column_offset: List[int],
     dye_well_column_offset: List[int],
     mode: str,
+    pre_wet_count: int,
     run_args: RunArgs,
 ) -> PhotometricConfig:
     """Run."""
@@ -482,6 +485,7 @@ def build_photometric_cfg(
         dye_well_column_offset=dye_well_column_offset,
         mode=mode,
         interactive=False,
+        pre_wet_count=pre_wet_count,
     )
 
 
@@ -510,6 +514,7 @@ def _main(
             args.photoplate_col_offset,
             args.dye_well_col_offset,
             args.mode,
+            args.pre_wet_count,
             run_args,
         )
         union_cfg = cfg_pm
@@ -534,6 +539,7 @@ def _main(
             args.same_tip,
             args.ignore_fail,
             args.mode,
+            args.pre_wet_count,
             run_args,
         )
 
@@ -616,6 +622,7 @@ if __name__ == "__main__":
         default="water",
     )
     parser.add_argument("--dilution", type=float, default=1.0)
+    parser.add_argument("--pre-wet-count", type=int, default=0)
     parser.add_argument("--reverse-tips", action="store_true")
     args = parser.parse_args()
     run_args = RunArgs.build_run_args(args)

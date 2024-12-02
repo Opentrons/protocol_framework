@@ -39,6 +39,7 @@ class VolumetricConfig:
     same_tip: bool
     ignore_fail: bool
     mode: str
+    pre_wet_count: int
 
 
 @dataclass
