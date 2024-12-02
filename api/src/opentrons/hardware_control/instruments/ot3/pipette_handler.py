@@ -508,7 +508,9 @@ class OT3PipetteHandler:
     def plunger_speed(
         self, instr: Pipette, ul_per_s: float, action: "UlPerMmAction"
     ) -> float:
+        print("-----------Plunger speed----------------")
         mm_per_s = ul_per_s / instr.ul_per_mm(instr.working_volume, action)
+        print(f"mm per s : {mm_per_s}")
         return round(mm_per_s, 6)
 
     def plunger_flowrate(
@@ -674,6 +676,8 @@ class OT3PipetteHandler:
     ) -> LiquidActionSpec:
         """Check preconditions and calculate values for blowout."""
         instrument = self.get_pipette(mount)
+        print("-----------blow out flow rate---------")
+        print(f"blow out flow rate: {instrument.blow_out_flow_rate}")
         speed = self.plunger_speed(instrument, instrument.blow_out_flow_rate, "blowout")
         acceleration = self.plunger_acceleration(
             instrument, instrument.flow_acceleration

@@ -201,6 +201,7 @@ def _pipette_with_liquid_settings(  # noqa: C901
     def _blow_out_remaining_air() -> None:
         # FIXME: using the HW-API to specify that we want to blow-out the full
         #        available blow-out volume
+        print(f"max blow out volume : {_get_max_blow_out_ul}")
         hw_api.blow_out(hw_mount, _get_max_blow_out_ul())
 
     # ASPIRATE/DISPENSE SEQUENCE HAS THREE PHASES:

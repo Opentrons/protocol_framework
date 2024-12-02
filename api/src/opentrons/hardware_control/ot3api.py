@@ -1824,7 +1824,10 @@ class OT3API(
             dispense_spec.plunger_distance,
             self._current_position,
         )
-
+        print("-----------Dispense Settings------------")
+        print(f"dispense current:{dispense_spec.current}")
+        print(f"dispense acceleration:{dispense_spec.acceleration}")
+        print(f"dispense speed:{dispense_spec.speed}")
         try:
             await self._backend.set_active_current(
                 {dispense_spec.axis: dispense_spec.current}
@@ -1870,6 +1873,10 @@ class OT3API(
                 f"max blowout distance = {max_blowout_pos}"
             )
 
+        print("-----------Blow out Settings------------")
+        print(f"blowout current:{blowout_spec.current}")
+        print(f"blowout acceleration:{blowout_spec.acceleration}")
+        print(f"blowout speed:{blowout_spec.speed}")
         await self._backend.set_active_current(
             {blowout_spec.axis: blowout_spec.current}
         )
