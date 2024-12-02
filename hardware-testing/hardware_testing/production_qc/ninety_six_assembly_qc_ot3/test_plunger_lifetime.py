@@ -565,7 +565,7 @@ async def _run(cycles: int, trials: int) -> None:
                     "w",
                 ) as writefile:
                     json.dump(calibrated_slot_loc, writefile)
-        await api.home_z(OT3Mount.LEFT)
+        await api.home()
     await _drop_tip(api, tip_rack_pos)
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
