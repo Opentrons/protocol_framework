@@ -61,6 +61,7 @@ def subject(
 )
 async def test_dispense_in_place_implementation(
     decoy: Decoy,
+    gantry_mover: GantryMover,
     pipetting: PipettingHandler,
     state_view: StateView,
     subject: DispenseInPlaceImplementation,
@@ -101,6 +102,9 @@ async def test_dispense_in_place_implementation(
             stateupdateLabware, stateupdateWell, "pipette-id-abc"
         )
     ).then_return(["A3", "A4"])
+    decoy.when(await gantry_mover.get_position("pipette-id-abc")).then_return(
+        Point(1, 2, 3)
+    )
 
     result = await subject.execute(data)
 

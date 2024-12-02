@@ -13,12 +13,14 @@ import { Module } from '@opentrons/components'
 import { selectors } from '../../../../labware-ingred/selectors'
 import { getInitialDeckSetup } from '../../../../step-forms/selectors'
 import { getCustomLabwareDefsByURI } from '../../../../labware-defs/selectors'
+import { getDesignerTab } from '../../../../file-data/selectors'
 import { LabwareOnDeck } from '../../../../components/DeckSetup/LabwareOnDeck'
 import { FixtureRender } from '../FixtureRender'
 import { SelectedHoveredItems } from '../SelectedHoveredItems'
 import type * as OpentronsComponents from '@opentrons/components'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
+vi.mock('../../../../file-data/selectors')
 vi.mock('../../../../step-forms/selectors')
 vi.mock('../FixtureRender')
 vi.mock('../../../../labware-ingred/selectors')
@@ -48,6 +50,7 @@ describe('SelectedHoveredItems', () => {
       hoveredFixture: null,
       slotPosition: [0, 0, 0],
     }
+    vi.mocked(getDesignerTab).mockReturnValue('startingDeck')
     vi.mocked(getInitialDeckSetup).mockReturnValue({
       modules: {},
       additionalEquipmentOnDeck: {},

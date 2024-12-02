@@ -73,7 +73,6 @@ export function ProtocolRoutes(): JSX.Element {
       onReset={handleReset}
     >
       <NavigationBar />
-
       <Kitchen>
         <Box width="100%">
           {showGateModal ? <GateModal /> : null}

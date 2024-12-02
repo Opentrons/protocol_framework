@@ -8,7 +8,6 @@ import {
   EmptySelectorButton,
   Flex,
   ListItem,
-  ListItemCustomize,
   SPACING,
   StyledText,
   TYPOGRAPHY,
@@ -36,6 +35,7 @@ import {
 } from './constants'
 import { getNumOptions, getNumSlotsAvailable } from './utils'
 import { HandleEnter } from '../../atoms/HandleEnter'
+import { PDListItemCustomize as ListItemCustomize } from '../CreateNewProtocolWizard/PDListItemCustomize'
 
 import type { DropdownBorder } from '@opentrons/components'
 import type { ModuleModel, ModuleType } from '@opentrons/shared-data'
@@ -150,6 +150,7 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
   return (
     <HandleEnter onEnter={proceed}>
       <WizardBody
+        robotType={robotType}
         stepNumber={robotType === FLEX_ROBOT_TYPE ? 4 : 3}
         header={t('add_modules')}
         goBack={() => {
@@ -258,7 +259,6 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                       return (
                         <ListItem type="noActive" key={`${module.model}`}>
                           <ListItemCustomize
-                            forceDirection
                             dropdown={
                               MOAM_MODULE_TYPES.includes(module.type) &&
                               robotType === FLEX_ROBOT_TYPE

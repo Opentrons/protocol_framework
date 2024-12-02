@@ -29144,6 +29144,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [
     {
       "description": "DNA sample of known quantity",

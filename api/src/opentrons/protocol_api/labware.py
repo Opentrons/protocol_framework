@@ -1,4 +1,4 @@
-""" opentrons.protocol_api.labware: classes and functions for labware handling
+"""opentrons.protocol_api.labware: classes and functions for labware handling
 
 This module provides things like :py:class:`Labware`, and :py:class:`Well`
 to encapsulate labware instances used in protocols
@@ -13,7 +13,18 @@ from __future__ import annotations
 import logging
 
 from itertools import dropwhile
-from typing import TYPE_CHECKING, Any, List, Dict, Optional, Union, Tuple, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    List,
+    Dict,
+    Optional,
+    Union,
+    Tuple,
+    cast,
+    Sequence,
+    Mapping,
+)
 
 from opentrons_shared_data.labware.types import LabwareDefinition, LabwareParameters
 
@@ -281,18 +292,14 @@ class Well:
         :param Liquid liquid: The liquid to load into the well.
         :param float volume: The volume of liquid to load, in µL.
 
-        .. note::
-            In API version 2.22 and later, use :py:meth:`~.Well.load_empty()` to mark a well as empty at the beginning of a protocol, rather than using this method with ``volume=0``.
+        .. deprecated:: 2.22
+            In API version 2.22 and later, use :py:meth:`~Labware.load_liquid`, :py:meth:`~Labware.load_liquid_by_well`,
+            or :py:meth:`~Labware.load_empty` to load liquid into a well.
         """
         self._core.load_liquid(
             liquid=liquid,
             volume=volume,
         )
-
-    @requires_version(2, 22)
-    def load_empty(self) -> None:
-        """Mark a well as empty."""
-        self._core.load_empty()
 
     def _from_center_cartesian(self, x: float, y: float, z: float) -> Point:
         """
@@ -1112,6 +1119,141 @@ class Labware:
             a tip rack. Formerly, it would do nothing.
         """
         self._core.reset_tips()
+
+    @requires_version(2, 22)
+    def load_liquid(
+        self, wells: Sequence[Union[str, Well]], volume: float, liquid: Liquid
+    ) -> None:
+        """Mark several wells as containing the same amount of liquid.
+
+        This method should be called at the beginning of a protocol, soon after loading the labware and before
+        liquid handling operations begin. It is a base of information for liquid tracking functionality. If a well in a labware
+        has not been named in a call to :py:meth:`~Labware.load_empty`, :py:meth:`~Labware.load_liquid`, or
+        :py:meth:`~Labware.load_liquid_by_well`, the volume it contains is unknown and the well's liquid will not be tracked.
+
+        For example, to load 10µL of a liquid named ``water`` (defined with :py:meth:`~ProtocolContext.define_liquid`)
+        into all the wells of a labware, you could call ``labware.load_liquid(labware.wells(), 10, water)``.
+
+        If you want to load different volumes of liquid into different wells, use :py:meth:`~Labware.load_liquid_by_well`.
+
+        If you want to mark the well as containing no liquid, use :py:meth:`~Labware.load_empty`.
+
+        :param wells: The wells to load the liquid into.
+        :type wells: List of well names or list of Well objects, for instance from :py:meth:`~Labware.wells`.
+
+        :param volume: The volume of liquid to load into each well, in 10µL.
+        :type volume: float
+
+        :param liquid: The liquid to load into each well, previously defined by :py:meth:`~ProtocolContext.define_liquid`
+        :type liquid: Liquid
+        """
+        well_names: List[str] = []
+        for well in wells:
+            if isinstance(well, str):
+                if well not in self.wells_by_name():
+                    raise KeyError(
+                        f"{well} is not a well in labware {self.name}. The elements of wells should name wells in this labware."
+                    )
+                well_names.append(well)
+            elif isinstance(well, Well):
+                if well.parent is not self:
+                    raise KeyError(
+                        f"{well.well_name} is not a well in labware {self.name}. The elements of wells should be wells of this labware."
+                    )
+                well_names.append(well.well_name)
+            else:
+                raise TypeError(
+                    f"Unexpected type for element {repr(well)}. The elements of wells should be Well instances or well names."
+                )
+            if not isinstance(volume, (float, int)):
+                raise TypeError(
+                    f"Unexpected type for volume {repr(volume)}. Volume should be a number in microliters."
+                )
+        self._core.load_liquid({well_name: volume for well_name in well_names}, liquid)
+
+    @requires_version(2, 22)
+    def load_liquid_by_well(
+        self, volumes: Mapping[Union[str, Well], float], liquid: Liquid
+    ) -> None:
+        """Mark several wells as containing unique volumes of liquid.
+
+        This method should be called at the beginning of a protocol, soon after loading the labware and before
+        liquid handling operations begin. It is a base of information for liquid tracking functionality. If a well in a labware
+        has not been named in a call to :py:meth:`~Labware.load_empty`, :py:meth:`~Labware.load_liquid`, or
+        :py:meth:`~Labware.load_liquid_by_well`, the volume it contains is unknown and the well's liquid will not be tracked.
+
+        For example, to load a decreasing amount of of a liquid named ``water`` (defined with :py:meth:`~ProtocolContext.define_liquid`)
+        into each successive well of a row, you could call
+        ``labware.load_liquid_by_well({'A1': 1000, 'A2': 950, 'A3': 900, ..., 'A12': 600}, water)``
+
+        If you want to load the same volume of a liquid into multiple wells, it is often easier to use :py:meth:`~Labware.load_liquid`.
+
+        If you want to mark the well as containing no liquid, use :py:meth:`~Labware.load_empty`.
+
+        :param volumes: A dictionary of well names (or :py:class:`Well` objects, for instance from ``labware['A1']``)
+        :type wells: Dict[Union[str, Well], float]
+
+        :param liquid: The liquid to load into each well, previously defined by :py:meth:`~ProtocolContext.define_liquid`
+        :type liquid: Liquid
+        """
+        verified_volumes: Dict[str, float] = {}
+        for well, volume in volumes.items():
+            if isinstance(well, str):
+                if well not in self.wells_by_name():
+                    raise KeyError(
+                        f"{well} is not a well in {self.name}. The keys of volumes should name wells in this labware"
+                    )
+                verified_volumes[well] = volume
+            elif isinstance(well, Well):
+                if well.parent is not self:
+                    raise KeyError(
+                        f"{well.well_name} is not a well in {self.name}. The keys of volumes should be wells of this labware"
+                    )
+                verified_volumes[well.well_name] = volume
+            else:
+                raise TypeError(
+                    f"Unexpected type for well name {repr(well)}. The keys of volumes should be Well instances or well names."
+                )
+            if not isinstance(volume, (float, int)):
+                raise TypeError(
+                    f"Unexpected type for volume {repr(volume)}. The values of volumes should be numbers in microliters."
+                )
+        self._core.load_liquid(verified_volumes, liquid)
+
+    @requires_version(2, 22)
+    def load_empty(self, wells: Sequence[Union[Well, str]]) -> None:
+        """Mark several wells as empty.
+
+        This method should be called at the beginning of a protocol, soon after loading the labware and before liquid handling
+        operations begin. It is a base of information for liquid tracking functionality. If a well in a labware has not been named
+        in a call to :py:meth:`Labware.load_empty`, :py:meth:`Labware.load_liquid`, or :py:meth:`Labware.load_liquid_by_well`, the
+        volume it contains is unknown and the well's liquid will not be tracked.
+
+        For instance, to mark all wells in the labware as empty, you can call ``labware.load_empty(labware.wells())``.
+
+        :param wells: The list of wells to mark empty. To mark all wells as empty, pass ``labware.wells()``. You can also specify
+                      wells by their names (for instance, ``labware.load_empty(['A1', 'A2'])``).
+        :type wells: Union[List[Well], List[str]]
+        """
+        well_names: List[str] = []
+        for well in wells:
+            if isinstance(well, str):
+                if well not in self.wells_by_name():
+                    raise KeyError(
+                        f"{well} is not a well in {self.name}. The elements of wells should name wells in this labware."
+                    )
+                well_names.append(well)
+            elif isinstance(well, Well):
+                if well.parent is not self:
+                    raise KeyError(
+                        f"{well.well_name} is not a well in {self.name}. The elements of wells should be wells of this labware."
+                    )
+                well_names.append(well.well_name)
+            else:
+                raise TypeError(
+                    f"Unexpected type for well name {repr(well)}. The elements of wells should be Well instances or well names."
+                )
+        self._core.load_empty(well_names)
 
 
 # TODO(mc, 2022-11-09): implementation detail, move to core

@@ -24,7 +24,7 @@ vi.mock('../useNotifyRunQuery')
 describe('useRunTimestamps hook', () => {
   beforeEach(() => {
     when(useRunCommands)
-      .calledWith(RUN_ID_2, { cursor: null, pageLength: 1 }, expect.any(Object))
+      .calledWith(RUN_ID_2, { pageLength: 1 }, expect.any(Object))
       .thenReturn([mockCommand.data as any])
   })
 

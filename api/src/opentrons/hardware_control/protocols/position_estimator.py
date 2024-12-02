@@ -10,7 +10,7 @@ class PositionEstimator(Protocol):
         """Update the specified axes' position estimators from their encoders.
 
         This will allow these axes to make a non-home move even if they do not currently have
-        a position estimation (unless there is no tracked poition from the encoders, as would be
+        a position estimation (unless there is no tracked position from the encoders, as would be
         true immediately after boot).
 
         Axis encoders have less precision than their position estimators. Calling this function will
@@ -19,6 +19,8 @@ class PositionEstimator(Protocol):
 
         This function updates only the requested axes. If other axes have bad position estimation,
         moves that require those axes or attempts to get the position of those axes will still fail.
+        Axes that are not currently available (like a plunger for a pipette that is not connected)
+        will be ignored.
         """
         ...
 

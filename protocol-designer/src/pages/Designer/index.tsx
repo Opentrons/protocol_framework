@@ -6,6 +6,7 @@ import {
   ALIGN_END,
   COLORS,
   DIRECTION_COLUMN,
+  FLEX_MAX_CONTENT,
   Flex,
   INFO_TOAST,
   SPACING,
@@ -149,12 +150,9 @@ export function Designer(): JSX.Element {
           }}
         />
       ) : null}
-      <Flex flexDirection={DIRECTION_COLUMN}>
+      <Flex flexDirection={DIRECTION_COLUMN} minHeight={FLEX_MAX_CONTENT}>
         <ProtocolNavBar
-          hasZoomInSlot={zoomIn.slot != null}
-          isAddingHardwareOrLabware={
-            zoomIn.slot != null && zoomIn.cutout != null
-          }
+          hasZoomInSlot={zoomIn.slot != null || zoomIn.cutout != null}
           hasTrashEntity={hasTrashEntity}
           showLiquidOverflowMenu={showLiquidOverflowMenu}
           tabs={[startingDeckTab, protocolStepTab]}
@@ -164,10 +162,15 @@ export function Designer(): JSX.Element {
           <Flex
             flexDirection={DIRECTION_COLUMN}
             backgroundColor={COLORS.grey10}
-            padding={zoomIn.slot != null ? '0' : SPACING.spacing80}
+            gridGap={SPACING.spacing24}
+            padding={zoomIn.slot != null ? '0' : SPACING.spacing40}
             height="calc(100vh - 64px)"
           >
-            <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing24}>
+            <Flex
+              flexDirection={DIRECTION_COLUMN}
+              gridGap={SPACING.spacing24}
+              height="100%"
+            >
               {zoomIn.slot == null ? (
                 <Flex alignSelf={ALIGN_END}>
                   <ToggleGroup

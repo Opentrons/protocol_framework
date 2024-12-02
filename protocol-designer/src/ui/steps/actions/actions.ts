@@ -2,6 +2,11 @@ import last from 'lodash/last'
 import { analyticsEvent } from '../../../analytics/actions'
 import { PRESAVED_STEP_ID } from '../../../steplist/types'
 import { selectors as stepFormSelectors } from '../../../step-forms'
+import {
+  DESELECT_ALL_STEPS_EVENT,
+  EXIT_BATCH_EDIT_MODE_EVENT,
+  SELECT_ALL_STEPS_EVENT,
+} from '../../../analytics/constants'
 import { getMultiSelectLastSelected } from '../selectors'
 import { resetScrollElements } from '../utils'
 import type { Timeline } from '@opentrons/step-generation'
@@ -187,7 +192,7 @@ export const selectAllSteps = (): ThunkAction<
   // dispatch an analytics event to indicate all steps have been selected
   // because there is no 'SELECT_ALL_STEPS' action that middleware can catch
   const selectAllStepsEvent: AnalyticsEvent = {
-    name: 'selectAllSteps',
+    name: SELECT_ALL_STEPS_EVENT,
     properties: {},
   }
   dispatch(analyticsEvent(selectAllStepsEvent))
@@ -220,13 +225,13 @@ export const deselectAllSteps = (
     // for analytics purposes we want to differentiate between
     // deselecting all, and using the "exit batch edit mode" button
     const exitBatchEditModeEvent: AnalyticsEvent = {
-      name: 'exitBatchEditMode',
+      name: EXIT_BATCH_EDIT_MODE_EVENT,
       properties: {},
     }
     dispatch(analyticsEvent(exitBatchEditModeEvent))
   } else {
     const deselectAllStepsEvent: AnalyticsEvent = {
-      name: 'deselectAllSteps',
+      name: DESELECT_ALL_STEPS_EVENT,
       properties: {},
     }
     dispatch(analyticsEvent(deselectAllStepsEvent))

@@ -47,7 +47,6 @@ describe('ProtocolNavBar', () => {
       ] as TabProps[],
       hasTrashEntity: false,
       showLiquidOverflowMenu: vi.fn(),
-      isAddingHardwareOrLabware: false,
     }
     vi.mocked(getFileMetadata).mockReturnValue({
       protocolName: 'mockProtocolName',
@@ -73,14 +72,14 @@ describe('ProtocolNavBar', () => {
   })
 
   it('should render protocol name and add hardware/labware - protocol name', () => {
-    props = { ...props, isAddingHardwareOrLabware: true }
+    props = { ...props, hasZoomInSlot: true }
     render(props)
     screen.getByText('mockProtocolName')
     screen.getByText('Add hardware/labware')
   })
 
   it('should render protocol name and add hardware/labware - no protocol name', () => {
-    props = { ...props, isAddingHardwareOrLabware: true }
+    props = { ...props, hasZoomInSlot: true }
     vi.mocked(getFileMetadata).mockReturnValue({})
     render(props)
     screen.getByText('Untitled protocol')

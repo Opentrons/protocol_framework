@@ -41,7 +41,7 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
         gridGap={SPACING.spacing4}
         paddingX={SPACING.spacing16}
       >
-        <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
+        <StyledText desktopStyle="bodyDefaultSemiBold">
           {t('protocol_steps:heater_shaker_settings')}
         </StyledText>
         <ToggleExpandStepFormField

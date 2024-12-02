@@ -95,7 +95,7 @@ export function Landing(): JSX.Element {
       ) : null}
       <Flex
         data-cy="landing-page"
-        backgroundColor={COLORS.grey20}
+        backgroundColor={COLORS.grey10}
         flexDirection={DIRECTION_COLUMN}
         alignItems={ALIGN_CENTER}
         justifyContent={JUSTIFY_CENTER}

@@ -23,7 +23,11 @@ class UpdatePositionEstimatorsParams(BaseModel):
     """Payload required for an UpdatePositionEstimators command."""
 
     axes: List[MotorAxis] = Field(
-        ..., description="The axes for which to update the position estimators."
+        ...,
+        description=(
+            "The axes for which to update the position estimators."
+            " Any axes that are not physically present will be ignored."
+        ),
     )
 
 

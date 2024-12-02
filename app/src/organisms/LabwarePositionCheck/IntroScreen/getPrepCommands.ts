@@ -3,7 +3,6 @@ import {
   HEATERSHAKER_MODULE_TYPE,
   THERMOCYCLER_MODULE_TYPE,
   ABSORBANCE_READER_TYPE,
-  NON_USER_ADDRESSABLE_LABWARE,
 } from '@opentrons/shared-data'
 
 import type {
@@ -49,8 +48,7 @@ export function getPrepCommands(
           return [...acc, loadWithPipetteId]
         } else if (
           command.commandType === 'loadLabware' &&
-          command.result?.labwareId != null &&
-          !NON_USER_ADDRESSABLE_LABWARE.includes(command.params.loadName)
+          command.result?.labwareId != null
         ) {
           // load all labware off-deck so that LPC can move them on individually later
           return [

@@ -5,20 +5,29 @@ from typing import TYPE_CHECKING, Optional, Type
 from typing_extensions import Literal
 
 from ..errors import LocationNotAccessibleByPipetteError
-from ..state import update_types
-from ..types import DeckPoint, AddressableOffsetVector
+from ..types import AddressableOffsetVector
 from ..resources import fixture_validation
 from .pipetting_common import (
     PipetteIdMixin,
+)
+from .movement_common import (
     MovementMixin,
     DestinationPositionResult,
+    move_to_addressable_area,
+    StallOrCollisionError,
 )
-from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
-from ..errors.error_occurrence import ErrorOccurrence
+from .command import (
+    AbstractCommandImpl,
+    BaseCommand,
+    BaseCommandCreate,
+    SuccessData,
+    DefinedErrorData,
+)
 
 if TYPE_CHECKING:
     from ..execution import MovementHandler
     from ..state.state import StateView
+    from ..resources.model_utils import ModelUtils
 
 MoveToAddressableAreaForDropTipCommandType = Literal["moveToAddressableAreaForDropTip"]
 
@@ -83,26 +92,32 @@ class MoveToAddressableAreaForDropTipResult(DestinationPositionResult):
     pass
 
 
+_ExecuteReturn = (
+    SuccessData[MoveToAddressableAreaForDropTipResult]
+    | DefinedErrorData[StallOrCollisionError]
+)
+
+
 class MoveToAddressableAreaForDropTipImplementation(
-    AbstractCommandImpl[
-        MoveToAddressableAreaForDropTipParams,
-        SuccessData[MoveToAddressableAreaForDropTipResult],
-    ]
+    AbstractCommandImpl[MoveToAddressableAreaForDropTipParams, _ExecuteReturn]
 ):
     """Move to addressable area for drop tip command implementation."""
 
     def __init__(
-        self, movement: MovementHandler, state_view: StateView, **kwargs: object
+        self,
+        movement: MovementHandler,
+        state_view: StateView,
+        model_utils: ModelUtils,
+        **kwargs: object,
     ) -> None:
         self._movement = movement
         self._state_view = state_view
+        self._model_utils = model_utils
 
     async def execute(
         self, params: MoveToAddressableAreaForDropTipParams
-    ) -> SuccessData[MoveToAddressableAreaForDropTipResult]:
+    ) -> _ExecuteReturn:
         """Move the requested pipette to the requested addressable area in preperation of a drop tip."""
-        state_update = update_types.StateUpdate()
-
         self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
             params.addressableAreaName
         )
@@ -120,7 +135,9 @@ class MoveToAddressableAreaForDropTipImplementation(
         else:
             offset = params.offset
 
-        x, y, z = await self._movement.move_to_addressable_area(
+        result = await move_to_addressable_area(
+            movement=self._movement,
+            model_utils=self._model_utils,
             pipette_id=params.pipetteId,
             addressable_area_name=params.addressableAreaName,
             offset=offset,
@@ -129,26 +146,22 @@ class MoveToAddressableAreaForDropTipImplementation(
             speed=params.speed,
             ignore_tip_configuration=params.ignoreTipConfiguration,
         )
-        deck_point = DeckPoint.construct(x=x, y=y, z=z)
-        state_update.set_pipette_location(
-            pipette_id=params.pipetteId,
-            new_addressable_area_name=params.addressableAreaName,
-            new_deck_point=deck_point,
-        )
-
-        return SuccessData(
-            public=MoveToAddressableAreaForDropTipResult(
-                position=DeckPoint(x=x, y=y, z=z)
-            ),
-            state_update=state_update,
-        )
+        if isinstance(result, DefinedErrorData):
+            return result
+        else:
+            return SuccessData(
+                public=MoveToAddressableAreaForDropTipResult(
+                    position=result.public.position,
+                ),
+                state_update=result.state_update,
+            )
 
 
 class MoveToAddressableAreaForDropTip(
     BaseCommand[
         MoveToAddressableAreaForDropTipParams,
         MoveToAddressableAreaForDropTipResult,
-        ErrorOccurrence,
+        StallOrCollisionError,
     ]
 ):
     """Move to addressable area for drop tip command model."""

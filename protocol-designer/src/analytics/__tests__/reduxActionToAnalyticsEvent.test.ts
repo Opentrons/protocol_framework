@@ -150,11 +150,13 @@ describe('reduxActionToAnalyticsEvent', () => {
     expect(result).toEqual({
       name: 'transferStep',
       properties: {
-        commandCreatorFnName: 'transfer',
         // existing fields
         id: 'stepId',
         pipette: 'pipetteId',
         otherField: 123,
+        aspirateFlowRate: undefined,
+        dispenseFlowRate: undefined,
+        aspirateAirGap: undefined,
         nested: { inner: true },
         // de-nested fields
         __nested__inner: true,

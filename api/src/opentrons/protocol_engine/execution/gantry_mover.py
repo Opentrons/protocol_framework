@@ -64,6 +64,7 @@ _HARDWARE_AXIS_TO_MOTOR_AXIS: Dict[HardwareAxis, MotorAxis] = {
     HardwareAxis.Q: MotorAxis.AXIS_96_CHANNEL_CAM,
 }
 
+
 # The height of the bottom of the pipette nozzle at home position without any tips.
 # We rely on this being the same for every OT-3 pipette.
 #
@@ -305,7 +306,6 @@ class HardwareGantryMover(GantryMover):
     ) -> Point:
         """Move the given hardware mount to a waypoint."""
         assert len(waypoints) > 0, "Must have at least one waypoint"
-        log.info(f"Moving mount {mount}")
         for waypoint in waypoints:
             log.info(f"The current waypoint moving is {waypoint}")
             await self._hardware_api.move_to(
@@ -338,6 +338,10 @@ class HardwareGantryMover(GantryMover):
             if relative_move:
                 current_position = await self._hardware_api.current_position(
                     mount, refresh=True
+                )
+                log.info(f"The current position of the robot is: {current_position}.")
+                converted_current_position_deck = (
+                    self._hardware_api.get_deck_from_machine(current_position)
                 )
                 log.info(f"The current position of the robot is: {current_position}.")
 

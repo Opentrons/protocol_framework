@@ -46,7 +46,7 @@ def get_files() -> Tuple[Dict[str, Dict[str, Union[str, Path]]], List[Path]]:
     labware_defs = []
     for root, directories, _ in os.walk(root_dir):
         for directory in directories:
-            if directory == "active_protocols":
+            if directory not in exclude:
                 active_dir = os.path.join(root, directory)
                 for file in os.listdir(
                     active_dir
@@ -100,7 +100,6 @@ if __name__ == "__main__":
     exclude = [
         "__init__.py",
         "helpers.py",
-        "shared_vars_and_funcs.py",
     ]
     print("Simulating Protocols")
     file_dict, labware_defs = get_files()

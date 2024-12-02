@@ -1014,13 +1014,13 @@ def set_pipette_offset_ot3(api: OT3API, mount: OT3Mount, offset: Point) -> None:
 
 def get_gripper_offset_ot3(api: OT3API) -> Point:
     """Get gripper offset OT3."""
-    assert api.has_gripper, "No gripper found"
+    assert api.has_gripper(), "No gripper found"
     return api._gripper_handler._gripper._calibration_offset.offset  # type: ignore[union-attr]
 
 
 def set_gripper_offset_ot3(api: OT3API, offset: Point) -> None:
     """Set gripper offset OT3."""
-    assert api.has_gripper, "No gripper found"
+    assert api.has_gripper(), "No gripper found"
     api._gripper_handler._gripper._calibration_offset.offset = offset  # type: ignore[union-attr]
 
 

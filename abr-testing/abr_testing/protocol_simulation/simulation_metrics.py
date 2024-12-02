@@ -225,7 +225,11 @@ def parse_results_volume(
     else:
         print(f"Expected JSON object (dict) but got {type(json_data).__name__}.")
         commands = {}
-
+    hellma_plate_orientation = False
+    parameters = json_data.get("runTimeParameters", "")
+    for parameter in parameters:
+        if parameter["displayName"] == "Hellma Plate Orientation":
+            hellma_plate_orientation = bool(parameter["value"])
     start_time = datetime.fromisoformat(commands[0]["createdAt"])
     end_time = datetime.fromisoformat(commands[len(commands) - 1]["completedAt"])
     header = ["", "Protocol Name", "Date", "Time"]
@@ -283,7 +287,7 @@ def parse_results_volume(
         temp_module_dict = read_robot_logs.temperature_module_commands(json_data)
         thermo_cycler_dict = read_robot_logs.thermocycler_commands(json_data)
         plate_reader_dict = read_robot_logs.plate_reader_commands(
-            json_data, hellma_plate_standards
+            json_data, hellma_plate_standards, hellma_plate_orientation
         )
         instrument_dict = read_robot_logs.instrument_commands(
             json_data, labware_name=None
@@ -499,12 +503,12 @@ def check_params(protocol_path: str) -> str:
 def get_extra_files(protocol_file_path: str) -> tuple[str, List[Path]]:
     """Get supporting files for protocol simulation if needed."""
     params = check_params(protocol_file_path)
-    needs_files = input("Does your protocol utilize custom labware? (y/n): ")
+    needs_files = input("Does your protocol utilize custom labware? (Y/N): ")
     labware_files = []
-    if needs_files == "y":
+    if needs_files == "Y":
         num_labware = input("How many custom labware?: ")
         for labware_num in range(int(num_labware)):
-            path = input("Enter custom labware definition: ")
+            path = input("Enter custom labware definition path: ")
             labware_files.append(Path(path))
     return (params, labware_files)
 

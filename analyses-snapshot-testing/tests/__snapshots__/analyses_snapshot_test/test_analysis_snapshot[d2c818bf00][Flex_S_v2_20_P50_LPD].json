@@ -5113,6 +5113,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [
     {
       "description": "Test this wet!!!",

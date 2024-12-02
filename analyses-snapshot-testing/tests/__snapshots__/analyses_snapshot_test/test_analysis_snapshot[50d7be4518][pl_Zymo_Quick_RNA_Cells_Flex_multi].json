@@ -23420,6 +23420,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [
     {
       "description": "Cells in DNA/ RNA Shield",

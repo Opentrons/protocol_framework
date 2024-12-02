@@ -24,10 +24,8 @@ import { DT_ROUTES } from '/app/organisms/DropTipWizardFlows/constants'
 import { SelectRecoveryOption } from './SelectRecoveryOption'
 
 import type { RecoveryContentProps, RecoveryRoute, RouteStep } from '../types'
-import type {
-  FixitCommandTypeUtils,
-  PipetteWithTip,
-} from '/app/organisms/DropTipWizardFlows'
+import type { FixitCommandTypeUtils } from '/app/organisms/DropTipWizardFlows'
+import type { PipetteWithTip } from '/app/resources/instruments'
 
 // The Drop Tip flow entry point. Includes entry from SelectRecoveryOption and CancelRun.
 export function ManageTips(props: RecoveryContentProps): JSX.Element {
@@ -202,6 +200,7 @@ export function useDropTipFlowUtils({
   subMapUtils,
   routeUpdateActions,
   recoveryMap,
+  errorKind,
 }: RecoveryContentProps): FixitCommandTypeUtils {
   const { t } = useTranslation('error_recovery')
   const {
@@ -210,7 +209,7 @@ export function useDropTipFlowUtils({
     ERROR_WHILE_RECOVERING,
     DROP_TIP_FLOWS,
   } = RECOVERY_MAP
-  const { runId } = tipStatusUtils
+  const { runId, gripperErrorFirstPipetteWithTip } = tipStatusUtils
   const { step } = recoveryMap
   const { selectedRecoveryOption } = currentRecoveryOptionUtils
   const { proceedToRouteAndStep } = routeUpdateActions
@@ -304,11 +303,12 @@ export function useDropTipFlowUtils({
   }
 
   const pipetteId =
-    failedCommand != null &&
+    gripperErrorFirstPipetteWithTip ??
+    (failedCommand != null &&
     'params' in failedCommand.byRunRecord &&
     'pipetteId' in failedCommand.byRunRecord.params
       ? failedCommand.byRunRecord.params.pipetteId
-      : null
+      : null)
 
   return {
     runId,

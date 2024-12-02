@@ -667,7 +667,11 @@ async def test_pickup_moves(
 
 @pytest.mark.parametrize("load_configs", load_pipette_configs)
 @given(blowout_volume=strategies.floats(min_value=0, max_value=10))
-@settings(suppress_health_check=[HealthCheck.function_scoped_fixture], max_examples=10)
+@settings(
+    suppress_health_check=[HealthCheck.function_scoped_fixture],
+    max_examples=10,
+    deadline=400,
+)
 @example(blowout_volume=0.0)
 async def test_blow_out_position(
     ot3_hardware: ThreadManager[OT3API],
@@ -2034,23 +2038,36 @@ async def test_drop_tip_full_tiprack(
 
 
 @pytest.mark.parametrize(
-    "axes",
-    [[Axis.X], [Axis.X, Axis.Y], [Axis.X, Axis.Y, Axis.P_L], None],
+    ("axes_in", "axes_present", "expected_axes"),
+    [
+        ([Axis.X, Axis.Y], [Axis.X, Axis.Y], [Axis.X, Axis.Y]),
+        ([Axis.X, Axis.Y], [Axis.Y, Axis.Z_L], [Axis.Y]),
+        (None, list(Axis), list(Axis)),
+        (None, [Axis.Y, Axis.Z_L], [Axis.Y, Axis.Z_L]),
+    ],
 )
 async def test_update_position_estimation(
     ot3_hardware: ThreadManager[OT3API],
     hardware_backend: OT3Simulator,
-    axes: List[Axis],
+    axes_in: List[Axis],
+    axes_present: List[Axis],
+    expected_axes: List[Axis],
 ) -> None:
+    def _axis_is_present(axis: Axis) -> bool:
+        return axis in axes_present
+
     with patch.object(
         hardware_backend,
         "update_motor_estimation",
         AsyncMock(spec=hardware_backend.update_motor_estimation),
-    ) as mock_update:
-        await ot3_hardware._update_position_estimation(axes)
-        if axes is None:
-            axes = [ax for ax in Axis]
-        mock_update.assert_called_once_with(axes)
+    ) as mock_update, patch.object(
+        hardware_backend,
+        "axis_is_present",
+        Mock(spec=hardware_backend.axis_is_present),
+    ) as mock_axis_is_present:
+        mock_axis_is_present.side_effect = _axis_is_present
+        await ot3_hardware._update_position_estimation(axes_in)
+        mock_update.assert_called_once_with(expected_axes)
 
 
 async def test_refresh_positions(

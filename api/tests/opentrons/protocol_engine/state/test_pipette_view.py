@@ -9,7 +9,10 @@ from decoy import Decoy
 
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.pipette import pipette_definition
-from opentrons_shared_data.pipette.pipette_definition import ValidNozzleMaps
+from opentrons_shared_data.pipette.pipette_definition import (
+    ValidNozzleMaps,
+    AvailableSensorDefinition,
+)
 
 from opentrons.config.defaults_ot2 import Z_RETRACT_DISTANCE
 from opentrons.hardware_control import CriticalPoint
@@ -56,6 +59,12 @@ _SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS = PipetteBoundingBoxOffsets(
     front_left_corner=Point(x=10, y=50, z=60),
     back_right_corner=Point(x=40, y=20, z=60),
 )
+
+
+@pytest.fixture
+def available_sensors() -> AvailableSensorDefinition:
+    """Provide a list of sensors."""
+    return AvailableSensorDefinition(sensors=["pressure", "capacitive", "environment"])
 
 
 def get_pipette_view(
@@ -269,6 +278,7 @@ def test_get_aspirated_volume(decoy: Decoy) -> None:
 
 def test_get_pipette_working_volume(
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
+    available_sensors: AvailableSensorDefinition,
 ) -> None:
     """It should get the minimum value of tip volume and max volume."""
     subject = get_pipette_view(
@@ -291,6 +301,14 @@ def test_get_pipette_working_volume(
                 default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
                 pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
                 lld_settings={},
+                plunger_positions={
+                    "top": 0.0,
+                    "bottom": 5.0,
+                    "blow_out": 19.0,
+                    "drop_tip": 20.0,
+                },
+                shaft_ul_per_mm=5.0,
+                available_sensors=available_sensors,
             )
         },
     )
@@ -300,6 +318,7 @@ def test_get_pipette_working_volume(
 
 def test_get_pipette_working_volume_raises_if_tip_volume_is_none(
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
+    available_sensors: AvailableSensorDefinition,
 ) -> None:
     """Should raise an exception that no tip is attached."""
     subject = get_pipette_view(
@@ -322,6 +341,14 @@ def test_get_pipette_working_volume_raises_if_tip_volume_is_none(
                 default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
                 pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
                 lld_settings={},
+                plunger_positions={
+                    "top": 0.0,
+                    "bottom": 5.0,
+                    "blow_out": 19.0,
+                    "drop_tip": 20.0,
+                },
+                shaft_ul_per_mm=5.0,
+                available_sensors=available_sensors,
             )
         },
     )
@@ -334,7 +361,9 @@ def test_get_pipette_working_volume_raises_if_tip_volume_is_none(
 
 
 def test_get_pipette_available_volume(
-    supported_tip_fixture: pipette_definition.SupportedTipsDefinition, decoy: Decoy
+    supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
+    decoy: Decoy,
+    available_sensors: AvailableSensorDefinition,
 ) -> None:
     """It should get the available volume for a pipette."""
     stack = decoy.mock(cls=fluid_stack.FluidStack)
@@ -364,6 +393,14 @@ def test_get_pipette_available_volume(
                 default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
                 pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
                 lld_settings={},
+                plunger_positions={
+                    "top": 0.0,
+                    "bottom": 5.0,
+                    "blow_out": 19.0,
+                    "drop_tip": 20.0,
+                },
+                shaft_ul_per_mm=5.0,
+                available_sensors=available_sensors,
             ),
             "pipette-id-none": StaticPipetteConfig(
                 min_volume=1,
@@ -380,6 +417,14 @@ def test_get_pipette_available_volume(
                 default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
                 pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
                 lld_settings={},
+                plunger_positions={
+                    "top": 0.0,
+                    "bottom": 5.0,
+                    "blow_out": 19.0,
+                    "drop_tip": 20.0,
+                },
+                shaft_ul_per_mm=5.0,
+                available_sensors=available_sensors,
             ),
         },
     )
@@ -475,6 +520,7 @@ def test_get_deck_point(
 
 def test_get_static_config(
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
+    available_sensors: AvailableSensorDefinition,
 ) -> None:
     """It should return the static pipette configuration that was set for the given pipette."""
     config = StaticPipetteConfig(
@@ -492,6 +538,14 @@ def test_get_static_config(
         default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
         pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
         lld_settings={},
+        plunger_positions={
+            "top": 0.0,
+            "bottom": 5.0,
+            "blow_out": 19.0,
+            "drop_tip": 20.0,
+        },
+        shaft_ul_per_mm=5.0,
+        available_sensors=available_sensors,
     )
 
     subject = get_pipette_view(
@@ -523,6 +577,7 @@ def test_get_static_config(
 
 def test_get_nominal_tip_overlap(
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
+    available_sensors: AvailableSensorDefinition,
 ) -> None:
     """It should return the static pipette configuration that was set for the given pipette."""
     config = StaticPipetteConfig(
@@ -543,6 +598,14 @@ def test_get_nominal_tip_overlap(
         default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
         pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
         lld_settings={},
+        plunger_positions={
+            "top": 0.0,
+            "bottom": 5.0,
+            "blow_out": 19.0,
+            "drop_tip": 20.0,
+        },
+        shaft_ul_per_mm=5.0,
+        available_sensors=available_sensors,
     )
 
     subject = get_pipette_view(static_config_by_id={"pipette-id": config})
@@ -944,6 +1007,7 @@ def test_get_pipette_bounds_at_location(
     destination_position: Point,
     critical_point: Optional[CriticalPoint],
     pipette_bounds_result: Tuple[Point, Point, Point, Point],
+    available_sensors: AvailableSensorDefinition,
 ) -> None:
     """It should get the pipette's nozzle's bounds at the given location."""
     subject = get_pipette_view(
@@ -967,6 +1031,14 @@ def test_get_pipette_bounds_at_location(
                 bounding_nozzle_offsets=_SAMPLE_NOZZLE_BOUNDS_OFFSETS,
                 pipette_bounding_box_offsets=bounding_box_offsets,
                 lld_settings={},
+                plunger_positions={
+                    "top": 0.0,
+                    "bottom": 5.0,
+                    "blow_out": 19.0,
+                    "drop_tip": 20.0,
+                },
+                shaft_ul_per_mm=5.0,
+                available_sensors=available_sensors,
             )
         },
     )

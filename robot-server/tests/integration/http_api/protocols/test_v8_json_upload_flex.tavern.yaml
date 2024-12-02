@@ -623,6 +623,7 @@ stages:
                 displayName: Water
                 description: Liquid H2O
                 displayColor: '#7332a8'
+            liquidClasses: []
 
 ---
 test_name: Upload and analyze a JSONv8 protocol, with liquids

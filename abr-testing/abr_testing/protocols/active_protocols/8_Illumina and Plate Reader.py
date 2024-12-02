@@ -20,10 +20,7 @@ metadata = {
 }
 
 
-requirements = {
-    "robotType": "Flex",
-    "apiLevel": "2.21",
-}
+requirements = {"robotType": "Flex", "apiLevel": "2.21"}
 
 HELLMA_PLATE_SLOT = "D4"
 PLATE_READER_SLOT = "C3"
@@ -59,14 +56,11 @@ def add_parameters(parameters: ParameterContext) -> None:
     """Add Parameters."""
     helpers.create_hs_speed_parameter(parameters)
     helpers.create_dot_bottom_parameter(parameters)
-    parameters.add_str(
+    parameters.add_bool(
         variable_name="plate_orientation",
         display_name="Hellma Plate Orientation",
-        default="0_deg",
-        choices=[
-            {"display_name": "0 degree Rotation", "value": "0_deg"},
-            {"display_name": "180 degree Rotation", "value": "180_deg"},
-        ],
+        default=True,
+        description="If hellma plate is rotated, set to True.",
     )
 
 
@@ -74,6 +68,7 @@ def plate_reader_actions(
     protocol: ProtocolContext,
     plate_reader: AbsorbanceReaderContext,
     hellma_plate: Labware,
+    hellma_plate_name: str,
 ) -> None:
     """Plate reader single and multi wavelength readings."""
     wavelengths = [450, 650]
@@ -85,7 +80,7 @@ def plate_reader_actions(
         protocol.move_labware(hellma_plate, plate_reader, use_gripper=True)
         plate_reader.close_lid()
         result = plate_reader.read(str(datetime.now()))
-        msg = f"result: {result}"
+        msg = f"{hellma_plate_name} result: {result}"
         protocol.comment(msg=msg)
         plate_reader.open_lid()
         protocol.move_labware(hellma_plate, HELLMA_PLATE_SLOT, use_gripper=True)
@@ -96,7 +91,7 @@ def plate_reader_actions(
     protocol.move_labware(hellma_plate, plate_reader, use_gripper=True)
     plate_reader.close_lid()
     result = plate_reader.read(str(datetime.now()))
-    msg = f"result: {result}"
+    msg = f"{hellma_plate_name} result: {result}"
     protocol.comment(msg=msg)
     plate_reader.open_lid()
     protocol.move_labware(hellma_plate, HELLMA_PLATE_SLOT, use_gripper=True)
@@ -108,6 +103,8 @@ def run(protocol: ProtocolContext) -> None:
     # LOAD PARAMETERS
     heater_shaker_speed = protocol.params.heater_shaker_speed  # type: ignore[attr-defined]
     dot_bottom = protocol.params.dot_bottom  # type: ignore[attr-defined]
+    plate_orientation = protocol.params.plate_orientation  # type: ignore[attr-defined]
+    plate_name_str = "hellma_plate_" + str(plate_orientation)
     global p200_tips
     global p50_tips
     # WASTE BIN
@@ -207,7 +204,7 @@ def run(protocol: ProtocolContext) -> None:
     PPC = reagent_plate.wells_by_name()["A6"]
     EPM = reagent_plate.wells_by_name()["A7"]
     # Load Liquids
-    plate_reader_actions(protocol, plate_reader, hellma_plate)
+    plate_reader_actions(protocol, plate_reader, hellma_plate, plate_name_str)
 
     # tip and sample tracking
     if COLUMNS == 1:
@@ -973,7 +970,6 @@ def run(protocol: ProtocolContext) -> None:
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
-        plate_reader_actions(protocol, plate_reader, hellma_plate)
 
         reservoir.label = "Liquid Waste"  # type: ignore[attr-defined]
         Liquid_trash_well_1 = reservoir["A9"]
@@ -985,3 +981,4 @@ def run(protocol: ProtocolContext) -> None:
             Liquid_trash_well_4,
         ]
         helpers.find_liquid_height_of_all_wells(protocol, p50, liquids_to_probe_at_end)
+        plate_reader_actions(protocol, plate_reader, hellma_plate, plate_name_str)

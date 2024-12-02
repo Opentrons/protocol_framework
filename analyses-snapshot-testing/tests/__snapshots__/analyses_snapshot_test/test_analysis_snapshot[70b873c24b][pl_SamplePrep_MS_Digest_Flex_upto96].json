@@ -65064,6 +65064,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [
     {
       "description": "100 mM ABC in MS grade water, volume per well",

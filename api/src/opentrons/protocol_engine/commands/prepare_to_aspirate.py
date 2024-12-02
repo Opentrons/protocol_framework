@@ -12,7 +12,6 @@ from .command import (
     BaseCommandCreate,
     DefinedErrorData,
     SuccessData,
-    Maybe,
 )
 from ..errors.error_occurrence import ErrorOccurrence
 
@@ -42,11 +41,6 @@ _ExecuteReturn = Union[
 ]
 
 
-_ExecuteMaybe = Maybe[
-    SuccessData[PrepareToAspirateResult], DefinedErrorData[OverpressureError]
-]
-
-
 class PrepareToAspirateImplementation(
     AbstractCommandImpl[PrepareToAspirateParams, _ExecuteReturn]
 ):
@@ -63,11 +57,11 @@ class PrepareToAspirateImplementation(
         self._model_utils = model_utils
         self._gantry_mover = gantry_mover
 
-    def _transform_result(self, result: SuccessData[BaseModel]) -> _ExecuteMaybe:
-        return _ExecuteMaybe.from_result(
-            SuccessData(
-                public=PrepareToAspirateResult(), state_update=result.state_update
-            )
+    def _transform_result(
+        self, result: SuccessData[BaseModel]
+    ) -> SuccessData[PrepareToAspirateResult]:
+        return SuccessData(
+            public=PrepareToAspirateResult(), state_update=result.state_update
         )
 
     async def execute(self, params: PrepareToAspirateParams) -> _ExecuteReturn:
@@ -85,7 +79,13 @@ class PrepareToAspirateImplementation(
                 )
             },
         )
-        return prepare_result.and_then(self._transform_result).unwrap()
+        if isinstance(prepare_result, DefinedErrorData):
+            return prepare_result
+        else:
+            return SuccessData(
+                public=PrepareToAspirateResult(),
+                state_update=prepare_result.state_update,
+            )
 
 
 class PrepareToAspirate(
