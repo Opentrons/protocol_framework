@@ -21,6 +21,7 @@ import { OPEN_STEP_DETAILS_EVENT } from '../../../../analytics/constants'
 import {
   getBatchEditFormHasUnsavedChanges,
   getCurrentFormHasUnsavedChanges,
+  getPipetteEntities,
   getSavedStepForms,
   getUnsavedForm,
 } from '../../../../step-forms/selectors'
@@ -61,12 +62,21 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
   const formData = useSelector(getUnsavedForm)
   const savedStepFormData = useSelector(getSavedStepForms)[stepId]
+  const pipetteEntities = useSelector(getPipetteEntities)
+
+  console.log('obj', JSON.stringify(pipetteEntities, null, 4))
+
   const isPipetteStep =
     savedStepFormData.stepType === 'moveLiquid' ||
     savedStepFormData.stepType === 'mix'
   const isThermocyclerProfile =
     savedStepFormData.stepType === 'thermocycler' &&
     savedStepFormData.thermocyclerFormType === 'thermocyclerProfile'
+  const is96Channel =
+    pipetteEntities[savedStepFormData.pipette]?.name === 'p1000_96'
+
+  console.log(savedStepFormData.pipette)
+  console.log('is96Channel', is96Channel)
 
   const duplicateStep = (
     stepId: StepIdType
@@ -132,7 +142,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
             {formData != null ? null : (
               <MenuItem onClick={handleEdit}>{t('edit_step')}</MenuItem>
             )}
-            {isPipetteStep || isThermocyclerProfile ? (
+            {(isPipetteStep && !is96Channel) || isThermocyclerProfile ? (
               <MenuItem
                 disabled={formData != null}
                 onClick={() => {
