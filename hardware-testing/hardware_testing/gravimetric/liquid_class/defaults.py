@@ -301,7 +301,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 1: DispenseSettings(  # 5uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -310,7 +310,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 5: DispenseSettings(  # 10uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -319,7 +319,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 20: DispenseSettings(  # 50uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -330,7 +330,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 5: DispenseSettings(  # 5uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -339,7 +339,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 10: DispenseSettings(  # 10uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -348,7 +348,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 50: DispenseSettings(  # 50uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -359,7 +359,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 5: DispenseSettings(  # 5uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -368,7 +368,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 50: DispenseSettings(  # 50uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -377,7 +377,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 200: DispenseSettings(  # 200uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -388,7 +388,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 10: DispenseSettings(  # 10uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -397,7 +397,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 100: DispenseSettings(  # 100uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -406,7 +406,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 1000: DispenseSettings(  # 1000uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -419,7 +419,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 1: DispenseSettings(  # 5uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -428,7 +428,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 5: DispenseSettings(  # 10uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -437,7 +437,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 20: DispenseSettings(  # 50uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -448,7 +448,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 5: DispenseSettings(  # 5uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=15,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -457,7 +457,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 10: DispenseSettings(  # 10uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=15,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -466,7 +466,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 50: DispenseSettings(  # 50uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=15,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -477,7 +477,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 5: DispenseSettings(  # 5uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -486,7 +486,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 50: DispenseSettings(  # 50uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -495,7 +495,7 @@ _dispense_defaults: Dict[int, Dict[int, Dict[int, Dict[int, DispenseSettings]]]]
                 200: DispenseSettings(  # 200uL
                     z_submerge_depth=_default_submerge_dispense_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_dispense_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -877,7 +877,7 @@ _aspirate_defaults: Dict[int, Dict[int, Dict[int, Dict[int, AspirateSettings]]]]
                 5: AspirateSettings(  # 5uL
                     z_submerge_depth=_default_submerge_aspirate_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_aspirate_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -887,7 +887,7 @@ _aspirate_defaults: Dict[int, Dict[int, Dict[int, Dict[int, AspirateSettings]]]]
                 50: AspirateSettings(  # 50uL
                     z_submerge_depth=_default_submerge_aspirate_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_aspirate_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -897,7 +897,7 @@ _aspirate_defaults: Dict[int, Dict[int, Dict[int, Dict[int, AspirateSettings]]]]
                 200: AspirateSettings(  # 200uL
                     z_submerge_depth=_default_submerge_aspirate_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_aspirate_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -1007,7 +1007,7 @@ _aspirate_defaults: Dict[int, Dict[int, Dict[int, Dict[int, AspirateSettings]]]]
                 5: AspirateSettings(  # 5uL
                     z_submerge_depth=_default_submerge_aspirate_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_aspirate_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -1017,7 +1017,7 @@ _aspirate_defaults: Dict[int, Dict[int, Dict[int, Dict[int, AspirateSettings]]]]
                 50: AspirateSettings(  # 50uL
                     z_submerge_depth=_default_submerge_aspirate_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_aspirate_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
@@ -1027,7 +1027,7 @@ _aspirate_defaults: Dict[int, Dict[int, Dict[int, Dict[int, AspirateSettings]]]]
                 200: AspirateSettings(  # 200uL
                     z_submerge_depth=_default_submerge_aspirate_mm,
                     plunger_acceleration=_default_accel_96ch_ul_sec_sec,
-                    plunger_flow_rate=80,  # ul/sec
+                    plunger_flow_rate=10,  # ul/sec
                     delay=_default_aspirate_delay_seconds,
                     z_retract_discontinuity=_default_retract_discontinuity,
                     z_retract_height=_default_retract_mm,
