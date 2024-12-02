@@ -22,6 +22,7 @@ export function HomeAndRetry(props: RecoveryContentProps): JSX.Element {
       return <PrepareDeckForHome {...props} />
     }
     case HOME_AND_RETRY.STEPS.REMOVE_TIPS_FROM_PIPETTE: {
+      // TODO: Make this work the same way as e.g. RetryNewTips by changing one of them. Or both of them.
       return <ManageTips {...props} />
     }
     case HOME_AND_RETRY.STEPS.REPLACE_TIPS: {
