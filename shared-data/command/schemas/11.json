@@ -2135,7 +2135,7 @@
         },
         "correctionByVolume": {
           "title": "Correctionbyvolume",
-          "description": "Settings for volume correction keyed by by target aspiration volume.",
+          "description": "Settings for volume correction keyed by by target aspiration volume, representing additional volume the plunger should move to accurately hit target volume.",
           "type": "array",
           "items": {
             "type": "array",
@@ -2448,7 +2448,7 @@
         },
         "correctionByVolume": {
           "title": "Correctionbyvolume",
-          "description": "Settings for volume correction keyed by by target dispense volume.",
+          "description": "Settings for volume correction keyed by by target dispense volume, representing additional volume the plunger should move to accurately hit target volume.",
           "type": "array",
           "items": {
             "type": "array",
@@ -2625,7 +2625,7 @@
         },
         "correctionByVolume": {
           "title": "Correctionbyvolume",
-          "description": "Settings for volume correction keyed by by target dispense volume.",
+          "description": "Settings for volume correction keyed by by target dispense volume, representing additional volume the plunger should move to accurately hit target volume.",
           "type": "array",
           "items": {
             "type": "array",
