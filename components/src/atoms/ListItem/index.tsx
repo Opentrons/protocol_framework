@@ -13,7 +13,7 @@ export type ListItemType =
   | 'noActive'
   | 'success'
   | 'warning'
-  | 'disabled'
+  | 'unavailable'
 
 interface ListItemProps extends StyleProps {
   /** ListItem state type */
@@ -41,7 +41,7 @@ const LISTITEM_PROPS_BY_TYPE: Record<
   warning: {
     backgroundColor: COLORS.yellow35,
   },
-  disabled: {
+  unavailable: {
     backgroundColor: COLORS.grey20,
     color: COLORS.grey40,
   },
@@ -63,7 +63,7 @@ export function ListItem(props: ListItemProps): JSX.Element {
 
   const LIST_ITEM_STYLE = css`
     background-color: ${listItemProps.backgroundColor};
-    color: ${listItemProps.color};
+    color: ${listItemProps.color ?? COLORS.black90};
     width: 100%;
     height: ${FLEX_MAX_CONTENT};
     border-radius: ${BORDERS.borderRadius4};

@@ -38,7 +38,7 @@ export function CheckboxExpandStepFormField(
   const [targetProps, tooltipProps] = useHoverTooltip()
   return (
     <>
-      <ListItem type={disabled ? 'disabled' : 'noActive'}>
+      <ListItem type={disabled ? 'unavailable' : 'noActive'}>
         <Flex
           padding={SPACING.spacing12}
           width="100%"
