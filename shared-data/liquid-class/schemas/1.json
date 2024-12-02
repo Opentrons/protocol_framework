@@ -144,6 +144,17 @@
       },
       "minItems": 1
     },
+    "correctionByVolume": {
+      "type": "array",
+      "description": "Settings for volume correction keyed by target aspiration/dispense volume, representing additional volume the plunger should move to accurately hit target volume.",
+      "items": {
+        "type": "array",
+        "items": { "type": "number" },
+        "minItems": 2,
+        "maxItems": 2
+      },
+      "minItems": 1
+    },
     "mix": {
       "type": "object",
       "description": "Mixing properties.",
@@ -310,6 +321,9 @@
         "flowRateByVolume": {
           "$ref": "#/definitions/flowRateByVolume"
         },
+        "correctionByVolume": {
+          "$ref": "#/definitions/correctionByVolume"
+        },
         "preWet": {
           "type": "boolean",
           "description": "Whether to perform a pre-wet action."
@@ -327,6 +341,7 @@
         "positionReference",
         "offset",
         "flowRateByVolume",
+        "correctionByVolume",
         "preWet",
         "mix",
         "delay"
@@ -352,6 +367,9 @@
         "flowRateByVolume": {
           "$ref": "#/definitions/flowRateByVolume"
         },
+        "correctionByVolume": {
+          "$ref": "#/definitions/correctionByVolume"
+        },
         "mix": {
           "$ref": "#/definitions/mix"
         },
@@ -368,6 +386,7 @@
         "positionReference",
         "offset",
         "flowRateByVolume",
+        "correctionByVolume",
         "mix",
         "pushOutByVolume",
         "delay"
@@ -393,6 +412,9 @@
         "flowRateByVolume": {
           "$ref": "#/definitions/flowRateByVolume"
         },
+        "correctionByVolume": {
+          "$ref": "#/definitions/correctionByVolume"
+        },
         "conditioningByVolume": {
           "$ref": "#/definitions/conditioningByVolume"
         },
@@ -409,6 +431,7 @@
         "positionReference",
         "offset",
         "flowRateByVolume",
+        "correctionByVolume",
         "conditioningByVolume",
         "disposalByVolume",
         "delay"

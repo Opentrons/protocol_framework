@@ -108,12 +108,13 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
     zValue =
       mmFromBottom ?? getDefaultMmFromBottom({ name: zName, wellDepthMm })
   }
+
   let modal = (
     <ZTipPositionModal
       name={zName}
       closeModal={handleClose}
       wellDepthMm={wellDepthMm}
-      zValue={mmFromBottom}
+      zValue={zValue as number}
       updateValue={zUpdateValue}
       isIndeterminate={isIndeterminate}
     />
@@ -133,7 +134,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
     const specs: PositionSpecs = {
       z: {
         name: zName,
-        value: mmFromBottom,
+        value: zValue as number,
         updateValue: zUpdateValue,
       },
       x: {
@@ -198,7 +199,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
                   propsForFields[yField].value != null
                     ? Number(propsForFields[yField].value)
                     : 0,
-                z: mmFromBottom ?? 0,
+                z: zValue,
               })}
             </StyledText>
           </ListButton>

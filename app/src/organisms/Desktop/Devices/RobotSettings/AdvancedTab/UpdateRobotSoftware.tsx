@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { css } from 'styled-components'
@@ -24,6 +24,7 @@ import { TertiaryButton } from '/app/atoms/buttons'
 import { getRobotUpdateDisplayInfo } from '/app/redux/robot-update'
 import { useDispatchStartRobotUpdate } from '/app/redux/robot-update/hooks'
 
+import type { ChangeEventHandler, MouseEventHandler } from 'react'
 import type { State } from '/app/redux/types'
 
 const OT_APP_UPDATE_PAGE_LINK = 'https://opentrons.com/ot-app/'
@@ -49,10 +50,10 @@ export function UpdateRobotSoftware({
   })
   const updateDisabled = updateFromFileDisabledReason !== null
   const [updateButtonProps, updateButtonTooltipProps] = useHoverTooltip()
-  const inputRef = React.useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const dispatchStartRobotUpdate = useDispatchStartRobotUpdate()
 
-  const handleChange: React.ChangeEventHandler<HTMLInputElement> = event => {
+  const handleChange: ChangeEventHandler<HTMLInputElement> = event => {
     const { files } = event.target
     if (files?.length === 1 && !updateDisabled) {
       dispatchStartRobotUpdate(robotName, files[0].path)
@@ -65,7 +66,7 @@ export function UpdateRobotSoftware({
     }
   }
 
-  const handleClick: React.MouseEventHandler<HTMLButtonElement> = () => {
+  const handleClick: MouseEventHandler<HTMLButtonElement> = () => {
     inputRef.current?.click()
   }
 

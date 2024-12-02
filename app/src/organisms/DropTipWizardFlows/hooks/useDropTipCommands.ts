@@ -2,13 +2,18 @@ import { useState, useEffect } from 'react'
 
 import { useDeleteMaintenanceRunMutation } from '@opentrons/react-api-client'
 
-import { DT_ROUTES, MANAGED_PIPETTE_ID } from '../constants'
+import {
+  DROP_TIP_SPECIAL_ERROR_TYPES,
+  DT_ROUTES,
+  MANAGED_PIPETTE_ID,
+} from '../constants'
 import { getAddressableAreaFromConfig } from '../utils'
 import { useNotifyDeckConfigurationQuery } from '/app/resources/deck_configuration'
 import type {
   CreateCommand,
   AddressableAreaName,
   PipetteModelSpecs,
+  RunCommandError,
 } from '@opentrons/shared-data'
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import type { CommandData, PipetteData } from '@opentrons/api-client'
@@ -129,17 +134,25 @@ export function useDropTipCommands({
             issuedCommandsType
           )
 
-          return chainRunCommands(
-            isFlex
-              ? [
-                  ENGAGE_AXES,
-                  UPDATE_ESTIMATORS_EXCEPT_PLUNGERS,
-                  Z_HOME,
-                  moveToAACommand,
-                ]
-              : [Z_HOME, moveToAACommand],
-            false
-          )
+          if (isFlex) {
+            return chainRunCommands(
+              [ENGAGE_AXES, UPDATE_ESTIMATORS_EXCEPT_PLUNGERS],
+              false
+            )
+              .catch(error => {
+                // If one of the engage/estimator commands fails, we can safely assume it's because the position is
+                // unknown, so show the special error modal.
+                throw {
+                  ...error,
+                  errorType: DROP_TIP_SPECIAL_ERROR_TYPES.MUST_HOME_ERROR,
+                }
+              })
+              .then(() => {
+                return chainRunCommands([Z_HOME, moveToAACommand], false)
+              })
+          } else {
+            return chainRunCommands([Z_HOME, moveToAACommand], false)
+          }
         })
         .then((commandData: CommandData[]) => {
           const error = commandData[0].data.error
@@ -149,12 +162,12 @@ export function useDropTipCommands({
           }
           resolve()
         })
-        .catch(error => {
+        .catch((error: RunCommandError) => {
           if (fixitCommandTypeUtils != null && issuedCommandsType === 'fixit') {
             fixitCommandTypeUtils.errorOverrides.generalFailure()
           } else {
             setErrorDetails({
-              runCommandError: error,
+              type: error.errorType ?? null,
               message: error.detail
                 ? `Error moving to position: ${error.detail}`
                 : 'Error moving to position: invalid addressable area.',
@@ -224,51 +237,70 @@ export function useDropTipCommands({
     proceed: () => void
   ): Promise<void> => {
     return new Promise((resolve, reject) => {
-      chainRunCommands(
-        currentRoute === DT_ROUTES.BLOWOUT
-          ? buildBlowoutCommands(instrumentModelSpecs, isFlex, pipetteId)
-          : buildDropTipInPlaceCommand(isFlex, pipetteId),
-        false
-      )
-        .then((commandData: CommandData[]) => {
-          const error = commandData[0].data.error
-          if (error != null) {
-            if (
-              fixitCommandTypeUtils != null &&
-              issuedCommandsType === 'fixit'
-            ) {
-              if (currentRoute === DT_ROUTES.BLOWOUT) {
-                fixitCommandTypeUtils.errorOverrides.blowoutFailed()
-              } else {
-                fixitCommandTypeUtils.errorOverrides.tipDropFailed()
-              }
-            }
+      const isBlowoutRoute = currentRoute === DT_ROUTES.BLOWOUT
 
-            setErrorDetails({
-              runCommandError: error,
-              message: `Error moving to position: ${error.detail}`,
-            })
-          } else {
-            proceed()
-            resolve()
-          }
-        })
-        .catch((error: Error) => {
-          if (fixitCommandTypeUtils != null && issuedCommandsType === 'fixit') {
-            if (currentRoute === DT_ROUTES.BLOWOUT) {
-              fixitCommandTypeUtils.errorOverrides.blowoutFailed()
-            } else {
-              fixitCommandTypeUtils.errorOverrides.tipDropFailed()
-            }
-          }
+      const handleError = (error: RunCommandError | Error): void => {
+        if (fixitCommandTypeUtils != null && issuedCommandsType === 'fixit') {
+          isBlowoutRoute
+            ? fixitCommandTypeUtils.errorOverrides.blowoutFailed()
+            : fixitCommandTypeUtils.errorOverrides.tipDropFailed()
+        } else {
+          const operation = isBlowoutRoute ? 'blowout' : 'drop tip'
+          const type = 'errorType' in error ? error.errorType : undefined
+          const messageDetail =
+            'message' in error ? error.message : error.detail
 
           setErrorDetails({
-            message: `Error issuing ${
-              currentRoute === DT_ROUTES.BLOWOUT ? 'blowout' : 'drop tip'
-            } command: ${error.message}`,
+            type,
+            message:
+              messageDetail != null
+                ? `Error during ${operation}: ${messageDetail}`
+                : null,
           })
-          resolve()
+        }
+        reject(error)
+      }
+
+      // Throw any errors in the response body if any.
+      const handleSuccess = (commandData: CommandData[]): void => {
+        const error = commandData[0].data.error
+        if (error != null) {
+          // eslint-disable-next-line @typescript-eslint/no-throw-literal
+          throw error
+        }
+        proceed()
+        resolve()
+      }
+
+      // For Flex, we need extra preparation steps
+      const prepareFlexBlowout = (): Promise<CommandData[]> => {
+        return chainRunCommands(
+          [ENGAGE_AXES, UPDATE_PLUNGER_ESTIMATORS],
+          false
+        ).catch(error => {
+          throw {
+            ...error,
+            errorType: DROP_TIP_SPECIAL_ERROR_TYPES.MUST_HOME_ERROR,
+          }
         })
+      }
+
+      const executeCommands = (): Promise<CommandData[]> => {
+        const commands = isBlowoutRoute
+          ? buildBlowoutCommands(instrumentModelSpecs, isFlex, pipetteId)
+          : buildDropTipInPlaceCommand(isFlex, pipetteId)
+
+        return chainRunCommands(commands, false)
+      }
+
+      if (isBlowoutRoute && isFlex) {
+        prepareFlexBlowout()
+          .then(executeCommands)
+          .then(handleSuccess)
+          .catch(handleError)
+      } else {
+        executeCommands().then(handleSuccess).catch(handleError)
+      }
     })
   }
 
@@ -356,13 +388,10 @@ const buildBlowoutCommands = (
 ): CreateCommand[] =>
   isFlex
     ? [
-        ENGAGE_AXES,
-        UPDATE_PLUNGER_ESTIMATORS,
         {
           commandType: 'unsafe/blowOutInPlace',
           params: {
             pipetteId: pipetteId ?? MANAGED_PIPETTE_ID,
-
             flowRate: Math.min(
               specs.defaultBlowOutFlowRate.value,
               MAXIMUM_BLOWOUT_FLOW_RATE_UL_PER_S
@@ -376,7 +405,6 @@ const buildBlowoutCommands = (
           commandType: 'blowOutInPlace',
           params: {
             pipetteId: pipetteId ?? MANAGED_PIPETTE_ID,
-
             flowRate: specs.defaultBlowOutFlowRate.value,
           },
         },

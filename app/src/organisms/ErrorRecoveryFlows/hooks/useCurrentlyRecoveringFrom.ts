@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useQueryClient } from 'react-query'
 
 import {
@@ -23,13 +23,15 @@ const VALID_RECOVERY_FETCH_STATUSES = [
 ] as Array<RunStatus | null>
 
 // Return the `currentlyRecoveringFrom` command returned by the server, if any.
-// Otherwise, returns null.
+// The command will only be returned after the initial fetches are complete to prevent rendering of stale data.
 export function useCurrentlyRecoveringFrom(
   runId: string,
   runStatus: RunStatus | null
 ): FailedCommand | null {
   const queryClient = useQueryClient()
   const host = useHost()
+  const [isReadyToShow, setIsReadyToShow] = useState(false)
+
   // There can only be a currentlyRecoveringFrom command when the run is in recovery mode.
   // In case we're falling back to polling, only enable queries when that is the case.
   const isRunInRecoveryMode = VALID_RECOVERY_FETCH_STATUSES.includes(runStatus)
@@ -38,12 +40,17 @@ export function useCurrentlyRecoveringFrom(
   useEffect(() => {
     if (isRunInRecoveryMode) {
       void queryClient.invalidateQueries([host, 'runs', runId])
+    } else {
+      setIsReadyToShow(false)
     }
   }, [isRunInRecoveryMode, host, runId])
 
-  const { data: allCommandsQueryData } = useNotifyAllCommandsQuery(
+  const {
+    data: allCommandsQueryData,
+    isFetching: isAllCommandsFetching,
+  } = useNotifyAllCommandsQuery(
     runId,
-    { cursor: null, pageLength: 0 }, // pageLength 0 because we only care about the links.
+    { pageLength: 0 }, // pageLength 0 because we only care about the links.
     {
       enabled: isRunInRecoveryMode,
       refetchInterval: ALL_COMMANDS_POLL_MS,
@@ -54,7 +61,10 @@ export function useCurrentlyRecoveringFrom(
 
   // TODO(mm, 2024-05-21): When the server supports fetching the
   // currentlyRecoveringFrom command in one step, do that instead of this chained query.
-  const { data: commandQueryData } = useCommandQuery(
+  const {
+    data: commandQueryData,
+    isFetching: isCommandFetching,
+  } = useCommandQuery(
     currentlyRecoveringFromLink?.meta.runId ?? null,
     currentlyRecoveringFromLink?.meta.commandId ?? null,
     {
@@ -62,5 +72,25 @@ export function useCurrentlyRecoveringFrom(
     }
   )
 
-  return isRunInRecoveryMode ? commandQueryData?.data ?? null : null
+  // Only mark as ready to show when waterfall fetches are complete
+  useEffect(() => {
+    if (
+      isRunInRecoveryMode &&
+      !isAllCommandsFetching &&
+      !isCommandFetching &&
+      !isReadyToShow
+    ) {
+      setIsReadyToShow(true)
+    }
+  }, [
+    isRunInRecoveryMode,
+    isAllCommandsFetching,
+    isCommandFetching,
+    isReadyToShow,
+  ])
+
+  const shouldShowCommand =
+    isRunInRecoveryMode && isReadyToShow && commandQueryData?.data
+
+  return shouldShowCommand ? commandQueryData.data : null
 }

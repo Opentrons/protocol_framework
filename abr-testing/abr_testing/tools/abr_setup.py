@@ -20,9 +20,9 @@ def run_sync_abr_sheet(
     sync_abr_sheet.run(storage_directory, abr_data_sheet, room_conditions_sheet)
 
 
-def run_temp_sensor(ip_file: str) -> None:
+def run_temp_sensor() -> None:
     """Run temperature sensors on all robots."""
-    processes = ABRAsairScript.run(ip_file)
+    processes = ABRAsairScript.run()
     for process in processes:
         process.start()
         time.sleep(20)
@@ -64,7 +64,6 @@ def get_calibration_data(
 
 def main(configurations: configparser.ConfigParser) -> None:
     """Main function."""
-    ip_file = None
     storage_directory = None
     email = None
     drive_folder = None
@@ -89,15 +88,10 @@ def main(configurations: configparser.ConfigParser) -> None:
 
     # Run Temperature Sensors
     if not has_defaults:
-        ip_file = configurations["TEMP-SENSOR"]["Robo_List"]
         ambient_conditions_sheet = configurations["TEMP-SENSOR"]["Sheet_Url"]
     print("Starting temp sensors...")
-    if ip_file:
-        run_temp_sensor(ip_file)
-        print("Temp Sensors Started")
-    else:
-        print("Missing ip_file location, please fix configs")
-        sys.exit(1)
+    run_temp_sensor()
+    print("Temp Sensors Started")
     # Get Run Logs and Record
     if not has_defaults:
         storage_directory = configurations["RUN-LOG"]["Storage"]

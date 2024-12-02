@@ -95,6 +95,6 @@ const ANIMATION_CONTAINER_STYLE = css`
 const ANIMATION_STYLE = css`
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
     width: 27rem;
-    height: 18.75rem;
+    height: 20.25rem;
   }
 `

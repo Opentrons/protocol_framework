@@ -45,6 +45,10 @@ def test_build_aspirate_settings() -> None:
     assert aspirate_properties.position_reference.value == "well-bottom"
     assert aspirate_properties.offset == Coordinate(x=0, y=0, z=-5)
     assert aspirate_properties.flow_rate_by_volume.as_dict() == {10: 50.0}
+    assert aspirate_properties.correction_by_volume.as_dict() == {
+        1.0: -2.5,
+        10.0: 3,
+    }
     assert aspirate_properties.pre_wet is True
     assert aspirate_properties.mix.enabled is True
     assert aspirate_properties.mix.repetitions == 3
@@ -94,6 +98,10 @@ def test_build_single_dispense_settings() -> None:
     assert single_dispense_properties.flow_rate_by_volume.as_dict() == {
         10.0: 40.0,
         20.0: 30.0,
+    }
+    assert single_dispense_properties.correction_by_volume.as_dict() == {
+        2.0: -1.5,
+        20.0: 2,
     }
     assert single_dispense_properties.mix.enabled is True
     assert single_dispense_properties.mix.repetitions == 3
@@ -147,6 +155,10 @@ def test_build_multi_dispense_settings() -> None:
     assert multi_dispense_properties.flow_rate_by_volume.as_dict() == {
         10.0: 40.0,
         20.0: 30.0,
+    }
+    assert multi_dispense_properties.correction_by_volume.as_dict() == {
+        3.0: -0.5,
+        30.0: 1,
     }
     assert multi_dispense_properties.conditioning_by_volume.as_dict() == {
         5.0: 5.0,

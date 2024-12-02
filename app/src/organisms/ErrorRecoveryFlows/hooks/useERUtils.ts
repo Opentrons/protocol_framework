@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import { useInstrumentsQuery } from '@opentrons/react-api-client'
 
 import { useRouteUpdateActions } from './useRouteUpdateActions'
@@ -13,12 +15,12 @@ import {
 } from '/app/resources/runs'
 import { useRecoveryOptionCopy } from './useRecoveryOptionCopy'
 import { useRecoveryActionMutation } from './useRecoveryActionMutation'
-import { useRunningStepCounts } from '/app/resources/protocols/hooks'
 import { useRecoveryToasts } from './useRecoveryToasts'
 import { useRecoveryAnalytics } from '/app/redux-resources/analytics'
 import { useShowDoorInfo } from './useShowDoorInfo'
 import { useCleanupRecoveryState } from './useCleanupRecoveryState'
 import { useFailedPipetteUtils } from './useFailedPipetteUtils'
+import { getRunningStepCountsFrom } from '/app/resources/protocols'
 
 import type {
   LabwareDefinition2,
@@ -102,7 +104,14 @@ export function useERUtils({
     pageLength: 999,
   })
 
-  const stepCounts = useRunningStepCounts(runId, runCommands)
+  const stepCounts = useMemo(
+    () =>
+      getRunningStepCountsFrom(
+        protocolAnalysis?.commands ?? [],
+        failedCommand?.byRunRecord ?? null
+      ),
+    [protocolAnalysis != null, failedCommand]
+  )
 
   const analytics = useRecoveryAnalytics()
 

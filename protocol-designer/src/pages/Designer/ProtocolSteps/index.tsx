@@ -40,7 +40,7 @@ import {
 } from '../../../file-data/selectors'
 import { TimelineAlerts } from '../../../organisms'
 
-const CONTENT_MAX_WIDTH = '46.9375rem'
+const CONTENT_MAX_WIDTH = '44.6704375rem'
 
 export function ProtocolSteps(): JSX.Element {
   const { i18n, t } = useTranslation('starting_deck_state')

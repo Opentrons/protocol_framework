@@ -24,6 +24,7 @@ import {
   IgnoreErrorSkipStep,
   ManualReplaceLwAndRetry,
   ManualMoveLwAndSkip,
+  HomeAndRetry,
 } from '../RecoveryOptions'
 import { RecoveryInProgress } from '../RecoveryInProgress'
 import { RecoveryError } from '../RecoveryError'
@@ -188,6 +189,7 @@ describe('ErrorRecoveryContent', () => {
     ROBOT_RELEASING_LABWARE,
     MANUAL_REPLACE_AND_RETRY,
     MANUAL_MOVE_AND_SKIP,
+    HOME_AND_RETRY,
   } = RECOVERY_MAP
 
   let props: React.ComponentProps<typeof ErrorRecoveryContent>
@@ -225,6 +227,7 @@ describe('ErrorRecoveryContent', () => {
     vi.mocked(RecoveryDoorOpenSpecial).mockReturnValue(
       <div>MOCK_DOOR_OPEN_SPECIAL</div>
     )
+    vi.mocked(HomeAndRetry).mockReturnValue(<div>MOCK_HOME_AND_RETRY</div>)
   })
 
   it(`returns SelectRecoveryOption when the route is ${OPTION_SELECTION.ROUTE}`, () => {
@@ -504,5 +507,18 @@ describe('ErrorRecoveryContent', () => {
     renderRecoveryContent(props)
 
     screen.getByText('MOCK_DOOR_OPEN_SPECIAL')
+  })
+
+  it(`returns HomeAndRetry when the route is ${HOME_AND_RETRY.ROUTE}`, () => {
+    props = {
+      ...props,
+      recoveryMap: {
+        ...props.recoveryMap,
+        route: HOME_AND_RETRY.ROUTE,
+      },
+    }
+    renderRecoveryContent(props)
+
+    screen.getByText('MOCK_HOME_AND_RETRY')
   })
 })

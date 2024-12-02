@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -64,7 +64,7 @@ export function TipPositionModal(
     'shared',
     'application',
   ])
-  const [view, setView] = React.useState<'top' | 'side'>('side')
+  const [view, setView] = useState<'top' | 'side'>('side')
   const zSpec = specs.z
   const ySpec = specs.y
   const xSpec = specs.x
@@ -80,18 +80,18 @@ export function TipPositionModal(
     wellDepthMm,
   })
 
-  const [zValue, setZValue] = React.useState<string | null>(
+  const [zValue, setZValue] = useState<string | null>(
     zSpec?.value == null ? String(defaultMmFromBottom) : String(zSpec?.value)
   )
-  const [yValue, setYValue] = React.useState<string | null>(
+  const [yValue, setYValue] = useState<string | null>(
     ySpec?.value == null ? null : String(ySpec?.value)
   )
-  const [xValue, setXValue] = React.useState<string | null>(
+  const [xValue, setXValue] = useState<string | null>(
     xSpec?.value == null ? null : String(xSpec?.value)
   )
 
   // in this modal, pristinity hides the OUT_OF_BOUNDS error only.
-  const [isPristine, setPristine] = React.useState<boolean>(true)
+  const [isPristine, setPristine] = useState<boolean>(true)
   const getMinMaxMmFromBottom = (): {
     maxMmFromBottom: number
     minMmFromBottom: number
