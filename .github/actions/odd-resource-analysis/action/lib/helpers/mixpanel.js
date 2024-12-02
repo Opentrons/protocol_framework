@@ -33,7 +33,7 @@ async function getMixpanelResourceMonitorDataFor({
   where,
 }) {
   const params = new URLSearchParams({
-    project_id: projectId,
+    project_id: Number(projectId),
     from_date: fromDate,
     to_date: toDate,
     event: '["resourceMonitorReport"]',
