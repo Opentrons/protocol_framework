@@ -855,10 +855,14 @@ def test_ensure_valid_tip_drop_location_for_transfer_v2(
     )
 
 
-def test_ensure_valid_tip_drop_location_for_transfer_v2_raises() -> None:
+def test_ensure_valid_tip_drop_location_for_transfer_v2_raises(decoy: Decoy) -> None:
     """It should raise an error for invalid tip drop locations."""
-    with pytest.raises(TypeError, match="However, it is 'a'"):
-        subject.ensure_valid_tip_drop_location_for_transfer_v2("a")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="However, it is '\\['a'\\]'"):
+        subject.ensure_valid_tip_drop_location_for_transfer_v2(["a"])  # type: ignore[arg-type]
+
+    mock_labware = decoy.mock(cls=Labware)
+    with pytest.raises(TypeError, match=f"However, it is '{mock_labware}'"):
+        subject.ensure_valid_tip_drop_location_for_transfer_v2(mock_labware)  # type: ignore[arg-type]
 
     with pytest.raises(
         TypeError, match="However, the given location doesn't refer to any well."
