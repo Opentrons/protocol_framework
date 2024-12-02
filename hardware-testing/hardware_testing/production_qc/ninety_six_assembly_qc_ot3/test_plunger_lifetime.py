@@ -1,4 +1,4 @@
-"""Test Droplets."""
+"""Pipette lifetime."""
 from asyncio import sleep
 
 #from time import time
@@ -47,36 +47,6 @@ TIP_RACK_96_ADAPTER_HEIGHT = 11  # DVT adapter
 # move to same spot over labware, regardless of number of tips attached
 OFFSET_FOR_1_WELL_LABWARE = Point(x=9 * -11 * 0.5, y=9 * 7 * 0.5)
 
-#PARTIAL_CURRENTS: Dict[int, float] = {1: 0.1, 8: 0.55, 12: 0.8, 16: 1.1, 24: 1.5}
-
-# PARTIAL_TESTS: Dict[str, Tuple[Point, float]] = {
-#     # test-name: [offset-from-A1, z-current]
-#     "1-tip-back-left": (
-#         Point(x=9 * 11, y=9 * 7),  # A12 Tip
-#         PARTIAL_CURRENTS[1],
-#     ),
-#     "8-tips-left": (
-#         Point(x=9 * 10),  # A11-H11 Tips
-#         PARTIAL_CURRENTS[8],
-#     ),
-#     "24-tips-left": (
-#         Point(x=9 * 7),  # A8-H10 Tips
-#         PARTIAL_CURRENTS[24],
-#     ),
-# }
-
-
-
-# def get_trash_nominal() -> Point:
-#     """Get nominal trash position."""
-#     trash_nominal = helpers_ot3.get_slot_calibration_square_position_ot3(
-#         TRASH_SLOT
-#     ) + Point(z=TRASH_HEIGHT)
-#     # center the 96ch of the 1-well labware
-#     trash_nominal += OFFSET_FOR_1_WELL_LABWARE
-#     return trash_nominal
-
-
 def get_reservoir_nominal() -> Point:
     """Get nominal reservoir position."""
     reservoir_a1_nominal = helpers_ot3.get_theoretical_a1_position(
@@ -86,16 +56,6 @@ def get_reservoir_nominal() -> Point:
     reservoir_a1_nominal += OFFSET_FOR_1_WELL_LABWARE
     return reservoir_a1_nominal
 
-# def get_plate_nominal() -> Point:
-#     """Get nominal reservoir position."""
-#     plate_a1_nominal = helpers_ot3.get_theoretical_a1_position(
-#         PLATE_SLOT, PLATE_LABWARE
-#     )
-#     # center the 96ch of the 1-well labware
-#     plate_a1_nominal
-#     return plate_a1_nominal
-
-
 def get_tiprack_96_nominal(pipette: Literal[200, 1000]) -> Point:
     """Get nominal tiprack position for 96-tip pick-up."""
     tip_rack_a1_nominal = helpers_ot3.get_theoretical_a1_position(
@@ -103,28 +63,24 @@ def get_tiprack_96_nominal(pipette: Literal[200, 1000]) -> Point:
     )
     return tip_rack_a1_nominal + Point(z=TIP_RACK_96_ADAPTER_HEIGHT)
 
-
-# def get_tiprack_partial_nominal(pipette: Literal[200, 1000]) -> Point:
-#     """Get nominal tiprack position for partial-tip pick-up."""
-#     tip_rack_a1_nominal = helpers_ot3.get_theoretical_a1_position(
-#         TIP_RACK_PARTIAL_SLOT, f"opentrons_flex_96_tiprack_{pipette}ul"
-#     )
-#     return tip_rack_a1_nominal
-
-
 async def aspirate_and_dispense(
-    api: OT3API, reservoir: Point, volume: float
+    api: OT3API, reservoir: Point, volume: float, cycle: int
 ) -> Tuple[bool, float]:
 
     try:
         """Aspirate and wait."""
-        await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, reservoir)
-        await api.move_rel(OT3Mount.LEFT, Point(z=DEPTH_INTO_RESERVOIR_FOR_ASPIRATE))
+        await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, reservoir + Point(z = DEPTH_INTO_RESERVOIR_FOR_ASPIRATE))
+        # await api.move_rel(OT3Mount.LEFT, Point(z=DEPTH_INTO_RESERVOIR_FOR_ASPIRATE))
+        # input("Press Enter to continue")
         await asyncio.sleep(1)
         print("volume:",volume)
-        await api.aspirate(OT3Mount.LEFT, volume)
+        await helpers_ot3.move_plunger_absolute_ot3(
+            api, OT3Mount.LEFT, 0.5
+        )
         await asyncio.sleep(1)
-        await api.dispense(OT3Mount.LEFT)
+        await helpers_ot3.move_plunger_absolute_ot3(
+            api, OT3Mount.LEFT, 67.5
+        )
         return "PASS"
     except Exception as err:
         print("aspirate_and_dispense",err)
@@ -137,24 +93,6 @@ def _convert(seconds: float) -> str:
 
     return "%02d:%02d:%02d:%02d:%02d" % (weeks, days, hours, minutes, seconds)
 
-# async def bottom_top(api: OT3API,blow_out:float) -> None:
-#     # MOVE DOWN
-#     passval = await _record_plunger_alignment(api,OT3Mount.LEFT)
-#     #_convert(time.perf_counter() - elapsed_time - start_time),
-#     print(f"moving down {blow_out} mm ")
-#     await helpers_ot3.move_plunger_absolute_ot3(
-#         api, OT3Mount.LEFT, blow_out
-#     )
-    
-#     # MOVE UP
-#     print(f"moving up {blow_out} mm ")
-#     await helpers_ot3.move_plunger_absolute_ot3(
-#         api, OT3Mount.LEFT, 0
-#     )
-#     await _record_plunger_alignment(api,OT3Mount.LEFT)
-
-
-
 async def _drop_tip(api: OT3API, trash: Point) -> None:
     print("drop in trash")
     await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, trash + Point(z=10))
@@ -166,36 +104,6 @@ async def _drop_tip(api: OT3API, trash: Point) -> None:
     #     await api.add_tip(OT3Mount.LEFT, helpers_ot3.get_default_tip_length(TIP_VOLUME))
     #     await api.drop_tip(OT3Mount.LEFT)
     await api.home_z(OT3Mount.LEFT)
-
-
-# async def _partial_pick_up_z_motion(
-#     api: OT3API, current: float, distance: float, speed: float
-# ) -> None:
-#     async with api._backend.motor_current(run_currents={Axis.Z_L: current}):
-#         target_down = target_position_from_relative(
-#             OT3Mount.LEFT, Point(z=-distance), api._current_position
-#         )
-#         await api._move(target_down, speed=speed)
-#     target_up = target_position_from_relative(
-#         OT3Mount.LEFT, Point(z=distance), api._current_position
-#     )
-#     await api._move(target_up)
-#     await api._update_position_estimation([Axis.Z_L])
-
-
-# async def _partial_pick_up(
-#     api: OT3API, position: Point, current: float, pipette: Literal[200, 1000]
-# ) -> None:
-#     await helpers_ot3.move_to_arched_ot3(
-#         api,
-#         OT3Mount.LEFT,
-#         position,
-#         safe_height=position.z + 10,
-#     )
-#     await _partial_pick_up_z_motion(api, current=current, distance=13, speed=5)
-#     await api.add_tip(OT3Mount.LEFT, helpers_ot3.get_default_tip_length(pipette))
-#     await api.prepare_for_aspirate(OT3Mount.LEFT)
-#     await api.home_z(OT3Mount.LEFT)
 
 async def _record_plunger_alignment(
     api: OT3API,
@@ -219,7 +127,7 @@ async def _record_plunger_alignment(
     _did_pass = abs(_stalled_mm) < STALL_THRESHOLD_MM
     # NOTE: only tests that are required to PASS need to show a results in the file
     data = [cycles, nnnnn,Direction,Position, round(est, 2), round(enc, 2),_did_pass]
-    
+
     print(data)
     return data
 
@@ -239,21 +147,21 @@ async def _run(cycles: int, trials: int) -> None:
         is_simulating=False,
         pipette_left=pipette_string,
     )
-    
+
     #report = _build_csv_report(cycles=cycles, trials=trials)
     global start_time
     global elapsed_time
     import time
     start_time = time.perf_counter()
     elapsed_time = 0.0
-    
-    #report 
+
+    #report
     test_pipdicc = api.get_attached_instrument(OT3Mount.LEFT)
     test_pip = test_pipdicc["pipette_id"]
     global test_name
     test_name = "plunger-bottom-top-lifetime-test"
     global file_name
-    cycles_star = 0
+    cycles_star = 1
     global run_id
     run_id = data.create_run_id()
 
@@ -263,7 +171,7 @@ async def _run(cycles: int, trials: int) -> None:
                 calibrated_slot_loc = json.load(openfile)
                 file_name= calibrated_slot_loc["csv_name"]
                 cycles_star = calibrated_slot_loc["cycles_star"]
-            
+
     else:
         file_name = data.create_file_name(
             test_name=test_name,
@@ -319,7 +227,7 @@ async def _run(cycles: int, trials: int) -> None:
         )
 
 
-        
+
 
         header = [
             "Time (W:H:M:S)",
@@ -343,18 +251,6 @@ async def _run(cycles: int, trials: int) -> None:
             calibrated_slot_loc = json.dumps(json_object, indent=0)
             outfile.write(calibrated_slot_loc)
 
-        
-
-    # if args.load_cal:
-    #     print("Loading calibration data...\n")
-        
-    #     if os.path.exists(pathjson):
-    #         with open(pathjson, "r"
-    #         ) as openfile:
-    #             calibrated_slot_loc = json.load(openfile)
-    #             file_name= calibrated_slot_loc["csv_name"]
-    #             cycles_star = calibrated_slot_loc["cycles_star"]
-    
     await api.home()
     _, _, blow_out, _ = helpers_ot3.get_plunger_positions_ot3(api, OT3Mount.LEFT)
     # GATHER NOMINAL POSITIONS
@@ -362,7 +258,7 @@ async def _run(cycles: int, trials: int) -> None:
     # tip_rack_partial_a1_nominal = get_tiprack_partial_nominal()
     reservoir_a1_nominal = get_reservoir_nominal()
     #plate_a1_nominal = get_plate_nominal()
- 
+
     reservoir_a1_actual: Optional[Point] = None
     #plate_a1_actual: Optional[Point] = None
 
@@ -376,26 +272,29 @@ async def _run(cycles: int, trials: int) -> None:
         await helpers_ot3.move_to_arched_ot3(
             api, OT3Mount.LEFT, reservoir_a1_nominal + Point(z=10)
         )
+
+        print(f'reservoir point: {reservoir_a1_nominal}')
+        print(f'reservoir point: {reservoir_a1_nominal + Point(z=10)}')
         await helpers_ot3.jog_mount_ot3(api, OT3Mount.LEFT)
         reservoir_a1_actual = await api.gantry_position(OT3Mount.LEFT)
 
     result = True
-    
-    get_test_volume = 1000 #input("Input Test Volume(ul)?")
+
+    get_test_volume = 200 #input("Input Test Volume(ul)?")
     #get_test_volume = float(get_test_volume.strip())
 
     tip_rack_pos = None
     tip_volume = 200
     #print(f"Ready to test x{number+1} {get_test_volume} uL")
-        
+
     if not api.is_simulator:
         ui.get_user_ready(
             f"\n\t picking up tips, place tip-rack {tip_volume}ul on slot {TIP_RACK_96_SLOT}, RESERVOIR_SLOT on slot {RESERVOIR_SLOT}"
         )
-    
-    
+
+
     ui.print_header("JOG to 96-Tip RACK")
-        
+
     if tip_rack_pos is None:
         await helpers_ot3.move_to_arched_ot3(
             api, OT3Mount.LEFT, tip_rack_96_a1_nominal + Point(z=30)
@@ -407,27 +306,37 @@ async def _run(cycles: int, trials: int) -> None:
             api, OT3Mount.LEFT, tip_rack_pos
         )
 
-    
+
     #await _drop_tip(api, tip_rack_pos)
 
-    
+
     await api.pick_up_tip(
         OT3Mount.LEFT, helpers_ot3.get_default_tip_length(tip_volume)
     )
     await api.home_z(OT3Mount.LEFT)
     for number in range(cycles_star,cycles):
-        
+
         # PICK-UP 96 TIPS
         if reservoir_a1_actual is None:
             await _find_reservoir_pos()
             await api.home_z(OT3Mount.LEFT)
         assert reservoir_a1_actual
-        asdipass = await aspirate_and_dispense(api, reservoir_a1_actual, get_test_volume)
+        asdipass = await aspirate_and_dispense(api, reservoir_a1_actual, get_test_volume, number)
+
+        if number % 5 == 0:
+            await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, reservoir_a1_actual)
+            await helpers_ot3.move_plunger_absolute_ot3(
+                api, OT3Mount.LEFT, 72.5
+            )
+            await helpers_ot3.move_plunger_absolute_ot3(
+                api, OT3Mount.LEFT, 67.5
+            )
         header_str = data.convert_list_to_csv_line(["aspirate_and_dispense",asdipass])
         data.append_data_to_file(
             test_name=test_name, file_name=file_name, data=header_str
         )
-        await api.move_rel(OT3Mount.LEFT, Point(z=35))
+        # if number % 2 == 0:
+        #     await api.move_rel(OT3Mount.LEFT, Point(z=35))
         for n in range(trials):
             #bottom
             passval = await _record_plunger_alignment(api,OT3Mount.LEFT,n,number,"bottom","start")
@@ -441,10 +350,10 @@ async def _run(cycles: int, trials: int) -> None:
             )
 
 
-            print(f"moving down {blow_out} mm ")
-            await helpers_ot3.move_plunger_absolute_ot3(
-                api, OT3Mount.LEFT, blow_out
-            )
+            # print(f"moving down {blow_out} mm ")
+            # await helpers_ot3.move_plunger_absolute_ot3(
+            #     api, OT3Mount.LEFT, blow_out
+            # )
             time2 = _convert(time.perf_counter() - elapsed_time - start_time)
             passval = await _record_plunger_alignment(api,OT3Mount.LEFT,n,number,"bottom","end")
             wlist = []
@@ -467,9 +376,9 @@ async def _run(cycles: int, trials: int) -> None:
                 test_name=test_name,  file_name=file_name, data=header_str
             )
 
-            await helpers_ot3.move_plunger_absolute_ot3(
-                api, OT3Mount.LEFT, 0
-            )
+            # await helpers_ot3.move_plunger_absolute_ot3(
+            #     api, OT3Mount.LEFT, 0
+            # )
             time2 = _convert(time.perf_counter() - elapsed_time - start_time)
             passval = await _record_plunger_alignment(api,OT3Mount.LEFT,n,number,"top","end")
             wlist = []
@@ -492,10 +401,10 @@ async def _run(cycles: int, trials: int) -> None:
             )
 
 
-            print(f"moving down {blow_out} mm ")
-            await helpers_ot3.move_plunger_absolute_ot3(
-                api, OT3Mount.LEFT, blow_out
-            )
+            # print(f"moving down {blow_out} mm ")
+            # await helpers_ot3.move_plunger_absolute_ot3(
+            #     api, OT3Mount.LEFT, blow_out
+            # )
             time2 = _convert(time.perf_counter() - elapsed_time - start_time)
             passval = await _record_plunger_alignment(api,OT3Mount.LEFT,n,number,"bottom","end")
             wlist = []
@@ -505,7 +414,7 @@ async def _run(cycles: int, trials: int) -> None:
             data.append_data_to_file(
                 test_name=test_name, file_name=file_name, data=header_str
             )
-            
+
             print('n',n)
             #input("continue")
         if os.path.exists(pathjson):
@@ -524,8 +433,8 @@ async def _run(cycles: int, trials: int) -> None:
                     "w",
                 ) as writefile:
                     json.dump(calibrated_slot_loc, writefile)
-        await api.home([Axis.X,Axis.Y,Axis.Z_L])
-        await api.prepare_for_aspirate(OT3Mount.LEFT)
+        # await api.home([Axis.X,Axis.Y,Axis.Z_L])
+        #await api.prepare_for_aspirate(OT3Mount.LEFT)
     await _drop_tip(api, tip_rack_pos)
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -535,4 +444,3 @@ if __name__ == "__main__":
     parser.add_argument("--restart_flag", action="store_true")
     args = parser.parse_args()
     asyncio.run(_run(args.cycles,args.n))
-
