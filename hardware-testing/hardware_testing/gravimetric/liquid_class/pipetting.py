@@ -317,7 +317,7 @@ def _pipette_with_liquid_settings(  # noqa: C901
     # PHASE 1: APPROACH
     pipette.flow_rate.aspirate = liquid_class.aspirate.plunger_flow_rate
     pipette.flow_rate.dispense = liquid_class.dispense.plunger_flow_rate
-    pipette.flow_rate.blow_out = liquid_class.dispense.plunger_flow_rate
+    pipette.flow_rate.blow_out = liquid_class.dispense.blow_out_flow_rate
     pipette.move_to(well.bottom(approach_mm).move(channel_offset))
     _aspirate_on_approach() if aspirate or mix else _dispense_on_approach()
 
@@ -405,7 +405,7 @@ def aspirate_with_liquid_class(
     liquid_class = get_liquid_class(
         pip_size, pipette.channels, tip_volume, int(aspirate_volume)
     )
-    print(f"aspirate liquid class : {dir(liquid_class)}")
+    print(f"aspirate liquid class : {(liquid_class.aspirate)}")
     _pipette_with_liquid_settings(
         ctx,
         pipette,
@@ -453,7 +453,7 @@ def dispense_with_liquid_class(
     liquid_class = get_liquid_class(
         pip_size, pipette.channels, tip_volume, int(dispense_volume)
     )
-    print(f"dispense liquid class : {dir(liquid_class)}")
+    print(f"dispense liquid class : {(liquid_class.dispense)}")
     _pipette_with_liquid_settings(
         ctx,
         pipette,
