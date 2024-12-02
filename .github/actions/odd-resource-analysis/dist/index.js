@@ -88,8 +88,11 @@ function processMixpanelData(data) {
   const systemMemory = []
 
   data.forEach(entry => {
-    const { systemUptimeHrs, systemAvailMemMb, processesDetails } =
-      entry.properties
+    const {
+      systemUptimeHrs,
+      systemAvailMemMb,
+      processesDetails,
+    } = entry.properties
     const uptime = parseFloat(systemUptimeHrs)
 
     // Validate uptime before adding any measurements
@@ -582,7 +585,7 @@ async function getMixpanelResourceMonitorDataFor({
   where,
 }) {
   const params = new URLSearchParams({
-    project_id: projectId,
+    project_id: Number(projectId),
     from_date: fromDate,
     to_date: toDate,
     event: '["resourceMonitorReport"]',
