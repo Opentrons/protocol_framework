@@ -63,8 +63,8 @@
         "valuesByApiLevel": { "2.14": 6 }
       },
       "defaultBlowOutFlowRate": {
-        "default": 80,
-        "valuesByApiLevel": { "2.14": 80 }
+        "default": 6,
+        "valuesByApiLevel": { "2.14": 6 }
       },
       "defaultFlowAcceleration": 16000.0,
       "defaultTipLength": 57.9,

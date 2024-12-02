@@ -158,8 +158,8 @@
   "plungerPositionsConfigurations": {
     "default": {
       "top": 0.5,
-      "bottom": 68.5,
-      "blowout": 73.5,
+      "bottom": 67.5,
+      "blowout": 72.5,
       "drop": 80
     }
   },
