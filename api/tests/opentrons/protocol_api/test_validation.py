@@ -35,7 +35,13 @@ from opentrons.hardware_control.modules.types import (
 from opentrons.protocols.models import LabwareDefinition
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocols.api_support.util import APIVersionError
-from opentrons.protocol_api import validation as subject, Well, Labware
+from opentrons.protocol_api import (
+    validation as subject,
+    Well,
+    Labware,
+    TrashBin,
+    WasteChute,
+)
 
 
 @pytest.mark.parametrize(
@@ -731,6 +737,7 @@ def test_ensure_only_gantry_axis_map_type(
         ("once", TransferTipPolicyV2.ONCE),
         ("NEVER", TransferTipPolicyV2.NEVER),
         ("alWaYs", TransferTipPolicyV2.ALWAYS),
+        ("Per Source", TransferTipPolicyV2.PER_SOURCE),
     ],
 )
 def test_ensure_new_tip_policy(
@@ -765,6 +772,12 @@ def test_ensure_new_tip_policy_raises() -> None:
             [("a",)],
             pytest.raises(
                 ValueError, match="'a' is not a valid location for transfer."
+            ),
+        ),
+        (
+            [],
+            pytest.raises(
+                ValueError, match="No target well\\(s\\) specified for transfer."
             ),
         ),
     ],
@@ -815,3 +828,41 @@ def test_ensure_valid_flat_wells_list(decoy: Decoy) -> None:
             [target2, target2],
         )
     ) == [target1, target1, target2, target2]
+
+
+def test_ensure_valid_tip_drop_location_for_transfer_v2(
+    decoy: Decoy,
+) -> None:
+    """It should check that the tip drop location is valid."""
+    mock_well = decoy.mock(cls=Well)
+    mock_location = Location(point=Point(x=1, y=1, z=1), labware=mock_well)
+    mock_trash_bin = decoy.mock(cls=TrashBin)
+    mock_waste_chute = decoy.mock(cls=WasteChute)
+    assert (
+        subject.ensure_valid_tip_drop_location_for_transfer_v2(mock_well) == mock_well
+    )
+    assert (
+        subject.ensure_valid_tip_drop_location_for_transfer_v2(mock_location)
+        == mock_location
+    )
+    assert (
+        subject.ensure_valid_tip_drop_location_for_transfer_v2(mock_trash_bin)
+        == mock_trash_bin
+    )
+    assert (
+        subject.ensure_valid_tip_drop_location_for_transfer_v2(mock_waste_chute)
+        == mock_waste_chute
+    )
+
+
+def test_ensure_valid_tip_drop_location_for_transfer_v2_raises() -> None:
+    """It should raise an error for invalid tip drop locations."""
+    with pytest.raises(TypeError, match="However, it is 'a'"):
+        subject.ensure_valid_tip_drop_location_for_transfer_v2("a")  # type: ignore[arg-type]
+
+    with pytest.raises(
+        TypeError, match="However, the given location doesn't refer to any well."
+    ):
+        subject.ensure_valid_tip_drop_location_for_transfer_v2(
+            Location(point=Point(x=1, y=1, z=1), labware=None)
+        )

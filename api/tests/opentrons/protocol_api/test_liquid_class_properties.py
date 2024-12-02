@@ -51,7 +51,7 @@ def test_build_aspirate_settings() -> None:
     assert aspirate_properties.mix.volume == 15
     assert aspirate_properties.delay.enabled is True
     assert aspirate_properties.delay.duration == 2
-    assert aspirate_properties.as_schema_v1_model() == aspirate_data
+    assert aspirate_properties.as_shared_data_model() == aspirate_data
 
 
 def test_build_single_dispense_settings() -> None:
@@ -104,7 +104,7 @@ def test_build_single_dispense_settings() -> None:
     }
     assert single_dispense_properties.delay.enabled is True
     assert single_dispense_properties.delay.duration == 2.5
-    assert single_dispense_properties.as_schema_v1_model() == single_dispense_data
+    assert single_dispense_properties.as_shared_data_model() == single_dispense_data
 
 
 def test_build_multi_dispense_settings() -> None:
@@ -156,7 +156,7 @@ def test_build_multi_dispense_settings() -> None:
     }
     assert multi_dispense_properties.delay.enabled is True
     assert multi_dispense_properties.delay.duration == 1
-    assert multi_dispense_properties.as_schema_v1_model() == multi_dispense_data
+    assert multi_dispense_properties.as_shared_data_model() == multi_dispense_data
 
 
 def test_build_multi_dispense_settings_none(

@@ -1786,10 +1786,7 @@ def test_transfer_liquid_raises_for_unequal_source_and_dest(
         ValueError, match="Sources and destinations should be of the same length"
     ):
         subject.transfer_liquid(
-            liquid_class=test_liq_class,
-            volume=10,
-            source=mock_well,
-            dest=[mock_well],
+            liquid_class=test_liq_class, volume=10, source=mock_well, dest=[mock_well]
         )
 
 
@@ -1819,10 +1816,7 @@ def test_transfer_liquid_raises_for_non_liquid_handling_locations(
     ).then_raise(ValueError("Uh oh"))
     with pytest.raises(ValueError, match="Uh oh"):
         subject.transfer_liquid(
-            liquid_class=test_liq_class,
-            volume=10,
-            source=[mock_well],
-            dest=[mock_well],
+            liquid_class=test_liq_class, volume=10, source=[mock_well], dest=[mock_well]
         )
 
 
@@ -1980,7 +1974,7 @@ def test_transfer_liquid_delegates_to_engine_core(
     ).then_return((next_tiprack, decoy.mock(cls=Well)))
     decoy.when(mock_instrument_core.get_current_volume()).then_return(0)
     decoy.when(
-        mock_validation.ensure_valid_trash_location_for_transfer_v2(trash_location)
+        mock_validation.ensure_valid_tip_drop_location_for_transfer_v2(trash_location)
     ).then_return(trash_location.move(Point(1, 2, 3)))
     decoy.when(next_tiprack.uri).then_return("tiprack-uri")
     decoy.when(mock_instrument_core.get_pipette_name()).then_return("pipette-name")
@@ -1998,7 +1992,7 @@ def test_transfer_liquid_delegates_to_engine_core(
         source=[mock_well],
         dest=[mock_well],
         new_tip="never",
-        trash_location=trash_location,
+        tip_drop_location=trash_location,
     )
     decoy.verify(
         mock_instrument_core.transfer_liquid(

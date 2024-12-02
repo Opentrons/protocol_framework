@@ -1527,13 +1527,13 @@ def test_load_liquid_class(
     decoy.when(
         mock_engine_client.state.pipettes.get_model_name(subject.pipette_id)
     ).then_return("flex_1channel_50")
-    decoy.when(test_transfer_props.aspirate.as_schema_v1_model()).then_return(
+    decoy.when(test_transfer_props.aspirate.as_shared_data_model()).then_return(
         sample_aspirate_data
     )
-    decoy.when(test_transfer_props.dispense.as_schema_v1_model()).then_return(
+    decoy.when(test_transfer_props.dispense.as_shared_data_model()).then_return(
         sample_single_dispense_data
     )
-    decoy.when(test_transfer_props.multi_dispense.as_schema_v1_model()).then_return(  # type: ignore[union-attr]
+    decoy.when(test_transfer_props.multi_dispense.as_shared_data_model()).then_return(  # type: ignore[union-attr]
         sample_multi_dispense_data
     )
     decoy.when(

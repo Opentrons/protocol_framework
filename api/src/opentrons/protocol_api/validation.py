@@ -644,7 +644,7 @@ def ensure_new_tip_policy(value: str) -> TransferTipPolicyV2:
     except ValueError:
         raise ValueError(
             f"'{value}' is invalid value for 'new_tip'."
-            f" Acceptable value is either 'never', 'once' or 'always'."
+            f" Acceptable value is either 'never', 'once', 'always' or 'per source'."
         )
 
 
@@ -668,8 +668,10 @@ def ensure_valid_flat_wells_list_for_transfer_v2(
     if isinstance(target, Well):
         return [target]
 
-    if isinstance(target, list) or isinstance(target, tuple):
-        if isinstance(target[0], list) or isinstance(target[0], tuple):
+    if isinstance(target, (list, tuple)):
+        if len(target) == 0:
+            raise ValueError("No target well(s) specified for transfer.")
+        if isinstance(target[0], (list, tuple)):
             for sub_sequence in target:
                 _verify_each_list_element_is_valid_location(sub_sequence)
             return [loc for sub_sequence in target for loc in sub_sequence]
@@ -684,18 +686,20 @@ def ensure_valid_flat_wells_list_for_transfer_v2(
         )
 
 
-def ensure_valid_trash_location_for_transfer_v2(
-    trash_location: Union[Location, Well, TrashBin, WasteChute]
+def ensure_valid_tip_drop_location_for_transfer_v2(
+    tip_drop_location: Union[Location, Well, TrashBin, WasteChute]
 ) -> Union[Location, Well, TrashBin, WasteChute]:
-    """Ensure that the trash location is valid for v2 transfer."""
+    """Ensure that the tip drop location is valid for v2 transfer."""
+    from .labware import Well
+
     if (
-        isinstance(trash_location, Well)
-        or isinstance(trash_location, TrashBin)
-        or isinstance(trash_location, WasteChute)
+        isinstance(tip_drop_location, Well)
+        or isinstance(tip_drop_location, TrashBin)
+        or isinstance(tip_drop_location, WasteChute)
     ):
-        return trash_location
-    elif isinstance(trash_location, Location):
-        _, maybe_well = trash_location.labware.get_parent_labware_and_well()
+        return tip_drop_location
+    elif isinstance(tip_drop_location, Location):
+        _, maybe_well = tip_drop_location.labware.get_parent_labware_and_well()
 
         if maybe_well is None:
             raise TypeError(
@@ -703,13 +707,13 @@ def ensure_valid_trash_location_for_transfer_v2(
                 " (for instance, as the result of a call to `Well.top()`),"
                 " it must be a location relative to a well,"
                 " since that is where a tip is dropped."
-                f" However, the given location refers to {trash_location.labware}"
+                " However, the given location doesn't refer to any well."
             )
-        return trash_location
+        return tip_drop_location
     else:
         raise TypeError(
             f"If specified, location should be an instance of"
             f" `types.Location` (e.g. the return value from `Well.top()`)"
-            f" or `Well` (e.g. `tiprack.wells()[0]`) or an instance of `TrashBin` or `WasteChute`."
-            f" However, it is {trash_location}."
+            f" or `Well` (e.g. `reservoir.wells()[0]`) or an instance of `TrashBin` or `WasteChute`."
+            f" However, it is '{tip_drop_location}'."
         )

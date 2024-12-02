@@ -879,9 +879,9 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             liquidClassName=liquid_class.name,
             pipetteModel=self.get_model(),  # TODO: verify this is the correct 'model' to use
             tiprack=tiprack_uri,
-            aspirate=transfer_props.aspirate.as_schema_v1_model(),
-            singleDispense=transfer_props.dispense.as_schema_v1_model(),
-            multiDispense=transfer_props.multi_dispense.as_schema_v1_model()
+            aspirate=transfer_props.aspirate.as_shared_data_model(),
+            singleDispense=transfer_props.dispense.as_shared_data_model(),
+            multiDispense=transfer_props.multi_dispense.as_shared_data_model()
             if transfer_props.multi_dispense
             else None,
         )

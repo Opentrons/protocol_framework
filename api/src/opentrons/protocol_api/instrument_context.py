@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from contextlib import ExitStack
-from typing import Any, List, Optional, Sequence, Union, cast, Dict, Literal
+from typing import Any, List, Optional, Sequence, Union, cast, Dict
 from opentrons_shared_data.errors.exceptions import (
     CommandPreconditionViolated,
     CommandParameterLimitViolated,
@@ -39,7 +39,10 @@ from ._nozzle_layout import NozzleLayout
 from ._liquid import LiquidClass
 from . import labware, validation
 from ..config import feature_flags
-from ..protocols.advanced_control.transfers.common import TransferTipPolicyV2
+from ..protocols.advanced_control.transfers.common import (
+    TransferTipPolicyV2,
+    TransferTipPolicyV2Type,
+)
 
 _DEFAULT_ASPIRATE_CLEARANCE = 1.0
 _DEFAULT_DISPENSE_CLEARANCE = 1.0
@@ -1517,10 +1520,10 @@ class InstrumentContext(publisher.CommandPublisher):
         dest: Union[
             labware.Well, Sequence[labware.Well], Sequence[Sequence[labware.Well]]
         ],
-        new_tip: Literal["once", "always", "never"] = "once",
-        trash_location: Optional[
+        new_tip: TransferTipPolicyV2Type = "once",
+        tip_drop_location: Optional[
             Union[types.Location, labware.Well, TrashBin, WasteChute]
-        ] = None,
+        ] = None,  # Maybe call this 'tip_drop_location' which is similar to PD
     ) -> InstrumentContext:
         """Transfer liquid from source to dest using the specified liquid class properties.
 
@@ -1536,14 +1539,14 @@ class InstrumentContext(publisher.CommandPublisher):
         flat_sources_list = validation.ensure_valid_flat_wells_list_for_transfer_v2(
             source
         )
-        flat_dest_list = validation.ensure_valid_flat_wells_list_for_transfer_v2(dest)
-        for well in flat_sources_list + flat_dest_list:
+        flat_dests_list = validation.ensure_valid_flat_wells_list_for_transfer_v2(dest)
+        for well in flat_sources_list + flat_dests_list:
             instrument.validate_takes_liquid(
                 location=well.top(),
                 reject_module=True,
                 reject_adapter=True,
             )
-        if len(flat_sources_list) != len(flat_dest_list):
+        if len(flat_sources_list) != len(flat_dests_list):
             raise ValueError(
                 "Sources and destinations should be of the same length in order to perform a transfer."
                 " To transfer liquid from one source to many destinations, use 'distribute_liquid',"
@@ -1575,17 +1578,19 @@ class InstrumentContext(publisher.CommandPublisher):
             )
 
         _trash_location: Union[types.Location, labware.Well, TrashBin, WasteChute]
-        if trash_location is None:
+        if tip_drop_location is None:
             saved_trash = self.trash_container
             if isinstance(saved_trash, labware.Labware):
                 _trash_location = saved_trash.wells()[0]
             else:
                 _trash_location = saved_trash
         else:
-            _trash_location = trash_location
+            _trash_location = tip_drop_location
 
-        checked_trash_location = validation.ensure_valid_trash_location_for_transfer_v2(
-            trash_location=_trash_location
+        checked_trash_location = (
+            validation.ensure_valid_tip_drop_location_for_transfer_v2(
+                tip_drop_location=_trash_location
+            )
         )
         liquid_class_id = self._core.load_liquid_class(
             liquid_class=liquid_class,
@@ -1597,7 +1602,7 @@ class InstrumentContext(publisher.CommandPublisher):
             liquid_class_id=liquid_class_id,
             volume=volume,
             source=[well._core for well in flat_sources_list],
-            dest=[well._core for well in flat_dest_list],
+            dest=[well._core for well in flat_dests_list],
             new_tip=valid_new_tip,
             trash_location=checked_trash_location._core
             if isinstance(checked_trash_location, labware.Well)
