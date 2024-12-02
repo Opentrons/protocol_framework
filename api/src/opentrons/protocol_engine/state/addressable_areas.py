@@ -14,7 +14,6 @@ from opentrons.types import Point, DeckSlotName
 
 from ..commands import (
     Command,
-    LoadModuleResult,
     MoveLabwareResult,
 )
 from ..errors import (
@@ -224,9 +223,6 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
             location = command.params.newLocation
             if isinstance(location, (DeckSlotLocation, AddressableAreaLocation)):
                 self._add_addressable_area(location)
-
-        elif isinstance(command.result, LoadModuleResult):
-            self._add_addressable_area(command.params.location)
 
     @staticmethod
     def _get_addressable_areas_from_deck_configuration(

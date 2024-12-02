@@ -25,14 +25,12 @@ from opentrons.protocol_engine.state.addressable_areas import (
 from opentrons.protocol_engine.types import (
     DeckType,
     DeckConfigurationType,
-    ModuleModel,
     LabwareMovementStrategy,
     DeckSlotLocation,
     AddressableAreaLocation,
 )
 
 from .command_fixtures import (
-    create_load_module_command,
     create_move_labware_command,
 )
 
@@ -176,14 +174,6 @@ def test_initial_state(
     ("command", "expected_area"),
     (
         (
-            create_load_module_command(
-                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
-                module_id="test-module-id",
-                model=ModuleModel.TEMPERATURE_MODULE_V2,
-            ),
-            "A1",
-        ),
-        (
             create_move_labware_command(
                 new_location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
                 strategy=LabwareMovementStrategy.USING_GRIPPER,
@@ -240,14 +230,6 @@ def test_addressable_area_usage_in_simulation(
 @pytest.mark.parametrize(
     ("command", "expected_area"),
     (
-        (
-            create_load_module_command(
-                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
-                module_id="test-module-id",
-                model=ModuleModel.TEMPERATURE_MODULE_V2,
-            ),
-            "A1",
-        ),
         (
             create_move_labware_command(
                 new_location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),

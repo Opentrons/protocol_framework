@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING, Optional, Type
 from typing_extensions import Literal
 from pydantic import BaseModel, Field
 
+from opentrons.protocol_engine.state.update_types import StateUpdate
+
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ..errors.error_occurrence import ErrorOccurrence
 from ..types import (
@@ -116,6 +118,8 @@ class LoadModuleImplementation(
 
     async def execute(self, params: LoadModuleParams) -> SuccessData[LoadModuleResult]:
         """Check that the requested module is attached and assign its identifier."""
+        state_update = StateUpdate()
+
         module_type = params.model.as_type()
         self._ensure_module_location(params.location.slotName, module_type)
 
@@ -123,13 +127,21 @@ class LoadModuleImplementation(
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
                 params.location.slotName.id
             )
+            state_update.set_addressable_area_used(
+                addressable_area_name=params.location.slotName.id
+            )
         else:
-            addressable_area = self._state_view.modules.ensure_and_convert_module_fixture_location(
-                deck_slot=params.location.slotName,
-                model=params.model,
+            addressable_area = (
+                self._state_view.modules.ensure_and_convert_module_fixture_location(
+                    deck_slot=params.location.slotName,
+                    model=params.model,
+                )
             )
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
                 addressable_area
+            )
+            state_update.set_addressable_area_used(
+                addressable_area_name=addressable_area
             )
 
         verified_location = self._state_view.geometry.ensure_location_not_occupied(
@@ -156,6 +168,7 @@ class LoadModuleImplementation(
                 model=loaded_module.definition.model,
                 definition=loaded_module.definition,
             ),
+            state_update=state_update,
         )
 
     def _ensure_module_location(
