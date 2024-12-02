@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled, { css } from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
@@ -91,6 +91,16 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
     setPipetteVolume(null)
   }
 
+  const ref = useRef<HTMLDivElement | null>(null)
+
+  const handleScrollToBottom = (): void => {
+    if (ref.current != null) {
+      ref.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      })
+    }
+  }
   //  initialize pipette name once all fields are filled out
   useEffect(() => {
     if (
@@ -106,6 +116,10 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
     }
   }, [pipetteType, pipetteGen, pipetteVolume, selectedPipetteName])
 
+  useEffect(() => {
+    handleScrollToBottom()
+  }, [pipetteType, pipetteVolume, pipetteGen])
+
   const noPipette =
     (pipettesByMount.left.pipetteName == null ||
       pipettesByMount.left.tiprackDefURI == null) &&
@@ -114,7 +128,8 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
 
   const isDisabled =
     (page === 'add' && pipettesByMount[defaultMount].tiprackDefURI == null) ||
-    noPipette
+    noPipette ||
+    selectedValues.length === 0
 
   const targetPipetteMount =
     pipettesByMount.left.pipetteName == null ||
@@ -186,6 +201,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
               flexDirection={DIRECTION_COLUMN}
               overflowY={OVERFLOW_AUTO}
               gridGap={SPACING.spacing32}
+              ref={ref}
             >
               <Flex
                 flexDirection={DIRECTION_COLUMN}

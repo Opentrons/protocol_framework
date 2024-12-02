@@ -935,16 +935,30 @@ def test_get_commands_slice_current_run(
     assert expected_command_slice == result
 
 
-def test_get_commands_errors_slice__not_current_run_raises(
+def test_get_commands_errors_slice_historical_run(
     decoy: Decoy,
     subject: RunDataManager,
     mock_run_orchestrator_store: RunOrchestratorStore,
+    mock_run_store: RunStore,
 ) -> None:
     """Should get a sliced command error list from engine store."""
+    expected_commands_errors_result = [
+        ErrorOccurrence.construct(id="error-id")  # type: ignore[call-arg]
+    ]
+
+    command_error_slice = CommandErrorSlice(
+        cursor=1, total_length=3, commands_errors=expected_commands_errors_result
+    )
+
     decoy.when(mock_run_orchestrator_store.current_run_id).then_return("run-not-id")
 
-    with pytest.raises(RunNotCurrentError):
-        subject.get_command_error_slice("run-id", 1, 2)
+    decoy.when(mock_run_store.get_commands_errors_slice("run-id", 2, 1)).then_return(
+        command_error_slice
+    )
+
+    result = subject.get_command_error_slice("run-id", 1, 2)
+
+    assert command_error_slice == result
 
 
 def test_get_commands_errors_slice_current_run(
@@ -1240,7 +1254,7 @@ async def test_get_current_run_labware_definition(
     ]
 
 
-async def test_create_policies_raises_run_not_current(
+async def test_set_error_recovery_rules_raises_run_not_current(
     decoy: Decoy,
     mock_run_orchestrator_store: RunOrchestratorStore,
     subject: RunDataManager,
@@ -1255,7 +1269,7 @@ async def test_create_policies_raises_run_not_current(
         )
 
 
-async def test_create_policies_translates_and_calls_orchestrator(
+async def test_set_error_recovery_rules_translates_and_calls_orchestrator(
     decoy: Decoy,
     mock_run_orchestrator_store: RunOrchestratorStore,
     mock_error_recovery_setting_store: ErrorRecoverySettingStore,
@@ -1280,6 +1294,34 @@ async def test_create_policies_translates_and_calls_orchestrator(
     decoy.verify(
         mock_run_orchestrator_store.set_error_recovery_policy(sentinel.expected_output)
     )
+
+
+async def test_get_error_recovery_rules(
+    decoy: Decoy,
+    mock_run_orchestrator_store: RunOrchestratorStore,
+    subject: RunDataManager,
+) -> None:
+    """It should return the current run's previously-set list of error recovery rules."""
+    # Before there has been any current run, it should raise an exception.
+    with pytest.raises(RunNotCurrentError):
+        subject.get_error_recovery_rules(run_id="whatever")
+
+    # While there is a current run, it should return its list of rules.
+    decoy.when(mock_run_orchestrator_store.current_run_id).then_return(
+        sentinel.current_run_id
+    )
+    subject.set_error_recovery_rules(
+        run_id=sentinel.current_run_id, rules=sentinel.input_rules
+    )
+    assert (
+        subject.get_error_recovery_rules(run_id=sentinel.current_run_id)
+        == sentinel.input_rules
+    )
+
+    # When the run stops being current, it should go back to raising.
+    decoy.when(mock_run_orchestrator_store.current_run_id).then_return(None)
+    with pytest.raises(RunNotCurrentError):
+        subject.get_error_recovery_rules(run_id="whatever")
 
 
 def test_get_nozzle_map_current_run(

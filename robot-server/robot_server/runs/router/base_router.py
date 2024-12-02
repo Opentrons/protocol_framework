@@ -75,7 +75,6 @@ from ..dependencies import (
     get_run_auto_deleter,
     get_quick_transfer_run_auto_deleter,
 )
-from ..error_recovery_models import ErrorRecoveryPolicy
 
 from robot_server.deck_configuration.fastapi_dependencies import (
     get_deck_configuration_store,
@@ -440,47 +439,6 @@ async def update_run(
 
 
 @PydanticResponse.wrap_route(
-    base_router.put,
-    path="/runs/{runId}/errorRecoveryPolicy",
-    summary="Set a run's error recovery policy",
-    description=dedent(
-        """
-        Update how to handle different kinds of command failures.
-
-        For this to have any effect, error recovery must also be enabled globally.
-        See `PATCH /errorRecovery/settings`.
-        """
-    ),
-    responses={
-        status.HTTP_200_OK: {"model": SimpleEmptyBody},
-        status.HTTP_409_CONFLICT: {"model": ErrorBody[RunStopped]},
-    },
-)
-async def put_error_recovery_policy(
-    runId: str,
-    request_body: RequestModel[ErrorRecoveryPolicy],
-    run_data_manager: Annotated[RunDataManager, Depends(get_run_data_manager)],
-) -> PydanticResponse[SimpleEmptyBody]:
-    """Create run polices.
-
-    Arguments:
-        runId: Run ID pulled from URL.
-        request_body:  Request body with run policies data.
-        run_data_manager: Current and historical run data management.
-    """
-    rules = request_body.data.policyRules
-    try:
-        run_data_manager.set_error_recovery_rules(run_id=runId, rules=rules)
-    except RunNotCurrentError as e:
-        raise RunStopped(detail=str(e)).as_error(status.HTTP_409_CONFLICT) from e
-
-    return await PydanticResponse.create(
-        content=SimpleEmptyBody.construct(),
-        status_code=status.HTTP_200_OK,
-    )
-
-
-@PydanticResponse.wrap_route(
     base_router.get,
     path="/runs/{runId}/commandErrors",
     summary="Get a list of all command errors in the run",
@@ -527,14 +485,13 @@ async def get_run_commands_error(
         run_data_manager: Run data retrieval interface.
     """
     try:
-        all_errors = run_data_manager.get_command_errors(run_id=runId)
-        total_length = len(all_errors)
+        all_errors_count = run_data_manager.get_command_errors_count(run_id=runId)
 
         if cursor is None:
-            if len(all_errors) > 0:
+            if all_errors_count > 0:
                 # Get the most recent error,
                 # which we can find just at the end of the list.
-                cursor = total_length - 1
+                cursor = all_errors_count - 1
             else:
                 cursor = 0
 

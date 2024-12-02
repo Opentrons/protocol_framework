@@ -117,12 +117,17 @@ class FlexStacker:
         """Constructor."""
         self._simulating = simulating
         if not self._simulating:
-            self._serial = serial.Serial(port, baudrate=STACKER_FREQ)
+            self._serial = serial.Serial(port, baudrate=STACKER_FREQ, timeout=60)
 
-    def _send_and_recv(self, msg: str, guard_ret: str = "") -> str:
+    def _send_and_recv(
+        self, msg: str, guard_ret: str = "", response_required: bool = True
+    ) -> str:
         """Internal utility to send a command and receive the response."""
         assert not self._simulating
+        self._serial.reset_input_buffer()
         self._serial.write(msg.encode())
+        if not response_required:
+            return "OK\n"
         ret = self._serial.readline()
         if guard_ret:
             if not ret.startswith(guard_ret.encode()):
@@ -154,6 +159,12 @@ class FlexStacker:
         if self._simulating:
             return
         self._send_and_recv(f"M996 {sn}\n", "M996 OK")
+
+    def stop_motor(self) -> None:
+        """Stop motor movement."""
+        if self._simulating:
+            return
+        self._send_and_recv("M0\n", response_required=False)
 
     def get_limit_switch(self, axis: StackerAxis, direction: Direction) -> bool:
         """Get limit switch status.
@@ -243,4 +254,5 @@ class FlexStacker:
     def __del__(self) -> None:
         """Close serial port."""
         if not self._simulating:
+            self.stop_motor()
             self._serial.close()

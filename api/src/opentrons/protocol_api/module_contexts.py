@@ -608,7 +608,7 @@ class ThermocyclerContext(ModuleContext):
         .. note::
 
             The Thermocycler will proceed to the next command immediately after
-            ``temperature`` has been reached.
+            ``temperature`` is reached.
 
         """
         self._core.set_target_lid_temperature(celsius=temperature)
@@ -625,28 +625,18 @@ class ThermocyclerContext(ModuleContext):
         """Execute a Thermocycler profile, defined as a cycle of
         ``steps``, for a given number of ``repetitions``.
 
-        :param steps: List of unique steps that make up a single cycle.
-                      Each list item should be a dictionary that maps to
-                      the parameters of the :py:meth:`set_block_temperature`
-                      method with a ``temperature`` key, and either or both of
+        :param steps: List of steps that make up a single cycle.
+                      Each list item should be a dictionary that maps to the parameters
+                      of the :py:meth:`set_block_temperature` method. The dictionary's
+                      keys must be ``temperature`` and one or both of
                       ``hold_time_seconds`` and ``hold_time_minutes``.
         :param repetitions: The number of times to repeat the cycled steps.
         :param block_max_volume: The greatest volume of liquid contained in any
                                  individual well of the loaded labware, in µL.
                                  If not specified, the default is 25 µL.
 
-        .. note::
-
-            Unlike with :py:meth:`set_block_temperature`, either or both of
-            ``hold_time_minutes`` and ``hold_time_seconds`` must be defined
-            and for each step.
-
-        .. note::
-
-            Before API Version 2.21, Thermocycler profiles run with this command
-            would be listed in the app as having a number of repetitions equal to
-            their step count. At or above API Version 2.21, the structure of the
-            Thermocycler cycles is preserved.
+        .. versionchanged:: 2.21
+            Fixed run log listing number of steps instead of number of repetitions.
 
         """
         repetitions = validation.ensure_thermocycler_repetition_count(repetitions)

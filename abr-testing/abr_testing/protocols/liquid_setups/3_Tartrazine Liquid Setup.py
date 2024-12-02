@@ -1,11 +1,11 @@
-"""Plate Filler Protocol for Simple Normalize Long."""
+"""Plate Filler Protocol for Tartrazine Protocol."""
 from opentrons import protocol_api
 from abr_testing.protocols.helpers import (
     load_common_liquid_setup_labware_and_instruments,
 )
 
 metadata = {
-    "protocolName": "DVT1ABR3 Liquids: Flex Normalize with Tubes",
+    "protocolName": "DVT1ABR3 Liquids: Tartrazine Protocol",
     "author": "Rhyann clarke <rhyann.clarke@opentrons.com>",
     "source": "Protocol Library",
 }
@@ -32,9 +32,16 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     )
     # Transfer Liquid
     p1000.transfer(
-        4000,
+        45000,
         source_reservoir["A1"],
-        reagent_tube["A1"].top(),
+        reagent_tube["B3"].top(),
+        blowout=True,
+        blowout_location="source well",
+    )
+    p1000.transfer(
+        45000,
+        source_reservoir["A1"],
+        reagent_tube["A4"].top(),
         blowout=True,
         blowout_location="source well",
     )

@@ -13,15 +13,15 @@
         "title": "Dispense volume will overflow a destination well"
       },
       "BELOW_PIPETTE_MINIMUM_VOLUME": {
-        "title": "Transfer volume is below pipette minimum ({{min}} uL)",
+        "title": "Transfer volume is below pipette minimum ({{min}} µL)",
         "body": "Pipettes cannot accurately handle volumes below their minimum. "
       },
       "BELOW_MIN_AIR_GAP_VOLUME": {
-        "title": "Air gap volume is below pipette minimum ({{min}} uL)",
+        "title": "Air gap volume is below pipette minimum ({{min}} µL)",
         "body": "Pipettes cannot accurately handle volumes below their minimum. "
       },
       "BELOW_MIN_DISPOSAL_VOLUME": {
-        "title": "Disposal volume is below recommended minimum ({{min}} uL)",
+        "title": "Disposal volume is below recommended minimum ({{min}} µL)",
         "body": "For accuracy in multi-dispense Transfers we recommend you use a disposal volume of at least the pipette's minimum. Read more ",
         "link": "here"
       }

@@ -149,7 +149,6 @@ export function CurrentRunningProtocolCommand({
 }: CurrentRunningProtocolCommandProps): JSX.Element | null {
   const { t } = useTranslation('run_details')
   const { data: mostRecentCommandData } = useNotifyAllCommandsQuery(runId, {
-    cursor: null,
     pageLength: 1,
   })
 

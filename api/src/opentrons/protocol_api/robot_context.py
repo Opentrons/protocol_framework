@@ -144,11 +144,13 @@ class RobotContext(publisher.CommandPublisher):
         )
         self._core.move_axes_relative(axis_map, speed)
 
-    def close_gripper_jaw(self, force: float) -> None:
-        raise NotImplementedError()
+    def close_gripper_jaw(self, force: Optional[float] = None) -> None:
+        """Command the gripper closed with some force."""
+        self._core.close_gripper(force)
 
     def open_gripper_jaw(self) -> None:
-        raise NotImplementedError()
+        """Command the gripper open."""
+        self._core.release_grip()
 
     def axis_coordinates_for(
         self,

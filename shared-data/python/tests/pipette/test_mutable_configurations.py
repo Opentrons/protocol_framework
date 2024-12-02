@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from pathlib import Path
 from typing import Dict, Any, cast, Union, Generator
@@ -68,9 +69,8 @@ def test_load_old_overrides_regression(
         "type": "float",
         "default": 0.1,
     }
-    json.dump(
-        TMPFILE_DATA, open(override_configuration_path / "P20SV222021040709.json", "w")
-    )
+    with open(override_configuration_path / "P20SV222021040709.json", "w") as f:
+        json.dump(TMPFILE_DATA, f)
     configs = mutable_configurations.load_with_mutable_configurations(
         pipette_definition.PipetteModelVersionType(
             pipette_type=types.PipetteModelType.p20,
@@ -305,3 +305,159 @@ def test_build_mutable_config_using_old_units() -> None:
     assert (
         types.MutableConfig.build(**old_units_config, name="dropTipSpeed") is not None  # type: ignore
     )
+
+
+@pytest.mark.parametrize(
+    ("filename", "type", "channels", "version", "file_contents"),
+    # From https://opentrons.atlassian.net/browse/RQA-3676.
+    # These could probably be pared down.
+    [
+        (
+            "P20MV202020121412.json",
+            types.PipetteModelType.p20,
+            types.PipetteChannelType.EIGHT_CHANNEL,
+            types.PipetteVersionType(2, 0),
+            '{"model": "p20_multi_v2.0"}',
+        ),
+        (
+            "P3HSV1318071638.json",
+            types.PipetteModelType.p300,
+            types.PipetteChannelType.SINGLE_CHANNEL,
+            types.PipetteVersionType(1, 3),
+            '{"dropTipShake": true, "model": "p300_single_v1.3", "quirks": {"dropTipShake": true}, "top": {"value": 30.0, "default": 19.5, "units": "mm", "type": "float", "min": -20, "max": 30}, "pickUpPresses": {"value": 3.0, "default": 3, "units": "presses", "type": "int", "min": 0, "max": 15}}',
+        ),
+        (
+            "P3HMV212021040004.json",
+            types.PipetteModelType.p300,
+            types.PipetteChannelType.EIGHT_CHANNEL,
+            types.PipetteVersionType(2, 1),
+            '{"needsUnstick": true, "model": "p300_multi_v2.1"}',
+        ),
+        (
+            "P20SV202020032604.json",
+            types.PipetteModelType.p20,
+            types.PipetteChannelType.SINGLE_CHANNEL,
+            types.PipetteVersionType(2, 0),
+            '{"model": "p20_single_v2.0"}',
+        ),
+        (
+            "P1KSV202019072441.json",
+            types.PipetteModelType.p1000,
+            types.PipetteChannelType.SINGLE_CHANNEL,
+            types.PipetteVersionType(2, 0),
+            '{"pickupTipShake": true, "model": "p1000_single_v2.0", "quirks": {"pickupTipShake": true}}',
+        ),
+        (
+            "P3HMV202021011105.json",
+            types.PipetteModelType.p300,
+            types.PipetteChannelType.EIGHT_CHANNEL,
+            types.PipetteVersionType(2, 0),
+            '{"needsUnstick": true, "model": "p300_multi_v2.0"}',
+        ),
+        (
+            "P20SV202019072527.json",
+            types.PipetteModelType.p20,
+            types.PipetteChannelType.SINGLE_CHANNEL,
+            types.PipetteVersionType(2, 0),
+            '{"model": "p20_single_v2.0"}',
+        ),
+        (
+            "P3HSV202021042602.json",
+            types.PipetteModelType.p300,
+            types.PipetteChannelType.SINGLE_CHANNEL,
+            types.PipetteVersionType(2, 0),
+            '{"model": "p300_single_v2.0"}',
+        ),
+        (
+            "P20SV222021030914.json",
+            types.PipetteModelType.p20,
+            types.PipetteChannelType.SINGLE_CHANNEL,
+            types.PipetteVersionType(2, 2),
+            '{"model": "p20_single_v2.2", "quirks": {}, "pickUpPresses": {"value": 3.0, "default": 1, "units": "presses", "type": "int", "min": 0, "max": 15}}',
+        ),
+        (
+            "P3HMV202020040801.json",
+            types.PipetteModelType.p300,
+            types.PipetteChannelType.EIGHT_CHANNEL,
+            types.PipetteVersionType(2, 0),
+            '{"needsUnstick": true, "model": "p300_multi_v2.0", "quirks": {"needsUnstick": true}, "top": {"value": 20.0, "default": 19.5, "units": "mm", "type": "float", "min": -20, "max": 30}, "bottom": {"value": -14.0, "default": -14.5, "units": "mm", "type": "float", "min": -20, "max": 30}, "blowout": {"value": -18.5, "default": -19.0, "units": "mm", "type": "float", "min": -20, "max": 30}, "dropTip": {"value": -20.0, "default": -33.4, "units": "mm", "type": "float", "min": -20, "max": 30}, "pickUpCurrent": {"value": 0.9, "default": 0.8, "units": "amps", "type": "float", "min": 0.1, "max": 2.0}, "pickUpDistance": {"value": 10.0, "default": 11.0, "units": "mm", "type": "float", "min": 0, "max": 10}, "pickUpIncrement": {"value": 0.1, "default": 0.0, "units": "mm", "type": "int", "min": 0, "max": 10}, "pickUpPresses": {"value": 4.0, "default": 1, "units": "presses", "type": "int", "min": 0, "max": 15}, "pickUpSpeed": {"value": 11.0, "default": 10.0, "units": "mm/s", "type": "float", "min": 0.01, "max": 30}, "plungerCurrent": {"value": 1.1, "default": 1.0, "units": "amps", "type": "float", "min": 0.1, "max": 2.0}, "dropTipCurrent": {"value": 1.22, "default": 1.25, "units": "amps", "type": "float", "min": 0.1, "max": 2.0}, "dropTipSpeed": {"value": 8.0, "default": 7.5, "units": "mm/s", "type": "float", "min": 0.01, "max": 30}, "tipLength": {"value": 52.0, "default": 51.0, "units": "mm", "type": "float", "min": 0, "max": 100}}',
+        ),
+        (
+            "P3HMV212021040002.json",
+            types.PipetteModelType.p300,
+            types.PipetteChannelType.EIGHT_CHANNEL,
+            types.PipetteVersionType(2, 1),
+            '{"needsUnstick": true, "model": "p300_multi_v2.1"}',
+        ),
+        (
+            "P3HMV1318072625.json",
+            types.PipetteModelType.p300,
+            types.PipetteChannelType.EIGHT_CHANNEL,
+            types.PipetteVersionType(1, 3),
+            '{"dropTipShake": true, "model": "p300_multi_v1.3", "quirks": {"dropTipShake": true}, "pickUpPresses": {"value": 4.0, "default": 3, "units": "presses", "type": "int", "min": 0, "max": 15}}',
+        ),
+        (
+            "P50MV1519091757.json",
+            types.PipetteModelType.p50,
+            types.PipetteChannelType.EIGHT_CHANNEL,
+            types.PipetteVersionType(1, 5),
+            '{"dropTipShake": true, "doubleDropTip": true, "model": "p50_multi_v1.5", "quirks": {"doubleDropTip": true, "dropTipShake": true}}',
+        ),
+        (
+            "P3HSV202019072224.json",
+            types.PipetteModelType.p300,
+            types.PipetteChannelType.SINGLE_CHANNEL,
+            types.PipetteVersionType(2, 0),
+            '{"model": "p300_single_v2.0", "quirks": {}}',
+        ),
+        (
+            "P20MV202019112708.json",
+            types.PipetteModelType.p20,
+            types.PipetteChannelType.EIGHT_CHANNEL,
+            types.PipetteVersionType(2, 0),
+            '{"model": "p20_multi_v2.0", "quirks": {}}',
+        ),
+        (
+            "P3HSV202021031503.json",
+            types.PipetteModelType.p300,
+            types.PipetteChannelType.SINGLE_CHANNEL,
+            types.PipetteVersionType(2, 1),
+            '{"model": "p300_single_v2.1"}',
+        ),
+        (
+            "P1KSV202020060206.json",
+            types.PipetteModelType.p1000,
+            types.PipetteChannelType.SINGLE_CHANNEL,
+            types.PipetteVersionType(2, 0),
+            '{"pickupTipShake": true, "model": "p1000_single_v2.0"}',
+        ),
+        (
+            "P3HMV202021010906.json",
+            types.PipetteModelType.p300,
+            types.PipetteChannelType.EIGHT_CHANNEL,
+            types.PipetteVersionType(2, 0),
+            '{"needsUnstick": true, "model": "p300_multi_v2.0"}',
+        ),
+    ],
+)
+def test_loading_does_not_log_warnings(
+    filename: str,
+    type: types.PipetteModelType,
+    channels: types.PipetteChannelType,
+    version: types.PipetteVersionType,
+    file_contents: str,
+    caplog: pytest.LogCaptureFixture,
+    override_configuration_path: Path,
+) -> None:
+    """Make sure load_with_mutable_configurations() doesn't log any exceptions.
+
+    load_with_mutable_configurations() suppresses and logs internal exceptions to
+    protect its caller, but those are still bugs, and we still want tests to catch them.
+    """
+    model = pipette_definition.PipetteModelVersionType(type, channels, version)
+    (override_configuration_path / filename).write_text(file_contents)
+    with caplog.at_level(logging.WARNING):
+        mutable_configurations.load_with_mutable_configurations(
+            model, override_configuration_path, Path(filename).stem
+        )
+    assert len(caplog.records) == 0

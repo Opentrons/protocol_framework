@@ -570,6 +570,7 @@ Total number of labware: 73
 - Well count: 96
 - Max volume: 2.4 mL
 - Well shape: U-bottom
+  </Opentrons Standard Labware Catalog>
 
 <Pipettes with volume>
     <Opentrons OT-2 Loadnames>
@@ -597,3 +598,38 @@ Total number of labware: 73
       - volume: 5–1000 µL
 
 </Pipettes with volume>
+
+<Modules>
+<Temperature Module GEN1>
+ - Loadname: `temperature module` or `tempdeck`
+ - Introduced in API Version: 2.0
+
+<Temperature Module GEN2>
+- Loadname: `temperature module gen2`
+- Introduced in API Version: 2.3
+
+<Magnetic Module GEN1>
+- Loadname: `magnetic module` or `magdeck`
+- Introduced in API Version: 2.0
+
+<Magnetic Module GEN2>
+- Loadname: `magnetic module gen2`
+- Introduced in API Version: 2.3
+
+<Thermocycler Module GEN1>
+- Loadname: `thermocycler module` or `thermocycler`
+- Introduced in API Version: 2.0
+
+<Thermocycler Module GEN2>
+- Loadname: `thermocycler module gen2` or `thermocyclerModuleV2`
+- Introduced in API Version: 2.13
+
+<Heater-Shaker Module GEN1>
+- Loadname: `heaterShakerModuleV1`
+- Introduced in API Version: 2.13
+
+<Magnetic Block GEN1>
+- Loadname: `magneticBlockV1`
+- Introduced in API Version: 2.15
+
+</Modules>
