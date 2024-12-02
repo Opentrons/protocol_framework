@@ -19,6 +19,7 @@ import {
   IgnoreErrorSkipStep,
   ManualMoveLwAndSkip,
   ManualReplaceLwAndRetry,
+  HomeAndRetry,
 } from './RecoveryOptions'
 import {
   useErrorDetailsModal,
@@ -225,6 +226,10 @@ export function ErrorRecoveryContent(props: RecoveryContentProps): JSX.Element {
     return <RecoveryDoorOpenSpecial {...props} />
   }
 
+  const buildHomeAndRetry = (): JSX.Element => {
+    return <HomeAndRetry {...props} />
+  }
+
   switch (props.recoveryMap.route) {
     case RECOVERY_MAP.OPTION_SELECTION.ROUTE:
       return buildSelectRecoveryOption()
@@ -264,6 +269,8 @@ export function ErrorRecoveryContent(props: RecoveryContentProps): JSX.Element {
       return buildRecoveryInProgress()
     case RECOVERY_MAP.ROBOT_DOOR_OPEN.ROUTE:
       return buildManuallyRouteToDoorOpen()
+    case RECOVERY_MAP.HOME_AND_RETRY.ROUTE:
+      return buildHomeAndRetry()
     default:
       return buildSelectRecoveryOption()
   }

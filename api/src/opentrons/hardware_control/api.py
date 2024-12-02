@@ -921,6 +921,16 @@ class API(
     async def disengage_axes(self, which: List[Axis]) -> None:
         await self._backend.disengage_axes([ot2_axis_to_string(ax) for ax in which])
 
+    def axis_is_present(self, axis: Axis) -> bool:
+        is_ot2 = axis in Axis.ot2_axes()
+        if not is_ot2:
+            return False
+        if axis in Axis.pipette_axes():
+            mount = Axis.to_ot2_mount(axis)
+            if self.attached_pipettes.get(mount) is None:
+                return False
+        return True
+
     @ExecutionManagerProvider.wait_for_running
     async def _fast_home(self, axes: Sequence[str], margin: float) -> Dict[str, float]:
         converted_axes = "".join(axes)

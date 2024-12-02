@@ -111,6 +111,11 @@ describe('useRecoveryOptionCopy', () => {
     screen.getByText('Manually replace labware on deck and retry step')
   })
 
+  it(`renders the correct copy for ${RECOVERY_MAP.HOME_AND_RETRY.ROUTE}`, () => {
+    render({ route: RECOVERY_MAP.HOME_AND_RETRY.ROUTE })
+    screen.getByText('Home gantry and retry step')
+  })
+
   it('renders "Unknown action" for an unknown recovery option', () => {
     render({ route: 'unknown_route' as RecoveryRoute })
 

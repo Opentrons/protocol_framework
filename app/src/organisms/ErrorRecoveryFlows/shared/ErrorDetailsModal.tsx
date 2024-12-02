@@ -67,6 +67,7 @@ export function ErrorDetailsModal(props: ErrorDetailsModalProps): JSX.Element {
       case ERROR_KINDS.OVERPRESSURE_WHILE_DISPENSING:
       case ERROR_KINDS.TIP_NOT_DETECTED:
       case ERROR_KINDS.GRIPPER_ERROR:
+      case ERROR_KINDS.STALL_OR_COLLISION:
         return true
       default:
         return false
@@ -213,6 +214,8 @@ export function NotificationBanner({
         return <TipNotDetectedBanner />
       case ERROR_KINDS.GRIPPER_ERROR:
         return <GripperErrorBanner />
+      case ERROR_KINDS.STALL_OR_COLLISION:
+        return <StallErrorBanner />
       default:
         console.error('Handle error kind notification banners explicitly.')
         return <div />
@@ -254,6 +257,18 @@ export function GripperErrorBanner(): JSX.Element {
       type="alert"
       heading={t('gripper_errors_occur_when')}
       message={t('if_issue_persists_gripper_error')}
+    />
+  )
+}
+
+export function StallErrorBanner(): JSX.Element {
+  const { t } = useTranslation('error_recovery')
+
+  return (
+    <InlineNotification
+      type="alert"
+      heading={t('stall_or_collision_detected_when')}
+      message={t('the_robot_must_return_to_home_position')}
     />
   )
 }
