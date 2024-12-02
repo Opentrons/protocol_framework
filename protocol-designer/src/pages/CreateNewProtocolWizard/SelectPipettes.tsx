@@ -67,7 +67,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
   const { makeSnackbar } = useKitchen()
   const allLabware = useSelector(getLabwareDefsByURI)
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
-  const [mount, setMount] = useState<PipetteMount | null>(null)
+  const [mount, setMount] = useState<PipetteMount>('left')
   const [page, setPage] = useState<'add' | 'overview'>('add')
   const [pipetteType, setPipetteType] = useState<PipetteType | null>(null)
   const [showIncompatibleTip, setIncompatibleTip] = useState<boolean>(false)
@@ -76,14 +76,13 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
   const allowAllTipracks = useSelector(getAllowAllTipracks)
   const allPipetteOptions = getAllPipetteNames('maxVolume', 'channels')
   const robotType = fields.robotType
-  const defaultMount = mount ?? 'left'
   const has96Channel = pipettesByMount.left.pipetteName === 'p1000_96'
   const selectedPipetteName =
     pipetteType === '96' || pipetteGen === 'GEN1'
       ? `${pipetteVolume}_${pipetteType}`
       : `${pipetteVolume}_${pipetteType}_${pipetteGen.toLowerCase()}`
 
-  const selectedValues = pipettesByMount[defaultMount].tiprackDefURI ?? []
+  const selectedValues = pipettesByMount[mount].tiprackDefURI ?? []
 
   const resetFields = (): void => {
     setPipetteType(null)
@@ -101,20 +100,6 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
       })
     }
   }
-  //  initialize pipette name once all fields are filled out
-  useEffect(() => {
-    if (
-      (pipetteType != null &&
-        pipetteVolume != null &&
-        robotType === FLEX_ROBOT_TYPE) ||
-      (robotType === OT2_ROBOT_TYPE && pipetteGen != null)
-    ) {
-      setValue(
-        `pipettesByMount.${defaultMount}.pipetteName`,
-        selectedPipetteName
-      )
-    }
-  }, [pipetteType, pipetteGen, pipetteVolume, selectedPipetteName])
 
   useEffect(() => {
     handleScrollToBottom()
@@ -127,9 +112,11 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
       pipettesByMount.right.tiprackDefURI == null)
 
   const isDisabled =
-    (page === 'add' && pipettesByMount[defaultMount].tiprackDefURI == null) ||
-    noPipette ||
-    selectedValues.length === 0
+    (page === 'add' &&
+      pipettesByMount[mount].tiprackDefURI == null &&
+      noPipette) ||
+    (pipettesByMount.left.tiprackDefURI == null &&
+      pipettesByMount.right.tiprackDefURI == null)
 
   const targetPipetteMount =
     pipettesByMount.left.pipetteName == null ||
@@ -143,6 +130,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
         proceed(1)
       } else {
         setPage('overview')
+        setValue(`pipettesByMount.${mount}.pipetteName`, selectedPipetteName)
       }
     }
   }
@@ -150,8 +138,8 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
   const handleGoBack = (): void => {
     if (page === 'add') {
       resetFields()
-      setValue(`pipettesByMount.${defaultMount}.pipetteName`, undefined)
-      setValue(`pipettesByMount.${defaultMount}.tiprackDefURI`, undefined)
+      setValue(`pipettesByMount.${mount}.pipetteName`, undefined)
+      setValue(`pipettesByMount.${mount}.tiprackDefURI`, undefined)
       if (
         pipettesByMount.left.pipetteName != null ||
         pipettesByMount.left.tiprackDefURI != null ||
@@ -174,6 +162,16 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
     }
   }, [location])
 
+  const hasAPipette =
+    (mount === 'left' && pipettesByMount.right.pipetteName != null) ||
+    (mount === 'right' && pipettesByMount.left.pipetteName != null)
+  let subHeader
+  if (page === 'add' && noPipette) {
+    subHeader = t('which_pipette')
+  } else if (page === 'add' && hasAPipette) {
+    subHeader = t('which_pipette_second')
+  }
+
   return (
     <>
       {showIncompatibleTip ? (
@@ -188,7 +186,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
           robotType={robotType}
           stepNumber={2}
           header={page === 'add' ? t('add_pipette') : t('robot_pipettes')}
-          subHeader={page === 'add' ? t('which_pipette') : undefined}
+          subHeader={subHeader}
           proceed={handleProceed}
           goBack={() => {
             handleGoBack()
@@ -213,8 +211,9 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                 <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
                   {PIPETTE_TYPES[robotType].map(type => {
                     return type.value === '96' &&
-                      (pipettesByMount.left.pipetteName != null ||
-                        pipettesByMount.right.pipetteName != null) ? null : (
+                      (mount === 'right' ||
+                        (mount === 'left' &&
+                          pipettesByMount.right.pipetteName != null)) ? null : (
                       <RadioButton
                         key={`${type.label}_${type.value}`}
                         onChange={() => {
@@ -222,11 +221,11 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                           setPipetteGen('flex')
                           setPipetteVolume(null)
                           setValue(
-                            `pipettesByMount.${defaultMount}.pipetteName`,
+                            `pipettesByMount.${mount}.pipetteName`,
                             undefined
                           )
                           setValue(
-                            `pipettesByMount.${defaultMount}.tiprackDefURI`,
+                            `pipettesByMount.${mount}.tiprackDefURI`,
                             undefined
                           )
                         }}
@@ -362,7 +361,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
 
                                     if (isCurrentlySelected) {
                                       setValue(
-                                        `pipettesByMount.${defaultMount}.tiprackDefURI`,
+                                        `pipettesByMount.${mount}.tiprackDefURI`,
                                         selectedValues.filter(v => v !== value)
                                       )
                                     } else {
@@ -375,7 +374,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                                         )
                                       } else {
                                         setValue(
-                                          `pipettesByMount.${defaultMount}.tiprackDefURI`,
+                                          `pipettesByMount.${mount}.tiprackDefURI`,
                                           [...selectedValues, value]
                                         )
                                       }
