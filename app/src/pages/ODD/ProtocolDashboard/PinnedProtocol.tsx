@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import styled, { css } from 'styled-components'
@@ -23,6 +23,7 @@ import { LongPressModal } from './LongPressModal'
 import { formatTimeWithUtcLabel } from '/app/resources/runs'
 import { useUpdatedLastRunTime } from './hooks'
 
+import type { Dispatch, SetStateAction } from 'react'
 import type { UseLongPressResult } from '@opentrons/components'
 import type { ProtocolResource } from '@opentrons/shared-data'
 
@@ -63,7 +64,7 @@ const cardStyleBySize: {
 
 interface PinnedProtocolProps {
   protocol: ProtocolResource
-  longPress: React.Dispatch<React.SetStateAction<boolean>>
+  longPress: Dispatch<SetStateAction<boolean>>
   setShowDeleteConfirmationModal: (showDeleteConfirmationModal: boolean) => void
   setTargetProtocolId: (targetProtocolId: string) => void
   cardSize?: CardSizeType
@@ -98,7 +99,7 @@ export function PinnedProtocol(props: PinnedProtocolProps): JSX.Element {
       navigate(`/protocols/${protocolId}`)
     }
   }
-  React.useEffect(() => {
+  useEffect(() => {
     if (longpress.isLongPressed) {
       longPress(true)
     }

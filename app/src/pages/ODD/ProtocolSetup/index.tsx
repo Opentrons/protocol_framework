@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect, useState } from 'react'
 import last from 'lodash/last'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
@@ -82,7 +82,14 @@ import {
   useProtocolAnalysisErrors,
 } from '/app/resources/runs'
 import { useScrollPosition } from '/app/local-resources/dom-utils'
+import {
+  getLabwareSetupItemGroups,
+  getProtocolUsesGripper,
+  useRequiredProtocolHardwareFromAnalysis,
+  useMissingProtocolHardwareFromAnalysis,
+} from '/app/transformations/commands'
 
+import type { Dispatch, SetStateAction } from 'react'
 import type { Run } from '@opentrons/api-client'
 import type { CutoutFixtureId, CutoutId } from '@opentrons/shared-data'
 import type { OnDeviceRouteParams } from '/app/App/types'
@@ -92,19 +99,13 @@ import type {
   ProtocolHardware,
   ProtocolFixture,
 } from '/app/transformations/commands'
-import {
-  getLabwareSetupItemGroups,
-  getProtocolUsesGripper,
-  useRequiredProtocolHardwareFromAnalysis,
-  useMissingProtocolHardwareFromAnalysis,
-} from '/app/transformations/commands'
 
 const FETCH_DURATION_MS = 5000
 
 const ANALYSIS_POLL_MS = 5000
 interface PrepareToRunProps {
   runId: string
-  setSetupScreen: React.Dispatch<React.SetStateAction<SetupScreens>>
+  setSetupScreen: Dispatch<SetStateAction<SetupScreens>>
   confirmAttachment: () => void
   confirmStepsComplete: () => void
   play: () => void
@@ -147,7 +148,7 @@ function PrepareToRun({
   const [
     isPollingForCompletedAnalysis,
     setIsPollingForCompletedAnalysis,
-  ] = React.useState<boolean>(mostRecentAnalysisSummary?.status !== 'completed')
+  ] = useState<boolean>(mostRecentAnalysisSummary?.status !== 'completed')
 
   const {
     data: mostRecentAnalysis = null,
@@ -165,7 +166,7 @@ function PrepareToRun({
     navigate('/protocols')
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (mostRecentAnalysis?.status === 'completed') {
       setIsPollingForCompletedAnalysis(false)
     } else {
@@ -229,10 +230,9 @@ function PrepareToRun({
       parameter.type === 'csv_file' || parameter.value !== parameter.default
   )
 
-  const [
-    showConfirmCancelModal,
-    setShowConfirmCancelModal,
-  ] = React.useState<boolean>(false)
+  const [showConfirmCancelModal, setShowConfirmCancelModal] = useState<boolean>(
+    false
+  )
 
   const deckConfigCompatibility = useDeckConfigurationCompatibility(
     robotType,
@@ -670,7 +670,7 @@ export function ProtocolSetup(): JSX.Element {
   const [
     showAnalysisFailedModal,
     setShowAnalysisFailedModal,
-  ] = React.useState<boolean>(true)
+  ] = useState<boolean>(true)
   const robotType = useRobotType(robotName)
   const attachedModules =
     useAttachedModules({
@@ -684,7 +684,7 @@ export function ProtocolSetup(): JSX.Element {
   const [
     isPollingForCompletedAnalysis,
     setIsPollingForCompletedAnalysis,
-  ] = React.useState<boolean>(mostRecentAnalysisSummary?.status !== 'completed')
+  ] = useState<boolean>(mostRecentAnalysisSummary?.status !== 'completed')
 
   const {
     data: mostRecentAnalysis = null,
@@ -699,7 +699,7 @@ export function ProtocolSetup(): JSX.Element {
 
   const areLiquidsInProtocol = (mostRecentAnalysis?.liquids?.length ?? 0) > 0
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (mostRecentAnalysis?.status === 'completed') {
       setIsPollingForCompletedAnalysis(false)
     } else {
@@ -754,14 +754,14 @@ export function ProtocolSetup(): JSX.Element {
     handleProceedToRunClick,
     !configBypassHeaterShakerAttachmentConfirmation
   )
-  const [cutoutId, setCutoutId] = React.useState<CutoutId | null>(null)
-  const [providedFixtureOptions, setProvidedFixtureOptions] = React.useState<
+  const [cutoutId, setCutoutId] = useState<CutoutId | null>(null)
+  const [providedFixtureOptions, setProvidedFixtureOptions] = useState<
     CutoutFixtureId[]
   >([])
   // TODO(jh 10-31-24): Refactor the below to utilize useMissingStepsModal.
-  const [labwareConfirmed, setLabwareConfirmed] = React.useState<boolean>(false)
-  const [liquidsConfirmed, setLiquidsConfirmed] = React.useState<boolean>(false)
-  const [offsetsConfirmed, setOffsetsConfirmed] = React.useState<boolean>(false)
+  const [labwareConfirmed, setLabwareConfirmed] = useState<boolean>(false)
+  const [liquidsConfirmed, setLiquidsConfirmed] = useState<boolean>(false)
+  const [offsetsConfirmed, setOffsetsConfirmed] = useState<boolean>(false)
   const missingSteps = [
     !offsetsConfirmed ? t('applied_labware_offsets') : null,
     !labwareConfirmed ? t('labware_placement') : null,
@@ -779,9 +779,7 @@ export function ProtocolSetup(): JSX.Element {
   const isHeaterShakerInProtocol = useIsHeaterShakerInProtocol()
 
   // orchestrate setup subpages/components
-  const [setupScreen, setSetupScreen] = React.useState<SetupScreens>(
-    'prepare to run'
-  )
+  const [setupScreen, setSetupScreen] = useState<SetupScreens>('prepare to run')
   const setupComponentByScreen = {
     'prepare to run': (
       <PrepareToRun
