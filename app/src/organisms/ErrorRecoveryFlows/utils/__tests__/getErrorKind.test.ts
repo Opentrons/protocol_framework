@@ -68,7 +68,7 @@ describe('getErrorKind', () => {
       errorType: 'someHithertoUnknownDefinedErrorType',
       expectedError: ERROR_KINDS.GENERAL_ERROR,
     },
-    ...[
+    ...([
       'aspirate',
       'dispense',
       'blowOut',
@@ -77,10 +77,11 @@ describe('getErrorKind', () => {
       'dropTip',
       'pickUpTip',
       'prepareToAspirate',
-    ].map(cmd => ({
+    ] as const).map(cmd => ({
       commandType: cmd,
       errorType: DEFINED_ERROR_TYPES.STALL_OR_COLLISION,
       expectedError: ERROR_KINDS.STALL_OR_COLLISION,
+      isDefined: true,
     })),
   ])(
     'returns $expectedError for $commandType with errorType $errorType',
