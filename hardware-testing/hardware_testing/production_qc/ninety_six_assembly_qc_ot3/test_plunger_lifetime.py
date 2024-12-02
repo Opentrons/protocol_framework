@@ -323,7 +323,7 @@ async def _run(cycles: int, trials: int) -> None:
         assert reservoir_a1_actual
         asdipass = await aspirate_and_dispense(api, reservoir_a1_actual, get_test_volume, number)
 
-        if number % 5 == 0:
+        if number % 100 == 0:
             await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, reservoir_a1_actual)
             await helpers_ot3.move_plunger_absolute_ot3(
                 api, OT3Mount.LEFT, 72.5
