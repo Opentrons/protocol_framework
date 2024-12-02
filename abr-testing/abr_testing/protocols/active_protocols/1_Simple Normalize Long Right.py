@@ -4,6 +4,7 @@ from opentrons.protocol_api import (
     ParameterContext,
     Labware,
     SINGLE,
+    ALL,
     InstrumentContext,
     Well,
 )
@@ -93,7 +94,7 @@ def run(protocol: ProtocolContext) -> None:
 
     reservoir = protocol.load_labware("nest_12_reservoir_15ml", "B3")
     waste_reservoir = protocol.load_labware(
-        "nest_1_reservoir_195ml", "B1", "Liquid Waste"
+        "nest_1_reservoir_195ml", "C1", "Liquid Waste"
     )
     sample_plate_2 = protocol.load_labware(
         "armadillo_96_wellplate_200ul_pcr_full_skirt", "C2"

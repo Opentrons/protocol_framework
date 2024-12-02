@@ -1,6 +1,6 @@
 """96 ch Test Single Tip and Gripper Moves."""
 from opentrons.protocol_api import (
-    ALL,
+    COLUMN,
     SINGLE,
     ParameterContext,
     ProtocolContext,
@@ -63,7 +63,7 @@ def run(ctx: ProtocolContext) -> None:
         helpers.temp_str, "C1"
     )  # type: ignore[assignment]
     if disposable_lid:
-        unused_lids = helpers.load_disposable_lids(ctx, 3, ["A4"], deck_riser)
+        unused_lids = helpers.load_disposable_lids(ctx, 3, ["A2"], deck_riser)
     used_lids: List[Labware] = []
     thermocycler.open_lid()
     h_s.open_labware_latch()
@@ -77,12 +77,11 @@ def run(ctx: ProtocolContext) -> None:
 
     source_reservoir = ctx.load_labware(RESERVOIR_NAME, "D2")
     dest_pcr_plate = ctx.load_labware(PCR_PLATE_96_NAME, "C2")
-    liquid_waste = ctx.load_labware("nest_1_reservoir_195ml", "B3", "Liquid Waste")
+    liquid_waste = ctx.load_labware("nest_1_reservoir_290ml", "B2", "Liquid Waste")
 
     tip_rack_1 = ctx.load_labware(
-        TIPRACK_96_NAME, "A2", adapter=TIPRACK_96_ADAPTER_NAME
+        TIPRACK_96_NAME, "A4"
     )
-    tip_rack_adapter = tip_rack_1.parent
 
     tip_rack_2 = ctx.load_labware(TIPRACK_96_NAME, "C3")
     tip_rack_3 = ctx.load_labware(TIPRACK_96_NAME, "C4")
@@ -162,7 +161,7 @@ def run(ctx: ProtocolContext) -> None:
         def deck_moves(labware: Labware, reset_location: str) -> None:
             """Function to perform the movement of labware."""
             deck_move_sequence = [
-                ["B2"],  # Deck Moves
+                ["B3"],  # Deck Moves
                 ["C3"],  # Staging Area Slot 3 Moves
                 ["C4", "D4"],  # Staging Area Slot 4 Moves
                 [
@@ -178,7 +177,7 @@ def run(ctx: ProtocolContext) -> None:
         def staging_area_slot_3_moves(labware: Labware, reset_location: str) -> None:
             """Function to perform the movement of labware, starting w/ staging area slot 3."""
             staging_area_slot_3_move_sequence = [
-                ["B2", "C2"],  # Deck Moves
+                ["B3", "C2"],  # Deck Moves
                 [],  # Don't have Staging Area Slot 3 open
                 ["C4", "D4"],  # Staging Area Slot 4 Moves
                 [
@@ -199,7 +198,7 @@ def run(ctx: ProtocolContext) -> None:
         def staging_area_slot_4_moves(labware: Labware, reset_location: str) -> None:
             """Function to perform the movement of labware, starting with staging area slot 4."""
             staging_area_slot_4_move_sequence = [
-                ["C2", "B2"],  # Deck Moves
+                ["C2", "B3"],  # Deck Moves
                 ["C3"],  # Staging Area Slot 3 Moves
                 ["C4"],  # Staging Area Slot 4 Moves
                 [
@@ -220,7 +219,7 @@ def run(ctx: ProtocolContext) -> None:
         def module_moves(labware: Labware, module_locations: List) -> None:
             """Function to perform the movement of labware, starting on a module."""
             module_move_sequence = [
-                ["C2", "B2"],  # Deck Moves
+                ["C2", "B3"],  # Deck Moves
                 ["C3"],  # Staging Area Slot 3 Moves
                 ["C4", "D4"],  # Staging Area Slot 4 Moves
             ]
@@ -293,43 +292,31 @@ def run(ctx: ProtocolContext) -> None:
             # want to test partial drop
             ctx.move_labware(tip_rack_2, waste_chute, use_gripper=USING_GRIPPER)
 
-        def test_full_tip_rack_usage() -> None:
+        def test_column_tip_rack_usage() -> None:
             """Full Tip Pick Up."""
-            pipette_96_channel.configure_nozzle_layout(style=ALL, start="A1")
-            pipette_96_channel.liquid_presence_detection = True
-            pipette_96_channel.pick_up_tip(tip_rack_1["A1"])
-
-            pipette_96_channel.aspirate(45, source_reservoir["A1"])
-
-            pipette_96_channel.liquid_presence_detection = False
-            pipette_96_channel.air_gap(5)
-
-            pipette_96_channel.dispense(25, dest_pcr_plate["A1"].bottom(b))
-            pipette_96_channel.blow_out(location=liquid_waste["A1"])
-            pipette_96_channel.mix(repetitions=5, volume=15)
-            pipette_96_channel.return_tip()
-
-            ctx.move_labware(tip_rack_1, waste_chute, use_gripper=USING_GRIPPER)
-            ctx.move_labware(tip_rack_3, tip_rack_adapter, use_gripper=USING_GRIPPER)
-
-            pipette_96_channel.pick_up_tip(tip_rack_3["A1"])
-            pipette_96_channel.transfer(
-                volume=10,
-                source=source_reservoir["A1"],
-                dest=dest_pcr_plate["A1"],
-                new_tip="never",
-                touch_tip=True,
-                blow_out=True,
-                blowout_location="trash",
-                mix_before=(3, 5),
-                mix_after=(1, 5),
-            )
-            pipette_96_channel.return_tip()
-
-            ctx.move_labware(tip_rack_3, waste_chute, use_gripper=USING_GRIPPER)
-
+            list_of_columns = list(range(1,13))
+            not_reversed = list(range(1,13))
+            list_of_columns.reverse()
+            i = 0
+            column_racks = [tip_rack_1, tip_rack_3]
+            for rack in column_racks:
+                ctx.move_labware(rack, "C3", use_gripper = USING_GRIPPER)
+                for (column,well) in zip(list_of_columns, not_reversed):
+                    tiprack_well = "A" + str(column)
+                    well_name = "A" + str(well)
+                    pipette_96_channel.configure_nozzle_layout(style=COLUMN, start="A12")
+                    pipette_96_channel.liquid_presence_detection = True
+                    pipette_96_channel.pick_up_tip(rack[tiprack_well])
+                    pipette_96_channel.aspirate(45, source_reservoir[well_name])
+                    pipette_96_channel.liquid_presence_detection = False
+                    pipette_96_channel.air_gap(5)
+                    pipette_96_channel.dispense(25, dest_pcr_plate[tiprack_well].bottom(b))
+                    pipette_96_channel.blow_out(location=liquid_waste["A1"])
+                    pipette_96_channel.drop_tip()
+                ctx.move_labware(rack, waste_chute, use_gripper=USING_GRIPPER)
+                i +=1
         test_single_tip_pickup_usage()
-        test_full_tip_rack_usage()
+        test_column_tip_rack_usage()
 
     def test_module_usage(unused_lids: List[Labware], used_lids: List[Labware]) -> None:
         """Test Module Use."""
