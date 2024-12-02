@@ -146,7 +146,7 @@
     },
     "correctionByVolume": {
       "type": "array",
-      "description": "Settings for volume correction keyed by by target aspiration/dispense volume.",
+      "description": "Settings for volume correction keyed by target aspiration/dispense volume, representing additional volume the plunger should move to accurately hit target volume.",
       "items": {
         "type": "array",
         "items": { "type": "number" },

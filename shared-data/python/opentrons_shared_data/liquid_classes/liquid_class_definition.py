@@ -258,7 +258,8 @@ class AspirateProperties(BaseModel):
     )
     correctionByVolume: CorrectionByVolume = Field(
         ...,
-        description="Settings for volume correction keyed by by target aspiration volume.",
+        description="Settings for volume correction keyed by by target aspiration volume,"
+        " representing additional volume the plunger should move to accurately hit target volume.",
     )
     preWet: bool = Field(..., description="Whether to perform a pre-wet action.")
     mix: MixProperties = Field(
@@ -286,7 +287,8 @@ class SingleDispenseProperties(BaseModel):
     )
     correctionByVolume: CorrectionByVolume = Field(
         ...,
-        description="Settings for volume correction keyed by by target dispense volume.",
+        description="Settings for volume correction keyed by by target dispense volume,"
+        " representing additional volume the plunger should move to accurately hit target volume.",
     )
     mix: MixProperties = Field(..., description="Mixing settings for after a dispense")
     pushOutByVolume: LiquidHandlingPropertyByVolume = Field(
@@ -314,7 +316,8 @@ class MultiDispenseProperties(BaseModel):
     )
     correctionByVolume: CorrectionByVolume = Field(
         ...,
-        description="Settings for volume correction keyed by by target dispense volume.",
+        description="Settings for volume correction keyed by by target dispense volume,"
+        " representing additional volume the plunger should move to accurately hit target volume.",
     )
     conditioningByVolume: LiquidHandlingPropertyByVolume = Field(
         ...,
