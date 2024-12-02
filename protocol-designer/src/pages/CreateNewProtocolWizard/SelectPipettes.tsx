@@ -67,7 +67,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
   const { makeSnackbar } = useKitchen()
   const allLabware = useSelector(getLabwareDefsByURI)
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
-  const [mount, setMount] = useState<PipetteMount | null>(null)
+  const [mount, setMount] = useState<PipetteMount>('left')
   const [page, setPage] = useState<'add' | 'overview'>('add')
   const [pipetteType, setPipetteType] = useState<PipetteType | null>(null)
   const [showIncompatibleTip, setIncompatibleTip] = useState<boolean>(false)
@@ -76,7 +76,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
   const allowAllTipracks = useSelector(getAllowAllTipracks)
   const allPipetteOptions = getAllPipetteNames('maxVolume', 'channels')
   const robotType = fields.robotType
-  const defaultMount = mount ?? 'left'
+  const defaultMount = mount
   const has96Channel = pipettesByMount.left.pipetteName === 'p1000_96'
   const selectedPipetteName =
     pipetteType === '96' || pipetteGen === 'GEN1'
@@ -101,20 +101,6 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
       })
     }
   }
-  //  initialize pipette name once all fields are filled out
-  useEffect(() => {
-    if (
-      (pipetteType != null &&
-        pipetteVolume != null &&
-        robotType === FLEX_ROBOT_TYPE) ||
-      (robotType === OT2_ROBOT_TYPE && pipetteGen != null)
-    ) {
-      setValue(
-        `pipettesByMount.${defaultMount}.pipetteName`,
-        selectedPipetteName
-      )
-    }
-  }, [pipetteType, pipetteGen, pipetteVolume, selectedPipetteName])
 
   useEffect(() => {
     handleScrollToBottom()
@@ -127,9 +113,9 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
       pipettesByMount.right.tiprackDefURI == null)
 
   const isDisabled =
-    (page === 'add' && pipettesByMount[defaultMount].tiprackDefURI == null) ||
-    noPipette ||
-    selectedValues.length === 0
+    page === 'add' &&
+    pipettesByMount[defaultMount].tiprackDefURI == null &&
+    noPipette
 
   const targetPipetteMount =
     pipettesByMount.left.pipetteName == null ||
@@ -143,6 +129,10 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
         proceed(1)
       } else {
         setPage('overview')
+        setValue(
+          `pipettesByMount.${defaultMount}.pipetteName`,
+          selectedPipetteName
+        )
       }
     }
   }
@@ -174,6 +164,16 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
     }
   }, [location])
 
+  const hasAPipette =
+    (defaultMount === 'left' && pipettesByMount.right.pipetteName != null) ||
+    (defaultMount === 'right' && pipettesByMount.left.pipetteName != null)
+  let subHeader
+  if (page === 'add' && noPipette) {
+    subHeader = t('which_pipette')
+  } else if (page === 'add' && hasAPipette) {
+    subHeader = t('which_pipette_second')
+  }
+
   return (
     <>
       {showIncompatibleTip ? (
@@ -188,7 +188,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
           robotType={robotType}
           stepNumber={2}
           header={page === 'add' ? t('add_pipette') : t('robot_pipettes')}
-          subHeader={page === 'add' ? t('which_pipette') : undefined}
+          subHeader={subHeader}
           proceed={handleProceed}
           goBack={() => {
             handleGoBack()
@@ -213,8 +213,9 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                 <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
                   {PIPETTE_TYPES[robotType].map(type => {
                     return type.value === '96' &&
-                      (pipettesByMount.left.pipetteName != null ||
-                        pipettesByMount.right.pipetteName != null) ? null : (
+                      (defaultMount === 'right' ||
+                        (defaultMount === 'left' &&
+                          pipettesByMount.right.pipetteName != null)) ? null : (
                       <RadioButton
                         key={`${type.label}_${type.value}`}
                         onChange={() => {
