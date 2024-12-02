@@ -36,12 +36,14 @@ from ..types import (
     DeckConfigurationType,
     Dimensions,
 )
+from ..actions.get_state_update import get_state_updates
 from ..actions import (
     Action,
     SucceedCommandAction,
     SetDeckConfigurationAction,
     AddAddressableAreaAction,
 )
+from . import update_types
 from .config import Config
 from ._abstract_store import HasState, HandlesActions
 
@@ -191,8 +193,16 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
             robot_definition=robot_definition,
         )
 
+    # TODO: Port loadLabware, moveLabware, loadModule, moveToAddressableArea, and moveToAddressableAreaForDropTip
+    # and their tests
     def handle_action(self, action: Action) -> None:
         """Modify state in reaction to an action."""
+        for state_update in get_state_updates(action):
+            if state_update.addressable_area_used != update_types.NO_CHANGE:
+                self._add_addressable_area(
+                    state_update.addressable_area_used.addressable_area_name
+                )
+
         if isinstance(action, SucceedCommandAction):
             self._handle_command(action.command)
         elif isinstance(action, AddAddressableAreaAction):

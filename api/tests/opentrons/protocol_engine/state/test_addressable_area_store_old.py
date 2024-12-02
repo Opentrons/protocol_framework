@@ -9,14 +9,16 @@ import pytest
 
 from opentrons_shared_data.deck.types import DeckDefinitionV5
 from opentrons_shared_data.labware.labware_definition import Parameters
+
 from opentrons.protocols.models import LabwareDefinition
 from opentrons.types import DeckSlotName
 
-from opentrons.protocol_engine.commands import Command
+from opentrons.protocol_engine.commands import Command, Comment
 from opentrons.protocol_engine.actions import (
     SucceedCommandAction,
     AddAddressableAreaAction,
 )
+from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.config import Config
 from opentrons.protocol_engine.state.addressable_areas import (
     AddressableAreaStore,
@@ -54,6 +56,11 @@ def _make_deck_config() -> DeckConfigurationType:
         ("cutoutC3", "stagingAreaRightSlot", None),
         ("cutoutD3", "wasteChuteRightAdapterNoCover", None),
     ]
+
+
+def _dummy_command() -> Command:
+    """Return a placeholder command."""
+    return Comment.construct()  # type: ignore[call-arg]
 
 
 @pytest.fixture
@@ -167,6 +174,8 @@ def test_initial_state(
     assert len(subject.state.loaded_addressable_areas_by_name) == 16
 
 
+# todo(mm, 2024-12-02): Delete in favor of test_addressable_area_usage_in_simulation()
+# when all of these commands have been ported to StateUpdate.
 @pytest.mark.parametrize(
     ("command", "expected_area"),
     (
@@ -238,6 +247,34 @@ def test_addressable_area_referencing_commands_load_on_simulated_deck(
     assert expected_area in simulated_subject.state.loaded_addressable_areas_by_name
 
 
+@pytest.mark.parametrize("addressable_area_name", ["A1", "A4", "gripperWasteChute"])
+def test_addressable_area_usage_in_simulation(
+    simulated_subject: AddressableAreaStore,
+    addressable_area_name: str,
+) -> None:
+    """Simulating stores should correctly handle `StateUpdate`s with addressable areas."""
+    assert (
+        addressable_area_name
+        not in simulated_subject.state.loaded_addressable_areas_by_name
+    )
+    simulated_subject.handle_action(
+        SucceedCommandAction(
+            command=_dummy_command(),
+            state_update=update_types.StateUpdate(
+                addressable_area_used=update_types.AddressableAreaUsedUpdate(
+                    addressable_area_name
+                )
+            ),
+        )
+    )
+    assert (
+        addressable_area_name
+        in simulated_subject.state.loaded_addressable_areas_by_name
+    )
+
+
+# todo(mm, 2024-12-02): Delete in favor of test_addressable_area_usage()
+# when all of these commands have been ported to StateUpdate.
 @pytest.mark.parametrize(
     ("command", "expected_area"),
     (
@@ -301,6 +338,37 @@ def test_addressable_area_referencing_commands_load(
     """It should check that the addressable area is in the deck config."""
     subject.handle_action(SucceedCommandAction(command=command))
     assert expected_area in subject.state.loaded_addressable_areas_by_name
+
+
+@pytest.mark.parametrize("addressable_area_name", ["A1", "C4"])
+def test_addressable_area_usage(
+    subject: AddressableAreaStore,
+    addressable_area_name: str,
+) -> None:
+    """Non-simulating stores should correctly handle `StateUpdate`s with addressable areas.
+
+    todo(mm, 2024-12-02): This is ported from an older test that said the
+    subject "should check that the addressable area is in the deck config." But
+    AddressableAreaStore does not do that--that is the job of AddressableAreaView--and
+    the original test did not cover that. Do we still need to test anything here, or
+    can this be deleted?
+    """
+    # The addressable area should have been added by the deck configuration.
+    # (Tested more explicitly elsewhere.)
+    assert addressable_area_name in subject.state.loaded_addressable_areas_by_name
+
+    subject.handle_action(
+        SucceedCommandAction(
+            command=_dummy_command(),
+            state_update=update_types.StateUpdate(
+                addressable_area_used=update_types.AddressableAreaUsedUpdate(
+                    addressable_area_name
+                )
+            ),
+        )
+    )
+    # The addressable area should still be there after handling the action.
+    assert addressable_area_name in subject.state.loaded_addressable_areas_by_name
 
 
 def test_add_addressable_area_action(
