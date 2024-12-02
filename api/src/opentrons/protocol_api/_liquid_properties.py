@@ -483,6 +483,7 @@ class AspirateProperties(BaseLiquidHandlingProperties):
             preWet=self._pre_wet,
             mix=self._mix.as_shared_data_model(),
             delay=self._delay.as_shared_data_model(),
+            correctionByVolume=self._correction_by_volume.as_list_of_tuples(),
         )
 
 
@@ -515,6 +516,7 @@ class SingleDispenseProperties(BaseLiquidHandlingProperties):
             mix=self._mix.as_shared_data_model(),
             pushOutByVolume=self._push_out_by_volume.as_list_of_tuples(),
             delay=self._delay.as_shared_data_model(),
+            correctionByVolume=self._correction_by_volume.as_list_of_tuples(),
         )
 
 
@@ -547,6 +549,7 @@ class MultiDispenseProperties(BaseLiquidHandlingProperties):
             conditioningByVolume=self._conditioning_by_volume.as_list_of_tuples(),
             disposalByVolume=self._disposal_by_volume.as_list_of_tuples(),
             delay=self._delay.as_shared_data_model(),
+            correctionByVolume=self._correction_by_volume.as_list_of_tuples(),
         )
 
 
