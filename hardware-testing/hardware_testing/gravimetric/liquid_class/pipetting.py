@@ -135,7 +135,6 @@ def _pipette_with_liquid_settings(  # noqa: C901
     mode: str = "",
     clear_accuracy_function: bool = False,
     pose_for_camera: bool = False,
-    pre_wet_count: int = 0,
 ) -> None:
     """Run a pipette given some Pipetting Liquid Settings."""
     # FIXME: stop using hwapi, and get those functions into core software
@@ -149,14 +148,6 @@ def _pipette_with_liquid_settings(  # noqa: C901
         bottom = hw_pipette.plunger_positions.bottom
         blow_out = hw_pipette.plunger_positions.blow_out
         return (blow_out - bottom) * blow_out_ul_per_mm
-
-    def _aspirate_and_delay() -> None:
-        pipette.aspirate(aspirate)
-        ctx.delay(liquid_class.aspirate.delay)
-
-    def _dispense_and_delay(push_out: float = 0.0) -> None:
-        pipette.dispense(aspirate, push_out=push_out)  # IMPORTANT: no push-out so tip stays submerged
-        ctx.delay(liquid_class.dispense.delay)
 
     # ASPIRATE/DISPENSE SEQUENCE HAS THREE PHASES:
     #  1. APPROACH
@@ -227,12 +218,11 @@ def _pipette_with_liquid_settings(  # noqa: C901
         assert pipette.current_volume == 0
 
     def _aspirate_on_submerge() -> None:
-        # pre-wet before final aspirate
+        # aspirate specified volume
         callbacks.on_aspirating()
-        for _ in range(pre_wet_count):
-            _aspirate_and_delay()
-            _dispense_and_delay(push_out=0.0)  # IMPORTANT: no push-out so tip stays submerged
-        _aspirate_and_delay()
+        pipette.aspirate(aspirate)
+        # delay
+        ctx.delay(liquid_class.aspirate.delay)
         # update liquid-height tracker
         liquid_tracker.update_affected_wells(
             well, aspirate=aspirate, channels=channel_count
@@ -425,7 +415,6 @@ def aspirate_with_liquid_class(
     mode: str = "",
     clear_accuracy_function: bool = False,
     pose_for_camera: bool = False,
-    pre_wet_count: int = 0,
 ) -> None:
     """Aspirate with liquid class."""
     _pipette_with_liquid_settings(
@@ -443,7 +432,6 @@ def aspirate_with_liquid_class(
         mode=mode,
         clear_accuracy_function=clear_accuracy_function,
         pose_for_camera=pose_for_camera,
-        pre_wet_count=pre_wet_count,
     )
 
 
@@ -478,5 +466,5 @@ def dispense_with_liquid_class(
         touch_tip=touch_tip,
         mode=mode,
         clear_accuracy_function=clear_accuracy_function,
-        pose_for_camera=pose_for_camera
+        pose_for_camera=pose_for_camera,
     )
