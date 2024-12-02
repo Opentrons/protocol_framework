@@ -2133,6 +2133,40 @@
             ]
           }
         },
+        "correctionByVolume": {
+          "title": "Correctionbyvolume",
+          "description": "Settings for volume correction keyed by by target aspiration volume, representing additional volume the plunger should move to accurately hit target volume.",
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              }
+            ]
+          }
+        },
         "preWet": {
           "title": "Prewet",
           "description": "Whether to perform a pre-wet action.",
@@ -2163,6 +2197,7 @@
         "positionReference",
         "offset",
         "flowRateByVolume",
+        "correctionByVolume",
         "preWet",
         "mix",
         "delay"
@@ -2411,6 +2446,40 @@
             ]
           }
         },
+        "correctionByVolume": {
+          "title": "Correctionbyvolume",
+          "description": "Settings for volume correction keyed by by target dispense volume, representing additional volume the plunger should move to accurately hit target volume.",
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              }
+            ]
+          }
+        },
         "mix": {
           "title": "Mix",
           "description": "Mixing settings for after a dispense",
@@ -2472,6 +2541,7 @@
         "positionReference",
         "offset",
         "flowRateByVolume",
+        "correctionByVolume",
         "mix",
         "pushOutByVolume",
         "delay"
@@ -2547,6 +2617,40 @@
                   {
                     "type": "number",
                     "minimum": 0.0
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "correctionByVolume": {
+          "title": "Correctionbyvolume",
+          "description": "Settings for volume correction keyed by by target dispense volume, representing additional volume the plunger should move to accurately hit target volume.",
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
                   }
                 ]
               }
@@ -2641,6 +2745,7 @@
         "positionReference",
         "offset",
         "flowRateByVolume",
+        "correctionByVolume",
         "conditioningByVolume",
         "disposalByVolume",
         "delay"

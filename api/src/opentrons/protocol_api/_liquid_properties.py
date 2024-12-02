@@ -314,6 +314,7 @@ class BaseLiquidHandlingProperties:
     _position_reference: PositionReference
     _offset: Coordinate
     _flow_rate_by_volume: LiquidHandlingPropertyByVolume
+    _correction_by_volume: LiquidHandlingPropertyByVolume
     _delay: DelayProperties
 
     @property
@@ -340,6 +341,10 @@ class BaseLiquidHandlingProperties:
     @property
     def flow_rate_by_volume(self) -> LiquidHandlingPropertyByVolume:
         return self._flow_rate_by_volume
+
+    @property
+    def correction_by_volume(self) -> LiquidHandlingPropertyByVolume:
+        return self._correction_by_volume
 
     @property
     def delay(self) -> DelayProperties:
@@ -543,6 +548,9 @@ def build_aspirate_properties(
         _flow_rate_by_volume=LiquidHandlingPropertyByVolume(
             aspirate_properties.flowRateByVolume
         ),
+        _correction_by_volume=LiquidHandlingPropertyByVolume(
+            aspirate_properties.correctionByVolume
+        ),
         _pre_wet=aspirate_properties.preWet,
         _mix=_build_mix_properties(aspirate_properties.mix),
         _delay=_build_delay_properties(aspirate_properties.delay),
@@ -559,6 +567,9 @@ def build_single_dispense_properties(
         _offset=single_dispense_properties.offset,
         _flow_rate_by_volume=LiquidHandlingPropertyByVolume(
             single_dispense_properties.flowRateByVolume
+        ),
+        _correction_by_volume=LiquidHandlingPropertyByVolume(
+            single_dispense_properties.correctionByVolume
         ),
         _mix=_build_mix_properties(single_dispense_properties.mix),
         _push_out_by_volume=LiquidHandlingPropertyByVolume(
@@ -580,6 +591,9 @@ def build_multi_dispense_properties(
         _offset=multi_dispense_properties.offset,
         _flow_rate_by_volume=LiquidHandlingPropertyByVolume(
             multi_dispense_properties.flowRateByVolume
+        ),
+        _correction_by_volume=LiquidHandlingPropertyByVolume(
+            multi_dispense_properties.correctionByVolume
         ),
         _conditioning_by_volume=LiquidHandlingPropertyByVolume(
             multi_dispense_properties.conditioningByVolume
