@@ -392,10 +392,20 @@ def aspirate_with_liquid_class(
     clear_accuracy_function: bool = False,
 ) -> None:
     """Aspirate with liquid class."""
-    pip_size = 50 if "50" in pipette.name else 1000
+    if "50" in pipette.name:
+        pip_size = 50
+    elif "200" in pipette.name:
+        pip_size = 200
+    else:
+        pip_size = 1000
+    print(f"pip_size:{pip_size}")
+    print(f"pipette channels :{pipette.channels}")
+    print(f"tip volume :{tip_volume}")
+    # pip_size = 50 if "50" in pipette.name else 1000
     liquid_class = get_liquid_class(
         pip_size, pipette.channels, tip_volume, int(aspirate_volume)
     )
+    print(f"aspirate liquid class : {dir(liquid_class)}")
     _pipette_with_liquid_settings(
         ctx,
         pipette,
@@ -430,10 +440,20 @@ def dispense_with_liquid_class(
     clear_accuracy_function: bool = False,
 ) -> None:
     """Dispense with liquid class."""
-    pip_size = 50 if "50" in pipette.name else 1000
+    if "50" in pipette.name:
+        pip_size = 50
+    elif "200" in pipette.name:
+        pip_size = 200
+    else:
+        pip_size = 1000
+    print(f"pip_size:{pip_size}")
+    print(f"pipette channels :{pipette.channels}")
+    print(f"tip volume :{tip_volume}")
+    # pip_size = 50 if "50" in pipette.name else 1000
     liquid_class = get_liquid_class(
         pip_size, pipette.channels, tip_volume, int(dispense_volume)
     )
+    print(f"dispense liquid class : {dir(liquid_class)}")
     _pipette_with_liquid_settings(
         ctx,
         pipette,
