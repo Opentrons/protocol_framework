@@ -34,7 +34,6 @@ from opentrons.protocol_engine.types import (
 from .command_fixtures import (
     create_load_module_command,
     create_move_labware_command,
-    create_move_to_addressable_area_command,
 )
 
 
@@ -197,12 +196,6 @@ def test_initial_state(
                 strategy=LabwareMovementStrategy.USING_GRIPPER,
             ),
             "A4",
-        ),
-        (
-            create_move_to_addressable_area_command(
-                pipette_id="pipette-id", addressable_area_name="gripperWasteChute"
-            ),
-            "gripperWasteChute",
         ),
     ),
 )

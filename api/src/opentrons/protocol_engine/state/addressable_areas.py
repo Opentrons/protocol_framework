@@ -16,8 +16,6 @@ from ..commands import (
     Command,
     LoadModuleResult,
     MoveLabwareResult,
-    MoveToAddressableAreaResult,
-    MoveToAddressableAreaForDropTipResult,
 )
 from ..errors import (
     IncompatibleAddressableAreaError,
@@ -229,13 +227,6 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
 
         elif isinstance(command.result, LoadModuleResult):
             self._add_addressable_area(command.params.location)
-
-        elif isinstance(
-            command.result,
-            (MoveToAddressableAreaResult, MoveToAddressableAreaForDropTipResult),
-        ):
-            addressable_area_name = command.params.addressableAreaName
-            self._add_addressable_area(addressable_area_name)
 
     @staticmethod
     def _get_addressable_areas_from_deck_configuration(
