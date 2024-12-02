@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled from '../../patches'
 import { Flex } from '../../primitives'
 import {
   ALIGN_CENTER,

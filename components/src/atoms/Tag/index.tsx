@@ -1,4 +1,4 @@
-import { css } from 'styled-components'
+import { css } from '../../patches'
 import { BORDERS, COLORS } from '../../helix-design-system'
 import { Flex } from '../../primitives'
 import { ALIGN_CENTER, DIRECTION_ROW, FLEX_MAX_CONTENT } from '../../styles'

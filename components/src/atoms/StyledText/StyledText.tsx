@@ -1,10 +1,10 @@
-import styled, { css } from 'styled-components'
+import styled, { css } from '../../patches'
 import { Text } from '../../primitives'
 import { TYPOGRAPHY, RESPONSIVENESS } from '../../ui-style-constants'
 import { TYPOGRAPHY as HELIX_TYPOGRAPHY } from '../../helix-design-system/product'
 
 import type * as React from 'react'
-import type { FlattenSimpleInterpolation } from 'styled-components'
+import type { FlattenSimpleInterpolation } from '../../patches'
 
 const helixProductStyleMap = {
   displayBold: {

@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components'
+import styled, { css } from '../../../patches'
 import { SPACING } from '../../../ui-style-constants'
 import { BORDERS, COLORS } from '../../../helix-design-system'
 import { Flex } from '../../../primitives'

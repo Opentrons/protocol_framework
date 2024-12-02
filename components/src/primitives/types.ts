@@ -1,6 +1,6 @@
 // known style types
 
-import type { StyledComponent, CSSProperties } from 'styled-components'
+import type { StyledComponent, CSSProperties } from '../patches'
 
 export interface ColorProps {
   color?: string

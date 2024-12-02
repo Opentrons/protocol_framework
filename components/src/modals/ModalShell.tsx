@@ -1,5 +1,5 @@
 import type * as React from 'react'
-import styled from 'styled-components'
+import styled from '../patches'
 import {
   ALIGN_CENTER,
   ALIGN_END,

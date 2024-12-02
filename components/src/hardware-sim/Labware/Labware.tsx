@@ -1,5 +1,5 @@
 import * as React from 'react'
-import styled from 'styled-components'
+import styled from '../../patches'
 import map from 'lodash/map'
 
 import { COLORS } from '../../helix-design-system'

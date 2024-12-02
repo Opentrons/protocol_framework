@@ -1,5 +1,5 @@
 import type * as React from 'react'
-import { css, keyframes } from 'styled-components'
+import { css, keyframes } from '../patches'
 import cx from 'classnames'
 
 import { Svg } from '../primitives'

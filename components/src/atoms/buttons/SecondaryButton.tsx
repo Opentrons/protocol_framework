@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled from '../../patches'
 
 import { TYPOGRAPHY, SPACING } from '../../ui-style-constants'
 import { isntStyleProp, styleProps } from '../../primitives'

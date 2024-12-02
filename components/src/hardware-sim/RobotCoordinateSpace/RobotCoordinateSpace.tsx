@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled from '../../patches'
 import { animated } from '@react-spring/web'
 import type * as React from 'react'
 import { Svg } from '../../primitives'

@@ -8,7 +8,7 @@ import {
 } from './labwareInternals'
 import { LabwareAdapter, labwareAdapterLoadNames } from './LabwareAdapter'
 
-import type { CSSProperties } from 'styled-components'
+import type { CSSProperties } from '../../patches'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
   HighlightedWellLabels,

@@ -8,7 +8,7 @@ import singleFlexSrc from './single-channel-flex.png'
 import eightChannelFlexSrc from './eight-channel-flex.png'
 import ninetySixSrc from './ninety-six-channel-gen1.png'
 
-import type { FlattenSimpleInterpolation } from 'styled-components'
+import type { FlattenSimpleInterpolation } from '../patches'
 import type { PipetteV2Specs } from '@opentrons/shared-data'
 import type { Mount } from '../robot-types'
 import type { StyleProps } from '..'

@@ -1,5 +1,5 @@
 import type * as React from 'react'
-import { css } from 'styled-components'
+import { css } from '../../patches'
 import { Btn, Flex } from '../../primitives'
 import { Icon } from '../../icons'
 import { BORDERS, COLORS } from '../../helix-design-system'

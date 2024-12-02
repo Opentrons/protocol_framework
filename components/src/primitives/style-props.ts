@@ -5,7 +5,7 @@ import pick from 'lodash/pick'
 
 import type * as Types from './types'
 
-import type { CSSObject } from 'styled-components'
+import type { CSSObject } from '../patches'
 
 const COLOR_PROPS = ['color', 'backgroundColor', 'opacity'] as const
 

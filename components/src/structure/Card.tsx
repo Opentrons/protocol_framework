@@ -1,7 +1,7 @@
 // Card component with drop shadow
 
 import type * as React from 'react'
-import styled, { css } from 'styled-components'
+import styled, { css } from '../patches'
 import { isntStyleProp, styleProps } from '../primitives'
 import * as styles from '../styles'
 

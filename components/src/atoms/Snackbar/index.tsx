@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { css } from 'styled-components'
+import { css } from '../../patches'
 import { ALIGN_CENTER } from '../../styles'
 import { Flex } from '../../primitives'
 import { BORDERS, COLORS } from '../../helix-design-system'

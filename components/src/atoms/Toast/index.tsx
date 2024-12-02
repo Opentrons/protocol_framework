@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { css } from 'styled-components'
+import { css } from '../../patches'
 
 import { Btn, Flex, Link } from '../../primitives'
 import { Icon } from '../../icons'
@@ -18,7 +18,7 @@ import type {
   DefaultTheme,
   FlattenSimpleInterpolation,
   ThemedCssFunction,
-} from 'styled-components'
+} from '../../patches'
 import type { StyleProps } from '../../primitives'
 import type { IconName, IconProps } from '../../icons'
 

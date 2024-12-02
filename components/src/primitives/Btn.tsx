@@ -1,10 +1,10 @@
-import styled, { css } from 'styled-components'
+import styled, { css } from '../patches'
 
 import * as Styles from '../styles'
 import { styleProps, isntStyleProp } from './style-props'
 
 import { RESPONSIVENESS } from '../ui-style-constants'
-import type { StyledComponent } from 'styled-components'
+import type { StyledComponent } from '../patches'
 import type { StyleProps } from './types'
 
 export const BUTTON_TYPE_SUBMIT: 'submit' = 'submit'

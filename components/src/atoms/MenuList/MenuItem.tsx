@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled from '../../patches'
 import { COLORS } from '../../helix-design-system'
 import { RESPONSIVENESS, SPACING, TYPOGRAPHY } from '../../ui-style-constants'
 import { ALIGN_CENTER } from '../../styles'

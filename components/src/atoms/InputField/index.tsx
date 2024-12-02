@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-import styled, { css } from 'styled-components'
+import styled, { css } from '../../patches'
 
 import { Flex } from '../../primitives'
 import {

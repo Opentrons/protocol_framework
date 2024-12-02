@@ -1,8 +1,8 @@
-import { css } from 'styled-components'
+import { css } from '../patches'
 
 import { C_DARK_GRAY, C_WHITE } from './colors'
 
-import type { FlattenSimpleInterpolation } from 'styled-components'
+import type { FlattenSimpleInterpolation } from '../patches'
 
 // font size values
 export const FONT_SIZE_HUGE = '3rem'

@@ -2,7 +2,7 @@ import type * as React from 'react'
 import { SLOT_RENDER_WIDTH, SLOT_RENDER_HEIGHT } from '@opentrons/shared-data'
 import { COLORS } from '../../../helix-design-system'
 
-import type { CSSProperties } from 'styled-components'
+import type { CSSProperties } from '../../../patches'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
 export interface LabwareOutlineProps {

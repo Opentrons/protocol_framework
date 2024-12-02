@@ -1,5 +1,5 @@
 import type * as React from 'react'
-import styled, { css } from 'styled-components'
+import styled, { css } from '../../patches'
 import { Flex } from '../../primitives'
 import { COLORS, BORDERS } from '../../helix-design-system'
 import { RESPONSIVENESS, SPACING } from '../../ui-style-constants'
@@ -14,7 +14,7 @@ import {
 } from '../../index'
 import type { IconName } from '../../icons'
 import type { StyleProps } from '../../primitives'
-import type { FlattenSimpleInterpolation } from 'styled-components'
+import type { FlattenSimpleInterpolation } from '../../patches'
 
 interface RadioButtonProps extends StyleProps {
   buttonLabel: string | React.ReactNode

@@ -1,4 +1,4 @@
-import { css } from 'styled-components'
+import { css } from '../../../patches'
 import { ALIGN_CENTER, JUSTIFY_CENTER } from '../../../styles'
 import { COLORS } from '../../../helix-design-system'
 import { Flex, Link } from '../../../primitives'

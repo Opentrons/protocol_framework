@@ -1,5 +1,5 @@
 import type * as React from 'react'
-import { css } from 'styled-components'
+import { css } from '../../patches'
 
 export interface RobotCoordsTextProps extends React.ComponentProps<'text'> {
   x: number

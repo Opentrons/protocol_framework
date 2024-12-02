@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled from '../../patches'
 
 import { COLORS } from '../../helix-design-system'
 import { styleProps } from '../../primitives'

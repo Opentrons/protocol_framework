@@ -1,6 +1,6 @@
 // Render labware definition to SVG. XY is in robot coordinates.
 import * as React from 'react'
-import styled from 'styled-components'
+import styled from '../../../patches'
 import flatMap from 'lodash/flatMap'
 
 import { LabwareOutline } from './LabwareOutline'
@@ -10,7 +10,7 @@ import { COLORS } from '../../../helix-design-system'
 
 import type { LabwareDefinition2, LabwareWell } from '@opentrons/shared-data'
 import type { WellMouseEvent, WellStroke } from './types'
-import type { CSSProperties } from 'styled-components'
+import type { CSSProperties } from '../../../patches'
 
 export interface StaticLabwareProps {
   /** Labware definition to render */

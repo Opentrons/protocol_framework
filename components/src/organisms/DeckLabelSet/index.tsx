@@ -1,5 +1,5 @@
 import * as React from 'react'
-import styled from 'styled-components'
+import styled from '../../patches'
 import { Box } from '../../primitives'
 import { BORDERS, COLORS } from '../../helix-design-system'
 import { RobotCoordsForeignDiv } from '../../hardware-sim'

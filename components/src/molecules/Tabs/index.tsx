@@ -1,4 +1,4 @@
-import { css } from 'styled-components'
+import { css } from '../../patches'
 import { TYPOGRAPHY, SPACING, RESPONSIVENESS } from '../../ui-style-constants'
 import { COLORS, BORDERS } from '../../helix-design-system'
 import { POSITION_RELATIVE, DIRECTION_ROW } from '../../styles'

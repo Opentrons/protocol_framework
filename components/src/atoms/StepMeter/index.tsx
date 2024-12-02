@@ -1,4 +1,4 @@
-import { css } from 'styled-components'
+import { css } from '../../patches'
 import { Box } from '../../primitives'
 import { RESPONSIVENESS, SPACING } from '../../ui-style-constants'
 import { COLORS } from '../../helix-design-system'

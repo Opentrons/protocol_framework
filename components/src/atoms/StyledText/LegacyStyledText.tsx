@@ -1,9 +1,9 @@
-import styled, { css } from 'styled-components'
+import styled, { css } from '../../patches'
 import { Text } from '../../primitives'
 import { TYPOGRAPHY, RESPONSIVENESS } from '../../ui-style-constants'
 
 import type * as React from 'react'
-import type { FlattenSimpleInterpolation } from 'styled-components'
+import type { FlattenSimpleInterpolation } from '../../patches'
 
 export interface LegacyProps extends React.ComponentProps<typeof Text> {
   children?: React.ReactNode

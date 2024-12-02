@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { css } from 'styled-components'
+import { css } from '../patches'
 
 import { BORDERS, COLORS } from '../helix-design-system'
 import { fontSizeH4 } from '../ui-style-constants/typography'
@@ -9,7 +9,7 @@ import { Box } from '../primitives'
 import { CURSOR_POINTER } from '../styles'
 
 import type { CSSProperties } from 'react'
-import type { FlattenSimpleInterpolation } from 'styled-components'
+import type { FlattenSimpleInterpolation } from '../patches'
 import type { Placement } from './types'
 import type { StyleProps } from '../primitives'
 
