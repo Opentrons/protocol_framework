@@ -64,8 +64,6 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
   const savedStepFormData = useSelector(getSavedStepForms)[stepId]
   const pipetteEntities = useSelector(getPipetteEntities)
 
-  console.log('obj', JSON.stringify(pipetteEntities, null, 4))
-
   const isPipetteStep =
     savedStepFormData.stepType === 'moveLiquid' ||
     savedStepFormData.stepType === 'mix'
@@ -74,9 +72,6 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
     savedStepFormData.thermocyclerFormType === 'thermocyclerProfile'
   const is96Channel =
     pipetteEntities[savedStepFormData.pipette]?.name === 'p1000_96'
-
-  console.log(savedStepFormData.pipette)
-  console.log('is96Channel', is96Channel)
 
   const duplicateStep = (
     stepId: StepIdType
@@ -142,6 +137,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
             {formData != null ? null : (
               <MenuItem onClick={handleEdit}>{t('edit_step')}</MenuItem>
             )}
+            {/* Note the following 96-channel check is temp */}
             {(isPipetteStep && !is96Channel) || isThermocyclerProfile ? (
               <MenuItem
                 disabled={formData != null}
