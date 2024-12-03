@@ -141,7 +141,7 @@
       },
       "HEATER_SHAKER_LATCH_OPEN": {
         "title": "Heater-Shaker latch open",
-        "body": "Before the robot can interact with labware on the Heater-Shaker module, the labware latch must be closed. To resolve this error, please add a Heater-Shaker step ahead of the current step, and set the labware latch status to \"closed\"."
+        "body": "This step tries to pipette to labware on the Heater-Shaker Module, which requires the labware latch to be closed. Close the latch before this step."
       },
       "HEATER_SHAKER_IS_SHAKING": {
         "title": "Heater-Shaker is shaking",
