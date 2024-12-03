@@ -29,11 +29,11 @@ class PipetteNameType:
 
     def __repr__(self) -> str:
         oem_name = (
-            f"_{self.oem_type.name}"
+            f"_{self.oem_type.value}"
             if self.oem_type != pip_types.PipetteOEMType.OT
             else ""
         )
-        base_name = f"{self.pipette_type.name}{oem_name}_{str(self.pipette_channels)}"
+        base_name = f"{self.pipette_type.name}_{str(self.pipette_channels)}{oem_name}"
         if self.pipette_generation == pip_types.PipetteGenerationType.GEN1:
             return base_name
         elif self.pipette_channels == pip_types.PipetteChannelType.NINETY_SIX_CHANNEL:
@@ -59,11 +59,11 @@ class PipetteModelVersionType:
 
     def __repr__(self) -> str:
         oem_name = (
-            f"_{self.oem_type.name}"
+            f"_{self.oem_type.value}"
             if self.oem_type != pip_types.PipetteOEMType.OT
             else ""
         )
-        base_name = f"{self.pipette_type.name}{oem_name}_{str(self.pipette_channels)}"
+        base_name = f"{self.pipette_type.name}_{str(self.pipette_channels)}{oem_name}"
 
         return f"{base_name}_v{self.pipette_version}"
 

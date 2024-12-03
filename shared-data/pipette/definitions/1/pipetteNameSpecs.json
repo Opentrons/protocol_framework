@@ -599,7 +599,7 @@
       "opentrons/opentrons_flex_96_filtertiprack_50ul/1"
     ]
   },
-  "p1000_EM_multi_flex": {
+  "p1000_multi_em_flex": {
     "displayName": "Flex 8-Channel EM 1000 μL",
     "displayCategory": "FLEX",
     "defaultAspirateFlowRate": {
