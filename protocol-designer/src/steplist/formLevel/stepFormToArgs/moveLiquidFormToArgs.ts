@@ -168,6 +168,7 @@ export const moveLiquidFormToArgs = (
   const blowoutLocation =
     (fields.blowout_checkbox && fields.blowout_location) ||
     (fields.disposalVolume_checkbox &&
+      path === 'multiDispense' &&
       fields.disposalVolume_volume &&
       fields.blowout_location) ||
     null
