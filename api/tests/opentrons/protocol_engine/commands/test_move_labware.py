@@ -162,7 +162,9 @@ async def test_move_labware_implementation_on_labware(
     )
     decoy.when(
         state_view.labware.get_definition(labware_id="my-cool-labware-id")
-    ).then_return(LabwareDefinition.construct(namespace="spacename"))
+    ).then_return(
+        LabwareDefinition.model_construct(namespace="spacename")  # type: ignore[call-arg]
+    )
     decoy.when(
         state_view.geometry.ensure_location_not_occupied(
             location=OnLabwareLocation(labwareId="new-labware-id"),
@@ -182,7 +184,7 @@ async def test_move_labware_implementation_on_labware(
             "my-even-cooler-labware-id"
         ),
         state_view.labware.raise_if_labware_cannot_be_stacked(
-            LabwareDefinition.construct(namespace="spacename"),
+            LabwareDefinition.model_construct(namespace="spacename"),  # type: ignore[call-arg]
             "my-even-cooler-labware-id",
         ),
     )
@@ -221,7 +223,9 @@ async def test_gripper_move_labware_implementation(
 
     decoy.when(
         state_view.labware.get_definition(labware_id="my-cool-labware-id")
-    ).then_return(LabwareDefinition.construct(namespace="my-cool-namespace"))
+    ).then_return(
+        LabwareDefinition.model_construct(namespace="my-cool-namespace")  # type: ignore[call-arg]
+    )
     decoy.when(state_view.labware.get(labware_id="my-cool-labware-id")).then_return(
         LoadedLabware(
             id="my-cool-labware-id",
@@ -253,7 +257,7 @@ async def test_gripper_move_labware_implementation(
     ).then_return(validated_new_location)
     decoy.when(
         labware_validation.validate_gripper_compatible(
-            LabwareDefinition.construct(namespace="my-cool-namespace")
+            LabwareDefinition.model_construct(namespace="my-cool-namespace")  # type: ignore[call-arg]
         )
     ).then_return(True)
 
@@ -307,7 +311,7 @@ async def test_gripper_error(
     labware_namespace = "labware-namespace"
     labware_load_name = "load-name"
     labware_definition_uri = "opentrons-test/load-name/1"
-    labware_def = LabwareDefinition.construct(
+    labware_def = LabwareDefinition.model_construct(  # type: ignore[call-arg]
         namespace=labware_namespace,
     )
     original_location = DeckSlotLocation(slotName=DeckSlotName.SLOT_A1)
@@ -317,7 +321,7 @@ async def test_gripper_error(
 
     # Common MoveLabwareImplementation boilerplate:
     decoy.when(state_view.labware.get_definition(labware_id=labware_id)).then_return(
-        LabwareDefinition.construct(namespace=labware_namespace)
+        LabwareDefinition.model_construct(namespace=labware_namespace)  # type: ignore[call-arg]
     )
     decoy.when(state_view.labware.get(labware_id=labware_id)).then_return(
         LoadedLabware(
@@ -367,7 +371,7 @@ async def test_gripper_error(
     result = await subject.execute(params)
 
     assert result == DefinedErrorData(
-        public=GripperMovementError.construct(
+        public=GripperMovementError.model_construct(
             id=error_id,
             createdAt=error_created_at,
             errorCode=underlying_exception.code.value.code,
@@ -452,7 +456,7 @@ async def test_gripper_move_to_waste_chute_implementation(
         pickUpOffset=LabwareOffsetVector(x=1, y=2, z=3),
         dropOffset=None,
     )
-    labware_def = LabwareDefinition.construct(
+    labware_def = LabwareDefinition.model_construct(  # type: ignore[call-arg]
         namespace="my-cool-namespace",
         dimensions=Dimensions(
             yDimension=labware_width, zDimension=labware_width, xDimension=labware_width
@@ -657,8 +661,8 @@ async def test_move_labware_raises_when_moving_adapter_with_gripper(
         strategy=LabwareMovementStrategy.USING_GRIPPER,
     )
 
-    definition = LabwareDefinition.construct(
-        parameters=Parameters.construct(loadName="My cool adapter"),
+    definition = LabwareDefinition.model_construct(  # type: ignore[call-arg]
+        parameters=Parameters.model_construct(loadName="My cool adapter"),  # type: ignore[call-arg]
     )
 
     decoy.when(state_view.labware.get(labware_id="my-cool-labware-id")).then_return(
@@ -698,8 +702,8 @@ async def test_move_labware_raises_when_moving_labware_with_gripper_incompatible
         strategy=LabwareMovementStrategy.USING_GRIPPER,
     )
 
-    definition = LabwareDefinition.construct(
-        parameters=Parameters.construct(loadName="My cool labware"),
+    definition = LabwareDefinition.model_construct(  # type: ignore[call-arg]
+        parameters=Parameters.model_construct(loadName="My cool labware"),  # type: ignore[call-arg]
     )
 
     decoy.when(state_view.labware.get(labware_id="my-cool-labware-id")).then_return(
@@ -747,7 +751,9 @@ async def test_move_labware_with_gripper_raises_on_ot2(
     )
     decoy.when(
         state_view.labware.get_definition(labware_id="my-cool-labware-id")
-    ).then_return(LabwareDefinition.construct(namespace="spacename"))
+    ).then_return(
+        LabwareDefinition.model_construct(namespace="spacename")  # type: ignore[call-arg]
+    )
 
     decoy.when(state_view.config).then_return(
         Config(robot_type="OT-2 Standard", deck_type=DeckType.OT2_STANDARD)
@@ -768,8 +774,8 @@ async def test_move_labware_raises_when_moving_fixed_trash_labware(
         strategy=LabwareMovementStrategy.USING_GRIPPER,
     )
 
-    definition = LabwareDefinition.construct(
-        parameters=Parameters.construct(
+    definition = LabwareDefinition.model_construct(  # type: ignore[call-arg]
+        parameters=Parameters.model_construct(  # type: ignore[call-arg]
             loadName="My cool labware", quirks=["fixedTrash"]
         ),
     )

@@ -1,4 +1,5 @@
 """Test equipment command execution side effects."""
+
 import pytest
 from _pytest.fixtures import SubRequest
 import inspect
@@ -648,7 +649,7 @@ async def test_load_pipette(
     decoy.when(state_store.config.use_virtual_pipettes).then_return(False)
     decoy.when(model_utils.generate_id()).then_return("unique-id")
     decoy.when(state_store.pipettes.get_by_mount(MountType.RIGHT)).then_return(
-        LoadedPipette.construct(pipetteName=PipetteNameType.P300_MULTI)
+        LoadedPipette.model_construct(pipetteName=PipetteNameType.P300_MULTI)  # type: ignore[call-arg]
     )
     decoy.when(hardware_api.get_attached_instrument(mount=HwMount.LEFT)).then_return(
         pipette_dict

@@ -1,4 +1,5 @@
 """Liquid state store tests."""
+
 import pytest
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
@@ -34,7 +35,7 @@ def test_handles_add_liquid_class(
 
     subject.handle_action(
         actions.SucceedCommandAction(
-            command=LoadLiquidClass.construct(),
+            command=LoadLiquidClass.model_construct(),  # type: ignore[call-arg]
             state_update=update_types.StateUpdate(
                 liquid_class_loaded=update_types.LiquidClassLoadedUpdate(
                     liquid_class_id="liquid-class-id",

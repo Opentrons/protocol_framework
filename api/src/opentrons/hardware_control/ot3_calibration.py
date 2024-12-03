@@ -1,4 +1,5 @@
 """Functions and utilites for OT3 calibration."""
+
 from __future__ import annotations
 from functools import lru_cache
 from dataclasses import dataclass
@@ -559,7 +560,6 @@ async def find_calibration_structure_center(
     raise_verify_error: bool = True,
     probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
 ) -> Point:
-
     # Perform xy offset search
     if method == CalibrationMethod.BINARY_SEARCH:
         found_center = await find_slot_center_binary(
@@ -968,7 +968,7 @@ def load_attitude_matrix(to_default: bool = True) -> DeckCalibration:
         return DeckCalibration(
             attitude=apply_machine_transform(calibration_data.attitude),
             source=calibration_data.source,
-            status=types.CalibrationStatus(**calibration_data.status.dict()),
+            status=types.CalibrationStatus(**calibration_data.status.model_dump()),
             belt_attitude=calibration_data.attitude,
             last_modified=calibration_data.lastModified,
             pipette_calibrated_with=calibration_data.pipetteCalibratedWith,

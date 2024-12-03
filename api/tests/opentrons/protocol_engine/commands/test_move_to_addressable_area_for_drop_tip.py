@@ -130,7 +130,7 @@ async def test_move_to_addressable_area_for_drop_tip_handles_stalls(
     result = await subject.execute(data)
 
     assert result == DefinedErrorData(
-        public=StallOrCollisionError.construct(
+        public=StallOrCollisionError.model_construct(
             id=test_id, createdAt=timestamp, wrappedErrors=[matchers.Anything()]
         ),
         state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),

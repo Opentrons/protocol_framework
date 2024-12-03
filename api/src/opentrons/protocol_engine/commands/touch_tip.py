@@ -136,7 +136,7 @@ class TouchTipImplementation(
             waypoints=touch_waypoints,
             speed=touch_speed,
         )
-        final_deck_point = DeckPoint.construct(
+        final_deck_point = DeckPoint.model_construct(
             x=final_point.x, y=final_point.y, z=final_point.z
         )
         state_update = center_result.state_update.set_pipette_location(

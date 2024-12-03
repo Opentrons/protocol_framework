@@ -182,7 +182,7 @@ async def move_to_well(
             state_update=StateUpdate().clear_all_pipette_locations(),
         )
     else:
-        deck_point = DeckPoint.construct(x=position.x, y=position.y, z=position.z)
+        deck_point = DeckPoint.model_construct(x=position.x, y=position.y, z=position.z)
         return SuccessData(
             public=DestinationPositionResult(
                 position=deck_point,
@@ -222,7 +222,7 @@ async def move_relative(
             state_update=StateUpdate().clear_all_pipette_locations(),
         )
     else:
-        deck_point = DeckPoint.construct(x=position.x, y=position.y, z=position.z)
+        deck_point = DeckPoint.model_construct(x=position.x, y=position.y, z=position.z)
         return SuccessData(
             public=DestinationPositionResult(
                 position=deck_point,
@@ -275,7 +275,7 @@ async def move_to_addressable_area(
             state_update=StateUpdate().clear_all_pipette_locations(),
         )
     else:
-        deck_point = DeckPoint.construct(x=x, y=y, z=z)
+        deck_point = DeckPoint.model_construct(x=x, y=y, z=z)
         return SuccessData(
             public=DestinationPositionResult(position=deck_point),
             state_update=StateUpdate().set_pipette_location(
@@ -320,7 +320,7 @@ async def move_to_coordinates(
             state_update=StateUpdate().clear_all_pipette_locations(),
         )
     else:
-        deck_point = DeckPoint.construct(x=x, y=y, z=z)
+        deck_point = DeckPoint.model_construct(x=x, y=y, z=z)
 
         return SuccessData(
             public=DestinationPositionResult(position=DeckPoint(x=x, y=y, z=z)),

@@ -1,4 +1,5 @@
 """Server notifying of module connections."""
+
 import asyncio
 import logging
 from typing import Dict, Set
@@ -53,7 +54,9 @@ class ModuleStatusServer(ProxyListener):
         self._connections[identifier] = connection
         for c in self._clients:
             c.write(
-                Message(status="connected", connections=[connection]).json().encode()
+                Message(status="connected", connections=[connection])
+                .model_dump_json()
+                .encode()
             )
             c.write(b"\n")
 
@@ -72,7 +75,7 @@ class ModuleStatusServer(ProxyListener):
             for c in self._clients:
                 c.write(
                     Message(status="disconnected", connections=[connection])
-                    .json()
+                    .model_dump_json()
                     .encode()
                 )
                 c.write(MessageDelimiter)
@@ -95,7 +98,7 @@ class ModuleStatusServer(ProxyListener):
         # A client connected. Send a dump of all connected modules.
         m = Message(status="dump", connections=list(self._connections.values()))
 
-        writer.write(m.json().encode())
+        writer.write(m.model_dump_json().encode())
         writer.write(MessageDelimiter)
 
         self._clients.add(writer)

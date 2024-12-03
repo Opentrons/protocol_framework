@@ -853,7 +853,7 @@ class LiquidClassRecord(ByTipTypeSetting, frozen=True):
                 for field_name, value in d.items()
             )
 
-        return hash(dict_to_tuple(self.dict()))
+        return hash(dict_to_tuple(self.model_dump()))
 
 
 class LiquidClassRecordWithId(LiquidClassRecord, frozen=True):

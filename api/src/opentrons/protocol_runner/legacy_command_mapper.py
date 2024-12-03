@@ -181,7 +181,9 @@ class LegacyCommandMapper:
                         update={
                             "result": pe_commands.PickUpTipResult(
                                 tipVolume=command["payload"]["location"].max_volume,  # type: ignore[typeddict-item]
-                                tipLength=command["payload"]["instrument"].hw_pipette["tip_length"],  # type: ignore[typeddict-item]
+                                tipLength=command["payload"]["instrument"].hw_pipette[  # type: ignore[typeddict-item]
+                                    "tip_length"
+                                ],
                                 position=pe_types.DeckPoint(x=0, y=0, z=0),
                             ),
                             "status": pe_commands.CommandStatus.SUCCEEDED,
@@ -242,7 +244,7 @@ class LegacyCommandMapper:
                 elif isinstance(running_command, pe_commands.Comment):
                     completed_command = running_command.model_copy(
                         update={
-                            "result": pe_commands.CommentResult.construct(),
+                            "result": pe_commands.CommentResult.model_construct(),
                             "status": pe_commands.CommandStatus.SUCCEEDED,
                             "completedAt": now,
                             "notes": [],
@@ -349,17 +351,17 @@ class LegacyCommandMapper:
             )
             return wait_for_resume_create, wait_for_resume_running
         elif command["name"] == legacy_command_types.COMMENT:
-            comment_running = pe_commands.Comment.construct(
+            comment_running = pe_commands.Comment.model_construct(
                 id=command_id,
                 key=command_id,
                 status=pe_commands.CommandStatus.RUNNING,
                 createdAt=now,
                 startedAt=now,
-                params=pe_commands.CommentParams.construct(
+                params=pe_commands.CommentParams.model_construct(
                     message=command["payload"]["text"],
                 ),
             )
-            comment_create = pe_commands.CommentCreate.construct(
+            comment_create = pe_commands.CommentCreate.model_construct(
                 key=comment_running.key, params=comment_running.params
             )
             return comment_create, comment_running

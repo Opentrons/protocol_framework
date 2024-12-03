@@ -1,4 +1,5 @@
 """Pipetting execution handler."""
+
 import pytest
 from decoy import Decoy, matchers
 
@@ -51,7 +52,7 @@ def mock_labware_data_provider(decoy: Decoy) -> LabwareDataProvider:
 @pytest.fixture
 def tip_rack_definition() -> LabwareDefinition:
     """Get a tip rack defintion value object."""
-    return LabwareDefinition.construct(namespace="test", version=42)
+    return LabwareDefinition.model_construct(namespace="test", version=42)  # type: ignore[call-arg]
 
 
 MOCK_MAP = NozzleMap.build(

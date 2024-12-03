@@ -123,7 +123,9 @@ class ReadAbsorbanceImpl(
                     )
                     asbsorbance_result[wavelength] = converted_values
                     transform_results.append(
-                        ReadData.construct(wavelength=wavelength, data=converted_values)
+                        ReadData.model_construct(
+                            wavelength=wavelength, data=converted_values
+                        )
                     )
         # Handle the virtual module case for data creation (all zeroes)
         elif self._state_view.config.use_virtual_modules:
@@ -137,7 +139,9 @@ class ReadAbsorbanceImpl(
                     )
                     asbsorbance_result[wavelength] = converted_values
                     transform_results.append(
-                        ReadData.construct(wavelength=wavelength, data=converted_values)
+                        ReadData.model_construct(
+                            wavelength=wavelength, data=converted_values
+                        )
                     )
             else:
                 raise CannotPerformModuleAction(
@@ -152,7 +156,7 @@ class ReadAbsorbanceImpl(
         file_ids = []
         if params.fileName is not None:
             # Create the Plate Reader Transform
-            plate_read_result = PlateReaderData.construct(
+            plate_read_result = PlateReaderData.model_construct(
                 read_results=transform_results,
                 reference_wavelength=abs_reader_substate.reference_wavelength,
                 start_time=start_time,

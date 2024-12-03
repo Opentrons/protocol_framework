@@ -103,7 +103,7 @@ def save_to_file(
     directory_path.mkdir(parents=True, exist_ok=True)
     file_path = directory_path / f"{file_name}.json"
     json_data = (
-        data.json()
+        data.model_dump_json()
         if isinstance(data, pydantic.BaseModel)
         else json.dumps(data, cls=encoder)
     )

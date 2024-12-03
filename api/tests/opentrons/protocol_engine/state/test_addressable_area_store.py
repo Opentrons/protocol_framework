@@ -174,8 +174,8 @@ def test_initial_state(
             create_load_labware_command(
                 location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
                 labware_id="test-labware-id",
-                definition=LabwareDefinition.construct(
-                    parameters=Parameters.construct(loadName="blah"),
+                definition=LabwareDefinition.model_construct(  # type: ignore[call-arg]
+                    parameters=Parameters.model_construct(loadName="blah"),  # type: ignore[call-arg]
                     namespace="bleh",
                     version=123,
                 ),
@@ -188,8 +188,8 @@ def test_initial_state(
             create_load_labware_command(
                 location=AddressableAreaLocation(addressableAreaName="A4"),
                 labware_id="test-labware-id",
-                definition=LabwareDefinition.construct(
-                    parameters=Parameters.construct(loadName="blah"),
+                definition=LabwareDefinition.model_construct(  # type: ignore[call-arg]
+                    parameters=Parameters.model_construct(loadName="blah"),  # type: ignore[call-arg]
                     namespace="bleh",
                     version=123,
                 ),
@@ -245,8 +245,8 @@ def test_addressable_area_referencing_commands_load_on_simulated_deck(
             create_load_labware_command(
                 location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
                 labware_id="test-labware-id",
-                definition=LabwareDefinition.construct(
-                    parameters=Parameters.construct(loadName="blah"),
+                definition=LabwareDefinition.model_construct(  # type: ignore[call-arg]
+                    parameters=Parameters.model_construct(loadName="blah"),  # type: ignore[call-arg]
                     namespace="bleh",
                     version=123,
                 ),
@@ -259,8 +259,8 @@ def test_addressable_area_referencing_commands_load_on_simulated_deck(
             create_load_labware_command(
                 location=AddressableAreaLocation(addressableAreaName="C4"),
                 labware_id="test-labware-id",
-                definition=LabwareDefinition.construct(
-                    parameters=Parameters.construct(loadName="blah"),
+                definition=LabwareDefinition.model_construct(  # type: ignore[call-arg]
+                    parameters=Parameters.model_construct(loadName="blah"),  # type: ignore[call-arg]
                     namespace="bleh",
                     version=123,
                 ),

@@ -1,4 +1,5 @@
 """Test state getters for retrieving geometry views of state."""
+
 import inspect
 import json
 from datetime import datetime
@@ -849,8 +850,8 @@ def test_get_all_obstacle_highest_z_with_modules(
     subject: GeometryView,
 ) -> None:
     """It should get the highest Z including modules."""
-    module_1 = LoadedModule.construct(id="module-id-1")
-    module_2 = LoadedModule.construct(id="module-id-2")
+    module_1 = LoadedModule.model_construct(id="module-id-1")  # type: ignore[call-arg]
+    module_2 = LoadedModule.model_construct(id="module-id-2")  # type: ignore[call-arg]
 
     decoy.when(mock_labware_view.get_all()).then_return([])
     decoy.when(mock_addressable_area_view.get_all()).then_return([])
@@ -939,7 +940,7 @@ def test_get_highest_z_in_slot_with_single_module(
 ) -> None:
     """It should get the highest Z in slot with just a single module."""
     # Case: Slot has a module that doesn't have any labware on it. Highest z is equal to module height.
-    module_in_slot = LoadedModule.construct(
+    module_in_slot = LoadedModule.model_construct(
         id="only-module",
         model=ModuleModel.THERMOCYCLER_MODULE_V2,
         location=DeckSlotLocation(slotName=DeckSlotName.SLOT_4),
@@ -1094,7 +1095,7 @@ def test_get_highest_z_in_slot_with_labware_stack_on_module(
         location=ModuleLocation(moduleId="module-id"),
         offsetId="offset-id2",
     )
-    module_on_slot = LoadedModule.construct(
+    module_on_slot = LoadedModule.model_construct(
         id="module-id",
         model=ModuleModel.THERMOCYCLER_MODULE_V2,
         location=DeckSlotLocation(slotName=DeckSlotName.SLOT_4),
@@ -1982,7 +1983,7 @@ def test_get_relative_well_location(
 
     assert result == WellLocation(
         origin=WellOrigin.TOP,
-        offset=WellOffset.construct(
+        offset=WellOffset.model_construct(
             x=cast(float, pytest.approx(7)),
             y=cast(float, pytest.approx(8)),
             z=cast(float, pytest.approx(9)),
@@ -2007,7 +2008,7 @@ def test_get_relative_liquid_handling_well_location(
 
     assert result == LiquidHandlingWellLocation(
         origin=WellOrigin.MENISCUS,
-        offset=WellOffset.construct(
+        offset=WellOffset.model_construct(
             x=0.0,
             y=0.0,
             z=cast(float, pytest.approx(-2)),
@@ -2457,8 +2458,8 @@ def test_get_slot_item(
     subject: GeometryView,
 ) -> None:
     """It should get items in certain slots."""
-    labware = LoadedLabware.construct(id="cool-labware")
-    module = LoadedModule.construct(id="cool-module")
+    labware = LoadedLabware.model_construct(id="cool-labware")  # type: ignore[call-arg]
+    module = LoadedModule.model_construct(id="cool-module")  # type: ignore[call-arg]
 
     decoy.when(mock_labware_view.get_by_slot(DeckSlotName.SLOT_1)).then_return(None)
     decoy.when(mock_labware_view.get_by_slot(DeckSlotName.SLOT_2)).then_return(labware)
@@ -2485,7 +2486,7 @@ def test_get_slot_item_that_is_overflowed_module(
     subject: GeometryView,
 ) -> None:
     """It should return the module that occupies the slot, even if not loaded on it."""
-    module = LoadedModule.construct(id="cool-module")
+    module = LoadedModule.model_construct(id="cool-module")  # type: ignore[call-arg]
     decoy.when(mock_labware_view.get_by_slot(DeckSlotName.SLOT_3)).then_return(None)
     decoy.when(mock_module_view.get_by_slot(DeckSlotName.SLOT_3)).then_return(None)
     decoy.when(
@@ -2901,19 +2902,19 @@ def test_check_gripper_labware_tip_collision(
         )
     )
 
-    definition = LabwareDefinition.construct(
+    definition = LabwareDefinition.model_construct(  # type: ignore[call-arg]
         namespace="hello",
-        dimensions=LabwareDimensions.construct(
+        dimensions=LabwareDimensions.model_construct(
             yDimension=1, zDimension=2, xDimension=3
         ),
         version=1,
-        parameters=LabwareDefinitionParameters.construct(
+        parameters=LabwareDefinitionParameters.model_construct(
             format="96Standard",
             loadName="labware-id",
             isTiprack=True,
             isMagneticModuleCompatible=False,
         ),
-        cornerOffsetFromSlot=CornerOffsetFromSlot.construct(x=1, y=2, z=3),
+        cornerOffsetFromSlot=CornerOffsetFromSlot.model_construct(x=1, y=2, z=3),
         ordering=[],
     )
 

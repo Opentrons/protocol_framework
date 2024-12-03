@@ -14,9 +14,18 @@ from opentrons.protocol_engine.resources import labware_validation as subject
 @pytest.mark.parametrize(
     ("definition", "expected_result"),
     [
-        (LabwareDefinition.construct(allowedRoles=[LabwareRole.labware]), True),
-        (LabwareDefinition.construct(allowedRoles=[]), True),
-        (LabwareDefinition.construct(allowedRoles=[LabwareRole.adapter]), False),
+        (
+            LabwareDefinition.model_construct(allowedRoles=[LabwareRole.labware]),  # type: ignore[call-arg]
+            True,
+        ),
+        (
+            LabwareDefinition.model_construct(allowedRoles=[]),  # type: ignore[call-arg]
+            True,
+        ),
+        (
+            LabwareDefinition.model_construct(allowedRoles=[LabwareRole.adapter]),  # type: ignore[call-arg]
+            False,
+        ),
     ],
 )
 def test_validate_definition_is_labware(
@@ -29,9 +38,18 @@ def test_validate_definition_is_labware(
 @pytest.mark.parametrize(
     ("definition", "expected_result"),
     [
-        (LabwareDefinition.construct(allowedRoles=[LabwareRole.adapter]), True),
-        (LabwareDefinition.construct(allowedRoles=[]), False),
-        (LabwareDefinition.construct(allowedRoles=[LabwareRole.labware]), False),
+        (
+            LabwareDefinition.model_construct(allowedRoles=[LabwareRole.adapter]),  # type: ignore[call-arg]
+            True,
+        ),
+        (
+            LabwareDefinition.model_construct(allowedRoles=[]),  # type: ignore[call-arg]
+            False,
+        ),
+        (
+            LabwareDefinition.model_construct(allowedRoles=[LabwareRole.labware]),  # type: ignore[call-arg]
+            False,
+        ),
     ],
 )
 def test_validate_definition_is_adapter(
@@ -45,18 +63,21 @@ def test_validate_definition_is_adapter(
     ("definition", "expected_result"),
     [
         (
-            LabwareDefinition.construct(
+            LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 stackingOffsetWithLabware={"labware123": OverlapOffset(x=4, y=5, z=6)}
             ),
             True,
         ),
         (
-            LabwareDefinition.construct(
+            LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 stackingOffsetWithLabware={"labwareXYZ": OverlapOffset(x=4, y=5, z=6)}
             ),
             False,
         ),
-        (LabwareDefinition.construct(stackingOffsetWithLabware={}), False),
+        (
+            LabwareDefinition.model_construct(stackingOffsetWithLabware={}),  # type: ignore[call-arg]
+            False,
+        ),
     ],
 )
 def test_validate_labware_can_be_stacked(
@@ -73,18 +94,20 @@ def test_validate_labware_can_be_stacked(
     ("definition", "expected_result"),
     [
         (
-            LabwareDefinition.construct(parameters=Parameters.construct(quirks=None)),
-            True,
-        ),
-        (
-            LabwareDefinition.construct(
-                parameters=Parameters.construct(quirks=["foo"])
+            LabwareDefinition.model_construct(  # type: ignore[call-arg]
+                parameters=Parameters.model_construct(quirks=None)  # type: ignore[call-arg]
             ),
             True,
         ),
         (
-            LabwareDefinition.construct(
-                parameters=Parameters.construct(quirks=["gripperIncompatible"])
+            LabwareDefinition.model_construct(  # type: ignore[call-arg]
+                parameters=Parameters.model_construct(quirks=["foo"])  # type: ignore[call-arg]
+            ),
+            True,
+        ),
+        (
+            LabwareDefinition.model_construct(  # type: ignore[call-arg]
+                parameters=Parameters.model_construct(quirks=["gripperIncompatible"])  # type: ignore[call-arg]
             ),
             False,
         ),

@@ -60,7 +60,7 @@ def _translate_labware_command(
             namespace=protocol.labwareDefinitions[definition_id].namespace,
             loadName=protocol.labwareDefinitions[definition_id].parameters.loadName,
             location=LabwareLocationAdapter.validate_python(
-                location.dict() if isinstance(location, Location) else location
+                location.model_dump() if isinstance(location, Location) else location
             ),
         ),
         key=command.key,
@@ -88,7 +88,7 @@ def _translate_v7_labware_command(
             namespace=command.params.namespace,
             loadName=command.params.loadName,
             location=LabwareLocationAdapter.validate_python(
-                location.dict() if isinstance(location, Location) else location
+                location.model_dump() if isinstance(location, Location) else location
             ),
         ),
         key=command.key,
@@ -112,7 +112,7 @@ def _translate_module_command(
         params=pe_commands.LoadModuleParams(
             model=ModuleModel(modules[module_id].model),
             location=DeckSlotLocation.model_validate(
-                location.dict() if isinstance(location, Location) else location
+                location.model_dump() if isinstance(location, Location) else location
             ),
             moduleId=command.params.moduleId,
         ),
@@ -134,7 +134,7 @@ def _translate_v7_module_command(
         params=pe_commands.LoadModuleParams(
             model=ModuleModel(command.params.model),
             location=DeckSlotLocation.model_validate(
-                location.dict() if isinstance(location, Location) else location
+                location.model_dump() if isinstance(location, Location) else location
             ),
             moduleId=command.params.moduleId,
         ),
@@ -188,7 +188,7 @@ def _translate_simple_command(
         protocol_schema_v8.Command,
     ],
 ) -> pe_commands.CommandCreate:
-    dict_command = command.dict(exclude_none=True)
+    dict_command = command.model_dump(exclude_none=True)
 
     # map deprecated `delay` commands to `waitForResume` / `waitForDuration`
     if dict_command["commandType"] == "delay":

@@ -1,4 +1,5 @@
 """Command factories to use in tests as data fixtures."""
+
 from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional, cast, Dict
@@ -203,7 +204,7 @@ def create_load_module_command(
         moduleId=module_id,
         model=model,
         serialNumber=None,
-        definition=ModuleDefinition.construct(),
+        definition=ModuleDefinition.model_construct(),  # type: ignore[call-arg]
     )
 
     return cmd.LoadModule(

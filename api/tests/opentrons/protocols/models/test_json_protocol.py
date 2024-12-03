@@ -28,4 +28,4 @@ def test_json_protocol_model(
     d = json_protocol.Model.model_validate(fx)
 
     # Compare the dict created by pydantic to the loaded json
-    assert d.dict(exclude_unset=True, by_alias=True) == fx
+    assert d.model_dump(exclude_unset=True, by_alias=True) == fx
