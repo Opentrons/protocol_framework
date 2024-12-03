@@ -1,9 +1,11 @@
 """LoadLiquidClass stores the liquid class settings used for a transfer into the Protocol Engine."""
 from __future__ import annotations
 
-from typing import Optional, Type, TYPE_CHECKING
+from typing import Optional, Type, TYPE_CHECKING, Any
+
 from typing_extensions import Literal
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ..errors import LiquidClassDoesNotExistError
@@ -19,13 +21,18 @@ if TYPE_CHECKING:
 LoadLiquidClassCommandType = Literal["loadLiquidClass"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default")
+
+
 class LoadLiquidClassParams(BaseModel):
     """The liquid class transfer properties to store."""
 
-    liquidClassId: Optional[str] = Field(
+    liquidClassId: str | SkipJsonSchema[None] = Field(
         None,
         description="Unique identifier for the liquid class to store. "
         "If you do not supply a liquidClassId, we will generate one.",
+        json_schema_extra=_remove_default,
     )
     liquidClassRecord: LiquidClassRecord = Field(
         ...,

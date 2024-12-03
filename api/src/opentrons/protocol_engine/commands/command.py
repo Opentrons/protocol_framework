@@ -14,9 +14,12 @@ from typing import (
     List,
     Type,
     Union,
+    Any,
+    Dict,
 )
 
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.protocol_engine.state.update_types import StateUpdate
@@ -61,6 +64,10 @@ class CommandIntent(str, enum.Enum):
     FIXIT = "fixit"
 
 
+def _pop_default(s: Dict[str, Any]) -> None:
+    s.pop("default")
+
+
 class BaseCommandCreate(
     BaseModel,
     # These type parameters need to be invariant because our fields are mutable.
@@ -80,7 +87,7 @@ class BaseCommandCreate(
         ),
     )
     params: _ParamsT = Field(..., description="Command execution data payload")
-    intent: Optional[CommandIntent] = Field(
+    intent: CommandIntent | SkipJsonSchema[None] = Field(
         None,
         description=(
             "The reason the command was added. If not specified or `protocol`,"
@@ -93,14 +100,16 @@ class BaseCommandCreate(
             "Use setup commands for activities like pre-run calibration checks"
             " and module setup, like pre-heating."
         ),
+        json_schema_extra=_pop_default,
     )
-    key: Optional[str] = Field(
+    key: str | SkipJsonSchema[None] = Field(
         None,
         description=(
             "A key value, unique in this run, that can be used to track"
             " the same logical command across multiple runs of the same protocol."
             " If a value is not provided, one will be generated."
         ),
+        json_schema_extra=_pop_default,
     )
 
 

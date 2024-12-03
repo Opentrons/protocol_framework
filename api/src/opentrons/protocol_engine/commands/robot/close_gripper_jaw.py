@@ -1,10 +1,12 @@
 """Command models for opening a gripper jaw."""
 from __future__ import annotations
-from typing import Literal, Type, Optional
-from opentrons.hardware_control import HardwareControlAPI
-from opentrons.protocol_engine.resources import ensure_ot3_hardware
+from typing import Literal, Type, Optional, Any
 
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
+
+from opentrons.hardware_control import HardwareControlAPI
+from opentrons.protocol_engine.resources import ensure_ot3_hardware
 
 from ..command import (
     AbstractCommandImpl,
@@ -18,12 +20,17 @@ from opentrons.protocol_engine.errors.error_occurrence import ErrorOccurrence
 closeGripperJawCommandType = Literal["robot/closeGripperJaw"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default")
+
+
 class closeGripperJawParams(BaseModel):
     """Payload required to close a gripper."""
 
-    force: Optional[float] = Field(
+    force: float | SkipJsonSchema[None] = Field(
         default=None,
         description="The force the gripper should use to hold the jaws, falls to default if none is provided.",
+        json_schema_extra=_remove_default,
     )
 
 

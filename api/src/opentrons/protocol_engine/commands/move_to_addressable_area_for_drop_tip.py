@@ -1,8 +1,10 @@
 """Move to addressable area for drop tip command request, result, and implementation models."""
 from __future__ import annotations
-from pydantic import Field
-from typing import TYPE_CHECKING, Optional, Type
+from typing import TYPE_CHECKING, Optional, Type, Any
 from typing_extensions import Literal
+
+from pydantic import Field
+from pydantic.json_schema import SkipJsonSchema
 
 from ..errors import LocationNotAccessibleByPipetteError
 from ..types import AddressableOffsetVector
@@ -30,6 +32,10 @@ if TYPE_CHECKING:
     from ..resources.model_utils import ModelUtils
 
 MoveToAddressableAreaForDropTipCommandType = Literal["moveToAddressableAreaForDropTip"]
+
+
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default")
 
 
 class MoveToAddressableAreaForDropTipParams(PipetteIdMixin, MovementMixin):
@@ -65,7 +71,7 @@ class MoveToAddressableAreaForDropTipParams(PipetteIdMixin, MovementMixin):
         AddressableOffsetVector(x=0, y=0, z=0),
         description="Relative offset of addressable area to move pipette's critical point.",
     )
-    alternateDropLocation: Optional[bool] = Field(
+    alternateDropLocation: bool | SkipJsonSchema[None] = Field(
         False,
         description=(
             "Whether to alternate location where tip is dropped within the addressable area."
@@ -74,8 +80,9 @@ class MoveToAddressableAreaForDropTipParams(PipetteIdMixin, MovementMixin):
             " labware well."
             " If False, the tip will be dropped at the top center of the area."
         ),
+        json_schema_extra=_remove_default,
     )
-    ignoreTipConfiguration: Optional[bool] = Field(
+    ignoreTipConfiguration: bool | SkipJsonSchema[None] = Field(
         True,
         description=(
             "Whether to utilize the critical point of the tip configuraiton when moving to an addressable area."
@@ -83,6 +90,7 @@ class MoveToAddressableAreaForDropTipParams(PipetteIdMixin, MovementMixin):
             " as the critical point for movement."
             " If False, this command will use the critical point provided by the current tip configuration."
         ),
+        json_schema_extra=_remove_default,
     )
 
 

@@ -1,7 +1,7 @@
 """Python shared data models for liquid class definitions."""
 
 from enum import Enum
-from typing import TYPE_CHECKING, Literal, Union, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Literal, Union, Optional, Sequence, Tuple, Any
 
 from pydantic import (
     BaseModel,
@@ -13,6 +13,7 @@ from pydantic import (
     StrictInt,
     StrictFloat,
 )
+from pydantic.json_schema import SkipJsonSchema
 
 
 if TYPE_CHECKING:
@@ -34,6 +35,10 @@ LiquidHandlingPropertyByVolume = Sequence[Tuple[_NonNegativeNumber, _NonNegative
 
 CorrectionByVolume = Sequence[Tuple[_NonNegativeNumber, _Number]]
 """Settings for correctionByVolume, which unlike other `byVolume` properties allows negative values with volume."""
+
+
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default")
 
 
 class PositionReference(Enum):
@@ -73,8 +78,10 @@ class DelayProperties(BaseModel):
     """Shared properties for delay.."""
 
     enable: bool = Field(..., description="Whether delay is enabled.")
-    params: Optional[DelayParams] = Field(
-        None, description="Parameters for the delay function."
+    params: DelayParams | SkipJsonSchema[None] = Field(
+        None,
+        description="Parameters for the delay function.",
+        json_schema_extra=_remove_default,
     )
 
     @field_validator("params")
@@ -110,8 +117,10 @@ class TouchTipProperties(BaseModel):
     """Shared properties for the touch-tip function."""
 
     enable: bool = Field(..., description="Whether touch-tip is enabled.")
-    params: Optional[LiquidClassTouchTipParams] = Field(
-        None, description="Parameters for the touch-tip function."
+    params: LiquidClassTouchTipParams | SkipJsonSchema[None] = Field(
+        None,
+        description="Parameters for the touch-tip function.",
+        json_schema_extra=_remove_default,
     )
 
     @field_validator("params")
@@ -139,8 +148,10 @@ class MixProperties(BaseModel):
     """Mixing properties."""
 
     enable: bool = Field(..., description="Whether mix is enabled.")
-    params: Optional[MixParams] = Field(
-        None, description="Parameters for the mix function."
+    params: MixParams | SkipJsonSchema[None] = Field(
+        None,
+        description="Parameters for the mix function.",
+        json_schema_extra=_remove_default,
     )
 
     @field_validator("params")
@@ -168,8 +179,10 @@ class BlowoutProperties(BaseModel):
     """Blowout properties."""
 
     enable: bool = Field(..., description="Whether blow-out is enabled.")
-    params: Optional[BlowoutParams] = Field(
-        None, description="Parameters for the blowout function."
+    params: BlowoutParams | SkipJsonSchema[None] = Field(
+        None,
+        description="Parameters for the blowout function.",
+        json_schema_extra=_remove_default,
     )
 
     @field_validator("params")
@@ -349,8 +362,9 @@ class ByTipTypeSetting(BaseModel):
     singleDispense: SingleDispenseProperties = Field(
         ..., description="Single dispense parameters for this tip type."
     )
-    multiDispense: Optional[MultiDispenseProperties] = Field(
-        None, description="Optional multi-dispense parameters for this tip type."
+    multiDispense: MultiDispenseProperties | SkipJsonSchema[None] = Field(
+        None, description="Optional multi-dispense parameters for this tip type.",
+        json_schema_extra=_remove_default,
     )
 
 

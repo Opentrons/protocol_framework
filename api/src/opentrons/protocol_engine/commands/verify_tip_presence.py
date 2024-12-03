@@ -1,8 +1,9 @@
 """Verify tip presence command request, result and implementation models."""
 from __future__ import annotations
+from typing import TYPE_CHECKING, Optional, Type, Any
 
 from pydantic import Field, BaseModel
-from typing import TYPE_CHECKING, Optional, Type
+from pydantic.json_schema import SkipJsonSchema
 from typing_extensions import Literal
 
 from .pipetting_common import PipetteIdMixin
@@ -18,14 +19,20 @@ if TYPE_CHECKING:
 VerifyTipPresenceCommandType = Literal["verifyTipPresence"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default")
+
+
 class VerifyTipPresenceParams(PipetteIdMixin):
     """Payload required for a VerifyTipPresence command."""
 
     expectedState: TipPresenceStatus = Field(
         ..., description="The expected tip presence status on the pipette."
     )
-    followSingularSensor: Optional[InstrumentSensorId] = Field(
-        default=None, description="The sensor id to follow if the other can be ignored."
+    followSingularSensor: InstrumentSensorId | SkipJsonSchema[None] = Field(
+        default=None,
+        description="The sensor id to follow if the other can be ignored.",
+        json_schema_extra=_remove_default,
     )
 
 

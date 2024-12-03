@@ -1,9 +1,10 @@
 """Dispense-in-place command request, result, and implementation models."""
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Optional, Type, Union
+from typing import TYPE_CHECKING, Optional, Type, Union, Any
 from typing_extensions import Literal
 from pydantic import Field
+from pydantic.json_schema import SkipJsonSchema
 
 from .pipetting_common import (
     PipetteIdMixin,
@@ -32,12 +33,17 @@ if TYPE_CHECKING:
 DispenseInPlaceCommandType = Literal["dispenseInPlace"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default")
+
+
 class DispenseInPlaceParams(PipetteIdMixin, DispenseVolumeMixin, FlowRateMixin):
     """Payload required to dispense in place."""
 
-    pushOut: Optional[float] = Field(
+    pushOut: float | SkipJsonSchema[None] = Field(
         None,
         description="push the plunger a small amount farther than necessary for accurate low-volume dispensing",
+        json_schema_extra=_remove_default,
     )
 
 

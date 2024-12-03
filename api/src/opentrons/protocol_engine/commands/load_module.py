@@ -1,8 +1,9 @@
 """Implementation, request models, and response models for the load module command."""
 from __future__ import annotations
-from typing import TYPE_CHECKING, Optional, Type
+from typing import TYPE_CHECKING, Optional, Type, Any
 from typing_extensions import Literal
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ..errors.error_occurrence import ErrorOccurrence
@@ -23,6 +24,10 @@ if TYPE_CHECKING:
 
 
 LoadModuleCommandType = Literal["loadModule"]
+
+
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default")
 
 
 class LoadModuleParams(BaseModel):
@@ -57,12 +62,13 @@ class LoadModuleParams(BaseModel):
         ),
     )
 
-    moduleId: Optional[str] = Field(
+    moduleId: str | SkipJsonSchema[None] = Field(
         None,
         description=(
             "An optional ID to assign to this module."
             " If None, an ID will be generated."
         ),
+        json_schema_extra=_remove_default,
     )
 
 

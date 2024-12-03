@@ -1,10 +1,11 @@
 """The liquidProbe and tryLiquidProbe commands."""
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, NamedTuple, Optional, Type, Union
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, NamedTuple, Optional, Type, Union, Any
 
+from typing_extensions import Literal
 from pydantic import Field
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.errors.exceptions import (
@@ -47,6 +48,10 @@ if TYPE_CHECKING:
     from ..state.state import StateView
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default")
+
+
 LiquidProbeCommandType = Literal["liquidProbe"]
 TryLiquidProbeCommandType = Literal["tryLiquidProbe"]
 
@@ -82,12 +87,13 @@ class LiquidProbeResult(DestinationPositionResult):
 class TryLiquidProbeResult(DestinationPositionResult):
     """Result data from the execution of a `tryLiquidProbe` command."""
 
-    z_position: Optional[float] = Field(
+    z_position: float | SkipJsonSchema[None] = Field(
         ...,
         description=(
             "The Z coordinate, in mm, of the found liquid in deck space."
             " If no liquid was found, `null` or omitted."
         ),
+        json_schema_extra=_remove_default,
     )
 
 

@@ -1,9 +1,11 @@
 """Touch tip command request, result, and implementation models."""
 
 from __future__ import annotations
-from pydantic import Field
-from typing import TYPE_CHECKING, Optional, Type
+from typing import TYPE_CHECKING, Optional, Type, Any
+
 from typing_extensions import Literal
+from pydantic import Field
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.types import Point
 
@@ -35,6 +37,10 @@ if TYPE_CHECKING:
 TouchTipCommandType = Literal["touchTip"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default")
+
+
 class TouchTipParams(PipetteIdMixin, WellLocationMixin):
     """Payload needed to touch a pipette tip the sides of a specific well."""
 
@@ -45,12 +51,13 @@ class TouchTipParams(PipetteIdMixin, WellLocationMixin):
         ),
     )
 
-    speed: Optional[float] = Field(
+    speed: float | SkipJsonSchema[None] = Field(
         None,
         description=(
             "Override the travel speed in mm/s."
             " This controls the straight linear speed of motion."
         ),
+        json_schema_extra=_remove_default,
     )
 
 
