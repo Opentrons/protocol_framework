@@ -1,8 +1,8 @@
 from enum import Enum
-from typing import Any, List, Optional, Dict, Union
+from typing import Any, List, Optional, Dict
 from typing_extensions import Literal
 
-from pydantic import BaseModel, Field, Extra, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 
 from opentrons_shared_data.labware.models import LabwareDefinition
 from opentrons_shared_data.command import known_schema_ids
@@ -18,7 +18,7 @@ from .shared_models import (
 class Command(BaseModel):
     commandType: str
     params: Dict[str, Any]
-    key: Optional[str]
+    key: Optional[str] = None
 
 
 class CommandAnnotation(BaseModel):
@@ -51,4 +51,4 @@ class ProtocolSchemaV8(BaseModel):
     commandAnnotationSchemaId: Literal["opentronsCommandAnnotationSchemaV1"]
     commandAnnotations: List[CommandAnnotation]
     designerApplication: Optional[DesignerApplication] = None
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, use_enum_values=True)

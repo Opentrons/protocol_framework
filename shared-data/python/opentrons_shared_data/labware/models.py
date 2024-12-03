@@ -242,8 +242,7 @@ class SphericalSegment(BaseModel):
     def count(self) -> int:
         return self.xCount * self.yCount
 
-    class Config:
-        keep_untouched = (cached_property,)
+    model_config = ConfigDict(ignored_types=(cached_property,))
 
 
 class ConicalFrustum(BaseModel):
@@ -277,8 +276,7 @@ class ConicalFrustum(BaseModel):
     def count(self) -> int:
         return self.xCount * self.yCount
 
-    class Config:
-        keep_untouched = (cached_property,)
+    model_config = ConfigDict(ignored_types=(cached_property,))
 
 
 class CuboidalFrustum(BaseModel):
@@ -321,8 +319,7 @@ class CuboidalFrustum(BaseModel):
     def count(self) -> int:
         return self.xCount * self.yCount
 
-    class Config:
-        keep_untouched = (cached_property,)
+    model_config = ConfigDict(ignored_types=(cached_property,))
 
 
 # A squared cone is the intersection of a cube and a cone that both
@@ -463,8 +460,7 @@ class SquaredConeSegment(BaseModel):
     def count(self) -> int:
         return self.xCount * self.yCount
 
-    class Config:
-        keep_untouched = (cached_property,)
+    model_config = ConfigDict(ignored_types=(cached_property,))
 
 
 """
@@ -589,8 +585,7 @@ class RoundedCuboidSegment(BaseModel):
     def count(self) -> int:
         return self.xCount * self.yCount
 
-    class Config:
-        keep_untouched = (cached_property,)
+    model_config = ConfigDict(ignored_types=(cached_property,))
 
 
 class Metadata1(BaseModel):

@@ -1,11 +1,12 @@
 """Python shared data models for liquid class definitions."""
 
 from enum import Enum
-from typing import TYPE_CHECKING, Literal, Union, Optional, Dict, Any, Sequence, Tuple
+from typing import TYPE_CHECKING, Literal, Union, Optional, Sequence, Tuple
 
 from pydantic import (
     BaseModel,
-    validator,
+    field_validator,
+    ValidationInfo,
     Field,
     conint,
     confloat,
@@ -76,11 +77,12 @@ class DelayProperties(BaseModel):
         None, description="Parameters for the delay function."
     )
 
-    @validator("params")
+    @field_validator("params")
+    @classmethod
     def _validate_params(
-        cls, v: Optional[DelayParams], values: Dict[str, Any]
+        cls, v: Optional[DelayParams], info: ValidationInfo
     ) -> Optional[DelayParams]:
-        if v is None and values["enable"]:
+        if v is None and info.data.get("enable", False):
             raise ValueError("If enable is true parameters for delay must be defined.")
         return v
 
@@ -112,11 +114,12 @@ class TouchTipProperties(BaseModel):
         None, description="Parameters for the touch-tip function."
     )
 
-    @validator("params")
+    @field_validator("params")
+    @classmethod
     def _validate_params(
-        cls, v: Optional[LiquidClassTouchTipParams], values: Dict[str, Any]
+        cls, v: Optional[LiquidClassTouchTipParams], info: ValidationInfo
     ) -> Optional[LiquidClassTouchTipParams]:
-        if v is None and values["enable"]:
+        if v is None and info.data.get("enable", False):
             raise ValueError(
                 "If enable is true parameters for touch tip must be defined."
             )
@@ -140,11 +143,12 @@ class MixProperties(BaseModel):
         None, description="Parameters for the mix function."
     )
 
-    @validator("params")
+    @field_validator("params")
+    @classmethod
     def _validate_params(
-        cls, v: Optional[MixParams], values: Dict[str, Any]
+        cls, v: Optional[MixParams], info: ValidationInfo
     ) -> Optional[MixParams]:
-        if v is None and values["enable"]:
+        if v is None and info.data.get("enable", False):
             raise ValueError("If enable is true parameters for mix must be defined.")
         return v
 
@@ -168,11 +172,12 @@ class BlowoutProperties(BaseModel):
         None, description="Parameters for the blowout function."
     )
 
-    @validator("params")
+    @field_validator("params")
+    @classmethod
     def _validate_params(
-        cls, v: Optional[BlowoutParams], values: Dict[str, Any]
+        cls, v: Optional[BlowoutParams], info: ValidationInfo
     ) -> Optional[BlowoutParams]:
-        if v is None and values["enable"]:
+        if v is None and info.data.get("enable", False):
             raise ValueError(
                 "If enable is true parameters for blowout must be defined."
             )
