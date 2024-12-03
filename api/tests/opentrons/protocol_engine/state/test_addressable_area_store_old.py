@@ -9,8 +9,6 @@ import pytest
 
 from opentrons_shared_data.deck.types import DeckDefinitionV5
 
-from opentrons.types import DeckSlotName
-
 from opentrons.protocol_engine.commands import Command, Comment
 from opentrons.protocol_engine.actions import (
     SucceedCommandAction,
@@ -25,13 +23,6 @@ from opentrons.protocol_engine.state.addressable_areas import (
 from opentrons.protocol_engine.types import (
     DeckType,
     DeckConfigurationType,
-    LabwareMovementStrategy,
-    DeckSlotLocation,
-    AddressableAreaLocation,
-)
-
-from .command_fixtures import (
-    create_move_labware_command,
 )
 
 
@@ -168,37 +159,6 @@ def test_initial_state(
     assert len(subject.state.loaded_addressable_areas_by_name) == 16
 
 
-# todo(mm, 2024-12-02): Delete in favor of test_addressable_area_usage_in_simulation()
-# when all of these commands have been ported to StateUpdate.
-@pytest.mark.parametrize(
-    ("command", "expected_area"),
-    (
-        (
-            create_move_labware_command(
-                new_location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
-                strategy=LabwareMovementStrategy.USING_GRIPPER,
-            ),
-            "A1",
-        ),
-        (
-            create_move_labware_command(
-                new_location=AddressableAreaLocation(addressableAreaName="A4"),
-                strategy=LabwareMovementStrategy.USING_GRIPPER,
-            ),
-            "A4",
-        ),
-    ),
-)
-def test_addressable_area_referencing_commands_load_on_simulated_deck(
-    command: Command,
-    expected_area: str,
-    simulated_subject: AddressableAreaStore,
-) -> None:
-    """It should check and store the addressable area when referenced in a command."""
-    simulated_subject.handle_action(SucceedCommandAction(command=command))
-    assert expected_area in simulated_subject.state.loaded_addressable_areas_by_name
-
-
 @pytest.mark.parametrize("addressable_area_name", ["A1", "A4", "gripperWasteChute"])
 def test_addressable_area_usage_in_simulation(
     simulated_subject: AddressableAreaStore,
@@ -223,37 +183,6 @@ def test_addressable_area_usage_in_simulation(
         addressable_area_name
         in simulated_subject.state.loaded_addressable_areas_by_name
     )
-
-
-# todo(mm, 2024-12-02): Delete in favor of test_addressable_area_usage()
-# when all of these commands have been ported to StateUpdate.
-@pytest.mark.parametrize(
-    ("command", "expected_area"),
-    (
-        (
-            create_move_labware_command(
-                new_location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
-                strategy=LabwareMovementStrategy.USING_GRIPPER,
-            ),
-            "A1",
-        ),
-        (
-            create_move_labware_command(
-                new_location=AddressableAreaLocation(addressableAreaName="C4"),
-                strategy=LabwareMovementStrategy.USING_GRIPPER,
-            ),
-            "C4",
-        ),
-    ),
-)
-def test_addressable_area_referencing_commands_load(
-    command: Command,
-    expected_area: str,
-    subject: AddressableAreaStore,
-) -> None:
-    """It should check that the addressable area is in the deck config."""
-    subject.handle_action(SucceedCommandAction(command=command))
-    assert expected_area in subject.state.loaded_addressable_areas_by_name
 
 
 @pytest.mark.parametrize("addressable_area_name", ["A1", "C4"])

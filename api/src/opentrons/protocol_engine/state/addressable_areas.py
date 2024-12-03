@@ -12,10 +12,6 @@ from opentrons_shared_data.deck.types import (
 
 from opentrons.types import Point, DeckSlotName
 
-from ..commands import (
-    Command,
-    MoveLabwareResult,
-)
 from ..errors import (
     IncompatibleAddressableAreaError,
     AreaNotInDeckConfigurationError,
@@ -35,7 +31,6 @@ from ..types import (
 from ..actions.get_state_update import get_state_updates
 from ..actions import (
     Action,
-    SucceedCommandAction,
     SetDeckConfigurationAction,
     AddAddressableAreaAction,
 )
@@ -199,9 +194,7 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
                     state_update.addressable_area_used.addressable_area_name
                 )
 
-        if isinstance(action, SucceedCommandAction):
-            self._handle_command(action.command)
-        elif isinstance(action, AddAddressableAreaAction):
+        if isinstance(action, AddAddressableAreaAction):
             self._add_addressable_area(action.addressable_area_name)
         elif isinstance(action, SetDeckConfigurationAction):
             current_state = self._state
@@ -216,13 +209,6 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
                         deck_definition=current_state.deck_definition,
                     )
                 )
-
-    def _handle_command(self, command: Command) -> None:
-        """Modify state in reaction to a command."""
-        if isinstance(command.result, MoveLabwareResult):
-            location = command.params.newLocation
-            if isinstance(location, (DeckSlotLocation, AddressableAreaLocation)):
-                self._add_addressable_area(location)
 
     @staticmethod
     def _get_addressable_areas_from_deck_configuration(
