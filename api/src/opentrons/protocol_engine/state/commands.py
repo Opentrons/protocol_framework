@@ -579,7 +579,7 @@ class CommandStore(HasState[CommandState], HandlesActions):
             )
 
 
-class CommandView(HasState[CommandState]):
+class CommandView:
     """Read-only command state view."""
 
     _state: CommandState
@@ -916,7 +916,7 @@ class CommandView(HasState[CommandState]):
         fatal error of the overall run coming from anywhere in the Python script,
         including in between commands.
         """
-        failed_command = self.state.failed_command
+        failed_command = self._state.failed_command
         if (
             failed_command
             and failed_command.command.error
@@ -932,7 +932,7 @@ class CommandView(HasState[CommandState]):
 
         The command ID is assumed to point to a failed command.
         """
-        return self.state.command_error_recovery_types[command_id]
+        return self._state.command_error_recovery_types[command_id]
 
     def get_is_stopped(self) -> bool:
         """Get whether an engine stop has completed."""
