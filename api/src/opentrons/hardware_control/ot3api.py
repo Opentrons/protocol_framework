@@ -300,8 +300,11 @@ class OT3API(
     async def set_system_constraints_for_plunger_acceleration(
         self, mount: OT3Mount, acceleration: float
     ) -> None:
+        high_speed_pipette = self._pipette_handler.get_pipette(
+            mount
+        ).is_high_speed_pipette()
         self._backend.update_constraints_for_plunger_acceleration(
-            mount, acceleration, self._gantry_load
+            mount, acceleration, self._gantry_load, high_speed_pipette
         )
 
     @contextlib.asynccontextmanager
@@ -635,24 +638,12 @@ class OT3API(
         )
         self._pipette_handler.hardware_instruments[mount] = p
 
-        if self._pipette_handler.has_pipette(mount):
-            self._confirm_pipette_motion_constraints(mount)
-
         if config is not None:
             self._set_pressure_sensor_available(mount, instrument_config=config)
 
         # TODO (lc 12-5-2022) Properly support backwards compatibility
         # when applicable
         return skipped
-
-    def _confirm_pipette_motion_constraints(
-        self,
-        mount: OT3Mount,
-    ) -> None:
-        if self._pipette_handler.get_pipette(mount).is_high_speed_pipette():
-            self._backend.update_constraints_for_emulsifying_pipette(
-                mount, self.gantry_load
-            )
 
     def get_pressure_sensor_available(self, mount: OT3Mount) -> bool:
         pip_axis = Axis.of_main_tool_actuator(mount)
