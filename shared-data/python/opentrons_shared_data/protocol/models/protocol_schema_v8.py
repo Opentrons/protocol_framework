@@ -28,7 +28,9 @@ class CommandAnnotation(BaseModel):
 
 
 CommandSchemaId = Enum(  # type: ignore[misc]
-    "CommandSchemaId", ((schema_id, schema_id) for schema_id in known_schema_ids())
+    "CommandSchemaId",
+    ((schema_id, schema_id) for schema_id in known_schema_ids()),
+    type=str,
 )
 
 
@@ -51,4 +53,4 @@ class ProtocolSchemaV8(BaseModel):
     commandAnnotationSchemaId: Literal["opentronsCommandAnnotationSchemaV1"]
     commandAnnotations: List[CommandAnnotation]
     designerApplication: Optional[DesignerApplication] = None
-    model_config = ConfigDict(populate_by_name=True, use_enum_values=True)
+    model_config = ConfigDict(populate_by_name=True)
