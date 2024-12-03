@@ -151,7 +151,9 @@ def run(ctx: ProtocolContext) -> None:
     tiprack_200_1 = ctx.load_labware("opentrons_flex_96_tiprack_200ul", "C1")
     tiprack_200_2 = ctx.load_labware("opentrons_flex_96_tiprack_200ul", "C3")
 
-    ctx.load_waste_chute()
+    if trash_tips:
+        ctx.load_waste_chute()
+
     unused_lids: List[Labware] = []
     # Load TC Lids
     if disposable_lid:
@@ -195,53 +197,23 @@ def run(ctx: ProtocolContext) -> None:
     etoh2 = reservoir.columns()[5]
     etoh2_res = etoh2[0]
 
-    liquid_vols_and_wells = {
-        "Samples": [
-            {"well": sample_plate.wells()[: 8 * num_cols], "volume": sample_vol}
-        ],
+    liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
+        "Samples": [{"well": sample_plate.wells()[: 8 * num_cols], "volume": 35.0}],
         "Final Library": [
-            {"well": sample_plate_2.wells()[: 8 * num_cols], "volume": elution_vol_2}
+            {"well": sample_plate_2.wells()[: 8 * num_cols], "volume": 17.0}
         ],
-        "Adapters": [{"well": adapters, "volume": adapter_vol * 2.0}],
+        "Adapters": [{"well": adapters, "volume": 10.0}],
         "End Repair Mix": [
-            {
-                "well": end_repair_cols,
-                "volume": (end_repair_vol * num_cols) + (0.1 * end_repair_vol),
-            }
+            {"well": temp_plate.wells()[: 8 * num_cols], "volume": 61.0}
         ],
-        "Fragmentation Mix": [
-            {"well": frag, "volume": (frag_vol * num_cols) + (0.1 * frag_vol)}
-        ],
-        "Ligation Mix": [
-            {
-                "well": ligation,
-                "volume": (ligation_vol * num_cols) + (0.1 * ligation_vol),
-            }
-        ],
-        "Amplification Mix": [
-            {
-                "well": lib_amplification_wells,
-                "volume": (amplification_vol * num_cols) + (0.1 * amplification_vol),
-            }
-        ],
-        "Ampure Beads": [
-            {
-                "well": bead,
-                "volume": (bead_vol * num_cols) + (0.1 * bead_vol * num_cols),
-            }
-        ],
-        "Resuspension Buffer": [
-            {"well": rsb, "volume": (rsb_vol * num_cols) + (0.1 * rsb_vol * num_cols)}
-        ],
+        "Fragmentation Mix": [{"well": frag, "volume": 91.5}],
+        "Ligation Mix": [{"well": ligation, "volume": 200.0}],
+        "Amplification Mix": [{"well": lib_amplification_wells, "volume": 183.0}],
+        "Ampure Beads": [{"well": bead, "volume": 910.8}],
+        "Resuspension Buffer": [{"well": rsb, "volume": 297.0}],
         "Ethanol 80%": [
-            {
-                "well": etoh1,
-                "volume": (etoh_vol * num_cols) + (0.1 * etoh_vol * num_cols),
-            },
-            {
-                "well": etoh2,
-                "volume": (etoh_vol * num_cols) + (0.1 * etoh_vol * num_cols),
-            },
+            {"well": etoh1, "volume": 2000.0},
+            {"well": etoh2, "volume": 2000.0},
         ],
     }
     waste1 = reservoir.columns()[6]

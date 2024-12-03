@@ -36,10 +36,57 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     elution_plate = protocol.load_labware(
         "armadillo_96_wellplate_200ul_pcr_full_skirt", "B1", "Elution Plate"
     )
-
-    p1000.distribute(350, source_reservoir["A1"], lysis_reservoir.wells())
-    p1000.distribute(440, source_reservoir["A1"], bind_reservoir.wells())
-    p1000.distribute(1300, source_reservoir["A1"], wash1_reservoir.wells())
-    p1000.distribute(700, source_reservoir["A1"], wash2_reservoir.wells())
-    p1000.distribute(180, source_reservoir["A1"], sample_plate.wells())
-    p1000.distribute(100, source_reservoir["A1"], elution_plate.wells())
+    p1000.transfer(
+        volume=350,
+        source=source_reservoir["A1"].bottom(z=2),
+        dest=lysis_reservoir.wells(),
+        blow_out=True,
+        blowout_location="source well",
+        new_tip="once",
+        trash=False,
+    )
+    p1000.transfer(
+        440,
+        source=source_reservoir["A1"].bottom(z=2),
+        dest=bind_reservoir.wells(),
+        blow_out=True,
+        blowout_location="source well",
+        new_tip="once",
+        trash=False,
+    )
+    p1000.transfer(
+        1300,
+        source_reservoir["A1"].bottom(z=2),
+        wash1_reservoir.wells(),
+        blow_out=True,
+        blowout_location="source well",
+        new_tip="once",
+        trash=False,
+    )
+    p1000.transfer(
+        700,
+        source_reservoir["A1"].bottom(z=2),
+        wash2_reservoir.wells(),
+        blow_out=True,
+        blowout_location="source well",
+        new_tip="once",
+        trash=False,
+    )
+    p1000.transfer(
+        180,
+        source_reservoir["A1"].bottom(z=2),
+        sample_plate.wells(),
+        blow_out=True,
+        blowout_location="source well",
+        new_tip="once",
+        trash=False,
+    )
+    p1000.transfer(
+        100,
+        source_reservoir["A1"].bottom(z=2),
+        elution_plate.wells(),
+        blow_out=True,
+        blowout_location="source well",
+        new_tip="once",
+        trash=False,
+    )
