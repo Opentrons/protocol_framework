@@ -56,6 +56,7 @@ from opentrons_shared_data.pipette.types import (
     UlPerMmAction,
     PipetteName,
     PipetteModel,
+    PipetteOEMType,
 )
 from opentrons.hardware_control.dev_types import InstrumentHardwareConfigs
 
@@ -112,17 +113,20 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
             pipette_type=config.pipette_type,
             pipette_channels=config.channels,
             pipette_generation=config.display_category,
+            oem_type=PipetteOEMType.OT,
         )
         self._acting_as = self._pipette_name
         self._pipette_model = PipetteModelVersionType(
             pipette_type=config.pipette_type,
             pipette_channels=config.channels,
             pipette_version=config.version,
+            oem_type=PipetteOEMType.OT,
         )
         self._valid_nozzle_maps = load_pipette_data.load_valid_nozzle_maps(
             self._pipette_model.pipette_type,
             self._pipette_model.pipette_channels,
             self._pipette_model.pipette_version,
+            self._pipette_model.PipetteOEMType.OT,
         )
         self._nozzle_offset = self._config.nozzle_offset
         self._nozzle_manager = (
@@ -280,6 +284,7 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
             self._pipette_model.pipette_type,
             self._pipette_model.pipette_channels,
             self._pipette_model.pipette_version,
+            self._pipette_model.oem_type,
         )
         self._config_as_dict = self._config.dict()
 

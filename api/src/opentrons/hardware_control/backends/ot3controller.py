@@ -980,6 +980,7 @@ class OT3Controller(FlexBackend):
                     converted_name.pipette_type,
                     converted_name.pipette_channels,
                     converted_name.pipette_version,
+                    converted_name.oem_type,
                 ),
                 "id": OT3Controller._combine_serial_number(attached),
             }

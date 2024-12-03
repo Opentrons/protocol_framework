@@ -238,6 +238,7 @@ def _load_full_mutable_configs(
         pipette_model.pipette_type,
         pipette_model.pipette_channels,
         pipette_model.pipette_version,
+        pipette_model.oem_type,
     )
     base_configs_dict = base_configs.dict(by_alias=True)
     full_mutable_configs = _list_all_mutable_configs(overrides, base_configs_dict)
@@ -334,6 +335,7 @@ def load_with_mutable_configurations(
         pipette_model.pipette_type,
         pipette_model.pipette_channels,
         pipette_model.pipette_version,
+        pipette_model.oem_type,
     )
     # Load overrides if we have a pipette id
     if pipette_serial_number:
@@ -431,6 +433,7 @@ def save_overrides(
         pipette_model.pipette_type,
         pipette_model.pipette_channels,
         pipette_model.pipette_version,
+        pipette_model.oem_type,
     )
     base_configs_dict = base_configs.dict(by_alias=True)
     try:

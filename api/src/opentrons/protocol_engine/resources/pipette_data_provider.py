@@ -96,6 +96,7 @@ class VirtualPipetteDataProvider:
                 config.pipette_type,
                 config.channels,
                 config.version,
+                PipetteOEMType.OT
             )
             new_nozzle_manager = NozzleConfigurationManager.build_from_config(
                 config, valid_nozzle_maps
@@ -128,6 +129,7 @@ class VirtualPipetteDataProvider:
             pipette_model.pipette_type,
             pipette_model.pipette_channels,
             pipette_model.pipette_version,
+            pipette_model.oem_type,
         )
 
         liquid_class = pipette_definition.liquid_class_for_volume_between_default_and_defaultlowvolume(
@@ -161,6 +163,7 @@ class VirtualPipetteDataProvider:
             pipette_model.pipette_type,
             pipette_model.pipette_channels,
             pipette_model.pipette_version,
+            pipette_model.oem_type,
         )
 
     def _get_virtual_pipette_static_config_by_model(  # noqa: C901
@@ -177,6 +180,7 @@ class VirtualPipetteDataProvider:
             pipette_model.pipette_type,
             pipette_model.pipette_channels,
             pipette_model.pipette_version,
+            pipette_model.oem_type,
         )
         try:
             tip_type = pip_types.PipetteTipType(
@@ -193,6 +197,7 @@ class VirtualPipetteDataProvider:
             pipette_model.pipette_type,
             pipette_model.pipette_channels,
             pipette_model.pipette_version,
+            pipette_model.oem_type,
         )
         if pipette_id not in self._nozzle_manager_layout_by_id:
             nozzle_manager = NozzleConfigurationManager.build_from_config(

@@ -111,6 +111,21 @@ class Quirks(enum.Enum):
     highSpeed = "highSpeed"
 
 
+class PipetteOEMType(enum.Enum):
+    OT = "ot"  # opentrons type
+    EM = "em"  # Emulsifying Pipette
+
+    @classmethod
+    def get_oem_from_quirks(cls, quirks: List[Quirks]) -> "PipetteOEMType":
+        """Return an oem type if true based on the quirks."""
+        return cls.EM if Quirks.highSpeed in quirks else cls.OT
+
+    @classmethod
+    def get_oem_from_model_str(cls, model_str: str) -> "PipetteOEMType":
+        """Return an oem type if true based on the model string."""
+        return cls.EM if "multi_em" in model_str else cls.OT
+
+
 class AvailableUnits(enum.Enum):
     mm = "mm"
     amps = "amps"
