@@ -1,4 +1,8 @@
-"""Well state store tests."""
+"""Well state store tests.
+
+DEPRECATED: Testing WellStore independently of WellView is no longer helpful.
+Add new tests to well_state.py, where they can be tested together.
+"""
 
 import pytest
 from datetime import datetime
