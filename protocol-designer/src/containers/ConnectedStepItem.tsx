@@ -2,7 +2,7 @@ import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import uniq from 'lodash/uniq'
 import UAParser from 'ua-parser-js'
-import { Box, useConditionalConfirm } from '@opentrons/components'
+import { useConditionalConfirm } from '@opentrons/components'
 
 import { selectors as uiLabwareSelectors } from '../ui/labware'
 import * as timelineWarningSelectors from '../top-selectors/timelineWarnings'
@@ -31,7 +31,6 @@ import {
   getAdditionalEquipmentEntities,
   getInitialDeckSetup,
 } from '../step-forms/selectors'
-
 import type { ThunkDispatch } from 'redux-thunk'
 import type {
   HoverOnStepAction,
@@ -47,18 +46,14 @@ import type { DeleteModalType } from '../components/modals/ConfirmDeleteModal'
 import type { SubstepIdentifier } from '../steplist/types'
 import type { StepIdType } from '../form-types'
 import type { BaseState, ThunkAction } from '../types'
-
 export interface ConnectedStepItemProps {
   stepId: StepIdType
   stepNumber: number
   onStepContextMenu?: () => void
 }
-
 const nonePressed = (keysPressed: boolean[]): boolean =>
   keysPressed.every(keyPress => keyPress === false)
-
 const getUserOS = (): string | undefined => new UAParser().getOS().name
-
 const getMouseClickKeyInfo = (
   event: React.MouseEvent
 ): { isShiftKeyPressed: boolean; isMetaKeyPressed: boolean } => {
@@ -68,11 +63,11 @@ const getMouseClickKeyInfo = (
     (isMac && event.metaKey) || (!isMac && event.ctrlKey)
   return { isShiftKeyPressed, isMetaKeyPressed }
 }
-
 export const ConnectedStepItem = (
   props: ConnectedStepItemProps
 ): JSX.Element => {
   const { stepId, stepNumber } = props
+
   const step = useSelector(stepFormSelectors.getSavedStepForms)[stepId]
   const argsAndErrors = useSelector(stepFormSelectors.getArgsAndErrorsByStepId)[
     stepId
@@ -85,7 +80,6 @@ export const ConnectedStepItem = (
   const hasFormLevelWarningsPerStep = useSelector(
     dismissSelectors.getHasFormLevelWarningsPerStep
   )
-
   const hasWarnings =
     hasTimelineWarningsPerStep[stepId] || hasFormLevelWarningsPerStep[stepId]
   const initialDeckSetup = useSelector(getInitialDeckSetup)
@@ -100,9 +94,7 @@ export const ConnectedStepItem = (
   const selected: boolean = multiSelectItemIds?.length
     ? multiSelectItemIds.includes(stepId)
     : selectedStepId === stepId
-
   const substeps = useSelector(fileDataSelectors.getSubsteps)[stepId]
-
   const ingredNames = useSelector(labwareIngredSelectors.getLiquidNamesById)
   const labwareNicknamesById = useSelector(
     uiLabwareSelectors.getLabwareNicknamesById
@@ -119,10 +111,8 @@ export const ConnectedStepItem = (
   const batchEditFormHasUnsavedChanges = useSelector(
     stepFormSelectors.getBatchEditFormHasUnsavedChanges
   )
-
   // Actions
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
-
   const highlightSubstep = (payload: SubstepIdentifier): HoverOnSubstepAction =>
     dispatch(stepsActions.hoverOnSubstep(payload))
   const selectStep = (): ThunkAction<any> =>
@@ -138,16 +128,13 @@ export const ConnectedStepItem = (
     dispatch(stepsActions.hoverOnStep(stepId))
   const unhighlightStep = (): HoverOnStepAction =>
     dispatch(stepsActions.hoverOnStep(null))
-
   const handleStepItemSelection = (event: React.MouseEvent): void => {
     const { isShiftKeyPressed, isMetaKeyPressed } = getMouseClickKeyInfo(event)
     let stepsToSelect: StepIdType[] = []
-
     // if user clicked on the last multi-selected step, shift/meta keys don't matter
     const toggledLastSelected = stepId === lastMultiSelectedStepId
     const noModifierKeys =
       nonePressed([isShiftKeyPressed, isMetaKeyPressed]) || toggledLastSelected
-
     if (noModifierKeys) {
       if (multiSelectItemIds) {
         const alreadySelected = multiSelectItemIds.includes(stepId)
@@ -186,7 +173,6 @@ export const ConnectedStepItem = (
       selectMultipleSteps(stepsToSelect, stepId)
     }
   }
-
   // step selection is gated when showConfirmation is true
   const { confirm, showConfirmation, cancel } = useConditionalConfirm(
     handleStepItemSelection,
@@ -196,13 +182,11 @@ export const ConnectedStepItem = (
   )
 
   const stepItemProps: StepItemProps = {
-    stepId,
     description: step.stepDetails,
     rawForm: step,
     stepNumber,
     stepType: step.stepType,
     title: step.stepName,
-
     collapsed,
     error: hasError,
     warning: hasWarnings,
@@ -211,14 +195,12 @@ export const ConnectedStepItem = (
     // no double-highlighting: whole step is only "hovered" when
     // user is not hovering on substep.
     hovered: hoveredStep === stepId && !hoveredSubstep,
-
     highlightStep,
     handleClick: confirm,
     toggleStepCollapsed,
     unhighlightStep,
     isMultiSelectMode,
   }
-
   const stepItemContentsProps: StepItemContentsProps = {
     modules: initialDeckSetup.modules,
     rawForm: step,
@@ -230,7 +212,6 @@ export const ConnectedStepItem = (
     highlightSubstep,
     hoveredSubstep,
   }
-
   const getModalType = (): DeleteModalType => {
     if (isMultiSelectMode) {
       return CLOSE_BATCH_EDIT_FORM
@@ -249,14 +230,9 @@ export const ConnectedStepItem = (
           onCancelClick={cancel}
         />
       )}
-      <Box>
-        <StepItem
-          {...stepItemProps}
-          onStepContextMenu={props.onStepContextMenu}
-        >
-          <StepItemContents {...stepItemContentsProps} />
-        </StepItem>
-      </Box>
+      <StepItem {...stepItemProps} onStepContextMenu={props.onStepContextMenu}>
+        <StepItemContents {...stepItemContentsProps} />
+      </StepItem>
     </>
   )
 }
@@ -283,7 +259,6 @@ export function getMetaSelectedSteps(
   }
   return stepsToSelect
 }
-
 function getShiftSelectedSteps(
   selectedStepId: StepIdType | null,
   orderedStepIds: StepIdType[],
@@ -304,11 +279,9 @@ function getShiftSelectedSteps(
       stepId,
       orderedStepIds
     )
-
     const allSelected: boolean = potentialStepsToSelect
       .slice(1)
       .every(stepId => multiSelectItemIds.includes(stepId))
-
     if (allSelected) {
       // if they're all selected, deselect them all
       if (multiSelectItemIds.length - potentialStepsToSelect.length > 0) {
@@ -327,7 +300,6 @@ function getShiftSelectedSteps(
   }
   return stepsToSelect
 }
-
 function getOrderedStepsInRange(
   lastSelectedStepId: StepIdType,
   stepId: StepIdType,
@@ -335,7 +307,6 @@ function getOrderedStepsInRange(
 ): StepIdType[] {
   const prevIndex: number = orderedStepIds.indexOf(lastSelectedStepId)
   const currentIndex: number = orderedStepIds.indexOf(stepId)
-
   const [startIndex, endIndex] = [prevIndex, currentIndex].sort((a, b) => a - b)
   const orderedSteps = orderedStepIds.slice(startIndex, endIndex + 1)
   return orderedSteps
