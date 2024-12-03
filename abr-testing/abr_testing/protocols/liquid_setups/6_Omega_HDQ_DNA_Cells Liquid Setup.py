@@ -30,11 +30,11 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     bind_reservoir = protocol.load_labware(
         deepwell_type, "D3", "Beads and binding reservoir"
     )
-    wash1_reservoir = protocol.load_labware(deepwell_type, "C3", "Wash 1 and 2 Buffer")
-    wash2_reservoir = protocol.load_labware(deepwell_type, "B3", "Wash 3 Buffer")
+    wash1_reservoir = protocol.load_labware(deepwell_type, "C3", "Wash 1 reservoir")
+    wash2_reservoir = protocol.load_labware(deepwell_type, "B3", "Wash 2 reservoir")
     sample_plate = protocol.load_labware(deepwell_type, "B2", "Sample Plate")
     elution_plate = protocol.load_labware(
-        "armadillo_96_wellplate_200ul_pcr_full_skirt", "B1", "Elution Plate"
+        "armadillo_96_wellplate_200ul_pcr_full_skirt", "B1", "Elution Plate/ reservoir"
     )
     p1000.transfer(
         volume=350,

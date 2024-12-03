@@ -135,15 +135,17 @@ def run(ctx: ProtocolContext) -> None:
     samples_flp = FLP_plate.rows()[0][:num_cols]
 
     sample_plate = ctx.load_labware(
-        "armadillo_96_wellplate_200ul_pcr_full_skirt", "D1", "Sample Pate"
+        "armadillo_96_wellplate_200ul_pcr_full_skirt", "D1", "Sample Plate 1"
     )
 
     sample_plate_2 = ctx.load_labware(
-        "armadillo_96_wellplate_200ul_pcr_full_skirt", "B2", "Sample Pate"
+        "armadillo_96_wellplate_200ul_pcr_full_skirt", "B2", "Sample Plate 2"
     )
     samples_2 = sample_plate_2.rows()[0][:num_cols]
     samples = sample_plate.rows()[0][:num_cols]
-    reservoir = ctx.load_labware("nest_96_wellplate_2ml_deep", "C2")
+    reservoir = ctx.load_labware(
+        "nest_96_wellplate_2ml_deep", "C2", "Beads + Buffer + Ethanol"
+    )
     # Load tipracks
     tiprack_50_1 = ctx.load_labware("opentrons_flex_96_tiprack_50ul", "A3")
     tiprack_50_2 = ctx.load_labware("opentrons_flex_96_tiprack_50ul", "A2")
