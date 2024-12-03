@@ -1,4 +1,5 @@
 """Test for the ProtocolEngine-based instrument API core."""
+
 from typing import cast, Optional
 
 from opentrons_shared_data.errors.exceptions import PipetteLiquidNotFoundError
@@ -530,7 +531,7 @@ def test_aspirate_from_well(
             pipette_id="abc123",
             labware_id="123abc",
             well_name="my cool well",
-            well_location=WellLocation(
+            well_location=LiquidHandlingWellLocation(
                 origin=WellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)
             ),
         ),
@@ -828,7 +829,7 @@ def test_dispense_to_well(
             pipette_id="abc123",
             labware_id="123abc",
             well_name="my cool well",
-            well_location=WellLocation(
+            well_location=LiquidHandlingWellLocation(
                 origin=WellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)
             ),
         ),

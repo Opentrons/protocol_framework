@@ -1,4 +1,5 @@
 """Translation of JSON protocol commands into ProtocolEngine commands."""
+
 from typing import List, Union, Iterator
 from pydantic import ValidationError as PydanticValidationError, TypeAdapter
 
@@ -11,6 +12,7 @@ from opentrons_shared_data.protocol.models import (
     ProtocolSchemaV8,
     protocol_schema_v8,
     Location,
+    #    CommandSchemaId,
 )
 from opentrons_shared_data import command as command_schema
 from opentrons_shared_data.errors.exceptions import InvalidProtocolData, PythonException
@@ -184,7 +186,7 @@ def _translate_simple_command(
         protocol_schema_v6.Command,
         protocol_schema_v7.Command,
         protocol_schema_v8.Command,
-    ]
+    ],
 ) -> pe_commands.CommandCreate:
     dict_command = command.dict(exclude_none=True)
 
