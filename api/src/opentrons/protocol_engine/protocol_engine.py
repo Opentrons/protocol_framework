@@ -427,7 +427,7 @@ class ProtocolEngine:
             post_run_hardware_state: The state in which to leave the gantry and motors in
                 after the run is over.
         """
-        if self._state_store.commands.state.stopped_by_estop:
+        if self._state_store.commands.get_is_stopped_by_estop():
             # This handles the case where the E-stop was pressed while we were *not* in the middle
             # of some hardware interaction that would raise it as an exception. For example, imagine
             # we were paused between two commands, or imagine we were executing a waitForDuration.

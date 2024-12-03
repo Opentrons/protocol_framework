@@ -938,6 +938,10 @@ class CommandView:
         """Get whether an engine stop has completed."""
         return self._state.run_completed_at is not None
 
+    def get_is_stopped_by_estop(self) -> bool:
+        """Return whether the engine was stopped specifically by an E-stop."""
+        return self._state.stopped_by_estop
+
     def has_been_played(self) -> bool:
         """Get whether engine has started."""
         return self._state.run_started_at is not None
