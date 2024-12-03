@@ -28,7 +28,16 @@ class CSVResult(enum.Enum):
         if b is None:
             return None
         return cls.PASS if b else cls.FAIL
-
+    
+    @classmethod
+    def from_Numbool(cls, b: int) -> Optional["CSVResult"]:
+        """From bool."""
+        if b is None:
+            return None
+        if b > 0:
+            return cls.FAIL
+        else:
+            return cls.PASS
 
 def print_csv_result(test: str, result: Optional[CSVResult]) -> None:
     """Print CSV Result."""

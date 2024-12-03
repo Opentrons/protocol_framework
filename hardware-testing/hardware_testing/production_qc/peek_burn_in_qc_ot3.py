@@ -448,7 +448,7 @@ async def _main(is_simulating: bool, cycles: int, trials: int, continue_after_st
                     cycle=cycle, trials=TRIALS_PER_CYCLE,
                     continue_after_stall=continue_after_stall
                 )
-                data = [failed_cycles, CSVResult.from_bool(True)]
+                data = [failed_cycles, CSVResult.from_Numbool(failed_cycles)]
                 report(
                     _get_cycling_section_tag(),
                     _get_cycling_test_tag(cycle),
@@ -459,6 +459,12 @@ async def _main(is_simulating: bool, cycles: int, trials: int, continue_after_st
                     cycle=cycles*TRIALS_PER_CYCLE, trials=trials,
                     continue_after_stall=continue_after_stall
                 )
+            data = [0, CSVResult.from_Numbool(0)]
+            report(
+                _get_cycling_section_tag(),
+                _get_cycling_test_tag(cycles*TRIALS_PER_CYCLE),
+                data,
+            )
             ui.print_title("DONE")
             report.save_to_disk()
             report.print_results()
