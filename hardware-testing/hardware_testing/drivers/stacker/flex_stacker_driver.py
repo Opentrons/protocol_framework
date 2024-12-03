@@ -60,7 +60,7 @@ FS_STALL = "async ERR403:motor stall error" + FS_COMMAND_TERMINATOR.strip("\r")
 DEFAULT_COMMAND_RETRIES = 1
 TOTAL_TRAVEL_X = 192.5
 TOTAL_TRAVEL_Z = 136
-TOTAL_TRAVEL_L = 22
+TOTAL_TRAVEL_L = 24
 LATCH_DISTANCE_MM = 2
 RETRACT_DIST_X = 1
 RETRACT_DIST_Z = 1
@@ -74,10 +74,10 @@ MAX_SPEED_DISCONTINUITY_Z = 5
 MAX_SPEED_DISCONTINUITY_L = 5
 HOME_CURRENT_X = 1.5
 HOME_CURRENT_Z = 1.5
-HOME_CURRENT_L = 0.5
+HOME_CURRENT_L = 1.2
 MOVE_CURRENT_X = 0.8
 MOVE_CURRENT_Z = 1.2
-MOVE_CURRENT_L = 0.5
+MOVE_CURRENT_L = 1.2
 MOVE_SPEED_X = 200
 MOVE_SPEED_UPZ = 150
 MOVE_SPEED_L = 100
@@ -448,6 +448,7 @@ class FlexStacker():
         velocity = self.set_default(velocity, MOVE_SPEED_L)
         acceleration = self.set_default(acceleration, MOVE_ACCELERATION_L)
         states = self.get_sensor_states()
+        print(states)
         if states['LR'] == '1':
             self.home(AXIS.L, DIR.NEGATIVE_HOME, velocity, acceleration)
         else:
@@ -465,7 +466,7 @@ class FlexStacker():
 
     def load_labware(self, labware_z_offset: float):
         labware_clearance = labware_z_offset
-        labware_retract_speed= 50
+        labware_retract_speed= 60
         # ----------------Set up the Stacker------------------------
         self.home(AXIS.X, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
         self.home(AXIS.Z, DIR.NEGATIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
@@ -484,7 +485,7 @@ class FlexStacker():
         self.home(AXIS.X, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
 
     def unload_labware(self):
-        labware_clearance = 31
+        labware_clearance = 60
         labware_retract_speed= 100
         # ----------------Set up the Stacker------------------------
         self.home(AXIS.X, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
@@ -498,7 +499,7 @@ class FlexStacker():
         self.open_latch()
         self.move(AXIS.Z, labware_clearance, DIR.NEGATIVE, self.move_speed_down_z, self.move_acceleration_z)
         self.close_latch()
-        self.move(AXIS.Z, TOTAL_TRAVEL_Z-30, DIR.NEGATIVE, self.move_speed_down_z, self.move_acceleration_z)
+        self.move(AXIS.Z, (TOTAL_TRAVEL_Z-labware_clearance)-10, DIR.NEGATIVE, self.move_speed_down_z, self.move_acceleration_z)
         self.home(AXIS.Z, DIR.NEGATIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
         self.move(AXIS.X, TOTAL_TRAVEL_X-5, DIR.POSITIVE, self.move_speed_x, self.move_acceleration_x)
         self.home(AXIS.X, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
