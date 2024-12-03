@@ -93,7 +93,7 @@ def run(ctx: ProtocolContext) -> None:
     num_cols = math.ceil(num_samples / 8)
 
     # Pre-set parameters
-    sample_vol = 35.0
+    # sample_vol = 35.0
     frag_vol = 15.0
     end_repair_vol = 10.0
     adapter_vol = 5.0
@@ -101,14 +101,14 @@ def run(ctx: ProtocolContext) -> None:
     amplification_vol = 30.0
     bead_vol_1 = 88.0
     bead_vol_2 = 50.0
-    bead_vol = bead_vol_1 + bead_vol_2
+    # bead_vol = bead_vol_1 + bead_vol_2
     bead_inc = 2.0
     rsb_vol_1 = 25.0
     rsb_vol_2 = 20.0
-    rsb_vol = rsb_vol_1 + rsb_vol_2
+    # rsb_vol = rsb_vol_1 + rsb_vol_2
     elution_vol = 20.0
     elution_vol_2 = 17.0
-    etoh_vol = 400.0
+    # etoh_vol = 400.0
 
     # Importing Labware, Modules and Instruments
     magblock: MagneticBlockContext = ctx.load_module(
