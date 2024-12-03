@@ -123,6 +123,9 @@ class LoadModuleImplementation(
         module_type = params.model.as_type()
         self._ensure_module_location(params.location.slotName, module_type)
 
+        # todo(mm, 2024-12-03): Theoretically, we should be able to deal with
+        # addressable areas and deck configurations the same way between OT-2 and Flex.
+        # Can this be simplified?
         if self._state_view.config.robot_type == "OT-2 Standard":
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
                 params.location.slotName.id
@@ -174,6 +177,9 @@ class LoadModuleImplementation(
     def _ensure_module_location(
         self, slot: DeckSlotName, module_type: ModuleType
     ) -> None:
+        # todo(mm, 2024-12-03): Theoretically, we should be able to deal with
+        # addressable areas and deck configurations the same way between OT-2 and Flex.
+        # Can this be simplified?
         if self._state_view.config.robot_type == "OT-2 Standard":
             slot_def = self._state_view.addressable_areas.get_slot_definition(slot.id)
             compatible_modules = slot_def["compatibleModuleTypes"]
