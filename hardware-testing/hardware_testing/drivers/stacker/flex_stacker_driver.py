@@ -65,10 +65,10 @@ LATCH_DISTANCE_MM = 2
 RETRACT_DIST_X = 1
 RETRACT_DIST_Z = 1
 HOME_SPEED = 10
-HOME_ACCELERATION = 100
+HOME_ACCELERATION = 2
 MOVE_ACCELERATION_X = 1500
-MOVE_ACCELERATION_Z = 300
-MOVE_ACCELERATION_L = 100
+MOVE_ACCELERATION_Z = 80
+MOVE_ACCELERATION_L = 800
 MAX_SPEED_DISCONTINUITY_X = 10
 MAX_SPEED_DISCONTINUITY_Z = 5
 MAX_SPEED_DISCONTINUITY_L = 5
@@ -76,12 +76,12 @@ HOME_CURRENT_X = 1.5
 HOME_CURRENT_Z = 1.5
 HOME_CURRENT_L = 0.5
 MOVE_CURRENT_X = 0.8
-MOVE_CURRENT_Z = 1.1
+MOVE_CURRENT_Z = 1.2
 MOVE_CURRENT_L = 0.5
 MOVE_SPEED_X = 200
-MOVE_SPEED_UPZ = 200
+MOVE_SPEED_UPZ = 150
 MOVE_SPEED_L = 100
-MOVE_SPEED_DOWNZ = 200
+MOVE_SPEED_DOWNZ = 150
 
 LABWARE_CLEARANCE = 9
 
@@ -287,8 +287,7 @@ class FlexStacker():
                         "XR": parse_data[1],
                         "ZE": parse_data[2],
                         "ZR": parse_data[3],
-                        "LR": parse_data[4],
-                        "LH": parse_data[5]
+                        "LR": parse_data[4]
                         })
         return states
 
@@ -346,6 +345,7 @@ class FlexStacker():
             self.current_position.update({'L': self.current_position['L'] + distance})
         elif direction == DIR.NEGATIVE and axis == AXIS.L:
             self.current_position.update({'L': self.current_position['L'] - distance})
+        else:
             raise(f"Not recognized {axis} and {direction}")
         print(self.current_position)
 
@@ -447,7 +447,12 @@ class FlexStacker():
     def close_latch(self, velocity: Optional[float] = None, acceleration: Optional[float] = None):
         velocity = self.set_default(velocity, MOVE_SPEED_L)
         acceleration = self.set_default(acceleration, MOVE_ACCELERATION_L)
-        self.home(AXIS.L, DIR.NEGATIVE_HOME, velocity, acceleration)
+        states = self.get_sensor_states()
+        if states['LR'] == '1':
+            self.home(AXIS.L, DIR.NEGATIVE_HOME, velocity, acceleration)
+        else:
+            self.move(AXIS.L, TOTAL_TRAVEL_L-5, DIR.NEGATIVE, velocity, acceleration, MAX_SPEED_DISCONTINUITY_L)
+            self.home(AXIS.L, DIR.NEGATIVE_HOME, velocity, acceleration)
 
     def open_latch(self, distance: Optional[float] = None,
                     velocity: Optional[float] = None, acceleration: Optional[float] = None,
