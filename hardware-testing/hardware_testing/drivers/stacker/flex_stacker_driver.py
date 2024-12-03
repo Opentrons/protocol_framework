@@ -58,28 +58,29 @@ FS_COMMAND_TERMINATOR = "\r\n"
 FS_ACK = "OK"+ FS_COMMAND_TERMINATOR.strip("\r")
 FS_STALL = "async ERR403:motor stall error" + FS_COMMAND_TERMINATOR.strip("\r")
 DEFAULT_COMMAND_RETRIES = 1
-TOTAL_TRAVEL_X = 202
-TOTAL_TRAVEL_Z = 113.75
-LATCH_DISTANCE_MM = 30
+TOTAL_TRAVEL_X = 192.5
+TOTAL_TRAVEL_Z = 136
+TOTAL_TRAVEL_L = 22
+LATCH_DISTANCE_MM = 2
 RETRACT_DIST_X = 1
 RETRACT_DIST_Z = 1
 HOME_SPEED = 10
 HOME_ACCELERATION = 100
 MOVE_ACCELERATION_X = 1500
-MOVE_ACCELERATION_Z = 200
-MOVE_ACCELERATION_L = 30
+MOVE_ACCELERATION_Z = 300
+MOVE_ACCELERATION_L = 100
 MAX_SPEED_DISCONTINUITY_X = 10
 MAX_SPEED_DISCONTINUITY_Z = 5
 MAX_SPEED_DISCONTINUITY_L = 5
 HOME_CURRENT_X = 1.5
 HOME_CURRENT_Z = 1.5
 HOME_CURRENT_L = 0.5
-MOVE_CURRENT_X = 1.1
-MOVE_CURRENT_Z = 0.8
+MOVE_CURRENT_X = 0.8
+MOVE_CURRENT_Z = 1.1
 MOVE_CURRENT_L = 0.5
 MOVE_SPEED_X = 200
 MOVE_SPEED_UPZ = 200
-MOVE_SPEED_L = 30
+MOVE_SPEED_L = 100
 MOVE_SPEED_DOWNZ = 200
 
 LABWARE_CLEARANCE = 9
@@ -454,8 +455,8 @@ class FlexStacker():
         distance = self.set_default(distance, LATCH_DISTANCE_MM)
         velocity = self.set_default(velocity, MOVE_SPEED_L)
         acceleration = self.set_default(acceleration, MOVE_ACCELERATION_L)
-        msd = self.set_default(msd, MAX_SPEED_DISCONTINUITY_L)
-        self.move(AXIS.L, TOTAL_TRAVEL_X-5, DIR.POSITIVE, velocity, acceleration, msd)
+        msd = self.set_default(max_speed_discontinuity, MAX_SPEED_DISCONTINUITY_L)
+        self.move(AXIS.L, TOTAL_TRAVEL_L, DIR.POSITIVE, velocity, acceleration, msd)
 
     def load_labware(self, labware_z_offset: float):
         labware_clearance = labware_z_offset
