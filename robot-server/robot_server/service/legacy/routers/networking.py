@@ -90,7 +90,7 @@ async def get_wifi_networks(
                 "letting the system decide when to do a rescan."
             ),
         ),
-    ] = False
+    ] = False,
 ) -> WifiNetworks:
     networks = await nmcli.available_ssids(rescan)
     return WifiNetworks(list=[WifiNetworkFull(**n) for n in networks])
@@ -190,7 +190,7 @@ async def post_wifi_key(key: UploadFile = File(...)):
     else:
         # We return a JSONResponse because we want the 200 status code.
         response.message = "Key file already present"
-        return JSONResponse(content=response.dict())
+        return JSONResponse(content=response.model_dump())
 
 
 @router.delete(
@@ -210,7 +210,7 @@ async def delete_wifi_key(
             description="The ID of key to delete, as determined by a previous"
             " call to GET /wifi/keys",
         ),
-    ]
+    ],
 ) -> V1BasicResponse:
     """Delete wifi key handler"""
     deleted_file = wifi.remove_key(key_uuid)
@@ -274,4 +274,4 @@ async def post_wifi_disconnect(wifi_ssid: WifiNetwork):
         )
     else:
         stat = status.HTTP_500_INTERNAL_SERVER_ERROR
-    return JSONResponse(status_code=stat, content=result.dict())
+    return JSONResponse(status_code=stat, content=result.model_dump())

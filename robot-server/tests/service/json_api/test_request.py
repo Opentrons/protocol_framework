@@ -10,14 +10,14 @@ def test_attributes_as_dict():
     DictRequest = RequestModel[dict]
     obj_to_validate = {"data": {"some_data": 1}}
     my_request_obj = DictRequest.model_validate(obj_to_validate)
-    assert my_request_obj.dict() == {"data": {"some_data": 1}}
+    assert my_request_obj.model_dump() == {"data": {"some_data": 1}}
 
 
 def test_attributes_as_item_model():
     ItemRequest = RequestModel[ItemModel]
     obj_to_validate = {"data": {"name": "apple", "quantity": 10, "price": 1.20}}
     my_request_obj = ItemRequest.model_validate(obj_to_validate)
-    assert my_request_obj.dict() == obj_to_validate
+    assert my_request_obj.model_dump() == obj_to_validate
 
 
 def test_attributes_as_item_model_empty_dict():
@@ -91,6 +91,6 @@ def test_request_with_id():
         "data": {"type": "item", "attributes": {}, "id": "abc123"},
     }
     my_request_obj = MyRequest.model_validate(obj_to_validate)
-    assert my_request_obj.dict() == {
+    assert my_request_obj.model_dump() == {
         "data": {"type": "item", "attributes": {}, "id": "abc123"},
     }

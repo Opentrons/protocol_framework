@@ -15,7 +15,7 @@ def test_follows_structure():
         }
     }
     validated = ThingWithLink.model_validate(structure_to_validate)
-    assert validated.dict() == structure_to_validate
+    assert validated.model_dump() == structure_to_validate
 
 
 def test_must_be_self_key_with_string_value():

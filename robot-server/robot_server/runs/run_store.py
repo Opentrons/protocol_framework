@@ -1,4 +1,5 @@
 """Runs' on-db store."""
+
 import logging
 from collections import defaultdict
 from dataclasses import dataclass
