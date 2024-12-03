@@ -124,12 +124,9 @@ class LoadModuleImplementation(
                 params.location.slotName.id
             )
         else:
-            addressable_area = (
-                self._state_view.modules.ensure_and_convert_module_fixture_location(
-                    deck_slot=params.location.slotName,
-                    deck_type=self._state_view.config.deck_type,
-                    model=params.model,
-                )
+            addressable_area = self._state_view.modules.ensure_and_convert_module_fixture_location(
+                deck_slot=params.location.slotName,
+                model=params.model,
             )
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
                 addressable_area
