@@ -51,7 +51,7 @@ jobs:
           git checkout ${{ github.ref }}
       - uses: 'actions/setup-node@v4'
         with:
-          node-version: '22.4.0'
+          node-version: '22.11.0'
       - name: 'install udev for usb-detection'
         run: |
           # WORKAROUND: Remove microsoft debian repo due to https://github.com/microsoft/linux-package-repositories/issues/130. Remove line below after it is resolved
@@ -99,7 +99,7 @@ jobs:
           git checkout ${{ github.ref }}
       - uses: 'actions/setup-node@v4'
         with:
-          node-version: '22.4.0'
+          node-version: '22.11.0'
       - name: 'install udev for usb-detection'
         if: startsWith(matrix.os, 'ubuntu')
         run: |
@@ -139,7 +139,7 @@ jobs:
           git checkout ${{ github.ref }}
       - uses: 'actions/setup-node@v4'
         with:
-          node-version: '22.4.0'
+          node-version: '22.11.0'
       - name: 'install udev for usb-detection'
         run: |
           # WORKAROUND: Remove microsoft debian repo due to https://github.com/microsoft/linux-package-repositories/issues/130. Remove line below after it is resolved
@@ -183,7 +183,7 @@ jobs:
           git checkout ${{ github.ref }}
       - uses: 'actions/setup-node@v4'
         with:
-          node-version: '22.4.0'
+          node-version: '22.11.0'
       - name: 'install udev for usb-detection'
         run: |
           # WORKAROUND: Remove microsoft debian repo due to https://github.com/microsoft/linux-package-repositories/issues/130. Remove line below after it is resolved
