@@ -1,7 +1,7 @@
 """Basic addressable area data state and store."""
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Dict, List, Optional, Set, Union
+from typing import Dict, List, Optional, Set
 
 from opentrons_shared_data.robot.types import RobotType, RobotDefinition
 from opentrons_shared_data.deck.types import (
@@ -21,8 +21,6 @@ from ..errors import (
 )
 from ..resources import deck_configuration_provider
 from ..types import (
-    DeckSlotLocation,
-    AddressableAreaLocation,
     AddressableArea,
     PotentialCutoutFixture,
     DeckConfigurationType,
@@ -237,16 +235,7 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
                 )
         return {area.area_name: area for area in addressable_areas}
 
-    def _add_addressable_area(
-        self, location: Union[DeckSlotLocation, AddressableAreaLocation, str]
-    ) -> None:
-        if isinstance(location, DeckSlotLocation):
-            addressable_area_name = location.slotName.id
-        elif isinstance(location, AddressableAreaLocation):
-            addressable_area_name = location.addressableAreaName
-        else:
-            addressable_area_name = location
-
+    def _add_addressable_area(self, addressable_area_name: str) -> None:
         if addressable_area_name not in self._state.loaded_addressable_areas_by_name:
             cutout_id = self._validate_addressable_area_for_simulation(
                 addressable_area_name
