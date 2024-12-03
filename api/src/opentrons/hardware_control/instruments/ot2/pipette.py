@@ -126,7 +126,7 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
             self._pipette_model.pipette_type,
             self._pipette_model.pipette_channels,
             self._pipette_model.pipette_version,
-            self._pipette_model.PipetteOEMType.OT,
+            PipetteOEMType.OT,
         )
         self._nozzle_offset = self._config.nozzle_offset
         self._nozzle_manager = (

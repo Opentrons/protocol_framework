@@ -93,10 +93,7 @@ class VirtualPipetteDataProvider:
             )
 
             valid_nozzle_maps = load_pipette_data.load_valid_nozzle_maps(
-                config.pipette_type,
-                config.channels,
-                config.version,
-                PipetteOEMType.OT
+                config.pipette_type, config.channels, config.version, pip_types.PipetteOEMType.OT
             )
             new_nozzle_manager = NozzleConfigurationManager.build_from_config(
                 config, valid_nozzle_maps
