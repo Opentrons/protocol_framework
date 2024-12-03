@@ -173,19 +173,31 @@ module.exports = {
       files: ['./app/src/**/*.@(ts|tsx)'],
       rules: {
         'opentrons/no-imports-up-the-tree-of-life': 'error',
+        'opentrons/no-margins-in-css': 'warn',
+        'opentrons/no-margins-inline': 'warn',
       },
     },
     {
       files: ['./protocol-designer/src/**/*.@(ts|tsx)'],
       rules: {
         'opentrons/no-imports-up-the-tree-of-life': 'warn',
+        'opentrons/no-margins-in-css': 'warn',
+        'opentrons/no-margins-inline': 'warn',
       },
     },
-    // apply application structure import requirements to app
     {
-      files: ['./app/src/**/*.@(ts|tsx)'],
+      files: ['./opentrons-ai-client/src/**/*.@(ts|tsx)'],
       rules: {
-        'opentrons/no-imports-across-applications': 'error',
+        'opentrons/no-imports-up-the-tree-of-life': 'warn',
+        'opentrons/no-margins-in-css': 'warn',
+        'opentrons/no-margins-inline': 'warn',
+      },
+    },
+    {
+      files: ['./components/src/**/*.@(ts|tsx)'],
+      rules: {
+        'opentrons/no-margins-in-css': 'warn',
+        'opentrons/no-margins-inline': 'warn',
       },
     },
   ],
