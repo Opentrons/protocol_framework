@@ -5,7 +5,7 @@ from abr_testing.protocols.helpers import (
 )
 
 metadata = {
-    "protocolName": "DRAFT - DVT1ABR4/8: Illumina DNA Enrichment Liquid Set Up",
+    "protocolName": "DVT1ABR4/8: Illumina DNA Enrichment Liquid Set Up",
     "author": "Tony Ngumah <tony.ngumah@opentrons.com>",
     "source": "Protocol Library",
 }
