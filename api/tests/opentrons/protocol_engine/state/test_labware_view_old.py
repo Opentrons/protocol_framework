@@ -1,4 +1,9 @@
-"""Labware state store tests."""
+"""Labware state store tests.
+
+DEPRECATED: Testing LabwareView independently of LabwareStore is no
+longer helpful. Try to add new tests to test_labware_state.py, where they can be
+tested together.
+"""
 import pytest
 from datetime import datetime
 from typing import Dict, Optional, cast, ContextManager, Any, Union, NamedTuple, List
