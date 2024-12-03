@@ -35,6 +35,7 @@ import type { StagingAreaLocation, TrashCutoutId } from '@opentrons/components'
 import type { CutoutId, DeckSlotId } from '@opentrons/shared-data'
 import type { AdditionalEquipmentEntity } from '@opentrons/step-generation'
 
+const RIGHT_COLUMN_FIXTURE_PADDING = 50 // mm
 const WASTE_CHUTE_SPACE = 30
 const OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST: string[] = [
   'calibrationMarkings',
@@ -48,6 +49,7 @@ const OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST: string[] = [
 ]
 
 const lightFill = COLORS.grey35
+const darkFill = COLORS.grey60
 
 interface DeckThumbnailProps {
   hoverSlot: DeckSlotId | null
@@ -98,6 +100,8 @@ export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
   const filteredAddressableAreas = deckDef.locations.addressableAreas.filter(
     aa => isAddressableAreaStandardSlot(aa.id, deckDef)
   )
+  const hasRightColumnFixtures =
+    stagingAreaFixtures.length + wasteChuteFixtures.length > 0
   return (
     <Flex
       width="100%"
@@ -117,7 +121,12 @@ export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
           hasWasteChute
             ? deckDef.cornerOffsetFromOrigin[1] - WASTE_CHUTE_SPACE
             : deckDef.cornerOffsetFromOrigin[1]
-        } ${deckDef.dimensions[0]} ${deckDef.dimensions[1]}`}
+        } ${
+          hasRightColumnFixtures
+            ? deckDef.dimensions[0] + RIGHT_COLUMN_FIXTURE_PADDING
+            : deckDef.dimensions[0]
+        } ${deckDef.dimensions[1]}`}
+        zoomed
       >
         {() => (
           <>
@@ -140,6 +149,7 @@ export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
                       deckDefinition={deckDef}
                       showExpansion={cutoutId === 'cutoutA1'}
                       fixtureBaseColor={lightFill}
+                      slotClipColor={darkFill}
                     />
                   ) : null
                 })}
@@ -149,6 +159,7 @@ export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
                     cutoutId={fixture.location as StagingAreaLocation}
                     deckDefinition={deckDef}
                     fixtureBaseColor={lightFill}
+                    slotClipColor={darkFill}
                   />
                 ))}
                 {trash != null
@@ -185,6 +196,7 @@ export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
                     cutoutId={fixture.location as typeof WASTE_CHUTE_CUTOUT}
                     deckDefinition={deckDef}
                     fixtureBaseColor={lightFill}
+                    slotClipColor={darkFill}
                   />
                 ))}
               </>

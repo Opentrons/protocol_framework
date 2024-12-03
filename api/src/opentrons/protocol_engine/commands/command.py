@@ -1,12 +1,11 @@
 """Base command data model and type definitions."""
 
-
 from __future__ import annotations
 
 import dataclasses
 from abc import ABC, abstractmethod
 from datetime import datetime
-from enum import Enum
+import enum
 from typing import (
     TYPE_CHECKING,
     Generic,
@@ -40,7 +39,7 @@ _ErrorT = TypeVar("_ErrorT", bound=ErrorOccurrence)
 _ErrorT_co = TypeVar("_ErrorT_co", bound=ErrorOccurrence, covariant=True)
 
 
-class CommandStatus(str, Enum):
+class CommandStatus(str, enum.Enum):
     """Command execution status."""
 
     QUEUED = "queued"
@@ -49,7 +48,7 @@ class CommandStatus(str, Enum):
     FAILED = "failed"
 
 
-class CommandIntent(str, Enum):
+class CommandIntent(str, enum.Enum):
     """Run intent for a given command.
 
     Props:
@@ -241,7 +240,9 @@ class BaseCommand(
     )
     error: Union[
         _ErrorT,
-        # ErrorOccurrence here is for undefined errors not captured by _ErrorT.
+        # ErrorOccurrence here is a catch-all for undefined errors not captured by
+        # _ErrorT, or defined errors that don't parse into _ErrorT because, for example,
+        # they are from an older software version that was missing some fields.
         ErrorOccurrence,
         None,
     ] = Field(

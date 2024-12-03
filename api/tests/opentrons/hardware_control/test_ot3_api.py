@@ -59,14 +59,13 @@ from opentrons.hardware_control.types import (
     EstopStateNotification,
     TipStateType,
 )
-from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType
 from opentrons.hardware_control.errors import InvalidCriticalPoint
 from opentrons.hardware_control.ot3api import OT3API
 from opentrons.hardware_control import ThreadManager
 
 from opentrons.hardware_control.backends.ot3simulator import OT3Simulator
 from opentrons_hardware.firmware_bindings.constants import NodeId
-from opentrons.types import Point, Mount
+from opentrons.types import Point, Mount, NozzleConfigurationType
 
 from opentrons_hardware.hardware_control.motion_planning.types import Move
 
@@ -668,7 +667,11 @@ async def test_pickup_moves(
 
 @pytest.mark.parametrize("load_configs", load_pipette_configs)
 @given(blowout_volume=strategies.floats(min_value=0, max_value=10))
-@settings(suppress_health_check=[HealthCheck.function_scoped_fixture], max_examples=10)
+@settings(
+    suppress_health_check=[HealthCheck.function_scoped_fixture],
+    max_examples=10,
+    deadline=400,
+)
 @example(blowout_volume=0.0)
 async def test_blow_out_position(
     ot3_hardware: ThreadManager[OT3API],
@@ -2026,34 +2029,45 @@ async def test_drop_tip_full_tiprack(
         assert len(tip_action.call_args_list) == 2
         # first call should be "clamp", moving down
         first_target = tip_action.call_args_list[0][-1]["targets"][0][0]
-        assert list(first_target.keys()) == [Axis.Q]
-        assert first_target[Axis.Q] == 10
+        assert first_target == 10
         # next call should be "clamp", moving back up
         second_target = tip_action.call_args_list[1][-1]["targets"][0][0]
-        assert list(second_target.keys()) == [Axis.Q]
-        assert second_target[Axis.Q] < 10
+        assert second_target < 10
         # home should be called after tip_action is done
         assert len(mock_home_gear_motors.call_args_list) == 1
 
 
 @pytest.mark.parametrize(
-    "axes",
-    [[Axis.X], [Axis.X, Axis.Y], [Axis.X, Axis.Y, Axis.P_L], None],
+    ("axes_in", "axes_present", "expected_axes"),
+    [
+        ([Axis.X, Axis.Y], [Axis.X, Axis.Y], [Axis.X, Axis.Y]),
+        ([Axis.X, Axis.Y], [Axis.Y, Axis.Z_L], [Axis.Y]),
+        (None, list(Axis), list(Axis)),
+        (None, [Axis.Y, Axis.Z_L], [Axis.Y, Axis.Z_L]),
+    ],
 )
 async def test_update_position_estimation(
     ot3_hardware: ThreadManager[OT3API],
     hardware_backend: OT3Simulator,
-    axes: List[Axis],
+    axes_in: List[Axis],
+    axes_present: List[Axis],
+    expected_axes: List[Axis],
 ) -> None:
+    def _axis_is_present(axis: Axis) -> bool:
+        return axis in axes_present
+
     with patch.object(
         hardware_backend,
         "update_motor_estimation",
         AsyncMock(spec=hardware_backend.update_motor_estimation),
-    ) as mock_update:
-        await ot3_hardware._update_position_estimation(axes)
-        if axes is None:
-            axes = [ax for ax in Axis]
-        mock_update.assert_called_once_with(axes)
+    ) as mock_update, patch.object(
+        hardware_backend,
+        "axis_is_present",
+        Mock(spec=hardware_backend.axis_is_present),
+    ) as mock_axis_is_present:
+        mock_axis_is_present.side_effect = _axis_is_present
+        await ot3_hardware._update_position_estimation(axes_in)
+        mock_update.assert_called_once_with(expected_axes)
 
 
 async def test_refresh_positions(

@@ -92,7 +92,7 @@ export interface UnsafeUngripLabwareRunTimeCommand
   result?: any
 }
 export interface UnsafePlaceLabwareParams {
-  labwareId: string
+  labwareURI: string
   location: OnDeckLabwareLocation
 }
 export interface UnsafePlaceLabwareCreateCommand

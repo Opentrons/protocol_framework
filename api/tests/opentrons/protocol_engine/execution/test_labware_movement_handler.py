@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 from datetime import datetime
-
-import pytest
-from decoy import Decoy, matchers
 from typing import TYPE_CHECKING, Union, Optional, Tuple
+from unittest.mock import sentinel
+
+from decoy import Decoy, matchers
+import pytest
 
 from opentrons.protocol_engine.execution import EquipmentHandler, MovementHandler
 from opentrons.hardware_control import HardwareControlAPI
@@ -133,7 +134,7 @@ async def set_up_decoy_hardware_gripper(
     decoy.when(ot3_hardware_api.hardware_gripper.jaw_width).then_return(89)
 
     decoy.when(
-        state_store.labware.get_grip_force("my-teleporting-labware")
+        state_store.labware.get_grip_force(sentinel.my_teleporting_labware_def)
     ).then_return(100)
 
     decoy.when(state_store.labware.get_labware_offset("new-offset-id")).then_return(
@@ -195,6 +196,10 @@ async def test_raise_error_if_gripper_pickup_failed(
     starting_location = DeckSlotLocation(slotName=DeckSlotName.SLOT_1)
     to_location = DeckSlotLocation(slotName=DeckSlotName.SLOT_2)
 
+    decoy.when(
+        state_store.labware.get_definition("my-teleporting-labware")
+    ).then_return(sentinel.my_teleporting_labware_def)
+
     mock_tc_context_manager = decoy.mock(name="mock_tc_context_manager")
     decoy.when(
         thermocycler_plate_lifter.lift_plate_for_labware_movement(
@@ -217,22 +222,27 @@ async def test_raise_error_if_gripper_pickup_failed(
 
     decoy.when(
         state_store.geometry.get_labware_grip_point(
-            labware_id="my-teleporting-labware", location=starting_location
+            labware_definition=sentinel.my_teleporting_labware_def,
+            location=starting_location,
         )
     ).then_return(Point(101, 102, 119.5))
 
     decoy.when(
         state_store.geometry.get_labware_grip_point(
-            labware_id="my-teleporting-labware", location=to_location
+            labware_definition=sentinel.my_teleporting_labware_def, location=to_location
         )
     ).then_return(Point(201, 202, 219.5))
 
     decoy.when(
-        state_store.labware.get_dimensions(labware_id="my-teleporting-labware")
+        state_store.labware.get_dimensions(
+            labware_definition=sentinel.my_teleporting_labware_def
+        )
     ).then_return(Dimensions(x=100, y=85, z=0))
 
     decoy.when(
-        state_store.labware.get_well_bbox(labware_id="my-teleporting-labware")
+        state_store.labware.get_well_bbox(
+            labware_definition=sentinel.my_teleporting_labware_def
+        )
     ).then_return(Dimensions(x=99, y=80, z=1))
 
     await subject.move_labware_with_gripper(
@@ -320,6 +330,10 @@ async def test_move_labware_with_gripper(
     #  smoke test for gripper labware movement with actual labware and make this a unit test.
     await set_up_decoy_hardware_gripper(decoy, ot3_hardware_api, state_store)
 
+    decoy.when(
+        state_store.labware.get_definition("my-teleporting-labware")
+    ).then_return(sentinel.my_teleporting_labware_def)
+
     user_offset_data, final_offset_data = hardware_gripper_offset_data
     current_labware = state_store.labware.get_definition(
         labware_id="my-teleporting-labware"
@@ -334,21 +348,26 @@ async def test_move_labware_with_gripper(
     ).then_return(final_offset_data)
 
     decoy.when(
-        state_store.labware.get_dimensions(labware_id="my-teleporting-labware")
+        state_store.labware.get_dimensions(
+            labware_definition=sentinel.my_teleporting_labware_def
+        )
     ).then_return(Dimensions(x=100, y=85, z=0))
 
     decoy.when(
-        state_store.labware.get_well_bbox(labware_id="my-teleporting-labware")
+        state_store.labware.get_well_bbox(
+            labware_definition=sentinel.my_teleporting_labware_def
+        )
     ).then_return(Dimensions(x=99, y=80, z=1))
 
     decoy.when(
         state_store.geometry.get_labware_grip_point(
-            labware_id="my-teleporting-labware", location=from_location
+            labware_definition=sentinel.my_teleporting_labware_def,
+            location=from_location,
         )
     ).then_return(Point(101, 102, 119.5))
     decoy.when(
         state_store.geometry.get_labware_grip_point(
-            labware_id="my-teleporting-labware", location=to_location
+            labware_definition=sentinel.my_teleporting_labware_def, location=to_location
         )
     ).then_return(Point(201, 202, 219.5))
     mock_tc_context_manager = decoy.mock(name="mock_tc_context_manager")

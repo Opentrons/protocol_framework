@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import {
   ALIGN_CENTER,
   BORDERS,
+  Box,
   COLORS,
   DIRECTION_COLUMN,
   DeckFromLayers,
@@ -37,6 +38,7 @@ import { DeckSetupDetails } from './DeckSetupDetails'
 import {
   animateZoom,
   getCutoutIdForAddressableArea,
+  useDeckSetupWindowBreakPoint,
   zoomInOnCoordinate,
 } from './utils'
 import { DeckSetupTools } from './DeckSetupTools'
@@ -67,11 +69,31 @@ const OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST: string[] = [
   'fixedTrash',
 ]
 export const lightFill = COLORS.grey35
+export const darkFill = COLORS.grey60
+const LEFT_SLOTS = [
+  'A1',
+  'A2',
+  'B1',
+  'B2',
+  'C1',
+  'C2',
+  'D1',
+  'D2',
+  '1',
+  '2',
+  '4',
+  '5',
+  '7',
+  '8',
+  '10',
+  '11',
+]
 
 export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   const { tab } = props
   const activeDeckSetup = useSelector(getDeckSetupForActiveItem)
   const dispatch = useDispatch<any>()
+  const breakPointSize = useDeckSetupWindowBreakPoint()
   const zoomIn = useSelector(selectors.getZoomedInSlot)
   const _disableCollisionWarnings = useSelector(getDisableModuleRestrictions)
   const robotType = useSelector(getRobotType)
@@ -96,6 +118,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
       aE.location === WASTE_CHUTE_CUTOUT &&
       wasteChuteFixtures.length > 0
   )
+
   const hasWasteChute =
     wasteChuteFixtures.length > 0 || wasteChuteStagingAreaFixtures.length > 0
 
@@ -111,6 +134,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   const initialViewBox = `${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`
 
   const [viewBox, setViewBox] = useState<string>(initialViewBox)
+
   const [hoveredLabware, setHoveredLabware] = useState<string | null>(null)
   const [hoveredModule, setHoveredModule] = useState<ModuleModel | null>(null)
   const [hoveredFixture, setHoveredFixture] = useState<Fixture | null>(null)
@@ -171,28 +195,42 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   )
 
   return (
-    <Flex>
+    <Flex height="100%">
       <Flex
         backgroundColor={COLORS.white}
         borderRadius={BORDERS.borderRadius12}
         width="100%"
-        height={zoomIn.slot != null ? '75vh' : '70vh'}
+        height={tab === 'protocolSteps' ? '65.75vh' : '100%'}
         flexDirection={DIRECTION_COLUMN}
-        padding={SPACING.spacing40}
+        padding={SPACING.spacing24}
       >
         <Flex
           width="100%"
           height="100%"
           alignItems={ALIGN_CENTER}
           justifyContent={JUSTIFY_CENTER}
+          gridGap={SPACING.spacing12}
         >
+          {zoomIn.slot == null ? (
+            <Box width="20%">
+              {hoverSlot != null &&
+              breakPointSize !== 'small' &&
+              LEFT_SLOTS.includes(hoverSlot) ? (
+                <SlotDetailsContainer robotType={robotType} slot={hoverSlot} />
+              ) : null}
+            </Box>
+          ) : null}
           <RobotCoordinateSpaceWithRef
-            height={zoomIn.slot != null ? '100%' : '95%'}
-            width="100%"
+            height="100%"
+            width={
+              zoomIn.slot != null || tab === 'protocolSteps' ? '100%' : '50%'
+            }
+            minWidth={tab === 'protocolSteps' ? 'auto' : '30rem'}
             deckDef={deckDef}
             viewBox={viewBox}
             outline="auto"
             zoomed={zoomIn.slot != null}
+            borderRadius={BORDERS.borderRadius12}
           >
             {() => (
               <>
@@ -213,6 +251,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                           key={addressableArea.id}
                           cutoutId={cutoutId}
                           deckDefinition={deckDef}
+                          slotClipColor={darkFill}
                           showExpansion={cutoutId === 'cutoutA1'}
                           fixtureBaseColor={lightFill}
                         />
@@ -228,6 +267,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                             key={fixture.id}
                             cutoutId={fixture.location as StagingAreaLocation}
                             deckDefinition={deckDef}
+                            slotClipColor={darkFill}
                             fixtureBaseColor={lightFill}
                           />
                         )
@@ -284,6 +324,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                               fixture.location as typeof WASTE_CHUTE_CUTOUT
                             }
                             deckDefinition={deckDef}
+                            slotClipColor={darkFill}
                             fixtureBaseColor={lightFill}
                           />
                         )
@@ -313,15 +354,18 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                   robotType={robotType}
                   show4thColumn={stagingAreaFixtures.length > 0}
                 />
-                {hoverSlot != null ? (
-                  <SlotDetailsContainer
-                    robotType={robotType}
-                    slot={hoverSlot}
-                  />
-                ) : null}
               </>
             )}
           </RobotCoordinateSpaceWithRef>
+          {zoomIn.slot == null ? (
+            <Box width="20%">
+              {hoverSlot != null &&
+              breakPointSize !== 'small' &&
+              !LEFT_SLOTS.includes(hoverSlot) ? (
+                <SlotDetailsContainer robotType={robotType} slot={hoverSlot} />
+              ) : null}
+            </Box>
+          ) : null}
         </Flex>
       </Flex>
       {zoomIn.slot != null && zoomIn.cutout != null ? (

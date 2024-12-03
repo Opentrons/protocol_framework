@@ -3,7 +3,7 @@ import pytest
 
 from opentrons.protocol_engine.state.liquids import LiquidState, LiquidView
 from opentrons.protocol_engine import Liquid
-from opentrons.protocol_engine.errors import LiquidDoesNotExistError
+from opentrons.protocol_engine.errors import LiquidDoesNotExistError, InvalidLiquidError
 
 
 @pytest.fixture
@@ -33,3 +33,22 @@ def test_has_liquid(subject: LiquidView) -> None:
 
     with pytest.raises(LiquidDoesNotExistError):
         subject.validate_liquid_id("no-id")
+
+
+def test_validate_liquid_prevents_empty(subject: LiquidView) -> None:
+    """It should not allow loading a liquid with the special id EMPTY."""
+    with pytest.raises(InvalidLiquidError):
+        subject.validate_liquid_allowed(
+            Liquid(id="EMPTY", displayName="empty", description="nothing")
+        )
+
+
+def test_validate_liquid_allows_non_empty(subject: LiquidView) -> None:
+    """It should allow a valid liquid."""
+    valid_liquid = Liquid(
+        id="some-id",
+        displayName="some-display-name",
+        description="some-description",
+        displayColor=None,
+    )
+    assert subject.validate_liquid_allowed(valid_liquid) == valid_liquid

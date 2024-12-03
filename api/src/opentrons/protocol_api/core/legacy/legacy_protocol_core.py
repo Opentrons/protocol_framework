@@ -267,6 +267,10 @@ class LegacyProtocolCore(
         """Load an adapter using its identifying parameters"""
         raise APIVersionError(api_element="Loading adapter")
 
+    def load_robot(self) -> None:  # type: ignore
+        """Load an adapter using its identifying parameters"""
+        raise APIVersionError(api_element="Loading robot")
+
     def move_labware(
         self,
         labware_core: LegacyLabwareCore,
@@ -277,6 +281,7 @@ class LegacyProtocolCore(
             legacy_module_core.LegacyModuleCore,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ],
         use_gripper: bool,
         pause_for_manual_move: bool,

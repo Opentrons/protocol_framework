@@ -146,7 +146,7 @@ describe('ErrorRecoveryFlows', () => {
   beforeEach(() => {
     props = {
       runStatus: RUN_STATUS_AWAITING_RECOVERY,
-      failedCommandByRunRecord: mockFailedCommand,
+      unvalidatedFailedCommand: mockFailedCommand,
       runId: 'MOCK_RUN_ID',
       protocolAnalysis: null,
     }

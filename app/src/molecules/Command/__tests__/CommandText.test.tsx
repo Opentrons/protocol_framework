@@ -553,9 +553,15 @@ describe('CommandText', () => {
     )
   })
   it('renders correct text for loadLabware in adapter', () => {
+    const flatBottomAdapterCommand = mockCommandTextData.commands.find(
+      c =>
+        c.commandType === 'loadLabware' &&
+        c.params.loadName === 'opentrons_96_flat_bottom_adapter'
+    )
+
     renderWithProviders(
       <CommandText
-        allRunDefs={[]}
+        allRunDefs={[flatBottomAdapterCommand?.result.definition]}
         command={{
           commandType: 'loadLabware',
           params: {
@@ -589,7 +595,7 @@ describe('CommandText', () => {
       }
     )
     screen.getByText(
-      'Load mock displayName in Opentrons 96 Flat Bottom Adapter in Slot 2'
+      'Load mock displayName on Opentrons 96 Flat Bottom Adapter in Slot 2'
     )
   })
   it('renders correct text for loadLabware off deck', () => {

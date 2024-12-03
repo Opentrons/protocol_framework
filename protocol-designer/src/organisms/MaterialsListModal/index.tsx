@@ -110,10 +110,7 @@ export function MaterialsListModal({
                           </Flex>
                         }
                         content={
-                          <Flex
-                            alignItems={ALIGN_CENTER}
-                            grigGap={SPACING.spacing4}
-                          >
+                          <Flex alignItems={ALIGN_CENTER}>
                             <StyledText desktopStyle="bodyDefaultRegular">
                               {t(`shared:${fixture.name}`)}
                             </StyledText>
@@ -145,7 +142,7 @@ export function MaterialsListModal({
                         content={
                           <Flex
                             alignItems={ALIGN_CENTER}
-                            grigGap={SPACING.spacing4}
+                            gridGap={SPACING.spacing4}
                           >
                             <ModuleIcon moduleType={hw.type} size="1rem" />
                             <StyledText desktopStyle="bodyDefaultRegular">

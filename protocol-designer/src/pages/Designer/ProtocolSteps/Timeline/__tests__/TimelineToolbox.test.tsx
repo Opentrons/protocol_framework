@@ -36,7 +36,7 @@ describe('TimelineToolbox', () => {
   })
   it('renders 2 terminal item steps, a draggable step and presaved step with toolbox title', () => {
     render()
-    screen.getByText('Protocol timeline')
+    screen.getByText('Timeline')
     screen.getByText('mock AddStepButton')
     screen.getByText('mock PresavedStep')
     screen.getByText('mock DraggableSteps')

@@ -30,6 +30,7 @@ export const AutoAddPauseUntilTempStepModal = (props: Props): JSX.Element => {
 
   return (
     <Modal
+      marginLeft="0"
       title={t('auto_add_pause_until_temp_step.redesign.title', {
         module: displayModule,
         temp: displayTemperature,

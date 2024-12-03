@@ -60,7 +60,9 @@ class CSVParameter:
         as appropriate.
 
         :param detect_dialect: If ``True``, examine the file and try to assign it a
-            :py:class:`csv.Dialect` to improve parsing behavior.
+            :py:class:`csv.Dialect` to improve parsing behavior. Set this to ``False``
+            when using the file output of :py:meth:`.AbsorbanceReaderContext.read` as
+            a runtime parameter.
         :param kwargs: For advanced CSV handling, you can pass any of the
             `formatting parameters <https://docs.python.org/3/library/csv.html#csv-fmt-params>`_
             accepted by :py:func:`csv.reader` from the Python standard library.

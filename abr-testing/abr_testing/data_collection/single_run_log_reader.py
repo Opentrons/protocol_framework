@@ -34,6 +34,7 @@ if __name__ == "__main__":
         header,
         runs_and_lpc,
         lpc_headers,
+        list_of_heights,
     ) = abr_google_drive.create_data_dictionary(
         run_ids_in_storage,
         run_log_file_path,
@@ -42,6 +43,7 @@ if __name__ == "__main__":
         "",
         hellma_plate_standards=file_values,
     )
+    print("list_of_heights not recorded.")
     transposed_list = list(zip(*runs_and_robots))
     # Adds Run to local csv
     sheet_location = os.path.join(run_log_file_path, "saved_data.csv")

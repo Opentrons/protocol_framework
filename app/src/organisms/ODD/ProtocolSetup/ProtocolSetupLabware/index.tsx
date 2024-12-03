@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 
@@ -52,6 +52,7 @@ import { useMostRecentCompletedAnalysis } from '/app/resources/runs'
 import { LabwareMapView } from './LabwareMapView'
 import { SingleLabwareModal } from './SingleLabwareModal'
 
+import type { Dispatch, SetStateAction } from 'react'
 import type { UseQueryResult } from 'react-query'
 import type {
   HeaterShakerCloseLatchCreateCommand,
@@ -71,7 +72,7 @@ const DECK_CONFIG_POLL_MS = 5000
 
 export interface ProtocolSetupLabwareProps {
   runId: string
-  setSetupScreen: React.Dispatch<React.SetStateAction<SetupScreens>>
+  setSetupScreen: Dispatch<SetStateAction<SetupScreens>>
   isConfirmed: boolean
   setIsConfirmed: (confirmed: boolean) => void
 }
@@ -83,12 +84,12 @@ export function ProtocolSetupLabware({
   setIsConfirmed,
 }: ProtocolSetupLabwareProps): JSX.Element {
   const { t } = useTranslation('protocol_setup')
-  const [showMapView, setShowMapView] = React.useState<boolean>(false)
+  const [showMapView, setShowMapView] = useState<boolean>(false)
   const [
     showLabwareDetailsModal,
     setShowLabwareDetailsModal,
-  ] = React.useState<boolean>(false)
-  const [selectedLabware, setSelectedLabware] = React.useState<
+  ] = useState<boolean>(false)
+  const [selectedLabware, setSelectedLabware] = useState<
     | (LabwareDefinition2 & {
         location: LabwareLocation
         nickName: string | null
@@ -289,7 +290,7 @@ function LabwareLatch({
     createLiveCommand,
     isLoading: isLiveCommandLoading,
   } = useCreateLiveCommandMutation()
-  const [isRefetchingModules, setIsRefetchingModules] = React.useState(false)
+  const [isRefetchingModules, setIsRefetchingModules] = useState(false)
   const isLatchLoading =
     isLiveCommandLoading ||
     isRefetchingModules ||

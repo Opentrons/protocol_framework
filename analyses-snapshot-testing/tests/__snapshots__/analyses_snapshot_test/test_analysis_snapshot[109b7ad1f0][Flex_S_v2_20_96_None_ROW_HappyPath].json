@@ -6263,6 +6263,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [],
   "metadata": {
     "description": "96 channel pipette and a ROW partial tip configuration.",

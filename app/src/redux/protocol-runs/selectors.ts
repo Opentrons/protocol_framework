@@ -76,6 +76,7 @@ export const getSetupStepsMissing: (
   ) as Types.StepMap<boolean>
 }
 
+// Reports all missing setup steps, including those validated on the robot.
 export const getMissingSetupSteps: (
   state: State,
   runId: string

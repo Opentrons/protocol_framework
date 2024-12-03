@@ -1,13 +1,12 @@
 import type * as React from 'react'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
-import { renderHook, act, screen, waitFor } from '@testing-library/react'
+import { renderHook, act, screen } from '@testing-library/react'
 
 import { renderWithProviders } from '/app/__testing-utils__'
 import { i18n } from '/app/i18n'
 import { mockRecoveryContentProps } from '../__fixtures__'
 import {
   ErrorRecoveryContent,
-  useInitialPipetteHome,
   useERWizard,
   ErrorRecoveryComponent,
 } from '../ErrorRecoveryWizard'
@@ -25,6 +24,7 @@ import {
   IgnoreErrorSkipStep,
   ManualReplaceLwAndRetry,
   ManualMoveLwAndSkip,
+  HomeAndRetry,
 } from '../RecoveryOptions'
 import { RecoveryInProgress } from '../RecoveryInProgress'
 import { RecoveryError } from '../RecoveryError'
@@ -34,8 +34,6 @@ import {
   ErrorDetailsModal,
   RecoveryDoorOpenSpecial,
 } from '../shared'
-
-import type { Mock } from 'vitest'
 
 vi.mock('../RecoveryOptions')
 vi.mock('../RecoveryInProgress')
@@ -191,6 +189,7 @@ describe('ErrorRecoveryContent', () => {
     ROBOT_RELEASING_LABWARE,
     MANUAL_REPLACE_AND_RETRY,
     MANUAL_MOVE_AND_SKIP,
+    HOME_AND_RETRY,
   } = RECOVERY_MAP
 
   let props: React.ComponentProps<typeof ErrorRecoveryContent>
@@ -228,6 +227,7 @@ describe('ErrorRecoveryContent', () => {
     vi.mocked(RecoveryDoorOpenSpecial).mockReturnValue(
       <div>MOCK_DOOR_OPEN_SPECIAL</div>
     )
+    vi.mocked(HomeAndRetry).mockReturnValue(<div>MOCK_HOME_AND_RETRY</div>)
   })
 
   it(`returns SelectRecoveryOption when the route is ${OPTION_SELECTION.ROUTE}`, () => {
@@ -508,74 +508,17 @@ describe('ErrorRecoveryContent', () => {
 
     screen.getByText('MOCK_DOOR_OPEN_SPECIAL')
   })
-})
 
-describe('useInitialPipetteHome', () => {
-  let mockZHomePipetteZAxes: Mock
-  let mockhandleMotionRouting: Mock
-  let mockRecoveryCommands: any
-  let mockRouteUpdateActions: any
+  it(`returns HomeAndRetry when the route is ${HOME_AND_RETRY.ROUTE}`, () => {
+    props = {
+      ...props,
+      recoveryMap: {
+        ...props.recoveryMap,
+        route: HOME_AND_RETRY.ROUTE,
+      },
+    }
+    renderRecoveryContent(props)
 
-  beforeEach(() => {
-    mockZHomePipetteZAxes = vi.fn()
-    mockhandleMotionRouting = vi.fn()
-
-    mockhandleMotionRouting.mockResolvedValue(() => mockZHomePipetteZAxes())
-    mockZHomePipetteZAxes.mockResolvedValue(() => mockhandleMotionRouting())
-
-    mockRecoveryCommands = {
-      homePipetteZAxes: mockZHomePipetteZAxes,
-    } as any
-    mockRouteUpdateActions = {
-      handleMotionRouting: mockhandleMotionRouting,
-    } as any
-  })
-
-  it('does not z-home the pipettes if error recovery was not launched', () => {
-    renderHook(() =>
-      useInitialPipetteHome({
-        hasLaunchedRecovery: false,
-        recoveryCommands: mockRecoveryCommands,
-        routeUpdateActions: mockRouteUpdateActions,
-      })
-    )
-
-    expect(mockhandleMotionRouting).not.toHaveBeenCalled()
-  })
-
-  it('sets the motion screen properly and z-homes all pipettes only on the initial render of Error Recovery', async () => {
-    const { rerender } = renderHook(() =>
-      useInitialPipetteHome({
-        hasLaunchedRecovery: true,
-        recoveryCommands: mockRecoveryCommands,
-        routeUpdateActions: mockRouteUpdateActions,
-      })
-    )
-
-    await waitFor(() => {
-      expect(mockhandleMotionRouting).toHaveBeenCalledWith(true)
-    })
-    await waitFor(() => {
-      expect(mockZHomePipetteZAxes).toHaveBeenCalledTimes(1)
-    })
-    await waitFor(() => {
-      expect(mockhandleMotionRouting).toHaveBeenCalledWith(false)
-    })
-
-    expect(mockhandleMotionRouting.mock.invocationCallOrder[0]).toBeLessThan(
-      mockZHomePipetteZAxes.mock.invocationCallOrder[0]
-    )
-    expect(mockZHomePipetteZAxes.mock.invocationCallOrder[0]).toBeLessThan(
-      mockhandleMotionRouting.mock.invocationCallOrder[1]
-    )
-
-    rerender()
-
-    await waitFor(() => {
-      expect(mockhandleMotionRouting).toHaveBeenCalledTimes(2)
-    })
-    await waitFor(() => {
-      expect(mockZHomePipetteZAxes).toHaveBeenCalledTimes(1)
-    })
+    screen.getByText('MOCK_HOME_AND_RETRY')
   })
 })

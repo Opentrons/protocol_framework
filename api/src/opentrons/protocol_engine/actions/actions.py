@@ -272,17 +272,6 @@ class SetPipetteMovementSpeedAction:
 
 
 @dataclasses.dataclass(frozen=True)
-class AddAbsorbanceReaderLidAction:
-    """Add the absorbance reader lid id to the absorbance reader module substate.
-
-    This action is dispatched the absorbance reader module is first loaded.
-    """
-
-    module_id: str
-    lid_id: str
-
-
-@dataclasses.dataclass(frozen=True)
 class SetErrorRecoveryPolicyAction:
     """See `ProtocolEngine.set_error_recovery_policy()`."""
 
@@ -309,6 +298,5 @@ Action = Union[
     AddLiquidAction,
     ResetTipsAction,
     SetPipetteMovementSpeedAction,
-    AddAbsorbanceReaderLidAction,
     SetErrorRecoveryPolicyAction,
 ]

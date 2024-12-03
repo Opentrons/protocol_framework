@@ -14,6 +14,7 @@ import {
   OverpressureBanner,
   TipNotDetectedBanner,
   GripperErrorBanner,
+  StallErrorBanner,
 } from '../ErrorDetailsModal'
 
 vi.mock('react-dom', () => ({
@@ -196,6 +197,28 @@ describe('GripperErrorBanner', () => {
           'Gripper errors occur when the gripper stalls or collides with another object on the deck and are usually caused by improperly placed labware or inaccurate labware offsets',
         message:
           ' If the issue persists, cancel the run and rerun gripper calibration',
+      }),
+      {}
+    )
+  })
+})
+
+describe('StallErrorBanner', () => {
+  beforeEach(() => {
+    vi.mocked(InlineNotification).mockReturnValue(
+      <div>MOCK_INLINE_NOTIFICATION</div>
+    )
+  })
+  it('renders the InlineNotification', () => {
+    renderWithProviders(<StallErrorBanner />, {
+      i18nInstance: i18n,
+    })
+    expect(vi.mocked(InlineNotification)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'alert',
+        heading:
+          "A stall or collision is detected when the robot's motors are blocked",
+        message: 'The robot must return to its home position before proceeding',
       }),
       {}
     )

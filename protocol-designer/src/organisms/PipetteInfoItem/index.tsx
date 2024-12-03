@@ -40,7 +40,7 @@ export function PipetteInfoItem(props: PipetteInfoItemProps): JSX.Element {
         <Flex gridGap={SPACING.spacing4} flexDirection={DIRECTION_COLUMN}>
           <StyledText desktopStyle="bodyDefaultSemiBold">
             {i18n.format(
-              t('pip', {
+              t('pipette', {
                 mount: is96Channel ? t('left_right') : mount,
               }),
               'titleCase'

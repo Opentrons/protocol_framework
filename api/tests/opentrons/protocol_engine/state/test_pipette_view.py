@@ -1,16 +1,22 @@
 """Tests for pipette state accessors in the protocol_engine state store."""
+
 from collections import OrderedDict
+from typing import cast, Dict, List, Optional, Tuple, NamedTuple
 
 import pytest
-from typing import cast, Dict, List, Optional, Tuple, NamedTuple
+from decoy import Decoy
+
 
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.pipette import pipette_definition
-from opentrons_shared_data.pipette.pipette_definition import ValidNozzleMaps
+from opentrons_shared_data.pipette.pipette_definition import (
+    ValidNozzleMaps,
+    AvailableSensorDefinition,
+)
 
 from opentrons.config.defaults_ot2 import Z_RETRACT_DISTANCE
 from opentrons.hardware_control import CriticalPoint
-from opentrons.types import MountType, Mount as HwMount, Point
+from opentrons.types import MountType, Mount as HwMount, Point, NozzleConfigurationType
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons.protocol_engine import errors
 from opentrons.protocol_engine.types import (
@@ -30,7 +36,8 @@ from opentrons.protocol_engine.state.pipettes import (
     BoundingNozzlesOffsets,
     PipetteBoundingBoxOffsets,
 )
-from opentrons.hardware_control.nozzle_manager import NozzleMap, NozzleConfigurationType
+from opentrons.protocol_engine.state import fluid_stack
+from opentrons.hardware_control.nozzle_manager import NozzleMap
 from opentrons.protocol_engine.errors import TipNotAttachedError, PipetteNotLoadedError
 
 from ..pipette_fixtures import (
@@ -54,9 +61,14 @@ _SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS = PipetteBoundingBoxOffsets(
 )
 
 
+@pytest.fixture
+def available_sensors() -> AvailableSensorDefinition:
+    """Provide a list of sensors."""
+    return AvailableSensorDefinition(sensors=["pressure", "capacitive", "environment"])
+
+
 def get_pipette_view(
     pipettes_by_id: Optional[Dict[str, LoadedPipette]] = None,
-    aspirated_volume_by_id: Optional[Dict[str, Optional[float]]] = None,
     current_well: Optional[CurrentPipetteLocation] = None,
     current_deck_point: CurrentDeckPoint = CurrentDeckPoint(
         mount=None, deck_point=None
@@ -67,11 +79,14 @@ def get_pipette_view(
     flow_rates_by_id: Optional[Dict[str, FlowRates]] = None,
     nozzle_layout_by_id: Optional[Dict[str, NozzleMap]] = None,
     liquid_presence_detection_by_id: Optional[Dict[str, bool]] = None,
+    pipette_contents_by_id: Optional[
+        Dict[str, Optional[fluid_stack.FluidStack]]
+    ] = None,
 ) -> PipetteView:
     """Get a pipette view test subject with the specified state."""
     state = PipetteState(
         pipettes_by_id=pipettes_by_id or {},
-        aspirated_volume_by_id=aspirated_volume_by_id or {},
+        pipette_contents_by_id=pipette_contents_by_id or {},
         current_location=current_well,
         current_deck_point=current_deck_point,
         attached_tip_by_id=attached_tip_by_id or {},
@@ -234,11 +249,12 @@ def test_get_hardware_pipette_raises_with_name_mismatch() -> None:
         )
 
 
-def test_get_aspirated_volume() -> None:
+def test_get_aspirated_volume(decoy: Decoy) -> None:
     """It should get the aspirate volume for a pipette."""
+    stack = decoy.mock(cls=fluid_stack.FluidStack)
     subject = get_pipette_view(
-        aspirated_volume_by_id={
-            "pipette-id": 42,
+        pipette_contents_by_id={
+            "pipette-id": stack,
             "pipette-id-none": None,
             "pipette-id-no-tip": None,
         },
@@ -248,6 +264,7 @@ def test_get_aspirated_volume() -> None:
             "pipette-id-no-tip": None,
         },
     )
+    decoy.when(stack.aspirated_volume()).then_return(42)
 
     assert subject.get_aspirated_volume("pipette-id") == 42
     assert subject.get_aspirated_volume("pipette-id-none") is None
@@ -261,6 +278,7 @@ def test_get_aspirated_volume() -> None:
 
 def test_get_pipette_working_volume(
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
+    available_sensors: AvailableSensorDefinition,
 ) -> None:
     """It should get the minimum value of tip volume and max volume."""
     subject = get_pipette_view(
@@ -283,6 +301,14 @@ def test_get_pipette_working_volume(
                 default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
                 pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
                 lld_settings={},
+                plunger_positions={
+                    "top": 0.0,
+                    "bottom": 5.0,
+                    "blow_out": 19.0,
+                    "drop_tip": 20.0,
+                },
+                shaft_ul_per_mm=5.0,
+                available_sensors=available_sensors,
             )
         },
     )
@@ -292,6 +318,7 @@ def test_get_pipette_working_volume(
 
 def test_get_pipette_working_volume_raises_if_tip_volume_is_none(
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
+    available_sensors: AvailableSensorDefinition,
 ) -> None:
     """Should raise an exception that no tip is attached."""
     subject = get_pipette_view(
@@ -314,6 +341,14 @@ def test_get_pipette_working_volume_raises_if_tip_volume_is_none(
                 default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
                 pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
                 lld_settings={},
+                plunger_positions={
+                    "top": 0.0,
+                    "bottom": 5.0,
+                    "blow_out": 19.0,
+                    "drop_tip": 20.0,
+                },
+                shaft_ul_per_mm=5.0,
+                available_sensors=available_sensors,
             )
         },
     )
@@ -327,8 +362,12 @@ def test_get_pipette_working_volume_raises_if_tip_volume_is_none(
 
 def test_get_pipette_available_volume(
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
+    decoy: Decoy,
+    available_sensors: AvailableSensorDefinition,
 ) -> None:
     """It should get the available volume for a pipette."""
+    stack = decoy.mock(cls=fluid_stack.FluidStack)
+    decoy.when(stack.aspirated_volume()).then_return(58)
     subject = get_pipette_view(
         attached_tip_by_id={
             "pipette-id": TipGeometry(
@@ -337,7 +376,7 @@ def test_get_pipette_available_volume(
                 volume=100,
             ),
         },
-        aspirated_volume_by_id={"pipette-id": 58},
+        pipette_contents_by_id={"pipette-id": stack},
         static_config_by_id={
             "pipette-id": StaticPipetteConfig(
                 min_volume=1,
@@ -354,6 +393,14 @@ def test_get_pipette_available_volume(
                 default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
                 pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
                 lld_settings={},
+                plunger_positions={
+                    "top": 0.0,
+                    "bottom": 5.0,
+                    "blow_out": 19.0,
+                    "drop_tip": 20.0,
+                },
+                shaft_ul_per_mm=5.0,
+                available_sensors=available_sensors,
             ),
             "pipette-id-none": StaticPipetteConfig(
                 min_volume=1,
@@ -370,6 +417,14 @@ def test_get_pipette_available_volume(
                 default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
                 pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
                 lld_settings={},
+                plunger_positions={
+                    "top": 0.0,
+                    "bottom": 5.0,
+                    "blow_out": 19.0,
+                    "drop_tip": 20.0,
+                },
+                shaft_ul_per_mm=5.0,
+                available_sensors=available_sensors,
             ),
         },
     )
@@ -465,6 +520,7 @@ def test_get_deck_point(
 
 def test_get_static_config(
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
+    available_sensors: AvailableSensorDefinition,
 ) -> None:
     """It should return the static pipette configuration that was set for the given pipette."""
     config = StaticPipetteConfig(
@@ -482,6 +538,14 @@ def test_get_static_config(
         default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
         pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
         lld_settings={},
+        plunger_positions={
+            "top": 0.0,
+            "bottom": 5.0,
+            "blow_out": 19.0,
+            "drop_tip": 20.0,
+        },
+        shaft_ul_per_mm=5.0,
+        available_sensors=available_sensors,
     )
 
     subject = get_pipette_view(
@@ -513,6 +577,7 @@ def test_get_static_config(
 
 def test_get_nominal_tip_overlap(
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
+    available_sensors: AvailableSensorDefinition,
 ) -> None:
     """It should return the static pipette configuration that was set for the given pipette."""
     config = StaticPipetteConfig(
@@ -533,6 +598,14 @@ def test_get_nominal_tip_overlap(
         default_nozzle_map=get_default_nozzle_map(PipetteNameType.P300_SINGLE),
         pipette_bounding_box_offsets=_SAMPLE_PIPETTE_BOUNDING_BOX_OFFSETS,
         lld_settings={},
+        plunger_positions={
+            "top": 0.0,
+            "bottom": 5.0,
+            "blow_out": 19.0,
+            "drop_tip": 20.0,
+        },
+        shaft_ul_per_mm=5.0,
+        available_sensors=available_sensors,
     )
 
     subject = get_pipette_view(static_config_by_id={"pipette-id": config})
@@ -934,6 +1007,7 @@ def test_get_pipette_bounds_at_location(
     destination_position: Point,
     critical_point: Optional[CriticalPoint],
     pipette_bounds_result: Tuple[Point, Point, Point, Point],
+    available_sensors: AvailableSensorDefinition,
 ) -> None:
     """It should get the pipette's nozzle's bounds at the given location."""
     subject = get_pipette_view(
@@ -957,6 +1031,14 @@ def test_get_pipette_bounds_at_location(
                 bounding_nozzle_offsets=_SAMPLE_NOZZLE_BOUNDS_OFFSETS,
                 pipette_bounding_box_offsets=bounding_box_offsets,
                 lld_settings={},
+                plunger_positions={
+                    "top": 0.0,
+                    "bottom": 5.0,
+                    "blow_out": 19.0,
+                    "drop_tip": 20.0,
+                },
+                shaft_ul_per_mm=5.0,
+                available_sensors=available_sensors,
             )
         },
     )
@@ -968,3 +1050,137 @@ def test_get_pipette_bounds_at_location(
         )
         == pipette_bounds_result
     )
+
+
+@pytest.mark.parametrize(
+    "nozzle_map,allowed",
+    [
+        (
+            NozzleMap.build(
+                physical_nozzles=NINETY_SIX_MAP,
+                physical_rows=NINETY_SIX_ROWS,
+                physical_columns=NINETY_SIX_COLS,
+                starting_nozzle="A1",
+                back_left_nozzle="A1",
+                front_right_nozzle="H12",
+                valid_nozzle_maps=ValidNozzleMaps(
+                    maps={
+                        "Full": sum(
+                            [
+                                NINETY_SIX_ROWS["A"],
+                                NINETY_SIX_ROWS["B"],
+                                NINETY_SIX_ROWS["C"],
+                                NINETY_SIX_ROWS["D"],
+                                NINETY_SIX_ROWS["E"],
+                                NINETY_SIX_ROWS["F"],
+                                NINETY_SIX_ROWS["G"],
+                                NINETY_SIX_ROWS["H"],
+                            ],
+                            [],
+                        )
+                    }
+                ),
+            ),
+            True,
+        ),
+        (
+            NozzleMap.build(
+                physical_nozzles=NINETY_SIX_MAP,
+                physical_rows=NINETY_SIX_ROWS,
+                physical_columns=NINETY_SIX_COLS,
+                starting_nozzle="A1",
+                back_left_nozzle="A1",
+                front_right_nozzle="H1",
+                valid_nozzle_maps=ValidNozzleMaps(
+                    maps={"Column1": NINETY_SIX_COLS["1"]}
+                ),
+            ),
+            True,
+        ),
+        (
+            NozzleMap.build(
+                physical_nozzles=NINETY_SIX_MAP,
+                physical_rows=NINETY_SIX_ROWS,
+                physical_columns=NINETY_SIX_COLS,
+                starting_nozzle="A12",
+                back_left_nozzle="A12",
+                front_right_nozzle="H12",
+                valid_nozzle_maps=ValidNozzleMaps(
+                    maps={"Column12": NINETY_SIX_COLS["12"]}
+                ),
+            ),
+            True,
+        ),
+        (
+            NozzleMap.build(
+                physical_nozzles=NINETY_SIX_MAP,
+                physical_rows=NINETY_SIX_ROWS,
+                physical_columns=NINETY_SIX_COLS,
+                starting_nozzle="A1",
+                back_left_nozzle="A1",
+                front_right_nozzle="A1",
+                valid_nozzle_maps=ValidNozzleMaps(maps={"Single": ["A1"]}),
+            ),
+            True,
+        ),
+        (
+            NozzleMap.build(
+                physical_nozzles=OrderedDict((("A1", Point(0.0, 1.0, 2.0)),)),
+                physical_rows=OrderedDict((("1", ["A1"]),)),
+                physical_columns=OrderedDict((("A", ["A1"]),)),
+                starting_nozzle="A1",
+                back_left_nozzle="A1",
+                front_right_nozzle="A1",
+                valid_nozzle_maps=ValidNozzleMaps(maps={"Single": ["A1"]}),
+            ),
+            True,
+        ),
+        (
+            NozzleMap.build(
+                physical_nozzles=EIGHT_CHANNEL_MAP,
+                physical_rows=EIGHT_CHANNEL_ROWS,
+                physical_columns=EIGHT_CHANNEL_COLS,
+                starting_nozzle="A1",
+                back_left_nozzle="A1",
+                front_right_nozzle="H1",
+                valid_nozzle_maps=ValidNozzleMaps(
+                    maps={"Full": EIGHT_CHANNEL_COLS["1"]}
+                ),
+            ),
+            True,
+        ),
+        (
+            NozzleMap.build(
+                physical_nozzles=EIGHT_CHANNEL_MAP,
+                physical_rows=EIGHT_CHANNEL_ROWS,
+                physical_columns=EIGHT_CHANNEL_COLS,
+                starting_nozzle="A1",
+                back_left_nozzle="A1",
+                front_right_nozzle="A1",
+                valid_nozzle_maps=ValidNozzleMaps(maps={"Full": ["A1"]}),
+            ),
+            True,
+        ),
+        (
+            NozzleMap.build(
+                physical_nozzles=NINETY_SIX_MAP,
+                physical_rows=NINETY_SIX_ROWS,
+                physical_columns=NINETY_SIX_COLS,
+                starting_nozzle="A5",
+                back_left_nozzle="A5",
+                front_right_nozzle="H5",
+                valid_nozzle_maps=ValidNozzleMaps(
+                    maps={"Column12": NINETY_SIX_COLS["5"]}
+                ),
+            ),
+            False,
+        ),
+    ],
+)
+def test_lld_config_validation(nozzle_map: NozzleMap, allowed: bool) -> None:
+    """It should validate partial tip configurations for LLD."""
+    pipette_id = "pipette-id"
+    subject = get_pipette_view(
+        nozzle_layout_by_id={pipette_id: nozzle_map},
+    )
+    assert subject.get_nozzle_configuration_supports_lld(pipette_id) == allowed

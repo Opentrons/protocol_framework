@@ -1,4 +1,5 @@
 """Well state store tests."""
+
 import pytest
 from datetime import datetime
 from opentrons.protocol_engine.state.wells import WellStore
@@ -138,7 +139,7 @@ def test_handles_load_liquid_and_aspirate(subject: WellStore) -> None:
             state_update=update_types.StateUpdate(
                 liquid_operated=update_types.LiquidOperatedUpdate(
                     labware_id=labware_id,
-                    well_name=well_name_1,
+                    well_names=[well_name_1, well_name_2],
                     volume_added=-aspirated_volume,
                 )
             ),
@@ -150,7 +151,7 @@ def test_handles_load_liquid_and_aspirate(subject: WellStore) -> None:
             state_update=update_types.StateUpdate(
                 liquid_operated=update_types.LiquidOperatedUpdate(
                     labware_id=labware_id,
-                    well_name=well_name_2,
+                    well_names=[well_name_2],
                     volume_added=-aspirated_volume,
                 )
             ),
@@ -167,12 +168,12 @@ def test_handles_load_liquid_and_aspirate(subject: WellStore) -> None:
     assert (
         subject.state.loaded_volumes[labware_id][well_name_1].operations_since_load == 1
     )
-    assert subject.state.loaded_volumes[labware_id][well_name_2].volume == 90.0
+    assert subject.state.loaded_volumes[labware_id][well_name_2].volume == 80.0
     assert (
         subject.state.loaded_volumes[labware_id][well_name_2].last_loaded == timestamp
     )
     assert (
-        subject.state.loaded_volumes[labware_id][well_name_2].operations_since_load == 1
+        subject.state.loaded_volumes[labware_id][well_name_2].operations_since_load == 2
     )
 
 
@@ -212,7 +213,7 @@ def test_handles_liquid_probe_and_aspirate(subject: WellStore) -> None:
             state_update=update_types.StateUpdate(
                 liquid_operated=update_types.LiquidOperatedUpdate(
                     labware_id="labware-id",
-                    well_name="well-name",
+                    well_names=["well-name"],
                     volume_added=-aspirated_volume,
                 )
             ),

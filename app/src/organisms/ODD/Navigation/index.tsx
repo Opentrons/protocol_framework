@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useLocation, NavLink } from 'react-router-dom'
@@ -27,10 +27,13 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { ODD_FOCUS_VISIBLE } from '/app/atoms/buttons/constants'
+import { useScrollPosition } from '/app/local-resources/dom-utils'
 
 import { useNetworkConnection } from '/app/resources/networking/hooks/useNetworkConnection'
 import { getLocalRobot } from '/app/redux/discovery'
 import { NavigationMenu } from './NavigationMenu'
+
+import type { Dispatch, SetStateAction } from 'react'
 import type { ON_DEVICE_DISPLAY_PATHS } from '/app/App/OnDeviceDisplayApp'
 
 const NAV_LINKS: Array<typeof ON_DEVICE_DISPLAY_PATHS[number]> = [
@@ -64,7 +67,7 @@ const CHAR_LIMIT_NO_ICON = 15
 interface NavigationProps {
   //  optionalProps for setting the zIndex and position between multiple sticky elements
   //  used for ProtocolDashboard
-  setNavMenuIsOpened?: React.Dispatch<React.SetStateAction<boolean>>
+  setNavMenuIsOpened?: Dispatch<SetStateAction<boolean>>
   longPressModalIsOpened?: boolean
 }
 export function Navigation(props: NavigationProps): JSX.Element {
@@ -72,7 +75,7 @@ export function Navigation(props: NavigationProps): JSX.Element {
   const { t } = useTranslation('top_navigation')
   const location = useLocation()
   const localRobot = useSelector(getLocalRobot)
-  const [showNavMenu, setShowNavMenu] = React.useState<boolean>(false)
+  const [showNavMenu, setShowNavMenu] = useState<boolean>(false)
   const robotName = localRobot?.name != null ? localRobot.name : 'no name'
 
   // We need to display an icon for what type of network connection (if any)
@@ -92,18 +95,10 @@ export function Navigation(props: NavigationProps): JSX.Element {
     setShowNavMenu(openMenu)
   }
 
-  const scrollRef = React.useRef<HTMLDivElement>(null)
-  const [isScrolled, setIsScrolled] = React.useState<boolean>(false)
+  const { scrollRef, isScrolled } = useScrollPosition()
 
-  const observer = new IntersectionObserver(([entry]) => {
-    setIsScrolled(!entry.isIntersecting)
-  })
-  if (scrollRef.current != null) {
-    observer.observe(scrollRef.current)
-  }
-
-  const navBarScrollRef = React.useRef<HTMLDivElement>(null)
-  React.useEffect(() => {
+  const navBarScrollRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
     navBarScrollRef?.current?.scrollIntoView({
       behavior: 'auto',
       inline: 'center',

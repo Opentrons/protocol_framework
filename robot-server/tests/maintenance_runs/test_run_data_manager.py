@@ -1,4 +1,5 @@
 """Tests for RunDataManager."""
+
 import pytest
 from datetime import datetime
 from decoy import Decoy
@@ -73,6 +74,7 @@ def engine_state_summary() -> StateSummary:
                 id="some-liquid-id", displayName="liquid", description="desc"
             )
         ],
+        liquidClasses=[],
         wells=[],
     )
 
@@ -144,6 +146,7 @@ async def test_create(
         pipettes=engine_state_summary.pipettes,
         modules=engine_state_summary.modules,
         liquids=engine_state_summary.liquids,
+        liquidClasses=engine_state_summary.liquidClasses,
     )
 
 
@@ -197,6 +200,7 @@ async def test_create_with_options(
         pipettes=engine_state_summary.pipettes,
         modules=engine_state_summary.modules,
         liquids=engine_state_summary.liquids,
+        liquidClasses=engine_state_summary.liquidClasses,
     )
 
 
@@ -266,6 +270,7 @@ async def test_get_current_run(
         pipettes=engine_state_summary.pipettes,
         modules=engine_state_summary.modules,
         liquids=engine_state_summary.liquids,
+        liquidClasses=engine_state_summary.liquidClasses,
     )
     assert subject.current_run_id == run_id
 

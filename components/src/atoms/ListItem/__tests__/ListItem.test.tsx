@@ -33,7 +33,7 @@ describe('ListItem', () => {
     render(props)
     screen.getByText('mock listitem content')
     const listItem = screen.getByTestId('ListItem_noActive')
-    expect(listItem).toHaveStyle(`backgroundColor: ${COLORS.grey30}`)
+    expect(listItem).toHaveStyle(`backgroundColor: ${COLORS.grey20}`)
     expect(listItem).toHaveStyle(`borderRadius: ${BORDERS.borderRadius4}`)
   })
   it('should render correct style - success', () => {

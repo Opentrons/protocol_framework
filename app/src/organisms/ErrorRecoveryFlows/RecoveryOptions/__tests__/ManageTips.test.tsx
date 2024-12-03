@@ -282,7 +282,7 @@ describe('useDropTipFlowUtils', () => {
 
     testingRender(result.current.copyOverrides.beforeBeginningTopText as any)
 
-    screen.getByText('First, do you need to blowout aspirated liquid?')
+    screen.getByText('First, do you need to blow out aspirated liquid?')
 
     testingRender(result.current.copyOverrides.tipDropCompleteBtnCopy as any)
 

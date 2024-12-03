@@ -65,6 +65,20 @@
           "type": "number"
         }
       }
+    },
+    "pickUpAndDropOffsets": {
+      "type": "object",
+      "required": ["pickUpOffset", "dropOffset"],
+      "properties": {
+        "pickUpOffset": {
+          "$ref": "#/definitions/coordinates",
+          "description": "Offset added to calculate pick-up coordinates."
+        },
+        "dropOffset": {
+          "$ref": "#/definitions/coordinates",
+          "description": "Offset added to calculate drop coordinates."
+        }
+      }
     }
   },
   "type": "object",
@@ -343,21 +357,23 @@
     },
     "gripperOffsets": {
       "type": "object",
-      "description": "Offsets to be added when calculating the coordinates a gripper should go to when picking up or dropping a labware on this labware.",
+      "description": "Offsets to add when picking up or dropping another labware stacked atop this one. Do not use this to adjust the position of the gripper paddles relative to this labware or the child labware; use `gripHeightFromLabwareBottom` on this definition or the child's definition for that.",
+      "additionalProperties": {
+        "$ref": "#/definitions/pickUpAndDropOffsets",
+        "description": "Properties here are named for, and matched based on, the deck slot that this labware is atop--or, if this labware is atop a module, the deck slot that that module is atop."
+      },
       "properties": {
         "default": {
-          "type": "object",
-          "properties": {
-            "pickUpOffset": {
-              "$ref": "#/definitions/coordinates",
-              "description": "Offset added to calculate pick-up coordinates of a labware placed on this labware."
-            },
-            "dropOffset": {
-              "$ref": "#/definitions/coordinates",
-              "description": "Offset added to calculate drop coordinates of a labware placed on this labware."
-            }
-          },
-          "required": ["pickUpOffset", "dropOffset"]
+          "$ref": "#/definitions/pickUpAndDropOffsets",
+          "description": "The offsets to use if there's no slot-specific match in `additionalProperties`."
+        },
+        "lidOffsets": {
+          "$ref": "#/definitions/pickUpAndDropOffsets",
+          "description": "Additional offsets for gripping this labware, if this labware is a lid. Beware this property's placement: instead of affecting the labware stacked atop this labware, like the rest of the `gripperOffsets` properties, it affects this labware."
+        },
+        "lidDisposalOffsets": {
+          "$ref": "#/definitions/pickUpAndDropOffsets",
+          "description": "Additional offsets for gripping this labware, if this labware is a lid and it's being moved to a trash bin. Beware this property's placement: instead of affecting the labware stacked atop this labware, like the rest of the `gripperOffsets` properties, it affects this labware."
         }
       }
     },

@@ -53,6 +53,7 @@ export function RenameStepModal(props: RenameStepModalProps): JSX.Element {
 
   return createPortal(
     <Modal
+      marginLeft="0"
       title={t('shared:name_step')}
       type="info"
       closeOnOutsideClick

@@ -143,7 +143,6 @@ export function SetupLabwarePositionCheck(
         ) : null}
         <PrimaryButton
           textTransform={TYPOGRAPHY.textTransformCapitalize}
-          title={t('run_labware_position_check')}
           onClick={() => {
             launchLPC()
             setIsShowingLPCSuccessToast(false)

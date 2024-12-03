@@ -235,7 +235,11 @@ class OT3Simulator(FlexBackend):
         self._sim_gantry_load = gantry_load
 
     def update_constraints_for_plunger_acceleration(
-        self, mount: OT3Mount, acceleration: float, gantry_load: GantryLoad
+        self,
+        mount: OT3Mount,
+        acceleration: float,
+        gantry_load: GantryLoad,
+        high_speed_pipette: bool = False,
     ) -> None:
         self._sim_gantry_load = gantry_load
 
@@ -439,10 +443,12 @@ class OT3Simulator(FlexBackend):
         return self._sim_jaw_state
 
     async def tip_action(
-        self, origin: Dict[Axis, float], targets: List[Tuple[Dict[Axis, float], float]]
+        self, origin: float, targets: List[Tuple[float, float]]
     ) -> None:
         self._gear_motor_position.update(
-            coalesce_move_segments(origin, [target[0] for target in targets])
+            coalesce_move_segments(
+                {Axis.Q: origin}, [{Axis.Q: target[0]} for target in targets]
+            )
         )
         await asyncio.sleep(0)
 

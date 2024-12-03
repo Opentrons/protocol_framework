@@ -20,7 +20,7 @@ export function useNotifyRunQuery<TError = Error>(
 
   const httpQueryResult = useRunQuery(runId, queryOptionsNotify, hostOverride)
 
-  if (shouldRefetch) {
+  if (shouldRefetch && runId != null) {
     void httpQueryResult.refetch()
   }
 

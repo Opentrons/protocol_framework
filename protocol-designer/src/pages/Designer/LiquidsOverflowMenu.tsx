@@ -45,7 +45,7 @@ export function LiquidsOverflowMenu(
   return (
     <Flex
       position={POSITION_ABSOLUTE}
-      zIndex={5}
+      zIndex={12}
       right={location.pathname === '/liquids' ? SPACING.spacing12 : '3.125rem'}
       top={`calc(${NAV_HEIGHT} - 6px)`}
       ref={overflowWrapperRef}

@@ -60,6 +60,15 @@ In the deployed environments the FastAPI server is run in a docker container. To
 Now the API is running at <http://localhost:8000>
 View the API docs in a browser at <http://localhost:8000/docs>
 
+##### Docker shell
+
+1. make clean
+1. make build
+1. make run-shell
+1. make shell
+
+Now you are in the docker container and can inspect the environment and such.
+
 #### Direct API Interaction and Authentication
 
 > There is only 1 endpoint with the potential to call the OpenAI API. This is the `/api/chat/completion` endpoint. This endpoint requires authentication and the steps are outlined below. In the POST request body setting `"fake": true` will short circuit the handling of the call. The OpenAI API will not be hit. Instead, a hard coded response is returned. We plan to extend this capability to allow for live local testing of the UI without calling the OpenAI API.
@@ -117,3 +126,48 @@ The live-test target will run tests against any environment. The default is loca
 
 1. alter the `Pipfile` to the new pinned version
 1. run `make setup` to update the `Pipfile.lock`
+
+## Google Sheets Integration
+
+1. Create a Google Cloud Platform project
+1. Enable the Google Sheets and Drive API
+1. Go to APIs & Services > Library and enable the Google Sheets API.
+1. Go to APIs & Services > Credentials and create a Service Account. This account will be used by your application to access the Google Sheets API.
+1. After creating the Service Account, click on it in the Credentials section, go to the Keys tab, and create a JSON key. This will download a JSON file with credentials for your Service Account.
+1. Open the JSON file and store its content securely. You’ll set this JSON content as an environment variable.
+1. Configure Access to the Google Sheet
+1. Open the Google Sheet you want to access.
+1. Click Share and add the Service Account email (found in the JSON file under "client_email") as a collaborator, typically with Editor access. This allows the Service Account to interact with the sheet.
+
+### Test that the credentials work with a direct call to the Integration
+
+```shell
+make test-googlesheet
+```
+
+## Add Secrets or Environment Variables
+
+1. Define the new secret or environment variable in the `api/settings.py` file.
+1. Add the new secret or environment variable to your local `.env` file.
+1. Test locally.
+1. Log into the AWS console and navigate to the Secrets Manager.
+1. Environment variables are added into the json secret named ENV_VARIABLES_SECRET_NAME in deploy.py for a given environment.
+1. Environment variables MUST be named the same as the property in the Settings class.
+1. Secret names MUST be the same as the property in the Settings class but with \_ replaced with - and prefixed with the environment name-.
+1. The deploy script will load the environment variables from the secret and set them in the container definition.
+1. The deploy script will map the secrets from Settings and match them to the container secrets.
+1. If any secrets are missing, the deploy script with retrieve the secret ARN and set the secret in the container definition.
+
+## AWS Deployment
+
+Locally test the deployment script like so:
+
+```shell
+AWS_PROFILE=robotics_ai_staging make dry-deploy ENV=staging
+```
+
+Locally deploy to the staging environment like so:
+
+```shell
+AWS_PROFILE=robotics_ai_staging make deploy ENV=staging
+```

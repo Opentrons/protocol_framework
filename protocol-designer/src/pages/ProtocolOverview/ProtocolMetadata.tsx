@@ -12,9 +12,9 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { BUTTON_LINK_STYLE, LINE_CLAMP_TEXT_STYLE } from '../../atoms'
 
-const REQUIRED_APP_VERSION = '8.0.0'
+const REQUIRED_APP_VERSION = '8.2.0'
 
 type MetadataInfo = Array<{
   author?: string
@@ -74,7 +74,10 @@ export function ProtocolMetadata({
                   </Flex>
                 }
                 content={
-                  <StyledText desktopStyle="bodyDefaultRegular">
+                  <StyledText
+                    desktopStyle="bodyDefaultRegular"
+                    css={LINE_CLAMP_TEXT_STYLE(2)}
+                  >
                     {value ?? t('na')}
                   </StyledText>
                 }

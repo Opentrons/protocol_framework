@@ -19,7 +19,7 @@ interface ProtocolParametersProps {
 export function ProtocolParameters({
   runTimeParameters,
 }: ProtocolParametersProps): JSX.Element {
-  const { t } = useTranslation('protocol_details')
+  const { t } = useTranslation(['protocol_details', 'protocol_setup'])
 
   return (
     <Flex>
@@ -46,7 +46,9 @@ export function ProtocolParameters({
           <ParametersTable runTimeParameters={runTimeParameters} t={t} />
         </Flex>
       ) : (
-        <InfoScreen content={t('no_parameters_specified_in_protocol')} />
+        <InfoScreen
+          content={t('protocol_setup:no_parameters_specified_in_protocol')}
+        />
       )}
     </Flex>
   )

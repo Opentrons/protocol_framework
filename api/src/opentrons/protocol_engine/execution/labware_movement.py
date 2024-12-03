@@ -1,7 +1,9 @@
 """Labware movement command handling."""
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, overload
+
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 from opentrons.types import Point
 
@@ -79,24 +81,64 @@ class LabwareMovementHandler:
             )
         )
 
+    @overload
     async def move_labware_with_gripper(
         self,
+        *,
         labware_id: str,
         current_location: OnDeckLabwareLocation,
         new_location: OnDeckLabwareLocation,
         user_offset_data: LabwareMovementOffsetData,
         post_drop_slide_offset: Optional[Point],
     ) -> None:
-        """Move a loaded labware from one location to another using gripper."""
+        ...
+
+    @overload
+    async def move_labware_with_gripper(
+        self,
+        *,
+        labware_definition: LabwareDefinition,
+        current_location: OnDeckLabwareLocation,
+        new_location: OnDeckLabwareLocation,
+        user_offset_data: LabwareMovementOffsetData,
+        post_drop_slide_offset: Optional[Point],
+    ) -> None:
+        ...
+
+    async def move_labware_with_gripper(  # noqa: C901
+        self,
+        *,
+        labware_id: str | None = None,
+        labware_definition: LabwareDefinition | None = None,
+        current_location: OnDeckLabwareLocation,
+        new_location: OnDeckLabwareLocation,
+        user_offset_data: LabwareMovementOffsetData,
+        post_drop_slide_offset: Optional[Point],
+    ) -> None:
+        """Physically move a labware from one location to another using the gripper.
+
+        Generally, provide the `labware_id` of a loaded labware, and this method will
+        automatically look up its labware definition. If you're physically moving
+        something that has not been loaded as a labware (this is not common),
+        provide the `labware_definition` yourself instead.
+        """
         use_virtual_gripper = self._state_store.config.use_virtual_gripper
 
+        if labware_definition is None:
+            assert labware_id is not None  # From this method's @typing.overloads.
+            labware_definition = self._state_store.labware.get_definition(labware_id)
+
         if use_virtual_gripper:
-            # During Analysis we will pass in hard coded estimates for certain positions only accessible during execution
-            self._state_store.geometry.check_gripper_labware_tip_collision(
-                gripper_homed_position_z=_GRIPPER_HOMED_POSITION_Z,
-                labware_id=labware_id,
-                current_location=current_location,
-            )
+            # todo(mm, 2024-11-07): We should do this collision checking even when we
+            # only have a `labware_definition`, not a `labware_id`. Resolve when
+            # `check_gripper_labware_tip_collision()` can be made independent of `labware_id`.
+            if labware_id is not None:
+                self._state_store.geometry.check_gripper_labware_tip_collision(
+                    # During Analysis we will pass in hard coded estimates for certain positions only accessible during execution
+                    gripper_homed_position_z=_GRIPPER_HOMED_POSITION_Z,
+                    labware_id=labware_id,
+                    current_location=current_location,
+                )
             return
 
         ot3api = ensure_ot3_hardware(
@@ -119,14 +161,16 @@ class LabwareMovementHandler:
         await ot3api.home(axes=[Axis.Z_L, Axis.Z_R, Axis.Z_G])
         gripper_homed_position = await ot3api.gantry_position(mount=gripper_mount)
 
-        # Verify that no tip collisions will occur during the move
-        self._state_store.geometry.check_gripper_labware_tip_collision(
-            gripper_homed_position_z=gripper_homed_position.z,
-            labware_id=labware_id,
-            current_location=current_location,
-        )
+        # todo(mm, 2024-11-07): We should do this collision checking even when we
+        # only have a `labware_definition`, not a `labware_id`. Resolve when
+        # `check_gripper_labware_tip_collision()` can be made independent of `labware_id`.
+        if labware_id is not None:
+            self._state_store.geometry.check_gripper_labware_tip_collision(
+                gripper_homed_position_z=gripper_homed_position.z,
+                labware_id=labware_id,
+                current_location=current_location,
+            )
 
-        current_labware = self._state_store.labware.get_definition(labware_id)
         async with self._thermocycler_plate_lifter.lift_plate_for_labware_movement(
             labware_location=current_location
         ):
@@ -135,14 +179,14 @@ class LabwareMovementHandler:
                     from_location=current_location,
                     to_location=new_location,
                     additional_offset_vector=user_offset_data,
-                    current_labware=current_labware,
+                    current_labware=labware_definition,
                 )
             )
             from_labware_center = self._state_store.geometry.get_labware_grip_point(
-                labware_id=labware_id, location=current_location
+                labware_definition=labware_definition, location=current_location
             )
             to_labware_center = self._state_store.geometry.get_labware_grip_point(
-                labware_id=labware_id, location=new_location
+                labware_definition=labware_definition, location=new_location
             )
             movement_waypoints = get_gripper_labware_movement_waypoints(
                 from_labware_center=from_labware_center,
@@ -151,7 +195,9 @@ class LabwareMovementHandler:
                 offset_data=final_offsets,
                 post_drop_slide_offset=post_drop_slide_offset,
             )
-            labware_grip_force = self._state_store.labware.get_grip_force(labware_id)
+            labware_grip_force = self._state_store.labware.get_grip_force(
+                labware_definition
+            )
             holding_labware = False
             for waypoint_data in movement_waypoints:
                 if waypoint_data.jaw_open:
@@ -174,9 +220,11 @@ class LabwareMovementHandler:
                     # should be holding labware
                     if holding_labware:
                         labware_bbox = self._state_store.labware.get_dimensions(
-                            labware_id
+                            labware_definition=labware_definition
                         )
-                        well_bbox = self._state_store.labware.get_well_bbox(labware_id)
+                        well_bbox = self._state_store.labware.get_well_bbox(
+                            labware_definition=labware_definition
+                        )
                         # todo(mm, 2024-09-26): This currently raises a lower-level 2015 FailedGripperPickupError.
                         # Convert this to a higher-level 3001 LabwareDroppedError or 3002 LabwareNotPickedUpError,
                         # depending on what waypoint we're at, to propagate a more specific error code to users.

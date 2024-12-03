@@ -16,8 +16,10 @@ import {
 import { BLOWOUT_SUCCESS, DROP_TIP_SUCCESS, DT_ROUTES } from '../constants'
 import { DropTipFooterButtons } from '../shared'
 
+import type { FlattenSimpleInterpolation } from 'styled-components'
 import type { AddressableAreaName } from '@opentrons/shared-data'
 import type {
+  DropTipModalStyle,
   DropTipWizardContainerProps,
   ValidDropTipBlowoutLocation,
 } from '../types'
@@ -32,6 +34,7 @@ interface ChooseLocationProps extends DropTipWizardContainerProps {
 }
 
 export function ChooseLocation({
+  issuedCommandsType,
   dropTipCommandLocations,
   dropTipCommands,
   goBackRunValid,
@@ -97,7 +100,7 @@ export function ChooseLocation({
     toggleIsRobotPipetteMoving()
     void moveToAddressableArea(
       selectedLocation?.slotName as AddressableAreaName,
-      false
+      true
     ).then(() => {
       void blowoutOrDropTip(currentRoute, () => {
         const successStep =
@@ -128,13 +131,7 @@ export function ChooseLocation({
   }
 
   return (
-    <Flex
-      css={
-        modalStyle === 'simple'
-          ? CONTAINER_STYLE_SIMPLE
-          : CONTAINER_STYLE_INTERVENTION
-      }
-    >
+    <Flex css={buildContainerStyle(modalStyle, dropTipCommandLocations.length)}>
       <Flex css={OPTION_CONTAINER_STYLE}>
         <StyledText
           oddStyle="level4HeaderSemiBold"
@@ -168,6 +165,17 @@ export function ChooseLocation({
   )
 }
 
+// TODO(jh, 10-31-24): The numLocations logic is a hack to get around some unexpected ODD-specific CSS behavior in RadioButton.
+//  Investigate RadioButton ODD styling.
+const buildContainerStyle = (
+  modalStyle: DropTipModalStyle,
+  numLocations: number
+): FlattenSimpleInterpolation => {
+  return modalStyle === 'simple'
+    ? containerStyleSimple(numLocations)
+    : CONTAINER_STYLE_INTERVENTION
+}
+
 const CONTAINER_STYLE_BASE = `
   overflow: ${OVERFLOW_AUTO};
   flex-direction: ${DIRECTION_COLUMN};
@@ -181,12 +189,14 @@ const CONTAINER_STYLE_INTERVENTION = css`
   ${CONTAINER_STYLE_BASE}
 `
 
-const CONTAINER_STYLE_SIMPLE = css`
+const containerStyleSimple = (
+  numLocations: number
+): FlattenSimpleInterpolation => css`
   ${CONTAINER_STYLE_BASE}
   justify-content: ${JUSTIFY_SPACE_BETWEEN};
 
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-    height: 80%;
+    height: ${numLocations >= 4 ? '80%' : '100%'};
     flex-grow: 0;
   }
 `

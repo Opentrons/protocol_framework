@@ -107,6 +107,7 @@ class ProtocolAnalyzer:
             pipettes=result.state_summary.pipettes,
             errors=result.state_summary.errors,
             liquids=result.state_summary.liquids,
+            liquidClasses=result.state_summary.liquidClasses,
         )
 
     async def update_to_failed_analysis(
@@ -136,6 +137,7 @@ class ProtocolAnalyzer:
                 )
             ],
             liquids=[],
+            liquidClasses=[],
         )
 
     def __del__(self) -> None:

@@ -92,6 +92,7 @@ export function RecoveryDropTipFlowErrors({
   routeUpdateActions,
   getRecoveryOptionCopy,
   errorKind,
+  subMapUtils,
 }: RecoveryContentProps): JSX.Element {
   const { t } = useTranslation('error_recovery')
   const { step } = recoveryMap
@@ -107,6 +108,9 @@ export function RecoveryDropTipFlowErrors({
     selectedRecoveryOption,
     errorKind
   )
+
+  // Whenever there is an error during drop tip wizard, reset the submap so properly re-entry routing occurs.
+  subMapUtils.updateSubMap(null)
 
   const buildTitle = (): string => {
     switch (step) {

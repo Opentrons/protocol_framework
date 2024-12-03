@@ -1,15 +1,26 @@
 import type * as React from 'react'
-import { describe, it, beforeEach, vi } from 'vitest'
+import { describe, it, beforeEach, vi, expect } from 'vitest'
 import { screen, fireEvent } from '@testing-library/react'
+
+import { useHoverTooltip } from '@opentrons/components'
 
 import { renderWithProviders } from '/app/__testing-utils__'
 import { i18n } from '/app/i18n'
 import { SetupLiquids } from '../index'
 import { SetupLiquidsList } from '../SetupLiquidsList'
 import { SetupLiquidsMap } from '../SetupLiquidsMap'
+import { useRunHasStarted } from '/app/resources/runs'
 
+vi.mock('@opentrons/components', async () => {
+  const actual = await vi.importActual('@opentrons/components')
+  return {
+    ...actual,
+    useHoverTooltip: vi.fn(),
+  }
+})
 vi.mock('../SetupLiquidsList')
 vi.mock('../SetupLiquidsMap')
+vi.mock('/app/resources/runs')
 
 describe('SetupLiquids', () => {
   const render = (
@@ -44,6 +55,8 @@ describe('SetupLiquids', () => {
     vi.mocked(SetupLiquidsMap).mockReturnValue(
       <div>Mock setup liquids map</div>
     )
+    vi.mocked(useHoverTooltip).mockReturnValue([{}, {}] as any)
+    vi.mocked(useRunHasStarted).mockReturnValue(false)
   })
 
   it('renders the list and map view buttons and proceed button', () => {
@@ -63,5 +76,16 @@ describe('SetupLiquids', () => {
     const mapViewButton = screen.getByRole('button', { name: 'List View' })
     fireEvent.click(mapViewButton)
     screen.getByText('Mock setup liquids list')
+  })
+  it('disables the confirmation button if the run has already started', () => {
+    vi.mocked(useRunHasStarted).mockReturnValue(true)
+
+    render(props)
+
+    const btn = screen.getByRole('button', {
+      name: 'Confirm locations and volumes',
+    })
+
+    expect(btn).toBeDisabled()
   })
 })

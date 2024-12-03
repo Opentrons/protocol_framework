@@ -4,11 +4,13 @@ import { renderHook, act } from '@testing-library/react'
 import {
   useResumeRunFromRecoveryMutation,
   useStopRunMutation,
-  useUpdateErrorRecoveryPolicy,
   useResumeRunFromRecoveryAssumingFalsePositiveMutation,
 } from '@opentrons/react-api-client'
 
-import { useChainRunCommands } from '/app/resources/runs'
+import {
+  useChainRunCommands,
+  useUpdateRecoveryPolicyWithStrategy,
+} from '/app/resources/runs'
 import {
   useRecoveryCommands,
   HOME_PIPETTE_Z_AXES,
@@ -16,8 +18,7 @@ import {
   buildPickUpTips,
   buildIgnorePolicyRules,
   isAssumeFalsePositiveResumeKind,
-  UPDATE_ESTIMATORS_EXCEPT_PLUNGERS,
-  HOME_GRIPPER_Z,
+  HOME_EXCEPT_PLUNGERS,
 } from '../useRecoveryCommands'
 import { RECOVERY_MAP, ERROR_KINDS } from '../../constants'
 import { getErrorKind } from '/app/organisms/ErrorRecoveryFlows/utils'
@@ -56,7 +57,11 @@ describe('useRecoveryCommands', () => {
 
   const props = {
     runId: mockRunId,
-    failedCommandByRunRecord: mockFailedCommand,
+    failedCommand: {
+      byRunRecord: mockFailedCommand,
+      byAnalysis: mockFailedCommand,
+    },
+    unvalidatedFailedCommand: mockFailedCommand,
     failedLabwareUtils: mockFailedLabwareUtils,
     routeUpdateActions: mockRouteUpdateActions,
     recoveryToastUtils: { makeSuccessToast: mockMakeSuccessToast } as any,
@@ -77,9 +82,9 @@ describe('useRecoveryCommands', () => {
     vi.mocked(useChainRunCommands).mockReturnValue({
       chainRunCommands: mockChainRunCommands,
     } as any)
-    vi.mocked(useUpdateErrorRecoveryPolicy).mockReturnValue({
-      mutateAsync: mockUpdateErrorRecoveryPolicy,
-    } as any)
+    vi.mocked(useUpdateRecoveryPolicyWithStrategy).mockReturnValue(
+      mockUpdateErrorRecoveryPolicy as any
+    )
     vi.mocked(
       useResumeRunFromRecoveryAssumingFalsePositiveMutation
     ).mockReturnValue({
@@ -136,32 +141,54 @@ describe('useRecoveryCommands', () => {
       false
     )
   })
-  ;([
+
+  const IN_PLACE_COMMANDS = [
     'aspirateInPlace',
     'dispenseInPlace',
     'blowOutInPlace',
     'dropTipInPlace',
     'prepareToAspirate',
-  ] as const).forEach(inPlaceCommandType => {
-    it(`Should move to retryLocation if failed command is ${inPlaceCommandType} and error is appropriate when retrying`, async () => {
-      const { result } = renderHook(() =>
-        useRecoveryCommands({
-          runId: mockRunId,
-          failedCommandByRunRecord: {
-            ...mockFailedCommand,
-            commandType: inPlaceCommandType,
-            params: {
-              pipetteId: 'mock-pipette-id',
-            },
-            error: {
-              errorType: 'overpressure',
-              errorCode: '3006',
-              isDefined: true,
-              errorInfo: {
-                retryLocation: [1, 2, 3],
-              },
+  ] as const
+
+  const ERROR_SCENARIOS = [
+    { type: 'overpressure', code: '3006' },
+    { type: 'tipPhysicallyAttached', code: '3007' },
+  ] as const
+
+  it.each(
+    ERROR_SCENARIOS.flatMap(error =>
+      IN_PLACE_COMMANDS.map(commandType => ({
+        errorType: error.type,
+        errorCode: error.code,
+        commandType,
+      }))
+    )
+  )(
+    'Should move to retryLocation if failed command is $commandType and error is $errorType when retrying',
+    async ({ errorType, errorCode, commandType }) => {
+      const { result } = renderHook(() => {
+        const failedCommand = {
+          ...mockFailedCommand,
+          commandType,
+          params: {
+            pipetteId: 'mock-pipette-id',
+          },
+          error: {
+            errorType,
+            errorCode,
+            isDefined: true,
+            errorInfo: {
+              retryLocation: [1, 2, 3],
             },
           },
+        }
+        return useRecoveryCommands({
+          runId: mockRunId,
+          failedCommand: {
+            byRunRecord: failedCommand,
+            byAnalysis: failedCommand,
+          },
+          unvalidatedFailedCommand: failedCommand,
           failedLabwareUtils: mockFailedLabwareUtils,
           routeUpdateActions: mockRouteUpdateActions,
           recoveryToastUtils: {} as any,
@@ -171,10 +198,12 @@ describe('useRecoveryCommands', () => {
           } as any,
           selectedRecoveryOption: RECOVERY_MAP.RETRY_NEW_TIPS.ROUTE,
         })
-      )
+      })
+
       await act(async () => {
         await result.current.retryFailedCommand()
       })
+
       expect(mockChainRunCommands).toHaveBeenLastCalledWith(
         [
           {
@@ -186,14 +215,14 @@ describe('useRecoveryCommands', () => {
             },
           },
           {
-            commandType: inPlaceCommandType,
+            commandType,
             params: { pipetteId: 'mock-pipette-id' },
           },
         ],
         false
       )
-    })
-  })
+    }
+  )
 
   it('should call resumeRun with runId and show success toast on success', async () => {
     const { result } = renderHook(() => useRecoveryCommands(props))
@@ -245,7 +274,7 @@ describe('useRecoveryCommands', () => {
 
     const testProps = {
       ...props,
-      failedCommandByRunRecord: mockFailedCmdWithPipetteId,
+      unvalidatedFailedCommand: mockFailedCmdWithPipetteId,
       failedLabwareUtils: {
         ...mockFailedLabwareUtils,
         failedLabware: mockFailedLabware,
@@ -281,11 +310,11 @@ describe('useRecoveryCommands', () => {
     const { result } = renderHook(() => useRecoveryCommands(props))
 
     await act(async () => {
-      await result.current.updatePositionEstimatorsAndHomeGripper()
+      await result.current.homeExceptPlungers()
     })
 
     expect(mockChainRunCommands).toHaveBeenCalledWith(
-      [UPDATE_ESTIMATORS_EXCEPT_PLUNGERS, HOME_GRIPPER_Z],
+      [HOME_EXCEPT_PLUNGERS],
       false
     )
   })
@@ -312,7 +341,7 @@ describe('useRecoveryCommands', () => {
 
     const testProps = {
       ...props,
-      failedCommandByRunRecord: mockFailedCommandWithError,
+      unvalidatedFailedCommand: mockFailedCommandWithError,
     }
 
     const { result, rerender } = renderHook(() =>
@@ -334,7 +363,8 @@ describe('useRecoveryCommands', () => {
     )
 
     expect(mockUpdateErrorRecoveryPolicy).toHaveBeenCalledWith(
-      expectedPolicyRules
+      expectedPolicyRules,
+      'append'
     )
   })
 
@@ -349,7 +379,7 @@ describe('useRecoveryCommands', () => {
 
     const testProps = {
       ...props,
-      failedCommandByRunRecord: mockFailedCommandWithError,
+      unvalidatedFailedCommand: mockFailedCommandWithError,
     }
 
     mockUpdateErrorRecoveryPolicy.mockRejectedValueOnce(

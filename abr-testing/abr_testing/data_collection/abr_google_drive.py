@@ -37,17 +37,23 @@ def create_data_dictionary(
     plate: str,
     accuracy: Any,
     hellma_plate_standards: List[Dict[str, Any]],
-) -> Tuple[List[List[Any]], List[str], List[List[Any]], List[str]]:
+) -> Tuple[List[List[Any]], List[str], List[List[Any]], List[str], List[List[Any]]]:
     """Pull data from run files and format into a dictionary."""
     runs_and_robots: List[Any] = []
     runs_and_lpc: List[Dict[str, Any]] = []
     headers: List[str] = []
     headers_lpc: List[str] = []
+    list_of_heights: List[List[Any]] = [[], [], [], [], [], [], [], []]
+    hellma_plate_orientation = False  # default hellma plate is not rotated.
     for filename in os.listdir(storage_directory):
         file_path = os.path.join(storage_directory, filename)
         if file_path.endswith(".json"):
             with open(file_path) as file:
-                file_results = json.load(file)
+                try:
+                    file_results = json.load(file)
+                except json.decoder.JSONDecodeError:
+                    print(f"Skipped file {file_path} bc no data.")
+                    continue
         else:
             continue
         if not isinstance(file_results, dict):
@@ -62,6 +68,10 @@ def create_data_dictionary(
         if run_id in runs_to_save:
             print(f"started reading run {run_id}.")
             robot = file_results.get("robot_name")
+            parameters = file_results.get("runTimeParameters", "")
+            for parameter in parameters:
+                if parameter["displayName"] == "Hellma Plate Orientation":
+                    hellma_plate_orientation = bool(parameter["value"])
             protocol_name = file_results["protocol"]["metadata"].get("protocolName", "")
             software_version = file_results.get("API_Version", "")
             left_pipette = file_results.get("left", "")
@@ -118,7 +128,10 @@ def create_data_dictionary(
                     file_results, labware_name="opentrons_tough_pcr_auto_sealing_lid"
                 )
                 plate_reader_dict = read_robot_logs.plate_reader_commands(
-                    file_results, hellma_plate_standards
+                    file_results, hellma_plate_standards, hellma_plate_orientation
+                )
+                list_of_heights = read_robot_logs.liquid_height_commands(
+                    file_results, list_of_heights
                 )
                 notes = {"Note1": "", "Jira Link": issue_url}
                 plate_measure = {
@@ -155,7 +168,13 @@ def create_data_dictionary(
     print(f"Number of runs read: {num_of_runs_read}")
     transposed_runs_and_robots = list(map(list, zip(*runs_and_robots)))
     transposed_runs_and_lpc = list(map(list, zip(*runs_and_lpc)))
-    return transposed_runs_and_robots, headers, transposed_runs_and_lpc, headers_lpc
+    return (
+        transposed_runs_and_robots,
+        headers,
+        transposed_runs_and_lpc,
+        headers_lpc,
+        list_of_heights,
+    )
 
 
 def run(
@@ -173,7 +192,8 @@ def run(
         credentials_path, google_sheet_name, 0
     )
     # Get run ids on google sheet
-    run_ids_on_gs = set(google_sheet.get_column(2))
+    run_ids_on_gs: Set[str] = set(google_sheet.get_column(2))
+
     # Get robots on google sheet
     # Uploads files that are not in google drive directory
     google_drive.upload_missing_files(storage_directory)
@@ -191,6 +211,7 @@ def run(
         headers,
         transposed_runs_and_lpc,
         headers_lpc,
+        list_of_heights,
     ) = create_data_dictionary(
         missing_runs_from_gs,
         storage_directory,
@@ -201,7 +222,15 @@ def run(
     )
     start_row = google_sheet.get_index_row() + 1
     google_sheet.batch_update_cells(transposed_runs_and_robots, "A", start_row, "0")
-
+    # Record Liquid Heights Found
+    google_sheet_ldf = google_sheets_tool.google_sheet(
+        credentials_path, google_sheet_name, 2
+    )
+    google_sheet_ldf.get_row(1)
+    start_row_lhd = google_sheet_ldf.get_index_row() + 1
+    google_sheet_ldf.batch_update_cells(
+        list_of_heights, "A", start_row_lhd, "2075262446"
+    )
     # Add LPC to google sheet
     google_sheet_lpc = google_sheets_tool.google_sheet(credentials_path, "ABR-LPC", 0)
     start_row_lpc = google_sheet_lpc.get_index_row() + 1

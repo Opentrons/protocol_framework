@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import last from 'lodash/last'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from 'react-query'
@@ -56,6 +56,7 @@ import { Hardware } from './Hardware'
 import { Labware } from './Labware'
 import { Liquids } from './Liquids'
 import { formatTimeWithUtcLabel } from '/app/resources/runs'
+import { useScrollPosition } from '/app/local-resources/dom-utils'
 
 import type { Protocol } from '@opentrons/api-client'
 import type { OddModalHeaderBaseProps } from '/app/molecules/OddModal/types'
@@ -335,14 +336,7 @@ export function ProtocolDetails(): JSX.Element | null {
   })
 
   // Watch for scrolling to toggle dropshadow
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const [isScrolled, setIsScrolled] = useState<boolean>(false)
-  const observer = new IntersectionObserver(([entry]) => {
-    setIsScrolled(!entry.isIntersecting)
-  })
-  if (scrollRef.current != null) {
-    observer.observe(scrollRef.current)
-  }
+  const { scrollRef, isScrolled } = useScrollPosition()
 
   let pinnedProtocolIds = useSelector(getPinnedProtocolIds) ?? []
   const pinned = pinnedProtocolIds.includes(protocolId)

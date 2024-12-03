@@ -30,13 +30,18 @@ export function StepInfo({
   ...styleProps
 }: StepInfoProps): JSX.Element {
   const { t } = useTranslation('error_recovery')
-  const { currentStepNumber, totalStepCount } = stepCounts
+  const { currentStepNumber, totalStepCount, hasRunDiverged } = stepCounts
 
   const currentCopy = currentStepNumber ?? '?'
   const totalCopy = totalStepCount ?? '?'
 
   const desktopStyleDefaulted = desktopStyle ?? 'bodyDefaultRegular'
   const oddStyleDefaulted = oddStyle ?? 'bodyTextRegular'
+
+  const buildAtStepCopy = (): string =>
+    hasRunDiverged
+      ? `${t('at_step')}: N/A`
+      : `${t('at_step')} ${currentCopy}/${totalCopy}: `
 
   return (
     <Flex display={DISPLAY_INLINE} {...styleProps}>
@@ -45,7 +50,7 @@ export function StepInfo({
         oddStyle={oddStyleDefaulted}
         display={DISPLAY_INLINE}
       >
-        {`${t('at_step')} ${currentCopy}/${totalCopy}: `}
+        {buildAtStepCopy()}
       </StyledText>
       {failedCommand?.byAnalysis != null && protocolAnalysis != null ? (
         <CommandText

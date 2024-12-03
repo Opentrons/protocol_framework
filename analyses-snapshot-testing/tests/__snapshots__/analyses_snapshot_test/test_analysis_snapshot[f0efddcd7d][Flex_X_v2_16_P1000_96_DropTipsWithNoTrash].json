@@ -1448,6 +1448,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [],
   "metadata": {
     "author": "Derek Maggio <derek.maggio@opentrons.com>",

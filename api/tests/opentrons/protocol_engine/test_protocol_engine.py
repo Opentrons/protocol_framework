@@ -995,8 +995,7 @@ async def test_estop_noops_if_invalid(
     subject.estop()  # Should not raise.
 
     decoy.verify(
-        action_dispatcher.dispatch(),  # type: ignore
-        ignore_extra_args=True,
+        action_dispatcher.dispatch(expected_action),
         times=0,
     )
     decoy.verify(
@@ -1131,21 +1130,18 @@ def test_add_liquid(
     decoy: Decoy,
     action_dispatcher: ActionDispatcher,
     subject: ProtocolEngine,
+    state_store: StateStore,
 ) -> None:
     """It should dispatch an AddLiquidAction action."""
+    liquid_obj = Liquid(id="water-id", displayName="water", description="water desc")
+    decoy.when(
+        state_store.liquid.validate_liquid_allowed(liquid=liquid_obj)
+    ).then_return(liquid_obj)
     subject.add_liquid(
         id="water-id", name="water", description="water desc", color=None
     )
 
-    decoy.verify(
-        action_dispatcher.dispatch(
-            AddLiquidAction(
-                liquid=Liquid(
-                    id="water-id", displayName="water", description="water desc"
-                )
-            )
-        )
-    )
+    decoy.verify(action_dispatcher.dispatch(AddLiquidAction(liquid=liquid_obj)))
 
 
 async def test_use_attached_temp_and_mag_modules(

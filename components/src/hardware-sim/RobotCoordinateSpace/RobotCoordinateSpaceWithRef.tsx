@@ -34,19 +34,9 @@ export function RobotCoordinateSpaceWithRef(
       (acc, deckSlot) => ({ ...acc, [deckSlot.id]: deckSlot }),
       {}
     )
-
-    if (deckDef.otId === 'ot2_standard') {
-      const PADDING = 5
-      wholeDeckViewBox = `${viewBoxOriginX - PADDING} ${
-        viewBoxOriginY + PADDING * 5
-      } ${deckXDimension + PADDING * 2} ${deckYDimension - PADDING * 10}`
-    } else {
-      const PADDING = 20
-      wholeDeckViewBox = `${viewBoxOriginX - PADDING} ${
-        viewBoxOriginY + PADDING
-      } ${deckXDimension + PADDING * 2} ${deckYDimension + PADDING * 2}`
-    }
+    wholeDeckViewBox = `${viewBoxOriginX} ${viewBoxOriginY} ${deckXDimension} ${deckYDimension}`
   }
+
   return (
     <Svg
       viewBox={zoomed ? viewBox : wholeDeckViewBox}

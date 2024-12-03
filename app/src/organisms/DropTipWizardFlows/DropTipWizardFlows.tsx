@@ -68,9 +68,11 @@ export function DropTipWizardFlows(
   // after it closes.
   useEffect(() => {
     return () => {
-      dropTipWithTypeUtils.dropTipCommands.handleCleanUpAndClose()
+      if (issuedCommandsType === 'setup') {
+        void dropTipWithTypeUtils.dropTipCommands.handleCleanUpAndClose()
+      }
     }
-  }, [])
+  }, [issuedCommandsType])
 
   return (
     <DropTipWizard

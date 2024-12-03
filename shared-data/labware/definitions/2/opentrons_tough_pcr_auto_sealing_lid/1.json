@@ -66,10 +66,15 @@
       "y": 0,
       "z": 8.193
     },
+    "biorad_96_wellplate_200ul_pcr": {
+      "x": 0,
+      "y": 0,
+      "z": 8.08
+    },
     "opentrons_flex_deck_riser": {
       "x": 0,
       "y": 0,
-      "z": 0
+      "z": 34
     }
   },
   "gripForce": 15,
@@ -97,6 +102,18 @@
         "x": 0.5,
         "y": 0,
         "z": -1
+      }
+    },
+    "lidDisposalOffsets": {
+      "pickUpOffset": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "dropOffset": {
+        "x": 0,
+        "y": 5.0,
+        "z": 50.0
       }
     }
   }

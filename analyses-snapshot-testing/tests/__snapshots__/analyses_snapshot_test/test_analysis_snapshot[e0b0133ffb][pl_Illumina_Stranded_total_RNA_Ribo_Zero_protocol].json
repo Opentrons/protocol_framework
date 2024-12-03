@@ -39234,6 +39234,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [],
   "metadata": {
     "author": "Dandra Howell <protocols@opentrons.com>",

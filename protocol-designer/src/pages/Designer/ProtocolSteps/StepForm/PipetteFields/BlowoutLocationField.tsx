@@ -21,9 +21,8 @@ export function BlowoutLocationField(
     <DropdownStepFormField
       title={t('blowout_location')}
       options={options}
-      addPadding={false}
       {...restProps}
-      width="16.5rem"
+      width="100%"
     />
   )
 }

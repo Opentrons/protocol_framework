@@ -27,7 +27,7 @@ from opentrons_shared_data.errors.exceptions import (
     InvalidInstrumentData,
 )
 from opentrons_shared_data.pipette.ul_per_mm import (
-    piecewise_volume_conversion,
+    calculate_ul_per_mm,
     PIPETTING_FUNCTION_FALLBACK_VERSION,
     PIPETTING_FUNCTION_LATEST_VERSION,
 )
@@ -41,6 +41,7 @@ from opentrons_shared_data.pipette.types import (
     UlPerMmAction,
     PipetteName,
     PipetteModel,
+    Quirks,
 )
 from opentrons_shared_data.pipette import (
     load_data as load_pipette_data,
@@ -224,6 +225,9 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
     @property
     def push_out_volume(self) -> float:
         return self._active_tip_settings.default_push_out_volume
+
+    def is_high_speed_pipette(self) -> bool:
+        return Quirks.highSpeed in self._config.quirks
 
     def act_as(self, name: PipetteName) -> None:
         """Reconfigure to act as ``name``. ``name`` must be either the
@@ -529,23 +533,13 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
     # want this to unbounded.
     @functools.lru_cache(maxsize=100)
     def ul_per_mm(self, ul: float, action: UlPerMmAction) -> float:
-        if action == "aspirate":
-            fallback = self._active_tip_settings.aspirate.default[
-                PIPETTING_FUNCTION_FALLBACK_VERSION
-            ]
-            sequence = self._active_tip_settings.aspirate.default.get(
-                self._pipetting_function_version, fallback
-            )
-        elif action == "blowout":
-            return self._config.shaft_ul_per_mm
-        else:
-            fallback = self._active_tip_settings.dispense.default[
-                PIPETTING_FUNCTION_FALLBACK_VERSION
-            ]
-            sequence = self._active_tip_settings.dispense.default.get(
-                self._pipetting_function_version, fallback
-            )
-        return piecewise_volume_conversion(ul, sequence)
+        return calculate_ul_per_mm(
+            ul,
+            action,
+            self._active_tip_settings,
+            self._pipetting_function_version,
+            self._config.shaft_ul_per_mm,
+        )
 
     def __str__(self) -> str:
         return "{} current volume {}ul critical point: {} at {}".format(
@@ -585,6 +579,7 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
                 "versioned_tip_overlap": self.tip_overlap,
                 "back_compat_names": self._config.pipette_backcompat_names,
                 "supported_tips": self.liquid_class.supported_tips,
+                "shaft_ul_per_mm": self._config.shaft_ul_per_mm,
             }
         )
         return self._config_as_dict

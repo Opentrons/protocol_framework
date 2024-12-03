@@ -125,7 +125,7 @@ describe('getLabwareDisplayLocation with translations', () => {
       },
     })
 
-    screen.getByText('Mock Adapter in D1')
+    screen.getByText('Mock Adapter in Slot D1')
   })
 
   it('should return a slot-only location when detailLevel is "slot-only"', () => {
@@ -135,6 +135,24 @@ describe('getLabwareDisplayLocation with translations', () => {
     })
 
     screen.getByText('Slot C1')
+  })
+
+  it('should special case the slotName if it contains "waste chute"', () => {
+    render({
+      location: { slotName: 'gripperWasteChute' },
+      params: { ...defaultParams, detailLevel: 'slot-only' },
+    })
+
+    screen.getByText('Waste Chute')
+  })
+
+  it('should special case the slotName if it contains "trash bin"', () => {
+    render({
+      location: { slotName: 'trashBin' },
+      params: { ...defaultParams, detailLevel: 'slot-only' },
+    })
+
+    screen.getByText('Trash Bin')
   })
 
   it('should handle an adapter on module location when the detail level is full', () => {
@@ -168,6 +186,6 @@ describe('getLabwareDisplayLocation with translations', () => {
       },
     })
 
-    screen.getByText('Mock Adapter on Temperature Module in 2')
+    screen.getByText('Mock Adapter on Temperature Module in Slot 2')
   })
 })

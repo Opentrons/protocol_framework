@@ -127,6 +127,7 @@ class LoadPipetteImplementation(
             serial_number=loaded_pipette.serial_number,
             config=loaded_pipette.static_config,
         )
+        state_update.set_fluid_unknown(pipette_id=loaded_pipette.pipette_id)
 
         return SuccessData(
             public=LoadPipetteResult(pipetteId=loaded_pipette.pipette_id),

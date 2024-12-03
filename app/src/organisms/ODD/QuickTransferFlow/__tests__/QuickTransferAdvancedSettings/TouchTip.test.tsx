@@ -83,7 +83,7 @@ describe('TouchTip', () => {
 
   it('renders the first touch tip screen, continue, and back buttons', () => {
     render(props)
-    screen.getByText('Touch tip before aspirating')
+    screen.getByText('Touch tip after aspirating')
     screen.getByTestId('ChildNavigation_Primary_Button')
     screen.getByText('Enabled')
     screen.getByText('Disabled')

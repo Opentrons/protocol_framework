@@ -10,30 +10,14 @@ import { mockConnectedRobot } from '/app/redux/discovery/__fixtures__'
 import { useNetworkConnection } from '/app/resources/networking/hooks/useNetworkConnection'
 import { NavigationMenu } from '../NavigationMenu'
 import { Navigation } from '..'
+import { useScrollPosition } from '/app/local-resources/dom-utils'
 
 vi.mock('/app/resources/networking/hooks/useNetworkConnection')
 vi.mock('/app/redux/discovery')
 vi.mock('../NavigationMenu')
+vi.mock('/app/local-resources/dom-utils')
 
 mockConnectedRobot.name = '12345678901234567'
-
-class MockIntersectionObserver {
-  observe = vi.fn()
-  disconnect = vi.fn()
-  unobserve = vi.fn()
-}
-
-Object.defineProperty(window, 'IntersectionObserver', {
-  writable: true,
-  configurable: true,
-  value: MockIntersectionObserver,
-})
-
-Object.defineProperty(global, 'IntersectionObserver', {
-  writable: true,
-  configurable: true,
-  value: MockIntersectionObserver,
-})
 
 const render = (props: React.ComponentProps<typeof Navigation>) => {
   return renderWithProviders(
@@ -55,6 +39,10 @@ describe('Navigation', () => {
       isWifiConnected: false,
       isUsbConnected: false,
       connectionStatus: 'Not connected',
+    })
+    vi.mocked(useScrollPosition).mockReturnValue({
+      isScrolled: false,
+      scrollRef: {} as any,
     })
   })
   it('should render text and they have attribute', () => {

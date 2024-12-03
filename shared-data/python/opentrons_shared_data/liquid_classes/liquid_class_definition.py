@@ -1,7 +1,7 @@
 """Python shared data models for liquid class definitions."""
 
 from enum import Enum
-from typing import TYPE_CHECKING, Literal, Union, Optional, Dict, Any, Sequence
+from typing import TYPE_CHECKING, Literal, Union, Optional, Dict, Any, Sequence, Tuple
 
 from pydantic import (
     BaseModel,
@@ -28,8 +28,11 @@ _Number = Union[StrictInt, StrictFloat]
 _NonNegativeNumber = Union[_StrictNonNegativeInt, _StrictNonNegativeFloat]
 """Non-negative JSON number type, written to preserve lack of decimal point."""
 
-LiquidHandlingPropertyByVolume = Dict[str, _NonNegativeNumber]
-"""Settings for liquid class settings keyed by target aspiration/dispense volume."""
+LiquidHandlingPropertyByVolume = Sequence[Tuple[_NonNegativeNumber, _NonNegativeNumber]]
+"""Settings for liquid class settings that are interpolated by volume."""
+
+CorrectionByVolume = Sequence[Tuple[_NonNegativeNumber, _Number]]
+"""Settings for correctionByVolume, which unlike other `byVolume` properties allows negative values with volume."""
 
 
 class PositionReference(Enum):
@@ -82,8 +85,12 @@ class DelayProperties(BaseModel):
         return v
 
 
-class TouchTipParams(BaseModel):
+class LiquidClassTouchTipParams(BaseModel):
     """Parameters for touch-tip."""
+
+    # Note: Do not call this `TouchTipParams`, because that class name is used by the
+    # unrelated touchTip command in PE. Both classes are exported to things like the
+    # command schema JSON files, so the classes can't have the same name.
 
     zOffset: _Number = Field(
         ...,
@@ -101,14 +108,14 @@ class TouchTipProperties(BaseModel):
     """Shared properties for the touch-tip function."""
 
     enable: bool = Field(..., description="Whether touch-tip is enabled.")
-    params: Optional[TouchTipParams] = Field(
+    params: Optional[LiquidClassTouchTipParams] = Field(
         None, description="Parameters for the touch-tip function."
     )
 
     @validator("params")
     def _validate_params(
-        cls, v: Optional[TouchTipParams], values: Dict[str, Any]
-    ) -> Optional[TouchTipParams]:
+        cls, v: Optional[LiquidClassTouchTipParams], values: Dict[str, Any]
+    ) -> Optional[LiquidClassTouchTipParams]:
         if v is None and values["enable"]:
             raise ValueError(
                 "If enable is true parameters for touch tip must be defined."
@@ -249,6 +256,11 @@ class AspirateProperties(BaseModel):
         ...,
         description="Settings for flow rate keyed by target aspiration volume.",
     )
+    correctionByVolume: CorrectionByVolume = Field(
+        ...,
+        description="Settings for volume correction keyed by by target aspiration volume,"
+        " representing additional volume the plunger should move to accurately hit target volume.",
+    )
     preWet: bool = Field(..., description="Whether to perform a pre-wet action.")
     mix: MixProperties = Field(
         ..., description="Mixing settings for before an aspirate"
@@ -273,6 +285,11 @@ class SingleDispenseProperties(BaseModel):
         ...,
         description="Settings for flow rate keyed by target dispense volume.",
     )
+    correctionByVolume: CorrectionByVolume = Field(
+        ...,
+        description="Settings for volume correction keyed by by target dispense volume,"
+        " representing additional volume the plunger should move to accurately hit target volume.",
+    )
     mix: MixProperties = Field(..., description="Mixing settings for after a dispense")
     pushOutByVolume: LiquidHandlingPropertyByVolume = Field(
         ..., description="Settings for pushout keyed by target dispense volume."
@@ -296,6 +313,11 @@ class MultiDispenseProperties(BaseModel):
     flowRateByVolume: LiquidHandlingPropertyByVolume = Field(
         ...,
         description="Settings for flow rate keyed by target dispense volume.",
+    )
+    correctionByVolume: CorrectionByVolume = Field(
+        ...,
+        description="Settings for volume correction keyed by by target dispense volume,"
+        " representing additional volume the plunger should move to accurately hit target volume.",
     )
     conditioningByVolume: LiquidHandlingPropertyByVolume = Field(
         ...,

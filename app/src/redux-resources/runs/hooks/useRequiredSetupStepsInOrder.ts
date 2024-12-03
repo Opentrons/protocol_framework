@@ -56,14 +56,19 @@ const keysInOrder = (
     protocolAnalysis == null
       ? NO_ANALYSIS_STEPS_IN_ORDER
       : ALL_STEPS_IN_ORDER.filter((stepKey: StepKey) => {
-          if (protocolAnalysis.modules.length === 0) {
-            return stepKey !== MODULE_SETUP_STEP_KEY
+          if (
+            stepKey === MODULE_SETUP_STEP_KEY &&
+            protocolAnalysis.modules.length === 0
+          ) {
+            return false
+          } else if (
+            stepKey === LIQUID_SETUP_STEP_KEY &&
+            protocolAnalysis.liquids.length === 0
+          ) {
+            return false
+          } else {
+            return true
           }
-
-          if (protocolAnalysis.liquids.length === 0) {
-            return stepKey !== LIQUID_SETUP_STEP_KEY
-          }
-          return true
         })
   return { orderedSteps: orderedSteps as StepKey[], orderedApplicableSteps }
 }

@@ -1,10 +1,10 @@
-import * as React from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 import {
+  LegacyStyledText,
   RESPONSIVENESS,
   SPACING,
-  LegacyStyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { RobotMotionLoader } from './RobotMotionLoader'
@@ -14,6 +14,7 @@ import detachProbe8 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach
 import detachProbe96 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_96.webm'
 import { GenericWizardTile } from '/app/molecules/GenericWizardTile'
 
+import type { Dispatch } from 'react'
 import type { CompletedProtocolAnalysis } from '@opentrons/shared-data'
 import type { Jog } from '/app/molecules/JogControls/types'
 import type { useChainRunCommands } from '/app/resources/runs'
@@ -27,7 +28,7 @@ import type { LabwareOffset } from '@opentrons/api-client'
 interface DetachProbeProps extends DetachProbeStep {
   protocolData: CompletedProtocolAnalysis
   proceed: () => void
-  registerPosition: React.Dispatch<RegisterPositionAction>
+  registerPosition: Dispatch<RegisterPositionAction>
   chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
   setFatalError: (errorMessage: string) => void
   workingOffsets: WorkingOffset[]
@@ -58,7 +59,7 @@ export const DetachProbe = (props: DetachProbeProps): JSX.Element | null => {
   }
   const pipetteMount = pipette?.mount
 
-  React.useEffect(() => {
+  useEffect(() => {
     // move into correct position for probe detach on mount
     chainRunCommands(
       [

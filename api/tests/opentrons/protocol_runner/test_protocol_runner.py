@@ -448,6 +448,7 @@ async def test_run_json_runner_stop_requested_stops_enqueuing(
         await run_func()
 
 
+@pytest.mark.filterwarnings("ignore::decoy.warnings.RedundantVerifyWarning")
 @pytest.mark.parametrize(
     "schema_version, json_protocol",
     [

@@ -1,10 +1,9 @@
 """Dispense-in-place command request, result, and implementation models."""
+
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Type, Union
 from typing_extensions import Literal
 from pydantic import Field
-
-from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
 
 from .pipetting_common import (
     PipetteIdMixin,
@@ -12,6 +11,7 @@ from .pipetting_common import (
     FlowRateMixin,
     BaseLiquidHandlingResult,
     OverpressureError,
+    dispense_in_place,
 )
 from .command import (
     AbstractCommandImpl,
@@ -20,8 +20,7 @@ from .command import (
     SuccessData,
     DefinedErrorData,
 )
-from ..errors.error_occurrence import ErrorOccurrence
-from ..state.update_types import StateUpdate, CLEAR
+from ..state.update_types import CLEAR
 from ..types import CurrentWell
 
 if TYPE_CHECKING:
@@ -74,63 +73,78 @@ class DispenseInPlaceImplementation(
 
     async def execute(self, params: DispenseInPlaceParams) -> _ExecuteReturn:
         """Dispense without moving the pipette."""
-        state_update = StateUpdate()
         current_location = self._state_view.pipettes.get_current_location()
-        try:
-            current_position = await self._gantry_mover.get_position(params.pipetteId)
-            volume = await self._pipetting.dispense_in_place(
-                pipette_id=params.pipetteId,
-                volume=params.volume,
-                flow_rate=params.flowRate,
-                push_out=params.pushOut,
-            )
-        except PipetteOverpressureError as e:
+        current_position = await self._gantry_mover.get_position(params.pipetteId)
+        result = await dispense_in_place(
+            pipette_id=params.pipetteId,
+            volume=params.volume,
+            flow_rate=params.flowRate,
+            push_out=params.pushOut,
+            location_if_error={
+                "retryLocation": (
+                    current_position.x,
+                    current_position.y,
+                    current_position.z,
+                )
+            },
+            pipetting=self._pipetting,
+            model_utils=self._model_utils,
+        )
+        if isinstance(result, DefinedErrorData):
             if (
                 isinstance(current_location, CurrentWell)
                 and current_location.pipette_id == params.pipetteId
             ):
-                state_update.set_liquid_operated(
-                    labware_id=current_location.labware_id,
-                    well_name=current_location.well_name,
-                    volume_added=CLEAR,
-                )
-            return DefinedErrorData(
-                public=OverpressureError(
-                    id=self._model_utils.generate_id(),
-                    createdAt=self._model_utils.get_timestamp(),
-                    wrappedErrors=[
-                        ErrorOccurrence.from_failed(
-                            id=self._model_utils.generate_id(),
-                            createdAt=self._model_utils.get_timestamp(),
-                            error=e,
-                        )
-                    ],
-                    errorInfo=(
-                        {
-                            "retryLocation": (
-                                current_position.x,
-                                current_position.y,
-                                current_position.z,
-                            )
-                        }
+                return DefinedErrorData(
+                    public=result.public,
+                    state_update=result.state_update.set_liquid_operated(
+                        labware_id=current_location.labware_id,
+                        well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+                            current_location.labware_id,
+                            current_location.well_name,
+                            params.pipetteId,
+                        ),
+                        volume_added=CLEAR,
                     ),
-                ),
-                state_update=state_update,
-            )
+                    state_update_if_false_positive=result.state_update_if_false_positive,
+                )
+            else:
+                return result
         else:
             if (
                 isinstance(current_location, CurrentWell)
                 and current_location.pipette_id == params.pipetteId
             ):
-                state_update.set_liquid_operated(
-                    labware_id=current_location.labware_id,
-                    well_name=current_location.well_name,
-                    volume_added=volume,
+                volume_added = (
+                    self._state_view.pipettes.get_liquid_dispensed_by_ejecting_volume(
+                        pipette_id=params.pipetteId, volume=result.public.volume
+                    )
                 )
-            return SuccessData(
-                public=DispenseInPlaceResult(volume=volume),
-                state_update=state_update,
-            )
+                if volume_added is not None:
+                    volume_added *= self._state_view.geometry.get_nozzles_per_well(
+                        current_location.labware_id,
+                        current_location.well_name,
+                        params.pipetteId,
+                    )
+                return SuccessData(
+                    public=DispenseInPlaceResult(volume=result.public.volume),
+                    state_update=result.state_update.set_liquid_operated(
+                        labware_id=current_location.labware_id,
+                        well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
+                            current_location.labware_id,
+                            current_location.well_name,
+                            params.pipetteId,
+                        ),
+                        volume_added=volume_added
+                        if volume_added is not None
+                        else CLEAR,
+                    ),
+                )
+            else:
+                return SuccessData(
+                    public=DispenseInPlaceResult(volume=result.public.volume),
+                    state_update=result.state_update,
+                )
 
 
 class DispenseInPlace(

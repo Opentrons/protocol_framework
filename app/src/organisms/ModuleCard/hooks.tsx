@@ -80,6 +80,7 @@ export function useLatchControls(module: AttachedModule): LatchControls {
 export type MenuItemsByModuleType = {
   [moduleType in AttachedModule['moduleType']]: Array<{
     setSetting: string
+    isSettingDisabled: boolean
     isSecondary: boolean
     menuButtons: JSX.Element[] | null
     onClick: (isSecondary: boolean) => void
@@ -267,6 +268,7 @@ export function useModuleOverflowMenu(
           module.data.lidTargetTemperature != null
             ? t('overflow_menu_deactivate_lid')
             : t('overflow_menu_lid_temp'),
+        isSettingDisabled: isDisabled,
         isSecondary: true,
         menuButtons: null,
         onClick:
@@ -285,6 +287,7 @@ export function useModuleOverflowMenu(
           module.data.lidStatus === 'open'
             ? t('close_lid')
             : t('open_lid'),
+        isSettingDisabled: isDisabled,
         isSecondary: false,
         menuButtons: [thermoSetBlockTempBtn, aboutModuleBtn],
         onClick: controlTCLid,
@@ -298,6 +301,7 @@ export function useModuleOverflowMenu(
             ? t('overflow_menu_deactivate_temp')
             : t('overflow_menu_mod_temp'),
         isSecondary: false,
+        isSettingDisabled: isDisabled,
         menuButtons: [aboutModuleBtn],
         onClick:
           module.data.status !== 'idle'
@@ -317,6 +321,7 @@ export function useModuleOverflowMenu(
             ? t('overflow_menu_disengage')
             : t('overflow_menu_engage'),
         isSecondary: false,
+        isSettingDisabled: isDisabled,
         menuButtons: [aboutModuleBtn],
         onClick:
           module.data.status !== 'disengaged'
@@ -336,6 +341,7 @@ export function useModuleOverflowMenu(
             ? t('heater_shaker:deactivate_heater')
             : t('heater_shaker:set_temperature'),
         isSecondary: false,
+        isSettingDisabled: isDisabled,
         menuButtons: [
           labwareLatchBtn,
           aboutModuleBtn,
@@ -358,6 +364,7 @@ export function useModuleOverflowMenu(
       {
         setSetting: t('overflow_menu_about'),
         isSecondary: false,
+        isSettingDisabled: false,
         menuButtons: [],
         onClick: handleAboutClick,
       },

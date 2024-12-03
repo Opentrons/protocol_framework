@@ -31929,6 +31929,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [
     {
       "description": "Dilution Buffer",

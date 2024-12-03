@@ -217,6 +217,7 @@ export function LargeButton(props: LargeButtonProps): JSX.Element {
       color: ${LARGE_BUTTON_PROPS_BY_TYPE[buttonType].disabledColor};
       background-color: ${LARGE_BUTTON_PROPS_BY_TYPE[buttonType]
         .disabledBackgroundColor};
+      border: none;
     }
 
     &[aria-disabled='true'] {

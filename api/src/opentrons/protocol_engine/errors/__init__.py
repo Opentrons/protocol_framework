@@ -55,6 +55,7 @@ from .exceptions import (
     InvalidTargetTemperatureError,
     InvalidBlockVolumeError,
     InvalidHoldTimeError,
+    InvalidWavelengthError,
     CannotPerformModuleAction,
     PauseNotAllowedError,
     ResumeFromRecoveryNotAllowedError,
@@ -77,6 +78,9 @@ from .exceptions import (
     OperationLocationNotInWellError,
     InvalidDispenseVolumeError,
     StorageLimitReachedError,
+    InvalidLiquidError,
+    LiquidClassDoesNotExistError,
+    LiquidClassRedefinitionError,
 )
 
 from .error_occurrence import ErrorOccurrence, ProtocolCommandFailedError
@@ -137,6 +141,8 @@ __all__ = [
     "InvalidTargetSpeedError",
     "InvalidBlockVolumeError",
     "InvalidHoldTimeError",
+    "InvalidLiquidError",
+    "InvalidWavelengthError",
     "CannotPerformModuleAction",
     "ResumeFromRecoveryNotAllowedError",
     "PauseNotAllowedError",
@@ -162,4 +168,6 @@ __all__ = [
     "OperationLocationNotInWellError",
     "InvalidDispenseVolumeError",
     "StorageLimitReachedError",
+    "LiquidClassDoesNotExistError",
+    "LiquidClassRedefinitionError",
 ]

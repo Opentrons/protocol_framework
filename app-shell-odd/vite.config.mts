@@ -59,7 +59,10 @@ export default defineConfig(
         },
       },
       define: {
-        'process.env': process.env,
+        'process.env': {
+          NODE_ENV: process.env.NODE_ENV,
+          OPENTRONS_PROJECT: process.env.OPENTRONS_PROJECT,
+        },
         global: 'globalThis',
         _PKG_VERSION_: JSON.stringify(version),
         _PKG_PRODUCT_NAME_: JSON.stringify(pkg.productName),

@@ -49,7 +49,11 @@ describe('TwoColLwInfoAndDeck', () => {
       failedLabwareUtils: {
         relevantWellName: 'A1',
         failedLabware: { location: 'C1' },
-        failedLabwareLocations: { newLoc: {}, currentLoc: {} },
+        failedLabwareLocations: {
+          newLoc: {},
+          currentLoc: {},
+          displayNameCurrentLoc: 'Slot C1',
+        },
       },
       deckMapUtils: {
         movedLabwareDef: {},
@@ -94,7 +98,7 @@ describe('TwoColLwInfoAndDeck', () => {
     expect(vi.mocked(LeftColumnLabwareInfo)).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'Manually replace labware on deck',
-        type: 'location-arrow-location',
+        type: 'location',
         bannerText:
           'Ensure labware is accurately placed in the slot to prevent further errors.',
       }),

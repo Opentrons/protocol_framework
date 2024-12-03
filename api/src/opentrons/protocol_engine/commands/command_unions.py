@@ -13,6 +13,7 @@ from .pipetting_common import (
     LiquidNotFoundError,
     TipPhysicallyAttachedError,
 )
+from .movement_common import StallOrCollisionError
 
 from . import absorbance_reader
 from . import heater_shaker
@@ -22,6 +23,7 @@ from . import thermocycler
 
 from . import calibration
 from . import unsafe
+from . import robot
 
 from .set_rail_lights import (
     SetRailLights,
@@ -29,6 +31,14 @@ from .set_rail_lights import (
     SetRailLightsCreate,
     SetRailLightsParams,
     SetRailLightsResult,
+)
+
+from .air_gap_in_place import (
+    AirGapInPlace,
+    AirGapInPlaceParams,
+    AirGapInPlaceCreate,
+    AirGapInPlaceResult,
+    AirGapInPlaceCommandType,
 )
 
 from .aspirate import (
@@ -125,6 +135,14 @@ from .load_liquid import (
     LoadLiquidCreate,
     LoadLiquidResult,
     LoadLiquidCommandType,
+)
+
+from .load_liquid_class import (
+    LoadLiquidClass,
+    LoadLiquidClassParams,
+    LoadLiquidClassCreate,
+    LoadLiquidClassResult,
+    LoadLiquidClassCommandType,
 )
 
 from .load_module import (
@@ -320,6 +338,7 @@ from .liquid_probe import (
 
 Command = Annotated[
     Union[
+        AirGapInPlace,
         Aspirate,
         AspirateInPlace,
         Comment,
@@ -337,6 +356,7 @@ Command = Annotated[
         LoadLabware,
         ReloadLabware,
         LoadLiquid,
+        LoadLiquidClass,
         LoadModule,
         LoadPipette,
         MoveLabware,
@@ -393,11 +413,17 @@ Command = Annotated[
         unsafe.UnsafeEngageAxes,
         unsafe.UnsafeUngripLabware,
         unsafe.UnsafePlaceLabware,
+        robot.MoveTo,
+        robot.MoveAxesRelative,
+        robot.MoveAxesTo,
+        robot.openGripperJaw,
+        robot.closeGripperJaw,
     ],
     Field(discriminator="commandType"),
 ]
 
 CommandParams = Union[
+    AirGapInPlaceParams,
     AspirateParams,
     AspirateInPlaceParams,
     CommentParams,
@@ -415,6 +441,7 @@ CommandParams = Union[
     LoadLabwareParams,
     ReloadLabwareParams,
     LoadLiquidParams,
+    LoadLiquidClassParams,
     LoadModuleParams,
     LoadPipetteParams,
     MoveLabwareParams,
@@ -471,9 +498,15 @@ CommandParams = Union[
     unsafe.UnsafeEngageAxesParams,
     unsafe.UnsafeUngripLabwareParams,
     unsafe.UnsafePlaceLabwareParams,
+    robot.MoveAxesRelativeParams,
+    robot.MoveAxesToParams,
+    robot.MoveToParams,
+    robot.openGripperJawParams,
+    robot.closeGripperJawParams,
 ]
 
 CommandType = Union[
+    AirGapInPlaceCommandType,
     AspirateCommandType,
     AspirateInPlaceCommandType,
     CommentCommandType,
@@ -491,6 +524,7 @@ CommandType = Union[
     LoadLabwareCommandType,
     ReloadLabwareCommandType,
     LoadLiquidCommandType,
+    LoadLiquidClassCommandType,
     LoadModuleCommandType,
     LoadPipetteCommandType,
     MoveLabwareCommandType,
@@ -547,10 +581,16 @@ CommandType = Union[
     unsafe.UnsafeEngageAxesCommandType,
     unsafe.UnsafeUngripLabwareCommandType,
     unsafe.UnsafePlaceLabwareCommandType,
+    robot.MoveAxesRelativeCommandType,
+    robot.MoveAxesToCommandType,
+    robot.MoveToCommandType,
+    robot.openGripperJawCommandType,
+    robot.closeGripperJawCommandType,
 ]
 
 CommandCreate = Annotated[
     Union[
+        AirGapInPlaceCreate,
         AspirateCreate,
         AspirateInPlaceCreate,
         CommentCreate,
@@ -568,6 +608,7 @@ CommandCreate = Annotated[
         LoadLabwareCreate,
         ReloadLabwareCreate,
         LoadLiquidCreate,
+        LoadLiquidClassCreate,
         LoadModuleCreate,
         LoadPipetteCreate,
         MoveLabwareCreate,
@@ -624,6 +665,11 @@ CommandCreate = Annotated[
         unsafe.UnsafeEngageAxesCreate,
         unsafe.UnsafeUngripLabwareCreate,
         unsafe.UnsafePlaceLabwareCreate,
+        robot.MoveAxesRelativeCreate,
+        robot.MoveAxesToCreate,
+        robot.MoveToCreate,
+        robot.openGripperJawCreate,
+        robot.closeGripperJawCreate,
     ],
     Field(discriminator="commandType"),
 ]
@@ -636,6 +682,7 @@ CommandCreateAdapter: TypeAdapter[CommandCreate] = TypeAdapter(CommandCreate)
 CommandAdapter: TypeAdapter[Command] = TypeAdapter(Command)
 
 CommandResult = Union[
+    AirGapInPlaceResult,
     AspirateResult,
     AspirateInPlaceResult,
     CommentResult,
@@ -653,6 +700,7 @@ CommandResult = Union[
     LoadLabwareResult,
     ReloadLabwareResult,
     LoadLiquidResult,
+    LoadLiquidClassResult,
     LoadModuleResult,
     LoadPipetteResult,
     MoveLabwareResult,
@@ -709,6 +757,11 @@ CommandResult = Union[
     unsafe.UnsafeEngageAxesResult,
     unsafe.UnsafeUngripLabwareResult,
     unsafe.UnsafePlaceLabwareResult,
+    robot.MoveAxesRelativeResult,
+    robot.MoveAxesToResult,
+    robot.MoveToResult,
+    robot.openGripperJawResult,
+    robot.closeGripperJawResult,
 ]
 
 
@@ -719,6 +772,7 @@ CommandDefinedErrorData = Union[
     DefinedErrorData[OverpressureError],
     DefinedErrorData[LiquidNotFoundError],
     DefinedErrorData[GripperMovementError],
+    DefinedErrorData[StallOrCollisionError],
 ]
 
 

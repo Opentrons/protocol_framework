@@ -20,6 +20,7 @@ import {
   StyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
+import { BUTTON_LINK_STYLE } from '../../../../../../atoms'
 import {
   isTimeFormatMinutesSeconds,
   temperatureRangeFieldValue,
@@ -235,7 +236,7 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
 
   const header = showEdit ? (
     <Flex
-      padding={`${SPACING.spacing12} ${SPACING.spacing16}`}
+      padding={SPACING.spacing12}
       justifyContent={JUSTIFY_SPACE_BETWEEN}
       width="100%"
     >
@@ -260,6 +261,8 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
           onClick={handleDeleteCycle}
           whiteSpace={NO_WRAP}
           textDecoration={TYPOGRAPHY.textDecorationUnderline}
+          padding={SPACING.spacing4}
+          css={BUTTON_LINK_STYLE}
         >
           <StyledText desktopStyle="bodyDefaultRegular">
             {i18n.format(
@@ -268,7 +271,11 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
             )}
           </StyledText>
         </Btn>
-        <PrimaryButton onClick={handleSaveCycle} disabled={isStepStateError}>
+        <PrimaryButton
+          onClick={handleSaveCycle}
+          disabled={isStepStateError}
+          borderRadius={BORDERS.borderRadiusFull}
+        >
           <StyledText desktopStyle="bodyDefaultRegular">
             {i18n.format(t('save'), 'capitalize')}
           </StyledText>
@@ -277,7 +284,7 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
     </Flex>
   ) : (
     <Flex
-      padding={`${SPACING.spacing12} ${SPACING.spacing16}`}
+      padding={SPACING.spacing12}
       justifyContent={JUSTIFY_SPACE_BETWEEN}
       width="100%"
       backgroundColor={backgroundColor}
@@ -307,21 +314,32 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
           )}
         </StyledText>
       </Flex>
-      <Flex gridGap={SPACING.spacing8}>
-        {hover ? (
-          <Btn
-            whiteSpace={NO_WRAP}
-            textDecoration={TYPOGRAPHY.textDecorationUnderline}
-            onClick={() => {
-              setShowEditCurrentCycle(true)
-              setIsInEdit(true)
-            }}
-          >
-            <StyledText desktopStyle="bodyDefaultRegular">
-              {i18n.format(t('edit'), 'capitalize')}
-            </StyledText>
-          </Btn>
-        ) : null}
+      <Flex
+        gridGap={SPACING.spacing8}
+        css={css`
+          box-sizing: border-box;
+        `}
+      >
+        <Btn
+          whiteSpace={NO_WRAP}
+          textDecoration={TYPOGRAPHY.textDecorationUnderline}
+          onClick={() => {
+            setShowEditCurrentCycle(true)
+            setIsInEdit(true)
+          }}
+          padding={SPACING.spacing4}
+          css={[
+            BUTTON_LINK_STYLE,
+            css`
+              visibility: ${hover ? 'visible' : 'hidden'};
+              opacity: ${hover ? 1 : 0};
+            `,
+          ]}
+        >
+          <StyledText desktopStyle="bodyDefaultRegular">
+            {i18n.format(t('edit'), 'capitalize')}
+          </StyledText>
+        </Btn>
         <Flex
           css={css`
             &:hover {
@@ -508,6 +526,8 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
             onClick={handleAddCycleStep}
             whiteSpace={NO_WRAP}
             textDecoration={TYPOGRAPHY.textDecorationUnderline}
+            padding={SPACING.spacing4}
+            css={BUTTON_LINK_STYLE}
           >
             <StyledText desktopStyle="bodyDefaultRegular">
               {i18n.format(

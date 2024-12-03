@@ -1,4 +1,5 @@
 """Test Peripherals."""
+
 import asyncio
 from pathlib import Path
 from subprocess import run as run_subprocess, Popen, CalledProcessError
@@ -69,7 +70,7 @@ COLOR_TO_STATE: Dict[str, Tuple[int, int, int, int]] = {
 async def _get_ip(api: OT3API) -> Optional[str]:
     _ip: Optional[str] = None
     if api.is_simulator:
-        assert nmcli.iface_info  # type: ignore[truthy-function]
+        assert nmcli.iface_info is not None
         _ip = "127.0.0.1"
     else:
         ethernet_status = await nmcli.iface_info(nmcli.NETWORK_IFACES.ETH_LL)

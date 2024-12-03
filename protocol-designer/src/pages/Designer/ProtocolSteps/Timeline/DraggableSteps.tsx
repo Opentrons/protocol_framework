@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { useDrop, useDrag } from 'react-dnd'
@@ -14,6 +14,7 @@ import { selectors as stepFormSelectors } from '../../../../step-forms'
 import { stepIconsByType } from '../../../../form-types'
 import { StepContainer } from './StepContainer'
 import { ConnectedStepInfo } from './ConnectedStepInfo'
+import type { Dispatch, SetStateAction } from 'react'
 import type { DragLayerMonitor, DropTargetMonitor } from 'react-dnd'
 import type { StepIdType } from '../../../../form-types'
 import type { ConnectedStepItemProps } from '../../../../containers/ConnectedStepItem'
@@ -23,6 +24,8 @@ interface DragDropStepProps extends ConnectedStepItemProps {
   moveStep: (stepId: StepIdType, value: number) => void
   findStepIndex: (stepId: StepIdType) => number
   orderedStepIds: string[]
+  openedOverflowMenuId?: string | null
+  setOpenedOverflowMenuId?: Dispatch<SetStateAction<string | null>>
 }
 
 interface DropType {
@@ -30,7 +33,15 @@ interface DropType {
 }
 
 function DragDropStep(props: DragDropStepProps): JSX.Element {
-  const { stepId, moveStep, findStepIndex, orderedStepIds, stepNumber } = props
+  const {
+    stepId,
+    moveStep,
+    findStepIndex,
+    orderedStepIds,
+    stepNumber,
+    openedOverflowMenuId,
+    setOpenedOverflowMenuId,
+  } = props
   const stepRef = useRef<HTMLDivElement>(null)
 
   const [{ isDragging }, drag] = useDrag(
@@ -73,6 +84,8 @@ function DragDropStep(props: DragDropStepProps): JSX.Element {
       data-handler-id={handlerId}
     >
       <ConnectedStepInfo
+        openedOverflowMenuId={openedOverflowMenuId}
+        setOpenedOverflowMenuId={setOpenedOverflowMenuId}
         stepNumber={stepNumber}
         stepId={stepId}
         dragHovered={hovered}
@@ -88,6 +101,9 @@ interface DraggableStepsProps {
 export function DraggableSteps(props: DraggableStepsProps): JSX.Element | null {
   const { orderedStepIds, reorderSteps } = props
   const { t } = useTranslation('shared')
+  const [openedOverflowMenuId, setOpenedOverflowMenuId] = useState<
+    string | null
+  >(null)
 
   const findStepIndex = (stepId: StepIdType): number =>
     orderedStepIds.findIndex(id => stepId === id)
@@ -123,6 +139,8 @@ export function DraggableSteps(props: DraggableStepsProps): JSX.Element | null {
           moveStep={moveStep}
           findStepIndex={findStepIndex}
           orderedStepIds={orderedStepIds}
+          openedOverflowMenuId={openedOverflowMenuId}
+          setOpenedOverflowMenuId={setOpenedOverflowMenuId}
         />
       ))}
       <StepDragPreview />

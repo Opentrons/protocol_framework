@@ -8,7 +8,12 @@ import type { StyleProps } from '../../primitives'
 
 export * from './ListItemChildren'
 
-export type ListItemType = 'error' | 'noActive' | 'success' | 'warning'
+export type ListItemType =
+  | 'error'
+  | 'noActive'
+  | 'success'
+  | 'warning'
+  | 'unavailable'
 
 interface ListItemProps extends StyleProps {
   /** ListItem state type */
@@ -22,19 +27,23 @@ interface ListItemProps extends StyleProps {
 
 const LISTITEM_PROPS_BY_TYPE: Record<
   ListItemType,
-  { backgroundColor: string }
+  { backgroundColor: string; color?: string }
 > = {
   error: {
     backgroundColor: COLORS.red35,
   },
   noActive: {
-    backgroundColor: COLORS.grey30,
+    backgroundColor: COLORS.grey20,
   },
   success: {
     backgroundColor: COLORS.green35,
   },
   warning: {
     backgroundColor: COLORS.yellow35,
+  },
+  unavailable: {
+    backgroundColor: COLORS.grey20,
+    color: COLORS.grey40,
   },
 }
 
@@ -54,6 +63,7 @@ export function ListItem(props: ListItemProps): JSX.Element {
 
   const LIST_ITEM_STYLE = css`
     background-color: ${listItemProps.backgroundColor};
+    color: ${listItemProps.color ?? COLORS.black90};
     width: 100%;
     height: ${FLEX_MAX_CONTENT};
     border-radius: ${BORDERS.borderRadius4};

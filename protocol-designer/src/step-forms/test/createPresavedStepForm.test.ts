@@ -124,10 +124,7 @@ describe('createPresavedStepForm', () => {
         stepType: 'pause',
         moduleId: hasTempModule ? 'someTemperatureModuleId' : null,
         pauseAction: null,
-        pauseHour: null,
         pauseMessage: '',
-        pauseMinute: null,
-        pauseSecond: null,
         pauseTime: null,
         pauseTemperature: null,
         stepDetails: '',
@@ -395,7 +392,7 @@ describe('createPresavedStepForm', () => {
           stepDetails: '',
           stepName: 'thermocycler',
           stepType: 'thermocycler',
-          thermocyclerFormType: null,
+          thermocyclerFormType: 'thermocyclerState',
         })
       })
     })

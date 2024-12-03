@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import get from 'lodash/get'
 import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   ALIGN_CENTER,
   Btn,
@@ -10,11 +10,11 @@ import {
   Icon,
   POSITION_RELATIVE,
   PrimaryButton,
-  SPACING,
   SecondaryButton,
+  SPACING,
   StyledText,
-  TYPOGRAPHY,
   Toolbox,
+  TYPOGRAPHY,
 } from '@opentrons/components'
 import { stepIconsByType } from '../../../../form-types'
 import { FormAlerts } from '../../../../organisms'
@@ -24,6 +24,15 @@ import { getFormWarningsForSelectedStep } from '../../../../dismiss/selectors'
 import { getTimelineWarningsForSelectedStep } from '../../../../top-selectors/timelineWarnings'
 import { getRobotStateTimeline } from '../../../../file-data/selectors'
 import { BUTTON_LINK_STYLE, LINE_CLAMP_TEXT_STYLE } from '../../../../atoms'
+import { analyticsEvent } from '../../../../analytics/actions'
+import {
+  getFormLevelErrorsForUnsavedForm,
+  getDynamicFieldFormErrorsForUnsavedForm,
+} from '../../../../step-forms/selectors'
+import {
+  FORM_ERRORS_EVENT,
+  FORM_WARNINGS_EVENT,
+} from '../../../../analytics/constants'
 import {
   CommentTools,
   HeaterShakerTools,
@@ -40,11 +49,18 @@ import {
   getVisibleFormErrors,
   getVisibleFormWarnings,
   capitalizeFirstLetter,
+  getIsErrorOnCurrentPage,
 } from './utils'
 import type { StepFieldName } from '../../../../steplist/fieldLevel'
 import type { FormData, StepType } from '../../../../form-types'
-import type { FieldPropsByName, FocusHandlers, StepFormProps } from './types'
-import { getFormLevelErrorsForUnsavedForm } from '../../../../step-forms/selectors'
+import type { AnalyticsEvent } from '../../../../analytics/mixpanel'
+import type { FormWarningType } from '../../../../steplist'
+import type {
+  FieldPropsByName,
+  FocusHandlers,
+  LiquidHandlingTab,
+  StepFormProps,
+} from './types'
 
 type StepFormMap = {
   [K in StepType]?: React.ComponentType<StepFormProps> | null
@@ -89,7 +105,10 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     'shared',
     'protocol_steps',
   ])
+  const dispatch = useDispatch()
   const { makeSnackbar } = useKitchen()
+  const toolsComponentRef = useRef<HTMLDivElement | null>(null)
+  const [analyticsStartTime] = useState<Date>(new Date())
   const formWarningsForSelectedStep = useSelector(
     getFormWarningsForSelectedStep
   )
@@ -99,18 +118,17 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   const formLevelErrorsForUnsavedForm = useSelector(
     getFormLevelErrorsForUnsavedForm
   )
+  const dynamicFormLevelErrorsForUnsavedForm = useSelector(
+    getDynamicFieldFormErrorsForUnsavedForm
+  ).map(error => ({
+    title: error.title,
+    body: error.body,
+    dependentFields: error.dependentProfileFields,
+  }))
   const timeline = useSelector(getRobotStateTimeline)
-  const [toolboxStep, setToolboxStep] = useState<number>(
-    // progress to step 2 if thermocycler form is populated
-    formData.thermocyclerFormType === 'thermocyclerProfile' ||
-      formData.thermocyclerFormType === 'thermocyclerState'
-      ? 1
-      : 0
-  )
-  const [
-    showFormErrorsAndWarnings,
-    setShowFormErrorsAndWarnings,
-  ] = useState<boolean>(false)
+  const [toolboxStep, setToolboxStep] = useState<number>(0)
+  const [showFormErrors, setShowFormErrors] = useState<boolean>(false)
+  const [tab, setTab] = useState<LiquidHandlingTab>('aspirate')
   const visibleFormWarnings = getVisibleFormWarnings({
     focusedField,
     dirtyFields: dirtyFields ?? [],
@@ -119,7 +137,12 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   const visibleFormErrors = getVisibleFormErrors({
     focusedField,
     dirtyFields: dirtyFields ?? [],
-    errors: formLevelErrorsForUnsavedForm,
+    errors: [
+      ...formLevelErrorsForUnsavedForm,
+      ...dynamicFormLevelErrorsForUnsavedForm,
+    ],
+    page: toolboxStep,
+    showErrors: showFormErrors,
   })
   const [isRename, setIsRename] = useState<boolean>(false)
   const icon = stepIconsByType[formData.stepType]
@@ -128,6 +151,36 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     STEP_FORM_MAP,
     formData.stepType
   )
+
+  const isAspirateError = formLevelErrorsForUnsavedForm.some(
+    error => error.tab === 'aspirate' && error.page === toolboxStep
+  )
+  const isDispenseError = formLevelErrorsForUnsavedForm.some(
+    error => error.tab === 'dispense' && error.page === toolboxStep
+  )
+
+  const visibleFormWarningsTypes = visibleFormWarnings.map(
+    warning => warning.type
+  )
+  const visibleFormErrorsTypes = visibleFormErrors.map(error => error.title)
+
+  useEffect(() => {
+    const dispatchAnalyticsEvent = (
+      eventName: string,
+      eventProperties: FormWarningType[] | string[]
+    ): void => {
+      if (eventProperties.length > 0) {
+        const event: AnalyticsEvent = {
+          name: eventName,
+          properties: { eventProperties },
+        }
+        dispatch(analyticsEvent(event))
+      }
+    }
+
+    dispatchAnalyticsEvent(FORM_WARNINGS_EVENT, visibleFormWarningsTypes)
+    dispatchAnalyticsEvent(FORM_ERRORS_EVENT, visibleFormErrorsTypes)
+  }, [visibleFormWarningsTypes, visibleFormErrorsTypes])
 
   if (!ToolsComponent) {
     // early-exit if step form doesn't exist, this is a good check for when new steps
@@ -147,8 +200,28 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     visibleFormWarnings.length + timelineWarningsForSelectedStep.length
   const numErrors = timeline.errors?.length ?? 0
 
+  const isErrorOnCurrentPage = getIsErrorOnCurrentPage({
+    errors: formLevelErrorsForUnsavedForm,
+    page: toolboxStep,
+  })
+  const handleScrollToTop = (): void => {
+    if (toolsComponentRef.current) {
+      toolsComponentRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    }
+  }
   const handleSaveClick = (): void => {
     if (canSave) {
+      const duration = new Date().getTime() - analyticsStartTime.getTime()
+      const stepDuration: AnalyticsEvent = {
+        name: 'stepDuration',
+        properties: {
+          stepType: formData.stepType,
+          duration: `${duration / 1000} seconds`,
+        },
+      }
       handleSave()
       makeSnackbar(
         getSaveStepSnackbarText({
@@ -159,10 +232,32 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
             'capitalize'
           ),
           t,
-        }) as string
+        })
       )
+      dispatch(analyticsEvent(stepDuration))
     } else {
-      setShowFormErrorsAndWarnings(true)
+      setShowFormErrors(true)
+      if (tab === 'aspirate' && isDispenseError && !isAspirateError) {
+        setTab('dispense')
+      }
+      if (tab === 'dispense' && isAspirateError && !isDispenseError) {
+        setTab('aspirate')
+      }
+      handleScrollToTop()
+    }
+  }
+
+  const handleContinue = (): void => {
+    if (isMultiStepToolbox && toolboxStep === 0) {
+      if (!isErrorOnCurrentPage) {
+        setToolboxStep(1)
+        setShowFormErrors(false)
+      } else {
+        setShowFormErrors(true)
+      }
+      handleScrollToTop()
+    } else {
+      handleSaveClick()
     }
   }
 
@@ -177,11 +272,12 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
         />
       ) : null}
       <Toolbox
+        height="calc(100vh - 6rem)"
         position={POSITION_RELATIVE}
         subHeader={
           isMultiStepToolbox ? (
             <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
-              {t('shared:step', { current: toolboxStep + 1, max: 2 })}
+              {t('shared:part', { current: toolboxStep + 1, max: 2 })}
             </StyledText>
           ) : null
         }
@@ -208,21 +304,14 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
                 width="100%"
                 onClick={() => {
                   setToolboxStep(0)
+                  setShowFormErrors(false)
+                  handleScrollToTop()
                 }}
               >
                 {i18n.format(t('shared:back'), 'capitalize')}
               </SecondaryButton>
             ) : null}
-            <PrimaryButton
-              onClick={
-                isMultiStepToolbox && toolboxStep === 0
-                  ? () => {
-                      setToolboxStep(1)
-                    }
-                  : handleSaveClick
-              }
-              width="100%"
-            >
+            <PrimaryButton onClick={handleContinue} width="100%">
               {isMultiStepToolbox && toolboxStep === 0
                 ? i18n.format(t('shared:continue'), 'capitalize')
                 : t('shared:save')}
@@ -241,23 +330,32 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
           </Flex>
         }
       >
-        <FormAlerts
-          focusedField={focusedField}
-          dirtyFields={dirtyFields}
-          showFormErrorsAndWarnings={showFormErrorsAndWarnings}
-        />
-        <ToolsComponent
-          {...{
-            formData,
-            propsForFields,
-            focusHandlers,
-            toolboxStep,
-            visibleFormErrors,
-            showFormErrors: showFormErrorsAndWarnings,
-            focusedField,
-            setShowFormErrorsAndWarnings,
-          }}
-        />
+        <div
+          ref={toolsComponentRef}
+          id="stepFormTools"
+          style={{ height: '100%' }}
+        >
+          <FormAlerts
+            focusedField={focusedField}
+            dirtyFields={dirtyFields}
+            showFormErrors={showFormErrors}
+            page={toolboxStep}
+          />
+          <ToolsComponent
+            {...{
+              formData,
+              propsForFields,
+              focusHandlers,
+              toolboxStep,
+              visibleFormErrors,
+              showFormErrors,
+              focusedField,
+              setShowFormErrors,
+              tab,
+              setTab,
+            }}
+          />
+        </div>
       </Toolbox>
     </>
   )

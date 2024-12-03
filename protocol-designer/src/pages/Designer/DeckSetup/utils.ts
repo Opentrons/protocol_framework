@@ -1,5 +1,7 @@
 import some from 'lodash/some'
+import { useEffect, useState } from 'react'
 import {
+  ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
   FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
   HEATERSHAKER_MODULE_TYPE,
@@ -12,6 +14,7 @@ import {
 } from '@opentrons/shared-data'
 
 import { getOnlyLatestDefs } from '../../../labware-defs'
+import { getStagingAreaAddressableAreas } from '../../../utils'
 import {
   FLEX_MODULE_MODELS,
   OT2_MODULE_MODELS,
@@ -28,7 +31,12 @@ import type {
   ModuleModel,
   RobotType,
 } from '@opentrons/shared-data'
-import type { InitialDeckSetup } from '../../../step-forms'
+import type {
+  AllTemporalPropertiesForTimelineFrame,
+  InitialDeckSetup,
+  LabwareOnDeck,
+} from '../../../step-forms'
+import type { Fixture } from './constants'
 
 const OT2_TC_SLOTS = ['7', '8', '10', '11']
 const FLEX_TC_SLOTS = ['A1', 'B1']
@@ -55,20 +63,21 @@ export function getModuleModelsBySlot(
 ): ModuleModel[] {
   const FLEX_MIDDLE_SLOTS = ['B2', 'C2', 'A2', 'D2']
   const OT2_MIDDLE_SLOTS = ['2', '5', '8', '11']
+  const FILTERED_MODULES = enableAbsorbanceReader
+    ? FLEX_MODULE_MODELS
+    : FLEX_MODULE_MODELS.filter(model => model !== ABSORBANCE_READER_V1)
 
-  let moduleModels: ModuleModel[] = enableAbsorbanceReader
-    ? FLEX_MODULE_MODELS.filter(model => model !== 'absorbanceReaderV1')
-    : FLEX_MODULE_MODELS
+  let moduleModels: ModuleModel[] = FILTERED_MODULES
 
   switch (robotType) {
     case FLEX_ROBOT_TYPE: {
       if (slot !== 'B1' && !FLEX_MIDDLE_SLOTS.includes(slot)) {
-        moduleModels = FLEX_MODULE_MODELS.filter(
+        moduleModels = FILTERED_MODULES.filter(
           model => model !== THERMOCYCLER_MODULE_V2
         )
       }
       if (FLEX_MIDDLE_SLOTS.includes(slot)) {
-        moduleModels = FLEX_MODULE_MODELS.filter(
+        moduleModels = FILTERED_MODULES.filter(
           model => model === MAGNETIC_BLOCK_V1
         )
       }
@@ -109,18 +118,16 @@ export const getLabwareIsRecommended = (
 ): boolean => {
   //  special-casing the thermocycler module V2 recommended labware since the thermocyclerModuleTypes
   //  have different recommended labware
-  const moduleType = moduleModel != null ? getModuleType(moduleModel) : null
-  if (moduleModel === THERMOCYCLER_MODULE_V2) {
-    return (
-      def.parameters.loadName === 'opentrons_96_wellplate_200ul_pcr_full_skirt'
-    )
-  } else {
-    return moduleType != null
-      ? RECOMMENDED_LABWARE_BY_MODULE[moduleType].includes(
-          def.parameters.loadName
-        )
-      : false
+  if (moduleModel == null) {
+    // permissive early exit if no module passed
+    return true
   }
+  const moduleType = getModuleType(moduleModel)
+  return moduleModel === THERMOCYCLER_MODULE_V2
+    ? def.parameters.loadName === 'opentrons_96_wellplate_200ul_pcr_full_skirt'
+    : RECOMMENDED_LABWARE_BY_MODULE[moduleType].includes(
+        def.parameters.loadName
+      )
 }
 
 export const getLabwareCompatibleWithAdapter = (
@@ -208,15 +215,15 @@ export function zoomInOnCoordinate(props: ZoomInOnCoordinateProps): string {
   const { x, y, deckDef } = props
   const [width, height] = [deckDef.dimensions[0], deckDef.dimensions[1]]
 
-  const zoomFactor = 0.6
+  const zoomFactor = 0.55
   const newWidth = width * zoomFactor
   const newHeight = height * zoomFactor
 
   //  +125 and +50 to get the approximate center of the screen point
-  const newMinX = x - newWidth / 2 + 125
+  const newMinX = x - newWidth / 2 + 20
   const newMinY = y - newHeight / 2 + 50
 
-  return `${newMinX} ${newMinY} ${newWidth} ${newHeight}`
+  return `${newMinX} ${newMinY} ${newWidth} ${newHeight + 70}`
 }
 
 export interface AnimateZoomProps {
@@ -252,4 +259,56 @@ export function animateZoom(props: AnimateZoomProps): void {
     }
   }
   requestAnimationFrame(animate)
+}
+
+export const getAdjacentLabware = (
+  fixture: Fixture,
+  cutout: CutoutId,
+  labware: AllTemporalPropertiesForTimelineFrame['labware']
+): LabwareOnDeck | null => {
+  let adjacentLabware: LabwareOnDeck | null = null
+  if (fixture === 'stagingArea' || fixture === 'wasteChuteAndStagingArea') {
+    const stagingAreaAddressableAreaName = getStagingAreaAddressableAreas([
+      cutout,
+    ])
+
+    adjacentLabware =
+      Object.values(labware).find(
+        lw => lw.slot === stagingAreaAddressableAreaName[0]
+      ) ?? null
+  }
+  return adjacentLabware
+}
+
+type BreakPoint = 'small' | 'medium' | 'large'
+
+export function useDeckSetupWindowBreakPoint(): BreakPoint {
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  })
+
+  useEffect(() => {
+    const handleResize = (): void => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
+
+  let size: BreakPoint = 'large'
+  if (windowSize.width <= 1024 && windowSize.width > 800) {
+    size = 'medium'
+  } else if (windowSize.width <= 800) {
+    size = 'small'
+  }
+
+  return size
 }

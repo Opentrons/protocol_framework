@@ -358,6 +358,8 @@ class PipetteName(int, Enum):
     p50_multi = 0x03
     p1000_96 = 0x04
     p50_96 = 0x05
+    p200_96 = 0x06
+    p1000_multi_em = 0x07
     unknown = 0xFFFF
 
 
@@ -461,3 +463,4 @@ class GripperJawState(int, Enum):
     force_controlling_home = 0x1
     force_controlling = 0x2
     position_controlling = 0x3
+    stopped = 0x4

@@ -4,12 +4,14 @@ import head from 'lodash/head'
 import {
   useResumeRunFromRecoveryMutation,
   useStopRunMutation,
-  useUpdateErrorRecoveryPolicy,
   useResumeRunFromRecoveryAssumingFalsePositiveMutation,
 } from '@opentrons/react-api-client'
 
-import { useChainRunCommands } from '/app/resources/runs'
-import { ERROR_KINDS, RECOVERY_MAP } from '../constants'
+import {
+  useChainRunCommands,
+  useUpdateRecoveryPolicyWithStrategy,
+} from '/app/resources/runs'
+import { DEFINED_ERROR_TYPES, ERROR_KINDS, RECOVERY_MAP } from '../constants'
 import { getErrorKind } from '/app/organisms/ErrorRecoveryFlows/utils'
 
 import type {
@@ -23,12 +25,7 @@ import type {
   PrepareToAspirateRunTimeCommand,
   MoveLabwareParams,
 } from '@opentrons/shared-data'
-import type {
-  CommandData,
-  IfMatchType,
-  RecoveryPolicyRulesParams,
-  RunAction,
-} from '@opentrons/api-client'
+import type { CommandData, IfMatchType, RunAction } from '@opentrons/api-client'
 import type { WellGroup } from '@opentrons/components'
 import type { FailedCommand, RecoveryRoute, RouteStep } from '../types'
 import type { UseFailedLabwareUtilsResult } from './useFailedLabwareUtils'
@@ -36,11 +33,14 @@ import type { UseRouteUpdateActionsResult } from './useRouteUpdateActions'
 import type { RecoveryToasts } from './useRecoveryToasts'
 import type { UseRecoveryAnalyticsResult } from '/app/redux-resources/analytics'
 import type { CurrentRecoveryOptionUtils } from './useRecoveryRouting'
-import type { ErrorRecoveryFlowsProps } from '../index'
+import type { ErrorRecoveryFlowsProps } from '..'
+import type { FailedCommandBySource } from './useRetainedFailedCommandBySource'
+import type { UpdateErrorRecoveryPolicyWithStrategy } from '/app/resources/runs'
 
 interface UseRecoveryCommandsParams {
   runId: string
-  failedCommandByRunRecord: ErrorRecoveryFlowsProps['failedCommandByRunRecord']
+  failedCommand: FailedCommandBySource | null
+  unvalidatedFailedCommand: ErrorRecoveryFlowsProps['unvalidatedFailedCommand']
   failedLabwareUtils: UseFailedLabwareUtilsResult
   routeUpdateActions: UseRouteUpdateActionsResult
   recoveryToastUtils: RecoveryToasts
@@ -67,16 +67,19 @@ export interface UseRecoveryCommandsResult {
   /* A non-terminal recovery command */
   releaseGripperJaws: () => Promise<CommandData[]>
   /* A non-terminal recovery command */
-  updatePositionEstimatorsAndHomeGripper: () => Promise<CommandData[]>
+  homeExceptPlungers: () => Promise<CommandData[]>
   /* A non-terminal recovery command */
   moveLabwareWithoutPause: () => Promise<CommandData[]>
+  /* A non-terminal recovery-command */
+  homeAll: () => Promise<CommandData[]>
 }
 
 // TODO(jh, 07-24-24): Create tighter abstractions for terminal vs. non-terminal commands.
 // Returns commands with a "fixit" intent. Commands may or may not terminate Error Recovery. See each command docstring for details.
 export function useRecoveryCommands({
   runId,
-  failedCommandByRunRecord,
+  failedCommand,
+  unvalidatedFailedCommand,
   failedLabwareUtils,
   routeUpdateActions,
   recoveryToastUtils,
@@ -88,7 +91,7 @@ export function useRecoveryCommands({
   const { proceedToRouteAndStep } = routeUpdateActions
   const { chainRunCommands } = useChainRunCommands(
     runId,
-    failedCommandByRunRecord?.id
+    unvalidatedFailedCommand?.id
   )
   const {
     mutateAsync: resumeRunFromRecovery,
@@ -97,11 +100,10 @@ export function useRecoveryCommands({
     mutateAsync: resumeRunFromRecoveryAssumingFalsePositive,
   } = useResumeRunFromRecoveryAssumingFalsePositiveMutation()
   const { stopRun } = useStopRunMutation()
-  const {
-    mutateAsync: updateErrorRecoveryPolicy,
-  } = useUpdateErrorRecoveryPolicy(runId)
+  const updateErrorRecoveryPolicy = useUpdateRecoveryPolicyWithStrategy(runId)
   const { makeSuccessToast } = recoveryToastUtils
 
+  // TODO(jh, 11-21-24): Some commands return a 200 with an error body. We should catch these and propagate the error.
   const chainRunRecoveryCommands = useCallback(
     (
       commands: CreateCommand[],
@@ -124,6 +126,7 @@ export function useRecoveryCommands({
       | DispenseInPlaceRunTimeCommand
       | DropTipInPlaceRunTimeCommand
       | PrepareToAspirateRunTimeCommand
+
     const IN_PLACE_COMMAND_TYPES = [
       'aspirateInPlace',
       'dispenseInPlace',
@@ -131,29 +134,38 @@ export function useRecoveryCommands({
       'dropTipInPlace',
       'prepareToAspirate',
     ] as const
+
+    const RETRY_ERROR_TYPES = [
+      DEFINED_ERROR_TYPES.OVERPRESSURE,
+      DEFINED_ERROR_TYPES.TIP_PHYSICALLY_ATTACHED,
+    ] as const
+
     const isInPlace = (
       failedCommand: FailedCommand
     ): failedCommand is InPlaceCommand =>
       IN_PLACE_COMMAND_TYPES.includes(
         (failedCommand as InPlaceCommand).commandType
       )
-    return failedCommandByRunRecord != null
-      ? isInPlace(failedCommandByRunRecord)
-        ? failedCommandByRunRecord.error?.isDefined &&
-          failedCommandByRunRecord.error?.errorType === 'overpressure' &&
+
+    return unvalidatedFailedCommand != null
+      ? isInPlace(unvalidatedFailedCommand)
+        ? unvalidatedFailedCommand.error?.isDefined &&
+          RETRY_ERROR_TYPES.includes(
+            unvalidatedFailedCommand.error?.errorType
+          ) &&
           // Paranoia: this value comes from the wire and may be unevenly implemented
-          typeof failedCommandByRunRecord.error?.errorInfo?.retryLocation?.at(
+          typeof unvalidatedFailedCommand.error?.errorInfo?.retryLocation?.at(
             0
           ) === 'number'
           ? {
               commandType: 'moveToCoordinates',
               intent: 'fixit',
               params: {
-                pipetteId: failedCommandByRunRecord.params?.pipetteId,
+                pipetteId: unvalidatedFailedCommand.params?.pipetteId,
                 coordinates: {
-                  x: failedCommandByRunRecord.error.errorInfo.retryLocation[0],
-                  y: failedCommandByRunRecord.error.errorInfo.retryLocation[1],
-                  z: failedCommandByRunRecord.error.errorInfo.retryLocation[2],
+                  x: unvalidatedFailedCommand.error.errorInfo.retryLocation[0],
+                  y: unvalidatedFailedCommand.error.errorInfo.retryLocation[1],
+                  z: unvalidatedFailedCommand.error.errorInfo.retryLocation[2],
                 },
               },
             }
@@ -163,7 +175,7 @@ export function useRecoveryCommands({
   }
 
   const retryFailedCommand = useCallback((): Promise<CommandData[]> => {
-    const { commandType, params } = failedCommandByRunRecord as FailedCommand // Null case is handled before command could be issued.
+    const { commandType, params } = unvalidatedFailedCommand as FailedCommand // Null case is handled before command could be issued.
     return chainRunRecoveryCommands(
       [
         // move back to the location of the command if it is an in-place command
@@ -171,7 +183,7 @@ export function useRecoveryCommands({
         { commandType, params }, // retry the command that failed
       ].filter(c => c != null) as CreateCommand[]
     ) // the created command is the same command that failed
-  }, [chainRunRecoveryCommands, failedCommandByRunRecord?.key])
+  }, [chainRunRecoveryCommands, unvalidatedFailedCommand?.key])
 
   // Homes the Z-axis of all attached pipettes.
   const homePipetteZAxes = useCallback((): Promise<CommandData[]> => {
@@ -184,7 +196,7 @@ export function useRecoveryCommands({
 
     const pickUpTipCmd = buildPickUpTips(
       selectedTipLocations,
-      failedCommandByRunRecord,
+      unvalidatedFailedCommand,
       failedLabware
     )
 
@@ -193,7 +205,7 @@ export function useRecoveryCommands({
     } else {
       return chainRunRecoveryCommands([pickUpTipCmd])
     }
-  }, [chainRunRecoveryCommands, failedCommandByRunRecord, failedLabwareUtils])
+  }, [chainRunRecoveryCommands, unvalidatedFailedCommand, failedLabwareUtils])
 
   const ignoreErrorKindThisRun = (ignoreErrors: boolean): Promise<void> => {
     setIgnoreErrors(ignoreErrors)
@@ -204,23 +216,25 @@ export function useRecoveryCommands({
   // If the request to update the policy fails, route to the error modal.
   const handleIgnoringErrorKind = useCallback((): Promise<void> => {
     if (ignoreErrors) {
-      if (failedCommandByRunRecord?.error != null) {
+      if (unvalidatedFailedCommand?.error != null) {
         const ifMatch: IfMatchType = isAssumeFalsePositiveResumeKind(
-          failedCommandByRunRecord
+          failedCommand
         )
           ? 'assumeFalsePositiveAndContinue'
           : 'ignoreAndContinue'
 
         const ignorePolicyRules = buildIgnorePolicyRules(
-          failedCommandByRunRecord.commandType,
-          failedCommandByRunRecord.error.errorType,
+          unvalidatedFailedCommand.commandType,
+          unvalidatedFailedCommand.error.errorType,
           ifMatch
         )
 
-        return updateErrorRecoveryPolicy(ignorePolicyRules)
+        return updateErrorRecoveryPolicy(ignorePolicyRules, 'append')
           .then(() => Promise.resolve())
-          .catch(() =>
-            Promise.reject(new Error('Failed to update recovery policy.'))
+          .catch((e: Error) =>
+            Promise.reject(
+              new Error(`Failed to update recovery policy: ${e.message}`)
+            )
           )
       } else {
         void proceedToRouteAndStep(RECOVERY_MAP.ERROR_WHILE_RECOVERING.ROUTE)
@@ -232,8 +246,8 @@ export function useRecoveryCommands({
       return Promise.resolve()
     }
   }, [
-    failedCommandByRunRecord?.error?.errorType,
-    failedCommandByRunRecord?.commandType,
+    unvalidatedFailedCommand?.error?.errorType,
+    unvalidatedFailedCommand?.commandType,
     ignoreErrors,
   ])
 
@@ -262,7 +276,7 @@ export function useRecoveryCommands({
   }, [runId])
 
   const handleResumeAction = (): Promise<RunAction> => {
-    if (isAssumeFalsePositiveResumeKind(failedCommandByRunRecord)) {
+    if (isAssumeFalsePositiveResumeKind(failedCommand)) {
       return resumeRunFromRecoveryAssumingFalsePositive(runId)
     } else {
       return resumeRunFromRecovery(runId)
@@ -291,25 +305,24 @@ export function useRecoveryCommands({
     return chainRunRecoveryCommands([RELEASE_GRIPPER_JAW])
   }, [chainRunRecoveryCommands])
 
-  const updatePositionEstimatorsAndHomeGripper = useCallback((): Promise<
-    CommandData[]
-  > => {
-    return chainRunRecoveryCommands([
-      UPDATE_ESTIMATORS_EXCEPT_PLUNGERS,
-      HOME_GRIPPER_Z,
-    ])
+  const homeExceptPlungers = useCallback((): Promise<CommandData[]> => {
+    return chainRunRecoveryCommands([HOME_EXCEPT_PLUNGERS])
+  }, [chainRunRecoveryCommands])
+
+  const homeAll = useCallback((): Promise<CommandData[]> => {
+    return chainRunRecoveryCommands([HOME_ALL])
   }, [chainRunRecoveryCommands])
 
   const moveLabwareWithoutPause = useCallback((): Promise<CommandData[]> => {
     const moveLabwareCmd = buildMoveLabwareWithoutPause(
-      failedCommandByRunRecord
+      unvalidatedFailedCommand
     )
     if (moveLabwareCmd == null) {
       return Promise.reject(new Error('Invalid use of MoveLabware command'))
     } else {
       return chainRunRecoveryCommands([moveLabwareCmd])
     }
-  }, [chainRunRecoveryCommands, failedCommandByRunRecord])
+  }, [chainRunRecoveryCommands, unvalidatedFailedCommand])
 
   return {
     resumeRun,
@@ -318,17 +331,18 @@ export function useRecoveryCommands({
     homePipetteZAxes,
     pickUpTips,
     releaseGripperJaws,
-    updatePositionEstimatorsAndHomeGripper,
+    homeExceptPlungers,
     moveLabwareWithoutPause,
     skipFailedCommand,
     ignoreErrorKindThisRun,
+    homeAll,
   }
 }
 
 export function isAssumeFalsePositiveResumeKind(
-  failedCommandByRunRecord: UseRecoveryCommandsParams['failedCommandByRunRecord']
+  failedCommand: UseRecoveryCommandsParams['failedCommand']
 ): boolean {
-  const errorKind = getErrorKind(failedCommandByRunRecord)
+  const errorKind = getErrorKind(failedCommand)
 
   switch (errorKind) {
     case ERROR_KINDS.TIP_NOT_DETECTED:
@@ -357,9 +371,16 @@ export const UPDATE_ESTIMATORS_EXCEPT_PLUNGERS: CreateCommand = {
   params: { axes: ['x', 'y', 'extensionZ'] },
 }
 
-export const HOME_GRIPPER_Z: CreateCommand = {
+export const HOME_EXCEPT_PLUNGERS: CreateCommand = {
   commandType: 'home',
-  params: { axes: ['extensionZ'] },
+  params: {
+    axes: ['extensionJaw', 'extensionZ', 'leftZ', 'rightZ', 'x', 'y'],
+  },
+}
+
+export const HOME_ALL: CreateCommand = {
+  commandType: 'home',
+  params: {},
 }
 
 const buildMoveLabwareWithoutPause = (
@@ -410,12 +431,8 @@ export const buildIgnorePolicyRules = (
   commandType: FailedCommand['commandType'],
   errorType: string,
   ifMatch: IfMatchType
-): RecoveryPolicyRulesParams => {
-  return [
-    {
-      commandType,
-      errorType,
-      ifMatch,
-    },
-  ]
-}
+): UpdateErrorRecoveryPolicyWithStrategy['newPolicy'] => ({
+  commandType,
+  errorType,
+  ifMatch,
+})

@@ -30,6 +30,7 @@ OT2_LOG_PATHS = [
 ]
 FLEX_LOG_PATHS = [
     "/logs/serial.log",
+    "/logs/can_bus.log",
     "/logs/api.log",
     "/logs/server.log",
     "/logs/update_server.log",

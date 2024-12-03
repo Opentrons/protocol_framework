@@ -41,7 +41,8 @@ describe('AddMetadata', () => {
     props = {
       ...props,
       ...mockWizardTileProps,
-    } as WizardTileProps
+      analyticsStartTime: new Date('2024-01-01T00:00:00Z'),
+    }
   })
 
   it('renders all the text and fields', () => {

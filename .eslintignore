@@ -28,6 +28,9 @@ robot-server/**
 shared-data/python/**
 hardware-testing/**
 
+# abr-testing don't format the json protocols
+abr-testing/protocols/**
+
 # analyses-snapshot-testing don't format the json protocols
 analyses-snapshot-testing/files
 # don't format the snapshots

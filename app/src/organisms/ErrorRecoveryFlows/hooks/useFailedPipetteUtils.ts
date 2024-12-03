@@ -8,7 +8,7 @@ import type {
   Run,
   PipetteData,
 } from '@opentrons/api-client'
-import type { ErrorRecoveryFlowsProps } from '/app/organisms/ErrorRecoveryFlows'
+import type { FailedCommandBySource } from './useRetainedFailedCommandBySource'
 
 export interface UseFailedPipetteUtilsParams
   extends UseFailedCommandPipetteInfoProps {
@@ -61,7 +61,7 @@ export function useFailedPipetteUtils(
 interface UseFailedCommandPipetteInfoProps {
   runRecord: Run | undefined
   attachedInstruments: Instruments | undefined
-  failedCommandByRunRecord: ErrorRecoveryFlowsProps['failedCommandByRunRecord']
+  failedCommandByRunRecord: FailedCommandBySource['byRunRecord'] | null
 }
 
 // /instruments data for the pipette used in the failedCommand, if any.

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useState } from 'react'
 
 import { RECOVERY_MAP } from '../constants'
 
@@ -9,25 +9,28 @@ import type {
 } from '../hooks'
 
 export interface UseCleanupProps {
-  isTakeover: ERUtilsProps['showTakeover']
+  isActiveUser: ERUtilsProps['isActiveUser']
   stashedMapRef: UseRouteUpdateActionsResult['stashedMapRef']
   setRM: UseRecoveryRoutingResult['setRM']
 }
 
-// When certain events (ex, a takeover) occur, reset state that needs to be reset.
+// When certain events (ex, someone terminates this app's recovery session) occur, reset state that needs to be reset.
 export function useCleanupRecoveryState({
-  isTakeover,
+  isActiveUser,
   stashedMapRef,
   setRM,
 }: UseCleanupProps): void {
-  useEffect(() => {
-    if (isTakeover) {
-      stashedMapRef.current = null
+  const [wasActiveUser, setWasActiveUser] = useState(false)
 
-      setRM({
-        route: RECOVERY_MAP.OPTION_SELECTION.ROUTE,
-        step: RECOVERY_MAP.OPTION_SELECTION.STEPS.SELECT,
-      })
-    }
-  }, [isTakeover])
+  if (isActiveUser && !wasActiveUser) {
+    setWasActiveUser(true)
+  } else if (!isActiveUser && wasActiveUser) {
+    setWasActiveUser(false)
+
+    stashedMapRef.current = null
+    setRM({
+      route: RECOVERY_MAP.OPTION_SELECTION.ROUTE,
+      step: RECOVERY_MAP.OPTION_SELECTION.STEPS.SELECT,
+    })
+  }
 }

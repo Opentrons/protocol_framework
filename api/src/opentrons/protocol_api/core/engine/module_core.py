@@ -41,6 +41,11 @@ from ..module import (
 from .exceptions import InvalidMagnetEngageHeightError
 
 
+# Valid wavelength range for absorbance reader
+ABS_WAVELENGTH_MIN = 350
+ABS_WAVELENGTH_MAX = 1000
+
+
 class ModuleCore(AbstractModuleCore):
     """Module core logic implementation for Python protocols.
     Args:
@@ -581,7 +586,39 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
                 "Cannot perform Initialize action on Absorbance Reader without calling `.close_lid()` first."
             )
 
-        # TODO: check that the wavelengths are within the supported wavelengths
+        wavelength_len = len(wavelengths)
+        if mode == "single" and wavelength_len != 1:
+            raise ValueError(
+                f"Single mode can only be initialized with 1 wavelength"
+                f" {wavelength_len} wavelengths provided instead."
+            )
+
+        if mode == "multi" and (wavelength_len < 1 or wavelength_len > 6):
+            raise ValueError(
+                f"Multi mode can only be initialized with 1 - 6 wavelengths."
+                f" {wavelength_len} wavelengths provided instead."
+            )
+
+        if reference_wavelength is not None and (
+            reference_wavelength < ABS_WAVELENGTH_MIN
+            or reference_wavelength > ABS_WAVELENGTH_MAX
+        ):
+            raise ValueError(
+                f"Unsupported reference wavelength: ({reference_wavelength}) needs"
+                f" to between {ABS_WAVELENGTH_MIN} and {ABS_WAVELENGTH_MAX} nm."
+            )
+
+        for wavelength in wavelengths:
+            if (
+                not isinstance(wavelength, int)
+                or wavelength < ABS_WAVELENGTH_MIN
+                or wavelength > ABS_WAVELENGTH_MAX
+            ):
+                raise ValueError(
+                    f"Unsupported sample wavelength: ({wavelength}) needs"
+                    f" to between {ABS_WAVELENGTH_MIN} and {ABS_WAVELENGTH_MAX} nm."
+                )
+
         self._engine_client.execute_command(
             cmd.absorbance_reader.InitializeParams(
                 moduleId=self.module_id,

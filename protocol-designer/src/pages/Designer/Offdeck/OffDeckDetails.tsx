@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import {
+  ALIGN_CENTER,
   BORDERS,
   COLORS,
   DIRECTION_COLUMN,
@@ -9,7 +10,7 @@ import {
   Flex,
   JUSTIFY_CENTER,
   LabwareRender,
-  OVERFLOW_SCROLL,
+  OVERFLOW_AUTO,
   RobotWorkSpace,
   SPACING,
   StyledText,
@@ -25,6 +26,8 @@ import { getRobotType } from '../../../file-data/selectors'
 import { SlotOverflowMenu } from '../DeckSetup/SlotOverflowMenu'
 import type { DeckSlotId } from '@opentrons/shared-data'
 import type { DeckSetupTabType } from '../types'
+
+const OFFDECK_MAP_WIDTH = '41.625rem'
 
 interface OffDeckDetailsProps extends DeckSetupTabType {
   addLabware: () => void
@@ -43,19 +46,30 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
   const allWellContentsForActiveItem = useSelector(
     wellContentsSelectors.getAllWellContentsForActiveItem
   )
+  const containerWidth = tab === 'startingDeck' ? '100vw' : '75vh'
+  const paddingLeftWithHover =
+    hoverSlot == null
+      ? `calc((${containerWidth} - (${SPACING.spacing24}  * 2) - ${OFFDECK_MAP_WIDTH}) / 2)`
+      : SPACING.spacing24
+  const paddingLeft = tab === 'startingDeck' ? paddingLeftWithHover : undefined
+  const padding =
+    tab === 'protocolSteps'
+      ? SPACING.spacing24
+      : `${SPACING.spacing24} ${paddingLeft}`
+  const stepDetailsContainerWidth = `calc(((${containerWidth} - ${OFFDECK_MAP_WIDTH}) / 2) - (${SPACING.spacing24}  * 3))`
 
   return (
     <Flex
       backgroundColor={COLORS.white}
       borderRadius={BORDERS.borderRadius8}
-      width={tab === 'startingDeck' ? '100vw' : '75vh'}
+      width={containerWidth}
       height="65vh"
-      padding={`${SPACING.spacing40} ${SPACING.spacing24}`}
-      justifyContent={JUSTIFY_CENTER}
+      padding={padding}
       gridGap={SPACING.spacing24}
+      alignItems={ALIGN_CENTER}
     >
       {hoverSlot != null ? (
-        <Flex width="17.625rem" height="6.25rem" marginTop="4.75rem">
+        <Flex width={stepDetailsContainerWidth} height="6.25rem">
           <SlotDetailsContainer
             robotType={robotType}
             slot="offDeck"
@@ -64,17 +78,12 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
         </Flex>
       ) : null}
       <Flex
-        marginRight={tab === 'startingDeck' ? '17.375rem' : '0'}
-        marginLeft={
-          (tab === 'startingDeck' && hoverSlot) || tab === 'protocolSteps'
-            ? '0'
-            : '17.375rem'
-        }
-        width="100%"
+        width={OFFDECK_MAP_WIDTH}
+        height="100%"
         borderRadius={SPACING.spacing12}
         padding={`${SPACING.spacing16} ${SPACING.spacing40}`}
         backgroundColor={COLORS.grey20}
-        overflowY={OVERFLOW_SCROLL}
+        overflowY={OVERFLOW_AUTO}
         flexDirection={DIRECTION_COLUMN}
       >
         <Flex
@@ -143,6 +152,8 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
                       setShowMenuList={() => {
                         setShowMenuListForId(null)
                       }}
+                      menuListSlotPosition={[0, 0, 0]}
+                      invertY
                     />
                   </Flex>
                 ) : null}

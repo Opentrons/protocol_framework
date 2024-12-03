@@ -24,21 +24,10 @@ import { Deck } from '../Deck'
 import { Hardware } from '../Hardware'
 import { Labware } from '../Labware'
 import { Parameters } from '../Parameters'
+import { useScrollPosition } from '/app/local-resources/dom-utils'
 
 import type { HostConfig } from '@opentrons/api-client'
 
-// Mock IntersectionObserver
-class IntersectionObserver {
-  observe = vi.fn()
-  disconnect = vi.fn()
-  unobserve = vi.fn()
-}
-
-Object.defineProperty(window, 'IntersectionObserver', {
-  writable: true,
-  configurable: true,
-  value: IntersectionObserver,
-})
 vi.mock(
   '/app/organisms/ODD/ProtocolSetup/ProtocolSetupParameters/ProtocolSetupParameters'
 )
@@ -55,6 +44,7 @@ vi.mock('../Hardware')
 vi.mock('../Labware')
 vi.mock('../Parameters')
 vi.mock('/app/redux/config')
+vi.mock('/app/local-resources/dom-utils')
 
 const MOCK_HOST_CONFIG = {} as HostConfig
 const mockCreateRun = vi.fn((id: string) => {})
@@ -119,6 +109,10 @@ describe('ODDProtocolDetails', () => {
     vi.mocked(getProtocol).mockResolvedValue({
       data: { links: { referencingRuns: [{ id: '1' }, { id: '2' }] } },
     } as any)
+    vi.mocked(useScrollPosition).mockReturnValue({
+      isScrolled: false,
+      scrollRef: {} as any,
+    })
   })
   afterEach(() => {
     vi.resetAllMocks()

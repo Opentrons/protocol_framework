@@ -110,6 +110,7 @@ def identify_labware_ids(
     file_results: Dict[str, Any], labware_name: Optional[str]
 ) -> List[str]:
     """Determine what type of labware is being picked up."""
+    list_of_labware_ids: List[str] = []
     if labware_name:
         labwares = file_results.get("labware", "")
         list_of_labware_ids = []
@@ -212,8 +213,46 @@ def instrument_commands(
     return pipette_dict
 
 
+def liquid_height_commands(
+    file_results: Dict[str, Any], all_heights_list: List[List[Any]]
+) -> List[List[Any]]:
+    """Record found liquid heights during a protocol."""
+    commandData = file_results.get("commands", "")
+    robot = file_results.get("robot_name", "")
+    run_id = file_results.get("run_id", "")
+    for command in commandData:
+        commandType = command["commandType"]
+        if commandType == "comment":
+            result = command["params"].get("message", "")
+            try:
+                result_str = "'" + result.split("result: {")[1] + "'"
+                entries = result_str.split(", (")
+                comment_time = command["completedAt"]
+                for entry in entries:
+                    height = float(entry.split(": ")[1].split("'")[0].split("}")[0])
+                    labware_type = str(
+                        entry.split(",")[0].replace("'", "").replace("(", "")
+                    )
+                    well_location = str(entry.split(", ")[1].split(" ")[0])
+                    slot_location = str(entry.split("slot ")[1].split(")")[0])
+                    labware_name = str(entry.split("of ")[1].split(" on")[0])
+                    all_heights_list[0].append(robot)
+                    all_heights_list[1].append(run_id)
+                    all_heights_list[2].append(comment_time)
+                    all_heights_list[3].append(labware_type)
+                    all_heights_list[4].append(labware_name)
+                    all_heights_list[5].append(slot_location)
+                    all_heights_list[6].append(well_location)
+                    all_heights_list[7].append(height)
+            except (IndexError, ValueError):
+                continue
+    return all_heights_list
+
+
 def plate_reader_commands(
-    file_results: Dict[str, Any], hellma_plate_standards: List[Dict[str, Any]]
+    file_results: Dict[str, Any],
+    hellma_plate_standards: List[Dict[str, Any]],
+    orientation: bool,
 ) -> Dict[str, object]:
     """Plate Reader Command Counts."""
     commandData = file_results.get("commands", "")
@@ -242,38 +281,46 @@ def plate_reader_commands(
             read = "yes"
         elif read == "yes" and commandType == "comment":
             result = command["params"].get("message", "")
-            formatted_result = result.split("result: ")[1]
-            result_dict = eval(formatted_result)
-            result_dict_keys = list(result_dict.keys())
-            if len(result_dict_keys) > 1:
-                read_type = "multi"
-            else:
-                read_type = "single"
-            for wavelength in result_dict_keys:
-                one_wavelength_dict = result_dict.get(wavelength)
-                result_ndarray = plate_reader.convert_read_dictionary_to_array(
-                    one_wavelength_dict
-                )
-                for item in hellma_plate_standards:
-                    wavelength_of_interest = item["wavelength"]
-                    if str(wavelength) == str(wavelength_of_interest):
-                        error_cells = plate_reader.check_byonoy_data_accuracy(
-                            result_ndarray, item, False
+            if "result:" in result:
+                plate_name = result.split("result:")[0]
+                formatted_result = result.split("result: ")[1]
+                print(formatted_result)
+                result_dict = eval(formatted_result)
+                result_dict_keys = list(result_dict.keys())
+                if len(result_dict_keys) > 1:
+                    read_type = "multi"
+                else:
+                    read_type = "single"
+                if "hellma_plate" in plate_name:
+                    for wavelength in result_dict_keys:
+                        one_wavelength_dict = result_dict.get(wavelength)
+                        result_ndarray = plate_reader.convert_read_dictionary_to_array(
+                            one_wavelength_dict
                         )
-                        if len(error_cells[0]) > 0:
-                            percent = (96 - len(error_cells)) / 96 * 100
-                            for cell in error_cells:
-                                print(
-                                    "FAIL: Cell " + str(cell) + " out of accuracy spec."
+                        for item in hellma_plate_standards:
+                            wavelength_of_interest = item["wavelength"]
+                            if str(wavelength) == str(wavelength_of_interest):
+                                error_cells = plate_reader.check_byonoy_data_accuracy(
+                                    result_ndarray, item, orientation
                                 )
-                        else:
-                            percent = 100
-                            print(
-                                f"PASS: {wavelength_of_interest} meet accuracy specification"
-                            )
-                        final_result[read_type, wavelength, read_num] = percent
-                        read_num += 1
-            read = "no"
+                                if len(error_cells[0]) > 0:
+                                    percent = (96 - len(error_cells)) / 96 * 100
+                                    for cell in error_cells:
+                                        print(
+                                            "FAIL: Cell "
+                                            + str(cell)
+                                            + " out of accuracy spec."
+                                        )
+                                else:
+                                    percent = 100
+                                    print(
+                                        f"PASS: {wavelength_of_interest} meet accuracy spec."
+                                    )
+                                final_result[read_type, wavelength, read_num] = percent
+                                read_num += 1
+                else:
+                    final_result = result_dict
+                read = "no"
     plate_dict = {
         "Plate Reader # of Reads": read_count,
         "Plate Reader Avg Read Time (sec)": avg_read_time,
@@ -341,8 +388,9 @@ def hs_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
             )
     if temp_time is not None and deactivate_time is None:
         # If heater shaker module is not deactivated, protocol completedAt time stamp used.
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - temp_time).total_seconds()
         hs_temps[hs_temp] = hs_temps.get(hs_temp, 0.0) + temp_duration
@@ -389,8 +437,9 @@ def temperature_module_commands(file_results: Dict[str, Any]) -> Dict[str, Any]:
                 tm_temps[tm_temp] = tm_temps.get(tm_temp, 0.0) + temp_duration
     if temp_time is not None and deactivate_time is None:
         # If temperature module is not deactivated, protocol completedAt time stamp used.
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - temp_time).total_seconds()
         tm_temps[tm_temp] = tm_temps.get(tm_temp, 0.0) + temp_duration
@@ -473,15 +522,17 @@ def thermocycler_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
                 block_temps[block_temp] = block_temps.get(block_temp, 0.0) + block_time
     if block_on_time is not None and block_off_time is None:
         # If thermocycler block not deactivated protocol completedAt time stamp used
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - block_on_time).total_seconds()
-        block_temps[block_temp] = block_temps.get(block_temp, 0.0) + temp_duration
+
     if lid_on_time is not None and lid_off_time is None:
         # If thermocycler lid not deactivated protocol completedAt time stamp used
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - lid_on_time).total_seconds()
         lid_temps[lid_temp] = block_temps.get(lid_temp, 0.0) + temp_duration

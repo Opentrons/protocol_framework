@@ -92,8 +92,7 @@ export function WellOrderModal(props: WellOrderModalProps): JSX.Element | null {
   }
 
   const handleReset = (): void => {
-    setWellOrder({ firstValue: DEFAULT_FIRST, secondValue: DEFAULT_SECOND })
-    applyChanges()
+    updateValues(DEFAULT_FIRST, DEFAULT_SECOND)
     closeModal()
   }
 
@@ -144,8 +143,16 @@ export function WellOrderModal(props: WellOrderModalProps): JSX.Element | null {
 
   if (!isOpen) return null
 
+  let secondaryOptions = WELL_ORDER_VALUES
+  if (VERTICAL_VALUES.includes(wellOrder.firstValue)) {
+    secondaryOptions = HORIZONTAL_VALUES
+  } else if (HORIZONTAL_VALUES.includes(wellOrder.firstValue)) {
+    secondaryOptions = VERTICAL_VALUES
+  }
+
   return createPortal(
     <Modal
+      marginLeft="0"
       width="37.125rem"
       closeOnOutsideClick
       type="info"
@@ -209,7 +216,7 @@ export function WellOrderModal(props: WellOrderModalProps): JSX.Element | null {
                 value: wellOrder.secondValue,
               }}
               onClick={makeOnChange('second')}
-              filterOptions={WELL_ORDER_VALUES.map(value => ({
+              filterOptions={secondaryOptions.map(value => ({
                 value,
                 name: t(`step_edit_form.field.well_order.option.${value}`),
                 disabled: isSecondOptionDisabled(value),

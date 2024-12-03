@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import { useInstrumentsQuery } from '@opentrons/react-api-client'
 
 import { useRouteUpdateActions } from './useRouteUpdateActions'
@@ -13,12 +15,12 @@ import {
 } from '/app/resources/runs'
 import { useRecoveryOptionCopy } from './useRecoveryOptionCopy'
 import { useRecoveryActionMutation } from './useRecoveryActionMutation'
-import { useRunningStepCounts } from '/app/resources/protocols/hooks'
 import { useRecoveryToasts } from './useRecoveryToasts'
 import { useRecoveryAnalytics } from '/app/redux-resources/analytics'
 import { useShowDoorInfo } from './useShowDoorInfo'
 import { useCleanupRecoveryState } from './useCleanupRecoveryState'
 import { useFailedPipetteUtils } from './useFailedPipetteUtils'
+import { getRunningStepCountsFrom } from '/app/resources/protocols'
 
 import type {
   LabwareDefinition2,
@@ -50,7 +52,7 @@ export type ERUtilsProps = Omit<ErrorRecoveryFlowsProps, 'failedCommand'> & {
   isOnDevice: boolean
   robotType: RobotType
   failedCommand: ReturnType<typeof useRetainedFailedCommandBySource>
-  showTakeover: boolean
+  isActiveUser: UseRecoveryTakeoverResult['isActiveUser']
   allRunDefs: LabwareDefinition2[]
   labwareDefinitionsByUri: LabwareDefinitionsByUri | null
 }
@@ -85,8 +87,9 @@ export function useERUtils({
   isOnDevice,
   robotType,
   runStatus,
-  showTakeover,
+  isActiveUser,
   allRunDefs,
+  unvalidatedFailedCommand,
   labwareDefinitionsByUri,
 }: ERUtilsProps): ERUtilsResults {
   const { data: attachedInstruments } = useInstrumentsQuery()
@@ -100,9 +103,15 @@ export function useERUtils({
     cursor: 0,
     pageLength: 999,
   })
-  const failedCommandByRunRecord = failedCommand?.byRunRecord ?? null
 
-  const stepCounts = useRunningStepCounts(runId, runCommands)
+  const stepCounts = useMemo(
+    () =>
+      getRunningStepCountsFrom(
+        protocolAnalysis?.commands ?? [],
+        failedCommand?.byRunRecord ?? null
+      ),
+    [protocolAnalysis != null, failedCommand]
+  )
 
   const analytics = useRecoveryAnalytics()
 
@@ -120,7 +129,7 @@ export function useERUtils({
   )
 
   const recoveryToastUtils = useRecoveryToasts({
-    currentStepCount: stepCounts.currentStepNumber,
+    stepCounts,
     selectedRecoveryOption: currentRecoveryOptionUtils.selectedRecoveryOption,
     isOnDevice,
     commandTextData: protocolAnalysis,
@@ -139,6 +148,7 @@ export function useERUtils({
   const tipStatusUtils = useRecoveryTipStatus({
     runId,
     runRecord,
+    failedCommand,
     attachedInstruments,
     failedPipetteInfo,
   })
@@ -152,7 +162,7 @@ export function useERUtils({
   })
 
   const failedLabwareUtils = useFailedLabwareUtils({
-    failedCommandByRunRecord,
+    failedCommand,
     protocolAnalysis,
     failedPipetteInfo,
     runRecord,
@@ -161,7 +171,8 @@ export function useERUtils({
 
   const recoveryCommands = useRecoveryCommands({
     runId,
-    failedCommandByRunRecord,
+    failedCommand,
+    unvalidatedFailedCommand,
     failedLabwareUtils,
     routeUpdateActions,
     recoveryToastUtils,
@@ -192,7 +203,7 @@ export function useERUtils({
   )
 
   useCleanupRecoveryState({
-    isTakeover: showTakeover,
+    isActiveUser,
     setRM,
     stashedMapRef: routeUpdateActions.stashedMapRef,
   })
