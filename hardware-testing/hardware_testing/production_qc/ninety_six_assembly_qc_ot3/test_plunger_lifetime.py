@@ -324,13 +324,22 @@ async def _run(cycles: int, trials: int) -> None:
         asdipass = await aspirate_and_dispense(api, reservoir_a1_actual, get_test_volume, number)
 
         if number % 100 == 0:
-            await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, reservoir_a1_actual)
-            await helpers_ot3.move_plunger_absolute_ot3(
-                api, OT3Mount.LEFT, 72.5
+            try:
+                await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, reservoir_a1_actual)
+                await helpers_ot3.move_plunger_absolute_ot3(
+                    api, OT3Mount.LEFT, 72.5
+                )
+                await helpers_ot3.move_plunger_absolute_ot3(
+                    api, OT3Mount.LEFT, 67.5
+                )
+                m_plunge_flag = "PASS"
+            except:
+                m_plunge_flag = "FAIL"
+            header_str = data.convert_list_to_csv_line(["number%100_move_plunger_absolute",m_plunge_flag])
+            data.append_data_to_file(
+                test_name=test_name, file_name=file_name, data=header_str
             )
-            await helpers_ot3.move_plunger_absolute_ot3(
-                api, OT3Mount.LEFT, 67.5
-            )
+
         header_str = data.convert_list_to_csv_line(["aspirate_and_dispense",asdipass])
         data.append_data_to_file(
             test_name=test_name, file_name=file_name, data=header_str
@@ -415,7 +424,7 @@ async def _run(cycles: int, trials: int) -> None:
                 test_name=test_name, file_name=file_name, data=header_str
             )
 
-            print('n',n)
+            #print('n',n)
             #input("continue")
         if os.path.exists(pathjson):
             with open(
