@@ -1,7 +1,7 @@
 """Tests for pipette state accessors in the protocol_engine state store.
 
 DEPRECATED: Testing PipetteView independently of PipetteStore is no longer helpful.
-Add new tests to test_pipette_state.py, where they can be tested together.
+Try to add new tests to test_pipette_state.py, where they can be tested together.
 """
 
 from collections import OrderedDict

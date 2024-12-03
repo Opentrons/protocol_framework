@@ -1,7 +1,7 @@
 """Tests for CommandView.
 
 DEPRECATED: Testing CommandView independently of CommandStore is no longer helpful.
-Add new tests to test_command_state.py, where they can be tested together.
+Try to add new tests to test_command_state.py, where they can be tested together.
 """
 
 

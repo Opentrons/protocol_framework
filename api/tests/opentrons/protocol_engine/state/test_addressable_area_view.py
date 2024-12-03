@@ -1,7 +1,7 @@
 """Addressable area state view tests.
 
 DEPRECATED: Testing AddressableAreaView independently of AddressableAreaStore is no
-longer helpful. Add new tests to test_addressable_area_state.py, where they can be
+longer helpful. Try to add new tests to test_addressable_area_state.py, where they can be
 tested together.
 """
 
