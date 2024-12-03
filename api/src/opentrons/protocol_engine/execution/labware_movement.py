@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Optional, TYPE_CHECKING, overload
 
-from opentrons_shared_data.labware.labware_definition import LabwareDefinition
+from opentrons_shared_data.labware.models import LabwareDefinition
 
 from opentrons.types import Point
 

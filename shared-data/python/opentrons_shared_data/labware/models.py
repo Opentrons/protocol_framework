@@ -6,17 +6,12 @@ shared-data. It's been modified by hand to be more friendly.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, List, Optional, Literal, Union, TYPE_CHECKING
-from typing import TYPE_
+from typing import Any, Dict, List, Optional, Literal, Union
 from math import sqrt, asin
 from numpy import pi, trapz
 from functools import cached_property
 
-from pydantic import (
-    ConfigDict,
-    BaseModel,
-    Field,
-)
+from pydantic import ConfigDict, BaseModel, Field, NonNegativeInt
 from opentrons_shared_data.types import Vec3f, Number, NonNegativeNumber
 
 
@@ -131,7 +126,8 @@ class Parameters(BaseModel):
     format: Literal[
         "96Standard", "384Standard", "trough", "irregular", "trash"
     ] = Field(
-        ..., description="Property to determine compatibility with multichannel pipette"
+        ...,
+        description="Property to determine compatibility with multichannel pipette",
     )
     quirks: Optional[List[str]] = Field(
         None,
@@ -222,22 +218,22 @@ class WellDefinition(BaseModel):
 
 class SphericalSegment(BaseModel):
     shape: Spherical = Field(..., description="Denote shape as spherical")
-    radiusOfCurvature: _NonNegativeNumber = Field(
+    radiusOfCurvature: NonNegativeNumber = Field(
         ...,
         description="radius of curvature of bottom subsection of wells",
     )
-    topHeight: _NonNegativeNumber = Field(
+    topHeight: NonNegativeNumber = Field(
         ..., description="The depth of a spherical bottom of a well"
     )
-    bottomHeight: _NonNegativeNumber = Field(
+    bottomHeight: NonNegativeNumber = Field(
         ...,
         description="Height of the bottom of the segment, must be 0.0",
     )
-    xCount: _StrictNonNegativeInt = Field(
+    xCount: NonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
-    yCount: _StrictNonNegativeInt = Field(
+    yCount: NonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
@@ -252,11 +248,11 @@ class SphericalSegment(BaseModel):
 
 class ConicalFrustum(BaseModel):
     shape: Conical = Field(..., description="Denote shape as conical")
-    bottomDiameter: _NonNegativeNumber = Field(
+    bottomDiameter: NonNegativeNumber = Field(
         ...,
         description="The diameter at the bottom cross-section of a circular frustum",
     )
-    topDiameter: _NonNegativeNumber = Field(
+    topDiameter: NonNegativeNumber = Field(
         ..., description="The diameter at the top cross-section of a circular frustum"
     )
     topHeight: NonNegativeNumber = Field(
@@ -264,15 +260,15 @@ class ConicalFrustum(BaseModel):
         description="The height at the top of a bounded subsection of a well, relative to the bottom"
         "of the well",
     )
-    bottomHeight: _NonNegativeNumber = Field(
+    bottomHeight: NonNegativeNumber = Field(
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
     )
-    xCount: _StrictNonNegativeInt = Field(
+    xCount: NonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
-    yCount: _StrictNonNegativeInt = Field(
+    yCount: NonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
@@ -287,36 +283,36 @@ class ConicalFrustum(BaseModel):
 
 class CuboidalFrustum(BaseModel):
     shape: Cuboidal = Field(..., description="Denote shape as cuboidal")
-    bottomXDimension: _NonNegativeNumber = Field(
+    bottomXDimension: NonNegativeNumber = Field(
         ...,
         description="x dimension of the bottom cross-section of a rectangular frustum",
     )
-    bottomYDimension: _NonNegativeNumber = Field(
+    bottomYDimension: NonNegativeNumber = Field(
         ...,
         description="y dimension of the bottom cross-section of a rectangular frustum",
     )
-    topXDimension: _NonNegativeNumber = Field(
+    topXDimension: NonNegativeNumber = Field(
         ...,
         description="x dimension of the top cross-section of a rectangular frustum",
     )
-    topYDimension: _NonNegativeNumber = Field(
+    topYDimension: NonNegativeNumber = Field(
         ...,
         description="y dimension of the top cross-section of a rectangular frustum",
     )
-    topHeight: _NonNegativeNumber = Field(
+    topHeight: NonNegativeNumber = Field(
         ...,
         description="The height at the top of a bounded subsection of a well, relative to the bottom"
         "of the well",
     )
-    bottomHeight: _NonNegativeNumber = Field(
+    bottomHeight: NonNegativeNumber = Field(
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
     )
-    xCount: _StrictNonNegativeInt = Field(
+    xCount: NonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
-    yCount: _StrictNonNegativeInt = Field(
+    yCount: NonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
@@ -354,33 +350,33 @@ class SquaredConeSegment(BaseModel):
         ...,
         description="Denote if the shape is going from circular to rectangular or vise versa",
     )
-    circleDiameter: _NonNegativeNumber = Field(
+    circleDiameter: NonNegativeNumber = Field(
         ...,
         description="diameter of the circular face of a truncated circular segment",
     )
 
-    rectangleXDimension: _NonNegativeNumber = Field(
+    rectangleXDimension: NonNegativeNumber = Field(
         ...,
         description="x dimension of the rectangular face of a truncated circular segment",
     )
-    rectangleYDimension: _NonNegativeNumber = Field(
+    rectangleYDimension: NonNegativeNumber = Field(
         ...,
         description="y dimension of the rectangular face of a truncated circular segment",
     )
-    topHeight: _NonNegativeNumber = Field(
+    topHeight: NonNegativeNumber = Field(
         ...,
         description="The height at the top of a bounded subsection of a well, relative to the bottom"
         "of the well",
     )
-    bottomHeight: _NonNegativeNumber = Field(
+    bottomHeight: NonNegativeNumber = Field(
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
     )
-    xCount: _StrictNonNegativeInt = Field(
+    xCount: NonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
-    yCount: _StrictNonNegativeInt = Field(
+    yCount: NonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
@@ -559,32 +555,32 @@ class RoundedCuboidSegment(BaseModel):
         ...,
         description="Denote if the shape is going from circular to rectangular or vise versa",
     )
-    circleDiameter: _NonNegativeNumber = Field(
+    circleDiameter: NonNegativeNumber = Field(
         ...,
         description="diameter of the circular face of a rounded rectangular segment",
     )
-    rectangleXDimension: _NonNegativeNumber = Field(
+    rectangleXDimension: NonNegativeNumber = Field(
         ...,
         description="x dimension of the rectangular face of a rounded rectangular segment",
     )
-    rectangleYDimension: _NonNegativeNumber = Field(
+    rectangleYDimension: NonNegativeNumber = Field(
         ...,
         description="y dimension of the rectangular face of a rounded rectangular segment",
     )
-    topHeight: _NonNegativeNumber = Field(
+    topHeight: NonNegativeNumber = Field(
         ...,
         description="The height at the top of a bounded subsection of a well, relative to the bottom"
         "of the well",
     )
-    bottomHeight: _NonNegativeNumber = Field(
+    bottomHeight: NonNegativeNumber = Field(
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
     )
-    xCount: _StrictNonNegativeInt = Field(
+    xCount: NonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
-    yCount: _StrictNonNegativeInt = Field(
+    yCount: NonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )

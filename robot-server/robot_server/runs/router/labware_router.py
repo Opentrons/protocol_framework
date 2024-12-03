@@ -1,4 +1,5 @@
 """Router for /runs endpoints dealing with labware offsets and definitions."""
+
 import logging
 from typing import Annotated, Union
 
@@ -16,6 +17,7 @@ from robot_server.service.json_api import (
     RequestModel,
     SimpleBody,
     PydanticResponse,
+    ResponseList,
 )
 
 from ..run_models import Run, LabwareDefinitionSummary
@@ -133,14 +135,14 @@ async def add_labware_definition(
         " Repeated definitions will be deduplicated."
     ),
     responses={
-        status.HTTP_200_OK: {"model": SimpleBody[list[SD_LabwareDefinition]]},
+        status.HTTP_200_OK: {"model": SimpleBody[ResponseList[SD_LabwareDefinition]]},
         status.HTTP_409_CONFLICT: {"model": ErrorBody[RunStopped]},
     },
 )
 async def get_run_loaded_labware_definitions(
     runId: str,
     run_data_manager: Annotated[RunDataManager, Depends(get_run_data_manager)],
-) -> PydanticResponse[SimpleBody[list[SD_LabwareDefinition]]]:
+) -> PydanticResponse[SimpleBody[ResponseList[SD_LabwareDefinition]]]:
     """Get a run's loaded labware definition by the run ID.
 
     Args:

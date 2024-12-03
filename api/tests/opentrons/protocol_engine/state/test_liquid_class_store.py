@@ -34,7 +34,7 @@ def test_handles_add_liquid_class(
 
     subject.handle_action(
         actions.SucceedCommandAction(
-            command=LoadLiquidClass.construct(),  # type: ignore[call-arg]
+            command=LoadLiquidClass.construct(),
             state_update=update_types.StateUpdate(
                 liquid_class_loaded=update_types.LiquidClassLoadedUpdate(
                     liquid_class_id="liquid-class-id",

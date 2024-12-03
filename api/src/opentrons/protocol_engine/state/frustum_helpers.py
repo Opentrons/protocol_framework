@@ -1,11 +1,12 @@
 """Helper functions for liquid-level related calculations inside a given frustum."""
+
 from typing import List, Tuple
 from numpy import pi, iscomplex, roots, real
 from math import isclose
 
 from ..errors.exceptions import InvalidLiquidHeightFound
 
-from opentrons_shared_data.labware.labware_definition import (
+from opentrons_shared_data.labware.models import (
     InnerWellGeometry,
     WellSegment,
     SphericalSegment,

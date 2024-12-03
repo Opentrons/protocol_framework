@@ -689,7 +689,7 @@ def test_get_labware_overlap_offsets() -> None:
     """It should get the labware overlap offsets."""
     subject = get_labware_view()
     result = subject.get_labware_overlap_offsets(
-        definition=LabwareDefinition.construct(  # type: ignore[call-arg]
+        definition=LabwareDefinition.construct(
             stackingOffsetWithLabware={
                 "bottom-labware-name": SharedDataOverlapOffset(x=1, y=2, z=3)
             }
@@ -775,7 +775,7 @@ def test_get_module_overlap_offsets(
         deck_definition=spec_deck_definition,
     )
     result = subject.get_module_overlap_offsets(
-        definition=LabwareDefinition.construct(  # type: ignore[call-arg]
+        definition=LabwareDefinition.construct(
             stackingOffsetWithModule=stacking_offset_with_module
         ),
         module_model=module_model,
@@ -1382,10 +1382,10 @@ def test_raise_if_labware_cannot_be_stacked_on_labware_on_adapter() -> None:
             ),
         },
         definitions_by_uri={
-            "def-uri-1": LabwareDefinition.construct(  # type: ignore[call-arg]
+            "def-uri-1": LabwareDefinition.construct(
                 allowedRoles=[LabwareRole.labware]
             ),
-            "def-uri-2": LabwareDefinition.construct(  # type: ignore[call-arg]
+            "def-uri-2": LabwareDefinition.construct(
                 allowedRoles=[LabwareRole.adapter]
             ),
         },
@@ -1458,7 +1458,7 @@ def test_labware_stacking_height_passes_or_raises(
             ),
         },
         definitions_by_uri={
-            "def-uri-1": LabwareDefinition.construct(  # type: ignore[call-arg]
+            "def-uri-1": LabwareDefinition.construct(
                 allowedRoles=allowed_roles,
                 parameters=Parameters.construct(
                     format="irregular",
@@ -1473,7 +1473,7 @@ def test_labware_stacking_height_passes_or_raises(
 
     with exception:
         subject.raise_if_labware_cannot_be_stacked(
-            top_labware_definition=LabwareDefinition.construct(  # type: ignore[call-arg]
+            top_labware_definition=LabwareDefinition.construct(
                 parameters=Parameters.construct(
                     format="irregular",
                     quirks=stacking_quirks,

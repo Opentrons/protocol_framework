@@ -83,7 +83,7 @@ def test_get_load_params(subject: LabwareCore) -> None:
             ordering=[],
             metadata=LabwareDefinitionMetadata.construct(
                 displayName="what a cool labware"
-            ),  # type: ignore[call-arg]
+            ),
         )
     ],
 )

@@ -145,8 +145,8 @@ class DefinedErrorData(Generic[_ErrorT_co]):
 _ExecuteReturnT_co = TypeVar(
     "_ExecuteReturnT_co",
     bound=Union[
-        SuccessData[BaseModel, object],
-        DefinedErrorData[ErrorOccurrence, object],
+        SuccessData[BaseModel],
+        DefinedErrorData[ErrorOccurrence],
     ],
     covariant=True,
 )

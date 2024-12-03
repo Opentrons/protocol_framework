@@ -1,5 +1,5 @@
 """Translation of JSON protocol commands into ProtocolEngine commands."""
-from typing import cast, List, Union, Iterator
+from typing import List, Union, Iterator
 from pydantic import ValidationError as PydanticValidationError, TypeAdapter
 
 from opentrons_shared_data.pipette.types import PipetteNameType

@@ -1,4 +1,5 @@
 """Test the ``moveLabware`` command."""
+
 from datetime import datetime
 import inspect
 import pytest
@@ -306,7 +307,7 @@ async def test_gripper_error(
     labware_namespace = "labware-namespace"
     labware_load_name = "load-name"
     labware_definition_uri = "opentrons-test/load-name/1"
-    labware_def = LabwareDefinition.construct(  # type: ignore[call-arg]
+    labware_def = LabwareDefinition.construct(
         namespace=labware_namespace,
     )
     original_location = DeckSlotLocation(slotName=DeckSlotName.SLOT_A1)
@@ -316,7 +317,7 @@ async def test_gripper_error(
 
     # Common MoveLabwareImplementation boilerplate:
     decoy.when(state_view.labware.get_definition(labware_id=labware_id)).then_return(
-        LabwareDefinition.construct(namespace=labware_namespace)  # type: ignore[call-arg]
+        LabwareDefinition.construct(namespace=labware_namespace)
     )
     decoy.when(state_view.labware.get(labware_id=labware_id)).then_return(
         LoadedLabware(
