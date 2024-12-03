@@ -60,7 +60,7 @@ FS_STALL = "async ERR403:motor stall error" + FS_COMMAND_TERMINATOR.strip("\r")
 DEFAULT_COMMAND_RETRIES = 1
 TOTAL_TRAVEL_X = 192.5
 TOTAL_TRAVEL_Z = 136
-TOTAL_TRAVEL_L = 24
+TOTAL_TRAVEL_L = 26
 LATCH_DISTANCE_MM = 2
 RETRACT_DIST_X = 1
 RETRACT_DIST_Z = 1
@@ -466,20 +466,19 @@ class FlexStacker():
 
     def load_labware(self, labware_z_offset: float):
         labware_clearance = labware_z_offset
-        labware_retract_speed= 60
         # ----------------Set up the Stacker------------------------
         self.home(AXIS.X, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
         self.home(AXIS.Z, DIR.NEGATIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
         self.close_latch()
         self.move(AXIS.X, TOTAL_TRAVEL_X-5, DIR.NEGATIVE, self.move_speed_x, self.move_acceleration_x)
         self.home(AXIS.X, DIR.NEGATIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
-        self.move(AXIS.Z, TOTAL_TRAVEL_Z-labware_clearance, DIR.POSITIVE, self.move_speed_up_z, self.move_acceleration_z)
+        self.move(AXIS.Z, TOTAL_TRAVEL_Z-(labware_clearance/2), DIR.POSITIVE, self.move_speed_up_z, self.move_acceleration_z)
         # #------------------- transfer -----------------------------
         self.open_latch()
-        self.move(AXIS.Z, labware_clearance - 5, DIR.POSITIVE, self.move_speed_up_z, self.move_acceleration_z)
+        self.move(AXIS.Z, (labware_clearance/2)-15, DIR.POSITIVE, self.move_speed_up_z, self.move_acceleration_z)
         self.home(AXIS.Z, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
         self.close_latch()
-        self.move(AXIS.Z, TOTAL_TRAVEL_Z-10, DIR.NEGATIVE, self.move_speed_down_z, self.move_acceleration_z)
+        self.move(AXIS.Z, TOTAL_TRAVEL_Z-15, DIR.NEGATIVE, self.move_speed_down_z, self.move_acceleration_z)
         self.home(AXIS.Z, DIR.NEGATIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
         self.move(AXIS.X, TOTAL_TRAVEL_X-5, DIR.POSITIVE, self.move_speed_x, self.move_acceleration_x)
         self.home(AXIS.X, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
