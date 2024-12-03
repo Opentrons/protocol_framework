@@ -187,6 +187,7 @@ def get_tips(
     tip_volume: int,
     all_channels: bool = True,
     reverse: bool = False,
+    starting_tip: str = "",
 ) -> Dict[int, List[Well]]:
     """Get tips."""
     ret = {}
@@ -219,4 +220,10 @@ def get_tips(
     if reverse:
         for key in ret.keys():
             ret[key].reverse()
+    if starting_tip:
+        for key in ret.keys():
+            for i in range(len(ret[key])):
+                if ret[key][i].well_name == starting_tip:
+                    ret[key] = ret[key][i:]
+                    break
     return ret

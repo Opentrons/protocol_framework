@@ -222,6 +222,7 @@ def _next_tip_for_channel(
     resources: TestResources,
     channel: int,
     max_tips: int,
+    tip_name: str = "",
 ) -> Well:
     _tips_used = sum([tc for tc in _tip_counter.values()])
     if _tips_used >= max_tips:
@@ -233,6 +234,8 @@ def _next_tip_for_channel(
         _tip_counter[channel] = 0
     _tip = resources.tips[channel][_tip_counter[channel]]
     _tip_counter[channel] += 1
+    if tip_name and _tip.well_name != tip_name:
+        raise RuntimeError(f"starting tip is {_tip.well_name} (expected {tip_name})")
     return _tip
 
 
@@ -667,7 +670,7 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
     try:
         well = labware_on_scale["A1"]
         if cfg.jog or cfg.blank or not cfg.lld_every_tip:
-            first_tip = _next_tip_for_channel(cfg, resources, 0, total_tips)
+            first_tip = _next_tip_for_channel(cfg, resources, 0, total_tips, tip_name=cfg.starting_tip)
             setup_channel_offset = _get_channel_offset(cfg, channel=0)
             first_tip_location = first_tip.top().move(setup_channel_offset)
             resources.pipette._retract()

@@ -397,6 +397,7 @@ def build_gravimetric_cfg(
     same_tip: bool,
     ignore_fail: bool,
     mode: str,
+    starting_tip: str,
     run_args: RunArgs,
 ) -> GravimetricConfig:
     """Build."""
@@ -430,6 +431,7 @@ def build_gravimetric_cfg(
         mode=mode,
         liquid=run_args.liquid,
         dilution=run_args.dilution,
+        starting_tip=starting_tip,
     )
 
 
@@ -450,6 +452,7 @@ def build_photometric_cfg(
     photoplate_column_offset: List[int],
     dye_well_column_offset: List[int],
     mode: str,
+    starting_tip: str,
     run_args: RunArgs,
 ) -> PhotometricConfig:
     """Run."""
@@ -482,6 +485,7 @@ def build_photometric_cfg(
         dye_well_column_offset=dye_well_column_offset,
         mode=mode,
         interactive=False,
+        starting_tip=starting_tip,
     )
 
 
@@ -510,6 +514,7 @@ def _main(
             args.photoplate_col_offset,
             args.dye_well_col_offset,
             args.mode,
+            args.starting_tip,
             run_args,
         )
         union_cfg = cfg_pm
@@ -534,6 +539,7 @@ def _main(
             args.same_tip,
             args.ignore_fail,
             args.mode,
+            args.starting_tip,
             run_args,
         )
 
@@ -555,7 +561,8 @@ def _main(
         run_args.pipette,
         tip,
         all_channels=all_channels_same_time,
-        reverse=run_args.reverse_tips
+        reverse=run_args.reverse_tips,
+        starting_tip=args.starting_tip,
     )
     test_resources = TestResources(
         ctx=run_args.ctx,
@@ -617,6 +624,16 @@ if __name__ == "__main__":
     )
     parser.add_argument("--dilution", type=float, default=1.0)
     parser.add_argument("--reverse-tips", action="store_true")
+    parser.add_argument(
+        "--starting-tip",
+        type=str,
+        choices=[
+            f"{c}{str(r + 1)}"
+            for r in range(12)
+            for c in "ABCDEFGH"
+        ],
+        default="A1"
+    )
     args = parser.parse_args()
     run_args = RunArgs.build_run_args(args)
     config.NUM_BLANK_TRIALS = args.blank_trials
