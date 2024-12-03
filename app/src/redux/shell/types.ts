@@ -11,6 +11,8 @@ export interface Remote {
     on: (channel: string, listener: IpcListener) => void
     off: (channel: string, listener: IpcListener) => void
   }
+  /* The renderer process isn't allowed the file path for security reasons. */
+  getFilePathFrom: (file: File) => Promise<string>
 }
 
 export type IpcListener = (
