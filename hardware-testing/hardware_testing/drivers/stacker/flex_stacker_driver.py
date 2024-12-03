@@ -475,6 +475,7 @@ class FlexStacker():
         self.move(AXIS.Z, TOTAL_TRAVEL_Z-labware_clearance, DIR.POSITIVE, self.move_speed_up_z, self.move_acceleration_z)
         # #------------------- transfer -----------------------------
         self.open_latch()
+        self.move(AXIS.Z, labware_clearance - 5, DIR.POSITIVE, self.move_speed_up_z, self.move_acceleration_z)
         self.home(AXIS.Z, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
         self.close_latch()
         self.move(AXIS.Z, TOTAL_TRAVEL_Z-10, DIR.NEGATIVE, self.move_speed_down_z, self.move_acceleration_z)
