@@ -42,9 +42,6 @@ import {
   getGripperDisplayName,
   getModuleType,
   getSimplestDeckConfigForProtocol,
-  parseInitialLoadedLabwareByAdapter,
-  parseInitialLoadedLabwareByModuleId,
-  parseInitialLoadedLabwareBySlot,
   parseInitialLoadedModulesBySlot,
   parseInitialPipetteNamesByMount,
 } from '@opentrons/shared-data'
@@ -75,7 +72,11 @@ import { RobotConfigurationDetails } from './RobotConfigurationDetails'
 import { ProtocolParameters } from './ProtocolParameters'
 import { AnnotatedSteps } from './AnnotatedSteps'
 
-import type { JsonConfig, PythonConfig } from '@opentrons/shared-data'
+import type {
+  JsonConfig,
+  PythonConfig,
+  LoadLabwareRunTimeCommand,
+} from '@opentrons/shared-data'
 import type { StoredProtocolData } from '/app/redux/protocol-storage'
 import type { State, Dispatch } from '/app/redux/types'
 
@@ -265,28 +266,12 @@ export function ProtocolDetails(
       : null
   )
 
-  const requiredLabwareDetails =
-    mostRecentAnalysis != null
-      ? map({
-          ...parseInitialLoadedLabwareByModuleId(
-            mostRecentAnalysis.commands != null
-              ? mostRecentAnalysis.commands
-              : []
-          ),
-          ...parseInitialLoadedLabwareBySlot(
-            mostRecentAnalysis.commands != null
-              ? mostRecentAnalysis.commands
-              : []
-          ),
-          ...parseInitialLoadedLabwareByAdapter(
-            mostRecentAnalysis.commands != null
-              ? mostRecentAnalysis.commands
-              : []
-          ),
-        }).filter(
-          labware => labware.result?.definition?.parameters?.format !== 'trash'
-        )
-      : []
+  const loadLabwareCommands =
+    mostRecentAnalysis?.commands.filter(
+      (command): command is LoadLabwareRunTimeCommand =>
+        command.commandType === 'loadLabware' &&
+        command.result.definition.parameters.format !== 'trash'
+    ) ?? []
 
   const protocolDisplayName = getProtocolDisplayName(
     protocolKey,
@@ -323,7 +308,7 @@ export function ProtocolDetails(
 
   const contentsByTabName = {
     labware: (
-      <ProtocolLabwareDetails requiredLabwareDetails={requiredLabwareDetails} />
+      <ProtocolLabwareDetails requiredLabwareDetails={loadLabwareCommands} />
     ),
     robot_config: (
       <RobotConfigurationDetails
