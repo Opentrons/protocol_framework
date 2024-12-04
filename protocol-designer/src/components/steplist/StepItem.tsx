@@ -71,14 +71,15 @@ export const StepItem = (props: StepItemProps): JSX.Element => {
   const {
     stepType,
     stepNumber,
+
     collapsed,
     error,
     warning,
     selected,
     isLastSelected,
     hovered,
-    unhighlightStep,
 
+    unhighlightStep,
     handleClick,
     onStepContextMenu,
     toggleStepCollapsed,

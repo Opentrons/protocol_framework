@@ -15,8 +15,10 @@ import { MultiSelectToolbar } from './MultiSelectToolbar'
 import { PresavedStepItem } from './PresavedStepItem'
 import { StartingDeckStateTerminalItem } from './StartingDeckStateTerminalItem'
 import { TerminalItem } from './TerminalItem'
+
 import type { StepIdType } from '../../form-types'
 import type { ThunkDispatch } from '../../types'
+
 export interface StepListProps {
   isMultiSelectMode?: boolean | null
   orderedStepIds: StepIdType[]
@@ -32,6 +34,7 @@ export const StepList = (): JSX.Element => {
   const handleKeyDown: (e: KeyboardEvent) => void = e => {
     const key = e.key
     const altIsPressed = e.altKey
+
     if (altIsPressed) {
       let delta = 0
       if (key === 'ArrowUp') {
@@ -43,11 +46,14 @@ export const StepList = (): JSX.Element => {
       dispatch(stepsActions.reorderSelectedStep(delta))
     }
   }
+
   React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent): void => {
       handleKeyDown(e)
     }
+
     global.addEventListener('keydown', onKeyDown, false)
+
     return () => {
       global.removeEventListener('keydown', onKeyDown, false)
     }

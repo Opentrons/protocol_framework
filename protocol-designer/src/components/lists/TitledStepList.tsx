@@ -65,23 +65,28 @@ export function TitledStepList(props: Props): JSX.Element {
       onCollapseToggle(e)
     }
   }
+
   const hasValidChildren = React.Children.toArray(props.children).some(
     child => child
   )
+
   const className = cx(styles.pd_titled_list, props.className, {
     [styles.titled_list_selected]: props.selected,
     [styles.hover_border]: props.hovered,
   })
+
   // @ts-expect-error(sa, 2021-6-21): cast props.onClick to a boolean
   const titleBarClass = cx(styles.step_title_bar, {
     [styles.clickable]: props.onClick,
     [styles.multiselect_title_bar]: props.isMultiSelectMode,
   })
+
   const iconClass = cx(
     styles.title_bar_icon,
     styles.icon_left_of_title,
     iconProps && iconProps.className
   )
+
   const multiSelectIconName = props.selected
     ? 'ot-checkbox'
     : 'checkbox-blank-outline'

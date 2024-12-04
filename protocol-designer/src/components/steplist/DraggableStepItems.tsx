@@ -20,12 +20,15 @@ interface DragDropStepItemProps extends ConnectedStepItemProps {
   findStepIndex: (stepId: StepIdType) => number
   orderedStepIds: string[]
 }
+
 interface DropType {
   stepId: StepIdType
 }
+
 const DragDropStepItem = (props: DragDropStepItemProps): JSX.Element => {
   const { stepId, moveStep, findStepIndex, orderedStepIds } = props
   const ref = React.useRef<HTMLDivElement>(null)
+
   const [{ isDragging }, drag] = useDrag(
     () => ({
       type: DND_TYPES.STEP_ITEM,
@@ -36,6 +39,7 @@ const DragDropStepItem = (props: DragDropStepItemProps): JSX.Element => {
     }),
     [orderedStepIds]
   )
+
   const [{ handlerId }, drop] = useDrop(
     () => ({
       accept: DND_TYPES.STEP_ITEM,
@@ -55,6 +59,7 @@ const DragDropStepItem = (props: DragDropStepItemProps): JSX.Element => {
     }),
     [orderedStepIds]
   )
+
   drag(drop(ref))
   return (
     <div
@@ -66,6 +71,7 @@ const DragDropStepItem = (props: DragDropStepItemProps): JSX.Element => {
     </div>
   )
 }
+
 interface StepItemsProps {
   orderedStepIds: StepIdType[]
   reorderSteps: (steps: StepIdType[]) => void
@@ -78,8 +84,10 @@ export const DraggableStepItems = (
 
   const findStepIndex = (stepId: StepIdType): number =>
     orderedStepIds.findIndex(id => stepId === id)
+
   const moveStep = (stepId: StepIdType, targetIndex: number): void => {
     const currentIndex = findStepIndex(stepId)
+
     const currentRemoved = [
       ...orderedStepIds.slice(0, currentIndex),
       ...orderedStepIds.slice(currentIndex + 1, orderedStepIds.length),
@@ -116,7 +124,9 @@ export const DraggableStepItems = (
     </>
   )
 }
+
 const NAV_OFFSET = 64
+
 const StepDragPreview = (): JSX.Element | null => {
   const [{ isDragging, itemType, item, currentOffset }] = useDrag(() => ({
     type: DND_TYPES.STEP_ITEM,
@@ -127,9 +137,11 @@ const StepDragPreview = (): JSX.Element | null => {
       item: monitor.getItem() as { stepId: StepIdType },
     }),
   }))
+
   const savedStepForms = useSelector(stepFormSelectors.getSavedStepForms)
   const savedForm = item && savedStepForms[item.stepId]
   const { stepType, stepName } = savedForm || {}
+
   if (
     itemType !== DND_TYPES.STEP_ITEM ||
     !isDragging ||
