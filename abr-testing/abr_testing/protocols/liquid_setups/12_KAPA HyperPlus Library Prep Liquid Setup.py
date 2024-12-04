@@ -52,8 +52,19 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
             sample_plate_1["A5"].top(),
             sample_plate_1["A6"].top(),
         ],
+        volume=[35, 35, 35, 35, 35, 35],
+        source=source_reservoir["A1"].bottom(z=2),
+        dest=[
+            sample_plate_1["A1"].top(),
+            sample_plate_1["A2"].top(),
+            sample_plate_1["A3"].top(),
+            sample_plate_1["A4"].top(),
+            sample_plate_1["A5"].top(),
+            sample_plate_1["A6"].top(),
+        ],
         blow_out=True,
         blowout_location="source well",
+        new_tip="once",
         new_tip="once",
         trash=False,
     )
@@ -70,8 +81,19 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
             sample_plate_2["A5"].top(),
             sample_plate_2["A6"].top(),
         ],
+        volume=[17, 17, 17, 17, 17, 17],
+        source=source_reservoir["A1"].bottom(z=2),
+        dest=[
+            sample_plate_2["A1"].top(),
+            sample_plate_2["A2"].top(),
+            sample_plate_2["A3"].top(),
+            sample_plate_2["A4"].top(),
+            sample_plate_2["A5"].top(),
+            sample_plate_2["A6"].top(),
+        ],
         blow_out=True,
         blowout_location="source well",
+        new_tip="once",
         new_tip="once",
         trash=False,
     )
@@ -86,8 +108,17 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
             reservoir["A5"].top(),
             reservoir["A6"].top(),
         ],
+        volume=[910.8, 297, 2000, 2000],
+        source=source_reservoir["A1"].bottom(z=2),
+        dest=[
+            reservoir["A1"].top(),
+            reservoir["A4"].top(),
+            reservoir["A5"].top(),
+            reservoir["A6"].top(),
+        ],
         blow_out=True,
         blowout_location="source well",
+        new_tip="once",
         new_tip="once",
         trash=False,
     )
@@ -96,7 +127,12 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     # adapters
 
     # Rest of liquids
+    # adapters
+
+    # Rest of liquids
     p1000.transfer(
+        volume=[10, 10, 10, 10, 10, 10, 61, 91.5, 200, 183],
+        source=source_reservoir["A1"].bottom(z=2),
         volume=[10, 10, 10, 10, 10, 10, 61, 91.5, 200, 183],
         source=source_reservoir["A1"].bottom(z=2),
         dest=[
@@ -113,6 +149,7 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
         ],
         blow_out=True,
         blowout_location="source well",
+        new_tip="once",
         new_tip="once",
         trash=False,
     )
