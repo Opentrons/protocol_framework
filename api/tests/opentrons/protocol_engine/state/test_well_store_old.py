@@ -1,7 +1,8 @@
 """Well state store tests.
 
 DEPRECATED: Testing WellStore independently of WellView is no longer helpful.
-Try to add new tests to well_state.py, where they can be tested together.
+Try to add new tests to well_state.py, where they can be tested together,
+treating WellState as a private implementation detail.
 """
 
 import pytest

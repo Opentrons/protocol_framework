@@ -1,7 +1,8 @@
 """Well view tests.
 
 DEPRECATED: Testing WellView independently of WellStore is no longer helpful.
-Try to add new tests to test_well_state.py, where they can be tested together.
+Try to add new tests to test_well_state.py, where they can be tested together,
+treating WellState as a private implementation detail.
 """
 from datetime import datetime
 from opentrons.protocol_engine.types import (

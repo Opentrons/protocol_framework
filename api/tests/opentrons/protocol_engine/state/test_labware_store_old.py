@@ -2,7 +2,7 @@
 
 DEPRECATED: Testing LabwareStore independently of LabwareView is no
 longer helpful. Try to add new tests to test_labware_state.py, where they can be
-tested together.
+tested together, treating LabwareState as a private implementation detail.
 """
 from typing import Optional
 from opentrons.protocol_engine.state import update_types

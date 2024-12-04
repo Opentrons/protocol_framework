@@ -2,7 +2,7 @@
 
 DEPRECATED: Testing LabwareView independently of LabwareStore is no
 longer helpful. Try to add new tests to test_labware_state.py, where they can be
-tested together.
+tested together, treating LabwareState as a private implementation detail.
 """
 import pytest
 from datetime import datetime

@@ -2,7 +2,7 @@
 
 DEPRECATED: Testing LiquidClassStore independently of LiquidClassView is no
 longer helpful. Try to add new tests to test_liquid_class_state.py, where they can be
-tested together.
+tested together, treating LiquidClassState as a private implementation detail.
 """
 import pytest
 
