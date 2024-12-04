@@ -1,4 +1,9 @@
-"""Tests for pipette state changes in the protocol_engine state store."""
+"""Tests for pipette state changes in the protocol_engine state store.
+
+DEPRECATED: Testing PipetteStore independently of PipetteView is no longer helpful.
+Try to add new tests to test_pipette_state.py, where they can be tested together,
+treating PipetteState as a private implementation detail.
+"""
 import pytest
 
 from opentrons_shared_data.pipette.types import PipetteNameType

@@ -1,4 +1,9 @@
-"""Liquid view tests."""
+"""Liquid view tests.
+
+DEPRECATED: Testing LiquidClassView independently of LiquidClassStore is no
+longer helpful. Try to add new tests to test_liquid_class_state.py, where they can be
+tested together, treating LiquidClassState as a private implementation detail.
+"""
 import pytest
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
