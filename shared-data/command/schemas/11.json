@@ -4034,7 +4034,7 @@
         },
         "labwareIds": {
           "title": "Labwareids",
-          "description": "Labware ID(s) of tip racks to resolve next available tip(s) from.",
+          "description": "Labware ID(s) of tip racks to resolve next available tip(s) from. Labware IDs will be resolved sequentially",
           "type": "array",
           "items": {
             "type": "string"

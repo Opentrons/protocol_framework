@@ -27,8 +27,9 @@ class GetNextTipParams(PipetteIdMixin):
     """Payload needed to resolve the next available tip."""
 
     labwareIds: List[str] = Field(
-        ...,  # TODO order matters
-        description="Labware ID(s) of tip racks to resolve next available tip(s) from.",
+        ...,
+        description="Labware ID(s) of tip racks to resolve next available tip(s) from."
+        " Labware IDs will be resolved sequentially",
     )
     startingWellName: Optional[str] = Field(
         "A1", description="Name of starting tip rack 'well'."
