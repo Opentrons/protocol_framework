@@ -231,7 +231,7 @@ PipetteName = Literal[
     "p1000_single_gen2",
     "p1000_single_flex",
     "p1000_multi_flex",
-    "p1000_multi_em",
+    "p1000_multi_em_flex",
     "p1000_96",
 ]
 
