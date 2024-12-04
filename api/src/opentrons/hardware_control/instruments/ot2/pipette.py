@@ -193,7 +193,7 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
         ], f"{self.name} is not back-compatible with {name}"
 
         liquid_model = load_pipette_data.load_liquid_model(
-            name.pipette_type, name.pipette_channels, name.get_version()
+            name.pipette_type, name.pipette_channels, name.get_version(), name.oem_type
         )
         # TODO need to grab name config here to deal with act as test
         self._liquid_class.max_volume = liquid_model["default"].max_volume

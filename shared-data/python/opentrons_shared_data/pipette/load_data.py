@@ -158,8 +158,9 @@ def load_liquid_model(
     model: PipetteModelType,
     channels: PipetteChannelType,
     version: PipetteVersionType,
+    oem: PipetteOEMType,
 ) -> Dict[str, PipetteLiquidPropertiesDefinition]:
-    liquid_dict = _liquid(channels, model, version)
+    liquid_dict = _liquid(channels, model, version, oem)
     return {
         k: PipetteLiquidPropertiesDefinition.parse_obj(v)
         for k, v in liquid_dict.items()
