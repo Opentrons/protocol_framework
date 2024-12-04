@@ -6,6 +6,7 @@ from decoy import Decoy
 import pytest
 import re
 
+from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
 from opentrons_shared_data.labware.labware_definition import (
     LabwareRole,
     Parameters as LabwareDefinitionParameters,
@@ -34,7 +35,13 @@ from opentrons.hardware_control.modules.types import (
 from opentrons.protocols.models import LabwareDefinition
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocols.api_support.util import APIVersionError
-from opentrons.protocol_api import validation as subject, Well, Labware
+from opentrons.protocol_api import (
+    validation as subject,
+    Well,
+    Labware,
+    TrashBin,
+    WasteChute,
+)
 
 
 @pytest.mark.parametrize(
@@ -722,3 +729,144 @@ def test_ensure_only_gantry_axis_map_type(
     """Check that gantry axis_map validation occurs for the given scenarios."""
     with pytest.raises(subject.IncorrectAxisError, match=error_message):
         subject.ensure_only_gantry_axis_map_type(axis_map, robot_type)
+
+
+@pytest.mark.parametrize(
+    ["value", "expected_result"],
+    [
+        ("once", TransferTipPolicyV2.ONCE),
+        ("NEVER", TransferTipPolicyV2.NEVER),
+        ("alWaYs", TransferTipPolicyV2.ALWAYS),
+        ("Per Source", TransferTipPolicyV2.PER_SOURCE),
+    ],
+)
+def test_ensure_new_tip_policy(
+    value: str, expected_result: TransferTipPolicyV2
+) -> None:
+    """It should return the expected tip policy."""
+    assert subject.ensure_new_tip_policy(value) == expected_result
+
+
+def test_ensure_new_tip_policy_raises() -> None:
+    """It should raise ValueError for invalid new_tip value."""
+    with pytest.raises(ValueError, match="is invalid value for 'new_tip'"):
+        subject.ensure_new_tip_policy("blah")
+
+
+@pytest.mark.parametrize(
+    ["target", "expected_raise"],
+    [
+        (
+            "a",
+            pytest.raises(
+                ValueError, match="'a' is not a valid location for transfer."
+            ),
+        ),
+        (
+            ["a"],
+            pytest.raises(
+                ValueError, match="'a' is not a valid location for transfer."
+            ),
+        ),
+        (
+            [("a",)],
+            pytest.raises(
+                ValueError, match="'a' is not a valid location for transfer."
+            ),
+        ),
+        (
+            [],
+            pytest.raises(
+                ValueError, match="No target well\\(s\\) specified for transfer."
+            ),
+        ),
+    ],
+)
+def test_ensure_valid_flat_wells_list_raises_for_invalid_targets(
+    target: Any,
+    expected_raise: ContextManager[Any],
+) -> None:
+    """It should raise an error if target location is invalid."""
+    with expected_raise:
+        subject.ensure_valid_flat_wells_list_for_transfer_v2(target)
+
+
+def test_ensure_valid_flat_wells_list_raises_for_mixed_targets(decoy: Decoy) -> None:
+    """It should raise appropriate error if target has mixed valid and invalid wells."""
+    target1 = [decoy.mock(cls=Well), "a"]
+    with pytest.raises(ValueError, match="'a' is not a valid location for transfer."):
+        subject.ensure_valid_flat_wells_list_for_transfer_v2(target1)  # type: ignore[arg-type]
+
+    target2 = [[decoy.mock(cls=Well)], ["a"]]
+    with pytest.raises(ValueError, match="'a' is not a valid location for transfer."):
+        subject.ensure_valid_flat_wells_list_for_transfer_v2(target2)  # type: ignore[arg-type]
+
+
+def test_ensure_valid_flat_wells_list(decoy: Decoy) -> None:
+    """It should convert the locations to flat lists correctly."""
+    target1 = decoy.mock(cls=Well)
+    target2 = decoy.mock(cls=Well)
+
+    assert subject.ensure_valid_flat_wells_list_for_transfer_v2(target1) == [target1]
+    assert subject.ensure_valid_flat_wells_list_for_transfer_v2([target1, target2]) == [
+        target1,
+        target2,
+    ]
+    assert subject.ensure_valid_flat_wells_list_for_transfer_v2(
+        [
+            [target1, target1],
+            [target2, target2],
+        ]
+    ) == [target1, target1, target2, target2]
+    assert subject.ensure_valid_flat_wells_list_for_transfer_v2((target1, target2)) == [
+        target1,
+        target2,
+    ]
+    assert subject.ensure_valid_flat_wells_list_for_transfer_v2(
+        (
+            [target1, target1],
+            [target2, target2],
+        )
+    ) == [target1, target1, target2, target2]
+
+
+def test_ensure_valid_tip_drop_location_for_transfer_v2(
+    decoy: Decoy,
+) -> None:
+    """It should check that the tip drop location is valid."""
+    mock_well = decoy.mock(cls=Well)
+    mock_location = Location(point=Point(x=1, y=1, z=1), labware=mock_well)
+    mock_trash_bin = decoy.mock(cls=TrashBin)
+    mock_waste_chute = decoy.mock(cls=WasteChute)
+    assert (
+        subject.ensure_valid_tip_drop_location_for_transfer_v2(mock_well) == mock_well
+    )
+    assert (
+        subject.ensure_valid_tip_drop_location_for_transfer_v2(mock_location)
+        == mock_location
+    )
+    assert (
+        subject.ensure_valid_tip_drop_location_for_transfer_v2(mock_trash_bin)
+        == mock_trash_bin
+    )
+    assert (
+        subject.ensure_valid_tip_drop_location_for_transfer_v2(mock_waste_chute)
+        == mock_waste_chute
+    )
+
+
+def test_ensure_valid_tip_drop_location_for_transfer_v2_raises(decoy: Decoy) -> None:
+    """It should raise an error for invalid tip drop locations."""
+    with pytest.raises(TypeError, match="However, it is '\\['a'\\]'"):
+        subject.ensure_valid_tip_drop_location_for_transfer_v2(["a"])  # type: ignore[arg-type]
+
+    mock_labware = decoy.mock(cls=Labware)
+    with pytest.raises(TypeError, match=f"However, it is '{mock_labware}'"):
+        subject.ensure_valid_tip_drop_location_for_transfer_v2(mock_labware)  # type: ignore[arg-type]
+
+    with pytest.raises(
+        TypeError, match="However, the given location doesn't refer to any well."
+    ):
+        subject.ensure_valid_tip_drop_location_for_transfer_v2(
+            Location(point=Point(x=1, y=1, z=1), labware=None)
+        )

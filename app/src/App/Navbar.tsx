@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
@@ -118,7 +118,7 @@ export function Navbar({ routes }: { routes: RouteProps[] }): JSX.Element {
     ({ navLinkTo }: RouteProps) => navLinkTo != null
   )
 
-  const debouncedNavigate = React.useCallback(
+  const debouncedNavigate = useCallback(
     debounce((path: string) => {
       navigate(path)
     }, DEBOUNCE_DURATION_MS),

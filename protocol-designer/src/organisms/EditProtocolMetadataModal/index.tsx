@@ -17,7 +17,7 @@ import {
   StyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { getTopPortalEl } from '../../components/portals/TopPortal'
+import { getMainPagePortalEl } from '../Portal'
 import { actions, selectors as fileSelectors } from '../../file-data'
 import type { FileMetadataFields } from '../../file-data'
 
@@ -113,7 +113,7 @@ export function EditProtocolMetadataModal(
         </Flex>
       </form>
     </Modal>,
-    getTopPortalEl()
+    getMainPagePortalEl()
   )
 }
 

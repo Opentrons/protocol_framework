@@ -828,6 +828,7 @@ def minimal_liquid_class_def2() -> LiquidClassSchemaV1:
                             positionReference=PositionReference.WELL_BOTTOM,
                             offset=Coordinate(x=0, y=0, z=-5),
                             flowRateByVolume=[(10.0, 40.0), (20.0, 30.0)],
+                            correctionByVolume=[(15.0, 1.5), (30.0, -5.0)],
                             preWet=True,
                             mix=MixProperties(enable=False),
                             delay=DelayProperties(
@@ -853,6 +854,7 @@ def minimal_liquid_class_def2() -> LiquidClassSchemaV1:
                             positionReference=PositionReference.WELL_BOTTOM,
                             offset=Coordinate(x=0, y=0, z=-5),
                             flowRateByVolume=[(10.0, 40.0), (20.0, 30.0)],
+                            correctionByVolume=[(15.0, -1.5), (30.0, 5.0)],
                             mix=MixProperties(enable=False),
                             pushOutByVolume=[(10.0, 7.0), (20.0, 10.0)],
                             delay=DelayProperties(enable=False),

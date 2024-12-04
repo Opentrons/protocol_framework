@@ -203,9 +203,6 @@ jobs:
           make setup-js
       - name: 'build typescript types'
         run: make -C components build-ts
-      - name: 'build js bundle'
-        run: |
-          make -C components lib
       # replace package.json stub version number with version from tag
       - name: 'set version number'
         run: |
@@ -221,4 +218,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          cd ./components && echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ./.npmrc && npm publish --access public
+          cd ./components
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ./.npmrc
+          ls -R # Debug: View contents of ./components
+          npm publish --access public

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import Keyboard from 'react-simple-keyboard'
 import { useSelector } from 'react-redux'
 import { getAppLanguage } from '/app/redux/config'
@@ -24,7 +24,7 @@ export function AlphanumericKeyboard({
   keyboardRef,
   debug = false, // If true, <ENTER> will input a \n
 }: AlphanumericKeyboardProps): JSX.Element {
-  const [layoutName, setLayoutName] = React.useState<string>('default')
+  const [layoutName, setLayoutName] = useState<string>('default')
   const appLanguage = useSelector(getAppLanguage)
   const onKeyPress = (button: string): void => {
     if (button === '{ABC}') handleShift()

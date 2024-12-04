@@ -8,6 +8,8 @@ from opentrons_shared_data.errors.exceptions import (
     UnexpectedTipRemovalError,
     UnsupportedHardwareCommand,
 )
+from opentrons_shared_data.robot.types import RobotTypeEnum
+
 from opentrons.legacy_broker import LegacyBroker
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons import types
@@ -16,7 +18,6 @@ from opentrons.legacy_commands import commands as cmds
 from opentrons.legacy_commands import publisher
 from opentrons.protocols.advanced_control.mix import mix_from_kwargs
 from opentrons.protocols.advanced_control.transfers import transfer as v1_transfer
-
 from opentrons.protocols.api_support.deck_type import NoTrashDefinedError
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocols.api_support import instrument
@@ -35,9 +36,13 @@ from .core.legacy.legacy_instrument_core import LegacyInstrumentCore
 from .config import Clearances
 from .disposal_locations import TrashBin, WasteChute
 from ._nozzle_layout import NozzleLayout
+from ._liquid import LiquidClass
 from . import labware, validation
-
-AdvancedLiquidHandling = v1_transfer.AdvancedLiquidHandling
+from ..config import feature_flags
+from ..protocols.advanced_control.transfers.common import (
+    TransferTipPolicyV2,
+    TransferTipPolicyV2Type,
+)
 
 _DEFAULT_ASPIRATE_CLEARANCE = 1.0
 _DEFAULT_DISPENSE_CLEARANCE = 1.0
@@ -60,6 +65,8 @@ _PARTIAL_NOZZLE_CONFIGURATION_SINGLE_ROW_PARTIAL_COLUMN_ADDED_IN = APIVersion(2,
 """The version after which partial nozzle configurations of single, row, and partial column layouts became available."""
 _AIR_GAP_TRACKING_ADDED_IN = APIVersion(2, 22)
 """The version after which air gaps should be implemented with a separate call instead of an aspirate for better liquid volume tracking."""
+
+AdvancedLiquidHandling = v1_transfer.AdvancedLiquidHandling
 
 
 class InstrumentContext(publisher.CommandPublisher):
@@ -756,8 +763,7 @@ class InstrumentContext(publisher.CommandPublisher):
             ``pipette.air_gap(height=2)``. If you call ``air_gap`` with a single,
             unnamed argument, it will always be interpreted as a volume.
 
-        .. note::
-
+        .. TODO: restore this as a note block for 2.22 docs
            Before API version 2.22, this function was implemented as an aspirate, and
            dispensing into a well would add the air gap volume to the liquid tracked in
            the well. At or above API version 2.22, air gap volume is not counted as liquid
@@ -1219,7 +1225,6 @@ class InstrumentContext(publisher.CommandPublisher):
         self._core.home_plunger()
         return self
 
-    # TODO (spp, 2024-03-08): verify if ok to & change source & dest types to AdvancedLiquidHandling
     @publisher.publish(command=cmds.distribute)
     @requires_version(2, 0)
     def distribute(
@@ -1259,7 +1264,6 @@ class InstrumentContext(publisher.CommandPublisher):
 
         return self.transfer(volume, source, dest, **kwargs)
 
-    # TODO (spp, 2024-03-08): verify if ok to & change source & dest types to AdvancedLiquidHandling
     @publisher.publish(command=cmds.consolidate)
     @requires_version(2, 0)
     def consolidate(
@@ -1504,6 +1508,109 @@ class InstrumentContext(publisher.CommandPublisher):
     def _execute_transfer(self, plan: v1_transfer.TransferPlan) -> None:
         for cmd in plan:
             getattr(self, cmd["method"])(*cmd["args"], **cmd["kwargs"])
+
+    def transfer_liquid(
+        self,
+        liquid_class: LiquidClass,
+        volume: float,
+        source: Union[
+            labware.Well, Sequence[labware.Well], Sequence[Sequence[labware.Well]]
+        ],
+        dest: Union[
+            labware.Well, Sequence[labware.Well], Sequence[Sequence[labware.Well]]
+        ],
+        new_tip: TransferTipPolicyV2Type = "once",
+        tip_drop_location: Optional[
+            Union[types.Location, labware.Well, TrashBin, WasteChute]
+        ] = None,  # Maybe call this 'tip_drop_location' which is similar to PD
+    ) -> InstrumentContext:
+        """Transfer liquid from source to dest using the specified liquid class properties.
+
+        TODO: Add args description.
+        """
+        if not feature_flags.allow_liquid_classes(
+            robot_type=RobotTypeEnum.robot_literal_to_enum(
+                self._protocol_core.robot_type
+            )
+        ):
+            raise NotImplementedError("This method is not implemented.")
+
+        flat_sources_list = validation.ensure_valid_flat_wells_list_for_transfer_v2(
+            source
+        )
+        flat_dests_list = validation.ensure_valid_flat_wells_list_for_transfer_v2(dest)
+        for well in flat_sources_list + flat_dests_list:
+            instrument.validate_takes_liquid(
+                location=well.top(),
+                reject_module=True,
+                reject_adapter=True,
+            )
+        if len(flat_sources_list) != len(flat_dests_list):
+            raise ValueError(
+                "Sources and destinations should be of the same length in order to perform a transfer."
+                " To transfer liquid from one source to many destinations, use 'distribute_liquid',"
+                " to transfer liquid onto one destinations from many sources, use 'consolidate_liquid'."
+            )
+
+        valid_new_tip = validation.ensure_new_tip_policy(new_tip)
+        if valid_new_tip == TransferTipPolicyV2.NEVER:
+            if self._last_tip_picked_up_from is None:
+                raise RuntimeError(
+                    "Pipette has no tip attached to perform transfer."
+                    " Either do a pick_up_tip beforehand or specify a new_tip parameter"
+                    " of 'once' or 'always'."
+                )
+            else:
+                tiprack = self._last_tip_picked_up_from.parent
+        else:
+            tiprack, well = labware.next_available_tip(
+                starting_tip=self.starting_tip,
+                tip_racks=self.tip_racks,
+                channels=self.active_channels,
+                nozzle_map=self._core.get_nozzle_map(),
+            )
+        if self.current_volume != 0:
+            raise RuntimeError(
+                "A transfer on a liquid class cannot start with liquid already in the tip."
+                " Ensure that all previously aspirated liquid is dispensed before starting"
+                " a new transfer."
+            )
+
+        _trash_location: Union[types.Location, labware.Well, TrashBin, WasteChute]
+        if tip_drop_location is None:
+            saved_trash = self.trash_container
+            if isinstance(saved_trash, labware.Labware):
+                _trash_location = saved_trash.wells()[0]
+            else:
+                _trash_location = saved_trash
+        else:
+            _trash_location = tip_drop_location
+
+        checked_trash_location = (
+            validation.ensure_valid_tip_drop_location_for_transfer_v2(
+                tip_drop_location=_trash_location
+            )
+        )
+        liquid_class_id = self._core.load_liquid_class(
+            liquid_class=liquid_class,
+            pipette_load_name=self.name,
+            tiprack_uri=tiprack.uri,
+        )
+
+        self._core.transfer_liquid(
+            liquid_class_id=liquid_class_id,
+            volume=volume,
+            source=[well._core for well in flat_sources_list],
+            dest=[well._core for well in flat_dests_list],
+            new_tip=valid_new_tip,
+            trash_location=(
+                checked_trash_location._core
+                if isinstance(checked_trash_location, labware.Well)
+                else checked_trash_location
+            ),
+        )
+
+        return self
 
     @requires_version(2, 0)
     def delay(self, *args: Any, **kwargs: Any) -> None:

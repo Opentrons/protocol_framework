@@ -54,7 +54,7 @@ class LiquidClassStore(HasState[LiquidClassState], HandlesActions):
         ] = state_update.liquid_class_id
 
 
-class LiquidClassView(HasState[LiquidClassState]):
+class LiquidClassView:
     """Read-only view of the LiquidClassState."""
 
     _state: LiquidClassState

@@ -28,9 +28,9 @@ import {
 } from '@opentrons/components'
 import * as labwareIngredActions from '../../labware-ingred/actions'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
-import { swatchColors } from '../../components/swatchColors'
 import { HandleEnter } from '../../atoms/HandleEnter'
 import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { swatchColors } from './swatchColors'
 
 import type { ColorResult, RGBColor } from 'react-color'
 import type { ThunkDispatch } from 'redux-thunk'

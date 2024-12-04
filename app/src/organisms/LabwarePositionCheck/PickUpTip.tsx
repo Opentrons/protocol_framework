@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import isEqual from 'lodash/isEqual'
 import {
@@ -27,6 +27,7 @@ import { getDisplayLocation } from './utils/getDisplayLocation'
 import { useSelector } from 'react-redux'
 import { getIsOnDevice } from '/app/redux/config'
 
+import type { Dispatch } from 'react'
 import type {
   CompletedProtocolAnalysis,
   CreateCommand,
@@ -46,7 +47,7 @@ import type { TFunction } from 'i18next'
 interface PickUpTipProps extends PickUpTipStep {
   protocolData: CompletedProtocolAnalysis
   proceed: () => void
-  registerPosition: React.Dispatch<RegisterPositionAction>
+  registerPosition: Dispatch<RegisterPositionAction>
   chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
   setFatalError: (errorMessage: string) => void
   workingOffsets: WorkingOffset[]
@@ -77,7 +78,7 @@ export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
     protocolHasModules,
     currentStepIndex,
   } = props
-  const [showTipConfirmation, setShowTipConfirmation] = React.useState(false)
+  const [showTipConfirmation, setShowTipConfirmation] = useState(false)
   const isOnDevice = useSelector(getIsOnDevice)
   const labwareDef = getLabwareDef(labwareId, protocolData)
   const pipette = protocolData.pipettes.find(p => p.id === pipetteId)

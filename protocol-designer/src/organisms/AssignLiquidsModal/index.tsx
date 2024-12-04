@@ -18,10 +18,8 @@ import { selectors } from '../../labware-ingred/selectors'
 import { selectors as stepFormSelectors } from '../../step-forms'
 import * as wellContentsSelectors from '../../top-selectors/well-contents'
 import { getSelectedWells } from '../../well-selection/selectors'
-import {
-  SelectableLabware,
-  wellFillFromWellContents,
-} from '../../components/labware'
+import { SelectableLabware } from '../Labware/SelectableLabware'
+import { wellFillFromWellContents } from '../LabwareOnDeck/utils'
 import { deselectWells, selectWells } from '../../well-selection/actions'
 import { LiquidToolbox } from './LiquidToolbox'
 

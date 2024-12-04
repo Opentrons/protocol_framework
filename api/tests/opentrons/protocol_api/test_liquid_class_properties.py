@@ -45,12 +45,17 @@ def test_build_aspirate_settings() -> None:
     assert aspirate_properties.position_reference.value == "well-bottom"
     assert aspirate_properties.offset == Coordinate(x=0, y=0, z=-5)
     assert aspirate_properties.flow_rate_by_volume.as_dict() == {10: 50.0}
+    assert aspirate_properties.correction_by_volume.as_dict() == {
+        1.0: -2.5,
+        10.0: 3,
+    }
     assert aspirate_properties.pre_wet is True
     assert aspirate_properties.mix.enabled is True
     assert aspirate_properties.mix.repetitions == 3
     assert aspirate_properties.mix.volume == 15
     assert aspirate_properties.delay.enabled is True
     assert aspirate_properties.delay.duration == 2
+    assert aspirate_properties.as_shared_data_model() == aspirate_data
 
 
 def test_build_single_dispense_settings() -> None:
@@ -94,6 +99,10 @@ def test_build_single_dispense_settings() -> None:
         10.0: 40.0,
         20.0: 30.0,
     }
+    assert single_dispense_properties.correction_by_volume.as_dict() == {
+        2.0: -1.5,
+        20.0: 2,
+    }
     assert single_dispense_properties.mix.enabled is True
     assert single_dispense_properties.mix.repetitions == 3
     assert single_dispense_properties.mix.volume == 15
@@ -103,6 +112,7 @@ def test_build_single_dispense_settings() -> None:
     }
     assert single_dispense_properties.delay.enabled is True
     assert single_dispense_properties.delay.duration == 2.5
+    assert single_dispense_properties.as_shared_data_model() == single_dispense_data
 
 
 def test_build_multi_dispense_settings() -> None:
@@ -146,6 +156,10 @@ def test_build_multi_dispense_settings() -> None:
         10.0: 40.0,
         20.0: 30.0,
     }
+    assert multi_dispense_properties.correction_by_volume.as_dict() == {
+        3.0: -0.5,
+        30.0: 1,
+    }
     assert multi_dispense_properties.conditioning_by_volume.as_dict() == {
         5.0: 5.0,
     }
@@ -154,6 +168,7 @@ def test_build_multi_dispense_settings() -> None:
     }
     assert multi_dispense_properties.delay.enabled is True
     assert multi_dispense_properties.delay.duration == 1
+    assert multi_dispense_properties.as_shared_data_model() == multi_dispense_data
 
 
 def test_build_multi_dispense_settings_none(
@@ -169,6 +184,7 @@ def test_liquid_handling_property_by_volume() -> None:
     subject = LiquidHandlingPropertyByVolume([(5.0, 50.0), (10.0, 250.0)])
     assert subject.as_dict() == {5.0: 50, 10.0: 250}
     assert subject.get_for_volume(7) == 130.0
+    assert subject.as_list_of_tuples() == [(5.0, 50.0), (10.0, 250.0)]
 
     subject.set_for_volume(volume=7, value=175.5)
     assert subject.as_dict() == {

@@ -30,12 +30,13 @@ import {
   selectors as stepFormSelectors,
   getIsModuleOnDeck,
 } from '../../../../step-forms'
-import { getEnableComment } from '../../../../feature-flags/selectors'
-import { getMainPagePortalEl } from '../../../../components/portals/MainPageModalPortal'
 import {
   CLOSE_UNSAVED_STEP_FORM,
   ConfirmDeleteModal,
-} from '../../../../components/modals/ConfirmDeleteModal'
+  getMainPagePortalEl,
+} from '../../../../organisms'
+import { getEnableComment } from '../../../../feature-flags/selectors'
+
 import { AddStepOverflowButton } from './AddStepOverflowButton'
 
 import type { MouseEvent } from 'react'
@@ -111,10 +112,8 @@ export function AddStepButton(): JSX.Element {
     heaterShaker: getIsModuleOnDeck(modules, HEATERSHAKER_MODULE_TYPE),
   }
 
-  const addStep = (
-    stepType: StepType
-  ): ReturnType<typeof stepsActions.addAndSelectStepWithHints> =>
-    dispatch(stepsActions.addAndSelectStepWithHints({ stepType }))
+  const addStep = (stepType: StepType): ReturnType<any> =>
+    dispatch(stepsActions.addAndSelectStep({ stepType }))
 
   const items = getSupportedSteps()
     .filter(stepType => isStepTypeEnabled[stepType])

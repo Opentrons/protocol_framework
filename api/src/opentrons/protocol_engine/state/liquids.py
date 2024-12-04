@@ -34,7 +34,7 @@ class LiquidStore(HasState[LiquidState], HandlesActions):
         self._state.liquids_by_id[action.liquid.id] = action.liquid
 
 
-class LiquidView(HasState[LiquidState]):
+class LiquidView:
     """Read-only liquid state view."""
 
     _state: LiquidState

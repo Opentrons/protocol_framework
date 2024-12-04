@@ -21,6 +21,7 @@ from opentrons_shared_data.robot.types import RobotType
 from opentrons.protocols.api_support.types import APIVersion, ThermocyclerStep
 from opentrons.protocols.api_support.util import APIVersionError
 from opentrons.protocols.models import LabwareDefinition
+from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
 from opentrons.types import (
     Mount,
     DeckSlotName,
@@ -634,3 +635,85 @@ def validate_coordinates(value: Sequence[float]) -> Tuple[float, float, float]:
     if not all(isinstance(v, (float, int)) for v in value):
         raise ValueError("All values in coordinates must be floats.")
     return float(value[0]), float(value[1]), float(value[2])
+
+
+def ensure_new_tip_policy(value: str) -> TransferTipPolicyV2:
+    """Ensure that new_tip value is a valid TransferTipPolicy value."""
+    try:
+        return TransferTipPolicyV2(value.lower())
+    except ValueError:
+        raise ValueError(
+            f"'{value}' is invalid value for 'new_tip'."
+            f" Acceptable value is either 'never', 'once', 'always' or 'per source'."
+        )
+
+
+def _verify_each_list_element_is_valid_location(locations: Sequence[Well]) -> None:
+    from .labware import Well
+
+    for loc in locations:
+        if not isinstance(loc, Well):
+            raise ValueError(
+                f"'{loc}' is not a valid location for transfer."
+                f" Location should be a well instance."
+            )
+
+
+def ensure_valid_flat_wells_list_for_transfer_v2(
+    target: Union[Well, Sequence[Well], Sequence[Sequence[Well]]],
+) -> List[Well]:
+    """Ensure that the given target(s) for a liquid transfer are valid and in a flat list."""
+    from .labware import Well
+
+    if isinstance(target, Well):
+        return [target]
+
+    if isinstance(target, (list, tuple)):
+        if len(target) == 0:
+            raise ValueError("No target well(s) specified for transfer.")
+        if isinstance(target[0], (list, tuple)):
+            for sub_sequence in target:
+                _verify_each_list_element_is_valid_location(sub_sequence)
+            return [loc for sub_sequence in target for loc in sub_sequence]
+        else:
+            _verify_each_list_element_is_valid_location(target)
+            return list(target)
+    else:
+        raise ValueError(
+            f"'{target}' is not a valid location for transfer."
+            f" Location should be a well instance, or a 1-dimensional or"
+            f" 2-dimensional sequence of well instances."
+        )
+
+
+def ensure_valid_tip_drop_location_for_transfer_v2(
+    tip_drop_location: Union[Location, Well, TrashBin, WasteChute]
+) -> Union[Location, Well, TrashBin, WasteChute]:
+    """Ensure that the tip drop location is valid for v2 transfer."""
+    from .labware import Well
+
+    if (
+        isinstance(tip_drop_location, Well)
+        or isinstance(tip_drop_location, TrashBin)
+        or isinstance(tip_drop_location, WasteChute)
+    ):
+        return tip_drop_location
+    elif isinstance(tip_drop_location, Location):
+        _, maybe_well = tip_drop_location.labware.get_parent_labware_and_well()
+
+        if maybe_well is None:
+            raise TypeError(
+                "If a location is specified as a `types.Location`"
+                " (for instance, as the result of a call to `Well.top()`),"
+                " it must be a location relative to a well,"
+                " since that is where a tip is dropped."
+                " However, the given location doesn't refer to any well."
+            )
+        return tip_drop_location
+    else:
+        raise TypeError(
+            f"If specified, location should be an instance of"
+            f" `types.Location` (e.g. the return value from `Well.top()`)"
+            f" or `Well` (e.g. `reservoir.wells()[0]`) or an instance of `TrashBin` or `WasteChute`."
+            f" However, it is '{tip_drop_location}'."
+        )

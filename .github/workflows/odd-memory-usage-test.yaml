@@ -20,5 +20,5 @@ jobs:
         with:
           mixpanel-user: ${{ secrets.MIXPANEL_INGEST_USER }}
           mixpanel-secret: ${{ secrets.MIXPANEL_INGEST_SECRET }}
-          mixpanel-project-id: ${{ secrets.OT_APP_MIXPANEL_ID }}
+          mixpanel-project-id: 12345
           previous-version-count: '2'

@@ -5,13 +5,13 @@ import { screen } from '@testing-library/react'
 import { FLEX_ROBOT_TYPE, fixture12Trough } from '@opentrons/shared-data'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { getInitialDeckSetup } from '../../../step-forms/selectors'
-import { LabwareOnDeck } from '../../../components/DeckSetup/LabwareOnDeck'
+import { LabwareOnDeck } from '../../../organisms'
 import { getRobotType } from '../../../file-data/selectors'
 import { DeckThumbnail } from '../DeckThumbnail'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type * as Components from '@opentrons/components'
 
-vi.mock('../../../components/DeckSetup/LabwareOnDeck')
+vi.mock('../../../organisms')
 vi.mock('../../../file-data/selectors')
 vi.mock('../../../step-forms/selectors')
 vi.mock('@opentrons/components', async importOriginal => {

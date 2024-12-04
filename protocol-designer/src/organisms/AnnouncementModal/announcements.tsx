@@ -23,8 +23,6 @@ import deckConfigutation from '../../assets/images/deck_configuration.png'
 import { DOC_URL } from '../KnowledgeLink'
 import type { ReactNode } from 'react'
 
-import styles from './AnnouncementModal.module.css'
-
 export interface Announcement {
   announcementKey: string
   image: ReactNode | null
@@ -32,6 +30,17 @@ export interface Announcement {
   message: ReactNode
 }
 
+const modulesDiagramsRow = css`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 19.294%;
+  padding-right: 19.294%;
+`
+const modulesDiagram = css`
+  width: 100%;
+  height: 100%;
+`
 const batchEditStyles = css`
   justify-content: ${JUSTIFY_SPACE_AROUND};
   padding: ${SPACING.spacing16};
@@ -52,8 +61,8 @@ export const useAnnouncements = (): Announcement[] => {
     {
       announcementKey: 'modulesRequireRunAppUpdate',
       image: (
-        <div className={styles.modules_diagrams_row}>
-          <img className={styles.modules_diagram} src={magTempCombined} />
+        <div css={modulesDiagramsRow}>
+          <img css={modulesDiagram} src={magTempCombined} />
         </div>
       ),
       heading: t('announcements.header', { pd: PD }),
@@ -76,8 +85,16 @@ export const useAnnouncements = (): Announcement[] => {
     {
       announcementKey: 'thermocyclerSupport',
       image: (
-        <div className={styles.thermocycler_diagram_row}>
-          <img className={styles.modules_diagram} src={thermocycler} />
+        <div
+          css={css`
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem;
+            padding: 0 25%;
+          `}
+        >
+          <img css={modulesDiagram} src={thermocycler} />
         </div>
       ),
       heading: t('announcements.header', { pd: PD }),
@@ -146,8 +163,8 @@ export const useAnnouncements = (): Announcement[] => {
     {
       announcementKey: 'heaterShakerSupport',
       image: (
-        <div className={styles.modules_diagrams_row}>
-          <img className={styles.modules_diagram} src={heaterShaker} />
+        <div css={modulesDiagramsRow}>
+          <img css={modulesDiagram} src={heaterShaker} />
         </div>
       ),
       heading: t('announcements.header', { pd: PD }),
@@ -172,8 +189,8 @@ export const useAnnouncements = (): Announcement[] => {
     {
       announcementKey: 'thermocyclerGen2Support',
       image: (
-        <div className={styles.modules_diagrams_row}>
-          <img className={styles.modules_diagram} src={thermocyclerGen2} />
+        <div css={modulesDiagramsRow}>
+          <img css={modulesDiagram} src={thermocyclerGen2} />
         </div>
       ),
       heading: t('announcements.header', { pd: PD }),
@@ -198,8 +215,15 @@ export const useAnnouncements = (): Announcement[] => {
     {
       announcementKey: 'liquidColorEnhancements',
       image: (
-        <div className={styles.modules_diagrams_color_enhancements}>
-          <img className={styles.modules_diagram} src={liquidEnhancements} />
+        <div
+          css={css`
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 6%;
+          `}
+        >
+          <img css={modulesDiagram} src={liquidEnhancements} />
         </div>
       ),
       heading: t('announcements.header', { pd: PD }),

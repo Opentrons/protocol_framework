@@ -41,7 +41,6 @@ import {
   OT2_ROBOT_TYPE,
 } from '@opentrons/shared-data'
 
-import { getTopPortalEl } from '../../components/portals/TopPortal'
 import { getAllowAllTipracks } from '../../feature-flags/selectors'
 import {
   getAdditionalEquipment,
@@ -60,14 +59,18 @@ import {
   PIPETTE_TYPES,
   PIPETTE_VOLUMES,
 } from '../../pages/CreateNewProtocolWizard/constants'
-import { getTiprackOptions } from '../../components/modals/utils'
 import { getLabwareDefsByURI } from '../../labware-defs/selectors'
 import { setFeatureFlags } from '../../feature-flags/actions'
 import { createCustomTiprackDef } from '../../labware-defs/actions'
 import { deleteContainer } from '../../labware-ingred/actions'
 import { selectors as stepFormSelectors } from '../../step-forms'
 import { BUTTON_LINK_STYLE } from '../../atoms'
-import { getSectionsFromPipetteName, getShouldShowPipetteType } from './utils'
+import { getMainPagePortalEl } from '../Portal'
+import {
+  getSectionsFromPipetteName,
+  getShouldShowPipetteType,
+  getTiprackOptions,
+} from './utils'
 import { editPipettes } from './editPipettes'
 import { HandleEnter } from '../../atoms/HandleEnter'
 
@@ -584,7 +587,7 @@ export function EditInstrumentsModal(
         )}
       </Modal>
     </HandleEnter>,
-    getTopPortalEl()
+    getMainPagePortalEl()
   )
 }
 
