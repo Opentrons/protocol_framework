@@ -350,7 +350,7 @@ class PipetteStore(HasState[PipetteState], HandlesActions):
         return stack
 
 
-class PipetteView(HasState[PipetteState]):
+class PipetteView:
     """Read-only view of computed pipettes state."""
 
     _state: PipetteState
