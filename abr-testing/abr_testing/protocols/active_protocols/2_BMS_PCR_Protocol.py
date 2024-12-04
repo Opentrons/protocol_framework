@@ -5,7 +5,7 @@ from opentrons.protocol_api.module_contexts import (
     ThermocyclerContext,
     TemperatureModuleContext,
 )
-from opentrons.protocol_api import SINGLE, Well, ALL
+from opentrons.protocol_api import SINGLE, Well
 from abr_testing.protocols import helpers
 from typing import List, Dict
 
@@ -83,9 +83,9 @@ def run(ctx: ProtocolContext) -> None:
     mmx_pic: List[Well] = reagent_rack.rows()[0]
     dna_pic: List[Well] = source_plate_1.wells()
     liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
-        "Water": [{"well": water, "volume": 1500.0}],
-        "Mastermix": [{"well": mmx_pic, "volume": 1500.0}],
-        "DNA": [{"well": dna_pic, "volume": 50.0}],
+        "Water": [{"well": water, "volume": 500.0}],
+        "Mastermix": [{"well": mmx_pic, "volume": 500.0}],
+        "DNA": [{"well": dna_pic, "volume": 100.0}],
     }
     helpers.find_liquid_height_of_loaded_liquids(ctx, liquid_vols_and_wells, p50)
     # adding water
@@ -205,33 +205,7 @@ def run(ctx: ProtocolContext) -> None:
         p50.drop_tip()
         p50.configure_nozzle_layout(style=SINGLE, start="A1", tip_racks=tiprack_50)
         mmx_pic.append(water)
-        helpers.find_liquid_height_of_all_wells(ctx, p50, mmx_pic)
-    # Empty Destination plate
-    p50.configure_nozzle_layout(ALL, tip_racks=[tiprack_50[1]])
-    first_row = [
-        "A1",
-        "A2",
-        "A3",
-        "A4",
-        "A5",
-        "A6",
-        "A7",
-        "A8",
-        "A9",
-        "A10",
-        "A11",
-        "A12",
-    ]
-    p50.pick_up_tip()
-    for row in first_row:
-        p50.aspirate(50, dest_plate_1[row])
-        p50.dispense(50, liquid_waste.top())
-        p50.aspirate(50, dest_plate_1[row])
-        p50.dispense(50, liquid_waste.top())
-        p50.aspirate(50, dest_plate_1[row])
-        p50.dispense(50, liquid_waste.top())
-        p50.aspirate(50, dest_plate_1[row])
-        p50.dispense(50, liquid_waste.top())
-    p50.return_tip()
-
+    # Empty plates into liquid waste
+    helpers.clean_up_plates(p50, [source_plate_1, dest_plate_1], liquid_waste, 50)
+    # Probe liquid waste
     helpers.find_liquid_height_of_all_wells(ctx, p50, [liquid_waste])

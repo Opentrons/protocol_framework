@@ -143,7 +143,7 @@ def run(ctx: ProtocolContext) -> None:
     )
     samples_2 = sample_plate_2.rows()[0][:num_cols]
     samples = sample_plate.rows()[0][:num_cols]
-    reservoir = ctx.load_labware("nest_96_wellplate_2ml_deep", "C2")
+    reservoir = ctx.load_labware("nest_96_wellplate_2ml_deep", "C2", "Liquid Waste")
     # Load tipracks
     tiprack_50_1 = ctx.load_labware("opentrons_flex_96_tiprack_50ul", "A3")
     tiprack_50_2 = ctx.load_labware("opentrons_flex_96_tiprack_50ul", "A2")
@@ -205,8 +205,8 @@ def run(ctx: ProtocolContext) -> None:
         "Adapters": [{"well": adapters, "volume": adapter_vol * 2.0}],
         "End Repair Mix": [
             {
-                "well": end_repair_cols,
-                "volume": (end_repair_vol * num_cols) + (0.1 * end_repair_vol),
+                "well": temp_plate.wells()[: 8 * num_cols],
+                "volume": 10.0,
             }
         ],
         "Fragmentation Mix": [
@@ -981,7 +981,6 @@ def run(ctx: ProtocolContext) -> None:
     lib_cleanup_2()
 
     # Probe liquid waste
-    reservoir.label = "Liquid Waste"  # type: ignore[attr-defined]
     waste1 = reservoir.columns()[6]
     waste1_res = waste1[0]
 

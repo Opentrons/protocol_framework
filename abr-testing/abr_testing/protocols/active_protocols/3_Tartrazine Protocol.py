@@ -1,5 +1,10 @@
 """Tartrazine Protocol."""
-from opentrons.protocol_api import ProtocolContext, ParameterContext, Well
+from opentrons.protocol_api import (
+    ProtocolContext,
+    ParameterContext,
+    Well,
+    InstrumentContext,
+)
 from abr_testing.protocols import helpers
 from opentrons.protocol_api.module_contexts import (
     AbsorbanceReaderContext,
@@ -41,7 +46,7 @@ def run(ctx: ProtocolContext) -> None:
     tube_rack = ctx.load_labware(
         "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical", "C2", "Reagent Tube"
     )
-    tartrazine_tube = tube_rack["A3"]
+    tartrazine_tube = tube_rack["A1"]
     water_tube_1 = tube_rack["A4"]
     water_tube_2 = tube_rack["B3"]
     sample_plate_1 = ctx.load_labware(
@@ -61,8 +66,10 @@ def run(ctx: ProtocolContext) -> None:
     tiprack_50_1 = ctx.load_labware("opentrons_flex_96_tiprack_50ul", "D3")
     tiprack_50_2 = ctx.load_labware("opentrons_flex_96_tiprack_50ul", "C3")
     tiprack_50_3 = ctx.load_labware("opentrons_flex_96_tiprack_50ul", "B3")
+    tiprack_50_4 = ctx.load_labware("opentrons_flex_96_tiprack_50ul", "B2")
+
     tiprack_1000_1 = ctx.load_labware("opentrons_flex_96_tiprack_1000ul", "A2")
-    tip_racks = [tiprack_50_1, tiprack_50_2, tiprack_50_3]
+    tip_racks = [tiprack_50_1, tiprack_50_2, tiprack_50_3, tiprack_50_4]
 
     # Pipette
     p50 = ctx.load_instrument("flex_1channel_50", "left", tip_racks=tip_racks)
@@ -70,9 +77,18 @@ def run(ctx: ProtocolContext) -> None:
         "flex_1channel_1000", "right", tip_racks=[tiprack_1000_1]
     )
 
+    def _mix_tartrazine(pipette: InstrumentContext, well_to_probe: Well) -> None:
+        """Mix Tartrazine."""
+        pipette.pick_up_tip()
+        top_of_tartrazine = helpers.find_liquid_height(pipette, well_to_probe)
+        for i in range(20):
+            p50.aspirate(1, well_to_probe.bottom(z=1))
+            p50.dispense(1, well_to_probe.bottom(z=top_of_tartrazine - 2))
+        pipette.return_tip()
+
     # Probe wells
     liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
-        "Tartrazine": [{"well": tartrazine_tube, "volume": 45.0}],
+        "Tartrazine": [{"well": tartrazine_tube, "volume": 5.0}],
         "Water": [{"well": [water_tube_1, water_tube_2], "volume": 45.0}],
     }
     helpers.find_liquid_height_of_loaded_liquids(ctx, liquid_vols_and_wells, p50)
@@ -83,6 +99,8 @@ def run(ctx: ProtocolContext) -> None:
     vol = 0.0
     tip_count = 0
     for sample_plate in sample_plate_list[:number_of_plates]:
+        _mix_tartrazine(p50, tartrazine_tube)
+        tip_count += 1
         deck_locations = ["D1", "D2", "C1", "B1"]
         p1000.pick_up_tip()
         for well in sample_plate.wells():
@@ -92,19 +110,19 @@ def run(ctx: ProtocolContext) -> None:
                 tube_of_choice = water_tube_2
             p50.pick_up_tip()
             p1000.aspirate(190, tube_of_choice)
-            p1000.air_gap(5)
+            p1000.air_gap(10)
             p1000.dispense(5, well.top())
             p1000.dispense(190, well)
             vol += 190
             height = helpers.find_liquid_height(p50, tartrazine_tube)
-            p50.aspirate(10, tartrazine_tube.bottom(z=height))
+            p50.aspirate(10, tartrazine_tube.bottom(z=height), rate=0.15)
             p50.air_gap(5)
             p50.dispense(5, well.top())
-            p50.dispense(10, well.bottom(z=0.5))
+            p50.dispense(10, well.bottom(z=0.5), rate=0.15)
             p50.blow_out()
             p50.return_tip()
             tip_count += 1
-            if tip_count >= (96 * 3):
+            if tip_count >= (96 * 4):
                 p50.reset_tipracks()
         p1000.return_tip()
         helpers.move_labware_to_hs(ctx, sample_plate, hs, hs_adapter)
@@ -145,6 +163,7 @@ def run(ctx: ProtocolContext) -> None:
                 "SD": standard_deviation,
                 "Avg Percent Error": avg_percent_error,
             }
+        ctx.comment(f"------plate {sample_plate}. {cv_dict[sample_plate_name]}------")
         all_percent_error_dict[sample_plate_name] = percent_error_dict
         plate_reader.open_lid()
         ctx.move_labware(sample_plate, deck_locations[i], use_gripper=True)

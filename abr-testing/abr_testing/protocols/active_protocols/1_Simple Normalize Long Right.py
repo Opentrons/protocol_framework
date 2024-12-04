@@ -23,8 +23,8 @@ requirements = {"robotType": "Flex", "apiLevel": "2.21"}
 def add_parameters(parameters: ParameterContext) -> None:
     """Parameters."""
     helpers.create_single_pipette_mount_parameter(parameters)
-    helpers.create_tip_size_parameter(parameters)
     helpers.create_csv_parameter(parameters)
+    helpers.create_dot_bottom_parameter(parameters)
 
 
 def get_next_tip_by_row(tip_rack: Labware, pipette: InstrumentContext) -> Well | None:
@@ -79,15 +79,15 @@ def get_next_tip_by_row(tip_rack: Labware, pipette: InstrumentContext) -> Well |
 
 def run(protocol: ProtocolContext) -> None:
     """Protocol."""
-    tip_type = protocol.params.tip_size  # type: ignore[attr-defined]
+    dot_bottom = protocol.params.dot_bottom  # type: ignore[attr-defined]
     mount_pos = protocol.params.pipette_mount  # type: ignore[attr-defined]
     all_data = protocol.params.parameters_csv.parse_as_csv()  # type: ignore[attr-defined]
     data = all_data[1:]
     # DECK SETUP AND LABWARE
     protocol.comment("THIS IS A NO MODULE RUN")
-    tiprack_x_1 = protocol.load_labware(tip_type, "D1")
-    tiprack_x_2 = protocol.load_labware(tip_type, "D2")
-    tiprack_x_3 = protocol.load_labware(tip_type, "A1")
+    tiprack_x_1 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "D1")
+    tiprack_x_2 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "D2")
+    tiprack_x_3 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "A1")
     sample_plate_1 = protocol.load_labware(
         "armadillo_96_wellplate_200ul_pcr_full_skirt", "D3"
     )
@@ -178,7 +178,7 @@ def run(protocol: ProtocolContext) -> None:
             if DilutionVol != 0 and DilutionVol < 100:
                 well = get_next_tip_by_row(current_rack, p1000)
                 p1000.pick_up_tip(well)
-                p1000.aspirate(DilutionVol, Diluent_1.bottom(z=2))
+                p1000.aspirate(DilutionVol, Diluent_1.bottom(z=dot_bottom))
                 p1000.dispense(
                     DilutionVol, sample_plate_1.wells_by_name()[CurrentWell].top(z=0.2)
                 )
@@ -223,7 +223,7 @@ def run(protocol: ProtocolContext) -> None:
             DilutionVol = float(data[current][2])
             if DilutionVol != 0 and DilutionVol < 100:
                 p1000_single.pick_up_tip()
-                p1000_single.aspirate(DilutionVol, Diluent_2.bottom(z=2))
+                p1000_single.aspirate(DilutionVol, Diluent_2.bottom(z=dot_bottom))
                 p1000_single.dispense(
                     DilutionVol, sample_plate_2.wells_by_name()[CurrentWell].top(z=0.2)
                 )
@@ -269,7 +269,7 @@ def run(protocol: ProtocolContext) -> None:
             DilutionVol = float(data[current][2])
             if DilutionVol != 0 and DilutionVol < 100:
                 p1000_single.pick_up_tip()
-                p1000_single.aspirate(DilutionVol, Diluent_2.bottom(z=2))
+                p1000_single.aspirate(DilutionVol, Diluent_2.bottom(z=dot_bottom))
                 p1000_single.dispense(
                     DilutionVol, sample_plate_3.wells_by_name()[CurrentWell].top(z=0.2)
                 )
@@ -315,7 +315,7 @@ def run(protocol: ProtocolContext) -> None:
             DilutionVol = float(data[current][2])
             if DilutionVol != 0 and DilutionVol < 100:
                 p1000_single.pick_up_tip()
-                p1000_single.aspirate(DilutionVol, Diluent_2.bottom(z=2))
+                p1000_single.aspirate(DilutionVol, Diluent_2.bottom(z=dot_bottom))
                 p1000_single.dispense(
                     DilutionVol, sample_plate_4.wells_by_name()[CurrentWell].top(z=0.2)
                 )
@@ -327,5 +327,14 @@ def run(protocol: ProtocolContext) -> None:
             current += 1
 
         current = 0
-        # Probe heights
-        helpers.find_liquid_height_of_all_wells(protocol, p1000_single, wells)
+    # Probe heights
+    p1000.configure_nozzle_layout(style=ALL, tip_racks=[tiprack_x_3])
+    helpers.clean_up_plates(
+        p1000,
+        [sample_plate_1, sample_plate_2, sample_plate_3, sample_plate_4],
+        waste_reservoir["A1"],
+        200,
+    )
+    helpers.find_liquid_height_of_all_wells(
+        protocol, p1000_single, [waste_reservoir["A1"]]
+    )

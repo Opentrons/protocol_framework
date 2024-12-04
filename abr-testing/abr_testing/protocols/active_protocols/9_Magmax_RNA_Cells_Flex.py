@@ -44,15 +44,17 @@ Slot D3: Trash
 
 Reservoir 1:
 Well 1 - 8120 ul
-Well 2 - 6400 ul
-Well 3-7 - 8550 ul
+Well 2 - 8120 ul
+Well 3 - 12800 ul
+Well 4-12 - 9500 ul
+
 """
 
-whichwash = 1
-sample_max = 48
-tip = 0
+whichwash = 0
+tip_pick_up = 0
 drop_count = 0
 waste_vol = 0
+wash_volume_tracker = 0.0
 
 
 # Start protocol
@@ -69,11 +71,11 @@ def run(ctx: ProtocolContext) -> None:
     inc_lysis = True
     res_type = "nest_12_reservoir_15ml"
     TIP_TRASH = False
-    num_samples = 48
+    num_samples = 96
     wash_vol = 150.0
     lysis_vol = 140.0
     stop_vol = 100.0
-    elution_vol = dnase_vol = 50.0
+    elution_vol = dnase_vol = 55.0
     heater_shaker_speed = ctx.params.heater_shaker_speed  # type: ignore[attr-defined]
     dot_bottom = ctx.params.dot_bottom  # type: ignore[attr-defined]
     pipette_mount = ctx.params.pipette_mount  # type: ignore[attr-defined]
@@ -119,37 +121,37 @@ def run(ctx: ProtocolContext) -> None:
     tips201 = ctx.load_labware("opentrons_flex_96_tiprack_200ul", "A2", "Tips 2")
     tips202 = ctx.load_labware("opentrons_flex_96_tiprack_200ul", "B1", "Tips 3")
     tips203 = ctx.load_labware("opentrons_flex_96_tiprack_200ul", "B2", "Tips 4")
-    tips = [
-        *tips200.wells()[num_samples:96],
-        *tips201.wells(),
-        *tips202.wells(),
-        *tips203.wells(),
-    ]
+    tips204 = ctx.load_labware("opentrons_flex_96_tiprack_200ul", "C2", "Tips 5")
+
     tips_sn = tips200.wells()[:num_samples]
 
     # load P1000M pipette
     m1000 = ctx.load_instrument(
         "flex_8channel_1000",
         pipette_mount,
-        tip_racks=[tips200, tips201, tips202, tips203],
+        tip_racks=[tips200, tips201, tips202, tips203, tips204],
     )
 
     # Load Liquid Locations in Reservoir
     elution_solution = elutionplate.rows()[0][:num_cols]
-    dnase1 = elutionplate.rows()[0][num_cols : 2 * num_cols]
-    lysis_ = res1.wells()[0]
-    stopreaction = res1.wells()[1]
-    wash1 = res1.wells()[2]
-    wash2 = res1.wells()[3]
-    wash3 = res1.wells()[4]
-    wash4 = res1.wells()[5]
-    wash5 = res1.wells()[6]
-
+    dnase1 = elutionplate.rows()[0][:num_cols]
+    lysis_ = res1.wells()[0:2]
+    stopreaction = res1.wells()[2]
+    wash1 = res1.wells()[3]
+    wash2 = res1.wells()[4]
+    wash3 = res1.wells()[5]
+    wash4 = res1.wells()[6]
+    wash5 = res1.wells()[7]
+    wash6 = res1.wells()[8]
+    wash7 = res1.wells()[9]
+    wash8 = res1.wells()[10]
+    wash9 = res1.wells()[11]
+    all_washes = res1.wells()[3:12]
     """
     Here is where you can define the locations of your reagents.
     """
     samples_m = sample_plate.rows()[0][:num_cols]  # 20ul beads each well
-    cells_m = sample_plate.rows()[0][num_cols : 2 * num_cols]
+    cells_m = sample_plate.rows()[0][:num_cols]
     elution_samples_m = elutionplate.rows()[0][:num_cols]
     # Do the same for color mapping
     beads_ = sample_plate.wells()[: (8 * num_cols)]
@@ -163,13 +165,17 @@ def run(ctx: ProtocolContext) -> None:
         "Sample": [{"well": cells_, "volume": 0.0}],
         "DNAse": [{"well": dnase1_, "volume": dnase_vol}],
         "Elution Buffer": [{"well": elution_samps, "volume": elution_vol}],
-        "Lysis": [{"well": lysis_, "volume": lysis_vol}],
-        "Wash 1": [{"well": wash1, "volume": wash_vol}],
-        "Wash 2": [{"well": wash2, "volume": wash_vol}],
-        "Wash 3": [{"well": wash3, "volume": wash_vol}],
-        "Wash 4": [{"well": wash4, "volume": wash_vol}],
-        "Wash 5": [{"well": wash5, "volume": wash_vol}],
-        "Stop": [{"well": stopreaction, "volume": stop_vol}],
+        "Lysis": [{"well": lysis_, "volume": 8120.0}],
+        "Stop": [{"well": stopreaction, "volume": 6400.0}],
+        "Wash 1": [{"well": wash1, "volume": 9500.0}],
+        "Wash 2": [{"well": wash2, "volume": 9500.0}],
+        "Wash 3": [{"well": wash3, "volume": 9500.0}],
+        "Wash 4": [{"well": wash4, "volume": 9500.0}],
+        "Wash 5": [{"well": wash5, "volume": 9500.0}],
+        "Wash 6": [{"well": wash6, "volume": 9500.0}],
+        "Wash 7": [{"well": wash7, "volume": 9500.0}],
+        "Wash 8": [{"well": wash8, "volume": 9500.0}],
+        "Wash 9": [{"well": wash9, "volume": 9500.0}],
     }
 
     helpers.find_liquid_height_of_loaded_liquids(ctx, liquid_vols_and_wells, m1000)
@@ -178,17 +184,19 @@ def run(ctx: ProtocolContext) -> None:
     m1000.flow_rate.dispense = 150
     m1000.flow_rate.blow_out = 300
 
-    def tiptrack(pip: InstrumentContext, tipbox: List[Well]) -> None:
+    def tiptrack(pip: InstrumentContext) -> None:
         """Tip Track."""
-        global tip
+        global tip_pick_up
         global drop_count
-        pip.pick_up_tip(tipbox[int(tip)])
-        tip = tip + 8
+        pip.pick_up_tip()
+        tip_pick_up += 1
         drop_count = drop_count + 8
         if drop_count >= 250:
             drop_count = 0
             if TIP_TRASH:
                 ctx.pause("Empty Trash bin.")
+        if tip_pick_up >= 59:
+            pip.reset_tipracks()
 
     def remove_supernatant(vol: float) -> None:
         """Remove Supernatant."""
@@ -301,23 +309,30 @@ def run(ctx: ProtocolContext) -> None:
         pip.flow_rate.aspirate = 300
         pip.flow_rate.dispense = 300
 
-    def lysis(vol: float, source: Well) -> None:
+    def lysis(vol: float, source: List[Well]) -> None:
         """Lysis Steps."""
+        tvol_total = 0.0
         ctx.comment("-----Beginning lysis steps-----")
         num_transfers = math.ceil(vol / 180)
-        tiptrack(m1000, tips)
+        tiptrack(m1000)
+        src = source[0]
         for i in range(num_cols):
-            src = source
             tvol = vol / num_transfers
             for t in range(num_transfers):
                 m1000.require_liquid_presence(src)
                 m1000.aspirate(tvol, src.bottom(1))
                 m1000.dispense(m1000.current_volume, cells_m[i].top(-3))
+                tvol_total += tvol * 8
+                if tvol_total > 8000.0:
+                    ctx.comment("-----Changing to second lysis well.------")
+                    src = source[1]
+                    ctx.comment(f"new source {src}")
+                    tvol_total = 0.0
 
         # mix after adding all reagent to wells with cells
         for i in range(num_cols):
             if i != 0:
-                tiptrack(m1000, tips)
+                tiptrack(m1000)
             for x in range(8 if not dry_run else 1):
                 m1000.aspirate(tvol * 0.75, cells_m[i].bottom(dot_bottom))
                 m1000.dispense(tvol * 0.75, cells_m[i].bottom(8))
@@ -347,7 +362,7 @@ def run(ctx: ProtocolContext) -> None:
         ctx.comment("-----Beginning bind steps-----")
         for i, well in enumerate(samples_m):
             # Transfer cells+lysis/bind to wells with beads
-            tiptrack(m1000, tips)
+            tiptrack(m1000)
             m1000.aspirate(185, cells_m[i].bottom(dot_bottom))
             m1000.air_gap(10)
             m1000.dispense(m1000.current_volume, well.bottom(8))
@@ -371,32 +386,28 @@ def run(ctx: ProtocolContext) -> None:
         # remove initial supernatant
         remove_supernatant(180)
 
-    def wash(vol: float, source: Well) -> None:
+    def wash(vol: float, source: List[Well]) -> None:
         """Wash Function."""
         global whichwash  # Defines which wash the protocol is on to log on the app
-
-        if source == wash1:
-            whichwash = 1
-        if source == wash2:
-            whichwash = 2
-        if source == wash3:
-            whichwash = 3
-        if source == wash4:
-            whichwash = 4
-
         ctx.comment("-----Now starting Wash #" + str(whichwash) + "-----")
-
-        tiptrack(m1000, tips)
+        global wash_volume_tracker
+        tiptrack(m1000)
         num_trans = math.ceil(vol / 180)
         vol_per_trans = vol / num_trans
         for i, m in enumerate(samples_m):
-            src = source
+            src = source[whichwash]
             for n in range(num_trans):
                 m1000.aspirate(vol_per_trans, src)
                 m1000.air_gap(10)
                 m1000.dispense(m1000.current_volume, m.top(-2))
                 ctx.delay(seconds=2)
                 m1000.blow_out(m.top(-2))
+                wash_volume_tracker += vol_per_trans * 8
+                if wash_volume_tracker > 9600:
+                    whichwash += 1
+                    src = source[whichwash]
+                    ctx.comment(f"new wash source {whichwash}")
+                    wash_volume_tracker = 0.0
             m1000.air_gap(10)
         m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
@@ -419,13 +430,14 @@ def run(ctx: ProtocolContext) -> None:
             )
 
         remove_supernatant(vol)
+        ctx.comment(f"final wash source {whichwash}")
 
     def dnase(vol: float, source: List[Well]) -> None:
         """Steps for DNAseI."""
         ctx.comment("-----DNAseI Steps Beginning-----")
         num_trans = math.ceil(vol / 180)
         vol_per_trans = vol / num_trans
-        tiptrack(m1000, tips)
+        tiptrack(m1000)
         for i, m in enumerate(samples_m):
             src = source[i]
             m1000.flow_rate.aspirate = 10
@@ -442,7 +454,7 @@ def run(ctx: ProtocolContext) -> None:
         # Is this mixing needed? \/\/\/
         for i in range(num_cols):
             if i != 0:
-                tiptrack(m1000, tips)
+                tiptrack(m1000)
             mixing(samples_m[i], m1000, 45, reps=5 if not dry_run else 1)
             m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
@@ -452,7 +464,7 @@ def run(ctx: ProtocolContext) -> None:
     def stop_reaction(vol: float, source: Well) -> None:
         """Adding stop solution."""
         ctx.comment("-----Adding Stop Solution-----")
-        tiptrack(m1000, tips)
+        tiptrack(m1000)
         num_trans = math.ceil(vol / 180)
         vol_per_trans = vol / num_trans
         for i, m in enumerate(samples_m):
@@ -483,7 +495,7 @@ def run(ctx: ProtocolContext) -> None:
     def elute(vol: float) -> None:
         """Elution."""
         ctx.comment("-----Elution Beginning-----")
-        tiptrack(m1000, tips)
+        tiptrack(m1000)
         m1000.flow_rate.aspirate = 10
         for i, m in enumerate(samples_m):
             loc = m.top(-2)
@@ -498,7 +510,7 @@ def run(ctx: ProtocolContext) -> None:
         # Is this mixing needed? \/\/\/
         for i in range(num_cols):
             if i != 0:
-                tiptrack(m1000, tips)
+                tiptrack(m1000)
             for mixes in range(10):
                 m1000.aspirate(elution_vol - 10, samples_m[i])
                 m1000.dispense(elution_vol - 10, samples_m[i].bottom(10))
@@ -523,7 +535,7 @@ def run(ctx: ProtocolContext) -> None:
 
         ctx.comment("-----Trasnferring Sample to Elution Plate-----")
         for i, (m, e) in enumerate(zip(samples_m, elution_samples_m)):
-            tiptrack(m1000, tips)
+            tiptrack(m1000)
             loc = m.bottom(dot_bottom)
             m1000.transfer(vol, loc, e.bottom(5), air_gap=20, new_tip="never")
             m1000.blow_out(e.top(-2))
@@ -537,15 +549,16 @@ def run(ctx: ProtocolContext) -> None:
     if inc_lysis:
         lysis(lysis_vol, lysis_)
     bind()
-    wash(wash_vol, wash1)
-    wash(wash_vol, wash2)
+    wash(wash_vol, all_washes)
+    wash(wash_vol, all_washes)
+    wash(wash_vol, all_washes)
     # dnase1 treatment
     dnase(dnase_vol, dnase1)
     stop_reaction(stop_vol, stopreaction)
     # Resume washes
-    wash(wash_vol, wash3)
-    wash(wash_vol, wash4)
-    wash(wash_vol, wash5)
+    wash(wash_vol, all_washes)
+    wash(wash_vol, all_washes)
+    wash(wash_vol, all_washes)
 
     for beaddry in np.arange(drybeads, 0, -0.5):
         ctx.delay(
@@ -553,6 +566,8 @@ def run(ctx: ProtocolContext) -> None:
             msg="There are " + str(beaddry) + " minutes left in the drying step.",
         )
     elute(elution_vol)
-
     end_list_of_wells_to_probe = [waste_reservoir["A1"]]
+    helpers.clean_up_plates(
+        m1000, [elutionplate, sample_plate], waste_reservoir["A1"], 200
+    )
     helpers.find_liquid_height_of_all_wells(ctx, m1000, end_list_of_wells_to_probe)

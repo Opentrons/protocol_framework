@@ -170,7 +170,6 @@ def run(ctx: ProtocolContext) -> None:
         drop_count = drop_count + 8
         if drop_count >= 150:
             drop_count = 0
-            ctx.pause("Empty Waste Bin.")
 
     def remove_supernatant(vol: float) -> None:
         """Remove supernatants."""
@@ -503,7 +502,5 @@ def run(ctx: ProtocolContext) -> None:
     # Probe wells
     end_wells_with_liquid = [
         waste_reservoir.wells()[0],
-        res1.wells()[0],
-        elutionplate.wells()[0],
     ]
     helpers.find_liquid_height_of_all_wells(ctx, m1000, end_wells_with_liquid)

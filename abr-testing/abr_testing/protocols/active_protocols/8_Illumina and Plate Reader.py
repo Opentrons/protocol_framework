@@ -116,7 +116,9 @@ def run(protocol: ProtocolContext) -> None:
     tiprack_50_2 = protocol.load_labware("opentrons_flex_96_tiprack_50ul", "A3")
     # MODULES + LABWARE
     # Reservoir
-    reservoir = protocol.load_labware("nest_96_wellplate_2ml_deep", "D2")
+    reservoir = protocol.load_labware(
+        "nest_96_wellplate_2ml_deep", "D2", "Liquid Waste"
+    )
     # Heatershaker
     heatershaker: HeaterShakerContext = protocol.load_module(
         helpers.hs_str, "D1"
@@ -971,7 +973,6 @@ def run(protocol: ProtocolContext) -> None:
                 p200_tips += 1
                 tipcheck()
 
-        reservoir.label = "Liquid Waste"  # type: ignore[attr-defined]
         Liquid_trash_well_1 = reservoir["A9"]
         Liquid_trash_well_2 = reservoir["A10"]
         Liquid_trash_well_4 = reservoir["A12"]

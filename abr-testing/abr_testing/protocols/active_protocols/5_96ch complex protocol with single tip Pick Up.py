@@ -79,9 +79,7 @@ def run(ctx: ProtocolContext) -> None:
     dest_pcr_plate = ctx.load_labware(PCR_PLATE_96_NAME, "C2")
     liquid_waste = ctx.load_labware("nest_1_reservoir_290ml", "B2", "Liquid Waste")
 
-    tip_rack_1 = ctx.load_labware(
-        TIPRACK_96_NAME, "A4"
-    )
+    tip_rack_1 = ctx.load_labware(TIPRACK_96_NAME, "A4")
 
     tip_rack_2 = ctx.load_labware(TIPRACK_96_NAME, "C3")
     tip_rack_3 = ctx.load_labware(TIPRACK_96_NAME, "C4")
@@ -293,28 +291,34 @@ def run(ctx: ProtocolContext) -> None:
             ctx.move_labware(tip_rack_2, waste_chute, use_gripper=USING_GRIPPER)
 
         def test_column_tip_rack_usage() -> None:
-            """Full Tip Pick Up."""
-            list_of_columns = list(range(1,13))
-            not_reversed = list(range(1,13))
-            list_of_columns.reverse()
+            """Column Tip Pick Up."""
+            list_of_columns = list(range(1, 13))
             i = 0
             column_racks = [tip_rack_1, tip_rack_3]
+            pipette_96_channel.configure_nozzle_layout(
+                style=COLUMN, start="A12", tip_racks=column_racks
+            )
+            ctx.comment("------------------------------")
+            ctx.comment(f"channels {pipette_96_channel.active_channels}")
             for rack in column_racks:
-                ctx.move_labware(rack, "C3", use_gripper = USING_GRIPPER)
-                for (column,well) in zip(list_of_columns, not_reversed):
-                    tiprack_well = "A" + str(column)
+                ctx.move_labware(rack, "C3", use_gripper=USING_GRIPPER)
+                for well in list_of_columns:
+                    tiprack_well = "A" + str(well)
                     well_name = "A" + str(well)
-                    pipette_96_channel.configure_nozzle_layout(style=COLUMN, start="A12")
+
                     pipette_96_channel.liquid_presence_detection = True
                     pipette_96_channel.pick_up_tip(rack[tiprack_well])
                     pipette_96_channel.aspirate(45, source_reservoir[well_name])
                     pipette_96_channel.liquid_presence_detection = False
                     pipette_96_channel.air_gap(5)
-                    pipette_96_channel.dispense(25, dest_pcr_plate[tiprack_well].bottom(b))
+                    pipette_96_channel.dispense(
+                        25, dest_pcr_plate[tiprack_well].bottom(b)
+                    )
                     pipette_96_channel.blow_out(location=liquid_waste["A1"])
                     pipette_96_channel.drop_tip()
                 ctx.move_labware(rack, waste_chute, use_gripper=USING_GRIPPER)
-                i +=1
+                i += 1
+
         test_single_tip_pickup_usage()
         test_column_tip_rack_usage()
 

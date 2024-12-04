@@ -323,6 +323,39 @@ def use_disposable_lid_with_tc(
 # FUNCTIONS FOR COMMON PIPETTE COMMAND SEQUENCES
 
 
+def clean_up_plates(
+    pipette: InstrumentContext,
+    list_of_labware: List[Labware],
+    liquid_waste: Well,
+    tip_size: int,
+) -> None:
+    """Aspirate liquid from labware and dispense into liquid waste."""
+    pipette.pick_up_tip()
+    pipette.liquid_presence_detection = False
+    num_of_active_channels = pipette.active_channels
+    for labware in list_of_labware:
+        if num_of_active_channels == 8:
+            list_of_wells = labware.rows()[0]
+        elif num_of_active_channels == 1:
+            list_of_wells = labware.wells()
+        elif num_of_active_channels == 96:
+            list_of_wells = [labware.wells()[0]]
+        for well in list_of_wells:
+            vol_removed = 0.0
+            while well.max_volume > vol_removed:
+                pipette.aspirate(tip_size, well)
+                pipette.dispense(
+                    tip_size,
+                    liquid_waste,
+                )
+                pipette.blow_out(liquid_waste)
+                vol_removed += pipette.max_volume
+    if pipette.channels != num_of_active_channels:
+        pipette.drop_tip()
+    else:
+        pipette.return_tip()
+
+
 def find_liquid_height(pipette: InstrumentContext, well_to_probe: Well) -> float:
     """Find liquid height of well."""
     try:
@@ -447,6 +480,8 @@ def find_liquid_height_of_loaded_liquids(
             entry["well"] if isinstance(entry["well"], list) else [entry["well"]]
         )
     ]
+    if pipette.active_channels == 96:
+        wells = [well for well in wells if well.display_name.split(" ")[0] == "A1"]
     find_liquid_height_of_all_wells(ctx, pipette, wells)
     return wells
 

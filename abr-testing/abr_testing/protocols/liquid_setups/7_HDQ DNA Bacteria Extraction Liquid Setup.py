@@ -52,12 +52,19 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     beads = 230
     pk = 230
     lysis = 230
-
+    source = source_reservoir["A1"].bottom(z=0.5)
     # Sample Plate
     p1000.transfer(
         volume=180,
-        source=source_reservoir["A1"].bottom(z=0.5),
-        dest=sample_plate["A1"].top(),
+        source=[source, source, source, source, source, source],
+        dest=[
+            sample_plate["A1"].top(),
+            sample_plate["A2"].top(),
+            sample_plate["A3"].top(),
+            sample_plate["A4"].top(),
+            sample_plate["A5"].top(),
+            sample_plate["A6"].top(),
+        ],
         blowout=True,
         blowout_location="source well",
         trash=False,
@@ -65,8 +72,15 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     # Elution Plate
     p1000.transfer(
         volume=100,
-        source=source_reservoir["A1"].bottom(z=0.5),
-        dest=elution_plate["A1"].top(),
+        source=[source, source, source, source, source, source],
+        dest=[
+            elution_plate["A1"].top(),
+            elution_plate["A2"].top(),
+            elution_plate["A3"].top(),
+            elution_plate["A4"].top(),
+            elution_plate["A5"].top(),
+            elution_plate["A6"].top(),
+        ],
         blowout=True,
         blowout_location="source well",
         trash=False,

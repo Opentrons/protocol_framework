@@ -26,7 +26,7 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     ) = load_common_liquid_setup_labware_and_instruments(protocol)
     reservoir = protocol.load_labware("nest_12_reservoir_15ml", "D2", "Reservoir")
     # Transfer Liquid
-    vol = 5400 / 8
+    vol = 7100 / 8
     columns = ["A1", "A2", "A3", "A4", "A5"]
     for i in columns:
         p1000.transfer(

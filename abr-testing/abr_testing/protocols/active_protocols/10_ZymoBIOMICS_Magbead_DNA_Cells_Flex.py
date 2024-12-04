@@ -114,7 +114,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
     magblock: MagneticBlockContext = ctx.load_module(
         helpers.mag_str, "C1"
     )  # type: ignore[assignment]
-    waste_reservoir = ctx.load_labware("nest_1_reservoir_195ml", "B3", "Liquid Waste")
+    waste_reservoir = ctx.load_labware("nest_1_reservoir_290ml", "B3", "Liquid Waste")
     waste = waste_reservoir.wells()[0].top()
     res1 = ctx.load_labware(res_type, "D2", "reagent reservoir 1")
     res2 = ctx.load_labware(res_type, "C2", "reagent reservoir 2")

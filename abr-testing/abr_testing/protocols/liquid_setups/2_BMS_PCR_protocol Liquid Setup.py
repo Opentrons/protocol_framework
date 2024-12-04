@@ -33,9 +33,9 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     )
     # Steps
     # Dispense into plate 1
-    p1000.transfer(50, source_reservoir["A1"], pcr_plate_1.wells(), trash=False)
+    p1000.transfer(100, source_reservoir["A1"], pcr_plate_1.wells(), trash=False)
 
     # Dispense
     p1000.configure_nozzle_layout(protocol_api.SINGLE, start="H1", tip_racks=[tip_rack])
-    p1000.transfer(1500, source_reservoir["A1"], snap_caps["B1"])
-    p1000.transfer(1500, source_reservoir["A1"], snap_caps.rows()[0])
+    p1000.transfer(1000, source_reservoir["A1"], snap_caps["B1"])
+    p1000.transfer(1000, source_reservoir["A1"], snap_caps.rows()[0])
