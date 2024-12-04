@@ -270,7 +270,7 @@ export function ProtocolDetails(
     mostRecentAnalysis?.commands.filter(
       (command): command is LoadLabwareRunTimeCommand =>
         command.commandType === 'loadLabware' &&
-        command.result.definition.parameters.format !== 'trash'
+        command.result?.definition.parameters.format !== 'trash'
     ) ?? []
 
   const protocolDisplayName = getProtocolDisplayName(
