@@ -1591,7 +1591,9 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
       const hardcodedTrashIdFlex = `${uuid()}:${hardcodedTrashAddressableAreaName}`
 
       const hardCodedTrashLocation =
-        unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT
+        unoccupiedSlotForTrash === ''
+          ? ''
+          : unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT
           ? WASTE_CHUTE_CUTOUT
           : getCutoutIdByAddressableArea(
               hardcodedTrashAddressableAreaName as AddressableAreaName,
