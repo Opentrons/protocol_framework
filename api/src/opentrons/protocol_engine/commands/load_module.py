@@ -130,25 +130,22 @@ class LoadModuleImplementation(
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
                 params.location.slotName.id
             )
-            state_update.set_addressable_area_used(
-                addressable_area_name=params.location.slotName.id
-            )
         else:
-            addressable_area = (
+            addressable_area_provided_by_module = (
                 self._state_view.modules.ensure_and_convert_module_fixture_location(
                     deck_slot=params.location.slotName,
                     model=params.model,
                 )
             )
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
-                addressable_area
-            )
-            state_update.set_addressable_area_used(
-                addressable_area_name=addressable_area
+                addressable_area_provided_by_module
             )
 
         verified_location = self._state_view.geometry.ensure_location_not_occupied(
             params.location
+        )
+        state_update.set_addressable_area_used(
+            addressable_area_name=params.location.slotName.id
         )
 
         if params.model == ModuleModel.MAGNETIC_BLOCK_V1:

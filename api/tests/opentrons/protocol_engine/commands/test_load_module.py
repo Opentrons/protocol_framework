@@ -78,7 +78,7 @@ async def test_load_module_implementation(
             deck_slot=data.location.slotName,
             model=data.model,
         )
-    ).then_return(sentinel.addressable_area_name)
+    ).then_return(sentinel.addressable_area_provided_by_module)
 
     decoy.when(
         await equipment.load_module(
@@ -95,6 +95,11 @@ async def test_load_module_implementation(
     )
 
     result = await subject.execute(data)
+    decoy.verify(
+        state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
+            sentinel.addressable_area_provided_by_module
+        )
+    )
     assert result == SuccessData(
         public=LoadModuleResult(
             moduleId="module-id",
@@ -104,7 +109,7 @@ async def test_load_module_implementation(
         ),
         state_update=update_types.StateUpdate(
             addressable_area_used=update_types.AddressableAreaUsedUpdate(
-                addressable_area_name=sentinel.addressable_area_name
+                addressable_area_name=data.location.slotName.id
             )
         ),
     )
@@ -145,7 +150,7 @@ async def test_load_module_implementation_mag_block(
             deck_slot=data.location.slotName,
             model=data.model,
         )
-    ).then_return(sentinel.addressable_area_name)
+    ).then_return(sentinel.addressable_area_provided_by_module)
 
     decoy.when(
         await equipment.load_magnetic_block(
@@ -162,6 +167,11 @@ async def test_load_module_implementation_mag_block(
     )
 
     result = await subject.execute(data)
+    decoy.verify(
+        state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
+            sentinel.addressable_area_provided_by_module
+        )
+    )
     assert result == SuccessData(
         public=LoadModuleResult(
             moduleId="module-id",
@@ -171,7 +181,7 @@ async def test_load_module_implementation_mag_block(
         ),
         state_update=update_types.StateUpdate(
             addressable_area_used=update_types.AddressableAreaUsedUpdate(
-                addressable_area_name=sentinel.addressable_area_name
+                addressable_area_name=data.location.slotName.id
             )
         ),
     )
@@ -238,7 +248,7 @@ async def test_load_module_implementation_abs_reader(
         ),
         state_update=update_types.StateUpdate(
             addressable_area_used=update_types.AddressableAreaUsedUpdate(
-                addressable_area_name=sentinel.addressable_area_name
+                addressable_area_name=data.location.slotName.id
             )
         ),
     )
