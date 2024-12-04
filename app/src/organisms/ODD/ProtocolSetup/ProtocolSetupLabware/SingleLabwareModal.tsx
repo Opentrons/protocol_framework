@@ -68,10 +68,6 @@ export const SingleLabwareModal = (
 
   const selectedLabwareLocation = selectedLabware?.location
 
-  const nickName =
-    mostRecentAnalysis?.labware.find(l => l.id === selectedLabware.id)
-      ?.displayName ?? selectedLabware.nickName
-
   return createPortal(
     <OddModal onOutsideClick={onOutsideClick}>
       <Flex justifyContent={JUSTIFY_SPACE_BETWEEN} width="100%">
@@ -88,7 +84,7 @@ export const SingleLabwareModal = (
             {getLabwareDisplayName(selectedLabware)}
           </LegacyStyledText>
           <LegacyStyledText as="p" color={COLORS.grey60}>
-            {nickName}
+            {selectedLabware.nickName}
             {selectedLabwareLocation != null &&
             selectedLabwareLocation !== 'offDeck' &&
             'labwareId' in selectedLabwareLocation
