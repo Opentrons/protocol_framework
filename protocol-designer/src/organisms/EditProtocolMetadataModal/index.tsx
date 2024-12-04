@@ -84,9 +84,10 @@ export function EditProtocolMetadataModal(
               {t('name')}
             </StyledText>
             <InputField
-              placeholder={protocolName}
               autoFocus
               {...register('protocolName')}
+              placeholder={protocolName}
+              value={watch('protocolName')}
             />
           </Flex>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
@@ -103,7 +104,11 @@ export function EditProtocolMetadataModal(
             <StyledText color={COLORS.grey60} desktopStyle="captionRegular">
               {t('author_org')}
             </StyledText>
-            <InputField placeholder={author ?? ''} {...register('author')} />
+            <InputField
+              placeholder={author ?? ''}
+              {...register('author')}
+              value={watch('author')}
+            />
           </Flex>
         </Flex>
       </form>
