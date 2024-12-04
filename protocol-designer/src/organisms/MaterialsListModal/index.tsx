@@ -28,10 +28,10 @@ import {
 
 import { getRobotType } from '../../file-data/selectors'
 import { getInitialDeckSetup } from '../../step-forms/selectors'
-import { getTopPortalEl } from '../../components/portals/TopPortal'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import { HandleEnter } from '../../atoms/HandleEnter'
 import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { getMainPagePortalEl } from '../Portal'
 
 import type { AdditionalEquipmentName } from '@opentrons/step-generation'
 import type { LabwareOnDeck, ModuleOnDeck } from '../../step-forms'
@@ -297,6 +297,6 @@ export function MaterialsListModal({
         </Flex>
       </Modal>
     </HandleEnter>,
-    getTopPortalEl()
+    getMainPagePortalEl()
   )
 }

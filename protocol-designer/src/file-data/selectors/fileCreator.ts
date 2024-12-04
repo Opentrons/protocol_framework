@@ -20,8 +20,8 @@ import { uuid } from '../../utils'
 import { selectors as ingredSelectors } from '../../labware-ingred/selectors'
 import { selectors as stepFormSelectors } from '../../step-forms'
 import { selectors as uiLabwareSelectors } from '../../ui/labware'
+import { swatchColors } from '../../organisms/DefineLiquidsModal/swatchColors'
 import { getLoadLiquidCommands } from '../../load-file/migration/utils/getLoadLiquidCommands'
-import { swatchColors } from '../../components/swatchColors'
 import {
   DEFAULT_MM_FROM_BOTTOM_ASPIRATE,
   DEFAULT_MM_FROM_BOTTOM_DISPENSE,
