@@ -27,7 +27,9 @@ class BaseErrorBody(BaseResponseBody):
         """Serialize the response as an API error to raise in a handler."""
         return ApiError(
             status_code=status_code,
-            content=self.model_dump(),
+            content=self.model_dump(
+                exclude_none=True, exclude_unset=True, exclude_defaults=True
+            ),
         )
 
 

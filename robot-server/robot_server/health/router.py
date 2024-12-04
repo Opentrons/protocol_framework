@@ -122,6 +122,7 @@ health_router = APIRouter()
             "description": "Robot motor controller is not ready",
         }
     },
+    response_model_exclude_none=True,
 )
 async def get_health(
     hardware: Annotated[HardwareControlAPI, Depends(get_hardware)],
