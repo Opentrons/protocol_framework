@@ -63,10 +63,10 @@ class GetNextTipImplementation(
         starting_tip_name = params.startingWellName
 
         num_tips = self._state_view.tips.get_pipette_active_channels(pipette_id)
-        active_tips = self._state_view.tips.get_pipette_active_channels(pipette_id)
+        total_tips = self._state_view.tips.get_pipette_channels(pipette_id)
         nozzle_map = (
             self._state_view.tips.get_pipette_nozzle_map(pipette_id)
-            if num_tips != active_tips
+            if num_tips != total_tips
             else None
         )
 
