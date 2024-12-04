@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
+import { WASTE_CHUTE_CUTOUT } from '@opentrons/shared-data'
 import { getIdsInRange, getUnoccupiedSlotForTrash } from '../utils'
-import { WASTE_CHUTE_CUTOUT, type AddressableAreaName, type CreateCommand } from '@opentrons/shared-data'
+import type { AddressableAreaName, CreateCommand } from '@opentrons/shared-data'
 
 describe('getIdsInRange', () => {
   it('gets id in array of length 1', () => {
