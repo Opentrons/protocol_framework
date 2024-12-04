@@ -1117,7 +1117,7 @@ def clear_pipette_ul_per_mm(api: OT3API, mount: OT3Mount) -> None:
     elif "p1000" in pip.model.lower():
         pip_nominal_ul_per_mm = _ul_per_mm_of_shaft_diameter(4.5)
     elif "p200" in pip.model.lower():
-        pip_nominal_ul_per_mm = _ul_per_mm_of_shaft_diameter(3.14159)
+        pip_nominal_ul_per_mm = _ul_per_mm_of_shaft_diameter(2)
     else:
         raise RuntimeError(f"unexpected pipette model: {pip.model}")
     # 10000 is an arbitrarily large volume that none of our pipettes can reach
