@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Optional, Type, List, Literal
 
 
 from ..errors import ErrorOccurrence
+from ..types import NextTipInfo
 from .pipetting_common import PipetteIdMixin
 
 from .command import (
@@ -37,11 +38,9 @@ class GetNextTipParams(PipetteIdMixin):
 class GetNextTipResult(BaseModel):
     """Result data from the execution of a GetNextTip."""
 
-    labwareId: Optional[str] = Field(
-        ..., description="Labware ID where next available tip is, if any."
-    )
-    wellName: Optional[str] = Field(
-        ..., description="Well name of next available tip, if any."
+    nextTipInfo: Optional[NextTipInfo] = Field(
+        ...,
+        description="Labware ID and well name of next available tip for a pipette, if any.",
     )
 
 
@@ -79,17 +78,12 @@ class GetNextTipImplementation(
                 nozzle_map=nozzle_map,
             )
             if well_name is not None:
+                next_tip = NextTipInfo(labwareId=labware_id, wellName=well_name)
                 break
         else:
-            labware_id = None
-            well_name = None
+            next_tip = None
 
-        return SuccessData(
-            public=GetNextTipResult(
-                labwareId=labware_id,
-                wellName=well_name,
-            )
-        )
+        return SuccessData(public=GetNextTipResult(nextTipInfo=next_tip))
 
 
 class GetNextTip(BaseCommand[GetNextTipParams, GetNextTipResult, ErrorOccurrence]):

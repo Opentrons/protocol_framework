@@ -1115,6 +1115,18 @@ class TipPresenceStatus(str, Enum):
         }[state]
 
 
+class NextTipInfo(BaseModel):
+    """Next available tip labware and well name data."""
+
+    labwareId: str = Field(
+        ...,
+        description="The labware ID of the tip rack where the next available tip(s) are located.",
+    )
+    wellName: str = Field(
+        ..., description="The (starting) well name of the next available tip(s)."
+    )
+
+
 # TODO (spp, 2024-04-02): move all RTP types to runner
 class RTPBase(BaseModel):
     """Parameters defined in a protocol."""

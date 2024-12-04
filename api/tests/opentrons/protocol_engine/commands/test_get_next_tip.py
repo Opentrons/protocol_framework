@@ -1,6 +1,8 @@
 """Test get next tip in place commands."""
 from decoy import Decoy
 
+from opentrons.protocol_engine import StateView
+from opentrons.protocol_engine.types import NextTipInfo
 from opentrons.protocol_engine.commands.command import SuccessData
 from opentrons.protocol_engine.commands.get_next_tip import (
     GetNextTipParams,
@@ -9,7 +11,6 @@ from opentrons.protocol_engine.commands.get_next_tip import (
 )
 
 from opentrons.hardware_control.nozzle_manager import NozzleMap
-from opentrons.protocol_engine import StateView
 
 
 async def test_get_next_tip_implementation_full(
@@ -34,7 +35,9 @@ async def test_get_next_tip_implementation_full(
     result = await subject.execute(params)
 
     assert result == SuccessData(
-        public=GetNextTipResult(labwareId="456", wellName="foo"),
+        public=GetNextTipResult(
+            nextTipInfo=NextTipInfo(labwareId="456", wellName="foo")
+        ),
     )
 
 
@@ -67,7 +70,9 @@ async def test_get_next_tip_implementation_partial(
     result = await subject.execute(params)
 
     assert result == SuccessData(
-        public=GetNextTipResult(labwareId="456", wellName="foo"),
+        public=GetNextTipResult(
+            nextTipInfo=NextTipInfo(labwareId="456", wellName="foo")
+        ),
     )
 
 
@@ -87,5 +92,5 @@ async def test_get_next_tip_implementation_no_tips(
     result = await subject.execute(params)
 
     assert result == SuccessData(
-        public=GetNextTipResult(labwareId=None, wellName=None),
+        public=GetNextTipResult(nextTipInfo=None),
     )
