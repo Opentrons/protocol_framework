@@ -182,8 +182,6 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
             robot_definition=robot_definition,
         )
 
-    # TODO: Port loadLabware, moveLabware, loadModule, moveToAddressableArea, and moveToAddressableAreaForDropTip
-    # and their tests
     def handle_action(self, action: Action) -> None:
         """Modify state in reaction to an action."""
         for state_update in get_state_updates(action):
