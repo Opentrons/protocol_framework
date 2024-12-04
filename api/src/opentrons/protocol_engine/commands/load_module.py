@@ -173,7 +173,7 @@ class LoadModuleImplementation(
             cutout_fixture_id = ModuleType.to_module_fixture_id(module_type)
             module_fixture = deck_configuration_provider.get_cutout_fixture(
                 cutout_fixture_id,
-                self._state_view.addressable_areas.state.deck_definition,
+                self._state_view.labware.get_deck_definition(),
             )
             cutout_id = (
                 self._state_view.addressable_areas.get_cutout_id_by_deck_slot_name(slot)

@@ -6,6 +6,7 @@ tested together.
 """
 
 import inspect
+from unittest.mock import sentinel
 
 import pytest
 from decoy import Decoy
@@ -171,6 +172,7 @@ def test_get_addressable_area_for_simulation_not_loaded(decoy: Decoy) -> None:
             }
         },
         use_simulated_deck_config=True,
+        deck_definition=sentinel.deck_definition,
     )
 
     addressable_area = AddressableArea(
@@ -185,7 +187,8 @@ def test_get_addressable_area_for_simulation_not_loaded(decoy: Decoy) -> None:
 
     decoy.when(
         deck_configuration_provider.get_potential_cutout_fixtures(
-            "abc", subject.state.deck_definition
+            "abc",
+            sentinel.deck_definition,
         )
     ).then_return(
         (
@@ -202,7 +205,8 @@ def test_get_addressable_area_for_simulation_not_loaded(decoy: Decoy) -> None:
 
     decoy.when(
         deck_configuration_provider.get_cutout_position(
-            "cutoutA1", subject.state.deck_definition
+            "cutoutA1",
+            sentinel.deck_definition,
         )
     ).then_return(DeckPoint(x=1, y=2, z=3))
 
@@ -211,7 +215,7 @@ def test_get_addressable_area_for_simulation_not_loaded(decoy: Decoy) -> None:
             "abc",
             DeckPoint(x=1, y=2, z=3),
             DeckSlotName.SLOT_A1,
-            subject.state.deck_definition,
+            sentinel.deck_definition,
         )
     ).then_return(addressable_area)
 
@@ -231,11 +235,12 @@ def test_get_addressable_area_for_simulation_raises(decoy: Decoy) -> None:
             }
         },
         use_simulated_deck_config=True,
+        deck_definition=sentinel.deck_definition,
     )
 
     decoy.when(
         deck_configuration_provider.get_potential_cutout_fixtures(
-            "abc", subject.state.deck_definition
+            "abc", sentinel.deck_definition
         )
     ).then_return(
         (
@@ -252,7 +257,7 @@ def test_get_addressable_area_for_simulation_raises(decoy: Decoy) -> None:
 
     decoy.when(
         deck_configuration_provider.get_provided_addressable_area_names(
-            "bleh", "789", subject.state.deck_definition
+            "bleh", "789", sentinel.deck_definition
         )
     ).then_return([])
 
@@ -322,10 +327,10 @@ def test_get_addressable_area_center() -> None:
 
 def test_get_fixture_height(decoy: Decoy) -> None:
     """It should return the height of the requested fixture."""
-    subject = get_addressable_area_view()
+    subject = get_addressable_area_view(deck_definition=sentinel.deck_definition)
     decoy.when(
         deck_configuration_provider.get_cutout_fixture(
-            "someShortCutoutFixture", subject.state.deck_definition
+            "someShortCutoutFixture", sentinel.deck_definition
         )
     ).then_return(
         {
@@ -342,7 +347,7 @@ def test_get_fixture_height(decoy: Decoy) -> None:
 
     decoy.when(
         deck_configuration_provider.get_cutout_fixture(
-            "someTallCutoutFixture", subject.state.deck_definition
+            "someTallCutoutFixture", sentinel.deck_definition
         )
     ).then_return(
         {
@@ -394,11 +399,14 @@ def test_get_slot_definition() -> None:
 
 def test_get_slot_definition_raises_with_bad_slot_name(decoy: Decoy) -> None:
     """It should raise a SlotDoesNotExistError if a bad slot name is given."""
-    subject = get_addressable_area_view()
+    deck_definition = cast(DeckDefinitionV5, {"otId": "fake"})
+    subject = get_addressable_area_view(
+        deck_definition=deck_definition,
+    )
 
     decoy.when(
         deck_configuration_provider.get_potential_cutout_fixtures(
-            "foo", subject.state.deck_definition
+            "foo", deck_definition
         )
     ).then_raise(AddressableAreaDoesNotExistError())
 
@@ -438,11 +446,12 @@ def test_raise_if_area_not_in_deck_configuration_simulated_config(decoy: Decoy) 
                 )
             },
         },
+        deck_definition=sentinel.deck_definition,
     )
 
     decoy.when(
         deck_configuration_provider.get_potential_cutout_fixtures(
-            "mario", subject.state.deck_definition
+            "mario", sentinel.deck_definition
         )
     ).then_return(
         (
@@ -461,7 +470,7 @@ def test_raise_if_area_not_in_deck_configuration_simulated_config(decoy: Decoy) 
 
     decoy.when(
         deck_configuration_provider.get_potential_cutout_fixtures(
-            "luigi", subject.state.deck_definition
+            "luigi", sentinel.deck_definition
         )
     ).then_return(
         (
@@ -478,13 +487,13 @@ def test_raise_if_area_not_in_deck_configuration_simulated_config(decoy: Decoy) 
 
     decoy.when(
         deck_configuration_provider.get_provided_addressable_area_names(
-            "1up", "fire flower", subject.state.deck_definition
+            "1up", "fire flower", sentinel.deck_definition
         )
     ).then_return([])
 
     decoy.when(
         deck_configuration_provider.get_addressable_area_display_name(
-            "luigi", subject.state.deck_definition
+            "luigi", sentinel.deck_definition
         )
     ).then_return("super luigi")
 

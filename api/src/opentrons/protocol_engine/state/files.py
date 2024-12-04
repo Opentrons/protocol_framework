@@ -35,7 +35,7 @@ class FileStore(HasState[FileState], HandlesActions):
             self._state.file_ids.extend(state_update.files_added.file_ids)
 
 
-class FileView(HasState[FileState]):
+class FileView:
     """Read-only engine created file state view."""
 
     _state: FileState
