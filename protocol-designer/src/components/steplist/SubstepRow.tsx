@@ -35,56 +35,86 @@ interface PillTooltipContentsProps {
   ingredNames: WellIngredientNames
   well: string
 }
+
 export const PillTooltipContents = (
   props: PillTooltipContentsProps
 ): JSX.Element => {
+  const { ingreds, ingredNames, well } = props
   const liquidDisplayColors = useSelector(selectors.getLiquidDisplayColors)
+  const isSingleChannel = (ingred: any): ingred is { volume: number } =>
+    typeof ingred === 'object' && 'volume' in ingred
+
+  const isMultiChannel = (
+    ingred: any
+  ): ingred is { [ingredId: string]: { volume: number } } =>
+    typeof ingred === 'object' && !('volume' in ingred)
+
   const totalLiquidVolume = reduce(
-    props.ingreds,
-    // @ts-expect-error(sa, 2021-6-20): TODO IMMEDIATELY, this could either be single channel OR multi channel volume data
-    // we have to differentiate, because the structure of the interface is different
-    (acc, ingred) => acc + ingred.volume,
+    ingreds,
+    (acc, ingred) => {
+      if (isSingleChannel(ingred)) {
+        return acc + (ingred.volume ?? 0)
+      } else if (isMultiChannel(ingred)) {
+        return (
+          acc +
+          reduce(
+            Object.values(ingred ?? {}),
+            (subAcc, channelData) => subAcc + (channelData?.volume ?? 0),
+            0
+          )
+        )
+      }
+      return acc
+    },
     0
   )
-  const hasMultipleIngreds = Object.keys(props.ingreds).length > 1
+
+  const hasMultipleIngreds = Object.keys(ingreds).length > 1
+
   return (
     <div className={styles.liquid_tooltip_contents}>
       <table>
         <tbody>
-          {map(props.ingreds, (ingred, groupId) => (
-            <tr key={groupId} className={styles.ingred_row}>
-              <td>
-                <div
-                  className={styles.liquid_circle}
-                  style={{
-                    backgroundColor:
-                      liquidDisplayColors[Number(groupId)] ??
-                      swatchColors(groupId),
-                  }}
-                />
-              </td>
-              <td className={styles.ingred_name}>
-                {props.ingredNames[groupId]}
-              </td>
-              {hasMultipleIngreds && (
-                <td className={styles.ingred_percentage}>
-                  {/* @ts-expect-error(sa, 2021-6-20): TODO IMMEDIATELY, this could either be single channel OR multi channel volume data */}
-                  {formatPercentage(ingred.volume, totalLiquidVolume)}
+          {map(ingreds, (ingred, groupId) => {
+            const volume = isSingleChannel(ingred)
+              ? ingred.volume
+              : reduce(
+                  Object.values(ingred ?? {}),
+                  (acc, channelData) => acc + (channelData?.volume ?? 0),
+                  0
+                )
+
+            return (
+              <tr key={groupId} className={styles.ingred_row}>
+                <td>
+                  <div
+                    className={styles.liquid_circle}
+                    style={{
+                      backgroundColor:
+                        liquidDisplayColors[Number(groupId)] ??
+                        swatchColors(groupId),
+                    }}
+                  />
                 </td>
-              )}
-              <td className={styles.ingred_partial_volume}>
-                {/* @ts-expect-error(sa, 2021-6-20): TODO IMMEDIATELY, this could either be single channel OR multi channel volume data */}
-                {formatVolume(ingred.volume, 2)}µl
-              </td>
-            </tr>
-          ))}
+                <td className={styles.ingred_name}>{ingredNames[groupId]}</td>
+                {hasMultipleIngreds && (
+                  <td className={styles.ingred_percentage}>
+                    {formatPercentage(volume, totalLiquidVolume)}
+                  </td>
+                )}
+                <td className={styles.ingred_partial_volume}>
+                  {formatVolume(volume, 2)}µl
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
       {hasMultipleIngreds && (
         <Fragment>
           <div className={styles.total_divider} />
           <div className={styles.total_row}>
-            <span>{`${props.well} Total Volume`}</span>
+            <span>{`${well} Total Volume`}</span>
             <span>{formatVolume(totalLiquidVolume, 2)}µl</span>
           </div>
         </Fragment>
