@@ -127,7 +127,7 @@ jobs:
           flags: api
 
   test-package:
-    name: 'opentrons package tests on ${{ matrix.os }}, python ${{ matrix.python }}'
+    name: 'installed package tests on ${{ matrix.os }}, python ${{ matrix.python }}'
     timeout-minutes: 5
     strategy:
       matrix:
@@ -146,12 +146,13 @@ jobs:
         id: setup-uv
       - name: Install Python
         run: uv python install ${{ matrix.python }}
-      - name: Install Opentrons
+      - name: Install opentrons and shared-data
         shell: bash
         run: |
           uv python pin '${{ matrix.python }}'
           uv venv
           uv pip install git+https://github.com/Opentrons/opentrons@${{ github.head_ref }}#subdirectory=api
+          uv pip install git+https://github.com/Opentrons/opentrons@${{ github.head_ref }}#subdirectory=shared-data/python
           uv pip list
       - name: Simulate protocol
         shell: bash
