@@ -362,6 +362,24 @@ def ensure_definition_is_labware(definition: LabwareDefinition) -> None:
         )
 
 
+def ensure_definition_is_lid(definition: LabwareDefinition) -> None:
+    """Ensure that one of the definition's allowed roles is `lid` or that that field is empty."""
+    if LabwareRole.lid not in definition.allowedRoles:
+        raise LabwareDefinitionIsNotLabwareError(
+            f"Labware {definition.parameters.loadName} is not a lid."
+        )
+
+
+def ensure_definition_is_not_lid_after_api_version(
+    api_version: APIVersion, definition: LabwareDefinition
+) -> None:
+    """Ensure that one of the definition's allowed roles is not `lid` or that the API Version is below the release where lid loading was seperated."""
+    if LabwareRole.lid in definition.allowedRoles and api_version >= APIVersion(2, 22):
+        raise APIVersionError(
+            f"Labware Lids cannot be loaded like standard labware in Protocols written with an API version greater than {APIVersion(2,22)}."
+        )
+
+
 _MODULE_ALIASES: Dict[str, ModuleModel] = {
     "magdeck": MagneticModuleModel.MAGNETIC_V1,
     "magnetic module": MagneticModuleModel.MAGNETIC_V1,

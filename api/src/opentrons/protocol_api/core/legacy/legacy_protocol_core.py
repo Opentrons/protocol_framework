@@ -171,6 +171,9 @@ class LegacyProtocolCore(
         label: Optional[str],
         namespace: Optional[str],
         version: Optional[int],
+        lid_load_name: Optional[str],
+        lid_namespace: Optional[str],
+        lid_version: Optional[int],
     ) -> LegacyLabwareCore:
         """Load a labware using its identifying parameters."""
         if isinstance(location, OffDeckType):
@@ -478,6 +481,15 @@ class LegacyProtocolCore(
         """Set the most recent moved to location."""
         self._last_location = location
         self._last_mount = mount
+
+    def load_lid_stack(
+        self,
+        load_name: str,
+        location: Union[DeckSlotName, Labware],
+        quantity: int,
+    ) -> Union[DeckSlotName, Labware]:
+        """Load a Stack of Lids to a given location, creating a Lid Store."""
+        raise APIVersionError(api_element="Lid stack")
 
     def get_module_cores(self) -> List[legacy_module_core.LegacyModuleCore]:
         """Get loaded module cores."""

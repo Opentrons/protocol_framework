@@ -79,6 +79,9 @@ class AbstractProtocol(
         label: Optional[str],
         namespace: Optional[str],
         version: Optional[int],
+        lid_load_name: Optional[str],
+        lid_namespace: Optional[str],
+        lid_version: Optional[int],
     ) -> LabwareCoreType:
         """Load a labware using its identifying parameters."""
         ...
@@ -188,7 +191,16 @@ class AbstractProtocol(
         self,
         location: Optional[Location],
         mount: Optional[Mount] = None,
-    ) -> None:
+    ) -> DeckSlotName:
+        ...
+
+    @abstractmethod
+    def load_lid_stack(
+        self,
+        load_name: str,
+        location: Union[DeckSlotName, StagingSlotName, Labware],
+        quantity: int,
+    ) -> Union[DeckSlotName, Labware]:
         ...
 
     @abstractmethod

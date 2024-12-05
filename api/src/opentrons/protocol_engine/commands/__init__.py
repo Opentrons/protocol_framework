@@ -163,6 +163,14 @@ from .load_pipette import (
     LoadPipetteCommandType,
 )
 
+from .load_lid_stack import (
+    LoadLidStack,
+    LoadLidStackParams,
+    LoadLidStackCreate,
+    LoadLidStackResult,
+    LoadLidStackCommandType,
+)
+
 from .move_labware import (
     MoveLabware,
     MoveLabwareParams,

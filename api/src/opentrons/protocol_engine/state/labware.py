@@ -815,6 +815,11 @@ class LabwareView(HasState[LabwareState]):
             return self.raise_if_labware_inaccessible_by_pipette(
                 labware_location.labwareId
             )
+        elif labware.lid_id is not None:
+            raise errors.LocationNotAccessibleByPipetteError(
+                f"Cannot move pipette to {labware.loadName} "
+                "because labware is currently covered by a lid."
+            )
         elif isinstance(labware_location, AddressableAreaLocation):
             if fixture_validation.is_staging_slot(labware_location.addressableAreaName):
                 raise errors.LocationNotAccessibleByPipetteError(

@@ -121,6 +121,19 @@ class LoadedLabwareUpdate:
 
 
 @dataclasses.dataclass
+class LoadedLidStackUpdate:
+    """An update that loads a new labware."""
+
+    labware_ids: typing.List[str]
+    """The unique IDs of the new lids."""
+
+    new_location: LabwareLocation
+    """The labware's initial location."""
+
+    definition: LabwareDefinition
+
+
+@dataclasses.dataclass
 class LoadPipetteUpdate:
     """An update that loads a new pipette.
 
@@ -287,6 +300,8 @@ class StateUpdate:
 
     loaded_labware: LoadedLabwareUpdate | NoChangeType = NO_CHANGE
 
+    loaded_lid_stack: LoadedLidStackUpdate | NoChangeType = NO_CHANGE
+
     tips_used: TipsUsedUpdate | NoChangeType = NO_CHANGE
 
     liquid_loaded: LiquidLoadedUpdate | NoChangeType = NO_CHANGE
@@ -408,6 +423,7 @@ class StateUpdate:
         labware_id: str,
         offset_id: typing.Optional[str],
         display_name: typing.Optional[str],
+        lid_id: typing.Optional[str],
         location: LabwareLocation,
     ) -> Self:
         """Add a new labware to state. See `LoadedLabwareUpdate`."""
@@ -415,6 +431,23 @@ class StateUpdate:
             definition=definition,
             labware_id=labware_id,
             offset_id=offset_id,
+            new_location=location,
+            display_name=display_name,
+            lid_id=lid_id,
+        )
+        return self
+
+    def set_loaded_lid_stack(
+        self: Self,
+        definition: LabwareDefinition,
+        labware_ids: typing.List[str],
+        display_name: typing.Optional[str],
+        location: LabwareLocation,
+    ) -> Self:
+        """Add a new lid stack to state. See `LoadedLidStackUpdate`."""
+        self.loaded_labware = LoadedLidStackUpdate(
+            definition=definition,
+            labware_ids=labware_ids,
             new_location=location,
             display_name=display_name,
         )

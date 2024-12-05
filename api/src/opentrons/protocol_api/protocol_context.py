@@ -399,6 +399,7 @@ class ProtocolContext(CommandPublisher):
         namespace: Optional[str] = None,
         version: Optional[int] = None,
         adapter: Optional[str] = None,
+        lid: Optional[str] = None,
     ) -> Labware:
         """Load a labware onto a location.
 
@@ -475,12 +476,23 @@ class ProtocolContext(CommandPublisher):
                 location, self._api_version, self._core.robot_type
             )
 
+
+        # TODO NOTE:
+        # Break the load lid behavior out into entirely seperate "load lid" command
+        # Load lid will also be responsible for assinging the lid ID to it's parent labware
+        # This means stripping the logic I added to load labware execute, as well as the parameter changes, out. 
+        # Instead, the load lid result will contain the labware ID of it's parent labware for the client to pair things up
+        # This means it will need to happen AFTER the load labware command here
+
         labware_core = self._core.load_labware(
             load_name=load_name,
             location=load_location,
             label=label,
             namespace=namespace,
             version=version,
+            lid_load_name=lid,
+            lid_namespace=namespace,
+            lid_version=version,
         )
 
         labware = Labware(
@@ -1333,6 +1345,51 @@ class ProtocolContext(CommandPublisher):
     def door_closed(self) -> bool:
         """Returns ``True`` if the front door of the robot is closed."""
         return self._core.door_closed()
+
+    @requires_version(2, 22)
+    def load_lid_stack(
+        self,
+        load_name: str,
+        location: Union[DeckLocation, Labware],
+        quantity: int,
+    ) -> Union[DeckSlotName, Labware]:
+        """
+        Load a stack of Lids onto a valid Deck Location or Adapter.
+
+        :param str load_name: A string to use for looking up a lid definition.
+            You can find the ``load_name`` for any standard lid on the Opentrons
+            `Labware Library <https://labware.opentrons.com>`_.
+        :param location: ither a :ref:`deck slot <deck-slots>`,
+            like ``1``, ``"1"``, or ``"D1"``, or the a valid Opentrons Adapter.
+        :param int quantity: The quantity of lids to be loaded in the stack.
+
+        :return: A :py:class:`~opentrons.protocol_api.DeckLocation` object representing the location of the stack.
+        """
+        load_location: Union[DeckSlotName, StagingSlotName, Labware]
+        if isinstance(location, DeckLocation):
+            load_location = validation.ensure_and_convert_deck_slot(
+                location, self._api_version, self._core.robot_type
+            )
+        else:
+            load_location = location
+        load_name = validation.ensure_lowercase_name(load_name)
+
+        result = self._core.load_lid_stack(
+            load_name=load_name, location=load_location, quantity=quantity
+        )
+        
+        # TODO load labware for the labware ID of the Lid
+        # the API core command should be responsible for calling load labware and then adding that accumulated labware to the lid store at this given location
+        # The user then reference the returned location in something like a move lid command
+
+        # move lid should accept a LidStoreLocation or a Labware as source and a LidStoreLocation, Labware or trash as destination
+        # ----------
+        # TODO NOTE: We're returning a union of deckslotname and labware as the location that this stack exists, should either be a DeckLocation or a new type alias of some kind
+        # TODO NOTE: We need a lid store tracking lid stacks by location (the value returned here)
+        #   - These lid stores will be responsible for owning the result of the load lid stack command
+        #   - When we do a move lid command, the lid store will have a validator that passes the "top" lid ID from the stack of lids via a get_next_lid function or something
+        #   - Add all that to the state store
+        return result
 
 
 def _create_module_context(

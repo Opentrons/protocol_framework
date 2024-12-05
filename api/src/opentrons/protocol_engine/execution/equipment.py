@@ -1,8 +1,9 @@
 """Equipment command side-effect logic."""
 from dataclasses import dataclass
-from typing import Optional, overload, Union
+from typing import Optional, overload, Union, List
 
 from opentrons_shared_data.pipette.types import PipetteNameType
+from opentrons_shared_data.labware.labware_definition import LabwareRole
 
 from opentrons.calibration_storage.helpers import uri_from_details
 from opentrons.protocols.models import LabwareDefinition
@@ -152,10 +153,6 @@ class EquipmentHandler:
         Returns:
             A LoadedLabwareData object.
         """
-        labware_id = (
-            labware_id if labware_id is not None else self._model_utils.generate_id()
-        )
-
         definition_uri = uri_from_details(
             load_name=load_name,
             namespace=namespace,
@@ -171,6 +168,25 @@ class EquipmentHandler:
                 namespace=namespace,
                 version=version,
             )
+
+        # Validate definition allows for load conditions
+        if LabwareRole.lid in definition.allowedRoles:
+            if isinstance(location, OnLabwareLocation):
+                parent_labware_uri = self._state_store.labware.get_uri_from_definition(
+                    self._state_store.labware.get_definition(location.labwareId)
+                )
+                if parent_labware_uri not in definition.compatibleParentLabware:
+                    raise ValueError(
+                        f"Labware Lid {load_name} may not be loaded on parent labware {self._state_store.labware.get_display_name(location.labwareId)}."
+                    )
+            else:
+                raise ValueError(
+                    f"Load Labware location must be another Labware when loading a lid as a Labware."
+                )
+
+        labware_id = (
+            labware_id if labware_id is not None else self._model_utils.generate_id()
+        )
 
         # Allow propagation of ModuleNotLoadedError.
         offset_id = self.find_applicable_labware_offset_id(
@@ -378,6 +394,80 @@ class EquipmentHandler:
             serial_number=attached_module.serial_number,
             definition=attached_module.definition,
         )
+
+    async def load_lids(
+        self,
+        load_name: str,
+        namespace: str,
+        version: int,
+        location: LabwareLocation,
+        quantity: int,
+        labware_ids: Optional[List[str]],
+    ) -> List[LoadedLabwareData]:
+        """Load one or many lid labware by assigning an identifier and pulling required data.
+
+        Args:
+            load_name: The lid labware's load name.
+            namespace: The lid labware's namespace.
+            version: The lid labware's version.
+            location: The deck location at which lid(s) will be placed.
+            labware_ids: An optional list of identifiers to assign the labware. If None,
+                an identifier will be generated.
+
+        Raises:
+            ModuleNotLoadedError: If `location` references a module ID
+                that doesn't point to a valid loaded module.
+
+        Returns:
+            A list of LoadedLabwareData objects.
+        """
+
+        definition_uri = uri_from_details(
+            load_name=load_name,
+            namespace=namespace,
+            version=version,
+        )
+        try:
+            # Try to use existing definition in state.
+            definition = self._state_store.labware.get_definition_by_uri(definition_uri)
+        except LabwareDefinitionDoesNotExistError:
+            definition = await self._labware_data_provider.get_labware_definition(
+                load_name=load_name,
+                namespace=namespace,
+                version=version,
+            )
+
+        if quantity > definition.stackLimit:
+            raise ValueError(
+                f"Requested quantity {quantity} is greater than the stack limit of {definition.stackLimit} provided by definition for {load_name}."
+            )
+
+        if labware_ids is not None and len(labware_ids) != quantity:
+            raise ValueError(
+                "Cannot provide a different amount of lid identifiers than the quantity of lids being loaded."
+            )
+
+        if labware_ids is None:
+            for i in range(quantity):
+                labware_ids[i] = self._model_utils.generate_id()
+
+        # Allow propagation of ModuleNotLoadedError.
+        load_labware_data_list = List[LoadedLabwareData]
+        for i in range(quantity):
+            if i == 0:
+                labware_location = location
+            else:
+                labware_location = OnLabwareLocation(labwareId=labware_ids[i - 1])
+            load_labware_data_list[i] = LoadedLabwareData(
+                labware_id=labware_ids[i],
+                definition=definition,
+                offsetId=self.find_applicable_labware_offset_id(
+                    labware_definition_uri=definition_uri,
+                    labware_location=labware_location,
+                ),
+            )
+
+        return load_labware_data_list
 
     async def configure_for_volume(
         self, pipette_id: str, volume: float, tip_overlap_version: Optional[str]

@@ -61,6 +61,18 @@ class LoadLabwareParams(BaseModel):
         #  user-specified label OR the displayName property of the labware's definition.
         # TODO: Make sure v6 JSON protocols don't do that.
     )
+    lidLoadName: Optional[str] = Field(
+        None,
+        description="Name used to reference an optional lid labware definition.",
+    )
+    lidNamespace: Optional[str] = Field(
+        None,
+        description="The namespace the lid labware definition belongs to.",
+    )
+    lidVersion: Optional[int] = Field(
+        None,
+        description="The lid labware definition version.",
+    )
 
 
 class LoadLabwareResult(BaseModel):
@@ -86,6 +98,10 @@ class LoadLabwareResult(BaseModel):
             " Null or undefined means no offset applies,"
             " so the default of (0, 0, 0) will be used."
         ),
+    )
+    lidId: Optional[str] = Field(
+        None,
+        description="An ID to reference the optional lid labware loaded on the primary labware in subsequent commands.",
     )
 
 
@@ -145,6 +161,28 @@ class LoadLabwareImplementation(
         )
 
         state_update = StateUpdate()
+        lid_id = None
+        if params.lidLoadName is not None:
+            if params.lidNamespace is None or params.lidVersion is None:
+                raise ValueError(
+                    f"Labware Namespace and Version required to load Lid Labware {params.lidLoadName}."
+                )
+            loaded_lid = await self._equipment.load_labware(
+                load_name=params.lidLoadName,
+                namespace=params.lidNamespace,
+                version=params.lidVersion,
+                location=OnLabwareLocation(labwareId=loaded_labware.labware_id),
+                labware_id=params.labwareId,
+            )
+            lid_id = loaded_lid.labware_id
+            state_update.set_loaded_labware(
+                labware_id=loaded_lid.labware_id,
+                offset_id=loaded_lid.offsetId,
+                definition=loaded_lid.definition,
+                location=OnLabwareLocation(labwareId=loaded_labware.labware_id),
+                display_name=None,
+                lid_id=lid_id,
+            )
 
         state_update.set_loaded_labware(
             labware_id=loaded_labware.labware_id,
@@ -152,6 +190,7 @@ class LoadLabwareImplementation(
             definition=loaded_labware.definition,
             location=verified_location,
             display_name=params.displayName,
+            lid_id=lid_id,
         )
 
         # TODO(jbl 2023-06-23) these validation checks happen after the labware is loaded, because they rely on
@@ -175,6 +214,7 @@ class LoadLabwareImplementation(
                 labwareId=loaded_labware.labware_id,
                 definition=loaded_labware.definition,
                 offsetId=loaded_labware.offsetId,
+                lidId=lid_id,
             ),
             state_update=state_update,
         )
