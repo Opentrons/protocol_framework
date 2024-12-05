@@ -10,6 +10,7 @@ from opentrons.protocol_engine import LabwareOffset, LabwareOffsetCreate
 from robot_server.service.json_api.request import RequestModel
 from robot_server.service.json_api.response import (
     PydanticResponse,
+    SimpleBody,
     SimpleEmptyBody,
     SimpleMultiBody,
 )
@@ -108,40 +109,23 @@ def get_labware_offsets(  # noqa: D103
 
 @PydanticResponse.wrap_route(
     router.delete,
-    path="",
-    summary="Delete labware offsets",
-    description=textwrap.dedent(
-        """\
-        Delete one or many labware offsets.
-
-        Query parameters select which ones to delete, acting as filters that are
-        ANDed together; they have the same meaning as in `GET /labwareOffsets`.
-        If no filters are provided, all labware offsets will be deleted.
-
-        The deleted offsets are returned.
-        """
-    ),
+    path="/{id}",
+    summary="Delete a single labware offset",
+    description="Delete a single labware offset. The deleted offset is returned.",
 )
 def delete_labware_offset(  # noqa: D103
     id: Annotated[
-        str | None,
-        fastapi.Query(),
-    ] = None,
-    definition_uri: Annotated[
-        str | None,
-        fastapi.Query(alias="definitionUri"),
-    ] = None,
-    location_slot_name: Annotated[
-        str | None,
-        fastapi.Query(alias="location.slotName"),
-    ] = None,
-    location_module_model: Annotated[
-        str | None,
-        fastapi.Query(alias="location.moduleModel"),
-    ] = None,
-    location_definition_uri: Annotated[
-        str | None,
-        fastapi.Query(alias="location.definitionUri"),
-    ] = None,
-) -> PydanticResponse[SimpleMultiBody[LabwareOffset]]:
+        str,
+        fastapi.Path(description="The `id` field of the offset to delete."),
+    ],
+) -> PydanticResponse[SimpleBody[LabwareOffset]]:
+    raise NotImplementedError()
+
+
+@PydanticResponse.wrap_route(
+    router.delete,
+    path="",
+    summary="Delete all labware offsets",
+)
+def delete_all_labware_offsets() -> PydanticResponse[SimpleEmptyBody]:  # noqa: D103
     raise NotImplementedError()
