@@ -136,8 +136,6 @@ jobs:
     runs-on: '${{ matrix.os }}'
     steps:
       - uses: 'actions/checkout@v4'
-        with:
-          fetch-depth: 0
       - name: 'Fix actions/checkout odd handling of tags'
         if: startsWith(github.ref, 'refs/tags')
         run: |
@@ -153,7 +151,7 @@ jobs:
         run: |
           uv python pin '${{ matrix.python }}'
           uv venv
-          uv pip install file://$(pwd)#subdirectory=api
+          uv pip install file://$(pwd)/api
           uv pip list
       - name: Simulate protocol
         shell: bash
