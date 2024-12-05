@@ -23,6 +23,7 @@ class GCODE(str, Enum):
     CLOSE_LABWARE_LATCH = "M243"
     GET_LABWARE_LATCH_STATE = "M241"
     DEACTIVATE_HEATER = "M106"
+    RESET_REASON = "M114"
 
 
 HS_BAUDRATE = 115200
@@ -166,12 +167,18 @@ class HeaterShakerDriver(AbstractHeaterShakerDriver):
 
     async def get_device_info(self) -> Dict[str, str]:
         """Send get-device-info command"""
-        c = CommandBuilder(terminator=HS_COMMAND_TERMINATOR).add_gcode(
+        device_info = CommandBuilder(terminator=HS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.GET_VERSION
         )
         response = await self._connection.send_command(
-            command=c, retries=DEFAULT_COMMAND_RETRIES
+            command=device_info, retries=DEFAULT_COMMAND_RETRIES
         )
+
+        reset_reason = CommandBuilder(terminator=HS_COMMAND_TERMINATOR).add_gcode(
+            gcode=GCODE.RESET_REASON
+        )
+        await self._connection.send_command(command=reset_reason, retries=DEFAULT_COMMAND_RETRIES)
+
         return utils.parse_hs_device_information(device_info_string=response)
 
     async def enter_programming_mode(self) -> None:
