@@ -82,7 +82,7 @@ export const Modal = (props: ModalProps): JSX.Element => {
       position={position}
       showOverlay={showOverlay}
       zIndexOverlay={zIndexOverlay}
-      width={styleProps.width ?? '31.25rem'}
+      width={styleProps.width ?? '40rem'}
       header={modalHeader}
       onOutsideClick={closeOnOutsideClick ?? false ? onClose : undefined}
       // center within viewport aside from nav

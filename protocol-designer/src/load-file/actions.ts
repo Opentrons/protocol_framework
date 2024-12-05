@@ -9,6 +9,8 @@ import type {
   LoadFileAction,
   NewProtocolFields,
 } from './types'
+import { pythonProtoParserDemo } from './pythondemo'
+
 export interface FileUploadMessageAction {
   type: 'FILE_UPLOAD_MESSAGE'
   payload: FileUploadMessage
@@ -52,7 +54,7 @@ export const loadProtocolFile = (
   // reset the state of the input to allow file re-uploads
   event.currentTarget.value = ''
 
-  if (!file.name.endsWith('.json')) {
+  if (!file.name.endsWith('.json') && !file.name.endsWith('.py')) {
     fileError('INVALID_FILE_TYPE')
   } else {
     reader.onload = readEvent => {
@@ -60,7 +62,11 @@ export const loadProtocolFile = (
       let parsedProtocol: PDProtocolFile | null | undefined
 
       try {
-        parsedProtocol = JSON.parse((result as any) as string)
+        if (file.name.endsWith('.py')) {
+          pythonProtoParserDemo(result, file.name)
+        } else {
+          parsedProtocol = JSON.parse((result as any) as string)
+        }
         // TODO LATER Ian 2018-05-18 validate file with JSON Schema here
         parsedProtocol && dispatch(loadFileAction(parsedProtocol))
       } catch (error) {
