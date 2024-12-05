@@ -151,7 +151,7 @@ jobs:
         run: |
           uv python pin '${{ matrix.python }}'
           uv venv
-          uv pip install file://$(pwd)/api
+          uv pip install git+https://github.com/Opentrons/opentrons@${{ github.head_ref }}#subdirectory=api
           uv pip list
       - name: Simulate protocol
         shell: bash
