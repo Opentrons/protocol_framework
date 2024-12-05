@@ -37,20 +37,20 @@ class AXIS(str, Enum):
     Z = 'Z',
     L = 'L',
 
-class LABWARE_Z_OFFSET(float, Enum):
-    BIORAD_HARDSHELL_PCR = 12.4,
-    OPENTRONS_TIPRACKS = 20,
-    DEEPWELL_96 = 50,
+class LABWARE_Z_HEIGHT(float, Enum):
+    BIORAD_HARDSHELL_PCR = 16.0,
+    OPENTRONS_TIPRACKS = 122,
+    DEEPWELL_96 = 40.5,
     FLEX_STACKER_PLATFORM = 8.4,
-    NEST_200_ul_PCR_PLATE = 16,
-    NEST_96_WELL_PLATE_FLATBOTTOM = 16,
+    NEST_200_ul_PCR_PLATE = 15.5,
+    NEST_96_WELL_PLATE_FLATBOTTOM = 18,
     NEST_96_WELL_PLATE_FLATBOTTOM_WITH_LID = 16,
     NEST_96_DEEP_WELL_PLATE_VBOTTOM = 39.1,
-    NEST_12_DEEP_WEEL_PLATE_VBOTTOM = 29.75
-    CORSTAR_24_WELL_WITH_LID = 16,
-    CORSTAR_24_WELL_WITHOUT_LID = 16,
+    NEST_12_DEEP_WEEL_PLATE_VBOTTOM = 29.75,
+    CORSTAR_24_WELL_WITH_LID = 16*2,
+    CORSTAR_24_WELL_WITHOUT_LID = 16*2,
     SARSTEDT_PCR_PLATE_FULLSKIRT = 16,
-    ARMADILLO_384_PLATE = 11.7
+    ARMADILLO_384_PLATE = 15.5
 
 FS_BAUDRATE = 115200
 DEFAULT_FS_TIMEOUT = 0.1
@@ -64,26 +64,26 @@ TOTAL_TRAVEL_L = 26
 LATCH_DISTANCE_MM = 2
 RETRACT_DIST_X = 1
 RETRACT_DIST_Z = 1
-HOME_SPEED = 10
-HOME_ACCELERATION = 2
+HOME_SPEED = 40
+HOME_SPEED_L = 100
+HOME_ACCELERATION = 800
+HOME_ACCELERATION_L = 800
 MOVE_ACCELERATION_X = 1500
-MOVE_ACCELERATION_Z = 80
+MOVE_ACCELERATION_Z = 600
 MOVE_ACCELERATION_L = 800
-MAX_SPEED_DISCONTINUITY_X = 10
+MAX_SPEED_DISCONTINUITY_X = 20
 MAX_SPEED_DISCONTINUITY_Z = 5
-MAX_SPEED_DISCONTINUITY_L = 5
-HOME_CURRENT_X = 1.5
-HOME_CURRENT_Z = 1.5
-HOME_CURRENT_L = 1.2
-MOVE_CURRENT_X = 0.8
-MOVE_CURRENT_Z = 1.2
-MOVE_CURRENT_L = 1.2
+MAX_SPEED_DISCONTINUITY_L = 20
+HOME_CURRENT_X = 1.3
+HOME_CURRENT_Z = 1.3
+HOME_CURRENT_L = 0.8
+MOVE_CURRENT_X = 0.6
+MOVE_CURRENT_Z = 0.8
+MOVE_CURRENT_L = 0.8
 MOVE_SPEED_X = 200
 MOVE_SPEED_UPZ = 150
 MOVE_SPEED_L = 100
 MOVE_SPEED_DOWNZ = 150
-
-LABWARE_CLEARANCE = 9
 
 class FlexStacker():
     """Flex Stacker Driver."""
@@ -102,14 +102,15 @@ class FlexStacker():
         self.move_speed_up_z = MOVE_SPEED_UPZ
         self.move_speed_down_z = MOVE_SPEED_DOWNZ
         self.home_acceleration = HOME_ACCELERATION
+        self.home_acceleration_l = HOME_ACCELERATION_L
         self.home_speed = HOME_SPEED
+        self.home_speed_l = HOME_SPEED_L
         self.move_acceleration_x = MOVE_ACCELERATION_X
         self.move_acceleration_z = MOVE_ACCELERATION_Z
         self.move_acceleration_l = MOVE_ACCELERATION_L
         self.max_speed_discontinuity_x = MAX_SPEED_DISCONTINUITY_X
         self.max_speed_discontinuity_z = MAX_SPEED_DISCONTINUITY_Z
         self.max_speed_discontinuity_l = MAX_SPEED_DISCONTINUITY_L
-        self.labware_clearance = LABWARE_CLEARANCE
         self.current_position = {'X': None, 'Z': None, 'L': None}
         # self.__class__.__name__ == 'FlexStacker'
 
@@ -161,14 +162,14 @@ class FlexStacker():
             # print(response)
             #response = self._stacker_connection.read_until(expected = f'{x} OK\n')
             response = self._stacker_connection.readline()
-            print(response)
+            #print(response)
             if (self._ack in response) or (self._stall in response):
                 # Remove ack from response
                 response = response.replace(self._ack, b"OK\n")
                 str_response = self.process_raw_response(
                     command=data, response=response.decode()
                 )
-                print(str_response)
+                #print(str_response)
                 return str_response
             end = time.time()
             if (end-start) > 120:
@@ -331,7 +332,7 @@ class FlexStacker():
                                                     ).add_element(
                                                     f'D{msd}')
 
-        print(c)
+        #print(c)
         self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
         if direction == DIR.POSITIVE and axis == AXIS.X:
             self.current_position.update({'X': self.current_position['X'] + distance})
@@ -377,8 +378,10 @@ class FlexStacker():
         elif axis == AXIS.L:
             current = self.set_default(current, HOME_CURRENT_L)
             self.set_run_current(current, AXIS.L)
-            velocity = self.set_default(velocity, self.home_speed)
-            acceleration = self.set_default(acceleration, self.home_acceleration)
+            velocity = self.set_default(velocity, self.home_speed_l)
+            acceleration = self.set_default(acceleration, self.home_acceleration_l)
+            print(velocity)
+            print(acceleration)
             # msd = self.set_default(msd, MAX_SPEED_DISCONTINUITY_L)
         else:
             raise(f"AXIS not defined!! {axis}")
@@ -433,7 +436,7 @@ class FlexStacker():
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.SET_IHOLD_CURRENT
         ).add_element(axis + f'{current}')
-        print(c)
+        #print(c)
         self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
 
     def set_run_current(self, current: float, axis: AXIS) -> str:
@@ -446,13 +449,20 @@ class FlexStacker():
 
     def close_latch(self, velocity: Optional[float] = None, acceleration: Optional[float] = None):
         velocity = self.set_default(velocity, MOVE_SPEED_L)
-        acceleration = self.set_default(acceleration, MOVE_ACCELERATION_L)
+        acceleration = self.set_default(acceleration, HOME_ACCELERATION_L)
         states = self.get_sensor_states()
         print(states)
-        if states['LR'] == '1':
+        print(velocity)
+        print(acceleration)
+        cur_position = self.current_position['L']
+        print(cur_position)
+        #     self.home(AXIS.L, DIR.NEGATIVE_HOME, velocity, acceleration)
+        if cur_position == None:
+            self.home(AXIS.L, DIR.NEGATIVE_HOME, velocity, acceleration)
+        elif cur_position != 0:
+            self.move(AXIS.L, TOTAL_TRAVEL_L-1, DIR.NEGATIVE, MOVE_SPEED_L, MOVE_ACCELERATION_L, MAX_SPEED_DISCONTINUITY_L)
             self.home(AXIS.L, DIR.NEGATIVE_HOME, velocity, acceleration)
         else:
-            self.move(AXIS.L, TOTAL_TRAVEL_L-5, DIR.NEGATIVE, velocity, acceleration, MAX_SPEED_DISCONTINUITY_L)
             self.home(AXIS.L, DIR.NEGATIVE_HOME, velocity, acceleration)
 
     def open_latch(self, distance: Optional[float] = None,
@@ -464,18 +474,17 @@ class FlexStacker():
         msd = self.set_default(max_speed_discontinuity, MAX_SPEED_DISCONTINUITY_L)
         self.move(AXIS.L, TOTAL_TRAVEL_L, DIR.POSITIVE, velocity, acceleration, msd)
 
-    def load_labware(self, labware_z_offset: float):
-        labware_clearance = labware_z_offset
+    def load_labware(self, labware_height: float):
         # ----------------Set up the Stacker------------------------
         self.home(AXIS.X, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
         self.home(AXIS.Z, DIR.NEGATIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
         self.close_latch()
         self.move(AXIS.X, TOTAL_TRAVEL_X-5, DIR.NEGATIVE, self.move_speed_x, self.move_acceleration_x)
         self.home(AXIS.X, DIR.NEGATIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
-        self.move(AXIS.Z, TOTAL_TRAVEL_Z-(labware_clearance/2), DIR.POSITIVE, self.move_speed_up_z, self.move_acceleration_z)
+        self.move(AXIS.Z, TOTAL_TRAVEL_Z-(labware_height/2)-10, DIR.POSITIVE, self.move_speed_up_z, self.move_acceleration_z)
         # #------------------- transfer -----------------------------
         self.open_latch()
-        self.move(AXIS.Z, (labware_clearance/2)-15, DIR.POSITIVE, self.move_speed_up_z, self.move_acceleration_z)
+        self.move(AXIS.Z, (labware_height/2), DIR.POSITIVE, self.move_speed_up_z, self.move_acceleration_z)
         self.home(AXIS.Z, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
         self.close_latch()
         self.move(AXIS.Z, TOTAL_TRAVEL_Z-15, DIR.NEGATIVE, self.move_speed_down_z, self.move_acceleration_z)
@@ -483,8 +492,8 @@ class FlexStacker():
         self.move(AXIS.X, TOTAL_TRAVEL_X-5, DIR.POSITIVE, self.move_speed_x, self.move_acceleration_x)
         self.home(AXIS.X, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
 
-    def unload_labware(self):
-        labware_clearance = 60
+    def unload_labware(self, labware_height: float):
+
         labware_retract_speed= 100
         # ----------------Set up the Stacker------------------------
         self.home(AXIS.X, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
@@ -496,9 +505,9 @@ class FlexStacker():
         self.home(AXIS.Z, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
         # #------------------- transfer -----------------------------
         self.open_latch()
-        self.move(AXIS.Z, labware_clearance, DIR.NEGATIVE, self.move_speed_down_z, self.move_acceleration_z)
+        self.move(AXIS.Z, (labware_height/2), DIR.NEGATIVE, self.move_speed_down_z, self.move_acceleration_z)
         self.close_latch()
-        self.move(AXIS.Z, (TOTAL_TRAVEL_Z-labware_clearance)-10, DIR.NEGATIVE, self.move_speed_down_z, self.move_acceleration_z)
+        self.move(AXIS.Z, (TOTAL_TRAVEL_Z-labware_height/2), DIR.NEGATIVE, self.move_speed_down_z, self.move_acceleration_z)
         self.home(AXIS.Z, DIR.NEGATIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
         self.move(AXIS.X, TOTAL_TRAVEL_X-5, DIR.POSITIVE, self.move_speed_x, self.move_acceleration_x)
         self.home(AXIS.X, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
