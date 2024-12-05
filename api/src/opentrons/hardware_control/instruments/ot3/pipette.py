@@ -42,6 +42,7 @@ from opentrons_shared_data.pipette.types import (
     PipetteName,
     PipetteModel,
     Quirks,
+    PipetteOEMType,
 )
 from opentrons_shared_data.pipette import (
     load_data as load_pipette_data,
@@ -93,22 +94,26 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
         self._liquid_class_name = pip_types.LiquidClasses.default
         self._liquid_class = self._config.liquid_properties[self._liquid_class_name]
 
+        oem = PipetteOEMType.get_oem_from_quirks(config.quirks)
         # TODO (lc 12-05-2022) figure out how we can safely deprecate "name" and "model"
         self._pipette_name = PipetteNameType(
             pipette_type=config.pipette_type,
             pipette_channels=config.channels,
             pipette_generation=config.display_category,
+            oem_type=oem,
         )
         self._acting_as = self._pipette_name
         self._pipette_model = PipetteModelVersionType(
             pipette_type=config.pipette_type,
             pipette_channels=config.channels,
             pipette_version=config.version,
+            oem_type=oem,
         )
         self._valid_nozzle_maps = load_pipette_data.load_valid_nozzle_maps(
             self._pipette_model.pipette_type,
             self._pipette_model.pipette_channels,
             self._pipette_model.pipette_version,
+            self._pipette_model.oem_type,
         )
         self._nozzle_offset = self._config.nozzle_offset
         self._nozzle_manager = (
@@ -250,6 +255,7 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
             self._pipette_model.pipette_type,
             self._pipette_model.pipette_channels,
             self._pipette_model.pipette_version,
+            self._pipette_model.oem_type,
         )
         self._config_as_dict = self._config.model_dump()
 

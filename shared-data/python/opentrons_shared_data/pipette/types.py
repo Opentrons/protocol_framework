@@ -115,6 +115,21 @@ class Quirks(enum.Enum):
     highSpeed = "highSpeed"
 
 
+class PipetteOEMType(enum.Enum):
+    OT = "ot"  # opentrons type
+    EM = "em"  # Emulsifying Pipette
+
+    @classmethod
+    def get_oem_from_quirks(cls, quirks: List[Quirks]) -> "PipetteOEMType":
+        """Return an oem type if true based on the quirks."""
+        return cls.EM if Quirks.highSpeed in quirks else cls.OT
+
+    @classmethod
+    def get_oem_from_model_str(cls, model_str: str) -> "PipetteOEMType":
+        """Return an oem type if true based on the model string."""
+        return cls.EM if "multi_em" in model_str else cls.OT
+
+
 class AvailableUnits(enum.Enum):
     mm = "mm"
     amps = "amps"
@@ -220,7 +235,7 @@ PipetteName = Literal[
     "p1000_single_gen2",
     "p1000_single_flex",
     "p1000_multi_flex",
-    "p1000_multi_em",
+    "p1000_multi_em_flex",
     "p1000_96",
     "p200_96",
 ]
@@ -247,7 +262,7 @@ class PipetteNameType(str, enum.Enum):
     P1000_SINGLE_GEN2 = "p1000_single_gen2"
     P1000_SINGLE_FLEX = "p1000_single_flex"
     P1000_MULTI_FLEX = "p1000_multi_flex"
-    P1000_MULTI_EM = "p1000_multi_em"
+    P1000_MULTI_EM = "p1000_multi_em_flex"
     P1000_96 = "p1000_96"
     P200_96 = "p200_96"
 
