@@ -146,11 +146,7 @@ jobs:
       - name: Install UV
         uses: astral-sh/setup-uv@v4
         id: setup-uv
-        with:
-          enable-cache: true
-          cache-suffix: ${{ runner.os }}-${{ matrix.python }}
       - name: Install Python
-        if: steps.setup-uv.outputs.cache-hit != 'true'
         run: uv python install ${{ matrix.python }}
       - name: Install Opentrons
         shell: bash
