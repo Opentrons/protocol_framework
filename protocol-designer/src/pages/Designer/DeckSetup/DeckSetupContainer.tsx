@@ -1,5 +1,6 @@
 import { useMemo, useState, Fragment } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { round } from 'lodash'
 import {
   ALIGN_CENTER,
   BORDERS,
@@ -35,13 +36,13 @@ import { SlotDetailsContainer } from '../../../organisms'
 import { selectZoomedIntoSlot } from '../../../labware-ingred/actions'
 import { selectors } from '../../../labware-ingred/selectors'
 import { DeckSetupDetails } from './DeckSetupDetails'
+import { DECK_SETUP_TOOLS_WIDTH_REM, DeckSetupTools } from './DeckSetupTools'
 import {
   animateZoom,
   getCutoutIdForAddressableArea,
   useDeckSetupWindowBreakPoint,
   zoomInOnCoordinate,
 } from './utils'
-import { DeckSetupTools } from './DeckSetupTools'
 
 import type { StagingAreaLocation, TrashCutoutId } from '@opentrons/components'
 import type {
@@ -122,18 +123,36 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   const hasWasteChute =
     wasteChuteFixtures.length > 0 || wasteChuteStagingAreaFixtures.length > 0
 
+  const windowInnerWidthRem = window.innerWidth / 16
+  const deckMapRatio = round(
+    (windowInnerWidthRem - DECK_SETUP_TOOLS_WIDTH_REM) / windowInnerWidthRem,
+    2
+  )
+
   const viewBoxX = deckDef.cornerOffsetFromOrigin[0]
   const viewBoxY = hasWasteChute
     ? deckDef.cornerOffsetFromOrigin[1] -
       WASTE_CHUTE_SPACE -
       DETAILS_HOVER_SPACE
     : deckDef.cornerOffsetFromOrigin[1]
-  const viewBoxWidth = deckDef.dimensions[0]
+  const viewBoxWidth = deckDef.dimensions[0] / deckMapRatio
   const viewBoxHeight = deckDef.dimensions[1] + DETAILS_HOVER_SPACE
 
   const initialViewBox = `${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`
 
   const [viewBox, setViewBox] = useState<string>(initialViewBox)
+
+  const isZoomed = Object.values(zoomIn).some(val => val != null)
+  const viewBoxNumerical = viewBox?.split(' ').map(val => Number(val)) ?? []
+  const viewBoxAdjustedNumerical = [
+    ...viewBoxNumerical.slice(0, 2),
+    (viewBoxNumerical[2] - viewBoxNumerical[0]) / deckMapRatio +
+      viewBoxNumerical[0],
+    viewBoxNumerical[3],
+  ]
+  const viewBoxAdjusted = viewBoxAdjustedNumerical.reduce((acc, num, i) => {
+    return i < viewBoxNumerical.length - 1 ? acc + `${num} ` : acc + `${num}`
+  }, '')
 
   const [hoveredLabware, setHoveredLabware] = useState<string | null>(null)
   const [hoveredModule, setHoveredModule] = useState<ModuleModel | null>(null)
@@ -202,7 +221,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
         width="100%"
         height={tab === 'protocolSteps' ? '65.75vh' : '100%'}
         flexDirection={DIRECTION_COLUMN}
-        padding={SPACING.spacing24}
+        padding={isZoomed ? '0' : SPACING.spacing24}
       >
         <Flex
           width="100%"
@@ -227,7 +246,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
             }
             minWidth={tab === 'protocolSteps' ? 'auto' : '30rem'}
             deckDef={deckDef}
-            viewBox={viewBox}
+            viewBox={viewBoxAdjusted}
             outline="auto"
             zoomed={zoomIn.slot != null}
             borderRadius={BORDERS.borderRadius12}

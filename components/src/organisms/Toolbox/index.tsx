@@ -5,31 +5,27 @@ import {
   DIRECTION_COLUMN,
   JUSTIFY_SPACE_BETWEEN,
   NO_WRAP,
-  POSITION_FIXED,
+  POSITION_RELATIVE,
 } from '../../styles'
 import { BORDERS, COLORS } from '../../helix-design-system'
 import { SPACING } from '../../ui-style-constants'
 import { PrimaryButton } from '../../atoms'
 import { textDecorationUnderline } from '../../ui-style-constants/typography'
+import type { StyleProps } from '../../primitives'
 
-export interface ToolboxProps {
+export interface ToolboxProps extends StyleProps {
   title: JSX.Element
   children: React.ReactNode
   disableCloseButton?: boolean
-  width?: string
-  height?: string
   confirmButtonText?: string
   onConfirmClick?: () => void
   confirmButton?: JSX.Element
   onCloseClick?: () => void
   closeButton?: JSX.Element
-  side?: 'left' | 'right'
-  horizontalSide?: 'top' | 'bottom'
   titlePadding?: string
   childrenPadding?: string
   subHeader?: JSX.Element | null
   secondaryHeaderButton?: JSX.Element
-  position?: string
 }
 
 export function Toolbox(props: ToolboxProps): JSX.Element {
@@ -43,14 +39,13 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
     height = '100%',
     disableCloseButton = false,
     width = '19.5rem',
-    side = 'right',
-    horizontalSide = 'bottom',
     confirmButton,
     titlePadding = SPACING.spacing16,
     childrenPadding = SPACING.spacing16,
     subHeader,
     secondaryHeaderButton,
-    position = POSITION_FIXED,
+    position = POSITION_RELATIVE,
+    ...styleProps
   } = props
 
   const slideOutRef = useRef<HTMLDivElement>(null)
@@ -69,26 +64,17 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
     handleScroll()
   }, [slideOutRef])
 
-  const positionStyles =
-    position === POSITION_FIXED
-      ? {
-          ...(side === 'right' && { right: '0' }),
-          ...(side === 'left' && { left: '0' }),
-          ...(horizontalSide === 'bottom' && { bottom: '0' }),
-          ...(horizontalSide === 'top' && { top: '5rem' }),
-          zIndex: 10,
-        }
-      : {}
   return (
     <Flex
       cursor="auto"
       backgroundColor={COLORS.white}
       boxShadow="0px 3px 6px rgba(0, 0, 0, 0.23)"
       height={height}
-      {...positionStyles}
-      borderRadius={BORDERS.borderRadius8}
       width={width}
+      position={position}
+      borderRadius={BORDERS.borderRadius8}
       flex="0"
+      {...styleProps}
     >
       <Flex
         width={width}
