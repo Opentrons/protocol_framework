@@ -23,7 +23,9 @@ def mock_set_system_time(mock_system_time: datetime) -> Iterator[MagicMock]:
     with patch.object(router, "set_system_time") as p:
         yield p
 
+
 ResourceLinksAdapter: TypeAdapter[ResourceLinks] = TypeAdapter(ResourceLinks)
+
 
 @pytest.fixture
 def response_links() -> ResourceLinks:
@@ -107,6 +109,6 @@ def test_set_system_time(
     )
     assert response.json() == {
         "data": {"systemTime": mock_system_time.isoformat(), "id": "time"},
-        "links": ResourceLinksAdapter.dump_python(response_links)
+        "links": ResourceLinksAdapter.dump_python(response_links),
     }
     assert response.status_code == 200

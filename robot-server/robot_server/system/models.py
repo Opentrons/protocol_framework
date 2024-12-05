@@ -13,8 +13,9 @@ class SystemTimeAttributes(BaseModel):
 
     systemTime: datetime
 
-    @field_serializer('systemTime')
+    @field_serializer("systemTime")
     def serialize_systemTime(self, systemTime: datetime) -> str:
+        """Serializes system time with expected format."""
         return systemTime.isoformat()
 
 
