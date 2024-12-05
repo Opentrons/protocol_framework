@@ -65,8 +65,12 @@ async def test_get_device_info(driver: TempDeckDriver, connection: AsyncMock) ->
 
     response = await driver.get_device_info()
 
-    device_info = CommandBuilder(terminator=TEMP_DECK_COMMAND_TERMINATOR).add_gcode("M115")
-    reset_reason = CommandBuilder(terminator=TEMP_DECK_COMMAND_TERMINATOR).add_gcode("M114")
+    device_info = CommandBuilder(terminator=TEMP_DECK_COMMAND_TERMINATOR).add_gcode(
+        "M115"
+    )
+    reset_reason = CommandBuilder(terminator=TEMP_DECK_COMMAND_TERMINATOR).add_gcode(
+        "M114"
+    )
 
     connection.send_command.assert_any_call(command=device_info, retries=3)
     connection.send_command.assert_called_with(command=reset_reason, retries=3)

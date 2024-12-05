@@ -303,7 +303,9 @@ class ThermocyclerDriver(AbstractThermocyclerDriver):
         reset_reason = CommandBuilder(terminator=TC_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.RESET_REASON
         )
-        await self._connection.send_command(command=reset_reason, retries=DEFAULT_COMMAND_RETRIES)
+        await self._connection.send_command(
+            command=reset_reason, retries=DEFAULT_COMMAND_RETRIES
+        )
 
         return utils.parse_device_information(device_info_string=response)
 
@@ -364,7 +366,9 @@ class ThermocyclerDriverV2(ThermocyclerDriver):
         reset_reason = CommandBuilder(terminator=TC_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.RESET_REASON
         )
-        await self._connection.send_command(command=reset_reason, retries=DEFAULT_COMMAND_RETRIES)
+        await self._connection.send_command(
+            command=reset_reason, retries=DEFAULT_COMMAND_RETRIES
+        )
 
         return utils.parse_hs_device_information(device_info_string=response)
 
