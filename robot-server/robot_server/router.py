@@ -57,12 +57,6 @@ router.include_router(
 )
 
 router.include_router(
-    router=datafiles_router,
-    tags=["Data files Management"],
-    dependencies=[Depends(check_version_header)],
-)
-
-router.include_router(
     router=labware_offset_router,
     tags=["Labware Offset Management"],
     dependencies=[Depends(check_version_header)],
@@ -83,6 +77,12 @@ router.include_router(
 router.include_router(
     router=protocols_router,
     tags=["Protocol Management"],
+    dependencies=[Depends(check_version_header)],
+)
+
+router.include_router(
+    router=datafiles_router,
+    tags=["Data files Management"],
     dependencies=[Depends(check_version_header)],
 )
 
