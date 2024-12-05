@@ -67,6 +67,7 @@ class LoadedStaticPipetteData:
     back_left_corner_offset: Point
     front_right_corner_offset: Point
     pipette_lld_settings: Optional[Dict[str, Dict[str, float]]]
+    available_sensors: pipette_definition.AvailableSensorDefinition
 
 
 class VirtualPipetteDataProvider:
@@ -95,6 +96,7 @@ class VirtualPipetteDataProvider:
                 config.pipette_type,
                 config.channels,
                 config.version,
+                pip_types.PipetteOEMType.OT,
             )
             new_nozzle_manager = NozzleConfigurationManager.build_from_config(
                 config, valid_nozzle_maps
@@ -127,6 +129,7 @@ class VirtualPipetteDataProvider:
             pipette_model.pipette_type,
             pipette_model.pipette_channels,
             pipette_model.pipette_version,
+            pipette_model.oem_type,
         )
 
         liquid_class = pipette_definition.liquid_class_for_volume_between_default_and_defaultlowvolume(
@@ -160,6 +163,7 @@ class VirtualPipetteDataProvider:
             pipette_model.pipette_type,
             pipette_model.pipette_channels,
             pipette_model.pipette_version,
+            pipette_model.oem_type,
         )
 
     def _get_virtual_pipette_static_config_by_model(  # noqa: C901
@@ -176,6 +180,7 @@ class VirtualPipetteDataProvider:
             pipette_model.pipette_type,
             pipette_model.pipette_channels,
             pipette_model.pipette_version,
+            pipette_model.oem_type,
         )
         try:
             tip_type = pip_types.PipetteTipType(
@@ -192,6 +197,7 @@ class VirtualPipetteDataProvider:
             pipette_model.pipette_type,
             pipette_model.pipette_channels,
             pipette_model.pipette_version,
+            pipette_model.oem_type,
         )
         if pipette_id not in self._nozzle_manager_layout_by_id:
             nozzle_manager = NozzleConfigurationManager.build_from_config(
@@ -280,6 +286,8 @@ class VirtualPipetteDataProvider:
                 pip_front_right[0], pip_front_right[1], pip_front_right[2]
             ),
             pipette_lld_settings=config.lld_settings,
+            available_sensors=config.available_sensors
+            or pipette_definition.AvailableSensorDefinition(sensors=[]),
         )
 
     def get_virtual_pipette_static_config(
@@ -298,6 +306,11 @@ def get_pipette_static_config(
     """Get the config for a pipette, given the state/config object from the HW API."""
     back_left_offset = pipette_dict["pipette_bounding_box_offsets"].back_left_corner
     front_right_offset = pipette_dict["pipette_bounding_box_offsets"].front_right_corner
+    available_sensors = (
+        pipette_dict["available_sensors"]
+        if "available_sensors" in pipette_dict.keys()
+        else pipette_definition.AvailableSensorDefinition(sensors=[])
+    )
     return LoadedStaticPipetteData(
         model=pipette_dict["model"],
         display_name=pipette_dict["display_name"],
@@ -327,6 +340,7 @@ def get_pipette_static_config(
             front_right_offset[0], front_right_offset[1], front_right_offset[2]
         ),
         pipette_lld_settings=pipette_dict["lld_settings"],
+        available_sensors=available_sensors,
     )
 
 

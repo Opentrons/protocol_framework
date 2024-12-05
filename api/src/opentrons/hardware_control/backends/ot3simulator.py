@@ -235,7 +235,11 @@ class OT3Simulator(FlexBackend):
         self._sim_gantry_load = gantry_load
 
     def update_constraints_for_plunger_acceleration(
-        self, mount: OT3Mount, acceleration: float, gantry_load: GantryLoad
+        self,
+        mount: OT3Mount,
+        acceleration: float,
+        gantry_load: GantryLoad,
+        high_speed_pipette: bool = False,
     ) -> None:
         self._sim_gantry_load = gantry_load
 
@@ -505,6 +509,7 @@ class OT3Simulator(FlexBackend):
                         converted_name.pipette_type,
                         converted_name.pipette_channels,
                         converted_name.pipette_version,
+                        converted_name.oem_type,
                     ),
                     "id": None,
                 }
@@ -527,6 +532,7 @@ class OT3Simulator(FlexBackend):
                     converted_name.pipette_type,
                     converted_name.pipette_channels,
                     converted_name.pipette_version,
+                    converted_name.oem_type,
                 ),
                 "id": init_instr["id"],
             }
@@ -538,6 +544,7 @@ class OT3Simulator(FlexBackend):
                     converted_name.pipette_type,
                     converted_name.pipette_channels,
                     converted_name.pipette_version,
+                    converted_name.oem_type,
                 ),
                 "id": None,
             }

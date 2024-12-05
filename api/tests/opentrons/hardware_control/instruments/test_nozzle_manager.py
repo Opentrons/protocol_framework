@@ -10,6 +10,7 @@ from opentrons_shared_data.pipette.types import (
     PipetteModelType,
     PipetteChannelType,
     PipetteVersionType,
+    PipetteOEMType,
 )
 from opentrons_shared_data.pipette.pipette_definition import (
     PipetteConfigurations,
@@ -261,7 +262,10 @@ def test_single_pipettes_always_full(
     pipette_details: Tuple[PipetteModelType, PipetteVersionType]
 ) -> None:
     config = load_definition(
-        pipette_details[0], PipetteChannelType.SINGLE_CHANNEL, pipette_details[1]
+        pipette_details[0],
+        PipetteChannelType.SINGLE_CHANNEL,
+        pipette_details[1],
+        PipetteOEMType.OT,
     )
     subject = nozzle_manager.NozzleConfigurationManager.build_from_config(
         config, ValidNozzleMaps(maps=A1)
@@ -298,7 +302,10 @@ def test_single_pipette_map_entries(
     pipette_details: Tuple[PipetteModelType, PipetteVersionType]
 ) -> None:
     config = load_definition(
-        pipette_details[0], PipetteChannelType.SINGLE_CHANNEL, pipette_details[1]
+        pipette_details[0],
+        PipetteChannelType.SINGLE_CHANNEL,
+        pipette_details[1],
+        PipetteOEMType.OT,
     )
     subject = nozzle_manager.NozzleConfigurationManager.build_from_config(
         config, ValidNozzleMaps(maps=A1)
@@ -335,7 +342,10 @@ def test_single_pipette_map_geometry(
     pipette_details: Tuple[PipetteModelType, PipetteVersionType]
 ) -> None:
     config = load_definition(
-        pipette_details[0], PipetteChannelType.SINGLE_CHANNEL, pipette_details[1]
+        pipette_details[0],
+        PipetteChannelType.SINGLE_CHANNEL,
+        pipette_details[1],
+        PipetteOEMType.OT,
     )
     subject = nozzle_manager.NozzleConfigurationManager.build_from_config(
         config, ValidNozzleMaps(maps=A1)
@@ -368,7 +378,10 @@ def test_multi_config_identification(
     pipette_details: Tuple[PipetteModelType, PipetteVersionType]
 ) -> None:
     config = load_definition(
-        pipette_details[0], PipetteChannelType.EIGHT_CHANNEL, pipette_details[1]
+        pipette_details[0],
+        PipetteChannelType.EIGHT_CHANNEL,
+        pipette_details[1],
+        PipetteOEMType.OT,
     )
     subject = nozzle_manager.NozzleConfigurationManager.build_from_config(
         config,
@@ -440,7 +453,10 @@ def test_multi_config_map_entries(
     pipette_details: Tuple[PipetteModelType, PipetteVersionType]
 ) -> None:
     config = load_definition(
-        pipette_details[0], PipetteChannelType.EIGHT_CHANNEL, pipette_details[1]
+        pipette_details[0],
+        PipetteChannelType.EIGHT_CHANNEL,
+        pipette_details[1],
+        PipetteOEMType.OT,
     )
     subject = nozzle_manager.NozzleConfigurationManager.build_from_config(
         config,
@@ -506,7 +522,10 @@ def test_multi_config_geometry(
     pipette_details: Tuple[PipetteModelType, PipetteVersionType]
 ) -> None:
     config = load_definition(
-        pipette_details[0], PipetteChannelType.EIGHT_CHANNEL, pipette_details[1]
+        pipette_details[0],
+        PipetteChannelType.EIGHT_CHANNEL,
+        pipette_details[1],
+        PipetteOEMType.OT,
     )
     subject = nozzle_manager.NozzleConfigurationManager.build_from_config(
         config,
@@ -557,7 +576,10 @@ def test_96_config_identification(
     pipette_details: Tuple[PipetteModelType, PipetteVersionType]
 ) -> None:
     config = load_definition(
-        pipette_details[0], PipetteChannelType.NINETY_SIX_CHANNEL, pipette_details[1]
+        pipette_details[0],
+        PipetteChannelType.NINETY_SIX_CHANNEL,
+        pipette_details[1],
+        PipetteOEMType.OT,
     )
     subject = nozzle_manager.NozzleConfigurationManager.build_from_config(
         config,
@@ -678,7 +700,10 @@ def test_96_config_map_entries(
     pipette_details: Tuple[PipetteModelType, PipetteVersionType]
 ) -> None:
     config = load_definition(
-        pipette_details[0], PipetteChannelType.NINETY_SIX_CHANNEL, pipette_details[1]
+        pipette_details[0],
+        PipetteChannelType.NINETY_SIX_CHANNEL,
+        pipette_details[1],
+        PipetteOEMType.OT,
     )
     subject = nozzle_manager.NozzleConfigurationManager.build_from_config(
         config,
@@ -1015,7 +1040,10 @@ def test_96_config_geometry(
     pipette_details: Tuple[PipetteModelType, PipetteVersionType]
 ) -> None:
     config = load_definition(
-        pipette_details[0], PipetteChannelType.NINETY_SIX_CHANNEL, pipette_details[1]
+        pipette_details[0],
+        PipetteChannelType.NINETY_SIX_CHANNEL,
+        pipette_details[1],
+        PipetteOEMType.OT,
     )
     subject = nozzle_manager.NozzleConfigurationManager.build_from_config(
         config,

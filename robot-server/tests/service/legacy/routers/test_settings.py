@@ -146,6 +146,7 @@ def test_receive_attached_pipette_settings(
                 pip_types.PipetteModelType.p20,
                 pip_types.PipetteChannelType.EIGHT_CHANNEL,
                 pip_types.PipetteVersionType(3, 5),
+                pip_types.PipetteOEMType.OT,
             ),
             pipette_serial_number="P12345",
             pipette_override_path="nope",
