@@ -52,7 +52,7 @@ export function getIs96ChannelPipetteAttached(
 ): boolean {
   const pipetteName = leftMountAttachedPipette?.name
 
-  return pipetteName === 'p1000_96'
+  return pipetteName === 'p1000_96' || pipetteName === 'p200_96'
 }
 
 export function getOffsetCalibrationForMount(

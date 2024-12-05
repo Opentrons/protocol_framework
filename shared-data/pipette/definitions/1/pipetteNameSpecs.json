@@ -678,7 +678,7 @@
   },
   "p200_96": {
     "displayName": "Flex 96-Channel 200 μL",
-    "displayCategory": "FLEX",
+    "displayCategory": "GEN1",
     "defaultAspirateFlowRate": {
       "value": 7.85,
       "min": 3,

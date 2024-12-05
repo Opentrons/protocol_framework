@@ -41,7 +41,8 @@ export const DetachPipette = (props: DetachPipetteProps): JSX.Element => {
   }
   const memoizedAttachedPipettes = React.useMemo(() => attachedPipettes, [])
   const is96ChannelPipette =
-    memoizedAttachedPipettes[mount]?.instrumentName === 'p1000_96'
+    memoizedAttachedPipettes[mount]?.instrumentName === 'p1000_96' ||
+    memoizedAttachedPipettes[mount]?.instrumentName === 'p200_96'
   const handle96ChannelProceed = (): void => {
     chainRunCommands?.(
       [

@@ -12,7 +12,7 @@ export const getPipetteWizardStepsForProtocol = (
 ): PipetteWizardStep[] => {
   const requiredPipette = pipetteInfo.find(pipette => pipette.mount === mount)
   const nintySixChannelAttached =
-    attachedPipettes[LEFT]?.instrumentName === 'p1000_96'
+    attachedPipettes[LEFT]?.instrumentName === 'p1000_96' || attachedPipettes[LEFT]?.instrumentName === 'p200_96'
 
   //  return empty array when correct pipette is attached && pipette cal not needed or
   //  no pipette is required in the protocol
@@ -47,6 +47,7 @@ export const getPipetteWizardStepsForProtocol = (
     ]
   } else if (
     requiredPipette.pipetteName !== 'p1000_96' &&
+    requiredPipette.pipetteName !== 'p200_96' &&
     attachedPipettes[mount] != null
   ) {
     //    96-channel pipette attached and need to attach single mount pipette
@@ -156,6 +157,7 @@ export const getPipetteWizardStepsForProtocol = (
     //  Single mount pipette attached to both mounts and need to attach 96-channel pipette
   } else if (
     requiredPipette.pipetteName === 'p1000_96' &&
+    requiredPipette.pipetteName === 'p200_96' &&
     attachedPipettes[LEFT] != null &&
     attachedPipettes[RIGHT] != null
   ) {
@@ -229,7 +231,8 @@ export const getPipetteWizardStepsForProtocol = (
       : ALL_STEPS.filter(step => step.section !== SECTIONS.FIRMWARE_UPDATE)
     //  Single mount pipette attached to left mount and need to attach 96-channel pipette
   } else if (
-    requiredPipette.pipetteName === 'p1000_96' &&
+    (requiredPipette.pipetteName === 'p1000_96' ||
+    requiredPipette.pipetteName === 'p200_96') &&
     attachedPipettes[LEFT] != null &&
     attachedPipettes[RIGHT] == null
   ) {
@@ -292,7 +295,8 @@ export const getPipetteWizardStepsForProtocol = (
       : ALL_STEPS.filter(step => step.section !== SECTIONS.FIRMWARE_UPDATE)
     //  Single mount pipette attached to right mount and need to attach 96-channel pipette
   } else if (
-    requiredPipette.pipetteName === 'p1000_96' &&
+    (requiredPipette.pipetteName === 'p1000_96' ||
+    requiredPipette.pipetteName === 'p200_96') &&
     attachedPipettes[LEFT] == null &&
     attachedPipettes[RIGHT] != null
   ) {
@@ -356,7 +360,7 @@ export const getPipetteWizardStepsForProtocol = (
     //  if no pipette is attached to gantry
   } else {
     //  Gantry empty and need to attach 96-channel pipette
-    if (requiredPipette.pipetteName === 'p1000_96') {
+    if (requiredPipette.pipetteName === 'p1000_96' || requiredPipette.pipetteName === 'p200_96') {
       const ALL_STEPS = [
         {
           section: SECTIONS.BEFORE_BEGINNING,

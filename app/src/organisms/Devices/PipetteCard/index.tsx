@@ -183,7 +183,7 @@ export const PipetteCard = (props: PipetteCardProps): JSX.Element => {
             setPipetteWizardFlow(null)
           }}
           selectedPipette={
-            pipetteName === 'p1000_96' ? NINETY_SIX_CHANNEL : selectedPipette
+            pipetteName === 'p1000_96' || pipetteName === 'p200_96' ? NINETY_SIX_CHANNEL : selectedPipette
           }
         />
       ) : null}
