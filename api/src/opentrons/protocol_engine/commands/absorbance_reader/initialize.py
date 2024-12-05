@@ -1,15 +1,19 @@
 """Command models to initialize an Absorbance Reader."""
 from __future__ import annotations
-from typing import Optional, Literal, TYPE_CHECKING
+from typing import List, Optional, Literal, TYPE_CHECKING
 from typing_extensions import Type
 
 from pydantic import BaseModel, Field
 
+from opentrons.drivers.types import ABSMeasurementMode
+from opentrons.protocol_engine.types import ABSMeasureMode
+
 from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ...errors.error_occurrence import ErrorOccurrence
+from ...errors import InvalidWavelengthError
 
 if TYPE_CHECKING:
-    from opentrons.protocol_engine.state import StateView
+    from opentrons.protocol_engine.state.state import StateView
     from opentrons.protocol_engine.execution import EquipmentHandler
 
 
@@ -20,7 +24,13 @@ class InitializeParams(BaseModel):
     """Input parameters to initialize an absorbance reading."""
 
     moduleId: str = Field(..., description="Unique ID of the absorbance reader.")
-    sampleWavelength: int = Field(..., description="Sample wavelength in nm.")
+    measureMode: ABSMeasureMode = Field(
+        ..., description="Initialize single or multi measurement mode."
+    )
+    sampleWavelengths: List[int] = Field(..., description="Sample wavelengths in nm.")
+    referenceWavelength: Optional[int] = Field(
+        None, description="Optional reference wavelength in nm."
+    )
 
 
 class InitializeResult(BaseModel):
@@ -28,7 +38,7 @@ class InitializeResult(BaseModel):
 
 
 class InitializeImpl(
-    AbstractCommandImpl[InitializeParams, SuccessData[InitializeResult, None]]
+    AbstractCommandImpl[InitializeParams, SuccessData[InitializeResult]]
 ):
     """Execution implementation of initializing an Absorbance Reader."""
 
@@ -41,9 +51,7 @@ class InitializeImpl(
         self._state_view = state_view
         self._equipment = equipment
 
-    async def execute(
-        self, params: InitializeParams
-    ) -> SuccessData[InitializeResult, None]:
+    async def execute(self, params: InitializeParams) -> SuccessData[InitializeResult]:
         """Initiate a single absorbance measurement."""
         abs_reader_substate = self._state_view.modules.get_absorbance_reader_substate(
             module_id=params.moduleId
@@ -54,11 +62,59 @@ class InitializeImpl(
         )
 
         if abs_reader is not None:
-            await abs_reader.set_sample_wavelength(wavelength=params.sampleWavelength)
+            # Validate the parameters before initializing.
+            sample_wavelengths = set(params.sampleWavelengths)
+            sample_wavelengths_len = len(params.sampleWavelengths)
+            reference_wavelength = params.referenceWavelength
+            supported_wavelengths = set(abs_reader.supported_wavelengths)
+            unsupported_wavelengths = sample_wavelengths.difference(
+                supported_wavelengths
+            )
+            sample_wl_str = ", ".join([str(w) + "nm" for w in sample_wavelengths])
+            supported_wl_str = ", ".join([str(w) + "nm" for w in supported_wavelengths])
+            unsupported_wl_str = ", ".join(
+                [str(w) + "nm" for w in unsupported_wavelengths]
+            )
+            if unsupported_wavelengths:
+                raise InvalidWavelengthError(
+                    f"Unsupported wavelengths: {unsupported_wl_str}. "
+                    f" Use one of {supported_wl_str} instead."
+                )
+
+            if params.measureMode == "single":
+                if sample_wavelengths_len != 1:
+                    raise ValueError(
+                        f"Measure mode `single` requires one sample wavelength,"
+                        f" {sample_wl_str} provided instead."
+                    )
+                if (
+                    reference_wavelength is not None
+                    and reference_wavelength not in supported_wavelengths
+                ):
+                    raise InvalidWavelengthError(
+                        f"Reference wavelength {reference_wavelength}nm is not supported."
+                        f" Use one of {supported_wl_str} instead."
+                    )
+
+            if params.measureMode == "multi":
+                if sample_wavelengths_len < 1 or sample_wavelengths_len > 6:
+                    raise ValueError(
+                        f"Measure mode `multi` requires 1-6 sample wavelengths,"
+                        f" {sample_wl_str} provided instead."
+                    )
+                if reference_wavelength is not None:
+                    raise ValueError(
+                        "Reference wavelength cannot be used with Measure mode `multi`."
+                    )
+
+            await abs_reader.set_sample_wavelength(
+                ABSMeasurementMode(params.measureMode),
+                params.sampleWavelengths,
+                reference_wavelength=params.referenceWavelength,
+            )
 
         return SuccessData(
             public=InitializeResult(),
-            private=None,
         )
 
 

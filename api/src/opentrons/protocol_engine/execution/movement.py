@@ -2,21 +2,23 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional, List
+from typing import Optional, List, Union
 
-from opentrons.types import Point, MountType
+from opentrons.types import Point, MountType, StagingSlotName
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons_shared_data.errors.exceptions import PositionUnknownError
+from opentrons.protocol_engine.errors import LocationIsStagingSlotError
 
 from ..types import (
     WellLocation,
+    LiquidHandlingWellLocation,
     DeckPoint,
     MovementAxis,
     MotorAxis,
     CurrentWell,
     AddressableOffsetVector,
 )
-from ..state import StateStore
+from ..state.state import StateStore
 from ..resources import ModelUtils
 from .thermocycler_movement_flagger import ThermocyclerMovementFlagger
 from .heater_shaker_movement_flagger import HeaterShakerMovementFlagger
@@ -66,11 +68,12 @@ class MovementHandler:
         pipette_id: str,
         labware_id: str,
         well_name: str,
-        well_location: Optional[WellLocation] = None,
+        well_location: Optional[Union[WellLocation, LiquidHandlingWellLocation]] = None,
         current_well: Optional[CurrentWell] = None,
         force_direct: bool = False,
         minimum_z_height: Optional[float] = None,
         speed: Optional[float] = None,
+        operation_volume: Optional[float] = None,
     ) -> Point:
         """Move to a specific well."""
         self._state_store.labware.raise_if_labware_inaccessible_by_pipette(
@@ -91,9 +94,13 @@ class MovementHandler:
             self._state_store.modules.get_heater_shaker_movement_restrictors()
         )
 
-        dest_slot_int = self._state_store.geometry.get_ancestor_slot_name(
-            labware_id
-        ).as_int()
+        ancestor = self._state_store.geometry.get_ancestor_slot_name(labware_id)
+        if isinstance(ancestor, StagingSlotName):
+            raise LocationIsStagingSlotError(
+                "Cannot move to well on labware in Staging Area Slot."
+            )
+
+        dest_slot_int = ancestor.as_int()
 
         self._hs_movement_flagger.raise_if_movement_restricted(
             hs_movement_restrictors=hs_movement_restrictors,
@@ -129,6 +136,7 @@ class MovementHandler:
             current_well=current_well,
             force_direct=force_direct,
             minimum_z_height=minimum_z_height,
+            operation_volume=operation_volume,
         )
 
         speed = self._state_store.pipettes.get_movement_speed(
@@ -137,6 +145,33 @@ class MovementHandler:
 
         final_point = await self._gantry_mover.move_to(
             pipette_id=pipette_id, waypoints=waypoints, speed=speed
+        )
+
+        return final_point
+
+    async def move_mount_to(
+        self, mount: MountType, destination: DeckPoint, speed: Optional[float] = None
+    ) -> Point:
+        """Move mount to a specific location on the deck."""
+        hw_mount = mount.to_hw_mount()
+        await self._gantry_mover.prepare_for_mount_movement(hw_mount)
+        origin = await self._gantry_mover.get_position_from_mount(mount=hw_mount)
+        max_travel_z = self._gantry_mover.get_max_travel_z_from_mount(mount=mount)
+
+        # calculate the movement's waypoints
+        waypoints = self._state_store.motion.get_movement_waypoints_to_coords(
+            origin=origin,
+            dest=Point(x=destination.x, y=destination.y, z=destination.z),
+            max_travel_z=max_travel_z,
+            direct=False,
+            additional_min_travel_z=None,
+        )
+
+        # move through the waypoints
+        final_point = await self._gantry_mover.move_mount_to(
+            mount=hw_mount,
+            waypoints=waypoints,
+            speed=speed,
         )
 
         return final_point
@@ -151,6 +186,7 @@ class MovementHandler:
         speed: Optional[float] = None,
         stay_at_highest_possible_z: bool = False,
         ignore_tip_configuration: Optional[bool] = True,
+        highest_possible_z_extra_offset: Optional[float] = None,
     ) -> Point:
         """Move to a specific addressable area."""
         # Check for presence of heater shakers on deck, and if planned
@@ -201,6 +237,7 @@ class MovementHandler:
             minimum_z_height=minimum_z_height,
             stay_at_max_travel_z=stay_at_highest_possible_z,
             ignore_tip_configuration=ignore_tip_configuration,
+            max_travel_z_extra_margin=highest_possible_z_extra_offset,
         )
 
         speed = self._state_store.pipettes.get_movement_speed(

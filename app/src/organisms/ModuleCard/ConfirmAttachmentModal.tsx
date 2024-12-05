@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
 import {
@@ -16,9 +16,11 @@ import {
   TEXT_ALIGN_CENTER,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { updateConfigValue } from '../../redux/config'
-import type { Dispatch } from '../../redux/types'
-import type { UpdateConfigValueAction } from '../../redux/config/types'
+import { updateConfigValue } from '/app/redux/config'
+
+import type { ChangeEvent } from 'react'
+import type { Dispatch } from '/app/redux/types'
+import type { UpdateConfigValueAction } from '/app/redux/config/types'
 
 export function setHeaterShakerAttached(
   heaterShakerAttached: boolean
@@ -28,7 +30,7 @@ export function setHeaterShakerAttached(
     heaterShakerAttached
   )
 }
-interface ConfirmAttachmentModalProps {
+export interface ConfirmAttachmentModalProps {
   onCloseClick: () => void
   isProceedToRunModal: boolean
   onConfirmClick: () => void
@@ -38,7 +40,7 @@ export const ConfirmAttachmentModal = (
 ): JSX.Element | null => {
   const { isProceedToRunModal, onCloseClick, onConfirmClick } = props
   const { t } = useTranslation(['heater_shaker', 'shared'])
-  const [isDismissed, setIsDismissed] = React.useState<boolean>(false)
+  const [isDismissed, setIsDismissed] = useState<boolean>(false)
   const dispatch = useDispatch<Dispatch>()
 
   const confirmAttached = (): void => {
@@ -81,7 +83,7 @@ export const ConfirmAttachmentModal = (
         }`}
       >
         <CheckboxField
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
             setIsDismissed(e.currentTarget.checked)
           }}
           value={isDismissed}

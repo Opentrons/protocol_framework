@@ -10,10 +10,10 @@ from opentrons.util.get_union_elements import get_union_elements
 from .command import DefinedErrorData
 from .pipetting_common import (
     OverpressureError,
-    OverpressureErrorInternalData,
     LiquidNotFoundError,
-    LiquidNotFoundErrorInternalData,
+    TipPhysicallyAttachedError,
 )
+from .movement_common import StallOrCollisionError
 
 from . import absorbance_reader
 from . import heater_shaker
@@ -23,6 +23,7 @@ from . import thermocycler
 
 from . import calibration
 from . import unsafe
+from . import robot
 
 from .set_rail_lights import (
     SetRailLights,
@@ -30,6 +31,14 @@ from .set_rail_lights import (
     SetRailLightsCreate,
     SetRailLightsParams,
     SetRailLightsResult,
+)
+
+from .air_gap_in_place import (
+    AirGapInPlace,
+    AirGapInPlaceParams,
+    AirGapInPlaceCreate,
+    AirGapInPlaceResult,
+    AirGapInPlaceCommandType,
 )
 
 from .aspirate import (
@@ -128,6 +137,14 @@ from .load_liquid import (
     LoadLiquidCommandType,
 )
 
+from .load_liquid_class import (
+    LoadLiquidClass,
+    LoadLiquidClassParams,
+    LoadLiquidClassCreate,
+    LoadLiquidClassResult,
+    LoadLiquidClassCommandType,
+)
+
 from .load_module import (
     LoadModule,
     LoadModuleParams,
@@ -142,10 +159,10 @@ from .load_pipette import (
     LoadPipetteCreate,
     LoadPipetteResult,
     LoadPipetteCommandType,
-    LoadPipettePrivateResult,
 )
 
 from .move_labware import (
+    GripperMovementError,
     MoveLabware,
     MoveLabwareParams,
     MoveLabwareCreate,
@@ -216,7 +233,6 @@ from .pick_up_tip import (
     PickUpTipResult,
     PickUpTipCommandType,
     TipPhysicallyMissingError,
-    TipPhysicallyMissingErrorInternalData,
 )
 
 from .touch_tip import (
@@ -273,7 +289,6 @@ from .configure_for_volume import (
     ConfigureForVolumeCreate,
     ConfigureForVolumeResult,
     ConfigureForVolumeCommandType,
-    ConfigureForVolumePrivateResult,
 )
 
 from .prepare_to_aspirate import (
@@ -290,7 +305,6 @@ from .configure_nozzle_layout import (
     ConfigureNozzleLayoutParams,
     ConfigureNozzleLayoutResult,
     ConfigureNozzleLayoutCommandType,
-    ConfigureNozzleLayoutPrivateResult,
 )
 
 from .verify_tip_presence import (
@@ -324,6 +338,7 @@ from .liquid_probe import (
 
 Command = Annotated[
     Union[
+        AirGapInPlace,
         Aspirate,
         AspirateInPlace,
         Comment,
@@ -341,6 +356,7 @@ Command = Annotated[
         LoadLabware,
         ReloadLabware,
         LoadLiquid,
+        LoadLiquidClass,
         LoadModule,
         LoadPipette,
         MoveLabware,
@@ -382,6 +398,7 @@ Command = Annotated[
         thermocycler.OpenLid,
         thermocycler.CloseLid,
         thermocycler.RunProfile,
+        thermocycler.RunExtendedProfile,
         absorbance_reader.CloseLid,
         absorbance_reader.OpenLid,
         absorbance_reader.Initialize,
@@ -393,11 +410,20 @@ Command = Annotated[
         unsafe.UnsafeBlowOutInPlace,
         unsafe.UnsafeDropTipInPlace,
         unsafe.UpdatePositionEstimators,
+        unsafe.UnsafeEngageAxes,
+        unsafe.UnsafeUngripLabware,
+        unsafe.UnsafePlaceLabware,
+        robot.MoveTo,
+        robot.MoveAxesRelative,
+        robot.MoveAxesTo,
+        robot.openGripperJaw,
+        robot.closeGripperJaw,
     ],
     Field(discriminator="commandType"),
 ]
 
 CommandParams = Union[
+    AirGapInPlaceParams,
     AspirateParams,
     AspirateInPlaceParams,
     CommentParams,
@@ -415,6 +441,7 @@ CommandParams = Union[
     LoadLabwareParams,
     ReloadLabwareParams,
     LoadLiquidParams,
+    LoadLiquidClassParams,
     LoadModuleParams,
     LoadPipetteParams,
     MoveLabwareParams,
@@ -456,6 +483,7 @@ CommandParams = Union[
     thermocycler.OpenLidParams,
     thermocycler.CloseLidParams,
     thermocycler.RunProfileParams,
+    thermocycler.RunExtendedProfileParams,
     absorbance_reader.CloseLidParams,
     absorbance_reader.OpenLidParams,
     absorbance_reader.InitializeParams,
@@ -467,9 +495,18 @@ CommandParams = Union[
     unsafe.UnsafeBlowOutInPlaceParams,
     unsafe.UnsafeDropTipInPlaceParams,
     unsafe.UpdatePositionEstimatorsParams,
+    unsafe.UnsafeEngageAxesParams,
+    unsafe.UnsafeUngripLabwareParams,
+    unsafe.UnsafePlaceLabwareParams,
+    robot.MoveAxesRelativeParams,
+    robot.MoveAxesToParams,
+    robot.MoveToParams,
+    robot.openGripperJawParams,
+    robot.closeGripperJawParams,
 ]
 
 CommandType = Union[
+    AirGapInPlaceCommandType,
     AspirateCommandType,
     AspirateInPlaceCommandType,
     CommentCommandType,
@@ -487,6 +524,7 @@ CommandType = Union[
     LoadLabwareCommandType,
     ReloadLabwareCommandType,
     LoadLiquidCommandType,
+    LoadLiquidClassCommandType,
     LoadModuleCommandType,
     LoadPipetteCommandType,
     MoveLabwareCommandType,
@@ -528,6 +566,7 @@ CommandType = Union[
     thermocycler.OpenLidCommandType,
     thermocycler.CloseLidCommandType,
     thermocycler.RunProfileCommandType,
+    thermocycler.RunExtendedProfileCommandType,
     absorbance_reader.CloseLidCommandType,
     absorbance_reader.OpenLidCommandType,
     absorbance_reader.InitializeCommandType,
@@ -539,10 +578,19 @@ CommandType = Union[
     unsafe.UnsafeBlowOutInPlaceCommandType,
     unsafe.UnsafeDropTipInPlaceCommandType,
     unsafe.UpdatePositionEstimatorsCommandType,
+    unsafe.UnsafeEngageAxesCommandType,
+    unsafe.UnsafeUngripLabwareCommandType,
+    unsafe.UnsafePlaceLabwareCommandType,
+    robot.MoveAxesRelativeCommandType,
+    robot.MoveAxesToCommandType,
+    robot.MoveToCommandType,
+    robot.openGripperJawCommandType,
+    robot.closeGripperJawCommandType,
 ]
 
 CommandCreate = Annotated[
     Union[
+        AirGapInPlaceCreate,
         AspirateCreate,
         AspirateInPlaceCreate,
         CommentCreate,
@@ -560,6 +608,7 @@ CommandCreate = Annotated[
         LoadLabwareCreate,
         ReloadLabwareCreate,
         LoadLiquidCreate,
+        LoadLiquidClassCreate,
         LoadModuleCreate,
         LoadPipetteCreate,
         MoveLabwareCreate,
@@ -601,6 +650,7 @@ CommandCreate = Annotated[
         thermocycler.OpenLidCreate,
         thermocycler.CloseLidCreate,
         thermocycler.RunProfileCreate,
+        thermocycler.RunExtendedProfileCreate,
         absorbance_reader.CloseLidCreate,
         absorbance_reader.OpenLidCreate,
         absorbance_reader.InitializeCreate,
@@ -612,11 +662,20 @@ CommandCreate = Annotated[
         unsafe.UnsafeBlowOutInPlaceCreate,
         unsafe.UnsafeDropTipInPlaceCreate,
         unsafe.UpdatePositionEstimatorsCreate,
+        unsafe.UnsafeEngageAxesCreate,
+        unsafe.UnsafeUngripLabwareCreate,
+        unsafe.UnsafePlaceLabwareCreate,
+        robot.MoveAxesRelativeCreate,
+        robot.MoveAxesToCreate,
+        robot.MoveToCreate,
+        robot.openGripperJawCreate,
+        robot.closeGripperJawCreate,
     ],
     Field(discriminator="commandType"),
 ]
 
 CommandResult = Union[
+    AirGapInPlaceResult,
     AspirateResult,
     AspirateInPlaceResult,
     CommentResult,
@@ -634,6 +693,7 @@ CommandResult = Union[
     LoadLabwareResult,
     ReloadLabwareResult,
     LoadLiquidResult,
+    LoadLiquidClassResult,
     LoadModuleResult,
     LoadPipetteResult,
     MoveLabwareResult,
@@ -675,6 +735,7 @@ CommandResult = Union[
     thermocycler.OpenLidResult,
     thermocycler.CloseLidResult,
     thermocycler.RunProfileResult,
+    thermocycler.RunExtendedProfileResult,
     absorbance_reader.CloseLidResult,
     absorbance_reader.OpenLidResult,
     absorbance_reader.InitializeResult,
@@ -686,24 +747,25 @@ CommandResult = Union[
     unsafe.UnsafeBlowOutInPlaceResult,
     unsafe.UnsafeDropTipInPlaceResult,
     unsafe.UpdatePositionEstimatorsResult,
+    unsafe.UnsafeEngageAxesResult,
+    unsafe.UnsafeUngripLabwareResult,
+    unsafe.UnsafePlaceLabwareResult,
+    robot.MoveAxesRelativeResult,
+    robot.MoveAxesToResult,
+    robot.MoveToResult,
+    robot.openGripperJawResult,
+    robot.closeGripperJawResult,
 ]
 
-# todo(mm, 2024-06-12): Ideally, command return types would have specific
-# CommandPrivateResults paired with specific CommandResults. For example,
-# a TouchTipResult can never be paired with a LoadPipettePrivateResult in practice,
-# and ideally our types would reflect that.
-CommandPrivateResult = Union[
-    None,
-    LoadPipettePrivateResult,
-    ConfigureForVolumePrivateResult,
-    ConfigureNozzleLayoutPrivateResult,
-]
 
 # All `DefinedErrorData`s that implementations will actually return in practice.
 CommandDefinedErrorData = Union[
-    DefinedErrorData[TipPhysicallyMissingError, TipPhysicallyMissingErrorInternalData],
-    DefinedErrorData[OverpressureError, OverpressureErrorInternalData],
-    DefinedErrorData[LiquidNotFoundError, LiquidNotFoundErrorInternalData],
+    DefinedErrorData[TipPhysicallyMissingError],
+    DefinedErrorData[TipPhysicallyAttachedError],
+    DefinedErrorData[OverpressureError],
+    DefinedErrorData[LiquidNotFoundError],
+    DefinedErrorData[GripperMovementError],
+    DefinedErrorData[StallOrCollisionError],
 ]
 
 

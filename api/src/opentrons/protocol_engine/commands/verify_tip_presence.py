@@ -36,9 +36,7 @@ class VerifyTipPresenceResult(BaseModel):
 
 
 class VerifyTipPresenceImplementation(
-    AbstractCommandImpl[
-        VerifyTipPresenceParams, SuccessData[VerifyTipPresenceResult, None]
-    ]
+    AbstractCommandImpl[VerifyTipPresenceParams, SuccessData[VerifyTipPresenceResult]]
 ):
     """VerifyTipPresence command implementation."""
 
@@ -51,7 +49,7 @@ class VerifyTipPresenceImplementation(
 
     async def execute(
         self, params: VerifyTipPresenceParams
-    ) -> SuccessData[VerifyTipPresenceResult, None]:
+    ) -> SuccessData[VerifyTipPresenceResult]:
         """Verify if tip presence is as expected for the requested pipette."""
         pipette_id = params.pipetteId
         expected_state = params.expectedState
@@ -67,7 +65,9 @@ class VerifyTipPresenceImplementation(
             follow_singular_sensor=follow_singular_sensor,
         )
 
-        return SuccessData(public=VerifyTipPresenceResult(), private=None)
+        return SuccessData(
+            public=VerifyTipPresenceResult(),
+        )
 
 
 class VerifyTipPresence(

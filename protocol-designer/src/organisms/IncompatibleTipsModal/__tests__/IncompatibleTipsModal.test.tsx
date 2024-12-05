@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { fireEvent, screen } from '@testing-library/react'
 import { i18n } from '../../../assets/localization'
@@ -28,7 +28,7 @@ describe('IncompatibleTipsModal', () => {
     screen.getByText(
       'Using a pipette with an incompatible tip rack may result reduce pipette accuracy and collisions. We strongly recommend that you do not pair a pipette with an incompatible tip rack.'
     )
-    fireEvent.click(screen.getByText('Show incompatible tips'))
+    fireEvent.click(screen.getByText('Show more tip types'))
     expect(vi.mocked(setFeatureFlags)).toHaveBeenCalled()
     fireEvent.click(screen.getByText('Cancel'))
     expect(props.onClose).toHaveBeenCalled()

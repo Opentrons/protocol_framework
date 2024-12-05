@@ -3,7 +3,7 @@ from decoy import Decoy
 
 from opentrons.hardware_control.modules import TempDeck
 
-from opentrons.protocol_engine.state import StateView
+from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.state.module_substates import (
     TemperatureModuleSubState,
     TemperatureModuleId,
@@ -52,5 +52,4 @@ async def test_set_target_temperature(
     decoy.verify(await tempdeck_hardware.start_set_temperature(celsius=1), times=1)
     assert result == SuccessData(
         public=temperature_module.SetTargetTemperatureResult(targetTemperature=1),
-        private=None,
     )

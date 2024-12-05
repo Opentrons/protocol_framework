@@ -1,6 +1,6 @@
 """Test Capacitance."""
 from asyncio import sleep
-from typing import List, Union, Tuple, Optional, cast
+from typing import List, Union, Tuple, Optional, cast, Literal
 
 from opentrons_hardware.hardware_control.tool_sensors import capacitive_probe
 from opentrons_hardware.firmware_bindings.constants import NodeId, SensorId
@@ -104,7 +104,9 @@ def _get_hover_and_probe_pos(
     return hover_pos + probe_offset, probe_pos + probe_offset
 
 
-async def run(api: OT3API, report: CSVReport, section: str) -> None:
+async def run(
+    api: OT3API, report: CSVReport, section: str, pipette: Literal[200, 1000]
+) -> None:
     """Run."""
     z_ax = Axis.Z_L
     p_ax = Axis.P_L
@@ -145,7 +147,7 @@ async def run(api: OT3API, report: CSVReport, section: str) -> None:
         # ATTACHED-pF
         if not api.is_simulator:
             ui.get_user_ready(f"ATTACH probe to {probe.name} channel")
-        await api.add_tip(OT3Mount.LEFT, api.config.calibration.probe_length)
+        api.add_tip(OT3Mount.LEFT, api.config.calibration.probe_length)
         attached_pf = await _read_from_sensor(api, sensor_id, 10)
         if not attached_pf:
             ui.print_error(f"{probe} cap sensor not working, skipping")
@@ -229,4 +231,4 @@ async def run(api: OT3API, report: CSVReport, section: str) -> None:
         await api.home_z(OT3Mount.LEFT)
         if not api.is_simulator:
             ui.get_user_ready("REMOVE probe")
-        await api.remove_tip(OT3Mount.LEFT)
+        api.remove_tip(OT3Mount.LEFT)

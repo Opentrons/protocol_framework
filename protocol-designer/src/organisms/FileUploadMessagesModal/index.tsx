@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
@@ -32,6 +31,7 @@ export function FileUploadMessagesModal(): JSX.Element | null {
 
   return (
     <Modal
+      marginLeft="0"
       type={message?.isError ? 'error' : 'info'}
       title={title}
       closeOnOutsideClick

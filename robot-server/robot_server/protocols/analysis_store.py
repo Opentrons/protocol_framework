@@ -20,6 +20,7 @@ from opentrons.protocol_engine import (
     LoadedLabware,
     LoadedModule,
     Liquid,
+    LiquidClassRecordWithId,
 )
 from opentrons.protocol_engine.protocol_engine import code_in_error_tree
 
@@ -153,6 +154,7 @@ class AnalysisStore:
         pipettes: List[LoadedPipette],
         errors: List[ErrorOccurrence],
         liquids: List[Liquid],
+        liquidClasses: List[LiquidClassRecordWithId],
         command_annotations: List[CommandAnnotation],
     ) -> None:
         """Promote a pending analysis to completed, adding details of its results.
@@ -169,6 +171,7 @@ class AnalysisStore:
             errors: See `CompletedAnalysis.errors`. Also used to infer whether
                 the completed analysis result is `OK` or `NOT_OK`.
             liquids: See `CompletedAnalysis.liquids`.
+            liquidClasses: See `CompletedAnalysis.liquidClasses`.
             robot_type: See `CompletedAnalysis.robotType`.
             command_annotations: See `CompletedAnalysis.command_annotations`.
         """
@@ -204,6 +207,7 @@ class AnalysisStore:
             pipettes=pipettes,
             errors=errors,
             liquids=liquids,
+            liquidClasses=liquidClasses,
             commandAnnotations=command_annotations,
         )
         completed_analysis_resource = CompletedAnalysisResource(
@@ -245,6 +249,7 @@ class AnalysisStore:
             pipettes=[],
             errors=errors,
             liquids=[],
+            liquidClasses=[],
         )
         completed_analysis_resource = CompletedAnalysisResource(
             id=completed_analysis.id,
@@ -396,14 +401,18 @@ class AnalysisStore:
                 last_analysis_summary.id
             )
         )
-        if len(primitive_rtps_in_last_analysis) == 0:
-            # Protocols migrated from v4 will not have any entries in RTP table,
-            # this is fine and we should just trigger a new analysis and have
-            # the new values be stored in the RTP table.
-            return False
         csv_rtps_in_last_analysis = self._completed_store.get_csv_rtps_by_analysis_id(
             last_analysis_summary.id
         )
+        if (
+            len(new_parameters) != 0
+            and len(primitive_rtps_in_last_analysis) + len(csv_rtps_in_last_analysis)
+            == 0
+        ):
+            # Protocols migrated from v4 will not have any entries in RTP table,
+            # this is fine, and we should just trigger a new analysis and have
+            # the new values be stored in the RTP table.
+            return False
         total_params_in_last_analysis = list(
             primitive_rtps_in_last_analysis.keys()
         ) + list(csv_rtps_in_last_analysis.keys())

@@ -9,7 +9,7 @@ from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, Succe
 from ...errors.error_occurrence import ErrorOccurrence
 
 if TYPE_CHECKING:
-    from opentrons.protocol_engine.state import StateView
+    from opentrons.protocol_engine.state.state import StateView
     from opentrons.protocol_engine.execution import EquipmentHandler
 
 
@@ -28,7 +28,7 @@ class WaitForLidTemperatureResult(BaseModel):
 
 class WaitForLidTemperatureImpl(
     AbstractCommandImpl[
-        WaitForLidTemperatureParams, SuccessData[WaitForLidTemperatureResult, None]
+        WaitForLidTemperatureParams, SuccessData[WaitForLidTemperatureResult]
     ]
 ):
     """Execution implementation of Thermocycler's wait for lid temperature command."""
@@ -45,7 +45,7 @@ class WaitForLidTemperatureImpl(
     async def execute(
         self,
         params: WaitForLidTemperatureParams,
-    ) -> SuccessData[WaitForLidTemperatureResult, None]:
+    ) -> SuccessData[WaitForLidTemperatureResult]:
         """Wait for a Thermocycler's lid temperature."""
         thermocycler_state = self._state_view.modules.get_thermocycler_module_substate(
             params.moduleId
@@ -61,7 +61,9 @@ class WaitForLidTemperatureImpl(
         if thermocycler_hardware is not None:
             await thermocycler_hardware.wait_for_lid_target()
 
-        return SuccessData(public=WaitForLidTemperatureResult(), private=None)
+        return SuccessData(
+            public=WaitForLidTemperatureResult(),
+        )
 
 
 class WaitForLidTemperature(

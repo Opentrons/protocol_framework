@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 
 import {
   useCreateMaintenanceRunLabwareDefinitionMutation,
@@ -8,10 +8,10 @@ import {
 import {
   useCreateTargetedMaintenanceRunMutation,
   useNotifyRunQuery,
-} from '../../resources/runs'
+  useMostRecentCompletedAnalysis,
+} from '/app/resources/runs'
 import { LabwarePositionCheck } from '.'
-import { useMostRecentCompletedAnalysis } from './useMostRecentCompletedAnalysis'
-import { getLabwareDefinitionsFromCommands } from '../../molecules/Command/utils/getLabwareDefinitionsFromCommands'
+import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 
 import type { RobotType } from '@opentrons/shared-data'
 
@@ -29,9 +29,7 @@ export function useLaunchLPC(
     isLoading: isDeletingMaintenanceRun,
   } = useDeleteMaintenanceRunMutation()
   const mostRecentAnalysis = useMostRecentCompletedAnalysis(runId)
-  const [maintenanceRunId, setMaintenanceRunId] = React.useState<string | null>(
-    null
-  )
+  const [maintenanceRunId, setMaintenanceRunId] = useState<string | null>(null)
   const currentOffsets = runRecord?.data?.labwareOffsets ?? []
   const {
     createLabwareDefinition,
@@ -63,12 +61,12 @@ export function useLaunchLPC(
         Promise.all(
           getLabwareDefinitionsFromCommands(
             mostRecentAnalysis?.commands ?? []
-          ).map(def =>
+          ).map(def => {
             createLabwareDefinition({
               maintenanceRunId: maintenanceRun?.data?.id,
               labwareDef: def,
             })
-          )
+          })
         ).then(() => {
           setMaintenanceRunId(maintenanceRun.data.id)
         })

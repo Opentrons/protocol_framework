@@ -1,8 +1,8 @@
-import * as React from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 
-import { StyledText } from '@opentrons/components'
+import { CURSOR_POINTER, StyledText } from '@opentrons/components'
 
 import { RecoveryError } from './RecoveryError'
 import { RecoveryDoorOpen } from './RecoveryDoorOpen'
@@ -17,24 +17,25 @@ import {
   SkipStepSameTips,
   SkipStepNewTips,
   IgnoreErrorSkipStep,
+  ManualMoveLwAndSkip,
+  ManualReplaceLwAndRetry,
+  HomeAndRetry,
 } from './RecoveryOptions'
 import {
   useErrorDetailsModal,
   ErrorDetailsModal,
   RecoveryInterventionModal,
+  RecoveryDoorOpenSpecial,
 } from './shared'
 import { RecoveryInProgress } from './RecoveryInProgress'
 import { getErrorKind } from './utils'
 import { RECOVERY_MAP } from './constants'
 
-import type { RobotType } from '@opentrons/shared-data'
-import type { RecoveryContentProps } from './types'
-import type {
-  ERUtilsResults,
-  UseRecoveryAnalyticsResult,
-  useRetainedFailedCommandBySource,
-} from './hooks'
+import type { LabwareDefinition2, RobotType } from '@opentrons/shared-data'
+import type { RecoveryRoute, RouteStep, RecoveryContentProps } from './types'
 import type { ErrorRecoveryFlowsProps } from '.'
+import type { UseRecoveryAnalyticsResult } from '/app/redux-resources/analytics'
+import type { ERUtilsResults, useRetainedFailedCommandBySource } from './hooks'
 
 export interface UseERWizardResult {
   hasLaunchedRecovery: boolean
@@ -43,11 +44,11 @@ export interface UseERWizardResult {
 }
 
 export function useERWizard(): UseERWizardResult {
-  const [showERWizard, setShowERWizard] = React.useState(false)
+  const [showERWizard, setShowERWizard] = useState(false)
   // Because RunPausedSplash has access to some ER Wiz routes but is not a part of the ER wizard, the splash screen
   // is the "home" route as opposed to SelectRecoveryOption (accessed by pressing "go back" or "continue" enough times)
   // when recovery mode has not been launched.
-  const [hasLaunchedRecovery, setHasLaunchedRecovery] = React.useState(false)
+  const [hasLaunchedRecovery, setHasLaunchedRecovery] = useState(false)
 
   const toggleERWizard = (
     isActive: boolean,
@@ -67,29 +68,20 @@ export type ErrorRecoveryWizardProps = ErrorRecoveryFlowsProps &
   ERUtilsResults & {
     robotType: RobotType
     isOnDevice: boolean
-    isDoorOpen: boolean
-    analytics: UseRecoveryAnalyticsResult
+    analytics: UseRecoveryAnalyticsResult<RecoveryRoute, RouteStep>
     failedCommand: ReturnType<typeof useRetainedFailedCommandBySource>
+    allRunDefs: LabwareDefinition2[]
   }
 
 export function ErrorRecoveryWizard(
   props: ErrorRecoveryWizardProps
 ): JSX.Element {
-  const {
-    hasLaunchedRecovery,
-    failedCommand,
-    recoveryCommands,
-    routeUpdateActions,
-  } = props
-  const errorKind = getErrorKind(failedCommand?.byRunRecord ?? null)
-
-  useInitialPipetteHome({
-    hasLaunchedRecovery,
-    recoveryCommands,
-    routeUpdateActions,
-  })
-
-  return <ErrorRecoveryComponent errorKind={errorKind} {...props} />
+  return (
+    <ErrorRecoveryComponent
+      errorKind={getErrorKind(props.failedCommand)}
+      {...props}
+    />
+  )
 }
 
 export function ErrorRecoveryComponent(
@@ -98,15 +90,16 @@ export function ErrorRecoveryComponent(
   const {
     recoveryMap,
     hasLaunchedRecovery,
-    isDoorOpen,
+    doorStatusUtils,
     isOnDevice,
     analytics,
   } = props
+  const { isProhibitedDoorOpen } = doorStatusUtils
   const { route, step } = recoveryMap
   const { t } = useTranslation('error_recovery')
   const { showModal, toggleModal } = useErrorDetailsModal()
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (showModal) {
       analytics.reportViewErrorDetailsEvent(route, step)
     }
@@ -115,10 +108,7 @@ export function ErrorRecoveryComponent(
   const buildTitleHeading = (): JSX.Element => {
     const titleText = hasLaunchedRecovery ? t('recovery_mode') : t('cancel_run')
     return (
-      <StyledText
-        oddStyle="level4HeaderBold"
-        desktopStyle="headingSmallRegular"
-      >
+      <StyledText oddStyle="level4HeaderBold" desktopStyle="bodyLargeSemiBold">
         {titleText}
       </StyledText>
     )
@@ -129,16 +119,15 @@ export function ErrorRecoveryComponent(
       oddStyle="bodyTextSemiBold"
       desktopStyle="bodyDefaultSemiBold"
       css={css`
-        cursor: pointer;
+        cursor: ${CURSOR_POINTER};
       `}
     >
       {t('view_error_details')}
     </StyledText>
   )
 
-  // TODO(jh, 07-29-24): Make RecoveryDoorOpen render logic equivalent to RecoveryTakeover. Do not nest it in RecoveryWizard.
   const buildInterventionContent = (): JSX.Element => {
-    if (isDoorOpen) {
+    if (isProhibitedDoorOpen) {
       return <RecoveryDoorOpen {...props} />
     } else {
       return <ErrorRecoveryContent {...props} />
@@ -146,7 +135,7 @@ export function ErrorRecoveryComponent(
   }
 
   const isLargeDesktopStyle =
-    !isDoorOpen &&
+    !isProhibitedDoorOpen &&
     route === RECOVERY_MAP.DROP_TIP_FLOWS.ROUTE &&
     step !== RECOVERY_MAP.DROP_TIP_FLOWS.STEPS.BEGIN_REMOVAL
   const desktopType = isLargeDesktopStyle ? 'desktop-large' : 'desktop-small'
@@ -185,7 +174,7 @@ export function ErrorRecoveryContent(props: RecoveryContentProps): JSX.Element {
     return <RecoveryInProgress {...props} />
   }
 
-  const buildResumeRun = (): JSX.Element => {
+  const buildRetryStep = (): JSX.Element => {
     return <RetryStep {...props} />
   }
 
@@ -221,13 +210,33 @@ export function ErrorRecoveryContent(props: RecoveryContentProps): JSX.Element {
     return <IgnoreErrorSkipStep {...props} />
   }
 
+  const buildManualMoveLwAndSkip = (): JSX.Element => {
+    return <ManualMoveLwAndSkip {...props} />
+  }
+
+  const buildManualReplaceLwAndRetry = (): JSX.Element => {
+    return <ManualReplaceLwAndRetry {...props} />
+  }
+
+  const buildManuallyRouteToDoorOpen = (): JSX.Element => {
+    return <RecoveryDoorOpen {...props} />
+  }
+
+  const buildRecoveryDoorOpenSpecial = (): JSX.Element => {
+    return <RecoveryDoorOpenSpecial {...props} />
+  }
+
+  const buildHomeAndRetry = (): JSX.Element => {
+    return <HomeAndRetry {...props} />
+  }
+
   switch (props.recoveryMap.route) {
     case RECOVERY_MAP.OPTION_SELECTION.ROUTE:
       return buildSelectRecoveryOption()
     case RECOVERY_MAP.ERROR_WHILE_RECOVERING.ROUTE:
       return buildRecoveryError()
-    case RECOVERY_MAP.RETRY_FAILED_COMMAND.ROUTE:
-      return buildResumeRun()
+    case RECOVERY_MAP.RETRY_STEP.ROUTE:
+      return buildRetryStep()
     case RECOVERY_MAP.CANCEL_RUN.ROUTE:
       return buildCancelRun()
     case RECOVERY_MAP.DROP_TIP_FLOWS.ROUTE:
@@ -236,7 +245,7 @@ export function ErrorRecoveryContent(props: RecoveryContentProps): JSX.Element {
       return buildRetryNewTips()
     case RECOVERY_MAP.RETRY_SAME_TIPS.ROUTE:
       return buildRetrySameTips()
-    case RECOVERY_MAP.FILL_MANUALLY_AND_SKIP.ROUTE:
+    case RECOVERY_MAP.MANUAL_FILL_AND_SKIP.ROUTE:
       return buildFillWellAndSkip()
     case RECOVERY_MAP.SKIP_STEP_WITH_SAME_TIPS.ROUTE:
       return buildSkipStepSameTips()
@@ -244,37 +253,25 @@ export function ErrorRecoveryContent(props: RecoveryContentProps): JSX.Element {
       return buildSkipStepNewTips()
     case RECOVERY_MAP.IGNORE_AND_SKIP.ROUTE:
       return buildIgnoreErrorSkipStep()
+    case RECOVERY_MAP.MANUAL_MOVE_AND_SKIP.ROUTE:
+      return buildManualMoveLwAndSkip()
+    case RECOVERY_MAP.MANUAL_REPLACE_AND_RETRY.ROUTE:
+      return buildManualReplaceLwAndRetry()
+    case RECOVERY_MAP.ROBOT_DOOR_OPEN_SPECIAL.ROUTE:
+      return buildRecoveryDoorOpenSpecial()
     case RECOVERY_MAP.ROBOT_IN_MOTION.ROUTE:
     case RECOVERY_MAP.ROBOT_RESUMING.ROUTE:
     case RECOVERY_MAP.ROBOT_RETRYING_STEP.ROUTE:
     case RECOVERY_MAP.ROBOT_CANCELING.ROUTE:
     case RECOVERY_MAP.ROBOT_PICKING_UP_TIPS.ROUTE:
     case RECOVERY_MAP.ROBOT_SKIPPING_STEP.ROUTE:
+    case RECOVERY_MAP.ROBOT_RELEASING_LABWARE.ROUTE:
       return buildRecoveryInProgress()
+    case RECOVERY_MAP.ROBOT_DOOR_OPEN.ROUTE:
+      return buildManuallyRouteToDoorOpen()
+    case RECOVERY_MAP.HOME_AND_RETRY.ROUTE:
+      return buildHomeAndRetry()
     default:
       return buildSelectRecoveryOption()
   }
-}
-interface UseInitialPipetteHomeParams {
-  hasLaunchedRecovery: ErrorRecoveryWizardProps['hasLaunchedRecovery']
-  recoveryCommands: ErrorRecoveryWizardProps['recoveryCommands']
-  routeUpdateActions: ErrorRecoveryWizardProps['routeUpdateActions']
-}
-// Home the Z-axis of all attached pipettes on Error Recovery launch.
-export function useInitialPipetteHome({
-  hasLaunchedRecovery,
-  recoveryCommands,
-  routeUpdateActions,
-}: UseInitialPipetteHomeParams): void {
-  const { homePipetteZAxes } = recoveryCommands
-  const { setRobotInMotion } = routeUpdateActions
-
-  // Synchronously set the recovery route to "robot in motion" before initial render to prevent screen flicker on ER launch.
-  React.useLayoutEffect(() => {
-    if (hasLaunchedRecovery) {
-      void setRobotInMotion(true)
-        .then(() => homePipetteZAxes())
-        .finally(() => setRobotInMotion(false))
-    }
-  }, [hasLaunchedRecovery])
 }

@@ -26,7 +26,7 @@ class _ABRAsairSensor:
         test_name = "ABR-Environment-Monitoring"
         run_id = data.create_run_id()
         file_name = data.create_file_name(test_name, run_id, robot)
-        sensor = asair_sensor.BuildAsairSensor(False, False)
+        sensor = asair_sensor.BuildAsairSensor(False, False, "USB0")
         print(sensor)
         env_data = sensor.get_reading()
         header = [
@@ -80,7 +80,7 @@ class _ABRAsairSensor:
                 break
             # write to google sheet
             try:
-                if google_sheet.creditals.access_token_expired:
+                if google_sheet.credentials.access_token_expired:
                     google_sheet.gc.login()
                 google_sheet.write_header(header)
                 google_sheet.update_row_index()

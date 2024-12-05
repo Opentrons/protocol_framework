@@ -15,7 +15,7 @@ from typing import (
 from opentrons_shared_data.pipette.types import (
     PipetteName,
 )
-from opentrons.config.types import GantryLoad, OutputOptions
+from opentrons.config.types import GantryLoad
 from opentrons.hardware_control.types import (
     BoardRevision,
     Axis,
@@ -38,6 +38,8 @@ from opentrons.hardware_control.types import (
     StatusBarState,
 )
 from opentrons.hardware_control.module_control import AttachedModulesControl
+from opentrons_hardware.firmware_bindings.constants import SensorId
+from opentrons_hardware.sensors.types import SensorDataType
 from ..dev_types import OT3AttachedInstruments
 from .types import HWStopCondition
 
@@ -54,6 +56,18 @@ class FlexBackend(Protocol):
     def restore_system_constraints(self) -> AsyncIterator[None]:
         ...
 
+    @asynccontextmanager
+    def grab_pressure(self, channels: int, mount: OT3Mount) -> AsyncIterator[None]:
+        ...
+
+    def set_pressure_sensor_available(
+        self, pipette_axis: Axis, available: bool
+    ) -> None:
+        ...
+
+    def get_pressure_sensor_available(self, pipette_axis: Axis) -> bool:
+        ...
+
     def update_constraints_for_gantry_load(self, gantry_load: GantryLoad) -> None:
         ...
 
@@ -64,7 +78,11 @@ class FlexBackend(Protocol):
         ...
 
     def update_constraints_for_plunger_acceleration(
-        self, mount: OT3Mount, acceleration: float, gantry_load: GantryLoad
+        self,
+        mount: OT3Mount,
+        acceleration: float,
+        gantry_load: GantryLoad,
+        high_speed_pipette: bool = False,
     ) -> None:
         ...
 
@@ -147,10 +165,12 @@ class FlexBackend(Protocol):
         plunger_speed: float,
         threshold_pascals: float,
         plunger_impulse_time: float,
-        output_format: OutputOptions = OutputOptions.can_bus_only,
-        data_files: Optional[Dict[InstrumentProbeType, str]] = None,
+        num_baseline_reads: int,
         probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
         force_both_sensors: bool = False,
+        response_queue: Optional[
+            asyncio.Queue[Dict[SensorId, List[SensorDataType]]]
+        ] = None,
     ) -> float:
         ...
 
@@ -213,7 +233,7 @@ class FlexBackend(Protocol):
         ...
 
     async def tip_action(
-        self, origin: Dict[Axis, float], targets: List[Tuple[Dict[Axis, float], float]]
+        self, origin: float, targets: List[Tuple[float, float]]
     ) -> None:
         ...
 
@@ -366,8 +386,6 @@ class FlexBackend(Protocol):
         speed_mm_per_s: float,
         sensor_threshold_pf: float,
         probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
-        output_format: OutputOptions = OutputOptions.sync_only,
-        data_files: Optional[Dict[InstrumentProbeType, str]] = None,
     ) -> bool:
         ...
 

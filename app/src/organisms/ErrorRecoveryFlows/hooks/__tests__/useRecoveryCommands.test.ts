@@ -4,20 +4,28 @@ import { renderHook, act } from '@testing-library/react'
 import {
   useResumeRunFromRecoveryMutation,
   useStopRunMutation,
-  useUpdateErrorRecoveryPolicy,
+  useResumeRunFromRecoveryAssumingFalsePositiveMutation,
 } from '@opentrons/react-api-client'
 
-import { useChainRunCommands } from '../../../../resources/runs'
+import {
+  useChainRunCommands,
+  useUpdateRecoveryPolicyWithStrategy,
+} from '/app/resources/runs'
 import {
   useRecoveryCommands,
   HOME_PIPETTE_Z_AXES,
+  RELEASE_GRIPPER_JAW,
   buildPickUpTips,
   buildIgnorePolicyRules,
+  isAssumeFalsePositiveResumeKind,
+  HOME_EXCEPT_PLUNGERS,
 } from '../useRecoveryCommands'
-import { RECOVERY_MAP } from '../../constants'
+import { RECOVERY_MAP, ERROR_KINDS } from '../../constants'
+import { getErrorKind } from '/app/organisms/ErrorRecoveryFlows/utils'
 
 vi.mock('@opentrons/react-api-client')
-vi.mock('../../../../resources/runs')
+vi.mock('/app/resources/runs')
+vi.mock('/app/organisms/ErrorRecoveryFlows/utils')
 
 describe('useRecoveryCommands', () => {
   const mockFailedCommand = {
@@ -38,15 +46,22 @@ describe('useRecoveryCommands', () => {
   const mockResumeRunFromRecovery = vi.fn(() =>
     Promise.resolve(mockMakeSuccessToast())
   )
+  const mockResumeRunFromRecoveryAssumingFalsePositive = vi.fn(() =>
+    Promise.resolve(mockMakeSuccessToast())
+  )
   const mockStopRun = vi.fn()
   const mockChainRunCommands = vi.fn().mockResolvedValue([])
   const mockReportActionSelectedResult = vi.fn()
   const mockReportRecoveredRunResult = vi.fn()
-  const mockUpdateErrorRecoveryPolicy = vi.fn()
+  const mockUpdateErrorRecoveryPolicy = vi.fn(() => Promise.resolve())
 
   const props = {
     runId: mockRunId,
-    failedCommandByRunRecord: mockFailedCommand,
+    failedCommand: {
+      byRunRecord: mockFailedCommand,
+      byAnalysis: mockFailedCommand,
+    },
+    unvalidatedFailedCommand: mockFailedCommand,
     failedLabwareUtils: mockFailedLabwareUtils,
     routeUpdateActions: mockRouteUpdateActions,
     recoveryToastUtils: { makeSuccessToast: mockMakeSuccessToast } as any,
@@ -67,8 +82,13 @@ describe('useRecoveryCommands', () => {
     vi.mocked(useChainRunCommands).mockReturnValue({
       chainRunCommands: mockChainRunCommands,
     } as any)
-    vi.mocked(useUpdateErrorRecoveryPolicy).mockReturnValue({
-      updateErrorRecoveryPolicy: mockUpdateErrorRecoveryPolicy,
+    vi.mocked(useUpdateRecoveryPolicyWithStrategy).mockReturnValue(
+      mockUpdateErrorRecoveryPolicy as any
+    )
+    vi.mocked(
+      useResumeRunFromRecoveryAssumingFalsePositiveMutation
+    ).mockReturnValue({
+      mutateAsync: mockResumeRunFromRecoveryAssumingFalsePositive,
     } as any)
   })
 
@@ -121,32 +141,54 @@ describe('useRecoveryCommands', () => {
       false
     )
   })
-  ;([
+
+  const IN_PLACE_COMMANDS = [
     'aspirateInPlace',
     'dispenseInPlace',
     'blowOutInPlace',
     'dropTipInPlace',
     'prepareToAspirate',
-  ] as const).forEach(inPlaceCommandType => {
-    it(`Should move to retryLocation if failed command is ${inPlaceCommandType} and error is appropriate when retrying`, async () => {
-      const { result } = renderHook(() =>
-        useRecoveryCommands({
-          runId: mockRunId,
-          failedCommandByRunRecord: {
-            ...mockFailedCommand,
-            commandType: inPlaceCommandType,
-            params: {
-              pipetteId: 'mock-pipette-id',
-            },
-            error: {
-              errorType: 'overpressure',
-              errorCode: '3006',
-              isDefined: true,
-              errorInfo: {
-                retryLocation: [1, 2, 3],
-              },
+  ] as const
+
+  const ERROR_SCENARIOS = [
+    { type: 'overpressure', code: '3006' },
+    { type: 'tipPhysicallyAttached', code: '3007' },
+  ] as const
+
+  it.each(
+    ERROR_SCENARIOS.flatMap(error =>
+      IN_PLACE_COMMANDS.map(commandType => ({
+        errorType: error.type,
+        errorCode: error.code,
+        commandType,
+      }))
+    )
+  )(
+    'Should move to retryLocation if failed command is $commandType and error is $errorType when retrying',
+    async ({ errorType, errorCode, commandType }) => {
+      const { result } = renderHook(() => {
+        const failedCommand = {
+          ...mockFailedCommand,
+          commandType,
+          params: {
+            pipetteId: 'mock-pipette-id',
+          },
+          error: {
+            errorType,
+            errorCode,
+            isDefined: true,
+            errorInfo: {
+              retryLocation: [1, 2, 3],
             },
           },
+        }
+        return useRecoveryCommands({
+          runId: mockRunId,
+          failedCommand: {
+            byRunRecord: failedCommand,
+            byAnalysis: failedCommand,
+          },
+          unvalidatedFailedCommand: failedCommand,
           failedLabwareUtils: mockFailedLabwareUtils,
           routeUpdateActions: mockRouteUpdateActions,
           recoveryToastUtils: {} as any,
@@ -156,10 +198,12 @@ describe('useRecoveryCommands', () => {
           } as any,
           selectedRecoveryOption: RECOVERY_MAP.RETRY_NEW_TIPS.ROUTE,
         })
-      )
+      })
+
       await act(async () => {
         await result.current.retryFailedCommand()
       })
+
       expect(mockChainRunCommands).toHaveBeenLastCalledWith(
         [
           {
@@ -171,14 +215,14 @@ describe('useRecoveryCommands', () => {
             },
           },
           {
-            commandType: inPlaceCommandType,
+            commandType,
             params: { pipetteId: 'mock-pipette-id' },
           },
         ],
         false
       )
-    })
-  })
+    }
+  )
 
   it('should call resumeRun with runId and show success toast on success', async () => {
     const { result } = renderHook(() => useRecoveryCommands(props))
@@ -230,7 +274,7 @@ describe('useRecoveryCommands', () => {
 
     const testProps = {
       ...props,
-      failedCommandByRunRecord: mockFailedCmdWithPipetteId,
+      unvalidatedFailedCommand: mockFailedCmdWithPipetteId,
       failedLabwareUtils: {
         ...mockFailedLabwareUtils,
         failedLabware: mockFailedLabware,
@@ -245,6 +289,32 @@ describe('useRecoveryCommands', () => {
 
     expect(mockChainRunCommands).toHaveBeenCalledWith(
       [buildPickUpTipsCmd],
+      false
+    )
+  })
+
+  it('should call releaseGripperJaws and resolve the promise', async () => {
+    const { result } = renderHook(() => useRecoveryCommands(props))
+
+    await act(async () => {
+      await result.current.releaseGripperJaws()
+    })
+
+    expect(mockChainRunCommands).toHaveBeenCalledWith(
+      [RELEASE_GRIPPER_JAW],
+      false
+    )
+  })
+
+  it('should call useUpdatePositionEstimators and resolve the promise', async () => {
+    const { result } = renderHook(() => useRecoveryCommands(props))
+
+    await act(async () => {
+      await result.current.homeExceptPlungers()
+    })
+
+    expect(mockChainRunCommands).toHaveBeenCalledWith(
+      [HOME_EXCEPT_PLUNGERS],
       false
     )
   })
@@ -271,35 +341,110 @@ describe('useRecoveryCommands', () => {
 
     const testProps = {
       ...props,
-      failedCommandByRunRecord: mockFailedCommandWithError,
+      unvalidatedFailedCommand: mockFailedCommandWithError,
     }
+
+    const { result, rerender } = renderHook(() =>
+      useRecoveryCommands(testProps)
+    )
+
+    await act(async () => {
+      await result.current.ignoreErrorKindThisRun(true)
+    })
+
+    rerender()
+
+    result.current.skipFailedCommand()
+
+    const expectedPolicyRules = buildIgnorePolicyRules(
+      'aspirateInPlace',
+      'mockErrorType',
+      'ignoreAndContinue'
+    )
+
+    expect(mockUpdateErrorRecoveryPolicy).toHaveBeenCalledWith(
+      expectedPolicyRules,
+      'append'
+    )
+  })
+
+  it('should call proceedToRouteAndStep with ERROR_WHILE_RECOVERING route when updateErrorRecoveryPolicy rejects', async () => {
+    const mockFailedCommandWithError = {
+      ...mockFailedCommand,
+      commandType: 'aspirateInPlace',
+      error: {
+        errorType: 'mockErrorType',
+      },
+    }
+
+    const testProps = {
+      ...props,
+      unvalidatedFailedCommand: mockFailedCommandWithError,
+    }
+
+    mockUpdateErrorRecoveryPolicy.mockRejectedValueOnce(
+      new Error('Update policy failed')
+    )
 
     const { result } = renderHook(() => useRecoveryCommands(testProps))
 
     await act(async () => {
-      await result.current.ignoreErrorKindThisRun()
+      await result.current.ignoreErrorKindThisRun(true)
     })
 
-    const expectedPolicyRules = buildIgnorePolicyRules(
-      'aspirateInPlace',
-      'mockErrorType'
-    )
-
-    expect(mockUpdateErrorRecoveryPolicy).toHaveBeenCalledWith(
-      expectedPolicyRules
+    expect(mockUpdateErrorRecoveryPolicy).toHaveBeenCalled()
+    expect(mockProceedToRouteAndStep).toHaveBeenCalledWith(
+      RECOVERY_MAP.ERROR_WHILE_RECOVERING.ROUTE
     )
   })
 
-  it('should reject with an error when failedCommand or error is null', async () => {
-    const testProps = {
-      ...props,
-      failedCommand: null,
-    }
+  describe('skipFailedCommand with false positive handling', () => {
+    it('should call resumeRunFromRecoveryAssumingFalsePositive for tip-related errors', async () => {
+      vi.mocked(getErrorKind).mockReturnValue(ERROR_KINDS.TIP_NOT_DETECTED)
 
-    const { result } = renderHook(() => useRecoveryCommands(testProps))
+      const { result } = renderHook(() => useRecoveryCommands(props))
 
-    await expect(result.current.ignoreErrorKindThisRun()).rejects.toThrow(
-      'Could not execute command. No failed command.'
-    )
+      await act(async () => {
+        await result.current.skipFailedCommand()
+      })
+
+      expect(
+        mockResumeRunFromRecoveryAssumingFalsePositive
+      ).toHaveBeenCalledWith(mockRunId)
+      expect(mockMakeSuccessToast).toHaveBeenCalled()
+    })
+
+    it('should call regular resumeRunFromRecovery for non-tip-related errors', async () => {
+      vi.mocked(getErrorKind).mockReturnValue(ERROR_KINDS.GRIPPER_ERROR)
+
+      const { result } = renderHook(() => useRecoveryCommands(props))
+
+      await act(async () => {
+        await result.current.skipFailedCommand()
+      })
+
+      expect(mockResumeRunFromRecovery).toHaveBeenCalledWith(mockRunId)
+      expect(mockMakeSuccessToast).toHaveBeenCalled()
+    })
+  })
+})
+
+describe('isAssumeFalsePositiveResumeKind', () => {
+  it(`should return true for ${ERROR_KINDS.TIP_NOT_DETECTED} error kind`, () => {
+    vi.mocked(getErrorKind).mockReturnValue(ERROR_KINDS.TIP_NOT_DETECTED)
+
+    expect(isAssumeFalsePositiveResumeKind({} as any)).toBe(true)
+  })
+
+  it(`should return true for ${ERROR_KINDS.TIP_DROP_FAILED} error kind`, () => {
+    vi.mocked(getErrorKind).mockReturnValue(ERROR_KINDS.TIP_DROP_FAILED)
+
+    expect(isAssumeFalsePositiveResumeKind({} as any)).toBe(true)
+  })
+
+  it('should return false for other error kinds', () => {
+    vi.mocked(getErrorKind).mockReturnValue(ERROR_KINDS.GRIPPER_ERROR)
+
+    expect(isAssumeFalsePositiveResumeKind({} as any)).toBe(false)
   })
 })

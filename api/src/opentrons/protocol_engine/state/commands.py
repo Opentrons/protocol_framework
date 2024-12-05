@@ -17,11 +17,15 @@ from opentrons.protocol_engine.actions.actions import (
     RunCommandAction,
     SetErrorRecoveryPolicyAction,
 )
+from opentrons.protocol_engine.commands.unsafe.unsafe_ungrip_labware import (
+    UnsafeUngripLabwareCommandType,
+)
 from opentrons.protocol_engine.error_recovery_policy import (
     ErrorRecoveryPolicy,
     ErrorRecoveryType,
 )
 from opentrons.protocol_engine.notes.notes import CommandNote
+from opentrons.protocol_engine.state import update_types
 
 from ..actions import (
     Action,
@@ -36,7 +40,7 @@ from ..actions import (
     DoorChangeAction,
 )
 
-from ..commands import Command, CommandStatus, CommandIntent
+from ..commands import Command, CommandStatus, CommandIntent, CommandCreate
 from ..errors import (
     RunStoppedError,
     ErrorOccurrence,
@@ -49,7 +53,7 @@ from ..errors import (
     ProtocolCommandFailedError,
 )
 from ..types import EngineStatus
-from .abstract_store import HasState, HandlesActions
+from ._abstract_store import HasState, HandlesActions
 from .command_history import (
     CommandEntry,
     CommandHistory,
@@ -95,7 +99,9 @@ class QueueStatus(enum.Enum):
     AWAITING_RECOVERY_PAUSED = enum.auto()
     """Execution of fixit commands has been paused.
 
-    New protocol and fixit commands may be enqueued, but will wait to execute.
+    New protocol and fixit commands may be enqueued, but will usually wait to execute.
+    There are certain exceptions where fixit commands will still run.
+
     New setup commands may not be enqueued.
     """
 
@@ -134,6 +140,16 @@ class CommandPointer:
     command_key: str
     created_at: datetime
     index: int
+
+
+@dataclass(frozen=True)
+class _RecoveryTargetInfo:
+    """Info about the failed command that we're currently recovering from."""
+
+    command_id: str
+
+    state_update_if_false_positive: update_types.StateUpdate
+    """See `CommandView.get_state_update_if_continued()`."""
 
 
 @dataclass
@@ -200,8 +216,8 @@ class CommandState:
     stable. Eventually, we might want this info to be stored directly on each command.
     """
 
-    recovery_target_command_id: Optional[str]
-    """If we're currently recovering from a command failure, which command it was."""
+    recovery_target: Optional[_RecoveryTargetInfo]
+    """If we're currently recovering from a command failure, info about that command."""
 
     finish_error: Optional[ErrorOccurrence]
     """The error that happened during the post-run finish steps (homing & dropping tips), if any."""
@@ -211,9 +227,6 @@ class CommandState:
 
     This value can be used to generate future hashes.
     """
-
-    failed_command_errors: List[ErrorOccurrence]
-    """List of command errors that occurred during run execution."""
 
     has_entered_error_recovery: bool
     """Whether the run has entered error recovery."""
@@ -248,12 +261,11 @@ class CommandStore(HasState[CommandState], HandlesActions):
             finish_error=None,
             failed_command=None,
             command_error_recovery_types={},
-            recovery_target_command_id=None,
+            recovery_target=None,
             run_completed_at=None,
             run_started_at=None,
             latest_protocol_command_hash=None,
             stopped_by_estop=False,
-            failed_command_errors=[],
             error_recovery_policy=error_recovery_policy,
             has_entered_error_recovery=False,
         )
@@ -330,14 +342,17 @@ class CommandStore(HasState[CommandState], HandlesActions):
     def _handle_fail_command_action(self, action: FailCommandAction) -> None:
         prev_entry = self.state.command_history.get(action.command_id)
 
-        if isinstance(action.error, EnumeratedError):
+        if isinstance(action.error, EnumeratedError):  # The error was undefined.
             public_error_occurrence = ErrorOccurrence.from_failed(
                 id=action.error_id,
                 createdAt=action.failed_at,
                 error=action.error,
             )
-        else:
+            # An empty state update, to no-op.
+            state_update_if_false_positive = update_types.StateUpdate()
+        else:  # The error was defined.
             public_error_occurrence = action.error.public
+            state_update_if_false_positive = action.error.state_update_if_false_positive
 
         self._update_to_failed(
             command_id=action.command_id,
@@ -347,8 +362,20 @@ class CommandStore(HasState[CommandState], HandlesActions):
             notes=action.notes,
         )
         self._state.failed_command = self._state.command_history.get(action.command_id)
-        self._state.failed_command_errors.append(public_error_occurrence)
 
+        if (
+            prev_entry.command.intent in (CommandIntent.PROTOCOL, None)
+            and action.type == ErrorRecoveryType.WAIT_FOR_RECOVERY
+        ):
+            self._state.queue_status = QueueStatus.AWAITING_RECOVERY
+            self._state.recovery_target = _RecoveryTargetInfo(
+                command_id=action.command_id,
+                state_update_if_false_positive=state_update_if_false_positive,
+            )
+            self._state.has_entered_error_recovery = True
+
+        # When one command fails, we generally also cancel the commands that
+        # would have been queued after it.
         other_command_ids_to_fail: List[str]
         if prev_entry.command.intent == CommandIntent.SETUP:
             other_command_ids_to_fail = list(
@@ -368,7 +395,8 @@ class CommandStore(HasState[CommandState], HandlesActions):
                 )
             elif (
                 action.type == ErrorRecoveryType.WAIT_FOR_RECOVERY
-                or action.type == ErrorRecoveryType.IGNORE_AND_CONTINUE
+                or action.type == ErrorRecoveryType.CONTINUE_WITH_ERROR
+                or action.type == ErrorRecoveryType.ASSUME_FALSE_POSITIVE_AND_CONTINUE
             ):
                 other_command_ids_to_fail = []
             else:
@@ -384,14 +412,6 @@ class CommandStore(HasState[CommandState], HandlesActions):
                 error_recovery_type=None,
                 notes=None,
             )
-
-        if (
-            prev_entry.command.intent in (CommandIntent.PROTOCOL, None)
-            and action.type == ErrorRecoveryType.WAIT_FOR_RECOVERY
-        ):
-            self._state.queue_status = QueueStatus.AWAITING_RECOVERY
-            self._state.recovery_target_command_id = action.command_id
-            self._state.has_entered_error_recovery = True
 
     def _handle_play_action(self, action: PlayAction) -> None:
         if not self._state.run_result:
@@ -420,13 +440,13 @@ class CommandStore(HasState[CommandState], HandlesActions):
         self, action: ResumeFromRecoveryAction
     ) -> None:
         self._state.queue_status = QueueStatus.RUNNING
-        self._state.recovery_target_command_id = None
+        self._state.recovery_target = None
 
     def _handle_stop_action(self, action: StopAction) -> None:
         if not self._state.run_result:
-            self._state.recovery_target_command_id = None
-
+            self._state.recovery_target = None
             self._state.queue_status = QueueStatus.PAUSED
+
             if action.from_estop:
                 self._state.stopped_by_estop = True
                 self._state.run_result = RunResult.FAILED
@@ -435,7 +455,9 @@ class CommandStore(HasState[CommandState], HandlesActions):
 
     def _handle_finish_action(self, action: FinishAction) -> None:
         if not self._state.run_result:
+            self._state.recovery_target = None
             self._state.queue_status = QueueStatus.PAUSED
+
             if action.set_run_status:
                 self._state.run_result = (
                     RunResult.SUCCEEDED
@@ -557,7 +579,7 @@ class CommandStore(HasState[CommandState], HandlesActions):
             )
 
 
-class CommandView(HasState[CommandState]):
+class CommandView:
     """Read-only command state view."""
 
     _state: CommandState
@@ -580,18 +602,19 @@ class CommandView(HasState[CommandState]):
         return self._state.command_history.get_all_commands()
 
     def get_slice(
-        self,
-        cursor: Optional[int],
-        length: int,
+        self, cursor: Optional[int], length: int, include_fixit_commands: bool
     ) -> CommandSlice:
         """Get a subset of commands around a given cursor.
 
         If the cursor is omitted, a cursor will be selected automatically
         based on the currently running or most recently executed command.
         """
+        command_ids = self._state.command_history.get_filtered_command_ids(
+            include_fixit_commands=include_fixit_commands
+        )
         running_command = self._state.command_history.get_running_command()
         queued_command_ids = self._state.command_history.get_queue_ids()
-        total_length = self._state.command_history.length()
+        total_length = len(command_ids)
 
         # TODO(mm, 2024-05-17): This looks like it's attempting to do the same thing
         # as self.get_current(), but in a different way. Can we unify them?
@@ -620,7 +643,9 @@ class CommandView(HasState[CommandState]):
         # start is inclusive, stop is exclusive
         actual_cursor = max(0, min(cursor, total_length - 1))
         stop = min(total_length, actual_cursor + length)
-        commands = self._state.command_history.get_slice(start=actual_cursor, stop=stop)
+        commands = self._state.command_history.get_slice(
+            start=actual_cursor, stop=stop, command_ids=command_ids
+        )
 
         return CommandSlice(
             commands=commands,
@@ -676,7 +701,12 @@ class CommandView(HasState[CommandState]):
 
     def get_all_errors(self) -> List[ErrorOccurrence]:
         """Get the run's full error list, if there was none, returns an empty list."""
-        return self._state.failed_command_errors
+        failed_commands = self._state.command_history.get_all_failed_commands()
+        return [
+            command_error.error
+            for command_error in failed_commands
+            if command_error.error is not None
+        ]
 
     def get_has_entered_recovery_mode(self) -> bool:
         """Get whether the run has entered recovery mode."""
@@ -736,6 +766,12 @@ class CommandView(HasState[CommandState]):
         # if queue is in recovery mode, return the next fixit command
         next_fixit_cmd = self._state.command_history.get_fixit_queue_ids().head(None)
         if next_fixit_cmd and self._state.queue_status == QueueStatus.AWAITING_RECOVERY:
+            return next_fixit_cmd
+        if (
+            next_fixit_cmd
+            and self._state.queue_status == QueueStatus.AWAITING_RECOVERY_PAUSED
+            and self._may_run_with_door_open(fixit_command=self.get(next_fixit_cmd))
+        ):
             return next_fixit_cmd
 
         # if there is a setup command queued, prioritize it
@@ -852,11 +888,11 @@ class CommandView(HasState[CommandState]):
 
     def get_recovery_target(self) -> Optional[CommandPointer]:
         """Return the command currently undergoing error recovery, if any."""
-        recovery_target_command_id = self._state.recovery_target_command_id
-        if recovery_target_command_id is None:
+        recovery_target = self._state.recovery_target
+        if recovery_target is None:
             return None
         else:
-            entry = self._state.command_history.get(recovery_target_command_id)
+            entry = self._state.command_history.get(recovery_target.command_id)
             return CommandPointer(
                 command_id=entry.command.id,
                 command_key=entry.command.key,
@@ -880,7 +916,7 @@ class CommandView(HasState[CommandState]):
         fatal error of the overall run coming from anywhere in the Python script,
         including in between commands.
         """
-        failed_command = self.state.failed_command
+        failed_command = self._state.failed_command
         if (
             failed_command
             and failed_command.command.error
@@ -896,11 +932,15 @@ class CommandView(HasState[CommandState]):
 
         The command ID is assumed to point to a failed command.
         """
-        return self.state.command_error_recovery_types[command_id]
+        return self._state.command_error_recovery_types[command_id]
 
     def get_is_stopped(self) -> bool:
         """Get whether an engine stop has completed."""
         return self._state.run_completed_at is not None
+
+    def get_is_stopped_by_estop(self) -> bool:
+        """Return whether the engine was stopped specifically by an E-stop."""
+        return self._state.stopped_by_estop
 
     def has_been_played(self) -> bool:
         """Get whether engine has started."""
@@ -967,12 +1007,23 @@ class CommandView(HasState[CommandState]):
                     "Setup commands are not allowed after run has started."
                 )
             elif action.request.intent == CommandIntent.FIXIT:
-                if self._state.queue_status != QueueStatus.AWAITING_RECOVERY:
+                if self.get_status() == EngineStatus.AWAITING_RECOVERY:
+                    return action
+                elif self.get_status() in (
+                    EngineStatus.AWAITING_RECOVERY_BLOCKED_BY_OPEN_DOOR,
+                    EngineStatus.AWAITING_RECOVERY_PAUSED,
+                ):
+                    if self._may_run_with_door_open(fixit_command=action.request):
+                        return action
+                    else:
+                        raise FixitCommandNotAllowedError(
+                            f"{action.request.commandType} fixit command may not run"
+                            " until the door is closed and the run is played again."
+                        )
+                else:
                     raise FixitCommandNotAllowedError(
                         "Fixit commands are not allowed when the run is not in a recoverable state."
                     )
-                else:
-                    return action
             else:
                 return action
 
@@ -1057,3 +1108,35 @@ class CommandView(HasState[CommandState]):
         higher-level code.
         """
         return self._state.error_recovery_policy
+
+    def get_state_update_for_false_positive(self) -> update_types.StateUpdate:
+        """Return the state update for if the current recovery target was a false positive.
+
+        If we're currently in error recovery mode, and you have decided that the
+        underlying command error was a false positive, this returns a state update
+        that will undo the error's effects on engine state.
+        See `ProtocolEngine.resume_from_recovery(reconcile_false_positive=True)`.
+        """
+        if self._state.recovery_target is None:
+            return update_types.StateUpdate()  # Empty/no-op.
+        else:
+            return self._state.recovery_target.state_update_if_false_positive
+
+    def _may_run_with_door_open(
+        self, *, fixit_command: Command | CommandCreate
+    ) -> bool:
+        """Return whether the given fixit command is exempt from the usual open-door auto pause.
+
+        This is required for certain error recovery flows, where we want the robot to
+        do stuff while the door is open.
+        """
+        # CommandIntent.PROTOCOL and CommandIntent.SETUP have their own rules for whether
+        # they run while the door is open. Passing one of those commands to this function
+        # is probably a mistake in the caller's logic.
+        assert fixit_command.intent == CommandIntent.FIXIT
+
+        # This type annotation is to make sure the string constant stays in sync and isn't typo'd.
+        required_command_type: UnsafeUngripLabwareCommandType = "unsafe/ungripLabware"
+        # todo(mm, 2024-10-04): Instead of allowlisting command types, maybe we should
+        # add a `mayRunWithDoorOpen: bool` field to command requests.
+        return fixit_command.commandType == required_command_type

@@ -51,5 +51,4 @@ async def test_save_position_implementation(
             positionId="456",
             position=DeckPoint(x=1, y=2, z=3),
         ),
-        private=None,
     )

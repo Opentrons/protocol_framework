@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { Box } from '../primitives'
 import { SPACING } from '../ui-style-constants'
 import { COLORS } from '../helix-design-system'
@@ -6,6 +6,7 @@ import { ModalHeader } from './ModalHeader'
 import { ModalShell } from './ModalShell'
 import type { IconProps } from '../icons'
 import type { StyleProps } from '../primitives'
+import type { Position } from './ModalShell'
 
 type ModalType = 'info' | 'warning' | 'error'
 
@@ -20,6 +21,9 @@ export interface ModalProps extends StyleProps {
   childrenPadding?: string | number
   children?: React.ReactNode
   footer?: React.ReactNode
+  zIndexOverlay?: number
+  showOverlay?: boolean
+  position?: Position
 }
 
 /**
@@ -36,6 +40,9 @@ export const Modal = (props: ModalProps): JSX.Element => {
     footer,
     titleElement1,
     titleElement2,
+    zIndexOverlay,
+    position,
+    showOverlay,
     ...styleProps
   } = props
 
@@ -70,9 +77,11 @@ export const Modal = (props: ModalProps): JSX.Element => {
       backgroundColor={COLORS.white}
     />
   )
-
   return (
     <ModalShell
+      position={position}
+      showOverlay={showOverlay}
+      zIndexOverlay={zIndexOverlay}
       width={styleProps.width ?? '31.25rem'}
       header={modalHeader}
       onOutsideClick={closeOnOutsideClick ?? false ? onClose : undefined}

@@ -203,6 +203,7 @@ async def test_returned_in_order_added(
             commands=[],
             errors=[],
             liquids=[],
+            liquidClasses=[],
             command_annotations=[],
         )
 
@@ -268,6 +269,7 @@ async def test_update_adds_details_and_completes_analysis(
         commands=[],
         errors=[],
         liquids=[],
+        liquidClasses=[],
         command_annotations=[command_annotation],
     )
 
@@ -286,6 +288,7 @@ async def test_update_adds_details_and_completes_analysis(
         commands=[],
         errors=[],
         liquids=[],
+        liquidClasses=[],
         commandAnnotations=[command_annotation],
     )
     assert await subject.get_by_protocol("protocol-id") == [result]
@@ -319,6 +322,7 @@ async def test_update_adds_details_and_completes_analysis(
         "commands": [],
         "errors": [],
         "liquids": [],
+        "liquidClasses": [],
         "modules": [],
         "commandAnnotations": [
             {"annotationType": "custom", "commandKeys": ["abc", "xyz"]}
@@ -371,6 +375,7 @@ async def test_update_adds_rtp_values_to_completed_store(
             commands=[],
             errors=[],
             liquids=[],
+            liquidClasses=[],
         ),
     )
 
@@ -391,6 +396,7 @@ async def test_update_adds_rtp_values_to_completed_store(
         commands=[],
         errors=[],
         liquids=[],
+        liquidClasses=[],
         command_annotations=[],
     )
     decoy.verify(
@@ -495,6 +501,7 @@ async def test_update_infers_status_from_errors(
         modules=[],
         pipettes=[],
         liquids=[],
+        liquidClasses=[],
         command_annotations=[],
     )
     analysis = (await subject.get_by_protocol("protocol-id"))[0]
@@ -537,6 +544,7 @@ async def test_save_initialization_failed_analysis(
             commands=[],
             errors=[error_occurence],
             liquids=[],
+            liquidClasses=[],
         ),
     )
 
@@ -651,3 +659,46 @@ async def test_matching_default_rtp_values_in_analysis_with_pending_analysis(
         await subject.matching_rtp_values_in_analysis(
             AnalysisSummary(id="analysis-id", status=AnalysisStatus.PENDING), []
         )
+
+
+async def test_matching_rtp_values_in_analysis_with_no_rtps(
+    decoy: Decoy,
+    sql_engine: SQLEngine,
+    subject: AnalysisStore,
+    protocol_store: ProtocolStore,
+) -> None:
+    """It should handle the cases of no RTPs, either previously or newly, appropriately."""
+    mock_completed_store = decoy.mock(cls=CompletedAnalysisStore)
+    subject = AnalysisStore(sql_engine=sql_engine, completed_store=mock_completed_store)
+    protocol_store.insert(make_dummy_protocol_resource(protocol_id="protocol-id"))
+
+    decoy.when(
+        mock_completed_store.get_primitive_rtps_by_analysis_id("analysis-2")
+    ).then_return({})
+    decoy.when(
+        mock_completed_store.get_csv_rtps_by_analysis_id("analysis-2")
+    ).then_return({})
+    assert (
+        await subject.matching_rtp_values_in_analysis(
+            last_analysis_summary=AnalysisSummary(
+                id="analysis-2", status=AnalysisStatus.COMPLETED
+            ),
+            new_parameters=[],
+        )
+        is True
+    )
+    decoy.when(
+        mock_completed_store.get_primitive_rtps_by_analysis_id("analysis-2")
+    ).then_return({})
+    decoy.when(
+        mock_completed_store.get_csv_rtps_by_analysis_id("analysis-2")
+    ).then_return({})
+    assert (
+        await subject.matching_rtp_values_in_analysis(
+            last_analysis_summary=AnalysisSummary(
+                id="analysis-2", status=AnalysisStatus.COMPLETED
+            ),
+            new_parameters=[mock_number_param("cool_param", 2.0)],
+        )
+        is False
+    )

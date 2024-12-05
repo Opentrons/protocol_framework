@@ -1,12 +1,15 @@
 """Test touch tip commands."""
+
 import pytest
 from decoy import Decoy
 
 from opentrons.hardware_control.types import CriticalPoint
 from opentrons.motion_planning import Waypoint
 from opentrons.protocol_engine import WellLocation, WellOffset, DeckPoint, errors
+from opentrons.protocol_engine.resources import ModelUtils
 from opentrons.protocol_engine.execution import MovementHandler, GantryMover
-from opentrons.protocol_engine.state import StateView
+from opentrons.protocol_engine.state import update_types
+from opentrons.protocol_engine.state.state import StateView
 from opentrons.types import Point
 
 from opentrons.protocol_engine.commands.command import SuccessData
@@ -21,6 +24,12 @@ from opentrons.protocol_engine.commands.touch_tip import (
 def mock_state_view(decoy: Decoy) -> StateView:
     """Get a mock StateView."""
     return decoy.mock(cls=StateView)
+
+
+@pytest.fixture
+def mock_model_utils(decoy: Decoy) -> ModelUtils:
+    """Get a mock ModelUtils."""
+    return decoy.mock(cls=ModelUtils)
 
 
 @pytest.fixture
@@ -40,12 +49,14 @@ def subject(
     mock_state_view: StateView,
     mock_movement_handler: MovementHandler,
     mock_gantry_mover: GantryMover,
+    mock_model_utils: ModelUtils,
 ) -> TouchTipImplementation:
     """Get the test subject."""
     return TouchTipImplementation(
         state_view=mock_state_view,
         movement=mock_movement_handler,
         gantry_mover=mock_gantry_mover,
+        model_utils=mock_model_utils,
     )
 
 
@@ -72,6 +83,11 @@ async def test_touch_tip_implementation(
             labware_id="123",
             well_name="A3",
             well_location=WellLocation(offset=WellOffset(x=1, y=2, z=3)),
+            current_well=None,
+            force_direct=False,
+            minimum_z_height=None,
+            speed=None,
+            operation_volume=None,
         )
     ).then_return(Point(x=1, y=2, z=3))
 
@@ -122,7 +138,14 @@ async def test_touch_tip_implementation(
     result = await subject.execute(params)
 
     assert result == SuccessData(
-        public=TouchTipResult(position=DeckPoint(x=4, y=5, z=6)), private=None
+        public=TouchTipResult(position=DeckPoint(x=4, y=5, z=6)),
+        state_update=update_types.StateUpdate(
+            pipette_location=update_types.PipetteLocationUpdate(
+                pipette_id="abc",
+                new_location=update_types.Well(labware_id="123", well_name="A3"),
+                new_deck_point=DeckPoint(x=4, y=5, z=6),
+            )
+        ),
     )
 
 

@@ -18,7 +18,7 @@ from opentrons_hardware.firmware_bindings.messages.message_definitions import (
 from opentrons_hardware.firmware_bindings.messages.messages import MessageDefinition
 from opentrons_hardware.firmware_bindings.constants import SensorType, SensorId
 
-from opentrons.config.types import LiquidProbeSettings, OutputOptions
+from opentrons.config.types import LiquidProbeSettings
 from opentrons.hardware_control.types import (
     TipStateType,
     FailedTipStateCheck,
@@ -119,6 +119,7 @@ class TestConfig:
     num_trials: int
     droplet_wait_seconds: int
     simulate: bool
+    skip_all_pressure: bool
 
 
 @dataclass
@@ -700,9 +701,12 @@ async def _test_for_leak(
             accumulate_raw_data_cb
         ), "pressure fixture requires recording data to disk"
         await _move_to_fixture(api, mount)
-        test_passed = await _fixture_check_pressure(
-            api, mount, test_config, fixture, write_cb, accumulate_raw_data_cb
-        )
+        if not test_config.skip_all_pressure:
+            test_passed = await _fixture_check_pressure(
+                api, mount, test_config, fixture, write_cb, accumulate_raw_data_cb
+            )
+        else:
+            test_passed = True
     else:
         await _pick_up_tip_for_tip_volume(api, mount, tip_volume=tip_volume)
         await _move_to_reservoir_liquid(api, mount)
@@ -981,7 +985,7 @@ async def _test_diagnostics_capacitive(  # noqa: C901
             probe_pos += Point(13, 13, 0)
             if sensor_id == SensorId.S1:
                 probe_pos += Point(x=0, y=9 * 7, z=0)
-            await api.add_tip(mount, api.config.calibration.probe_length)
+            api.add_tip(mount, api.config.calibration.probe_length)
             print(f"Moving to: {probe_pos}")
             # start probe 5mm above deck
             _probe_start_mm = probe_pos.z + 5
@@ -1013,7 +1017,7 @@ async def _test_diagnostics_capacitive(  # noqa: C901
         await api.home_z(mount)
         if not api.is_simulator:
             _get_operator_answer_to_question('REMOVE the probe, enter "y" when removed')
-        await api.remove_tip(mount)
+        api.remove_tip(mount)
 
     return all(results)
 
@@ -1029,9 +1033,9 @@ async def _test_diagnostics_pressure(
     sensor_ids = [SensorId.S0]
     if pip.channels == 8:
         sensor_ids.append(SensorId.S1)
-    await api.add_tip(mount, 0.1)
+    api.add_tip(mount, 0.1)
     await api.prepare_for_aspirate(mount)
-    await api.remove_tip(mount)
+    api.remove_tip(mount)
 
     async def _read_pressure(_sensor_id: SensorId) -> float:
         return await _read_pipette_sensor_repeatedly_and_average(
@@ -1129,7 +1133,9 @@ async def _test_diagnostics_pressure(
     return all(results)
 
 
-async def _test_diagnostics(api: OT3API, mount: OT3Mount, write_cb: Callable) -> bool:
+async def _test_diagnostics(
+    api: OT3API, mount: OT3Mount, write_cb: Callable, cfg: TestConfig
+) -> bool:
     # ENVIRONMENT SENSOR
     environment_pass = await _test_diagnostics_environment(api, mount, write_cb)
     print(f"environment: {_bool_to_pass_fail(environment_pass)}")
@@ -1146,9 +1152,14 @@ async def _test_diagnostics(api: OT3API, mount: OT3Mount, write_cb: Callable) ->
     print(f"capacitance: {_bool_to_pass_fail(capacitance_pass)}")
     write_cb(["diagnostics-capacitance", _bool_to_pass_fail(capacitance_pass)])
     # PRESSURE
-    pressure_pass = await _test_diagnostics_pressure(api, mount, write_cb)
-    print(f"pressure: {_bool_to_pass_fail(pressure_pass)}")
+    if not cfg.skip_all_pressure:
+        pressure_pass = await _test_diagnostics_pressure(api, mount, write_cb)
+        print(f"pressure: {_bool_to_pass_fail(pressure_pass)}")
+    else:
+        print("Skipping pressure")
+        pressure_pass = True
     write_cb(["diagnostics-pressure", _bool_to_pass_fail(pressure_pass)])
+
     return environment_pass and pressure_pass and encoder_pass and capacitance_pass
 
 
@@ -1378,13 +1389,11 @@ async def _test_liquid_probe(
                 plunger_speed=probe_cfg.plunger_speed,
                 plunger_impulse_time=0.2,
                 sensor_threshold_pascals=probe_cfg.sensor_threshold_pascals,
-                output_option=OutputOptions.can_bus_only,  # FIXME: remove
                 aspirate_while_sensing=False,
                 z_overlap_between_passes_mm=0.1,
                 plunger_reset_offset=2.0,
                 samples_for_baselining=20,
                 sample_time_sec=0.004,
-                data_files=None,
             )
             end_z = await api.liquid_probe(
                 mount, max_z_distance_machine_coords, probe_settings, probe=probe
@@ -1676,7 +1685,9 @@ async def _main(test_config: TestConfig) -> None:  # noqa: C901
             if not test_config.skip_diagnostics:
                 await api.move_to(mount, hover_over_slot_3)
                 await api.move_rel(mount, Point(z=-20))
-                test_passed = await _test_diagnostics(api, mount, csv_cb.write)
+                test_passed = await _test_diagnostics(
+                    api, mount, csv_cb.write, test_config
+                )
                 await api.retract(mount)
                 csv_cb.results("diagnostics", test_passed)
             if not test_config.skip_plunger:
@@ -1808,6 +1819,7 @@ if __name__ == "__main__":
     arg_parser.add_argument("--skip-plunger", action="store_true")
     arg_parser.add_argument("--skip-tip-presence", action="store_true")
     arg_parser.add_argument("--skip-liquid-probe", action="store_true")
+    arg_parser.add_argument("--skip-all-pressure", action="store_true")
     arg_parser.add_argument("--fixture-side", choices=["left", "right"], default="left")
     arg_parser.add_argument("--port", type=str, default="")
     arg_parser.add_argument("--num-trials", type=int, default=2)
@@ -1843,11 +1855,11 @@ if __name__ == "__main__":
     _cfg = TestConfig(
         operator_name=operator,
         skip_liquid=args.skip_liquid,
-        skip_fixture=args.skip_fixture,
+        skip_fixture=args.skip_fixture or args.skip_all_pressure,
         skip_diagnostics=args.skip_diagnostics,
         skip_plunger=args.skip_plunger,
         skip_tip_presence=args.skip_tip_presence,
-        skip_liquid_probe=args.skip_liquid_probe,
+        skip_liquid_probe=args.skip_liquid_probe or args.skip_all_pressure,
         fixture_port=args.port,
         fixture_side=args.fixture_side,
         fixture_aspirate_sample_count=args.aspirate_sample_count,
@@ -1861,6 +1873,7 @@ if __name__ == "__main__":
         num_trials=args.num_trials,
         droplet_wait_seconds=args.wait,
         simulate=args.simulate,
+        skip_all_pressure=args.skip_all_pressure,
     )
     # NOTE: overwrite default aspirate sample-count from user's input
     # FIXME: this value is being set in a few places, maybe there's a way to clean this up

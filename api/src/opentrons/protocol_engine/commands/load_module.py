@@ -16,10 +16,9 @@ from opentrons.types import DeckSlotName
 
 from opentrons.protocol_engine.resources import deck_configuration_provider
 
-from opentrons.drivers.types import AbsorbanceReaderLidStatus
 
 if TYPE_CHECKING:
-    from ..state import StateView
+    from ..state.state import StateView
     from ..execution import EquipmentHandler
 
 
@@ -105,7 +104,7 @@ class LoadModuleResult(BaseModel):
 
 
 class LoadModuleImplementation(
-    AbstractCommandImpl[LoadModuleParams, SuccessData[LoadModuleResult, None]]
+    AbstractCommandImpl[LoadModuleParams, SuccessData[LoadModuleResult]]
 ):
     """The implementation of the load module command."""
 
@@ -115,9 +114,7 @@ class LoadModuleImplementation(
         self._equipment = equipment
         self._state_view = state_view
 
-    async def execute(
-        self, params: LoadModuleParams
-    ) -> SuccessData[LoadModuleResult, None]:
+    async def execute(self, params: LoadModuleParams) -> SuccessData[LoadModuleResult]:
         """Check that the requested module is attached and assign its identifier."""
         module_type = params.model.as_type()
         self._ensure_module_location(params.location.slotName, module_type)
@@ -153,40 +150,6 @@ class LoadModuleImplementation(
                 module_id=params.moduleId,
             )
 
-        # Handle lid position update for loaded Plate Reader module on deck
-        if (
-            not self._state_view.config.use_virtual_modules
-            and params.model == ModuleModel.ABSORBANCE_READER_V1
-            and params.moduleId is not None
-        ):
-            abs_reader = self._equipment.get_module_hardware_api(
-                self._state_view.modules.get_absorbance_reader_substate(
-                    params.moduleId
-                ).module_id
-            )
-
-            if abs_reader is not None:
-                result = await abs_reader.get_current_lid_status()
-                if (
-                    isinstance(result, AbsorbanceReaderLidStatus)
-                    and result is not AbsorbanceReaderLidStatus.ON
-                ):
-                    reader_area = self._state_view.modules.ensure_and_convert_module_fixture_location(
-                        params.location.slotName,
-                        self._state_view.config.deck_type,
-                        params.model,
-                    )
-                    lid_labware = self._state_view.labware.get_by_addressable_area(
-                        reader_area
-                    )
-
-                    if lid_labware is not None:
-                        self._state_view.labware._state.labware_by_id[
-                            lid_labware.id
-                        ].location = self._state_view.modules.absorbance_reader_dock_location(
-                            params.moduleId
-                        )
-
         return SuccessData(
             public=LoadModuleResult(
                 moduleId=loaded_module.module_id,
@@ -194,7 +157,6 @@ class LoadModuleImplementation(
                 model=loaded_module.definition.model,
                 definition=loaded_module.definition,
             ),
-            private=None,
         )
 
     def _ensure_module_location(
@@ -211,7 +173,7 @@ class LoadModuleImplementation(
             cutout_fixture_id = ModuleType.to_module_fixture_id(module_type)
             module_fixture = deck_configuration_provider.get_cutout_fixture(
                 cutout_fixture_id,
-                self._state_view.addressable_areas.state.deck_definition,
+                self._state_view.labware.get_deck_definition(),
             )
             cutout_id = (
                 self._state_view.addressable_areas.get_cutout_id_by_deck_slot_name(slot)

@@ -20,6 +20,7 @@ from opentrons.protocol_engine import (
     LoadedModule,
     LoadedPipette,
     Liquid,
+    LiquidClassRecordWithId,
 )
 
 
@@ -185,6 +186,10 @@ class CompletedAnalysis(BaseModel):
     liquids: List[Liquid] = Field(
         default_factory=list,
         description="Liquids used by the protocol",
+    )
+    liquidClasses: List[LiquidClassRecordWithId] = Field(
+        default_factory=list,
+        description="Liquid classes used by the protocol",
     )
     errors: List[ErrorOccurrence] = Field(
         ...,

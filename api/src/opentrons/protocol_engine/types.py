@@ -37,7 +37,9 @@ from opentrons.hardware_control.types import (
 from opentrons.hardware_control.modules import (
     ModuleType as ModuleType,
 )
-
+from opentrons_shared_data.liquid_classes.liquid_class_definition import (
+    ByTipTypeSetting,
+)
 from opentrons_shared_data.pipette.types import (  # noqa: F401
     # convenience re-export of LabwareUri type
     LabwareUri as LabwareUri,
@@ -206,6 +208,22 @@ class WellOrigin(str, Enum):
         TOP: the top-center of the well
         BOTTOM: the bottom-center of the well
         CENTER: the middle-center of the well
+        MENISCUS: the meniscus-center of the well
+    """
+
+    TOP = "top"
+    BOTTOM = "bottom"
+    CENTER = "center"
+    MENISCUS = "meniscus"
+
+
+class PickUpTipWellOrigin(str, Enum):
+    """The origin of a PickUpTipWellLocation offset.
+
+    Props:
+        TOP: the top-center of the well
+        BOTTOM: the bottom-center of the well
+        CENTER: the middle-center of the well
     """
 
     TOP = "top"
@@ -243,6 +261,34 @@ class WellLocation(BaseModel):
     """A relative location in reference to a well's location."""
 
     origin: WellOrigin = WellOrigin.TOP
+    offset: WellOffset = Field(default_factory=WellOffset)
+    volumeOffset: float = Field(
+        default=0.0,
+        description="""A volume of liquid, in µL, to offset the z-axis offset.""",
+    )
+
+
+class LiquidHandlingWellLocation(BaseModel):
+    """A relative location in reference to a well's location.
+
+    To be used with commands that handle liquids.
+    """
+
+    origin: WellOrigin = WellOrigin.TOP
+    offset: WellOffset = Field(default_factory=WellOffset)
+    volumeOffset: Union[float, Literal["operationVolume"]] = Field(
+        default=0.0,
+        description="""A volume of liquid, in µL, to offset the z-axis offset. When "operationVolume" is specified, this volume is pulled from the command volume parameter.""",
+    )
+
+
+class PickUpTipWellLocation(BaseModel):
+    """A relative location in reference to a well's location.
+
+    To be used for picking up tips.
+    """
+
+    origin: PickUpTipWellOrigin = PickUpTipWellOrigin.TOP
     offset: WellOffset = Field(default_factory=WellOffset)
 
 
@@ -312,6 +358,48 @@ class CurrentWell:
     well_name: str
 
 
+class LoadedVolumeInfo(BaseModel):
+    """A well's liquid volume, initialized by a LoadLiquid, updated by Aspirate and Dispense."""
+
+    volume: Optional[float] = None
+    last_loaded: datetime
+    operations_since_load: int
+
+
+class ProbedHeightInfo(BaseModel):
+    """A well's liquid height, initialized by a LiquidProbe, cleared by Aspirate and Dispense."""
+
+    height: Optional[float] = None
+    last_probed: datetime
+
+
+class ProbedVolumeInfo(BaseModel):
+    """A well's liquid volume, initialized by a LiquidProbe, updated by Aspirate and Dispense."""
+
+    volume: Optional[float] = None
+    last_probed: datetime
+    operations_since_probe: int
+
+
+class WellInfoSummary(BaseModel):
+    """Payload for a well's liquid info in StateSummary."""
+
+    labware_id: str
+    well_name: str
+    loaded_volume: Optional[float] = None
+    probed_height: Optional[float] = None
+    probed_volume: Optional[float] = None
+
+
+@dataclass
+class WellLiquidInfo:
+    """Tracked and sensed information about liquid in a well."""
+
+    probed_height: Optional[ProbedHeightInfo]
+    loaded_volume: Optional[LoadedVolumeInfo]
+    probed_volume: Optional[ProbedVolumeInfo]
+
+
 @dataclass(frozen=True)
 class CurrentAddressableArea:
     """The latest addressable area the robot has accessed."""
@@ -338,6 +426,21 @@ class TipGeometry:
     volume: float
 
 
+class FluidKind(str, Enum):
+    """A kind of fluid that can be inside a pipette."""
+
+    LIQUID = "LIQUID"
+    AIR = "AIR"
+
+
+@dataclass(frozen=True)
+class AspiratedFluid:
+    """Fluid inside a pipette."""
+
+    kind: FluidKind
+    volume: float
+
+
 class MovementAxis(str, Enum):
     """Axis on which to issue a relative movement."""
 
@@ -357,6 +460,7 @@ class MotorAxis(str, Enum):
     RIGHT_PLUNGER = "rightPlunger"
     EXTENSION_Z = "extensionZ"
     EXTENSION_JAW = "extensionJaw"
+    AXIS_96_CHANNEL_CAM = "axis96ChannelCam"
 
 
 # TODO(mc, 2022-01-18): use opentrons_shared_data.module.types.ModuleModel
@@ -728,6 +832,10 @@ class HexColor(BaseModel):
         return v
 
 
+EmptyLiquidId = Literal["EMPTY"]
+LiquidId = str | EmptyLiquidId
+
+
 class Liquid(BaseModel):
     """Payload required to create a liquid."""
 
@@ -735,6 +843,58 @@ class Liquid(BaseModel):
     displayName: str
     description: str
     displayColor: Optional[HexColor]
+
+
+class LiquidClassRecord(ByTipTypeSetting, frozen=True):
+    """LiquidClassRecord is our internal representation of an (immutable) liquid class.
+
+    Conceptually, a liquid class record is the tuple (name, pipette, tip, transfer properties).
+    We consider two liquid classes to be the same if every entry in that tuple is the same; and liquid
+    classes are different if any entry in the tuple is different.
+
+    This class defines the tuple via inheritance so that we can reuse the definitions from shared_data.
+    """
+
+    liquidClassName: str = Field(
+        ...,
+        description="Identifier for the liquid of this liquid class, e.g. glycerol50.",
+    )
+    pipetteModel: str = Field(
+        ...,
+        description="Identifier for the pipette of this liquid class.",
+    )
+    # The other fields like tiprack ID, aspirate properties, etc. are pulled in from ByTipTypeSetting.
+
+    def __hash__(self) -> int:
+        """Hash function for LiquidClassRecord."""
+        # Within the Protocol Engine, LiquidClassRecords are immutable, and we'd like to be able to
+        # look up LiquidClassRecords by value, which involves hashing. However, Pydantic does not
+        # generate a usable hash function if any of the subfields (like Coordinate) are not frozen.
+        # So we have to implement the hash function ourselves.
+        # Our strategy is to recursively convert this object into a list of (key, value) tuples.
+        def dict_to_tuple(d: dict[str, Any]) -> tuple[tuple[str, Any], ...]:
+            return tuple(
+                (
+                    field_name,
+                    dict_to_tuple(value)
+                    if isinstance(value, dict)
+                    else tuple(value)
+                    if isinstance(value, list)
+                    else value,
+                )
+                for field_name, value in d.items()
+            )
+
+        return hash(dict_to_tuple(self.dict()))
+
+
+class LiquidClassRecordWithId(LiquidClassRecord, frozen=True):
+    """A LiquidClassRecord with its ID, for use in summary lists."""
+
+    liquidClassId: str = Field(
+        ...,
+        description="Unique identifier for this liquid class.",
+    )
 
 
 class SpeedRange(NamedTuple):
@@ -1122,3 +1282,6 @@ PrimitiveRunTimeParamValuesType = Mapping[
 
 CSVRunTimeParamFilesType = Mapping[StrictStr, StrictStr]
 CSVRuntimeParamPaths = Dict[str, Path]
+
+
+ABSMeasureMode = Literal["single", "multi"]

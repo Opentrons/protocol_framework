@@ -9,12 +9,12 @@ from opentrons_shared_data.deck.types import DeckDefinitionV5
 from opentrons_shared_data.robot.types import RobotDefinition
 
 from opentrons.protocol_engine.error_recovery_policy import ErrorRecoveryPolicy
-from opentrons.protocol_engine.types import ModuleOffsetData
+from opentrons.protocol_engine.types import LiquidClassRecordWithId, ModuleOffsetData
 from opentrons.util.change_notifier import ChangeNotifier
 
 from ..resources import DeckFixedLabware
 from ..actions import Action, ActionHandler
-from .abstract_store import HasState, HandlesActions
+from ._abstract_store import HasState, HandlesActions
 from .commands import CommandState, CommandStore, CommandView
 from .addressable_areas import (
     AddressableAreaState,
@@ -25,9 +25,12 @@ from .labware import LabwareState, LabwareStore, LabwareView
 from .pipettes import PipetteState, PipetteStore, PipetteView
 from .modules import ModuleState, ModuleStore, ModuleView
 from .liquids import LiquidState, LiquidView, LiquidStore
+from .liquid_classes import LiquidClassState, LiquidClassStore, LiquidClassView
 from .tips import TipState, TipView, TipStore
+from .wells import WellState, WellView, WellStore
 from .geometry import GeometryView
 from .motion import MotionView
+from .files import FileView, FileState, FileStore
 from .config import Config
 from .state_summary import StateSummary
 from ..types import DeckConfigurationType
@@ -47,7 +50,10 @@ class State:
     pipettes: PipetteState
     modules: ModuleState
     liquids: LiquidState
+    liquid_classes: LiquidClassState
     tips: TipState
+    wells: WellState
+    files: FileState
 
 
 class StateView(HasState[State]):
@@ -60,9 +66,12 @@ class StateView(HasState[State]):
     _pipettes: PipetteView
     _modules: ModuleView
     _liquid: LiquidView
+    _liquid_classes: LiquidClassView
     _tips: TipView
+    _wells: WellView
     _geometry: GeometryView
     _motion: MotionView
+    _files: FileView
     _config: Config
 
     @property
@@ -96,9 +105,19 @@ class StateView(HasState[State]):
         return self._liquid
 
     @property
+    def liquid_classes(self) -> LiquidClassView:
+        """Get state view selectors for liquid class state."""
+        return self._liquid_classes
+
+    @property
     def tips(self) -> TipView:
         """Get state view selectors for tip state."""
         return self._tips
+
+    @property
+    def wells(self) -> WellView:
+        """Get state view selectors for well state."""
+        return self._wells
 
     @property
     def geometry(self) -> GeometryView:
@@ -109,6 +128,11 @@ class StateView(HasState[State]):
     def motion(self) -> MotionView:
         """Get state view selectors for derived motion state."""
         return self._motion
+
+    @property
+    def files(self) -> FileView:
+        """Get state view selectors for engine create file state."""
+        return self._files
 
     @property
     def config(self) -> Config:
@@ -129,7 +153,15 @@ class StateView(HasState[State]):
             completedAt=self._state.commands.run_completed_at,
             startedAt=self._state.commands.run_started_at,
             liquids=self._liquid.get_all(),
+            wells=self._wells.get_all(),
             hasEverEnteredErrorRecovery=self._commands.get_has_entered_recovery_mode(),
+            files=self._state.files.file_ids,
+            liquidClasses=[
+                LiquidClassRecordWithId(
+                    liquidClassId=liquid_class_id, **dict(liquid_class_record)
+                )
+                for liquid_class_id, liquid_class_record in self._liquid_classes.get_all().items()
+            ],
         )
 
 
@@ -195,7 +227,10 @@ class StateStore(StateView, ActionHandler):
             module_calibration_offsets=module_calibration_offsets,
         )
         self._liquid_store = LiquidStore()
+        self._liquid_class_store = LiquidClassStore()
         self._tip_store = TipStore()
+        self._well_store = WellStore()
+        self._file_store = FileStore()
 
         self._substores: List[HandlesActions] = [
             self._command_store,
@@ -204,7 +239,10 @@ class StateStore(StateView, ActionHandler):
             self._labware_store,
             self._module_store,
             self._liquid_store,
+            self._liquid_class_store,
             self._tip_store,
+            self._well_store,
+            self._file_store,
         ]
         self._config = config
         self._change_notifier = change_notifier or ChangeNotifier()
@@ -320,7 +358,10 @@ class StateStore(StateView, ActionHandler):
             pipettes=self._pipette_store.state,
             modules=self._module_store.state,
             liquids=self._liquid_store.state,
+            liquid_classes=self._liquid_class_store.state,
             tips=self._tip_store.state,
+            wells=self._well_store.state,
+            files=self._file_store.state,
         )
 
     def _initialize_state(self) -> None:
@@ -335,12 +376,16 @@ class StateStore(StateView, ActionHandler):
         self._pipettes = PipetteView(state.pipettes)
         self._modules = ModuleView(state.modules)
         self._liquid = LiquidView(state.liquids)
+        self._liquid_classes = LiquidClassView(state.liquid_classes)
         self._tips = TipView(state.tips)
+        self._wells = WellView(state.wells)
+        self._files = FileView(state.files)
 
         # Derived states
         self._geometry = GeometryView(
             config=self._config,
             labware_view=self._labware,
+            well_view=self._wells,
             module_view=self._modules,
             pipette_view=self._pipettes,
             addressable_area_view=self._addressable_areas,
@@ -364,7 +409,9 @@ class StateStore(StateView, ActionHandler):
         self._pipettes._state = next_state.pipettes
         self._modules._state = next_state.modules
         self._liquid._state = next_state.liquids
+        self._liquid_classes._state = next_state.liquid_classes
         self._tips._state = next_state.tips
+        self._wells._state = next_state.wells
         self._change_notifier.notify()
         if self._notify_robot_server is not None:
             self._notify_robot_server()

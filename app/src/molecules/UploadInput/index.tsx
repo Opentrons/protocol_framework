@@ -1,25 +1,32 @@
-import * as React from 'react'
+import { useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import {
   ALIGN_CENTER,
   BORDERS,
   COLORS,
+  CURSOR_POINTER,
   DIRECTION_COLUMN,
   DISPLAY_FLEX,
   Flex,
   Icon,
   JUSTIFY_CENTER,
+  LegacyStyledText,
   POSITION_FIXED,
   PrimaryButton,
   SPACING,
-  LegacyStyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
 
+import type {
+  ChangeEventHandler,
+  DragEventHandler,
+  MouseEventHandler,
+} from 'react'
+
 const StyledLabel = styled.label`
   display: ${DISPLAY_FLEX};
-  cursor: pointer;
+  cursor: ${CURSOR_POINTER};
   flex-direction: ${DIRECTION_COLUMN};
   align-items: ${ALIGN_CENTER};
   width: 100%;
@@ -29,8 +36,7 @@ const StyledLabel = styled.label`
   text-align: ${TYPOGRAPHY.textAlignCenter};
   background-color: ${COLORS.white};
 
-  &:hover,
-  &:focus-within {
+  &:hover {
     border: 2px dashed ${COLORS.blue50};
   }
 `
@@ -66,39 +72,37 @@ export function UploadInput(props: UploadInputProps): JSX.Element | null {
   } = props
   const { t } = useTranslation('protocol_info')
 
-  const fileInput = React.useRef<HTMLInputElement>(null)
-  const [isFileOverDropZone, setIsFileOverDropZone] = React.useState<boolean>(
-    false
-  )
-  const [isHover, setIsHover] = React.useState<boolean>(false)
-  const handleDrop: React.DragEventHandler<HTMLLabelElement> = e => {
+  const fileInput = useRef<HTMLInputElement>(null)
+  const [isFileOverDropZone, setIsFileOverDropZone] = useState<boolean>(false)
+  const [isHover, setIsHover] = useState<boolean>(false)
+  const handleDrop: DragEventHandler<HTMLLabelElement> = e => {
     e.preventDefault()
     e.stopPropagation()
     Array.from(e.dataTransfer.files).forEach(f => onUpload(f))
     setIsFileOverDropZone(false)
   }
-  const handleDragEnter: React.DragEventHandler<HTMLLabelElement> = e => {
+  const handleDragEnter: DragEventHandler<HTMLLabelElement> = e => {
     e.preventDefault()
     e.stopPropagation()
   }
-  const handleDragLeave: React.DragEventHandler<HTMLLabelElement> = e => {
+  const handleDragLeave: DragEventHandler<HTMLLabelElement> = e => {
     e.preventDefault()
     e.stopPropagation()
     setIsFileOverDropZone(false)
     setIsHover(false)
   }
-  const handleDragOver: React.DragEventHandler<HTMLLabelElement> = e => {
+  const handleDragOver: DragEventHandler<HTMLLabelElement> = e => {
     e.preventDefault()
     e.stopPropagation()
     setIsFileOverDropZone(true)
     setIsHover(true)
   }
 
-  const handleClick: React.MouseEventHandler<HTMLButtonElement> = _event => {
+  const handleClick: MouseEventHandler<HTMLButtonElement> = _event => {
     onClick != null ? onClick() : fileInput.current?.click()
   }
 
-  const onChange: React.ChangeEventHandler<HTMLInputElement> = event => {
+  const onChange: ChangeEventHandler<HTMLInputElement> = event => {
     ;[...(event.target.files ?? [])].forEach(f => onUpload(f))
     if ('value' in event.currentTarget) event.currentTarget.value = ''
   }

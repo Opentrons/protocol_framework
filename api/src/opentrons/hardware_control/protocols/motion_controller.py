@@ -9,6 +9,12 @@ from .types import MountArgType
 class MotionController(Protocol[MountArgType]):
     """Protocol specifying fundamental motion controls."""
 
+    def get_deck_from_machine(
+        self, machine_pos: Dict[Axis, float]
+    ) -> Dict[Axis, float]:
+        """Convert machine coordinates to deck coordinates."""
+        ...
+
     async def halt(self, disengage_before_stopping: bool = False) -> None:
         """Immediately stop motion.
 
@@ -202,6 +208,10 @@ class MotionController(Protocol[MountArgType]):
 
     async def disengage_axes(self, which: List[Axis]) -> None:
         """Disengage some axes."""
+        ...
+
+    async def engage_axes(self, which: List[Axis]) -> None:
+        """Engage some axes."""
         ...
 
     async def retract(self, mount: MountArgType, margin: float = 10) -> None:

@@ -8,7 +8,6 @@ import {
   MAGNETIC_MODULE_V1,
   MAGNETIC_MODULE_V2,
   OT2_ROBOT_TYPE,
-  SPAN7_8_10_11_SLOT,
   TEMPERATURE_MODULE_TYPE,
   TEMPERATURE_MODULE_V1,
   TEMPERATURE_MODULE_V2,
@@ -103,11 +102,6 @@ export const PIPETTE_VOLUMES: PipetteVolumes = {
   ],
 }
 
-export const MAX_MOAM_MODULES = 7
-//  limiting 10 instead of 11 to make space for a single default tiprack
-//  to be auto-generated
-export const MAX_MAGNETIC_BLOCKS = 10
-
 export const FLEX_SUPPORTED_MODULE_MODELS: ModuleModel[] = [
   THERMOCYCLER_MODULE_V2,
   HEATERSHAKER_MODULE_V1,
@@ -137,7 +131,7 @@ export const DEFAULT_SLOT_MAP_FLEX: {
 }
 
 export const DEFAULT_SLOT_MAP_OT2: { [moduleType in ModuleType]?: string } = {
-  [THERMOCYCLER_MODULE_TYPE]: SPAN7_8_10_11_SLOT,
+  [THERMOCYCLER_MODULE_TYPE]: '7',
   [HEATERSHAKER_MODULE_TYPE]: '1',
   [MAGNETIC_MODULE_TYPE]: '1',
   [TEMPERATURE_MODULE_TYPE]: '3',

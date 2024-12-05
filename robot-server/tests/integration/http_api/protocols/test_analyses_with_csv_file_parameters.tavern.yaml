@@ -17,6 +17,7 @@ stages:
           csv_file_id: data.id
           csv_file_name: data.name
           file_created_at: data.createdAt
+          source: "uploaded"
       status_code:
       - 201
       json:
@@ -24,6 +25,7 @@ stages:
           id: !anystr
           name: "sample_record.csv"
           createdAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
+          source: "uploaded"
 
   - name: Upload a protocol
     request:
@@ -40,6 +42,7 @@ stages:
           protocol_id: data.id
           analysis_id: data.analysisSummaries[0].id
           run_time_parameters_data1: data.analysisSummaries[0].runTimeParameters
+          source: "uploaded"
       strict:
         - json:off
       status_code: 201
@@ -130,3 +133,4 @@ stages:
           - id: '{csv_file_id}'
             name: '{csv_file_name}'
             createdAt: '{file_created_at}'
+            source: 'uploaded'

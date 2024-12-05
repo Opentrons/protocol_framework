@@ -17,7 +17,7 @@ from typing import (
     Mapping,
 )
 
-from opentrons.config.types import OT3Config, GantryLoad, OutputOptions
+from opentrons.config.types import OT3Config, GantryLoad
 from opentrons.config import gripper_config
 
 from opentrons.hardware_control.module_control import AttachedModulesControl
@@ -63,7 +63,8 @@ from opentrons.hardware_control.dev_types import (
 from opentrons.util.async_helpers import ensure_yield
 from .types import HWStopCondition
 from .flex_protocol import FlexBackend
-
+from opentrons_hardware.firmware_bindings.constants import SensorId
+from opentrons_hardware.sensors.types import SensorDataType
 
 log = logging.getLogger(__name__)
 
@@ -234,7 +235,11 @@ class OT3Simulator(FlexBackend):
         self._sim_gantry_load = gantry_load
 
     def update_constraints_for_plunger_acceleration(
-        self, mount: OT3Mount, acceleration: float, gantry_load: GantryLoad
+        self,
+        mount: OT3Mount,
+        acceleration: float,
+        gantry_load: GantryLoad,
+        high_speed_pipette: bool = False,
     ) -> None:
         self._sim_gantry_load = gantry_load
 
@@ -346,10 +351,12 @@ class OT3Simulator(FlexBackend):
         plunger_speed: float,
         threshold_pascals: float,
         plunger_impulse_time: float,
-        output_format: OutputOptions = OutputOptions.can_bus_only,
-        data_files: Optional[Dict[InstrumentProbeType, str]] = None,
+        num_baseline_reads: int,
         probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
         force_both_sensors: bool = False,
+        response_queue: Optional[
+            asyncio.Queue[Dict[SensorId, List[SensorDataType]]]
+        ] = None,
     ) -> float:
         z_axis = Axis.by_mount(mount)
         pos = self._position
@@ -436,10 +443,12 @@ class OT3Simulator(FlexBackend):
         return self._sim_jaw_state
 
     async def tip_action(
-        self, origin: Dict[Axis, float], targets: List[Tuple[Dict[Axis, float], float]]
+        self, origin: float, targets: List[Tuple[float, float]]
     ) -> None:
         self._gear_motor_position.update(
-            coalesce_move_segments(origin, [target[0] for target in targets])
+            coalesce_move_segments(
+                {Axis.Q: origin}, [{Axis.Q: target[0]} for target in targets]
+            )
         )
         await asyncio.sleep(0)
 
@@ -749,8 +758,6 @@ class OT3Simulator(FlexBackend):
         speed_mm_per_s: float,
         sensor_threshold_pf: float,
         probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
-        output_format: OutputOptions = OutputOptions.sync_only,
-        data_files: Optional[Dict[InstrumentProbeType, str]] = None,
     ) -> bool:
         self._position[moving] += distance_mm
         return True

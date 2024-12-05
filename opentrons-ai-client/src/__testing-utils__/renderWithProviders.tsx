@@ -1,33 +1,51 @@
 // render using targetted component using @testing-library/react
 // with wrapping providers for i18next and redux
-import * as React from 'react'
+import type * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { I18nextProvider } from 'react-i18next'
-import { Provider } from 'react-redux'
-import { vi } from 'vitest'
 import { render } from '@testing-library/react'
-import { createStore } from 'redux'
 
-import type { PreloadedState, Store } from 'redux'
 import type { RenderOptions, RenderResult } from '@testing-library/react'
+import { useHydrateAtoms } from 'jotai/utils'
+import { Provider } from 'jotai'
 
-export interface RenderWithProvidersOptions<State> extends RenderOptions {
-  initialState?: State
+interface HydrateAtomsProps {
+  initialValues: Array<[any, any]>
+  children: React.ReactNode
+}
+
+interface TestProviderProps {
+  initialValues: Array<[any, any]>
+  children: React.ReactNode
+}
+
+const HydrateAtoms = ({
+  initialValues,
+  children,
+}: HydrateAtomsProps): React.ReactNode => {
+  useHydrateAtoms(initialValues)
+  return children
+}
+
+export const TestProvider = ({
+  initialValues,
+  children,
+}: TestProviderProps): React.ReactNode => (
+  <Provider>
+    <HydrateAtoms initialValues={initialValues}>{children}</HydrateAtoms>
+  </Provider>
+)
+
+export interface RenderWithProvidersOptions extends RenderOptions {
+  initialValues?: Array<[any, any]>
   i18nInstance: React.ComponentProps<typeof I18nextProvider>['i18n']
 }
 
-export function renderWithProviders<State>(
+export function renderWithProviders(
   Component: React.ReactElement,
-  options?: RenderWithProvidersOptions<State>
-): [RenderResult, Store<State>] {
-  const { initialState = {}, i18nInstance = null } = options ?? {}
-
-  const store: Store<State> = createStore(
-    vi.fn(),
-    initialState as PreloadedState<State>
-  )
-  store.dispatch = vi.fn()
-  store.getState = vi.fn(() => initialState) as () => State
+  options?: RenderWithProvidersOptions
+): RenderResult {
+  const { i18nInstance = null, initialValues = [] } = options ?? {}
 
   const queryClient = new QueryClient()
 
@@ -36,7 +54,7 @@ export function renderWithProviders<State>(
   > = ({ children }) => {
     const BaseWrapper = (
       <QueryClientProvider client={queryClient}>
-        <Provider store={store}>{children}</Provider>
+        <TestProvider initialValues={initialValues}>{children}</TestProvider>
       </QueryClientProvider>
     )
     if (i18nInstance != null) {
@@ -48,5 +66,5 @@ export function renderWithProviders<State>(
     }
   }
 
-  return [render(Component, { wrapper: ProviderWrapper }), store]
+  return render(Component, { wrapper: ProviderWrapper, ...options })
 }

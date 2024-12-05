@@ -145,7 +145,9 @@ export const OT3_PIPETTES = [
   'p50_single_flex',
   'p50_multi_flex',
   'p1000_multi_flex',
+  'p1000_multi_em_flex',
   'p1000_96',
+  'p200_96',
 ]
 export const OT2_PIPETTES = [
   'p300_single',
@@ -513,6 +515,7 @@ export const SINGLE_RIGHT_SLOT_FIXTURE: 'singleRightSlot' = 'singleRightSlot'
 export const STAGING_AREA_RIGHT_SLOT_FIXTURE: 'stagingAreaRightSlot' =
   'stagingAreaRightSlot'
 
+export const TRASH_BIN_FIXTURE: 'trashBin' = 'trashBin'
 export const TRASH_BIN_ADAPTER_FIXTURE: 'trashBinAdapter' = 'trashBinAdapter'
 
 export const WASTE_CHUTE_RIGHT_ADAPTER_COVERED_FIXTURE: 'wasteChuteRightAdapterCovered' =

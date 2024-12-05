@@ -3,7 +3,6 @@ import mapValues from 'lodash/mapValues'
 import cloneDeep from 'lodash/cloneDeep'
 import merge from 'lodash/merge'
 import omit from 'lodash/omit'
-import omitBy from 'lodash/omitBy'
 import reduce from 'lodash/reduce'
 import {
   FLEX_ROBOT_TYPE,
@@ -27,13 +26,8 @@ import {
 } from '../../steplist/formLevel'
 import { PRESAVED_STEP_ID } from '../../steplist/types'
 import { getLabwareIsCompatible } from '../../utils/labwareModuleCompatibility'
-import {
-  createInitialProfileCycle,
-  createInitialProfileStep,
-} from '../utils/createInitialProfileItems'
 import { getLabwareOnModule } from '../../ui/modules/utils'
 import { nestedCombineReducers } from './nestedCombineReducers'
-import { PROFILE_CYCLE, PROFILE_STEP } from '../../form-types'
 import { COLUMN_4_SLOTS } from '@opentrons/step-generation'
 import {
   _getPipetteEntitiesRootState,
@@ -93,26 +87,14 @@ import type {
   DeleteMultipleStepsAction,
   PopulateFormAction,
   ReorderStepsAction,
-  AddProfileCycleAction,
-  AddProfileStepAction,
-  DeleteProfileCycleAction,
-  DeleteProfileStepAction,
-  EditProfileCycleAction,
-  EditProfileStepAction,
   FormPatch,
 } from '../../steplist/actions'
-import type {
-  FormData,
-  StepIdType,
-  StepType,
-  ProfileItem,
-  ProfileCycleItem,
-  ProfileStepItem,
-} from '../../form-types'
+import type { FormData, StepIdType, StepType } from '../../form-types'
 import type {
   CreateContainerAction,
   DeleteContainerAction,
   DuplicateLabwareAction,
+  RenameStepAction,
   SwapSlotContentsAction,
 } from '../../labware-ingred/actions'
 import type {
@@ -135,7 +117,6 @@ type FormState = FormData | null
 const unsavedFormInitialState = null
 // the `unsavedForm` state holds temporary form info that is saved or thrown away with "cancel".
 export type UnsavedFormActions =
-  | AddProfileCycleAction
   | AddStepAction
   | ChangeFormInputAction
   | PopulateFormAction
@@ -148,15 +129,11 @@ export type UnsavedFormActions =
   | SelectTerminalItemAction
   | EditModuleAction
   | SubstituteStepFormPipettesAction
-  | AddProfileStepAction
-  | DeleteProfileStepAction
-  | DeleteProfileCycleAction
-  | EditProfileCycleAction
-  | EditProfileStepAction
   | SelectMultipleStepsAction
   | ToggleIsGripperRequiredAction
   | CreateDeckFixtureAction
   | DeleteDeckFixtureAction
+  | RenameStepAction
 export const unsavedForm = (
   rootState: RootState,
   action: UnsavedFormActions
@@ -166,26 +143,6 @@ export const unsavedForm = (
     : unsavedFormInitialState
 
   switch (action.type) {
-    case 'ADD_PROFILE_CYCLE': {
-      if (unsavedFormState?.stepType !== 'thermocycler') {
-        console.error(
-          'ADD_PROFILE_CYCLE should only be dispatched when unsaved form is "thermocycler" form'
-        )
-        return unsavedFormState
-      }
-
-      const cycleId = uuid()
-      const profileStepId = uuid()
-      return {
-        ...unsavedFormState,
-        orderedProfileItems: [...unsavedFormState.orderedProfileItems, cycleId],
-        profileItemsById: {
-          ...unsavedFormState.profileItemsById,
-          [cycleId]: createInitialProfileCycle(cycleId, profileStepId),
-        },
-      }
-    }
-
     case 'ADD_STEP': {
       return createPresavedStepForm({
         stepType: action.payload.stepType,
@@ -203,6 +160,17 @@ export const unsavedForm = (
     }
 
     case 'CHANGE_FORM_INPUT': {
+      const fieldUpdate = handleFormChange(
+        action.payload.update,
+        unsavedFormState,
+        _getPipetteEntitiesRootState(rootState),
+        _getLabwareEntitiesRootState(rootState)
+      )
+      // @ts-expect-error (IL, 2020-02-24): address in #3161, underspecified form fields may be overwritten in type-unsafe manner
+      return { ...unsavedFormState, ...fieldUpdate }
+    }
+
+    case 'CHANGE_STEP_DETAILS': {
       const fieldUpdate = handleFormChange(
         action.payload.update,
         unsavedFormState,
@@ -261,221 +229,6 @@ export const unsavedForm = (
       }
 
       return unsavedFormState
-    }
-
-    case 'ADD_PROFILE_STEP': {
-      if (unsavedFormState?.stepType !== 'thermocycler') {
-        console.error(
-          'ADD_PROFILE_STEP should only be dispatched when unsaved form is "thermocycler" form'
-        )
-        return unsavedFormState
-      }
-
-      const id = uuid()
-      const newStep = createInitialProfileStep(id)
-
-      if (action.payload !== null) {
-        const { cycleId } = action.payload
-        const targetCycle = unsavedFormState.profileItemsById[cycleId]
-        // add to cycle
-        return {
-          ...unsavedFormState,
-          profileItemsById: {
-            ...unsavedFormState.profileItemsById,
-            [cycleId]: {
-              ...targetCycle,
-              steps: [...targetCycle.steps, newStep],
-            },
-          },
-        }
-      }
-
-      // TODO factor this createInitialProfileStep out somewhere
-      return {
-        ...unsavedFormState,
-        orderedProfileItems: [...unsavedFormState.orderedProfileItems, id],
-        profileItemsById: {
-          ...unsavedFormState.profileItemsById,
-          [id]: newStep,
-        },
-      }
-    }
-
-    case 'DELETE_PROFILE_CYCLE': {
-      if (unsavedFormState?.stepType !== 'thermocycler') {
-        console.error(
-          'DELETE_PROFILE_CYCLE should only be dispatched when unsaved form is "thermocycler" form'
-        )
-        return unsavedFormState
-      }
-
-      const { id } = action.payload
-      const isCycle =
-        unsavedFormState.profileItemsById[id].type === PROFILE_CYCLE
-
-      if (!isCycle) {
-        return unsavedFormState
-      }
-
-      return {
-        ...unsavedFormState,
-        orderedProfileItems: unsavedFormState.orderedProfileItems.filter(
-          (itemId: string) => itemId !== id
-        ),
-        profileItemsById: omit(unsavedFormState.profileItemsById, id),
-      }
-    }
-
-    case 'DELETE_PROFILE_STEP': {
-      if (unsavedFormState?.stepType !== 'thermocycler') {
-        console.error(
-          'DELETE_PROFILE_STEP should only be dispatched when unsaved form is "thermocycler" form'
-        )
-        return unsavedFormState
-      }
-
-      const { id } = action.payload
-
-      const omitTopLevelSteps = (
-        profileItemsById: Record<string, ProfileItem>
-      ): Record<string, ProfileItem> =>
-        omitBy(
-          profileItemsById,
-          (item: ProfileItem, itemId: string): boolean => {
-            return item.type === PROFILE_STEP && itemId === id
-          }
-        )
-
-      // not top-level, must be nested inside a cycle
-      const omitCycleSteps = (
-        profileItemsById: Record<string, ProfileItem>
-      ): Record<string, ProfileItem> =>
-        mapValues(
-          profileItemsById,
-          (item: ProfileItem): ProfileItem => {
-            if (item.type === PROFILE_CYCLE) {
-              return {
-                ...item,
-                steps: item.steps.filter(
-                  (stepItem: ProfileStepItem) => stepItem.id !== id
-                ),
-              }
-            }
-
-            return item
-          }
-        )
-
-      const isTopLevelProfileStep =
-        unsavedFormState.orderedProfileItems.includes(id) &&
-        unsavedFormState.profileItemsById[id].type === PROFILE_STEP
-      const filteredItemsById = isTopLevelProfileStep
-        ? omitTopLevelSteps(
-            unsavedFormState.profileItemsById as Record<string, ProfileItem>
-          )
-        : omitCycleSteps(
-            unsavedFormState.profileItemsById as Record<string, ProfileItem>
-          )
-      const filteredOrderedProfileItems = isTopLevelProfileStep
-        ? unsavedFormState.orderedProfileItems.filter(
-            (itemId: string) => itemId !== id
-          )
-        : unsavedFormState.orderedProfileItems
-      return {
-        ...unsavedFormState,
-        orderedProfileItems: filteredOrderedProfileItems,
-        profileItemsById: filteredItemsById,
-      }
-    }
-
-    case 'EDIT_PROFILE_CYCLE': {
-      if (unsavedFormState?.stepType !== 'thermocycler') {
-        console.error(
-          'EDIT_PROFILE_CYCLE should only be dispatched when unsaved form is "thermocycler" form'
-        )
-        return unsavedFormState
-      }
-
-      const { id, fields } = action.payload
-      const cycle = unsavedFormState.profileItemsById[id]
-
-      if (cycle.type !== PROFILE_CYCLE) {
-        console.warn(
-          `EDIT_PROFILE_CYCLE got non-cycle profile item ${cycle.id}`
-        )
-        return unsavedFormState
-      }
-
-      return {
-        ...unsavedFormState,
-        profileItemsById: {
-          ...unsavedFormState.profileItemsById,
-          [id]: { ...cycle, ...fields },
-        },
-      }
-    }
-
-    case 'EDIT_PROFILE_STEP': {
-      if (unsavedFormState?.stepType !== 'thermocycler') {
-        console.error(
-          'EDIT_PROFILE_STEP should only be dispatched when unsaved form is "thermocycler" form'
-        )
-        return unsavedFormState
-      }
-
-      const { id, fields } = action.payload
-      const isTopLevelStep =
-        unsavedFormState.orderedProfileItems.includes(id) &&
-        unsavedFormState.profileItemsById[id].type === PROFILE_STEP
-
-      if (isTopLevelStep) {
-        return {
-          ...unsavedFormState,
-          profileItemsById: {
-            ...unsavedFormState.profileItemsById,
-            [id]: { ...unsavedFormState.profileItemsById[id], ...fields },
-          },
-        }
-      } else {
-        // it's a step in a cycle. Get the cycle id, and the index of our edited step in that cycle's `steps` array
-        let editedStepIndex = -1
-        const cycleId: string | undefined = Object.keys(
-          unsavedFormState.profileItemsById as Record<string, ProfileItem>
-        ).find((itemId: string): boolean => {
-          const item: ProfileItem = unsavedFormState.profileItemsById[itemId]
-
-          if (item.type === PROFILE_CYCLE) {
-            const stepIndex = item.steps.findIndex(step => step.id === id)
-
-            if (stepIndex !== -1) {
-              editedStepIndex = stepIndex
-              return true
-            }
-          }
-
-          return false
-        })
-
-        if (cycleId == null || editedStepIndex === -1) {
-          console.warn(`EDIT_PROFILE_STEP: step does not exist ${id}`)
-          return unsavedFormState
-        }
-
-        let newCycle: ProfileCycleItem = {
-          ...unsavedFormState.profileItemsById[cycleId],
-        }
-        const newSteps = [...newCycle.steps]
-        newSteps[editedStepIndex] = {
-          ...newCycle.steps[editedStepIndex],
-          ...fields,
-        }
-        newCycle = { ...newCycle, steps: newSteps }
-        const newProfileItems = {
-          ...unsavedFormState.profileItemsById,
-          [cycleId]: newCycle,
-        }
-        return { ...unsavedFormState, profileItemsById: newProfileItems }
-      }
     }
 
     default:

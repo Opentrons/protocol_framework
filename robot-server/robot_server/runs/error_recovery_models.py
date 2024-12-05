@@ -4,33 +4,60 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
+# There's a lot of nested classes here.
+# Here's an example of a JSON document that this code models:
+# {
+#   "policyRules": [
+#     {
+#       "matchCriteria": {
+#         "command": {
+#           "commandType": "foo",
+#           "error": {
+#             "errorType": "bar"
+#           }
+#         }
+#       },
+#       "ifMatch": "ignoreAndContinue"
+#     }
+#   ]
+# }
+
 
 class ReactionIfMatch(Enum):
-    """The type of the error recovery setting.
+    """How to handle a matching error.
 
-    * `"ignoreAndContinue"`: Ignore this error and future errors of the same type.
-    * `"failRun"`: Errors of this type should fail the run.
-    * `"waitForRecovery"`: Instances of this error should initiate a recover operation.
+    * `"failRun"`: Fail the run.
 
+    * `"waitForRecovery"`: Enter interactive error recovery mode. You can then
+      perform error recovery with `POST /runs/{id}/commands` and exit error
+      recovery mode with `POST /runs/{id}/actions`.
+
+    * `"assumeFalsePositiveAndContinue"`: Continue the run without interruption, acting
+      as if the error was a false positive.
+
+      This is equivalent to doing `"waitForRecovery"`
+      and then sending `actionType: "resume-from-recovery-assuming-false-positive"`
+      to `POST /runs/{id}/actions`, except this requires no ongoing intervention from
+      the client.
+
+    * `"ignoreAndContinue"`: Continue the run without interruption, accepting whatever
+      state the error left the robot in.
+
+      This is equivalent to doing `"waitForRecovery"`
+      and then sending `actionType: "resume-from-recovery"` to `POST /runs/{id}/actions`,
+      except this requires no ongoing intervention from the client.
+
+      This is probably not useful very often because it's likely to cause downstream
+      errors—imagine trying an `aspirate` command after a failed `pickUpTip` command.
+      This is provided for symmetry.
     """
 
-    IGNORE_AND_CONTINUE = "ignoreAndContinue"
     FAIL_RUN = "failRun"
     WAIT_FOR_RECOVERY = "waitForRecovery"
-
-
-# There's a lot of nested classes here. This is the JSON schema this code models.
-# "ErrorRecoveryRule": {
-#     "matchCriteria": {
-#         "command": {
-#             "commandType": "foo",
-#             "error": {
-#                 "errorType": "bar"
-#             }
-#         }
-#     },
-#     "ifMatch": "baz"
-# }
+    ASSUME_FALSE_POSITIVE_AND_CONTINUE = "assumeFalsePositiveAndContinue"
+    # todo(mm, 2024-10-22): "ignoreAndContinue" may be a misnomer now: is
+    # "assumeFalsePositiveAndContinue" not also a way to "ignore"? Consider renaming.
+    IGNORE_AND_CONTINUE = "ignoreAndContinue"
 
 
 class ErrorMatcher(BaseModel):
@@ -65,10 +92,7 @@ class ErrorRecoveryRule(BaseModel):
         ...,
         description="The criteria that must be met for this rule to be applied.",
     )
-    ifMatch: ReactionIfMatch = Field(
-        ...,
-        description="The specific recovery setting that will be in use if the type parameters match.",
-    )
+    ifMatch: ReactionIfMatch
 
 
 class ErrorRecoveryPolicy(BaseModel):
@@ -76,6 +100,9 @@ class ErrorRecoveryPolicy(BaseModel):
 
     policyRules: List[ErrorRecoveryRule] = Field(
         ...,
-        description="A list or error recovery rules to apply for a run's recovery management."
-        "The rules are evaluated first-to-last. The first exact match will dectate recovery management.",
+        description=(
+            "A list of error recovery rules to apply for a run's recovery management."
+            " The rules are evaluated first-to-last."
+            " The first exact match will dictate recovery management."
+        ),
     )

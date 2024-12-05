@@ -3,9 +3,8 @@ from dataclasses import dataclass
 from typing import List, Dict, Tuple
 from typing_extensions import Final
 from enum import Enum
-from opentrons.config.types import LiquidProbeSettings, OutputOptions
+from opentrons.config.types import LiquidProbeSettings
 from opentrons.protocol_api.labware import Well
-from opentrons.hardware_control.types import InstrumentProbeType
 
 
 class ConfigType(Enum):
@@ -103,6 +102,20 @@ LIQUID_PROBE_SETTINGS: Dict[int, Dict[int, Dict[int, Dict[str, int]]]] = {
             },
         },
     },
+    200: {
+        96: {
+            50: {
+                "mount_speed": 5,
+                "plunger_speed": 20,
+                "sensor_threshold_pascals": 15,
+            },
+            200: {
+                "mount_speed": 5,
+                "plunger_speed": 20,
+                "sensor_threshold_pascals": 15,
+            },
+        }
+    },
     1000: {
         1: {
             50: {
@@ -170,13 +183,11 @@ def _get_liquid_probe_settings(
         plunger_speed=lqid_cfg["plunger_speed"],
         plunger_impulse_time=0.2,
         sensor_threshold_pascals=lqid_cfg["sensor_threshold_pascals"],
-        output_option=OutputOptions.sync_only,
         aspirate_while_sensing=False,
         z_overlap_between_passes_mm=0.1,
         plunger_reset_offset=2.0,
         samples_for_baselining=20,
         sample_time_sec=0.004,
-        data_files={InstrumentProbeType.PRIMARY: "/data/testing_data/pressure.csv"},
     )
 
 
@@ -202,6 +213,10 @@ QC_VOLUMES_G: Dict[int, Dict[int, List[Tuple[int, List[float]]]]] = {
         ],
     },
     96: {
+        200: [
+            (50, [1.0, 50.0]),  # T50
+            (200, [200.0]),  # T200
+        ],
         1000: [  # P1000
             (50, [5.0]),  # T50
             (200, [200.0]),  # T200
@@ -263,6 +278,10 @@ QC_VOLUMES_P: Dict[int, Dict[int, List[Tuple[int, List[float]]]]] = {
         ],
     },
     96: {
+        200: [
+            (50, [1.0, 5.0]),  # T50
+            (200, [200.0]),  # T200
+        ],
         1000: [  # P1000
             (50, [5.0]),  # T50
             (200, [200.0]),  # T200
@@ -343,6 +362,21 @@ QC_TEST_MIN_REQUIREMENTS: Dict[
         },
     },
     96: {
+        200: {
+            50: {  # T50
+                1.0: (2.5, 2.0),
+                2.0: (2.5, 2.0),
+                3.0: (2.5, 2.0),
+                5.0: (2.5, 2.0),
+                10.0: (3.1, 1.7),
+                50.0: (1.5, 0.75),
+            },
+            200: {  # T200
+                5.0: (2.5, 4.0),
+                50.0: (1.5, 2.0),
+                200.0: (1.4, 0.9),
+            },
+        },
         1000: {  # P1000
             50: {  # T50
                 1.0: (2.5, 2.0),
