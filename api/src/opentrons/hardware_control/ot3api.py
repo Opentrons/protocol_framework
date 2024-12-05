@@ -98,6 +98,7 @@ from .types import (
     EstopState,
     HardwareFeatureFlags,
     FailedTipStateCheck,
+    PipetteSensorResponseQueue,
 )
 from .errors import (
     UpdateOngoingError,
@@ -143,8 +144,6 @@ from .backends.types import HWStopCondition
 from .backends.flex_protocol import FlexBackend
 from .backends.ot3simulator import OT3Simulator
 from .backends.errors import SubsystemUpdating
-from opentrons_hardware.firmware_bindings.constants import SensorId
-from opentrons_hardware.sensors.types import SensorDataType
 
 mod_log = logging.getLogger(__name__)
 
@@ -2679,9 +2678,7 @@ class OT3API(
         probe: InstrumentProbeType,
         p_travel: float,
         force_both_sensors: bool = False,
-        response_queue: Optional[
-            asyncio.Queue[Dict[SensorId, List[SensorDataType]]]
-        ] = None,
+        response_queue: Optional[PipetteSensorResponseQueue] = None,
     ) -> float:
         plunger_direction = -1 if probe_settings.aspirate_while_sensing else 1
         end_z = await self._backend.liquid_probe(
@@ -2715,9 +2712,7 @@ class OT3API(
         probe_settings: Optional[LiquidProbeSettings] = None,
         probe: Optional[InstrumentProbeType] = None,
         force_both_sensors: bool = False,
-        response_queue: Optional[
-            asyncio.Queue[Dict[SensorId, List[SensorDataType]]]
-        ] = None,
+        response_queue: Optional[PipetteSensorResponseQueue] = None,
     ) -> float:
         """Search for and return liquid level height.
 

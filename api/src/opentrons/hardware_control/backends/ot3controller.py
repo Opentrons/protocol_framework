@@ -104,7 +104,6 @@ from opentrons_hardware.firmware_bindings.constants import (
     ErrorCode,
     SensorId,
 )
-from opentrons_hardware.sensors.types import SensorDataType
 from opentrons_hardware.firmware_bindings.messages.message_definitions import (
     StopRequest,
 )
@@ -142,6 +141,10 @@ from opentrons.hardware_control.types import (
     EstopState,
     HardwareEventHandler,
     HardwareEventUnsubscriber,
+    PipetteSensorId,
+    PipetteSensorType,
+    PipetteSensorData,
+    PipetteSensorResponseQueue,
 )
 from opentrons.hardware_control.errors import (
     InvalidPipetteName,
@@ -212,6 +215,7 @@ from ..types import HepaFanState, HepaUVState, StatusBarState
 from .types import HWStopCondition
 from .flex_protocol import FlexBackend
 from .status_bar_state import StatusBarStateController
+from opentrons_hardware.sensors.types import SensorDataType
 
 log = logging.getLogger(__name__)
 
@@ -967,7 +971,6 @@ class OT3Controller(FlexBackend):
     async def tip_action(
         self, origin: float, targets: List[Tuple[float, float]]
     ) -> None:
-
         move_group = self._build_tip_action_group(origin, targets)
         runner = MoveGroupRunner(
             move_groups=[move_group],
@@ -1492,9 +1495,7 @@ class OT3Controller(FlexBackend):
         num_baseline_reads: int,
         probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
         force_both_sensors: bool = False,
-        response_queue: Optional[
-            asyncio.Queue[Dict[SensorId, List[SensorDataType]]]
-        ] = None,
+        response_queue: Optional[PipetteSensorResponseQueue] = None,
     ) -> float:
         head_node = axis_to_node(Axis.by_mount(mount))
         tool = sensor_node_for_pipette(OT3Mount(mount.value))
@@ -1502,6 +1503,27 @@ class OT3Controller(FlexBackend):
             raise UnsupportedHardwareCommand(
                 "Liquid Presence Detection not available on this pipette."
             )
+
+        if response_queue is None:
+            response_capture: Optional[
+                Callable[[Dict[SensorId, List[SensorDataType]]], None]
+            ] = None
+        else:
+
+            def response_capture(data: Dict[SensorId, List[SensorDataType]]) -> None:
+                response_queue.put_nowait(
+                    {
+                        PipetteSensorId(sensor_id.value): [
+                            PipetteSensorData(
+                                sensor_type=PipetteSensorType(packet.sensor_type.value),
+                                _as_int=packet.to_int,
+                                _as_float=packet.to_float(),
+                            )
+                            for packet in packets
+                        ]
+                        for sensor_id, packets in data.items()
+                    }
+                )
 
         positions = await liquid_probe(
             messenger=self._messenger,
@@ -1515,7 +1537,7 @@ class OT3Controller(FlexBackend):
             num_baseline_reads=num_baseline_reads,
             sensor_id=sensor_id_for_instrument(probe),
             force_both_sensors=force_both_sensors,
-            response_queue=response_queue,
+            emplace_data=response_capture,
         )
         for node, point in positions.items():
             self._position.update({node: point.motor_position})
