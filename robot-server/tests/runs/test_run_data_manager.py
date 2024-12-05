@@ -148,6 +148,7 @@ def command_annotations() -> List[pe_types.CommandAnnotation]:
         )
     ]
 
+
 @pytest.fixture
 def mock_nozzle_maps(decoy: Decoy) -> Dict[str, NozzleMap]:
     """Get a mock NozzleMap."""
