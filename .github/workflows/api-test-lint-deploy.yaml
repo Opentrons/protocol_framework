@@ -73,8 +73,6 @@ jobs:
     strategy:
       matrix:
         os: ['windows-2022', 'ubuntu-22.04', 'macos-latest']
-        # TODO(mc, 2022-02-24): expand this matrix to 3.8 and 3.9,
-        # preferably in a nightly cronjob on edge or something
         python: ['3.10']
         with-ot-hardware: ['true', 'false']
         exclude:
@@ -127,6 +125,46 @@ jobs:
         with:
           files: ./api/coverage.xml
           flags: api
+
+  test-package:
+    name: 'opentrons package tests on ${{ matrix.os }}, python ${{ matrix.python }}'
+    timeout-minutes: 5
+    strategy:
+      matrix:
+        os: ['windows-2022', 'ubuntu-22.04', 'macos-latest']
+        python: ['3.10']
+    runs-on: '${{ matrix.os }}'
+    steps:
+      - uses: 'actions/checkout@v4'
+        with:
+          fetch-depth: 0
+      - name: 'Fix actions/checkout odd handling of tags'
+        if: startsWith(github.ref, 'refs/tags')
+        run: |
+          git fetch -f origin ${{ github.ref }}:${{ github.ref }}
+          git checkout ${{ github.ref }}
+      - name: Install UV
+        uses: astral-sh/setup-uv@v4
+        id: setup-uv
+        with:
+          enable-cache: true
+          cache-suffix: ${{ runner.os }}-${{ matrix.python }}
+      - name: Install Python
+        if: steps.setup-uv.outputs.cache-hit != 'true'
+        run: uv python install ${{ matrix.python }}
+      - name: Install Opentrons
+        shell: bash
+        run: |
+          uv python pin '${{ matrix.python }}'
+          uv venv
+          uv pip install file://$(pwd)#subdirectory=api
+          uv pip list
+      - name: Simulate protocol
+        shell: bash
+        run: |
+          uv run opentrons_simulate --help
+          uv run opentrons_simulate analyses-snapshot-testing/files/protocols/Flex_S_v2_19_Illumina_DNA_Prep_48x.py
+
 
   deploy:
     name: 'deploy opentrons package'
