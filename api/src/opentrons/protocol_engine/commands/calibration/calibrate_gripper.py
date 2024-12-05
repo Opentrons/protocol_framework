@@ -24,7 +24,7 @@ CalibrateGripperCommandType = Literal["calibration/calibrateGripper"]
 
 
 def _remove_default(s: dict[str, Any]) -> None:
-    s.pop("default")
+    s.pop("default", None)
 
 
 class CalibrateGripperParamsJaw(Enum):  # noqa: D101

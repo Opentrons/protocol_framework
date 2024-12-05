@@ -49,7 +49,7 @@ if TYPE_CHECKING:
 
 
 def _remove_default(s: dict[str, Any]) -> None:
-    s.pop("default")
+    s.pop("default", None)
 
 
 LiquidProbeCommandType = Literal["liquidProbe"]
@@ -375,9 +375,9 @@ class TryLiquidProbe(
     params: TryLiquidProbeParams
     result: Optional[TryLiquidProbeResult]
 
-    _ImplementationCls: Type[
+    _ImplementationCls: Type[TryLiquidProbeImplementation] = (
         TryLiquidProbeImplementation
-    ] = TryLiquidProbeImplementation
+    )
 
 
 class LiquidProbeCreate(BaseCommandCreate[LiquidProbeParams]):

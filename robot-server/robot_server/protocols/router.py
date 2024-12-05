@@ -342,9 +342,9 @@ async def create_protocol(  # noqa: C901
     if cached_protocol_id is not None:
 
         @TrackingFunctions.track_getting_cached_protocol_analysis
-        async def _get_cached_protocol_analysis() -> PydanticResponse[
-            SimpleBody[Protocol]
-        ]:
+        async def _get_cached_protocol_analysis() -> (
+            PydanticResponse[SimpleBody[Protocol]]
+        ):
             resource = protocol_store.get(protocol_id=cached_protocol_id)
             try:
                 analysis_summaries, _ = await _start_new_analysis_if_necessary(
@@ -712,6 +712,7 @@ async def delete_protocol_by_id(
         status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ErrorBody[FileIdNotFound]},
         status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ErrorBody[LastAnalysisPending]},
     },
+    response_model_exclude_unset=True,
 )
 async def create_protocol_analysis(
     protocolId: str,
@@ -790,6 +791,7 @@ async def create_protocol_analysis(
         status.HTTP_200_OK: {"model": SimpleMultiBody[ProtocolAnalysis]},
         status.HTTP_404_NOT_FOUND: {"model": ErrorBody[ProtocolNotFound]},
     },
+    response_model_exclude_unset=True,
 )
 async def get_protocol_analyses(
     protocolId: str,
@@ -830,6 +832,9 @@ async def get_protocol_analyses(
             "model": ErrorBody[Union[ProtocolNotFound, AnalysisNotFound]]
         },
     },
+    response_model_exclude_unset=True,
+    response_model_exclude_defaults=True,
+    response_model_exclude_none=True,
 )
 async def get_protocol_analysis_by_id(
     protocolId: str,

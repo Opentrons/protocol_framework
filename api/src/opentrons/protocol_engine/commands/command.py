@@ -65,7 +65,7 @@ class CommandIntent(str, enum.Enum):
 
 
 def _pop_default(s: Dict[str, Any]) -> None:
-    s.pop("default")
+    s.pop("default", None)
 
 
 class BaseCommandCreate(

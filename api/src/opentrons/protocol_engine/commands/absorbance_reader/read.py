@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 
 def _remove_default(s: dict[str, Any]) -> None:
-    s.pop("default")
+    s.pop("default", None)
 
 
 ReadAbsorbanceCommandType = Literal["absorbanceReader/read"]

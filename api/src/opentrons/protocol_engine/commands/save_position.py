@@ -19,7 +19,7 @@ SavePositionCommandType = Literal["savePosition"]
 
 
 def _remove_default(s: dict[str, Any]) -> None:
-    s.pop("default")
+    s.pop("default", None)
 
 
 class SavePositionParams(BaseModel):

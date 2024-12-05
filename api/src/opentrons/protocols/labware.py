@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import logging
 import json
-
 from pathlib import Path
 from typing import Any, AnyStr, Dict, Optional, Union
 
+from pydantic_core import from_json
 import jsonschema  # type: ignore
 
 from opentrons_shared_data import load_shared_data, get_shared_data_root
@@ -103,7 +103,7 @@ def save_definition(
 
 
 def verify_definition(
-    contents: Union[AnyStr, LabwareDefinition, Dict[str, Any]]
+    contents: Union[AnyStr, LabwareDefinition, Dict[str, Any]],
 ) -> LabwareDefinition:
     """Verify that an input string is a labware definition and return it.
 
@@ -114,14 +114,23 @@ def verify_definition(
     :raises jsonschema.ValidationError: If the definition is not valid.
     :returns: The parsed definition
     """
-    schema_body = load_shared_data("labware/schemas/2.json").decode("utf-8")
-    labware_schema_v2 = json.loads(schema_body)
+    schemata_by_version = {
+        2: from_json(load_shared_data("labware/schemas/2.json").decode("utf-8")),
+        3: from_json(load_shared_data("labware/schemas/3.json").decode("utf-8")),
+    }
 
     if isinstance(contents, dict):
         to_return = contents
     else:
-        to_return = json.loads(contents)
-    jsonschema.validate(to_return, labware_schema_v2)
+        to_return = from_json(contents)
+    try:
+        schema = schemata_by_version[to_return.get("schemaVersion", None)]
+    except KeyError:
+        raise RuntimeError(
+            f'Invalid or unknown labware schema version {to_return.get("schemaVersion", None)}'
+        )
+    jsonschema.validate(to_return, schema)
+
     # we can type ignore this because if it passes the jsonschema it has
     # the correct structure
     return to_return  # type: ignore[return-value]
@@ -176,7 +185,6 @@ def _get_labware_definition_from_bundle(
 def _get_standard_labware_definition(
     load_name: str, namespace: Optional[str] = None, version: Optional[int] = None
 ) -> LabwareDefinition:
-
     if version is None:
         checked_version = 1
     else:
