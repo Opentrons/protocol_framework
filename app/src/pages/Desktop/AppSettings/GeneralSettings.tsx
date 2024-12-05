@@ -42,11 +42,7 @@ import {
   useTrackEvent,
   ANALYTICS_APP_UPDATE_NOTIFICATIONS_TOGGLED,
 } from '/app/redux/analytics'
-import {
-  getAppLanguage,
-  updateConfigValue,
-  useFeatureFlag,
-} from '/app/redux/config'
+import { getAppLanguage, updateConfigValue } from '/app/redux/config'
 import { UpdateAppModal } from '/app/organisms/Desktop/UpdateAppModal'
 import { PreviousVersionModal } from '/app/organisms/Desktop/AppSettings/PreviousVersionModal'
 import { ConnectRobotSlideout } from '/app/organisms/Desktop/AppSettings/ConnectRobotSlideout'

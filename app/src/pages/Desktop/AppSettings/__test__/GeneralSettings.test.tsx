@@ -12,10 +12,7 @@ import {
   US_ENGLISH_DISPLAY_NAME,
 } from '/app/i18n'
 import { getAlertIsPermanentlyIgnored } from '/app/redux/alerts'
-import {
-  getAppLanguage,
-  updateConfigValue,
-} from '/app/redux/config'
+import { getAppLanguage, updateConfigValue } from '/app/redux/config'
 import * as Shell from '/app/redux/shell'
 import { GeneralSettings } from '../GeneralSettings'
 
@@ -40,6 +37,7 @@ describe('GeneralSettings', () => {
     vi.mocked(Shell.getAvailableShellUpdate).mockReturnValue(null)
     vi.mocked(getAlertIsPermanentlyIgnored).mockReturnValue(false)
     vi.mocked(getAppLanguage).mockReturnValue(US_ENGLISH)
+  })
   afterEach(() => {
     vi.resetAllMocks()
   })
