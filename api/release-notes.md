@@ -8,6 +8,12 @@ By installing and using Opentrons software, you agree to the Opentrons End-User 
 
 ---
 
+## Opentrons Robot Software Changes in 8.3.0-alpha.0
+
+Welcome to 8.3.0.alpha.0! This release solely adds support for the Ultima PEEK pipette.
+
+---
+
 ## Opentrons Robot Software Changes in 8.2.0
 
 Welcome to the v8.2.0 release of the Opentrons robot software! This release adds support for the Opentrons Absorbance Plate Reader Module.
