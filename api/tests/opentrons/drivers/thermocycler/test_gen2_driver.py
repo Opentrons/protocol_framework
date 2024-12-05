@@ -233,8 +233,7 @@ async def test_device_info(
     )
 
     connection.send_command.assert_any_call(command=get_device_info, retries=3)
-    connection.send_command.assert_any_call(command=reset_reason, retries=3)
-    # connection.send_command.assert_any_call(command=reset_reason, retries=3)
+    connection.send_command.assert_called_with(command=reset_reason, retries=3)
 
     assert device_info == {
         "serial": "EMPTYSN",
