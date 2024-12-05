@@ -51,6 +51,7 @@ class LABWARE_Z_HEIGHT(float, Enum):
     CORSTAR_24_WELL_WITHOUT_LID = 16*2,
     SARSTEDT_PCR_PLATE_FULLSKIRT = 16,
     ARMADILLO_384_PLATE = 15.5
+    THERMOCYLER_LID_WITH_ADAPTER = 40
 
 FS_BAUDRATE = 115200
 DEFAULT_FS_TIMEOUT = 0.1
@@ -61,25 +62,25 @@ DEFAULT_COMMAND_RETRIES = 1
 TOTAL_TRAVEL_X = 192.5
 TOTAL_TRAVEL_Z = 136
 TOTAL_TRAVEL_L = 26
-LATCH_DISTANCE_MM = 2
+LATCH_DISTANCE_MM = 26
 RETRACT_DIST_X = 1
 RETRACT_DIST_Z = 1
-HOME_SPEED = 40
+HOME_SPEED = 10
 HOME_SPEED_L = 100
-HOME_ACCELERATION = 800
+HOME_ACCELERATION = 100
 HOME_ACCELERATION_L = 800
 MOVE_ACCELERATION_X = 1500
-MOVE_ACCELERATION_Z = 600
+MOVE_ACCELERATION_Z = 400
 MOVE_ACCELERATION_L = 800
 MAX_SPEED_DISCONTINUITY_X = 20
-MAX_SPEED_DISCONTINUITY_Z = 5
+MAX_SPEED_DISCONTINUITY_Z = 20
 MAX_SPEED_DISCONTINUITY_L = 20
-HOME_CURRENT_X = 1.3
-HOME_CURRENT_Z = 1.3
+HOME_CURRENT_X = 1.5
+HOME_CURRENT_Z = 1.8
 HOME_CURRENT_L = 0.8
 MOVE_CURRENT_X = 0.6
-MOVE_CURRENT_Z = 0.8
-MOVE_CURRENT_L = 0.8
+MOVE_CURRENT_Z = 1.5
+MOVE_CURRENT_L = 0.6
 MOVE_SPEED_X = 200
 MOVE_SPEED_UPZ = 150
 MOVE_SPEED_L = 100
@@ -395,7 +396,7 @@ class FlexStacker():
                                                             ).add_element(
                                                             f'A{acceleration}'
                                                             )
-        # print(c)
+        print(c)
         self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
         if direction == DIR.POSITIVE_HOME and axis == AXIS.X:
             self.current_position.update({'X': TOTAL_TRAVEL_X})
@@ -445,6 +446,7 @@ class FlexStacker():
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.SET_PEAK_CURRENT
         ).add_element(axis + f'{current}')
+        print(c)
         self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
 
     def close_latch(self, velocity: Optional[float] = None, acceleration: Optional[float] = None):
@@ -460,7 +462,7 @@ class FlexStacker():
         if cur_position == None:
             self.home(AXIS.L, DIR.NEGATIVE_HOME, velocity, acceleration)
         elif cur_position != 0:
-            self.move(AXIS.L, TOTAL_TRAVEL_L-1, DIR.NEGATIVE, MOVE_SPEED_L, MOVE_ACCELERATION_L, MAX_SPEED_DISCONTINUITY_L)
+            self.move(AXIS.L, TOTAL_TRAVEL_L-2, DIR.NEGATIVE, MOVE_SPEED_L, MOVE_ACCELERATION_L, MAX_SPEED_DISCONTINUITY_L)
             self.home(AXIS.L, DIR.NEGATIVE_HOME, velocity, acceleration)
         else:
             self.home(AXIS.L, DIR.NEGATIVE_HOME, velocity, acceleration)
@@ -468,7 +470,7 @@ class FlexStacker():
     def open_latch(self, distance: Optional[float] = None,
                     velocity: Optional[float] = None, acceleration: Optional[float] = None,
                     max_speed_discontinuity: Optional[float] = None):
-        distance = self.set_default(distance, LATCH_DISTANCE_MM)
+        # distance = self.set_default(distance, LATCH_DISTANCE_MM)
         velocity = self.set_default(velocity, MOVE_SPEED_L)
         acceleration = self.set_default(acceleration, MOVE_ACCELERATION_L)
         msd = self.set_default(max_speed_discontinuity, MAX_SPEED_DISCONTINUITY_L)
