@@ -87,7 +87,7 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
           flexDirection={DIRECTION_COLUMN}
           borderBottom={`1px solid ${COLORS.grey30}`}
         >
-          {subHeader != null ? subHeader : null}
+          {subHeader ?? null}
           <Flex
             justifyContent={JUSTIFY_SPACE_BETWEEN}
             alignItems={ALIGN_CENTER}
@@ -95,7 +95,7 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
           >
             {title}
             <Flex gridGap={SPACING.spacing4}>
-              {secondaryHeaderButton != null ? secondaryHeaderButton : null}
+              {secondaryHeaderButton ?? null}
               {onCloseClick != null && closeButton != null ? (
                 <Btn
                   disabled={disableCloseButton}
@@ -137,7 +137,7 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
                 {confirmButtonText}
               </PrimaryButton>
             ) : null}
-            {confirmButton != null ? confirmButton : null}
+            {confirmButton ?? null}
           </Box>
         ) : null}
       </Flex>
