@@ -13,7 +13,7 @@ def build_arg_parser():
     arg_parser = argparse.ArgumentParser(description="Motion Parameter Test Script")
     arg_parser.add_argument("-c", "--cycles", default = 20, help = "number of cycles to execute")
     arg_parser.add_argument("-a", "--axis", default = AXIS.X, help = "Choose a Axis")
-    arg_parser.add_argument("-l", "--labware", default = 13, type = str,  help = "number of cycles to execute")
+    arg_parser.add_argument("-l", "--labware", default = 14, type = str,  help = "number of cycles to execute")
     # arg_parser.add_argument("-")
     return arg_parser
 
@@ -34,7 +34,8 @@ if __name__ == '__main__':
     '10': LABWARE_Z_HEIGHT.CORSTAR_24_WELL_WITH_LID,
     '11': LABWARE_Z_HEIGHT.CORSTAR_24_WELL_WITHOUT_LID, # 32 plates
     '12': LABWARE_Z_HEIGHT.SARSTEDT_PCR_PLATE_FULLSKIRT,
-    '13': LABWARE_Z_HEIGHT.ARMADILLO_384_PLATE
+    '13': LABWARE_Z_HEIGHT.ARMADILLO_384_PLATE,
+    '14': LABWARE_Z_HEIGHT.THERMOCYLER_LID_WITH_ADAPTER,
     }
     print(labware_library[str(options.labware)].value)
     num_loaded_labware = 48
@@ -46,7 +47,7 @@ if __name__ == '__main__':
         labware_height = labware
     # s.close_latch()
     for cycle in range(1, num_loaded_labware+1):
-        # s.unload_labware(labware_height)
-        s.load_labware(labware_height)
+        s.unload_labware(labware_height)
+        #s.load_labware(labware_height)
         input("Remove Labware")
         # s.load_labware(labware_height)
