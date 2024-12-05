@@ -147,8 +147,7 @@ jobs:
       - name: Install opentrons and shared-data
         shell: bash
         run: |
-          pip install git+https://github.com/Opentrons/opentrons@${{ github.head_ref }}#subdirectory=api
-          pip install git+https://github.com/Opentrons/opentrons@${{ github.head_ref }}#subdirectory=shared-data/python
+          pip install git+https://github.com/Opentrons/opentrons@${{ github.head_ref }}#subdirectory=shared-data/python git+https://github.com/Opentrons/opentrons@${{ github.head_ref }}#subdirectory=api
           pip list
       - name: Simulate protocol
         shell: bash
