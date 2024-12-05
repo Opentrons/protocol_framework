@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { css } from 'styled-components'
 
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
@@ -49,6 +49,15 @@ export function AnnotatedSteps(props: AnnotatedStepsProps): JSX.Element {
     }
   `
 
+  const isValidRobotSideAnalysis = analysis != null
+  const allRunDefs = useMemo(
+    () =>
+      analysis != null
+        ? getLabwareDefinitionsFromCommands(analysis.commands)
+        : [],
+    [isValidRobotSideAnalysis]
+  )
+
   const annotations = analysis.commandAnnotations ?? []
 
   const groupedCommands = analysis.commands.reduce<
@@ -92,15 +101,6 @@ export function AnnotatedSteps(props: AnnotatedStepsProps): JSX.Element {
     }
   }, [])
 
-  const isValidRobotSideAnalysis = analysis != null
-  const allRunDefs = useMemo(
-    () =>
-      analysis != null
-        ? getLabwareDefinitionsFromCommands(analysis.commands)
-        : [],
-    [isValidRobotSideAnalysis]
-  )
-
   return (
     <Flex
       css={HIDE_SCROLLBAR}
@@ -114,8 +114,7 @@ export function AnnotatedSteps(props: AnnotatedStepsProps): JSX.Element {
         marginY={SPACING.spacing16}
         gridGap={SPACING.spacing4}
       >
-
-{/*        {groupedCommands.map((c, i) =>
+        {groupedCommands.map((c, i) =>
           'annotationIndex' in c ? (
             <AnnotatedGroup
               key={i}
@@ -126,6 +125,7 @@ export function AnnotatedSteps(props: AnnotatedStepsProps): JSX.Element {
               }
               isHighlighted={c.isHighlighted}
               subCommands={c.subCommands}
+              allRunDefs={allRunDefs}
             />
           ) : (
             <IndividualCommand
@@ -134,19 +134,10 @@ export function AnnotatedSteps(props: AnnotatedStepsProps): JSX.Element {
               command={c.command}
               isHighlighted={c.isHighlighted}
               analysis={analysis}
+              allRunDefs={allRunDefs}
             />
           )
-        )}*/}
-        {analysis.commands.map((c, i) => (
-          <IndividualCommand
-            key={i}
-            stepNumber={(i + 1).toString()}
-            command={c}
-            isHighlighted={i === currentCommandIndex}
-            analysis={analysis}
-            allRunDefs={allRunDefs}
-          />
-        ))}
+        )}
       </Flex>
     </Flex>
   )
@@ -158,6 +149,7 @@ interface AnnotatedGroupProps {
   analysis: ProtocolAnalysisOutput | CompletedProtocolAnalysis
   stepNumber: string
   isHighlighted: boolean
+  allRunDefs: LabwareDefinition2[]
 }
 function AnnotatedGroup(props: AnnotatedGroupProps): JSX.Element {
   const {
@@ -165,9 +157,10 @@ function AnnotatedGroup(props: AnnotatedGroupProps): JSX.Element {
     annotationType,
     analysis,
     stepNumber,
+    allRunDefs,
     isHighlighted,
   } = props
-  const [isExpanded, setIsExpanded] = React.useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
   const backgroundColor = isHighlighted ? COLORS.blue30 : COLORS.grey20
   return (
     <Flex
@@ -219,6 +212,7 @@ function AnnotatedGroup(props: AnnotatedGroupProps): JSX.Element {
                 analysis={analysis}
                 isHighlighted={c.isHighlighted}
                 stepNumber={`${stepNumber}.${(i + 1).toString()}`}
+                allRunDefs={allRunDefs}
               />
             ))}
           </Flex>
