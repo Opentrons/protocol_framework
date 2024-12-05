@@ -90,7 +90,6 @@ export function RobotSettingsList(props: RobotSettingsListProps): JSX.Element {
 
   const appLanguage = useSelector(getAppLanguage)
   const currentLanguageOption = LANGUAGES.find(lng => lng.value === appLanguage)
-  const enableLocalization = useFeatureFlag('enableLocalization')
 
   return (
     <Flex flexDirection={DIRECTION_COLUMN}>
@@ -143,18 +142,16 @@ export function RobotSettingsList(props: RobotSettingsListProps): JSX.Element {
             </Flex>
           }
         />
-        {enableLocalization ? (
-          <RobotSettingButton
-            settingName={t('app_settings:language')}
-            settingInfo={
-              currentLanguageOption != null ? currentLanguageOption.name : ''
-            }
-            onClick={() => {
-              setCurrentOption('LanguageSetting')
-            }}
-            iconName="language"
-          />
-        ) : null}
+        <RobotSettingButton
+          settingName={t('app_settings:language')}
+          settingInfo={
+            currentLanguageOption != null ? currentLanguageOption.name : ''
+          }
+          onClick={() => {
+            setCurrentOption('LanguageSetting')
+          }}
+          iconName="language"
+        />
         <RobotSettingButton
           settingName={t('display_led_lights')}
           dataTestId="RobotSettingButton_display_led_lights"

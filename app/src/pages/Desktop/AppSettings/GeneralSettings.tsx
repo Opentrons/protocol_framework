@@ -70,7 +70,6 @@ export function GeneralSettings(): JSX.Element {
   ] = useState<boolean>(false)
   const updateAvailable = Boolean(useSelector(getAvailableShellUpdate))
 
-  const enableLocalization = useFeatureFlag('enableLocalization')
   const appLanguage = useSelector(getAppLanguage)
   const currentLanguageOption = LANGUAGES.find(lng => lng.value === appLanguage)
 
@@ -277,7 +276,7 @@ export function GeneralSettings(): JSX.Element {
           </TertiaryButton>
         </Flex>
         <Divider marginY={SPACING.spacing24} />
-        {enableLocalization && currentLanguageOption != null ? (
+        {currentLanguageOption != null ? (
           <>
             <Flex
               flexDirection={DIRECTION_ROW}

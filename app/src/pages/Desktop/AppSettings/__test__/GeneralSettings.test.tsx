@@ -1,7 +1,6 @@
 import { MemoryRouter } from 'react-router-dom'
 import { vi, it, describe, expect, beforeEach, afterEach } from 'vitest'
 import { fireEvent, screen } from '@testing-library/react'
-import { when } from 'vitest-when'
 
 import { renderWithProviders } from '/app/__testing-utils__'
 
@@ -16,7 +15,6 @@ import { getAlertIsPermanentlyIgnored } from '/app/redux/alerts'
 import {
   getAppLanguage,
   updateConfigValue,
-  useFeatureFlag,
 } from '/app/redux/config'
 import * as Shell from '/app/redux/shell'
 import { GeneralSettings } from '../GeneralSettings'
@@ -42,10 +40,6 @@ describe('GeneralSettings', () => {
     vi.mocked(Shell.getAvailableShellUpdate).mockReturnValue(null)
     vi.mocked(getAlertIsPermanentlyIgnored).mockReturnValue(false)
     vi.mocked(getAppLanguage).mockReturnValue(US_ENGLISH)
-    when(vi.mocked(useFeatureFlag))
-      .calledWith('enableLocalization')
-      .thenReturn(true)
-  })
   afterEach(() => {
     vi.resetAllMocks()
   })

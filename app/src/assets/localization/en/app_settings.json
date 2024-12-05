@@ -1,6 +1,5 @@
 {
   "__dev_internal__enableLabwareCreator": "Enable App Labware Creator",
-  "__dev_internal__enableLocalization": "Enable App Localization",
   "__dev_internal__enableRunNotes": "Display Notes During a Protocol Run",
   "__dev_internal__forceHttpPolling": "Poll all network requests instead of using MQTT",
   "__dev_internal__protocolStats": "Protocol Stats",
