@@ -22,6 +22,7 @@ from .addressable_areas import (
     AddressableAreaView,
 )
 from .labware import LabwareState, LabwareStore, LabwareView
+from .lid_stack import LidStackState, LidStackStore, LidStackView
 from .pipettes import PipetteState, PipetteStore, PipetteView
 from .modules import ModuleState, ModuleStore, ModuleView
 from .liquids import LiquidState, LiquidView, LiquidStore
@@ -216,6 +217,7 @@ class StateStore(StateView, ActionHandler):
             deck_fixed_labware=deck_fixed_labware,
             deck_definition=deck_definition,
         )
+        self._lid_stack_store = LidStackStore()
         self._module_store = ModuleStore(
             config=config,
             deck_fixed_labware=deck_fixed_labware,

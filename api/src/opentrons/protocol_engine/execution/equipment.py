@@ -180,9 +180,7 @@ class EquipmentHandler:
                         f"Labware Lid {load_name} may not be loaded on parent labware {self._state_store.labware.get_display_name(location.labwareId)}."
                     )
             else:
-                raise ValueError(
-                    f"Load Labware location must be another Labware when loading a lid as a Labware."
-                )
+                raise ValueError("Load Labware location must be another Labware when loading a Lid outside of a stack.")
 
         labware_id = (
             labware_id if labware_id is not None else self._model_utils.generate_id()

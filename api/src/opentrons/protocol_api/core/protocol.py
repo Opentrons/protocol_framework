@@ -79,9 +79,6 @@ class AbstractProtocol(
         label: Optional[str],
         namespace: Optional[str],
         version: Optional[int],
-        lid_load_name: Optional[str],
-        lid_namespace: Optional[str],
-        lid_version: Optional[int],
     ) -> LabwareCoreType:
         """Load a labware using its identifying parameters."""
         ...

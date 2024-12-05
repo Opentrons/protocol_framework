@@ -132,6 +132,15 @@ class LoadedLidStackUpdate:
 
     definition: LabwareDefinition
 
+@dataclasses.dataclass
+class LabwareLidUpdate:
+    """An update that identifies a lid on a given parent labware."""
+
+    parent_labware_id: str
+    """The unique ID of the parent labware."""
+
+    lid_id: str
+    """The unique IDs of the new lids."""
 
 @dataclasses.dataclass
 class LoadPipetteUpdate:
@@ -302,6 +311,12 @@ class StateUpdate:
 
     loaded_lid_stack: LoadedLidStackUpdate | NoChangeType = NO_CHANGE
 
+    # TODO NOTE: Do I add a new Update class for labware specifically updating the lid info?
+    # This will update under two cases:
+    # 1. the lid has been loaded with a labware
+    # 2. the lid has been moved to a labware
+    labware_lid: LabwareLidUpdate | NoChangeType = NO_CHANGE
+
     tips_used: TipsUsedUpdate | NoChangeType = NO_CHANGE
 
     liquid_loaded: LiquidLoadedUpdate | NoChangeType = NO_CHANGE
@@ -423,7 +438,6 @@ class StateUpdate:
         labware_id: str,
         offset_id: typing.Optional[str],
         display_name: typing.Optional[str],
-        lid_id: typing.Optional[str],
         location: LabwareLocation,
     ) -> Self:
         """Add a new labware to state. See `LoadedLabwareUpdate`."""
@@ -433,7 +447,6 @@ class StateUpdate:
             offset_id=offset_id,
             new_location=location,
             display_name=display_name,
-            lid_id=lid_id,
         )
         return self
 
@@ -445,11 +458,23 @@ class StateUpdate:
         location: LabwareLocation,
     ) -> Self:
         """Add a new lid stack to state. See `LoadedLidStackUpdate`."""
-        self.loaded_labware = LoadedLidStackUpdate(
+        self.loaded_lid_stack = LoadedLidStackUpdate(
             definition=definition,
             labware_ids=labware_ids,
             new_location=location,
             display_name=display_name,
+        )
+        return self
+    
+    def set_lid(
+        self: Self,
+        parent_labware_id: str,
+        lid_id: str,
+    ) -> Self:
+        """Update the labware parent of a loaded or moved lid. See `LabwareLidUpdate`."""
+        self.labware_lid = LabwareLidUpdate(
+            parent_labware_id=parent_labware_id,
+            lid_id=lid_id,
         )
         return self
 

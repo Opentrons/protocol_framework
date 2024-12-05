@@ -157,6 +157,7 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
         for state_update in get_state_updates(action):
             self._add_loaded_labware(state_update)
             self._set_labware_location(state_update)
+            self._set_labware_lid(state_update)
 
         if isinstance(action, AddLabwareOffsetAction):
             labware_offset = LabwareOffset.construct(
@@ -220,6 +221,13 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                 offsetId=loaded_labware_update.offset_id,
                 displayName=display_name,
             )
+    
+    def _set_labware_lid(self, state_update: update_types.StateUpdate) -> None:
+        labware_lid_update = state_update.labware_lid
+        if labware_lid_update != update_types.NO_CHANGE:
+            parent_labware_id = labware_lid_update.parent_labware_id
+            lid_id = labware_lid_update.lid_id
+            self._state.labware_by_id[parent_labware_id].lid_id = lid_id
 
     def _set_labware_location(self, state_update: update_types.StateUpdate) -> None:
         labware_location_update = state_update.labware_location

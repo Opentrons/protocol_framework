@@ -490,9 +490,6 @@ class ProtocolContext(CommandPublisher):
             label=label,
             namespace=namespace,
             version=version,
-            lid_load_name=lid,
-            lid_namespace=namespace,
-            lid_version=version,
         )
 
         labware = Labware(

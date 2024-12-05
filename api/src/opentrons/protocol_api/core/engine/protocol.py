@@ -215,9 +215,6 @@ class ProtocolCore(
         label: Optional[str],
         namespace: Optional[str],
         version: Optional[int],
-        lid_load_name: Optional[str],
-        lid_namespace: Optional[str],
-        lid_version: Optional[int],
     ) -> LabwareCore:
         """Load a labware using its identifying parameters."""
         load_location = self._convert_labware_location(location=location)
@@ -228,10 +225,7 @@ class ProtocolCore(
         namespace, version = load_labware_params.resolve(
             load_name, namespace, version, custom_labware_params
         )
-        lid_namespace, lid_version = load_labware_params.resolve(
-            lid_load_name, lid_namespace, lid_version, custom_labware_params
-        )
-
+        
         load_result = self._engine_client.execute_command_without_recovery(
             cmd.LoadLabwareParams(
                 loadName=load_name,
@@ -239,9 +233,6 @@ class ProtocolCore(
                 namespace=namespace,
                 version=version,
                 displayName=label,
-                lidLoadName=lid_load_name,
-                lidNamespace=lid_namespace,
-                lid_version=lid_version,
             )
         )
         # FIXME(jbl, 2023-08-14) validating after loading the object issue

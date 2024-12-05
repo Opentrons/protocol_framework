@@ -171,9 +171,6 @@ class LegacyProtocolCore(
         label: Optional[str],
         namespace: Optional[str],
         version: Optional[int],
-        lid_load_name: Optional[str],
-        lid_namespace: Optional[str],
-        lid_version: Optional[int],
     ) -> LegacyLabwareCore:
         """Load a labware using its identifying parameters."""
         if isinstance(location, OffDeckType):
