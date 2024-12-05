@@ -10,7 +10,7 @@ By installing and using Opentrons software, you agree to the Opentrons End-User 
 
 ## Opentrons App Changes in 8.3.0-alpha.0
 
-Welcome to 8.3.0.alpha.0! This release solely adds support for the Ultima PEEK pipette.
+Welcome to 8.3.0-alpha.0! This release solely adds support for the Ultima PEEK pipette.
 
 ---
 
