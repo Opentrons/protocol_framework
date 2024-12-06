@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 from pydantic import BaseModel, Field
-from typing import TYPE_CHECKING, Optional, Type, List, Literal
+from typing import TYPE_CHECKING, Optional, Type, List, Literal, Union
 
+from opentrons.types import NozzleConfigurationType
 
 from ..errors import ErrorOccurrence
-from ..types import NextTipInfo
+from ..types import NextTipInfo, NoTipAvailable, NoTipReason
 from .pipetting_common import PipetteIdMixin
 
 from .command import (
@@ -28,20 +29,23 @@ class GetNextTipParams(PipetteIdMixin):
 
     labwareIds: List[str] = Field(
         ...,
-        description="Labware ID(s) of tip racks to resolve next available tip(s) from."
+        description="Labware ID(s) of tip racks to resolve next available tip(s) from"
         " Labware IDs will be resolved sequentially",
     )
-    startingWellName: Optional[str] = Field(
-        "A1", description="Name of starting tip rack 'well'."
+    startingTipWell: Optional[str] = Field(
+        None,
+        description="Name of starting tip rack 'well'."
+        " This only applies to the first tip rack in the list provided in labwareIDs",
     )
 
 
 class GetNextTipResult(BaseModel):
     """Result data from the execution of a GetNextTip."""
 
-    nextTipInfo: Optional[NextTipInfo] = Field(
+    nextTipInfo: Union[NextTipInfo, NoTipAvailable] = Field(
         ...,
-        description="Labware ID and well name of next available tip for a pipette, if any.",
+        description="Labware ID and well name of next available tip for a pipette,"
+        " or information why no tip could be resolved.",
     )
 
 
@@ -60,17 +64,25 @@ class GetNextTipImplementation(
     async def execute(self, params: GetNextTipParams) -> SuccessData[GetNextTipResult]:
         """Get the next available tip for the requested pipette."""
         pipette_id = params.pipetteId
-        starting_tip_name = params.startingWellName
+        starting_tip_name = params.startingTipWell
 
         num_tips = self._state_view.tips.get_pipette_active_channels(pipette_id)
-        total_tips = self._state_view.tips.get_pipette_channels(pipette_id)
-        nozzle_map = (
-            self._state_view.tips.get_pipette_nozzle_map(pipette_id)
-            if num_tips != total_tips
-            else None
-        )
+        nozzle_map = self._state_view.tips.get_pipette_nozzle_map(pipette_id)
 
-        labware_id: Optional[str]
+        if (
+            starting_tip_name is not None
+            and nozzle_map.configuration != NozzleConfigurationType.FULL
+        ):
+            return SuccessData(
+                public=GetNextTipResult(
+                    nextTipInfo=NoTipAvailable(
+                        noTipReason=NoTipReason.STARTING_TIP_WITH_PARTIAL,
+                        message="Cannot automatically resolve next tip with starting tip and partial tip configuration.",
+                    )
+                )
+            )
+
+        next_tip: Union[NextTipInfo, NoTipAvailable]
         for labware_id in params.labwareIds:
             well_name = self._state_view.tips.get_next_tip(
                 labware_id=labware_id,
@@ -79,10 +91,15 @@ class GetNextTipImplementation(
                 nozzle_map=nozzle_map,
             )
             if well_name is not None:
-                next_tip = NextTipInfo(labwareId=labware_id, wellName=well_name)
+                next_tip = NextTipInfo(labwareId=labware_id, tipOriginWell=well_name)
                 break
+            # After the first tip rack is exhausted, starting tip no longer applies
+            starting_tip_name = None
         else:
-            next_tip = None
+            next_tip = NoTipAvailable(
+                noTipReason=NoTipReason.NO_AVAILABLE_TIPS,
+                message="No available tips for given pipette, nozzle configuration and provided tip racks.",
+            )
 
         return SuccessData(public=GetNextTipResult(nextTipInfo=next_tip))
 
