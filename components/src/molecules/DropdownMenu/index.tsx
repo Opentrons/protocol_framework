@@ -108,37 +108,37 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
     }
 
     const handlePositionCalculation = (): void => {
-      const dropdownRect = dropDownMenuWrapperRef.current?.getBoundingClientRect();
-      if (!dropdownRect) return;
+      const dropdownRect = dropDownMenuWrapperRef.current?.getBoundingClientRect()
+      if (!dropdownRect) return
 
-      const parentElement = dropDownMenuWrapperRef.current?.parentElement;
-      const grandParentElement = parentElement?.parentElement?.parentElement;
+      const parentElement = dropDownMenuWrapperRef.current?.parentElement
+      const grandParentElement = parentElement?.parentElement?.parentElement
 
-      let availableHeight = window.innerHeight;
-      let scrollOffset = 0;
+      let availableHeight = window.innerHeight
+      let scrollOffset = 0
 
       if (grandParentElement) {
-        const grandParentRect = grandParentElement.getBoundingClientRect();
-        availableHeight = grandParentRect.bottom - grandParentRect.top;
-        scrollOffset = grandParentRect.top;
+        const grandParentRect = grandParentElement.getBoundingClientRect()
+        availableHeight = grandParentRect.bottom - grandParentRect.top
+        scrollOffset = grandParentRect.top
       } else if (parentElement) {
-        const parentRect = parentElement.getBoundingClientRect();
-        availableHeight = parentRect.bottom - parentRect.top;
-        scrollOffset = parentRect.top;
+        const parentRect = parentElement.getBoundingClientRect()
+        availableHeight = parentRect.bottom - parentRect.top
+        scrollOffset = parentRect.top
       }
 
-      const dropdownHeight = filterOptions.length * 34 + 10; // note (kk:2024/12/06) need to modify the value since design uses different height in desktop and pd 
-      const dropdownBottom = dropdownRect.bottom + dropdownHeight - scrollOffset;
+      const dropdownHeight = filterOptions.length * 34 + 10 // note (kk:2024/12/06) need to modify the value since design uses different height in desktop and pd
+      const dropdownBottom = dropdownRect.bottom + dropdownHeight - scrollOffset
 
-      const fitsBelow = dropdownBottom <= availableHeight;
-      const fitsAbove = dropdownRect.top - dropdownHeight >= scrollOffset;
+      const fitsBelow = dropdownBottom <= availableHeight
+      const fitsAbove = dropdownRect.top - dropdownHeight >= scrollOffset
 
       if (menuPlacement === 'auto') {
-        setDropdownPosition(fitsBelow ? 'bottom' : fitsAbove ? 'top' : 'bottom');
+        setDropdownPosition(fitsBelow ? 'bottom' : fitsAbove ? 'top' : 'bottom')
       } else {
-        setDropdownPosition(menuPlacement);
+        setDropdownPosition(menuPlacement)
       }
-    };
+    }
 
     window.addEventListener('resize', handlePositionCalculation)
     window.addEventListener('scroll', handlePositionCalculation)
