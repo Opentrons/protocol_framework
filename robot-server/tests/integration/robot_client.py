@@ -127,9 +127,7 @@ class RobotClient:
         multipart_upload_name = "files"
 
         with contextlib.ExitStack() as file_exit_stack:
-            opened_files: List[
-                Union[BinaryIO, Tuple[str, bytes]],
-            ] = []
+            opened_files: List[Union[BinaryIO, Tuple[str, bytes]],] = []
 
             for file in files:
                 if isinstance(file, Path):
@@ -381,6 +379,11 @@ class RobotClient:
         response = await self.httpx_client.delete(
             url=f"{self.base_url}/errorRecovery/settings"
         )
+        response.raise_for_status()
+        return response
+
+    async def delete_all_labware_offsets(self) -> Response:
+        response = await self.httpx_client.delete(url=f"{self.base_url}/labwareOffsets")
         response.raise_for_status()
         return response
 
