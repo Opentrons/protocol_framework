@@ -449,7 +449,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--cycles", type=int, default=DEFAULT_CYCLES)
     parser.add_argument("--n", type=int, default=DEFAULT_N)
-    parser.add_argument("--load_cal", action="store_true")
+    #parser.add_argument("--load_cal", action="store_true")
     parser.add_argument("--restart_flag", action="store_true")
     args = parser.parse_args()
     asyncio.run(_run(args.cycles,args.n))
