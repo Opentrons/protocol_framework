@@ -8,12 +8,13 @@ export const STAGING_CREATE_PROTOCOL_END_POINT =
 export const STAGING_UPDATE_PROTOCOL_END_POINT =
   'https://staging.opentrons.ai/api/chat/updateProtocol'
 
-export const PROD_END_POINT = 'https://opentrons.ai/api/chat/completion'
-export const PROD_FEEDBACK_END_POINT = 'https://opentrons.ai/api/chat/feedback'
+export const PROD_END_POINT = 'https://ai.opentrons.com/api/chat/completion'
+export const PROD_FEEDBACK_END_POINT =
+  'https://ai.opentrons.com/api/chat/feedback'
 export const PROD_CREATE_PROTOCOL_END_POINT =
-  'https://opentrons.ai/api/chat/createProtocol'
+  'https://ai.opentrons.com/api/chat/createProtocol'
 export const PROD_UPDATE_PROTOCOL_END_POINT =
-  'https://opentrons.ai/api/chat/updateProtocol'
+  'https://ai.opentrons.com/api/chat/updateProtocol'
 
 // auth0 domain
 export const AUTH0_DOMAIN = 'identity.auth.opentrons.com'
@@ -24,7 +25,7 @@ export const STAGING_AUTH0_AUDIENCE = 'https://staging.opentrons.ai/api'
 
 // auth0 for production
 export const PROD_AUTH0_CLIENT_ID = 'b5oTRmfMY94tjYL8GyUaVYHhMTC28X8o'
-export const PROD_AUTH0_AUDIENCE = 'https://opentrons.ai/api'
+export const PROD_AUTH0_AUDIENCE = 'https://ai.opentrons.com/api'
 
 // auth0 for local
 export const LOCAL_AUTH0_CLIENT_ID = 'PcuD1wEutfijyglNeRBi41oxsKJ1HtKw'
