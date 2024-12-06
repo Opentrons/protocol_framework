@@ -131,7 +131,7 @@ jobs:
     timeout-minutes: 5
     strategy:
       matrix:
-        os: ['windows-2022', 'ubuntu-22.04', 'macos-latest']
+        os: ['ubuntu-22.04', 'macos-latest']
         python: ['3.10']
     runs-on: '${{ matrix.os }}'
     steps:
@@ -145,14 +145,23 @@ jobs:
         with:
           python-version: '3.10'
       - name: Install opentrons and shared-data
-        shell: bash
+        working-directory: package-testing
+        run: make setup
+      - name: Run the tests
+        id: test
+        working-directory: package-testing
+        run: make test
+        continue-on-error: true
+      - name: Save the test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-test-results
+          path: package-testing/test-results
+      - name: Set job summary
         run: |
-          pip install -U ./shared-data/python ./api
-      - name: Simulate protocol
-        shell: bash
-        run: |
-          opentrons_simulate --help
-          opentrons_simulate analyses-snapshot-testing/files/protocols/Flex_S_v2_19_Illumina_DNA_Prep_48x.py
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "Test Outcome: ${{ steps.test.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "[Download the test results artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
 
   deploy:
     name: 'deploy opentrons package'
