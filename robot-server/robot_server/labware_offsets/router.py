@@ -90,21 +90,21 @@ async def get_labware_offsets(  # noqa: D103
     location_slot_name: Annotated[
         DeckSlotName | None,
         fastapi.Query(
-            alias="location.slotName",
+            alias="locationSlotName",
             description="Filter for exact matches on the `location.slotName` field.",
         ),
     ] = None,
     location_module_model: Annotated[
         ModuleModel | None,
         fastapi.Query(
-            alias="location.moduleModel",
+            alias="locationModuleModel",
             description="Filter for exact matches on the `location.moduleModel` field.",
         ),
     ] = None,
     location_definition_uri: Annotated[
         str | None,
         fastapi.Query(
-            alias="location.definitionUri",
+            alias="locationDefinitionUri",
             description=(
                 "Filter for exact matches on the `location.definitionUri` field."
                 " (Not to be confused with just `definitionUri`.)"
