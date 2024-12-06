@@ -18,6 +18,8 @@ module.exports = {
       'marginRight',
       'marginTop',
       'marginBottom',
+      'marginX',
+      'marginY',
     ]
 
     return {

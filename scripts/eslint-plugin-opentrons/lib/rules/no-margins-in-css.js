@@ -16,16 +16,10 @@ module.exports = {
       TaggedTemplateExpression(node) {
         const forbiddenMargins = [
           'margin',
-          'marginTop',
-          'marginLeft',
-          'marginRight',
-          'marginBottom',
-          'marginX',
-          'marginY',
-          'margin-top',
-          'margin-left',
-          'margin-right',
-          'margin-bottom',
+          // 'margin-top',
+          // 'margin-left',
+          // 'margin-right',
+          // 'margin-bottom',
         ]
 
         if (node.tag.type === 'Identifier' && node.tag.name === 'css') {

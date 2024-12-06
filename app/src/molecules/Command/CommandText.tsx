@@ -1,5 +1,6 @@
 import type * as React from 'react'
 import { pick } from 'lodash'
+import { css } from 'styled-components'
 
 import {
   ALIGN_CENTER,
@@ -174,21 +175,10 @@ function ThermocyclerRunProfile(
       >
         <ul>
           {shouldPropagateTextLimit(propagateTextLimit, isOnDevice) ? (
-            <li
-              css={`
-                margin-left: ${SPACING.spacing4};
-              `}
-            >
-              {stepTexts[0]}
-            </li>
+            <li css={LIST_STYLE}>{stepTexts[0]}</li>
           ) : (
             stepTexts.map((step: string, index: number) => (
-              <li
-                css={`
-                  margin-left: ${SPACING.spacing4};
-                `}
-                key={index}
-              >
+              <li css={LIST_STYLE} key={index}>
                 {' '}
                 {step}
               </li>
@@ -252,11 +242,7 @@ function ThermocyclerRunExtendedProfile(
       >
         <ul>
           {shouldPropagateTextLimit(propagateTextLimit, isOnDevice) ? (
-            <li
-              css={`
-                margin-left: ${SPACING.spacing4};
-              `}
-            >
+            <li css={LIST_STYLE}>
               {profileElementTexts[0].kind === 'step'
                 ? profileElementTexts[0].stepText
                 : profileElementTexts[0].cycleText}
@@ -264,30 +250,18 @@ function ThermocyclerRunExtendedProfile(
           ) : (
             profileElementTexts.map((element, index: number) =>
               element.kind === 'step' ? (
-                <li
-                  css={`
-                    margin-left: ${SPACING.spacing4};
-                  `}
-                  key={`tc-outer-step-${index}`}
-                >
+                <li css={LIST_STYLE} key={`tc-outer-step-${index}`}>
                   {' '}
                   {element.stepText}
                 </li>
               ) : (
-                <li
-                  css={`
-                    margin-left: ${SPACING.spacing4};
-                  `}
-                  key={`tc-outer-step-${index}`}
-                >
+                <li css={LIST_STYLE} key={`tc-outer-step-${index}`}>
                   {element.cycleText}
                   <ul>
                     {element.stepTexts.map(
                       ({ stepText }, stepIndex: number) => (
                         <li
-                          css={`
-                            margin-left: ${SPACING.spacing8};
-                          `}
+                          css={LIST_STYLE}
                           key={`tc-inner-step-${index}.${stepIndex}`}
                         >
                           {' '}
@@ -305,3 +279,7 @@ function ThermocyclerRunExtendedProfile(
     </Flex>
   )
 }
+
+const LIST_STYLE = css`
+  margin-left: ${SPACING.spacing4};
+`
