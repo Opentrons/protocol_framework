@@ -6,13 +6,15 @@ import type { PauseForm } from '../../form-types'
 import type { DesignerApplicationData } from './utils/getLoadLiquidCommands'
 
 const getTimeFromIndividualUnits = (
-  seconds?: number | null,
-  minutes?: number | null,
-  hours?: number | null
+  seconds: any,
+  minutes: any,
+  hours?: any
 ): string => {
   const pad = (num: number): string => String(num).padStart(2, '0')
-  const hoursString = hours !== undefined ? `${pad(hours ?? 0)}:` : ''
-  return `${hoursString}${pad(minutes ?? 0)}:${pad(seconds ?? 0)}`
+  const hoursString = hours !== undefined ? `${pad(Number(hours) ?? 0)}:` : ''
+  return `${hoursString}${pad(Number(minutes) ?? 0)}:${pad(
+    Number(seconds) ?? 0
+  )}`
 }
 
 export const migrateFile = (
