@@ -4034,16 +4034,15 @@
         },
         "labwareIds": {
           "title": "Labwareids",
-          "description": "Labware ID(s) of tip racks to resolve next available tip(s) from. Labware IDs will be resolved sequentially",
+          "description": "Labware ID(s) of tip racks to resolve next available tip(s) from Labware IDs will be resolved sequentially",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
-        "startingWellName": {
-          "title": "Startingwellname",
-          "description": "Name of starting tip rack 'well'.",
-          "default": "A1",
+        "startingTipWell": {
+          "title": "Startingtipwell",
+          "description": "Name of starting tip rack 'well'. This only applies to the first tip rack in the list provided in labwareIDs",
           "type": "string"
         }
       },
