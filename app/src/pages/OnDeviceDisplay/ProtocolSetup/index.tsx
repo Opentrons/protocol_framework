@@ -34,6 +34,7 @@ import {
 import {
   getDeckDefFromRobotType,
   getModuleDisplayName,
+  FLEX_ROBOT_TYPE,
 } from '@opentrons/shared-data'
 
 import { StyledText } from '../../../atoms/text'
@@ -362,7 +363,11 @@ function PrepareToRun({
     protocolRecord?.data.files[0].name ??
     ''
   const mostRecentAnalysis = useMostRecentCompletedAnalysis(runId)
-  const { launchLPC, LPCWizard } = useLaunchLPC(runId, protocolName)
+  const { launchLPC, LPCWizard } = useLaunchLPC(
+    runId,
+    FLEX_ROBOT_TYPE,
+    protocolName
+  )
 
   const onConfirmCancelClose = (): void => {
     setShowConfirmCancelModal(false)

@@ -14,7 +14,6 @@ import {
   Coordinates,
   FIXED_TRASH_ID,
   FLEX_ROBOT_TYPE,
-  OT2_ROBOT_TYPE,
 } from '@opentrons/shared-data'
 import { Portal } from '../../App/portal'
 // import { useTrackEvent } from '../../redux/analytics'
@@ -35,7 +34,7 @@ import { RobotMotionLoader } from './RobotMotionLoader'
 import { getLabwarePositionCheckSteps } from './getLabwarePositionCheckSteps'
 import type { LabwareOffset, CommandData } from '@opentrons/api-client'
 import type { DropTipCreateCommand } from '@opentrons/shared-data/protocol/types/schemaV7/command/pipetting'
-import type { CreateCommand } from '@opentrons/shared-data'
+import type { CreateCommand, RobotType } from '@opentrons/shared-data'
 import type { Axis, Sign, StepSize } from '../../molecules/JogControls/types'
 import type { RegisterPositionAction, WorkingOffset } from './types'
 
@@ -49,6 +48,7 @@ interface LabwarePositionCheckModalProps {
   onCloseClick: () => unknown
   protocolName: string
   setMaintenanceRunId: (id: string | null) => void
+  robotType: RobotType
   caughtError?: Error
 }
 
@@ -63,11 +63,11 @@ export const LabwarePositionCheckComponent = (
     onCloseClick,
     setMaintenanceRunId,
     protocolName,
+    robotType,
   } = props
   const { t } = useTranslation(['labware_position_check', 'shared'])
   const isOnDevice = useSelector(getIsOnDevice)
   const protocolData = mostRecentAnalysis
-  const robotType = mostRecentAnalysis?.robotType ?? OT2_ROBOT_TYPE
 
   // we should start checking for run deletion only after the maintenance run is created
   // and the useCurrentRun poll has returned that created id
@@ -344,13 +344,16 @@ export const LabwarePositionCheckComponent = (
   } else if (currentStep.section === 'DETACH_PROBE') {
     modalContent = <DetachProbe {...currentStep} {...movementStepProps} />
   } else if (currentStep.section === 'PICK_UP_TIP') {
-    modalContent = <PickUpTip {...currentStep} {...movementStepProps} />
+    modalContent = (
+      <PickUpTip {...currentStep} {...movementStepProps} {...{ robotType }} />
+    )
   } else if (currentStep.section === 'RETURN_TIP') {
     modalContent = (
       <ReturnTip
         {...currentStep}
         {...movementStepProps}
         {...{ tipPickUpOffset }}
+        {...{ robotType }}
       />
     )
   } else if (currentStep.section === 'RESULTS_SUMMARY') {

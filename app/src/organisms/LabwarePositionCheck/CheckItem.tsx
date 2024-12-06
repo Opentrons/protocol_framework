@@ -461,6 +461,7 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
           }
           labwareDef={labwareDef}
           confirmPlacement={handleConfirmPlacement}
+          robotType={robotType}
         />
       )}
     </Flex>

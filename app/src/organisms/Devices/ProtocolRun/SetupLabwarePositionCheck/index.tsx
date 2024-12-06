@@ -13,11 +13,16 @@ import {
   PrimaryButton,
   COLORS,
 } from '@opentrons/components'
+import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import { useRunQuery, useProtocolQuery } from '@opentrons/react-api-client'
 import { useMostRecentCompletedAnalysis } from '../../../LabwarePositionCheck/useMostRecentCompletedAnalysis'
 import { useLPCSuccessToast } from '../../hooks/useLPCSuccessToast'
 import { Tooltip } from '../../../../atoms/Tooltip'
-import { useLPCDisabledReason, useStoredProtocolAnalysis } from '../../hooks'
+import {
+  useLPCDisabledReason,
+  useStoredProtocolAnalysis,
+  useIsFlex,
+} from '../../hooks'
 import { CurrentOffsetsTable } from './CurrentOffsetsTable'
 import { useLaunchLPC } from '../../../LabwarePositionCheck/useLaunchLPC'
 import { StyledText } from '../../../../atoms/text'
@@ -71,8 +76,8 @@ export function SetupLabwarePositionCheck(
   })
 
   const { setIsShowingLPCSuccessToast } = useLPCSuccessToast()
-
-  const { launchLPC, LPCWizard } = useLaunchLPC(runId, protocolName)
+  const robotType = useIsFlex(robotName) ? FLEX_ROBOT_TYPE : OT2_ROBOT_TYPE
+  const { launchLPC, LPCWizard } = useLaunchLPC(runId, robotType, protocolName)
 
   return (
     <Flex

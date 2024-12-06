@@ -3,7 +3,10 @@ import { useLogger } from '../../logger'
 import { LabwarePositionCheckComponent } from './LabwarePositionCheckComponent'
 import { FatalErrorModal } from './FatalErrorModal'
 
-import type { CompletedProtocolAnalysis } from '@opentrons/shared-data'
+import type {
+  CompletedProtocolAnalysis,
+  RobotType,
+} from '@opentrons/shared-data'
 import type { LabwareOffset } from '@opentrons/api-client'
 
 interface LabwarePositionCheckModalProps {
@@ -15,6 +18,7 @@ interface LabwarePositionCheckModalProps {
   protocolName: string
   caughtError?: Error
   setMaintenanceRunId: (id: string | null) => void
+  robotType: RobotType
 }
 
 // We explicitly wrap LabwarePositionCheckComponent in an ErrorBoundary because an error might occur while pulling in

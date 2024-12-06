@@ -26,6 +26,8 @@ import {
   getLabwareDefinitionsFromCommands,
 } from './utils/labware'
 import { getDisplayLocation } from './utils/getDisplayLocation'
+import { useSelector } from 'react-redux'
+import { getIsOnDevice } from '../../redux/config'
 
 import type { Jog } from '../../molecules/JogControls/types'
 import type {
@@ -34,8 +36,7 @@ import type {
   WorkingOffset,
 } from './types'
 import type { LabwareOffset } from '@opentrons/api-client'
-import { useSelector } from 'react-redux'
-import { getIsOnDevice } from '../../redux/config'
+import type { RobotType } from '@opentrons/shared-data'
 
 interface PickUpTipProps extends PickUpTipStep {
   protocolData: CompletedProtocolAnalysis
@@ -47,6 +48,7 @@ interface PickUpTipProps extends PickUpTipStep {
   existingOffsets: LabwareOffset[]
   handleJog: Jog
   isRobotMoving: boolean
+  robotType: RobotType
 }
 export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])

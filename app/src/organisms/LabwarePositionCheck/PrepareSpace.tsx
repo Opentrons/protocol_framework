@@ -34,6 +34,7 @@ import { SmallButton } from '../../atoms/buttons'
 import { NeedHelpLink } from '../CalibrationPanels'
 
 import type { CheckLabwareStep } from './types'
+import type { RobotType } from '@opentrons/shared-data'
 
 const LPC_HELP_LINK_URL =
   'https://support.opentrons.com/s/article/How-Labware-Offsets-work-on-the-OT-2'
@@ -78,12 +79,20 @@ interface PrepareSpaceProps extends Omit<CheckLabwareStep, 'section'> {
   confirmPlacement: () => void
   header: React.ReactNode
   body: React.ReactNode
+  robotType: RobotType
 }
 export const PrepareSpace = (props: PrepareSpaceProps): JSX.Element | null => {
   const { i18n, t } = useTranslation(['labware_position_check', 'shared'])
-  const { location, moduleId, labwareDef, protocolData, header, body } = props
+  const {
+    location,
+    moduleId,
+    labwareDef,
+    protocolData,
+    header,
+    body,
+    robotType,
+  } = props
 
-  const robotType = protocolData.robotType
   const isOnDevice = useSelector(getIsOnDevice)
 
   if (protocolData == null || robotType == null) return null

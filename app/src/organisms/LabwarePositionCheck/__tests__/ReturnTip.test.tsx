@@ -6,13 +6,6 @@ import { i18n } from '../../../i18n'
 import { ReturnTip } from '../ReturnTip'
 import { SECTIONS } from '../constants'
 import { mockCompletedAnalysis } from '../__fixtures__'
-import { useProtocolMetadata } from '../../Devices/hooks'
-
-jest.mock('../../Devices/hooks')
-
-const mockUseProtocolMetaData = useProtocolMetadata as jest.MockedFunction<
-  typeof useProtocolMetadata
->
 
 const matchTextWithSpans: (text: string) => MatcherFunction = (
   text: string
@@ -48,8 +41,9 @@ describe('ReturnTip', () => {
       chainRunCommands: mockChainRunCommands,
       tipPickUpOffset: null,
       isRobotMoving: false,
+      robotType: 'OT-3 Standard',
+      definitionUri: 'mock_uri',
     }
-    mockUseProtocolMetaData.mockReturnValue({ robotType: 'OT-3 Standard' })
   })
   afterEach(() => {
     jest.restoreAllMocks()

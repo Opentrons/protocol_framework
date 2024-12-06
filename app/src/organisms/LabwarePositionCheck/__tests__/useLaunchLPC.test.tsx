@@ -4,6 +4,7 @@ import configureStore from 'redux-mock-store'
 import { when, resetAllWhenMocks } from 'jest-when'
 import { renderHook } from '@testing-library/react-hooks'
 import { renderWithProviders } from '@opentrons/components'
+import { OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import {
   useCreateMaintenanceRunLabwareDefinitionMutation,
@@ -18,7 +19,7 @@ import { useLaunchLPC } from '../useLaunchLPC'
 import { LabwarePositionCheck } from '..'
 
 import type { LabwareOffset } from '@opentrons/api-client'
-import { LabwareDefinition2 } from '@opentrons/shared-data'
+import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
 jest.mock('../')
 jest.mock('@opentrons/react-api-client')
@@ -156,12 +157,18 @@ describe('useLaunchLPC hook', () => {
   })
 
   it('returns and no wizard by default', () => {
-    const { result } = renderHook(() => useLaunchLPC(MOCK_RUN_ID), { wrapper })
+    const { result } = renderHook(
+      () => useLaunchLPC(MOCK_RUN_ID, OT2_ROBOT_TYPE),
+      { wrapper }
+    )
     expect(result.current.LPCWizard).toEqual(null)
   })
 
   it('returns creates maintenance run with current offsets and definitions when create callback is called, closes and deletes when exit is clicked', async () => {
-    const { result } = renderHook(() => useLaunchLPC(MOCK_RUN_ID), { wrapper })
+    const { result } = renderHook(
+      () => useLaunchLPC(MOCK_RUN_ID, OT2_ROBOT_TYPE),
+      { wrapper }
+    )
     await result.current.launchLPC()
     await expect(mockCreateLabwareDefinition).toHaveBeenCalledWith({
       maintenanceRunId: MOCK_MAINTENANCE_RUN_ID,

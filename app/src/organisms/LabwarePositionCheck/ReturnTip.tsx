@@ -22,6 +22,7 @@ import { PrepareSpace } from './PrepareSpace'
 
 import type { VectorOffset } from '@opentrons/api-client'
 import type { ReturnTipStep } from './types'
+import type { RobotType } from '@opentrons/shared-data'
 
 interface ReturnTipProps extends ReturnTipStep {
   protocolData: CompletedProtocolAnalysis
@@ -30,6 +31,7 @@ interface ReturnTipProps extends ReturnTipStep {
   setFatalError: (errorMessage: string) => void
   tipPickUpOffset: VectorOffset | null
   isRobotMoving: boolean
+  robotType: RobotType
 }
 export const ReturnTip = (props: ReturnTipProps): JSX.Element | null => {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])

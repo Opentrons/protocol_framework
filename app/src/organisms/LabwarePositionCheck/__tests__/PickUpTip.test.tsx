@@ -3,7 +3,6 @@ import { resetAllWhenMocks, when } from 'jest-when'
 import { nestedTextMatcher, renderWithProviders } from '@opentrons/components'
 import { HEATERSHAKER_MODULE_V1 } from '@opentrons/shared-data'
 import { i18n } from '../../../i18n'
-import { useProtocolMetadata } from '../../Devices/hooks'
 import { getIsOnDevice } from '../../../redux/config'
 import { PickUpTip } from '../PickUpTip'
 import { SECTIONS } from '../constants'
@@ -11,14 +10,10 @@ import { mockCompletedAnalysis, mockExistingOffsets } from '../__fixtures__'
 import type { CommandData } from '@opentrons/api-client'
 import type { MatcherFunction } from '@testing-library/react'
 
-jest.mock('../../Devices/hooks')
 jest.mock('../../../redux/config')
 
 const mockStartPosition = { x: 10, y: 20, z: 30 }
 
-const mockUseProtocolMetaData = useProtocolMetadata as jest.MockedFunction<
-  typeof useProtocolMetadata
->
 const mockGetIsOnDevice = getIsOnDevice as jest.MockedFunction<
   typeof getIsOnDevice
 >
@@ -61,8 +56,8 @@ describe('PickUpTip', () => {
       workingOffsets: [],
       existingOffsets: mockExistingOffsets,
       isRobotMoving: false,
+      robotType: 'OT-3 Standard',
     }
-    mockUseProtocolMetaData.mockReturnValue({ robotType: 'OT-3 Standard' })
   })
   afterEach(() => {
     jest.resetAllMocks()
