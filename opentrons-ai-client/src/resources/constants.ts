@@ -9,7 +9,8 @@ export const STAGING_UPDATE_PROTOCOL_END_POINT =
   'https://staging.opentrons.ai/api/chat/updateProtocol'
 
 export const PROD_END_POINT = 'https://ai.opentrons.com/api/chat/completion'
-export const PROD_FEEDBACK_END_POINT = 'https://ai.opentrons.com/api/chat/feedback'
+export const PROD_FEEDBACK_END_POINT =
+  'https://ai.opentrons.com/api/chat/feedback'
 export const PROD_CREATE_PROTOCOL_END_POINT =
   'https://ai.opentrons.com/api/chat/createProtocol'
 export const PROD_UPDATE_PROTOCOL_END_POINT =
