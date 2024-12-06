@@ -155,9 +155,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         "Samples": [{"well": samps, "volume": 0.0}],
         "Reagents": [{"well": res2.wells(), "volume": 9000.0}],
     }
-    flattened_list_of_wells = helpers.find_liquid_height_of_loaded_liquids(
-        ctx, liquid_vols_and_wells, m1000
-    )
+    helpers.find_liquid_height_of_loaded_liquids(ctx, liquid_vols_and_wells, m1000)
 
     m1000.flow_rate.aspirate = 300
     m1000.flow_rate.dispense = 300
@@ -532,5 +530,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         )
     elute(elution_vol)
     h_s.deactivate_heater()
-    flattened_list_of_wells.extend([waste_reservoir["A1"], elutionplate["A1"]])
-    helpers.find_liquid_height_of_all_wells(ctx, m1000, flattened_list_of_wells)
+    helpers.clean_up_plates(
+        m1000, [elutionplate, sample_plate, res1, res2], waste_reservoir["A1"], 1000
+    )
+    helpers.find_liquid_height_of_all_wells(ctx, m1000, [waste_reservoir["A1"]])
