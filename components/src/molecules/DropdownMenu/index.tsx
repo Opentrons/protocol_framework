@@ -25,12 +25,6 @@ import { Tooltip } from '../../atoms/Tooltip'
 import { StyledText } from '../../atoms/StyledText'
 import { LiquidIcon } from '../LiquidIcon'
 
-/** this is the max height to display 10 items */
-const MAX_HEIGHT = 316
-
-/** this is for adjustment variable for the case that the space of the bottom and the space of the top are very close */
-const HEIGHT_ADJUSTMENT = 100
-
 export interface DropdownOption {
   name: string
   value: string
