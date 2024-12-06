@@ -596,23 +596,39 @@ if __name__ == "__main__":
                 mnt.name.lower(), hw.is_simulator, run_args.environment_sensor
             )
             start_temp = env_data.celsius_pipette
-            temp_limit = min(start_temp + 3.0, 28.0)
-            max_pre_heat_seconds = 60 * 10
+            temp_limit = 25.95
+            max_pre_heat_seconds = 60 * 60 * 3
             now = time()
             start_time = now
+            
+            def format_time_str(second):
+                h = int(second / 3600)
+                m = int((second % 3600) / 60)
+                s = (second % 3600) % 60
+                return f"{h}:{m}:{s}"
+            
             while (
                 now - start_time < max_pre_heat_seconds
                 and env_data.celsius_pipette < temp_limit
             ):
+                duration =format_time_str(int(now - start_time))
+                max_pre_heat_seconds = format_time_str(max_pre_heat_seconds)
+                celsius = round(env_data.celsius_pipette, 2)
+                
                 ui.print_info(
-                    f"pre-heat {int(now - start_time)} seconds "
+                    f"pre-heat h:m:s {duration}"
                     f"({max_pre_heat_seconds} limit): "
-                    f"{round(env_data.celsius_pipette, 2)} C "
+                    f"{celsius} C "
                     f"({round(temp_limit, 2)} C limit)"
                 )
+                
+                # record temp 
+                with open('/data/testing_data/pre_heat.csv', mode='a') as f:
+                    f.write(f'{duration}, {celsius} \n')
+                
                 # NOTE: moving slowly helps make sure full current is sent to coils
-                hw.aspirate(mnt, rate=0.1)
-                hw.dispense(mnt, rate=0.1, push_out=0)
+                hw.aspirate(mnt, rate=1)
+                hw.dispense(mnt, rate=1, push_out=0)
                 env_data = read_environment_data(
                     mnt.name.lower(), hw.is_simulator, run_args.environment_sensor
                 )
