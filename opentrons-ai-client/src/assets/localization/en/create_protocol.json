@@ -4,6 +4,7 @@
   "application_scientific_dropdown_placeholder": "Select an option",
   "basic_aliquoting": "Basic aliquoting",
   "pcr": "PCR",
+  "serial_dilution": "Serial dilution",
   "other": "Other",
   "application_other_title": "Other application",
   "application_other_caption": "Example: “cherrypicking” or “serial dilution”",

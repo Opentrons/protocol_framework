@@ -249,6 +249,7 @@ function ParagraphText(props: JSX.IntrinsicAttributes): JSX.Element {
       {...props}
       fontSize={TYPOGRAPHY.fontSize20}
       lineHeight={TYPOGRAPHY.lineHeight24}
+      css="white-space: pre-wrap;"
     />
   )
 }
