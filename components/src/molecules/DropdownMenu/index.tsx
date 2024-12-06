@@ -139,7 +139,6 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
       const fitsBelow = dropdownBottom <= availableHeight;
       const fitsAbove = dropdownRect.top - dropdownHeight >= scrollOffset;
 
-      // Determine position based on fit or default to `bottom`
       if (menuPlacement === 'auto') {
         setDropdownPosition(fitsBelow ? 'bottom' : fitsAbove ? 'top' : 'bottom');
       } else {
