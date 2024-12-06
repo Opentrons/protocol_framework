@@ -11,6 +11,7 @@ Run against your local code.
 ## Notes
 
 - find . -name "\*.sh" -exec shellcheck {} +
+- <https://learn.microsoft.com/en-us/powershell/scripting/install/install-ubuntu?view=powershell-7.4>
 
 ## TODO
 

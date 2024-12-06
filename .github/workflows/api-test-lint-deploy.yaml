@@ -127,11 +127,11 @@ jobs:
           flags: api
 
   test-package:
-    name: 'installed package tests on ${{ matrix.os }}, python ${{ matrix.python }}'
+    name: 'installed package tests on ${{ matrix.os }}'
     timeout-minutes: 5
     strategy:
       matrix:
-        os: ['ubuntu-22.04', 'macos-latest']
+        os: ['ubuntu-22.04', 'macos-latest', 'windows-2022']
     runs-on: '${{ matrix.os }}'
     steps:
       - uses: 'actions/checkout@v4'
@@ -143,21 +143,25 @@ jobs:
       - uses: 'actions/setup-python@v4'
         with:
           python-version: '3.10'
-      - name: Install opentrons and shared-data
+      - name: Set up package-testing
+        id: setup
         working-directory: package-testing
+        shell: bash
         run: make setup
       - name: Run the tests
+        shell: bash
         id: test
         working-directory: package-testing
         run: make test
-        continue-on-error: true
       - name: Save the test results
+        if: ${{ always() && steps.setup.outcome == 'success'}}
         id: results
         uses: actions/upload-artifact@v4
         with:
           name: package-test-results-${{ matrix.os }}
           path: package-testing/results
       - name: Set job summary
+        if: ${{ always() }}
         run: |
           echo "## Opentrons Package Test Results ${{matrix.os}}" >> $GITHUB_STEP_SUMMARY
           echo "### Test Outcome: ${{ steps.test.outcome }}" >> $GITHUB_STEP_SUMMARY
