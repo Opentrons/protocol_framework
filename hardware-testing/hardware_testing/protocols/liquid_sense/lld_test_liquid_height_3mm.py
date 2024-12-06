@@ -54,7 +54,7 @@ VOLUMES_3MM_TOP_BOTTOM = {
     "corning_384_wellplate_112ul_flat": [23.2, 50.1, 80.0],
     "biorad_384_wellplate_50ul": [28.7, 8.0, 0.0],
     "usascientific_12_reservoir_22ml": [63.7, 10947.7, 21111.5],
-    "usascientific_96_wellplate_2.4ml_deep": [74.7, 1151.9, 2317.8]
+    "usascientific_96_wellplate_2.4ml_deep": [74.7, 1151.9, 2317.8],
     "opentrons_24_tuberack_eppendorf_2ml_safelock_snapcap": [63.0, 2237.8, 0.0]
 }
 
