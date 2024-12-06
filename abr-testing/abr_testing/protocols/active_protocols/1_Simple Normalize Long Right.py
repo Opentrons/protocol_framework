@@ -113,6 +113,7 @@ def run(protocol: ProtocolContext) -> None:
     Dye_3 = reservoir["A3"]
     Diluent_1 = reservoir["A4"]
     Diluent_2 = reservoir["A5"]
+    Diluent_3 = reservoir["A6"]
 
     # pipette
     p1000 = protocol.load_instrument(
@@ -126,11 +127,11 @@ def run(protocol: ProtocolContext) -> None:
     )
     # LOAD LIQUIDS
     liquid_volumes = [675.0, 675.0, 675.0, 675.0, 675.0]
-    wells = [Dye_1, Dye_2, Dye_3, Diluent_1, Diluent_2]
+    wells = [Dye_1, Dye_2, Dye_3, Diluent_1, Diluent_2, Diluent_3]
     helpers.load_wells_with_water(protocol, wells, liquid_volumes)
     liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
         "Dye": [{"well": [Dye_1, Dye_2, Dye_3], "volume": 675.0}],
-        "Diluent": [{"well": [Diluent_1, Diluent_2], "volume": 675.0}],
+        "Diluent": [{"well": [Diluent_1, Diluent_2, Diluent_3], "volume": 675.0}],
     }
     current_rack = tiprack_x_1
     # CONFIGURE SINGLE LAYOUT
@@ -269,7 +270,7 @@ def run(protocol: ProtocolContext) -> None:
             DilutionVol = float(data[current][2])
             if DilutionVol != 0 and DilutionVol < 100:
                 p1000_single.pick_up_tip()
-                p1000_single.aspirate(DilutionVol, Diluent_2.bottom(z=dot_bottom))
+                p1000_single.aspirate(DilutionVol, Diluent_3.bottom(z=dot_bottom))
                 p1000_single.dispense(
                     DilutionVol, sample_plate_3.wells_by_name()[CurrentWell].top(z=0.2)
                 )
@@ -315,7 +316,7 @@ def run(protocol: ProtocolContext) -> None:
             DilutionVol = float(data[current][2])
             if DilutionVol != 0 and DilutionVol < 100:
                 p1000_single.pick_up_tip()
-                p1000_single.aspirate(DilutionVol, Diluent_2.bottom(z=dot_bottom))
+                p1000_single.aspirate(DilutionVol, Diluent_3.bottom(z=dot_bottom))
                 p1000_single.dispense(
                     DilutionVol, sample_plate_4.wells_by_name()[CurrentWell].top(z=0.2)
                 )
