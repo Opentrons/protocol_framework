@@ -132,7 +132,6 @@ jobs:
     strategy:
       matrix:
         os: ['ubuntu-22.04', 'macos-latest']
-        python: ['3.10']
     runs-on: '${{ matrix.os }}'
     steps:
       - uses: 'actions/checkout@v4'
@@ -153,15 +152,16 @@ jobs:
         run: make test
         continue-on-error: true
       - name: Save the test results
+        id: results
         uses: actions/upload-artifact@v4
         with:
-          name: package-test-results
+          name: package-test-results-${{ matrix.os }}
           path: package-testing/results
       - name: Set job summary
         run: |
-          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "Test Outcome: ${{ steps.test.outcome }}" >> $GITHUB_STEP_SUMMARY
-          echo "[Download the test results artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+          echo "## Opentrons Package Test Results ${{matrix.os}}" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Outcome: ${{ steps.test.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "[Download the test results artifact](${{steps.results.outputs.artifact-url}})" >> $GITHUB_STEP_SUMMARY
 
   deploy:
     name: 'deploy opentrons package'
