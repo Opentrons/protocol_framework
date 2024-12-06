@@ -3,18 +3,21 @@ import { useDispatch, useSelector } from 'react-redux'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import {
-  useHoverTooltip,
-  TOOLTIP_TOP,
-  TOOLTIP_FIXED,
-  Tooltip,
+  BORDERS,
   COLORS,
   DIRECTION_COLUMN,
   Flex,
-  POSITION_ABSOLUTE,
-  BORDERS,
+  Icon,
   NO_WRAP,
-  useOnClickOutside,
+  POSITION_ABSOLUTE,
   SecondaryButton,
+  SPACING,
+  StyledText,
+  TOOLTIP_FIXED,
+  TOOLTIP_TOP,
+  Tooltip,
+  useHoverTooltip,
+  useOnClickOutside,
 } from '@opentrons/components'
 import {
   HEATERSHAKER_MODULE_TYPE,
@@ -188,8 +191,10 @@ export function AddStepButton(): JSX.Element {
           setShowStepOverflowMenu(true)
         }}
         disabled={isStepCreationDisabled}
+        gridGap={SPACING.spacing10}
       >
-        {t('button:add_step')}
+        <Icon name="plus" size="1rem" />
+        <StyledText>{t('button:add_step')}</StyledText>
       </SecondaryButton>
     </>
   )

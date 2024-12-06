@@ -25,7 +25,13 @@ import { DraggableSteps } from './DraggableSteps'
 import type { StepIdType } from '../../../../form-types'
 import type { ThunkDispatch } from '../../../../types'
 
-export const TimelineToolbox = (): JSX.Element => {
+interface TimelineToolboxProps {
+  sidebarWidth: number
+}
+
+export const TimelineToolbox = ({
+  sidebarWidth,
+}: TimelineToolboxProps): JSX.Element => {
   const { t } = useTranslation('protocol_steps')
   const orderedStepIds = useSelector(stepFormSelectors.getOrderedStepIds)
   const formData = useSelector(getUnsavedForm)
@@ -60,7 +66,7 @@ export const TimelineToolbox = (): JSX.Element => {
   return (
     <Toolbox
       position={POSITION_RELATIVE}
-      width="19.5rem"
+      width={`${sidebarWidth / 16}rem`}
       title={
         <StyledText desktopStyle="bodyLargeSemiBold">
           {t('timeline')}

@@ -29,12 +29,13 @@ import {
 } from '../../../ui/steps/selectors'
 import { DeckSetupContainer } from '../DeckSetup'
 import { OffDeck } from '../Offdeck'
-import { TimelineToolbox, SubstepsToolbox } from './Timeline'
+import { SubstepsToolbox } from './Timeline'
 import { StepForm } from './StepForm'
 import { StepSummary } from './StepSummary'
 import { BatchEditToolbox } from './BatchEditToolbox'
 import { getDesignerTab } from '../../../file-data/selectors'
 import { TimelineAlerts } from '../../../organisms'
+import { DraggableSidebar } from './DraggableSidebar'
 
 const CONTENT_MAX_WIDTH = '46.9375rem'
 
@@ -62,6 +63,8 @@ export function ProtocolSteps(): JSX.Element {
       : null
 
   const stepDetails = currentStep?.stepDetails ?? null
+
+  console.log('ProtocolSteps')
   return (
     <Flex
       backgroundColor={COLORS.grey10}
@@ -71,7 +74,7 @@ export function ProtocolSteps(): JSX.Element {
       justifyContent={JUSTIFY_SPACE_BETWEEN}
       padding={SPACING.spacing12}
     >
-      <TimelineToolbox />
+      <DraggableSidebar />
       <Flex
         alignItems={ALIGN_CENTER}
         alignSelf={ALIGN_CENTER}
