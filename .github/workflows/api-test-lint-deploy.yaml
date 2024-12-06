@@ -156,7 +156,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: package-test-results
-          path: package-testing/test-results
+          path: package-testing/results
       - name: Set job summary
         run: |
           echo "## Test Results" >> $GITHUB_STEP_SUMMARY
