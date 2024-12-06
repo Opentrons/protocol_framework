@@ -23,7 +23,7 @@ class GCODE(str, Enum):
     CLOSE_LABWARE_LATCH = "M243"
     GET_LABWARE_LATCH_STATE = "M241"
     DEACTIVATE_HEATER = "M106"
-    RESET_REASON = "M114"
+    GET_RESET_REASON = "M114"
 
 
 HS_BAUDRATE = 115200
@@ -175,7 +175,7 @@ class HeaterShakerDriver(AbstractHeaterShakerDriver):
         )
 
         reset_reason = CommandBuilder(terminator=HS_COMMAND_TERMINATOR).add_gcode(
-            gcode=GCODE.RESET_REASON
+            gcode=GCODE.GET_RESET_REASON
         )
         await self._connection.send_command(
             command=reset_reason, retries=DEFAULT_COMMAND_RETRIES

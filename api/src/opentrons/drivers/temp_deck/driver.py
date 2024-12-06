@@ -31,7 +31,7 @@ class GCODE(str, Enum):
     GET_TEMP = "M105"
     SET_TEMP = "M104"
     DEVICE_INFO = "M115"
-    RESET_REASON = "M114"
+    GET_RESET_REASON = "M114"
     DISENGAGE = "M18"
     PROGRAMMING_MODE = "dfu"
 
@@ -162,7 +162,7 @@ class TempDeckDriver(AbstractTempDeckDriver):
 
         reset_reason = CommandBuilder(
             terminator=TEMP_DECK_COMMAND_TERMINATOR
-        ).add_gcode(gcode=GCODE.RESET_REASON)
+        ).add_gcode(gcode=GCODE.GET_RESET_REASON)
         await self._send_command(command=reset_reason)
 
         return utils.parse_device_information(device_info_string=response)

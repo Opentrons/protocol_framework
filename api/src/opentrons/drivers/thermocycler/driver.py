@@ -33,7 +33,7 @@ class GCODE(str, Enum):
     DEACTIVATE_LID = "M108"
     DEACTIVATE_BLOCK = "M14"
     DEVICE_INFO = "M115"
-    RESET_REASON = "M114"
+    GET_RESET_REASON = "M114"
     ENTER_PROGRAMMING = "dfu"
 
 
@@ -301,7 +301,7 @@ class ThermocyclerDriver(AbstractThermocyclerDriver):
         )
 
         reset_reason = CommandBuilder(terminator=TC_COMMAND_TERMINATOR).add_gcode(
-            gcode=GCODE.RESET_REASON
+            gcode=GCODE.GET_RESET_REASON
         )
         await self._connection.send_command(
             command=reset_reason, retries=DEFAULT_COMMAND_RETRIES
@@ -364,7 +364,7 @@ class ThermocyclerDriverV2(ThermocyclerDriver):
         )
 
         reset_reason = CommandBuilder(terminator=TC_COMMAND_TERMINATOR).add_gcode(
-            gcode=GCODE.RESET_REASON
+            gcode=GCODE.GET_RESET_REASON
         )
         await self._connection.send_command(
             command=reset_reason, retries=DEFAULT_COMMAND_RETRIES
