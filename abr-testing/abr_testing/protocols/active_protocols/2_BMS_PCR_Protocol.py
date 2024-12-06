@@ -5,7 +5,7 @@ from opentrons.protocol_api.module_contexts import (
     ThermocyclerContext,
     TemperatureModuleContext,
 )
-from opentrons.protocol_api import SINGLE, Well
+from opentrons.protocol_api import SINGLE, Well, ALL
 from abr_testing.protocols import helpers
 from typing import List, Dict
 
@@ -206,6 +206,7 @@ def run(ctx: ProtocolContext) -> None:
         p50.configure_nozzle_layout(style=SINGLE, start="A1", tip_racks=tiprack_50)
         mmx_pic.append(water)
     # Empty plates into liquid waste
+    p50.configure_nozzle_layout(style=ALL, tip_racks=tiprack_50)
     helpers.clean_up_plates(p50, [source_plate_1, dest_plate_1], liquid_waste, 50)
     # Probe liquid waste
     helpers.find_liquid_height_of_all_wells(ctx, p50, [liquid_waste])

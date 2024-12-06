@@ -80,9 +80,14 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     )
 
     # Sample Plate Prep: total 303
-    dest_list = [sample_plate_2["A10"], sample_plate_2["A11"], sample_plate_2["A12"]]
+    dest_list = [
+        sample_plate_2["A9"],
+        sample_plate_2["A10"],
+        sample_plate_2["A11"],
+        sample_plate_2["A12"],
+    ]
     p1000.transfer(
-        volume=[1000, 1000, 1000],
+        volume=[1000, 1000, 1000, 1000],
         source=source_reservoir["A1"],
         dest=dest_list,
         blow_out=True,

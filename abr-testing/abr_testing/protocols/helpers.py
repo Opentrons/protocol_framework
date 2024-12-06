@@ -106,6 +106,17 @@ def load_temp_adapter_and_labware(
 
 
 # FUNCTIONS FOR LOADING COMMON PARAMETERS
+def create_channel_parameter(parameters: ParameterContext) -> None:
+    """Create pipette channel parameter."""
+    parameters.add_str(
+        variable_name="channels",
+        display_name="Number of Pipette Channels",
+        choices=[
+            {"display_name": "1 Channel", "value": "1channel"},
+            {"display_name": "8 Channel", "value": "8channel"},
+        ],
+        default="8channel",
+    )
 
 
 def create_single_pipette_mount_parameter(parameters: ParameterContext) -> None:
