@@ -52,6 +52,7 @@ export function Settings(): JSX.Element {
     : analyticsActions.optIn
 
   const prereleaseModeEnabled = flags.PRERELEASE_MODE === true
+  const pdVersion = process.env.OT_PD_VERSION
 
   const allFlags = Object.keys(flags) as FlagTypes[]
 
@@ -126,7 +127,7 @@ export function Settings(): JSX.Element {
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing24}>
             <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
               <StyledText desktopStyle="bodyLargeSemiBold">
-                {t('shared:app_settings')}
+                {t('shared:app_info')}
               </StyledText>
               <ListItem
                 padding={SPACING.spacing16}
@@ -138,7 +139,7 @@ export function Settings(): JSX.Element {
                     {t('shared:pd_version')}
                   </StyledText>
                   <StyledText desktopStyle="bodyDefaultRegular">
-                    {process.env.OT_PD_VERSION}
+                    {pdVersion}
                   </StyledText>
                 </Flex>
                 <Flex gridGap={SPACING.spacing16} alignItems={ALIGN_CENTER}>
@@ -185,7 +186,7 @@ export function Settings(): JSX.Element {
                   </StyledText>
                   <Flex color={COLORS.grey60}>
                     <StyledText desktopStyle="bodyDefaultRegular">
-                      {t('shared:reset_hints_and_tips')}
+                      {t('shared:show_hints_and_tips')}
                     </StyledText>
                   </Flex>
                 </Flex>
@@ -202,7 +203,7 @@ export function Settings(): JSX.Element {
                 >
                   <StyledText desktopStyle="bodyDefaultRegular">
                     {canClearHintDismissals
-                      ? t('shared:reset_hints')
+                      ? t('shared:reset')
                       : t('shared:no_hints_to_restore')}
                   </StyledText>
                 </Btn>
@@ -245,7 +246,7 @@ export function Settings(): JSX.Element {
               >
                 <Flex flexDirection={DIRECTION_COLUMN}>
                   <StyledText desktopStyle="bodyDefaultSemiBold">
-                    {t('shared:shared_sessions')}
+                    {t('shared:shared_analytics')}
                   </StyledText>
                   <StyledText desktopStyle="bodyDefaultRegular">
                     <Trans

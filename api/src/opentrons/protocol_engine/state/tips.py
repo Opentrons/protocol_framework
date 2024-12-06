@@ -119,7 +119,7 @@ class TipStore(HasState[TipState], HandlesActions):
             wells[well] = TipRackWellState.USED
 
 
-class TipView(HasState[TipState]):
+class TipView:
     """Read-only tip state view."""
 
     _state: TipState

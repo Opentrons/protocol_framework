@@ -17,10 +17,6 @@ import type { AnalyticsEventAction } from '../../../analytics/actions'
 import type { TerminalItemId, SubstepIdentifier } from '../../../steplist/types'
 import type {
   AddStepAction,
-  ExpandAddStepButtonAction,
-  ToggleStepCollapsedAction,
-  ExpandMultipleStepsAction,
-  CollapseMultipleStepsAction,
   HoverOnStepAction,
   HoverOnSubstepAction,
   SelectTerminalItemAction,
@@ -51,30 +47,6 @@ export const addStep = (args: {
     },
   }
 }
-export const expandAddStepButton = (
-  payload: boolean
-): ExpandAddStepButtonAction => ({
-  type: 'EXPAND_ADD_STEP_BUTTON',
-  payload,
-})
-export const toggleStepCollapsed = (
-  stepId: StepIdType
-): ToggleStepCollapsedAction => ({
-  type: 'TOGGLE_STEP_COLLAPSED',
-  payload: stepId,
-})
-export const expandMultipleSteps = (
-  stepIds: StepIdType[]
-): ExpandMultipleStepsAction => ({
-  type: 'EXPAND_MULTIPLE_STEPS',
-  payload: stepIds,
-})
-export const collapseMultipleSteps = (
-  stepIds: StepIdType[]
-): CollapseMultipleStepsAction => ({
-  type: 'COLLAPSE_MULTIPLE_STEPS',
-  payload: stepIds,
-})
 export const hoverOnSubstep = (
   payload: SubstepIdentifier
 ): HoverOnSubstepAction => ({

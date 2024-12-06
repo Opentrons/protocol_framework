@@ -15,7 +15,7 @@ import {
   StyledText,
 } from '@opentrons/components'
 import { actions } from '../../tutorial'
-import { getMainPagePortalEl } from '../../components/portals/MainPageModalPortal'
+import { getMainPagePortalEl } from '../Portal'
 import type { ReactNode } from 'react'
 import type { HintKey } from '../../tutorial'
 

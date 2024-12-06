@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
@@ -17,6 +17,7 @@ import { LANGUAGES } from '/app/i18n'
 import { ChildNavigation } from '/app/organisms/ODD/ChildNavigation'
 import { getAppLanguage, updateConfigValue } from '/app/redux/config'
 
+import type { ChangeEvent } from 'react'
 import type { Dispatch } from '/app/redux/types'
 import type { SetSettingOption } from './types'
 
@@ -49,7 +50,7 @@ export function LanguageSetting({
 
   const appLanguage = useSelector(getAppLanguage)
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
     dispatch(updateConfigValue('language.appLanguage', event.target.value))
   }
 
@@ -68,7 +69,7 @@ export function LanguageSetting({
         padding={`${SPACING.spacing16} ${SPACING.spacing40} ${SPACING.spacing40} ${SPACING.spacing40}`}
       >
         {LANGUAGES.map(lng => (
-          <React.Fragment key={`language_setting_${lng.name}`}>
+          <Fragment key={`language_setting_${lng.name}`}>
             <SettingButton
               id={lng.name}
               type="radio"
@@ -84,7 +85,7 @@ export function LanguageSetting({
                 {lng.name}
               </StyledText>
             </SettingButtonLabel>
-          </React.Fragment>
+          </Fragment>
         ))}
       </Flex>
     </Flex>

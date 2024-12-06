@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { fireEvent, screen } from '@testing-library/react'
 import {
@@ -67,6 +67,9 @@ describe('DeckSetupTools', () => {
     })
     vi.mocked(getDismissedHints).mockReturnValue([])
   })
+  afterEach(() => {
+    vi.resetAllMocks()
+  })
   it('should render the relevant modules and fixtures for slot D3 on Flex with tabs', () => {
     render(props)
     screen.getByText('Add a module')
@@ -92,6 +95,14 @@ describe('DeckSetupTools', () => {
     screen.getByText('mock labware tools')
   })
   it('should clear the slot from all items when the clear cta is called', () => {
+    vi.mocked(selectors.getZoomedInSlotInfo).mockReturnValue({
+      selectedLabwareDefUri: 'mockUri',
+      selectedNestedLabwareDefUri: 'mockUri',
+      selectedFixture: null,
+      selectedModuleModel: null,
+      selectedSlot: { slot: 'D3', cutout: 'cutoutD3' },
+    })
+
     vi.mocked(getDeckSetupForActiveItem).mockReturnValue({
       labware: {
         labId: {

@@ -20,7 +20,6 @@ import {
   getAppLanguage,
   getStoredSystemLanguage,
   updateConfigValue,
-  useFeatureFlag,
 } from '/app/redux/config'
 import { getSystemLanguage } from '/app/redux/shell'
 
@@ -33,7 +32,6 @@ type ArrayElement<
 
 export function SystemLanguagePreferenceModal(): JSX.Element | null {
   const { i18n, t } = useTranslation(['app_settings', 'shared', 'branded'])
-  const enableLocalization = useFeatureFlag('enableLocalization')
 
   const [currentOption, setCurrentOption] = useState<DropdownOption>(
     LANGUAGES[0]
@@ -46,11 +44,7 @@ export function SystemLanguagePreferenceModal(): JSX.Element | null {
   const storedSystemLanguage = useSelector(getStoredSystemLanguage)
 
   const showBootModal = appLanguage == null && systemLanguage != null
-  const showUpdateModal =
-    appLanguage != null &&
-    systemLanguage != null &&
-    storedSystemLanguage != null &&
-    systemLanguage !== storedSystemLanguage
+  const [showUpdateModal, setShowUpdateModal] = useState(false)
 
   const title = showUpdateModal
     ? t('system_language_preferences_update')
@@ -120,10 +114,17 @@ export function SystemLanguagePreferenceModal(): JSX.Element | null {
           void i18n.changeLanguage(systemLanguage)
         }
       }
+      // only show update modal if we support the language their system has updated to
+      setShowUpdateModal(
+        appLanguage != null &&
+          matchedSystemLanguageOption != null &&
+          storedSystemLanguage != null &&
+          systemLanguage !== storedSystemLanguage
+      )
     }
   }, [i18n, systemLanguage, showBootModal])
 
-  return enableLocalization && (showBootModal || showUpdateModal) ? (
+  return showBootModal || showUpdateModal ? (
     <Modal title={title}>
       <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing24}>
         <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing16}>

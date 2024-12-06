@@ -18,6 +18,7 @@ import {
 } from '@opentrons/components'
 import {
   FLEX_ROBOT_TYPE,
+  FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
   getModuleDisplayName,
   getModuleType,
   MAGNETIC_MODULE_TYPE,
@@ -58,7 +59,7 @@ import { LabwareTools } from './LabwareTools'
 import { MagnetModuleChangeContent } from './MagnetModuleChangeContent'
 import { getModuleModelsBySlot, getDeckErrors } from './utils'
 
-import type { ModuleModel } from '@opentrons/shared-data'
+import type { AddressableAreaName, ModuleModel } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../../types'
 import type { Fixture } from './constants'
 
@@ -242,7 +243,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     handleResetSearchTerm()
   }
 
-  const handleClear = (): void => {
+  const handleClear = (keepExistingLabware = false): void => {
     onDeckProps?.setHoveredModule(null)
     onDeckProps?.setHoveredFixture(null)
     if (slot !== 'offDeck') {
@@ -250,30 +251,40 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       if (createdModuleForSlot != null) {
         dispatch(deleteModule(createdModuleForSlot.id))
       }
-      //  clear fixture(s) from slot
-      if (createFixtureForSlots != null && createFixtureForSlots.length > 0) {
-        createFixtureForSlots.forEach(fixture =>
-          dispatch(deleteDeckFixture(fixture.id))
-        )
-      }
       //  clear labware from slot
       if (
         createdLabwareForSlot != null &&
-        createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri
+        (!keepExistingLabware ||
+          createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri)
       ) {
         dispatch(deleteContainer({ labwareId: createdLabwareForSlot.id }))
       }
       //  clear nested labware from slot
       if (
         createdNestedLabwareForSlot != null &&
-        createdNestedLabwareForSlot.labwareDefURI !==
-          selectedNestedLabwareDefUri
+        (!keepExistingLabware ||
+          createdNestedLabwareForSlot.labwareDefURI !==
+            selectedNestedLabwareDefUri)
       ) {
         dispatch(deleteContainer({ labwareId: createdNestedLabwareForSlot.id }))
       }
       // clear labware on staging area 4th column slot
-      if (matchingLabwareFor4thColumn != null) {
+      if (matchingLabwareFor4thColumn != null && !keepExistingLabware) {
         dispatch(deleteContainer({ labwareId: matchingLabwareFor4thColumn.id }))
+      }
+      //  clear fixture(s) from slot
+      if (createFixtureForSlots != null && createFixtureForSlots.length > 0) {
+        createFixtureForSlots.forEach(fixture =>
+          dispatch(deleteDeckFixture(fixture.id))
+        )
+        // zoom out if you're clearing a staging area slot directly from a 4th column
+        if (
+          FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS.includes(
+            slot as AddressableAreaName
+          )
+        ) {
+          dispatch(selectZoomedIntoSlot({ slot: null, cutout: null }))
+        }
       }
     }
     handleResetToolbox()
@@ -285,7 +296,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
   }
   const handleConfirm = (): void => {
     //  clear entities first before recreating them
-    handleClear()
+    handleClear(true)
 
     if (selectedFixture != null && cutout != null) {
       //  create fixture(s)

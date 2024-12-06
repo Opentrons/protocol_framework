@@ -632,7 +632,7 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             )
 
 
-class ModuleView(HasState[ModuleState]):
+class ModuleView:
     """Read-only view of computed module state."""
 
     _state: ModuleState
@@ -860,8 +860,8 @@ class ModuleView(HasState[ModuleState]):
         Labware Position Check offset.
         """
         if (
-            self.state.deck_type == DeckType.OT2_STANDARD
-            or self.state.deck_type == DeckType.OT2_SHORT_TRASH
+            self._state.deck_type == DeckType.OT2_STANDARD
+            or self._state.deck_type == DeckType.OT2_SHORT_TRASH
         ):
             definition = self.get_definition(module_id)
             slot = self.get_location(module_id).slotName.id
@@ -908,7 +908,7 @@ class ModuleView(HasState[ModuleState]):
                     "Module location invalid for nominal module offset calculation."
                 )
             module_addressable_area = self.ensure_and_convert_module_fixture_location(
-                location, self.state.deck_type, module.model
+                location, self._state.deck_type, module.model
             )
             module_addressable_area_position = (
                 addressable_areas.get_addressable_area_offsets_from_cutout(
@@ -1268,7 +1268,10 @@ class ModuleView(HasState[ModuleState]):
                 row = chr(ord("A") + i // 12)  # Convert index to row (A-H)
                 col = (i % 12) + 1  # Convert index to column (1-12)
                 well_key = f"{row}{col}"
-                well_map[well_key] = value
+                truncated_value = float(
+                    "{:.5}".format(str(value))
+                )  # Truncate the returned value to the third decimal place
+                well_map[well_key] = truncated_value
             return well_map
         else:
             raise ValueError(

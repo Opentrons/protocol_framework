@@ -132,6 +132,7 @@ export function useActionButtonProperties({
     handleButtonClick = () => {
       isResetRunLoadingRef.current = true
       reset()
+      runHeaderModalContainerUtils.dropTipUtils.resetTipStatus()
       trackEvent({
         name: ANALYTICS_PROTOCOL_PROCEED_TO_RUN,
         properties: { sourceLocation: 'RunRecordDetail', robotSerialNumber },

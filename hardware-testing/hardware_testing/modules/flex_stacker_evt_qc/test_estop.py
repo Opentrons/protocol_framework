@@ -41,9 +41,6 @@ def axis_at_limit(driver: FlexStacker, axis: StackerAxis) -> Direction:
 
 def run(driver: FlexStacker, report: CSVReport, section: str) -> None:
     """Run."""
-    if not driver._simulating and driver.get_estop():
-        raise RuntimeError("E-Stop is either triggered/not attached.")
-
     x_limit = axis_at_limit(driver, StackerAxis.X)
     z_limit = axis_at_limit(driver, StackerAxis.Z)
     l_limit = axis_at_limit(driver, StackerAxis.L)
@@ -59,14 +56,23 @@ def run(driver: FlexStacker, report: CSVReport, section: str) -> None:
 
     report(section, "trigger-estop", [CSVResult.PASS])
 
-    print("try to move X axis...")
-    driver.move_in_mm(StackerAxis.X, x_limit.opposite().distance(10))
-    print("X should not move")
-    report(
-        section,
-        "x-move-disabled",
-        [CSVResult.from_bool(driver.get_limit_switch(StackerAxis.X, x_limit))],
-    )
+    print("Check X limit switch...")
+    limit_switch_triggered = driver.get_limit_switch(StackerAxis.X, x_limit)
+    if limit_switch_triggered:
+        report(
+            section,
+            "x-move-disabled",
+            [CSVResult.from_bool(False)],
+        )
+    else:
+        print("try to move X axis back to the limit switch...")
+        driver.move_in_mm(StackerAxis.X, x_limit.distance(3))
+        print("X should not move")
+        report(
+            section,
+            "x-move-disabled",
+            [CSVResult.from_bool(not driver.get_limit_switch(StackerAxis.X, x_limit))],
+        )
 
     print("try to move Z axis...")
     driver.move_in_mm(StackerAxis.Z, z_limit.opposite().distance(10))
@@ -77,14 +83,23 @@ def run(driver: FlexStacker, report: CSVReport, section: str) -> None:
         [CSVResult.from_bool(driver.get_limit_switch(StackerAxis.Z, z_limit))],
     )
 
-    print("try to move L axis...")
-    driver.move_in_mm(StackerAxis.L, l_limit.opposite().distance(10))
-    print("L should not move")
-    report(
-        section,
-        "l-move-disabled",
-        [CSVResult.from_bool(driver.get_limit_switch(StackerAxis.L, l_limit))],
-    )
+    print("Check L limit switch...")
+    limit_switch_triggered = driver.get_limit_switch(StackerAxis.L, l_limit)
+    if limit_switch_triggered:
+        report(
+            section,
+            "l-move-disabled",
+            [CSVResult.from_bool(False)],
+        )
+    else:
+        print("try to move L axis back to the limit switch...")
+        driver.move_in_mm(StackerAxis.L, l_limit.distance(1))
+        print("L should not move")
+        report(
+            section,
+            "l-move-disabled",
+            [CSVResult.from_bool(not driver.get_limit_switch(StackerAxis.L, l_limit))],
+        )
 
     if not driver._simulating:
         ui.get_user_ready("Untrigger the E-Stop")

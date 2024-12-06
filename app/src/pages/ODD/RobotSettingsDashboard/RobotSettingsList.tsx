@@ -33,7 +33,6 @@ import {
   toggleDevInternalFlag,
   toggleDevtools,
   toggleHistoricOffsets,
-  useFeatureFlag,
 } from '/app/redux/config'
 import { InlineNotification } from '/app/atoms/InlineNotification'
 import { getRobotSettings, updateSetting } from '/app/redux/robot-settings'
@@ -90,7 +89,6 @@ export function RobotSettingsList(props: RobotSettingsListProps): JSX.Element {
 
   const appLanguage = useSelector(getAppLanguage)
   const currentLanguageOption = LANGUAGES.find(lng => lng.value === appLanguage)
-  const enableLocalization = useFeatureFlag('enableLocalization')
 
   return (
     <Flex flexDirection={DIRECTION_COLUMN}>
@@ -143,18 +141,16 @@ export function RobotSettingsList(props: RobotSettingsListProps): JSX.Element {
             </Flex>
           }
         />
-        {enableLocalization ? (
-          <RobotSettingButton
-            settingName={t('app_settings:language')}
-            settingInfo={
-              currentLanguageOption != null ? currentLanguageOption.name : ''
-            }
-            onClick={() => {
-              setCurrentOption('LanguageSetting')
-            }}
-            iconName="language"
-          />
-        ) : null}
+        <RobotSettingButton
+          settingName={t('app_settings:language')}
+          settingInfo={
+            currentLanguageOption != null ? currentLanguageOption.name : ''
+          }
+          onClick={() => {
+            setCurrentOption('LanguageSetting')
+          }}
+          iconName="language"
+        />
         <RobotSettingButton
           settingName={t('display_led_lights')}
           dataTestId="RobotSettingButton_display_led_lights"
@@ -200,7 +196,7 @@ export function RobotSettingsList(props: RobotSettingsListProps): JSX.Element {
           settingName={t('app_settings:error_recovery_mode')}
           dataTestId="RobotSettingButton_error_recovery_mode"
           settingInfo={t('app_settings:error_recovery_mode_description')}
-          iconName="recovery"
+          iconName="recovery-alt"
           rightElement={<OnOffToggle isOn={isEREnabled} />}
           onClick={toggleERSettings}
         />

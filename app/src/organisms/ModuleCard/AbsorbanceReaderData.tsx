@@ -12,7 +12,7 @@ export const AbsorbanceReaderData = (
   props: AbsorbanceReaderProps
 ): JSX.Element | null => {
   const { moduleData } = props
-  const { t } = useTranslation('device_details')
+  const { t, i18n } = useTranslation(['device_details', 'shared'])
 
   const StatusLabelProps = {
     status: 'Idle',
@@ -37,6 +37,10 @@ export const AbsorbanceReaderData = (
       break
     }
   }
+  const lidDisplayStatus =
+    moduleData.lidStatus === 'on'
+      ? i18n.format(t('shared:closed'), 'capitalize')
+      : i18n.format(t('shared:open'), 'capitalize')
 
   return (
     <>
@@ -46,7 +50,7 @@ export const AbsorbanceReaderData = (
         data-testid="abs_module_data"
       >
         {t('abs_reader_lid_status', {
-          status: moduleData.lidStatus === 'on' ? 'closed' : 'open',
+          status: lidDisplayStatus,
         })}
       </StyledText>
     </>

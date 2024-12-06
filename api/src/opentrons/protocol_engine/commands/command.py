@@ -184,7 +184,9 @@ class BaseCommand(
     )
     error: Union[
         _ErrorT,
-        # ErrorOccurrence here is for undefined errors not captured by _ErrorT.
+        # ErrorOccurrence here is a catch-all for undefined errors not captured by
+        # _ErrorT, or defined errors that don't parse into _ErrorT because, for example,
+        # they are from an older software version that was missing some fields.
         ErrorOccurrence,
         None,
     ] = Field(

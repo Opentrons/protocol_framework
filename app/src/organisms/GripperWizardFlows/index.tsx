@@ -71,6 +71,7 @@ export function GripperWizardFlows(
   const [createdMaintenanceRunId, setCreatedMaintenanceRunId] = useState<
     string | null
   >(null)
+  const [errorMessage, setErrorMessage] = useState<null | string>(null)
 
   // we should start checking for run deletion only after the maintenance run is created
   // and the useCurrentRun poll has returned that created id
@@ -85,6 +86,9 @@ export function GripperWizardFlows(
   } = useCreateTargetedMaintenanceRunMutation({
     onSuccess: response => {
       setCreatedMaintenanceRunId(response.data.id)
+    },
+    onError: error => {
+      setErrorMessage(error.message)
     },
   })
 
@@ -117,7 +121,6 @@ export function GripperWizardFlows(
   ])
 
   const [isExiting, setIsExiting] = useState<boolean>(false)
-  const [errorMessage, setErrorMessage] = useState<null | string>(null)
 
   const handleClose = (): void => {
     if (props?.onComplete != null) {
@@ -298,9 +301,12 @@ export const GripperWizard = (
         isRobotMoving={isRobotMoving}
       />
     )
-  } else if (
+  }
+  // These flows often have custom error messaging, so this fallback modal is shown only in specific circumstances.
+  else if (
     (isExiting && errorMessage != null) ||
-    maintenanceRunStatus === RUN_STATUS_FAILED
+    maintenanceRunStatus === RUN_STATUS_FAILED ||
+    (errorMessage != null && createdMaintenanceRunId == null)
   ) {
     onExit = handleClose
     modalContent = (

@@ -69,6 +69,7 @@ class LoadedStaticPipetteData:
     pipette_lld_settings: Optional[Dict[str, Dict[str, float]]]
     plunger_positions: Dict[str, float]
     shaft_ul_per_mm: float
+    available_sensors: pipette_definition.AvailableSensorDefinition
 
 
 class VirtualPipetteDataProvider:
@@ -290,6 +291,8 @@ class VirtualPipetteDataProvider:
                 "drop_tip": plunger_positions.drop_tip,
             },
             shaft_ul_per_mm=config.shaft_ul_per_mm,
+            available_sensors=config.available_sensors
+            or pipette_definition.AvailableSensorDefinition(sensors=[]),
         )
 
     def get_virtual_pipette_static_config(
@@ -308,6 +311,11 @@ def get_pipette_static_config(
     """Get the config for a pipette, given the state/config object from the HW API."""
     back_left_offset = pipette_dict["pipette_bounding_box_offsets"].back_left_corner
     front_right_offset = pipette_dict["pipette_bounding_box_offsets"].front_right_corner
+    available_sensors = (
+        pipette_dict["available_sensors"]
+        if "available_sensors" in pipette_dict.keys()
+        else pipette_definition.AvailableSensorDefinition(sensors=[])
+    )
     return LoadedStaticPipetteData(
         model=pipette_dict["model"],
         display_name=pipette_dict["display_name"],
@@ -339,6 +347,7 @@ def get_pipette_static_config(
         pipette_lld_settings=pipette_dict["lld_settings"],
         plunger_positions=pipette_dict["plunger_positions"],
         shaft_ul_per_mm=pipette_dict["shaft_ul_per_mm"],
+        available_sensors=available_sensors,
     )
 
 

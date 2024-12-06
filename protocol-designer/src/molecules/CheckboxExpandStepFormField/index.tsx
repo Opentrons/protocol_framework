@@ -20,6 +20,7 @@ interface CheckboxExpandStepFormFieldProps {
   isChecked: boolean
   children?: React.ReactNode
   tooltipText?: string | null
+  disabled?: boolean
 }
 export function CheckboxExpandStepFormField(
   props: CheckboxExpandStepFormFieldProps
@@ -31,12 +32,13 @@ export function CheckboxExpandStepFormField(
     isChecked,
     title,
     tooltipText,
+    disabled = false,
   } = props
 
   const [targetProps, tooltipProps] = useHoverTooltip()
   return (
     <>
-      <ListItem type="noActive">
+      <ListItem type={disabled ? 'unavailable' : 'noActive'}>
         <Flex
           padding={SPACING.spacing12}
           width="100%"
@@ -54,8 +56,13 @@ export function CheckboxExpandStepFormField(
               onClick={() => {
                 checkboxUpdateValue(!checkboxValue)
               }}
+              disabled={disabled}
             >
-              <Check color={COLORS.blue50} isChecked={isChecked} />
+              <Check
+                color={COLORS.blue50}
+                isChecked={isChecked}
+                disabled={disabled}
+              />
             </Btn>
           </Flex>
           {children}

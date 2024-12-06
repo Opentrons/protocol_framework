@@ -44,20 +44,20 @@ TESTS = [
         test_z_axis.run,
     ),
     (
-        TestSection.L_AXIS,
-        test_l_axis.run,
-    ),
-    (
         TestSection.X_AXIS,
         test_x_axis.run,
     ),
     (
-        TestSection.DOOR_SWITCH,
-        test_door_switch.run,
+        TestSection.L_AXIS,
+        test_l_axis.run,
     ),
     (
         TestSection.ESTOP,
         test_estop.run,
+    ),
+    (
+        TestSection.DOOR_SWITCH,
+        test_door_switch.run,
     ),
 ]
 
@@ -76,20 +76,20 @@ def build_report(test_name: str) -> CSVReport:
                 lines=test_z_axis.build_csv_lines(),
             ),
             CSVSection(
-                title=TestSection.L_AXIS.value,
-                lines=test_l_axis.build_csv_lines(),
-            ),
-            CSVSection(
                 title=TestSection.X_AXIS.value,
                 lines=test_x_axis.build_csv_lines(),
             ),
             CSVSection(
-                title=TestSection.DOOR_SWITCH.value,
-                lines=test_door_switch.build_csv_lines(),
+                title=TestSection.L_AXIS.value,
+                lines=test_l_axis.build_csv_lines(),
             ),
             CSVSection(
                 title=TestSection.ESTOP.value,
                 lines=test_estop.build_csv_lines(),
+            ),
+            CSVSection(
+                title=TestSection.DOOR_SWITCH.value,
+                lines=test_door_switch.build_csv_lines(),
             ),
         ],
     )

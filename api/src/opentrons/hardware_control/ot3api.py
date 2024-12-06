@@ -32,6 +32,7 @@ from opentrons_shared_data.pipette.types import (
 )
 from opentrons_shared_data.pipette import (
     pipette_load_name_conversions as pipette_load_name,
+    pipette_definition,
 )
 from opentrons_shared_data.robot.types import RobotType
 
@@ -97,6 +98,7 @@ from .types import (
     EstopState,
     HardwareFeatureFlags,
     FailedTipStateCheck,
+    PipetteSensorResponseQueue,
 )
 from .errors import (
     UpdateOngoingError,
@@ -142,8 +144,6 @@ from .backends.types import HWStopCondition
 from .backends.flex_protocol import FlexBackend
 from .backends.ot3simulator import OT3Simulator
 from .backends.errors import SubsystemUpdating
-from opentrons_hardware.firmware_bindings.constants import SensorId
-from opentrons_hardware.sensors.types import SensorDataType
 
 mod_log = logging.getLogger(__name__)
 
@@ -298,8 +298,11 @@ class OT3API(
     async def set_system_constraints_for_plunger_acceleration(
         self, mount: OT3Mount, acceleration: float
     ) -> None:
+        high_speed_pipette = self._pipette_handler.get_pipette(
+            mount
+        ).is_high_speed_pipette()
         self._backend.update_constraints_for_plunger_acceleration(
-            mount, acceleration, self._gantry_load
+            mount, acceleration, self._gantry_load, high_speed_pipette
         )
 
     @contextlib.asynccontextmanager
@@ -634,20 +637,30 @@ class OT3API(
             self._feature_flags.use_old_aspiration_functions,
         )
         self._pipette_handler.hardware_instruments[mount] = p
-        if self._pipette_handler.has_pipette(mount):
-            self._confirm_pipette_motion_constraints(mount)
+
+        if config is not None:
+            self._set_pressure_sensor_available(mount, instrument_config=config)
+
         # TODO (lc 12-5-2022) Properly support backwards compatibility
         # when applicable
         return skipped
 
-    def _confirm_pipette_motion_constraints(
+    def get_pressure_sensor_available(self, mount: OT3Mount) -> bool:
+        pip_axis = Axis.of_main_tool_actuator(mount)
+        return self._backend.get_pressure_sensor_available(pip_axis)
+
+    def _set_pressure_sensor_available(
         self,
         mount: OT3Mount,
+        instrument_config: pipette_definition.PipetteConfigurations,
     ) -> None:
-        if self._pipette_handler.get_pipette(mount).is_high_speed_pipette():
-            self._backend.update_constraints_for_emulsifying_pipette(
-                mount, self.gantry_load
-            )
+        pressure_sensor_available = (
+            "pressure" in instrument_config.available_sensors.sensors
+        )
+        pip_axis = Axis.of_main_tool_actuator(mount)
+        self._backend.set_pressure_sensor_available(
+            pipette_axis=pip_axis, available=pressure_sensor_available
+        )
 
     async def cache_gripper(self, instrument_data: AttachedGripper) -> bool:
         """Set up gripper based on scanned information."""
@@ -788,11 +801,13 @@ class OT3API(
         Function to update motor estimation for a set of axes
         """
         await self._backend.update_motor_status()
-        if axes:
-            checked_axes = [ax for ax in axes if ax in Axis]
-        else:
-            checked_axes = [ax for ax in Axis]
-        await self._backend.update_motor_estimation(checked_axes)
+
+        if axes is None:
+            axes = [ax for ax in Axis]
+
+        axes = [ax for ax in axes if self._backend.axis_is_present(ax)]
+
+        await self._backend.update_motor_estimation(axes)
 
     # Global actions API
     def pause(self, pause_type: PauseType) -> None:
@@ -1658,7 +1673,12 @@ class OT3API(
         await self._backend.disengage_axes(which)
 
     async def engage_axes(self, which: List[Axis]) -> None:
-        await self._backend.engage_axes(which)
+        await self._backend.engage_axes(
+            [axis for axis in which if self._backend.axis_is_present(axis)]
+        )
+
+    def axis_is_present(self, axis: Axis) -> bool:
+        return self._backend.axis_is_present(axis)
 
     async def get_limit_switches(self) -> Dict[Axis, bool]:
         res = await self._backend.get_limit_switches()
@@ -2658,9 +2678,7 @@ class OT3API(
         probe: InstrumentProbeType,
         p_travel: float,
         force_both_sensors: bool = False,
-        response_queue: Optional[
-            asyncio.Queue[Dict[SensorId, List[SensorDataType]]]
-        ] = None,
+        response_queue: Optional[PipetteSensorResponseQueue] = None,
     ) -> float:
         plunger_direction = -1 if probe_settings.aspirate_while_sensing else 1
         end_z = await self._backend.liquid_probe(
@@ -2694,9 +2712,7 @@ class OT3API(
         probe_settings: Optional[LiquidProbeSettings] = None,
         probe: Optional[InstrumentProbeType] = None,
         force_both_sensors: bool = False,
-        response_queue: Optional[
-            asyncio.Queue[Dict[SensorId, List[SensorDataType]]]
-        ] = None,
+        response_queue: Optional[PipetteSensorResponseQueue] = None,
     ) -> float:
         """Search for and return liquid level height.
 

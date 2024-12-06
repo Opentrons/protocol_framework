@@ -31,6 +31,9 @@ _NonNegativeNumber = Union[_StrictNonNegativeInt, _StrictNonNegativeFloat]
 LiquidHandlingPropertyByVolume = Sequence[Tuple[_NonNegativeNumber, _NonNegativeNumber]]
 """Settings for liquid class settings that are interpolated by volume."""
 
+CorrectionByVolume = Sequence[Tuple[_NonNegativeNumber, _Number]]
+"""Settings for correctionByVolume, which unlike other `byVolume` properties allows negative values with volume."""
+
 
 class PositionReference(Enum):
     """Positional reference for liquid handling operations."""
@@ -253,6 +256,11 @@ class AspirateProperties(BaseModel):
         ...,
         description="Settings for flow rate keyed by target aspiration volume.",
     )
+    correctionByVolume: CorrectionByVolume = Field(
+        ...,
+        description="Settings for volume correction keyed by by target aspiration volume,"
+        " representing additional volume the plunger should move to accurately hit target volume.",
+    )
     preWet: bool = Field(..., description="Whether to perform a pre-wet action.")
     mix: MixProperties = Field(
         ..., description="Mixing settings for before an aspirate"
@@ -277,6 +285,11 @@ class SingleDispenseProperties(BaseModel):
         ...,
         description="Settings for flow rate keyed by target dispense volume.",
     )
+    correctionByVolume: CorrectionByVolume = Field(
+        ...,
+        description="Settings for volume correction keyed by by target dispense volume,"
+        " representing additional volume the plunger should move to accurately hit target volume.",
+    )
     mix: MixProperties = Field(..., description="Mixing settings for after a dispense")
     pushOutByVolume: LiquidHandlingPropertyByVolume = Field(
         ..., description="Settings for pushout keyed by target dispense volume."
@@ -300,6 +313,11 @@ class MultiDispenseProperties(BaseModel):
     flowRateByVolume: LiquidHandlingPropertyByVolume = Field(
         ...,
         description="Settings for flow rate keyed by target dispense volume.",
+    )
+    correctionByVolume: CorrectionByVolume = Field(
+        ...,
+        description="Settings for volume correction keyed by by target dispense volume,"
+        " representing additional volume the plunger should move to accurately hit target volume.",
     )
     conditioningByVolume: LiquidHandlingPropertyByVolume = Field(
         ...,

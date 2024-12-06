@@ -84,6 +84,10 @@ export function InstrumentsSection(): JSX.Element | null {
           name
         )
       )
+      .filter(name => {
+        const specs = getPipetteSpecsV2(name)
+        return !specs?.displayName?.includes('GEN1')
+      })
       .map(name => ({
         value: name,
         name: getPipetteSpecsV2(name)?.displayName ?? '',

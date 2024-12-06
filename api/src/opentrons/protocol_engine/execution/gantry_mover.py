@@ -159,6 +159,12 @@ class GantryMover(TypingProtocol):
         """Find a mount axis in the axis_map if it exists otherwise default to left mount."""
         ...
 
+    def motor_axes_to_present_hardware_axes(
+        self, motor_axes: List[MotorAxis]
+    ) -> List[HardwareAxis]:
+        """Transform a list of engine axes into a list of hardware axes, filtering out non-present axes."""
+        ...
+
 
 class HardwareGantryMover(GantryMover):
     """Hardware API based gantry movement handler."""
@@ -166,6 +172,18 @@ class HardwareGantryMover(GantryMover):
     def __init__(self, hardware_api: HardwareControlAPI, state_view: StateView) -> None:
         self._hardware_api = hardware_api
         self._state_view = state_view
+
+    def motor_axes_to_present_hardware_axes(
+        self, motor_axes: List[MotorAxis]
+    ) -> List[HardwareAxis]:
+        """Get hardware axes from engine axes while filtering out non-present axes."""
+        return [
+            self.motor_axis_to_hardware_axis(motor_axis)
+            for motor_axis in motor_axes
+            if self._hardware_api.axis_is_present(
+                self.motor_axis_to_hardware_axis(motor_axis)
+            )
+        ]
 
     def motor_axis_to_hardware_axis(self, motor_axis: MotorAxis) -> HardwareAxis:
         """Transform an engine motor axis into a hardware axis."""
@@ -642,6 +660,14 @@ class VirtualGantryMover(GantryMover):
     async def prepare_for_mount_movement(self, mount: Mount) -> None:
         """Retract the 'idle' mount if necessary."""
         pass
+
+    def motor_axes_to_present_hardware_axes(
+        self, motor_axes: List[MotorAxis]
+    ) -> List[HardwareAxis]:
+        """Get present hardware axes from a list of engine axes. In simulation, all axes are present."""
+        return [
+            self.motor_axis_to_hardware_axis(motor_axis) for motor_axis in motor_axes
+        ]
 
 
 def create_gantry_mover(

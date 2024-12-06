@@ -84,6 +84,11 @@ describe('capitalizeFirstLetter', () => {
       'Move labware to D3 on top of Magnetic Block'
     )
   })
+
+  it('should capitalize the first letter of a step name and leave the rest unchanged', () => {
+    const moduleName = 'Heater-shaker'
+    expect(capitalizeFirstLetter(moduleName)).toBe('Heater-Shaker')
+  })
 })
 
 describe('getFormErrorsMappedToField', () => {

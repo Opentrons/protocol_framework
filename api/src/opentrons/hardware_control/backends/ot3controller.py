@@ -50,7 +50,6 @@ from .ot3utils import (
     get_system_constraints,
     get_system_constraints_for_calibration,
     get_system_constraints_for_plunger_acceleration,
-    get_system_constraints_for_emulsifying_pipette,
 )
 from .tip_presence_manager import TipPresenceManager
 
@@ -105,7 +104,6 @@ from opentrons_hardware.firmware_bindings.constants import (
     ErrorCode,
     SensorId,
 )
-from opentrons_hardware.sensors.types import SensorDataType
 from opentrons_hardware.firmware_bindings.messages.message_definitions import (
     StopRequest,
 )
@@ -143,6 +141,10 @@ from opentrons.hardware_control.types import (
     EstopState,
     HardwareEventHandler,
     HardwareEventUnsubscriber,
+    PipetteSensorId,
+    PipetteSensorType,
+    PipetteSensorData,
+    PipetteSensorResponseQueue,
 )
 from opentrons.hardware_control.errors import (
     InvalidPipetteName,
@@ -198,6 +200,7 @@ from opentrons_shared_data.errors.exceptions import (
     PipetteLiquidNotFoundError,
     CommunicationError,
     PythonException,
+    UnsupportedHardwareCommand,
 )
 
 from .subsystem_manager import SubsystemManager
@@ -212,6 +215,7 @@ from ..types import HepaFanState, HepaUVState, StatusBarState
 from .types import HWStopCondition
 from .flex_protocol import FlexBackend
 from .status_bar_state import StatusBarStateController
+from opentrons_hardware.sensors.types import SensorDataType
 
 log = logging.getLogger(__name__)
 
@@ -363,6 +367,7 @@ class OT3Controller(FlexBackend):
                 self._configuration.motion_settings, GantryLoad.LOW_THROUGHPUT
             )
         )
+        self._pressure_sensor_available: Dict[NodeId, bool] = {}
 
     @asynccontextmanager
     async def restore_system_constraints(self) -> AsyncIterator[None]:
@@ -381,6 +386,16 @@ class OT3Controller(FlexBackend):
         async with grab_pressure(channels, tool, self._messenger):
             yield
 
+    def set_pressure_sensor_available(
+        self, pipette_axis: Axis, available: bool
+    ) -> None:
+        pip_node = axis_to_node(pipette_axis)
+        self._pressure_sensor_available[pip_node] = available
+
+    def get_pressure_sensor_available(self, pipette_axis: Axis) -> bool:
+        pip_node = axis_to_node(pipette_axis)
+        return self._pressure_sensor_available[pip_node]
+
     def update_constraints_for_calibration_with_gantry_load(
         self,
         gantry_load: GantryLoad,
@@ -394,28 +409,24 @@ class OT3Controller(FlexBackend):
             f"Set system constraints for calibration: {self._move_manager.get_constraints()}"
         )
 
-    def update_constraints_for_emulsifying_pipette(
-        self, mount: OT3Mount, gantry_load: GantryLoad
-    ) -> None:
-        self._move_manager.update_constraints(
-            get_system_constraints_for_emulsifying_pipette(
-                self._configuration.motion_settings, gantry_load, mount
-            )
-        )
-        log.debug(
-            f"Set system constraints for emulsifying pipette: {self._move_manager.get_constraints()}"
-        )
-
     def update_constraints_for_gantry_load(self, gantry_load: GantryLoad) -> None:
         self._move_manager.update_constraints(
             get_system_constraints(self._configuration.motion_settings, gantry_load)
         )
 
     def update_constraints_for_plunger_acceleration(
-        self, mount: OT3Mount, acceleration: float, gantry_load: GantryLoad
+        self,
+        mount: OT3Mount,
+        acceleration: float,
+        gantry_load: GantryLoad,
+        high_speed_pipette: bool = False,
     ) -> None:
         new_constraints = get_system_constraints_for_plunger_acceleration(
-            self._configuration.motion_settings, gantry_load, mount, acceleration
+            self._configuration.motion_settings,
+            gantry_load,
+            mount,
+            acceleration,
+            high_speed_pipette,
         )
         self._move_manager.update_constraints(new_constraints)
 
@@ -775,7 +786,8 @@ class OT3Controller(FlexBackend):
             for runner, is_gear_move in maybe_runners
             if runner
         ]
-        async with self._monitor_overpressure(pipettes_moving):
+        checked_moving_pipettes = self._pipettes_to_monitor_pressure(pipettes_moving)
+        async with self._monitor_overpressure(checked_moving_pipettes):
             all_positions = await asyncio.gather(*coros)
 
         for positions, handle_gear_move in all_positions:
@@ -884,7 +896,8 @@ class OT3Controller(FlexBackend):
         moving_pipettes = [
             axis_to_node(ax) for ax in checked_axes if ax in Axis.pipette_axes()
         ]
-        async with self._monitor_overpressure(moving_pipettes):
+        checked_moving_pipettes = self._pipettes_to_monitor_pressure(moving_pipettes)
+        async with self._monitor_overpressure(checked_moving_pipettes):
             positions = await asyncio.gather(*coros)
         # TODO(CM): default gear motor homing routine to have some acceleration
         if Axis.Q in checked_axes:
@@ -898,6 +911,9 @@ class OT3Controller(FlexBackend):
         for position in positions:
             self._handle_motor_status_response(position)
         return axis_convert(self._position, 0.0)
+
+    def _pipettes_to_monitor_pressure(self, pipettes: List[NodeId]) -> List[NodeId]:
+        return [pip for pip in pipettes if self._pressure_sensor_available[pip]]
 
     def _filter_move_group(self, move_group: MoveGroup) -> MoveGroup:
         new_group: MoveGroup = []
@@ -955,7 +971,6 @@ class OT3Controller(FlexBackend):
     async def tip_action(
         self, origin: float, targets: List[Tuple[float, float]]
     ) -> None:
-
         move_group = self._build_tip_action_group(origin, targets)
         runner = MoveGroupRunner(
             move_groups=[move_group],
@@ -1480,12 +1495,36 @@ class OT3Controller(FlexBackend):
         num_baseline_reads: int,
         probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
         force_both_sensors: bool = False,
-        response_queue: Optional[
-            asyncio.Queue[Dict[SensorId, List[SensorDataType]]]
-        ] = None,
+        response_queue: Optional[PipetteSensorResponseQueue] = None,
     ) -> float:
         head_node = axis_to_node(Axis.by_mount(mount))
         tool = sensor_node_for_pipette(OT3Mount(mount.value))
+        if tool not in self._pipettes_to_monitor_pressure([tool]):
+            raise UnsupportedHardwareCommand(
+                "Liquid Presence Detection not available on this pipette."
+            )
+
+        if response_queue is None:
+            response_capture: Optional[
+                Callable[[Dict[SensorId, List[SensorDataType]]], None]
+            ] = None
+        else:
+
+            def response_capture(data: Dict[SensorId, List[SensorDataType]]) -> None:
+                response_queue.put_nowait(
+                    {
+                        PipetteSensorId(sensor_id.value): [
+                            PipetteSensorData(
+                                sensor_type=PipetteSensorType(packet.sensor_type.value),
+                                _as_int=packet.to_int,
+                                _as_float=packet.to_float(),
+                            )
+                            for packet in packets
+                        ]
+                        for sensor_id, packets in data.items()
+                    }
+                )
+
         positions = await liquid_probe(
             messenger=self._messenger,
             tool=tool,
@@ -1498,7 +1537,7 @@ class OT3Controller(FlexBackend):
             num_baseline_reads=num_baseline_reads,
             sensor_id=sensor_id_for_instrument(probe),
             force_both_sensors=force_both_sensors,
-            response_queue=response_queue,
+            emplace_data=response_capture,
         )
         for node, point in positions.items():
             self._position.update({node: point.motor_position})

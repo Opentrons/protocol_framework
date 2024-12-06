@@ -22,7 +22,6 @@ from opentrons.protocols.api_support.types import APIVersion
 from . import common as tx_commons
 from ..common import Mix, MixOpts, MixStrategy
 
-
 AdvancedLiquidHandling = Union[
     Well,
     types.Location,

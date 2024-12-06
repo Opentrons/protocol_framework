@@ -14,11 +14,11 @@ import {
 import { RecoverySingleColumnContentWrapper } from './RecoveryContentWrapper'
 import { RecoveryFooterButtons } from './RecoveryFooterButtons'
 import { ODD_ONLY, DESKTOP_ONLY, RECOVERY_MAP } from '../constants'
+import { RecoveryRadioGroup } from '/app/organisms/ErrorRecoveryFlows/shared/RecoveryRadioGroup'
 
 import type { JSX } from 'react'
 import type { TFunction } from 'i18next'
 import type { RecoveryContentProps } from '../types'
-import { RecoveryRadioGroup } from '/app/organisms/ErrorRecoveryFlows/shared/RecoveryRadioGroup'
 
 type HoldingLabwareOption = 'yes' | 'no'
 export const HOLDING_LABWARE_OPTIONS: HoldingLabwareOption[] = [

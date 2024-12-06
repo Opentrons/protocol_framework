@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect } from 'react'
 import omit from 'lodash/omit'
 import isEqual from 'lodash/isEqual'
 import { Trans, useTranslation } from 'react-i18next'
@@ -29,6 +29,7 @@ import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analy
 import { getIsOnDevice } from '/app/redux/config'
 import { getDisplayLocation } from './utils/getDisplayLocation'
 
+import type { Dispatch } from 'react'
 import type { LabwareOffset } from '@opentrons/api-client'
 import type {
   CompletedProtocolAnalysis,
@@ -54,7 +55,7 @@ interface CheckItemProps extends Omit<CheckLabwareStep, 'section'> {
   proceed: () => void
   chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
   setFatalError: (errorMessage: string) => void
-  registerPosition: React.Dispatch<RegisterPositionAction>
+  registerPosition: Dispatch<RegisterPositionAction>
   workingOffsets: WorkingOffset[]
   existingOffsets: LabwareOffset[]
   handleJog: Jog
@@ -131,7 +132,7 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
       o.initialPosition != null
   )?.initialPosition
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (initialPosition == null && modulePrepCommands.length > 0) {
       chainRunCommands(modulePrepCommands, false)
         .then(() => {})
@@ -155,6 +156,13 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
     labwareDefs,
     t as TFunction,
     i18n
+  )
+  const slotOnlyDisplayLocation = getDisplayLocation(
+    location,
+    labwareDefs,
+    t as TFunction,
+    i18n,
+    true
   )
   const labwareDisplayName = getLabwareDisplayName(labwareDef)
 
@@ -445,7 +453,7 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
         <JogToWell
           header={t('check_item_in_location', {
             item: isTiprack ? t('tip_rack') : t('labware'),
-            location: displayLocation,
+            location: slotOnlyDisplayLocation,
           })}
           body={
             <Trans
@@ -483,7 +491,7 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
           {...props}
           header={t('prepare_item_in_location', {
             item: isTiprack ? t('tip_rack') : t('labware'),
-            location: displayLocation,
+            location: slotOnlyDisplayLocation,
           })}
           body={
             <UnorderedList

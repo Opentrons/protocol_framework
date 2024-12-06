@@ -45,6 +45,7 @@ export function AddMetadata(props: AddMetadataProps): JSX.Element | null {
   return (
     <HandleEnter onEnter={handleProceed}>
       <WizardBody
+        robotType={robotType}
         stepNumber={
           robotType === FLEX_ROBOT_TYPE
             ? FLEX_METADATA_WIZARD_STEP
