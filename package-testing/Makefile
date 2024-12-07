@@ -1,37 +1,41 @@
-# package testing Makefile
-
 VENV_DIR ?= venv
 RESULTS_DIR ?= results
-TEST ?= Flex_v2_19_expect_success
+TESTS ?= all
 
 .PHONY: setup
 setup:
+	@echo "Setting up environment for Unix-like system..."
 	./setup.sh $(VENV_DIR)
+
+.PHONY:  setup-windows
+setup-windows:
+	@echo "Setting up environment for Windows..."
+	./setup.ps1 $(VENV_DIR)
 
 .PHONY: clean
 clean:
-	@echo "Removing the results directory $(RESULTS_DIR)"
+	@echo "Removing the results directory $(RESULTS_DIR)..."
 	rm -rf $(RESULTS_DIR) || true
+
+.PHONY: clean-windows
+clean-windows:
+	@echo "Removing the results directory $(RESULTS_DIR)..."
+	if (Test-Path $(RESULTS_DIR)) { Remove-Item -Recurse -Force $(RESULTS_DIR) } || $true
 
 .PHONY: teardown
 teardown: clean
 	rm -rf $(VENV_DIR) || true
 
+.PHONY: teardown-windows
+teardown-windows: clean-windows
+	if (Test-Path $(VENV_DIR)) { Remove-Item -Recurse -Force $(VENV_DIR) } || $true
+
 .PHONY: test
 test: clean
-	@echo "Running all tests"
-	@echo "Test are run serially and fail fast, so if one fails the rest won't run"
-	@echo "This target expects you already have run 'make setup'"
-	./test_help.sh $(VENV_DIR) $(RESULTS_DIR)
-	./Flex_v2_19_expect_success.sh $(VENV_DIR) $(RESULTS_DIR)
-	./OT2_v2_20_expect_success.sh $(VENV_DIR) $(RESULTS_DIR)
-	./Flex_v2_16_expect_error.sh $(VENV_DIR) $(RESULTS_DIR)
-	./OT2_v6PD_expect_error.sh $(VENV_DIR) $(RESULTS_DIR)
+	@echo "Running all tests for Unix-like system..."
+	python run_tests.py $(VENV_DIR) $(RESULTS_DIR) $(TESTS)
 
-.PHONY: test1
-test1: clean
-	@echo "Easy way to run a single test"
-	@echo Run like this: make test1 TEST=Flex_v2_19_expect_success
-	@echo "This target expects you already have run 'make setup'"
-	@echo "Running test $(TEST)"
-	./$(TEST).sh $(VENV_DIR) $(RESULTS_DIR)
+.PHONY: test-windows
+test-windows: clean-windows
+	@echo "Running all tests for Windows..."
+	python run_tests.py $(VENV_DIR) $(RESULTS_DIR) $(TESTS)

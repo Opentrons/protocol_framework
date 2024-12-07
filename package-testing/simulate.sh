@@ -1,27 +1,34 @@
 #!/bin/bash
 
-VENV_DIR=${VENV_DIR:-"venv"}
-RESULT_DIR=${RESULT_DIR:-"results"}
-
-mkdir -p "$RESULT_DIR"
-
 # Function to test `opentrons_simulate` with a given protocol file
 # Arguments:
-#   1. Protocol file path (required)
-#   2. Result file path (required)
-#   3. Expected return code (optional, default 0)
+#   1. Test Key (required)
+#   2. Protocol File Path (required)
+#   3. Expected return code (required)
+#   4. Virtual Environment Directory (optional)
+#   5. Result Directory (optional)
 simulate_protocol() {
-    local protocol_file="$1"
-    local result_file="$2"
-    local expected_return_code="${3:-0}"
+    local test_key="$1"
+    local protocol_file_path="$2"
+    local expected_return_code="$3"
+    local venv="${4:-"venv"}"
+    local result_dir="${5:-"results"}"
+    mkdir -p "$result_dir"
+    local result_file="$result_dir/$test_key.txt"
 
-    echo "Activating virtual environment $VENV_DIR ..."
+    # echo "test_key: $test_key, protocol_file_path: $protocol_file_path, expected_return_code: $expected_return_code, venv: $venv, result_dir:$result_dir"
+    # Fail fast if protocol file does not exist
+    if [ ! -f "$protocol_file_path" ]; then
+        echo "FAIL: Protocol file not found: $protocol_file_path"
+        exit 1
+    fi
+    echo "Activating virtual environment $venv ..."
     # shellcheck disable=SC1091
-    source "$VENV_DIR/bin/activate"
+    source "$venv/bin/activate"
 
-    printf "Running opentrons_simulate for protocol:\n %s\n" "$protocol_file"
+    printf "Running opentrons_simulate for protocol:\n %s\n" "$protocol_file_path"
 
-    output=$(opentrons_simulate "$protocol_file" 2>&1)
+    output=$(opentrons_simulate "$protocol_file_path" 2>&1)
     return_code=$?
 
     if [ $return_code -ne "$expected_return_code" ]; then
@@ -37,3 +44,5 @@ simulate_protocol() {
         exit 0
     fi
 }
+
+simulate_protocol "$@"

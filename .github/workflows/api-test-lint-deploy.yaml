@@ -145,16 +145,28 @@ jobs:
           python-version: '3.10'
       - name: Set up package-testing
         id: setup
+        if: ${{ matrix.os != 'windows-2022' }}
         working-directory: package-testing
         shell: bash
         run: make setup
+      - name: Set up package-testing (Windows)
+        id: setup-windows
+        if: ${{ matrix.os == 'windows-2022' }}
+        working-directory: package-testing
+        shell: pwsh
+        run: make setup-windows
       - name: Run the tests
         shell: bash
         id: test
         working-directory: package-testing
         run: make test
+      - name: Run the tests (Windows)
+        shell: pwsh
+        id: test-windows
+        working-directory: package-testing
+        run: make test-windows
       - name: Save the test results
-        if: ${{ always() && steps.setup.outcome == 'success'}}
+        if: ${{ always() && steps.setup.outcome == 'success' || steps.setup-windows.outcome == 'success' }}
         id: results
         uses: actions/upload-artifact@v4
         with:
@@ -164,7 +176,7 @@ jobs:
         if: ${{ always() }}
         run: |
           echo "## Opentrons Package Test Results ${{matrix.os}}" >> $GITHUB_STEP_SUMMARY
-          echo "### Test Outcome: ${{ steps.test.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Outcome: Unixy ${{ steps.test.outcome }} Windows: ${{ steps.test-windows.outcome }}" >> $GITHUB_STEP_SUMMARY
           echo "[Download the test results artifact](${{steps.results.outputs.artifact-url}})" >> $GITHUB_STEP_SUMMARY
 
   deploy:
