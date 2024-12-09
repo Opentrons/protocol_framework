@@ -64,7 +64,11 @@
               [10.0, 10.0],
               [50.0, 30.0]
             ],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [1.0, -1.6],
+              [10.0, -1.1],
+              [50.0, -3.0]
+            ],
             "preWet": false,
             "mix": {
               "enable": false,
@@ -134,7 +138,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 30.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [1.0, -1.6],
+              [10.0, -1.1],
+              [50.0, -3.0]
+            ],
             "mix": {
               "enable": false,
               "params": {
@@ -204,7 +212,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 30.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [1.0, -1.6],
+              [10.0, -1.1],
+              [50.0, -3.0]
+            ],
             "conditioningByVolume": [
               [1.0, 5.0],
               [40.0, 5.0],
@@ -287,7 +299,11 @@
               [10.0, 10.0],
               [50.0, 30.0]
             ],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [1.0, -1.6],
+              [10.0, -1.1],
+              [50.0, -3.0]
+            ],
             "preWet": false,
             "mix": {
               "enable": false,
@@ -357,7 +373,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 30.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [1.0, -1.6],
+              [10.0, -1.1],
+              [50.0, -3.0]
+            ],
             "mix": {
               "enable": false,
               "params": {
@@ -427,7 +447,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 30.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [1.0, -1.6],
+              [10.0, -1.1],
+              [50.0, -3.0]
+            ],
             "conditioningByVolume": [
               [1.0, 5.0],
               [40.0, 5.0],
@@ -510,7 +534,11 @@
               [10.0, 10.0],
               [50.0, 30.0]
             ],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -2.1],
+              [10.0, -1.7],
+              [50.0, -3.3]
+            ],
             "preWet": false,
             "mix": {
               "enable": false,
@@ -580,7 +608,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 125.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -2.1],
+              [10.0, -1.7],
+              [50.0, -3.3]
+            ],
             "mix": {
               "enable": false,
               "params": {
@@ -655,7 +687,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 125.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -2.1],
+              [10.0, -1.7],
+              [50.0, -3.3]
+            ],
             "conditioningByVolume": [
               [1.0, 5.0],
               [40.0, 5.0],
@@ -733,7 +769,11 @@
               [50.0, 50.0],
               [200.0, 200.0]
             ],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -1.5],
+              [50.0, -2.2],
+              [200.0, -7.4]
+            ],
             "preWet": false,
             "mix": {
               "enable": false,
@@ -803,7 +843,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 125.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -1.5],
+              [50.0, -2.2],
+              [200.0, -7.4]
+            ],
             "mix": {
               "enable": false,
               "params": {
@@ -877,7 +921,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 125.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -1.5],
+              [50.0, -2.2],
+              [200.0, -7.4]
+            ],
             "conditioningByVolume": [
               [1.0, 5.0],
               [190.0, 5.0],
@@ -955,7 +1003,11 @@
               [100.0, 100.0],
               [200.0, 200.0]
             ],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [10.0, -1.9],
+              [100.0, -3.6],
+              [1000.0, -32.2]
+            ],
             "preWet": false,
             "mix": {
               "enable": false,
@@ -1025,7 +1077,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 250.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [10.0, -1.9],
+              [100.0, -3.6],
+              [1000.0, -32.2]
+            ],
             "mix": {
               "enable": false,
               "params": {
@@ -1099,7 +1155,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 250.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [10.0, -1.9],
+              [100.0, -3.6],
+              [1000.0, -32.2]
+            ],
             "conditioningByVolume": [
               [1.0, 5.0],
               [990.0, 5.0],
@@ -1182,7 +1242,11 @@
               [10.0, 10.0],
               [50.0, 30.0]
             ],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -2.1],
+              [10.0, -1.7],
+              [50.0, -3.3]
+            ],
             "preWet": false,
             "mix": {
               "enable": false,
@@ -1252,7 +1316,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 125.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -2.1],
+              [10.0, -1.7],
+              [50.0, -3.3]
+            ],
             "mix": {
               "enable": false,
               "params": {
@@ -1327,7 +1395,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 125.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -2.1],
+              [10.0, -1.7],
+              [50.0, -3.3]
+            ],
             "conditioningByVolume": [
               [1.0, 5.0],
               [40.0, 5.0],
@@ -1405,7 +1477,11 @@
               [50.0, 50.0],
               [200.0, 200.0]
             ],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -1.5],
+              [50.0, -2.2],
+              [200.0, -7.4]
+            ],
             "preWet": false,
             "mix": {
               "enable": false,
@@ -1475,7 +1551,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 125.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -1.5],
+              [50.0, -2.2],
+              [200.0, -7.4]
+            ],
             "mix": {
               "enable": false,
               "params": {
@@ -1549,7 +1629,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 125.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -1.5],
+              [50.0, -2.2],
+              [200.0, -7.4]
+            ],
             "conditioningByVolume": [
               [1.0, 5.0],
               [190.0, 5.0],
@@ -1627,7 +1711,11 @@
               [100.0, 100.0],
               [200.0, 200.0]
             ],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [10.0, -1.9],
+              [100.0, -3.6],
+              [1000.0, -32.2]
+            ],
             "preWet": false,
             "mix": {
               "enable": false,
@@ -1697,7 +1785,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 250.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [10.0, -1.9],
+              [100.0, -3.6],
+              [1000.0, -32.2]
+            ],
             "mix": {
               "enable": false,
               "params": {
@@ -1771,7 +1863,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 250.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [10.0, -1.9],
+              [100.0, -3.6],
+              [1000.0, -32.2]
+            ],
             "conditioningByVolume": [
               [1.0, 5.0],
               [990.0, 5.0],
@@ -1854,7 +1950,11 @@
               [10.0, 10.0],
               [50.0, 30.0]
             ],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -2.1],
+              [10.0, -1.7],
+              [50.0, -3.3]
+            ],
             "preWet": false,
             "mix": {
               "enable": false,
@@ -1924,7 +2024,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 125.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -2.1],
+              [10.0, -1.7],
+              [50.0, -3.3]
+            ],
             "mix": {
               "enable": false,
               "params": {
@@ -1999,7 +2103,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 125.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -2.1],
+              [10.0, -1.7],
+              [50.0, -3.3]
+            ],
             "conditioningByVolume": [
               [1.0, 5.0],
               [40.0, 5.0],
@@ -2077,7 +2185,11 @@
               [50.0, 50.0],
               [200.0, 200.0]
             ],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -1.5],
+              [50.0, -2.2],
+              [200.0, -7.4]
+            ],
             "preWet": false,
             "mix": {
               "enable": false,
@@ -2147,7 +2259,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 125.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -1.5],
+              [50.0, -2.2],
+              [200.0, -7.4]
+            ],
             "mix": {
               "enable": false,
               "params": {
@@ -2221,7 +2337,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 125.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [5.0, -1.5],
+              [50.0, -2.2],
+              [200.0, -7.4]
+            ],
             "conditioningByVolume": [
               [1.0, 5.0],
               [190.0, 5.0],
@@ -2299,7 +2419,11 @@
               [100.0, 100.0],
               [200.0, 200.0]
             ],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [10.0, -1.9],
+              [100.0, -3.6],
+              [1000.0, -32.2]
+            ],
             "preWet": false,
             "mix": {
               "enable": false,
@@ -2369,7 +2493,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 200.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [10.0, -1.9],
+              [100.0, -3.6],
+              [1000.0, -32.2]
+            ],
             "mix": {
               "enable": false,
               "params": {
@@ -2443,7 +2571,11 @@
               "z": 2
             },
             "flowRateByVolume": [[0.0, 200.0]],
-            "correctionByVolume": [[0.0, 0.0]],
+            "correctionByVolume": [
+              [10.0, -1.9],
+              [100.0, -3.6],
+              [1000.0, -32.2]
+            ],
             "conditioningByVolume": [
               [1.0, 5.0],
               [990.0, 5.0],
