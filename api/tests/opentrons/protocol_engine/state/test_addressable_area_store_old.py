@@ -185,37 +185,6 @@ def test_addressable_area_usage_in_simulation(
     )
 
 
-@pytest.mark.parametrize("addressable_area_name", ["A1", "C4"])
-def test_addressable_area_usage(
-    subject: AddressableAreaStore,
-    addressable_area_name: str,
-) -> None:
-    """Non-simulating stores should correctly handle `StateUpdate`s with addressable areas.
-
-    todo(mm, 2024-12-02): This is ported from an older test that said the
-    subject "should check that the addressable area is in the deck config." But
-    AddressableAreaStore does not do that--that is the job of AddressableAreaView--and
-    the original test did not cover that. Do we still need to test anything here, or
-    can this be deleted?
-    """
-    # The addressable area should have been added by the deck configuration.
-    # (Tested more explicitly elsewhere.)
-    assert addressable_area_name in subject.state.loaded_addressable_areas_by_name
-
-    subject.handle_action(
-        SucceedCommandAction(
-            command=_dummy_command(),
-            state_update=update_types.StateUpdate(
-                addressable_area_used=update_types.AddressableAreaUsedUpdate(
-                    addressable_area_name
-                )
-            ),
-        )
-    )
-    # The addressable area should still be there after handling the action.
-    assert addressable_area_name in subject.state.loaded_addressable_areas_by_name
-
-
 def test_add_addressable_area_action(
     simulated_subject: AddressableAreaStore,
 ) -> None:
