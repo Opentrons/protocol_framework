@@ -463,6 +463,13 @@ __all__ = [
     "LoadPipetteResult",
     "LoadPipetteCommandType",
     "LoadPipettePrivateResult",
+    # load lid stack command models
+    "LoadLidStack",
+    "LoadLidStackCreate",
+    "LoadLidStackParams",
+    "LoadLidStackResult",
+    "LoadLidStackCommandType",
+    "LoadLidStackPrivateResult",
     # move labware command models
     "MoveLabware",
     "MoveLabwareCreate",

@@ -186,9 +186,9 @@ class Parameters(BaseModel):
     magneticModuleEngageHeight: Optional[_NonNegativeNumber] = Field(
         None, description="Distance to move magnetic module magnets to engage"
     )
-    isDeckSlotCompatible: Optional[bool] = Field(
+    isDeckSlotCompatible: bool = Field(
         True,
-        description="Optional flag marking whether a labware is compatible by with"
+        description="Flag marking whether a labware is compatible by with"
         " being placed or loaded in a base deck slot, defaults to true.",
     )
 
@@ -750,7 +750,7 @@ class LabwareDefinition(BaseModel):
     stackLimit: Optional[int] = Field(
         1,
         description="The limit representing the maximum stack size for a given labware,"
-        " defaults to 1 when unspecified indicating a single labware with no labware below it."
+        " defaults to 1 when unspecified indicating a single labware with no labware below it.",
     )
     compatibleParentLabware: Optional[List[str]] = Field(
         None,

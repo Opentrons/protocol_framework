@@ -156,6 +156,7 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
         """Modify state in reaction to an action."""
         for state_update in get_state_updates(action):
             self._add_loaded_labware(state_update)
+            self._add_loaded_lid_stack(state_update)
             self._set_labware_location(state_update)
             self._set_labware_lid(state_update)
 
@@ -221,7 +222,51 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                 offsetId=loaded_labware_update.offset_id,
                 displayName=display_name,
             )
-    
+
+    def _add_loaded_lid_stack(self, state_update: update_types.StateUpdate) -> None:
+        loaded_lid_stack_update = state_update.loaded_lid_stack
+        if loaded_lid_stack_update != update_types.NO_CHANGE:
+            for i in range(len(loaded_lid_stack_update.labware_ids)):
+                if (
+                    loaded_lid_stack_update.offset_ids[
+                        loaded_lid_stack_update.labware_ids[i]
+                    ]
+                    is not None
+                ):
+                    assert (
+                        loaded_lid_stack_update.offset_ids[
+                            loaded_lid_stack_update.labware_ids[i]
+                        ]
+                        in self._state.labware_offsets_by_id
+                    )
+
+                definition_uri = uri_from_details(
+                    namespace=loaded_lid_stack_update.definition.namespace,
+                    load_name=loaded_lid_stack_update.definition.parameters.loadName,
+                    version=loaded_lid_stack_update.definition.version,
+                )
+
+                self._state.definitions_by_uri[
+                    definition_uri
+                ] = loaded_lid_stack_update.definition
+
+                location = loaded_lid_stack_update.new_locations_by_id[
+                    loaded_lid_stack_update.labware_ids[i]
+                ]
+
+                self._state.labware_by_id[
+                    loaded_lid_stack_update.labware_ids[i]
+                ] = LoadedLabware.construct(
+                    id=loaded_lid_stack_update.labware_ids[i],
+                    location=location,
+                    loadName=loaded_lid_stack_update.definition.parameters.loadName,
+                    definitionUri=definition_uri,
+                    offsetId=loaded_lid_stack_update.offset_ids[
+                        loaded_lid_stack_update.labware_ids[i]
+                    ],
+                    displayName=None,
+                )
+
     def _set_labware_lid(self, state_update: update_types.StateUpdate) -> None:
         labware_lid_update = state_update.labware_lid
         if labware_lid_update != update_types.NO_CHANGE:
@@ -449,21 +494,7 @@ class LabwareView(HasState[LabwareState]):
 
         If not defined within a labware, defaults to one.
         """
-        stacking_quirks = {
-            "stackingMaxFive": 5,
-            "stackingMaxFour": 4,
-            "stackingMaxThree": 3,
-            "stackingMaxTwo": 2,
-            "stackingMaxOne": 1,
-            "stackingMaxZero": 0,
-        }
-        for quirk in stacking_quirks.keys():
-            if (
-                labware.parameters.quirks is not None
-                and quirk in labware.parameters.quirks
-            ):
-                return stacking_quirks[quirk]
-        return 1
+        return labware.stackLimit if labware.stackLimit is not None else 1
 
     def get_should_center_pipette_on_target_well(self, labware_id: str) -> bool:
         """True if a pipette moving to a well of this labware should center its body on the target.

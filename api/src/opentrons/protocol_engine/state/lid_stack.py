@@ -36,9 +36,7 @@ class LidStackStore(HasState[LidStackState], HandlesActions):
         self,
     ) -> None:
         """Initialize a lid stack store and its state."""
-        self._state = LidStackState(
-            lid_stack_by_location={}, definition=LabwareDefinition()
-        )
+        self._state = LidStackState(lid_stack_by_location={}, definition_by_location={})
 
     def handle_action(self, action: Action) -> None:
         """Modify state in reaction to an action."""
@@ -48,10 +46,17 @@ class LidStackStore(HasState[LidStackState], HandlesActions):
     def _add_loaded_lid_stack(self, state_update: update_types.StateUpdate) -> None:
         loaded_lid_stack_update = state_update.loaded_lid_stack
         if loaded_lid_stack_update != update_types.NO_CHANGE:
-            location = loaded_lid_stack_update.new_location
+            # The first entry in the list should be placed at the bottom of the lid stack, key by this location
+            location = loaded_lid_stack_update.new_locations_by_id[
+                loaded_lid_stack_update.labware_ids[0]
+            ]
 
-            self._state.definition_by_location[location] = loaded_lid_stack_update.definition
-            self._state.lid_stack_by_location[location] = loaded_lid_stack_update.labware_ids
+            self._state.definition_by_location[
+                location
+            ] = loaded_lid_stack_update.definition
+            self._state.lid_stack_by_location[
+                location
+            ] = loaded_lid_stack_update.labware_ids
 
 
 class LidStackView(HasState[LidStackState]):
@@ -85,8 +90,10 @@ class LidStackView(HasState[LidStackState]):
             raise errors.exceptions.LabwareNotLoadedError(
                 f"There is no Lid Stack loaded on {location}."
             )
-        
-    def get_definition_by_stack_location(self, location: LabwareLocation) -> LabwareDefinition:
+
+    def get_definition_by_stack_location(
+        self, location: LabwareLocation
+    ) -> LabwareDefinition:
         """Return the Labware Definition for a stack at a given location."""
         try:
             return self._state.definition_by_location[location]

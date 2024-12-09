@@ -10,7 +10,14 @@ from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.labware.types import LabwareDefinition
 from opentrons_shared_data.robot.types import RobotType
 
-from opentrons.types import DeckSlotName, StagingSlotName, Location, Mount, Point
+from opentrons.types import (
+    DeckSlotName,
+    StagingSlotName,
+    Location,
+    Mount,
+    Point,
+    DeckLocation,
+)
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.modules.types import ModuleModel
 from opentrons.protocols.api_support.util import AxisMaxSpeeds
@@ -92,6 +99,17 @@ class AbstractProtocol(
         version: Optional[int],
     ) -> LabwareCoreType:
         """Load an adapter using its identifying parameters"""
+        ...
+
+    @abstractmethod
+    def load_lid(
+        self,
+        load_name: str,
+        location: LabwareCoreType,
+        namespace: Optional[str],
+        version: Optional[int],
+    ) -> LabwareCoreType:
+        """Load an individual lid labware using its identifying parameters. Must be loaded on a labware."""
         ...
 
     @abstractmethod
@@ -188,7 +206,7 @@ class AbstractProtocol(
         self,
         location: Optional[Location],
         mount: Optional[Mount] = None,
-    ) -> DeckSlotName:
+    ) -> None:
         ...
 
     @abstractmethod
@@ -197,7 +215,9 @@ class AbstractProtocol(
         load_name: str,
         location: Union[DeckSlotName, StagingSlotName, Labware],
         quantity: int,
-    ) -> Union[DeckSlotName, Labware]:
+        namespace: Optional[str],
+        version: Optional[int],
+    ) -> Union[DeckLocation, LabwareCoreType]:
         ...
 
     @abstractmethod

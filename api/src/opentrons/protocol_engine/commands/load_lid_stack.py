@@ -1,7 +1,7 @@
 """Load lid stack command request, result, and implementation models."""
 from __future__ import annotations
 from pydantic import BaseModel, Field
-from typing import TYPE_CHECKING, Optional, Type, List, Dict
+from typing import TYPE_CHECKING, Optional, Type, List, Dict, Union
 from typing_extensions import Literal
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
@@ -68,10 +68,10 @@ class LoadLidStackResult(BaseModel):
     location: LabwareLocation = Field(
         ..., description="The Location that the stack of lid labware has been loaded."
     )
-    offsetIdsByLabwareId: Optional[Dict[str, str]] = Field(
+    offsetIdsByLabwareId: Dict[str, Optional[str]] = Field(
         # Default `None` instead of `...` so this field shows up as non-required in
         # OpenAPI. The server is allowed to omit it or make it null.
-        None,
+        ...,
         description=(
             "An Dictionary of IDs referencing the labware offset that will apply"
             " to the newly-placed lid stack, keyed by Labware ID."
@@ -118,39 +118,36 @@ class LoadLidStackImplementation(
         verified_location = self._state_view.geometry.ensure_location_not_occupied(
             params.location
         )
-        loaded_lid_ids = [str]
-        loaded_lid_offset_id_by_id = Dict[str, str]
-        loaded_lid_labwares = [LoadedLabwareData]
+        loaded_lid_ids = []
+        loaded_lid_offset_id_by_id = {}
+        loaded_lid_locations_by_id = {}
+        loaded_lid_labwares = []
         state_update = StateUpdate()
+        loaded_lid_labwares = await self._equipment.load_lids(
+            load_name=params.loadName,
+            namespace=params.namespace,
+            version=params.version,
+            location=verified_location,
+            quantity=params.quantity,
+            labware_ids=None,
+        )
         for i in range(params.quantity):
-            loaded_lid_labwares.append(
-                await self._equipment.load_lids(
-                    load_name=params.loadName,
-                    namespace=params.namespace,
-                    version=params.version,
-                    location=verified_location,
-                    quantity=params.quantity,
-                    labware_id=None,
-                )
-            )
-            loaded_lid_ids[i] = loaded_lid_labwares[i].labware_id
+            loaded_lid_ids.append(loaded_lid_labwares[i].labware_id)
             loaded_lid_offset_id_by_id[
                 loaded_lid_labwares[i].labware_id
             ] = loaded_lid_labwares[i].offsetId
-
-            state_update.set_loaded_labware(
-                labware_id=loaded_lid_labwares[i].labware_id,
-                offset_id=loaded_lid_labwares[i].offsetId,
-                definition=loaded_lid_labwares[i].definition,
-                location=verified_location,
-                display_name=None,
-            )
+            if i == 0:
+                loaded_lid_locations_by_id[loaded_lid_ids[i]] = verified_location
+            else:
+                loaded_lid_locations_by_id[
+                    loaded_lid_ids[i]
+                ] = loaded_lid_locations_by_id[loaded_lid_ids[i - 1]]
 
         state_update.set_loaded_lid_stack(
             labware_ids=loaded_lid_ids,
             definition=loaded_lid_labwares[0].definition,
-            location=verified_location,
-            display_name=None,
+            locations=loaded_lid_locations_by_id,
+            offset_ids=loaded_lid_offset_id_by_id,
         )
 
         if isinstance(verified_location, OnLabwareLocation):
@@ -177,7 +174,7 @@ class LoadLidStack(
 ):
     """Load lid stack command resource model."""
 
-    commandType: LoadLidStackCommandType = "loadLabware"
+    commandType: LoadLidStackCommandType = "loadLidStack"
     params: LoadLidStackParams
     result: Optional[LoadLidStackResult]
 
@@ -187,7 +184,7 @@ class LoadLidStack(
 class LoadLidStackCreate(BaseCommandCreate[LoadLidStackParams]):
     """Load lid stack command creation request."""
 
-    commandType: LoadLidStackCommandType = "loadLabware"
+    commandType: LoadLidStackCommandType = "loadLidStack"
     params: LoadLidStackParams
 
     _CommandCls: Type[LoadLidStack] = LoadLidStack

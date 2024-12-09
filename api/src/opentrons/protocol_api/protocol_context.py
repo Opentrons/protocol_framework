@@ -476,14 +476,6 @@ class ProtocolContext(CommandPublisher):
                 location, self._api_version, self._core.robot_type
             )
 
-
-        # TODO NOTE:
-        # Break the load lid behavior out into entirely seperate "load lid" command
-        # Load lid will also be responsible for assinging the lid ID to it's parent labware
-        # This means stripping the logic I added to load labware execute, as well as the parameter changes, out. 
-        # Instead, the load lid result will contain the labware ID of it's parent labware for the client to pair things up
-        # This means it will need to happen AFTER the load labware command here
-
         labware_core = self._core.load_labware(
             load_name=load_name,
             location=load_location,
@@ -491,6 +483,14 @@ class ProtocolContext(CommandPublisher):
             namespace=namespace,
             version=version,
         )
+
+        if lid is not None:
+            loaded_lid = self._core.load_lid(
+                load_name=lid,
+                location=labware_core,
+                namespace=namespace,
+                version=version,
+            )
 
         labware = Labware(
             core=labware_core,
@@ -1349,7 +1349,9 @@ class ProtocolContext(CommandPublisher):
         load_name: str,
         location: Union[DeckLocation, Labware],
         quantity: int,
-    ) -> Union[DeckSlotName, Labware]:
+        namespace: Optional[str] = None,
+        version: Optional[int] = None,
+    ) -> Union[DeckLocation, Labware]:
         """
         Load a stack of Lids onto a valid Deck Location or Adapter.
 
@@ -1363,29 +1365,29 @@ class ProtocolContext(CommandPublisher):
         :return: A :py:class:`~opentrons.protocol_api.DeckLocation` object representing the location of the stack.
         """
         load_location: Union[DeckSlotName, StagingSlotName, Labware]
-        if isinstance(location, DeckLocation):
+        if isinstance(location, Labware):
+            load_location = location
+        else:
             load_location = validation.ensure_and_convert_deck_slot(
                 location, self._api_version, self._core.robot_type
             )
-        else:
-            load_location = location
         load_name = validation.ensure_lowercase_name(load_name)
 
         result = self._core.load_lid_stack(
-            load_name=load_name, location=load_location, quantity=quantity
+            load_name=load_name,
+            location=load_location,
+            quantity=quantity,
+            namespace=namespace,
+            version=version,
         )
-        
-        # TODO load labware for the labware ID of the Lid
-        # the API core command should be responsible for calling load labware and then adding that accumulated labware to the lid store at this given location
-        # The user then reference the returned location in something like a move lid command
-
-        # move lid should accept a LidStoreLocation or a Labware as source and a LidStoreLocation, Labware or trash as destination
-        # ----------
-        # TODO NOTE: We're returning a union of deckslotname and labware as the location that this stack exists, should either be a DeckLocation or a new type alias of some kind
-        # TODO NOTE: We need a lid store tracking lid stacks by location (the value returned here)
-        #   - These lid stores will be responsible for owning the result of the load lid stack command
-        #   - When we do a move lid command, the lid store will have a validator that passes the "top" lid ID from the stack of lids via a get_next_lid function or something
-        #   - Add all that to the state store
+        if not isinstance(result, int) and not isinstance(result, str):
+            labware = Labware(
+                core=result,
+                api_version=self._api_version,
+                protocol_core=self._core,
+                core_map=self._core_map,
+            )
+            return labware
         return result
 
 

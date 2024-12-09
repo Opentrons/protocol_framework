@@ -145,7 +145,7 @@ class LoadLabwareImplementation(
         )
 
         state_update = StateUpdate()
-        
+
         if labware_validation.validate_definition_is_lid(loaded_labware.definition):
             if isinstance(params.location, OnLabwareLocation):
                 state_update.set_lid(
@@ -154,7 +154,9 @@ class LoadLabwareImplementation(
                 )
             else:
                 # todo(chb, 2024-12-05): This is redundant, we're already doing this check on the equipment handler. Theoretically this can never raise?
-                raise ValueError("Load Labware location must be another Labware when loading a Lid outside of a stack.")
+                raise ValueError(
+                    "Load Labware location must be another Labware when loading a Lid outside of a stack."
+                )
 
         state_update.set_loaded_labware(
             labware_id=loaded_labware.labware_id,

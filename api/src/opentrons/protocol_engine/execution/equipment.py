@@ -175,12 +175,17 @@ class EquipmentHandler:
                 parent_labware_uri = self._state_store.labware.get_uri_from_definition(
                     self._state_store.labware.get_definition(location.labwareId)
                 )
-                if parent_labware_uri not in definition.compatibleParentLabware:
+                if (
+                    definition.compatibleParentLabware is not None
+                    and parent_labware_uri not in definition.compatibleParentLabware
+                ):
                     raise ValueError(
                         f"Labware Lid {load_name} may not be loaded on parent labware {self._state_store.labware.get_display_name(location.labwareId)}."
                     )
             else:
-                raise ValueError("Load Labware location must be another Labware when loading a Lid outside of a stack.")
+                raise ValueError(
+                    "Load Labware location must be another Labware when loading a Lid outside of a stack."
+                )
 
         labware_id = (
             labware_id if labware_id is not None else self._model_utils.generate_id()
@@ -435,7 +440,7 @@ class EquipmentHandler:
                 version=version,
             )
 
-        if quantity > definition.stackLimit:
+        if definition.stackLimit is not None and quantity > definition.stackLimit:
             raise ValueError(
                 f"Requested quantity {quantity} is greater than the stack limit of {definition.stackLimit} provided by definition for {load_name}."
             )
@@ -446,23 +451,33 @@ class EquipmentHandler:
             )
 
         if labware_ids is None:
+            labware_ids = []
             for i in range(quantity):
-                labware_ids[i] = self._model_utils.generate_id()
+                labware_ids.append(self._model_utils.generate_id())
 
         # Allow propagation of ModuleNotLoadedError.
-        load_labware_data_list = List[LoadedLabwareData]
+        load_labware_data_list = []
         for i in range(quantity):
             if i == 0:
+                if (
+                    isinstance(location, DeckSlotLocation)
+                    and not definition.parameters.isDeckSlotCompatible
+                ):
+                    raise ValueError(
+                        f"Lid Labware {load_name} cannot be loaded onto a Deck Slot."
+                    )
                 labware_location = location
             else:
                 labware_location = OnLabwareLocation(labwareId=labware_ids[i - 1])
-            load_labware_data_list[i] = LoadedLabwareData(
-                labware_id=labware_ids[i],
-                definition=definition,
-                offsetId=self.find_applicable_labware_offset_id(
-                    labware_definition_uri=definition_uri,
-                    labware_location=labware_location,
-                ),
+            load_labware_data_list.append(
+                LoadedLabwareData(
+                    labware_id=labware_ids[i],
+                    definition=definition,
+                    offsetId=self.find_applicable_labware_offset_id(
+                        labware_definition_uri=definition_uri,
+                        labware_location=labware_location,
+                    ),
+                )
             )
 
         return load_labware_data_list

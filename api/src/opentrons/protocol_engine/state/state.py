@@ -49,6 +49,7 @@ class State:
     addressable_areas: AddressableAreaState
     labware: LabwareState
     pipettes: PipetteState
+    lid_stacks: LidStackState
     modules: ModuleState
     liquids: LiquidState
     liquid_classes: LiquidClassState
@@ -234,6 +235,7 @@ class StateStore(StateView, ActionHandler):
             self._pipette_store,
             self._addressable_area_store,
             self._labware_store,
+            self._lid_stack_store,
             self._module_store,
             self._liquid_store,
             self._liquid_class_store,
@@ -352,6 +354,7 @@ class StateStore(StateView, ActionHandler):
             commands=self._command_store.state,
             addressable_areas=self._addressable_area_store.state,
             labware=self._labware_store.state,
+            lid_stacks=self._lid_stack_store.state,
             pipettes=self._pipette_store.state,
             modules=self._module_store.state,
             liquids=self._liquid_store.state,
@@ -370,7 +373,9 @@ class StateStore(StateView, ActionHandler):
         self._commands = CommandView(state.commands)
         self._addressable_areas = AddressableAreaView(state.addressable_areas)
         self._labware = LabwareView(state.labware)
+        self._lid_stacks = LidStackView(state.lid_stacks)
         self._pipettes = PipetteView(state.pipettes)
+        self._lid_stacks = LidStackView(state.lid_stacks)
         self._modules = ModuleView(state.modules)
         self._liquid = LiquidView(state.liquids)
         self._liquid_classes = LiquidClassView(state.liquid_classes)
@@ -403,6 +408,7 @@ class StateStore(StateView, ActionHandler):
         self._commands._state = next_state.commands
         self._addressable_areas._state = next_state.addressable_areas
         self._labware._state = next_state.labware
+        self._lid_stacks._state = next_state.lid_stacks
         self._pipettes._state = next_state.pipettes
         self._modules._state = next_state.modules
         self._liquid._state = next_state.liquids

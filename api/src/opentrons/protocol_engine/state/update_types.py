@@ -122,15 +122,19 @@ class LoadedLabwareUpdate:
 
 @dataclasses.dataclass
 class LoadedLidStackUpdate:
-    """An update that loads a new labware."""
+    """An update that loads a new lid stack."""
 
     labware_ids: typing.List[str]
     """The unique IDs of the new lids."""
 
-    new_location: LabwareLocation
-    """The labware's initial location."""
+    new_locations_by_id: typing.Dict[str, LabwareLocation]
+    """Each lid's initial location keyed by Labware ID."""
+
+    offset_ids: typing.Dict[str, typing.Optional[str]]
+    """The IDs of each lid's offset keyed by Labware ID."""
 
     definition: LabwareDefinition
+
 
 @dataclasses.dataclass
 class LabwareLidUpdate:
@@ -141,6 +145,7 @@ class LabwareLidUpdate:
 
     lid_id: str
     """The unique IDs of the new lids."""
+
 
 @dataclasses.dataclass
 class LoadPipetteUpdate:
@@ -311,10 +316,6 @@ class StateUpdate:
 
     loaded_lid_stack: LoadedLidStackUpdate | NoChangeType = NO_CHANGE
 
-    # TODO NOTE: Do I add a new Update class for labware specifically updating the lid info?
-    # This will update under two cases:
-    # 1. the lid has been loaded with a labware
-    # 2. the lid has been moved to a labware
     labware_lid: LabwareLidUpdate | NoChangeType = NO_CHANGE
 
     tips_used: TipsUsedUpdate | NoChangeType = NO_CHANGE
@@ -454,18 +455,18 @@ class StateUpdate:
         self: Self,
         definition: LabwareDefinition,
         labware_ids: typing.List[str],
-        display_name: typing.Optional[str],
-        location: LabwareLocation,
+        locations: typing.Dict[str, LabwareLocation],
+        offset_ids: typing.Dict[str, typing.Optional[str]],
     ) -> Self:
         """Add a new lid stack to state. See `LoadedLidStackUpdate`."""
         self.loaded_lid_stack = LoadedLidStackUpdate(
             definition=definition,
             labware_ids=labware_ids,
-            new_location=location,
-            display_name=display_name,
+            new_locations_by_id=locations,
+            offset_ids=offset_ids,
         )
         return self
-    
+
     def set_lid(
         self: Self,
         parent_labware_id: str,

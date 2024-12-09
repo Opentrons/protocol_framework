@@ -79,6 +79,12 @@ class SyncClient:
 
     @overload
     def execute_command_without_recovery(
+        self, params: commands.LoadLidStackParams
+    ) -> commands.LoadLidStackResult:
+        pass
+
+    @overload
+    def execute_command_without_recovery(
         self, params: commands.LiquidProbeParams
     ) -> commands.LiquidProbeResult:
         pass

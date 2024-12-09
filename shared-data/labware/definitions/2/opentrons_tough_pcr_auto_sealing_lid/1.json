@@ -30,7 +30,7 @@
   },
   "parameters": {
     "format": "irregular",
-    "quirks": ["stackingMaxFive"],
+    "quirks": [],
     "isTiprack": false,
     "isMagneticModuleCompatible": false,
     "loadName": "opentrons_tough_pcr_auto_sealing_lid"
@@ -72,6 +72,11 @@
       "z": 0
     }
   },
+  "stackLimit": 5,
+  "compatibleParentLabware": [
+    "armadillo_96_wellplate_200ul_pcr_full_skirt",
+    "opentrons_96_wellplate_200ul_pcr_full_skirt"
+  ],
   "gripForce": 15,
   "gripHeightFromLabwareBottom": 7.91,
   "gripperOffsets": {
