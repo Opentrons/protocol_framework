@@ -293,17 +293,11 @@ class JsonTranslator:
         if isinstance(protocol, (ProtocolSchemaV6, ProtocolSchemaV7)):
             return []
         else:
-            if (
-                protocol.commandAnnotationSchemaId
-                == "opentronsCommandAnnotationSchemaV1"
-            ):
-                command_annotations: List[CommandAnnotation] = [
-                    parse_obj_as(
-                        CommandAnnotation,  # type: ignore[arg-type]
-                        command_annotation.dict(),
-                    )
-                    for command_annotation in protocol.commandAnnotations
-                ]
-            else:
-                raise ValueError("Uh oh")
+            command_annotations: List[CommandAnnotation] = [
+                parse_obj_as(
+                    CommandAnnotation,  # type: ignore[arg-type]
+                    command_annotation.dict(),
+                )
+                for command_annotation in protocol.commandAnnotations
+            ]
             return command_annotations
