@@ -36,12 +36,19 @@ interface SetupLabwarePositionCheckProps {
   setOffsetsConfirmed: (confirmed: boolean) => void
   robotName: string
   runId: string
+  isNewLpc: boolean
 }
 
 export function SetupLabwarePositionCheck(
   props: SetupLabwarePositionCheckProps
 ): JSX.Element {
-  const { robotName, runId, setOffsetsConfirmed, offsetsConfirmed } = props
+  const {
+    robotName,
+    runId,
+    setOffsetsConfirmed,
+    offsetsConfirmed,
+    isNewLpc,
+  } = props
   const { t, i18n } = useTranslation('protocol_setup')
 
   const robotType = useRobotType(robotName)
@@ -144,7 +151,7 @@ export function SetupLabwarePositionCheck(
         <PrimaryButton
           textTransform={TYPOGRAPHY.textTransformCapitalize}
           onClick={() => {
-            launchLPC()
+            isNewLpc ? (() => null)() : launchLPC()
             setIsShowingLPCSuccessToast(false)
           }}
           id="LabwareSetup_checkLabwarePositionsButton"
@@ -159,7 +166,7 @@ export function SetupLabwarePositionCheck(
           </Tooltip>
         ) : null}
       </Flex>
-      {LPCWizard}
+      {isNewLpc ? null : LPCWizard}
     </Flex>
   )
 }

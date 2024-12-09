@@ -67,7 +67,7 @@ import {
   ANALYTICS_PROTOCOL_RUN_ACTION,
   useTrackEvent,
 } from '/app/redux/analytics'
-import { getIsHeaterShakerAttached } from '/app/redux/config'
+import { getIsHeaterShakerAttached, useFeatureFlag } from '/app/redux/config'
 import { ConfirmAttachedModal } from './ConfirmAttachedModal'
 import { ConfirmSetupStepsCompleteModal } from './ConfirmSetupStepsCompleteModal'
 import { getLatestCurrentOffsets } from '/app/transformations/runs'
@@ -658,6 +658,7 @@ export function ProtocolSetup(): JSX.Element {
   const { runId } = useParams<
     keyof OnDeviceRouteParams
   >() as OnDeviceRouteParams
+  const isNewLpc = useFeatureFlag('lpcRedesign')
   const { data: runRecord } = useNotifyRunQuery(runId, { staleTime: Infinity })
   const { analysisErrors } = useProtocolAnalysisErrors(runId)
   const { t } = useTranslation(['protocol_setup'])
@@ -815,6 +816,7 @@ export function ProtocolSetup(): JSX.Element {
         LPCWizard={LPCWizard}
         isConfirmed={offsetsConfirmed}
         setIsConfirmed={setOffsetsConfirmed}
+        isNewLpc={isNewLpc}
       />
     ),
     labware: (

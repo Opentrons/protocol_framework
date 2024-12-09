@@ -51,6 +51,7 @@ const render = () => {
         setOffsetsConfirmed={confirmOffsets}
         robotName={ROBOT_NAME}
         runId={RUN_ID}
+        isNewLpc={false}
       />
     </MemoryRouter>,
     {
