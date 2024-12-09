@@ -52,6 +52,8 @@ all: clean sdist wheel
 setup:
 	$(pipenv) sync $(pipenv_opts)
 	$(pipenv) run pip freeze
+	cd .. && $(MAKE) -C app-shell-odd setup
+	cd .. && $(MAKE) -C app setup
 
 .PHONY: teardown
 teardown:
@@ -219,6 +221,11 @@ push-no-restart-ot3: sdist Pipfile.lock
 
 .PHONY: push-ot3
 push-ot3: push-no-restart-ot3 push-plot-webpage-ot3 push-description-ot3
+	cd .. && $(MAKE) -C app-shell-odd push-ot3 host=$(host)
+
+.PHONE: open-dev-app
+open-dev-app:
+	cd .. && $(MAKE) -C app dev
 
 .PHONY: push-all
 push-all: clean wheel push-no-restart push-plot-webpage
