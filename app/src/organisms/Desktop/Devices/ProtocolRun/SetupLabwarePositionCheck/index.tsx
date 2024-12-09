@@ -21,7 +21,7 @@ import { useProtocolQuery } from '@opentrons/react-api-client'
 import { useLPCSuccessToast } from '../../hooks/useLPCSuccessToast'
 import { useStoredProtocolAnalysis } from '/app/resources/analysis'
 import { CurrentOffsetsTable } from './CurrentOffsetsTable'
-import { useLaunchLPC } from '/app/organisms/LabwarePositionCheck/useLaunchLPC'
+import { useLaunchLegacyLPC } from '/app/organisms/LegacyLabwarePositionCheck/useLaunchLegacyLPC'
 import { getLatestCurrentOffsets } from '/app/transformations/runs'
 import {
   useNotifyRunQuery,
@@ -95,7 +95,11 @@ export function SetupLabwarePositionCheck(
 
   const { setIsShowingLPCSuccessToast } = useLPCSuccessToast()
 
-  const { launchLPC, LPCWizard } = useLaunchLPC(runId, robotType, protocolName)
+  const { launchLegacyLPC, LegacyLPCWizard } = useLaunchLegacyLPC(
+    runId,
+    robotType,
+    protocolName
+  )
 
   const nonIdentityOffsets = getLatestCurrentOffsets(sortedOffsets)
 
@@ -151,7 +155,7 @@ export function SetupLabwarePositionCheck(
         <PrimaryButton
           textTransform={TYPOGRAPHY.textTransformCapitalize}
           onClick={() => {
-            isNewLpc ? (() => null)() : launchLPC()
+            isNewLpc ? (() => null)() : launchLegacyLPC()
             setIsShowingLPCSuccessToast(false)
           }}
           id="LabwareSetup_checkLabwarePositionsButton"
@@ -166,7 +170,7 @@ export function SetupLabwarePositionCheck(
           </Tooltip>
         ) : null}
       </Flex>
-      {isNewLpc ? null : LPCWizard}
+      {isNewLpc ? null : LegacyLPCWizard}
     </Flex>
   )
 }

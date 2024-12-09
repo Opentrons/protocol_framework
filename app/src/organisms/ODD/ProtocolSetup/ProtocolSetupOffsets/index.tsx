@@ -16,7 +16,7 @@ import { useToaster } from '/app/organisms/ToasterOven'
 import { ODDBackButton } from '/app/molecules/ODDBackButton'
 import { FloatingActionButton, SmallButton } from '/app/atoms/buttons'
 import type { SetupScreens } from '../types'
-import { TerseOffsetTable } from '/app/organisms/LabwarePositionCheck/ResultsSummary'
+import { TerseOffsetTable } from '/app/organisms/LegacyLabwarePositionCheck/ResultsSummary'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import {
   useNotifyRunQuery,

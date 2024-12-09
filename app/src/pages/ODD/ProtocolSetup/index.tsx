@@ -56,7 +56,7 @@ import {
   getIncompleteInstrumentCount,
   ViewOnlyParameters,
 } from '/app/organisms/ODD/ProtocolSetup'
-import { useLaunchLPC } from '/app/organisms/LabwarePositionCheck/useLaunchLPC'
+import { useLaunchLegacyLPC } from '/app/organisms/LegacyLabwarePositionCheck/useLaunchLegacyLPC'
 import { ConfirmCancelRunModal } from '/app/organisms/ODD/RunningProtocol'
 import { useRunControls } from '/app/organisms/RunTimeControl/hooks'
 import { useToaster } from '/app/organisms/ToasterOven'
@@ -736,7 +736,11 @@ export function ProtocolSetup(): JSX.Element {
     protocolRecord?.data.files[0].name ??
     ''
 
-  const { launchLPC, LPCWizard } = useLaunchLPC(runId, robotType, protocolName)
+  const { launchLegacyLPC, LegacyLPCWizard } = useLaunchLegacyLPC(
+    runId,
+    robotType,
+    protocolName
+  )
   const handleProceedToRunClick = (): void => {
     trackEvent({
       name: ANALYTICS_PROTOCOL_PROCEED_TO_RUN,
@@ -812,8 +816,8 @@ export function ProtocolSetup(): JSX.Element {
         runId={runId}
         setSetupScreen={setSetupScreen}
         lpcDisabledReason={lpcDisabledReason}
-        launchLPC={launchLPC}
-        LPCWizard={LPCWizard}
+        launchLPC={launchLegacyLPC}
+        LPCWizard={LegacyLPCWizard}
         isConfirmed={offsetsConfirmed}
         setIsConfirmed={setOffsetsConfirmed}
         isNewLpc={isNewLpc}

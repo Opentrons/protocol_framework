@@ -31,7 +31,7 @@ interface LabwarePositionCheckModalProps {
 // the component's dependencies (like useLabwarePositionCheck). If we wrapped the contents of LabwarePositionCheckComponent
 // in an ErrorBoundary as part of its return value (render), an error could occur before this point, meaning the error boundary
 // would never get invoked
-export const LabwarePositionCheck = (
+export const LegacyLabwarePositionCheck = (
   props: LabwarePositionCheckModalProps
 ): JSX.Element => {
   const logger = useLogger(new URL('', import.meta.url).pathname)

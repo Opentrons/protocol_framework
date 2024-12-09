@@ -24,8 +24,8 @@ import {
   useNotifyRunQuery,
   useMostRecentCompletedAnalysis,
 } from '/app/resources/runs'
-import { useLaunchLPC } from '../useLaunchLPC'
-import { LabwarePositionCheck } from '..'
+import { useLaunchLegacyLPC } from '../useLaunchLegacyLPC'
+import { LegacyLabwarePositionCheck } from '..'
 
 import type { Mock } from 'vitest'
 import type { LabwareOffset } from '@opentrons/api-client'
@@ -84,15 +84,17 @@ describe('useLaunchLPC hook', () => {
         </QueryClientProvider>
       </Provider>
     )
-    vi.mocked(LabwarePositionCheck).mockImplementation(({ onCloseClick }) => (
-      <div
-        onClick={() => {
-          onCloseClick()
-        }}
-      >
-        exit
-      </div>
-    ))
+    vi.mocked(LegacyLabwarePositionCheck).mockImplementation(
+      ({ onCloseClick }) => (
+        <div
+          onClick={() => {
+            onCloseClick()
+          }}
+        >
+          exit
+        </div>
+      )
+    )
     when(vi.mocked(useNotifyRunQuery))
       .calledWith(MOCK_RUN_ID, { staleTime: Infinity })
       .thenReturn({
@@ -150,19 +152,19 @@ describe('useLaunchLPC hook', () => {
 
   it('returns and no wizard by default', () => {
     const { result } = renderHook(
-      () => useLaunchLPC(MOCK_RUN_ID, FLEX_ROBOT_TYPE),
+      () => useLaunchLegacyLPC(MOCK_RUN_ID, FLEX_ROBOT_TYPE),
       { wrapper }
     )
-    expect(result.current.LPCWizard).toEqual(null)
+    expect(result.current.LegacyLPCWizard).toEqual(null)
   })
 
   it('returns creates maintenance run with current offsets and definitions when create callback is called, closes and deletes when exit is clicked', async () => {
     const { result } = renderHook(
-      () => useLaunchLPC(MOCK_RUN_ID, FLEX_ROBOT_TYPE),
+      () => useLaunchLegacyLPC(MOCK_RUN_ID, FLEX_ROBOT_TYPE),
       { wrapper }
     )
     act(() => {
-      result.current.launchLPC()
+      result.current.launchLegacyLPC()
     })
     await waitFor(() => {
       expect(mockCreateLabwareDefinition).toHaveBeenCalledWith({
@@ -184,9 +186,9 @@ describe('useLaunchLPC hook', () => {
     })
 
     await waitFor(() => {
-      expect(result.current.LPCWizard).not.toBeNull()
+      expect(result.current.LegacyLPCWizard).not.toBeNull()
     })
-    renderWithProviders(result.current.LPCWizard ?? <></>)
+    renderWithProviders(result.current.LegacyLPCWizard ?? <></>)
     fireEvent.click(screen.getByText('exit'))
     expect(mockDeleteMaintenanceRun).toHaveBeenCalledWith(
       MOCK_MAINTENANCE_RUN_ID,
@@ -194,6 +196,6 @@ describe('useLaunchLPC hook', () => {
         onSettled: expect.any(Function),
       }
     )
-    expect(result.current.LPCWizard).toBeNull()
+    expect(result.current.LegacyLPCWizard).toBeNull()
   })
 })

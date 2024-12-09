@@ -53,8 +53,8 @@ import { MiniCard } from '/app/molecules/MiniCard'
 import { UploadInput } from '/app/molecules/UploadInput'
 import { useTrackCreateProtocolRunEvent } from '/app/organisms/Desktop/Devices/hooks'
 import { useCreateRunFromProtocol } from '/app/organisms/Desktop/ChooseRobotToRunProtocolSlideout/useCreateRunFromProtocol'
-import { ApplyHistoricOffsets } from '/app/organisms/ApplyHistoricOffsets'
-import { useOffsetCandidatesForAnalysis } from '/app/organisms/ApplyHistoricOffsets/hooks/useOffsetCandidatesForAnalysis'
+import { LegacyApplyHistoricOffsets } from '/app/organisms/LegacyApplyHistoricOffsets'
+import { useOffsetCandidatesForAnalysis } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/useOffsetCandidatesForAnalysis'
 import { FileCard } from '../ChooseRobotSlideout/FileCard'
 import {
   getRunTimeParameterFilesForRun,
@@ -656,7 +656,7 @@ export function ChooseProtocolSlideoutComponent(
         >
           {currentPage === 1
             ? !isNewLpc && (
-                <ApplyHistoricOffsets
+                <LegacyApplyHistoricOffsets
                   offsetCandidates={offsetCandidates}
                   shouldApplyOffsets={shouldApplyOffsets}
                   setShouldApplyOffsets={setShouldApplyOffsets}

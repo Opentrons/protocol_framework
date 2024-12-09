@@ -29,8 +29,8 @@ import {
   getRunTimeParameterFilesForRun,
   getRunTimeParameterValuesForRun,
 } from '/app/transformations/runs'
-import { ApplyHistoricOffsets } from '/app/organisms/ApplyHistoricOffsets'
-import { useOffsetCandidatesForAnalysis } from '/app/organisms/ApplyHistoricOffsets/hooks/useOffsetCandidatesForAnalysis'
+import { LegacyApplyHistoricOffsets } from '/app/organisms/LegacyApplyHistoricOffsets'
+import { useOffsetCandidatesForAnalysis } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/useOffsetCandidatesForAnalysis'
 import { ChooseRobotSlideout } from '../ChooseRobotSlideout'
 import { useCreateRunFromProtocol } from './useCreateRunFromProtocol'
 import { useFeatureFlag } from '/app/redux/config'
@@ -222,7 +222,7 @@ export function ChooseRobotToRunProtocolSlideoutComponent(
   )
 
   const offsetsComponent = isNewLpc ? null : (
-    <ApplyHistoricOffsets
+    <LegacyApplyHistoricOffsets
       offsetCandidates={offsetCandidates}
       shouldApplyOffsets={shouldApplyOffsets}
       setShouldApplyOffsets={setShouldApplyOffsets}
