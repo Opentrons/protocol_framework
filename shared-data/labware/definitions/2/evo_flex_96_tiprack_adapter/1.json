@@ -5,7 +5,7 @@
     "brandId": []
   },
   "metadata": {
-    "displayName": "Flex 96 Evo Tip Rack Adapter",
+    "displayName": "Evotips adapter",
     "displayCategory": "adapter",
     "displayVolumeUnits": "\u00b5L",
     "tags": []
@@ -27,7 +27,7 @@
     "quirks": ["tiprackAdapterFor96Channel"],
     "isTiprack": false,
     "isMagneticModuleCompatible": false,
-    "loadName": "evo_flex_96_tiprack_adapter"
+    "loadName": "evotips_flex_96_tiprack_adapter"
   },
   "namespace": "opentrons",
   "version": 1,
