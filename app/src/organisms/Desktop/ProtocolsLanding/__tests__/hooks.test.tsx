@@ -107,6 +107,7 @@ const mockStoredProtocolData = [
     modified: 1652339310312.1985,
     srcFileNames: ['testProtocol.json'],
     srcFiles: [],
+    groupedCommands: [],
     mostRecentAnalysis: {
       robotType: OT2_ROBOT_TYPE,
       createdAt: '2022-05-10T17:04:43.132768+00:00',

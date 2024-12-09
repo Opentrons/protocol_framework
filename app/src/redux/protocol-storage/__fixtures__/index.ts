@@ -1,7 +1,15 @@
 import { simpleAnalysisFileFixture } from '@opentrons/shared-data'
-import type { StoredProtocolData, StoredProtocolDir } from '../types'
+import type { LeafNode, StoredProtocolData, StoredProtocolDir } from '../types'
 
 import type { ProtocolAnalysisOutput } from '@opentrons/shared-data'
+
+const mockGroupedCommands = simpleAnalysisFileFixture.commands.map(
+  command =>
+    ({
+      command,
+      isHighlighted: false,
+    } as LeafNode)
+)
 
 export const storedProtocolData: StoredProtocolData = {
   protocolKey: 'protocolKeyStub',
@@ -9,6 +17,7 @@ export const storedProtocolData: StoredProtocolData = {
   srcFileNames: ['fakeSrcFileName'],
   srcFiles: ['fakeSrcFile' as any],
   modified: 123456789,
+  groupedCommands: mockGroupedCommands,
 }
 
 export const storedProtocolDataWithCsvRunTimeParameter: StoredProtocolData = {
@@ -29,6 +38,7 @@ export const storedProtocolDataWithCsvRunTimeParameter: StoredProtocolData = {
   srcFileNames: ['fakeSrcFileName'],
   srcFiles: ['fakeSrcFile' as any],
   modified: 123456789,
+  groupedCommands: mockGroupedCommands,
 }
 
 export const storedProtocolDataWithoutRunTimeParameters: StoredProtocolData = {
@@ -40,6 +50,7 @@ export const storedProtocolDataWithoutRunTimeParameters: StoredProtocolData = {
   srcFileNames: ['fakeSrcFileName'],
   srcFiles: ['fakeSrcFile' as any],
   modified: 123456789,
+  groupedCommands: mockGroupedCommands,
 }
 
 export const storedProtocolDir: StoredProtocolDir = {
@@ -55,4 +66,5 @@ export const storedProtocolDataTwo: StoredProtocolData = {
   srcFileNames: ['fakeSrcFileNameTwo'],
   srcFiles: ['fakeSrcFileTwo' as any],
   modified: 987654321,
+  groupedCommands: mockGroupedCommands,
 }

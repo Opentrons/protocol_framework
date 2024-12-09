@@ -5,6 +5,7 @@ import { when } from 'vitest-when'
 import { renderWithProviders } from '/app/__testing-utils__'
 
 import { i18n } from '/app/i18n'
+import { getGroupedCommands } from '/app/redux/protocol-storage/utils'
 import { getStoredProtocol } from '/app/redux/protocol-storage'
 import { storedProtocolData } from '/app/redux/protocol-storage/__fixtures__'
 import { ProtocolDetails as ProtocolDetailsContents } from '/app/organisms/Desktop/ProtocolDetails'
@@ -15,7 +16,7 @@ import type { State } from '/app/redux/types'
 
 const mockProtocolKey = 'protocolKeyStub'
 
-vi.mock('/app/redux/protocol-storage')
+vi.mock('/app/redux/protocol-storage/selectors')
 vi.mock('/app/organisms/Desktop/ProtocolDetails')
 
 const MOCK_STATE: State = {
@@ -65,6 +66,10 @@ describe('ProtocolDetails', () => {
         mostRecentAnalysis: storedProtocolData.mostRecentAnalysis,
         srcFileNames: storedProtocolData.srcFileNames,
         srcFiles: storedProtocolData.srcFiles,
+        groupedCommands:
+          storedProtocolData.mostRecentAnalysis != null
+            ? getGroupedCommands(storedProtocolData.mostRecentAnalysis)
+            : [],
       },
       {}
     )

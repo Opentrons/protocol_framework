@@ -210,7 +210,13 @@ export function ProtocolDetails(
 ): JSX.Element | null {
   const trackEvent = useTrackEvent()
   const dispatch = useDispatch<Dispatch>()
-  const { protocolKey, srcFileNames, mostRecentAnalysis, modified } = props
+  const {
+    protocolKey,
+    srcFileNames,
+    mostRecentAnalysis,
+    modified,
+    groupedCommands,
+  } = props
   const { t, i18n } = useTranslation(['protocol_details', 'shared'])
   const enableProtocolStats = useFeatureFlag('protocolStats')
   const enableProtocolTimeline = useFeatureFlag('protocolTimeline')
@@ -338,7 +344,10 @@ export function ProtocolDetails(
     ) : null,
     timeline:
       enableProtocolTimeline && mostRecentAnalysis != null ? (
-        <AnnotatedSteps analysis={mostRecentAnalysis} />
+        <AnnotatedSteps
+          analysis={mostRecentAnalysis}
+          groupedCommands={groupedCommands}
+        />
       ) : null,
     parameters: <ProtocolParameters runTimeParameters={runTimeParameters} />,
   }

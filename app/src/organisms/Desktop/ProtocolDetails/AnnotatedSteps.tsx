@@ -14,6 +14,7 @@ import {
   OVERFLOW_AUTO,
   Icon,
   ALIGN_FLEX_START,
+  CURSOR_POINTER,
 } from '@opentrons/components'
 
 import { CommandIcon, CommandText } from '/app/molecules/Command'
@@ -25,24 +26,16 @@ import type {
   RunTimeCommand,
   LabwareDefinition2,
 } from '@opentrons/shared-data'
+import type { LeafNode, ParentNode } from '/app/redux/protocol-storage'
 
 interface AnnotatedStepsProps {
   analysis: CompletedProtocolAnalysis | ProtocolAnalysisOutput
+  groupedCommands: Array<LeafNode | ParentNode>
   currentCommandIndex?: number
 }
 
-interface ParentNode {
-  annotationIndex: number
-  subCommands: LeafNode[]
-  isHighlighted: boolean
-}
-interface LeafNode {
-  command: RunTimeCommand
-  isHighlighted: boolean
-}
-
 export function AnnotatedSteps(props: AnnotatedStepsProps): JSX.Element {
-  const { analysis, currentCommandIndex } = props
+  const { analysis, currentCommandIndex, groupedCommands } = props
   const HIDE_SCROLLBAR = css`
     ::-webkit-scrollbar {
       display: none;
@@ -57,49 +50,30 @@ export function AnnotatedSteps(props: AnnotatedStepsProps): JSX.Element {
         : [],
     [isValidRobotSideAnalysis]
   )
+  const annotations = analysis?.commandAnnotations ?? []
 
-  const annotations = analysis.commandAnnotations ?? []
-
-  const groupedCommands = analysis.commands.reduce<
-    Array<LeafNode | ParentNode>
-  >((acc, c, i) => {
-    const foundAnnotationIndex = annotations.findIndex(
-      a => c.key != null && a.commandKeys.includes(c.key)
-    )
-    const lastAccNode = acc[acc.length - 1]
-    if (
-      acc.length > 0 &&
-      c.key != null &&
-      'annotationIndex' in lastAccNode &&
-      lastAccNode.annotationIndex != null &&
-      annotations[lastAccNode.annotationIndex]?.commandKeys.includes(c.key)
-    ) {
-      return [
-        ...acc.slice(0, -1),
-        {
-          ...lastAccNode,
-          subCommands: [
-            ...lastAccNode.subCommands,
-            { command: c, isHighlighted: i === currentCommandIndex },
-          ],
-          isHighlighted: lastAccNode.isHighlighted || i === currentCommandIndex,
-        },
-      ]
-    } else if (foundAnnotationIndex >= 0) {
-      return [
-        ...acc,
-        {
-          annotationIndex: foundAnnotationIndex,
-          subCommands: [
-            { command: c, isHighlighted: i === currentCommandIndex },
-          ],
-          isHighlighted: i === currentCommandIndex,
-        },
-      ]
+  //  NOTE: isHighlighted is meant to show when running on the protocol in the run log
+  //  but isn't in use during protocol details. Therefore, this info is not in use and is
+  //  merely a proof-of-concept for when we do add this to the run log.
+  const groupedCommandsHighlightedInfo = groupedCommands.map(node => {
+    if ('annotationIndex' in node) {
+      return {
+        ...node,
+        isHighlighted: node.subCommands.some(subNode => subNode.isHighlighted),
+        subCommands: node.subCommands.map(subNode => ({
+          ...subNode,
+          isHighlighted:
+            currentCommandIndex === analysis.commands.indexOf(subNode.command),
+        })),
+      }
     } else {
-      return [...acc, { command: c, isHighlighted: i === currentCommandIndex }]
+      return {
+        ...node,
+        isHighlighted:
+          currentCommandIndex === analysis.commands.indexOf(node.command),
+      }
     }
-  }, [])
+  })
 
   return (
     <Flex
@@ -114,10 +88,10 @@ export function AnnotatedSteps(props: AnnotatedStepsProps): JSX.Element {
         marginY={SPACING.spacing16}
         gridGap={SPACING.spacing4}
       >
-        {groupedCommands.map((c, i) =>
+        {groupedCommandsHighlightedInfo.map((c, i) =>
           'annotationIndex' in c ? (
             <AnnotatedGroup
-              key={i}
+              key={`group-${i}`}
               stepNumber={(i + 1).toString()}
               analysis={analysis}
               annotationType={
@@ -129,7 +103,7 @@ export function AnnotatedSteps(props: AnnotatedStepsProps): JSX.Element {
             />
           ) : (
             <IndividualCommand
-              key={i}
+              key={c.command.id}
               stepNumber={(i + 1).toString()}
               command={c.command}
               isHighlighted={c.isHighlighted}
@@ -167,7 +141,7 @@ function AnnotatedGroup(props: AnnotatedGroupProps): JSX.Element {
       onClick={() => {
         setIsExpanded(!isExpanded)
       }}
-      cursor="pointer"
+      cursor={CURSOR_POINTER}
     >
       {isExpanded ? (
         <Flex flexDirection={DIRECTION_COLUMN}>
@@ -187,12 +161,11 @@ function AnnotatedGroup(props: AnnotatedGroupProps): JSX.Element {
               backgroundColor={backgroundColor}
               color={COLORS.black90}
               borderRadius={BORDERS.borderRadius4}
-              padding={SPACING.spacing8}
+              padding={`${SPACING.spacing8} ${SPACING.spacing8} ${SPACING.spacing8} ${SPACING.spacing16}`}
             >
               <LegacyStyledText
                 as="h3"
                 fontWeight={TYPOGRAPHY.fontWeightSemiBold}
-                marginLeft={SPACING.spacing8}
               >
                 {annotationType}
               </LegacyStyledText>
@@ -219,16 +192,10 @@ function AnnotatedGroup(props: AnnotatedGroupProps): JSX.Element {
         </Flex>
       ) : (
         <Flex alignItems={ALIGN_CENTER} gridGap={SPACING.spacing8}>
-          <LegacyStyledText
-            minWidth={SPACING.spacing16}
-            fontSize={TYPOGRAPHY.fontSizeCaption}
-          >
-            {stepNumber}
-          </LegacyStyledText>
+          <LegacyStyledText as="label">{stepNumber}</LegacyStyledText>
           <Flex
             alignItems={ALIGN_CENTER}
             backgroundColor={backgroundColor}
-            color={COLORS.black90}
             borderRadius={BORDERS.borderRadius4}
             padding={SPACING.spacing8}
           >
@@ -239,7 +206,7 @@ function AnnotatedGroup(props: AnnotatedGroupProps): JSX.Element {
             >
               {annotationType}
             </LegacyStyledText>
-            <Icon name="chevron-down" size="2rem" />
+            <Icon name="chevron-down" size="2rem" color={COLORS.black90} />
           </Flex>
         </Flex>
       )}
