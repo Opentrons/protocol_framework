@@ -640,7 +640,7 @@ class LabwareDefinition(BaseModel):
         ...,
         description="Version of the labware definition itself "
         "(eg myPlate v1/v2/v3). An incrementing integer",
-        ge=1.0,
+        ge=1,
     )
     namespace: str = Field(..., pattern=SAFE_STRING_REGEX)
     metadata: Metadata = Field(
