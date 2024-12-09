@@ -33,9 +33,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "touchTip": {
                 "enable": false,
                 "params": {
@@ -102,9 +100,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -175,9 +171,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -255,9 +249,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "touchTip": {
                 "enable": false,
                 "params": {
@@ -324,9 +316,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -397,9 +387,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -477,9 +465,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "touchTip": {
                 "enable": false,
                 "params": {
@@ -546,9 +532,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -618,9 +602,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -693,9 +675,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "touchTip": {
                 "enable": false,
                 "params": {
@@ -762,9 +742,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -798,9 +776,7 @@
                 "volume": 50
               }
             },
-            "pushOutByVolume": [
-              [0.0, 20.0]
-            ],
+            "pushOutByVolume": [[0.0, 20.0]],
             "delay": {
               "enable": true,
               "params": {
@@ -832,9 +808,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -907,9 +881,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "touchTip": {
                 "enable": false,
                 "params": {
@@ -976,9 +948,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -1012,9 +982,7 @@
                 "volume": 50
               }
             },
-            "pushOutByVolume": [
-              [0.0, 35.0]
-            ],
+            "pushOutByVolume": [[0.0, 35.0]],
             "delay": {
               "enable": true,
               "params": {
@@ -1046,9 +1014,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -1126,9 +1092,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "touchTip": {
                 "enable": false,
                 "params": {
@@ -1195,9 +1159,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -1267,9 +1229,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -1342,9 +1302,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "touchTip": {
                 "enable": false,
                 "params": {
@@ -1411,9 +1369,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -1447,9 +1403,7 @@
                 "volume": 50
               }
             },
-            "pushOutByVolume": [
-              [0.0, 20.0]
-            ],
+            "pushOutByVolume": [[0.0, 20.0]],
             "delay": {
               "enable": true,
               "params": {
@@ -1481,9 +1435,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -1556,9 +1508,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "touchTip": {
                 "enable": false,
                 "params": {
@@ -1625,9 +1575,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -1661,9 +1609,7 @@
                 "volume": 50
               }
             },
-            "pushOutByVolume": [
-              [0.0, 35.0]
-            ],
+            "pushOutByVolume": [[0.0, 35.0]],
             "delay": {
               "enable": true,
               "params": {
@@ -1695,9 +1641,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -1775,9 +1719,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "touchTip": {
                 "enable": false,
                 "params": {
@@ -1844,9 +1786,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -1916,9 +1856,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -1991,9 +1929,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "touchTip": {
                 "enable": false,
                 "params": {
@@ -2060,9 +1996,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -2096,9 +2030,7 @@
                 "volume": 50
               }
             },
-            "pushOutByVolume": [
-              [0.0, 20.0]
-            ],
+            "pushOutByVolume": [[0.0, 20.0]],
             "delay": {
               "enable": true,
               "params": {
@@ -2130,9 +2062,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -2205,9 +2135,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "touchTip": {
                 "enable": false,
                 "params": {
@@ -2275,9 +2203,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
@@ -2311,9 +2237,7 @@
                 "volume": 50
               }
             },
-            "pushOutByVolume": [
-              [0.0, 35.0]
-            ],
+            "pushOutByVolume": [[0.0, 35.0]],
             "delay": {
               "enable": true,
               "params": {
@@ -2345,9 +2269,7 @@
                 "z": 2
               },
               "speed": 4,
-              "airGapByVolume": [
-                [0.0, 0.0]
-              ],
+              "airGapByVolume": [[0.0, 0.0]],
               "blowout": {
                 "enable": false
               },
