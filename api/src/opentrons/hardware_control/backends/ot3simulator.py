@@ -45,6 +45,7 @@ from opentrons.hardware_control.types import (
     EstopPhysicalStatus,
     HardwareEventHandler,
     HardwareEventUnsubscriber,
+    PipetteSensorResponseQueue,
 )
 
 from opentrons_shared_data.pipette.types import PipetteName, PipetteModel
@@ -62,9 +63,9 @@ from opentrons.hardware_control.dev_types import (
 )
 from opentrons.util.async_helpers import ensure_yield
 from .types import HWStopCondition
-from .flex_protocol import FlexBackend
-from opentrons_hardware.firmware_bindings.constants import SensorId
-from opentrons_hardware.sensors.types import SensorDataType
+from .flex_protocol import (
+    FlexBackend,
+)
 
 log = logging.getLogger(__name__)
 
@@ -354,9 +355,7 @@ class OT3Simulator(FlexBackend):
         num_baseline_reads: int,
         probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
         force_both_sensors: bool = False,
-        response_queue: Optional[
-            asyncio.Queue[Dict[SensorId, List[SensorDataType]]]
-        ] = None,
+        response_queue: Optional[PipetteSensorResponseQueue] = None,
     ) -> float:
         z_axis = Axis.by_mount(mount)
         pos = self._position

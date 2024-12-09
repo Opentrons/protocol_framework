@@ -239,7 +239,7 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
           onClose()
         }}
         onCloseClick={handleClearSelectedWells}
-        height="calc(100vh - 64px)"
+        height="100%"
         closeButton={
           <StyledText desktopStyle="bodyDefaultRegular">
             {t('clear_wells')}
