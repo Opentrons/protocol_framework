@@ -148,7 +148,7 @@ export const getOnDeviceDisplaySettings: (
     sleepMs: SLEEP_NEVER_MS,
     brightness: 4,
     textSize: 1,
-    unfinishedUnboxingFlowRoute: '/welcome',
+    unfinishedUnboxingFlowRoute: '/choose-language',
   }
 })
 
