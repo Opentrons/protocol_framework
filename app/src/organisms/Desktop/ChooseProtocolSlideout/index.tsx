@@ -68,6 +68,7 @@ import type { RunTimeParameter } from '@opentrons/shared-data'
 import type { Robot } from '/app/redux/discovery/types'
 import type { StoredProtocolData } from '/app/redux/protocol-storage'
 import type { State } from '/app/redux/types'
+import { useFeatureFlag } from '/app/redux/config'
 
 export const CARD_OUTLINE_BORDER_STYLE = css`
   border-style: ${BORDERS.styleSolid};
@@ -105,6 +106,8 @@ export function ChooseProtocolSlideoutComponent(
 
   const { robot, showSlideout, onCloseClick } = props
   const { name } = robot
+
+  const isNewLpc = useFeatureFlag('lpcRedesign')
 
   const [
     selectedProtocol,
@@ -651,28 +654,30 @@ export function ChooseProtocolSlideoutComponent(
             robot?.ip === OPENTRONS_USB ? appShellRequestor : undefined
           }
         >
-          {currentPage === 1 ? (
-            <ApplyHistoricOffsets
-              offsetCandidates={offsetCandidates}
-              shouldApplyOffsets={shouldApplyOffsets}
-              setShouldApplyOffsets={setShouldApplyOffsets}
-              commands={
-                (!missingAnalysisData
-                  ? selectedProtocol?.mostRecentAnalysis?.commands
-                  : []) ?? []
-              }
-              labware={
-                (!missingAnalysisData
-                  ? selectedProtocol?.mostRecentAnalysis?.labware
-                  : []) ?? []
-              }
-              modules={
-                (!missingAnalysisData
-                  ? selectedProtocol?.mostRecentAnalysis?.modules
-                  : []) ?? []
-              }
-            />
-          ) : null}
+          {currentPage === 1
+            ? !isNewLpc && (
+                <ApplyHistoricOffsets
+                  offsetCandidates={offsetCandidates}
+                  shouldApplyOffsets={shouldApplyOffsets}
+                  setShouldApplyOffsets={setShouldApplyOffsets}
+                  commands={
+                    (!missingAnalysisData
+                      ? selectedProtocol?.mostRecentAnalysis?.commands
+                      : []) ?? []
+                  }
+                  labware={
+                    (!missingAnalysisData
+                      ? selectedProtocol?.mostRecentAnalysis?.labware
+                      : []) ?? []
+                  }
+                  modules={
+                    (!missingAnalysisData
+                      ? selectedProtocol?.mostRecentAnalysis?.modules
+                      : []) ?? []
+                  }
+                />
+              )
+            : null}
           {hasRunTimeParameters ? multiPageFooter : singlePageFooter}
         </ApiHostProvider>
       }
