@@ -4,6 +4,7 @@ export const DEV_INTERNAL_FLAGS: DevInternalFlag[] = [
   'forceHttpPolling',
   'protocolStats',
   'enableRunNotes',
+  'lpcRedesign',
   'protocolTimeline',
   'enableLabwareCreator',
   'reactQueryDevtools',
