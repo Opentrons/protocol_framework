@@ -19,7 +19,7 @@ import asyncio
 
 NUM_SECONDS_TO_WAIT = 1
 HOVER_HEIGHT_MM = 50
-DEPTH_INTO_RESERVOIR_FOR_ASPIRATE = -24
+DEPTH_INTO_RESERVOIR_FOR_ASPIRATE = -26
 DEPTH_INTO_RESERVOIR_FOR_DISPENSE = DEPTH_INTO_RESERVOIR_FOR_ASPIRATE
 
 RESERVOIR_LABWARE = "nest_1_reservoir_195ml"
@@ -127,6 +127,7 @@ async def aspirate_and_dispense(
         OT3Mount.LEFT, plate + Point(z=-9)
     )
     await api.dispense(OT3Mount.LEFT)
+    await api.blow_out()
     await api.home_z(OT3Mount.LEFT)
 
 

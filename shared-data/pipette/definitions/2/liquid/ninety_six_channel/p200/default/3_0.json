@@ -12,8 +12,8 @@
         "valuesByApiLevel": { "2.14": 6 }
       },
       "defaultBlowOutFlowRate": {
-        "default": 80,
-        "valuesByApiLevel": { "2.14": 80 }
+        "default": 10,
+        "valuesByApiLevel": { "2.14": 10 }
       },
       "defaultFlowAcceleration": 16000.0,
       "defaultTipLength": 57.9,
@@ -67,8 +67,8 @@
         "valuesByApiLevel": { "2.14": 80 }
       },
       "defaultBlowOutFlowRate": {
-        "default": 80,
-        "valuesByApiLevel": { "2.14": 80 }
+        "default": 10,
+        "valuesByApiLevel": { "2.14": 10 }
       },
       "defaultFlowAcceleration": 16000.0,
       "defaultTipLength": 58.35,
@@ -119,7 +119,7 @@
           ]
         }
       },
-      "defaultPushOutVolume": 5
+      "defaultPushOutVolume": 10
     }
   },
   "maxVolume": 200,
