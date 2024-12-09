@@ -363,7 +363,8 @@ class ByTipTypeSetting(BaseModel):
         ..., description="Single dispense parameters for this tip type."
     )
     multiDispense: MultiDispenseProperties | SkipJsonSchema[None] = Field(
-        None, description="Optional multi-dispense parameters for this tip type.",
+        None,
+        description="Optional multi-dispense parameters for this tip type.",
         json_schema_extra=_remove_default,
     )
 
