@@ -70,11 +70,11 @@ HOME_SPEED_L = 100
 HOME_ACCELERATION = 100
 HOME_ACCELERATION_L = 800
 MOVE_ACCELERATION_X = 1500
-MOVE_ACCELERATION_Z = 1500
+MOVE_ACCELERATION_Z = 1000
 MOVE_ACCELERATION_L = 800
-MAX_SPEED_DISCONTINUITY_X = 20
-MAX_SPEED_DISCONTINUITY_Z = 10
-MAX_SPEED_DISCONTINUITY_L = 20
+MAX_SPEED_DISCONTINUITY_X = 40
+MAX_SPEED_DISCONTINUITY_Z = 40
+MAX_SPEED_DISCONTINUITY_L = 40
 HOME_CURRENT_X = 1.8
 HOME_CURRENT_Z = 1.5
 HOME_CURRENT_L = 0.8
@@ -333,7 +333,7 @@ class FlexStacker():
                                                     ).add_element(
                                                     f'D{msd}')
 
-        #print(c)
+        print(c)
         self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
         if direction == DIR.POSITIVE and axis == AXIS.X:
             self.current_position.update({'X': self.current_position['X'] + distance})
