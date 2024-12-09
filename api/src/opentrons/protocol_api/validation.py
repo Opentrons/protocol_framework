@@ -20,7 +20,12 @@ from opentrons_shared_data.labware.labware_definition import (
 )
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.robot.types import RobotType
-from opentrons.protocol_engine.types import LabwareLocation, NonStackedLocation
+from opentrons.protocol_engine.types import (
+    LabwareLocation,
+    DeckSlotLocation,
+    AddressableAreaLocation,
+    ModuleLocation,
+)
 from opentrons.protocols.api_support.types import APIVersion, ThermocyclerStep
 from opentrons.protocols.api_support.util import APIVersionError
 from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
@@ -400,7 +405,14 @@ def ensure_labware_is_loadable(
     if (
         definition.allowedRoles
         and LabwareRole.stackableOnly in definition.allowedRoles
-        and isinstance(location, NonStackedLocation)
+        and isinstance(
+            location,
+            (
+                DeckSlotLocation,
+                AddressableAreaLocation,
+                ModuleLocation,
+            ),
+        )
     ):
         raise LabwareDefinitionIsNotLoadableOnPosition(
             f"Labware {definition.parameters.loadName} cannot be loaded on {location}."

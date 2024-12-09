@@ -14,11 +14,11 @@
     ["A12", "B12", "C12", "D12", "E12", "F12", "G12", "H12"]
   ],
   "brand": {
-    "brand": "opentrons_evo",
+    "brand": "opentrons",
     "brandId": []
   },
   "metadata": {
-    "displayName": "Opentrons_evo 96 Well Plate 300 µL",
+    "displayName": "Evotips",
     "displayCategory": "wellPlate",
     "displayVolumeUnits": "µL",
     "tags": []
@@ -26,7 +26,7 @@
   "dimensions": {
     "xDimension": 127.75,
     "yDimension": 86,
-    "zDimension": 34
+    "zDimension": 38.5
   },
   "wells": {
     "A1": {
@@ -1004,7 +1004,7 @@
     "quirks": [],
     "isTiprack": false,
     "isMagneticModuleCompatible": false,
-    "loadName": "opentrons_evo_96_wellplate_300ul"
+    "loadName": "evotips_opentrons_96_labware"
   },
   "namespace": "opentrons",
   "allowedRoles": ["stackableOnly"],
@@ -1019,7 +1019,7 @@
     "nest_96_wellplate_2ml_deep": {
       "x": 0,
       "y": 0,
-      "z": 20
+      "z": 2
     }
   }
 }
