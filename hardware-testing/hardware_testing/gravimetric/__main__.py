@@ -172,9 +172,9 @@ class RunArgs:
             offsets = workarounds.http_get_all_labware_offsets()
             ui.print_info(f"found {len(offsets)} offsets:")
             for offset in offsets:
-                ui.print_info(f"\t{offset['createdAt']}:")
-                ui.print_info(f"\t\t{offset['definitionUri']}")
-                ui.print_info(f"\t\t{offset['vector']}")
+                # ui.print_info(f"\t{offset['createdAt']}:")
+                # ui.print_info(f"\t\t{offset['definitionUri']}")
+                # ui.print_info(f"\t\t{offset['vector']}")
                 LABWARE_OFFSETS.append(offset)
         # gather the custom labware (for simulation)
         custom_defs = {}

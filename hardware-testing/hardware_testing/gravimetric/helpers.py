@@ -253,10 +253,10 @@ def _get_tip_batch(is_simulating: bool, tip: int) -> str:
 
 def _apply(labware: Labware, cfg: config.VolumetricConfig) -> None:
     o = get_latest_offset_for_labware(cfg.labware_offsets, labware)
-    ui.print_info(
-        f'Apply labware offset to "{labware.name}" (slot={labware.parent}): '
-        f"x={round(o.x, 2)}, y={round(o.y, 2)}, z={round(o.z, 2)}"
-    )
+    # ui.print_info(
+    #     f'Apply labware offset to "{labware.name}" (slot={labware.parent}): '
+    #     f"x={round(o.x, 2)}, y={round(o.y, 2)}, z={round(o.z, 2)}"
+    # )
     labware.set_calibration(o)
 
 
