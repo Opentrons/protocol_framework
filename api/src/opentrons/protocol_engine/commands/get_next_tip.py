@@ -73,6 +73,10 @@ class GetNextTipImplementation(
             starting_tip_name is not None
             and nozzle_map.configuration != NozzleConfigurationType.FULL
         ):
+            # This is to match the behavior found in PAPI, but also because we don't have logic to automatically find
+            # the next tip with partial configuration and a starting tip. This will never work for a 96-channel due to
+            # x-axis overlap, but could eventually work with 8-channel if we better define starting tip USED or CLEAN
+            # state when starting a protocol to prevent accidental tip pick-up with starting non-full tip racks.
             return SuccessData(
                 public=GetNextTipResult(
                     nextTipInfo=NoTipAvailable(
@@ -91,7 +95,7 @@ class GetNextTipImplementation(
                 nozzle_map=nozzle_map,
             )
             if well_name is not None:
-                next_tip = NextTipInfo(labwareId=labware_id, tipOriginWell=well_name)
+                next_tip = NextTipInfo(labwareId=labware_id, tipStartingWell=well_name)
                 break
             # After the first tip rack is exhausted, starting tip no longer applies
             starting_tip_name = None

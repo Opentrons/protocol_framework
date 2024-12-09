@@ -44,7 +44,7 @@ async def test_get_next_tip_implementation(
 
     assert result == SuccessData(
         public=GetNextTipResult(
-            nextTipInfo=NextTipInfo(labwareId="123", tipOriginWell="foo")
+            nextTipInfo=NextTipInfo(labwareId="123", tipStartingWell="foo")
         ),
     )
 
@@ -79,7 +79,7 @@ async def test_get_next_tip_implementation_multiple_tip_racks(
 
     assert result == SuccessData(
         public=GetNextTipResult(
-            nextTipInfo=NextTipInfo(labwareId="456", tipOriginWell="foo")
+            nextTipInfo=NextTipInfo(labwareId="456", tipStartingWell="foo")
         ),
     )
 

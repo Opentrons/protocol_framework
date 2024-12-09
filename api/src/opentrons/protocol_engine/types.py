@@ -1122,7 +1122,7 @@ class NextTipInfo(BaseModel):
         ...,
         description="The labware ID of the tip rack where the next available tip(s) are located.",
     )
-    tipOriginWell: str = Field(
+    tipStartingWell: str = Field(
         ..., description="The (starting) well name of the next available tip(s)."
     )
 
