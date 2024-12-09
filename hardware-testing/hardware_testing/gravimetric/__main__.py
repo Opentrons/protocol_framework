@@ -187,11 +187,11 @@ class RunArgs:
                 "Starting opentrons-robot-server, so we can http GET labware offsets"
             )
             LABWARE_OFFSETS.extend(workarounds.http_get_all_labware_offsets())
-            ui.print_info(f"found {len(LABWARE_OFFSETS)} offsets:")
-            for offset in LABWARE_OFFSETS:
-                ui.print_info(f"\t{offset.createdAt}:")
-                ui.print_info(f"\t\t{offset.definitionUri}")
-                ui.print_info(f"\t\t{offset.vector}")
+            #ui.print_info(f"found {len(LABWARE_OFFSETS)} offsets:")
+            #for offset in LABWARE_OFFSETS:
+            #    ui.print_info(f"\t{offset.createdAt}:")
+            #    ui.print_info(f"\t\t{offset.definitionUri}")
+            #    ui.print_info(f"\t\t{offset.vector}")
         # gather the custom labware (for simulation)
         custom_defs = {}
         if args.simulate:
