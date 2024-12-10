@@ -38,7 +38,7 @@ class ResponseSpec(NamedTuple):
 RESPONSE_SPECS = [
     ResponseSpec(
         subject=SimpleBody(data=_Resource(id="hello")),
-        expected={"data": {"id": "hello", "val": None}},
+        expected={"data": {"id": "hello"}},
     ),
     ResponseSpec(
         subject=Body(
@@ -46,8 +46,8 @@ RESPONSE_SPECS = [
             links=_Links(sibling=ResourceLink(href="/bar")),
         ),
         expected={
-            "data": {"id": "hello", "val": None},
-            "links": {"sibling": {"href": "/bar", "meta": None}},
+            "data": {"id": "hello"},
+            "links": {"sibling": {"href": "/bar"}},
         },
     ),
     ResponseSpec(
@@ -56,7 +56,7 @@ RESPONSE_SPECS = [
     ),
     ResponseSpec(
         subject=EmptyBody(links=_Links(sibling=ResourceLink(href="/bar"))),
-        expected={"links": {"sibling": {"href": "/bar", "meta": None}}},
+        expected={"links": {"sibling": {"href": "/bar"}}},
     ),
     ResponseSpec(
         subject=SimpleMultiBody(
@@ -64,7 +64,7 @@ RESPONSE_SPECS = [
             meta=MultiBodyMeta(cursor=1, totalLength=3),
         ),
         expected={
-            "data": [{"id": "hello", "val": None}, {"id": "goodbye", "val": None}],
+            "data": [{"id": "hello"}, {"id": "goodbye"}],
             "meta": {"cursor": 1, "totalLength": 3},
         },
     ),
@@ -75,8 +75,8 @@ RESPONSE_SPECS = [
             meta=MultiBodyMeta(cursor=1, totalLength=3),
         ),
         expected={
-            "data": [{"id": "hello", "val": None}, {"id": "goodbye", "val": None}],
-            "links": {"sibling": {"href": "/bar", "meta": None}},
+            "data": [{"id": "hello"}, {"id": "goodbye"}],
+            "links": {"sibling": {"href": "/bar"}},
             "meta": {"cursor": 1, "totalLength": 3},
         },
     ),
