@@ -1,7 +1,7 @@
-import { useState, Fragment } from 'react'
+import { scan } from 'react-scan'
+import { useState, Fragment, useEffect } from 'react'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
-
 import {
   Box,
   COLORS,
@@ -39,6 +39,7 @@ import { ProtocolTimeline } from '/app/pages/Desktop/Protocols/ProtocolDetails/P
 import { PortalRoot as ModalPortalRoot } from './portal'
 import { DesktopAppFallback } from './DesktopAppFallback'
 import { ReactQueryDevtools } from './tools'
+import { useFeatureFlag } from '../redux/config'
 
 import type { RouteProps } from './types'
 
@@ -48,6 +49,15 @@ export const DesktopApp = (): JSX.Element => {
     isEmergencyStopModalDismissed,
     setIsEmergencyStopModalDismissed,
   ] = useState<boolean>(false)
+
+  // note for react-scan
+  const enableReactScan = useFeatureFlag('reactScan')
+  if (typeof window !== 'undefined') {
+    scan({
+      enabled: enableReactScan,
+      log: true,
+    })
+  }
 
   const desktopRoutes: RouteProps[] = [
     {
