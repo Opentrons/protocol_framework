@@ -37,7 +37,7 @@
   "wells": {
     "A1": {
       "shape": "rectangular",
-      "depth": 42.16,
+      "depth": 41.75,
       "xDimension": 8.33,
       "yDimension": 71.88,
       "totalLiquidVolume": 22000,
@@ -48,7 +48,7 @@
     },
     "A2": {
       "shape": "rectangular",
-      "depth": 42.16,
+      "depth": 41.75,
       "xDimension": 8.33,
       "yDimension": 71.88,
       "totalLiquidVolume": 22000,
@@ -59,7 +59,7 @@
     },
     "A3": {
       "shape": "rectangular",
-      "depth": 42.16,
+      "depth": 41.75,
       "xDimension": 8.33,
       "yDimension": 71.88,
       "totalLiquidVolume": 22000,
@@ -70,7 +70,7 @@
     },
     "A4": {
       "shape": "rectangular",
-      "depth": 42.16,
+      "depth": 41.75,
       "xDimension": 8.33,
       "yDimension": 71.88,
       "totalLiquidVolume": 22000,
@@ -81,7 +81,7 @@
     },
     "A5": {
       "shape": "rectangular",
-      "depth": 42.16,
+      "depth": 41.75,
       "xDimension": 8.33,
       "yDimension": 71.88,
       "totalLiquidVolume": 22000,
@@ -92,7 +92,7 @@
     },
     "A6": {
       "shape": "rectangular",
-      "depth": 42.16,
+      "depth": 41.75,
       "xDimension": 8.33,
       "yDimension": 71.88,
       "totalLiquidVolume": 22000,
@@ -103,7 +103,7 @@
     },
     "A7": {
       "shape": "rectangular",
-      "depth": 42.16,
+      "depth": 41.75,
       "xDimension": 8.33,
       "yDimension": 71.88,
       "totalLiquidVolume": 22000,
@@ -114,7 +114,7 @@
     },
     "A8": {
       "shape": "rectangular",
-      "depth": 42.16,
+      "depth": 41.75,
       "xDimension": 8.33,
       "yDimension": 71.88,
       "totalLiquidVolume": 22000,
@@ -125,7 +125,7 @@
     },
     "A9": {
       "shape": "rectangular",
-      "depth": 42.16,
+      "depth": 41.75,
       "xDimension": 8.33,
       "yDimension": 71.88,
       "totalLiquidVolume": 22000,
@@ -136,7 +136,7 @@
     },
     "A10": {
       "shape": "rectangular",
-      "depth": 42.16,
+      "depth": 41.75,
       "xDimension": 8.33,
       "yDimension": 71.88,
       "totalLiquidVolume": 22000,
@@ -147,7 +147,7 @@
     },
     "A11": {
       "shape": "rectangular",
-      "depth": 42.16,
+      "depth": 41.75,
       "xDimension": 8.33,
       "yDimension": 71.88,
       "totalLiquidVolume": 22000,
@@ -158,7 +158,7 @@
     },
     "A12": {
       "shape": "rectangular",
-      "depth": 42.16,
+      "depth": 41.75,
       "xDimension": 8.33,
       "yDimension": 71.88,
       "totalLiquidVolume": 22000,

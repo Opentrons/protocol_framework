@@ -62,9 +62,9 @@
     },
     "A3": {
       "totalLiquidVolume": 50000,
-      "diameter": 27.95,
+      "diameter": 28.18,
       "shape": "circular",
-      "depth": 113.05,
+      "depth": 113.10,
       "x": 71.38,
       "y": 60.25,
       "z": 7.3,
@@ -72,9 +72,9 @@
     },
     "B3": {
       "totalLiquidVolume": 50000,
-      "diameter": 27.95,
+      "diameter": 28.18,
       "shape": "circular",
-      "depth": 113.05,
+      "depth": 113.10,
       "x": 71.38,
       "y": 25.25,
       "z": 7.3,
@@ -82,9 +82,9 @@
     },
     "A4": {
       "totalLiquidVolume": 50000,
-      "diameter": 27.95,
+      "diameter": 28.18,
       "shape": "circular",
-      "depth": 113.05,
+      "depth": 113.10,
       "x": 106.38,
       "y": 60.25,
       "z": 7.3,
@@ -92,9 +92,9 @@
     },
     "B4": {
       "totalLiquidVolume": 50000,
-      "diameter": 27.95,
+      "diameter": 28.18,
       "shape": "circular",
-      "depth": 113.05,
+      "depth": 113.10,
       "x": 106.38,
       "y": 25.25,
       "z": 7.3,
@@ -171,50 +171,63 @@
     "conicalWell15mL": {
       "sections": [
         {
-          "shape": "conical",
-          "topDiameter": 13.8,
-          "bottomDiameter": 2.5,
-          "topHeight": 22.55,
+          "shape": "spherical",
+          "radiusOfCurvature": 1.235,
+          "topHeight": 0.92,
           "bottomHeight": 0.0
         },
         {
           "shape": "conical",
-          "topDiameter": 14.78,
+          "topDiameter": 13.8,
+          "bottomDiameter": 2.38,
+          "topHeight": 22.55,
+          "bottomHeight": 0.92
+        },
+        {
+          "shape": "conical",
+          "topDiameter": 14.56,
           "bottomDiameter": 13.8,
-          "topHeight": 109.03,
+          "topHeight": 113.80,
           "bottomHeight": 22.55
         },
         {
           "shape": "conical",
           "topDiameter": 15.5,
-          "bottomDiameter": 14.78,
+          "bottomDiameter": 14.56,
           "topHeight": 117.8,
-          "bottomHeight": 109.03
+          "bottomHeight": 113.80
         }
       ]
     },
-    "conicalWell50ml": {
+    "conicalWell50mL": {
       "sections": [
         {
           "shape": "conical",
           "topDiameter": 26.0,
-          "bottomDiameter": 6.0,
-          "topHeight": 14.28,
+          "bottomDiameter": 4.5,
+          "topHeight": 14.35,
           "bottomHeight": 0.0
         },
         {
           "shape": "conical",
-          "topDiameter": 27.0,
+          "topDiameter": 27.69,
           "bottomDiameter": 26.0,
-          "topHeight": 109.0,
-          "bottomHeight": 14.28
+          "topHeight": 108.80,
+          "bottomHeight": 14.35
         },
         {
           "shape": "conical",
-          "topDiameter": 27.45,
-          "bottomDiameter": 27.0,
-          "topHeight": 113.3,
-          "bottomHeight": 109.0
+          "topDiameter": 27.95,
+          "bottomDiameter": 27.69,
+          "topHeight": 109.10,
+          "bottomHeight": 108.80
+        },
+        {
+          "shape": "conical",
+          "topDiameter": 28.18,
+          "bottomDiameter": 27.95,
+          "topHeight": 113.10,
+          "bottomHeight": 109.10
         }
       ]
     }

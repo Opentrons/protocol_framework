@@ -3365,114 +3365,111 @@ def test_validate_dispense_volume_into_well_meniscus(
 
 
 @pytest.mark.parametrize(
-[
-    "labware_id",
-    "well_name",
-    "input_volume_bottom",
-    "input_volume_top",
-    "expected_height_from_bottom_mm",
-    "expected_height_from_top_mm"
-],
-    INNER_WELL_GEOMETRY_TEST_PARAMS
+    [
+        "labware_id",
+        "well_name",
+        "input_volume_bottom",
+        "input_volume_top",
+        "expected_height_from_bottom_mm",
+        "expected_height_from_top_mm",
+    ],
+    INNER_WELL_GEOMETRY_TEST_PARAMS,
 )
 def test_get_well_height_at_volume(
-        decoy: Decoy,
-        subject: GeometryView,
-        labware_id: str,
-        well_name: str,
-        input_volume_bottom: float,
-        input_volume_top: float,
-        expected_height_from_bottom_mm: float,
-        expected_height_from_top_mm: float,
+    decoy: Decoy,
+    subject: GeometryView,
+    labware_id: str,
+    well_name: str,
+    input_volume_bottom: float,
+    input_volume_top: float,
+    expected_height_from_bottom_mm: float,
+    expected_height_from_top_mm: float,
 ) -> None:
     def _get_labware_def() -> LabwareDefinition:
         def_dir = str(get_shared_data_root()) + f"/labware/definitions/3/{labware_id}"
-        version_str = max(
-            [str(version) for version in listdir(def_dir)]
-        )
+        version_str = max([str(version) for version in listdir(def_dir)])
         def_path = path.join(def_dir, version_str)
         _labware_def = LabwareDefinition.parse_obj(
-            json.loads(
-                load_shared_data(def_path).decode(
-                    "utf-8"
-                )
-            )
+            json.loads(load_shared_data(def_path).decode("utf-8"))
         )
         well_geometry = _labware_def.innerLabwareGeometry.get(well_name)
         return well_geometry
-    decoy.when(subject._labware.get_well_geometry(labware_id, well_name)).then_return(_get_labware_def())
+
+    decoy.when(subject._labware.get_well_geometry(labware_id, well_name)).then_return(
+        _get_labware_def()
+    )
 
     found_height_bottom = subject.get_well_height_at_volume(
-        labware_id=labware_id,
-        well_name=well_name,
-        volume=input_volume_bottom
+        labware_id=labware_id, well_name=well_name, volume=input_volume_bottom
     )
     found_height_top = subject.get_well_height_at_volume(
-        labware_id=labware_id,
-        well_name=well_name,
-        volume=input_volume_top
+        labware_id=labware_id, well_name=well_name, volume=input_volume_top
     )
     assert isclose(found_height_bottom, expected_height_from_bottom_mm, rel_tol=0.01)
-    vol_2_expected_height_from_bottom = subject.get_well_height(
-        labware_id=labware_id, well_name=well_name
-    ) - expected_height_from_top_mm
+    vol_2_expected_height_from_bottom = (
+        subject.get_well_height(labware_id=labware_id, well_name=well_name)
+        - expected_height_from_top_mm
+    )
     assert isclose(found_height_top, vol_2_expected_height_from_bottom, rel_tol=0.01)
 
+
 @pytest.mark.parametrize(
-[
-    "labware_id",
-    "well_name",
-    "expected_volume_bottom",
-    "expected_volume_top",
-    "input_height_from_bottom_mm",
-    "input_height_from_top_mm"
-],
-    INNER_WELL_GEOMETRY_TEST_PARAMS
+    [
+        "labware_id",
+        "well_name",
+        "expected_volume_bottom",
+        "expected_volume_top",
+        "input_height_from_bottom_mm",
+        "input_height_from_top_mm",
+    ],
+    INNER_WELL_GEOMETRY_TEST_PARAMS,
 )
 def test_get_well_volume_at_height(
-        decoy: Decoy,
-        subject: GeometryView,
-        labware_id: str,
-        well_name: str,
-        expected_volume_bottom: float,
-        expected_volume_top: float,
-        input_height_from_bottom_mm: float,
-        input_height_from_top_mm: float,
-        mock_labware_view: LabwareView,
+    decoy: Decoy,
+    subject: GeometryView,
+    labware_id: str,
+    well_name: str,
+    expected_volume_bottom: float,
+    expected_volume_top: float,
+    input_height_from_bottom_mm: float,
+    input_height_from_top_mm: float,
+    mock_labware_view: LabwareView,
 ) -> None:
     def _get_labware_def() -> LabwareDefinition:
         def_dir = str(get_shared_data_root()) + f"/labware/definitions/3/{labware_id}"
-        version_str = max(
-            [str(version) for version in listdir(def_dir)]
-        )
+        version_str = max([str(version) for version in listdir(def_dir)])
         def_path = path.join(def_dir, version_str)
         _labware_def = LabwareDefinition.parse_obj(
-            json.loads(
-                load_shared_data(def_path).decode(
-                    "utf-8"
-                )
-            )
+            json.loads(load_shared_data(def_path).decode("utf-8"))
         )
         return _labware_def
+
     labware_def = _get_labware_def()
     well_geometry = labware_def.innerLabwareGeometry.get(well_name)
-    well_definition = [well for well in labware_def.wells.values() if well.geometryDefinitionId == well_name][0]
+    well_definition = [
+        well
+        for well in labware_def.wells.values()
+        if well.geometryDefinitionId == well_name
+    ][0]
 
-    decoy.when(mock_labware_view.get_well_geometry(labware_id, well_name)).then_return(well_geometry)
-    decoy.when(mock_labware_view.get_well_definition(labware_id, well_name)).then_return(well_definition)
+    decoy.when(mock_labware_view.get_well_geometry(labware_id, well_name)).then_return(
+        well_geometry
+    )
+    decoy.when(
+        mock_labware_view.get_well_definition(labware_id, well_name)
+    ).then_return(well_definition)
 
     found_volume_bottom = subject.get_well_volume_at_height(
-        labware_id=labware_id,
-        well_name=well_name,
-        height=input_height_from_bottom_mm
+        labware_id=labware_id, well_name=well_name, height=input_height_from_bottom_mm
     )
-    vol_2_input_height_from_bottom = subject.get_well_height(
-        labware_id=labware_id, well_name=well_name
-    ) - input_height_from_top_mm
+    vol_2_input_height_from_bottom = (
+        subject.get_well_height(labware_id=labware_id, well_name=well_name)
+        - input_height_from_top_mm
+    )
     found_volume_top = subject.get_well_volume_at_height(
         labware_id=labware_id,
         well_name=well_name,
-        height=vol_2_input_height_from_bottom
+        height=vol_2_input_height_from_bottom,
     )
     assert isclose(found_volume_bottom, expected_volume_bottom, rel_tol=0.01)
     assert isclose(found_volume_top, expected_volume_top, rel_tol=0.01)
