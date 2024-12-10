@@ -1,5 +1,16 @@
 """Common functions between v1 transfer and liquid-class-based transfer."""
-from typing import Iterable, Generator, Tuple, TypeVar
+import enum
+from typing import Iterable, Generator, Tuple, TypeVar, Literal
+
+
+class TransferTipPolicyV2(enum.Enum):
+    ONCE = "once"
+    NEVER = "never"
+    ALWAYS = "always"
+    PER_SOURCE = "per source"
+
+
+TransferTipPolicyV2Type = Literal["once", "always", "per source", "never"]
 
 Target = TypeVar("Target")
 

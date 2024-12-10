@@ -29,11 +29,6 @@ import { selectors as fileSelectors } from '../../file-data'
 import { selectors as stepFormSelectors } from '../../step-forms'
 import { actions as loadFileActions } from '../../load-file'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
-import {
-  getUnusedEntities,
-  getUnusedStagingAreas,
-  getUnusedTrash,
-} from '../../components/FileSidebar/utils'
 import { MaterialsListModal } from '../../organisms/MaterialsListModal'
 import { LINE_CLAMP_TEXT_STYLE, COLUMN_STYLE } from '../../atoms'
 import { useBlockingHint } from '../../organisms/BlockingHintModal/useBlockingHint'
@@ -47,9 +42,13 @@ import { InstrumentsInfo } from './InstrumentsInfo'
 import { LiquidDefinitions } from './LiquidDefinitions'
 import { StepsInfo } from './StepsInfo'
 import { StartingDeck } from './StartingDeck'
+import {
+  getUnusedEntities,
+  getUnusedStagingAreas,
+  getUnusedTrash,
+} from './utils'
 
 import type { CreateCommand } from '@opentrons/shared-data'
-import type { DeckSlot } from '@opentrons/step-generation'
 import type { ThunkDispatch } from '../../types'
 
 const DATE_ONLY_FORMAT = 'MMMM dd, yyyy'
@@ -94,7 +93,6 @@ export function ProtocolOverview(): JSX.Element {
     labwareIngredSelectors.allIngredientGroupFields
   )
   const dispatch: ThunkDispatch<any> = useDispatch()
-  const [hover, setHover] = useState<DeckSlot | string | null>(null)
   const [showMaterialsListModal, setShowMaterialsListModal] = useState<boolean>(
     false
   )
@@ -104,8 +102,6 @@ export function ProtocolOverview(): JSX.Element {
   const liquidsOnDeck = useSelector(
     labwareIngredSelectors.allIngredientNamesIds
   )
-  const leftString = t('starting_deck_state:onDeck')
-  const rightString = t('starting_deck_state:offDeck')
 
   useEffect(() => {
     if (formValues?.created == null) {
@@ -122,7 +118,6 @@ export function ProtocolOverview(): JSX.Element {
     additionalEquipmentOnDeck,
     pipettes,
   } = initialDeckSetup
-  const isOffDeckHover = hover != null && labwaresOnDeck[hover] != null
 
   const nonLoadCommands =
     fileData?.commands.filter(
@@ -326,13 +321,8 @@ export function ProtocolOverview(): JSX.Element {
             gridGap={SPACING.spacing12}
           >
             <StartingDeck
-              setShowMaterialsListModal={setShowMaterialsListModal}
-              leftString={leftString}
-              rightString={rightString}
               robotType={robotType}
-              isOffDeckHover={isOffDeckHover}
-              hover={hover}
-              setHover={setHover}
+              setShowMaterialsListModal={setShowMaterialsListModal}
             />
           </Flex>
         </Flex>

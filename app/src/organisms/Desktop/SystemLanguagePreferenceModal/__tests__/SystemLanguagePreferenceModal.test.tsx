@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom'
 import { fireEvent, screen } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { describe, it, vi, afterEach, beforeEach, expect } from 'vitest'
-import { when } from 'vitest-when'
 
 import { renderWithProviders } from '/app/__testing-utils__'
 import { i18n } from '/app/i18n'
@@ -10,7 +9,6 @@ import {
   getAppLanguage,
   getStoredSystemLanguage,
   updateConfigValue,
-  useFeatureFlag,
 } from '/app/redux/config'
 import { getSystemLanguage } from '/app/redux/shell'
 import { SystemLanguagePreferenceModal } from '..'
@@ -34,9 +32,6 @@ describe('SystemLanguagePreferenceModal', () => {
     vi.mocked(getAppLanguage).mockReturnValue(MOCK_DEFAULT_LANGUAGE)
     vi.mocked(getSystemLanguage).mockReturnValue(MOCK_DEFAULT_LANGUAGE)
     vi.mocked(getStoredSystemLanguage).mockReturnValue(MOCK_DEFAULT_LANGUAGE)
-    when(vi.mocked(useFeatureFlag))
-      .calledWith('enableLocalization')
-      .thenReturn(true)
     vi.mocked(useNavigate).mockReturnValue(mockNavigate)
   })
   afterEach(() => {

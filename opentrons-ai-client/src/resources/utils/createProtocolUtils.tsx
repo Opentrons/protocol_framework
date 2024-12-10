@@ -162,8 +162,10 @@ export function generateChatPrompt(
   const defs = getOnlyLatestDefs()
 
   const robotType = t(values.instruments.robot)
-  const scientificApplication = t(values.application.scientificApplication)
-  const description = values.application.description
+  const scientificApplication = `- ${t(
+    values.application.scientificApplication
+  )}`
+  const description = `- ${values.application.description}`
   const pipetteMounts =
     values.instruments.pipettes === TWO_PIPETTES
       ? [
@@ -209,9 +211,7 @@ export function generateChatPrompt(
 
   const prompt = `${t('create_protocol_prompt_robot', { robotType })}\n${t(
     'application_title'
-  )}:  \n${scientificApplication}\n\n${t(
-    'description'
-  )}:  \n${description}\n\n${t(
+  )}:\n${scientificApplication}\n\n${t('description')}:\n${description}\n\n${t(
     'pipette_mounts'
   )}:\n\n${pipetteMounts}${flexGripper}\n\n${t(
     'modules_title'

@@ -17,7 +17,12 @@ import { ConnectedStepInfo } from './ConnectedStepInfo'
 import type { Dispatch, SetStateAction } from 'react'
 import type { DragLayerMonitor, DropTargetMonitor } from 'react-dnd'
 import type { StepIdType } from '../../../../form-types'
-import type { ConnectedStepItemProps } from '../../../../containers/ConnectedStepItem'
+
+export interface ConnectedStepItemProps {
+  stepId: StepIdType
+  stepNumber: number
+  onStepContextMenu?: () => void
+}
 
 interface DragDropStepProps extends ConnectedStepItemProps {
   stepId: StepIdType

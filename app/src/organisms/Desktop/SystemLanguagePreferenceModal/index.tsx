@@ -20,7 +20,6 @@ import {
   getAppLanguage,
   getStoredSystemLanguage,
   updateConfigValue,
-  useFeatureFlag,
 } from '/app/redux/config'
 import { getSystemLanguage } from '/app/redux/shell'
 
@@ -33,7 +32,6 @@ type ArrayElement<
 
 export function SystemLanguagePreferenceModal(): JSX.Element | null {
   const { i18n, t } = useTranslation(['app_settings', 'shared', 'branded'])
-  const enableLocalization = useFeatureFlag('enableLocalization')
 
   const [currentOption, setCurrentOption] = useState<DropdownOption>(
     LANGUAGES[0]
@@ -126,7 +124,7 @@ export function SystemLanguagePreferenceModal(): JSX.Element | null {
     }
   }, [i18n, systemLanguage, showBootModal])
 
-  return enableLocalization && (showBootModal || showUpdateModal) ? (
+  return showBootModal || showUpdateModal ? (
     <Modal title={title}>
       <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing24}>
         <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing16}>

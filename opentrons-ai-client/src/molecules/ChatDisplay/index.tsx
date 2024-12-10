@@ -106,7 +106,18 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
 
   const handleFileDownload = (): void => {
     const lastCodeBlock = document.querySelector(`#${chatId}`)
-    const code = lastCodeBlock?.textContent ?? ''
+    const code = lastCodeBlock?.textContent?.trim() ?? ''
+    // Don't proceed if code is empty, no need to download as a python file
+    if (!code) {
+      return
+    }
+    // Make sure python protocol is valid
+    const hasRunFunction = code.includes('def run(')
+    const numberOfLines = code.split('\n').length
+    if (!hasRunFunction || numberOfLines <= 3) {
+      return
+    }
+
     const blobParts: BlobPart[] = [code]
 
     const file = new File(blobParts, 'OpentronsAI.py', { type: 'text/python' })
@@ -238,6 +249,7 @@ function ParagraphText(props: JSX.IntrinsicAttributes): JSX.Element {
       {...props}
       fontSize={TYPOGRAPHY.fontSize20}
       lineHeight={TYPOGRAPHY.lineHeight24}
+      css="white-space: pre-wrap;"
     />
   )
 }

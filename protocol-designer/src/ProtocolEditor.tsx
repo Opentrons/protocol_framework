@@ -7,29 +7,25 @@ import {
   Flex,
   OVERFLOW_AUTO,
 } from '@opentrons/components'
-import { PortalRoot as TopPortalRoot } from './components/portals/TopPortal'
 import { ProtocolRoutes } from './ProtocolRoutes'
+import { PortalRoot } from './organisms'
 
-function ProtocolEditorComponent(): JSX.Element {
+export function ProtocolEditor(): JSX.Element {
   return (
-    <Box
-      width="100%"
-      height="100vh"
-      overflow={OVERFLOW_AUTO}
-      id="protocol-editor"
-    >
-      <TopPortalRoot />
-      <Flex flexDirection={DIRECTION_COLUMN}>
-        <HashRouter>
-          <ProtocolRoutes />
-        </HashRouter>
-      </Flex>
-    </Box>
+    <DndProvider backend={HTML5Backend}>
+      <Box
+        width="100%"
+        height="100vh"
+        overflow={OVERFLOW_AUTO}
+        id="protocol-editor"
+      >
+        <PortalRoot />
+        <Flex flexDirection={DIRECTION_COLUMN}>
+          <HashRouter>
+            <ProtocolRoutes />
+          </HashRouter>
+        </Flex>
+      </Box>
+    </DndProvider>
   )
 }
-
-export const ProtocolEditor = (): JSX.Element => (
-  <DndProvider backend={HTML5Backend}>
-    <ProtocolEditorComponent />
-  </DndProvider>
-)

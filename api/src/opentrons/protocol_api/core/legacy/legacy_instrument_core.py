@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union, List
 
 from opentrons import types
 from opentrons.hardware_control import CriticalPoint
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons.protocol_api.core.common import WellCore
+from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
 from opentrons.protocols.api_support import instrument as instrument_support
 from opentrons.protocols.api_support.definitions import MAX_SUPPORTED_VERSION
 from opentrons.protocols.api_support.labware_like import LabwareLike
@@ -19,6 +20,7 @@ from opentrons.protocols.api_support.util import (
 )
 from opentrons.protocols.geometry import planning
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
+from opentrons.protocol_api._liquid import LiquidClass
 
 from ...disposal_locations import TrashBin, WasteChute
 from ..instrument import AbstractInstrument
@@ -553,6 +555,29 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
     ) -> None:
         """This will never be called because it was added in API 2.16."""
         pass
+
+    def load_liquid_class(
+        self,
+        liquid_class: LiquidClass,
+        pipette_load_name: str,
+        tiprack_uri: str,
+    ) -> str:
+        """This will never be called because it was added in .."""
+        # TODO(spp, 2024-11-20): update the docstring and error to include API version
+        assert False, "load_liquid_class is not supported in legacy context"
+
+    def transfer_liquid(
+        self,
+        liquid_class_id: str,
+        volume: float,
+        source: List[LegacyWellCore],
+        dest: List[LegacyWellCore],
+        new_tip: TransferTipPolicyV2,
+        trash_location: Union[LegacyWellCore, types.Location, TrashBin, WasteChute],
+    ) -> None:
+        """This will never be called because it was added in .."""
+        # TODO(spp, 2024-11-20): update the docstring and error to include API version
+        assert False, "transfer_liquid is not supported in legacy context"
 
     def get_active_channels(self) -> int:
         """This will never be called because it was added in API 2.16."""

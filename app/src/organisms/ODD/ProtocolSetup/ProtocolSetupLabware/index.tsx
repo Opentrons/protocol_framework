@@ -7,6 +7,7 @@ import {
   ALIGN_FLEX_START,
   BORDERS,
   Box,
+  Chip,
   COLORS,
   DeckInfoLabel,
   DIRECTION_COLUMN,
@@ -15,18 +16,16 @@ import {
   Icon,
   JUSTIFY_SPACE_BETWEEN,
   JUSTIFY_SPACE_EVENLY,
+  LegacyStyledText,
   MODULE_ICON_NAME_BY_TYPE,
   SPACING,
-  LegacyStyledText,
   TYPOGRAPHY,
-  Chip,
 } from '@opentrons/components'
 import {
   FLEX_ROBOT_TYPE,
   getDeckDefFromRobotType,
-  getLabwareDefURI,
-  getTopLabwareInfo,
   getModuleDisplayName,
+  getTopLabwareInfo,
   HEATERSHAKER_MODULE_TYPE,
   TC_MODULE_LOCATION_OT3,
   THERMOCYCLER_MODULE_TYPE,
@@ -130,15 +129,16 @@ export function ProtocolSetupLabware({
     )
     if (foundLabware != null) {
       const nickName = onDeckItems.find(
-        item => getLabwareDefURI(item.definition) === foundLabware.definitionUri
+        item => item.labwareId === foundLabware.id
       )?.nickName
+
       const location = onDeckItems.find(
         item => item.labwareId === foundLabware.id
       )?.initialLocation
       if (location != null) {
         setSelectedLabware({
           ...labwareDef,
-          location: location,
+          location,
           nickName: nickName ?? null,
           id: labwareId,
         })

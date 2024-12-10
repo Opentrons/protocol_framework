@@ -324,8 +324,8 @@ class HardwareTipHandler(TipHandler):
         follow_singular_sensor: Optional[InstrumentProbeType] = None,
     ) -> None:
         """See documentation on abstract base class."""
-        nozzle_configuration = (
-            self._state_view.pipettes.state.nozzle_configuration_by_id[pipette_id]
+        nozzle_configuration = self._state_view.pipettes.get_nozzle_configuration(
+            pipette_id=pipette_id
         )
 
         # Configuration metrics by which tip presence checking is ignored
