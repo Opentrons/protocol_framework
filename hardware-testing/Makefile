@@ -52,8 +52,6 @@ all: clean sdist wheel
 setup:
 	$(pipenv) sync $(pipenv_opts)
 	$(pipenv) run pip freeze
-	cd .. && $(MAKE) -C app-shell-odd setup
-	cd .. && $(MAKE) -C app setup
 
 .PHONY: teardown
 teardown:
