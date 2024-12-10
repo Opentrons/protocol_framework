@@ -172,20 +172,16 @@ class EquipmentHandler:
         # Validate definition allows for load conditions
         if LabwareRole.lid in definition.allowedRoles:
             if isinstance(location, OnLabwareLocation):
-                parent_labware_uri = self._state_store.labware.get_uri_from_definition(
-                    self._state_store.labware.get_definition(location.labwareId)
+                parent_labware = self._state_store.labware.get_load_name(
+                    location.labwareId
                 )
                 if (
                     definition.compatibleParentLabware is not None
-                    and parent_labware_uri not in definition.compatibleParentLabware
+                    and parent_labware not in definition.compatibleParentLabware
                 ):
                     raise ValueError(
                         f"Labware Lid {load_name} may not be loaded on parent labware {self._state_store.labware.get_display_name(location.labwareId)}."
                     )
-            else:
-                raise ValueError(
-                    "Load Labware location must be another Labware when loading a Lid outside of a stack."
-                )
 
         labware_id = (
             labware_id if labware_id is not None else self._model_utils.generate_id()
@@ -398,7 +394,7 @@ class EquipmentHandler:
             definition=attached_module.definition,
         )
 
-    async def load_lids(
+    async def load_lids(  # noqa: C901
         self,
         load_name: str,
         namespace: str,
@@ -424,7 +420,6 @@ class EquipmentHandler:
         Returns:
             A list of LoadedLabwareData objects.
         """
-
         definition_uri = uri_from_details(
             load_name=load_name,
             namespace=namespace,
@@ -469,14 +464,16 @@ class EquipmentHandler:
                 labware_location = location
             else:
                 labware_location = OnLabwareLocation(labwareId=labware_ids[i - 1])
+
             load_labware_data_list.append(
                 LoadedLabwareData(
                     labware_id=labware_ids[i],
                     definition=definition,
-                    offsetId=self.find_applicable_labware_offset_id(
-                        labware_definition_uri=definition_uri,
-                        labware_location=labware_location,
-                    ),
+                    offsetId=None
+                    # offsetId=self.find_applicable_labware_offset_id(
+                    #     labware_definition_uri=definition_uri,
+                    #     labware_location=labware_location,
+                    # ),
                 )
             )
 

@@ -485,7 +485,13 @@ class ProtocolContext(CommandPublisher):
         )
 
         if lid is not None:
-            loaded_lid = self._core.load_lid(
+            if self._api_version >= APIVersion(2, 24):
+                raise APIVersionError(
+                    api_element="Loading a Lid on a Labware",
+                    until_version="2.24",
+                    current_version=f"{self._api_version}",
+                )
+            self._core.load_lid(
                 load_name=lid,
                 location=labware_core,
                 namespace=namespace,

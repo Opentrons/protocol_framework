@@ -1,17 +1,15 @@
 """Load lid stack command request, result, and implementation models."""
 from __future__ import annotations
 from pydantic import BaseModel, Field
-from typing import TYPE_CHECKING, Optional, Type, List, Dict, Union
+from typing import TYPE_CHECKING, Optional, Type, List, Dict
 from typing_extensions import Literal
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 from ..errors import LabwareIsNotAllowedInLocationError
-from ..resources import labware_validation, fixture_validation
+from ..resources import fixture_validation
 from ..types import (
     LabwareLocation,
-    ModuleLocation,
-    ModuleModel,
     OnLabwareLocation,
     DeckSlotLocation,
     AddressableAreaLocation,
@@ -23,7 +21,7 @@ from ..state.update_types import StateUpdate
 
 if TYPE_CHECKING:
     from ..state.state import StateView
-    from ..execution import LoadedLabwareData, EquipmentHandler
+    from ..execution import EquipmentHandler
 
 
 LoadLidStackCommandType = Literal["loadLidStack"]

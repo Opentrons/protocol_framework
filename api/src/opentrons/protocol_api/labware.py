@@ -544,6 +544,7 @@ class Labware:
         self,
         name: str,
         label: Optional[str] = None,
+        lid: Optional[str] = None,
         namespace: Optional[str] = None,
         version: Optional[int] = None,
     ) -> Labware:
@@ -572,6 +573,20 @@ class Labware:
         )
 
         self._core_map.add(labware_core, labware)
+
+        if lid is not None:
+            if self._api_version >= APIVersion(2, 24):
+                raise APIVersionError(
+                    api_element="Loading a Lid on a Labware",
+                    until_version="2.24",
+                    current_version=f"{self._api_version}",
+                )
+            self._protocol_core.load_lid(
+                load_name=lid,
+                location=labware_core,
+                namespace=namespace,
+                version=version,
+            )
 
         return labware
 

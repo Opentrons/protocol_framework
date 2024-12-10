@@ -7,10 +7,7 @@ from opentrons_shared_data.liquid_classes import LiquidClassDefinitionDoesNotExi
 from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.commands import LoadModuleResult
 from opentrons_shared_data.deck.types import DeckDefinitionV5, SlotDefV3
-from opentrons_shared_data.labware.labware_definition import (
-    LabwareDefinition,
-    LabwareRole,
-)
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.labware.types import LabwareDefinition as LabwareDefDict
 from opentrons_shared_data import liquid_classes
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
@@ -52,7 +49,6 @@ from opentrons.protocol_engine.types import (
     OFF_DECK_LOCATION,
     LabwareLocation,
     NonStackedLocation,
-    StagingSlotLocation,
 )
 from opentrons.protocol_engine.clients import SyncClient as ProtocolEngineClient
 from opentrons.protocol_engine.errors import (
@@ -81,8 +77,6 @@ from .module_core import (
 )
 from .exceptions import InvalidModuleLocationError
 from . import load_labware_params, deck_conflict, overlap_versions
-
-from opentrons.protocols.api_support.util import APIVersionError
 
 if TYPE_CHECKING:
     from ...labware import Labware
@@ -706,15 +700,15 @@ class ProtocolCore(
         version: Optional[int],
     ) -> Union[DeckLocation, LabwareCore]:
         """Load a Stack of Lids to a given location, creating a Lid Store."""
-        if isinstance(location, Labware):
+        if isinstance(location, DeckSlotName) or isinstance(location, StagingSlotName):
+            load_location = self._convert_labware_location(location=location)
+        else:
             if isinstance(location._core, LabwareCore):
                 load_location = self._convert_labware_location(location=location._core)
             else:
                 raise ValueError(
                     "Expected type of Labware Location for lid stack must be Labware, not Legacy Labware or Well."
                 )
-        else:
-            load_location = self._convert_labware_location(location=location)
 
         custom_labware_params = (
             self._engine_client.state.labware.find_custom_labware_load_params()
@@ -750,10 +744,10 @@ class ProtocolCore(
             existing_module_ids=list(self._module_cores_by_id.keys()),
         )
 
-        if isinstance(load_result.location, DeckSlotLocation) or isinstance(
-            load_result.location, StagingSlotLocation
-        ):
+        if isinstance(load_result.location, DeckSlotLocation):
             return load_result.location.slotName.id
+        elif isinstance(load_result.location, AddressableAreaLocation):
+            return load_result.location.addressableAreaName
         elif isinstance(load_result.location, OnLabwareLocation):
             return LabwareCore(
                 labware_id=load_result.location.labwareId,
@@ -761,7 +755,7 @@ class ProtocolCore(
             )
         else:
             raise ValueError(
-                "Invalid load location for Lid Stack. A stack must be on a Deck slot, a Staging Area slot, or on a Labware Adapter."
+                "Invalid load location for Lid Stack. A stack must be on a Deck slot, a Staging Area slot, a valid Addressable Area or on a Labware Adapter."
             )
 
     def get_deck_definition(self) -> DeckDefinitionV5:
