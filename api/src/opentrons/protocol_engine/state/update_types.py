@@ -269,6 +269,13 @@ class FilesAddedUpdate:
 
 
 @dataclasses.dataclass
+class AddressableAreaUsedUpdate:
+    """An update that says an addressable area has been used."""
+
+    addressable_area_name: str
+
+
+@dataclasses.dataclass
 class StateUpdate:
     """Represents an update to perform on engine state."""
 
@@ -308,6 +315,8 @@ class StateUpdate:
 
     files_added: FilesAddedUpdate | NoChangeType = NO_CHANGE
 
+    addressable_area_used: AddressableAreaUsedUpdate | NoChangeType = NO_CHANGE
+
     def append(self, other: Self) -> Self:
         """Apply another `StateUpdate` "on top of" this one.
 
@@ -334,7 +343,8 @@ class StateUpdate:
         return accumulator
 
     # These convenience functions let the caller avoid the boilerplate of constructing a
-    # complicated dataclass tree.
+    # complicated dataclass tree, and allow chaining.
+
     @typing.overload
     def set_pipette_location(
         self: Self, *, pipette_id: str, new_deck_point: DeckPoint
@@ -565,5 +575,12 @@ class StateUpdate:
         """Update an absorbance reader's lid location. See `AbsorbanceReaderLidUpdate`."""
         self.absorbance_reader_lid = AbsorbanceReaderLidUpdate(
             module_id=module_id, is_lid_on=is_lid_on
+        )
+        return self
+
+    def set_addressable_area_used(self: Self, addressable_area_name: str) -> Self:
+        """Mark that an addressable area has been used. See `AddressableAreaUsedUpdate`."""
+        self.addressable_area_used = AddressableAreaUsedUpdate(
+            addressable_area_name=addressable_area_name
         )
         return self

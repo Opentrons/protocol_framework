@@ -62,7 +62,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
     <Flex
       backgroundColor={COLORS.white}
       borderRadius={BORDERS.borderRadius8}
-      width={containerWidth}
+      width="100%"
       height="65vh"
       padding={padding}
       gridGap={SPACING.spacing24}
@@ -85,6 +85,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
         backgroundColor={COLORS.grey20}
         overflowY={OVERFLOW_AUTO}
         flexDirection={DIRECTION_COLUMN}
+        flex="0 0 auto"
       >
         <Flex
           justifyContent={JUSTIFY_CENTER}
