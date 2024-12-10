@@ -30,7 +30,7 @@ class WaitForResumeResult(BaseModel):
 
 
 class WaitForResumeImplementation(
-    AbstractCommandImpl[WaitForResumeParams, SuccessData[WaitForResumeResult, None]]
+    AbstractCommandImpl[WaitForResumeParams, SuccessData[WaitForResumeResult]]
 ):
     """Wait for resume command implementation."""
 
@@ -39,10 +39,12 @@ class WaitForResumeImplementation(
 
     async def execute(
         self, params: WaitForResumeParams
-    ) -> SuccessData[WaitForResumeResult, None]:
+    ) -> SuccessData[WaitForResumeResult]:
         """Dispatch a PauseAction to the store to pause the protocol."""
         await self._run_control.wait_for_resume()
-        return SuccessData(public=WaitForResumeResult(), private=None)
+        return SuccessData(
+            public=WaitForResumeResult(),
+        )
 
 
 class WaitForResume(

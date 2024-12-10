@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import {
   RESPONSIVENESS,
@@ -8,20 +8,21 @@ import {
 } from '@opentrons/components'
 import { getPipetteNameSpecs } from '@opentrons/shared-data'
 import { css } from 'styled-components'
-import { ProbeNotAttached } from '../PipetteWizardFlows/ProbeNotAttached'
+import { ProbeNotAttached } from '/app/organisms/PipetteWizardFlows/ProbeNotAttached'
 import { RobotMotionLoader } from './RobotMotionLoader'
-import attachProbe1 from '../../assets/videos/pipette-wizard-flows/Pipette_Attach_Probe_1.webm'
-import attachProbe8 from '../../assets/videos/pipette-wizard-flows/Pipette_Attach_Probe_8.webm'
-import attachProbe96 from '../../assets/videos/pipette-wizard-flows/Pipette_Attach_Probe_96.webm'
-import { GenericWizardTile } from '../../molecules/GenericWizardTile'
+import attachProbe1 from '/app/assets/videos/pipette-wizard-flows/Pipette_Attach_Probe_1.webm'
+import attachProbe8 from '/app/assets/videos/pipette-wizard-flows/Pipette_Attach_Probe_8.webm'
+import attachProbe96 from '/app/assets/videos/pipette-wizard-flows/Pipette_Attach_Probe_96.webm'
+import { GenericWizardTile } from '/app/molecules/GenericWizardTile'
 
+import type { Dispatch } from 'react'
 import type {
   CompletedProtocolAnalysis,
   CreateCommand,
 } from '@opentrons/shared-data'
 import type { LabwareOffset } from '@opentrons/api-client'
-import type { Jog } from '../../molecules/JogControls/types'
-import type { useChainRunCommands } from '../../resources/runs'
+import type { Jog } from '/app/molecules/JogControls/types'
+import type { useChainRunCommands } from '/app/resources/runs'
 import type {
   AttachProbeStep,
   RegisterPositionAction,
@@ -31,7 +32,7 @@ import type {
 interface AttachProbeProps extends AttachProbeStep {
   protocolData: CompletedProtocolAnalysis
   proceed: () => void
-  registerPosition: React.Dispatch<RegisterPositionAction>
+  registerPosition: Dispatch<RegisterPositionAction>
   chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
   setFatalError: (errorMessage: string) => void
   workingOffsets: WorkingOffset[]
@@ -52,9 +53,7 @@ export const AttachProbe = (props: AttachProbeProps): JSX.Element | null => {
     setFatalError,
     isOnDevice,
   } = props
-  const [showUnableToDetect, setShowUnableToDetect] = React.useState<boolean>(
-    false
-  )
+  const [showUnableToDetect, setShowUnableToDetect] = useState<boolean>(false)
 
   const pipette = protocolData.pipettes.find(p => p.id === pipetteId)
   const pipetteName = pipette?.pipetteName
@@ -72,7 +71,7 @@ export const AttachProbe = (props: AttachProbeProps): JSX.Element | null => {
 
   const pipetteMount = pipette?.mount
 
-  React.useEffect(() => {
+  useEffect(() => {
     // move into correct position for probe attach on mount
     chainRunCommands(
       [

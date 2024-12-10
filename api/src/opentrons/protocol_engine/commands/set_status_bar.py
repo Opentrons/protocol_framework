@@ -49,7 +49,7 @@ class SetStatusBarResult(BaseModel):
 
 
 class SetStatusBarImplementation(
-    AbstractCommandImpl[SetStatusBarParams, SuccessData[SetStatusBarResult, None]]
+    AbstractCommandImpl[SetStatusBarParams, SuccessData[SetStatusBarResult]]
 ):
     """setStatusBar command implementation."""
 
@@ -58,12 +58,14 @@ class SetStatusBarImplementation(
 
     async def execute(
         self, params: SetStatusBarParams
-    ) -> SuccessData[SetStatusBarResult, None]:
+    ) -> SuccessData[SetStatusBarResult]:
         """Execute the setStatusBar command."""
         if not self._status_bar.status_bar_should_not_be_changed():
             state = _animation_to_status_bar_state(params.animation)
             await self._status_bar.set_status_bar(state)
-        return SuccessData(public=SetStatusBarResult(), private=None)
+        return SuccessData(
+            public=SetStatusBarResult(),
+        )
 
 
 class SetStatusBar(

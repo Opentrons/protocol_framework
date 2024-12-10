@@ -1,11 +1,13 @@
-import * as React from 'react'
+import { Component } from 'react'
 import { useLogger } from '../../logger'
 import { LabwarePositionCheckComponent } from './LabwarePositionCheckComponent'
 import { FatalErrorModal } from './FatalErrorModal'
-import { getIsOnDevice } from '../../redux/config'
+import { getIsOnDevice } from '/app/redux/config'
 import { useSelector } from 'react-redux'
 
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
+
+import type { ErrorInfo, ReactNode } from 'react'
 import type {
   CompletedProtocolAnalysis,
   RobotType,
@@ -48,7 +50,7 @@ export const LabwarePositionCheck = (
 }
 
 interface ErrorBoundaryProps {
-  children: React.ReactNode
+  children: ReactNode
   onClose: () => void
   shouldUseMetalProbe: boolean
   logger: ReturnType<typeof useLogger>
@@ -60,7 +62,7 @@ interface ErrorBoundaryProps {
   }) => JSX.Element
   isOnDevice: boolean
 }
-class ErrorBoundary extends React.Component<
+class ErrorBoundary extends Component<
   ErrorBoundaryProps,
   { error: Error | null }
 > {
@@ -69,7 +71,7 @@ class ErrorBoundary extends React.Component<
     this.state = { error: null }
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     this.props.logger.error(`LPC error message: ${error.message}`)
     this.props.logger.error(
       `LPC error component stack: ${errorInfo.componentStack}`

@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { Icon } from '../../icons'
 import { Btn, Text } from '../../primitives'
 import { TYPOGRAPHY } from '../../ui-style-constants'
@@ -31,7 +30,7 @@ interface AbsorbanceReaderFixtureProps {
   selected?: boolean
 }
 
-const ABSORBANCE_READER_FIXTURE_DISPLAY_NAME = 'Absorbance Reader'
+const ABSORBANCE_READER_FIXTURE_DISPLAY_NAME = 'Absorbance'
 
 export function AbsorbanceReaderFixture(
   props: AbsorbanceReaderFixtureProps

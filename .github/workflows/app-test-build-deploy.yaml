@@ -56,10 +56,10 @@ jobs:
     name: 'opentrons app frontend unit tests'
     timeout-minutes: 60
     steps:
-      - uses: 'actions/checkout@v3'
-      - uses: 'actions/setup-node@v3'
+      - uses: 'actions/checkout@v4'
+      - uses: 'actions/setup-node@v4'
         with:
-          node-version: '18.19.0'
+          node-version: '22.11.0'
       - name: 'install udev'
         run: |
           # WORKAROUND: Remove microsoft debian repo due to https://github.com/microsoft/linux-package-repositories/issues/130. Remove line below after it is resolved
@@ -97,11 +97,15 @@ jobs:
     strategy:
       matrix:
         os: ['windows-2022', 'ubuntu-22.04', 'macos-latest']
-    name: 'opentrons app backend unit tests on ${{matrix.os}}'
+        shell: ['app-shell', 'app-shell-odd', 'discovery-client']
+        exclude:
+          - os: 'windows-2022'
+            shell: 'app-shell-odd'
+    name: 'opentrons ${{matrix.shell}} unit tests on ${{matrix.os}}'
     timeout-minutes: 60
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: 'actions/checkout@v3'
+      - uses: 'actions/checkout@v4'
         with:
           fetch-depth: 0
       # https://github.com/actions/checkout/issues/290
@@ -110,9 +114,9 @@ jobs:
         run: |
           git fetch -f origin ${{ github.ref }}:${{ github.ref }}
           git checkout ${{ github.ref }}
-      - uses: 'actions/setup-node@v3'
+      - uses: 'actions/setup-node@v4'
         with:
-          node-version: '18.19.0'
+          node-version: '22.11.0'
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
@@ -144,7 +148,7 @@ jobs:
           yarn config set cache-folder ${{ github.workspace }}/.yarn-cache
           make setup-js
       - name: 'test native(er) packages'
-        run: make test-js-internal tests="app-shell/src app-shell-odd/src discovery-client/src" cov_opts="--coverage=true"
+        run: make test-js-internal tests="${{matrix.shell}}/src" cov_opts="--coverage=true"
       - name: 'Upload coverage report'
         uses: 'codecov/codecov-action@v3'
         with:
@@ -257,7 +261,7 @@ jobs:
              echo "bucket=${{env._APP_DEPLOY_BUCKET_OT3}}" >> $GITHUB_OUTPUT
              echo "folder=${{env._APP_DEPLOY_FOLDER_OT3}}" >> $GITHUB_OUTPUT
           fi
-      - uses: 'actions/checkout@v3'
+      - uses: 'actions/checkout@v4'
         with:
           fetch-depth: 0
       # https://github.com/actions/checkout/issues/290
@@ -266,9 +270,9 @@ jobs:
         run: |
           git fetch -f origin ${{ github.ref }}:${{ github.ref }}
           git checkout ${{ github.ref }}
-      - uses: 'actions/setup-node@v3'
+      - uses: 'actions/setup-node@v4'
         with:
-          node-version: '18.19.0'
+          node-version: '22.11.0'
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
@@ -304,7 +308,7 @@ jobs:
         if: startsWith(matrix.os, 'windows') && contains(needs.determine-build-type.outputs.type, 'release')
         shell: bash
         run: |
-          echo "${{ secrets.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /d/Certificate_pkcs12.p12
+          echo "${{ secrets.SM_CLIENT_CERT_FILE_B64_V2 }}" | base64 --decode > /d/Certificate_pkcs12.p12
           echo "${{ secrets.WINDOWS_CSC_B64}}" | base64 --decode > /d/opentrons_labworks_inc.crt
           echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH
           echo "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools" >> $GITHUB_PATH
@@ -314,18 +318,27 @@ jobs:
         if: startsWith(matrix.os, 'windows') && contains(needs.determine-build-type.outputs.type, 'release')
         shell: cmd
         env:
-          SM_HOST: ${{ secrets.SM_HOST }}
+          SM_HOST: ${{ secrets.SM_HOST_V2 }}
           SM_CLIENT_CERT_FILE: "D:\\Certificate_pkcs12.p12"
-          SM_CLIENT_CERT_PASSWORD: ${{secrets.SM_CLIENT_CERT_PASSWORD}}
-          SM_API_KEY: ${{secrets.SM_API_KEY}}
+          SM_CLIENT_CERT_PASSWORD: ${{secrets.SM_CLIENT_CERT_PASSWORD_V2}}
+          SM_API_KEY: ${{secrets.SM_API_KEY_V2}}
         run: |
-          curl -X GET  https://one.digicert.com/signingmanager/api-ui/v1/releases/Keylockertools-windows-x64.msi/download -H "x-api-key:${{secrets.SM_API_KEY}}" -o Keylockertools-windows-x64.msi
+          curl -X GET  https://one.digicert.com/signingmanager/api-ui/v1/releases/Keylockertools-windows-x64.msi/download -H "x-api-key:${{secrets.SM_API_KEY_V2}}" -o Keylockertools-windows-x64.msi
           msiexec /i Keylockertools-windows-x64.msi /quiet /qn
           smksp_registrar.exe list
           smctl.exe keypair ls
           C:\Windows\System32\certutil.exe -csp "DigiCert Signing Manager KSP" -key -user
           smksp_cert_sync.exe
           smctl.exe healthcheck --all
+
+      # Do the frontend dist bundle
+      - name: 'bundle ${{matrix.variant}} frontend'
+        env:
+          OT_APP_MIXPANEL_ID: ${{ secrets.OT_APP_MIXPANEL_ID }}
+          OT_APP_INTERCOM_ID: ${{ secrets.OT_APP_INTERCOM_ID }}
+          OPENTRONS_PROJECT: ${{ steps.project.outputs.project }}
+        run: |
+          make -C app dist
 
       # build the desktop app and deploy it
       - name: 'build ${{matrix.variant}} app for ${{ matrix.os }}'
@@ -335,18 +348,18 @@ jobs:
           OT_APP_MIXPANEL_ID: ${{ secrets.OT_APP_MIXPANEL_ID }}
           OT_APP_INTERCOM_ID: ${{ secrets.OT_APP_INTERCOM_ID }}
           WINDOWS_SIGN: ${{ format('{0}', contains(needs.determine-build-type.outputs.type, 'release')) }}
-          SM_HOST: ${{secrets.SM_HOST}}
+          SM_CODE_SIGNING_CERT_SHA1_HASH: ${{secrets.SM_CODE_SIGNING_CERT_SHA1_HASH_V2}}
+          SM_KEYPAIR_ALIAS: ${{secrets.SM_KEYPAIR_ALIAS_V2}}
+          SM_HOST: ${{ secrets.SM_HOST_V2 }}
           SM_CLIENT_CERT_FILE: "D:\\Certificate_pkcs12.p12"
-          SM_CLIENT_CERT_PASSWORD: ${{secrets.SM_CLIENT_CERT_PASSWORD}}
-          SM_API_KEY: ${{secrets.SM_API_KEY}}
-          SM_CODE_SIGNING_CERT_SHA1_HASH: ${{secrets.SM_CODE_SIGNING_CERT_SHA1_HASH}}
-          SM_KEYPAIR_ALIAS: ${{secrets.SM_KEYPAIR_ALIAS}}
+          SM_CLIENT_CERT_PASSWORD: ${{secrets.SM_CLIENT_CERT_PASSWORD_V2}}
+          SM_API_KEY: ${{secrets.SM_API_KEY_V2}}
           WINDOWS_CSC_FILEPATH: "D:\\opentrons_labworks_inc.crt"
-          CSC_LINK: ${{ secrets.OT_APP_CSC_MACOS }}
-          CSC_KEY_PASSWORD: ${{ secrets.OT_APP_CSC_KEY_MACOS }}
-          APPLE_ID: ${{ secrets.OT_APP_APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.OT_APP_APPLE_ID_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.OT_APP_APPLE_TEAM_ID }}
+          CSC_LINK: ${{ secrets.OT_APP_CSC_MACOS_V2 }}
+          CSC_KEY_PASSWORD: ${{ secrets.OT_APP_CSC_KEY_MACOS_V2 }}
+          APPLE_ID: ${{ secrets.OT_APP_APPLE_ID_V2 }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.OT_APP_APPLE_ID_PASSWORD_V2 }}
+          APPLE_TEAM_ID: ${{ secrets.OT_APP_APPLE_TEAM_ID_V2 }}
           HOST_PYTHON: python
           OPENTRONS_PROJECT: ${{ steps.project.outputs.project }}
           OT_APP_DEPLOY_BUCKET: ${{ steps.project.outputs.bucket }}
@@ -475,7 +488,7 @@ jobs:
           _ACCESS_URL: https://${{env._APP_DEPLOY_BUCKET_ROBOTSTACK}}/${{env._APP_DEPLOY_FOLDER_ROBOTSTACK}}
 
       - name: 'pull repo for scripts'
-        uses: 'actions/checkout@v3'
+        uses: 'actions/checkout@v4'
         with:
           path: ./monorepo
       # https://github.com/actions/checkout/issues/290
@@ -485,9 +498,9 @@ jobs:
           cd ./monorepo
           git fetch -f origin ${{ github.ref }}:${{ github.ref }}
           git checkout ${{ github.ref }}
-      - uses: 'actions/setup-node@v3'
+      - uses: 'actions/setup-node@v4'
         with:
-          node-version: '18.19.0'
+          node-version: '22.11.0'
       - name: 'install udev'
         run: |
           # WORKAROUND: Remove microsoft debian repo due to https://github.com/microsoft/linux-package-repositories/issues/130. Remove line below after it is resolved

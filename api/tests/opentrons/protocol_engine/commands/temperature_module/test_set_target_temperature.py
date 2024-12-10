@@ -52,5 +52,4 @@ async def test_set_target_temperature(
     decoy.verify(await tempdeck_hardware.start_set_temperature(celsius=1), times=1)
     assert result == SuccessData(
         public=temperature_module.SetTargetTemperatureResult(targetTemperature=1),
-        private=None,
     )

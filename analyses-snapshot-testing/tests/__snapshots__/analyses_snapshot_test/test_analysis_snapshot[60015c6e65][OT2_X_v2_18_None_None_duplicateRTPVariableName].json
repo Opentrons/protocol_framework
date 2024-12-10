@@ -42,6 +42,7 @@
     }
   ],
   "labware": [],
+  "liquidClasses": [],
   "liquids": [],
   "metadata": {
     "protocolName": "Multiple RTP Variables with Same Name"

@@ -7,13 +7,15 @@ from .versioning import check_version_header
 
 from .client_data.router import router as client_data_router
 from .commands.router import commands_router
+from .data_files.router import datafiles_router
 from .deck_configuration.router import router as deck_configuration_router
+from .error_recovery.settings.router import router as error_recovery_settings_router
 from .health.router import health_router
 from .instruments.router import instruments_router
+from .labware_offsets.router import router as labware_offset_router
 from .maintenance_runs.router import maintenance_runs_router
 from .modules.router import modules_router
 from .protocols.router import protocols_router
-from .data_files.router import datafiles_router
 from .robot.router import robot_router
 from .runs.router import runs_router
 from .service.labware.router import router as labware_router
@@ -55,6 +57,12 @@ router.include_router(
 )
 
 router.include_router(
+    router=labware_offset_router,
+    tags=["Labware Offset Management"],
+    dependencies=[Depends(check_version_header)],
+)
+
+router.include_router(
     router=runs_router,
     tags=["Run Management"],
     dependencies=[Depends(check_version_header)],
@@ -77,6 +85,7 @@ router.include_router(
     tags=["Data files Management"],
     dependencies=[Depends(check_version_header)],
 )
+
 router.include_router(
     router=commands_router,
     tags=["Simple Commands"],
@@ -86,6 +95,12 @@ router.include_router(
 router.include_router(
     router=deck_configuration_router,
     tags=["Flex Deck Configuration"],
+    dependencies=[Depends(check_version_header)],
+)
+
+router.include_router(
+    router=error_recovery_settings_router,
+    tags=["Error Recovery Settings"],
     dependencies=[Depends(check_version_header)],
 )
 

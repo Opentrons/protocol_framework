@@ -1,90 +1,31 @@
-import * as React from 'react'
-import cx from 'classnames'
 import { DndProvider } from 'react-dnd'
-import { BrowserRouter } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { HashRouter } from 'react-router-dom'
 import { HTML5Backend } from 'react-dnd-html5-backend'
-import { DIRECTION_COLUMN, Flex } from '@opentrons/components'
 import {
-  getEnableRedesign,
-  getFeatureFlagData,
-} from './feature-flags/selectors'
-import { ComputingSpinner } from './components/ComputingSpinner'
-import { ConnectedNav } from './containers/ConnectedNav'
-import { Sidebar } from './containers/ConnectedSidebar'
-import { ConnectedTitleBar } from './containers/ConnectedTitleBar'
-import { MainPanel } from './containers/ConnectedMainPanel'
-import { PortalRoot as MainPageModalPortalRoot } from './components/portals/MainPageModalPortal'
-import { MAIN_CONTENT_FORCED_SCROLL_CLASSNAME } from './ui/steps/utils'
-import { PrereleaseModeIndicator } from './components/PrereleaseModeIndicator'
-import { PortalRoot as TopPortalRoot } from './components/portals/TopPortal'
-import { FileUploadMessageModal } from './components/modals/FileUploadMessageModal/FileUploadMessageModal'
-import { LabwareUploadMessageModal } from './components/modals/LabwareUploadMessageModal/LabwareUploadMessageModal'
-import { GateModal } from './components/modals/GateModal'
-import { CreateFileWizard } from './components/modals/CreateFileWizard'
-import { AnnouncementModal } from './components/modals/AnnouncementModal'
+  Box,
+  DIRECTION_COLUMN,
+  Flex,
+  OVERFLOW_AUTO,
+} from '@opentrons/components'
 import { ProtocolRoutes } from './ProtocolRoutes'
-import { Bouncing } from './Bouncing'
+import { PortalRoot } from './organisms'
 
-import styles from './components/ProtocolEditor.module.css'
-import './css/reset.module.css'
-
-const showGateModal =
-  process.env.NODE_ENV === 'production' || process.env.OT_PD_SHOW_GATE
-
-function ProtocolEditorComponent(): JSX.Element {
-  const flags = useSelector(getFeatureFlagData)
-  const enableRedesign = useSelector(getEnableRedesign)
-
-  const prereleaseModeEnabled = flags.PRERELEASE_MODE === true
-
+export function ProtocolEditor(): JSX.Element {
   return (
-    <div id="protocol-editor">
-      <TopPortalRoot />
-      {enableRedesign ? (
+    <DndProvider backend={HTML5Backend}>
+      <Box
+        width="100%"
+        height="100vh"
+        overflow={OVERFLOW_AUTO}
+        id="protocol-editor"
+      >
+        <PortalRoot />
         <Flex flexDirection={DIRECTION_COLUMN}>
-          {prereleaseModeEnabled ? <Bouncing /> : null}
-          <BrowserRouter>
+          <HashRouter>
             <ProtocolRoutes />
-          </BrowserRouter>
+          </HashRouter>
         </Flex>
-      ) : (
-        <div className="container">
-          <ComputingSpinner />
-          <TopPortalRoot />
-          {showGateModal ? <GateModal /> : null}
-          <PrereleaseModeIndicator />
-          <div className={styles.wrapper}>
-            <ConnectedNav />
-            <Sidebar />
-            <div className={styles.main_page_wrapper}>
-              <ConnectedTitleBar />
-
-              <div
-                id="main-page"
-                className={cx(
-                  styles.main_page_content,
-                  MAIN_CONTENT_FORCED_SCROLL_CLASSNAME
-                )}
-              >
-                <AnnouncementModal />
-                <CreateFileWizard />
-                <FileUploadMessageModal />
-
-                <MainPageModalPortalRoot />
-                <LabwareUploadMessageModal />
-                <MainPanel />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      </Box>
+    </DndProvider>
   )
 }
-
-export const ProtocolEditor = (): JSX.Element => (
-  <DndProvider backend={HTML5Backend}>
-    <ProtocolEditorComponent />
-  </DndProvider>
-)

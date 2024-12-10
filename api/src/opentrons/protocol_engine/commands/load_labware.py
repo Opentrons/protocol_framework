@@ -10,6 +10,8 @@ from ..errors import LabwareIsNotAllowedInLocationError
 from ..resources import labware_validation, fixture_validation
 from ..types import (
     LabwareLocation,
+    ModuleLocation,
+    ModuleModel,
     OnLabwareLocation,
     DeckSlotLocation,
     AddressableAreaLocation,
@@ -17,6 +19,7 @@ from ..types import (
 
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ..errors.error_occurrence import ErrorOccurrence
+from ..state.update_types import StateUpdate
 
 if TYPE_CHECKING:
     from ..state.state import StateView
@@ -87,7 +90,7 @@ class LoadLabwareResult(BaseModel):
 
 
 class LoadLabwareImplementation(
-    AbstractCommandImpl[LoadLabwareParams, SuccessData[LoadLabwareResult, None]]
+    AbstractCommandImpl[LoadLabwareParams, SuccessData[LoadLabwareResult]]
 ):
     """Load labware command implementation."""
 
@@ -99,7 +102,7 @@ class LoadLabwareImplementation(
 
     async def execute(
         self, params: LoadLabwareParams
-    ) -> SuccessData[LoadLabwareResult, None]:
+    ) -> SuccessData[LoadLabwareResult]:
         """Load definition and calibration data necessary for a labware."""
         # TODO (tz, 8-15-2023): extend column validation to column 1 when working
         # on https://opentrons.atlassian.net/browse/RSS-258 and completing
@@ -141,6 +144,16 @@ class LoadLabwareImplementation(
             labware_id=params.labwareId,
         )
 
+        state_update = StateUpdate()
+
+        state_update.set_loaded_labware(
+            labware_id=loaded_labware.labware_id,
+            offset_id=loaded_labware.offsetId,
+            definition=loaded_labware.definition,
+            location=verified_location,
+            display_name=params.displayName,
+        )
+
         # TODO(jbl 2023-06-23) these validation checks happen after the labware is loaded, because they rely on
         #   on the definition. In practice this will not cause any issues since they will raise protocol ending
         #   exception, but for correctness should be refactored to do this check beforehand.
@@ -149,6 +162,13 @@ class LoadLabwareImplementation(
                 top_labware_definition=loaded_labware.definition,
                 bottom_labware_id=verified_location.labwareId,
             )
+        # Validate labware for the absorbance reader
+        elif isinstance(params.location, ModuleLocation):
+            module = self._state_view.modules.get(params.location.moduleId)
+            if module is not None and module.model == ModuleModel.ABSORBANCE_READER_V1:
+                self._state_view.labware.raise_if_labware_incompatible_with_plate_reader(
+                    loaded_labware.definition
+                )
 
         return SuccessData(
             public=LoadLabwareResult(
@@ -156,7 +176,7 @@ class LoadLabwareImplementation(
                 definition=loaded_labware.definition,
                 offsetId=loaded_labware.offsetId,
             ),
-            private=None,
+            state_update=state_update,
         )
 
 

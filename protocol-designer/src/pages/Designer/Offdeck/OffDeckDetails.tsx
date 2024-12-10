@@ -1,7 +1,8 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import {
+  ALIGN_CENTER,
   BORDERS,
   COLORS,
   DIRECTION_COLUMN,
@@ -9,33 +10,33 @@ import {
   Flex,
   JUSTIFY_CENTER,
   LabwareRender,
-  OVERFLOW_SCROLL,
+  OVERFLOW_AUTO,
   RobotWorkSpace,
   SPACING,
   StyledText,
   WRAP,
 } from '@opentrons/components'
 import * as wellContentsSelectors from '../../../top-selectors/well-contents'
-import { wellFillFromWellContents } from '../../../components/labware'
 import { selectors } from '../../../labware-ingred/selectors'
-import { START_TERMINAL_ITEM_ID } from '../../../steplist'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
 import { DeckItemHover } from '../DeckSetup/DeckItemHover'
 import { SlotDetailsContainer } from '../../../organisms'
+import { wellFillFromWellContents } from '../../../organisms/LabwareOnDeck/utils'
 import { getRobotType } from '../../../file-data/selectors'
 import { SlotOverflowMenu } from '../DeckSetup/SlotOverflowMenu'
 import type { DeckSlotId } from '@opentrons/shared-data'
+import type { DeckSetupTabType } from '../types'
 
-interface OffDeckDetailsProps {
+const OFFDECK_MAP_WIDTH = '41.625rem'
+
+interface OffDeckDetailsProps extends DeckSetupTabType {
   addLabware: () => void
 }
 export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
-  const { addLabware } = props
+  const { addLabware, tab } = props
   const { t, i18n } = useTranslation('starting_deck_state')
-  const [hoverSlot, setHoverSlot] = React.useState<DeckSlotId | null>(null)
-  const [menuListId, setShowMenuListForId] = React.useState<DeckSlotId | null>(
-    null
-  )
+  const [hoverSlot, setHoverSlot] = useState<DeckSlotId | null>(null)
+  const [menuListId, setShowMenuListForId] = useState<DeckSlotId | null>(null)
   const robotType = useSelector(getRobotType)
   const deckSetup = useSelector(getDeckSetupForActiveItem)
   const offDeckLabware = Object.values(deckSetup.labware).filter(
@@ -45,19 +46,30 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
   const allWellContentsForActiveItem = useSelector(
     wellContentsSelectors.getAllWellContentsForActiveItem
   )
+  const containerWidth = tab === 'startingDeck' ? '100vw' : '75vh'
+  const paddingLeftWithHover =
+    hoverSlot == null
+      ? `calc((${containerWidth} - (${SPACING.spacing24}  * 2) - ${OFFDECK_MAP_WIDTH}) / 2)`
+      : SPACING.spacing24
+  const paddingLeft = tab === 'startingDeck' ? paddingLeftWithHover : undefined
+  const padding =
+    tab === 'protocolSteps'
+      ? SPACING.spacing24
+      : `${SPACING.spacing24} ${paddingLeft}`
+  const stepDetailsContainerWidth = `calc(((${containerWidth} - ${OFFDECK_MAP_WIDTH}) / 2) - (${SPACING.spacing24}  * 3))`
 
   return (
     <Flex
       backgroundColor={COLORS.white}
       borderRadius={BORDERS.borderRadius8}
       width="100%"
-      height="70vh"
-      padding={`${SPACING.spacing40} ${SPACING.spacing24}`}
-      justifyContent={JUSTIFY_CENTER}
+      height="65vh"
+      padding={padding}
       gridGap={SPACING.spacing24}
+      alignItems={ALIGN_CENTER}
     >
       {hoverSlot != null ? (
-        <Flex width="17.625rem" height="6.25rem" marginTop="4.75rem">
+        <Flex width={stepDetailsContainerWidth} height="6.25rem">
           <SlotDetailsContainer
             robotType={robotType}
             slot="offDeck"
@@ -66,15 +78,14 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
         </Flex>
       ) : null}
       <Flex
-        marginRight="17.375rem"
-        marginLeft={hoverSlot ? '0' : '17.375rem'}
-        width="100%"
+        width={OFFDECK_MAP_WIDTH}
+        height="100%"
         borderRadius={SPACING.spacing12}
         padding={`${SPACING.spacing16} ${SPACING.spacing40}`}
         backgroundColor={COLORS.grey20}
-        height="100%"
-        overflowY={OVERFLOW_SCROLL}
+        overflowY={OVERFLOW_AUTO}
         flexDirection={DIRECTION_COLUMN}
+        flex="0 0 auto"
       >
         <Flex
           justifyContent={JUSTIFY_CENTER}
@@ -83,7 +94,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
           marginBottom={SPACING.spacing40}
         >
           <StyledText desktopStyle="bodyDefaultSemiBold">
-            {i18n.format(t('off_deck_labware'), 'uppercase')}
+            {i18n.format(t('off_deck_labware'), 'upperCase')}
           </StyledText>
         </Flex>
 
@@ -124,7 +135,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
                         slotBoundingBox={xyzDimensions}
                         slotPosition={[0, 0, 0]}
                         itemId={lw.id}
-                        selectedTerminalItemId={START_TERMINAL_ITEM_ID}
+                        tab={tab}
                       />
                     </>
                   )}
@@ -137,26 +148,29 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
                     zIndex={3}
                   >
                     <SlotOverflowMenu
-                      slot={menuListId}
+                      location={menuListId}
                       addEquipment={addLabware}
                       setShowMenuList={() => {
                         setShowMenuListForId(null)
                       }}
+                      menuListSlotPosition={[0, 0, 0]}
+                      invertY
                     />
                   </Flex>
                 ) : null}
               </Flex>
             )
           })}
-          <Flex width="9.5625rem" height="6.375rem">
-            <EmptySelectorButton
-              onClick={addLabware}
-              text={t('add_labware')}
-              textAlignment="middle"
-              size="large"
-              iconName="plus"
-            />
-          </Flex>
+          {tab === 'startingDeck' ? (
+            <Flex width="9.5625rem" height="6.375rem">
+              <EmptySelectorButton
+                onClick={addLabware}
+                text={t('add_labware')}
+                textAlignment="middle"
+                iconName="plus"
+              />
+            </Flex>
+          ) : null}
         </Flex>
       </Flex>
     </Flex>

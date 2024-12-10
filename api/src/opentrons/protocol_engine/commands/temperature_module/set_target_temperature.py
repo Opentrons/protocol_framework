@@ -34,7 +34,7 @@ class SetTargetTemperatureResult(BaseModel):
 
 class SetTargetTemperatureImpl(
     AbstractCommandImpl[
-        SetTargetTemperatureParams, SuccessData[SetTargetTemperatureResult, None]
+        SetTargetTemperatureParams, SuccessData[SetTargetTemperatureResult]
     ]
 ):
     """Execution implementation of a Temperature Module's set temperature command."""
@@ -50,7 +50,7 @@ class SetTargetTemperatureImpl(
 
     async def execute(
         self, params: SetTargetTemperatureParams
-    ) -> SuccessData[SetTargetTemperatureResult, None]:
+    ) -> SuccessData[SetTargetTemperatureResult]:
         """Set a Temperature Module's target temperature."""
         # Allow propagation of ModuleNotLoadedError and WrongModuleTypeError.
         module_substate = self._state_view.modules.get_temperature_module_substate(
@@ -69,7 +69,6 @@ class SetTargetTemperatureImpl(
             await temp_hardware_module.start_set_temperature(celsius=validated_temp)
         return SuccessData(
             public=SetTargetTemperatureResult(targetTemperature=validated_temp),
-            private=None,
         )
 
 

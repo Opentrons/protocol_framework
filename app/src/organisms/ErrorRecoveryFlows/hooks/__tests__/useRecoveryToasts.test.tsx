@@ -1,7 +1,7 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { I18nextProvider } from 'react-i18next'
-import { i18n } from '../../../../i18n'
+import { i18n } from '/app/i18n'
 import { renderHook, render, screen } from '@testing-library/react'
 
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
@@ -14,25 +14,31 @@ import {
 } from '../useRecoveryToasts'
 import { RECOVERY_MAP } from '../../constants'
 import { useToaster } from '../../../ToasterOven'
-import { useCommandTextString } from '../../../../molecules/Command'
+import { useCommandTextString } from '/app/local-resources/commands'
 
 import type { Mock } from 'vitest'
 import type { BuildToast } from '../useRecoveryToasts'
 
 vi.mock('../../../ToasterOven')
-vi.mock('../../../../molecules/Command')
+vi.mock('/app/local-resources/commands')
 
 const TEST_COMMAND = 'test command'
-const TC_COMMAND = 'tc command cycle some more text'
+const TC_COMMAND =
+  'tc starting profile of 1231231 element steps composed of some extra text bla bla'
 
 let mockMakeToast: Mock
 
 const DEFAULT_PROPS: BuildToast = {
   isOnDevice: false,
-  currentStepCount: 1,
+  stepCounts: {
+    currentStepNumber: 1,
+    hasRunDiverged: false,
+    totalStepCount: 1,
+  },
   selectedRecoveryOption: RECOVERY_MAP.RETRY_SAME_TIPS.ROUTE,
   commandTextData: { commands: [] } as any,
   robotType: FLEX_ROBOT_TYPE,
+  allRunDefs: [],
 }
 
 // Utility function for rendering with I18nextProvider
@@ -45,6 +51,7 @@ describe('useRecoveryToasts', () => {
     mockMakeToast = vi.fn()
     vi.mocked(useToaster).mockReturnValue({ makeToast: mockMakeToast } as any)
     vi.mocked(useCommandTextString).mockReturnValue({
+      kind: 'generic',
       commandText: TEST_COMMAND,
     })
   })
@@ -69,6 +76,7 @@ describe('useRecoveryToasts', () => {
 
   it('should make toast with correct parameters for desktop', () => {
     vi.mocked(useCommandTextString).mockReturnValue({
+      kind: 'generic',
       commandText: TEST_COMMAND,
     })
 
@@ -80,19 +88,19 @@ describe('useRecoveryToasts', () => {
     )
 
     vi.mocked(useCommandTextString).mockReturnValue({
+      kind: 'generic',
       commandText: TEST_COMMAND,
-      stepTexts: undefined,
     })
 
     result.current.makeSuccessToast()
     expect(mockMakeToast).toHaveBeenCalledWith(
-      'Retrying step 1 succeeded.',
+      'test command',
       'success',
       expect.objectContaining({
         closeButton: true,
         disableTimeout: true,
         displayType: 'desktop',
-        heading: expect.any(String),
+        heading: 'Retrying step 1 succeeded.',
       })
     )
   })
@@ -120,8 +128,8 @@ describe('useRecoveryToasts', () => {
 
   it('should use recoveryToastText when desktopFullCommandText is null', () => {
     vi.mocked(useCommandTextString).mockReturnValue({
+      kind: 'generic',
       commandText: '',
-      stepTexts: undefined,
     })
 
     const { result } = renderHook(() =>
@@ -183,28 +191,27 @@ describe('getStepNumber', () => {
   })
 
   it('should handle a falsy currentStepCount', () => {
-    expect(getStepNumber(RECOVERY_MAP.RETRY_SAME_TIPS.ROUTE, null)).toBe('?')
+    expect(getStepNumber(RECOVERY_MAP.RETRY_SAME_TIPS.ROUTE, null)).toBe(null)
   })
 
   it('should handle unknown recovery option', () => {
-    expect(getStepNumber('UNKNOWN_OPTION' as any, 3)).toBe(
-      'HANDLE RECOVERY TOAST OPTION EXPLICITLY.'
-    )
+    expect(getStepNumber('UNKNOWN_OPTION' as any, 3)).toBeNull()
   })
 })
 
 describe('useRecoveryFullCommandText', () => {
   it('should return the correct command text', () => {
     vi.mocked(useCommandTextString).mockReturnValue({
+      kind: 'generic',
       commandText: TEST_COMMAND,
-      stepTexts: undefined,
     })
 
     const { result } = renderHook(() =>
       useRecoveryFullCommandText({
         robotType: FLEX_ROBOT_TYPE,
-        stepNumber: 0,
-        commandTextData: { commands: [TEST_COMMAND] } as any,
+        stepNumber: 1,
+        commandTextData: { commands: [TEST_COMMAND, {}] } as any,
+        allRunDefs: [],
       })
     )
 
@@ -213,8 +220,8 @@ describe('useRecoveryFullCommandText', () => {
 
   it('should return null when relevantCmd is null', () => {
     vi.mocked(useCommandTextString).mockReturnValue({
+      kind: 'generic',
       commandText: '',
-      stepTexts: undefined,
     })
 
     const { result } = renderHook(() =>
@@ -222,26 +229,29 @@ describe('useRecoveryFullCommandText', () => {
         robotType: FLEX_ROBOT_TYPE,
         stepNumber: 1,
         commandTextData: { commands: [] } as any,
+        allRunDefs: [],
       })
     )
 
     expect(result.current).toBeNull()
   })
 
-  it('should return stepNumber if it is a string', () => {
+  it('should return null if there is no current step count', () => {
     const { result } = renderHook(() =>
       useRecoveryFullCommandText({
         robotType: FLEX_ROBOT_TYPE,
-        stepNumber: '?',
+        stepNumber: null,
         commandTextData: { commands: [] } as any,
+        allRunDefs: [],
       })
     )
 
-    expect(result.current).toBe('?')
+    expect(result.current).toBeNull()
   })
 
   it('should truncate TC command', () => {
     vi.mocked(useCommandTextString).mockReturnValue({
+      kind: 'thermocycler/runProfile',
       commandText: TC_COMMAND,
       stepTexts: ['step'],
     })
@@ -249,13 +259,33 @@ describe('useRecoveryFullCommandText', () => {
     const { result } = renderHook(() =>
       useRecoveryFullCommandText({
         robotType: FLEX_ROBOT_TYPE,
-        stepNumber: 0,
+        stepNumber: 1,
         commandTextData: {
           commands: [TC_COMMAND],
         } as any,
+        allRunDefs: [],
       })
     )
+    expect(result.current).toBe('tc starting profile of 1231231 element steps')
+  })
 
-    expect(result.current).toBe('tc command cycle')
+  it('should truncate new TC command', () => {
+    vi.mocked(useCommandTextString).mockReturnValue({
+      kind: 'thermocycler/runExtendedProfile',
+      commandText: TC_COMMAND,
+      profileElementTexts: [{ kind: 'step', stepText: 'blah blah blah' }],
+    })
+
+    const { result } = renderHook(() =>
+      useRecoveryFullCommandText({
+        robotType: FLEX_ROBOT_TYPE,
+        stepNumber: 1,
+        commandTextData: {
+          commands: [TC_COMMAND, {}],
+        } as any,
+        allRunDefs: [],
+      })
+    )
+    expect(result.current).toBe('tc starting profile of 1231231 element steps')
   })
 })

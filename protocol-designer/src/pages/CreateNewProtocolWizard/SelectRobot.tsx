@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   DIRECTION_COLUMN,
@@ -6,10 +5,11 @@ import {
   RadioButton,
   SPACING,
   StyledText,
+  WRAP,
 } from '@opentrons/components'
 import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import { WizardBody } from './WizardBody'
-import { HandleEnter } from './HandleEnter'
+import { HandleEnter } from '../../atoms/HandleEnter'
 import type { WizardTileProps } from './types'
 
 export function SelectRobot(props: WizardTileProps): JSX.Element {
@@ -21,23 +21,19 @@ export function SelectRobot(props: WizardTileProps): JSX.Element {
   return (
     <HandleEnter onEnter={proceed}>
       <WizardBody
+        robotType={robotType}
         stepNumber={1}
         header={t('basics')}
-        subHeader={t('questions')}
         disabled={false}
         proceed={() => {
           proceed(1)
         }}
       >
-        <Flex flexDirection={DIRECTION_COLUMN} marginTop={SPACING.spacing60}>
-          <StyledText
-            desktopStyle="headingSmallBold"
-            marginBottom={SPACING.spacing16}
-          >
+        <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
+          <StyledText desktopStyle="headingSmallBold">
             {t('robot_type')}
           </StyledText>
-
-          <Flex gridGap={SPACING.spacing4}>
+          <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
             <RadioButton
               onChange={() => {
                 setValue('fields.robotType', FLEX_ROBOT_TYPE)

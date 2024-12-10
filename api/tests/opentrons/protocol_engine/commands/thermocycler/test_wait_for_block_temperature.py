@@ -51,4 +51,4 @@ async def test_set_target_block_temperature(
         tc_module_substate.get_target_block_temperature(),
         await tc_hardware.wait_for_block_target(),
     )
-    assert result == SuccessData(public=expected_result, private=None)
+    assert result == SuccessData(public=expected_result)

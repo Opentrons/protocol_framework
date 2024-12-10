@@ -1,15 +1,25 @@
-import type { CommonCommandRunTimeInfo, CommonCommandCreateInfo } from '.'
+import type {
+  CommonCommandRunTimeInfo,
+  CommonCommandCreateInfo,
+  OnDeckLabwareLocation,
+} from '.'
 import type { MotorAxes } from '../../js/types'
 
 export type UnsafeRunTimeCommand =
   | UnsafeBlowoutInPlaceRunTimeCommand
   | UnsafeDropTipInPlaceRunTimeCommand
   | UnsafeUpdatePositionEstimatorsRunTimeCommand
+  | UnsafeEngageAxesRunTimeCommand
+  | UnsafeUngripLabwareRunTimeCommand
+  | UnsafePlaceLabwareRunTimeCommand
 
 export type UnsafeCreateCommand =
   | UnsafeBlowoutInPlaceCreateCommand
   | UnsafeDropTipInPlaceCreateCommand
   | UnsafeUpdatePositionEstimatorsCreateCommand
+  | UnsafeEngageAxesCreateCommand
+  | UnsafeUngripLabwareCreateCommand
+  | UnsafePlaceLabwareCreateCommand
 
 export interface UnsafeBlowoutInPlaceParams {
   pipetteId: string
@@ -54,5 +64,44 @@ export interface UnsafeUpdatePositionEstimatorsCreateCommand
 export interface UnsafeUpdatePositionEstimatorsRunTimeCommand
   extends CommonCommandRunTimeInfo,
     UnsafeUpdatePositionEstimatorsCreateCommand {
+  result?: any
+}
+
+export interface UnsafeEngageAxesParams {
+  axes: MotorAxes
+}
+
+export interface UnsafeEngageAxesCreateCommand extends CommonCommandCreateInfo {
+  commandType: 'unsafe/engageAxes'
+  params: UnsafeUpdatePositionEstimatorsParams
+}
+export interface UnsafeEngageAxesRunTimeCommand
+  extends CommonCommandRunTimeInfo,
+    UnsafeEngageAxesCreateCommand {
+  result?: any
+}
+
+export interface UnsafeUngripLabwareCreateCommand
+  extends CommonCommandCreateInfo {
+  commandType: 'unsafe/ungripLabware'
+  params: {}
+}
+export interface UnsafeUngripLabwareRunTimeCommand
+  extends CommonCommandRunTimeInfo,
+    UnsafeUngripLabwareCreateCommand {
+  result?: any
+}
+export interface UnsafePlaceLabwareParams {
+  labwareURI: string
+  location: OnDeckLabwareLocation
+}
+export interface UnsafePlaceLabwareCreateCommand
+  extends CommonCommandCreateInfo {
+  commandType: 'unsafe/placeLabware'
+  params: UnsafePlaceLabwareParams
+}
+export interface UnsafePlaceLabwareRunTimeCommand
+  extends CommonCommandRunTimeInfo,
+    UnsafePlaceLabwareCreateCommand {
   result?: any
 }

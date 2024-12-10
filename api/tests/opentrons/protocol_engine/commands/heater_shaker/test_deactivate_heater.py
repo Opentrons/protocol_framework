@@ -46,5 +46,5 @@ async def test_deactivate_heater(
     result = await subject.execute(data)
     decoy.verify(await hs_hardware.deactivate_heater(), times=1)
     assert result == SuccessData(
-        public=heater_shaker.DeactivateHeaterResult(), private=None
+        public=heater_shaker.DeactivateHeaterResult(),
     )

@@ -1,5 +1,6 @@
 import type { AddressableAreaName } from '../../deck'
 import type { CommonCommandRunTimeInfo, CommonCommandCreateInfo } from '.'
+import type { DropTipWellLocation, WellLocation } from './support'
 export type PipettingRunTimeCommand =
   | AspirateInPlaceRunTimeCommand
   | AspirateInPlaceRunTimeCommand
@@ -19,6 +20,7 @@ export type PipettingRunTimeCommand =
   | VerifyTipPresenceRunTimeCommand
   | LiquidProbeRunTimeCommand
   | TryLiquidProbeRunTimeCommand
+  | AirGapInPlaceRunTimeCommand
 
 export type PipettingCreateCommand =
   | AspirateCreateCommand
@@ -38,6 +40,7 @@ export type PipettingCreateCommand =
   | VerifyTipPresenceCreateCommand
   | LiquidProbeCreateCommand
   | TryLiquidProbeCreateCommand
+  | AirGapInPlaceCreateCommand
 
 export interface ConfigureForVolumeCreateCommand
   extends CommonCommandCreateInfo {
@@ -54,6 +57,22 @@ export interface ConfigureForVolumeRunTimeCommand
     ConfigureForVolumeCreateCommand {
   result?: BasicLiquidHandlingResult
 }
+
+export type AirGapInPlaceParams = FlowRateParams &
+  PipetteIdentityParams &
+  VolumeParams
+
+export interface AirGapInPlaceCreateCommand extends CommonCommandCreateInfo {
+  commandType: 'airGapInPlace'
+  params: AirGapInPlaceParams
+}
+
+export interface AirGapInPlaceRunTimeCommand
+  extends CommonCommandRunTimeInfo,
+    AirGapInPlaceCreateCommand {
+  result?: BasicLiquidHandlingResult
+}
+
 export interface AspirateCreateCommand extends CommonCommandCreateInfo {
   commandType: 'aspirate'
   params: AspDispAirgapParams
@@ -226,17 +245,7 @@ export type BlowoutParams = FlowRateParams &
   PipetteAccessParams &
   WellLocationParam
 export type TouchTipParams = PipetteAccessParams & WellLocationParam
-export type DropTipParams = PipetteAccessParams & {
-  wellLocation?: {
-    origin?: 'default' | 'top' | 'center' | 'bottom'
-    offset?: {
-      // mm values all default to 0
-      x?: number
-      y?: number
-      z?: number
-    }
-  }
-}
+export type DropTipParams = PipetteAccessParams & DropTipWellLocationParam
 export type PickUpTipParams = TouchTipParams
 
 interface AddressableOffsetVector {
@@ -292,17 +301,11 @@ interface VolumeParams {
 }
 
 interface WellLocationParam {
-  wellLocation?: {
-    // default value is 'top'
-    origin?: 'top' | 'center' | 'bottom'
-    offset?: {
-      // mm
-      // all values default to 0
-      x?: number
-      y?: number
-      z?: number
-    }
-  }
+  wellLocation?: WellLocation
+}
+
+interface DropTipWellLocationParam {
+  wellLocation?: DropTipWellLocation
 }
 
 interface VerifyTipPresenceParams extends PipetteIdentityParams {

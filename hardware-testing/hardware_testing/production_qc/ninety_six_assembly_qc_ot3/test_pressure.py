@@ -1,6 +1,6 @@
 """Test Pressure."""
 from asyncio import sleep
-from typing import List, Union
+from typing import List, Union, Literal
 
 from opentrons_hardware.firmware_bindings.constants import SensorId
 
@@ -94,7 +94,9 @@ def check_value(test_value: float, test_name: str) -> CSVResult:
         return CSVResult.FAIL
 
 
-async def run(api: OT3API, report: CSVReport, section: str) -> None:
+async def run(
+    api: OT3API, report: CSVReport, section: str, pipette: Literal[200, 1000]
+) -> None:
     """Run."""
     await api.home_z(OT3Mount.LEFT)
     slot_5 = helpers_ot3.get_slot_calibration_square_position_ot3(5)
@@ -119,7 +121,7 @@ async def run(api: OT3API, report: CSVReport, section: str) -> None:
 
         # SEALED-Pa
         sealed_pa = 0.0
-        await api.add_tip(OT3Mount.LEFT, helpers_ot3.get_default_tip_length(TIP_VOLUME))
+        api.add_tip(OT3Mount.LEFT, helpers_ot3.get_default_tip_length(TIP_VOLUME))
         await api.prepare_for_aspirate(OT3Mount.LEFT)
         if not api.is_simulator:
             ui.get_user_ready(f"attach {TIP_VOLUME} uL TIP to {probe.name} sensor")
@@ -171,4 +173,4 @@ async def run(api: OT3API, report: CSVReport, section: str) -> None:
 
         if not api.is_simulator:
             ui.get_user_ready("REMOVE tip")
-        await api.remove_tip(OT3Mount.LEFT)
+        api.remove_tip(OT3Mount.LEFT)

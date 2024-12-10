@@ -51,8 +51,12 @@ class JiraTicket:
     def match_issues(self, issue_ids: List[List[str]], ticket_summary: str) -> List:
         """Matches related ticket ID's."""
         to_link = []
-        error = ticket_summary.split("_")[3]
-        robot = ticket_summary.split("_")[0]
+        try:
+            error = ticket_summary.split("_")[3]
+            robot = ticket_summary.split("_")[0]
+        except IndexError:
+            error = ""
+            robot = ""
         # for every issue see if both match, if yes then grab issue ID and add it to a list
         for issue in issue_ids:
             summary = issue[1]
@@ -103,6 +107,12 @@ class JiraTicket:
         webbrowser.open(url)
         return url
 
+    def get_labels(self) -> List[str]:
+        """Get list of available labels."""
+        url = f"{self.url}/rest/api/3/label"
+        response = requests.request("GET", url, headers=self.headers, auth=self.auth)
+        return response.json()
+
     def create_ticket(
         self,
         summary: str,
@@ -114,10 +124,12 @@ class JiraTicket:
         priority: str,
         components: list,
         affects_versions: str,
-        robot: str,
+        labels: list,
+        parent_name: str,
     ) -> Tuple[str, str]:
         """Create ticket."""
         # Check if software version is a field on JIRA, if not replaces with existing version
+        # TODO: automate parent linking
         data = {
             "fields": {
                 "project": {"id": "10273", "key": project_key},
@@ -125,7 +137,8 @@ class JiraTicket:
                 "summary": summary,
                 "reporter": {"id": reporter_id},
                 "assignee": {"id": assignee_id},
-                "parent": {"key": robot},
+                # "parent": {"key": parent_name},
+                "labels": labels,
                 "priority": {"name": priority},
                 "components": [{"name": component} for component in components],
                 "description": {
@@ -190,6 +203,7 @@ class JiraTicket:
 
     def get_project_issues(self, project_key: str) -> Dict[str, Any]:
         """Retrieve all issues for the given project key."""
+        # TODO: add field for ticket type.
         headers = {"Accept": "application/json"}
         query = {"jql": f"project={project_key}"}
         response = requests.request(
@@ -199,7 +213,6 @@ class JiraTicket:
             params=query,
             auth=self.auth,
         )
-        response.raise_for_status()
         return response.json()
 
     def get_project_versions(self, project_key: str) -> List[str]:

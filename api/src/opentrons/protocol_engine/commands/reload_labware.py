@@ -6,6 +6,7 @@ from typing_extensions import Literal
 
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ..errors.error_occurrence import ErrorOccurrence
+from ..state.update_types import StateUpdate
 
 if TYPE_CHECKING:
     from ..state.state import StateView
@@ -46,7 +47,7 @@ class ReloadLabwareResult(BaseModel):
 
 
 class ReloadLabwareImplementation(
-    AbstractCommandImpl[ReloadLabwareParams, SuccessData[ReloadLabwareResult, None]]
+    AbstractCommandImpl[ReloadLabwareParams, SuccessData[ReloadLabwareResult]]
 ):
     """Reload labware command implementation."""
 
@@ -58,10 +59,18 @@ class ReloadLabwareImplementation(
 
     async def execute(
         self, params: ReloadLabwareParams
-    ) -> SuccessData[ReloadLabwareResult, None]:
+    ) -> SuccessData[ReloadLabwareResult]:
         """Reload the definition and calibration data for a specific labware."""
         reloaded_labware = await self._equipment.reload_labware(
             labware_id=params.labwareId,
+        )
+
+        state_update = StateUpdate()
+
+        state_update.set_labware_location(
+            labware_id=params.labwareId,
+            new_location=reloaded_labware.location,
+            new_offset_id=reloaded_labware.offsetId,
         )
 
         return SuccessData(
@@ -69,7 +78,7 @@ class ReloadLabwareImplementation(
                 labwareId=params.labwareId,
                 offsetId=reloaded_labware.offsetId,
             ),
-            private=None,
+            state_update=state_update,
         )
 
 

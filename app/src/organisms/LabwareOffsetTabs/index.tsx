@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   BORDERS,
@@ -27,7 +27,7 @@ export function LabwareOffsetTabs({
   ...styleProps
 }: LabwareOffsetTabsProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
-  const [currentTab, setCurrentTab] = React.useState<TabOptions>('table')
+  const [currentTab, setCurrentTab] = useState<TabOptions>('table')
 
   const activeTabComponent = {
     table: TableComponent,
@@ -73,7 +73,6 @@ export function LabwareOffsetTabs({
       </Flex>
       <Box
         backgroundColor={COLORS.white}
-        border={BORDERS.lineBorder}
         // remove left upper corner border radius when first tab is active
         borderRadius={`${
           currentTab === 'table' ? '0' : BORDERS.borderRadius4

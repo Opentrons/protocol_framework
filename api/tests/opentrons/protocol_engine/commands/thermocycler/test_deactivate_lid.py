@@ -45,4 +45,4 @@ async def test_deactivate_lid(
     result = await subject.execute(data)
 
     decoy.verify(await tc_hardware.deactivate_lid(), times=1)
-    assert result == SuccessData(public=expected_result, private=None)
+    assert result == SuccessData(public=expected_result)

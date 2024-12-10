@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { describe, it, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { FLEX_ROBOT_TYPE, fixture12Trough } from '@opentrons/shared-data'
@@ -36,6 +36,7 @@ describe('OffDeckDetails', () => {
 
   beforeEach(() => {
     props = {
+      tab: 'startingDeck',
       addLabware: vi.fn(),
     }
     vi.mocked(getRobotType).mockReturnValue(FLEX_ROBOT_TYPE)
@@ -58,7 +59,7 @@ describe('OffDeckDetails', () => {
 
   it('renders off-deck overview with 1 labware', () => {
     render(props)
-    screen.getByText('Off-deck Labware')
+    screen.getByText('OFF-DECK LABWARE')
     screen.getByText('mock LabwareRender')
     screen.getByText('Add labware')
   })

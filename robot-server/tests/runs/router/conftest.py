@@ -1,4 +1,5 @@
 """Common test fixtures for runs route tests."""
+from opentrons.hardware_control import HardwareControlAPI, OT3HardwareControlAPI
 import pytest
 from decoy import Decoy
 
@@ -12,7 +13,10 @@ from robot_server.maintenance_runs.maintenance_run_orchestrator_store import (
 )
 from robot_server.deck_configuration.store import DeckConfigurationStore
 
+from robot_server.file_provider.provider import FileProviderWrapper
+
 from opentrons.protocol_engine import ProtocolEngine
+from opentrons.protocol_engine.resources import FileProvider
 
 
 @pytest.fixture()
@@ -63,3 +67,23 @@ def mock_maintenance_run_orchestrator_store(
 def mock_deck_configuration_store(decoy: Decoy) -> DeckConfigurationStore:
     """Get a mock DeckConfigurationStore."""
     return decoy.mock(cls=DeckConfigurationStore)
+
+
+@pytest.fixture()
+def mock_file_provider_wrapper(decoy: Decoy) -> FileProviderWrapper:
+    """Return a mock FileProviderWrapper."""
+    return decoy.mock(cls=FileProviderWrapper)
+
+
+@pytest.fixture()
+def mock_file_provider(
+    decoy: Decoy, mock_file_provider_wrapper: FileProviderWrapper
+) -> FileProvider:
+    """Return a mock FileProvider."""
+    return decoy.mock(cls=FileProvider)
+
+
+@pytest.fixture
+def mock_hardware_api(decoy: Decoy) -> HardwareControlAPI:
+    """Get a mock HardwareControlAPI."""
+    return decoy.mock(cls=OT3HardwareControlAPI)

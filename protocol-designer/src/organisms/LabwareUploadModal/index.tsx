@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
@@ -44,6 +43,7 @@ export function LabwareUploadModal(): JSX.Element | null {
 
   return (
     <Modal
+      marginLeft="0"
       type={
         message.messageType === 'ASK_FOR_LABWARE_OVERWRITE'
           ? 'warning'

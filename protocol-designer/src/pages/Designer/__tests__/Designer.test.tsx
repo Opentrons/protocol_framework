@@ -1,19 +1,25 @@
-import * as React from 'react'
-
 import { describe, it, vi, beforeEach, expect } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { fireEvent, screen } from '@testing-library/react'
 import { i18n } from '../../../assets/localization'
 import { renderWithProviders } from '../../../__testing-utils__'
-import { getFileMetadata } from '../../../file-data/selectors'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
+import { selectors } from '../../../labware-ingred/selectors'
+import { getDesignerTab, getFileMetadata } from '../../../file-data/selectors'
+import { generateNewProtocol } from '../../../labware-ingred/actions'
 import { DeckSetupContainer } from '../DeckSetup'
 import { Designer } from '../index'
+import { LiquidsOverflowMenu } from '../LiquidsOverflowMenu'
+import { ProtocolSteps } from '../ProtocolSteps'
 
 import type { NavigateFunction } from 'react-router-dom'
 
 const mockNavigate = vi.fn()
 
+vi.mock('../ProtocolSteps')
+vi.mock('../../../labware-ingred/actions')
+vi.mock('../../../labware-ingred/selectors')
+vi.mock('../LiquidsOverflowMenu')
 vi.mock('../DeckSetup')
 vi.mock('../../../file-data/selectors')
 vi.mock('../../../top-selectors/labware-locations')
@@ -38,19 +44,33 @@ const render = () => {
 
 describe('Designer', () => {
   beforeEach(() => {
+    vi.mocked(getDesignerTab).mockReturnValue('startingDeck')
+    vi.mocked(ProtocolSteps).mockReturnValue(<div>mock ProtocolSteps</div>)
     vi.mocked(getFileMetadata).mockReturnValue({
       protocolName: 'mockProtocolName',
+      created: 123,
     })
+    vi.mocked(selectors.getIsNewProtocol).mockReturnValue(true)
     vi.mocked(getDeckSetupForActiveItem).mockReturnValue({
       modules: {},
-      additionalEquipmentOnDeck: {},
+      additionalEquipmentOnDeck: {
+        trash: { name: 'trashBin', location: 'cutoutA3', id: 'mockId' },
+      },
       labware: {},
       pipettes: {},
     })
     vi.mocked(DeckSetupContainer).mockReturnValue(
       <div>mock DeckSetupContainer</div>
     )
+    vi.mocked(LiquidsOverflowMenu).mockReturnValue(
+      <div>mock LiquidsOverflowMenu</div>
+    )
+    vi.mocked(selectors.getZoomedInSlot).mockReturnValue({
+      slot: null,
+      cutout: null,
+    })
   })
+
   it('renders deck setup container and nav buttons', () => {
     render()
     screen.getByText('mock DeckSetupContainer')
@@ -58,10 +78,35 @@ describe('Designer', () => {
     screen.getByText('Edit protocol')
     screen.getByText('Protocol steps')
     screen.getByText('Protocol starting deck')
-    screen.getByText('Liquids')
+    screen.getByTestId('water-drop')
     fireEvent.click(screen.getByRole('button', { name: 'Done' }))
     expect(mockNavigate).toHaveBeenCalledWith('/overview')
   })
-  it.todo('renders the liquids button overflow menu')
-  it.todo('renders the protocol steps page')
+
+  it('renders the liquids button overflow menu', () => {
+    render()
+    fireEvent.click(screen.getByTestId('water-drop'))
+    screen.getByText('mock LiquidsOverflowMenu')
+  })
+
+  it('calls generateNewProtocol when hardware has been placed for a new protocol', () => {
+    vi.mocked(getDeckSetupForActiveItem).mockReturnValue({
+      modules: {},
+      additionalEquipmentOnDeck: {
+        wasteChute: { name: 'wasteChute', id: 'mockId', location: 'cutoutD3' },
+        trashBin: { name: 'trashBin', id: 'mockId', location: 'cutoutA3' },
+      },
+      labware: {},
+      pipettes: {},
+    })
+    render()
+    expect(vi.mocked(generateNewProtocol)).toHaveBeenCalled()
+  })
+
+  it('renders the protocol steps page', () => {
+    vi.mocked(getDesignerTab).mockReturnValue('protocolSteps')
+    render()
+    fireEvent.click(screen.getByText('Protocol steps'))
+    screen.getByText('mock ProtocolSteps')
+  })
 })

@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { fireEvent, screen } from '@testing-library/react'
 import { i18n } from '../../../assets/localization'
@@ -25,10 +24,12 @@ describe('LabwareUploadModal', () => {
 
   it('renders modal for not json', () => {
     render()
-    screen.getByText('Protocol Designer only accepts JSON files.')
-    screen.getByText('Incompatible file type')
+    screen.getByText(
+      'Protocol Designer only accepts custom JSON labware definitions made with our Labware Creator. Upload a valid file to continue.'
+    )
+    screen.getByText('Invalid file type')
     fireEvent.click(
-      screen.getByTestId('ModalHeader_icon_close_Incompatible file type')
+      screen.getByTestId('ModalHeader_icon_close_Invalid file type')
     )
     expect(vi.mocked(dismissLabwareUploadMessage)).toHaveBeenCalled()
   })

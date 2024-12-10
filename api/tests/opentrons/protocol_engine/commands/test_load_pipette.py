@@ -1,9 +1,16 @@
 """Test load pipette commands."""
+from opentrons.protocol_engine.state.update_types import (
+    LoadPipetteUpdate,
+    PipetteConfigUpdate,
+    StateUpdate,
+    PipetteUnknownFluidUpdate,
+)
 import pytest
 from decoy import Decoy
 
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.robot.types import RobotType
+from opentrons_shared_data.pipette.pipette_definition import AvailableSensorDefinition
 from opentrons.types import MountType, Point
 
 from opentrons.protocol_engine.errors import InvalidSpecificationForRobotTypeError
@@ -17,10 +24,15 @@ from opentrons.protocol_engine.commands.command import SuccessData
 from opentrons.protocol_engine.commands.load_pipette import (
     LoadPipetteParams,
     LoadPipetteResult,
-    LoadPipettePrivateResult,
     LoadPipetteImplementation,
 )
 from ..pipette_fixtures import get_default_nozzle_map
+
+
+@pytest.fixture
+def available_sensors() -> AvailableSensorDefinition:
+    """Provide a list of sensors."""
+    return AvailableSensorDefinition(sensors=["pressure", "capacitive", "environment"])
 
 
 @pytest.mark.parametrize(
@@ -44,6 +56,7 @@ async def test_load_pipette_implementation(
     equipment: EquipmentHandler,
     state_view: StateView,
     data: LoadPipetteParams,
+    available_sensors: AvailableSensorDefinition,
 ) -> None:
     """A LoadPipette command should have an execution implementation."""
     subject = LoadPipetteImplementation(equipment=equipment, state_view=state_view)
@@ -64,6 +77,14 @@ async def test_load_pipette_implementation(
         back_left_corner_offset=Point(x=1, y=2, z=3),
         front_right_corner_offset=Point(x=4, y=5, z=6),
         pipette_lld_settings={},
+        plunger_positions={
+            "top": 0.0,
+            "bottom": 5.0,
+            "blow_out": 19.0,
+            "drop_tip": 20.0,
+        },
+        shaft_ul_per_mm=5.0,
+        available_sensors=available_sensors,
     )
 
     decoy.when(
@@ -85,8 +106,19 @@ async def test_load_pipette_implementation(
 
     assert result == SuccessData(
         public=LoadPipetteResult(pipetteId="some id"),
-        private=LoadPipettePrivateResult(
-            pipette_id="some id", serial_number="some-serial-number", config=config_data
+        state_update=StateUpdate(
+            loaded_pipette=LoadPipetteUpdate(
+                pipette_name=PipetteNameType.P300_SINGLE,
+                mount=MountType.LEFT,
+                pipette_id="some id",
+                liquid_presence_detection=None,
+            ),
+            pipette_config=PipetteConfigUpdate(
+                pipette_id="some id",
+                serial_number="some-serial-number",
+                config=config_data,
+            ),
+            pipette_aspirated_fluid=PipetteUnknownFluidUpdate(pipette_id="some id"),
         ),
     )
 
@@ -95,6 +127,7 @@ async def test_load_pipette_implementation_96_channel(
     decoy: Decoy,
     equipment: EquipmentHandler,
     state_view: StateView,
+    available_sensors: AvailableSensorDefinition,
 ) -> None:
     """A LoadPipette command should have an execution implementation."""
     subject = LoadPipetteImplementation(equipment=equipment, state_view=state_view)
@@ -121,6 +154,14 @@ async def test_load_pipette_implementation_96_channel(
         back_left_corner_offset=Point(x=1, y=2, z=3),
         front_right_corner_offset=Point(x=4, y=5, z=6),
         pipette_lld_settings={},
+        plunger_positions={
+            "top": 0.0,
+            "bottom": 5.0,
+            "blow_out": 19.0,
+            "drop_tip": 20.0,
+        },
+        shaft_ul_per_mm=5.0,
+        available_sensors=available_sensors,
     )
 
     decoy.when(
@@ -140,8 +181,19 @@ async def test_load_pipette_implementation_96_channel(
 
     assert result == SuccessData(
         public=LoadPipetteResult(pipetteId="pipette-id"),
-        private=LoadPipettePrivateResult(
-            pipette_id="pipette-id", serial_number="some id", config=config_data
+        state_update=StateUpdate(
+            loaded_pipette=LoadPipetteUpdate(
+                pipette_name=PipetteNameType.P1000_96,
+                mount=MountType.LEFT,
+                pipette_id="pipette-id",
+                liquid_presence_detection=None,
+            ),
+            pipette_config=PipetteConfigUpdate(
+                pipette_id="pipette-id",
+                serial_number="some id",
+                config=config_data,
+            ),
+            pipette_aspirated_fluid=PipetteUnknownFluidUpdate(pipette_id="pipette-id"),
         ),
     )
 

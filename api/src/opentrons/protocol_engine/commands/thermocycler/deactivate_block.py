@@ -27,7 +27,7 @@ class DeactivateBlockResult(BaseModel):
 
 
 class DeactivateBlockImpl(
-    AbstractCommandImpl[DeactivateBlockParams, SuccessData[DeactivateBlockResult, None]]
+    AbstractCommandImpl[DeactivateBlockParams, SuccessData[DeactivateBlockResult]]
 ):
     """Execution implementation of a Thermocycler's deactivate block command."""
 
@@ -42,7 +42,7 @@ class DeactivateBlockImpl(
 
     async def execute(
         self, params: DeactivateBlockParams
-    ) -> SuccessData[DeactivateBlockResult, None]:
+    ) -> SuccessData[DeactivateBlockResult]:
         """Unset a Thermocycler's target block temperature."""
         thermocycler_state = self._state_view.modules.get_thermocycler_module_substate(
             params.moduleId
@@ -54,7 +54,9 @@ class DeactivateBlockImpl(
         if thermocycler_hardware is not None:
             await thermocycler_hardware.deactivate_block()
 
-        return SuccessData(public=DeactivateBlockResult(), private=None)
+        return SuccessData(
+            public=DeactivateBlockResult(),
+        )
 
 
 class DeactivateBlock(

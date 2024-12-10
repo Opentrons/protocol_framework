@@ -53,9 +53,9 @@ from opentrons.protocol_engine.resources.pipette_data_provider import (
 )
 from opentrons.protocol_engine.execution.equipment import (
     EquipmentHandler,
-    LoadedLabwareData,
     LoadedPipetteData,
     LoadedModuleData,
+    LoadedLabwareData,
 )
 from ..pipette_fixtures import get_default_nozzle_map
 
@@ -66,6 +66,14 @@ def _make_config(use_virtual_modules: bool) -> Config:
         # Robot and deck type are arbitrary.
         robot_type="OT-2 Standard",
         deck_type=DeckType.OT2_STANDARD,
+    )
+
+
+@pytest.fixture
+def available_sensors() -> pipette_definition.AvailableSensorDefinition:
+    """Provide a list of sensors."""
+    return pipette_definition.AvailableSensorDefinition(
+        sensors=["pressure", "capacitive", "environment"]
     )
 
 
@@ -133,6 +141,7 @@ def tip_overlap_versions(request: SubRequest) -> str:
 def loaded_static_pipette_data(
     supported_tip_fixture: pipette_definition.SupportedTipsDefinition,
     target_tip_overlap_data: Dict[str, float],
+    available_sensors: pipette_definition.AvailableSensorDefinition,
 ) -> LoadedStaticPipetteData:
     """Get a pipette config data value object."""
     return LoadedStaticPipetteData(
@@ -154,6 +163,14 @@ def loaded_static_pipette_data(
         back_left_corner_offset=Point(x=1, y=2, z=3),
         front_right_corner_offset=Point(x=4, y=5, z=6),
         pipette_lld_settings={},
+        plunger_positions={
+            "top": 0.0,
+            "bottom": 5.0,
+            "blow_out": 19.0,
+            "drop_tip": 20.0,
+        },
+        shaft_ul_per_mm=5.0,
+        available_sensors=available_sensors,
     )
 
 

@@ -1,39 +1,40 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { createPortal } from 'react-dom'
 import { css } from 'styled-components'
 
 import {
-  Flex,
-  StyledText,
-  SPACING,
-  COLORS,
-  ModalShell,
-  ModalHeader,
   BORDERS,
+  COLORS,
   DIRECTION_COLUMN,
+  Flex,
+  ModalHeader,
+  ModalShell,
+  SPACING,
+  StyledText,
 } from '@opentrons/components'
 
 import { useErrorName } from '../hooks'
-import { OddModal } from '../../../molecules/OddModal'
-import { getModalPortalEl, getTopPortalEl } from '../../../App/portal'
+import { OddModal } from '/app/molecules/OddModal'
+import { getModalPortalEl, getTopPortalEl } from '/app/App/portal'
 import { ERROR_KINDS } from '../constants'
-import { InlineNotification } from '../../../atoms/InlineNotification'
+import { InlineNotification } from '/app/atoms/InlineNotification'
 import { StepInfo } from './StepInfo'
 import { getErrorKind } from '../utils'
 
-import type { RobotType } from '@opentrons/shared-data'
+import type { ReactNode } from 'react'
+import type { LabwareDefinition2, RobotType } from '@opentrons/shared-data'
 import type { IconProps } from '@opentrons/components'
-import type { OddModalHeaderBaseProps } from '../../../molecules/OddModal/types'
+import type { OddModalHeaderBaseProps } from '/app/molecules/OddModal/types'
 import type { ERUtilsResults, useRetainedFailedCommandBySource } from '../hooks'
 import type { ErrorRecoveryFlowsProps } from '..'
-import type { DesktopSizeType } from '../types'
+import type { DesktopSizeType, ErrorKind } from '../types'
 
 export function useErrorDetailsModal(): {
   showModal: boolean
   toggleModal: () => void
 } {
-  const [showModal, setShowModal] = React.useState(false)
+  const [showModal, setShowModal] = useState(false)
 
   const toggleModal = (): void => {
     setShowModal(!showModal)
@@ -44,7 +45,7 @@ export function useErrorDetailsModal(): {
 
 type ErrorDetailsModalProps = Omit<
   ErrorRecoveryFlowsProps,
-  'failedCommandByRunRecord'
+  'unvalidatedFailedCommand'
 > &
   ERUtilsResults & {
     toggleModal: () => void
@@ -52,18 +53,22 @@ type ErrorDetailsModalProps = Omit<
     robotType: RobotType
     desktopType: DesktopSizeType
     failedCommand: ReturnType<typeof useRetainedFailedCommandBySource>
+    allRunDefs: LabwareDefinition2[]
   }
 
 export function ErrorDetailsModal(props: ErrorDetailsModalProps): JSX.Element {
   const { failedCommand, toggleModal, isOnDevice } = props
-  const errorKind = getErrorKind(failedCommand?.byRunRecord ?? null)
+  const errorKind = getErrorKind(failedCommand)
   const errorName = useErrorName(errorKind)
 
-  const getIsOverpressureErrorKind = (): boolean => {
+  const isNotificationErrorKind = (): boolean => {
     switch (errorKind) {
       case ERROR_KINDS.OVERPRESSURE_PREPARE_TO_ASPIRATE:
       case ERROR_KINDS.OVERPRESSURE_WHILE_ASPIRATING:
       case ERROR_KINDS.OVERPRESSURE_WHILE_DISPENSING:
+      case ERROR_KINDS.TIP_NOT_DETECTED:
+      case ERROR_KINDS.GRIPPER_ERROR:
+      case ERROR_KINDS.STALL_OR_COLLISION:
         return true
       default:
         return false
@@ -83,7 +88,9 @@ export function ErrorDetailsModal(props: ErrorDetailsModalProps): JSX.Element {
           toggleModal={toggleModal}
           modalHeader={modalHeader}
         >
-          {getIsOverpressureErrorKind() ? <OverpressureBanner /> : null}
+          {isNotificationErrorKind() ? (
+            <NotificationBanner errorKind={errorKind} />
+          ) : null}
         </ErrorDetailsModalODD>,
         getTopPortalEl()
       )
@@ -94,7 +101,9 @@ export function ErrorDetailsModal(props: ErrorDetailsModalProps): JSX.Element {
           toggleModal={toggleModal}
           modalHeader={modalHeader}
         >
-          {getIsOverpressureErrorKind() ? <OverpressureBanner /> : null}
+          {isNotificationErrorKind() ? (
+            <NotificationBanner errorKind={errorKind} />
+          ) : null}
         </ErrorDetailsModalDesktop>,
         getModalPortalEl()
       )
@@ -105,7 +114,7 @@ export function ErrorDetailsModal(props: ErrorDetailsModalProps): JSX.Element {
 }
 
 type ErrorDetailsModalType = ErrorDetailsModalProps & {
-  children: React.ReactNode
+  children: ReactNode
   modalHeader: OddModalHeaderBaseProps
   toggleModal: () => void
   desktopType: DesktopSizeType
@@ -191,14 +200,76 @@ export function ErrorDetailsModalODD(
   )
 }
 
-export function OverpressureBanner(): JSX.Element | null {
+export function NotificationBanner({
+  errorKind,
+}: {
+  errorKind: ErrorKind
+}): JSX.Element {
+  const buildContent = (): JSX.Element => {
+    switch (errorKind) {
+      case ERROR_KINDS.OVERPRESSURE_PREPARE_TO_ASPIRATE:
+      case ERROR_KINDS.OVERPRESSURE_WHILE_ASPIRATING:
+      case ERROR_KINDS.OVERPRESSURE_WHILE_DISPENSING:
+        return <OverpressureBanner />
+      case ERROR_KINDS.TIP_NOT_DETECTED:
+        return <TipNotDetectedBanner />
+      case ERROR_KINDS.GRIPPER_ERROR:
+        return <GripperErrorBanner />
+      case ERROR_KINDS.STALL_OR_COLLISION:
+        return <StallErrorBanner />
+      default:
+        console.error('Handle error kind notification banners explicitly.')
+        return <div />
+    }
+  }
+
+  return buildContent()
+}
+
+export function OverpressureBanner(): JSX.Element {
   const { t } = useTranslation('error_recovery')
 
   return (
     <InlineNotification
       type="alert"
       heading={t('overpressure_is_usually_caused')}
-      message={t('if_issue_persists')}
+      message={t('if_issue_persists_overpressure')}
+    />
+  )
+}
+
+export function TipNotDetectedBanner(): JSX.Element {
+  const { t } = useTranslation('error_recovery')
+
+  return (
+    <InlineNotification
+      type="alert"
+      heading={t('tip_presence_errors_are_caused')}
+      message={t('if_issue_persists_tip_not_detected')}
+    />
+  )
+}
+
+export function GripperErrorBanner(): JSX.Element {
+  const { t } = useTranslation('error_recovery')
+
+  return (
+    <InlineNotification
+      type="alert"
+      heading={t('gripper_errors_occur_when')}
+      message={t('if_issue_persists_gripper_error')}
+    />
+  )
+}
+
+export function StallErrorBanner(): JSX.Element {
+  const { t } = useTranslation('error_recovery')
+
+  return (
+    <InlineNotification
+      type="alert"
+      heading={t('stall_or_collision_detected_when')}
+      message={t('the_robot_must_return_to_home_position')}
     />
   )
 }

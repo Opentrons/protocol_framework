@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { css } from 'styled-components'
 
 import {
@@ -13,7 +12,7 @@ import {
   ALIGN_CENTER,
   RESPONSIVENESS,
 } from '@opentrons/components'
-import { Divider } from '../../../atoms/structure/Divider'
+import { Divider } from '/app/atoms/structure/Divider'
 
 import type { DeckInfoLabelProps } from '@opentrons/components'
 
@@ -83,7 +82,7 @@ const buildContent = (props: InterventionInfoProps): JSX.Element => {
 }
 
 const buildLocArrowLoc = (props: InterventionInfoProps): JSX.Element => {
-  const { currentLocationProps, newLocationProps } = props
+  const { currentLocationProps, newLocationProps, type } = props
 
   if (newLocationProps != null) {
     return (
@@ -102,6 +101,9 @@ const buildLocArrowLoc = (props: InterventionInfoProps): JSX.Element => {
       </Flex>
     )
   } else {
+    console.error(
+      `InterventionInfo type is ${type}, but no newLocation was specified.`
+    )
     return buildLoc(props)
   }
 }
@@ -117,7 +119,7 @@ const buildLoc = ({
 }
 
 const buildLocColonLoc = (props: InterventionInfoProps): JSX.Element => {
-  const { currentLocationProps, newLocationProps } = props
+  const { currentLocationProps, newLocationProps, type } = props
 
   if (newLocationProps != null) {
     return (
@@ -136,6 +138,9 @@ const buildLocColonLoc = (props: InterventionInfoProps): JSX.Element => {
       </Flex>
     )
   } else {
+    console.error(
+      `InterventionInfo type is ${type}, but no newLocation was specified.`
+    )
     return buildLoc(props)
   }
 }

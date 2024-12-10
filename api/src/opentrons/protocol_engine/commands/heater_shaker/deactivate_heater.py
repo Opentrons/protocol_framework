@@ -27,9 +27,7 @@ class DeactivateHeaterResult(BaseModel):
 
 
 class DeactivateHeaterImpl(
-    AbstractCommandImpl[
-        DeactivateHeaterParams, SuccessData[DeactivateHeaterResult, None]
-    ]
+    AbstractCommandImpl[DeactivateHeaterParams, SuccessData[DeactivateHeaterResult]]
 ):
     """Execution implementation of a Heater-Shaker's deactivate heater command."""
 
@@ -44,7 +42,7 @@ class DeactivateHeaterImpl(
 
     async def execute(
         self, params: DeactivateHeaterParams
-    ) -> SuccessData[DeactivateHeaterResult, None]:
+    ) -> SuccessData[DeactivateHeaterResult]:
         """Unset a Heater-Shaker's target temperature."""
         hs_module_substate = self._state_view.modules.get_heater_shaker_module_substate(
             module_id=params.moduleId
@@ -58,7 +56,9 @@ class DeactivateHeaterImpl(
         if hs_hardware_module is not None:
             await hs_hardware_module.deactivate_heater()
 
-        return SuccessData(public=DeactivateHeaterResult(), private=None)
+        return SuccessData(
+            public=DeactivateHeaterResult(),
+        )
 
 
 class DeactivateHeater(

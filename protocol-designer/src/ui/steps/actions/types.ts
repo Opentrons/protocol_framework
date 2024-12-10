@@ -31,22 +31,6 @@ export interface DuplicateMultipleStepsAction {
     indexToInsert: number
   }
 }
-export interface ExpandAddStepButtonAction {
-  type: 'EXPAND_ADD_STEP_BUTTON'
-  payload: boolean
-}
-export interface ToggleStepCollapsedAction {
-  type: 'TOGGLE_STEP_COLLAPSED'
-  payload: StepIdType
-}
-export interface ExpandMultipleStepsAction {
-  type: 'EXPAND_MULTIPLE_STEPS'
-  payload: StepIdType[]
-}
-export interface CollapseMultipleStepsAction {
-  type: 'COLLAPSE_MULTIPLE_STEPS'
-  payload: StepIdType[]
-}
 export interface HoverOnSubstepAction {
   type: 'HOVER_ON_SUBSTEP'
   payload: SubstepIdentifier
@@ -88,4 +72,10 @@ export interface SelectMultipleStepsAction {
     stepIds: StepIdType[]
     lastSelected: StepIdType
   }
+}
+
+export type ViewSubstep = StepIdType | null
+export interface ToggleViewSubstepAction {
+  type: 'TOGGLE_VIEW_SUBSTEP'
+  payload: ViewSubstep
 }

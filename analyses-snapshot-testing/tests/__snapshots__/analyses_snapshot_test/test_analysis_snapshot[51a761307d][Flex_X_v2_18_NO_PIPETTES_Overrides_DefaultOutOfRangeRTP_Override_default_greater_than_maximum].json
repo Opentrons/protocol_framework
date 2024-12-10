@@ -42,6 +42,7 @@
     }
   ],
   "labware": [],
+  "liquidClasses": [],
   "liquids": [],
   "metadata": {
     "protocolName": "Default not in range"

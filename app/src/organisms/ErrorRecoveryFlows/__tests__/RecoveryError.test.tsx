@@ -1,11 +1,11 @@
 /* eslint-disable testing-library/prefer-presence-queries */
-import * as React from 'react'
+import type * as React from 'react'
 import { describe, it, vi, expect, beforeEach } from 'vitest'
 import { screen, fireEvent, waitFor } from '@testing-library/react'
 
 import { mockRecoveryContentProps } from '../__fixtures__'
-import { renderWithProviders } from '../../../__testing-utils__'
-import { i18n } from '../../../i18n'
+import { renderWithProviders } from '/app/__testing-utils__'
+import { i18n } from '/app/i18n'
 import { RecoveryError } from '../RecoveryError'
 import { RECOVERY_MAP } from '../constants'
 
@@ -23,21 +23,23 @@ describe('RecoveryError', () => {
   let props: React.ComponentProps<typeof RecoveryError>
   let proceedToRouteAndStepMock: Mock
   let getRecoverOptionCopyMock: Mock
-  let setRobotInMotionMock: Mock
+  let handleMotionRoutingMock: Mock
   let homePipetteZAxesMock: Mock
+  let updateSubMapMock: Mock
 
   beforeEach(() => {
     proceedToRouteAndStepMock = vi.fn()
     getRecoverOptionCopyMock = vi.fn()
-    setRobotInMotionMock = vi.fn().mockResolvedValue(undefined)
+    handleMotionRoutingMock = vi.fn().mockResolvedValue(undefined)
     homePipetteZAxesMock = vi.fn().mockResolvedValue(undefined)
+    updateSubMapMock = vi.fn()
 
     props = {
       ...mockRecoveryContentProps,
       routeUpdateActions: {
         ...mockRecoveryContentProps.routeUpdateActions,
         proceedToRouteAndStep: proceedToRouteAndStepMock,
-        setRobotInMotion: setRobotInMotionMock,
+        handleMotionRouting: handleMotionRoutingMock,
       },
       recoveryCommands: {
         ...mockRecoveryContentProps.recoveryCommands,
@@ -48,6 +50,7 @@ describe('RecoveryError', () => {
         route: ERROR_WHILE_RECOVERING.ROUTE,
         step: ERROR_WHILE_RECOVERING.STEPS.RECOVERY_ACTION_FAILED,
       },
+      subMapUtils: { subMap: null, updateSubMap: updateSubMapMock },
     }
 
     getRecoverOptionCopyMock.mockReturnValue('Retry step')
@@ -95,7 +98,7 @@ describe('RecoveryError', () => {
     expect(screen.queryAllByText('Continue to drop tip')[0]).toBeInTheDocument()
   })
 
-  it(`renders RecoveryDropTipFlowErrors when step is ${ERROR_WHILE_RECOVERING.STEPS.DROP_TIP_TIP_DROP_FAILED}`, () => {
+  it(`renders RecoveryDropTipFlowErrors when step is ${ERROR_WHILE_RECOVERING.STEPS.DROP_TIP_TIP_DROP_FAILED} and resets the submap`, () => {
     props.recoveryMap.step =
       RECOVERY_MAP.ERROR_WHILE_RECOVERING.STEPS.DROP_TIP_TIP_DROP_FAILED
     render(props)
@@ -107,6 +110,7 @@ describe('RecoveryError', () => {
       )[0]
     ).toBeInTheDocument()
     expect(screen.queryAllByText('Return to menu')[0]).toBeInTheDocument()
+    expect(updateSubMapMock).toHaveBeenCalledWith(null)
   })
 
   it(`calls proceedToRouteAndStep with ${RECOVERY_MAP.OPTION_SELECTION.ROUTE} when the "Return to menu" button is clicked in RecoveryDropTipFlowErrors with step ${ERROR_WHILE_RECOVERING.STEPS.DROP_TIP_GENERAL_ERROR}`, () => {
@@ -151,14 +155,14 @@ describe('RecoveryError', () => {
 
     fireEvent.click(screen.queryAllByText('Back to menu')[0])
 
-    expect(setRobotInMotionMock).toHaveBeenCalledWith(true)
+    expect(handleMotionRoutingMock).toHaveBeenCalledWith(true)
 
     await waitFor(() => {
       expect(homePipetteZAxesMock).toHaveBeenCalled()
     })
 
     await waitFor(() => {
-      expect(setRobotInMotionMock).toHaveBeenCalledWith(false)
+      expect(handleMotionRoutingMock).toHaveBeenCalledWith(false)
     })
 
     await waitFor(() => {
@@ -167,17 +171,17 @@ describe('RecoveryError', () => {
       )
     })
 
-    expect(setRobotInMotionMock).toHaveBeenCalledTimes(2)
+    expect(handleMotionRoutingMock).toHaveBeenCalledTimes(2)
     expect(homePipetteZAxesMock).toHaveBeenCalledTimes(1)
     expect(proceedToRouteAndStepMock).toHaveBeenCalledTimes(1)
 
-    expect(setRobotInMotionMock.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(handleMotionRoutingMock.mock.invocationCallOrder[0]).toBeLessThan(
       homePipetteZAxesMock.mock.invocationCallOrder[0]
     )
     expect(homePipetteZAxesMock.mock.invocationCallOrder[0]).toBeLessThan(
-      setRobotInMotionMock.mock.invocationCallOrder[1]
+      handleMotionRoutingMock.mock.invocationCallOrder[1]
     )
-    expect(setRobotInMotionMock.mock.invocationCallOrder[1]).toBeLessThan(
+    expect(handleMotionRoutingMock.mock.invocationCallOrder[1]).toBeLessThan(
       proceedToRouteAndStepMock.mock.invocationCallOrder[0]
     )
   })

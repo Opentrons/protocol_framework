@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { css } from 'styled-components'
@@ -6,6 +6,7 @@ import {
   ALIGN_CENTER,
   BORDERS,
   COLORS,
+  CURSOR_POINTER,
   DISPLAY_FLEX,
   Flex,
   JUSTIFY_CENTER,
@@ -16,16 +17,15 @@ import {
   StyledText,
 } from '@opentrons/components'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
-import { START_TERMINAL_ITEM_ID } from '../../../steplist'
 
 import type {
   CoordinateTuple,
   DeckSlotId,
   Dimensions,
 } from '@opentrons/shared-data'
-import type { TerminalItemId } from '../../../steplist'
+import type { DeckSetupTabType } from '../types'
 
-interface DeckItemHoverProps {
+interface DeckItemHoverProps extends DeckSetupTabType {
   hover: string | null
   setHover: React.Dispatch<React.SetStateAction<string | null>>
   slotBoundingBox: Dimensions
@@ -34,29 +34,27 @@ interface DeckItemHoverProps {
   slotPosition: CoordinateTuple | null
   setShowMenuListForId: React.Dispatch<React.SetStateAction<string | null>>
   menuListId: DeckSlotId | null
-  selectedTerminalItemId?: TerminalItemId | null
+  isSelected?: boolean
 }
 
 export function DeckItemHover(props: DeckItemHoverProps): JSX.Element | null {
   const {
     hover,
-    selectedTerminalItemId,
+    tab,
     setHover,
     slotBoundingBox,
     itemId,
     setShowMenuListForId,
     menuListId,
     slotPosition,
+    isSelected = false,
   } = props
   const { t } = useTranslation('starting_deck_state')
   const deckSetup = useSelector(getDeckSetupForActiveItem)
   const offDeckLabware = Object.values(deckSetup.labware).find(
     lw => lw.id === itemId
   )
-  if (
-    selectedTerminalItemId !== START_TERMINAL_ITEM_ID ||
-    slotPosition === null
-  )
+  if (tab === 'protocolSteps' || slotPosition === null || isSelected)
     return null
 
   const hoverOpacity =
@@ -84,6 +82,7 @@ export function DeckItemHover(props: DeckItemHoverProps): JSX.Element | null {
           color: COLORS.white,
           fontSize: PRODUCT.TYPOGRAPHY.fontSizeBodyDefaultSemiBold,
           borderRadius: BORDERS.borderRadius8,
+          cursor: CURSOR_POINTER,
         },
         onMouseEnter: () => {
           setHover(itemId)

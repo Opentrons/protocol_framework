@@ -1,13 +1,14 @@
-import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import without from 'lodash/without'
-import { THERMOCYCLER_MODULE_V2 } from '@opentrons/shared-data'
+import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
+  ALIGN_CENTER,
+  BORDERS,
+  COLORS,
   DIRECTION_COLUMN,
   EmptySelectorButton,
   Flex,
   ListItem,
-  ListItemCustomize,
   SPACING,
   StyledText,
   TYPOGRAPHY,
@@ -20,7 +21,8 @@ import {
   getNumOptions,
   getNumSlotsAvailable,
 } from './utils'
-import { HandleEnter } from './HandleEnter'
+import { HandleEnter } from '../../atoms/HandleEnter'
+import { PDListItemCustomize as ListItemCustomize } from './PDListItemCustomize'
 
 import type { DropdownBorder } from '@opentrons/components'
 import type { AdditionalEquipment, WizardTileProps } from './types'
@@ -37,13 +39,7 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
   const additionalEquipment = watch('additionalEquipment')
   const modules = watch('modules')
   const { t } = useTranslation(['create_new_protocol', 'shared'])
-  const numSlotsAvailable = getNumSlotsAvailable(modules, additionalEquipment)
 
-  const hasTC =
-    modules != null &&
-    Object.values(modules).some(
-      module => module.model === THERMOCYCLER_MODULE_V2
-    )
   const hasTrash = additionalEquipment.some(
     ae => ae === 'trashBin' || ae === 'wasteChute'
   )
@@ -68,6 +64,7 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
   return (
     <HandleEnter onEnter={handleProceed}>
       <WizardBody
+        robotType={FLEX_ROBOT_TYPE}
         stepNumber={5}
         header={t('add_fixtures')}
         subHeader={t('fixtures_replace')}
@@ -77,49 +74,57 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
         }}
         proceed={handleProceed}
       >
-        <Flex marginTop={SPACING.spacing60} flexDirection={DIRECTION_COLUMN}>
-          <Flex flexDirection={DIRECTION_COLUMN}>
-            <StyledText
-              desktopStyle="headingSmallBold"
-              marginBottom={SPACING.spacing12}
-            >
-              {t('which_fixtures')}
-            </StyledText>
+        <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing32}>
+          <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
+            {filteredAdditionalEquipment.length > 0 ? (
+              <StyledText desktopStyle="headingSmallBold">
+                {t('which_fixtures')}
+              </StyledText>
+            ) : null}
+            <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
+              {filteredAdditionalEquipment.map(equipment => {
+                const numSlotsAvailable = getNumSlotsAvailable(
+                  modules,
+                  additionalEquipment,
+                  equipment
+                )
+
+                return (
+                  <EmptySelectorButton
+                    disabled={numSlotsAvailable === 0}
+                    key={equipment}
+                    textAlignment={TYPOGRAPHY.textAlignLeft}
+                    iconName="plus"
+                    text={t(`${equipment}`)}
+                    onClick={() => {
+                      if (numSlotsAvailable === 0) {
+                        makeSnackbar(t('slots_limit_reached') as string)
+                      } else {
+                        setValue('additionalEquipment', [
+                          ...additionalEquipment,
+                          equipment,
+                        ])
+                      }
+                    }}
+                  />
+                )
+              })}
+            </Flex>
           </Flex>
-          <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
-            {filteredAdditionalEquipment.map(equipment => (
-              <EmptySelectorButton
-                disabled={numSlotsAvailable === 0}
-                key={equipment}
-                textAlignment={TYPOGRAPHY.textAlignLeft}
-                size="small"
-                iconName="plus"
-                text={t(`${equipment}`)}
-                onClick={() => {
-                  if (numSlotsAvailable === 0) {
-                    makeSnackbar(t('slots_limit_reached') as string)
-                  } else {
-                    setValue('additionalEquipment', [
-                      ...additionalEquipment,
-                      equipment,
-                    ])
-                  }
-                }}
-              />
-            ))}
-          </Flex>
-          <Flex marginTop={SPACING.spacing32} flexDirection={DIRECTION_COLUMN}>
-            <StyledText
-              desktopStyle="headingSmallBold"
-              marginBottom={SPACING.spacing12}
-            >
+          <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
+            <StyledText desktopStyle="headingSmallBold">
               {t('fixtures_added')}
             </StyledText>
-            <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
+            <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
               {filteredDuplicateStagingAreas.map(ae => {
                 const numStagingAreas = filteredAdditionalEquipmentWithoutGripper.filter(
                   additionalEquipment => additionalEquipment === 'stagingArea'
                 )?.length
+                const numSlotsAvailable = getNumSlotsAvailable(
+                  modules,
+                  additionalEquipment,
+                  ae
+                )
 
                 const dropdownProps = {
                   currentOption: {
@@ -130,7 +135,7 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
                   filterOptions: getNumOptions(
                     numSlotsAvailable >= MAX_SLOTS
                       ? MAX_SLOTS
-                      : numSlotsAvailable + numStagingAreas - (hasTC ? 1 : 0)
+                      : numSlotsAvailable + numStagingAreas
                   ),
                   onClick: (value: string) => {
                     const inputNum = parseInt(value)
@@ -168,7 +173,18 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
                       }
                       header={t(`${ae}`)}
                       leftHeaderItem={
-                        <AdditionalEquipmentDiagram additionalEquipment={ae} />
+                        <Flex
+                          padding={SPACING.spacing2}
+                          backgroundColor={COLORS.white}
+                          borderRadius={BORDERS.borderRadius8}
+                          alignItems={ALIGN_CENTER}
+                          width="3.75rem"
+                          height="3.625rem"
+                        >
+                          <AdditionalEquipmentDiagram
+                            additionalEquipment={ae}
+                          />
+                        </Flex>
                       }
                     />
                   </ListItem>

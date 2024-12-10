@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Trans, useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
@@ -20,26 +20,27 @@ import {
 } from '@opentrons/components'
 import { RobotMotionLoader } from '../RobotMotionLoader'
 import { getPrepCommands } from './getPrepCommands'
-import { WizardRequiredEquipmentList } from '../../../molecules/WizardRequiredEquipmentList'
-import { getLatestCurrentOffsets } from '../../Devices/ProtocolRun/SetupLabwarePositionCheck/utils'
-import { getIsOnDevice } from '../../../redux/config'
-import { NeedHelpLink } from '../../CalibrationPanels'
+import { WizardRequiredEquipmentList } from '/app/molecules/WizardRequiredEquipmentList'
+import { getLatestCurrentOffsets } from '/app/transformations/runs'
+import { getIsOnDevice } from '/app/redux/config'
+import { NeedHelpLink } from '/app/molecules/OT2CalibrationNeedHelpLink'
 import { useSelector } from 'react-redux'
 import { TwoUpTileLayout } from '../TwoUpTileLayout'
-import { getTopPortalEl } from '../../../App/portal'
-import { SmallButton } from '../../../atoms/buttons'
-import { CALIBRATION_PROBE } from '../../PipetteWizardFlows/constants'
+import { getTopPortalEl } from '/app/App/portal'
+import { SmallButton } from '/app/atoms/buttons'
+import { CALIBRATION_PROBE } from '/app/organisms/PipetteWizardFlows/constants'
 import { TerseOffsetTable } from '../ResultsSummary'
-import { getLabwareDefinitionsFromCommands } from '../../../molecules/Command/utils/getLabwareDefinitionsFromCommands'
+import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 
+import type { Dispatch } from 'react'
 import type { LabwareOffset } from '@opentrons/api-client'
 import type {
   CompletedProtocolAnalysis,
   LabwareDefinition2,
 } from '@opentrons/shared-data'
-import type { useChainRunCommands } from '../../../resources/runs'
+import type { useChainRunCommands } from '/app/resources/runs'
 import type { RegisterPositionAction } from '../types'
-import type { Jog } from '../../../molecules/JogControls'
+import type { Jog } from '/app/molecules/JogControls'
 
 export const INTERVAL_MS = 3000
 
@@ -49,7 +50,7 @@ const SUPPORT_PAGE_URL = 'https://support.opentrons.com/s/ot2-calibration'
 export const IntroScreen = (props: {
   proceed: () => void
   protocolData: CompletedProtocolAnalysis
-  registerPosition: React.Dispatch<RegisterPositionAction>
+  registerPosition: Dispatch<RegisterPositionAction>
   chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
   handleJog: Jog
   setFatalError: (errorMessage: string) => void
@@ -160,7 +161,7 @@ interface ViewOffsetsProps {
 function ViewOffsets(props: ViewOffsetsProps): JSX.Element {
   const { existingOffsets, labwareDefinitions } = props
   const { t, i18n } = useTranslation('labware_position_check')
-  const [showOffsetsTable, setShowOffsetsModal] = React.useState(false)
+  const [showOffsetsTable, setShowOffsetsModal] = useState(false)
   const latestCurrentOffsets = getLatestCurrentOffsets(existingOffsets)
   return existingOffsets.length > 0 ? (
     <>

@@ -22,5 +22,5 @@ async def test_pause_implementation(
 
     result = await subject.execute(data)
 
-    assert result == SuccessData(public=WaitForDurationResult(), private=None)
+    assert result == SuccessData(public=WaitForDurationResult())
     decoy.verify(await run_control.wait_for_duration(42.0), times=1)

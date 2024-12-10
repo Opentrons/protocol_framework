@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ...errors.error_occurrence import ErrorOccurrence
+from ...state import update_types
 
 if TYPE_CHECKING:
     from opentrons.protocol_engine.state.state import StateView
@@ -33,9 +34,7 @@ class OpenLabwareLatchResult(BaseModel):
 
 
 class OpenLabwareLatchImpl(
-    AbstractCommandImpl[
-        OpenLabwareLatchParams, SuccessData[OpenLabwareLatchResult, None]
-    ]
+    AbstractCommandImpl[OpenLabwareLatchParams, SuccessData[OpenLabwareLatchResult]]
 ):
     """Execution implementation of a Heater-Shaker's open latch labware command."""
 
@@ -52,8 +51,10 @@ class OpenLabwareLatchImpl(
 
     async def execute(
         self, params: OpenLabwareLatchParams
-    ) -> SuccessData[OpenLabwareLatchResult, None]:
+    ) -> SuccessData[OpenLabwareLatchResult]:
         """Open a Heater-Shaker's labware latch."""
+        state_update = update_types.StateUpdate()
+
         # Allow propagation of ModuleNotLoadedError and WrongModuleTypeError.
         hs_module_substate = self._state_view.modules.get_heater_shaker_module_substate(
             module_id=params.moduleId
@@ -72,6 +73,7 @@ class OpenLabwareLatchImpl(
             await self._movement.home(
                 axes=self._state_view.motion.get_robot_mount_axes()
             )
+            state_update.clear_all_pipette_locations()
 
         # Allow propagation of ModuleNotAttachedError.
         hs_hardware_module = self._equipment.get_module_hardware_api(
@@ -83,7 +85,7 @@ class OpenLabwareLatchImpl(
 
         return SuccessData(
             public=OpenLabwareLatchResult(pipetteRetracted=pipette_should_retract),
-            private=None,
+            state_update=state_update,
         )
 
 

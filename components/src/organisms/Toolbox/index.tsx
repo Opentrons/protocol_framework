@@ -1,27 +1,31 @@
-import * as React from 'react'
-import { Icon } from '../../icons'
+import { useEffect, useRef, useState } from 'react'
 import { Box, Btn, Flex } from '../../primitives'
 import {
   ALIGN_CENTER,
   DIRECTION_COLUMN,
   JUSTIFY_SPACE_BETWEEN,
-  POSITION_FIXED,
+  NO_WRAP,
+  POSITION_RELATIVE,
 } from '../../styles'
 import { BORDERS, COLORS } from '../../helix-design-system'
 import { SPACING } from '../../ui-style-constants'
-import { PrimaryButton, StyledText } from '../../atoms'
+import { PrimaryButton } from '../../atoms'
 import { textDecorationUnderline } from '../../ui-style-constants/typography'
-import type { IconName } from '../../icons'
+import type { StyleProps } from '../../primitives'
 
-export interface ToolboxProps {
-  title: string
+export interface ToolboxProps extends StyleProps {
+  title: JSX.Element
   children: React.ReactNode
-  confirmButtonText: string
-  onConfirmClick: () => void
-  onCloseClick: () => void
-  closeButtonText: string
-  width?: string
-  titleIconName?: IconName
+  disableCloseButton?: boolean
+  confirmButtonText?: string
+  onConfirmClick?: () => void
+  confirmButton?: JSX.Element
+  onCloseClick?: () => void
+  closeButton?: JSX.Element
+  titlePadding?: string
+  childrenPadding?: string
+  subHeader?: JSX.Element | null
+  secondaryHeaderButton?: JSX.Element
 }
 
 export function Toolbox(props: ToolboxProps): JSX.Element {
@@ -31,15 +35,21 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
     confirmButtonText,
     onCloseClick,
     onConfirmClick,
-    titleIconName,
-    closeButtonText,
+    closeButton,
+    height = '100%',
+    disableCloseButton = false,
     width = '19.5rem',
+    confirmButton,
+    titlePadding = SPACING.spacing16,
+    childrenPadding = SPACING.spacing16,
+    subHeader,
+    secondaryHeaderButton,
+    position = POSITION_RELATIVE,
+    ...styleProps
   } = props
 
-  const slideOutRef = React.useRef<HTMLDivElement>(null)
-  const [isScrolledToBottom, setIsScrolledToBottom] = React.useState<boolean>(
-    false
-  )
+  const slideOutRef = useRef<HTMLDivElement>(null)
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState<boolean>(false)
   const handleScroll = (): void => {
     if (slideOutRef.current == null) return
     const { scrollTop, scrollHeight, clientHeight } = slideOutRef.current
@@ -50,20 +60,21 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     handleScroll()
   }, [slideOutRef])
 
   return (
-    <Box
+    <Flex
       cursor="auto"
-      position={POSITION_FIXED}
-      right="0"
-      top="0"
       backgroundColor={COLORS.white}
       boxShadow="0px 3px 6px rgba(0, 0, 0, 0.23)"
-      height="100%"
+      height={height}
+      width={width}
+      position={position}
       borderRadius={BORDERS.borderRadius8}
+      flex="0"
+      {...styleProps}
     >
       <Flex
         width={width}
@@ -72,29 +83,35 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
         justifyContent={JUSTIFY_SPACE_BETWEEN}
       >
         <Flex
-          justifyContent={JUSTIFY_SPACE_BETWEEN}
-          alignItems={ALIGN_CENTER}
-          padding={`${SPACING.spacing20} ${SPACING.spacing16}`}
+          padding={titlePadding}
+          flexDirection={DIRECTION_COLUMN}
           borderBottom={`1px solid ${COLORS.grey30}`}
         >
-          <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
-            {titleIconName != null ? (
-              <Icon name={titleIconName} size="1.25rem" />
-            ) : null}
-            <StyledText desktopStyle="bodyLargeSemiBold">{title}</StyledText>
-          </Flex>
-          <Btn
-            onClick={onCloseClick}
-            textDecoration={textDecorationUnderline}
-            data-testid={`Toolbox_${closeButtonText}`}
+          {subHeader ?? null}
+          <Flex
+            justifyContent={JUSTIFY_SPACE_BETWEEN}
+            alignItems={ALIGN_CENTER}
+            gridGap={SPACING.spacing12}
           >
-            <StyledText desktopStyle="bodyDefaultRegular">
-              {closeButtonText}
-            </StyledText>
-          </Btn>
+            {title}
+            <Flex gridGap={SPACING.spacing4}>
+              {secondaryHeaderButton ?? null}
+              {onCloseClick != null && closeButton != null ? (
+                <Btn
+                  disabled={disableCloseButton}
+                  onClick={onCloseClick}
+                  textDecoration={textDecorationUnderline}
+                  data-testid="Toolbox_closeButton"
+                  whiteSpace={NO_WRAP}
+                >
+                  {closeButton}
+                </Btn>
+              ) : null}
+            </Flex>
+          </Flex>
         </Flex>
         <Box
-          padding={SPACING.spacing16}
+          padding={childrenPadding}
           flex="1 1 auto"
           overflowY="auto"
           ref={slideOutRef}
@@ -102,23 +119,28 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
         >
           {children}
         </Box>
-        <Box
-          padding={SPACING.spacing16}
-          boxShadow={isScrolledToBottom ? 'none' : '0px -4px 12px #0000001a'}
-          zIndex={3}
-          width="100%"
-          borderTop={`1px solid ${COLORS.grey30}`}
-          alignItems={ALIGN_CENTER}
-        >
-          <PrimaryButton
+        {(onConfirmClick != null && confirmButtonText != null) ||
+        confirmButton != null ? (
+          <Box
+            padding={SPACING.spacing16}
+            boxShadow={isScrolledToBottom ? 'none' : '0px -4px 12px #0000001a'}
             width="100%"
-            data-testid="Toolbox_confirmButton"
-            onClick={onConfirmClick}
+            borderTop={`1px solid ${COLORS.grey30}`}
+            alignItems={ALIGN_CENTER}
           >
-            {confirmButtonText}
-          </PrimaryButton>
-        </Box>
+            {onConfirmClick != null && confirmButtonText != null ? (
+              <PrimaryButton
+                width="100%"
+                data-testid="Toolbox_confirmButton"
+                onClick={onConfirmClick}
+              >
+                {confirmButtonText}
+              </PrimaryButton>
+            ) : null}
+            {confirmButton ?? null}
+          </Box>
+        ) : null}
       </Flex>
-    </Box>
+    </Flex>
   )
 }

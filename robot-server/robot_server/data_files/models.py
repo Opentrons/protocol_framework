@@ -1,6 +1,7 @@
 """Data files models."""
 from datetime import datetime
 from typing import Literal, Set
+from enum import Enum
 
 from pydantic import Field
 
@@ -10,12 +11,24 @@ from robot_server.errors.error_responses import ErrorDetails
 from robot_server.service.json_api import ResourceModel
 
 
+class DataFileSource(Enum):
+    """The source this data file is from."""
+
+    UPLOADED = "uploaded"
+    GENERATED = "generated"
+
+
 class DataFile(ResourceModel):
-    """A model representing an uploaded data file."""
+    """A model representing a data file."""
 
     id: str = Field(..., description="A unique identifier for this file.")
-    name: str = Field(..., description="Name of the uploaded file.")
-    createdAt: datetime = Field(..., description="When this data file was *uploaded*.")
+    name: str = Field(..., description="Name of the data file.")
+    source: DataFileSource = Field(
+        ..., description="The origin of the file (uploaded or generated)"
+    )
+    createdAt: datetime = Field(
+        ..., description="When this data file was uploaded or generated.."
+    )
 
 
 class FileIdNotFoundError(GeneralError):

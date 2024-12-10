@@ -72,7 +72,6 @@ async def test_calibrate_gripper(
     result = await subject.execute(params)
     assert result == SuccessData(
         public=CalibrateGripperResult(jawOffset=Vec3f(x=1.1, y=2.2, z=3.3)),
-        private=None,
     )
 
 

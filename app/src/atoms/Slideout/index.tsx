@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { css } from 'styled-components'
 import { useTranslation } from 'react-i18next'
 
@@ -124,9 +124,9 @@ export const Slideout = (props: SlideoutProps): JSX.Element => {
     multiSlideoutSpecs,
   } = props
   const { t } = useTranslation('shared')
-  const slideOutRef = React.useRef<HTMLDivElement>(null)
-  const [isReachedBottom, setIsReachedBottom] = React.useState<boolean>(false)
-  const hasBeenExpanded = React.useRef<boolean>(isExpanded ?? false)
+  const slideOutRef = useRef<HTMLDivElement>(null)
+  const [isReachedBottom, setIsReachedBottom] = useState<boolean>(false)
+  const hasBeenExpanded = useRef<boolean>(isExpanded ?? false)
   const handleScroll = (): void => {
     if (slideOutRef.current == null) return
     const { scrollTop, scrollHeight, clientHeight } = slideOutRef.current
@@ -137,7 +137,7 @@ export const Slideout = (props: SlideoutProps): JSX.Element => {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     handleScroll()
   }, [slideOutRef])
 

@@ -71,6 +71,8 @@ def engine_state_summary() -> StateSummary:
         pipettes=[],
         modules=[],
         liquids=[],
+        wells=[],
+        files=[],
         hasEverEnteredErrorRecovery=False,
     )
 
@@ -215,6 +217,18 @@ async def test_create_play_action_to_start(
         times=1,
     )
 
+    # Verify maintenance run publication after background task execution
+    decoy.verify(
+        mock_maintenance_runs_publisher.publish_current_maintenance_run(),
+        times=1,
+    )
+
+    # Verify maintenance run publication after background task execution
+    decoy.verify(
+        mock_maintenance_runs_publisher.publish_current_maintenance_run(),
+        times=1,
+    )
+
 
 def test_create_pause_action(
     decoy: Decoy,
@@ -290,7 +304,9 @@ def test_create_resume_from_recovery_action(
     )
 
     decoy.verify(mock_run_store.insert_action(run_id, result), times=1)
-    decoy.verify(mock_run_orchestrator_store.resume_from_recovery())
+    decoy.verify(
+        mock_run_orchestrator_store.resume_from_recovery(reconcile_false_positive=False)
+    )
 
 
 @pytest.mark.parametrize(

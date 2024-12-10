@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSelector } from 'react-redux'
 import pick from 'lodash/pick'
@@ -18,13 +18,15 @@ import {
   ModalHeader,
   ModalShell,
 } from '@opentrons/components'
-import { getTopPortalEl } from '../../App/portal'
-import { ExternalLink } from '../../atoms/Link/ExternalLink'
-import { PythonLabwareOffsetSnippet } from '../../molecules/PythonLabwareOffsetSnippet'
-import { LabwareOffsetTabs } from '../LabwareOffsetTabs'
-import { getLabwareDefinitionsFromCommands } from '../../molecules/Command/utils/getLabwareDefinitionsFromCommands'
+import { getTopPortalEl } from '/app/App/portal'
+import { ExternalLink } from '/app/atoms/Link/ExternalLink'
+import { PythonLabwareOffsetSnippet } from '/app/molecules/PythonLabwareOffsetSnippet'
+import { LabwareOffsetTabs } from '/app/organisms/LabwareOffsetTabs'
+import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import { LabwareOffsetTable } from './LabwareOffsetTable'
-import { getIsLabwareOffsetCodeSnippetsOn } from '../../redux/config'
+import { getIsLabwareOffsetCodeSnippetsOn } from '/app/redux/config'
+
+import type { ChangeEvent } from 'react'
 import type { LabwareOffset } from '@opentrons/api-client'
 import type {
   LoadedLabware,
@@ -58,7 +60,7 @@ export function ApplyHistoricOffsets(
     modules,
     commands,
   } = props
-  const [showOffsetDataModal, setShowOffsetDataModal] = React.useState(false)
+  const [showOffsetDataModal, setShowOffsetDataModal] = useState(false)
   const { t } = useTranslation('labware_position_check')
   const isLabwareOffsetCodeSnippetsOn = useSelector(
     getIsLabwareOffsetCodeSnippetsOn
@@ -85,7 +87,7 @@ export function ApplyHistoricOffsets(
   return (
     <Flex alignItems={ALIGN_CENTER} justifyContent={JUSTIFY_SPACE_BETWEEN}>
       <CheckboxField
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {
           setShouldApplyOffsets(e.currentTarget.checked)
         }}
         value={shouldApplyOffsets}

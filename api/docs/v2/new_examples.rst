@@ -284,7 +284,7 @@ When used in a protocol, loops automate repetitive steps such as aspirating and 
                 # etc...
                 # range() starts at 0 and stops before 8, creating a range of 0-7
                 for i in range(8):
-                    pipette.distribute(200, reservoir.wells()[i], plate.rows()[i])
+                    pipette.distribute(20, reservoir.wells()[i], plate.rows()[i])
 
     .. tab:: OT-2
 
@@ -315,7 +315,7 @@ When used in a protocol, loops automate repetitive steps such as aspirating and 
                 # etc...
                 # range() starts at 0 and stops before 8, creating a range of 0-7
                 for i in range(8):
-                    p300.distribute(200, reservoir.wells()[i], plate.rows()[i])
+                    p300.distribute(20, reservoir.wells()[i], plate.rows()[i])
 
 Notice here how Python's :py:class:`range` class (e.g., ``range(8)``) determines how many times the code loops. Also, in Python, a range of numbers is *exclusive* of the end value and counting starts at 0, not 1. For the Corning 96-well plate used here, this means well A1=0, B1=1, C1=2, and so on to the last well in the row, which is H1=7.
 
@@ -383,7 +383,7 @@ Opentrons electronic pipettes can do some things that a human cannot do with a p
                     location=3)
                 p300 = protocol.load_instrument(
                     instrument_name="p300_single", 
-                    mount="right",
+                    mount="left",
                     tip_racks=[tiprack_1])
 
                 p300.pick_up_tip()
@@ -442,13 +442,13 @@ This protocol dispenses diluent to all wells of a Corning 96-well plate. Next, i
                     source = reservoir.wells()[i]
                     row = plate.rows()[i]
 
-                # transfer 30 µL of source to first well in column
-                pipette.transfer(30, source, row[0], mix_after=(3, 25))
+                    # transfer 30 µL of source to first well in column
+                    pipette.transfer(30, source, row[0], mix_after=(3, 25))
 
-                # dilute the sample down the column
-                pipette.transfer(
-                    30, row[:11], row[1:],
-                    mix_after=(3, 25))
+                    # dilute the sample down the column
+                    pipette.transfer(
+                        30, row[:11], row[1:],
+                        mix_after=(3, 25))
     
     .. tab:: OT-2
 
@@ -474,7 +474,7 @@ This protocol dispenses diluent to all wells of a Corning 96-well plate. Next, i
                     location=4)
                 p300 = protocol.load_instrument(
                     instrument_name="p300_single",
-                    mount="right",
+                    mount="left",
                     tip_racks=[tiprack_1, tiprack_2])
                 # Dispense diluent
                 p300.distribute(50, reservoir["A12"], plate.wells())
@@ -483,16 +483,15 @@ This protocol dispenses diluent to all wells of a Corning 96-well plate. Next, i
                 for i in range(8):
                     # save the source well and destination column to variables
                     source = reservoir.wells()[i]
-                    source = reservoir.wells()[i]
                     row = plate.rows()[i]
 
-                # transfer 30 µL of source to first well in column
-                p300.transfer(30, source, row[0], mix_after=(3, 25))
+                    # transfer 30 µL of source to first well in column
+                    p300.transfer(30, source, row[0], mix_after=(3, 25))
 
-                # dilute the sample down the column
-                p300.transfer(
-                    30, row[:11], row[1:],
-                    mix_after=(3, 25))
+                    # dilute the sample down the column
+                    p300.transfer(
+                        30, row[:11], row[1:],
+                        mix_after=(3, 25))
 
 Notice here how the code sample loops through the rows and uses slicing to distribute the diluent. For information about these features, see the Loops and Air Gaps examples above. See also, the :ref:`tutorial-commands` section of the Tutorial.
 

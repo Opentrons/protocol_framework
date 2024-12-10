@@ -323,7 +323,7 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
         return cutout_id
 
 
-class AddressableAreaView(HasState[AddressableAreaState]):
+class AddressableAreaView:
     """Read-only addressable area state view."""
 
     _state: AddressableAreaState
@@ -345,11 +345,25 @@ class AddressableAreaView(HasState[AddressableAreaState]):
     @cached_property
     def mount_offsets(self) -> Dict[str, Point]:
         """The left and right mount offsets of the robot."""
-        left_offset = self.state.robot_definition["mountOffsets"]["left"]
-        right_offset = self.state.robot_definition["mountOffsets"]["right"]
+        left_offset = self._state.robot_definition["mountOffsets"]["left"]
+        right_offset = self._state.robot_definition["mountOffsets"]["right"]
         return {
             "left": Point(x=left_offset[0], y=left_offset[1], z=left_offset[2]),
             "right": Point(x=right_offset[0], y=right_offset[1], z=right_offset[2]),
+        }
+
+    @cached_property
+    def padding_offsets(self) -> Dict[str, float]:
+        """The padding offsets to be applied to the deck extents of the robot."""
+        rear_offset = self._state.robot_definition["paddingOffsets"]["rear"]
+        front_offset = self._state.robot_definition["paddingOffsets"]["front"]
+        left_side_offset = self._state.robot_definition["paddingOffsets"]["leftSide"]
+        right_side_offset = self._state.robot_definition["paddingOffsets"]["rightSide"]
+        return {
+            "rear": rear_offset,
+            "front": front_offset,
+            "left_side": left_side_offset,
+            "right_side": right_side_offset,
         }
 
     def get_addressable_area(self, addressable_area_name: str) -> AddressableArea:
@@ -406,12 +420,12 @@ class AddressableAreaView(HasState[AddressableAreaState]):
                     _get_conflicting_addressable_areas_error_string(
                         self._state.potential_cutout_fixtures_by_cutout_id[cutout_id],
                         self._state.loaded_addressable_areas_by_name,
-                        self.state.deck_definition,
+                        self._state.deck_definition,
                     )
                 )
                 area_display_name = (
                     deck_configuration_provider.get_addressable_area_display_name(
-                        area_name, self.state.deck_definition
+                        area_name, self._state.deck_definition
                     )
                 )
                 raise IncompatibleAddressableAreaError(
@@ -490,7 +504,7 @@ class AddressableAreaView(HasState[AddressableAreaState]):
         addressable_area_name: str,
     ) -> Point:
         """Get the offset form cutout fixture of an addressable area."""
-        for addressable_area in self.state.deck_definition["locations"][
+        for addressable_area in self._state.deck_definition["locations"][
             "addressableAreas"
         ]:
             if addressable_area["id"] == addressable_area_name:
@@ -554,7 +568,7 @@ class AddressableAreaView(HasState[AddressableAreaState]):
         self, slot_name: DeckSlotName
     ) -> Optional[CutoutFixture]:
         """Get the Cutout Fixture currently loaded where a specific Deck Slot would be."""
-        deck_config = self.state.deck_configuration
+        deck_config = self._state.deck_configuration
         if deck_config:
             slot_cutout_id = DECK_SLOT_TO_CUTOUT_MAP[slot_name]
             slot_cutout_fixture = None
@@ -567,7 +581,7 @@ class AddressableAreaView(HasState[AddressableAreaState]):
                 if cutout_id == slot_cutout_id:
                     slot_cutout_fixture = (
                         deck_configuration_provider.get_cutout_fixture(
-                            cutout_fixture_id, self.state.deck_definition
+                            cutout_fixture_id, self._state.deck_definition
                         )
                     )
                     return slot_cutout_fixture
@@ -591,7 +605,7 @@ class AddressableAreaView(HasState[AddressableAreaState]):
         self, slot_name: DeckSlotName
     ) -> Optional[str]:
         """Get the serial number provided by the deck configuration for a Fixture at a given location."""
-        deck_config = self.state.deck_configuration
+        deck_config = self._state.deck_configuration
         if deck_config:
             slot_cutout_id = DECK_SLOT_TO_CUTOUT_MAP[slot_name]
             # This will only ever be one under current assumptions

@@ -37,6 +37,8 @@ import type { AlertsState, AlertsAction } from './alerts/types'
 import type { SessionState, SessionsAction } from './sessions/types'
 import type { AnalyticsTriggerAction } from './analytics/types'
 
+import type { ProtocolRunState, ProtocolRunAction } from './protocol-runs/types'
+
 export interface State {
   readonly robotApi: RobotApiState
   readonly robotAdmin: RobotAdminState
@@ -54,6 +56,7 @@ export interface State {
   readonly sessions: SessionState
   readonly calibration: CalibrationState
   readonly protocolStorage: ProtocolStorageState
+  readonly protocolRuns: ProtocolRunState
 }
 
 export type Action =
@@ -78,6 +81,7 @@ export type Action =
   | CalibrationAction
   | AnalyticsTriggerAction
   | AddCustomLabwareFromCreatorAction
+  | ProtocolRunAction
 
 export type GetState = () => State
 
@@ -115,3 +119,5 @@ export type Epic = (
 ) => Observable<Action>
 
 export type Error = Partial<{ name: string; message: string }>
+
+export * from './shell/types'

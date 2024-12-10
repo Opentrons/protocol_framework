@@ -29,8 +29,17 @@ from .module_contexts import (
     AbsorbanceReaderContext,
 )
 from .disposal_locations import TrashBin, WasteChute
-from ._liquid import Liquid
-from ._types import OFF_DECK
+from ._liquid import Liquid, LiquidClass
+from ._types import (
+    OFF_DECK,
+    PLUNGER_BLOWOUT,
+    PLUNGER_TOP,
+    PLUNGER_BOTTOM,
+    PLUNGER_DROPTIP,
+    ASPIRATE_ACTION,
+    DISPENSE_ACTION,
+    BLOWOUT_ACTION,
+)
 from ._nozzle_layout import (
     COLUMN,
     PARTIAL_COLUMN,
@@ -67,13 +76,24 @@ __all__ = [
     "WasteChute",
     "Well",
     "Liquid",
+    "LiquidClass",
     "Parameters",
+    # Partial Tip types
     "COLUMN",
     "PARTIAL_COLUMN",
     "SINGLE",
     "ROW",
     "ALL",
+    # Deck location types
     "OFF_DECK",
+    # Pipette plunger types
+    "PLUNGER_BLOWOUT",
+    "PLUNGER_TOP",
+    "PLUNGER_BOTTOM",
+    "PLUNGER_DROPTIP",
+    "ASPIRATE_ACTION",
+    "DISPENSE_ACTION",
+    "BLOWOUT_ACTION",
     "RuntimeParameterRequiredError",
     "CSVParameter",
     # For internal Opentrons use only:

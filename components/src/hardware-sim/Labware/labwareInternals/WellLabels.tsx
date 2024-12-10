@@ -73,6 +73,7 @@ const Labels = (props: {
                 ? highlightColor
                 : fillColor
             }
+            canHighlight={false}
           >
             {(props.isLetterColumn === true ? /[A-Z]+/g : /\d+/g).exec(
               wellName

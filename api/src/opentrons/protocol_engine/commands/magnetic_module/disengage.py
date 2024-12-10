@@ -38,7 +38,7 @@ class DisengageResult(BaseModel):
 
 
 class DisengageImplementation(
-    AbstractCommandImpl[DisengageParams, SuccessData[DisengageResult, None]]
+    AbstractCommandImpl[DisengageParams, SuccessData[DisengageResult]]
 ):
     """The implementation of a Magnetic Module disengage command."""
 
@@ -51,9 +51,7 @@ class DisengageImplementation(
         self._state_view = state_view
         self._equipment = equipment
 
-    async def execute(
-        self, params: DisengageParams
-    ) -> SuccessData[DisengageResult, None]:
+    async def execute(self, params: DisengageParams) -> SuccessData[DisengageResult]:
         """Execute a Magnetic Module disengage command.
 
         Raises:
@@ -75,7 +73,9 @@ class DisengageImplementation(
         if hardware_module is not None:  # Not virtualizing modules.
             await hardware_module.deactivate()
 
-        return SuccessData(public=DisengageResult(), private=None)
+        return SuccessData(
+            public=DisengageResult(),
+        )
 
 
 class Disengage(BaseCommand[DisengageParams, DisengageResult, ErrorOccurrence]):

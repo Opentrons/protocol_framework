@@ -67,4 +67,4 @@ async def test_set_target_block_temperature(
         ),
         times=1,
     )
-    assert result == SuccessData(public=expected_result, private=None)
+    assert result == SuccessData(public=expected_result)

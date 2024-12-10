@@ -95,7 +95,6 @@ async def test_calibrate_module_implementation(
             ),
             location=location,
         ),
-        private=None,
     )
 
 

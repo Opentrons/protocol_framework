@@ -1,14 +1,11 @@
-import * as React from 'react'
-import { useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { FLEX_ROBOT_TYPE, getModuleDisplayName } from '@opentrons/shared-data'
-import { RobotCoordsForeignObject } from '@opentrons/components'
+import { getModuleDisplayName } from '@opentrons/shared-data'
 import * as wellContentsSelectors from '../../top-selectors/well-contents'
 import { selectors } from '../../labware-ingred/selectors'
+import { selectors as uiLabwareSelectors } from '../../ui/labware'
 import { getDeckSetupForActiveItem } from '../../top-selectors/labware-locations'
 import { SlotInformation } from '../../organisms/SlotInformation'
-import { getYPosition } from './utils'
 
 import type { DeckSlotId, RobotType } from '@opentrons/shared-data'
 import type { ContentsByWell } from '../../labware-ingred/types'
@@ -16,7 +13,7 @@ import type { ContentsByWell } from '../../labware-ingred/types'
 interface SlotDetailContainerProps {
   robotType: RobotType
   slot: DeckSlotId | null
-  offDeckLabwareId?: string
+  offDeckLabwareId?: string | null
 }
 
 export function SlotDetailsContainer(
@@ -24,11 +21,11 @@ export function SlotDetailsContainer(
 ): JSX.Element | null {
   const { robotType, slot, offDeckLabwareId } = props
   const { t } = useTranslation('shared')
-  const location = useLocation()
   const deckSetup = useSelector(getDeckSetupForActiveItem)
   const allWellContentsForActiveItem = useSelector(
     wellContentsSelectors.getAllWellContentsForActiveItem
   )
+  const nickNames = useSelector(uiLabwareSelectors.getLabwareNicknamesById)
   const allIngredNamesIds = useSelector(selectors.allIngredientNamesIds)
 
   if (slot == null || (slot === 'offDeck' && offDeckLabwareId == null)) {
@@ -41,10 +38,8 @@ export function SlotDetailsContainer(
     additionalEquipmentOnDeck,
   } = deckSetup
 
-  const offDeckLabwareDisplayName =
-    offDeckLabwareId != null
-      ? deckSetupLabwares[offDeckLabwareId].def.metadata.displayName
-      : null
+  const offDeckLabwareNickName =
+    offDeckLabwareId != null ? nickNames[offDeckLabwareId] : null
 
   const moduleOnSlot = Object.values(deckSetupModules).find(
     module => module.slot === slot
@@ -52,13 +47,9 @@ export function SlotDetailsContainer(
   const labwareOnSlot = Object.values(deckSetupLabwares).find(
     lw => lw.slot === slot || lw.slot === moduleOnSlot?.id
   )
-  const nestedLabwareOnSlot = Object.values(deckSetupLabwares).find(lw =>
-    Object.keys(deckSetupLabwares).includes(lw.slot)
+  const nestedLabwareOnSlot = Object.values(deckSetupLabwares).find(
+    lw => lw.slot === labwareOnSlot?.id
   )
-  const labwareOnSlotDisplayName = labwareOnSlot?.def.metadata.displayName
-  const nestedLabwareOnSlotDisplayName =
-    nestedLabwareOnSlot?.def.metadata.displayName
-
   const fixturesOnSlot = Object.values(additionalEquipmentOnDeck).filter(
     ae => ae.location?.split('cutout')[1] === slot
   )
@@ -95,39 +86,25 @@ export function SlotDetailsContainer(
     .filter(Boolean)
 
   const labwares: string[] = []
-  if (offDeckLabwareDisplayName != null) {
-    labwares.push(offDeckLabwareDisplayName)
+  const adapters: string[] = []
+  if (offDeckLabwareNickName != null) {
+    labwares.push(offDeckLabwareNickName)
   } else {
-    if (labwareOnSlotDisplayName != null) {
-      labwares.push(labwareOnSlotDisplayName)
-    }
-    if (nestedLabwareOnSlotDisplayName != null) {
-      labwares.push(nestedLabwareOnSlotDisplayName)
+    if (nestedLabwareOnSlot != null && labwareOnSlot != null) {
+      adapters.push(nickNames[labwareOnSlot.id])
+      labwares.push(nickNames[nestedLabwareOnSlot.id])
+    } else if (nestedLabwareOnSlot == null && labwareOnSlot != null) {
+      labwares.push(nickNames[labwareOnSlot.id])
     }
   }
 
-  return location.pathname === '/designer' && slot !== 'offDeck' ? (
-    <RobotCoordsForeignObject
-      width="15.8125rem"
-      height="26.75rem"
-      x={robotType === FLEX_ROBOT_TYPE ? '-400' : '-300'}
-      y={getYPosition({ robotType, slot })}
-    >
-      <SlotInformation
-        location={slot}
-        robotType={robotType}
-        modules={moduleDisplayName != null ? [moduleDisplayName] : []}
-        labwares={labwares}
-        fixtures={fixtureDisplayNames}
-        liquids={liquidNamesOnLabware}
-      />
-    </RobotCoordsForeignObject>
-  ) : (
+  return (
     <SlotInformation
       location={slot}
       robotType={robotType}
       modules={moduleDisplayName != null ? [moduleDisplayName] : []}
       labwares={labwares}
+      adapters={adapters}
       fixtures={fixtureDisplayNames}
       liquids={liquidNamesOnLabware}
     />

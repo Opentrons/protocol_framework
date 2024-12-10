@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import isEqual from 'lodash/isEqual'
 import {
@@ -18,23 +18,24 @@ import {
 import { RobotMotionLoader } from './RobotMotionLoader'
 import { PrepareSpace } from './PrepareSpace'
 import { JogToWell } from './JogToWell'
-import { UnorderedList } from '../../molecules/UnorderedList'
-import { getCurrentOffsetForLabwareInLocation } from '../Devices/ProtocolRun/utils/getCurrentOffsetForLabwareInLocation'
+import { UnorderedList } from '/app/molecules/UnorderedList'
+import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
 import { TipConfirmation } from './TipConfirmation'
 import { getLabwareDef } from './utils/labware'
-import { getLabwareDefinitionsFromCommands } from '../../molecules/Command/utils/getLabwareDefinitionsFromCommands'
+import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import { getDisplayLocation } from './utils/getDisplayLocation'
 import { useSelector } from 'react-redux'
-import { getIsOnDevice } from '../../redux/config'
+import { getIsOnDevice } from '/app/redux/config'
 
+import type { Dispatch } from 'react'
 import type {
   CompletedProtocolAnalysis,
   CreateCommand,
   MoveLabwareCreateCommand,
   RobotType,
 } from '@opentrons/shared-data'
-import type { useChainRunCommands } from '../../resources/runs'
-import type { Jog } from '../../molecules/JogControls/types'
+import type { useChainRunCommands } from '/app/resources/runs'
+import type { Jog } from '/app/molecules/JogControls/types'
 import type {
   PickUpTipStep,
   RegisterPositionAction,
@@ -46,7 +47,7 @@ import type { TFunction } from 'i18next'
 interface PickUpTipProps extends PickUpTipStep {
   protocolData: CompletedProtocolAnalysis
   proceed: () => void
-  registerPosition: React.Dispatch<RegisterPositionAction>
+  registerPosition: Dispatch<RegisterPositionAction>
   chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
   setFatalError: (errorMessage: string) => void
   workingOffsets: WorkingOffset[]
@@ -77,7 +78,7 @@ export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
     protocolHasModules,
     currentStepIndex,
   } = props
-  const [showTipConfirmation, setShowTipConfirmation] = React.useState(false)
+  const [showTipConfirmation, setShowTipConfirmation] = useState(false)
   const isOnDevice = useSelector(getIsOnDevice)
   const labwareDef = getLabwareDef(labwareId, protocolData)
   const pipette = protocolData.pipettes.find(p => p.id === pipetteId)

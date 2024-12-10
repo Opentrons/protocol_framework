@@ -313,9 +313,16 @@ def test_resume_from_recovery(
     subject: AnyRunner,
 ) -> None:
     """It should call `resume_from_recovery()` on the underlying engine."""
-    subject.resume_from_recovery()
+    subject.resume_from_recovery(
+        reconcile_false_positive=sentinel.reconcile_false_positive
+    )
 
-    decoy.verify(protocol_engine.resume_from_recovery(), times=1)
+    decoy.verify(
+        protocol_engine.resume_from_recovery(
+            reconcile_false_positive=sentinel.reconcile_false_positive
+        ),
+        times=1,
+    )
 
 
 async def test_run_json_runner(
@@ -441,6 +448,7 @@ async def test_run_json_runner_stop_requested_stops_enqueuing(
         await run_func()
 
 
+@pytest.mark.filterwarnings("ignore::decoy.warnings.RedundantVerifyWarning")
 @pytest.mark.parametrize(
     "schema_version, json_protocol",
     [

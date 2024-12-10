@@ -29,9 +29,9 @@ describe('useDropTipCommandErrors', () => {
 
     act(() => {
       result.current({
-        runCommandError: {
-          errorType: DROP_TIP_SPECIAL_ERROR_TYPES.MUST_HOME_ERROR,
-        } as any,
+        type: DROP_TIP_SPECIAL_ERROR_TYPES.MUST_HOME_ERROR,
+        message: 'remove_the_tips_manually',
+        header: 'cant_safely_drop_tips',
       })
     })
 

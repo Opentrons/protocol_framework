@@ -57,7 +57,7 @@ async def test_load_module_implementation(
 
     deck_def = load_deck(STANDARD_OT3_DECK, 5)
 
-    decoy.when(state_view.addressable_areas.state.deck_definition).then_return(deck_def)
+    decoy.when(state_view.labware.get_deck_definition()).then_return(deck_def)
     decoy.when(
         state_view.addressable_areas.get_cutout_id_by_deck_slot_name(
             DeckSlotName.SLOT_D1
@@ -92,7 +92,6 @@ async def test_load_module_implementation(
             model=ModuleModel.TEMPERATURE_MODULE_V2,
             definition=tempdeck_v2_def,
         ),
-        private=None,
     )
 
 
@@ -113,7 +112,7 @@ async def test_load_module_implementation_mag_block(
 
     deck_def = load_deck(STANDARD_OT3_DECK, 5)
 
-    decoy.when(state_view.addressable_areas.state.deck_definition).then_return(deck_def)
+    decoy.when(state_view.labware.get_deck_definition()).then_return(deck_def)
     decoy.when(
         state_view.addressable_areas.get_cutout_id_by_deck_slot_name(
             DeckSlotName.SLOT_D1
@@ -148,7 +147,6 @@ async def test_load_module_implementation_mag_block(
             model=ModuleModel.MAGNETIC_BLOCK_V1,
             definition=mag_block_v1_def,
         ),
-        private=None,
     )
 
 
@@ -169,7 +167,7 @@ async def test_load_module_implementation_abs_reader(
 
     deck_def = load_deck(STANDARD_OT3_DECK, 5)
 
-    decoy.when(state_view.addressable_areas.state.deck_definition).then_return(deck_def)
+    decoy.when(state_view.labware.get_deck_definition()).then_return(deck_def)
     decoy.when(
         state_view.addressable_areas.get_cutout_id_by_deck_slot_name(
             DeckSlotName.SLOT_D3
@@ -204,7 +202,6 @@ async def test_load_module_implementation_abs_reader(
             model=ModuleModel.ABSORBANCE_READER_V1,
             definition=abs_reader_v1_def,
         ),
-        private=None,
     )
 
 
@@ -224,7 +221,7 @@ async def test_load_module_raises_if_location_occupied(
 
     deck_def = load_deck(STANDARD_OT3_DECK, 5)
 
-    decoy.when(state_view.addressable_areas.state.deck_definition).then_return(deck_def)
+    decoy.when(state_view.labware.get_deck_definition()).then_return(deck_def)
     decoy.when(
         state_view.addressable_areas.get_cutout_id_by_deck_slot_name(
             DeckSlotName.SLOT_D1
@@ -306,9 +303,7 @@ async def test_load_module_raises_wrong_location(
             state_view.addressable_areas.get_slot_definition(slot_name.id)
         ).then_return(cast(SlotDefV3, {"compatibleModuleTypes": []}))
     else:
-        decoy.when(state_view.addressable_areas.state.deck_definition).then_return(
-            deck_def
-        )
+        decoy.when(state_view.labware.get_deck_definition()).then_return(deck_def)
         decoy.when(
             state_view.addressable_areas.get_cutout_id_by_deck_slot_name(slot_name)
         ).then_return("cutout" + slot_name.value)
@@ -364,9 +359,7 @@ async def test_load_module_raises_module_fixture_id_does_not_exist(
             state_view.addressable_areas.get_slot_definition(slot_name.id)
         ).then_return(cast(SlotDefV3, {"compatibleModuleTypes": []}))
     else:
-        decoy.when(state_view.addressable_areas.state.deck_definition).then_return(
-            deck_def
-        )
+        decoy.when(state_view.labware.get_deck_definition()).then_return(deck_def)
         decoy.when(
             state_view.addressable_areas.get_cutout_id_by_deck_slot_name(slot_name)
         ).then_return("cutout" + slot_name.value)

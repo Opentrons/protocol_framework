@@ -46,4 +46,4 @@ async def test_magnetic_module_disengage_implementation(
     result = await subject.execute(params=params)
 
     decoy.verify(await magnetic_module_hw.deactivate(), times=1)
-    assert result == SuccessData(public=DisengageResult(), private=None)
+    assert result == SuccessData(public=DisengageResult())
