@@ -24,69 +24,11 @@ import {
 import * as FileSystem from './file-system'
 import { createFailedAnalysis } from '../protocol-analysis/writeFailedAnalysis'
 
-import type {
-  ProtocolAnalysisOutput,
-  RunTimeCommand,
-} from '@opentrons/shared-data'
+import type { ProtocolAnalysisOutput } from '@opentrons/shared-data'
 import type { ProtocolListActionSource as ListSource } from '@opentrons/app/src/redux/protocol-storage/types'
 import type { Action, Dispatch } from '../types'
 
 const ensureDir: (dir: string) => Promise<void> = fse.ensureDir
-
-interface ParentNode {
-  annotationIndex: number
-  subCommands: LeafNode[]
-  isHighlighted: boolean
-}
-interface LeafNode {
-  command: RunTimeCommand
-  isHighlighted: boolean
-}
-
-const getGroupedCommands = (
-  mostRecentAnalysis: ProtocolAnalysisOutput
-): Array<LeafNode | ParentNode> => {
-  const annotations = mostRecentAnalysis.commandAnnotations ?? []
-  return mostRecentAnalysis.commands.reduce<Array<LeafNode | ParentNode>>(
-    (acc, c) => {
-      const foundAnnotationIndex = annotations.findIndex(
-        a => c.key != null && a.commandKeys.includes(c.key)
-      )
-      const lastAccNode = acc[acc.length - 1]
-      if (
-        acc.length > 0 &&
-        c.key != null &&
-        'annotationIndex' in lastAccNode &&
-        lastAccNode.annotationIndex != null &&
-        annotations[lastAccNode.annotationIndex]?.commandKeys.includes(c.key)
-      ) {
-        return [
-          ...acc.slice(0, -1),
-          {
-            ...lastAccNode,
-            subCommands: [
-              ...lastAccNode.subCommands,
-              { command: c, isHighlighted: false },
-            ],
-            isHighlighted: false,
-          },
-        ]
-      } else if (foundAnnotationIndex >= 0) {
-        return [
-          ...acc,
-          {
-            annotationIndex: foundAnnotationIndex,
-            subCommands: [{ command: c, isHighlighted: false }],
-            isHighlighted: false,
-          },
-        ]
-      } else {
-        return [...acc, { command: c, isHighlighted: false }]
-      }
-    },
-    []
-  )
-}
 
 export const getUnixTimeFromAnalysisPath = (analysisPath: string): number =>
   Number(path.basename(analysisPath, path.extname(analysisPath)))
@@ -200,10 +142,7 @@ export const fetchProtocols = (
           mostRecentAnalysisFilePath != null
             ? getParsedAnalysisFromPath(mostRecentAnalysisFilePath) ?? null
             : null
-        const groupedCommands =
-          mostRecentAnalysis != null
-            ? getGroupedCommands(mostRecentAnalysis)
-            : []
+
         return {
           protocolKey: path.parse(storedProtocolDir.dirPath).base,
           modified: storedProtocolDir.modified,
@@ -215,7 +154,6 @@ export const fetchProtocols = (
             return Buffer.from(buffer, buffer.byteOffset, buffer.byteLength)
           }),
           mostRecentAnalysis,
-          groupedCommands,
         }
       })
       dispatch(updateProtocolList(storedProtocolsData, source))

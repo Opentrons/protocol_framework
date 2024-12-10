@@ -77,7 +77,10 @@ import type {
   PythonConfig,
   LoadLabwareRunTimeCommand,
 } from '@opentrons/shared-data'
-import type { StoredProtocolData } from '/app/redux/protocol-storage'
+import type {
+  GroupedCommands,
+  StoredProtocolData,
+} from '/app/redux/protocol-storage'
 import type { State, Dispatch } from '/app/redux/types'
 
 const GRID_STYLE = css`
@@ -203,7 +206,9 @@ const ReadMoreContent = (props: ReadMoreContentProps): JSX.Element => {
   )
 }
 
-interface ProtocolDetailsProps extends StoredProtocolData {}
+interface ProtocolDetailsProps extends StoredProtocolData {
+  groupedCommands: GroupedCommands | null
+}
 
 export function ProtocolDetails(
   props: ProtocolDetailsProps

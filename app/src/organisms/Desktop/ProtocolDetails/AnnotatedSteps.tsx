@@ -19,18 +19,17 @@ import {
 
 import { CommandIcon, CommandText } from '/app/molecules/Command'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
-
 import type {
   CompletedProtocolAnalysis,
   ProtocolAnalysisOutput,
   RunTimeCommand,
   LabwareDefinition2,
 } from '@opentrons/shared-data'
-import type { LeafNode, ParentNode } from '/app/redux/protocol-storage'
+import type { GroupedCommands, LeafNode } from '/app/redux/protocol-storage'
 
 interface AnnotatedStepsProps {
   analysis: CompletedProtocolAnalysis | ProtocolAnalysisOutput
-  groupedCommands: Array<LeafNode | ParentNode>
+  groupedCommands: GroupedCommands | null
   currentCommandIndex?: number
 }
 
@@ -41,7 +40,6 @@ export function AnnotatedSteps(props: AnnotatedStepsProps): JSX.Element {
       display: none;
     }
   `
-
   const isValidRobotSideAnalysis = analysis != null
   const allRunDefs = useMemo(
     () =>
@@ -55,7 +53,7 @@ export function AnnotatedSteps(props: AnnotatedStepsProps): JSX.Element {
   //  NOTE: isHighlighted is meant to show when running on the protocol in the run log
   //  but isn't in use during protocol details. Therefore, this info is not in use and is
   //  merely a proof-of-concept for when we do add this to the run log.
-  const groupedCommandsHighlightedInfo = groupedCommands.map(node => {
+  const groupedCommandsHighlightedInfo = groupedCommands?.map(node => {
     if ('annotationIndex' in node) {
       return {
         ...node,
@@ -88,30 +86,42 @@ export function AnnotatedSteps(props: AnnotatedStepsProps): JSX.Element {
         marginY={SPACING.spacing16}
         gridGap={SPACING.spacing4}
       >
-        {groupedCommandsHighlightedInfo.map((c, i) =>
-          'annotationIndex' in c ? (
-            <AnnotatedGroup
-              key={`group-${i}`}
-              stepNumber={(i + 1).toString()}
-              analysis={analysis}
-              annotationType={
-                annotations[c.annotationIndex]?.machineReadableName
-              }
-              isHighlighted={c.isHighlighted}
-              subCommands={c.subCommands}
-              allRunDefs={allRunDefs}
-            />
-          ) : (
-            <IndividualCommand
-              key={c.command.id}
-              stepNumber={(i + 1).toString()}
-              command={c.command}
-              isHighlighted={c.isHighlighted}
-              analysis={analysis}
-              allRunDefs={allRunDefs}
-            />
-          )
-        )}
+        {groupedCommandsHighlightedInfo != null &&
+        groupedCommandsHighlightedInfo.length > 0
+          ? groupedCommandsHighlightedInfo.map((c, i) =>
+              'annotationIndex' in c ? (
+                <AnnotatedGroup
+                  key={`group-${i}`}
+                  stepNumber={(i + 1).toString()}
+                  analysis={analysis}
+                  annotationType={
+                    annotations[c.annotationIndex]?.machineReadableName
+                  }
+                  isHighlighted={c.isHighlighted}
+                  subCommands={c.subCommands}
+                  allRunDefs={allRunDefs}
+                />
+              ) : (
+                <IndividualCommand
+                  key={c.command.id}
+                  stepNumber={(i + 1).toString()}
+                  command={c.command}
+                  isHighlighted={c.isHighlighted}
+                  analysis={analysis}
+                  allRunDefs={allRunDefs}
+                />
+              )
+            )
+          : analysis.commands.map((c, i) => (
+              <IndividualCommand
+                key={i}
+                stepNumber={(i + 1).toString()}
+                command={c}
+                isHighlighted={i === currentCommandIndex}
+                analysis={analysis}
+                allRunDefs={allRunDefs}
+              />
+            ))}
       </Flex>
     </Flex>
   )

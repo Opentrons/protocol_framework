@@ -13,14 +13,7 @@ export type ProtocolSort =
   | 'flex'
   | 'ot2'
 
-export interface StoredProtocolDir {
-  dirPath: string
-  modified: number
-  srcFilePaths: string[]
-  analysisFilePaths: string[]
-}
-
-export interface ParentNode {
+interface ParentNode {
   annotationIndex: number
   subCommands: LeafNode[]
   isHighlighted: boolean
@@ -30,13 +23,21 @@ export interface LeafNode {
   isHighlighted: boolean
 }
 
+export type GroupedCommands = Array<LeafNode | ParentNode>
+
+export interface StoredProtocolDir {
+  dirPath: string
+  modified: number
+  srcFilePaths: string[]
+  analysisFilePaths: string[]
+}
+
 export interface StoredProtocolData {
   protocolKey: string
   modified: number
   srcFileNames: string[]
   srcFiles: Buffer[]
   mostRecentAnalysis: ProtocolAnalysisOutput | null
-  groupedCommands: Array<LeafNode | ParentNode>
 }
 
 // state types

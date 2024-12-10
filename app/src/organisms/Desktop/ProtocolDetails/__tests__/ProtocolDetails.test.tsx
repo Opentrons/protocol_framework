@@ -41,7 +41,9 @@ const render = (
 ) => {
   return renderWithProviders(
     <MemoryRouter>
-      <ProtocolDetails {...{ ...storedProtocolData, ...props }} />
+      <ProtocolDetails
+        {...{ ...storedProtocolData, ...props, groupedCommands: null }}
+      />
     </MemoryRouter>,
     {
       i18nInstance: i18n,
