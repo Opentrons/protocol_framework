@@ -41,6 +41,7 @@ def add_parameters(parameters: ParameterContext) -> None:
     helpers.create_disposable_lid_parameter(parameters)
     helpers.create_tc_lid_deck_riser_parameter(parameters)
     helpers.create_two_pipette_mount_parameters(parameters)
+    helpers.create_deactivate_modules_parameter(parameters)
     parameters.add_int(
         variable_name="num_samples",
         display_name="number of samples",
@@ -71,6 +72,7 @@ def add_parameters(parameters: ParameterContext) -> None:
 def run(ctx: ProtocolContext) -> None:
     """Protocol."""
     USE_GRIPPER = True
+    deactivate_mods = ctx.params.deactivate_modules  # type: ignore[attr-defined]
     trash_tips = ctx.params.trash_tips  # type: ignore[attr-defined]
     dry_run = ctx.params.dry_run  # type: ignore[attr-defined]
     pipette_1000_mount = ctx.params.pipette_mount_1  # type: ignore[attr-defined]
@@ -964,3 +966,5 @@ def run(ctx: ProtocolContext) -> None:
 
     end_probed_wells = [waste1_res, waste2_res]
     helpers.find_liquid_height_of_all_wells(ctx, p50, end_probed_wells)
+    if deactivate_mods:
+        helpers.deactivate_modules(ctx)

@@ -13,6 +13,8 @@ from opentrons.protocol_api.module_contexts import (
     MagneticBlockContext,
     ThermocyclerContext,
     TemperatureModuleContext,
+    MagneticModuleContext,
+    AbsorbanceReaderContext,
 )
 from typing import List, Union, Dict
 from opentrons.hardware_control.modules.types import ThermocyclerStep
@@ -249,7 +251,33 @@ def create_tc_compatible_labware_parameter(parameters: ParameterContext) -> None
     )
 
 
+def create_deactivate_modules_parameter(parameters: ParameterContext) -> None:
+    """Create parameter for deactivating modules at the end fof run."""
+    parameters.add_bool(
+        variable_name="deactivate_modules",
+        display_name="Deactivate Modules",
+        description="deactivate all modules at end of run",
+        default=True,
+    )
+
+
 # FUNCTIONS FOR COMMON MODULE SEQUENCES
+def deactivate_modules(protocol: ProtocolContext) -> None:
+    """Deactivate all loaded modules."""
+    print("Deactivating Modules")
+    modules = protocol.loaded_modules
+
+    if modules:
+        for module in modules.values():
+            if isinstance(module, HeaterShakerContext):
+                module.deactivate_shaker()
+                module.deactivate_heater()
+            elif isinstance(module, TemperatureModuleContext):
+                module.deactivate()
+            elif isinstance(module, MagneticModuleContext):
+                module.disengage()
+            elif isinstance(module, ThermocyclerContext):
+                module.deactivate()
 
 
 def move_labware_from_hs_to_destination(
@@ -463,6 +491,14 @@ liquid_colors = [
     "#C0C0C0",
 ]
 
+# Modules with deactivate
+ModuleTypes = Union[
+    TemperatureModuleContext,
+    ThermocyclerContext,
+    HeaterShakerContext,
+    MagneticModuleContext,
+    AbsorbanceReaderContext,
+]
 # THERMOCYCLER PROFILES
 
 
