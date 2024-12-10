@@ -59,6 +59,7 @@ import { SetupStep } from './SetupStep'
 import { SetupLiquids } from './SetupLiquids'
 import { EmptySetupStep } from './EmptySetupStep'
 import { HowLPCWorksModal } from './SetupLabwarePositionCheck/HowLPCWorksModal'
+import { useFeatureFlag } from '/app/redux/config'
 
 import type { RefObject } from 'react'
 import type { Dispatch, State } from '/app/redux/types'
@@ -85,7 +86,7 @@ export function ProtocolRunSetup({
     orderedApplicableSteps,
   } = useRequiredSetupStepsInOrder({ runId, protocolAnalysis })
   const modules = parseAllRequiredModuleModels(protocolAnalysis?.commands ?? [])
-
+  const isNewLpc = useFeatureFlag('lpcRedesign')
   const robot = useRobot(robotName)
   const calibrationStatusRobot = useRunCalibrationStatus(robotName, runId)
   const calibrationStatusModules = useModuleCalibrationStatus(robotName, runId)
@@ -224,6 +225,7 @@ export function ProtocolRunSetup({
             }
           }}
           offsetsConfirmed={!missingSteps.includes(LPC_STEP_KEY)}
+          isNewLpc={isNewLpc}
         />
       ),
       description: t('labware_position_check_step_description'),

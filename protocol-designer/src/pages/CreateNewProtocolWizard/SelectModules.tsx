@@ -25,7 +25,7 @@ import {
 import { uuid } from '../../utils'
 import { getEnableAbsorbanceReader } from '../../feature-flags/selectors'
 import { useKitchen } from '../../organisms/Kitchen/hooks'
-import { ModuleDiagram } from '../../components/modules'
+import { ModuleDiagram } from './ModuleDiagram'
 import { WizardBody } from './WizardBody'
 import {
   DEFAULT_SLOT_MAP_FLEX,

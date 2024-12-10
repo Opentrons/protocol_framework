@@ -23,8 +23,8 @@ import {
   ConfirmDeleteModal,
   DELETE_MULTIPLE_STEP_FORMS,
   DELETE_STEP_FORM,
-} from '../../../../components/modals/ConfirmDeleteModal'
-import { getTopPortalEl } from '../../../../components/portals/TopPortal'
+  getMainPagePortalEl,
+} from '../../../../organisms'
 import { actions as steplistActions } from '../../../../steplist'
 import {
   deselectAllSteps,
@@ -287,7 +287,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
               confirmMultiDelete={confirmMultiDelete}
               multiSelectItemIds={multiSelectItemIds}
             />,
-            getTopPortalEl()
+            getMainPagePortalEl()
           )
         : null}
     </>

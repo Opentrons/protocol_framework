@@ -12,13 +12,12 @@ import {
   MOVABLE_TRASH_ADDRESSABLE_AREAS,
   FLEX_MODULE_ADDRESSABLE_AREAS,
 } from '@opentrons/shared-data'
-import { COLUMN_4_SLOTS } from '@opentrons/step-generation'
+import { COLUMN_4_SLOTS, getHasWasteChute } from '@opentrons/step-generation'
 import {
   START_TERMINAL_ITEM_ID,
   END_TERMINAL_ITEM_ID,
   PRESAVED_STEP_ID,
 } from '../../steplist'
-import { getHasWasteChute } from '../../components/labware'
 import { selectors as stepFormSelectors } from '../../step-forms'
 import { getActiveItem } from '../../ui/steps'
 import { TERMINAL_ITEM_SELECTION_TYPE } from '../../ui/steps/reducers'

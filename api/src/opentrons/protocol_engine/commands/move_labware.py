@@ -165,6 +165,7 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
                 area_name
             )
+            state_update.set_addressable_area_used(addressable_area_name=area_name)
 
             if fixture_validation.is_gripper_waste_chute(area_name):
                 # When dropping off labware in the waste chute, some bigger pieces
@@ -209,6 +210,9 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
         elif isinstance(params.newLocation, DeckSlotLocation):
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
                 params.newLocation.slotName.id
+            )
+            state_update.set_addressable_area_used(
+                addressable_area_name=params.newLocation.slotName.id
             )
 
         available_new_location = self._state_view.geometry.ensure_location_not_occupied(

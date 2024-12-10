@@ -98,7 +98,7 @@ class LabwareLocationUpdate:
     new_location: LabwareLocation
     """The labware's new location."""
 
-    offset_id: typing.Optional[str]
+    offset_id: str | None
     """The ID of the labware's new offset, for its new location."""
 
 
@@ -112,10 +112,10 @@ class LoadedLabwareUpdate:
     new_location: LabwareLocation
     """The labware's initial location."""
 
-    offset_id: typing.Optional[str]
+    offset_id: str | None
     """The ID of the labware's offset."""
 
-    display_name: typing.Optional[str]
+    display_name: str | None
 
     definition: LabwareDefinition
 
@@ -133,7 +133,7 @@ class LoadPipetteUpdate:
 
     pipette_name: PipetteNameType
     mount: MountType
-    liquid_presence_detection: typing.Optional[bool]
+    liquid_presence_detection: bool | None
 
 
 @dataclasses.dataclass
@@ -162,7 +162,7 @@ class PipetteTipStateUpdate:
     """Update pipette tip state."""
 
     pipette_id: str
-    tip_geometry: typing.Optional[TipGeometry]
+    tip_geometry: TipGeometry | None
 
 
 @dataclasses.dataclass
@@ -262,6 +262,20 @@ class LiquidClassLoadedUpdate:
 
 
 @dataclasses.dataclass
+class FilesAddedUpdate:
+    """An update that adds a new data file."""
+
+    file_ids: list[str]
+
+
+@dataclasses.dataclass
+class AddressableAreaUsedUpdate:
+    """An update that says an addressable area has been used."""
+
+    addressable_area_name: str
+
+
+@dataclasses.dataclass
 class StateUpdate:
     """Represents an update to perform on engine state."""
 
@@ -299,6 +313,10 @@ class StateUpdate:
 
     liquid_class_loaded: LiquidClassLoadedUpdate | NoChangeType = NO_CHANGE
 
+    files_added: FilesAddedUpdate | NoChangeType = NO_CHANGE
+
+    addressable_area_used: AddressableAreaUsedUpdate | NoChangeType = NO_CHANGE
+
     def append(self, other: Self) -> Self:
         """Apply another `StateUpdate` "on top of" this one.
 
@@ -325,7 +343,8 @@ class StateUpdate:
         return accumulator
 
     # These convenience functions let the caller avoid the boilerplate of constructing a
-    # complicated dataclass tree.
+    # complicated dataclass tree, and allow chaining.
+
     @typing.overload
     def set_pipette_location(
         self: Self, *, pipette_id: str, new_deck_point: DeckPoint
@@ -378,7 +397,6 @@ class StateUpdate:
                 new_deck_point=new_deck_point,
             )
         else:
-
             self.pipette_location = PipetteLocationUpdate(
                 pipette_id=pipette_id,
                 new_location=Well(labware_id=new_labware_id, well_name=new_well_name),
@@ -410,8 +428,8 @@ class StateUpdate:
         self: Self,
         definition: LabwareDefinition,
         labware_id: str,
-        offset_id: typing.Optional[str],
-        display_name: typing.Optional[str],
+        offset_id: str | None,
+        display_name: str | None,
         location: LabwareLocation,
     ) -> Self:
         """Add a new labware to state. See `LoadedLabwareUpdate`."""
@@ -429,7 +447,7 @@ class StateUpdate:
         pipette_id: str,
         pipette_name: PipetteNameType,
         mount: MountType,
-        liquid_presence_detection: typing.Optional[bool],
+        liquid_presence_detection: bool | None,
     ) -> Self:
         """Add a new pipette to state. See `LoadPipetteUpdate`."""
         self.loaded_pipette = LoadPipetteUpdate(
@@ -462,7 +480,7 @@ class StateUpdate:
         return self
 
     def update_pipette_tip_state(
-        self: Self, pipette_id: str, tip_geometry: typing.Optional[TipGeometry]
+        self: Self, pipette_id: str, tip_geometry: TipGeometry | None
     ) -> Self:
         """Update a pipette's tip state. See `PipetteTipStateUpdate`."""
         self.pipette_tip_state = PipetteTipStateUpdate(
@@ -557,5 +575,12 @@ class StateUpdate:
         """Update an absorbance reader's lid location. See `AbsorbanceReaderLidUpdate`."""
         self.absorbance_reader_lid = AbsorbanceReaderLidUpdate(
             module_id=module_id, is_lid_on=is_lid_on
+        )
+        return self
+
+    def set_addressable_area_used(self: Self, addressable_area_name: str) -> Self:
+        """Mark that an addressable area has been used. See `AddressableAreaUsedUpdate`."""
+        self.addressable_area_used = AddressableAreaUsedUpdate(
+            addressable_area_name=addressable_area_name
         )
         return self

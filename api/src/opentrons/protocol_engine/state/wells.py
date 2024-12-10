@@ -135,7 +135,7 @@ class WellStore(HasState[WellState], HandlesActions):
                 )
 
 
-class WellView(HasState[WellState]):
+class WellView:
     """Read-only well state view."""
 
     _state: WellState

@@ -343,6 +343,14 @@ from .verify_tip_presence import (
     VerifyTipPresenceCommandType,
 )
 
+from .get_next_tip import (
+    GetNextTip,
+    GetNextTipCreate,
+    GetNextTipParams,
+    GetNextTipResult,
+    GetNextTipCommandType,
+)
+
 from .liquid_probe import (
     LiquidProbe,
     LiquidProbeParams,
@@ -615,6 +623,12 @@ __all__ = [
     "VerifyTipPresenceParams",
     "VerifyTipPresenceResult",
     "VerifyTipPresenceCommandType",
+    # get next tip command bundle
+    "GetNextTip",
+    "GetNextTipCreate",
+    "GetNextTipParams",
+    "GetNextTipResult",
+    "GetNextTipCommandType",
     # liquid probe command bundle
     "LiquidProbe",
     "LiquidProbeParams",

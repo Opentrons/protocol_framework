@@ -2,6 +2,8 @@
 
 from datetime import datetime
 import inspect
+from unittest.mock import sentinel
+
 import pytest
 from decoy import Decoy, matchers
 
@@ -91,9 +93,10 @@ async def test_manual_move_labware_implementation(
     times_pause_called: int,
 ) -> None:
     """It should execute a pause and return the new offset."""
+    new_location = DeckSlotLocation(slotName=DeckSlotName.SLOT_4)
     data = MoveLabwareParams(
         labwareId="my-cool-labware-id",
-        newLocation=DeckSlotLocation(slotName=DeckSlotName.SLOT_4),
+        newLocation=new_location,
         strategy=strategy,
     )
 
@@ -132,7 +135,10 @@ async def test_manual_move_labware_implementation(
                 labware_id="my-cool-labware-id",
                 offset_id="wowzers-a-new-offset-id",
                 new_location=DeckSlotLocation(slotName=DeckSlotName.SLOT_5),
-            )
+            ),
+            addressable_area_used=update_types.AddressableAreaUsedUpdate(
+                addressable_area_name=new_location.slotName.id
+            ),
         ),
     )
 
@@ -212,20 +218,19 @@ async def test_gripper_move_labware_implementation(
     """It should delegate to the equipment handler and return the new offset."""
     from_location = DeckSlotLocation(slotName=DeckSlotName.SLOT_1)
     new_location = DeckSlotLocation(slotName=DeckSlotName.SLOT_5)
+    pick_up_offset = LabwareOffsetVector(x=1, y=2, z=3)
 
     data = MoveLabwareParams(
         labwareId="my-cool-labware-id",
-        newLocation=DeckSlotLocation(slotName=DeckSlotName.SLOT_4),
+        newLocation=new_location,
         strategy=LabwareMovementStrategy.USING_GRIPPER,
-        pickUpOffset=LabwareOffsetVector(x=1, y=2, z=3),
+        pickUpOffset=pick_up_offset,
         dropOffset=None,
     )
 
     decoy.when(
         state_view.labware.get_definition(labware_id="my-cool-labware-id")
-    ).then_return(
-        LabwareDefinition.model_construct(namespace="my-cool-namespace")  # type: ignore[call-arg]
-    )
+    ).then_return(sentinel.labware_definition)
     decoy.when(state_view.labware.get(labware_id="my-cool-labware-id")).then_return(
         LoadedLabware(
             id="my-cool-labware-id",
@@ -236,29 +241,25 @@ async def test_gripper_move_labware_implementation(
         )
     )
     decoy.when(
-        state_view.geometry.ensure_location_not_occupied(
-            location=DeckSlotLocation(slotName=DeckSlotName.SLOT_4),
-        )
-    ).then_return(DeckSlotLocation(slotName=DeckSlotName.SLOT_5))
+        state_view.geometry.ensure_location_not_occupied(location=new_location)
+    ).then_return(sentinel.new_location_validated_unoccupied)
     decoy.when(
         equipment.find_applicable_labware_offset_id(
             labware_definition_uri="opentrons-test/load-name/1",
-            labware_location=new_location,
+            labware_location=sentinel.new_location_validated_unoccupied,
         )
     ).then_return("wowzers-a-new-offset-id")
 
-    validated_from_location = DeckSlotLocation(slotName=DeckSlotName.SLOT_6)
-    validated_new_location = DeckSlotLocation(slotName=DeckSlotName.SLOT_7)
     decoy.when(
         state_view.geometry.ensure_valid_gripper_location(from_location)
-    ).then_return(validated_from_location)
+    ).then_return(sentinel.from_location_validated_for_gripper)
     decoy.when(
-        state_view.geometry.ensure_valid_gripper_location(new_location)
-    ).then_return(validated_new_location)
-    decoy.when(
-        labware_validation.validate_gripper_compatible(
-            LabwareDefinition.model_construct(namespace="my-cool-namespace")  # type: ignore[call-arg]
+        state_view.geometry.ensure_valid_gripper_location(
+            sentinel.new_location_validated_unoccupied
         )
+    ).then_return(sentinel.new_location_validated_for_gripper)
+    decoy.when(
+        labware_validation.validate_gripper_compatible(sentinel.labware_definition)
     ).then_return(True)
 
     result = await subject.execute(data)
@@ -266,10 +267,10 @@ async def test_gripper_move_labware_implementation(
         state_view.labware.raise_if_labware_has_labware_on_top("my-cool-labware-id"),
         await labware_movement.move_labware_with_gripper(
             labware_id="my-cool-labware-id",
-            current_location=validated_from_location,
-            new_location=validated_new_location,
+            current_location=sentinel.from_location_validated_for_gripper,
+            new_location=sentinel.new_location_validated_for_gripper,
             user_offset_data=LabwareMovementOffsetData(
-                pickUpOffset=LabwareOffsetVector(x=1, y=2, z=3),
+                pickUpOffset=pick_up_offset,
                 dropOffset=LabwareOffsetVector(x=0, y=0, z=0),
             ),
             post_drop_slide_offset=None,
@@ -283,8 +284,11 @@ async def test_gripper_move_labware_implementation(
             pipette_location=update_types.CLEAR,
             labware_location=update_types.LabwareLocationUpdate(
                 labware_id="my-cool-labware-id",
-                new_location=new_location,
+                new_location=sentinel.new_location_validated_unoccupied,
                 offset_id="wowzers-a-new-offset-id",
+            ),
+            addressable_area_used=update_types.AddressableAreaUsedUpdate(
+                addressable_area_name=new_location.slotName.id
             ),
         ),
     )
@@ -381,6 +385,9 @@ async def test_gripper_error(
         state_update=update_types.StateUpdate(
             labware_location=update_types.NO_CHANGE,
             pipette_location=update_types.CLEAR,
+            addressable_area_used=update_types.AddressableAreaUsedUpdate(
+                addressable_area_name=new_location.slotName.id
+            ),
         ),
     )
 
@@ -520,6 +527,9 @@ async def test_gripper_move_to_waste_chute_implementation(
                 labware_id="my-cool-labware-id",
                 new_location=new_location,
                 offset_id="wowzers-a-new-offset-id",
+            ),
+            addressable_area_used=update_types.AddressableAreaUsedUpdate(
+                addressable_area_name=new_location.addressableAreaName
             ),
         ),
     )

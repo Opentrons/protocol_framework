@@ -244,7 +244,7 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                 self._state.labware_by_id[labware_id].location = new_location
 
 
-class LabwareView(HasState[LabwareState]):
+class LabwareView:
     """Read-only labware state view."""
 
     _state: LabwareState
@@ -268,7 +268,7 @@ class LabwareView(HasState[LabwareState]):
 
     def get_id_by_module(self, module_id: str) -> str:
         """Return the ID of the labware loaded on the given module."""
-        for labware_id, labware in self.state.labware_by_id.items():
+        for labware_id, labware in self._state.labware_by_id.items():
             if (
                 isinstance(labware.location, ModuleLocation)
                 and labware.location.moduleId == module_id
@@ -281,7 +281,7 @@ class LabwareView(HasState[LabwareState]):
 
     def get_id_by_labware(self, labware_id: str) -> str:
         """Return the ID of the labware loaded on the given labware."""
-        for labware in self.state.labware_by_id.values():
+        for labware in self._state.labware_by_id.values():
             if (
                 isinstance(labware.location, OnLabwareLocation)
                 and labware.location.labwareId == labware_id

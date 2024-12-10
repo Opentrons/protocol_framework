@@ -112,6 +112,8 @@ class LoadLabwareImplementation(
         self, params: LoadLabwareParams
     ) -> SuccessData[LoadLabwareResult]:
         """Load definition and calibration data necessary for a labware."""
+        state_update = StateUpdate()
+
         # TODO (tz, 8-15-2023): extend column validation to column 1 when working
         # on https://opentrons.atlassian.net/browse/RSS-258 and completing
         # https://opentrons.atlassian.net/browse/RSS-255
@@ -136,10 +138,12 @@ class LoadLabwareImplementation(
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
                 area_name
             )
+            state_update.set_addressable_area_used(area_name)
         elif isinstance(params.location, DeckSlotLocation):
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
                 params.location.slotName.id
             )
+            state_update.set_addressable_area_used(params.location.slotName.id)
 
         verified_location = self._state_view.geometry.ensure_location_not_occupied(
             params.location
@@ -151,8 +155,6 @@ class LoadLabwareImplementation(
             location=verified_location,
             labware_id=params.labwareId,
         )
-
-        state_update = StateUpdate()
 
         state_update.set_loaded_labware(
             labware_id=loaded_labware.labware_id,

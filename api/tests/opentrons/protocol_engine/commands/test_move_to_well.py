@@ -126,7 +126,7 @@ async def test_move_to_well_stall_defined_error(
     error_id = "error-id"
     error_timestamp = datetime(year=2020, month=1, day=2)
     decoy.when(
-        movement.move_to_well(
+        await movement.move_to_well(
             pipette_id="abc",
             labware_id="123",
             well_name="A3",

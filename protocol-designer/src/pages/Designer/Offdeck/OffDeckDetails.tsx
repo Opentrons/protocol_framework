@@ -17,11 +17,11 @@ import {
   WRAP,
 } from '@opentrons/components'
 import * as wellContentsSelectors from '../../../top-selectors/well-contents'
-import { wellFillFromWellContents } from '../../../components/labware'
 import { selectors } from '../../../labware-ingred/selectors'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
 import { DeckItemHover } from '../DeckSetup/DeckItemHover'
 import { SlotDetailsContainer } from '../../../organisms'
+import { wellFillFromWellContents } from '../../../organisms/LabwareOnDeck/utils'
 import { getRobotType } from '../../../file-data/selectors'
 import { SlotOverflowMenu } from '../DeckSetup/SlotOverflowMenu'
 import type { DeckSlotId } from '@opentrons/shared-data'
@@ -62,7 +62,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
     <Flex
       backgroundColor={COLORS.white}
       borderRadius={BORDERS.borderRadius8}
-      width={containerWidth}
+      width="100%"
       height="65vh"
       padding={padding}
       gridGap={SPACING.spacing24}
@@ -85,6 +85,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
         backgroundColor={COLORS.grey20}
         overflowY={OVERFLOW_AUTO}
         flexDirection={DIRECTION_COLUMN}
+        flex="0 0 auto"
       >
         <Flex
           justifyContent={JUSTIFY_CENTER}

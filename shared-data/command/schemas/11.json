@@ -1589,6 +1589,68 @@
       "title": "EngageParams",
       "type": "object"
     },
+    "GetNextTipCreate": {
+      "description": "Get next tip command creation request model.",
+      "properties": {
+        "commandType": {
+          "const": "getNextTip",
+          "default": "getNextTip",
+          "enum": ["getNextTip"],
+          "title": "Commandtype",
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/$defs/CommandIntent",
+          "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
+          "title": "Intent"
+        },
+        "key": {
+          "description": "A key value, unique in this run, that can be used to track the same logical command across multiple runs of the same protocol. If a value is not provided, one will be generated.",
+          "title": "Key",
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/$defs/GetNextTipParams"
+        }
+      },
+      "required": ["params"],
+      "title": "GetNextTipCreate",
+      "type": "object"
+    },
+    "GetNextTipParams": {
+      "description": "Payload needed to resolve the next available tip.",
+      "properties": {
+        "labwareIds": {
+          "description": "Labware ID(s) of tip racks to resolve next available tip(s) from Labware IDs will be resolved sequentially",
+          "items": {
+            "type": "string"
+          },
+          "title": "Labwareids",
+          "type": "array"
+        },
+        "pipetteId": {
+          "description": "Identifier of pipette to use for liquid handling.",
+          "title": "Pipetteid",
+          "type": "string"
+        },
+        "startingTipWell": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Name of starting tip rack 'well'. This only applies to the first tip rack in the list provided in labwareIDs",
+          "title": "Startingtipwell"
+        }
+      },
+      "required": ["pipetteId", "labwareIds"],
+      "title": "GetNextTipParams",
+      "type": "object"
+    },
     "GetTipPresenceCreate": {
       "description": "GetTipPresence command creation request model.",
       "properties": {
@@ -5529,6 +5591,7 @@
       "dispenseInPlace": "#/$defs/DispenseInPlaceCreate",
       "dropTip": "#/$defs/DropTipCreate",
       "dropTipInPlace": "#/$defs/DropTipInPlaceCreate",
+      "getNextTip": "#/$defs/GetNextTipCreate",
       "getTipPresence": "#/$defs/GetTipPresenceCreate",
       "heaterShaker/closeLabwareLatch": "#/$defs/CloseLabwareLatchCreate",
       "heaterShaker/deactivateHeater": "#/$defs/DeactivateHeaterCreate",
@@ -5703,6 +5766,9 @@
     },
     {
       "$ref": "#/$defs/GetTipPresenceCreate"
+    },
+    {
+      "$ref": "#/$defs/GetNextTipCreate"
     },
     {
       "$ref": "#/$defs/LiquidProbeCreate"

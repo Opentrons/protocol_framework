@@ -23,8 +23,7 @@ import {
   getWellSelectionLabwareKey,
 } from '../../../../../ui/steps'
 import { selectors as stepFormSelectors } from '../../../../../step-forms'
-import { SelectWellsModal } from '../../../../../organisms'
-import { getMainPagePortalEl } from '../../../../../components/portals/MainPageModalPortal'
+import { SelectWellsModal, getMainPagePortalEl } from '../../../../../organisms'
 import { getNozzleType } from '../utils'
 
 import type { FieldProps } from '../types'

@@ -93,7 +93,10 @@ async def test_move_to_addressable_area_implementation_non_gen1(
                 pipette_id="abc",
                 new_location=update_types.AddressableArea(addressable_area_name="123"),
                 new_deck_point=DeckPoint(x=9, y=8, z=7),
-            )
+            ),
+            addressable_area_used=update_types.AddressableAreaUsedUpdate(
+                addressable_area_name="123"
+            ),
         ),
     )
 
@@ -154,7 +157,10 @@ async def test_move_to_addressable_area_implementation_with_gen1(
                 pipette_id="abc",
                 new_location=update_types.AddressableArea(addressable_area_name="123"),
                 new_deck_point=DeckPoint(x=9, y=8, z=7),
-            )
+            ),
+            addressable_area_used=update_types.AddressableAreaUsedUpdate(
+                addressable_area_name="123"
+            ),
         ),
     )
 
@@ -206,5 +212,10 @@ async def test_move_to_addressable_area_implementation_handles_stalls(
         public=StallOrCollisionError.model_construct(
             id=test_id, createdAt=timestamp, wrappedErrors=[matchers.Anything()]
         ),
-        state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),
+        state_update=update_types.StateUpdate(
+            pipette_location=update_types.CLEAR,
+            addressable_area_used=update_types.AddressableAreaUsedUpdate(
+                addressable_area_name="123"
+            ),
+        ),
     )
