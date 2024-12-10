@@ -122,12 +122,14 @@ async def aspirate_and_dispense(
     await api.aspirate(OT3Mount.LEFT, volume)
     await api.home_z(OT3Mount.LEFT)
 
+    input("Pausing for observing (记录当前是否所有通道都有正常吸液)...")
+
     await helpers_ot3.move_to_arched_ot3(api, OT3Mount.LEFT, plate)
     await api.move_to(
         OT3Mount.LEFT, plate + Point(z=-9)
     )
     await api.dispense(OT3Mount.LEFT)
-    await api.blow_out()
+    await api.blow_out(OT3Mount.LEFT)
     await api.home_z(OT3Mount.LEFT)
 
 
