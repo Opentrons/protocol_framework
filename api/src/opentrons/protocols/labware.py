@@ -63,7 +63,7 @@ def get_labware_definition(
     return _get_standard_labware_definition(load_name, namespace, version)
 
 
-def get_all_labware_definitions(schema_version: str = 2) -> List[str]:
+def get_all_labware_definitions(schema_version: str = "2") -> List[str]:
     """
     Return a list of standard and custom labware definitions with load_name +
         name_space + version existing on the robot
@@ -77,7 +77,9 @@ def get_all_labware_definitions(schema_version: str = 2) -> List[str]:
                     labware_list.append(sub_dir.name)
 
     # check for standard labware
-    _check_for_subdirectories(get_shared_data_root() / STANDARD_DEFS_PATH / schema_version)
+    _check_for_subdirectories(
+        get_shared_data_root() / STANDARD_DEFS_PATH / schema_version
+    )
     # check for custom labware
     for namespace in os.scandir(USER_DEFS_PATH):
         _check_for_subdirectories(namespace)
