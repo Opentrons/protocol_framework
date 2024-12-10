@@ -48,7 +48,7 @@ export function ControlledRadioButtonGroup({
                 <RadioButton
                   key={index}
                   {...radioButton}
-                  radioButtonType={'small'}
+                  radioButtonType="small"
                   isSelected={field.value === radioButton.buttonValue}
                   onChange={e => {
                     field.onChange(e)

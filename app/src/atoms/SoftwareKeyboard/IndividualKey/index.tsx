@@ -34,7 +34,7 @@ export function IndividualKey({
      */
     <Keyboard
       keyboardRef={r => (keyboardRef.current = r)}
-      theme={'hg-theme-default oddTheme1 individual-key'}
+      theme="hg-theme-default oddTheme1 individual-key"
       onChange={onChange}
       layoutName="default"
       display={customDisplay}

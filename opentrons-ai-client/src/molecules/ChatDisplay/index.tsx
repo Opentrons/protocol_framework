@@ -205,14 +205,14 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
                 setInputFieldToCorrespondingRequest()
               }}
             >
-              <StyledIcon size={SPACING.spacing20} name={'reload'} />
+              <StyledIcon size={SPACING.spacing20} name="reload" />
             </HoverShadow>
             <HoverShadow
               onClick={() => {
                 setShowFeedbackModal(true)
               }}
             >
-              <StyledIcon size={SPACING.spacing20} name={'thumbs-down'} />
+              <StyledIcon size={SPACING.spacing20} name="thumbs-down" />
             </HoverShadow>
             <HoverShadow
               onClick={async () => {
@@ -229,7 +229,7 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
                 handleFileDownload()
               }}
             >
-              <StyledIcon size={SPACING.spacing20} name={'download'} />
+              <StyledIcon size={SPACING.spacing20} name="download" />
             </HoverShadow>
           </Flex>
         ) : null}
