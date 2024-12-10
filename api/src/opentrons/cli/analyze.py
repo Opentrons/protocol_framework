@@ -57,6 +57,7 @@ from opentrons.protocol_engine import (
     StateSummary,
 )
 from opentrons.protocol_engine.protocol_engine import code_in_error_tree
+from opentrons.protocol_engine.types import CommandAnnotation
 
 from opentrons_shared_data.robot.types import RobotType
 
@@ -493,4 +494,4 @@ class AnalyzeResults(BaseModel):
     liquids: List[Liquid]
     liquidClasses: List[LiquidClassRecordWithId]
     errors: List[ErrorOccurrence]
-    commandAnnotations: List[Any]
+    commandAnnotations: List[CommandAnnotation]
