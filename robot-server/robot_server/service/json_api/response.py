@@ -12,7 +12,7 @@ from typing import (
     Callable,
 )
 from typing_extensions import get_args, override
-from pydantic import Field, BaseModel, RootModel, model_serializer
+from pydantic import Field, BaseModel, RootModel
 from fastapi.responses import JSONResponse
 from fastapi.dependencies.utils import get_typed_return_annotation
 from .resource_links import ResourceLinks as DeprecatedResourceLinks
