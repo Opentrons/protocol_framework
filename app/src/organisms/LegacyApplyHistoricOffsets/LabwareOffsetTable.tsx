@@ -1,9 +1,12 @@
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
+
 import { SPACING, TYPOGRAPHY, COLORS } from '@opentrons/components'
+
 import { OffsetVector } from '/app/molecules/OffsetVector'
 import { formatTimestamp } from '/app/transformations/runs'
-import { getDisplayLocation } from '/app/organisms/LabwarePositionCheck/utils/getDisplayLocation'
+import { getDisplayLocation } from '/app/organisms/LegacyLabwarePositionCheck/utils/getDisplayLocation'
+
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type { OffsetCandidate } from './hooks/useOffsetCandidatesForAnalysis'
 import type { TFunction } from 'i18next'

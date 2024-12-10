@@ -32,7 +32,6 @@ from opentrons.protocol_engine.types import (
     ModuleModel,
     Liquid,
     PostRunHardwareState,
-    AddressableAreaLocation,
 )
 from opentrons.protocol_engine.execution import (
     QueueWorker,
@@ -1119,11 +1118,7 @@ def test_add_addressable_area(
 
     decoy.verify(
         action_dispatcher.dispatch(
-            AddAddressableAreaAction(
-                addressable_area=AddressableAreaLocation(
-                    addressableAreaName="my_funky_area"
-                )
-            )
+            AddAddressableAreaAction(addressable_area_name="my_funky_area")
         )
     )
 

@@ -1,7 +1,7 @@
 """Basic addressable area data state and store."""
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Dict, List, Optional, Set, Union
+from typing import Dict, List, Optional, Set
 
 from opentrons_shared_data.robot.types import RobotType, RobotDefinition
 from opentrons_shared_data.deck.types import (
@@ -12,14 +12,6 @@ from opentrons_shared_data.deck.types import (
 
 from opentrons.types import Point, DeckSlotName
 
-from ..commands import (
-    Command,
-    LoadLabwareResult,
-    LoadModuleResult,
-    MoveLabwareResult,
-    MoveToAddressableAreaResult,
-    MoveToAddressableAreaForDropTipResult,
-)
 from ..errors import (
     IncompatibleAddressableAreaError,
     AreaNotInDeckConfigurationError,
@@ -29,19 +21,18 @@ from ..errors import (
 )
 from ..resources import deck_configuration_provider
 from ..types import (
-    DeckSlotLocation,
-    AddressableAreaLocation,
     AddressableArea,
     PotentialCutoutFixture,
     DeckConfigurationType,
     Dimensions,
 )
+from ..actions.get_state_update import get_state_updates
 from ..actions import (
     Action,
-    SucceedCommandAction,
     SetDeckConfigurationAction,
     AddAddressableAreaAction,
 )
+from . import update_types
 from .config import Config
 from ._abstract_store import HasState, HandlesActions
 
@@ -193,10 +184,14 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
 
     def handle_action(self, action: Action) -> None:
         """Modify state in reaction to an action."""
-        if isinstance(action, SucceedCommandAction):
-            self._handle_command(action.command)
-        elif isinstance(action, AddAddressableAreaAction):
-            self._check_location_is_addressable_area(action.addressable_area)
+        for state_update in get_state_updates(action):
+            if state_update.addressable_area_used != update_types.NO_CHANGE:
+                self._add_addressable_area(
+                    state_update.addressable_area_used.addressable_area_name
+                )
+
+        if isinstance(action, AddAddressableAreaAction):
+            self._add_addressable_area(action.addressable_area_name)
         elif isinstance(action, SetDeckConfigurationAction):
             current_state = self._state
             if (
@@ -210,28 +205,6 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
                         deck_definition=current_state.deck_definition,
                     )
                 )
-
-    def _handle_command(self, command: Command) -> None:
-        """Modify state in reaction to a command."""
-        if isinstance(command.result, LoadLabwareResult):
-            location = command.params.location
-            if isinstance(location, (DeckSlotLocation, AddressableAreaLocation)):
-                self._check_location_is_addressable_area(location)
-
-        elif isinstance(command.result, MoveLabwareResult):
-            location = command.params.newLocation
-            if isinstance(location, (DeckSlotLocation, AddressableAreaLocation)):
-                self._check_location_is_addressable_area(location)
-
-        elif isinstance(command.result, LoadModuleResult):
-            self._check_location_is_addressable_area(command.params.location)
-
-        elif isinstance(
-            command.result,
-            (MoveToAddressableAreaResult, MoveToAddressableAreaForDropTipResult),
-        ):
-            addressable_area_name = command.params.addressableAreaName
-            self._check_location_is_addressable_area(addressable_area_name)
 
     @staticmethod
     def _get_addressable_areas_from_deck_configuration(
@@ -260,16 +233,7 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
                 )
         return {area.area_name: area for area in addressable_areas}
 
-    def _check_location_is_addressable_area(
-        self, location: Union[DeckSlotLocation, AddressableAreaLocation, str]
-    ) -> None:
-        if isinstance(location, DeckSlotLocation):
-            addressable_area_name = location.slotName.id
-        elif isinstance(location, AddressableAreaLocation):
-            addressable_area_name = location.addressableAreaName
-        else:
-            addressable_area_name = location
-
+    def _add_addressable_area(self, addressable_area_name: str) -> None:
         if addressable_area_name not in self._state.loaded_addressable_areas_by_name:
             cutout_id = self._validate_addressable_area_for_simulation(
                 addressable_area_name
