@@ -22,6 +22,7 @@ from opentrons.types import Point
 # FIXME: replace this with actual Opentrons API software
 #        volume estimations. No need for us to include Solidworks
 #        in this testing loop.
+
 # Default tube volumes are for 50 ml
 VOLUMES_3MM_TOP_BOTTOM = {
     "corning_96_wellplate_360ul_flat": [257.1, 97.2, 0.0],
@@ -41,18 +42,18 @@ VOLUMES_3MM_TOP_BOTTOM = {
     "corning_48_wellplate_1.6ml_flat": [1327.0, 790.63, 268.9, 0.0],
     "opentrons_24_tuberack_nest_0.5ml_screwcap": [795.4, 21.95, 0.0],
     "opentrons_24_tuberack_nest_1.5ml_screwcap": [19.5, 735.89, 1750.8, 0.0],
-    "opentrons_24_tuberack_nest_1.5ml_snapcap": [27.7, 1650.6, 619.18, 0.0],
+    "opentrons_24_tuberack_nest_1.5ml_snapcap": [28.7, 1739.7, 658.2, 0.0],
     "opentrons_24_tuberack_nest_2ml_screwcap": [2104.9, 66.6, 0.0],
     "opentrons_24_tuberack_nest_2ml_snapcap": [2148.5, 69.6, 0.0],
     "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical": [115.0, 26117.4, 56110.3, 0.0],
     "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical": [169.5, 57720.5, 0.0],
-    "nest_1_reservoir_195ml": [14034.2, 172301.9, 0.0],
-    "axygen_1_reservoir_90ml": [15417.9, 29844.3, 44805.8],
+    "nest_1_reservoir_195ml": [14513.1, 178181.9, 0.0],
+    "axygen_1_reservoir_90ml": [23136.9, 72854.8, 0.0],
     "agilent_1_reservoir_290ml": [15652.9, 141945.59, 268813.8],
     "opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap": [26.6, 593.7, 1629.9],
     "corning_384_wellplate_112ul_flat": [23.2, 50.1, 80.0],
     "biorad_384_wellplate_50ul": [28.7, 8.0, 0.0],
-    "usascientific_12_reservoir_22ml": [63.7, 10947.7, 21111.5],
+    "usascientific_12_reservoir_22ml": [68.4, 11356.9, 19797.4],
     "usascientific_96_wellplate_2.4ml_deep": [74.7, 1151.9, 2317.8],
     "opentrons_24_tuberack_eppendorf_2ml_safelock_snapcap": [63.0, 2237.8, 0.0],
 }
