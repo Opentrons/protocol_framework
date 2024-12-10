@@ -1,7 +1,7 @@
 """Protocols."""
 from opentrons.protocol_api import ParameterContext
 
-# from opentrons.protocols.labware import get_all_labware_definitions
+from opentrons.protocols.labware import get_all_labware_definitions
 from typing import List
 from opentrons.protocols.parameters.types import ParameterChoice
 
@@ -60,8 +60,7 @@ def create_labware_parameters(parameters: ParameterContext) -> None:
     # NOTE: Place function inside def add_parameters(parameters) in protocol.
     # NOTE: Copy ctx.params.labware_type # type: ignore[attr-defined] to get result
 
-    # labware_list = get_all_labware_definitions()
-    labware_list = ["this", "that"]
+    labware_list = get_all_labware_definitions()
     available_labware_choices: List[ParameterChoice] = []
     # Filter out labwaer containing the following strings
     # TODO: change get_all_labware_definitions function to one
