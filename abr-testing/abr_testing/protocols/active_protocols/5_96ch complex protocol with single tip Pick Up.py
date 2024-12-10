@@ -2,13 +2,13 @@
 from opentrons.protocol_api import (
     COLUMN,
     SINGLE,
+    ALL,
     ParameterContext,
     ProtocolContext,
     Labware,
 )
 from opentrons.protocol_api.module_contexts import (
     HeaterShakerContext,
-    MagneticBlockContext,
     ThermocyclerContext,
     TemperatureModuleContext,
 )
@@ -57,7 +57,6 @@ def run(ctx: ProtocolContext) -> None:
     waste_chute = ctx.load_waste_chute()
 
     thermocycler: ThermocyclerContext = ctx.load_module(helpers.tc_str)  # type: ignore[assignment]
-    mag: MagneticBlockContext = ctx.load_module(helpers.mag_str, "A3")  # type: ignore[assignment]
     h_s: HeaterShakerContext = ctx.load_module(helpers.hs_str, "D1")  # type: ignore[assignment]
     temperature_module: TemperatureModuleContext = ctx.load_module(
         helpers.temp_str, "C1"
@@ -77,10 +76,11 @@ def run(ctx: ProtocolContext) -> None:
 
     source_reservoir = ctx.load_labware(RESERVOIR_NAME, "D2")
     dest_pcr_plate = ctx.load_labware(PCR_PLATE_96_NAME, "C2")
-    liquid_waste = ctx.load_labware("nest_1_reservoir_290ml", "B2", "Liquid Waste")
+    liquid_waste = ctx.load_labware("nest_1_reservoir_195ml", "B2", "Liquid Waste")
 
-    tip_rack_1 = ctx.load_labware(TIPRACK_96_NAME, "A4")
-
+    tip_rack_1 = ctx.load_labware(
+        TIPRACK_96_NAME, "A3", adapter="opentrons_flex_96_tiprack_adapter"
+    )
     tip_rack_2 = ctx.load_labware(TIPRACK_96_NAME, "C3")
     tip_rack_3 = ctx.load_labware(TIPRACK_96_NAME, "C4")
 
@@ -166,7 +166,6 @@ def run(ctx: ProtocolContext) -> None:
                     thermocycler,
                     temperature_module_adapter,
                     h_s_adapter,
-                    mag,
                 ],  # Module Moves
             ]
 
@@ -182,7 +181,6 @@ def run(ctx: ProtocolContext) -> None:
                     thermocycler,
                     temperature_module_adapter,
                     h_s_adapter,
-                    mag,
                 ],  # Module Moves
             ]
 
@@ -203,7 +201,6 @@ def run(ctx: ProtocolContext) -> None:
                     thermocycler,
                     temperature_module_adapter,
                     h_s_adapter,
-                    mag,
                 ],  # Module Moves
             ]
 
@@ -254,7 +251,7 @@ def run(ctx: ProtocolContext) -> None:
         )
         staging_area_slot_4_moves(dest_pcr_plate, STAGING_AREA_SLOT_4_RESET_LOCATION)
 
-        module_locations = [thermocycler, mag] + adapters
+        module_locations = [thermocycler] + adapters
         module_moves(dest_pcr_plate, module_locations)
         ctx.move_labware(dest_pcr_plate, thermocycler, use_gripper=USING_GRIPPER)
 
@@ -293,34 +290,44 @@ def run(ctx: ProtocolContext) -> None:
         def test_column_tip_rack_usage() -> None:
             """Column Tip Pick Up."""
             list_of_columns = list(range(1, 13))
-            i = 0
-            column_racks = [tip_rack_1, tip_rack_3]
             pipette_96_channel.configure_nozzle_layout(
-                style=COLUMN, start="A12", tip_racks=column_racks
+                style=COLUMN, start="A12", tip_racks=[tip_rack_3]
             )
             ctx.comment("------------------------------")
             ctx.comment(f"channels {pipette_96_channel.active_channels}")
-            for rack in column_racks:
-                ctx.move_labware(rack, "C3", use_gripper=USING_GRIPPER)
-                for well in list_of_columns:
-                    tiprack_well = "A" + str(well)
-                    well_name = "A" + str(well)
+            ctx.move_labware(tip_rack_3, "C3", use_gripper=USING_GRIPPER)
+            for well in list_of_columns:
+                tiprack_well = "A" + str(well)
+                well_name = "A" + str(well)
+                pipette_96_channel.liquid_presence_detection = True
+                pipette_96_channel.pick_up_tip(tip_rack_3[tiprack_well])
+                pipette_96_channel.aspirate(45, source_reservoir[well_name])
+                pipette_96_channel.liquid_presence_detection = False
+                pipette_96_channel.air_gap(5)
+                pipette_96_channel.dispense(25, dest_pcr_plate[tiprack_well].bottom(b))
+                pipette_96_channel.blow_out(location=liquid_waste["A1"])
+                pipette_96_channel.drop_tip()
+            ctx.move_labware(tip_rack_3, waste_chute, use_gripper=USING_GRIPPER)
 
-                    pipette_96_channel.liquid_presence_detection = True
-                    pipette_96_channel.pick_up_tip(rack[tiprack_well])
-                    pipette_96_channel.aspirate(45, source_reservoir[well_name])
-                    pipette_96_channel.liquid_presence_detection = False
-                    pipette_96_channel.air_gap(5)
-                    pipette_96_channel.dispense(
-                        25, dest_pcr_plate[tiprack_well].bottom(b)
-                    )
-                    pipette_96_channel.blow_out(location=liquid_waste["A1"])
-                    pipette_96_channel.drop_tip()
-                ctx.move_labware(rack, waste_chute, use_gripper=USING_GRIPPER)
-                i += 1
+        def test_full_tip_rack_usage() -> None:
+            """Full Tip Pick Up."""
+            pipette_96_channel.configure_nozzle_layout(
+                style=ALL, tip_racks=[tip_rack_1]
+            )
+            ctx.comment(f"channels {pipette_96_channel.active_channels}")
+            pipette_96_channel.liquid_presence_detection = True
+            pipette_96_channel.pick_up_tip()
+            pipette_96_channel.aspirate(45, source_reservoir["A1"])
+            pipette_96_channel.liquid_presence_detection = False
+            pipette_96_channel.air_gap(5)
+            pipette_96_channel.dispense(25, dest_pcr_plate["A1"].bottom(b))
+            pipette_96_channel.blow_out(location=liquid_waste["A1"])
+            pipette_96_channel.return_tip()
+            pipette_96_channel.reset_tipracks()
 
         test_single_tip_pickup_usage()
         test_column_tip_rack_usage()
+        test_full_tip_rack_usage()
 
     def test_module_usage(unused_lids: List[Labware], used_lids: List[Labware]) -> None:
         """Test Module Use."""
@@ -380,16 +387,15 @@ def run(ctx: ProtocolContext) -> None:
             temperature_module.set_temperature(10)
             temperature_module.deactivate()
 
-        def test_mag() -> None:
-            """Tests magnetic block."""
-            pass
-
         test_thermocycler(unused_lids, used_lids)
         test_h_s()
         test_temperature_module()
-        test_mag()
 
     test_pipetting()
     test_gripper_moves()
     test_module_usage(unused_lids, used_lids)
     test_manual_moves()
+    ctx.move_labware(source_reservoir, "C2", use_gripper=True)
+    helpers.clean_up_plates(
+        pipette_96_channel, [dest_pcr_plate, source_reservoir], liquid_waste["A1"], 50
+    )

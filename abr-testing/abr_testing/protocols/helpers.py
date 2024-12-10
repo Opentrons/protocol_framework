@@ -119,6 +119,42 @@ def create_channel_parameter(parameters: ParameterContext) -> None:
     )
 
 
+def create_pipette_parameters(parameters: ParameterContext) -> None:
+    """Create parameter for pipettes."""
+    # NOTE: Place function inside def add_parameters(parameters) in protocol.
+    # NOTE: Copy ctx.params.left mount, ctx.params.right_mount # type: ignore[attr-defined]
+    # to get result
+    # Left Mount
+    parameters.add_str(
+        variable_name="left_mount",
+        display_name="Left Mount",
+        description="Pipette Type on Left Mount.",
+        choices=[
+            {"display_name": "8ch 50ul", "value": "flex_8channel_50"},
+            {"display_name": "8ch 1000ul", "value": "flex_8channel_1000"},
+            {"display_name": "1ch 50ul", "value": "flex_1channel_50"},
+            {"display_name": "1ch 1000ul", "value": "flex_1channel_1000"},
+            {"display_name": "96ch 1000ul", "value": "flex_96channel_1000"},
+            {"display_name": "None", "value": "none"},
+        ],
+        default="flex_8channel_1000",
+    )
+    # Right Mount
+    parameters.add_str(
+        variable_name="right_mount",
+        display_name="Right Mount",
+        description="Pipette Type on Right Mount.",
+        choices=[
+            {"display_name": "8ch 50ul", "value": "flex_8channel_50"},
+            {"display_name": "8ch 1000ul", "value": "flex_8channel_1000"},
+            {"display_name": "1ch 50ul", "value": "flex_1channel_50"},
+            {"display_name": "1ch 1000ul", "value": "flex_1channel_1000"},
+            {"display_name": "None", "value": "none"},
+        ],
+        default="none",
+    )
+
+
 def create_single_pipette_mount_parameter(parameters: ParameterContext) -> None:
     """Create parameter to specify pipette mount."""
     parameters.add_str(
@@ -204,7 +240,7 @@ def create_tip_size_parameter(parameters: ParameterContext) -> None:
             {"display_name": "200 µL", "value": "opentrons_flex_96_tiprack_200ul"},
             {"display_name": "1000 µL", "value": "opentrons_flex_96_tiprack_1000ul"},
         ],
-        default="opentrons_flex_96_tiprack_1000ul",
+        default="opentrons_flex_96_tiprack_50ul",
     )
 
 

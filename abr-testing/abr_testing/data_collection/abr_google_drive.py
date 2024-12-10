@@ -34,16 +34,13 @@ def create_data_dictionary(
     runs_to_save: Union[Set[str], str],
     storage_directory: str,
     issue_url: str,
-    plate: str,
-    accuracy: Any,
     hellma_plate_standards: List[Dict[str, Any]],
-) -> Tuple[List[List[Any]], List[str], List[List[Any]], List[str], List[List[Any]]]:
+) -> Tuple[List[List[Any]], List[str], List[List[Any]], List[str]]:
     """Pull data from run files and format into a dictionary."""
     runs_and_robots: List[Any] = []
     runs_and_lpc: List[Dict[str, Any]] = []
     headers: List[str] = []
     headers_lpc: List[str] = []
-    list_of_heights: List[List[Any]] = [[], [], [], [], [], [], [], []]
     hellma_plate_orientation = False  # default hellma plate is not rotated.
     for filename in os.listdir(storage_directory):
         file_path = os.path.join(storage_directory, filename)
@@ -130,13 +127,10 @@ def create_data_dictionary(
                 plate_reader_dict = read_robot_logs.plate_reader_commands(
                     file_results, hellma_plate_standards, hellma_plate_orientation
                 )
-                list_of_heights = read_robot_logs.liquid_height_commands(
-                    file_results, list_of_heights
-                )
                 notes = {"Note1": "", "Jira Link": issue_url}
+                liquid_height = read_robot_logs.get_liquid_waste_height(file_results)
                 plate_measure = {
-                    "Plate Measured": plate,
-                    "End Volume Accuracy (%)": accuracy,
+                    "Liquid Waste Height (mm)": liquid_height,
                     "Average Temp (oC)": "",
                     "Average RH(%)": "",
                 }
@@ -173,7 +167,6 @@ def create_data_dictionary(
         headers,
         transposed_runs_and_lpc,
         headers_lpc,
-        list_of_heights,
     )
 
 
@@ -211,26 +204,15 @@ def run(
         headers,
         transposed_runs_and_lpc,
         headers_lpc,
-        list_of_heights,
     ) = create_data_dictionary(
         missing_runs_from_gs,
         storage_directory,
         "",
-        "",
-        "",
-        hellma_plate_standards=file_values,
+        file_values,
     )
     start_row = google_sheet.get_index_row() + 1
     google_sheet.batch_update_cells(transposed_runs_and_robots, "A", start_row, "0")
-    # Record Liquid Heights Found
-    google_sheet_ldf = google_sheets_tool.google_sheet(
-        credentials_path, google_sheet_name, 2
-    )
-    google_sheet_ldf.get_row(1)
-    start_row_lhd = google_sheet_ldf.get_index_row() + 1
-    google_sheet_ldf.batch_update_cells(
-        list_of_heights, "A", start_row_lhd, "2075262446"
-    )
+
     # Add LPC to google sheet
     google_sheet_lpc = google_sheets_tool.google_sheet(credentials_path, "ABR-LPC", 0)
     start_row_lpc = google_sheet_lpc.get_index_row() + 1

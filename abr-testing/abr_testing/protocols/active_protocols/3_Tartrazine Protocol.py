@@ -154,6 +154,11 @@ def run(ctx: ProtocolContext) -> None:
             vol += 190 * p1000.active_channels
             # Probe to find liquid height of tartrazine to ensure correct amount is aspirated
             height = helpers.find_liquid_height(p50, tartrazine_well)
+            if height <= 0.0:
+                # If a negative tartrazine height is found,
+                # the protocol will pause, prompt a refill, and reprobe.
+                ctx.pause("Fill tartrazine")
+                height = helpers.find_liquid_height(p50, tartrazine_well)
             p50.aspirate(10, tartrazine_well.bottom(z=height), rate=0.15)
             p50.air_gap(5)
             p50.dispense(5, well.top())

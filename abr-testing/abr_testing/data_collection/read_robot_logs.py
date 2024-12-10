@@ -134,7 +134,8 @@ def match_pipette_to_action(
     left_pipette_add = 0
     for command in commandTypes:
         command_type = command_dict["commandType"]
-        command_pipette = command_dict.get("pipetteId", "")
+        command_params = command_dict.get("params", "")
+        command_pipette = command_params.get("pipetteId", "")
         if command_type == command and command_pipette == right_pipette:
             right_pipette_add = 1
         elif command_type == command and command_pipette == left_pipette:
@@ -211,6 +212,22 @@ def instrument_commands(
         "Average Liquid Probe Time (sec)": avg_liquid_probe_time_sec,
     }
     return pipette_dict
+
+
+def get_liquid_waste_height(file_results: Dict[str, Any]) -> float:
+    """Find liquid waste height."""
+    commandData = file_results.get("commands", "")
+    height_float = 0.0
+    for command in commandData:
+        commandType = command["commandType"]
+        if commandType == "comment":
+            result = command["params"].get("message", "")
+            try:
+                height = result.split("Liquid Waste Total Height: ")[1]
+                height_float = float(height)
+            except IndexError:
+                continue
+    return height_float
 
 
 def liquid_height_commands(
@@ -292,10 +309,13 @@ def plate_reader_commands(
             read = "yes"
         elif read == "yes" and commandType == "comment":
             result = command["params"].get("message", "")
-            if "result:" in result:
-                plate_name = result.split("result:")[0]
-                formatted_result = result.split("result: ")[1]
-                print(formatted_result)
+            if "result:" in result or "Result:" in result:
+                try:
+                    plate_name = result.split("result:")[0]
+                    formatted_result = result.split("result: ")[1]
+                except IndexError:
+                    plate_name = result.split("Result:")[0]
+                    formatted_result = result.split("Result: ")[1]
                 result_dict = eval(formatted_result)
                 result_dict_keys = list(result_dict.keys())
                 if len(result_dict_keys) > 1:
