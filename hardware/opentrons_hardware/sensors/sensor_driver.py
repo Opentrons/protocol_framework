@@ -181,7 +181,9 @@ class SensorDriver(AbstractSensorDriver):
         sensor_info = sensor.sensor
 
         if binding is not None:
-            binding_field = SensorOutputBindingField.from_flags(binding)
+            # binding += SensorOutputBinding.report
+            # binding_field = SensorOutputBindingField.from_flags(binding)
+            binding_field = SensorOutputBindingField.from_flags([SensorOutputBinding.sync, SensorOutputBinding.report])
         else:
             binding_field = SensorOutputBindingField(SensorOutputBinding.none)
 

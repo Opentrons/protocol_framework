@@ -569,6 +569,8 @@ class GeometryView:
     ) -> float:
         """Get the height of a specified well for a labware."""
         well_def = self._labware.get_well_definition(labware_id, well_name)
+        if labware_id == "axygen_1_reservoir_90ml":
+            breakpoint()
         return well_def.depth
 
     def _get_highest_z_from_labware_data(self, lw_data: LoadedLabware) -> float:

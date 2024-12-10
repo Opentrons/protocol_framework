@@ -398,6 +398,9 @@ class LabwareView:
 
     def get_definition(self, labware_id: str) -> LabwareDefinition:
         """Get labware definition by the labware's unique identifier."""
+        ret = self.get_definition_by_uri(
+            LabwareUri(self.get(labware_id).definitionUri)
+        )
         return self.get_definition_by_uri(
             LabwareUri(self.get(labware_id).definitionUri)
         )
@@ -524,7 +527,6 @@ class LabwareView:
         will be used.
         """
         definition = self.get_definition(labware_id)
-
         if well_name is None:
             well_name = definition.ordering[0][0]
 
