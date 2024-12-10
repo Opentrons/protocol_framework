@@ -6,6 +6,7 @@ from datetime import datetime
 from math import isclose
 from typing import cast, List, Tuple, Optional, NamedTuple, Dict
 from unittest.mock import sentinel
+from os import listdir, path
 
 import pytest
 from decoy import Decoy
@@ -15,12 +16,13 @@ from opentrons.protocol_engine.state.update_types import (
     StateUpdate,
 )
 
+from opentrons_shared_data import get_shared_data_root, load_shared_data
 from opentrons_shared_data.deck.types import DeckDefinitionV5
 from opentrons_shared_data.deck import load as load_deck
 from opentrons_shared_data.labware.types import LabwareUri
 from opentrons_shared_data.pipette import pipette_definition
 from opentrons.calibration_storage.helpers import uri_from_details
-from opentrons.protocols.models import LabwareDefinition
+from opentrons.protocols.models import LabwareDefinition, WellDefinition
 from opentrons.types import Point, DeckSlotName, MountType, StagingSlotName
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.labware.labware_definition import (
@@ -28,7 +30,6 @@ from opentrons_shared_data.labware.labware_definition import (
     Parameters as LabwareDefinitionParameters,
     CornerOffsetFromSlot,
 )
-from opentrons_shared_data import load_shared_data
 
 from opentrons.protocol_engine import errors
 from opentrons.protocol_engine.types import (
@@ -96,6 +97,7 @@ from opentrons.protocol_engine.state.frustum_helpers import (
     _volume_from_height_circular,
     _volume_from_height_rectangular,
 )
+from .inner_geometry_test_params import INNER_WELL_GEOMETRY_TEST_PARAMS
 from ..pipette_fixtures import get_default_nozzle_map
 from ..mock_circular_frusta import TEST_EXAMPLES as CIRCULAR_TEST_EXAMPLES
 from ..mock_rectangular_frusta import TEST_EXAMPLES as RECTANGULAR_TEST_EXAMPLES
@@ -3436,6 +3438,7 @@ def test_get_well_volume_at_height(
         expected_volume_top: float,
         input_height_from_bottom_mm: float,
         input_height_from_top_mm: float,
+        mock_labware_view: LabwareView,
 ) -> None:
     def _get_labware_def() -> LabwareDefinition:
         def_dir = str(get_shared_data_root()) + f"/labware/definitions/3/{labware_id}"
@@ -3450,19 +3453,13 @@ def test_get_well_volume_at_height(
                 )
             )
         )
-        wells = _labware_def.wells
-        for id in wells:
-            breakpoint()
-            if wells[id]["geometryDefinitionId"] == well_name:
-                breakpoint()
-                depth = wells[id].depth
-                break
-        if labware_id == "axygen_1_reservoir_90ml":
-            breakpoint()
         return _labware_def
-    well_geometry = _get_labware_def().innerLabwareGeometry.get(well_name)
-    decoy.when(subject._labware.get_well_geometry(labware_id, well_name)).then_return(well_geometry)
-    # decoy.when(subject._labware.get_well_height
+    labware_def = _get_labware_def()
+    well_geometry = labware_def.innerLabwareGeometry.get(well_name)
+    well_definition = [well for well in labware_def.wells.values() if well.geometryDefinitionId == well_name][0]
+
+    decoy.when(mock_labware_view.get_well_geometry(labware_id, well_name)).then_return(well_geometry)
+    decoy.when(mock_labware_view.get_well_definition(labware_id, well_name)).then_return(well_definition)
 
     found_volume_bottom = subject.get_well_volume_at_height(
         labware_id=labware_id,
