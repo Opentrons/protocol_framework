@@ -27,6 +27,7 @@ from opentrons_hardware.firmware_bindings.messages.message_definitions import (
 from opentrons_hardware.hardware_control.motion_planning import move_utils
 
 from opentrons.hardware_control.ot3api import OT3API
+from opentrons.hardware_control.backends.ot3controller import OT3Controller
 
 from hardware_testing import data
 from hardware_testing.drivers import list_ports_and_select
@@ -44,7 +45,7 @@ RUN_ID = ""
 PIP_SN = ""
 
 MNT = OT3Mount.LEFT
-DIAL_THREAD = Optional[Thread]
+DIAL_THREAD: Optional[Thread] = None
 DIAL_THREAD_RUNNING = Event()
 
 DIAL_INDICATOR_READ_SECONDS = 0.05
@@ -75,7 +76,7 @@ def _dial_thread(simulate: bool, csv_file_name: str) -> None:
         time.sleep(0.01)  # give time to main thread
         if read_timestamp + DIAL_INDICATOR_READ_SECONDS < time.time():
             read_timestamp = time.time()
-            if simulate:
+            if simulate or not dial:
                 dial_pos = random()
             else:
                 dial_pos = dial.read()
@@ -106,7 +107,7 @@ def _start_indicator_thread(simulate: bool, csv_file_name: str) -> None:
 
 
 def _stop_indicator_thread() -> None:
-    if DIAL_THREAD_RUNNING.is_set():
+    if DIAL_THREAD and DIAL_THREAD_RUNNING.is_set():
         DIAL_THREAD_RUNNING.clear()  # clear the flag
         DIAL_THREAD.join()  # wait for thread to complete
 
@@ -129,9 +130,11 @@ async def _set_move_flags(simulate: bool) -> AsyncIterator[None]:
         MOVING = False
 
 
-async def _run_test_loop(api: OT3API, skip_test: bool) -> None:
+async def _run_test_loop(api: OT3API, skip_test: bool) -> None:  # noqa: C901
     global PLUNGER_POS
-    bottom = api.hardware_pipettes[MNT.to_mount()].plunger_positions.bottom
+    pip = api.hardware_pipettes[MNT.to_mount()]
+    assert pip
+    bottom = pip.plunger_positions.bottom
     min_pos = bottom - MAX_DIST_MM
     max_pos = bottom + MAX_DIST_MM
 
@@ -154,7 +157,7 @@ async def _run_test_loop(api: OT3API, skip_test: bool) -> None:
             MessageId(arb_id.parts.message_id) == MessageId.get_motor_usage_response
         )
 
-    async def _process_input_string(inp_str) -> None:
+    async def _process_input_string(inp_str: str) -> None:
         global PLUNGER_POS
         nonlocal prev_inp, overshoot, event
         if not inp_str:
@@ -168,6 +171,7 @@ async def _run_test_loop(api: OT3API, skip_test: bool) -> None:
                     PLUNGER_POS = bottom
             elif inp == "u":
                 event = AsyncEvent()
+                assert isinstance(api._backend, OT3Controller)
                 can_messenger = api._backend._messenger
                 can_messenger.add_listener(_listener, _filter)
                 await can_messenger.send(
@@ -198,7 +202,7 @@ async def _run_test_loop(api: OT3API, skip_test: bool) -> None:
                 try:
                     delta = float(inp[1:]) * -1.0  # UP is negative
                     if cmd == "a":
-                        pip = api.hardware_pipettes[MNT.to_mount()]
+                        assert pip
                         delta = delta / pip.ul_per_mm(delta, "aspirate")
                     new_pos = max(min(PLUNGER_POS + delta, max_pos), min_pos)
                     use_overshoot = new_pos < PLUNGER_POS  # if closer to endstop (up)
@@ -244,7 +248,7 @@ async def _run_test_loop(api: OT3API, skip_test: bool) -> None:
             await _process_input_string(input("enter command, or ENTER to repeat: "))
 
 
-async def _main(simulate: bool, skip_test: bool):
+async def _main(simulate: bool, skip_test: bool) -> None:
     global PIP_SN, PLUNGER_POS
 
     # create OT3API
@@ -252,7 +256,8 @@ async def _main(simulate: bool, skip_test: bool):
         is_simulating=simulate, pipette_left="p1000_96_v3.5"
     )
     pip = api.hardware_pipettes[MNT.to_mount()]
-    await api.add_tip(MNT, 60)
+    assert pip
+    api.add_tip(MNT, 60)
     pip.working_volume = 50  # 50ul tip
     api.set_pipette_speed(MNT, aspirate=SPEED, dispense=SPEED, blow_out=SPEED)
 
@@ -282,7 +287,9 @@ async def _main(simulate: bool, skip_test: bool):
 
 
 if __name__ == "__main__":
-    move_utils.MINIMUM_DISPLACEMENT = 0.01  # we can do this b/c we're only moving the plunger
+    move_utils.MINIMUM_DISPLACEMENT = (
+        0.01  # we can do this b/c we're only moving the plunger
+    )
     parser = argparse.ArgumentParser()
     parser.add_argument("--simulate", action="store_true")
     parser.add_argument("--skip-test", action="store_true")
