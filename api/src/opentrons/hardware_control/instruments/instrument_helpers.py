@@ -26,6 +26,7 @@ def piecewise_volume_conversion(
     for x in sequence:
         if ul <= x[0]:
             # use that element to calculate the movement distance in mm
+            print(f"SEQUENCE: {x}")
             return x[1] * ul + x[2]
 
     # Compatibility with previous implementation of search.
