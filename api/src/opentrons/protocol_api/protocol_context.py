@@ -963,6 +963,7 @@ class ProtocolContext(CommandPublisher):
         """
         instrument_name = validation.ensure_lowercase_name(instrument_name)
         checked_instrument_name = validation.ensure_pipette_name(instrument_name)
+
         checked_mount = validation.ensure_mount_for_pipette(
             mount, checked_instrument_name
         )
