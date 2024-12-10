@@ -396,6 +396,7 @@ def ensure_definition_is_not_lid_after_api_version(
     ):
         raise APIVersionError(
             f"Labware Lids cannot be loaded like standard labware in Protocols written with an API version greater than {LID_STACK_VERSION_GATE}."
+        )
 
 
 def ensure_labware_is_loadable(
