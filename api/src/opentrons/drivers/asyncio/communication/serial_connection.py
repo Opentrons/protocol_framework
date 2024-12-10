@@ -249,8 +249,8 @@ class SerialConnection:
         if self._alarm_keyword in lower:
             raise AlarmResponse(port=self._port, response=response)
 
-        if self._error_keyword in lower:
-            if ErrorCodes.UNHANDLED_GCODE.value in lower:
+        if self._error_keyword.lower() in lower:
+            if ErrorCodes.UNHANDLED_GCODE.value.lower() in lower:
                 raise UnhandledGcode(
                     port=self._port, response=response, command=request
                 )

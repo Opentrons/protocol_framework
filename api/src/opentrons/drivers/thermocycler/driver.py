@@ -96,7 +96,7 @@ class ThermocyclerDriverFactory:
             name=port,
             ack=TC_GEN2_SERIAL_ACK,
             retry_wait_time_seconds=0.1,
-            error_keyword="error",
+            error_keyword="err",
             alarm_keyword="alarm",
         )
 
@@ -300,16 +300,6 @@ class ThermocyclerDriver(AbstractThermocyclerDriver):
         response = await self._connection.send_command(
             command=device_info, retries=DEFAULT_COMMAND_RETRIES
         )
-
-        reset_reason = CommandBuilder(terminator=TC_COMMAND_TERMINATOR).add_gcode(
-            gcode=GCODE.GET_RESET_REASON
-        )
-        try:
-            await self._connection.send_command(
-                command=reset_reason, retries=DEFAULT_COMMAND_RETRIES
-            )
-        except UnhandledGcode:
-            pass
 
         return utils.parse_device_information(device_info_string=response)
 
