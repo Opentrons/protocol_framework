@@ -1,5 +1,5 @@
 """Measure Liquid Height."""
-from typing import List, Tuple, Optional, Any
+from typing import List, Tuple, Optional
 from opentrons.protocol_api import (
     ProtocolContext,
     Labware,

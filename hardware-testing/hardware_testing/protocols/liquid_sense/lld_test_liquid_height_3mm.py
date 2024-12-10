@@ -1,6 +1,6 @@
 """Measure Liquid Height 3mm."""
 import math
-from typing import List, Tuple, Optional, Dict
+from typing import List, Tuple, Optional
 from opentrons.protocol_api import (
     ProtocolContext,
     Labware,
@@ -9,7 +9,6 @@ from opentrons.protocol_api import (
     ParameterContext,
 )
 from opentrons.types import Point
-from opentrons.protocols.parameters.types import UserFacingTypes
 
 
 ###########################################
@@ -55,7 +54,7 @@ VOLUMES_3MM_TOP_BOTTOM = {
     "biorad_384_wellplate_50ul": [28.7, 8.0, 0.0],
     "usascientific_12_reservoir_22ml": [63.7, 10947.7, 21111.5],
     "usascientific_96_wellplate_2.4ml_deep": [74.7, 1151.9, 2317.8],
-    "opentrons_24_tuberack_eppendorf_2ml_safelock_snapcap": [63.0, 2237.8, 0.0]
+    "opentrons_24_tuberack_eppendorf_2ml_safelock_snapcap": [63.0, 2237.8, 0.0],
 }
 
 SAME_TIP = True  # this is fine when using Ethanol (b/c it evaporates)
@@ -88,6 +87,7 @@ requirements = {"robotType": "Flex", "apiLevel": "2.20"}
 
 
 def add_parameters(parameters: ParameterContext) -> None:
+    """Add parameters."""
     from hardware_testing import protocols
 
     protocols.create_pipette_parameters(parameters)
@@ -166,8 +166,17 @@ def _setup(
 
     if tube_volume == 15:
         # Replace volumes with 15 ml volumes
-        VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [17.3,7090.6, 16077.5,  0.0]
-        VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] = [42.2, 15956.6, 0.0]
+        VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [
+            17.3,
+            7090.6,
+            16077.5,
+            0.0,
+        ]
+        VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] = [
+            42.2,
+            15956.6,
+            0.0,
+        ]
     volumes = VOLUMES_3MM_TOP_BOTTOM[labware.load_name]
     total_volume_to_aspirate = 0.0
     for one_vols in volumes:
@@ -224,26 +233,42 @@ def _write_line_to_csv(ctx: ProtocolContext, line: List[str]) -> None:
     append_data_to_file(metadata["protocolName"], RUN_ID, FILE_NAME, line_str)
 
 
-def _get_test_wells(labware: Labware, channels: int, tube_volume: int, total_test_wells: int) -> List[Well]:
+def _get_test_wells(
+    labware: Labware, channels: int, tube_volume: int, total_test_wells: int
+) -> List[Well]:
     well_names = []
     try:
         if tube_volume == 15:
             print("cHANGING LABWARE WELLS")
-            
-            TEST_WELLS[channels]["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = ["A1", "B1", "C1", "A2", "B2", "C2"]
-            TEST_WELLS[channels]["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] = ["A1", "B1", "C1", "A2", "B2", "C2"]
+
+            TEST_WELLS[channels]["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [
+                "A1",
+                "B1",
+                "C1",
+                "A2",
+                "B2",
+                "C2",
+            ]
+            TEST_WELLS[channels][
+                "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"
+            ] = ["A1", "B1", "C1", "A2", "B2", "C2"]
             well_names = TEST_WELLS[channels][labware.load_name]
             print(TEST_WELLS[channels][labware.load_name])
         else:
             well_names = TEST_WELLS[channels][labware.load_name]
     except KeyError:
-        well_names = [str(well_name).split(" ")[0].replace(" ", "") for well_name in labware.wells()]
+        well_names = [
+            str(well_name).split(" ")[0].replace(" ", "")
+            for well_name in labware.wells()
+        ]
         print(len(well_names))
     print(well_names)
     amount_of_well_names = len(well_names)
     if amount_of_well_names < total_test_wells:
         wells_needed = total_test_wells - amount_of_well_names
-        repeat_times = (wells_needed // len(well_names)) + 1  # Calculate how many times to repeat
+        repeat_times = (
+            wells_needed // len(well_names)
+        ) + 1  # Calculate how many times to repeat
         # Extend well_names by repeating it, then trim any excess elements
         well_names.extend(well_names * repeat_times)
         diff_after_extension = len(well_names) - total_test_wells
@@ -312,7 +337,7 @@ def _get_tip_z_error(
     return z_error * -1.0
 
 
-def _test_for_finding_liquid_height(
+def _test_for_finding_liquid_height(  # noqa: C901
     ctx: ProtocolContext,
     volume: float,
     liquid_pipette: InstrumentContext,
@@ -348,7 +373,8 @@ def _test_for_finding_liquid_height(
                 need_to_transfer_per_ch = volume / liquid_pipette.channels
                 # set flow-rates
                 liquid_pipette.flow_rate.aspirate = min(
-                    max(min(liquid_pipette.max_volume, need_to_transfer_per_ch), 10), 200
+                    max(min(liquid_pipette.max_volume, need_to_transfer_per_ch), 10),
+                    200,
                 )
                 liquid_pipette.flow_rate.dispense = min(
                     liquid_pipette.flow_rate.aspirate, 50
@@ -357,7 +383,9 @@ def _test_for_finding_liquid_height(
                 if _src_meniscus_height is None:
                     _src_meniscus_height = src_well.depth - 1.0
                 if src_well.diameter:
-                    src_well_z_ul_per_mm = math.pi * math.pow(src_well.diameter * 0.5, 2)
+                    src_well_z_ul_per_mm = math.pi * math.pow(
+                        src_well.diameter * 0.5, 2
+                    )
                 elif src_well.width is not None and src_well.length is not None:
                     src_well_z_ul_per_mm = src_well.width * src_well.length
                 else:
@@ -473,14 +501,20 @@ def run(ctx: ProtocolContext) -> None:
     try:
         if tube_volume == 15:
             # Replace volumes with 15 ml volumes
-            VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"] = [17.3,7090.6, 16077.5,  0.0]
-            VOLUMES_3MM_TOP_BOTTOM["opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"] = [42.2, 15956.6, 0.0]
+            VOLUMES_3MM_TOP_BOTTOM[
+                "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical"
+            ] = [17.3, 7090.6, 16077.5, 0.0]
+            VOLUMES_3MM_TOP_BOTTOM[
+                "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical"
+            ] = [42.2, 15956.6, 0.0]
         volumes = VOLUMES_3MM_TOP_BOTTOM[labware.load_name]
     except KeyError:
         volumes = [0.0, 0.0, 0.0]
         ctx.comment(f"No volumes loaded for labware {labware.load_name}")
-    total_test_wells = len(volumes) * num_trials 
-    test_wells = _get_test_wells(labware, channels=1, tube_volume=tube_volume, total_test_wells=total_test_wells)
+    total_test_wells = len(volumes) * num_trials
+    test_wells = _get_test_wells(
+        labware, channels=1, tube_volume=tube_volume, total_test_wells=total_test_wells
+    )
     stuff_lengths = len(test_tips_liquid), len(test_tips_probe), len(test_wells)
 
     assert min(stuff_lengths) >= num_trials * len(volumes), f"{stuff_lengths}"
