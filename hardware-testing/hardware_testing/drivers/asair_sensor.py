@@ -4,12 +4,11 @@ This library is for the temperature and humidity sensor used with the
 pipette gravimetric fixture. The sensor outputs temperature and
 relative humidity that is recorded onto the pipette results.
 """
-
 import abc
 import codecs
 import logging
 import time
-from typing import Tuple, Optional
+from typing import Tuple
 from abc import ABC
 from dataclasses import dataclass
 from . import list_ports_and_select
