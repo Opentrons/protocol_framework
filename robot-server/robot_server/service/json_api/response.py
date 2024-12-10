@@ -64,7 +64,7 @@ class SimpleBody(BaseResponseBody, Generic[ResponseDataT]):
     data: ResponseDataT = Field(..., description=DESCRIPTION_DATA)
 
 
-class Body(BaseResponseBody, BaseModel, Generic[ResponseDataT, ResponseLinksT]):
+class Body(BaseResponseBody, Generic[ResponseDataT, ResponseLinksT]):
     """A response that returns a single resource and stateful links."""
 
     data: ResponseDataT = Field(..., description=DESCRIPTION_DATA)
@@ -75,7 +75,7 @@ class SimpleEmptyBody(BaseResponseBody):
     """A response that returns no data and no links."""
 
 
-class EmptyBody(BaseResponseBody, BaseModel, Generic[ResponseLinksT]):
+class EmptyBody(BaseResponseBody, Generic[ResponseLinksT]):
     """A response that returns no data except stateful links."""
 
     links: ResponseLinksT = Field(..., description=DESCRIPTION_LINKS)
@@ -95,7 +95,7 @@ class MultiBodyMeta(BaseModel):
     )
 
 
-class SimpleMultiBody(BaseResponseBody, BaseModel, Generic[ResponseDataT]):
+class SimpleMultiBody(BaseResponseBody, Generic[ResponseDataT]):
     """A response that returns multiple resources."""
 
     data: Sequence[ResponseDataT] = Field(..., description=DESCRIPTION_DATA)
@@ -115,11 +115,7 @@ class SimpleMultiBody(BaseResponseBody, BaseModel, Generic[ResponseDataT]):
     )
 
 
-class MultiBody(
-    BaseResponseBody,
-    BaseModel,
-    Generic[ResponseDataT, ResponseLinksT],
-):
+class MultiBody(BaseResponseBody, Generic[ResponseDataT, ResponseLinksT]):
     """A response that returns multiple resources and stateful links."""
 
     data: List[ResponseDataT] = Field(..., description=DESCRIPTION_DATA)

@@ -176,7 +176,7 @@ class LegacyErrorResponse(BaseErrorBody):
         )
 
 
-class ErrorBody(BaseErrorBody, BaseModel, Generic[ErrorDetailsT]):
+class ErrorBody(BaseErrorBody, Generic[ErrorDetailsT]):
     """A response body for a single error."""
 
     errors: Sequence[ErrorDetailsT] = Field(..., description="Error details.")
@@ -189,7 +189,7 @@ class ErrorBody(BaseErrorBody, BaseModel, Generic[ErrorDetailsT]):
     )
 
 
-class MultiErrorResponse(BaseErrorBody, BaseModel, Generic[ErrorDetailsT]):
+class MultiErrorResponse(BaseErrorBody, Generic[ErrorDetailsT]):
     """An response body for multiple errors."""
 
     errors: Sequence[ErrorDetailsT] = Field(..., description="Error details.")
