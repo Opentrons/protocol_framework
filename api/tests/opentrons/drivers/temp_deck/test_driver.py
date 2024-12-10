@@ -1,7 +1,10 @@
 from mock import AsyncMock
 import pytest
 
-from opentrons.drivers.asyncio.communication.serial_connection import SerialConnection, UnhandledGcode
+from opentrons.drivers.asyncio.communication.serial_connection import (
+    SerialConnection,
+)
+from opentrons.drivers.asyncio.communication.errors import UnhandledGcode
 from opentrons.drivers.temp_deck.driver import (
     TempDeckDriver,
     TEMP_DECK_COMMAND_TERMINATOR,
@@ -59,7 +62,9 @@ async def test_get_temperature(driver: TempDeckDriver, connection: AsyncMock) ->
     assert response == Temperature(current=25, target=132)
 
 
-async def test_get_device_info_with_reset_reason(driver: TempDeckDriver, connection: AsyncMock) -> None:
+async def test_get_device_info_with_reset_reason(
+    driver: TempDeckDriver, connection: AsyncMock
+) -> None:
     """It should send a get device info command and parse response"""
     connection.send_command.return_value = "serial:s model:m version:v"
 
@@ -78,14 +83,23 @@ async def test_get_device_info_with_reset_reason(driver: TempDeckDriver, connect
     assert response == {"serial": "s", "model": "m", "version": "v"}
 
 
-async def test_get_device_info_no_reset_reason(driver: TempDeckDriver, connection: AsyncMock) -> None:
+async def test_get_device_info_no_reset_reason(
+    driver: TempDeckDriver, connection: AsyncMock
+) -> None:
     """It should send a get device info command and parse response"""
 
-    async def fake_send_command(command: CommandBuilder, retries: int = 0, timeout: float | None = None) -> str:
-        if command.build().startswith('M114'):
-            raise UnhandledGcode(port='fake port', response='ERR003: Unhandled Gcode', command=command.build(), )
+    async def fake_send_command(
+        command: CommandBuilder, retries: int = 0, timeout: float | None = None
+    ) -> str:
+        if command.build().startswith("M114"):
+            raise UnhandledGcode(
+                port="fake port",
+                response="ERR003: Unhandled Gcode",
+                command=command.build(),
+            )
         else:
             return "serial:s model:m version:v"
+
     connection.send_command.side_effect = fake_send_command
 
     response = await driver.get_device_info()
@@ -101,7 +115,6 @@ async def test_get_device_info_no_reset_reason(driver: TempDeckDriver, connectio
     connection.send_command.assert_called_with(command=reset_reason, retries=3)
 
     assert response == {"serial": "s", "model": "m", "version": "v"}
-
 
 
 async def test_enter_programming_mode(

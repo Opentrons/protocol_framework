@@ -6,7 +6,10 @@ import asyncio
 from typing import Optional, Dict
 from opentrons.drivers import utils
 from opentrons.drivers.command_builder import CommandBuilder
-from opentrons.drivers.asyncio.communication import AsyncResponseSerialConnection, UnhandledGcode
+from opentrons.drivers.asyncio.communication import (
+    AsyncResponseSerialConnection,
+    UnhandledGcode,
+)
 from opentrons.drivers.heater_shaker.abstract import AbstractHeaterShakerDriver
 from opentrons.drivers.types import Temperature, RPM, HeaterShakerLabwareLatchStatus
 

@@ -251,7 +251,9 @@ class SerialConnection:
 
         if self._error_keyword in lower:
             if ErrorCodes.UNHANDLED_GCODE.value in lower:
-                raise UnhandledGcode(port=self._port, response=response, command=request)
+                raise UnhandledGcode(
+                    port=self._port, response=response, command=request
+                )
             else:
                 raise ErrorResponse(port=self._port, response=response)
 

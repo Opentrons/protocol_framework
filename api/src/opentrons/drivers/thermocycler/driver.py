@@ -11,7 +11,7 @@ from opentrons.drivers.asyncio.communication import (
     SerialConnection,
     AsyncResponseSerialConnection,
     AsyncSerial,
-    UnhandledGcode
+    UnhandledGcode,
 )
 from opentrons.drivers.thermocycler.abstract import AbstractThermocyclerDriver
 from opentrons.drivers.types import Temperature, PlateTemperature, ThermocyclerLidStatus

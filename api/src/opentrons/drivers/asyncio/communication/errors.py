@@ -3,8 +3,10 @@
 
 from enum import Enum
 
+
 class ErrorCodes(Enum):
-    UNHANDLED_GCODE = 'ERR003'
+    UNHANDLED_GCODE = "ERR003"
+
 
 class SerialException(Exception):
     """Base serial exception"""
