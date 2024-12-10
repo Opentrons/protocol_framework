@@ -1990,11 +1990,15 @@
               "z": 2
             },
             "flowRateByVolume": [
+              [1.0, 7.0],
+              [10.0, 10.0],
+              [50.0, 40.0]
+            ],
+            "correctionByVolume": [
               [5.0, -0.3],
               [10.0, -0.2],
               [50.0, 0.0]
             ],
-            "correctionByVolume": [[0.0, 0.0]],
             "conditioningByVolume": [
               [1.0, 5.0],
               [40.0, 5.0],
