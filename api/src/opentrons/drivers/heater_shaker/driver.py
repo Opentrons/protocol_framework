@@ -6,7 +6,7 @@ import asyncio
 from typing import Optional, Dict
 from opentrons.drivers import utils
 from opentrons.drivers.command_builder import CommandBuilder
-from opentrons.drivers.asyncio.communication import AsyncResponseSerialConnection
+from opentrons.drivers.asyncio.communication import AsyncResponseSerialConnection, UnhandledGcode
 from opentrons.drivers.heater_shaker.abstract import AbstractHeaterShakerDriver
 from opentrons.drivers.types import Temperature, RPM, HeaterShakerLabwareLatchStatus
 
@@ -177,9 +177,12 @@ class HeaterShakerDriver(AbstractHeaterShakerDriver):
         reset_reason = CommandBuilder(terminator=HS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.GET_RESET_REASON
         )
-        await self._connection.send_command(
-            command=reset_reason, retries=DEFAULT_COMMAND_RETRIES
-        )
+        try:
+            await self._connection.send_command(
+                command=reset_reason, retries=DEFAULT_COMMAND_RETRIES
+            )
+        except UnhandledGcode:
+            pass
 
         return utils.parse_hs_device_information(device_info_string=response)
 

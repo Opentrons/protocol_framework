@@ -6,7 +6,7 @@ from typing import Optional, List
 
 from opentrons.drivers.command_builder import CommandBuilder
 
-from .errors import NoResponse, AlarmResponse, ErrorResponse
+from .errors import NoResponse, AlarmResponse, ErrorResponse, UnhandledGcode, ErrorCodes
 from .async_serial import AsyncSerial
 
 log = logging.getLogger(__name__)
@@ -199,7 +199,7 @@ class SerialConnection:
                 str_response = self.process_raw_response(
                     command=data, response=response.decode()
                 )
-                self.raise_on_error(response=str_response)
+                self.raise_on_error(response=str_response, request=data)
                 return str_response
 
             log.info(f"{self.name}: retry number {retry}/{retries}")
@@ -232,11 +232,12 @@ class SerialConnection:
     def send_data_lock(self) -> asyncio.Lock:
         return self._send_data_lock
 
-    def raise_on_error(self, response: str) -> None:
+    def raise_on_error(self, response: str, request: str) -> None:
         """
         Raise an error if the response contains an error
 
         Args:
+            gcode: the requesting gocde
             response: response
 
         Returns: None
@@ -249,7 +250,10 @@ class SerialConnection:
             raise AlarmResponse(port=self._port, response=response)
 
         if self._error_keyword in lower:
-            raise ErrorResponse(port=self._port, response=response)
+            if ErrorCodes.UNHANDLED_GCODE.value in lower:
+                raise UnhandledGcode(port=self._port, response=response, command=request)
+            else:
+                raise ErrorResponse(port=self._port, response=response)
 
     async def on_retry(self) -> None:
         """
@@ -454,7 +458,7 @@ class AsyncResponseSerialConnection(SerialConnection):
                     str_response = self.process_raw_response(
                         command=data, response=ackless_response.decode()
                     )
-                    self.raise_on_error(response=str_response)
+                    self.raise_on_error(response=str_response, request=data)
 
             if self._ack in response[-1]:
                 # Remove ack from response
@@ -462,7 +466,7 @@ class AsyncResponseSerialConnection(SerialConnection):
                 str_response = self.process_raw_response(
                     command=data, response=ackless_response.decode()
                 )
-                self.raise_on_error(response=str_response)
+                self.raise_on_error(response=str_response, request=data)
                 return str_response
 
             log.info(f"{self._name}: retry number {retry}/{retries}")

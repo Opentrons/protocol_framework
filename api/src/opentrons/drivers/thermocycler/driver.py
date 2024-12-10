@@ -11,6 +11,7 @@ from opentrons.drivers.asyncio.communication import (
     SerialConnection,
     AsyncResponseSerialConnection,
     AsyncSerial,
+    UnhandledGcode
 )
 from opentrons.drivers.thermocycler.abstract import AbstractThermocyclerDriver
 from opentrons.drivers.types import Temperature, PlateTemperature, ThermocyclerLidStatus
@@ -303,9 +304,12 @@ class ThermocyclerDriver(AbstractThermocyclerDriver):
         reset_reason = CommandBuilder(terminator=TC_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.GET_RESET_REASON
         )
-        await self._connection.send_command(
-            command=reset_reason, retries=DEFAULT_COMMAND_RETRIES
-        )
+        try:
+            await self._connection.send_command(
+                command=reset_reason, retries=DEFAULT_COMMAND_RETRIES
+            )
+        except UnhandledGcode:
+            pass
 
         return utils.parse_device_information(device_info_string=response)
 
@@ -366,9 +370,12 @@ class ThermocyclerDriverV2(ThermocyclerDriver):
         reset_reason = CommandBuilder(terminator=TC_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.GET_RESET_REASON
         )
-        await self._connection.send_command(
-            command=reset_reason, retries=DEFAULT_COMMAND_RETRIES
-        )
+        try:
+            await self._connection.send_command(
+                command=reset_reason, retries=DEFAULT_COMMAND_RETRIES
+            )
+        except UnhandledGcode:
+            pass
 
         return utils.parse_hs_device_information(device_info_string=response)
 
