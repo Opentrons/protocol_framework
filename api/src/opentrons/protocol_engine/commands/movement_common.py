@@ -265,17 +265,21 @@ async def move_to_addressable_area(
                     )
                 ],
             ),
-            state_update=StateUpdate().clear_all_pipette_locations(),
+            state_update=StateUpdate()
+            .clear_all_pipette_locations()
+            .set_addressable_area_used(addressable_area_name=addressable_area_name),
         )
     else:
         deck_point = DeckPoint.construct(x=x, y=y, z=z)
         return SuccessData(
             public=DestinationPositionResult(position=deck_point),
-            state_update=StateUpdate().set_pipette_location(
+            state_update=StateUpdate()
+            .set_pipette_location(
                 pipette_id=pipette_id,
                 new_addressable_area_name=addressable_area_name,
                 new_deck_point=deck_point,
-            ),
+            )
+            .set_addressable_area_used(addressable_area_name=addressable_area_name),
         )
 
 
