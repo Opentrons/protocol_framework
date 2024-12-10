@@ -56,7 +56,7 @@ import {
   getIncompleteInstrumentCount,
   ViewOnlyParameters,
 } from '/app/organisms/ODD/ProtocolSetup'
-import { useLaunchLPC } from '/app/organisms/LabwarePositionCheck/useLaunchLPC'
+import { useLaunchLegacyLPC } from '/app/organisms/LegacyLabwarePositionCheck/useLaunchLegacyLPC'
 import { ConfirmCancelRunModal } from '/app/organisms/ODD/RunningProtocol'
 import { useRunControls } from '/app/organisms/RunTimeControl/hooks'
 import { useToaster } from '/app/organisms/ToasterOven'
@@ -67,7 +67,7 @@ import {
   ANALYTICS_PROTOCOL_RUN_ACTION,
   useTrackEvent,
 } from '/app/redux/analytics'
-import { getIsHeaterShakerAttached } from '/app/redux/config'
+import { getIsHeaterShakerAttached, useFeatureFlag } from '/app/redux/config'
 import { ConfirmAttachedModal } from './ConfirmAttachedModal'
 import { ConfirmSetupStepsCompleteModal } from './ConfirmSetupStepsCompleteModal'
 import { getLatestCurrentOffsets } from '/app/transformations/runs'
@@ -658,6 +658,7 @@ export function ProtocolSetup(): JSX.Element {
   const { runId } = useParams<
     keyof OnDeviceRouteParams
   >() as OnDeviceRouteParams
+  const isNewLpc = useFeatureFlag('lpcRedesign')
   const { data: runRecord } = useNotifyRunQuery(runId, { staleTime: Infinity })
   const { analysisErrors } = useProtocolAnalysisErrors(runId)
   const { t } = useTranslation(['protocol_setup'])
@@ -735,7 +736,11 @@ export function ProtocolSetup(): JSX.Element {
     protocolRecord?.data.files[0].name ??
     ''
 
-  const { launchLPC, LPCWizard } = useLaunchLPC(runId, robotType, protocolName)
+  const { launchLegacyLPC, LegacyLPCWizard } = useLaunchLegacyLPC(
+    runId,
+    robotType,
+    protocolName
+  )
   const handleProceedToRunClick = (): void => {
     trackEvent({
       name: ANALYTICS_PROTOCOL_PROCEED_TO_RUN,
@@ -811,10 +816,11 @@ export function ProtocolSetup(): JSX.Element {
         runId={runId}
         setSetupScreen={setSetupScreen}
         lpcDisabledReason={lpcDisabledReason}
-        launchLPC={launchLPC}
-        LPCWizard={LPCWizard}
+        launchLPC={launchLegacyLPC}
+        LPCWizard={LegacyLPCWizard}
         isConfirmed={offsetsConfirmed}
         setIsConfirmed={setOffsetsConfirmed}
+        isNewLpc={isNewLpc}
       />
     ),
     labware: (
