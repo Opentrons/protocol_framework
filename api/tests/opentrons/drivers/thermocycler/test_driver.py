@@ -240,9 +240,6 @@ async def test_device_info(
     get_device_info = CommandBuilder(terminator=driver.TC_COMMAND_TERMINATOR).add_gcode(
         gcode="M115"
     )
-    reset_reason = CommandBuilder(terminator=driver.TC_COMMAND_TERMINATOR).add_gcode(
-        gcode="M114"
-    )
 
     connection.send_command.assert_any_call(command=get_device_info, retries=3)
     assert device_info == {"serial": "s", "model": "m", "version": "v"}
