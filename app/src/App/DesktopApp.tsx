@@ -1,5 +1,5 @@
 import { scan } from 'react-scan'
-import { useState, Fragment, useEffect } from 'react'
+import { useState, Fragment } from 'react'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
 import {
