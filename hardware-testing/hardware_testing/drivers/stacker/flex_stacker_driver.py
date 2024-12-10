@@ -16,6 +16,8 @@ class GCODE(str, Enum):
     MOVE_MIRCROSTEP = 'G0.S',
     MOVE_LS = 'G5',
     LIMITSWITCH_STATUS = 'M119'
+    CURRENT_MOTION_PARMS = 'M120'
+    PLATFORM_STATUS = 'M121'
     ENABLE_MOTOR = 'M17'
     DISABLE_MOTOR = 'M18'
     WRITE_TO_REGISTER = 'M921'
@@ -25,6 +27,8 @@ class GCODE(str, Enum):
     SET_MICROSTEPPING = 'M909'
     STALLGUARD = 'M910'
     GET_STALLGUARD_VAL = 'M911'
+    SET_SERIAL_NUM = 'M996'
+    DEVICE_INFO = 'M115'
 
 class DIR(str, Enum):
     POSITIVE = '',
@@ -75,7 +79,7 @@ MOVE_ACCELERATION_L = 800
 MAX_SPEED_DISCONTINUITY_X = 40
 MAX_SPEED_DISCONTINUITY_Z = 40
 MAX_SPEED_DISCONTINUITY_L = 40
-HOME_CURRENT_X = 1.8
+HOME_CURRENT_X = 1.5
 HOME_CURRENT_Z = 1.5
 HOME_CURRENT_L = 0.8
 MOVE_CURRENT_X = 0.6
@@ -163,7 +167,7 @@ class FlexStacker():
             # print(response)
             #response = self._stacker_connection.read_until(expected = f'{x} OK\n')
             response = self._stacker_connection.readline()
-            #print(response)
+            # print(response)
             if (self._ack in response) or (self._stall in response):
                 # Remove ack from response
                 response = response.replace(self._ack, b"OK\n")
@@ -216,6 +220,21 @@ class FlexStacker():
         """Disconnect from Flex Stacker"""
         self._stacker_connection.close()
 
+    def get_device_info(self) -> str:
+        """Get the serial number of the flex stacker unit"""
+        c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
+            gcode=GCODE.DEVICE_INFO)
+        print(c)
+        response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
+        return response
+
+    def set_device_serial_numer(self, serial_number) -> None:
+        """Get the serial number of the flex stacker unit"""
+        c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
+            gcode=GCODE.SET_SERIAL_NUM).add_element(serial_number)
+        print(c)
+        response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
+
     def enable_motor(self, axis: AXIS):
         """Enables a Axis motor
         Args:
@@ -243,7 +262,16 @@ class FlexStacker():
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.LIMITSWITCH_STATUS
         )
-        print(c)
+        # print(c)
+        response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
+
+        return self.sensor_parse(response)
+
+    def get_platform_sensor_states(self) -> str:
+        """Returns the limit switch status"""
+        c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
+            gcode=GCODE.PLATFORM_STATUS
+        )
         response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
 
         return self.sensor_parse(response)
@@ -269,7 +297,8 @@ class FlexStacker():
         i_tracker = 0
         switch_state = []
         final = []
-        for i in cmd[cmd.index(GCODE.LIMITSWITCH_STATUS):]:
+        # print(cmd.index(GCODE.LIMITSWITCH_STATUS))
+        for i in cmd:
             if i in punctuation:
                 switch_state.append(i_tracker)
             if len(switch_state) == 1:
@@ -278,7 +307,10 @@ class FlexStacker():
                 switch_state = []
             i_tracker += 1
         # print(final)
-        final = self._parse_lsw(final)
+        if GCODE.LIMITSWITCH_STATUS in cmd:
+            final = self._parse_lsw(final)
+        elif GCODE.PLATFORM_STATUS in cmd:
+            final = self._parse_plat(final)
         return final
 
     def _parse_lsw(self, parse_data):
@@ -293,8 +325,27 @@ class FlexStacker():
                         })
         return states
 
+    def _parse_plat(self, parse_data):
+        """LSW->X+:0,X-:0,Z+:0,Z-:1,PR:1,PH:1PS->X+1,X-:0"""
+        "2024-09-03 14:58:03.135606 Rx <== M119 XE:0 XR:0 ZE:0 ZR:0 LR:0 LH:1 OK"
+        states = {}
+
+        states.update({"E": parse_data[0],
+                        "R": parse_data[1],
+                        })
+        return states
+
     def set_default(self, value, default):
         return value if value is not None else default
+
+    def get_current_motion_params(self, axis)-> str:
+        """Read current motion parameters"""
+        c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
+            gcode=GCODE.CURRENT_MOTION_PARMS
+        ).add_element(axis)
+        print(c)
+        response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('CMD: rrr')
+        return response
 
     def move(self, axis: AXIS, distance: float, direction: DIR,
                 velocity: Optional[float] = None, acceleration: Optional[float] = None,
