@@ -21,6 +21,7 @@ stages:
           id: !anystr
           name: "color_codes.csv"
           createdAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
+          source: "uploaded"
 
   - name: Upload same file again. It should not create a new record.
     request:
@@ -49,6 +50,7 @@ stages:
           id: !anystr
           name: "sample_record.csv"
           createdAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
+          source: "uploaded"
 
   - name: Get color_codes.csv file info
     request:
@@ -61,3 +63,4 @@ stages:
           id: '{data_file_id}'
           name: "color_codes.csv"
           createdAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
+          source: "uploaded"

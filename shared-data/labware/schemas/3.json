@@ -65,38 +65,25 @@
         }
       }
     },
-    "CircularCrossSection": {
+    "pickUpAndDropOffsets": {
       "type": "object",
-      "required": ["shape", "diameter"],
+      "required": ["pickUpOffset", "dropOffset"],
       "properties": {
-        "shape": {
-          "type": "string",
-          "enum": ["circular"]
+        "pickUpOffset": {
+          "$ref": "#/definitions/coordinates",
+          "description": "Offset added to calculate pick-up coordinates."
         },
-        "diameter": {
-          "type": "number"
-        }
-      }
-    },
-    "RectangularCrossSection": {
-      "type": "object",
-      "required": ["shape", "xDimension", "yDimension"],
-      "properties": {
-        "shape": {
-          "type": "string",
-          "enum": ["rectangular"]
-        },
-        "xDimension": {
-          "type": "number"
-        },
-        "yDimension": {
-          "type": "number"
+        "dropOffset": {
+          "$ref": "#/definitions/coordinates",
+          "description": "Offset added to calculate drop coordinates."
         }
       }
     },
     "SphericalSegment": {
       "type": "object",
-      "required": ["shape", "radiusOfCurvature", "depth"],
+      "description": "A partial sphere shaped section at the bottom of the well.",
+      "additionalProperties": false,
+      "required": ["shape", "radiusOfCurvature", "topHeight", "bottomHeight"],
       "properties": {
         "shape": {
           "type": "string",
@@ -105,55 +92,182 @@
         "radiusOfCurvature": {
           "type": "number"
         },
-        "depth": {
+        "topHeight": {
+          "type": "number"
+        },
+        "bottomHeight": {
           "type": "number"
         }
       }
     },
-    "BoundedSection": {
+    "ConicalFrustum": {
       "type": "object",
-      "required": ["geometry", "topHeight"],
+      "description": "A cone or conical segment, bounded by two circles on the top and bottom.",
+      "required": [
+        "shape",
+        "bottomDiameter",
+        "topDiameter",
+        "topHeight",
+        "bottomHeight"
+      ],
       "properties": {
-        "geometry": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/CircularCrossSection"
-            },
-            {
-              "$ref": "#/definitions/RectangularCrossSection"
-            }
-          ]
+        "shape": {
+          "type": "string",
+          "enum": ["conical"]
+        },
+        "bottomDiameter": {
+          "type": "number"
+        },
+        "topDiameter": {
+          "type": "number"
         },
         "topHeight": {
-          "type": "number",
-          "description": "The height at the top of a bounded subsection of a well, relative to the bottom"
+          "type": "number"
+        },
+        "bottomHeight": {
+          "type": "number"
+        }
+      }
+    },
+    "CuboidalFrustum": {
+      "type": "object",
+      "description": "A cuboidal shape bounded by two rectangles on the top and bottom",
+      "required": [
+        "shape",
+        "bottomXDimension",
+        "bottomYDimension",
+        "topXDimension",
+        "topYDimension",
+        "topHeight",
+        "bottomHeight"
+      ],
+      "properties": {
+        "shape": {
+          "type": "string",
+          "enum": ["cuboidal"]
+        },
+        "bottomXDimension": {
+          "type": "number"
+        },
+        "bottomYDimension": {
+          "type": "number"
+        },
+        "topXDimension": {
+          "type": "number"
+        },
+        "topYDimension": {
+          "type": "number"
+        },
+        "topHeight": {
+          "type": "number"
+        },
+        "bottomHeight": {
+          "type": "number"
+        }
+      }
+    },
+    "SquaredConeSegment": {
+      "type": "object",
+      "description": "The intersection of a pyramid and a cone that both share a central axis where one face is a circle and one face is a rectangle",
+      "required": [
+        "shape",
+        "bottomCrossSection",
+        "circleDiameter",
+        "rectangleXDimension",
+        "rectangleYDimension",
+        "topHeight",
+        "bottomHeight"
+      ],
+      "properties": {
+        "shape": {
+          "type": "string",
+          "enum": ["squaredcone"]
+        },
+        "bottomCrossSection": {
+          "type": "string",
+          "enum": ["circular", "rectangular"]
+        },
+        "circleDiameter": {
+          "type": "number"
+        },
+        "rectangleXDimension": {
+          "type": "number"
+        },
+        "rectangleYDimension": {
+          "type": "number"
+        },
+        "topHeight": {
+          "type": "number"
+        },
+        "bottomHeight": {
+          "type": "number"
+        }
+      }
+    },
+    "RoundedCuboidSegment": {
+      "type": "object",
+      "description": "A cuboidal frustum where each corner is filleted out by circles with centers on the diagonals between opposite corners",
+      "required": [
+        "shape",
+        "bottomCrossSection",
+        "circleDiameter",
+        "rectangleXDimension",
+        "rectangleYDimension",
+        "topHeight",
+        "bottomHeight"
+      ],
+      "properties": {
+        "shape": {
+          "type": "string",
+          "enum": ["roundedcuboid"]
+        },
+        "bottomCrossSection": {
+          "type": "string",
+          "enum": ["circular", "rectangular"]
+        },
+        "circleDiameter": {
+          "type": "number"
+        },
+        "rectangleXDimension": {
+          "type": "number"
+        },
+        "rectangleYDimension": {
+          "type": "number"
+        },
+        "topHeight": {
+          "type": "number"
+        },
+        "bottomHeight": {
+          "type": "number"
         }
       }
     },
     "InnerWellGeometry": {
       "type": "object",
-      "required": ["frusta", "bottomShape"],
+      "required": ["sections"],
       "properties": {
-        "frusta": {
+        "sections": {
           "description": "A list of all of the sections of the well that have a contiguous shape",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/BoundedSection"
+            "oneOf": [
+              {
+                "$ref": "#/definitions/ConicalFrustum"
+              },
+              {
+                "$ref": "#/definitions/CuboidalFrustum"
+              },
+              {
+                "$ref": "#/definitions/SquaredConeSegment"
+              },
+              {
+                "$ref": "#/definitions/RoundedCuboidSegment"
+              },
+              {
+                "$ref": "#/definitions/SphericalSegment"
+              }
+            ]
           }
-        },
-        "bottomShape": {
-          "description": "The shape at the bottom of the well: either a spherical segment or a cross-section",
-          "anyOf": [
-            {
-              "$ref": "#/definitions/CircularCrossSection"
-            },
-            {
-              "$ref": "#/definitions/RectangularCrossSection"
-            },
-            {
-              "$ref": "#/definitions/SphericalSegment"
-            }
-          ]
         }
       }
     }
@@ -419,7 +533,7 @@
       "description": "Allowed behaviors and usage of a labware in a protocol.",
       "items": {
         "type": "string",
-        "enum": ["labware", "adapter", "fixture", "maintenance"]
+        "enum": ["labware", "adapter", "fixture", "maintenance", "lid"]
       }
     },
     "stackingOffsetWithLabware": {
@@ -438,21 +552,23 @@
     },
     "gripperOffsets": {
       "type": "object",
-      "description": "Offsets to be added when calculating the coordinates a gripper should go to when picking up or dropping a labware on this labware.",
+      "description": "Offsets to add when picking up or dropping another labware stacked atop this one. Do not use this to adjust the position of the gripper paddles relative to this labware or the child labware; use `gripHeightFromLabwareBottom` on this definition or the child's definition for that.",
+      "additionalProperties": {
+        "$ref": "#/definitions/pickUpAndDropOffsets",
+        "description": "Properties here are named for, and matched based on, the deck slot that this labware is atop--or, if this labware is atop a module, the deck slot that that module is atop."
+      },
       "properties": {
         "default": {
-          "type": "object",
-          "properties": {
-            "pickUpOffset": {
-              "$ref": "#/definitions/coordinates",
-              "description": "Offset added to calculate pick-up coordinates of a labware placed on this labware."
-            },
-            "dropOffset": {
-              "$ref": "#/definitions/coordinates",
-              "description": "Offset added to calculate drop coordinates of a labware placed on this labware."
-            }
-          },
-          "required": ["pickUpOffset", "dropOffset"]
+          "$ref": "#/definitions/pickUpAndDropOffsets",
+          "description": "The offsets to use if there's no slot-specific match in `additionalProperties`."
+        },
+        "lidOffsets": {
+          "$ref": "#/definitions/pickUpAndDropOffsets",
+          "description": "Additional offsets for gripping this labware, if this labware is a lid. Beware this property's placement: instead of affecting the labware stacked atop this labware, like the rest of the `gripperOffsets` properties, it affects this labware."
+        },
+        "lidDisposalOffsets": {
+          "$ref": "#/definitions/pickUpAndDropOffsets",
+          "description": "Additional offsets for gripping this labware, if this labware is a lid and it's being moved to a trash bin. Beware this property's placement: instead of affecting the labware stacked atop this labware, like the rest of the `gripperOffsets` properties, it affects this labware."
         }
       }
     },

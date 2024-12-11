@@ -9,7 +9,7 @@ from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, Succe
 from ...errors.error_occurrence import ErrorOccurrence
 
 if TYPE_CHECKING:
-    from opentrons.protocol_engine.state import StateView
+    from opentrons.protocol_engine.state.state import StateView
     from opentrons.protocol_engine.execution import EquipmentHandler
 
 
@@ -36,9 +36,7 @@ class WaitForTemperatureResult(BaseModel):
 
 
 class WaitForTemperatureImpl(
-    AbstractCommandImpl[
-        WaitForTemperatureParams, SuccessData[WaitForTemperatureResult, None]
-    ]
+    AbstractCommandImpl[WaitForTemperatureParams, SuccessData[WaitForTemperatureResult]]
 ):
     """Execution implementation of a Heater-Shaker's wait for temperature command."""
 
@@ -53,7 +51,7 @@ class WaitForTemperatureImpl(
 
     async def execute(
         self, params: WaitForTemperatureParams
-    ) -> SuccessData[WaitForTemperatureResult, None]:
+    ) -> SuccessData[WaitForTemperatureResult]:
         """Wait for a Heater-Shaker's target temperature to be reached."""
         hs_module_substate = self._state_view.modules.get_heater_shaker_module_substate(
             module_id=params.moduleId
@@ -72,7 +70,9 @@ class WaitForTemperatureImpl(
         if hs_hardware_module is not None:
             await hs_hardware_module.await_temperature(awaiting_temperature=target_temp)
 
-        return SuccessData(public=WaitForTemperatureResult(), private=None)
+        return SuccessData(
+            public=WaitForTemperatureResult(),
+        )
 
 
 class WaitForTemperature(

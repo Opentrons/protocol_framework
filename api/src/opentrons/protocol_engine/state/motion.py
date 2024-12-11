@@ -1,8 +1,8 @@
 """Motion state store and getters."""
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Union
 
-from opentrons.types import MountType, Point
+from opentrons.types import MountType, Point, StagingSlotName
 from opentrons.hardware_control.types import CriticalPoint
 from opentrons.motion_planning.adjacent_slots_getters import (
     get_east_west_slots,
@@ -10,11 +10,12 @@ from opentrons.motion_planning.adjacent_slots_getters import (
 )
 from opentrons import motion_planning
 
-from . import move_types
+from . import _move_types
 from .. import errors
 from ..types import (
     MotorAxis,
     WellLocation,
+    LiquidHandlingWellLocation,
     CurrentWell,
     CurrentPipetteLocation,
     AddressableOffsetVector,
@@ -89,13 +90,14 @@ class MotionView:
         pipette_id: str,
         labware_id: str,
         well_name: str,
-        well_location: Optional[WellLocation],
+        well_location: Optional[Union[WellLocation, LiquidHandlingWellLocation]],
         origin: Point,
         origin_cp: Optional[CriticalPoint],
         max_travel_z: float,
         current_well: Optional[CurrentWell] = None,
         force_direct: bool = False,
         minimum_z_height: Optional[float] = None,
+        operation_volume: Optional[float] = None,
     ) -> List[motion_planning.Waypoint]:
         """Calculate waypoints to a destination that's specified as a well."""
         location = current_well or self._pipettes.get_current_location()
@@ -107,12 +109,14 @@ class MotionView:
             destination_cp = CriticalPoint.XY_CENTER
 
         destination = self._geometry.get_well_position(
-            labware_id,
-            well_name,
-            well_location,
+            labware_id=labware_id,
+            well_name=well_name,
+            well_location=well_location,
+            operation_volume=operation_volume,
+            pipette_id=pipette_id,
         )
 
-        move_type = move_types.get_move_type_to_well(
+        move_type = _move_types.get_move_type_to_well(
             pipette_id, labware_id, well_name, location, force_direct
         )
         min_travel_z = self._geometry.get_min_travel_z(
@@ -151,6 +155,7 @@ class MotionView:
         minimum_z_height: Optional[float] = None,
         stay_at_max_travel_z: bool = False,
         ignore_tip_configuration: Optional[bool] = True,
+        max_travel_z_extra_margin: Optional[float] = None,
     ) -> List[motion_planning.Waypoint]:
         """Calculate waypoints to a destination that's specified as an addressable area."""
         location = self._pipettes.get_current_location()
@@ -169,7 +174,9 @@ class MotionView:
                 # beneath max_travel_z. Investigate why motion_planning.get_waypoints() does not
                 # let us travel at max_travel_z, and whether it's safe to make it do that.
                 # Possibly related: https://github.com/Opentrons/opentrons/pull/6882#discussion_r514248062
-                max_travel_z - motion_planning.waypoints.MINIMUM_Z_MARGIN,
+                max_travel_z
+                - motion_planning.waypoints.MINIMUM_Z_MARGIN
+                - (max_travel_z_extra_margin or 0.0),
             )
             destination = base_destination_at_max_z + Point(
                 offset.x, offset.y, offset.z
@@ -270,9 +277,13 @@ class MotionView:
         current_location = self._pipettes.get_current_location()
         if current_location is not None:
             if isinstance(current_location, CurrentWell):
-                pipette_deck_slot = self._geometry.get_ancestor_slot_name(
+                ancestor = self._geometry.get_ancestor_slot_name(
                     current_location.labware_id
-                ).as_int()
+                )
+                if isinstance(ancestor, StagingSlotName):
+                    # Staging Area Slots cannot intersect with the h/s
+                    return False
+                pipette_deck_slot = ancestor.as_int()
             else:
                 pipette_deck_slot = (
                     self._addressable_areas.get_addressable_area_base_slot(
@@ -292,9 +303,13 @@ class MotionView:
         current_location = self._pipettes.get_current_location()
         if current_location is not None:
             if isinstance(current_location, CurrentWell):
-                pipette_deck_slot = self._geometry.get_ancestor_slot_name(
+                ancestor = self._geometry.get_ancestor_slot_name(
                     current_location.labware_id
-                ).as_int()
+                )
+                if isinstance(ancestor, StagingSlotName):
+                    # Staging Area Slots cannot intersect with the h/s
+                    return False
+                pipette_deck_slot = ancestor.as_int()
             else:
                 pipette_deck_slot = (
                     self._addressable_areas.get_addressable_area_base_slot(
@@ -317,6 +332,10 @@ class MotionView:
         """Get a list of touch points for a touch tip operation."""
         mount = self._pipettes.get_mount(pipette_id)
         labware_slot = self._geometry.get_ancestor_slot_name(labware_id)
+        if isinstance(labware_slot, StagingSlotName):
+            raise errors.LocationIsStagingSlotError(
+                "Cannot perform Touch Tip on labware in Staging Area Slot."
+            )
         next_to_module = self._modules.is_edge_move_unsafe(mount, labware_slot)
         edge_path_type = self._labware.get_edge_path_type(
             labware_id, well_name, mount, labware_slot, next_to_module
@@ -326,7 +345,7 @@ class MotionView:
             labware_id, well_name, radius
         )
 
-        positions = move_types.get_edge_point_list(
+        positions = _move_types.get_edge_point_list(
             center_point, x_offset, y_offset, edge_path_type
         )
         critical_point: Optional[CriticalPoint] = None

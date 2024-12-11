@@ -12,20 +12,24 @@ from opentrons_shared_data.labware.constants import WELL_NAME_PATTERN
 from opentrons_shared_data.deck.types import CutoutFixture
 from opentrons_shared_data.pipette import PIPETTE_X_SPAN
 from opentrons_shared_data.pipette.types import ChannelCount
+from opentrons.protocols.models import LabwareDefinition
 
 from .. import errors
 from ..errors import (
     LabwareNotLoadedOnLabwareError,
     LabwareNotLoadedOnModuleError,
     LabwareMovementNotAllowedError,
+    OperationLocationNotInWellError,
 )
-from ..resources import fixture_validation
+from ..resources import fixture_validation, labware_validation
 from ..types import (
     OFF_DECK_LOCATION,
     LoadedLabware,
     LoadedModule,
     WellLocation,
+    LiquidHandlingWellLocation,
     DropTipWellLocation,
+    PickUpTipWellLocation,
     WellOrigin,
     DropTipWellOrigin,
     WellOffset,
@@ -45,12 +49,18 @@ from ..types import (
     AddressableOffsetVector,
     StagingSlotLocation,
     LabwareOffsetLocation,
+    ModuleModel,
 )
 from .config import Config
 from .labware import LabwareView
+from .wells import WellView
 from .modules import ModuleView
 from .pipettes import PipetteView
 from .addressable_areas import AddressableAreaView
+from .frustum_helpers import (
+    find_volume_at_well_height,
+    find_height_at_well_volume,
+)
 
 
 SLOT_WIDTH = 128
@@ -77,6 +87,11 @@ class _GripperMoveType(enum.Enum):
 class _AbsoluteRobotExtents:
     front_left: Dict[MountType, Point]
     back_right: Dict[MountType, Point]
+    deck_extents: Point
+    padding_rear: float
+    padding_front: float
+    padding_left_side: float
+    padding_right_side: float
 
 
 _LabwareLocation = TypeVar("_LabwareLocation", bound=LabwareLocation)
@@ -91,6 +106,7 @@ class GeometryView:
         self,
         config: Config,
         labware_view: LabwareView,
+        well_view: WellView,
         module_view: ModuleView,
         pipette_view: PipetteView,
         addressable_area_view: AddressableAreaView,
@@ -98,6 +114,7 @@ class GeometryView:
         """Initialize a GeometryView instance."""
         self._config = config
         self._labware = labware_view
+        self._wells = well_view
         self._modules = module_view
         self._pipettes = pipette_view
         self._addressable_areas = addressable_area_view
@@ -118,7 +135,13 @@ class GeometryView:
             MountType.RIGHT: self._addressable_areas.deck_extents + right_offset,
         }
         return _AbsoluteRobotExtents(
-            front_left=front_left_abs, back_right=back_right_abs
+            front_left=front_left_abs,
+            back_right=back_right_abs,
+            deck_extents=self._addressable_areas.deck_extents,
+            padding_rear=self._addressable_areas.padding_offsets["rear"],
+            padding_front=self._addressable_areas.padding_offsets["front"],
+            padding_left_side=self._addressable_areas.padding_offsets["left_side"],
+            padding_right_side=self._addressable_areas.padding_offsets["right_side"],
         )
 
     def get_labware_highest_z(self, labware_id: str) -> float:
@@ -239,32 +262,33 @@ class GeometryView:
         return min_travel_z
 
     def get_labware_parent_nominal_position(self, labware_id: str) -> Point:
-        """Get the position of the labware's uncalibrated parent slot (deck, module, or another labware)."""
+        """Get the position of the labware's uncalibrated parent (deck slot, module, or another labware)."""
         try:
             addressable_area_name = self.get_ancestor_slot_name(labware_id).id
         except errors.LocationIsStagingSlotError:
             addressable_area_name = self._get_staging_slot_name(labware_id)
         except errors.LocationIsLidDockSlotError:
             addressable_area_name = self._get_lid_dock_slot_name(labware_id)
-        slot_pos = self._addressable_areas.get_addressable_area_position(
+        parent_pos = self._addressable_areas.get_addressable_area_position(
             addressable_area_name
         )
-        labware_data = self._labware.get(labware_id)
 
-        offset = self._get_labware_position_offset(labware_id, labware_data.location)
-
-        return Point(
-            slot_pos.x + offset.x,
-            slot_pos.y + offset.y,
-            slot_pos.z + offset.z,
+        offset_from_parent = self._get_offset_from_parent(
+            child_definition=self._labware.get_definition(labware_id),
+            parent=self._labware.get(labware_id).location,
         )
 
-    def _get_labware_position_offset(
-        self, labware_id: str, labware_location: LabwareLocation
-    ) -> LabwareOffsetVector:
-        """Gets the offset vector of a labware on the given location.
+        return Point(
+            parent_pos.x + offset_from_parent.x,
+            parent_pos.y + offset_from_parent.y,
+            parent_pos.z + offset_from_parent.z,
+        )
 
-        NOTE: Not to be confused with LPC offset.
+    def _get_offset_from_parent(
+        self, child_definition: LabwareDefinition, parent: LabwareLocation
+    ) -> LabwareOffsetVector:
+        """Gets the offset vector of a labware placed on the given location.
+
         - For labware on Deck Slot: returns an offset of (0, 0, 0)
         - For labware on a Module: returns the nominal offset for the labware's position
           when placed on the specified module (using slot-transformed labwareOffset
@@ -275,40 +299,42 @@ class GeometryView:
           on modules as well as stacking overlaps.
           Does not include module calibration offset or LPC offset.
         """
-        if isinstance(labware_location, (AddressableAreaLocation, DeckSlotLocation)):
+        if isinstance(parent, (AddressableAreaLocation, DeckSlotLocation)):
             return LabwareOffsetVector(x=0, y=0, z=0)
-        elif isinstance(labware_location, ModuleLocation):
-            module_id = labware_location.moduleId
-            module_offset = self._modules.get_nominal_module_offset(
+        elif isinstance(parent, ModuleLocation):
+            module_id = parent.moduleId
+            module_to_child = self._modules.get_nominal_offset_to_child(
                 module_id=module_id, addressable_areas=self._addressable_areas
             )
             module_model = self._modules.get_connected_model(module_id)
             stacking_overlap = self._labware.get_module_overlap_offsets(
-                labware_id, module_model
+                child_definition, module_model
             )
             return LabwareOffsetVector(
-                x=module_offset.x - stacking_overlap.x,
-                y=module_offset.y - stacking_overlap.y,
-                z=module_offset.z - stacking_overlap.z,
+                x=module_to_child.x - stacking_overlap.x,
+                y=module_to_child.y - stacking_overlap.y,
+                z=module_to_child.z - stacking_overlap.z,
             )
-        elif isinstance(labware_location, OnLabwareLocation):
-            on_labware = self._labware.get(labware_location.labwareId)
-            on_labware_dimensions = self._labware.get_dimensions(on_labware.id)
+        elif isinstance(parent, OnLabwareLocation):
+            on_labware = self._labware.get(parent.labwareId)
+            on_labware_dimensions = self._labware.get_dimensions(
+                labware_id=on_labware.id
+            )
             stacking_overlap = self._labware.get_labware_overlap_offsets(
-                labware_id=labware_id, below_labware_name=on_labware.loadName
+                definition=child_definition, below_labware_name=on_labware.loadName
             )
             labware_offset = LabwareOffsetVector(
                 x=stacking_overlap.x,
                 y=stacking_overlap.y,
                 z=on_labware_dimensions.z - stacking_overlap.z,
             )
-            return labware_offset + self._get_labware_position_offset(
-                on_labware.id, on_labware.location
+            return labware_offset + self._get_offset_from_parent(
+                self._labware.get_definition(on_labware.id), on_labware.location
             )
         else:
             raise errors.LabwareNotOnDeckError(
-                f"Cannot access labware {labware_id} since it is not on the deck. "
-                f"Either it has been loaded off-deck or its been moved off-deck."
+                "Cannot access labware since it is not on the deck. "
+                "Either it has been loaded off-deck or its been moved off-deck."
             )
 
     def _normalize_module_calibration_offset(
@@ -399,11 +425,51 @@ class GeometryView:
             z=origin_pos.z + cal_offset.z,
         )
 
+    WellLocations = Union[
+        WellLocation, LiquidHandlingWellLocation, PickUpTipWellLocation
+    ]
+
+    def validate_well_position(
+        self,
+        well_location: WellLocations,
+        z_offset: float,
+        pipette_id: Optional[str] = None,
+    ) -> None:
+        """Raise exception if operation location is not within well.
+
+        Primarily this checks if there is not enough liquid in a well to do meniscus-relative static aspiration.
+        """
+        if well_location.origin == WellOrigin.MENISCUS:
+            assert pipette_id is not None
+            lld_min_height = self._pipettes.get_current_tip_lld_settings(
+                pipette_id=pipette_id
+            )
+            if z_offset < lld_min_height:
+                if isinstance(well_location, PickUpTipWellLocation):
+                    raise OperationLocationNotInWellError(
+                        f"Specifying {well_location.origin} with an offset of {well_location.offset} results in an operation location that could be below the bottom of the well"
+                    )
+                else:
+                    raise OperationLocationNotInWellError(
+                        f"Specifying {well_location.origin} with an offset of {well_location.offset} and a volume offset of {well_location.volumeOffset} results in an operation location that could be below the bottom of the well"
+                    )
+        elif z_offset < 0:
+            if isinstance(well_location, PickUpTipWellLocation):
+                raise OperationLocationNotInWellError(
+                    f"Specifying {well_location.origin} with an offset of {well_location.offset} results in an operation location below the bottom of the well"
+                )
+            else:
+                raise OperationLocationNotInWellError(
+                    f"Specifying {well_location.origin} with an offset of {well_location.offset} and a volume offset of {well_location.volumeOffset} results in an operation location below the bottom of the well"
+                )
+
     def get_well_position(
         self,
         labware_id: str,
         well_name: str,
-        well_location: Optional[WellLocation] = None,
+        well_location: Optional[WellLocations] = None,
+        operation_volume: Optional[float] = None,
+        pipette_id: Optional[str] = None,
     ) -> Point:
         """Given relative well location in a labware, get absolute position."""
         labware_pos = self.get_labware_position(labware_id)
@@ -413,10 +479,17 @@ class GeometryView:
         offset = WellOffset(x=0, y=0, z=well_depth)
         if well_location is not None:
             offset = well_location.offset
-            if well_location.origin == WellOrigin.TOP:
-                offset = offset.copy(update={"z": offset.z + well_depth})
-            elif well_location.origin == WellOrigin.CENTER:
-                offset = offset.copy(update={"z": offset.z + well_depth / 2.0})
+            offset_adjustment = self.get_well_offset_adjustment(
+                labware_id=labware_id,
+                well_name=well_name,
+                well_location=well_location,
+                well_depth=well_depth,
+                operation_volume=operation_volume,
+            )
+            offset = offset.copy(update={"z": offset.z + offset_adjustment})
+            self.validate_well_position(
+                well_location=well_location, z_offset=offset.z, pipette_id=pipette_id
+            )
 
         return Point(
             x=labware_pos.x + offset.x + well_def.x,
@@ -450,6 +523,41 @@ class GeometryView:
         delta = absolute_point - well_absolute_point
 
         return WellLocation(offset=WellOffset(x=delta.x, y=delta.y, z=delta.z))
+
+    def get_relative_liquid_handling_well_location(
+        self,
+        labware_id: str,
+        well_name: str,
+        absolute_point: Point,
+        is_meniscus: Optional[bool] = None,
+    ) -> LiquidHandlingWellLocation:
+        """Given absolute position, get relative location of a well in a labware.
+
+        If is_meniscus is True, absolute_point will hold the z-offset in its z field.
+        """
+        if is_meniscus:
+            return LiquidHandlingWellLocation(
+                origin=WellOrigin.MENISCUS,
+                offset=WellOffset(x=0, y=0, z=absolute_point.z),
+            )
+        else:
+            well_absolute_point = self.get_well_position(labware_id, well_name)
+            delta = absolute_point - well_absolute_point
+            return LiquidHandlingWellLocation(
+                offset=WellOffset(x=delta.x, y=delta.y, z=delta.z)
+            )
+
+    def get_relative_pick_up_tip_well_location(
+        self,
+        labware_id: str,
+        well_name: str,
+        absolute_point: Point,
+    ) -> PickUpTipWellLocation:
+        """Given absolute position, get relative location of a well in a labware."""
+        well_absolute_point = self.get_well_position(labware_id, well_name)
+        delta = absolute_point - well_absolute_point
+
+        return PickUpTipWellLocation(offset=WellOffset(x=delta.x, y=delta.y, z=delta.z))
 
     def get_well_height(
         self,
@@ -574,6 +682,14 @@ class GeometryView:
             ),
         )
 
+    def convert_pick_up_tip_well_location(
+        self, well_location: PickUpTipWellLocation
+    ) -> WellLocation:
+        """Convert PickUpTipWellLocation to WellLocation."""
+        return WellLocation(
+            origin=WellOrigin(well_location.origin.value), offset=well_location.offset
+        )
+
     # TODO(jbl 11-30-2023) fold this function into get_ancestor_slot_name see RSS-411
     def _get_staging_slot_name(self, labware_id: str) -> str:
         """Get the staging slot name that the labware is on."""
@@ -596,10 +712,12 @@ class GeometryView:
         assert isinstance(labware_location, AddressableAreaLocation)
         return labware_location.addressableAreaName
 
-    def get_ancestor_slot_name(self, labware_id: str) -> DeckSlotName:
+    def get_ancestor_slot_name(
+        self, labware_id: str
+    ) -> Union[DeckSlotName, StagingSlotName]:
         """Get the slot name of the labware or the module that the labware is on."""
         labware = self._labware.get(labware_id)
-        slot_name: DeckSlotName
+        slot_name: Union[DeckSlotName, StagingSlotName]
 
         if isinstance(labware.location, DeckSlotLocation):
             slot_name = labware.location.slotName
@@ -611,18 +729,14 @@ class GeometryView:
             slot_name = self.get_ancestor_slot_name(below_labware_id)
         elif isinstance(labware.location, AddressableAreaLocation):
             area_name = labware.location.addressableAreaName
-            # TODO we might want to eventually return some sort of staging slot name when we're ready to work through
-            #   the linting nightmare it will create
             if self._labware.is_absorbance_reader_lid(labware_id):
                 raise errors.LocationIsLidDockSlotError(
                     "Cannot get ancestor slot name for labware on lid dock slot."
                 )
-            if fixture_validation.is_staging_slot(area_name):
-                raise errors.LocationIsStagingSlotError(
-                    "Cannot get ancestor slot name for labware on staging slot."
-                )
-                raise errors.LocationIs
-            slot_name = DeckSlotName.from_primitive(area_name)
+            elif fixture_validation.is_staging_slot(area_name):
+                slot_name = StagingSlotName.from_primitive(area_name)
+            else:
+                slot_name = DeckSlotName.from_primitive(area_name)
         elif labware.location == OFF_DECK_LOCATION:
             raise errors.LabwareNotOnDeckError(
                 f"Labware {labware_id} does not have a slot associated with it"
@@ -655,7 +769,7 @@ class GeometryView:
 
     def get_labware_grip_point(
         self,
-        labware_id: str,
+        labware_definition: LabwareDefinition,
         location: Union[
             DeckSlotLocation, ModuleLocation, OnLabwareLocation, AddressableAreaLocation
         ],
@@ -671,7 +785,7 @@ class GeometryView:
         z-position of labware bottom + grip height from labware bottom.
         """
         grip_height_from_labware_bottom = (
-            self._labware.get_grip_height_from_labware_bottom(labware_id)
+            self._labware.get_grip_height_from_labware_bottom(labware_definition)
         )
         location_name: str
 
@@ -697,7 +811,9 @@ class GeometryView:
                 ).slotName.id
             else:  # OnLabwareLocation
                 location_name = self.get_ancestor_slot_name(location.labwareId).id
-            labware_offset = self._get_labware_position_offset(labware_id, location)
+            labware_offset = self._get_offset_from_parent(
+                child_definition=labware_definition, parent=location
+            )
             # Get the calibrated offset if the on labware location is on top of a module, otherwise return empty one
             cal_offset = self._get_calibrated_module_offset(location)
             offset = LabwareOffsetVector(
@@ -716,7 +832,9 @@ class GeometryView:
         )
 
     def get_extra_waypoints(
-        self, location: Optional[CurrentPipetteLocation], to_slot: DeckSlotName
+        self,
+        location: Optional[CurrentPipetteLocation],
+        to_slot: Union[DeckSlotName, StagingSlotName],
     ) -> List[Tuple[float, float]]:
         """Get extra waypoints for movement if thermocycler needs to be dodged."""
         if location is not None:
@@ -775,8 +893,10 @@ class GeometryView:
         return maybe_labware or maybe_module or maybe_fixture or None
 
     @staticmethod
-    def get_slot_column(slot_name: DeckSlotName) -> int:
+    def get_slot_column(slot_name: Union[DeckSlotName, StagingSlotName]) -> int:
         """Get the column number for the specified slot."""
+        if isinstance(slot_name, StagingSlotName):
+            return 4
         row_col_name = slot_name.to_ot3_equivalent()
         slot_name_match = WELL_NAME_PATTERN.match(row_col_name.value)
         assert (
@@ -967,17 +1087,22 @@ class GeometryView:
         from_location: OnDeckLabwareLocation,
         to_location: OnDeckLabwareLocation,
         additional_offset_vector: LabwareMovementOffsetData,
+        current_labware: LabwareDefinition,
     ) -> LabwareMovementOffsetData:
         """Calculate the final labware offset vector to use in labware movement."""
         pick_up_offset = (
             self.get_total_nominal_gripper_offset_for_move_type(
-                location=from_location, move_type=_GripperMoveType.PICK_UP_LABWARE
+                location=from_location,
+                move_type=_GripperMoveType.PICK_UP_LABWARE,
+                current_labware=current_labware,
             )
             + additional_offset_vector.pickUpOffset
         )
         drop_offset = (
             self.get_total_nominal_gripper_offset_for_move_type(
-                location=to_location, move_type=_GripperMoveType.DROP_LABWARE
+                location=to_location,
+                move_type=_GripperMoveType.DROP_LABWARE,
+                current_labware=current_labware,
             )
             + additional_offset_vector.dropOffset
         )
@@ -1008,7 +1133,10 @@ class GeometryView:
         return location
 
     def get_total_nominal_gripper_offset_for_move_type(
-        self, location: OnDeckLabwareLocation, move_type: _GripperMoveType
+        self,
+        location: OnDeckLabwareLocation,
+        move_type: _GripperMoveType,
+        current_labware: LabwareDefinition,
     ) -> LabwareOffsetVector:
         """Get the total of the offsets to be used to pick up labware in its current location."""
         if move_type == _GripperMoveType.PICK_UP_LABWARE:
@@ -1024,14 +1152,45 @@ class GeometryView:
                     location
                 )
                 ancestor = self._labware.get_parent_location(location.labwareId)
+                extra_offset = LabwareOffsetVector(x=0, y=0, z=0)
+                if (
+                    isinstance(ancestor, ModuleLocation)
+                    and self._modules._state.requested_model_by_id[ancestor.moduleId]
+                    == ModuleModel.THERMOCYCLER_MODULE_V2
+                    and labware_validation.validate_definition_is_lid(current_labware)
+                ):
+                    if "lidOffsets" in current_labware.gripperOffsets.keys():
+                        extra_offset = LabwareOffsetVector(
+                            x=current_labware.gripperOffsets[
+                                "lidOffsets"
+                            ].pickUpOffset.x,
+                            y=current_labware.gripperOffsets[
+                                "lidOffsets"
+                            ].pickUpOffset.y,
+                            z=current_labware.gripperOffsets[
+                                "lidOffsets"
+                            ].pickUpOffset.z,
+                        )
+                    else:
+                        raise errors.LabwareOffsetDoesNotExistError(
+                            f"Labware Definition {current_labware.parameters.loadName} does not contain required field 'lidOffsets' of 'gripperOffsets'."
+                        )
+
                 assert isinstance(
-                    ancestor, (DeckSlotLocation, ModuleLocation)
+                    ancestor,
+                    (
+                        DeckSlotLocation,
+                        ModuleLocation,
+                        OnLabwareLocation,
+                        AddressableAreaLocation,
+                    ),
                 ), "No gripper offsets for off-deck labware"
                 return (
                     direct_parent_offset.pickUpOffset
                     + self._nominal_gripper_offsets_for_location(
                         location=ancestor
                     ).pickUpOffset
+                    + extra_offset
                 )
         else:
             if isinstance(
@@ -1046,16 +1205,65 @@ class GeometryView:
                     location
                 )
                 ancestor = self._labware.get_parent_location(location.labwareId)
+                extra_offset = LabwareOffsetVector(x=0, y=0, z=0)
+                if (
+                    isinstance(ancestor, ModuleLocation)
+                    # todo(mm, 2024-11-06): Do not access private module state; only use public ModuleView methods.
+                    and self._modules._state.requested_model_by_id[ancestor.moduleId]
+                    == ModuleModel.THERMOCYCLER_MODULE_V2
+                    and labware_validation.validate_definition_is_lid(current_labware)
+                ):
+                    if "lidOffsets" in current_labware.gripperOffsets.keys():
+                        extra_offset = LabwareOffsetVector(
+                            x=current_labware.gripperOffsets[
+                                "lidOffsets"
+                            ].pickUpOffset.x,
+                            y=current_labware.gripperOffsets[
+                                "lidOffsets"
+                            ].pickUpOffset.y,
+                            z=current_labware.gripperOffsets[
+                                "lidOffsets"
+                            ].pickUpOffset.z,
+                        )
+                    else:
+                        raise errors.LabwareOffsetDoesNotExistError(
+                            f"Labware Definition {current_labware.parameters.loadName} does not contain required field 'lidOffsets' of 'gripperOffsets'."
+                        )
+
                 assert isinstance(
-                    ancestor, (DeckSlotLocation, ModuleLocation)
+                    ancestor,
+                    (
+                        DeckSlotLocation,
+                        ModuleLocation,
+                        OnLabwareLocation,
+                        AddressableAreaLocation,
+                    ),
                 ), "No gripper offsets for off-deck labware"
                 return (
                     direct_parent_offset.dropOffset
                     + self._nominal_gripper_offsets_for_location(
                         location=ancestor
                     ).dropOffset
+                    + extra_offset
                 )
 
+    # todo(mm, 2024-11-05): This may be incorrect because it does not take the following
+    # offsets into account, which *are* taken into account for the actual gripper movement:
+    #
+    # * The pickup offset in the definition of the parent of the gripped labware.
+    # * The "additional offset" or "user offset", e.g. the `pickUpOffset` and `dropOffset`
+    #   params in the `moveLabware` command.
+    #
+    # And this *does* take these extra offsets into account:
+    #
+    # * The labware's Labware Position Check offset
+    #
+    # For robustness, we should combine this with `get_gripper_labware_movement_waypoints()`.
+    #
+    # We should also be more explicit about which offsets act to move the gripper paddles
+    # relative to the gripped labware, and which offsets act to change how the gripped
+    # labware sits atop its parent. Those have different effects on how far the gripped
+    # labware juts beyond the paddles while it's in transit.
     def check_gripper_labware_tip_collision(
         self,
         gripper_homed_position_z: float,
@@ -1063,18 +1271,22 @@ class GeometryView:
         current_location: OnDeckLabwareLocation,
     ) -> None:
         """Check for potential collision of tips against labware to be lifted."""
-        # TODO(cb, 2024-01-22): Remove the 1 and 8 channel special case once we are doing X axis validation
+        labware_definition = self._labware.get_definition(labware_id)
         pipettes = self._pipettes.get_all()
         for pipette in pipettes:
+            # TODO(cb, 2024-01-22): Remove the 1 and 8 channel special case once we are doing X axis validation
             if self._pipettes.get_channels(pipette.id) in [1, 8]:
                 return
 
             tip = self._pipettes.get_attached_tip(pipette.id)
             if tip:
+                # NOTE: This call to get_labware_highest_z() uses the labware's LPC offset,
+                # which is an inconsistency between this and the actual gripper movement.
+                # See the todo comment above this function.
                 labware_top_z_when_gripped = gripper_homed_position_z + (
                     self.get_labware_highest_z(labware_id=labware_id)
                     - self.get_labware_grip_point(
-                        labware_id=labware_id, location=current_location
+                        labware_definition=labware_definition, location=current_location
                     ).z
                 )
                 # TODO(cb, 2024-01-18): Utilizing the nozzle map and labware X coordinates verify if collisions will occur on the X axis (analysis will use hard coded data to measure from the gripper critical point to the pipette mount)
@@ -1082,7 +1294,7 @@ class GeometryView:
                     _PIPETTE_HOMED_POSITION_Z - tip.length
                 ) < labware_top_z_when_gripped:
                     raise LabwareMovementNotAllowedError(
-                        f"Cannot move labware '{self._labware.get(labware_id).loadName}' when {int(tip.volume)} µL tips are attached."
+                        f"Cannot move labware '{labware_definition.parameters.loadName}' when {int(tip.volume)} µL tips are attached."
                     )
         return
 
@@ -1117,20 +1329,30 @@ class GeometryView:
         """
         parent_location = self._labware.get_parent_location(labware_id)
         assert isinstance(
-            parent_location, (DeckSlotLocation, ModuleLocation)
+            parent_location,
+            (
+                DeckSlotLocation,
+                ModuleLocation,
+                AddressableAreaLocation,
+                OnLabwareLocation,
+            ),
         ), "No gripper offsets for off-deck labware"
 
         if isinstance(parent_location, DeckSlotLocation):
             slot_name = parent_location.slotName
+        elif isinstance(parent_location, AddressableAreaLocation):
+            slot_name = self._addressable_areas.get_addressable_area_base_slot(
+                parent_location.addressableAreaName
+            )
         else:
             module_loc = self._modules.get_location(parent_location.moduleId)
             slot_name = module_loc.slotName
 
-        slot_based_offset = self._labware.get_labware_gripper_offsets(
+        slot_based_offset = self._labware.get_child_gripper_offsets(
             labware_id=labware_id, slot_name=slot_name.to_ot3_equivalent()
         )
 
-        return slot_based_offset or self._labware.get_labware_gripper_offsets(
+        return slot_based_offset or self._labware.get_child_gripper_offsets(
             labware_id=labware_id, slot_name=None
         )
 
@@ -1178,3 +1400,162 @@ class GeometryView:
                 )
 
         return None
+
+    def get_well_offset_adjustment(
+        self,
+        labware_id: str,
+        well_name: str,
+        well_location: WellLocations,
+        well_depth: float,
+        operation_volume: Optional[float] = None,
+    ) -> float:
+        """Return a z-axis distance that accounts for well handling height and operation volume.
+
+        Distance is with reference to the well bottom.
+        """
+        # TODO(pbm, 10-23-24): refactor to smartly reduce height/volume conversions
+        initial_handling_height = self.get_well_handling_height(
+            labware_id=labware_id,
+            well_name=well_name,
+            well_location=well_location,
+            well_depth=well_depth,
+        )
+        if isinstance(well_location, PickUpTipWellLocation):
+            volume = 0.0
+        elif isinstance(well_location.volumeOffset, float):
+            volume = well_location.volumeOffset
+        elif well_location.volumeOffset == "operationVolume":
+            volume = operation_volume or 0.0
+
+        if volume:
+            return self.get_well_height_after_volume(
+                labware_id=labware_id,
+                well_name=well_name,
+                initial_height=initial_handling_height,
+                volume=volume,
+            )
+        else:
+            return initial_handling_height
+
+    def get_meniscus_height(
+        self,
+        labware_id: str,
+        well_name: str,
+    ) -> float:
+        """Returns stored meniscus height in specified well."""
+        well_liquid = self._wells.get_well_liquid_info(
+            labware_id=labware_id, well_name=well_name
+        )
+        if (
+            well_liquid.probed_height is not None
+            and well_liquid.probed_height.height is not None
+        ):
+            return well_liquid.probed_height.height
+        elif (
+            well_liquid.loaded_volume is not None
+            and well_liquid.loaded_volume.volume is not None
+        ):
+            return self.get_well_height_at_volume(
+                labware_id=labware_id,
+                well_name=well_name,
+                volume=well_liquid.loaded_volume.volume,
+            )
+        elif (
+            well_liquid.probed_volume is not None
+            and well_liquid.probed_volume.volume is not None
+        ):
+            return self.get_well_height_at_volume(
+                labware_id=labware_id,
+                well_name=well_name,
+                volume=well_liquid.probed_volume.volume,
+            )
+        else:
+            raise errors.LiquidHeightUnknownError(
+                "Must LiquidProbe or LoadLiquid before specifying WellOrigin.MENISCUS."
+            )
+
+    def get_well_handling_height(
+        self,
+        labware_id: str,
+        well_name: str,
+        well_location: WellLocations,
+        well_depth: float,
+    ) -> float:
+        """Return the handling height for a labware well (with reference to the well bottom)."""
+        handling_height = 0.0
+        if well_location.origin == WellOrigin.TOP:
+            handling_height = well_depth
+        elif well_location.origin == WellOrigin.CENTER:
+            handling_height = well_depth / 2.0
+        elif well_location.origin == WellOrigin.MENISCUS:
+            handling_height = self.get_meniscus_height(
+                labware_id=labware_id, well_name=well_name
+            )
+        return float(handling_height)
+
+    def get_well_height_after_volume(
+        self, labware_id: str, well_name: str, initial_height: float, volume: float
+    ) -> float:
+        """Return the height of liquid in a labware well after a given volume has been handled.
+
+        This is given an initial handling height, with reference to the well bottom.
+        """
+        well_geometry = self._labware.get_well_geometry(
+            labware_id=labware_id, well_name=well_name
+        )
+        initial_volume = find_volume_at_well_height(
+            target_height=initial_height, well_geometry=well_geometry
+        )
+        final_volume = initial_volume + volume
+        return find_height_at_well_volume(
+            target_volume=final_volume, well_geometry=well_geometry
+        )
+
+    def get_well_height_at_volume(
+        self, labware_id: str, well_name: str, volume: float
+    ) -> float:
+        """Convert well volume to height."""
+        well_geometry = self._labware.get_well_geometry(labware_id, well_name)
+        return find_height_at_well_volume(
+            target_volume=volume, well_geometry=well_geometry
+        )
+
+    def get_well_volume_at_height(
+        self, labware_id: str, well_name: str, height: float
+    ) -> float:
+        """Convert well height to volume."""
+        well_geometry = self._labware.get_well_geometry(labware_id, well_name)
+        return find_volume_at_well_height(
+            target_height=height, well_geometry=well_geometry
+        )
+
+    def validate_dispense_volume_into_well(
+        self,
+        labware_id: str,
+        well_name: str,
+        well_location: WellLocations,
+        volume: float,
+    ) -> None:
+        """Raise InvalidDispenseVolumeError if planned dispense volume will overflow well."""
+        well_def = self._labware.get_well_definition(labware_id, well_name)
+        well_volumetric_capacity = well_def.totalLiquidVolume
+        if well_location.origin == WellOrigin.MENISCUS:
+            # TODO(pbm, 10-23-24): refactor to smartly reduce height/volume conversions
+            well_geometry = self._labware.get_well_geometry(labware_id, well_name)
+            meniscus_height = self.get_meniscus_height(
+                labware_id=labware_id, well_name=well_name
+            )
+            meniscus_volume = find_volume_at_well_height(
+                target_height=meniscus_height, well_geometry=well_geometry
+            )
+            remaining_volume = well_volumetric_capacity - meniscus_volume
+            if volume > remaining_volume:
+                raise errors.InvalidDispenseVolumeError(
+                    f"Attempting to dispense {volume}µL of liquid into a well that can currently only hold {remaining_volume}µL (well {well_name} in labware_id: {labware_id})"
+                )
+        else:
+            # TODO(pbm, 10-08-24): factor in well (LabwareStore) state volume
+            if volume > well_volumetric_capacity:
+                raise errors.InvalidDispenseVolumeError(
+                    f"Attempting to dispense {volume}µL of liquid into a well that can only hold {well_volumetric_capacity}µL (well {well_name} in labware_id: {labware_id})"
+                )

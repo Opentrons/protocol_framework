@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   FLEX_ROBOT_TYPE,
@@ -12,7 +12,6 @@ import {
 } from '../step-forms'
 import { moveDeckItem } from '../labware-ingred/actions/actions'
 import { getRobotType } from '../file-data/selectors'
-import { getEnableMoam } from '../feature-flags/selectors'
 import { EditMultipleModulesModal } from './modals/EditModulesModal/EditMultipleModulesModal'
 import { useBlockingHint } from './Hints/useBlockingHint'
 import { MagneticModuleWarningModalContent } from './modals/EditModulesModal/MagneticModuleWarningModalContent'
@@ -34,14 +33,15 @@ export interface ModelModuleInfo {
 
 export const EditModules = (props: EditModulesProps): JSX.Element => {
   const { onCloseClick, moduleToEdit } = props
-  const enableMoam = useSelector(getEnableMoam)
   const { moduleId, moduleType } = moduleToEdit
   const _initialDeckSetup = useSelector(stepFormSelectors.getInitialDeckSetup)
   const robotType = useSelector(getRobotType)
 
-  const MOAM_MODULE_TYPES: ModuleType[] = enableMoam
-    ? [TEMPERATURE_MODULE_TYPE, HEATERSHAKER_MODULE_TYPE, MAGNETIC_BLOCK_TYPE]
-    : [TEMPERATURE_MODULE_TYPE]
+  const MOAM_MODULE_TYPES: ModuleType[] = [
+    TEMPERATURE_MODULE_TYPE,
+    HEATERSHAKER_MODULE_TYPE,
+    MAGNETIC_BLOCK_TYPE,
+  ]
 
   const showMultipleModuleModal =
     robotType === FLEX_ROBOT_TYPE && MOAM_MODULE_TYPES.includes(moduleType)
@@ -50,7 +50,7 @@ export const EditModules = (props: EditModulesProps): JSX.Element => {
   const [
     changeModuleWarningInfo,
     displayModuleWarning,
-  ] = React.useState<null | ModelModuleInfo>(null)
+  ] = useState<null | ModelModuleInfo>(null)
   const dispatch = useDispatch()
 
   const editModuleModel = (selectedModel: ModuleModel): void => {

@@ -4,7 +4,7 @@ from decoy import Decoy
 from opentrons.hardware_control.modules import MagDeck
 
 from opentrons.protocol_engine.execution import EquipmentHandler
-from opentrons.protocol_engine.state import StateView
+from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.state.module_substates import (
     MagneticModuleSubState,
     MagneticModuleId,
@@ -46,4 +46,4 @@ async def test_magnetic_module_disengage_implementation(
     result = await subject.execute(params=params)
 
     decoy.verify(await magnetic_module_hw.deactivate(), times=1)
-    assert result == SuccessData(public=DisengageResult(), private=None)
+    assert result == SuccessData(public=DisengageResult())

@@ -1,16 +1,15 @@
-import * as React from 'react'
 import { Flex } from '../../../primitives'
 import {
+  ALIGN_FLEX_START,
   DIRECTION_ROW,
-  FLEX_AUTO,
   JUSTIFY_SPACE_BETWEEN,
 } from '../../../styles'
 import { SPACING } from '../../../ui-style-constants'
 
 interface ListItemDescriptorProps {
-  type: 'default' | 'mini'
-  description: JSX.Element | string
-  content: JSX.Element | string
+  type: 'default' | 'large'
+  description: JSX.Element
+  content: JSX.Element
 }
 
 export const ListItemDescriptor = (
@@ -22,20 +21,12 @@ export const ListItemDescriptor = (
       flexDirection={DIRECTION_ROW}
       gridGap={SPACING.spacing8}
       width="100%"
-      justifyContent={type === 'mini' ? JUSTIFY_SPACE_BETWEEN : 'none'}
-      padding={
-        type === 'mini'
-          ? `${SPACING.spacing4} ${SPACING.spacing8}`
-          : SPACING.spacing12
-      }
+      alignItems={ALIGN_FLEX_START}
+      justifyContent={type === 'default' ? JUSTIFY_SPACE_BETWEEN : 'none'}
+      padding={type === 'default' ? SPACING.spacing4 : SPACING.spacing12}
     >
-      <Flex
-        flex={type === 'default' && '1'}
-        width={type === 'mini' ? FLEX_AUTO : '40%'}
-      >
-        {description}
-      </Flex>
-      <Flex flex={type === 'default' && '1.95'}>{content}</Flex>
+      {description}
+      {content}
     </Flex>
   )
 }

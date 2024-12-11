@@ -92,6 +92,12 @@ def get_addressable_area_view(
             "robotType": "OT-3 Standard",
             "models": ["OT-3 Standard"],
             "extents": [477.2, 493.8, 0.0],
+            "paddingOffsets": {
+                "rear": -177.42,
+                "front": 51.8,
+                "leftSide": 31.88,
+                "rightSide": -80.32,
+            },
             "mountOffsets": {
                 "left": [-13.5, -60.5, 255.675],
                 "right": [40.5, -60.5, 255.675],
@@ -400,7 +406,7 @@ def test_get_module_offset_for_ot2_standard(
         },
     )
     assert (
-        subject.get_nominal_module_offset("module-id", get_addressable_area_view())
+        subject.get_nominal_offset_to_child("module-id", get_addressable_area_view())
         == expected_offset
     )
 
@@ -464,7 +470,7 @@ def test_get_module_offset_for_ot3_standard(
         },
     )
 
-    result_offset = subject.get_nominal_module_offset(
+    result_offset = subject.get_nominal_offset_to_child(
         "module-id",
         get_addressable_area_view(
             deck_configuration=None,

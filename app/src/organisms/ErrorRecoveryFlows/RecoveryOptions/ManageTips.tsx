@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 
 import {
@@ -20,13 +19,15 @@ import {
   RecoveryFooterButtons,
   RecoverySingleColumnContentWrapper,
 } from '../shared'
-import { DropTipWizardFlows } from '../../DropTipWizardFlows'
-import { DT_ROUTES } from '../../DropTipWizardFlows/constants'
+import { DropTipWizardFlows } from '/app/organisms/DropTipWizardFlows'
+import { DT_ROUTES } from '/app/organisms/DropTipWizardFlows/constants'
 import { SelectRecoveryOption } from './SelectRecoveryOption'
 
-import type { PipetteWithTip } from '../../DropTipWizardFlows'
 import type { RecoveryContentProps, RecoveryRoute, RouteStep } from '../types'
-import type { FixitCommandTypeUtils } from '../../DropTipWizardFlows/types'
+import type {
+  FixitCommandTypeUtils,
+  PipetteWithTip,
+} from '/app/organisms/DropTipWizardFlows'
 
 // The Drop Tip flow entry point. Includes entry from SelectRecoveryOption and CancelRun.
 export function ManageTips(props: RecoveryContentProps): JSX.Element {
@@ -64,7 +65,7 @@ export function BeginRemoval({
   const { aPipetteWithTip } = tipStatusUtils
   const {
     proceedNextStep,
-    setRobotInMotion,
+    handleMotionRouting,
     proceedToRouteAndStep,
   } = routeUpdateActions
   const { cancelRun } = recoveryCommands
@@ -83,7 +84,7 @@ export function BeginRemoval({
         RETRY_NEW_TIPS.STEPS.REPLACE_TIPS
       )
     } else {
-      void setRobotInMotion(true, ROBOT_CANCELING.ROUTE).then(() => {
+      void handleMotionRouting(true, ROBOT_CANCELING.ROUTE).then(() => {
         cancelRun()
       })
     }
@@ -151,7 +152,7 @@ function DropTipFlowsContainer(
     currentRecoveryOptionUtils,
   } = props
   const { DROP_TIP_FLOWS, ROBOT_CANCELING, RETRY_NEW_TIPS } = RECOVERY_MAP
-  const { proceedToRouteAndStep, setRobotInMotion } = routeUpdateActions
+  const { proceedToRouteAndStep, handleMotionRouting } = routeUpdateActions
   const { selectedRecoveryOption } = currentRecoveryOptionUtils
   const { setTipStatusResolved } = tipStatusUtils
   const { cancelRun } = recoveryCommands
@@ -170,7 +171,7 @@ function DropTipFlowsContainer(
   }
 
   const onEmptyCache = (): void => {
-    void setRobotInMotion(true, ROBOT_CANCELING.ROUTE).then(() => {
+    void handleMotionRouting(true, ROBOT_CANCELING.ROUTE).then(() => {
       cancelRun()
     })
   }
@@ -182,15 +183,14 @@ function DropTipFlowsContainer(
   const fixitCommandTypeUtils = useDropTipFlowUtils(props)
 
   return (
-    <RecoverySingleColumnContentWrapper>
-      <DropTipWizardFlows
-        robotType={robotType}
-        closeFlow={onCloseFlow}
-        mount={mount}
-        instrumentModelSpecs={specs}
-        fixitCommandTypeUtils={fixitCommandTypeUtils}
-      />
-    </RecoverySingleColumnContentWrapper>
+    <DropTipWizardFlows
+      robotType={robotType}
+      closeFlow={onCloseFlow}
+      mount={mount}
+      instrumentModelSpecs={specs}
+      fixitCommandTypeUtils={fixitCommandTypeUtils}
+      modalStyle="intervention"
+    />
   )
 }
 
@@ -202,7 +202,7 @@ export function useDropTipFlowUtils({
   subMapUtils,
   routeUpdateActions,
   recoveryMap,
-  failedPipetteInfo,
+  errorKind,
 }: RecoveryContentProps): FixitCommandTypeUtils {
   const { t } = useTranslation('error_recovery')
   const {
@@ -211,7 +211,7 @@ export function useDropTipFlowUtils({
     ERROR_WHILE_RECOVERING,
     DROP_TIP_FLOWS,
   } = RECOVERY_MAP
-  const { runId } = tipStatusUtils
+  const { runId, gripperErrorFirstPipetteWithTip } = tipStatusUtils
   const { step } = recoveryMap
   const { selectedRecoveryOption } = currentRecoveryOptionUtils
   const { proceedToRouteAndStep } = routeUpdateActions
@@ -253,7 +253,7 @@ export function useDropTipFlowUtils({
   const buildCopyOverrides = (): FixitCommandTypeUtils['copyOverrides'] => {
     return {
       tipDropCompleteBtnCopy: buildTipDropCompleteBtn(),
-      beforeBeginningTopText: t('preserve_aspirated_liquid'),
+      beforeBeginningTopText: t('do_you_need_to_blowout'),
     }
   }
 
@@ -305,11 +305,12 @@ export function useDropTipFlowUtils({
   }
 
   const pipetteId =
-    failedCommand != null &&
+    gripperErrorFirstPipetteWithTip ??
+    (failedCommand != null &&
     'params' in failedCommand.byRunRecord &&
     'pipetteId' in failedCommand.byRunRecord.params
       ? failedCommand.byRunRecord.params.pipetteId
-      : null
+      : null)
 
   return {
     runId,

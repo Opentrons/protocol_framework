@@ -1181,7 +1181,14 @@
       },
       "id": "UUID",
       "key": "bd403a1c851a75b4b68ce34796d713fa",
-      "notes": [],
+      "notes": [
+        {
+          "longMessage": "Handling this command failure with FAIL_RUN.",
+          "noteKind": "debugErrorRecovery",
+          "shortMessage": "Handling this command failure with FAIL_RUN.",
+          "source": "execution"
+        }
+      ],
       "params": {
         "liquidPresenceDetection": false,
         "mount": "left",

@@ -12060,7 +12060,8 @@
             "y": 0,
             "z": 1.0
           },
-          "origin": "bottom"
+          "origin": "bottom",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12093,7 +12094,8 @@
             "y": 0,
             "z": 0.5
           },
-          "origin": "bottom"
+          "origin": "bottom",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12201,7 +12203,8 @@
             "y": 0,
             "z": 1.0
           },
-          "origin": "bottom"
+          "origin": "bottom",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12234,7 +12237,8 @@
             "y": 0,
             "z": 0.5
           },
-          "origin": "bottom"
+          "origin": "bottom",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12356,7 +12360,8 @@
             "y": 0,
             "z": 1.0
           },
-          "origin": "bottom"
+          "origin": "bottom",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12389,7 +12394,8 @@
             "y": 0,
             "z": 0.5
           },
-          "origin": "bottom"
+          "origin": "bottom",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12581,7 +12587,14 @@
       },
       "id": "UUID",
       "key": "702caca4-12c8-4f26-a68e-138134723f09",
-      "notes": [],
+      "notes": [
+        {
+          "longMessage": "Handling this command failure with FAIL_RUN.",
+          "noteKind": "debugErrorRecovery",
+          "shortMessage": "Handling this command failure with FAIL_RUN.",
+          "source": "execution"
+        }
+      ],
       "params": {
         "labwareId": "UUID",
         "newLocation": {

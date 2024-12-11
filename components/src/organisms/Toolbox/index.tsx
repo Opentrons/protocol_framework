@@ -1,27 +1,34 @@
 import * as React from 'react'
-import { Icon } from '../../icons'
 import { Box, Btn, Flex } from '../../primitives'
 import {
   ALIGN_CENTER,
   DIRECTION_COLUMN,
   JUSTIFY_SPACE_BETWEEN,
+  NO_WRAP,
   POSITION_FIXED,
 } from '../../styles'
 import { BORDERS, COLORS } from '../../helix-design-system'
 import { SPACING } from '../../ui-style-constants'
-import { PrimaryButton, StyledText } from '../../atoms'
+import { PrimaryButton } from '../../atoms'
 import { textDecorationUnderline } from '../../ui-style-constants/typography'
-import type { IconName } from '../../icons'
 
 export interface ToolboxProps {
-  title: string
+  title: JSX.Element
   children: React.ReactNode
-  confirmButtonText: string
-  onConfirmClick: () => void
-  onCloseClick: () => void
-  closeButtonText: string
+  disableCloseButton?: boolean
   width?: string
-  titleIconName?: IconName
+  height?: string
+  confirmButtonText?: string
+  onConfirmClick?: () => void
+  confirmButton?: JSX.Element
+  onCloseClick?: () => void
+  closeButton?: JSX.Element
+  side?: 'left' | 'right'
+  horizontalSide?: 'top' | 'bottom'
+  childrenPadding?: string
+  subHeader?: JSX.Element | null
+  secondaryHeaderButton?: JSX.Element
+  position?: string
 }
 
 export function Toolbox(props: ToolboxProps): JSX.Element {
@@ -31,9 +38,17 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
     confirmButtonText,
     onCloseClick,
     onConfirmClick,
-    titleIconName,
-    closeButtonText,
+    closeButton,
+    height = '100%',
+    disableCloseButton = false,
     width = '19.5rem',
+    side = 'right',
+    horizontalSide = 'bottom',
+    confirmButton,
+    childrenPadding = SPACING.spacing16,
+    subHeader,
+    secondaryHeaderButton,
+    position = POSITION_FIXED,
   } = props
 
   const slideOutRef = React.useRef<HTMLDivElement>(null)
@@ -54,16 +69,26 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
     handleScroll()
   }, [slideOutRef])
 
+  const positionStyles =
+    position === POSITION_FIXED
+      ? {
+          ...(side === 'right' && { right: '0' }),
+          ...(side === 'left' && { left: '0' }),
+          ...(horizontalSide === 'bottom' && { bottom: '0' }),
+          ...(horizontalSide === 'top' && { top: '5rem' }),
+          zIndex: 10,
+        }
+      : {}
   return (
-    <Box
+    <Flex
       cursor="auto"
-      position={POSITION_FIXED}
-      right="0"
-      top="0"
       backgroundColor={COLORS.white}
       boxShadow="0px 3px 6px rgba(0, 0, 0, 0.23)"
-      height="100%"
+      height={height}
+      {...positionStyles}
       borderRadius={BORDERS.borderRadius8}
+      width={width}
+      flex="0"
     >
       <Flex
         width={width}
@@ -72,29 +97,35 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
         justifyContent={JUSTIFY_SPACE_BETWEEN}
       >
         <Flex
-          justifyContent={JUSTIFY_SPACE_BETWEEN}
-          alignItems={ALIGN_CENTER}
           padding={`${SPACING.spacing20} ${SPACING.spacing16}`}
+          flexDirection={DIRECTION_COLUMN}
           borderBottom={`1px solid ${COLORS.grey30}`}
         >
-          <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
-            {titleIconName != null ? (
-              <Icon name={titleIconName} size="1.25rem" />
-            ) : null}
-            <StyledText desktopStyle="bodyLargeSemiBold">{title}</StyledText>
-          </Flex>
-          <Btn
-            onClick={onCloseClick}
-            textDecoration={textDecorationUnderline}
-            data-testid={`Toolbox_${closeButtonText}`}
+          {subHeader != null ? subHeader : null}
+          <Flex
+            justifyContent={JUSTIFY_SPACE_BETWEEN}
+            alignItems={ALIGN_CENTER}
+            gridGap={SPACING.spacing12}
           >
-            <StyledText desktopStyle="bodyDefaultRegular">
-              {closeButtonText}
-            </StyledText>
-          </Btn>
+            {title}
+            <Flex gridGap={SPACING.spacing4}>
+              {secondaryHeaderButton != null ? secondaryHeaderButton : null}
+              {onCloseClick != null && closeButton != null ? (
+                <Btn
+                  onClick={onCloseClick}
+                  textDecoration={textDecorationUnderline}
+                  data-testid="Toolbox_closeButton"
+                  whiteSpace={NO_WRAP}
+                  disable={disableCloseButton}
+                >
+                  {closeButton}
+                </Btn>
+              ) : null}
+            </Flex>
+          </Flex>
         </Flex>
         <Box
-          padding={SPACING.spacing16}
+          padding={childrenPadding}
           flex="1 1 auto"
           overflowY="auto"
           ref={slideOutRef}
@@ -102,23 +133,29 @@ export function Toolbox(props: ToolboxProps): JSX.Element {
         >
           {children}
         </Box>
-        <Box
-          padding={SPACING.spacing16}
-          boxShadow={isScrolledToBottom ? 'none' : '0px -4px 12px #0000001a'}
-          zIndex={3}
-          width="100%"
-          borderTop={`1px solid ${COLORS.grey30}`}
-          alignItems={ALIGN_CENTER}
-        >
-          <PrimaryButton
+        {(onConfirmClick != null && confirmButtonText != null) ||
+        confirmButton != null ? (
+          <Box
+            padding={SPACING.spacing16}
+            boxShadow={isScrolledToBottom ? 'none' : '0px -4px 12px #0000001a'}
+            zIndex={3}
             width="100%"
-            data-testid="Toolbox_confirmButton"
-            onClick={onConfirmClick}
+            borderTop={`1px solid ${COLORS.grey30}`}
+            alignItems={ALIGN_CENTER}
           >
-            {confirmButtonText}
-          </PrimaryButton>
-        </Box>
+            {onConfirmClick != null && confirmButtonText != null ? (
+              <PrimaryButton
+                width="100%"
+                data-testid="Toolbox_confirmButton"
+                onClick={onConfirmClick}
+              >
+                {confirmButtonText}
+              </PrimaryButton>
+            ) : null}
+            {confirmButton != null ? confirmButton : null}
+          </Box>
+        ) : null}
       </Flex>
-    </Box>
+    </Flex>
   )
 }

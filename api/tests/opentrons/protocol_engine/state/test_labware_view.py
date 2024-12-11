@@ -40,7 +40,7 @@ from opentrons.protocol_engine.types import (
     OverlapOffset,
     LabwareMovementOffsetData,
 )
-from opentrons.protocol_engine.state.move_types import EdgePathType
+from opentrons.protocol_engine.state._move_types import EdgePathType
 from opentrons.protocol_engine.state.labware import (
     LabwareState,
     LabwareView,
@@ -460,6 +460,17 @@ def test_get_well_definition_get_first(well_plate_def: LabwareDefinition) -> Non
     assert result == expected_well_def
 
 
+def test_get_well_geometry_raises_error(well_plate_def: LabwareDefinition) -> None:
+    """It should raise an IncompleteLabwareDefinitionError when there's no innerLabwareGeometry."""
+    subject = get_labware_view(
+        labware_by_id={"plate-id": plate},
+        definitions_by_uri={"some-plate-uri": well_plate_def},
+    )
+
+    with pytest.raises(errors.IncompleteLabwareDefinitionError):
+        subject.get_well_geometry(labware_id="plate-id")
+
+
 def test_get_well_size_circular(well_plate_def: LabwareDefinition) -> None:
     """It should return the well dimensions of a circular well."""
     subject = get_labware_view(
@@ -675,19 +686,14 @@ def test_get_dimensions(well_plate_def: LabwareDefinition) -> None:
 
 def test_get_labware_overlap_offsets() -> None:
     """It should get the labware overlap offsets."""
-    subject = get_labware_view(
-        labware_by_id={"plate-id": plate},
-        definitions_by_uri={
-            "some-plate-uri": LabwareDefinition.construct(  # type: ignore[call-arg]
-                stackingOffsetWithLabware={
-                    "bottom-labware-name": SharedDataOverlapOffset(x=1, y=2, z=3)
-                }
-            )
-        },
-    )
-
+    subject = get_labware_view()
     result = subject.get_labware_overlap_offsets(
-        labware_id="plate-id", below_labware_name="bottom-labware-name"
+        definition=LabwareDefinition.construct(  # type: ignore[call-arg]
+            stackingOffsetWithLabware={
+                "bottom-labware-name": SharedDataOverlapOffset(x=1, y=2, z=3)
+            }
+        ),
+        below_labware_name="bottom-labware-name",
     )
 
     assert result == OverlapOffset(x=1, y=2, z=3)
@@ -766,15 +772,12 @@ def test_get_module_overlap_offsets(
     """It should get the labware overlap offsets."""
     subject = get_labware_view(
         deck_definition=spec_deck_definition,
-        labware_by_id={"plate-id": plate},
-        definitions_by_uri={
-            "some-plate-uri": LabwareDefinition.construct(  # type: ignore[call-arg]
-                stackingOffsetWithModule=stacking_offset_with_module
-            )
-        },
     )
     result = subject.get_module_overlap_offsets(
-        labware_id="plate-id", module_model=module_model
+        definition=LabwareDefinition.construct(  # type: ignore[call-arg]
+            stackingOffsetWithModule=stacking_offset_with_module
+        ),
+        module_model=module_model,
     )
 
     assert result == expected_offset
@@ -1264,7 +1267,9 @@ def test_raise_if_labware_inaccessible_by_pipette_off_deck() -> None:
         subject.raise_if_labware_inaccessible_by_pipette("labware-id")
 
 
-def test_raise_if_labware_inaccessible_by_pipette_stacked_labware_on_staging_area() -> None:
+def test_raise_if_labware_inaccessible_by_pipette_stacked_labware_on_staging_area() -> (
+    None
+):
     """It should raise if the labware is stacked on a staging slot."""
     subject = get_labware_view(
         labware_by_id={
@@ -1384,13 +1389,18 @@ def test_raise_if_labware_cannot_be_stacked_on_labware_on_adapter() -> None:
             ),
         },
         definitions_by_uri={
+            "def-uri-1": LabwareDefinition.construct(  # type: ignore[call-arg]
+                allowedRoles=[LabwareRole.labware]
+            ),
             "def-uri-2": LabwareDefinition.construct(  # type: ignore[call-arg]
                 allowedRoles=[LabwareRole.adapter]
-            )
+            ),
         },
     )
 
-    with pytest.raises(errors.LabwareCannotBeStackedError, match="on top of adapter"):
+    with pytest.raises(
+        errors.LabwareCannotBeStackedError, match="cannot be loaded to stack"
+    ):
         subject.raise_if_labware_cannot_be_stacked(
             top_labware_definition=LabwareDefinition.construct(  # type: ignore[call-arg]
                 parameters=Parameters.construct(  # type: ignore[call-arg]
@@ -1401,6 +1411,90 @@ def test_raise_if_labware_cannot_be_stacked_on_labware_on_adapter() -> None:
                 },
             ),
             bottom_labware_id="labware-id",
+        )
+
+
+@pytest.mark.parametrize(
+    argnames=[
+        "allowed_roles",
+        "stacking_quirks",
+        "exception",
+    ],
+    argvalues=[
+        [
+            [LabwareRole.labware],
+            [],
+            pytest.raises(errors.LabwareCannotBeStackedError),
+        ],
+        [
+            [LabwareRole.lid],
+            ["stackingMaxFive"],
+            does_not_raise(),
+        ],
+    ],
+)
+def test_labware_stacking_height_passes_or_raises(
+    allowed_roles: List[LabwareRole],
+    stacking_quirks: List[str],
+    exception: ContextManager[None],
+) -> None:
+    """It should raise if the labware is stacked too high, and pass if the labware definition allowed this."""
+    subject = get_labware_view(
+        labware_by_id={
+            "labware-id4": LoadedLabware(
+                id="labware-id4",
+                loadName="test",
+                definitionUri="def-uri-1",
+                location=OnLabwareLocation(labwareId="labware-id3"),
+            ),
+            "labware-id3": LoadedLabware(
+                id="labware-id3",
+                loadName="test",
+                definitionUri="def-uri-1",
+                location=OnLabwareLocation(labwareId="labware-id2"),
+            ),
+            "labware-id2": LoadedLabware(
+                id="labware-id2",
+                loadName="test",
+                definitionUri="def-uri-1",
+                location=OnLabwareLocation(labwareId="labware-id1"),
+            ),
+            "labware-id1": LoadedLabware(
+                id="labware-id1",
+                loadName="test",
+                definitionUri="def-uri-1",
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_1),
+            ),
+        },
+        definitions_by_uri={
+            "def-uri-1": LabwareDefinition.construct(  # type: ignore[call-arg]
+                allowedRoles=allowed_roles,
+                parameters=Parameters.construct(
+                    format="irregular",
+                    quirks=stacking_quirks,
+                    isTiprack=False,
+                    loadName="name",
+                    isMagneticModuleCompatible=False,
+                ),
+            )
+        },
+    )
+
+    with exception:
+        subject.raise_if_labware_cannot_be_stacked(
+            top_labware_definition=LabwareDefinition.construct(  # type: ignore[call-arg]
+                parameters=Parameters.construct(
+                    format="irregular",
+                    quirks=stacking_quirks,
+                    isTiprack=False,
+                    loadName="name",
+                    isMagneticModuleCompatible=False,
+                ),
+                stackingOffsetWithLabware={
+                    "test": SharedDataOverlapOffset(x=0, y=0, z=0)
+                },
+            ),
+            bottom_labware_id="labware-id4",
         )
 
 
@@ -1428,10 +1522,9 @@ def test_get_labware_gripper_offsets(
     )
 
     assert (
-        subject.get_labware_gripper_offsets(labware_id="plate-id", slot_name=None)
-        is None
+        subject.get_child_gripper_offsets(labware_id="plate-id", slot_name=None) is None
     )
-    assert subject.get_labware_gripper_offsets(
+    assert subject.get_child_gripper_offsets(
         labware_id="adapter-plate-id", slot_name=DeckSlotName.SLOT_D1
     ) == LabwareMovementOffsetData(
         pickUpOffset=LabwareOffsetVector(x=0, y=0, z=0),
@@ -1468,13 +1561,13 @@ def test_get_labware_gripper_offsets_default_no_slots(
     )
 
     assert (
-        subject.get_labware_gripper_offsets(
+        subject.get_child_gripper_offsets(
             labware_id="labware-id", slot_name=DeckSlotName.SLOT_D1
         )
         is None
     )
 
-    assert subject.get_labware_gripper_offsets(
+    assert subject.get_child_gripper_offsets(
         labware_id="labware-id", slot_name=None
     ) == LabwareMovementOffsetData(
         pickUpOffset=LabwareOffsetVector(x=1, y=2, z=3),
@@ -1487,16 +1580,10 @@ def test_get_grip_force(
     reservoir_def: LabwareDefinition,
 ) -> None:
     """It should get the grip force, if present, from labware definition or return default."""
-    subject = get_labware_view(
-        labware_by_id={"flex-tiprack-id": flex_tiprack, "reservoir-id": reservoir},
-        definitions_by_uri={
-            "some-flex-tiprack-uri": flex_50uL_tiprack,
-            "some-reservoir-uri": reservoir_def,
-        },
-    )
+    subject = get_labware_view()
 
-    assert subject.get_grip_force("flex-tiprack-id") == 16  # from definition
-    assert subject.get_grip_force("reservoir-id") == 15  # default
+    assert subject.get_grip_force(flex_50uL_tiprack) == 16  # from definition
+    assert subject.get_grip_force(reservoir_def) == 15  # default
 
 
 def test_get_grip_height_from_labware_bottom(
@@ -1504,20 +1591,11 @@ def test_get_grip_height_from_labware_bottom(
     reservoir_def: LabwareDefinition,
 ) -> None:
     """It should get the grip height, if present, from labware definition or return default."""
-    subject = get_labware_view(
-        labware_by_id={"plate-id": plate, "reservoir-id": reservoir},
-        definitions_by_uri={
-            "some-plate-uri": well_plate_def,
-            "some-reservoir-uri": reservoir_def,
-        },
-    )
-
+    subject = get_labware_view()
     assert (
-        subject.get_grip_height_from_labware_bottom("plate-id") == 12.2
+        subject.get_grip_height_from_labware_bottom(well_plate_def) == 12.2
     )  # from definition
-    assert (
-        subject.get_grip_height_from_labware_bottom("reservoir-id") == 15.7
-    )  # default
+    assert subject.get_grip_height_from_labware_bottom(reservoir_def) == 15.7  # default
 
 
 @pytest.mark.parametrize(
@@ -1536,18 +1614,7 @@ def test_calculates_well_bounding_box(
 ) -> None:
     """It should be able to calculate well bounding boxes."""
     definition = LabwareDefinition.parse_obj(load_definition(labware_to_check, 1))
-    labware = LoadedLabware(
-        id="test-labware-id",
-        loadName=labware_to_check,
-        location=DeckSlotLocation(slotName=DeckSlotName.SLOT_1),
-        definitionUri="test-labware-uri",
-        offsetId=None,
-        displayName="Fancy Plate Name",
-    )
-    subject = get_labware_view(
-        labware_by_id={"test-labware-id": labware},
-        definitions_by_uri={"test-labware-uri": definition},
-    )
-    assert subject.get_well_bbox("test-labware-id").x == pytest.approx(well_bbox.x)
-    assert subject.get_well_bbox("test-labware-id").y == pytest.approx(well_bbox.y)
-    assert subject.get_well_bbox("test-labware-id").z == pytest.approx(well_bbox.z)
+    subject = get_labware_view()
+    assert subject.get_well_bbox(definition).x == pytest.approx(well_bbox.x)
+    assert subject.get_well_bbox(definition).y == pytest.approx(well_bbox.y)
+    assert subject.get_well_bbox(definition).z == pytest.approx(well_bbox.z)

@@ -45,7 +45,7 @@ async def test_update_position_estimators_implementation(
 
     result = await subject.execute(data)
 
-    assert result == SuccessData(public=UpdatePositionEstimatorsResult(), private=None)
+    assert result == SuccessData(public=UpdatePositionEstimatorsResult())
 
     decoy.verify(
         await ot3_hardware_api.update_axis_position_estimations(

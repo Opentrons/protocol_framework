@@ -120,11 +120,13 @@ export function getDefaultsForStepType(
       return {
         moduleId: null,
         pauseAction: null,
+        // TODO: (nd: 10/23/2024) remove individual time unit fields
         pauseHour: null,
         pauseMessage: '',
         pauseMinute: null,
         pauseSecond: null,
         pauseTemperature: null,
+        pauseTime: null,
       }
 
     case 'manualIntervention':
@@ -150,8 +152,10 @@ export function getDefaultsForStepType(
     case 'heaterShaker':
       return {
         heaterShakerSetTimer: null,
+        // TODO: (nd: 10/23/2024) remove individual time unit fields
         heaterShakerTimerMinutes: null,
         heaterShakerTimerSeconds: null,
+        heaterShakerTimer: null,
         latchOpen: false,
         moduleId: null,
         setHeaterShakerTemperature: null,

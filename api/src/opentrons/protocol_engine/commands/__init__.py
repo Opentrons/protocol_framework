@@ -38,7 +38,6 @@ from .command_unions import (
     CommandCreate,
     CommandResult,
     CommandType,
-    CommandPrivateResult,
     CommandDefinedErrorData,
 )
 
@@ -153,7 +152,6 @@ from .load_pipette import (
     LoadPipetteCreate,
     LoadPipetteResult,
     LoadPipetteCommandType,
-    LoadPipettePrivateResult,
 )
 
 from .move_labware import (
@@ -306,7 +304,6 @@ from .configure_nozzle_layout import (
     ConfigureNozzleLayoutCreate,
     ConfigureNozzleLayoutParams,
     ConfigureNozzleLayoutResult,
-    ConfigureNozzleLayoutPrivateResult,
     ConfigureNozzleLayoutCommandType,
 )
 
@@ -569,7 +566,6 @@ __all__ = [
     "ConfigureNozzleLayoutParams",
     "ConfigureNozzleLayoutResult",
     "ConfigureNozzleLayoutCommandType",
-    "ConfigureNozzleLayoutPrivateResult",
     # get pipette tip presence bundle
     "GetTipPresence",
     "GetTipPresenceCreate",

@@ -1,4 +1,8 @@
 """Test load pipette commands."""
+from opentrons.protocol_engine.state.update_types import (
+    PipetteConfigUpdate,
+    StateUpdate,
+)
 import pytest
 from decoy import Decoy
 
@@ -15,7 +19,6 @@ from opentrons.protocol_engine.commands.command import SuccessData
 from opentrons.protocol_engine.commands.configure_for_volume import (
     ConfigureForVolumeParams,
     ConfigureForVolumeResult,
-    ConfigureForVolumePrivateResult,
     ConfigureForVolumeImplementation,
 )
 from opentrons_shared_data.pipette.types import PipetteNameType
@@ -81,7 +84,9 @@ async def test_configure_for_volume_implementation(
 
     assert result == SuccessData(
         public=ConfigureForVolumeResult(),
-        private=ConfigureForVolumePrivateResult(
-            pipette_id="pipette-id", serial_number="some number", config=config
+        state_update=StateUpdate(
+            pipette_config=PipetteConfigUpdate(
+                pipette_id="pipette-id", serial_number="some number", config=config
+            )
         ),
     )

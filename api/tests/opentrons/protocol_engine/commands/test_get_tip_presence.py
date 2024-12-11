@@ -41,5 +41,5 @@ async def test_get_tip_presence_implementation(
     result = await subject.execute(data)
 
     assert result == SuccessData(
-        public=GetTipPresenceResult(status=status), private=None
+        public=GetTipPresenceResult(status=status),
     )

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useMemo, Fragment } from 'react'
 import styled, { css } from 'styled-components'
 import { useSelector } from 'react-redux'
 import isEqual from 'lodash/isEqual'
@@ -11,7 +11,7 @@ import {
   getVectorSum,
   IDENTITY_VECTOR,
 } from '@opentrons/shared-data'
-import { NeedHelpLink } from '../CalibrationPanels'
+import { NeedHelpLink } from '/app/molecules/OT2CalibrationNeedHelpLink'
 import {
   ALIGN_CENTER,
   ALIGN_FLEX_END,
@@ -29,16 +29,17 @@ import {
   SPACING,
   LegacyStyledText,
   TYPOGRAPHY,
+  DIRECTION_ROW,
 } from '@opentrons/components'
-import { PythonLabwareOffsetSnippet } from '../../molecules/PythonLabwareOffsetSnippet'
+import { PythonLabwareOffsetSnippet } from '/app/molecules/PythonLabwareOffsetSnippet'
 import {
   getIsLabwareOffsetCodeSnippetsOn,
   getIsOnDevice,
-} from '../../redux/config'
-import { SmallButton } from '../../atoms/buttons'
-import { LabwareOffsetTabs } from '../LabwareOffsetTabs'
-import { getCurrentOffsetForLabwareInLocation } from '../Devices/ProtocolRun/utils/getCurrentOffsetForLabwareInLocation'
-import { getLabwareDefinitionsFromCommands } from '../../molecules/Command/utils/getLabwareDefinitionsFromCommands'
+} from '/app/redux/config'
+import { SmallButton } from '/app/atoms/buttons'
+import { LabwareOffsetTabs } from '/app/organisms/LabwareOffsetTabs'
+import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
+import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import { getDisplayLocation } from './utils/getDisplayLocation'
 
 import type {
@@ -84,7 +85,7 @@ export const ResultsSummary = (
   )
   const isOnDevice = useSelector(getIsOnDevice)
 
-  const offsetsToApply = React.useMemo(() => {
+  const offsetsToApply = useMemo(() => {
     return workingOffsets.map<LabwareOffsetCreateData>(
       ({ initialPosition, finalPosition, labwareId, location }) => {
         const definitionUri =
@@ -321,7 +322,7 @@ const OffsetTable = (props: OffsetTableProps): JSX.Element => {
                 ) : (
                   <Flex>
                     {[vector.x, vector.y, vector.z].map((axis, index) => (
-                      <React.Fragment key={index}>
+                      <Fragment key={index}>
                         <LegacyStyledText
                           as="p"
                           marginLeft={index > 0 ? SPACING.spacing8 : 0}
@@ -333,7 +334,7 @@ const OffsetTable = (props: OffsetTableProps): JSX.Element => {
                         <LegacyStyledText as="p">
                           {axis.toFixed(1)}
                         </LegacyStyledText>
-                      </React.Fragment>
+                      </Fragment>
                     ))}
                   </Flex>
                 )}
@@ -373,16 +374,18 @@ export const TerseOffsetTable = (props: OffsetTableProps): JSX.Element => {
           return (
             <TerseTableRow key={index}>
               <TerseTableDatum>
-                <DeckInfoLabel deckLabel={location.slotName} />
-                {location.moduleModel != null ? (
-                  <DeckInfoLabel
-                    iconName={
-                      MODULE_ICON_NAME_BY_TYPE[
-                        getModuleType(location.moduleModel)
-                      ]
-                    }
-                  />
-                ) : null}
+                <Flex flexDirection={DIRECTION_ROW} gridGap={SPACING.spacing4}>
+                  <DeckInfoLabel deckLabel={location.slotName} />
+                  {location.moduleModel != null ? (
+                    <DeckInfoLabel
+                      iconName={
+                        MODULE_ICON_NAME_BY_TYPE[
+                          getModuleType(location.moduleModel)
+                        ]
+                      }
+                    />
+                  ) : null}
+                </Flex>
               </TerseTableDatum>
               <TerseTableDatum>
                 <LegacyStyledText
@@ -398,7 +401,7 @@ export const TerseOffsetTable = (props: OffsetTableProps): JSX.Element => {
                 ) : (
                   <Flex>
                     {[vector.x, vector.y, vector.z].map((axis, index) => (
-                      <React.Fragment key={index}>
+                      <Fragment key={index}>
                         <LegacyStyledText
                           fontSize={TYPOGRAPHY.fontSize20}
                           lineHeight={TYPOGRAPHY.lineHeight24}
@@ -414,7 +417,7 @@ export const TerseOffsetTable = (props: OffsetTableProps): JSX.Element => {
                         >
                           {axis.toFixed(1)}
                         </LegacyStyledText>
-                      </React.Fragment>
+                      </Fragment>
                     ))}
                   </Flex>
                 )}

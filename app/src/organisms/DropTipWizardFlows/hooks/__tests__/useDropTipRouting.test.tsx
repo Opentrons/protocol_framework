@@ -18,7 +18,7 @@ describe('useDropTipRouting', () => {
     const { result } = renderHook(() => useDropTipRouting())
 
     await act(async () => {
-      await result.current.proceedToRoute(DT_ROUTES.BLOWOUT)
+      await result.current.proceedToRouteAndStep(DT_ROUTES.BLOWOUT)
     })
 
     const initialStep = result.current.currentStep
@@ -34,7 +34,7 @@ describe('useDropTipRouting', () => {
     const { result } = renderHook(() => useDropTipRouting())
 
     await act(async () => {
-      await result.current.proceedToRoute(DT_ROUTES.BLOWOUT)
+      await result.current.proceedToRouteAndStep(DT_ROUTES.BLOWOUT)
     })
 
     await act(async () => {
@@ -75,11 +75,11 @@ describe('useDropTipRouting', () => {
     expect(result.current.currentStepIdx).toBe(0)
   })
 
-  it('should proceed to the specified route when proceedToRoute is called', async () => {
+  it('should proceed to the specified route when proceedToRouteAndStep is called', async () => {
     const { result } = renderHook(() => useDropTipRouting())
 
     await act(async () => {
-      await result.current.proceedToRoute(DT_ROUTES.BLOWOUT)
+      await result.current.proceedToRouteAndStep(DT_ROUTES.BLOWOUT)
     })
     expect(result.current.currentRoute).toBe(DT_ROUTES.BLOWOUT)
     expect(result.current.currentStep).toBe(head(DT_ROUTES.BLOWOUT))
@@ -98,7 +98,7 @@ describe('useReportMap', () => {
     const { result } = renderHook(() => useDropTipRouting(mockFixitUtils))
 
     await act(async () => {
-      await result.current.proceedToRoute(DT_ROUTES.BLOWOUT)
+      await result.current.proceedToRouteAndStep(DT_ROUTES.BLOWOUT)
     })
 
     expect(mockReportMap).toHaveBeenCalledWith({
@@ -143,5 +143,16 @@ describe('getInitialRouteAndStep', () => {
 
     expect(initialRoute).toBe(DT_ROUTES.DROP_TIP)
     expect(initialStep).toBe(DT_ROUTES.DROP_TIP[2])
+  })
+
+  it('should return the overridden route and first step when fixitUtils.routeOverride.route is provided but routeOverride.step is not provided', () => {
+    const fixitUtils = {
+      routeOverride: { route: DT_ROUTES.DROP_TIP, step: null },
+    } as any
+
+    const [initialRoute, initialStep] = getInitialRouteAndStep(fixitUtils)
+
+    expect(initialRoute).toBe(DT_ROUTES.DROP_TIP)
+    expect(initialStep).toBe(DT_ROUTES.DROP_TIP[0])
   })
 })

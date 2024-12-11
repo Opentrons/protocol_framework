@@ -3,7 +3,7 @@
 from decoy import Decoy
 
 from opentrons.hardware_control.modules import MagDeck
-from opentrons.protocol_engine.state import StateView
+from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.state.module_substates import (
     MagneticModuleId,
     MagneticModuleSubState,
@@ -51,4 +51,4 @@ async def test_magnetic_module_engage_implementation(
     result = await subject.execute(params=params)
 
     decoy.verify(await magnetic_module_hw.engage(9001), times=1)
-    assert result == SuccessData(public=EngageResult(), private=None)
+    assert result == SuccessData(public=EngageResult())

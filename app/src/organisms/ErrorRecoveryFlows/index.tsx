@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useMemo, useLayoutEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import {
@@ -7,25 +7,29 @@ import {
   RUN_STATUS_AWAITING_RECOVERY_PAUSED,
   RUN_STATUS_BLOCKED_BY_OPEN_DOOR,
   RUN_STATUS_FAILED,
+  RUN_STATUS_FINISHING,
   RUN_STATUS_IDLE,
   RUN_STATUS_PAUSED,
   RUN_STATUS_RUNNING,
   RUN_STATUS_STOP_REQUESTED,
+  RUN_STATUS_STOPPED,
   RUN_STATUS_SUCCEEDED,
 } from '@opentrons/api-client'
-import { OT2_ROBOT_TYPE } from '@opentrons/shared-data'
+import {
+  getLoadedLabwareDefinitionsByUri,
+  OT2_ROBOT_TYPE,
+} from '@opentrons/shared-data'
 import { useHost } from '@opentrons/react-api-client'
 
-import { getIsOnDevice } from '../../redux/config'
+import { getIsOnDevice } from '/app/redux/config'
 import { ErrorRecoveryWizard, useERWizard } from './ErrorRecoveryWizard'
-import { RunPausedSplash, useRunPausedSplash } from './RunPausedSplash'
+import { RecoverySplash, useRecoverySplash } from './RecoverySplash'
 import { RecoveryTakeover } from './RecoveryTakeover'
 import {
   useCurrentlyRecoveringFrom,
   useERUtils,
   useRecoveryTakeover,
   useRetainedFailedCommandBySource,
-  useShowDoorInfo,
 } from './hooks'
 
 import type { RunStatus } from '@opentrons/api-client'
@@ -39,18 +43,20 @@ const VALID_ER_RUN_STATUSES: RunStatus[] = [
   RUN_STATUS_STOP_REQUESTED,
 ]
 
+// Effectively statuses that are not an "awaiting-recovery" status OR "stop requested."
 const INVALID_ER_RUN_STATUSES: RunStatus[] = [
   RUN_STATUS_RUNNING,
   RUN_STATUS_PAUSED,
   RUN_STATUS_BLOCKED_BY_OPEN_DOOR,
+  RUN_STATUS_FINISHING,
+  RUN_STATUS_STOPPED,
   RUN_STATUS_FAILED,
   RUN_STATUS_SUCCEEDED,
   RUN_STATUS_IDLE,
 ]
 
-interface UseErrorRecoveryResult {
+export interface UseErrorRecoveryResult {
   isERActive: boolean
-  /* There is no FailedCommand if the run statis is not AWAITING_RECOVERY. */
   failedCommand: FailedCommand | null
 }
 
@@ -58,47 +64,39 @@ export function useErrorRecoveryFlows(
   runId: string,
   runStatus: RunStatus | null
 ): UseErrorRecoveryResult {
-  const [isERActive, setIsERActive] = React.useState(false)
-  // If client accesses a valid ER runs status besides AWAITING_RECOVERY but accesses it outside of Error Recovery flows, don't show ER.
-  const [hasSeenAwaitingRecovery, setHasSeenAwaitingRecovery] = React.useState(
-    false
-  )
+  const [isERActive, setIsERActive] = useState(false)
   const failedCommand = useCurrentlyRecoveringFrom(runId, runStatus)
 
-  if (
-    !hasSeenAwaitingRecovery &&
-    ([
-      RUN_STATUS_AWAITING_RECOVERY,
-      RUN_STATUS_AWAITING_RECOVERY_BLOCKED_BY_OPEN_DOOR,
-      RUN_STATUS_AWAITING_RECOVERY_PAUSED,
-    ] as Array<RunStatus | null>).includes(runStatus)
-  ) {
-    setHasSeenAwaitingRecovery(true)
-  }
-  // Reset recovery mode after the client has exited recovery, otherwise "cancel run" will trigger ER after the first recovery.
-  else if (
-    hasSeenAwaitingRecovery &&
-    runStatus != null &&
-    INVALID_ER_RUN_STATUSES.includes(runStatus)
-  ) {
-    setHasSeenAwaitingRecovery(false)
+  // The complexity of this logic exists to persist Error Recovery screens past the server's definition of Error Recovery.
+  // Ex, show a "cancelling run" modal in Error Recovery flows despite the robot no longer being in a recoverable state.
+
+  const isValidERStatus = (
+    status: RunStatus | null,
+    hasSeenAwaitingRecovery: boolean
+  ): boolean => {
+    return (
+      status !== null &&
+      (status === RUN_STATUS_AWAITING_RECOVERY ||
+        (VALID_ER_RUN_STATUSES.includes(status) && hasSeenAwaitingRecovery))
+    )
   }
 
-  const isValidRunStatus =
-    runStatus != null &&
-    VALID_ER_RUN_STATUSES.includes(runStatus) &&
-    hasSeenAwaitingRecovery
+  // If client accesses a valid ER runs status besides AWAITING_RECOVERY but accesses it outside of Error Recovery flows,
+  // don't show ER.
+  useLayoutEffect(() => {
+    if (runStatus != null) {
+      const isAwaitingRecovery =
+        VALID_ER_RUN_STATUSES.includes(runStatus) &&
+        runStatus !== RUN_STATUS_STOP_REQUESTED &&
+        failedCommand != null // Prevents one render cycle of an unknown failed command.
 
-  if (!isERActive && isValidRunStatus && failedCommand != null) {
-    setIsERActive(true)
-  }
-  // Because multiple ER flows may occur per run, disable ER when the status is not "awaiting-recovery" or a
-  // terminating run status in which we want to persist ER flows. Specific recovery commands cause run status to change.
-  // See a specific command's docstring for details.
-  // ER handles a null failedCommand outside the splash screen, so we shouldn't set it false here.
-  else if (isERActive && !isValidRunStatus) {
-    setIsERActive(false)
-  }
+      if (isAwaitingRecovery) {
+        setIsERActive(isValidERStatus(runStatus, true))
+      } else if (INVALID_ER_RUN_STATUSES.includes(runStatus)) {
+        setIsERActive(isValidERStatus(runStatus, false))
+      }
+    }
+  }, [runStatus, failedCommand])
 
   return {
     isERActive,
@@ -109,17 +107,21 @@ export function useErrorRecoveryFlows(
 export interface ErrorRecoveryFlowsProps {
   runId: string
   runStatus: RunStatus | null
-  failedCommandByRunRecord: FailedCommand | null
+  /* In some parts of Error Recovery, such as "retry failed command" during a generic error flow, we want to utilize
+   * information derived from the failed command from the run record even if there is no matching command in protocol analysis.
+   * Using a failed command that is not matched to a protocol analysis command is unsafe in most circumstances (ie, in
+   * non-generic recovery flows. Prefer using failedCommandBySource in most circumstances. */
+  unvalidatedFailedCommand: FailedCommand | null
   protocolAnalysis: CompletedProtocolAnalysis | null
 }
 
 export function ErrorRecoveryFlows(
   props: ErrorRecoveryFlowsProps
 ): JSX.Element | null {
-  const { protocolAnalysis, runStatus, failedCommandByRunRecord } = props
+  const { protocolAnalysis, runStatus, unvalidatedFailedCommand } = props
 
   const failedCommandBySource = useRetainedFailedCommandBySource(
-    failedCommandByRunRecord,
+    unvalidatedFailedCommand,
     protocolAnalysis
   )
 
@@ -128,15 +130,27 @@ export function ErrorRecoveryFlows(
   const robotType = protocolAnalysis?.robotType ?? OT2_ROBOT_TYPE
   const robotName = useHost()?.robotName ?? 'robot'
 
-  const isDoorOpen = useShowDoorInfo(runStatus)
+  const isValidRobotSideAnalysis = protocolAnalysis != null
+
+  // TODO(jh, 10-22-24): EXEC-769.
+  const labwareDefinitionsByUri = useMemo(
+    () =>
+      protocolAnalysis != null
+        ? getLoadedLabwareDefinitionsByUri(protocolAnalysis?.commands)
+        : null,
+    [isValidRobotSideAnalysis]
+  )
+  const allRunDefs =
+    labwareDefinitionsByUri != null
+      ? Object.values(labwareDefinitionsByUri)
+      : []
+
   const {
     showTakeover,
     isActiveUser,
     intent,
     toggleERWizAsActiveUser,
   } = useRecoveryTakeover(toggleERWizard)
-  const renderWizard = isActiveUser && (showERWizard || isDoorOpen)
-  const showSplash = useRunPausedSplash(isOnDevice, renderWizard)
 
   const recoveryUtils = useERUtils({
     ...props,
@@ -144,8 +158,16 @@ export function ErrorRecoveryFlows(
     toggleERWizAsActiveUser,
     isOnDevice,
     robotType,
+    isActiveUser,
     failedCommand: failedCommandBySource,
+    allRunDefs,
+    labwareDefinitionsByUri,
   })
+
+  const renderWizard =
+    isActiveUser &&
+    (showERWizard || recoveryUtils.doorStatusUtils.isProhibitedDoorOpen)
+  const showSplash = useRecoverySplash(isOnDevice, renderWizard as boolean)
 
   return (
     <>
@@ -163,12 +185,12 @@ export function ErrorRecoveryFlows(
           {...recoveryUtils}
           robotType={robotType}
           isOnDevice={isOnDevice}
-          isDoorOpen={isDoorOpen}
           failedCommand={failedCommandBySource}
+          allRunDefs={allRunDefs}
         />
       ) : null}
       {showSplash ? (
-        <RunPausedSplash
+        <RecoverySplash
           {...props}
           {...recoveryUtils}
           robotType={robotType}
@@ -176,6 +198,8 @@ export function ErrorRecoveryFlows(
           isOnDevice={isOnDevice}
           toggleERWizAsActiveUser={toggleERWizAsActiveUser}
           failedCommand={failedCommandBySource}
+          resumePausedRecovery={!renderWizard && !showTakeover}
+          allRunDefs={allRunDefs}
         />
       ) : null}
     </>

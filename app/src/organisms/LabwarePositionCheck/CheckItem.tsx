@@ -23,10 +23,10 @@ import {
 } from '@opentrons/shared-data'
 import { useSelector } from 'react-redux'
 import { getLabwareDef } from './utils/labware'
-import { getLabwareDefinitionsFromCommands } from '../../molecules/Command/utils/getLabwareDefinitionsFromCommands'
-import { UnorderedList } from '../../molecules/UnorderedList'
-import { getCurrentOffsetForLabwareInLocation } from '../Devices/ProtocolRun/utils/getCurrentOffsetForLabwareInLocation'
-import { getIsOnDevice } from '../../redux/config'
+import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
+import { UnorderedList } from '/app/molecules/UnorderedList'
+import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
+import { getIsOnDevice } from '/app/redux/config'
 import { getDisplayLocation } from './utils/getDisplayLocation'
 
 import type { LabwareOffset } from '@opentrons/api-client'
@@ -37,13 +37,13 @@ import type {
   MoveLabwareCreateCommand,
   RobotType,
 } from '@opentrons/shared-data'
-import type { useChainRunCommands } from '../../resources/runs'
+import type { useChainRunCommands } from '/app/resources/runs'
 import type {
   CheckLabwareStep,
   RegisterPositionAction,
   WorkingOffset,
 } from './types'
-import type { Jog } from '../../molecules/JogControls/types'
+import type { Jog } from '/app/molecules/JogControls/types'
 import type { TFunction } from 'i18next'
 
 const PROBE_LENGTH_MM = 44.5
@@ -155,6 +155,13 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
     labwareDefs,
     t as TFunction,
     i18n
+  )
+  const slotOnlyDisplayLocation = getDisplayLocation(
+    location,
+    labwareDefs,
+    t as TFunction,
+    i18n,
+    true
   )
   const labwareDisplayName = getLabwareDisplayName(labwareDef)
 
@@ -445,7 +452,7 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
         <JogToWell
           header={t('check_item_in_location', {
             item: isTiprack ? t('tip_rack') : t('labware'),
-            location: displayLocation,
+            location: slotOnlyDisplayLocation,
           })}
           body={
             <Trans
@@ -483,7 +490,7 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
           {...props}
           header={t('prepare_item_in_location', {
             item: isTiprack ? t('tip_rack') : t('labware'),
-            location: displayLocation,
+            location: slotOnlyDisplayLocation,
           })}
           body={
             <UnorderedList

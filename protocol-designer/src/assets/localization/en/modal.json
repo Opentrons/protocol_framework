@@ -50,6 +50,12 @@
       "body4": "Assign up to three types of tip racks to a single pipette.",
       "body5": "Add multiple Temperature Modules to the deck (Flex only).",
       "body6": "All protocols require {{app}} version <strong>7.3.0 or later</strong> to run."
+    },
+    "redesign": {
+      "body1": "Welcome to Protocol Designer 8.2.0!",
+      "body2": "We’re excited to release the new Opentrons Protocol Designer, now with a fresh redesign!  Enjoy the same functionality with the added ability to:",
+      "body3": "Add multiple Heater-Shaker Modules and Magnetic Blocks to the deck (Flex only).",
+      "body4": "All protocols now require Opentrons App version <strong>8.0.0+</strong> to run."
     }
   },
   "labware_selection": {
@@ -248,7 +254,14 @@
     "body2": "Build a pause later if you want your protocol to proceed to the next steps while the temperature module ramps up to {{temperature}}°C.",
     "heater_shaker_pause_later": "Build a pause later if you want your protocol to proceed to the next steps while the Heater-Shaker module goes to {{temperature}}°C",
     "now_button": "Pause protocol now",
-    "later_button": "I will build a pause later"
+    "later_button": "I will build a pause later",
+    "redesign": {
+      "title": "Pause protocol until {{module}} is at {{temp}}˚C",
+      "body1": "Build a pause step to wait until {{module}} reaches {{temp}}˚C before continuing to the next step.",
+      "body2": "Build a pause step later if you want your protocol to proceed to the next step while the {{module}} goes to {{temp}}˚C",
+      "build_pause_later": "Build pause later",
+      "pause_protocol": "Pause protocol"
+    }
   },
   "step_notes": {
     "title": "Step Notes"

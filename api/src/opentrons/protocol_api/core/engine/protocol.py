@@ -2,11 +2,17 @@
 from __future__ import annotations
 from typing import Dict, Optional, Type, Union, List, Tuple, TYPE_CHECKING
 
+from opentrons_shared_data.liquid_classes import LiquidClassDefinitionDoesNotExist
+
 from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.commands import LoadModuleResult
 from opentrons_shared_data.deck.types import DeckDefinitionV5, SlotDefV3
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.labware.types import LabwareDefinition as LabwareDefDict
+from opentrons_shared_data import liquid_classes
+from opentrons_shared_data.liquid_classes.liquid_class_definition import (
+    LiquidClassSchemaV1,
+)
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.robot.types import RobotType
 
@@ -51,7 +57,7 @@ from opentrons.protocol_engine.errors import (
 
 from ... import validation
 from ..._types import OffDeckType
-from ..._liquid import Liquid
+from ..._liquid import Liquid, LiquidClass
 from ...disposal_locations import TrashBin, WasteChute
 from ..protocol import AbstractProtocol
 from ..labware import LabwareLoadParams
@@ -103,6 +109,7 @@ class ProtocolCore(
             str, Union[ModuleCore, NonConnectedModuleCore]
         ] = {}
         self._disposal_locations: List[Union[Labware, TrashBin, WasteChute]] = []
+        self._defined_liquid_class_defs_by_name: Dict[str, LiquidClassSchemaV1] = {}
         self._load_fixed_trash()
 
     @property
@@ -311,7 +318,6 @@ class ProtocolCore(
 
         return labware_core
 
-    # TODO (spp, 2022-12-14): https://opentrons.atlassian.net/browse/RLAB-237
     def move_labware(
         self,
         labware_core: LabwareCore,
@@ -323,6 +329,7 @@ class ProtocolCore(
             NonConnectedModuleCore,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ],
         use_gripper: bool,
         pause_for_manual_move: bool,
@@ -441,34 +448,9 @@ class ProtocolCore(
             existing_module_ids=list(self._module_cores_by_id.keys()),
         )
 
-        # When the protocol engine is created, we add Module Lids as part of the deck fixed labware
-        # If a valid module exists in the deck config. For analysis, we add the labware here since
-        # deck fixed labware is not created under the same conditions.
-        if self._engine_client.state.config.use_virtual_modules:
-            self._load_virtual_module_lid(module_core)
-
         self._module_cores_by_id[module_core.module_id] = module_core
 
         return module_core
-
-    def _load_virtual_module_lid(
-        self, module_core: Union[ModuleCore, NonConnectedModuleCore]
-    ) -> None:
-        if isinstance(module_core, AbsorbanceReaderCore):
-            lid = self._engine_client.execute_command_without_recovery(
-                cmd.LoadLabwareParams(
-                    loadName="opentrons_flex_lid_absorbance_plate_reader_module",
-                    location=ModuleLocation(moduleId=module_core.module_id),
-                    namespace="opentrons",
-                    version=1,
-                    displayName="Absorbance Reader Lid",
-                )
-            )
-
-            self._engine_client.add_absorbance_reader_lid(
-                module_id=module_core.module_id,
-                lid_id=lid.labwareId,
-            )
 
     def _create_non_connected_module_core(
         self, load_module_result: LoadModuleResult
@@ -748,6 +730,23 @@ class ProtocolCore(
             ),
         )
 
+    def define_liquid_class(self, name: str) -> LiquidClass:
+        """Define a liquid class for use in transfer functions."""
+        try:
+            # Check if we have already loaded this liquid class' definition
+            liquid_class_def = self._defined_liquid_class_defs_by_name[name]
+        except KeyError:
+            try:
+                # Fetching the liquid class data from file and parsing it
+                # is an expensive operation and should be avoided.
+                # Calling this often will degrade protocol execution performance.
+                liquid_class_def = liquid_classes.load_definition(name)
+                self._defined_liquid_class_defs_by_name[name] = liquid_class_def
+            except LiquidClassDefinitionDoesNotExist:
+                raise ValueError(f"Liquid class definition not found for '{name}'.")
+
+        return LiquidClass.create(liquid_class_def)
+
     def get_labware_location(
         self, labware_core: LabwareCore
     ) -> Union[str, LabwareCore, ModuleCore, NonConnectedModuleCore, OffDeckType]:
@@ -779,6 +778,7 @@ class ProtocolCore(
             NonConnectedModuleCore,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ],
     ) -> LabwareLocation:
         if isinstance(location, LabwareCore):
@@ -795,6 +795,7 @@ class ProtocolCore(
             NonConnectedModuleCore,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ]
     ) -> NonStackedLocation:
         if isinstance(location, (ModuleCore, NonConnectedModuleCore)):
@@ -808,3 +809,5 @@ class ProtocolCore(
         elif isinstance(location, WasteChute):
             # TODO(mm, 2023-12-06) This will need to determine the appropriate Waste Chute to return, but only move_labware uses this for now
             return AddressableAreaLocation(addressableAreaName="gripperWasteChute")
+        elif isinstance(location, TrashBin):
+            return AddressableAreaLocation(addressableAreaName=location.area_name)

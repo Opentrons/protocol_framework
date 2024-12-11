@@ -121,7 +121,14 @@
       },
       "id": "UUID",
       "key": "a3a7eed460d8d94a91747f23820a180d",
-      "notes": [],
+      "notes": [
+        {
+          "longMessage": "Handling this command failure with FAIL_RUN.",
+          "noteKind": "debugErrorRecovery",
+          "shortMessage": "Handling this command failure with FAIL_RUN.",
+          "source": "execution"
+        }
+      ],
       "params": {
         "location": {
           "slotName": "C3"

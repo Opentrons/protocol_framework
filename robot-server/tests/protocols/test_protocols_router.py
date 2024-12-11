@@ -30,8 +30,11 @@ from opentrons.protocol_reader import (
     BufferedFile,
 )
 
-from robot_server.data_files.data_files_store import DataFilesStore, DataFileInfo
-from robot_server.data_files.models import DataFile
+from robot_server.data_files.data_files_store import (
+    DataFilesStore,
+    DataFileInfo,
+)
+from robot_server.data_files.models import DataFile, DataFileSource
 from robot_server.errors.error_responses import ApiError
 from robot_server.protocols.analyses_manager import AnalysesManager
 from robot_server.protocols.protocol_analyzer import ProtocolAnalyzer
@@ -728,6 +731,7 @@ async def test_create_new_protocol_with_run_time_params(
             id="123",
             name="file.abc",
             file_hash="xyz",
+            source=DataFileSource.UPLOADED,
             created_at=datetime(year=2022, month=2, day=2),
         )
     )
@@ -993,6 +997,7 @@ async def test_create_existing_protocol_with_different_run_time_params(
             id="123",
             name="file.abc",
             file_hash="xyz",
+            source=DataFileSource.UPLOADED,
             created_at=datetime(year=2022, month=2, day=2),
         )
     )
@@ -1813,6 +1818,7 @@ async def test_update_protocol_analyses_with_new_rtp_values(
             id="123",
             name="foo.csv",
             file_hash="xyz",
+            source=DataFileSource.UPLOADED,
             created_at=datetime(year=2022, month=2, day=2),
         )
     )
@@ -2172,11 +2178,13 @@ async def test_get_data_files(
             id="id1",
             name="csv-file1.csv",
             createdAt=datetime(year=2024, month=1, day=1),
+            source=DataFileSource.UPLOADED,
         ),
         DataFile(
             id="id2",
             name="csv-file2.csv",
             createdAt=datetime(year=2024, month=1, day=1),
+            source=DataFileSource.UPLOADED,
         ),
     ]
     decoy.when(protocol_store.has(protocol_id="protocol-id")).then_return(True)

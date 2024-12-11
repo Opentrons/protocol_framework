@@ -98,6 +98,10 @@ class AbstractLabware(ABC, Generic[WellCoreType]):
         """Whether the labware is an adapter."""
 
     @abstractmethod
+    def is_lid(self) -> bool:
+        """Whether the labware is a lid."""
+
+    @abstractmethod
     def is_fixed_trash(self) -> bool:
         """Whether the labware is a fixed trash."""
 

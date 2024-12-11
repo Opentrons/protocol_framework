@@ -1,15 +1,22 @@
-import * as React from 'react'
 import { useCreateLiveCommandMutation } from '@opentrons/react-api-client'
 import { useTranslation } from 'react-i18next'
-import { MenuItem, Tooltip, useHoverTooltip } from '@opentrons/components'
+import {
+  MenuItem,
+  NO_WRAP,
+  Tooltip,
+  useHoverTooltip,
+} from '@opentrons/components'
 import {
   HEATERSHAKER_MODULE_TYPE,
   MAGNETIC_MODULE_TYPE,
   TEMPERATURE_MODULE_TYPE,
   THERMOCYCLER_MODULE_TYPE,
 } from '@opentrons/shared-data'
-import { useMostRecentCompletedAnalysis } from '../LabwarePositionCheck/useMostRecentCompletedAnalysis'
-import { useCurrentRunId } from '../../resources/runs'
+
+import {
+  useCurrentRunId,
+  useMostRecentCompletedAnalysis,
+} from '/app/resources/runs'
 
 import type {
   HeaterShakerCloseLatchCreateCommand,
@@ -24,7 +31,7 @@ import type {
   TemperatureModuleDeactivateCreateCommand,
 } from '@opentrons/shared-data'
 
-import type { AttachedModule } from '../../redux/modules/types'
+import type { AttachedModule } from '/app/redux/modules/types'
 
 export function useIsHeaterShakerInProtocol(): boolean {
   const currentRunId = useCurrentRunId()
@@ -73,6 +80,7 @@ export function useLatchControls(module: AttachedModule): LatchControls {
 export type MenuItemsByModuleType = {
   [moduleType in AttachedModule['moduleType']]: Array<{
     setSetting: string
+    isSettingDisabled: boolean
     isSecondary: boolean
     menuButtons: JSX.Element[] | null
     onClick: (isSecondary: boolean) => void
@@ -153,7 +161,7 @@ export function useModuleOverflowMenu(
       onClick={() => {
         handleInstructionsClick()
       }}
-      whiteSpace="nowrap"
+      whiteSpace={NO_WRAP}
     >
       {t('heater_shaker:show_attachment_instructions')}
     </MenuItem>
@@ -244,7 +252,7 @@ export function useModuleOverflowMenu(
       key={`thermocycler_block_temp_command_btn_${String(module.moduleModel)}`}
       onClick={sendBlockTempCommand}
       disabled={isDisabled}
-      whiteSpace="nowrap"
+      whiteSpace={NO_WRAP}
     >
       {module.data.status !== 'idle'
         ? t('overflow_menu_deactivate_block')
@@ -260,6 +268,7 @@ export function useModuleOverflowMenu(
           module.data.lidTargetTemperature != null
             ? t('overflow_menu_deactivate_lid')
             : t('overflow_menu_lid_temp'),
+        isSettingDisabled: isDisabled,
         isSecondary: true,
         menuButtons: null,
         onClick:
@@ -278,6 +287,7 @@ export function useModuleOverflowMenu(
           module.data.lidStatus === 'open'
             ? t('close_lid')
             : t('open_lid'),
+        isSettingDisabled: isDisabled,
         isSecondary: false,
         menuButtons: [thermoSetBlockTempBtn, aboutModuleBtn],
         onClick: controlTCLid,
@@ -291,6 +301,7 @@ export function useModuleOverflowMenu(
             ? t('overflow_menu_deactivate_temp')
             : t('overflow_menu_mod_temp'),
         isSecondary: false,
+        isSettingDisabled: isDisabled,
         menuButtons: [aboutModuleBtn],
         onClick:
           module.data.status !== 'idle'
@@ -310,6 +321,7 @@ export function useModuleOverflowMenu(
             ? t('overflow_menu_disengage')
             : t('overflow_menu_engage'),
         isSecondary: false,
+        isSettingDisabled: isDisabled,
         menuButtons: [aboutModuleBtn],
         onClick:
           module.data.status !== 'disengaged'
@@ -329,6 +341,7 @@ export function useModuleOverflowMenu(
             ? t('heater_shaker:deactivate_heater')
             : t('heater_shaker:set_temperature'),
         isSecondary: false,
+        isSettingDisabled: isDisabled,
         menuButtons: [
           labwareLatchBtn,
           aboutModuleBtn,
@@ -347,7 +360,15 @@ export function useModuleOverflowMenu(
               },
       },
     ],
-    absorbanceReaderType: [],
+    absorbanceReaderType: [
+      {
+        setSetting: t('overflow_menu_about'),
+        isSecondary: false,
+        isSettingDisabled: false,
+        menuButtons: [],
+        onClick: handleAboutClick,
+      },
+    ],
   }
 
   return {

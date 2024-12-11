@@ -106,6 +106,12 @@ export type LabwareLocation =
   | { labwareId: string }
   | { addressableAreaName: AddressableAreaName }
 
+export type OnDeckLabwareLocation =
+  | { slotName: string }
+  | { moduleId: string }
+  | { labwareId: string }
+  | { addressableAreaName: AddressableAreaName }
+
 export type NonStackedLocation =
   | 'offDeck'
   | { slotName: string }
@@ -175,9 +181,9 @@ interface LoadLiquidResult {
 }
 
 export const COLUMN = 'COLUMN'
-const SINGLE = 'SINGLE'
-const ROW = 'ROW'
-const QUADRANT = 'QUADRANT'
+export const SINGLE = 'SINGLE'
+export const ROW = 'ROW'
+export const QUADRANT = 'QUADRANT'
 export const ALL = 'ALL'
 
 export type NozzleConfigurationStyle =

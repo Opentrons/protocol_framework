@@ -32,4 +32,4 @@ async def test_verify_tip_presence_implementation(
 
     result = await subject.execute(data)
 
-    assert result == SuccessData(public=VerifyTipPresenceResult(), private=None)
+    assert result == SuccessData(public=VerifyTipPresenceResult())

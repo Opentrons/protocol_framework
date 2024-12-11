@@ -9383,7 +9383,14 @@
       },
       "id": "UUID",
       "key": "08e16a2cac011d4bef561f8b0854d19e",
-      "notes": [],
+      "notes": [
+        {
+          "longMessage": "Handling this command failure with FAIL_RUN.",
+          "noteKind": "debugErrorRecovery",
+          "shortMessage": "Handling this command failure with FAIL_RUN.",
+          "source": "execution"
+        }
+      ],
       "params": {
         "displayName": "4 custom tubes",
         "loadName": "cpx_4_tuberack_100ul",

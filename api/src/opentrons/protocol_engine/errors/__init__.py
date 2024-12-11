@@ -8,6 +8,7 @@ from .exceptions import (
     InvalidSpecificationForRobotTypeError,
     InvalidLoadPipetteSpecsError,
     TipNotAttachedError,
+    PickUpTipTipNotAttachedError,
     TipAttachedError,
     CommandDoesNotExistError,
     LabwareNotLoadedError,
@@ -54,6 +55,7 @@ from .exceptions import (
     InvalidTargetTemperatureError,
     InvalidBlockVolumeError,
     InvalidHoldTimeError,
+    InvalidWavelengthError,
     CannotPerformModuleAction,
     PauseNotAllowedError,
     ResumeFromRecoveryNotAllowedError,
@@ -69,6 +71,13 @@ from .exceptions import (
     InvalidAxisForRobotType,
     NotSupportedOnRobotType,
     CommandNotAllowedError,
+    InvalidLiquidHeightFound,
+    LiquidHeightUnknownError,
+    IncompleteLabwareDefinitionError,
+    IncompleteWellDefinitionError,
+    OperationLocationNotInWellError,
+    InvalidDispenseVolumeError,
+    StorageLimitReachedError,
 )
 
 from .error_occurrence import ErrorOccurrence, ProtocolCommandFailedError
@@ -82,6 +91,7 @@ __all__ = [
     "InvalidSpecificationForRobotTypeError",
     "InvalidLoadPipetteSpecsError",
     "TipNotAttachedError",
+    "PickUpTipTipNotAttachedError",
     "TipAttachedError",
     "CommandDoesNotExistError",
     "LabwareNotLoadedError",
@@ -128,6 +138,7 @@ __all__ = [
     "InvalidTargetSpeedError",
     "InvalidBlockVolumeError",
     "InvalidHoldTimeError",
+    "InvalidWavelengthError",
     "CannotPerformModuleAction",
     "ResumeFromRecoveryNotAllowedError",
     "PauseNotAllowedError",
@@ -146,4 +157,11 @@ __all__ = [
     # error occurrence models
     "ErrorOccurrence",
     "CommandNotAllowedError",
+    "InvalidLiquidHeightFound",
+    "LiquidHeightUnknownError",
+    "IncompleteLabwareDefinitionError",
+    "IncompleteWellDefinitionError",
+    "OperationLocationNotInWellError",
+    "InvalidDispenseVolumeError",
+    "StorageLimitReachedError",
 ]

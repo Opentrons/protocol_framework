@@ -2,6 +2,10 @@
 from typing import Annotated
 
 from fastapi import Depends, status
+from robot_server.error_recovery.settings.store import (
+    ErrorRecoverySettingStore,
+    get_error_recovery_setting_store,
+)
 from robot_server.protocols.dependencies import get_protocol_store
 from robot_server.protocols.protocol_models import ProtocolKind
 from robot_server.protocols.protocol_store import ProtocolStore
@@ -44,6 +48,7 @@ _run_store_accessor = AppStateAccessor[RunStore]("run_store")
 _run_orchestrator_store_accessor = AppStateAccessor[RunOrchestratorStore](
     "run_orchestrator_store"
 )
+_run_data_manager_accessor = AppStateAccessor[RunDataManager]("run_data_manager")
 _light_control_accessor = AppStateAccessor[LightController]("light_controller")
 
 
@@ -150,20 +155,31 @@ async def get_is_okay_to_create_maintenance_run(
 
 
 async def get_run_data_manager(
+    app_state: Annotated[AppState, Depends(get_app_state)],
     task_runner: Annotated[TaskRunner, Depends(get_task_runner)],
     run_orchestrator_store: Annotated[
         RunOrchestratorStore, Depends(get_run_orchestrator_store)
     ],
     run_store: Annotated[RunStore, Depends(get_run_store)],
     runs_publisher: Annotated[RunsPublisher, Depends(get_runs_publisher)],
+    error_recovery_setting_store: Annotated[
+        ErrorRecoverySettingStore, Depends(get_error_recovery_setting_store)
+    ],
 ) -> RunDataManager:
-    """Get a run data manager to keep track of current/historical run data."""
-    return RunDataManager(
-        task_runner=task_runner,
-        run_orchestrator_store=run_orchestrator_store,
-        run_store=run_store,
-        runs_publisher=runs_publisher,
-    )
+    """Get a singleton run data manager to keep track of current/historical run data."""
+    run_data_manager = _run_data_manager_accessor.get_from(app_state)
+
+    if run_data_manager is None:
+        run_data_manager = RunDataManager(
+            run_orchestrator_store=run_orchestrator_store,
+            run_store=run_store,
+            error_recovery_setting_store=error_recovery_setting_store,
+            task_runner=task_runner,
+            runs_publisher=runs_publisher,
+        )
+        _run_data_manager_accessor.set_on(app_state, run_data_manager)
+
+    return run_data_manager
 
 
 async def get_run_auto_deleter(

@@ -138,6 +138,11 @@ class LegacyLabwareCore(AbstractLabware[LegacyWellCore]):
     def is_adapter(self) -> bool:
         return False  # Adapters were introduced in v2.15 and not supported in legacy protocols
 
+    def is_lid(self) -> bool:
+        return (
+            False  # Lids were introduced in v2.21 and not supported in legacy protocols
+        )
+
     def is_fixed_trash(self) -> bool:
         """Whether the labware is fixed trash."""
         return "fixedTrash" in self.get_quirks()

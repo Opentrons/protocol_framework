@@ -19,7 +19,7 @@ from opentrons.protocol_engine.actions.actions import (
     PlayAction,
     SetErrorRecoveryPolicyAction,
 )
-from opentrons.protocol_engine.commands.command import CommandIntent
+from opentrons.protocol_engine.commands.command import CommandIntent, DefinedErrorData
 from opentrons.protocol_engine.error_recovery_policy import ErrorRecoveryType
 from opentrons.protocol_engine.errors.error_occurrence import ErrorOccurrence
 from opentrons.protocol_engine.errors.exceptions import (
@@ -32,6 +32,7 @@ from opentrons.protocol_engine.state.commands import (
     CommandView,
 )
 from opentrons.protocol_engine.state.config import Config
+from opentrons.protocol_engine.state.update_types import StateUpdate
 from opentrons.protocol_engine.types import DeckType, EngineStatus
 
 
@@ -557,6 +558,79 @@ def test_door_during_error_recovery() -> None:
     assert subject.state.failed_command_errors == [expected_error_occurance]
 
 
+@pytest.mark.parametrize("close_door_before_queueing", [False, True])
+def test_door_ungrip_labware(close_door_before_queueing: bool) -> None:
+    """Ungrip commands should be able to run even when the door is open."""
+    subject = CommandStore(
+        is_door_open=False,
+        error_recovery_policy=_placeholder_error_recovery_policy,
+        config=Config(
+            block_on_door_open=True,
+            # Choice of robot and deck type are arbitrary.
+            robot_type="OT-2 Standard",
+            deck_type=DeckType.OT2_STANDARD,
+        ),
+    )
+    subject_view = CommandView(subject.state)
+
+    # Fail a command to put the subject in recovery mode.
+    queue_failing = actions.QueueCommandAction(
+        request=commands.CommentCreate(
+            params=commands.CommentParams(message=""), key="command-key-1"
+        ),
+        request_hash=None,
+        created_at=datetime(year=2021, month=1, day=1),
+        command_id="failing-command-id",
+    )
+    subject.handle_action(queue_failing)
+    run_failing = actions.RunCommandAction(
+        command_id="failing-command-id",
+        started_at=datetime(year=2022, month=2, day=2),
+    )
+    subject.handle_action(run_failing)
+    expected_error = errors.ProtocolEngineError(message="oh no")
+    fail_failing = actions.FailCommandAction(
+        command_id="failing-command-id",
+        running_command=subject_view.get("failing-command-id"),
+        error_id="error-id",
+        failed_at=datetime(year=2023, month=3, day=3),
+        error=expected_error,
+        notes=[],
+        type=ErrorRecoveryType.WAIT_FOR_RECOVERY,
+    )
+    subject.handle_action(fail_failing)
+
+    # Open the door:
+    subject.handle_action(actions.DoorChangeAction(DoorState.OPEN))
+    assert (
+        subject_view.get_status() == EngineStatus.AWAITING_RECOVERY_BLOCKED_BY_OPEN_DOOR
+    )
+    assert subject_view.get_next_to_execute() is None
+
+    if close_door_before_queueing:
+        subject.handle_action(actions.DoorChangeAction(DoorState.CLOSED))
+
+    assert subject_view.get_status() in (
+        EngineStatus.AWAITING_RECOVERY_PAUSED,  # If we closed the door.
+        EngineStatus.AWAITING_RECOVERY_BLOCKED_BY_OPEN_DOOR,  # If we didn't.
+    )
+
+    # Make sure the special ungrip command can be queued and that it will be returned
+    # as next to execute:
+    queue_fixit = actions.QueueCommandAction(
+        request=commands.unsafe.UnsafeUngripLabwareCreate(
+            params=commands.unsafe.UnsafeUngripLabwareParams(),
+            intent=CommandIntent.FIXIT,
+        ),
+        request_hash=None,
+        created_at=datetime(year=2021, month=1, day=1),
+        command_id="fixit-command-id",
+    )
+    subject_view.validate_action_allowed(queue_fixit)
+    subject.handle_action(queue_fixit)
+    assert subject_view.get_next_to_execute() == "fixit-command-id"
+
+
 @pytest.mark.parametrize(
     ("door_initially_open", "expected_engine_status_after_play"),
     [
@@ -699,7 +773,7 @@ def test_recovery_target_tracking() -> None:
     assert recovery_target.command_id == "c1"
     assert subject_view.get_recovery_in_progress_for_command("c1")
 
-    resume_from_1_recovery = actions.ResumeFromRecoveryAction()
+    resume_from_1_recovery = actions.ResumeFromRecoveryAction(StateUpdate())
     subject.handle_action(resume_from_1_recovery)
 
     # c1 failed recoverably, but we've already completed its recovery.
@@ -735,7 +809,7 @@ def test_recovery_target_tracking() -> None:
     # even though it failed recoverably before.
     assert not subject_view.get_recovery_in_progress_for_command("c1")
 
-    resume_from_2_recovery = actions.ResumeFromRecoveryAction()
+    resume_from_2_recovery = actions.ResumeFromRecoveryAction(StateUpdate())
     subject.handle_action(resume_from_2_recovery)
     queue_3 = actions.QueueCommandAction(
         "c3",
@@ -762,6 +836,58 @@ def test_recovery_target_tracking() -> None:
     assert not subject_view.get_recovery_in_progress_for_command("c3")
 
     assert subject_view.get_has_entered_recovery_mode() is True
+
+
+@pytest.mark.parametrize(
+    "ending_action",
+    [
+        actions.StopAction(from_estop=False),
+        actions.StopAction(from_estop=True),
+        actions.FinishAction(set_run_status=False),
+        actions.FinishAction(
+            set_run_status=True,
+            error_details=actions.FinishErrorDetails(
+                error=Exception("blimey"),
+                error_id="error-id",
+                created_at=datetime.now(),
+            ),
+        ),
+    ],
+)
+def test_recovery_target_clears_when_run_ends(ending_action: actions.Action) -> None:
+    """There should never be an error recovery target when the run is done."""
+    subject = CommandStore(
+        config=_make_config(),
+        error_recovery_policy=_placeholder_error_recovery_policy,
+        is_door_open=False,
+    )
+    subject_view = CommandView(subject.state)
+
+    # Setup: Put the run in error recovery mode.
+    queue = actions.QueueCommandAction(
+        "c1",
+        created_at=datetime.now(),
+        request=commands.CommentCreate(params=commands.CommentParams(message="")),
+        request_hash=None,
+    )
+    subject.handle_action(queue)
+    run = actions.RunCommandAction(command_id="c1", started_at=datetime.now())
+    subject.handle_action(run)
+    fail = actions.FailCommandAction(
+        command_id="c1",
+        error_id="c1-error",
+        failed_at=datetime.now(),
+        error=PythonException(RuntimeError()),
+        notes=[],
+        type=ErrorRecoveryType.WAIT_FOR_RECOVERY,
+        running_command=subject_view.get("c1"),
+    )
+    subject.handle_action(fail)
+
+    # Test: Assert that the ending action clears the recovery target.
+    assert subject_view.get_recovery_target() is not None
+    subject.handle_action(ending_action)
+    assert subject_view.get_recovery_target() is None
 
 
 def test_final_state_after_estop() -> None:
@@ -920,3 +1046,57 @@ def test_set_and_get_error_recovery_policy() -> None:
     assert subject_view.get_error_recovery_policy() is initial_policy
     subject.handle_action(SetErrorRecoveryPolicyAction(sentinel.new_policy))
     assert subject_view.get_error_recovery_policy() is new_policy
+
+
+def test_get_state_update_for_false_positive() -> None:
+    """Test storage of false-positive state updates."""
+    subject = CommandStore(
+        config=_make_config(),
+        error_recovery_policy=_placeholder_error_recovery_policy,
+        is_door_open=False,
+    )
+    subject_view = CommandView(subject.state)
+
+    empty_state_update = StateUpdate()
+
+    assert subject_view.get_state_update_for_false_positive() == empty_state_update
+
+    queue = actions.QueueCommandAction(
+        request=commands.CommentCreate(
+            params=commands.CommentParams(message=""), key="command-key-1"
+        ),
+        request_hash=None,
+        created_at=datetime(year=2021, month=1, day=1),
+        command_id="command-id-1",
+    )
+    subject.handle_action(queue)
+    run = actions.RunCommandAction(
+        command_id="command-id-1",
+        started_at=datetime(year=2022, month=2, day=2),
+    )
+    subject.handle_action(run)
+    fail = actions.FailCommandAction(
+        command_id="command-id-1",
+        running_command=subject_view.get("command-id-1"),
+        error_id="error-id",
+        failed_at=datetime(year=2023, month=3, day=3),
+        error=DefinedErrorData(
+            public=sentinel.public,
+            state_update_if_false_positive=sentinel.state_update_if_false_positive,
+        ),
+        type=ErrorRecoveryType.WAIT_FOR_RECOVERY,
+        notes=[],
+    )
+    subject.handle_action(fail)
+
+    assert (
+        subject_view.get_state_update_for_false_positive()
+        == sentinel.state_update_if_false_positive
+    )
+
+    resume_from_recovery = actions.ResumeFromRecoveryAction(
+        state_update=sentinel.some_other_state_update
+    )
+    subject.handle_action(resume_from_recovery)
+
+    assert subject_view.get_state_update_for_false_positive() == empty_state_update

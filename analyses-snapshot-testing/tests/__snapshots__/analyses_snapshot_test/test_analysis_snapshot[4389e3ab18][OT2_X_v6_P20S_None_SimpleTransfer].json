@@ -1757,13 +1757,13 @@
       "createdAt": "TIMESTAMP",
       "error": {
         "createdAt": "TIMESTAMP",
-        "detail": "Cannot aspirate 21.0 µL when only 20.0 is available.",
+        "detail": "Cannot aspirate 21.0 µL when only 20 is available in the tip.",
         "errorCode": "4000",
         "errorInfo": {
           "attempted_aspirate_volume": 21.0,
-          "available_volume": 20.0,
+          "available_volume": 20,
           "max_pipette_volume": 20,
-          "max_tip_volume": 20.0
+          "max_tip_volume": 20
         },
         "errorType": "InvalidAspirateVolumeError",
         "id": "UUID",
@@ -1772,7 +1772,14 @@
       },
       "id": "UUID",
       "key": "c2e4fa67-3c04-4d22-b3fa-5d61e956c488",
-      "notes": [],
+      "notes": [
+        {
+          "longMessage": "Handling this command failure with FAIL_RUN.",
+          "noteKind": "debugErrorRecovery",
+          "shortMessage": "Handling this command failure with FAIL_RUN.",
+          "source": "execution"
+        }
+      ],
       "params": {
         "flowRate": 3.78,
         "labwareId": "UUID",
@@ -1784,7 +1791,8 @@
             "y": 0,
             "z": 1.0
           },
-          "origin": "bottom"
+          "origin": "bottom",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -1800,13 +1808,13 @@
   "errors": [
     {
       "createdAt": "TIMESTAMP",
-      "detail": "Cannot aspirate 21.0 µL when only 20.0 is available.",
+      "detail": "Cannot aspirate 21.0 µL when only 20 is available in the tip.",
       "errorCode": "4000",
       "errorInfo": {
         "attempted_aspirate_volume": 21.0,
-        "available_volume": 20.0,
+        "available_volume": 20,
         "max_pipette_volume": 20,
-        "max_tip_volume": 20.0
+        "max_tip_volume": 20
       },
       "errorType": "InvalidAspirateVolumeError",
       "id": "UUID",

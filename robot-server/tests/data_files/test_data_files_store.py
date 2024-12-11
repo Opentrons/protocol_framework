@@ -13,7 +13,11 @@ from robot_server.data_files.data_files_store import (
     DataFileInfo,
 )
 from robot_server.deletion_planner import FileUsageInfo
-from robot_server.data_files.models import FileIdNotFoundError, FileInUseError
+from robot_server.data_files.models import (
+    DataFileSource,
+    FileIdNotFoundError,
+    FileInUseError,
+)
 from robot_server.protocols.analysis_memcache import MemoryCache
 from robot_server.protocols.analysis_models import (
     CompletedAnalysis,
@@ -107,6 +111,7 @@ async def test_insert_data_file_info_and_fetch_by_hash(
         id="file-id",
         name="file-name",
         file_hash="abc123",
+        source=DataFileSource.UPLOADED,
         created_at=datetime(year=2024, month=6, day=20, tzinfo=timezone.utc),
     )
     assert subject.get_file_info_by_hash("abc123") is None
@@ -122,12 +127,14 @@ async def test_insert_file_info_with_existing_id(
         id="file-id",
         name="file-name",
         file_hash="abc123",
+        source=DataFileSource.UPLOADED,
         created_at=datetime(year=2024, month=6, day=20, tzinfo=timezone.utc),
     )
     data_file_info2 = DataFileInfo(
         id="file-id",
         name="file-name2",
         file_hash="abc1234",
+        source=DataFileSource.UPLOADED,
         created_at=datetime(year=2024, month=6, day=20, tzinfo=timezone.utc),
     )
     await subject.insert(data_file_info1)
@@ -143,6 +150,7 @@ async def test_insert_data_file_info_and_get_by_id(
         id="file-id",
         name="file-name",
         file_hash="abc",
+        source=DataFileSource.UPLOADED,
         created_at=datetime(year=2024, month=7, day=15, tzinfo=timezone.utc),
     )
     await subject.insert(data_file_info)
@@ -176,12 +184,14 @@ async def test_get_usage_info(
         id="file-id-1",
         name="file-name",
         file_hash="abc",
+        source=DataFileSource.UPLOADED,
         created_at=datetime(year=2024, month=7, day=15, tzinfo=timezone.utc),
     )
     data_file_2 = DataFileInfo(
         id="file-id-2",
         name="file-name",
         file_hash="xyz",
+        source=DataFileSource.UPLOADED,
         created_at=datetime(year=2024, month=7, day=15, tzinfo=timezone.utc),
     )
     await subject.insert(data_file_1)
@@ -212,6 +222,7 @@ async def test_remove(
         id="file-id",
         name="file-name",
         file_hash="abc123",
+        source=DataFileSource.UPLOADED,
         created_at=datetime(year=2024, month=6, day=20, tzinfo=timezone.utc),
     )
     await subject.insert(data_file_info)
@@ -241,6 +252,7 @@ async def test_remove_raises_in_file_in_use(
         id="file-id",
         name="file-name",
         file_hash="abc123",
+        source=DataFileSource.UPLOADED,
         created_at=datetime(year=2024, month=6, day=20, tzinfo=timezone.utc),
     )
 

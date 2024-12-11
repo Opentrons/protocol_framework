@@ -1,4 +1,8 @@
 """Test configure nozzle layout commands."""
+from opentrons.protocol_engine.state.update_types import (
+    PipetteNozzleMapUpdate,
+    StateUpdate,
+)
 import pytest
 from decoy import Decoy
 from typing import Union, Dict
@@ -15,7 +19,6 @@ from opentrons.protocol_engine.commands.command import SuccessData
 from opentrons.protocol_engine.commands.configure_nozzle_layout import (
     ConfigureNozzleLayoutParams,
     ConfigureNozzleLayoutResult,
-    ConfigureNozzleLayoutPrivateResult,
     ConfigureNozzleLayoutImplementation,
 )
 
@@ -142,8 +145,10 @@ async def test_configure_nozzle_layout_implementation(
 
     assert result == SuccessData(
         public=ConfigureNozzleLayoutResult(),
-        private=ConfigureNozzleLayoutPrivateResult(
-            pipette_id="pipette-id",
-            nozzle_map=expected_nozzlemap,
+        state_update=StateUpdate(
+            pipette_nozzle_map=PipetteNozzleMapUpdate(
+                pipette_id="pipette-id",
+                nozzle_map=expected_nozzlemap,
+            )
         ),
     )

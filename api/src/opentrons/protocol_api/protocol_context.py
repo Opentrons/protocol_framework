@@ -14,8 +14,10 @@ from typing import (
 
 from opentrons_shared_data.labware.types import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType
+from opentrons_shared_data.robot.types import RobotTypeEnum
 
 from opentrons.types import Mount, Location, DeckLocation, DeckSlotName, StagingSlotName
+from opentrons.config import feature_flags
 from opentrons.legacy_broker import LegacyBroker
 from opentrons.hardware_control.modules.types import (
     MagneticBlockModel,
@@ -43,6 +45,7 @@ from opentrons.protocols.api_support.util import (
     UnsupportedAPIError,
 )
 from opentrons_shared_data.errors.exceptions import CommandPreconditionViolated
+from opentrons.protocol_engine.errors import LabwareMovementNotAllowedError
 
 from ._types import OffDeckType
 from .core.common import ModuleCore, LabwareCore, ProtocolCore
@@ -61,7 +64,7 @@ from .core.engine import ENGINE_CORE_API_VERSION
 from .core.legacy.legacy_protocol_core import LegacyProtocolCore
 
 from . import validation
-from ._liquid import Liquid
+from ._liquid import Liquid, LiquidClass
 from .disposal_locations import TrashBin, WasteChute
 from .deck import Deck
 from .instrument_context import InstrumentContext
@@ -209,8 +212,12 @@ class ProtocolContext(CommandPublisher):
         return self._api_version
 
     @property
-    @requires_version(2, 20)
+    @requires_version(2, 21)
     def robot(self) -> RobotContext:
+        """The :py:class:`.RobotContext` for the protocol.
+
+        :meta private:
+        """
         return self._robot
 
     @property
@@ -657,13 +664,12 @@ class ProtocolContext(CommandPublisher):
             if slot is not None
         }
 
-    # TODO (spp, 2022-12-14): https://opentrons.atlassian.net/browse/RLAB-237
     @requires_version(2, 15)
     def move_labware(
         self,
         labware: Labware,
         new_location: Union[
-            DeckLocation, Labware, ModuleTypes, OffDeckType, WasteChute
+            DeckLocation, Labware, ModuleTypes, OffDeckType, WasteChute, TrashBin
         ],
         use_gripper: bool = False,
         pick_up_offset: Optional[Mapping[str, float]] = None,
@@ -708,7 +714,8 @@ class ProtocolContext(CommandPublisher):
                 f"Expected labware of type 'Labware' but got {type(labware)}."
             )
 
-        # Ensure that when moving to an absorbance reader than the lid is open
+        # Ensure that when moving to an absorbance reader that the lid is open
+        # todo(mm, 2024-11-08): Unify this with opentrons.protocol_api.core.engine.deck_conflict.
         if isinstance(new_location, AbsorbanceReaderContext):
             if new_location.is_lid_on():
                 raise CommandPreconditionViolated(
@@ -722,11 +729,19 @@ class ProtocolContext(CommandPublisher):
             OffDeckType,
             DeckSlotName,
             StagingSlotName,
+            TrashBin,
         ]
         if isinstance(new_location, (Labware, ModuleContext)):
             location = new_location._core
         elif isinstance(new_location, (OffDeckType, WasteChute)):
             location = new_location
+        elif isinstance(new_location, TrashBin):
+            if labware._core.is_lid():
+                location = new_location
+            else:
+                raise LabwareMovementNotAllowedError(
+                    "Can only dispose of tips and Lid-type labware in a Trash Bin. Did you mean to use a Waste Chute?"
+                )
         else:
             location = validation.ensure_and_convert_deck_slot(
                 new_location, self._api_version, self._core.robot_type
@@ -932,6 +947,7 @@ class ProtocolContext(CommandPublisher):
                              from the Opentrons App or touchscreen.
         :param bool liquid_presence_detection: If ``True``, enable automatic
             :ref:`liquid presence detection <lpd>` for Flex 1-, 8-, or 96-channel pipettes.
+
             .. versionadded:: 2.20
         """
         instrument_name = validation.ensure_lowercase_name(instrument_name)
@@ -1279,6 +1295,18 @@ class ProtocolContext(CommandPublisher):
             description=description,
             display_color=display_color,
         )
+
+    def define_liquid_class(
+        self,
+        name: str,
+    ) -> LiquidClass:
+        """Define a liquid class for use in the protocol."""
+        if feature_flags.allow_liquid_classes(
+            robot_type=RobotTypeEnum.robot_literal_to_enum(self._core.robot_type)
+        ):
+            return self._core.define_liquid_class(name=name)
+        else:
+            raise NotImplementedError("This method is not implemented.")
 
     @property
     @requires_version(2, 5)

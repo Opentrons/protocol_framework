@@ -4,7 +4,7 @@ from typing import cast
 from decoy import Decoy
 
 from opentrons.protocol_engine.errors import LocationIsOccupiedError
-from opentrons.protocol_engine.state import StateView
+from opentrons.protocol_engine.state.state import StateView
 from opentrons_shared_data.robot.types import RobotType
 from opentrons.types import DeckSlotName
 from opentrons.protocol_engine.types import (
@@ -92,7 +92,6 @@ async def test_load_module_implementation(
             model=ModuleModel.TEMPERATURE_MODULE_V2,
             definition=tempdeck_v2_def,
         ),
-        private=None,
     )
 
 
@@ -148,7 +147,6 @@ async def test_load_module_implementation_mag_block(
             model=ModuleModel.MAGNETIC_BLOCK_V1,
             definition=mag_block_v1_def,
         ),
-        private=None,
     )
 
 
@@ -204,7 +202,6 @@ async def test_load_module_implementation_abs_reader(
             model=ModuleModel.ABSORBANCE_READER_V1,
             definition=abs_reader_v1_def,
         ),
-        private=None,
     )
 
 

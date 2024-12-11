@@ -244,6 +244,7 @@ class MessageId(int, Enum):
     max_sensor_value_request = 0x70
     max_sensor_value_response = 0x71
 
+    batch_read_sensor_response = 0x81
     read_sensor_request = 0x82
     write_sensor_request = 0x83
     baseline_sensor_request = 0x84
@@ -460,3 +461,4 @@ class GripperJawState(int, Enum):
     force_controlling_home = 0x1
     force_controlling = 0x2
     position_controlling = 0x3
+    stopped = 0x4

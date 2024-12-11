@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 
@@ -38,12 +37,10 @@ import {
   getLabwareNameFromRunData,
   getModuleModelFromRunData,
 } from './utils'
-import { Divider } from '../../atoms/structure'
-import {
-  getLoadedLabware,
-  getLoadedModule,
-} from '../../molecules/Command/utils/accessors'
-import { useNotifyDeckConfigurationQuery } from '../../resources/deck_configuration'
+import { Divider } from '/app/atoms/structure'
+import { getLoadedModule } from '/app/local-resources/modules'
+import { getLoadedLabware } from '/app/local-resources/labware'
+import { useNotifyDeckConfigurationQuery } from '/app/resources/deck_configuration'
 
 import type {
   CompletedProtocolAnalysis,
@@ -136,7 +133,7 @@ export function MoveLabwareInterventionContent({
     deckDef
   )
   const oldLabwareLocation =
-    getLoadedLabware(run, command.params.labwareId)?.location ?? null
+    getLoadedLabware(run.labware, command.params.labwareId)?.location ?? null
 
   const labwareName = getLabwareNameFromRunData(
     run,
@@ -276,8 +273,8 @@ function LabwareDisplayLocation(
       console.warn('labware is located on an unknown module model')
     } else {
       const slotName =
-        getLoadedModule(protocolData, location.moduleId)?.location?.slotName ??
-        ''
+        getLoadedModule(protocolData.modules, location.moduleId)?.location
+          ?.slotName ?? ''
       const isModuleUnderAdapterThermocycler =
         getModuleType(moduleModel) === THERMOCYCLER_MODULE_TYPE
       if (isModuleUnderAdapterThermocycler) {
@@ -310,8 +307,8 @@ function LabwareDisplayLocation(
         console.warn('labware is located on an adapter on an unknown module')
       } else {
         const slotName =
-          getLoadedModule(protocolData, adapter.location.moduleId)?.location
-            ?.slotName ?? ''
+          getLoadedModule(protocolData.modules, adapter.location.moduleId)
+            ?.location?.slotName ?? ''
         const isModuleUnderAdapterThermocycler =
           getModuleType(moduleModel) === THERMOCYCLER_MODULE_TYPE
         if (isModuleUnderAdapterThermocycler) {
