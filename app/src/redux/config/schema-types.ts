@@ -16,6 +16,7 @@ export type DevInternalFlag =
   | 'protocolTimeline'
   | 'enableLabwareCreator'
   | 'reactQueryDevtools'
+  | 'reactScan'
 
 export type FeatureFlags = Partial<Record<DevInternalFlag, boolean | undefined>>
 
