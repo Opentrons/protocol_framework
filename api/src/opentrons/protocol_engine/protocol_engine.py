@@ -30,7 +30,6 @@ from .types import (
     HexColor,
     PostRunHardwareState,
     DeckConfigurationType,
-    AddressableAreaLocation,
 )
 from .execution import (
     QueueWorker,
@@ -574,9 +573,8 @@ class ProtocolEngine:
 
     def add_addressable_area(self, addressable_area_name: str) -> None:
         """Add an addressable area to state."""
-        area = AddressableAreaLocation(addressableAreaName=addressable_area_name)
         self._action_dispatcher.dispatch(
-            AddAddressableAreaAction(addressable_area=area)
+            AddAddressableAreaAction(addressable_area_name)
         )
 
     def reset_tips(self, labware_id: str) -> None:

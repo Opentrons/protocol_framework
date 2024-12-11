@@ -1,7 +1,7 @@
 import { isEqual } from 'lodash'
 import { SECTIONS } from '../constants'
 import { getLabwareDefURI, getPipetteNameSpecs } from '@opentrons/shared-data'
-import { getLabwareLocationCombos } from '../../ApplyHistoricOffsets/hooks/getLabwareLocationCombos'
+import { getLabwareLocationCombos } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/getLabwareLocationCombos'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 
 import type {
@@ -9,7 +9,7 @@ import type {
   LoadedPipette,
 } from '@opentrons/shared-data'
 import type { LabwarePositionCheckStep, CheckPositionsStep } from '../types'
-import type { LabwareLocationCombo } from '../../ApplyHistoricOffsets/hooks/getLabwareLocationCombos'
+import type { LabwareLocationCombo } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/getLabwareLocationCombos'
 
 function getPrimaryPipetteId(pipettes: LoadedPipette[]): string {
   if (pipettes.length < 1) {

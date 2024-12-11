@@ -41,7 +41,7 @@ export interface OffsetCandidate extends LabwareOffset {
   labwareDisplayName: string
 }
 
-interface ApplyHistoricOffsetsProps {
+interface LegacyApplyHistoricOffsetsProps {
   offsetCandidates: OffsetCandidate[]
   shouldApplyOffsets: boolean
   setShouldApplyOffsets: (shouldApplyOffsets: boolean) => void
@@ -49,8 +49,8 @@ interface ApplyHistoricOffsetsProps {
   labware: LoadedLabware[]
   modules: LoadedModule[]
 }
-export function ApplyHistoricOffsets(
-  props: ApplyHistoricOffsetsProps
+export function LegacyApplyHistoricOffsets(
+  props: LegacyApplyHistoricOffsetsProps
 ): JSX.Element {
   const {
     offsetCandidates,

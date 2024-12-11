@@ -9,6 +9,7 @@ import {
   Flex,
   Icon,
   ModuleIcon,
+  POSITION_FIXED,
   RadioButton,
   SPACING,
   StyledText,
@@ -51,7 +52,10 @@ import { selectors } from '../../../labware-ingred/selectors'
 import { useKitchen } from '../../../organisms/Kitchen/hooks'
 import { getDismissedHints } from '../../../tutorial/selectors'
 import { createContainerAboveModule } from '../../../step-forms/actions/thunks'
-import { ConfirmDeleteStagingAreaModal } from '../../../organisms'
+import {
+  ConfirmDeleteStagingAreaModal,
+  PROTOCOL_NAV_BAR_HEIGHT_REM,
+} from '../../../organisms'
 import { BUTTON_LINK_STYLE } from '../../../atoms'
 import { getSlotInformation } from '../utils'
 import { ALL_ORDERED_CATEGORIES, FIXTURES, MOAM_MODELS } from './constants'
@@ -70,12 +74,19 @@ interface DeckSetupToolsProps {
     setHoveredModule: (model: ModuleModel | null) => void
     setHoveredFixture: (fixture: Fixture | null) => void
   } | null
+  position?: string
 }
 
 export type CategoryExpand = Record<string, boolean>
+export const DECK_SETUP_TOOLS_WIDTH_REM = 21.875
 
 export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
-  const { onCloseClick, setHoveredLabware, onDeckProps } = props
+  const {
+    onCloseClick,
+    setHoveredLabware,
+    onDeckProps,
+    position = POSITION_FIXED,
+  } = props
   const { t, i18n } = useTranslation(['starting_deck_state', 'shared'])
   const { makeSnackbar } = useKitchen()
   const selectedSlotInfo = useSelector(selectors.getZoomedInSlotInfo)
@@ -318,21 +329,19 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       )
     }
     if (
-      selectedModuleModel == null &&
-      selectedLabwareDefUri != null &&
-      (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
-        (selectedNestedLabwareDefUri != null &&
-          selectedNestedLabwareDefUri !==
-            createdNestedLabwareForSlot?.labwareDefURI))
+      (slot === 'offDeck' && selectedLabwareDefUri != null) ||
+      (selectedModuleModel == null &&
+        selectedLabwareDefUri != null &&
+        (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
+          (selectedNestedLabwareDefUri != null &&
+            selectedNestedLabwareDefUri !==
+              createdNestedLabwareForSlot?.labwareDefURI)))
     ) {
       //  create adapter + labware on deck
       dispatch(
         createContainer({
           slot,
-          labwareDefURI:
-            selectedNestedLabwareDefUri == null
-              ? selectedLabwareDefUri
-              : selectedNestedLabwareDefUri,
+          labwareDefURI: selectedNestedLabwareDefUri ?? selectedLabwareDefUri,
           adapterUnderLabwareDefURI:
             selectedNestedLabwareDefUri == null
               ? undefined
@@ -358,6 +367,13 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     dispatch(selectZoomedIntoSlot({ slot: null, cutout: null }))
     onCloseClick()
   }
+  const positionStyles =
+    position === POSITION_FIXED
+      ? {
+          right: SPACING.spacing12,
+          top: `calc(${PROTOCOL_NAV_BAR_HEIGHT_REM}rem + ${SPACING.spacing12})`,
+        }
+      : {}
   return (
     <>
       {showDeleteLabwareModal != null ? (
@@ -382,8 +398,10 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       ) : null}
       {changeModuleWarning}
       <Toolbox
-        height="calc(100vh - 64px)"
-        width="23.375rem"
+        height={`calc(100vh - ${PROTOCOL_NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
+        width={`${DECK_SETUP_TOOLS_WIDTH_REM}rem`}
+        position={position}
+        {...positionStyles}
         title={
           <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
             <DeckInfoLabel

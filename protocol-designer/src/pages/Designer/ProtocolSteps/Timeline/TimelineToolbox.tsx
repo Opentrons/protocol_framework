@@ -9,6 +9,7 @@ import {
   StyledText,
   Toolbox,
 } from '@opentrons/components'
+import { PROTOCOL_NAV_BAR_HEIGHT_REM } from '../../../../organisms'
 import {
   END_TERMINAL_ITEM_ID,
   START_TERMINAL_ITEM_ID,
@@ -67,7 +68,9 @@ export const TimelineToolbox = ({
   return (
     <Toolbox
       position={POSITION_RELATIVE}
+      height="100%"
       width={`${sidebarWidth / 16}rem`}
+      maxHeight={`calc(100vh - ${PROTOCOL_NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
       title={
         <StyledText desktopStyle="bodyLargeSemiBold">
           {t('timeline')}
@@ -80,7 +83,6 @@ export const TimelineToolbox = ({
           <AddStepButton hasIcon={sidebarWidth > SIDEBAR_MIN_WIDTH_FOR_ICON} />
         )
       }
-      height="calc(100vh - 6rem)"
     >
       <Flex
         flexDirection={DIRECTION_COLUMN}

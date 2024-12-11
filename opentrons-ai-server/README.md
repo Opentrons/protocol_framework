@@ -9,9 +9,7 @@ The Opentrons AI server is a FastAPI server that handles complex tasks like runn
 Currently we have 2 environments: `staging` and `prod`.
 
 - staging: <https://staging.opentrons.ai>
-- prod: <https://opentrons.ai>
-
-If your browser blocks cross site cookies, use <https://ai.opentrons.com> instead.
+- prod: <https://ai.opentrons.com>
 
 ### Environment Variables and Secrets
 

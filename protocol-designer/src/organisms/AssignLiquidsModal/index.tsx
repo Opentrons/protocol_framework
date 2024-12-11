@@ -21,6 +21,7 @@ import { getSelectedWells } from '../../well-selection/selectors'
 import { SelectableLabware } from '../Labware/SelectableLabware'
 import { wellFillFromWellContents } from '../LabwareOnDeck/utils'
 import { deselectWells, selectWells } from '../../well-selection/actions'
+import { PROTOCOL_NAV_BAR_HEIGHT_REM } from '../ProtocolNavBar'
 import { LiquidToolbox } from './LiquidToolbox'
 
 import type { WellGroup } from '@opentrons/components'
@@ -51,18 +52,19 @@ export function AssignLiquidsModal(): JSX.Element | null {
 
   return (
     <Flex
+      height={`calc(100vh - ${PROTOCOL_NAV_BAR_HEIGHT_REM}rem)`}
       justifyContent={JUSTIFY_SPACE_BETWEEN}
       backgroundColor={COLORS.grey10}
+      padding={SPACING.spacing12}
+      gridGap={SPACING.spacing12}
     >
       <Flex
+        width="100%"
         justifyContent={JUSTIFY_CENTER}
-        width="80%"
         alignItems={ALIGN_CENTER}
-        height="calc(100vh - 64px)"
       >
         <Box
-          width="80vh"
-          height="max-content"
+          width="50vw"
           padding={SPACING.spacing60}
           backgroundColor={COLORS.white}
           borderRadius={BORDERS.borderRadius12}

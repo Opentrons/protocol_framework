@@ -6,7 +6,7 @@ import {
   getIsTiprack,
   FIXED_TRASH_ID,
 } from '@opentrons/shared-data'
-import { getLabwareLocationCombos } from '../../ApplyHistoricOffsets/hooks/getLabwareLocationCombos'
+import { getLabwareLocationCombos } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/getLabwareLocationCombos'
 
 import type {
   LabwarePositionCheckStep,
@@ -20,7 +20,7 @@ import type {
   ProtocolAnalysisOutput,
   PickUpTipRunTimeCommand,
 } from '@opentrons/shared-data'
-import type { LabwareLocationCombo } from '../../ApplyHistoricOffsets/hooks/getLabwareLocationCombos'
+import type { LabwareLocationCombo } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/getLabwareLocationCombos'
 
 interface LPCArgs {
   primaryPipetteId: string

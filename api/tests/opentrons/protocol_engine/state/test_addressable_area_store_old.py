@@ -8,15 +8,13 @@ tested together, treating AddressableAreaState as a private implementation detai
 import pytest
 
 from opentrons_shared_data.deck.types import DeckDefinitionV5
-from opentrons_shared_data.labware.labware_definition import Parameters
-from opentrons.protocols.models import LabwareDefinition
-from opentrons.types import DeckSlotName
 
-from opentrons.protocol_engine.commands import Command
+from opentrons.protocol_engine.commands import Command, Comment
 from opentrons.protocol_engine.actions import (
     SucceedCommandAction,
     AddAddressableAreaAction,
 )
+from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.config import Config
 from opentrons.protocol_engine.state.addressable_areas import (
     AddressableAreaStore,
@@ -25,17 +23,6 @@ from opentrons.protocol_engine.state.addressable_areas import (
 from opentrons.protocol_engine.types import (
     DeckType,
     DeckConfigurationType,
-    ModuleModel,
-    LabwareMovementStrategy,
-    DeckSlotLocation,
-    AddressableAreaLocation,
-)
-
-from .command_fixtures import (
-    create_load_labware_command,
-    create_load_module_command,
-    create_move_labware_command,
-    create_move_to_addressable_area_command,
 )
 
 
@@ -54,6 +41,11 @@ def _make_deck_config() -> DeckConfigurationType:
         ("cutoutC3", "stagingAreaRightSlot", None),
         ("cutoutD3", "wasteChuteRightAdapterNoCover", None),
     ]
+
+
+def _dummy_command() -> Command:
+    """Return a placeholder command."""
+    return Comment.construct()  # type: ignore[call-arg]
 
 
 @pytest.fixture
@@ -167,140 +159,30 @@ def test_initial_state(
     assert len(subject.state.loaded_addressable_areas_by_name) == 16
 
 
-@pytest.mark.parametrize(
-    ("command", "expected_area"),
-    (
-        (
-            create_load_labware_command(
-                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
-                labware_id="test-labware-id",
-                definition=LabwareDefinition.construct(  # type: ignore[call-arg]
-                    parameters=Parameters.construct(loadName="blah"),  # type: ignore[call-arg]
-                    namespace="bleh",
-                    version=123,
-                ),
-                offset_id="offset-id",
-                display_name="display-name",
-            ),
-            "A1",
-        ),
-        (
-            create_load_labware_command(
-                location=AddressableAreaLocation(addressableAreaName="A4"),
-                labware_id="test-labware-id",
-                definition=LabwareDefinition.construct(  # type: ignore[call-arg]
-                    parameters=Parameters.construct(loadName="blah"),  # type: ignore[call-arg]
-                    namespace="bleh",
-                    version=123,
-                ),
-                offset_id="offset-id",
-                display_name="display-name",
-            ),
-            "A4",
-        ),
-        (
-            create_load_module_command(
-                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
-                module_id="test-module-id",
-                model=ModuleModel.TEMPERATURE_MODULE_V2,
-            ),
-            "A1",
-        ),
-        (
-            create_move_labware_command(
-                new_location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
-                strategy=LabwareMovementStrategy.USING_GRIPPER,
-            ),
-            "A1",
-        ),
-        (
-            create_move_labware_command(
-                new_location=AddressableAreaLocation(addressableAreaName="A4"),
-                strategy=LabwareMovementStrategy.USING_GRIPPER,
-            ),
-            "A4",
-        ),
-        (
-            create_move_to_addressable_area_command(
-                pipette_id="pipette-id", addressable_area_name="gripperWasteChute"
-            ),
-            "gripperWasteChute",
-        ),
-    ),
-)
-def test_addressable_area_referencing_commands_load_on_simulated_deck(
-    command: Command,
-    expected_area: str,
+@pytest.mark.parametrize("addressable_area_name", ["A1", "A4", "gripperWasteChute"])
+def test_addressable_area_usage_in_simulation(
     simulated_subject: AddressableAreaStore,
+    addressable_area_name: str,
 ) -> None:
-    """It should check and store the addressable area when referenced in a command."""
-    simulated_subject.handle_action(SucceedCommandAction(command=command))
-    assert expected_area in simulated_subject.state.loaded_addressable_areas_by_name
-
-
-@pytest.mark.parametrize(
-    ("command", "expected_area"),
-    (
-        (
-            create_load_labware_command(
-                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
-                labware_id="test-labware-id",
-                definition=LabwareDefinition.construct(  # type: ignore[call-arg]
-                    parameters=Parameters.construct(loadName="blah"),  # type: ignore[call-arg]
-                    namespace="bleh",
-                    version=123,
-                ),
-                offset_id="offset-id",
-                display_name="display-name",
+    """Simulating stores should correctly handle `StateUpdate`s with addressable areas."""
+    assert (
+        addressable_area_name
+        not in simulated_subject.state.loaded_addressable_areas_by_name
+    )
+    simulated_subject.handle_action(
+        SucceedCommandAction(
+            command=_dummy_command(),
+            state_update=update_types.StateUpdate(
+                addressable_area_used=update_types.AddressableAreaUsedUpdate(
+                    addressable_area_name
+                )
             ),
-            "A1",
-        ),
-        (
-            create_load_labware_command(
-                location=AddressableAreaLocation(addressableAreaName="C4"),
-                labware_id="test-labware-id",
-                definition=LabwareDefinition.construct(  # type: ignore[call-arg]
-                    parameters=Parameters.construct(loadName="blah"),  # type: ignore[call-arg]
-                    namespace="bleh",
-                    version=123,
-                ),
-                offset_id="offset-id",
-                display_name="display-name",
-            ),
-            "C4",
-        ),
-        (
-            create_load_module_command(
-                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
-                module_id="test-module-id",
-                model=ModuleModel.TEMPERATURE_MODULE_V2,
-            ),
-            "A1",
-        ),
-        (
-            create_move_labware_command(
-                new_location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A1),
-                strategy=LabwareMovementStrategy.USING_GRIPPER,
-            ),
-            "A1",
-        ),
-        (
-            create_move_labware_command(
-                new_location=AddressableAreaLocation(addressableAreaName="C4"),
-                strategy=LabwareMovementStrategy.USING_GRIPPER,
-            ),
-            "C4",
-        ),
-    ),
-)
-def test_addressable_area_referencing_commands_load(
-    command: Command,
-    expected_area: str,
-    subject: AddressableAreaStore,
-) -> None:
-    """It should check that the addressable area is in the deck config."""
-    subject.handle_action(SucceedCommandAction(command=command))
-    assert expected_area in subject.state.loaded_addressable_areas_by_name
+        )
+    )
+    assert (
+        addressable_area_name
+        in simulated_subject.state.loaded_addressable_areas_by_name
+    )
 
 
 def test_add_addressable_area_action(
@@ -308,10 +190,6 @@ def test_add_addressable_area_action(
 ) -> None:
     """It should add the addressable area to the store."""
     simulated_subject.handle_action(
-        AddAddressableAreaAction(
-            addressable_area=AddressableAreaLocation(
-                addressableAreaName="movableTrashA1"
-            )
-        )
+        AddAddressableAreaAction(addressable_area_name="movableTrashA1")
     )
     assert "movableTrashA1" in simulated_subject.state.loaded_addressable_areas_by_name
