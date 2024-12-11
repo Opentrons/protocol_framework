@@ -68,6 +68,7 @@ class ReadAbsorbanceImpl(
         self, params: ReadAbsorbanceParams
     ) -> SuccessData[ReadAbsorbanceResult]:
         """Initiate an absorbance measurement."""
+        state_update = update_types.StateUpdate()
         abs_reader_substate = self._state_view.modules.get_absorbance_reader_substate(
             module_id=params.moduleId
         )
@@ -168,11 +169,16 @@ class ReadAbsorbanceImpl(
                     )
                     file_ids.append(file_id)
 
+                state_update.set_absorbance_reader_data(
+                    module_id=params.moduleId, read_data=plate_read_result
+                )
                 # Return success data to api
                 return SuccessData(
                     public=ReadAbsorbanceResult(
-                        data=asbsorbance_result, fileIds=file_ids
+                        data=asbsorbance_result,
+                        fileIds=file_ids,
                     ),
+                    state_update=state_update,
                 )
 
         return SuccessData(

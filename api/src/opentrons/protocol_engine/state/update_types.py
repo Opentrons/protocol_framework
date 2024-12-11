@@ -8,6 +8,7 @@ from datetime import datetime
 
 from opentrons.hardware_control.nozzle_manager import NozzleMap
 from opentrons.protocol_engine.resources import pipette_data_provider
+from opentrons.protocol_engine.resources.file_provider import PlateReaderData
 from opentrons.protocol_engine.types import (
     DeckPoint,
     LabwareLocation,
@@ -254,6 +255,14 @@ class AbsorbanceReaderLidUpdate:
 
 
 @dataclasses.dataclass
+class AbsorbanceReaderDataUpdate:
+    """An update to an absorbance reader's lid location."""
+
+    module_id: str
+    read_data: PlateReaderData
+
+
+@dataclasses.dataclass
 class LiquidClassLoadedUpdate:
     """The state update from loading a liquid class."""
 
@@ -310,6 +319,9 @@ class StateUpdate:
     liquid_operated: LiquidOperatedUpdate | NoChangeType = NO_CHANGE
 
     absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
+
+    # this might need to be an array
+    absorbance_reader_data: AbsorbanceReaderDataUpdate | NoChangeType = NO_CHANGE
 
     liquid_class_loaded: LiquidClassLoadedUpdate | NoChangeType = NO_CHANGE
 
@@ -575,6 +587,15 @@ class StateUpdate:
         """Update an absorbance reader's lid location. See `AbsorbanceReaderLidUpdate`."""
         self.absorbance_reader_lid = AbsorbanceReaderLidUpdate(
             module_id=module_id, is_lid_on=is_lid_on
+        )
+        return self
+
+    def set_absorbance_reader_data(
+        self, module_id: str, read_data: PlateReaderData
+    ) -> Self:
+        """Update an absorbance reader's read data. See `AbsorbanceReaderReadDataUpdate`."""
+        self.absorbance_reader_data = AbsorbanceReaderDataUpdate(
+            module_id=module_id, read_data=read_data
         )
         return self
 
