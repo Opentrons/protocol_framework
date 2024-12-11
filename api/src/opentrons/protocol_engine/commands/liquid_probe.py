@@ -375,9 +375,9 @@ class TryLiquidProbe(
     params: TryLiquidProbeParams
     result: Optional[TryLiquidProbeResult]
 
-    _ImplementationCls: Type[TryLiquidProbeImplementation] = (
+    _ImplementationCls: Type[
         TryLiquidProbeImplementation
-    )
+    ] = TryLiquidProbeImplementation
 
 
 class LiquidProbeCreate(BaseCommandCreate[LiquidProbeParams]):
