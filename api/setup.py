@@ -62,6 +62,7 @@ INSTALL_REQUIRES = [
     "jsonschema>=4.0.0,<5",
     "numpy>=1.20.0,<2",
     "pydantic>=2.0.0,<3",
+    "pydantic-settings>=2,<3",
     "pyserial>=3.5",
     "typing-extensions>=4.0.0,<5",
     "click>=8.0.0,<9",
