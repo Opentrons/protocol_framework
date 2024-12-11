@@ -16,6 +16,8 @@ export interface DropdownStepFormFieldProps extends FieldProps {
   options: Options
   title: string
   width?: string
+  onEnter?: (id: string) => void
+  onExit?: () => void
 }
 
 export function DropdownStepFormField(
@@ -31,6 +33,8 @@ export function DropdownStepFormField(
     padding = `0 ${SPACING.spacing16}`,
     width = '17.5rem',
     onFieldFocus,
+    onEnter,
+    onExit,
     onFieldBlur,
   } = props
   const { t } = useTranslation('tooltip')
@@ -60,6 +64,8 @@ export function DropdownStepFormField(
           onClick={value => {
             updateValue(value)
           }}
+          onEnter={onEnter}
+          onExit={onExit}
         />
       ) : (
         <Flex

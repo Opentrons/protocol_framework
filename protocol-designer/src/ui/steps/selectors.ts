@@ -38,6 +38,7 @@ import type {
   CollapsedStepsState,
   HoverableItem,
 } from './reducers'
+import { Selection } from './actions/types'
 
 export const rootSelector = (state: BaseState): StepsState => state.ui.steps
 // ======= Selectors ===============================================
@@ -101,6 +102,14 @@ export const getHoveredStepId: Selector<StepIdType | null> = createSelector(
   getHoveredItem,
   item =>
     item && item.selectionType === SINGLE_STEP_SELECTION_TYPE ? item.id : null
+)
+export const getHoveredSelection: Selector<Selection> = createSelector(
+  rootSelector,
+  (state: StepsState) => state.hoveredSelection
+)
+export const getSelectedSelection: Selector<Selection[]> = createSelector(
+  rootSelector,
+  (state: StepsState) => state.selectedSelection
 )
 
 /** Array of labware (labwareId's) involved in hovered Step, or [] */

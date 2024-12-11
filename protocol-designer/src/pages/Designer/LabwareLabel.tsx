@@ -27,17 +27,14 @@ export const LabwareLabel = (props: ModuleLabelProps): JSX.Element => {
   const designerTab = useSelector(getDesignerTab)
   const [labelContainerHeight, setLabelContainerHeight] = useState(0)
 
-  const deckLabels =
-    designerTab === 'startingDeck'
-      ? [
-          ...nestedLabwareInfo,
-          {
-            text: labwareDef.metadata.displayName,
-            isSelected: isSelected,
-            isLast: isLast,
-          },
-        ]
-      : []
+  const deckLabels = [
+    ...nestedLabwareInfo,
+    {
+      text: labwareDef.metadata.displayName,
+      isSelected: isSelected,
+      isLast: isLast,
+    },
+  ]
 
   useEffect(() => {
     if (labelContainerRef.current) {

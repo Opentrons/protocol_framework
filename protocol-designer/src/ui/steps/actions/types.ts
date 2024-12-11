@@ -31,6 +31,19 @@ export interface DuplicateMultipleStepsAction {
     indexToInsert: number
   }
 }
+
+export interface Selection {
+  id: string | null
+  text: string | null
+}
+export interface selectSelectionAction {
+  type: 'SELECT_SELECTION'
+  payload: Selection[]
+}
+export interface hoverSelectionAction {
+  type: 'HOVER_SELECTION'
+  payload: Selection
+}
 export interface HoverOnSubstepAction {
   type: 'HOVER_ON_SUBSTEP'
   payload: SubstepIdentifier

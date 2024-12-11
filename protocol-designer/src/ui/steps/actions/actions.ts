@@ -28,6 +28,9 @@ import type {
   SelectMultipleStepsForGroupAction,
   ToggleViewSubstepAction,
   ViewSubstep,
+  hoverSelectionAction,
+  selectSelectionAction,
+  Selection,
 } from './types'
 
 // adds an incremental integer ID for Step reducers.
@@ -48,6 +51,15 @@ export const addStep = (args: {
     },
   }
 }
+export const hoverSelection = (args: Selection): hoverSelectionAction => ({
+  type: 'HOVER_SELECTION',
+  payload: { id: args.id, text: args.text },
+})
+export const selectSelection = (args: Selection[]): selectSelectionAction => ({
+  type: 'SELECT_SELECTION',
+  payload: [...args],
+})
+
 export const hoverOnSubstep = (
   payload: SubstepIdentifier
 ): HoverOnSubstepAction => ({

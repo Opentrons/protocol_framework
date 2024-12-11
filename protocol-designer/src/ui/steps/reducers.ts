@@ -21,6 +21,7 @@ import type {
   SelectStepAction,
   SelectMultipleStepsAction,
   SelectTerminalItemAction,
+  Selection,
 } from './actions/types'
 
 export type CollapsedStepsState = Record<StepIdType, boolean>
@@ -188,6 +189,28 @@ const selectedSubstep: Reducer<StepIdType | null, any> = handleActions(
   },
   null
 )
+const hoveredSelection: Reducer<Selection, any> = handleActions(
+  {
+    HOVER_SELECTION: (
+      state,
+      action: {
+        payload: Selection
+      }
+    ) => action.payload,
+  },
+  { id: null, text: null }
+)
+const selectedSelection: Reducer<Selection[], any> = handleActions(
+  {
+    SELECT_SELECTION: (
+      state,
+      action: {
+        payload: Selection[]
+      }
+    ) => action.payload,
+  },
+  []
+)
 export interface StepsState {
   collapsedSteps: CollapsedStepsState
   selectedItem: SelectedItemState
@@ -195,6 +218,8 @@ export interface StepsState {
   hoveredSubstep: SubstepIdentifier
   wellSelectionLabwareKey: string | null
   selectedSubstep: StepIdType | null
+  hoveredSelection: Selection
+  selectedSelection: Selection[]
 }
 export const _allReducers = {
   collapsedSteps,
@@ -203,6 +228,8 @@ export const _allReducers = {
   hoveredSubstep,
   wellSelectionLabwareKey,
   selectedSubstep,
+  hoveredSelection,
+  selectedSelection,
 }
 export const rootReducer: Reducer<StepsState, Action> = combineReducers(
   _allReducers
