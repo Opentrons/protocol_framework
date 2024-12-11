@@ -1,4 +1,3 @@
-import { scan } from 'react-scan'
 import { DndProvider } from 'react-dnd'
 import { HashRouter } from 'react-router-dom'
 import { HTML5Backend } from 'react-dnd-html5-backend'
@@ -16,11 +15,18 @@ import { getEnableReactScan } from './feature-flags/selectors'
 export function ProtocolEditor(): JSX.Element {
   // note for react-scan
   const enableReactScan = useSelector(getEnableReactScan)
-  if (typeof window !== 'undefined') {
-    scan({
-      enabled: enableReactScan,
-      log: true,
-    })
+  // Dynamically import `react-scan` to avoid build errors
+  if (typeof window !== 'undefined' && enableReactScan) {
+    import('react-scan')
+      .then(({ scan }) => {
+        scan({
+          enabled: enableReactScan,
+          log: true,
+        })
+      })
+      .catch(error => {
+        console.error('Failed to load react-scan:', error)
+      })
   }
 
   return (

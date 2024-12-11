@@ -1,4 +1,3 @@
-import { scan } from 'react-scan'
 import { useState, Fragment } from 'react'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -52,11 +51,18 @@ export const DesktopApp = (): JSX.Element => {
 
   // note for react-scan
   const enableReactScan = useFeatureFlag('reactScan')
-  if (typeof window !== 'undefined') {
-    scan({
-      enabled: enableReactScan,
-      log: true,
-    })
+  // Dynamically import `react-scan` to avoid build errors
+  if (typeof window !== 'undefined' && enableReactScan) {
+    import('react-scan')
+      .then(({ scan }) => {
+        scan({
+          enabled: enableReactScan,
+          log: true,
+        })
+      })
+      .catch(error => {
+        console.error('Failed to load react-scan:', error)
+      })
   }
 
   const desktopRoutes: RouteProps[] = [
