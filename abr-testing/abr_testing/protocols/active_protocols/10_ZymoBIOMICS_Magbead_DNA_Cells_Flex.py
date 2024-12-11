@@ -284,7 +284,6 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
     def lysis(vol: float, source: Well) -> None:
         """Lysis."""
         ctx.comment("-----Beginning Lysis Steps-----")
-        ctx.pause(msg="\n Hello \n - step 1 \n - step 2")
         num_transfers = math.ceil(vol / 980)
         tipcheck(m1000)
         total_lysis_aspirated = 0.0

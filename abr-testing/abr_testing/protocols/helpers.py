@@ -393,9 +393,9 @@ def clean_up_plates(
                 pipette.aspirate(tip_size, well)
                 pipette.dispense(
                     tip_size,
-                    liquid_waste,
+                    liquid_waste.top(),
                 )
-                pipette.blow_out(liquid_waste)
+                pipette.blow_out(liquid_waste.top())
                 vol_removed += pipette.max_volume
     if pipette.channels != num_of_active_channels:
         pipette.drop_tip()
