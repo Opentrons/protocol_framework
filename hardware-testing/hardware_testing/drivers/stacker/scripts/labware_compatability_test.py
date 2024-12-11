@@ -13,7 +13,7 @@ def build_arg_parser():
     arg_parser = argparse.ArgumentParser(description="Motion Parameter Test Script")
     arg_parser.add_argument("-c", "--cycles", default = 20, help = "number of cycles to execute")
     arg_parser.add_argument("-a", "--axis", default = AXIS.X, help = "Choose a Axis")
-    arg_parser.add_argument("-l", "--labware", default = 14, type = str,  help = "number of cycles to execute")
+    arg_parser.add_argument("-l", "--labware", default = 2, type = str,  help = "number of cycles to execute")
     # arg_parser.add_argument("-")
     return arg_parser
 
@@ -48,6 +48,6 @@ if __name__ == '__main__':
     # s.close_latch()
     for cycle in range(1, num_loaded_labware+1):
         s.unload_labware(labware_height)
-        #s.load_labware(labware_height)
+        s.load_labware(labware_height)
         input("Remove Labware")
         # s.load_labware(labware_height)
