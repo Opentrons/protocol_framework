@@ -30,12 +30,14 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     res2 = protocol.load_labware("nest_12_reservoir_15ml", "C3", "Reagent Reservoir 2")
     res3 = protocol.load_labware("nest_12_reservoir_15ml", "B3", "Reagent Reservoir 3")
 
+    total_volume = 12320 + (11875 * 7) + (13500 * 4) + (9800 * 13) + 1200
+    print(f"Total volume: {total_volume}")
     lysis_and_pk = 12320 / 8
     beads_and_binding = 11875 / 8
     binding2 = 13500 / 8
     wash2 = 9800 / 8
     wash2_list = [wash2] * 12
-    final_elution = 13500 / 8
+    final_elution = 1200 / 8
     # Fill up Plates
     # Res1
     p1000.transfer(
@@ -74,8 +76,8 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     )
     # Res2
     p1000.transfer(
-        volume=wash2_list,
-        source=source_reservoir["A1"],
+        volume=[final_elution] + wash2_list[:11],
+        source=[source_reservoir["A1"]] * 12,
         dest=res2.wells(),
         blow_out=True,
         blowout_location="source well",
@@ -83,17 +85,9 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     )
     # Res 3
     p1000.transfer(
-        volume=wash2_list[:11],
-        source=source_reservoir["A1"],
-        dest=res3.wells()[1:],
-        blow_out=True,
-        blowout_location="source well",
-        trash=False,
-    )
-    p1000.transfer(
-        volume=final_elution,
-        source=source_reservoir["A1"],
-        dest=res3["A1"].top(),
+        volume=[wash2, wash2],
+        source=[source_reservoir["A1"], source_reservoir["A1"]],
+        dest=[res3["A1"], res3["A2"]],
         blow_out=True,
         blowout_location="source well",
         trash=False,

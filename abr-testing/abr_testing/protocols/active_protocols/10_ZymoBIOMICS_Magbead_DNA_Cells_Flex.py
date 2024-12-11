@@ -69,7 +69,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
     global m1000_tips
     num_samples = 96
     wash1_vol = 500.0
-    wash2_vol = wash3_vol = 900.0
+    wash2_vol = wash3_vol = 600.0
     lysis_vol = 90.0
     sample_vol = 10.0  # Sample should be pelleted tissue/bacteria/cells
     bind_vol = 600.0
@@ -147,10 +147,9 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
     lysis_ = res1.wells()[0]
     binding_buffer = res1.wells()[1:8]
     bind2_res = res1.wells()[8:12]
-    all_washes = res3.wells()[1:]
-    elution_solution = res3.wells()[0]
-    all_washes.extend(res2.wells())
-
+    all_washes = res2.wells()[1:]
+    elution_solution = res2.wells()[0]
+    all_washes.extend(res3.wells()[:2])
     samples_m = sample_plate.rows()[0][:num_cols]
     elution_samples_m = elutionplate.rows()[0][:num_cols]
     # Redefine per well for liquid definitions
@@ -159,7 +158,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         "Lysis and PK": [{"well": lysis_, "volume": 12320.0}],
         "Beads and Binding": [{"well": binding_buffer, "volume": 11875.0}],
         "Binding 2": [{"well": bind2_res, "volume": 13500.0}],
-        "Final Elution": [{"well": elution_solution, "volume": 52000}],
+        "Final Elution": [{"well": elution_solution, "volume": 1200.0}],
         "Samples": [{"well": samps, "volume": 0.0}],
         "Reagents": [{"well": all_washes, "volume": 9800.0}],
     }
@@ -440,7 +439,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
                     new_tip="never",
                 )
                 wash_volume_tracker += vol_per_trans * 8
-                if wash_volume_tracker > 9800:
+                if wash_volume_tracker > 9700:
                     whichwash += 1
                     src = source[whichwash]
                     ctx.comment(f"new wash source {whichwash}")
@@ -466,11 +465,13 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
 
     def elute(vol: float) -> None:
         tipcheck(m1000)
+        total_elution_vol = 0.0
         for i, m in enumerate(samples_m):
             m1000.require_liquid_presence(elution_solution)
             m1000.aspirate(vol, elution_solution)
             m1000.air_gap(20)
             m1000.dispense(m1000.current_volume, m.top(-3))
+            total_elution_vol += vol
         m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
         helpers.set_hs_speed(ctx, h_s, heater_shaker_speed * 0.9, wash_time, True)
