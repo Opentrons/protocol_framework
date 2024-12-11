@@ -31,15 +31,15 @@ export function HighlightLabware(
       selected => selected.id === labwareOnDeck.id
     ) != null
 
-  // const selected =
-  //   isLabwareSelectionSelected ??
-  //   hoveredLabware.includes(adapterId ?? labwareOnDeck.id)
+  const selected =
+    isLabwareSelectionSelected ??
+    hoveredLabware.includes(adapterId ?? labwareOnDeck.id)
   const highlighted = hoveredLabwareOnSelection.id === labwareOnDeck.id
 
-  if (highlighted) {
+  if (highlighted || selected) {
     return (
       <LabwareLabel
-        isSelected={true}
+        isSelected={selected}
         isLast={true}
         position={position}
         labwareDef={labwareOnDeck.def}

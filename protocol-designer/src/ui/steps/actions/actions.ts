@@ -55,9 +55,9 @@ export const hoverSelection = (args: Selection): hoverSelectionAction => ({
   type: 'HOVER_SELECTION',
   payload: { id: args.id, text: args.text },
 })
-export const selectSelection = (args: Selection[]): selectSelectionAction => ({
+export const selectSelection = (args: Selection): selectSelectionAction => ({
   type: 'SELECT_SELECTION',
-  payload: [...args],
+  payload: { id: args.id, text: args.text },
 })
 
 export const hoverOnSubstep = (

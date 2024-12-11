@@ -203,11 +203,14 @@ const hoveredSelection: Reducer<Selection, any> = handleActions(
 const selectedSelection: Reducer<Selection[], any> = handleActions(
   {
     SELECT_SELECTION: (
-      state,
+      state: Selection[],
       action: {
-        payload: Selection[]
+        payload: Selection
       }
-    ) => action.payload,
+    ) => {
+      const exists = state.some(sel => sel.id === action.payload.id)
+      return exists ? state : [...state, action.payload]
+    },
   },
   []
 )

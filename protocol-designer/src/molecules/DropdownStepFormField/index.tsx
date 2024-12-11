@@ -11,6 +11,9 @@ import {
 } from '@opentrons/components'
 import type { Options } from '@opentrons/components'
 import type { FieldProps } from '../../pages/Designer/ProtocolSteps/StepForm/types'
+import { useDispatch } from 'react-redux'
+import { selectSelection } from '../../ui/steps/actions/actions'
+import { Selection } from '../../ui/steps/actions/types'
 
 export interface DropdownStepFormFieldProps extends FieldProps {
   options: Options
@@ -38,6 +41,7 @@ export function DropdownStepFormField(
     onFieldBlur,
   } = props
   const { t } = useTranslation('tooltip')
+  const dispatch = useDispatch()
   const availableOptionId = options.find(opt => opt.value === value)
 
   useEffect(() => {
@@ -62,7 +66,9 @@ export function DropdownStepFormField(
             availableOptionId ?? { name: 'Choose option', value: '' }
           }
           onClick={value => {
+            const selection = { id: value, text: 'selected' }
             updateValue(value)
+            dispatch(selectSelection(selection))
           }}
           onEnter={onEnter}
           onExit={onExit}
