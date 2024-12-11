@@ -6,7 +6,7 @@ from typing import List, Optional, Iterator
 class CommandBuilder:
     """Class used to build GCODE commands."""
 
-    def __init__(self, terminator: str) -> None:
+    def __init__(self, terminator: str = "\n") -> None:
         """
         Construct a command builder.
 
