@@ -8,7 +8,11 @@ from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons.protocols.api_support.util import FlowRates, find_value_for_api_version
 from opentrons.protocols.api_support.types import APIVersion
-from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
+from opentrons.protocols.advanced_control.transfers.common import (
+    TransferTipPolicyV2,
+    check_valid_volume_parameters,
+    expand_for_volume_constraints,
+)
 from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine import (
     DeckPoint,
@@ -40,12 +44,14 @@ from opentrons.protocol_api._nozzle_layout import NozzleLayout
 from . import overlap_versions, pipette_movement_conflict
 
 from .well import WellCore
+from .complex_commands_executor import LiquidClassTransferExecutor
 from ..instrument import AbstractInstrument
 from ...disposal_locations import TrashBin, WasteChute
 
 if TYPE_CHECKING:
     from .protocol import ProtocolCore
     from opentrons.protocol_api._liquid import LiquidClass
+    from opentrons.protocol_api._liquid_properties import TransferProperties
 
 _DISPENSE_VOLUME_VALIDATION_ADDED_IN = APIVersion(2, 17)
 
@@ -892,16 +898,67 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         )
         return result.liquidClassId
 
+    def get_next_tip(self) -> NextTipInfo:
+        """Get the next tip to pick up."""
+
     def transfer_liquid(
         self,
-        liquid_class_id: str,
+        liquid_class: LiquidClass,
         volume: float,
         source: List[WellCore],
         dest: List[WellCore],
         new_tip: TransferTipPolicyV2,
+        tiprack_uri: str,
         trash_location: Union[WellCore, Location, TrashBin, WasteChute],
     ) -> None:
         """Execute transfer using liquid class properties."""
+        liquid_class_id = self.load_liquid_class(
+            liquid_class=liquid_class,
+            pipette_load_name=self.name,
+            tiprack_uri=tiprack_uri,
+        )
+        transfer_props = liquid_class.get_for(
+            pipette=pipette_load_name, tiprack=tiprack_uri
+        )
+        aspirate_props = transfer_props.aspirate
+        dispense_props = transfer_props.dispense
+
+        check_valid_volume_parameters(
+            disposal_volume=0,  # No disposal volume for 1-to-1 transfer
+            air_gap=aspirate_props.retract.air_gap_by_volume.get_for_volume(volume),
+            max_volume=self.get_max_volume(),
+        )
+        source_dest_per_volume_step = expand_for_volume_constraints(
+            volumes=[volume for _ in range(len(source))],
+            targets=zip(source, dest),
+            max_volume=self.get_max_volume(),
+        )
+        transfer_executer = LiquidClassTransferExecutor(instrument_core=self)
+        if new_tip == TransferTipPolicyV2.ONCE:
+            # TODO: update this once getNextTip is implemented
+            next_tip = self.get_next_tip()
+            self.pick_up_tip(next_tip)
+        for step_volume, (src, dest) in source_dest_per_volume_step:
+            if new_tip == TransferTipPolicyV2.ALWAYS:
+                # TODO: update this once getNextTip is implemented
+                next_tip = self.get_next_tip()
+                self.pick_up_tip(next_tip)
+
+            transfer_executer.aspirate(aspirate_props)
+            if new_tip == TransferTipPolicyV2.ALWAYS:
+                if isinstance(trash_location, (TrashBin, WasteChute)):
+                    self.drop_tip_in_disposal_location(
+                        disposal_location=trash_location,
+                        home_after=False,
+                        alternate_tip_drop=True,
+                    )
+                elif isinstance(trash_location, Location):
+                    self.drop_tip(
+                        location=trash_location,
+                        well_core=trash_location.labware.as_well()._core,
+                        home_after=False,
+                        alternate_drop_location=True,
+                    )
 
     def retract(self) -> None:
         """Retract this instrument to the top of the gantry."""
@@ -994,3 +1051,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         return self._engine_client.state.pipettes.get_nozzle_configuration_supports_lld(
             self.pipette_id
         )
+
+    def delay(self, seconds: float) -> None:
+        """Call a protocol delay."""
+        self._protocol_core.delay(seconds=seconds, msg=None)

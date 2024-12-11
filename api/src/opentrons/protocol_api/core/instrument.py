@@ -326,11 +326,12 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
     @abstractmethod
     def transfer_liquid(
         self,
-        liquid_class_id: str,
+        liquid_class: LiquidClass,
         volume: float,
         source: List[WellCoreType],
         dest: List[WellCoreType],
         new_tip: TransferTipPolicyV2,
+        tiprack_uri: str,
         trash_location: Union[WellCoreType, types.Location, TrashBin, WasteChute],
     ) -> None:
         """Transfer a liquid from source to dest according to liquid class properties."""
