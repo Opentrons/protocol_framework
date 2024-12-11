@@ -8,6 +8,7 @@ export const DEV_INTERNAL_FLAGS: DevInternalFlag[] = [
   'protocolTimeline',
   'enableLabwareCreator',
   'reactQueryDevtools',
+  'reactScan',
 ]
 
 // action type constants
