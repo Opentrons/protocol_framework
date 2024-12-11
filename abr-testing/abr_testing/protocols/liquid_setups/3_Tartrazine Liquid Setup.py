@@ -66,7 +66,7 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
         ]  # Skip A1 as it's reserved for tartrazine
         # NEEDED WATER
         needed_water: float = (
-            float(number_of_plates) * 96.0 * 250
+            float(number_of_plates) * 96.0 * 250.0
         )  # loading extra as a safety factor
         # CALCULATING NEEDED # OF WATER WELLS
         needed_wells = round(needed_water / water_max_vol)

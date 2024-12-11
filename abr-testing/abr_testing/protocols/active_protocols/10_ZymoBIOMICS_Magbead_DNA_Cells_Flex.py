@@ -253,6 +253,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
         dispensing at the top and 2 cycles of aspirating from middle,
         dispensing at the bottom
         """
+        pip.liquid_presence_detection = False
         center = well.top(5)
         asp = well.bottom(1)
         disp = well.top(-8)
@@ -292,6 +293,9 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
             tvol = vol / num_transfers
             # Mix Shield and PK before transferring first time
             if i == 0:
+                m1000.liquid_presence_detection = (
+                    False  # turn off liquid detection during mixing
+                )
                 for x in range(lysis_rep_1):
                     m1000.aspirate(vol, src.bottom(1))
                     m1000.dispense(vol, src.bottom(8))
@@ -301,7 +305,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
                 m1000.aspirate(tvol, src.bottom(1))
                 m1000.air_gap(10)
                 m1000.dispense(m1000.current_volume, samples_m[i].top())
-                total_lysis_aspirated += tvol
+                total_lysis_aspirated += tvol * 8
         # Mix shield and pk with samples
         for i in range(num_cols):
             if i != 0:
@@ -309,6 +313,7 @@ def run(ctx: protocol_api.ProtocolContext) -> None:
             mixing(samples_m[i], m1000, tvol, reps=lysis_rep_2)
             m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
         helpers.set_hs_speed(ctx, h_s, heater_shaker_speed, lysis_incubation, True)
+        print(f"total lysis vol{total_lysis_aspirated}")
 
     def bind(vol1: float, vol2: float) -> None:
         """Binding.

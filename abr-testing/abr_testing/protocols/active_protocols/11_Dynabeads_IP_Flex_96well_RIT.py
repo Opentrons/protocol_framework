@@ -194,7 +194,6 @@ def run(ctx: ProtocolContext) -> None:
         global waste_vol
         global waste_vol_chk
         if waste_vol_chk >= WASTE_VOL_MAX:
-            ctx.pause("Empty Liquid Waste")
             waste_vol_chk = 0
         waste_vol = 0.0
         for k in range(NUM_COL):

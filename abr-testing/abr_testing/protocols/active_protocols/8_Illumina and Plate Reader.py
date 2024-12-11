@@ -303,7 +303,6 @@ def run(protocol: ProtocolContext) -> None:
                 thermocycler.set_block_temperature(58)
                 thermocycler.set_lid_temperature(58)
                 heatershaker.set_and_wait_for_temperature(58)
-        protocol.pause("Ready")
         heatershaker.close_labware_latch()
 
         # Sample Plate contains 30ul  of DNA

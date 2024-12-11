@@ -399,3 +399,6 @@ def run(ctx: ProtocolContext) -> None:
     helpers.clean_up_plates(
         pipette_96_channel, [dest_pcr_plate, source_reservoir], liquid_waste["A1"], 50
     )
+    helpers.find_liquid_height_of_all_wells(
+        ctx, pipette_96_channel, [liquid_waste["A1"]]
+    )
