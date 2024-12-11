@@ -147,7 +147,8 @@ def verify_definition(
     else:
         to_return = from_json(contents)
     try:
-        schema = schemata_by_version[to_return.get("schemaVersion", None)]
+        schema_version = to_return["schemaVersion"]
+        schema = schemata_by_version[schema_version]
     except KeyError:
         raise RuntimeError(
             f'Invalid or unknown labware schema version {to_return.get("schemaVersion", None)}'
