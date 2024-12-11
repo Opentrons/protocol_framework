@@ -78,10 +78,7 @@ export const TimelineToolbox = (): JSX.Element => {
         gridGap={SPACING.spacing4}
         width="100%"
       >
-        <TerminalItemStep
-          id={START_TERMINAL_ITEM_ID}
-          title={t('starting_deck')}
-        />
+        <TerminalItemStep id={START_TERMINAL_ITEM_ID} />
         <DraggableSteps
           orderedStepIds={orderedStepIds}
           reorderSteps={(stepIds: StepIdType[]) => {
@@ -89,7 +86,7 @@ export const TimelineToolbox = (): JSX.Element => {
           }}
         />
         <PresavedStep />
-        <TerminalItemStep id={END_TERMINAL_ITEM_ID} title={t('ending_deck')} />
+        <TerminalItemStep id={END_TERMINAL_ITEM_ID} />
       </Flex>
     </Toolbox>
   )
