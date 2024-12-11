@@ -1,7 +1,17 @@
 import round from 'lodash/round'
 import uniq from 'lodash/uniq'
 import { UAParser } from 'ua-parser-js'
-import type { StepIdType } from '../../../../form-types'
+
+import {
+  HEATERSHAKER_MODULE_TYPE,
+  MAGNETIC_MODULE_TYPE,
+  TEMPERATURE_MODULE_TYPE,
+  THERMOCYCLER_MODULE_TYPE,
+} from '@opentrons/shared-data'
+import { getIsModuleOnDeck } from '../../../../step-forms'
+
+import type { ModuleOnDeck } from '../../../../step-forms'
+import type { StepType, StepIdType } from '../../../../form-types'
 
 export const capitalizeFirstLetterAfterNumber = (title: string): string =>
   title.replace(
@@ -128,3 +138,46 @@ export const getMouseClickKeyInfo = (
 }
 
 const getUserOS = (): string | undefined => new UAParser().getOS().name
+
+export const getSupportedSteps = (
+  enableComment: boolean
+): Array<Exclude<StepType, 'manualIntervention'>> =>
+  enableComment
+    ? [
+        'comment',
+        'moveLabware',
+        'moveLiquid',
+        'mix',
+        'pause',
+        'heaterShaker',
+        'magnet',
+        'temperature',
+        'thermocycler',
+      ]
+    : [
+        'moveLabware',
+        'moveLiquid',
+        'mix',
+        'pause',
+        'heaterShaker',
+        'magnet',
+        'temperature',
+        'thermocycler',
+      ]
+
+export const getIsStepTypeEnabled = (
+  enableComment: boolean,
+  modules: Record<string, ModuleOnDeck>
+): Record<Exclude<StepType, 'manualIntervention'>, boolean> => {
+  return {
+    comment: enableComment,
+    moveLabware: true,
+    moveLiquid: true,
+    mix: true,
+    pause: true,
+    magnet: getIsModuleOnDeck(modules, MAGNETIC_MODULE_TYPE),
+    temperature: getIsModuleOnDeck(modules, TEMPERATURE_MODULE_TYPE),
+    thermocycler: getIsModuleOnDeck(modules, THERMOCYCLER_MODULE_TYPE),
+    heaterShaker: getIsModuleOnDeck(modules, HEATERSHAKER_MODULE_TYPE),
+  }
+}

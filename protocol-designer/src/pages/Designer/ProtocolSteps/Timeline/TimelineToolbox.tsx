@@ -25,6 +25,7 @@ import { DraggableSteps } from './DraggableSteps'
 import type { StepIdType } from '../../../../form-types'
 import type { ThunkDispatch } from '../../../../types'
 
+const SIDEBAR_MIN_WIDTH_FOR_ICON = 179
 interface TimelineToolboxProps {
   sidebarWidth: number
 }
@@ -74,7 +75,11 @@ export const TimelineToolbox = ({
       }
       titlePadding={SPACING.spacing12}
       childrenPadding={SPACING.spacing12}
-      confirmButton={formData != null ? undefined : <AddStepButton />}
+      confirmButton={
+        formData != null ? undefined : (
+          <AddStepButton hasIcon={sidebarWidth > SIDEBAR_MIN_WIDTH_FOR_ICON} />
+        )
+      }
       height="calc(100vh - 6rem)"
     >
       <Flex

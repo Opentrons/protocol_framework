@@ -3,41 +3,6 @@ import styled from 'styled-components'
 import { DIRECTION_COLUMN, DISPLAY_FLEX, Flex } from '@opentrons/components'
 import { TimelineToolbox } from './Timeline/TimelineToolbox'
 
-const SidebarContainer = styled(Flex)<{ width: number }>`
-  display: ${DISPLAY_FLEX};
-  flex-direction: ${DIRECTION_COLUMN};
-  background-color: #f4f4f4;
-  border-right: 1px solid #ccc;
-  position: relative;
-  width: ${props => props.width}px;
-  overflow: hidden;
-`
-
-const SidebarContent = styled(Flex)`
-  flex: 1;
-`
-
-const SidebarResizer = styled(Flex)<{ dragging: boolean }>`
-  width: 0.3125rem;
-  cursor: ew-resize;
-  background-color: #ddd;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: blue; /* Hover state */
-  }
-
-  ${props =>
-    props.dragging === true &&
-    `
-    background-color: darkblue; /* Dragging state */
-  `}
-`
-
 const INITIAL_SIDEBAR_WIDTH = 350
 const MIN_SIDEBAR_WIDTH = 80
 const MAX_SIDEBAR_WIDTH = 350
@@ -89,3 +54,39 @@ export function DraggableSidebar(): JSX.Element {
     </SidebarContainer>
   )
 }
+
+const SidebarContainer = styled(Flex)<{ width: number }>`
+  display: ${DISPLAY_FLEX};
+  flex-direction: ${DIRECTION_COLUMN};
+  background-color: #f4f4f4;
+  border-right: 1px solid #ccc;
+  position: relative;
+  width: ${props => props.width}px;
+  /* width: 100%; */
+  overflow: hidden;
+`
+
+const SidebarContent = styled(Flex)`
+  flex: 1;
+`
+
+const SidebarResizer = styled(Flex)<{ dragging: boolean }>`
+  width: 0.3125rem;
+  cursor: ew-resize;
+  background-color: #ddd;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: blue; /* Hover state */
+  }
+
+  ${props =>
+    props.dragging === true &&
+    `
+    background-color: darkblue; /* Dragging state */
+  `}
+`
