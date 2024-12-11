@@ -15,10 +15,12 @@ import { deleteModule } from '../../../../step-forms/actions'
 import { deleteDeckFixture } from '../../../../step-forms/actions/additionalItems'
 import { getDeckSetupForActiveItem } from '../../../../top-selectors/labware-locations'
 import { selectors as labwareIngredSelectors } from '../../../../labware-ingred/selectors'
+import { getNextAvailableDeckSlot } from '../../../../labware-ingred/utils'
 import { SlotOverflowMenu } from '../SlotOverflowMenu'
 
 import type { NavigateFunction } from 'react-router-dom'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
+import { useKitchen } from '../../../../organisms/Kitchen/hooks'
 
 const mockNavigate = vi.fn()
 
@@ -28,6 +30,9 @@ vi.mock('../../../../labware-ingred/actions')
 vi.mock('../../../../labware-ingred/selectors')
 vi.mock('../../../../step-forms/actions/additionalItems')
 vi.mock('../../../../organisms')
+vi.mock('../../../../file-data/selectors')
+vi.mock('../../../../labware-ingred/utils')
+vi.mock('../../../../organisms/Kitchen/hooks')
 vi.mock('react-router-dom', async importOriginal => {
   const actual = await importOriginal<NavigateFunction>()
   return {
@@ -43,6 +48,7 @@ const render = (props: React.ComponentProps<typeof SlotOverflowMenu>) => {
 }
 
 const MOCK_STAGING_AREA_ID = 'MOCK_STAGING_AREA_ID'
+const MOCK_MAKE_SNACKBAR = vi.fn()
 
 describe('SlotOverflowMenu', () => {
   let props: React.ComponentProps<typeof SlotOverflowMenu>
@@ -91,6 +97,12 @@ describe('SlotOverflowMenu', () => {
       <div>mockEditNickNameModal</div>
     )
     vi.mocked(labwareIngredSelectors.getLiquidsByLabwareId).mockReturnValue({})
+    vi.mocked(getNextAvailableDeckSlot).mockReturnValue('A1')
+    vi.mocked(useKitchen).mockReturnValue({
+      makeSnackbar: MOCK_MAKE_SNACKBAR,
+      eatToast: vi.fn(),
+      bakeToast: vi.fn(),
+    })
   })
 
   afterEach(() => {
@@ -164,5 +176,12 @@ describe('SlotOverflowMenu', () => {
     })
     expect(vi.mocked(deleteModule)).toHaveBeenCalledOnce()
     expect(vi.mocked(deleteModule)).toHaveBeenCalledWith('modId')
+  })
+
+  it('renders snackbar if duplicate is clicked and the deck is full', () => {
+    vi.mocked(getNextAvailableDeckSlot).mockReturnValue(null)
+    render(props)
+    fireEvent.click(screen.getByRole('button', { name: 'Duplicate labware' }))
+    expect(MOCK_MAKE_SNACKBAR).toHaveBeenCalled()
   })
 })
