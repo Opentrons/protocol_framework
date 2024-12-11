@@ -479,6 +479,15 @@ export const getModulesForEditModulesCard: Selector<
     }
   )
 )
+export const getUnsavedGroup: Selector<
+  BaseState,
+  StepIdType[]
+> = createSelector(rootSelector, state => state.unsavedGroup)
+export const getStepGroups: Selector<
+  BaseState,
+  Record<string, StepIdType[]>
+> = createSelector(rootSelector, state => state.stepGroups)
+
 export const getUnsavedForm: Selector<
   BaseState,
   FormData | null | undefined
@@ -722,7 +731,7 @@ export const getUnsavedFormIsPristineSetTempForm: Selector<
   (unsavedForm, isPresaved) => {
     const isSetTempForm =
       unsavedForm?.stepType === 'temperature' &&
-      unsavedForm?.setTemperature === 'true'
+      unsavedForm?.targetTemperature != null
     return isPresaved && isSetTempForm
   }
 )
@@ -736,7 +745,7 @@ export const getUnsavedFormIsPristineHeaterShakerForm: Selector<
   (unsavedForm, isPresaved) => {
     const isSetHsTempForm =
       unsavedForm?.stepType === 'heaterShaker' &&
-      unsavedForm?.targetHeaterShakerTemperature !== null
+      unsavedForm?.targetHeaterShakerTemperature != null
 
     return isPresaved && isSetHsTempForm
   }

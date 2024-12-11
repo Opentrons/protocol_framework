@@ -184,7 +184,7 @@
           "pauseAction": "untilTime",
           "pauseMessage": "",
           "pauseTemperature": null,
-          "pauseTime": "0:1:2",
+          "pauseTime": "00:01:02",
           "id": "5db07ad0-75c7-11ea-b42f-4b64e50f43e5",
           "stepType": "pause",
           "stepName": "pause",
