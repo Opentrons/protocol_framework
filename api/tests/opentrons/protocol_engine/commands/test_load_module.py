@@ -1,9 +1,12 @@
 """Test load module command."""
-import pytest
 from typing import cast
+from unittest.mock import sentinel
+
+import pytest
 from decoy import Decoy
 
 from opentrons.protocol_engine.errors import LocationIsOccupiedError
+from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.state import StateView
 from opentrons_shared_data.robot.types import RobotType
 from opentrons.types import DeckSlotName
@@ -71,6 +74,13 @@ async def test_load_module_implementation(
     ).then_return(DeckSlotLocation(slotName=DeckSlotName.SLOT_2))
 
     decoy.when(
+        state_view.modules.ensure_and_convert_module_fixture_location(
+            deck_slot=data.location.slotName,
+            model=data.model,
+        )
+    ).then_return(sentinel.addressable_area_provided_by_module)
+
+    decoy.when(
         await equipment.load_module(
             model=ModuleModel.TEMPERATURE_MODULE_V2,
             location=DeckSlotLocation(slotName=DeckSlotName.SLOT_2),
@@ -85,12 +95,22 @@ async def test_load_module_implementation(
     )
 
     result = await subject.execute(data)
+    decoy.verify(
+        state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
+            sentinel.addressable_area_provided_by_module
+        )
+    )
     assert result == SuccessData(
         public=LoadModuleResult(
             moduleId="module-id",
             serialNumber="mod-serial",
             model=ModuleModel.TEMPERATURE_MODULE_V2,
             definition=tempdeck_v2_def,
+        ),
+        state_update=update_types.StateUpdate(
+            addressable_area_used=update_types.AddressableAreaUsedUpdate(
+                addressable_area_name=data.location.slotName.id
+            )
         ),
     )
 
@@ -126,6 +146,13 @@ async def test_load_module_implementation_mag_block(
     ).then_return(DeckSlotLocation(slotName=DeckSlotName.SLOT_2))
 
     decoy.when(
+        state_view.modules.ensure_and_convert_module_fixture_location(
+            deck_slot=data.location.slotName,
+            model=data.model,
+        )
+    ).then_return(sentinel.addressable_area_provided_by_module)
+
+    decoy.when(
         await equipment.load_magnetic_block(
             model=ModuleModel.MAGNETIC_BLOCK_V1,
             location=DeckSlotLocation(slotName=DeckSlotName.SLOT_2),
@@ -140,12 +167,22 @@ async def test_load_module_implementation_mag_block(
     )
 
     result = await subject.execute(data)
+    decoy.verify(
+        state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
+            sentinel.addressable_area_provided_by_module
+        )
+    )
     assert result == SuccessData(
         public=LoadModuleResult(
             moduleId="module-id",
             serialNumber=None,
             model=ModuleModel.MAGNETIC_BLOCK_V1,
             definition=mag_block_v1_def,
+        ),
+        state_update=update_types.StateUpdate(
+            addressable_area_used=update_types.AddressableAreaUsedUpdate(
+                addressable_area_name=data.location.slotName.id
+            )
         ),
     )
 
@@ -181,6 +218,13 @@ async def test_load_module_implementation_abs_reader(
     ).then_return(DeckSlotLocation(slotName=DeckSlotName.SLOT_D3))
 
     decoy.when(
+        state_view.modules.ensure_and_convert_module_fixture_location(
+            deck_slot=data.location.slotName,
+            model=data.model,
+        )
+    ).then_return(sentinel.addressable_area_name)
+
+    decoy.when(
         await equipment.load_module(
             model=ModuleModel.ABSORBANCE_READER_V1,
             location=DeckSlotLocation(slotName=DeckSlotName.SLOT_D3),
@@ -201,6 +245,11 @@ async def test_load_module_implementation_abs_reader(
             serialNumber=None,
             model=ModuleModel.ABSORBANCE_READER_V1,
             definition=abs_reader_v1_def,
+        ),
+        state_update=update_types.StateUpdate(
+            addressable_area_used=update_types.AddressableAreaUsedUpdate(
+                addressable_area_name=data.location.slotName.id
+            )
         ),
     )
 

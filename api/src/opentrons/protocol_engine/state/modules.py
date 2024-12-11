@@ -908,7 +908,7 @@ class ModuleView:
                     "Module location invalid for nominal module offset calculation."
                 )
             module_addressable_area = self.ensure_and_convert_module_fixture_location(
-                location, self._state.deck_type, module.model
+                location, module.model
             )
             module_addressable_area_position = (
                 addressable_areas.get_addressable_area_offsets_from_cutout(
@@ -1281,13 +1281,14 @@ class ModuleView:
     def ensure_and_convert_module_fixture_location(
         self,
         deck_slot: DeckSlotName,
-        deck_type: DeckType,
         model: ModuleModel,
     ) -> str:
         """Ensure module fixture load location is valid.
 
         Also, convert the deck slot to a valid module fixture addressable area.
         """
+        deck_type = self._state.deck_type
+
         if deck_type == DeckType.OT2_STANDARD or deck_type == DeckType.OT2_SHORT_TRASH:
             raise ValueError(
                 f"Invalid Deck Type: {deck_type.name} - Does not support modules as fixtures."

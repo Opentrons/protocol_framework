@@ -1,4 +1,4 @@
-import { useMemo, useLayoutEffect, useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import {
@@ -15,10 +15,7 @@ import {
   RUN_STATUS_STOPPED,
   RUN_STATUS_SUCCEEDED,
 } from '@opentrons/api-client'
-import {
-  getLoadedLabwareDefinitionsByUri,
-  OT2_ROBOT_TYPE,
-} from '@opentrons/shared-data'
+import { OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import { useHost } from '@opentrons/react-api-client'
 
 import { getIsOnDevice } from '/app/redux/config'
@@ -35,6 +32,7 @@ import {
 import type { RunStatus } from '@opentrons/api-client'
 import type { CompletedProtocolAnalysis } from '@opentrons/shared-data'
 import type { FailedCommand } from './types'
+import { useRunLoadedLabwareDefinitionsByUri } from '/app/resources/runs'
 
 const VALID_ER_RUN_STATUSES: RunStatus[] = [
   RUN_STATUS_AWAITING_RECOVERY,
@@ -118,7 +116,7 @@ export interface ErrorRecoveryFlowsProps {
 export function ErrorRecoveryFlows(
   props: ErrorRecoveryFlowsProps
 ): JSX.Element | null {
-  const { protocolAnalysis, runStatus, unvalidatedFailedCommand } = props
+  const { protocolAnalysis, runStatus, unvalidatedFailedCommand, runId } = props
 
   const failedCommandBySource = useRetainedFailedCommandBySource(
     unvalidatedFailedCommand,
@@ -130,16 +128,7 @@ export function ErrorRecoveryFlows(
   const robotType = protocolAnalysis?.robotType ?? OT2_ROBOT_TYPE
   const robotName = useHost()?.robotName ?? 'robot'
 
-  const isValidRobotSideAnalysis = protocolAnalysis != null
-
-  // TODO(jh, 10-22-24): EXEC-769.
-  const labwareDefinitionsByUri = useMemo(
-    () =>
-      protocolAnalysis != null
-        ? getLoadedLabwareDefinitionsByUri(protocolAnalysis?.commands)
-        : null,
-    [isValidRobotSideAnalysis]
-  )
+  const labwareDefinitionsByUri = useRunLoadedLabwareDefinitionsByUri(runId)
   const allRunDefs =
     labwareDefinitionsByUri != null
       ? Object.values(labwareDefinitionsByUri)

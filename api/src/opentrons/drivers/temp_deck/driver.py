@@ -17,7 +17,7 @@ from enum import Enum
 from opentrons.drivers import utils
 from opentrons.drivers.types import Temperature
 from opentrons.drivers.command_builder import CommandBuilder
-from opentrons.drivers.asyncio.communication import SerialConnection
+from opentrons.drivers.asyncio.communication import SerialConnection, UnhandledGcode
 from opentrons.drivers.temp_deck.abstract import AbstractTempDeckDriver
 
 log = logging.getLogger(__name__)
@@ -163,7 +163,10 @@ class TempDeckDriver(AbstractTempDeckDriver):
         reset_reason = CommandBuilder(
             terminator=TEMP_DECK_COMMAND_TERMINATOR
         ).add_gcode(gcode=GCODE.GET_RESET_REASON)
-        await self._send_command(command=reset_reason)
+        try:
+            await self._send_command(command=reset_reason)
+        except UnhandledGcode:
+            pass
 
         return utils.parse_device_information(device_info_string=response)
 
