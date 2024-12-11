@@ -221,7 +221,6 @@ push-no-restart-ot3: sdist Pipfile.lock
 
 .PHONY: push-ot3
 push-ot3: push-no-restart-ot3 push-plot-webpage-ot3 push-description-ot3
-	cd .. && $(MAKE) -C app-shell-odd push-ot3 host=$(host)
 
 .PHONE: open-dev-app
 open-dev-app:
