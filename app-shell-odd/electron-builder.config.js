@@ -2,7 +2,7 @@
 
 module.exports = {
   appId: 'com.opentrons.odd',
-  electronVersion: '33.2.1',
+  electronVersion: '32.2.7',
   npmRebuild: false,
   files: [
     '**/*',
