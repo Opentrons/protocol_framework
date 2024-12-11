@@ -7,14 +7,13 @@ from opentrons.protocol_api import (
     ParameterContext,
     Well,
 )
-from typing import Tuple
 from opentrons.protocol_api.module_contexts import (
     HeaterShakerContext,
     MagneticBlockContext,
     ThermocyclerContext,
     TemperatureModuleContext,
 )
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Tuple
 from opentrons.hardware_control.modules.types import ThermocyclerStep
 from opentrons_shared_data.errors.exceptions import PipetteLiquidNotFoundError
 
@@ -107,6 +106,53 @@ def load_temp_adapter_and_labware(
 
 
 # FUNCTIONS FOR LOADING COMMON PARAMETERS
+def create_channel_parameter(parameters: ParameterContext) -> None:
+    """Create pipette channel parameter."""
+    parameters.add_str(
+        variable_name="channels",
+        display_name="Number of Pipette Channels",
+        choices=[
+            {"display_name": "1 Channel", "value": "1channel"},
+            {"display_name": "8 Channel", "value": "8channel"},
+        ],
+        default="8channel",
+    )
+
+
+def create_pipette_parameters(parameters: ParameterContext) -> None:
+    """Create parameter for pipettes."""
+    # NOTE: Place function inside def add_parameters(parameters) in protocol.
+    # NOTE: Copy ctx.params.left mount, ctx.params.right_mount # type: ignore[attr-defined]
+    # to get result
+    # Left Mount
+    parameters.add_str(
+        variable_name="left_mount",
+        display_name="Left Mount",
+        description="Pipette Type on Left Mount.",
+        choices=[
+            {"display_name": "8ch 50ul", "value": "flex_8channel_50"},
+            {"display_name": "8ch 1000ul", "value": "flex_8channel_1000"},
+            {"display_name": "1ch 50ul", "value": "flex_1channel_50"},
+            {"display_name": "1ch 1000ul", "value": "flex_1channel_1000"},
+            {"display_name": "96ch 1000ul", "value": "flex_96channel_1000"},
+            {"display_name": "None", "value": "none"},
+        ],
+        default="flex_8channel_1000",
+    )
+    # Right Mount
+    parameters.add_str(
+        variable_name="right_mount",
+        display_name="Right Mount",
+        description="Pipette Type on Right Mount.",
+        choices=[
+            {"display_name": "8ch 50ul", "value": "flex_8channel_50"},
+            {"display_name": "8ch 1000ul", "value": "flex_8channel_1000"},
+            {"display_name": "1ch 50ul", "value": "flex_1channel_50"},
+            {"display_name": "1ch 1000ul", "value": "flex_1channel_1000"},
+            {"display_name": "None", "value": "none"},
+        ],
+        default="none",
+    )
 
 
 def create_single_pipette_mount_parameter(parameters: ParameterContext) -> None:
@@ -163,6 +209,16 @@ def create_disposable_lid_parameter(parameters: ParameterContext) -> None:
     )
 
 
+def create_disposable_lid_trash_location(parameters: ParameterContext) -> None:
+    """Create a parameter for lid placement after use."""
+    parameters.add_bool(
+        variable_name="trash_lid",
+        display_name="Trash Disposable Lid",
+        description="True means trash lid, false means keep on deck.",
+        default=True,
+    )
+
+
 def create_tc_lid_deck_riser_parameter(parameters: ParameterContext) -> None:
     """Create parameter for tc lid deck riser."""
     parameters.add_bool(
@@ -184,7 +240,7 @@ def create_tip_size_parameter(parameters: ParameterContext) -> None:
             {"display_name": "200 µL", "value": "opentrons_flex_96_tiprack_200ul"},
             {"display_name": "1000 µL", "value": "opentrons_flex_96_tiprack_1000ul"},
         ],
-        default="opentrons_flex_96_tiprack_1000ul",
+        default="opentrons_flex_96_tiprack_50ul",
     )
 
 
@@ -314,6 +370,39 @@ def use_disposable_lid_with_tc(
 # FUNCTIONS FOR COMMON PIPETTE COMMAND SEQUENCES
 
 
+def clean_up_plates(
+    pipette: InstrumentContext,
+    list_of_labware: List[Labware],
+    liquid_waste: Well,
+    tip_size: int,
+) -> None:
+    """Aspirate liquid from labware and dispense into liquid waste."""
+    pipette.pick_up_tip()
+    pipette.liquid_presence_detection = False
+    num_of_active_channels = pipette.active_channels
+    for labware in list_of_labware:
+        if num_of_active_channels == 8:
+            list_of_wells = labware.rows()[0]
+        elif num_of_active_channels == 1:
+            list_of_wells = labware.wells()
+        elif num_of_active_channels == 96:
+            list_of_wells = [labware.wells()[0]]
+        for well in list_of_wells:
+            vol_removed = 0.0
+            while well.max_volume > vol_removed:
+                pipette.aspirate(tip_size, well)
+                pipette.dispense(
+                    tip_size,
+                    liquid_waste.top(),
+                )
+                pipette.blow_out(liquid_waste.top())
+                vol_removed += pipette.max_volume
+    if pipette.channels != num_of_active_channels:
+        pipette.drop_tip()
+    else:
+        pipette.return_tip()
+
+
 def find_liquid_height(pipette: InstrumentContext, well_to_probe: Well) -> float:
     """Find liquid height of well."""
     try:
@@ -372,6 +461,18 @@ def load_wells_with_custom_liquids(
                 well.load_liquid(liquid, volume)
 
 
+def comment_height_of_specific_labware(
+    protocol: ProtocolContext, labware_name: str, dict_of_labware_heights: Dict
+) -> None:
+    """Comment height found of specific labware."""
+    total_height = 0.0
+    for key in dict_of_labware_heights.keys():
+        if key[0] == labware_name:
+            height = dict_of_labware_heights[key]
+            total_height += height
+    protocol.comment(f"Liquid Waste Total Height: {total_height}")
+
+
 def find_liquid_height_of_all_wells(
     protocol: ProtocolContext,
     pipette: InstrumentContext,
@@ -382,7 +483,7 @@ def find_liquid_height_of_all_wells(
     pipette.pick_up_tip()
     pip_channels = pipette.active_channels
     for well in wells:
-        labware_name = well.parent.load_name
+        labware_name = well.parent.name
         total_number_of_wells_in_plate = len(well.parent.wells())
         # if pip_channels is > 1 and total_wells > 12 - only probe 1st row.
         if (
@@ -402,6 +503,9 @@ def find_liquid_height_of_all_wells(
         pipette.reset_tipracks()
     msg = f"result: {dict_of_labware_heights}"
     protocol.comment(msg=msg)
+    comment_height_of_specific_labware(
+        protocol, "Liquid Waste", dict_of_labware_heights
+    )
     return dict_of_labware_heights
 
 
@@ -423,6 +527,8 @@ def find_liquid_height_of_loaded_liquids(
             entry["well"] if isinstance(entry["well"], list) else [entry["well"]]
         )
     ]
+    if pipette.active_channels == 96:
+        wells = [well for well in wells if well.display_name.split(" ")[0] == "A1"]
     find_liquid_height_of_all_wells(ctx, pipette, wells)
     return wells
 
