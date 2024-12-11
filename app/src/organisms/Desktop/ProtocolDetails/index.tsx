@@ -77,7 +77,10 @@ import type {
   PythonConfig,
   LoadLabwareRunTimeCommand,
 } from '@opentrons/shared-data'
-import type { StoredProtocolData } from '/app/redux/protocol-storage'
+import type {
+  GroupedCommands,
+  StoredProtocolData,
+} from '/app/redux/protocol-storage'
 import type { State, Dispatch } from '/app/redux/types'
 
 const GRID_STYLE = css`
@@ -203,14 +206,22 @@ const ReadMoreContent = (props: ReadMoreContentProps): JSX.Element => {
   )
 }
 
-interface ProtocolDetailsProps extends StoredProtocolData {}
+interface ProtocolDetailsProps extends StoredProtocolData {
+  groupedCommands: GroupedCommands | null
+}
 
 export function ProtocolDetails(
   props: ProtocolDetailsProps
 ): JSX.Element | null {
   const trackEvent = useTrackEvent()
   const dispatch = useDispatch<Dispatch>()
-  const { protocolKey, srcFileNames, mostRecentAnalysis, modified } = props
+  const {
+    protocolKey,
+    srcFileNames,
+    mostRecentAnalysis,
+    modified,
+    groupedCommands,
+  } = props
   const { t, i18n } = useTranslation(['protocol_details', 'shared'])
   const enableProtocolStats = useFeatureFlag('protocolStats')
   const enableProtocolTimeline = useFeatureFlag('protocolTimeline')
@@ -338,7 +349,10 @@ export function ProtocolDetails(
     ) : null,
     timeline:
       enableProtocolTimeline && mostRecentAnalysis != null ? (
-        <AnnotatedSteps analysis={mostRecentAnalysis} />
+        <AnnotatedSteps
+          analysis={mostRecentAnalysis}
+          groupedCommands={groupedCommands}
+        />
       ) : null,
     parameters: <ProtocolParameters runTimeParameters={runTimeParameters} />,
   }
