@@ -11,6 +11,7 @@ import {
   openIngredientSelector,
 } from '../../../../labware-ingred/actions'
 import { EditNickNameModal } from '../../../../organisms'
+import { useKitchen } from '../../../../organisms/Kitchen/hooks'
 import { deleteModule } from '../../../../step-forms/actions'
 import { deleteDeckFixture } from '../../../../step-forms/actions/additionalItems'
 import { getDeckSetupForActiveItem } from '../../../../top-selectors/labware-locations'
@@ -20,7 +21,6 @@ import { SlotOverflowMenu } from '../SlotOverflowMenu'
 
 import type { NavigateFunction } from 'react-router-dom'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
-import { useKitchen } from '../../../../organisms/Kitchen/hooks'
 
 const mockNavigate = vi.fn()
 

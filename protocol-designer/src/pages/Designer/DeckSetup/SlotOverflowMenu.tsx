@@ -115,8 +115,6 @@ export function SlotOverflowMenu(
 
   const { makeSnackbar } = useKitchen()
 
-  const isSpace = getNextAvailableDeckSlot(deckSetup, robotType) != null
-
   const {
     labware: deckSetupLabware,
     modules: deckSetupModules,
@@ -133,6 +131,9 @@ export function SlotOverflowMenu(
       ? lw.id === location
       : lw.slot === location || lw.slot === moduleOnSlot?.id
   )
+  const isSpace =
+    getNextAvailableDeckSlot(deckSetup, robotType, labwareOnSlot?.def) != null
+
   const isLabwareTiprack = labwareOnSlot?.def.parameters.isTiprack ?? false
   const isLabwareAnAdapter =
     labwareOnSlot?.def.allowedRoles?.includes('adapter') ?? false
@@ -171,10 +172,8 @@ export function SlotOverflowMenu(
     location as AddressableAreaName
   )
 
-  function handleDuplicate(): void {
-    console.log('test')
+  const handleDuplicate = (): void => {
     if (!isSpace) {
-      console.log('test')
       makeSnackbar(t('deck_slots_full') as string)
       return
     }
