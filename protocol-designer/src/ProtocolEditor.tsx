@@ -1,6 +1,8 @@
+import { scan } from 'react-scan'
 import { DndProvider } from 'react-dnd'
 import { HashRouter } from 'react-router-dom'
 import { HTML5Backend } from 'react-dnd-html5-backend'
+import { useSelector } from 'react-redux'
 import {
   Box,
   DIRECTION_COLUMN,
@@ -9,8 +11,18 @@ import {
 } from '@opentrons/components'
 import { ProtocolRoutes } from './ProtocolRoutes'
 import { PortalRoot } from './organisms'
+import { getEnableReactScan } from './feature-flags/selectors'
 
 export function ProtocolEditor(): JSX.Element {
+  // note for react-scan
+  const enableReactScan = useSelector(getEnableReactScan)
+  if (typeof window !== 'undefined') {
+    scan({
+      enabled: enableReactScan,
+      log: true,
+    })
+  }
+
   return (
     <DndProvider backend={HTML5Backend}>
       <Box

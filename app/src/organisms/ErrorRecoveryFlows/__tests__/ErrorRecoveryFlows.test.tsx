@@ -8,7 +8,6 @@ import {
   RUN_STATUS_RUNNING,
   RUN_STATUS_STOP_REQUESTED,
 } from '@opentrons/api-client'
-import { getLoadedLabwareDefinitionsByUri } from '@opentrons/shared-data'
 
 import { renderWithProviders } from '/app/__testing-utils__'
 import { i18n } from '/app/i18n'
@@ -23,6 +22,7 @@ import { useRecoveryAnalytics } from '/app/redux-resources/analytics'
 import { getIsOnDevice } from '/app/redux/config'
 import { useERWizard, ErrorRecoveryWizard } from '../ErrorRecoveryWizard'
 import { useRecoverySplash, RecoverySplash } from '../RecoverySplash'
+import { useRunLoadedLabwareDefinitionsByUri } from '/app/resources/runs'
 
 import type { RunStatus } from '@opentrons/api-client'
 
@@ -33,13 +33,7 @@ vi.mock('/app/redux/config')
 vi.mock('../RecoverySplash')
 vi.mock('/app/redux-resources/analytics')
 vi.mock('@opentrons/react-api-client')
-vi.mock('@opentrons/shared-data', async () => {
-  const actual = await vi.importActual('@opentrons/shared-data')
-  return {
-    ...actual,
-    getLoadedLabwareDefinitionsByUri: vi.fn(),
-  }
-})
+vi.mock('/app/resources/runs')
 vi.mock('react-redux', async () => {
   const actual = await vi.importActual('react-redux')
   return {
@@ -173,7 +167,7 @@ describe('ErrorRecoveryFlows', () => {
       intent: 'recovering',
       showTakeover: false,
     })
-    vi.mocked(getLoadedLabwareDefinitionsByUri).mockReturnValue({})
+    vi.mocked(useRunLoadedLabwareDefinitionsByUri).mockReturnValue({})
   })
 
   it('renders the wizard when showERWizard is true', () => {
