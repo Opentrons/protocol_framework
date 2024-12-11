@@ -44,7 +44,11 @@ from opentrons.protocol_api._nozzle_layout import NozzleLayout
 from . import overlap_versions, pipette_movement_conflict
 
 from .well import WellCore
-from .complex_commands_executor import LiquidClassTransferExecutor
+from .transfer_components_executor import (
+    TransferComponentsExecutor,
+    MixData,
+    MixAspDispData,
+)
 from ..instrument import AbstractInstrument
 from ...disposal_locations import TrashBin, WasteChute
 
@@ -905,6 +909,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         self,
         liquid_class: LiquidClass,
         volume: float,
+        # TODO: update source and dest types to list of tuples of Location and WellCore
         source: List[WellCore],
         dest: List[WellCore],
         new_tip: TransferTipPolicyV2,
@@ -933,7 +938,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             targets=zip(source, dest),
             max_volume=self.get_max_volume(),
         )
-        transfer_executer = LiquidClassTransferExecutor(instrument_core=self)
+        transfer_executer = TransferComponentsExecutor(instrument_core=self)
         if new_tip == TransferTipPolicyV2.ONCE:
             # TODO: update this once getNextTip is implemented
             next_tip = self.get_next_tip()
@@ -959,6 +964,105 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                         home_after=False,
                         alternate_drop_location=True,
                     )
+
+    def aspirate_liquid_class(
+        self,
+        volume: float,
+        source: WellCore,
+        transfer_properties: TransferProperties,
+    ) -> None:
+        """Execute aspiration steps.
+
+        1. Submerge
+        2. Mix
+        3. pre-wet
+        4. Aspirate
+            - Aspirate with provided flow rate
+        5. Delay- wait inside the liquid
+        6. Aspirate retract
+        """
+        aspirate_props = transfer_properties.aspirate
+        dispense_props = transfer_properties.dispense
+        aspirate_location_and_well = _TargetAsLocationAndWell(
+            location=location_from_position_reference_and_offset(
+                well=source,
+                position_reference=aspirate_props.position_reference,
+                offset=aspirate_props.offset,
+            ),
+            well=source,
+        )
+        transfer_executer = TransferComponentsExecutor(
+            instrument_core=self,
+            transfer_properties=transfer_properties,
+            target_location_and_well=aspirate_location_and_well,
+        )
+        transfer_executer.submerge(submerge_properties=aspirate_props.submerge)
+        transfer_executer.mix(
+            mix_properties=aspirate_props.mix,
+            aspirate_data=MixAspDispData(
+                flow_rate=aspirate_props.flow_rate_by_volume.get_for_volume(
+                    aspirate_props.mix.volume
+                ),
+                delay=aspirate_props.delay,
+            ),
+            dispense_data=MixAspDispData(
+                flow_rate=dispense_props.flow_rate_by_volume.get_for_volume(
+                    aspirate_props.mix.volume
+                ),
+                delay=dispense_props.delay,
+            ),
+        )
+        transfer_executer.pre_wet(
+            enabled=aspirate_props.pre_wet,
+            volume=volume,
+            aspirate_data=MixAspDispData(
+                flow_rate=aspirate_props.flow_rate_by_volume.get_for_volume(volume),
+                delay=aspirate_props.delay,
+            ),
+            dispense_data=MixAspDispData(
+                flow_rate=dispense_props.flow_rate_by_volume.get_for_volume(volume),
+                delay=dispense_props.delay,
+            ),
+        )
+        transfer_executer.aspirate_and_wait(volume=volume)
+        transfer_executer.retract_after_aspiration(
+            air_gap_volume=aspirate_props.retract.air_gap_by_volume.get_for_volume(
+                volume
+            )
+        )
+
+    def dispense_liquid_class(
+        self,
+        volume: float,
+        dest: WellCore,
+        dispense_properties: SingleDispenseProperties,
+    ) -> None:
+        """Execute single-dispense steps.
+
+        1. Move pipette to the ‘submerge’ position with normal speed.
+            - The pipette will move in an arc- move to max z height of labware
+              (if asp & disp are in same labware)
+              or max z height of all labware (if asp & disp are in separate labware)
+        2. Air gap removal:
+            - If dispense location is above the meniscus, DO NOT remove air gap
+              (it will be dispensed along with rest of the liquid later).
+              All other scenarios, remove the air gap by doing a dispense
+            - Flow rate = min(dispenseFlowRate, (airGapByVolume)/sec)
+            - Use the post-dispense delay
+        4. Move to the dispense position at the specified ‘submerge’ speed
+           (even if we might not be moving into the liquid)
+           - Do a delay (submerge delay)
+        6. Dispense:
+            - Dispense at the specified flow rate.
+            - Do a push out as specified ONLY IF there is no mix following the dispense AND the tip is empty.
+            Volume for push out is the volume being dispensed. So if we are dispensing 50uL, use pushOutByVolume[50] as push out volume.
+        7. Delay
+        8. Mix using the same flow rate and delays as specified for asp+disp, with the volume and the number of repetitions specified. Use the delays in asp & disp.
+            - If the dispense position is outside the liquid, then raise error if mix is enabled.
+            - If the user wants to perform a mix then they should specify a dispense position that’s inside the liquid OR do mix() on the wells after transfer.
+            - Do push out at the last dispense.
+
+        """
 
     def retract(self) -> None:
         """Retract this instrument to the top of the gantry."""

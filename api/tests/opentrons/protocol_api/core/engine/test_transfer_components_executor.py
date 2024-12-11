@@ -7,8 +7,8 @@ from opentrons.protocol_api._liquid import LiquidClass
 from opentrons.protocol_api._liquid_properties import TransferProperties
 from opentrons.protocol_api.core.engine.well import WellCore
 from opentrons.protocol_api.core.engine.instrument import InstrumentCore
-from opentrons.protocol_api.core.engine.complex_commands_executor import (
-    LiquidClassTransferExecutor,
+from opentrons.protocol_api.core.engine.transfer_components_executor import (
+    TransferComponentsExecutor,
 )
 from opentrons.types import Location, Point
 
@@ -32,9 +32,9 @@ def sample_transfer_props(
 @pytest.fixture
 def subject(
     mock_instrument_core: InstrumentCore, sample_transfer_props: TransferProperties
-) -> LiquidClassTransferExecutor:
-    """Return a LiquidClassTransferExecutor test subject."""
-    return LiquidClassTransferExecutor(
+) -> TransferComponentsExecutor:
+    """Return a TransferComponentsExecutor test subject."""
+    return TransferComponentsExecutor(
         instrument_core=mock_instrument_core,
         transfer_properties=sample_transfer_props,
     )
@@ -67,7 +67,7 @@ def test_transfer_aspirate(
     decoy: Decoy,
     mock_instrument_core: InstrumentCore,
     sample_transfer_props: TransferProperties,
-    subject: LiquidClassTransferExecutor,
+    subject: TransferComponentsExecutor,
 ) -> None:
     """Should perform the expected aspiration steps."""
     source_well = decoy.mock(cls=WellCore)
