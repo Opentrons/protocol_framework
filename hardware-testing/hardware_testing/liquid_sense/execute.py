@@ -465,13 +465,13 @@ def _run_trial(
         result: LLDResult = LLDResult.success
         # write the data files that used to be made automatically
         if not run_args.ctx.is_simulating():
+            as_dict = data_capture.get_nowait()
             for probe in probes:
                 sensor_id = (
                     PipetteSensorId.S0
                     if probe == InstrumentProbeType.PRIMARY
                     else PipetteSensorId.S1
                 )
-                as_dict = data_capture.get_nowait()
                 data = [d.to_float() for d in as_dict[sensor_id]]
                 with open(data_files[probe], "w") as d_file:
                     writer = csv.writer(d_file)
@@ -495,8 +495,7 @@ def _run_trial(
                     )
                     for i in range(len(data)):
                         writer.writerow([f"{i*0.004}", f"{data[i]}"])
-        if not run_args.ctx.is_simulating():
-            for probe in data_files:
+
                 if _test_for_blockage(data_files[probe], lps.sensor_threshold_pascals):
                     result = LLDResult.blockage
                     break

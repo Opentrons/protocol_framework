@@ -364,8 +364,7 @@ async def liquid_probe(
         for s_id in listeners.keys():
             data = listeners[s_id].get_data()
             if data:
-                for d in data:
-                    emplace_data({s_id: data})
+                emplace_data({s_id: data})
 
     return positions
 
