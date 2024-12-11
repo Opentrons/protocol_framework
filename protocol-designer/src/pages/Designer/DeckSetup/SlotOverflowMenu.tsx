@@ -117,8 +117,6 @@ export function SlotOverflowMenu(
 
   const isSpace = getNextAvailableDeckSlot(deckSetup, robotType) != null
 
-  console.log(isSpace)
-
   const {
     labware: deckSetupLabware,
     modules: deckSetupModules,
