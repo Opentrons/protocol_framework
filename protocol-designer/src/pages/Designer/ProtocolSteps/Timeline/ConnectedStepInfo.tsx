@@ -49,6 +49,7 @@ export interface ConnectedStepInfoProps {
   dragHovered?: boolean
   openedOverflowMenuId?: string | null
   setOpenedOverflowMenuId?: Dispatch<SetStateAction<string | null>>
+  sidebarWidth: number
 }
 
 export function ConnectedStepInfo(props: ConnectedStepInfoProps): JSX.Element {
@@ -58,6 +59,7 @@ export function ConnectedStepInfo(props: ConnectedStepInfoProps): JSX.Element {
     dragHovered = false,
     openedOverflowMenuId,
     setOpenedOverflowMenuId,
+    sidebarWidth,
   } = props
   const { t } = useTranslation('application')
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
@@ -227,6 +229,7 @@ export function ConnectedStepInfo(props: ConnectedStepInfoProps): JSX.Element {
           step.stepName || t(`stepType.${step.stepType}`)
         }`}
         dragHovered={dragHovered}
+        sidebarWidth={sidebarWidth}
       />
     </>
   )

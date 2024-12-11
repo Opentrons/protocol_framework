@@ -31,6 +31,7 @@ interface DragDropStepProps extends ConnectedStepItemProps {
   orderedStepIds: string[]
   openedOverflowMenuId?: string | null
   setOpenedOverflowMenuId?: Dispatch<SetStateAction<string | null>>
+  sidebarWidth: number
 }
 
 interface DropType {
@@ -46,6 +47,7 @@ function DragDropStep(props: DragDropStepProps): JSX.Element {
     stepNumber,
     openedOverflowMenuId,
     setOpenedOverflowMenuId,
+    sidebarWidth,
   } = props
   const stepRef = useRef<HTMLDivElement>(null)
 
@@ -94,6 +96,7 @@ function DragDropStep(props: DragDropStepProps): JSX.Element {
         stepNumber={stepNumber}
         stepId={stepId}
         dragHovered={hovered}
+        sidebarWidth={sidebarWidth}
       />
     </Box>
   )
@@ -102,9 +105,10 @@ function DragDropStep(props: DragDropStepProps): JSX.Element {
 interface DraggableStepsProps {
   orderedStepIds: StepIdType[]
   reorderSteps: (steps: StepIdType[]) => void
+  sidebarWidth: number
 }
 export function DraggableSteps(props: DraggableStepsProps): JSX.Element | null {
-  const { orderedStepIds, reorderSteps } = props
+  const { orderedStepIds, reorderSteps, sidebarWidth } = props
   const { t } = useTranslation('shared')
   const [openedOverflowMenuId, setOpenedOverflowMenuId] = useState<
     string | null
@@ -146,6 +150,7 @@ export function DraggableSteps(props: DraggableStepsProps): JSX.Element | null {
           orderedStepIds={orderedStepIds}
           openedOverflowMenuId={openedOverflowMenuId}
           setOpenedOverflowMenuId={setOpenedOverflowMenuId}
+          sidebarWidth={sidebarWidth}
         />
       ))}
       <StepDragPreview />

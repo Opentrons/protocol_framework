@@ -12,6 +12,7 @@ import {
   Divider,
   Flex,
   Icon,
+  JUSTIFY_CENTER,
   JUSTIFY_SPACE_BETWEEN,
   JUSTIFY_START,
   OverflowBtn,
@@ -48,9 +49,11 @@ import type { BaseState } from '../../../../types'
 const STARTING_DECK_STATE = 'Starting deck'
 const FINAL_DECK_STATE = 'Ending deck'
 const PX_HEIGHT_TO_TOP_OF_CONTAINER = 32
+const SIDEBAR_MIN_WIDTH_FOR_ICON = 179
 export interface StepContainerProps {
   title: string
   iconName: IconName
+  sidebarWidth: number
   openedOverflowMenuId?: string | null
   setOpenedOverflowMenuId?: Dispatch<SetStateAction<string | null>>
   stepId?: string
@@ -83,6 +86,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
     dragHovered = false,
     setOpenedOverflowMenuId,
     openedOverflowMenuId,
+    sidebarWidth,
   } = props
   const [top, setTop] = useState<number>(0)
   const menuRootRef = useRef<HTMLDivElement | null>(null)
@@ -91,6 +95,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
   const multiSelectItemIds = useSelector(getMultiSelectItemIds)
 
+  const hasText = sidebarWidth > SIDEBAR_MIN_WIDTH_FOR_ICON
   let backgroundColor = isStartingOrEndingState ? COLORS.blue20 : COLORS.grey20
   let color = COLORS.black90
   if (selected) {
@@ -183,14 +188,14 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
 
   return (
     <>
-      {showDeleteConfirmation && (
+      {showDeleteConfirmation === true && (
         <ConfirmDeleteModal
           modalType={DELETE_STEP_FORM}
           onCancelClick={cancelDelete}
           onContinueClick={confirmDelete}
         />
       )}
-      {showMultiDeleteConfirmation && (
+      {showMultiDeleteConfirmation === true && (
         <ConfirmDeleteModal
           modalType={DELETE_MULTIPLE_STEP_FORMS}
           onContinueClick={confirmMultiDelete}
@@ -226,10 +231,10 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
             <Flex
               alignItems={ALIGN_CENTER}
               gridGap={SPACING.spacing8}
-              justifyContent={JUSTIFY_START}
+              justifyContent={hasText ? JUSTIFY_START : JUSTIFY_CENTER}
               width="100%"
             >
-              {iconName && (
+              {iconName != null && (
                 <Icon
                   size="1.25rem"
                   name={iconName}
@@ -237,12 +242,14 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
                   minWidth="1.25rem"
                 />
               )}
-              <StyledText
-                desktopStyle="bodyDefaultRegular"
-                css={LINE_CLAMP_TEXT_STYLE(1)}
-              >
-                {capitalizeFirstLetterAfterNumber(title)}
-              </StyledText>
+              {hasText ? (
+                <StyledText
+                  desktopStyle="bodyDefaultRegular"
+                  css={LINE_CLAMP_TEXT_STYLE(1)}
+                >
+                  {capitalizeFirstLetterAfterNumber(title)}
+                </StyledText>
+              ) : null}
             </Flex>
             {selected && !isStartingOrEndingState ? (
               <OverflowBtn

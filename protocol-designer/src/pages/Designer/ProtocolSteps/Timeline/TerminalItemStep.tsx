@@ -21,6 +21,7 @@ import {
   toggleViewSubstep,
 } from '../../../../ui/steps/actions/actions'
 import { StepContainer } from './StepContainer'
+import { START_TERMINAL_ITEM_ID } from '../../../../steplist'
 
 import type {
   SelectTerminalItemAction,
@@ -32,10 +33,11 @@ import type { ThunkDispatch } from '../../../../types'
 export interface TerminalItemStepProps {
   id: TerminalItemId
   title: string
+  sidebarWidth: number
 }
 
 export function TerminalItemStep(props: TerminalItemStepProps): JSX.Element {
-  const { id, title } = props
+  const { id, title, sidebarWidth } = props
   const hovered = useSelector(getHoveredTerminalItemId) === id
   const selected = useSelector(getSelectedTerminalItemId) === id
   const currentFormIsPresaved = useSelector(getCurrentFormIsPresaved)
@@ -83,7 +85,7 @@ export function TerminalItemStep(props: TerminalItemStepProps): JSX.Element {
       <StepContainer
         {...{
           stepId: `TerminalItem_${id}`,
-          iconName: title === 'Starting deck state' ? 'ot-start' : 'ot-end',
+          iconName: id === START_TERMINAL_ITEM_ID ? 'ot-start' : 'ot-end',
           hovered,
           selected,
           title,
@@ -91,6 +93,7 @@ export function TerminalItemStep(props: TerminalItemStepProps): JSX.Element {
           onMouseEnter,
           onMouseLeave,
         }}
+        sidebarWidth={sidebarWidth}
       />
     </>
   )

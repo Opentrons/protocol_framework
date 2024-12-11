@@ -43,10 +43,10 @@ import type { BaseState } from '../../../../types'
 import type { StepType } from '../../../../form-types'
 
 interface AddStepButtonProps {
-  hasIcon: boolean
+  hasText: boolean
 }
 
-export function AddStepButton({ hasIcon }: AddStepButtonProps): JSX.Element {
+export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
   const { t } = useTranslation(['tooltip', 'button'])
   const enableComment = useSelector(getEnableComment)
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
@@ -145,8 +145,8 @@ export function AddStepButton({ hasIcon }: AddStepButtonProps): JSX.Element {
         }}
         disabled={isStepCreationDisabled}
       >
-        {hasIcon ? <Icon name="plus" size="1rem" /> : null}
-        <StyledText>{t('button:add_step')}</StyledText>
+        <Icon name="plus" size="1rem" />
+        {hasText ? <StyledText>{t('button:add_step')}</StyledText> : null}
       </SecondaryButton>
     </>
   )

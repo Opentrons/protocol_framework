@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import {
   DIRECTION_COLUMN,
   Flex,
+  OVERFLOW_WRAP_ANYWHERE,
   POSITION_RELATIVE,
   SPACING,
   StyledText,
@@ -72,7 +73,10 @@ export const TimelineToolbox = ({
       width={`${sidebarWidth / 16}rem`}
       maxHeight={`calc(100vh - ${PROTOCOL_NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
       title={
-        <StyledText desktopStyle="bodyLargeSemiBold">
+        <StyledText
+          desktopStyle="bodyLargeSemiBold"
+          overflowWrap={OVERFLOW_WRAP_ANYWHERE}
+        >
           {t('timeline')}
         </StyledText>
       }
@@ -80,7 +84,7 @@ export const TimelineToolbox = ({
       childrenPadding={SPACING.spacing12}
       confirmButton={
         formData != null ? undefined : (
-          <AddStepButton hasIcon={sidebarWidth > SIDEBAR_MIN_WIDTH_FOR_ICON} />
+          <AddStepButton hasText={sidebarWidth > SIDEBAR_MIN_WIDTH_FOR_ICON} />
         )
       }
     >
@@ -92,15 +96,21 @@ export const TimelineToolbox = ({
         <TerminalItemStep
           id={START_TERMINAL_ITEM_ID}
           title={t('starting_deck')}
+          sidebarWidth={sidebarWidth}
         />
         <DraggableSteps
           orderedStepIds={orderedStepIds}
           reorderSteps={(stepIds: StepIdType[]) => {
             dispatch(steplistActions.reorderSteps(stepIds))
           }}
+          sidebarWidth={sidebarWidth}
         />
         <PresavedStep />
-        <TerminalItemStep id={END_TERMINAL_ITEM_ID} title={t('ending_deck')} />
+        <TerminalItemStep
+          id={END_TERMINAL_ITEM_ID}
+          title={t('ending_deck')}
+          sidebarWidth={sidebarWidth}
+        />
       </Flex>
     </Toolbox>
   )
