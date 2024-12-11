@@ -747,7 +747,7 @@ class LabwareDefinition(BaseModel):
         None,
         description="A dictionary holding all unique inner well geometries in a labware.",
     )
-    stackLimit: Optional[int] = Field(
+    stackLimit: int = Field(
         1,
         description="The limit representing the maximum stack size for a given labware,"
         " defaults to 1 when unspecified indicating a single labware with no labware below it.",

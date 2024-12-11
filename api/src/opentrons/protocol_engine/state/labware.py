@@ -227,19 +227,6 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
         loaded_lid_stack_update = state_update.loaded_lid_stack
         if loaded_lid_stack_update != update_types.NO_CHANGE:
             for i in range(len(loaded_lid_stack_update.labware_ids)):
-                if (
-                    loaded_lid_stack_update.offset_ids[
-                        loaded_lid_stack_update.labware_ids[i]
-                    ]
-                    is not None
-                ):
-                    assert (
-                        loaded_lid_stack_update.offset_ids[
-                            loaded_lid_stack_update.labware_ids[i]
-                        ]
-                        in self._state.labware_offsets_by_id
-                    )
-
                 definition_uri = uri_from_details(
                     namespace=loaded_lid_stack_update.definition.namespace,
                     load_name=loaded_lid_stack_update.definition.parameters.loadName,
@@ -261,9 +248,7 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                     location=location,
                     loadName=loaded_lid_stack_update.definition.parameters.loadName,
                     definitionUri=definition_uri,
-                    offsetId=loaded_lid_stack_update.offset_ids[
-                        loaded_lid_stack_update.labware_ids[i]
-                    ],
+                    offsetId=None,
                     displayName=None,
                 )
 

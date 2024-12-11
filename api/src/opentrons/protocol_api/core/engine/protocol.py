@@ -694,7 +694,7 @@ class ProtocolCore(
     def load_lid_stack(
         self,
         load_name: str,
-        location: Union[DeckSlotName, StagingSlotName, Labware],
+        location: Union[DeckSlotName, StagingSlotName, LabwareCore],
         quantity: int,
         namespace: Optional[str],
         version: Optional[int],
@@ -703,8 +703,8 @@ class ProtocolCore(
         if isinstance(location, DeckSlotName) or isinstance(location, StagingSlotName):
             load_location = self._convert_labware_location(location=location)
         else:
-            if isinstance(location._core, LabwareCore):
-                load_location = self._convert_labware_location(location=location._core)
+            if isinstance(location, LabwareCore):
+                load_location = self._convert_labware_location(location=location)
             else:
                 raise ValueError(
                     "Expected type of Labware Location for lid stack must be Labware, not Legacy Labware or Well."

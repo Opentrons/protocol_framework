@@ -401,7 +401,6 @@ class EquipmentHandler:
         version: int,
         location: LabwareLocation,
         quantity: int,
-        labware_ids: Optional[List[str]],
     ) -> List[LoadedLabwareData]:
         """Load one or many lid labware by assigning an identifier and pulling required data.
 
@@ -435,45 +434,27 @@ class EquipmentHandler:
                 version=version,
             )
 
-        if definition.stackLimit is not None and quantity > definition.stackLimit:
+        if quantity > definition.stackLimit:
             raise ValueError(
                 f"Requested quantity {quantity} is greater than the stack limit of {definition.stackLimit} provided by definition for {load_name}."
             )
 
-        if labware_ids is not None and len(labware_ids) != quantity:
+        # Allow propagation of ModuleNotLoadedError.
+        if (
+            isinstance(location, DeckSlotLocation)
+            and not definition.parameters.isDeckSlotCompatible
+        ):
             raise ValueError(
-                "Cannot provide a different amount of lid identifiers than the quantity of lids being loaded."
+                f"Lid Labware {load_name} cannot be loaded onto a Deck Slot."
             )
 
-        if labware_ids is None:
-            labware_ids = []
-            for i in range(quantity):
-                labware_ids.append(self._model_utils.generate_id())
-
-        # Allow propagation of ModuleNotLoadedError.
         load_labware_data_list = []
         for i in range(quantity):
-            if i == 0:
-                if (
-                    isinstance(location, DeckSlotLocation)
-                    and not definition.parameters.isDeckSlotCompatible
-                ):
-                    raise ValueError(
-                        f"Lid Labware {load_name} cannot be loaded onto a Deck Slot."
-                    )
-                labware_location = location
-            else:
-                labware_location = OnLabwareLocation(labwareId=labware_ids[i - 1])
-
             load_labware_data_list.append(
                 LoadedLabwareData(
-                    labware_id=labware_ids[i],
+                    labware_id=self._model_utils.generate_id(),
                     definition=definition,
-                    offsetId=None
-                    # offsetId=self.find_applicable_labware_offset_id(
-                    #     labware_definition_uri=definition_uri,
-                    #     labware_location=labware_location,
-                    # ),
+                    offsetId=None,
                 )
             )
 

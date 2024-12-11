@@ -182,10 +182,10 @@ class ModuleContext(CommandPublisher):
             location=load_location,
         )
         if lid is not None:
-            if self._api_version >= APIVersion(2, 24):
+            if self._api_version < validation.LID_STACK_VERSION_GATE:
                 raise APIVersionError(
                     api_element="Loading a lid on a Labware",
-                    until_version="2.24",
+                    until_version="2.23",
                     current_version=f"{self._api_version}",
                 )
             self._protocol_core.load_lid(

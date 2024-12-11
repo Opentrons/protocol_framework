@@ -66,19 +66,6 @@ class LoadLidStackResult(BaseModel):
     location: LabwareLocation = Field(
         ..., description="The Location that the stack of lid labware has been loaded."
     )
-    offsetIdsByLabwareId: Dict[str, Optional[str]] = Field(
-        # Default `None` instead of `...` so this field shows up as non-required in
-        # OpenAPI. The server is allowed to omit it or make it null.
-        ...,
-        description=(
-            "An Dictionary of IDs referencing the labware offset that will apply"
-            " to the newly-placed lid stack, keyed by Labware ID."
-            " This offset will be in effect per lid until a lid is moved"
-            " with a `moveLid` command."
-            " Null or undefined means no offset applies,"
-            " so the default of (0, 0, 0) will be used."
-        ),
-    )
 
 
 class LoadLidStackImplementation(
@@ -116,36 +103,25 @@ class LoadLidStackImplementation(
         verified_location = self._state_view.geometry.ensure_location_not_occupied(
             params.location
         )
-        loaded_lid_ids = []
-        loaded_lid_offset_id_by_id = {}
-        loaded_lid_locations_by_id = {}
-        loaded_lid_labwares = []
-        state_update = StateUpdate()
+
         loaded_lid_labwares = await self._equipment.load_lids(
             load_name=params.loadName,
             namespace=params.namespace,
             version=params.version,
             location=verified_location,
             quantity=params.quantity,
-            labware_ids=None,
         )
-        for i in range(params.quantity):
-            loaded_lid_ids.append(loaded_lid_labwares[i].labware_id)
-            loaded_lid_offset_id_by_id[
-                loaded_lid_labwares[i].labware_id
-            ] = loaded_lid_labwares[i].offsetId
-            if i == 0:
-                loaded_lid_locations_by_id[loaded_lid_ids[i]] = verified_location
-            else:
-                loaded_lid_locations_by_id[
-                    loaded_lid_ids[i]
-                ] = loaded_lid_locations_by_id[loaded_lid_ids[i - 1]]
+        loaded_lid_locations_by_id = {}
+        load_location = verified_location
+        for loaded_lid in loaded_lid_labwares:
+            loaded_lid_locations_by_id[loaded_lid.labware_id] = load_location
+            load_location = OnLabwareLocation(labwareId=loaded_lid.labware_id)
 
+        state_update = StateUpdate()
         state_update.set_loaded_lid_stack(
-            labware_ids=loaded_lid_ids,
+            labware_ids=list(loaded_lid_locations_by_id.keys()),
             definition=loaded_lid_labwares[0].definition,
             locations=loaded_lid_locations_by_id,
-            offset_ids=loaded_lid_offset_id_by_id,
         )
 
         if isinstance(verified_location, OnLabwareLocation):
@@ -158,10 +134,9 @@ class LoadLidStackImplementation(
 
         return SuccessData(
             public=LoadLidStackResult(
-                labwareIds=loaded_lid_ids,
+                labwareIds=list(loaded_lid_locations_by_id.keys()),
                 definition=loaded_lid_labwares[0].definition,
                 location=params.location,
-                offsetIdsByLabwareId=loaded_lid_offset_id_by_id,
             ),
             state_update=state_update,
         )

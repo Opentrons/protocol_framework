@@ -499,7 +499,7 @@ class LegacyProtocolCore(
     def load_lid_stack(
         self,
         load_name: str,
-        location: Union[DeckSlotName, StagingSlotName, Labware],
+        location: Union[DeckSlotName, StagingSlotName, LegacyLabwareCore],
         quantity: int,
         namespace: Optional[str],
         version: Optional[int],

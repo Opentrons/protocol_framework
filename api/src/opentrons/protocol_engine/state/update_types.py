@@ -130,9 +130,6 @@ class LoadedLidStackUpdate:
     new_locations_by_id: typing.Dict[str, LabwareLocation]
     """Each lid's initial location keyed by Labware ID."""
 
-    offset_ids: typing.Dict[str, typing.Optional[str]]
-    """The IDs of each lid's offset keyed by Labware ID."""
-
     definition: LabwareDefinition
 
 
@@ -456,14 +453,12 @@ class StateUpdate:
         definition: LabwareDefinition,
         labware_ids: typing.List[str],
         locations: typing.Dict[str, LabwareLocation],
-        offset_ids: typing.Dict[str, typing.Optional[str]],
     ) -> Self:
         """Add a new lid stack to state. See `LoadedLidStackUpdate`."""
         self.loaded_lid_stack = LoadedLidStackUpdate(
             definition=definition,
             labware_ids=labware_ids,
             new_locations_by_id=locations,
-            offset_ids=offset_ids,
         )
         return self
 
