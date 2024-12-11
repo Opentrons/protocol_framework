@@ -10,16 +10,16 @@ import {
   useNotifyRunQuery,
   useMostRecentCompletedAnalysis,
 } from '/app/resources/runs'
-import { LabwarePositionCheck } from '.'
+import { LegacyLabwarePositionCheck } from '.'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 
 import type { RobotType } from '@opentrons/shared-data'
 
-export function useLaunchLPC(
+export function useLaunchLegacyLPC(
   runId: string,
   robotType: RobotType,
   protocolName?: string
-): { launchLPC: () => void; LPCWizard: JSX.Element | null } {
+): { launchLegacyLPC: () => void; LegacyLPCWizard: JSX.Element | null } {
   const { data: runRecord } = useNotifyRunQuery(runId, { staleTime: Infinity })
   const {
     createTargetedMaintenanceRun,
@@ -45,7 +45,7 @@ export function useLaunchLPC(
     }
   }
   return {
-    launchLPC: () =>
+    launchLegacyLPC: () =>
       createTargetedMaintenanceRun({
         labwareOffsets: currentOffsets.map(
           ({ vector, location, definitionUri }) => ({
@@ -71,9 +71,9 @@ export function useLaunchLPC(
           setMaintenanceRunId(maintenanceRun.data.id)
         })
       ),
-    LPCWizard:
+    LegacyLPCWizard:
       maintenanceRunId != null ? (
-        <LabwarePositionCheck
+        <LegacyLabwarePositionCheck
           onCloseClick={handleCloseLPC}
           runId={runId}
           mostRecentAnalysis={mostRecentAnalysis}

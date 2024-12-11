@@ -27,7 +27,7 @@ import {
   storedProtocolDataWithCsvRunTimeParameter,
 } from '/app/redux/protocol-storage/__fixtures__'
 import { useCreateRunFromProtocol } from '../useCreateRunFromProtocol'
-import { useOffsetCandidatesForAnalysis } from '/app/organisms/ApplyHistoricOffsets/hooks/useOffsetCandidatesForAnalysis'
+import { useOffsetCandidatesForAnalysis } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/useOffsetCandidatesForAnalysis'
 import { ChooseRobotToRunProtocolSlideout } from '../'
 import { useNotifyDataReady } from '/app/resources/useNotifyDataReady'
 import { useCurrentRunId, useCloseCurrentRun } from '/app/resources/runs'
@@ -43,7 +43,7 @@ vi.mock('/app/redux/robot-update')
 vi.mock('/app/redux/networking')
 vi.mock('../useCreateRunFromProtocol')
 vi.mock(
-  '/app/organisms/ApplyHistoricOffsets/hooks/useOffsetCandidatesForAnalysis'
+  '/app/organisms/LegacyApplyHistoricOffsets/hooks/useOffsetCandidatesForAnalysis'
 )
 vi.mock('/app/resources/useNotifyDataReady')
 vi.mock('/app/resources/runs')

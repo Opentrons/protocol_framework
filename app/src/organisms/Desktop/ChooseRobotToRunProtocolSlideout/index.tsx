@@ -29,10 +29,11 @@ import {
   getRunTimeParameterFilesForRun,
   getRunTimeParameterValuesForRun,
 } from '/app/transformations/runs'
-import { ApplyHistoricOffsets } from '/app/organisms/ApplyHistoricOffsets'
-import { useOffsetCandidatesForAnalysis } from '/app/organisms/ApplyHistoricOffsets/hooks/useOffsetCandidatesForAnalysis'
+import { LegacyApplyHistoricOffsets } from '/app/organisms/LegacyApplyHistoricOffsets'
+import { useOffsetCandidatesForAnalysis } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/useOffsetCandidatesForAnalysis'
 import { ChooseRobotSlideout } from '../ChooseRobotSlideout'
 import { useCreateRunFromProtocol } from './useCreateRunFromProtocol'
+import { useFeatureFlag } from '/app/redux/config'
 
 import type { MouseEventHandler } from 'react'
 import type { StyleProps } from '@opentrons/components'
@@ -67,6 +68,7 @@ export function ChooseRobotToRunProtocolSlideoutComponent(
     setSelectedRobot,
   } = props
   const navigate = useNavigate()
+  const isNewLpc = useFeatureFlag('lpcRedesign')
   const [shouldApplyOffsets, setShouldApplyOffsets] = useState<boolean>(true)
   const {
     protocolKey,
@@ -219,8 +221,8 @@ export function ChooseRobotToRunProtocolSlideoutComponent(
     </PrimaryButton>
   )
 
-  const offsetsComponent = (
-    <ApplyHistoricOffsets
+  const offsetsComponent = isNewLpc ? null : (
+    <LegacyApplyHistoricOffsets
       offsetCandidates={offsetCandidates}
       shouldApplyOffsets={shouldApplyOffsets}
       setShouldApplyOffsets={setShouldApplyOffsets}
