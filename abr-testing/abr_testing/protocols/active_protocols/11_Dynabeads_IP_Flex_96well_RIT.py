@@ -1,5 +1,5 @@
 """Immunoprecipitation by Dynabeads."""
-from opentrons.protocol_api import ProtocolContext, ParameterContext, Well
+from opentrons.protocol_api import ProtocolContext, ParameterContext, Well, Labware
 from opentrons.protocol_api.module_contexts import (
     HeaterShakerContext,
     TemperatureModuleContext,
@@ -25,6 +25,7 @@ def add_parameters(parameters: ParameterContext) -> None:
     helpers.create_hs_speed_parameter(parameters)
     helpers.create_two_pipette_mount_parameters(parameters)
     helpers.create_dot_bottom_parameter(parameters)
+    helpers.create_deactivate_modules_parameter(parameters)
 
 
 NUM_COL = 12
@@ -55,6 +56,8 @@ def run(ctx: ProtocolContext) -> None:
     ASP_HEIGHT = ctx.params.dot_bottom  # type: ignore[attr-defined]
     single_channel_mount = ctx.params.pipette_mount_1  # type: ignore[attr-defined]
     eight_channel_mount = ctx.params.pipette_mount_2  # type: ignore[attr-defined]
+    deactivate_modules_bool = ctx.params.deactivate_modules  # type: ignore[attr-defined]
+
     MIX_SPEED = heater_shaker_speed
     MIX_SEC = 10
 
@@ -215,7 +218,8 @@ def run(ctx: ProtocolContext) -> None:
         waste_vol_chk = waste_vol_chk + waste_vol
 
     # protocol
-    def protocol(sample_plate):
+    def protocol(sample_plate: Labware) -> None:
+        """Protocol."""
         # Add beads, samples and antibody solution
         samples = sample_plate.rows()[0][:NUM_COL]  # 1
         h_s.close_labware_latch()
@@ -279,13 +283,8 @@ def run(ctx: ProtocolContext) -> None:
     ctx.move_labware(sample_plate_1, "B4", True)
     ctx.move_labware(sample_plate_2, "B2", True)
     protocol(sample_plate_2)
-    end_wells_to_probe = [
-        waste_res["A1"],
-        reagent_res["A1"],
-        reagent_res["B1"],
-        reagent_res["C1"],
-    ]
 
-    # end_wells_to_probe.extend(wash_res.wells())
     helpers.clean_up_plates(p1000_single, [wash_res], waste, 1000)
-    helpers.find_liquid_height_of_all_wells(ctx, p1000_single, end_wells_to_probe)
+    helpers.find_liquid_height_of_all_wells(ctx, p1000_single, [waste_res["A1"]])
+    if deactivate_modules_bool:
+        helpers.deactivate_modules(ctx)

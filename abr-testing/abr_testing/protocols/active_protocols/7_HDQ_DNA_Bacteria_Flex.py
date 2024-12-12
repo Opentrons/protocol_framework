@@ -22,7 +22,7 @@ metadata = {
 }
 
 requirements = {
-    "robotType": "OT-3",
+    "robotType": "Flex",
     "apiLevel": "2.21",
 }
 """
@@ -57,6 +57,7 @@ def add_parameters(parameters: ParameterContext) -> None:
     helpers.create_single_pipette_mount_parameter(parameters)
     helpers.create_hs_speed_parameter(parameters)
     helpers.create_dot_bottom_parameter(parameters)
+    helpers.create_deactivate_modules_parameter(parameters)
 
 
 def run(ctx: ProtocolContext) -> None:
@@ -64,6 +65,8 @@ def run(ctx: ProtocolContext) -> None:
     heater_shaker_speed = ctx.params.heater_shaker_speed  # type: ignore[attr-defined]
     mount = ctx.params.pipette_mount  # type: ignore[attr-defined]
     dot_bottom = ctx.params.dot_bottom  # type: ignore[attr-defined]
+    deactivate_modules_bool = ctx.params.deactivate_modules  # type: ignore[attr-defined]
+
     dry_run = False
     TIP_TRASH = False
     res_type = "nest_12_reservoir_22ml"
@@ -515,3 +518,5 @@ def run(ctx: ProtocolContext) -> None:
     m1000.tip_racks = [tips1004]
     helpers.clean_up_plates(m1000, [res1, elutionplate], waste_reservoir["A1"], 1000)
     helpers.find_liquid_height_of_all_wells(ctx, m1000, end_wells_with_liquid)
+    if deactivate_modules_bool:
+        helpers.deactivate_modules(ctx)
