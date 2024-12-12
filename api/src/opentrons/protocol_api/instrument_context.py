@@ -763,8 +763,7 @@ class InstrumentContext(publisher.CommandPublisher):
             ``pipette.air_gap(height=2)``. If you call ``air_gap`` with a single,
             unnamed argument, it will always be interpreted as a volume.
 
-        .. note::
-
+        .. TODO: restore this as a note block for 2.22 docs
            Before API version 2.22, this function was implemented as an aspirate, and
            dispensing into a well would add the air gap volume to the liquid tracked in
            the well. At or above API version 2.22, air gap volume is not counted as liquid
@@ -1606,9 +1605,11 @@ class InstrumentContext(publisher.CommandPublisher):
             ],
             new_tip=valid_new_tip,
             tiprack_uri=tiprack.uri,
-            trash_location=checked_trash_location._core
-            if isinstance(checked_trash_location, labware.Well)
-            else checked_trash_location,
+            trash_location=(
+                checked_trash_location._core
+                if isinstance(checked_trash_location, labware.Well)
+                else checked_trash_location
+            ),
         )
         return self
 

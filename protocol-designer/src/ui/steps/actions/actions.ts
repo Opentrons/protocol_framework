@@ -17,10 +17,6 @@ import type { AnalyticsEventAction } from '../../../analytics/actions'
 import type { TerminalItemId, SubstepIdentifier } from '../../../steplist/types'
 import type {
   AddStepAction,
-  ExpandAddStepButtonAction,
-  ToggleStepCollapsedAction,
-  ExpandMultipleStepsAction,
-  CollapseMultipleStepsAction,
   HoverOnStepAction,
   HoverOnSubstepAction,
   SelectTerminalItemAction,
@@ -29,6 +25,7 @@ import type {
   ClearWellSelectionLabwareKeyAction,
   SelectStepAction,
   SelectMultipleStepsAction,
+  SelectMultipleStepsForGroupAction,
   ToggleViewSubstepAction,
   ViewSubstep,
 } from './types'
@@ -51,30 +48,6 @@ export const addStep = (args: {
     },
   }
 }
-export const expandAddStepButton = (
-  payload: boolean
-): ExpandAddStepButtonAction => ({
-  type: 'EXPAND_ADD_STEP_BUTTON',
-  payload,
-})
-export const toggleStepCollapsed = (
-  stepId: StepIdType
-): ToggleStepCollapsedAction => ({
-  type: 'TOGGLE_STEP_COLLAPSED',
-  payload: stepId,
-})
-export const expandMultipleSteps = (
-  stepIds: StepIdType[]
-): ExpandMultipleStepsAction => ({
-  type: 'EXPAND_MULTIPLE_STEPS',
-  payload: stepIds,
-})
-export const collapseMultipleSteps = (
-  stepIds: StepIdType[]
-): CollapseMultipleStepsAction => ({
-  type: 'COLLAPSE_MULTIPLE_STEPS',
-  payload: stepIds,
-})
 export const hoverOnSubstep = (
   payload: SubstepIdentifier
 ): HoverOnSubstepAction => ({
@@ -166,6 +139,22 @@ export const selectMultipleSteps = (
 ) => {
   const selectStepAction: SelectMultipleStepsAction = {
     type: 'SELECT_MULTIPLE_STEPS',
+    payload: {
+      stepIds,
+      lastSelected,
+    },
+  }
+  dispatch(selectStepAction)
+}
+export const selectMultipleStepsForGroup = (
+  stepIds: StepIdType[],
+  lastSelected: StepIdType
+): ThunkAction<SelectMultipleStepsForGroupAction> => (
+  dispatch: ThunkDispatch<any>,
+  getState: GetState
+) => {
+  const selectStepAction: SelectMultipleStepsForGroupAction = {
+    type: 'SELECT_MULTIPLE_STEPS_FOR_GROUP',
     payload: {
       stepIds,
       lastSelected,

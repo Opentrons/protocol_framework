@@ -285,7 +285,7 @@ export function UpdateProtocol(): JSX.Element {
                           <LinkComponent
                             color={COLORS.blue55}
                             role="button"
-                            to={''}
+                            to=""
                           />
                         ),
                       }}
@@ -304,7 +304,7 @@ export function UpdateProtocol(): JSX.Element {
             </FadeWrapper>
           </CSSTransition>
         </Flex>
-        <Flex height={'16px'}></Flex>
+        <Flex height="1rem"></Flex>
         <Flex flexDirection={DIRECTION_COLUMN} width="100%">
           <DropdownMenu
             title={t('type_of_update')}

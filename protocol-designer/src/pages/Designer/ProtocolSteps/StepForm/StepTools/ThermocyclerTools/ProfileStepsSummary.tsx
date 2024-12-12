@@ -8,8 +8,7 @@ import {
   SPACING,
   StyledText,
 } from '@opentrons/components'
-
-import { getTopPortalEl } from '../../../../../../components/portals/TopPortal'
+import { getMainPagePortalEl } from '../../../../../../organisms'
 import { ThermocyclerProfileModal } from './ThermocyclerProfileModal'
 
 import type { FormData } from '../../../../../../form-types'
@@ -35,7 +34,7 @@ export function ProfileStepsSummary(
               propsForFields={propsForFields}
               setShowProfileModal={setShowProfileModal}
             />,
-            getTopPortalEl()
+            getMainPagePortalEl()
           )
         : null}
       <Flex

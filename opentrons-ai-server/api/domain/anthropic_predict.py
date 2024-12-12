@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Literal
 
 import requests
 import structlog
+import weave  # type: ignore
 from anthropic import Anthropic
 from anthropic.types import Message, MessageParam
 from ddtrace import tracer
@@ -11,6 +12,7 @@ from ddtrace import tracer
 from api.domain.config_anthropic import DOCUMENTS, PROMPT, SYSTEM_PROMPT
 from api.settings import Settings
 
+weave.init("opentronsai/OpentronsAI-Phase-2")
 settings: Settings = Settings()
 logger = structlog.stdlib.get_logger(settings.logger_name)
 ROOT_PATH: Path = Path(Path(__file__)).parent.parent.parent
@@ -93,6 +95,7 @@ class AnthropicPredict:
             tools=self.tools,  # type: ignore
             extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
             metadata={"user_id": user_id},
+            temperature=0.0,
         )
 
         logger.info(

@@ -369,8 +369,8 @@ export function AddFixtureModal({
               }}
               aria-label="back"
               paddingX={SPACING.spacing16}
-              marginTop={'1.44rem'}
-              marginBottom={'0.56rem'}
+              marginTop="1.44rem"
+              marginBottom="0.56rem"
             >
               <LegacyStyledText css={GO_BACK_BUTTON_STYLE}>
                 {t('shared:go_back')}

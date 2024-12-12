@@ -95,7 +95,6 @@ class CloseLidImpl(AbstractCommandImpl[CloseLidParams, SuccessData[CloseLidResul
                     deck_slot=self._state_view.modules.get_location(
                         params.moduleId
                     ).slotName,
-                    deck_type=self._state_view.config.deck_type,
                     model=absorbance_model,
                 )
             )

@@ -9,8 +9,8 @@ import {
   SPACING,
   StyledText,
 } from '@opentrons/components'
-import { getTopPortalEl } from '../../components/portals/TopPortal'
 import { HandleEnter } from '../../atoms/HandleEnter'
+import { getMainPagePortalEl } from '../Portal'
 
 interface ConfirmDeleteStagingAreaModalProps {
   onClose: () => void
@@ -54,6 +54,6 @@ export function ConfirmDeleteStagingAreaModal(
         </StyledText>
       </Modal>
     </HandleEnter>,
-    getTopPortalEl()
+    getMainPagePortalEl()
   )
 }
