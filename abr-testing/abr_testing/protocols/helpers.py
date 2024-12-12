@@ -280,6 +280,25 @@ def create_hs_speed_parameter(parameters: ParameterContext) -> None:
     )
 
 
+def create_plate_reader_compatible_labware_parameter(
+    parameters: ParameterContext,
+) -> None:
+    """Create parameter for flat bottom plates compatible with plate reader."""
+    parameters.add_str(
+        variable_name="labware_plate_reader_compatible",
+        display_name="Plate Reader Labware",
+        default="nest_96_wellplate_200ul_flat",
+        choices=[
+            {
+                "display_name": "Corning_96well",
+                "value": "corning_96_wellplate_360ul_flat",
+            },
+            {"display_name": "Hellma Plate", "value": "hellma_reference_plate"},
+            {"display_name": "Nest_96well", "value": "nest_96_wellplate_200ul_flat"},
+        ],
+    )
+
+
 def create_tc_compatible_labware_parameter(parameters: ParameterContext) -> None:
     """Create parameter for labware type compatible with thermocycler."""
     parameters.add_str(
@@ -607,6 +626,3 @@ def perform_pcr(
     thermocycler.execute_profile(
         steps=final_extension_profile, repetitions=1, block_max_volume=50
     )
-
-
-# TODO: Create dictionary of labware, module, and adapter.
