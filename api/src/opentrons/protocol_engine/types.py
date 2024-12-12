@@ -17,6 +17,7 @@ from typing import (
 )
 
 from pydantic import (
+    ConfigDict,
     BaseModel,
     Field,
     RootModel,
@@ -24,8 +25,6 @@ from pydantic import (
     StrictFloat,
     StrictInt,
     StrictStr,
-    validator,
-    Extra,
 )
 from typing_extensions import Literal, TypeGuard
 
@@ -1156,11 +1155,7 @@ class CustomCommandAnnotation(BaseCommandAnnotation):
     """Annotates a group of atomic commands in some manner that Opentrons software does not anticipate or originate."""
 
     annotationType: Literal["custom"] = "custom"
-
-    class Config:
-        """Config to allow extra, non-defined properties."""
-
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")
 
 
 CommandAnnotation = Union[SecondOrderCommandAnnotation, CustomCommandAnnotation]

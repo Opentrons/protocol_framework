@@ -38,6 +38,9 @@ class CommandTranslatorError(Exception):
 # serializer. To improve performance, TypeAdapters are instantiated once.
 # See https://docs.pydantic.dev/latest/concepts/performance/#typeadapter-instantiated-once
 LabwareLocationAdapter: TypeAdapter[LabwareLocation] = TypeAdapter(LabwareLocation)
+CommandAnnotationAdapter: TypeAdapter[CommandAnnotation] = TypeAdapter(
+    CommandAnnotation
+)
 
 
 def _translate_labware_command(
@@ -301,9 +304,8 @@ class JsonTranslator:
             return []
         else:
             command_annotations: List[CommandAnnotation] = [
-                parse_obj_as(
-                    CommandAnnotation,  # type: ignore[arg-type]
-                    command_annotation.dict(),
+                CommandAnnotationAdapter.validate_python(
+                    command_annotation.model_dump(),
                 )
                 for command_annotation in protocol.commandAnnotations
             ]
