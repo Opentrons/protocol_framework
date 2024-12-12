@@ -18,7 +18,7 @@ from typing import List, Tuple, Dict
 
 metadata = {
     "protocolName": "KAPA HyperPlus Library Preparation",
-    "author": "Your Name <your.email@example.com>",
+    "author": "Tony Ngumah <tony.ngumah@opentrons.com>",
 }
 
 requirements = {"robotType": "Flex", "apiLevel": "2.21"}
