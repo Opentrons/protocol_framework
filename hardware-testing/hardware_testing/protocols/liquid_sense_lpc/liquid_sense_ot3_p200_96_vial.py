@@ -8,6 +8,7 @@ SLOT_SCALE = 1
 SLOT_DIAL = 9
 
 SLOTS_TIPRACK = {
+    20: [3],
     50: [3],
     200: [3],
 }
@@ -20,7 +21,7 @@ def run(ctx: ProtocolContext) -> None:
     trash = ctx.load_trash_bin("A3")
     vial = ctx.load_labware(LABWARE_ON_SCALE, SLOT_SCALE)
     dial = ctx.load_labware("dial_indicator", SLOT_DIAL)
-    pipette = ctx.load_instrument("flex_96channel_200", "left")
+    pipette = ctx.load_instrument("flex_96channel_1000", "left")
     adapters = [
         ctx.load_adapter("opentrons_flex_96_tiprack_adapter", slot)
         for slot in SLOTS_TIPRACK[50]

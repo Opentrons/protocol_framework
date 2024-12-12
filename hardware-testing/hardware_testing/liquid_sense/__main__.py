@@ -196,7 +196,7 @@ class RunArgs:
             elif args.pipette == 50:
                 tip_volumes = [50]
             else:
-                tip_volumes = [50, 200]
+                tip_volumes = [20, 50, 200]
         else:
             tip_volumes = [args.tip]
 
