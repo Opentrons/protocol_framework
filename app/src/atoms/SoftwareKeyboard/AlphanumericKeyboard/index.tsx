@@ -49,7 +49,7 @@ export function AlphanumericKeyboard({
   return (
     <Keyboard
       keyboardRef={r => (keyboardRef.current = r)}
-      theme={'hg-theme-default oddTheme1 alphanumericKeyboard'}
+      theme="hg-theme-default oddTheme1 alphanumericKeyboard"
       onChange={onChange}
       onKeyPress={onKeyPress}
       layoutName={layoutName}
