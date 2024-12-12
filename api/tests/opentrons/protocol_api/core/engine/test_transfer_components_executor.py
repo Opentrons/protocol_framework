@@ -62,7 +62,7 @@ def test_submerge(
     mock_instrument_core: InstrumentCore,
     sample_transfer_props: TransferProperties,
 ) -> None:
-    """Should perform the expected aspiration steps."""
+    """Should perform the expected submerge steps."""
     source_well = decoy.mock(cls=WellCore)
     well_top_point = Point(1, 2, 3)
     well_bottom_point = Point(4, 5, 6)
@@ -151,7 +151,7 @@ def test_aspirate_and_wait_skips_delay(
     mock_instrument_core: InstrumentCore,
     sample_transfer_props: TransferProperties,
 ) -> None:
-    """It should execute an aspirate and a delay according to properties."""
+    """It should skip the wait after aspirate."""
     sample_transfer_props.aspirate.delay.enabled = False
     source_well = decoy.mock(cls=WellCore)
 
@@ -206,7 +206,7 @@ def test_dispense_and_wait_skips_delay(
     mock_instrument_core: InstrumentCore,
     sample_transfer_props: TransferProperties,
 ) -> None:
-    """It should execute an aspirate and a delay according to properties."""
+    """It should skip the wait after dispense."""
     sample_transfer_props.dispense.delay.enabled = False
     source_well = decoy.mock(cls=WellCore)
 

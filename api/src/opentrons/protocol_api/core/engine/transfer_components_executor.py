@@ -237,7 +237,7 @@ class TransferComponentsExecutor:
     def _remove_air_gap(self, location: Location, volume: float) -> None:
         """Remove a previously added air gap."""
         dispense_props = self._transfer_properties.dispense
-        # To err on the side of caution, the maximum flow rate should be air_gap_volume per second
+        # The maximum flow rate should be air_gap_volume per second
         flow_rate = min(
             dispense_props.flow_rate_by_volume.get_for_volume(volume), volume
         )
