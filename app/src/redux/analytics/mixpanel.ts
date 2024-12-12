@@ -4,6 +4,7 @@ import mixpanel from 'mixpanel-browser'
 import { createLogger } from '../../logger'
 import { CURRENT_VERSION } from '../shell'
 
+import type { Config as MixpanelConfig } from 'mixpanel-browser'
 import type { AnalyticsEvent, AnalyticsConfig } from './types'
 
 const log = createLogger(new URL('', import.meta.url).pathname)
@@ -11,13 +12,14 @@ const log = createLogger(new URL('', import.meta.url).pathname)
 // pulled in from environment at build time
 const MIXPANEL_ID = process.env.OT_APP_MIXPANEL_ID
 
-const MIXPANEL_OPTS = {
+const MIXPANEL_OPTS: Partial<MixpanelConfig> = {
   // opt out by default
   opt_out_tracking_by_default: true,
   // user details are persisted in our own config store
   disable_persistence: true,
   // pageviews tracked manually via connected-react-router events
   track_pageview: false,
+  debug: true,
 }
 
 const initMixpanelInstanceOnce = initializeMixpanelInstanceOnce(MIXPANEL_ID)
@@ -44,10 +46,10 @@ export function trackEvent(
   log.debug('Trackable event', { event, optedIn })
   if (MIXPANEL_ID != null && optedIn) {
     if (event.superProperties != null) {
-      mixpanel.register(event.superProperties)
+      mixpanel.register?.(event.superProperties)
     }
     if ('name' in event && event.name != null) {
-      mixpanel.track(event.name, event.properties)
+      mixpanel.track?.(event.name, event.properties)
     }
   }
 }
@@ -58,11 +60,15 @@ export function setMixpanelTracking(
 ): void {
   if (MIXPANEL_ID != null) {
     initMixpanelInstanceOnce(config)
+
+    console.log('=>(mixpanel.ts:64) mixpanel', mixpanel)
+    console.log('=> HITTING MIXPANEL WIHT DEBUG')
+
     if (config.optedIn) {
       log.debug('User has opted into analytics; tracking with Mixpanel')
-      mixpanel.identify(config.appId)
-      mixpanel.opt_in_tracking()
-      mixpanel.register({
+      mixpanel.identify?.(config.appId)
+      mixpanel.opt_in_tracking?.()
+      mixpanel.register?.({
         appVersion: CURRENT_VERSION,
         appId: config.appId,
         appMode: Boolean(isOnDevice) ? 'ODD' : 'Desktop',
@@ -81,6 +87,8 @@ function initializeMixpanelInstanceOnce(
   let hasBeenInitialized = false
 
   return function (config: AnalyticsConfig): undefined {
+    console.log('=>(mixpanel.ts:81) config', config)
+
     if (!hasBeenInitialized && MIXPANEL_ID != null) {
       hasBeenInitialized = true
       log.debug('Initializing Mixpanel', { config })
