@@ -95,6 +95,7 @@ class AnthropicPredict:
             tools=self.tools,  # type: ignore
             extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
             metadata={"user_id": user_id},
+            temperature=0.0,
         )
 
         logger.info(
