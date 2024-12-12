@@ -20,12 +20,6 @@ from opentrons_shared_data.labware.labware_definition import (
 )
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.robot.types import RobotType
-from opentrons.protocol_engine.types import (
-    LabwareLocation,
-    DeckSlotLocation,
-    AddressableAreaLocation,
-    ModuleLocation,
-)
 from opentrons.protocols.api_support.types import APIVersion, ThermocyclerStep
 from opentrons.protocols.api_support.util import APIVersionError
 from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
@@ -396,27 +390,6 @@ def ensure_definition_is_not_lid_after_api_version(
     ):
         raise APIVersionError(
             f"Labware Lids cannot be loaded like standard labware in Protocols written with an API version greater than {LID_STACK_VERSION_GATE}."
-        )
-
-
-def ensure_labware_is_loadable(
-    definition: LabwareDefinition, location: LabwareLocation
-) -> None:
-    """Ensure that one of the definition's allowed roles is `stackableOnly` and that the location is a `NonStackedLocation`."""
-    if (
-        definition.allowedRoles
-        and LabwareRole.stackableOnly in definition.allowedRoles
-        and isinstance(
-            location,
-            (
-                DeckSlotLocation,
-                AddressableAreaLocation,
-                ModuleLocation,
-            ),
-        )
-    ):
-        raise LabwareDefinitionIsNotLoadableOnPosition(
-            f"Labware {definition.parameters.loadName} cannot be loaded on {location}."
         )
 
 
