@@ -1,5 +1,6 @@
 import type * as React from 'react'
 import { useSelector } from 'react-redux'
+import 'source-map-support/register'
 
 import { Flex, POSITION_FIXED, DIRECTION_ROW } from '@opentrons/components'
 
