@@ -227,6 +227,11 @@ class FlexStacker():
         response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
         return response
 
+    def get_device_firmware_version(self) -> str:
+        """Get the firmware version of the flex stacker unit"""
+        firmware_version = self.get_device_info().split()[1].split(':')[1]
+        return firmware_version
+
     def get_device_serial_number(self) -> str:
         """Get the serial number of the flex stacker unit"""
         serial_number = self.get_device_info().split()[3].split(':')[1]
