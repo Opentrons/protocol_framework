@@ -23,6 +23,7 @@ import { ExternalLink } from '/app/atoms/Link/ExternalLink'
 import { TertiaryButton } from '/app/atoms/buttons'
 import { getRobotUpdateDisplayInfo } from '/app/redux/robot-update'
 import { useDispatchStartRobotUpdate } from '/app/redux/robot-update/hooks'
+import { remote } from '/app/redux/shell/remote'
 
 import type { ChangeEventHandler, MouseEventHandler } from 'react'
 import type { State } from '/app/redux/types'
@@ -55,14 +56,19 @@ export function UpdateRobotSoftware({
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = event => {
     const { files } = event.target
-    if (files?.length === 1 && !updateDisabled) {
-      dispatchStartRobotUpdate(robotName, files[0].path)
-      onUpdateStart()
-    }
-    // this is to reset the state of the file picker so users can reselect the same
-    // system image if the upload fails
-    if (inputRef.current?.value != null) {
-      inputRef.current.value = ''
+
+    if (files != null) {
+      void remote.getFilePathFrom(files[0]).then(filePath => {
+        if (files.length === 1 && !updateDisabled) {
+          dispatchStartRobotUpdate(robotName, filePath)
+          onUpdateStart()
+        }
+        // this is to reset the state of the file picker so users can reselect the same
+        // system image if the upload fails
+        if (inputRef.current?.value != null) {
+          inputRef.current.value = ''
+        }
+      })
     }
   }
 
