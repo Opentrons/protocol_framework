@@ -15,6 +15,7 @@ import {
   THERMOCYCLER_MODULE_TYPE,
   WASTE_CHUTE_ADDRESSABLE_AREAS,
   MOVABLE_TRASH_ADDRESSABLE_AREAS,
+  WASTE_CHUTE_CUTOUT,
 } from '@opentrons/shared-data'
 import { rootReducer as labwareDefsRootReducer } from '../../labware-defs'
 import { getCutoutIdByAddressableArea, uuid } from '../../utils'
@@ -39,7 +40,7 @@ import {
   createPresavedStepForm,
   getDeckItemIdInSlot,
   getIdsInRange,
-  getUnoccupiedSlotForMoveableTrash,
+  getUnoccupiedSlotForTrash,
 } from '../utils'
 
 import type { Reducer } from 'redux'
@@ -1154,9 +1155,9 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
         ]),
       ]
 
-      const unoccupiedSlotForMovableTrash = hasWasteChuteCommands
+      const unoccupiedSlotForTrash = hasWasteChuteCommands
         ? ''
-        : getUnoccupiedSlotForMoveableTrash(
+        : getUnoccupiedSlotForTrash(
             file,
             hasWasteChuteCommands,
             stagingAreaSlotNames
@@ -1310,7 +1311,6 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
             },
           }
         : {}
-
       const hardcodedTrashBinIdOt2 = `${uuid()}:fixedTrash`
       const hardcodedTrashBinOt2 = {
         [hardcodedTrashBinIdOt2]: {
@@ -1323,22 +1323,34 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
           ),
         },
       }
-      const hardcodedTrashAddressableAreaName = `movableTrash${unoccupiedSlotForMovableTrash}`
-      const hardcodedTrashBinIdFlex = `${uuid()}:${hardcodedTrashAddressableAreaName}`
-      const hardcodedTrashBinFlex = {
-        [hardcodedTrashBinIdFlex]: {
-          name: 'trashBin' as const,
-          id: hardcodedTrashBinIdFlex,
-          location: hasWasteChuteCommands
-            ? ''
-            : getCutoutIdByAddressableArea(
-                hardcodedTrashAddressableAreaName as AddressableAreaName,
-                'trashBinAdapter',
-                FLEX_ROBOT_TYPE
-              ),
+      const hardcodedTrashAddressableAreaName =
+        unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT
+          ? 'wasteChute'
+          : `movableTrash${unoccupiedSlotForTrash}`
+
+      const hardcodedTrashIdFlex = `${uuid()}:${hardcodedTrashAddressableAreaName}`
+
+      const hardCodedTrashLocation =
+        unoccupiedSlotForTrash === ''
+          ? ''
+          : unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT
+          ? WASTE_CHUTE_CUTOUT
+          : getCutoutIdByAddressableArea(
+              hardcodedTrashAddressableAreaName as AddressableAreaName,
+              'trashBinAdapter',
+              FLEX_ROBOT_TYPE
+            )
+
+      const hardcodedTrashFlex = {
+        [hardcodedTrashIdFlex]: {
+          name:
+            unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT
+              ? ('wasteChute' as const)
+              : ('trashBin' as const),
+          id: hardcodedTrashIdFlex,
+          location: hasWasteChuteCommands ? '' : hardCodedTrashLocation,
         },
       }
-
       if (isFlex) {
         if (trashBin != null) {
           return {
@@ -1349,12 +1361,12 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
             ...stagingAreas,
           }
         } else if (trashBin == null && !hasWasteChuteCommands) {
-          //  always hardcode a trash bin when no pipetting command is provided since return tip
+          //  always hardcode a trash bin or waste chute when no pipetting command is provided since return tip
           //  is not supported
           return {
             ...state,
             ...gripper,
-            ...hardcodedTrashBinFlex,
+            ...hardcodedTrashFlex,
             ...wasteChute,
             ...stagingAreas,
           }
@@ -1422,6 +1434,64 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
     DEFAULT: (): NormalizedAdditionalEquipmentById => ({}),
   },
   initialAdditionalEquipmentState
+)
+export const ADD_STEPS_TO_GROUP = 'ADD_STEPS_TO_GROUP'
+export const CREATE_GROUP = 'CREATE_GROUP'
+export const REMOVE_GROUP = 'REMOVE_GROUP'
+export type StepGroupsState = Record<string, StepIdType[]>
+const initialStepGroupState = {}
+const stepGroups: Reducer<StepGroupsState, any> = handleActions<
+  StepGroupsState,
+  any
+>(
+  {
+    CREATE_GROUP: (state, action) => {
+      return {
+        ...state,
+        [action.payload.groupName]: [],
+      }
+    },
+    REMOVE_GROUP: (state, action) => {
+      const {
+        [action.payload.groupName]: removedGroup,
+        ...remainingGroups
+      } = state
+      return remainingGroups
+    },
+    ADD_STEPS_TO_GROUP: (state, action) => {
+      return {
+        ...state,
+        [action.payload.groupName]: [
+          ...state[action.payload.groupName],
+          ...action.payload.stepIds,
+        ],
+      }
+    },
+  },
+  initialStepGroupState
+)
+export type UnsavedGroupState = StepIdType[]
+export const SELECT_STEP_FOR_UNSAVED_GROUP = 'SELECT_STEP_FOR_UNSAVED_GROUP'
+export const CLEAR_UNSAVED_GROUP = 'CLEAR_UNSAVED_GROUP'
+const initialUnsavedGroupState: StepIdType[] = []
+const unsavedGroup: Reducer<UnsavedGroupState, any> = handleActions<
+  UnsavedGroupState,
+  any
+>(
+  {
+    SELECT_STEP_FOR_UNSAVED_GROUP: (state, action) => {
+      const stepId: string = action.payload.stepId
+      if (state.includes(stepId)) {
+        return state.filter(id => id !== stepId)
+      } else {
+        return [...state, stepId]
+      }
+    },
+    CLEAR_UNSAVED_GROUP: () => {
+      return []
+    },
+  },
+  initialUnsavedGroupState
 )
 
 export type OrderedStepIdsState = StepIdType[]
@@ -1539,6 +1609,8 @@ export const presavedStepForm = (
   }
 }
 export interface RootState {
+  unsavedGroup: UnsavedGroupState
+  stepGroups: StepGroupsState
   orderedStepIds: OrderedStepIdsState
   labwareDefs: LabwareDefsRootState
   labwareInvariantProperties: NormalizedLabwareById
@@ -1555,6 +1627,8 @@ export interface RootState {
 // TODO: Ian 2018-12-13 remove this 'action: any' type
 export const rootReducer: Reducer<RootState, any> = nestedCombineReducers(
   ({ action, state, prevStateFallback }) => ({
+    unsavedGroup: unsavedGroup(prevStateFallback.unsavedGroup, action),
+    stepGroups: stepGroups(prevStateFallback.stepGroups, action),
     orderedStepIds: orderedStepIds(prevStateFallback.orderedStepIds, action),
     labwareInvariantProperties: labwareInvariantProperties(
       prevStateFallback.labwareInvariantProperties,

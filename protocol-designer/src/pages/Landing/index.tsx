@@ -128,7 +128,7 @@ export function Landing(): JSX.Element {
             </StyledText>
           </Flex>
         </Flex>
-        <StyledNavLink to={'/createNew'}>
+        <StyledNavLink to="/createNew">
           <LargeButton
             onClick={() => {
               dispatch(toggleNewProtocolModal(true))
