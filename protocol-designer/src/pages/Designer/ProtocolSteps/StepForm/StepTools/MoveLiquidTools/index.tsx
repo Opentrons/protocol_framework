@@ -137,13 +137,6 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
 
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
-  // auto-collapse blowout field if disposal volume is not null
-  // useEffect(() => {
-  //   if (formData.disposalVolume_checkbox) {
-  //     propsForFields.blowout_checkbox.updateValue(false)
-  //   }
-  // }, [formData.disposalVolume_checkbox])
-
   return toolboxStep === 0 ? (
     <Flex
       flexDirection={DIRECTION_COLUMN}
