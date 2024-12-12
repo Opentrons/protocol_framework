@@ -44,6 +44,9 @@ class TouchTipParams(PipetteIdMixin, WellLocationMixin):
             "The proportion of the target well's radius the pipette tip will move towards."
         ),
     )
+    mmToEdge: Optional[float] = Field(
+        None, description="Offset away from the the well edge, in millimeters."
+    )
 
     speed: Optional[float] = Field(
         None,
@@ -112,11 +115,13 @@ class TouchTipImplementation(
             pipette_id, params.speed
         )
 
+        mm_to_edge = params.mmToEdge if params.mmToEdge is not None else 0
         touch_waypoints = self._state_view.motion.get_touch_tip_waypoints(
             pipette_id=pipette_id,
             labware_id=labware_id,
             well_name=well_name,
             radius=params.radius,
+            mm_to_edge=mm_to_edge,
             center_point=Point(
                 center_result.public.position.x,
                 center_result.public.position.y,

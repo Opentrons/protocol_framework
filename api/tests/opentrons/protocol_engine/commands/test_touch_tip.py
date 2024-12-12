@@ -74,6 +74,7 @@ async def test_touch_tip_implementation(
         wellName="A3",
         wellLocation=WellLocation(offset=WellOffset(x=1, y=2, z=3)),
         radius=0.456,
+        mmToEdge=0.789,
         speed=42.0,
     )
 
@@ -102,8 +103,9 @@ async def test_touch_tip_implementation(
             pipette_id="abc",
             labware_id="123",
             well_name="A3",
-            center_point=Point(x=1, y=2, z=3),
             radius=0.456,
+            mm_to_edge=0.789,
+            center_point=Point(x=1, y=2, z=3),
         )
     ).then_return(
         [

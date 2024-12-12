@@ -89,7 +89,11 @@ def get_edge_point_list(
 ) -> None:
     """It should get a list of well edge points."""
     result = subject.get_edge_point_list(
-        Point(x=10, y=20, z=30), x_radius=5, y_radius=10, edge_path_type=edge_path_type
+        Point(x=13, y=23, z=33),
+        x_radius=5,
+        y_radius=10,
+        mm_to_edge=3,
+        edge_path_type=edge_path_type,
     )
 
     assert result == expected_result
