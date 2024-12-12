@@ -25,7 +25,7 @@ from opentrons.protocol_engine import (
     DeckSlotLocation,
     Liquid,
 )
-from opentrons.protocol_engine.types import HexColor
+from opentrons.protocol_engine.types import HexColor, CommandAnnotation
 
 
 class CommandTranslatorError(Exception):
@@ -291,3 +291,20 @@ class JsonTranslator:
                     )
 
         return list(translate_all_commands())
+
+    def translate_command_annotations(
+        self,
+        protocol: Union[ProtocolSchemaV8, ProtocolSchemaV7, ProtocolSchemaV6],
+    ) -> List[CommandAnnotation]:
+        """Translate command annotations in json protocol schema v8."""
+        if isinstance(protocol, (ProtocolSchemaV6, ProtocolSchemaV7)):
+            return []
+        else:
+            command_annotations: List[CommandAnnotation] = [
+                parse_obj_as(
+                    CommandAnnotation,  # type: ignore[arg-type]
+                    command_annotation.dict(),
+                )
+                for command_annotation in protocol.commandAnnotations
+            ]
+            return command_annotations

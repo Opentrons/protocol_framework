@@ -103,7 +103,7 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
             'form:step_edit_form.field.heaterShaker.timer.heaterShakerSetTimer'
           )}
           fieldTitle={t('form:step_edit_form.field.heaterShaker.duration')}
-          isSelected={formData.heaterShakerSetTimer === true}
+          isSelected={formData.heaterShakerSetTimer === 'true'}
           units={t('application:units.time')}
           toggleElement="checkbox"
           formLevelError={getFormLevelError(

@@ -212,6 +212,7 @@ async def test_get_by_analysis_id_as_document(
         "liquidClasses": [],
         "modules": [],
         "pipettes": [],
+        "commandAnnotations": [],
     }
 
 

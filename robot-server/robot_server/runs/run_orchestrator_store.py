@@ -289,6 +289,7 @@ class RunOrchestratorStore:
         run_data = self.run_orchestrator.get_state_summary()
         commands = self.run_orchestrator.get_all_commands()
         run_time_parameters = self.run_orchestrator.get_run_time_parameters()
+        command_annotations = self.run_orchestrator.get_command_annotations()
 
         self._run_orchestrator = None
 
@@ -296,6 +297,7 @@ class RunOrchestratorStore:
             state_summary=run_data,
             commands=commands,
             parameters=run_time_parameters,
+            command_annotations=command_annotations,
         )
 
     # todo(mm, 2024-11-15): Are all of these pass-through methods helpful?
