@@ -99,7 +99,7 @@ def test_submerge(
             is_meniscus=None,
             push_out=0,
         ),
-        mock_instrument_core.delay(0.2),
+        mock_instrument_core.delay(0.5),
         mock_instrument_core.move_to(
             location=Location(Point(), labware=None),
             well_core=source_well,
@@ -108,4 +108,115 @@ def test_submerge(
             speed=100,
         ),
         mock_instrument_core.delay(10),
+    )
+
+
+def test_aspirate_and_wait(
+    decoy: Decoy,
+    mock_instrument_core: InstrumentCore,
+    sample_transfer_props: TransferProperties,
+) -> None:
+    """It should execute an aspirate and a delay according to properties."""
+    source_well = decoy.mock(cls=WellCore)
+    aspirate_flow_rate = (
+        sample_transfer_props.aspirate.flow_rate_by_volume.get_for_volume(10)
+    )
+
+    subject = TransferComponentsExecutor(
+        instrument_core=mock_instrument_core,
+        transfer_properties=sample_transfer_props,
+        target_location=Location(Point(1, 2, 3), labware=None),
+        target_well=source_well,
+    )
+    subject.aspirate_and_wait(volume=10)
+    decoy.verify(
+        mock_instrument_core.aspirate(
+            location=Location(Point(1, 2, 3), labware=None),
+            well_core=None,
+            volume=10,
+            rate=1,
+            flow_rate=aspirate_flow_rate,
+            in_place=True,
+            is_meniscus=None,
+        ),
+        mock_instrument_core.delay(0.2),
+    )
+
+
+def test_dispense_and_wait(
+    decoy: Decoy,
+    mock_instrument_core: InstrumentCore,
+    sample_transfer_props: TransferProperties,
+) -> None:
+    """It should execute an aspirate and a delay according to properties."""
+    source_well = decoy.mock(cls=WellCore)
+    dispense_flow_rate = (
+        sample_transfer_props.dispense.flow_rate_by_volume.get_for_volume(10)
+    )
+
+    subject = TransferComponentsExecutor(
+        instrument_core=mock_instrument_core,
+        transfer_properties=sample_transfer_props,
+        target_location=Location(Point(1, 2, 3), labware=None),
+        target_well=source_well,
+    )
+    subject.dispense_and_wait(volume=10, push_out=123)
+    decoy.verify(
+        mock_instrument_core.dispense(
+            location=Location(Point(1, 2, 3), labware=None),
+            well_core=None,
+            volume=10,
+            rate=1,
+            flow_rate=dispense_flow_rate,
+            in_place=True,
+            push_out=123,
+            is_meniscus=None,
+        ),
+        mock_instrument_core.delay(0.5),
+    )
+
+
+def test_mix(
+    decoy: Decoy,
+    mock_instrument_core: InstrumentCore,
+    sample_transfer_props: TransferProperties,
+) -> None:
+    """It should execute mix steps."""
+    source_well = decoy.mock(cls=WellCore)
+    aspirate_flow_rate = (
+        sample_transfer_props.aspirate.flow_rate_by_volume.get_for_volume(50)
+    )
+    dispense_flow_rate = (
+        sample_transfer_props.dispense.flow_rate_by_volume.get_for_volume(50)
+    )
+    subject = TransferComponentsExecutor(
+        instrument_core=mock_instrument_core,
+        transfer_properties=sample_transfer_props,
+        target_location=Location(Point(1, 2, 3), labware=None),
+        target_well=source_well,
+    )
+    subject.mix(mix_properties=sample_transfer_props.aspirate.mix)
+
+    decoy.verify(
+        mock_instrument_core.aspirate(
+            location=Location(Point(1, 2, 3), labware=None),
+            well_core=None,
+            volume=50,
+            rate=1,
+            flow_rate=aspirate_flow_rate,
+            in_place=True,
+            is_meniscus=None,
+        ),
+        mock_instrument_core.delay(0.2),
+        mock_instrument_core.dispense(
+            location=Location(Point(1, 2, 3), labware=None),
+            well_core=None,
+            volume=50,
+            rate=1,
+            flow_rate=dispense_flow_rate,
+            in_place=True,
+            push_out=0,
+            is_meniscus=None,
+        ),
+        mock_instrument_core.delay(0.5),
     )

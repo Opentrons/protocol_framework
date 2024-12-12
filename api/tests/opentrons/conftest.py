@@ -968,7 +968,7 @@ def maximal_liquid_class_def() -> LiquidClassSchemaV1:
                                 (50.0, 2.0),
                             ],
                             delay=DelayProperties(
-                                enable=True, params=DelayParams(duration=0.2)
+                                enable=True, params=DelayParams(duration=0.5)
                             ),
                         ),
                         multiDispense=MultiDispenseProperties(
