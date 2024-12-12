@@ -52,6 +52,7 @@ import type {
 } from '../../../step-forms'
 import type { DeckSetupTabType } from '../types'
 import type { Fixture } from './constants'
+import { HighlightModule } from '../HighlightModule'
 
 interface DeckSetupDetailsProps extends DeckSetupTabType {
   activeDeckSetup: InitialDeckSetup
@@ -271,6 +272,14 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
                 />
               ) : null}
             </Module>
+            <HighlightModule
+              moduleModel={moduleOnDeck.model}
+              moduleId={moduleOnDeck.id}
+              position={slotPosition}
+              orientation={inferModuleOrientationFromXCoordinate(
+                slotPosition[0]
+              )}
+            />
           </Fragment>
         ) : null
       })}

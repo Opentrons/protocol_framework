@@ -15,7 +15,9 @@ interface ModuleLabelProps {
   orientation: 'left' | 'right'
   isSelected: boolean
   isLast: boolean
+  isZoomed?: boolean
   labwareInfos?: DeckLabelProps[]
+  labelName?: string
 }
 export const ModuleLabel = (props: ModuleLabelProps): JSX.Element => {
   const {
@@ -25,6 +27,8 @@ export const ModuleLabel = (props: ModuleLabelProps): JSX.Element => {
     isSelected,
     isLast,
     labwareInfos = [],
+    isZoomed = true,
+    labelName,
   } = props
   const labelContainerRef = useRef<HTMLDivElement>(null)
   const [labelContainerHeight, setLabelContainerHeight] = useState(12)
@@ -52,14 +56,14 @@ export const ModuleLabel = (props: ModuleLabelProps): JSX.Element => {
 
   return (
     <DeckLabelSet
-      isZoomed={true}
       ref={labelContainerRef}
       deckLabels={[
         {
-          text: def?.displayName,
+          text: labelName ?? def?.displayName,
           isSelected,
           isLast,
           moduleModel: def?.model,
+          isZoomed: isZoomed,
         },
         ...labwareInfos,
       ]}

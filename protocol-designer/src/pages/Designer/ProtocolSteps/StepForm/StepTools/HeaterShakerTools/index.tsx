@@ -1,4 +1,4 @@
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -16,12 +16,13 @@ import {
 } from '../../../../../../molecules'
 import { getFormErrorsMappedToField, getFormLevelError } from '../../utils'
 import type { StepFormProps } from '../../types'
+import { hoverSelection } from '../../../../../../ui/steps/actions/actions'
 
 export function HeaterShakerTools(props: StepFormProps): JSX.Element {
   const { propsForFields, formData, visibleFormErrors } = props
   const { t } = useTranslation(['application', 'form', 'protocol_steps'])
   const moduleLabwareOptions = useSelector(getHeaterShakerLabwareOptions)
-
+  const dispatch = useDispatch()
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
   return (
@@ -34,6 +35,13 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
         {...propsForFields.moduleId}
         options={moduleLabwareOptions}
         title={t('protocol_steps:module')}
+        onEnter={(id: string) => {
+          console.log(id)
+          dispatch(hoverSelection({ id, text: 'Select' }))
+        }}
+        onExit={() => {
+          dispatch(hoverSelection({ id: null, text: null }))
+        }}
       />
       <Box borderBottom={`1px solid ${COLORS.grey30}`} />
       <Flex

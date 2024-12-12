@@ -63,7 +63,11 @@ export const selectSelection = (args: {
   payload: {
     selection:
       args.selection != null
-        ? { id: args.selection.id, text: args.selection.text }
+        ? {
+            id: args.selection.id,
+            text: args.selection.text,
+            field: args.selection.field,
+          }
         : null,
     mode: args.mode,
   },
@@ -103,6 +107,21 @@ export const clearWellSelectionLabwareKey = (): ClearWellSelectionLabwareKeyActi
   type: 'CLEAR_WELL_SELECTION_LABWARE_KEY',
   payload: null,
 })
+export const resetSelectStep = (stepId: StepIdType): ThunkAction<any> => (
+  dispatch: ThunkDispatch<any>,
+  getState: GetState
+) => {
+  const selectStepAction: SelectStepAction = {
+    type: 'SELECT_STEP',
+    payload: stepId,
+  }
+  dispatch(selectStepAction)
+  dispatch({
+    type: 'POPULATE_FORM',
+    payload: null,
+  })
+  resetScrollElements()
+}
 
 export const populateForm = (stepId: StepIdType): ThunkAction<any> => (
   dispatch: ThunkDispatch<any>,
@@ -129,10 +148,145 @@ export const populateForm = (stepId: StepIdType): ThunkAction<any> => (
         mode: 'add',
       },
     })
+  } else if (formData.stepType === 'moveLiquid') {
+    dispatch({
+      type: 'SELECT_SELECTION',
+      payload: {
+        selection: {
+          id: formData.aspirate_labware,
+          text: 'Selected',
+          field: '1',
+        },
+        mode: 'add',
+      },
+    })
+    dispatch({
+      type: 'SELECT_SELECTION',
+      payload: {
+        selection: {
+          id: formData.dispense_labware,
+          text: 'Selected',
+          field: '2',
+        },
+        mode: 'add',
+      },
+    })
+  } else if (formData.stepType === 'mix') {
+    dispatch({
+      type: 'SELECT_SELECTION',
+      payload: {
+        selection: {
+          id: formData.labware,
+          text: 'Selected',
+          field: '1',
+        },
+        mode: 'add',
+      },
+    })
+  } else if (
+    formData.stepType === 'heaterShaker' ||
+    formData.stepType === 'temperature' ||
+    formData.stepType === 'thermocycler' ||
+    formData.stepType === 'magnet'
+  ) {
+    dispatch({
+      type: 'SELECT_SELECTION',
+      payload: {
+        selection: {
+          id: formData.moduleId,
+          text: 'Selected',
+          field: '1',
+        },
+        mode: 'add',
+      },
+    })
   }
   resetScrollElements()
 }
-
+export const selectStep = (stepId: StepIdType): ThunkAction<any> => (
+  dispatch: ThunkDispatch<any>,
+  getState: GetState
+) => {
+  const selectStepAction: SelectStepAction = {
+    type: 'SELECT_STEP',
+    payload: stepId,
+  }
+  dispatch(selectStepAction)
+  const state = getState()
+  const formData = { ...stepFormSelectors.getSavedStepForms(state)[stepId] }
+  dispatch({
+    type: 'POPULATE_FORM',
+    payload: formData,
+  })
+  if (formData.stepType === 'moveLabware') {
+    dispatch({
+      type: 'SELECT_SELECTION',
+      payload: {
+        selection: { id: formData.labware, text: 'Selected' },
+        mode: 'add',
+      },
+    })
+    dispatch({
+      type: 'SELECT_SELECTION',
+      payload: {
+        selection: { id: formData.newLocation, text: 'New location' },
+        mode: 'add',
+      },
+    })
+  } else if (formData.stepType === 'moveLiquid') {
+    dispatch({
+      type: 'SELECT_SELECTION',
+      payload: {
+        selection: {
+          id: formData.aspirate_labware,
+          text: 'Selected',
+          field: '1',
+        },
+        mode: 'add',
+      },
+    })
+    dispatch({
+      type: 'SELECT_SELECTION',
+      payload: {
+        selection: {
+          id: formData.dispense_labware,
+          text: 'Selected',
+          field: '2',
+        },
+        mode: 'add',
+      },
+    })
+  } else if (formData.stepType === 'mix') {
+    dispatch({
+      type: 'SELECT_SELECTION',
+      payload: {
+        selection: {
+          id: formData.labware,
+          text: 'Selected',
+          field: '1',
+        },
+        mode: 'add',
+      },
+    })
+  } else if (
+    formData.stepType === 'heaterShaker' ||
+    formData.stepType === 'temperature' ||
+    formData.stepType === 'thermocycler' ||
+    formData.stepType === 'magnet'
+  ) {
+    dispatch({
+      type: 'SELECT_SELECTION',
+      payload: {
+        selection: {
+          id: formData.moduleId,
+          text: 'Selected',
+          field: '1',
+        },
+        mode: 'add',
+      },
+    })
+  }
+}
 // NOTE(sa, 2020-12-11): this is a thunk so that we can populate the batch edit form with things later
 export const selectMultipleSteps = (
   stepIds: StepIdType[],

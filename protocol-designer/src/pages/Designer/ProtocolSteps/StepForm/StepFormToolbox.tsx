@@ -243,8 +243,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
         })
       )
       dispatch(analyticsEvent(stepDuration))
-      dispatch(selectSelection({ id: null, text: null, fieldType: undefined }))
-      dispatch(hoverSelection({ id: null, text: null, fieldType: undefined }))
+      dispatch(selectSelection({ selection: null, mode: 'clear' }))
+      dispatch(hoverSelection({ id: null, text: null }))
     } else {
       setShowFormErrors(true)
       if (tab === 'aspirate' && isDispenseError && !isAspirateError) {
@@ -306,7 +306,16 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
           </Btn>
         }
         childrenPadding="0"
-        onCloseClick={handleClose}
+        onCloseClick={() => {
+          handleClose()
+          dispatch(
+            selectSelection({
+              selection: null,
+              mode: 'clear',
+            })
+          )
+          dispatch(hoverSelection({ id: null, text: null }))
+        }}
         closeButton={<Icon size="2rem" name="close" />}
         confirmButton={
           <Flex gridGap={SPACING.spacing8}>

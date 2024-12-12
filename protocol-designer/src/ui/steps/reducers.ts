@@ -207,7 +207,7 @@ const selectedSelection: Reducer<Selection[], any> = handleActions(
       action: {
         payload: {
           selection: Selection | null
-          mode: 'add' | 'clear' | 'replace'
+          mode: 'add' | 'clear'
         }
       }
     ) => {
@@ -216,15 +216,15 @@ const selectedSelection: Reducer<Selection[], any> = handleActions(
       switch (mode) {
         case 'clear':
           return []
-        case 'replace':
-          return selection != null ? [selection] : state
         case 'add': {
-          const exists = state.some(sel => sel.id === selection?.id)
-          if (selection != null) {
-            return exists ? state : [...state, selection]
-          } else {
+          if (!selection) {
             return state
           }
+          const updatedState = state.filter(
+            sel => sel.field !== selection.field
+          )
+
+          return [...updatedState, selection]
         }
         default:
           return state

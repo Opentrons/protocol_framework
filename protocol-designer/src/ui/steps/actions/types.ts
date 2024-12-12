@@ -35,10 +35,14 @@ export interface DuplicateMultipleStepsAction {
 export interface Selection {
   id: string | null
   text: string | null
+  field?: '1' | '2'
 }
 export interface selectSelectionAction {
   type: 'SELECT_SELECTION'
-  payload: { selection: Selection | null; mode: 'add' | 'clear' | 'replace' }
+  payload: {
+    selection: Selection | null
+    mode: 'add' | 'clear' | 'replace'
+  }
 }
 export interface hoverSelectionAction {
   type: 'HOVER_SELECTION'

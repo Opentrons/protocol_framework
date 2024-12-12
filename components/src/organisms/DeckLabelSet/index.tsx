@@ -26,7 +26,7 @@ const DeckLabelSetComponent = (
   return (
     <RobotCoordsForeignDiv x={x} y={y}>
       <StyledBox width={width} height={height} data-testid="DeckLabeSet" />
-      <LabelContainer ref={ref}>
+      <LabelContainer ref={ref} isZoomed={deckLabels[0].isZoomed}>
         {deckLabels.length > 0
           ? deckLabels.map((deckLabel, index) => (
               <DeckLabel
@@ -46,9 +46,14 @@ export const DeckLabelSet = React.forwardRef<HTMLDivElement, DeckLabelSetProps>(
   DeckLabelSetComponent
 )
 
-const StyledBox = styled(Box)`
+interface StyledBoxProps {
+  isZoomed: boolean
+}
+
+const StyledBox = styled(Box)<StyledBoxProps>`
   border-radius: ${BORDERS.borderRadius4};
-  border: 1.5px solid ${COLORS.blue50};
+  border: ${({ isZoomed }) =>
+    isZoomed ? `1.5px solid ${COLORS.blue50}` : `3px solid ${COLORS.blue50}`};
 `
 
 const LabelContainer = styled.div`

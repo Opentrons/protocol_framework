@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
 import {
   COLORS,
   DIRECTION_COLUMN,
@@ -9,11 +10,9 @@ import {
   SPACING,
   StyledText,
 } from '@opentrons/components'
+import { selectSelection } from '../../ui/steps/actions/actions'
 import type { Options } from '@opentrons/components'
 import type { FieldProps } from '../../pages/Designer/ProtocolSteps/StepForm/types'
-import { useDispatch } from 'react-redux'
-import { selectSelection } from '../../ui/steps/actions/actions'
-import { Selection } from '../../ui/steps/actions/types'
 
 export interface DropdownStepFormFieldProps extends FieldProps {
   options: Options
@@ -39,17 +38,17 @@ export function DropdownStepFormField(
     onEnter,
     onExit,
     onFieldBlur,
+    name: fieldName,
   } = props
   const { t } = useTranslation('tooltip')
   const dispatch = useDispatch()
   const availableOptionId = options.find(opt => opt.value === value)
-
   useEffect(() => {
     if (options.length === 1) {
       updateValue(options[0].value)
     }
   }, [])
-
+  console.log(fieldName)
   return (
     <Flex padding={padding ?? SPACING.spacing16}>
       {options.length > 1 || options.length === 0 ? (
@@ -66,9 +65,30 @@ export function DropdownStepFormField(
             availableOptionId ?? { name: 'Choose option', value: '' }
           }
           onClick={value => {
-            const selection = { id: value, text: 'Selected' }
             updateValue(value)
-            dispatch(selectSelection({ selection, mode: 'replace' }))
+            const selection = { id: value, text: 'Selected' }
+            if (
+              fieldName === 'aspirate_labware' ||
+              fieldName === 'labware' ||
+              fieldName === 'moduleId'
+            ) {
+              dispatch(
+                selectSelection({
+                  selection: { ...selection, field: '1' },
+                  mode: 'add',
+                })
+              )
+            } else if (
+              fieldName === 'dispense_labware' ||
+              fieldName === 'newLocation'
+            ) {
+              dispatch(
+                selectSelection({
+                  selection: { ...selection, field: '2' },
+                  mode: 'add',
+                })
+              )
+            }
           }}
           onEnter={onEnter}
           onExit={onExit}
