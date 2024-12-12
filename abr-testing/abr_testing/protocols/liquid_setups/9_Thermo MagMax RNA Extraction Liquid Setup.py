@@ -13,7 +13,7 @@ metadata = {
 
 requirements = {
     "robotType": "Flex",
-    "apiLevel": "2.16",
+    "apiLevel": "2.21",
 }
 
 
@@ -34,15 +34,28 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     )
 
     # Volumes
+    lysis = 8120 / 8
+    stop_reaction_vol = 6400 / 8
     elution_vol = 55
-    well1 = 8120 / 8
-    well2 = 6400 / 8
-    well3_7 = 8550 / 8
+    well4_12 = 9500 / 8
     sample_vol = 100
 
     # Reservoir
     p1000.transfer(
-        volume=[well1, well2, well3_7, well3_7, well3_7, well3_7, well3_7],
+        volume=[
+            lysis,
+            lysis,
+            stop_reaction_vol,
+            well4_12,
+            well4_12,
+            well4_12,
+            well4_12,
+            well4_12,
+            well4_12,
+            well4_12,
+            well4_12,
+            well4_12,
+        ],
         source=source_reservoir["A1"].bottom(z=0.2),
         dest=[
             res1["A1"].top(),
@@ -52,6 +65,11 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
             res1["A5"].top(),
             res1["A6"].top(),
             res1["A7"].top(),
+            res1["A8"].top(),
+            res1["A9"].top(),
+            res1["A10"].top(),
+            res1["A11"].top(),
+            res1["A12"].top(),
         ],
         blow_out=True,
         blowout_location="source well",
@@ -94,7 +112,20 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     )
     # Sample Plate
     p1000.transfer(
-        volume=[sample_vol, sample_vol, sample_vol, sample_vol, sample_vol, sample_vol],
+        volume=[
+            sample_vol,
+            sample_vol,
+            sample_vol,
+            sample_vol,
+            sample_vol,
+            sample_vol,
+            sample_vol,
+            sample_vol,
+            sample_vol,
+            sample_vol,
+            sample_vol,
+            sample_vol,
+        ],
         source=source_reservoir["A1"].bottom(z=0.2),
         dest=[
             sample_plate["A1"].top(),
@@ -103,6 +134,12 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
             sample_plate["A4"].top(),
             sample_plate["A5"].top(),
             sample_plate["A6"].top(),
+            sample_plate["A7"].top(),
+            sample_plate["A8"].top(),
+            sample_plate["A9"].top(),
+            sample_plate["A10"].top(),
+            sample_plate["A11"].top(),
+            sample_plate["A12"].top(),
         ],
         blow_out=True,
         blowout_location="source well",
