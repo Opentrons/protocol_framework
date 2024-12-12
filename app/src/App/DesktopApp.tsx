@@ -1,4 +1,5 @@
 import { useState, Fragment } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
 
@@ -43,6 +44,7 @@ import { ReactQueryDevtools } from './tools'
 import type { RouteProps } from './types'
 
 export const DesktopApp = (): JSX.Element => {
+  const { t } = useTranslation('top_navigation')
   useSoftwareUpdatePoll()
   const [
     isEmergencyStopModalDismissed,
@@ -52,55 +54,55 @@ export const DesktopApp = (): JSX.Element => {
   const desktopRoutes: RouteProps[] = [
     {
       Component: ProtocolsLanding,
-      name: 'protocols',
+      name: t('protocols'),
       navLinkTo: '/protocols',
       path: '/protocols',
     },
     {
       Component: ProtocolDetails,
-      name: 'Protocol Details',
+      name: t('protocol_details'),
       path: '/protocols/:protocolKey',
     },
     {
       Component: ProtocolTimeline,
-      name: 'Protocol Timeline',
+      name: t('protocol_timeline'),
       path: '/protocols/:protocolKey/timeline',
     },
     {
       Component: Labware,
-      name: 'labware',
+      name: t('labware'),
       navLinkTo: '/labware',
       path: '/labware',
     },
     {
       Component: DevicesLanding,
-      name: 'devices',
+      name: t('devices'),
       navLinkTo: '/devices',
       path: '/devices',
     },
     {
       Component: DeviceDetails,
-      name: 'Device',
+      name: t('device'),
       path: '/devices/:robotName',
     },
     {
       Component: RobotSettings,
-      name: 'Robot Settings',
+      name: t('robot_settings'),
       path: '/devices/:robotName/robot-settings/:robotSettingsTab?',
     },
     {
       Component: CalibrationDashboard,
-      name: 'Calibration Dashboard',
+      name: t('calibration_dashboard'),
       path: '/devices/:robotName/robot-settings/calibration/dashboard',
     },
     {
       Component: ProtocolRunDetails,
-      name: 'Run Details',
+      name: t('run_details'),
       path: '/devices/:robotName/protocol-runs/:runId/:protocolRunDetailsTab?',
     },
     {
       Component: AppSettings,
-      name: 'App Settings',
+      name: t('app_settings'),
       path: '/app-settings/:appSettingsTab?',
     },
   ]
