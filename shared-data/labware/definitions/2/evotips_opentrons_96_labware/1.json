@@ -1007,7 +1007,7 @@
     "loadName": "evotips_opentrons_96_labware"
   },
   "namespace": "opentrons",
-  "allowedRoles": ["labware"],
+  "allowedRoles": ["labware", "lid"],
   "version": 1,
   "schemaVersion": 2,
   "cornerOffsetFromSlot": {
@@ -1017,6 +1017,11 @@
   },
   "stackingOffsetWithLabware": {
     "nest_96_wellplate_2ml_deep": {
+      "x": 0,
+      "y": 0,
+      "z": 4.5
+    },
+    "nest_1_reservoir_195ml": {
       "x": 0,
       "y": 0,
       "z": 4.5
