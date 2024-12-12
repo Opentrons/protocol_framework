@@ -1,15 +1,15 @@
 import serial
-from serial import Serial # type: ignore[import]
-from abc import ABC, abstractmethod
 import time
-from typing import Tuple
+from typing import Tuple, Dict, Optional
 import re
-from datetime import datetime
 from enum import Enum
 # from .command_builder import CommandBuilder
 from opentrons.drivers.command_builder import CommandBuilder
 import math
 from typing import List, Optional, Iterator
+from opentrons.drivers.asyncio.communication import SerialConnection
+from .abstract import AbstractFlexStacker
+from opentrons.drivers import utils
 
 class GCODE(str, Enum):
     CR = '\r\n',
@@ -66,8 +66,8 @@ FS_STALL = "async ERR403:motor stall error" + FS_COMMAND_TERMINATOR.strip("\r")
 DEFAULT_COMMAND_RETRIES = 1
 TOTAL_TRAVEL_X = 192.5
 TOTAL_TRAVEL_Z = 136
-TOTAL_TRAVEL_L = 26
-LATCH_DISTANCE_MM = 26
+TOTAL_TRAVEL_L = 35
+LATCH_DISTANCE_MM = 35
 RETRACT_DIST_X = 1
 RETRACT_DIST_Z = 1
 HOME_SPEED = 10
@@ -82,16 +82,21 @@ MAX_SPEED_DISCONTINUITY_Z = 40
 MAX_SPEED_DISCONTINUITY_L = 40
 HOME_CURRENT_X = 1.5
 HOME_CURRENT_Z = 1.5
-HOME_CURRENT_L = 0.8
+HOME_CURRENT_L = 1.0
 MOVE_CURRENT_X = 0.6
 MOVE_CURRENT_Z = 1.5
-MOVE_CURRENT_L = 0.6
+MOVE_CURRENT_L = 1.0
 MOVE_SPEED_X = 200
 MOVE_SPEED_UPZ = 150
 MOVE_SPEED_L = 100
 MOVE_SPEED_DOWNZ = 150
+FLEXSTACKER_BAUDRATE = 115200
 
-class FlexStacker():
+
+class FlexStackerError(Exception):
+    pass
+
+class FlexStacker(AbstractFlexStacker):
     """Flex Stacker Driver."""
 
     def __init__(self, connection: Serial) -> None:
@@ -121,10 +126,31 @@ class FlexStacker():
         # self.__class__.__name__ == 'FlexStacker'
 
     @classmethod
-    def create(cls, port: str, baudrate: int = 115200, timeout: float = 1.0) -> "FlexStacker":
+    def create(
+        cls,port: str, loop: Optional[asyncio.AbstractEventLoop] = None
+    ) -> FlexStacker:
         """Flex Stacker Driver"""
-        conn = Serial(port = port, baudrate = baudrate, timeout = timeout)
-        return cls(connection = conn)
+        connection = await SerialConnection.create(
+            port=port,
+            baud_rate=FLEXSTACKER_BAUDRATE,
+            timeout=DEFAULT_MAG_DECK_TIMEOUT,
+            ack=MAG_DECK_ACK,
+            loop=loop,
+            reset_buffer_before_write=False,
+        )
+        return cls(connection = connection)
+
+    async def connect(self)-> None:
+        """Connect to device"""
+        await self._stacker_connection.open()
+
+    async def disconnect(self) -> None:
+        """Disconnect from device"""
+        await self._stacker_connection.close()
+
+    async def is_connected(self) -> bool:
+        """Check if connected"""
+        return await self._connection.is_open()
 
     def send_command(
         self, command: CommandBuilder, retries: int = 0, timeout: Optional[float] = None
@@ -229,7 +255,7 @@ class FlexStacker():
         response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
         return response
 
-    def set_device_serial_numer(self, serial_number) -> None:
+    def set_device_serial_numer(self, serial_number: str) -> None:
         """Get the serial number of the flex stacker unit"""
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.SET_SERIAL_NUM).add_element(serial_number)
@@ -258,7 +284,7 @@ class FlexStacker():
         print(c)
         response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
 
-    def get_sensor_states(self):
+    def get_sensor_states(self) -> Dict[str, str]:
         """Returns the limit switch status"""
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.LIMITSWITCH_STATUS
@@ -268,7 +294,7 @@ class FlexStacker():
 
         return self.sensor_parse(response)
 
-    def get_platform_sensor_states(self) -> str:
+    def get_platform_sensor_states(self) -> Dict[str, str]:
         """Returns the limit switch status"""
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.PLATFORM_STATUS
@@ -401,19 +427,26 @@ class FlexStacker():
             self.current_position.update({'L': self.current_position['L'] - distance})
         else:
             raise(f"Not recognized {axis} and {direction}")
-        print(self.current_position)
+        #print(self.current_position)
 
 
-    def microstepping_move(self, axis: AXIS, distance: float, direction: DIR, speed: float, acceleration: float):
+    def microstepping_move(self, axis: AXIS, distance: float, direction: DIR):
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_element(
                             axis.upper()).add_element(f'{direction}').add_gcode(
             gcode=GCODE.MOVE_IGNORE_LIMIT
         )
         self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
 
+    def set_microstep(self, axis: AXIS, microstepping: int):
+        c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_element(
+                            axis.upper()).add_element(f'{microstepping}').add_gcode(
+            gcode=GCODE.SET_MICROSTEPPING
+        )
+        self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
+
     def home(self, axis: AXIS, direction: DIR, velocity: Optional[float] = None,
                                                 acceleration: Optional[float] = None,
-                                                current: Optional[float] = None):
+                                                current: Optional[float] = None) -> None:
         # Set this to max current to overcome spring force on platforms
         if axis == AXIS.X:
             current = self.set_default(current, HOME_CURRENT_X)
@@ -481,7 +514,7 @@ class FlexStacker():
         current = '0b'+ str(bin(current_cs).replace("0b", '')).zfill(5)
         return current
 
-    def set_ihold_current(self, current: float, axis: AXIS) -> str:
+    def set_ihold_current(self, current: float, axis: AXIS) -> None:
         """
             M907 - Set axis hold current in Amps ex: M907 X0.5
             M909 - Set microstepping using power of 2 ex: M90  Z2 = 2^2 microstepping"""
@@ -493,7 +526,7 @@ class FlexStacker():
         #print(c)
         self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
 
-    def set_run_current(self, current: float, axis: AXIS) -> str:
+    def set_run_current(self, current: float, axis: AXIS) -> None:
         """ M906 - Set axis peak run current in Amps ex: M906 X1.5"""
         # current = convert_current_to_binary(current)
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
@@ -503,7 +536,7 @@ class FlexStacker():
         self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
         time.sleep(0.1)
 
-    def close_latch(self, velocity: Optional[float] = None, acceleration: Optional[float] = None):
+    def close_latch(self, velocity: Optional[float] = None, acceleration: Optional[float] = None) -> None:
         velocity = self.set_default(velocity, MOVE_SPEED_L)
         acceleration = self.set_default(acceleration, HOME_ACCELERATION_L)
         states = self.get_sensor_states()
@@ -523,14 +556,14 @@ class FlexStacker():
 
     def open_latch(self, distance: Optional[float] = None,
                     velocity: Optional[float] = None, acceleration: Optional[float] = None,
-                    max_speed_discontinuity: Optional[float] = None):
+                    max_speed_discontinuity: Optional[float] = None) -> None:
         # distance = self.set_default(distance, LATCH_DISTANCE_MM)
         velocity = self.set_default(velocity, MOVE_SPEED_L)
         acceleration = self.set_default(acceleration, MOVE_ACCELERATION_L)
         msd = self.set_default(max_speed_discontinuity, MAX_SPEED_DISCONTINUITY_L)
         self.move(AXIS.L, TOTAL_TRAVEL_L, DIR.POSITIVE, velocity, acceleration, msd)
 
-    def load_labware(self, labware_height: float):
+    def load_labware(self, labware_height: float) -> None:
         # ----------------Set up the Stacker------------------------
         self.home(AXIS.X, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
         self.home(AXIS.Z, DIR.NEGATIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
@@ -596,7 +629,7 @@ class FlexStacker():
 
         response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
 
-    def enable_SG(self, axis: AXIS, sg_value: int, enable: bool):
+    def enable_SG(self, axis: AXIS, sg_value: int, enable: bool) -> None:
         """
         Enable StallGuard and set SGT
 
@@ -613,7 +646,7 @@ class FlexStacker():
 
         response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
 
-    def read_SG_value(self, axis: AXIS):
+    def read_SG_value(self, axis: AXIS) -> int:
         """
         Get the StallGuard (SGT) value
 

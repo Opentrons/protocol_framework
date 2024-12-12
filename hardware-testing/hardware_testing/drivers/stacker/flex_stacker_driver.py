@@ -65,8 +65,7 @@ FS_STALL = "async ERR403:motor stall error" + FS_COMMAND_TERMINATOR.strip("\r")
 DEFAULT_COMMAND_RETRIES = 1
 TOTAL_TRAVEL_X = 192.5
 TOTAL_TRAVEL_Z = 136
-TOTAL_TRAVEL_L = 26
-LATCH_DISTANCE_MM = 26
+TOTAL_TRAVEL_L = 42
 RETRACT_DIST_X = 1
 RETRACT_DIST_Z = 1
 HOME_SPEED = 10
@@ -74,7 +73,7 @@ HOME_SPEED_L = 100
 HOME_ACCELERATION = 100
 HOME_ACCELERATION_L = 800
 MOVE_ACCELERATION_X = 1500
-MOVE_ACCELERATION_Z = 800 #1000
+MOVE_ACCELERATION_Z = 500
 MOVE_ACCELERATION_L = 800
 MAX_SPEED_DISCONTINUITY_X = 40
 MAX_SPEED_DISCONTINUITY_Z = 40
@@ -82,7 +81,7 @@ MAX_SPEED_DISCONTINUITY_L = 40
 HOME_CURRENT_X = 1.5
 HOME_CURRENT_Z = 1.5
 HOME_CURRENT_L = 0.8
-MOVE_CURRENT_X = 0.6
+MOVE_CURRENT_X = 1.0
 MOVE_CURRENT_Z = 1.5
 MOVE_CURRENT_L = 0.6
 MOVE_SPEED_X = 200
@@ -167,7 +166,7 @@ class FlexStacker():
             # print(response)
             #response = self._stacker_connection.read_until(expected = f'{x} OK\n')
             response = self._stacker_connection.readline()
-            # print(response)
+            print(response)
             if (self._ack in response) or (self._stall in response):
                 # Remove ack from response
                 response = response.replace(self._ack, b"OK\n")
@@ -228,7 +227,7 @@ class FlexStacker():
         response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
         return response
 
-    def set_device_serial_numer(self, serial_number) -> None:
+    def set_device_serial_number(self, serial_number) -> None:
         """Get the serial number of the flex stacker unit"""
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.SET_SERIAL_NUM).add_element(serial_number)
@@ -408,6 +407,12 @@ class FlexStacker():
                             axis.upper()).add_element(f'{direction}').add_gcode(
             gcode=GCODE.MOVE_IGNORE_LIMIT
         )
+        self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
+
+    def set_microstep(self, axis: AXIS, microstepping: int):
+        c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
+            gcode=GCODE.SET_MICROSTEPPING).add_element(f'{axis.upper()}{microstepping}')
+        print(c)
         self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
 
     def home(self, axis: AXIS, direction: DIR, velocity: Optional[float] = None,
