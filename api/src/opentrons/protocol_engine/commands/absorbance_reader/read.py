@@ -158,6 +158,10 @@ class ReadAbsorbanceImpl(
                 else "VIRTUAL_SERIAL",
             )
 
+            state_update.set_absorbance_reader_data(
+                module_id=params.moduleId, read_result=asbsorbance_result
+            )
+
             if isinstance(plate_read_result, PlateReaderData):
                 # Write a CSV file for each of the measurements taken
                 for measurement in plate_read_result.read_results:
@@ -169,9 +173,6 @@ class ReadAbsorbanceImpl(
                     )
                     file_ids.append(file_id)
 
-                state_update.set_absorbance_reader_data(
-                    module_id=params.moduleId, read_data=plate_read_result
-                )
                 # Return success data to api
                 return SuccessData(
                     public=ReadAbsorbanceResult(
@@ -181,14 +182,14 @@ class ReadAbsorbanceImpl(
                     state_update=state_update,
                 )
 
+        state_update.files_added = update_types.FilesAddedUpdate(file_ids=file_ids)
+
         return SuccessData(
             public=ReadAbsorbanceResult(
                 data=asbsorbance_result,
                 fileIds=file_ids,
             ),
-            state_update=update_types.StateUpdate(
-                files_added=update_types.FilesAddedUpdate(file_ids=file_ids)
-            ),
+            state_update=state_update,
         )
 
 

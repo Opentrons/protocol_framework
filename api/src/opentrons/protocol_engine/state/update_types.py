@@ -259,7 +259,7 @@ class AbsorbanceReaderDataUpdate:
     """An update to an absorbance reader's lid location."""
 
     module_id: str
-    read_data: PlateReaderData
+    read_result: typing.Dict[int, typing.Dict[str, float]]
 
 
 @dataclasses.dataclass
@@ -591,11 +591,11 @@ class StateUpdate:
         return self
 
     def set_absorbance_reader_data(
-        self, module_id: str, read_data: PlateReaderData
+        self, module_id: str, read_result: typing.Dict[int, typing.Dict[str, float]]
     ) -> Self:
         """Update an absorbance reader's read data. See `AbsorbanceReaderReadDataUpdate`."""
         self.absorbance_reader_data = AbsorbanceReaderDataUpdate(
-            module_id=module_id, read_data=read_data
+            module_id=module_id, read_result=read_result
         )
         return self
 
