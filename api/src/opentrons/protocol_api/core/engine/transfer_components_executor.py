@@ -1,7 +1,6 @@
 """Executor for liquid class based complex commands."""
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import Union, TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     PositionReference,
@@ -9,15 +8,9 @@ from opentrons_shared_data.liquid_classes.liquid_class_definition import (
 )
 
 from opentrons.protocol_api._liquid_properties import (
-    SingleDispenseProperties,
-    MultiDispenseProperties,
     Submerge,
-    RetractAspirate,
-    RetractDispense,
-    DelayProperties,
     TransferProperties,
     MixProperties,
-    AspirateProperties,
 )
 from opentrons.types import Location, Point
 
@@ -26,41 +19,18 @@ if TYPE_CHECKING:
     from .instrument import InstrumentCore
 
 
-@dataclass
-class _TargetPosition:
-    position_reference: PositionReference
-    offset: Coordinate
-
-
-@dataclass
-class _TargetAsLocationAndWell:
-    location: Location
-    well: WellCore
-
-
-@dataclass
-class MixAspDispData:
-    flow_rate: float
-    delay: DelayProperties
-
-
-@dataclass
-class MixData:
-    mix_properties: MixProperties
-    aspirate_data: MixAspDispData
-    dispense_data: MixAspDispData
-
-
 class TransferComponentsExecutor:
     def __init__(
         self,
         instrument_core: InstrumentCore,
         transfer_properties: TransferProperties,
-        target_location_and_well: _TargetAsLocationAndWell,
+        target_location: Location,
+        target_well: WellCore,
     ) -> None:
         self._instrument = instrument_core
         self._transfer_properties = transfer_properties
-        self._target_location_and_well = target_location_and_well
+        self._target_location = target_location
+        self._target_well = target_well
 
     def submerge(
         self,
@@ -78,17 +48,16 @@ class TransferComponentsExecutor:
         """
         # TODO: compare submerge start position and aspirate position and raise error if incompatible
         submerge_start_point = absolute_point_from_position_reference_and_offset(
-            self._target_location_and_well.well,
-            submerge_properties.position_reference,
-            submerge_properties.offset
+            well=self._target_well,
+            position_reference=submerge_properties.position_reference,
+            offset=submerge_properties.offset,
         )
         submerge_start_location = Location(
-            point=submerge_start_point,
-            labware=self._target_location_and_well.location.labware
+            point=submerge_start_point, labware=self._target_location.labware
         )
         self._instrument.move_to(
             location=submerge_start_location,
-            well_core=self._target_location_and_well.well,
+            well_core=self._target_well,
             force_direct=False,
             minimum_z_height=None,
             speed=None,
@@ -98,8 +67,8 @@ class TransferComponentsExecutor:
             volume=air_gap_volume,
         )
         self._instrument.move_to(
-            location=self._target_location_and_well.location,
-            well_core=self._target_location_and_well.well,
+            location=self._target_location,
+            well_core=self._target_well,
             force_direct=True,
             minimum_z_height=None,
             speed=submerge_properties.speed,
@@ -110,9 +79,10 @@ class TransferComponentsExecutor:
 
     def aspirate_and_wait(self, volume: float) -> None:
         """Aspirate according to aspirate properties and wait if enabled."""
+        # TODO: handle volume correction
         aspirate_props = self._transfer_properties.aspirate
         self._instrument.aspirate(
-            location=self._target_location_and_well.location,
+            location=self._target_location,
             well_core=None,
             volume=volume,
             rate=1,
@@ -122,22 +92,22 @@ class TransferComponentsExecutor:
         )
         delay_props = aspirate_props.delay
         if delay_props.enabled:
-            # This would have been validated in the liquid class.
             # Assertion only for mypy purposes
             assert delay_props.duration is not None
             self._instrument.delay(delay_props.duration)
 
     def dispense_and_wait(self, volume: float, push_out: Optional[float]) -> None:
         """Dispense according to dispense properties and wait if enabled."""
+        # TODO: handle volume correction
         dispense_props = self._transfer_properties.dispense
         self._instrument.dispense(
-            location=self._target_location_and_well.location,
+            location=self._target_location,
             well_core=None,
             volume=volume,
             rate=1,
             flow_rate=dispense_props.flow_rate_by_volume.get_for_volume(volume),
             in_place=True,
-            push_out=push_out,  # TODO: check if this should be 0 instead
+            push_out=push_out,
             is_meniscus=None,
         )
         dispense_delay = dispense_props.delay
@@ -145,12 +115,7 @@ class TransferComponentsExecutor:
             assert dispense_delay.duration is not None
             self._instrument.delay(dispense_delay.duration)
 
-    def mix(
-        self,
-        mix_properties: MixProperties,
-        aspirate_data: MixAspDispData,
-        dispense_data: MixAspDispData,
-    ) -> None:
+    def mix(self, mix_properties: MixProperties) -> None:
         """Execute mix steps.
 
         1. Use same flow rates and delays as aspirate and dispense
@@ -163,7 +128,6 @@ class TransferComponentsExecutor:
         """
         if not mix_properties.enabled:
             return
-        # This would have been validated in the liquid class.
         # Assertion only for mypy purposes
         assert (
             mix_properties.repetitions is not None and mix_properties.volume is not None
@@ -177,24 +141,18 @@ class TransferComponentsExecutor:
         self,
         enabled: bool,
         volume: float,
-        aspirate_data: MixAspDispData,
-        dispense_data: MixAspDispData,
     ) -> None:
         """Do a pre-wet.
 
         - 1 combo of aspirate + dispense at the same flow rate as specified in asp & disp and the delays in asp & disp
         - Use the target volume/ volume we will be aspirating
         - No push out
-        - Not pre-wet for consolidation
+        - No pre-wet for consolidation
         """
         if not enabled:
             return
         mix_props = MixProperties(_enabled=True, _repetitions=1, _volume=volume)
-        self.mix(
-            mix_properties=mix_props,
-            aspirate_data=aspirate_data,
-            dispense_data=dispense_data,
-        )
+        self.mix(mix_properties=mix_props)
 
     def retract_after_aspiration(self, air_gap_volume: float) -> None:
         """Execute post-aspiration retraction steps.
@@ -215,12 +173,16 @@ class TransferComponentsExecutor:
         # TODO: Raise error if retract is below the meniscus
         retract_props = self._transfer_properties.aspirate.retract
         retract_point = absolute_point_from_position_reference_and_offset(
-            self._target_location_and_well.well, retract_props.position_reference,
-            retract_props.offset)
-        retract_location = Location(retract_point, labware=self._target_location_and_well.location.labware)
+            well=self._target_well,
+            position_reference=retract_props.position_reference,
+            offset=retract_props.offset,
+        )
+        retract_location = Location(
+            retract_point, labware=self._target_location.labware
+        )
         self._instrument.move_to(
             location=retract_location,
-            well_core=self._target_location_and_well.well,
+            well_core=self._target_well,
             force_direct=True,
             minimum_z_height=None,
             speed=retract_props.speed,
@@ -238,18 +200,18 @@ class TransferComponentsExecutor:
             )
             # TODO: update this once touch tip has mmToEdge
             self._instrument.touch_tip(
-                location=self._target_location_and_well.location,
-                well_core=self._target_location_and_well.well,
+                location=self._target_location,
+                well_core=self._target_well,
                 radius=0,
                 z_offset=touch_tip_props.z_offset,
                 speed=touch_tip_props.speed,
             )
             self._instrument.move_to(
                 location=retract_location,
-                well_core=self._target_location_and_well.well,
+                well_core=self._target_well,
                 force_direct=True,
                 minimum_z_height=None,
-                # Full speed because assumption is that the tip will already be out of the liquid
+                # Full speed because the tip will already be out of the liquid
                 speed=None,
             )
         self._add_air_gap(volume=air_gap_volume)
@@ -257,14 +219,13 @@ class TransferComponentsExecutor:
     def _add_air_gap(self, volume: float) -> None:
         """Add an air gap."""
         aspirate_props = self._transfer_properties.aspirate
-        # To err on the side of caution, the maximum flow rate should be air_gap_volume per second
+        # The maximum flow rate should be air_gap_volume per second
         flow_rate = min(
             aspirate_props.flow_rate_by_volume.get_for_volume(volume), volume
         )
         self._instrument.air_gap_in_place(volume=volume, flow_rate=flow_rate)
         delay_props = aspirate_props.delay
         if delay_props.enabled:
-            # This would have been validated in the liquid class.
             # Assertion only for mypy purposes
             assert delay_props.duration is not None
             self._instrument.delay(delay_props.duration)
@@ -323,7 +284,7 @@ def absolute_point_from_position_reference_and_offset(
     position_reference: PositionReference,
     offset: Coordinate,
 ) -> Point:
-    """Get the absolute point, given the well, the position reference and offset."""
+    """Return the absolute point, given the well, the position reference and offset."""
     match position_reference:
         case PositionReference.WELL_TOP:
             reference_point = well.get_top(0)

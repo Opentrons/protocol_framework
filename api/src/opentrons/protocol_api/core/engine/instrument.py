@@ -46,8 +46,6 @@ from . import overlap_versions, pipette_movement_conflict
 from .well import WellCore
 from .transfer_components_executor import (
     TransferComponentsExecutor,
-    MixData,
-    MixAspDispData,
     absolute_point_from_position_reference_and_offset,
 )
 from ..instrument import AbstractInstrument
@@ -903,15 +901,16 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         )
         return result.liquidClassId
 
-    def get_next_tip(self) -> NextTipInfo:
+    # TODO: update with getNextTip implementation
+    def get_next_tip(self) -> None:
         """Get the next tip to pick up."""
 
     def transfer_liquid(
         self,
         liquid_class: LiquidClass,
         volume: float,
-        source: List[Tuple[types.Location, WellCore]],
-        dest: List[Tuple[types.Location, WellCore]],
+        source: List[Tuple[Location, WellCore]],
+        dest: List[Tuple[Location, WellCore]],
         new_tip: TransferTipPolicyV2,
         tiprack_uri: str,
         tip_drop_location: Union[WellCore, Location, TrashBin, WasteChute],
@@ -932,16 +931,18 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             tiprack_uri: The URI of the tiprack that the transfer settings are for.
             tip_drop_location: Location where the tip will be dropped (if appropriate).
         """
-        liquid_class_id = self.load_liquid_class(
+        # TODO: use the ID returned by load_liquid_class in command annotations
+        self.load_liquid_class(
             liquid_class=liquid_class,
-            pipette_load_name=self.name,
+            pipette_load_name=self.get_pipette_name(),  # TODO: update this to use load name instead
             tiprack_uri=tiprack_uri,
         )
         transfer_props = liquid_class.get_for(
-            pipette=pipette_load_name, tiprack=tiprack_uri
+            # update this to fetch load name instead
+            pipette=self.get_pipette_name(),
+            tiprack=tiprack_uri,
         )
         aspirate_props = transfer_props.aspirate
-        dispense_props = transfer_props.dispense
 
         check_valid_volume_parameters(
             disposal_volume=0,  # No disposal volume for 1-to-1 transfer
@@ -953,18 +954,16 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             targets=zip(source, dest),
             max_volume=self.get_max_volume(),
         )
-        transfer_executer = TransferComponentsExecutor(instrument_core=self)
         if new_tip == TransferTipPolicyV2.ONCE:
             # TODO: update this once getNextTip is implemented
-            next_tip = self.get_next_tip()
-            self.pick_up_tip(next_tip)
-        for step_volume, (src, dest) in source_dest_per_volume_step:
+            self.get_next_tip()
+        for step_volume, (src, dest) in source_dest_per_volume_step:  # type: ignore[assignment]
             if new_tip == TransferTipPolicyV2.ALWAYS:
                 # TODO: update this once getNextTip is implemented
-                next_tip = self.get_next_tip()
-                self.pick_up_tip(next_tip)
+                self.get_next_tip()
 
-            transfer_executer.aspirate(aspirate_props)
+            # TODO: add aspirate and dispense
+
             if new_tip == TransferTipPolicyV2.ALWAYS:
                 if isinstance(tip_drop_location, (TrashBin, WasteChute)):
                     self.drop_tip_in_disposal_location(
@@ -975,15 +974,29 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                 elif isinstance(tip_drop_location, Location):
                     self.drop_tip(
                         location=tip_drop_location,
-                        well_core=tip_drop_location.labware.as_well()._core,
+                        well_core=tip_drop_location.labware.as_well()._core,  # type: ignore[arg-type]
                         home_after=False,
                         alternate_drop_location=True,
                     )
 
+    def _get_transfer_components_executor(
+        self,
+        transfer_properties: TransferProperties,
+        target_location: Location,
+        target_well: WellCore,
+    ) -> TransferComponentsExecutor:
+        """Get a TransferComponentsExecutor."""
+        return TransferComponentsExecutor(
+            instrument_core=self,
+            transfer_properties=transfer_properties,
+            target_location=target_location,
+            target_well=target_well,
+        )
+
     def aspirate_liquid_class(
         self,
         volume: float,
-        source: Tuple(Location, WellCore),
+        source: Tuple[Location, WellCore],
         transfer_properties: TransferProperties,
     ) -> None:
         """Execute aspiration steps.
@@ -992,55 +1005,38 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         2. Mix
         3. pre-wet
         4. Aspirate
-            - Aspirate with provided flow rate
         5. Delay- wait inside the liquid
         6. Aspirate retract
         """
         aspirate_props = transfer_properties.aspirate
         dispense_props = transfer_properties.dispense
 
-        aspirate_location_point = absolute_point_from_position_reference_and_offset(
-            well=source, position_reference=aspirate_props.position_reference,
-            offset=aspirate_props.offset)
-        aspirate_location_and_well = _TargetAsLocationAndWell(
-            location=Location(aspirate_location_point, labware=source[0].labware),
-            well=source,
+        source_loc, source_well = source
+
+        aspirate_point = absolute_point_from_position_reference_and_offset(
+            well=source_well,
+            position_reference=aspirate_props.position_reference,
+            offset=aspirate_props.offset,
         )
-        transfer_executer = TransferComponentsExecutor(
-            instrument_core=self,
+        aspirate_location = Location(aspirate_point, labware=source_loc.labware)
+
+        components_executer = self._get_transfer_components_executor(
             transfer_properties=transfer_properties,
-            target_location_and_well=aspirate_location_and_well,
+            target_location=aspirate_location,
+            target_well=source_well,
         )
-        transfer_executer.submerge(submerge_properties=aspirate_props.submerge)
-        transfer_executer.mix(
-            mix_properties=aspirate_props.mix,
-            aspirate_data=MixAspDispData(
-                flow_rate=aspirate_props.flow_rate_by_volume.get_for_volume(
-                    aspirate_props.mix.volume
-                ),
-                delay=aspirate_props.delay,
-            ),
-            dispense_data=MixAspDispData(
-                flow_rate=dispense_props.flow_rate_by_volume.get_for_volume(
-                    aspirate_props.mix.volume
-                ),
-                delay=dispense_props.delay,
-            ),
+        components_executer.submerge(
+            submerge_properties=aspirate_props.submerge,
+            # Assuming aspirate is not called with liquid already in the tip
+            air_gap_volume=self.get_current_volume(),
         )
-        transfer_executer.pre_wet(
+        components_executer.mix(mix_properties=aspirate_props.mix)
+        components_executer.pre_wet(
             enabled=aspirate_props.pre_wet,
             volume=volume,
-            aspirate_data=MixAspDispData(
-                flow_rate=aspirate_props.flow_rate_by_volume.get_for_volume(volume),
-                delay=aspirate_props.delay,
-            ),
-            dispense_data=MixAspDispData(
-                flow_rate=dispense_props.flow_rate_by_volume.get_for_volume(volume),
-                delay=dispense_props.delay,
-            ),
         )
-        transfer_executer.aspirate_and_wait(volume=volume)
-        transfer_executer.retract_after_aspiration(
+        components_executer.aspirate_and_wait(volume=volume)
+        components_executer.retract_after_aspiration(
             air_gap_volume=aspirate_props.retract.air_gap_by_volume.get_for_volume(
                 volume
             )
@@ -1050,7 +1046,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         self,
         volume: float,
         dest: WellCore,
-        dispense_properties: SingleDispenseProperties,
+        transfer_properties: TransferProperties,
     ) -> None:
         """Execute single-dispense steps.
 

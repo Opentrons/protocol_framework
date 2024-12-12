@@ -311,19 +311,6 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         ...
 
     @abstractmethod
-    def load_liquid_class(
-        self,
-        liquid_class: LiquidClass,
-        pipette_load_name: str,
-        tiprack_uri: str,
-    ) -> str:
-        """Load the liquid class properties of given pipette and tiprack into the engine.
-
-        Returns: ID of the liquid class record
-        """
-        ...
-
-    @abstractmethod
     def transfer_liquid(
         self,
         liquid_class: LiquidClass,

@@ -1,7 +1,9 @@
 """Tests for complex commands executor."""
 import pytest
 from decoy import Decoy
-from opentrons_shared_data.liquid_classes import LiquidClassSchemaV1
+from opentrons_shared_data.liquid_classes.liquid_class_definition import (
+    LiquidClassSchemaV1,
+)
 
 from opentrons.protocol_api._liquid import LiquidClass
 from opentrons.protocol_api._liquid_properties import TransferProperties
@@ -29,17 +31,6 @@ def sample_transfer_props(
     )
 
 
-@pytest.fixture
-def subject(
-    mock_instrument_core: InstrumentCore, sample_transfer_props: TransferProperties
-) -> TransferComponentsExecutor:
-    """Return a TransferComponentsExecutor test subject."""
-    return TransferComponentsExecutor(
-        instrument_core=mock_instrument_core,
-        transfer_properties=sample_transfer_props,
-    )
-
-
 """ Test aspirate properties:
 "submerge": {
   "positionReference": "well-top",
@@ -63,26 +54,32 @@ def subject(
 """
 
 
-def test_transfer_aspirate(
+def test_submerge(
     decoy: Decoy,
     mock_instrument_core: InstrumentCore,
     sample_transfer_props: TransferProperties,
-    subject: TransferComponentsExecutor,
 ) -> None:
     """Should perform the expected aspiration steps."""
     source_well = decoy.mock(cls=WellCore)
     well_top_point = Point(1, 2, 3)
     well_bottom_point = Point(4, 5, 6)
-    aspirate_flow_rate = (
-        sample_transfer_props.aspirate.flow_rate_by_volume.get_for_volume(50)
-    )
-    dispense_flow_rate = (
-        sample_transfer_props.dispense.flow_rate_by_volume.get_for_volume(50)
+    air_gap_removal_flow_rate = (
+        sample_transfer_props.dispense.flow_rate_by_volume.get_for_volume(123)
     )
 
+    subject = TransferComponentsExecutor(
+        instrument_core=mock_instrument_core,
+        transfer_properties=sample_transfer_props,
+        target_location=Location(Point(), labware=None),
+        target_well=source_well,
+    )
     decoy.when(source_well.get_bottom(0)).then_return(well_bottom_point)
     decoy.when(source_well.get_top(0)).then_return(well_top_point)
-    subject.aspirate(volume=20, source=source_well)
+
+    subject.submerge(
+        submerge_properties=sample_transfer_props.aspirate.submerge,
+        air_gap_volume=123,
+    )
 
     decoy.verify(
         mock_instrument_core.move_to(
@@ -92,32 +89,23 @@ def test_transfer_aspirate(
             minimum_z_height=None,
             speed=None,
         ),
+        mock_instrument_core.dispense(
+            location=Location(Point(x=2, y=4, z=6), labware=None),
+            well_core=None,
+            volume=123,
+            rate=1,
+            flow_rate=air_gap_removal_flow_rate,
+            in_place=True,
+            is_meniscus=None,
+            push_out=0,
+        ),
+        mock_instrument_core.delay(0.2),
         mock_instrument_core.move_to(
-            location=Location(Point(14, 25, 36), labware=None),
+            location=Location(Point(), labware=None),
             well_core=source_well,
             force_direct=True,
             minimum_z_height=None,
             speed=100,
         ),
         mock_instrument_core.delay(10),
-        mock_instrument_core.aspirate(
-            location=Location(Point(14, 25, 36), labware=None),
-            well_core=source_well,
-            volume=50,
-            rate=1,
-            flow_rate=aspirate_flow_rate,
-            in_place=True,
-            is_meniscus=None,
-        ),
-        mock_instrument_core.delay(0.2),
-        mock_instrument_core.dispense(
-            location=Location(Point(14, 25, 36), labware=None),
-            well_core=source_well,
-            volume=50,
-            rate=1,
-            flow_rate=dispense_flow_rate,
-            in_place=True,
-            push_out=None,
-            is_meniscus=None,
-        ),
     )
