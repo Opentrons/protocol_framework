@@ -4,7 +4,6 @@ from urllib.request import Request, urlopen
 from typing import List
 import platform
 from json import loads as json_loads
-from hardware_testing.data import ui
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.protocol_api.labware import Labware
 from opentrons.protocol_api import InstrumentContext, ProtocolContext
