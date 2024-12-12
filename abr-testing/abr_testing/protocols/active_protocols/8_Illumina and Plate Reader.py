@@ -1,5 +1,11 @@
 """Illumina DNA Prep and Plate Reader Test."""
-from opentrons.protocol_api import ParameterContext, ProtocolContext, Labware
+from opentrons.protocol_api import (
+    ParameterContext,
+    ProtocolContext,
+    Labware,
+    Well,
+    InstrumentContext,
+)
 from abr_testing.protocols import helpers
 from opentrons.protocol_api.module_contexts import (
     AbsorbanceReaderContext,
@@ -10,8 +16,9 @@ from opentrons.protocol_api.module_contexts import (
 )
 from datetime import datetime
 from opentrons.hardware_control.modules.types import ThermocyclerStep
-from typing import List
+from typing import List, Dict
 from opentrons import types
+
 
 metadata = {
     "protocolName": "Illumina DNA Prep and Plate Reader Test",
@@ -31,7 +38,7 @@ TIP_TRASH = False  # True = Used tips go in Trash, False = Used tips go back int
 HYBRID_PAUSE = True  # True = sets a pause on the Hybridization
 
 # PROTOCOL SETTINGS
-COLUMNS = 3  # 1-3
+COLUMNS = 4  # 1-4
 HYBRIDDECK = True
 HYBRIDTIME = 1.6  # Hours
 
@@ -55,6 +62,8 @@ def add_parameters(parameters: ParameterContext) -> None:
     """Add Parameters."""
     helpers.create_hs_speed_parameter(parameters)
     helpers.create_dot_bottom_parameter(parameters)
+    helpers.create_deactivate_modules_parameter(parameters)
+    helpers.create_plate_reader_compatible_labware_parameter(parameters)
     parameters.add_bool(
         variable_name="plate_orientation",
         display_name="Hellma Plate Orientation",
@@ -103,6 +112,9 @@ def run(protocol: ProtocolContext) -> None:
     heater_shaker_speed = protocol.params.heater_shaker_speed  # type: ignore[attr-defined]
     dot_bottom = protocol.params.dot_bottom  # type: ignore[attr-defined]
     plate_orientation = protocol.params.plate_orientation  # type: ignore[attr-defined]
+    deactivate_modules_bool = protocol.params.deactivate_modules  # type: ignore[attr-defined]
+    plate_type = protocol.params.labware_plate_reader_compatible  # type: ignore [attr-defined]
+
     plate_name_str = "hellma_plate_" + str(plate_orientation)
     global p200_tips
     global p50_tips
@@ -115,7 +127,9 @@ def run(protocol: ProtocolContext) -> None:
     tiprack_50_2 = protocol.load_labware("opentrons_flex_96_tiprack_50ul", "A3")
     # MODULES + LABWARE
     # Reservoir
-    reservoir = protocol.load_labware("nest_96_wellplate_2ml_deep", "D2")
+    reservoir = protocol.load_labware(
+        "nest_96_wellplate_2ml_deep", "D2", "Liquid Waste"
+    )
     # Heatershaker
     heatershaker: HeaterShakerContext = protocol.load_module(
         helpers.hs_str, "D1"
@@ -123,6 +137,7 @@ def run(protocol: ProtocolContext) -> None:
     sample_plate_2 = heatershaker.load_labware(
         "thermoscientificnunc_96_wellplate_1300ul"
     )
+    heatershaker.close_labware_latch()
     # Magnetic Block
     mag_block: MagneticBlockContext = protocol.load_module(
         helpers.mag_str, "C1"
@@ -133,6 +148,7 @@ def run(protocol: ProtocolContext) -> None:
     sample_plate_1 = thermocycler.load_labware(
         "armadillo_96_wellplate_200ul_pcr_full_skirt"
     )
+    thermocycler.open_lid()
     # Temperature Module
     temp_block: TemperatureModuleContext = protocol.load_module(
         helpers.temp_str, "B3"
@@ -144,7 +160,7 @@ def run(protocol: ProtocolContext) -> None:
     plate_reader: AbsorbanceReaderContext = protocol.load_module(
         helpers.abs_mod_str, PLATE_READER_SLOT
     )  # type: ignore[assignment]
-    hellma_plate = protocol.load_labware("hellma_reference_plate", HELLMA_PLATE_SLOT)
+    hellma_plate = protocol.load_labware(plate_type, HELLMA_PLATE_SLOT)
     # PIPETTES
     p1000 = protocol.load_instrument(
         "flex_8channel_1000",
@@ -154,6 +170,28 @@ def run(protocol: ProtocolContext) -> None:
     p50 = protocol.load_instrument(
         "flex_8channel_50", "right", tip_racks=[tiprack_50_1, tiprack_50_2]
     )
+
+    # Load liquids and probe
+    liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
+        "Reagents": [
+            {"well": reagent_plate.columns()[3], "volume": 75.0},
+            {"well": reagent_plate.columns()[4], "volume": 15.0},
+            {"well": reagent_plate.columns()[5], "volume": 20.0},
+            {"well": reagent_plate.columns()[6], "volume": 65.0},
+        ],
+        "AMPure": [{"well": reservoir.columns()[0], "volume": 120.0}],
+        "SMB": [{"well": reservoir.columns()[1], "volume": 750.0}],
+        "EtOH": [{"well": reservoir.columns()[3], "volume": 900.0}],
+        "RSB": [{"well": reservoir.columns()[4], "volume": 96.0}],
+        "Wash": [
+            {"well": sample_plate_2.columns()[9], "volume": 1000.0},
+            {"well": sample_plate_2.columns()[10], "volume": 1000.0},
+            {"well": sample_plate_2.columns()[11], "volume": 1000.0},
+        ],
+        "Samples": [{"well": sample_plate_1.wells(), "volume": 150.0}],
+    }
+    helpers.find_liquid_height_of_loaded_liquids(protocol, liquid_vols_and_wells, p50)
+
     # reagent
     AMPure = reservoir["A1"]
     SMB = reservoir["A2"]
@@ -165,11 +203,42 @@ def run(protocol: ProtocolContext) -> None:
     Liquid_trash_well_2 = reservoir["A10"]
     Liquid_trash_well_3 = reservoir["A11"]
     Liquid_trash_well_4 = reservoir["A12"]
+    liquid_trash_list = {
+        Liquid_trash_well_1: 0.0,
+        Liquid_trash_well_2: 0.0,
+        Liquid_trash_well_3: 0.0,
+        Liquid_trash_well_4: 0.0,
+    }
+
+    def trash_liquid(
+        protocol: ProtocolContext,
+        pipette: InstrumentContext,
+        vol_to_trash: float,
+        liquid_trash_list: Dict[Well, float],
+    ) -> None:
+        """Determine which wells to use as liquid waste."""
+        remaining_volume = vol_to_trash
+        max_capacity = 1500.0
+        # Determine liquid waste location depending on current total volume
+        # Distribute the liquid volume sequentially
+        for well, current_volume in liquid_trash_list.items():
+            if remaining_volume <= 0.0:
+                break
+            available_capacity = max_capacity - current_volume
+            if available_capacity < remaining_volume:
+                continue
+            pipette.dispense(remaining_volume, well.top())
+            protocol.delay(minutes=0.1)
+            pipette.blow_out(well.top())
+            liquid_trash_list[well] += remaining_volume
+            if pipette.current_volume <= 0.0:
+                break
 
     # Will Be distributed during the protocol
-    EEW_1 = sample_plate_2.wells_by_name()["A10"]
-    EEW_2 = sample_plate_2.wells_by_name()["A11"]
-    EEW_3 = sample_plate_2.wells_by_name()["A12"]
+    EEW_1 = sample_plate_2.wells_by_name()["A9"]
+    EEW_2 = sample_plate_2.wells_by_name()["A10"]
+    EEW_3 = sample_plate_2.wells_by_name()["A11"]
+    EEW_4 = sample_plate_2.wells_by_name()["A12"]
 
     NHB2 = reagent_plate.wells_by_name()["A1"]
     Panel = reagent_plate.wells_by_name()["A2"]
@@ -206,6 +275,14 @@ def run(protocol: ProtocolContext) -> None:
         column_5_list = ["A7", "A8", "A9"]  # Plate 2
         column_6_list = ["A7", "A8", "A9"]  # Plate 1
         WASHES = [EEW_1, EEW_2, EEW_3]
+    if COLUMNS == 4:
+        column_1_list = ["A1", "A2", "A3", "A4"]  # Plate 1
+        column_2_list = ["A1", "A2", "A3", "A4"]  # Plate 2
+        column_3_list = ["A5", "A6", "A7", "A8"]  # Plate 2
+        column_4_list = ["A5", "A6", "A7", "A8"]  # Plate 1
+        column_5_list = ["A9", "A10", "A11", "A12"]  # Plate 2
+        column_6_list = ["A9", "A10", "A11", "A12"]  # Plate 1
+        WASHES = [EEW_1, EEW_2, EEW_3, EEW_4]
 
     def tipcheck() -> None:
         """Check tips."""
@@ -231,9 +308,7 @@ def run(protocol: ProtocolContext) -> None:
                 thermocycler.set_block_temperature(58)
                 thermocycler.set_lid_temperature(58)
                 heatershaker.set_and_wait_for_temperature(58)
-        protocol.pause("Ready")
         heatershaker.close_labware_latch()
-        Liquid_trash = Liquid_trash_well_1
 
         # Sample Plate contains 30ul  of DNA
 
@@ -409,19 +484,13 @@ def run(protocol: ProtocolContext) -> None:
                 p1000.pick_up_tip()
                 p1000.move_to(sample_plate_2[X].bottom(4))
                 p1000.aspirate(200, rate=0.25)
-                p1000.dispense(200, Liquid_trash.top(z=-7))
+                trash_liquid(protocol, p1000, 200, liquid_trash_list)
                 p1000.move_to(sample_plate_2[X].bottom(0.5))
                 p1000.aspirate(200, rate=0.25)
-                p1000.dispense(200, Liquid_trash.top(z=-7))
-                p1000.move_to(Liquid_trash.top(z=-7))
-                protocol.delay(minutes=0.1)
-                p1000.blow_out(Liquid_trash.top(z=-7))
-                p1000.aspirate(20)
+                trash_liquid(protocol, p1000, 200, liquid_trash_list)
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
-
-            Liquid_trash = Liquid_trash_well_2
 
             # ============================================================================================
             # GRIPPER MOVE sample_plate_2 FROM MAGPLATE TO heatershaker
@@ -469,9 +538,6 @@ def run(protocol: ProtocolContext) -> None:
                 if DRYRUN is False:
                     protocol.delay(seconds=1 * 60)
 
-                if washcount > 2:
-                    Liquid_trash = Liquid_trash_well_3
-
                 protocol.comment("--> Removing Supernatant")
                 RemoveSup = 200
                 for loop, X in enumerate(column_2_list):
@@ -482,10 +548,7 @@ def run(protocol: ProtocolContext) -> None:
                     p1000.move_to(sample_plate_2[X].bottom(z=0.5))
                     p1000.aspirate(100, rate=0.25)
                     p1000.move_to(sample_plate_2[X].top(z=0.5))
-                    p1000.dispense(200, Liquid_trash.top(z=-7))
-                    protocol.delay(minutes=0.1)
-                    p1000.blow_out(Liquid_trash.top(z=-7))
-                    p1000.aspirate(20)
+                    trash_liquid(protocol, p1000, 200, liquid_trash_list)
                     p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                     p200_tips += 1
                     tipcheck()
@@ -554,10 +617,7 @@ def run(protocol: ProtocolContext) -> None:
                 p1000.move_to(sample_plate_2[X].bottom(z=0.5))
                 p1000.aspirate(100, rate=0.25)
                 p1000.move_to(sample_plate_2[X].top(z=0.5))
-                p1000.dispense(200, Liquid_trash.top(z=-7))
-                protocol.delay(minutes=0.1)
-                p1000.blow_out(Liquid_trash.top(z=-7))
-                p1000.aspirate(20)
+                trash_liquid(protocol, p1000, 200, liquid_trash_list)
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
@@ -568,12 +628,7 @@ def run(protocol: ProtocolContext) -> None:
                 p50.move_to(sample_plate_2[X].bottom(z=dot_bottom))  # original = z=0
                 p50.aspirate(50, rate=0.25)
                 p50.default_speed = 200
-                p50.dispense(50, Liquid_trash.top(z=-7))
-                protocol.delay(minutes=0.1)
-                p50.blow_out()
-                p50.default_speed = 400
-                p50.move_to(Liquid_trash.top(z=-7))
-                p50.move_to(Liquid_trash.top(z=0))
+                trash_liquid(protocol, p50, 50, liquid_trash_list)
                 p50.return_tip() if TIP_TRASH is False else p50.drop_tip()
                 p50_tips += 1
                 tipcheck()
@@ -722,8 +777,6 @@ def run(protocol: ProtocolContext) -> None:
                 p50_tips += 1
                 tipcheck()
 
-            Liquid_trash = Liquid_trash_well_4
-
             protocol.comment("--> ADDING AMPure (0.8x)")
             AMPureVol = 40.5
             AMPureMixRep = 5 * 60 if DRYRUN is False else 0.1 * 60
@@ -777,12 +830,7 @@ def run(protocol: ProtocolContext) -> None:
                 p1000.default_speed = 5
                 p1000.move_to(sample_plate_2[X].top(z=2))
                 p1000.default_speed = 200
-                p1000.dispense(200, Liquid_trash.top(z=-7))
-                protocol.delay(minutes=0.1)
-                p1000.blow_out()
-                p1000.default_speed = 400
-                p1000.move_to(Liquid_trash.top(z=-7))
-                p1000.move_to(Liquid_trash.top(z=0))
+                trash_liquid(protocol, p1000, 200, liquid_trash_list)
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
@@ -821,12 +869,7 @@ def run(protocol: ProtocolContext) -> None:
                     p1000.default_speed = 5
                     p1000.move_to(sample_plate_2[X].top(z=2))
                     p1000.default_speed = 200
-                    p1000.dispense(200, Liquid_trash.top(z=-7))
-                    protocol.delay(minutes=0.1)
-                    p1000.blow_out()
-                    p1000.default_speed = 400
-                    p1000.move_to(Liquid_trash.top(z=-7))
-                    p1000.move_to(Liquid_trash.top(z=0))
+                    trash_liquid(protocol, p1000, 200, liquid_trash_list)
                     p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                     p200_tips += 1
                     tipcheck()
@@ -842,12 +885,7 @@ def run(protocol: ProtocolContext) -> None:
                 )  # original = (z=0)
                 p1000.aspirate(50, rate=0.25)
                 p1000.default_speed = 200
-                p1000.dispense(50, Liquid_trash.top(z=-7))
-                protocol.delay(minutes=0.1)
-                p1000.blow_out()
-                p1000.default_speed = 400
-                p1000.move_to(Liquid_trash.top(z=-7))
-                p1000.move_to(Liquid_trash.top(z=0))
+                trash_liquid(protocol, p1000, 50, liquid_trash_list)
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
@@ -945,4 +983,13 @@ def run(protocol: ProtocolContext) -> None:
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
+        liquids_to_probe_at_end = [
+            Liquid_trash_well_1,
+            Liquid_trash_well_2,
+            Liquid_trash_well_3,
+            Liquid_trash_well_4,
+        ]
+        helpers.find_liquid_height_of_all_wells(protocol, p50, liquids_to_probe_at_end)
         plate_reader_actions(protocol, plate_reader, hellma_plate, plate_name_str)
+        if deactivate_modules_bool:
+            helpers.deactivate_modules(protocol)
