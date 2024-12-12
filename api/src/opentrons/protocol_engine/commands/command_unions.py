@@ -169,6 +169,14 @@ from .load_lid_stack import (
     LoadLidStackCommandType,
 )
 
+from .load_lid import (
+    LoadLid,
+    LoadLidParams,
+    LoadLidCreate,
+    LoadLidResult,
+    LoadLidCommandType,
+)
+
 from .move_labware import (
     GripperMovementError,
     MoveLabware,
@@ -368,6 +376,7 @@ Command = Annotated[
         LoadModule,
         LoadPipette,
         LoadLidStack,
+        LoadLid,
         MoveLabware,
         MoveRelative,
         MoveToCoordinates,
@@ -447,6 +456,7 @@ CommandParams = Union[
     RetractAxisParams,
     LoadLabwareParams,
     LoadLidStackParams,
+    LoadLidParams,
     ReloadLabwareParams,
     LoadLiquidParams,
     LoadLiquidClassParams,
@@ -534,6 +544,7 @@ CommandType = Union[
     LoadModuleCommandType,
     LoadPipetteCommandType,
     LoadLidStackCommandType,
+    LoadLidCommandType,
     MoveLabwareCommandType,
     MoveRelativeCommandType,
     MoveToCoordinatesCommandType,
@@ -617,6 +628,7 @@ CommandCreate = Annotated[
         LoadModuleCreate,
         LoadPipetteCreate,
         LoadLidStackCreate,
+        LoadLidCreate,
         MoveLabwareCreate,
         MoveRelativeCreate,
         MoveToCoordinatesCreate,
@@ -701,6 +713,7 @@ CommandResult = Union[
     LoadModuleResult,
     LoadPipetteResult,
     LoadLidStackResult,
+    LoadLidResult,
     MoveLabwareResult,
     MoveRelativeResult,
     MoveToCoordinatesResult,

@@ -31,7 +31,7 @@ def _convert_to_compatible_location_key(location: LabwareLocation) -> Union[str,
         return location.labwareId
     else:
         raise ValueError(
-            f"Lid Stacks can only be created on top of Deck Slots, Staging Area Slots, Addressable Areas and compatible Labware."
+            "Lid Stacks can only be created on top of Deck Slots, Staging Area Slots, Addressable Areas and compatible Labware."
         )
 
 

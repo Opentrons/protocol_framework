@@ -341,7 +341,7 @@ class ProtocolCore(
             load_name, namespace, version, custom_labware_params
         )
         load_result = self._engine_client.execute_command_without_recovery(
-            cmd.LoadLabwareParams(
+            cmd.LoadLidParams(
                 loadName=load_name,
                 location=load_location,
                 namespace=namespace,

@@ -1409,16 +1409,19 @@ class ProtocolContext(CommandPublisher):
             )
 
         if adapter is not None:
-            if isinstance(load_location, LabwareCore):
+            if isinstance(load_location, DeckSlotName) or isinstance(
+                load_location, StagingSlotName
+            ):
+                loaded_adapter = self.load_adapter(
+                    load_name=adapter,
+                    location=load_location.value,
+                    namespace=namespace,
+                )
+                load_location = loaded_adapter._core
+            else:
                 raise ValueError(
                     "Location cannot be a Labware or Adapter when the 'adapter' field is not None."
                 )
-            loaded_adapter = self.load_adapter(
-                load_name=adapter,
-                location=load_location,
-                namespace=namespace,
-            )
-            load_location = loaded_adapter._core
 
         load_name = validation.ensure_lowercase_name(load_name)
 

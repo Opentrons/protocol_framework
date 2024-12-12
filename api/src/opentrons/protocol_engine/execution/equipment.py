@@ -394,7 +394,7 @@ class EquipmentHandler:
             definition=attached_module.definition,
         )
 
-    async def load_lids(  # noqa: C901
+    async def load_lids(
         self,
         load_name: str,
         namespace: str,

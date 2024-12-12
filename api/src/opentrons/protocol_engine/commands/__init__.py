@@ -171,6 +171,14 @@ from .load_lid_stack import (
     LoadLidStackCommandType,
 )
 
+from .load_lid import (
+    LoadLid,
+    LoadLidParams,
+    LoadLidCreate,
+    LoadLidResult,
+    LoadLidCommandType,
+)
+
 from .move_labware import (
     MoveLabware,
     MoveLabwareParams,
@@ -470,6 +478,13 @@ __all__ = [
     "LoadLidStackResult",
     "LoadLidStackCommandType",
     "LoadLidStackPrivateResult",
+    # load lid command models
+    "LoadLid",
+    "LoadLidCreate",
+    "LoadLidParams",
+    "LoadLidResult",
+    "LoadLidCommandType",
+    "LoadLidPrivateResult",
     # move labware command models
     "MoveLabware",
     "MoveLabwareCreate",

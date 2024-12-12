@@ -100,7 +100,7 @@ class LoadLabwareImplementation(
         self._equipment = equipment
         self._state_view = state_view
 
-    async def execute(  # noqa: C901
+    async def execute(
         self, params: LoadLabwareParams
     ) -> SuccessData[LoadLabwareResult]:
         """Load definition and calibration data necessary for a labware."""
@@ -145,18 +145,6 @@ class LoadLabwareImplementation(
         )
 
         state_update = StateUpdate()
-
-        # In the case of lids being loaded on top of other labware, set the parent labware's lid
-        if labware_validation.validate_definition_is_lid(loaded_labware.definition):
-            if isinstance(
-                params.location, OnLabwareLocation
-            ) and not labware_validation.validate_definition_is_adapter(
-                self._state_view.labware.get_definition(params.location.labwareId)
-            ):
-                state_update.set_lid(
-                    parent_labware_id=params.location.labwareId,
-                    lid_id=loaded_labware.labware_id,
-                )
 
         state_update.set_loaded_labware(
             labware_id=loaded_labware.labware_id,

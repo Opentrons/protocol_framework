@@ -1,7 +1,7 @@
 """Load lid stack command request, result, and implementation models."""
 from __future__ import annotations
 from pydantic import BaseModel, Field
-from typing import TYPE_CHECKING, Optional, Type, List, Dict
+from typing import TYPE_CHECKING, Optional, Type, List
 from typing_extensions import Literal
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
