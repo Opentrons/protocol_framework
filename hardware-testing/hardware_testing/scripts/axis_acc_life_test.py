@@ -1,7 +1,7 @@
 from opentrons.protocol_api import ProtocolContext
 from hardware_testing.drivers.stacker import flex_stacker_driver
 
-metadata = {"protocolName": "Flex Stacker Axis Acc Life Test"}
+metadata = {"protocolName": "Flex Stacker Axis Accelerated Lifetime Test"}
 requirements = {"robotType": "Flex", "apiLevel": "2.17"}
 
 CYCLES = 5000
