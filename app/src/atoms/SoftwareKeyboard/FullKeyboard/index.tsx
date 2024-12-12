@@ -60,7 +60,7 @@ export function FullKeyboard({
   return (
     <Keyboard
       keyboardRef={r => (keyboardRef.current = r)}
-      theme={'hg-theme-default oddTheme1'}
+      theme="hg-theme-default oddTheme1"
       onChange={onChange}
       onKeyPress={onKeyPress}
       layoutName={layoutName}

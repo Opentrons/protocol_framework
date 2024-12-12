@@ -72,7 +72,7 @@ export function PromptPreviewSection({
                 key={`item-tag-${index}`}
                 itemMaxWidth={itemMaxWidth}
               >
-                <Tag text={item} type={'default'} />
+                <Tag text={item} type="default" />
               </TagItemWrapper>
             )
         )}
