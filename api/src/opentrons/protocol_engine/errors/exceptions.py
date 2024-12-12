@@ -361,6 +361,19 @@ class TouchTipDisabledError(ProtocolEngineError):
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
 
 
+class TouchTipIncompatibleArgumentsError(ProtocolEngineError):
+    """Raised when touch tip is used with both a custom radius and a mmToEdge argument."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build a TouchTipIncompatibleArgumentsError."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
 class WellDoesNotExistError(ProtocolEngineError):
     """Raised when referencing a well that does not exist."""
 

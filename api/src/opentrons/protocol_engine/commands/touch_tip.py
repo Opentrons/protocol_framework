@@ -7,7 +7,11 @@ from typing_extensions import Literal
 
 from opentrons.types import Point
 
-from ..errors import TouchTipDisabledError, LabwareIsTipRackError
+from ..errors import (
+    TouchTipDisabledError,
+    TouchTipIncompatibleArgumentsError,
+    LabwareIsTipRackError,
+)
 from ..types import DeckPoint
 from .command import (
     AbstractCommandImpl,
@@ -44,8 +48,11 @@ class TouchTipParams(PipetteIdMixin, WellLocationMixin):
             "The proportion of the target well's radius the pipette tip will move towards."
         ),
     )
+
     mmToEdge: Optional[float] = Field(
-        None, description="Offset away from the the well edge, in millimeters."
+        None,
+        description="Offset away from the the well edge, in millimeters."
+        "Incompatible when a radius is included as a non 1.0 value.",
     )
 
     speed: Optional[float] = Field(
@@ -91,6 +98,11 @@ class TouchTipImplementation(
         pipette_id = params.pipetteId
         labware_id = params.labwareId
         well_name = params.wellName
+
+        if params.radius != 1.0 and params.mmToEdge is not None:
+            raise TouchTipIncompatibleArgumentsError(
+                "Cannot use mmToEdge with a radius that is not 1.0"
+            )
 
         if self._state_view.labware.get_has_quirk(labware_id, "touchTipDisabled"):
             raise TouchTipDisabledError(
