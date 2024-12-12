@@ -1,7 +1,8 @@
 """Push one or more folders to one or more robots."""
 import subprocess
-import multiprocessing
 import json
+from typing import List
+from multiprocessing import Process, Queue
 
 global folders
 # Opentrons folders that can be pushed to robot
@@ -13,13 +14,13 @@ folders = [
 ]
 
 
-def push_subroutine(cmd: str) -> None:
+def push_subroutine(cmd: str, queue: Queue) -> None:
     """Pushes specified folder to specified robot."""
     try:
         subprocess.run(cmd)
+        queue.put(f"{cmd}: SUCCESS!\n")
     except Exception:
-        print("failed to push folder")
-        raise
+        queue.put(f"{cmd}: FAILED\n")
 
 
 def main(folder_to_push: str, robot_to_push: str) -> int:
@@ -27,6 +28,8 @@ def main(folder_to_push: str, robot_to_push: str) -> int:
     cmd = "make -C {folder} push-ot3 host={ip}"
     robot_ip_path = ""
     push_cmd = ""
+    processes: List[Process] = []
+    queue: Queue = Queue()
     folder_int = int(folder_to_push)
     if folders[folder_int].lower() == "abr-testing + hardware-testing":
         if robot_to_push.lower() == "all":
@@ -41,20 +44,16 @@ def main(folder_to_push: str, robot_to_push: str) -> int:
         for folder_name in folders[:-2]:
             # Push abr-testing and hardware-testing folders to all robots
             for robot in robot_ips:
-                print_proc = multiprocessing.Process(
-                    target=print, args=(f"Pushing {folder_name} to {robot}!\n\n",)
-                )
-                print_proc.start()
-                print_proc.join()
                 push_cmd = cmd.format(folder=folder_name, ip=robot)
-                process = multiprocessing.Process(
-                    target=push_subroutine, args=(push_cmd,)
+                process = Process(
+                    target=push_subroutine,
+                    args=(
+                        push_cmd,
+                        queue,
+                    ),
                 )
                 process.start()
-                process.join()
-                print_proc = multiprocessing.Process(target=print, args=("Done!\n\n",))
-                print_proc.start()
-                print_proc.join()
+                processes.append(process)
     else:
 
         if folder_int == (len(folders) - 1):
@@ -72,18 +71,15 @@ def main(folder_to_push: str, robot_to_push: str) -> int:
 
         # Push folder to robots
         for robot in robot_ips:
-            print_proc = multiprocessing.Process(
-                target=print, args=(f"Pushing {folder_name} to {robot}!\n\n",)
-            )
-            print_proc.start()
-            print_proc.join()
             push_cmd = cmd.format(folder=folder_name, ip=robot)
-            process = multiprocessing.Process(target=push_subroutine, args=(push_cmd,))
+            process = Process(target=push_subroutine, args=(push_cmd, queue))
             process.start()
-            process.join()
-            print_proc = multiprocessing.Process(target=print, args=("Done!\n\n",))
-            print_proc.start()
-            print_proc.join()
+            processes.append(process)
+
+    for process in processes:
+        process.join()
+        result = queue.get()
+        print(f"\n{result}")
     return 0
 
 
