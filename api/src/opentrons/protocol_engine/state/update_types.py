@@ -18,6 +18,7 @@ from opentrons.protocol_engine.types import (
 )
 from opentrons.types import MountType
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
+from opentrons_shared_data.module.types import ModuleType
 from opentrons_shared_data.pipette.types import PipetteNameType
 
 
@@ -247,10 +248,15 @@ class PipetteEmptyFluidUpdate:
 
 
 @dataclasses.dataclass
+class ModuleStateUpdate:
+    module_id: str
+    module_type: ModuleType
+
+
+@dataclasses.dataclass
 class AbsorbanceReaderLidUpdate:
     """An update to an absorbance reader's lid location."""
 
-    module_id: str
     is_lid_on: bool
 
 
@@ -258,7 +264,6 @@ class AbsorbanceReaderLidUpdate:
 class AbsorbanceReaderDataUpdate:
     """An update to an absorbance reader's lid location."""
 
-    module_id: str
     read_result: typing.Dict[int, typing.Dict[str, float]]
 
 
@@ -320,8 +325,10 @@ class StateUpdate:
 
     absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
 
-    # this might need to be an array
+    # this might need to be an array?
     absorbance_reader_data: AbsorbanceReaderDataUpdate | NoChangeType = NO_CHANGE
+
+    module_state_update: ModuleStateUpdate | NoChangeType = NO_CHANGE
 
     liquid_class_loaded: LiquidClassLoadedUpdate | NoChangeType = NO_CHANGE
 
@@ -585,17 +592,21 @@ class StateUpdate:
 
     def set_absorbance_reader_lid(self: Self, module_id: str, is_lid_on: bool) -> Self:
         """Update an absorbance reader's lid location. See `AbsorbanceReaderLidUpdate`."""
-        self.absorbance_reader_lid = AbsorbanceReaderLidUpdate(
-            module_id=module_id, is_lid_on=is_lid_on
+        self.module_state_update = ModuleStateUpdate(
+            module_id=module_id, module_type="absorbanceReaderType"
         )
+        self.absorbance_reader_lid = AbsorbanceReaderLidUpdate(is_lid_on=is_lid_on)
         return self
 
     def set_absorbance_reader_data(
         self, module_id: str, read_result: typing.Dict[int, typing.Dict[str, float]]
     ) -> Self:
         """Update an absorbance reader's read data. See `AbsorbanceReaderReadDataUpdate`."""
+        self.module_state_update = ModuleStateUpdate(
+            module_id=module_id, module_type="absorbanceReaderType"
+        )
         self.absorbance_reader_data = AbsorbanceReaderDataUpdate(
-            module_id=module_id, read_result=read_result
+            read_result=read_result
         )
         return self
 

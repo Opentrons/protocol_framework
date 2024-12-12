@@ -35,6 +35,7 @@ from opentrons.protocol_engine.state.module_substates.absorbance_reader_substate
     AbsorbanceReaderMeasureMode,
 )
 from opentrons.types import DeckSlotName, MountType, StagingSlotName
+from opentrons_shared_data.module import types
 from ..errors import ModuleNotConnectedError
 
 from ..types import (
@@ -307,10 +308,12 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
 
     def _handle_state_update(self, state_update: update_types.StateUpdate) -> None:
         if (
-            state_update.absorbance_reader_lid != update_types.NO_CHANGE
-            or state_update.absorbance_reader_data != update_types.NO_CHANGE
+            state_update.module_state_update != update_types.NO_CHANGE
+            and state_update.module_state_update.module_type == "absorbanceReaderType"
         ):
-            self._handle_absorbance_reader_commands(state_update)
+            self._handle_absorbance_reader_commands(
+                state_update, state_update.module_state_update.module_id
+            )
             # module_id = state_update.absorbance_reader_lid.module_id
             # is_lid_on = state_update.absorbance_reader_lid.is_lid_on
             #
@@ -593,12 +596,8 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             )
 
     def _handle_absorbance_reader_commands(
-        self, state_update: update_types.StateUpdate
+        self, state_update: update_types.StateUpdate, module_id: str
     ) -> None:
-        module_id = (
-            state_update.absorbance_reader_lid.module_id
-            or state_update.absorbance_reader_data.module_id
-        )
         # Get current values:
         absorbance_reader_substate = self._state.substate_by_module_id[module_id]
         assert isinstance(
