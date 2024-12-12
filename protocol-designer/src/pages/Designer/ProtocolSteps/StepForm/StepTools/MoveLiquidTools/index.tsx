@@ -71,7 +71,6 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
   const labwares = useSelector(getLabwareEntities)
   const pipettes = useSelector(getPipetteEntities)
   const addFieldNamePrefix = makeAddFieldNamePrefix(tab)
-
   const isWasteChuteSelected =
     propsForFields.dispense_labware?.value != null
       ? additionalEquipmentEntities[
@@ -98,11 +97,15 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     additionalEquipmentEntities[String(propsForFields.dispense_labware.value)]
       ?.name === 'trashBin'
 
-  const destinationLabwareType = getTrashOrLabware(
-    labwares,
-    additionalEquipmentEntities,
-    formData.dispense_labware as string
-  )
+  const destinationLabwareType =
+    formData.dispense_labware != null
+      ? getTrashOrLabware(
+          labwares,
+          additionalEquipmentEntities,
+          formData.dispense_labware as string
+        )
+      : null
+
   const isDestinationTrash =
     destinationLabwareType != null
       ? ['trashBin', 'wasteChute'].includes(destinationLabwareType)
@@ -134,12 +137,12 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
 
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
-  // auto-collapse blowout field if disposal volume is checked
-  useEffect(() => {
-    if (formData.disposalVolume_checkbox) {
-      propsForFields.blowout_checkbox.updateValue(false)
-    }
-  }, [formData.disposalVolume_checkbox])
+  // auto-collapse blowout field if disposal volume is not null
+  // useEffect(() => {
+  //   if (formData.disposalVolume_checkbox) {
+  //     propsForFields.blowout_checkbox.updateValue(false)
+  //   }
+  // }, [formData.disposalVolume_checkbox])
 
   return toolboxStep === 0 ? (
     <Flex
