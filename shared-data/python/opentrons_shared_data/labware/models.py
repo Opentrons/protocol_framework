@@ -6,14 +6,19 @@ shared-data. It's been modified by hand to be more friendly.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, List, Optional, Literal, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 from math import sqrt, asin
 from numpy import pi, trapz
 from functools import cached_property
 
-from pydantic import ConfigDict, BaseModel, Field, NonNegativeInt
-from opentrons_shared_data.types import Vec3f, Number, NonNegativeNumber
-
+from pydantic import (
+    ConfigDict,
+    BaseModel,
+    Field,
+    StrictInt,
+    StrictFloat,
+)
+from typing_extensions import Annotated, Literal
 
 from .constants import (
     Conical,
@@ -29,36 +34,56 @@ from .constants import (
 SAFE_STRING_REGEX = "^[a-z0-9._]+$"
 
 
-class CornerOffsetFromSlot(Vec3f[Number]):
+if TYPE_CHECKING:
+    _StrictNonNegativeInt = int
+    _StrictNonNegativeFloat = float
+else:
+    _StrictNonNegativeInt = Annotated[int, Field(strict=True, ge=0)]
+    _StrictNonNegativeFloat = Annotated[float, Field(strict=True, ge=0.0)]
+
+
+_Number = Union[StrictInt, StrictFloat]
+"""JSON number type, written to preserve lack of decimal point.
+
+For labware definition hashing, which is an older part of the codebase,
+this ensures that Pydantic won't change `"someFloatField: 0` to
+`"someFloatField": 0.0`, which would hash differently.
+"""
+
+_NonNegativeNumber = Union[_StrictNonNegativeInt, _StrictNonNegativeFloat]
+"""Non-negative JSON number type, written to preserve lack of decimal point."""
+
+
+class CornerOffsetFromSlot(BaseModel):
     """
     Distance from left-front-bottom corner of slot to left-front-bottom corner
      of labware bounding box. Used for labware that spans multiple slots. For
       labware that does not span multiple slots, x/y/z should all be zero.
     """
 
+    x: _Number
+    y: _Number
+    z: _Number
 
-class OverlapOffset(Vec3f[Number]):
+
+class OverlapOffset(BaseModel):
     """
     Overlap dimensions of labware with another labware/module that it can be stacked on top of.
     """
 
+    x: _Number
+    y: _Number
+    z: _Number
 
-class OffsetVector(Vec3f[Number]):
+
+class OffsetVector(BaseModel):
     """
     A generic 3-D offset vector.
     """
 
-    def __add__(self, other: Any) -> OffsetVector:
-        """Adds two vectors together."""
-        if not isinstance(other, OffsetVector):
-            return NotImplemented
-        return OffsetVector(x=self.x + other.x, y=self.y + other.y, z=self.z + other.z)
-
-    def __sub__(self, other: Any) -> OffsetVector:
-        """Subtracts two vectors."""
-        if not isinstance(other, OffsetVector):
-            return NotImplemented
-        return OffsetVector(x=self.x - other.x, y=self.y - other.y, z=self.z - other.z)
+    x: _Number
+    y: _Number
+    z: _Number
 
 
 class GripperOffsets(BaseModel):
@@ -126,8 +151,7 @@ class Parameters(BaseModel):
     format: Literal[
         "96Standard", "384Standard", "trough", "irregular", "trash"
     ] = Field(
-        ...,
-        description="Property to determine compatibility with multichannel pipette",
+        ..., description="Property to determine compatibility with multichannel pipette"
     )
     quirks: Optional[List[str]] = Field(
         None,
@@ -137,12 +161,12 @@ class Parameters(BaseModel):
     isTiprack: bool = Field(
         ..., description="Flag marking whether a labware is a tiprack or not"
     )
-    tipLength: Optional[NonNegativeNumber] = Field(
+    tipLength: Optional[_NonNegativeNumber] = Field(
         None,
         description="Required if labware is tiprack, specifies length of tip"
         " from drawing or as measured with calipers",
     )
-    tipOverlap: Optional[NonNegativeNumber] = Field(
+    tipOverlap: Optional[_NonNegativeNumber] = Field(
         None,
         description="Required if labware is tiprack, specifies the length of "
         "the area of the tip that overlaps the nozzle of the pipette",
@@ -157,7 +181,7 @@ class Parameters(BaseModel):
         description="Flag marking whether a labware is compatible by default "
         "with the Magnetic Module",
     )
-    magneticModuleEngageHeight: Optional[NonNegativeNumber] = Field(
+    magneticModuleEngageHeight: Optional[_NonNegativeNumber] = Field(
         None, description="Distance to move magnetic module magnets to engage"
     )
 
@@ -167,42 +191,42 @@ class Dimensions(BaseModel):
     Outer dimensions of a labware
     """
 
-    yDimension: NonNegativeNumber = Field(...)
-    zDimension: NonNegativeNumber = Field(...)
-    xDimension: NonNegativeNumber = Field(...)
+    yDimension: _NonNegativeNumber = Field(...)
+    zDimension: _NonNegativeNumber = Field(...)
+    xDimension: _NonNegativeNumber = Field(...)
 
 
 class WellDefinition(BaseModel):
     model_config = ConfigDict(extra="allow")
 
-    depth: NonNegativeNumber = Field(...)
-    x: NonNegativeNumber = Field(
+    depth: _NonNegativeNumber = Field(...)
+    x: _NonNegativeNumber = Field(
         ...,
         description="x location of center-bottom of well in reference to "
         "left-front-bottom of labware",
     )
-    y: NonNegativeNumber = Field(
+    y: _NonNegativeNumber = Field(
         ...,
         description="y location of center-bottom of well in reference to "
         "left-front-bottom of labware",
     )
-    z: NonNegativeNumber = Field(
+    z: _NonNegativeNumber = Field(
         ...,
         description="z location of center-bottom of well in reference to "
         "left-front-bottom of labware",
     )
-    totalLiquidVolume: NonNegativeNumber = Field(
+    totalLiquidVolume: _NonNegativeNumber = Field(
         ..., description="Total well, tube, or tip volume in microliters"
     )
-    xDimension: Optional[NonNegativeNumber] = Field(
+    xDimension: Optional[_NonNegativeNumber] = Field(
         None,
         description="x dimension of rectangular wells",
     )
-    yDimension: Optional[NonNegativeNumber] = Field(
+    yDimension: Optional[_NonNegativeNumber] = Field(
         None,
         description="y dimension of rectangular wells",
     )
-    diameter: Optional[NonNegativeNumber] = Field(
+    diameter: Optional[_NonNegativeNumber] = Field(
         None,
         description="diameter of circular wells",
     )
@@ -218,22 +242,22 @@ class WellDefinition(BaseModel):
 
 class SphericalSegment(BaseModel):
     shape: Spherical = Field(..., description="Denote shape as spherical")
-    radiusOfCurvature: NonNegativeNumber = Field(
+    radiusOfCurvature: _NonNegativeNumber = Field(
         ...,
         description="radius of curvature of bottom subsection of wells",
     )
-    topHeight: NonNegativeNumber = Field(
+    topHeight: _NonNegativeNumber = Field(
         ..., description="The depth of a spherical bottom of a well"
     )
-    bottomHeight: NonNegativeNumber = Field(
+    bottomHeight: _NonNegativeNumber = Field(
         ...,
         description="Height of the bottom of the segment, must be 0.0",
     )
-    xCount: NonNegativeInt = Field(
+    xCount: _StrictNonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
-    yCount: NonNegativeInt = Field(
+    yCount: _StrictNonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
@@ -247,27 +271,27 @@ class SphericalSegment(BaseModel):
 
 class ConicalFrustum(BaseModel):
     shape: Conical = Field(..., description="Denote shape as conical")
-    bottomDiameter: NonNegativeNumber = Field(
+    bottomDiameter: _NonNegativeNumber = Field(
         ...,
         description="The diameter at the bottom cross-section of a circular frustum",
     )
-    topDiameter: NonNegativeNumber = Field(
+    topDiameter: _NonNegativeNumber = Field(
         ..., description="The diameter at the top cross-section of a circular frustum"
     )
-    topHeight: NonNegativeNumber = Field(
+    topHeight: _NonNegativeNumber = Field(
         ...,
         description="The height at the top of a bounded subsection of a well, relative to the bottom"
         "of the well",
     )
-    bottomHeight: NonNegativeNumber = Field(
+    bottomHeight: _NonNegativeNumber = Field(
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
     )
-    xCount: NonNegativeInt = Field(
+    xCount: _StrictNonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
-    yCount: NonNegativeInt = Field(
+    yCount: _StrictNonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
@@ -281,36 +305,36 @@ class ConicalFrustum(BaseModel):
 
 class CuboidalFrustum(BaseModel):
     shape: Cuboidal = Field(..., description="Denote shape as cuboidal")
-    bottomXDimension: NonNegativeNumber = Field(
+    bottomXDimension: _NonNegativeNumber = Field(
         ...,
         description="x dimension of the bottom cross-section of a rectangular frustum",
     )
-    bottomYDimension: NonNegativeNumber = Field(
+    bottomYDimension: _NonNegativeNumber = Field(
         ...,
         description="y dimension of the bottom cross-section of a rectangular frustum",
     )
-    topXDimension: NonNegativeNumber = Field(
+    topXDimension: _NonNegativeNumber = Field(
         ...,
         description="x dimension of the top cross-section of a rectangular frustum",
     )
-    topYDimension: NonNegativeNumber = Field(
+    topYDimension: _NonNegativeNumber = Field(
         ...,
         description="y dimension of the top cross-section of a rectangular frustum",
     )
-    topHeight: NonNegativeNumber = Field(
+    topHeight: _NonNegativeNumber = Field(
         ...,
         description="The height at the top of a bounded subsection of a well, relative to the bottom"
         "of the well",
     )
-    bottomHeight: NonNegativeNumber = Field(
+    bottomHeight: _NonNegativeNumber = Field(
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
     )
-    xCount: NonNegativeInt = Field(
+    xCount: _StrictNonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
-    yCount: NonNegativeInt = Field(
+    yCount: _StrictNonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
@@ -347,33 +371,33 @@ class SquaredConeSegment(BaseModel):
         ...,
         description="Denote if the shape is going from circular to rectangular or vise versa",
     )
-    circleDiameter: NonNegativeNumber = Field(
+    circleDiameter: _NonNegativeNumber = Field(
         ...,
         description="diameter of the circular face of a truncated circular segment",
     )
 
-    rectangleXDimension: NonNegativeNumber = Field(
+    rectangleXDimension: _NonNegativeNumber = Field(
         ...,
         description="x dimension of the rectangular face of a truncated circular segment",
     )
-    rectangleYDimension: NonNegativeNumber = Field(
+    rectangleYDimension: _NonNegativeNumber = Field(
         ...,
         description="y dimension of the rectangular face of a truncated circular segment",
     )
-    topHeight: NonNegativeNumber = Field(
+    topHeight: _NonNegativeNumber = Field(
         ...,
         description="The height at the top of a bounded subsection of a well, relative to the bottom"
         "of the well",
     )
-    bottomHeight: NonNegativeNumber = Field(
+    bottomHeight: _NonNegativeNumber = Field(
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
     )
-    xCount: NonNegativeInt = Field(
+    xCount: _StrictNonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
-    yCount: NonNegativeInt = Field(
+    yCount: _StrictNonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
@@ -551,32 +575,32 @@ class RoundedCuboidSegment(BaseModel):
         ...,
         description="Denote if the shape is going from circular to rectangular or vise versa",
     )
-    circleDiameter: NonNegativeNumber = Field(
+    circleDiameter: _NonNegativeNumber = Field(
         ...,
         description="diameter of the circular face of a rounded rectangular segment",
     )
-    rectangleXDimension: NonNegativeNumber = Field(
+    rectangleXDimension: _NonNegativeNumber = Field(
         ...,
         description="x dimension of the rectangular face of a rounded rectangular segment",
     )
-    rectangleYDimension: NonNegativeNumber = Field(
+    rectangleYDimension: _NonNegativeNumber = Field(
         ...,
         description="y dimension of the rectangular face of a rounded rectangular segment",
     )
-    topHeight: NonNegativeNumber = Field(
+    topHeight: _NonNegativeNumber = Field(
         ...,
         description="The height at the top of a bounded subsection of a well, relative to the bottom"
         "of the well",
     )
-    bottomHeight: NonNegativeNumber = Field(
+    bottomHeight: _NonNegativeNumber = Field(
         ...,
         description="The height at the bottom of a bounded subsection of a well, relative to the bottom of the well",
     )
-    xCount: NonNegativeInt = Field(
+    xCount: _StrictNonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
-    yCount: NonNegativeInt = Field(
+    yCount: _StrictNonNegativeInt = Field(
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )

@@ -44,9 +44,6 @@ from opentrons_shared_data.pipette.types import (  # noqa: F401
     # convenience re-export of LabwareUri type
     LabwareUri as LabwareUri,
 )
-
-from opentrons_shared_data.labware import models as lw_models
-from opentrons_shared_data.types import Vec3f as SD_Vec3f
 from opentrons_shared_data.module.types import ModuleType as SharedDataModuleType
 
 
@@ -560,7 +557,12 @@ class ModuleDimensions(BaseModel):
     lidHeight: Optional[float] = None
 
 
-Vec3f = SD_Vec3f[float]
+class Vec3f(BaseModel):
+    """A 3D vector of floats."""
+
+    x: float
+    y: float
+    z: float
 
 
 # TODO(mm, 2022-11-07): Deduplicate with Vec3f.
@@ -572,7 +574,29 @@ class ModuleCalibrationPoint(BaseModel):
     z: float
 
 
-LabwareOffsetVector = lw_models.OffsetVector
+# TODO(mm, 2022-11-07): Deduplicate with Vec3f.
+class LabwareOffsetVector(BaseModel):
+    """Offset, in deck coordinates from nominal to actual position."""
+
+    x: float
+    y: float
+    z: float
+
+    def __add__(self, other: Any) -> LabwareOffsetVector:
+        """Adds two vectors together."""
+        if not isinstance(other, LabwareOffsetVector):
+            return NotImplemented
+        return LabwareOffsetVector(
+            x=self.x + other.x, y=self.y + other.y, z=self.z + other.z
+        )
+
+    def __sub__(self, other: Any) -> LabwareOffsetVector:
+        """Subtracts two vectors."""
+        if not isinstance(other, LabwareOffsetVector):
+            return NotImplemented
+        return LabwareOffsetVector(
+            x=self.x - other.x, y=self.y - other.y, z=self.z - other.z
+        )
 
 
 # TODO(mm, 2022-11-07): Deduplicate with Vec3f.
