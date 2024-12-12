@@ -98,11 +98,14 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     additionalEquipmentEntities[String(propsForFields.dispense_labware.value)]
       ?.name === 'trashBin'
 
-  const destinationLabwareType = getTrashOrLabware(
-    labwares,
-    additionalEquipmentEntities,
-    formData.dispense_labware as string
-  )
+  const destinationLabwareType =
+    formData.dispense_labware != null
+      ? getTrashOrLabware(
+          labwares,
+          additionalEquipmentEntities,
+          formData.dispense_labware as string
+        )
+      : null
   const isDestinationTrash =
     destinationLabwareType != null
       ? ['trashBin', 'wasteChute'].includes(destinationLabwareType)
