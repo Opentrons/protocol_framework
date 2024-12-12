@@ -6,7 +6,6 @@ import os
 from pathlib import Path
 from typing import Any, AnyStr, Dict, Optional, Union, List
 
-from pydantic_core import from_json
 import jsonschema  # type: ignore
 
 from opentrons_shared_data import load_shared_data, get_shared_data_root
@@ -128,7 +127,7 @@ def save_definition(
 
 
 def verify_definition(
-    contents: Union[AnyStr, LabwareDefinition, Dict[str, Any]],
+    contents: Union[AnyStr, LabwareDefinition, Dict[str, Any]]
 ) -> LabwareDefinition:
     """Verify that an input string is a labware definition and return it.
 
@@ -140,14 +139,14 @@ def verify_definition(
     :returns: The parsed definition
     """
     schemata_by_version = {
-        2: from_json(load_shared_data("labware/schemas/2.json").decode("utf-8")),
-        3: from_json(load_shared_data("labware/schemas/3.json").decode("utf-8")),
+        2: json.loads(load_shared_data("labware/schemas/2.json").decode("utf-8")),
+        3: json.loads(load_shared_data("labware/schemas/3.json").decode("utf-8")),
     }
 
     if isinstance(contents, dict):
         to_return = contents
     else:
-        to_return = from_json(contents)
+        to_return = json.loads(contents)
     try:
         schema_version = to_return["schemaVersion"]
         schema = schemata_by_version[schema_version]
