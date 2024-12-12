@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod, ABC
-from typing import Any, Generic, Optional, TypeVar, Union, List
+from typing import Any, Generic, Optional, TypeVar, Union, List, Tuple
 
 from opentrons import types
 from opentrons.hardware_control.dev_types import PipetteDict
@@ -328,8 +328,8 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         self,
         liquid_class: LiquidClass,
         volume: float,
-        source: List[WellCoreType],
-        dest: List[WellCoreType],
+        source: List[Tuple[types.Location, WellCoreType]],
+        dest: List[Tuple[types.Location, WellCoreType]],
         new_tip: TransferTipPolicyV2,
         tiprack_uri: str,
         trash_location: Union[WellCoreType, types.Location, TrashBin, WasteChute],

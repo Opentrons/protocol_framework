@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional, Union, List
+from typing import TYPE_CHECKING, Optional, Union, List, Tuple
 
 from opentrons import types
 from opentrons.hardware_control import CriticalPoint
@@ -570,8 +570,8 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
         self,
         liquid_class_id: str,
         volume: float,
-        source: List[LegacyWellCore],
-        dest: List[LegacyWellCore],
+        source: List[Tuple[types.Location, LegacyWellCore]],
+        dest: List[Tuple[types.Location, LegacyWellCore]],
         new_tip: TransferTipPolicyV2,
         trash_location: Union[LegacyWellCore, types.Location, TrashBin, WasteChute],
     ) -> None:

@@ -1596,8 +1596,14 @@ class InstrumentContext(publisher.CommandPublisher):
         self._core.transfer_liquid(
             liquid_class=liquid_class,
             volume=volume,
-            source=[well._core for well in flat_sources_list],
-            dest=[well._core for well in flat_dests_list],
+            source=[
+                (types.Location(types.Point(), labware=well), well._core)
+                for well in flat_sources_list
+            ],
+            dest=[
+                (types.Location(types.Point(), labware=well), well._core)
+                for well in flat_dests_list
+            ],
             new_tip=valid_new_tip,
             tiprack_uri=tiprack.uri,
             trash_location=checked_trash_location._core

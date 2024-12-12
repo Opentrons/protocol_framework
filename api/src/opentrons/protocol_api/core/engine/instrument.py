@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING, cast, Union, List
+from typing import Optional, TYPE_CHECKING, cast, Union, List, Tuple
 from opentrons.types import Location, Mount, NozzleConfigurationType, NozzleMapInterface
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.dev_types import PipetteDict
@@ -909,9 +909,8 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         self,
         liquid_class: LiquidClass,
         volume: float,
-        # TODO: update source and dest types to list of tuples of Location and WellCore
-        source: List[WellCore],
-        dest: List[WellCore],
+        source: List[Tuple[types.Location, WellCore]],
+        dest: List[Tuple[types.Location, WellCore]],
         new_tip: TransferTipPolicyV2,
         tiprack_uri: str,
         trash_location: Union[WellCore, Location, TrashBin, WasteChute],
