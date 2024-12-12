@@ -1,8 +1,8 @@
 """Gripper configurations."""
 
 from typing_extensions import Annotated, Literal
-from typing import TYPE_CHECKING, List, Dict, Tuple, Any, NewType
-from pydantic import ConfigDict, BaseModel, Field, conlist
+from typing import List, Dict, Tuple, Any, NewType
+from pydantic import ConfigDict, BaseModel, Field
 from enum import Enum
 
 
@@ -42,20 +42,12 @@ GripperSchemaVersion = Literal[1]
 GripperSchema = Dict[str, Any]
 
 
-if TYPE_CHECKING:
-    _StrictNonNegativeInt = int
-    _StrictNonNegativeFloat = float
-else:
-    _StrictNonNegativeInt = Annotated[int, Field(strict=True, ge=0)]
-    _StrictNonNegativeFloat = Annotated[float, Field(strict=True, ge=0.0)]
+_StrictNonNegativeInt = Annotated[int, Field(strict=True, ge=0)]
+_StrictNonNegativeFloat = Annotated[float, Field(strict=True, ge=0.0)]
 
 
 PolynomialTerm = Tuple[_StrictNonNegativeInt, float]
-
-if TYPE_CHECKING:
-    _Polynomial = List[PolynomialTerm]
-else:
-    _Polynomial = conlist(PolynomialTerm, min_length=1)
+_Polynomial = Annotated[List[PolynomialTerm], Field(min_length=1)]
 
 
 class GripperBaseModel(BaseModel):

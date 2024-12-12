@@ -1,27 +1,22 @@
 """Python shared data models for liquid class definitions."""
 
 from enum import Enum
-from typing import TYPE_CHECKING, Literal, Union, Optional, Sequence, Tuple, Any
+from typing import Literal, Union, Optional, Sequence, Tuple, Any
 
 from pydantic import (
     BaseModel,
     field_validator,
     ValidationInfo,
     Field,
-    conint,
-    confloat,
     StrictInt,
     StrictFloat,
 )
 from pydantic.json_schema import SkipJsonSchema
+from typing_extensions import Annotated
 
 
-if TYPE_CHECKING:
-    _StrictNonNegativeInt = int
-    _StrictNonNegativeFloat = float
-else:
-    _StrictNonNegativeInt = conint(strict=True, ge=0)
-    _StrictNonNegativeFloat = confloat(strict=True, ge=0.0)
+_StrictNonNegativeInt = Annotated[int, Field(strict=True, ge=0)]
+_StrictNonNegativeFloat = Annotated[float, Field(strict=True, ge=0.0)]
 
 
 _Number = Union[StrictInt, StrictFloat]

@@ -6,7 +6,7 @@ shared-data. It's been modified by hand to be more friendly.
 from __future__ import annotations
 
 from enum import Enum
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 from math import sqrt, asin
 from numpy import pi, trapz
 from functools import cached_property
@@ -34,12 +34,8 @@ from .constants import (
 SAFE_STRING_REGEX = "^[a-z0-9._]+$"
 
 
-if TYPE_CHECKING:
-    _StrictNonNegativeInt = int
-    _StrictNonNegativeFloat = float
-else:
-    _StrictNonNegativeInt = Annotated[int, Field(strict=True, ge=0)]
-    _StrictNonNegativeFloat = Annotated[float, Field(strict=True, ge=0.0)]
+_StrictNonNegativeInt = Annotated[int, Field(strict=True, ge=0)]
+_StrictNonNegativeFloat = Annotated[float, Field(strict=True, ge=0.0)]
 
 
 _Number = Union[StrictInt, StrictFloat]
