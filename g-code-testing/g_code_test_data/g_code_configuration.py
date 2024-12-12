@@ -10,7 +10,8 @@ from typing import (
     Union,
 )
 from typing_extensions import (
-    Annotated, Final,
+    Annotated,
+    Final,
     Literal,
 )
 
@@ -22,9 +23,11 @@ from opentrons.hardware_control.emulation.settings import Settings, SmoothieSett
 from opentrons.protocols.api_support.types import APIVersion
 
 from pydantic import (
-    StringConstraints, ConfigDict, BaseModel,
+    StringConstraints,
+    ConfigDict,
+    BaseModel,
     Field,
-    validator,
+    model_validator,
 )
 
 BUCKET_NAME = "g-code-comparison"
@@ -48,12 +51,13 @@ class ProtocolGCodeConfirmConfig(BaseModel, SharedFunctionsMixin):
     versions: Set[Union[APIVersion,int]] = Field(..., min_length=1)
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("name", pre=True, always=True)
-    def name_from_path(cls, name, values) -> str:
-        derived_name = os.path.splitext(os.path.basename(values["path"]))[0]
-        return derived_name if name is None else name
+    @model_validator(mode="after")
+    def _populate_name_from_path(self) -> "ProtocolGCodeConfirmConfig":
+        """If `.name` was not given, give it a default based on `.path`."""
+        derived_name = os.path.splitext(os.path.basename(self.path))[0]
+        if self.name is None:
+            self.name = derived_name
+        return self
 
     def _get_full_path(self, version: APIVersion):
         return os.path.join(
