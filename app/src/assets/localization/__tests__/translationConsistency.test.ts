@@ -1,13 +1,13 @@
 import { resources } from '..'
-import { describe, it, expect } from 'vitest'
+import { describe, it } from 'vitest'
 
 describe('Translation consistency between en and zh', () => {
-  const enTranslations = resources['en']
-  const zhTranslations = resources['zh']
+  const enTranslations = resources.en
+  const zhTranslations = resources.zh
 
   const checkKeys = (
-    base: { [key: string]: any },
-    compare: { [key: string]: any },
+    base: Record<string, any>,
+    compare: Record<string, any>,
     baseLang: string,
     compareLang: string
   ) => {
@@ -15,17 +15,27 @@ describe('Translation consistency between en and zh', () => {
 
     const traverseKeys = (obj: object, path = '') => {
       Object.entries(obj).forEach(([key, value]) => {
-        const fullPath = path ? `${path}.${key}` : key
+        const fullPath = path.length > 0 ? `${path}.${key}` : key
 
-        if (typeof value === 'object' && value !== null) {
+        if (value !== null && typeof value === 'object') {
           // Recursively check nested objects
           traverseKeys(value, fullPath)
         } else {
           // Check if key exists and has same type
           const compareObj = path
             .split('.')
-            .reduce((acc, curr) => acc?.[curr], compare)
-          if (!compareObj?.[key] || typeof compareObj[key] !== typeof value) {
+            .reduce<Record<string, unknown>>((acc, curr) => {
+              return acc !== null && acc !== undefined && curr in acc
+                ? (acc[curr] as Record<string, unknown>)
+                : {}
+            }, compare)
+
+          if (
+            compareObj === null ||
+            compareObj === undefined ||
+            !(key in compareObj) ||
+            typeof compareObj[key] !== typeof value
+          ) {
             missingKeys.push(fullPath)
           }
         }
@@ -49,40 +59,5 @@ describe('Translation consistency between en and zh', () => {
 
   it('should have all keys in en that are in zh', () => {
     checkKeys(zhTranslations, enTranslations, 'zh', 'en')
-  })
-
-  it('should have matching value types', () => {
-    const checkValueTypes = (
-      obj1: { [key: string]: any },
-      obj2: { [key: string]: any },
-      path = ''
-    ) => {
-      const typeMismatches: string[] = []
-
-      Object.entries(obj1).forEach(([key, value]) => {
-        const fullPath = path ? `${path}.${key}` : key
-        const value2 = path
-          .split('.')
-          .reduce((acc, curr) => acc?.[curr], obj2)?.[key]
-
-        if (value2 !== undefined && typeof value !== typeof value2) {
-          typeMismatches.push(
-            `${fullPath}: en(${typeof value}) vs zh(${typeof value2})`
-          )
-        }
-
-        if (typeof value === 'object' && value !== null) {
-          checkValueTypes(value, value2, fullPath)
-        }
-      })
-
-      return typeMismatches
-    }
-
-    const typeMismatches = checkValueTypes(enTranslations, zhTranslations)
-
-    if (typeMismatches.length > 0) {
-      throw new Error(`Type mismatches found:\n${typeMismatches.join('\n')}`)
-    }
   })
 })
