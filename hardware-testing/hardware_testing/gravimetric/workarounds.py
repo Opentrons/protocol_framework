@@ -83,7 +83,7 @@ def get_latest_offset_for_labware(
             return False
         offset_uri = _o["definitionUri"]
         if offset_uri[0:-1] != lw_uri[0:-1]:  # drop schema version number
-            ui.print_info(f"{_o} does not apply {offset_uri} != {lw_uri}")
+            #ui.print_info(f"{_o} does not apply {offset_uri} != {lw_uri}")
             # NOTE: we're allowing tip-rack adapters to share offsets
             #       because it doesn't make a difference which volume
             #       of tip it holds
