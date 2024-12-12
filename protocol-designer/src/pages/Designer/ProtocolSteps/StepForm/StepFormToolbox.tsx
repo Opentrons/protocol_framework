@@ -65,6 +65,10 @@ import type {
   LiquidHandlingTab,
   StepFormProps,
 } from './types'
+import {
+  hoverSelection,
+  selectSelection,
+} from '../../../../ui/steps/actions/actions'
 
 type StepFormMap = {
   [K in StepType]?: React.ComponentType<StepFormProps> | null
@@ -239,6 +243,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
         })
       )
       dispatch(analyticsEvent(stepDuration))
+      dispatch(selectSelection({ id: null, text: null, fieldType: undefined }))
+      dispatch(hoverSelection({ id: null, text: null, fieldType: undefined }))
     } else {
       setShowFormErrors(true)
       if (tab === 'aspirate' && isDispenseError && !isAspirateError) {

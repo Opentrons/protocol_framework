@@ -38,7 +38,7 @@ export interface Selection {
 }
 export interface selectSelectionAction {
   type: 'SELECT_SELECTION'
-  payload: Selection
+  payload: { selection: Selection | null; mode: 'add' | 'clear' | 'replace' }
 }
 export interface hoverSelectionAction {
   type: 'HOVER_SELECTION'

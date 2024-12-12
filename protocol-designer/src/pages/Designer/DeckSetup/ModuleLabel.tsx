@@ -52,6 +52,7 @@ export const ModuleLabel = (props: ModuleLabelProps): JSX.Element => {
 
   return (
     <DeckLabelSet
+      isZoomed={true}
       ref={labelContainerRef}
       deckLabels={[
         {

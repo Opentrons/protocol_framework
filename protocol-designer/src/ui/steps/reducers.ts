@@ -205,11 +205,30 @@ const selectedSelection: Reducer<Selection[], any> = handleActions(
     SELECT_SELECTION: (
       state: Selection[],
       action: {
-        payload: Selection
+        payload: {
+          selection: Selection | null
+          mode: 'add' | 'clear' | 'replace'
+        }
       }
     ) => {
-      const exists = state.some(sel => sel.id === action.payload.id)
-      return exists ? state : [...state, action.payload]
+      const { selection, mode } = action.payload
+
+      switch (mode) {
+        case 'clear':
+          return []
+        case 'replace':
+          return selection != null ? [selection] : state
+        case 'add': {
+          const exists = state.some(sel => sel.id === selection?.id)
+          if (selection != null) {
+            return exists ? state : [...state, selection]
+          } else {
+            return state
+          }
+        }
+        default:
+          return state
+      }
     },
   },
   []

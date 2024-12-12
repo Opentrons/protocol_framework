@@ -14,6 +14,7 @@ interface ModuleLabelProps {
   isSelected: boolean
   isLast: boolean
   nestedLabwareInfo?: DeckLabelProps[]
+  labelText?: string
 }
 export const LabwareLabel = (props: ModuleLabelProps): JSX.Element => {
   const {
@@ -22,6 +23,7 @@ export const LabwareLabel = (props: ModuleLabelProps): JSX.Element => {
     isSelected,
     isLast,
     nestedLabwareInfo = [],
+    labelText = labwareDef.metadata.displayName,
   } = props
   const labelContainerRef = useRef<HTMLDivElement>(null)
   const designerTab = useSelector(getDesignerTab)
@@ -30,9 +32,10 @@ export const LabwareLabel = (props: ModuleLabelProps): JSX.Element => {
   const deckLabels = [
     ...nestedLabwareInfo,
     {
-      text: labwareDef.metadata.displayName,
+      text: labelText,
       isSelected: isSelected,
       isLast: isLast,
+      isZoomed: designerTab === 'startingDeck',
     },
   ]
 

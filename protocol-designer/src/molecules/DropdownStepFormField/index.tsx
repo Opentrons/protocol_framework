@@ -66,9 +66,9 @@ export function DropdownStepFormField(
             availableOptionId ?? { name: 'Choose option', value: '' }
           }
           onClick={value => {
-            const selection = { id: value, text: 'selected' }
+            const selection = { id: value, text: 'Selected' }
             updateValue(value)
-            dispatch(selectSelection(selection))
+            dispatch(selectSelection({ selection, mode: 'replace' }))
           }}
           onEnter={onEnter}
           onExit={onExit}

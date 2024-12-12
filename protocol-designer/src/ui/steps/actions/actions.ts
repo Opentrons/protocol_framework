@@ -55,9 +55,18 @@ export const hoverSelection = (args: Selection): hoverSelectionAction => ({
   type: 'HOVER_SELECTION',
   payload: { id: args.id, text: args.text },
 })
-export const selectSelection = (args: Selection): selectSelectionAction => ({
+export const selectSelection = (args: {
+  selection: Selection | null
+  mode: 'add' | 'clear' | 'replace'
+}): selectSelectionAction => ({
   type: 'SELECT_SELECTION',
-  payload: { id: args.id, text: args.text },
+  payload: {
+    selection:
+      args.selection != null
+        ? { id: args.selection.id, text: args.selection.text }
+        : null,
+    mode: args.mode,
+  },
 })
 
 export const hoverOnSubstep = (
@@ -94,21 +103,6 @@ export const clearWellSelectionLabwareKey = (): ClearWellSelectionLabwareKeyActi
   type: 'CLEAR_WELL_SELECTION_LABWARE_KEY',
   payload: null,
 })
-export const resetSelectStep = (stepId: StepIdType): ThunkAction<any> => (
-  dispatch: ThunkDispatch<any>,
-  getState: GetState
-) => {
-  const selectStepAction: SelectStepAction = {
-    type: 'SELECT_STEP',
-    payload: stepId,
-  }
-  dispatch(selectStepAction)
-  dispatch({
-    type: 'POPULATE_FORM',
-    payload: null,
-  })
-  resetScrollElements()
-}
 
 export const populateForm = (stepId: StepIdType): ThunkAction<any> => (
   dispatch: ThunkDispatch<any>,
@@ -120,24 +114,22 @@ export const populateForm = (stepId: StepIdType): ThunkAction<any> => (
     type: 'POPULATE_FORM',
     payload: formData,
   })
-  resetScrollElements()
-}
-
-export const selectStep = (stepId: StepIdType): ThunkAction<any> => (
-  dispatch: ThunkDispatch<any>,
-  getState: GetState
-) => {
-  const selectStepAction: SelectStepAction = {
-    type: 'SELECT_STEP',
-    payload: stepId,
+  if (formData.stepType === 'moveLabware') {
+    dispatch({
+      type: 'SELECT_SELECTION',
+      payload: {
+        selection: { id: formData.labware, text: 'Selected' },
+        mode: 'add',
+      },
+    })
+    dispatch({
+      type: 'SELECT_SELECTION',
+      payload: {
+        selection: { id: formData.newLocation, text: 'New location' },
+        mode: 'add',
+      },
+    })
   }
-  dispatch(selectStepAction)
-  const state = getState()
-  const formData = { ...stepFormSelectors.getSavedStepForms(state)[stepId] }
-  dispatch({
-    type: 'POPULATE_FORM',
-    payload: formData,
-  })
   resetScrollElements()
 }
 

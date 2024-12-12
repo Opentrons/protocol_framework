@@ -36,6 +36,12 @@ export function HighlightLabware(
     hoveredLabware.includes(adapterId ?? labwareOnDeck.id)
   const highlighted = hoveredLabwareOnSelection.id === labwareOnDeck.id
 
+  let labelText
+  if (hoveredLabwareOnSelection != null && !isLabwareSelectionSelected) {
+    labelText = hoveredLabwareOnSelection.text ?? undefined
+  } else if (isLabwareSelectionSelected) {
+    labelText = selectedLabwareSelection[0].text ?? undefined
+  }
   if (highlighted || selected) {
     return (
       <LabwareLabel
@@ -43,6 +49,7 @@ export function HighlightLabware(
         isLast={true}
         position={position}
         labwareDef={labwareOnDeck.def}
+        labelText={labelText}
       />
     )
   }
