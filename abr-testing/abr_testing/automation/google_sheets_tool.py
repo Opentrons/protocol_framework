@@ -6,7 +6,7 @@ import time as t
 import sys
 from datetime import datetime
 from oauth2client.service_account import ServiceAccountCredentials  # type: ignore[import]
-from typing import Dict, List, Any, Set, Tuple, Optional
+from typing import Dict, List, Any, Set, Optional, Tuple
 
 """Google Sheets Tool.
 
@@ -57,7 +57,7 @@ class google_sheet:
     def create_worksheet(self, title: str) -> Optional[str]:
         """Create a worksheet with tab name. Existing spreadsheet needed."""
         try:
-            new_sheet = self.spread_sheet.add_worksheet(title, rows="2500", cols="60")
+            new_sheet = self.spread_sheet.add_worksheet(title, rows="10000", cols="100")
             return new_sheet.id
         except gspread.exceptions.APIError:
             print("Sheet already exists.")
@@ -113,62 +113,7 @@ class google_sheet:
             ]
         }
         self.spread_sheet.batch_update(body=delete_body)
-
-    def batch_update_cells(
-        self,
-        data: List[List[Any]],
-        start_column_index: Any,
-        start_row: int,
-        sheet_id: str,
-    ) -> None:
-        """Writes to multiple cells at once in a specific sheet."""
-
-        def column_letter_to_index(column_letter: str) -> int:
-            """Convert a column letter (e.g., 'A') to a 1-based column index (e.g., 1)."""
-            index = 0
-            for char in column_letter.upper():
-                index = index * 26 + (ord(char) - ord("A") + 1)
-            return index
-
-        requests = []
-        user_entered_value: Dict[str, Any] = {}
-        if type(start_column_index) == str:
-            start_column_index = column_letter_to_index(start_column_index) - 1
-
-        for col_offset, col_values in enumerate(data):
-            column_index = start_column_index + col_offset
-            for row_offset, value in enumerate(col_values):
-                row_index = start_row + row_offset
-                try:
-                    float_value = float(value)
-                    user_entered_value = {"numberValue": float_value}
-                except (ValueError, TypeError):
-                    user_entered_value = {"stringValue": str(value)}
-                requests.append(
-                    {
-                        "updateCells": {
-                            "range": {
-                                "sheetId": sheet_id,
-                                "startRowIndex": row_index - 1,
-                                "endRowIndex": row_index,
-                                "startColumnIndex": column_index,
-                                "endColumnIndex": column_index + 1,
-                            },
-                            "rows": [
-                                {"values": [{"userEnteredValue": user_entered_value}]}
-                            ],
-                            "fields": "userEnteredValue",
-                        }
-                    }
-                )
-
-        body = {"requests": requests}
-        try:
-            self.spread_sheet.batch_update(body=body)
-        except gspread.exceptions.APIError as e:
-            print(f"ERROR MESSAGE: {e}")
-            raise
-
+        
     def update_cell(
         self, sheet_title: str, row: int, column: int, single_data: Any
     ) -> Tuple[int, int, Any]:
@@ -183,6 +128,75 @@ class google_sheet:
                 row, column, single_data
             )
         return row, column, single_data
+    
+    def batch_update_cells(
+        self,
+        data: List[List[Any]],
+        start_column_index: Any,
+        start_row: int,
+        sheet_id: str,
+    ) -> None:
+        """Writes to multiple cells in a specific sheet, w/ max of 100,000 requests per batch."""
+
+        def column_letter_to_index(column_letter: str) -> int:
+            """Convert a column letter (e.g., 'A') to a 1-based column index (e.g., 1)."""
+            index = 0
+            for char in column_letter.upper():
+                index = index * 26 + (ord(char) - ord("A") + 1)
+            return index
+
+        if isinstance(start_column_index, str):
+            start_column_index = column_letter_to_index(start_column_index) - 1
+
+        def create_requests(
+            data: List[List[Any]], start_column_index: int, start_row: int
+        ) -> List[Dict[str, Any]]:
+            """Creates a list of API requests for the provided data."""
+            requests = []
+            for col_offset, col_values in enumerate(data):
+                column_index = start_column_index + col_offset
+                for row_offset, value in enumerate(col_values):
+                    row_index = start_row + row_offset
+                    try:
+                        float_value = float(value)
+                        user_entered_value = {"numberValue": float_value}
+                    except (ValueError, TypeError):
+                        user_entered_value = {"stringValue": value}
+                    requests.append(
+                        {
+                            "updateCells": {
+                                "range": {
+                                    "sheetId": sheet_id,
+                                    "startRowIndex": row_index - 1,
+                                    "endRowIndex": row_index,
+                                    "startColumnIndex": column_index,
+                                    "endColumnIndex": column_index + 1,
+                                },
+                                "rows": [
+                                    {
+                                        "values": [
+                                            {"userEnteredValue": user_entered_value}
+                                        ]
+                                    }
+                                ],
+                                "fields": "userEnteredValue",
+                            }
+                        }
+                    )
+            return requests
+
+        requests = create_requests(data, start_column_index, start_row)
+
+        # Fixed batch size of 100,000
+        max_batch_size = 100000
+        for i in range(0, len(requests), max_batch_size):
+            batch = requests[i : i + max_batch_size]
+            body = {"requests": batch}
+            try:
+                self.spread_sheet.batch_update(body=body)
+            except gspread.exceptions.APIError as e:
+                print(f"ERROR MESSAGE: {e}")
+                raise
 
     def get_all_data(
         self, expected_headers: Optional[Set[str]]
