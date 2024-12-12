@@ -34,7 +34,7 @@ MAG_DELAY_MIN = 1
 BEADS_VOL = 50
 AB_VOL = 50
 SAMPLE_VOL = 200
-WASH_TIMES = 3
+WASH_TIMES = 6
 WASH_VOL = 200
 ELUTION_VOL = 50
 
@@ -59,16 +59,22 @@ def run(ctx: ProtocolContext) -> None:
     MIX_SEC = 10
 
     # if on deck:
-    INCUBATION_SPEEND = heater_shaker_speed * 0.5
+    INCUBATION_SPEED = heater_shaker_speed * 0.5
     INCUBATION_MIN = 60
     # load labware
 
-    sample_plate = ctx.load_labware("nest_96_wellplate_2ml_deep", "B2", "samples")
+    sample_plate_1 = ctx.load_labware(
+        "nest_96_wellplate_2ml_deep", "B2", "sample plate 1"
+    )
+    sample_plate_2 = ctx.load_labware(
+        "nest_96_wellplate_2ml_deep", "C4", "sample plate 2"
+    )
+
     wash_res = ctx.load_labware("nest_12_reservoir_15ml", "B1", "wash")
     reagent_res = ctx.load_labware(
         "opentrons_15_tuberack_nest_15ml_conical", "C3", "reagents"
     )
-    waste_res = ctx.load_labware("nest_1_reservoir_290ml", "D2", "waste")
+    waste_res = ctx.load_labware("nest_1_reservoir_290ml", "D2", "Liquid Waste")
 
     tips = ctx.load_labware("opentrons_flex_96_tiprack_1000ul", "B3")
     tips_sample = ctx.load_labware(
@@ -105,7 +111,8 @@ def run(ctx: ProtocolContext) -> None:
     mag: MagneticBlockContext = ctx.load_module(helpers.mag_str, "C1")  # type: ignore[assignment]
 
     # liquids
-    samples = sample_plate.rows()[0][:NUM_COL]  # 1
+    samples1 = sample_plate_1.rows()[0][:NUM_COL]  # 1
+    samples2 = sample_plate_2.rows()[0][:NUM_COL]  # 1
     beads = reagent_res.wells()[0]  # 2
     ab = reagent_res.wells()[1]  # 3
     elu = reagent_res.wells()[2]  # 4
@@ -119,11 +126,12 @@ def run(ctx: ProtocolContext) -> None:
     liquid_vols_and_wells: Dict[
         str, List[Dict[str, Union[Well, List[Well], float]]]
     ] = {
-        "Beads": [{"well": beads, "volume": 4900.0}],
-        "AB": [{"well": ab, "volume": 4900.0}],
-        "Elution": [{"well": elu, "volume": 4900.0}],
-        "Wash": [{"well": wash, "volume": 750.0}],
-        "Samples": [{"well": samples, "volume": 250.0}],
+        "Beads": [{"well": beads, "volume": 9800.0}],
+        "AB": [{"well": ab, "volume": 9800.0}],
+        "Elution": [{"well": elu, "volume": 9800.0}],
+        "Wash": [{"well": wash, "volume": 1500.0}],
+        "Samples 1": [{"well": samples1, "volume": 250.0}],
+        "Samples 2": [{"well": samples2, "volume": 250.0}],
     }
     helpers.find_liquid_height_of_loaded_liquids(
         ctx, liquid_vols_and_wells, p1000_single
@@ -193,9 +201,6 @@ def run(ctx: ProtocolContext) -> None:
         """Discard function."""
         global waste_vol
         global waste_vol_chk
-        if waste_vol_chk >= WASTE_VOL_MAX:
-            ctx.pause("Empty Liquid Waste")
-            waste_vol_chk = 0
         waste_vol = 0.0
         for k in range(NUM_COL):
             p1000.pick_up_tip(tips_reused_loc[k * 8])
@@ -210,64 +215,77 @@ def run(ctx: ProtocolContext) -> None:
         waste_vol_chk = waste_vol_chk + waste_vol
 
     # protocol
+    def protocol(sample_plate):
+        # Add beads, samples and antibody solution
+        samples = sample_plate.rows()[0][:NUM_COL]  # 1
+        h_s.close_labware_latch()
+        transfer_well_to_plate(BEADS_VOL, beads, working_wells, 2)
 
-    # Add beads, samples and antibody solution
-    h_s.close_labware_latch()
-    transfer_well_to_plate(BEADS_VOL, beads, working_wells, 2)
+        helpers.move_labware_from_hs_to_destination(ctx, working_plate, h_s, mag)
 
-    helpers.move_labware_from_hs_to_destination(ctx, working_plate, h_s, mag)
+        ctx.delay(minutes=MAG_DELAY_MIN)
+        discard(BEADS_VOL * 1.1, working_cols)
 
-    ctx.delay(minutes=MAG_DELAY_MIN)
-    discard(BEADS_VOL * 1.1, working_cols)
-
-    helpers.move_labware_to_hs(ctx, working_plate, h_s, h_s_adapter)
-
-    transfer_plate_to_plate(SAMPLE_VOL, samples, working_cols, 1)
-    transfer_well_to_plate(AB_VOL, ab, working_wells, 3)
-
-    h_s.set_and_wait_for_shake_speed(rpm=MIX_SPEED)
-    ctx.delay(seconds=MIX_SEC)
-
-    h_s.set_and_wait_for_shake_speed(rpm=INCUBATION_SPEEND)
-    ctx.delay(seconds=INCUBATION_MIN * 60)
-    h_s.deactivate_shaker()
-
-    helpers.move_labware_from_hs_to_destination(ctx, working_plate, h_s, mag)
-
-    ctx.delay(minutes=MAG_DELAY_MIN)
-    vol_total = SAMPLE_VOL + AB_VOL
-    discard(vol_total * 1.1, working_cols)
-
-    # Wash
-    for _ in range(WASH_TIMES):
         helpers.move_labware_to_hs(ctx, working_plate, h_s, h_s_adapter)
 
-        transfer_well_to_plate(WASH_VOL, wash, working_cols, 5)
-        helpers.set_hs_speed(ctx, h_s, MIX_SPEED, MIX_SEC / 60, True)
+        transfer_plate_to_plate(SAMPLE_VOL, samples, working_cols, 1)
+        transfer_well_to_plate(AB_VOL, ab, working_wells, 3)
+
+        h_s.set_and_wait_for_shake_speed(rpm=MIX_SPEED)
+        ctx.delay(seconds=MIX_SEC)
+
+        h_s.set_and_wait_for_shake_speed(rpm=INCUBATION_SPEED)
+        ctx.delay(seconds=INCUBATION_MIN * 60)
+        h_s.deactivate_shaker()
+
         helpers.move_labware_from_hs_to_destination(ctx, working_plate, h_s, mag)
+
         ctx.delay(minutes=MAG_DELAY_MIN)
-        discard(WASH_VOL * 1.1, working_cols)
+        vol_total = SAMPLE_VOL + AB_VOL
+        discard(vol_total * 1.1, working_cols)
 
-    # Elution
-    helpers.move_labware_to_hs(ctx, working_plate, h_s, h_s_adapter)
+        # Wash
+        for _ in range(WASH_TIMES):
+            helpers.move_labware_to_hs(ctx, working_plate, h_s, h_s_adapter)
 
-    transfer_well_to_plate(ELUTION_VOL, elu, working_wells, 4)
-    if READY_FOR_SDSPAGE == 1:
-        ctx.pause("Seal the Working Plate")
-        h_s.set_and_wait_for_temperature(70)
-        helpers.set_hs_speed(ctx, h_s, MIX_SPEED, (MIX_SEC / 60) + 10, True)
-        h_s.deactivate_heater()
-        h_s.open_labware_latch()
-        ctx.pause("Protocol Complete")
+            transfer_well_to_plate(WASH_VOL, wash, working_cols, 5)
+            helpers.set_hs_speed(ctx, h_s, MIX_SPEED, MIX_SEC / 60, True)
+            helpers.move_labware_from_hs_to_destination(ctx, working_plate, h_s, mag)
+            ctx.delay(minutes=MAG_DELAY_MIN)
+            discard(WASH_VOL * 1.1, working_cols)
+        # Elution
+        helpers.move_labware_to_hs(ctx, working_plate, h_s, h_s_adapter)
+        transfer_well_to_plate(ELUTION_VOL, elu, working_wells, 4)
+        if READY_FOR_SDSPAGE == 1:
+            ctx.pause("Seal the Working Plate")
+            h_s.set_and_wait_for_temperature(70)
+            helpers.set_hs_speed(ctx, h_s, MIX_SPEED, (MIX_SEC / 60) + 10, True)
+            h_s.deactivate_heater()
+            h_s.open_labware_latch()
+            ctx.pause("Protocol Complete")
+        elif READY_FOR_SDSPAGE == 0:
+            helpers.set_hs_speed(ctx, h_s, MIX_SPEED, (MIX_SEC / 60) + 2, True)
 
-    elif READY_FOR_SDSPAGE == 0:
-        helpers.set_hs_speed(ctx, h_s, MIX_SPEED, (MIX_SEC / 60) + 2, True)
+            temp.set_temperature(4)
+            helpers.move_labware_from_hs_to_destination(ctx, working_plate, h_s, mag)
+            ctx.delay(minutes=MAG_DELAY_MIN)
+            transfer_plate_to_plate(ELUTION_VOL * 1.1, working_cols, final_cols, 6)
+            temp.deactivate()
+        helpers.clean_up_plates(p1000_single, [sample_plate], waste, 1000)
+        helpers.move_labware_to_hs(ctx, working_plate, h_s, h_s_adapter)
 
-        temp.set_temperature(4)
-        helpers.move_labware_from_hs_to_destination(ctx, working_plate, h_s, mag)
-        ctx.delay(minutes=MAG_DELAY_MIN)
-        transfer_plate_to_plate(ELUTION_VOL * 1.1, working_cols, final_cols, 6)
-        temp.deactivate()
-    end_wells_to_probe = [reagent_res["A1"], reagent_res["B1"], reagent_res["C1"]]
-    end_wells_to_probe.extend(wash_res.wells())
+    protocol(sample_plate_1)
+    # swap plates
+    ctx.move_labware(sample_plate_1, "B4", True)
+    ctx.move_labware(sample_plate_2, "B2", True)
+    protocol(sample_plate_2)
+    end_wells_to_probe = [
+        waste_res["A1"],
+        reagent_res["A1"],
+        reagent_res["B1"],
+        reagent_res["C1"],
+    ]
+
+    # end_wells_to_probe.extend(wash_res.wells())
+    helpers.clean_up_plates(p1000_single, [wash_res], waste, 1000)
     helpers.find_liquid_height_of_all_wells(ctx, p1000_single, end_wells_to_probe)

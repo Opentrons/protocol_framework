@@ -68,7 +68,7 @@ def run(ctx: ProtocolContext) -> None:
     TIP_TRASH = False
     res_type = "nest_12_reservoir_22ml"
 
-    num_samples = 8
+    num_samples = 96
     wash1_vol = 600.0
     wash2_vol = 600.0
     wash3_vol = 600.0
@@ -115,17 +115,24 @@ def run(ctx: ProtocolContext) -> None:
 
     res1 = ctx.load_labware(res_type, "D2", "Reagent Reservoir 1")
     num_cols = math.ceil(num_samples / 8)
-
     # Load tips and combine all similar boxes
     tips1000 = ctx.load_labware("opentrons_flex_96_tiprack_1000ul", "A1", "Tips 1")
     tips1001 = ctx.load_labware("opentrons_flex_96_tiprack_1000ul", "A2", "Tips 2")
     tips1002 = ctx.load_labware("opentrons_flex_96_tiprack_1000ul", "B1", "Tips 3")
-    tips = [*tips1000.wells()[num_samples:96], *tips1001.wells(), *tips1002.wells()]
+    tips1003 = ctx.load_labware("opentrons_flex_96_tiprack_1000ul", "B2", "Tips 4")
+    tips1004 = ctx.load_labware("opentrons_flex_96_tiprack_1000ul", "C2", "Tips 5")
+
+    tips = [
+        *tips1000.wells()[num_samples:96],
+        *tips1001.wells(),
+        *tips1002.wells(),
+        *tips1003.wells(),
+    ]
     tips_sn = tips1000.wells()[:num_samples]
 
     # load instruments
     m1000 = ctx.load_instrument(
-        "flex_8channel_1000", mount, tip_racks=[tips1000, tips1001, tips1002]
+        "flex_8channel_1000", mount, tip_racks=[tips1000, tips1001, tips1002, tips1003]
     )
 
     """
@@ -167,10 +174,11 @@ def run(ctx: ProtocolContext) -> None:
         if tipbox == tips:
             m1000.pick_up_tip(tipbox[int(tip1k)])
             tip1k = tip1k + 8
+            if tip1k >= len(tipbox):
+                tip1k = 0
         drop_count = drop_count + 8
         if drop_count >= 150:
             drop_count = 0
-            ctx.pause("Empty Waste Bin.")
 
     def remove_supernatant(vol: float) -> None:
         """Remove supernatants."""
@@ -303,7 +311,6 @@ def run(ctx: ProtocolContext) -> None:
                         m1000.require_liquid_presence(src)
                         m1000.aspirate(tvol, src.bottom(1))
                         m1000.dispense(tvol, src.bottom(4))
-                m1000.require_liquid_presence(src)
                 m1000.aspirate(tvol, src.bottom(height))
                 m1000.air_gap(10)
                 m1000.dispense(m1000.current_volume, samples_m[i].top())
@@ -352,7 +359,7 @@ def run(ctx: ProtocolContext) -> None:
         for i, well in enumerate(samples_m):
             num_trans = math.ceil(vol / 980)
             vol_per_trans = vol / num_trans
-            source = binding_buffer[i // 3]
+            source = binding_buffer[i // 7]
             if i == 0:
                 reps = 6 if not dry_run else 1
             else:
@@ -416,7 +423,7 @@ def run(ctx: ProtocolContext) -> None:
         vol_per_trans = vol / num_trans
         tiptrack(tips)
         for i, m in enumerate(samples_m):
-            src = source[i // 2]
+            src = source[i // 4]
             for n in range(num_trans):
                 if m1000.current_volume > 0:
                     m1000.dispense(m1000.current_volume, src.top())
@@ -504,7 +511,7 @@ def run(ctx: ProtocolContext) -> None:
     # Probe wells
     end_wells_with_liquid = [
         waste_reservoir.wells()[0],
-        res1.wells()[0],
-        elutionplate.wells()[0],
     ]
+    m1000.tip_racks = [tips1004]
+    helpers.clean_up_plates(m1000, [res1, elutionplate], waste_reservoir["A1"], 1000)
     helpers.find_liquid_height_of_all_wells(ctx, m1000, end_wells_with_liquid)
