@@ -500,10 +500,18 @@ class OT3PipetteHandler:
         self._ihp_log.debug(f"{action} on {target.name}")
 
     def plunger_position(
-        self, instr: Pipette, ul: float, action: "UlPerMmAction"
+        self,
+        instr: Pipette,
+        ul: float,
+        action: "UlPerMmAction",
+        volume_correction: float = 0.0,
     ) -> float:
-        mm = ul / instr.ul_per_mm(ul, action)
-        position = instr.plunger_positions.bottom - mm
+        # NOTE: "ul" is the total expected volume displaced inside tip (relative to "bottom")
+        #       so it will always be a POSITIVE value
+        multiplier = 1.0 + (volume_correction / ul)
+        mm_dist_from_bottom = ul / instr.ul_per_mm(ul, action)
+        mm_dist_from_bottom_corrected = mm_dist_from_bottom * multiplier
+        position = instr.plunger_positions.bottom - mm_dist_from_bottom_corrected
         return round(position, 6)
 
     def plunger_speed(
@@ -529,6 +537,7 @@ class OT3PipetteHandler:
         mount: OT3Mount,
         volume: Optional[float],
         rate: float,
+        volume_correction: float = 0.0,
     ) -> Optional[LiquidActionSpec]:
         """Check preconditions for aspirate, parse args, and calculate positions.
 
@@ -564,7 +573,10 @@ class OT3PipetteHandler:
         ), "Cannot aspirate more than pipette max volume"
 
         dist = self.plunger_position(
-            instrument, instrument.current_volume + asp_vol, "aspirate"
+            instrument,
+            instrument.current_volume + asp_vol,
+            "aspirate",
+            volume_correction=volume_correction,
         )
         speed = self.plunger_speed(
             instrument, instrument.aspirate_flow_rate * rate, "aspirate"
@@ -589,6 +601,7 @@ class OT3PipetteHandler:
         volume: Optional[float],
         rate: float,
         push_out: Optional[float],
+        volume_correction: float = 0.0,
     ) -> Optional[LiquidActionSpec]:
         """Check preconditions for dispense, parse args, and calculate positions.
 
@@ -657,7 +670,10 @@ class OT3PipetteHandler:
             )
 
         dist = self.plunger_position(
-            instrument, instrument.current_volume - disp_vol, "dispense"
+            instrument,
+            instrument.current_volume - disp_vol,
+            "dispense",
+            volume_correction=volume_correction,
         )
         speed = self.plunger_speed(
             instrument, instrument.dispense_flow_rate * rate, "dispense"
