@@ -227,8 +227,13 @@ class FlexStacker():
         response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
         return response
 
-    def set_device_serial_number(self, serial_number) -> None:
+    def get_device_serial_number(self) -> str:
         """Get the serial number of the flex stacker unit"""
+        serial_number = self.get_device_info().split()[3].split(':')[1]
+        return serial_number
+
+    def set_device_serial_number(self, serial_number) -> None:
+        """Set the serial number of the flex stacker unit"""
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.SET_SERIAL_NUM).add_element(serial_number)
         print(c)
