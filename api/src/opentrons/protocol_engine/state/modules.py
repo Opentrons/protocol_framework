@@ -299,10 +299,7 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
 
         if isinstance(
             command.result,
-            (
-                absorbance_reader.InitializeResult,
-                absorbance_reader.ReadAbsorbanceResult,
-            ),
+            (absorbance_reader.InitializeResult,),
         ):
             self._handle_absorbance_reader_commands(command)
 

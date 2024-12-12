@@ -267,6 +267,10 @@ class AbsorbanceReaderDataUpdate:
     read_result: typing.Dict[int, typing.Dict[str, float]]
 
 
+class AbsorbanceReaderInitializeUpdate:
+    """An update to an absorbance reader's initialization."""
+
+
 @dataclasses.dataclass
 class LiquidClassLoadedUpdate:
     """The state update from loading a liquid class."""
@@ -327,6 +331,10 @@ class StateUpdate:
 
     # this might need to be an array?
     absorbance_reader_data: AbsorbanceReaderDataUpdate | NoChangeType = NO_CHANGE
+
+    initialize_absorbance_reader_update: AbsorbanceReaderInitializeUpdate | NoChangeType = (
+        NO_CHANGE
+    )
 
     module_state_update: ModuleStateUpdate | NoChangeType = NO_CHANGE
 
@@ -602,6 +610,7 @@ class StateUpdate:
         self, module_id: str, read_result: typing.Dict[int, typing.Dict[str, float]]
     ) -> Self:
         """Update an absorbance reader's read data. See `AbsorbanceReaderReadDataUpdate`."""
+        # consolidate together
         self.module_state_update = ModuleStateUpdate(
             module_id=module_id, module_type="absorbanceReaderType"
         )
@@ -609,6 +618,12 @@ class StateUpdate:
             read_result=read_result
         )
         return self
+
+    def initialize_absorbance_reader(self, module_id: str):
+        self.module_state_update = ModuleStateUpdate(
+            module_id=module_id, module_type="absorbanceReaderType"
+        )
+        self.initialize_absorbance_reader_update = AbsorbanceReaderInitializeUpdate()
 
     def set_addressable_area_used(self: Self, addressable_area_name: str) -> Self:
         """Mark that an addressable area has been used. See `AddressableAreaUsedUpdate`."""
