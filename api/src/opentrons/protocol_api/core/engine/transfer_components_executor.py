@@ -77,10 +77,14 @@ class TransferComponentsExecutor:
         3. delay
         """
         # TODO: compare submerge start position and aspirate position and raise error if incompatible
-        submerge_start_location = location_from_position_reference_and_offset(
+        submerge_start_point = absolute_point_from_position_reference_and_offset(
             self._target_location_and_well.well,
             submerge_properties.position_reference,
-            submerge_properties.offset,
+            submerge_properties.offset
+        )
+        submerge_start_location = Location(
+            point=submerge_start_point,
+            labware=self._target_location_and_well.location.labware
         )
         self._instrument.move_to(
             location=submerge_start_location,
@@ -210,11 +214,10 @@ class TransferComponentsExecutor:
         """
         # TODO: Raise error if retract is below the meniscus
         retract_props = self._transfer_properties.aspirate.retract
-        retract_location = location_from_position_reference_and_offset(
-            self._target_location_and_well.well,
-            retract_props.position_reference,
-            retract_props.offset,
-        )
+        retract_point = absolute_point_from_position_reference_and_offset(
+            self._target_location_and_well.well, retract_props.position_reference,
+            retract_props.offset)
+        retract_location = Location(retract_point, labware=self._target_location_and_well.location.labware)
         self._instrument.move_to(
             location=retract_location,
             well_core=self._target_location_and_well.well,
@@ -315,12 +318,12 @@ class TransferComponentsExecutor:
         """
 
 
-def location_from_position_reference_and_offset(
+def absolute_point_from_position_reference_and_offset(
     well: WellCore,
     position_reference: PositionReference,
     offset: Coordinate,
-) -> Location:
-    """Get position in `Location` type, given the well, the position reference and offset."""
+) -> Point:
+    """Get the absolute point, given the well, the position reference and offset."""
     match position_reference:
         case PositionReference.WELL_TOP:
             reference_point = well.get_top(0)
@@ -330,8 +333,9 @@ def location_from_position_reference_and_offset(
             reference_point = well.get_center()
         case PositionReference.LIQUID_MENISCUS:
             raise NotImplementedError(
-                "Liquid transfer using liquid-meniscus relative positioning is not yet implemented"
+                "Liquid transfer using liquid-meniscus relative positioning"
+                " is not yet implemented."
             )
         case _:
             raise ValueError(f"Unknown position reference {position_reference}")
-    return Location(reference_point + Point(offset.x, offset.y, offset.z), labware=None)
+    return reference_point + Point(offset.x, offset.y, offset.z)

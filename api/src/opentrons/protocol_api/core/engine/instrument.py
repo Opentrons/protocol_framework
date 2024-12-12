@@ -48,6 +48,7 @@ from .transfer_components_executor import (
     TransferComponentsExecutor,
     MixData,
     MixAspDispData,
+    absolute_point_from_position_reference_and_offset,
 )
 from ..instrument import AbstractInstrument
 from ...disposal_locations import TrashBin, WasteChute
@@ -913,9 +914,24 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         dest: List[Tuple[types.Location, WellCore]],
         new_tip: TransferTipPolicyV2,
         tiprack_uri: str,
-        trash_location: Union[WellCore, Location, TrashBin, WasteChute],
+        tip_drop_location: Union[WellCore, Location, TrashBin, WasteChute],
     ) -> None:
-        """Execute transfer using liquid class properties."""
+        """Execute transfer using liquid class properties.
+
+        Args:
+            liquid_class: The liquid class to use for transfer properties.
+            volume: Volume to transfer per well.
+            source: List of source wells, with each well represented as a tuple of
+                    types.Location and WellCore.
+                    types.Location is only necessary for saving the last accessed location.
+            dest: List of destination wells, with each well represented as a tuple of
+                    types.Location and WellCore.
+                    types.Location is only necessary for saving the last accessed location.
+            new_tip: Whether the transfer should use a new tip 'once', 'never', 'always',
+                     or 'per source'.
+            tiprack_uri: The URI of the tiprack that the transfer settings are for.
+            tip_drop_location: Location where the tip will be dropped (if appropriate).
+        """
         liquid_class_id = self.load_liquid_class(
             liquid_class=liquid_class,
             pipette_load_name=self.name,
@@ -950,16 +966,16 @@ class InstrumentCore(AbstractInstrument[WellCore]):
 
             transfer_executer.aspirate(aspirate_props)
             if new_tip == TransferTipPolicyV2.ALWAYS:
-                if isinstance(trash_location, (TrashBin, WasteChute)):
+                if isinstance(tip_drop_location, (TrashBin, WasteChute)):
                     self.drop_tip_in_disposal_location(
-                        disposal_location=trash_location,
+                        disposal_location=tip_drop_location,
                         home_after=False,
                         alternate_tip_drop=True,
                     )
-                elif isinstance(trash_location, Location):
+                elif isinstance(tip_drop_location, Location):
                     self.drop_tip(
-                        location=trash_location,
-                        well_core=trash_location.labware.as_well()._core,
+                        location=tip_drop_location,
+                        well_core=tip_drop_location.labware.as_well()._core,
                         home_after=False,
                         alternate_drop_location=True,
                     )
@@ -967,7 +983,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
     def aspirate_liquid_class(
         self,
         volume: float,
-        source: WellCore,
+        source: Tuple(Location, WellCore),
         transfer_properties: TransferProperties,
     ) -> None:
         """Execute aspiration steps.
@@ -982,12 +998,12 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         """
         aspirate_props = transfer_properties.aspirate
         dispense_props = transfer_properties.dispense
+
+        aspirate_location_point = absolute_point_from_position_reference_and_offset(
+            well=source, position_reference=aspirate_props.position_reference,
+            offset=aspirate_props.offset)
         aspirate_location_and_well = _TargetAsLocationAndWell(
-            location=location_from_position_reference_and_offset(
-                well=source,
-                position_reference=aspirate_props.position_reference,
-                offset=aspirate_props.offset,
-            ),
+            location=Location(aspirate_location_point, labware=source[0].labware),
             well=source,
         )
         transfer_executer = TransferComponentsExecutor(
