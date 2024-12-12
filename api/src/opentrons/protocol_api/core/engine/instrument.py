@@ -931,6 +931,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             tiprack_uri: The URI of the tiprack that the transfer settings are for.
             tip_drop_location: Location where the tip will be dropped (if appropriate).
         """
+        # This function is WIP
         # TODO: use the ID returned by load_liquid_class in command annotations
         self.load_liquid_class(
             liquid_class=liquid_class,
@@ -1009,10 +1010,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         6. Aspirate retract
         """
         aspirate_props = transfer_properties.aspirate
-        dispense_props = transfer_properties.dispense
-
         source_loc, source_well = source
-
         aspirate_point = absolute_point_from_position_reference_and_offset(
             well=source_well,
             position_reference=aspirate_props.position_reference,
@@ -1027,20 +1025,17 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         )
         components_executer.submerge(
             submerge_properties=aspirate_props.submerge,
-            # Assuming aspirate is not called with liquid already in the tip
+            # Assuming aspirate is not called with *liquid*git swta in the tip
             air_gap_volume=self.get_current_volume(),
         )
+        # TODO: when aspirating for consolidation, do not perform mix
         components_executer.mix(mix_properties=aspirate_props.mix)
+        # TODO: when aspirating for consolidation, do not preform pre-wet
         components_executer.pre_wet(
-            enabled=aspirate_props.pre_wet,
             volume=volume,
         )
         components_executer.aspirate_and_wait(volume=volume)
-        components_executer.retract_after_aspiration(
-            air_gap_volume=aspirate_props.retract.air_gap_by_volume.get_for_volume(
-                volume
-            )
-        )
+        components_executer.retract_after_aspiration(volume=volume)
 
     def dispense_liquid_class(
         self,

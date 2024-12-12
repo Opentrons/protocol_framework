@@ -139,7 +139,6 @@ class TransferComponentsExecutor:
 
     def pre_wet(
         self,
-        enabled: bool,
         volume: float,
     ) -> None:
         """Do a pre-wet.
@@ -149,12 +148,12 @@ class TransferComponentsExecutor:
         - No push out
         - No pre-wet for consolidation
         """
-        if not enabled:
+        if not self._transfer_properties.aspirate.pre_wet:
             return
         mix_props = MixProperties(_enabled=True, _repetitions=1, _volume=volume)
         self.mix(mix_properties=mix_props)
 
-    def retract_after_aspiration(self, air_gap_volume: float) -> None:
+    def retract_after_aspiration(self, volume: float) -> None:
         """Execute post-aspiration retraction steps.
 
         1. Move TO the position reference+offset AT the specified speed
@@ -200,7 +199,7 @@ class TransferComponentsExecutor:
             )
             # TODO: update this once touch tip has mmToEdge
             self._instrument.touch_tip(
-                location=self._target_location,
+                location=retract_location,
                 well_core=self._target_well,
                 radius=0,
                 z_offset=touch_tip_props.z_offset,
@@ -214,16 +213,21 @@ class TransferComponentsExecutor:
                 # Full speed because the tip will already be out of the liquid
                 speed=None,
             )
-        self._add_air_gap(volume=air_gap_volume)
+        self._add_air_gap(
+            air_gap_volume=self._transfer_properties.aspirate.retract.air_gap_by_volume.get_for_volume(
+                volume
+            )
+        )
 
-    def _add_air_gap(self, volume: float) -> None:
+    def _add_air_gap(self, air_gap_volume: float) -> None:
         """Add an air gap."""
         aspirate_props = self._transfer_properties.aspirate
         # The maximum flow rate should be air_gap_volume per second
         flow_rate = min(
-            aspirate_props.flow_rate_by_volume.get_for_volume(volume), volume
+            aspirate_props.flow_rate_by_volume.get_for_volume(air_gap_volume),
+            air_gap_volume,
         )
-        self._instrument.air_gap_in_place(volume=volume, flow_rate=flow_rate)
+        self._instrument.air_gap_in_place(volume=air_gap_volume, flow_rate=flow_rate)
         delay_props = aspirate_props.delay
         if delay_props.enabled:
             # Assertion only for mypy purposes
