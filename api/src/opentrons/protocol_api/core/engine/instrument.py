@@ -42,12 +42,9 @@ from opentrons_shared_data.errors.exceptions import (
 )
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
 from . import overlap_versions, pipette_movement_conflict
+from . import transfer_components_executor as tx_comps_executor
 
 from .well import WellCore
-from .transfer_components_executor import (
-    TransferComponentsExecutor,
-    absolute_point_from_position_reference_and_offset,
-)
 from ..instrument import AbstractInstrument
 from ...disposal_locations import TrashBin, WasteChute
 
@@ -980,20 +977,6 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                         alternate_drop_location=True,
                     )
 
-    def _get_transfer_components_executor(
-        self,
-        transfer_properties: TransferProperties,
-        target_location: Location,
-        target_well: WellCore,
-    ) -> TransferComponentsExecutor:
-        """Get a TransferComponentsExecutor."""
-        return TransferComponentsExecutor(
-            instrument_core=self,
-            transfer_properties=transfer_properties,
-            target_location=target_location,
-            target_well=target_well,
-        )
-
     def aspirate_liquid_class(
         self,
         volume: float,
@@ -1011,21 +994,25 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         """
         aspirate_props = transfer_properties.aspirate
         source_loc, source_well = source
-        aspirate_point = absolute_point_from_position_reference_and_offset(
-            well=source_well,
-            position_reference=aspirate_props.position_reference,
-            offset=aspirate_props.offset,
+        aspirate_point = (
+            tx_comps_executor.absolute_point_from_position_reference_and_offset(
+                well=source_well,
+                position_reference=aspirate_props.position_reference,
+                offset=aspirate_props.offset,
+            )
         )
         aspirate_location = Location(aspirate_point, labware=source_loc.labware)
 
-        components_executer = self._get_transfer_components_executor(
+        components_executer = tx_comps_executor.get_transfer_components_executor(
+            instrument_core=self,
             transfer_properties=transfer_properties,
             target_location=aspirate_location,
             target_well=source_well,
         )
         components_executer.submerge(
             submerge_properties=aspirate_props.submerge,
-            # Assuming aspirate is not called with *liquid*git swta in the tip
+            # Assuming aspirate is not called with *liquid* in the tip
+            # TODO: evaluate if using the current volume to find air gap is not a good idea.
             air_gap_volume=self.get_current_volume(),
         )
         # TODO: when aspirating for consolidation, do not perform mix
