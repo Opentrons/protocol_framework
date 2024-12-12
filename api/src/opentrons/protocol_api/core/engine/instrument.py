@@ -1037,39 +1037,6 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         components_executer.aspirate_and_wait(volume=volume)
         components_executer.retract_after_aspiration(volume=volume)
 
-    def dispense_liquid_class(
-        self,
-        volume: float,
-        dest: WellCore,
-        transfer_properties: TransferProperties,
-    ) -> None:
-        """Execute single-dispense steps.
-
-        1. Move pipette to the ‘submerge’ position with normal speed.
-            - The pipette will move in an arc- move to max z height of labware
-              (if asp & disp are in same labware)
-              or max z height of all labware (if asp & disp are in separate labware)
-        2. Air gap removal:
-            - If dispense location is above the meniscus, DO NOT remove air gap
-              (it will be dispensed along with rest of the liquid later).
-              All other scenarios, remove the air gap by doing a dispense
-            - Flow rate = min(dispenseFlowRate, (airGapByVolume)/sec)
-            - Use the post-dispense delay
-        4. Move to the dispense position at the specified ‘submerge’ speed
-           (even if we might not be moving into the liquid)
-           - Do a delay (submerge delay)
-        6. Dispense:
-            - Dispense at the specified flow rate.
-            - Do a push out as specified ONLY IF there is no mix following the dispense AND the tip is empty.
-            Volume for push out is the volume being dispensed. So if we are dispensing 50uL, use pushOutByVolume[50] as push out volume.
-        7. Delay
-        8. Mix using the same flow rate and delays as specified for asp+disp, with the volume and the number of repetitions specified. Use the delays in asp & disp.
-            - If the dispense position is outside the liquid, then raise error if mix is enabled.
-            - If the user wants to perform a mix then they should specify a dispense position that’s inside the liquid OR do mix() on the wells after transfer.
-            - Do push out at the last dispense.
-
-        """
-
     def retract(self) -> None:
         """Retract this instrument to the top of the gantry."""
         z_axis = self._engine_client.state.pipettes.get_z_axis(self._pipette_id)
