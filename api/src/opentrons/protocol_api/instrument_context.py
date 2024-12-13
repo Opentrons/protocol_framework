@@ -1712,6 +1712,26 @@ class InstrumentContext(publisher.CommandPublisher):
 
         return self
 
+    @requires_version(2, 22)
+    def seal(
+        self,
+        location: types.Location,
+    ) -> InstrumentContext:
+        """Seal resin tips onto the pipette.
+
+        The location provided should contain resin tips. Sealing the
+        tip will perform a `pick up` action but there will be no tip tracking
+        associated with the pipette.
+
+        See :ref:`seal` for examples.
+
+        :param location: A location containing resin tips.
+
+        :type location: :py:class:`~.types.Location`
+        """
+        # with ExitStack() as contexts:
+        return self
+
     @requires_version(2, 18)
     def _retract(
         self,
