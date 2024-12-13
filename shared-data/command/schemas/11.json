@@ -531,7 +531,7 @@
           "description": "Which of the gripper's jaws to use to measure its offset. The robot will assume that a human operator has already attached the capacitive probe to the jaw and none is attached to the other jaw."
         },
         "otherJawOffset": {
-          "$ref": "#/$defs/Vec3f_float_",
+          "$ref": "#/$defs/Vec3f",
           "description": "If an offset for the other probe is already found, then specifying it here will enable the CalibrateGripper command to complete the calibration process by calculating the total offset and saving it to disk. If this param is not specified then the command will only find and return the offset for the specified probe.",
           "title": "Otherjawoffset"
         }
@@ -1812,6 +1812,26 @@
       "title": "LabwareMovementStrategy",
       "type": "string"
     },
+    "LabwareOffsetVector": {
+      "description": "Offset, in deck coordinates from nominal to actual position.",
+      "properties": {
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        },
+        "z": {
+          "title": "Z",
+          "type": "number"
+        }
+      },
+      "required": ["x", "y", "z"],
+      "title": "LabwareOffsetVector",
+      "type": "object"
+    },
     "LiquidClassRecord": {
       "description": "LiquidClassRecord is our internal representation of an (immutable) liquid class.\n\nConceptually, a liquid class record is the tuple (name, pipette, tip, transfer properties).\nWe consider two liquid classes to be the same if every entry in that tuple is the same; and liquid\nclasses are different if any entry in the tuple is different.\n\nThis class defines the tuple via inheritance so that we can reuse the definitions from shared_data.",
       "properties": {
@@ -2522,7 +2542,7 @@
       "description": "Input parameters for a ``moveLabware`` command.",
       "properties": {
         "dropOffset": {
-          "$ref": "#/$defs/OffsetVector",
+          "$ref": "#/$defs/LabwareOffsetVector",
           "description": "Offset to use when dropping off labware. Experimental param, subject to change",
           "title": "Dropoffset"
         },
@@ -2555,7 +2575,7 @@
           "title": "Newlocation"
         },
         "pickUpOffset": {
-          "$ref": "#/$defs/OffsetVector",
+          "$ref": "#/$defs/LabwareOffsetVector",
           "description": "Offset to use when picking up labware. Experimental param, subject to change",
           "title": "Pickupoffset"
         },
@@ -3186,47 +3206,6 @@
         "delay"
       ],
       "title": "MultiDispenseProperties",
-      "type": "object"
-    },
-    "OffsetVector": {
-      "description": "A generic 3-D offset vector.",
-      "properties": {
-        "x": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "number"
-            }
-          ],
-          "title": "X"
-        },
-        "y": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "number"
-            }
-          ],
-          "title": "Y"
-        },
-        "z": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "number"
-            }
-          ],
-          "title": "Z"
-        }
-      },
-      "required": ["x", "y", "z"],
-      "title": "OffsetVector",
       "type": "object"
     },
     "OnLabwareLocation": {
@@ -4859,7 +4838,8 @@
       "title": "UpdatePositionEstimatorsParams",
       "type": "object"
     },
-    "Vec3f_float_": {
+    "Vec3f": {
+      "description": "A 3D vector of floats.",
       "properties": {
         "x": {
           "title": "X",
@@ -4875,7 +4855,7 @@
         }
       },
       "required": ["x", "y", "z"],
-      "title": "Vec3f[float]",
+      "title": "Vec3f",
       "type": "object"
     },
     "VerifyTipPresenceCreate": {
