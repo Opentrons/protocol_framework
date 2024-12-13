@@ -86,9 +86,6 @@ export function GateModal(): JSX.Element | null {
               }}
             />
           </StyledText>
-          <StyledText desktopStyle="bodyDefaultRegular">
-            {t('analytics_tracking')}
-          </StyledText>
         </Flex>
       </Modal>
     )
