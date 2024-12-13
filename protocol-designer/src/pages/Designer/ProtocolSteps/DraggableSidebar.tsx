@@ -1,11 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import styled from 'styled-components'
 import {
+  Box,
   DIRECTION_COLUMN,
   DISPLAY_FLEX,
   Flex,
   JUSTIFY_SPACE_BETWEEN,
-  Box,
 } from '@opentrons/components'
 import { TimelineToolbox } from './Timeline/TimelineToolbox'
 
