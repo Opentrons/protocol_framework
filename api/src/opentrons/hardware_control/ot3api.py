@@ -2677,6 +2677,7 @@ class OT3API(
         probe_settings: LiquidProbeSettings,
         probe: InstrumentProbeType,
         p_travel: float,
+        z_retract_settings: Tuple[float, float, float],
         force_both_sensors: bool = False,
         response_queue: Optional[PipetteSensorResponseQueue] = None,
     ) -> float:
@@ -2838,6 +2839,7 @@ class OT3API(
                     probe_settings,
                     checked_probe,
                     plunger_travel_mm + sensor_baseline_plunger_move_mm,
+                    z_offset_for_plunger_prep,
                     force_both_sensors,
                     response_queue,
                 )
