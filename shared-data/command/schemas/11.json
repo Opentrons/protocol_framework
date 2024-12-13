@@ -3924,6 +3924,11 @@
           "default": 1.0,
           "type": "number"
         },
+        "mmToEdge": {
+          "title": "Mmtoedge",
+          "description": "Offset away from the the well edge, in millimeters.Incompatible when a radius is included as a non 1.0 value.",
+          "type": "number"
+        },
         "speed": {
           "title": "Speed",
           "description": "Override the travel speed in mm/s. This controls the straight linear speed of motion.",
