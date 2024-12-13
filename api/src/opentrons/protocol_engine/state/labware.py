@@ -259,7 +259,7 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                 ] = loaded_lid_stack_update.definition
 
                 location = loaded_lid_stack_update.new_locations_by_id[
-                    loaded_lid_stack_update.labware_ids[i + 1]
+                    loaded_lid_stack_update.labware_ids[i]
                 ]
 
                 self._state.labware_by_id[

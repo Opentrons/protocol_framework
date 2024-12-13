@@ -237,6 +237,7 @@ export type LabwareRoles =
   | 'fixture'
   | 'maintenance'
   | 'lid'
+  | 'system'
 
 // NOTE: must be synced with shared-data/labware/schemas/2.json
 export interface LabwareDefinition2 {

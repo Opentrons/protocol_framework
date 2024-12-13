@@ -39,6 +39,7 @@ LabwareRoles = Union[
     Literal["adapter"],
     Literal["maintenance"],
     Literal["lid"],
+    Literal["system"],
 ]
 
 
