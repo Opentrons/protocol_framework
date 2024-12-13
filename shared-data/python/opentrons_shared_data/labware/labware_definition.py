@@ -118,6 +118,7 @@ class DisplayCategory(str, Enum):
     adapter = "adapter"
     other = "other"
     lid = "lid"
+    system = "system"
 
 
 class LabwareRole(str, Enum):
@@ -126,6 +127,7 @@ class LabwareRole(str, Enum):
     adapter = "adapter"
     maintenance = "maintenance"
     lid = "lid"
+    system = "system"
 
 
 class Metadata(BaseModel):

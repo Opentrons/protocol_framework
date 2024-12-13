@@ -23,7 +23,6 @@ from opentrons.types import (
     MountType,
     Point,
     StagingSlotName,
-    DeckLocation,
 )
 from opentrons.hardware_control import SyncHardwareAPI, SynchronousAdapter
 from opentrons.hardware_control.modules import AbstractModule
@@ -698,8 +697,8 @@ class ProtocolCore(
         quantity: int,
         namespace: Optional[str],
         version: Optional[int],
-    ) -> Union[DeckLocation, LabwareCore]:
-        """Load a Stack of Lids to a given location, creating a Lid Store."""
+    ) -> LabwareCore:
+        """Load a Stack of Lids to a given location, creating a Lid Stack."""
         if isinstance(location, DeckSlotName) or isinstance(location, StagingSlotName):
             load_location = self._convert_labware_location(location=location)
         else:
@@ -744,19 +743,14 @@ class ProtocolCore(
             existing_module_ids=list(self._module_cores_by_id.keys()),
         )
 
-        if isinstance(load_result.location, DeckSlotLocation):
-            return load_result.location.slotName.id
-        elif isinstance(load_result.location, AddressableAreaLocation):
-            return load_result.location.addressableAreaName
-        elif isinstance(load_result.location, OnLabwareLocation):
-            return LabwareCore(
-                labware_id=load_result.location.labwareId,
-                engine_client=self._engine_client,
-            )
-        else:
-            raise ValueError(
-                "Invalid load location for Lid Stack. A stack must be on a Deck slot, a Staging Area slot, a valid Addressable Area or on a Labware Adapter."
-            )
+        labware_core = LabwareCore(
+            labware_id=load_result.stackLabwareId,
+            engine_client=self._engine_client,
+        )
+
+        self._labware_cores_by_id[labware_core.labware_id] = labware_core
+
+        return labware_core
 
     def get_deck_definition(self) -> DeckDefinitionV5:
         """Get the geometry definition of the robot's deck."""

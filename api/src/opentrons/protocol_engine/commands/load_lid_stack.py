@@ -6,8 +6,8 @@ from typing_extensions import Literal
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
-from ..errors import LabwareIsNotAllowedInLocationError
-from ..resources import fixture_validation
+from ..errors import LabwareIsNotAllowedInLocationError, ProtocolEngineError
+from ..resources import fixture_validation, labware_validation
 from ..types import (
     LabwareLocation,
     OnLabwareLocation,
@@ -25,6 +25,10 @@ if TYPE_CHECKING:
 
 
 LoadLidStackCommandType = Literal["loadLidStack"]
+
+_LID_STACK_PE_LABWARE = "protocol_engine_lid_stack_object"
+_LID_STACK_PE_NAMESPACE = "opentrons"
+_LID_STACK_PE_VERSION = 1
 
 
 class LoadLidStackParams(BaseModel):
@@ -55,6 +59,10 @@ class LoadLidStackParams(BaseModel):
 class LoadLidStackResult(BaseModel):
     """Result data from the execution of a LoadLidStack command."""
 
+    stackLabwareId: str = Field(
+        ...,
+        description="An ID to reference the Protocol Engine Labware Lid Stack in subsequent commands.",
+    )
     labwareIds: List[str] = Field(
         ...,
         description="A list of lid labware IDs to reference the lids in this stack by. The first ID is the bottom of the stack.",
@@ -82,7 +90,7 @@ class LoadLidStackImplementation(
     async def execute(
         self, params: LoadLidStackParams
     ) -> SuccessData[LoadLidStackResult]:
-        """Load definition and calibration data necessary for a lid labware."""
+        """Load definition and calibration data necessary for a lid stack."""
         if isinstance(params.location, AddressableAreaLocation):
             area_name = params.location.addressableAreaName
             if not (
@@ -104,23 +112,40 @@ class LoadLidStackImplementation(
             params.location
         )
 
+        lid_stack_object = await self._equipment.load_labware(
+            load_name=_LID_STACK_PE_LABWARE,
+            namespace=_LID_STACK_PE_NAMESPACE,
+            version=_LID_STACK_PE_VERSION,
+            location=verified_location,
+            labware_id=None,
+        )
+        if not labware_validation.validate_definition_is_system(
+            lid_stack_object.definition
+        ):
+            raise ProtocolEngineError(
+                message="Lid Stack Labware Object Labware Definition does not contain required allowed role 'system'."
+            )
+
         loaded_lid_labwares = await self._equipment.load_lids(
             load_name=params.loadName,
             namespace=params.namespace,
             version=params.version,
-            location=verified_location,
+            location=OnLabwareLocation(labwareId=lid_stack_object.labware_id),
             quantity=params.quantity,
         )
         loaded_lid_locations_by_id = {}
-        load_location = verified_location
+        load_location = OnLabwareLocation(labwareId=lid_stack_object.labware_id)
         for loaded_lid in loaded_lid_labwares:
             loaded_lid_locations_by_id[loaded_lid.labware_id] = load_location
             load_location = OnLabwareLocation(labwareId=loaded_lid.labware_id)
 
         state_update = StateUpdate()
         state_update.set_loaded_lid_stack(
+            stack_id=lid_stack_object.labware_id,
+            stack_object_definition=lid_stack_object.definition,
+            stack_location=verified_location,
             labware_ids=list(loaded_lid_locations_by_id.keys()),
-            definition=loaded_lid_labwares[0].definition,
+            labware_definition=loaded_lid_labwares[0].definition,
             locations=loaded_lid_locations_by_id,
         )
 
@@ -134,6 +159,7 @@ class LoadLidStackImplementation(
 
         return SuccessData(
             public=LoadLidStackResult(
+                stackLabwareId=lid_stack_object.labware_id,
                 labwareIds=list(loaded_lid_locations_by_id.keys()),
                 definition=loaded_lid_labwares[0].definition,
                 location=params.location,

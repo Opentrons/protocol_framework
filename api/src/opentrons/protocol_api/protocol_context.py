@@ -1362,7 +1362,7 @@ class ProtocolContext(CommandPublisher):
         adapter: Optional[str] = None,
         namespace: Optional[str] = None,
         version: Optional[int] = None,
-    ) -> Union[DeckLocation, Labware]:
+    ) -> Labware:
         """
         Load a stack of Lids onto a valid Deck Location or Adapter.
 
@@ -1391,7 +1391,7 @@ class ProtocolContext(CommandPublisher):
             leave this unspecified to let ``load_lid_stack()`` choose a version
             automatically.
 
-        :return: A :py:class:`~opentrons.protocol_api.DeckLocation` object representing the location of the stack.
+        :return:  The initialized and loaded labware object representing the Lid Stack.
         """
         if self._api_version < validation.LID_STACK_VERSION_GATE:
             raise APIVersionError(
@@ -1432,15 +1432,14 @@ class ProtocolContext(CommandPublisher):
             namespace=namespace,
             version=version,
         )
-        if not isinstance(result, int) and not isinstance(result, str):
-            labware = Labware(
-                core=result,
-                api_version=self._api_version,
-                protocol_core=self._core,
-                core_map=self._core_map,
-            )
-            return labware
-        return result
+
+        labware = Labware(
+            core=result,
+            api_version=self._api_version,
+            protocol_core=self._core,
+            core_map=self._core_map,
+        )
+        return labware
 
 
 def _create_module_context(

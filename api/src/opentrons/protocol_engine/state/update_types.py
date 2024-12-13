@@ -11,6 +11,7 @@ from opentrons.protocol_engine.resources import pipette_data_provider
 from opentrons.protocol_engine.types import (
     DeckPoint,
     LabwareLocation,
+    OnLabwareLocation,
     TipGeometry,
     AspiratedFluid,
     LiquidClassRecord,
@@ -124,13 +125,23 @@ class LoadedLabwareUpdate:
 class LoadedLidStackUpdate:
     """An update that loads a new lid stack."""
 
+    stack_id: str
+    """The unique ID of the Lid Stack Object."""
+
+    stack_object_definition: LabwareDefinition
+    "The System-only Labware Definition of the Lid Stack Object"
+
+    stack_location: LabwareLocation
+    "The initial location of the Lid Stack Object."
+
     labware_ids: typing.List[str]
     """The unique IDs of the new lids."""
 
-    new_locations_by_id: typing.Dict[str, LabwareLocation]
+    new_locations_by_id: typing.Dict[str, OnLabwareLocation]
     """Each lid's initial location keyed by Labware ID."""
 
     definition: LabwareDefinition
+    "The Labware Definition of the Lid Labware(s) loaded."
 
 
 @dataclasses.dataclass
@@ -450,13 +461,19 @@ class StateUpdate:
 
     def set_loaded_lid_stack(
         self: Self,
-        definition: LabwareDefinition,
+        stack_id: str,
+        stack_object_definition: LabwareDefinition,
+        stack_location: LabwareLocation,
+        labware_definition: LabwareDefinition,
         labware_ids: typing.List[str],
-        locations: typing.Dict[str, LabwareLocation],
+        locations: typing.Dict[str, OnLabwareLocation],
     ) -> Self:
         """Add a new lid stack to state. See `LoadedLidStackUpdate`."""
         self.loaded_lid_stack = LoadedLidStackUpdate(
-            definition=definition,
+            stack_id=stack_id,
+            stack_object_definition=stack_object_definition,
+            stack_location=stack_location,
+            definition=labware_definition,
             labware_ids=labware_ids,
             new_locations_by_id=locations,
         )

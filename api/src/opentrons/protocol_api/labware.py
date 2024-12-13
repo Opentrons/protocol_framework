@@ -642,7 +642,7 @@ class Labware:
             leave this unspecified to let ``load_lid_stack()`` choose a version
             automatically.
 
-        :return: A :py:class:`~opentrons.protocol_api.DeckLocation` object representing the location of the stack.
+        :return: The initialized and loaded labware object representing the Lid Stack.
         """
         if self._api_version < validation.LID_STACK_VERSION_GATE:
             raise APIVersionError(
@@ -662,18 +662,14 @@ class Labware:
             namespace=namespace,
             version=version,
         )
-        if not isinstance(result, int) and not isinstance(result, str):
-            labware = Labware(
-                core=result,
-                api_version=self._api_version,
-                protocol_core=self._protocol_core,
-                core_map=self._core_map,
-            )
-            return labware
-        else:
-            raise ValueError(
-                "Error loading Lid Stack onto Labware, resulting location did not match expected parent."
-            )
+
+        labware = Labware(
+            core=result,
+            api_version=self._api_version,
+            protocol_core=self._protocol_core,
+            core_map=self._core_map,
+        )
+        return labware
 
     def set_calibration(self, delta: Point) -> None:
         """

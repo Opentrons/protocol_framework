@@ -16,7 +16,6 @@ from opentrons.types import (
     Location,
     Mount,
     Point,
-    DeckLocation,
 )
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.modules.types import ModuleModel
@@ -217,7 +216,7 @@ class AbstractProtocol(
         quantity: int,
         namespace: Optional[str],
         version: Optional[int],
-    ) -> Union[DeckLocation, LabwareCoreType]:
+    ) -> LabwareCoreType:
         ...
 
     @abstractmethod

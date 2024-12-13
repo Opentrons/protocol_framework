@@ -226,6 +226,27 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
     def _add_loaded_lid_stack(self, state_update: update_types.StateUpdate) -> None:
         loaded_lid_stack_update = state_update.loaded_lid_stack
         if loaded_lid_stack_update != update_types.NO_CHANGE:
+            # Add the stack object
+            stack_definition_uri = uri_from_details(
+                namespace=loaded_lid_stack_update.stack_object_definition.namespace,
+                load_name=loaded_lid_stack_update.stack_object_definition.parameters.loadName,
+                version=loaded_lid_stack_update.stack_object_definition.version,
+            )
+            self.state.definitions_by_uri[
+                stack_definition_uri
+            ] = loaded_lid_stack_update.stack_object_definition
+            self._state.labware_by_id[
+                loaded_lid_stack_update.stack_id
+            ] = LoadedLabware.construct(
+                id=loaded_lid_stack_update.stack_id,
+                location=loaded_lid_stack_update.stack_location,
+                loadName=loaded_lid_stack_update.stack_object_definition.parameters.loadName,
+                definitionUri=stack_definition_uri,
+                offsetId=None,
+                displayName=None,
+            )
+
+            # Add the Lids on top of the stack object
             for i in range(len(loaded_lid_stack_update.labware_ids)):
                 definition_uri = uri_from_details(
                     namespace=loaded_lid_stack_update.definition.namespace,
@@ -238,7 +259,7 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                 ] = loaded_lid_stack_update.definition
 
                 location = loaded_lid_stack_update.new_locations_by_id[
-                    loaded_lid_stack_update.labware_ids[i]
+                    loaded_lid_stack_update.labware_ids[i + 1]
                 ]
 
                 self._state.labware_by_id[

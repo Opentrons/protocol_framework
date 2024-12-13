@@ -12,7 +12,6 @@ from opentrons.types import (
     Location,
     Mount,
     Point,
-    DeckLocation,
 )
 from opentrons.util.broker import Broker
 from opentrons.hardware_control import SyncHardwareAPI
@@ -503,8 +502,8 @@ class LegacyProtocolCore(
         quantity: int,
         namespace: Optional[str],
         version: Optional[int],
-    ) -> Union[DeckLocation, LegacyLabwareCore]:
-        """Load a Stack of Lids to a given location, creating a Lid Store."""
+    ) -> LegacyLabwareCore:
+        """Load a Stack of Lids to a given location, creating a Lid Stack."""
         raise APIVersionError(api_element="Lid stack")
 
     def get_module_cores(self) -> List[legacy_module_core.LegacyModuleCore]:
