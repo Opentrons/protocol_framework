@@ -215,7 +215,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
           role="button"
           onDoubleClick={onDoubleClick}
           onClick={onClick}
-          padding={`${SPACING.spacing8} ${SPACING.spacing12}`}
+          padding={`${SPACING.spacing4} ${SPACING.spacing12}`}
           borderRadius={BORDERS.borderRadius8}
           width="100%"
           backgroundColor={backgroundColor}
@@ -226,7 +226,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
           <Flex
             justifyContent={JUSTIFY_SPACE_BETWEEN}
             alignItems={ALIGN_CENTER}
-            height="1.75rem"
+            height="1.9375rem"
           >
             <Flex
               alignItems={ALIGN_CENTER}

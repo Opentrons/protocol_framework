@@ -7,7 +7,13 @@ const INITIAL_SIDEBAR_WIDTH = 350
 const MIN_SIDEBAR_WIDTH = 80
 const MAX_SIDEBAR_WIDTH = 350
 
-export function DraggableSidebar(): JSX.Element {
+interface DraggableSidebarProps {
+  setTargetWidth: (width: number) => void
+}
+
+export function DraggableSidebar({
+  setTargetWidth,
+}: DraggableSidebarProps): JSX.Element {
   const sidebarRef = useRef<HTMLDivElement>(null)
   const [isResizing, setIsResizing] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(INITIAL_SIDEBAR_WIDTH)
@@ -29,10 +35,11 @@ export function DraggableSidebar(): JSX.Element {
 
         if (newWidth >= MIN_SIDEBAR_WIDTH && newWidth <= MAX_SIDEBAR_WIDTH) {
           setSidebarWidth(newWidth)
+          setTargetWidth(newWidth)
         }
       }
     },
-    [isResizing]
+    [isResizing, setTargetWidth]
   )
 
   useEffect(() => {
@@ -46,29 +53,63 @@ export function DraggableSidebar(): JSX.Element {
   }, [resize, stopResizing])
 
   return (
-    <SidebarContainer ref={sidebarRef} width={sidebarWidth}>
-      <SidebarContent>
-        <TimelineToolbox sidebarWidth={sidebarWidth} />
-      </SidebarContent>
+    <SidebarContainer ref={sidebarRef} resizedWidth={sidebarWidth}>
+      {/* <SidebarContent> */}
+      <TimelineToolbox sidebarWidth={sidebarWidth} />
+      {/* </SidebarContent> */}
       <SidebarResizer dragging={isResizing} onMouseDown={startResizing} />
     </SidebarContainer>
   )
 }
 
-const SidebarContainer = styled(Flex)<{ width: number }>`
+// const SidebarContainer = styled(Flex)<{ resizedWidth: number }>`
+//   display: ${DISPLAY_FLEX};
+//   flex-direction: ${DIRECTION_COLUMN};
+//   background-color: #f4f4f4;
+//   border-right: 1px solid #ccc;
+//   position: relative;
+//   width: ${props => props.resizedWidth}px;
+//   overflow: hidden;
+//   height: 100%;
+// `
+
+const SidebarContainer = styled(Flex)<{ resizedWidth: number }>`
   display: ${DISPLAY_FLEX};
   flex-direction: ${DIRECTION_COLUMN};
   background-color: #f4f4f4;
   border-right: 1px solid #ccc;
   position: relative;
-  width: ${props => props.width}px;
-  /* width: 100%; */
-  overflow: hidden;
+  width: ${props => props.resizedWidth}px;
+  overflow: hidden; /* Prevent content overflow */
+  height: 100%;
+  margin: 0; /* Ensure no margins */
+  padding: 0; /* Ensure no padding */
 `
 
-const SidebarContent = styled(Flex)`
-  flex: 1;
-`
+// const SidebarContent = styled(Flex)`
+//   flex: 1;
+// `
+
+// const SidebarResizer = styled(Flex)<{ dragging: boolean }>`
+//   width: 0.3125rem;
+//   cursor: ew-resize;
+//   background-color: #ddd;
+//   position: absolute;
+//   top: 0;
+//   right: 0;
+//   bottom: 0;
+//   transition: background-color 0.2s ease;
+
+//   &:hover {
+//     background-color: blue; /* Hover state */
+//   }
+
+//   ${props =>
+//     props.dragging === true &&
+//     `
+//     background-color: darkblue; /* Dragging state */
+//   `}
+// `
 
 const SidebarResizer = styled(Flex)<{ dragging: boolean }>`
   width: 0.3125rem;
@@ -78,6 +119,8 @@ const SidebarResizer = styled(Flex)<{ dragging: boolean }>`
   top: 0;
   right: 0;
   bottom: 0;
+  margin: 0;
+  padding: 0;
   transition: background-color 0.2s ease;
 
   &:hover {

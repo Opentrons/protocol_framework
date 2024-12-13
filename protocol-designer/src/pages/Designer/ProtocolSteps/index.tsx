@@ -1,15 +1,20 @@
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
+import { css } from 'styled-components'
+
 import {
   ALIGN_CENTER,
   COLORS,
   DIRECTION_COLUMN,
+  DIRECTION_ROW,
   FLEX_MAX_CONTENT,
   Flex,
   JUSTIFY_CENTER,
+  JUSTIFY_END,
   JUSTIFY_SPACE_BETWEEN,
   POSITION_FIXED,
+  POSITION_RELATIVE,
   SPACING,
   StyledText,
   Tag,
@@ -57,6 +62,7 @@ export function ProtocolSteps(): JSX.Element {
   const [deckView, setDeckView] = useState<
     typeof leftString | typeof rightString
   >(leftString)
+  const [targetWidth, setTargetWidth] = useState<number>(350)
 
   const currentHoveredStepId = useSelector(getHoveredStepId)
   const currentSelectedStepId = useSelector(getSelectedStepId)
@@ -75,6 +81,7 @@ export function ProtocolSteps(): JSX.Element {
     hasTimelineErrors && tab === 'protocolSteps' && formData == null
   const stepDetails = currentStep?.stepDetails ?? null
 
+  console.log('targetWidth', targetWidth)
   return (
     <Flex
       backgroundColor={COLORS.grey10}
@@ -83,15 +90,37 @@ export function ProtocolSteps(): JSX.Element {
       width="100%"
       padding={SPACING.spacing12}
       gridGap={SPACING.spacing16}
-      justifyContent={JUSTIFY_SPACE_BETWEEN}
+      // justifyContent={JUSTIFY_SPACE_BETWEEN}
+      id="container for sidebar and main"
     >
-      <DraggableSidebar />
       <Flex
+        // width="100%"
+        // minWidth="100%"
+        flex="1"
+        id="sidebar"
+        css={css`
+          outline: 1px solid red;
+        `}
+        height="100%"
+      >
+        <DraggableSidebar setTargetWidth={setTargetWidth} />
+      </Flex>
+      <Flex
+        backgroundColor={COLORS.blue35}
         alignItems={ALIGN_CENTER}
         flexDirection={DIRECTION_COLUMN}
         gridGap={SPACING.spacing16}
-        width="100%"
+        flex="2.85"
+        // width="82.3%"
+        // maxWidth="100%"
+        // minWidth="82.3%"
+        // maxwidth={targetWidth === null ? '100%' : `calc(100% - ${targetWidth})`}
+        id="main"
+        css={css`
+          outline: 1px solid blue;
+        `}
         paddingTop={showTimelineAlerts ? '0' : SPACING.spacing24}
+        position={POSITION_RELATIVE}
       >
         <Flex
           flexDirection={DIRECTION_COLUMN}
@@ -142,11 +171,15 @@ export function ProtocolSteps(): JSX.Element {
         </Flex>
         {enableHoyKeyDisplay ? (
           <Flex
+            id="hotkey-display"
             position={POSITION_FIXED}
-            left="21rem"
+            left={`calc(1.5rem + ${targetWidth}px)`}
             bottom="0.75rem"
-            gridGap={SPACING.spacing6}
+            gridGap={SPACING.spacing4}
             flexDirection={DIRECTION_COLUMN}
+            css={css`
+              outline: 1px solid orange;
+            `}
           >
             <Tag
               text={t('double_click_to_edit')}
