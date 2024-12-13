@@ -32,7 +32,6 @@ from opentrons.protocol_engine.types import (
     ModuleModel,
     Liquid,
     PostRunHardwareState,
-    AddressableAreaLocation,
 )
 from opentrons.protocol_engine.execution import (
     QueueWorker,
@@ -684,7 +683,7 @@ async def test_finish(
     """It should be able to gracefully tell the engine it's done."""
     completed_at = datetime(2021, 1, 1, 0, 0)
 
-    decoy.when(state_store.commands.state.stopped_by_estop).then_return(False)
+    decoy.when(state_store.commands.get_is_stopped_by_estop()).then_return(False)
     decoy.when(model_utils.get_timestamp()).then_return(completed_at)
 
     await subject.finish(
@@ -719,7 +718,7 @@ async def test_finish_with_defaults(
     state_store: StateStore,
 ) -> None:
     """It should be able to gracefully tell the engine it's done."""
-    decoy.when(state_store.commands.state.stopped_by_estop).then_return(False)
+    decoy.when(state_store.commands.get_is_stopped_by_estop()).then_return(False)
     await subject.finish()
 
     decoy.verify(
@@ -761,7 +760,7 @@ async def test_finish_with_error(
         error=error,
     )
 
-    decoy.when(state_store.commands.state.stopped_by_estop).then_return(
+    decoy.when(state_store.commands.get_is_stopped_by_estop()).then_return(
         stopped_by_estop
     )
     decoy.when(model_utils.generate_id()).then_return("error-id")
@@ -861,7 +860,7 @@ async def test_finish_stops_hardware_if_queue_worker_join_fails(
         await queue_worker.join(),
     ).then_raise(exception)
 
-    decoy.when(state_store.commands.state.stopped_by_estop).then_return(False)
+    decoy.when(state_store.commands.get_is_stopped_by_estop()).then_return(False)
 
     error_id = "error-id"
     completed_at = datetime(2021, 1, 1, 0, 0)
@@ -997,8 +996,7 @@ async def test_estop_noops_if_invalid(
     subject.estop()  # Should not raise.
 
     decoy.verify(
-        action_dispatcher.dispatch(),  # type: ignore
-        ignore_extra_args=True,
+        action_dispatcher.dispatch(expected_action),
         times=0,
     )
     decoy.verify(
@@ -1120,11 +1118,7 @@ def test_add_addressable_area(
 
     decoy.verify(
         action_dispatcher.dispatch(
-            AddAddressableAreaAction(
-                addressable_area=AddressableAreaLocation(
-                    addressableAreaName="my_funky_area"
-                )
-            )
+            AddAddressableAreaAction(addressable_area_name="my_funky_area")
         )
     )
 

@@ -6,6 +6,7 @@ import { ControlledInputField } from '../../atoms/ControlledInputField'
 
 export const BASIC_ALIQUOTING = 'basic_aliquoting'
 export const PCR = 'pcr'
+export const SERIAL_DILUTION = 'serial_dilution'
 export const OTHER = 'other'
 export const APPLICATION_SCIENTIFIC_APPLICATION =
   'application.scientificApplication'
@@ -19,6 +20,7 @@ export function ApplicationSection(): JSX.Element | null {
   const options = [
     { name: t(BASIC_ALIQUOTING), value: BASIC_ALIQUOTING },
     { name: t(PCR), value: PCR },
+    { name: t(SERIAL_DILUTION), value: SERIAL_DILUTION },
     { name: t(OTHER), value: OTHER },
   ]
 

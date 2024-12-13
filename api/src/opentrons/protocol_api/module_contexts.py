@@ -595,7 +595,7 @@ class ThermocyclerContext(ModuleContext):
                                  individual well of the loaded labware, in µL.
                                  If not specified, the default is 25 µL.
 
-        .. note:
+        .. note::
 
             If ``hold_time_minutes`` and ``hold_time_seconds`` are not
             specified, the Thermocycler will proceed to the next command
@@ -619,10 +619,10 @@ class ThermocyclerContext(ModuleContext):
         :param temperature: A value between 37 and 110, representing the target
                             temperature in °C.
 
-        .. note:
+        .. note::
 
             The Thermocycler will proceed to the next command immediately after
-            ``temperature`` has been reached.
+            ``temperature`` is reached.
 
         """
         self._core.set_target_lid_temperature(celsius=temperature)
@@ -639,28 +639,18 @@ class ThermocyclerContext(ModuleContext):
         """Execute a Thermocycler profile, defined as a cycle of
         ``steps``, for a given number of ``repetitions``.
 
-        :param steps: List of unique steps that make up a single cycle.
-                      Each list item should be a dictionary that maps to
-                      the parameters of the :py:meth:`set_block_temperature`
-                      method with a ``temperature`` key, and either or both of
+        :param steps: List of steps that make up a single cycle.
+                      Each list item should be a dictionary that maps to the parameters
+                      of the :py:meth:`set_block_temperature` method. The dictionary's
+                      keys must be ``temperature`` and one or both of
                       ``hold_time_seconds`` and ``hold_time_minutes``.
         :param repetitions: The number of times to repeat the cycled steps.
         :param block_max_volume: The greatest volume of liquid contained in any
                                  individual well of the loaded labware, in µL.
                                  If not specified, the default is 25 µL.
 
-        .. note:
-
-            Unlike with :py:meth:`set_block_temperature`, either or both of
-            ``hold_time_minutes`` and ``hold_time_seconds`` must be defined
-            and for each step.
-
-        .. note:
-
-            Before API Version 2.21, Thermocycler profiles run with this command
-            would be listed in the app as having a number of repetitions equal to
-            their step count. At or above API Version 2.21, the structure of the
-            Thermocycler cycles is preserved.
+        .. versionchanged:: 2.21
+            Fixed run log listing number of steps instead of number of repetitions.
 
         """
         repetitions = validation.ensure_thermocycler_repetition_count(repetitions)
@@ -1005,7 +995,7 @@ class MagneticBlockContext(ModuleContext):
 
 
 class AbsorbanceReaderContext(ModuleContext):
-    """An object representing a connected Absorbance Reader Module.
+    """An object representing a connected Absorbance Plate Reader Module.
 
     It should not be instantiated directly; instead, it should be
     created through :py:meth:`.ProtocolContext.load_module`.
@@ -1023,17 +1013,21 @@ class AbsorbanceReaderContext(ModuleContext):
 
     @requires_version(2, 21)
     def close_lid(self) -> None:
-        """Close the lid of the Absorbance Reader."""
+        """Use the Flex Gripper to close the lid of the Absorbance Plate Reader.
+
+        You must call this method before initializing the reader, even if the reader was
+        in the closed position at the start of the protocol.
+        """
         self._core.close_lid()
 
     @requires_version(2, 21)
     def open_lid(self) -> None:
-        """Open the lid of the Absorbance Reader."""
+        """Use the Flex Gripper to open the lid of the Absorbance Plate Reader."""
         self._core.open_lid()
 
     @requires_version(2, 21)
     def is_lid_on(self) -> bool:
-        """Return ``True`` if the Absorbance Reader's lid is currently closed."""
+        """Return ``True`` if the Absorbance Plate Reader's lid is currently closed."""
         return self._core.is_lid_on()
 
     @requires_version(2, 21)
@@ -1043,19 +1037,28 @@ class AbsorbanceReaderContext(ModuleContext):
         wavelengths: List[int],
         reference_wavelength: Optional[int] = None,
     ) -> None:
-        """Take a zero reading on the Absorbance Plate Reader Module.
+        """Prepare the Absorbance Plate Reader to read a plate.
+
+        See :ref:`absorbance-initialization` for examples.
 
         :param mode: Either ``"single"`` or ``"multi"``.
 
-             - In single measurement mode, :py:meth:`.AbsorbanceReaderContext.read` uses
-               one sample wavelength and an optional reference wavelength.
-             - In multiple measurement mode, :py:meth:`.AbsorbanceReaderContext.read` uses
-               a list of up to six sample wavelengths.
-        :param wavelengths: A list of wavelengths, in mm, to measure.
-             - Must contain only one item when initializing a single measurement.
-             - Must contain one to six items when initializing a multiple measurement.
-        :param reference_wavelength: An optional reference wavelength, in mm. Cannot be
-             used with multiple measurements.
+            - In single measurement mode, :py:meth:`.AbsorbanceReaderContext.read` uses
+              one sample wavelength and an optional reference wavelength.
+            - In multiple measurement mode, :py:meth:`.AbsorbanceReaderContext.read` uses
+              a list of up to six sample wavelengths.
+        :param wavelengths: A list of wavelengths, in nm, to measure.
+
+            - In the default hardware configuration, each wavelength must be one of
+              ``450`` (blue), ``562`` (green), ``600`` (orange), or ``650`` (red). In
+              custom hardware configurations, the module may accept other integers
+              between 350 and 1000.
+            - The list must contain only one item when initializing a single measurement.
+            - The list can contain one to six items when initializing a multiple measurement.
+        :param reference_wavelength: An optional reference wavelength, in nm. If provided,
+            :py:meth:`.AbsorbanceReaderContext.read` will read at the reference
+            wavelength and then subtract the reference wavelength values from the
+            measurement wavelength values. Can only be used with single measurements.
         """
         self._core.initialize(
             mode, wavelengths, reference_wavelength=reference_wavelength
@@ -1065,16 +1068,33 @@ class AbsorbanceReaderContext(ModuleContext):
     def read(
         self, export_filename: Optional[str] = None
     ) -> Dict[int, Dict[str, float]]:
-        """Initiate read on the Absorbance Reader.
+        """Read a plate on the Absorbance Plate Reader.
 
-        Returns a dictionary of wavelengths to dictionary of values ordered by well name.
+        This method always returns a dictionary of measurement data. It optionally will
+        save a CSV file of the results to the Flex filesystem, which you can access from
+        the Recent Protocol Runs screen in the Opentrons App. These files are `only` saved
+        if you specify ``export_filename``.
 
-        :param export_filename: Optional, if a filename is provided a CSV file will be saved
-             as a result of the read action containing measurement data. The filename will
-             be modified to include the wavelength used during measurement. If multiple
-             measurements are taken, then a file will be generated for each wavelength provided.
+        In simulation, the values for each well key in the dictionary are set to zero, and
+        no files are written.
 
-        Example: If `export_filename="my_data"` and wavelengths 450 and 531 are used during
-        measurement, the output files will be "my_data_450.csv" and "my_data_531.csv".
+        .. note::
+
+            Avoid divide-by-zero errors when simulating and using the results of this
+            method later in the protocol. If you divide by any of the measurement
+            values, use :py:meth:`.ProtocolContext.is_simulating` to use alternate dummy
+            data or skip the division step.
+
+        :param export_filename: An optional file basename. If provided, this method
+            will write a CSV file for each measurement in the read operation. File
+            names will use the value of this parameter, the measurement wavelength
+            supplied in :py:meth:`~.AbsorbanceReaderContext.initialize`, and a
+            ``.csv`` extension. For example, when reading at wavelengths 450 and 562
+            with ``export_filename="my_data"``, there will be two output files:
+            ``my_data_450.csv`` and ``my_data_562.csv``.
+
+            See :ref:`absorbance-csv` for information on working with these CSV files.
+
+        :returns: A dictionary of wavelengths to dictionary of values ordered by well name.
         """
         return self._core.read(filename=export_filename)

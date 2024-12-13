@@ -199,10 +199,19 @@ async def create_chat_completion(
             return ChatResponse(reply="Default fake response.  ", fake=body.fake)
 
         response: Optional[str] = None
+
+        if body.history and body.history[0].get("content") and "Write a protocol using" in body.history[0]["content"]:  # type: ignore
+            protocol_option = "create"
+        else:
+            protocol_option = "update"
+
         if "openai" in settings.model.lower():
             response = openai.predict(prompt=body.message, chat_completion_message_params=body.history)
         else:
-            response = claude.predict(prompt=body.message)
+            if protocol_option == "create":
+                response = claude.create(user_id=str(user.sub), prompt=body.message, history=body.history)  # type: ignore
+            else:
+                response = claude.update(user_id=str(user.sub), prompt=body.message, history=body.history)  # type: ignore
 
         if response is None or response == "":
             return ChatResponse(reply="No response was generated", fake=bool(body.fake))
@@ -211,50 +220,6 @@ async def create_chat_completion(
 
     except Exception as e:
         logger.exception("Error processing chat completion")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=InternalServerError(exception_object=e).model_dump()
-        ) from e
-
-
-@tracer.wrap()
-@app.post(
-    "/api/chat/updateProtocol",
-    response_model=Union[ChatResponse, ErrorResponse],
-    summary="Updates protocol",
-    description="Generate a chat response based on the provided prompt that will update an existing protocol with the required changes.",
-)
-async def update_protocol(
-    body: UpdateProtocol, user: Annotated[User, Security(auth.verify)]
-) -> Union[ChatResponse, ErrorResponse]:  # noqa: B008
-    """
-    Generate an updated protocol using LLM.
-
-    - **request**: The HTTP request containing the existing protocol and other relevant parameters.
-    - **returns**: A chat response or an error message.
-    """
-    logger.info("POST /api/chat/updateProtocol", extra={"body": body.model_dump(), "user": user})
-    try:
-        if not body.protocol_text or body.protocol_text == "":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=EmptyRequestError(message="Request body is empty").model_dump()
-            )
-
-        if body.fake:
-            return ChatResponse(reply="Fake response", fake=bool(body.fake))
-
-        response: Optional[str] = None
-        if "openai" in settings.model.lower():
-            response = openai.predict(prompt=body.prompt, chat_completion_message_params=None)
-        else:
-            response = claude.predict(prompt=body.prompt)
-
-        if response is None or response == "":
-            return ChatResponse(reply="No response was generated", fake=bool(body.fake))
-
-        return ChatResponse(reply=response, fake=bool(body.fake))
-
-    except Exception as e:
-        logger.exception("Error processing protocol update")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=InternalServerError(exception_object=e).model_dump()
         ) from e
@@ -291,7 +256,7 @@ async def create_protocol(
         if "openai" in settings.model.lower():
             response = openai.predict(prompt=str(body.model_dump()), chat_completion_message_params=None)
         else:
-            response = claude.predict(prompt=str(body.model_dump()))
+            response = claude.create(user_id=str(user.sub), prompt=body.prompt, history=None)
 
         if response is None or response == "":
             return ChatResponse(reply="No response was generated", fake=bool(body.fake))
@@ -300,6 +265,50 @@ async def create_protocol(
 
     except Exception as e:
         logger.exception("Error processing protocol creation")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=InternalServerError(exception_object=e).model_dump()
+        ) from e
+
+
+@tracer.wrap()
+@app.post(
+    "/api/chat/updateProtocol",
+    response_model=Union[ChatResponse, ErrorResponse],
+    summary="Updates protocol",
+    description="Generate a chat response based on the provided prompt that will update an existing protocol with the required changes.",
+)
+async def update_protocol(
+    body: UpdateProtocol, user: Annotated[User, Security(auth.verify)]
+) -> Union[ChatResponse, ErrorResponse]:  # noqa: B008
+    """
+    Generate an updated protocol using LLM.
+
+    - **request**: The HTTP request containing the existing protocol and other relevant parameters.
+    - **returns**: A chat response or an error message.
+    """
+    logger.info("POST /api/chat/updateProtocol", extra={"body": body.model_dump(), "user": user})
+    try:
+        if not body.protocol_text or body.protocol_text == "":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=EmptyRequestError(message="Request body is empty").model_dump()
+            )
+
+        if body.fake:
+            return ChatResponse(reply="Fake response", fake=bool(body.fake))
+
+        response: Optional[str] = None
+        if "openai" in settings.model.lower():
+            response = openai.predict(prompt=body.prompt, chat_completion_message_params=None)
+        else:
+            response = claude.update(user_id=str(user.sub), prompt=body.prompt, history=None)
+
+        if response is None or response == "":
+            return ChatResponse(reply="No response was generated", fake=bool(body.fake))
+
+        return ChatResponse(reply=response, fake=bool(body.fake))
+
+    except Exception as e:
+        logger.exception("Error processing protocol update")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=InternalServerError(exception_object=e).model_dump()
         ) from e

@@ -17,7 +17,7 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { stepIconsByType } from '../../../../form-types'
-import { FormAlerts } from '../../../../organisms'
+import { FormAlerts, PROTOCOL_NAV_BAR_HEIGHT_REM } from '../../../../organisms'
 import { useKitchen } from '../../../../organisms/Kitchen/hooks'
 import { RenameStepModal } from '../../../../organisms/RenameStepModal'
 import { getFormWarningsForSelectedStep } from '../../../../dismiss/selectors'
@@ -254,8 +254,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
         setShowFormErrors(false)
       } else {
         setShowFormErrors(true)
-        handleScrollToTop()
       }
+      handleScrollToTop()
     } else {
       handleSaveClick()
     }
@@ -272,6 +272,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
         />
       ) : null}
       <Toolbox
+        height="100%"
+        maxHeight={`calc(100vh - ${PROTOCOL_NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
         position={POSITION_RELATIVE}
         subHeader={
           isMultiStepToolbox ? (
@@ -304,6 +306,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
                 onClick={() => {
                   setToolboxStep(0)
                   setShowFormErrors(false)
+                  handleScrollToTop()
                 }}
               >
                 {i18n.format(t('shared:back'), 'capitalize')}

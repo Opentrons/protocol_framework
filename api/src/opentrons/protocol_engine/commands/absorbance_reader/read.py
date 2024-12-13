@@ -16,6 +16,7 @@ from ...resources.file_provider import (
     MAXIMUM_CSV_FILE_LIMIT,
 )
 from ...resources import FileProvider
+from ...state import update_types
 
 if TYPE_CHECKING:
     from opentrons.protocol_engine.state.state import StateView
@@ -80,6 +81,10 @@ class ReadAbsorbanceImpl(
             raise CannotPerformModuleAction(
                 "Cannot perform Read action on Absorbance Reader without calling `.initialize(...)` first."
             )
+        if abs_reader_substate.is_lid_on is False:
+            raise CannotPerformModuleAction(
+                "Absorbance Plate Reader can't read a plate with the lid open. Call `close_lid()` first."
+            )
 
         # TODO: we need to return a file ID and increase the file count even when a moduel is not attached
         if (
@@ -139,7 +144,7 @@ class ReadAbsorbanceImpl(
         # Today, the action handler for the FileStore looks for a ReadAbsorbanceResult command action, this will need to be delinked.
 
         # Begin interfacing with the file provider if the user provided a filename
-        file_ids = []
+        file_ids: list[str] = []
         if params.fileName is not None:
             # Create the Plate Reader Transform
             plate_read_result = PlateReaderData.construct(
@@ -171,7 +176,13 @@ class ReadAbsorbanceImpl(
                 )
 
         return SuccessData(
-            public=ReadAbsorbanceResult(data=asbsorbance_result, fileIds=file_ids),
+            public=ReadAbsorbanceResult(
+                data=asbsorbance_result,
+                fileIds=file_ids,
+            ),
+            state_update=update_types.StateUpdate(
+                files_added=update_types.FilesAddedUpdate(file_ids=file_ids)
+            ),
         )
 
 

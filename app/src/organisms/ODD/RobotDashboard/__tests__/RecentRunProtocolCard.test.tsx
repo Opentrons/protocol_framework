@@ -87,7 +87,7 @@ const missingBoth = [
 const mockRunData = {
   id: RUN_ID,
   createdAt: '2022-05-03T21:36:12.494778+00:00',
-  completedAt: 'thistime',
+  completedAt: '2023-05-03T21:36:12.494778+00:00',
   startedAt: 'thistime',
   protocolId: 'mockProtocolId',
   status: RUN_STATUS_FAILED,
@@ -169,7 +169,7 @@ describe('RecentRunProtocolCard', () => {
   it('should render text', () => {
     render(props)
     const lastRunTime = formatDistance(
-      new Date(mockRunData.createdAt),
+      new Date(mockRunData.completedAt),
       new Date(),
       {
         addSuffix: true,

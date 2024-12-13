@@ -1,4 +1,5 @@
 {
+  "commandAnnotations": [],
   "commands": [
     {
       "commandType": "home",
@@ -52167,6 +52168,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [
     {
       "description": "CleanupBead Beads",

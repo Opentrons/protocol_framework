@@ -13,6 +13,11 @@ import { AddCustomLabwareSlideout } from '..'
 vi.mock('/app/redux/custom-labware')
 vi.mock('/app/local-resources/labware')
 vi.mock('/app/redux/analytics')
+vi.mock('/app/redux/shell/remote', () => ({
+  remote: {
+    getFilePathFrom: vi.fn(),
+  },
+}))
 
 let mockTrackEvent: any
 

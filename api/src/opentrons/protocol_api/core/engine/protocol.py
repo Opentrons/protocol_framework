@@ -474,6 +474,8 @@ class ProtocolCore(
                 raise InvalidModuleLocationError(deck_slot, model.name)
 
         robot_type = self._engine_client.state.config.robot_type
+        # todo(mm, 2024-12-03): This might be possible to remove:
+        # Protocol Engine will normalize the deck slot itself.
         normalized_deck_slot = deck_slot.to_equivalent_for_robot_type(robot_type)
 
         result = self._engine_client.execute_command_without_recovery(

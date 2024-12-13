@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
@@ -24,9 +24,11 @@ import { useTrackEvent, ANALYTICS_RENAME_ROBOT } from '/app/redux/analytics'
 import { Slideout } from '/app/atoms/Slideout'
 import { useIsFlex } from '/app/redux-resources/robots'
 
+import type { ChangeEvent } from 'react'
 import type { Resolver, FieldError } from 'react-hook-form'
 import type { UpdatedRobotName } from '@opentrons/api-client'
 import type { State, Dispatch } from '/app/redux/types'
+
 interface RenameRobotSlideoutProps {
   isExpanded: boolean
   onCloseClick: () => void
@@ -49,9 +51,7 @@ export function RenameRobotSlideout({
   robotName,
 }: RenameRobotSlideoutProps): JSX.Element {
   const { t } = useTranslation('device_settings')
-  const [previousRobotName, setPreviousRobotName] = React.useState<string>(
-    robotName
-  )
+  const [previousRobotName, setPreviousRobotName] = useState<string>(robotName)
   const isFlex = useIsFlex(robotName)
   const trackEvent = useTrackEvent()
   const navigate = useNavigate()
@@ -190,7 +190,7 @@ export function RenameRobotSlideout({
               id="newRobotName"
               name="newRobotName"
               type="text"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 field.onChange(e)
                 trigger('newRobotName')
               }}

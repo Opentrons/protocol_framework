@@ -42,6 +42,7 @@
       "setStatusBar": "#/definitions/SetStatusBarCreate",
       "verifyTipPresence": "#/definitions/VerifyTipPresenceCreate",
       "getTipPresence": "#/definitions/GetTipPresenceCreate",
+      "getNextTip": "#/definitions/GetNextTipCreate",
       "liquidProbe": "#/definitions/LiquidProbeCreate",
       "tryLiquidProbe": "#/definitions/TryLiquidProbeCreate",
       "heaterShaker/waitForTemperature": "#/definitions/opentrons__protocol_engine__commands__heater_shaker__wait_for_temperature__WaitForTemperatureCreate",
@@ -82,7 +83,9 @@
       "unsafe/placeLabware": "#/definitions/UnsafePlaceLabwareCreate",
       "robot/moveAxesRelative": "#/definitions/MoveAxesRelativeCreate",
       "robot/moveAxesTo": "#/definitions/MoveAxesToCreate",
-      "robot/moveTo": "#/definitions/MoveToCreate"
+      "robot/moveTo": "#/definitions/MoveToCreate",
+      "robot/openGripperJaw": "#/definitions/openGripperJawCreate",
+      "robot/closeGripperJaw": "#/definitions/closeGripperJawCreate"
     }
   },
   "oneOf": [
@@ -196,6 +199,9 @@
     },
     {
       "$ref": "#/definitions/GetTipPresenceCreate"
+    },
+    {
+      "$ref": "#/definitions/GetNextTipCreate"
     },
     {
       "$ref": "#/definitions/LiquidProbeCreate"
@@ -319,6 +325,12 @@
     },
     {
       "$ref": "#/definitions/MoveToCreate"
+    },
+    {
+      "$ref": "#/definitions/openGripperJawCreate"
+    },
+    {
+      "$ref": "#/definitions/closeGripperJawCreate"
     }
   ],
   "definitions": {
@@ -1940,16 +1952,35 @@
         "airGapByVolume": {
           "title": "Airgapbyvolume",
           "description": "Settings for air gap keyed by target aspiration volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               }
             ]
           }
@@ -2073,16 +2104,69 @@
         "flowRateByVolume": {
           "title": "Flowratebyvolume",
           "description": "Settings for flow rate keyed by target aspiration volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "correctionByVolume": {
+          "title": "Correctionbyvolume",
+          "description": "Settings for volume correction keyed by by target aspiration volume, representing additional volume the plunger should move to accurately hit target volume.",
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
               }
             ]
           }
@@ -2117,6 +2201,7 @@
         "positionReference",
         "offset",
         "flowRateByVolume",
+        "correctionByVolume",
         "preWet",
         "mix",
         "delay"
@@ -2218,16 +2303,35 @@
         "airGapByVolume": {
           "title": "Airgapbyvolume",
           "description": "Settings for air gap keyed by target aspiration volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               }
             ]
           }
@@ -2313,16 +2417,69 @@
         "flowRateByVolume": {
           "title": "Flowratebyvolume",
           "description": "Settings for flow rate keyed by target dispense volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "correctionByVolume": {
+          "title": "Correctionbyvolume",
+          "description": "Settings for volume correction keyed by by target dispense volume, representing additional volume the plunger should move to accurately hit target volume.",
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
               }
             ]
           }
@@ -2339,16 +2496,35 @@
         "pushOutByVolume": {
           "title": "Pushoutbyvolume",
           "description": "Settings for pushout keyed by target dispense volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               }
             ]
           }
@@ -2369,6 +2545,7 @@
         "positionReference",
         "offset",
         "flowRateByVolume",
+        "correctionByVolume",
         "mix",
         "pushOutByVolume",
         "delay"
@@ -2417,16 +2594,69 @@
         "flowRateByVolume": {
           "title": "Flowratebyvolume",
           "description": "Settings for flow rate keyed by target dispense volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "correctionByVolume": {
+          "title": "Correctionbyvolume",
+          "description": "Settings for volume correction keyed by by target dispense volume, representing additional volume the plunger should move to accurately hit target volume.",
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
               }
             ]
           }
@@ -2434,16 +2664,35 @@
         "conditioningByVolume": {
           "title": "Conditioningbyvolume",
           "description": "Settings for conditioning volume keyed by target dispense volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               }
             ]
           }
@@ -2451,16 +2700,35 @@
         "disposalByVolume": {
           "title": "Disposalbyvolume",
           "description": "Settings for disposal volume keyed by target dispense volume.",
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
               {
-                "type": "integer",
-                "minimum": 0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               },
               {
-                "type": "number",
-                "minimum": 0.0
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0.0
+                  }
+                ]
               }
             ]
           }
@@ -2481,6 +2749,7 @@
         "positionReference",
         "offset",
         "flowRateByVolume",
+        "correctionByVolume",
         "conditioningByVolume",
         "disposalByVolume",
         "delay"
@@ -2690,6 +2959,7 @@
         "p1000_single_gen2",
         "p1000_single_flex",
         "p1000_multi_flex",
+        "p1000_multi_em",
         "p1000_96",
         "p200_96"
       ],
@@ -3840,6 +4110,62 @@
         },
         "params": {
           "$ref": "#/definitions/GetTipPresenceParams"
+        },
+        "intent": {
+          "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/CommandIntent"
+            }
+          ]
+        },
+        "key": {
+          "title": "Key",
+          "description": "A key value, unique in this run, that can be used to track the same logical command across multiple runs of the same protocol. If a value is not provided, one will be generated.",
+          "type": "string"
+        }
+      },
+      "required": ["params"]
+    },
+    "GetNextTipParams": {
+      "title": "GetNextTipParams",
+      "description": "Payload needed to resolve the next available tip.",
+      "type": "object",
+      "properties": {
+        "pipetteId": {
+          "title": "Pipetteid",
+          "description": "Identifier of pipette to use for liquid handling.",
+          "type": "string"
+        },
+        "labwareIds": {
+          "title": "Labwareids",
+          "description": "Labware ID(s) of tip racks to resolve next available tip(s) from Labware IDs will be resolved sequentially",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "startingTipWell": {
+          "title": "Startingtipwell",
+          "description": "Name of starting tip rack 'well'. This only applies to the first tip rack in the list provided in labwareIDs",
+          "type": "string"
+        }
+      },
+      "required": ["pipetteId", "labwareIds"]
+    },
+    "GetNextTipCreate": {
+      "title": "GetNextTipCreate",
+      "description": "Get next tip command creation request model.",
+      "type": "object",
+      "properties": {
+        "commandType": {
+          "title": "Commandtype",
+          "default": "getNextTip",
+          "enum": ["getNextTip"],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/GetNextTipParams"
         },
         "intent": {
           "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
@@ -5608,7 +5934,7 @@
       "type": "object",
       "properties": {
         "axes": {
-          "description": "The axes for which to update the position estimators.",
+          "description": "The axes for which to update the position estimators. Any axes that are not physically present will be ignored.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/MotorAxis"
@@ -5942,6 +6268,84 @@
         },
         "params": {
           "$ref": "#/definitions/MoveToParams"
+        },
+        "intent": {
+          "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/CommandIntent"
+            }
+          ]
+        },
+        "key": {
+          "title": "Key",
+          "description": "A key value, unique in this run, that can be used to track the same logical command across multiple runs of the same protocol. If a value is not provided, one will be generated.",
+          "type": "string"
+        }
+      },
+      "required": ["params"]
+    },
+    "openGripperJawParams": {
+      "title": "openGripperJawParams",
+      "description": "Payload required to release a gripper.",
+      "type": "object",
+      "properties": {}
+    },
+    "openGripperJawCreate": {
+      "title": "openGripperJawCreate",
+      "description": "openGripperJaw command request model.",
+      "type": "object",
+      "properties": {
+        "commandType": {
+          "title": "Commandtype",
+          "default": "robot/openGripperJaw",
+          "enum": ["robot/openGripperJaw"],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/openGripperJawParams"
+        },
+        "intent": {
+          "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/CommandIntent"
+            }
+          ]
+        },
+        "key": {
+          "title": "Key",
+          "description": "A key value, unique in this run, that can be used to track the same logical command across multiple runs of the same protocol. If a value is not provided, one will be generated.",
+          "type": "string"
+        }
+      },
+      "required": ["params"]
+    },
+    "closeGripperJawParams": {
+      "title": "closeGripperJawParams",
+      "description": "Payload required to close a gripper.",
+      "type": "object",
+      "properties": {
+        "force": {
+          "title": "Force",
+          "description": "The force the gripper should use to hold the jaws, falls to default if none is provided.",
+          "type": "number"
+        }
+      }
+    },
+    "closeGripperJawCreate": {
+      "title": "closeGripperJawCreate",
+      "description": "closeGripperJaw command request model.",
+      "type": "object",
+      "properties": {
+        "commandType": {
+          "title": "Commandtype",
+          "default": "robot/closeGripperJaw",
+          "enum": ["robot/closeGripperJaw"],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/closeGripperJawParams"
         },
         "intent": {
           "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",

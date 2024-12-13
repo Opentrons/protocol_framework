@@ -10,15 +10,15 @@ import {
   getHydratedForm,
   selectors as stepFormSelectors,
 } from '../../../../step-forms'
-import { maskField } from '../../../../steplist/fieldLevel'
-import { getInvariantContext } from '../../../../step-forms/selectors'
 import {
+  AutoAddPauseUntilTempStepModal,
   CLOSE_STEP_FORM_WITH_CHANGES,
   CLOSE_UNSAVED_STEP_FORM,
   ConfirmDeleteModal,
   DELETE_STEP_FORM,
-} from '../../../../components/modals/ConfirmDeleteModal'
-import { AutoAddPauseUntilTempStepModal } from '../../../../components/modals/AutoAddPauseUntilTempStepModal'
+} from '../../../../organisms'
+import { maskField } from '../../../../steplist/fieldLevel'
+import { getInvariantContext } from '../../../../step-forms/selectors'
 import { getDirtyFields, makeSingleEditFieldProps } from './utils'
 import { StepFormToolbox } from './StepFormToolbox'
 

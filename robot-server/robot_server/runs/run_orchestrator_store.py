@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import List, Optional, Callable, Mapping
+from typing import Dict, List, Optional, Callable, Mapping
 
 from opentrons.types import NozzleMapInterface
 from opentrons.protocol_engine.errors.exceptions import EStopActivatedError
@@ -289,12 +289,19 @@ class RunOrchestratorStore:
         run_data = self.run_orchestrator.get_state_summary()
         commands = self.run_orchestrator.get_all_commands()
         run_time_parameters = self.run_orchestrator.get_run_time_parameters()
+        command_annotations = self.run_orchestrator.get_command_annotations()
 
         self._run_orchestrator = None
 
         return RunResult(
-            state_summary=run_data, commands=commands, parameters=run_time_parameters
+            state_summary=run_data,
+            commands=commands,
+            parameters=run_time_parameters,
+            command_annotations=command_annotations,
         )
+
+    # todo(mm, 2024-11-15): Are all of these pass-through methods helpful?
+    # Can we delete them and make callers just call .run_orchestrator.play(), etc.?
 
     def play(self, deck_configuration: Optional[DeckConfigurationType] = None) -> None:
         """Start or resume the run."""
@@ -331,6 +338,10 @@ class RunOrchestratorStore:
     def get_nozzle_maps(self) -> Mapping[str, NozzleMapInterface]:
         """Get the current nozzle map keyed by pipette id."""
         return self.run_orchestrator.get_nozzle_maps()
+
+    def get_tip_attached(self) -> Dict[str, bool]:
+        """Get current tip state keyed by pipette id."""
+        return self.run_orchestrator.get_tip_attached()
 
     def get_run_time_parameters(self) -> List[RunTimeParameter]:
         """Parameter definitions defined by protocol, if any. Will always be empty before execution."""

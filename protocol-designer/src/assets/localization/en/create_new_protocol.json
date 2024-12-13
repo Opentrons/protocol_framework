@@ -11,7 +11,7 @@
   "edit": "Edit",
   "fixtures_added": "Fixtures added",
   "fixtures_replace": "Fixtures replace standard deck slots and let you add functionality to your Flex.",
-  "incompatible_tip_body": "Protocol Designer only accepts custom JSON labware definitions made with our Labware Creator. Upload a valid file to continue.",
+  "incompatible_tip_body": "Using a pipette with an incompatible tip rack may result reduce pipette accuracy and collisions. We strongly recommend that you do not pair a pipette with an incompatible tip rack.",
   "incompatible_tips": "Incompatible tips",
   "labware_name": "Labware name",
   "left_right": "Left + Right",
@@ -41,10 +41,11 @@
   "trash_required": "A trash entity is required",
   "trashBin": "Trash Bin",
   "up_to_3_tipracks": "Up to 3 tip rack types are allowed per pipette",
-  "vol_label": "{{volume}} uL",
+  "vol_label": "{{volume}} µL",
   "wasteChute": "Waste Chute",
   "which_fixtures": "Which fixtures will you be using?",
   "which_modules": "Select modules to use in your protocol.",
   "which_pipette": "Pick your first pipette. If you need a second pipette, you can add it next.",
+  "which_pipette_second": "Now add your second pipette",
   "your_pipettes": "Your pipettes"
 }

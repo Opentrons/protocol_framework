@@ -1,4 +1,5 @@
 {
+  "commandAnnotations": [],
   "commands": [
     {
       "commandType": "home",
@@ -2580,6 +2581,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [],
   "metadata": {
     "author": "AA BB",

@@ -1,4 +1,5 @@
 {
+  "commandAnnotations": [],
   "commands": [
     {
       "commandType": "home",
@@ -50265,6 +50266,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [
     {
       "description": "Digested Protein samples, volume per well",

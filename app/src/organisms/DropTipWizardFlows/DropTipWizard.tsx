@@ -246,7 +246,13 @@ export const DropTipWizardContent = (
 
   function buildModalContent(): JSX.Element {
     // Don't render the spinner screen for 1 render cycle on fixit commands.
-    if (currentStep === BEFORE_BEGINNING && issuedCommandsType === 'fixit') {
+
+    if (errorDetails != null) {
+      return buildErrorScreen()
+    } else if (
+      currentStep === BEFORE_BEGINNING &&
+      issuedCommandsType === 'fixit'
+    ) {
       return buildBeforeBeginning()
     } else if (
       activeMaintenanceRunId == null &&
@@ -259,8 +265,6 @@ export const DropTipWizardContent = (
       return buildRobotInMotion()
     } else if (showConfirmExit) {
       return buildShowExitConfirmation()
-    } else if (errorDetails != null) {
-      return buildErrorScreen()
     } else if (currentStep === BEFORE_BEGINNING) {
       return buildBeforeBeginning()
     } else if (currentStep === CHOOSE_LOCATION_OPTION) {

@@ -53,9 +53,11 @@ from opentrons.protocol_engine import (
     LoadedPipette,
     LoadedModule,
     Liquid,
+    LiquidClassRecordWithId,
     StateSummary,
 )
 from opentrons.protocol_engine.protocol_engine import code_in_error_tree
+from opentrons.protocol_engine.types import CommandAnnotation
 
 from opentrons_shared_data.robot.types import RobotType
 
@@ -333,8 +335,10 @@ async def _do_analyze(
                 wells=[],
                 hasEverEnteredErrorRecovery=False,
                 files=[],
+                liquidClasses=[],
             ),
             parameters=[],
+            command_annotations=[],
         )
         return analysis
     return await orchestrator.run(deck_configuration=[])
@@ -399,6 +403,8 @@ async def _analyze(
         pipettes=analysis.state_summary.pipettes,
         modules=analysis.state_summary.modules,
         liquids=analysis.state_summary.liquids,
+        commandAnnotations=analysis.command_annotations,
+        liquidClasses=analysis.state_summary.liquidClasses,
     )
 
     _call_for_output_of_kind(
@@ -486,4 +492,6 @@ class AnalyzeResults(BaseModel):
     pipettes: List[LoadedPipette]
     modules: List[LoadedModule]
     liquids: List[Liquid]
+    liquidClasses: List[LiquidClassRecordWithId]
     errors: List[ErrorOccurrence]
+    commandAnnotations: List[CommandAnnotation]

@@ -44,7 +44,7 @@ export function TemperatureTools(props: StepFormProps): JSX.Element {
           title={t('form:step_edit_form.moduleState')}
           fieldTitle={t('form:step_edit_form.field.temperature.setTemperature')}
           units={t('units.degrees')}
-          isSelected={formData.setTemperature === true}
+          isSelected={formData.setTemperature === 'true'}
           onLabel={t('form:step_edit_form.field.temperature.toggleOn')}
           offLabel={t('form:step_edit_form.field.temperature.toggleOff')}
           formLevelError={getFormLevelError(

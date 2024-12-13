@@ -1,4 +1,5 @@
 {
+  "commandAnnotations": [],
   "commands": [
     {
       "commandType": "home",
@@ -40778,6 +40779,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [],
   "metadata": {
     "author": "Opentrons <protocols@opentrons.com>",

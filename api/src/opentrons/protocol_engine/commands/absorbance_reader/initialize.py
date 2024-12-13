@@ -10,6 +10,7 @@ from opentrons.protocol_engine.types import ABSMeasureMode
 
 from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ...errors.error_occurrence import ErrorOccurrence
+from ...errors import InvalidWavelengthError
 
 if TYPE_CHECKING:
     from opentrons.protocol_engine.state.state import StateView
@@ -69,30 +70,41 @@ class InitializeImpl(
             unsupported_wavelengths = sample_wavelengths.difference(
                 supported_wavelengths
             )
+            sample_wl_str = ", ".join([str(w) + "nm" for w in sample_wavelengths])
+            supported_wl_str = ", ".join([str(w) + "nm" for w in supported_wavelengths])
+            unsupported_wl_str = ", ".join(
+                [str(w) + "nm" for w in unsupported_wavelengths]
+            )
             if unsupported_wavelengths:
-                raise ValueError(f"Unsupported wavelengths: {unsupported_wavelengths}")
+                raise InvalidWavelengthError(
+                    f"Unsupported wavelengths: {unsupported_wl_str}. "
+                    f" Use one of {supported_wl_str} instead."
+                )
 
             if params.measureMode == "single":
                 if sample_wavelengths_len != 1:
                     raise ValueError(
-                        f"single requires one sample wavelength, provided {sample_wavelengths}"
+                        f"Measure mode `single` requires one sample wavelength,"
+                        f" {sample_wl_str} provided instead."
                     )
                 if (
                     reference_wavelength is not None
                     and reference_wavelength not in supported_wavelengths
                 ):
-                    raise ValueError(
-                        f"Reference wavelength {reference_wavelength} not supported {supported_wavelengths}"
+                    raise InvalidWavelengthError(
+                        f"Reference wavelength {reference_wavelength}nm is not supported."
+                        f" Use one of {supported_wl_str} instead."
                     )
 
             if params.measureMode == "multi":
                 if sample_wavelengths_len < 1 or sample_wavelengths_len > 6:
                     raise ValueError(
-                        f"multi requires 1-6 sample wavelengths, provided {sample_wavelengths}"
+                        f"Measure mode `multi` requires 1-6 sample wavelengths,"
+                        f" {sample_wl_str} provided instead."
                     )
                 if reference_wavelength is not None:
-                    raise RuntimeError(
-                        "Reference wavelength cannot be used with multi mode."
+                    raise ValueError(
+                        "Reference wavelength cannot be used with Measure mode `multi`."
                     )
 
             await abs_reader.set_sample_wavelength(

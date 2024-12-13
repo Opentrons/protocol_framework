@@ -8,7 +8,6 @@ import {
   MAGNETIC_BLOCK_V1,
   MAGNETIC_MODULE_V1,
   MAGNETIC_MODULE_V2,
-  STAGING_AREA_CUTOUTS,
   TEMPERATURE_MODULE_V1,
   TEMPERATURE_MODULE_V2,
   THERMOCYCLER_MODULE_TYPE,
@@ -19,6 +18,7 @@ import {
 import wasteChuteImage from '../../assets/images/waste_chute.png'
 import trashBinImage from '../../assets/images/flex_trash_bin.png'
 import stagingAreaImage from '../../assets/images/staging_area.png'
+import { STAGING_AREA_CUTOUTS_ORDERED } from '../../constants'
 
 import type {
   CutoutId,
@@ -268,7 +268,9 @@ export const getTrashSlot = (values: WizardFormState): string => {
     equipment.includes('stagingArea')
   )
 
-  const cutouts = stagingAreas.map((_, index) => STAGING_AREA_CUTOUTS[index])
+  const cutouts = stagingAreas.map(
+    (_, index) => STAGING_AREA_CUTOUTS_ORDERED[index]
+  )
   const hasWasteChute = additionalEquipment.find(equipment =>
     equipment.includes('wasteChute')
   )

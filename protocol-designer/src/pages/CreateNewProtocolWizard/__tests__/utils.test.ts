@@ -291,10 +291,23 @@ describe('getTrashSlot', () => {
     const result = getTrashSlot(MOCK_FORM_STATE)
     expect(result).toBe('cutoutA3')
   })
-  it('should return cutoutA1 when there is a staging area in slot A3', () => {
+  it('should return cutoutA3 when there are 3 or fewer staging areas', () => {
     MOCK_FORM_STATE = {
       ...MOCK_FORM_STATE,
       additionalEquipment: ['stagingArea'],
+    }
+    const result = getTrashSlot(MOCK_FORM_STATE)
+    expect(result).toBe('cutoutA3')
+  })
+  it('should return cutoutA1 when there are 4 staging areas', () => {
+    MOCK_FORM_STATE = {
+      ...MOCK_FORM_STATE,
+      additionalEquipment: [
+        'stagingArea',
+        'stagingArea',
+        'stagingArea',
+        'stagingArea',
+      ],
     }
     const result = getTrashSlot(MOCK_FORM_STATE)
     expect(result).toBe('cutoutA1')

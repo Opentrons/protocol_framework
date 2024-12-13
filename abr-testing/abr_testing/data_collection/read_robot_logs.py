@@ -250,7 +250,9 @@ def liquid_height_commands(
 
 
 def plate_reader_commands(
-    file_results: Dict[str, Any], hellma_plate_standards: List[Dict[str, Any]]
+    file_results: Dict[str, Any],
+    hellma_plate_standards: List[Dict[str, Any]],
+    orientation: bool,
 ) -> Dict[str, object]:
     """Plate Reader Command Counts."""
     commandData = file_results.get("commands", "")
@@ -279,38 +281,46 @@ def plate_reader_commands(
             read = "yes"
         elif read == "yes" and commandType == "comment":
             result = command["params"].get("message", "")
-            formatted_result = result.split("result: ")[1]
-            result_dict = eval(formatted_result)
-            result_dict_keys = list(result_dict.keys())
-            if len(result_dict_keys) > 1:
-                read_type = "multi"
-            else:
-                read_type = "single"
-            for wavelength in result_dict_keys:
-                one_wavelength_dict = result_dict.get(wavelength)
-                result_ndarray = plate_reader.convert_read_dictionary_to_array(
-                    one_wavelength_dict
-                )
-                for item in hellma_plate_standards:
-                    wavelength_of_interest = item["wavelength"]
-                    if str(wavelength) == str(wavelength_of_interest):
-                        error_cells = plate_reader.check_byonoy_data_accuracy(
-                            result_ndarray, item, False
+            if "result:" in result:
+                plate_name = result.split("result:")[0]
+                formatted_result = result.split("result: ")[1]
+                print(formatted_result)
+                result_dict = eval(formatted_result)
+                result_dict_keys = list(result_dict.keys())
+                if len(result_dict_keys) > 1:
+                    read_type = "multi"
+                else:
+                    read_type = "single"
+                if "hellma_plate" in plate_name:
+                    for wavelength in result_dict_keys:
+                        one_wavelength_dict = result_dict.get(wavelength)
+                        result_ndarray = plate_reader.convert_read_dictionary_to_array(
+                            one_wavelength_dict
                         )
-                        if len(error_cells[0]) > 0:
-                            percent = (96 - len(error_cells)) / 96 * 100
-                            for cell in error_cells:
-                                print(
-                                    "FAIL: Cell " + str(cell) + " out of accuracy spec."
+                        for item in hellma_plate_standards:
+                            wavelength_of_interest = item["wavelength"]
+                            if str(wavelength) == str(wavelength_of_interest):
+                                error_cells = plate_reader.check_byonoy_data_accuracy(
+                                    result_ndarray, item, orientation
                                 )
-                        else:
-                            percent = 100
-                            print(
-                                f"PASS: {wavelength_of_interest} meet accuracy specification"
-                            )
-                        final_result[read_type, wavelength, read_num] = percent
-                        read_num += 1
-            read = "no"
+                                if len(error_cells[0]) > 0:
+                                    percent = (96 - len(error_cells)) / 96 * 100
+                                    for cell in error_cells:
+                                        print(
+                                            "FAIL: Cell "
+                                            + str(cell)
+                                            + " out of accuracy spec."
+                                        )
+                                else:
+                                    percent = 100
+                                    print(
+                                        f"PASS: {wavelength_of_interest} meet accuracy spec."
+                                    )
+                                final_result[read_type, wavelength, read_num] = percent
+                                read_num += 1
+                else:
+                    final_result = result_dict
+                read = "no"
     plate_dict = {
         "Plate Reader # of Reads": read_count,
         "Plate Reader Avg Read Time (sec)": avg_read_time,

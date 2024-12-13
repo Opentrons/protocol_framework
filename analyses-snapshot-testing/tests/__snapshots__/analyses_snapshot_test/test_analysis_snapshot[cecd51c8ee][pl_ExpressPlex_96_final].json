@@ -1,4 +1,5 @@
 {
+  "commandAnnotations": [],
   "commands": [
     {
       "commandType": "home",
@@ -13346,6 +13347,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [
     {
       "description": "Index Plate color",

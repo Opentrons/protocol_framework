@@ -9,6 +9,7 @@ import {
   StyledText,
   Toolbox,
 } from '@opentrons/components'
+import { PROTOCOL_NAV_BAR_HEIGHT_REM } from '../../../../organisms'
 import {
   END_TERMINAL_ITEM_ID,
   START_TERMINAL_ITEM_ID,
@@ -60,6 +61,8 @@ export const TimelineToolbox = (): JSX.Element => {
   return (
     <Toolbox
       position={POSITION_RELATIVE}
+      height="100%"
+      maxHeight={`calc(100vh - ${PROTOCOL_NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
       width="19.5rem"
       title={
         <StyledText desktopStyle="bodyLargeSemiBold">
@@ -75,10 +78,7 @@ export const TimelineToolbox = (): JSX.Element => {
         gridGap={SPACING.spacing4}
         width="100%"
       >
-        <TerminalItemStep
-          id={START_TERMINAL_ITEM_ID}
-          title={t('starting_deck_state')}
-        />
+        <TerminalItemStep id={START_TERMINAL_ITEM_ID} />
         <DraggableSteps
           orderedStepIds={orderedStepIds}
           reorderSteps={(stepIds: StepIdType[]) => {
@@ -86,10 +86,7 @@ export const TimelineToolbox = (): JSX.Element => {
           }}
         />
         <PresavedStep />
-        <TerminalItemStep
-          id={END_TERMINAL_ITEM_ID}
-          title={t('final_deck_state')}
-        />
+        <TerminalItemStep id={END_TERMINAL_ITEM_ID} />
       </Flex>
     </Toolbox>
   )

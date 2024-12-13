@@ -24,6 +24,8 @@ import { LiquidButton } from './LiquidButton'
 
 import type { StyleProps, TabProps } from '@opentrons/components'
 
+export const PROTOCOL_NAV_BAR_HEIGHT_REM = 4
+
 interface ProtocolNavBarProps {
   hasZoomInSlot?: boolean
   tabs?: TabProps[]
@@ -96,8 +98,9 @@ export function ProtocolNavBar({
 }
 
 const NavContainer = styled(Flex)<{ showShadow: boolean }>`
-  z-index: 11;
+  z-index: ${props => (props.showShadow === true ? 11 : 0)};
   padding: ${SPACING.spacing12};
+  height: ${PROTOCOL_NAV_BAR_HEIGHT_REM}rem;
   width: 100%;
   justify-content: ${JUSTIFY_SPACE_BETWEEN};
   align-items: ${ALIGN_CENTER};

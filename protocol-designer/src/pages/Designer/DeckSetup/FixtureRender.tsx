@@ -10,7 +10,7 @@ import {
 } from '@opentrons/components'
 import { getPositionFromSlotId } from '@opentrons/shared-data'
 import { getInitialDeckSetup } from '../../../step-forms/selectors'
-import { LabwareOnDeck as LabwareOnDeckComponent } from '../../../components/DeckSetup/LabwareOnDeck'
+import { LabwareOnDeck as LabwareOnDeckComponent } from '../../../organisms'
 import { lightFill, darkFill } from './DeckSetupContainer'
 import { getAdjacentLabware } from './utils'
 import type { TrashCutoutId, StagingAreaLocation } from '@opentrons/components'

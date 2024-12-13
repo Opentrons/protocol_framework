@@ -1,8 +1,5 @@
 import partition from 'lodash/partition'
-import {
-  getLabwareDisplayName,
-  NON_USER_ADDRESSABLE_LABWARE,
-} from '@opentrons/shared-data'
+import { getLabwareDisplayName } from '@opentrons/shared-data'
 
 import type {
   LabwareDefinition2,
@@ -30,24 +27,11 @@ export interface GroupedLabwareSetupItems {
 export function getLabwareSetupItemGroups(
   commands: RunTimeCommand[]
 ): GroupedLabwareSetupItems {
-  let beyondInitialLoadCommands = false
-
-  const LABWARE_ACCESS_COMMAND_TYPES = [
-    'moveToWell',
-    'aspirate',
-    'dispense',
-    'blowout',
-    'pickUpTip',
-    'dropTip',
-    'touchTip',
-  ]
-
   const [offDeckItems, onDeckItems] = partition(
     commands.reduce<LabwareSetupItem[]>((acc, c) => {
       if (
         c.commandType === 'loadLabware' &&
-        c.result?.definition?.metadata?.displayCategory !== 'trash' &&
-        !NON_USER_ADDRESSABLE_LABWARE.includes(c.params?.loadName)
+        c.result?.definition?.metadata?.displayCategory !== 'trash'
       ) {
         const { location, displayName } = c.params
         const { definition } = c.result ?? {}
@@ -81,12 +65,7 @@ export function getLabwareSetupItemGroups(
         return [
           ...acc,
           {
-            // NOTE: for the purposes of the labware setup step, anything loaded after
-            // the initial load commands will be treated as "initially off deck"
-            // even if technically loaded directly onto the deck later in the protocol
-            initialLocation: beyondInitialLoadCommands
-              ? 'offDeck'
-              : c.params.location,
+            initialLocation: c.params.location,
             definition,
             moduleModel,
             moduleLocation,
@@ -94,17 +73,7 @@ export function getLabwareSetupItemGroups(
             labwareId: c.result?.labwareId,
           },
         ]
-      } else if (
-        !beyondInitialLoadCommands &&
-        LABWARE_ACCESS_COMMAND_TYPES.includes(c.commandType) &&
-        !(
-          c.commandType === 'moveLabware' &&
-          c.params.strategy === 'manualMoveWithoutPause'
-        )
-      ) {
-        beyondInitialLoadCommands = true
       }
-
       return acc
     }, []),
     ({ initialLocation }) => initialLocation === 'offDeck'

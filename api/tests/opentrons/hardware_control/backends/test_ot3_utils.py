@@ -3,7 +3,7 @@ from typing import List
 from opentrons_hardware.hardware_control.motion_planning import Move
 from opentrons.hardware_control.backends import ot3utils
 from opentrons_hardware.firmware_bindings.constants import NodeId
-from opentrons.hardware_control.types import Axis, OT3Mount
+from opentrons.hardware_control.types import Axis, OT3Mount, OT3AxisKind
 from numpy import float64 as f64
 
 from opentrons.config import defaults_ot3, types as conf_types
@@ -93,6 +93,22 @@ def test_get_system_contraints_for_plunger() -> None:
     )
 
     assert updated_contraints[axis].max_acceleration == set_acceleration
+
+
+@pytest.mark.parametrize(["mount"], [[OT3Mount.LEFT], [OT3Mount.RIGHT]])
+def test_get_system_constraints_for_emulsifying_pipette(mount: OT3Mount) -> None:
+    set_max_speed = 90
+    config = defaults_ot3.build_with_defaults({})
+    pipette_ax = Axis.of_main_tool_actuator(mount)
+    default_pip_max_speed = config.motion_settings.default_max_speed[
+        conf_types.GantryLoad.LOW_THROUGHPUT
+    ][OT3AxisKind.P]
+    updated_constraints = ot3utils.get_system_constraints_for_emulsifying_pipette(
+        config.motion_settings, conf_types.GantryLoad.LOW_THROUGHPUT, mount
+    )
+    other_pipette = list(set(Axis.pipette_axes()) - {pipette_ax})[0]
+    assert updated_constraints[pipette_ax].max_speed == set_max_speed
+    assert updated_constraints[other_pipette].max_speed == default_pip_max_speed
 
 
 @pytest.mark.parametrize(
