@@ -115,7 +115,12 @@ class InitializeImpl(
                 reference_wavelength=params.referenceWavelength,
             )
 
-        state_update.initialize_absorbance_reader(params.moduleId)
+        state_update.initialize_absorbance_reader(
+            params.moduleId,
+            params.measureMode,
+            params.sampleWavelengths,
+            params.referenceWavelength,
+        )
 
         return SuccessData(public=InitializeResult(), state_update=state_update)
 

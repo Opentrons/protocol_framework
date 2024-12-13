@@ -297,12 +297,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         ):
             self._handle_thermocycler_module_commands(command)
 
-        if isinstance(
-            command.result,
-            (absorbance_reader.InitializeResult,),
-        ):
-            self._handle_absorbance_reader_commands(command)
-
     def _handle_state_update(self, state_update: update_types.StateUpdate) -> None:
         if (
             state_update.module_state_update != update_types.NO_CHANGE
@@ -601,7 +595,7 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             absorbance_reader_substate, AbsorbanceReaderSubState
         ), f"{module_id} is not an absorbance plate reader."
         is_lid_on = absorbance_reader_substate.is_lid_on
-
+        measured = True
         configured = absorbance_reader_substate.configured
         measure_mode = absorbance_reader_substate.measure_mode
         configured_wavelengths = absorbance_reader_substate.configured_wavelengths
@@ -609,17 +603,21 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         data = absorbance_reader_substate.data
         if state_update.absorbance_reader_lid != update_types.NO_CHANGE:
             is_lid_on = state_update.absorbance_reader_lid.is_lid_on
-        # elif isinstance(command.result, absorbance_reader.InitializeResult):
-        #     self._state.substate_by_module_id[module_id] = AbsorbanceReaderSubState(
-        #         module_id=AbsorbanceReaderId(module_id),
-        #         configured=True,
-        #         measured=False,
-        #         is_lid_on=is_lid_on,
-        #         measure_mode=AbsorbanceReaderMeasureMode(command.params.measureMode),
-        #         configured_wavelengths=command.params.sampleWavelengths,
-        #         reference_wavelength=command.params.referenceWavelength,
-        #         data=None,
-        #     )
+        elif state_update.initialize_absorbance_reader_update != update_types.NO_CHANGE:
+            module_id = AbsorbanceReaderId(module_id)
+            configured = True
+            measured = False
+            is_lid_on = is_lid_on
+            measure_mode = AbsorbanceReaderMeasureMode(
+                state_update.initialize_absorbance_reader_update.measure_mode
+            )
+            configured_wavelengths = (
+                state_update.initialize_absorbance_reader_update.sample_wave_lengths
+            )
+            reference_wavelength = (
+                state_update.initialize_absorbance_reader_update.reference_wave_length
+            )
+            data = None
         elif state_update.absorbance_reader_data != update_types.NO_CHANGE:
             data = state_update.absorbance_reader_data.read_result
             #
@@ -637,7 +635,7 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         self._state.substate_by_module_id[module_id] = AbsorbanceReaderSubState(
             module_id=AbsorbanceReaderId(module_id),
             configured=configured,
-            measured=True,
+            measured=measured,
             is_lid_on=is_lid_on,
             measure_mode=measure_mode,
             configured_wavelengths=configured_wavelengths,

@@ -15,6 +15,7 @@ from opentrons.protocol_engine.types import (
     TipGeometry,
     AspiratedFluid,
     LiquidClassRecord,
+    ABSMeasureMode,
 )
 from opentrons.types import MountType
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
@@ -267,8 +268,13 @@ class AbsorbanceReaderDataUpdate:
     read_result: typing.Dict[int, typing.Dict[str, float]]
 
 
+@dataclasses.dataclass(frozen=True)
 class AbsorbanceReaderInitializeUpdate:
     """An update to an absorbance reader's initialization."""
+
+    measure_mode: ABSMeasureMode
+    sample_wave_lengths: typing.List[int]
+    reference_wave_length: typing.Optional[int]
 
 
 @dataclasses.dataclass
@@ -619,11 +625,22 @@ class StateUpdate:
         )
         return self
 
-    def initialize_absorbance_reader(self, module_id: str):
+    def initialize_absorbance_reader(
+        self,
+        module_id: str,
+        measure_mode: ABSMeasureMode,
+        sample_wave_lengths: typing.List[int],
+        reference_wave_length: typing.Optional[int],
+    ) -> Self:
         self.module_state_update = ModuleStateUpdate(
             module_id=module_id, module_type="absorbanceReaderType"
         )
-        self.initialize_absorbance_reader_update = AbsorbanceReaderInitializeUpdate()
+        self.initialize_absorbance_reader_update = AbsorbanceReaderInitializeUpdate(
+            measure_mode=measure_mode,
+            sample_wave_lengths=sample_wave_lengths,
+            reference_wave_length=reference_wave_length,
+        )
+        return self
 
     def set_addressable_area_used(self: Self, addressable_area_name: str) -> Self:
         """Mark that an addressable area has been used. See `AddressableAreaUsedUpdate`."""
