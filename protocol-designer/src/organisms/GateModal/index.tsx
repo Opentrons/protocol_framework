@@ -21,10 +21,12 @@ const EULA_URL = 'https://opentrons.com/eula'
 
 export function GateModal(): JSX.Element | null {
   const { t } = useTranslation('shared')
-  const analytics = useSelector(analyticsSelectors.getHasOptedIn)
+  const { appVersion, hasOptedIn } = useSelector(
+    analyticsSelectors.getHasOptedIn
+  )
   const dispatch = useDispatch()
 
-  if (analytics.appVersion == null || analytics.hasOptedIn == null) {
+  if (appVersion == null || hasOptedIn == null) {
     return (
       <Modal
         position="bottomRight"

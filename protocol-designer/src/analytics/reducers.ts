@@ -23,9 +23,7 @@ const hasOptedIn: Reducer<OptInState, any> = handleActions(
       action: RehydratePersistedAction
     ) => {
       const persistedState = action.payload?.['analytics.hasOptedIn']
-      return persistedState !== undefined && state.appVersion != null
-        ? persistedState
-        : optInInitialState
+      return persistedState !== undefined ? persistedState : optInInitialState
     },
   },
   optInInitialState

@@ -31,7 +31,6 @@ import { BUTTON_LINK_STYLE } from '../../atoms'
 import { actions as featureFlagActions } from '../../feature-flags'
 import { getFeatureFlagData } from '../../feature-flags/selectors'
 import type { FlagTypes } from '../../feature-flags'
-import { OLDEST_MIGRATEABLE_VERSION } from '../../load-file/migration'
 
 const HOT_KEY_FLAG = 'OT_PD_ENABLE_HOT_KEYS_DISPLAY'
 const PRIVACY_POLICY_URL = 'https://opentrons.com/privacy-policy'

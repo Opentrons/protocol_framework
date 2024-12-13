@@ -20,7 +20,7 @@ import { FeatureFlagCard } from './FeatureFlagCard/FeatureFlagCard'
 
 export function SettingsApp(): JSX.Element {
   const dispatch = useDispatch()
-  const analytics = useSelector(analyticsSelectors.getHasOptedIn)
+  const { hasOptedIn } = useSelector(analyticsSelectors.getHasOptedIn)
   const canClearHintDismissals = useSelector(
     tutorialSelectors.getCanClearHintDismissals
   )
@@ -72,9 +72,9 @@ export function SettingsApp(): JSX.Element {
                 toggledOn={Boolean(analytics.hasOptedIn)}
                 onClick={() =>
                   dispatch(
-                    analytics.hasOptedIn
-                      ? analyticsActions.optOut
-                      : analyticsActions.optIn
+                    hasOptedIn
+                      ? analyticsActions.optOut()
+                      : analyticsActions.optIn()
                   )
                 }
               />
