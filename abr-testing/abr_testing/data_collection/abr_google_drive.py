@@ -100,12 +100,15 @@ def create_data_dictionary(
                 run_time_min = run_time.total_seconds() / 60
             except ValueError:
                 pass  # Handle datetime parsing errors if necessary
+            # Get protocol version #
+            version_number = read_robot_logs.get_protocol_version_number(file_results)
 
             if run_time_min > 0:
                 run_row = {
                     "Robot": robot,
                     "Run_ID": run_id,
                     "Protocol_Name": protocol_name,
+                    "Protocol Version": version_number,
                     "Software Version": software_version,
                     "Date": start_date,
                     "Start_Time": start_time_str,

@@ -48,23 +48,28 @@ def add_parameters(parameters: ParameterContext) -> None:
     helpers.create_deactivate_modules_parameter(parameters)
 
 
-def run(ctx: ProtocolContext) -> None:
+def run(protocol: ProtocolContext) -> None:
     """Protocol."""
-    b = ctx.params.dot_bottom  # type: ignore[attr-defined]
-    TIPRACK_96_NAME = ctx.params.tip_size  # type: ignore[attr-defined]
-    disposable_lid = ctx.params.disposable_lid  # type: ignore[attr-defined]
-    deck_riser = ctx.params.deck_riser  # type: ignore[attr-defined]
-    deactivate_modules_bool = ctx.params.deactivate_modules  # type: ignore[attr-defined]
+    b = protocol.params.dot_bottom  # type: ignore[attr-defined]
+    TIPRACK_96_NAME = protocol.params.tip_size  # type: ignore[attr-defined]
+    disposable_lid = protocol.params.disposable_lid  # type: ignore[attr-defined]
+    deck_riser = protocol.params.deck_riser  # type: ignore[attr-defined]
+    deactivate_modules_bool = protocol.params.deactivate_modules  # type: ignore[attr-defined]
 
-    waste_chute = ctx.load_waste_chute()
+    waste_chute = protocol.load_waste_chute()
+    helpers.comment_protocol_version(protocol, "01")
 
-    thermocycler: ThermocyclerContext = ctx.load_module(helpers.tc_str)  # type: ignore[assignment]
-    h_s: HeaterShakerContext = ctx.load_module(helpers.hs_str, "D1")  # type: ignore[assignment]
-    temperature_module: TemperatureModuleContext = ctx.load_module(
+    thermocycler: ThermocyclerContext = protocol.load_module(
+        helpers.tc_str
+    )  # type: ignore[assignment]
+    h_s: HeaterShakerContext = protocol.load_module(
+        helpers.hs_str, "D1"
+    )  # type: ignore[assignment]
+    temperature_module: TemperatureModuleContext = protocol.load_module(
         helpers.temp_str, "C1"
     )  # type: ignore[assignment]
     if disposable_lid:
-        unused_lids = helpers.load_disposable_lids(ctx, 3, ["A2"], deck_riser)
+        unused_lids = helpers.load_disposable_lids(protocol, 3, ["A2"], deck_riser)
     used_lids: List[Labware] = []
     thermocycler.open_lid()
     h_s.open_labware_latch()
@@ -76,15 +81,15 @@ def run(ctx: ProtocolContext) -> None:
 
     adapters = [temperature_module_adapter, h_s_adapter]
 
-    source_reservoir = ctx.load_labware(RESERVOIR_NAME, "D2")
-    dest_pcr_plate = ctx.load_labware(PCR_PLATE_96_NAME, "C2")
-    liquid_waste = ctx.load_labware("nest_1_reservoir_195ml", "B2", "Liquid Waste")
+    source_reservoir = protocol.load_labware(RESERVOIR_NAME, "D2")
+    dest_pcr_plate = protocol.load_labware(PCR_PLATE_96_NAME, "C2")
+    liquid_waste = protocol.load_labware("nest_1_reservoir_195ml", "B2", "Liquid Waste")
 
-    tip_rack_1 = ctx.load_labware(
+    tip_rack_1 = protocol.load_labware(
         TIPRACK_96_NAME, "A3", adapter="opentrons_flex_96_tiprack_adapter"
     )
-    tip_rack_2 = ctx.load_labware(TIPRACK_96_NAME, "C3")
-    tip_rack_3 = ctx.load_labware(TIPRACK_96_NAME, "C4")
+    tip_rack_2 = protocol.load_labware(TIPRACK_96_NAME, "C3")
+    tip_rack_3 = protocol.load_labware(TIPRACK_96_NAME, "C4")
 
     tip_racks = [
         tip_rack_1,
@@ -92,14 +97,16 @@ def run(ctx: ProtocolContext) -> None:
         tip_rack_3,
     ]
 
-    pipette_96_channel = ctx.load_instrument(
+    pipette_96_channel = protocol.load_instrument(
         PIPETTE_96_CHANNEL_NAME,
         mount="left",
         tip_racks=tip_racks,
         liquid_presence_detection=True,
     )
 
-    water = ctx.define_liquid(name="water", description="H₂O", display_color="#42AB2D")
+    water = protocol.define_liquid(
+        name="water", description="H₂O", display_color="#42AB2D"
+    )
     source_reservoir.wells_by_name()["A1"].load_liquid(liquid=water, volume=29000)
 
     def run_moves(
@@ -123,7 +130,7 @@ def run(ctx: ProtocolContext) -> None:
 
             def reset_labware() -> None:
                 """Reset the labware to the reset location."""
-                ctx.move_labware(
+                protocol.move_labware(
                     labware_to_move, reset_location, use_gripper=use_gripper
                 )
 
@@ -131,7 +138,9 @@ def run(ctx: ProtocolContext) -> None:
                 return
 
             for location in move_locations:
-                ctx.move_labware(labware_to_move, location, use_gripper=use_gripper)
+                protocol.move_labware(
+                    labware_to_move, location, use_gripper=use_gripper
+                )
 
                 if reset_after_each_move:
                     reset_labware()
@@ -226,7 +235,7 @@ def run(ctx: ProtocolContext) -> None:
                 labware_move_to_locations.remove(module_starting_location)
                 all_sequences = module_move_sequence.copy()
                 all_sequences.append(labware_move_to_locations)
-                ctx.move_labware(
+                protocol.move_labware(
                     labware, module_starting_location, use_gripper=USING_GRIPPER
                 )
                 run_moves(
@@ -239,14 +248,14 @@ def run(ctx: ProtocolContext) -> None:
 
         deck_moves(dest_pcr_plate, DECK_MOVE_RESET_LOCATION)
 
-        ctx.move_labware(
+        protocol.move_labware(
             dest_pcr_plate,
             STAGING_AREA_SLOT_3_RESET_LOCATION,
             use_gripper=USING_GRIPPER,
         )
         staging_area_slot_3_moves(dest_pcr_plate, STAGING_AREA_SLOT_3_RESET_LOCATION)
 
-        ctx.move_labware(
+        protocol.move_labware(
             dest_pcr_plate,
             STAGING_AREA_SLOT_4_RESET_LOCATION,
             use_gripper=USING_GRIPPER,
@@ -255,11 +264,11 @@ def run(ctx: ProtocolContext) -> None:
 
         module_locations = [thermocycler] + adapters
         module_moves(dest_pcr_plate, module_locations)
-        ctx.move_labware(dest_pcr_plate, thermocycler, use_gripper=USING_GRIPPER)
+        protocol.move_labware(dest_pcr_plate, thermocycler, use_gripper=USING_GRIPPER)
 
     def test_manual_moves() -> None:
         """Test manual moves."""
-        ctx.move_labware(source_reservoir, "D4", use_gripper=USING_GRIPPER)
+        protocol.move_labware(source_reservoir, "D4", use_gripper=USING_GRIPPER)
 
     def test_pipetting() -> None:
         """Test pipetting."""
@@ -287,7 +296,7 @@ def run(ctx: ProtocolContext) -> None:
                     tip_count += 1
             # leave this dropping in waste chute, do not use get_disposal_preference
             # want to test partial drop
-            ctx.move_labware(tip_rack_2, waste_chute, use_gripper=USING_GRIPPER)
+            protocol.move_labware(tip_rack_2, waste_chute, use_gripper=USING_GRIPPER)
 
         def test_column_tip_rack_usage() -> None:
             """Column Tip Pick Up."""
@@ -295,9 +304,9 @@ def run(ctx: ProtocolContext) -> None:
             pipette_96_channel.configure_nozzle_layout(
                 style=COLUMN, start="A12", tip_racks=[tip_rack_3]
             )
-            ctx.comment("------------------------------")
-            ctx.comment(f"channels {pipette_96_channel.active_channels}")
-            ctx.move_labware(tip_rack_3, "C3", use_gripper=USING_GRIPPER)
+            protocol.comment("------------------------------")
+            protocol.comment(f"channels {pipette_96_channel.active_channels}")
+            protocol.move_labware(tip_rack_3, "C3", use_gripper=USING_GRIPPER)
             for well in list_of_columns:
                 tiprack_well = "A" + str(well)
                 well_name = "A" + str(well)
@@ -309,14 +318,14 @@ def run(ctx: ProtocolContext) -> None:
                 pipette_96_channel.dispense(25, dest_pcr_plate[tiprack_well].bottom(b))
                 pipette_96_channel.blow_out(location=liquid_waste["A1"])
                 pipette_96_channel.drop_tip()
-            ctx.move_labware(tip_rack_3, waste_chute, use_gripper=USING_GRIPPER)
+            protocol.move_labware(tip_rack_3, waste_chute, use_gripper=USING_GRIPPER)
 
         def test_full_tip_rack_usage() -> None:
             """Full Tip Pick Up."""
             pipette_96_channel.configure_nozzle_layout(
                 style=ALL, tip_racks=[tip_rack_1]
             )
-            ctx.comment(f"channels {pipette_96_channel.active_channels}")
+            protocol.comment(f"channels {pipette_96_channel.active_channels}")
             pipette_96_channel.liquid_presence_detection = True
             pipette_96_channel.pick_up_tip()
             pipette_96_channel.aspirate(45, source_reservoir["A1"])
@@ -343,14 +352,14 @@ def run(ctx: ProtocolContext) -> None:
                     unused_lids,
                     used_lids,
                 ) = helpers.use_disposable_lid_with_tc(
-                    ctx, unused_lids, used_lids, dest_pcr_plate, thermocycler
+                    protocol, unused_lids, used_lids, dest_pcr_plate, thermocycler
                 )
             thermocycler.set_block_temperature(4)
             thermocycler.set_lid_temperature(105)
             # Close lid
             thermocycler.close_lid()
             helpers.perform_pcr(
-                ctx,
+                protocol,
                 thermocycler,
                 initial_denature_time_sec=45,
                 denaturation_time_sec=30,
@@ -366,9 +375,9 @@ def run(ctx: ProtocolContext) -> None:
             thermocycler.open_lid()
             if disposable_lid:
                 if len(used_lids) <= 1:
-                    ctx.move_labware(lid_on_plate, waste_chute, use_gripper=True)
+                    protocol.move_labware(lid_on_plate, waste_chute, use_gripper=True)
                 else:
-                    ctx.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
+                    protocol.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
             thermocycler.deactivate()
 
         def test_h_s() -> None:
@@ -397,13 +406,13 @@ def run(ctx: ProtocolContext) -> None:
     test_gripper_moves()
     test_module_usage(unused_lids, used_lids)
     test_manual_moves()
-    ctx.move_labware(source_reservoir, "C2", use_gripper=True)
+    protocol.move_labware(source_reservoir, "C2", use_gripper=True)
     helpers.clean_up_plates(
         pipette_96_channel, [dest_pcr_plate, source_reservoir], liquid_waste["A1"], 50
     )
     pipette_96_channel.reset_tipracks()
     helpers.find_liquid_height_of_all_wells(
-        ctx, pipette_96_channel, [liquid_waste["A1"]]
+        protocol, pipette_96_channel, [liquid_waste["A1"]]
     )
     if deactivate_modules_bool:
-        helpers.deactivate_modules(ctx)
+        helpers.deactivate_modules(protocol)

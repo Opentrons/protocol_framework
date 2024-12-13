@@ -66,7 +66,7 @@ def add_parameters(parameters: ParameterContext) -> None:
     helpers.create_deactivate_modules_parameter(parameters)
 
 
-def run(ctx: ProtocolContext) -> None:
+def run(protocol: ProtocolContext) -> None:
     """Protocol."""
     dry_run = False
     inc_lysis = True
@@ -77,10 +77,11 @@ def run(ctx: ProtocolContext) -> None:
     lysis_vol = 140.0
     stop_vol = 100.0
     elution_vol = dnase_vol = 55.0
-    heater_shaker_speed = ctx.params.heater_shaker_speed  # type: ignore[attr-defined]
-    dot_bottom = ctx.params.dot_bottom  # type: ignore[attr-defined]
-    pipette_mount = ctx.params.pipette_mount  # type: ignore[attr-defined]
-    deactivate_modules_bool = ctx.params.deactivate_modules  # type: ignore[attr-defined]
+    heater_shaker_speed = protocol.params.heater_shaker_speed  # type: ignore[attr-defined]
+    dot_bottom = protocol.params.dot_bottom  # type: ignore[attr-defined]
+    pipette_mount = protocol.params.pipette_mount  # type: ignore[attr-defined]
+    deactivate_modules_bool = protocol.params.deactivate_modules  # type: ignore[attr-defined]
+    helpers.comment_protocol_version(protocol, "01")
 
     # Protocol Parameters
     deepwell_type = "nest_96_wellplate_2ml_deep"
@@ -97,38 +98,42 @@ def run(ctx: ProtocolContext) -> None:
         drybeads = elute_time = 0.25
         bind_time = wash_time = dnase_time = stop_time = 0.25
     bead_vol = 20.0
-    ctx.load_trash_bin("A3")
-    h_s: HeaterShakerContext = ctx.load_module(helpers.hs_str, "D1")  # type: ignore[assignment]
+    protocol.load_trash_bin("A3")
+    h_s: HeaterShakerContext = protocol.load_module(
+        helpers.hs_str, "D1"
+    )  # type: ignore[assignment]
     sample_plate, h_s_adapter = helpers.load_hs_adapter_and_labware(
         deepwell_type, h_s, "Sample Plate"
     )
     h_s.close_labware_latch()
-    temp: TemperatureModuleContext = ctx.load_module(
+    temp: TemperatureModuleContext = protocol.load_module(
         helpers.temp_str, "D3"
     )  # type: ignore[assignment]
     elutionplate, temp_adapter = helpers.load_temp_adapter_and_labware(
         "armadillo_96_wellplate_200ul_pcr_full_skirt", temp, "Elution Plate"
     )
     temp.set_temperature(4)
-    magblock: MagneticBlockContext = ctx.load_module(
+    magblock: MagneticBlockContext = protocol.load_module(
         helpers.mag_str, "C1"
     )  # type: ignore[assignment]
-    waste_reservoir = ctx.load_labware("nest_1_reservoir_195ml", "B3", "Liquid Waste")
+    waste_reservoir = protocol.load_labware(
+        "nest_1_reservoir_195ml", "B3", "Liquid Waste"
+    )
     waste = waste_reservoir.wells()[0].top()
-    res1 = ctx.load_labware(res_type, "D2", "reagent reservoir 1")
+    res1 = protocol.load_labware(res_type, "D2", "reagent reservoir 1")
     num_cols = math.ceil(num_samples / 8)
 
     # Load tips and combine all similar boxes
-    tips200 = ctx.load_labware("opentrons_flex_96_tiprack_200ul", "A1", "Tips 1")
-    tips201 = ctx.load_labware("opentrons_flex_96_tiprack_200ul", "A2", "Tips 2")
-    tips202 = ctx.load_labware("opentrons_flex_96_tiprack_200ul", "B1", "Tips 3")
-    tips203 = ctx.load_labware("opentrons_flex_96_tiprack_200ul", "B2", "Tips 4")
-    tips204 = ctx.load_labware("opentrons_flex_96_tiprack_200ul", "C2", "Tips 5")
+    tips200 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "A1", "Tips 1")
+    tips201 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "A2", "Tips 2")
+    tips202 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "B1", "Tips 3")
+    tips203 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "B2", "Tips 4")
+    tips204 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "C2", "Tips 5")
 
     tips_sn = tips200.wells()[:num_samples]
 
     # load P1000M pipette
-    m1000 = ctx.load_instrument(
+    m1000 = protocol.load_instrument(
         "flex_8channel_1000",
         pipette_mount,
         tip_racks=[tips200, tips201, tips202, tips203, tips204],
@@ -180,7 +185,7 @@ def run(ctx: ProtocolContext) -> None:
         "Wash 9": [{"well": wash9, "volume": 9500.0}],
     }
 
-    helpers.find_liquid_height_of_loaded_liquids(ctx, liquid_vols_and_wells, m1000)
+    helpers.find_liquid_height_of_loaded_liquids(protocol, liquid_vols_and_wells, m1000)
 
     m1000.flow_rate.aspirate = 50
     m1000.flow_rate.dispense = 150
@@ -196,13 +201,13 @@ def run(ctx: ProtocolContext) -> None:
         if drop_count >= 250:
             drop_count = 0
             if TIP_TRASH:
-                ctx.pause("Empty Trash bin.")
+                protocol.pause("Empty Trash bin.")
         if tip_pick_up >= 59:
             pip.reset_tipracks()
 
     def remove_supernatant(vol: float) -> None:
         """Remove Supernatant."""
-        ctx.comment("-----Removing Supernatant-----")
+        protocol.comment("-----Removing Supernatant-----")
         m1000.flow_rate.aspirate = 30
         num_trans = math.ceil(vol / 180)
         vol_per_trans = vol / num_trans
@@ -221,7 +226,7 @@ def run(ctx: ProtocolContext) -> None:
             m1000.drop_tip(tips_sn[8 * i]) if TIP_TRASH else m1000.return_tip()
         m1000.flow_rate.aspirate = 300
         # Move Plate From Magnet to H-S
-        helpers.move_labware_to_hs(ctx, sample_plate, h_s, h_s_adapter)
+        helpers.move_labware_to_hs(protocol, sample_plate, h_s, h_s_adapter)
 
     def bead_mixing(
         well: Well, pip: InstrumentContext, mvol: float, reps: int = 8
@@ -314,7 +319,7 @@ def run(ctx: ProtocolContext) -> None:
     def lysis(vol: float, source: List[Well]) -> None:
         """Lysis Steps."""
         tvol_total = 0.0
-        ctx.comment("-----Beginning lysis steps-----")
+        protocol.comment("-----Beginning lysis steps-----")
         num_transfers = math.ceil(vol / 180)
         tiptrack(m1000)
         src = source[0]
@@ -326,9 +331,9 @@ def run(ctx: ProtocolContext) -> None:
                 m1000.dispense(m1000.current_volume, cells_m[i].top(-3))
                 tvol_total += tvol * 8
                 if tvol_total > 8000.0:
-                    ctx.comment("-----Changing to second lysis well.------")
+                    protocol.comment("-----Changing to second lysis well.------")
                     src = source[1]
-                    ctx.comment(f"new source {src}")
+                    protocol.comment(f"new source {src}")
                     tvol_total = 0.0
 
         # mix after adding all reagent to wells with cells
@@ -339,11 +344,11 @@ def run(ctx: ProtocolContext) -> None:
                 m1000.aspirate(tvol * 0.75, cells_m[i].bottom(dot_bottom))
                 m1000.dispense(tvol * 0.75, cells_m[i].bottom(8))
                 if x == 3:
-                    ctx.delay(minutes=0.0167)
+                    protocol.delay(minutes=0.0167)
                     m1000.blow_out(cells_m[i].bottom(1))
             m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
-        helpers.set_hs_speed(ctx, h_s, heater_shaker_speed, lysis_time, True)
+        helpers.set_hs_speed(protocol, h_s, heater_shaker_speed, lysis_time, True)
 
     def bind() -> None:
         """Bind.
@@ -361,7 +366,7 @@ def run(ctx: ProtocolContext) -> None:
                                supernatant to the final clean elutions PCR
                                plate.
         """
-        ctx.comment("-----Beginning bind steps-----")
+        protocol.comment("-----Beginning bind steps-----")
         for i, well in enumerate(samples_m):
             # Transfer cells+lysis/bind to wells with beads
             tiptrack(m1000)
@@ -372,15 +377,17 @@ def run(ctx: ProtocolContext) -> None:
             bead_mixing(well, m1000, 130, reps=5 if not dry_run else 1)
             m1000.air_gap(10)
             m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
-        helpers.set_hs_speed(ctx, h_s, heater_shaker_speed, bind_time, True)
+        helpers.set_hs_speed(protocol, h_s, heater_shaker_speed, bind_time, True)
 
         # Transfer from H-S plate to Magdeck plate
-        helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
+        helpers.move_labware_from_hs_to_destination(
+            protocol, sample_plate, h_s, magblock
+        )
 
         for bindi in np.arange(
             settling_time, 0, -0.5
         ):  # Settling time delay with countdown timer
-            ctx.delay(
+            protocol.delay(
                 minutes=0.5,
                 msg="There are " + str(bindi) + " minutes left in the incubation.",
             )
@@ -391,7 +398,7 @@ def run(ctx: ProtocolContext) -> None:
     def wash(vol: float, source: List[Well]) -> None:
         """Wash Function."""
         global whichwash  # Defines which wash the protocol is on to log on the app
-        ctx.comment("-----Now starting Wash #" + str(whichwash) + "-----")
+        protocol.comment("-----Now starting Wash #" + str(whichwash) + "-----")
         global wash_volume_tracker
         tiptrack(m1000)
         num_trans = math.ceil(vol / 180)
@@ -402,27 +409,29 @@ def run(ctx: ProtocolContext) -> None:
                 m1000.aspirate(vol_per_trans, src)
                 m1000.air_gap(10)
                 m1000.dispense(m1000.current_volume, m.top(-2))
-                ctx.delay(seconds=2)
+                protocol.delay(seconds=2)
                 m1000.blow_out(m.top(-2))
                 wash_volume_tracker += vol_per_trans * 8
                 if wash_volume_tracker > 9600:
                     whichwash += 1
                     src = source[whichwash]
-                    ctx.comment(f"new wash source {whichwash}")
+                    protocol.comment(f"new wash source {whichwash}")
                     wash_volume_tracker = 0.0
             m1000.air_gap(10)
         m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
         # Shake for 5 minutes to mix wash with beads
-        helpers.set_hs_speed(ctx, h_s, heater_shaker_speed, wash_time, True)
+        helpers.set_hs_speed(protocol, h_s, heater_shaker_speed, wash_time, True)
 
         # Transfer from H-S plate to Magdeck plate
-        helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
+        helpers.move_labware_from_hs_to_destination(
+            protocol, sample_plate, h_s, magblock
+        )
 
         for washi in np.arange(
             settling_time, 0, -0.5
         ):  # settling time timer for washes
-            ctx.delay(
+            protocol.delay(
                 minutes=0.5,
                 msg="There are "
                 + str(washi)
@@ -432,11 +441,11 @@ def run(ctx: ProtocolContext) -> None:
             )
 
         remove_supernatant(vol)
-        ctx.comment(f"final wash source {whichwash}")
+        protocol.comment(f"final wash source {whichwash}")
 
     def dnase(vol: float, source: List[Well]) -> None:
         """Steps for DNAseI."""
-        ctx.comment("-----DNAseI Steps Beginning-----")
+        protocol.comment("-----DNAseI Steps Beginning-----")
         num_trans = math.ceil(vol / 180)
         vol_per_trans = vol / num_trans
         tiptrack(m1000)
@@ -461,11 +470,11 @@ def run(ctx: ProtocolContext) -> None:
             m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
         # Shake for 10 minutes to mix DNAseI
-        helpers.set_hs_speed(ctx, h_s, heater_shaker_speed, dnase_time, True)
+        helpers.set_hs_speed(protocol, h_s, heater_shaker_speed, dnase_time, True)
 
     def stop_reaction(vol: float, source: Well) -> None:
         """Adding stop solution."""
-        ctx.comment("-----Adding Stop Solution-----")
+        protocol.comment("-----Adding Stop Solution-----")
         tiptrack(m1000)
         num_trans = math.ceil(vol / 180)
         vol_per_trans = vol / num_trans
@@ -481,13 +490,15 @@ def run(ctx: ProtocolContext) -> None:
         m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
         # Shake for 3 minutes to mix wash with beads
-        helpers.set_hs_speed(ctx, h_s, heater_shaker_speed, stop_time, True)
+        helpers.set_hs_speed(protocol, h_s, heater_shaker_speed, stop_time, True)
 
         # Transfer from H-S plate to Magdeck plate
-        helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
+        helpers.move_labware_from_hs_to_destination(
+            protocol, sample_plate, h_s, magblock
+        )
 
         for stop in np.arange(settling_time, 0, -0.5):
-            ctx.delay(
+            protocol.delay(
                 minutes=0.5,
                 msg="There are " + str(stop) + " minutes left in this incubation.",
             )
@@ -496,7 +507,7 @@ def run(ctx: ProtocolContext) -> None:
 
     def elute(vol: float) -> None:
         """Elution."""
-        ctx.comment("-----Elution Beginning-----")
+        protocol.comment("-----Elution Beginning-----")
         tiptrack(m1000)
         m1000.flow_rate.aspirate = 10
         for i, m in enumerate(samples_m):
@@ -524,18 +535,20 @@ def run(ctx: ProtocolContext) -> None:
             m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
         # Shake for 3 minutes to mix wash with beads
-        helpers.set_hs_speed(ctx, h_s, heater_shaker_speed, elute_time, True)
+        helpers.set_hs_speed(protocol, h_s, heater_shaker_speed, elute_time, True)
 
         # Transfer from H-S plate to Magdeck plate
-        helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
+        helpers.move_labware_from_hs_to_destination(
+            protocol, sample_plate, h_s, magblock
+        )
 
         for elutei in np.arange(settling_time, 0, -0.5):
-            ctx.delay(
+            protocol.delay(
                 minutes=0.5,
                 msg="Incubating on MagDeck for " + str(elutei) + " more minutes.",
             )
 
-        ctx.comment("-----Trasnferring Sample to Elution Plate-----")
+        protocol.comment("-----Trasnferring Sample to Elution Plate-----")
         for i, (m, e) in enumerate(zip(samples_m, elution_samples_m)):
             tiptrack(m1000)
             loc = m.bottom(dot_bottom)
@@ -563,7 +576,7 @@ def run(ctx: ProtocolContext) -> None:
     wash(wash_vol, all_washes)
 
     for beaddry in np.arange(drybeads, 0, -0.5):
-        ctx.delay(
+        protocol.delay(
             minutes=0.5,
             msg="There are " + str(beaddry) + " minutes left in the drying step.",
         )
@@ -572,6 +585,6 @@ def run(ctx: ProtocolContext) -> None:
     helpers.clean_up_plates(
         m1000, [elutionplate, sample_plate], waste_reservoir["A1"], 200
     )
-    helpers.find_liquid_height_of_all_wells(ctx, m1000, end_list_of_wells_to_probe)
+    helpers.find_liquid_height_of_all_wells(protocol, m1000, end_list_of_wells_to_probe)
     if deactivate_modules_bool:
-        helpers.deactivate_modules(ctx)
+        helpers.deactivate_modules(protocol)

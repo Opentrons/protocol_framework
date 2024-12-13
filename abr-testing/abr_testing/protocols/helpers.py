@@ -107,6 +107,14 @@ def load_temp_adapter_and_labware(
     return labware_on_temp_mod, temp_adapter
 
 
+# FUNCTIONS FOR COMMON COMMENTS
+
+
+def comment_protocol_version(protocol: ProtocolContext, version: str) -> None:
+    """Comment version number of protocol."""
+    protocol.comment(f"Protocol Version: {version}")
+
+
 # FUNCTIONS FOR LOADING COMMON PARAMETERS
 def create_channel_parameter(parameters: ParameterContext) -> None:
     """Create pipette channel parameter."""

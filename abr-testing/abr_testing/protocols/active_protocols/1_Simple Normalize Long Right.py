@@ -83,6 +83,7 @@ def run(protocol: ProtocolContext) -> None:
     mount_pos = protocol.params.pipette_mount  # type: ignore[attr-defined]
     all_data = protocol.params.parameters_csv.parse_as_csv()  # type: ignore[attr-defined]
     data = all_data[1:]
+    helpers.comment_protocol_version(protocol, "01")
     # DECK SETUP AND LABWARE
     protocol.comment("THIS IS A NO MODULE RUN")
     tiprack_x_1 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "D1")

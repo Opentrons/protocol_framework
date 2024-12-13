@@ -36,47 +36,51 @@ def add_parameters(parameters: ParameterContext) -> None:
     helpers.create_plate_reader_compatible_labware_parameter(parameters)
 
 
-def run(ctx: ProtocolContext) -> None:
+def run(protocol: ProtocolContext) -> None:
     """Protocol."""
     # Load parameters
-    number_of_plates = ctx.params.number_of_plates  # type: ignore [attr-defined]
-    channels = ctx.params.channels  # type: ignore [attr-defined]
-    plate_type = ctx.params.labware_plate_reader_compatible  # type: ignore [attr-defined]
+    number_of_plates = protocol.params.number_of_plates  # type: ignore [attr-defined]
+    channels = protocol.params.channels  # type: ignore [attr-defined]
+    plate_type = protocol.params.labware_plate_reader_compatible  # type: ignore [attr-defined]
+
+    helpers.comment_protocol_version(protocol, "01")
     # Plate Reader
-    plate_reader: AbsorbanceReaderContext = ctx.load_module(
+    plate_reader: AbsorbanceReaderContext = protocol.load_module(
         helpers.abs_mod_str, "A3"
     )  # type: ignore[assignment]
-    hs: HeaterShakerContext = ctx.load_module(helpers.hs_str, "A1")  # type: ignore[assignment]
+    hs: HeaterShakerContext = protocol.load_module(helpers.hs_str, "A1")  # type: ignore[assignment]
     # Load Plates based off of number_of_plates parameter
     available_deck_slots = ["D1", "D2", "C1", "B1"]
     sample_plate_list = []
     for plate_num, slot in zip(range(number_of_plates), available_deck_slots):
-        plate = ctx.load_labware(plate_type, slot, f"Sample Plate {plate_num + 1}")
+        plate = protocol.load_labware(plate_type, slot, f"Sample Plate {plate_num + 1}")
         sample_plate_list.append(plate)
     available_tip_rack_slots = ["D3", "C3", "B3", "B2"]
     # LOAD PIPETTES AND TIP RACKS
     # 50 CHANNEL
     tip_racks_50 = []
     for plate_num, slot_2 in zip(range(number_of_plates), available_tip_rack_slots):
-        tiprack_50 = ctx.load_labware("opentrons_flex_96_tiprack_50ul", slot_2)
+        tiprack_50 = protocol.load_labware("opentrons_flex_96_tiprack_50ul", slot_2)
         tip_racks_50.append(tiprack_50)
-    p50 = ctx.load_instrument(f"flex_{channels}_50", "left", tip_racks=tip_racks_50)
+    p50 = protocol.load_instrument(
+        f"flex_{channels}_50", "left", tip_racks=tip_racks_50
+    )
     # 1000 CHANNEL
-    tiprack_1000_1 = ctx.load_labware("opentrons_flex_96_tiprack_1000ul", "A2")
-    p1000 = ctx.load_instrument(
+    tiprack_1000_1 = protocol.load_labware("opentrons_flex_96_tiprack_1000ul", "A2")
+    p1000 = protocol.load_instrument(
         f"flex_{channels}_1000", "right", tip_racks=[tiprack_1000_1]
     )
     # DETERMINE RESERVOIR BASED OFF # OF PIPETTE CHANNELS
     # 1 CHANNEL = TUBE RACK
     if p50.active_channels == 1:
-        reservoir = ctx.load_labware(
+        reservoir = protocol.load_labware(
             "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical", "C2", "Reservoir"
         )
         water_max_vol = reservoir["A3"].max_volume - 500
         reservoir_wells = reservoir.wells()[6:]  # Skip first 4 bc they are 15ml
     else:
         # 8 CHANNEL = 12 WELL RESERVOIR
-        reservoir = ctx.load_labware("nest_12_reservoir_15ml", "C2", "Reservoir")
+        reservoir = protocol.load_labware("nest_12_reservoir_15ml", "C2", "Reservoir")
         water_max_vol = reservoir["A1"].max_volume - 500
         reservoir_wells = reservoir.wells()[
             1:
@@ -113,7 +117,7 @@ def run(ctx: ProtocolContext) -> None:
         "Tartrazine": [{"well": tartrazine_well, "volume": needed_tartrazine}],
         "Water": [{"well": water_wells, "volume": water_max_vol}],
     }
-    helpers.find_liquid_height_of_loaded_liquids(ctx, liquid_vols_and_wells, p50)
+    helpers.find_liquid_height_of_loaded_liquids(protocol, liquid_vols_and_wells, p50)
     tip_count = 1 * p50.active_channels  # number of 50 ul tip uses.
     p50.reset_tipracks()
     i = 0
@@ -148,7 +152,7 @@ def run(ctx: ProtocolContext) -> None:
             p1000.dispense(190, well)
             # Two blow outs ensures water is completely removed from pipette
             p1000.blow_out(well.top())
-            ctx.delay(minutes=0.1)
+            protocol.delay(minutes=0.1)
             p1000.blow_out(well.top())
             vol += 190 * p1000.active_channels
             # Probe to find liquid height of tartrazine to ensure correct amount is aspirated
@@ -156,14 +160,14 @@ def run(ctx: ProtocolContext) -> None:
             if height <= 0.0:
                 # If a negative tartrazine height is found,
                 # the protocol will pause, prompt a refill, and reprobe.
-                ctx.pause("Fill tartrazine")
+                protocol.pause("Fill tartrazine")
                 height = helpers.find_liquid_height(p50, tartrazine_well)
             p50.aspirate(10, tartrazine_well.bottom(z=height), rate=0.15)
             p50.air_gap(5)
             p50.dispense(5, well.top())
             p50.dispense(10, well.bottom(z=0.5), rate=0.15)
             p50.blow_out()
-            ctx.delay(minutes=0.1)
+            protocol.delay(minutes=0.1)
             p50.blow_out()
             p50.return_tip()
             tip_count += p50.active_channels
@@ -176,15 +180,15 @@ def run(ctx: ProtocolContext) -> None:
                 p1000.reset_tipracks()
                 water_tip_count = 0
         # Move labware to heater shaker to be mixed
-        helpers.move_labware_to_hs(ctx, sample_plate, hs, hs)
-        helpers.set_hs_speed(ctx, hs, 1500, 2.0, True)
+        helpers.move_labware_to_hs(protocol, sample_plate, hs, hs)
+        helpers.set_hs_speed(protocol, hs, 1500, 2.0, True)
         hs.open_labware_latch()
         # Initialize plate reader
         plate_reader.close_lid()
         plate_reader.initialize("single", [450])
         plate_reader.open_lid()
         # Move sample plate into plate reader
-        ctx.move_labware(sample_plate, plate_reader, use_gripper=True)
+        protocol.move_labware(sample_plate, plate_reader, use_gripper=True)
         sample_plate_name = "sample plate_" + str(i + 1)
         csv_string = sample_plate_name + "_" + str(datetime.now())
         plate_reader.close_lid()
@@ -220,10 +224,12 @@ def run(ctx: ProtocolContext) -> None:
         # Move Plate back to original location
         all_percent_error_dict[sample_plate_name] = percent_error_dict
         plate_reader.open_lid()
-        ctx.comment(f"------plate {sample_plate}. {cv_dict[sample_plate_name]}------")
-        ctx.move_labware(sample_plate, return_location, use_gripper=True)
+        protocol.comment(
+            f"------plate {sample_plate}. {cv_dict[sample_plate_name]}------"
+        )
+        protocol.move_labware(sample_plate, return_location, use_gripper=True)
         i += 1
     # Print percent error dictionary
-    ctx.comment("Percent Error: " + str(all_percent_error_dict))
+    protocol.comment("Percent Error: " + str(all_percent_error_dict))
     # Print cv dictionary
-    ctx.comment("Plate Reader Result: " + str(cv_dict))
+    protocol.comment("Plate Reader Result: " + str(cv_dict))

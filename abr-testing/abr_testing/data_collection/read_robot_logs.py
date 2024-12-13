@@ -214,20 +214,33 @@ def instrument_commands(
     return pipette_dict
 
 
+def get_comment_result_by_string(file_results: Dict[str, Any], key_phrase: str) -> str:
+    """Get comment string based off ky phrase."""
+    commandData = file_results.get("commands", "")
+    result_str = ""
+    for command in commandData:
+        commandType = command["CommandType"]
+        if commandType == "comment":
+            command_str = command["params"].get("message", "")
+        try:
+            result_str = command_str.split(key_phrase)[1]
+        except IndexError:
+            continue
+    return result_str
+
+
+def get_protocol_version_number(file_results: Dict[str, Any]) -> str:
+    """Get protocol version number."""
+    return get_comment_result_by_string(file_results, "Protocol Version: ")
+
+
 def get_liquid_waste_height(file_results: Dict[str, Any]) -> float:
     """Find liquid waste height."""
-    commandData = file_results.get("commands", "")
-    height_float = 0.0
-    for command in commandData:
-        commandType = command["commandType"]
-        if commandType == "comment":
-            result = command["params"].get("message", "")
-            try:
-                height = result.split("Liquid Waste Total Height: ")[1]
-                height_float = float(height)
-            except IndexError:
-                continue
-    return height_float
+    result_str = get_comment_result_by_string(
+        file_results, "Liquid Waste Total Height: "
+    )
+    height = float(result_str)
+    return height
 
 
 def liquid_height_commands(

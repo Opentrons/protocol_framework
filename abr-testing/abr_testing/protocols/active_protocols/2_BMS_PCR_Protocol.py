@@ -26,25 +26,26 @@ def add_parameters(parameters: ParameterContext) -> None:
     helpers.create_deactivate_modules_parameter(parameters)
 
 
-def run(ctx: ProtocolContext) -> None:
+def run(protocol: ProtocolContext) -> None:
     """Protocol."""
-    pipette_mount = ctx.params.pipette_mount  # type: ignore[attr-defined]
-    disposable_lid = ctx.params.disposable_lid  # type: ignore[attr-defined]
-    parsed_csv = ctx.params.parameters_csv.parse_as_csv()  # type: ignore[attr-defined]
-    deck_riser = ctx.params.deck_riser  # type: ignore[attr-defined]
-    deactivate_modules_bool = ctx.params.deactivate_modules  # type: ignore[attr-defined]
+    pipette_mount = protocol.params.pipette_mount  # type: ignore[attr-defined]
+    disposable_lid = protocol.params.disposable_lid  # type: ignore[attr-defined]
+    parsed_csv = protocol.params.parameters_csv.parse_as_csv()  # type: ignore[attr-defined]
+    deck_riser = protocol.params.deck_riser  # type: ignore[attr-defined]
+    deactivate_modules_bool = protocol.params.deactivate_modules  # type: ignore[attr-defined]
+    helpers.comment_protocol_version(protocol, "01")
 
     rxn_vol = 50
     real_mode = True
     # DECK SETUP AND LABWARE
 
-    tc_mod: ThermocyclerContext = ctx.load_module(
+    tc_mod: ThermocyclerContext = protocol.load_module(
         helpers.tc_str
     )  # type: ignore[assignment]
 
     tc_mod.open_lid()
     tc_mod.set_lid_temperature(105)
-    temp_mod: TemperatureModuleContext = ctx.load_module(
+    temp_mod: TemperatureModuleContext = protocol.load_module(
         helpers.temp_str, location="D3"
     )  # type: ignore[assignment]
     reagent_rack = temp_mod.load_labware(
@@ -54,29 +55,29 @@ def run(ctx: ProtocolContext) -> None:
         "opentrons_96_wellplate_200ul_pcr_full_skirt", "Destination Plate 1"
     )
 
-    source_plate_1 = ctx.load_labware(
+    source_plate_1 = protocol.load_labware(
         "opentrons_96_wellplate_200ul_pcr_full_skirt", "D1", "DNA Plate 1"
     )
-    waste = ctx.load_labware("nest_1_reservoir_195ml", "D2", "Liquid Waste")
+    waste = protocol.load_labware("nest_1_reservoir_195ml", "D2", "Liquid Waste")
     liquid_waste = waste["A1"]
     tiprack_50 = [
-        ctx.load_labware("opentrons_flex_96_tiprack_50ul", slot) for slot in [8, 9]
+        protocol.load_labware("opentrons_flex_96_tiprack_50ul", slot) for slot in [8, 9]
     ]
 
     # Opentrons tough pcr auto sealing lids
     if disposable_lid:
-        unused_lids = helpers.load_disposable_lids(ctx, 3, ["C3"], deck_riser)
+        unused_lids = helpers.load_disposable_lids(protocol, 3, ["C3"], deck_riser)
     used_lids: List[Labware] = []
 
     # LOAD PIPETTES
-    p50 = ctx.load_instrument(
+    p50 = protocol.load_instrument(
         "flex_8channel_50",
         pipette_mount,
         tip_racks=tiprack_50,
         liquid_presence_detection=True,
     )
     p50.configure_nozzle_layout(style=SINGLE, start="A1", tip_racks=tiprack_50)
-    ctx.load_trash_bin("A3")
+    protocol.load_trash_bin("A3")
 
     temp_mod.set_temperature(4)
 
@@ -89,9 +90,9 @@ def run(ctx: ProtocolContext) -> None:
         "Mastermix": [{"well": mmx_pic, "volume": 500.0}],
         "DNA": [{"well": dna_pic, "volume": 100.0}],
     }
-    helpers.find_liquid_height_of_loaded_liquids(ctx, liquid_vols_and_wells, p50)
+    helpers.find_liquid_height_of_loaded_liquids(protocol, liquid_vols_and_wells, p50)
     # adding water
-    ctx.comment("\n\n----------ADDING WATER----------\n")
+    protocol.comment("\n\n----------ADDING WATER----------\n")
     p50.pick_up_tip()
     p50.aspirate(40, water)  # prewet
     p50.dispense(40, water)
@@ -115,7 +116,7 @@ def run(ctx: ProtocolContext) -> None:
     p50.drop_tip()
 
     # adding Mastermix
-    ctx.comment("\n\n----------ADDING MASTERMIX----------\n")
+    protocol.comment("\n\n----------ADDING MASTERMIX----------\n")
     for i, row in enumerate(parsed_csv):
         p50.pick_up_tip()
         mmx_vol = row[3]
@@ -142,7 +143,7 @@ def run(ctx: ProtocolContext) -> None:
         p50.configure_for_volume(mmx_vol)
         p50.aspirate(mmx_vol, reagent_rack[mmx_tube])
         p50.dispense(mmx_vol, dest_plate_1[dest_well].top())
-        ctx.delay(seconds=2)
+        protocol.delay(seconds=2)
         p50.blow_out()
         p50.touch_tip()
         p50.configure_for_volume(50)
@@ -151,7 +152,7 @@ def run(ctx: ProtocolContext) -> None:
         p50.drop_tip()
 
     # adding DNA
-    ctx.comment("\n\n----------ADDING DNA----------\n")
+    protocol.comment("\n\n----------ADDING DNA----------\n")
     for row in parsed_csv:
         dna_vol = row[2]
         if dna_vol.lower() == "x":
@@ -176,17 +177,17 @@ def run(ctx: ProtocolContext) -> None:
         p50.drop_tip()
         p50.configure_for_volume(50)
 
-    ctx.comment("\n\n-----------Running PCR------------\n")
+    protocol.comment("\n\n-----------Running PCR------------\n")
 
     if real_mode:
         if disposable_lid:
             lid_on_plate, unused_lids, used_lids = helpers.use_disposable_lid_with_tc(
-                ctx, unused_lids, used_lids, dest_plate_1, tc_mod
+                protocol, unused_lids, used_lids, dest_plate_1, tc_mod
             )
         else:
             tc_mod.close_lid()
         helpers.perform_pcr(
-            ctx,
+            protocol,
             tc_mod,
             initial_denature_time_sec=120,
             denaturation_time_sec=10,
@@ -201,9 +202,9 @@ def run(ctx: ProtocolContext) -> None:
         tc_mod.open_lid()
         if disposable_lid:
             if len(used_lids) <= 1:
-                ctx.move_labware(lid_on_plate, "C2", use_gripper=True)
+                protocol.move_labware(lid_on_plate, "C2", use_gripper=True)
             else:
-                ctx.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
+                protocol.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
         p50.drop_tip()
         p50.configure_nozzle_layout(style=SINGLE, start="A1", tip_racks=tiprack_50)
         mmx_pic.append(water)
@@ -211,6 +212,6 @@ def run(ctx: ProtocolContext) -> None:
     p50.configure_nozzle_layout(style=ALL, tip_racks=tiprack_50)
     helpers.clean_up_plates(p50, [source_plate_1, dest_plate_1], liquid_waste, 50)
     # Probe liquid waste
-    helpers.find_liquid_height_of_all_wells(ctx, p50, [liquid_waste])
+    helpers.find_liquid_height_of_all_wells(protocol, p50, [liquid_waste])
     if deactivate_modules_bool:
-        helpers.deactivate_modules(ctx)
+        helpers.deactivate_modules(protocol)

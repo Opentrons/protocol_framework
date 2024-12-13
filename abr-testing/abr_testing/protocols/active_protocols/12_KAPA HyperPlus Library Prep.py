@@ -69,23 +69,25 @@ def add_parameters(parameters: ParameterContext) -> None:
     )
 
 
-def run(ctx: ProtocolContext) -> None:
+def run(protocol: ProtocolContext) -> None:
     """Protocol."""
     USE_GRIPPER = True
-    deactivate_mods = ctx.params.deactivate_modules  # type: ignore[attr-defined]
-    trash_tips = ctx.params.trash_tips  # type: ignore[attr-defined]
-    dry_run = ctx.params.dry_run  # type: ignore[attr-defined]
-    pipette_1000_mount = ctx.params.pipette_mount_1  # type: ignore[attr-defined]
-    pipette_50_mount = ctx.params.pipette_mount_2  # type: ignore[attr-defined]
-    deck_riser = ctx.params.deck_riser  # type: ignore[attr-defined]
+    deactivate_mods = protocol.params.deactivate_modules  # type: ignore[attr-defined]
+    trash_tips = protocol.params.trash_tips  # type: ignore[attr-defined]
+    dry_run = protocol.params.dry_run  # type: ignore[attr-defined]
+    pipette_1000_mount = protocol.params.pipette_mount_1  # type: ignore[attr-defined]
+    pipette_50_mount = protocol.params.pipette_mount_2  # type: ignore[attr-defined]
+    deck_riser = protocol.params.deck_riser  # type: ignore[attr-defined]
+    helpers.comment_protocol_version(protocol, "01")
+
     REUSE_ETOH_TIPS = True
     REUSE_RSB_TIPS = (
         True  # Reuse tips for RSB buffer (adding RSB, mixing, and transferring)
     )
     REUSE_REMOVE_TIPS = True  # Reuse tips for supernatant removal
-    num_samples = ctx.params.num_samples  # type: ignore[attr-defined]
-    PCRCYCLES = ctx.params.PCR_CYCLES  # type: ignore[attr-defined]
-    disposable_lid = ctx.params.disposable_lid  # type: ignore[attr-defined]
+    num_samples = protocol.params.num_samples  # type: ignore[attr-defined]
+    PCRCYCLES = protocol.params.PCR_CYCLES  # type: ignore[attr-defined]
+    disposable_lid = protocol.params.disposable_lid  # type: ignore[attr-defined]
     Fragmentation_time = 10
     ligation_tc_time = 15
     used_lids: List[Labware] = []
@@ -113,10 +115,10 @@ def run(ctx: ProtocolContext) -> None:
     # etoh_vol = 400.0
 
     # Importing Labware, Modules and Instruments
-    magblock: MagneticBlockContext = ctx.load_module(
+    magblock: MagneticBlockContext = protocol.load_module(
         helpers.mag_str, "D2"
     )  # type: ignore[assignment]
-    temp_mod: TemperatureModuleContext = ctx.load_module(
+    temp_mod: TemperatureModuleContext = protocol.load_module(
         helpers.temp_str, "B3"
     )  # type: ignore[assignment]
     temp_plate, temp_adapter = helpers.load_temp_adapter_and_labware(
@@ -127,7 +129,7 @@ def run(ctx: ProtocolContext) -> None:
 
     if not dry_run:
         temp_mod.set_temperature(4)
-    tc_mod: ThermocyclerContext = ctx.load_module(helpers.tc_str)  # type: ignore[assignment]
+    tc_mod: ThermocyclerContext = protocol.load_module(helpers.tc_str)  # type: ignore[assignment]
     # Just in case
     tc_mod.open_lid()
 
@@ -136,32 +138,32 @@ def run(ctx: ProtocolContext) -> None:
     )
     samples_flp = FLP_plate.rows()[0][:num_cols]
 
-    sample_plate = ctx.load_labware(
+    sample_plate = protocol.load_labware(
         "armadillo_96_wellplate_200ul_pcr_full_skirt", "D1", "Sample Plate 1"
     )
 
-    sample_plate_2 = ctx.load_labware(
+    sample_plate_2 = protocol.load_labware(
         "armadillo_96_wellplate_200ul_pcr_full_skirt", "B2", "Sample Plate 2"
     )
     samples_2 = sample_plate_2.rows()[0][:num_cols]
     samples = sample_plate.rows()[0][:num_cols]
-    reservoir = ctx.load_labware(
+    reservoir = protocol.load_labware(
         "nest_96_wellplate_2ml_deep", "C2", "Beads + Buffer + Ethanol"
     )
     # Load tipracks
-    tiprack_50_1 = ctx.load_labware("opentrons_flex_96_tiprack_50ul", "A3")
-    tiprack_50_2 = ctx.load_labware("opentrons_flex_96_tiprack_50ul", "A2")
+    tiprack_50_1 = protocol.load_labware("opentrons_flex_96_tiprack_50ul", "A3")
+    tiprack_50_2 = protocol.load_labware("opentrons_flex_96_tiprack_50ul", "A2")
 
-    tiprack_200_1 = ctx.load_labware("opentrons_flex_96_tiprack_200ul", "C1")
-    tiprack_200_2 = ctx.load_labware("opentrons_flex_96_tiprack_200ul", "C3")
+    tiprack_200_1 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "C1")
+    tiprack_200_2 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "C3")
 
     if trash_tips:
-        ctx.load_waste_chute()
+        protocol.load_waste_chute()
 
     unused_lids: List[Labware] = []
     # Load TC Lids
     if disposable_lid:
-        unused_lids = helpers.load_disposable_lids(ctx, 5, ["C4"], deck_riser)
+        unused_lids = helpers.load_disposable_lids(protocol, 5, ["C4"], deck_riser)
     # Import Global Variables
 
     global tip50
@@ -170,12 +172,12 @@ def run(ctx: ProtocolContext) -> None:
     global p200_rack_count
     tip_count = {1000: 0, 50: 0}
 
-    p200 = ctx.load_instrument(
+    p200 = protocol.load_instrument(
         "flex_8channel_1000",
         pipette_1000_mount,
         tip_racks=[tiprack_200_1, tiprack_200_2],
     )
-    p50 = ctx.load_instrument(
+    p50 = protocol.load_instrument(
         "flex_8channel_50", pipette_50_mount, tip_racks=[tiprack_50_1, tiprack_50_2]
     )
 
@@ -226,7 +228,7 @@ def run(ctx: ProtocolContext) -> None:
     waste2 = reservoir.columns()[7]
     waste2_res = waste2[0]
 
-    helpers.find_liquid_height_of_loaded_liquids(ctx, liquid_vols_and_wells, p50)
+    helpers.find_liquid_height_of_loaded_liquids(protocol, liquid_vols_and_wells, p50)
 
     def tip_track(pipette: InstrumentContext, tip_count: Dict) -> None:
         """Track tip usage."""
@@ -250,19 +252,19 @@ def run(ctx: ProtocolContext) -> None:
     ) -> Tuple[List[Labware], List[Labware]]:
         """Run Tag Profile."""
         # Presetting Thermocycler Temps
-        ctx.comment(
+        protocol.comment(
             "****Starting Fragmentation Profile (37C for 10 minutes with 100C lid)****"
         )
         tc_mod.set_lid_temperature(100)
         tc_mod.set_block_temperature(37)
 
         # Move Plate to TC
-        ctx.comment("****Moving Plate to Pre-Warmed TC Module Block****")
-        ctx.move_labware(sample_plate, tc_mod, use_gripper=USE_GRIPPER)
+        protocol.comment("****Moving Plate to Pre-Warmed TC Module Block****")
+        protocol.move_labware(sample_plate, tc_mod, use_gripper=USE_GRIPPER)
 
         if disposable_lid:
             lid_on_plate, unused_lids, used_lids = helpers.use_disposable_lid_with_tc(
-                ctx, unused_lids, used_lids, sample_plate, tc_mod
+                protocol, unused_lids, used_lids, sample_plate, tc_mod
             )
         else:
             tc_mod.close_lid()
@@ -273,13 +275,13 @@ def run(ctx: ProtocolContext) -> None:
 
         if disposable_lid:
             if len(used_lids) <= 1:
-                ctx.move_labware(lid_on_plate, "D4", use_gripper=True)
+                protocol.move_labware(lid_on_plate, "D4", use_gripper=True)
             else:
-                ctx.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
+                protocol.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
         # #Move Plate to H-S
-        ctx.comment("****Moving Plate off of TC****")
+        protocol.comment("****Moving Plate off of TC****")
 
-        ctx.move_labware(sample_plate, "D1", use_gripper=USE_GRIPPER)
+        protocol.move_labware(sample_plate, "D1", use_gripper=USE_GRIPPER)
         return unused_lids, used_lids
 
     def run_er_profile(
@@ -287,19 +289,19 @@ def run(ctx: ProtocolContext) -> None:
     ) -> Tuple[List[Labware], List[Labware]]:
         """End Repair Profile."""
         # Presetting Thermocycler Temps
-        ctx.comment(
+        protocol.comment(
             "****Starting End Repair Profile (65C for 30 minutes with 100C lid)****"
         )
         tc_mod.set_lid_temperature(100)
         tc_mod.set_block_temperature(65)
 
         # Move Plate to TC
-        ctx.comment("****Moving Plate to Pre-Warmed TC Module Block****")
-        ctx.move_labware(sample_plate, tc_mod, use_gripper=USE_GRIPPER)
+        protocol.comment("****Moving Plate to Pre-Warmed TC Module Block****")
+        protocol.move_labware(sample_plate, tc_mod, use_gripper=USE_GRIPPER)
 
         if disposable_lid:
             lid_on_plate, unused_lids, used_lids = helpers.use_disposable_lid_with_tc(
-                ctx, unused_lids, used_lids, sample_plate, tc_mod
+                protocol, unused_lids, used_lids, sample_plate, tc_mod
             )
         else:
             tc_mod.close_lid()
@@ -313,13 +315,13 @@ def run(ctx: ProtocolContext) -> None:
         if disposable_lid:
             # move lid
             if len(used_lids) <= 1:
-                ctx.move_labware(lid_on_plate, "C4", use_gripper=True)
+                protocol.move_labware(lid_on_plate, "C4", use_gripper=True)
             else:
-                ctx.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
+                protocol.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
         # #Move Plate to H-S
-        ctx.comment("****Moving Plate off of TC****")
+        protocol.comment("****Moving Plate off of TC****")
 
-        ctx.move_labware(sample_plate, "D1", use_gripper=USE_GRIPPER)
+        protocol.move_labware(sample_plate, "D1", use_gripper=USE_GRIPPER)
         return unused_lids, used_lids
 
     def run_ligation_profile(
@@ -327,20 +329,20 @@ def run(ctx: ProtocolContext) -> None:
     ) -> Tuple[List[Labware], List[Labware]]:
         """Run Ligation Profile."""
         # Presetting Thermocycler Temps
-        ctx.comment(
+        protocol.comment(
             "****Starting Ligation Profile (20C for 15 minutes with 100C lid)****"
         )
         tc_mod.set_lid_temperature(100)
         tc_mod.set_block_temperature(20)
 
         # Move Plate to TC
-        ctx.comment("****Moving Plate to Pre-Warmed TC Module Block****")
+        protocol.comment("****Moving Plate to Pre-Warmed TC Module Block****")
 
-        ctx.move_labware(sample_plate, tc_mod, use_gripper=USE_GRIPPER)
+        protocol.move_labware(sample_plate, tc_mod, use_gripper=USE_GRIPPER)
 
         if disposable_lid:
             lid_on_plate, unused_lids, used_lids = helpers.use_disposable_lid_with_tc(
-                ctx, unused_lids, used_lids, sample_plate, tc_mod
+                protocol, unused_lids, used_lids, sample_plate, tc_mod
             )
         else:
             tc_mod.close_lid()
@@ -355,14 +357,14 @@ def run(ctx: ProtocolContext) -> None:
         tc_mod.open_lid()
         if disposable_lid:
             if len(used_lids) <= 1:
-                ctx.move_labware(lid_on_plate, "C4", use_gripper=True)
+                protocol.move_labware(lid_on_plate, "C4", use_gripper=True)
             else:
-                ctx.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
+                protocol.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
 
         # #Move Plate to H-S
-        ctx.comment("****Moving Plate off of TC****")
+        protocol.comment("****Moving Plate off of TC****")
 
-        ctx.move_labware(sample_plate, "D1", use_gripper=USE_GRIPPER)
+        protocol.move_labware(sample_plate, "D1", use_gripper=USE_GRIPPER)
         return unused_lids, used_lids
 
     def run_amplification_profile(
@@ -370,27 +372,27 @@ def run(ctx: ProtocolContext) -> None:
     ) -> Tuple[List[Labware], List[Labware]]:
         """Run Amplification Profile."""
         # Presetting Thermocycler Temps
-        ctx.comment(
+        protocol.comment(
             "Amplification Profile (37C for 5 min, 50C for 5 min with 100C lid)"
         )
         tc_mod.set_lid_temperature(100)
         tc_mod.set_block_temperature(98)
 
         # Move Plate to TC
-        ctx.comment("****Moving Sample Plate onto TC****")
-        ctx.move_labware(sample_plate_2, tc_mod, use_gripper=USE_GRIPPER)
+        protocol.comment("****Moving Sample Plate onto TC****")
+        protocol.move_labware(sample_plate_2, tc_mod, use_gripper=USE_GRIPPER)
 
         if not dry_run:
             tc_mod.set_lid_temperature(105)
         if disposable_lid:
             lid_on_plate, unused_lids, used_lids = helpers.use_disposable_lid_with_tc(
-                ctx, unused_lids, used_lids, sample_plate_2, tc_mod
+                protocol, unused_lids, used_lids, sample_plate_2, tc_mod
             )
         else:
             tc_mod.close_lid()
         if not dry_run:
             helpers.perform_pcr(
-                ctx,
+                protocol,
                 tc_mod,
                 initial_denature_time_sec=45,
                 denaturation_time_sec=15,
@@ -403,16 +405,16 @@ def run(ctx: ProtocolContext) -> None:
         tc_mod.open_lid()
         if disposable_lid:
             if len(used_lids) <= 1:
-                ctx.move_labware(lid_on_plate, "C4", use_gripper=True)
+                protocol.move_labware(lid_on_plate, "C4", use_gripper=True)
             else:
-                ctx.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
+                protocol.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
 
         # Move Sample Plate to H-S
-        ctx.comment("****Moving Sample Plate back to H-S****")
-        ctx.move_labware(sample_plate_2, "D1", use_gripper=USE_GRIPPER)
+        protocol.comment("****Moving Sample Plate back to H-S****")
+        protocol.move_labware(sample_plate_2, "D1", use_gripper=USE_GRIPPER)
         # get FLP plate out of the way
-        ctx.comment("****Moving FLP Plate back to TC****")
-        ctx.move_labware(FLP_plate, tc_mod, use_gripper=USE_GRIPPER)
+        protocol.comment("****Moving FLP Plate back to TC****")
+        protocol.move_labware(FLP_plate, tc_mod, use_gripper=USE_GRIPPER)
         return unused_lids, used_lids
 
     def mix_beads(
@@ -465,39 +467,39 @@ def run(ctx: ProtocolContext) -> None:
 
     def remove_supernatant(well: Well, vol: float, waste_: Well, column: int) -> None:
         """Remove supernatant."""
-        ctx.comment("-------Removing " + str(vol) + "ul of Supernatant-------")
+        protocol.comment("-------Removing " + str(vol) + "ul of Supernatant-------")
         p200.flow_rate.aspirate = 15
         num_trans = math.ceil(vol / 190)
         vol_per_trans = vol / num_trans
         tip_track(p200, tip_count)
         for x in range(num_trans):
             p200.aspirate(vol_per_trans / 2, well.bottom(0.2))
-            ctx.delay(seconds=1)
+            protocol.delay(seconds=1)
             p200.aspirate(vol_per_trans / 2, well.bottom(0.2))
             p200.air_gap(10)
             p200.dispense(p200.current_volume, waste_)
             p200.air_gap(10)
             if REUSE_REMOVE_TIPS:
                 p200.return_tip()
-                ctx.comment("****Dropping Tip Back in Tip Box****")
+                protocol.comment("****Dropping Tip Back in Tip Box****")
             else:
                 if trash_tips:
                     p200.drop_tip()
-                    ctx.comment("****Dropping Tip in Waste shoot****")
+                    protocol.comment("****Dropping Tip in Waste shoot****")
                 else:
                     p200.return_tip()
-                    ctx.comment("****Dropping Tip Back in Tip Box****")
+                    protocol.comment("****Dropping Tip Back in Tip Box****")
         p200.flow_rate.aspirate = 150
 
     def Fragmentation(
         unused_lids: List[Labware], used_lids: List[Labware]
     ) -> Tuple[List[Labware], List[Labware]]:
         """Fragmentation Function."""
-        ctx.comment("-------Starting Fragmentation-------")
+        protocol.comment("-------Starting Fragmentation-------")
 
         for i in range(num_cols):
 
-            ctx.comment("Mixing and Transfering beads to column " + str(i + 1))
+            protocol.comment("Mixing and Transfering beads to column " + str(i + 1))
 
             p50.flow_rate.dispense = 15
             tip_track(p50, tip_count)
@@ -514,10 +516,10 @@ def run(ctx: ProtocolContext) -> None:
             p50.flow_rate.dispense = 150
             if trash_tips:
                 p50.drop_tip()
-                ctx.comment("****Dropping Tip in Waste shoot****")
+                protocol.comment("****Dropping Tip in Waste shoot****")
             else:
                 p50.return_tip()
-                ctx.comment("****Dropping Tip Back in Tip Box****")
+                protocol.comment("****Dropping Tip Back in Tip Box****")
 
         unused_lids, used_lids = run_tag_profile(
             unused_lids, used_lids
@@ -528,11 +530,11 @@ def run(ctx: ProtocolContext) -> None:
         unused_lids: List[Labware], used_lids: List[Labware]
     ) -> Tuple[List[Labware], List[Labware]]:
         """End Repair Function."""
-        ctx.comment("-------Starting end_repair-------")
+        protocol.comment("-------Starting end_repair-------")
 
         for i in range(num_cols):
 
-            ctx.comment(
+            protocol.comment(
                 "**** Mixing and Transfering beads to column " + str(i + 1) + " ****"
             )
 
@@ -551,10 +553,10 @@ def run(ctx: ProtocolContext) -> None:
             p50.flow_rate.dispense = 150
             if trash_tips:
                 p50.drop_tip()
-                ctx.comment("****Dropping Tip in Waste shoot****")
+                protocol.comment("****Dropping Tip in Waste shoot****")
             else:
                 p50.return_tip()
-                ctx.comment("****Dropping Tip Back in Tip Box****")
+                protocol.comment("****Dropping Tip Back in Tip Box****")
 
         unused_lids, used_lids = run_er_profile(
             unused_lids, used_lids
@@ -567,8 +569,8 @@ def run(ctx: ProtocolContext) -> None:
         unused_lids: List[Labware], used_lids: List[Labware]
     ) -> Tuple[List[Labware], List[Labware]]:
         """Index Ligation."""
-        ctx.comment("-------Ligating Indexes-------")
-        ctx.comment("-------Adding and Mixing ELM-------")
+        protocol.comment("-------Ligating Indexes-------")
+        protocol.comment("-------Adding and Mixing ELM-------")
         for i in samples:
             tip_track(p50, tip_count)
             p50.aspirate(ligation_vol, ligation_res)
@@ -583,13 +585,13 @@ def run(ctx: ProtocolContext) -> None:
             p50.flow_rate.dispense = 150
             if trash_tips:
                 p50.drop_tip()
-                ctx.comment("****Dropping Tip in Waste shoot****")
+                protocol.comment("****Dropping Tip in Waste shoot****")
             else:
                 p50.return_tip()
-                ctx.comment("****Dropping Tip Back in Tip Box****")
+                protocol.comment("****Dropping Tip Back in Tip Box****")
 
         # Add and mix adapters
-        ctx.comment("-------Adding and Mixing Adapters-------")
+        protocol.comment("-------Adding and Mixing Adapters-------")
         for i_well, x_well in zip(samples, adapters):
             tip_track(p50, tip_count)
             p50.aspirate(adapter_vol, x_well)
@@ -602,10 +604,10 @@ def run(ctx: ProtocolContext) -> None:
                 p50.dispense(40, i_well.bottom(8))
             if trash_tips:
                 p50.drop_tip()
-                ctx.comment("****Dropping Tip in Waste shoot****")
+                protocol.comment("****Dropping Tip in Waste shoot****")
             else:
                 p50.return_tip()
-                ctx.comment("****Dropping Tip Back in Tip Box****")
+                protocol.comment("****Dropping Tip Back in Tip Box****")
 
         p50.flow_rate.aspirate = 150
         p50.flow_rate.dispense = 150
@@ -615,13 +617,13 @@ def run(ctx: ProtocolContext) -> None:
 
     def lib_cleanup() -> None:
         """Litigation Clean up."""
-        ctx.comment("-------Starting Cleanup-------")
-        ctx.comment("-------Adding and Mixing Cleanup Beads-------")
+        protocol.comment("-------Starting Cleanup-------")
+        protocol.comment("-------Adding and Mixing Cleanup Beads-------")
 
         # Move FLP plate off magnetic module if it's there
         if FLP_plate.parent == magblock:
-            ctx.comment("****Moving FLP Plate off Magnetic Module****")
-            ctx.move_labware(FLP_plate, tc_mod, use_gripper=USE_GRIPPER)
+            protocol.comment("****Moving FLP Plate off Magnetic Module****")
+            protocol.move_labware(FLP_plate, tc_mod, use_gripper=USE_GRIPPER)
 
         for x, i in enumerate(samples):
             mix_beads(p200, bead_res, bead_vol_1, 7 if x == 0 else 2, x)
@@ -638,22 +640,22 @@ def run(ctx: ProtocolContext) -> None:
             p200.flow_rate.dispense = 150
             if trash_tips:
                 p200.drop_tip()
-                ctx.comment("****Dropping Tip in Waste shoot****")
+                protocol.comment("****Dropping Tip in Waste shoot****")
             else:
                 p200.return_tip()
-                ctx.comment("****Dropping Tip Back in Tip Box****")
+                protocol.comment("****Dropping Tip Back in Tip Box****")
 
-        ctx.delay(
+        protocol.delay(
             minutes=bead_inc,
             msg="Please wait "
             + str(bead_inc)
             + " minutes while samples incubate at RT.",
         )
 
-        ctx.comment("****Moving Labware to Magnet for Pelleting****")
-        ctx.move_labware(sample_plate, magblock, use_gripper=USE_GRIPPER)
+        protocol.comment("****Moving Labware to Magnet for Pelleting****")
+        protocol.move_labware(sample_plate, magblock, use_gripper=USE_GRIPPER)
 
-        ctx.delay(minutes=4.5, msg="Time for Pelleting")
+        protocol.delay(minutes=4.5, msg="Time for Pelleting")
 
         for col, i in enumerate(samples):
             remove_supernatant(i, 130, waste1_res, col)
@@ -663,7 +665,7 @@ def run(ctx: ProtocolContext) -> None:
         p200.flow_rate.aspirate = 75
         p200.flow_rate.dispense = 75
         for y in range(2 if not dry_run else 1):
-            ctx.comment(f"-------Wash # {y+1} with Ethanol-------")
+            protocol.comment(f"-------Wash # {y+1} with Ethanol-------")
             if y == 0:  # First wash
                 this_res = etoh1_res
                 this_waste_res = waste1_res
@@ -674,42 +676,42 @@ def run(ctx: ProtocolContext) -> None:
                 p200.aspirate(150, this_res)
                 p200.air_gap(10)
                 p200.dispense(p200.current_volume, i.top())
-                ctx.delay(seconds=1)
+                protocol.delay(seconds=1)
                 p200.air_gap(10)
                 if not REUSE_ETOH_TIPS:
                     p200.drop_tip() if trash_tips else p200.return_tip()
 
-            ctx.delay(seconds=10)
+            protocol.delay(seconds=10)
             # Remove the ethanol wash
             for x, i in enumerate(samp_list):
                 tip_track(p200, tip_count)
                 p200.aspirate(155, i)
                 p200.air_gap(10)
                 p200.dispense(p200.current_volume, this_waste_res)
-                ctx.delay(seconds=1)
+                protocol.delay(seconds=1)
                 p200.air_gap(10)
                 if trash_tips:
                     p200.drop_tip()
-                    ctx.comment("****Dropping Tip in Waste shoot****")
+                    protocol.comment("****Dropping Tip in Waste shoot****")
                 else:
                     p200.return_tip()
-                    ctx.comment("****Dropping Tip Back in Tip Box****")
+                    protocol.comment("****Dropping Tip Back in Tip Box****")
 
         p200.flow_rate.aspirate = 150
         p200.flow_rate.dispense = 150
 
         # Wash complete, move on to drying steps.
-        ctx.delay(minutes=2, msg="Allow 3 minutes for residual ethanol to dry")
+        protocol.delay(minutes=2, msg="Allow 3 minutes for residual ethanol to dry")
 
         # Return Plate to H-S from Magnet
 
-        ctx.comment("****Moving sample plate off of Magnet****")
-        ctx.move_labware(sample_plate, "D1", use_gripper=USE_GRIPPER)
+        protocol.comment("****Moving sample plate off of Magnet****")
+        protocol.move_labware(sample_plate, "D1", use_gripper=USE_GRIPPER)
 
         # Adding RSB and Mixing
 
         for col, i in enumerate(samp_list):
-            ctx.comment(f"****Adding RSB to Columns: {col+1}****")
+            protocol.comment(f"****Adding RSB to Columns: {col+1}****")
             tip_track(p50, tip_count)
             p50.aspirate(rsb_vol_1, rsb_res)
             p50.air_gap(5)
@@ -725,23 +727,23 @@ def run(ctx: ProtocolContext) -> None:
             p50.air_gap(5)
             if REUSE_RSB_TIPS:
                 p50.return_tip()
-                ctx.comment("****Dropping Tip Back in Tip Box****")
+                protocol.comment("****Dropping Tip Back in Tip Box****")
             else:
                 if trash_tips:
                     p50.drop_tip()
-                    ctx.comment("****Dropping Tip in Waste shoot****")
+                    protocol.comment("****Dropping Tip in Waste shoot****")
                 else:
                     p50.return_tip()
-                    ctx.comment("****Dropping Tip Back in Tip Box****")
+                    protocol.comment("****Dropping Tip Back in Tip Box****")
 
-        ctx.delay(
+        protocol.delay(
             minutes=3, msg="Allow 3 minutes for incubation and liquid aggregation."
         )
 
-        ctx.comment("****Move Samples to Magnet for Pelleting****")
-        ctx.move_labware(sample_plate, magblock, use_gripper=USE_GRIPPER)
+        protocol.comment("****Move Samples to Magnet for Pelleting****")
+        protocol.move_labware(sample_plate, magblock, use_gripper=USE_GRIPPER)
 
-        ctx.delay(minutes=2, msg="Please allow 2 minutes for beads to pellet.")
+        protocol.delay(minutes=2, msg="Please allow 2 minutes for beads to pellet.")
 
         p200.flow_rate.aspirate = 10
         for i_int, (s, e) in enumerate(zip(samp_list, samples_2)):
@@ -752,31 +754,31 @@ def run(ctx: ProtocolContext) -> None:
             p50.air_gap(5)
             if trash_tips:
                 p50.drop_tip()
-                ctx.comment("****Dropping Tip in Waste shoot****")
+                protocol.comment("****Dropping Tip in Waste shoot****")
             else:
                 p50.return_tip()
-                ctx.comment("****Dropping Tip Back in Tip Box****")
+                protocol.comment("****Dropping Tip Back in Tip Box****")
 
         # move new sample plate to D1 or heatershaker
-        ctx.comment("****Moving sample plate off of Magnet****")
-        ctx.move_labware(sample_plate_2, "D1", use_gripper=USE_GRIPPER)
+        protocol.comment("****Moving sample plate off of Magnet****")
+        protocol.move_labware(sample_plate_2, "D1", use_gripper=USE_GRIPPER)
 
         # Keep Sample PLate 1 to B2
-        ctx.comment("****Moving Sample_plate_1 Plate off magnet to B2****")
-        ctx.move_labware(sample_plate, "B2", use_gripper=USE_GRIPPER)
+        protocol.comment("****Moving Sample_plate_1 Plate off magnet to B2****")
+        protocol.move_labware(sample_plate, "B2", use_gripper=USE_GRIPPER)
 
-        ctx.comment("****Moving FLP Plate off TC****")
-        ctx.move_labware(FLP_plate, magblock, use_gripper=USE_GRIPPER)
+        protocol.comment("****Moving FLP Plate off TC****")
+        protocol.move_labware(FLP_plate, magblock, use_gripper=USE_GRIPPER)
 
     def lib_amplification(
         unused_lids: List[Labware], used_lids: List[Labware]
     ) -> Tuple[List[Labware], List[Labware]]:
         """Library Amplification."""
-        ctx.comment("-------Starting lib_amplification-------")
+        protocol.comment("-------Starting lib_amplification-------")
 
         for i in range(num_cols):
 
-            ctx.comment(
+            protocol.comment(
                 "**** Mixing and Transfering beads to column " + str(i + 1) + " ****"
             )
             mix_beads(
@@ -797,10 +799,10 @@ def run(ctx: ProtocolContext) -> None:
             p50.flow_rate.dispense = 150
             if trash_tips:
                 p50.drop_tip()
-                ctx.comment("****Dropping Tip in Waste shoot****")
+                protocol.comment("****Dropping Tip in Waste shoot****")
             else:
                 p50.return_tip()
-                ctx.comment("****Dropping Tip Back in Tip Box****")
+                protocol.comment("****Dropping Tip Back in Tip Box****")
 
         unused_lids, used_lids = run_amplification_profile(
             unused_lids, used_lids
@@ -809,8 +811,8 @@ def run(ctx: ProtocolContext) -> None:
 
     def lib_cleanup_2() -> None:
         """Final Library Clean up."""
-        ctx.comment("-------Starting Cleanup-------")
-        ctx.comment("-------Adding and Mixing Cleanup Beads-------")
+        protocol.comment("-------Starting Cleanup-------")
+        protocol.comment("-------Adding and Mixing Cleanup Beads-------")
         for x, i in enumerate(samples_2):
             mix_beads(p200, bead_res, bead_vol_2, 7 if x == 0 else 2, x)
             tip_track(p200, tip_count)
@@ -828,22 +830,22 @@ def run(ctx: ProtocolContext) -> None:
             p200.flow_rate.dispense = 150
             if trash_tips:
                 p200.drop_tip()
-                ctx.comment("****Dropping Tip in Waste shoot****")
+                protocol.comment("****Dropping Tip in Waste shoot****")
             else:
                 p200.return_tip()
-                ctx.comment("****Dropping Tip Back in Tip Box****")
+                protocol.comment("****Dropping Tip Back in Tip Box****")
 
-        ctx.delay(
+        protocol.delay(
             minutes=bead_inc,
             msg="Please wait "
             + str(bead_inc)
             + " minutes while samples incubate at RT.",
         )
 
-        ctx.comment("****Moving Labware to Magnet for Pelleting****")
-        ctx.move_labware(sample_plate_2, magblock, use_gripper=USE_GRIPPER)
+        protocol.comment("****Moving Labware to Magnet for Pelleting****")
+        protocol.move_labware(sample_plate_2, magblock, use_gripper=USE_GRIPPER)
 
-        ctx.delay(minutes=4.5, msg="Time for Pelleting")
+        protocol.delay(minutes=4.5, msg="Time for Pelleting")
 
         for col, i in enumerate(samples_2):
             remove_supernatant(i, 130, waste1_res, col)
@@ -853,7 +855,7 @@ def run(ctx: ProtocolContext) -> None:
         p200.flow_rate.aspirate = 75
         p200.flow_rate.dispense = 75
         for y in range(2 if not dry_run else 1):
-            ctx.comment(f"-------Wash # {y+1} with Ethanol-------")
+            protocol.comment(f"-------Wash # {y+1} with Ethanol-------")
             if y == 0:  # First wash
                 this_res = etoh1_res
                 this_waste_res = waste1_res
@@ -864,41 +866,41 @@ def run(ctx: ProtocolContext) -> None:
                 p200.aspirate(150, this_res)
                 p200.air_gap(10)
                 p200.dispense(p200.current_volume, i.top())
-                ctx.delay(seconds=1)
+                protocol.delay(seconds=1)
                 p200.air_gap(10)
                 if not REUSE_ETOH_TIPS:
                     p200.drop_tip() if trash_tips else p200.return_tip()
 
-            ctx.delay(seconds=10)
+            protocol.delay(seconds=10)
             # Remove the ethanol wash
             for x, i in enumerate(samp_list_2):
                 tip_track(p200, tip_count)
                 p200.aspirate(155, i)
                 p200.air_gap(10)
                 p200.dispense(p200.current_volume, this_waste_res)
-                ctx.delay(seconds=1)
+                protocol.delay(seconds=1)
                 p200.air_gap(10)
                 if trash_tips:
                     p200.drop_tip()
-                    ctx.comment("****Dropping Tip in Waste shoot****")
+                    protocol.comment("****Dropping Tip in Waste shoot****")
                 else:
                     p200.return_tip()
-                    ctx.comment("****Dropping Tip Back in Tip Box****")
+                    protocol.comment("****Dropping Tip Back in Tip Box****")
 
         p200.flow_rate.aspirate = 150
         p200.flow_rate.dispense = 150
 
         # Washes Complete, Move on to Drying Steps
 
-        ctx.delay(minutes=3, msg="Allow 3 minutes for residual ethanol to dry")
+        protocol.delay(minutes=3, msg="Allow 3 minutes for residual ethanol to dry")
 
-        ctx.comment("****Moving sample plate off of Magnet****")
-        ctx.move_labware(sample_plate_2, "D1", use_gripper=USE_GRIPPER)
+        protocol.comment("****Moving sample plate off of Magnet****")
+        protocol.move_labware(sample_plate_2, "D1", use_gripper=USE_GRIPPER)
 
         # Adding RSB and Mixing
 
         for col, i in enumerate(samp_list_2):
-            ctx.comment(f"****Adding RSB to Columns: {col+1}****")
+            protocol.comment(f"****Adding RSB to Columns: {col+1}****")
             tip_track(p50, tip_count)
             p50.aspirate(rsb_vol_2, rsb_res)
             p50.air_gap(5)
@@ -914,23 +916,23 @@ def run(ctx: ProtocolContext) -> None:
             p50.air_gap(5)
             if REUSE_RSB_TIPS:
                 p50.return_tip()
-                ctx.comment("****Dropping Tip Back in Tip Box****")
+                protocol.comment("****Dropping Tip Back in Tip Box****")
             else:
                 if trash_tips:
                     p50.drop_tip()
-                    ctx.comment("****Dropping Tip in Waste shoot****")
+                    protocol.comment("****Dropping Tip in Waste shoot****")
                 else:
                     p50.return_tip()
-                    ctx.comment("****Dropping Tip Back in Tip Box****")
+                    protocol.comment("****Dropping Tip Back in Tip Box****")
 
-        ctx.delay(
+        protocol.delay(
             minutes=3, msg="Allow 3 minutes for incubation and liquid aggregation."
         )
 
-        ctx.comment("****Move Samples to Magnet for Pelleting****")
-        ctx.move_labware(sample_plate_2, magblock, use_gripper=USE_GRIPPER)
+        protocol.comment("****Move Samples to Magnet for Pelleting****")
+        protocol.move_labware(sample_plate_2, magblock, use_gripper=USE_GRIPPER)
 
-        ctx.delay(minutes=2, msg="Please allow 2 minutes for beads to pellet.")
+        protocol.delay(minutes=2, msg="Please allow 2 minutes for beads to pellet.")
 
         p200.flow_rate.aspirate = 10
         for i_int, (s, e) in enumerate(zip(samp_list_2, samples_flp)):
@@ -941,10 +943,10 @@ def run(ctx: ProtocolContext) -> None:
             p50.air_gap(5)
             if trash_tips:
                 p50.drop_tip()
-                ctx.comment("****Dropping Tip in Waste shoot****")
+                protocol.comment("****Dropping Tip in Waste shoot****")
             else:
                 p50.return_tip()
-                ctx.comment("****Dropping Tip Back in Tip Box****")
+                protocol.comment("****Dropping Tip Back in Tip Box****")
 
         # Set Block Temp for Final Plate
         tc_mod.set_block_temperature(4)
@@ -965,6 +967,6 @@ def run(ctx: ProtocolContext) -> None:
     waste2_res = waste2[0]
 
     end_probed_wells = [waste1_res, waste2_res]
-    helpers.find_liquid_height_of_all_wells(ctx, p50, end_probed_wells)
+    helpers.find_liquid_height_of_all_wells(protocol, p50, end_probed_wells)
     if deactivate_mods:
-        helpers.deactivate_modules(ctx)
+        helpers.deactivate_modules(protocol)

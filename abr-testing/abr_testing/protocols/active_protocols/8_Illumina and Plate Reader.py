@@ -114,6 +114,7 @@ def run(protocol: ProtocolContext) -> None:
     plate_orientation = protocol.params.plate_orientation  # type: ignore[attr-defined]
     deactivate_modules_bool = protocol.params.deactivate_modules  # type: ignore[attr-defined]
     plate_type = protocol.params.labware_plate_reader_compatible  # type: ignore [attr-defined]
+    helpers.comment_protocol_version(protocol, "01")
 
     plate_name_str = "hellma_plate_" + str(plate_orientation)
     global p200_tips
