@@ -32,7 +32,7 @@ import {
 } from '../../../ui/steps/selectors'
 import { DeckSetupContainer } from '../DeckSetup'
 import { OffDeck } from '../Offdeck'
-import { SubstepsToolbox } from './Timeline'
+import { SubStepsToolbox } from './Timeline'
 import { StepForm } from './StepForm'
 import { StepSummary } from './StepSummary'
 import { BatchEditToolbox } from './BatchEditToolbox'
@@ -173,7 +173,7 @@ export function ProtocolSteps(): JSX.Element {
         ) : null}
       </Flex>
       {formData == null && selectedSubstep ? (
-        <SubstepsToolbox stepId={selectedSubstep} />
+        <SubStepsToolbox stepId={selectedSubstep} />
       ) : null}
       <StepForm />
       {isMultiSelectMode ? <BatchEditToolbox /> : null}

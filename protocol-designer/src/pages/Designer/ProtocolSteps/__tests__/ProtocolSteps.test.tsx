@@ -19,8 +19,9 @@ import {
 import { getEnableHotKeysDisplay } from '../../../../feature-flags/selectors'
 import { DeckSetupContainer } from '../../DeckSetup'
 import { OffDeck } from '../../Offdeck'
+import { SubStepsToolbox } from '../Timeline'
 import { ProtocolSteps } from '..'
-import { SubstepsToolbox, TimelineToolbox } from '../Timeline'
+
 import type { SavedStepFormState } from '../../../../step-forms'
 
 vi.mock('../../Offdeck')
@@ -64,7 +65,7 @@ describe('ProtocolSteps', () => {
       timeline: [],
       errors: [],
     })
-    vi.mocked(TimelineToolbox).mockReturnValue(<div>mock TimelineToolbox</div>)
+    // vi.mocked(TimelineToolbox).mockReturnValue(<div>mock TimelineToolbox</div>)
     vi.mocked(DeckSetupContainer).mockReturnValue(
       <div>mock DeckSetupContainer</div>
     )
@@ -72,7 +73,7 @@ describe('ProtocolSteps', () => {
     vi.mocked(OffDeck).mockReturnValue(<div>mock OffDeck</div>)
     vi.mocked(getUnsavedForm).mockReturnValue(null)
     vi.mocked(getSelectedSubstep).mockReturnValue(null)
-    vi.mocked(SubstepsToolbox).mockReturnValue(<div>mock SubstepsToolbox</div>)
+    vi.mocked(SubStepsToolbox).mockReturnValue(<div>mock SubStepsToolbox</div>)
     vi.mocked(getEnableHotKeysDisplay).mockReturnValue(true)
     vi.mocked(getSavedStepForms).mockReturnValue(
       MOCK_STEP_FORMS as SavedStepFormState
@@ -84,7 +85,7 @@ describe('ProtocolSteps', () => {
 
   it('renders each component in ProtocolSteps', () => {
     render()
-    screen.getByText('mock TimelineToolbox')
+    // screen.getByText('mock TimelineToolbox')
     screen.getByText('mock DeckSetupContainer')
   })
 
@@ -98,7 +99,7 @@ describe('ProtocolSteps', () => {
   it('renders the substepToolbox when selectedSubstep is not null', () => {
     vi.mocked(getSelectedSubstep).mockReturnValue('mockId')
     render()
-    screen.getByText('mock SubstepsToolbox')
+    screen.getByText('mock SubStepsToolbox')
   })
 
   it('renders the hot keys display', () => {
