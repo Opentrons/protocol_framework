@@ -8,6 +8,7 @@ import {
   SPACING,
   StyledText,
 } from '@opentrons/components'
+import { hoverSelection } from '../../../../../../ui/steps/actions/actions'
 import { getHeaterShakerLabwareOptions } from '../../../../../../ui/modules/selectors'
 import {
   DropdownStepFormField,
@@ -16,7 +17,6 @@ import {
 } from '../../../../../../molecules'
 import { getFormErrorsMappedToField, getFormLevelError } from '../../utils'
 import type { StepFormProps } from '../../types'
-import { hoverSelection } from '../../../../../../ui/steps/actions/actions'
 
 export function HeaterShakerTools(props: StepFormProps): JSX.Element {
   const { propsForFields, formData, visibleFormErrors } = props
@@ -36,8 +36,7 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
         options={moduleLabwareOptions}
         title={t('protocol_steps:module')}
         onEnter={(id: string) => {
-          console.log(id)
-          dispatch(hoverSelection({ id, text: 'Select' }))
+          dispatch(hoverSelection({ id, text: t('select') }))
         }}
         onExit={() => {
           dispatch(hoverSelection({ id: null, text: null }))

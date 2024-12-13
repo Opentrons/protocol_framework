@@ -8,14 +8,14 @@ import type { FieldProps } from '../../types'
 export function MoveLabwareField(props: FieldProps): JSX.Element {
   const options = useSelector(getMoveLabwareOptions)
   const dispatch = useDispatch()
-  const { t } = useTranslation('protocol_steps')
+  const { t } = useTranslation(['protocol_steps', 'application'])
   return (
     <DropdownStepFormField
       {...props}
       options={options}
       title={t('select_labware')}
       onEnter={(id: string) => {
-        dispatch(hoverSelection({ id, text: 'Select' }))
+        dispatch(hoverSelection({ id, text: t('application:select') }))
       }}
       onExit={() => {
         dispatch(hoverSelection({ id: null, text: null }))

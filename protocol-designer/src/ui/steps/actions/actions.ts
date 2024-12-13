@@ -274,6 +274,7 @@ export const selectStep = (stepId: StepIdType): ThunkAction<any> => (
     formData.stepType === 'thermocycler' ||
     formData.stepType === 'magnet'
   ) {
+    console.log('hit here', formData.moduleId)
     dispatch({
       type: 'SELECT_SELECTION',
       payload: {

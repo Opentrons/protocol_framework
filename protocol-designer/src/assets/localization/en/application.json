@@ -42,6 +42,8 @@
     "temperature": "temperature",
     "thermocycler": "thermocycler"
   },
+  "select": "Select",
+  "selected": "Selected",
   "temperature": "Temperature (˚C)",
   "time": "Time",
   "units": {

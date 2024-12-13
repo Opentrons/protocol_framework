@@ -40,15 +40,35 @@ export function DropdownStepFormField(
     onFieldBlur,
     name: fieldName,
   } = props
-  const { t } = useTranslation('tooltip')
+  const { t } = useTranslation(['tooltip', 'application'])
   const dispatch = useDispatch()
   const availableOptionId = options.find(opt => opt.value === value)
-  useEffect(() => {
-    if (options.length === 1) {
-      updateValue(options[0].value)
+  const handleSelection = (value: string): void => {
+    const selection = { id: value, text: t('application:selected') }
+    if (
+      fieldName === 'aspirate_labware' ||
+      fieldName === 'labware' ||
+      fieldName === 'moduleId'
+    ) {
+      dispatch(
+        selectSelection({
+          selection: { ...selection, field: '1' },
+          mode: 'add',
+        })
+      )
+    } else if (
+      fieldName === 'dispense_labware' ||
+      fieldName === 'newLocation'
+    ) {
+      dispatch(
+        selectSelection({
+          selection: { ...selection, field: '2' },
+          mode: 'add',
+        })
+      )
     }
-  }, [])
-  console.log(fieldName)
+  }
+
   return (
     <Flex padding={padding ?? SPACING.spacing16}>
       {options.length > 1 || options.length === 0 ? (
@@ -66,29 +86,7 @@ export function DropdownStepFormField(
           }
           onClick={value => {
             updateValue(value)
-            const selection = { id: value, text: 'Selected' }
-            if (
-              fieldName === 'aspirate_labware' ||
-              fieldName === 'labware' ||
-              fieldName === 'moduleId'
-            ) {
-              dispatch(
-                selectSelection({
-                  selection: { ...selection, field: '1' },
-                  mode: 'add',
-                })
-              )
-            } else if (
-              fieldName === 'dispense_labware' ||
-              fieldName === 'newLocation'
-            ) {
-              dispatch(
-                selectSelection({
-                  selection: { ...selection, field: '2' },
-                  mode: 'add',
-                })
-              )
-            }
+            handleSelection(value)
           }}
           onEnter={onEnter}
           onExit={onExit}

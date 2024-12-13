@@ -35,6 +35,7 @@ import {
   _getLabwareEntitiesRootState,
   _getInitialDeckSetupRootState,
   _getAdditionalEquipmentEntitiesRootState,
+  _getModuleEntitiesRootState,
 } from '../selectors'
 import {
   createPresavedStepForm,
@@ -157,6 +158,7 @@ export const unsavedForm = (
         additionalEquipmentEntities: _getAdditionalEquipmentEntitiesRootState(
           rootState
         ),
+        moduleEntities: _getModuleEntitiesRootState(rootState),
       })
     }
 

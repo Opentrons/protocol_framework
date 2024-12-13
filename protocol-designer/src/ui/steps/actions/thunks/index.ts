@@ -4,13 +4,14 @@ import {
   getUnsavedFormIsPristineSetTempForm,
   getUnsavedFormIsPristineHeaterShakerForm,
   getOrderedStepIds,
+  getInitialDeckSetup,
 } from '../../../../step-forms/selectors'
 import { changeFormInput } from '../../../../steplist/actions/actions'
 import { PRESAVED_STEP_ID } from '../../../../steplist/types'
 import { PAUSE_UNTIL_TEMP } from '../../../../constants'
 import { uuid } from '../../../../utils'
 import { getMultiSelectLastSelected, getSelectedStepId } from '../../selectors'
-import { addStep } from '../actions'
+import { addStep, selectSelection } from '../actions'
 import {
   actions as tutorialActions,
   selectors as tutorialSelectors,
@@ -23,16 +24,36 @@ import type {
   DuplicateMultipleStepsAction,
   SelectMultipleStepsAction,
 } from '../types'
+import { THERMOCYCLER, THERMOCYCLER_MODULE_TYPE } from '@opentrons/shared-data'
 export const addAndSelectStep: (arg: {
   stepType: StepType
 }) => ThunkAction<any> = payload => (dispatch, getState) => {
   const robotStateTimeline = fileDataSelectors.getRobotStateTimeline(getState())
+  const initialDeckSetup = getInitialDeckSetup(getState())
+  const { modules, labware } = initialDeckSetup
   dispatch(
     addStep({
       stepType: payload.stepType,
       robotStateTimeline,
     })
   )
+  if (payload.stepType === 'thermocycler') {
+    const tcId = Object.entries(modules).find(
+      ([key, value]) => value.moduleState.type === THERMOCYCLER_MODULE_TYPE
+    )?.[0]
+    if (tcId != null) {
+      dispatch(
+        selectSelection({
+          selection: {
+            id: tcId,
+            text: 'Selected',
+            field: '1',
+          },
+          mode: 'add',
+        })
+      )
+    }
+  }
 }
 export interface ReorderSelectedStepAction {
   type: 'REORDER_SELECTED_STEP'
