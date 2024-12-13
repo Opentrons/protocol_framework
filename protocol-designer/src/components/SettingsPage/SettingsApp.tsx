@@ -24,9 +24,6 @@ export function SettingsApp(): JSX.Element {
   const canClearHintDismissals = useSelector(
     tutorialSelectors.getCanClearHintDismissals
   )
-  const _toggleOptedIn = analytics.hasOptedIn
-    ? analyticsActions.optOut
-    : analyticsActions.optIn
 
   const { t } = useTranslation(['card', 'application', 'button'])
   return (
@@ -75,9 +72,9 @@ export function SettingsApp(): JSX.Element {
                 toggledOn={Boolean(analytics.hasOptedIn)}
                 onClick={() =>
                   dispatch(
-                    _toggleOptedIn(
-                      process.env.OT_PD_VERSION || OLDEST_MIGRATEABLE_VERSION
-                    )
+                    analytics.hasOptedIn
+                      ? analyticsActions.optOut
+                      : analyticsActions.optIn
                   )
                 }
               />

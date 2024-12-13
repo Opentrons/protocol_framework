@@ -1,3 +1,4 @@
+import { OLDEST_MIGRATEABLE_VERSION } from '../load-file/migration'
 import { setMixpanelTracking } from './mixpanel'
 import type { AnalyticsEvent } from './mixpanel'
 
@@ -16,14 +17,20 @@ const _setOptIn = (payload: SetOptIn['payload']): SetOptIn => {
 
   return {
     type: 'SET_OPT_IN',
-    payload,
+    payload: { hasOptedIn: payload.hasOptedIn, appVersion: payload.appVersion },
   }
 }
 
-export const optIn = (appVersion: string): SetOptIn =>
-  _setOptIn({ hasOptedIn: true, appVersion: appVersion })
-export const optOut = (appVersion: string): SetOptIn =>
-  _setOptIn({ hasOptedIn: false, appVersion: appVersion })
+export const optIn = (): SetOptIn =>
+  _setOptIn({
+    hasOptedIn: true,
+    appVersion: process.env.OT_PD_VERSION || OLDEST_MIGRATEABLE_VERSION,
+  })
+export const optOut = (): SetOptIn =>
+  _setOptIn({
+    hasOptedIn: false,
+    appVersion: process.env.OT_PD_VERSION || OLDEST_MIGRATEABLE_VERSION,
+  })
 export interface AnalyticsEventAction {
   type: 'ANALYTICS_EVENT'
   payload: AnalyticsEvent

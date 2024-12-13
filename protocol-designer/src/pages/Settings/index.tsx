@@ -48,12 +48,10 @@ export function Settings(): JSX.Element {
   const canClearHintDismissals = useSelector(
     tutorialSelectors.getCanClearHintDismissals
   )
-  const _toggleOptedIn = analytics.hasOptedIn
-    ? analyticsActions.optOut
-    : analyticsActions.optIn
+
+  const pdVersion = process.env.OT_PD_VERSION
 
   const prereleaseModeEnabled = flags.PRERELEASE_MODE === true
-  const pdVersion = process.env.OT_PD_VERSION
 
   const allFlags = Object.keys(flags) as FlagTypes[]
 
@@ -283,7 +281,9 @@ export function Settings(): JSX.Element {
                   }
                   onClick={() =>
                     dispatch(
-                      _toggleOptedIn(pdVersion || OLDEST_MIGRATEABLE_VERSION)
+                      analytics.hasOptedIn
+                        ? analyticsActions.optOut()
+                        : analyticsActions.optIn()
                     )
                   }
                 >
