@@ -111,6 +111,9 @@ class Stacker_Axis_Acc_Lifetime_Test:
         stackerD_thread.join()
 
     def move_stackerA(self, cycle, stacker, test_file):
+        # stacker.unload_labware(self.labware_height)
+        # stacker.load_labware(self.labware_height)
+
         serial_number = stacker.get_device_serial_number()
         test_dataA = self.test_data.copy()
         test_dataA["Cycle"] = str(cycle)
@@ -133,10 +136,13 @@ class Stacker_Axis_Acc_Lifetime_Test:
         data.append_data_to_file(test_name=self.test_name, run_id=self.test_date, file_name=test_file, data=test_data)
 
     def move_stackerB(self, cycle, stacker, test_file):
+        # stacker.unload_labware(self.labware_height)
+        # stacker.load_labware(self.labware_height)
+
         serial_number = stacker.get_device_serial_number()
         test_dataB = self.test_data.copy()
         test_dataB["Cycle"] = str(cycle)
-        test_dataAB["Stacker"] = serial_number
+        test_dataB["Stacker"] = serial_number
 
         stacker.unload_labware(self.labware_height)
         sensor_states = stacker.get_sensor_states()
@@ -155,6 +161,9 @@ class Stacker_Axis_Acc_Lifetime_Test:
         data.append_data_to_file(test_name=self.test_name, run_id=self.test_date, file_name=test_file, data=test_data)
 
     def move_stackerC(self, cycle, stacker, test_file):
+        # stacker.unload_labware(self.labware_height)
+        # stacker.load_labware(self.labware_height)
+
         serial_number = stacker.get_device_serial_number()
         test_dataC = self.test_data.copy()
         test_dataC["Cycle"] = str(cycle)
@@ -177,6 +186,9 @@ class Stacker_Axis_Acc_Lifetime_Test:
         data.append_data_to_file(test_name=self.test_name, run_id=self.test_date, file_name=test_file, data=test_data)
 
     def move_stackerD(self, cycle, stacker, test_file):
+        # stacker.unload_labware(self.labware_height)
+        # stacker.load_labware(self.labware_height)
+
         serial_number = stacker.get_device_serial_number()
         test_dataD = self.test_data.copy()
         test_dataD["Cycle"] = str(cycle)
