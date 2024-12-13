@@ -568,7 +568,14 @@
       "description": "Allowed behaviors and usage of a labware in a protocol.",
       "items": {
         "type": "string",
-        "enum": ["labware", "adapter", "fixture", "maintenance", "lid", "system"]
+        "enum": [
+          "labware",
+          "adapter",
+          "fixture",
+          "maintenance",
+          "lid",
+          "system"
+        ]
       }
     },
     "stackingOffsetWithLabware": {
