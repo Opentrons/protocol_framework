@@ -20,6 +20,7 @@ import { getEnableHotKeysDisplay } from '../../../../feature-flags/selectors'
 import { DeckSetupContainer } from '../../DeckSetup'
 import { OffDeck } from '../../Offdeck'
 import { SubStepsToolbox } from '../Timeline'
+import { DraggableSidebar } from '../DraggableSidebar'
 import { ProtocolSteps } from '..'
 
 import type { SavedStepFormState } from '../../../../step-forms'
@@ -32,6 +33,7 @@ vi.mock('../StepForm')
 vi.mock('../../DeckSetup')
 vi.mock('../StepSummary.tsx')
 vi.mock('../Timeline')
+vi.mock('../DraggableSidebar')
 vi.mock('../../../../feature-flags/selectors')
 vi.mock('../../../../file-data/selectors')
 vi.mock('../../../../organisms/Alerts')
@@ -65,7 +67,9 @@ describe('ProtocolSteps', () => {
       timeline: [],
       errors: [],
     })
-    // vi.mocked(TimelineToolbox).mockReturnValue(<div>mock TimelineToolbox</div>)
+    vi.mocked(DraggableSidebar).mockReturnValue(
+      <div>mock DraggableSidebar</div>
+    )
     vi.mocked(DeckSetupContainer).mockReturnValue(
       <div>mock DeckSetupContainer</div>
     )
@@ -85,7 +89,7 @@ describe('ProtocolSteps', () => {
 
   it('renders each component in ProtocolSteps', () => {
     render()
-    // screen.getByText('mock TimelineToolbox')
+    screen.getByText('mock DraggableSidebar')
     screen.getByText('mock DeckSetupContainer')
   })
 
