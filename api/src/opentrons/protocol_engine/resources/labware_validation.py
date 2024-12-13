@@ -50,7 +50,7 @@ def validate_labware_can_be_ondeck(definition: LabwareDefinition) -> bool:
     """Validate that the labware being loaded onto the deck can sit in a slot."""
     return (
         definition.parameters.quirks is None
-        or "stackableOnly" not in definition.parameters.quirks
+        or "stackingOnly" not in definition.parameters.quirks
     )
 
 
