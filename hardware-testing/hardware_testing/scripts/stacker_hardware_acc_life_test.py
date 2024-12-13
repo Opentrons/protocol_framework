@@ -97,18 +97,24 @@ class Stacker_Axis_Acc_Lifetime_Test:
         # # Define threads
         stackerA_thread = threading.Thread(target = self.move_stackerA, args = (cycle, self.stackers[0], self.test_files[0],))
         stackerB_thread = threading.Thread(target = self.move_stackerB, args = (cycle, self.stackers[1], self.test_files[1],))
-        stackerC_thread = threading.Thread(target = self.move_stackerC, args = (cycle, self.stackers[2], self.test_files[2],))
-        stackerD_thread = threading.Thread(target = self.move_stackerD, args = (cycle, self.stackers[3], self.test_files[3],))
+        if self.num_stacker >= 3:
+            stackerC_thread = threading.Thread(target = self.move_stackerC, args = (cycle, self.stackers[2], self.test_files[2],))
+        if self.num_stacker == 4:
+            stackerD_thread = threading.Thread(target = self.move_stackerD, args = (cycle, self.stackers[3], self.test_files[3],))
         # # Start threads
         stackerA_thread.start()
         stackerB_thread.start()
-        stackerC_thread.start()
-        stackerD_thread.start()
+        if self.num_stacker >= 3:
+            stackerC_thread.start()
+        if self.num_stacker == 4:
+            stackerD_thread.start()
         # # Join threads
         stackerA_thread.join()
         stackerB_thread.join()
-        stackerC_thread.join()
-        stackerD_thread.join()
+        if self.num_stacker >= 3:
+            stackerC_thread.join()
+        if self.num_stacker == 4:
+            stackerD_thread.join()
 
     def move_stackerA(self, cycle, stacker, test_file):
         # stacker.unload_labware(self.labware_height)
