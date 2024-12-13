@@ -27,6 +27,7 @@ declare global {
       openDesignPage: () => Cypress.Chainable<void>
       addStep: (stepName: string) => Cypress.Chainable<void>
       openSettingsPage: () => Cypress.Chainable<void>
+      robotSelection: (robotName: string) => Cypress.Chainable<void>
       verifySettingsPage: () => Cypress.Chainable<void>
       verifyCreateNewPage: () => Cypress.Chainable<void>
       togglePreWetTip: () => Cypress.Chainable<void>
@@ -54,6 +55,8 @@ export const locators = {
   import: 'Import',
   createNew: 'Create new',
   createProtocol: 'Create a protocol',
+  Flex_Home: 'Opentrons Flex',
+  OT2_Home: "Opentrons OT-2",
   editProtocol: 'Edit existing protocol',
   settingsDataTestid: 'SettingsIconButton',
   settings: 'Settings',
@@ -119,10 +122,28 @@ Cypress.Commands.add('importProtocol', (protocolFilePath: string) => {
     .selectFile(protocolFilePath, { force: true })
 })
 
+Cypress.Commands.add('robotSelection',(robotName:string) =>{
+  if (robotName ==='Opentrons OT-2') {
+  cy.contains('label', locators.OT2_Home ).should('be.visible').click()
+  
+  }
+  else {
+  // Just checking that the selection modal works 
+  cy.contains('label', locators.OT2_Home ).should('be.visible').click()
+  cy.contains('label', locators.Flex_Home).should('be.visible').click()
+
+  }
+  cy.contains('button', "Confirm").should('be.visible').click()
+  
+})
+
 // Settings Page Actions
 Cypress.Commands.add('openSettingsPage', () => {
   cy.getByTestId(locators.settingsDataTestid).click()
 })
+
+
+
 
 Cypress.Commands.add('verifySettingsPage', () => {
   cy.verifyFullHeader()

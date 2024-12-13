@@ -1,3 +1,45 @@
+
+
+import '../support/commands.ts'; // Importing the custom commands file
+
+const Flex_Home = 'Opentrons Flex';
+const OT2_Home = 'Opentrons OT-2';
+
+
+describe('Happy Path Transfer Tests', () => {
+  it('It should verify the working function of every permutation of transfer checkboxes', () => {
+
+    cy.visit('/'); // Replace with the appropriate URL or navigation
+    cy.verifyHomePage(); // This calls the custom command from commands.ts
+    cy.clickCreateNew()
+    cy.robotSelection(Flex_Home);
+    // ToDo Split pipette selector to only do one (left or right). 
+   
+
+    /*
+    const Flex_Home ='Opentrons Flex'
+    const OT2_Home = 'Opentrons OT-2'
+    cy.visit('/'); // Replace with the appropriate URL or navigation
+    cy.verifyHomePage(); // This calls the custom command from commands.ts
+    cy.clickCreateNew()
+    cy.contains('label', Flex_Home).should('be.visible')
+    cy.contains('label', OT2_Home ).should('be.visible').click()
+    cy.contains('button', "Confirm").should('be.visible')
+
+    */
+
+    
+
+  });
+});
+
+
+
+
+
+
+
+
 // TODO: refactor to test with new navigation
 // const isMacOSX = Cypress.platform === 'darwin'
 // const batchEditClickOptions = { [isMacOSX ? 'metaKey' : 'ctrlKey']: true }
@@ -43,7 +85,13 @@
 //   cy.get('button').contains('exit batch edit').should('exist')
 // }
 
+/*
 describe('Advanced Settings for Transfer Form', () => {
+  cy.visit('/')
+
+
+
+
   // before(() => {
   //   cy.visit('/')
   //   cy.closeAnnouncementModal()
@@ -345,3 +393,4 @@ describe('Advanced Settings for Transfer Form', () => {
   //   })
   // })
 })
+*/
