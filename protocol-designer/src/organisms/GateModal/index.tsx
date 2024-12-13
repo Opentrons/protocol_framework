@@ -9,23 +9,23 @@ import {
   Modal,
   PrimaryButton,
   SPACING,
-  SecondaryButton,
   StyledText,
 } from '@opentrons/components'
 import {
   actions as analyticsActions,
   selectors as analyticsSelectors,
 } from '../../analytics'
+import { OLDEST_MIGRATEABLE_VERSION } from '../../load-file/migration'
 
 const PRIVACY_POLICY_URL = 'https://opentrons.com/privacy-policy'
 const EULA_URL = 'https://opentrons.com/eula'
 
 export function GateModal(): JSX.Element | null {
   const { t } = useTranslation('shared')
-  const hasOptedIn = useSelector(analyticsSelectors.getHasOptedIn)
+  const analytics = useSelector(analyticsSelectors.getHasOptedIn)
   const dispatch = useDispatch()
 
-  if (hasOptedIn == null) {
+  if (analytics.appVersion == null || analytics.hasOptedIn == null) {
     return (
       <Modal
         position="bottomRight"
@@ -36,16 +36,17 @@ export function GateModal(): JSX.Element | null {
             gridGap={SPACING.spacing8}
             padding={SPACING.spacing24}
           >
-            <SecondaryButton
-              onClick={() => dispatch(analyticsActions.optOut())}
+            <PrimaryButton
+              onClick={() =>
+                dispatch(
+                  analyticsActions.optIn(
+                    process.env.OT_PD_VERSION || OLDEST_MIGRATEABLE_VERSION
+                  )
+                )
+              }
             >
               <StyledText desktopStyle="bodyDefaultRegular">
-                {t('reject')}
-              </StyledText>
-            </SecondaryButton>
-            <PrimaryButton onClick={() => dispatch(analyticsActions.optIn())}>
-              <StyledText desktopStyle="bodyDefaultRegular">
-                {t('agree')}
+                {t('confirm')}
               </StyledText>
             </PrimaryButton>
           </Flex>

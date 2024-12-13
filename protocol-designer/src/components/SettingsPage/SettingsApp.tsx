@@ -20,11 +20,11 @@ import { FeatureFlagCard } from './FeatureFlagCard/FeatureFlagCard'
 
 export function SettingsApp(): JSX.Element {
   const dispatch = useDispatch()
-  const hasOptedIn = useSelector(analyticsSelectors.getHasOptedIn)
+  const analytics = useSelector(analyticsSelectors.getHasOptedIn)
   const canClearHintDismissals = useSelector(
     tutorialSelectors.getCanClearHintDismissals
   )
-  const _toggleOptedIn = hasOptedIn
+  const _toggleOptedIn = analytics.hasOptedIn
     ? analyticsActions.optOut
     : analyticsActions.optIn
 
@@ -72,8 +72,14 @@ export function SettingsApp(): JSX.Element {
               <p className={styles.toggle_label}>{t('toggle.share_session')}</p>
               <ToggleButton
                 className={styles.toggle_button}
-                toggledOn={Boolean(hasOptedIn)}
-                onClick={() => dispatch(_toggleOptedIn())}
+                toggledOn={Boolean(analytics.hasOptedIn)}
+                onClick={() =>
+                  dispatch(
+                    _toggleOptedIn(
+                      process.env.OT_PD_VERSION || OLDEST_MIGRATEABLE_VERSION
+                    )
+                  )
+                }
               />
             </div>
 

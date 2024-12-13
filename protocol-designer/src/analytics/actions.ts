@@ -3,7 +3,7 @@ import type { AnalyticsEvent } from './mixpanel'
 
 export interface SetOptIn {
   type: 'SET_OPT_IN'
-  payload: boolean
+  payload: { hasOptedIn: boolean; appVersion: string }
 }
 
 const _setOptIn = (payload: SetOptIn['payload']): SetOptIn => {
@@ -20,8 +20,10 @@ const _setOptIn = (payload: SetOptIn['payload']): SetOptIn => {
   }
 }
 
-export const optIn = (): SetOptIn => _setOptIn(true)
-export const optOut = (): SetOptIn => _setOptIn(false)
+export const optIn = (appVersion: string): SetOptIn =>
+  _setOptIn({ hasOptedIn: true, appVersion: appVersion })
+export const optOut = (appVersion: string): SetOptIn =>
+  _setOptIn({ hasOptedIn: false, appVersion: appVersion })
 export interface AnalyticsEventAction {
   type: 'ANALYTICS_EVENT'
   payload: AnalyticsEvent

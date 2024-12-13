@@ -24,7 +24,7 @@ const MIXPANEL_OPTS = {
 }
 
 export function initializeMixpanel(state: BaseState): void {
-  const optedIn = getHasOptedIn(state) ?? false
+  const optedIn = getHasOptedIn(state)?.hasOptedIn ?? false
   if (MIXPANEL_ID != null) {
     console.debug('Initializing Mixpanel', { optedIn })
 
