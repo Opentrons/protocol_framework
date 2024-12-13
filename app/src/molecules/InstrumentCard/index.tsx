@@ -91,7 +91,7 @@ export function InstrumentCard(props: InstrumentCardProps): JSX.Element {
             pipetteSpecs={instrumentDiagramProps.pipetteSpecs}
             mount={instrumentDiagramProps.mount}
             transform="scale(0.3)"
-            transformOrigin={'-5% 52%'}
+            transformOrigin="-5% 52%"
           />
         </Flex>
       ) : null}

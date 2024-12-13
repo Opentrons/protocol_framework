@@ -67,8 +67,8 @@ export function AddMetadata(props: AddMetadataProps): JSX.Element | null {
               {...register('fields.name')}
               type="text"
               value={watch('fields.name')}
-              min={''}
-              max={''}
+              min=""
+              max=""
               autoFocus
             />
           </Flex>
@@ -86,8 +86,8 @@ export function AddMetadata(props: AddMetadataProps): JSX.Element | null {
               {...register('fields.organizationOrAuthor')}
               type="text"
               value={watch('fields.organizationOrAuthor')}
-              min={''}
-              max={''}
+              min=""
+              max=""
             />
           </Flex>
         </Flex>
