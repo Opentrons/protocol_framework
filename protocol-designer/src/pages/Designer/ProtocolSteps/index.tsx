@@ -1,17 +1,14 @@
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { css } from 'styled-components'
 
 import {
   ALIGN_CENTER,
   COLORS,
   DIRECTION_COLUMN,
-  DIRECTION_ROW,
   FLEX_MAX_CONTENT,
   Flex,
   JUSTIFY_CENTER,
-  JUSTIFY_END,
   JUSTIFY_SPACE_BETWEEN,
   POSITION_FIXED,
   POSITION_RELATIVE,
@@ -90,35 +87,14 @@ export function ProtocolSteps(): JSX.Element {
       width="100%"
       padding={SPACING.spacing12}
       gridGap={SPACING.spacing16}
-      // justifyContent={JUSTIFY_SPACE_BETWEEN}
-      id="container for sidebar and main"
     >
-      <Flex
-        // width="100%"
-        // minWidth="100%"
-        flex="1"
-        id="sidebar"
-        css={css`
-          outline: 1px solid red;
-        `}
-        height="100%"
-      >
-        <DraggableSidebar setTargetWidth={setTargetWidth} />
-      </Flex>
+      <DraggableSidebar setTargetWidth={setTargetWidth} />
       <Flex
         backgroundColor={COLORS.blue35}
         alignItems={ALIGN_CENTER}
         flexDirection={DIRECTION_COLUMN}
         gridGap={SPACING.spacing16}
         flex="2.85"
-        // width="82.3%"
-        // maxWidth="100%"
-        // minWidth="82.3%"
-        // maxwidth={targetWidth === null ? '100%' : `calc(100% - ${targetWidth})`}
-        id="main"
-        css={css`
-          outline: 1px solid blue;
-        `}
         paddingTop={showTimelineAlerts ? '0' : SPACING.spacing24}
         position={POSITION_RELATIVE}
       >
@@ -171,15 +147,11 @@ export function ProtocolSteps(): JSX.Element {
         </Flex>
         {enableHoyKeyDisplay ? (
           <Flex
-            id="hotkey-display"
             position={POSITION_FIXED}
             left={`calc(1.5rem + ${targetWidth}px)`}
             bottom="0.75rem"
             gridGap={SPACING.spacing4}
             flexDirection={DIRECTION_COLUMN}
-            css={css`
-              outline: 1px solid orange;
-            `}
           >
             <Tag
               text={t('double_click_to_edit')}

@@ -1,6 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import styled from 'styled-components'
-import { DIRECTION_COLUMN, DISPLAY_FLEX, Flex } from '@opentrons/components'
+import {
+  DIRECTION_COLUMN,
+  DISPLAY_FLEX,
+  Flex,
+  JUSTIFY_SPACE_BETWEEN,
+  Box,
+} from '@opentrons/components'
 import { TimelineToolbox } from './Timeline/TimelineToolbox'
 
 const INITIAL_SIDEBAR_WIDTH = 350
@@ -53,63 +59,36 @@ export function DraggableSidebar({
   }, [resize, stopResizing])
 
   return (
-    <SidebarContainer ref={sidebarRef} resizedWidth={sidebarWidth}>
-      {/* <SidebarContent> */}
-      <TimelineToolbox sidebarWidth={sidebarWidth} />
-      {/* </SidebarContent> */}
-      <SidebarResizer dragging={isResizing} onMouseDown={startResizing} />
-    </SidebarContainer>
+    <Flex
+      flexDirection={DIRECTION_COLUMN}
+      justifyContent={JUSTIFY_SPACE_BETWEEN}
+      height="100%"
+    >
+      <SidebarContainer ref={sidebarRef} resizedWidth={sidebarWidth}>
+        <SidebarContent>
+          <TimelineToolbox sidebarWidth={sidebarWidth} />
+        </SidebarContent>
+        <SidebarResizer dragging={isResizing} onMouseDown={startResizing} />
+      </SidebarContainer>
+    </Flex>
   )
 }
 
-// const SidebarContainer = styled(Flex)<{ resizedWidth: number }>`
-//   display: ${DISPLAY_FLEX};
-//   flex-direction: ${DIRECTION_COLUMN};
-//   background-color: #f4f4f4;
-//   border-right: 1px solid #ccc;
-//   position: relative;
-//   width: ${props => props.resizedWidth}px;
-//   overflow: hidden;
-//   height: 100%;
-// `
-
-const SidebarContainer = styled(Flex)<{ resizedWidth: number }>`
+const SidebarContainer = styled(Box)<{ resizedWidth: number }>`
   display: ${DISPLAY_FLEX};
   flex-direction: ${DIRECTION_COLUMN};
-  background-color: #f4f4f4;
+  /* background-color: #f4f4f4; */
+  background-color: #ff0000;
   border-right: 1px solid #ccc;
   position: relative;
   width: ${props => props.resizedWidth}px;
   overflow: hidden; /* Prevent content overflow */
   height: 100%;
-  margin: 0; /* Ensure no margins */
-  padding: 0; /* Ensure no padding */
 `
 
-// const SidebarContent = styled(Flex)`
-//   flex: 1;
-// `
-
-// const SidebarResizer = styled(Flex)<{ dragging: boolean }>`
-//   width: 0.3125rem;
-//   cursor: ew-resize;
-//   background-color: #ddd;
-//   position: absolute;
-//   top: 0;
-//   right: 0;
-//   bottom: 0;
-//   transition: background-color 0.2s ease;
-
-//   &:hover {
-//     background-color: blue; /* Hover state */
-//   }
-
-//   ${props =>
-//     props.dragging === true &&
-//     `
-//     background-color: darkblue; /* Dragging state */
-//   `}
-// `
+const SidebarContent = styled(Flex)`
+  flex: 1;
+`
 
 const SidebarResizer = styled(Flex)<{ dragging: boolean }>`
   width: 0.3125rem;
