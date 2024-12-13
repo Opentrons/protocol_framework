@@ -701,6 +701,10 @@ class ProtocolCore(
         version: Optional[int],
     ) -> LabwareCore:
         """Load a Stack of Lids to a given location, creating a Lid Stack."""
+        if quantity < 1:
+            raise ValueError(
+                "When loading a lid stack quantity cannot be less than one."
+            )
         if isinstance(location, DeckSlotName) or isinstance(location, StagingSlotName):
             load_location = self._convert_labware_location(location=location)
         else:
@@ -733,7 +737,7 @@ class ProtocolCore(
 
         deck_conflict.check(
             engine_state=self._engine_client.state,
-            new_labware_id=load_result.labwareIds[0],
+            new_labware_id=load_result.stackLabwareId,
             existing_disposal_locations=self._disposal_locations,
             # TODO (spp, 2023-11-27): We've been using IDs from _labware_cores_by_id
             #  and _module_cores_by_id instead of getting the lists directly from engine

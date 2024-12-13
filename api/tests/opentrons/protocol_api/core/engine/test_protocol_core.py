@@ -755,6 +755,154 @@ def test_load_adapter_on_staging_slot(
     assert subject.get_slot_item(StagingSlotName.SLOT_B4) is result
 
 
+def test_load_lid(
+    decoy: Decoy,
+    mock_engine_client: EngineClient,
+    subject: ProtocolCore,
+) -> None:
+    """It should issue a LoadLid command."""
+    mock_labware_core = decoy.mock(cls=LabwareCore)
+    decoy.when(mock_labware_core.labware_id).then_return("labware-id")
+    decoy.when(
+        mock_engine_client.state.labware.find_custom_labware_load_params()
+    ).then_return([EngineLabwareLoadParams("hello", "world", 654)])
+
+    decoy.when(
+        load_labware_params.resolve(
+            "some_labware",
+            "a_namespace",
+            456,
+            [EngineLabwareLoadParams("hello", "world", 654)],
+        )
+    ).then_return(("some_namespace", 9001))
+
+    decoy.when(
+        mock_engine_client.execute_command_without_recovery(
+            cmd.LoadLidParams(
+                location=OnLabwareLocation(labwareId="labware-id"),
+                loadName="some_labware",
+                namespace="some_namespace",
+                version=9001,
+            )
+        )
+    ).then_return(
+        commands.LoadLidResult(
+            labwareId="abc123",
+            definition=LabwareDefinition.construct(),  # type: ignore[call-arg]
+        )
+    )
+
+    decoy.when(mock_engine_client.state.labware.get_definition("abc123")).then_return(
+        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+    )
+
+    result = subject.load_lid(
+        load_name="some_labware",
+        location=mock_labware_core,
+        namespace="a_namespace",
+        version=456,
+    )
+
+    assert isinstance(result, LabwareCore)
+    assert result.labware_id == "abc123"
+    assert subject.get_labware_cores() == [result]
+
+    decoy.verify(
+        deck_conflict.check(
+            engine_state=mock_engine_client.state,
+            existing_labware_ids=[],
+            existing_module_ids=[],
+            existing_disposal_locations=[],
+            new_labware_id="abc123",
+        )
+    )
+
+    decoy.when(
+        mock_engine_client.state.geometry.get_slot_item(
+            slot_name=DeckSlotName.SLOT_5,
+        )
+    ).then_return(
+        LoadedLabware.construct(id="abc123")  # type: ignore[call-arg]
+    )
+
+    assert subject.get_slot_item(DeckSlotName.SLOT_5) is result
+
+
+def test_load_lid_stack(
+    decoy: Decoy,
+    mock_engine_client: EngineClient,
+    subject: ProtocolCore,
+) -> None:
+    """It should issue a LoadLidStack command."""
+    decoy.when(
+        mock_engine_client.state.labware.find_custom_labware_load_params()
+    ).then_return([EngineLabwareLoadParams("hello", "world", 654)])
+
+    decoy.when(
+        load_labware_params.resolve(
+            "some_labware",
+            "a_namespace",
+            456,
+            [EngineLabwareLoadParams("hello", "world", 654)],
+        )
+    ).then_return(("some_namespace", 9001))
+
+    decoy.when(
+        mock_engine_client.execute_command_without_recovery(
+            cmd.LoadLidStackParams(
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_5),
+                loadName="some_labware",
+                namespace="some_namespace",
+                version=9001,
+                quantity=5,
+            )
+        )
+    ).then_return(
+        commands.LoadLidStackResult(
+            stackLabwareId="abc123",
+            labwareIds=["1", "2", "3", "4", "5"],
+            definition=LabwareDefinition.construct(),  # type: ignore[call-arg]
+            location=DeckSlotLocation(slotName=DeckSlotName.SLOT_5),
+        )
+    )
+
+    decoy.when(mock_engine_client.state.labware.get_definition("abc123")).then_return(
+        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+    )
+
+    result = subject.load_lid_stack(
+        load_name="some_labware",
+        location=DeckSlotName.SLOT_5,
+        namespace="a_namespace",
+        version=456,
+        quantity=5,
+    )
+
+    assert isinstance(result, LabwareCore)
+    assert result.labware_id == "abc123"
+    assert subject.get_labware_cores() == [result]
+
+    decoy.verify(
+        deck_conflict.check(
+            engine_state=mock_engine_client.state,
+            existing_labware_ids=[],
+            existing_module_ids=[],
+            existing_disposal_locations=[],
+            new_labware_id="abc123",
+        )
+    )
+
+    decoy.when(
+        mock_engine_client.state.geometry.get_slot_item(
+            slot_name=DeckSlotName.SLOT_5,
+        )
+    ).then_return(
+        LoadedLabware.construct(id="abc123")  # type: ignore[call-arg]
+    )
+
+    assert subject.get_slot_item(DeckSlotName.SLOT_5) is result
+
+
 def test_load_trash_bin(
     decoy: Decoy,
     mock_engine_client: EngineClient,
