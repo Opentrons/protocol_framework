@@ -153,12 +153,18 @@ export function DraggableSteps(props: DraggableStepsProps): JSX.Element | null {
           sidebarWidth={sidebarWidth}
         />
       ))}
-      <StepDragPreview />
+      <StepDragPreview sidebarWidth={sidebarWidth} />
     </Flex>
   )
 }
 
-function StepDragPreview(): JSX.Element | null {
+interface StepDragPreviewProps {
+  sidebarWidth: number
+}
+
+function StepDragPreview({
+  sidebarWidth,
+}: StepDragPreviewProps): JSX.Element | null {
   const [{ isDragging, itemType, item, currentOffset }] = useDrag(() => ({
     type: DND_TYPES.STEP_ITEM,
     collect: (monitor: DragLayerMonitor) => ({
@@ -187,6 +193,7 @@ function StepDragPreview(): JSX.Element | null {
       <StepContainer
         iconName={stepIconsByType[stepType]}
         title={stepName || ''}
+        sidebarWidth={sidebarWidth}
       />
     </Flex>
   )

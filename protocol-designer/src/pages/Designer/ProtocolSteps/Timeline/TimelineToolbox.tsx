@@ -105,7 +105,7 @@ export const TimelineToolbox = ({
           }}
           sidebarWidth={sidebarWidth}
         />
-        <PresavedStep />
+        <PresavedStep sidebarWidth={sidebarWidth} />
         <TerminalItemStep
           id={END_TERMINAL_ITEM_ID}
           title={t('ending_deck')}
