@@ -69,7 +69,7 @@ export function SettingsApp(): JSX.Element {
               <p className={styles.toggle_label}>{t('toggle.share_session')}</p>
               <ToggleButton
                 className={styles.toggle_button}
-                toggledOn={Boolean(analytics.hasOptedIn)}
+                toggledOn={Boolean(hasOptedIn)}
                 onClick={() =>
                   dispatch(
                     hasOptedIn
