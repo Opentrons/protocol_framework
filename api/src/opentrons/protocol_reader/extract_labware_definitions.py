@@ -42,7 +42,7 @@ async def extract_labware_definitions(
 
 async def _extract_from_labware_file(path: Path) -> LabwareDefinition:
     def _do_parse() -> LabwareDefinition:
-        return LabwareDefinition.model_validate_json(path.read_text())
+        return LabwareDefinition.model_validate_json(path.read_bytes())
 
     return await anyio.to_thread.run_sync(_do_parse)
 

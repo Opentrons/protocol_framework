@@ -31,15 +31,15 @@ class JsonFileReader:
             )
         if protocol_source.config.schema_version == 6:
             return ProtocolSchemaV6.model_validate_json(
-                protocol_source.main_file.read_text()
+                protocol_source.main_file.read_bytes()
             )
         elif protocol_source.config.schema_version == 7:
             return ProtocolSchemaV7.model_validate_json(
-                protocol_source.main_file.read_text()
+                protocol_source.main_file.read_bytes()
             )
         elif protocol_source.config.schema_version == 8:
             return ProtocolSchemaV8.model_validate_json(
-                protocol_source.main_file.read_text()
+                protocol_source.main_file.read_bytes()
             )
         else:
             raise ProtocolFilesInvalidError(
