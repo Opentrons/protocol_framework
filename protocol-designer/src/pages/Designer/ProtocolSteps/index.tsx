@@ -88,9 +88,10 @@ export function ProtocolSteps(): JSX.Element {
       padding={SPACING.spacing12}
       gridGap={SPACING.spacing16}
     >
-      <DraggableSidebar setTargetWidth={setTargetWidth} />
+      <Flex flex="1" height="100%">
+        <DraggableSidebar setTargetWidth={setTargetWidth} />
+      </Flex>
       <Flex
-        backgroundColor={COLORS.blue35}
         alignItems={ALIGN_CENTER}
         flexDirection={DIRECTION_COLUMN}
         gridGap={SPACING.spacing16}
