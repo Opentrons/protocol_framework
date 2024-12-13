@@ -15,7 +15,6 @@ import {
   actions as analyticsActions,
   selectors as analyticsSelectors,
 } from '../../analytics'
-import { OLDEST_MIGRATEABLE_VERSION } from '../../load-file/migration'
 
 const PRIVACY_POLICY_URL = 'https://opentrons.com/privacy-policy'
 const EULA_URL = 'https://opentrons.com/eula'
@@ -36,15 +35,7 @@ export function GateModal(): JSX.Element | null {
             gridGap={SPACING.spacing8}
             padding={SPACING.spacing24}
           >
-            <PrimaryButton
-              onClick={() =>
-                dispatch(
-                  analyticsActions.optIn(
-                    process.env.OT_PD_VERSION || OLDEST_MIGRATEABLE_VERSION
-                  )
-                )
-              }
-            >
+            <PrimaryButton onClick={() => dispatch(analyticsActions.optIn())}>
               <StyledText desktopStyle="bodyDefaultRegular">
                 {t('confirm')}
               </StyledText>
