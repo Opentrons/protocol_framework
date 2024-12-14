@@ -62,7 +62,7 @@ export const locators = {
   eula: 'a[href="https://opentrons.com/eula"]',
   privacyToggle: 'Settings_hotKeys',
   analyticsToggleTestId: 'analyticsToggle',
-  confirm: 'Confirm'
+  confirm: 'Confirm',
 }
 
 // General Custom Commands
@@ -115,11 +115,10 @@ Cypress.Commands.add('clickCreateNew', () => {
 
 Cypress.Commands.add('closeAnalyticsModal', () => {
   cy.get('button')
-  .contains(locators.confirm)
-  .should('be.visible')
-  .click({ force: true })
+    .contains(locators.confirm)
+    .should('be.visible')
+    .click({ force: true })
 })
-
 
 // Header Import
 Cypress.Commands.add('importProtocol', (protocolFilePath: string) => {
