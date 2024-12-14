@@ -74,7 +74,7 @@ export function DraggableSidebar({
   )
 }
 
-const SidebarContainer = styled(Box) <{ resizedWidth: number }>`
+const SidebarContainer = styled(Box)<{ resizedWidth: number }>`
   display: ${DISPLAY_FLEX};
   flex-direction: ${DIRECTION_COLUMN};
   border-right: 1px solid #ccc;
@@ -88,7 +88,7 @@ const SidebarContent = styled(Flex)`
   flex: 1;
 `
 
-const SidebarResizer = styled(Flex) <{ dragging: boolean }>`
+const SidebarResizer = styled(Flex)<{ dragging: boolean }>`
   width: 0.3125rem;
   cursor: ew-resize;
   background-color: #ddd;
