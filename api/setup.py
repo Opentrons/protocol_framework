@@ -59,7 +59,8 @@ INSTALL_REQUIRES = [
     f"opentrons-shared-data=={VERSION}",
     "aionotify==0.3.1",
     "anyio>=3.6.1,<4.0.0",
-    "jsonschema>=4.0.0,<5",
+    # todo(mm, 2024-12-14): investigate ref resolution problems caused by jsonschema>=4.18.1.
+    "jsonschema>=3.0.1,<4.18.0",
     "numpy>=1.20.0,<2",
     "pydantic>=2.0.0,<3",
     "pydantic-settings>=2,<3",
