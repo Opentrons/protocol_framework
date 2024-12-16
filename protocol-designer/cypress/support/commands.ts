@@ -111,7 +111,16 @@ Cypress.Commands.add('verifyHomePage', () => {
 })
 
 Cypress.Commands.add('clickCreateNew', () => {
+  //8.2.2 adjustments 
+  cy.contains('button', 'Confirm').click()
+  // cy.get('[data-testid="SettingsIconButton"]').click();
+  cy.getByTestId(locators.settingsDataTestid).click()
+  cy.get('[data-testid="analyticsToggle"] svg')
+  .should('have.css', 'fill', 'rgb(0, 108, 250)')
+  cy.getByTestId(locators.settingsDataTestid).click()
   cy.contains(locators.createProtocol).click()
+
+
 })
 
 // Header Import
@@ -197,6 +206,8 @@ Cypress.Commands.add(
     cy.get(rightPipetteSelector).click()
   }
 )
+
+
 
 Cypress.Commands.add('selectTipRacks', (left, right) => {
   if (left.length > 0) {
