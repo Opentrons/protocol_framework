@@ -201,3 +201,9 @@ class FlexStackerDriver(StackerDriver):
             params,
         )
         await self._connection.send_command(command)
+
+    async def home_axis(self, axis: StackerAxis, direction: Direction) -> None:
+        """Home axis."""
+        await self._connection.send_command(
+            GCODE.HOME_AXIS.build_command().add_int(axis.name, direction.value)
+        )
