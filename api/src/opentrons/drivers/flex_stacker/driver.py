@@ -47,18 +47,18 @@ class FlexStackerDriver(StackerDriver):
     def parse_limit_switch_status(cls, response: str) -> LimitSwitchStatus:
         """Parse limit switch statuses."""
         field_names = LimitSwitchStatus.get_fields()
-        pattern = r"/s".join([rf"{name}:(?P<{name}>\d)" for name in field_names])
+        pattern = r"\s".join([rf"{name}:(?P<{name}>\d)" for name in field_names])
         _RE = re.compile(f"^{GCODE.GET_LIMIT_SWITCH} {pattern}")
         m = _RE.match(response)
         if not m:
-            raise ValueError(f"Incorrect Response for limit siwtch status: {response}")
+            raise ValueError(f"Incorrect Response for limit switch status: {response}")
         return LimitSwitchStatus(*(bool(int(m.group(name))) for name in field_names))
 
     @classmethod
     def parse_platform_sensor_status(cls, response: str) -> PlatformStatus:
         """Parse platform statuses."""
         field_names = PlatformStatus.get_fields()
-        pattern = r"/s".join([rf"{name}:(?P<{name}>\d)" for name in field_names])
+        pattern = r"\s".join([rf"{name}:(?P<{name}>\d)" for name in field_names])
         _RE = re.compile(f"^{GCODE.GET_PLATFORM_SENSOR} {pattern}")
         m = _RE.match(response)
         if not m:
