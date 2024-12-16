@@ -12,10 +12,35 @@ describe('Happy Path Transfer Tests', () => {
     cy.visit('/'); // Replace with the appropriate URL or navigation
     cy.verifyHomePage(); // This calls the custom command from commands.ts
     cy.clickCreateNew()
-    cy.robotSelection(Flex_Home);
-    // ToDo Split pipette selector to only do one (left or right). 
-   
+    cy.robotSelection(Flex_Home)
+    const pipette = '1-Channel'
+    function putPipette(pipette) {
+      cy.contains('label', pipette).should('exist').and('be.visible').click()
+    }
+    putPipette(pipette)
+    // Check step 2 has the right text
+    cy.contains('Step 2')
+    cy.contains('Add a pipette')
+    cy.contains('Pick your first pipette. If you need a second pipette, you can add it next.')
+    // Check 
+    cy.contains('button', 'Go back').click()
+    cy.robotSelection(Flex_Home)
+    putPipette(pipette)
+    
 
+
+
+    // ToDo split pipette selector to only do one (left or right). 
+    // ToDo Get a function that grabs all pipette names to select on this page
+    /*
+    Select pipette
+    <label tabindex="0" role="label" for="1-Channel" class="sc-hLBbgP sc-eDvSVe eXFOtc hkuXTe"><div class="Flex-sc-1qhp8l7-0 jnMqWr"><p class="Text-sc-1wb1h0f-0 StyledText__DesktopStyledText-sc-18lb8jp-0 StyledText-sc-18lb8jp-1 cJXFkZ bslzER jgHigt">1-Channel</p></div></label>
+    Select tip 
+    Select Modules 
+
+
+
+    */
     /*
     const Flex_Home ='Opentrons Flex'
     const OT2_Home = 'Opentrons OT-2'
