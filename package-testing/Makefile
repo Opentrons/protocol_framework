@@ -10,7 +10,7 @@ setup:
 .PHONY:  setup-windows
 setup-windows:
 	@echo "Setting up environment for Windows..."
-	./setup.ps1 $(VENV_DIR)
+	pwsh -ExecutionPolicy Bypass -File ./setup.ps1 $(VENV_DIR)
 
 .PHONY: clean
 clean:
@@ -20,7 +20,7 @@ clean:
 .PHONY: clean-windows
 clean-windows:
 	@echo "Removing the results directory $(RESULTS_DIR)..."
-	if (Test-Path $(RESULTS_DIR)) { Remove-Item -Recurse -Force $(RESULTS_DIR) } || $true
+	pwsh -Command "if (Test-Path '$(RESULTS_DIR)') { Remove-Item -Recurse -Force '$(RESULTS_DIR)' }"
 
 .PHONY: teardown
 teardown: clean
@@ -28,14 +28,16 @@ teardown: clean
 
 .PHONY: teardown-windows
 teardown-windows: clean-windows
-	if (Test-Path $(VENV_DIR)) { Remove-Item -Recurse -Force $(VENV_DIR) } || $true
+		pwsh -Command "if (Test-Path '$(VENV_DIR)') { Remove-Item -Recurse -Force '$(VENV_DIR)' }"
+
+
 
 .PHONY: test
 test: clean
-	@echo "Running all tests for Unix-like system..."
+	@echo "Running $(TESTS) tests for Unix-like system..."
 	python run_tests.py $(VENV_DIR) $(RESULTS_DIR) $(TESTS)
 
 .PHONY: test-windows
 test-windows: clean-windows
-	@echo "Running all tests for Windows..."
+	@echo "Running $(TESTS) tests for Windows..."
 	python run_tests.py $(VENV_DIR) $(RESULTS_DIR) $(TESTS)

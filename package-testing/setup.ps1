@@ -1,7 +1,7 @@
 # Exit immediately on any errors
 $ErrorActionPreference = "Stop"
 
-$VENV_DIR = $env:VENV_DIR -ne $null ? $env:VENV_DIR : "venv"
+$VENV_DIR = $null -ne $env:VENV_DIR ? $env:VENV_DIR : "venv"
 
 
 if (Test-Path -Path $VENV_DIR) {
@@ -20,7 +20,7 @@ if ($IsWindows) {
 }
 
 Write-Output "Installing packages..."
-pip install -U ../shared-data/python ../api ../hardware
+pip install -U ../shared-data/python ../api
 
 Write-Output "Validating that opentrons-hardware is not installed..."
 $pipList = pip list 2>&1

@@ -1,10 +1,9 @@
 from dataclasses import dataclass
-import json
 import os
 import platform
 import subprocess
 import sys
-from typing import List
+from typing import List, Union
 
 
 @dataclass
@@ -24,8 +23,12 @@ class TestSimulate(TestConfig):
     expected_return_code: str
 
 
-tests: List[TestHelp | TestSimulate] = [
-    TestHelp(test_key="help", test_helper="help", expected_output="Simulate a protocol for an Opentrons robot"),
+tests: List[Union[TestHelp, TestSimulate]] = [
+    TestHelp(
+        test_key="help",
+        test_helper="help",
+        expected_output="Simulate a protocol for an Opentrons robot"
+    ),
     TestSimulate(
         test_key="Flex_v2_19_expect_success",
         test_helper="simulate",
@@ -55,34 +58,39 @@ tests: List[TestHelp | TestSimulate] = [
 
 def get_os_type() -> str:
     """Determine the current operating system type."""
-    system_name = platform.system().lower()
-    if "windows" in system_name:
-        return "windows_nt"
-    return "unix"
+    return "windows_nt" if "windows" in platform.system().lower() else "unix"
 
 
-def run_test(test: TestConfig, script_ext: str, venv_dir: str, results_dir: str):
-    """Run a single test."""
-    # Ensure results directory exists
-    os.makedirs(results_dir, exist_ok=True)
+def build_command(test: TestConfig, script_ext: str, venv_dir: str, results_dir: str) -> List[str]:
+    """
+    Build the command to run a test based on the test type.
 
-    # Construct the command based on the test helper
-    if get_os_type() == "windows_nt":
-        script_name = f"{test.test_helper}.{script_ext}"
-    else:
-        script_name = f"./{test.test_helper}.{script_ext}"
-    command: List[str] = []
+    Args:
+        test: The test object (either TestHelp or TestSimulate).
+        script_ext: The script file extension (e.g., "ps1", "sh").
+        venv_dir: The virtual environment directory.
+        results_dir: The directory for storing test results.
+
+    Returns:
+        A list of strings representing the command to execute.
+
+    Raises:
+        ValueError: If the test type is unknown.
+    """
+    prefix = ["pwsh", "-File"] if get_os_type() == "windows_nt" else []
+
+    # Build command based on test type
     if isinstance(test, TestHelp):
-        command = [
-            script_name,
+        return prefix + [
+            f"./{test.test_helper}.{script_ext}",
             test.test_key,
             test.expected_output,
             venv_dir,
             results_dir,
         ]
     elif isinstance(test, TestSimulate):
-        command = [
-            script_name,
+        return prefix + [
+            f"./{test.test_helper}.{script_ext}",
             test.test_key,
             test.protocol_path,
             test.expected_return_code,
@@ -92,11 +100,23 @@ def run_test(test: TestConfig, script_ext: str, venv_dir: str, results_dir: str)
     else:
         raise ValueError(f"Unknown test type: {type(test)}")
 
-    if command == []:
-        print(f"Command is empty: {command}")
-        sys.exit(1)
 
-    print(f"Running {test.test_key} using {script_name}...")
+def run_test(test: TestConfig, script_ext: str, venv_dir: str, results_dir: str):
+    """
+    Run a single test.
+
+    Args:
+        test: The test object to run.
+        script_ext: The script extension (e.g., "ps1", "sh").
+        venv_dir: The virtual environment directory.
+        results_dir: The directory to store test results.
+    """
+    # Ensure results directory exists
+    os.makedirs(results_dir, exist_ok=True)
+
+    # Build and execute command
+    command = build_command(test, script_ext, venv_dir, results_dir)
+    print(f"Running {test.test_key} using {test.test_helper}.{script_ext}...")
     try:
         subprocess.run(command, check=True, shell=False)
         print(f"Test {test.test_key} passed.")
@@ -114,6 +134,7 @@ def main():
     os_type = get_os_type()
     script_ext = "ps1" if os_type == "windows_nt" else "sh"
 
+    # Filter tests based on user input
     if tests_arg.lower() == "all":
         selected_tests = tests
     else:
@@ -121,8 +142,9 @@ def main():
         selected_tests = [test for test in tests if test.test_key in requested_keys]
 
     if not selected_tests:
-        print(f"No matching tests found for the provided test keys {tests_arg}")
+        print(f"No matching tests found for the provided test keys: {tests_arg}")
         sys.exit(1)
+
     # Run selected tests
     for test in selected_tests:
         run_test(test, script_ext, venv_dir, results_dir)
