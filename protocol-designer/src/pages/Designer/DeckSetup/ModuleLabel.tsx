@@ -1,12 +1,15 @@
 import { useRef, useState, useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import { DeckLabelSet } from '@opentrons/components'
 import {
+  FLEX_ROBOT_TYPE,
   HEATERSHAKER_MODULE_TYPE,
   MAGNETIC_MODULE_TYPE,
   TEMPERATURE_MODULE_TYPE,
   THERMOCYCLER_MODULE_TYPE,
   getModuleDef2,
 } from '@opentrons/shared-data'
+import { getRobotType } from '../../../file-data/selectors'
 import type { DeckLabelProps } from '@opentrons/components'
 import type { CoordinateTuple, ModuleModel } from '@opentrons/shared-data'
 
@@ -31,6 +34,7 @@ export const ModuleLabel = (props: ModuleLabelProps): JSX.Element => {
     isZoomed = true,
     labelName,
   } = props
+  const robotType = useSelector(getRobotType)
   const labelContainerRef = useRef<HTMLDivElement>(null)
   const [labelContainerHeight, setLabelContainerHeight] = useState(12)
 
@@ -53,7 +57,11 @@ export const ModuleLabel = (props: ModuleLabelProps): JSX.Element => {
     leftOverhang = overhang + 14
   } else if (def?.moduleType === MAGNETIC_MODULE_TYPE) {
     leftOverhang = overhang + 8
-  } else if (def?.moduleType === THERMOCYCLER_MODULE_TYPE && !isZoomed) {
+  } else if (
+    def?.moduleType === THERMOCYCLER_MODULE_TYPE &&
+    !isZoomed &&
+    robotType === FLEX_ROBOT_TYPE
+  ) {
     leftOverhang = overhang + 20
   }
 

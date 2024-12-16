@@ -38,7 +38,7 @@ import type {
   CollapsedStepsState,
   HoverableItem,
 } from './reducers'
-import { Selection } from './actions/types'
+import type { Selection } from './actions/types'
 
 export const rootSelector = (state: BaseState): StepsState => state.ui.steps
 // ======= Selectors ===============================================

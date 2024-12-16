@@ -57,7 +57,7 @@ export const hoverSelection = (args: Selection): hoverSelectionAction => ({
 })
 export const selectSelection = (args: {
   selection: Selection | null
-  mode: 'add' | 'clear' | 'replace'
+  mode: 'add' | 'clear'
 }): selectSelectionAction => ({
   type: 'SELECT_SELECTION',
   payload: {
@@ -123,28 +123,26 @@ export const resetSelectStep = (stepId: StepIdType): ThunkAction<any> => (
   resetScrollElements()
 }
 
-export const populateForm = (stepId: StepIdType): ThunkAction<any> => (
-  dispatch: ThunkDispatch<any>,
-  getState: GetState
-) => {
-  const state = getState()
-  const formData = { ...stepFormSelectors.getSavedStepForms(state)[stepId] }
-  dispatch({
-    type: 'POPULATE_FORM',
-    payload: formData,
-  })
+const setSelection = (
+  formData: {
+    [x: string]: any
+    stepType: StepType
+    id: string
+  },
+  dispatch: ThunkDispatch<any>
+): void => {
   if (formData.stepType === 'moveLabware') {
     dispatch({
       type: 'SELECT_SELECTION',
       payload: {
-        selection: { id: formData.labware, text: 'Selected' },
+        selection: { id: formData.labware, text: 'Selected', field: '1' },
         mode: 'add',
       },
     })
     dispatch({
       type: 'SELECT_SELECTION',
       payload: {
-        selection: { id: formData.newLocation, text: 'New location' },
+        selection: { id: formData.newLocation, text: 'Location', field: '2' },
         mode: 'add',
       },
     })
@@ -201,6 +199,19 @@ export const populateForm = (stepId: StepIdType): ThunkAction<any> => (
       },
     })
   }
+}
+
+export const populateForm = (stepId: StepIdType): ThunkAction<any> => (
+  dispatch: ThunkDispatch<any>,
+  getState: GetState
+) => {
+  const state = getState()
+  const formData = { ...stepFormSelectors.getSavedStepForms(state)[stepId] }
+  dispatch({
+    type: 'POPULATE_FORM',
+    payload: formData,
+  })
+  setSelection(formData, dispatch)
   resetScrollElements()
 }
 export const selectStep = (stepId: StepIdType): ThunkAction<any> => (
@@ -218,74 +229,7 @@ export const selectStep = (stepId: StepIdType): ThunkAction<any> => (
     type: 'POPULATE_FORM',
     payload: formData,
   })
-  if (formData.stepType === 'moveLabware') {
-    dispatch({
-      type: 'SELECT_SELECTION',
-      payload: {
-        selection: { id: formData.labware, text: 'Selected' },
-        mode: 'add',
-      },
-    })
-    dispatch({
-      type: 'SELECT_SELECTION',
-      payload: {
-        selection: { id: formData.newLocation, text: 'Location' },
-        mode: 'add',
-      },
-    })
-  } else if (formData.stepType === 'moveLiquid') {
-    dispatch({
-      type: 'SELECT_SELECTION',
-      payload: {
-        selection: {
-          id: formData.aspirate_labware,
-          text: 'Selected',
-          field: '1',
-        },
-        mode: 'add',
-      },
-    })
-    dispatch({
-      type: 'SELECT_SELECTION',
-      payload: {
-        selection: {
-          id: formData.dispense_labware,
-          text: 'Selected',
-          field: '2',
-        },
-        mode: 'add',
-      },
-    })
-  } else if (formData.stepType === 'mix') {
-    dispatch({
-      type: 'SELECT_SELECTION',
-      payload: {
-        selection: {
-          id: formData.labware,
-          text: 'Selected',
-          field: '1',
-        },
-        mode: 'add',
-      },
-    })
-  } else if (
-    formData.stepType === 'heaterShaker' ||
-    formData.stepType === 'temperature' ||
-    formData.stepType === 'thermocycler' ||
-    formData.stepType === 'magnet'
-  ) {
-    dispatch({
-      type: 'SELECT_SELECTION',
-      payload: {
-        selection: {
-          id: formData.moduleId,
-          text: 'Selected',
-          field: '1',
-        },
-        mode: 'add',
-      },
-    })
-  }
+  setSelection(formData, dispatch)
 }
 // NOTE(sa, 2020-12-11): this is a thunk so that we can populate the batch edit form with things later
 export const selectMultipleSteps = (

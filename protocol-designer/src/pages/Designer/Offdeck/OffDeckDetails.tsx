@@ -24,9 +24,9 @@ import { SlotDetailsContainer } from '../../../organisms'
 import { wellFillFromWellContents } from '../../../organisms/LabwareOnDeck/utils'
 import { getRobotType } from '../../../file-data/selectors'
 import { SlotOverflowMenu } from '../DeckSetup/SlotOverflowMenu'
+import { HighlightOffdeckSlot } from './HighlightOffdeckSlot'
 import type { DeckSlotId } from '@opentrons/shared-data'
 import type { DeckSetupTabType } from '../types'
-import { HighlightLabware } from '../HighlightLabware'
 
 const OFFDECK_MAP_WIDTH = '41.625rem'
 
@@ -142,7 +142,12 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
                     </>
                   )}
                 </RobotWorkSpace>
-                <HighlightLabware labwareOnDeck={lw} position={[20, 0, 0]} />
+                <Flex marginTop="-6.3rem">
+                  <HighlightOffdeckSlot
+                    labwareOnDeck={lw}
+                    position={[0, 0, 0]}
+                  />
+                </Flex>
                 {menuListId === lw.id ? (
                   <Flex
                     marginTop={`-${SPACING.spacing32}`}

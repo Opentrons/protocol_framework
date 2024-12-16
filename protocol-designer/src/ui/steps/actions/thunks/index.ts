@@ -45,7 +45,7 @@ export const addAndSelectStep: (arg: {
   )
   if (payload.stepType === 'thermocycler') {
     const tcId = Object.entries(modules).find(
-      ([key, value]) => value.moduleState.type === THERMOCYCLER_MODULE_TYPE
+      ([key, module]) => module.type === THERMOCYCLER_MODULE_TYPE
     )?.[0]
     if (tcId != null) {
       dispatch(
@@ -61,7 +61,7 @@ export const addAndSelectStep: (arg: {
     }
   } else if (payload.stepType === 'magnet') {
     const magId = Object.entries(modules).find(
-      ([key, value]) => value.moduleState.type === MAGNETIC_MODULE_TYPE
+      ([key, module]) => module.type === MAGNETIC_MODULE_TYPE
     )?.[0]
     if (magId != null) {
       dispatch(
@@ -77,7 +77,7 @@ export const addAndSelectStep: (arg: {
     }
   } else if (payload.stepType === 'temperature') {
     const temperatureModules = Object.entries(modules).filter(
-      ([key, value]) => value.moduleState.type === TEMPERATURE_MODULE_TYPE
+      ([key, module]) => module.type === TEMPERATURE_MODULE_TYPE
     )
     //  only set selected temperature module if only 1 type is on deck
     const tempId =
@@ -96,7 +96,7 @@ export const addAndSelectStep: (arg: {
     }
   } else if (payload.stepType === 'heaterShaker') {
     const hsModules = Object.entries(modules).filter(
-      ([key, value]) => value.moduleState.type === HEATERSHAKER_MODULE_TYPE
+      ([key, module]) => module.type === HEATERSHAKER_MODULE_TYPE
     )
     //  only set selected h-s module if only 1 type is on deck
     const hsId = hsModules.length === 1 ? hsModules[0][0] : null
@@ -112,8 +112,46 @@ export const addAndSelectStep: (arg: {
         })
       )
     }
+  } else if (payload.stepType === 'mix' || payload.stepType === 'moveLiquid') {
+    const labwares = Object.entries(labware).filter(
+      ([key, lw]) =>
+        !lw.def.parameters.isTiprack &&
+        !lw.def.allowedRoles?.includes('adapter') &&
+        !lw.def.allowedRoles?.includes('lid')
+    )
+    //  only set selected labware if only 1 available labware is on deck
+    const labwareId = labwares.length === 1 ? labwares[0][0] : null
+    if (labwareId != null) {
+      dispatch(
+        selectSelection({
+          selection: {
+            id: labwareId,
+            text: 'Selected',
+            field: '1',
+          },
+          mode: 'add',
+        })
+      )
+    }
+  } else if (payload.stepType === 'moveLabware') {
+    const labwares = Object.entries(labware).filter(
+      ([key, lw]) => !lw.def.allowedRoles?.includes('adapter')
+    )
+    //  only set selected labware if only 1 available labware/tiprack/lid is on deck
+    const labwareId = labwares.length === 1 ? labwares[0][0] : null
+    if (labwareId != null) {
+      dispatch(
+        selectSelection({
+          selection: {
+            id: labwareId,
+            text: 'Selected',
+            field: '1',
+          },
+          mode: 'add',
+        })
+      )
+    }
   }
-  // TODO: still populate the labware in here for if there is only 1 labware selectable
 }
 export interface ReorderSelectedStepAction {
   type: 'REORDER_SELECTED_STEP'

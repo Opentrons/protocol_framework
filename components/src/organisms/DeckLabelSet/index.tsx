@@ -15,21 +15,32 @@ interface DeckLabelSetProps {
   y: number
   width: number
   height: number
+  invert?: boolean
 }
 
 const DeckLabelSetComponent = (
   props: DeckLabelSetProps,
   ref: React.ForwardedRef<HTMLDivElement>
 ): JSX.Element => {
-  const { deckLabels, x, y, width, height } = props
+  const { deckLabels, x, y, width, height, invert = false } = props
 
   return (
-    <RobotCoordsForeignDiv x={x} y={y}>
-      <StyledBox width={width} height={height} data-testid="DeckLabeSet" />
-      <LabelContainer
-        ref={ref}
+    <RobotCoordsForeignDiv
+      x={x}
+      y={y}
+      innerDivProps={{
+        style: {
+          transform: `rotate(180deg) scaleX(-1) scaleY(${invert ? '-1' : '1'})`,
+        },
+      }}
+    >
+      <StyledBox
+        width={width}
+        height={height}
+        data-testid="DeckLabeSet"
         isZoomed={deckLabels.length > 0 ? deckLabels[0].isZoomed : true}
-      >
+      />
+      <LabelContainer ref={ref}>
         {deckLabels.length > 0
           ? deckLabels.map((deckLabel, index) => (
               <DeckLabel

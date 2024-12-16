@@ -27,10 +27,10 @@ import type {
   AdditionalEquipmentEntities,
 } from '@opentrons/step-generation'
 import type { FormData, StepType, StepIdType } from '../../form-types'
-import type { InitialDeckSetup, ModuleEntities } from '../types'
+import type { InitialDeckSetup } from '../types'
 import type { FormPatch } from '../../steplist/actions/types'
 import type { SavedStepFormState, OrderedStepIdsState } from '../reducers'
-import { moduleEntities } from '../../file-data/__fixtures__/createFile/engageMagnet'
+
 export interface CreatePresavedStepFormArgs {
   stepId: StepIdType
   stepType: StepType
@@ -41,7 +41,6 @@ export interface CreatePresavedStepFormArgs {
   initialDeckSetup: InitialDeckSetup
   robotStateTimeline: Timeline
   additionalEquipmentEntities: AdditionalEquipmentEntities
-  moduleEntities: ModuleEntities
 }
 type FormUpdater = (arg0: FormData) => FormPatch | null
 
@@ -134,15 +133,15 @@ const _patchDefaultLabwareLocations = (args: {
   const filteredLabware = Object.values(labwareEntities).filter(
     lw =>
       // Filter out the tiprack, adapter, and lid entities
-      !lw.def.parameters.isTiprack &&
-      !lw.def.allowedRoles?.includes('adapter') &&
-      !lw.def.allowedRoles?.includes('lid')
+      !lw.def?.parameters.isTiprack &&
+      !lw.def?.allowedRoles?.includes('adapter') &&
+      !lw.def?.allowedRoles?.includes('lid')
   )
 
   const filteredMoveLabware = Object.values(labwareEntities).filter(
     lw =>
       // Filter out adapter entities
-      !lw.def.allowedRoles?.includes('adapter')
+      !lw.def?.allowedRoles?.includes('adapter')
   )
 
   const formHasAspirateLabware = formData && 'aspirate_labware' in formData
@@ -151,7 +150,7 @@ const _patchDefaultLabwareLocations = (args: {
 
   if (filteredLabware.length === 1 && formHasAspirateLabware) {
     return handleFormChange(
-      { aspirate_labware: filteredLabware[0].id },
+      { aspirate_labware: filteredLabware[0].id ?? null },
       formData,
       pipetteEntities,
       labwareEntities
@@ -160,7 +159,7 @@ const _patchDefaultLabwareLocations = (args: {
 
   if (filteredLabware.length === 1 && formHasMixLabware) {
     return handleFormChange(
-      { labware: filteredLabware[0].id },
+      { labware: filteredLabware[0].id ?? null },
       formData,
       pipetteEntities,
       labwareEntities
@@ -227,17 +226,10 @@ const _patchTemperatureModuleId = (args: {
   orderedStepIds: OrderedStepIdsState
   savedStepForms: SavedStepFormState
   stepType: StepType
-  moduleEntities: ModuleEntities
 }): FormUpdater => () => {
-  const {
-    initialDeckSetup,
-    orderedStepIds,
-    savedStepForms,
-    stepType,
-    moduleEntities,
-  } = args
+  const { initialDeckSetup, orderedStepIds, savedStepForms, stepType } = args
   const numOfModules =
-    Object.values(moduleEntities).filter(
+    Object.values(initialDeckSetup.modules).filter(
       module => module.type === TEMPERATURE_MODULE_TYPE
     )?.length ?? 1
   const hasTemperatureModuleId =
@@ -265,11 +257,10 @@ const _patchHeaterShakerModuleId = (args: {
   orderedStepIds: OrderedStepIdsState
   savedStepForms: SavedStepFormState
   stepType: StepType
-  moduleEntities: ModuleEntities
 }): FormUpdater => () => {
-  const { initialDeckSetup, stepType, moduleEntities } = args
+  const { initialDeckSetup, stepType } = args
   const numOfModules =
-    Object.values(moduleEntities).filter(
+    Object.values(initialDeckSetup.modules).filter(
       module => module.type === HEATERSHAKER_MODULE_TYPE
     )?.length ?? 1
   const hasHeaterShakerModuleId =
@@ -338,7 +329,6 @@ export const createPresavedStepForm = ({
   stepType,
   robotStateTimeline,
   additionalEquipmentEntities,
-  moduleEntities,
 }: CreatePresavedStepFormArgs): FormData => {
   const formData = createBlankForm({
     stepId,
@@ -377,7 +367,6 @@ export const createPresavedStepForm = ({
     orderedStepIds,
     savedStepForms,
     stepType,
-    moduleEntities,
   })
 
   const updateHeaterShakerModuleId = _patchHeaterShakerModuleId({
@@ -385,7 +374,6 @@ export const createPresavedStepForm = ({
     orderedStepIds,
     savedStepForms,
     stepType,
-    moduleEntities,
   })
 
   const updateThermocyclerFields = _patchThermocyclerFields({

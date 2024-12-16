@@ -340,9 +340,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                                           text: isTrashBinSelected
                                             ? t('selected')
                                             : t('select'),
-                                          isSelected: isTrashBinSelected
-                                            ? true
-                                            : false,
+                                          isSelected: isTrashBinSelected,
                                           isLast: true,
                                           isZoomed: false,
                                         },
@@ -377,9 +375,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                                       text: isWasteChuteSelected
                                         ? t('selected')
                                         : t('select'),
-                                      isSelected: isWasteChuteSelected
-                                        ? true
-                                        : false,
+                                      isSelected: isWasteChuteSelected,
                                       isLast: true,
                                       isZoomed: false,
                                     },
@@ -414,9 +410,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                                       text: isWasteChuteSelected
                                         ? t('selected')
                                         : t('select'),
-                                      isSelected: isWasteChuteSelected
-                                        ? true
-                                        : false,
+                                      isSelected: isWasteChuteSelected,
                                       isLast: true,
                                       isZoomed: false,
                                     },

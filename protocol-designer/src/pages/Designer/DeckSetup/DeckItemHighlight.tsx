@@ -42,7 +42,7 @@ export function DeckItemHighlight(
   )
 
   if (tab === 'startingDeck' || slotPosition === null) return null
-
+console.log(selectedLocationSelection)
   return isHovered || isSelected ? (
     <>
       <RobotCoordsForeignDiv

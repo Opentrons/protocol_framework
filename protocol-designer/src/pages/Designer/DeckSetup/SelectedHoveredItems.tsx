@@ -115,6 +115,7 @@ export const SelectedHoveredItems = (
       text: def.metadata.displayName,
       isSelected: true,
       isLast: hoveredLabware == null && selectedNestedLabwareDefUri == null,
+      isZoomed: true,
     }
     labwareInfos.push(selectedLabwareLabel)
   }
@@ -123,6 +124,7 @@ export const SelectedHoveredItems = (
       text: selectedNestedLabwareDef.metadata.displayName,
       isSelected: true,
       isLast: hoveredLabware == null,
+      isZoomed: true,
     }
     labwareInfos.push(selectedNestedLabwareLabel)
   }
@@ -136,6 +138,7 @@ export const SelectedHoveredItems = (
       text: hoveredLabwareDef.metadata.displayName,
       isSelected: false,
       isLast: true,
+      isZoomed: true,
     }
     labwareInfos.push(hoverLabelLabel)
   }
@@ -208,6 +211,7 @@ export const SelectedHoveredItems = (
               selectedNestedLabwareDef?.metadata.displayName ?? 'unknown name',
             isSelected: true,
             isLast: true,
+            isZoomed: true,
           },
         ]}
       />

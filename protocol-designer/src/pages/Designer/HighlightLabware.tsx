@@ -41,6 +41,7 @@ export function HighlightLabware(
   } else if (isLabwareSelectionSelected) {
     labelText = selectedLabwareSelection[0].text ?? undefined
   }
+  console.log(selectedLabwareSelection)
   if (highlighted || selected) {
     return (
       <LabwareLabel
