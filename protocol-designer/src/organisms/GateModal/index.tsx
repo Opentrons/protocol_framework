@@ -29,6 +29,7 @@ export function GateModal(): JSX.Element | null {
   if (appVersion == null || hasOptedIn == null) {
     return (
       <Modal
+        hasHeader={false}
         position="bottomRight"
         showOverlay={false}
         footer={
