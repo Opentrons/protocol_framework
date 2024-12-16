@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 
-import { StyledText } from '../../atoms'
+import { StyledText } from '../../atoms/StyledText'
 import { BORDERS, COLORS } from '../../helix-design-system'
 import { Icon } from '../../icons'
 import { Flex } from '../../primitives'

@@ -77,7 +77,6 @@ jobs:
     name: 'build components artifact'
     runs-on: 'ubuntu-22.04'
     if: github.event_name != 'pull_request'
-    needs: ['js-unit-test']
     steps:
       - uses: 'actions/checkout@v3'
       - uses: 'actions/setup-node@v3'
@@ -201,8 +200,6 @@ jobs:
           npm config set cache ./.npm-cache
           yarn config set cache-folder ./.yarn-cache
           make setup-js
-      - name: 'build typescript types'
-        run: make -C components build-ts
       # replace package.json stub version number with version from tag
       - name: 'set version number'
         run: |

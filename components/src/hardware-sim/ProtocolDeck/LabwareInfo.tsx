@@ -1,7 +1,7 @@
 import type * as React from 'react'
 import { css } from 'styled-components'
 
-import { RobotCoordsForeignDiv } from '../Deck'
+import { RobotCoordsForeignDiv } from '../Deck/RobotCoordsForeignDiv'
 import {
   DISPLAY_FLEX,
   DIRECTION_COLUMN,

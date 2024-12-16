@@ -7,9 +7,9 @@ import {
   getTopLabwareInfo,
 } from '@opentrons/shared-data'
 
-import { BaseDeck } from '../BaseDeck'
+import { BaseDeck } from '../BaseDeck/BaseDeck'
 import { LabwareInfo } from './LabwareInfo'
-import { getStandardDeckViewLayerBlockList } from './utils'
+import { getStandardDeckViewLayerBlockList } from './utils/getStandardDeckViewLayerBlockList'
 import { getLabwareInfoByLiquidId } from './utils/getLabwareInfoByLiquidId'
 import { getTopMostLabwareInSlots } from './utils/getLabwareInSlots'
 import { getModulesInSlots } from './utils/getModulesInSlots'

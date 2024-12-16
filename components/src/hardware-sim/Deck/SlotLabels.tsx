@@ -1,5 +1,5 @@
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
-import { DeckInfoLabel } from '../../molecules'
+import { DeckInfoLabel } from '../../molecules/DeckInfoLabel'
 import { Flex } from '../../primitives'
 import { ALIGN_CENTER, DIRECTION_COLUMN, JUSTIFY_CENTER } from '../../styles'
 import { RobotCoordsForeignObject } from './RobotCoordsForeignObject'
