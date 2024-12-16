@@ -159,7 +159,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
 
     assert len(commands_result) == 32
 
-    assert commands_result[0] == commands.Home.construct(
+    assert commands_result[0] == commands.Home.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -170,7 +170,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=commands.HomeResult(),
     )
-    assert commands_result[1] == commands.LoadLabware.construct(
+    assert commands_result[1] == commands.LoadLabware.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -186,7 +186,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=tiprack_1_result_captor,
     )
-    assert commands_result[2] == commands.LoadLabware.construct(
+    assert commands_result[2] == commands.LoadLabware.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -202,7 +202,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=tiprack_2_result_captor,
     )
-    assert commands_result[3] == commands.LoadModule.construct(
+    assert commands_result[3] == commands.LoadModule.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -217,7 +217,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=module_1_result_captor,
     )
-    assert commands_result[4] == commands.LoadLabware.construct(
+    assert commands_result[4] == commands.LoadLabware.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -233,7 +233,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=well_plate_1_result_captor,
     )
-    assert commands_result[5] == commands.LoadLabware.construct(
+    assert commands_result[5] == commands.LoadLabware.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -250,7 +250,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         result=module_plate_1_result_captor,
     )
 
-    assert commands_result[6] == commands.LoadPipette.construct(
+    assert commands_result[6] == commands.LoadPipette.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -264,7 +264,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         result=pipette_left_result_captor,
     )
 
-    assert commands_result[7] == commands.LoadPipette.construct(
+    assert commands_result[7] == commands.LoadPipette.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -285,7 +285,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
     pipette_left_id = pipette_left_result_captor.value.pipetteId
     pipette_right_id = pipette_right_result_captor.value.pipetteId
 
-    assert commands_result[8] == commands.PickUpTip.construct(
+    assert commands_result[8] == commands.PickUpTip.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -302,7 +302,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
             tipVolume=300.0, tipLength=51.83, position=DeckPoint(x=0, y=0, z=0)
         ),
     )
-    assert commands_result[9] == commands.PickUpTip.construct(
+    assert commands_result[9] == commands.PickUpTip.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -320,7 +320,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         ),
     )
 
-    assert commands_result[10] == commands.DropTip.construct(
+    assert commands_result[10] == commands.DropTip.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -336,7 +336,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         result=commands.DropTipResult(position=DeckPoint(x=0, y=0, z=0)),
     )
 
-    assert commands_result[11] == commands.PickUpTip.construct(
+    assert commands_result[11] == commands.PickUpTip.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -353,7 +353,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
             tipVolume=300.0, tipLength=51.83, position=DeckPoint(x=0, y=0, z=0)
         ),
     )
-    assert commands_result[12] == commands.Aspirate.construct(
+    assert commands_result[12] == commands.Aspirate.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -370,7 +370,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=commands.AspirateResult(volume=40, position=DeckPoint(x=0, y=0, z=0)),
     )
-    assert commands_result[13] == commands.Dispense.construct(
+    assert commands_result[13] == commands.Dispense.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -387,7 +387,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=commands.DispenseResult(volume=35, position=DeckPoint(x=0, y=0, z=0)),
     )
-    assert commands_result[14] == commands.Aspirate.construct(
+    assert commands_result[14] == commands.Aspirate.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -404,7 +404,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=commands.AspirateResult(volume=40, position=DeckPoint(x=0, y=0, z=0)),
     )
-    assert commands_result[15] == commands.Dispense.construct(
+    assert commands_result[15] == commands.Dispense.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -421,7 +421,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=commands.DispenseResult(volume=35, position=DeckPoint(x=0, y=0, z=0)),
     )
-    assert commands_result[16] == commands.BlowOut.construct(
+    assert commands_result[16] == commands.BlowOut.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -437,7 +437,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=commands.BlowOutResult(position=DeckPoint(x=0, y=0, z=0)),
     )
-    assert commands_result[17] == commands.Aspirate.construct(
+    assert commands_result[17] == commands.Aspirate.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -454,7 +454,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=commands.AspirateResult(volume=50, position=DeckPoint(x=0, y=0, z=0)),
     )
-    assert commands_result[18] == commands.Dispense.construct(
+    assert commands_result[18] == commands.Dispense.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -471,7 +471,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=commands.DispenseResult(volume=50, position=DeckPoint(x=0, y=0, z=0)),
     )
-    assert commands_result[19] == commands.BlowOut.construct(
+    assert commands_result[19] == commands.BlowOut.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -487,7 +487,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=commands.BlowOutResult(position=DeckPoint(x=0, y=0, z=0)),
     )
-    assert commands_result[20] == commands.Aspirate.construct(
+    assert commands_result[20] == commands.Aspirate.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -504,7 +504,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=commands.AspirateResult(volume=300, position=DeckPoint(x=0, y=0, z=0)),
     )
-    assert commands_result[21] == commands.Dispense.construct(
+    assert commands_result[21] == commands.Dispense.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -521,7 +521,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=commands.DispenseResult(volume=300, position=DeckPoint(x=0, y=0, z=0)),
     )
-    assert commands_result[22] == commands.BlowOut.construct(
+    assert commands_result[22] == commands.BlowOut.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -538,7 +538,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         result=commands.BlowOutResult(position=DeckPoint(x=0, y=0, z=0)),
     )
     #   TODO:(jr, 15.08.2022): this should map to move_to when move_to is mapped in a followup ticket RSS-62
-    assert commands_result[23] == commands.Custom.construct(
+    assert commands_result[23] == commands.Custom.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -554,7 +554,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
     )
     #   TODO:(jr, 15.08.2022): aspirate commands with no labware get filtered
     #   into custom. Refactor this in followup legacy command mapping
-    assert commands_result[24] == commands.Custom.construct(
+    assert commands_result[24] == commands.Custom.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -570,7 +570,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
     )
     #   TODO:(jr, 15.08.2022): dispense commands with no labware get filtered
     #   into custom. Refactor this in followup legacy command mapping
-    assert commands_result[25] == commands.Custom.construct(
+    assert commands_result[25] == commands.Custom.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -586,7 +586,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
     )
     #   TODO:(jr, 15.08.2022): blow_out commands with no labware get filtered
     #   into custom. Refactor this in followup legacy command mapping
-    assert commands_result[26] == commands.Custom.construct(
+    assert commands_result[26] == commands.Custom.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -600,7 +600,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=commands.CustomResult(),
     )
-    assert commands_result[27] == commands.Aspirate.construct(
+    assert commands_result[27] == commands.Aspirate.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -617,7 +617,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=commands.AspirateResult(volume=50, position=DeckPoint(x=0, y=0, z=0)),
     )
-    assert commands_result[28] == commands.Dispense.construct(
+    assert commands_result[28] == commands.Dispense.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -636,7 +636,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
     )
     #   TODO:(jr, 15.08.2022): aspirate commands with no labware get filtered
     #   into custom. Refactor this in followup legacy command mapping
-    assert commands_result[29] == commands.Custom.construct(
+    assert commands_result[29] == commands.Custom.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -652,7 +652,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
     )
     #   TODO:(jr, 15.08.2022): dispense commands with no labware get filtered
     #   into custom. Refactor this in followup legacy command mapping
-    assert commands_result[30] == commands.Custom.construct(
+    assert commands_result[30] == commands.Custom.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -666,7 +666,7 @@ async def test_big_protocol_commands(big_protocol_file: Path) -> None:
         notes=[],
         result=commands.CustomResult(),
     )
-    assert commands_result[31] == commands.DropTip.construct(
+    assert commands_result[31] == commands.DropTip.model_construct(
         id=matchers.IsA(str),
         key=matchers.IsA(str),
         status=commands.CommandStatus.SUCCEEDED,
@@ -812,7 +812,7 @@ async def test_comment(tmp_path: Path) -> None:
     )
     result_commands = await simulate_and_get_commands(path)
     [initial_home, comment] = result_commands
-    assert comment == commands.Comment.construct(
+    assert comment == commands.Comment.model_construct(
         status=commands.CommandStatus.SUCCEEDED,
         params=commands.CommentParams(message="oy."),
         notes=[],

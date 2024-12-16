@@ -44,7 +44,7 @@ class CustomImplementation(
     async def execute(self, params: CustomParams) -> SuccessData[CustomResult]:
         """A custom command does nothing when executed directly."""
         return SuccessData(
-            public=CustomResult.construct(),
+            public=CustomResult.model_construct(),
         )
 
 

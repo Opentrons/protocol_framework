@@ -70,7 +70,7 @@ async def add_labware_offset(
     log.info(f'Added labware offset "{added_offset.id}"' f' to run "{run.id}".')
 
     return await PydanticResponse.create(
-        content=SimpleBody.construct(data=added_offset),
+        content=SimpleBody.model_construct(data=added_offset),
         status_code=status.HTTP_201_CREATED,
     )
 
@@ -114,8 +114,8 @@ async def add_labware_definition(
     log.info(f'Added labware definition "{uri}"' f' to run "{run.id}".')
 
     return PydanticResponse(
-        content=SimpleBody.construct(
-            data=LabwareDefinitionSummary.construct(definitionUri=uri)
+        content=SimpleBody.model_construct(
+            data=LabwareDefinitionSummary.model_construct(definitionUri=uri)
         ),
         status_code=status.HTTP_201_CREATED,
     )
@@ -156,6 +156,6 @@ async def get_run_loaded_labware_definitions(
         raise RunStopped(detail=str(e)).as_error(status.HTTP_409_CONFLICT) from e
 
     return await PydanticResponse.create(
-        content=SimpleBody.construct(data=labware_definitions),
+        content=SimpleBody.model_construct(data=labware_definitions),
         status_code=status.HTTP_200_OK,
     )
