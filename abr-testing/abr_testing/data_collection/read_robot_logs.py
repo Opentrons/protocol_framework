@@ -217,9 +217,9 @@ def instrument_commands(
 def get_comment_result_by_string(file_results: Dict[str, Any], key_phrase: str) -> str:
     """Get comment string based off ky phrase."""
     commandData = file_results.get("commands", "")
-    result_str = ""
+    result_str = command_str = ""
     for command in commandData:
-        commandType = command["CommandType"]
+        commandType = command["commandType"]
         if commandType == "comment":
             command_str = command["params"].get("message", "")
         try:
