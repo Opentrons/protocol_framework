@@ -221,6 +221,19 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
     aa => isAddressableAreaStandardSlot(aa.id, deckDef)
   )
 
+  const isTrashBinHovered =
+    hoveredTrashSelection?.id != null &&
+    hoveredTrashSelection.id.includes('trashBin')
+  const isTrashBinSelected = selectedTrashSelection.some(selected =>
+    selected.id?.includes('trashBin')
+  )
+  const isWasteChuteHovered =
+    hoveredTrashSelection?.id != null &&
+    hoveredTrashSelection.id.includes('wasteChute')
+  const isWasteChuteSelected = selectedTrashSelection.some(selected =>
+    selected.id?.includes('wasteChute')
+  )
+
   return (
     <Flex height="100%">
       <Flex
@@ -318,34 +331,16 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                                 trashCutoutId={cutoutId as TrashCutoutId}
                                 backgroundColor={COLORS.grey50}
                                 showHighlight={
-                                  (hoveredTrashSelection?.id != null &&
-                                    hoveredTrashSelection.id.includes(
-                                      'trashBin'
-                                    )) ??
-                                  selectedTrashSelection.some(selected =>
-                                    selected.id?.includes('trashBin')
-                                  )
+                                  isTrashBinHovered || isTrashBinSelected
                                 }
                                 tagInfo={
-                                  (hoveredTrashSelection?.id != null &&
-                                    hoveredTrashSelection.id.includes(
-                                      'trashBin'
-                                    )) ??
-                                  selectedTrashSelection.some(selected =>
-                                    selected.id?.includes('trashBin')
-                                  )
+                                  isTrashBinHovered || isTrashBinSelected
                                     ? [
                                         {
-                                          text: selectedTrashSelection.some(
-                                            selected =>
-                                              selected.id?.includes('trashBin')
-                                          )
+                                          text: isTrashBinSelected
                                             ? t('selected')
                                             : t('select'),
-                                          isSelected: selectedTrashSelection.some(
-                                            selected =>
-                                              selected.id?.includes('trashBin')
-                                          )
+                                          isSelected: isTrashBinSelected
                                             ? true
                                             : false,
                                           isLast: true,
@@ -372,6 +367,25 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                             }
                             deckDefinition={deckDef}
                             fixtureBaseColor={lightFill}
+                            showHighlight={
+                              isWasteChuteHovered || isWasteChuteSelected
+                            }
+                            tagInfo={
+                              isWasteChuteHovered || isWasteChuteSelected
+                                ? [
+                                    {
+                                      text: isWasteChuteSelected
+                                        ? t('selected')
+                                        : t('select'),
+                                      isSelected: isWasteChuteSelected
+                                        ? true
+                                        : false,
+                                      isLast: true,
+                                      isZoomed: false,
+                                    },
+                                  ]
+                                : []
+                            }
                           />
                         )
                       }
@@ -390,6 +404,25 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                             deckDefinition={deckDef}
                             slotClipColor={darkFill}
                             fixtureBaseColor={lightFill}
+                            showHighlight={
+                              isWasteChuteHovered ?? isWasteChuteSelected
+                            }
+                            tagInfo={
+                              isWasteChuteHovered ?? isWasteChuteSelected
+                                ? [
+                                    {
+                                      text: isWasteChuteSelected
+                                        ? t('selected')
+                                        : t('select'),
+                                      isSelected: isWasteChuteSelected
+                                        ? true
+                                        : false,
+                                      isLast: true,
+                                      isZoomed: false,
+                                    },
+                                  ]
+                                : []
+                            }
                           />
                         )
                       }

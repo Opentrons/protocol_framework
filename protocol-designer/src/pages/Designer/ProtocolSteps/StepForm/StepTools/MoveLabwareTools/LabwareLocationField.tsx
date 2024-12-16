@@ -54,7 +54,7 @@ export function LabwareLocationField(
         dispatch(
           hoverSelection({
             id,
-            text: i18n.format(t('application:new_location'), 'capitalize'),
+            text: i18n.format(t('application:location'), 'capitalize'),
           })
         )
       }}

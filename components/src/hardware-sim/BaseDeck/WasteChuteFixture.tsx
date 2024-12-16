@@ -8,8 +8,10 @@ import {
   JUSTIFY_CENTER,
   TEXT_ALIGN_CENTER,
 } from '../../styles'
+import { DeckLabelSet } from '../../organisms'
 import { SPACING, TYPOGRAPHY } from '../../ui-style-constants'
 import { COLORS } from '../../helix-design-system'
+import { blue50 } from '../../helix-design-system/colors'
 import { RobotCoordsForeignObject } from '../Deck/RobotCoordsForeignObject'
 import { SlotBase } from './SlotBase'
 import type {
@@ -17,6 +19,7 @@ import type {
   DeckDefinition,
   ModuleType,
 } from '@opentrons/shared-data'
+import type { DeckLabelProps } from '../../molecules'
 
 interface WasteChuteFixtureProps extends React.SVGProps<SVGGElement> {
   cutoutId: typeof WASTE_CHUTE_CUTOUT
@@ -25,6 +28,10 @@ interface WasteChuteFixtureProps extends React.SVGProps<SVGGElement> {
   fixtureBaseColor?: React.SVGProps<SVGPathElement>['fill']
   wasteChuteColor?: string
   showExtensions?: boolean
+  /** optional prop to highlight the border of the wasteChute */
+  showHighlight?: boolean
+  /** optional tag info to display a tag below the waste */
+  tagInfo?: DeckLabelProps[]
 }
 
 export function WasteChuteFixture(
@@ -35,6 +42,8 @@ export function WasteChuteFixture(
     deckDefinition,
     fixtureBaseColor = COLORS.grey35,
     wasteChuteColor = COLORS.grey50,
+    showHighlight,
+    tagInfo,
     ...restProps
   } = props
 
@@ -64,6 +73,8 @@ export function WasteChuteFixture(
       <WasteChute
         backgroundColor={wasteChuteColor}
         wasteIconColor={fixtureBaseColor}
+        showHighlight={showHighlight}
+        tagInfo={tagInfo}
       />
     </g>
   )
@@ -72,43 +83,57 @@ export function WasteChuteFixture(
 interface WasteChuteProps {
   wasteIconColor: string
   backgroundColor: string
+  showHighlight?: boolean
+  tagInfo?: DeckLabelProps[]
 }
 
 /**
  * a deck map foreign object representing the physical location of the waste chute connected to the deck
  */
 export function WasteChute(props: WasteChuteProps): JSX.Element {
-  const { wasteIconColor, backgroundColor } = props
+  const { wasteIconColor, backgroundColor, showHighlight, tagInfo } = props
 
   return (
-    <RobotCoordsForeignObject
-      width={130}
-      height={138}
-      x={322}
-      y={-51}
-      flexProps={{ flex: '1' }}
-      foreignObjectProps={{ flex: '1' }}
-    >
-      <Flex
-        alignItems={ALIGN_CENTER}
-        backgroundColor={backgroundColor}
-        borderRadius="6px"
-        color={wasteIconColor}
-        flexDirection={DIRECTION_COLUMN}
-        gridGap={SPACING.spacing4}
-        justifyContent={JUSTIFY_CENTER}
-        padding={SPACING.spacing8}
-        width="100%"
+    <>
+      <RobotCoordsForeignObject
+        width={130}
+        height={138}
+        x={322}
+        y={-51}
+        flexProps={{ flex: '1' }}
+        foreignObjectProps={{ flex: '1' }}
       >
-        <Icon name="trash" color={wasteIconColor} height="2rem" />
-        <Text
-          color={COLORS.white}
-          textAlign={TEXT_ALIGN_CENTER}
-          css={TYPOGRAPHY.bodyTextSemiBold}
+        <Flex
+          alignItems={ALIGN_CENTER}
+          backgroundColor={backgroundColor}
+          borderRadius="6px"
+          color={wasteIconColor}
+          flexDirection={DIRECTION_COLUMN}
+          gridGap={SPACING.spacing4}
+          justifyContent={JUSTIFY_CENTER}
+          padding={SPACING.spacing8}
+          width="100%"
+          border={showHighlight ? `3px solid ${blue50}` : 'none'}
         >
-          Waste chute
-        </Text>
-      </Flex>
-    </RobotCoordsForeignObject>
+          <Icon name="trash" color={wasteIconColor} height="2rem" />
+          <Text
+            color={COLORS.white}
+            textAlign={TEXT_ALIGN_CENTER}
+            css={TYPOGRAPHY.bodyTextSemiBold}
+          >
+            Waste chute
+          </Text>
+        </Flex>
+      </RobotCoordsForeignObject>
+      {tagInfo != null && tagInfo.length > 0 ? (
+        <DeckLabelSet
+          width={130}
+          height={138}
+          x={322}
+          y={-79}
+          deckLabels={tagInfo}
+        />
+      ) : null}
+    </>
   )
 }

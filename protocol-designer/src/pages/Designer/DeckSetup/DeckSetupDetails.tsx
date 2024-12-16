@@ -53,6 +53,7 @@ import type {
 import type { DeckSetupTabType } from '../types'
 import type { Fixture } from './constants'
 import { HighlightModule } from '../HighlightModule'
+import { DeckItemHighlight } from './DeckItemHighlight'
 
 interface DeckSetupDetailsProps extends DeckSetupTabType {
   activeDeckSetup: InitialDeckSetup
@@ -255,21 +256,35 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
                     itemId={slotId}
                     tab={tab}
                   />
+                  <DeckItemHighlight
+                    tab={tab}
+                    slotBoundingBox={controlSelectDimensions}
+                    slotPosition={[0, 0, 0]}
+                    itemId={slotId}
+                  />
                 </>
               ) : null}
 
               {labwareLoadedOnModule == null ? (
-                <DeckItemHover
-                  isSelected={selectedZoomInSlot != null}
-                  hover={hover}
-                  setHover={setHover}
-                  setShowMenuListForId={setShowMenuListForId}
-                  menuListId={menuListId}
-                  slotBoundingBox={labwareInterfaceBoundingBox}
-                  slotPosition={[0, 0, 0]}
-                  itemId={slotId}
-                  tab={tab}
-                />
+                <>
+                  <DeckItemHover
+                    isSelected={selectedZoomInSlot != null}
+                    hover={hover}
+                    setHover={setHover}
+                    setShowMenuListForId={setShowMenuListForId}
+                    menuListId={menuListId}
+                    slotBoundingBox={labwareInterfaceBoundingBox}
+                    slotPosition={[0, 0, 0]}
+                    itemId={slotId}
+                    tab={tab}
+                  />
+                  <DeckItemHighlight
+                    tab={tab}
+                    slotBoundingBox={labwareInterfaceBoundingBox}
+                    slotPosition={[0, 0, 0]}
+                    itemId={slotId}
+                  />
+                </>
               ) : null}
             </Module>
             <HighlightModule
@@ -333,6 +348,15 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
                 itemId={addressableArea.id}
                 tab={tab}
               />
+              <DeckItemHighlight
+                tab={tab}
+                slotBoundingBox={addressableArea.boundingBox}
+                slotPosition={getPositionFromSlotId(
+                  addressableArea.id,
+                  deckDef
+                )}
+                itemId={addressableArea.id}
+              />
             </Fragment>
           )
         })}
@@ -372,6 +396,12 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
               slotPosition={slotPosition}
               itemId={labware.slot}
               tab={tab}
+            />
+            <DeckItemHighlight
+              tab={tab}
+              slotBoundingBox={slotBoundingBox}
+              slotPosition={slotPosition}
+              itemId={labware.slot}
             />
           </Fragment>
         ) : null
@@ -435,6 +465,12 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
               slotPosition={slotPosition}
               itemId={slotOnDeck ?? ''}
               tab={tab}
+            />
+            <DeckItemHighlight
+              tab={tab}
+              slotBoundingBox={slotBoundingBox}
+              slotPosition={slotPosition}
+              itemId={slotOnDeck ?? ''}
             />
           </Fragment>
         )

@@ -26,6 +26,7 @@ import { getRobotType } from '../../../file-data/selectors'
 import { SlotOverflowMenu } from '../DeckSetup/SlotOverflowMenu'
 import type { DeckSlotId } from '@opentrons/shared-data'
 import type { DeckSetupTabType } from '../types'
+import { HighlightLabware } from '../HighlightLabware'
 
 const OFFDECK_MAP_WIDTH = '41.625rem'
 
@@ -127,6 +128,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
                           liquidDisplayColors
                         )}
                       />
+
                       <DeckItemHover
                         hover={hoverSlot}
                         setShowMenuListForId={setShowMenuListForId}
@@ -140,8 +142,8 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
                     </>
                   )}
                 </RobotWorkSpace>
+                <HighlightLabware labwareOnDeck={lw} position={[20, 0, 0]} />
                 {menuListId === lw.id ? (
-                  // TODO fix this rendering position
                   <Flex
                     marginTop={`-${SPACING.spacing32}`}
                     marginLeft="4rem"
