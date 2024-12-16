@@ -77,8 +77,6 @@ export function DraggableSidebar({
 const SidebarContainer = styled(Box)`
   display: ${DISPLAY_FLEX};
   flex-direction: ${DIRECTION_COLUMN};
-  /* background-color: #f4f4f4; */
-  background-color: #ff0000;
   border-right: 1px solid #ccc;
   position: relative;
   overflow: hidden;

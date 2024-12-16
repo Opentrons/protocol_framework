@@ -3,21 +3,16 @@ import { screen } from '@testing-library/react'
 
 import { i18n } from '../../../../assets/localization'
 import { renderWithProviders } from '../../../../__testing-utils__'
-import { TimelineToolbox } from '../Timeline'
 import { DraggableSidebar } from '../DraggableSidebar'
 
 import type { ComponentProps } from 'react'
 
-vi.mock('../Timeline')
 vi.mock('../../../../step-forms/selectors')
 vi.mock('../../../../ui/steps/selectors')
-// vi.mock('../Timeline', async importOriginal => {
-//   const actual = await importOriginal<typeof TimelineToolbox>()
-//   return {
-//     ...actual,
-//     TimelineToolbox: () => <div>mock TimelineToolbox</div>,
-//   }
-// })
+vi.mock('../../../../feature-flags/selectors')
+vi.mock('../Timeline/DraggableSteps')
+vi.mock('../Timeline/PresavedStep')
+vi.mock('../Timeline/AddStepButton')
 
 const mockSetTargetWidth = vi.fn()
 
@@ -33,11 +28,14 @@ describe('DraggableSidebar', () => {
     props = {
       setTargetWidth: mockSetTargetWidth,
     }
-    vi.mocked(TimelineToolbox).mockReturnValue(<div>mock TimelineToolbox</div>)
   })
 
-  it('renders mock TimelineToolbox', () => {
+  it('renders initial timeline toolbox', () => {
     render(props)
-    screen.getByText('mock TimelineToolbox')
+    screen.getByText('Timeline')
+    screen.getByText('Starting deck')
+    screen.getByText('Ending deck')
   })
+
+  // ToDo (kk: 2024/12/12): Add more tests
 })

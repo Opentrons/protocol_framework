@@ -41,6 +41,7 @@ describe('TimelineToolbox', () => {
     vi.mocked(PresavedStep).mockReturnValue(<div>mock PresavedStep</div>)
     vi.mocked(AddStepButton).mockReturnValue(<div>mock AddStepButton</div>)
   })
+
   it('renders 2 terminal item steps, a draggable step and presaved step with toolbox title', () => {
     render(props)
     screen.getByText('Timeline')
