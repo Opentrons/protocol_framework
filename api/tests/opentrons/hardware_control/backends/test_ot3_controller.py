@@ -745,6 +745,7 @@ async def test_liquid_probe(
             threshold_pascals=fake_liquid_settings.sensor_threshold_pascals,
             plunger_impulse_time=fake_liquid_settings.plunger_impulse_time,
             num_baseline_reads=fake_liquid_settings.samples_for_baselining,
+            z_offset_for_plunger_prep=2.0,
         )
     except PipetteLiquidNotFoundError:
         # the move raises a liquid not found now since we don't call the move group and it doesn't
