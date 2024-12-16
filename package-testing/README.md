@@ -18,7 +18,7 @@
 ## Use the tests on Windows
 
 - powershell is mapped to pwsh and is version 7
-- python is on the path is version 3.10.*
+- python is on the path is version 3.10.\*
 
 1. cd package-testing
 2. make setup-windows - note that this deletes and recreates the virtual environment
