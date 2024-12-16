@@ -73,11 +73,11 @@ INNER_WELL_GEOMETRY_TEST_PARAMS = [
     ],
     # weird one
     [
-      "nest_1_reservoir_290ml", "cuboidalWell", 16570.4, 271690.5, 3.0, 3.0
+      "nest_1_reservoir_290ml", "cuboidalWell", 16570.380, 271690.520, 3.0, 3.0
     ],
     # failing isclose
     [
-        "opentrons_24_tuberack_nest_2ml_snapcap", "conicalWell", 69.6, 2148.5, 3.0, 3.0
+        "opentrons_24_tuberack_nest_2ml_snapcap", "conicalWell", 69.62, 2148.5, 3.0, 3.0
     ],
     ["nest_96_wellplate_2ml_deep", "cuboidalWell", 118.3, 2060.4, 3.0, 3.0],
     ["opentrons_24_tuberack_nest_1.5ml_snapcap", "conicalWell", 27.8, 1682.3, 3.0, 3.0],
