@@ -1,7 +1,7 @@
 """Unit tests for `robot_server.persistence.pydantic`."""
 
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, TypeAdapter
 
 from robot_server.persistence import pydantic as subject
 
@@ -20,8 +20,8 @@ def test_round_trip() -> None:
     assert after_round_trip == original
 
     original_list = [original] * 10
-    after_round_trip_list = subject.json_to_pydantic_list(
-        _DummyModel, subject.pydantic_list_to_json(original_list)
+    after_round_trip_list = subject.json_to_pydantic(
+        TypeAdapter(list[_DummyModel]), subject.pydantic_list_to_json(original_list)
     )
     assert after_round_trip_list == original_list
 

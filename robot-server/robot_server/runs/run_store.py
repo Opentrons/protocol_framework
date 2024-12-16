@@ -39,7 +39,6 @@ from robot_server.persistence.tables import (
 from robot_server.persistence.pydantic import (
     json_to_pydantic,
     pydantic_to_json,
-    json_to_pydantic_list,
     pydantic_list_to_json,
 )
 from robot_server.protocols.protocol_store import ProtocolNotFoundError
@@ -434,8 +433,7 @@ class RunStore:
 
         try:
             return (
-                # TODO
-                json_to_pydantic_list(RunTimeParameter, row.run_time_parameters)  # type: ignore[arg-type]
+                json_to_pydantic(_rtp_list_adapter, row.run_time_parameters)
                 if row.run_time_parameters is not None
                 else []
             )
