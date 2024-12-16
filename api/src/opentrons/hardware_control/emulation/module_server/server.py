@@ -1,5 +1,4 @@
 """Server notifying of module connections."""
-
 import asyncio
 import logging
 from typing import Dict, Set

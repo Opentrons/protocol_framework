@@ -1,5 +1,4 @@
 """Test Signals."""
-
 import asyncio
 from math import copysign
 from numpy import float64

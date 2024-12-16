@@ -1,5 +1,4 @@
 """Test Peripherals."""
-
 import asyncio
 from pathlib import Path
 from subprocess import run as run_subprocess, Popen, CalledProcessError

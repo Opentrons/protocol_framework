@@ -5,6 +5,7 @@ Try to add new tests to test_command_state.py, where they can be tested together
 treating CommandState as a private implementation detail.
 """
 
+
 import pytest
 from contextlib import nullcontext as does_not_raise
 from datetime import datetime

@@ -1,5 +1,4 @@
 """Functions and utilites for OT3 calibration."""
-
 from __future__ import annotations
 from functools import lru_cache
 from dataclasses import dataclass
@@ -560,6 +559,7 @@ async def find_calibration_structure_center(
     raise_verify_error: bool = True,
     probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
 ) -> Point:
+
     # Perform xy offset search
     if method == CalibrationMethod.BINARY_SEARCH:
         found_center = await find_slot_center_binary(
