@@ -293,12 +293,12 @@ class AsyncResponseSerialConnection(SerialConnection):
         ack: str,
         name: Optional[str] = None,
         retry_wait_time_seconds: float = 0.1,
-        number_of_retries: int = 0,
         loop: Optional[asyncio.AbstractEventLoop] = None,
         error_keyword: Optional[str] = None,
         alarm_keyword: Optional[str] = None,
         reset_buffer_before_write: bool = False,
         async_error_ack: Optional[str] = None,
+        number_of_retries: int = 0,
     ) -> AsyncResponseSerialConnection:
         """
         Create a connection.
