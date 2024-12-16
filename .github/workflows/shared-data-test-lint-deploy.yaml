@@ -254,7 +254,7 @@ jobs:
           yarn config set cache-folder ./.yarn-cache
           make setup-js 
       - name: 'build typescript'
-        run: make build-ts
+        run: make -C shared-data build-ts
       - name: 'build library'
         run: |
           make -C shared-data lib-js
