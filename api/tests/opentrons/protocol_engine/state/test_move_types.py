@@ -92,7 +92,7 @@ def test_get_edge_point_list(
         Point(x=10, y=20, z=30),
         x_radius=5,
         y_radius=10,
-        mm_to_edge=3,
+        mm_from_edge=3,
         edge_path_type=edge_path_type,
     )
 

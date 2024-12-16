@@ -327,7 +327,7 @@ class MotionView:
         labware_id: str,
         well_name: str,
         center_point: Point,
-        mm_to_edge: float = 0,
+        mm_from_edge: float = 0,
         radius: float = 1.0,
     ) -> List[motion_planning.Waypoint]:
         """Get a list of touch points for a touch tip operation."""
@@ -350,7 +350,7 @@ class MotionView:
             center=center_point,
             x_radius=x_offset,
             y_radius=y_offset,
-            mm_to_edge=mm_to_edge,
+            mm_from_edge=mm_from_edge,
             edge_path_type=edge_path_type,
         )
         critical_point: Optional[CriticalPoint] = None

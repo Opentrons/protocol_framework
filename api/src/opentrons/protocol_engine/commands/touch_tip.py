@@ -49,7 +49,7 @@ class TouchTipParams(PipetteIdMixin, WellLocationMixin):
         ),
     )
 
-    mmToEdge: Optional[float] = Field(
+    mmFromEdge: Optional[float] = Field(
         None,
         description="Offset away from the the well edge, in millimeters."
         "Incompatible when a radius is included as a non 1.0 value.",
@@ -99,9 +99,9 @@ class TouchTipImplementation(
         labware_id = params.labwareId
         well_name = params.wellName
 
-        if params.radius != 1.0 and params.mmToEdge is not None:
+        if params.radius != 1.0 and params.mmFromEdge is not None:
             raise TouchTipIncompatibleArgumentsError(
-                "Cannot use mmToEdge with a radius that is not 1.0"
+                "Cannot use mmFromEdge with a radius that is not 1.0"
             )
 
         if self._state_view.labware.get_has_quirk(labware_id, "touchTipDisabled"):
@@ -127,13 +127,13 @@ class TouchTipImplementation(
             pipette_id, params.speed
         )
 
-        mm_to_edge = params.mmToEdge if params.mmToEdge is not None else 0
+        mm_from_edge = params.mmFromEdge if params.mmFromEdge is not None else 0
         touch_waypoints = self._state_view.motion.get_touch_tip_waypoints(
             pipette_id=pipette_id,
             labware_id=labware_id,
             well_name=well_name,
             radius=params.radius,
-            mm_to_edge=mm_to_edge,
+            mm_from_edge=mm_from_edge,
             center_point=Point(
                 center_result.public.position.x,
                 center_result.public.position.y,

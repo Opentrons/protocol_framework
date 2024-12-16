@@ -103,7 +103,7 @@ async def test_touch_tip_implementation(
             labware_id="123",
             well_name="A3",
             radius=0.456,
-            mm_to_edge=0,
+            mm_from_edge=0,
             center_point=Point(x=1, y=2, z=3),
         )
     ).then_return(
@@ -157,13 +157,13 @@ async def test_touch_tip_implementation_with_mm_to_edge(
     mock_gantry_mover: GantryMover,
     subject: TouchTipImplementation,
 ) -> None:
-    """A TouchTip command should use mmToEdge if provided."""
+    """A TouchTip command should use mmFromEdge if provided."""
     params = TouchTipParams(
         pipetteId="abc",
         labwareId="123",
         wellName="A3",
         wellLocation=WellLocation(offset=WellOffset(x=1, y=2, z=3)),
-        mmToEdge=0.789,
+        mmFromEdge=0.789,
         speed=42.0,
     )
 
@@ -193,7 +193,7 @@ async def test_touch_tip_implementation_with_mm_to_edge(
             labware_id="123",
             well_name="A3",
             radius=1.0,
-            mm_to_edge=0.789,
+            mm_from_edge=0.789,
             center_point=Point(x=1, y=2, z=3),
         )
     ).then_return(
@@ -279,14 +279,14 @@ async def test_touch_tip_no_tip_racks(
 async def test_touch_tip_incompatible_arguments(
     decoy: Decoy, mock_state_view: StateView, subject: TouchTipImplementation
 ) -> None:
-    """It should disallow touch tip if radius and mmToEdge is provided."""
+    """It should disallow touch tip if radius and mmFromEdge is provided."""
     params = TouchTipParams(
         pipetteId="abc",
         labwareId="123",
         wellName="A3",
         wellLocation=WellLocation(),
         radius=1.23,
-        mmToEdge=4.56,
+        mmFromEdge=4.56,
     )
 
     with pytest.raises(errors.TouchTipIncompatibleArgumentsError):

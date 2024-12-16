@@ -362,7 +362,7 @@ class TouchTipDisabledError(ProtocolEngineError):
 
 
 class TouchTipIncompatibleArgumentsError(ProtocolEngineError):
-    """Raised when touch tip is used with both a custom radius and a mmToEdge argument."""
+    """Raised when touch tip is used with both a custom radius and a mmFromEdge argument."""
 
     def __init__(
         self,
