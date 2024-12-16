@@ -147,7 +147,7 @@ INNER_WELL_GEOMETRY_TEST_PARAMS = [
     ["axygen_1_reservoir_90ml", "cuboidalWell", 22373.4, 70450.6, 3.0, 3.0],
     # fails- this one thought it was a rectangle ?
     [
-        "corning_384_wellplate_112ul_flat", "conicalWell", 22.4, 77.4, 3.0, 3.0
+        "corning_384_wellplate_112ul_flat", "conicalWell", 22.4, 77.4, 2.88, 3.0
     ],
     ["corning_96_wellplate_360ul_flat", "conicalWell", 97.2, 257.1, 3.0, 3.0],
     ["biorad_384_wellplate_50ul", "conicalWell", 7.7, 27.8, 3.0, 3.0],

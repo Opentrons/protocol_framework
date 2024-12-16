@@ -5102,10 +5102,12 @@
     "conicalWell": {
       "sections": [
         {
-          "shape": "conical",
-          "topDiameter": 3.64,
-          "bottomDiameter": 2.74,
-          "topHeight": 11.65,
+          "shape": "cuboidal",
+          "topXDimension": 3.6322,
+          "topYDimension": 3.6322,
+          "bottomXDimension": 2.667,
+          "bottomYDimension": 2.667,
+          "topHeight": 11.43,
           "bottomHeight": 0.0
         }
       ]
