@@ -249,12 +249,6 @@ class PipetteEmptyFluidUpdate:
 
 
 @dataclasses.dataclass
-class ModuleStateUpdate:
-    module_id: str
-    module_type: ModuleType
-
-
-@dataclasses.dataclass
 class AbsorbanceReaderLidUpdate:
     """An update to an absorbance reader's lid location."""
 
@@ -275,6 +269,17 @@ class AbsorbanceReaderInitializeUpdate:
     measure_mode: ABSMeasureMode
     sample_wave_lengths: typing.List[int]
     reference_wave_length: typing.Optional[int]
+
+
+@dataclasses.dataclass
+class ModuleStateUpdate:
+    module_id: str
+    module_type: ModuleType
+    absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
+    absorbance_reader_data: AbsorbanceReaderDataUpdate | NoChangeType = NO_CHANGE
+    initialize_absorbance_reader_update: AbsorbanceReaderInitializeUpdate | NoChangeType = (
+        NO_CHANGE
+    )
 
 
 @dataclasses.dataclass
@@ -332,15 +337,6 @@ class StateUpdate:
     liquid_probed: LiquidProbedUpdate | NoChangeType = NO_CHANGE
 
     liquid_operated: LiquidOperatedUpdate | NoChangeType = NO_CHANGE
-
-    absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
-
-    # this might need to be an array?
-    absorbance_reader_data: AbsorbanceReaderDataUpdate | NoChangeType = NO_CHANGE
-
-    initialize_absorbance_reader_update: AbsorbanceReaderInitializeUpdate | NoChangeType = (
-        NO_CHANGE
-    )
 
     module_state_update: ModuleStateUpdate | NoChangeType = NO_CHANGE
 
@@ -607,9 +603,10 @@ class StateUpdate:
     def set_absorbance_reader_lid(self: Self, module_id: str, is_lid_on: bool) -> Self:
         """Update an absorbance reader's lid location. See `AbsorbanceReaderLidUpdate`."""
         self.module_state_update = ModuleStateUpdate(
-            module_id=module_id, module_type="absorbanceReaderType"
+            module_id=module_id,
+            module_type="absorbanceReaderType",
+            absorbance_reader_lid=AbsorbanceReaderLidUpdate(is_lid_on=is_lid_on),
         )
-        self.absorbance_reader_lid = AbsorbanceReaderLidUpdate(is_lid_on=is_lid_on)
         return self
 
     def set_absorbance_reader_data(

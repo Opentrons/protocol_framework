@@ -601,25 +601,37 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         configured_wavelengths = absorbance_reader_substate.configured_wavelengths
         reference_wavelength = absorbance_reader_substate.reference_wavelength
         data = absorbance_reader_substate.data
-        if state_update.absorbance_reader_lid != update_types.NO_CHANGE:
-            is_lid_on = state_update.absorbance_reader_lid.is_lid_on
-        elif state_update.initialize_absorbance_reader_update != update_types.NO_CHANGE:
+        if (
+            state_update.module_state_update != update_types.NO_CHANGE
+            and state_update.module_state_update.absorbance_reader_lid
+            != update_types.NO_CHANGE
+        ):
+            is_lid_on = state_update.module_state_update.absorbance_reader_lid.is_lid_on
+        elif (
+            state_update.module_state_update != update_types.NO_CHANGE
+            and state_update.module_state_update.initialize_absorbance_reader_update
+            != update_types.NO_CHANGE
+        ):
             module_id = AbsorbanceReaderId(module_id)
             configured = True
             measured = False
             is_lid_on = is_lid_on
             measure_mode = AbsorbanceReaderMeasureMode(
-                state_update.initialize_absorbance_reader_update.measure_mode
+                state_update.module_state_update.initialize_absorbance_reader_update.measure_mode
             )
             configured_wavelengths = (
-                state_update.initialize_absorbance_reader_update.sample_wave_lengths
+                state_update.module_state_update.initialize_absorbance_reader_update.sample_wave_lengths
             )
             reference_wavelength = (
-                state_update.initialize_absorbance_reader_update.reference_wave_length
+                state_update.module_state_update.initialize_absorbance_reader_update.reference_wave_length
             )
             data = None
-        elif state_update.absorbance_reader_data != update_types.NO_CHANGE:
-            data = state_update.absorbance_reader_data.read_result
+        elif (
+            state_update.module_state_update != update_types.NO_CHANGE
+            and state_update.module_state_update.absorbance_reader_data
+            != update_types.NO_CHANGE
+        ):
+            data = state_update.module_state_update.absorbance_reader_data.read_result
             #
             # self._state.substate_by_module_id[module_id] = AbsorbanceReaderSubState(
             #     module_id=AbsorbanceReaderId(module_id),
