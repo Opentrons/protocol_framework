@@ -3384,6 +3384,7 @@ def test_get_well_height_at_volume(
     input_volume_top: float,
     expected_height_from_bottom_mm: float,
     expected_height_from_top_mm: float,
+    mock_labware_view: LabwareView,
 ) -> None:
     def _get_labware_def() -> LabwareDefinition:
         def_dir = str(get_shared_data_root()) + f"/labware/definitions/3/{labware_id}"
@@ -3392,12 +3393,22 @@ def test_get_well_height_at_volume(
         _labware_def = LabwareDefinition.parse_obj(
             json.loads(load_shared_data(def_path).decode("utf-8"))
         )
-        well_geometry = _labware_def.innerLabwareGeometry.get(well_name)
-        return well_geometry
+        return _labware_def
 
-    decoy.when(subject._labware.get_well_geometry(labware_id, well_name)).then_return(
-        _get_labware_def()
+    labware_def = _get_labware_def()
+    well_geometry = labware_def.innerLabwareGeometry.get(well_name)
+    well_definition = [
+        well
+        for well in labware_def.wells.values()
+        if well.geometryDefinitionId == well_name
+    ][0]
+
+    decoy.when(mock_labware_view.get_well_geometry(labware_id, well_name)).then_return(
+        well_geometry
     )
+    decoy.when(
+        mock_labware_view.get_well_definition(labware_id, well_name)
+    ).then_return(well_definition)
 
     found_height_bottom = subject.get_well_height_at_volume(
         labware_id=labware_id, well_name=well_name, volume=input_volume_bottom
