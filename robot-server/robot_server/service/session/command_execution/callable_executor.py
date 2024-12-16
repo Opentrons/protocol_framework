@@ -26,13 +26,7 @@ class CallableExecutor(CommandExecutor):
         with duration() as time_it:
             name_arg = command.request.command
             data = command.request.data
-            data_arg = (
-                data.model_dump(
-                    exclude_none=True, exclude_defaults=True, exclude_unset=True
-                )
-                if data
-                else {}
-            )
+            data_arg = data.model_dump() if data else {}
 
             await self._callable(name_arg, data_arg)
 
