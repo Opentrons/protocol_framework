@@ -7,9 +7,7 @@ from opentrons.protocol_engine.state import update_types
 def test_append() -> None:
     """Test `StateUpdate.append()`."""
     state_update = update_types.StateUpdate(
-        absorbance_reader_lid=update_types.AbsorbanceReaderLidUpdate(
-            module_id="module_id", is_lid_on=True
-        )
+        absorbance_reader_lid=update_types.AbsorbanceReaderLidUpdate(is_lid_on=True)
     )
 
     # Populating a new field should leave the original ones unchanged.
@@ -18,7 +16,7 @@ def test_append() -> None:
     )
     assert result is state_update
     assert state_update.absorbance_reader_lid == update_types.AbsorbanceReaderLidUpdate(
-        module_id="module_id", is_lid_on=True
+        is_lid_on=True
     )
     assert state_update.pipette_location == update_types.CLEAR
 
@@ -26,13 +24,13 @@ def test_append() -> None:
     result = state_update.append(
         update_types.StateUpdate(
             absorbance_reader_lid=update_types.AbsorbanceReaderLidUpdate(
-                module_id="module_id", is_lid_on=False
+                is_lid_on=False
             )
         )
     )
     assert result is state_update
     assert state_update.absorbance_reader_lid == update_types.AbsorbanceReaderLidUpdate(
-        module_id="module_id", is_lid_on=False
+        is_lid_on=False
     )
     assert state_update.pipette_location == update_types.CLEAR
 
@@ -44,32 +42,24 @@ def test_reduce() -> None:
     # It should union all the set fields together.
     assert update_types.StateUpdate.reduce(
         update_types.StateUpdate(
-            absorbance_reader_lid=update_types.AbsorbanceReaderLidUpdate(
-                module_id="module_id", is_lid_on=True
-            )
+            absorbance_reader_lid=update_types.AbsorbanceReaderLidUpdate(is_lid_on=True)
         ),
         update_types.StateUpdate(pipette_location=update_types.CLEAR),
     ) == update_types.StateUpdate(
-        absorbance_reader_lid=update_types.AbsorbanceReaderLidUpdate(
-            module_id="module_id", is_lid_on=True
-        ),
+        absorbance_reader_lid=update_types.AbsorbanceReaderLidUpdate(is_lid_on=True),
         pipette_location=update_types.CLEAR,
     )
 
     # When one field appears multiple times, the last write wins.
     assert update_types.StateUpdate.reduce(
         update_types.StateUpdate(
-            absorbance_reader_lid=update_types.AbsorbanceReaderLidUpdate(
-                module_id="module_id", is_lid_on=True
-            )
+            absorbance_reader_lid=update_types.AbsorbanceReaderLidUpdate(is_lid_on=True)
         ),
         update_types.StateUpdate(
             absorbance_reader_lid=update_types.AbsorbanceReaderLidUpdate(
-                module_id="module_id", is_lid_on=False
+                is_lid_on=False
             )
         ),
     ) == update_types.StateUpdate(
-        absorbance_reader_lid=update_types.AbsorbanceReaderLidUpdate(
-            module_id="module_id", is_lid_on=False
-        )
+        absorbance_reader_lid=update_types.AbsorbanceReaderLidUpdate(is_lid_on=False)
     )
