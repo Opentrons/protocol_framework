@@ -9,7 +9,7 @@ import {
 } from '@opentrons/components'
 import { TimelineToolbox } from './Timeline/TimelineToolbox'
 
-const INITIAL_SIDEBAR_WIDTH = 350
+const INITIAL_SIDEBAR_WIDTH = 276
 const MIN_SIDEBAR_WIDTH = 80
 const MAX_SIDEBAR_WIDTH = 350
 
@@ -74,15 +74,14 @@ export function DraggableSidebar({
   )
 }
 
-const SidebarContainer = styled(Box)<{ resizedWidth: number }>`
+const SidebarContainer = styled(Box)`
   display: ${DISPLAY_FLEX};
   flex-direction: ${DIRECTION_COLUMN};
   /* background-color: #f4f4f4; */
   background-color: #ff0000;
   border-right: 1px solid #ccc;
   position: relative;
-  width: ${props => props.resizedWidth}px;
-  overflow: hidden; /* Prevent content overflow */
+  overflow: hidden;
   height: 100%;
 `
 
@@ -90,7 +89,11 @@ const SidebarContent = styled(Flex)`
   flex: 1;
 `
 
-const SidebarResizer = styled(Flex)<{ dragging: boolean }>`
+interface SidebarResizerProps {
+  dragging: boolean
+}
+
+const SidebarResizer = styled(Flex)<SidebarResizerProps>`
   width: 0.3125rem;
   cursor: ew-resize;
   background-color: #ddd;
