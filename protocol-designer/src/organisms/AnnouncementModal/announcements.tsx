@@ -47,6 +47,7 @@ const OPENTRONS_PD = 'Opentrons Protocol Designer'
 
 export const useAnnouncements = (): Announcement[] => {
   const { t } = useTranslation('modal')
+  const pdVersion = process.env.OT_PD_VERSION
 
   return [
     {
@@ -307,7 +308,7 @@ export const useAnnouncements = (): Announcement[] => {
     {
       announcementKey: 'redesign8.2',
       image: <Flex />,
-      heading: t('announcements.redesign.body1'),
+      heading: t('announcements.redesign.body1', { version: pdVersion }),
       message: (
         <Flex gridGap={SPACING.spacing8} flexDirection={DIRECTION_COLUMN}>
           <StyledText desktopStyle="bodyDefaultRegular">
