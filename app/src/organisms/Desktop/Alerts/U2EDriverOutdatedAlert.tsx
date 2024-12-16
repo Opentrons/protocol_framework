@@ -32,7 +32,7 @@ const IgnoreCheckbox = styled(DeprecatedCheckboxField)`
 
 export function U2EDriverOutdatedAlert(props: AlertProps): JSX.Element {
   const trackEvent = useTrackEvent()
-  const { t } = useTranslation('app_settings')
+  const { t } = useTranslation(['app_settings', 'branded'])
   const [rememberDismiss, toggleRememberDismiss] = useToggle()
   const { dismissAlert } = props
 
@@ -70,7 +70,7 @@ export function U2EDriverOutdatedAlert(props: AlertProps): JSX.Element {
       ]}
     >
       <p>
-        {t('u2e_driver_outdated_message')} {t('u2e_driver_description')}
+        {t('u2e_driver_outdated_message')} {t('branded:u2e_driver_description')}
       </p>
       <p>{t('please_update_driver')}</p>
       <IgnoreCheckbox
