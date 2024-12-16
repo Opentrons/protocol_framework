@@ -85,7 +85,6 @@ def migrate_commands_for_run(
             _legacy_pickle.loads(old_commands_bytes) if old_commands_bytes else []
         )
 
-        # TODO Fold the list into this?
         parsed_commands: typing.Iterable[commands.Command] = (
             commands.CommandAdapter.validate_python(c) for c in old_commands
         )
