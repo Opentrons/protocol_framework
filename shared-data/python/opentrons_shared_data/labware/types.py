@@ -5,7 +5,7 @@ this module shouldn't be imported unless typing.TYPE_CHECKING is true.
 """
 from typing import Dict, List, NewType, Union
 from typing_extensions import Literal, TypedDict, NotRequired
-from .models import InnerWellGeometry
+from .labware_definition import InnerWellGeometry
 from .constants import (
     CircularType,
     RectangularType,

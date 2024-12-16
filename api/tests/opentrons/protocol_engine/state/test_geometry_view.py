@@ -23,7 +23,7 @@ from opentrons.calibration_storage.helpers import uri_from_details
 from opentrons.protocols.models import LabwareDefinition
 from opentrons.types import Point, DeckSlotName, MountType, StagingSlotName
 from opentrons_shared_data.pipette.types import PipetteNameType
-from opentrons_shared_data.labware.models import (
+from opentrons_shared_data.labware.labware_definition import (
     Dimensions as LabwareDimensions,
     Parameters as LabwareDefinitionParameters,
     CornerOffsetFromSlot,

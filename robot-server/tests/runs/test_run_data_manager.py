@@ -28,7 +28,7 @@ from opentrons.protocol_runner import RunResult
 from opentrons.hardware_control.nozzle_manager import NozzleMap
 
 from opentrons_shared_data.errors.exceptions import InvalidStoredData
-from opentrons_shared_data.labware.models import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 from robot_server.error_recovery.settings.store import ErrorRecoverySettingStore
 from robot_server.protocols.protocol_models import ProtocolKind

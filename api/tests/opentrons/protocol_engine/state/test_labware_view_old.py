@@ -13,7 +13,7 @@ from opentrons_shared_data.deck import load as load_deck
 from opentrons_shared_data.deck.types import DeckDefinitionV5
 from opentrons_shared_data.pipette.types import LabwareUri
 from opentrons_shared_data.labware import load_definition
-from opentrons_shared_data.labware.models import (
+from opentrons_shared_data.labware.labware_definition import (
     Parameters,
     LabwareRole,
     OverlapOffset as SharedDataOverlapOffset,

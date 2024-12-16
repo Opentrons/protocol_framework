@@ -5,7 +5,7 @@ from typing import Annotated, Union
 
 from fastapi import APIRouter, Depends, status
 
-from opentrons_shared_data.labware.models import (
+from opentrons_shared_data.labware.labware_definition import (
     LabwareDefinition as SD_LabwareDefinition,
 )
 

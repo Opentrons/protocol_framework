@@ -16,7 +16,7 @@ from opentrons.protocol_engine.types import (
     LiquidClassRecord,
 )
 from opentrons.types import MountType
-from opentrons_shared_data.labware.models import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType
 
 

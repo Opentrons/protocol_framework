@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional, Type
 from typing_extensions import Literal
 
 from opentrons_shared_data.labware.types import LabwareUri
-from opentrons_shared_data.labware.models import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from pydantic import BaseModel, Field
 
 from opentrons.hardware_control.types import Axis, OT3Mount

@@ -4,7 +4,7 @@ from typing_extensions import Literal
 
 from pydantic import BaseModel, Field, ConfigDict
 
-from opentrons_shared_data.labware.models import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.command import known_schema_ids
 
 from .shared_models import (

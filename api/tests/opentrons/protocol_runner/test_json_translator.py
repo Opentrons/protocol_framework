@@ -3,7 +3,7 @@
 import pytest
 from typing import Dict, List
 
-from opentrons_shared_data.labware.models import (
+from opentrons_shared_data.labware.labware_definition import (
     LabwareDefinition,
     Parameters,
     Metadata,

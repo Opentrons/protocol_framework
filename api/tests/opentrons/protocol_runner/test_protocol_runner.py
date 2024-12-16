@@ -8,7 +8,7 @@ from decoy import Decoy, matchers
 from pathlib import Path
 from typing import List, cast, Union, Type
 
-from opentrons_shared_data.labware.models import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.labware.types import (
     LabwareDefinition as LabwareDefinitionTypedDict,
 )

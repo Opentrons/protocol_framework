@@ -19,7 +19,7 @@ from typing import (
 from opentrons.protocol_engine.state import update_types
 from opentrons_shared_data.deck.types import DeckDefinitionV5
 from opentrons_shared_data.gripper.constants import LABWARE_GRIP_FORCE
-from opentrons_shared_data.labware.models import (
+from opentrons_shared_data.labware.labware_definition import (
     LabwareRole,
     InnerWellGeometry,
 )

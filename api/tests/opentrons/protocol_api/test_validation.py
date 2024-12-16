@@ -8,7 +8,7 @@ import pytest
 import re
 
 from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
-from opentrons_shared_data.labware.models import (
+from opentrons_shared_data.labware.labware_definition import (
     LabwareRole,
     Parameters as LabwareDefinitionParameters,
 )

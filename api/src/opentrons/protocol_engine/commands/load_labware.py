@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from pydantic.json_schema import SkipJsonSchema
 from typing_extensions import Literal
 
-from opentrons_shared_data.labware.models import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 from ..errors import LabwareIsNotAllowedInLocationError
 from ..resources import labware_validation, fixture_validation

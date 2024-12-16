@@ -6,7 +6,7 @@ from pydantic import (
 )
 from typing import Any, List, Optional, Dict, Union
 from typing_extensions import Literal
-from opentrons_shared_data.labware.models import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 from .shared_models import (
     Liquid,

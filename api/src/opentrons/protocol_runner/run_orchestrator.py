@@ -9,7 +9,7 @@ from anyio import move_on_after
 
 from opentrons.types import NozzleMapInterface
 from opentrons_shared_data.labware.types import LabwareUri
-from opentrons_shared_data.labware.models import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.errors import GeneralError
 from opentrons_shared_data.robot.types import RobotType
 

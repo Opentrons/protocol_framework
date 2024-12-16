@@ -10,7 +10,7 @@ from opentrons_shared_data.labware.types import (
     LabwareParameters as LabwareParamsDict,
     LabwareUri,
 )
-from opentrons_shared_data.labware.models import (
+from opentrons_shared_data.labware.labware_definition import (
     LabwareDefinition,
     LabwareRole,
     Parameters as LabwareDefinitionParameters,

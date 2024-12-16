@@ -38,7 +38,7 @@ from opentrons.protocol_engine.state.update_types import (
     StateUpdate,
 )
 
-from opentrons_shared_data.labware.models import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.errors import ErrorCodes, EnumeratedError, PythonException
 
 

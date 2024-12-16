@@ -6,7 +6,7 @@ from math import isclose
 
 from ..errors.exceptions import InvalidLiquidHeightFound
 
-from opentrons_shared_data.labware.models import (
+from opentrons_shared_data.labware.labware_definition import (
     InnerWellGeometry,
     WellSegment,
     SphericalSegment,
