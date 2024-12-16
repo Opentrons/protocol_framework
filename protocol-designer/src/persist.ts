@@ -8,7 +8,10 @@ export interface RehydratePersistedAction {
   payload: {
     'tutorial.dismissedHints'?: Record<string, any>
     'featureFlags.flags'?: Record<string, any>
-    'analytics.hasOptedIn'?: boolean | null
+    'analytics.hasOptedIn'?: {
+      hasOptedIn: boolean | null
+      appVersion?: string
+    }
   }
 }
 export const getLocalStorageItem = (path: string): unknown => {

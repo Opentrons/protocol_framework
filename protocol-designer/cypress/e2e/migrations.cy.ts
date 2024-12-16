@@ -6,6 +6,7 @@ import { TestFilePath } from '../support/testFiles'
 describe('Protocol fixtures migrate and match snapshots', () => {
   beforeEach(() => {
     cy.visit('/')
+    cy.closeAnalyticsModal()
   })
 
   const testCases: MigrateTestCase[] = [
