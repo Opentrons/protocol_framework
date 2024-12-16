@@ -102,6 +102,7 @@ Cypress.Commands.add('verifyCreateNewHeader', () => {
 
 // Home Page
 Cypress.Commands.add('verifyHomePage', () => {
+  cy.contains('button', 'Confirm').click()
   cy.contains(content.welcome)
   cy.contains('button', locators.createProtocol).should('be.visible')
   cy.contains('label', locators.editProtocol).should('be.visible')
