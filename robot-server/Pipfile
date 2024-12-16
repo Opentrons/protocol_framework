@@ -63,3 +63,7 @@ server-utils = {editable = true, path = "./../server-utils"}
 performance-metrics = {file = "../performance-metrics", editable = true}
 robot-server = { editable = true, path = "."}
 pydantic-settings = "==2.4.0"
+# this is a dependency of jsonschema (which requires just >0.7.0).
+# versions above 0.18.1 require a version of triomphe that requires a version of
+# rust too new for openembedded
+rpds-py = "==0.18.1"
