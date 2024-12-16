@@ -327,7 +327,7 @@ class MotionView:
         labware_id: str,
         well_name: str,
         center_point: Point,
-        mm_to_edge: float,
+        mm_to_edge: float = 0,
         radius: float = 1.0,
     ) -> List[motion_planning.Waypoint]:
         """Get a list of touch points for a touch tip operation."""
