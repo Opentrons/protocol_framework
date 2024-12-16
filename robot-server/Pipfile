@@ -37,7 +37,6 @@ sqlalchemy2-stubs = "==0.0.2a21"
 python-box = "==6.1.0"
 types-paho-mqtt = "==1.6.0.20240106"
 pyusb = "==1.2.1"
-performance-metrics = {file = "../performance-metrics", editable = true}
 
 [packages]
 anyio = "==3.7.1"
@@ -60,7 +59,7 @@ opentrons-hardware = {editable = true, path='../hardware', extras=['FLEX']}
 opentrons = { editable = true, path = "../api"}
 opentrons-shared-data = { editable = true, path = "../shared-data/python" }
 server-utils = {editable = true, path = "./../server-utils"}
-performance-metrics = {file = "../performance-metrics", editable = true}
+performance-metrics = {editable = true, path = "../performance-metrics" }
 robot-server = { editable = true, path = "."}
 pydantic-settings = "==2.4.0"
 # this is a dependency of jsonschema (which requires just >0.7.0).
