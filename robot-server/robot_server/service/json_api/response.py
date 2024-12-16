@@ -12,7 +12,7 @@ from typing import (
     Callable,
 )
 from typing_extensions import get_args, override
-from pydantic import Field, BaseModel, RootModel
+from pydantic import Field, BaseModel
 from fastapi.responses import JSONResponse
 from fastapi.dependencies.utils import get_typed_return_annotation
 from .resource_links import ResourceLinks as DeprecatedResourceLinks
@@ -273,12 +273,6 @@ class DeprecatedMultiResponseModel(
         None,
         description=DESCRIPTION_LINKS,
     )
-
-
-class ResponseList(RootModel[List[ResponseDataT]], Generic[ResponseDataT]):
-    """A response that returns a list resource."""
-
-    root: List[ResponseDataT]
 
 
 class NotifyRefetchBody(BaseResponseBody):

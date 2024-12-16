@@ -172,7 +172,7 @@ async def test_get_run_labware_definition(
         runId="run-id", run_data_manager=mock_run_data_manager
     )
 
-    assert result.content.data.root == [
+    assert result.content.data == [
         SD_LabwareDefinition.model_construct(namespace="test_1"),  # type: ignore[call-arg]
         SD_LabwareDefinition.model_construct(namespace="test_2"),  # type: ignore[call-arg]
     ]

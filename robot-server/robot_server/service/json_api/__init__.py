@@ -16,7 +16,6 @@ from .response import (
     PydanticResponse,
     NotifyRefetchBody,
     NotifyUnsubscribeBody,
-    ResponseList,
 )
 
 
@@ -34,7 +33,6 @@ __all__ = [
     "MultiBody",
     "SimpleMultiBody",
     "MultiBodyMeta",
-    "ResponseList",
     # resource data models
     "ResourceModel",
     # response links models
