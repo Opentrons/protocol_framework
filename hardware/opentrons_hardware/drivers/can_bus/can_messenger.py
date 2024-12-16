@@ -154,6 +154,7 @@ class AcknowledgeListener:
             log.error(
                 f"Message did not receive ack for message index {self._message.payload.message_index}"
             )
+            log.error(f"Missing node {self._expected_nodes}")
             return ErrorCode.timeout
         finally:
             self._can_messenger.remove_listener(self)
@@ -284,6 +285,7 @@ class CanMessenger:
                     expected_nodes = list(self._known_nodes)
             else:
                 expected_nodes = [node_id]
+            log.warning(f"Setting expected nodes to {expected_nodes}")
 
         listener = AcknowledgeListener(
             can_messenger=self,
