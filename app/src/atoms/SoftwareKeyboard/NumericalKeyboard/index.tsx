@@ -36,7 +36,7 @@ export function NumericalKeyboard({
      */
     <Keyboard
       keyboardRef={r => (keyboardRef.current = r)}
-      theme={'hg-theme-default oddTheme1 numerical-keyboard'}
+      theme="hg-theme-default oddTheme1 numerical-keyboard"
       onInit={keyboard => {
         keyboard.setInput(initialValue)
       }}

@@ -41,3 +41,7 @@ export const getEnableHotKeysDisplay: Selector<boolean> = createSelector(
   getFeatureFlagData,
   flags => flags.OT_PD_ENABLE_HOT_KEYS_DISPLAY ?? false
 )
+export const getEnableReactScan: Selector<boolean> = createSelector(
+  getFeatureFlagData,
+  flags => flags.OT_PD_ENABLE_REACT_SCAN ?? false
+)

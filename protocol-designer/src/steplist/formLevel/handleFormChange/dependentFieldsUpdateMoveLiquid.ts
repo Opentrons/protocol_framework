@@ -428,6 +428,7 @@ const updatePatchDisposalVolumeFields = (
       ...patch,
       disposalVolume_checkbox: true,
       disposalVolume_volume: recommendedMinimumDisposalVol,
+      blowout_checkbox: false,
     }
   }
 

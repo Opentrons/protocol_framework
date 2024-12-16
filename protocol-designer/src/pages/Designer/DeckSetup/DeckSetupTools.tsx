@@ -329,12 +329,13 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       )
     }
     if (
-      selectedModuleModel == null &&
-      selectedLabwareDefUri != null &&
-      (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
-        (selectedNestedLabwareDefUri != null &&
-          selectedNestedLabwareDefUri !==
-            createdNestedLabwareForSlot?.labwareDefURI))
+      (slot === 'offDeck' && selectedLabwareDefUri != null) ||
+      (selectedModuleModel == null &&
+        selectedLabwareDefUri != null &&
+        (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
+          (selectedNestedLabwareDefUri != null &&
+            selectedNestedLabwareDefUri !==
+              createdNestedLabwareForSlot?.labwareDefURI)))
     ) {
       //  create adapter + labware on deck
       dispatch(

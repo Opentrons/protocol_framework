@@ -70,7 +70,7 @@ export function StepsSection(): JSX.Element | null {
                 setValue(STEPS_FIELD_NAME, [...steps, ''])
               }}
               text={t('add_step')}
-              textAlignment={'left'}
+              textAlignment="left"
               iconName="plus"
             />
 

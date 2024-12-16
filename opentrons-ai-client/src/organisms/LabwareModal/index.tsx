@@ -144,12 +144,12 @@ export function LabwareModal({
                         <ListButton
                           key={`ListButton_${category}`}
                           type="noActive"
-                          maxWidth={'100% !important'}
+                          maxWidth="100% !important"
                           onClick={() => {
                             handleCategoryClick(category)
                           }}
                         >
-                          <Flex id={`${category}`} width={'100%'}>
+                          <Flex id={`${category}`} width="100%">
                             <ListButtonAccordion
                               mainHeadline={t(`${category}`)}
                               isExpanded={category === selectedCategory}
