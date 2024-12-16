@@ -21,7 +21,7 @@ import liquidEnhancements from '../../assets/images/announcements/liquid-enhance
 import opentronsFlex from '../../assets/images/OpentronsFlex.png'
 import deckConfigutation from '../../assets/images/deck_configuration.png'
 import { DOC_URL } from '../KnowledgeLink'
-import type { ReactNode, version } from 'react'
+import type { ReactNode } from 'react'
 
 import styles from './AnnouncementModal.module.css'
 
