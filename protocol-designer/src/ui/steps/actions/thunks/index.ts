@@ -1,5 +1,11 @@
 import last from 'lodash/last'
 import {
+  HEATERSHAKER_MODULE_TYPE,
+  MAGNETIC_MODULE_TYPE,
+  TEMPERATURE_MODULE_TYPE,
+  THERMOCYCLER_MODULE_TYPE,
+} from '@opentrons/shared-data'
+import {
   getUnsavedForm,
   getUnsavedFormIsPristineSetTempForm,
   getUnsavedFormIsPristineHeaterShakerForm,
@@ -24,7 +30,7 @@ import type {
   DuplicateMultipleStepsAction,
   SelectMultipleStepsAction,
 } from '../types'
-import { THERMOCYCLER, THERMOCYCLER_MODULE_TYPE } from '@opentrons/shared-data'
+
 export const addAndSelectStep: (arg: {
   stepType: StepType
 }) => ThunkAction<any> = payload => (dispatch, getState) => {
@@ -53,7 +59,61 @@ export const addAndSelectStep: (arg: {
         })
       )
     }
+  } else if (payload.stepType === 'magnet') {
+    const magId = Object.entries(modules).find(
+      ([key, value]) => value.moduleState.type === MAGNETIC_MODULE_TYPE
+    )?.[0]
+    if (magId != null) {
+      dispatch(
+        selectSelection({
+          selection: {
+            id: magId,
+            text: 'Selected',
+            field: '1',
+          },
+          mode: 'add',
+        })
+      )
+    }
+  } else if (payload.stepType === 'temperature') {
+    const temperatureModules = Object.entries(modules).filter(
+      ([key, value]) => value.moduleState.type === TEMPERATURE_MODULE_TYPE
+    )
+    //  only set selected temperature module if only 1 type is on deck
+    const tempId =
+      temperatureModules.length === 1 ? temperatureModules[0][0] : null
+    if (tempId != null) {
+      dispatch(
+        selectSelection({
+          selection: {
+            id: tempId,
+            text: 'Selected',
+            field: '1',
+          },
+          mode: 'add',
+        })
+      )
+    }
+  } else if (payload.stepType === 'heaterShaker') {
+    const hsModules = Object.entries(modules).filter(
+      ([key, value]) => value.moduleState.type === HEATERSHAKER_MODULE_TYPE
+    )
+    //  only set selected h-s module if only 1 type is on deck
+    const hsId = hsModules.length === 1 ? hsModules[0][0] : null
+    if (hsId != null) {
+      dispatch(
+        selectSelection({
+          selection: {
+            id: hsId,
+            text: 'Selected',
+            field: '1',
+          },
+          mode: 'add',
+        })
+      )
+    }
   }
+  // TODO: still populate the labware in here for if there is only 1 labware selectable
 }
 export interface ReorderSelectedStepAction {
   type: 'REORDER_SELECTED_STEP'

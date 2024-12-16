@@ -1,5 +1,6 @@
 import { useMemo, useState, Fragment } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import round from 'lodash/round'
 import {
   ALIGN_CENTER,
@@ -35,6 +36,10 @@ import { getHasGen1MultiChannelPipette } from '../../../step-forms'
 import { SlotDetailsContainer } from '../../../organisms'
 import { selectZoomedIntoSlot } from '../../../labware-ingred/actions'
 import { selectors } from '../../../labware-ingred/selectors'
+import {
+  getHoveredSelection,
+  getSelectedSelection,
+} from '../../../ui/steps/selectors'
 import { DeckSetupDetails } from './DeckSetupDetails'
 import { DECK_SETUP_TOOLS_WIDTH_REM, DeckSetupTools } from './DeckSetupTools'
 import {
@@ -92,12 +97,15 @@ const LEFT_SLOTS = [
 
 export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   const { tab } = props
+  const { t } = useTranslation('application')
   const activeDeckSetup = useSelector(getDeckSetupForActiveItem)
   const dispatch = useDispatch<any>()
   const breakPointSize = useDeckSetupWindowBreakPoint()
   const zoomIn = useSelector(selectors.getZoomedInSlot)
   const _disableCollisionWarnings = useSelector(getDisableModuleRestrictions)
   const robotType = useSelector(getRobotType)
+  const selectedTrashSelection = useSelector(getSelectedSelection)
+  const hoveredTrashSelection = useSelector(getHoveredSelection)
   const deckDef = useMemo(() => getDeckDefFromRobotType(robotType), [robotType])
   const [hoverSlot, setHoverSlot] = useState<DeckSlot | null>(null)
   const trash = Object.values(activeDeckSetup.additionalEquipmentOnDeck).find(
@@ -309,6 +317,43 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                                 trashIconColor={lightFill}
                                 trashCutoutId={cutoutId as TrashCutoutId}
                                 backgroundColor={COLORS.grey50}
+                                showHighlight={
+                                  (hoveredTrashSelection?.id != null &&
+                                    hoveredTrashSelection.id.includes(
+                                      'trashBin'
+                                    )) ??
+                                  selectedTrashSelection.some(selected =>
+                                    selected.id?.includes('trashBin')
+                                  )
+                                }
+                                tagInfo={
+                                  (hoveredTrashSelection?.id != null &&
+                                    hoveredTrashSelection.id.includes(
+                                      'trashBin'
+                                    )) ??
+                                  selectedTrashSelection.some(selected =>
+                                    selected.id?.includes('trashBin')
+                                  )
+                                    ? [
+                                        {
+                                          text: selectedTrashSelection.some(
+                                            selected =>
+                                              selected.id?.includes('trashBin')
+                                          )
+                                            ? t('selected')
+                                            : t('select'),
+                                          isSelected: selectedTrashSelection.some(
+                                            selected =>
+                                              selected.id?.includes('trashBin')
+                                          )
+                                            ? true
+                                            : false,
+                                          isLast: true,
+                                          isZoomed: false,
+                                        },
+                                      ]
+                                    : []
+                                }
                               />
                             </Fragment>
                           ) : null

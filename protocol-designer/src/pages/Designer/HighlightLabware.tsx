@@ -26,10 +26,9 @@ export function HighlightLabware(
     labwareEntities[labwareOnDeck.slot] != null
       ? labwareEntities[labwareOnDeck.slot].id
       : null
-  const isLabwareSelectionSelected =
-    selectedLabwareSelection.find(
-      selected => selected.id === labwareOnDeck.id
-    ) != null
+  const isLabwareSelectionSelected = selectedLabwareSelection.some(
+    selected => selected.id === labwareOnDeck.id
+  )
 
   const selected =
     isLabwareSelectionSelected ??

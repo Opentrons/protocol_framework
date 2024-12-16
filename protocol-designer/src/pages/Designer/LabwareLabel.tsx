@@ -8,7 +8,7 @@ import type {
   LabwareDefinition2,
 } from '@opentrons/shared-data'
 
-interface ModuleLabelProps {
+interface LabwareLabelProps {
   position: CoordinateTuple
   labwareDef: LabwareDefinition2
   isSelected: boolean
@@ -16,7 +16,7 @@ interface ModuleLabelProps {
   nestedLabwareInfo?: DeckLabelProps[]
   labelText?: string
 }
-export const LabwareLabel = (props: ModuleLabelProps): JSX.Element => {
+export const LabwareLabel = (props: LabwareLabelProps): JSX.Element => {
   const {
     labwareDef,
     position,

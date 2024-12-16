@@ -26,7 +26,10 @@ const DeckLabelSetComponent = (
   return (
     <RobotCoordsForeignDiv x={x} y={y}>
       <StyledBox width={width} height={height} data-testid="DeckLabeSet" />
-      <LabelContainer ref={ref} isZoomed={deckLabels[0].isZoomed}>
+      <LabelContainer
+        ref={ref}
+        isZoomed={deckLabels.length > 0 ? deckLabels[0].isZoomed : true}
+      >
         {deckLabels.length > 0
           ? deckLabels.map((deckLabel, index) => (
               <DeckLabel

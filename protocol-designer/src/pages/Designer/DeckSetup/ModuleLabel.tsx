@@ -4,6 +4,7 @@ import {
   HEATERSHAKER_MODULE_TYPE,
   MAGNETIC_MODULE_TYPE,
   TEMPERATURE_MODULE_TYPE,
+  THERMOCYCLER_MODULE_TYPE,
   getModuleDef2,
 } from '@opentrons/shared-data'
 import type { DeckLabelProps } from '@opentrons/components'
@@ -52,6 +53,8 @@ export const ModuleLabel = (props: ModuleLabelProps): JSX.Element => {
     leftOverhang = overhang + 14
   } else if (def?.moduleType === MAGNETIC_MODULE_TYPE) {
     leftOverhang = overhang + 8
+  } else if (def?.moduleType === THERMOCYCLER_MODULE_TYPE && !isZoomed) {
+    leftOverhang = overhang + 20
   }
 
   return (

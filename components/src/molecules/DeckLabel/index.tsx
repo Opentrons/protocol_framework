@@ -70,7 +70,7 @@ export function DeckLabel({
       }
     >
       <Flex gridGap={SPACING.spacing2} alignItems={ALIGN_CENTER}>
-        {moduleModel != null ? (
+        {moduleModel != null && isZoomed ? (
           <ModuleIcon size="0.5rem" moduleType={getModuleType(moduleModel)} />
         ) : null}
         <StyledText color={isSelected ? COLORS.white : COLORS.blue50}>
