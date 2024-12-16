@@ -20,13 +20,10 @@ import { FeatureFlagCard } from './FeatureFlagCard/FeatureFlagCard'
 
 export function SettingsApp(): JSX.Element {
   const dispatch = useDispatch()
-  const hasOptedIn = useSelector(analyticsSelectors.getHasOptedIn)
+  const { hasOptedIn } = useSelector(analyticsSelectors.getHasOptedIn)
   const canClearHintDismissals = useSelector(
     tutorialSelectors.getCanClearHintDismissals
   )
-  const _toggleOptedIn = hasOptedIn
-    ? analyticsActions.optOut
-    : analyticsActions.optIn
 
   const { t } = useTranslation(['card', 'application', 'button'])
   return (
@@ -73,7 +70,13 @@ export function SettingsApp(): JSX.Element {
               <ToggleButton
                 className={styles.toggle_button}
                 toggledOn={Boolean(hasOptedIn)}
-                onClick={() => dispatch(_toggleOptedIn())}
+                onClick={() =>
+                  dispatch(
+                    hasOptedIn
+                      ? analyticsActions.optOut()
+                      : analyticsActions.optIn()
+                  )
+                }
               />
             </div>
 

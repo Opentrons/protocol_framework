@@ -42,17 +42,15 @@ export function Settings(): JSX.Element {
   const [showAnnouncementModal, setShowAnnouncementModal] = useState<boolean>(
     false
   )
-  const hasOptedIn = useSelector(analyticsSelectors.getHasOptedIn)
+  const analytics = useSelector(analyticsSelectors.getHasOptedIn)
   const flags = useSelector(getFeatureFlagData)
   const canClearHintDismissals = useSelector(
     tutorialSelectors.getCanClearHintDismissals
   )
-  const _toggleOptedIn = hasOptedIn
-    ? analyticsActions.optOut
-    : analyticsActions.optIn
+
+  const pdVersion = process.env.OT_PD_VERSION
 
   const prereleaseModeEnabled = flags.PRERELEASE_MODE === true
-  const pdVersion = process.env.OT_PD_VERSION
 
   const allFlags = Object.keys(flags) as FlagTypes[]
 
@@ -276,15 +274,23 @@ export function Settings(): JSX.Element {
                   data-testid="analyticsToggle"
                   size="2rem"
                   css={
-                    Boolean(hasOptedIn)
+                    Boolean(analytics.hasOptedIn)
                       ? TOGGLE_ENABLED_STYLES
                       : TOGGLE_DISABLED_STYLES
                   }
-                  onClick={() => dispatch(_toggleOptedIn())}
+                  onClick={() =>
+                    dispatch(
+                      analytics.hasOptedIn
+                        ? analyticsActions.optOut()
+                        : analyticsActions.optIn()
+                    )
+                  }
                 >
                   <Icon
                     name={
-                      hasOptedIn ? 'ot-toggle-input-on' : 'ot-toggle-input-off'
+                      analytics.hasOptedIn
+                        ? 'ot-toggle-input-on'
+                        : 'ot-toggle-input-off'
                     }
                     height="1rem"
                   />

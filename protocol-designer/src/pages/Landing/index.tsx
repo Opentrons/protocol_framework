@@ -38,7 +38,7 @@ export function Landing(): JSX.Element {
   const [showAnnouncementModal, setShowAnnouncementModal] = useState<boolean>(
     false
   )
-  const hasOptedIn = useSelector(getHasOptedIn)
+  const { hasOptedIn } = useSelector(getHasOptedIn)
   const { bakeToast, eatToast } = useKitchen()
   const announcements = useAnnouncements()
   const lastAnnouncement = announcements[announcements.length - 1]
