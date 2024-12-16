@@ -1,7 +1,7 @@
 """Store Pydantic objects in the SQL database."""
 
 import json
-from typing import Type, TypeVar, List, Sequence, Any, overload
+from typing import Type, TypeVar, List, Sequence
 from pydantic import BaseModel, TypeAdapter, parse_obj_as
 
 
@@ -21,20 +21,6 @@ def pydantic_to_json(obj: BaseModel) -> str:
 def pydantic_list_to_json(obj_list: Sequence[BaseModel]) -> str:
     """Serialize a list of Pydantic objects for storing in the SQL database."""
     return json.dumps([obj.dict(by_alias=True, exclude_none=True) for obj in obj_list])
-
-
-# TODO: It would be nice to type this function as (Type[_BasemodelT] | TypeAdapter[_BaseModelT]) -> _BaseModelT,
-# but TypeAdapters are "typing special forms" and can't be used in an type context. We need [PEP747](https://peps.python.org/pep-0747)
-# for this (see also https://github.com/python/mypy/issues/9773 ). We may be able to special case support for either
-# a model or union of models using variadic generics, but that needs mypy 1.9. For now, loosen the constraints and cast.
-@overload
-def json_to_pydantic(model: Type[_BaseModelT], json_str: str) -> _BaseModelT:
-    ...
-
-
-@overload
-def json_to_pydantic(model: Any, json_str: str) -> Any:
-    ...
 
 
 def json_to_pydantic(

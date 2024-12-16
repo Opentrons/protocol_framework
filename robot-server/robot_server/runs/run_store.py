@@ -5,7 +5,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from functools import lru_cache
-from typing import Dict, List, Optional, Literal, Union, cast
+from typing import Dict, List, Optional, Literal, Union
 
 import sqlalchemy
 from pydantic import TypeAdapter, ValidationError
@@ -831,11 +831,12 @@ def _convert_state_to_sql_values(
 
 
 _command_type_adapter: TypeAdapter[Command] = TypeAdapter(Command)
+_rtp_list_adapter = TypeAdapter(list[RunTimeParameter])
 
 
 def _parse_command(json_str: str) -> Command:
     """Parse a JSON string from the database into a `Command`."""
-    return cast(Command, json_to_pydantic(_command_type_adapter, json_str))
+    return json_to_pydantic(_command_type_adapter, json_str)
 
 
 def _convert_commands_status_to_sql_command_status(
