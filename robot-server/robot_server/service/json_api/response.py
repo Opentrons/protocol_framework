@@ -41,7 +41,7 @@ class BaseResponseBody(BaseModel):
     """
 
     @override
-    def dict(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+    def model_dump(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
         """Always exclude `None` when serializing to an object.
 
         With Pydantic v1, the OpenAPI spec described `Optional`(i.e., possibly
@@ -56,11 +56,23 @@ class BaseResponseBody(BaseModel):
         serialization behavior at this point would risk breaking things on the client.
         """
         kwargs["exclude_none"] = True
+        return super().model_dump(*args, **kwargs)
+
+    @override
+    def dict(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+        """See notes in `model_dump()`."""
+        kwargs["exclude_none"] = True
         return super().dict(*args, **kwargs)
 
     @override
+    def model_dump_json(self, *args: Any, **kwargs: Any) -> str:
+        """See notes in `.model_dump()`."""
+        kwargs["exclude_none"] = True
+        return super().json(*args, **kwargs)
+
+    @override
     def json(self, *args: Any, **kwargs: Any) -> str:
-        """See notes in `.dict()`."""
+        """See notes in `.model_dump()`."""
         kwargs["exclude_none"] = True
         return super().json(*args, **kwargs)
 
