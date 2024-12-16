@@ -77,7 +77,7 @@ def save_settings(settings: SystemServerSettings) -> bool:
     env_path = env_path or f"{settings.persistence_directory}/system.env"
     prefix = settings.model_config.get("env_prefix")
     try:
-        for key, val in settings.model_dump().items():
+        for key, val in settings.dict().items():
             name = f"{prefix}{key}"
             value = str(val) if val is not None else ""
             set_key(env_path, name, value)

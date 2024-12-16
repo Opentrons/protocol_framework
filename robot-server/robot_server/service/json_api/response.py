@@ -41,7 +41,7 @@ class BaseResponseBody(BaseModel):
     """
 
     @override
-    def model_dump_json(self, **kwargs: Any) -> str:
+    def json(self, **kwargs: Any) -> str:
         """Always exclude `None` when serializing.
 
         The OpenAPI spec marks `Optional` BaseModel fields as omittable, but
@@ -49,13 +49,13 @@ class BaseResponseBody(BaseModel):
         returned in a response, which would violate the spec.
         """
         kwargs["exclude_none"] = True
-        return super().model_dump_json(**kwargs)
+        return super().json(**kwargs)
 
     @override
-    def model_dump(self, **kwargs: Any) -> Dict[str, Any]:
-        """See `model_dump_json()`."""
+    def dict(self, **kwargs: Any) -> Dict[str, Any]:
+        """See `json()`."""
         kwargs["exclude_none"] = True
-        return super().model_dump(**kwargs)
+        return super().dict(**kwargs)
 
 
 class SimpleBody(BaseResponseBody, Generic[ResponseDataT]):

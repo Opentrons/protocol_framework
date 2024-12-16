@@ -71,7 +71,7 @@ async def add_labware_offset(
     log.info(f'Added labware offset "{added_offset.id}"' f' to run "{run.id}".')
 
     return await PydanticResponse.create(
-        content=SimpleBody.model_construct(data=added_offset),
+        content=SimpleBody.construct(data=added_offset),
         status_code=status.HTTP_201_CREATED,
     )
 
@@ -115,8 +115,8 @@ async def add_labware_definition(
     log.info(f'Added labware definition "{uri}"' f' to run "{run.id}".')
 
     return PydanticResponse(
-        content=SimpleBody.model_construct(
-            data=LabwareDefinitionSummary.model_construct(definitionUri=uri)
+        content=SimpleBody.construct(
+            data=LabwareDefinitionSummary.construct(definitionUri=uri)
         ),
         status_code=status.HTTP_201_CREATED,
     )
@@ -158,6 +158,6 @@ async def get_run_loaded_labware_definitions(
 
     labware_definitions_result = ResponseList(root=labware_definitions)
     return await PydanticResponse.create(
-        content=SimpleBody.model_construct(data=labware_definitions_result),
+        content=SimpleBody.construct(data=labware_definitions_result),
         status_code=status.HTTP_200_OK,
     )

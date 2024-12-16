@@ -167,7 +167,7 @@ async def test_tip_physically_missing_error(
     )
 
     assert result == DefinedErrorData(
-        public=TipPhysicallyMissingError.model_construct(
+        public=TipPhysicallyMissingError.construct(
             id=error_id, createdAt=error_created_at, wrappedErrors=[matchers.Anything()]
         ),
         state_update=update_types.StateUpdate(
@@ -255,7 +255,7 @@ async def test_stall_error(
     )
 
     assert result == DefinedErrorData(
-        public=StallOrCollisionError.model_construct(
+        public=StallOrCollisionError.construct(
             id=error_id, createdAt=error_created_at, wrappedErrors=[matchers.Anything()]
         ),
         state_update=update_types.StateUpdate(

@@ -143,7 +143,7 @@ class StateView(HasState[State]):
         """Get protocol run data."""
         error = self._commands.get_error()
         # TODO maybe add summary here for AA
-        return StateSummary.model_construct(
+        return StateSummary.construct(
             status=self._commands.get_status(),
             errors=[] if error is None else [error],
             pipettes=self._pipettes.get_all(),

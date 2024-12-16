@@ -119,7 +119,7 @@ async def test_dispense_implementation(
                     labware_id="labware-id-abc123",
                     well_name="A3",
                 ),
-                new_deck_point=DeckPoint.model_construct(x=1, y=2, z=3),
+                new_deck_point=DeckPoint.construct(x=1, y=2, z=3),
             ),
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id="labware-id-abc123",
@@ -203,7 +203,7 @@ async def test_overpressure_error(
     result = await subject.execute(data)
 
     assert result == DefinedErrorData(
-        public=OverpressureError.model_construct(
+        public=OverpressureError.construct(
             id=error_id,
             createdAt=error_timestamp,
             wrappedErrors=[matchers.Anything()],
@@ -216,7 +216,7 @@ async def test_overpressure_error(
                     labware_id="labware-id",
                     well_name="well-name",
                 ),
-                new_deck_point=DeckPoint.model_construct(x=1, y=2, z=3),
+                new_deck_point=DeckPoint.construct(x=1, y=2, z=3),
             ),
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id="labware-id",
@@ -234,7 +234,7 @@ async def test_overpressure_error(
                     labware_id="labware-id",
                     well_name="well-name",
                 ),
-                new_deck_point=DeckPoint.model_construct(x=1, y=2, z=3),
+                new_deck_point=DeckPoint.construct(x=1, y=2, z=3),
             ),
         ),
     )
@@ -288,7 +288,7 @@ async def test_stall_error(
     result = await subject.execute(data)
 
     assert result == DefinedErrorData(
-        public=StallOrCollisionError.model_construct(
+        public=StallOrCollisionError.construct(
             id=error_id,
             createdAt=error_timestamp,
             wrappedErrors=[matchers.Anything()],

@@ -489,7 +489,7 @@ class GeometryView:
                 well_depth=well_depth,
                 operation_volume=operation_volume,
             )
-            offset = offset.model_copy(update={"z": offset.z + offset_adjustment})
+            offset = offset.copy(update={"z": offset.z + offset_adjustment})
             self.validate_well_position(
                 well_location=well_location, z_offset=offset.z, pipette_id=pipette_id
             )

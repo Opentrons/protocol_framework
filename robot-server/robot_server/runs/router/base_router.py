@@ -289,7 +289,7 @@ async def create_run(  # noqa: C901
     log.info(f'Created protocol run "{run_id}" from protocol "{protocol_id}".')
 
     return await PydanticResponse.create(
-        content=SimpleBody.model_construct(data=run_data),
+        content=SimpleBody.construct(data=run_data),
         status_code=status.HTTP_201_CREATED,
     )
 
@@ -329,13 +329,13 @@ async def get_runs(
     current_run_id = run_data_manager.current_run_id
     meta = MultiBodyMeta(cursor=0, totalLength=len(data))
     links = AllRunsLinks(
-        current=ResourceLink.model_construct(href=f"/runs/{current_run_id}")
+        current=ResourceLink.construct(href=f"/runs/{current_run_id}")
         if current_run_id is not None
         else None
     )
 
     return await PydanticResponse.create(
-        content=MultiBody.model_construct(data=data, links=links, meta=meta),
+        content=MultiBody.construct(data=data, links=links, meta=meta),
         status_code=status.HTTP_200_OK,
     )
 
@@ -359,7 +359,7 @@ async def get_run(
         run_data: Data of the run specified in the runId url parameter.
     """
     return await PydanticResponse.create(
-        content=SimpleBody.model_construct(data=run_data),
+        content=SimpleBody.construct(data=run_data),
         status_code=status.HTTP_200_OK,
     )
 
@@ -394,7 +394,7 @@ async def remove_run(
         raise RunNotFound(detail=str(e)).as_error(status.HTTP_404_NOT_FOUND) from e
 
     return await PydanticResponse.create(
-        content=SimpleEmptyBody.model_construct(),
+        content=SimpleEmptyBody.construct(),
         status_code=status.HTTP_200_OK,
     )
 
@@ -434,7 +434,7 @@ async def update_run(
         raise RunNotFound(detail=str(e)).as_error(status.HTTP_404_NOT_FOUND) from e
 
     return await PydanticResponse.create(
-        content=SimpleBody.model_construct(data=run_data),
+        content=SimpleBody.construct(data=run_data),
         status_code=status.HTTP_200_OK,
     )
 

@@ -24,7 +24,7 @@ def _build_run(
     created_at: datetime,
     state_summary: Optional[StateSummary],
 ) -> MaintenanceRun:
-    state_summary = state_summary or StateSummary.model_construct(
+    state_summary = state_summary or StateSummary.construct(
         status=EngineStatus.IDLE,
         errors=[],
         labware=[],
@@ -37,7 +37,7 @@ def _build_run(
         liquidClasses=[],
         hasEverEnteredErrorRecovery=False,
     )
-    return MaintenanceRun.model_construct(
+    return MaintenanceRun.construct(
         id=run_id,
         createdAt=created_at,
         status=state_summary.status,

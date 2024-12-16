@@ -117,7 +117,7 @@ async def create_command(
     response_data = cast(StatelessCommand, orchestrator.get_command(command.id))
 
     return await PydanticResponse.create(
-        content=SimpleBody.model_construct(data=response_data),
+        content=SimpleBody.construct(data=response_data),
         status_code=status.HTTP_201_CREATED,
     )
 
@@ -168,7 +168,7 @@ async def get_commands_list(
     meta = MultiBodyMeta(cursor=cmd_slice.cursor, totalLength=cmd_slice.total_length)
 
     return await PydanticResponse.create(
-        content=SimpleMultiBody.model_construct(data=commands, meta=meta),
+        content=SimpleMultiBody.construct(data=commands, meta=meta),
         status_code=status.HTTP_200_OK,
     )
 
@@ -204,6 +204,6 @@ async def get_command(
         raise CommandNotFound.from_exc(e).as_error(status.HTTP_404_NOT_FOUND) from e
 
     return await PydanticResponse.create(
-        content=SimpleBody.model_construct(data=cast(StatelessCommand, command)),
+        content=SimpleBody.construct(data=cast(StatelessCommand, command)),
         status_code=status.HTTP_200_OK,
     )

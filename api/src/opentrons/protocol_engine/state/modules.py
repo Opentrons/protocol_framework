@@ -654,7 +654,7 @@ class ModuleView:
             DeckSlotLocation(slotName=slot_name) if slot_name is not None else None
         )
 
-        return LoadedModule.model_construct(
+        return LoadedModule.construct(
             id=module_id,
             location=location,
             model=attached_module.definition.model,

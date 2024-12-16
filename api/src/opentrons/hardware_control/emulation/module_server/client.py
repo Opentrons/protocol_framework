@@ -66,7 +66,7 @@ class ModuleStatusClient:
         """Read a message from the module server."""
         try:
             b = await self._reader.readuntil(MessageDelimiter)
-            m: Message = Message.model_validate_json(b)
+            m: Message = Message.parse_raw(b)
             return m
         except LimitOverrunError as e:
             raise ModuleServerClientError(str(e))

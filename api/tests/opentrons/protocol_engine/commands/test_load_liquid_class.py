@@ -152,7 +152,7 @@ async def test_load_liquid_class_conflicting_definition_for_id(
         liquid_class_record
     )
 
-    new_liquid_class_record = liquid_class_record.model_copy(deep=True)
+    new_liquid_class_record = liquid_class_record.copy(deep=True)
     new_liquid_class_record.aspirate.offset.x += 123  # make it different
     params = LoadLiquidClassParams(
         liquidClassId="liquid-class-1", liquidClassRecord=new_liquid_class_record

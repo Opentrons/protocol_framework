@@ -35,9 +35,9 @@ def standardize_labware_offset(
     original: LabwareOffsetCreate, robot_type: RobotType
 ) -> LabwareOffsetCreate:
     """Convert the deck slot in the given `LabwareOffsetCreate` to match the given robot type."""
-    return original.model_copy(
+    return original.copy(
         update={
-            "location": original.location.model_copy(
+            "location": original.location.copy(
                 update={
                     "slotName": original.location.slotName.to_equivalent_for_robot_type(
                         robot_type
@@ -70,40 +70,40 @@ def standardize_command(
 def _standardize_load_labware(
     original: commands.LoadLabwareCreate, robot_type: RobotType
 ) -> commands.LoadLabwareCreate:
-    params = original.params.model_copy(
+    params = original.params.copy(
         update={
             "location": _standardize_labware_location(
                 original.params.location, robot_type
             )
         }
     )
-    return original.model_copy(update={"params": params})
+    return original.copy(update={"params": params})
 
 
 def _standardize_load_module(
     original: commands.LoadModuleCreate, robot_type: RobotType
 ) -> commands.LoadModuleCreate:
-    params = original.params.model_copy(
+    params = original.params.copy(
         update={
             "location": _standardize_deck_slot_location(
                 original.params.location, robot_type
             )
         }
     )
-    return original.model_copy(update={"params": params})
+    return original.copy(update={"params": params})
 
 
 def _standardize_move_labware(
     original: commands.MoveLabwareCreate, robot_type: RobotType
 ) -> commands.MoveLabwareCreate:
-    params = original.params.model_copy(
+    params = original.params.copy(
         update={
             "newLocation": _standardize_labware_location(
                 original.params.newLocation, robot_type
             )
         }
     )
-    return original.model_copy(update={"params": params})
+    return original.copy(update={"params": params})
 
 
 _standardize_command_functions: Dict[
@@ -135,6 +135,6 @@ def _standardize_labware_location(
 def _standardize_deck_slot_location(
     original: DeckSlotLocation, robot_type: RobotType
 ) -> DeckSlotLocation:
-    return original.model_copy(
+    return original.copy(
         update={"slotName": original.slotName.to_equivalent_for_robot_type(robot_type)}
     )

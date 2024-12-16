@@ -29,7 +29,7 @@ class ErrorOccurrence(BaseModel):
             wrappedErrors = [
                 cls.from_failed(id, createdAt, err) for err in error.wrapping
             ]
-        return cls.model_construct(
+        return cls.construct(
             id=id,
             createdAt=createdAt,
             errorType=type(error).__name__,

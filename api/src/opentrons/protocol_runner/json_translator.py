@@ -63,7 +63,7 @@ def _translate_labware_command(
             namespace=protocol.labwareDefinitions[definition_id].namespace,
             loadName=protocol.labwareDefinitions[definition_id].parameters.loadName,
             location=LabwareLocationAdapter.validate_python(
-                location.model_dump() if isinstance(location, Location) else location
+                location.dict() if isinstance(location, Location) else location
             ),
         ),
         key=command.key,
@@ -91,7 +91,7 @@ def _translate_v7_labware_command(
             namespace=command.params.namespace,
             loadName=command.params.loadName,
             location=LabwareLocationAdapter.validate_python(
-                location.model_dump() if isinstance(location, Location) else location
+                location.dict() if isinstance(location, Location) else location
             ),
         ),
         key=command.key,
@@ -114,8 +114,8 @@ def _translate_module_command(
     translated_obj = pe_commands.LoadModuleCreate(
         params=pe_commands.LoadModuleParams(
             model=ModuleModel(modules[module_id].model),
-            location=DeckSlotLocation.model_validate(
-                location.model_dump() if isinstance(location, Location) else location
+            location=DeckSlotLocation.parse_obj(
+                location.dict() if isinstance(location, Location) else location
             ),
             moduleId=command.params.moduleId,
         ),
@@ -136,8 +136,8 @@ def _translate_v7_module_command(
     translated_obj = pe_commands.LoadModuleCreate(
         params=pe_commands.LoadModuleParams(
             model=ModuleModel(command.params.model),
-            location=DeckSlotLocation.model_validate(
-                location.model_dump() if isinstance(location, Location) else location
+            location=DeckSlotLocation.parse_obj(
+                location.dict() if isinstance(location, Location) else location
             ),
             moduleId=command.params.moduleId,
         ),
@@ -191,7 +191,7 @@ def _translate_simple_command(
         protocol_schema_v8.Command,
     ],
 ) -> pe_commands.CommandCreate:
-    dict_command = command.model_dump(exclude_none=True)
+    dict_command = command.dict(exclude_none=True)
 
     # map deprecated `delay` commands to `waitForResume` / `waitForDuration`
     if dict_command["commandType"] == "delay":
@@ -305,7 +305,7 @@ class JsonTranslator:
         else:
             command_annotations: List[CommandAnnotation] = [
                 CommandAnnotationAdapter.validate_python(
-                    command_annotation.model_dump(),
+                    command_annotation.dict(),
                 )
                 for command_annotation in protocol.commandAnnotations
             ]

@@ -124,7 +124,7 @@ def load_tip_length_for_pipette(
     if isinstance(tiprack, LabwareDefinition):
         tiprack = typing.cast(
             "TypeDictLabwareDef",
-            tiprack.model_dump(exclude_none=True, exclude_unset=True),
+            tiprack.dict(exclude_none=True, exclude_unset=True),
         )
 
     tip_length_data = calibration_storage.load_tip_length_calibration(

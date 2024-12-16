@@ -190,7 +190,7 @@ async def post_wifi_key(key: UploadFile = File(...)):
     else:
         # We return a JSONResponse because we want the 200 status code.
         response.message = "Key file already present"
-        return JSONResponse(content=response.model_dump())
+        return JSONResponse(content=response.dict())
 
 
 @router.delete(
@@ -274,4 +274,4 @@ async def post_wifi_disconnect(wifi_ssid: WifiNetwork):
         )
     else:
         stat = status.HTTP_500_INTERNAL_SERVER_ERROR
-    return JSONResponse(status_code=stat, content=result.model_dump())
+    return JSONResponse(status_code=stat, content=result.dict())

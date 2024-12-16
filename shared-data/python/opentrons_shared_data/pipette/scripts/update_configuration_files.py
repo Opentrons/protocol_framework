@@ -218,7 +218,7 @@ def load_and_update_file_from_config(
             geometry["nozzleOffset"] = value_to_update
         else:
             geometry = update(geometry, camel_list_to_update, value_to_update)
-        PipetteGeometryDefinition.model_validate(geometry)
+        PipetteGeometryDefinition.parse_obj(geometry)
 
         filepath = (
             ROOT
@@ -240,7 +240,7 @@ def load_and_update_file_from_config(
 
         physical = update(physical, camel_list_to_update, value_to_update)
 
-        PipettePhysicalPropertiesDefinition.model_validate(physical)
+        PipettePhysicalPropertiesDefinition.parse_obj(physical)
         filepath = (
             ROOT
             / "general"
@@ -274,7 +274,7 @@ def load_and_update_file_from_config(
                     liquid[c.name.lower()], camel_list_to_update, value_to_update
                 )
 
-                PipetteLiquidPropertiesDefinition.model_validate(liquid)
+                PipetteLiquidPropertiesDefinition.parse_obj(liquid)
                 filepath = (
                     ROOT
                     / "liquid"
@@ -292,7 +292,7 @@ def load_and_update_file_from_config(
             liquid = update(
                 liquid[lc.name.lower()], camel_list_to_update, value_to_update
             )
-            PipetteLiquidPropertiesDefinition.model_validate(liquid)
+            PipetteLiquidPropertiesDefinition.parse_obj(liquid)
 
             filepath = (
                 ROOT

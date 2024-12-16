@@ -79,7 +79,7 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
         use_old_aspiration_functions: bool = False,
     ) -> None:
         self._config = config
-        self._config_as_dict = config.model_dump()
+        self._config_as_dict = config.dict()
         self._plunger_motor_current = config.plunger_motor_configurations
         self._pick_up_configurations = config.pick_up_tip_configurations
         self._plunger_homing_configurations = config.plunger_homing_configurations
@@ -251,7 +251,7 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
             self._pipette_model.pipette_channels,
             self._pipette_model.pipette_version,
         )
-        self._config_as_dict = self._config.model_dump()
+        self._config_as_dict = self._config.dict()
 
     def reset_state(self) -> None:
         self._current_volume = 0.0
@@ -770,8 +770,8 @@ def _reload_and_check_skip(
         # Same config, good enough
         return attached_instr, True
     else:
-        newdict = new_config.model_dump()
-        olddict = attached_instr.config.model_dump()
+        newdict = new_config.dict()
+        olddict = attached_instr.config.dict()
         changed: Set[str] = set()
         for k in newdict.keys():
             if newdict[k] != olddict[k]:

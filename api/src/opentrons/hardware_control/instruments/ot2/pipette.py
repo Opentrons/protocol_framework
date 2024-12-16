@@ -96,7 +96,7 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
         use_old_aspiration_functions: bool = False,
     ) -> None:
         self._config = config
-        self._config_as_dict = config.model_dump()
+        self._config_as_dict = config.dict()
         self._pipette_offset = pipette_offset_cal
         self._pipette_type = self._config.pipette_type
         self._pipette_version = self._config.version
@@ -273,7 +273,7 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
             self._config, elements, liquid_class
         )
         # Update the cached dict representation
-        self._config_as_dict = self._config.model_dump()
+        self._config_as_dict = self._config.dict()
 
     def reload_configurations(self) -> None:
         self._config = load_pipette_data.load_definition(
@@ -281,7 +281,7 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
             self._pipette_model.pipette_channels,
             self._pipette_model.pipette_version,
         )
-        self._config_as_dict = self._config.model_dump()
+        self._config_as_dict = self._config.dict()
 
     def reset_state(self) -> None:
         self._current_volume = 0.0
@@ -656,8 +656,8 @@ def _reload_and_check_skip(
         # Same config, good enough
         return attached_instr, True
     else:
-        newdict = new_config.model_dump()
-        olddict = attached_instr.config.model_dump()
+        newdict = new_config.dict()
+        olddict = attached_instr.config.dict()
         changed: Set[str] = set()
         for k in newdict.keys():
             if newdict[k] != olddict[k]:

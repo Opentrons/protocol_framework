@@ -67,7 +67,7 @@ async def get_attached_modules(
                 module_identity=module_identity,
                 live_data=mod.live_data,
                 usb_port=mod.usb_port,
-                module_offset=ModuleCalibrationData.model_construct(
+                module_offset=ModuleCalibrationData.construct(
                     offset=Vec3f(
                         x=calibrated.offset.x,
                         y=calibrated.offset.y,
@@ -83,7 +83,7 @@ async def get_attached_modules(
         )
 
     return await PydanticResponse.create(
-        content=SimpleMultiBody.model_construct(
+        content=SimpleMultiBody.construct(
             data=response_data,
             meta=MultiBodyMeta(cursor=0, totalLength=len(response_data)),
         ),

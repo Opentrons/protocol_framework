@@ -158,7 +158,7 @@ async def test_overpressure_error(
     result = await subject.execute(data)
 
     assert result == DefinedErrorData(
-        public=OverpressureError.model_construct(
+        public=OverpressureError.construct(
             id=error_id,
             createdAt=error_timestamp,
             wrappedErrors=[matchers.Anything()],
@@ -233,7 +233,7 @@ async def test_stall_error(
     result = await subject.execute(data)
 
     assert result == DefinedErrorData(
-        public=StallOrCollisionError.model_construct(
+        public=StallOrCollisionError.construct(
             id=error_id,
             createdAt=error_timestamp,
             wrappedErrors=[matchers.Anything()],

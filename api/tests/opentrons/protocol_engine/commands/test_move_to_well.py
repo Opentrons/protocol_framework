@@ -158,7 +158,7 @@ async def test_move_to_well_stall_defined_error(
     result = await subject.execute(data)
     assert isinstance(result, DefinedErrorData)
     assert result == DefinedErrorData(
-        public=StallOrCollisionError.model_construct(
+        public=StallOrCollisionError.construct(
             id=error_id, createdAt=error_timestamp, wrappedErrors=[matchers.Anything()]
         ),
         state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),

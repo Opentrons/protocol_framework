@@ -20,9 +20,7 @@ def pydantic_to_json(obj: BaseModel) -> str:
 
 def pydantic_list_to_json(obj_list: Sequence[BaseModel]) -> str:
     """Serialize a list of Pydantic objects for storing in the SQL database."""
-    return json.dumps(
-        [obj.model_dump(by_alias=True, exclude_none=True) for obj in obj_list]
-    )
+    return json.dumps([obj.dict(by_alias=True, exclude_none=True) for obj in obj_list])
 
 
 # TODO: It would be nice to type this function as (Type[_BasemodelT] | TypeAdapter[_BaseModelT]) -> _BaseModelT,

@@ -1,4 +1,5 @@
 """Types and functions for accessing liquid class definitions."""
+import json
 
 from .. import load_shared_data
 from .liquid_class_definition import LiquidClassSchemaV1
@@ -17,8 +18,10 @@ def load_definition(name: str, version: int = DEFAULT_VERSION) -> LiquidClassSch
     Note: this is an expensive operation and should be called sparingly.
     """
     try:
-        return LiquidClassSchemaV1.model_validate_json(
-            load_shared_data(f"liquid-class/definitions/{version}/{name}.json")
+        return LiquidClassSchemaV1.parse_obj(
+            json.loads(
+                load_shared_data(f"liquid-class/definitions/{version}/{name}.json")
+            )
         )
     except FileNotFoundError:
         raise LiquidClassDefinitionDoesNotExist(

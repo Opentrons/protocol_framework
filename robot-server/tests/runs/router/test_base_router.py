@@ -865,7 +865,7 @@ async def test_get_current_state_success(
     )
 
     assert result.status_code == 200
-    assert result.content.data == RunCurrentState.model_construct(
+    assert result.content.data == RunCurrentState.construct(
         estopEngaged=False,
         activeNozzleLayouts={
             "mock-pipette-id": ActiveNozzleLayout(
