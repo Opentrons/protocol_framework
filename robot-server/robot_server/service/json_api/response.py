@@ -41,21 +41,21 @@ class BaseResponseBody(BaseModel):
     """
 
     @override
-    def json(self, **kwargs: Any) -> str:
-        """Always exclude `None` when serializing.
+    def dict(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+        """Always exclude `None` when serializing to an object.
 
         The OpenAPI spec marks `Optional` BaseModel fields as omittable, but
         not nullable. This `dict` method override ensures that `null` is never
         returned in a response, which would violate the spec.
         """
         kwargs["exclude_none"] = True
-        return super().json(**kwargs)
+        return super().dict(*args, **kwargs)
 
     @override
-    def dict(self, **kwargs: Any) -> Dict[str, Any]:
-        """See `json()`."""
+    def json(self, *args: Any, **kwargs: Any) -> str:
+        """See notes in `.dict()`."""
         kwargs["exclude_none"] = True
-        return super().dict(**kwargs)
+        return super().json(*args, **kwargs)
 
 
 class SimpleBody(BaseResponseBody, Generic[ResponseDataT]):
