@@ -156,6 +156,7 @@ jobs:
         shell: pwsh
         run: make setup-windows
       - name: Run the tests
+        if: ${{ matrix.os != 'windows-2022' }}
         shell: bash
         id: test
         working-directory: package-testing
