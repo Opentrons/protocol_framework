@@ -205,6 +205,7 @@ export function DefineLiquidsModal(
                 left="4.375rem"
                 top="4.6875rem"
                 ref={chooseColorWrapperRef}
+                zIndex={2}
               >
                 <Controller
                   name="displayColor"
