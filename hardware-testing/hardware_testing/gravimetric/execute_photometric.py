@@ -195,6 +195,7 @@ def _run_trial(trial: PhotometricTrial) -> None:
     )
 
     _record_measurement_and_store(MeasurementType.ASPIRATE)
+    input("请记录吸液状态，并尝试拍摄清晰的吸液后的针管照片..........")
     for i in range(num_dispenses):
         dest_name = _get_photo_plate_dest(trial.cfg, trial.trial)
         dest_well = trial.dest[dest_name]
@@ -219,6 +220,7 @@ def _run_trial(trial: PhotometricTrial) -> None:
             touch_tip=trial.cfg.touch_tip,
         )
         _record_measurement_and_store(MeasurementType.DISPENSE)
+        input("请记录排液状态，并尝试拍摄清晰的排液后的针管照片..........")
         trial.ctx._core.get_hardware().retract(OT3Mount.LEFT)
         if (i + 1) == num_dispenses:
             if not trial.cfg.same_tip:
