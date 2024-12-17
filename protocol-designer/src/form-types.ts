@@ -360,7 +360,7 @@ export interface HydratedTemperatureFormData {
   targetTemperature: string | null
 }
 export interface HydratedHeaterShakerFormData {
-  heaterShakerSetTimer: 'true' | 'false' | null
+  heaterShakerSetTimer: boolean | null
   heaterShakerTimer: string | null
   id: string
   latchOpen: boolean
