@@ -59,10 +59,7 @@ export function Liquids(): JSX.Element {
       ) : null}
 
       <Flex flexDirection={DIRECTION_COLUMN}>
-        <EditNavigation
-          liquidPage
-          showLiquidOverflowMenu={showLiquidOverflowMenu}
-        />
+        <EditNavigation showLiquidOverflowMenu={showLiquidOverflowMenu} />
         <AssignLiquidsModal />
       </Flex>
     </>

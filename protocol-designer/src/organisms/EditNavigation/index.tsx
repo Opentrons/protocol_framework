@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import {
@@ -29,7 +29,6 @@ interface EditNavigationProps {
   tabs?: TabProps[]
   hasTrashEntity?: boolean
   showLiquidOverflowMenu?: (liquidOverflowMenu: boolean) => void
-  liquidPage?: boolean
 }
 
 export function EditNavigation({
@@ -37,18 +36,19 @@ export function EditNavigation({
   tabs = [],
   hasTrashEntity,
   showLiquidOverflowMenu,
-  liquidPage = false,
 }: EditNavigationProps): JSX.Element {
   const { t } = useTranslation('starting_deck_state')
+  const location = useLocation()
   const metadata = useSelector(getFileMetadata)
   const { makeSnackbar } = useKitchen()
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const isLiquidsPage = location.pathname === '/liquids'
 
-  const showProtocolEditButtons = !(hasZoomInSlot || liquidPage)
+  const showProtocolEditButtons = !(hasZoomInSlot || isLiquidsPage)
 
   let metadataText = t('edit_protocol')
-  if (liquidPage) {
+  if (isLiquidsPage) {
     metadataText = t('add_liquid')
   } else if (hasZoomInSlot) {
     metadataText = t('add_hardware_labware')
@@ -76,7 +76,7 @@ export function EditNavigation({
           <LiquidButton showLiquidOverflowMenu={showLiquidOverflowMenu} />
         ) : null}
 
-        {liquidPage ? null : (
+        {isLiquidsPage ? null : (
           <SecondaryButton
             onClick={() => {
               if (hasTrashEntity) {

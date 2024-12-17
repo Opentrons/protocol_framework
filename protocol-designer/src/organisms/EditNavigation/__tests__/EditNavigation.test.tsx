@@ -21,6 +21,11 @@ vi.mock('react-router-dom', async importOriginal => {
   return {
     ...reactRouterDom,
     useNavigate: () => mockNavigate,
+    useLocation: () => ({
+      location: {
+        pathname: '/designer',
+      },
+    }),
   }
 })
 
