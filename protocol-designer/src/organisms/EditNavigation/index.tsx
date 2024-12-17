@@ -45,12 +45,12 @@ export function EditNavigation({
   const dispatch = useDispatch()
   const isLiquidsPage = location.pathname === '/liquids'
 
-  const showProtocolEditButtons = !(hasZoomInSlot || isLiquidsPage)
+  const showProtocolEditButtons = !(hasZoomInSlot === true || isLiquidsPage)
 
   let metadataText = t('edit_protocol')
   if (isLiquidsPage) {
     metadataText = t('add_liquid')
-  } else if (hasZoomInSlot) {
+  } else if (hasZoomInSlot === true) {
     metadataText = t('add_hardware_labware')
   }
   return (
@@ -79,7 +79,7 @@ export function EditNavigation({
         {isLiquidsPage ? null : (
           <SecondaryButton
             onClick={() => {
-              if (hasTrashEntity) {
+              if (hasTrashEntity === true) {
                 navigate('/overview')
                 dispatch(selectTerminalItem('__initial_setup__'))
               } else {
@@ -103,7 +103,7 @@ const NavContainer = styled(Flex)<{ showShadow: boolean }>`
   justify-content: ${JUSTIFY_SPACE_BETWEEN};
   align-items: ${ALIGN_CENTER};
   box-shadow: ${props =>
-    props.showShadow
+    props.showShadow === true
       ? `0px 1px 3px 0px ${COLORS.black90}${COLORS.opacity20HexCode}`
       : 'none'};
 `
@@ -117,7 +117,7 @@ const MetadataContainer = styled.div.withConfig<MetadataProps>({
   display: flex;
   flex-direction: ${DIRECTION_COLUMN};
   text-align: ${props =>
-    props.showProtocolEditButtons === true
+    props.showProtocolEditButtons
       ? TYPOGRAPHY.textAlignCenter
       : TYPOGRAPHY.textAlignLeft};
 
