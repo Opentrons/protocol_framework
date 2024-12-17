@@ -13,6 +13,24 @@ export const BUTTON_LINK_STYLE = css`
   }
 `
 
+export const LINK_BUTTON_STYLE = css`
+  color: ${COLORS.black90};
+
+  &:hover {
+    color: ${COLORS.blue50};
+  }
+
+  &:focus-visible {
+    color: ${COLORS.blue50};
+    outline: 2px solid ${COLORS.blue50};
+    outline-offset: 0.25rem;
+  }
+
+  &:disabled {
+    color: ${COLORS.grey40};
+  }
+`
+
 export const LINE_CLAMP_TEXT_STYLE = (
   lineClamp: number
 ): FlattenSimpleInterpolation => css`

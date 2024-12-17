@@ -1,18 +1,20 @@
 import { Route, Navigate, Routes, useNavigate } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Box } from '@opentrons/components'
-import { Landing } from './pages/Landing'
-import { ProtocolOverview } from './pages/ProtocolOverview'
-import { Liquids } from './pages/Liquids'
-import { Designer } from './pages/Designer'
-import { CreateNewProtocolWizard } from './pages/CreateNewProtocolWizard'
-import { NavigationBar } from './NavigationBar'
-import { Settings } from './pages/Settings'
 import {
-  Kitchen,
+  CreateNewProtocolWizard,
+  Designer,
+  Landing,
+  Liquids,
+  ProtocolOverview,
+  Settings,
+} from './pages'
+import {
   FileUploadMessagesModal,
-  LabwareUploadModal,
   GateModal,
+  Kitchen,
+  LabwareUploadModal,
+  NavigationBar,
 } from './organisms'
 import { ProtocolDesignerAppFallback } from './resources/ProtocolDesignerAppFallback'
 
