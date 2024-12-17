@@ -221,7 +221,7 @@ async def create_run_command(
     # TODO(mc, 2022-05-26): increment the HTTP API version so that default
     # behavior is to pass through `command_intent` without overriding it
     command_intent = request_body.data.intent or pe_commands.CommandIntent.SETUP
-    command_create = request_body.data.copy(update={"intent": command_intent})
+    command_create = request_body.data.model_copy(update={"intent": command_intent})
 
     try:
         command = await run_orchestrator_store.add_command_and_wait_for_interval(

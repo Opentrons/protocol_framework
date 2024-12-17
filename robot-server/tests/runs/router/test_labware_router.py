@@ -93,7 +93,7 @@ async def test_add_labware_offset_not_current(
     run: Run,
 ) -> None:
     """It should 409 if the run is not current."""
-    not_current_run = run.copy(update={"current": False})
+    not_current_run = run.model_copy(update={"current": False})
 
     labware_offset_request = pe_types.LabwareOffsetCreate(
         definitionUri="namespace_1/load_name_1/123",
@@ -142,7 +142,7 @@ async def test_add_labware_definition_not_current(
     labware_definition: LabwareDefinition,
 ) -> None:
     """It should 409 if the run is not current."""
-    not_current_run = run.copy(update={"current": False})
+    not_current_run = run.model_copy(update={"current": False})
 
     with pytest.raises(ApiError) as exc_info:
         await add_labware_definition(

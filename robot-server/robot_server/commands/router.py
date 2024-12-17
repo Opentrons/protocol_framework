@@ -109,7 +109,9 @@ async def create_command(
             Comes from a query parameter in the URL.
         orchestrator: The `RunOrchestrator` handling engine for command to be enqueued.
     """
-    command_create = request_body.data.copy(update={"intent": CommandIntent.SETUP})
+    command_create = request_body.data.model_copy(
+        update={"intent": CommandIntent.SETUP}
+    )
     command = await orchestrator.add_command_and_wait_for_interval(
         command=command_create, wait_until_complete=waitUntilComplete, timeout=timeout
     )
