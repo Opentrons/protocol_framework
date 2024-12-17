@@ -17,7 +17,10 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { getFileMetadata } from '../../file-data/selectors'
-import { selectTerminalItem } from '../../ui/steps/actions/actions'
+import {
+  selectDropdownItem,
+  selectTerminalItem,
+} from '../../ui/steps/actions/actions'
 import { LINE_CLAMP_TEXT_STYLE, NAV_BAR_HEIGHT_REM } from '../../atoms'
 import { useKitchen } from '../Kitchen/hooks'
 import { LiquidButton } from '../../molecules/LiquidButton'
@@ -82,6 +85,12 @@ export function DesignerNavigation({
               if (hasTrashEntity === true) {
                 navigate('/overview')
                 dispatch(selectTerminalItem('__initial_setup__'))
+                dispatch(
+                  selectDropdownItem({
+                    selection: null,
+                    mode: 'clear',
+                  })
+                )
               } else {
                 makeSnackbar(t('trash_required') as string)
               }

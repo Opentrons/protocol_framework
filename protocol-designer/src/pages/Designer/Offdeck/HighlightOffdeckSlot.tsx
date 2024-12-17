@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { DeckLabelSet } from '@opentrons/components'
+import { DeckLabelSet, Flex } from '@opentrons/components'
 import {
   getHoveredDropdownItem,
   getSelectedDropdownItem,
@@ -28,21 +28,23 @@ export function HighlightOffdeckSlot(
     const highlighted = hoveredDropdownItem.id === labwareOnDeck?.id
     if (highlighted ?? isLabwareSelectionSelected) {
       return (
-        <DeckLabelSet
-          deckLabels={[
-            {
-              text: isLabwareSelectionSelected ? t('selected') : t('select'),
-              isSelected: isLabwareSelectionSelected,
-              isLast: true,
-              isZoomed: false,
-            },
-          ]}
-          x={position[0] - labwareOnDeck.def.cornerOffsetFromSlot.x}
-          y={position[1] + labwareOnDeck.def.cornerOffsetFromSlot.y}
-          width={153}
-          height={102}
-          invert={true}
-        />
+        <Flex marginTop="-6.3rem">
+          <DeckLabelSet
+            deckLabels={[
+              {
+                text: isLabwareSelectionSelected ? t('selected') : t('select'),
+                isSelected: isLabwareSelectionSelected,
+                isLast: true,
+                isZoomed: false,
+              },
+            ]}
+            x={position[0] - labwareOnDeck.def.cornerOffsetFromSlot.x}
+            y={position[1] + labwareOnDeck.def.cornerOffsetFromSlot.y}
+            width={153}
+            height={102}
+            invert={true}
+          />
+        </Flex>
       )
     }
   } else {

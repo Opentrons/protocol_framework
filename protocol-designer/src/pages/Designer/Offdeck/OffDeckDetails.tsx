@@ -14,6 +14,7 @@ import {
   RobotWorkSpace,
   SPACING,
   StyledText,
+  TYPOGRAPHY,
   WRAP,
 } from '@opentrons/components'
 import * as wellContentsSelectors from '../../../top-selectors/well-contents'
@@ -27,6 +28,10 @@ import { SlotOverflowMenu } from '../DeckSetup/SlotOverflowMenu'
 import { HighlightOffdeckSlot } from './HighlightOffdeckSlot'
 import type { DeckSlotId } from '@opentrons/shared-data'
 import type { DeckSetupTabType } from '../types'
+import {
+  getHoveredDropdownItem,
+  getSelectedDropdownItem,
+} from '../../../ui/steps/selectors'
 
 const OFFDECK_MAP_WIDTH = '41.625rem'
 
@@ -40,6 +45,8 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
   const [menuListId, setShowMenuListForId] = useState<DeckSlotId | null>(null)
   const robotType = useSelector(getRobotType)
   const deckSetup = useSelector(getDeckSetupForActiveItem)
+  const hoveredDropdownItem = useSelector(getHoveredDropdownItem)
+  const selectedDropdownSelection = useSelector(getSelectedDropdownItem)
   const offDeckLabware = Object.values(deckSetup.labware).filter(
     lw => lw.slot === 'offDeck'
   )
@@ -99,7 +106,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
           </StyledText>
         </Flex>
 
-        <Flex flexWrap={WRAP} gridGap={SPACING.spacing32}>
+        <Flex flexWrap={WRAP} paddingY={SPACING.spacing32}>
           {offDeckLabware.map(lw => {
             const wellContents = allWellContentsForActiveItem
               ? allWellContentsForActiveItem[lw.id]
@@ -111,8 +118,21 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
               yDimension: dimensions.yDimension ?? 0,
               zDimension: dimensions.zDimension ?? 0,
             }
+            const isLabwareSelectionSelected = selectedDropdownSelection.some(
+              selected => selected.id === lw.id
+            )
+            const highlighted = hoveredDropdownItem.id === lw.id
             return (
-              <Flex flexDirection={DIRECTION_COLUMN} key={lw.id}>
+              <Flex
+                flexDirection={DIRECTION_COLUMN}
+                key={lw.id}
+                paddingRight={SPACING.spacing32}
+                paddingBottom={
+                  isLabwareSelectionSelected || highlighted
+                    ? '0px'
+                    : SPACING.spacing32
+                }
+              >
                 <RobotWorkSpace
                   key={lw.id}
                   viewBox={`${definition.cornerOffsetFromSlot.x} ${definition.cornerOffsetFromSlot.y} ${dimensions.xDimension} ${dimensions.yDimension}`}
@@ -142,12 +162,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
                     </>
                   )}
                 </RobotWorkSpace>
-                <Flex marginTop="-6.3rem">
-                  <HighlightOffdeckSlot
-                    labwareOnDeck={lw}
-                    position={[0, 0, 0]}
-                  />
-                </Flex>
+                <HighlightOffdeckSlot labwareOnDeck={lw} position={[0, 0, 0]} />
                 {menuListId === lw.id ? (
                   <Flex
                     marginTop={`-${SPACING.spacing32}`}

@@ -120,6 +120,16 @@ export const resetSelectStep = (stepId: StepIdType): ThunkAction<any> => (
     type: 'POPULATE_FORM',
     payload: null,
   })
+  dispatch({
+    type: 'SELECT_DROPDOWN_ITEM',
+    payload: {
+      selection: {
+        id: null,
+        text: null,
+      },
+      mode: 'clear',
+    },
+  })
   resetScrollElements()
 }
 
@@ -152,7 +162,7 @@ const setSelection = (
       payload: {
         selection: {
           id: formData.aspirate_labware,
-          text: 'Selected',
+          text: 'Source',
           field: '1',
         },
         mode: 'add',
@@ -163,7 +173,7 @@ const setSelection = (
       payload: {
         selection: {
           id: formData.dispense_labware,
-          text: 'Selected',
+          text: 'Destination',
           field: '2',
         },
         mode: 'add',

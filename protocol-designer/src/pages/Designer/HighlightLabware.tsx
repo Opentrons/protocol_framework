@@ -26,20 +26,19 @@ export function HighlightLabware(
     labwareEntities[labwareOnDeck.slot] != null
       ? labwareEntities[labwareOnDeck.slot].id
       : null
-  const isLabwareSelectionSelected = selectedDropdownLabware.some(
+  const labwareSelectionSelected = selectedDropdownLabware.find(
     selected => selected.id === labwareOnDeck.id
   )
-
+  const isLabwareSelected = labwareSelectionSelected != null
   const selected =
-    isLabwareSelectionSelected ??
-    hoveredLabware.includes(adapterId ?? labwareOnDeck.id)
+    isLabwareSelected ?? hoveredLabware.includes(adapterId ?? labwareOnDeck.id)
   const highlighted = hoveredDropdownLabware.id === labwareOnDeck.id
 
   let labelText
-  if (hoveredDropdownLabware != null && !isLabwareSelectionSelected) {
+  if (hoveredDropdownLabware != null && labwareSelectionSelected == null) {
     labelText = hoveredDropdownLabware.text ?? undefined
-  } else if (isLabwareSelectionSelected) {
-    labelText = selectedDropdownLabware[0].text ?? undefined
+  } else if (labwareSelectionSelected != null) {
+    labelText = labwareSelectionSelected.text ?? undefined
   }
 
   if (highlighted || selected) {

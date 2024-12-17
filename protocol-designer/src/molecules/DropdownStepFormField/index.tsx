@@ -43,12 +43,17 @@ export function DropdownStepFormField(
   const dispatch = useDispatch()
   const availableOptionId = options.find(opt => opt.value === value)
   const handleSelection = (value: string): void => {
+    let text = t('application:selected')
+    if (fieldName === 'newLocation') {
+      text = i18n.format(t('application:location'), 'capitalize')
+    } else if (fieldName === 'aspirate_labware') {
+      text = t('application:source')
+    } else if (fieldName === 'dispense_labware') {
+      text = t('application:dest')
+    }
     const selection = {
       id: value,
-      text:
-        fieldName === 'newLocation'
-          ? i18n.format(t('application:location'), 'capitalize')
-          : t('application:selected'),
+      text,
     }
     if (
       fieldName === 'aspirate_labware' ||

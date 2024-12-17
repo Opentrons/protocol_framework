@@ -5,6 +5,7 @@
   "cancel": "cancel",
   "date_created": "Date Created",
   "description": "Description",
+  "dest": "Destination",
   "edit": "edit",
   "exit_batch_edit": "exit batch edit",
   "go_back": "Go back",
@@ -45,6 +46,7 @@
   },
   "select": "Select",
   "selected": "Selected",
+  "source": "Source",
   "temperature": "Temperature (˚C)",
   "time": "Time",
   "units": {

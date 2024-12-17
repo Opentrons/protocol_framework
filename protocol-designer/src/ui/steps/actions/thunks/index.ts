@@ -126,7 +126,7 @@ export const addAndSelectStep: (arg: {
         selectDropdownItem({
           selection: {
             id: labwareId,
-            text: 'Selected',
+            text: payload.stepType === 'moveLiquid' ? 'Source' : 'Selected',
             field: '1',
           },
           mode: 'add',
