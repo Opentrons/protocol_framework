@@ -44,9 +44,16 @@ class BaseResponseBody(BaseModel):
     def dict(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
         """Always exclude `None` when serializing to an object.
 
-        The OpenAPI spec marks `Optional` BaseModel fields as omittable, but
-        not nullable. This `dict` method override ensures that `null` is never
-        returned in a response, which would violate the spec.
+        With Pydantic v1, the OpenAPI spec described `Optional`(i.e., possibly
+        `None`-valued) fields as omittable, but not nullable. This did not match
+        Pydantic's actual serialization behavior, which serialized Python `None` to
+        JSON `null` by default. This method override fixed the mismatch by making
+        Pydantic omit the field from serialization instead.
+
+        With Pydantic v2, the OpenAPI spec does describe `Optional` fields as nullable,
+        matching Pydantic's serialization behavior. We therefore no longer need this
+        override to make them match. However, removing this override and changing
+        serialization behavior at this point would risk breaking things on the client.
         """
         kwargs["exclude_none"] = True
         return super().dict(*args, **kwargs)
