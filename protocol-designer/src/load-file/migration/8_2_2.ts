@@ -17,13 +17,18 @@ export const migrateFile = (
   ).reduce((acc, form) => {
     if (form.stepType === 'heaterShaker') {
       const { id, heaterShakerSetTimer } = form
+      let newSetTimer = heaterShakerSetTimer
+
+      if (heaterShakerSetTimer === 'false') {
+        newSetTimer = false
+      } else if (heaterShakerSetTimer === 'true') {
+        newSetTimer = true
+      }
       return {
         ...acc,
         [id]: {
           ...form,
-          heaterShakerSetTimer: JSON.parse(
-            heaterShakerSetTimer as string | null
-          ),
+          heaterShakerSetTimer: newSetTimer,
         },
       }
     }
