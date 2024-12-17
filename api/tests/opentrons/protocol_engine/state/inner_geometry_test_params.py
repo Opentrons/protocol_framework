@@ -143,10 +143,50 @@ INNER_WELL_GEOMETRY_TEST_PARAMS = [
         "appliedbiosystemsmicroamp_384_wellplate_40ul",
         "conicalWell",
         7.44,
-        26.2,
+        26.19,
         3.0,
         3.0,
     ],
+    [
+        "opentrons_24_tuberack_eppendorf_2ml_safelock_snapcap",
+        "conicalWell",
+        60.940,
+        2163.980,
+        3.0,
+        3.0
+    ],
+    [
+        "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical",
+        "conicalWell15mL",
+        16.690,
+        15546.930,
+        3.0,
+        5.0
+    ],
+    [
+        "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical",
+        "conicalWell50mL",
+        111.200,
+        56110.279,
+        3.0,
+        5.0
+    ],
+    [
+        "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical",
+        "15mlconicalWell",
+        40.830,
+        15956.600,
+        3.0,
+        3.0
+    ],
+    [
+        "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical",
+        "50mlconicalWell",
+        163.860,
+        57720.510,
+        3.0,
+        3.0
+    ]
 ]
 print(f"len of existing labware = {len(INNER_WELL_GEOMETRY_TEST_PARAMS)}")
 existing_names = [param[0] for param in INNER_WELL_GEOMETRY_TEST_PARAMS]
@@ -156,13 +196,15 @@ for missing in diff:
     print(missing)
 
 gotta_add = [
-    "opentrons_24_tuberack_eppendorf_2ml_safelock_snapcap",
-    "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical-15mL-ONLY",
-    "opentrons_24_tuberack_generic_2ml_screwcap",
-    "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical-50mL-ONLY",
-    "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical-50mL-ONLY",
-    "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical-15mL-ONLY",
-    "usascientific_96_wellplate_2.4ml_deep",
+    # "opentrons_24_tuberack_eppendorf_2ml_safelock_snapcap",
+    # check if the test is looking for the right name below
+    # "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical-15mL-ONLY",
+    # "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical-50mL-ONLY",
+    # "opentrons_24_tuberack_generic_2ml_screwcap", # doesnt have volume estimates
+    # check if the test is looking for the right name below
+    # "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical-50mL-ONLY",
+    # "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical-15mL-ONLY",
+    "usascientific_96_wellplate_2.4ml_deep" # definition isnt in yet
 ]
 failing = [
     "corning_384_wellplate_112ul_flat",
