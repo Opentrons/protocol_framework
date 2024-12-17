@@ -39,7 +39,7 @@ const mockAllIngredientGroupFields = {
     name: 'Amplicon PCR sample + AMPure XP beads',
     displayColor: '#9dffd8',
     description: '25µl Amplicon PCR + 20 µl AMPure XP beads',
-    liquidClass: null,
+    liquidClass: 'Water',
     serialize: false,
     liquidGroupId: '2',
   },

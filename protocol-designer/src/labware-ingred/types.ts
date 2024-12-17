@@ -30,8 +30,8 @@ export type OrderedLiquids = Array<{
 }>
 // TODO: Ian 2018-10-15 audit & rename these confusing types
 export interface LiquidGroup {
-  name: string | null | undefined
-  description: string | null | undefined
+  name: string | null
+  description: string | null
   displayColor: string
   liquidClass: string | null
   serialize: boolean

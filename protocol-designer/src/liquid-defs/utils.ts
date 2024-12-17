@@ -7,5 +7,9 @@ export const getLiquidClassDisplayName = (
   if (liquidClass == null) {
     return null
   }
-  return liquidClassDefs[liquidClass]?.displayName ?? null
+  if (!(liquidClass in liquidClassDefs)) {
+    console.warn(`Liquid class ${liquidClass} not found`)
+    return null
+  }
+  return liquidClassDefs[liquidClass].displayName
 }

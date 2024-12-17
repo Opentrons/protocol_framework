@@ -65,6 +65,7 @@ export function LiquidDefinitions({
       <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
         {Object.keys(allIngredientGroupFields).length > 0 ? (
           Object.values(allIngredientGroupFields).map((liquid, index) => {
+            console.log(getLiquidDescription(liquid, enableLiquidClasses))
             return (
               <ListItem
                 type="noActive"

@@ -45,9 +45,9 @@ import type { LiquidGroup } from '../../labware-ingred/types'
 interface LiquidEditFormValues {
   name: string
   displayColor: string
-  description?: string | null
-  liquidClass: string | null
-  serialize?: boolean
+  description: string
+  liquidClass: string
+  serialize: boolean
   [key: string]: unknown
 }
 
@@ -144,7 +144,7 @@ export function DefineLiquidsModal(
       name: values.name,
       displayColor: values.displayColor,
       liquidClass: values.liquidClass ? values.liquidClass : null,
-      description: values.description ?? null,
+      description: values.description ? values.description : null,
       serialize: values.serialize ?? false,
     })
   }
