@@ -24,12 +24,12 @@ type MetadataInfo = Array<{
 }>
 
 interface ProtocolMetadataProps {
-  setShowEditMetadataModal: (showEditMetadataModal: boolean) => void
+  handleOpenEditMetadataModal: () => void
   metaDataInfo: MetadataInfo
 }
 
 export function ProtocolMetadata({
-  setShowEditMetadataModal,
+  handleOpenEditMetadataModal,
   metaDataInfo,
 }: ProtocolMetadataProps): JSX.Element {
   const { t } = useTranslation('protocol_overview')
@@ -43,9 +43,7 @@ export function ProtocolMetadata({
         <Flex padding={SPACING.spacing4}>
           <Btn
             textDecoration={TYPOGRAPHY.textDecorationUnderline}
-            onClick={() => {
-              setShowEditMetadataModal(true)
-            }}
+            onClick={handleOpenEditMetadataModal}
             css={BUTTON_LINK_STYLE}
             data-testid="ProtocolOverview_MetadataEditButton"
           >

@@ -47,6 +47,7 @@ import {
   getUnusedStagingAreas,
   getUnusedTrash,
 } from './utils'
+import { useModal } from '../../resources/ModalProvider'
 
 import type { CreateCommand } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../types'
@@ -80,9 +81,8 @@ export function ProtocolOverview(): JSX.Element {
     showEditInstrumentsModal,
     setShowEditInstrumentsModal,
   ] = useState<boolean>(false)
-  const [showEditMetadataModal, setShowEditMetadataModal] = useState<boolean>(
-    false
-  )
+  const { openModal, closeModal } = useModal()
+
   const [showExportWarningModal, setShowExportWarningModal] = useState<boolean>(
     false
   )
@@ -211,15 +211,12 @@ export function ProtocolOverview(): JSX.Element {
     },
   })
 
+  const handleOpenEditMetadataModal = (): void => {
+    openModal(<EditProtocolMetadataModal onClose={closeModal} />)
+  }
+
   return (
     <Fragment>
-      {showEditMetadataModal ? (
-        <EditProtocolMetadataModal
-          onClose={() => {
-            setShowEditMetadataModal(false)
-          }}
-        />
-      ) : null}
       {showEditInstrumentsModal ? (
         <EditInstrumentsModal
           onClose={() => {
@@ -302,7 +299,7 @@ export function ProtocolOverview(): JSX.Element {
           >
             <ProtocolMetadata
               metaDataInfo={metaDataInfo}
-              setShowEditMetadataModal={setShowEditMetadataModal}
+              handleOpenEditMetadataModal={handleOpenEditMetadataModal}
             />
             <InstrumentsInfo
               robotType={robotType}
