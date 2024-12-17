@@ -1,5 +1,4 @@
-import type * as React from 'react'
-import { describe, it, vi, beforeEach } from 'vitest'
+import { describe, it, vi, beforeEach, expect } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { FLEX_ROBOT_TYPE, fixture12Trough } from '@opentrons/shared-data'
 import { screen } from '@testing-library/react'
@@ -67,6 +66,6 @@ describe('OffDeckDetails', () => {
     screen.getByText('OFF-DECK LABWARE')
     screen.getByText('mock LabwareRender')
     screen.getByText('Add labware')
-    screen.getByText('Highlight Offdeck Slot')
+    expect(screen.getAllByText('Highlight Offdeck Slot')).toHaveLength(2)
   })
 })
