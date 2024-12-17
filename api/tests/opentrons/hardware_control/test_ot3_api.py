@@ -858,6 +858,7 @@ async def test_liquid_probe(
             fake_settings_aspirate.sensor_threshold_pascals,
             fake_settings_aspirate.plunger_impulse_time,
             fake_settings_aspirate.samples_for_baselining,
+            probe_safe_reset_mm,
             probe=InstrumentProbeType.PRIMARY,
             force_both_sensors=False,
             response_queue=None,
@@ -1114,6 +1115,7 @@ async def test_multi_liquid_probe(
             fake_settings_aspirate.sensor_threshold_pascals,
             fake_settings_aspirate.plunger_impulse_time,
             fake_settings_aspirate.samples_for_baselining,
+            2.0,
             probe=InstrumentProbeType.PRIMARY,
             force_both_sensors=False,
             response_queue=None,
@@ -1149,6 +1151,7 @@ async def test_liquid_not_found(
         threshold_pascals: float,
         plunger_impulse_time: float,
         num_baseline_reads: int,
+        z_offset_for_plunger_prep: float,
         probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
         force_both_sensors: bool = False,
         response_queue: Optional[
