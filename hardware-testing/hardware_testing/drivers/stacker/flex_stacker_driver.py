@@ -155,25 +155,25 @@ class FlexStacker():
 
         Raises: SerialException
         """
-        x = data.split(" ")
-        x = x[0]
-        # print(x)
         data_encode = data.encode()
-        #print(f'data encode: {data_encode}')
         self._stacker_connection.write(data=data_encode)
         start = time.time()
         while True:
-            # print(response)
-            #response = self._stacker_connection.read_until(expected = f'{x} OK\n')
             response = self._stacker_connection.readline()
-            print(response)
-            if (self._ack in response) or (self._stall in response):
+            #if (self._ack in response) or (self._stall in response):
+            if (self._ack in response):
                 # Remove ack from response
                 response = response.replace(self._ack, b"OK\n")
                 str_response = self.process_raw_response(
                     command=data, response=response.decode()
                 )
-                #print(str_response)
+                return str_response
+            if (self._stall in response):
+                # Remove ack from response
+                str_response = self.process_raw_response(
+                    command=data, response=response.decode()
+                )
+                print(str_response)
                 return str_response
             end = time.time()
             if (end-start) > 120:
@@ -394,7 +394,10 @@ class FlexStacker():
                                                     f'D{msd}')
 
         print(c)
-        self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
+        response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
+        stall_detection = "async ERR403:motor stall error"
+        if response in stall_detection:
+            raise(f"Stall Detected on {axis}")
         if direction == DIR.POSITIVE and axis == AXIS.X:
             self.current_position.update({'X': self.current_position['X'] + distance})
         elif direction == DIR.NEGATIVE and axis == AXIS.X:
@@ -563,7 +566,6 @@ class FlexStacker():
         self.home(AXIS.X, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
 
     def unload_labware(self, labware_height: float):
-        labware_retract_speed= 100
         axis_swap_approach_mm = 10
         # ----------------Set up the Stacker------------------------
         self.home(AXIS.X, DIR.POSITIVE_HOME, HOME_SPEED, HOME_ACCELERATION)
