@@ -189,9 +189,9 @@ const selectedSubstep: Reducer<StepIdType | null, any> = handleActions(
   },
   null
 )
-const hoveredSelection: Reducer<Selection, any> = handleActions(
+const hoveredDropdownItem: Reducer<Selection, any> = handleActions(
   {
-    HOVER_SELECTION: (
+    HOVER_DROPDOWN_ITEM: (
       state,
       action: {
         payload: Selection
@@ -200,9 +200,9 @@ const hoveredSelection: Reducer<Selection, any> = handleActions(
   },
   { id: null, text: null }
 )
-const selectedSelection: Reducer<Selection[], any> = handleActions(
+const selectedDropdownItem: Reducer<Selection[], any> = handleActions(
   {
-    SELECT_SELECTION: (
+    SELECT_DROPDOWN_ITEM: (
       state: Selection[],
       action: {
         payload: {
@@ -240,8 +240,8 @@ export interface StepsState {
   hoveredSubstep: SubstepIdentifier
   wellSelectionLabwareKey: string | null
   selectedSubstep: StepIdType | null
-  hoveredSelection: Selection
-  selectedSelection: Selection[]
+  hoveredDropdownItem: Selection
+  selectedDropdownItem: Selection[]
 }
 export const _allReducers = {
   collapsedSteps,
@@ -250,8 +250,8 @@ export const _allReducers = {
   hoveredSubstep,
   wellSelectionLabwareKey,
   selectedSubstep,
-  hoveredSelection,
-  selectedSelection,
+  hoveredDropdownItem,
+  selectedDropdownItem,
 }
 export const rootReducer: Reducer<StepsState, Action> = combineReducers(
   _allReducers

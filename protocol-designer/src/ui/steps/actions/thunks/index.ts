@@ -17,7 +17,7 @@ import { PRESAVED_STEP_ID } from '../../../../steplist/types'
 import { PAUSE_UNTIL_TEMP } from '../../../../constants'
 import { uuid } from '../../../../utils'
 import { getMultiSelectLastSelected, getSelectedStepId } from '../../selectors'
-import { addStep, selectSelection } from '../actions'
+import { addStep, selectDropdownItem } from '../actions'
 import {
   actions as tutorialActions,
   selectors as tutorialSelectors,
@@ -49,7 +49,7 @@ export const addAndSelectStep: (arg: {
     )?.[0]
     if (tcId != null) {
       dispatch(
-        selectSelection({
+        selectDropdownItem({
           selection: {
             id: tcId,
             text: 'Selected',
@@ -65,7 +65,7 @@ export const addAndSelectStep: (arg: {
     )?.[0]
     if (magId != null) {
       dispatch(
-        selectSelection({
+        selectDropdownItem({
           selection: {
             id: magId,
             text: 'Selected',
@@ -84,7 +84,7 @@ export const addAndSelectStep: (arg: {
       temperatureModules.length === 1 ? temperatureModules[0][0] : null
     if (tempId != null) {
       dispatch(
-        selectSelection({
+        selectDropdownItem({
           selection: {
             id: tempId,
             text: 'Selected',
@@ -102,7 +102,7 @@ export const addAndSelectStep: (arg: {
     const hsId = hsModules.length === 1 ? hsModules[0][0] : null
     if (hsId != null) {
       dispatch(
-        selectSelection({
+        selectDropdownItem({
           selection: {
             id: hsId,
             text: 'Selected',
@@ -123,7 +123,7 @@ export const addAndSelectStep: (arg: {
     const labwareId = labwares.length === 1 ? labwares[0][0] : null
     if (labwareId != null) {
       dispatch(
-        selectSelection({
+        selectDropdownItem({
           selection: {
             id: labwareId,
             text: 'Selected',
@@ -141,7 +141,7 @@ export const addAndSelectStep: (arg: {
     const labwareId = labwares.length === 1 ? labwares[0][0] : null
     if (labwareId != null) {
       dispatch(
-        selectSelection({
+        selectDropdownItem({
           selection: {
             id: labwareId,
             text: 'Selected',

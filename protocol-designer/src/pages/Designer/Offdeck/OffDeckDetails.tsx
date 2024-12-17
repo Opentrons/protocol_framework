@@ -168,6 +168,9 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
               </Flex>
             )
           })}
+
+          <HighlightOffdeckSlot position={[0, 0, 0]} />
+
           {tab === 'startingDeck' ? (
             <Flex width="9.5625rem" height="6.375rem">
               <EmptySelectorButton

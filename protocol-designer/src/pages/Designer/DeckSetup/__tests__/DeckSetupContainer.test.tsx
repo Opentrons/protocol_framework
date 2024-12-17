@@ -9,8 +9,8 @@ import { renderWithProviders } from '../../../../__testing-utils__'
 import { selectors } from '../../../../labware-ingred/selectors'
 import { getDeckSetupForActiveItem } from '../../../../top-selectors/labware-locations'
 import {
-  getHoveredSelection,
-  getSelectedSelection,
+  getHoveredDropdownItem,
+  getSelectedDropdownItem,
 } from '../../../../ui/steps/selectors'
 import { getSelectedTerminalItemId } from '../../../../ui/steps'
 import { getDisableModuleRestrictions } from '../../../../feature-flags/selectors'
@@ -46,8 +46,10 @@ describe('DeckSetupContainer', () => {
       slot: 'D3',
       cutout: 'cutoutD3',
     })
-    vi.mocked(getSelectedSelection).mockReturnValue([{ id: null, text: null }])
-    vi.mocked(getHoveredSelection).mockReturnValue({ id: null, text: null })
+    vi.mocked(getSelectedDropdownItem).mockReturnValue([
+      { id: null, text: null },
+    ])
+    vi.mocked(getHoveredDropdownItem).mockReturnValue({ id: null, text: null })
     vi.mocked(DeckSetupTools).mockReturnValue(<div>mock DeckSetupTools</div>)
     vi.mocked(DeckSetupDetails).mockReturnValue(
       <div>mock DeckSetupDetails</div>

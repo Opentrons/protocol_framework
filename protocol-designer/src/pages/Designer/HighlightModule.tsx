@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux'
 import {
-  getHoveredSelection,
-  getSelectedSelection,
+  getHoveredDropdownItem,
+  getSelectedDropdownItem,
 } from '../../ui/steps/selectors'
 import { ModuleLabel } from './DeckSetup/ModuleLabel'
 
@@ -17,17 +17,17 @@ export const HighlightModule = (
   props: HighlightModuleProps
 ): JSX.Element | null => {
   const { moduleModel, position, orientation, moduleId } = props
-  const hoveredModulSelection = useSelector(getHoveredSelection)
-  const selectedModuleSelection = useSelector(getSelectedSelection)
+  const hoveredModulSelection = useSelector(getHoveredDropdownItem)
+  const selectedDropdownModule = useSelector(getSelectedDropdownItem)
   const isSelectedModuleSelected =
-    selectedModuleSelection.find(selected => selected.id === moduleId) != null
+    selectedDropdownModule.find(selected => selected.id === moduleId) != null
   const highlighted = hoveredModulSelection.id === moduleId
 
   let labelText
   if (hoveredModulSelection != null && !isSelectedModuleSelected) {
     labelText = hoveredModulSelection.text ?? undefined
   } else if (isSelectedModuleSelected) {
-    labelText = selectedModuleSelection[0].text ?? undefined
+    labelText = selectedDropdownModule[0].text ?? undefined
   }
 
   if (isSelectedModuleSelected || highlighted) {

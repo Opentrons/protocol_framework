@@ -37,15 +37,15 @@ export interface Selection {
   text: string | null
   field?: '1' | '2'
 }
-export interface selectSelectionAction {
-  type: 'SELECT_SELECTION'
+export interface selectDropdownItemAction {
+  type: 'SELECT_DROPDOWN_ITEM'
   payload: {
     selection: Selection | null
-    mode: 'add' | 'clear' | 'replace'
+    mode: 'add' | 'clear'
   }
 }
 export interface hoverSelectionAction {
-  type: 'HOVER_SELECTION'
+  type: 'HOVER_DROPDOWN_ITEM'
   payload: Selection
 }
 export interface HoverOnSubstepAction {

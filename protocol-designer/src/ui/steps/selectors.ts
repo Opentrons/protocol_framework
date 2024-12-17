@@ -103,13 +103,13 @@ export const getHoveredStepId: Selector<StepIdType | null> = createSelector(
   item =>
     item && item.selectionType === SINGLE_STEP_SELECTION_TYPE ? item.id : null
 )
-export const getHoveredSelection: Selector<Selection> = createSelector(
+export const getHoveredDropdownItem: Selector<Selection> = createSelector(
   rootSelector,
-  (state: StepsState) => state.hoveredSelection
+  (state: StepsState) => state.hoveredDropdownItem
 )
-export const getSelectedSelection: Selector<Selection[]> = createSelector(
+export const getSelectedDropdownItem: Selector<Selection[]> = createSelector(
   rootSelector,
-  (state: StepsState) => state.selectedSelection
+  (state: StepsState) => state.selectedDropdownItem
 )
 
 /** Array of labware (labwareId's) involved in hovered Step, or [] */

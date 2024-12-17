@@ -2,8 +2,8 @@ import { useSelector } from 'react-redux'
 import { getLabwareEntities } from '../../step-forms/selectors'
 import { getHoveredStepLabware } from '../../ui/steps'
 import {
-  getHoveredSelection,
-  getSelectedSelection,
+  getHoveredDropdownItem,
+  getSelectedDropdownItem,
 } from '../../ui/steps/selectors'
 import { LabwareLabel } from './LabwareLabel'
 import type { CoordinateTuple } from '@opentrons/shared-data'
@@ -20,28 +20,28 @@ export function HighlightLabware(
   const { labwareOnDeck, position } = props
   const labwareEntities = useSelector(getLabwareEntities)
   const hoveredLabware = useSelector(getHoveredStepLabware)
-  const hoveredLabwareOnSelection = useSelector(getHoveredSelection)
-  const selectedLabwareSelection = useSelector(getSelectedSelection)
+  const hoveredDropdownLabware = useSelector(getHoveredDropdownItem)
+  const selectedDropdownLabware = useSelector(getSelectedDropdownItem)
   const adapterId =
     labwareEntities[labwareOnDeck.slot] != null
       ? labwareEntities[labwareOnDeck.slot].id
       : null
-  const isLabwareSelectionSelected = selectedLabwareSelection.some(
+  const isLabwareSelectionSelected = selectedDropdownLabware.some(
     selected => selected.id === labwareOnDeck.id
   )
 
   const selected =
     isLabwareSelectionSelected ??
     hoveredLabware.includes(adapterId ?? labwareOnDeck.id)
-  const highlighted = hoveredLabwareOnSelection.id === labwareOnDeck.id
+  const highlighted = hoveredDropdownLabware.id === labwareOnDeck.id
 
   let labelText
-  if (hoveredLabwareOnSelection != null && !isLabwareSelectionSelected) {
-    labelText = hoveredLabwareOnSelection.text ?? undefined
+  if (hoveredDropdownLabware != null && !isLabwareSelectionSelected) {
+    labelText = hoveredDropdownLabware.text ?? undefined
   } else if (isLabwareSelectionSelected) {
-    labelText = selectedLabwareSelection[0].text ?? undefined
+    labelText = selectedDropdownLabware[0].text ?? undefined
   }
-  console.log(selectedLabwareSelection)
+
   if (highlighted || selected) {
     return (
       <LabwareLabel

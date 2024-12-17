@@ -86,7 +86,7 @@ describe('addAndSelectStep', () => {
       ],
       [
         {
-          type: 'SELECT_SELECTION',
+          type: 'SELECT_DROPDOWN_ITEM',
           payload: {
             selection: { id: 'modId', text: 'Selected', field: '1' },
             mode: 'add',

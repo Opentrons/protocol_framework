@@ -29,7 +29,7 @@ import type {
   ToggleViewSubstepAction,
   ViewSubstep,
   hoverSelectionAction,
-  selectSelectionAction,
+  selectDropdownItemAction,
   Selection,
 } from './types'
 
@@ -52,14 +52,14 @@ export const addStep = (args: {
   }
 }
 export const hoverSelection = (args: Selection): hoverSelectionAction => ({
-  type: 'HOVER_SELECTION',
+  type: 'HOVER_DROPDOWN_ITEM',
   payload: { id: args.id, text: args.text },
 })
-export const selectSelection = (args: {
+export const selectDropdownItem = (args: {
   selection: Selection | null
   mode: 'add' | 'clear'
-}): selectSelectionAction => ({
-  type: 'SELECT_SELECTION',
+}): selectDropdownItemAction => ({
+  type: 'SELECT_DROPDOWN_ITEM',
   payload: {
     selection:
       args.selection != null
@@ -133,14 +133,14 @@ const setSelection = (
 ): void => {
   if (formData.stepType === 'moveLabware') {
     dispatch({
-      type: 'SELECT_SELECTION',
+      type: 'SELECT_DROPDOWN_ITEM',
       payload: {
         selection: { id: formData.labware, text: 'Selected', field: '1' },
         mode: 'add',
       },
     })
     dispatch({
-      type: 'SELECT_SELECTION',
+      type: 'SELECT_DROPDOWN_ITEM',
       payload: {
         selection: { id: formData.newLocation, text: 'Location', field: '2' },
         mode: 'add',
@@ -148,7 +148,7 @@ const setSelection = (
     })
   } else if (formData.stepType === 'moveLiquid') {
     dispatch({
-      type: 'SELECT_SELECTION',
+      type: 'SELECT_DROPDOWN_ITEM',
       payload: {
         selection: {
           id: formData.aspirate_labware,
@@ -159,7 +159,7 @@ const setSelection = (
       },
     })
     dispatch({
-      type: 'SELECT_SELECTION',
+      type: 'SELECT_DROPDOWN_ITEM',
       payload: {
         selection: {
           id: formData.dispense_labware,
@@ -171,7 +171,7 @@ const setSelection = (
     })
   } else if (formData.stepType === 'mix') {
     dispatch({
-      type: 'SELECT_SELECTION',
+      type: 'SELECT_DROPDOWN_ITEM',
       payload: {
         selection: {
           id: formData.labware,
@@ -188,7 +188,7 @@ const setSelection = (
     formData.stepType === 'magnet'
   ) {
     dispatch({
-      type: 'SELECT_SELECTION',
+      type: 'SELECT_DROPDOWN_ITEM',
       payload: {
         selection: {
           id: formData.moduleId,

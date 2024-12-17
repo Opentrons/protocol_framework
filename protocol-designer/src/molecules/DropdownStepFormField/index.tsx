@@ -9,7 +9,7 @@ import {
   SPACING,
   StyledText,
 } from '@opentrons/components'
-import { selectSelection } from '../../ui/steps/actions/actions'
+import { selectDropdownItem } from '../../ui/steps/actions/actions'
 import type { Options } from '@opentrons/components'
 import type { FieldProps } from '../../pages/Designer/ProtocolSteps/StepForm/types'
 
@@ -56,7 +56,7 @@ export function DropdownStepFormField(
       fieldName === 'moduleId'
     ) {
       dispatch(
-        selectSelection({
+        selectDropdownItem({
           selection: { ...selection, field: '1' },
           mode: 'add',
         })
@@ -66,7 +66,7 @@ export function DropdownStepFormField(
       fieldName === 'newLocation'
     ) {
       dispatch(
-        selectSelection({
+        selectDropdownItem({
           selection: { ...selection, field: '2' },
           mode: 'add',
         })

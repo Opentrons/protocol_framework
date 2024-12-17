@@ -67,7 +67,7 @@ import type {
 } from './types'
 import {
   hoverSelection,
-  selectSelection,
+  selectDropdownItem,
 } from '../../../../ui/steps/actions/actions'
 
 type StepFormMap = {
@@ -243,7 +243,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
         })
       )
       dispatch(analyticsEvent(stepDuration))
-      dispatch(selectSelection({ selection: null, mode: 'clear' }))
+      dispatch(selectDropdownItem({ selection: null, mode: 'clear' }))
       dispatch(hoverSelection({ id: null, text: null }))
     } else {
       setShowFormErrors(true)
@@ -309,7 +309,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
         onCloseClick={() => {
           handleClose()
           dispatch(
-            selectSelection({
+            selectDropdownItem({
               selection: null,
               mode: 'clear',
             })

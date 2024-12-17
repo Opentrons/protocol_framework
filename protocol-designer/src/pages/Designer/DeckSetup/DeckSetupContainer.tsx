@@ -37,8 +37,8 @@ import { SlotDetailsContainer } from '../../../organisms'
 import { selectZoomedIntoSlot } from '../../../labware-ingred/actions'
 import { selectors } from '../../../labware-ingred/selectors'
 import {
-  getHoveredSelection,
-  getSelectedSelection,
+  getHoveredDropdownItem,
+  getSelectedDropdownItem,
 } from '../../../ui/steps/selectors'
 import { DeckSetupDetails } from './DeckSetupDetails'
 import { DECK_SETUP_TOOLS_WIDTH_REM, DeckSetupTools } from './DeckSetupTools'
@@ -104,8 +104,8 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   const zoomIn = useSelector(selectors.getZoomedInSlot)
   const _disableCollisionWarnings = useSelector(getDisableModuleRestrictions)
   const robotType = useSelector(getRobotType)
-  const selectedTrashSelection = useSelector(getSelectedSelection)
-  const hoveredTrashSelection = useSelector(getHoveredSelection)
+  const selectedTrashDropdownSelection = useSelector(getSelectedDropdownItem)
+  const hoveredTrashDropdownSelection = useSelector(getHoveredDropdownItem)
   const deckDef = useMemo(() => getDeckDefFromRobotType(robotType), [robotType])
   const [hoverSlot, setHoverSlot] = useState<DeckSlot | null>(null)
   const trash = Object.values(activeDeckSetup.additionalEquipmentOnDeck).find(
@@ -222,15 +222,15 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   )
 
   const isTrashBinHovered =
-    hoveredTrashSelection?.id != null &&
-    hoveredTrashSelection.id.includes('trashBin')
-  const isTrashBinSelected = selectedTrashSelection.some(selected =>
+    hoveredTrashDropdownSelection?.id != null &&
+    hoveredTrashDropdownSelection.id.includes('trashBin')
+  const isTrashBinSelected = selectedTrashDropdownSelection.some(selected =>
     selected.id?.includes('trashBin')
   )
   const isWasteChuteHovered =
-    hoveredTrashSelection?.id != null &&
-    hoveredTrashSelection.id.includes('wasteChute')
-  const isWasteChuteSelected = selectedTrashSelection.some(selected =>
+    hoveredTrashDropdownSelection?.id != null &&
+    hoveredTrashDropdownSelection.id.includes('wasteChute')
+  const isWasteChuteSelected = selectedTrashDropdownSelection.some(selected =>
     selected.id?.includes('wasteChute')
   )
 

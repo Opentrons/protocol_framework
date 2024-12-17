@@ -12,8 +12,8 @@ import {
   RobotCoordsForeignDiv,
 } from '@opentrons/components'
 import {
-  getHoveredSelection,
-  getSelectedSelection,
+  getHoveredDropdownItem,
+  getSelectedDropdownItem,
 } from '../../../ui/steps/selectors'
 import type { CoordinateTuple, Dimensions } from '@opentrons/shared-data'
 import type { DeckSetupTabType } from '../types'
@@ -30,19 +30,19 @@ export function DeckItemHighlight(
 ): JSX.Element | null {
   const { tab, slotBoundingBox, itemId, slotPosition } = props
   const { t, i18n } = useTranslation('application')
-  const hoveredLocationSelection = useSelector(getHoveredSelection)
-  const selectedLocationSelection = useSelector(getSelectedSelection)
+  const hoveredDropdownSelection = useSelector(getHoveredDropdownItem)
+  const selectedDropdownLocation = useSelector(getSelectedDropdownItem)
 
   const isHovered =
-    hoveredLocationSelection?.id != null
-      ? hoveredLocationSelection.id === itemId
+    hoveredDropdownSelection?.id != null
+      ? hoveredDropdownSelection.id === itemId
       : false
-  const isSelected = selectedLocationSelection.some(
+  const isSelected = selectedDropdownLocation.some(
     selected => selected.id === itemId && selected.field === '2'
   )
 
   if (tab === 'startingDeck' || slotPosition === null) return null
-console.log(selectedLocationSelection)
+
   return isHovered || isSelected ? (
     <>
       <RobotCoordsForeignDiv
