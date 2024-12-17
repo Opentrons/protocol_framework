@@ -370,7 +370,7 @@ async def create_protocol(  # noqa: C901
                 protocolKind=resource.protocol_kind,
                 protocolType=resource.source.config.protocol_type,
                 robotType=resource.source.robot_type,
-                metadata=Metadata.parse_obj(resource.source.metadata),
+                metadata=Metadata.model_validate(resource.source.metadata),
                 analysisSummaries=analysis_summaries,
                 key=resource.protocol_key,
                 files=[
