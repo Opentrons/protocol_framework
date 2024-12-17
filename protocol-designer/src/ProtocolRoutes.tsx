@@ -14,7 +14,7 @@ import {
   GateModal,
   Kitchen,
   LabwareUploadModal,
-  NavigationBar,
+  Navigation,
 } from './organisms'
 import { ProtocolDesignerAppFallback } from './resources/ProtocolDesignerAppFallback'
 
@@ -74,7 +74,7 @@ export function ProtocolRoutes(): JSX.Element {
       FallbackComponent={ProtocolDesignerAppFallback}
       onReset={handleReset}
     >
-      <NavigationBar />
+      <Navigation />
       <Kitchen>
         <Box width="100%">
           {showGateModal ? <GateModal /> : null}

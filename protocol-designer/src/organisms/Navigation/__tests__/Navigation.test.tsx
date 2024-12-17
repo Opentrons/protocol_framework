@@ -7,7 +7,7 @@ import { renderWithProviders } from '../../../__testing-utils__'
 import { getHasUnsavedChanges } from '../../../load-file/selectors'
 import { toggleNewProtocolModal } from '../../../navigation/actions'
 import { SettingsIcon } from '../../SettingsIcon'
-import { NavigationBar } from '..'
+import { Navigation } from '..'
 
 vi.mock('../../SettingsIcon')
 vi.mock('../../../navigation/actions')
@@ -16,13 +16,13 @@ vi.mock('../../../load-file/selectors')
 const render = () => {
   return renderWithProviders(
     <MemoryRouter>
-      <NavigationBar />
+      <Navigation />
     </MemoryRouter>,
     { i18nInstance: i18n }
   )
 }
 
-describe('NavigationBar', () => {
+describe('Navigation', () => {
   beforeEach(() => {
     vi.mocked(getHasUnsavedChanges).mockReturnValue(false)
     vi.mocked(SettingsIcon).mockReturnValue(<div>mock SettingsIcon</div>)

@@ -20,7 +20,7 @@ import { getHasUnsavedChanges } from '../../load-file/selectors'
 import { SettingsIcon } from '../SettingsIcon'
 import type { ThunkDispatch } from '../../types'
 
-export function NavigationBar(): JSX.Element | null {
+export function Navigation(): JSX.Element | null {
   const { t } = useTranslation(['shared', 'alert'])
   const location = useLocation()
   const navigate = useNavigate()
