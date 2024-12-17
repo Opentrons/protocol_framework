@@ -1,5 +1,5 @@
+"""Arguments needed to test inner geometry.
 
-"""
 Each labware has 2 nominal volumes calculated in solidworks.
 - One is a nominal bottom volume, calculated some set distance from the bottom of the inside of the well.
 - The other is a nominal top volume, calculated some set distance from the top of the inside of the well.
@@ -39,7 +39,7 @@ labware_to_test = [
     "opentrons_24_tuberack_nest_1.5ml_screwcap",
     "opentrons_24_tuberack_nest_2ml_screwcap",
     "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical-50mL-ONLY",
-    "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical-15mL-ONLY"
+    "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical-15mL-ONLY",
 ]
 print(f"len of list = {len(labware_to_test)}")
 print(f"len of set = {len(set(labware_to_test))}")
@@ -72,20 +72,14 @@ INNER_WELL_GEOMETRY_TEST_PARAMS = [
         3.0,
     ],
     # weird one
-    [
-      "nest_1_reservoir_290ml", "cuboidalWell", 16570.380, 271690.520, 3.0, 3.0
-    ],
+    ["nest_1_reservoir_290ml", "cuboidalWell", 16570.380, 271690.520, 3.0, 3.0],
     # failing isclose
-    [
-        "opentrons_24_tuberack_nest_2ml_snapcap", "conicalWell", 69.62, 2148.5, 3.0, 3.0
-    ],
+    ["opentrons_24_tuberack_nest_2ml_snapcap", "conicalWell", 69.62, 2148.5, 3.0, 3.0],
     ["nest_96_wellplate_2ml_deep", "cuboidalWell", 118.3, 2060.4, 3.0, 3.0],
     ["opentrons_24_tuberack_nest_1.5ml_snapcap", "conicalWell", 27.8, 1682.3, 3.0, 3.0],
     ["nest_12_reservoir_15ml", "cuboidalWell", 1219.0, 13236.1, 3.0, 3.0],
     # weird one
-    [
-        "nest_1_reservoir_195ml", "cuboidalWell", 14034.2, 172301.9, 3.0, 3.0
-    ],
+    ["nest_1_reservoir_195ml", "cuboidalWell", 14034.2, 172301.9, 3.0, 3.0],
     [
         "opentrons_24_tuberack_nest_0.5ml_screwcap",
         "conicalWell",
@@ -121,15 +115,11 @@ INNER_WELL_GEOMETRY_TEST_PARAMS = [
         3.0,
     ],
     # failed - squared cone
-    [
-        "usascientific_12_reservoir_22ml", "cuboidalWell", 61.6, 21111.5, 3.0, 3.0
-    ],
+    ["usascientific_12_reservoir_22ml", "cuboidalWell", 61.6, 21111.5, 3.0, 3.0],
     ["thermoscientificnunc_96_wellplate_2000ul", "conicalWell", 73.5, 1768.0, 3.0, 3.0],
     # skipped usascientific_96_wellplate_2.4ml_deep since it doesnt have a definition yet
     # weird one
-    [
-        "agilent_1_reservoir_290ml", "cuboidalWell", 15652.9, 268813.8, 3.0, 3.0
-    ],
+    ["agilent_1_reservoir_290ml", "cuboidalWell", 15652.9, 268813.8, 3.0, 3.0],
     [
         "opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap",
         "conicalWell",
@@ -146,9 +136,7 @@ INNER_WELL_GEOMETRY_TEST_PARAMS = [
     ["biorad_96_wellplate_200ul_pcr", "conicalWell", 17.9, 161.2, 3.0, 3.0],
     ["axygen_1_reservoir_90ml", "cuboidalWell", 22373.4, 70450.6, 3.0, 3.0],
     # fails- this one thought it was a rectangle ?
-    [
-        "corning_384_wellplate_112ul_flat", "flatWell", 22.4, 77.4, 2.88, 3.0
-    ],
+    ["corning_384_wellplate_112ul_flat", "flatWell", 22.4, 77.4, 2.88, 3.0],
     ["corning_96_wellplate_360ul_flat", "conicalWell", 97.2, 257.1, 3.0, 3.0],
     ["biorad_384_wellplate_50ul", "conicalWell", 7.7, 27.8, 3.0, 3.0],
     [
@@ -161,7 +149,7 @@ INNER_WELL_GEOMETRY_TEST_PARAMS = [
     ],
 ]
 print(f"len of existing labware = {len(INNER_WELL_GEOMETRY_TEST_PARAMS)}")
-existing_names = [l[0] for l in INNER_WELL_GEOMETRY_TEST_PARAMS]
+existing_names = [param[0] for param in INNER_WELL_GEOMETRY_TEST_PARAMS]
 diff = set(labware_to_test).difference(set(existing_names))
 print("\nlabware missing:")
 for missing in diff:
@@ -174,7 +162,7 @@ gotta_add = [
     "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical-50mL-ONLY",
     "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical-50mL-ONLY",
     "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical-15mL-ONLY",
-    "usascientific_96_wellplate_2.4ml_deep"
+    "usascientific_96_wellplate_2.4ml_deep",
 ]
 failing = [
     "corning_384_wellplate_112ul_flat",
