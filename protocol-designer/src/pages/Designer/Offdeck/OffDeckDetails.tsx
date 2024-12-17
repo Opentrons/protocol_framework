@@ -14,7 +14,6 @@ import {
   RobotWorkSpace,
   SPACING,
   StyledText,
-  TYPOGRAPHY,
   WRAP,
 } from '@opentrons/components'
 import * as wellContentsSelectors from '../../../top-selectors/well-contents'

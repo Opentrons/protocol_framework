@@ -29,6 +29,7 @@ import { HoveredItems } from './HoveredItems'
 import { SelectedHoveredItems } from './SelectedHoveredItems'
 import { getAdjacentLabware } from './utils'
 import { SlotWarning } from './SlotWarning'
+import { HighlightItems } from './HighlightItems'
 
 import type { ComponentProps, Dispatch, SetStateAction } from 'react'
 import type { ThermocyclerVizProps } from '@opentrons/components'
@@ -52,8 +53,6 @@ import type {
 } from '../../../step-forms'
 import type { DeckSetupTabType } from '../types'
 import type { Fixture } from './constants'
-import { HighlightModule } from '../HighlightModule'
-import { DeckItemHighlight } from './DeckItemHighlight'
 
 interface DeckSetupDetailsProps extends DeckSetupTabType {
   activeDeckSetup: InitialDeckSetup
@@ -256,12 +255,6 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
                     itemId={slotId}
                     tab={tab}
                   />
-                  <DeckItemHighlight
-                    tab={tab}
-                    slotBoundingBox={controlSelectDimensions}
-                    slotPosition={[0, 0, 0]}
-                    itemId={slotId}
-                  />
                 </>
               ) : null}
 
@@ -278,23 +271,9 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
                     itemId={slotId}
                     tab={tab}
                   />
-                  <DeckItemHighlight
-                    tab={tab}
-                    slotBoundingBox={labwareInterfaceBoundingBox}
-                    slotPosition={[0, 0, 0]}
-                    itemId={slotId}
-                  />
                 </>
               ) : null}
             </Module>
-            <HighlightModule
-              moduleModel={moduleOnDeck.model}
-              moduleId={moduleOnDeck.id}
-              position={slotPosition}
-              orientation={inferModuleOrientationFromXCoordinate(
-                slotPosition[0]
-              )}
-            />
           </Fragment>
         ) : null
       })}
@@ -348,15 +327,6 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
                 itemId={addressableArea.id}
                 tab={tab}
               />
-              <DeckItemHighlight
-                tab={tab}
-                slotBoundingBox={addressableArea.boundingBox}
-                slotPosition={getPositionFromSlotId(
-                  addressableArea.id,
-                  deckDef
-                )}
-                itemId={addressableArea.id}
-              />
             </Fragment>
           )
         })}
@@ -396,12 +366,6 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
               slotPosition={slotPosition}
               itemId={labware.slot}
               tab={tab}
-            />
-            <DeckItemHighlight
-              tab={tab}
-              slotBoundingBox={slotBoundingBox}
-              slotPosition={slotPosition}
-              itemId={labware.slot}
             />
           </Fragment>
         ) : null
@@ -466,16 +430,11 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
               itemId={slotOnDeck ?? ''}
               tab={tab}
             />
-            <DeckItemHighlight
-              tab={tab}
-              slotBoundingBox={slotBoundingBox}
-              slotPosition={slotPosition}
-              itemId={slotOnDeck ?? ''}
-            />
           </Fragment>
         )
       })}
 
+      <HighlightItems robotType={robotType} deckDef={deckDef} />
       {/* selected hardware + labware */}
       <SelectedHoveredItems
         deckDef={deckDef}

@@ -1,10 +1,7 @@
 import { useSelector } from 'react-redux'
 import { getLabwareEntities } from '../../step-forms/selectors'
 import { getHoveredStepLabware } from '../../ui/steps'
-import {
-  getHoveredDropdownItem,
-  getSelectedDropdownItem,
-} from '../../ui/steps/selectors'
+import { getDesignerTab } from '../../file-data/selectors'
 import { LabwareLabel } from './LabwareLabel'
 import type { CoordinateTuple } from '@opentrons/shared-data'
 import type { LabwareOnDeck } from '../../step-forms'
@@ -20,35 +17,24 @@ export function HighlightLabware(
   const { labwareOnDeck, position } = props
   const labwareEntities = useSelector(getLabwareEntities)
   const hoveredLabware = useSelector(getHoveredStepLabware)
-  const hoveredDropdownLabware = useSelector(getHoveredDropdownItem)
-  const selectedDropdownLabware = useSelector(getSelectedDropdownItem)
+  const tab = useSelector(getDesignerTab)
   const adapterId =
     labwareEntities[labwareOnDeck.slot] != null
       ? labwareEntities[labwareOnDeck.slot].id
       : null
-  const labwareSelectionSelected = selectedDropdownLabware.find(
-    selected => selected.id === labwareOnDeck.id
-  )
-  const isLabwareSelected = labwareSelectionSelected != null
-  const selected =
-    isLabwareSelected ?? hoveredLabware.includes(adapterId ?? labwareOnDeck.id)
-  const highlighted = hoveredDropdownLabware.id === labwareOnDeck.id
 
-  let labelText
-  if (hoveredDropdownLabware != null && labwareSelectionSelected == null) {
-    labelText = hoveredDropdownLabware.text ?? undefined
-  } else if (labwareSelectionSelected != null) {
-    labelText = labwareSelectionSelected.text ?? undefined
+  const highlighted = hoveredLabware.includes(adapterId ?? labwareOnDeck.id)
+
+  if (tab === 'protocolSteps') {
+    return null
   }
-
-  if (highlighted || selected) {
+  if (highlighted) {
     return (
       <LabwareLabel
-        isSelected={selected}
+        isSelected={true}
         isLast={true}
         position={position}
         labwareDef={labwareOnDeck.def}
-        labelText={labelText}
       />
     )
   }

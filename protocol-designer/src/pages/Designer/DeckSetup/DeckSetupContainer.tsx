@@ -1,6 +1,5 @@
 import { useMemo, useState, Fragment } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useTranslation } from 'react-i18next'
 import round from 'lodash/round'
 import {
   ALIGN_CENTER,
@@ -36,10 +35,6 @@ import { getHasGen1MultiChannelPipette } from '../../../step-forms'
 import { SlotDetailsContainer } from '../../../organisms'
 import { selectZoomedIntoSlot } from '../../../labware-ingred/actions'
 import { selectors } from '../../../labware-ingred/selectors'
-import {
-  getHoveredDropdownItem,
-  getSelectedDropdownItem,
-} from '../../../ui/steps/selectors'
 import { DeckSetupDetails } from './DeckSetupDetails'
 import { DECK_SETUP_TOOLS_WIDTH_REM, DeckSetupTools } from './DeckSetupTools'
 import {
@@ -97,15 +92,12 @@ const LEFT_SLOTS = [
 
 export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   const { tab } = props
-  const { t } = useTranslation('application')
   const activeDeckSetup = useSelector(getDeckSetupForActiveItem)
   const dispatch = useDispatch<any>()
   const breakPointSize = useDeckSetupWindowBreakPoint()
   const zoomIn = useSelector(selectors.getZoomedInSlot)
   const _disableCollisionWarnings = useSelector(getDisableModuleRestrictions)
   const robotType = useSelector(getRobotType)
-  const selectedTrashDropdownSelection = useSelector(getSelectedDropdownItem)
-  const hoveredTrashDropdownSelection = useSelector(getHoveredDropdownItem)
   const deckDef = useMemo(() => getDeckDefFromRobotType(robotType), [robotType])
   const [hoverSlot, setHoverSlot] = useState<DeckSlot | null>(null)
   const trash = Object.values(activeDeckSetup.additionalEquipmentOnDeck).find(
@@ -221,19 +213,6 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
     aa => isAddressableAreaStandardSlot(aa.id, deckDef)
   )
 
-  const isTrashBinHovered =
-    hoveredTrashDropdownSelection?.id != null &&
-    hoveredTrashDropdownSelection.id.includes('trashBin')
-  const isTrashBinSelected = selectedTrashDropdownSelection.some(selected =>
-    selected.id?.includes('trashBin')
-  )
-  const isWasteChuteHovered =
-    hoveredTrashDropdownSelection?.id != null &&
-    hoveredTrashDropdownSelection.id.includes('wasteChute')
-  const isWasteChuteSelected = selectedTrashDropdownSelection.some(selected =>
-    selected.id?.includes('wasteChute')
-  )
-
   return (
     <Flex height="100%">
       <Flex
@@ -330,23 +309,6 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                                 trashIconColor={lightFill}
                                 trashCutoutId={cutoutId as TrashCutoutId}
                                 backgroundColor={COLORS.grey50}
-                                showHighlight={
-                                  isTrashBinHovered || isTrashBinSelected
-                                }
-                                tagInfo={
-                                  isTrashBinHovered || isTrashBinSelected
-                                    ? [
-                                        {
-                                          text: isTrashBinSelected
-                                            ? t('selected')
-                                            : t('select'),
-                                          isSelected: isTrashBinSelected,
-                                          isLast: true,
-                                          isZoomed: false,
-                                        },
-                                      ]
-                                    : []
-                                }
                               />
                             </Fragment>
                           ) : null
@@ -365,23 +327,6 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                             }
                             deckDefinition={deckDef}
                             fixtureBaseColor={lightFill}
-                            showHighlight={
-                              isWasteChuteHovered || isWasteChuteSelected
-                            }
-                            tagInfo={
-                              isWasteChuteHovered || isWasteChuteSelected
-                                ? [
-                                    {
-                                      text: isWasteChuteSelected
-                                        ? t('selected')
-                                        : t('select'),
-                                      isSelected: isWasteChuteSelected,
-                                      isLast: true,
-                                      isZoomed: false,
-                                    },
-                                  ]
-                                : []
-                            }
                           />
                         )
                       }
@@ -400,23 +345,6 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                             deckDefinition={deckDef}
                             slotClipColor={darkFill}
                             fixtureBaseColor={lightFill}
-                            showHighlight={
-                              isWasteChuteHovered ?? isWasteChuteSelected
-                            }
-                            tagInfo={
-                              isWasteChuteHovered ?? isWasteChuteSelected
-                                ? [
-                                    {
-                                      text: isWasteChuteSelected
-                                        ? t('selected')
-                                        : t('select'),
-                                      isSelected: isWasteChuteSelected,
-                                      isLast: true,
-                                      isZoomed: false,
-                                    },
-                                  ]
-                                : []
-                            }
                           />
                         )
                       }

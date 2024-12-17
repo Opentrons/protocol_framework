@@ -6,6 +6,10 @@ import { i18n } from '../../../../assets/localization'
 import { renderWithProviders } from '../../../../__testing-utils__'
 import { selectors } from '../../../../labware-ingred/selectors'
 import { getRobotType } from '../../../../file-data/selectors'
+import {
+  getHoveredDropdownItem,
+  getSelectedDropdownItem,
+} from '../../../../ui/steps/selectors'
 import { getDeckSetupForActiveItem } from '../../../../top-selectors/labware-locations'
 import { getAllWellContentsForActiveItem } from '../../../../top-selectors/well-contents'
 import { OffDeckDetails } from '../OffDeckDetails'
@@ -13,6 +17,7 @@ import { HighlightOffdeckSlot } from '../HighlightOffdeckSlot'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type * as Components from '@opentrons/components'
 
+vi.mock('../../../../ui/steps/selectors')
 vi.mock('../HighlightOffdeckSlot')
 vi.mock('../../../../top-selectors/labware-locations')
 vi.mock('../../../../file-data/selectors')
@@ -59,6 +64,8 @@ describe('OffDeckDetails', () => {
     vi.mocked(HighlightOffdeckSlot).mockReturnValue(
       <div>Highlight Offdeck Slot</div>
     )
+    vi.mocked(getSelectedDropdownItem).mockReturnValue([])
+    vi.mocked(getHoveredDropdownItem).mockReturnValue({ id: null, text: null })
   })
 
   it('renders off-deck overview with 1 labware', () => {
