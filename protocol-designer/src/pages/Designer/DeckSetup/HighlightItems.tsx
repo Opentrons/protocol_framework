@@ -3,6 +3,8 @@ import { useSelector } from 'react-redux'
 import {
   STANDARD_FLEX_SLOTS,
   STANDARD_OT2_SLOTS,
+  THERMOCYCLER_MODULE_TYPE,
+  WASTE_CHUTE_CUTOUT,
   getAddressableAreaFromSlotId,
   getPositionFromSlotId,
   inferModuleOrientationFromXCoordinate,
@@ -39,6 +41,7 @@ const SLOTS = [
   'B4',
   'C4',
   'D4',
+  'cutoutD3',
 ]
 
 export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
@@ -114,6 +117,10 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
         }
 
         let labwareSlot = labwareOnDeck.slot
+        const hasTC = Object.values(modules).some(
+          mod => mod.type === THERMOCYCLER_MODULE_TYPE
+        )
+
         if (modules[labwareSlot]) {
           labwareSlot = modules[labwareSlot].slot
         } else if (labware[labwareSlot]) {
@@ -130,7 +137,9 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
                 selected => selected.id === labwareOnDeck.id
               )}
               isLast={true}
-              position={position}
+              position={
+                hasTC && labwareSlot === 'B1' ? [-20, 282, 0] : position
+              }
               labwareDef={labwareOnDeck.def}
               labelText={
                 hoveredItemLabware == null
@@ -256,7 +265,12 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
     if (hoveredDeckItem != null || selectedItemSlot != null) {
       const slot = hoveredDeckItem ?? selectedItemSlot?.id
       const addressableArea =
-        slot != null ? getAddressableAreaFromSlotId(slot, deckDef) : null
+        slot != null
+          ? getAddressableAreaFromSlotId(
+              slot === WASTE_CHUTE_CUTOUT ? 'D3' : slot,
+              deckDef
+            )
+          : null
 
       if (!addressableArea) {
         console.warn(
