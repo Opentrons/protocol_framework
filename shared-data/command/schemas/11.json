@@ -1634,17 +1634,9 @@
           "type": "string"
         },
         "startingTipWell": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
           "description": "Name of starting tip rack 'well'. This only applies to the first tip rack in the list provided in labwareIDs",
-          "title": "Startingtipwell"
+          "title": "Startingtipwell",
+          "type": "string"
         }
       },
       "required": ["pipetteId", "labwareIds"],
