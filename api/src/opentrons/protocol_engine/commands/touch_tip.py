@@ -9,7 +9,11 @@ from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.types import Point
 
-from ..errors import TouchTipDisabledError, LabwareIsTipRackError
+from ..errors import (
+    TouchTipDisabledError,
+    TouchTipIncompatibleArgumentsError,
+    LabwareIsTipRackError,
+)
 from ..types import DeckPoint
 from .command import (
     AbstractCommandImpl,
@@ -49,6 +53,13 @@ class TouchTipParams(PipetteIdMixin, WellLocationMixin):
         description=(
             "The proportion of the target well's radius the pipette tip will move towards."
         ),
+    )
+
+    mmFromEdge: float | SkipJsonSchema[None] = Field(
+        None,
+        description="Offset away from the the well edge, in millimeters."
+        "Incompatible when a radius is included as a non 1.0 value.",
+        json_schema_extra=_remove_default,
     )
 
     speed: float | SkipJsonSchema[None] = Field(
@@ -96,6 +107,11 @@ class TouchTipImplementation(
         labware_id = params.labwareId
         well_name = params.wellName
 
+        if params.radius != 1.0 and params.mmFromEdge is not None:
+            raise TouchTipIncompatibleArgumentsError(
+                "Cannot use mmFromEdge with a radius that is not 1.0"
+            )
+
         if self._state_view.labware.get_has_quirk(labware_id, "touchTipDisabled"):
             raise TouchTipDisabledError(
                 f"Touch tip not allowed on labware {labware_id}"
@@ -119,11 +135,13 @@ class TouchTipImplementation(
             pipette_id, params.speed
         )
 
+        mm_from_edge = params.mmFromEdge if params.mmFromEdge is not None else 0
         touch_waypoints = self._state_view.motion.get_touch_tip_waypoints(
             pipette_id=pipette_id,
             labware_id=labware_id,
             well_name=well_name,
             radius=params.radius,
+            mm_from_edge=mm_from_edge,
             center_point=Point(
                 center_result.public.position.x,
                 center_result.public.position.y,
