@@ -219,7 +219,7 @@ def _migrate_data_1_to_2(transaction: sqlalchemy.engine.Connection) -> None:
             _legacy_pickle.loads(row.completed_analysis)
         )
 
-        v2_completed_analysis_as_document = v1_completed_analysis.json(
+        v2_completed_analysis_as_document = v1_completed_analysis.model_dump_json(
             # by_alias and exclude_none should match how
             # FastAPI + Pydantic + our customizations serialize these objects
             # over the `GET /protocols/:id/analyses/:id` endpoint.

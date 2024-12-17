@@ -68,13 +68,13 @@ class BaseResponseBody(BaseModel):
     def model_dump_json(self, *args: Any, **kwargs: Any) -> str:
         """See notes in `.model_dump()`."""
         kwargs["exclude_none"] = True
-        return super().json(*args, **kwargs)
+        return super().model_dump_json(*args, **kwargs)
 
     @override
     def json(self, *args: Any, **kwargs: Any) -> str:
         """See notes in `.model_dump()`."""
         kwargs["exclude_none"] = True
-        return super().json(*args, **kwargs)
+        return super().model_dump_json(*args, **kwargs)
 
 
 class SimpleBody(BaseResponseBody, Generic[ResponseDataT]):
@@ -241,7 +241,7 @@ class PydanticResponse(JSONResponse, Generic[ResponseBodyT]):
 
     def render(self, content: ResponseBodyT) -> bytes:
         """Render the response body to JSON bytes."""
-        return content.json().encode(self.charset)
+        return content.model_dump_json().encode(self.charset)
 
 
 # TODO(mc, 2021-12-09): remove this model

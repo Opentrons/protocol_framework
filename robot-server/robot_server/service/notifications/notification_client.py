@@ -92,7 +92,7 @@ class NotificationClient:
             topic: The topic to publish the message on.
         """
         message = NotifyRefetchBody.model_construct()
-        payload = message.json()
+        payload = message.model_dump_json()
         self._client.publish(
             topic=topic,
             payload=payload,
@@ -110,7 +110,7 @@ class NotificationClient:
             topic: The topic to publish the message on.
         """
         message = NotifyUnsubscribeBody.model_construct()
-        payload = message.json()
+        payload = message.model_dump_json()
         self._client.publish(
             topic=topic,
             payload=payload,
