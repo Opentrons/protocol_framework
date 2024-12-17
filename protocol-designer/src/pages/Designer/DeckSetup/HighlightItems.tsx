@@ -1,4 +1,5 @@
 import { useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 
 import {
   STANDARD_FLEX_SLOTS,
@@ -46,6 +47,7 @@ const SLOTS = [
 
 export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
   const { robotType, deckDef } = props
+  const { t, i18n } = useTranslation('application')
   const tab = useSelector(getDesignerTab)
   const { labware, modules, additionalEquipmentOnDeck } = useSelector(
     getDeckSetupForActiveItem
@@ -264,29 +266,47 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
 
     if (hoveredDeckItem != null || selectedItemSlot != null) {
       const slot = hoveredDeckItem ?? selectedItemSlot?.id
-      const addressableArea =
-        slot != null
-          ? getAddressableAreaFromSlotId(
-              slot === WASTE_CHUTE_CUTOUT ? 'D3' : slot,
-              deckDef
-            )
-          : null
 
-      if (!addressableArea) {
-        console.warn(
-          `addressableArea was null as ${addressableArea}, expected to find a matching entity`
+      if (slot === WASTE_CHUTE_CUTOUT) {
+        items.push(
+          <FixtureRender
+            key={`${slot}_wasteChute_selected`}
+            fixture={'wasteChute' as Fixture}
+            cutout={WASTE_CHUTE_CUTOUT as CutoutId}
+            robotType={robotType}
+            deckDef={deckDef}
+            showHighlight={true}
+            tagInfo={[
+              {
+                text: i18n.format(t('location'), 'capitalize'),
+                isSelected: true,
+                isLast: true,
+                isZoomed: false,
+              },
+            ]}
+          />
         )
-        return []
-      }
+      } else {
+        const addressableArea =
+          slot != null && slot !== WASTE_CHUTE_CUTOUT
+            ? getAddressableAreaFromSlotId(slot, deckDef)
+            : null
 
-      items.push(
-        <DeckItemHighlight
-          tab={tab}
-          slotBoundingBox={addressableArea.boundingBox}
-          slotPosition={getPositionFromSlotId(addressableArea.id, deckDef)}
-          itemId={addressableArea.id}
-        />
-      )
+        if (!addressableArea) {
+          console.warn(
+            `addressableArea was null as ${addressableArea}, expected to find a matching entity`
+          )
+          return []
+        }
+        items.push(
+          <DeckItemHighlight
+            tab={tab}
+            slotBoundingBox={addressableArea.boundingBox}
+            slotPosition={getPositionFromSlotId(addressableArea.id, deckDef)}
+            itemId={addressableArea.id}
+          />
+        )
+      }
     }
 
     return items

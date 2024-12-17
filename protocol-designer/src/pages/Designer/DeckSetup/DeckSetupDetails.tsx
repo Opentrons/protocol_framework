@@ -434,7 +434,9 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
         )
       })}
 
+      {/* highlight items from Protocol steps */}
       <HighlightItems robotType={robotType} deckDef={deckDef} />
+
       {/* selected hardware + labware */}
       <SelectedHoveredItems
         deckDef={deckDef}
