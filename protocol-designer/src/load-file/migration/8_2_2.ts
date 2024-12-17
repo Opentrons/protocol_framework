@@ -21,7 +21,9 @@ export const migrateFile = (
         ...acc,
         [id]: {
           ...form,
-          heaterShakerSetTimer: JSON.parse(heaterShakerSetTimer),
+          heaterShakerSetTimer: JSON.parse(
+            heaterShakerSetTimer as string | null
+          ),
         },
       }
     }
