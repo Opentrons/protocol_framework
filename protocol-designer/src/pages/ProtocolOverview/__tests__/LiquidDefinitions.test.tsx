@@ -8,6 +8,8 @@ import { LiquidDefinitions } from '../LiquidDefinitions'
 import type { ComponentProps } from 'react'
 import type { InfoScreen } from '@opentrons/components'
 
+vi.mock('../../../feature-flags/selectors')
+
 vi.mock('@opentrons/components', async importOriginal => {
   const actual = await importOriginal<typeof InfoScreen>()
   return {
