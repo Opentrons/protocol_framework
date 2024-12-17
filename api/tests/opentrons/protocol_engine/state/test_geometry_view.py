@@ -22,13 +22,14 @@ from opentrons_shared_data.deck import load as load_deck
 from opentrons_shared_data.labware.types import LabwareUri
 from opentrons_shared_data.pipette import pipette_definition
 from opentrons.calibration_storage.helpers import uri_from_details
-from opentrons.protocols.models import LabwareDefinition, WellDefinition
+from opentrons.protocols.models import LabwareDefinition
 from opentrons.types import Point, DeckSlotName, MountType, StagingSlotName
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.labware.labware_definition import (
     Dimensions as LabwareDimensions,
     Parameters as LabwareDefinitionParameters,
     CornerOffsetFromSlot,
+    ConicalFrustum,
 )
 
 from opentrons.protocol_engine import errors
@@ -3280,19 +3281,23 @@ def test_circular_frustum_math_helpers(
         nonlocal total_frustum_height, bottom_radius
         top_radius = frustum["radius"][index]
         target_height = frustum["height"][index]
-
+        segment = ConicalFrustum(
+            shape="conical",
+            bottomDiameter=bottom_radius * 2,
+            topDiameter=top_radius * 2,
+            topHeight=total_frustum_height,
+            bottomHeight=0.0,
+            xCount=1,
+            yCount=1,
+        )
         found_volume = _volume_from_height_circular(
             target_height=target_height,
-            total_frustum_height=total_frustum_height,
-            top_radius=top_radius,
-            bottom_radius=bottom_radius,
+            segment=segment,
         )
 
         found_height = _height_from_volume_circular(
-            volume=found_volume,
-            total_frustum_height=total_frustum_height,
-            top_radius=top_radius,
-            bottom_radius=bottom_radius,
+            target_volume=found_volume,
+            segment=segment,
         )
 
         assert isclose(found_height, frustum["height"][index])
@@ -3386,6 +3391,8 @@ def test_get_well_height_at_volume(
     expected_height_from_top_mm: float,
     mock_labware_view: LabwareView,
 ) -> None:
+    """Test getting the well height at a given volume."""
+
     def _get_labware_def() -> LabwareDefinition:
         def_dir = str(get_shared_data_root()) + f"/labware/definitions/3/{labware_id}"
         version_str = max([str(version) for version in listdir(def_dir)])
@@ -3396,7 +3403,9 @@ def test_get_well_height_at_volume(
         return _labware_def
 
     labware_def = _get_labware_def()
+    assert labware_def.innerLabwareGeometry is not None
     well_geometry = labware_def.innerLabwareGeometry.get(well_name)
+    assert well_geometry is not None
     well_definition = [
         well
         for well in labware_def.wells.values()
@@ -3446,6 +3455,8 @@ def test_get_well_volume_at_height(
     input_height_from_top_mm: float,
     mock_labware_view: LabwareView,
 ) -> None:
+    """Test getting the volume at a given height."""
+
     def _get_labware_def() -> LabwareDefinition:
         def_dir = str(get_shared_data_root()) + f"/labware/definitions/3/{labware_id}"
         version_str = max([str(version) for version in listdir(def_dir)])
@@ -3456,7 +3467,9 @@ def test_get_well_volume_at_height(
         return _labware_def
 
     labware_def = _get_labware_def()
+    assert labware_def.innerLabwareGeometry is not None
     well_geometry = labware_def.innerLabwareGeometry.get(well_name)
+    assert well_geometry is not None
     well_definition = [
         well
         for well in labware_def.wells.values()
