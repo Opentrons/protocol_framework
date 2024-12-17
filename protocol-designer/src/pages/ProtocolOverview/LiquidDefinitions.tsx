@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 import {
   ALIGN_CENTER,
   DIRECTION_COLUMN,
@@ -12,6 +13,7 @@ import {
   Tag,
 } from '@opentrons/components'
 import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { getEnableLiquidClasses } from '../../feature-flags/selectors'
 
 import type { AllIngredGroupFields } from '../../labware-ingred/types'
 
@@ -23,6 +25,7 @@ export function LiquidDefinitions({
   allIngredientGroupFields,
 }: LiquidDefinitionsProps): JSX.Element {
   const { t } = useTranslation('protocol_overview')
+  const enableLiquidClasses = useSelector(getEnableLiquidClasses)
 
   return (
     <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
@@ -60,7 +63,9 @@ export function LiquidDefinitions({
                     flexDirection={DIRECTION_COLUMN}
                     gridGap={SPACING.spacing4}
                   >
-                    {liquid.description || liquid.liquidClass == null ? (
+                    {liquid.description ||
+                    liquid.liquidClass == null ||
+                    !enableLiquidClasses ? (
                       <StyledText
                         desktopStyle="bodyDefaultRegular"
                         css={LINE_CLAMP_TEXT_STYLE(10)}
@@ -70,7 +75,7 @@ export function LiquidDefinitions({
                           : t('na')}
                       </StyledText>
                     ) : null}
-                    {liquid.liquidClass != null ? (
+                    {liquid.liquidClass && enableLiquidClasses ? (
                       <Tag
                         text={liquid.liquidClass}
                         type="default"
