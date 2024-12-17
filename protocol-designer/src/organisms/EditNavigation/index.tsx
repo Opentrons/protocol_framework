@@ -20,11 +20,11 @@ import { getFileMetadata } from '../../file-data/selectors'
 import { selectTerminalItem } from '../../ui/steps/actions/actions'
 import { LINE_CLAMP_TEXT_STYLE, NAV_BAR_HEIGHT_REM } from '../../atoms'
 import { useKitchen } from '../Kitchen/hooks'
-import { LiquidButton } from './LiquidButton'
+import { LiquidButton } from '../../molecules/LiquidButton'
 
 import type { StyleProps, TabProps } from '@opentrons/components'
 
-interface ProtocolNavBarProps {
+interface EditNavigationProps {
   hasZoomInSlot?: boolean
   tabs?: TabProps[]
   hasTrashEntity?: boolean
@@ -32,13 +32,13 @@ interface ProtocolNavBarProps {
   liquidPage?: boolean
 }
 
-export function ProtocolNavBar({
+export function EditNavigation({
   hasZoomInSlot,
   tabs = [],
   hasTrashEntity,
   showLiquidOverflowMenu,
   liquidPage = false,
-}: ProtocolNavBarProps): JSX.Element {
+}: EditNavigationProps): JSX.Element {
   const { t } = useTranslation('starting_deck_state')
   const metadata = useSelector(getFileMetadata)
   const { makeSnackbar } = useKitchen()

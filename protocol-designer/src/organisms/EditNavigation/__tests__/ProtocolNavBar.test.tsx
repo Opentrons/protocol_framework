@@ -4,9 +4,9 @@ import { describe, it, beforeEach, vi } from 'vitest'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { i18n } from '../../../assets/localization'
 import { getFileMetadata } from '../../../file-data/selectors'
-import { LiquidButton } from '../LiquidButton'
+import { LiquidButton } from '../../../molecules/LiquidButton'
 
-import { ProtocolNavBar } from '..'
+import { EditNavigation } from '..'
 
 import type { ComponentProps } from 'react'
 import type { NavigateFunction } from 'react-router-dom'
@@ -24,14 +24,14 @@ vi.mock('react-router-dom', async importOriginal => {
   }
 })
 
-const render = (props: ComponentProps<typeof ProtocolNavBar>) => {
-  return renderWithProviders(<ProtocolNavBar {...props} />, {
+const render = (props: ComponentProps<typeof EditNavigation>) => {
+  return renderWithProviders(<EditNavigation {...props} />, {
     i18nInstance: i18n,
   })
 }
 
-describe('ProtocolNavBar', () => {
-  let props: ComponentProps<typeof ProtocolNavBar>
+describe('EditNavigation', () => {
+  let props: ComponentProps<typeof EditNavigation>
   beforeEach(() => {
     props = {
       hasZoomInSlot: false,

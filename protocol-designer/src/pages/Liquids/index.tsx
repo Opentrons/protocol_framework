@@ -9,7 +9,7 @@ import {
 import {
   AssignLiquidsModal,
   DefineLiquidsModal,
-  ProtocolNavBar,
+  EditNavigation,
 } from '../../organisms'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import { LiquidsOverflowMenu } from '../Designer/LiquidsOverflowMenu'
@@ -59,7 +59,7 @@ export function Liquids(): JSX.Element {
       ) : null}
 
       <Flex flexDirection={DIRECTION_COLUMN}>
-        <ProtocolNavBar
+        <EditNavigation
           liquidPage
           showLiquidOverflowMenu={showLiquidOverflowMenu}
         />
