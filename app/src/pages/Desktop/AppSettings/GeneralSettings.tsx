@@ -41,6 +41,7 @@ import {
 import {
   useTrackEvent,
   ANALYTICS_APP_UPDATE_NOTIFICATIONS_TOGGLED,
+  ANALYTICS_LANGUAGE_UPDATED_DESKTOP_APP_SETTINGS,
 } from '/app/redux/analytics'
 import { getAppLanguage, updateConfigValue } from '/app/redux/config'
 import { UpdateAppModal } from '/app/organisms/Desktop/UpdateAppModal'
@@ -71,6 +72,12 @@ export function GeneralSettings(): JSX.Element {
 
   const handleDropdownClick = (value: string): void => {
     dispatch(updateConfigValue('language.appLanguage', value))
+    trackEvent({
+      name: ANALYTICS_LANGUAGE_UPDATED_DESKTOP_APP_SETTINGS,
+      properties: {
+        language: value,
+      },
+    })
   }
 
   const [showUpdateBanner, setShowUpdateBanner] = useState<boolean>(
