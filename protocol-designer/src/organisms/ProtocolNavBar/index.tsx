@@ -18,13 +18,11 @@ import {
 } from '@opentrons/components'
 import { getFileMetadata } from '../../file-data/selectors'
 import { selectTerminalItem } from '../../ui/steps/actions/actions'
-import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { LINE_CLAMP_TEXT_STYLE, NAV_BAR_HEIGHT_REM } from '../../atoms'
 import { useKitchen } from '../Kitchen/hooks'
 import { LiquidButton } from './LiquidButton'
 
 import type { StyleProps, TabProps } from '@opentrons/components'
-
-export const PROTOCOL_NAV_BAR_HEIGHT_REM = 4
 
 interface ProtocolNavBarProps {
   hasZoomInSlot?: boolean
@@ -100,7 +98,7 @@ export function ProtocolNavBar({
 const NavContainer = styled(Flex)<{ showShadow: boolean }>`
   z-index: ${props => (props.showShadow === true ? 11 : 0)};
   padding: ${SPACING.spacing12};
-  height: ${PROTOCOL_NAV_BAR_HEIGHT_REM}rem;
+  height: ${NAV_BAR_HEIGHT_REM}rem;
   width: 100%;
   justify-content: ${JUSTIFY_SPACE_BETWEEN};
   align-items: ${ALIGN_CENTER};

@@ -50,3 +50,5 @@ export const COLUMN_STYLE = css`
   min-width: calc((${MIN_OVERVIEW_WIDTH} - ${COLUMN_GRID_GAP}) * 0.5);
   flex: 1;
 `
+
+export const NAV_BAR_HEIGHT_REM = 4
