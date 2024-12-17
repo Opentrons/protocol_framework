@@ -13,7 +13,7 @@ class _DummyModel(BaseModel):
 
 def test_round_trip() -> None:
     """Test Python->JSON->Python round trips."""
-    original = _DummyModel.construct(field="hello", aliasedField="world")
+    original = _DummyModel.model_construct(field="hello", aliasedField="world")
     after_round_trip = subject.json_to_pydantic(
         _DummyModel, subject.pydantic_to_json(original)
     )
@@ -28,7 +28,7 @@ def test_round_trip() -> None:
 
 def test_field_aliases() -> None:
     """The JSON should contain field aliases, not the Python attribute names."""
-    original = _DummyModel.construct(field="hello", aliasedField="world")
+    original = _DummyModel.model_construct(field="hello", aliasedField="world")
     json = subject.pydantic_to_json(original)
     json_list = subject.pydantic_list_to_json([original])
     assert '"aliasedFieldAlias"' in json

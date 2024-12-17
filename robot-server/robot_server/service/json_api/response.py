@@ -124,8 +124,8 @@ class SimpleMultiBody(BaseResponseBody, Generic[ResponseDataT]):
     # non-validating classmethod is taken from the type of this member, and there we really
     # want the arguments to be Sequence so they can accept narrower subtypes. For instance,
     # if you define a function as returning SimpleMultiBody[Union[A, B]], you should really
-    # be able to do return SimpleMultiBody.construct([A(), A(), A()]) or even
-    # SimpleMultiBody[Union[A, B]].construct([A(), A(), A()]). However, because construct's
+    # be able to do return SimpleMultiBody.model_construct([A(), A(), A()]) or even
+    # SimpleMultiBody[Union[A, B]].model_construct([A(), A(), A()]). However, because construct's
     # params are defined based on the dataclass fields, the only way to get the arguments
     # to be covariant is to make data the covariant Sequence protocol.
     meta: MultiBodyMeta = Field(

@@ -953,7 +953,7 @@ async def get_protocol_data_files(
     data_files = await protocol_store.get_referenced_data_files(protocolId)
 
     return await PydanticResponse.create(
-        content=SimpleMultiBody.construct(
+        content=SimpleMultiBody.model_construct(
             data=data_files, meta=MultiBodyMeta(cursor=0, totalLength=len(data_files))
         )
     )

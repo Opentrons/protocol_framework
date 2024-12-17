@@ -337,7 +337,7 @@ async def get_run_commands(
         totalLength=command_slice.total_length,
     )
 
-    links = CommandCollectionLinks.construct(
+    links = CommandCollectionLinks.model_construct(
         current=_make_command_link(runId, current_command),
         currentlyRecoveringFrom=_make_command_link(runId, recovery_target_command),
     )
@@ -401,7 +401,7 @@ async def get_run_commands_as_pre_serialized_list(
             status.HTTP_503_SERVICE_UNAVAILABLE
         ) from e
     return await PydanticResponse.create(
-        content=SimpleMultiBody.construct(
+        content=SimpleMultiBody.model_construct(
             data=commands, meta=MultiBodyMeta(cursor=0, totalLength=len(commands))
         )
     )
@@ -451,7 +451,7 @@ def _make_command_link(
     run_id: str, command_pointer: Optional[CommandPointer]
 ) -> Optional[CommandLink]:
     return (
-        CommandLink.construct(
+        CommandLink.model_construct(
             href=f"/runs/{run_id}/commands/{command_pointer.command_id}",
             meta=CommandLinkMeta(
                 runId=run_id,

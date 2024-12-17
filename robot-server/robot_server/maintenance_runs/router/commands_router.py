@@ -249,7 +249,7 @@ async def get_run_commands(
         totalLength=command_slice.total_length,
     )
 
-    links = CommandCollectionLinks.construct(
+    links = CommandCollectionLinks.model_construct(
         current=_make_command_link(runId, current_command),
         currentlyRecoveringFrom=_make_command_link(runId, recovery_target_command),
     )
@@ -306,7 +306,7 @@ def _make_command_link(
     run_id: str, command_pointer: Optional[CommandPointer]
 ) -> Optional[CommandLink]:
     return (
-        CommandLink.construct(
+        CommandLink.model_construct(
             href=f"/maintenance_runs/{run_id}/commands/{command_pointer.command_id}",
             meta=CommandLinkMeta(
                 runId=run_id,

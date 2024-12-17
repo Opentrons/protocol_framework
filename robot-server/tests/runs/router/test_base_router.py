@@ -777,7 +777,7 @@ async def test_get_run_commands_errors_raises_no_run(
 
 @pytest.mark.parametrize(
     "error_list, expected_cursor_result",
-    [([], 0), ([pe_errors.ErrorOccurrence.construct(id="error-id")], 1)],
+    [([], 0), ([pe_errors.ErrorOccurrence.model_construct(id="error-id")], 1)],
 )
 async def test_get_run_commands_errors_defualt_cursor(
     decoy: Decoy,

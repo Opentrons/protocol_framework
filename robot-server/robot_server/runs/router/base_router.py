@@ -509,7 +509,7 @@ async def get_run_commands_error(
     )
 
     return await PydanticResponse.create(
-        content=SimpleMultiBody.construct(
+        content=SimpleMultiBody.model_construct(
             data=command_error_slice.commands_errors,
             meta=meta,
         ),
@@ -554,7 +554,7 @@ async def get_current_state(  # noqa: C901
 
     active_nozzle_maps = run_data_manager.get_nozzle_maps(run_id=runId)
     nozzle_layouts = {
-        pipetteId: ActiveNozzleLayout.construct(
+        pipetteId: ActiveNozzleLayout.model_construct(
             startingNozzle=nozzle_map.starting_nozzle,
             activeNozzles=nozzle_map.active_nozzles,
             config=NozzleLayoutConfig(nozzle_map.configuration.value.lower()),
@@ -563,7 +563,7 @@ async def get_current_state(  # noqa: C901
     }
 
     tip_states = {
-        pipette_id: TipState.construct(hasTip=has_tip)
+        pipette_id: TipState.model_construct(hasTip=has_tip)
         for pipette_id, has_tip in run_data_manager.get_tip_attached(
             run_id=runId
         ).items()
@@ -625,8 +625,8 @@ async def get_current_state(  # noqa: C901
                     break
 
     last_completed_command = run_data_manager.get_last_completed_command(run_id=runId)
-    links = CurrentStateLinks.construct(
-        lastCompleted=CommandLinkNoMeta.construct(
+    links = CurrentStateLinks.model_construct(
+        lastCompleted=CommandLinkNoMeta.model_construct(
             id=last_completed_command.command_id,
             href=f"/runs/{runId}/commands/{last_completed_command.command_id}",
         )
@@ -635,8 +635,8 @@ async def get_current_state(  # noqa: C901
     )
 
     return await PydanticResponse.create(
-        content=Body.construct(
-            data=RunCurrentState.construct(
+        content=Body.model_construct(
+            data=RunCurrentState.model_construct(
                 estopEngaged=estop_engaged,
                 activeNozzleLayouts=nozzle_layouts,
                 tipStates=tip_states,
