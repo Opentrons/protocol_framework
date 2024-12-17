@@ -1,7 +1,7 @@
+"""Interface with opentrons modules!"""
 from serial import Serial  # type: ignore[import-untyped]
 import asyncio
 import subprocess
-import time
 from typing import Any
 
 # Generic
@@ -25,15 +25,17 @@ tc_gcode_shortcuts = {
 
 # HS Commands
 hs_gcode_shortcuts = {
-    "srpm": "M3 S{rpm}", # Set RPM
-    "grpm": "M123", # Get RPM
-    "home": "G28", # Home
-    "deactivate": "M106", # Deactivate
+    "srpm": "M3 S{rpm}",  # Set RPM
+    "grpm": "M123",  # Get RPM
+    "home": "G28",  # Home
+    "deactivate": "M106",  # Deactivate
 }
 
 gcode_shortcuts = tc_gcode_shortcuts | hs_gcode_shortcuts
 
+
 async def message_read(dev: Serial) -> Any:
+    """Read message."""
     response = dev.readline().decode()
     while not response:
         await asyncio.sleep(1)
@@ -42,6 +44,7 @@ async def message_read(dev: Serial) -> Any:
 
 
 async def message_return(dev: Serial) -> Any:
+    """Wait until message becomes available."""
     try:
         response = await asyncio.wait_for(message_read(dev), timeout=30)
         return response
@@ -50,8 +53,10 @@ async def message_return(dev: Serial) -> Any:
         return ""
 
 
-async def handle_module_gcode_shortcut(dev: Serial, command: str, in_commands:bool, output: str = "") -> None:
-        # handle debugging commands that require followup
+async def handle_module_gcode_shortcut(
+    dev: Serial, command: str, in_commands: bool, output: str = ""
+) -> None:
+    """Handle debugging commands that require followup."""
     if in_commands:
         if command == _MOVE_SEAL:
             distance = input("enter distance in steps => ")
@@ -74,24 +79,25 @@ async def handle_module_gcode_shortcut(dev: Serial, command: str, in_commands:bo
         mr = await message_return(dev)
         print(mr)
     except TypeError:
-        print('Invalid input')
+        print("Invalid input")
         return
-    
+
     if output:
         try:
-            with open(output, 'w') as result_file:
-                if 'OK' in mr:
-                    status = command + ': SUCCESS'
+            with open(output, "w") as result_file:
+                if "OK" in mr:
+                    status = command + ": SUCCESS"
                 else:
-                    status = command + ': FAILURE'
+                    status = command + ": FAILURE"
                 result_file.write(status)
-                result_file.write(f'    {mr}')
+                result_file.write(f"    {mr}")
             result_file.close()
-        except:
-            print(f'cannot open file: {output}')
-    
+        except FileNotFoundError:
+            print(f"cannot open file: {output}")
 
-async def comms_loop(dev: Serial, commands: list, output:str ="") -> bool:
+
+async def comms_loop(dev: Serial, commands: list, output: str = "") -> bool:
+    """Loop for commands."""
     _exit = False
     try:
         command = commands.pop(0)
@@ -110,7 +116,8 @@ async def comms_loop(dev: Serial, commands: list, output:str ="") -> bool:
     return _exit
 
 
-async def _main(module, commands:list = [], output:str = "") -> bool:
+async def _main(module: str, commands: list = [], output: str = "") -> bool:
+    """Main process."""
     module_name = (
         subprocess.check_output(["find", "/dev/", "-name", f"*{module}*"])
         .decode()
@@ -118,14 +125,14 @@ async def _main(module, commands:list = [], output:str = "") -> bool:
     )
     if not module_name:
         print(f"{module} not found. Exiting.")
-        return(False)
+        return False
     dev = Serial(f"{module_name}", 9600, timeout=2)
     _exit = False
     while not _exit:
         _exit = await comms_loop(dev, commands, output)
     dev.close()
-    return(True)
+    return True
 
 
 if __name__ == "__main__":
-    asyncio.run(_main())
+    asyncio.run(_main("heatershaker"))
