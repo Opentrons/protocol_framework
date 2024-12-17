@@ -2,9 +2,13 @@
 
 import '../support/commands.ts'; // Importing the custom commands file
 
+
+/*
+These constants will help us run through both test suites in one go
+*/
 const Flex_Home = 'Opentrons Flex';
 const OT2_Home = 'Opentrons OT-2';
-
+const pipette = '1-Channel'
 
 describe('Happy Path Transfer Tests', () => {
   it('It should verify the working function of every permutation of transfer checkboxes', () => {
@@ -13,7 +17,7 @@ describe('Happy Path Transfer Tests', () => {
     cy.verifyHomePage(); // This calls the custom command from commands.ts
     cy.clickCreateNew()
     cy.robotSelection(Flex_Home)
-    const pipette = '1-Channel'
+    
     function putPipette(pipette) {
       cy.contains('label', pipette).should('exist').and('be.visible').click()
     }
@@ -26,6 +30,71 @@ describe('Happy Path Transfer Tests', () => {
     cy.contains('button', 'Go back').click()
     cy.robotSelection(Flex_Home)
     putPipette(pipette)
+    // Make a function for this later that selects a pipette and its tips
+    let tip_volume = '50 µL'
+    let tip_rack = 'Filter Tip Rack 50 µL'
+    // I'm leaving them as "let" because they'll be lists some day
+    cy.contains(tip_volume).click()
+    cy.contains(tip_rack).click()
+    cy.contains('Confirm').click()
+    cy.contains('Left Mount').should('be.visible')
+    if (tip_rack === 'Filter Tip Rack 50 µL') {
+      cy.contains('Flex 1-Channel 50 μL').should('be.visible')
+      cy.contains(tip_rack).should('be.visible')
+      //  block of code to be executed if the condition is true
+    }
+    cy.contains('Confirm').click()
+    // Gripper setup on step 3 of the onboarding flow 
+
+    let wantGripper = 'Yes'
+    function step3Gripper(wantGripper) {
+      cy.contains('Add a gripper').should('be.visible')
+      cy.contains('Do you want to move labware automatically with the gripper?').should('be.visible')
+      cy.contains('Yes').should('be.visible')
+      cy.contains('No').should('be.visible')
+      cy.contains('Yes').click()
+      cy.contains('button', 'Confirm').click()
+      return console.log('step 3 onboarding step looks good!')
+    }
+    step3Gripper(wantGripper)
+    // Maybe a module selection function? 
+    function step4modules() {
+
+    
+      cy.contains('Thermocycler Module GEN2').click()
+      cy.get('img[alt="thermocyclerModuleType"]').should('be.visible')
+      cy.contains('Heater-Shaker Module GEN1').click()
+      cy.get('img[alt="heaterShakerModuleType"]').should('be.visible')
+      cy.contains('Magnetic Block GEN1').click()
+      cy.get('img[alt="magneticBlockType"]').should('be.visible')
+      cy.contains('Temperature Module GEN2').click()
+      cy.get('img[alt="temperatureModuleType"]').should('be.visible')
+      cy.contains('Confirm').click()
+    }
+    step4modules()
+    // step 5 
+
+
+    /*
+    cy.get('img src="https://sandbox.designer.opentrons.com/chore_release-pd-8.2.2/assets/MagneticBlock_GEN1_HERO-BOB_hSjt.png"')
+    .should('be.visible')
+    cy.contains('Temperature Module GEN2').click()
+    */
+
+    
+    
+   
+    
+
+
+
+    // 
+    
+
+
+
+
+
     
 
     

@@ -113,8 +113,6 @@ Cypress.Commands.add('verifyHomePage', () => {
 })
 
 Cypress.Commands.add('clickCreateNew', () => {
-  // 8.2.2 adjustments 
-  cy.contains('button', 'Confirm').click()
   // cy.get('[data-testid="SettingsIconButton"]').click();
   cy.getByTestId(locators.settingsDataTestid).click()
   cy.get('[data-testid="analyticsToggle"] svg')
