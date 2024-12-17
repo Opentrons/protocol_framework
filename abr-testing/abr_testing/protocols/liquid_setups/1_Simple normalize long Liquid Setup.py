@@ -27,7 +27,7 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     reservoir = protocol.load_labware("nest_12_reservoir_15ml", "D2", "Reservoir")
     # Transfer Liquid
     vol = 6175 / 8
-    columns = ["A1", "A2", "A3", "A4", "A5", "A6"]
+    columns = ["A1", "A2", "A3", "A4", "A5"]
     for i in columns:
         p1000.transfer(
             vol,
@@ -37,3 +37,11 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
             blowout_location="source well",
             trash=False,
         )
+    p1000.transfer(
+        8500 / 8,
+        source=source_reservoir["A1"].bottom(z=2),
+        dest=reservoir["A6"],
+        blowout=True,
+        blowout_location="source well",
+        trash=False,
+    )
