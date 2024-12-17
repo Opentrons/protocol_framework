@@ -39,6 +39,7 @@ declare global {
 // Only Header, Home, and Settings page actions are here
 // due to their simplicity
 // Create and Import page actions are in their respective files
+// Fixed clickCreateNew and above commands for 8.2.2
 
 export const content = {
   siteTitle: 'Opentrons Protocol Designer',
