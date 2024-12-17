@@ -22,11 +22,12 @@ export interface WellContents {
 export type ContentsByWell = Record<string, WellContents> | null
 export type WellContentsByLabware = Record<string, ContentsByWell>
 // ==== INGREDIENTS ====
+// TODO(ND: 12/17/2024): add migration for liquids in >8.3.0
 export type OrderedLiquids = Array<{
   ingredientId: string
-  name: string | null | undefined
-  displayColor: string | null | undefined
-  liquidClass: string | null | undefined
+  name?: string | null
+  displayColor?: string | null
+  liquidClass?: string | null
 }>
 // TODO: Ian 2018-10-15 audit & rename these confusing types
 export interface LiquidGroup {
