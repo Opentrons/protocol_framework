@@ -162,6 +162,7 @@ describe('MaterialsListModal', () => {
           ingredientId: mockId,
           name: 'mockName',
           displayColor: 'mockDisplayColor',
+          liquidClass: null,
         },
       ],
     }

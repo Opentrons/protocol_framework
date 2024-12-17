@@ -19,23 +19,21 @@ export interface WellContents {
   selected?: boolean
   maxVolume?: number
 }
-export type ContentsByWell = {
-  [wellName: string]: WellContents
-} | null
-export interface WellContentsByLabware {
-  [labwareId: string]: ContentsByWell
-}
+export type ContentsByWell = Record<string, WellContents> | null
+export type WellContentsByLabware = Record<string, ContentsByWell>
 // ==== INGREDIENTS ====
 export type OrderedLiquids = Array<{
   ingredientId: string
   name: string | null | undefined
   displayColor: string | null | undefined
+  liquidClass: string | null | undefined
 }>
 // TODO: Ian 2018-10-15 audit & rename these confusing types
 export interface LiquidGroup {
   name: string | null | undefined
   description: string | null | undefined
   displayColor: string
+  liquidClass: string | null
   serialize: boolean
 }
 export type IngredInputs = LiquidGroup & {

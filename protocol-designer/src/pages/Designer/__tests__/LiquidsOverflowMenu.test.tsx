@@ -42,6 +42,7 @@ describe('SlotOverflowMenu', () => {
         displayColor: 'mockColor',
         name: 'mockname',
         ingredientId: '0',
+        liquidClass: null,
       },
     ])
   })

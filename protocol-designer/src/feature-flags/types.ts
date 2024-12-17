@@ -36,6 +36,7 @@ export type FlagTypes =
   | 'OT_PD_ENABLE_RETURN_TIP'
   | 'OT_PD_ENABLE_HOT_KEYS_DISPLAY'
   | 'OT_PD_ENABLE_REACT_SCAN'
+  | 'OT_PD_ENABLE_LIQUID_CLASSES'
 // flags that are not in this list only show in prerelease mode
 export const userFacingFlags: FlagTypes[] = [
   'OT_PD_DISABLE_MODULE_RESTRICTIONS',
@@ -49,5 +50,6 @@ export const allFlags: FlagTypes[] = [
   'OT_PD_ENABLE_COMMENT',
   'OT_PD_ENABLE_RETURN_TIP',
   'OT_PD_ENABLE_REACT_SCAN',
+  'OT_PD_ENABLE_LIQUID_CLASSES',
 ]
 export type Flags = Partial<Record<FlagTypes, boolean | null | undefined>>

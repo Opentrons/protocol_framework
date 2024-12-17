@@ -9,6 +9,7 @@ import {
   ListItemDescriptor,
   SPACING,
   StyledText,
+  Tag,
 } from '@opentrons/components'
 import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
 
@@ -55,14 +56,28 @@ export function LiquidDefinitions({
                   </Flex>
                 }
                 content={
-                  <StyledText
-                    desktopStyle="bodyDefaultRegular"
-                    css={LINE_CLAMP_TEXT_STYLE(10)}
+                  <Flex
+                    flexDirection={DIRECTION_COLUMN}
+                    gridGap={SPACING.spacing4}
                   >
-                    {liquid.description != null && liquid.description !== ''
-                      ? liquid.description
-                      : t('na')}
-                  </StyledText>
+                    {liquid.description || liquid.liquidClass == null ? (
+                      <StyledText
+                        desktopStyle="bodyDefaultRegular"
+                        css={LINE_CLAMP_TEXT_STYLE(10)}
+                      >
+                        {liquid.description != null && liquid.description !== ''
+                          ? liquid.description
+                          : t('na')}
+                      </StyledText>
+                    ) : null}
+                    {liquid.liquidClass != null ? (
+                      <Tag
+                        text={liquid.liquidClass}
+                        type="default"
+                        shrinkToContent
+                      />
+                    ) : null}
+                  </Flex>
                 }
               />
             </ListItem>
