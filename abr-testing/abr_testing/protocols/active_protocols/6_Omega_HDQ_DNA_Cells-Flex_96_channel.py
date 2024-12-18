@@ -237,7 +237,6 @@ def run(protocol: ProtocolContext) -> None:
         if not dry_run:
             h_s.set_and_wait_for_temperature(55)
         protocol.delay(
-
             minutes=10 if not dry_run else 0.25,
             msg="Please allow another 10 minutes of 55C incubation to complete lysis.",
         )
@@ -433,4 +432,3 @@ def run(protocol: ProtocolContext) -> None:
     if deactivate_modules:
         helpers.deactivate_modules(protocol)
     helpers.find_liquid_height_of_all_wells(protocol, pip, [liquid_waste["A1"]])
-
