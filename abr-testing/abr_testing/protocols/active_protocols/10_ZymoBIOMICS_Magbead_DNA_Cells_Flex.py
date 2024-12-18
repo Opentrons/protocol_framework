@@ -460,7 +460,6 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
                     src = source[whichwash]
                     protocol.comment(f"new wash source {whichwash}")
                     wash_volume_tracker = 0.0
-
         m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
         helpers.set_hs_speed(protocol, h_s, heater_shaker_speed * 0.9, wash_time, True)
 

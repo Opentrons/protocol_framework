@@ -54,6 +54,8 @@ def clean_sheet(sheet_name: str, credentials: str) -> Any:
         print("deleted rows")
     except Exception:
         print("could not delete rows")
+        return
+
     clean_sheet(sheet_name, credentials)
 
 

@@ -36,6 +36,7 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     wash2 = 9800 / 8
     wash2_list = [wash2] * 12
     final_elution = 7500 / 8
+
     # Fill up Plates
     # Res1
     p1000.transfer(

@@ -238,7 +238,7 @@ export function getAddressableAreaNamesFromLoadedModule(
     return [...acc, ...providedAddressableAreas]
   }, [])
 }
-
+// note: we've decided not to translate these strings
 export function getFixtureDisplayName(
   cutoutFixtureId: CutoutFixtureId | null,
   usbPortNumber?: number

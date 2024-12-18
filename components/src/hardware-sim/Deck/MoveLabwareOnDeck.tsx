@@ -191,7 +191,10 @@ export function MoveLabwareOnDeck(
       loadedLabware,
     }) ?? offDeckPosition
 
+  const shouldReset = usePositionChangeReset(initialPosition, finalPosition)
+
   const springProps = useSpring({
+    reset: shouldReset,
     config: { duration: 1000, easing: easings.easeInOutSine },
     from: {
       ...initialPosition,
@@ -245,6 +248,37 @@ export function MoveLabwareOnDeck(
   )
 }
 
+function usePositionChangeReset(
+  initialPosition: { x: number; y: number },
+  finalPosition: { x: number; y: number }
+): boolean {
+  const [shouldReset, setShouldReset] = React.useState(false)
+
+  React.useLayoutEffect(() => {
+    if (shouldReset) {
+      setShouldReset(false)
+      return
+    }
+
+    const isNewPosition =
+      previousInitialRef.current?.x !== initialPosition.x ||
+      previousInitialRef.current?.y !== initialPosition.y ||
+      previousFinalRef.current?.x !== finalPosition.x ||
+      previousFinalRef.current?.y !== finalPosition.y
+
+    if (isNewPosition) {
+      setShouldReset(true)
+    }
+
+    previousInitialRef.current = initialPosition
+    previousFinalRef.current = finalPosition
+  }, [initialPosition, finalPosition])
+
+  const previousInitialRef = React.useRef(initialPosition)
+  const previousFinalRef = React.useRef(finalPosition)
+
+  return shouldReset
+}
 /**
  * These animated components needs to be split out because react-spring and styled-components don't play nice
  * @see https://github.com/pmndrs/react-spring/issues/1515 */

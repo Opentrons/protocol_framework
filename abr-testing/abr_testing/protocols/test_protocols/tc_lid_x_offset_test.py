@@ -73,11 +73,13 @@ def run(protocol: ProtocolContext) -> None:
     # Load Parameters
     lids_in_stack: int = protocol.params.lids_in_a_stack  # type: ignore[attr-defined]
     num_offset = protocol.params.num_offset  # type: ignore[attr-defined]
+
     offset = protocol.params.offset  # type: ignore[attr-defined]
     negative = protocol.params.negative  # type: ignore[attr-defined]
     thermocycler_bool = protocol.params.thermocycler_bool  # type: ignore[attr-defined]
     if negative:
         num_offset = num_offset * -1
+
     # Thermocycler
     if thermocycler_bool:
         thermocycler: ThermocyclerContext = protocol.load_module(

@@ -34,6 +34,9 @@ export function useTrackProtocolRunEvent(
             ...properties,
             ...protocolRunAnalyticsData,
             runTime,
+            // It's sometimes unavoidable (namely on the desktop app) to prevent sending an event multiple times.
+            // In these circumstances, we need an idempotency key to accurately filter events in Mixpanel.
+            transactionId: runId,
           },
         })
       })

@@ -48,7 +48,7 @@ export function LabwareLiquidsSection(): JSX.Element | null {
           setDisplayLabwareModal(true)
         }}
         text={t('add_opentrons_labware')}
-        textAlignment={'left'}
+        textAlignment="left"
         iconName="plus"
       />
 
@@ -77,7 +77,7 @@ export function LabwareLiquidsSection(): JSX.Element | null {
           setValue(LIQUIDS_FIELD_NAME, [...liquids, ''])
         }}
         text={t('add_opentrons_liquid')}
-        textAlignment={'left'}
+        textAlignment="left"
         iconName="plus"
       />
 

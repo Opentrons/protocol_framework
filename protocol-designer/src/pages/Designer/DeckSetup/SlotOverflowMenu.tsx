@@ -21,21 +21,26 @@ import {
   getCutoutIdFromAddressableArea,
   getDeckDefFromRobotType,
 } from '@opentrons/shared-data'
-import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
 
-import { deleteModule } from '../../../step-forms/actions'
-import {
-  ConfirmDeleteStagingAreaModal,
-  EditNickNameModal,
-} from '../../../organisms'
-import { deleteDeckFixture } from '../../../step-forms/actions/additionalItems'
+import { getRobotType } from '../../../file-data/selectors'
 import {
   deleteContainer,
   duplicateLabware,
   openIngredientSelector,
 } from '../../../labware-ingred/actions'
+import { getNextAvailableDeckSlot } from '../../../labware-ingred/utils'
+import { deleteModule } from '../../../step-forms/actions'
+import {
+  ConfirmDeleteStagingAreaModal,
+  EditNickNameModal,
+} from '../../../organisms'
+import { useKitchen } from '../../../organisms/Kitchen/hooks'
+import { deleteDeckFixture } from '../../../step-forms/actions/additionalItems'
+import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
+
 import { getStagingAreaAddressableAreas } from '../../../utils'
 import { selectors as labwareIngredSelectors } from '../../../labware-ingred/selectors'
+
 import type { MouseEvent, SetStateAction } from 'react'
 import type {
   AddressableAreaName,
@@ -68,6 +73,7 @@ const TOP_SLOT_Y_POSITION = 50
 const TOP_SLOT_Y_POSITION_ALL_BUTTONS = 110
 const TOP_SLOT_Y_POSITION_2_BUTTONS = 35
 const STAGING_AREA_SLOTS = ['A4', 'B4', 'C4', 'D4']
+
 interface SlotOverflowMenuProps {
   //   can be off-deck id or deck slot
   location: DeckSlotId | string
@@ -105,11 +111,16 @@ export function SlotOverflowMenu(
     labwareIngredSelectors.getLiquidsByLabwareId
   )
 
+  const robotType = useSelector(getRobotType)
+
+  const { makeSnackbar } = useKitchen()
+
   const {
     labware: deckSetupLabware,
     modules: deckSetupModules,
     additionalEquipmentOnDeck,
   } = deckSetup
+
   const isOffDeckLocation = deckSetupLabware[location] != null
 
   const moduleOnSlot = Object.values(deckSetupModules).find(
@@ -120,6 +131,9 @@ export function SlotOverflowMenu(
       ? lw.id === location
       : lw.slot === location || lw.slot === moduleOnSlot?.id
   )
+  const isSpace =
+    getNextAvailableDeckSlot(deckSetup, robotType, labwareOnSlot?.def) != null
+
   const isLabwareTiprack = labwareOnSlot?.def.parameters.isTiprack ?? false
   const isLabwareAnAdapter =
     labwareOnSlot?.def.allowedRoles?.includes('adapter') ?? false
@@ -157,6 +171,24 @@ export function SlotOverflowMenu(
   const isStagingSlot = FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS.includes(
     location as AddressableAreaName
   )
+
+  const handleDuplicate = (): void => {
+    if (!isSpace) {
+      makeSnackbar(t('deck_slots_full') as string)
+      return
+    }
+
+    if (
+      labwareOnSlot != null &&
+      !isLabwareAnAdapter &&
+      nestedLabwareOnSlot == null
+    ) {
+      dispatch(duplicateLabware(labwareOnSlot.id))
+    } else if (nestedLabwareOnSlot != null) {
+      dispatch(duplicateLabware(nestedLabwareOnSlot.id))
+    }
+    setShowMenuList(false)
+  }
 
   const handleClear = (): void => {
     //  clear module from slot
@@ -309,20 +341,7 @@ export function SlotOverflowMenu(
           </StyledText>
         </MenuItem>
         {showDuplicateBtn ? (
-          <MenuItem
-            onClick={() => {
-              if (
-                labwareOnSlot != null &&
-                !isLabwareAnAdapter &&
-                nestedLabwareOnSlot == null
-              ) {
-                dispatch(duplicateLabware(labwareOnSlot.id))
-              } else if (nestedLabwareOnSlot != null) {
-                dispatch(duplicateLabware(nestedLabwareOnSlot.id))
-              }
-              setShowMenuList(false)
-            }}
-          >
+          <MenuItem onClick={handleDuplicate}>
             <StyledText desktopStyle="bodyDefaultRegular">
               {t('duplicate')}
             </StyledText>

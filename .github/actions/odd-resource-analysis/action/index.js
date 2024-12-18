@@ -5,9 +5,11 @@ async function run() {
   try {
     const mixpanelUser = core.getInput('mixpanel-user', { required: true })
     const mixpanelSecret = core.getInput('mixpanel-secret', { required: true })
-    const mixpanelProjectId = core.getInput('mixpanel-project-id', {
-      required: true,
-    })
+    const mixpanelProjectId = parseInt(
+      core.getInput('mixpanel-project-id', {
+        required: true,
+      })
+    )
     const previousVersionCount = parseInt(
       core.getInput('previous-version-count') || '2'
     )
