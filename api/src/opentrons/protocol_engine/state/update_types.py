@@ -630,12 +630,13 @@ class StateUpdate:
         reference_wave_length: typing.Optional[int],
     ) -> Self:
         self.module_state_update = ModuleStateUpdate(
-            module_id=module_id, module_type="absorbanceReaderType"
-        )
-        self.initialize_absorbance_reader_update = AbsorbanceReaderInitializeUpdate(
-            measure_mode=measure_mode,
-            sample_wave_lengths=sample_wave_lengths,
-            reference_wave_length=reference_wave_length,
+            module_id=module_id,
+            module_type="absorbanceReaderType",
+            initialize_absorbance_reader_update=AbsorbanceReaderInitializeUpdate(
+                measure_mode=measure_mode,
+                sample_wave_lengths=sample_wave_lengths,
+                reference_wave_length=reference_wave_length,
+            ),
         )
         return self
 

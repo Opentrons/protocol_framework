@@ -116,7 +116,7 @@ class InitializeImpl(
             )
 
         state_update.initialize_absorbance_reader(
-            params.moduleId,
+            params.moduleId,  # should this be the verified id?
             params.measureMode,
             params.sampleWavelengths,
             params.referenceWavelength,
