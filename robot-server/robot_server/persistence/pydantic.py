@@ -11,7 +11,7 @@ _TypeAdapterArgT = TypeVar("_TypeAdapterArgT")
 
 def pydantic_to_json(obj: BaseModel) -> str:
     """Serialize a Pydantic object for storing in the SQL database."""
-    return obj.json(
+    return obj.model_dump_json(
         # by_alias and exclude_none should match how
         # FastAPI + Pydantic + our customizations serialize these objects
         by_alias=True,
@@ -21,7 +21,9 @@ def pydantic_to_json(obj: BaseModel) -> str:
 
 def pydantic_list_to_json(obj_list: Sequence[BaseModel]) -> str:
     """Serialize a list of Pydantic objects for storing in the SQL database."""
-    return json.dumps([obj.dict(by_alias=True, exclude_none=True) for obj in obj_list])
+    return json.dumps(
+        [obj.model_dump(by_alias=True, exclude_none=True) for obj in obj_list]
+    )
 
 
 @overload

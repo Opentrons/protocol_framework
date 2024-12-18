@@ -967,7 +967,7 @@ def test_get_commands_errors_slice_historical_run(
     mock_run_store: RunStore,
 ) -> None:
     """Should get a sliced command error list from engine store."""
-    expected_commands_errors_result = [ErrorOccurrence.construct(id="error-id")]
+    expected_commands_errors_result = [ErrorOccurrence.model_construct(id="error-id")]  # type: ignore[call-arg]
 
     command_error_slice = CommandErrorSlice(
         cursor=1, total_length=3, commands_errors=expected_commands_errors_result

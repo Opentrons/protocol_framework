@@ -97,7 +97,7 @@ async def test_move_to_coordinates_stall(
     result = await subject.execute(params=params)
 
     assert result == DefinedErrorData(
-        public=StallOrCollisionError.construct(
+        public=StallOrCollisionError.model_construct(
             id=test_id, createdAt=timestamp, wrappedErrors=[matchers.Anything()]
         ),
         state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),

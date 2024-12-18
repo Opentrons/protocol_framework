@@ -207,7 +207,7 @@ async def test_overpressure_error(
 
     if isinstance(location, CurrentWell):
         assert result == DefinedErrorData(
-            public=OverpressureError.construct(
+            public=OverpressureError.model_construct(
                 id=error_id,
                 createdAt=error_timestamp,
                 wrappedErrors=[matchers.Anything()],
@@ -226,7 +226,7 @@ async def test_overpressure_error(
         )
     else:
         assert result == DefinedErrorData(
-            public=OverpressureError.construct(
+            public=OverpressureError.model_construct(
                 id=error_id,
                 createdAt=error_timestamp,
                 wrappedErrors=[matchers.Anything()],

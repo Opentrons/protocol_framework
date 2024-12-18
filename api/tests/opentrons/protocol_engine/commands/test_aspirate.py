@@ -411,7 +411,7 @@ async def test_overpressure_error(
     result = await subject.execute(params)
 
     assert result == DefinedErrorData(
-        public=OverpressureError.construct(
+        public=OverpressureError.model_construct(
             id=error_id,
             createdAt=error_timestamp,
             wrappedErrors=[matchers.Anything()],
@@ -581,7 +581,7 @@ async def test_stall_during_final_movement(
     result = await subject.execute(params)
 
     assert result == DefinedErrorData(
-        public=StallOrCollisionError.construct(
+        public=StallOrCollisionError.model_construct(
             id=error_id,
             createdAt=error_timestamp,
             wrappedErrors=[matchers.Anything()],
@@ -639,7 +639,7 @@ async def test_stall_during_preparation(
 
     result = await subject.execute(params)
     assert result == DefinedErrorData(
-        public=StallOrCollisionError.construct(
+        public=StallOrCollisionError.model_construct(
             id=error_id, createdAt=error_timestamp, wrappedErrors=[matchers.Anything()]
         ),
         state_update=update_types.StateUpdate(
@@ -715,7 +715,7 @@ async def test_overpressure_during_preparation(
 
     result = await subject.execute(params)
     assert result == DefinedErrorData(
-        public=OverpressureError.construct(
+        public=OverpressureError.model_construct(
             id=error_id,
             createdAt=error_timestamp,
             wrappedErrors=[matchers.Anything()],

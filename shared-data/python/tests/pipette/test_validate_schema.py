@@ -163,7 +163,7 @@ def test_serializer() -> None:
     assert loaded_model.display_category == types.PipetteGenerationType.FLEX
     assert loaded_model.channels == types.PipetteChannelType.NINETY_SIX_CHANNEL
 
-    model_dict = loaded_model.dict()
+    model_dict = loaded_model.model_dump()
     # each field should be the value of the enum class
     assert (
         isinstance(model_dict["pipette_type"], str)

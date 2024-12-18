@@ -25,7 +25,7 @@ class BaseErrorBody(BaseResponseBody):
 
     def as_error(self, status_code: int) -> ApiError:
         """Serialize the response as an API error to raise in a handler."""
-        return ApiError(status_code=status_code, content=self.dict())
+        return ApiError(status_code=status_code, content=self.model_dump())
 
 
 class ErrorSource(BaseModel):

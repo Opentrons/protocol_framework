@@ -20,7 +20,7 @@ from . import list_fixtures
 def test_v6_types(defpath: Path) -> None:
     def_data = load_shared_data(defpath)
     def_model = protocol_schema_v6.ProtocolSchemaV6.model_validate_json(def_data)
-    def_dict_from_model = def_model.dict(
+    def_dict_from_model = def_model.model_dump(
         exclude_unset=True,
         # 'schemaVersion' in python is '$schemaVersion' in JSON
         by_alias=True,

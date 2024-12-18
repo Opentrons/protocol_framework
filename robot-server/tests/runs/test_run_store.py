@@ -122,7 +122,7 @@ def protocol_commands_errors() -> List[pe_commands.Command]:
             params=pe_commands.WaitForResumeParams(message="hello world"),
             result=pe_commands.WaitForResumeResult(),
             intent=pe_commands.CommandIntent.PROTOCOL,
-            error=ErrorOccurrence.construct(
+            error=ErrorOccurrence.model_construct(
                 id="error-id",
                 createdAt=datetime(2024, 1, 1),
                 errorType="blah-blah",
@@ -137,7 +137,7 @@ def protocol_commands_errors() -> List[pe_commands.Command]:
             params=pe_commands.WaitForResumeParams(message="hey world"),
             result=pe_commands.WaitForResumeResult(),
             intent=pe_commands.CommandIntent.PROTOCOL,
-            error=ErrorOccurrence.construct(
+            error=ErrorOccurrence.model_construct(
                 id="error-id-2",
                 createdAt=datetime(2024, 1, 1),
                 errorType="blah-blah",
@@ -738,7 +738,7 @@ def test_get_run_time_parameters_invalid(
     state_summary: StateSummary,
 ) -> None:
     """It should return an empty list if there invalid parameters."""
-    bad_parameters = [pe_types.BooleanParameter.construct(foo="bar")]
+    bad_parameters = [pe_types.BooleanParameter.model_construct(foo="bar")]  # type: ignore[call-arg]
     subject.insert(
         run_id="run-id",
         protocol_id=None,

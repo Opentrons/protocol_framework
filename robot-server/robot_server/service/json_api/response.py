@@ -41,7 +41,7 @@ class BaseResponseBody(BaseModel):
     """
 
     @override
-    def dict(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+    def model_dump(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
         """Always exclude `None` when serializing to an object.
 
         With Pydantic v1, the OpenAPI spec described `Optional`(i.e., possibly
@@ -56,13 +56,25 @@ class BaseResponseBody(BaseModel):
         serialization behavior at this point would risk breaking things on the client.
         """
         kwargs["exclude_none"] = True
+        return super().model_dump(*args, **kwargs)
+
+    @override
+    def dict(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+        """See notes in `model_dump()`."""
+        kwargs["exclude_none"] = True
         return super().dict(*args, **kwargs)
 
     @override
-    def json(self, *args: Any, **kwargs: Any) -> str:
-        """See notes in `.dict()`."""
+    def model_dump_json(self, *args: Any, **kwargs: Any) -> str:
+        """See notes in `.model_dump()`."""
         kwargs["exclude_none"] = True
-        return super().json(*args, **kwargs)
+        return super().model_dump_json(*args, **kwargs)
+
+    @override
+    def json(self, *args: Any, **kwargs: Any) -> str:
+        """See notes in `.model_dump()`."""
+        kwargs["exclude_none"] = True
+        return super().model_dump_json(*args, **kwargs)
 
 
 class SimpleBody(BaseResponseBody, Generic[ResponseDataT]):
@@ -112,8 +124,8 @@ class SimpleMultiBody(BaseResponseBody, Generic[ResponseDataT]):
     # non-validating classmethod is taken from the type of this member, and there we really
     # want the arguments to be Sequence so they can accept narrower subtypes. For instance,
     # if you define a function as returning SimpleMultiBody[Union[A, B]], you should really
-    # be able to do return SimpleMultiBody.construct([A(), A(), A()]) or even
-    # SimpleMultiBody[Union[A, B]].construct([A(), A(), A()]). However, because construct's
+    # be able to do return SimpleMultiBody.model_construct([A(), A(), A()]) or even
+    # SimpleMultiBody[Union[A, B]].model_construct([A(), A(), A()]). However, because construct's
     # params are defined based on the dataclass fields, the only way to get the arguments
     # to be covariant is to make data the covariant Sequence protocol.
     meta: MultiBodyMeta = Field(
@@ -229,7 +241,7 @@ class PydanticResponse(JSONResponse, Generic[ResponseBodyT]):
 
     def render(self, content: ResponseBodyT) -> bytes:
         """Render the response body to JSON bytes."""
-        return content.json().encode(self.charset)
+        return content.model_dump_json().encode(self.charset)
 
 
 # TODO(mc, 2021-12-09): remove this model

@@ -109,7 +109,9 @@ async def create_command(
             Comes from a query parameter in the URL.
         orchestrator: The `RunOrchestrator` handling engine for command to be enqueued.
     """
-    command_create = request_body.data.copy(update={"intent": CommandIntent.SETUP})
+    command_create = request_body.data.model_copy(
+        update={"intent": CommandIntent.SETUP}
+    )
     command = await orchestrator.add_command_and_wait_for_interval(
         command=command_create, wait_until_complete=waitUntilComplete, timeout=timeout
     )
@@ -117,7 +119,7 @@ async def create_command(
     response_data = cast(StatelessCommand, orchestrator.get_command(command.id))
 
     return await PydanticResponse.create(
-        content=SimpleBody.construct(data=response_data),
+        content=SimpleBody.model_construct(data=response_data),
         status_code=status.HTTP_201_CREATED,
     )
 
@@ -168,7 +170,7 @@ async def get_commands_list(
     meta = MultiBodyMeta(cursor=cmd_slice.cursor, totalLength=cmd_slice.total_length)
 
     return await PydanticResponse.create(
-        content=SimpleMultiBody.construct(data=commands, meta=meta),
+        content=SimpleMultiBody.model_construct(data=commands, meta=meta),
         status_code=status.HTTP_200_OK,
     )
 
@@ -204,6 +206,6 @@ async def get_command(
         raise CommandNotFound.from_exc(e).as_error(status.HTTP_404_NOT_FOUND) from e
 
     return await PydanticResponse.create(
-        content=SimpleBody.construct(data=cast(StatelessCommand, command)),
+        content=SimpleBody.model_construct(data=cast(StatelessCommand, command)),
         status_code=status.HTTP_200_OK,
     )
