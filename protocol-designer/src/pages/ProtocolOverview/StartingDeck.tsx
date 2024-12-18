@@ -27,12 +27,12 @@ import type { DeckSlot } from '../../types'
 
 interface StartingDeckProps {
   robotType: RobotType
-  setShowMaterialsListModal: Dispatch<SetStateAction<boolean>>
+  handleOpenMaterialsListModal: () => void
 }
 
 export function StartingDeck({
   robotType,
-  setShowMaterialsListModal,
+  handleOpenMaterialsListModal,
 }: StartingDeckProps): JSX.Element {
   const [isOffDeck, setIsOFfDeck] = useState<boolean>(false)
 
@@ -41,7 +41,7 @@ export function StartingDeck({
       <StartingDeckHeader
         isOffDeck={isOffDeck}
         setIsOffDeck={setIsOFfDeck}
-        setShowMaterialsListModal={setShowMaterialsListModal}
+        handleOpenMaterialsListModal={handleOpenMaterialsListModal}
       />
       <StartingDeckBody isOffDeck={isOffDeck} robotType={robotType} />
     </Flex>
@@ -51,11 +51,11 @@ export function StartingDeck({
 interface StartingDeckHeaderProps {
   isOffDeck: boolean
   setIsOffDeck: Dispatch<SetStateAction<boolean>>
-  setShowMaterialsListModal: Dispatch<SetStateAction<boolean>>
+  handleOpenMaterialsListModal: () => void
 }
 
 function StartingDeckHeader(props: StartingDeckHeaderProps): JSX.Element {
-  const { isOffDeck, setIsOffDeck, setShowMaterialsListModal } = props
+  const { isOffDeck, setIsOffDeck, handleOpenMaterialsListModal } = props
   const { t } = useTranslation(['protocol_overview', 'starting_deck_state'])
   const onDeckString = t('starting_deck_state:onDeck')
   const offDeckString = t('starting_deck_state:offDeck')
@@ -69,9 +69,7 @@ function StartingDeckHeader(props: StartingDeckHeaderProps): JSX.Element {
           <Btn
             data-testid="Materials_list"
             textDecoration={TYPOGRAPHY.textDecorationUnderline}
-            onClick={() => {
-              setShowMaterialsListModal(true)
-            }}
+            onClick={handleOpenMaterialsListModal}
             css={BUTTON_LINK_STYLE}
           >
             <StyledText desktopStyle="bodyDefaultRegular">
