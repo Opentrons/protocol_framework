@@ -10,7 +10,8 @@ import {
   StyledText,
   Toolbox,
 } from '@opentrons/components'
-import { PROTOCOL_NAV_BAR_HEIGHT_REM } from '../../../../organisms'
+
+import { NAV_BAR_HEIGHT_REM } from '../../../../atoms'
 import {
   END_TERMINAL_ITEM_ID,
   START_TERMINAL_ITEM_ID,
@@ -70,8 +71,8 @@ export const TimelineToolbox = ({
     <Toolbox
       position={POSITION_RELATIVE}
       height="100%"
+      maxHeight={`calc(100vh - ${NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
       width={`${sidebarWidth / 16}rem`}
-      maxHeight={`calc(100vh - ${PROTOCOL_NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
       title={
         <StyledText
           desktopStyle="bodyLargeSemiBold"

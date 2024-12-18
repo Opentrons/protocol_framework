@@ -1,11 +1,15 @@
 import { useRef, useState, useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import { DeckLabelSet } from '@opentrons/components'
 import {
+  FLEX_ROBOT_TYPE,
   HEATERSHAKER_MODULE_TYPE,
   MAGNETIC_MODULE_TYPE,
   TEMPERATURE_MODULE_TYPE,
+  THERMOCYCLER_MODULE_TYPE,
   getModuleDef2,
 } from '@opentrons/shared-data'
+import { getRobotType } from '../../../file-data/selectors'
 import type { DeckLabelProps } from '@opentrons/components'
 import type { CoordinateTuple, ModuleModel } from '@opentrons/shared-data'
 
@@ -15,7 +19,9 @@ interface ModuleLabelProps {
   orientation: 'left' | 'right'
   isSelected: boolean
   isLast: boolean
+  isZoomed?: boolean
   labwareInfos?: DeckLabelProps[]
+  labelName?: string
 }
 export const ModuleLabel = (props: ModuleLabelProps): JSX.Element => {
   const {
@@ -25,7 +31,10 @@ export const ModuleLabel = (props: ModuleLabelProps): JSX.Element => {
     isSelected,
     isLast,
     labwareInfos = [],
+    isZoomed = true,
+    labelName,
   } = props
+  const robotType = useSelector(getRobotType)
   const labelContainerRef = useRef<HTMLDivElement>(null)
   const [labelContainerHeight, setLabelContainerHeight] = useState(12)
 
@@ -40,14 +49,25 @@ export const ModuleLabel = (props: ModuleLabelProps): JSX.Element => {
     def?.dimensions.labwareInterfaceXDimension != null
       ? def.dimensions.xDimension - def?.dimensions.labwareInterfaceXDimension
       : 0
-  //  TODO(ja 9/6/24): definitely need to refine these overhang values
   let leftOverhang = overhang
-  if (def?.moduleType === TEMPERATURE_MODULE_TYPE) {
-    leftOverhang = overhang * 2
-  } else if (def?.moduleType === HEATERSHAKER_MODULE_TYPE) {
-    leftOverhang = overhang + 14
-  } else if (def?.moduleType === MAGNETIC_MODULE_TYPE) {
-    leftOverhang = overhang + 8
+
+  switch (def?.moduleType) {
+    case TEMPERATURE_MODULE_TYPE:
+      leftOverhang = overhang * 2
+      break
+    case HEATERSHAKER_MODULE_TYPE:
+      leftOverhang = overhang + 14
+      break
+    case MAGNETIC_MODULE_TYPE:
+      leftOverhang = overhang + 8
+      break
+    case THERMOCYCLER_MODULE_TYPE:
+      if (!isZoomed && robotType === FLEX_ROBOT_TYPE) {
+        leftOverhang = overhang + 20
+      }
+      break
+    default:
+      break
   }
 
   return (
@@ -55,10 +75,11 @@ export const ModuleLabel = (props: ModuleLabelProps): JSX.Element => {
       ref={labelContainerRef}
       deckLabels={[
         {
-          text: def?.displayName,
+          text: labelName ?? def?.displayName,
           isSelected,
           isLast,
           moduleModel: def?.model,
+          isZoomed: isZoomed,
         },
         ...labwareInfos,
       ]}

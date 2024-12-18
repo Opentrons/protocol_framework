@@ -23,12 +23,17 @@ import { DeckItemHover } from '../DeckSetup/DeckItemHover'
 import { SlotDetailsContainer } from '../../../organisms'
 import { wellFillFromWellContents } from '../../../organisms/LabwareOnDeck/utils'
 import { getRobotType } from '../../../file-data/selectors'
+import {
+  getHoveredDropdownItem,
+  getSelectedDropdownItem,
+} from '../../../ui/steps/selectors'
 import { SlotOverflowMenu } from '../DeckSetup/SlotOverflowMenu'
-import type { DeckSlotId } from '@opentrons/shared-data'
+import { HighlightOffdeckSlot } from './HighlightOffdeckSlot'
+import type { CoordinateTuple, DeckSlotId } from '@opentrons/shared-data'
 import type { DeckSetupTabType } from '../types'
 
 const OFFDECK_MAP_WIDTH = '41.625rem'
-
+const ZERO_SLOT_POSITION: CoordinateTuple = [0, 0, 0]
 interface OffDeckDetailsProps extends DeckSetupTabType {
   addLabware: () => void
 }
@@ -39,6 +44,8 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
   const [menuListId, setShowMenuListForId] = useState<DeckSlotId | null>(null)
   const robotType = useSelector(getRobotType)
   const deckSetup = useSelector(getDeckSetupForActiveItem)
+  const hoveredDropdownItem = useSelector(getHoveredDropdownItem)
+  const selectedDropdownSelection = useSelector(getSelectedDropdownItem)
   const offDeckLabware = Object.values(deckSetup.labware).filter(
     lw => lw.slot === 'offDeck'
   )
@@ -98,7 +105,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
           </StyledText>
         </Flex>
 
-        <Flex flexWrap={WRAP} gridGap={SPACING.spacing32}>
+        <Flex flexWrap={WRAP} paddingY={SPACING.spacing32}>
           {offDeckLabware.map(lw => {
             const wellContents = allWellContentsForActiveItem
               ? allWellContentsForActiveItem[lw.id]
@@ -110,8 +117,21 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
               yDimension: dimensions.yDimension ?? 0,
               zDimension: dimensions.zDimension ?? 0,
             }
+            const isLabwareSelectionSelected = selectedDropdownSelection.some(
+              selected => selected.id === lw.id
+            )
+            const highlighted = hoveredDropdownItem.id === lw.id
             return (
-              <Flex flexDirection={DIRECTION_COLUMN} key={lw.id}>
+              <Flex
+                flexDirection={DIRECTION_COLUMN}
+                key={lw.id}
+                paddingRight={SPACING.spacing32}
+                paddingBottom={
+                  isLabwareSelectionSelected || highlighted
+                    ? '0px'
+                    : SPACING.spacing32
+                }
+              >
                 <RobotWorkSpace
                   key={lw.id}
                   viewBox={`${definition.cornerOffsetFromSlot.x} ${definition.cornerOffsetFromSlot.y} ${dimensions.xDimension} ${dimensions.yDimension}`}
@@ -127,21 +147,25 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
                           liquidDisplayColors
                         )}
                       />
+
                       <DeckItemHover
                         hover={hoverSlot}
                         setShowMenuListForId={setShowMenuListForId}
                         menuListId={menuListId}
                         setHover={setHoverSlot}
                         slotBoundingBox={xyzDimensions}
-                        slotPosition={[0, 0, 0]}
+                        slotPosition={ZERO_SLOT_POSITION}
                         itemId={lw.id}
                         tab={tab}
                       />
                     </>
                   )}
                 </RobotWorkSpace>
+                <HighlightOffdeckSlot
+                  labwareOnDeck={lw}
+                  position={ZERO_SLOT_POSITION}
+                />
                 {menuListId === lw.id ? (
-                  // TODO fix this rendering position
                   <Flex
                     marginTop={`-${SPACING.spacing32}`}
                     marginLeft="4rem"
@@ -153,7 +177,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
                       setShowMenuList={() => {
                         setShowMenuListForId(null)
                       }}
-                      menuListSlotPosition={[0, 0, 0]}
+                      menuListSlotPosition={ZERO_SLOT_POSITION}
                       invertY
                     />
                   </Flex>
@@ -161,6 +185,9 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
               </Flex>
             )
           })}
+
+          <HighlightOffdeckSlot position={ZERO_SLOT_POSITION} />
+
           {tab === 'startingDeck' ? (
             <Flex width="9.5625rem" height="6.375rem">
               <EmptySelectorButton

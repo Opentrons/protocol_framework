@@ -15,17 +15,31 @@ interface DeckLabelSetProps {
   y: number
   width: number
   height: number
+  invert?: boolean
 }
 
 const DeckLabelSetComponent = (
   props: DeckLabelSetProps,
   ref: React.ForwardedRef<HTMLDivElement>
 ): JSX.Element => {
-  const { deckLabels, x, y, width, height } = props
+  const { deckLabels, x, y, width, height, invert = false } = props
 
   return (
-    <RobotCoordsForeignDiv x={x} y={y}>
-      <StyledBox width={width} height={height} data-testid="DeckLabeSet" />
+    <RobotCoordsForeignDiv
+      x={x}
+      y={y}
+      innerDivProps={{
+        style: {
+          transform: `rotate(180deg) scaleX(-1) scaleY(${invert ? '-1' : '1'})`,
+        },
+      }}
+    >
+      <StyledBox
+        width={width}
+        height={height}
+        data-testid="DeckLabeSet"
+        isZoomed={deckLabels.length > 0 ? deckLabels[0].isZoomed : true}
+      />
       <LabelContainer ref={ref}>
         {deckLabels.length > 0
           ? deckLabels.map((deckLabel, index) => (
@@ -46,9 +60,14 @@ export const DeckLabelSet = React.forwardRef<HTMLDivElement, DeckLabelSetProps>(
   DeckLabelSetComponent
 )
 
-const StyledBox = styled(Box)`
+interface StyledBoxProps {
+  isZoomed: boolean
+}
+
+const StyledBox = styled(Box)<StyledBoxProps>`
   border-radius: ${BORDERS.borderRadius4};
-  border: 1.5px solid ${COLORS.blue50};
+  border: ${({ isZoomed }) =>
+    isZoomed ? `1.5px solid ${COLORS.blue50}` : `3px solid ${COLORS.blue50}`};
 `
 
 const LabelContainer = styled.div`

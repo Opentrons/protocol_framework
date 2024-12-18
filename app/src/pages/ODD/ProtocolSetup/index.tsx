@@ -741,10 +741,18 @@ export function ProtocolSetup(): JSX.Element {
     robotType,
     protocolName
   )
+
+  const { trackProtocolRunEvent } = useTrackProtocolRunEvent(runId, robotName)
+  const robotAnalyticsData = useRobotAnalyticsData(robotName)
+
   const handleProceedToRunClick = (): void => {
     trackEvent({
       name: ANALYTICS_PROTOCOL_PROCEED_TO_RUN,
       properties: { robotSerialNumber },
+    })
+    trackProtocolRunEvent({
+      name: ANALYTICS_PROTOCOL_RUN_ACTION.START,
+      properties: robotAnalyticsData ?? {},
     })
     play()
   }

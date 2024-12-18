@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
 import {
   COLORS,
   DIRECTION_COLUMN,
@@ -9,6 +9,7 @@ import {
   SPACING,
   StyledText,
 } from '@opentrons/components'
+import { selectDropdownItem } from '../../ui/steps/actions/actions'
 import type { Options } from '@opentrons/components'
 import type { FieldProps } from '../../pages/Designer/ProtocolSteps/StepForm/types'
 
@@ -16,7 +17,12 @@ export interface DropdownStepFormFieldProps extends FieldProps {
   options: Options
   title: string
   width?: string
+  onEnter?: (id: string) => void
+  onExit?: () => void
 }
+
+const FIRST_FIELDS = ['aspirate_labware', 'labware', 'moduleId']
+const SECOND_FIELDS = ['dispense_labware', 'newLocation']
 
 export function DropdownStepFormField(
   props: DropdownStepFormFieldProps
@@ -31,16 +37,44 @@ export function DropdownStepFormField(
     padding = `0 ${SPACING.spacing16}`,
     width = '17.5rem',
     onFieldFocus,
+    onEnter,
+    onExit,
     onFieldBlur,
+    name: fieldName,
   } = props
-  const { t } = useTranslation('tooltip')
+  const { t } = useTranslation(['tooltip', 'application'])
+  const dispatch = useDispatch()
   const availableOptionId = options.find(opt => opt.value === value)
-
-  useEffect(() => {
-    if (options.length === 1) {
-      updateValue(options[0].value)
+  const handleSelection = (value: string): void => {
+    let text = t('application:selected')
+    if (fieldName === 'newLocation') {
+      text = t('application:location')
+    } else if (fieldName === 'aspirate_labware') {
+      text = t('application:source')
+    } else if (fieldName === 'dispense_labware') {
+      text = t('application:dest')
     }
-  }, [])
+
+    const selection = {
+      id: value,
+      text,
+    }
+    if (FIRST_FIELDS.includes(fieldName)) {
+      dispatch(
+        selectDropdownItem({
+          selection: { ...selection, field: '1' },
+          mode: 'add',
+        })
+      )
+    } else if (SECOND_FIELDS.includes(fieldName)) {
+      dispatch(
+        selectDropdownItem({
+          selection: { ...selection, field: '2' },
+          mode: 'add',
+        })
+      )
+    }
+  }
 
   return (
     <Flex padding={padding ?? SPACING.spacing16}>
@@ -59,7 +93,10 @@ export function DropdownStepFormField(
           }
           onClick={value => {
             updateValue(value)
+            handleSelection(value)
           }}
+          onEnter={onEnter}
+          onExit={onExit}
         />
       ) : (
         <Flex

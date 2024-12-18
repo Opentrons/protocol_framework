@@ -1,17 +1,18 @@
 import { useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { css } from 'styled-components'
+
 import {
   BORDERS,
   Btn,
   COLORS,
+  CURSOR_POINTER,
   Flex,
   Icon,
   JUSTIFY_CENTER,
 } from '@opentrons/components'
 import { getFileMetadata } from '../../file-data/selectors'
-import { BUTTON_LINK_STYLE } from '../../atoms/constants'
 
-//  TODO(ja): this icon needs to be updated to match css states and correct svg
 export const SettingsIcon = (): JSX.Element => {
   const location = useLocation()
   const navigate = useNavigate()
@@ -32,22 +33,57 @@ export const SettingsIcon = (): JSX.Element => {
       data-testid="SettingsIcon"
       borderRadius={BORDERS.borderRadiusFull}
       backgroundColor={
-        location.pathname === '/settings' ? COLORS.grey30 : COLORS.transparent
+        location.pathname === '/settings' ? COLORS.grey35 : COLORS.transparent
       }
-      cursor="pointer"
-      width="2rem"
-      height="2rem"
+      cursor={CURSOR_POINTER}
       justifyContent={JUSTIFY_CENTER}
     >
       <Btn
         onClick={handleNavigate}
-        css={BUTTON_LINK_STYLE}
+        css={GEAR_ICON_STYLE}
         data-testid="SettingsIconButton"
       >
         <Flex justifyContent={JUSTIFY_CENTER}>
-          <Icon size="1rem" name="settings" />
+          <Icon size="1rem" name="gear" />
         </Flex>
       </Btn>
     </Flex>
   )
 }
+
+const GEAR_ICON_STYLE = css`
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  color: ${COLORS.grey60};
+
+  &:hover {
+    background-color: ${COLORS.grey30};
+  }
+
+  &:active {
+    color: ${COLORS.grey60};
+    background-color: ${COLORS.grey35};
+  }
+
+  &:focus-visible {
+    position: relative;
+    outline: none;
+
+    /* blue ring */
+    &::after {
+      content: '';
+      position: absolute;
+      top: -0.5rem;
+      left: -0.5rem;
+      right: -0.5rem;
+      bottom: -0.5rem;
+
+      border: 3px solid ${COLORS.blue50};
+      border-radius: 50%;
+      pointer-events: none;
+      box-sizing: content-box;
+    }
+    background-color: ${COLORS.grey35};
+  }
+`

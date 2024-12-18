@@ -13,11 +13,14 @@ import {
   ToggleGroup,
   useOnClickOutside,
 } from '@opentrons/components'
-import { selectTerminalItem } from '../../ui/steps/actions/actions'
+import {
+  selectDropdownItem,
+  selectTerminalItem,
+} from '../../ui/steps/actions/actions'
 import { useKitchen } from '../../organisms/Kitchen/hooks'
 import { getDeckSetupForActiveItem } from '../../top-selectors/labware-locations'
 import { generateNewProtocol } from '../../labware-ingred/actions'
-import { DefineLiquidsModal, ProtocolNavBar } from '../../organisms'
+import { DefineLiquidsModal, DesignerNavigation } from '../../organisms'
 import { selectDesignerTab } from '../../file-data/actions'
 import { getDesignerTab, getFileMetadata } from '../../file-data/selectors'
 import { DeckSetupContainer } from './DeckSetup'
@@ -68,6 +71,12 @@ export function Designer(): JSX.Element {
     isActive: tab === 'startingDeck',
     onClick: () => {
       dispatch(selectDesignerTab({ tab: 'startingDeck' }))
+      dispatch(
+        selectDropdownItem({
+          selection: null,
+          mode: 'clear',
+        })
+      )
     },
   }
   const protocolStepTab = {
@@ -151,7 +160,7 @@ export function Designer(): JSX.Element {
         />
       ) : null}
       <Flex flexDirection={DIRECTION_COLUMN} minHeight={FLEX_MAX_CONTENT}>
-        <ProtocolNavBar
+        <DesignerNavigation
           hasZoomInSlot={zoomIn.slot != null || zoomIn.cutout != null}
           hasTrashEntity={hasTrashEntity}
           showLiquidOverflowMenu={showLiquidOverflowMenu}

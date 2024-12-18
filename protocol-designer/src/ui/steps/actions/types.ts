@@ -31,6 +31,24 @@ export interface DuplicateMultipleStepsAction {
     indexToInsert: number
   }
 }
+
+export type Mode = 'clear' | 'add'
+export interface Selection {
+  id: string | null
+  text: string | null
+  field?: '1' | '2'
+}
+export interface selectDropdownItemAction {
+  type: 'SELECT_DROPDOWN_ITEM'
+  payload: {
+    selection: Selection | null
+    mode: 'add' | 'clear'
+  }
+}
+export interface hoverSelectionAction {
+  type: 'HOVER_DROPDOWN_ITEM'
+  payload: Selection
+}
 export interface HoverOnSubstepAction {
   type: 'HOVER_ON_SUBSTEP'
   payload: SubstepIdentifier
