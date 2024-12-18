@@ -10,7 +10,16 @@ By installing and using Opentrons software, you agree to the Opentrons End-User 
 
 ## Opentrons App Changes in 8.3.0-alpha.0
 
-Welcome to 8.3.0-alpha.0! This release solely adds support for the modified pipettes, outfitted with a PEEK motor nut to enable emulsification applications. Included is the recognition of new load name "FLEX 8-Channel EM 1000 μL" based on SN P1KP, which automatically disables pressure sensors and allows a max plunger speed of 90mm/s.
+Welcome to 8.3.0-alpha.0! This release adds support for Evosep Evotips on the Flex, as well as other features.
+
+### New Features
+- Use Evosep Evotips in Python API version 2.22 protocols for protein purification. Only available with the Flex 96-channel pipette.  
+- Change the app or Flex touchscreen language to Mandarin in Settings.
+- Load a newly modified “FLEX 8-Channel EM 1000 µL” pipette equipped with a PEEK motor component to automate emulsion applications. 
+
+### Improved Features
+- Recover from a stall or collision error during a protocol. 
+
 
 ---
 

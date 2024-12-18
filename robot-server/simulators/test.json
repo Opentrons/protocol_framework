@@ -1,11 +1,11 @@
 {
   "attached_instruments": {
     "right": {
-      "model": "p300_single_v1",
+      "model": "p300_single_v2",
       "id": "321"
     },
     "left": {
-      "model": "p10_single_v1",
+      "model": "p1000_single_v2",
       "id": "123"
     }
   },
