@@ -3,6 +3,7 @@ import { fireEvent, screen } from '@testing-library/react'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { getFileMetadata } from '../../../file-data/selectors'
 import { SettingsIcon } from '..'
+
 import type { NavigateFunction } from 'react-router-dom'
 
 const mockNavigate = vi.fn()
