@@ -130,6 +130,7 @@ async def aspirate_and_wait(
         OT3Mount.LEFT, reservoir + Point(z=DEPTH_INTO_RESERVOIR_FOR_DISPENSE)
     )
     await api.dispense(OT3Mount.LEFT)
+    await api.blow_out(OT3Mount.LEFT)
     return result, duration_seconds
 
 
@@ -201,7 +202,7 @@ async def run(
         reservoir_a1_actual = await api.gantry_position(OT3Mount.LEFT)
 
     result = True
-    for test_volume in [1000, 5]: # FIXME: Once the p200 96ch pipette complete function, set ture test_volume
+    for test_volume in [200, 5]: # FIXME: Once the p200 96ch pipette complete function, set ture test_volume
         tip_volume = 50 if test_volume <= 50 else pipette
         if not api.is_simulator:
             answer = ui.get_user_answer(f"Test {test_volume}uL")
