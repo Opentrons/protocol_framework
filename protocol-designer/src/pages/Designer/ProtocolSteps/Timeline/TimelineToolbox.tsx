@@ -95,7 +95,6 @@ export const TimelineToolbox = ({
       >
         <TerminalItemStep
           id={START_TERMINAL_ITEM_ID}
-          title={t('starting_deck')}
           sidebarWidth={sidebarWidth}
         />
         <DraggableSteps
@@ -108,7 +107,6 @@ export const TimelineToolbox = ({
         <PresavedStep sidebarWidth={sidebarWidth} />
         <TerminalItemStep
           id={END_TERMINAL_ITEM_ID}
-          title={t('ending_deck')}
           sidebarWidth={sidebarWidth}
         />
       </Flex>
