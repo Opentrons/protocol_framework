@@ -13,6 +13,7 @@ class GCODE(str, Enum):
     STOP_MOTOR = "M0"
     DEVICE_INFO = "M115"
     GET_LIMIT_SWITCH = "M119"
+    SET_LED = "M200"
     GET_PLATFORM_SENSOR = "M121"
     GET_DOOR_SWITCH = "M122"
     SET_SERIAL_NUMBER = "M996"
@@ -54,6 +55,15 @@ class StackerAxis(Enum):
     def __str__(self) -> str:
         """Name."""
         return self.name
+
+
+class LEDColor(Enum):
+    """Stacker LED Color."""
+
+    WHITE = 0
+    RED = 1
+    GREEN = 2
+    BLUE = 3
 
 
 class Direction(Enum):

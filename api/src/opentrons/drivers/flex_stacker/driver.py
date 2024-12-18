@@ -15,6 +15,7 @@ from .types import (
     HardwareRevision,
     MoveParams,
     LimitSwitchStatus,
+    LEDColor,
 )
 
 
@@ -207,3 +208,21 @@ class FlexStackerDriver(StackerDriver):
         await self._connection.send_command(
             GCODE.HOME_AXIS.build_command().add_int(axis.name, direction.value)
         )
+
+    async def set_led(
+        self, power: float, color: LEDColor | None, external: bool | None
+    ) -> None:
+        """Set LED color.
+
+        :param power: Power of the LED (0-1.0), 0 is off, 1 is full power
+        :param color: Color of the LED
+        :param external: True if external LED, False if internal LED
+        """
+        command = GCODE.SET_LED.build_command().add_float(
+            "P", power, GCODE_ROUNDING_PRECISION
+        )
+        if color is not None:
+            command.add_int("C", color.value)
+        if external is not None:
+            command.add_int("E", external)
+        await self._connection.send_command(command)
