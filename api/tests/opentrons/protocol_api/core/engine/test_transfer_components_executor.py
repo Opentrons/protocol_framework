@@ -16,7 +16,6 @@ from opentrons.protocol_api.core.engine.transfer_components_executor import (
     absolute_point_from_position_reference_and_offset,
     TipState,
     TransferType,
-    LiquidAndAirGapPair,
 )
 from opentrons.types import Location, Point
 

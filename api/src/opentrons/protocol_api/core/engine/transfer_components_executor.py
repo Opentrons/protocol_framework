@@ -333,7 +333,7 @@ class TransferComponentsExecutor:
             )
         )
 
-    def retract_after_dispensing(
+    def retract_after_dispensing(  # noqa: C901
         self,
         trash_location: Union[Location, TrashBin, WasteChute],
         source_location: Optional[Location],

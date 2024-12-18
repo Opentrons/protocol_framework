@@ -22,7 +22,6 @@ from opentrons.protocol_api.core.engine.transfer_components_executor import (
     TransferComponentsExecutor,
     TransferType,
     TipState,
-    LiquidAndAirGapPair,
 )
 from opentrons.protocol_engine import (
     DeckPoint,
