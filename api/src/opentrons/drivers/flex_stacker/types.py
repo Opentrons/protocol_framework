@@ -11,6 +11,7 @@ class GCODE(str, Enum):
     MOVE_TO_SWITCH = "G5"
     HOME_AXIS = "G28"
     STOP_MOTOR = "M0"
+    GET_RESET_REASON = "M114"
     DEVICE_INFO = "M115"
     GET_LIMIT_SWITCH = "M119"
     SET_LED = "M200"
@@ -122,6 +123,10 @@ class PlatformStatus:
     def get_fields(cls) -> List[str]:
         """Get fields."""
         return [f.name for f in fields(cls)]
+
+    def get(self, direction: Direction) -> bool:
+        """Get platform status."""
+        return self.E if direction == Direction.EXTENT else self.R
 
 
 @dataclass

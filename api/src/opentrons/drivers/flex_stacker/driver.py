@@ -134,6 +134,7 @@ class FlexStackerDriver(StackerDriver):
         response = await self._connection.send_command(
             GCODE.DEVICE_INFO.build_command()
         )
+        await self._connection.send_command(GCODE.GET_RESET_REASON.build_command())
         return self.parse_device_info(response)
 
     async def set_serial_number(self, sn: str) -> None:
@@ -161,7 +162,12 @@ class FlexStackerDriver(StackerDriver):
         )
         return self.parse_limit_switch_status(response)
 
-    async def get_platform_sensor_status(self) -> PlatformStatus:
+    async def get_platform_sensor(self, direction: Direction) -> bool:
+        """Get platform sensor at one direction."""
+        response = await self.get_platform_status()
+        return response.get(direction)
+
+    async def get_platform_status(self) -> PlatformStatus:
         """Get platform sensor status.
 
         :return: True if platform is detected, False otherwise
@@ -226,3 +232,8 @@ class FlexStackerDriver(StackerDriver):
         if external is not None:
             command.add_int("E", external)
         await self._connection.send_command(command)
+
+    async def update_firmware(self, firmware_file_path: str) -> None:
+        """Updates the firmware on the device."""
+        # TODO: Implement firmware update
+        pass
