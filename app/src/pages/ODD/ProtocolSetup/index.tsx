@@ -88,7 +88,7 @@ import {
   useRequiredProtocolHardwareFromAnalysis,
   useMissingProtocolHardwareFromAnalysis,
 } from '/app/transformations/commands'
-import { useLaunchLPC } from '/app/organisms/LabwarePositionCheck/useLaunchLPC'
+import { useLPCFlows } from '/app/src/organisms/LabwarePositionCheck/useLPCFlows'
 
 import type { Dispatch, SetStateAction } from 'react'
 import type { Run } from '@opentrons/api-client'
@@ -742,7 +742,7 @@ export function ProtocolSetup(): JSX.Element {
     robotType,
     protocolName
   )
-  const { launchLPC, LPCWizard } = useLaunchLPC(runId, robotType, protocolName)
+  const { launchLPC, LPCWizard } = useLPCFlows(runId, robotType, protocolName)
 
   const { trackProtocolRunEvent } = useTrackProtocolRunEvent(runId, robotName)
   const robotAnalyticsData = useRobotAnalyticsData(robotName)

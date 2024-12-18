@@ -29,7 +29,7 @@ import {
   useLPCDisabledReason,
 } from '/app/resources/runs'
 import { useRobotType } from '/app/redux-resources/robots'
-import { useLaunchLPC } from '/app/organisms/LabwarePositionCheck/useLaunchLPC'
+import { useLPCFlows } from '/app/src/organisms/LabwarePositionCheck/useLPCFlows'
 
 import type { LabwareOffset } from '@opentrons/api-client'
 
@@ -102,7 +102,7 @@ export function SetupLabwarePositionCheck(
     robotType,
     protocolName
   )
-  const { launchLPC, LPCWizard } = useLaunchLPC(runId, robotType, protocolName)
+  const { launchLPC, LPCWizard } = useLPCFlows(runId, robotType, protocolName)
 
   const nonIdentityOffsets = getLatestCurrentOffsets(sortedOffsets)
 

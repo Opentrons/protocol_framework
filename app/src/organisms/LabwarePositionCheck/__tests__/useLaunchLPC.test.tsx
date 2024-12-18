@@ -24,7 +24,7 @@ import {
   useNotifyRunQuery,
   useMostRecentCompletedAnalysis,
 } from '/app/resources/runs'
-import { useLaunchLPC } from '../useLaunchLPC'
+import { useLPCFlows } from '../useLPCFlows'
 import { LabwarePositionCheck } from '..'
 
 import type { Mock } from 'vitest'
@@ -150,7 +150,7 @@ describe('useLaunchLPC hook', () => {
 
   it('returns and no wizard by default', () => {
     const { result } = renderHook(
-      () => useLaunchLPC(MOCK_RUN_ID, FLEX_ROBOT_TYPE),
+      () => useLPCFlows(MOCK_RUN_ID, FLEX_ROBOT_TYPE),
       { wrapper }
     )
     expect(result.current.LPCWizard).toEqual(null)
@@ -158,7 +158,7 @@ describe('useLaunchLPC hook', () => {
 
   it('returns creates maintenance run with current offsets and definitions when create callback is called, closes and deletes when exit is clicked', async () => {
     const { result } = renderHook(
-      () => useLaunchLPC(MOCK_RUN_ID, FLEX_ROBOT_TYPE),
+      () => useLPCFlows(MOCK_RUN_ID, FLEX_ROBOT_TYPE),
       { wrapper }
     )
     act(() => {

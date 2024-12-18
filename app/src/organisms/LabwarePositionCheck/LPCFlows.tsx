@@ -10,12 +10,18 @@ import {
   useNotifyRunQuery,
   useMostRecentCompletedAnalysis,
 } from '/app/resources/runs'
-import { LabwarePositionCheck } from '.'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
+import { LabwarePositionCheckComponent } from './LabwarePositionCheckComponent'
 
-import type { RobotType } from '@opentrons/shared-data'
+import type {
+  RobotType,
+  CompletedProtocolAnalysis,
+} from '@opentrons/shared-data'
+import type { LabwareOffset } from '@opentrons/api-client'
 
-export function useLaunchLPC(
+//TOME TODO: This needds to take all props that get passed to LPC, just like in ER.
+
+export function useLPCFlows(
   runId: string,
   robotType: RobotType,
   protocolName?: string
@@ -73,7 +79,7 @@ export function useLaunchLPC(
       ),
     LPCWizard:
       maintenanceRunId != null ? (
-        <LabwarePositionCheck
+        <LPCFlows
           onCloseClick={handleCloseLPC}
           runId={runId}
           mostRecentAnalysis={mostRecentAnalysis}
@@ -86,4 +92,21 @@ export function useLaunchLPC(
         />
       ) : null,
   }
+}
+
+interface LPCFlowsProps {
+  onCloseClick: () => void
+  runId: string
+  maintenanceRunId: string
+  robotType: RobotType
+  existingOffsets: LabwareOffset[]
+  mostRecentAnalysis: CompletedProtocolAnalysis | null
+  protocolName: string
+  caughtError?: Error
+  setMaintenanceRunId: (id: string | null) => void
+  isDeletingMaintenanceRun: boolean
+}
+
+function LPCFlows(props: LPCFlowsProps): JSX.Element {
+  return <LabwarePositionCheckComponent {...props} />
 }
