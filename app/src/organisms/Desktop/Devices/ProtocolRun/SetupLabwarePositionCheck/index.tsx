@@ -29,6 +29,8 @@ import {
   useLPCDisabledReason,
 } from '/app/resources/runs'
 import { useRobotType } from '/app/redux-resources/robots'
+import { useLaunchLPC } from '/app/organisms/LabwarePositionCheck/useLaunchLPC'
+
 import type { LabwareOffset } from '@opentrons/api-client'
 
 interface SetupLabwarePositionCheckProps {
@@ -100,6 +102,7 @@ export function SetupLabwarePositionCheck(
     robotType,
     protocolName
   )
+  const { launchLPC, LPCWizard } = useLaunchLPC(runId, robotType, protocolName)
 
   const nonIdentityOffsets = getLatestCurrentOffsets(sortedOffsets)
 
@@ -155,7 +158,7 @@ export function SetupLabwarePositionCheck(
         <PrimaryButton
           textTransform={TYPOGRAPHY.textTransformCapitalize}
           onClick={() => {
-            isNewLpc ? (() => null)() : launchLegacyLPC()
+            isNewLpc ? launchLPC() : launchLegacyLPC()
             setIsShowingLPCSuccessToast(false)
           }}
           id="LabwareSetup_checkLabwarePositionsButton"
@@ -170,7 +173,7 @@ export function SetupLabwarePositionCheck(
           </Tooltip>
         ) : null}
       </Flex>
-      {isNewLpc ? null : LegacyLPCWizard}
+      {isNewLpc ? LPCWizard : LegacyLPCWizard}
     </Flex>
   )
 }

@@ -153,7 +153,7 @@ describe('useLaunchLPC hook', () => {
       () => useLaunchLPC(MOCK_RUN_ID, FLEX_ROBOT_TYPE),
       { wrapper }
     )
-    expect(result.current.launchLPCWizard).toEqual(null)
+    expect(result.current.LPCWizard).toEqual(null)
   })
 
   it('returns creates maintenance run with current offsets and definitions when create callback is called, closes and deletes when exit is clicked', async () => {
@@ -184,9 +184,9 @@ describe('useLaunchLPC hook', () => {
     })
 
     await waitFor(() => {
-      expect(result.current.launchLPCWizard).not.toBeNull()
+      expect(result.current.LPCWizard).not.toBeNull()
     })
-    renderWithProviders(result.current.launchLPCWizard ?? <></>)
+    renderWithProviders(result.current.LPCWizard ?? <></>)
     fireEvent.click(screen.getByText('exit'))
     expect(mockDeleteMaintenanceRun).toHaveBeenCalledWith(
       MOCK_MAINTENANCE_RUN_ID,
@@ -194,6 +194,6 @@ describe('useLaunchLPC hook', () => {
         onSettled: expect.any(Function),
       }
     )
-    expect(result.current.launchLPCWizard).toBeNull()
+    expect(result.current.LPCWizard).toBeNull()
   })
 })

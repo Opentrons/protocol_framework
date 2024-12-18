@@ -32,7 +32,6 @@ export interface ProtocolSetupOffsetsProps {
   LPCWizard: JSX.Element | null
   isConfirmed: boolean
   setIsConfirmed: (confirmed: boolean) => void
-  isNewLpc: boolean
 }
 
 export function ProtocolSetupOffsets({
@@ -43,7 +42,6 @@ export function ProtocolSetupOffsets({
   launchLPC,
   lpcDisabledReason,
   LPCWizard,
-  isNewLpc,
 }: ProtocolSetupOffsetsProps): JSX.Element {
   const { t } = useTranslation('protocol_setup')
   const { makeSnackbar } = useToaster()
@@ -77,7 +75,7 @@ export function ProtocolSetupOffsets({
   const nonIdentityOffsets = getLatestCurrentOffsets(sortedOffsets)
   return (
     <>
-      {isNewLpc ? null : LPCWizard}
+      {LPCWizard}
       {LPCWizard == null && (
         <>
           <Flex
@@ -134,7 +132,7 @@ export function ProtocolSetupOffsets({
               if (lpcDisabledReason != null) {
                 makeDisabledReasonSnackbar()
               } else {
-                isNewLpc ? (() => null)() : launchLPC()
+                launchLPC()
               }
             }}
           />

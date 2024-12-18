@@ -19,7 +19,7 @@ export function useLaunchLPC(
   runId: string,
   robotType: RobotType,
   protocolName?: string
-): { launchLPC: () => void; launchLPCWizard: JSX.Element | null } {
+): { launchLPC: () => void; LPCWizard: JSX.Element | null } {
   const { data: runRecord } = useNotifyRunQuery(runId, { staleTime: Infinity })
   const {
     createTargetedMaintenanceRun,
@@ -71,7 +71,7 @@ export function useLaunchLPC(
           setMaintenanceRunId(maintenanceRun.data.id)
         })
       ),
-    launchLPCWizard:
+    LPCWizard:
       maintenanceRunId != null ? (
         <LabwarePositionCheck
           onCloseClick={handleCloseLPC}
