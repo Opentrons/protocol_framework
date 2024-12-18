@@ -6,8 +6,8 @@ import { addHint } from '../../../../tutorial/actions'
 import { selectors as labwareIngredSelectors } from '../../../../labware-ingred/selectors'
 import * as fileDataSelectors from '../../../../file-data/selectors'
 import { getInitialDeckSetup } from '../../../../step-forms/selectors'
-import type { StepType } from '../../../../form-types'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
+import type { StepType } from '../../../../form-types'
 
 vi.mock('../../../../tutorial/actions')
 vi.mock('../../../../ui/modules/selectors')

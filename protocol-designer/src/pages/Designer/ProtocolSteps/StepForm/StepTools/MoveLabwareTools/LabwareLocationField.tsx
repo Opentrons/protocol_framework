@@ -19,7 +19,7 @@ interface LabwareLocationFieldProps extends FieldProps {
 export function LabwareLocationField(
   props: LabwareLocationFieldProps
 ): JSX.Element {
-  const { t, i18n } = useTranslation(['form', 'protocol_steps'])
+  const { t } = useTranslation(['form', 'protocol_steps'])
   const { labware, useGripper } = props
   const additionalEquipmentEntities = useSelector(
     getAdditionalEquipmentEntities
@@ -54,7 +54,7 @@ export function LabwareLocationField(
         dispatch(
           hoverSelection({
             id,
-            text: i18n.format(t('application:location'), 'capitalize'),
+            text: t('application:location'),
           })
         )
       }}

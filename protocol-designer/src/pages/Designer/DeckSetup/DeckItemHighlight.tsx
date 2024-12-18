@@ -29,7 +29,7 @@ export function DeckItemHighlight(
   props: DeckItemHighlightProps
 ): JSX.Element | null {
   const { tab, slotBoundingBox, itemId, slotPosition } = props
-  const { t, i18n } = useTranslation('application')
+  const { t } = useTranslation('application')
   const hoveredDropdownSelection = useSelector(getHoveredDropdownItem)
   const selectedDropdownLocation = useSelector(getSelectedDropdownItem)
 
@@ -41,9 +41,15 @@ export function DeckItemHighlight(
     selected => selected.id === itemId && selected.field === '2'
   )
 
-  if (tab === 'startingDeck' || slotPosition === null) return null
+  if (
+    tab === 'startingDeck' ||
+    slotPosition === null ||
+    (!isHovered && !isSelected)
+  ) {
+    return null
+  }
 
-  return isHovered || isSelected ? (
+  return (
     <>
       <RobotCoordsForeignDiv
         x={slotPosition[0]}
@@ -72,7 +78,7 @@ export function DeckItemHighlight(
       <DeckLabelSet
         deckLabels={[
           {
-            text: i18n.format(t('location'), 'capitalize'),
+            text: t('location'),
             isLast: true,
             isSelected: isSelected,
             isZoomed: false,
@@ -84,5 +90,5 @@ export function DeckItemHighlight(
         height={slotBoundingBox.yDimension}
       />
     </>
-  ) : null
+  )
 }

@@ -42,18 +42,19 @@ export function DropdownStepFormField(
     onFieldBlur,
     name: fieldName,
   } = props
-  const { t, i18n } = useTranslation(['tooltip', 'application'])
+  const { t } = useTranslation(['tooltip', 'application'])
   const dispatch = useDispatch()
   const availableOptionId = options.find(opt => opt.value === value)
   const handleSelection = (value: string): void => {
     let text = t('application:selected')
     if (fieldName === 'newLocation') {
-      text = i18n.format(t('application:location'), 'capitalize')
+      text = t('application:location')
     } else if (fieldName === 'aspirate_labware') {
       text = t('application:source')
     } else if (fieldName === 'dispense_labware') {
       text = t('application:dest')
     }
+
     const selection = {
       id: value,
       text,

@@ -47,7 +47,7 @@ const SLOTS = [
 
 export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
   const { robotType, deckDef } = props
-  const { t, i18n } = useTranslation('application')
+  const { t } = useTranslation('application')
   const tab = useSelector(getDesignerTab)
   const { labware, modules, additionalEquipmentOnDeck } = useSelector(
     getDeckSetupForActiveItem
@@ -106,9 +106,10 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
         .map(item => (item?.id != null ? labware[item.id] : null))
         .filter(Boolean)
 
-      const labwaresToRender = hoveredItemLabware
-        ? [hoveredItemLabware]
-        : selectedLabwaresOnDeck
+      const labwaresToRender =
+        hoveredItemLabware != null
+          ? [hoveredItemLabware]
+          : selectedLabwaresOnDeck
 
       labwaresToRender.forEach((labwareOnDeck, index) => {
         if (!labwareOnDeck) {
@@ -120,7 +121,7 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
 
         let labwareSlot = labwareOnDeck.slot
         const hasTC = Object.values(modules).some(
-          mod => mod.type === THERMOCYCLER_MODULE_TYPE
+          module => module.type === THERMOCYCLER_MODULE_TYPE
         )
 
         if (modules[labwareSlot]) {
@@ -131,7 +132,7 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
         }
 
         const position = getPositionFromSlotId(labwareSlot, deckDef)
-        if (position) {
+        if (position != null) {
           items.push(
             <LabwareLabel
               key={`${labwareOnDeck.id}_${index}`}
@@ -175,7 +176,7 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
       }
 
       const position = getPositionFromSlotId(moduleOnDeck.slot, deckDef)
-      if (position) {
+      if (position != null) {
         items.push(
           <ModuleLabel
             key={`module_${moduleOnDeck.id}`}
@@ -215,7 +216,7 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
         return []
       }
 
-      if (hoveredItemTrash) {
+      if (hoveredItemTrash != null) {
         items.push(
           <FixtureRender
             key={`${hoveredItemTrash.id}_hovered`}
@@ -236,7 +237,7 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
         )
       }
 
-      if (selectedTrashOnDeck && selectedItemTrash) {
+      if (selectedTrashOnDeck != null && selectedItemTrash != null) {
         items.push(
           <FixtureRender
             key={`${selectedTrashOnDeck.id}_selected`}
@@ -278,7 +279,7 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
             showHighlight={true}
             tagInfo={[
               {
-                text: i18n.format(t('location'), 'capitalize'),
+                text: t('location'),
                 isSelected: true,
                 isLast: true,
                 isZoomed: false,

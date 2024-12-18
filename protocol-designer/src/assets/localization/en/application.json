@@ -12,7 +12,7 @@
   "information": "Information",
   "labware": "labware",
   "last_exported": "Last Exported",
-  "location": "location",
+  "location": "Location",
   "magnet_height_caption": "Must be between {{low}} to {{high}}.",
   "magnet_recommended": "The recommended height is {{default}}",
   "manually": "Manually",

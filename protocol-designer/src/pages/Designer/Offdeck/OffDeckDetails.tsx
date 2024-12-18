@@ -23,17 +23,17 @@ import { DeckItemHover } from '../DeckSetup/DeckItemHover'
 import { SlotDetailsContainer } from '../../../organisms'
 import { wellFillFromWellContents } from '../../../organisms/LabwareOnDeck/utils'
 import { getRobotType } from '../../../file-data/selectors'
-import { SlotOverflowMenu } from '../DeckSetup/SlotOverflowMenu'
-import { HighlightOffdeckSlot } from './HighlightOffdeckSlot'
-import type { DeckSlotId } from '@opentrons/shared-data'
-import type { DeckSetupTabType } from '../types'
 import {
   getHoveredDropdownItem,
   getSelectedDropdownItem,
 } from '../../../ui/steps/selectors'
+import { SlotOverflowMenu } from '../DeckSetup/SlotOverflowMenu'
+import { HighlightOffdeckSlot } from './HighlightOffdeckSlot'
+import type { CoordinateTuple, DeckSlotId } from '@opentrons/shared-data'
+import type { DeckSetupTabType } from '../types'
 
 const OFFDECK_MAP_WIDTH = '41.625rem'
-
+const ZERO_SLOT_POSITION: CoordinateTuple = [0, 0, 0]
 interface OffDeckDetailsProps extends DeckSetupTabType {
   addLabware: () => void
 }
@@ -154,14 +154,17 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
                         menuListId={menuListId}
                         setHover={setHoverSlot}
                         slotBoundingBox={xyzDimensions}
-                        slotPosition={[0, 0, 0]}
+                        slotPosition={ZERO_SLOT_POSITION}
                         itemId={lw.id}
                         tab={tab}
                       />
                     </>
                   )}
                 </RobotWorkSpace>
-                <HighlightOffdeckSlot labwareOnDeck={lw} position={[0, 0, 0]} />
+                <HighlightOffdeckSlot
+                  labwareOnDeck={lw}
+                  position={ZERO_SLOT_POSITION}
+                />
                 {menuListId === lw.id ? (
                   <Flex
                     marginTop={`-${SPACING.spacing32}`}
@@ -174,7 +177,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
                       setShowMenuList={() => {
                         setShowMenuListForId(null)
                       }}
-                      menuListSlotPosition={[0, 0, 0]}
+                      menuListSlotPosition={ZERO_SLOT_POSITION}
                       invertY
                     />
                   </Flex>
@@ -183,7 +186,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
             )
           })}
 
-          <HighlightOffdeckSlot position={[0, 0, 0]} />
+          <HighlightOffdeckSlot position={ZERO_SLOT_POSITION} />
 
           {tab === 'startingDeck' ? (
             <Flex width="9.5625rem" height="6.375rem">

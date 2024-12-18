@@ -49,20 +49,25 @@ export const ModuleLabel = (props: ModuleLabelProps): JSX.Element => {
     def?.dimensions.labwareInterfaceXDimension != null
       ? def.dimensions.xDimension - def?.dimensions.labwareInterfaceXDimension
       : 0
-  //  TODO(ja 9/6/24): definitely need to refine these overhang values
   let leftOverhang = overhang
-  if (def?.moduleType === TEMPERATURE_MODULE_TYPE) {
-    leftOverhang = overhang * 2
-  } else if (def?.moduleType === HEATERSHAKER_MODULE_TYPE) {
-    leftOverhang = overhang + 14
-  } else if (def?.moduleType === MAGNETIC_MODULE_TYPE) {
-    leftOverhang = overhang + 8
-  } else if (
-    def?.moduleType === THERMOCYCLER_MODULE_TYPE &&
-    !isZoomed &&
-    robotType === FLEX_ROBOT_TYPE
-  ) {
-    leftOverhang = overhang + 20
+
+  switch (def?.moduleType) {
+    case TEMPERATURE_MODULE_TYPE:
+      leftOverhang = overhang * 2
+      break
+    case HEATERSHAKER_MODULE_TYPE:
+      leftOverhang = overhang + 14
+      break
+    case MAGNETIC_MODULE_TYPE:
+      leftOverhang = overhang + 8
+      break
+    case THERMOCYCLER_MODULE_TYPE:
+      if (!isZoomed && robotType === FLEX_ROBOT_TYPE) {
+        leftOverhang = overhang + 20
+      }
+      break
+    default:
+      break
   }
 
   return (
