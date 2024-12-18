@@ -113,6 +113,7 @@ const allIngredientNamesIds: Selector<
     ingredientId: ingredId,
     name: ingreds[ingredId].name,
     displayColor: ingreds[ingredId].displayColor,
+    liquidClass: ingreds[ingredId].liquidClass,
   }))
 })
 const getLabwareSelectionMode: Selector<RootSlice, boolean> = createSelector(
