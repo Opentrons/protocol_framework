@@ -1,3 +1,57 @@
+import '../support/commands.ts'; // Importing the custom commands file
+
+const Flex_Home = 'Opentrons Flex';
+const OT2_Home = 'Opentrons OT-2';
+
+
+describe('Happy Path Mixing Tests', () => {
+  it('It should verify the working function of every permutation of transfer checkboxes', () => {
+
+    cy.visit('/'); // Replace with the appropriate URL or navigation
+    cy.verifyHomePage(); // This calls the custom command from commands.ts
+    cy.clickCreateNew()
+    cy.robotSelection(Flex_Home)
+
+
+    /* Is it correct to assume that, for example, testing mix settings, that we would need to run functions that at least perform XYZ tasks to get to that point?*/
+
+    //we need a function to run through the pipette/volume/tiprack selection flow (Add Pipettes Page)
+    //We need a function to run through your pipettes and add a pipette (Robot Pipettes Page)
+    //Add a gripper page
+    //Add modules
+    //add fixtures
+
+
+    const pipette = '1-Channel'
+    function putPipette(pipette) {
+      cy.contains('label', pipette).should('exist').and('be.visible').click()
+    }
+    putPipette(pipette)
+    // Check step 2 has the right text
+    cy.contains('Step 2')
+    cy.contains('Add a pipette')
+    cy.contains('Pick your first pipette. If you need a second pipette, you can add it next.')
+    // Check 
+    cy.contains('button', 'Go back').click()
+    cy.robotSelection(Flex_Home)
+    putPipette(pipette)
+  });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // TODO: refactor to test with new navigation
 // const isMacOSX = Cypress.platform === 'darwin'
 // const invalidInput = 'abcdefghijklmnopqrstuvwxyz!@#$%^&*()<>?,-'
