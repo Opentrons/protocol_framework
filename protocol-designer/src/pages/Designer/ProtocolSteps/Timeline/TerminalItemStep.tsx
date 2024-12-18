@@ -1,4 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import { useConditionalConfirm } from '@opentrons/components'
 import {
   getHoveredTerminalItemId,
@@ -28,7 +29,6 @@ import type {
 } from '../../../../ui/steps'
 import type { TerminalItemId } from '../../../../steplist'
 import type { ThunkDispatch } from '../../../../types'
-import { useTranslation } from 'react-i18next'
 
 export interface TerminalItemStepProps {
   id: TerminalItemId
