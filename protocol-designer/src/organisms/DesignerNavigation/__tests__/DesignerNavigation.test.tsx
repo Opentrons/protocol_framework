@@ -6,7 +6,7 @@ import { i18n } from '../../../assets/localization'
 import { getFileMetadata } from '../../../file-data/selectors'
 import { LiquidButton } from '../../../molecules'
 
-import { EditNavigation } from '..'
+import { DesignerNavigation } from '..'
 
 import type { ComponentProps } from 'react'
 import type { NavigateFunction } from 'react-router-dom'
@@ -29,14 +29,14 @@ vi.mock('react-router-dom', async importOriginal => {
   }
 })
 
-const render = (props: ComponentProps<typeof EditNavigation>) => {
-  return renderWithProviders(<EditNavigation {...props} />, {
+const render = (props: ComponentProps<typeof DesignerNavigation>) => {
+  return renderWithProviders(<DesignerNavigation {...props} />, {
     i18nInstance: i18n,
   })
 }
 
-describe('EditNavigation', () => {
-  let props: ComponentProps<typeof EditNavigation>
+describe('DesignerNavigation', () => {
+  let props: ComponentProps<typeof DesignerNavigation>
   beforeEach(() => {
     props = {
       hasZoomInSlot: false,

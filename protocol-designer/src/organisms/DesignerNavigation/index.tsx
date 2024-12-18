@@ -24,19 +24,19 @@ import { LiquidButton } from '../../molecules/LiquidButton'
 
 import type { StyleProps, TabProps } from '@opentrons/components'
 
-interface EditNavigationProps {
+interface DesignerNavigationProps {
   hasZoomInSlot?: boolean
   tabs?: TabProps[]
   hasTrashEntity?: boolean
   showLiquidOverflowMenu?: (liquidOverflowMenu: boolean) => void
 }
-
-export function EditNavigation({
+// Note: this navigation is used in design page and liquids page
+export function DesignerNavigation({
   hasZoomInSlot,
   tabs = [],
   hasTrashEntity,
   showLiquidOverflowMenu,
-}: EditNavigationProps): JSX.Element {
+}: DesignerNavigationProps): JSX.Element {
   const { t } = useTranslation('starting_deck_state')
   const location = useLocation()
   const metadata = useSelector(getFileMetadata)
