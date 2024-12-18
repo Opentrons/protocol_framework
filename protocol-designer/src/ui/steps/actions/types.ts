@@ -32,6 +32,7 @@ export interface DuplicateMultipleStepsAction {
   }
 }
 
+export type Mode = 'clear' | 'add'
 export interface Selection {
   id: string | null
   text: string | null

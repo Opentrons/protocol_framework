@@ -17,20 +17,21 @@ import type { AnalyticsEventAction } from '../../../analytics/actions'
 import type { TerminalItemId, SubstepIdentifier } from '../../../steplist/types'
 import type {
   AddStepAction,
+  ClearWellSelectionLabwareKeyAction,
   HoverOnStepAction,
   HoverOnSubstepAction,
-  SelectTerminalItemAction,
   HoverOnTerminalItemAction,
-  SetWellSelectionLabwareKeyAction,
-  ClearWellSelectionLabwareKeyAction,
-  SelectStepAction,
-  SelectMultipleStepsAction,
-  SelectMultipleStepsForGroupAction,
-  ToggleViewSubstepAction,
-  ViewSubstep,
   hoverSelectionAction,
+  Mode,
   selectDropdownItemAction,
   Selection,
+  SelectMultipleStepsAction,
+  SelectMultipleStepsForGroupAction,
+  SelectStepAction,
+  SelectTerminalItemAction,
+  SetWellSelectionLabwareKeyAction,
+  ToggleViewSubstepAction,
+  ViewSubstep,
 } from './types'
 
 // adds an incremental integer ID for Step reducers.
@@ -57,7 +58,7 @@ export const hoverSelection = (args: Selection): hoverSelectionAction => ({
 })
 export const selectDropdownItem = (args: {
   selection: Selection | null
-  mode: 'add' | 'clear'
+  mode: Mode
 }): selectDropdownItemAction => ({
   type: 'SELECT_DROPDOWN_ITEM',
   payload: {
