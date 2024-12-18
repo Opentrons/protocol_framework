@@ -1,9 +1,10 @@
 """Command models to initialize an Absorbance Reader."""
 from __future__ import annotations
-from typing import List, Optional, Literal, TYPE_CHECKING
+from typing import List, Optional, Literal, TYPE_CHECKING, Any
 from typing_extensions import Type
 
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.drivers.types import ABSMeasurementMode
 from opentrons.protocol_engine.types import ABSMeasureMode
@@ -20,6 +21,10 @@ if TYPE_CHECKING:
 InitializeCommandType = Literal["absorbanceReader/initialize"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 class InitializeParams(BaseModel):
     """Input parameters to initialize an absorbance reading."""
 
@@ -28,8 +33,10 @@ class InitializeParams(BaseModel):
         ..., description="Initialize single or multi measurement mode."
     )
     sampleWavelengths: List[int] = Field(..., description="Sample wavelengths in nm.")
-    referenceWavelength: Optional[int] = Field(
-        None, description="Optional reference wavelength in nm."
+    referenceWavelength: int | SkipJsonSchema[None] = Field(
+        None,
+        description="Optional reference wavelength in nm.",
+        json_schema_extra=_remove_default,
     )
 
 

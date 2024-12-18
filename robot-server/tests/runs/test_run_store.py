@@ -1,4 +1,5 @@
 """Tests for robot_server.runs.run_store."""
+
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional, Type
@@ -241,10 +242,10 @@ def run_time_parameters() -> List[pe_types.RunTimeParameter]:
 @pytest.fixture
 def invalid_state_summary() -> StateSummary:
     """Should fail pydantic validation."""
-    analysis_error = pe_errors.ErrorOccurrence.construct(
+    analysis_error = pe_errors.ErrorOccurrence.model_construct(
         id="error-id",
         # Invalid value here should fail analysis
-        createdAt=MountType.LEFT,  # type: ignore
+        createdAt=MountType.LEFT,  # type: ignore[arg-type]
         errorType="BadError",
         detail="oh no",
     )
@@ -737,7 +738,7 @@ def test_get_run_time_parameters_invalid(
     state_summary: StateSummary,
 ) -> None:
     """It should return an empty list if there invalid parameters."""
-    bad_parameters = [pe_types.BooleanParameter.construct(foo="bar")]  # type: ignore[call-arg]
+    bad_parameters = [pe_types.BooleanParameter.construct(foo="bar")]
     subject.insert(
         run_id="run-id",
         protocol_id=None,
@@ -993,12 +994,12 @@ def test_get_all_commands_as_preserialized_list(
         run_id="run-id", include_fixit_commands=True
     )
     assert result == [
-        '{"id": "pause-1", "createdAt": "2021-01-01T00:00:00", "commandType": "waitForResume",'
-        ' "key": "command-key", "status": "succeeded", "params": {"message": "hello world"}, "result": {}, "intent": "protocol"}',
-        '{"id": "pause-2", "createdAt": "2022-02-02T00:00:00", "commandType": "waitForResume",'
-        ' "key": "command-key", "status": "succeeded", "params": {"message": "hey world"}, "result": {}, "intent": "protocol"}',
-        '{"id": "pause-3", "createdAt": "2023-03-03T00:00:00", "commandType": "waitForResume", "key": "command-key", "status": "succeeded", "params": {"message": "sup world"}, "result": {}}',
-        '{"id": "fixit-pause-1", "createdAt": "2021-01-01T00:00:00", "commandType": "waitForResume", "key": "command-key", "status": "succeeded", "params": {"message": "hello world"}, "result": {}, "intent": "fixit"}',
+        '{"id":"pause-1","createdAt":"2021-01-01T00:00:00","commandType":"waitForResume",'
+        '"key":"command-key","status":"succeeded","params":{"message":"hello world"},"result":{},"intent":"protocol"}',
+        '{"id":"pause-2","createdAt":"2022-02-02T00:00:00","commandType":"waitForResume",'
+        '"key":"command-key","status":"succeeded","params":{"message":"hey world"},"result":{},"intent":"protocol"}',
+        '{"id":"pause-3","createdAt":"2023-03-03T00:00:00","commandType":"waitForResume","key":"command-key","status":"succeeded","params":{"message":"sup world"},"result":{}}',
+        '{"id":"fixit-pause-1","createdAt":"2021-01-01T00:00:00","commandType":"waitForResume","key":"command-key","status":"succeeded","params":{"message":"hello world"},"result":{},"intent":"fixit"}',
     ]
 
 
@@ -1023,9 +1024,9 @@ def test_get_all_commands_as_preserialized_list_no_fixit(
         run_id="run-id", include_fixit_commands=False
     )
     assert result == [
-        '{"id": "pause-1", "createdAt": "2021-01-01T00:00:00", "commandType": "waitForResume",'
-        ' "key": "command-key", "status": "succeeded", "params": {"message": "hello world"}, "result": {}, "intent": "protocol"}',
-        '{"id": "pause-2", "createdAt": "2022-02-02T00:00:00", "commandType": "waitForResume",'
-        ' "key": "command-key", "status": "succeeded", "params": {"message": "hey world"}, "result": {}, "intent": "protocol"}',
-        '{"id": "pause-3", "createdAt": "2023-03-03T00:00:00", "commandType": "waitForResume", "key": "command-key", "status": "succeeded", "params": {"message": "sup world"}, "result": {}}',
+        '{"id":"pause-1","createdAt":"2021-01-01T00:00:00","commandType":"waitForResume",'
+        '"key":"command-key","status":"succeeded","params":{"message":"hello world"},"result":{},"intent":"protocol"}',
+        '{"id":"pause-2","createdAt":"2022-02-02T00:00:00","commandType":"waitForResume",'
+        '"key":"command-key","status":"succeeded","params":{"message":"hey world"},"result":{},"intent":"protocol"}',
+        '{"id":"pause-3","createdAt":"2023-03-03T00:00:00","commandType":"waitForResume","key":"command-key","status":"succeeded","params":{"message":"sup world"},"result":{}}',
     ]

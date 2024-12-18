@@ -169,63 +169,63 @@ def magdeck_well_plate_def() -> LabwareDefinition:
 def tempdeck_v1_def() -> ModuleDefinition:
     """Get the definition of a V1 tempdeck."""
     definition = load_shared_data("module/definitions/3/temperatureModuleV1.json")
-    return ModuleDefinition.parse_raw(definition)
+    return ModuleDefinition.model_validate_json(definition)
 
 
 @pytest.fixture(scope="session")
 def tempdeck_v2_def() -> ModuleDefinition:
     """Get the definition of a V2 tempdeck."""
     definition = load_shared_data("module/definitions/3/temperatureModuleV2.json")
-    return ModuleDefinition.parse_raw(definition)
+    return ModuleDefinition.model_validate_json(definition)
 
 
 @pytest.fixture(scope="session")
 def magdeck_v1_def() -> ModuleDefinition:
     """Get the definition of a V1 magdeck."""
     definition = load_shared_data("module/definitions/3/magneticModuleV1.json")
-    return ModuleDefinition.parse_raw(definition)
+    return ModuleDefinition.model_validate_json(definition)
 
 
 @pytest.fixture(scope="session")
 def magdeck_v2_def() -> ModuleDefinition:
     """Get the definition of a V2 magdeck."""
     definition = load_shared_data("module/definitions/3/magneticModuleV2.json")
-    return ModuleDefinition.parse_raw(definition)
+    return ModuleDefinition.model_validate_json(definition)
 
 
 @pytest.fixture(scope="session")
 def thermocycler_v1_def() -> ModuleDefinition:
     """Get the definition of a V2 thermocycler."""
     definition = load_shared_data("module/definitions/3/thermocyclerModuleV1.json")
-    return ModuleDefinition.parse_raw(definition)
+    return ModuleDefinition.model_validate_json(definition)
 
 
 @pytest.fixture(scope="session")
 def thermocycler_v2_def() -> ModuleDefinition:
     """Get the definition of a V2 thermocycler."""
     definition = load_shared_data("module/definitions/3/thermocyclerModuleV2.json")
-    return ModuleDefinition.parse_raw(definition)
+    return ModuleDefinition.model_validate_json(definition)
 
 
 @pytest.fixture(scope="session")
 def heater_shaker_v1_def() -> ModuleDefinition:
     """Get the definition of a V1 heater-shaker."""
     definition = load_shared_data("module/definitions/3/heaterShakerModuleV1.json")
-    return ModuleDefinition.parse_raw(definition)
+    return ModuleDefinition.model_validate_json(definition)
 
 
 @pytest.fixture(scope="session")
 def mag_block_v1_def() -> ModuleDefinition:
     """Get the definition of a V1 Mag Block."""
     definition = load_shared_data("module/definitions/3/magneticBlockV1.json")
-    return ModuleDefinition.parse_raw(definition)
+    return ModuleDefinition.model_validate_json(definition)
 
 
 @pytest.fixture(scope="session")
 def abs_reader_v1_def() -> ModuleDefinition:
     """Get the definition of a V1 absorbance plate reader."""
     definition = load_shared_data("module/definitions/3/absorbanceReaderV1.json")
-    return ModuleDefinition.parse_raw(definition)
+    return ModuleDefinition.model_validate_json(definition)
 
 
 @pytest.fixture(scope="session")

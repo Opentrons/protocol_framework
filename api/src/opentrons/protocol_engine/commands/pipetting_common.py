@@ -1,10 +1,12 @@
 """Common pipetting command base models."""
 
 from __future__ import annotations
-from opentrons_shared_data.errors import ErrorCodes
-from pydantic import BaseModel, Field
-from typing import Literal, Tuple, TypedDict, TYPE_CHECKING
+from typing import Literal, Tuple, TYPE_CHECKING
 
+from typing_extensions import TypedDict
+from pydantic import BaseModel, Field
+
+from opentrons_shared_data.errors import ErrorCodes
 from opentrons.protocol_engine.errors.error_occurrence import ErrorOccurrence
 from opentrons.protocol_engine.types import AspiratedFluid, FluidKind
 from opentrons_shared_data.errors.exceptions import PipetteOverpressureError
@@ -69,6 +71,10 @@ class BaseLiquidHandlingResult(BaseModel):
         description="Amount of liquid in uL handled in the operation.",
         ge=0,
     )
+
+
+class EmptyResult(BaseModel):
+    """A result with no data."""
 
 
 class ErrorLocationInfo(TypedDict):
@@ -139,7 +145,7 @@ async def prepare_for_aspirate(
     pipetting: PipettingHandler,
     model_utils: ModelUtils,
     location_if_error: ErrorLocationInfo,
-) -> SuccessData[BaseModel] | DefinedErrorData[OverpressureError]:
+) -> SuccessData[EmptyResult] | DefinedErrorData[OverpressureError]:
     """Execute pipetting.prepare_for_aspirate, handle errors, and marshal success."""
     try:
         await pipetting.prepare_for_aspirate(pipette_id)
@@ -161,7 +167,7 @@ async def prepare_for_aspirate(
         )
     else:
         return SuccessData(
-            public=BaseModel(),
+            public=EmptyResult(),
             state_update=StateUpdate().set_fluid_empty(pipette_id=pipette_id),
         )
 
@@ -259,7 +265,7 @@ async def blow_out_in_place(
     location_if_error: ErrorLocationInfo,
     pipetting: PipettingHandler,
     model_utils: ModelUtils,
-) -> SuccessData[BaseModel] | DefinedErrorData[OverpressureError]:
+) -> SuccessData[EmptyResult] | DefinedErrorData[OverpressureError]:
     """Execute a blow-out-in-place micro-operation."""
     try:
         await pipetting.blow_out_in_place(pipette_id=pipette_id, flow_rate=flow_rate)
@@ -281,6 +287,6 @@ async def blow_out_in_place(
         )
     else:
         return SuccessData(
-            public=BaseModel(),
+            public=EmptyResult(),
             state_update=StateUpdate().set_fluid_empty(pipette_id=pipette_id),
         )

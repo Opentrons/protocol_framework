@@ -80,7 +80,7 @@ class CalibratePipette(
 
     commandType: CalibratePipetteCommandType = "calibration/calibratePipette"
     params: CalibratePipetteParams
-    result: Optional[CalibratePipetteResult]
+    result: Optional[CalibratePipetteResult] = None
 
     _ImplementationCls: Type[
         CalibratePipetteImplementation

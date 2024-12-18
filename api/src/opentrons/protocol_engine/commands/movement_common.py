@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Optional, Union, TYPE_CHECKING, Literal
+from typing import Optional, Union, TYPE_CHECKING, Literal, Any
 
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons_shared_data.errors import ErrorCodes
 from opentrons_shared_data.errors.exceptions import StallOrCollisionDetectedError
@@ -24,6 +25,10 @@ from .command import SuccessData, DefinedErrorData
 if TYPE_CHECKING:
     from ..execution.movement import MovementHandler
     from ..resources.model_utils import ModelUtils
+
+
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
 
 
 class WellLocationMixin(BaseModel):
@@ -63,13 +68,14 @@ class LiquidHandlingWellLocationMixin(BaseModel):
 class MovementMixin(BaseModel):
     """Mixin for command requests that move a pipette."""
 
-    minimumZHeight: Optional[float] = Field(
+    minimumZHeight: float | SkipJsonSchema[None] = Field(
         None,
         description=(
             "Optional minimal Z margin in mm."
             " If this is larger than the API's default safe Z margin,"
             " it will make the arc higher. If it's smaller, it will have no effect."
         ),
+        json_schema_extra=_remove_default,
     )
 
     forceDirect: bool = Field(
@@ -83,12 +89,13 @@ class MovementMixin(BaseModel):
         ),
     )
 
-    speed: Optional[float] = Field(
+    speed: float | SkipJsonSchema[None] = Field(
         None,
         description=(
             "Override the travel speed in mm/s."
             " This controls the straight linear speed of motion."
         ),
+        json_schema_extra=_remove_default,
     )
 
 

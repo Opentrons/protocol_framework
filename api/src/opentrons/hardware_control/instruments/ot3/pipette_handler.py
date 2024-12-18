@@ -248,7 +248,7 @@ class OT3PipetteHandler:
             result["current_nozzle_map"] = instr.nozzle_manager.current_configuration
             result["min_volume"] = instr.liquid_class.min_volume
             result["max_volume"] = instr.liquid_class.max_volume
-            result["channels"] = instr._max_channels
+            result["channels"] = instr._max_channels.value
             result["has_tip"] = instr.has_tip
             result["tip_length"] = instr.current_tip_length
             result["aspirate_speed"] = self.plunger_speed(

@@ -1,10 +1,11 @@
 """Command models to read absorbance."""
 from __future__ import annotations
 from datetime import datetime
-from typing import Optional, Dict, TYPE_CHECKING, List
-from typing_extensions import Literal, Type
+from typing import Optional, Dict, TYPE_CHECKING, List, Any
 
+from typing_extensions import Literal, Type
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ...errors import CannotPerformModuleAction, StorageLimitReachedError
@@ -23,6 +24,10 @@ if TYPE_CHECKING:
     from opentrons.protocol_engine.execution import EquipmentHandler
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 ReadAbsorbanceCommandType = Literal["absorbanceReader/read"]
 
 
@@ -30,9 +35,10 @@ class ReadAbsorbanceParams(BaseModel):
     """Input parameters for an absorbance reading."""
 
     moduleId: str = Field(..., description="Unique ID of the Absorbance Reader.")
-    fileName: Optional[str] = Field(
+    fileName: str | SkipJsonSchema[None] = Field(
         None,
         description="Optional file name to use when storing the results of a measurement.",
+        json_schema_extra=_remove_default,
     )
 
 

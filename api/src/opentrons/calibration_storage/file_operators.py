@@ -133,7 +133,7 @@ def deserialize_pydantic_model(
     Returns `None` if the file is missing or corrupt.
     """
     try:
-        return model.parse_raw(serialized)
+        return model.model_validate_json(serialized)
     except json.JSONDecodeError:
         _log.warning("Data is not valid JSON.", exc_info=True)
         return None

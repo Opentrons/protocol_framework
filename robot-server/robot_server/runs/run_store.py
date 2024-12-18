@@ -1,4 +1,5 @@
 """Runs' on-db store."""
+
 import logging
 from collections import defaultdict
 from dataclasses import dataclass
@@ -7,8 +8,8 @@ from functools import lru_cache
 from typing import Dict, List, Optional, Literal, Union
 
 import sqlalchemy
+from pydantic import TypeAdapter, ValidationError
 from sqlalchemy import and_
-from pydantic import ValidationError
 
 from opentrons.util.helpers import utc_now
 from opentrons.protocol_engine import (
@@ -38,7 +39,6 @@ from robot_server.persistence.tables import (
 from robot_server.persistence.pydantic import (
     json_to_pydantic,
     pydantic_to_json,
-    json_to_pydantic_list,
     pydantic_list_to_json,
 )
 from robot_server.protocols.protocol_store import ProtocolNotFoundError
@@ -433,7 +433,7 @@ class RunStore:
 
         try:
             return (
-                json_to_pydantic_list(RunTimeParameter, row.run_time_parameters)  # type: ignore[arg-type]
+                json_to_pydantic(_rtp_list_adapter, row.run_time_parameters)
                 if row.run_time_parameters is not None
                 else []
             )
@@ -515,8 +515,7 @@ class RunStore:
             slice_result = transaction.execute(select_slice).all()
 
         sliced_commands: List[Command] = [
-            json_to_pydantic(Command, row.command)  # type: ignore[arg-type]
-            for row in slice_result
+            _parse_command(row.command) for row in slice_result
         ]
 
         return CommandSlice(
@@ -680,7 +679,7 @@ class RunStore:
             if command is None:
                 raise CommandNotFoundError(command_id=command_id)
 
-        return json_to_pydantic(Command, command)  # type: ignore[arg-type]
+        return _parse_command(command)
 
     def remove(self, run_id: str) -> None:
         """Remove a run by its unique identifier.
@@ -827,6 +826,15 @@ def _convert_state_to_sql_values(
         "_updated_at": utc_now(),
         "run_time_parameters": pydantic_list_to_json(run_time_parameters),
     }
+
+
+_command_type_adapter: TypeAdapter[Command] = TypeAdapter(Command)
+_rtp_list_adapter = TypeAdapter(list[RunTimeParameter])
+
+
+def _parse_command(json_str: str) -> Command:
+    """Parse a JSON string from the database into a `Command`."""
+    return json_to_pydantic(_command_type_adapter, json_str)
 
 
 def _convert_commands_status_to_sql_command_status(

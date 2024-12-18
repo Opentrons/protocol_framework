@@ -90,7 +90,7 @@ async def get_wifi_networks(
                 "letting the system decide when to do a rescan."
             ),
         ),
-    ] = False
+    ] = False,
 ) -> WifiNetworks:
     networks = await nmcli.available_ssids(rescan)
     return WifiNetworks(list=[WifiNetworkFull(**n) for n in networks])
@@ -210,7 +210,7 @@ async def delete_wifi_key(
             description="The ID of key to delete, as determined by a previous"
             " call to GET /wifi/keys",
         ),
-    ]
+    ],
 ) -> V1BasicResponse:
     """Delete wifi key handler"""
     deleted_file = wifi.remove_key(key_uuid)

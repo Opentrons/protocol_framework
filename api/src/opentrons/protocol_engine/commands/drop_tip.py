@@ -1,9 +1,11 @@
 """Drop tip command request, result, and implementation models."""
 
 from __future__ import annotations
+from typing import TYPE_CHECKING, Optional, Type, Any
 
 from pydantic import Field
-from typing import TYPE_CHECKING, Optional, Type
+from pydantic.json_schema import SkipJsonSchema
+
 from typing_extensions import Literal
 
 from opentrons.protocol_engine.errors.exceptions import TipAttachedError
@@ -37,6 +39,10 @@ if TYPE_CHECKING:
 DropTipCommandType = Literal["dropTip"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 class DropTipParams(PipetteIdMixin):
     """Payload required to drop a tip in a specific well."""
 
@@ -46,15 +52,16 @@ class DropTipParams(PipetteIdMixin):
         default_factory=DropTipWellLocation,
         description="Relative well location at which to drop the tip.",
     )
-    homeAfter: Optional[bool] = Field(
+    homeAfter: bool | SkipJsonSchema[None] = Field(
         None,
         description=(
             "Whether to home this pipette's plunger after dropping the tip."
             " You should normally leave this unspecified to let the robot choose"
             " a safe default depending on its hardware."
         ),
+        json_schema_extra=_remove_default,
     )
-    alternateDropLocation: Optional[bool] = Field(
+    alternateDropLocation: bool | SkipJsonSchema[None] = Field(
         False,
         description=(
             "Whether to alternate location where tip is dropped within the labware."
@@ -63,6 +70,7 @@ class DropTipParams(PipetteIdMixin):
             " labware well."
             " If False, the tip will be dropped at the top center of the well."
         ),
+        json_schema_extra=_remove_default,
     )
 
 
@@ -184,7 +192,7 @@ class DropTip(
 
     commandType: DropTipCommandType = "dropTip"
     params: DropTipParams
-    result: Optional[DropTipResult]
+    result: Optional[DropTipResult] = None
 
     _ImplementationCls: Type[DropTipImplementation] = DropTipImplementation
 

@@ -1,4 +1,5 @@
 """Tests for /runs routes dealing with labware offsets and definitions."""
+
 import pytest
 from datetime import datetime
 from decoy import Decoy
@@ -49,7 +50,7 @@ def run() -> Run:
 @pytest.fixture()
 def labware_definition(minimal_labware_def: LabwareDefDict) -> LabwareDefinition:
     """Create a labware definition fixture."""
-    return LabwareDefinition.parse_obj(minimal_labware_def)
+    return LabwareDefinition.model_validate(minimal_labware_def)
 
 
 async def test_add_labware_offset(
@@ -162,8 +163,8 @@ async def test_get_run_labware_definition(
         mock_run_data_manager.get_run_loaded_labware_definitions(run_id="run-id")
     ).then_return(
         [
-            SD_LabwareDefinition.construct(namespace="test_1"),  # type: ignore[call-arg]
-            SD_LabwareDefinition.construct(namespace="test_2"),  # type: ignore[call-arg]
+            SD_LabwareDefinition.model_construct(namespace="test_1"),  # type: ignore[call-arg]
+            SD_LabwareDefinition.model_construct(namespace="test_2"),  # type: ignore[call-arg]
         ]
     )
 
@@ -172,7 +173,7 @@ async def test_get_run_labware_definition(
     )
 
     assert result.content.data == [
-        SD_LabwareDefinition.construct(namespace="test_1"),  # type: ignore[call-arg]
-        SD_LabwareDefinition.construct(namespace="test_2"),  # type: ignore[call-arg]
+        SD_LabwareDefinition.model_construct(namespace="test_1"),  # type: ignore[call-arg]
+        SD_LabwareDefinition.model_construct(namespace="test_2"),  # type: ignore[call-arg]
     ]
     assert result.status_code == 200

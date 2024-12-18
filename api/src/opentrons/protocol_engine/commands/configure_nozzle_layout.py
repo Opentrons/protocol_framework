@@ -97,7 +97,7 @@ class ConfigureNozzleLayout(
 
     commandType: ConfigureNozzleLayoutCommandType = "configureNozzleLayout"
     params: ConfigureNozzleLayoutParams
-    result: Optional[ConfigureNozzleLayoutResult]
+    result: Optional[ConfigureNozzleLayoutResult] = None
 
     _ImplementationCls: Type[
         ConfigureNozzleLayoutImplementation

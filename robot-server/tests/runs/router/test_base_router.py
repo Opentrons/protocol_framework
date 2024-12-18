@@ -1,4 +1,5 @@
 """Tests for base /runs routes."""
+
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons_shared_data.robot.types import RobotTypeEnum
 import pytest
@@ -874,6 +875,7 @@ async def test_get_current_state_success(
             )
         },
         tipStates={"mock-pipette-id": TipState(hasTip=True)},
+        placeLabwareState=None,
     )
     assert result.content.links == CurrentStateLinks(
         lastCompleted=CommandLinkNoMeta(

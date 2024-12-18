@@ -998,11 +998,15 @@ class LabwareView:
             return None
         else:
             return LabwareMovementOffsetData(
-                pickUpOffset=cast(
-                    LabwareOffsetVector, parsed_offsets[offset_key].pickUpOffset
+                pickUpOffset=LabwareOffsetVector.construct(
+                    x=parsed_offsets[offset_key].pickUpOffset.x,
+                    y=parsed_offsets[offset_key].pickUpOffset.y,
+                    z=parsed_offsets[offset_key].pickUpOffset.z,
                 ),
-                dropOffset=cast(
-                    LabwareOffsetVector, parsed_offsets[offset_key].dropOffset
+                dropOffset=LabwareOffsetVector.construct(
+                    x=parsed_offsets[offset_key].dropOffset.x,
+                    y=parsed_offsets[offset_key].dropOffset.y,
+                    z=parsed_offsets[offset_key].dropOffset.z,
                 ),
             )
 
