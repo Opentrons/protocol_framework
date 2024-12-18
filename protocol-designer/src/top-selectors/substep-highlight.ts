@@ -18,7 +18,6 @@ import type {
 import type { PipetteEntity, LabwareEntity } from '@opentrons/step-generation'
 import type { Selector } from '../types'
 import type { SubstepItemData } from '../steplist/types'
-import { getSelectedSubstep } from '../ui/steps/selectors'
 
 function _wellsForPipette(
   pipetteEntity: PipetteEntity,
