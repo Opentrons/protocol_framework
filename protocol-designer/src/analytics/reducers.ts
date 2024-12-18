@@ -5,11 +5,11 @@ import type { Action } from '../types'
 import type { SetOptIn } from './actions'
 import type { RehydratePersistedAction } from '../persist'
 export interface OptInState {
-  hasOptedIn: boolean | null
+  hasOptedIn: boolean
   appVersion?: string
 }
 const optInInitialState = {
-  hasOptedIn: null,
+  hasOptedIn: true,
 }
 
 // @ts-expect-error(sb, 2021-6-17): cannot use string literals as action type

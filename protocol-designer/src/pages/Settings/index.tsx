@@ -42,7 +42,7 @@ export function Settings(): JSX.Element {
   const [showAnnouncementModal, setShowAnnouncementModal] = useState<boolean>(
     false
   )
-  const analytics = useSelector(analyticsSelectors.getHasOptedIn)
+  const { hasOptedIn } = useSelector(analyticsSelectors.getHasOptedIn)
   const flags = useSelector(getFeatureFlagData)
   const canClearHintDismissals = useSelector(
     tutorialSelectors.getCanClearHintDismissals
@@ -274,13 +274,13 @@ export function Settings(): JSX.Element {
                   data-testid="analyticsToggle"
                   size="2rem"
                   css={
-                    Boolean(analytics.hasOptedIn)
+                    Boolean(hasOptedIn)
                       ? TOGGLE_ENABLED_STYLES
                       : TOGGLE_DISABLED_STYLES
                   }
                   onClick={() =>
                     dispatch(
-                      analytics.hasOptedIn
+                      hasOptedIn
                         ? analyticsActions.optOut()
                         : analyticsActions.optIn()
                     )
@@ -288,9 +288,7 @@ export function Settings(): JSX.Element {
                 >
                   <Icon
                     name={
-                      analytics.hasOptedIn
-                        ? 'ot-toggle-input-on'
-                        : 'ot-toggle-input-off'
+                      hasOptedIn ? 'ot-toggle-input-on' : 'ot-toggle-input-off'
                     }
                     height="1rem"
                   />
