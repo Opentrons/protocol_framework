@@ -13,13 +13,14 @@ By installing and using Opentrons software, you agree to the Opentrons End-User 
 Welcome to 8.3.0-alpha.0! This release adds support for Evosep Evotips on the Flex, as well as other features.
 
 ### New Features
-- Use Evosep Evotips in Python API version 2.22 protocols for protein purification. Only available with the Flex 96-channel pipette.  
+
+- Use Evosep Evotips in Python API version 2.22 protocols for protein purification. Only available with the Flex 96-channel pipette.
 - Change the app or Flex touchscreen language to Mandarin in Settings.
-- Load a newly modified “FLEX 8-Channel EM 1000 µL” pipette equipped with a PEEK motor component to automate emulsion applications. 
+- Load a newly modified “FLEX 8-Channel EM 1000 µL” pipette equipped with a PEEK motor component to automate emulsion applications.
 
 ### Improved Features
-- Recover from a stall or collision error during a protocol. 
 
+- Recover from a stall or collision error during a protocol.
 
 ---
 
