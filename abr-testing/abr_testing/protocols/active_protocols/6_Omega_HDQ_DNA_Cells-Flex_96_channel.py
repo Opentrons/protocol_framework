@@ -29,19 +29,28 @@ requirements = {
 def add_parameters(parameters: ParameterContext) -> None:
     """Parameters."""
     helpers.create_dot_bottom_parameter(parameters)
+    helpers.create_deactivate_modules_parameter(parameters)
+    parameters.add_int(
+        variable_name="number_of_runs",
+        display_name="Number of Runs",
+        default=2,
+        minimum=1,
+        maximum=10,
+    )
 
 
 # Start protocol
 def run(ctx: ProtocolContext) -> None:
     """Protocol."""
     dot_bottom = ctx.params.dot_bottom  # type: ignore[attr-defined]
-
+    deactivate_modules = ctx.params.deactivate_modules  # type: ignore[attr-defined]
+    number_of_runs = ctx.params.number_of_runs  # type: ignore[attr-defined]
     dry_run = False
     tip_mixing = False
 
     wash_vol = 600.0
     AL_vol = 230.0
-    bind_vol = 320.0
+    bind_vol = 300.0
     sample_vol = 180.0
     elution_vol = 100.0
 
@@ -211,74 +220,43 @@ def run(ctx: ProtocolContext) -> None:
         pip.flow_rate.aspirate = 150
         pip.flow_rate.dispense = 200
 
-    # Start Protocol
-    temp.set_temperature(inc_temp)
-    # Transfer and mix lysis
-    pip.pick_up_tip(tips)
-    pip.aspirate(AL_total_vol, lysis_res)
-    pip.dispense(AL_total_vol, samples_m)
-    resuspend_pellet(400, samples_m, reps=4 if not dry_run else 1)
-    if not tip_mixing:
-        pip.return_tip()
-
-    # Mix, then heat
-    ctx.comment("Lysis Mixing")
-    helpers.set_hs_speed(ctx, h_s, 1800, 10, False)
-    if not dry_run:
-        h_s.set_and_wait_for_temperature(55)
-    ctx.delay(
-        minutes=10 if not dry_run else 0.25,
-        msg="Please allow another 10 minutes of 55C incubation to complete lysis.",
-    )
-    h_s.deactivate_shaker()
-
-    # Transfer and mix bind&beads
-    pip.pick_up_tip(tips)
-    bead_mix(binding_buffer_vol, bind_res, reps=4 if not dry_run else 1)
-    pip.aspirate(binding_buffer_vol, bind_res)
-    pip.dispense(binding_buffer_vol, samples_m)
-    bead_mix(binding_buffer_vol + starting_vol, samples_m, reps=4 if not dry_run else 1)
-    if not tip_mixing:
-        pip.return_tip()
-        pip.home()
-
-    # Shake for binding incubation
-    ctx.comment("Binding incubation")
-    helpers.set_hs_speed(ctx, h_s, 1800, 10, True)
-
-    # Transfer plate to magnet
-    helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
-
-    ctx.delay(
-        minutes=settling_time,
-        msg="Please wait " + str(settling_time) + " minute(s) for beads to pellet.",
-    )
-
-    # Remove Supernatant and move off magnet
-    pip.pick_up_tip(tips)
-    pip.aspirate(1000, samples_m.bottom(dot_bottom))
-    pip.dispense(1000, waste)
-    if starting_vol + binding_buffer_vol > 1000:
-        pip.aspirate(1000, samples_m.bottom(dot_bottom))
-        pip.dispense(1000, waste)
-    pip.return_tip()
-
-    # Transfer plate from magnet to H/S
-    helpers.move_labware_to_hs(ctx, sample_plate, h_s, h_s_adapter)
-
-    # Washes
-    for i in range(num_washes if not dry_run else 1):
-        if i == 0 or i == 1:
-            wash_res = wash1_res
-        else:
-            wash_res = wash2_res
-
+    def protocol() -> None:
+        # Start Protocol
+        temp.set_temperature(inc_temp)
+        # Transfer and mix lysis
         pip.pick_up_tip(tips)
-        pip.aspirate(wash_vol, wash_res)
-        pip.dispense(wash_vol, samples_m)
+        pip.aspirate(AL_total_vol, lysis_res)
+        pip.dispense(AL_total_vol, samples_m)
+        resuspend_pellet(200, samples_m, reps=4 if not dry_run else 1)
         if not tip_mixing:
             pip.return_tip()
-        helpers.set_hs_speed(ctx, h_s, 1800, 5, True)
+
+        # Mix, then heat
+        ctx.comment("Lysis Mixing")
+        helpers.set_hs_speed(ctx, h_s, 1800, 10, False)
+        if not dry_run:
+            h_s.set_and_wait_for_temperature(55)
+        ctx.delay(
+            minutes=10 if not dry_run else 0.25,
+            msg="Please allow another 10 minutes of 55C incubation to complete lysis.",
+        )
+        h_s.deactivate_shaker()
+
+        # Transfer and mix bind&beads
+        pip.pick_up_tip(tips)
+        bead_mix(binding_buffer_vol, bind_res, reps=4 if not dry_run else 1)
+        pip.aspirate(binding_buffer_vol, bind_res)
+        pip.dispense(binding_buffer_vol, samples_m)
+        bead_mix(
+            binding_buffer_vol + starting_vol, samples_m, reps=4 if not dry_run else 1
+        )
+        if not tip_mixing:
+            pip.return_tip()
+            pip.home()
+
+        # Shake for binding incubation
+        ctx.comment("Binding incubation")
+        helpers.set_hs_speed(ctx, h_s, 1800, 10, True)
 
         # Transfer plate to magnet
         helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
@@ -290,62 +268,161 @@ def run(ctx: ProtocolContext) -> None:
 
         # Remove Supernatant and move off magnet
         pip.pick_up_tip(tips)
-        pip.aspirate(1000, samples_m.bottom(dot_bottom))
-        pip.dispense(1000, bind_res.top())
-        if wash_vol > 1000:
-            pip.aspirate(1000, samples_m.bottom(dot_bottom))
-            pip.dispense(1000, bind_res.top())
+        pip.aspirate(550, samples_m.bottom(dot_bottom))
+        pip.dispense(550, waste)
+        if starting_vol + binding_buffer_vol > 1000:
+            pip.aspirate(550, samples_m.bottom(dot_bottom))
+            pip.dispense(550, waste)
         pip.return_tip()
 
         # Transfer plate from magnet to H/S
         helpers.move_labware_to_hs(ctx, sample_plate, h_s, h_s_adapter)
 
-    # Dry beads
-    if dry_run:
-        drybeads = 0.5
-    else:
-        drybeads = 10
-    # Number of minutes you want to dry for
-    for beaddry in np.arange(drybeads, 0, -0.5):
+        # Washes
+        for i in range(num_washes if not dry_run else 1):
+            if i == 0 or i == 1:
+                wash_res = wash1_res
+            else:
+                wash_res = wash2_res
+
+            pip.pick_up_tip(tips)
+            pip.aspirate(wash_vol, wash_res)
+            pip.dispense(wash_vol, samples_m)
+            if not tip_mixing:
+                pip.return_tip()
+            helpers.set_hs_speed(ctx, h_s, 1800, 5, True)
+
+            # Transfer plate to magnet
+            helpers.move_labware_from_hs_to_destination(
+                ctx, sample_plate, h_s, magblock
+            )
+
+            ctx.delay(
+                minutes=settling_time,
+                msg="Please wait "
+                + str(settling_time)
+                + " minute(s) for beads to pellet.",
+            )
+
+            # Remove Supernatant and move off magnet
+            pip.pick_up_tip(tips)
+            pip.aspirate(473, samples_m.bottom(dot_bottom))
+            pip.dispense(473, bind_res.top())
+            if wash_vol > 1000:
+                pip.aspirate(473, samples_m.bottom(dot_bottom))
+                pip.dispense(473, bind_res.top())
+            pip.return_tip()
+
+            # Transfer plate from magnet to H/S
+            helpers.move_labware_to_hs(ctx, sample_plate, h_s, h_s_adapter)
+
+        # Dry beads
+        if dry_run:
+            drybeads = 0.5
+        else:
+            drybeads = 10
+        # Number of minutes you want to dry for
+        for beaddry in np.arange(drybeads, 0, -0.5):
+            ctx.delay(
+                minutes=0.5,
+                msg="There are " + str(beaddry) + " minutes left in the drying step.",
+            )
+
+        # Elution
+        pip.pick_up_tip(tips1)
+        pip.aspirate(elution_vol, elution_res)
+        pip.dispense(elution_vol, samples_m)
+        resuspend_pellet(elution_vol, samples_m, reps=3 if not dry_run else 1)
+        if not tip_mixing:
+            pip.return_tip()
+            pip.home()
+
+        helpers.set_hs_speed(ctx, h_s, 2000, 5, True)
+
+        # Transfer plate to magnet
+        helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
+
         ctx.delay(
-            minutes=0.5,
-            msg="There are " + str(beaddry) + " minutes left in the drying step.",
+            minutes=settling_time,
+            msg="Please wait " + str(settling_time) + " minute(s) for beads to pellet.",
         )
 
-    # Elution
-    pip.pick_up_tip(tips1)
-    pip.aspirate(elution_vol, elution_res)
-    pip.dispense(elution_vol, samples_m)
-    resuspend_pellet(elution_vol, samples_m, reps=3 if not dry_run else 1)
-    if not tip_mixing:
+        pip.pick_up_tip(tips1)
+        pip.aspirate(elution_vol, samples_m)
+        pip.dispense(elution_vol, elutionplate.wells()[0])
         pip.return_tip()
+
         pip.home()
+        pip.reset_tipracks()
 
-    helpers.set_hs_speed(ctx, h_s, 2000, 5, True)
+        # Empty Plates
+        pip.pick_up_tip()
+        pip.aspirate(500, samples_m)
+        pip.dispense(500, liquid_waste["A1"].top())
+        pip.aspirate(500, wash1_res)
+        pip.dispense(500, liquid_waste["A1"].top())
+        pip.aspirate(500, wash2_res)
+        pip.dispense(500, liquid_waste["A1"].top())
+        pip.return_tip()
+        helpers.find_liquid_height_of_all_wells(ctx, pip, [liquid_waste["A1"]])
+        helpers.move_labware_to_hs(ctx, sample_plate, h_s, h_s_adapter)
 
-    # Transfer plate to magnet
-    helpers.move_labware_from_hs_to_destination(ctx, sample_plate, h_s, magblock)
+    def setup() -> None:
+        pip.pick_up_tip()
+        pip.transfer(
+            volume=250,
+            source=liquid_waste["A1"].bottom(z=2),
+            dest=lysis_reservoir["A1"],
+            blow_out=True,
+            blowout_location="source well",
+            new_tip="never",
+            trash=False,
+        )
+        pip.transfer(
+            1700,
+            liquid_waste["A1"].bottom(z=2),
+            wash1_reservoir["A1"],
+            blow_out=True,
+            blowout_location="source well",
+            new_tip="never",
+            trash=False,
+        )
+        pip.transfer(
+            1100,
+            bind_reservoir["A1"].bottom(z=2),
+            wash2_reservoir["A1"],
+            blow_out=True,
+            blowout_location="source well",
+            new_tip="never",
+            trash=False,
+        )
+        pip.transfer(
+            100,
+            liquid_waste["A1"].bottom(z=2),
+            sample_plate["A1"],
+            blow_out=True,
+            blowout_location="source well",
+            new_tip="never",
+            trash=False,
+        )
+        pip.return_tip()
 
-    ctx.delay(
-        minutes=settling_time,
-        msg="Please wait " + str(settling_time) + " minute(s) for beads to pellet.",
-    )
+    def clean() -> None:
+        plates_to_clean = [
+            sample_plate,
+            elutionplate,
+            wash2_reservoir,
+            wash1_reservoir,
+            liquid_waste,
+        ]
+        helpers.clean_up_plates(pip, plates_to_clean, liquid_waste["A1"], 1000)
 
-    pip.pick_up_tip(tips1)
-    pip.aspirate(elution_vol, samples_m)
-    pip.dispense(elution_vol, elutionplate.wells()[0])
-    pip.return_tip()
-
-    pip.home()
-    pip.reset_tipracks()
-
-    # Empty Plates
-    pip.pick_up_tip()
-    pip.aspirate(1000, samples_m)
-    pip.dispense(1000, liquid_waste["A1"].top())
-    pip.aspirate(1000, wash1_res)
-    pip.dispense(1000, liquid_waste["A1"].top())
-    pip.aspirate(1000, wash2_res)
-    pip.dispense(1000, liquid_waste["A1"].top())
-    pip.return_tip()
-    helpers.find_liquid_height_of_all_wells(ctx, pip, [liquid_waste["A1"]])
+    for i in range(number_of_runs):
+        protocol()
+        pip.reset_tipracks()
+        if i < number_of_runs - 1:
+            setup()
+            pip.reset_tipracks()
+    clean()
+    if deactivate_modules:
+        helpers.deactivate_modules(ctx)
