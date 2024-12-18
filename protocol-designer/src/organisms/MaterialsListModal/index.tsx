@@ -51,7 +51,7 @@ interface MaterialsListModalProps {
   fixtures: FixtureInList[]
   labware: LabwareOnDeck[]
   liquids: OrderedLiquids
-  setShowMaterialsListModal: (showMaterialsListModal: boolean) => void
+  onClose: () => void
 }
 
 export function MaterialsListModal({
@@ -59,7 +59,8 @@ export function MaterialsListModal({
   fixtures,
   labware,
   liquids,
-  setShowMaterialsListModal,
+  // setShowMaterialsListModal,
+  onClose,
 }: MaterialsListModalProps): JSX.Element {
   const { t } = useTranslation(['protocol_overview', 'shared'])
   const robotType = useSelector(getRobotType)
@@ -71,7 +72,7 @@ export function MaterialsListModal({
   const tCSlot = robotType === FLEX_ROBOT_TYPE ? 'A1, B1' : '7,8,10,11'
 
   const handleClose = (): void => {
-    setShowMaterialsListModal(false)
+    onClose()
   }
 
   return createPortal(

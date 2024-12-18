@@ -47,6 +47,7 @@ import {
   getUnusedStagingAreas,
   getUnusedTrash,
 } from './utils'
+import { useModal } from '../../resources/ModalProvider'
 
 import type { CreateCommand } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../types'
@@ -76,13 +77,8 @@ export function ProtocolOverview(): JSX.Element {
     'modules',
   ])
   const navigate = useNavigate()
-  const [
-    showEditInstrumentsModal,
-    setShowEditInstrumentsModal,
-  ] = useState<boolean>(false)
-  const [showEditMetadataModal, setShowEditMetadataModal] = useState<boolean>(
-    false
-  )
+  const { openModal, closeModal } = useModal()
+
   const [showExportWarningModal, setShowExportWarningModal] = useState<boolean>(
     false
   )
@@ -93,9 +89,6 @@ export function ProtocolOverview(): JSX.Element {
     labwareIngredSelectors.allIngredientGroupFields
   )
   const dispatch: ThunkDispatch<any> = useDispatch()
-  const [showMaterialsListModal, setShowMaterialsListModal] = useState<boolean>(
-    false
-  )
   const fileData = useSelector(fileSelectors.createFile)
   const savedStepForms = useSelector(stepFormSelectors.getSavedStepForms)
   const additionalEquipment = useSelector(getAdditionalEquipmentEntities)
@@ -211,36 +204,33 @@ export function ProtocolOverview(): JSX.Element {
     },
   })
 
+  const handleOpenEditMetadataModal = (): void => {
+    openModal(<EditProtocolMetadataModal onClose={closeModal} />)
+  }
+
+  const handleOpenEditInstrumentsModal = (): void => {
+    openModal(<EditInstrumentsModal onClose={closeModal} />)
+  }
+
+  const handleOpenMaterialsListModal = (): void => {
+    openModal(
+      <MaterialsListModal
+        hardware={Object.values(modulesOnDeck)}
+        fixtures={
+          robotType === OT2_ROBOT_TYPE
+            ? Object.values(additionalEquipmentOnDeck)
+            : []
+        }
+        labware={Object.values(labwaresOnDeck)}
+        liquids={liquidsOnDeck}
+        onClose={closeModal}
+      />
+    )
+  }
+
   return (
     <Fragment>
-      {showEditMetadataModal ? (
-        <EditProtocolMetadataModal
-          onClose={() => {
-            setShowEditMetadataModal(false)
-          }}
-        />
-      ) : null}
-      {showEditInstrumentsModal ? (
-        <EditInstrumentsModal
-          onClose={() => {
-            setShowEditInstrumentsModal(false)
-          }}
-        />
-      ) : null}
       {exportWarningModal}
-      {showMaterialsListModal ? (
-        <MaterialsListModal
-          hardware={Object.values(modulesOnDeck)}
-          fixtures={
-            robotType === OT2_ROBOT_TYPE
-              ? Object.values(additionalEquipmentOnDeck)
-              : []
-          }
-          labware={Object.values(labwaresOnDeck)}
-          liquids={liquidsOnDeck}
-          setShowMaterialsListModal={setShowMaterialsListModal}
-        />
-      ) : null}
       <Flex
         flexDirection={DIRECTION_COLUMN}
         padding={`${SPACING.spacing60} ${SPACING.spacing80}`}
@@ -302,13 +292,13 @@ export function ProtocolOverview(): JSX.Element {
           >
             <ProtocolMetadata
               metaDataInfo={metaDataInfo}
-              setShowEditMetadataModal={setShowEditMetadataModal}
+              handleOpenEditMetadataModal={handleOpenEditMetadataModal}
             />
             <InstrumentsInfo
               robotType={robotType}
               pipettesOnDeck={pipettesOnDeck}
               additionalEquipment={additionalEquipment}
-              setShowEditInstrumentsModal={setShowEditInstrumentsModal}
+              handleOpenEditInstrumentsModal={handleOpenEditInstrumentsModal}
             />
             <LiquidDefinitions
               allIngredientGroupFields={allIngredientGroupFields}
@@ -322,7 +312,7 @@ export function ProtocolOverview(): JSX.Element {
           >
             <StartingDeck
               robotType={robotType}
-              setShowMaterialsListModal={setShowMaterialsListModal}
+              handleOpenMaterialsListModal={handleOpenMaterialsListModal}
             />
           </Flex>
         </Flex>

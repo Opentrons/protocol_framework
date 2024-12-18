@@ -15,6 +15,7 @@ import {
   GateModal,
 } from './organisms'
 import { ProtocolDesignerAppFallback } from './resources/ProtocolDesignerAppFallback'
+import { ModalProvider } from './resources/ModalProvider'
 
 import type { RouteProps } from './types'
 
@@ -72,20 +73,22 @@ export function ProtocolRoutes(): JSX.Element {
       FallbackComponent={ProtocolDesignerAppFallback}
       onReset={handleReset}
     >
-      <NavigationBar />
-      <Kitchen>
-        <Box width="100%">
-          {showGateModal ? <GateModal /> : null}
-          <LabwareUploadModal />
-          <FileUploadMessagesModal />
-          <Routes>
-            {allRoutes.map(({ Component, path }: RouteProps) => {
-              return <Route key={path} path={path} element={<Component />} />
-            })}
-            <Route path="*" element={<Navigate to={landingPage.path} />} />
-          </Routes>
-        </Box>
-      </Kitchen>
+      <ModalProvider>
+        <NavigationBar />
+        <Kitchen>
+          <Box width="100%">
+            {showGateModal ? <GateModal /> : null}
+            <LabwareUploadModal />
+            <FileUploadMessagesModal />
+            <Routes>
+              {allRoutes.map(({ Component, path }: RouteProps) => {
+                return <Route key={path} path={path} element={<Component />} />
+              })}
+              <Route path="*" element={<Navigate to={landingPage.path} />} />
+            </Routes>
+          </Box>
+        </Kitchen>
+      </ModalProvider>
     </ErrorBoundary>
   )
 }

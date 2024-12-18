@@ -24,14 +24,14 @@ interface InstrumentsInfoProps {
   robotType: RobotType
   pipettesOnDeck: PipetteOnDeck[]
   additionalEquipment: AdditionalEquipmentEntities
-  setShowEditInstrumentsModal: (showEditInstrumentsModal: boolean) => void
+  handleOpenEditInstrumentsModal: () => void
 }
 
 export function InstrumentsInfo({
   robotType,
   pipettesOnDeck,
   additionalEquipment,
-  setShowEditInstrumentsModal,
+  handleOpenEditInstrumentsModal,
 }: InstrumentsInfoProps): JSX.Element {
   const { t } = useTranslation(['protocol_overview', 'shared'])
   const leftPipette = pipettesOnDeck.find(pipette => pipette.mount === 'left')
@@ -84,9 +84,7 @@ export function InstrumentsInfo({
         <Flex padding={SPACING.spacing4}>
           <Btn
             textDecoration={TYPOGRAPHY.textDecorationUnderline}
-            onClick={() => {
-              setShowEditInstrumentsModal(true)
-            }}
+            onClick={handleOpenEditInstrumentsModal}
             css={BUTTON_LINK_STYLE}
           >
             <StyledText desktopStyle="bodyDefaultRegular">
