@@ -18,6 +18,9 @@ declare global {
         left_pipette_selector: string,
         right_pipette_selector: string
       ) => Cypress.Chainable<void>
+      chooseDeckSlot: (
+        slot: string
+      ) => Cypress.Chainable<void>
       selectTipRacks: (left: string, right: string) => Cypress.Chainable<void>
       addLiquid: (
         liquidName: string,
@@ -49,7 +52,7 @@ export const content = {
   welcome: 'Welcome to Protocol Designer!',
   appSettings: 'App Info',
   privacy: 'Privacy',
-  shareSessions: 'Share analytics with Opentrons',
+  shareSessions: 'Share analytics with Opentrons'
 }
 
 export const locators = {
@@ -206,6 +209,34 @@ Cypress.Commands.add(
     cy.get(rightPipetteSelector).click()
   }
 )
+
+Cypress.Commands.add('chooseDeckSlot', (slot: string) => {
+  const deck_slots = {
+    A1: () => cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click(),
+    A2: () => cy.contains('foreignObject[x="164"][y="321"]', 'Edit slot').click(),
+    A3: () => cy.contains('foreignObject[x="328"][y="321"]', 'Edit slot').click(),
+    B1: () => cy.contains('foreignObject[x="0"][y="214"]', 'Edit slot').click(),
+    B2: () => cy.contains('foreignObject[x="164"][y="214"]', 'Edit slot').click(),
+    B3: () => cy.contains('foreignObject[x="328"][y="214"]', 'Edit slot').click(),
+    C1: () => cy.contains('foreignObject[x="0"][y="107"]', 'Edit slot').click(),
+    C2: () => cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click(),
+    C3: () => cy.contains('foreignObject[x="328"][y="107"]', 'Edit slot').click(),
+    D1: () => cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot').click(),
+    D2: () => cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot').click(),
+    D3: () => cy.contains('foreignObject[x="328"][y="0"]', 'Edit slot').click()
+  };
+
+  // Correct syntax: just assign the action to `slotAction`
+  const slotAction = deck_slots[slot];
+
+  // Call the corresponding Cypress command, if the action exists
+  if (slotAction) {
+    slotAction()  // Execute the Cypress command for the selected slot
+    cy.contains('Add hardware/labware').click()
+  } else {
+    throw new Error(`Slot ${slot} not found in deck slots.`);
+  }
+});
 
 
 

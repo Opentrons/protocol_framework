@@ -72,7 +72,63 @@ describe('Happy Path Transfer Tests', () => {
       cy.contains('Confirm').click()
     }
     step4modules()
-    // step 5 
+    // Todo Step 5 and Step 6 test
+    cy.contains('Confirm').click()
+    cy.contains('Confirm').click()
+    // ToDo make sure that the protocol overview stage works. 
+    cy.contains('Edit protocol').click()
+    cy.chooseDeckSlot('C2')
+    //cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click()
+    cy.contains('Labware').click()
+    cy.contains('Well plates').click()
+    cy.contains('Armadillo 96 Well Plate 200 µL PCR Full Skirt').click()
+    cy.get('[data-testid="Toolbox_confirmButton"]').click({ force: true })
+    cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click({force:true})
+
+
+    
+    //cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click({force:true})
+
+
+
+
+
+    //cy.contains('Labware')
+
+    //C2
+    //cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click()
+    /*
+    List of foreign objects by their dimensions
+    A1 cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot'.click())
+    A2 cy.contains('foreignObject[x="164"][y="321"]', 'Edit slot'.click())
+    A3 cy.contains('foreignObject[x="328"][y="321"]', 'Edit slot'.click())
+    B1 cy.contains('foreignObject[x="0"][y="214"]', 'Edit slot'.click())
+    B2 cy.contains('foreignObject[x="164"][y="214"]', 'Edit slot'.click())
+    B3 cy.contains('foreignObject[x="328"][y="214"]', 'Edit slot'.click())
+    C1 cy.contains('foreignObject[x="0"][y="107"]', 'Edit slot').click()
+    C2  cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click()
+    C3 cy.contains('foreignObject[x="328"][y="107"]', 'Edit slot').click()
+    D1 cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot').click()
+    D2 cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot').click()
+    D3 cy.contains('foreignObject[x="328"][y="0"]', 'Edit slot').click()
+
+    const deck_slots = {
+  A1: cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click(),
+  A2: cy.contains('foreignObject[x="164"][y="321"]', 'Edit slot').click(),
+  A3: cy.contains('foreignObject[x="328"][y="321"]', 'Edit slot').click(),
+  B1: cy.contains('foreignObject[x="0"][y="214"]', 'Edit slot').click(),
+  B2: cy.contains('foreignObject[x="164"][y="214"]', 'Edit slot').click(),
+  B3: cy.contains('foreignObject[x="328"][y="214"]', 'Edit slot').click(),
+  C1: cy.contains('foreignObject[x="0"][y="107"]', 'Edit slot').click(),
+  C2: cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click(),
+  C3: cy.contains('foreignObject[x="328"][y="107"]', 'Edit slot').click(),
+  D1: cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot').click(),
+  D2: cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot').click(),
+  D3: cy.contains('foreignObject[x="328"][y="0"]', 'Edit slot').click()
+};
+   
+   
+    */
 
 
     /*
