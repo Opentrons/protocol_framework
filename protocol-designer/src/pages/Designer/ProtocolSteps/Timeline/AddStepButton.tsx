@@ -8,6 +8,7 @@ import {
   BORDERS,
   COLORS,
   DIRECTION_COLUMN,
+  DISPLAY_FLEX,
   Flex,
   Icon,
   JUSTIFY_CENTER,
@@ -133,7 +134,7 @@ export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
         </Tooltip>
       )}
       <SecondaryButton
-        display="flex"
+        display={DISPLAY_FLEX}
         justifyContent={JUSTIFY_CENTER}
         alignItems={ALIGN_CENTER}
         gridGap={SPACING.spacing10}

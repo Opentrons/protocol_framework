@@ -78,7 +78,6 @@ export function ProtocolSteps(): JSX.Element {
     hasTimelineErrors && tab === 'protocolSteps' && formData == null
   const stepDetails = currentStep?.stepDetails ?? null
 
-  console.log('targetWidth', targetWidth)
   return (
     <Flex
       backgroundColor={COLORS.grey10}

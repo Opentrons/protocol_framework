@@ -1,5 +1,7 @@
+import { useTranslation } from 'react-i18next'
 import { useSelector, useDispatch } from 'react-redux'
 import { useConditionalConfirm } from '@opentrons/components'
+
 import {
   getHoveredTerminalItemId,
   getSelectedTerminalItemId,
@@ -10,6 +12,7 @@ import {
   getCurrentFormIsPresaved,
   getCurrentFormHasUnsavedChanges,
 } from '../../../../step-forms/selectors'
+import { START_TERMINAL_ITEM_ID } from '../../../../steplist'
 import {
   CLOSE_STEP_FORM_WITH_CHANGES,
   CLOSE_UNSAVED_STEP_FORM,
@@ -21,7 +24,6 @@ import {
   toggleViewSubstep,
 } from '../../../../ui/steps/actions/actions'
 import { StepContainer } from './StepContainer'
-import { START_TERMINAL_ITEM_ID } from '../../../../steplist'
 
 import type {
   SelectTerminalItemAction,
@@ -29,11 +31,9 @@ import type {
 } from '../../../../ui/steps'
 import type { TerminalItemId } from '../../../../steplist'
 import type { ThunkDispatch } from '../../../../types'
-import { useTranslation } from 'react-i18next'
 
 export interface TerminalItemStepProps {
   id: TerminalItemId
-  title: string
   sidebarWidth: number
 }
 
