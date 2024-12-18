@@ -8,7 +8,7 @@ export interface OptInState {
   hasOptedIn: boolean
   appVersion?: string
 }
-const optInInitialState = {
+const optInInitialState: OptInState = {
   hasOptedIn: true,
 }
 
