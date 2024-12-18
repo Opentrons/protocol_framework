@@ -210,7 +210,7 @@ class FlexStackerDriver(StackerDriver):
         )
 
     async def set_led(
-        self, power: float, color: LEDColor | None, external: bool | None
+        self, power: float, color: LEDColor | None = None, external: bool | None = None
     ) -> None:
         """Set LED color.
 
