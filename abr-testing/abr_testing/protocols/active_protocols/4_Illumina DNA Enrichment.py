@@ -1,4 +1,4 @@
-"""Illumina DNA Prep and Plate Reader Test."""
+"""DVT1ABR4: Illumina DNA Enrichment."""
 from opentrons.protocol_api import (
     ParameterContext,
     ProtocolContext,
@@ -6,30 +6,28 @@ from opentrons.protocol_api import (
     Well,
     InstrumentContext,
 )
+from opentrons import types
 from abr_testing.protocols import helpers
 from opentrons.protocol_api.module_contexts import (
-    AbsorbanceReaderContext,
-    ThermocyclerContext,
     HeaterShakerContext,
-    TemperatureModuleContext,
     MagneticBlockContext,
+    ThermocyclerContext,
+    TemperatureModuleContext,
 )
-from datetime import datetime
 from opentrons.hardware_control.modules.types import ThermocyclerStep
 from typing import List, Dict
-from opentrons import types
 
 
 metadata = {
-    "protocolName": "Illumina DNA Prep and Plate Reader Test",
-    "author": "Platform Expansion",
+    "protocolName": "Illumina DNA Enrichment v4 with TC Auto Sealing Lid",
+    "author": "Opentrons <protocols@opentrons.com>",
+    "source": "Protocol Library",
 }
 
-
-requirements = {"robotType": "Flex", "apiLevel": "2.21"}
-
-HELLMA_PLATE_SLOT = "D4"
-PLATE_READER_SLOT = "C3"
+requirements = {
+    "robotType": "Flex",
+    "apiLevel": "2.21",
+}
 
 # SCRIPT SETTINGS
 DRYRUN = False  # True = skip incubation times, shorten mix, for testing purposes
@@ -53,96 +51,70 @@ STEP_CLEANUP = 1
 
 p200_tips = 0
 p50_tips = 0
+total_waste_volume = 0.0
 
 
 RUN = 1
 
 
 def add_parameters(parameters: ParameterContext) -> None:
-    """Add Parameters."""
+    """Add parameters."""
     helpers.create_hs_speed_parameter(parameters)
     helpers.create_dot_bottom_parameter(parameters)
+    helpers.create_disposable_lid_parameter(parameters)
+    helpers.create_tc_lid_deck_riser_parameter(parameters)
+    helpers.create_disposable_lid_trash_location(parameters)
     helpers.create_deactivate_modules_parameter(parameters)
-    helpers.create_plate_reader_compatible_labware_parameter(parameters)
-    parameters.add_bool(
-        variable_name="plate_orientation",
-        display_name="Hellma Plate Orientation",
-        default=True,
-        description="If hellma plate is rotated, set to True.",
-    )
-
-
-def plate_reader_actions(
-    protocol: ProtocolContext,
-    plate_reader: AbsorbanceReaderContext,
-    hellma_plate: Labware,
-    hellma_plate_name: str,
-) -> None:
-    """Plate reader single and multi wavelength readings."""
-    wavelengths = [450, 650]
-    # Single Wavelength Readings
-    plate_reader.close_lid()
-    for wavelength in wavelengths:
-        plate_reader.initialize("single", [wavelength], reference_wavelength=wavelength)
-        plate_reader.open_lid()
-        protocol.move_labware(hellma_plate, plate_reader, use_gripper=True)
-        plate_reader.close_lid()
-        result = plate_reader.read(str(datetime.now()))
-        msg = f"{hellma_plate_name} result: {result}"
-        protocol.comment(msg=msg)
-        plate_reader.open_lid()
-        protocol.move_labware(hellma_plate, HELLMA_PLATE_SLOT, use_gripper=True)
-        plate_reader.close_lid()
-    # Multi Wavelength
-    plate_reader.initialize("multi", [450, 650])
-    plate_reader.open_lid()
-    protocol.move_labware(hellma_plate, plate_reader, use_gripper=True)
-    plate_reader.close_lid()
-    result = plate_reader.read(str(datetime.now()))
-    msg = f"{hellma_plate_name} result: {result}"
-    protocol.comment(msg=msg)
-    plate_reader.open_lid()
-    protocol.move_labware(hellma_plate, HELLMA_PLATE_SLOT, use_gripper=True)
-    plate_reader.close_lid()
 
 
 def run(protocol: ProtocolContext) -> None:
     """Protocol."""
-    # LOAD PARAMETERS
     heater_shaker_speed = protocol.params.heater_shaker_speed  # type: ignore[attr-defined]
     dot_bottom = protocol.params.dot_bottom  # type: ignore[attr-defined]
-    plate_orientation = protocol.params.plate_orientation  # type: ignore[attr-defined]
+    disposable_lid = protocol.params.disposable_lid  # type: ignore[attr-defined]
+    deck_riser = protocol.params.deck_riser  # type: ignore[attr-defined]
+    trash_lid = protocol.params.trash_lid  # type: ignore[attr-defined]
     deactivate_modules_bool = protocol.params.deactivate_modules  # type: ignore[attr-defined]
-    plate_type = protocol.params.labware_plate_reader_compatible  # type: ignore [attr-defined]
     helpers.comment_protocol_version(protocol, "01")
 
-    plate_name_str = "hellma_plate_" + str(plate_orientation)
+    unused_lids: List[Labware] = []
+    used_lids: List[Labware] = []
     global p200_tips
     global p50_tips
-    # WASTE BIN
-    protocol.load_waste_chute()
-    # TIP RACKS
-    tiprack_200_1 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "B2")
-    tiprack_200_2 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "C2")
-    tiprack_50_1 = protocol.load_labware("opentrons_flex_96_tiprack_50ul", "A2")
-    tiprack_50_2 = protocol.load_labware("opentrons_flex_96_tiprack_50ul", "A3")
-    # MODULES + LABWARE
-    # Reservoir
-    reservoir = protocol.load_labware(
-        "nest_96_wellplate_2ml_deep", "D2", "Liquid Waste"
+
+    protocol.comment("THIS IS A DRY RUN") if DRYRUN else protocol.comment(
+        "THIS IS A REACTION RUN"
     )
-    # Heatershaker
+    protocol.comment("USED TIPS WILL GO IN TRASH") if TIP_TRASH else protocol.comment(
+        "USED TIPS WILL BE RE-RACKED"
+    )
+
+    # DECK SETUP AND LABWARE
+    # ========== FIRST ROW ===========
     heatershaker: HeaterShakerContext = protocol.load_module(
-        helpers.hs_str, "D1"
+        helpers.hs_str, "1"
     )  # type: ignore[assignment]
+    heatershaker.close_labware_latch()
     sample_plate_2 = heatershaker.load_labware(
         "thermoscientificnunc_96_wellplate_1300ul"
     )
-    heatershaker.close_labware_latch()
-    # Magnetic Block
-    mag_block: MagneticBlockContext = protocol.load_module(
+    reservoir = protocol.load_labware("nest_96_wellplate_2ml_deep", "2", "Liquid Waste")
+    temp_block: TemperatureModuleContext = protocol.load_module(
+        helpers.temp_str, "3"
+    )  # type: ignore[assignment]
+    reagent_plate, temp_adapter = helpers.load_temp_adapter_and_labware(
+        "armadillo_96_wellplate_200ul_pcr_full_skirt", temp_block, "Reagent Plate"
+    )
+    # ========== SECOND ROW ==========
+    MAG_PLATE_SLOT: MagneticBlockContext = protocol.load_module(
         helpers.mag_str, "C1"
     )  # type: ignore[assignment]
+    tiprack_200_1 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "5")
+    tiprack_50_1 = protocol.load_labware("opentrons_flex_96_tiprack_50ul", "6")
+    # Opentrons tough pcr auto sealing lids
+    if disposable_lid:
+        unused_lids = helpers.load_disposable_lids(protocol, 3, ["C4"], deck_riser)
+    # ========== THIRD ROW ===========
     thermocycler: ThermocyclerContext = protocol.load_module(
         helpers.tc_str
     )  # type: ignore[assignment]
@@ -150,56 +122,17 @@ def run(protocol: ProtocolContext) -> None:
         "armadillo_96_wellplate_200ul_pcr_full_skirt"
     )
     thermocycler.open_lid()
-    # Temperature Module
-    temp_block: TemperatureModuleContext = protocol.load_module(
-        helpers.temp_str, "B3"
-    )  # type: ignore[assignment]
-    reagent_plate, temp_adapter = helpers.load_temp_adapter_and_labware(
-        "armadillo_96_wellplate_200ul_pcr_full_skirt", temp_block, "Reagent Plate"
-    )
-    # Plate Reader
-    plate_reader: AbsorbanceReaderContext = protocol.load_module(
-        helpers.abs_mod_str, PLATE_READER_SLOT
-    )  # type: ignore[assignment]
-    hellma_plate = protocol.load_labware(plate_type, HELLMA_PLATE_SLOT)
-    # PIPETTES
-    p1000 = protocol.load_instrument(
-        "flex_8channel_1000",
-        "left",
-        tip_racks=[tiprack_200_1, tiprack_200_2],
-    )
-    p50 = protocol.load_instrument(
-        "flex_8channel_50", "right", tip_racks=[tiprack_50_1, tiprack_50_2]
-    )
-
-    # Load liquids and probe
-    liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
-        "Reagents": [
-            {"well": reagent_plate.columns()[3], "volume": 75.0},
-            {"well": reagent_plate.columns()[4], "volume": 15.0},
-            {"well": reagent_plate.columns()[5], "volume": 20.0},
-            {"well": reagent_plate.columns()[6], "volume": 65.0},
-        ],
-        "AMPure": [{"well": reservoir.columns()[0], "volume": 120.0}],
-        "SMB": [{"well": reservoir.columns()[1], "volume": 750.0}],
-        "EtOH": [{"well": reservoir.columns()[3], "volume": 900.0}],
-        "RSB": [{"well": reservoir.columns()[4], "volume": 96.0}],
-        "Wash": [
-            {"well": sample_plate_2.columns()[9], "volume": 1000.0},
-            {"well": sample_plate_2.columns()[10], "volume": 1000.0},
-            {"well": sample_plate_2.columns()[11], "volume": 1000.0},
-        ],
-        "Samples": [{"well": sample_plate_1.wells(), "volume": 150.0}],
-    }
-    helpers.find_liquid_height_of_loaded_liquids(protocol, liquid_vols_and_wells, p50)
-
+    tiprack_200_2 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "8")
+    tiprack_50_2 = protocol.load_labware("opentrons_flex_96_tiprack_50ul", "9")
+    # ========== FOURTH ROW ==========
+    tiprack_200_3 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "11")
+    trash_bin = protocol.load_trash_bin("A3")
     # reagent
     AMPure = reservoir["A1"]
     SMB = reservoir["A2"]
 
     EtOH = reservoir["A4"]
     RSB = reservoir["A5"]
-
     Liquid_trash_well_1 = reservoir["A9"]
     Liquid_trash_well_2 = reservoir["A10"]
     Liquid_trash_well_3 = reservoir["A11"]
@@ -248,9 +181,38 @@ def run(protocol: ProtocolContext) -> None:
     ET2 = reagent_plate.wells_by_name()["A5"]
     PPC = reagent_plate.wells_by_name()["A6"]
     EPM = reagent_plate.wells_by_name()["A7"]
-    # Load Liquids
-    plate_reader_actions(protocol, plate_reader, hellma_plate, plate_name_str)
 
+    # pipette
+    p1000 = protocol.load_instrument(
+        "flex_8channel_1000",
+        "left",
+        tip_racks=[tiprack_200_1, tiprack_200_2, tiprack_200_3],
+    )
+    p50 = protocol.load_instrument(
+        "flex_8channel_50", "right", tip_racks=[tiprack_50_1, tiprack_50_2]
+    )
+    reagent_plate.columns()[3]
+    # Load liquids and probe
+    liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
+        "Reagents": [
+            {"well": reagent_plate.columns()[3], "volume": 75.0},
+            {"well": reagent_plate.columns()[4], "volume": 15.0},
+            {"well": reagent_plate.columns()[5], "volume": 20.0},
+            {"well": reagent_plate.columns()[6], "volume": 65.0},
+        ],
+        "AMPure": [{"well": reservoir.columns()[0], "volume": 120.0}],
+        "SMB": [{"well": reservoir.columns()[1], "volume": 750.0}],
+        "EtOH": [{"well": reservoir.columns()[3], "volume": 900.0}],
+        "RSB": [{"well": reservoir.columns()[4], "volume": 96.0}],
+        "Wash": [
+            {"well": sample_plate_2.columns()[8], "volume": 1000.0},
+            {"well": sample_plate_2.columns()[9], "volume": 1000.0},
+            {"well": sample_plate_2.columns()[10], "volume": 1000.0},
+            {"well": sample_plate_2.columns()[11], "volume": 1000.0},
+        ],
+        "Samples": [{"well": sample_plate_1.wells(), "volume": 150.0}],
+    }
+    helpers.find_liquid_height_of_loaded_liquids(protocol, liquid_vols_and_wells, p50)
     # tip and sample tracking
     if COLUMNS == 1:
         column_1_list = ["A1"]  # Plate 1
@@ -286,8 +248,8 @@ def run(protocol: ProtocolContext) -> None:
         WASHES = [EEW_1, EEW_2, EEW_3, EEW_4]
 
     def tipcheck() -> None:
-        """Check tips."""
-        if p200_tips >= 2 * 12:
+        """Tip tracking function."""
+        if p200_tips >= 3 * 12:
             p1000.reset_tipracks()
             p200_tips == 0
         if p50_tips >= 2 * 12:
@@ -365,7 +327,16 @@ def run(protocol: ProtocolContext) -> None:
 
             if HYBRIDDECK:
                 protocol.comment("Hybridize on Deck")
-                thermocycler.close_lid()
+                if disposable_lid:
+                    (
+                        lid_on_plate,
+                        unused_lids,
+                        used_lids,
+                    ) = helpers.use_disposable_lid_with_tc(
+                        protocol, unused_lids, used_lids, sample_plate_1, thermocycler
+                    )
+                else:
+                    thermocycler.close_lid()
                 if DRYRUN is False:
                     profile_TAGSTOP: List[ThermocyclerStep] = [
                         {"temperature": 98, "hold_time_minutes": 5},
@@ -397,6 +368,15 @@ def run(protocol: ProtocolContext) -> None:
                         protocol.comment("HYBRIDIZATION PAUSED")
                     thermocycler.set_block_temperature(10)
                 thermocycler.open_lid()
+                if disposable_lid:
+                    if trash_lid:
+                        protocol.move_labware(lid_on_plate, trash_bin, use_gripper=True)
+                    elif len(used_lids) <= 1:
+                        protocol.move_labware(lid_on_plate, "B4", use_gripper=True)
+                    else:
+                        protocol.move_labware(
+                            lid_on_plate, used_lids[-2], use_gripper=True
+                        )
             else:
                 protocol.comment("Hybridize off Deck")
 
@@ -426,13 +406,25 @@ def run(protocol: ProtocolContext) -> None:
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
-
-            thermocycler.close_lid()
+            if disposable_lid:
+                (
+                    lid_on_plate,
+                    unused_lids,
+                    used_lids,
+                ) = helpers.use_disposable_lid_with_tc(
+                    protocol,
+                    unused_lids,
+                    used_lids,
+                    sample_plate_1,
+                    thermocycler,
+                )
+            else:
+                thermocycler.close_lid()
 
             protocol.comment("--> ADDING SMB")
             SMBVol = 250
             SMBMixRPM = heater_shaker_speed
-            SMBMixRep = 5 * 60 if DRYRUN is False else 0.1 * 60
+            SMBMixRep = 5.0 if DRYRUN is False else 0.1  # minutes
             SMBPremix = 3 if DRYRUN is False else 1
             # ==============================
             for loop, X in enumerate(column_2_list):
@@ -461,16 +453,21 @@ def run(protocol: ProtocolContext) -> None:
                 p200_tips += 1
                 tipcheck()
             # ==============================
-            heatershaker.set_and_wait_for_shake_speed(rpm=SMBMixRPM)
-            protocol.delay(SMBMixRep)
-            heatershaker.deactivate_shaker()
+            helpers.set_hs_speed(protocol, heatershaker, SMBMixRPM, SMBMixRep, True)
 
-            # ============================================================================================
             # GRIPPER MOVE sample_plate_2 FROM heatershaker TO MAGPLATE
             helpers.move_labware_from_hs_to_destination(
-                protocol, sample_plate_2, heatershaker, mag_block
+                protocol, sample_plate_2, heatershaker, MAG_PLATE_SLOT
             )
+
             thermocycler.open_lid()
+            if disposable_lid:
+                if trash_lid:
+                    protocol.move_labware(lid_on_plate, trash_bin, use_gripper=True)
+                elif len(used_lids) <= 1:
+                    protocol.move_labware(lid_on_plate, "B4", use_gripper=True)
+                else:
+                    protocol.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
 
             if DRYRUN is False:
                 protocol.delay(minutes=2)
@@ -485,23 +482,22 @@ def run(protocol: ProtocolContext) -> None:
                 p1000.pick_up_tip()
                 p1000.move_to(sample_plate_2[X].bottom(4))
                 p1000.aspirate(200, rate=0.25)
-                trash_liquid(protocol, p1000, 200, liquid_trash_list)
+                trash_liquid(protocol, p1000, 200.0, liquid_trash_list)
                 p1000.move_to(sample_plate_2[X].bottom(0.5))
                 p1000.aspirate(200, rate=0.25)
-                trash_liquid(protocol, p1000, 200, liquid_trash_list)
+                trash_liquid(protocol, p1000, 200.0, liquid_trash_list)
+                p1000.aspirate(20)
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
 
-            # ============================================================================================
             # GRIPPER MOVE sample_plate_2 FROM MAGPLATE TO heatershaker
             helpers.move_labware_to_hs(
                 protocol, sample_plate_2, heatershaker, heatershaker
             )
-            # ============================================================================================
 
-            protocol.comment("--> Repeating 3 washes")
-            washreps = 3
+            protocol.comment("--> Repeating 6 washes")
+            washreps = 6
             washcount = 0
             for wash in range(washreps):
 
@@ -518,22 +514,17 @@ def run(protocol: ProtocolContext) -> None:
                     p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                     p200_tips += 1
                     tipcheck()
-                heatershaker.close_labware_latch()
-                heatershaker.set_and_wait_for_shake_speed(
-                    rpm=(heater_shaker_speed * 0.9)
+                helpers.set_hs_speed(
+                    protocol, heatershaker, int(heater_shaker_speed * 0.9), 4.0, True
                 )
-                if DRYRUN is False:
-                    protocol.delay(seconds=4 * 60)
-                heatershaker.deactivate_shaker()
                 heatershaker.open_labware_latch()
 
                 if DRYRUN is False:
                     protocol.delay(seconds=5 * 60)
 
-                # ============================================================================================
                 # GRIPPER MOVE sample_plate_2 FROM heatershaker TO MAGPLATE
                 helpers.move_labware_from_hs_to_destination(
-                    protocol, sample_plate_2, heatershaker, mag_block
+                    protocol, sample_plate_2, heatershaker, MAG_PLATE_SLOT
                 )
 
                 if DRYRUN is False:
@@ -548,8 +539,7 @@ def run(protocol: ProtocolContext) -> None:
                     protocol.delay(minutes=0.1)
                     p1000.move_to(sample_plate_2[X].bottom(z=0.5))
                     p1000.aspirate(100, rate=0.25)
-                    p1000.move_to(sample_plate_2[X].top(z=0.5))
-                    trash_liquid(protocol, p1000, 200, liquid_trash_list)
+                    trash_liquid(protocol, p1000, RemoveSup, liquid_trash_list)
                     p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                     p200_tips += 1
                     tipcheck()
@@ -575,10 +565,9 @@ def run(protocol: ProtocolContext) -> None:
                 p200_tips += 1
                 tipcheck()
 
-            heatershaker.set_and_wait_for_shake_speed(rpm=(heater_shaker_speed * 0.9))
-            if DRYRUN is False:
-                protocol.delay(seconds=4 * 60)
-            heatershaker.deactivate_shaker()
+            helpers.set_hs_speed(
+                protocol, heatershaker, int(heater_shaker_speed * 0.9), 4.0, True
+            )
 
             if DRYRUN is False:
                 protocol.delay(seconds=1 * 60)
@@ -599,12 +588,10 @@ def run(protocol: ProtocolContext) -> None:
             if DRYRUN is False:
                 protocol.delay(seconds=5 * 60)
 
-            # ============================================================================================
             # GRIPPER MOVE sample_plate_2 FROM heatershaker TO MAGPLATE
             helpers.move_labware_from_hs_to_destination(
-                protocol, sample_plate_2, heatershaker, mag_block
+                protocol, sample_plate_2, heatershaker, MAG_PLATE_SLOT
             )
-
             if DRYRUN is False:
                 protocol.delay(seconds=1 * 60)
 
@@ -618,7 +605,8 @@ def run(protocol: ProtocolContext) -> None:
                 p1000.move_to(sample_plate_2[X].bottom(z=0.5))
                 p1000.aspirate(100, rate=0.25)
                 p1000.move_to(sample_plate_2[X].top(z=0.5))
-                trash_liquid(protocol, p1000, 200, liquid_trash_list)
+                trash_liquid(protocol, p1000, 100, liquid_trash_list)
+                p1000.aspirate(20)
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
@@ -656,12 +644,9 @@ def run(protocol: ProtocolContext) -> None:
                 protocol, sample_plate_2, heatershaker, heatershaker
             )
             # ============================================================================================
-
-            heatershaker.close_labware_latch()
-            heatershaker.set_and_wait_for_shake_speed(rpm=(heater_shaker_speed * 0.9))
-            if DRYRUN is False:
-                protocol.delay(seconds=2 * 60)
-            heatershaker.deactivate_shaker()
+            helpers.set_hs_speed(
+                protocol, heatershaker, int(heater_shaker_speed * 0.9), 2.0, True
+            )
             heatershaker.open_labware_latch()
 
             if DRYRUN is False:
@@ -670,7 +655,7 @@ def run(protocol: ProtocolContext) -> None:
             # ============================================================================================
             # GRIPPER MOVE sample_plate_2 FROM heatershaker TO MAGPLATE
             helpers.move_labware_from_hs_to_destination(
-                protocol, sample_plate_2, heatershaker, mag_block
+                protocol, sample_plate_2, heatershaker, MAG_PLATE_SLOT
             )
             protocol.comment("--> Transfer Elution")
             TransferSup = 21
@@ -740,20 +725,52 @@ def run(protocol: ProtocolContext) -> None:
         if STEP_PCRDECK == 1:
             if DRYRUN is False:
                 if DRYRUN is False:
-                    thermocycler.close_lid()
-                    helpers.perform_pcr(
-                        protocol,
-                        thermocycler,
-                        initial_denature_time_sec=45,
-                        denaturation_time_sec=30,
-                        anneal_time_sec=30,
-                        extension_time_sec=30,
-                        cycle_repetitions=12,
-                        final_extension_time_min=1,
+                    if disposable_lid:
+                        (
+                            lid_on_plate,
+                            unused_lids,
+                            used_lids,
+                        ) = helpers.use_disposable_lid_with_tc(
+                            protocol,
+                            unused_lids,
+                            used_lids,
+                            sample_plate_1,
+                            thermocycler,
+                        )
+                    else:
+                        thermocycler.close_lid()
+                    profile_PCR_1: List[ThermocyclerStep] = [
+                        {"temperature": 98, "hold_time_seconds": 45}
+                    ]
+                    thermocycler.execute_profile(
+                        steps=profile_PCR_1, repetitions=1, block_max_volume=50
+                    )
+                    profile_PCR_2: List[ThermocyclerStep] = [
+                        {"temperature": 98, "hold_time_seconds": 30},
+                        {"temperature": 60, "hold_time_seconds": 30},
+                        {"temperature": 72, "hold_time_seconds": 30},
+                    ]
+                    thermocycler.execute_profile(
+                        steps=profile_PCR_2, repetitions=12, block_max_volume=50
+                    )
+                    profile_PCR_3: List[ThermocyclerStep] = [
+                        {"temperature": 72, "hold_time_minutes": 1}
+                    ]
+                    thermocycler.execute_profile(
+                        steps=profile_PCR_3, repetitions=1, block_max_volume=50
                     )
                     thermocycler.set_block_temperature(10)
 
                 thermocycler.open_lid()
+                if disposable_lid:
+                    if trash_lid:
+                        protocol.move_labware(lid_on_plate, trash_bin, use_gripper=True)
+                    elif len(used_lids) <= 1:
+                        protocol.move_labware(lid_on_plate, "B4", use_gripper=True)
+                    else:
+                        protocol.move_labware(
+                            lid_on_plate, used_lids[-2], use_gripper=True
+                        )
 
         if STEP_CLEANUP == 1:
             protocol.comment("==============================================")
@@ -780,7 +797,7 @@ def run(protocol: ProtocolContext) -> None:
 
             protocol.comment("--> ADDING AMPure (0.8x)")
             AMPureVol = 40.5
-            AMPureMixRep = 5 * 60 if DRYRUN is False else 0.1 * 60
+            AMPureMixRep = 5.0 if DRYRUN is False else 0.1
             AMPurePremix = 3 if DRYRUN is False else 1
             # ========NEW SINGLE TIP DISPENSE===========
             for loop, X in enumerate(column_5_list):
@@ -807,13 +824,17 @@ def run(protocol: ProtocolContext) -> None:
                 p200_tips += 1
                 tipcheck()
             # ========NEW HS MIX=========================
-            heatershaker.set_and_wait_for_shake_speed(rpm=(heater_shaker_speed * 0.9))
-            protocol.delay(AMPureMixRep)
-            heatershaker.deactivate_shaker()
+            helpers.set_hs_speed(
+                protocol,
+                heatershaker,
+                int(heater_shaker_speed * 0.9),
+                AMPureMixRep,
+                True,
+            )
 
             # GRIPPER MOVE PLATE FROM HEATER SHAKER TO MAG PLATE
             helpers.move_labware_from_hs_to_destination(
-                protocol, sample_plate_2, heatershaker, mag_block
+                protocol, sample_plate_2, heatershaker, MAG_PLATE_SLOT
             )
 
             if DRYRUN is False:
@@ -836,7 +857,7 @@ def run(protocol: ProtocolContext) -> None:
                 p200_tips += 1
                 tipcheck()
 
-            for well_num in ["A1", "A2"]:
+            for X_times in range(2):
                 protocol.comment("--> ETOH Wash")
                 ETOHMaxVol = 150
                 for loop, X in enumerate(column_5_list):
@@ -845,13 +866,13 @@ def run(protocol: ProtocolContext) -> None:
                     p1000.move_to(EtOH.top(z=0))
                     p1000.move_to(EtOH.top(z=-5))
                     p1000.move_to(EtOH.top(z=0))
-                    p1000.move_to(sample_plate_2[well_num].top(z=-2))
+                    p1000.move_to(sample_plate_2[X].top(z=-2))
                     p1000.dispense(ETOHMaxVol, rate=1)
                     protocol.delay(minutes=0.1)
                     p1000.blow_out()
-                    p1000.move_to(sample_plate_2[well_num].top(z=5))
-                    p1000.move_to(sample_plate_2[well_num].top(z=0))
-                    p1000.move_to(sample_plate_2[well_num].top(z=5))
+                    p1000.move_to(sample_plate_2[X].top(z=5))
+                    p1000.move_to(sample_plate_2[X].top(z=0))
+                    p1000.move_to(sample_plate_2[X].top(z=5))
                     p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                     p200_tips += 1
                     tipcheck()
@@ -870,7 +891,7 @@ def run(protocol: ProtocolContext) -> None:
                     p1000.default_speed = 5
                     p1000.move_to(sample_plate_2[X].top(z=2))
                     p1000.default_speed = 200
-                    trash_liquid(protocol, p1000, 200, liquid_trash_list)
+                    trash_liquid(protocol, p1000, RemoveSup, liquid_trash_list)
                     p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                     p200_tips += 1
                     tipcheck()
@@ -894,7 +915,6 @@ def run(protocol: ProtocolContext) -> None:
             if DRYRUN is False:
                 protocol.delay(minutes=1)
 
-            # ============================================================================================
             # GRIPPER MOVE PLATE FROM MAG PLATE TO HEATER SHAKER
             helpers.move_labware_to_hs(
                 protocol, sample_plate_2, heatershaker, heatershaker
@@ -902,7 +922,7 @@ def run(protocol: ProtocolContext) -> None:
 
             protocol.comment("--> Adding RSB")
             RSBVol = 32
-            RSBMixRep = 1 * 60 if DRYRUN is False else 0.1 * 60
+            RSBMixRep = 1.0 if DRYRUN is False else 0.1  # minutes
             for loop, X in enumerate(column_5_list):
                 p1000.pick_up_tip()
                 p1000.aspirate(RSBVol, RSB.bottom(z=1))
@@ -957,16 +977,17 @@ def run(protocol: ProtocolContext) -> None:
                 p200_tips += 1
                 tipcheck()
                 if DRYRUN is False:
-                    heatershaker.set_and_wait_for_shake_speed(
-                        rpm=(heater_shaker_speed * 0.8)
+                    helpers.set_hs_speed(
+                        protocol,
+                        heatershaker,
+                        int(heater_shaker_speed * 0.8),
+                        RSBMixRep,
+                        True,
                     )
-                    protocol.delay(RSBMixRep)
-                    heatershaker.deactivate_shaker()
 
-            # ============================================================================================
             # GRIPPER MOVE PLATE FROM HEATER SHAKER TO MAG PLATE
             helpers.move_labware_from_hs_to_destination(
-                protocol, sample_plate_2, heatershaker, mag_block
+                protocol, sample_plate_2, heatershaker, MAG_PLATE_SLOT
             )
 
             if DRYRUN is False:
@@ -984,13 +1005,12 @@ def run(protocol: ProtocolContext) -> None:
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
-        liquids_to_probe_at_end = [
-            Liquid_trash_well_1,
-            Liquid_trash_well_2,
-            Liquid_trash_well_3,
-            Liquid_trash_well_4,
-        ]
-        helpers.find_liquid_height_of_all_wells(protocol, p50, liquids_to_probe_at_end)
-        plate_reader_actions(protocol, plate_reader, hellma_plate, plate_name_str)
-        if deactivate_modules_bool:
-            helpers.deactivate_modules(protocol)
+    liquids_to_probe_at_end = [
+        Liquid_trash_well_1,
+        Liquid_trash_well_2,
+        Liquid_trash_well_3,
+        Liquid_trash_well_4,
+    ]
+    helpers.find_liquid_height_of_all_wells(protocol, p50, liquids_to_probe_at_end)
+    if deactivate_modules_bool:
+        helpers.deactivate_modules(protocol)

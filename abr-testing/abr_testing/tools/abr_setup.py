@@ -42,7 +42,9 @@ def clean_sheet(sheet_name: str, credentials: str) -> Any:
         # Check if the date is older than the cutoff
         if formatted_date < cutoff_date:
             rem_rows.append(row_id)
-        if len(rem_rows) > 2000:
+
+        # Limit rem_rows to 1500 at a time
+        if len(rem_rows) >= 1500:
             break
     if len(rem_rows) == 0:
         # No more rows to remove
@@ -53,9 +55,7 @@ def clean_sheet(sheet_name: str, credentials: str) -> Any:
         sheet.batch_delete_rows(rem_rows)
         print("deleted rows")
     except Exception:
-        print("could not delete rows")
-        traceback.print_exc()
-        sys.exit(1)
+        return
     clean_sheet(sheet_name, credentials)
 
 
