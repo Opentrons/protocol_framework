@@ -8,7 +8,7 @@ export interface OptInState {
   hasOptedIn: boolean
   appVersion?: string
 }
-const optInInitialState = {
+const optInInitialState: OptInState = {
   hasOptedIn: true,
 }
 
@@ -23,7 +23,11 @@ const hasOptedIn: Reducer<OptInState, any> = handleActions(
       action: RehydratePersistedAction
     ) => {
       const persistedState = action.payload?.['analytics.hasOptedIn']
-      return persistedState !== undefined ? persistedState : optInInitialState
+      if (persistedState == null || persistedState?.hasOptedIn == null) {
+        return optInInitialState
+      } else {
+        return persistedState
+      }
     },
   },
   optInInitialState
