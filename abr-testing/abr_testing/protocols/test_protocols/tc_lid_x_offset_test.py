@@ -63,6 +63,9 @@ def add_parameters(parameters: ParameterContext) -> None:
         ],
         default="X",
     )
+    parameters.add_bool(
+        variable_name="thermocycler_bool", display_name="thermocycler", default=False
+    )
 
 
 def run(protocol: ProtocolContext) -> None:
@@ -72,16 +75,22 @@ def run(protocol: ProtocolContext) -> None:
     num_offset = protocol.params.num_offset  # type: ignore[attr-defined]
     offset = protocol.params.offset  # type: ignore[attr-defined]
     negative = protocol.params.negative  # type: ignore[attr-defined]
+    thermocycler_bool = protocol.params.thermocycler_bool  # type: ignore[attr-defined]
     if negative:
         num_offset = num_offset * -1
     # Thermocycler
-    thermocycler: ThermocyclerContext = protocol.load_module(
-        "thermocyclerModuleV2"
-    )  # type: ignore[assignment]
-    plate_in_cycler: Labware = thermocycler.load_labware(
-        "armadillo_96_wellplate_200ul_pcr_full_skirt"
-    )
-    thermocycler.open_lid()
+    if thermocycler_bool:
+        thermocycler: ThermocyclerContext = protocol.load_module(
+            "thermocyclerModuleV2"
+        )  # type: ignore[assignment]
+        plate_in_cycler: Labware = thermocycler.load_labware(
+            "armadillo_96_wellplate_200ul_pcr_full_skirt"
+        )
+        thermocycler.open_lid()
+    else:
+        plate_in_cycler = protocol.load_labware(
+            "armadillo_96_wellplate_200ul_pcr_full_skirt", "D2"
+        )
     # Load Lids
     deck_riser_adapter = protocol.load_adapter("opentrons_flex_deck_riser", "D3")
     unused_lids: List[Labware] = [

@@ -165,7 +165,7 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
         "Lysis and PK": [{"well": lysis_, "volume": 12320.0}],
         "Beads and Binding": [{"well": binding_buffer, "volume": 11875.0}],
         "Binding 2": [{"well": bind2_res, "volume": 13500.0}],
-        "Final Elution": [{"well": elution_solution, "volume": 1200.0}],
+        "Final Elution": [{"well": elution_solution, "volume": 7500.0}],
         "Samples": [{"well": samps, "volume": 0.0}],
         "Reagents": [{"well": all_washes, "volume": 9800.0}],
     }
@@ -460,6 +460,7 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
                     src = source[whichwash]
                     protocol.comment(f"new wash source {whichwash}")
                     wash_volume_tracker = 0.0
+
         m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
         helpers.set_hs_speed(protocol, h_s, heater_shaker_speed * 0.9, wash_time, True)
 
@@ -489,9 +490,8 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
             m1000.aspirate(vol, elution_solution)
             m1000.air_gap(20)
             m1000.dispense(m1000.current_volume, m.top(-3))
-            total_elution_vol += vol
+            total_elution_vol += vol * 8
         m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
-
         helpers.set_hs_speed(protocol, h_s, heater_shaker_speed * 0.9, wash_time, True)
 
         # Transfer back to magnet

@@ -56,7 +56,7 @@ def clean_sheet(sheet_name: str, credentials: str) -> Any:
         print("could not delete rows")
         traceback.print_exc()
         sys.exit(1)
-    clean_sheet(sheet_name, credentials)
+    # clean_sheet(sheet_name, credentials)
 
 
 def run_sync_abr_sheet(
@@ -69,7 +69,7 @@ def run_sync_abr_sheet(
 def run_temp_sensor(ambient_conditions_sheet: str, credentials: str) -> None:
     """Run temperature sensors on all robots."""
     # Remove entries > 60 days
-    clean_sheet(ambient_conditions_sheet, credentials)
+    # clean_sheet(ambient_conditions_sheet, credentials)
     processes = ABRAsairScript.run()
     for process in processes:
         process.start()

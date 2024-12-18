@@ -239,7 +239,10 @@ def get_liquid_waste_height(file_results: Dict[str, Any]) -> float:
     result_str = get_comment_result_by_string(
         file_results, "Liquid Waste Total Height: "
     )
-    height = float(result_str)
+    try:
+        height = float(result_str)
+    except ValueError:
+        height = 0.0
     return height
 
 
