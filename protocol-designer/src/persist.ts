@@ -9,7 +9,7 @@ export interface RehydratePersistedAction {
     'tutorial.dismissedHints'?: Record<string, any>
     'featureFlags.flags'?: Record<string, any>
     'analytics.hasOptedIn'?: {
-      hasOptedIn: boolean | null
+      hasOptedIn: boolean
       appVersion?: string
     }
   }
