@@ -76,6 +76,7 @@ export const HoveredItems = (
             text: selectedLabwareDef.metadata.displayName,
             isLast: false,
             isSelected: true,
+            isZoomed: true,
           },
         ]
       : []

@@ -65,6 +65,8 @@ export interface DropdownMenuProps {
   disabled?: boolean
   /** optional placement of the menu */
   menuPlacement?: 'auto' | 'top' | 'bottom'
+  onEnter?: (id: string) => void
+  onExit?: () => void
 }
 
 // TODO: (smb: 4/15/22) refactor this to use html select for accessibility
@@ -84,6 +86,8 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
     disabled = false,
     onFocus,
     onBlur,
+    onEnter,
+    onExit,
     menuPlacement = 'auto',
   } = props
   const [targetProps, tooltipProps] = useHoverTooltip()
@@ -290,6 +294,8 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
                     setShowDropdownMenu(false)
                   }}
                   border="none"
+                  onMouseEnter={() => onEnter?.(option.value)}
+                  onMouseLeave={onExit}
                 >
                   <Flex
                     gridGap={SPACING.spacing8}

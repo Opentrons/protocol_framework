@@ -8,7 +8,6 @@ import {
   RadioButton,
   SPACING,
 } from '@opentrons/components'
-
 import { ProfileSettings } from './ProfileSettings'
 import { ProfileStepsSummary } from './ProfileStepsSummary'
 import { ThermocyclerState } from './ThermocyclerState'
@@ -27,8 +26,7 @@ export function ThermocyclerTools(props: StepFormProps): JSX.Element {
     focusedField,
     setShowFormErrors,
   } = props
-  const { t } = useTranslation('form')
-
+  const { t } = useTranslation(['form', 'application'])
   const [contentType, setContentType] = useState<ThermocyclerContentType>(
     formData.thermocyclerFormType as ThermocyclerContentType
   )

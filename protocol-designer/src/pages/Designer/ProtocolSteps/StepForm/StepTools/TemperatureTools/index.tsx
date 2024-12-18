@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   Box,
   COLORS,
@@ -7,6 +7,7 @@ import {
   Flex,
   SPACING,
 } from '@opentrons/components'
+import { hoverSelection } from '../../../../../../ui/steps/actions/actions'
 import { getTemperatureLabwareOptions } from '../../../../../../ui/modules/selectors'
 import {
   DropdownStepFormField,
@@ -20,7 +21,7 @@ export function TemperatureTools(props: StepFormProps): JSX.Element {
   const { propsForFields, formData, visibleFormErrors } = props
   const { t } = useTranslation(['application', 'form', 'protocol_steps'])
   const moduleLabwareOptions = useSelector(getTemperatureLabwareOptions)
-
+  const dispatch = useDispatch()
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
   return (
@@ -34,6 +35,12 @@ export function TemperatureTools(props: StepFormProps): JSX.Element {
         tooltipContent={null}
         options={moduleLabwareOptions}
         title={t('protocol_steps:module')}
+        onEnter={(id: string) => {
+          dispatch(hoverSelection({ id, text: t('select') }))
+        }}
+        onExit={() => {
+          dispatch(hoverSelection({ id: null, text: null }))
+        }}
       />
       <Box borderBottom={`1px solid ${COLORS.grey30}`} />
       <Flex padding={`0 ${SPACING.spacing16}`}>

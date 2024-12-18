@@ -65,6 +65,10 @@ import type {
   LiquidHandlingTab,
   StepFormProps,
 } from './types'
+import {
+  hoverSelection,
+  selectDropdownItem,
+} from '../../../../ui/steps/actions/actions'
 
 type StepFormMap = {
   [K in StepType]?: React.ComponentType<StepFormProps> | null
@@ -239,6 +243,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
         })
       )
       dispatch(analyticsEvent(stepDuration))
+      dispatch(selectDropdownItem({ selection: null, mode: 'clear' }))
+      dispatch(hoverSelection({ id: null, text: null }))
     } else {
       setShowFormErrors(true)
       if (tab === 'aspirate' && isDispenseError && !isAspirateError) {
@@ -300,7 +306,16 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
           </Btn>
         }
         childrenPadding="0"
-        onCloseClick={handleClose}
+        onCloseClick={() => {
+          handleClose()
+          dispatch(
+            selectDropdownItem({
+              selection: null,
+              mode: 'clear',
+            })
+          )
+          dispatch(hoverSelection({ id: null, text: null }))
+        }}
         closeButton={<Icon size="2rem" name="close" />}
         confirmButton={
           <Flex gridGap={SPACING.spacing8}>
