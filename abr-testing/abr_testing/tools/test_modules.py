@@ -12,8 +12,24 @@ from typing import Any, Tuple, Dict
 # python3 test_modules.py
 
 
+async def tc_test_1(module: str, path_to_file: str)-> None:
+    duration = int(input("How long to run this test for? (in seconds): "))
+    start = time.time()
+    while time.time() - start < duration:
+        try:
+            tc_open_lid(module, path_to_file)
+        except asyncio.TimeoutError:
+            return
+        time.sleep(5)
+        try:
+            tc_close_lid(module, path_to_file)
+        except asyncio.TimeoutError:
+            return
+        time.sleep(5)
+
+
 async def hs_test_1(module: str, path_to_file: str) -> None:
-    """Heater Shaker Test 1."""
+    """Heater Shaker Test 1. (Home and Shake)"""
     duration = int(input("How long to run this test for? (in seconds): "))
     rpm = input("Target RPM (200-3000): ")
     start = time.time()
@@ -44,14 +60,16 @@ hs_tests: Dict[str, Tuple[Any, str]] = {
     "Test 1": (hs_test_1, "Repeatedly home heater shaker then set shake speed"),
     "Input GCodes": (input_codes, "Input g codes"),
 }
-td_tests: Dict[str, Tuple[Any, str]] = {}
 
-tc_tests: Dict[str, Tuple[Any, str]] = {}
+tc_tests: Dict[str, Tuple[Any, str]] = {
+    "Test 1": (tc_test_1, "Repeatedly open and close TC lid"),
+    "Input GCodes": (input_codes, "Input g codes"),
+}
 
 global modules
+
 modules = {
     "heatershaker": hs_tests,
-    "tempdeck": td_tests,
     "thermocycler": tc_tests,
 }
 
@@ -80,6 +98,7 @@ async def main(module: str) -> None:
         traceback.print_exc()
 
 
+# HS Test Functions
 async def hs_test_home(module: str, path_to_file: str) -> None:
     """Home heater shaker."""
     hs_gcodes = module_control.hs_gcode_shortcuts
@@ -99,6 +118,21 @@ async def hs_deactivate(module: str, path_to_file: str) -> None:
     hs_gcodes = module_control.hs_gcode_shortcuts
     deactivate_gcode = hs_gcodes["deactivate"]
     await (module_control._main(module, [deactivate_gcode, "done"], path_to_file))
+
+
+# TC Test Functions
+async def tc_open_lid(module: str, path_to_file: str) -> None:
+    """Open thermocycler lid"""
+    tc_gcodes = module_control.tc_gcode_shortcuts
+    open_lid_gcode = tc_gcodes["ol"]
+    await (module_control._main(module, [open_lid_gcode, "done"], path_to_file))
+
+async def tc_close_lid(module: str, path_to_file: str) -> None:
+    """Open thermocycler lid"""
+    tc_gcodes = module_control.tc_gcode_shortcuts
+    close_lid_gcode = tc_gcodes["cl"]
+    await (module_control._main(module, [close_lid_gcode, "done"], path_to_file))
+
 
 
 if __name__ == "__main__":
