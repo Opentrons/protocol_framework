@@ -14,9 +14,12 @@ describe('Happy Path Transfer Tests', () => {
   it('It should verify the working function of every permutation of transfer checkboxes', () => {
 
     cy.visit('/'); // Replace with the appropriate URL or navigation
+    /*
     cy.verifyHomePage(); // This calls the custom command from commands.ts
     cy.clickCreateNew()
+    /
     cy.robotSelection(Flex_Home)
+
     
     function putPipette(pipette) {
       cy.contains('label', pipette).should('exist').and('be.visible').click()
@@ -83,9 +86,31 @@ describe('Happy Path Transfer Tests', () => {
     cy.contains('Well plates').click()
     cy.contains('Armadillo 96 Well Plate 200 µL PCR Full Skirt').click()
     cy.get('[data-testid="Toolbox_confirmButton"]').click({ force: true })
-    cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click({force:true})
 
+    cy.get('foreignObject[x="164"][y="107"]')
+  .find('.Box-sc-8ozbhb-0.kIDovv')
+  .find('a[role="button"]')
+  .contains('Edit slot')
+  .click({force:true})
+  cy.contains('button', 'Add liquid').click()
+  cy.contains('button', 'Liquid').click()
+  cy.contains('button', 'Define a liquid').click()
+  cy.get('input[name="name"]') // Select the input with name="name"
+  .type('My liquid!')
+  cy.get('button[type="submit"]').contains('Save').click();
 
+  //cy.contains('button','Save').click()
+
+  
+    /*  
+    
+    cy.get('foreignObject[x="164"][y="107"]') // Select the <foreignObject> with specific attributes
+  .find('.Box-sc-8ozbhb-0.kIDovv')       // Find the parent <div> inside it
+  .find('a[role="button"]')              // Find the <a> element acting as a button
+  .contains('Edit slot')                 // Ensure it contains the text "Edit slot"
+  .click()
+
+    */
     
     //cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click({force:true})
 

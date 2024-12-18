@@ -10,6 +10,6 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       return require('./cypress/plugins/index.js')(on, config)
     },
-    baseUrl: 'https://sandbox.designer.opentrons.com/protocol-designer@8.2.2-candidate-b',
+    baseUrl: 'http://localhost:5178',
   },
 })
