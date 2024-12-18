@@ -26,16 +26,17 @@ def retrieve_protocol_file(
     protocol_dir = f"/var/lib/opentrons-robot-server/7.1/protocols/{protocol_id}"
 
     print(f"FILE TO FIND: {protocol_dir}/{protocol_id}")
-    # Download protocol and supporting files
+    # Copy protocol file found in robot oto host computer
     save_dir = Path(f"{storage}/protocol_errors")
-
     command = ["scp", "-r", f"root@{robot_ip}:{protocol_dir}", save_dir]
     try:
+        # If file found and copied return path to file
         subprocess.run(command, check=True)  # type: ignore
         print("File transfer successful!")
         return save_dir
     except subprocess.CalledProcessError as e:
         print(f"Error during file transfer: {e}")
+        # Return empty string if file can't be copied
     return ""
 
 
@@ -287,6 +288,7 @@ def get_error_runs_from_robot(ip: str) -> Tuple[List[str], List[str]]:
         num_of_errors = len(run["errors"])
         if not run["current"] and num_of_errors > 0:
             error_run_ids.append(run_id)
+            # Protocol ID will identify the correct folder on the robot of the protocol file
             protocol_ids.append(protocol_id)
     return (error_run_ids, protocol_ids)
 
@@ -400,6 +402,7 @@ def get_run_error_info_from_robot(
         "protocolName", ""
     )
 
+    # If Protocol was successfully retrieved from the robot
     description["protocol_found_on_robot"] = protocol_found
     # Get start and end time of run
     start_time = datetime.strptime(
@@ -550,9 +553,11 @@ if __name__ == "__main__":
         print("Invalid IP address.")
         sys.exit()
     if len(run_or_other) < 1:
+        # Retrieve the most recently run protocol file
         protocol_files_path = retrieve_protocol_file(
             protocol_ids[-1], ip, storage_directory
         )
+        # Set protocol_found to true if python protocol was successfully copied over
         if protocol_files_path:
             protocol_found = True
 
@@ -610,6 +615,7 @@ if __name__ == "__main__":
     print(protocol_files_path)
     error_files = [saved_file_path_calibration, run_log_file_path] + file_paths
 
+    # Move protocol file(s) to error folder
     if protocol_files_path:
         for file in os.listdir(protocol_files_path):
             error_files.append(os.path.join(protocol_files_path, file))
@@ -624,7 +630,7 @@ if __name__ == "__main__":
             shutil.move(source_file, destination_file)
         except shutil.Error:
             continue
-    # POST FILES TO TICKET
+    # POST ALL FILES TO TICKET
     list_of_files = os.listdir(error_folder_path)
     for file in list_of_files:
         file_to_attach = os.path.join(error_folder_path, file)
