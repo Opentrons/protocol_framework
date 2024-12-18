@@ -9,7 +9,6 @@ import { Flex, Text } from '../../primitives'
 import { ALIGN_CENTER, JUSTIFY_CENTER } from '../../styles'
 import { SPACING, TYPOGRAPHY } from '../../ui-style-constants'
 import { COLORS, BORDERS } from '../../helix-design-system'
-import { blue50 } from '../../helix-design-system/colors'
 import { RobotCoordsForeignObject } from './RobotCoordsForeignObject'
 
 import type { RobotType } from '@opentrons/shared-data'
@@ -106,7 +105,7 @@ export const FlexTrash = ({
           justifyContent={JUSTIFY_CENTER}
           gridGap={SPACING.spacing8}
           width="100%"
-          border={showHighlight ? `3px solid ${blue50}` : 'none'}
+          border={showHighlight ? `3px solid ${COLORS.blue50}` : 'none'}
         >
           {rotateDegrees === '180' ? (
             <Text

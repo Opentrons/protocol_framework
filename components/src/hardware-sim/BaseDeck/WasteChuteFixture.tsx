@@ -11,7 +11,6 @@ import {
 import { DeckLabelSet } from '../../organisms'
 import { SPACING, TYPOGRAPHY } from '../../ui-style-constants'
 import { COLORS } from '../../helix-design-system'
-import { blue50 } from '../../helix-design-system/colors'
 import { RobotCoordsForeignObject } from '../Deck/RobotCoordsForeignObject'
 import { SlotBase } from './SlotBase'
 import type {
@@ -21,6 +20,11 @@ import type {
 } from '@opentrons/shared-data'
 import type { DeckLabelProps } from '../../molecules'
 
+const WASTE_CHUTE_WIDTH = 130
+const WASTE_CHUTE_HEIGHT = 138
+const WASTE_CHUTE_X = 322
+const WASTE_CHUTE_Y = -51
+const TAG_HEIGHT = 28
 interface WasteChuteFixtureProps extends React.SVGProps<SVGGElement> {
   cutoutId: typeof WASTE_CHUTE_CUTOUT
   deckDefinition: DeckDefinition
@@ -96,9 +100,9 @@ export function WasteChute(props: WasteChuteProps): JSX.Element {
   return (
     <>
       <RobotCoordsForeignObject
-        width={130}
-        height={138}
-        x={322}
+        width={WASTE_CHUTE_WIDTH}
+        height={WASTE_CHUTE_HEIGHT}
+        x={WASTE_CHUTE_X}
         y={-51}
         flexProps={{ flex: '1' }}
         foreignObjectProps={{ flex: '1' }}
@@ -113,7 +117,7 @@ export function WasteChute(props: WasteChuteProps): JSX.Element {
           justifyContent={JUSTIFY_CENTER}
           padding={SPACING.spacing8}
           width="100%"
-          border={showHighlight ? `3px solid ${blue50}` : 'none'}
+          border={showHighlight ? `3px solid ${COLORS.blue50}` : 'none'}
         >
           <Icon name="trash" color={wasteIconColor} height="2rem" />
           <Text
@@ -127,10 +131,10 @@ export function WasteChute(props: WasteChuteProps): JSX.Element {
       </RobotCoordsForeignObject>
       {tagInfo != null && tagInfo.length > 0 ? (
         <DeckLabelSet
-          width={130}
-          height={138}
-          x={322}
-          y={-79}
+          width={WASTE_CHUTE_WIDTH}
+          height={WASTE_CHUTE_HEIGHT}
+          x={WASTE_CHUTE_X}
+          y={WASTE_CHUTE_Y - TAG_HEIGHT}
           deckLabels={tagInfo}
         />
       ) : null}

@@ -21,6 +21,9 @@ export interface DropdownStepFormFieldProps extends FieldProps {
   onExit?: () => void
 }
 
+const FIRST_FIELDS = ['aspirate_labware', 'labware', 'moduleId']
+const SECOND_FIELDS = ['dispense_labware', 'newLocation']
+
 export function DropdownStepFormField(
   props: DropdownStepFormFieldProps
 ): JSX.Element {
@@ -55,21 +58,14 @@ export function DropdownStepFormField(
       id: value,
       text,
     }
-    if (
-      fieldName === 'aspirate_labware' ||
-      fieldName === 'labware' ||
-      fieldName === 'moduleId'
-    ) {
+    if (FIRST_FIELDS.includes(fieldName)) {
       dispatch(
         selectDropdownItem({
           selection: { ...selection, field: '1' },
           mode: 'add',
         })
       )
-    } else if (
-      fieldName === 'dispense_labware' ||
-      fieldName === 'newLocation'
-    ) {
+    } else if (SECOND_FIELDS.includes(fieldName)) {
       dispatch(
         selectDropdownItem({
           selection: { ...selection, field: '2' },
