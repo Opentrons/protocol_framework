@@ -93,17 +93,45 @@ Define a liquid class to automatically populate advanced settings in your protoc
 - **Volatile liquids**, based on 80% ethanol. 
 - **Viscous liquid**, based on 50% glycerol. 
 
-The above liquid classes can be used with any pipette and compatible tips only on the Flex. 
+The above liquid classes can be used with any pipette and compatible tips only on the Flex. Some settings like flow rate and air gap volume vary between pipette and tip combinations, regardless of liquid class. 
+
 
 Use :py:meth:`.ProtocolContext.define_liquid_class` to define a liquid in your protocol as one of the three classes.
 
 .. code-block:: python
    
-   def define_liquid_class(Viscous)
+   def define_liquid_class(
+        liquid_class: "Viscous",
+        pipette_load_name: "insert pipette", 
+        tiprack_uri: "insert tiprack", 
+   )
 
-**TODO**: fill in code-block example when ``define_liquid_class`` is used. what do users see? 
+When you define a liquid as `aqueous`, `volatile`, or `viscous`, you'll need to enter the pipette and tip rack combination to use with this liquid. Advanced settings for that liquid class, shown below, are then automatically used in your liquid transfers. 
 
-To transfer liquids of a defined class, use ``transfer_liquid``, just as you would for any liquid transfer. Here, you'll only specify source and destination wells and transfer volume. The liquid class definition contains all the other required information. 
-**TODO**: fill in code-block example for transferring a viscous liquid; defined with that class 
+##TODO: insert table of changes between liquid classes, like submerge/retract speed, flow rate, and correction by volume for flow rate. anything else?
+
+Next, load and transfer liquids of a defined class. Use ``load_liquid_class`` and ``transfer_liquid``. Here, you'll only specify source and destination wells and transfer volume. The liquid class definition contains all other required information. 
+
+.. code-block:: python
+
+    ## Load a viscous liquid in a well plate on the deck with class-specific commands.## 
+    def load_liquid_class(
+        liquid_class: "Viscous",
+        pipette_load_name: "insert pipette",
+        tiprack_uri: "insert tiprack"
+    )
+
+    well_plate["A1"].load_liquid_class(liquid_class=Viscous, volume=50)
+
+    def transfer_liquid(
+        liquid_class_id: "Viscous", 
+        volume: "insert volume", 
+        source: "[wells]", 
+        dest: "[Wells]", 
+        new_tip: "once", 
+        trash_location: "[TrashBin]"
+    )
+
+##TODO: insert description of the transfer step the robot will perform, with advanced settings and changes included in liquid class description. 
 
 .. versionadded:: 2.22
