@@ -14,6 +14,9 @@ from opentrons.protocol_api.core.engine.instrument import InstrumentCore
 from opentrons.protocol_api.core.engine.transfer_components_executor import (
     TransferComponentsExecutor,
     absolute_point_from_position_reference_and_offset,
+    TipState,
+    TransferType,
+    LiquidAndAirGapPair,
 )
 from opentrons.types import Location, Point
 
@@ -75,14 +78,13 @@ def test_submerge(
         transfer_properties=sample_transfer_props,
         target_location=Location(Point(), labware=None),
         target_well=source_well,
+        tip_state=TipState(),
+        transfer_type=TransferType.ONE_TO_ONE,
     )
     decoy.when(source_well.get_bottom(0)).then_return(well_bottom_point)
     decoy.when(source_well.get_top(0)).then_return(well_top_point)
 
-    subject.submerge(
-        submerge_properties=sample_transfer_props.aspirate.submerge,
-        air_gap_volume=123,
-    )
+    subject.submerge(submerge_properties=sample_transfer_props.aspirate.submerge)
 
     decoy.verify(
         mock_instrument_core.move_to(
@@ -130,6 +132,8 @@ def test_aspirate_and_wait(
         transfer_properties=sample_transfer_props,
         target_location=Location(Point(1, 2, 3), labware=None),
         target_well=source_well,
+        tip_state=TipState(),
+        transfer_type=TransferType.ONE_TO_ONE,
     )
     subject.aspirate_and_wait(volume=10)
     decoy.verify(
@@ -160,6 +164,8 @@ def test_aspirate_and_wait_skips_delay(
         transfer_properties=sample_transfer_props,
         target_location=Location(Point(1, 2, 3), labware=None),
         target_well=source_well,
+        tip_state=TipState(),
+        transfer_type=TransferType.ONE_TO_ONE,
     )
     subject.aspirate_and_wait(volume=10)
     decoy.verify(
@@ -184,8 +190,10 @@ def test_dispense_and_wait(
         transfer_properties=sample_transfer_props,
         target_location=Location(Point(1, 2, 3), labware=None),
         target_well=source_well,
+        tip_state=TipState(),
+        transfer_type=TransferType.ONE_TO_ONE,
     )
-    subject.dispense_and_wait(volume=10, push_out=123)
+    subject.dispense_and_wait(volume=10, push_out_override=123)
     decoy.verify(
         mock_instrument_core.dispense(
             location=Location(Point(1, 2, 3), labware=None),
@@ -215,8 +223,10 @@ def test_dispense_and_wait_skips_delay(
         transfer_properties=sample_transfer_props,
         target_location=Location(Point(1, 2, 3), labware=None),
         target_well=source_well,
+        tip_state=TipState(),
+        transfer_type=TransferType.ONE_TO_ONE,
     )
-    subject.dispense_and_wait(volume=10, push_out=123)
+    subject.dispense_and_wait(volume=10, push_out_override=123)
     decoy.verify(
         mock_instrument_core.delay(0.2),
         times=0,
@@ -241,8 +251,13 @@ def test_mix(
         transfer_properties=sample_transfer_props,
         target_location=Location(Point(1, 2, 3), labware=None),
         target_well=source_well,
+        tip_state=TipState(),
+        transfer_type=TransferType.ONE_TO_ONE,
     )
-    subject.mix(mix_properties=sample_transfer_props.aspirate.mix)
+    subject.mix(
+        mix_properties=sample_transfer_props.aspirate.mix,
+        last_dispense_push_out=True,
+    )
 
     decoy.verify(
         mock_instrument_core.aspirate(
@@ -262,7 +277,7 @@ def test_mix(
             rate=1,
             flow_rate=dispense_flow_rate,
             in_place=True,
-            push_out=0,
+            push_out=2.0,
             is_meniscus=None,
         ),
         mock_instrument_core.delay(0.5),
@@ -285,8 +300,13 @@ def test_mix_disabled(
         transfer_properties=sample_transfer_props,
         target_location=Location(Point(1, 2, 3), labware=None),
         target_well=source_well,
+        tip_state=TipState(),
+        transfer_type=TransferType.ONE_TO_ONE,
     )
-    subject.mix(mix_properties=sample_transfer_props.aspirate.mix)
+    subject.mix(
+        mix_properties=sample_transfer_props.aspirate.mix,
+        last_dispense_push_out=True,
+    )
     decoy.verify(
         mock_instrument_core.aspirate(
             location=Location(Point(1, 2, 3), labware=None),
@@ -319,6 +339,8 @@ def test_pre_wet(
         transfer_properties=sample_transfer_props,
         target_location=Location(Point(1, 2, 3), labware=None),
         target_well=source_well,
+        tip_state=TipState(),
+        transfer_type=TransferType.ONE_TO_ONE,
     )
     subject.pre_wet(volume=40)
 
@@ -363,6 +385,8 @@ def test_pre_wet_disabled(
         transfer_properties=sample_transfer_props,
         target_location=Location(Point(1, 2, 3), labware=None),
         target_well=source_well,
+        tip_state=TipState(),
+        transfer_type=TransferType.ONE_TO_ONE,
     )
     subject.pre_wet(volume=40)
 
@@ -399,6 +423,8 @@ def test_retract_after_aspiration(
         transfer_properties=sample_transfer_props,
         target_location=Location(Point(1, 1, 1), labware=None),
         target_well=source_well,
+        tip_state=TipState(),
+        transfer_type=TransferType.ONE_TO_ONE,
     )
     decoy.when(source_well.get_bottom(0)).then_return(well_bottom_point)
     decoy.when(source_well.get_top(0)).then_return(well_top_point)
@@ -458,6 +484,8 @@ def test_retract_after_aspiration_without_touch_tip_and_delay(
         transfer_properties=sample_transfer_props,
         target_location=Location(Point(1, 1, 1), labware=None),
         target_well=source_well,
+        tip_state=TipState(),
+        transfer_type=TransferType.ONE_TO_ONE,
     )
     decoy.when(source_well.get_bottom(0)).then_return(well_bottom_point)
     decoy.when(source_well.get_top(0)).then_return(well_top_point)

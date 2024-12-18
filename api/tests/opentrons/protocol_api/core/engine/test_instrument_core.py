@@ -19,6 +19,9 @@ from opentrons.protocol_api._liquid_properties import TransferProperties
 from opentrons.protocol_api.core.engine import transfer_components_executor
 from opentrons.protocol_api.core.engine.transfer_components_executor import (
     TransferComponentsExecutor,
+    TransferType,
+    TipState,
+    LiquidAndAirGapPair,
 )
 from opentrons.protocol_engine import (
     DeckPoint,
@@ -1620,6 +1623,8 @@ def test_aspirate_liquid_class(
             transfer_properties=test_transfer_properties,
             target_location=Location(Point(1, 2, 3), labware=None),
             target_well=source_well,
+            transfer_type=TransferType.ONE_TO_ONE,
+            tip_state=TipState(),
         )
     ).then_return(mock_transfer_components_executor)
     decoy.when(
@@ -1629,14 +1634,16 @@ def test_aspirate_liquid_class(
         volume=123,
         source=(source_location, source_well),
         transfer_properties=test_transfer_properties,
+        transfer_type=TransferType.ONE_TO_ONE,
+        tip_contents=[],
     )
     decoy.verify(
         mock_transfer_components_executor.submerge(
             submerge_properties=test_transfer_properties.aspirate.submerge,
-            air_gap_volume=111,
         ),
         mock_transfer_components_executor.mix(
-            mix_properties=test_transfer_properties.aspirate.mix
+            mix_properties=test_transfer_properties.aspirate.mix,
+            last_dispense_push_out=False,
         ),
         mock_transfer_components_executor.pre_wet(volume=123),
         mock_transfer_components_executor.aspirate_and_wait(volume=123),
