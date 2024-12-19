@@ -19,6 +19,7 @@ from typing import List, Union, Dict, Tuple, Any
 from opentrons.hardware_control.modules.types import ThermocyclerStep
 from opentrons_shared_data.errors.exceptions import PipetteLiquidNotFoundError
 
+import traceback
 # FUNCTIONS FOR LOADING COMMON CONFIGURATIONS
 
 
@@ -625,7 +626,8 @@ def move_labware_to_destination(
         z = 16
     offsets = {"x": x, "y": y, "z": z}
     print(f"OFFSETS: {offsets}")
-
+    print(f'LABWARE: {labware}')
+    print(f"DESTINATION: {dest}")
     if isinstance(dest, str):
         try:
             if dest[1] == "4":
@@ -639,6 +641,30 @@ def move_labware_to_destination(
         except IndexError:
             print("OT-2")
             return
+    if isinstance(dest, Labware):
+        SEARCHING = True
+        try:
+            print('FINDING DESTINATION LABWARE LOCATION...')
+            labware_location = dest.parent
+            while SEARCHING:
+                if len(str(labware_location)) > 2:
+                    print('Need to get parent')
+                    labware_location = labware_location.parent
+                else:
+                    break
+            print(f'Location: {labware_location}')
+            if labware_location[1] == "4":
+                protocol.move_labware(
+                    labware=labware,
+                    new_location=dest,
+                    use_gripper=use_gripper,
+                    drop_offset=offsets,
+                )
+            return
+        except Exception:
+            traceback.print_exc()
+            raise
+            # print('not a labware')
     protocol.move_labware(
         labware=labware,
         new_location=dest,
