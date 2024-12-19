@@ -23,8 +23,8 @@ import {
   ConfirmDeleteModal,
   DELETE_MULTIPLE_STEP_FORMS,
   DELETE_STEP_FORM,
-} from '../../../../components/modals/ConfirmDeleteModal'
-import { getTopPortalEl } from '../../../../components/portals/TopPortal'
+  getMainPagePortalEl,
+} from '../../../../organisms'
 import { actions as steplistActions } from '../../../../steplist'
 import {
   deselectAllSteps,
@@ -45,8 +45,8 @@ import type { IconName } from '@opentrons/components'
 import type { StepIdType } from '../../../../form-types'
 import type { BaseState } from '../../../../types'
 
-const STARTING_DECK_STATE = 'Starting deck state'
-const FINAL_DECK_STATE = 'Final deck state'
+const STARTING_DECK_STATE = 'Starting deck'
+const FINAL_DECK_STATE = 'Ending deck'
 const PX_HEIGHT_TO_TOP_OF_CONTAINER = 32
 export interface StepContainerProps {
   title: string
@@ -287,7 +287,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
               confirmMultiDelete={confirmMultiDelete}
               multiSelectItemIds={multiSelectItemIds}
             />,
-            getTopPortalEl()
+            getMainPagePortalEl()
           )
         : null}
     </>

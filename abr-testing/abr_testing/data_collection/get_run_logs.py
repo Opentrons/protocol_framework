@@ -104,10 +104,11 @@ def get_all_run_logs(
     ip_json_file = os.path.join(storage_directory, "IPs.json")
     try:
         ip_file = json.load(open(ip_json_file))
+        robot_dict = ip_file.get("ip_address_list")
     except FileNotFoundError:
         print(f"Add .json file with robot IPs to: {storage_directory}.")
         sys.exit()
-    ip_address_list = ip_file["ip_address_list"]
+    ip_address_list = list(robot_dict.keys())
     runs_from_storage = read_robot_logs.get_run_ids_from_google_drive(google_drive)
     for ip in ip_address_list:
         runs = get_run_ids_from_robot(ip)

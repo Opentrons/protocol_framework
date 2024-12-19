@@ -21,9 +21,6 @@ import type {
   SelectStepAction,
   SelectMultipleStepsAction,
   SelectTerminalItemAction,
-  ToggleStepCollapsedAction,
-  ExpandMultipleStepsAction,
-  CollapseMultipleStepsAction,
 } from './actions/types'
 
 export type CollapsedStepsState = Record<StepIdType, boolean>
@@ -50,18 +47,6 @@ const collapsedSteps: Reducer<CollapsedStepsState, any> = handleActions(
       state: CollapsedStepsState,
       action: DeleteMultipleStepsAction
     ) => omit(state, action.payload),
-    TOGGLE_STEP_COLLAPSED: (
-      state: CollapsedStepsState,
-      { payload }: ToggleStepCollapsedAction
-    ) => ({ ...state, [payload]: !state[payload] }),
-    EXPAND_MULTIPLE_STEPS: (
-      state: CollapsedStepsState,
-      { payload }: ExpandMultipleStepsAction
-    ) => payload.reduce((acc, stepId) => ({ ...acc, [stepId]: false }), state),
-    COLLAPSE_MULTIPLE_STEPS: (
-      state: CollapsedStepsState,
-      { payload }: CollapseMultipleStepsAction
-    ) => payload.reduce((acc, stepId) => ({ ...acc, [stepId]: true }), state),
     LOAD_FILE: (
       state: CollapsedStepsState,
       action: LoadFileAction // default all steps to collapsed

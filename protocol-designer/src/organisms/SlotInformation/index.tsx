@@ -63,7 +63,11 @@ export const SlotInformation: FC<SlotInformationProps> = ({
     <Flex
       flexDirection={DIRECTION_COLUMN}
       gridGap={SPACING.spacing12}
-      maxWidth={pathLocation.pathname === '/designer' ? '23.4375rem' : '100%'}
+      maxWidth={
+        pathLocation.pathname === '/designer' && !isOffDeck
+          ? '23.4375rem'
+          : '100%'
+      }
       width="100%"
     >
       <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
@@ -76,7 +80,10 @@ export const SlotInformation: FC<SlotInformationProps> = ({
         {liquids.length > 1 ? (
           <ListItem type="noActive" width="max-content">
             <ListItemDescriptor
-              changeFlexDirection={breakPointSize === 'medium'}
+              changeFlexDirection={
+                breakPointSize === 'medium' &&
+                pathLocation.pathname === '/designer'
+              }
               type="default"
               content={
                 <StyledText
@@ -147,11 +154,14 @@ interface StackInfoProps {
 function StackInfo({ title, stackInformation }: StackInfoProps): JSX.Element {
   const { t } = useTranslation('shared')
   const breakPointSize = useDeckSetupWindowBreakPoint()
+  const pathLocation = useLocation()
 
   return (
     <ListItem type="noActive">
       <ListItemDescriptor
-        changeFlexDirection={breakPointSize === 'medium'}
+        changeFlexDirection={
+          breakPointSize === 'medium' && pathLocation.pathname === '/designer'
+        }
         type="default"
         content={
           <StyledText
@@ -161,6 +171,7 @@ function StackInfo({ title, stackInformation }: StackInfoProps): JSX.Element {
                 ? TYPOGRAPHY.textAlignLeft
                 : TYPOGRAPHY.textAlignRight
             }
+            css={LINE_CLAMP_TEXT_STYLE(3)}
           >
             {stackInformation ?? t('none')}
           </StyledText>

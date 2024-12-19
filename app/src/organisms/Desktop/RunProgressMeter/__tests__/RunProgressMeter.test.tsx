@@ -77,7 +77,6 @@ describe('RunProgressMeter', () => {
       .thenReturn(null)
     when(useNotifyAllCommandsQuery)
       .calledWith(NON_DETERMINISTIC_RUN_ID, {
-        cursor: null,
         pageLength: 1,
       })
       .thenReturn(mockUseAllCommandsResponseNonDeterministic)

@@ -1,4 +1,4 @@
-import { LabwareOnDeck as LabwareOnDeckComponent } from '../../../components/DeckSetup/LabwareOnDeck'
+import { LabwareOnDeck as LabwareOnDeckComponent } from '../../../organisms'
 import { LabwareLabel } from '../LabwareLabel'
 import { LabwareRenderOnDeck } from './LabwareRenderOnDeck'
 import type { DeckLabelProps } from '@opentrons/components'

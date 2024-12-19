@@ -1,4 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import { useConditionalConfirm } from '@opentrons/components'
 import {
   getHoveredTerminalItemId,
@@ -14,7 +15,7 @@ import {
   CLOSE_STEP_FORM_WITH_CHANGES,
   CLOSE_UNSAVED_STEP_FORM,
   ConfirmDeleteModal,
-} from '../../../../components/modals/ConfirmDeleteModal'
+} from '../../../../organisms'
 import {
   deselectAllSteps,
   hoverOnStep,
@@ -31,11 +32,11 @@ import type { ThunkDispatch } from '../../../../types'
 
 export interface TerminalItemStepProps {
   id: TerminalItemId
-  title: string
 }
 
 export function TerminalItemStep(props: TerminalItemStepProps): JSX.Element {
-  const { id, title } = props
+  const { id } = props
+  const { t } = useTranslation('protocol_steps')
   const hovered = useSelector(getHoveredTerminalItemId) === id
   const selected = useSelector(getSelectedTerminalItemId) === id
   const currentFormIsPresaved = useSelector(getCurrentFormIsPresaved)
@@ -83,10 +84,11 @@ export function TerminalItemStep(props: TerminalItemStepProps): JSX.Element {
       <StepContainer
         {...{
           stepId: `TerminalItem_${id}`,
-          iconName: title === 'Starting deck state' ? 'ot-start' : 'ot-end',
+          iconName: id === '__initial_setup__' ? 'ot-start' : 'ot-end',
           hovered,
           selected,
-          title,
+          title:
+            id === '__initial_setup__' ? t('starting_deck') : t('ending_deck'),
           onClick,
           onMouseEnter,
           onMouseLeave,

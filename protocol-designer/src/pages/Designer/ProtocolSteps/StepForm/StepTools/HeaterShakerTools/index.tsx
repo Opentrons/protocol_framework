@@ -41,7 +41,7 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
         gridGap={SPACING.spacing4}
         paddingX={SPACING.spacing16}
       >
-        <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
+        <StyledText desktopStyle="bodyDefaultSemiBold">
           {t('protocol_steps:heater_shaker_settings')}
         </StyledText>
         <ToggleExpandStepFormField
@@ -103,7 +103,7 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
             'form:step_edit_form.field.heaterShaker.timer.heaterShakerSetTimer'
           )}
           fieldTitle={t('form:step_edit_form.field.heaterShaker.duration')}
-          isSelected={formData.heaterShakerSetTimer === true}
+          isSelected={formData.heaterShakerSetTimer === 'true'}
           units={t('application:units.time')}
           toggleElement="checkbox"
           formLevelError={getFormLevelError(

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -18,7 +18,7 @@ import {
 import { DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP } from '../../constants'
 import { getIsTouchTipField } from '../../form-types'
 import { BUTTON_LINK_STYLE } from '../../atoms'
-import { getMainPagePortalEl } from '../../components/portals/MainPageModalPortal'
+import { getMainPagePortalEl } from '../Portal'
 import * as utils from './utils'
 import { TOO_MANY_DECIMALS } from './constants'
 import { TipPositionZOnlyView } from './TipPositionZOnlyView'
@@ -53,12 +53,12 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
         wellDepthMm,
       })
 
-  const [value, setValue] = React.useState<string | null>(
+  const [value, setValue] = useState<string | null>(
     zValue !== null ? String(zValue) : null
   )
 
   // in this modal, pristinity hides the OUT_OF_BOUNDS error only.
-  const [isPristine, setPristine] = React.useState<boolean>(true)
+  const [isPristine, setPristine] = useState<boolean>(true)
 
   const getMinMaxMmFromBottom = (): {
     maxMmFromBottom: number

@@ -8,6 +8,7 @@ import {
   StyledText,
   Tabs,
 } from '@opentrons/components'
+import { getTrashOrLabware } from '@opentrons/step-generation'
 import { getEnableReturnTip } from '../../../../../../feature-flags/selectors'
 import {
   getAdditionalEquipmentEntities,
@@ -60,7 +61,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     tab,
     setTab,
   } = props
-  const { t, i18n } = useTranslation(['protocol_steps', 'form'])
+  const { t, i18n } = useTranslation(['protocol_steps', 'form', 'tooltip'])
   const { path } = formData
   const additionalEquipmentEntities = useSelector(
     getAdditionalEquipmentEntities
@@ -96,6 +97,23 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     additionalEquipmentEntities[String(propsForFields.dispense_labware.value)]
       ?.name === 'trashBin'
 
+  const destinationLabwareType =
+    formData.dispense_labware != null
+      ? getTrashOrLabware(
+          labwares,
+          additionalEquipmentEntities,
+          formData.dispense_labware as string
+        )
+      : null
+  const isDestinationTrash =
+    destinationLabwareType != null
+      ? ['trashBin', 'wasteChute'].includes(destinationLabwareType)
+      : false
+  const dispenseMixDisabledTooltipText = t(
+    `tooltip:step_fields.moveLiquid.disabled.${
+      isDestinationTrash ? 'dispense_mix_checkbox' : 'dispense_mix_checkbox_2'
+    }`
+  )
   const aspirateTab = {
     text: t('aspirate'),
     isActive: tab === 'aspirate',
@@ -186,6 +204,11 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         )}
       </Flex>
       <Divider marginY="0" />
+      <VolumeField
+        {...propsForFields.volume}
+        errorToShow={getFormLevelError('volume', mappedErrorsToField)}
+      />
+      <Divider marginY="0" />
       <PathField
         {...propsForFields.path}
         aspirate_airGap_checkbox={formData.aspirate_airGap_checkbox}
@@ -208,11 +231,6 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         stepType={formData.stepType}
         isDisposalLocation={isDisposalLocation}
         tooltipContent={null}
-      />
-      <Divider marginY="0" />
-      <VolumeField
-        {...propsForFields.volume}
-        errorToShow={getFormLevelError('volume', mappedErrorsToField)}
       />
       {enableReturnTip ? (
         <>
@@ -329,7 +347,16 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           checkboxUpdateValue={
             propsForFields[`${tab}_mix_checkbox`].updateValue
           }
-          tooltipText={propsForFields[`${tab}_mix_checkbox`].tooltipContent}
+          tooltipText={
+            tab === 'dispense'
+              ? dispenseMixDisabledTooltipText
+              : propsForFields.aspirate_mix_checkbox.tooltipContent
+          }
+          disabled={
+            tab === 'dispense'
+              ? isDestinationTrash || formData.path === 'multiDispense'
+              : formData.path === 'multiAspirate'
+          }
         >
           {formData[`${tab}_mix_checkbox`] === true ? (
             <Flex
@@ -416,6 +443,10 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
             isChecked={propsForFields.blowout_checkbox.value === true}
             checkboxUpdateValue={propsForFields.blowout_checkbox.updateValue}
             tooltipText={propsForFields.blowout_checkbox.tooltipContent}
+            disabled={
+              formData.path === 'multiDispense' &&
+              formData.disposalVolume_checkbox
+            }
           >
             {formData.blowout_checkbox === true ? (
               <Flex

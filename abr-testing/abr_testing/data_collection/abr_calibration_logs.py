@@ -286,6 +286,7 @@ def run(
     ip_json_file = os.path.join(storage_directory, "IPs.json")
     try:
         ip_file = json.load(open(ip_json_file))
+        robot_dict = ip_file.get("ip_address_list")
     except FileNotFoundError:
         print(f"Add .json file with robot IPs to: {storage_directory}.")
         sys.exit()
@@ -294,7 +295,7 @@ def run(
         ip_or_all = input("IP Address or ALL: ")
         calibration_data = []
         if ip_or_all.upper() == "ALL":
-            ip_address_list = ip_file["ip_address_list"]
+            ip_address_list = list(robot_dict.keys())
             for ip in ip_address_list:
                 saved_file_path, calibration = read_robot_logs.get_calibration_offsets(
                     ip, storage_directory

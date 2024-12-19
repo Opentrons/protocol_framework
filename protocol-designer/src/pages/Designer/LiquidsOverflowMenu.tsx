@@ -13,6 +13,7 @@ import {
   Icon,
   LiquidIcon,
   MenuItem,
+  OVERFLOW_AUTO,
   POSITION_ABSOLUTE,
   SPACING,
   StyledText,
@@ -58,6 +59,8 @@ export function LiquidsOverflowMenu(
         e.stopPropagation()
       }}
       width="9.375rem"
+      maxHeight="18.75rem"
+      overflowY={OVERFLOW_AUTO}
     >
       {liquids.map(({ name, displayColor, ingredientId }) => {
         return (

@@ -41,7 +41,9 @@ export function IgnoreErrorSkipStep(props: RecoveryContentProps): JSX.Element {
       case IGNORE_AND_SKIP.STEPS.SKIP_STEP:
         return <SkipStepInfo {...props} />
       default:
-        console.warn(`${step} in ${route} not explicitly handled. Rerouting.`)
+        console.warn(
+          `IgnoreErrorAndSkipStep: ${step} in ${route} not explicitly handled. Rerouting.`
+        )
         return <SelectRecoveryOption {...props} />
     }
   }

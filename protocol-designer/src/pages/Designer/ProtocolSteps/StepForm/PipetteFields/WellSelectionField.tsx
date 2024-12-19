@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
@@ -22,8 +23,7 @@ import {
   getWellSelectionLabwareKey,
 } from '../../../../../ui/steps'
 import { selectors as stepFormSelectors } from '../../../../../step-forms'
-import { SelectWellsModal } from '../../../../../organisms'
-import { getMainPagePortalEl } from '../../../../../components/portals/MainPageModalPortal'
+import { SelectWellsModal, getMainPagePortalEl } from '../../../../../organisms'
 import { getNozzleType } from '../utils'
 
 import type { FieldProps } from '../types'
@@ -58,12 +58,28 @@ export const WellSelectionField = (
   const stepId = useSelector(getSelectedStepId)
   const pipetteEntities = useSelector(stepFormSelectors.getPipetteEntities)
   const wellSelectionLabwareKey = useSelector(getWellSelectionLabwareKey)
-  const primaryWellCount =
+
+  const calculateWellCount =
     Array.isArray(selectedWells) && selectedWells.length > 0
       ? selectedWells.length.toString()
       : null
+
+  const [primaryWellCount, setPrimaryWellCount] = useState(calculateWellCount)
   const pipette = pipetteId != null ? pipetteEntities[pipetteId] : null
   const nozzleType = getNozzleType(pipette, nozzles)
+  const previousNozzleType = useRef(nozzleType)
+
+  useEffect(() => {
+    if (previousNozzleType.current !== nozzleType) {
+      setPrimaryWellCount(null)
+      updateValue([])
+      previousNozzleType.current = nozzleType
+    }
+  }, [nozzleType, updateValue])
+
+  useEffect(() => {
+    setPrimaryWellCount(calculateWellCount)
+  }, [selectedWells])
 
   const getModalKey = (): string => {
     return `${String(stepId)}${name}${pipetteId || 'noPipette'}${

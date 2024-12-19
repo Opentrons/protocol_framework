@@ -17,6 +17,9 @@ from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocol_api.core.common import ProtocolCore, RobotCore
 from opentrons.protocol_api import RobotContext, ModuleContext
 from opentrons.protocol_api.deck import Deck
+from opentrons_shared_data.pipette.types import PipetteNameType
+
+from opentrons.protocol_api._types import PipetteActionTypes, PlungerPositionTypes
 
 
 @pytest.fixture
@@ -58,7 +61,12 @@ def subject(
     api_version: APIVersion,
 ) -> RobotContext:
     """Get a RobotContext test subject with its dependencies mocked out."""
-    decoy.when(mock_core.get_pipette_type_from_engine(Mount.LEFT)).then_return(None)
+    decoy.when(mock_core.get_pipette_type_from_engine(Mount.LEFT)).then_return(
+        PipetteNameType.P1000_SINGLE_FLEX
+    )
+    decoy.when(mock_core.get_pipette_type_from_engine(Mount.RIGHT)).then_return(
+        PipetteNameType.P1000_SINGLE_FLEX
+    )
     return RobotContext(
         core=mock_core, api_version=api_version, protocol_core=mock_protocol
     )
@@ -176,3 +184,73 @@ def test_get_axes_coordinates_for(
     """Test `RobotContext.get_axis_coordinates_for`."""
     res = subject.axis_coordinates_for(mount, location_to_move)
     assert res == expected_axis_map
+
+
+@pytest.mark.parametrize(
+    argnames=["mount", "volume", "action", "expected_axis_map"],
+    argvalues=[
+        (Mount.RIGHT, 200, PipetteActionTypes.ASPIRATE_ACTION, {AxisType.P_R: 100}),
+        (Mount.LEFT, 100, PipetteActionTypes.DISPENSE_ACTION, {AxisType.P_L: 100}),
+    ],
+)
+def test_plunger_coordinates_for_volume(
+    decoy: Decoy,
+    subject: RobotContext,
+    mount: Mount,
+    volume: float,
+    action: PipetteActionTypes,
+    expected_axis_map: AxisMapType,
+) -> None:
+    """Test `RobotContext.plunger_coordinates_for_volume`."""
+    decoy.when(
+        subject._core.get_plunger_position_from_volume(
+            mount, volume, action, "OT-3 Standard"
+        )
+    ).then_return(100)
+
+    result = subject.plunger_coordinates_for_volume(mount, volume, action)
+    assert result == expected_axis_map
+
+
+@pytest.mark.parametrize(
+    argnames=["mount", "position_name", "expected_axis_map"],
+    argvalues=[
+        (Mount.RIGHT, PlungerPositionTypes.PLUNGER_TOP, {AxisType.P_R: 3}),
+        (
+            Mount.RIGHT,
+            PlungerPositionTypes.PLUNGER_BOTTOM,
+            {AxisType.P_R: 3},
+        ),
+    ],
+)
+def test_plunger_coordinates_for_named_position(
+    decoy: Decoy,
+    subject: RobotContext,
+    mount: Mount,
+    position_name: PlungerPositionTypes,
+    expected_axis_map: AxisMapType,
+) -> None:
+    """Test `RobotContext.plunger_coordinates_for_named_position`."""
+    decoy.when(
+        subject._core.get_plunger_position_from_name(mount, position_name)
+    ).then_return(3)
+    result = subject.plunger_coordinates_for_named_position(mount, position_name)
+    assert result == expected_axis_map
+
+
+def test_plunger_methods_raise_without_pipette(
+    mock_core: RobotCore, mock_protocol: ProtocolCore, api_version: APIVersion
+) -> None:
+    """Test that `RobotContext` plunger functions raise without pipette attached."""
+    subject = RobotContext(
+        core=mock_core, api_version=api_version, protocol_core=mock_protocol
+    )
+    with pytest.raises(ValueError):
+        subject.plunger_coordinates_for_named_position(
+            Mount.LEFT, PlungerPositionTypes.PLUNGER_TOP
+        )
+
+    with pytest.raises(ValueError):
+        subject.plunger_coordinates_for_volume(
+            Mount.LEFT, 200, PipetteActionTypes.ASPIRATE_ACTION
+        )

@@ -1,7 +1,6 @@
 import { vi, it, describe, expect, beforeEach, afterEach } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { fireEvent, screen } from '@testing-library/react'
-import { when } from 'vitest-when'
 
 import { renderWithProviders } from '/app/__testing-utils__'
 
@@ -12,7 +11,6 @@ import {
   getAppLanguage,
   toggleDevtools,
   toggleHistoricOffsets,
-  useFeatureFlag,
 } from '/app/redux/config'
 import { mockConnectedRobot } from '/app/redux/discovery/__fixtures__'
 import { Navigation } from '/app/organisms/ODD/Navigation'
@@ -92,9 +90,6 @@ describe('RobotSettingsDashboard', () => {
       toggleERSettings: mockToggleER,
     })
     vi.mocked(getAppLanguage).mockReturnValue(MOCK_DEFAULT_LANGUAGE)
-    when(vi.mocked(useFeatureFlag))
-      .calledWith('enableLocalization')
-      .thenReturn(true)
   })
 
   afterEach(() => {
@@ -113,7 +108,7 @@ describe('RobotSettingsDashboard', () => {
     screen.getByText('Robot System Version')
     screen.getByText('Network Settings')
     screen.getByText('Status LEDs')
-    screen.getByText('Error Recovery Mode')
+    screen.getByText('Recovery mode')
     screen.getByText(
       'Control the strip of color lights on the front of the robot.'
     )

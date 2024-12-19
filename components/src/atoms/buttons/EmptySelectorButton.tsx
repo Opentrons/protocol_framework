@@ -1,27 +1,18 @@
 import styled from 'styled-components'
 import { Flex } from '../../primitives'
 import {
+  ALIGN_CENTER,
   CURSOR_DEFAULT,
   CURSOR_POINTER,
+  FLEX_MAX_CONTENT,
   Icon,
-  SPACING,
-  StyledText,
   JUSTIFY_CENTER,
   JUSTIFY_START,
-  ALIGN_CENTER,
-  FLEX_MAX_CONTENT,
+  SPACING,
+  StyledText,
 } from '../../index'
-import {
-  black90,
-  blue30,
-  blue50,
-  grey30,
-  grey40,
-  white,
-} from '../../helix-design-system/colors'
-import { borderRadius8 } from '../../helix-design-system/borders'
+import { BORDERS, COLORS } from '../../helix-design-system'
 import type { IconName } from '../../index'
-
 interface EmptySelectorButtonProps {
   onClick: () => void
   text: string
@@ -41,10 +32,9 @@ export function EmptySelectorButton(
       <Flex
         gridGap={SPACING.spacing4}
         padding={SPACING.spacing12}
-        backgroundColor={disabled ? grey30 : blue30}
-        color={disabled ? grey40 : black90}
-        borderRadius={borderRadius8}
-        border={`2px dashed ${disabled ? grey40 : blue50}`}
+        color={disabled ? COLORS.grey40 : COLORS.black90}
+        border={`2px dashed ${disabled ? COLORS.grey40 : COLORS.blue50}`}
+        borderRadius={BORDERS.borderRadius8}
         width="100%"
         height="100%"
         alignItems={ALIGN_CENTER}
@@ -74,10 +64,20 @@ const StyledButton = styled.button<ButtonProps>`
   border: none;
   width: ${FLEX_MAX_CONTENT};
   height: ${FLEX_MAX_CONTENT};
-  cursor: ${({ disabled }) => (disabled ? CURSOR_DEFAULT : CURSOR_POINTER)};
+  cursor: ${CURSOR_POINTER};
+  background-color: ${COLORS.blue30};
+  border-radius: ${BORDERS.borderRadius8};
+
   &:focus-visible {
-    outline: 2px solid ${white};
-    box-shadow: 0 0 0 4px ${blue50};
-    border-radius: ${borderRadius8};
+    outline: 2px solid ${COLORS.white};
+    box-shadow: 0 0 0 4px ${COLORS.blue50};
+    border-radius: ${BORDERS.borderRadius8};
+  }
+  &:hover {
+    background-color: ${COLORS.blue35};
+  }
+  &:disabled {
+    background-color: ${COLORS.grey20};
+    cursor: ${CURSOR_DEFAULT};
   }
 `

@@ -12,8 +12,6 @@ from opentrons_shared_data.errors.exceptions import EnumeratedError
 log = getLogger(__name__)
 
 
-# TODO(mc, 2021-11-12): flesh this model out with structured error data
-# for each error type so client may produce better error messages
 class ErrorOccurrence(BaseModel):
     """An occurrence of a specific error during protocol execution."""
 
@@ -44,8 +42,15 @@ class ErrorOccurrence(BaseModel):
     id: str = Field(..., description="Unique identifier of this error occurrence.")
     createdAt: datetime = Field(..., description="When the error occurred.")
 
+    # Our Python should probably always set this to False--if we want it to be True,
+    # we should probably be using a more specific subclass of ErrorOccurrence anyway.
+    # However, we can't make this Literal[False], because we want this class to be able
+    # to act as a catch-all for parsing defined errors that might be missing some
+    # `errorInfo` fields because they were serialized by older software.
     isDefined: bool = Field(
-        default=False,  # default=False for database backwards compatibility.
+        # default=False for database backwards compatibility, so we can parse objects
+        # serialized before isDefined existed.
+        default=False,
         description=dedent(
             """\
             Whether this error is *defined.*

@@ -1,17 +1,32 @@
-import styled, { css } from 'styled-components'
+import { css } from 'styled-components'
 import {
-  BORDERS,
   COLORS,
   DIRECTION_COLUMN,
   OVERFLOW_HIDDEN,
-  SPACING,
-  TYPOGRAPHY,
 } from '@opentrons/components'
 import type { FlattenSimpleInterpolation } from 'styled-components'
 
 export const BUTTON_LINK_STYLE = css`
   color: ${COLORS.grey60};
   &:hover {
+    color: ${COLORS.grey40};
+  }
+`
+
+export const LINK_BUTTON_STYLE = css`
+  color: ${COLORS.black90};
+
+  &:hover {
+    color: ${COLORS.blue50};
+  }
+
+  &:focus-visible {
+    color: ${COLORS.blue50};
+    outline: 2px solid ${COLORS.blue50};
+    outline-offset: 0.25rem;
+  }
+
+  &:disabled {
     color: ${COLORS.grey40};
   }
 `
@@ -36,39 +51,4 @@ export const COLUMN_STYLE = css`
   flex: 1;
 `
 
-export const DescriptionField = styled.textarea`
-  min-height: 5rem;
-  width: 100%;
-  border: 1px ${BORDERS.styleSolid} ${COLORS.grey50};
-  border-radius: ${BORDERS.borderRadius4};
-  padding: ${SPACING.spacing8};
-  font-size: ${TYPOGRAPHY.fontSizeP};
-  resize: none;
-
-  &:active:enabled {
-    border: 1px ${BORDERS.styleSolid} ${COLORS.blue50};
-  }
-
-  &:hover {
-    border: 1px ${BORDERS.styleSolid} ${COLORS.grey60};
-  }
-
-  &:focus-visible {
-    border: 1px ${BORDERS.styleSolid} ${COLORS.grey55};
-    outline: 2px ${BORDERS.styleSolid} ${COLORS.blue50};
-    outline-offset: 2px;
-  }
-
-  &:focus-within {
-    border: 1px ${BORDERS.styleSolid} ${COLORS.blue50};
-  }
-
-  &:disabled {
-    border: 1px ${BORDERS.styleSolid} ${COLORS.grey30};
-  }
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-`
+export const NAV_BAR_HEIGHT_REM = 4

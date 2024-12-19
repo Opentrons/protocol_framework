@@ -13,17 +13,19 @@ import { Module } from '@opentrons/components'
 import { selectors } from '../../../../labware-ingred/selectors'
 import { getInitialDeckSetup } from '../../../../step-forms/selectors'
 import { getCustomLabwareDefsByURI } from '../../../../labware-defs/selectors'
-import { LabwareOnDeck } from '../../../../components/DeckSetup/LabwareOnDeck'
+import { getDesignerTab } from '../../../../file-data/selectors'
+import { LabwareOnDeck } from '../../../../organisms'
 import { FixtureRender } from '../FixtureRender'
 import { SelectedHoveredItems } from '../SelectedHoveredItems'
 import type * as OpentronsComponents from '@opentrons/components'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
+vi.mock('../../../../file-data/selectors')
 vi.mock('../../../../step-forms/selectors')
 vi.mock('../FixtureRender')
 vi.mock('../../../../labware-ingred/selectors')
 vi.mock('../../../../labware-defs/selectors')
-vi.mock('../../../../components/DeckSetup/LabwareOnDeck')
+vi.mock('../../../../organisms')
 vi.mock('@opentrons/components', async importOriginal => {
   const actual = await importOriginal<typeof OpentronsComponents>()
   return {
@@ -48,6 +50,7 @@ describe('SelectedHoveredItems', () => {
       hoveredFixture: null,
       slotPosition: [0, 0, 0],
     }
+    vi.mocked(getDesignerTab).mockReturnValue('startingDeck')
     vi.mocked(getInitialDeckSetup).mockReturnValue({
       modules: {},
       additionalEquipmentOnDeck: {},

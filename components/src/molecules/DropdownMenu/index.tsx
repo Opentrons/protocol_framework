@@ -25,12 +25,6 @@ import { Tooltip } from '../../atoms/Tooltip'
 import { StyledText } from '../../atoms/StyledText'
 import { LiquidIcon } from '../LiquidIcon'
 
-/** this is the max height to display 10 items */
-const MAX_HEIGHT = 316
-
-/** this is for adjustment variable for the case that the space of the bottom and the space of the top are very close */
-const HEIGHT_ADJUSTMENT = 100
-
 export interface DropdownOption {
   name: string
   value: string
@@ -69,8 +63,8 @@ export interface DropdownMenuProps {
   onBlur?: React.FocusEventHandler<HTMLButtonElement>
   /** optional disabled */
   disabled?: boolean
-  /** force direction for pd after release this will be fixed and remove */
-  forceDirection?: boolean
+  /** optional placement of the menu */
+  menuPlacement?: 'auto' | 'top' | 'bottom'
 }
 
 // TODO: (smb: 4/15/22) refactor this to use html select for accessibility
@@ -90,7 +84,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
     disabled = false,
     onFocus,
     onBlur,
-    forceDirection = false,
+    menuPlacement = 'auto',
   } = props
   const [targetProps, tooltipProps] = useHoverTooltip()
   const [showDropdownMenu, setShowDropdownMenu] = React.useState<boolean>(false)
@@ -108,37 +102,41 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
   })
 
   React.useEffect(() => {
-    if (forceDirection) return
+    if (menuPlacement !== 'auto') {
+      setDropdownPosition(menuPlacement)
+      return
+    }
+
     const handlePositionCalculation = (): void => {
       const dropdownRect = dropDownMenuWrapperRef.current?.getBoundingClientRect()
-      if (dropdownRect != null) {
-        const parentElement = dropDownMenuWrapperRef?.current?.parentElement
-        const grandParentElement = parentElement?.parentElement?.parentElement
-        let availableHeight = window.innerHeight
-        let scrollOffset = 0
+      if (!dropdownRect) return
 
-        if (grandParentElement != null) {
-          const grandParentRect = grandParentElement.getBoundingClientRect()
-          availableHeight = grandParentRect.bottom - grandParentRect.top
-          scrollOffset = grandParentRect.top
-        } else if (parentElement != null) {
-          const parentRect = parentElement.getBoundingClientRect()
-          availableHeight = parentRect.bottom - parentRect.top
-          scrollOffset = parentRect.top
-        }
+      const parentElement = dropDownMenuWrapperRef.current?.parentElement
+      const grandParentElement = parentElement?.parentElement?.parentElement
 
-        const downSpace =
-          filterOptions.length + 1 > 10
-            ? MAX_HEIGHT
-            : (filterOptions.length + 1) * 34
-        const dropdownBottom = dropdownRect.bottom + downSpace - scrollOffset
+      let availableHeight = window.innerHeight
+      let scrollOffset = 0
 
-        setDropdownPosition(
-          dropdownBottom > availableHeight &&
-            Math.abs(dropdownBottom - availableHeight) > HEIGHT_ADJUSTMENT
-            ? 'top'
-            : 'bottom'
-        )
+      if (grandParentElement) {
+        const grandParentRect = grandParentElement.getBoundingClientRect()
+        availableHeight = grandParentRect.bottom - grandParentRect.top
+        scrollOffset = grandParentRect.top
+      } else if (parentElement) {
+        const parentRect = parentElement.getBoundingClientRect()
+        availableHeight = parentRect.bottom - parentRect.top
+        scrollOffset = parentRect.top
+      }
+
+      const dropdownHeight = filterOptions.length * 34 + 10 // note (kk:2024/12/06) need to modify the value since design uses different height in desktop and pd
+      const dropdownBottom = dropdownRect.bottom + dropdownHeight - scrollOffset
+
+      const fitsBelow = dropdownBottom <= availableHeight
+      const fitsAbove = dropdownRect.top - dropdownHeight >= scrollOffset
+
+      if (menuPlacement === 'auto') {
+        setDropdownPosition(fitsBelow ? 'bottom' : fitsAbove ? 'top' : 'bottom')
+      } else {
+        setDropdownPosition(menuPlacement)
       }
     }
 
@@ -253,7 +251,10 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
                   : TYPOGRAPHY.pRegular};
               `}
             >
-              <StyledText desktopStyle="captionRegular" css={MENU_TEXT_STYLE}>
+              <StyledText
+                desktopStyle="captionRegular"
+                css={LINE_CLAMP_TEXT_STYLE}
+              >
                 {currentOption.name}
               </StyledText>
             </Flex>
@@ -325,11 +326,12 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
   )
 }
 
-const MENU_TEXT_STYLE = css`
+const LINE_CLAMP_TEXT_STYLE = css`
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: ${OVERFLOW_HIDDEN};
   text-overflow: ellipsis;
   word-wrap: break-word;
   -webkit-line-clamp: 1;
+  word-break: break-all;
 `

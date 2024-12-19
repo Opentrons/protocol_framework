@@ -13,8 +13,11 @@ import {
   StyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { getTopPortalEl } from '../../components/portals/TopPortal'
+import { getMainPagePortalEl } from '../Portal'
 
+// Note: We decided not to use this component for the release.
+// We will find out a better way to handle responsiveness with user's screen size issue.
+// This component may be used in the future. If not, we will remove it.
 export function DisabledScreen(): JSX.Element {
   const { t } = useTranslation('shared')
 
@@ -56,6 +59,6 @@ export function DisabledScreen(): JSX.Element {
         </Flex>
       </Flex>
     </ModalShell>,
-    getTopPortalEl()
+    getMainPagePortalEl()
   )
 }

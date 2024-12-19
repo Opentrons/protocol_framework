@@ -18,6 +18,7 @@ import {
   TIP_NOT_DETECTED_OPTIONS,
   TIP_DROP_FAILED_OPTIONS,
   GRIPPER_ERROR_OPTIONS,
+  STALL_OR_COLLISION_OPTIONS,
 } from '../SelectRecoveryOption'
 import { RECOVERY_MAP, ERROR_KINDS } from '../../constants'
 import { clickButtonLabeled } from '../../__tests__/util'
@@ -95,6 +96,9 @@ describe('SelectRecoveryOption', () => {
         expect.any(String)
       )
       .thenReturn('Skip to next step with same tips')
+    when(mockGetRecoveryOptionCopy)
+      .calledWith(RECOVERY_MAP.HOME_AND_RETRY.ROUTE, expect.any(String))
+      .thenReturn('Home gantry and retry')
   })
 
   it('sets the selected recovery option when clicking continue', () => {
@@ -231,6 +235,22 @@ describe('SelectRecoveryOption', () => {
       RECOVERY_MAP.RETRY_STEP.ROUTE
     )
   })
+  it('renders appropriate "Stall or collision" copy and click behavior', () => {
+    props = {
+      ...props,
+      errorKind: ERROR_KINDS.STALL_OR_COLLISION,
+    }
+    renderSelectRecoveryOption(props)
+    screen.getByText('Choose a recovery action')
+    const homeGantryAndRetry = screen.getAllByRole('label', {
+      name: 'Home gantry and retry',
+    })
+    fireEvent.click(homeGantryAndRetry[0])
+    clickButtonLabeled('Continue')
+    expect(mockProceedToRouteAndStep).toHaveBeenCalledWith(
+      RECOVERY_MAP.HOME_AND_RETRY.ROUTE
+    )
+  })
 })
 describe('RecoveryOptions', () => {
   let props: React.ComponentProps<typeof RecoveryOptions>
@@ -292,6 +312,9 @@ describe('RecoveryOptions', () => {
         expect.any(String)
       )
       .thenReturn('Manually replace labware on deck and retry step')
+    when(mockGetRecoveryOptionCopy)
+      .calledWith(RECOVERY_MAP.HOME_AND_RETRY.ROUTE, expect.any(String))
+      .thenReturn('Home gantry and retry')
   })
 
   it('renders valid recovery options for a general error errorKind', () => {
@@ -415,6 +438,17 @@ describe('RecoveryOptions', () => {
     })
     screen.getByRole('label', { name: 'Cancel run' })
   })
+  it(`renders valid recovery options for a ${ERROR_KINDS.STALL_OR_COLLISION} errorKind`, () => {
+    props = {
+      ...props,
+      validRecoveryOptions: STALL_OR_COLLISION_OPTIONS,
+    }
+    renderRecoveryOptions(props)
+    screen.getByRole('label', {
+      name: 'Home gantry and retry',
+    })
+    screen.getByRole('label', { name: 'Cancel run' })
+  })
 })
 
 describe('getRecoveryOptions', () => {
@@ -474,5 +508,12 @@ describe('getRecoveryOptions', () => {
       ERROR_KINDS.GRIPPER_ERROR
     )
     expect(overpressureWhileDispensingOptions).toBe(GRIPPER_ERROR_OPTIONS)
+  })
+
+  it(`returns valid options when the errorKind is ${ERROR_KINDS.STALL_OR_COLLISION}`, () => {
+    const stallOrCollisionOptions = getRecoveryOptions(
+      ERROR_KINDS.STALL_OR_COLLISION
+    )
+    expect(stallOrCollisionOptions).toBe(STALL_OR_COLLISION_OPTIONS)
   })
 })

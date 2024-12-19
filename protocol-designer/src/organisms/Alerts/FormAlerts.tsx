@@ -118,7 +118,7 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
         width="100%"
         iconMarginLeft={SPACING.spacing4}
       >
-        <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
+        <Flex flexDirection={DIRECTION_COLUMN}>
           <StyledText desktopStyle="bodyDefaultSemiBold">
             {data.title}
           </StyledText>
@@ -183,8 +183,8 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
   return [...formErrors, ...timelineWarnings, ...formWarnings].length > 0 ? (
     <Flex
       flexDirection={DIRECTION_COLUMN}
-      gridGap={SPACING.spacing4}
       padding={`${SPACING.spacing16} ${SPACING.spacing16} 0`}
+      gridGap={SPACING.spacing4}
     >
       {showFormErrors
         ? formErrors.map((error, key) => makeAlert('error', error, key))

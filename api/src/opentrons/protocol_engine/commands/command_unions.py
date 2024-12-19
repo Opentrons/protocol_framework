@@ -323,6 +323,14 @@ from .get_tip_presence import (
     GetTipPresenceCommandType,
 )
 
+from .get_next_tip import (
+    GetNextTip,
+    GetNextTipCreate,
+    GetNextTipParams,
+    GetNextTipResult,
+    GetNextTipCommandType,
+)
+
 from .liquid_probe import (
     LiquidProbe,
     LiquidProbeParams,
@@ -375,6 +383,7 @@ Command = Annotated[
         SetStatusBar,
         VerifyTipPresence,
         GetTipPresence,
+        GetNextTip,
         LiquidProbe,
         TryLiquidProbe,
         heater_shaker.WaitForTemperature,
@@ -416,6 +425,8 @@ Command = Annotated[
         robot.MoveTo,
         robot.MoveAxesRelative,
         robot.MoveAxesTo,
+        robot.openGripperJaw,
+        robot.closeGripperJaw,
     ],
     Field(discriminator="commandType"),
 ]
@@ -458,6 +469,7 @@ CommandParams = Union[
     SetStatusBarParams,
     VerifyTipPresenceParams,
     GetTipPresenceParams,
+    GetNextTipParams,
     LiquidProbeParams,
     TryLiquidProbeParams,
     heater_shaker.WaitForTemperatureParams,
@@ -499,6 +511,8 @@ CommandParams = Union[
     robot.MoveAxesRelativeParams,
     robot.MoveAxesToParams,
     robot.MoveToParams,
+    robot.openGripperJawParams,
+    robot.closeGripperJawParams,
 ]
 
 CommandType = Union[
@@ -539,6 +553,7 @@ CommandType = Union[
     SetStatusBarCommandType,
     VerifyTipPresenceCommandType,
     GetTipPresenceCommandType,
+    GetNextTipCommandType,
     LiquidProbeCommandType,
     TryLiquidProbeCommandType,
     heater_shaker.WaitForTemperatureCommandType,
@@ -580,6 +595,8 @@ CommandType = Union[
     robot.MoveAxesRelativeCommandType,
     robot.MoveAxesToCommandType,
     robot.MoveToCommandType,
+    robot.openGripperJawCommandType,
+    robot.closeGripperJawCommandType,
 ]
 
 CommandCreate = Annotated[
@@ -621,6 +638,7 @@ CommandCreate = Annotated[
         SetStatusBarCreate,
         VerifyTipPresenceCreate,
         GetTipPresenceCreate,
+        GetNextTipCreate,
         LiquidProbeCreate,
         TryLiquidProbeCreate,
         heater_shaker.WaitForTemperatureCreate,
@@ -662,6 +680,8 @@ CommandCreate = Annotated[
         robot.MoveAxesRelativeCreate,
         robot.MoveAxesToCreate,
         robot.MoveToCreate,
+        robot.openGripperJawCreate,
+        robot.closeGripperJawCreate,
     ],
     Field(discriminator="commandType"),
 ]
@@ -704,6 +724,7 @@ CommandResult = Union[
     SetStatusBarResult,
     VerifyTipPresenceResult,
     GetTipPresenceResult,
+    GetNextTipResult,
     LiquidProbeResult,
     TryLiquidProbeResult,
     heater_shaker.WaitForTemperatureResult,
@@ -745,6 +766,8 @@ CommandResult = Union[
     robot.MoveAxesRelativeResult,
     robot.MoveAxesToResult,
     robot.MoveToResult,
+    robot.openGripperJawResult,
+    robot.closeGripperJawResult,
 ]
 
 

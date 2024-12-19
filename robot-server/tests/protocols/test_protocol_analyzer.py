@@ -165,6 +165,8 @@ async def test_analyze(
         displayName="Foo", variableName="Bar", default=True, value=False
     )
 
+    command_annotation = pe_types.CustomCommandAnnotation(commandKeys=["abc", "xyz"])
+
     orchestrator = decoy.mock(cls=protocol_runner.RunOrchestrator)
     decoy.when(
         await simulating_runner.create_simulating_orchestrator(
@@ -189,11 +191,13 @@ async def test_analyze(
                 modules=[],
                 labwareOffsets=[],
                 liquids=[],
+                liquidClasses=[],
                 wells=[],
                 files=[],
                 hasEverEnteredErrorRecovery=False,
             ),
             parameters=[bool_parameter],
+            command_annotations=[command_annotation],
         )
     )
 
@@ -211,6 +215,8 @@ async def test_analyze(
             pipettes=[analysis_pipette],
             errors=[],
             liquids=[],
+            liquidClasses=[],
+            command_annotations=[command_annotation],
         )
     )
 
@@ -294,5 +300,7 @@ async def test_analyze_updates_pending_on_error(
             pipettes=[],
             errors=[error_occurrence],
             liquids=[],
+            liquidClasses=[],
+            command_annotations=[],
         ),
     )

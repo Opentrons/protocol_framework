@@ -34,6 +34,7 @@ def _build_run(
         liquids=[],
         wells=[],
         files=[],
+        liquidClasses=[],
         hasEverEnteredErrorRecovery=False,
     )
     return MaintenanceRun.construct(
@@ -50,6 +51,7 @@ def _build_run(
         completedAt=state_summary.completedAt,
         startedAt=state_summary.startedAt,
         liquids=state_summary.liquids,
+        liquidClasses=state_summary.liquidClasses,
         hasEverEnteredErrorRecovery=state_summary.hasEverEnteredErrorRecovery,
     )
 

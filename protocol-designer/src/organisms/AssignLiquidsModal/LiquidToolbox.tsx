@@ -22,6 +22,7 @@ import { selectors as labwareIngredSelectors } from '../../labware-ingred/select
 import * as wellContentsSelectors from '../../top-selectors/well-contents'
 import * as fieldProcessors from '../../steplist/fieldLevel/processing'
 import * as labwareIngredActions from '../../labware-ingred/actions'
+import { getLiquidClassDisplayName } from '../../liquid-defs/utils'
 import { getSelectedWells } from '../../well-selection/selectors'
 import { getLabwareNicknamesById } from '../../ui/labware/selectors'
 import {
@@ -38,6 +39,7 @@ export interface LiquidInfo {
   name: string
   color: string
   liquidIndex: string
+  liquidClassDisplayName: string | null
 }
 
 interface ValidFormValues {
@@ -214,6 +216,9 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
         liquidIndex: liquid,
         name: foundLiquid?.name ?? '',
         color: foundLiquid?.displayColor ?? '',
+        liquidClassDisplayName: getLiquidClassDisplayName(
+          foundLiquid?.liquidClass ?? null
+        ),
       }
     })
     .filter(Boolean)
@@ -239,7 +244,7 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
           onClose()
         }}
         onCloseClick={handleClearSelectedWells}
-        height="calc(100vh - 64px)"
+        height="100%"
         closeButton={
           <StyledText desktopStyle="bodyDefaultRegular">
             {t('clear_wells')}
@@ -331,6 +336,7 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
                                 liquidColor: selectLiquidColor,
                               }}
                               onClick={field.onChange}
+                              menuPlacement="bottom"
                             />
                           )
                         }}

@@ -48,7 +48,7 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
     align-items: ${ALIGN_CENTER};
     flex-direction: ${DIRECTION_ROW};
     color: ${isChecked ? COLORS.white : COLORS.black90};
-    background-color: ${isChecked ? COLORS.blue50 : COLORS.blue35};
+    background-color: ${isChecked ? COLORS.blue50 : COLORS.blue30};
     border-radius: ${type === 'round'
       ? BORDERS.borderRadiusFull
       : BORDERS.borderRadius8};
@@ -67,6 +67,9 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
     &:disabled {
       background-color: ${COLORS.grey35};
       color: ${COLORS.grey50};
+    }
+    &:hover {
+      background-color: ${isChecked ? COLORS.blue55 : COLORS.blue35};
     }
 
     @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
@@ -97,9 +100,10 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
 interface CheckProps {
   isChecked: boolean
   color?: string
+  disabled?: boolean
 }
 export function Check(props: CheckProps): JSX.Element {
-  const { isChecked, color = COLORS.white } = props
+  const { isChecked, color = COLORS.white, disabled = false } = props
   return isChecked ? (
     <Flex css={CHECK_STYLE}>
       <Icon name="ot-checkbox" color={color} />
@@ -107,7 +111,7 @@ export function Check(props: CheckProps): JSX.Element {
   ) : (
     <Flex
       css={CHECK_STYLE}
-      border={`2px solid ${COLORS.black90}`}
+      border={`2px solid ${disabled ? COLORS.grey40 : COLORS.black90}`}
       borderRadius={BORDERS.borderRadius4}
     />
   )
