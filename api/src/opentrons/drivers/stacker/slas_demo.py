@@ -21,10 +21,10 @@ class StackerModule:
     }
 
     def __init__(
-        self, port: str, labware_name: str, slot: str, protocol: ProtocolContext
+        self, serial_number: str, labware_name: str, slot: str, protocol: ProtocolContext
     ):
         self.stacker = (
-            FlexStacker.create(port) if not protocol.is_simulating() else None
+            FlexStacker.create_from_sn(serial_number) if not protocol.is_simulating() else None
         )
         self.labware_name = labware_name
         self.slot = slot
@@ -59,13 +59,13 @@ def run(protocol: ProtocolContext) -> None:
     hardware.cache_instruments()
 
     tiprack_stacker = StackerModule(
-        port="/dev/ttyACM1",
+        serial_number="PS241204SZEVT01",
         labware_name="opentrons_flex_96_tiprack_1000ul",
         slot="C4",
         protocol=protocol,
     )
     plate_stacker = StackerModule(
-        port="/dev/ttyACM2",
+        serial_number="PS241204SZEVT01",
         labware_name="opentrons_96_wellplate_200ul_pcr_full_skirt",
         slot="D4",
         protocol=protocol,
