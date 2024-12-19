@@ -9,7 +9,6 @@ declare global {
       verifyFullHeader: () => Cypress.Chainable<void>
       verifyCreateNewHeader: () => Cypress.Chainable<void>
       clickCreateNew: () => Cypress.Chainable<void>
-      closeAnalyticsModal: () => Cypress.Chainable<void>
       closeAnnouncementModal: () => Cypress.Chainable<void>
       verifyHomePage: () => Cypress.Chainable<void>
       importProtocol: (protocolFile: string) => Cypress.Chainable<void>
@@ -69,7 +68,6 @@ export const locators = {
   eula: 'a[href="https://opentrons.com/eula"]',
   privacyToggle: 'Settings_hotKeys',
   analyticsToggleTestId: 'analyticsToggle',
-  confirm: 'Confirm',
 }
 
 // General Custom Commands
@@ -109,7 +107,7 @@ Cypress.Commands.add('verifyCreateNewHeader', () => {
 // Home Page
 Cypress.Commands.add('verifyHomePage', () => {
   // Todo re-add when Once 8.2.2 comes back in 
-  //cy.contains('button', 'Confirm').click()
+  cy.contains('button', 'Confirm').click()
   cy.contains(content.welcome)
   cy.contains('button', locators.createProtocol).should('be.visible')
   cy.contains('label', locators.editProtocol).should('be.visible')
@@ -128,13 +126,6 @@ Cypress.Commands.add('clickCreateNew', () => {
   cy.contains(locators.createProtocol).click()
 
 
-})
-
-Cypress.Commands.add('closeAnalyticsModal', () => {
-  cy.get('button')
-    .contains(locators.confirm)
-    .should('be.visible')
-    .click({ force: true })
 })
 
 // Header Import
