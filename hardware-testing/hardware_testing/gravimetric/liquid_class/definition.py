@@ -57,19 +57,24 @@ def interpolate(
             delay=_interp(a.aspirate.delay, b.aspirate.delay),
             retract_mm=_interp(a.aspirate.retract_mm, b.aspirate.retract_mm),
             air_gap=_interp(a.aspirate.air_gap, b.aspirate.air_gap),
-            retract_delay=_interp(a.aspirate.retract_delay, b.aspirate.retract_delay)
+            retract_delay=_interp(a.aspirate.retract_delay, b.aspirate.retract_delay),
         ),
         dispense=DispenseSettings(
             z_speed=_interp(a.dispense.z_speed, b.dispense.z_speed),
             submerge_mm=_interp(a.dispense.submerge_mm, b.dispense.submerge_mm),
             flow_rate=_interp(a.dispense.flow_rate, b.dispense.flow_rate),
-            break_off_flow_acceleration=_interp(a.dispense.break_off_flow_acceleration, b.dispense.break_off_flow_acceleration),
-            break_off_flow_rate=_interp(a.dispense.break_off_flow_rate, b.dispense.break_off_flow_rate),
+            break_off_flow_acceleration=_interp(
+                a.dispense.break_off_flow_acceleration,
+                b.dispense.break_off_flow_acceleration,
+            ),
+            break_off_flow_rate=_interp(
+                a.dispense.break_off_flow_rate, b.dispense.break_off_flow_rate
+            ),
             break_off_ul=_interp(a.dispense.break_off_ul, b.dispense.break_off_ul),
             delay=_interp(a.dispense.delay, b.dispense.delay),
             retract_mm=_interp(a.dispense.retract_mm, b.dispense.retract_mm),
             push_out=_interp(a.dispense.push_out, b.dispense.push_out),
             blow_out=a.dispense.blow_out or b.dispense.blow_out,
-            retract_delay=_interp(a.dispense.retract_delay, b.dispense.retract_delay)
+            retract_delay=_interp(a.dispense.retract_delay, b.dispense.retract_delay),
         ),
     )

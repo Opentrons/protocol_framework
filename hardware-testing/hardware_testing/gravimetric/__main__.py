@@ -200,7 +200,9 @@ class RunArgs:
             API_LEVEL,  # type: ignore[attr-defined]
             is_simulating=args.simulate,
             pipette_left=PIPETTE_MODEL_NAME[args.pipette][args.channels],
-            pipette_right=PIPETTE_MODEL_NAME[args.pipette][args.channels] if args.channels < 96 else None,
+            pipette_right=PIPETTE_MODEL_NAME[args.pipette][args.channels]
+            if args.channels < 96
+            else None,
             extra_labware=custom_defs,
         )
         for offset in LABWARE_OFFSETS:
@@ -390,7 +392,7 @@ class RunArgs:
             test_report=report,
             liquid=args.liquid,
             dilution=args.dilution,
-            reverse_tips=args.reverse_tips
+            reverse_tips=args.reverse_tips,
         )
 
 
@@ -644,12 +646,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--starting-tip",
         type=str,
-        choices=[
-            f"{c}{str(r + 1)}"
-            for r in range(12)
-            for c in "ABCDEFGH"
-        ],
-        default="A1"
+        choices=[f"{c}{str(r + 1)}" for r in range(12) for c in "ABCDEFGH"],
+        default="A1",
     )
     args = parser.parse_args()
     run_args = RunArgs.build_run_args(args)
@@ -671,7 +669,11 @@ if __name__ == "__main__":
         # NOTE: there is a chance that the pipette has a tip still attached
         #       from a previous run (eg: previous run ended in error)
         #       so here we just assume there's a tip and drop the tip no matter what
-        hw_mount = helpers.OT3Mount.LEFT if run_args.pipette.mount == "left" else helpers.OT3Mount.RIGHT
+        hw_mount = (
+            helpers.OT3Mount.LEFT
+            if run_args.pipette.mount == "left"
+            else helpers.OT3Mount.RIGHT
+        )
         hw.add_tip(hw_mount, tip_length=120)  # langer than any tip, to be safe
         run_args.pipette.move_to(run_args.pipette.trash_container)
         hw.drop_tip(hw_mount)

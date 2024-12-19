@@ -20,7 +20,7 @@ from .helpers import (
     _sense_liquid_height,
     _pick_up_tip,
     _drop_tip,
-    get_pipette_unique_name
+    get_pipette_unique_name,
 )
 from .trial import (
     build_gravimetric_trials,
@@ -344,7 +344,9 @@ def _run_trial(
         raise NotImplementedError("mix testing not implemented")
 
     # center channel over well
-    trial.pipette.move_to(trial.well.top(config.VIAL_SAFE_Z_OFFSET).move(trial.channel_offset))
+    trial.pipette.move_to(
+        trial.well.top(config.VIAL_SAFE_Z_OFFSET).move(trial.channel_offset)
+    )
     if trial.cfg.lld_every_tip:
         liq_height = _get_liquid_height(
             trial.ctx,
@@ -630,10 +632,16 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
         "P50SV3520230812A17": "A",
         "P50SV3520230724A01": "B",
         "P50SV3520230724A02": "C",
-        "P50SV3520231024A11": "D"
+        "P50SV3520231024A11": "D",
     }
     unit_tag: str = UNITS.get(get_pipette_unique_name(resources.pipette), "S")
-    meta_data: List[str] = [resources.test_report._run_id, cfg.liquid, f"P{cfg.pipette_volume}S", unit_tag, str(cfg.tip_volume)]
+    meta_data: List[str] = [
+        resources.test_report._run_id,
+        cfg.liquid,
+        f"P{cfg.pipette_volume}S",
+        unit_tag,
+        str(cfg.tip_volume),
+    ]
     simplified_results_for_calibration_test: List[List[str]] = []
 
     total_tips = len(
@@ -670,7 +678,9 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
     try:
         well = labware_on_scale["A1"]
         if cfg.jog or cfg.blank or not cfg.lld_every_tip:
-            first_tip = _next_tip_for_channel(cfg, resources, 0, total_tips, tip_name=cfg.starting_tip)
+            first_tip = _next_tip_for_channel(
+                cfg, resources, 0, total_tips, tip_name=cfg.starting_tip
+            )
             setup_channel_offset = _get_channel_offset(cfg, channel=0)
             first_tip_location = first_tip.top().move(setup_channel_offset)
             resources.pipette._retract()
@@ -827,7 +837,9 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                     # FIXME: see why it takes so long to store CSV data
                     resources.test_report.save_to_disk()
 
-                    simplified_results_for_calibration_test[-1].append(str(round(asp_with_evap, 2)))
+                    simplified_results_for_calibration_test[-1].append(
+                        str(round(asp_with_evap, 2))
+                    )
 
                     ui.print_info("dropping tip")
                     if not cfg.same_tip:
@@ -990,14 +1002,13 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
         channel_count=len(channels_to_test),
         test_report=resources.test_report,
     )
-    csv_data_str = "\n".join([
-        "\t".join(csv_line)
-        for csv_line in simplified_results_for_calibration_test
-    ])
+    csv_data_str = "\n".join(
+        ["\t".join(csv_line) for csv_line in simplified_results_for_calibration_test]
+    )
     print(csv_data_str)
     dump_data_to_file(
         resources.test_report._test_name,
         resources.test_report._run_id,
         f"aspirate-volumes-{resources.test_report._tag}.csv",
-        csv_data_str
+        csv_data_str,
     )

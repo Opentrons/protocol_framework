@@ -229,7 +229,10 @@ def _pipette_with_liquid_settings(  # noqa: C901
         )
 
     def _aspirate_on_retract() -> None:
-        if liquid_class.aspirate.retract_delay and liquid_class.aspirate.submerge_mm < 0:
+        if (
+            liquid_class.aspirate.retract_delay
+            and liquid_class.aspirate.submerge_mm < 0
+        ):
             # NOTE: residual liquid on outside of tip will drop down to bottom of tip
             #       after retracting from liquid. If we air-gap too soon before
             #       said liquid slides down to bottom of tip, the air-gap we create
@@ -257,7 +260,9 @@ def _pipette_with_liquid_settings(  # noqa: C901
         #       adhering to outside of tip.
         likely_a_contact_dispense = liquid_class.dispense.submerge_mm <= 1
         if not blank and has_air_gap and likely_a_contact_dispense:
-            pipette.flow_rate.dispense = max(liquid_class.aspirate.air_gap, 1)  # 1 second (minimum)
+            pipette.flow_rate.dispense = max(
+                liquid_class.aspirate.air_gap, 1
+            )  # 1 second (minimum)
             pipette.dispense(liquid_class.aspirate.air_gap)
             pipette.flow_rate.dispense = liquid_class.dispense.flow_rate
 
@@ -276,20 +281,31 @@ def _pipette_with_liquid_settings(  # noqa: C901
             ), f"push-out ({push_out}) cannot exceed {_get_max_blow_out_ul()}"
             if not break_off:
                 if liquid_class.dispense.break_off_flow_acceleration:
-                    hw_pipette.flow_acceleration = liquid_class.dispense.break_off_flow_acceleration
+                    hw_pipette.flow_acceleration = (
+                        liquid_class.dispense.break_off_flow_acceleration
+                    )
                 pipette.dispense(push_out=push_out)
             else:
-                assert push_out is not None, \
-                    "push-out must be specified when setting a break-off volume"
+                assert (
+                    push_out is not None
+                ), "push-out must be specified when setting a break-off volume"
                 if break_off == push_out:
                     break_off = push_out + 0.1
 
                 def _break_off_cfg() -> None:
-                    pipette.flow_rate.dispense = liquid_class.dispense.break_off_flow_rate
-                    pipette.flow_rate.blow_out = liquid_class.dispense.break_off_flow_rate
-                    hw_api.set_flow_rate(hw_mount, blow_out=liquid_class.dispense.break_off_flow_rate)
+                    pipette.flow_rate.dispense = (
+                        liquid_class.dispense.break_off_flow_rate
+                    )
+                    pipette.flow_rate.blow_out = (
+                        liquid_class.dispense.break_off_flow_rate
+                    )
+                    hw_api.set_flow_rate(
+                        hw_mount, blow_out=liquid_class.dispense.break_off_flow_rate
+                    )
                     if liquid_class.dispense.break_off_flow_acceleration:
-                        hw_pipette.flow_acceleration = liquid_class.dispense.break_off_flow_acceleration
+                        hw_pipette.flow_acceleration = (
+                            liquid_class.dispense.break_off_flow_acceleration
+                        )
 
                 if break_off < push_out:
                     # 1) dispense w/ push-out (minus break-out ul)
@@ -297,7 +313,9 @@ def _pipette_with_liquid_settings(  # noqa: C901
                     pipette.dispense(push_out=_reduced_push_out_ul)
                     # 2) blow-out using break-off ul and speed
                     _break_off_cfg()
-                    hw_api.blow_out(OT3Mount.LEFT, push_out)  # NOTE: volume is absolute below "bottom"
+                    hw_api.blow_out(
+                        OT3Mount.LEFT, push_out
+                    )  # NOTE: volume is absolute below "bottom"
                 elif break_off > push_out:
                     # 1) dispense a reduced amount
                     _remaining_ul = break_off - push_out
@@ -308,7 +326,9 @@ def _pipette_with_liquid_settings(  # noqa: C901
         finally:
             hw_pipette.flow_acceleration = default_flow_accel
             pipette.flow_rate.dispense = liquid_class.dispense.flow_rate
-            hw_api.set_flow_rate(hw_mount, blow_out=liquid_class.dispense.flow_rate)  # FIXME: is this correct?
+            hw_api.set_flow_rate(
+                hw_mount, blow_out=liquid_class.dispense.flow_rate
+            )  # FIXME: is this correct?
         # delay
         _delay_seconds = liquid_class.dispense.delay
         if liquid_class.dispense.submerge_mm >= 0:
@@ -321,7 +341,10 @@ def _pipette_with_liquid_settings(  # noqa: C901
         )
 
     def _dispense_on_retract() -> None:
-        if liquid_class.dispense.retract_delay and liquid_class.dispense.submerge_mm < 0:
+        if (
+            liquid_class.dispense.retract_delay
+            and liquid_class.dispense.submerge_mm < 0
+        ):
             # NOTE: if non-contact dispense, the "retract" delay should have already happened
             ctx.delay(seconds=liquid_class.dispense.retract_delay)
         # NOTE: both the plunger reset or tje trailing-air-gap
@@ -342,7 +365,9 @@ def _pipette_with_liquid_settings(  # noqa: C901
     # PHASE 1: APPROACH
     pipette.flow_rate.aspirate = liquid_class.aspirate.flow_rate
     pipette.flow_rate.dispense = liquid_class.dispense.flow_rate
-    pipette.flow_rate.blow_out = liquid_class.dispense.flow_rate  # FIXME: is this correct?
+    pipette.flow_rate.blow_out = (
+        liquid_class.dispense.flow_rate
+    )  # FIXME: is this correct?
 
     pipette.move_to(well.bottom(approach_mm).move(channel_offset))
     _aspirate_on_approach() if aspirate or mix else _dispense_on_approach()
