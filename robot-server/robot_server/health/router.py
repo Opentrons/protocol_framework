@@ -1,6 +1,6 @@
 """HTTP routes and handlers for /health endpoints."""
 from dataclasses import dataclass
-from fastapi import Depends, status
+from fastapi import APIRouter, Depends, status
 from typing import Annotated, Dict, cast
 import logging
 import json
@@ -10,7 +10,6 @@ from opentrons.hardware_control import HardwareControlAPI
 
 from server_utils.util import call_once
 
-from robot_server.fast_build_router import FastBuildRouter
 from robot_server.hardware import get_hardware, get_robot_type
 from robot_server.persistence.fastapi_dependencies import (
     get_sql_engine as ensure_sql_engine_is_ready,
@@ -109,7 +108,7 @@ async def get_versions() -> ComponentVersions:
     )
 
 
-health_router = FastBuildRouter()
+health_router = APIRouter()
 
 
 @health_router.get(

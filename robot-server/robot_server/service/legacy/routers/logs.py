@@ -1,12 +1,11 @@
-from fastapi import Query, Response
+from fastapi import APIRouter, Query, Response
 from typing import Annotated, Dict
 
 from opentrons.system import log_control
 
-from robot_server.fast_build_router import FastBuildRouter
 from robot_server.service.legacy.models.logs import LogIdentifier, LogFormat
 
-router = FastBuildRouter()
+router = APIRouter()
 
 IDENTIFIER_TO_SYSLOG_ID: Dict[LogIdentifier, str] = {
     LogIdentifier.api: "opentrons-api",

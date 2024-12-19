@@ -2,7 +2,7 @@ from typing import Annotated
 
 import asyncio
 
-from fastapi import Query, Depends
+from fastapi import APIRouter, Query, Depends
 from starlette import status
 
 from opentrons_shared_data.errors import ErrorCodes
@@ -16,13 +16,12 @@ from opentrons.hardware_control import HardwareControlAPI
 from opentrons.types import Mount, Point
 
 from robot_server.errors.error_responses import LegacyErrorResponse
-from robot_server.fast_build_router import FastBuildRouter
 from robot_server.service.dependencies import get_motion_lock
 from robot_server.hardware import get_hardware
 from robot_server.service.legacy.models import V1BasicResponse
 from robot_server.service.legacy.models import control
 
-router = FastBuildRouter()
+router = APIRouter()
 
 
 @router.post(
