@@ -52,6 +52,7 @@ describe('DownloadUpdateModal', () => {
 
   let props: React.ComponentProps<typeof RobotUpdateProgressModal>
   const mockCreateLiveCommand = vi.fn()
+  const mockDispatchStartRobotUpdate = vi.fn()
 
   beforeEach(() => {
     mockCreateLiveCommand.mockResolvedValue(null)
@@ -68,7 +69,9 @@ describe('DownloadUpdateModal', () => {
       progressPercent: 50,
     })
     vi.mocked(getRobotSessionIsManualFile).mockReturnValue(false)
-    vi.mocked(useDispatchStartRobotUpdate).mockReturnValue(vi.fn)
+    vi.mocked(useDispatchStartRobotUpdate).mockReturnValue(
+      mockDispatchStartRobotUpdate
+    )
     vi.mocked(getRobotUpdateDownloadError).mockReturnValue(null)
   })
 
