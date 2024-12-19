@@ -18,9 +18,7 @@ declare global {
         left_pipette_selector: string,
         right_pipette_selector: string
       ) => Cypress.Chainable<void>
-      chooseDeckSlot: (
-        slot: string
-      ) => Cypress.Chainable<void>
+      chooseDeckSlot: (slot: string) => Cypress.Chainable<void>
       selectTipRacks: (left: string, right: string) => Cypress.Chainable<void>
       addLiquid: (
         liquidName: string,
@@ -52,7 +50,7 @@ export const content = {
   welcome: 'Welcome to Protocol Designer!',
   appSettings: 'App Info',
   privacy: 'Privacy',
-  shareSessions: 'Share analytics with Opentrons'
+  shareSessions: 'Share analytics with Opentrons',
 }
 
 export const locators = {
@@ -60,7 +58,7 @@ export const locators = {
   createNew: 'Create new',
   createProtocol: 'Create a protocol',
   Flex_Home: 'Opentrons Flex',
-  OT2_Home: "Opentrons OT-2",
+  OT2_Home: 'Opentrons OT-2',
   editProtocol: 'Edit existing protocol',
   settingsDataTestid: 'SettingsIconButton',
   settings: 'Settings',
@@ -106,7 +104,7 @@ Cypress.Commands.add('verifyCreateNewHeader', () => {
 
 // Home Page
 Cypress.Commands.add('verifyHomePage', () => {
-  // Todo re-add when Once 8.2.2 comes back in 
+  // Todo re-add when Once 8.2.2 comes back in
   cy.contains('button', 'Confirm').click()
   cy.contains(content.welcome)
   cy.contains('button', locators.createProtocol).should('be.visible')
@@ -124,8 +122,6 @@ Cypress.Commands.add('clickCreateNew', () => {
   // .should('have.css', 'fill', 'rgb(0, 108, 250)')
   cy.getByTestId(locators.settingsDataTestid).click()
   cy.contains(locators.createProtocol).click()
-
-
 })
 
 // Header Import
@@ -136,28 +132,21 @@ Cypress.Commands.add('importProtocol', (protocolFilePath: string) => {
     .selectFile(protocolFilePath, { force: true })
 })
 
-Cypress.Commands.add('robotSelection',(robotName:string) =>{
-  if (robotName ==='Opentrons OT-2') {
-  cy.contains('label', locators.OT2_Home ).should('be.visible').click()
-  
+Cypress.Commands.add('robotSelection', (robotName: string) => {
+  if (robotName === 'Opentrons OT-2') {
+    cy.contains('label', locators.OT2_Home).should('be.visible').click()
+  } else {
+    // Just checking that the selection modal works
+    cy.contains('label', locators.OT2_Home).should('be.visible').click()
+    cy.contains('label', locators.Flex_Home).should('be.visible').click()
   }
-  else {
-  // Just checking that the selection modal works 
-  cy.contains('label', locators.OT2_Home ).should('be.visible').click()
-  cy.contains('label', locators.Flex_Home).should('be.visible').click()
-
-  }
-  cy.contains('button', "Confirm").should('be.visible').click()
-  
+  cy.contains('button', 'Confirm').should('be.visible').click()
 })
 
 // Settings Page Actions
 Cypress.Commands.add('openSettingsPage', () => {
   cy.getByTestId(locators.settingsDataTestid).click()
 })
-
-
-
 
 Cypress.Commands.add('verifySettingsPage', () => {
   cy.verifyFullHeader()
@@ -213,7 +202,22 @@ Cypress.Commands.add(
 )
 
 Cypress.Commands.add('chooseDeckSlot', (slot: string) => {
-  const deckSlots = {
+  // Define the deckSlots object with a Record type for valid keys
+  const deckSlots: Record<
+    | 'A1'
+    | 'A2'
+    | 'A3'
+    | 'B1'
+    | 'B2'
+    | 'B3'
+    | 'C1'
+    | 'C2'
+    | 'C3'
+    | 'D1'
+    | 'D2'
+    | 'D3',
+    () => void
+  > = {
     A1: () => cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot'),
     A2: () => cy.contains('foreignObject[x="164"][y="321"]', 'Edit slot'),
     A3: () => cy.contains('foreignObject[x="328"][y="321"]', 'Edit slot'),
@@ -225,21 +229,19 @@ Cypress.Commands.add('chooseDeckSlot', (slot: string) => {
     C3: () => cy.contains('foreignObject[x="328"][y="107"]', 'Edit slot'),
     D1: () => cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot'),
     D2: () => cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot'),
-    D3: () => cy.contains('foreignObject[x="328"][y="0"]', 'Edit slot')
-  };
-
-  // Correct syntax: just assign the action to `slotAction`
-  const slotAction = deckSlots[slot];
-
-
-  // Call the corresponding Cypress command, if the action exists
-  if (Boolean(slotAction)) {
-    slotAction()  // Execute the Cypress command for the selected slot
-    
-  } else {
-    throw new Error(`Slot ${slot} not found in deck slots.`);
+    D3: () => cy.contains('foreignObject[x="328"][y="0"]', 'Edit slot'),
   }
-});
+
+  // Type-safe slot action assignment
+  const slotAction = deckSlots[slot as keyof typeof deckSlots]
+
+  // Check if slotAction exists and call it, else throw an error
+  if (slotAction) {
+    slotAction() // Execute the Cypress command for the selected slot
+  } else {
+    throw new Error(`Slot ${slot} not found in deck slots.`)
+  }
+})
 
 Cypress.Commands.add('selectTipRacks', (left, right) => {
   if (left.length > 0) {

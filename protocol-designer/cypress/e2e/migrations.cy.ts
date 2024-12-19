@@ -7,8 +7,7 @@ describe('Protocol fixtures migrate and match snapshots', () => {
   beforeEach(() => {
     cy.visit('/')
     // Get rid of the analytics
-    cy.contains('button', 'Confirm').click() 
-    
+    cy.contains('button', 'Confirm').click()
   })
 
   const testCases: MigrateTestCase[] = [
