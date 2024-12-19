@@ -10,11 +10,11 @@ import {
   StyledText,
 } from '@opentrons/components'
 import { selectDropdownItem } from '../../ui/steps/actions/actions'
-import type { Options } from '@opentrons/components'
+import type { DropdownOption } from '@opentrons/components'
 import type { FieldProps } from '../../pages/Designer/ProtocolSteps/StepForm/types'
 
 export interface DropdownStepFormFieldProps extends FieldProps {
-  options: Options
+  options: DropdownOption[]
   title: string
   width?: string
   onEnter?: (id: string) => void

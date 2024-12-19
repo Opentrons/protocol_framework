@@ -30,6 +30,8 @@ export interface DropdownOption {
   value: string
   /** optional dropdown option for adding the liquid color icon */
   liquidColor?: string
+  /** optional dropdown option for adding the deck label */
+  deckLabel?: string
   disabled?: boolean
   tooltipText?: string
 }

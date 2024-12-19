@@ -14,7 +14,7 @@ import {
 import { i18n } from '../../../../assets/localization'
 import { PROFILE_CYCLE } from '../../../../form-types'
 import type { PipetteEntity } from '@opentrons/step-generation'
-import type { Options } from '@opentrons/components'
+import type { DropdownOption } from '@opentrons/components'
 import type { ProfileFormError } from '../../../../steplist/formLevel/profileErrors'
 import type { FormWarning } from '../../../../steplist/formLevel/warnings'
 import type { StepFormErrors } from '../../../../steplist/types'
@@ -32,7 +32,7 @@ import type { FieldProps, FieldPropsByName, FocusHandlers } from './types'
 export function getBlowoutLocationOptionsForForm(args: {
   stepType: StepType
   path?: PathOption | null | undefined
-}): Options {
+}): DropdownOption[] {
   const { stepType, path } = args
   // TODO: Ian 2019-02-21 use i18n for names
   const destOption = {

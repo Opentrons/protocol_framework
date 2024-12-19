@@ -3,7 +3,7 @@ import {
   MAGNETIC_MODULE_V1,
   getLabwareDefaultEngageHeight,
 } from '@opentrons/shared-data'
-import type { Options } from '@opentrons/components'
+import type { DropdownOption } from '@opentrons/components'
 import type { ModuleType } from '@opentrons/shared-data'
 import type {
   ModuleOnDeck,
@@ -95,11 +95,11 @@ export function getModuleLabwareOptions(
   initialDeckSetup: InitialDeckSetup,
   nicknamesById: Record<string, string>,
   type: ModuleType
-): Options {
+): DropdownOption[] {
   const labwares = initialDeckSetup.labware
   const modulesOnDeck = getModulesOnDeckByType(initialDeckSetup, type)
   const module = getModuleShortNames(type)
-  let options: Options = []
+  let options: DropdownOption[] = []
 
   if (modulesOnDeck != null) {
     options = modulesOnDeck.map(moduleOnDeck => {
