@@ -1,4 +1,5 @@
 import { getHasWasteChute } from '@opentrons/step-generation'
+import { WASTE_CHUTE_DISPLAY_NAME } from '@opentrons/components'
 import {
   FLEX_ROBOT_TYPE,
   RobotType,
@@ -57,7 +58,7 @@ export function getLabwareLatestSlot(
     hasWasteChute &&
     (initialSlot === 'D3' || moveLabwareStep?.newLocation === 'D3')
   ) {
-    return 'Waste chute'
+    return WASTE_CHUTE_DISPLAY_NAME
   }
 
   if (moveLabwareStep?.newLocation != null) {

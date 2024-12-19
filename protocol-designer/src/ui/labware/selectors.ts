@@ -2,6 +2,10 @@ import { createSelector } from 'reselect'
 import mapValues from 'lodash/mapValues'
 import reduce from 'lodash/reduce'
 import {
+  TRASH_BIN_DISPLAY_NAME,
+  WASTE_CHUTE_DISPLAY_NAME,
+} from '@opentrons/components'
+import {
   FLEX_ROBOT_TYPE,
   OT2_ROBOT_TYPE,
   RobotType,
@@ -23,8 +27,6 @@ import type {
   SavedStepFormState,
 } from '../../step-forms'
 
-const TRASH_BIN = 'Trash bin'
-
 export const getLabwareNicknamesById: Selector<
   Record<string, string>
 > = createSelector(
@@ -42,8 +44,8 @@ export const _sortLabwareDropdownOptions = (
 ): DropdownOption[] =>
   options.sort((a, b) => {
     // special case for trash (always at the bottom of the list)
-    if (a.name === TRASH_BIN) return 1
-    if (b.name === TRASH_BIN) return -1
+    if (a.name === TRASH_BIN_DISPLAY_NAME) return 1
+    if (b.name === TRASH_BIN_DISPLAY_NAME) return -1
     // sort by name everything else by name
     return a.name.localeCompare(b.name)
   })
@@ -106,6 +108,7 @@ export const getMoveLabwareOptions: Selector<DropdownOption[]> = createSelector(
     )?.location
     const robotType =
       trashBinLocation === 'cutout12' ? OT2_ROBOT_TYPE : FLEX_ROBOT_TYPE
+
     const moveLabwareOptions = reduce(
       labwareEntities,
       (
@@ -226,7 +229,7 @@ export const getWasteChuteOption: Selector<DropdownOption | null> = createSelect
     const wasteChuteOption: DropdownOption | null =
       wasteChuteEntity != null
         ? {
-            name: 'Waste chute',
+            name: WASTE_CHUTE_DISPLAY_NAME,
             value: wasteChuteEntity.id,
           }
         : null
@@ -250,7 +253,7 @@ export const getDisposalOptions = createSelector(
           ? [
               ...acc,
               {
-                name: TRASH_BIN,
+                name: TRASH_BIN_DISPLAY_NAME,
                 value: additionalEquipment.id ?? '',
               },
             ]

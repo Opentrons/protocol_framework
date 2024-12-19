@@ -16,7 +16,6 @@
   "magnet_height_caption": "Must be between {{low}} to {{high}}.",
   "magnet_recommended": "The recommended height is {{default}}",
   "manually": "Manually",
-  "mix": "Mix",
   "module_and_slot": "{{moduleLongName}} in Slot {{slotName}}",
   "n_steps_selected": "{{n}} steps selected",
   "networking": {
