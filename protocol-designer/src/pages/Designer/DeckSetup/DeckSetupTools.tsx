@@ -255,7 +255,11 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       if (
         createdLabwareForSlot != null &&
         (!keepExistingLabware ||
-          createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri)
+          createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri ||
+          //  if nested labware changes but labware doesn't, still delete both
+          (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
+            createdNestedLabwareForSlot?.labwareDefURI !==
+              selectedNestedLabwareDefUri))
       ) {
         dispatch(deleteContainer({ labwareId: createdLabwareForSlot.id }))
       }
@@ -344,7 +348,11 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     if (
       selectedModuleModel != null &&
       selectedLabwareDefUri != null &&
-      createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri
+      (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
+        //  if nested labware changes but labware doesn't, still create both both
+        (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
+          createdNestedLabwareForSlot?.labwareDefURI !==
+            selectedNestedLabwareDefUri))
     ) {
       //   create adapter + labware on module
       dispatch(
