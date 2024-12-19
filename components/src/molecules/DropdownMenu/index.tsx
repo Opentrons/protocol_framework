@@ -24,7 +24,7 @@ import { MenuItem } from '../../atoms/MenuList/MenuItem'
 import { Tooltip } from '../../atoms/Tooltip'
 import { StyledText } from '../../atoms/StyledText'
 import { LiquidIcon } from '../LiquidIcon'
-import { DeckInfoLabel } from '..'
+import { DeckInfoLabel } from '../DeckInfoLabel'
 
 export interface DropdownOption {
   name: string
