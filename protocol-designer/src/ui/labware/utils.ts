@@ -4,7 +4,6 @@ import {
   RobotType,
   THERMOCYCLER_MODULE_TYPE,
 } from '@opentrons/shared-data'
-import { WASTE_CHUTE_DISPLAY_NAME } from '@opentrons/components'
 import type { InitialDeckSetup, SavedStepFormState } from '../../step-forms'
 
 function resolveSlotLocation(
@@ -58,7 +57,7 @@ export function getLabwareLatestSlot(
     hasWasteChute &&
     (initialSlot === 'D3' || moveLabwareStep?.newLocation === 'D3')
   ) {
-    return WASTE_CHUTE_DISPLAY_NAME
+    return 'Waste chute'
   }
 
   if (moveLabwareStep?.newLocation != null) {

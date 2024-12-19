@@ -9,7 +9,6 @@ import {
   THERMOCYCLER_MODULE_TYPE,
   THERMOCYCLER_MODULE_V1,
 } from '@opentrons/shared-data'
-import { SPAN7_8_10_11_SLOT } from '../../../constants'
 import {
   getDisposalOptions,
   getLabwareOptions,
@@ -23,7 +22,6 @@ import {
 } from '@opentrons/shared-data/labware/fixtures/2'
 
 import type { LabwareEntities } from '@opentrons/step-generation'
-import type { InitialDeckSetup } from '../../../step-forms'
 
 describe('labware selectors', () => {
   let names: Record<string, string>
@@ -161,7 +159,7 @@ describe('labware selectors', () => {
         ...tipracks,
         ...otherLabware,
       }
-      const initialDeckSetup: InitialDeckSetup = {
+      const initialDeckSetup = {
         labware: labwareEntities,
         modules: {},
         pipettes: {},
@@ -203,7 +201,7 @@ describe('labware selectors', () => {
         },
       }
       const labwareEntities = { ...trash, ...labware }
-      const initialDeckSetup: InitialDeckSetup = {
+      const initialDeckSetup = {
         pipettes: {},
         labware: {
           ...trash,
@@ -275,7 +273,7 @@ describe('labware selectors', () => {
         },
       }
       const labwareEntities = { ...trash, ...labware }
-      const initialDeckSetup: InitialDeckSetup = {
+      const initialDeckSetup = {
         pipettes: {},
         labware: {
           ...labware,
