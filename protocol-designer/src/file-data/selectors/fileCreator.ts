@@ -59,6 +59,7 @@ import type { LabwareDefByDefURI } from '../../labware-defs'
 import type { Selector } from '../../types'
 import type { DesignerApplicationData } from '../../load-file/migration/utils/getLoadLiquidCommands'
 import type { SecondOrderCommandAnnotation } from '@opentrons/shared-data/commandAnnotation/types'
+import genPythonProtocol from './pythonProtocol'
 
 // TODO: BC: 2018-02-21 uncomment this assert, causes test failures
 // console.assert(!isEmpty(process.env.OT_PD_VERSION), 'Could not find application version!')
@@ -432,6 +433,18 @@ export const createFile: Selector<ProtocolFile> = createSelector(
       designerApplication,
     }
 
+    console.log(genPythonProtocol(
+      fileMetadata,
+      robotType,
+      initialRobotState,
+      labwareEntities,
+      labwareNicknamesById,
+      moduleEntities,
+      pipetteEntities,
+      ingredients,
+      ingredLocations,
+    ));
+
     return {
       ...protocolBase,
       ...deckStructure,
@@ -440,5 +453,53 @@ export const createFile: Selector<ProtocolFile> = createSelector(
       ...commandv8Mixin,
       ...commandAnnotionaV1Mixin,
     }
+  }
+)
+
+export const createPythonFile: Selector<string> = createSelector(
+  getFileMetadata,
+  getInitialRobotState,
+  getRobotStateTimeline,
+  getRobotType,
+  dismissSelectors.getAllDismissedWarnings,
+  ingredSelectors.getLiquidGroupsById,
+  ingredSelectors.getLiquidsByLabwareId,
+  stepFormSelectors.getSavedStepForms,
+  stepFormSelectors.getOrderedStepIds,
+  stepFormSelectors.getLabwareEntities,
+  stepFormSelectors.getModuleEntities,
+  stepFormSelectors.getPipetteEntities,
+  uiLabwareSelectors.getLabwareNicknamesById,
+  labwareDefSelectors.getLabwareDefsByURI,
+  getStepGroups,
+  (
+    fileMetadata,
+    initialRobotState,
+    robotStateTimeline,
+    robotType,
+    dismissedWarnings,
+    ingredients,
+    ingredLocations,
+    savedStepForms,
+    orderedStepIds,
+    labwareEntities,
+    moduleEntities,
+    pipetteEntities,
+    labwareNicknamesById,
+    labwareDefsByURI,
+    stepGroups
+  ) => {
+    const pythonProtocol = genPythonProtocol(
+      fileMetadata,
+      robotType,
+      initialRobotState,
+      labwareEntities,
+      labwareNicknamesById,
+      moduleEntities,
+      pipetteEntities,
+      ingredients,
+      ingredLocations,
+    );
+    return pythonProtocol;
   }
 )
