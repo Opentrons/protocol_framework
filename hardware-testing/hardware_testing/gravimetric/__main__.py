@@ -596,8 +596,8 @@ if __name__ == "__main__":
                 mnt.name.lower(), hw.is_simulator, run_args.environment_sensor
             )
             start_temp = env_data.celsius_pipette
-            temp_limit = 26.5
-            max_pre_heat_seconds = 60 * 60 * 3
+            temp_limit = 27
+            max_pre_heat_seconds = 60 * 60 * 4
             now = time()
             start_time = now
             
