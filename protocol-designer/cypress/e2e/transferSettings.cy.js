@@ -14,7 +14,7 @@ describe('Happy Path Transfer Tests', () => {
   it('It should verify the working function of every permutation of transfer checkboxes', () => {
 
     cy.visit('/'); // Replace with the appropriate URL or navigation
-    /*
+   
     cy.verifyHomePage(); // This calls the custom command from commands.ts
     cy.clickCreateNew()
     /
@@ -80,14 +80,16 @@ describe('Happy Path Transfer Tests', () => {
     cy.contains('Confirm').click()
     // ToDo make sure that the protocol overview stage works. 
     cy.contains('Edit protocol').click()
-    cy.chooseDeckSlot('C2')
+    cy.chooseDeckSlot('C2').click()
+    cy.contains('Add hardware/labware').click()
     //cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click()
     cy.contains('Labware').click()
     cy.contains('Well plates').click()
-    cy.contains('Armadillo 96 Well Plate 200 µL PCR Full Skirt').click()
+    cy.contains('Armadillo 96 Well Plate 200 µL PCR Full Skirt').click({force:true})
     cy.get('[data-testid="Toolbox_confirmButton"]').click({ force: true })
-
-    cy.get('foreignObject[x="164"][y="107"]')
+    // To do make a liquid adding function
+    // I suspect we're almost there, just need 
+    cy.chooseDeckSlot('C2')
   .find('.Box-sc-8ozbhb-0.kIDovv')
   .find('a[role="button"]')
   .contains('Edit slot')
@@ -97,7 +99,20 @@ describe('Happy Path Transfer Tests', () => {
   cy.contains('button', 'Define a liquid').click()
   cy.get('input[name="name"]') // Select the input with name="name"
   .type('My liquid!')
-  cy.get('button[type="submit"]').contains('Save').click();
+
+  cy.get('div[aria-label="ModalShell_ModalArea"]')
+  .find('form') // Target the form that wraps the button
+  .invoke('submit', (e) => {
+    e.preventDefault(); // Prevent default behavior
+  });
+
+// Then click the Save button
+cy.get('div[aria-label="ModalShell_ModalArea"]')
+  .find('button[type="submit"]')
+  .contains('Save')
+  .click();
+  
+  //cy.get('button[type="submit"]').contains('Save').click();
 
   //cy.contains('button','Save').click()
 

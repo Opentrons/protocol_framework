@@ -106,7 +106,8 @@ Cypress.Commands.add('verifyCreateNewHeader', () => {
 
 // Home Page
 Cypress.Commands.add('verifyHomePage', () => {
-  cy.contains('button', 'Confirm').click()
+  // Todo re-add when Once 8.2.2 comes back in 
+  //cy.contains('button', 'Confirm').click()
   cy.contains(content.welcome)
   cy.contains('button', locators.createProtocol).should('be.visible')
   cy.contains('label', locators.editProtocol).should('be.visible')
@@ -118,8 +119,9 @@ Cypress.Commands.add('verifyHomePage', () => {
 Cypress.Commands.add('clickCreateNew', () => {
   // cy.get('[data-testid="SettingsIconButton"]').click();
   cy.getByTestId(locators.settingsDataTestid).click()
-  cy.get('[data-testid="analyticsToggle"] svg')
-  .should('have.css', 'fill', 'rgb(0, 108, 250)')
+  // ToDo  re-add when 8.2.2 pushed to edge
+  // cy.get('[data-testid="analyticsToggle"] svg')
+  // .should('have.css', 'fill', 'rgb(0, 108, 250)')
   cy.getByTestId(locators.settingsDataTestid).click()
   cy.contains(locators.createProtocol).click()
 
@@ -212,18 +214,18 @@ Cypress.Commands.add(
 
 Cypress.Commands.add('chooseDeckSlot', (slot: string) => {
   const deck_slots = {
-    A1: () => cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click(),
-    A2: () => cy.contains('foreignObject[x="164"][y="321"]', 'Edit slot').click(),
-    A3: () => cy.contains('foreignObject[x="328"][y="321"]', 'Edit slot').click(),
-    B1: () => cy.contains('foreignObject[x="0"][y="214"]', 'Edit slot').click(),
-    B2: () => cy.contains('foreignObject[x="164"][y="214"]', 'Edit slot').click(),
-    B3: () => cy.contains('foreignObject[x="328"][y="214"]', 'Edit slot').click(),
-    C1: () => cy.contains('foreignObject[x="0"][y="107"]', 'Edit slot').click(),
-    C2: () => cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click(),
-    C3: () => cy.contains('foreignObject[x="328"][y="107"]', 'Edit slot').click(),
-    D1: () => cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot').click(),
-    D2: () => cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot').click(),
-    D3: () => cy.contains('foreignObject[x="328"][y="0"]', 'Edit slot').click()
+    A1: () => cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot'),
+    A2: () => cy.contains('foreignObject[x="164"][y="321"]', 'Edit slot'),
+    A3: () => cy.contains('foreignObject[x="328"][y="321"]', 'Edit slot'),
+    B1: () => cy.contains('foreignObject[x="0"][y="214"]', 'Edit slot'),
+    B2: () => cy.contains('foreignObject[x="164"][y="214"]', 'Edit slot'),
+    B3: () => cy.contains('foreignObject[x="328"][y="214"]', 'Edit slot'),
+    C1: () => cy.contains('foreignObject[x="0"][y="107"]', 'Edit slot'),
+    C2: () => cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot'),
+    C3: () => cy.contains('foreignObject[x="328"][y="107"]', 'Edit slot'),
+    D1: () => cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot'),
+    D2: () => cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot'),
+    D3: () => cy.contains('foreignObject[x="328"][y="0"]', 'Edit slot')
   };
 
   // Correct syntax: just assign the action to `slotAction`
@@ -232,7 +234,7 @@ Cypress.Commands.add('chooseDeckSlot', (slot: string) => {
   // Call the corresponding Cypress command, if the action exists
   if (slotAction) {
     slotAction()  // Execute the Cypress command for the selected slot
-    cy.contains('Add hardware/labware').click()
+    
   } else {
     throw new Error(`Slot ${slot} not found in deck slots.`);
   }
