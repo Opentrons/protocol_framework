@@ -237,6 +237,7 @@ class OT3PipetteHandler:
                 "back_compat_names",
                 "supported_tips",
                 "lld_settings",
+                "available_sensors",
             ]
 
             instr_dict = instr.as_dict()
@@ -282,6 +283,7 @@ class OT3PipetteHandler:
                 "pipette_bounding_box_offsets"
             ] = instr.config.pipette_bounding_box_offsets
             result["lld_settings"] = instr.config.lld_settings
+            result["available_sensors"] = instr.config.available_sensors
         return cast(PipetteDict, result)
 
     @property
