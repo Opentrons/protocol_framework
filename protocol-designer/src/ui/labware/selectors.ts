@@ -8,7 +8,6 @@ import {
 import {
   FLEX_ROBOT_TYPE,
   OT2_ROBOT_TYPE,
-  RobotType,
   getIsTiprack,
   getLabwareDisplayName,
 } from '@opentrons/shared-data'
@@ -21,6 +20,7 @@ import type {
   AdditionalEquipmentEntity,
 } from '@opentrons/step-generation'
 import type { DropdownOption } from '@opentrons/components'
+import type { RobotType } from '@opentrons/shared-data'
 import type { Selector } from '../../types'
 import type {
   AllTemporalPropertiesForTimelineFrame,
