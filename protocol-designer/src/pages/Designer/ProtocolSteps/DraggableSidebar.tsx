@@ -79,7 +79,7 @@ const SidebarContainer = styled(Box)`
   flex-direction: ${DIRECTION_COLUMN};
   border-right: 1px solid #ccc;
   position: relative;
-  overflow: hidden;
+  /* overflow: hidden; */
   height: 100%;
 `
 
@@ -92,6 +92,7 @@ interface SidebarResizerProps {
 }
 
 const SidebarResizer = styled(Flex)<SidebarResizerProps>`
+  user-select: none;
   width: 0.3125rem;
   cursor: ew-resize;
   background-color: #ddd;
