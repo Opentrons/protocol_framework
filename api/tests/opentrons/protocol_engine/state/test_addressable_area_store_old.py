@@ -45,7 +45,7 @@ def _make_deck_config() -> DeckConfigurationType:
 
 def _dummy_command() -> Command:
     """Return a placeholder command."""
-    return Comment.construct()  # type: ignore[call-arg]
+    return Comment.model_construct()  # type: ignore[call-arg]
 
 
 @pytest.fixture

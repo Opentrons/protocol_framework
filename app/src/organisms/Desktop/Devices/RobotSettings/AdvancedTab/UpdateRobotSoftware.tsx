@@ -112,7 +112,7 @@ export function UpdateRobotSoftware({
         </TertiaryButton>
         {updateFromFileDisabledReason != null && (
           <Tooltip tooltipProps={updateButtonTooltipProps}>
-            {updateFromFileDisabledReason}
+            {t(updateFromFileDisabledReason)}
           </Tooltip>
         )}
       </Flex>

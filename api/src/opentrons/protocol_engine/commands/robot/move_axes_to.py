@@ -1,7 +1,9 @@
 """Command models for moving any robot axis to an absolute position."""
 from __future__ import annotations
-from typing import Literal, Optional, Type, TYPE_CHECKING
+from typing import Literal, Optional, Type, TYPE_CHECKING, Any
+
 from pydantic import Field, BaseModel
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.protocol_engine.resources import ensure_ot3_hardware
@@ -22,18 +24,25 @@ if TYPE_CHECKING:
 MoveAxesToCommandType = Literal["robot/moveAxesTo"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 class MoveAxesToParams(BaseModel):
     """Payload required to move axes to absolute position."""
 
     axis_map: MotorAxisMapType = Field(
         ..., description="The specified axes to move to an absolute deck position with."
     )
-    critical_point: Optional[MotorAxisMapType] = Field(
-        default=None, description="The critical point to move the mount with."
+    critical_point: MotorAxisMapType | SkipJsonSchema[None] = Field(
+        default=None,
+        description="The critical point to move the mount with.",
+        json_schema_extra=_remove_default,
     )
-    speed: Optional[float] = Field(
+    speed: float | SkipJsonSchema[None] = Field(
         default=None,
         description="The max velocity to move the axes at. Will fall to hardware defaults if none provided.",
+        json_schema_extra=_remove_default,
     )
 
 

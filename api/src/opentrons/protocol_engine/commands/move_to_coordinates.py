@@ -91,7 +91,7 @@ class MoveToCoordinates(
 
     commandType: MoveToCoordinatesCommandType = "moveToCoordinates"
     params: MoveToCoordinatesParams
-    result: Optional[MoveToCoordinatesResult]
+    result: Optional[MoveToCoordinatesResult] = None
 
     _ImplementationCls: Type[
         MoveToCoordinatesImplementation

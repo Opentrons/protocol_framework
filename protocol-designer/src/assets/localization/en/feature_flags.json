@@ -31,5 +31,9 @@
   "OT_PD_ENABLE_REACT_SCAN": {
     "title": "Enable React Scan",
     "description": "Enable React Scan support for components rendering check"
+  },
+  "OT_PD_ENABLE_LIQUID_CLASSES": {
+    "title": "Enable liquid classes",
+    "description": "Enable liquid classes support"
   }
 }

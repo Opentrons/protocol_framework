@@ -32,7 +32,7 @@ from ..pipette_fixtures import (
     get_default_nozzle_map,
 )
 
-_tip_rack_parameters = LabwareParameters.construct(isTiprack=True)  # type: ignore[call-arg]
+_tip_rack_parameters = LabwareParameters.model_construct(isTiprack=True)  # type: ignore[call-arg]
 
 
 @pytest.fixture
@@ -50,7 +50,7 @@ def subject() -> TipStore:
 @pytest.fixture
 def labware_definition() -> LabwareDefinition:
     """Get a labware definition value object."""
-    return LabwareDefinition.construct(  # type: ignore[call-arg]
+    return LabwareDefinition.model_construct(  # type: ignore[call-arg]
         ordering=[
             ["A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1"],
             ["A2", "B2", "C2", "D2", "E2", "F2", "G2", "H2"],
@@ -90,14 +90,12 @@ def load_labware_action(
 
 def _dummy_command() -> commands.Command:
     """Return a placeholder command."""
-    return commands.Comment.construct()  # type: ignore[call-arg]
+    return commands.Comment.model_construct()  # type: ignore[call-arg]
 
 
 @pytest.mark.parametrize(
     "labware_definition",
-    [
-        LabwareDefinition.construct(ordering=[], parameters=_tip_rack_parameters)  # type: ignore[call-arg]
-    ],
+    [LabwareDefinition.model_construct(ordering=[], parameters=_tip_rack_parameters)],  # type: ignore[call-arg]
 )
 def test_get_next_tip_returns_none(
     load_labware_action: actions.SucceedCommandAction,
@@ -594,7 +592,6 @@ def test_get_next_tip_with_1_channel_followed_by_8_channel(
             command=_dummy_command(),
         )
     )
-
     config_update_2 = update_types.PipetteConfigUpdate(
         pipette_id="pipette-id2",
         serial_number="pipette-serial2",
@@ -929,9 +926,9 @@ def test_handle_pipette_config_action(
 @pytest.mark.parametrize(
     "labware_definition",
     [
-        LabwareDefinition.construct(  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(  # type: ignore[call-arg]
             ordering=[["A1"]],
-            parameters=LabwareParameters.construct(isTiprack=False),  # type: ignore[call-arg]
+            parameters=LabwareParameters.model_construct(isTiprack=False),  # type: ignore[call-arg]
         )
     ],
 )

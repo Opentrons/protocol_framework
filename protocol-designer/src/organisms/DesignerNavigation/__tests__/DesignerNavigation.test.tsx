@@ -4,16 +4,16 @@ import { describe, it, beforeEach, vi } from 'vitest'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { i18n } from '../../../assets/localization'
 import { getFileMetadata } from '../../../file-data/selectors'
-import { LiquidButton } from '../LiquidButton'
+import { LiquidButton } from '../../../molecules'
 
-import { ProtocolNavBar } from '..'
+import { DesignerNavigation } from '..'
 
 import type { ComponentProps } from 'react'
 import type { NavigateFunction } from 'react-router-dom'
 import type { TabProps } from '@opentrons/components'
 
 vi.mock('../../../file-data/selectors')
-vi.mock('../LiquidButton')
+vi.mock('../../../molecules/LiquidButton')
 
 const mockNavigate = vi.fn()
 vi.mock('react-router-dom', async importOriginal => {
@@ -21,17 +21,22 @@ vi.mock('react-router-dom', async importOriginal => {
   return {
     ...reactRouterDom,
     useNavigate: () => mockNavigate,
+    useLocation: () => ({
+      location: {
+        pathname: '/designer',
+      },
+    }),
   }
 })
 
-const render = (props: ComponentProps<typeof ProtocolNavBar>) => {
-  return renderWithProviders(<ProtocolNavBar {...props} />, {
+const render = (props: ComponentProps<typeof DesignerNavigation>) => {
+  return renderWithProviders(<DesignerNavigation {...props} />, {
     i18nInstance: i18n,
   })
 }
 
-describe('ProtocolNavBar', () => {
-  let props: ComponentProps<typeof ProtocolNavBar>
+describe('DesignerNavigation', () => {
+  let props: ComponentProps<typeof DesignerNavigation>
   beforeEach(() => {
     props = {
       hasZoomInSlot: false,

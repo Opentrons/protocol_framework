@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { screen } from '@testing-library/react'
 import { describe, it, beforeEach, expect } from 'vitest'
 
@@ -20,6 +19,7 @@ describe('DeckLabel', () => {
       text: 'mock DeckLabel text',
       isSelected: false,
       isLast: true,
+      isZoomed: true,
     }
   })
 

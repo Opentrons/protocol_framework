@@ -1,7 +1,9 @@
 """Load labware command request, result, and implementation models."""
 from __future__ import annotations
+from typing import TYPE_CHECKING, Optional, Type, Any
+
 from pydantic import BaseModel, Field
-from typing import TYPE_CHECKING, Optional, Type
+from pydantic.json_schema import SkipJsonSchema
 from typing_extensions import Literal
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
@@ -29,6 +31,10 @@ if TYPE_CHECKING:
 LoadLabwareCommandType = Literal["loadLabware"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 class LoadLabwareParams(BaseModel):
     """Payload required to load a labware into a slot."""
 
@@ -48,18 +54,20 @@ class LoadLabwareParams(BaseModel):
         ...,
         description="The labware definition version.",
     )
-    labwareId: Optional[str] = Field(
+    labwareId: str | SkipJsonSchema[None] = Field(
         None,
         description="An optional ID to assign to this labware. If None, an ID "
         "will be generated.",
+        json_schema_extra=_remove_default,
     )
-    displayName: Optional[str] = Field(
+    displayName: str | SkipJsonSchema[None] = Field(
         None,
         description="An optional user-specified display name "
         "or label for this labware.",
         # NOTE: v4/5 JSON protocols will always have a displayName which will be the
         #  user-specified label OR the displayName property of the labware's definition.
         # TODO: Make sure v6 JSON protocols don't do that.
+        json_schema_extra=_remove_default,
     )
 
 
@@ -187,7 +195,7 @@ class LoadLabware(BaseCommand[LoadLabwareParams, LoadLabwareResult, ErrorOccurre
 
     commandType: LoadLabwareCommandType = "loadLabware"
     params: LoadLabwareParams
-    result: Optional[LoadLabwareResult]
+    result: Optional[LoadLabwareResult] = None
 
     _ImplementationCls: Type[LoadLabwareImplementation] = LoadLabwareImplementation
 
