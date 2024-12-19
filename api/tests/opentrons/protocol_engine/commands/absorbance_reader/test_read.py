@@ -7,6 +7,7 @@ from opentrons.drivers.types import ABSMeasurementMode
 from opentrons.hardware_control.modules import AbsorbanceReader
 
 from opentrons.protocol_engine.execution import EquipmentHandler
+from opentrons.protocol_engine.resources import FileProvider
 from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.state.module_substates import (
@@ -15,31 +16,27 @@ from opentrons.protocol_engine.state.module_substates import (
 )
 from opentrons.protocol_engine.commands.command import SuccessData
 from opentrons.protocol_engine.commands.absorbance_reader import (
-    InitializeParams,
-    InitializeResult,
+    ReadAbsorbanceResult,
+    ReadAbsorbanceParams,
 )
-from opentrons.protocol_engine.commands.absorbance_reader.initialize import (
-    InitializeImpl,
+from opentrons.protocol_engine.commands.absorbance_reader.read import (
+    ReadAbsorbanceImpl,
 )
 
 
-@pytest.mark.parametrize(
-    "input_sample_wave_length, input_measure_mode", [([1, 2], "multi"), ([1], "single")]
-)
 async def test_absorbance_reader_implementation(
     decoy: Decoy,
     state_view: StateView,
     equipment: EquipmentHandler,
-    input_sample_wave_length: List[int],
-    input_measure_mode: str,
+    file_provider: FileProvider,
 ) -> None:
     """It should validate, find hardware module if not virtualized, and disengage."""
-    subject = InitializeImpl(state_view=state_view, equipment=equipment)
+    subject = ReadAbsorbanceImpl(
+        state_view=state_view, equipment=equipment, file_provider=file_provider
+    )
 
-    params = InitializeParams(
+    params = ReadAbsorbanceParams(
         moduleId="unverified-module-id",
-        measureMode=input_measure_mode,  # type: ignore[arg-type]
-        sampleWavelengths=input_sample_wave_length,
     )
 
     mabsorbance_module_substate = decoy.mock(cls=AbsorbanceReaderSubState)
@@ -56,29 +53,19 @@ async def test_absorbance_reader_implementation(
         absorbance_module_hw
     )
 
-    decoy.when((absorbance_module_hw.supported_wavelengths)).then_return([1, 2])
-
     result = await subject.execute(params=params)
 
     decoy.verify(
-        await absorbance_module_hw.set_sample_wavelength(
-            ABSMeasurementMode(params.measureMode),
-            params.sampleWavelengths,
-            reference_wavelength=params.referenceWavelength,
-        ),
+        await absorbance_module_hw.start_measure(),
         times=1,
     )
     assert result == SuccessData(
-        public=InitializeResult(),
+        public=ReadAbsorbanceResult(),
         state_update=update_types.StateUpdate(
             module_state_update=update_types.ModuleStateUpdate(
                 module_id="unverified-module-id",
                 module_type="absorbanceReaderType",
-                initialize_absorbance_reader_update=update_types.AbsorbanceReaderInitializeUpdate(
-                    measure_mode=input_measure_mode,  # type: ignore[arg-type]
-                    sample_wave_lengths=input_sample_wave_length,
-                    reference_wave_length=None,
-                ),
+                absorbance_reader_data=update_types.AbsorbanceReaderDataUpdate(),
             )
         ),
     )
