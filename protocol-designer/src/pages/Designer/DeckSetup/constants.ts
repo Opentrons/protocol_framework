@@ -94,6 +94,7 @@ export const RECOMMENDED_LABWARE_BY_MODULE: { [K in ModuleType]: string[] } = {
   ],
   [ABSORBANCE_READER_TYPE]: [
     'opentrons_flex_lid_absorbance_plate_reader_module',
+    'nest_96_wellplate_200ul_flat',
   ],
 }
 
