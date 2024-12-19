@@ -72,12 +72,12 @@ GRAV_CONFIG_EXCLUDE_FROM_REPORT = ["labware_offsets", "slots_tiprack"]
 PHOTO_CONFIG_EXCLUDE_FROM_REPORT = ["labware_offsets", "slots_tiprack"]
 
 NUM_BLANK_TRIALS: int = 10
-SCALE_SECONDS_TO_TRUE_STABILIZE = 30
+SCALE_SECONDS_TO_TRUE_STABILIZE = 60 * 3
 
 TOUCH_TIP_SPEED = 30
 GANTRY_MAX_SPEED = 40
 
-VIAL_SAFE_Z_OFFSET: Final = 0
+VIAL_SAFE_Z_OFFSET: Final = 25
 LABWARE_BOTTOM_CLEARANCE = 1.5
 
 QC_VOLUMES_G: Dict[int, Dict[int, List[Tuple[int, List[float]]]]] = {
@@ -121,9 +121,9 @@ QC_VOLUMES_EXTRA_G: Dict[int, Dict[int, List[Tuple[int, List[float]]]]] = {
             (50, [10.0]),  # T50
         ],
         1000: [  # P1000
-            (50, [10.0, 50.0]),  # T50
-            (200, [5.0, 50.0, 200.0]),  # T200
-            (1000, [10.0, 100.0]),  # T1000
+            (50, [50.0]),  # T50
+            (200, [200.0]),  # T200
+            (1000, []),  # T1000
         ],
     },
     8: {
