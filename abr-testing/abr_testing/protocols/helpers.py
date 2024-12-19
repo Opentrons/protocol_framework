@@ -15,7 +15,7 @@ from opentrons.protocol_api.module_contexts import (
     MagneticModuleContext,
     AbsorbanceReaderContext,
 )
-from typing import List, Union, Dict, Tuple
+from typing import List, Union, Dict, Tuple, Any
 from opentrons.hardware_control.modules.types import ThermocyclerStep
 from opentrons_shared_data.errors.exceptions import PipetteLiquidNotFoundError
 
@@ -411,10 +411,21 @@ def use_disposable_lid_with_tc(
     used_lids: List[Labware],
     plate_in_thermocycler: Labware,
     thermocycler: ThermocyclerContext,
+    flex_stacker: bool = False,
+    deck_riser: bool = False,
 ) -> Tuple[Labware, List[Labware], List[Labware]]:
     """Use disposable lid with thermocycler."""
+    x = y = z = 0.0
     lid_on_plate = unused_lids[0]
-    protocol.move_labware(lid_on_plate, plate_in_thermocycler, use_gripper=True)
+    if flex_stacker:
+        z = 16
+    if deck_riser:
+        x = -2.25
+    offsets = {"x": x, "y": y, "z": z}
+    print(f"OFFSETS: {offsets}")
+    protocol.move_labware(
+        lid_on_plate, plate_in_thermocycler, use_gripper=True, pick_up_offset=offsets
+    )
     # Remove lid from the list
     unused_lids.pop(0)
     used_lids.append(lid_on_plate)
@@ -595,6 +606,45 @@ def load_wells_with_water(
     water = protocol.define_liquid("Water", display_color="#0000FF")
     for well, volume in zip(wells, volumes):
         well.load_liquid(water, volume)
+
+
+# Functions for gripper movements
+
+
+def move_labware_to_destination(
+    protocol: ProtocolContext,
+    labware: Labware,
+    dest: Any,
+    use_gripper: bool = True,
+    flex_stacker: bool = False,
+) -> None:
+    """Move labware from one location another."""
+    x = y = z = 0.0
+
+    if flex_stacker:
+        z = 16
+    offsets = {"x": x, "y": y, "z": z}
+    print(f"OFFSETS: {offsets}")
+
+    if isinstance(dest, str):
+        try:
+            if dest[1] == "4":
+                protocol.move_labware(
+                    labware=labware,
+                    new_location=dest,
+                    use_gripper=use_gripper,
+                    drop_offset=offsets,
+                )
+                return
+        except IndexError:
+            print("OT-2")
+            return
+    protocol.move_labware(
+        labware=labware,
+        new_location=dest,
+        use_gripper=use_gripper,
+        pick_up_offset=offsets,
+    )
 
 
 # CONSTANTS

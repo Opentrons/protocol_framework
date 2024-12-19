@@ -75,7 +75,7 @@ def run(protocol: ProtocolContext) -> None:
     deck_riser = protocol.params.deck_riser  # type: ignore[attr-defined]
     trash_lid = protocol.params.trash_lid  # type: ignore[attr-defined]
     deactivate_modules_bool = protocol.params.deactivate_modules  # type: ignore[attr-defined]
-    helpers.comment_protocol_version(protocol, "01")
+    helpers.comment_protocol_version(protocol, "02")
 
     unused_lids: List[Labware] = []
     used_lids: List[Labware] = []
@@ -333,7 +333,13 @@ def run(protocol: ProtocolContext) -> None:
                         unused_lids,
                         used_lids,
                     ) = helpers.use_disposable_lid_with_tc(
-                        protocol, unused_lids, used_lids, sample_plate_1, thermocycler
+                        protocol,
+                        unused_lids,
+                        used_lids,
+                        sample_plate_1,
+                        thermocycler,
+                        flex_stacker=True,
+                        deck_riser=deck_riser,  # add stacker and deck riser offset
                     )
                 else:
                     thermocycler.close_lid()
@@ -417,6 +423,8 @@ def run(protocol: ProtocolContext) -> None:
                     used_lids,
                     sample_plate_1,
                     thermocycler,
+                    flex_stacker=True,
+                    deck_riser=deck_riser,
                 )
             else:
                 thermocycler.close_lid()
@@ -736,6 +744,8 @@ def run(protocol: ProtocolContext) -> None:
                             used_lids,
                             sample_plate_1,
                             thermocycler,
+                            flex_stacker=True,
+                            deck_riser=deck_riser,
                         )
                     else:
                         thermocycler.close_lid()

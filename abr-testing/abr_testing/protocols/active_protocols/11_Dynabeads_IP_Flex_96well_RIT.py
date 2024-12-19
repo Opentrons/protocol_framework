@@ -57,7 +57,7 @@ def run(protocol: ProtocolContext) -> None:
     single_channel_mount = protocol.params.pipette_mount_1  # type: ignore[attr-defined]
     eight_channel_mount = protocol.params.pipette_mount_2  # type: ignore[attr-defined]
     deactivate_modules_bool = protocol.params.deactivate_modules  # type: ignore[attr-defined]
-    helpers.comment_protocol_version(protocol, "01")
+    helpers.comment_protocol_version(protocol, "02")
 
     MIX_SPEED = heater_shaker_speed
     MIX_SEC = 10
@@ -289,8 +289,16 @@ def run(protocol: ProtocolContext) -> None:
 
     run(sample_plate_1)
     # swap plates
-    protocol.move_labware(sample_plate_1, "B4", True)
-    protocol.move_labware(sample_plate_2, "B2", True)
+    helpers.move_labware_to_destination(
+        protocol=protocol,
+        labware=sample_plate_1,
+        dest="B4",
+        use_gripper=True,
+        flex_stacker=True,
+    )
+    helpers.move_labware_to_destination(
+        protocol=protocol, labware=sample_plate_2, dest="B2", use_gripper=True
+    )
     run(sample_plate_2)
 
     helpers.clean_up_plates(p1000_single, [wash_res], waste, 1000)

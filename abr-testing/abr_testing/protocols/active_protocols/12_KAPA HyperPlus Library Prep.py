@@ -78,7 +78,7 @@ def run(protocol: ProtocolContext) -> None:
     pipette_1000_mount = protocol.params.pipette_mount_1  # type: ignore[attr-defined]
     pipette_50_mount = protocol.params.pipette_mount_2  # type: ignore[attr-defined]
     deck_riser = protocol.params.deck_riser  # type: ignore[attr-defined]
-    helpers.comment_protocol_version(protocol, "01")
+    helpers.comment_protocol_version(protocol, "02")
 
     REUSE_ETOH_TIPS = True
     REUSE_RSB_TIPS = (
@@ -260,11 +260,23 @@ def run(protocol: ProtocolContext) -> None:
 
         # Move Plate to TC
         protocol.comment("****Moving Plate to Pre-Warmed TC Module Block****")
-        protocol.move_labware(sample_plate, tc_mod, use_gripper=USE_GRIPPER)
+        print("Moving to TC")
+        helpers.move_labware_to_destination(
+            protocol=protocol,
+            labware=sample_plate,
+            dest=tc_mod,
+            use_gripper=USE_GRIPPER,
+        )
 
         if disposable_lid:
             lid_on_plate, unused_lids, used_lids = helpers.use_disposable_lid_with_tc(
-                protocol, unused_lids, used_lids, sample_plate, tc_mod
+                protocol,
+                unused_lids,
+                used_lids,
+                sample_plate,
+                tc_mod,
+                flex_stacker=True,
+                deck_riser=True,
             )
         else:
             tc_mod.close_lid()
@@ -275,13 +287,27 @@ def run(protocol: ProtocolContext) -> None:
 
         if disposable_lid:
             if len(used_lids) <= 1:
-                protocol.move_labware(lid_on_plate, "D4", use_gripper=True)
+                helpers.move_labware_to_destination(
+                    protocol=protocol,
+                    labware=lid_on_plate,
+                    dest="D4",
+                    use_gripper=True,
+                    flex_stacker=True,
+                )
             else:
-                protocol.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
+                helpers.move_labware_to_destination(
+                    protocol=protocol,
+                    labware=lid_on_plate,
+                    dest=used_lids[-2],
+                    use_gripper=True,
+                    flex_stacker=True,
+                )
         # #Move Plate to H-S
         protocol.comment("****Moving Plate off of TC****")
 
-        protocol.move_labware(sample_plate, "D1", use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol, labware=sample_plate, dest="D1", use_gripper=USE_GRIPPER
+        )
         return unused_lids, used_lids
 
     def run_er_profile(
@@ -297,11 +323,22 @@ def run(protocol: ProtocolContext) -> None:
 
         # Move Plate to TC
         protocol.comment("****Moving Plate to Pre-Warmed TC Module Block****")
-        protocol.move_labware(sample_plate, tc_mod, use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol,
+            labware=sample_plate,
+            dest=tc_mod,
+            use_gripper=USE_GRIPPER,
+        )
 
         if disposable_lid:
             lid_on_plate, unused_lids, used_lids = helpers.use_disposable_lid_with_tc(
-                protocol, unused_lids, used_lids, sample_plate, tc_mod
+                protocol,
+                unused_lids,
+                used_lids,
+                sample_plate,
+                tc_mod,
+                flex_stacker=True,
+                deck_riser=True,
             )
         else:
             tc_mod.close_lid()
@@ -315,13 +352,27 @@ def run(protocol: ProtocolContext) -> None:
         if disposable_lid:
             # move lid
             if len(used_lids) <= 1:
-                protocol.move_labware(lid_on_plate, "C4", use_gripper=True)
+                helpers.move_labware_to_destination(
+                    protocol=protocol,
+                    labware=lid_on_plate,
+                    dest="C4",
+                    use_gripper=True,
+                    flex_stacker=True,
+                )
             else:
-                protocol.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
+                helpers.move_labware_to_destination(
+                    protocol=protocol,
+                    labware=lid_on_plate,
+                    dest=used_lids[-2],
+                    use_gripper=True,
+                    flex_stacker=True,
+                )
         # #Move Plate to H-S
         protocol.comment("****Moving Plate off of TC****")
 
-        protocol.move_labware(sample_plate, "D1", use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol, labware=sample_plate, dest="D1", use_gripper=USE_GRIPPER
+        )
         return unused_lids, used_lids
 
     def run_ligation_profile(
@@ -338,11 +389,22 @@ def run(protocol: ProtocolContext) -> None:
         # Move Plate to TC
         protocol.comment("****Moving Plate to Pre-Warmed TC Module Block****")
 
-        protocol.move_labware(sample_plate, tc_mod, use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol,
+            labware=sample_plate,
+            dest=tc_mod,
+            use_gripper=USE_GRIPPER,
+        )
 
         if disposable_lid:
             lid_on_plate, unused_lids, used_lids = helpers.use_disposable_lid_with_tc(
-                protocol, unused_lids, used_lids, sample_plate, tc_mod
+                protocol,
+                unused_lids,
+                used_lids,
+                sample_plate,
+                tc_mod,
+                flex_stacker=True,
+                deck_riser=True,
             )
         else:
             tc_mod.close_lid()
@@ -357,14 +419,28 @@ def run(protocol: ProtocolContext) -> None:
         tc_mod.open_lid()
         if disposable_lid:
             if len(used_lids) <= 1:
-                protocol.move_labware(lid_on_plate, "C4", use_gripper=True)
+                helpers.move_labware_to_destination(
+                    protocol=protocol,
+                    labware=lid_on_plate,
+                    dest="C4",
+                    use_gripper=True,
+                    flex_stacker=True,
+                )
             else:
-                protocol.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
+                helpers.move_labware_to_destination(
+                    protocol=protocol,
+                    labware=lid_on_plate,
+                    dest=used_lids[-2],
+                    use_gripper=True,
+                    flex_stacker=True,
+                )
 
         # #Move Plate to H-S
         protocol.comment("****Moving Plate off of TC****")
 
-        protocol.move_labware(sample_plate, "D1", use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol, labware=sample_plate, dest="D1", use_gripper=USE_GRIPPER
+        )
         return unused_lids, used_lids
 
     def run_amplification_profile(
@@ -380,13 +456,24 @@ def run(protocol: ProtocolContext) -> None:
 
         # Move Plate to TC
         protocol.comment("****Moving Sample Plate onto TC****")
-        protocol.move_labware(sample_plate_2, tc_mod, use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol,
+            labware=sample_plate_2,
+            dest=tc_mod,
+            use_gripper=USE_GRIPPER,
+        )
 
         if not dry_run:
             tc_mod.set_lid_temperature(105)
         if disposable_lid:
             lid_on_plate, unused_lids, used_lids = helpers.use_disposable_lid_with_tc(
-                protocol, unused_lids, used_lids, sample_plate_2, tc_mod
+                protocol,
+                unused_lids,
+                used_lids,
+                sample_plate_2,
+                tc_mod,
+                flex_stacker=True,
+                deck_riser=True,
             )
         else:
             tc_mod.close_lid()
@@ -405,16 +492,35 @@ def run(protocol: ProtocolContext) -> None:
         tc_mod.open_lid()
         if disposable_lid:
             if len(used_lids) <= 1:
-                protocol.move_labware(lid_on_plate, "C4", use_gripper=True)
+                helpers.move_labware_to_destination(
+                    protocol=protocol,
+                    labware=lid_on_plate,
+                    dest="C4",
+                    use_gripper=True,
+                    flex_stacker=True,
+                )
             else:
-                protocol.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
+                helpers.move_labware_to_destination(
+                    protocol=protocol,
+                    labware=lid_on_plate,
+                    dest=used_lids[-2],
+                    use_gripper=True,
+                    flex_stacker=True,
+                )
 
         # Move Sample Plate to H-S
         protocol.comment("****Moving Sample Plate back to H-S****")
-        protocol.move_labware(sample_plate_2, "D1", use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol,
+            labware=sample_plate_2,
+            dest="D1",
+            use_gripper=USE_GRIPPER,
+        )
         # get FLP plate out of the way
         protocol.comment("****Moving FLP Plate back to TC****")
-        protocol.move_labware(FLP_plate, tc_mod, use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol, labware=FLP_plate, dest=tc_mod, use_gripper=USE_GRIPPER
+        )
         return unused_lids, used_lids
 
     def mix_beads(
@@ -623,7 +729,12 @@ def run(protocol: ProtocolContext) -> None:
         # Move FLP plate off magnetic module if it's there
         if FLP_plate.parent == magblock:
             protocol.comment("****Moving FLP Plate off Magnetic Module****")
-            protocol.move_labware(FLP_plate, tc_mod, use_gripper=USE_GRIPPER)
+            helpers.move_labware_to_destination(
+                protocol=protocol,
+                labware=FLP_plate,
+                dest=tc_mod,
+                use_gripper=USE_GRIPPER,
+            )
 
         for x, i in enumerate(samples):
             mix_beads(p200, bead_res, bead_vol_1, 7 if x == 0 else 2, x)
@@ -653,7 +764,12 @@ def run(protocol: ProtocolContext) -> None:
         )
 
         protocol.comment("****Moving Labware to Magnet for Pelleting****")
-        protocol.move_labware(sample_plate, magblock, use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol,
+            labware=sample_plate,
+            dest=magblock,
+            use_gripper=USE_GRIPPER,
+        )
 
         protocol.delay(minutes=4.5, msg="Time for Pelleting")
 
@@ -706,7 +822,9 @@ def run(protocol: ProtocolContext) -> None:
         # Return Plate to H-S from Magnet
 
         protocol.comment("****Moving sample plate off of Magnet****")
-        protocol.move_labware(sample_plate, "D1", use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol, labware=sample_plate, dest="D1", use_gripper=USE_GRIPPER
+        )
 
         # Adding RSB and Mixing
 
@@ -741,7 +859,12 @@ def run(protocol: ProtocolContext) -> None:
         )
 
         protocol.comment("****Move Samples to Magnet for Pelleting****")
-        protocol.move_labware(sample_plate, magblock, use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol,
+            labware=sample_plate,
+            dest=magblock,
+            use_gripper=USE_GRIPPER,
+        )
 
         protocol.delay(minutes=2, msg="Please allow 2 minutes for beads to pellet.")
 
@@ -761,14 +884,23 @@ def run(protocol: ProtocolContext) -> None:
 
         # move new sample plate to D1 or heatershaker
         protocol.comment("****Moving sample plate off of Magnet****")
-        protocol.move_labware(sample_plate_2, "D1", use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol,
+            labware=sample_plate_2,
+            dest="D1",
+            use_gripper=USE_GRIPPER,
+        )
 
         # Keep Sample PLate 1 to B2
         protocol.comment("****Moving Sample_plate_1 Plate off magnet to B2****")
-        protocol.move_labware(sample_plate, "B2", use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol, labware=sample_plate, dest="B2", use_gripper=USE_GRIPPER
+        )
 
         protocol.comment("****Moving FLP Plate off TC****")
-        protocol.move_labware(FLP_plate, magblock, use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol, labware=FLP_plate, dest=magblock, use_gripper=USE_GRIPPER
+        )
 
     def lib_amplification(
         unused_lids: List[Labware], used_lids: List[Labware]
@@ -843,7 +975,12 @@ def run(protocol: ProtocolContext) -> None:
         )
 
         protocol.comment("****Moving Labware to Magnet for Pelleting****")
-        protocol.move_labware(sample_plate_2, magblock, use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol,
+            labware=sample_plate_2,
+            dest=magblock,
+            use_gripper=USE_GRIPPER,
+        )
 
         protocol.delay(minutes=4.5, msg="Time for Pelleting")
 
@@ -895,7 +1032,12 @@ def run(protocol: ProtocolContext) -> None:
         protocol.delay(minutes=3, msg="Allow 3 minutes for residual ethanol to dry")
 
         protocol.comment("****Moving sample plate off of Magnet****")
-        protocol.move_labware(sample_plate_2, "D1", use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol,
+            labware=sample_plate_2,
+            dest="D1",
+            use_gripper=USE_GRIPPER,
+        )
 
         # Adding RSB and Mixing
 
@@ -930,7 +1072,12 @@ def run(protocol: ProtocolContext) -> None:
         )
 
         protocol.comment("****Move Samples to Magnet for Pelleting****")
-        protocol.move_labware(sample_plate_2, magblock, use_gripper=USE_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol,
+            labware=sample_plate_2,
+            dest=magblock,
+            use_gripper=USE_GRIPPER,
+        )
 
         protocol.delay(minutes=2, msg="Please allow 2 minutes for beads to pellet.")
 
