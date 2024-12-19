@@ -12,24 +12,25 @@ from typing import Any, Tuple, Dict
 # python3 test_modules.py
 
 
-async def tc_test_1(module: str, path_to_file: str)-> None:
+async def tc_test_1(module: str, path_to_file: str) -> None:
+    """Thermocycler Test 1 Open and Close Lid."""
     duration = int(input("How long to run this test for? (in seconds): "))
     start = time.time()
     while time.time() - start < duration:
         try:
-            tc_open_lid(module, path_to_file)
+            await (tc_open_lid(module, path_to_file))
         except asyncio.TimeoutError:
             return
         time.sleep(5)
         try:
-            tc_close_lid(module, path_to_file)
+            await (tc_close_lid(module, path_to_file))
         except asyncio.TimeoutError:
             return
         time.sleep(5)
 
 
 async def hs_test_1(module: str, path_to_file: str) -> None:
-    """Heater Shaker Test 1. (Home and Shake)"""
+    """Heater Shaker Test 1. (Home and Shake)."""
     duration = int(input("How long to run this test for? (in seconds): "))
     rpm = input("Target RPM (200-3000): ")
     start = time.time()
@@ -122,17 +123,17 @@ async def hs_deactivate(module: str, path_to_file: str) -> None:
 
 # TC Test Functions
 async def tc_open_lid(module: str, path_to_file: str) -> None:
-    """Open thermocycler lid"""
+    """Open thermocycler lid."""
     tc_gcodes = module_control.tc_gcode_shortcuts
     open_lid_gcode = tc_gcodes["ol"]
     await (module_control._main(module, [open_lid_gcode, "done"], path_to_file))
 
+
 async def tc_close_lid(module: str, path_to_file: str) -> None:
-    """Open thermocycler lid"""
+    """Open thermocycler lid."""
     tc_gcodes = module_control.tc_gcode_shortcuts
     close_lid_gcode = tc_gcodes["cl"]
     await (module_control._main(module, [close_lid_gcode, "done"], path_to_file))
-
 
 
 if __name__ == "__main__":
