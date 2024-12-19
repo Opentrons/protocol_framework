@@ -216,7 +216,7 @@ Cypress.Commands.add('chooseDeckSlot', (slot: string) => {
     | 'D1'
     | 'D2'
     | 'D3',
-    () => void
+    () => Cypress.Chainable<JQuery<HTMLElement>>
   > = {
     A1: () => cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot'),
     A2: () => cy.contains('foreignObject[x="164"][y="321"]', 'Edit slot'),
