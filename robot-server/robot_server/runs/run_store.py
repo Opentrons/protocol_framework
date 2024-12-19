@@ -20,7 +20,7 @@ from opentrons.protocol_engine import (
     CommandErrorSlice,
     CommandStatus,
 )
-from opentrons.protocol_engine.commands import Command
+from opentrons.protocol_engine.commands import Command, CommandAdapter
 from opentrons.protocol_engine.types import RunTimeParameter
 
 from opentrons_shared_data.errors.exceptions import (
@@ -50,6 +50,8 @@ from ..persistence.tables import CommandStatusSQLEnum
 log = logging.getLogger(__name__)
 
 _CACHE_ENTRIES = 32
+
+_rtp_list_adapter = TypeAdapter(list[RunTimeParameter])
 
 
 @dataclass(frozen=True)
@@ -828,13 +830,9 @@ def _convert_state_to_sql_values(
     }
 
 
-_command_type_adapter: TypeAdapter[Command] = TypeAdapter(Command)
-_rtp_list_adapter = TypeAdapter(list[RunTimeParameter])
-
-
 def _parse_command(json_str: str) -> Command:
     """Parse a JSON string from the database into a `Command`."""
-    return json_to_pydantic(_command_type_adapter, json_str)
+    return json_to_pydantic(CommandAdapter, json_str)
 
 
 def _convert_commands_status_to_sql_command_status(
