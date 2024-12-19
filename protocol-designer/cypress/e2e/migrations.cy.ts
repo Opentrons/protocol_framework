@@ -6,7 +6,9 @@ import { TestFilePath } from '../support/testFiles'
 describe('Protocol fixtures migrate and match snapshots', () => {
   beforeEach(() => {
     cy.visit('/')
-    cy.closeAnalyticsModal()
+    // Get rid of the analytics
+    cy.contains('button', 'Confirm').click() 
+    
   })
 
   const testCases: MigrateTestCase[] = [

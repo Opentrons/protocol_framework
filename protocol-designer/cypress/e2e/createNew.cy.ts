@@ -9,10 +9,10 @@ import { UniversalActions } from '../support/universalActions'
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
     cy.visit('/')
+    cy.contains('button', 'Confirm').click()
   })
 
   it('content and step 1 flow works', () => {
-    cy.closeAnalyticsModal()
     cy.clickCreateNew()
     cy.verifyCreateNewHeader()
     verifyCreateProtocolPage()

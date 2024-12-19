@@ -213,7 +213,7 @@ Cypress.Commands.add(
 )
 
 Cypress.Commands.add('chooseDeckSlot', (slot: string) => {
-  const deck_slots = {
+  const deckSlots = {
     A1: () => cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot'),
     A2: () => cy.contains('foreignObject[x="164"][y="321"]', 'Edit slot'),
     A3: () => cy.contains('foreignObject[x="328"][y="321"]', 'Edit slot'),
@@ -229,18 +229,17 @@ Cypress.Commands.add('chooseDeckSlot', (slot: string) => {
   };
 
   // Correct syntax: just assign the action to `slotAction`
-  const slotAction = deck_slots[slot];
+  const slotAction = deckSlots[slot];
+
 
   // Call the corresponding Cypress command, if the action exists
-  if (slotAction) {
+  if (Boolean(slotAction)) {
     slotAction()  // Execute the Cypress command for the selected slot
     
   } else {
     throw new Error(`Slot ${slot} not found in deck slots.`);
   }
 });
-
-
 
 Cypress.Commands.add('selectTipRacks', (left, right) => {
   if (left.length > 0) {
