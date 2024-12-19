@@ -77,7 +77,7 @@ export function getModuleUnderLabware(
 export const getModuleShortNames = (type: ModuleType): string => {
   switch (type) {
     case 'heaterShakerModuleType':
-      return 'Heater-Shaker'
+      return 'Heater-Shaker Module'
     case 'magneticBlockType':
       return 'Magnetic Block'
     case 'magneticModuleType':
@@ -110,22 +110,25 @@ export function getModuleLabwareOptions(
         )?.id
         if (labwareOnAdapterId != null) {
           return {
-            name: `${nicknamesById[labwareOnAdapterId]} in ${
-              nicknamesById[labware.id]
-            } in ${module} in slot ${moduleOnDeck.slot}`,
+            name: `${nicknamesById[labware.id]} with ${
+              nicknamesById[labwareOnAdapterId]
+            }`,
+            deckLabel: moduleOnDeck.slot,
+            subtext: module,
             value: moduleOnDeck.id,
           }
         } else {
           return {
-            name: `${nicknamesById[labware.id]} in ${module} in slot ${
-              moduleOnDeck.slot
-            }`,
+            name: nicknamesById[labware.id],
+            deckLabel: moduleOnDeck.slot,
+            subtext: module,
             value: moduleOnDeck.id,
           }
         }
       } else {
         return {
-          name: `No labware in ${module} in slot ${moduleOnDeck.slot}`,
+          name: module,
+          deckLabel: moduleOnDeck.slot,
           value: moduleOnDeck.id,
         }
       }
