@@ -2,6 +2,8 @@ import { getHasWasteChute } from '@opentrons/step-generation'
 import { WASTE_CHUTE_DISPLAY_NAME } from '@opentrons/components'
 import {
   FLEX_ROBOT_TYPE,
+  TC_MODULE_LOCATION_OT2,
+  TC_MODULE_LOCATION_OT3,
   THERMOCYCLER_MODULE_TYPE,
 } from '@opentrons/shared-data'
 import type { RobotType } from '@opentrons/shared-data'
@@ -13,7 +15,10 @@ function resolveSlotLocation(
   location: string,
   robotType: RobotType
 ): string {
-  const TCSlot = robotType === FLEX_ROBOT_TYPE ? 'A1+B1' : '8,9,10,11'
+  const TCSlot =
+    robotType === FLEX_ROBOT_TYPE
+      ? TC_MODULE_LOCATION_OT3
+      : TC_MODULE_LOCATION_OT2
   if (location === 'offDeck') {
     return 'offDeck'
   } else if (modules[location] != null) {
