@@ -46,7 +46,8 @@ def interpolate(
 ) -> LiquidClassSettings:
     """Interpolate."""
 
-    def _interp(lower: float, upper: float) -> float:
+    def _interp(lower: Optional[float], upper: Optional[float]) -> float:
+        assert lower is not None and upper is not None, f"lower={upper}, upper={upper}"
         return lower + ((upper - lower) * factor)
 
     return LiquidClassSettings(

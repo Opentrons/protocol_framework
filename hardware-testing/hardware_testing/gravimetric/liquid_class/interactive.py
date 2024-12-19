@@ -36,6 +36,7 @@ def _user_input_value_for_attribute(attribute: str, default: Optional[Any]) -> f
 def interactively_build_liquid_class(
     default: LiquidClassSettings,
 ) -> LiquidClassSettings:
+    """Interactively build liquid class."""
     ret = deepcopy(default)
     for asp_or_disp_field in fields(LiquidClassSettings):
         settings = getattr(default, asp_or_disp_field.name)

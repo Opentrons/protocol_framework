@@ -11,7 +11,6 @@ from hardware_testing.data import (
     dump_data_to_file,
     append_data_to_file,
     create_file_name,
-    ui,
 )
 
 from .scale import Scale

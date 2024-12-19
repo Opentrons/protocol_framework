@@ -30,6 +30,7 @@ class SupportedLiquid(Enum):
         raise ValueError(f"no supported liquid matching {s}")
 
     def name_with_dilution(self, dilution: float) -> str:
+        """Name with dilution."""
         if dilution == 0.0 or dilution == 1.0:
             return str(self.name)
         return f"{self.name}-{int(dilution * 100.0)}"

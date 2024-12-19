@@ -1,6 +1,5 @@
 """Opentrons helper methods."""
 import asyncio
-from random import random, randint
 from types import MethodType
 from typing import Any, List, Dict, Optional, Tuple, Union
 from statistics import stdev
@@ -217,6 +216,7 @@ def _reduce_volumes_to_not_exceed_software_limit(
         liq_cls = get_liquid_class(
             liquid, dilution, pipette_volume, pipette_channels, tip_volume, int(v)
         )
+        assert liq_cls.aspirate.air_gap is not None
         max_vol = tip_volume - liq_cls.aspirate.air_gap
         test_volumes[i] = min(v, max_vol - 0.1)
     return test_volumes
@@ -408,7 +408,7 @@ def _load_pipette(
         trash = ctx.load_trash_bin("A3")
     except Exception:
         # TODO: handle actual error for when trash is already configured for A3
-        trash = ctx.fixed_trash
+        trash = ctx.fixed_trash  # type: ignore[assignment]
     pipette = ctx.load_instrument(pip_name, pipette_mount)
     loaded_pipettes = ctx.loaded_instruments
     assert pipette.max_volume == pipette_volume, (
@@ -436,7 +436,7 @@ def _load_pipette(
 
 
 def _get_tag_from_pipette(
-    pipette: InstrumentContext, increment: bool, user_volumes: List[float]
+    pipette: InstrumentContext, increment: bool = False, user_volumes: List[float] = []
 ) -> str:
     pipette_tag = get_pipette_unique_name(pipette)
     ui.print_info(f'found pipette "{pipette_tag}"')

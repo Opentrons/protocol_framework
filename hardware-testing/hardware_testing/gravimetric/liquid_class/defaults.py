@@ -1008,6 +1008,7 @@ _defaults: Dict[
 
 
 def get_default(liquid: str, dilution: float) -> LiquidClassSettings:
+    """Get default."""
     cls_name = SupportedLiquid.from_string(liquid).name_with_dilution(dilution)
     return LiquidClassSettings(
         aspirate=deepcopy(_default_aspirate[cls_name]),
@@ -1073,6 +1074,7 @@ def set_liquid_class(
     tip: int,
     volume: float,
 ) -> None:
+    """Set liquid class."""
     cls_name = SupportedLiquid.from_string(liquid).name_with_dilution(dilution)
     _cls_per_volume = _defaults[tip][pipette][channels]
     if volume not in _cls_per_volume:

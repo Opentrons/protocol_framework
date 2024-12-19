@@ -207,7 +207,7 @@ def get_tips(
         if all_channels:
             ret = {0: get_tips_for_96_channel(ctx)}
         else:
-            ret = NotImplementedError(
+            raise NotImplementedError(
                 "no support for individual channel testing on the 96ch pipette"
             )
     else:

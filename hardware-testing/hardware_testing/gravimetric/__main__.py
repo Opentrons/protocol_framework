@@ -343,6 +343,7 @@ class RunArgs:
             else:
                 protocol_cfg = GRAVIMETRIC_CFG[args.pipette][args.channels]
             name = protocol_cfg.metadata["protocolName"]  # type: ignore[attr-defined]
+            assert scale
             recorder = execute._load_scale(name, scale, run_id, pipette_tag, start_time)
             assert (
                 0.0 <= args.dilution <= 1.0
@@ -505,6 +506,8 @@ def build_photometric_cfg(
         mode=mode,
         interactive=False,
         starting_tip=starting_tip,
+        liquid=run_args.liquid,
+        dilution=run_args.dilution,
     )
 
 
@@ -675,7 +678,7 @@ if __name__ == "__main__":
             else helpers.OT3Mount.RIGHT
         )
         hw.add_tip(hw_mount, tip_length=120)  # langer than any tip, to be safe
-        run_args.pipette.move_to(run_args.pipette.trash_container)
+        run_args.pipette.move_to(run_args.pipette.trash_container)  # type: ignore[arg-type]
         hw.drop_tip(hw_mount)
         hw._move_to_plunger_bottom(hw_mount, rate=1.0)
         hw.retract(hw_mount)

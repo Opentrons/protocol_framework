@@ -37,6 +37,8 @@ class VolumetricConfig:
     ignore_fail: bool
     mode: str
     starting_tip: str
+    liquid: str
+    dilution: float
 
 
 @dataclass
@@ -50,8 +52,6 @@ class GravimetricConfig(VolumetricConfig):
     scale_delay: int
     isolate_channels: List[int]
     isolate_volumes: List[float]
-    liquid: str
-    dilution: float
 
 
 @dataclass

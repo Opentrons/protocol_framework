@@ -3,11 +3,9 @@ from time import sleep
 from typing import Optional, Tuple, List, Dict
 
 from opentrons.protocol_api import ProtocolContext, Well, Labware, InstrumentContext
-from subprocess import run as run_subprocess
-import subprocess
 from hardware_testing.data import ui, dump_data_to_file
 from hardware_testing.data.csv_report import CSVReport
-from hardware_testing.opentrons_api.types import Point, OT3Mount, Axis
+from hardware_testing.opentrons_api.types import OT3Mount, Axis
 from hardware_testing.drivers import asair_sensor
 import os
 from . import report
@@ -29,7 +27,6 @@ from .trial import (
     _finish_test,
 )
 from .liquid_class.pipetting import (
-    mix_with_liquid_class,
     aspirate_with_liquid_class,
     dispense_with_liquid_class,
     PipettingCallbacks,
@@ -53,7 +50,6 @@ from .measurement.record import (
 )
 from .measurement.scale import Scale
 from .tips import MULTI_CHANNEL_TEST_ORDER
-import glob
 
 from opentrons.hardware_control.types import StatusBarState
 from hardware_testing.gravimetric.workarounds import get_sync_hw_api
@@ -603,7 +599,7 @@ def _get_liquid_height(
     if pipette.channels == 96:
         if not ctx.is_simulating() and not same_tip:
             ui.alert_user_ready(
-                f"Please replace the tips in slot 2",
+                "Please replace the tips in slot 2",
                 get_sync_hw_api(ctx),
             )
         _tip_counter[0] = 0
