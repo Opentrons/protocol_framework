@@ -87,8 +87,9 @@ describe('Happy Path Transfer Tests', () => {
     cy.contains('Well plates').click()
     cy.contains('Armadillo 96 Well Plate 200 µL PCR Full Skirt').click({force:true})
     cy.get('[data-testid="Toolbox_confirmButton"]').click({ force: true })
-    // To do make a liquid adding function
-    // I suspect we're almost there, just need 
+    // Todo make a liquid adding function
+    /*
+    */
     cy.chooseDeckSlot('C2')
   .find('.Box-sc-8ozbhb-0.kIDovv')
   .find('a[role="button"]')
@@ -110,7 +111,49 @@ describe('Happy Path Transfer Tests', () => {
 cy.get('div[aria-label="ModalShell_ModalArea"]')
   .find('button[type="submit"]')
   .contains('Save')
-  .click();
+  .click()
+
+  cy.get('circle[data-wellname="A1"]').click({ force: true })
+  cy.get('circle[data-wellname="A2"]').click({ force: true });
+
+
+// Open the dropdown
+cy.get('div[tabindex="0"].sc-bqWxrE').click();
+
+// Select the option with specific text
+cy.contains('My liquid!').click();
+cy.contains('Liquid')
+cy.contains('Add liquid')
+cy.contains('Liquid volume by well')
+cy.contains('Cancel')
+cy.get('input[name="volume"]').type(150)
+cy.contains('button', 'Save').click();
+cy.contains('button', 'Done').click({force:true})
+
+cy.chooseDeckSlot('C3').click()
+cy.contains('Add hardware/labware').click()
+//cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click()
+cy.contains('Labware').click()
+cy.contains('Well plates').click()
+cy.contains('Bio-Rad 96 Well Plate 200 µL PCR').click({force:true})
+cy.get('[data-testid="Toolbox_confirmButton"]').click({ force: true })
+//cy.get('[data-testid="Toolbox_confirmButton"]').click({ force: true })
+// Todo make a liquid adding function
+cy.contains('button','Protocol steps').click()
+cy.contains('button', '+ Add Step').click()
+cy.contains('button', 'Transfer').should('be.visible').click();
+cy.contains('Source labware')
+cy.contains('Select source wells')
+cy.contains('Destination labware')
+cy.contains('Volume per well')
+cy.contains('Tip handling')
+cy.contains('Tip handling')
+cy.contains('Tip drop location')
+
+
+
+
+
   
   //cy.get('button[type="submit"]').contains('Save').click();
 
