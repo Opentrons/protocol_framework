@@ -237,6 +237,7 @@ export function makeEvent(
         name: 'pipetteOffsetCalibrationStarted',
         properties: {
           ...action.payload,
+          robotType: OT2_ROBOT_TYPE,
         },
       })
     }
@@ -246,6 +247,7 @@ export function makeEvent(
         name: 'tipLengthCalibrationStarted',
         properties: {
           ...action.payload,
+          robotType: OT2_ROBOT_TYPE,
         },
       })
     }
