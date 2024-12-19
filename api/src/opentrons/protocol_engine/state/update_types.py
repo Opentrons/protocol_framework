@@ -613,12 +613,11 @@ class StateUpdate:
         self, module_id: str, read_result: typing.Dict[int, typing.Dict[str, float]]
     ) -> Self:
         """Update an absorbance reader's read data. See `AbsorbanceReaderReadDataUpdate`."""
-        # consolidate together
+
         self.module_state_update = ModuleStateUpdate(
-            module_id=module_id, module_type="absorbanceReaderType"
-        )
-        self.absorbance_reader_data = AbsorbanceReaderDataUpdate(
-            read_result=read_result
+            module_id=module_id,
+            module_type="absorbanceReaderType",
+            absorbance_reader_data=AbsorbanceReaderDataUpdate(read_result=read_result),
         )
         return self
 

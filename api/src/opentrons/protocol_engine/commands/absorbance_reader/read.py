@@ -140,6 +140,9 @@ class ReadAbsorbanceImpl(
                     "Plate Reader data cannot be requested with a module that has not been initialized."
                 )
 
+        state_update.set_absorbance_reader_data(
+            module_id=params.moduleId, read_result=asbsorbance_result
+        )
         # TODO (cb, 10-17-2024): FILE PROVIDER - Some day we may want to break the file provider behavior into a seperate API function.
         # When this happens, we probably will to have the change the command results handler we utilize to track file IDs in engine.
         # Today, the action handler for the FileStore looks for a ReadAbsorbanceResult command action, this will need to be delinked.
@@ -156,10 +159,6 @@ class ReadAbsorbanceImpl(
                 serial_number=abs_reader.serial_number
                 if (abs_reader is not None and abs_reader.serial_number is not None)
                 else "VIRTUAL_SERIAL",
-            )
-
-            state_update.set_absorbance_reader_data(
-                module_id=params.moduleId, read_result=asbsorbance_result
             )
 
             if isinstance(plate_read_result, PlateReaderData):

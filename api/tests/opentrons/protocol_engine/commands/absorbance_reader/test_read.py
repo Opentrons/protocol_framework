@@ -1,9 +1,9 @@
 """Test absorbance reader initilize command."""
 import pytest
 from decoy import Decoy
-from typing import List
+from typing import List, Dict
 
-from opentrons.drivers.types import ABSMeasurementMode
+from opentrons.drivers.types import ABSMeasurementMode, ABSMeasurementConfig
 from opentrons.hardware_control.modules import AbsorbanceReader
 
 from opentrons.protocol_engine.execution import EquipmentHandler
@@ -42,6 +42,7 @@ async def test_absorbance_reader_implementation(
     mabsorbance_module_substate = decoy.mock(cls=AbsorbanceReaderSubState)
     absorbance_module_hw = decoy.mock(cls=AbsorbanceReader)
     verified_module_id = AbsorbanceReaderId("module-id")
+    asbsorbance_result = {1: {"A1": 1.2}}
 
     decoy.when(
         state_view.modules.get_absorbance_reader_substate("unverified-module-id")
@@ -53,19 +54,33 @@ async def test_absorbance_reader_implementation(
         absorbance_module_hw
     )
 
+    decoy.when(await absorbance_module_hw.start_measure()).then_return([[1.2, 1.3]])
+    decoy.when(absorbance_module_hw._measurement_config).then_return(
+        ABSMeasurementConfig(
+            measure_mode=ABSMeasurementMode.SINGLE,
+            sample_wavelengths=[1, 2],
+            reference_wavelength=None,
+        )
+    )
+    decoy.when(
+        state_view.modules.convert_absorbance_reader_data_points([1.2, 1.3])
+    ).then_return({"A1": 1.2})
+
     result = await subject.execute(params=params)
 
-    decoy.verify(
-        await absorbance_module_hw.start_measure(),
-        times=1,
-    )
     assert result == SuccessData(
-        public=ReadAbsorbanceResult(),
+        public=ReadAbsorbanceResult(
+            data=asbsorbance_result,
+            fileIds=[],
+        ),
         state_update=update_types.StateUpdate(
+            files_added=update_types.FilesAddedUpdate(file_ids=[]),
             module_state_update=update_types.ModuleStateUpdate(
                 module_id="unverified-module-id",
                 module_type="absorbanceReaderType",
-                absorbance_reader_data=update_types.AbsorbanceReaderDataUpdate(),
-            )
+                absorbance_reader_data=update_types.AbsorbanceReaderDataUpdate(
+                    read_result=asbsorbance_result
+                ),
+            ),
         ),
     )
