@@ -1,8 +1,9 @@
 """Verify tip presence command request, result and implementation models."""
 from __future__ import annotations
+from typing import TYPE_CHECKING, Optional, Type, Any
 
 from pydantic import Field, BaseModel
-from typing import TYPE_CHECKING, Optional, Type
+from pydantic.json_schema import SkipJsonSchema
 from typing_extensions import Literal
 
 from .pipetting_common import PipetteIdMixin
@@ -18,14 +19,20 @@ if TYPE_CHECKING:
 VerifyTipPresenceCommandType = Literal["verifyTipPresence"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 class VerifyTipPresenceParams(PipetteIdMixin):
     """Payload required for a VerifyTipPresence command."""
 
     expectedState: TipPresenceStatus = Field(
         ..., description="The expected tip presence status on the pipette."
     )
-    followSingularSensor: Optional[InstrumentSensorId] = Field(
-        default=None, description="The sensor id to follow if the other can be ignored."
+    followSingularSensor: InstrumentSensorId | SkipJsonSchema[None] = Field(
+        default=None,
+        description="The sensor id to follow if the other can be ignored.",
+        json_schema_extra=_remove_default,
     )
 
 
@@ -36,9 +43,7 @@ class VerifyTipPresenceResult(BaseModel):
 
 
 class VerifyTipPresenceImplementation(
-    AbstractCommandImpl[
-        VerifyTipPresenceParams, SuccessData[VerifyTipPresenceResult, None]
-    ]
+    AbstractCommandImpl[VerifyTipPresenceParams, SuccessData[VerifyTipPresenceResult]]
 ):
     """VerifyTipPresence command implementation."""
 
@@ -51,7 +56,7 @@ class VerifyTipPresenceImplementation(
 
     async def execute(
         self, params: VerifyTipPresenceParams
-    ) -> SuccessData[VerifyTipPresenceResult, None]:
+    ) -> SuccessData[VerifyTipPresenceResult]:
         """Verify if tip presence is as expected for the requested pipette."""
         pipette_id = params.pipetteId
         expected_state = params.expectedState
@@ -67,7 +72,9 @@ class VerifyTipPresenceImplementation(
             follow_singular_sensor=follow_singular_sensor,
         )
 
-        return SuccessData(public=VerifyTipPresenceResult(), private=None)
+        return SuccessData(
+            public=VerifyTipPresenceResult(),
+        )
 
 
 class VerifyTipPresence(
@@ -77,7 +84,7 @@ class VerifyTipPresence(
 
     commandType: VerifyTipPresenceCommandType = "verifyTipPresence"
     params: VerifyTipPresenceParams
-    result: Optional[VerifyTipPresenceResult]
+    result: Optional[VerifyTipPresenceResult] = None
 
     _ImplementationCls: Type[
         VerifyTipPresenceImplementation

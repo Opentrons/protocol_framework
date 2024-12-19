@@ -1,19 +1,25 @@
 """Configure for volume command request, result, and implementation models."""
 from __future__ import annotations
+from typing import TYPE_CHECKING, Optional, Type, Any
+
 from pydantic import BaseModel, Field
-from typing import TYPE_CHECKING, Optional, Type
+from pydantic.json_schema import SkipJsonSchema
 from typing_extensions import Literal
 
 from .pipetting_common import PipetteIdMixin
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ..errors.error_occurrence import ErrorOccurrence
-from .configuring_common import PipetteConfigUpdateResultMixin
+from ..state.update_types import StateUpdate
 
 if TYPE_CHECKING:
     from ..execution import EquipmentHandler
 
 
 ConfigureForVolumeCommandType = Literal["configureForVolume"]
+
+
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
 
 
 class ConfigureForVolumeParams(PipetteIdMixin):
@@ -25,19 +31,14 @@ class ConfigureForVolumeParams(PipetteIdMixin):
         "than a pipette-specific maximum volume.",
         ge=0,
     )
-    tipOverlapNotAfterVersion: Optional[str] = Field(
+    tipOverlapNotAfterVersion: str | SkipJsonSchema[None] = Field(
         None,
         description="A version of tip overlap data to not exceed. The highest-versioned "
         "tip overlap data that does not exceed this version will be used. Versions are "
         "expressed as vN where N is an integer, counting up from v0. If None, the current "
         "highest version will be used.",
+        json_schema_extra=_remove_default,
     )
-
-
-class ConfigureForVolumePrivateResult(PipetteConfigUpdateResultMixin):
-    """Result sent to the store but not serialized."""
-
-    pass
 
 
 class ConfigureForVolumeResult(BaseModel):
@@ -49,7 +50,7 @@ class ConfigureForVolumeResult(BaseModel):
 class ConfigureForVolumeImplementation(
     AbstractCommandImpl[
         ConfigureForVolumeParams,
-        SuccessData[ConfigureForVolumeResult, ConfigureForVolumePrivateResult],
+        SuccessData[ConfigureForVolumeResult],
     ]
 ):
     """Configure for volume command implementation."""
@@ -59,7 +60,7 @@ class ConfigureForVolumeImplementation(
 
     async def execute(
         self, params: ConfigureForVolumeParams
-    ) -> SuccessData[ConfigureForVolumeResult, ConfigureForVolumePrivateResult]:
+    ) -> SuccessData[ConfigureForVolumeResult]:
         """Check that requested pipette can be configured for the given volume."""
         pipette_result = await self._equipment.configure_for_volume(
             pipette_id=params.pipetteId,
@@ -67,13 +68,16 @@ class ConfigureForVolumeImplementation(
             tip_overlap_version=params.tipOverlapNotAfterVersion,
         )
 
+        state_update = StateUpdate()
+        state_update.update_pipette_config(
+            pipette_id=pipette_result.pipette_id,
+            config=pipette_result.static_config,
+            serial_number=pipette_result.serial_number,
+        )
+
         return SuccessData(
             public=ConfigureForVolumeResult(),
-            private=ConfigureForVolumePrivateResult(
-                pipette_id=pipette_result.pipette_id,
-                serial_number=pipette_result.serial_number,
-                config=pipette_result.static_config,
-            ),
+            state_update=state_update,
         )
 
 
@@ -84,7 +88,7 @@ class ConfigureForVolume(
 
     commandType: ConfigureForVolumeCommandType = "configureForVolume"
     params: ConfigureForVolumeParams
-    result: Optional[ConfigureForVolumeResult]
+    result: Optional[ConfigureForVolumeResult] = None
 
     _ImplementationCls: Type[
         ConfigureForVolumeImplementation

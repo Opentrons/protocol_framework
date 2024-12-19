@@ -1,17 +1,25 @@
-import * as React from 'react'
-import { Route, Navigate, Routes, useLocation } from 'react-router-dom'
+import { Route, Navigate, Routes, useNavigate } from 'react-router-dom'
+import { ErrorBoundary } from 'react-error-boundary'
 import { Box } from '@opentrons/components'
-import { Landing } from './pages/Landing'
-import { ProtocolOverview } from './pages/ProtocolOverview'
-import { Liquids } from './pages/Liquids'
-import { StartingDeckState } from './pages/StartingDeckState'
-import { ProtocolSteps } from './pages/ProtocolSteps'
-import { CreateNewProtocol } from './pages/CreateNewProtocol'
-import { Navbar } from './Navbar'
+import {
+  CreateNewProtocolWizard,
+  Designer,
+  Landing,
+  Liquids,
+  ProtocolOverview,
+  Settings,
+} from './pages'
+import {
+  FileUploadMessagesModal,
+  GateModal,
+  Kitchen,
+  LabwareUploadModal,
+  Navigation,
+} from './organisms'
+import { ProtocolDesignerAppFallback } from './resources/ProtocolDesignerAppFallback'
 
 import type { RouteProps } from './types'
 
-const LANDING_ROUTE = '/'
 const pdRoutes: RouteProps[] = [
   {
     Component: ProtocolOverview,
@@ -26,28 +34,26 @@ const pdRoutes: RouteProps[] = [
     path: '/liquids',
   },
   {
-    Component: StartingDeckState,
-    name: 'Starting deck state',
-    navLinkTo: '/startingDeckState',
-    path: '/startingDeckState',
+    Component: Designer,
+    name: 'Edit protocol',
+    navLinkTo: '/designer',
+    path: '/designer',
   },
   {
-    Component: ProtocolSteps,
-    name: 'Protocol steps',
-    navLinkTo: '/steps',
-    path: '/steps',
-  },
-  {
-    Component: CreateNewProtocol,
+    Component: CreateNewProtocolWizard,
     name: 'Create new protocol',
     navLinkTo: '/createNew',
     path: '/createNew',
   },
+  {
+    Component: Settings,
+    name: 'Settings',
+    navLinkTo: '/settings',
+    path: '/settings',
+  },
 ]
 
 export function ProtocolRoutes(): JSX.Element {
-  const location = useLocation()
-  const currentPath = location.pathname
   const landingPage: RouteProps = {
     Component: Landing,
     name: 'Landing',
@@ -55,18 +61,33 @@ export function ProtocolRoutes(): JSX.Element {
     path: '/',
   }
   const allRoutes: RouteProps[] = [...pdRoutes, landingPage]
+  const showGateModal =
+    process.env.NODE_ENV === 'production' || process.env.OT_PD_SHOW_GATE
+
+  const navigate = useNavigate()
+  const handleReset = (): void => {
+    navigate('/', { replace: true })
+  }
 
   return (
-    <>
-      {currentPath === LANDING_ROUTE ? null : <Navbar routes={pdRoutes} />}
-      <Box width="100%">
-        <Routes>
-          {allRoutes.map(({ Component, path }: RouteProps) => {
-            return <Route key={path} path={path} element={<Component />} />
-          })}
-          <Route path="*" element={<Navigate to={LANDING_ROUTE} />} />
-        </Routes>
-      </Box>
-    </>
+    <ErrorBoundary
+      FallbackComponent={ProtocolDesignerAppFallback}
+      onReset={handleReset}
+    >
+      <Navigation />
+      <Kitchen>
+        <Box width="100%">
+          {showGateModal ? <GateModal /> : null}
+          <LabwareUploadModal />
+          <FileUploadMessagesModal />
+          <Routes>
+            {allRoutes.map(({ Component, path }: RouteProps) => {
+              return <Route key={path} path={path} element={<Component />} />
+            })}
+            <Route path="*" element={<Navigate to={landingPage.path} />} />
+          </Routes>
+        </Box>
+      </Kitchen>
+    </ErrorBoundary>
   )
 }

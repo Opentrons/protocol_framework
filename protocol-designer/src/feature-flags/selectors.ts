@@ -29,14 +29,6 @@ export const getEnableAbsorbanceReader: Selector<boolean> = createSelector(
   getFeatureFlagData,
   flags => flags.OT_PD_ENABLE_ABSORBANCE_READER ?? false
 )
-export const getEnableRedesign: Selector<boolean> = createSelector(
-  getFeatureFlagData,
-  flags => flags.OT_PD_ENABLE_REDESIGN ?? false
-)
-export const getEnableMoam: Selector<boolean> = createSelector(
-  getFeatureFlagData,
-  flags => flags.OT_PD_ENABLE_MOAM ?? false
-)
 export const getEnableComment: Selector<boolean> = createSelector(
   getFeatureFlagData,
   flags => flags.OT_PD_ENABLE_COMMENT ?? false
@@ -44,4 +36,16 @@ export const getEnableComment: Selector<boolean> = createSelector(
 export const getEnableReturnTip: Selector<boolean> = createSelector(
   getFeatureFlagData,
   flags => flags.OT_PD_ENABLE_RETURN_TIP ?? false
+)
+export const getEnableHotKeysDisplay: Selector<boolean> = createSelector(
+  getFeatureFlagData,
+  flags => flags.OT_PD_ENABLE_HOT_KEYS_DISPLAY ?? false
+)
+export const getEnableReactScan: Selector<boolean> = createSelector(
+  getFeatureFlagData,
+  flags => flags.OT_PD_ENABLE_REACT_SCAN ?? false
+)
+export const getEnableLiquidClasses: Selector<boolean> = createSelector(
+  getFeatureFlagData,
+  flags => flags.OT_PD_ENABLE_LIQUID_CLASSES ?? false
 )

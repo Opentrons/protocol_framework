@@ -14,7 +14,7 @@ from opentrons.protocol_engine.commands.calibration.move_to_maintenance_position
 )
 from opentrons.protocol_engine.commands.command import SuccessData
 
-from opentrons.protocol_engine.state import StateView
+from opentrons.protocol_engine.state.state import StateView
 from opentrons.types import MountType, Mount, Point
 from opentrons.hardware_control.types import Axis, CriticalPoint
 
@@ -56,7 +56,9 @@ async def test_calibration_move_to_location_implementation_for_attach_instrument
     decoy.when(ot3_hardware_api.get_instrument_max_height(Mount.LEFT)).then_return(300)
 
     result = await subject.execute(params=params)
-    assert result == SuccessData(public=MoveToMaintenancePositionResult(), private=None)
+    assert result == SuccessData(
+        public=MoveToMaintenancePositionResult(),
+    )
 
     hw_mount = mount_type.to_hw_mount()
     decoy.verify(
@@ -100,7 +102,9 @@ async def test_calibration_move_to_location_implementation_for_attach_plate(
     decoy.when(ot3_hardware_api.get_instrument_max_height(Mount.LEFT)).then_return(300)
 
     result = await subject.execute(params=params)
-    assert result == SuccessData(public=MoveToMaintenancePositionResult(), private=None)
+    assert result == SuccessData(
+        public=MoveToMaintenancePositionResult(),
+    )
 
     decoy.verify(
         await ot3_hardware_api.prepare_for_mount_movement(Mount.LEFT),
@@ -150,7 +154,9 @@ async def test_calibration_move_to_location_implementation_for_gripper(
     decoy.when(ot3_hardware_api.get_instrument_max_height(Mount.LEFT)).then_return(300)
 
     result = await subject.execute(params=params)
-    assert result == SuccessData(public=MoveToMaintenancePositionResult(), private=None)
+    assert result == SuccessData(
+        public=MoveToMaintenancePositionResult(),
+    )
 
     decoy.verify(
         await ot3_hardware_api.prepare_for_mount_movement(Mount.LEFT),

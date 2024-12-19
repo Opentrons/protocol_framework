@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, screen, waitFor, renderHook } from '@testing-library/react'
@@ -12,10 +12,10 @@ import {
   RUN_STATUS_AWAITING_RECOVERY_PAUSED,
 } from '@opentrons/api-client'
 
-import { renderWithProviders } from '../../../__testing-utils__'
-import { i18n } from '../../../i18n'
+import { renderWithProviders } from '/app/__testing-utils__'
+import { i18n } from '/app/i18n'
 import { mockRecoveryContentProps } from '../__fixtures__'
-import { getIsOnDevice } from '../../../redux/config'
+import { getIsOnDevice } from '/app/redux/config'
 import { useRecoverySplash, RecoverySplash } from '../RecoverySplash'
 import { StepInfo } from '../shared'
 import { useToaster } from '../../ToasterOven'
@@ -23,7 +23,7 @@ import { clickButtonLabeled } from './util'
 
 import type { Store } from 'redux'
 
-vi.mock('../../../redux/config')
+vi.mock('/app/redux/config')
 vi.mock('../shared')
 vi.mock('../../ToasterOven')
 
@@ -80,11 +80,14 @@ describe('RecoverySplash', () => {
   let props: React.ComponentProps<typeof RecoverySplash>
   const mockToggleERWiz = vi.fn(() => Promise.resolve())
   const mockProceedToRouteAndStep = vi.fn()
+  const mockHandleMotionRouting = vi.fn(() => Promise.resolve())
   const mockRouteUpdateActions = {
     proceedToRouteAndStep: mockProceedToRouteAndStep,
+    handleMotionRouting: mockHandleMotionRouting,
   } as any
   const mockMakeToast = vi.fn()
   const mockResumeRecovery = vi.fn()
+  const mockHomePipetteZAxes = vi.fn(() => Promise.resolve())
 
   beforeEach(() => {
     props = {
@@ -96,6 +99,7 @@ describe('RecoverySplash', () => {
         resumeRecovery: mockResumeRecovery,
       } as any,
       resumePausedRecovery: true,
+      recoveryCommands: { homePipetteZAxes: mockHomePipetteZAxes } as any,
     }
 
     vi.mocked(StepInfo).mockReturnValue(<div>MOCK STEP INFO</div>)
@@ -132,7 +136,7 @@ describe('RecoverySplash', () => {
     render(props)
 
     const primaryBtn = screen.getByRole('button', {
-      name: 'Launch Recovery Mode',
+      name: 'Launch recovery mode',
     })
     const secondaryBtn = screen.getByRole('button', { name: 'Cancel run' })
 
@@ -162,6 +166,13 @@ describe('RecoverySplash', () => {
     await waitFor(() => {
       expect(mockToggleERWiz).toHaveBeenCalledWith(true, true)
     })
+
+    expect(mockHandleMotionRouting).toHaveBeenNthCalledWith(1, true)
+    expect(mockHandleMotionRouting).toHaveBeenNthCalledWith(2, false)
+
+    await waitFor(() => {
+      expect(props.recoveryCommands.homePipetteZAxes).toHaveBeenCalled()
+    })
   })
 
   it('should render a door open toast if the door is open', () => {
@@ -172,7 +183,7 @@ describe('RecoverySplash', () => {
 
     render(props)
 
-    clickButtonLabeled('Launch Recovery Mode')
+    clickButtonLabeled('Launch recovery mode')
 
     expect(mockMakeToast).toHaveBeenCalled()
   })

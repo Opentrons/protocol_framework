@@ -1,13 +1,13 @@
-import logging
-from typing import Any, Optional
-
 import jwt
+import structlog
 from fastapi import HTTPException, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, SecurityScopes
 
+from api.models.user import User
 from api.settings import Settings
 
-logger = logging.getLogger(__name__)
+settings: Settings = Settings()
+logger = structlog.stdlib.get_logger(settings.logger_name)
 
 
 class UnauthenticatedException(HTTPException):
@@ -27,18 +27,18 @@ class VerifyToken:
         self.jwks_client = jwt.PyJWKClient(jwks_url)
 
     async def verify(
-        self, security_scopes: SecurityScopes, credentials: Optional[HTTPAuthorizationCredentials] = Security(HTTPBearer())  # noqa: B008
-    ) -> Any:
+        self, security_scopes: SecurityScopes, credentials: HTTPAuthorizationCredentials = Security(HTTPBearer())  # noqa: B008
+    ) -> User:
         if credentials is None:
             raise UnauthenticatedException()
 
         try:
             signing_key = self.jwks_client.get_signing_key_from_jwt(credentials.credentials).key
         except jwt.PyJWKClientError as error:
-            logger.error(error, extra={"credentials": credentials})
+            logger.error("Client Error", extra={"credentials": credentials}, exc_info=True)
             raise UnauthenticatedException() from error
         except jwt.exceptions.DecodeError as error:
-            logger.error(error, extra={"credentials": credentials})
+            logger.error("Decode Error", extra={"credentials": credentials}, exc_info=True)
             raise UnauthenticatedException() from error
 
         try:
@@ -49,12 +49,13 @@ class VerifyToken:
                 audience=self.config.auth0_api_audience,
                 issuer=self.config.auth0_issuer,
             )
-            logger.info("Decoded token", extra={"token": payload})
-            return payload
-        except jwt.ExpiredSignatureError as error:
-            logger.error(error, extra={"credentials": credentials})
+            user = User(**payload)
+            logger.info("User object", extra={"user": user})
+            return user
+        except jwt.ExpiredSignatureError:
+            logger.error("Expired Signature", extra={"credentials": credentials}, exc_info=True)
             # Handle token expiration, e.g., refresh token, re-authenticate, etc.
-        except jwt.PyJWTError as error:
-            logger.error(error, extra={"credentials": credentials})
+        except jwt.PyJWTError:
+            logger.error("General JWT Error", extra={"credentials": credentials}, exc_info=True)
             # Handle other JWT errors
         raise UnauthenticatedException()

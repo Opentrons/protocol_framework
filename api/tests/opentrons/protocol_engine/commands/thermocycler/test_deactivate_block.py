@@ -3,7 +3,7 @@ from decoy import Decoy
 
 from opentrons.hardware_control.modules import Thermocycler
 
-from opentrons.protocol_engine.state import StateView
+from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.state.module_substates import (
     ThermocyclerModuleSubState,
     ThermocyclerModuleId,
@@ -45,4 +45,4 @@ async def test_deactivate_block(
     result = await subject.execute(data)
 
     decoy.verify(await tc_hardware.deactivate_block(), times=1)
-    assert result == SuccessData(public=expected_result, private=None)
+    assert result == SuccessData(public=expected_result)

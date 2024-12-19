@@ -1,5 +1,6 @@
 import type { LogLevel } from '../../logger'
-import type { ProtocolSort } from '../../organisms/ProtocolsLanding/hooks'
+import type { Language } from '/app/i18n'
+import type { ProtocolSort } from '/app/redux/protocol-storage'
 
 export type UrlProtocol = 'file:' | 'http:'
 
@@ -11,8 +12,11 @@ export type DevInternalFlag =
   | 'forceHttpPolling'
   | 'protocolStats'
   | 'enableRunNotes'
+  | 'lpcRedesign'
   | 'protocolTimeline'
   | 'enableLabwareCreator'
+  | 'reactQueryDevtools'
+  | 'reactScan'
 
 export type FeatureFlags = Partial<Record<DevInternalFlag, boolean | undefined>>
 
@@ -273,4 +277,12 @@ export type ConfigV24 = Omit<ConfigV23, 'version' | 'support'> & {
   }
 }
 
-export type Config = ConfigV24
+export type ConfigV25 = Omit<ConfigV24, 'version'> & {
+  version: 25
+  language: {
+    appLanguage: Language | null
+    systemLanguage: string | null
+  }
+}
+
+export type Config = ConfigV25

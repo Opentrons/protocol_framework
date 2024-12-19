@@ -1,7 +1,7 @@
 """Pipetting execution handler."""
+
 import pytest
-from decoy import Decoy
-from mock import AsyncMock, patch
+from decoy import Decoy, matchers
 
 from typing import Dict, ContextManager, Optional, OrderedDict
 from contextlib import nullcontext as does_not_raise
@@ -12,7 +12,7 @@ from opentrons.hardware_control.types import TipStateType
 from opentrons.hardware_control.protocols.types import OT2RobotType, FlexRobotType
 
 from opentrons.protocols.models import LabwareDefinition
-from opentrons.protocol_engine.state import StateView
+from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.types import TipGeometry, TipPresenceStatus
 from opentrons.protocol_engine.resources import LabwareDataProvider
 from opentrons.protocol_engine.errors.exceptions import TipNotAttachedError
@@ -52,7 +52,7 @@ def mock_labware_data_provider(decoy: Decoy) -> LabwareDataProvider:
 @pytest.fixture
 def tip_rack_definition() -> LabwareDefinition:
     """Get a tip rack defintion value object."""
-    return LabwareDefinition.construct(namespace="test", version=42)  # type: ignore[call-arg]
+    return LabwareDefinition.model_construct(namespace="test", version=42)  # type: ignore[call-arg]
 
 
 MOCK_MAP = NozzleMap.build(
@@ -91,7 +91,6 @@ async def test_create_tip_handler(
     )
 
 
-@pytest.mark.ot3_only
 @pytest.mark.parametrize("tip_state", [TipStateType.PRESENT, TipStateType.ABSENT])
 async def test_flex_pick_up_tip_state(
     decoy: Decoy,
@@ -99,25 +98,26 @@ async def test_flex_pick_up_tip_state(
     mock_labware_data_provider: LabwareDataProvider,
     tip_rack_definition: LabwareDefinition,
     tip_state: TipStateType,
+    mock_hardware_api: HardwareAPI,
 ) -> None:
     """Test the protocol engine's pick_up_tip logic."""
-    from opentrons.hardware_control.ot3api import OT3API
-
-    ot3_hardware_api = decoy.mock(cls=OT3API)
-    decoy.when(ot3_hardware_api.get_robot_type()).then_return(FlexRobotType)
-
     subject = HardwareTipHandler(
         state_view=mock_state_view,
-        hardware_api=ot3_hardware_api,
+        hardware_api=mock_hardware_api,
         labware_data_provider=mock_labware_data_provider,
     )
-    decoy.when(subject._state_view.config.robot_type).then_return("OT-3 Standard")
     decoy.when(mock_state_view.pipettes.get_mount("pipette-id")).then_return(
         MountType.LEFT
     )
-    decoy.when(mock_state_view.pipettes.state.nozzle_configuration_by_id).then_return(
-        {"pipette-id": MOCK_MAP}
+    decoy.when(mock_state_view.pipettes.get_serial_number("pipette-id")).then_return(
+        "pipette-serial"
     )
+    decoy.when(mock_state_view.labware.get_definition("labware-id")).then_return(
+        tip_rack_definition
+    )
+    decoy.when(
+        mock_state_view.pipettes.get_nozzle_configuration("pipette-id")
+    ).then_return(MOCK_MAP)
     decoy.when(
         mock_state_view.geometry.get_nominal_tip_geometry(
             pipette_id="pipette-id",
@@ -134,31 +134,34 @@ async def test_flex_pick_up_tip_state(
         )
     ).then_return(42)
 
-    with patch.object(
-        ot3_hardware_api, "cache_tip", AsyncMock(spec=ot3_hardware_api.cache_tip)
-    ) as mock_add_tip:
-
-        if tip_state == TipStateType.PRESENT:
+    if tip_state == TipStateType.PRESENT:
+        await subject.pick_up_tip(
+            pipette_id="pipette-id",
+            labware_id="labware-id",
+            well_name="B2",
+        )
+        decoy.verify(mock_hardware_api.cache_tip(Mount.LEFT, 42), times=1)
+    else:
+        decoy.when(
+            await subject.verify_tip_presence(
+                pipette_id="pipette-id", expected=TipPresenceStatus.PRESENT
+            )
+        ).then_raise(TipNotAttachedError())
+        # if a TipNotAttchedError is caught, we should not add any tip information
+        with pytest.raises(TipNotAttachedError):
             await subject.pick_up_tip(
                 pipette_id="pipette-id",
                 labware_id="labware-id",
                 well_name="B2",
             )
-            mock_add_tip.assert_called_once()
-        else:
-            decoy.when(
-                await subject.verify_tip_presence(
-                    pipette_id="pipette-id", expected=TipPresenceStatus.PRESENT
-                )
-            ).then_raise(TipNotAttachedError())
-            # if a TipNotAttchedError is caught, we should not add any tip information
-            with pytest.raises(TipNotAttachedError):
-                await subject.pick_up_tip(
-                    pipette_id="pipette-id",
-                    labware_id="labware-id",
-                    well_name="B2",
-                )
-            mock_add_tip.assert_not_called()
+        decoy.verify(
+            mock_hardware_api.cache_tip(
+                mount=matchers.Anything(),
+                tip_length=matchers.Anything(),
+            ),
+            ignore_extra_args=True,
+            times=0,
+        )
 
 
 async def test_pick_up_tip(
@@ -187,9 +190,9 @@ async def test_pick_up_tip(
         MountType.LEFT
     )
 
-    decoy.when(mock_state_view.pipettes.state.nozzle_configuration_by_id).then_return(
-        {"pipette-id": MOCK_MAP}
-    )
+    decoy.when(
+        mock_state_view.pipettes.get_nozzle_configuration(pipette_id="pipette-id")
+    ).then_return(MOCK_MAP)
 
     decoy.when(
         mock_state_view.geometry.get_nominal_tip_geometry(
@@ -229,6 +232,8 @@ async def test_pick_up_tip(
     )
 
 
+# todo(mm, 2024-10-17): Test that when verify_tip_presence raises,
+# the hardware API state is NOT updated.
 async def test_drop_tip(
     decoy: Decoy,
     mock_state_view: StateView,
@@ -245,19 +250,24 @@ async def test_drop_tip(
     decoy.when(mock_state_view.pipettes.get_mount("pipette-id")).then_return(
         MountType.RIGHT
     )
-    decoy.when(mock_state_view.pipettes.state.nozzle_configuration_by_id).then_return(
-        {"pipette-id": MOCK_MAP}
-    )
+    decoy.when(
+        mock_state_view.pipettes.get_nozzle_configuration("pipette-id")
+    ).then_return(MOCK_MAP)
 
     await subject.drop_tip(pipette_id="pipette-id", home_after=True)
 
     decoy.verify(
-        await mock_hardware_api.drop_tip(mount=Mount.RIGHT, home_after=True),
-        times=1,
+        await mock_hardware_api.tip_drop_moves(mount=Mount.RIGHT, home_after=True)
+    )
+    decoy.verify(mock_hardware_api.remove_tip(mount=Mount.RIGHT))
+    decoy.verify(
+        mock_hardware_api.set_current_tiprack_diameter(
+            mount=Mount.RIGHT, tiprack_diameter=0
+        )
     )
 
 
-async def test_add_tip(
+def test_add_tip(
     decoy: Decoy,
     mock_state_view: StateView,
     mock_hardware_api: HardwareAPI,
@@ -280,15 +290,40 @@ async def test_add_tip(
         MountType.LEFT
     )
 
-    await subject.add_tip(pipette_id="pipette-id", tip=tip)
+    subject.cache_tip(pipette_id="pipette-id", tip=tip)
 
     decoy.verify(
-        await mock_hardware_api.add_tip(mount=Mount.LEFT, tip_length=50),
+        mock_hardware_api.cache_tip(mount=Mount.LEFT, tip_length=50),
         mock_hardware_api.set_current_tiprack_diameter(
             mount=Mount.LEFT,
             tiprack_diameter=5,
         ),
         mock_hardware_api.set_working_volume(mount=Mount.LEFT, tip_volume=300),
+    )
+
+
+def test_remove_tip(
+    decoy: Decoy,
+    mock_state_view: StateView,
+    mock_hardware_api: HardwareAPI,
+    mock_labware_data_provider: LabwareDataProvider,
+) -> None:
+    """It should remove a tip manually from the hardware API."""
+    subject = HardwareTipHandler(
+        state_view=mock_state_view,
+        hardware_api=mock_hardware_api,
+        labware_data_provider=mock_labware_data_provider,
+    )
+
+    decoy.when(mock_state_view.pipettes.get_mount("pipette-id")).then_return(
+        MountType.LEFT
+    )
+
+    subject.remove_tip(pipette_id="pipette-id")
+
+    decoy.verify(
+        mock_hardware_api.remove_tip(Mount.LEFT),
+        mock_hardware_api.set_current_tiprack_diameter(Mount.LEFT, 0),
     )
 
 
@@ -524,8 +559,8 @@ async def test_verify_tip_presence_on_ot3(
         )
 
         decoy.when(
-            mock_state_view.pipettes.state.nozzle_configuration_by_id
-        ).then_return({"pipette-id": MOCK_MAP})
+            mock_state_view.pipettes.get_nozzle_configuration("pipette-id")
+        ).then_return(MOCK_MAP)
 
         await subject.verify_tip_presence("pipette-id", expected, None)
 

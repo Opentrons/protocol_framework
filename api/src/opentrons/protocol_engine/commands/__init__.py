@@ -20,6 +20,7 @@ from . import temperature_module
 from . import thermocycler
 from . import calibration
 from . import unsafe
+from . import robot
 
 from .hash_command_params import hash_protocol_command_params
 from .generate_command_schema import generate_command_schema
@@ -34,12 +35,21 @@ from .command import (
 
 from .command_unions import (
     Command,
+    CommandAdapter,
     CommandParams,
     CommandCreate,
+    CommandCreateAdapter,
     CommandResult,
     CommandType,
-    CommandPrivateResult,
     CommandDefinedErrorData,
+)
+
+from .air_gap_in_place import (
+    AirGapInPlace,
+    AirGapInPlaceParams,
+    AirGapInPlaceCreate,
+    AirGapInPlaceResult,
+    AirGapInPlaceCommandType,
 )
 
 from .aspirate import (
@@ -139,6 +149,15 @@ from .load_liquid import (
     LoadLiquidImplementation,
 )
 
+from .load_liquid_class import (
+    LoadLiquidClass,
+    LoadLiquidClassParams,
+    LoadLiquidClassCreate,
+    LoadLiquidClassResult,
+    LoadLiquidClassCommandType,
+    LoadLiquidClassImplementation,
+)
+
 from .load_module import (
     LoadModule,
     LoadModuleParams,
@@ -153,7 +172,6 @@ from .load_pipette import (
     LoadPipetteCreate,
     LoadPipetteResult,
     LoadPipetteCommandType,
-    LoadPipettePrivateResult,
 )
 
 from .move_labware import (
@@ -306,7 +324,6 @@ from .configure_nozzle_layout import (
     ConfigureNozzleLayoutCreate,
     ConfigureNozzleLayoutParams,
     ConfigureNozzleLayoutResult,
-    ConfigureNozzleLayoutPrivateResult,
     ConfigureNozzleLayoutCommandType,
 )
 
@@ -326,6 +343,14 @@ from .verify_tip_presence import (
     VerifyTipPresenceCommandType,
 )
 
+from .get_next_tip import (
+    GetNextTip,
+    GetNextTipCreate,
+    GetNextTipParams,
+    GetNextTipResult,
+    GetNextTipCommandType,
+)
+
 from .liquid_probe import (
     LiquidProbe,
     LiquidProbeParams,
@@ -342,8 +367,10 @@ from .liquid_probe import (
 __all__ = [
     # command type unions
     "Command",
+    "CommandAdapter",
     "CommandParams",
     "CommandCreate",
+    "CommandCreateAdapter",
     "CommandResult",
     "CommandType",
     "CommandPrivateResult",
@@ -358,6 +385,12 @@ __all__ = [
     "hash_protocol_command_params",
     # command schema generation
     "generate_command_schema",
+    # air gap command models
+    "AirGapInPlace",
+    "AirGapInPlaceCreate",
+    "AirGapInPlaceParams",
+    "AirGapInPlaceResult",
+    "AirGapInPlaceCommandType",
     # aspirate command models
     "Aspirate",
     "AspirateCreate",
@@ -541,6 +574,14 @@ __all__ = [
     "LoadLiquidParams",
     "LoadLiquidResult",
     "LoadLiquidCommandType",
+    # load liquid class command models
+    "LoadLiquidClass",
+    "LoadLiquidClassParams",
+    "LoadLiquidClassCreate",
+    "LoadLiquidClassResult",
+    "LoadLiquidClassImplementation",
+    "LoadLiquidClassCommandType",
+    # hardware control command models
     # hardware module command bundles
     "absorbance_reader",
     "heater_shaker",
@@ -551,6 +592,7 @@ __all__ = [
     "calibration",
     # unsafe command bundle
     "unsafe",
+    "robot",
     # configure pipette volume command bundle
     "ConfigureForVolume",
     "ConfigureForVolumeCreate",
@@ -569,7 +611,6 @@ __all__ = [
     "ConfigureNozzleLayoutParams",
     "ConfigureNozzleLayoutResult",
     "ConfigureNozzleLayoutCommandType",
-    "ConfigureNozzleLayoutPrivateResult",
     # get pipette tip presence bundle
     "GetTipPresence",
     "GetTipPresenceCreate",
@@ -582,6 +623,12 @@ __all__ = [
     "VerifyTipPresenceParams",
     "VerifyTipPresenceResult",
     "VerifyTipPresenceCommandType",
+    # get next tip command bundle
+    "GetNextTip",
+    "GetNextTipCreate",
+    "GetNextTipParams",
+    "GetNextTipResult",
+    "GetNextTipCommandType",
     # liquid probe command bundle
     "LiquidProbe",
     "LiquidProbeParams",

@@ -1,7 +1,7 @@
-import { getWellRatio } from '../utils'
-import { canPipetteUseLabware } from '../../utils'
+import type * as React from 'react'
+
 import { MAGNETIC_MODULE_V1, MAGNETIC_MODULE_V2 } from '@opentrons/shared-data'
-import { getPipetteCapacity } from '../../pipettes/pipetteData'
+
 import {
   MIN_ENGAGE_HEIGHT_V1,
   MAX_ENGAGE_HEIGHT_V1,
@@ -12,10 +12,14 @@ import {
   PAUSE_UNTIL_TEMP,
   THERMOCYCLER_PROFILE,
 } from '../../constants'
-import type * as React from 'react'
-import type { StepFieldName } from '../../form-types'
-import type { LabwareEntities, PipetteEntity } from '@opentrons/step-generation'
+import { getPipetteCapacity } from '../../pipettes/pipetteData'
+import { canPipetteUseLabware } from '../../utils'
+import { getWellRatio } from '../utils'
+import { getTimeFromForm } from '../utils/getTimeFromForm'
+
 import type { LabwareDefinition2, PipetteV2Specs } from '@opentrons/shared-data'
+import type { LabwareEntities, PipetteEntity } from '@opentrons/step-generation'
+import type { StepFieldName } from '../../form-types'
 /*******************
  ** Error Messages **
  ********************/
@@ -40,21 +44,30 @@ export type FormErrorKey =
   | 'PROFILE_LID_TEMPERATURE_REQUIRED'
   | 'BLOCK_TEMPERATURE_HOLD_REQUIRED'
   | 'LID_TEMPERATURE_HOLD_REQUIRED'
+  | 'PAUSE_TIME_REQUIRED'
+  | 'PAUSE_TEMP_REQUIRED'
+  | 'LABWARE_TO_MOVE_REQUIRED'
+  | 'NEW_LABWARE_LOCATION_REQUIRED'
+
 export interface FormError {
   title: string
   body?: React.ReactNode
   dependentFields: StepFieldName[]
+  showAtField?: boolean
+  showAtForm?: boolean
+  page?: number
+  tab?: 'aspirate' | 'dispense'
 }
 const INCOMPATIBLE_ASPIRATE_LABWARE: FormError = {
-  title: 'Selected aspirate labware is incompatible with selected pipette',
+  title: 'Selected aspirate labware is incompatible with pipette',
   dependentFields: ['aspirate_labware', 'pipette'],
 }
 const INCOMPATIBLE_DISPENSE_LABWARE: FormError = {
-  title: 'Selected dispense labware is incompatible with selected pipette',
+  title: 'Selected dispense labware is incompatible with pipette',
   dependentFields: ['dispense_labware', 'pipette'],
 }
 const INCOMPATIBLE_LABWARE: FormError = {
-  title: 'Selected labware is incompatible with selected pipette',
+  title: 'Selected labware is incompatible with pipette',
   dependentFields: ['labware', 'pipette'],
 }
 const PAUSE_TYPE_REQUIRED: FormError = {
@@ -89,8 +102,10 @@ const MAGNET_ACTION_TYPE_REQUIRED: FormError = {
   dependentFields: ['magnetAction'],
 }
 const ENGAGE_HEIGHT_REQUIRED: FormError = {
-  title: 'Engage height is required',
+  title: 'Engage height required',
   dependentFields: ['magnetAction', 'engageHeight'],
+  showAtForm: false,
+  showAtField: true,
 }
 const ENGAGE_HEIGHT_MIN_EXCEEDED: FormError = {
   title: 'Specified distance is below module minimum',
@@ -106,34 +121,240 @@ const MODULE_ID_REQUIRED: FormError = {
   dependentFields: ['moduleId'],
 }
 const TARGET_TEMPERATURE_REQUIRED: FormError = {
-  title: 'Temperature is required',
+  title: 'Temperature required',
   dependentFields: ['setTemperature', 'targetTemperature'],
+  showAtForm: false,
+  showAtField: true,
 }
 const PROFILE_VOLUME_REQUIRED: FormError = {
-  title: 'Volume is required',
+  title: 'Well volume required',
   dependentFields: ['thermocyclerFormType', 'profileVolume'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
 }
 const PROFILE_LID_TEMPERATURE_REQUIRED: FormError = {
-  title: 'Temperature is required',
+  title: 'Temperature required',
   dependentFields: ['thermocyclerFormType', 'profileTargetLidTemp'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
 }
 const LID_TEMPERATURE_REQUIRED: FormError = {
-  title: 'Temperature is required',
+  title: 'Temperature required',
   dependentFields: ['lidIsActive', 'lidTargetTemp'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
 }
 const BLOCK_TEMPERATURE_REQUIRED: FormError = {
-  title: 'Temperature is required',
+  title: 'Temperature required',
   dependentFields: ['blockIsActive', 'blockTargetTemp'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
 }
 const BLOCK_TEMPERATURE_HOLD_REQUIRED: FormError = {
-  title: 'Temperature is required',
+  title: 'Temperature required',
   dependentFields: ['blockIsActiveHold', 'blockTargetTempHold'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
 }
 const LID_TEMPERATURE_HOLD_REQUIRED: FormError = {
-  title: 'Temperature is required',
+  title: 'Temperature required',
   dependentFields: ['lidIsActiveHold', 'lidTargetTempHold'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
 }
-interface HydratedFormData {
+const SHAKE_SPEED_REQUIRED: FormError = {
+  title: 'Speed required',
+  dependentFields: ['setShake', 'targetSpeed'],
+  showAtForm: false,
+  showAtField: true,
+}
+const SHAKE_TIME_REQUIRED: FormError = {
+  title: 'Duration required',
+  dependentFields: ['heaterShakerSetTimer', 'heaterShakerTimer'],
+  showAtForm: false,
+  showAtField: true,
+}
+const PAUSE_ACTION_REQUIRED: FormError = {
+  title: 'Pause type required',
+  dependentFields: [],
+  showAtForm: false,
+  showAtField: true,
+}
+const PAUSE_MODULE_REQUIRED: FormError = {
+  title: 'Select a module',
+  dependentFields: ['moduleId', 'pauseAction'],
+  showAtForm: false,
+  showAtField: true,
+}
+const PAUSE_TEMP_REQUIRED: FormError = {
+  title: 'Pause temperature required',
+  dependentFields: ['pauseTemperature', 'pauseAction'],
+  showAtForm: false,
+  showAtField: true,
+}
+const PAUSE_TIME_REQUIRED: FormError = {
+  title: 'Pause duration required',
+  dependentFields: ['pauseTime', 'pauseAction'],
+  showAtForm: false,
+  showAtField: true,
+}
+const HS_TEMPERATURE_REQUIRED: FormError = {
+  title: 'Temperature required',
+  dependentFields: [
+    'targetHeaterShakerTemperature',
+    'setHeaterShakerTemperature',
+  ],
+  showAtForm: false,
+  showAtField: true,
+}
+const LABWARE_TO_MOVE_REQUIRED: FormError = {
+  title: 'Labware required',
+  dependentFields: ['labware'],
+  showAtForm: false,
+  showAtField: true,
+}
+const NEW_LABWARE_LOCATION_REQUIRED: FormError = {
+  title: 'New location required',
+  dependentFields: ['newLocation'],
+  showAtForm: false,
+  showAtField: true,
+}
+const ASPIRATE_WELLS_REQUIRED: FormError = {
+  title: 'Choose wells',
+  dependentFields: ['aspirate_wells'],
+  showAtForm: false,
+  showAtField: true,
+  page: 0,
+}
+const DISPENSE_WELLS_REQUIRED: FormError = {
+  title: 'Choose wells',
+  dependentFields: ['dispense_wells'],
+  showAtForm: false,
+  showAtField: true,
+  page: 0,
+}
+const MIX_WELLS_REQUIRED: FormError = {
+  title: 'Choose wells',
+  dependentFields: ['wells'],
+  showAtForm: false,
+  showAtField: true,
+  page: 0,
+}
+const VOLUME_REQUIRED: FormError = {
+  title: 'Volume required',
+  dependentFields: ['volume'],
+  showAtForm: false,
+  showAtField: true,
+  page: 0,
+}
+const TIMES_REQUIRED: FormError = {
+  title: 'Repetitions required',
+  dependentFields: ['times'],
+  showAtForm: false,
+  showAtField: true,
+  page: 0,
+}
+const ASPIRATE_LABWARE_REQUIRED: FormError = {
+  title: 'Labware required',
+  dependentFields: ['aspirate_labware'],
+  showAtForm: false,
+  showAtField: true,
+  page: 0,
+}
+const DISPENSE_LABWARE_REQUIRED: FormError = {
+  title: 'Labware required',
+  dependentFields: ['dispense_labware'],
+  showAtForm: false,
+  showAtField: true,
+  page: 0,
+}
+const MIX_LABWARE_REQUIRED: FormError = {
+  title: 'Labware required',
+  dependentFields: ['labware'],
+  showAtForm: false,
+  showAtField: true,
+  page: 0,
+}
+const ASPIRATE_MIX_TIMES_REQUIRED: FormError = {
+  title: 'Repititions required',
+  dependentFields: ['aspirate_mix_times'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+  tab: 'aspirate',
+}
+const ASPIRATE_MIX_VOLUME_REQUIRED: FormError = {
+  title: 'Volume required',
+  dependentFields: ['aspirate_mix_checkbox', 'aspirate_mix_volume'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+  tab: 'aspirate',
+}
+const ASPIRATE_DELAY_DURATION_REQUIRED: FormError = {
+  title: 'Duration required',
+  dependentFields: ['aspirate_delay_checkbox', 'aspirate_delay_seconds'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+  tab: 'aspirate',
+}
+const ASPIRATE_AIRGAP_VOLUME_REQUIRED: FormError = {
+  title: 'Volume required',
+  dependentFields: ['aspirate_airGap_checkbox', 'aspirate_airGap_volume'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+  tab: 'aspirate',
+}
+const DISPENSE_MIX_TIMES_REQUIRED: FormError = {
+  title: 'Repititions required',
+  dependentFields: ['dispense_mix_checkbox', 'dispense_mix_times'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+  tab: 'dispense',
+}
+const DISPENSE_MIX_VOLUME_REQUIRED: FormError = {
+  title: 'Volume required',
+  dependentFields: ['dispense_mix_checkbox', 'dispense_mix_volume'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+  tab: 'dispense',
+}
+const DISPENSE_DELAY_DURATION_REQUIRED: FormError = {
+  title: 'Duration required',
+  dependentFields: ['dispense_delay_checkbox', 'dispense_delay_seconds'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+  tab: 'dispense',
+}
+const DISPENSE_AIRGAP_VOLUME_REQUIRED: FormError = {
+  title: 'Volume required',
+  dependentFields: ['dispense_airGap_checkbox', 'dispense_airGap_volume'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+  tab: 'dispense',
+}
+const BLOWOUT_LOCATION_REQUIRED: FormError = {
+  title: 'Volume required',
+  dependentFields: ['blowout_checkbox', 'blowout_location'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+  tab: 'dispense',
+}
+
+export interface HydratedFormData {
   [key: string]: any
 }
 
@@ -191,20 +412,11 @@ export const incompatibleAspirateLabware = (
 export const pauseForTimeOrUntilTold = (
   fields: HydratedFormData
 ): FormError | null => {
-  const {
-    pauseAction,
-    pauseHour,
-    pauseMinute,
-    pauseSecond,
-    moduleId,
-    pauseTemperature,
-  } = fields
+  const { pauseAction, moduleId, pauseTemperature } = fields
 
   if (pauseAction === PAUSE_UNTIL_TIME) {
+    const { hours, minutes, seconds } = getTimeFromForm(fields, 'pauseTime')
     // user selected pause for amount of time
-    const hours = parseFloat(pauseHour as string) ?? 0
-    const minutes = parseFloat(pauseMinute as string) ?? 0
-    const seconds = parseFloat(pauseSecond as string) ?? 0
     const totalSeconds = hours * 3600 + minutes * 60 + seconds
     return totalSeconds <= 0 ? TIME_PARAM_REQUIRED : null
   } else if (pauseAction === PAUSE_UNTIL_TEMP) {
@@ -251,16 +463,12 @@ export const wellRatioMoveLiquid = (
     ? null
     : wellRatioFormError
 }
-export const volumeTooHigh = (
-  fields: HydratedFormData,
-  labwareEntities?: LabwareEntities
-): FormError | null => {
+export const volumeTooHigh = (fields: HydratedFormData): FormError | null => {
   const { pipette, tipRack } = fields
   const volume = Number(fields.volume)
 
   const pipetteCapacity = getPipetteCapacity(
     pipette as PipetteEntity,
-    labwareEntities ?? {},
     tipRack as string
   )
   if (
@@ -299,7 +507,7 @@ export const targetTemperatureRequired = (
   fields: HydratedFormData
 ): FormError | null => {
   const { setTemperature, targetTemperature } = fields
-  return setTemperature === 'true' && !targetTemperature
+  return setTemperature && !targetTemperature
     ? TARGET_TEMPERATURE_REQUIRED
     : null
 }
@@ -351,6 +559,71 @@ export const lidTemperatureHoldRequired = (
     ? LID_TEMPERATURE_HOLD_REQUIRED
     : null
 }
+export const shakeSpeedRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { targetSpeed, setShake } = fields
+  return setShake && !targetSpeed ? SHAKE_SPEED_REQUIRED : null
+}
+export const shakeTimeRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { heaterShakerTimer, heaterShakerSetTimer } = fields
+  return heaterShakerSetTimer && !heaterShakerTimer ? SHAKE_TIME_REQUIRED : null
+}
+export const temperatureRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { setHeaterShakerTemperature, targetHeaterShakerTemperature } = fields
+  return setHeaterShakerTemperature && !targetHeaterShakerTemperature
+    ? HS_TEMPERATURE_REQUIRED
+    : null
+}
+export const pauseActionRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { pauseAction } = fields
+  return pauseAction == null ? PAUSE_ACTION_REQUIRED : null
+}
+export const pauseTimeRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { pauseTime, pauseAction } = fields
+  return pauseAction === PAUSE_UNTIL_TIME && !pauseTime
+    ? PAUSE_TIME_REQUIRED
+    : null
+}
+export const pauseModuleRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { moduleId, pauseAction } = fields
+  return pauseAction === PAUSE_UNTIL_TEMP && moduleId == null
+    ? PAUSE_MODULE_REQUIRED
+    : null
+}
+export const pauseTemperatureRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { pauseTemperature, pauseAction } = fields
+  return pauseAction === PAUSE_UNTIL_TEMP && !pauseTemperature
+    ? PAUSE_TEMP_REQUIRED
+    : null
+}
+export const labwareToMoveRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { labware } = fields
+  return labware == null ? LABWARE_TO_MOVE_REQUIRED : null
+}
+export const newLabwareLocationRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { newLocation } = fields
+  return newLocation == null ||
+    Object.values(newLocation as Object).every(val => val == null)
+    ? NEW_LABWARE_LOCATION_REQUIRED
+    : null
+}
 export const engageHeightRangeExceeded = (
   fields: HydratedFormData
 ): FormError | null => {
@@ -377,6 +650,131 @@ export const engageHeightRangeExceeded = (
   }
 
   return null
+}
+export const aspirateWellsRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { aspirate_wells } = fields
+  return aspirate_wells == null || aspirate_wells.length === 0
+    ? ASPIRATE_WELLS_REQUIRED
+    : null
+}
+export const dispenseWellsRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { dispense_wells, dispense_labware } = fields
+  return (dispense_wells == null || dispense_wells.length === 0) &&
+    !(
+      dispense_labware != null &&
+      (dispense_labware.name === 'wasteChute' ||
+        dispense_labware.name === 'trashBin')
+    )
+    ? DISPENSE_WELLS_REQUIRED
+    : null
+}
+export const mixWellsRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { wells } = fields
+  return wells == null || wells.length === 0 ? MIX_WELLS_REQUIRED : null
+}
+export const volumeRequired = (fields: HydratedFormData): FormError | null => {
+  const { volume } = fields
+  return !volume ? VOLUME_REQUIRED : null
+}
+export const timesRequired = (fields: HydratedFormData): FormError | null => {
+  const { times } = fields
+  return !times ? TIMES_REQUIRED : null
+}
+export const aspirateLabwareRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { aspirate_labware } = fields
+  return aspirate_labware == null ? ASPIRATE_LABWARE_REQUIRED : null
+}
+export const dispenseLabwareRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { dispense_labware } = fields
+  return dispense_labware == null ? DISPENSE_LABWARE_REQUIRED : null
+}
+export const mixLabwareRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { labware } = fields
+  return labware == null ? MIX_LABWARE_REQUIRED : null
+}
+export const aspirateMixTimesRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { aspirate_mix_checkbox, aspirate_mix_times } = fields
+  return aspirate_mix_checkbox && !aspirate_mix_times
+    ? ASPIRATE_MIX_TIMES_REQUIRED
+    : null
+}
+export const aspirateMixVolumeRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { aspirate_mix_checkbox, aspirate_mix_volume } = fields
+  return aspirate_mix_checkbox && !aspirate_mix_volume
+    ? ASPIRATE_MIX_VOLUME_REQUIRED
+    : null
+}
+export const aspirateDelayDurationRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { aspirate_delay_seconds, aspirate_delay_checkbox } = fields
+  return aspirate_delay_checkbox && !aspirate_delay_seconds
+    ? ASPIRATE_DELAY_DURATION_REQUIRED
+    : null
+}
+export const aspirateAirGapVolumeRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { aspirate_airGap_checkbox, aspirate_airGap_volume } = fields
+  return aspirate_airGap_checkbox && !aspirate_airGap_volume
+    ? ASPIRATE_AIRGAP_VOLUME_REQUIRED
+    : null
+}
+export const dispenseMixTimesRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { dispense_mix_checkbox, dispense_mix_times } = fields
+  return dispense_mix_checkbox && !dispense_mix_times
+    ? DISPENSE_MIX_TIMES_REQUIRED
+    : null
+}
+export const dispenseMixVolumeRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { dispense_mix_checkbox, dispense_mix_volume } = fields
+  return dispense_mix_checkbox && !dispense_mix_volume
+    ? DISPENSE_MIX_VOLUME_REQUIRED
+    : null
+}
+export const dispenseDelayDurationRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { dispense_delay_seconds, dispense_delay_checkbox } = fields
+  return dispense_delay_checkbox && !dispense_delay_seconds
+    ? DISPENSE_DELAY_DURATION_REQUIRED
+    : null
+}
+export const dispenseAirGapVolumeRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { dispense_airGap_checkbox, dispense_airGap_volume } = fields
+  return dispense_airGap_checkbox && !dispense_airGap_volume
+    ? DISPENSE_AIRGAP_VOLUME_REQUIRED
+    : null
+}
+export const blowoutLocationRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { blowout_checkbox, blowout_location } = fields
+  return blowout_checkbox && !blowout_location
+    ? BLOWOUT_LOCATION_REQUIRED
+    : null
 }
 
 /*******************

@@ -1,6 +1,8 @@
 from typing import Optional
 from typing_extensions import Protocol
 
+from opentrons.types import Point
+from opentrons.hardware_control.types import CriticalPoint
 from .types import MountArgType, CalibrationType, ConfigType
 
 from .instrument_configurer import InstrumentConfigurer
@@ -16,6 +18,22 @@ class LiquidHandler(
     Calibratable[CalibrationType],
     Protocol[CalibrationType, MountArgType, ConfigType],
 ):
+    def critical_point_for(
+        self,
+        mount: MountArgType,
+        cp_override: Optional[CriticalPoint] = None,
+    ) -> Point:
+        """
+        Determine the current critical point for the specified mount.
+
+        :param mount: A robot mount that the instrument is on.
+        :param cp_override: The critical point override to use.
+
+        If no critical point override is specified, the robot defaults to nozzle location `A1` or the mount critical point.
+        :return: Point.
+        """
+        ...
+
     async def update_nozzle_configuration_for_mount(
         self,
         mount: MountArgType,
@@ -162,6 +180,11 @@ class LiquidHandler(
         If ``presses`` or ``increment`` is not specified (or is ``None``),
         their value is taken from the pipette configuration.
         """
+        ...
+
+    async def tip_drop_moves(
+        self, mount: MountArgType, home_after: bool = True
+    ) -> None:
         ...
 
     async def drop_tip(

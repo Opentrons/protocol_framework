@@ -5,7 +5,7 @@ install-pipenv:
 
 .PHONY: setup
 setup: install-pipenv
-	python -m pipenv install --dev --python 3.12.4
+	python -m pipenv install --dev --python 3.12
 
 .PHONY: teardown
 teardown:
@@ -75,6 +75,12 @@ deploy: gen-requirements
 	@echo "Deploying to environment: $(ENV)"
 	python -m pipenv run python deploy.py --env $(ENV) $(if $(TAG),--tag $(TAG),)
 
+.PHONY: dry-deploy
+dry-deploy: gen-requirements
+	@echo "Dry run deploying to environment: $(ENV)"
+	@echo "Data is retrieved from AWS but no changes are made"
+	python -m pipenv run python deploy.py --dry --env $(ENV) $(if $(TAG),--tag $(TAG),)
+
 .PHONY: prompted-deploy
 prompted-deploy: gen-requirements
 	python -m pipenv run python deploy.py
@@ -95,8 +101,8 @@ live-client:
 live-hf:
 	python -m pipenv run python -m tests.helpers.huggingface_client
 
-.PHONY: test-live
-test-live:
+.PHONY: live-test
+live-test:
 	python -m pipenv run python -m pytest tests -m live --env $(ENV)
 
 IMAGE_NAME=ai-server-local
@@ -115,7 +121,7 @@ run:
 	docker logs -f $(CONTAINER_NAME)
 
 .PHONY: clean
-clean:
+clean: gen-requirements
 	docker stop $(CONTAINER_NAME) || true
 	docker rm $(CONTAINER_NAME) || true
 
@@ -132,4 +138,9 @@ run-shell:
 
 .PHONY: shell
 shell:
-	docker exec -it $(CONTAINER_NAME) /bin/bash]
+	docker exec -it $(CONTAINER_NAME) /bin/bash
+
+.PHONY: test-googlesheet
+test-googlesheet:
+	@echo "Loading environment variables from .env and running test-googlesheet"
+	pipenv run python -m api.integration.google_sheets

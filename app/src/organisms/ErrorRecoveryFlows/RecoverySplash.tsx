@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect } from 'react'
 import styled, { css } from 'styled-components'
 import { useTranslation } from 'react-i18next'
 
@@ -6,6 +6,7 @@ import {
   ALIGN_CENTER,
   COLORS,
   DIRECTION_COLUMN,
+  RESPONSIVENESS,
   DISPLAY_FLEX,
   Flex,
   Icon,
@@ -15,25 +16,20 @@ import {
   POSITION_ABSOLUTE,
   PrimaryButton,
   SecondaryButton,
+  LargeButton,
   SPACING,
   StyledText,
   TEXT_ALIGN_CENTER,
   TYPOGRAPHY,
+  WARNING_TOAST,
 } from '@opentrons/components'
 import {
   RUN_STATUS_AWAITING_RECOVERY_BLOCKED_BY_OPEN_DOOR,
   RUN_STATUS_AWAITING_RECOVERY_PAUSED,
 } from '@opentrons/api-client'
 
-import type {
-  ERUtilsResults,
-  UseRecoveryAnalyticsResult,
-  UseRecoveryTakeoverResult,
-  useRetainedFailedCommandBySource,
-} from './hooks'
 import { useErrorName } from './hooks'
 import { getErrorKind } from './utils'
-import { LargeButton } from '../../atoms/buttons'
 import {
   BANNER_TEXT_CONTAINER_STYLE,
   BANNER_TEXT_CONTENT_STYLE,
@@ -41,10 +37,16 @@ import {
 } from './constants'
 import { RecoveryInterventionModal, StepInfo } from './shared'
 import { useToaster } from '../ToasterOven'
-import { WARNING_TOAST } from '../../atoms/Toast'
 
-import type { RobotType } from '@opentrons/shared-data'
+import type { LabwareDefinition2, RobotType } from '@opentrons/shared-data'
 import type { ErrorRecoveryFlowsProps } from '.'
+import type {
+  ERUtilsResults,
+  UseRecoveryTakeoverResult,
+  useRetainedFailedCommandBySource,
+} from './hooks'
+import type { RecoveryRoute, RouteStep } from './types'
+import type { UseRecoveryAnalyticsResult } from '/app/redux-resources/analytics'
 
 export function useRecoverySplash(
   isOnDevice: boolean,
@@ -68,7 +70,8 @@ type RecoverySplashProps = ErrorRecoveryFlowsProps &
     /* Whether the app should resume any paused recovery state without user action. */
     resumePausedRecovery: boolean
     toggleERWizAsActiveUser: UseRecoveryTakeoverResult['toggleERWizAsActiveUser']
-    analytics: UseRecoveryAnalyticsResult
+    analytics: UseRecoveryAnalyticsResult<RecoveryRoute, RouteStep>
+    allRunDefs: LabwareDefinition2[]
   }
 export function RecoverySplash(props: RecoverySplashProps): JSX.Element | null {
   const {
@@ -81,13 +84,14 @@ export function RecoverySplash(props: RecoverySplashProps): JSX.Element | null {
     runStatus,
     recoveryActionMutationUtils,
     resumePausedRecovery,
+    recoveryCommands,
   } = props
   const { t } = useTranslation('error_recovery')
-  const errorKind = getErrorKind(failedCommand?.byRunRecord ?? null)
+  const errorKind = getErrorKind(failedCommand)
   const title = useErrorName(errorKind)
   const { makeToast } = useToaster()
 
-  const { proceedToRouteAndStep } = routeUpdateActions
+  const { proceedToRouteAndStep, handleMotionRouting } = routeUpdateActions
   const { reportErrorEvent } = analytics
 
   const buildTitleHeadingDesktop = (): JSX.Element => {
@@ -101,7 +105,7 @@ export function RecoverySplash(props: RecoverySplashProps): JSX.Element | null {
   // Resume recovery when the run when the door is closed.
   // The CTA/flow for handling a door open event within the ER wizard is different, and because this splash always renders
   // behind the wizard, we want to ensure we only implicitly resume recovery when only viewing the splash from this app.
-  React.useEffect(() => {
+  useEffect(() => {
     if (
       runStatus === RUN_STATUS_AWAITING_RECOVERY_PAUSED &&
       resumePausedRecovery
@@ -136,9 +140,16 @@ export function RecoverySplash(props: RecoverySplashProps): JSX.Element | null {
 
   const onLaunchERClick = (): void => {
     const onClick = (): void => {
-      void toggleERWizAsActiveUser(true, true).then(() => {
-        reportErrorEvent(failedCommand?.byRunRecord ?? null, 'launch-recovery')
-      })
+      void toggleERWizAsActiveUser(true, true)
+        .then(() => {
+          reportErrorEvent(
+            failedCommand?.byRunRecord ?? null,
+            'launch-recovery'
+          )
+        })
+        .then(() => handleMotionRouting(true))
+        .then(() => recoveryCommands.homePipetteZAxes())
+        .finally(() => handleMotionRouting(false))
     }
     handleConditionalClick(onClick)
   }
@@ -146,6 +157,7 @@ export function RecoverySplash(props: RecoverySplashProps): JSX.Element | null {
   const isDisabled = (): boolean => {
     switch (runStatus) {
       case RUN_STATUS_AWAITING_RECOVERY_BLOCKED_BY_OPEN_DOOR:
+      case RUN_STATUS_AWAITING_RECOVERY_PAUSED:
         return true
       default:
         return false
@@ -189,6 +201,7 @@ export function RecoverySplash(props: RecoverySplashProps): JSX.Element | null {
               overflowWrap={OVERFLOW_WRAP_BREAK_WORD}
               color={COLORS.white}
               textAlign={TEXT_ALIGN_CENTER}
+              css={TEXT_TRUNCATION_STYLE}
             />
           </Flex>
         </SplashFrame>
@@ -197,21 +210,19 @@ export function RecoverySplash(props: RecoverySplashProps): JSX.Element | null {
           gridGap={SPACING.spacing16}
         >
           <LargeButton
+            css={SHARED_BUTTON_STYLE_ODD}
             onClick={onCancelClick}
             buttonText={t('cancel_run')}
-            css={
-              isDisabled() ? BTN_STYLE_DISABLED_ODD : SHARED_BUTTON_STYLE_ODD
-            }
-            iconName={'remove'}
+            iconName="remove"
+            ariaDisabled={isDisabled()}
             buttonType="alertAlt"
           />
           <LargeButton
+            css={SHARED_BUTTON_STYLE_ODD}
             onClick={onLaunchERClick}
             buttonText={t('launch_recovery_mode')}
-            css={
-              isDisabled() ? BTN_STYLE_DISABLED_ODD : SHARED_BUTTON_STYLE_ODD
-            }
-            iconName={'recovery'}
+            iconName="recovery"
+            ariaDisabled={isDisabled()}
             buttonType="alertStroke"
           />
         </Flex>
@@ -244,6 +255,7 @@ export function RecoverySplash(props: RecoverySplashProps): JSX.Element | null {
                 overflow="hidden"
                 overflowWrap={OVERFLOW_WRAP_BREAK_WORD}
                 textAlign={TEXT_ALIGN_CENTER}
+                css={TEXT_TRUNCATION_STYLE}
               />
             </Flex>
           </Flex>
@@ -292,33 +304,21 @@ const SplashFrame = styled(Flex)`
   padding-bottom: 0px;
 `
 
+const TEXT_TRUNCATION_STYLE = css`
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+    font-size: ${TYPOGRAPHY.fontSize22};
+  }
+`
+
 const SHARED_BUTTON_STYLE_ODD = css`
   width: 29rem;
   height: 13.5rem;
-`
-const BTN_STYLE_DISABLED_ODD = css`
-  ${SHARED_BUTTON_STYLE_ODD}
-
-  background-color: ${COLORS.grey35};
-  color: ${COLORS.grey50};
-  border: none;
-  box-shadow: none;
-
-  #btn-icon: {
-    color: ${COLORS.grey50};
-  }
-
-  &:active,
-  &:focus,
-  &:hover {
-    background-color: ${COLORS.grey35};
-    color: ${COLORS.grey50};
-  }
-  &:active,
-  &:focus,
-  &:hover #btn-icon {
-    color: ${COLORS.grey50};
-  }
 `
 
 const PRIMARY_BTN_STYLES_DESKTOP = css`

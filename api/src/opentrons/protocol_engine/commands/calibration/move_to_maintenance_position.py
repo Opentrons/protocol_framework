@@ -15,7 +15,7 @@ from opentrons.protocol_engine.resources.ot3_validation import ensure_ot3_hardwa
 
 if TYPE_CHECKING:
     from opentrons.hardware_control import HardwareControlAPI
-    from ...state import StateView
+    from ...state.state import StateView
 
 # These offsets supplied from HW
 _ATTACH_POINT = Point(x=0, y=110)
@@ -57,7 +57,7 @@ class MoveToMaintenancePositionResult(BaseModel):
 class MoveToMaintenancePositionImplementation(
     AbstractCommandImpl[
         MoveToMaintenancePositionParams,
-        SuccessData[MoveToMaintenancePositionResult, None],
+        SuccessData[MoveToMaintenancePositionResult],
     ]
 ):
     """Calibration set up position command implementation."""
@@ -73,7 +73,7 @@ class MoveToMaintenancePositionImplementation(
 
     async def execute(
         self, params: MoveToMaintenancePositionParams
-    ) -> SuccessData[MoveToMaintenancePositionResult, None]:
+    ) -> SuccessData[MoveToMaintenancePositionResult]:
         """Move the requested mount to a maintenance deck slot."""
         ot3_api = ensure_ot3_hardware(
             self._hardware_api,
@@ -118,7 +118,9 @@ class MoveToMaintenancePositionImplementation(
                 )
                 await ot3_api.disengage_axes([Axis.Z_R])
 
-        return SuccessData(public=MoveToMaintenancePositionResult(), private=None)
+        return SuccessData(
+            public=MoveToMaintenancePositionResult(),
+        )
 
 
 class MoveToMaintenancePosition(
@@ -134,7 +136,7 @@ class MoveToMaintenancePosition(
         "calibration/moveToMaintenancePosition"
     )
     params: MoveToMaintenancePositionParams
-    result: Optional[MoveToMaintenancePositionResult]
+    result: Optional[MoveToMaintenancePositionResult] = None
 
     _ImplementationCls: Type[
         MoveToMaintenancePositionImplementation

@@ -24,7 +24,7 @@ def _build_run(
     created_at: datetime,
     state_summary: Optional[StateSummary],
 ) -> MaintenanceRun:
-    state_summary = state_summary or StateSummary.construct(
+    state_summary = state_summary or StateSummary.model_construct(
         status=EngineStatus.IDLE,
         errors=[],
         labware=[],
@@ -32,13 +32,16 @@ def _build_run(
         pipettes=[],
         modules=[],
         liquids=[],
+        wells=[],
+        files=[],
+        liquidClasses=[],
         hasEverEnteredErrorRecovery=False,
     )
-    return MaintenanceRun.construct(
+    return MaintenanceRun.model_construct(
         id=run_id,
         createdAt=created_at,
         status=state_summary.status,
-        actions=[],  # TODO (spp, 2023-04-23): wire up actions once they are allowed
+        actions=[],
         errors=state_summary.errors,
         labware=state_summary.labware,
         labwareOffsets=state_summary.labwareOffsets,
@@ -48,6 +51,7 @@ def _build_run(
         completedAt=state_summary.completedAt,
         startedAt=state_summary.startedAt,
         liquids=state_summary.liquids,
+        liquidClasses=state_summary.liquidClasses,
         hasEverEnteredErrorRecovery=state_summary.hasEverEnteredErrorRecovery,
     )
 
@@ -158,7 +162,6 @@ class MaintenanceRunDataManager:
         """
         if run_id == self._run_orchestrator_store.current_run_id:
             await self._run_orchestrator_store.clear()
-
             await self._maintenance_runs_publisher.publish_current_maintenance_run_async()
 
         else:

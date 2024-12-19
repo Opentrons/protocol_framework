@@ -1,4 +1,5 @@
 """Protocol run control and management."""
+import asyncio
 from typing import List, NamedTuple, Optional, Union
 
 from abc import ABC, abstractmethod
@@ -23,6 +24,7 @@ from opentrons.protocol_engine import (
     Command,
     commands as pe_commands,
 )
+from opentrons.protocol_engine.types import CommandAnnotation
 from opentrons.protocols.parse import PythonParseMode
 from opentrons.util.async_helpers import asyncio_yield
 from opentrons.util.broker import Broker
@@ -55,6 +57,7 @@ class RunResult(NamedTuple):
     commands: List[Command]
     state_summary: StateSummary
     parameters: List[RunTimeParameter]
+    command_annotations: List[CommandAnnotation]
 
 
 class AbstractRunner(ABC):
@@ -92,6 +95,11 @@ class AbstractRunner(ABC):
         """Parameter definitions defined by protocol, if any. Currently only for python protocols."""
         return []
 
+    @property
+    def command_annotations(self) -> List[CommandAnnotation]:
+        """Command annotations defined by protocol, if any. Currently only for json protocols."""
+        return []
+
     def was_started(self) -> bool:
         """Whether the run has been started.
 
@@ -122,9 +130,9 @@ class AbstractRunner(ABC):
                 post_run_hardware_state=PostRunHardwareState.STAY_ENGAGED_IN_PLACE,
             )
 
-    def resume_from_recovery(self) -> None:
+    def resume_from_recovery(self, reconcile_false_positive: bool) -> None:
         """See `ProtocolEngine.resume_from_recovery()`."""
-        self._protocol_engine.resume_from_recovery()
+        self._protocol_engine.resume_from_recovery(reconcile_false_positive)
 
     @abstractmethod
     async def run(
@@ -176,7 +184,7 @@ class PythonAndLegacyRunner(AbstractRunner):
 
     @property
     def run_time_parameters(self) -> List[RunTimeParameter]:
-        """Parameter definitions defined by protocol, if any. Will always be empty before execution."""
+        """Parameter definitions defined by protocol, if any."""
         if self._parameter_context is not None:
             return self._parameter_context.export_parameters_for_analysis()
         return []
@@ -220,7 +228,9 @@ class PythonAndLegacyRunner(AbstractRunner):
             equipment_broker = Broker[LoadInfo]()
             self._protocol_engine.add_plugin(
                 LegacyContextPlugin(
-                    broker=self._broker, equipment_broker=equipment_broker
+                    engine_loop=asyncio.get_running_loop(),
+                    broker=self._broker,
+                    equipment_broker=equipment_broker,
                 )
             )
             self._hardware_api.should_taskify_movement_execution(taskify=True)
@@ -275,7 +285,10 @@ class PythonAndLegacyRunner(AbstractRunner):
         commands = self._protocol_engine.state_view.commands.get_all()
         parameters = self.run_time_parameters
         return RunResult(
-            commands=commands, state_summary=run_data, parameters=parameters
+            commands=commands,
+            state_summary=run_data,
+            parameters=parameters,
+            command_annotations=[],
         )
 
 
@@ -310,6 +323,12 @@ class JsonRunner(AbstractRunner):
 
         hardware_api.should_taskify_movement_execution(taskify=False)
         self._queued_commands: List[pe_commands.CommandCreate] = []
+        self._command_annotations: List[CommandAnnotation] = []
+
+    @property
+    def command_annotations(self) -> List[CommandAnnotation]:
+        """Command annotations defined by protocol, if any."""
+        return self._command_annotations
 
     async def load(self, protocol_source: ProtocolSource) -> None:
         """Load a JSONv6+ ProtocolSource into managed ProtocolEngine."""
@@ -352,6 +371,11 @@ class JsonRunner(AbstractRunner):
             )
             await asyncio_yield()
 
+        self._command_annotations = await anyio.to_thread.run_sync(
+            self._json_translator.translate_command_annotations,
+            protocol,
+        )
+
         initial_home_command = pe_commands.HomeCreate(
             params=pe_commands.HomeParams(axes=None)
         )
@@ -379,7 +403,12 @@ class JsonRunner(AbstractRunner):
 
         run_data = self._protocol_engine.state_view.get_summary()
         commands = self._protocol_engine.state_view.commands.get_all()
-        return RunResult(commands=commands, state_summary=run_data, parameters=[])
+        return RunResult(
+            commands=commands,
+            state_summary=run_data,
+            parameters=[],
+            command_annotations=self._command_annotations,
+        )
 
     async def _add_and_execute_commands(self) -> None:
         for command_request in self._queued_commands:
@@ -450,7 +479,12 @@ class LiveRunner(AbstractRunner):
 
         run_data = self._protocol_engine.state_view.get_summary()
         commands = self._protocol_engine.state_view.commands.get_all()
-        return RunResult(commands=commands, state_summary=run_data, parameters=[])
+        return RunResult(
+            commands=commands,
+            state_summary=run_data,
+            parameters=[],
+            command_annotations=[],
+        )
 
 
 AnyRunner = Union[PythonAndLegacyRunner, JsonRunner, LiveRunner]

@@ -72,8 +72,8 @@ async def put_client_data(  # noqa: D103
     ],
 ) -> SimpleBody[ClientData]:
     store.put(key, request_body.data)
-    await client_data_publisher.publish_client_data(key)
-    return SimpleBody.construct(data=store.get(key))
+    client_data_publisher.publish_client_data(key)
+    return SimpleBody.model_construct(data=store.get(key))
 
 
 @router.get(
@@ -89,10 +89,10 @@ async def put_client_data(  # noqa: D103
 )
 async def get_client_data(  # noqa: D103
     key: Key,
-    store: ClientDataStore = fastapi.Depends(get_client_data_store),
+    store: Annotated[ClientDataStore, fastapi.Depends(get_client_data_store)],
 ) -> SimpleBody[ClientData]:
     try:
-        return SimpleBody.construct(data=store.get(key))
+        return SimpleBody.model_construct(data=store.get(key))
     except KeyError as e:
         raise ClientDataKeyDoesNotExist.from_exc(e).as_error(
             fastapi.status.HTTP_404_NOT_FOUND
@@ -124,8 +124,8 @@ async def delete_client_data(  # noqa: D103
             fastapi.status.HTTP_404_NOT_FOUND
         ) from e
     else:
-        await client_data_publisher.publish_client_data(key)
-        return SimpleEmptyBody.construct()
+        client_data_publisher.publish_client_data(key)
+        return SimpleEmptyBody.model_construct()
 
 
 @router.delete(
@@ -142,5 +142,5 @@ async def delete_all_client_data(  # noqa: D103
     keys_that_will_be_deleted = store.get_keys()
     store.delete_all()
     for deleted_key in keys_that_will_be_deleted:
-        await client_data_publisher.publish_client_data(deleted_key)
-    return SimpleEmptyBody.construct()
+        client_data_publisher.publish_client_data(deleted_key)
+    return SimpleEmptyBody.model_construct()

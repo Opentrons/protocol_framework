@@ -1,10 +1,10 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { describe, it, vi, expect, beforeEach } from 'vitest'
 import { screen, fireEvent, waitFor } from '@testing-library/react'
 
 import { mockRecoveryContentProps } from '../../__fixtures__'
-import { renderWithProviders } from '../../../../__testing-utils__'
-import { i18n } from '../../../../i18n'
+import { renderWithProviders } from '/app/__testing-utils__'
+import { i18n } from '/app/i18n'
 import { SelectTips } from '../SelectTips'
 import { RECOVERY_MAP } from '../../constants'
 import { TipSelectionModal } from '../TipSelectionModal'
@@ -13,7 +13,6 @@ import type { Mock } from 'vitest'
 
 vi.mock('../TipSelectionModal')
 vi.mock('../TipSelection')
-vi.mock('../LeftColumnLabwareInfo')
 
 const render = (props: React.ComponentProps<typeof SelectTips>) => {
   return renderWithProviders(<SelectTips {...props} />, {
@@ -24,13 +23,13 @@ const render = (props: React.ComponentProps<typeof SelectTips>) => {
 describe('SelectTips', () => {
   let props: React.ComponentProps<typeof SelectTips>
   let mockGoBackPrevStep: Mock
-  let mockSetRobotInMotion: Mock
+  let mockhandleMotionRouting: Mock
   let mockProceedNextStep: Mock
   let mockPickUpTips: Mock
 
   beforeEach(() => {
     mockGoBackPrevStep = vi.fn()
-    mockSetRobotInMotion = vi.fn(() => Promise.resolve())
+    mockhandleMotionRouting = vi.fn(() => Promise.resolve())
     mockProceedNextStep = vi.fn()
     mockPickUpTips = vi.fn(() => Promise.resolve())
 
@@ -38,20 +37,26 @@ describe('SelectTips', () => {
       ...mockRecoveryContentProps,
       routeUpdateActions: {
         goBackPrevStep: mockGoBackPrevStep,
-        setRobotInMotion: mockSetRobotInMotion,
+        handleMotionRouting: mockhandleMotionRouting,
         proceedNextStep: mockProceedNextStep,
       } as any,
       recoveryCommands: {
         pickUpTips: mockPickUpTips,
       } as any,
-      failedPipetteInfo: {
-        data: {
-          channels: 8,
-        },
+      failedPipetteUtils: {
+        failedPipetteInfo: {
+          data: {
+            channels: 8,
+          },
+        } as any,
       } as any,
       failedLabwareUtils: {
         selectedTipLocations: { A1: null },
         areTipsSelected: true,
+        failedLabwareLocations: {
+          displayNameNewLoc: null,
+          displayNameCurrentLoc: 'A1',
+        },
       } as any,
     }
 
@@ -69,7 +74,7 @@ describe('SelectTips', () => {
   })
 
   it('calls the correct routeUpdateActions and recoveryCommands in the correct order when the primary button is clicked', async () => {
-    const setRobotInMotionMock = vi.fn(() => Promise.resolve())
+    const handleMotionRoutingMock = vi.fn(() => Promise.resolve())
     const pickUpTipsMock = vi.fn(() => Promise.resolve())
     const proceedNextStepMock = vi.fn()
 
@@ -78,7 +83,7 @@ describe('SelectTips', () => {
     } as any
 
     const mockRouteUpdateActions = {
-      setRobotInMotion: setRobotInMotionMock,
+      handleMotionRouting: handleMotionRoutingMock,
       proceedNextStep: proceedNextStepMock,
     } as any
 
@@ -92,10 +97,10 @@ describe('SelectTips', () => {
     fireEvent.click(primaryBtn)
 
     await waitFor(() => {
-      expect(setRobotInMotionMock).toHaveBeenCalledTimes(1)
+      expect(handleMotionRoutingMock).toHaveBeenCalledTimes(1)
     })
     await waitFor(() => {
-      expect(setRobotInMotionMock).toHaveBeenCalledWith(
+      expect(handleMotionRoutingMock).toHaveBeenCalledWith(
         true,
         RECOVERY_MAP.ROBOT_PICKING_UP_TIPS.ROUTE
       )
@@ -107,7 +112,7 @@ describe('SelectTips', () => {
       expect(proceedNextStepMock).toHaveBeenCalledTimes(1)
     })
 
-    expect(setRobotInMotionMock.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(handleMotionRoutingMock.mock.invocationCallOrder[0]).toBeLessThan(
       pickUpTipsMock.mock.invocationCallOrder[0]
     )
 
@@ -126,13 +131,23 @@ describe('SelectTips', () => {
     expect(mockGoBackPrevStep).toHaveBeenCalled()
   })
 
+  it('renders expected banner text', () => {
+    render(props)
+
+    screen.getByText(
+      "It's best to replace tips and select the last location used for tip pickup."
+    )
+  })
+
   it('disables the tertiary button when the pipette has 96 channels', () => {
     props = {
       ...props,
-      failedPipetteInfo: {
-        data: {
-          channels: 96,
-        },
+      failedPipetteUtils: {
+        failedPipetteInfo: {
+          data: {
+            channels: 96,
+          },
+        } as any,
       } as any,
     }
     render(props)
@@ -149,6 +164,10 @@ describe('SelectTips', () => {
       failedLabwareUtils: {
         selectedTipLocations: null,
         areTipsSelected: false,
+        failedLabwareLocations: {
+          displayNameNewLoc: null,
+          displayNameCurrentLoc: '',
+        },
       } as any,
     }
 
@@ -159,5 +178,50 @@ describe('SelectTips', () => {
     })
 
     expect(primaryBtn[0]).toBeDisabled()
+  })
+
+  it('does not render the tertiary button if a partial tip config is used', () => {
+    const mockFailedPipetteUtils = {
+      failedPipetteInfo: {
+        data: {
+          channels: 8,
+        },
+      } as any,
+      isPartialTipConfigValid: true,
+      relevantActiveNozzleLayout: {
+        activeNozzles: ['H1', 'G1'],
+        startingNozzle: 'A1',
+        config: 'column',
+      },
+    } as any
+
+    render({ ...props, failedPipetteUtils: mockFailedPipetteUtils })
+
+    const tertiaryBtn = screen.queryByRole('button', {
+      name: 'Change location',
+    })
+    expect(tertiaryBtn).not.toBeInTheDocument()
+  })
+
+  it('renders alternative banner text if partial tip config is used', () => {
+    const mockFailedPipetteUtils = {
+      failedPipetteInfo: {
+        data: {
+          channels: 8,
+        },
+      } as any,
+      isPartialTipConfigValid: true,
+      relevantActiveNozzleLayout: {
+        activeNozzles: ['H1', 'G1'],
+        startingNozzle: 'A1',
+        config: 'column',
+      },
+    } as any
+
+    render({ ...props, failedPipetteUtils: mockFailedPipetteUtils })
+
+    screen.getByText(
+      'Replace tips and select the last location used for partial tip pickup.'
+    )
   })
 })

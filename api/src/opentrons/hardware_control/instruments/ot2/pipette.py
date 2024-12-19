@@ -28,7 +28,7 @@ from opentrons_shared_data.errors.exceptions import (
     CommandPreconditionViolated,
 )
 from opentrons_shared_data.pipette.ul_per_mm import (
-    piecewise_volume_conversion,
+    calculate_ul_per_mm,
     PIPETTING_FUNCTION_FALLBACK_VERSION,
     PIPETTING_FUNCTION_LATEST_VERSION,
 )
@@ -96,7 +96,7 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
         use_old_aspiration_functions: bool = False,
     ) -> None:
         self._config = config
-        self._config_as_dict = config.dict()
+        self._config_as_dict = config.model_dump()
         self._pipette_offset = pipette_offset_cal
         self._pipette_type = self._config.pipette_type
         self._pipette_version = self._config.version
@@ -273,7 +273,7 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
             self._config, elements, liquid_class
         )
         # Update the cached dict representation
-        self._config_as_dict = self._config.dict()
+        self._config_as_dict = self._config.model_dump()
 
     def reload_configurations(self) -> None:
         self._config = load_pipette_data.load_definition(
@@ -281,7 +281,7 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
             self._pipette_model.pipette_channels,
             self._pipette_model.pipette_version,
         )
-        self._config_as_dict = self._config.dict()
+        self._config_as_dict = self._config.model_dump()
 
     def reset_state(self) -> None:
         self._current_volume = 0.0
@@ -584,21 +584,9 @@ class Pipette(AbstractInstrument[PipetteConfigurations]):
     # want this to unbounded.
     @functools.lru_cache(maxsize=100)
     def ul_per_mm(self, ul: float, action: UlPerMmAction) -> float:
-        if action == "aspirate":
-            fallback = self._active_tip_settings.aspirate.default[
-                PIPETTING_FUNCTION_FALLBACK_VERSION
-            ]
-            sequence = self._active_tip_settings.aspirate.default.get(
-                self._pipetting_function_version, fallback
-            )
-        else:
-            fallback = self._active_tip_settings.dispense.default[
-                PIPETTING_FUNCTION_FALLBACK_VERSION
-            ]
-            sequence = self._active_tip_settings.dispense.default.get(
-                self._pipetting_function_version, fallback
-            )
-        return piecewise_volume_conversion(ul, sequence)
+        return calculate_ul_per_mm(
+            ul, action, self._active_tip_settings, self._pipetting_function_version
+        )
 
     def __str__(self) -> str:
         return "{} current volume {}ul critical point: {} at {}".format(
@@ -668,8 +656,8 @@ def _reload_and_check_skip(
         # Same config, good enough
         return attached_instr, True
     else:
-        newdict = new_config.dict()
-        olddict = attached_instr.config.dict()
+        newdict = new_config.model_dump()
+        olddict = attached_instr.config.model_dump()
         changed: Set[str] = set()
         for k in newdict.keys():
             if newdict[k] != olddict[k]:

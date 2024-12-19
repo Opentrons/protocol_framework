@@ -1,4 +1,3 @@
-import * as React from 'react'
 import {
   Icon,
   Flex,
@@ -153,7 +152,7 @@ function ModalContentMixedSpinner(
   return (
     <Box
       marginBottom={SPACING.spacing16}
-      width={'80px'}
+      width="80px"
       css={`
         @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
           width: 100px;

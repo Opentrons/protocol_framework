@@ -1,99 +1,49 @@
-import * as React from 'react'
-import cx from 'classnames'
 import { DndProvider } from 'react-dnd'
-import { BrowserRouter } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
+import { HashRouter } from 'react-router-dom'
 import { HTML5Backend } from 'react-dnd-html5-backend'
+import { useSelector } from 'react-redux'
 import {
+  Box,
   DIRECTION_COLUMN,
-  DIRECTION_ROW,
   Flex,
-  PrimaryButton,
-  SPACING,
+  OVERFLOW_AUTO,
 } from '@opentrons/components'
-import { getEnableRedesign } from './feature-flags/selectors'
-import { setFeatureFlags } from './feature-flags/actions'
-import { ComputingSpinner } from './components/ComputingSpinner'
-import { ConnectedNav } from './containers/ConnectedNav'
-import { Sidebar } from './containers/ConnectedSidebar'
-import { ConnectedTitleBar } from './containers/ConnectedTitleBar'
-import { MainPanel } from './containers/ConnectedMainPanel'
-import { PortalRoot as MainPageModalPortalRoot } from './components/portals/MainPageModalPortal'
-import { MAIN_CONTENT_FORCED_SCROLL_CLASSNAME } from './ui/steps/utils'
-import { PrereleaseModeIndicator } from './components/PrereleaseModeIndicator'
-import { PortalRoot as TopPortalRoot } from './components/portals/TopPortal'
-import { FileUploadMessageModal } from './components/modals/FileUploadMessageModal/FileUploadMessageModal'
-import { LabwareUploadMessageModal } from './components/modals/LabwareUploadMessageModal/LabwareUploadMessageModal'
-import { GateModal } from './components/modals/GateModal'
-import { CreateFileWizard } from './components/modals/CreateFileWizard'
-import { AnnouncementModal } from './components/modals/AnnouncementModal'
 import { ProtocolRoutes } from './ProtocolRoutes'
+import { PortalRoot } from './organisms'
+import { getEnableReactScan } from './feature-flags/selectors'
 
-import styles from './components/ProtocolEditor.module.css'
-import './css/reset.module.css'
-
-const showGateModal =
-  process.env.NODE_ENV === 'production' || process.env.OT_PD_SHOW_GATE
-
-function ProtocolEditorComponent(): JSX.Element {
-  const enableRedesign = useSelector(getEnableRedesign)
-  const dispatch = useDispatch()
+export function ProtocolEditor(): JSX.Element {
+  // note for react-scan
+  const enableReactScan = useSelector(getEnableReactScan)
+  // Dynamically import `react-scan` to avoid build errors
+  if (typeof window !== 'undefined' && enableReactScan) {
+    import('react-scan')
+      .then(({ scan }) => {
+        scan({
+          enabled: enableReactScan,
+          log: true,
+        })
+      })
+      .catch(error => {
+        console.error('Failed to load react-scan:', error)
+      })
+  }
 
   return (
-    <div id="protocol-editor">
-      <TopPortalRoot />
-      {enableRedesign ? (
+    <DndProvider backend={HTML5Backend}>
+      <Box
+        width="100%"
+        height="100vh"
+        overflow={OVERFLOW_AUTO}
+        id="protocol-editor"
+      >
+        <PortalRoot />
         <Flex flexDirection={DIRECTION_COLUMN}>
-          <Flex padding={SPACING.spacing12} flexDirection={DIRECTION_ROW}>
-            <PrimaryButton
-              onClick={() => {
-                dispatch(setFeatureFlags({ OT_PD_ENABLE_REDESIGN: false }))
-              }}
-            >
-              turn off redesign
-            </PrimaryButton>
-          </Flex>
-          <BrowserRouter>
+          <HashRouter>
             <ProtocolRoutes />
-          </BrowserRouter>
+          </HashRouter>
         </Flex>
-      ) : (
-        <div className="container">
-          <ComputingSpinner />
-          <TopPortalRoot />
-          {showGateModal ? <GateModal /> : null}
-          <PrereleaseModeIndicator />
-          <div className={styles.wrapper}>
-            <ConnectedNav />
-            <Sidebar />
-            <div className={styles.main_page_wrapper}>
-              <ConnectedTitleBar />
-
-              <div
-                id="main-page"
-                className={cx(
-                  styles.main_page_content,
-                  MAIN_CONTENT_FORCED_SCROLL_CLASSNAME
-                )}
-              >
-                <AnnouncementModal />
-                <CreateFileWizard />
-                <FileUploadMessageModal />
-
-                <MainPageModalPortalRoot />
-                <LabwareUploadMessageModal />
-                <MainPanel />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      </Box>
+    </DndProvider>
   )
 }
-
-export const ProtocolEditor = (): JSX.Element => (
-  <DndProvider backend={HTML5Backend}>
-    <ProtocolEditorComponent />
-  </DndProvider>
-)

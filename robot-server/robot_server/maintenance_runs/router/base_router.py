@@ -5,7 +5,7 @@ Contains routes dealing primarily with `Maintenance Run` models.
 import logging
 from datetime import datetime
 from textwrap import dedent
-from typing import Optional, Callable
+from typing import Annotated, Optional, Callable
 from typing_extensions import Literal
 
 from fastapi import APIRouter, Depends, status
@@ -104,9 +104,9 @@ class AllRunsLinks(BaseModel):
 
 async def get_run_data_from_url(
     runId: str,
-    run_data_manager: MaintenanceRunDataManager = Depends(
-        get_maintenance_run_data_manager
-    ),
+    run_data_manager: Annotated[
+        MaintenanceRunDataManager, Depends(get_maintenance_run_data_manager)
+    ],
 ) -> MaintenanceRun:
     """Get the data of a maintenance run.
 
@@ -143,20 +143,20 @@ async def get_run_data_from_url(
     },
 )
 async def create_run(
+    run_data_manager: Annotated[
+        MaintenanceRunDataManager, Depends(get_maintenance_run_data_manager)
+    ],
+    run_id: Annotated[str, Depends(get_unique_id)],
+    created_at: Annotated[datetime, Depends(get_current_time)],
+    is_ok_to_create_maintenance_run: Annotated[
+        bool, Depends(get_is_okay_to_create_maintenance_run)
+    ],
+    check_estop: Annotated[bool, Depends(require_estop_in_good_state)],
+    deck_configuration_store: Annotated[
+        DeckConfigurationStore, Depends(get_deck_configuration_store)
+    ],
+    notify_publishers: Annotated[Callable[[], None], Depends(get_pe_notify_publishers)],
     request_body: Optional[RequestModel[MaintenanceRunCreate]] = None,
-    run_data_manager: MaintenanceRunDataManager = Depends(
-        get_maintenance_run_data_manager
-    ),
-    run_id: str = Depends(get_unique_id),
-    created_at: datetime = Depends(get_current_time),
-    is_ok_to_create_maintenance_run: bool = Depends(
-        get_is_okay_to_create_maintenance_run
-    ),
-    check_estop: bool = Depends(require_estop_in_good_state),
-    deck_configuration_store: DeckConfigurationStore = Depends(
-        get_deck_configuration_store
-    ),
-    notify_publishers: Callable[[], None] = Depends(get_pe_notify_publishers),
 ) -> PydanticResponse[SimpleBody[MaintenanceRun]]:
     """Create a new maintenance run.
 
@@ -188,7 +188,7 @@ async def create_run(
 
     log.info(f'Created an empty run "{run_id}"".')
     return await PydanticResponse.create(
-        content=SimpleBody.construct(data=run_data),
+        content=SimpleBody.model_construct(data=run_data),
         status_code=status.HTTP_201_CREATED,
     )
 
@@ -204,9 +204,9 @@ async def create_run(
     },
 )
 async def get_current_run(
-    run_data_manager: MaintenanceRunDataManager = Depends(
-        get_maintenance_run_data_manager
-    ),
+    run_data_manager: Annotated[
+        MaintenanceRunDataManager, Depends(get_maintenance_run_data_manager)
+    ],
 ) -> PydanticResponse[Body[MaintenanceRun, AllRunsLinks]]:
     """Get the current maintenance run.
 
@@ -221,11 +221,11 @@ async def get_current_run(
 
     data = run_data_manager.get(current_run_id)
     links = AllRunsLinks(
-        current=ResourceLink.construct(href=f"/maintenance_runs/{current_run_id}")
+        current=ResourceLink.model_construct(href=f"/maintenance_runs/{current_run_id}")
     )
 
     return await PydanticResponse.create(
-        content=Body.construct(data=data, links=links),
+        content=Body.model_construct(data=data, links=links),
         status_code=status.HTTP_200_OK,
     )
 
@@ -241,7 +241,7 @@ async def get_current_run(
     },
 )
 async def get_run(
-    run_data: MaintenanceRun = Depends(get_run_data_from_url),
+    run_data: Annotated[MaintenanceRun, Depends(get_run_data_from_url)],
 ) -> PydanticResponse[SimpleBody[MaintenanceRun]]:
     """Get a maintenance run by its ID.
 
@@ -249,7 +249,7 @@ async def get_run(
         run_data: Data of the run specified in the runId url parameter.
     """
     return await PydanticResponse.create(
-        content=SimpleBody.construct(data=run_data),
+        content=SimpleBody.model_construct(data=run_data),
         status_code=status.HTTP_200_OK,
     )
 
@@ -266,9 +266,9 @@ async def get_run(
 )
 async def remove_run(
     runId: str,
-    run_data_manager: MaintenanceRunDataManager = Depends(
-        get_maintenance_run_data_manager
-    ),
+    run_data_manager: Annotated[
+        MaintenanceRunDataManager, Depends(get_maintenance_run_data_manager)
+    ],
 ) -> PydanticResponse[SimpleEmptyBody]:
     """Delete a maintenance run by its ID.
 
@@ -285,6 +285,6 @@ async def remove_run(
         raise RunNotFound(detail=str(e)).as_error(status.HTTP_404_NOT_FOUND) from e
 
     return await PydanticResponse.create(
-        content=SimpleEmptyBody.construct(),
+        content=SimpleEmptyBody.model_construct(),
         status_code=status.HTTP_200_OK,
     )

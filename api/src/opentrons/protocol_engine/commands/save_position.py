@@ -1,8 +1,10 @@
 """Save pipette position command request, result, and implementation models."""
 
 from __future__ import annotations
+from typing import TYPE_CHECKING, Optional, Type, Any
+
 from pydantic import BaseModel, Field
-from typing import TYPE_CHECKING, Optional, Type
+from pydantic.json_schema import SkipJsonSchema
 from typing_extensions import Literal
 
 from ..types import DeckPoint
@@ -16,19 +18,26 @@ if TYPE_CHECKING:
 SavePositionCommandType = Literal["savePosition"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 class SavePositionParams(BaseModel):
     """Payload needed to save a pipette's current position."""
 
     pipetteId: str = Field(
         ..., description="Unique identifier of the pipette in question."
     )
-    positionId: Optional[str] = Field(
+    positionId: str | SkipJsonSchema[None] = Field(
         None,
         description="An optional ID to assign to this command instance. "
         "Auto-assigned if not defined.",
+        json_schema_extra=_remove_default,
     )
-    failOnNotHomed: Optional[bool] = Field(
-        True, descrption="Require all axes to be homed before saving position."
+    failOnNotHomed: bool | SkipJsonSchema[None] = Field(
+        True,
+        description="Require all axes to be homed before saving position.",
+        json_schema_extra=_remove_default,
     )
 
 
@@ -46,7 +55,7 @@ class SavePositionResult(BaseModel):
 
 
 class SavePositionImplementation(
-    AbstractCommandImpl[SavePositionParams, SuccessData[SavePositionResult, None]]
+    AbstractCommandImpl[SavePositionParams, SuccessData[SavePositionResult]]
 ):
     """Save position command implementation."""
 
@@ -61,7 +70,7 @@ class SavePositionImplementation(
 
     async def execute(
         self, params: SavePositionParams
-    ) -> SuccessData[SavePositionResult, None]:
+    ) -> SuccessData[SavePositionResult]:
         """Check the requested pipette's current position."""
         position_id = self._model_utils.ensure_id(params.positionId)
         fail_on_not_homed = (
@@ -76,7 +85,6 @@ class SavePositionImplementation(
                 positionId=position_id,
                 position=DeckPoint(x=x, y=y, z=z),
             ),
-            private=None,
         )
 
 
@@ -87,7 +95,7 @@ class SavePosition(
 
     commandType: SavePositionCommandType = "savePosition"
     params: SavePositionParams
-    result: Optional[SavePositionResult]
+    result: Optional[SavePositionResult] = None
 
     _ImplementationCls: Type[SavePositionImplementation] = SavePositionImplementation
 

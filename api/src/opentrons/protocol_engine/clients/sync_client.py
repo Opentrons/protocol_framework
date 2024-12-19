@@ -7,7 +7,7 @@ from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 from .. import commands
 from ..commands.command_unions import CREATE_TYPES_BY_PARAMS_TYPE
-from ..state import StateView
+from ..state.state import StateView
 from ..types import (
     Liquid,
     LabwareOffsetCreate,
@@ -87,6 +87,12 @@ class SyncClient:
     def execute_command_without_recovery(
         self, params: commands.TryLiquidProbeParams
     ) -> commands.TryLiquidProbeResult:
+        pass
+
+    @overload
+    def execute_command_without_recovery(
+        self, params: commands.LoadLiquidClassParams
+    ) -> commands.LoadLiquidClassResult:
         pass
 
     def execute_command_without_recovery(

@@ -819,13 +819,13 @@ async def find_pipette_offset(
     try:
         if reset_instrument_offset:
             await hcapi.reset_instrument_offset(mount)
-        await hcapi.add_tip(mount, hcapi.config.calibration.probe_length)
+        hcapi.add_tip(mount, hcapi.config.calibration.probe_length)
         offset = await _calibrate_mount(
             hcapi, mount, slot, method, raise_verify_error, probe=probe
         )
         return offset
     finally:
-        await hcapi.remove_tip(mount)
+        hcapi.remove_tip(mount)
 
 
 async def calibrate_pipette(
@@ -877,7 +877,7 @@ async def calibrate_module(
         if mount == OT3Mount.GRIPPER:
             hcapi.add_gripper_probe(GripperProbe.FRONT)
         else:
-            await hcapi.add_tip(mount, hcapi.config.calibration.probe_length)
+            hcapi.add_tip(mount, hcapi.config.calibration.probe_length)
 
         LOG.info(
             f"Starting module calibration for {module_id} at {nominal_position} using {mount}"
@@ -903,7 +903,7 @@ async def calibrate_module(
             hcapi.remove_gripper_probe()
             await hcapi.ungrip()
         else:
-            await hcapi.remove_tip(mount)
+            hcapi.remove_tip(mount)
 
 
 async def calibrate_belts(
@@ -927,7 +927,7 @@ async def calibrate_belts(
         raise RuntimeError("Must use pipette mount, not gripper")
     try:
         hcapi.reset_deck_calibration()
-        await hcapi.add_tip(mount, hcapi.config.calibration.probe_length)
+        hcapi.add_tip(mount, hcapi.config.calibration.probe_length)
         belt_attitude, alignment_details = await _determine_transform_matrix(
             hcapi, mount
         )
@@ -935,7 +935,7 @@ async def calibrate_belts(
         return belt_attitude, alignment_details
     finally:
         hcapi.load_deck_calibration()
-        await hcapi.remove_tip(mount)
+        hcapi.remove_tip(mount)
 
 
 def apply_machine_transform(
@@ -968,7 +968,7 @@ def load_attitude_matrix(to_default: bool = True) -> DeckCalibration:
         return DeckCalibration(
             attitude=apply_machine_transform(calibration_data.attitude),
             source=calibration_data.source,
-            status=types.CalibrationStatus(**calibration_data.status.dict()),
+            status=types.CalibrationStatus(**calibration_data.status.model_dump()),
             belt_attitude=calibration_data.attitude,
             last_modified=calibration_data.lastModified,
             pipette_calibrated_with=calibration_data.pipetteCalibratedWith,

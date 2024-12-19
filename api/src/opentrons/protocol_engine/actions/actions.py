@@ -3,7 +3,7 @@
 Actions can be passed to the ActionDispatcher, where they will trigger
 reactions in objects that subscribe to the pipeline, like the StateStore.
 """
-from dataclasses import dataclass
+import dataclasses
 from datetime import datetime
 from enum import Enum
 from typing import List, Optional, Union
@@ -18,20 +18,19 @@ from ..commands import (
     Command,
     CommandCreate,
     CommandDefinedErrorData,
-    CommandPrivateResult,
 )
 from ..error_recovery_policy import ErrorRecoveryPolicy, ErrorRecoveryType
 from ..notes.notes import CommandNote
+from ..state.update_types import StateUpdate
 from ..types import (
     LabwareOffsetCreate,
     ModuleDefinition,
     Liquid,
     DeckConfigurationType,
-    AddressableAreaLocation,
 )
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class PlayAction:
     """Start or resume processing commands in the engine."""
 
@@ -50,28 +49,28 @@ class PauseSource(str, Enum):
     PROTOCOL = "protocol"
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class PauseAction:
     """Pause processing commands in the engine."""
 
     source: PauseSource
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class StopAction:
     """Request engine execution to stop soon."""
 
     from_estop: bool = False
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class ResumeFromRecoveryAction:
     """See `ProtocolEngine.resume_from_recovery()`."""
 
-    pass
+    state_update: StateUpdate
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class FinishErrorDetails:
     """Error details for the payload of a FinishAction or HardwareStoppedAction."""
 
@@ -80,7 +79,7 @@ class FinishErrorDetails:
     created_at: datetime
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class FinishAction:
     """Gracefully stop processing commands in the engine."""
 
@@ -95,7 +94,7 @@ class FinishAction:
     """The fatal error that caused the run to fail."""
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class HardwareStoppedAction:
     """An action dispatched after hardware has been stopped for good, for this engine instance."""
 
@@ -105,14 +104,14 @@ class HardwareStoppedAction:
     """The error that happened while doing post-run finish steps (homing and dropping tips)."""
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class DoorChangeAction:
     """Handle events coming in from hardware control."""
 
     door_state: DoorState
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class QueueCommandAction:
     """Add a command request to the queue."""
 
@@ -123,7 +122,7 @@ class QueueCommandAction:
     failed_command_id: Optional[str] = None
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class RunCommandAction:
     """Mark a given command as running.
 
@@ -135,7 +134,7 @@ class RunCommandAction:
     started_at: datetime
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class SucceedCommandAction:
     """Mark a given command as succeeded.
 
@@ -145,10 +144,15 @@ class SucceedCommandAction:
     command: Command
     """The command in its new succeeded state."""
 
-    private_result: CommandPrivateResult
+    state_update: StateUpdate = dataclasses.field(
+        # todo(mm, 2024-08-26): This has a default only to make it easier to transition
+        # old tests while https://opentrons.atlassian.net/browse/EXEC-639 is in
+        # progress. Make this mandatory when that's completed.
+        default_factory=StateUpdate
+    )
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class FailCommandAction:
     """Mark a given command as failed.
 
@@ -196,7 +200,7 @@ class FailCommandAction:
     """The command to fail, in its prior `running` state."""
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class AddLabwareOffsetAction:
     """Add a labware offset, to apply to subsequent `LoadLabwareCommand`s."""
 
@@ -205,40 +209,40 @@ class AddLabwareOffsetAction:
     request: LabwareOffsetCreate
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class AddLabwareDefinitionAction:
     """Add a labware definition, to apply to subsequent `LoadLabwareCommand`s."""
 
     definition: LabwareDefinition
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class AddLiquidAction:
     """Add a liquid, to apply to subsequent `LoadLiquid`s."""
 
     liquid: Liquid
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class SetDeckConfigurationAction:
     """See `ProtocolEngine.set_deck_configuration()`."""
 
     deck_configuration: Optional[DeckConfigurationType]
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class AddAddressableAreaAction:
     """Add a single addressable area to state.
 
-    This differs from the deck configuration in ProvideDeckConfigurationAction which
+    This differs from the deck configuration in SetDeckConfigurationAction which
     sends over a mapping of cutout fixtures. This action will only load one addressable
     area and that should be pre-validated before being sent via the action.
     """
 
-    addressable_area: AddressableAreaLocation
+    addressable_area_name: str
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class AddModuleAction:
     """Add an attached module directly to state without a location."""
 
@@ -248,14 +252,14 @@ class AddModuleAction:
     module_live_data: LiveData
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class ResetTipsAction:
     """Reset the tip tracking state of a given tip rack."""
 
     labware_id: str
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class SetPipetteMovementSpeedAction:
     """Set the speed of a pipette's X/Y/Z movements. Does not affect plunger speed.
 
@@ -266,7 +270,7 @@ class SetPipetteMovementSpeedAction:
     speed: Optional[float]
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class SetErrorRecoveryPolicyAction:
     """See `ProtocolEngine.set_error_recovery_policy()`."""
 

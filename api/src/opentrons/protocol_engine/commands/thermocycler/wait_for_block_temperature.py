@@ -9,7 +9,7 @@ from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, Succe
 from ...errors.error_occurrence import ErrorOccurrence
 
 if TYPE_CHECKING:
-    from opentrons.protocol_engine.state import StateView
+    from opentrons.protocol_engine.state.state import StateView
     from opentrons.protocol_engine.execution import EquipmentHandler
 
 
@@ -28,7 +28,7 @@ class WaitForBlockTemperatureResult(BaseModel):
 
 class WaitForBlockTemperatureImpl(
     AbstractCommandImpl[
-        WaitForBlockTemperatureParams, SuccessData[WaitForBlockTemperatureResult, None]
+        WaitForBlockTemperatureParams, SuccessData[WaitForBlockTemperatureResult]
     ]
 ):
     """Execution implementation of Thermocycler's wait for block temperature command."""
@@ -45,7 +45,7 @@ class WaitForBlockTemperatureImpl(
     async def execute(
         self,
         params: WaitForBlockTemperatureParams,
-    ) -> SuccessData[WaitForBlockTemperatureResult, None]:
+    ) -> SuccessData[WaitForBlockTemperatureResult]:
         """Wait for a Thermocycler's target block temperature."""
         thermocycler_state = self._state_view.modules.get_thermocycler_module_substate(
             params.moduleId
@@ -61,7 +61,9 @@ class WaitForBlockTemperatureImpl(
         if thermocycler_hardware is not None:
             await thermocycler_hardware.wait_for_block_target()
 
-        return SuccessData(public=WaitForBlockTemperatureResult(), private=None)
+        return SuccessData(
+            public=WaitForBlockTemperatureResult(),
+        )
 
 
 class WaitForBlockTemperature(
@@ -75,7 +77,7 @@ class WaitForBlockTemperature(
         "thermocycler/waitForBlockTemperature"
     )
     params: WaitForBlockTemperatureParams
-    result: Optional[WaitForBlockTemperatureResult]
+    result: Optional[WaitForBlockTemperatureResult] = None
 
     _ImplementationCls: Type[WaitForBlockTemperatureImpl] = WaitForBlockTemperatureImpl
 

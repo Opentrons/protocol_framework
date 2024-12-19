@@ -1,11 +1,13 @@
 """Engine/Runner provider."""
+
 from __future__ import annotations
 
 import enum
-from typing import Optional, Union, List, Dict, AsyncGenerator
+from typing import Optional, Union, List, Dict, AsyncGenerator, Mapping
 
 from anyio import move_on_after
 
+from opentrons.types import NozzleMapInterface
 from opentrons_shared_data.labware.types import LabwareUri
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.errors import GeneralError
@@ -35,6 +37,7 @@ from ..protocol_engine.types import (
     RunTimeParameter,
     PrimitiveRunTimeParamValuesType,
     CSVRuntimeParamPaths,
+    CommandAnnotation,
 )
 from ..protocol_engine.error_recovery_policy import ErrorRecoveryPolicy
 
@@ -204,9 +207,9 @@ class RunOrchestrator:
                 post_run_hardware_state=PostRunHardwareState.STAY_ENGAGED_IN_PLACE,
             )
 
-    def resume_from_recovery(self) -> None:
+    def resume_from_recovery(self, reconcile_false_positive: bool) -> None:
         """Resume the run from recovery."""
-        self._protocol_engine.resume_from_recovery()
+        self._protocol_engine.resume_from_recovery(reconcile_false_positive)
 
     async def finish(
         self,
@@ -252,23 +255,46 @@ class RunOrchestrator:
             else self._protocol_runner.run_time_parameters
         )
 
+    def get_command_annotations(self) -> List[CommandAnnotation]:
+        """Get the list of command annotations defined in the protocol, if any."""
+        return (
+            []
+            if self._protocol_runner is None
+            else self._protocol_runner.command_annotations
+        )
+
     def get_current_command(self) -> Optional[CommandPointer]:
         """Get the "current" command, if any."""
         return self._protocol_engine.state_view.commands.get_current()
 
+    def get_most_recently_finalized_command(self) -> Optional[CommandPointer]:
+        """Get the most recently finalized command, if any."""
+        most_recently_finalized_command = (
+            self._protocol_engine.state_view.commands.get_most_recently_finalized_command()
+        )
+        return (
+            CommandPointer(
+                command_id=most_recently_finalized_command.command.id,
+                command_key=most_recently_finalized_command.command.key,
+                created_at=most_recently_finalized_command.command.createdAt,
+                index=most_recently_finalized_command.index,
+            )
+            if most_recently_finalized_command
+            else None
+        )
+
     def get_command_slice(
-        self,
-        cursor: Optional[int],
-        length: int,
+        self, cursor: Optional[int], length: int, include_fixit_commands: bool
     ) -> CommandSlice:
         """Get a slice of run commands.
 
         Args:
             cursor: Requested index of first command in the returned slice.
             length: Length of slice to return.
+            include_fixit_commands: Get all command intents.
         """
         return self._protocol_engine.state_view.commands.get_slice(
-            cursor=cursor, length=length
+            cursor=cursor, length=length, include_fixit_commands=include_fixit_commands
         )
 
     def get_command_error_slice(
@@ -397,6 +423,25 @@ class RunOrchestrator:
     def get_deck_type(self) -> DeckType:
         """Get engine deck type."""
         return self._protocol_engine.state_view.config.deck_type
+
+    def get_nozzle_maps(self) -> Mapping[str, NozzleMapInterface]:
+        """Get current nozzle maps keyed by pipette id."""
+        return self._protocol_engine.state_view.tips.get_pipette_nozzle_maps()
+
+    def get_tip_attached(self) -> Dict[str, bool]:
+        """Get current tip state keyed by pipette id."""
+
+        def has_tip_attached(pipette_id: str) -> bool:
+            return (
+                self._protocol_engine.state_view.pipettes.get_attached_tip(pipette_id)
+                is not None
+            )
+
+        pipette_ids = (
+            pipette.id
+            for pipette in self._protocol_engine.state_view.pipettes.get_all()
+        )
+        return {pipette_id: has_tip_attached(pipette_id) for pipette_id in pipette_ids}
 
     def set_error_recovery_policy(self, policy: ErrorRecoveryPolicy) -> None:
         """Create error recovery policy for the run."""

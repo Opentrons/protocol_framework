@@ -479,6 +479,15 @@ export const getModulesForEditModulesCard: Selector<
     }
   )
 )
+export const getUnsavedGroup: Selector<
+  BaseState,
+  StepIdType[]
+> = createSelector(rootSelector, state => state.unsavedGroup)
+export const getStepGroups: Selector<
+  BaseState,
+  Record<string, StepIdType[]>
+> = createSelector(rootSelector, state => state.stepGroups)
+
 export const getUnsavedForm: Selector<
   BaseState,
   FormData | null | undefined
@@ -613,7 +622,6 @@ export const getInvariantContext: Selector<
   featureFlagSelectors.getDisableModuleRestrictions,
   featureFlagSelectors.getAllowAllTipracks,
   featureFlagSelectors.getEnableAbsorbanceReader,
-  featureFlagSelectors.getEnableRedesign,
   (
     labwareEntities,
     moduleEntities,
@@ -621,8 +629,7 @@ export const getInvariantContext: Selector<
     additionalEquipmentEntities,
     disableModuleRestrictions,
     allowAllTipracks,
-    enableAbsorbanceReader,
-    enableEnableRedesign
+    enableAbsorbanceReader
   ) => ({
     labwareEntities,
     moduleEntities,
@@ -632,7 +639,6 @@ export const getInvariantContext: Selector<
       OT_PD_ALLOW_ALL_TIPRACKS: Boolean(allowAllTipracks),
       OT_PD_DISABLE_MODULE_RESTRICTIONS: Boolean(disableModuleRestrictions),
       OT_PD_ENABLE_ABSORBANCE_READER: Boolean(enableAbsorbanceReader),
-      OT_PD_ENABLE_REDESIGN: Boolean(enableEnableRedesign),
     },
   })
 )
@@ -654,13 +660,20 @@ export const getHydratedUnsavedForm: Selector<
 export const getDynamicFieldFormErrorsForUnsavedForm: Selector<
   BaseState,
   ProfileFormError[]
-> = createSelector(getHydratedUnsavedForm, hydratedForm => {
-  if (!hydratedForm) return []
+> = createSelector(
+  getHydratedUnsavedForm,
+  getInvariantContext,
+  (hydratedForm, invariantContext) => {
+    if (!hydratedForm) return []
 
-  const errors = _dynamicFieldFormErrors(hydratedForm)
+    const errors = [
+      ..._dynamicFieldFormErrors(hydratedForm),
+      ..._dynamicMoveLabwareFieldFormErrors(hydratedForm, invariantContext),
+    ]
 
-  return errors
-})
+    return errors
+  }
+)
 export const getFormLevelErrorsForUnsavedForm: Selector<
   BaseState,
   StepFormErrors
@@ -718,7 +731,7 @@ export const getUnsavedFormIsPristineSetTempForm: Selector<
   (unsavedForm, isPresaved) => {
     const isSetTempForm =
       unsavedForm?.stepType === 'temperature' &&
-      unsavedForm?.setTemperature === 'true'
+      unsavedForm?.targetTemperature != null
     return isPresaved && isSetTempForm
   }
 )
@@ -732,7 +745,7 @@ export const getUnsavedFormIsPristineHeaterShakerForm: Selector<
   (unsavedForm, isPresaved) => {
     const isSetHsTempForm =
       unsavedForm?.stepType === 'heaterShaker' &&
-      unsavedForm?.targetHeaterShakerTemperature !== null
+      unsavedForm?.targetHeaterShakerTemperature != null
 
     return isPresaved && isSetHsTempForm
   }

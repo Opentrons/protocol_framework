@@ -3,7 +3,7 @@ import asyncio
 from logging import getLogger
 from typing import Optional, AsyncGenerator, Callable
 
-from ..state import StateStore
+from ..state.state import StateStore
 from .command_executor import CommandExecutor
 
 log = getLogger(__name__)
@@ -69,7 +69,11 @@ class QueueWorker:
 
     async def _run_commands(self) -> None:
         async for command_id in self._command_generator():
-            await self._command_executor.execute(command_id=command_id)
+            try:
+                await self._command_executor.execute(command_id=command_id)
+            except BaseException:
+                log.exception("Unhandled failure in command executor")
+                raise
             # Yield to the event loop in case we're executing a long sequence of commands
             # that never yields internally. For example, a long sequence of comment commands.
             await asyncio.sleep(0)

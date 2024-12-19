@@ -248,7 +248,7 @@ class OT3PipetteHandler:
             result["current_nozzle_map"] = instr.nozzle_manager.current_configuration
             result["min_volume"] = instr.liquid_class.min_volume
             result["max_volume"] = instr.liquid_class.max_volume
-            result["channels"] = instr._max_channels
+            result["channels"] = instr._max_channels.value
             result["has_tip"] = instr.has_tip
             result["tip_length"] = instr.current_tip_length
             result["aspirate_speed"] = self.plunger_speed(
@@ -282,6 +282,13 @@ class OT3PipetteHandler:
                 "pipette_bounding_box_offsets"
             ] = instr.config.pipette_bounding_box_offsets
             result["lld_settings"] = instr.config.lld_settings
+            result["plunger_positions"] = {
+                "top": instr.plunger_positions.top,
+                "bottom": instr.plunger_positions.bottom,
+                "blow_out": instr.plunger_positions.blow_out,
+                "drop_tip": instr.plunger_positions.drop_tip,
+            }
+            result["shaft_ul_per_mm"] = instr.config.shaft_ul_per_mm
         return cast(PipetteDict, result)
 
     @property
@@ -425,7 +432,7 @@ class OT3PipetteHandler:
         if instr:
             instr.reset_nozzle_configuration()
 
-    async def add_tip(self, mount: OT3Mount, tip_length: float) -> None:
+    def add_tip(self, mount: OT3Mount, tip_length: float) -> None:
         instr = self._attached_instruments[mount]
         attached = self.attached_instruments
         instr_dict = attached[mount]
@@ -440,7 +447,15 @@ class OT3PipetteHandler:
                 "attach tip called while tip already attached to {instr}"
             )
 
-    async def remove_tip(self, mount: OT3Mount) -> None:
+    def cache_tip(self, mount: OT3Mount, tip_length: float) -> None:
+        instrument = self.get_pipette(mount)
+        if instrument.has_tip:
+            # instrument.add_tip() would raise an AssertionError if we tried to overwrite an existing tip.
+            instrument.remove_tip()
+        instrument.add_tip(tip_length=tip_length)
+        instrument.set_current_volume(0)
+
+    def remove_tip(self, mount: OT3Mount) -> None:
         instr = self._attached_instruments[mount]
         attached = self.attached_instruments
         instr_dict = attached[mount]

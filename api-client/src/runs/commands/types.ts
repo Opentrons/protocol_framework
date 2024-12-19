@@ -1,8 +1,16 @@
 import type { RunTimeCommand, RunCommandError } from '@opentrons/shared-data'
 
 export interface GetCommandsParams {
-  cursor: number | null // the index of the command at the center of the window
   pageLength: number // the number of items to include
+  cursor?: number
+}
+
+export interface GetRunCommandsParams extends GetCommandsParams {
+  includeFixitCommands?: boolean
+}
+
+export interface GetRunCommandsParamsRequest extends GetCommandsParams {
+  includeFixitCommands?: boolean
 }
 
 export interface RunCommandErrors {

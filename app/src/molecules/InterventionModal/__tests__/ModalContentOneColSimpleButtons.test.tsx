@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { vi, describe, it, expect } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 
@@ -17,7 +17,7 @@ describe('InterventionModal', () => {
   it('renders headline', () => {
     render(
       <ModalContentOneColSimpleButtons
-        headline={'headline'}
+        headline="headline"
         firstButton={{ label: 'first button', value: 'first' }}
         secondButton={{ label: 'second button', value: 'second' }}
       />
@@ -27,7 +27,7 @@ describe('InterventionModal', () => {
   it('renders buttons', () => {
     render(
       <ModalContentOneColSimpleButtons
-        headline={'headline'}
+        headline="headline"
         firstButton={{ label: 'first button', value: 'first' }}
         secondButton={{ label: 'second button', value: 'second' }}
         furtherButtons={[
@@ -44,7 +44,7 @@ describe('InterventionModal', () => {
   it('enforces single-item selection', () => {
     render(
       <ModalContentOneColSimpleButtons
-        headline={'headline'}
+        headline="headline"
         firstButton={{ label: 'first button', value: 'first' }}
         secondButton={{ label: 'second button', value: 'second' }}
         furtherButtons={[{ label: 'third button', value: 'third' }]}
@@ -55,28 +55,28 @@ describe('InterventionModal', () => {
     expect(inputElForButtonFromButtonText('third button').checked).toBeFalsy()
 
     fireEvent.click(inputElForButtonFromButtonText('first button'))
-    expect(inputElForButtonFromButtonText('first button').checked).toBeTruthy()
+    expect(screen.getByLabelText('first button')).toBeChecked()
     expect(inputElForButtonFromButtonText('second button').checked).toBeFalsy()
     expect(inputElForButtonFromButtonText('third button').checked).toBeFalsy()
 
     fireEvent.click(inputElForButtonFromButtonText('third button'))
     expect(inputElForButtonFromButtonText('first button').checked).toBeFalsy()
     expect(inputElForButtonFromButtonText('second button').checked).toBeFalsy()
-    expect(inputElForButtonFromButtonText('third button').checked).toBeTruthy()
+    expect(screen.getByLabelText('third button')).toBeChecked()
   })
 
   it('can start with a button selected', () => {
     render(
       <ModalContentOneColSimpleButtons
-        headline={'headline'}
+        headline="headline"
         firstButton={{ label: 'first button', value: 'first' }}
         secondButton={{ label: 'second button', value: 'second' }}
         furtherButtons={[{ label: 'third button', value: 'third' }]}
-        initialSelected={'second'}
+        initialSelected="second"
       />
     )
     expect(inputElForButtonFromButtonText('first button').checked).toBeFalsy()
-    expect(inputElForButtonFromButtonText('second button').checked).toBeTruthy()
+    expect(screen.getByLabelText('second button')).toBeChecked()
     expect(inputElForButtonFromButtonText('third button').checked).toBeFalsy()
   })
 
@@ -84,7 +84,7 @@ describe('InterventionModal', () => {
     const onChange = vi.fn()
     render(
       <ModalContentOneColSimpleButtons
-        headline={'headline'}
+        headline="headline"
         firstButton={{
           label: 'first button',
           value: 'first',
@@ -110,7 +110,7 @@ describe('InterventionModal', () => {
     const onSelect = vi.fn()
     render(
       <ModalContentOneColSimpleButtons
-        headline={'headline'}
+        headline="headline"
         firstButton={{ label: 'first button', value: 'first' }}
         secondButton={{ label: 'second button', value: 'second' }}
         furtherButtons={[{ label: 'third button', value: 'third' }]}

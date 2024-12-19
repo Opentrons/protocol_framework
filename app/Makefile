@@ -21,7 +21,7 @@ discovery_client_dir := ../discovery-client
 
 # These variables can be overriden when make is invoked to customize the
 # behavior of jest. For instance,
-# make test tests=src/pages/Labware/__tests__/hooks.test.tsx would run only the
+# make test tests=src/pages/Desktop/Labware/__tests__/hooks.test.tsx would run only the
 # specified test
 tests ?=
 cov_opts ?= --coverage=true
@@ -47,7 +47,7 @@ clean:
 dist: export NODE_ENV := production
 dist:
 	echo "Building app JS bundle (browser layer)"
-	vite build
+	NODE_OPTIONS="--max-old-space-size=8192" vite build
 
 # development
 #####################################################################

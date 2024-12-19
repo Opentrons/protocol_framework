@@ -11,7 +11,12 @@ from opentrons.protocol_engine import (
     commands as pe_commands,
     errors as pe_errors,
 )
-from opentrons.protocol_engine.types import RunTimeParameter, BooleanParameter
+from opentrons.protocol_engine.types import (
+    RunTimeParameter,
+    BooleanParameter,
+    CommandAnnotation,
+    SecondOrderCommandAnnotation,
+)
 from opentrons.protocol_runner import RunResult
 
 from robot_server.service.notifications import RunsPublisher, MaintenanceRunsPublisher
@@ -71,11 +76,13 @@ def engine_state_summary() -> StateSummary:
         pipettes=[],
         modules=[],
         liquids=[],
+        wells=[],
+        files=[],
         hasEverEnteredErrorRecovery=False,
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def run_time_parameters() -> List[RunTimeParameter]:
     """Get a RunTimeParameter list."""
     return [
@@ -89,10 +96,22 @@ def run_time_parameters() -> List[RunTimeParameter]:
 
 
 @pytest.fixture
+def command_annotations() -> List[CommandAnnotation]:
+    """Get a CommandAnnotation list."""
+    return [
+        SecondOrderCommandAnnotation(
+            commandKeys=["abc"],
+            params={"abc": "123"},
+            machineReadableName="hello world",
+        )
+    ]
+
+
+@pytest.fixture
 def protocol_commands() -> List[pe_commands.Command]:
     """Get a StateSummary value object."""
     return [
-        pe_commands.WaitForResume.construct(  # type: ignore[call-arg]
+        pe_commands.WaitForResume.model_construct(  # type: ignore[call-arg]
             params=pe_commands.WaitForResumeParams(message="hello world")
         )
     ]
@@ -155,6 +174,7 @@ async def test_create_play_action_to_start(
     mock_maintenance_runs_publisher: MaintenanceRunsPublisher,
     engine_state_summary: StateSummary,
     run_time_parameters: List[RunTimeParameter],
+    command_annotations: List[CommandAnnotation],
     protocol_commands: List[pe_commands.Command],
     run_id: str,
     subject: RunController,
@@ -187,6 +207,7 @@ async def test_create_play_action_to_start(
             commands=protocol_commands,
             state_summary=engine_state_summary,
             parameters=run_time_parameters,
+            command_annotations=command_annotations,
         )
     )
 
@@ -199,7 +220,25 @@ async def test_create_play_action_to_start(
             commands=protocol_commands,
             run_time_parameters=run_time_parameters,
         ),
-        await mock_runs_publisher.publish_pre_serialized_commands_notification(run_id),
+        mock_runs_publisher.publish_pre_serialized_commands_notification(run_id),
+        times=1,
+    )
+
+    # Verify maintenance run publication after background task execution
+    decoy.verify(
+        mock_maintenance_runs_publisher.publish_current_maintenance_run(),
+        times=1,
+    )
+
+    # Verify maintenance run publication after background task execution
+    decoy.verify(
+        mock_maintenance_runs_publisher.publish_current_maintenance_run(),
+        times=1,
+    )
+
+    # Verify maintenance run publication after background task execution
+    decoy.verify(
+        mock_maintenance_runs_publisher.publish_current_maintenance_run(),
         times=1,
     )
 
@@ -284,7 +323,9 @@ def test_create_resume_from_recovery_action(
     )
 
     decoy.verify(mock_run_store.insert_action(run_id, result), times=1)
-    decoy.verify(mock_run_orchestrator_store.resume_from_recovery())
+    decoy.verify(
+        mock_run_orchestrator_store.resume_from_recovery(reconcile_false_positive=False)
+    )
 
 
 @pytest.mark.parametrize(

@@ -1,9 +1,10 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
   ALIGN_CENTER,
+  Banner,
   BORDERS,
   Chip,
   COLORS,
@@ -13,46 +14,43 @@ import {
   Icon,
   JUSTIFY_FLEX_END,
   JUSTIFY_SPACE_BETWEEN,
+  LegacyStyledText,
+  ListItem,
+  Modal,
   PrimaryButton,
   SPACING,
-  LegacyStyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
 
 import { useAcknowledgeEstopDisengageMutation } from '@opentrons/react-api-client'
 
-import { getTopPortalEl } from '../../App/portal'
-import { Banner } from '../../atoms/Banner'
-import { ListItem } from '../../atoms/ListItem'
-import { SmallButton } from '../../atoms/buttons'
-import { LegacyModal } from '../../molecules/LegacyModal'
-import { Modal } from '../../molecules/Modal'
-import { getIsOnDevice } from '../../redux/config'
+import { usePlacePlateReaderLid } from '/app/resources/modules'
+import { getTopPortalEl } from '/app/App/portal'
+import { SmallButton } from '/app/atoms/buttons'
+import { OddModal } from '/app/molecules/OddModal'
+import { getIsOnDevice } from '/app/redux/config'
 
+import type { MouseEventHandler } from 'react'
+import type { ModalProps } from '@opentrons/components'
 import type {
-  ModalHeaderBaseProps,
+  OddModalHeaderBaseProps,
   ModalSize,
-} from '../../molecules/Modal/types'
-import type { LegacyModalProps } from '../../molecules/LegacyModal'
+} from '/app/molecules/OddModal/types'
 
 // Note (07/13/2023) After the launch, we will unify the modal components into one component.
 // Then TouchScreenModal and DesktopModal will be TouchScreenContent and DesktopContent that only render each content.
 interface EstopPressedModalProps {
   isEngaged: boolean
   closeModal: () => void
-  isDismissedModal?: boolean
-  setIsDismissedModal?: (isDismissedModal: boolean) => void
-  isWaitingForLogicalDisengage: boolean
-  setShouldSeeLogicalDisengage: () => void
+  isWaitingForResumeOperation: boolean
+  setIsWaitingForResumeOperation: () => void
 }
 
 export function EstopPressedModal({
   isEngaged,
   closeModal,
-  isDismissedModal,
-  setIsDismissedModal,
-  isWaitingForLogicalDisengage,
-  setShouldSeeLogicalDisengage,
+  isWaitingForResumeOperation,
+  setIsWaitingForResumeOperation,
 }: EstopPressedModalProps): JSX.Element {
   const isOnDevice = useSelector(getIsOnDevice)
   return createPortal(
@@ -60,20 +58,17 @@ export function EstopPressedModal({
       <TouchscreenModal
         isEngaged={isEngaged}
         closeModal={closeModal}
-        isWaitingForLogicalDisengage={isWaitingForLogicalDisengage}
-        setShouldSeeLogicalDisengage={setShouldSeeLogicalDisengage}
+        isWaitingForResumeOperation={isWaitingForResumeOperation}
+        setIsWaitingForResumeOperation={setIsWaitingForResumeOperation}
       />
     ) : (
       <>
-        {isDismissedModal === false ? (
-          <DesktopModal
-            isEngaged={isEngaged}
-            closeModal={closeModal}
-            setIsDismissedModal={setIsDismissedModal}
-            isWaitingForLogicalDisengage={isWaitingForLogicalDisengage}
-            setShouldSeeLogicalDisengage={setShouldSeeLogicalDisengage}
-          />
-        ) : null}
+        <DesktopModal
+          isEngaged={isEngaged}
+          closeModal={closeModal}
+          isWaitingForResumeOperation={isWaitingForResumeOperation}
+          setIsWaitingForResumeOperation={setIsWaitingForResumeOperation}
+        />
       </>
     ),
     getTopPortalEl()
@@ -83,13 +78,20 @@ export function EstopPressedModal({
 function TouchscreenModal({
   isEngaged,
   closeModal,
-  isWaitingForLogicalDisengage,
-  setShouldSeeLogicalDisengage,
+  isWaitingForResumeOperation,
+  setIsWaitingForResumeOperation,
 }: EstopPressedModalProps): JSX.Element {
   const { t } = useTranslation(['device_settings', 'branded'])
-  const [isResuming, setIsResuming] = React.useState<boolean>(false)
+  const [isResuming, setIsResuming] = useState<boolean>(false)
   const { acknowledgeEstopDisengage } = useAcknowledgeEstopDisengageMutation()
-  const modalHeader: ModalHeaderBaseProps = {
+
+  const {
+    handlePlaceReaderLid,
+    isValidPlateReaderMove,
+  } = usePlacePlateReaderLid({
+    onSettled: closeModal,
+  })
+  const modalHeader: OddModalHeaderBaseProps = {
     title: t('estop_pressed'),
     iconName: 'ot-alert',
     iconColor: COLORS.red50,
@@ -100,12 +102,15 @@ function TouchscreenModal({
   }
   const handleClick = (): void => {
     setIsResuming(true)
+    setIsWaitingForResumeOperation()
     acknowledgeEstopDisengage(null)
-    setShouldSeeLogicalDisengage()
-    closeModal()
+    handlePlaceReaderLid()
+    if (!isValidPlateReaderMove) {
+      closeModal()
+    }
   }
   return (
-    <Modal {...modalProps}>
+    <OddModal {...modalProps}>
       <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing40}>
         <LegacyStyledText as="p" fontWeight>
           {t('branded:estop_pressed_description')}
@@ -131,69 +136,58 @@ function TouchscreenModal({
           data-testid="Estop_pressed_button"
           width="100%"
           iconName={
-            isResuming || isWaitingForLogicalDisengage
-              ? 'ot-spinner'
-              : undefined
+            isResuming || isWaitingForResumeOperation ? 'ot-spinner' : undefined
           }
           iconPlacement={
-            isResuming || isWaitingForLogicalDisengage ? 'startIcon' : undefined
+            isResuming || isWaitingForResumeOperation ? 'startIcon' : undefined
           }
           buttonText={t('resume_robot_operations')}
-          disabled={isEngaged || isResuming || isWaitingForLogicalDisengage}
+          disabled={isEngaged || isResuming || isWaitingForResumeOperation}
           onClick={handleClick}
         />
       </Flex>
-    </Modal>
+    </OddModal>
   )
 }
 
 function DesktopModal({
   isEngaged,
   closeModal,
-  setIsDismissedModal,
-  isWaitingForLogicalDisengage,
-  setShouldSeeLogicalDisengage,
+  isWaitingForResumeOperation,
+  setIsWaitingForResumeOperation,
 }: EstopPressedModalProps): JSX.Element {
   const { t } = useTranslation('device_settings')
-  const [isResuming, setIsResuming] = React.useState<boolean>(false)
+  const [isResuming, setIsResuming] = useState<boolean>(false)
   const { acknowledgeEstopDisengage } = useAcknowledgeEstopDisengageMutation()
+  const {
+    handlePlaceReaderLid,
+    isValidPlateReaderMove,
+  } = usePlacePlateReaderLid({
+    onSettled: closeModal,
+  })
 
-  const handleCloseModal = (): void => {
-    if (setIsDismissedModal != null) {
-      setIsDismissedModal(true)
-    }
-    closeModal()
-  }
-
-  const modalProps: LegacyModalProps = {
+  const modalProps: ModalProps = {
     type: 'error',
     title: t('estop_pressed'),
-    onClose: handleCloseModal,
+    onClose: closeModal,
     closeOnOutsideClick: false,
     childrenPadding: SPACING.spacing24,
     width: '47rem',
   }
 
-  const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e): void => {
+  const handleClick: MouseEventHandler<HTMLButtonElement> = (e): void => {
     e.preventDefault()
     setIsResuming(true)
-    acknowledgeEstopDisengage(
-      {},
-      {
-        onSuccess: () => {
-          setShouldSeeLogicalDisengage()
-          closeModal()
-        },
-        onError: (error: any) => {
-          setIsResuming(false)
-          console.error(error)
-        },
-      }
-    )
+    setIsWaitingForResumeOperation()
+    acknowledgeEstopDisengage(null)
+    handlePlaceReaderLid()
+    if (!isValidPlateReaderMove) {
+      closeModal()
+    }
   }
 
   return (
-    <LegacyModal {...modalProps}>
+    <Modal {...modalProps}>
       <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing24}>
         <Banner type={isEngaged ? 'error' : 'success'}>
           {isEngaged ? t('estop_engaged') : t('estop_disengaged')}
@@ -204,14 +198,14 @@ function DesktopModal({
         <Flex justifyContent={JUSTIFY_FLEX_END}>
           <PrimaryButton
             onClick={handleClick}
-            disabled={isEngaged || isResuming || isWaitingForLogicalDisengage}
+            disabled={isEngaged || isResuming || isWaitingForResumeOperation}
           >
             <Flex
               flexDirection={DIRECTION_ROW}
               gridGap={SPACING.spacing8}
               alignItems={ALIGN_CENTER}
             >
-              {isResuming || isWaitingForLogicalDisengage ? (
+              {isResuming || isWaitingForResumeOperation ? (
                 <Icon size="1rem" spin name="ot-spinner" />
               ) : null}
               {t('resume_robot_operations')}
@@ -219,6 +213,6 @@ function DesktopModal({
           </PrimaryButton>
         </Flex>
       </Flex>
-    </LegacyModal>
+    </Modal>
   )
 }

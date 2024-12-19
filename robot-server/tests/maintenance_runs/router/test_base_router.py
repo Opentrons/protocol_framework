@@ -75,6 +75,7 @@ async def test_create_run(
         labwareOffsets=[],
         status=pe_types.EngineStatus.IDLE,
         liquids=[],
+        liquidClasses=[],
         hasEverEnteredErrorRecovery=False,
     )
 
@@ -101,6 +102,7 @@ async def test_create_run(
         is_ok_to_create_maintenance_run=True,
         deck_configuration_store=mock_deck_configuration_store,
         notify_publishers=mock_notify_publishers,
+        check_estop=True,
     )
 
     assert result.content.data == expected_response
@@ -125,6 +127,8 @@ async def test_create_maintenance_run_with_protocol_run_conflict(
             run_data_manager=mock_maintenance_run_data_manager,
             is_ok_to_create_maintenance_run=False,
             deck_configuration_store=mock_deck_configuration_store,
+            check_estop=True,
+            notify_publishers=mock_notify_publishers,
         )
     assert exc_info.value.status_code == 409
     assert exc_info.value.content["errors"][0]["id"] == "ProtocolRunIsActive"
@@ -147,6 +151,7 @@ async def test_get_run_data_from_url(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         hasEverEnteredErrorRecovery=False,
     )
 
@@ -197,6 +202,7 @@ async def test_get_run() -> None:
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         hasEverEnteredErrorRecovery=False,
     )
 
@@ -223,6 +229,7 @@ async def test_get_current_run(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         hasEverEnteredErrorRecovery=False,
     )
     decoy.when(mock_maintenance_run_data_manager.current_run_id).then_return(

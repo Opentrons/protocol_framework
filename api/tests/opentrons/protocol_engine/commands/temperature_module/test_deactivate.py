@@ -3,7 +3,7 @@ from decoy import Decoy
 
 from opentrons.hardware_control.modules import TempDeck
 
-from opentrons.protocol_engine.state import StateView
+from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.state.module_substates import (
     TemperatureModuleSubState,
     TemperatureModuleId,
@@ -45,5 +45,5 @@ async def test_await_temperature(
     result = await subject.execute(data)
     decoy.verify(await tempdeck_hardware.deactivate(), times=1)
     assert result == SuccessData(
-        public=temperature_module.DeactivateTemperatureResult(), private=None
+        public=temperature_module.DeactivateTemperatureResult(),
     )

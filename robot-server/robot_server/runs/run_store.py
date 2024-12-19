@@ -1,4 +1,5 @@
 """Runs' on-db store."""
+
 import logging
 from collections import defaultdict
 from dataclasses import dataclass
@@ -7,10 +8,18 @@ from functools import lru_cache
 from typing import Dict, List, Optional, Literal, Union
 
 import sqlalchemy
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
+from sqlalchemy import and_
 
 from opentrons.util.helpers import utc_now
-from opentrons.protocol_engine import StateSummary, CommandSlice
+from opentrons.protocol_engine import (
+    StateSummary,
+    CommandSlice,
+    CommandIntent,
+    ErrorOccurrence,
+    CommandErrorSlice,
+    CommandStatus,
+)
 from opentrons.protocol_engine.commands import Command
 from opentrons.protocol_engine.types import RunTimeParameter
 
@@ -30,13 +39,13 @@ from robot_server.persistence.tables import (
 from robot_server.persistence.pydantic import (
     json_to_pydantic,
     pydantic_to_json,
-    json_to_pydantic_list,
     pydantic_list_to_json,
 )
 from robot_server.protocols.protocol_store import ProtocolNotFoundError
 
 from .action_models import RunAction, RunActionType
 from .run_models import RunNotFoundError
+from ..persistence.tables import CommandStatusSQLEnum
 
 log = logging.getLogger(__name__)
 
@@ -175,6 +184,15 @@ class RunStore:
                         "index_in_run": command_index,
                         "command_id": command.id,
                         "command": pydantic_to_json(command),
+                        "command_intent": str(command.intent.value)
+                        if command.intent
+                        else CommandIntent.PROTOCOL,
+                        "command_error": pydantic_to_json(command.error)
+                        if command.error
+                        else None,
+                        "command_status": _convert_commands_status_to_sql_command_status(
+                            command.status
+                        ),
                     },
                 )
 
@@ -415,7 +433,7 @@ class RunStore:
 
         try:
             return (
-                json_to_pydantic_list(RunTimeParameter, row.run_time_parameters)  # type: ignore[arg-type]
+                json_to_pydantic(_rtp_list_adapter, row.run_time_parameters)
                 if row.run_time_parameters is not None
                 else []
             )
@@ -430,6 +448,7 @@ class RunStore:
         run_id: str,
         length: int,
         cursor: Optional[int],
+        include_fixit_commands: bool,
     ) -> CommandSlice:
         """Get a slice of run commands from the store.
 
@@ -439,6 +458,7 @@ class RunStore:
             cursor: The starting index of the slice in the whole collection.
                 If `None`, up to `length` elements at the end of the collection will
                 be returned.
+            include_fixit_commands: Wether we should include fixit command intent in the result.
 
         Returns:
             A collection of commands as well as the actual cursor used and
@@ -451,31 +471,51 @@ class RunStore:
             if not self._run_exists(run_id, transaction):
                 raise RunNotFoundError(run_id=run_id)
 
-            select_count = sqlalchemy.select(sqlalchemy.func.count()).where(
-                run_command_table.c.run_id == run_id
-            )
+            if include_fixit_commands:
+                select_count = sqlalchemy.select(sqlalchemy.func.count()).where(
+                    run_command_table.c.run_id == run_id
+                )
+            else:
+                select_count = sqlalchemy.select(sqlalchemy.func.count()).where(
+                    and_(
+                        run_command_table.c.run_id == run_id,
+                        run_command_table.c.command_intent != "fixit",
+                    )
+                )
             count_result: int = transaction.execute(select_count).scalar_one()
 
             actual_cursor = cursor if cursor is not None else count_result - length
             # Clamp to [0, count_result).
             actual_cursor = max(0, min(actual_cursor, count_result - 1))
-
-            select_slice = (
-                sqlalchemy.select(
-                    run_command_table.c.index_in_run, run_command_table.c.command
+            if include_fixit_commands:
+                select_slice = (
+                    sqlalchemy.select(
+                        run_command_table.c.index_in_run, run_command_table.c.command
+                    )
+                    .where(
+                        run_command_table.c.run_id == run_id,
+                        run_command_table.c.index_in_run >= actual_cursor,
+                        run_command_table.c.index_in_run < actual_cursor + length,
+                    )
+                    .order_by(run_command_table.c.index_in_run)
                 )
-                .where(
-                    run_command_table.c.run_id == run_id,
-                    run_command_table.c.index_in_run >= actual_cursor,
-                    run_command_table.c.index_in_run < actual_cursor + length,
+            else:
+                select_slice = (
+                    sqlalchemy.select(
+                        run_command_table.c.index_in_run, run_command_table.c.command
+                    )
+                    .where(
+                        run_command_table.c.run_id == run_id,
+                        run_command_table.c.index_in_run >= actual_cursor,
+                        run_command_table.c.index_in_run < actual_cursor + length,
+                        run_command_table.c.command_intent != "fixit",
+                    )
+                    .order_by(run_command_table.c.index_in_run)
                 )
-                .order_by(run_command_table.c.index_in_run)
-            )
             slice_result = transaction.execute(select_slice).all()
 
         sliced_commands: List[Command] = [
-            json_to_pydantic(Command, row.command)  # type: ignore[arg-type]
-            for row in slice_result
+            _parse_command(row.command) for row in slice_result
         ]
 
         return CommandSlice(
@@ -484,18 +524,132 @@ class RunStore:
             commands=sliced_commands,
         )
 
-    def get_all_commands_as_preserialized_list(self, run_id: str) -> List[str]:
+    def get_all_commands_as_preserialized_list(
+        self, run_id: str, include_fixit_commands: bool
+    ) -> List[str]:
         """Get all commands of the run as a list of strings of json command objects."""
         with self._sql_engine.begin() as transaction:
             if not self._run_exists(run_id, transaction):
                 raise RunNotFoundError(run_id=run_id)
-            select_commands = (
-                sqlalchemy.select(run_command_table.c.command)
-                .where(run_command_table.c.run_id == run_id)
-                .order_by(run_command_table.c.index_in_run)
-            )
+            # TODO (tz, 8-21-24): consolidate into 1 query.
+            if include_fixit_commands:
+                select_commands = (
+                    sqlalchemy.select(run_command_table.c.command)
+                    .where(run_command_table.c.run_id == run_id)
+                    .order_by(run_command_table.c.index_in_run)
+                )
+            else:
+                select_commands = (
+                    sqlalchemy.select(run_command_table.c.command)
+                    .where(
+                        and_(run_command_table.c.run_id == run_id),
+                        run_command_table.c.command_intent != "fixit",
+                    )
+                    .order_by(run_command_table.c.index_in_run)
+                )
             commands_result = transaction.scalars(select_commands).all()
         return commands_result
+
+    def get_command_errors_count(self, run_id: str) -> int:
+        """Get run commands errors count from the store.
+
+        Args:
+            run_id: Run ID to pull commands from.
+
+        Returns:
+            The number of commands errors.
+
+        Raises:
+            RunNotFoundError: The given run ID was not found.
+        """
+        with self._sql_engine.begin() as transaction:
+            if not self._run_exists(run_id, transaction):
+                raise RunNotFoundError(run_id=run_id)
+
+            select_count = sqlalchemy.select(sqlalchemy.func.count()).where(
+                and_(
+                    run_command_table.c.run_id == run_id,
+                    run_command_table.c.command_status == CommandStatusSQLEnum.FAILED,
+                )
+            )
+            errors_count: int = transaction.execute(select_count).scalar_one()
+            return errors_count
+
+    def get_commands_errors_slice(
+        self,
+        run_id: str,
+        length: int,
+        cursor: Optional[int],
+    ) -> CommandErrorSlice:
+        """Get a slice of run commands errors from the store.
+
+        Args:
+            run_id: Run ID to pull commands from.
+            length: Number of commands to return.
+            cursor: The starting index of the slice in the whole collection.
+                If `None`, up to `length` elements at the end of the collection will
+                be returned.
+
+        Returns:
+            A collection of command errors as well as the actual cursor used and
+            the total length of the collection.
+
+        Raises:
+            RunNotFoundError: The given run ID was not found.
+        """
+        with self._sql_engine.begin() as transaction:
+            if not self._run_exists(run_id, transaction):
+                raise RunNotFoundError(run_id=run_id)
+
+            select_count = sqlalchemy.select(sqlalchemy.func.count()).where(
+                and_(
+                    run_command_table.c.run_id == run_id,
+                    run_command_table.c.command_status == CommandStatusSQLEnum.FAILED,
+                )
+            )
+            count_result: int = transaction.execute(select_count).scalar_one()
+
+            actual_cursor = cursor if cursor is not None else count_result - length
+            # Clamp to [0, count_result).
+            # cursor is 0 based index and row number starts from 1.
+            actual_cursor = max(0, min(actual_cursor, count_result - 1)) + 1
+            select_command_errors = (
+                sqlalchemy.select(
+                    sqlalchemy.func.row_number().over().label("row_num"),
+                    run_command_table,
+                )
+                .where(
+                    and_(
+                        run_command_table.c.run_id == run_id,
+                        run_command_table.c.command_status
+                        == CommandStatusSQLEnum.FAILED,
+                    )
+                )
+                .order_by(run_command_table.c.index_in_run)
+                .subquery()
+            )
+
+            select_slice = (
+                sqlalchemy.select(select_command_errors.c.command_error)
+                .where(
+                    and_(
+                        select_command_errors.c.row_num >= actual_cursor,
+                        select_command_errors.c.row_num < actual_cursor + length,
+                    )
+                )
+                .order_by(select_command_errors.c.index_in_run)
+            )
+            slice_result = transaction.execute(select_slice).all()
+
+        sliced_commands: List[ErrorOccurrence] = [
+            json_to_pydantic(ErrorOccurrence, row.command_error) for row in slice_result
+        ]
+
+        return CommandErrorSlice(
+            cursor=actual_cursor,
+            total_length=count_result,
+            commands_errors=sliced_commands,
+        )
 
     @lru_cache(maxsize=_CACHE_ENTRIES)
     def get_command(self, run_id: str, command_id: str) -> Command:
@@ -525,7 +679,7 @@ class RunStore:
             if command is None:
                 raise CommandNotFoundError(command_id=command_id)
 
-        return json_to_pydantic(Command, command)  # type: ignore[arg-type]
+        return _parse_command(command)
 
     def remove(self, run_id: str) -> None:
         """Remove a run by its unique identifier.
@@ -672,3 +826,26 @@ def _convert_state_to_sql_values(
         "_updated_at": utc_now(),
         "run_time_parameters": pydantic_list_to_json(run_time_parameters),
     }
+
+
+_command_type_adapter: TypeAdapter[Command] = TypeAdapter(Command)
+_rtp_list_adapter = TypeAdapter(list[RunTimeParameter])
+
+
+def _parse_command(json_str: str) -> Command:
+    """Parse a JSON string from the database into a `Command`."""
+    return json_to_pydantic(_command_type_adapter, json_str)
+
+
+def _convert_commands_status_to_sql_command_status(
+    status: CommandStatus,
+) -> CommandStatusSQLEnum:
+    match status:
+        case CommandStatus.QUEUED:
+            return CommandStatusSQLEnum.QUEUED
+        case CommandStatus.RUNNING:
+            return CommandStatusSQLEnum.RUNNING
+        case CommandStatus.FAILED:
+            return CommandStatusSQLEnum.FAILED
+        case CommandStatus.SUCCEEDED:
+            return CommandStatusSQLEnum.SUCCEEDED

@@ -1,10 +1,11 @@
 """Models and implementation for the calibrateGripper command."""
 
 from enum import Enum
-from typing import Optional, Type
+from typing import Optional, Type, Any
 from typing_extensions import Literal
 
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.types import Point
 from opentrons.hardware_control import HardwareControlAPI
@@ -20,6 +21,10 @@ from opentrons.protocol_engine.resources import ensure_ot3_hardware
 
 
 CalibrateGripperCommandType = Literal["calibration/calibrateGripper"]
+
+
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
 
 
 class CalibrateGripperParamsJaw(Enum):  # noqa: D101
@@ -39,7 +44,7 @@ class CalibrateGripperParams(BaseModel):
         ),
     )
 
-    otherJawOffset: Optional[Vec3f] = Field(
+    otherJawOffset: Vec3f | SkipJsonSchema[None] = Field(
         None,
         description=(
             "If an offset for the other probe is already found, then specifying it here"
@@ -48,6 +53,7 @@ class CalibrateGripperParams(BaseModel):
             " If this param is not specified then the command will only find and return"
             " the offset for the specified probe."
         ),
+        json_schema_extra=_remove_default,
     )
 
 
@@ -62,18 +68,17 @@ class CalibrateGripperResult(BaseModel):
         ),
     )
 
-    savedCalibration: Optional[GripperCalibrationOffset] = Field(
+    savedCalibration: GripperCalibrationOffset | SkipJsonSchema[None] = Field(
         None,
         description=(
             "Gripper calibration result data, when `otherJawOffset` is provided."
         ),
+        json_schema_extra=_remove_default,
     )
 
 
 class CalibrateGripperImplementation(
-    AbstractCommandImpl[
-        CalibrateGripperParams, SuccessData[CalibrateGripperResult, None]
-    ]
+    AbstractCommandImpl[CalibrateGripperParams, SuccessData[CalibrateGripperResult]]
 ):
     """The implementation of a `calibrateGripper` command."""
 
@@ -87,7 +92,7 @@ class CalibrateGripperImplementation(
 
     async def execute(
         self, params: CalibrateGripperParams
-    ) -> SuccessData[CalibrateGripperResult, None]:
+    ) -> SuccessData[CalibrateGripperResult]:
         """Execute a `calibrateGripper` command.
 
         1. Move from the current location to the calibration area on the deck.
@@ -120,13 +125,12 @@ class CalibrateGripperImplementation(
             calibration_data = result
 
         return SuccessData(
-            public=CalibrateGripperResult.construct(
-                jawOffset=Vec3f.construct(
+            public=CalibrateGripperResult.model_construct(
+                jawOffset=Vec3f.model_construct(
                     x=probe_offset.x, y=probe_offset.y, z=probe_offset.z
                 ),
                 savedCalibration=calibration_data,
             ),
-            private=None,
         )
 
     @staticmethod
@@ -146,7 +150,7 @@ class CalibrateGripper(
 
     commandType: CalibrateGripperCommandType = "calibration/calibrateGripper"
     params: CalibrateGripperParams
-    result: Optional[CalibrateGripperResult]
+    result: Optional[CalibrateGripperResult] = None
 
     _ImplementationCls: Type[
         CalibrateGripperImplementation

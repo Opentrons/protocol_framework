@@ -29,7 +29,12 @@ def is_drop_tip_waste_chute(addressable_area_name: str) -> bool:
 
 def is_trash(addressable_area_name: str) -> bool:
     """Check if an addressable area is a trash bin."""
-    return addressable_area_name in {"movableTrash", "fixedTrash", "shortFixedTrash"}
+    return any(
+        [
+            s in addressable_area_name
+            for s in {"movableTrash", "fixedTrash", "shortFixedTrash"}
+        ]
+    )
 
 
 def is_staging_slot(addressable_area_name: str) -> bool:
@@ -46,3 +51,8 @@ def is_deck_slot(addressable_area_name: str) -> bool:
     except ValueError:
         return False
     return True
+
+
+def is_abs_reader(addressable_area_name: str) -> bool:
+    """Check if an addressable area is an absorbance plate reader area."""
+    return "absorbanceReaderV1" in addressable_area_name

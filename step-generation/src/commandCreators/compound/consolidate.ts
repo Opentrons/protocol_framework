@@ -4,6 +4,7 @@ import {
   COLUMN,
   getWellDepth,
   LOW_VOLUME_PIPETTES,
+  GRIPPER_WASTE_CHUTE_ADDRESSABLE_AREA,
 } from '@opentrons/shared-data'
 import { AIR_GAP_OFFSET_FROM_TOP } from '../../constants'
 import * as errorCreators from '../../errorCreators'
@@ -20,6 +21,7 @@ import {
   moveHelper,
   getIsSafePipetteMovement,
   getWasteChuteAddressableAreaNamePip,
+  getHasWasteChute,
 } from '../../utils'
 import {
   aspirate,
@@ -78,9 +80,11 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
     aspirateYOffset,
     dispenseXOffset,
     dispenseYOffset,
+    destLabware,
+    sourceLabware,
+    nozzles,
   } = args
 
-  const actionName = 'consolidate'
   const pipetteData = prevRobotState.pipettes[args.pipette]
   const is96Channel =
     invariantContext.pipetteEntities[args.pipette]?.spec.channels === 96
@@ -90,7 +94,6 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
     return {
       errors: [
         errorCreators.pipetteDoesNotExist({
-          actionName,
           pipette: args.pipette,
         }),
       ],
@@ -103,6 +106,20 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
       !invariantContext.additionalEquipmentEntities[args.destLabware])
   ) {
     return { errors: [errorCreators.equipmentDoesNotExist()] }
+  }
+
+  const initialDestLabwareSlot = prevRobotState.labware[destLabware]?.slot
+  const initialSourceLabwareSlot = prevRobotState.labware[sourceLabware]?.slot
+  const hasWasteChute = getHasWasteChute(
+    invariantContext.additionalEquipmentEntities
+  )
+
+  if (
+    hasWasteChute &&
+    (initialDestLabwareSlot === GRIPPER_WASTE_CHUTE_ADDRESSABLE_AREA ||
+      initialSourceLabwareSlot === GRIPPER_WASTE_CHUTE_ADDRESSABLE_AREA)
+  ) {
+    return { errors: [errorCreators.labwareDiscarded()] }
   }
 
   if (
@@ -215,6 +232,7 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
                   tipRack: args.tipRack,
                   xOffset: 0,
                   yOffset: 0,
+                  nozzles,
                 }),
                 ...(aspirateDelay != null
                   ? [
@@ -274,6 +292,7 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
               tipRack: args.tipRack,
               xOffset: aspirateXOffset,
               yOffset: aspirateYOffset,
+              nozzles,
             }),
             ...delayAfterAspirateCommands,
             ...touchTipAfterAspirateCommand,
@@ -328,6 +347,7 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
               aspirateYOffset,
               dispenseXOffset,
               dispenseYOffset,
+              nozzles,
             })
           : []
       const preWetTipCommands = args.preWetTip // Pre-wet tip is equivalent to a single mix, with volume equal to the consolidate volume.
@@ -348,6 +368,7 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
             aspirateYOffset,
             dispenseXOffset,
             dispenseYOffset,
+            nozzles,
           })
         : []
       //  can not mix in a waste chute
@@ -370,6 +391,7 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
               aspirateYOffset,
               dispenseXOffset,
               dispenseYOffset,
+              nozzles,
             })
           : []
 
@@ -397,6 +419,8 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
           offsetFromBottomMm: dispenseOffsetFromBottomMm,
           xOffset: dispenseXOffset,
           yOffset: dispenseYOffset,
+          nozzles,
+          tipRack: args.tipRack,
         }),
       ]
 
@@ -444,6 +468,7 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
                 flowRate: aspirateFlowRateUlSec,
                 offsetFromBottomMm: airGapOffsetDestWell,
                 tipRack: args.tipRack,
+                nozzles,
               }),
               ...(aspirateDelay != null
                 ? [

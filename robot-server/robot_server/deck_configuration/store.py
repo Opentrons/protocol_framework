@@ -70,7 +70,7 @@ class DeckConfigurationStore:  # noqa: D101
             await _write(
                 path=self._path, storable_deck_configuration=storable_deck_configuration
             )
-            await self._deck_configuration_publisher.publish_deck_configuration()
+            self._deck_configuration_publisher.publish_deck_configuration()
 
             return await self._get_assuming_locked()
 
@@ -92,7 +92,7 @@ class DeckConfigurationStore:  # noqa: D101
         """Delete the robot's current deck configuration, resetting it to the default."""
         async with self._lock:
             await self._path.unlink(missing_ok=True)
-            await self._deck_configuration_publisher.publish_deck_configuration()
+            self._deck_configuration_publisher.publish_deck_configuration()
 
     async def _get_assuming_locked(self) -> models.DeckConfigurationResponse:
         from_storage = await _read(self._path)
@@ -132,7 +132,7 @@ async def get_for_cli(deck_type: DeckType, path: Path) -> bytes:
         return serialize_deck_configuration(from_storage[0], from_storage[1])
     else:
         default_as_http_response = _get_default(deck_type)
-        default_as_http_request = models.DeckConfigurationRequest.construct(
+        default_as_http_request = models.DeckConfigurationRequest.model_construct(
             cutoutFixtures=default_as_http_response.cutoutFixtures
         )
         storable_default = _http_types_to_storage_types(
@@ -162,21 +162,21 @@ def _storage_types_to_http_types(
 ) -> models.DeckConfigurationResponse:
     storage_cutout_fixtures, last_modified_at = storage_val
     http_cutout_fixtures = [
-        models.CutoutFixture.construct(
+        models.CutoutFixture.model_construct(
             cutoutFixtureId=storage_element.cutout_fixture_id,
             cutoutId=storage_element.cutout_id,
             opentronsModuleSerialNumber=storage_element.opentrons_module_serial_number,
         )
         for storage_element in storage_cutout_fixtures
     ]
-    return models.DeckConfigurationResponse.construct(
+    return models.DeckConfigurationResponse.model_construct(
         cutoutFixtures=http_cutout_fixtures,
         lastModifiedAt=last_modified_at,
     )
 
 
 def _get_default(deck_type: DeckType) -> models.DeckConfigurationResponse:
-    return models.DeckConfigurationResponse.construct(
+    return models.DeckConfigurationResponse.model_construct(
         cutoutFixtures=defaults.for_deck_definition(deck_type.value).cutoutFixtures,
         lastModifiedAt=None,
     )

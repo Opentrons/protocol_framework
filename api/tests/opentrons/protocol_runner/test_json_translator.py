@@ -1,4 +1,5 @@
 """Tests for the JSON JsonTranslator interface."""
+
 import pytest
 from typing import Dict, List
 
@@ -13,6 +14,9 @@ from opentrons_shared_data.labware.labware_definition import (
     Group,
     Metadata1,
     WellDefinition,
+    CuboidalFrustum,
+    InnerWellGeometry,
+    SphericalSegment,
 )
 from opentrons_shared_data.protocol.models import (
     protocol_schema_v6,
@@ -37,6 +41,8 @@ from opentrons.protocol_engine import (
     DeckPoint,
     DeckSlotLocation,
     WellLocation,
+    LiquidHandlingWellLocation,
+    PickUpTipWellLocation,
     DropTipWellLocation,
     WellOrigin,
     DropTipWellOrigin,
@@ -82,17 +88,17 @@ VALID_TEST_PARAMS = [
         protocol_schema_v8.Command(
             commandType="aspirate",
             key=None,
-            params=protocol_schema_v8.Params(
-                pipetteId="pipette-id-1",
-                labwareId="labware-id-2",
-                volume=1.23,
-                flowRate=4.56,
-                wellName="A1",
-                wellLocation=SD_WellLocation(
-                    origin="bottom",
-                    offset=OffsetVector(x=0, y=0, z=7.89),
-                ),
-            ),
+            params={
+                "pipetteId": "pipette-id-1",
+                "labwareId": "labware-id-2",
+                "volume": 1.23,
+                "flowRate": 4.56,
+                "wellName": "A1",
+                "wellLocation": {
+                    "origin": "bottom",
+                    "offset": {"x": 0, "y": 0, "z": 7.89},
+                },
+            },
         ),
         pe_commands.AspirateCreate(
             key=None,
@@ -103,7 +109,7 @@ VALID_TEST_PARAMS = [
                 volume=1.23,
                 flowRate=4.56,
                 wellName="A1",
-                wellLocation=WellLocation(
+                wellLocation=LiquidHandlingWellLocation(
                     origin=WellOrigin.BOTTOM,
                     offset=WellOffset(x=0, y=0, z=7.89),
                 ),
@@ -144,17 +150,17 @@ VALID_TEST_PARAMS = [
         protocol_schema_v8.Command(
             commandType="dispense",
             key="dispense-key",
-            params=protocol_schema_v8.Params(
-                pipetteId="pipette-id-1",
-                labwareId="labware-id-2",
-                volume=1.23,
-                flowRate=4.56,
-                wellName="A1",
-                wellLocation=SD_WellLocation(
-                    origin="bottom",
-                    offset=OffsetVector(x=0, y=0, z=7.89),
-                ),
-            ),
+            params={
+                "pipetteId": "pipette-id-1",
+                "labwareId": "labware-id-2",
+                "volume": 1.23,
+                "flowRate": 4.56,
+                "wellName": "A1",
+                "wellLocation": {
+                    "origin": "bottom",
+                    "offset": {"x": 0, "y": 0, "z": 7.89},
+                },
+            },
         ),
         pe_commands.DispenseCreate(
             key="dispense-key",
@@ -164,7 +170,7 @@ VALID_TEST_PARAMS = [
                 volume=1.23,
                 flowRate=4.56,
                 wellName="A1",
-                wellLocation=WellLocation(
+                wellLocation=LiquidHandlingWellLocation(
                     origin=WellOrigin.BOTTOM,
                     offset=WellOffset(x=0, y=0, z=7.89),
                 ),
@@ -188,13 +194,13 @@ VALID_TEST_PARAMS = [
                 wellName="A1",
             ),
         ),
-        protocol_schema_v8.Command(
+        protocol_schema_v8.Command.model_construct(
             commandType="dropTip",
-            params=protocol_schema_v8.Params(
-                pipetteId="pipette-id-1",
-                labwareId="labware-id-2",
-                wellName="A1",
-            ),
+            params={
+                "pipetteId": "pipette-id-1",
+                "labwareId": "labware-id-2",
+                "wellName": "A1",
+            },
         ),
         pe_commands.DropTipCreate(
             params=pe_commands.DropTipParams(
@@ -225,20 +231,20 @@ VALID_TEST_PARAMS = [
                 wellName="A1",
             ),
         ),
-        protocol_schema_v8.Command(
+        protocol_schema_v8.Command.model_construct(
             commandType="pickUpTip",
-            params=protocol_schema_v8.Params(
-                pipetteId="pipette-id-1",
-                labwareId="labware-id-2",
-                wellName="A1",
-            ),
+            params={
+                "pipetteId": "pipette-id-1",
+                "labwareId": "labware-id-2",
+                "wellName": "A1",
+            },
         ),
         pe_commands.PickUpTipCreate(
             params=pe_commands.PickUpTipParams(
                 pipetteId="pipette-id-1",
                 labwareId="labware-id-2",
                 wellName="A1",
-                wellLocation=WellLocation(),
+                wellLocation=PickUpTipWellLocation(),
             )
         ),
     ),
@@ -267,17 +273,17 @@ VALID_TEST_PARAMS = [
                 ),
             ),
         ),
-        protocol_schema_v8.Command(
+        protocol_schema_v8.Command.model_construct(
             commandType="touchTip",
-            params=protocol_schema_v8.Params(
-                pipetteId="pipette-id-1",
-                labwareId="labware-id-2",
-                wellName="A1",
-                wellLocation=SD_WellLocation(
-                    origin="bottom",
-                    offset=OffsetVector(x=0, y=0, z=-1.23),
-                ),
-            ),
+            params={
+                "pipetteId": "pipette-id-1",
+                "labwareId": "labware-id-2",
+                "wellName": "A1",
+                "wellLocation": {
+                    "origin": "bottom",
+                    "offset": {"x": 0, "y": 0, "z": -1.23},
+                },
+            },
         ),
         pe_commands.TouchTipCreate(
             params=pe_commands.TouchTipParams(
@@ -302,11 +308,13 @@ VALID_TEST_PARAMS = [
                 pipetteId="pipette-id-1", mount="left", pipetteName="p10_single"
             ),
         ),
-        protocol_schema_v8.Command(
+        protocol_schema_v8.Command.model_construct(
             commandType="loadPipette",
-            params=protocol_schema_v8.Params(
-                pipetteId="pipette-id-1", mount="left", pipetteName="p10_single"
-            ),
+            params={
+                "pipetteId": "pipette-id-1",
+                "mount": "left",
+                "pipetteName": "p10_single",
+            },
         ),
         pe_commands.LoadPipetteCreate(
             params=pe_commands.LoadPipetteParams(
@@ -332,13 +340,13 @@ VALID_TEST_PARAMS = [
                 location=Location(slotName="3"),
             ),
         ),
-        protocol_schema_v8.Command(
+        protocol_schema_v8.Command.model_construct(
             commandType="loadModule",
-            params=protocol_schema_v8.Params(
-                moduleId="module-id-1",
-                model="magneticModuleV2",
-                location=Location(slotName="3"),
-            ),
+            params={
+                "moduleId": "module-id-1",
+                "model": "magneticModuleV2",
+                "location": {"slotName": "3"},
+            },
         ),
         pe_commands.LoadModuleCreate(
             params=pe_commands.LoadModuleParams(
@@ -367,16 +375,16 @@ VALID_TEST_PARAMS = [
                 displayName="Trash",
             ),
         ),
-        protocol_schema_v8.Command(
+        protocol_schema_v8.Command.model_construct(
             commandType="loadLabware",
-            params=protocol_schema_v8.Params(
-                labwareId="labware-id-2",
-                version=1,
-                namespace="example",
-                loadName="foo_8_plate_33ul",
-                location=Location(moduleId="temperatureModuleId"),
-                displayName="Trash",
-            ),
+            params={
+                "labwareId": "labware-id-2",
+                "version": 1,
+                "namespace": "example",
+                "loadName": "foo_8_plate_33ul",
+                "location": {"moduleId": "temperatureModuleId"},
+                "displayName": "Trash",
+            },
         ),
         pe_commands.LoadLabwareCreate(
             params=pe_commands.LoadLabwareParams(
@@ -416,18 +424,18 @@ VALID_TEST_PARAMS = [
                 flowRate=1.23,
             ),
         ),
-        protocol_schema_v8.Command(
+        protocol_schema_v8.Command.model_construct(
             commandType="blowout",
-            params=protocol_schema_v8.Params(
-                pipetteId="pipette-id-1",
-                labwareId="labware-id-2",
-                wellName="A1",
-                wellLocation=SD_WellLocation(
-                    origin="bottom",
-                    offset=OffsetVector(x=0, y=0, z=7.89),
-                ),
-                flowRate=1.23,
-            ),
+            params={
+                "pipetteId": "pipette-id-1",
+                "labwareId": "labware-id-2",
+                "wellName": "A1",
+                "wellLocation": {
+                    "origin": "bottom",
+                    "offset": {"x": 0, "y": 0, "z": 7.89},
+                },
+                "flowRate": 1.23,
+            },
         ),
         pe_commands.BlowOutCreate(
             params=pe_commands.BlowOutParams(
@@ -451,9 +459,9 @@ VALID_TEST_PARAMS = [
             commandType="delay",
             params=protocol_schema_v7.Params(waitForResume=True, message="hello world"),
         ),
-        protocol_schema_v8.Command(
+        protocol_schema_v8.Command.model_construct(
             commandType="delay",
-            params=protocol_schema_v8.Params(waitForResume=True, message="hello world"),
+            params={"waitForResume": True, "message": "hello world"},
         ),
         pe_commands.WaitForResumeCreate(
             params=pe_commands.WaitForResumeParams(message="hello world")
@@ -468,9 +476,9 @@ VALID_TEST_PARAMS = [
             commandType="delay",
             params=protocol_schema_v7.Params(seconds=12.34, message="hello world"),
         ),
-        protocol_schema_v8.Command(
+        protocol_schema_v8.Command.model_construct(
             commandType="delay",
-            params=protocol_schema_v8.Params(seconds=12.34, message="hello world"),
+            params={"seconds": 12.34, "message": "hello world"},
         ),
         pe_commands.WaitForDurationCreate(
             params=pe_commands.WaitForDurationParams(
@@ -488,9 +496,9 @@ VALID_TEST_PARAMS = [
             commandType="waitForResume",
             params=protocol_schema_v7.Params(message="hello world"),
         ),
-        protocol_schema_v8.Command(
+        protocol_schema_v8.Command.model_construct(
             commandType="waitForResume",
-            params=protocol_schema_v8.Params(message="hello world"),
+            params={"message": "hello world"},
         ),
         pe_commands.WaitForResumeCreate(
             params=pe_commands.WaitForResumeParams(message="hello world")
@@ -505,9 +513,9 @@ VALID_TEST_PARAMS = [
             commandType="waitForDuration",
             params=protocol_schema_v7.Params(seconds=12.34, message="hello world"),
         ),
-        protocol_schema_v8.Command(
+        protocol_schema_v8.Command.model_construct(
             commandType="waitForDuration",
-            params=protocol_schema_v8.Params(seconds=12.34, message="hello world"),
+            params={"seconds": 12.34, "message": "hello world"},
         ),
         pe_commands.WaitForDurationCreate(
             params=pe_commands.WaitForDurationParams(
@@ -535,14 +543,14 @@ VALID_TEST_PARAMS = [
                 forceDirect=True,
             ),
         ),
-        protocol_schema_v8.Command(
+        protocol_schema_v8.Command.model_construct(
             commandType="moveToCoordinates",
-            params=protocol_schema_v8.Params(
-                pipetteId="pipette-id-1",
-                coordinates=OffsetVector(x=1.1, y=2.2, z=3.3),
-                minimumZHeight=123.4,
-                forceDirect=True,
-            ),
+            params={
+                "pipetteId": "pipette-id-1",
+                "coordinates": {"x": 1.1, "y": 2.2, "z": 3.3},
+                "minimumZHeight": 123.4,
+                "forceDirect": True,
+            },
         ),
         pe_commands.MoveToCoordinatesCreate(
             params=pe_commands.MoveToCoordinatesParams(
@@ -588,22 +596,22 @@ VALID_TEST_PARAMS = [
                 ],
             ),
         ),
-        protocol_schema_v8.Command(
+        protocol_schema_v8.Command.model_construct(
             commandType="thermocycler/runProfile",
-            params=protocol_schema_v8.Params(
-                moduleId="module-id-2",
-                blockMaxVolumeUl=1.11,
-                profile=[
-                    ProfileStep(
-                        celsius=2.22,
-                        holdSeconds=3.33,
-                    ),
-                    ProfileStep(
-                        celsius=4.44,
-                        holdSeconds=5.55,
-                    ),
+            params={
+                "moduleId": "module-id-2",
+                "blockMaxVolumeUl": 1.11,
+                "profile": [
+                    {
+                        "celsius": 2.22,
+                        "holdSeconds": 3.33,
+                    },
+                    {
+                        "celsius": 4.44,
+                        "holdSeconds": 5.55,
+                    },
                 ],
-            ),
+            },
         ),
         pe_commands.thermocycler.RunProfileCreate(
             params=pe_commands.thermocycler.RunProfileParams(
@@ -639,14 +647,14 @@ VALID_TEST_PARAMS = [
                 volumeByWell={"A1": 32, "B2": 50},
             ),
         ),
-        protocol_schema_v8.Command(
+        protocol_schema_v8.Command.model_construct(
             commandType="loadLiquid",
             key=None,
-            params=protocol_schema_v8.Params(
-                labwareId="labware-id-2",
-                liquidId="liquid-id-555",
-                volumeByWell={"A1": 32, "B2": 50},
-            ),
+            params={
+                "labwareId": "labware-id-2",
+                "liquidId": "liquid-id-555",
+                "volumeByWell": {"A1": 32, "B2": 50},
+            },
         ),
         pe_commands.LoadLiquidCreate(
             key=None,
@@ -680,11 +688,41 @@ def _load_labware_definition_data() -> LabwareDefinition:
                 y=75.43,
                 z=75,
                 totalLiquidVolume=1100000,
-                shape="rectangular",
+                shape="circular",
             )
         },
         dimensions=Dimensions(yDimension=85.5, zDimension=100, xDimension=127.75),
         cornerOffsetFromSlot=CornerOffsetFromSlot(x=0, y=0, z=0),
+        innerLabwareGeometry={
+            "welldefinition1111": InnerWellGeometry(
+                sections=[
+                    CuboidalFrustum(
+                        shape="cuboidal",
+                        topXDimension=7.6,
+                        topYDimension=8.5,
+                        bottomXDimension=5.6,
+                        bottomYDimension=6.5,
+                        topHeight=45,
+                        bottomHeight=20,
+                    ),
+                    CuboidalFrustum(
+                        shape="cuboidal",
+                        topXDimension=5.6,
+                        topYDimension=6.5,
+                        bottomXDimension=4.5,
+                        bottomYDimension=4.0,
+                        topHeight=20,
+                        bottomHeight=10,
+                    ),
+                    SphericalSegment(
+                        shape="spherical",
+                        radiusOfCurvature=6,
+                        topHeight=10,
+                        bottomHeight=0.0,
+                    ),
+                ],
+            )
+        },
         brand=BrandData(brand="foo"),
         metadata=Metadata(
             displayName="Foo 8 Well Plate 33uL",
@@ -790,7 +828,7 @@ def _make_v8_json_protocol(
         ),
         labwareDefinitions=labware_definitions,
         labwareDefinitionSchemaId="opentronsLabwareSchemaV2",
-        commandSchemaId="opentronsCommandSchemaV8",
+        commandSchemaId=protocol_schema_v8.CommandSchemaId("opentronsCommandSchemaV8"),
         commands=commands,
         liquidSchemaId="opentronsLiquidSchemaV1",
         liquids=liquids,
@@ -836,6 +874,6 @@ def test_load_liquid(
             id="liquid-id-555",
             displayName="water",
             description="water description",
-            displayColor=HexColor(__root__="#F00"),
+            displayColor=HexColor("#F00"),
         )
     ]

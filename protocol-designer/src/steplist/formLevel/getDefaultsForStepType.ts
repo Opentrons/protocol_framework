@@ -120,11 +120,9 @@ export function getDefaultsForStepType(
       return {
         moduleId: null,
         pauseAction: null,
-        pauseHour: null,
         pauseMessage: '',
-        pauseMinute: null,
-        pauseSecond: null,
         pauseTemperature: null,
+        pauseTime: null,
       }
 
     case 'manualIntervention':
@@ -150,8 +148,7 @@ export function getDefaultsForStepType(
     case 'heaterShaker':
       return {
         heaterShakerSetTimer: null,
-        heaterShakerTimerMinutes: null,
-        heaterShakerTimerSeconds: null,
+        heaterShakerTimer: null,
         latchOpen: false,
         moduleId: null,
         setHeaterShakerTemperature: null,
@@ -176,7 +173,7 @@ export function getDefaultsForStepType(
         profileItemsById: {},
         profileTargetLidTemp: null,
         profileVolume: null,
-        thermocyclerFormType: null,
+        thermocyclerFormType: 'thermocyclerState',
       }
 
     default:

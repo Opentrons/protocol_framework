@@ -17,18 +17,15 @@ stages:
           csv_file_id: data.id
           csv_file_name: data.name
           file_created_at: data.createdAt
+          source: "uploaded"
       status_code:
-      # If the file exists on the test server then accept 200 else 201.
-      # We have to do this because the persistent storage is scoped to a test session and
-      # there are tests elsewhere in the suite that upload the same file.
-      # We currently do not allow deleting data files over http, so this situation is not easy to change.
-      - 200
       - 201
       json:
         data:
           id: !anystr
           name: "sample_record.csv"
           createdAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
+          source: "uploaded"
 
   - name: Upload a protocol
     request:
@@ -45,6 +42,7 @@ stages:
           protocol_id: data.id
           analysis_id: data.analysisSummaries[0].id
           run_time_parameters_data1: data.analysisSummaries[0].runTimeParameters
+          source: "uploaded"
       strict:
         - json:off
       status_code: 201
@@ -135,3 +133,4 @@ stages:
           - id: '{csv_file_id}'
             name: '{csv_file_name}'
             createdAt: '{file_created_at}'
+            source: 'uploaded'

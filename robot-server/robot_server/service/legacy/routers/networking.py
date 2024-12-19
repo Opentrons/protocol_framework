@@ -1,7 +1,7 @@
 import logging
 import os
 import subprocess
-from typing import Optional
+from typing import Annotated, Optional
 
 from starlette import status
 from starlette.responses import JSONResponse
@@ -78,17 +78,19 @@ async def get_networking_status() -> NetworkingStatus:
     response_model=WifiNetworks,
 )
 async def get_wifi_networks(
-    rescan: Optional[bool] = Query(
-        default=False,
-        description=(
-            "If `true`, forces a rescan for beaconing Wi-Fi networks. "
-            "This is an expensive operation that can take ~10 seconds, "
-            'so only do it based on user needs like clicking a "scan network" '
-            "button, not just to poll. "
-            "If `false`, returns the cached Wi-Fi networks, "
-            "letting the system decide when to do a rescan."
+    rescan: Annotated[
+        Optional[bool],
+        Query(
+            description=(
+                "If `true`, forces a rescan for beaconing Wi-Fi networks. "
+                "This is an expensive operation that can take ~10 seconds, "
+                'so only do it based on user needs like clicking a "scan network" '
+                "button, not just to poll. "
+                "If `false`, returns the cached Wi-Fi networks, "
+                "letting the system decide when to do a rescan."
+            ),
         ),
-    )
+    ] = False,
 ) -> WifiNetworks:
     networks = await nmcli.available_ssids(rescan)
     return WifiNetworks(list=[WifiNetworkFull(**n) for n in networks])
@@ -188,7 +190,7 @@ async def post_wifi_key(key: UploadFile = File(...)):
     else:
         # We return a JSONResponse because we want the 200 status code.
         response.message = "Key file already present"
-        return JSONResponse(content=response.dict())
+        return JSONResponse(content=response.model_dump())
 
 
 @router.delete(
@@ -201,11 +203,14 @@ async def post_wifi_key(key: UploadFile = File(...)):
     },
 )
 async def delete_wifi_key(
-    key_uuid: str = Path(
-        ...,
-        description="The ID of key to delete, as determined by a previous"
-        " call to GET /wifi/keys",
-    )
+    key_uuid: Annotated[
+        str,
+        Path(
+            ...,
+            description="The ID of key to delete, as determined by a previous"
+            " call to GET /wifi/keys",
+        ),
+    ],
 ) -> V1BasicResponse:
     """Delete wifi key handler"""
     deleted_file = wifi.remove_key(key_uuid)
@@ -269,4 +274,4 @@ async def post_wifi_disconnect(wifi_ssid: WifiNetwork):
         )
     else:
         stat = status.HTTP_500_INTERNAL_SERVER_ERROR
-    return JSONResponse(status_code=stat, content=result.dict())
+    return JSONResponse(status_code=stat, content=result.model_dump())

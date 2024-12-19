@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState, useLayoutEffect } from 'react'
 
 import type { RunTimeCommand } from '@opentrons/shared-data'
 import type { ErrorRecoveryFlowsProps } from '..'
@@ -16,7 +16,7 @@ export interface FailedCommandBySource {
  * In order to reduce misuse, bundle the failedCommand into "run" and "analysis" versions.
  */
 export function useRetainedFailedCommandBySource(
-  failedCommandByRunRecord: ErrorRecoveryFlowsProps['failedCommandByRunRecord'],
+  failedCommandByRunRecord: ErrorRecoveryFlowsProps['unvalidatedFailedCommand'],
   protocolAnalysis: ErrorRecoveryFlowsProps['protocolAnalysis']
 ): FailedCommandBySource | null {
   // In some cases, Error Recovery (by the app definition) persists when Error Recovery (by the server definition) does
@@ -25,9 +25,9 @@ export function useRetainedFailedCommandBySource(
   const [
     retainedFailedCommand,
     setRetainedFailedCommand,
-  ] = React.useState<FailedCommandBySource | null>(null)
+  ] = useState<FailedCommandBySource | null>(null)
 
-  React.useEffect(() => {
+  useLayoutEffect(() => {
     if (failedCommandByRunRecord !== null) {
       const failedCommandByAnalysis =
         protocolAnalysis?.commands.find(

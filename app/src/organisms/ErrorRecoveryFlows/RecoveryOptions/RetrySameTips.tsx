@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 
 import { LegacyStyledText } from '@opentrons/components'
@@ -19,7 +18,9 @@ export function RetrySameTips(props: RecoveryContentProps): JSX.Element {
       case RETRY_SAME_TIPS.STEPS.RETRY:
         return <RetrySameTipsInfo {...props} />
       default:
-        console.warn(`${step} in ${route} not explicitly handled. Rerouting.`)
+        console.warn(
+          `RetrySameTips: ${step} in ${route} not explicitly handled. Rerouting.`
+        )
         return <SelectRecoveryOption {...props} />
     }
   }
@@ -30,12 +31,12 @@ export function RetrySameTips(props: RecoveryContentProps): JSX.Element {
 export function RetrySameTipsInfo(props: RecoveryContentProps): JSX.Element {
   const { routeUpdateActions, recoveryCommands } = props
   const { retryFailedCommand, resumeRun } = recoveryCommands
-  const { setRobotInMotion } = routeUpdateActions
+  const { handleMotionRouting } = routeUpdateActions
   const { ROBOT_RETRYING_STEP } = RECOVERY_MAP
   const { t } = useTranslation('error_recovery')
 
   const primaryBtnOnClick = (): Promise<void> => {
-    return setRobotInMotion(true, ROBOT_RETRYING_STEP.ROUTE)
+    return handleMotionRouting(true, ROBOT_RETRYING_STEP.ROUTE)
       .then(() => retryFailedCommand())
       .then(() => {
         resumeRun()

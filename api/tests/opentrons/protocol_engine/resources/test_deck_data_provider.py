@@ -7,7 +7,10 @@ from opentrons_shared_data.deck.types import DeckDefinitionV5
 from opentrons.protocols.models import LabwareDefinition
 from opentrons.types import DeckSlotName
 
-from opentrons.protocol_engine.types import DeckSlotLocation, DeckType
+from opentrons.protocol_engine.types import (
+    DeckSlotLocation,
+    DeckType,
+)
 from opentrons.protocol_engine.resources import (
     LabwareDataProvider,
     DeckDataProvider,
@@ -61,7 +64,7 @@ async def test_get_deck_labware_fixtures_ot2_standard(
         )
     ).then_return(ot2_fixed_trash_def)
 
-    result = await subject.get_deck_fixed_labware(ot2_standard_deck_def)
+    result = await subject.get_deck_fixed_labware(True, ot2_standard_deck_def, None)
 
     assert result == [
         DeckFixedLabware(
@@ -91,7 +94,7 @@ async def test_get_deck_labware_fixtures_ot2_short_trash(
         )
     ).then_return(ot2_short_fixed_trash_def)
 
-    result = await subject.get_deck_fixed_labware(ot2_short_trash_deck_def)
+    result = await subject.get_deck_fixed_labware(True, ot2_short_trash_deck_def, None)
 
     assert result == [
         DeckFixedLabware(
@@ -121,7 +124,7 @@ async def test_get_deck_labware_fixtures_ot3_standard(
         )
     ).then_return(ot3_fixed_trash_def)
 
-    result = await subject.get_deck_fixed_labware(ot3_standard_deck_def)
+    result = await subject.get_deck_fixed_labware(True, ot3_standard_deck_def, None)
 
     assert result == [
         DeckFixedLabware(

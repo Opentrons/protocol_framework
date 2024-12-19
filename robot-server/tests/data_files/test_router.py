@@ -8,15 +8,24 @@ from decoy import Decoy
 from fastapi import UploadFile
 from opentrons.protocol_reader import FileHasher, FileReaderWriter, BufferedFile
 
-from robot_server.service.json_api import MultiBodyMeta
+from robot_server.service.json_api import MultiBodyMeta, SimpleEmptyBody
 
-from robot_server.data_files.data_files_store import DataFilesStore, DataFileInfo
-from robot_server.data_files.models import DataFile, FileIdNotFoundError
+from robot_server.data_files.data_files_store import (
+    DataFilesStore,
+    DataFileInfo,
+)
+from robot_server.data_files.models import (
+    DataFile,
+    DataFileSource,
+    FileIdNotFoundError,
+    FileInUseError,
+)
 from robot_server.data_files.router import (
     upload_data_file,
     get_data_file_info_by_id,
     get_data_file,
     get_all_data_files,
+    delete_file_by_id,
 )
 from robot_server.data_files.file_auto_deleter import DataFileAutoDeleter
 from robot_server.errors.error_responses import ApiError
@@ -83,6 +92,7 @@ async def test_upload_new_data_file(
         id="data-file-id",
         name="abc.csv",
         createdAt=datetime(year=2024, month=6, day=18),
+        source=DataFileSource.UPLOADED,
     )
     assert result.status_code == 201
     decoy.verify(
@@ -96,6 +106,7 @@ async def test_upload_new_data_file(
                 name="abc.csv",
                 file_hash="abc123",
                 created_at=datetime(year=2024, month=6, day=18),
+                source=DataFileSource.UPLOADED,
             )
         ),
     )
@@ -106,6 +117,7 @@ async def test_upload_existing_data_file(
     data_files_store: DataFilesStore,
     file_reader_writer: FileReaderWriter,
     file_hasher: FileHasher,
+    file_auto_deleter: DataFileAutoDeleter,
 ) -> None:
     """It should return the existing file info."""
     data_files_directory = Path("/dev/null")
@@ -125,6 +137,7 @@ async def test_upload_existing_data_file(
             name="abc.csv",
             file_hash="abc123",
             created_at=datetime(year=2023, month=6, day=18),
+            source=DataFileSource.UPLOADED,
         )
     )
 
@@ -135,6 +148,7 @@ async def test_upload_existing_data_file(
         data_files_store=data_files_store,
         file_reader_writer=file_reader_writer,
         file_hasher=file_hasher,
+        data_file_auto_deleter=file_auto_deleter,
         file_id="data-file-id",
         created_at=datetime(year=2024, month=6, day=18),
     )
@@ -143,6 +157,7 @@ async def test_upload_existing_data_file(
         id="existing-file-id",
         name="abc.csv",
         createdAt=datetime(year=2023, month=6, day=18),
+        source=DataFileSource.UPLOADED,
     )
 
 
@@ -180,6 +195,7 @@ async def test_upload_new_data_file_path(
         id="data-file-id",
         name="abc.csv",
         createdAt=datetime(year=2024, month=6, day=18),
+        source=DataFileSource.UPLOADED,
     )
     decoy.verify(
         await file_reader_writer.write(
@@ -191,6 +207,7 @@ async def test_upload_new_data_file_path(
                 name="abc.csv",
                 file_hash="abc123",
                 created_at=datetime(year=2024, month=6, day=18),
+                source=DataFileSource.UPLOADED,
             )
         ),
     )
@@ -201,6 +218,7 @@ async def test_upload_non_existent_file_path(
     data_files_store: DataFilesStore,
     file_reader_writer: FileReaderWriter,
     file_hasher: FileHasher,
+    file_auto_deleter: DataFileAutoDeleter,
 ) -> None:
     """It should store the data file from path to persistent storage & update the database."""
     data_files_directory = Path("/dev/null")
@@ -216,6 +234,7 @@ async def test_upload_non_existent_file_path(
             data_files_store=data_files_store,
             file_reader_writer=file_reader_writer,
             file_hasher=file_hasher,
+            data_file_auto_deleter=file_auto_deleter,
             file_id="data-file-id",
             created_at=datetime(year=2024, month=6, day=18),
         )
@@ -228,6 +247,7 @@ async def test_upload_non_csv_file(
     data_files_store: DataFilesStore,
     file_reader_writer: FileReaderWriter,
     file_hasher: FileHasher,
+    file_auto_deleter: DataFileAutoDeleter,
 ) -> None:
     """It should store the data file from path to persistent storage & update the database."""
     data_files_directory = Path("/dev/null")
@@ -245,6 +265,7 @@ async def test_upload_non_csv_file(
             data_files_store=data_files_store,
             file_reader_writer=file_reader_writer,
             file_hasher=file_hasher,
+            data_file_auto_deleter=file_auto_deleter,
             file_id="data-file-id",
             created_at=datetime(year=2024, month=6, day=18),
         )
@@ -263,6 +284,7 @@ async def test_get_data_file_info(
             name="abc.xyz",
             file_hash="123",
             created_at=datetime(year=2024, month=7, day=15),
+            source=DataFileSource.UPLOADED,
         )
     )
 
@@ -275,6 +297,7 @@ async def test_get_data_file_info(
         id="qwerty",
         name="abc.xyz",
         createdAt=datetime(year=2024, month=7, day=15),
+        source=DataFileSource.UPLOADED,
     )
 
 
@@ -310,6 +333,7 @@ async def test_get_data_file(
             name="abc.xyz",
             file_hash="123",
             created_at=datetime(year=2024, month=7, day=15),
+            source=DataFileSource.UPLOADED,
         )
     )
 
@@ -351,12 +375,14 @@ async def test_get_all_data_file_info(
                 name="abc.xyz",
                 file_hash="123",
                 created_at=datetime(year=2024, month=7, day=15),
+                source=DataFileSource.UPLOADED,
             ),
             DataFileInfo(
                 id="hfhcjdeowjfie",
                 name="mcd.kfc",
                 file_hash="124",
                 created_at=datetime(year=2024, month=7, day=22),
+                source=DataFileSource.UPLOADED,
             ),
         ]
     )
@@ -369,11 +395,58 @@ async def test_get_all_data_file_info(
             id="qwerty",
             name="abc.xyz",
             createdAt=datetime(year=2024, month=7, day=15),
+            source=DataFileSource.UPLOADED,
         ),
         DataFile(
             id="hfhcjdeowjfie",
             name="mcd.kfc",
             createdAt=datetime(year=2024, month=7, day=22),
+            source=DataFileSource.UPLOADED,
         ),
     ]
     assert result.content.meta == MultiBodyMeta(cursor=0, totalLength=2)
+
+
+async def test_delete_by_file_id(
+    decoy: Decoy,
+    data_files_store: DataFilesStore,
+) -> None:
+    """It should delete the data file."""
+    result = await delete_file_by_id(
+        dataFileId="file-id", data_files_store=data_files_store
+    )
+    decoy.verify(data_files_store.remove(file_id="file-id"))
+
+    assert result.content == SimpleEmptyBody()
+    assert result.status_code == 200
+
+
+async def test_delete_non_existent_file(
+    decoy: Decoy,
+    data_files_store: DataFilesStore,
+) -> None:
+    """It should raise an error if the file ID doesn't exist."""
+    decoy.when(data_files_store.remove("file-id")).then_raise(
+        FileIdNotFoundError(data_file_id="file-id")
+    )
+
+    with pytest.raises(ApiError) as exc_info:
+        await delete_file_by_id(dataFileId="file-id", data_files_store=data_files_store)
+
+    assert exc_info.value.status_code == 404
+
+
+async def test_delete_file_in_use(
+    decoy: Decoy,
+    data_files_store: DataFilesStore,
+) -> None:
+    """It should raise an error if the file to be deleted is in use."""
+    decoy.when(data_files_store.remove("file-id")).then_raise(
+        FileInUseError(
+            data_file_id="file-id", ids_used_in_runs=set(), ids_used_in_analyses=set()
+        )
+    )
+    with pytest.raises(ApiError) as exc_info:
+        await delete_file_by_id(dataFileId="file-id", data_files_store=data_files_store)
+
+    assert exc_info.value.status_code == 409

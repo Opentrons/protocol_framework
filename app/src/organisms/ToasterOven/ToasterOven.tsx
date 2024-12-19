@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -10,19 +10,23 @@ import {
   JUSTIFY_CENTER,
   POSITION_FIXED,
   SPACING,
+  Snackbar,
+  Toast,
 } from '@opentrons/components'
 
-import { Snackbar } from '../../atoms/Snackbar'
-import { Toast } from '../../atoms/Toast'
-import { getIsOnDevice } from '../../redux/config'
+import { getIsOnDevice } from '/app/redux/config'
 import { ToasterContext } from './ToasterContext'
 
-import type { SnackbarProps } from '../../atoms/Snackbar'
-import type { ToastProps, ToastType } from '../../atoms/Toast'
+import type { ReactNode } from 'react'
+import type { SnackbarProps } from '@opentrons/components'
+import type {
+  ToastProps,
+  ToastType,
+} from '@opentrons/components/src/atoms/Toast'
 import type { MakeSnackbarOptions, MakeToastOptions } from './ToasterContext'
 
 interface ToasterOvenProps {
-  children: React.ReactNode
+  children: ReactNode
 }
 
 /**
@@ -31,8 +35,8 @@ interface ToasterOvenProps {
  * @returns
  */
 export function ToasterOven({ children }: ToasterOvenProps): JSX.Element {
-  const [toasts, setToasts] = React.useState<ToastProps[]>([])
-  const [snackbar, setSnackbar] = React.useState<SnackbarProps | null>(null)
+  const [toasts, setToasts] = useState<ToastProps[]>([])
+  const [snackbar, setSnackbar] = useState<SnackbarProps | null>(null)
 
   const isOnDevice = useSelector(getIsOnDevice) ?? null
   const displayType: 'desktop' | 'odd' =

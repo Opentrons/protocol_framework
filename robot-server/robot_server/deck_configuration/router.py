@@ -2,7 +2,7 @@
 
 
 from datetime import datetime
-from typing import Union
+from typing import Annotated, Union
 
 import fastapi
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
@@ -62,9 +62,11 @@ router = fastapi.APIRouter()
 )
 async def put_deck_configuration(  # noqa: D103
     request_body: RequestModel[models.DeckConfigurationRequest],
-    store: DeckConfigurationStore = fastapi.Depends(get_deck_configuration_store),
-    now: datetime = fastapi.Depends(get_current_time),
-    deck_definition: DeckDefinitionV5 = fastapi.Depends(get_deck_definition),
+    store: Annotated[
+        DeckConfigurationStore, fastapi.Depends(get_deck_configuration_store)
+    ],
+    now: Annotated[datetime, fastapi.Depends(get_current_time)],
+    deck_definition: Annotated[DeckDefinitionV5, fastapi.Depends(get_deck_definition)],
 ) -> PydanticResponse[
     Union[
         SimpleBody[models.DeckConfigurationResponse],
@@ -76,12 +78,12 @@ async def put_deck_configuration(  # noqa: D103
     if len(validation_errors) == 0:
         success_data = await store.set(request=request_body.data, last_modified_at=now)
         return await PydanticResponse.create(
-            content=SimpleBody.construct(data=success_data)
+            content=SimpleBody.model_construct(data=success_data)
         )
     else:
         error_data = validation_mapping.map_out(validation_errors)
         return await PydanticResponse.create(
-            content=ErrorBody.construct(errors=error_data),
+            content=ErrorBody.model_construct(errors=error_data),
             status_code=HTTP_422_UNPROCESSABLE_ENTITY,
         )
 
@@ -104,8 +106,10 @@ async def put_deck_configuration(  # noqa: D103
     },
 )
 async def get_deck_configuration(  # noqa: D103
-    store: DeckConfigurationStore = fastapi.Depends(get_deck_configuration_store),
+    store: Annotated[
+        DeckConfigurationStore, fastapi.Depends(get_deck_configuration_store)
+    ],
 ) -> PydanticResponse[SimpleBody[models.DeckConfigurationResponse]]:
     return await PydanticResponse.create(
-        content=SimpleBody.construct(data=await store.get())
+        content=SimpleBody.model_construct(data=await store.get())
     )

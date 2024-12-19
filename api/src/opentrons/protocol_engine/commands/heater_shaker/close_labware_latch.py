@@ -9,7 +9,7 @@ from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, Succe
 from ...errors.error_occurrence import ErrorOccurrence
 
 if TYPE_CHECKING:
-    from opentrons.protocol_engine.state import StateView
+    from opentrons.protocol_engine.state.state import StateView
     from opentrons.protocol_engine.execution import EquipmentHandler
 
 
@@ -27,9 +27,7 @@ class CloseLabwareLatchResult(BaseModel):
 
 
 class CloseLabwareLatchImpl(
-    AbstractCommandImpl[
-        CloseLabwareLatchParams, SuccessData[CloseLabwareLatchResult, None]
-    ]
+    AbstractCommandImpl[CloseLabwareLatchParams, SuccessData[CloseLabwareLatchResult]]
 ):
     """Execution implementation of a Heater-Shaker's close labware latch command."""
 
@@ -44,7 +42,7 @@ class CloseLabwareLatchImpl(
 
     async def execute(
         self, params: CloseLabwareLatchParams
-    ) -> SuccessData[CloseLabwareLatchResult, None]:
+    ) -> SuccessData[CloseLabwareLatchResult]:
         """Close a Heater-Shaker's labware latch."""
         # Allow propagation of ModuleNotLoadedError and WrongModuleTypeError.
         hs_module_substate = self._state_view.modules.get_heater_shaker_module_substate(
@@ -59,7 +57,9 @@ class CloseLabwareLatchImpl(
         if hs_hardware_module is not None:
             await hs_hardware_module.close_labware_latch()
 
-        return SuccessData(public=CloseLabwareLatchResult(), private=None)
+        return SuccessData(
+            public=CloseLabwareLatchResult(),
+        )
 
 
 class CloseLabwareLatch(
@@ -69,7 +69,7 @@ class CloseLabwareLatch(
 
     commandType: CloseLabwareLatchCommandType = "heaterShaker/closeLabwareLatch"
     params: CloseLabwareLatchParams
-    result: Optional[CloseLabwareLatchResult]
+    result: Optional[CloseLabwareLatchResult] = None
 
     _ImplementationCls: Type[CloseLabwareLatchImpl] = CloseLabwareLatchImpl
 

@@ -1,27 +1,36 @@
 """The liquidProbe and tryLiquidProbe commands."""
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Optional, Type, Union
+from typing import TYPE_CHECKING, NamedTuple, Optional, Type, Union, Any
+
+from typing_extensions import Literal
+from pydantic import Field
+from pydantic.json_schema import SkipJsonSchema
+
+from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.errors.exceptions import (
     MustHomeError,
     PipetteNotReadyToAspirateError,
     TipNotEmptyError,
+    IncompleteLabwareDefinitionError,
+    TipNotAttachedError,
 )
 from opentrons.types import MountType
 from opentrons_shared_data.errors.exceptions import (
     PipetteLiquidNotFoundError,
+    UnsupportedHardwareCommand,
 )
-from typing_extensions import Literal
-
-from pydantic import Field
 
 from ..types import DeckPoint
 from .pipetting_common import (
     LiquidNotFoundError,
-    LiquidNotFoundErrorInternalData,
     PipetteIdMixin,
+)
+from .movement_common import (
     WellLocationMixin,
     DestinationPositionResult,
+    StallOrCollisionError,
+    move_to_well,
 )
 from .command import (
     AbstractCommandImpl,
@@ -36,7 +45,11 @@ from ..errors.error_occurrence import ErrorOccurrence
 if TYPE_CHECKING:
     from ..execution import MovementHandler, PipettingHandler
     from ..resources import ModelUtils
-    from ..state import StateView
+    from ..state.state import StateView
+
+
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
 
 
 LiquidProbeCommandType = Literal["liquidProbe"]
@@ -74,20 +87,110 @@ class LiquidProbeResult(DestinationPositionResult):
 class TryLiquidProbeResult(DestinationPositionResult):
     """Result data from the execution of a `tryLiquidProbe` command."""
 
-    z_position: Optional[float] = Field(
+    z_position: float | SkipJsonSchema[None] = Field(
         ...,
         description=(
             "The Z coordinate, in mm, of the found liquid in deck space."
             " If no liquid was found, `null` or omitted."
         ),
+        json_schema_extra=_remove_default,
     )
 
 
 _LiquidProbeExecuteReturn = Union[
-    SuccessData[LiquidProbeResult, None],
-    DefinedErrorData[LiquidNotFoundError, LiquidNotFoundErrorInternalData],
+    SuccessData[LiquidProbeResult],
+    DefinedErrorData[LiquidNotFoundError] | DefinedErrorData[StallOrCollisionError],
 ]
-_TryLiquidProbeExecuteReturn = SuccessData[TryLiquidProbeResult, None]
+_TryLiquidProbeExecuteReturn = (
+    SuccessData[TryLiquidProbeResult] | DefinedErrorData[StallOrCollisionError]
+)
+
+
+class _ExecuteCommonResult(NamedTuple):
+    # If the probe succeeded, the z_pos that it returned.
+    # Or, if the probe found no liquid, the error representing that,
+    # so calling code can propagate those details up.
+    z_pos_or_error: float | PipetteLiquidNotFoundError
+
+    state_update: update_types.StateUpdate
+    deck_point: DeckPoint
+
+
+async def _execute_common(
+    state_view: StateView,
+    movement: MovementHandler,
+    pipetting: PipettingHandler,
+    model_utils: ModelUtils,
+    params: _CommonParams,
+) -> _ExecuteCommonResult | DefinedErrorData[StallOrCollisionError]:
+    pipette_id = params.pipetteId
+    labware_id = params.labwareId
+    well_name = params.wellName
+    if (
+        "pressure"
+        not in state_view.pipettes.get_config(pipette_id).available_sensors.sensors
+    ):
+        raise UnsupportedHardwareCommand(
+            "Pressure sensor not available for this pipette"
+        )
+
+    if not state_view.pipettes.get_nozzle_configuration_supports_lld(pipette_id):
+        raise TipNotAttachedError(
+            "Either the front right or back left nozzle must have a tip attached to probe liquid height."
+        )
+
+    # May raise TipNotAttachedError.
+    aspirated_volume = state_view.pipettes.get_aspirated_volume(pipette_id)
+
+    if aspirated_volume is None:
+        # Theoretically, we could avoid raising an error by automatically preparing
+        # to aspirate above the well like AspirateImplementation does. However, the
+        # only way for this to happen is if someone tries to do a liquid probe with
+        # a tip that's previously held liquid, which they should avoid anyway.
+        raise PipetteNotReadyToAspirateError(
+            "The pipette cannot probe liquid because of a previous blow out."
+            " The plunger must be reset while the tip is somewhere away from liquid."
+        )
+    elif aspirated_volume != 0:
+        raise TipNotEmptyError(
+            message="The pipette cannot probe for liquid when the tip has liquid in it."
+        )
+
+    if await movement.check_for_valid_position(mount=MountType.LEFT) is False:
+        raise MustHomeError(
+            message="Current position of pipette is invalid. Please home."
+        )
+
+    # liquid_probe process start position
+    move_result = await move_to_well(
+        movement=movement,
+        model_utils=model_utils,
+        pipette_id=pipette_id,
+        labware_id=labware_id,
+        well_name=well_name,
+        well_location=params.wellLocation,
+    )
+    if isinstance(move_result, DefinedErrorData):
+        return move_result
+    try:
+        z_pos = await pipetting.liquid_probe_in_place(
+            pipette_id=pipette_id,
+            labware_id=labware_id,
+            well_name=well_name,
+            well_location=params.wellLocation,
+        )
+    except PipetteLiquidNotFoundError as exception:
+        return _ExecuteCommonResult(
+            z_pos_or_error=exception,
+            state_update=move_result.state_update,
+            deck_point=move_result.public.position,
+        )
+    else:
+        return _ExecuteCommonResult(
+            z_pos_or_error=z_pos,
+            state_update=move_result.state_update,
+            deck_point=move_result.public.position,
+        )
 
 
 class LiquidProbeImplementation(
@@ -124,48 +227,24 @@ class LiquidProbeImplementation(
             MustHomeError: as an undefined error, if the plunger is not in a valid
                 position.
         """
-        pipette_id = params.pipetteId
-        labware_id = params.labwareId
-        well_name = params.wellName
-
-        # May raise TipNotAttachedError.
-        aspirated_volume = self._state_view.pipettes.get_aspirated_volume(pipette_id)
-
-        if aspirated_volume is None:
-            # Theoretically, we could avoid raising an error by automatically preparing
-            # to aspirate above the well like AspirateImplementation does. However, the
-            # only way for this to happen is if someone tries to do a liquid probe with
-            # a tip that's previously held liquid, which they should avoid anyway.
-            raise PipetteNotReadyToAspirateError(
-                "The pipette cannot probe liquid because of a previous blow out."
-                " The plunger must be reset while the tip is somewhere away from liquid."
-            )
-        elif aspirated_volume != 0:
-            raise TipNotEmptyError(
-                message="The pipette cannot probe for liquid when the tip has liquid in it."
-            )
-
-        if await self._movement.check_for_valid_position(mount=MountType.LEFT) is False:
-            raise MustHomeError(
-                message="Current position of pipette is invalid. Please home."
-            )
-
-        # liquid_probe process start position
-        position = await self._movement.move_to_well(
-            pipette_id=pipette_id,
-            labware_id=labware_id,
-            well_name=well_name,
-            well_location=params.wellLocation,
+        result = await _execute_common(
+            state_view=self._state_view,
+            movement=self._movement,
+            pipetting=self._pipetting,
+            model_utils=self._model_utils,
+            params=params,
         )
-
-        try:
-            z_pos = await self._pipetting.liquid_probe_in_place(
-                pipette_id=pipette_id,
-                labware_id=labware_id,
-                well_name=well_name,
-                well_location=params.wellLocation,
+        if isinstance(result, DefinedErrorData):
+            return result
+        z_pos_or_error, state_update, deck_point = result
+        if isinstance(z_pos_or_error, PipetteLiquidNotFoundError):
+            state_update.set_liquid_probed(
+                labware_id=params.labwareId,
+                well_name=params.wellName,
+                height=update_types.CLEAR,
+                volume=update_types.CLEAR,
+                last_probed=self._model_utils.get_timestamp(),
             )
-        except PipetteLiquidNotFoundError as e:
             return DefinedErrorData(
                 public=LiquidNotFoundError(
                     id=self._model_utils.generate_id(),
@@ -174,21 +253,35 @@ class LiquidProbeImplementation(
                         ErrorOccurrence.from_failed(
                             id=self._model_utils.generate_id(),
                             createdAt=self._model_utils.get_timestamp(),
-                            error=e,
+                            error=z_pos_or_error,
                         )
                     ],
                 ),
-                private=LiquidNotFoundErrorInternalData(
-                    position=DeckPoint(x=position.x, y=position.y, z=position.z)
-                ),
+                state_update=state_update,
             )
         else:
+            try:
+                well_volume: float | update_types.ClearType = (
+                    self._state_view.geometry.get_well_volume_at_height(
+                        labware_id=params.labwareId,
+                        well_name=params.wellName,
+                        height=z_pos_or_error,
+                    )
+                )
+            except IncompleteLabwareDefinitionError:
+                well_volume = update_types.CLEAR
+            state_update.set_liquid_probed(
+                labware_id=params.labwareId,
+                well_name=params.wellName,
+                height=z_pos_or_error,
+                volume=well_volume,
+                last_probed=self._model_utils.get_timestamp(),
+            )
             return SuccessData(
                 public=LiquidProbeResult(
-                    z_position=z_pos,
-                    position=DeckPoint(x=position.x, y=position.y, z=position.z),
+                    z_position=z_pos_or_error, position=deck_point
                 ),
-                private=None,
+                state_update=state_update,
             )
 
 
@@ -217,44 +310,52 @@ class TryLiquidProbeImplementation(
         found, `tryLiquidProbe` returns a success result with `z_position=null` instead
         of a defined error.
         """
-        # We defer to the `liquidProbe` implementation. If it returns a defined
-        # `liquidNotFound` error, we remap that to a success result.
-        # Otherwise, we return the result or propagate the exception unchanged.
-
-        original_impl = LiquidProbeImplementation(
+        result = await _execute_common(
             state_view=self._state_view,
             movement=self._movement,
             pipetting=self._pipetting,
             model_utils=self._model_utils,
+            params=params,
         )
-        original_result = await original_impl.execute(params)
+        if isinstance(result, DefinedErrorData):
+            return result
+        z_pos_or_error, state_update, deck_point = result
 
-        match original_result:
-            case DefinedErrorData(
-                public=LiquidNotFoundError(),
-                private=LiquidNotFoundErrorInternalData() as original_private,
-            ):
-                return SuccessData(
-                    public=TryLiquidProbeResult(
-                        z_position=None,
-                        position=original_private.position,
-                    ),
-                    private=None,
+        if isinstance(z_pos_or_error, PipetteLiquidNotFoundError):
+            z_pos = None
+            well_volume: float | update_types.ClearType = update_types.CLEAR
+        else:
+            z_pos = z_pos_or_error
+            try:
+                well_volume = self._state_view.geometry.get_well_volume_at_height(
+                    labware_id=params.labwareId, well_name=params.wellName, height=z_pos
                 )
-            case SuccessData(
-                public=LiquidProbeResult() as original_public, private=None
-            ):
-                return SuccessData(
-                    public=TryLiquidProbeResult(
-                        position=original_public.position,
-                        z_position=original_public.z_position,
-                    ),
-                    private=None,
-                )
+            except IncompleteLabwareDefinitionError:
+                well_volume = update_types.CLEAR
+
+        state_update.set_liquid_probed(
+            labware_id=params.labwareId,
+            well_name=params.wellName,
+            height=z_pos if z_pos is not None else update_types.CLEAR,
+            volume=well_volume,
+            last_probed=self._model_utils.get_timestamp(),
+        )
+
+        return SuccessData(
+            public=TryLiquidProbeResult(
+                z_position=z_pos,
+                position=deck_point,
+            ),
+            state_update=state_update,
+        )
 
 
 class LiquidProbe(
-    BaseCommand[LiquidProbeParams, LiquidProbeResult, LiquidNotFoundError]
+    BaseCommand[
+        LiquidProbeParams,
+        LiquidProbeResult,
+        LiquidNotFoundError | StallOrCollisionError,
+    ]
 ):
     """The model for a full `liquidProbe` command."""
 
@@ -266,7 +367,7 @@ class LiquidProbe(
 
 
 class TryLiquidProbe(
-    BaseCommand[TryLiquidProbeParams, TryLiquidProbeResult, ErrorOccurrence]
+    BaseCommand[TryLiquidProbeParams, TryLiquidProbeResult, StallOrCollisionError]
 ):
     """The model for a full `tryLiquidProbe` command."""
 

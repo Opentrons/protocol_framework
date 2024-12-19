@@ -18,7 +18,8 @@ from opentrons.protocols.api_support.util import AxisMaxSpeeds
 from .instrument import InstrumentCoreType
 from .labware import LabwareCoreType, LabwareLoadParams
 from .module import ModuleCoreType
-from .._liquid import Liquid
+from .._liquid import Liquid, LiquidClass
+from .robot import AbstractRobot
 from .._types import OffDeckType
 from ..disposal_locations import TrashBin, WasteChute
 
@@ -93,7 +94,6 @@ class AbstractProtocol(
         """Load an adapter using its identifying parameters"""
         ...
 
-    # TODO (spp, 2022-12-14): https://opentrons.atlassian.net/browse/RLAB-237
     @abstractmethod
     def move_labware(
         self,
@@ -105,6 +105,7 @@ class AbstractProtocol(
             ModuleCoreType,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ],
         use_gripper: bool,
         pause_for_manual_move: bool,
@@ -249,7 +250,15 @@ class AbstractProtocol(
         """Define a liquid to load into a well."""
 
     @abstractmethod
+    def define_liquid_class(self, name: str) -> LiquidClass:
+        """Define a liquid class for use in transfer functions."""
+
+    @abstractmethod
     def get_labware_location(
         self, labware_core: LabwareCoreType
     ) -> Union[str, LabwareCoreType, ModuleCoreType, OffDeckType]:
         """Get labware parent location."""
+
+    @abstractmethod
+    def load_robot(self) -> AbstractRobot:
+        """Load a Robot Core context into a protocol"""

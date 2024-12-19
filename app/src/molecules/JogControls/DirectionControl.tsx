@@ -1,5 +1,5 @@
 // jog controls component
-import * as React from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled, { css } from 'styled-components'
 
@@ -13,16 +13,17 @@ import {
   COLORS,
   DIRECTION_COLUMN,
   DIRECTION_ROW,
+  DISPLAY_GRID,
   Flex,
   HandleKeypress,
   Icon,
   JUSTIFY_CENTER,
   JUSTIFY_FLEX_START,
   JUSTIFY_SPACE_BETWEEN,
+  LegacyStyledText,
   PrimaryButton,
   RESPONSIVENESS,
   SPACING,
-  LegacyStyledText,
   TEXT_ALIGN_LEFT,
   TYPOGRAPHY,
 } from '@opentrons/components'
@@ -30,8 +31,9 @@ import { ControlContainer } from './ControlContainer'
 import { HORIZONTAL_PLANE, VERTICAL_PLANE } from './constants'
 import { TouchControlButton } from './TouchControlButton'
 
-import type { IconName } from '@opentrons/components'
+import type { MouseEvent } from 'react'
 import type { CSSProperties } from 'styled-components'
+import type { IconName } from '@opentrons/components'
 import type { Jog, Plane, Sign, Bearing, Axis, StepSize } from './types'
 
 interface Control {
@@ -222,12 +224,12 @@ interface DirectionControlProps {
 
 export function DirectionControl(props: DirectionControlProps): JSX.Element {
   const { planes, jog, stepSize, initialPlane } = props
-  const [currentPlane, setCurrentPlane] = React.useState<Plane>(
+  const [currentPlane, setCurrentPlane] = useState<Plane>(
     initialPlane ?? planes[0]
   )
   const { t } = useTranslation(['robot_calibration'])
 
-  const handlePlane = (event: React.MouseEvent<HTMLButtonElement>): void => {
+  const handlePlane = (event: MouseEvent<HTMLButtonElement>): void => {
     setCurrentPlane(event.currentTarget.value as Plane)
     event.currentTarget.blur()
   }
@@ -302,7 +304,7 @@ export function DirectionControl(props: DirectionControlProps): JSX.Element {
 }
 
 const ARROW_GRID_STYLES = css`
-  display: grid;
+  display: ${DISPLAY_GRID};
   max-width: 8.75rem;
   grid-template-columns: repeat(6, 1fr);
   grid-template-areas:
@@ -448,7 +450,7 @@ export function TouchDirectionControl(
   props: DirectionControlProps
 ): JSX.Element {
   const { planes, jog, stepSize, initialPlane } = props
-  const [currentPlane, setCurrentPlane] = React.useState<Plane>(
+  const [currentPlane, setCurrentPlane] = useState<Plane>(
     initialPlane ?? planes[0]
   )
   const { i18n, t } = useTranslation(['robot_calibration'])

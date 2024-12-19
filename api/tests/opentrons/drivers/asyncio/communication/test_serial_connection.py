@@ -1,5 +1,4 @@
-from typing import Type, Union
-
+from typing import Type, Union, AsyncGenerator
 import pytest
 from _pytest.fixtures import SubRequest
 from mock import AsyncMock, call
@@ -14,6 +13,7 @@ from opentrons.drivers.asyncio.communication import (
     NoResponse,
     AlarmResponse,
     ErrorResponse,
+    UnhandledGcode,
 )
 
 
@@ -83,7 +83,9 @@ async def async_subject(
 
 
 @pytest.fixture
-async def subject_raise_on_error_patched(async_subject):
+async def subject_raise_on_error_patched(
+    async_subject: AsyncResponseSerialConnection,
+) -> AsyncGenerator[AsyncResponseSerialConnection, None]:
     raise_on_error_mock = mock.MagicMock()
     with mock.patch.object(async_subject, "raise_on_error", raise_on_error_mock):
         yield async_subject
@@ -148,25 +150,31 @@ async def test_send_command_response(
 
 
 @pytest.mark.parametrize(
-    argnames=["response", "exception_type"],
+    argnames=["response", "exception_type", "async_only"],
     argvalues=[
-        ["error", ErrorResponse],
-        ["Error", ErrorResponse],
-        ["Error: was found.", ErrorResponse],
-        ["alarm", AlarmResponse],
-        ["ALARM", AlarmResponse],
-        ["This is an Alarm", AlarmResponse],
-        ["error:Alarm lock", AlarmResponse],
-        ["alarm:error", AlarmResponse],
-        ["ALARM: Hard limit -X", AlarmResponse],
+        ["error", ErrorResponse, False],
+        ["Error", ErrorResponse, False],
+        ["Error: was found.", ErrorResponse, False],
+        ["alarm", AlarmResponse, False],
+        ["ALARM", AlarmResponse, False],
+        ["This is an Alarm", AlarmResponse, False],
+        ["error:Alarm lock", AlarmResponse, False],
+        ["alarm:error", AlarmResponse, False],
+        ["ALARM: Hard limit -X", AlarmResponse, False],
+        ["ERR003:unhandled gcode OK ", UnhandledGcode, True],
     ],
 )
 def test_raise_on_error(
-    subject: SerialKind, response: str, exception_type: Type[Exception]
+    subject: SerialKind,
+    response: str,
+    exception_type: Type[Exception],
+    async_only: bool,
 ) -> None:
     """It should raise an exception on error/alarm responses."""
+    if isinstance(subject, SerialConnection) and async_only:
+        pytest.skip()
     with pytest.raises(expected_exception=exception_type, match=response):
-        subject.raise_on_error(response)
+        subject.raise_on_error(response, "fake request")
 
 
 async def test_on_retry(mock_serial_port: AsyncMock, subject: SerialKind) -> None:
@@ -187,6 +195,7 @@ async def test_send_data_with_async_error_before(
     serial_error_response = f" {error_response}  {ack}"
     encoded_error_response = serial_error_response.encode()
     successful_response = "G28"
+    data = "G28"
     serial_successful_response = f" {successful_response}  {ack}"
     encoded_successful_response = serial_successful_response.encode()
     mock_serial_port.read_until.side_effect = [
@@ -194,7 +203,7 @@ async def test_send_data_with_async_error_before(
         encoded_successful_response,
     ]
 
-    response = await subject_raise_on_error_patched._send_data(data="G28")
+    response = await subject_raise_on_error_patched._send_data(data=data)
 
     assert response == successful_response
     mock_serial_port.read_until.assert_has_calls(
@@ -205,8 +214,8 @@ async def test_send_data_with_async_error_before(
     )
     subject_raise_on_error_patched.raise_on_error.assert_has_calls(  # type: ignore[attr-defined]
         calls=[
-            call(response=error_response),
-            call(response=successful_response),
+            call(response=error_response, request=data),
+            call(response=successful_response, request=data),
         ]
     )
 
@@ -221,6 +230,7 @@ async def test_send_data_with_async_error_after(
     serial_error_response = f" {error_response}  {ack}"
     encoded_error_response = serial_error_response.encode()
     successful_response = "G28"
+    data = "G28"
     serial_successful_response = f" {successful_response}  {ack}"
     encoded_successful_response = serial_successful_response.encode()
     mock_serial_port.read_until.side_effect = [
@@ -228,7 +238,7 @@ async def test_send_data_with_async_error_after(
         encoded_error_response,
     ]
 
-    response = await subject_raise_on_error_patched._send_data(data="G28")
+    response = await subject_raise_on_error_patched._send_data(data=data)
 
     assert response == successful_response
     mock_serial_port.read_until.assert_has_calls(
@@ -238,6 +248,6 @@ async def test_send_data_with_async_error_after(
     )
     subject_raise_on_error_patched.raise_on_error.assert_has_calls(  # type: ignore[attr-defined]
         calls=[
-            call(response=successful_response),
+            call(response=successful_response, request=data),
         ]
     )

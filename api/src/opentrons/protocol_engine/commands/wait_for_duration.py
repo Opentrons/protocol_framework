@@ -1,7 +1,9 @@
 """Wait for duration command request, result, and implementation models."""
 from __future__ import annotations
+from typing import TYPE_CHECKING, Optional, Type, Any
+
 from pydantic import BaseModel, Field
-from typing import TYPE_CHECKING, Optional, Type
+from pydantic.json_schema import SkipJsonSchema
 from typing_extensions import Literal
 
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
@@ -14,13 +16,18 @@ if TYPE_CHECKING:
 WaitForDurationCommandType = Literal["waitForDuration"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 class WaitForDurationParams(BaseModel):
     """Payload required to pause the protocol."""
 
     seconds: float = Field(..., description="Duration, in seconds, to wait for.")
-    message: Optional[str] = Field(
+    message: str | SkipJsonSchema[None] = Field(
         None,
         description="A user-facing message associated with the pause",
+        json_schema_extra=_remove_default,
     )
 
 
@@ -29,7 +36,7 @@ class WaitForDurationResult(BaseModel):
 
 
 class WaitForDurationImplementation(
-    AbstractCommandImpl[WaitForDurationParams, SuccessData[WaitForDurationResult, None]]
+    AbstractCommandImpl[WaitForDurationParams, SuccessData[WaitForDurationResult]]
 ):
     """Wait for duration command implementation."""
 
@@ -38,10 +45,12 @@ class WaitForDurationImplementation(
 
     async def execute(
         self, params: WaitForDurationParams
-    ) -> SuccessData[WaitForDurationResult, None]:
+    ) -> SuccessData[WaitForDurationResult]:
         """Wait for a duration of time."""
         await self._run_control.wait_for_duration(params.seconds)
-        return SuccessData(public=WaitForDurationResult(), private=None)
+        return SuccessData(
+            public=WaitForDurationResult(),
+        )
 
 
 class WaitForDuration(
@@ -51,7 +60,7 @@ class WaitForDuration(
 
     commandType: WaitForDurationCommandType = "waitForDuration"
     params: WaitForDurationParams
-    result: Optional[WaitForDurationResult]
+    result: Optional[WaitForDurationResult] = None
 
     _ImplementationCls: Type[
         WaitForDurationImplementation

@@ -3,9 +3,6 @@ from dataclasses import dataclass
 from typing import List, Dict, Tuple
 from typing_extensions import Final
 from enum import Enum
-from opentrons.config.types import LiquidProbeSettings, OutputOptions
-from opentrons.protocol_api.labware import Well
-from opentrons.hardware_control.types import InstrumentProbeType
 
 
 class ConfigType(Enum):
@@ -83,7 +80,6 @@ GANTRY_MAX_SPEED = 40
 VIAL_SAFE_Z_OFFSET: Final = 0
 LABWARE_BOTTOM_CLEARANCE = 1.5
 
-
 QC_VOLUMES_G: Dict[int, Dict[int, List[Tuple[int, List[float]]]]] = {
     1: {
         50: [  # P50
@@ -106,6 +102,10 @@ QC_VOLUMES_G: Dict[int, Dict[int, List[Tuple[int, List[float]]]]] = {
         ],
     },
     96: {
+        200: [
+            (50, [1.0, 50.0]),  # T50
+            (200, [200.0]),  # T200
+        ],
         1000: [  # P1000
             (50, [5.0]),  # T50
             (200, [200.0]),  # T200
@@ -167,6 +167,10 @@ QC_VOLUMES_P: Dict[int, Dict[int, List[Tuple[int, List[float]]]]] = {
         ],
     },
     96: {
+        200: [
+            (50, [1.0, 5.0]),  # T50
+            (200, [200.0]),  # T200
+        ],
         1000: [  # P1000
             (50, [5.0]),  # T50
             (200, [200.0]),  # T200
@@ -247,6 +251,21 @@ QC_TEST_MIN_REQUIREMENTS: Dict[
         },
     },
     96: {
+        200: {
+            50: {  # T50
+                1.0: (2.5, 2.0),
+                2.0: (2.5, 2.0),
+                3.0: (2.5, 2.0),
+                5.0: (2.5, 2.0),
+                10.0: (3.1, 1.7),
+                50.0: (1.5, 0.75),
+            },
+            200: {  # T200
+                5.0: (2.5, 4.0),
+                50.0: (1.5, 2.0),
+                200.0: (1.4, 0.9),
+            },
+        },
         1000: {  # P1000
             50: {  # T50
                 1.0: (2.5, 2.0),

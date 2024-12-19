@@ -10,7 +10,7 @@ from ...errors.error_occurrence import ErrorOccurrence
 
 if TYPE_CHECKING:
     from opentrons.protocol_engine.execution import EquipmentHandler
-    from opentrons.protocol_engine.state import StateView
+    from opentrons.protocol_engine.state.state import StateView
 
 
 EngageCommandType = Literal["magneticModule/engage"]
@@ -54,7 +54,7 @@ class EngageResult(BaseModel):
 
 
 class EngageImplementation(
-    AbstractCommandImpl[EngageParams, SuccessData[EngageResult, None]]
+    AbstractCommandImpl[EngageParams, SuccessData[EngageResult]]
 ):
     """The implementation of a Magnetic Module engage command."""
 
@@ -67,7 +67,7 @@ class EngageImplementation(
         self._state_view = state_view
         self._equipment = equipment
 
-    async def execute(self, params: EngageParams) -> SuccessData[EngageResult, None]:
+    async def execute(self, params: EngageParams) -> SuccessData[EngageResult]:
         """Execute a Magnetic Module engage command.
 
         Raises:
@@ -95,7 +95,9 @@ class EngageImplementation(
         if hardware_module is not None:  # Not virtualizing modules.
             await hardware_module.engage(height=hardware_height)
 
-        return SuccessData(public=EngageResult(), private=None)
+        return SuccessData(
+            public=EngageResult(),
+        )
 
 
 class Engage(BaseCommand[EngageParams, EngageResult, ErrorOccurrence]):
@@ -103,7 +105,7 @@ class Engage(BaseCommand[EngageParams, EngageResult, ErrorOccurrence]):
 
     commandType: EngageCommandType = "magneticModule/engage"
     params: EngageParams
-    result: Optional[EngageResult]
+    result: Optional[EngageResult] = None
 
     _ImplementationCls: Type[EngageImplementation] = EngageImplementation
 

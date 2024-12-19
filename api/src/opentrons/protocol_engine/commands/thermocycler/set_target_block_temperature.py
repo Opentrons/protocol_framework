@@ -1,19 +1,24 @@
 """Command models to start heating a Thermocycler's block."""
 from __future__ import annotations
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Any
 from typing_extensions import Literal, Type
 
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ...errors.error_occurrence import ErrorOccurrence
 
 if TYPE_CHECKING:
-    from opentrons.protocol_engine.state import StateView
+    from opentrons.protocol_engine.state.state import StateView
     from opentrons.protocol_engine.execution import EquipmentHandler
 
 
 SetTargetBlockTemperatureCommandType = Literal["thermocycler/setTargetBlockTemperature"]
+
+
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
 
 
 class SetTargetBlockTemperatureParams(BaseModel):
@@ -21,16 +26,18 @@ class SetTargetBlockTemperatureParams(BaseModel):
 
     moduleId: str = Field(..., description="Unique ID of the Thermocycler Module.")
     celsius: float = Field(..., description="Target temperature in °C.")
-    blockMaxVolumeUl: Optional[float] = Field(
+    blockMaxVolumeUl: float | SkipJsonSchema[None] = Field(
         None,
         description="Amount of liquid in uL of the most-full well"
         " in labware loaded onto the thermocycler.",
+        json_schema_extra=_remove_default,
     )
-    holdTimeSeconds: Optional[float] = Field(
+    holdTimeSeconds: float | SkipJsonSchema[None] = Field(
         None,
         description="Amount of time, in seconds, to hold the temperature for."
         " If specified, a waitForBlockTemperature command will block until"
         " the given hold time has elapsed.",
+        json_schema_extra=_remove_default,
     )
 
 
@@ -46,7 +53,7 @@ class SetTargetBlockTemperatureResult(BaseModel):
 class SetTargetBlockTemperatureImpl(
     AbstractCommandImpl[
         SetTargetBlockTemperatureParams,
-        SuccessData[SetTargetBlockTemperatureResult, None],
+        SuccessData[SetTargetBlockTemperatureResult],
     ]
 ):
     """Execution implementation of a Thermocycler's set block temperature command."""
@@ -63,7 +70,7 @@ class SetTargetBlockTemperatureImpl(
     async def execute(
         self,
         params: SetTargetBlockTemperatureParams,
-    ) -> SuccessData[SetTargetBlockTemperatureResult, None]:
+    ) -> SuccessData[SetTargetBlockTemperatureResult]:
         """Set a Thermocycler's target block temperature."""
         thermocycler_state = self._state_view.modules.get_thermocycler_module_substate(
             params.moduleId
@@ -97,7 +104,6 @@ class SetTargetBlockTemperatureImpl(
             public=SetTargetBlockTemperatureResult(
                 targetBlockTemperature=target_temperature
             ),
-            private=None,
         )
 
 
@@ -114,7 +120,7 @@ class SetTargetBlockTemperature(
         "thermocycler/setTargetBlockTemperature"
     )
     params: SetTargetBlockTemperatureParams
-    result: Optional[SetTargetBlockTemperatureResult]
+    result: Optional[SetTargetBlockTemperatureResult] = None
 
     _ImplementationCls: Type[
         SetTargetBlockTemperatureImpl

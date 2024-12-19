@@ -29,12 +29,12 @@ stages:
           data_file_id: data.id
       status_code:
         - 201
-        - 200
       json:
         data:
           id: !anystr
           name: "sample_plates.csv"
           createdAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
+          source: "uploaded"
 
   - name: Create run from protocol
     request:
@@ -116,7 +116,9 @@ stages:
               file:
                 id: '{data_file_id}'
                 name: sample_plates.csv
+          outputFileIds: []
           liquids: []
+          liquidClasses: []
           protocolId: '{protocol_id}'
 
   - name: Play the run

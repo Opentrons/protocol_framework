@@ -2,11 +2,18 @@
 from __future__ import annotations
 from typing import Dict, Optional, Type, Union, List, Tuple, TYPE_CHECKING
 
+from opentrons_shared_data.liquid_classes import LiquidClassDefinitionDoesNotExist
+
 from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.commands import LoadModuleResult
+
 from opentrons_shared_data.deck.types import DeckDefinitionV5, SlotDefV3
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.labware.types import LabwareDefinition as LabwareDefDict
+from opentrons_shared_data import liquid_classes
+from opentrons_shared_data.liquid_classes.liquid_class_definition import (
+    LiquidClassSchemaV1,
+)
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.robot.types import RobotType
 
@@ -51,12 +58,13 @@ from opentrons.protocol_engine.errors import (
 
 from ... import validation
 from ..._types import OffDeckType
-from ..._liquid import Liquid
+from ..._liquid import Liquid, LiquidClass
 from ...disposal_locations import TrashBin, WasteChute
 from ..protocol import AbstractProtocol
 from ..labware import LabwareLoadParams
 from .labware import LabwareCore
 from .instrument import InstrumentCore
+from .robot import RobotCore
 from .module_core import (
     ModuleCore,
     TemperatureModuleCore,
@@ -76,7 +84,9 @@ if TYPE_CHECKING:
 
 class ProtocolCore(
     AbstractProtocol[
-        InstrumentCore, LabwareCore, Union[ModuleCore, NonConnectedModuleCore]
+        InstrumentCore,
+        LabwareCore,
+        Union[ModuleCore, NonConnectedModuleCore],
     ]
 ):
     """Protocol API core using a ProtocolEngine.
@@ -103,6 +113,7 @@ class ProtocolCore(
             str, Union[ModuleCore, NonConnectedModuleCore]
         ] = {}
         self._disposal_locations: List[Union[Labware, TrashBin, WasteChute]] = []
+        self._defined_liquid_class_defs_by_name: Dict[str, LiquidClassSchemaV1] = {}
         self._load_fixed_trash()
 
     @property
@@ -182,7 +193,7 @@ class ProtocolCore(
     ) -> LabwareLoadParams:
         """Add a labware definition to the set of loadable definitions."""
         uri = self._engine_client.add_labware_definition(
-            LabwareDefinition.parse_obj(definition)
+            LabwareDefinition.model_validate(definition)
         )
         return LabwareLoadParams.from_uri(uri)
 
@@ -311,7 +322,6 @@ class ProtocolCore(
 
         return labware_core
 
-    # TODO (spp, 2022-12-14): https://opentrons.atlassian.net/browse/RLAB-237
     def move_labware(
         self,
         labware_core: LabwareCore,
@@ -323,6 +333,7 @@ class ProtocolCore(
             NonConnectedModuleCore,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ],
         use_gripper: bool,
         pause_for_manual_move: bool,
@@ -415,6 +426,8 @@ class ProtocolCore(
                 raise InvalidModuleLocationError(deck_slot, model.name)
 
         robot_type = self._engine_client.state.config.robot_type
+        # todo(mm, 2024-12-03): This might be possible to remove:
+        # Protocol Engine will normalize the deck slot itself.
         normalized_deck_slot = deck_slot.to_equivalent_for_robot_type(robot_type)
 
         result = self._engine_client.execute_command_without_recovery(
@@ -494,6 +507,12 @@ class ProtocolCore(
             return self._create_module_core(
                 load_module_result=load_module_result, model=model
             )
+
+    def load_robot(self) -> RobotCore:
+        """Load a robot core into the RobotContext."""
+        return RobotCore(
+            engine_client=self._engine_client, sync_hardware_api=self._sync_hardware
+        )
 
     def load_instrument(
         self,
@@ -718,10 +737,25 @@ class ProtocolCore(
             _id=liquid.id,
             name=liquid.displayName,
             description=liquid.description,
-            display_color=(
-                liquid.displayColor.__root__ if liquid.displayColor else None
-            ),
+            display_color=(liquid.displayColor.root if liquid.displayColor else None),
         )
+
+    def define_liquid_class(self, name: str) -> LiquidClass:
+        """Define a liquid class for use in transfer functions."""
+        try:
+            # Check if we have already loaded this liquid class' definition
+            liquid_class_def = self._defined_liquid_class_defs_by_name[name]
+        except KeyError:
+            try:
+                # Fetching the liquid class data from file and parsing it
+                # is an expensive operation and should be avoided.
+                # Calling this often will degrade protocol execution performance.
+                liquid_class_def = liquid_classes.load_definition(name)
+                self._defined_liquid_class_defs_by_name[name] = liquid_class_def
+            except LiquidClassDefinitionDoesNotExist:
+                raise ValueError(f"Liquid class definition not found for '{name}'.")
+
+        return LiquidClass.create(liquid_class_def)
 
     def get_labware_location(
         self, labware_core: LabwareCore
@@ -754,6 +788,7 @@ class ProtocolCore(
             NonConnectedModuleCore,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ],
     ) -> LabwareLocation:
         if isinstance(location, LabwareCore):
@@ -770,6 +805,7 @@ class ProtocolCore(
             NonConnectedModuleCore,
             OffDeckType,
             WasteChute,
+            TrashBin,
         ]
     ) -> NonStackedLocation:
         if isinstance(location, (ModuleCore, NonConnectedModuleCore)):
@@ -783,3 +819,5 @@ class ProtocolCore(
         elif isinstance(location, WasteChute):
             # TODO(mm, 2023-12-06) This will need to determine the appropriate Waste Chute to return, but only move_labware uses this for now
             return AddressableAreaLocation(addressableAreaName="gripperWasteChute")
+        elif isinstance(location, TrashBin):
+            return AddressableAreaLocation(addressableAreaName=location.area_name)

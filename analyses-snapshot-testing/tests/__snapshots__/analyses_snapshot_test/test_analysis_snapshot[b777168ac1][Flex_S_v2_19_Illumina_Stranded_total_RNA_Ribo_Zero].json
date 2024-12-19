@@ -1,4 +1,5 @@
 {
+  "commandAnnotations": [],
   "commands": [
     {
       "commandType": "home",
@@ -4341,7 +4342,14 @@
       },
       "id": "UUID",
       "key": "bccdb28e967f574dfbe472004101d7f9",
-      "notes": [],
+      "notes": [
+        {
+          "longMessage": "Handling this command failure with FAIL_RUN.",
+          "noteKind": "debugErrorRecovery",
+          "shortMessage": "Handling this command failure with FAIL_RUN.",
+          "source": "execution"
+        }
+      ],
       "params": {
         "displayName": "Index Anchors",
         "loadName": "eppendorf_96_wellplate_150ul",
@@ -4485,6 +4493,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [],
   "metadata": {
     "author": "Dandra Howell <protocols@opentrons.com>",

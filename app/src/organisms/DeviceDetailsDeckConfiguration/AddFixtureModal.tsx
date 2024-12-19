@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 
@@ -7,11 +7,13 @@ import {
   BORDERS,
   Btn,
   COLORS,
+  CURSOR_DEFAULT,
   DIRECTION_COLUMN,
   DIRECTION_ROW,
   Flex,
   JUSTIFY_SPACE_BETWEEN,
   LegacyStyledText,
+  Modal,
   SPACING,
   TYPOGRAPHY,
 } from '@opentrons/components'
@@ -23,11 +25,11 @@ import {
   getCutoutDisplayName,
   getFixtureDisplayName,
   ABSORBANCE_READER_CUTOUTS,
-  ABSORBANCE_READER_V1,
   ABSORBANCE_READER_V1_FIXTURE,
+  ABSORBANCE_READER_V1,
   HEATER_SHAKER_CUTOUTS,
-  HEATERSHAKER_MODULE_V1,
   HEATERSHAKER_MODULE_V1_FIXTURE,
+  HEATERSHAKER_MODULE_V1,
   MAGNETIC_BLOCK_V1_FIXTURE,
   SINGLE_CENTER_CUTOUTS,
   SINGLE_LEFT_CUTOUTS,
@@ -36,8 +38,8 @@ import {
   STAGING_AREA_RIGHT_SLOT_FIXTURE,
   STAGING_AREA_SLOT_WITH_MAGNETIC_BLOCK_V1_FIXTURE,
   TEMPERATURE_MODULE_CUTOUTS,
-  TEMPERATURE_MODULE_V2,
   TEMPERATURE_MODULE_V2_FIXTURE,
+  TEMPERATURE_MODULE_V2,
   THERMOCYCLER_MODULE_CUTOUTS,
   THERMOCYCLER_MODULE_V2,
   THERMOCYCLER_V2_FRONT_FIXTURE,
@@ -47,19 +49,19 @@ import {
   WASTE_CHUTE_FIXTURES,
 } from '@opentrons/shared-data'
 
-import { ODD_FOCUS_VISIBLE } from '../../atoms/buttons/constants'
-import { TertiaryButton } from '../../atoms/buttons'
-import { Modal } from '../../molecules/Modal'
-import { LegacyModal } from '../../molecules/LegacyModal'
-import { useNotifyDeckConfigurationQuery } from '../../resources/deck_configuration/'
+import { ODD_FOCUS_VISIBLE } from '/app/atoms/buttons/constants'
+import { TertiaryButton } from '/app/atoms/buttons'
+import { OddModal } from '/app/molecules/OddModal'
+import { useNotifyDeckConfigurationQuery } from '/app/resources/deck_configuration/'
 
+import type { MouseEventHandler } from 'react'
 import type {
   CutoutConfig,
   CutoutId,
   CutoutFixtureId,
 } from '@opentrons/shared-data'
-import type { ModalHeaderBaseProps } from '../../molecules/Modal/types'
-import type { LegacyModalProps } from '../../molecules/LegacyModal'
+import type { ModalProps } from '@opentrons/components'
+import type { OddModalHeaderBaseProps } from '/app/molecules/OddModal/types'
 
 interface AddFixtureModalProps {
   cutoutId: CutoutId
@@ -100,11 +102,9 @@ export function AddFixtureModal({
     // only show provided options if given as props
     initialStage = 'providedOptions'
   }
-  const [optionStage, setOptionStage] = React.useState<OptionStage>(
-    initialStage
-  )
+  const [optionStage, setOptionStage] = useState<OptionStage>(initialStage)
 
-  const modalHeader: ModalHeaderBaseProps = {
+  const modalHeader: OddModalHeaderBaseProps = {
     title: t('add_to_slot', {
       slotName: getCutoutDisplayName(cutoutId),
     }),
@@ -112,7 +112,7 @@ export function AddFixtureModal({
     onClick: closeModal,
   }
 
-  const modalProps: LegacyModalProps = {
+  const modalProps: ModalProps = {
     title: t('add_to_slot', {
       slotName: getCutoutDisplayName(cutoutId),
     }),
@@ -335,7 +335,7 @@ export function AddFixtureModal({
   return (
     <>
       {isOnDevice ? (
-        <Modal
+        <OddModal
           header={modalHeader}
           onOutsideClick={() => {
             if (providedFixtureOptions == null) closeModal()
@@ -350,9 +350,9 @@ export function AddFixtureModal({
               {nextStageOptions}
             </Flex>
           </Flex>
-        </Modal>
+        </OddModal>
       ) : (
-        <LegacyModal {...modalProps}>
+        <Modal {...modalProps}>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing16}>
             <LegacyStyledText as="p">
               {t('add_fixture_description')}
@@ -369,15 +369,15 @@ export function AddFixtureModal({
               }}
               aria-label="back"
               paddingX={SPACING.spacing16}
-              marginTop={'1.44rem'}
-              marginBottom={'0.56rem'}
+              marginTop="1.44rem"
+              marginBottom="0.56rem"
             >
               <LegacyStyledText css={GO_BACK_BUTTON_STYLE}>
                 {t('shared:go_back')}
               </LegacyStyledText>
             </Btn>
           ) : null}
-        </LegacyModal>
+        </Modal>
       )}
     </>
   )
@@ -385,7 +385,7 @@ export function AddFixtureModal({
 
 const FIXTURE_BUTTON_STYLE_ODD = css`
   background-color: ${COLORS.grey35};
-  cursor: default;
+  cursor: ${CURSOR_DEFAULT};
   border-radius: ${BORDERS.borderRadius16};
   box-shadow: none;
 
@@ -424,7 +424,7 @@ const GO_BACK_BUTTON_STYLE = css`
 `
 
 interface FixtureOptionProps {
-  onClickHandler: React.MouseEventHandler
+  onClickHandler: MouseEventHandler
   optionName: string
   buttonText: string
   isOnDevice: boolean

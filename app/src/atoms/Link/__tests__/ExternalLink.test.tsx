@@ -1,9 +1,9 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { describe, it, expect, beforeEach } from 'vitest'
 import { screen } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { COLORS } from '@opentrons/components'
-import { renderWithProviders } from '../../../__testing-utils__'
+import { renderWithProviders } from '/app/__testing-utils__'
 import { ExternalLink } from '../ExternalLink'
 
 const TEST_URL = 'https://opentrons.com'
@@ -38,6 +38,5 @@ describe('ExternalLink', () => {
     const icon = screen.getByLabelText('open_in_new_icon')
     expect(icon).toBeInTheDocument()
     expect(icon).toHaveStyle('width: 0.5rem; height: 0.5rem')
-    expect(icon).toHaveStyle('margin-left: 0.4375rem')
   })
 })

@@ -5,7 +5,8 @@ from contextlib import contextmanager
 
 from opentrons.hardware_control import HardwareControlAPI
 
-from ..state import StateView, HardwarePipette
+from ..state.state import StateView
+from ..state.pipettes import HardwarePipette
 from ..notes import CommandNoteAdder, CommandNote
 from ..errors.exceptions import (
     TipNotAttachedError,
@@ -90,7 +91,11 @@ class HardwarePipettingHandler(PipettingHandler):
         )
 
     async def prepare_for_aspirate(self, pipette_id: str) -> None:
-        """Prepare for pipette aspiration."""
+        """Prepare for pipette aspiration.
+
+        Raises:
+            PipetteOverpressureError, propagated as-is from the hardware controller.
+        """
         hw_mount = self._state_view.pipettes.get_mount(pipette_id).to_hw_mount()
         await self._hardware_api.prepare_for_aspirate(mount=hw_mount)
 
@@ -186,7 +191,9 @@ class HardwarePipettingHandler(PipettingHandler):
             mount=hw_pipette.mount,
             max_z_dist=well_depth - lld_min_height + well_location.offset.z,
         )
-        return float(z_pos)
+        labware_pos = self._state_view.geometry.get_labware_position(labware_id)
+        relative_height = z_pos - labware_pos.z - well_def.z
+        return float(relative_height)
 
     @contextmanager
     def _set_flow_rate(
@@ -285,8 +292,8 @@ class VirtualPipettingHandler(PipettingHandler):
         well_location: WellLocation,
     ) -> float:
         """Detect liquid level."""
-        # TODO (pm, 6-18-24): return a value of worth if needed
-        return 0.0
+        well_def = self._state_view.labware.get_well_definition(labware_id, well_name)
+        return well_def.depth
 
     def _validate_tip_attached(self, pipette_id: str, command_name: str) -> None:
         """Validate if there is a tip attached."""

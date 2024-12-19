@@ -1,7 +1,8 @@
 """Command factories to use in tests as data fixtures."""
+
 from datetime import datetime
 from pydantic import BaseModel
-from typing import Optional, cast
+from typing import Optional, cast, Dict
 
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons.types import MountType
@@ -13,11 +14,18 @@ from opentrons.protocol_engine.types import (
     ModuleDefinition,
     MovementAxis,
     WellLocation,
+    LiquidHandlingWellLocation,
     LabwareLocation,
     DeckSlotLocation,
     LabwareMovementStrategy,
     AddressableOffsetVector,
 )
+
+
+class FixtureModel(BaseModel):
+    """Fixture Model."""
+
+    ...
 
 
 def create_queued_command(
@@ -28,6 +36,10 @@ def create_queued_command(
     params: Optional[BaseModel] = None,
 ) -> cmd.Command:
     """Given command data, build a pending command model."""
+
+    class DummyParams(BaseModel):
+        pass
+
     return cast(
         cmd.Command,
         cmd.BaseCommand(
@@ -36,7 +48,7 @@ def create_queued_command(
             commandType=command_type,
             createdAt=datetime(year=2021, month=1, day=1),
             status=cmd.CommandStatus.QUEUED,
-            params=params or BaseModel(),
+            params=params or DummyParams(),
             intent=intent,
         ),
     )
@@ -58,7 +70,7 @@ def create_running_command(
             createdAt=created_at,
             commandType=command_type,
             status=cmd.CommandStatus.RUNNING,
-            params=params or BaseModel(),
+            params=params or FixtureModel(),
         ),
     )
 
@@ -83,7 +95,7 @@ def create_failed_command(
             completedAt=completed_at,
             commandType=command_type,
             status=cmd.CommandStatus.FAILED,
-            params=params or BaseModel(),
+            params=params or FixtureModel(),
             error=error,
             intent=intent,
         ),
@@ -107,9 +119,25 @@ def create_succeeded_command(
             createdAt=created_at,
             commandType=command_type,
             status=cmd.CommandStatus.SUCCEEDED,
-            params=params or BaseModel(),
-            result=result or BaseModel(),
+            params=params or FixtureModel(),
+            result=result or FixtureModel(),
         ),
+    )
+
+
+def create_comment_command(command_id: str = "command-id") -> cmd.Comment:
+    """Create a completed LoadLabware command."""
+    params = cmd.CommentParams(message="hello world!")
+
+    result = cmd.CommentResult()
+
+    return cmd.Comment(
+        id=command_id,
+        key="command-key",
+        status=cmd.CommandStatus.SUCCEEDED,
+        createdAt=datetime.now(),
+        params=params,
+        result=result,
     )
 
 
@@ -176,7 +204,7 @@ def create_load_module_command(
         moduleId=module_id,
         model=model,
         serialNumber=None,
-        definition=ModuleDefinition.construct(),  # type: ignore[call-arg]
+        definition=ModuleDefinition.model_construct(),  # type: ignore[call-arg]
     )
 
     return cmd.LoadModule(
@@ -195,7 +223,7 @@ def create_aspirate_command(
     flow_rate: float,
     labware_id: str = "labware-id",
     well_name: str = "A1",
-    well_location: Optional[WellLocation] = None,
+    well_location: Optional[LiquidHandlingWellLocation] = None,
     destination: DeckPoint = DeckPoint(x=0, y=0, z=0),
 ) -> cmd.Aspirate:
     """Get a completed Aspirate command."""
@@ -203,7 +231,7 @@ def create_aspirate_command(
         pipetteId=pipette_id,
         labwareId=labware_id,
         wellName=well_name,
-        wellLocation=well_location or WellLocation(),
+        wellLocation=well_location or LiquidHandlingWellLocation(),
         volume=volume,
         flowRate=flow_rate,
     )
@@ -248,7 +276,7 @@ def create_dispense_command(
     flow_rate: float,
     labware_id: str = "labware-id",
     well_name: str = "A1",
-    well_location: Optional[WellLocation] = None,
+    well_location: Optional[LiquidHandlingWellLocation] = None,
     destination: DeckPoint = DeckPoint(x=0, y=0, z=0),
 ) -> cmd.Dispense:
     """Get a completed Dispense command."""
@@ -256,7 +284,7 @@ def create_dispense_command(
         pipetteId=pipette_id,
         labwareId=labware_id,
         wellName=well_name,
-        wellLocation=well_location or WellLocation(),
+        wellLocation=well_location or LiquidHandlingWellLocation(),
         volume=volume,
         flowRate=flow_rate,
     )
@@ -286,6 +314,55 @@ def create_dispense_in_place_command(
     result = cmd.DispenseInPlaceResult(volume=volume)
 
     return cmd.DispenseInPlace(
+        id="command-id",
+        key="command-key",
+        status=cmd.CommandStatus.SUCCEEDED,
+        createdAt=datetime.now(),
+        params=params,
+        result=result,
+    )
+
+
+def create_liquid_probe_command(
+    pipette_id: str = "pippete-id",
+    labware_id: str = "labware-id",
+    well_name: str = "well-name",
+    well_location: Optional[WellLocation] = None,
+    destination: DeckPoint = DeckPoint(x=0, y=0, z=0),
+) -> cmd.LiquidProbe:
+    """Get a completed Liquid Probe command."""
+    params = cmd.LiquidProbeParams(
+        pipetteId=pipette_id,
+        labwareId=labware_id,
+        wellName=well_name,
+        wellLocation=well_location or WellLocation(),
+    )
+    result = cmd.LiquidProbeResult(position=destination, z_position=0.5)
+
+    return cmd.LiquidProbe(
+        id="command-id",
+        key="command-key",
+        status=cmd.CommandStatus.SUCCEEDED,
+        createdAt=datetime.now(),
+        params=params,
+        result=result,
+    )
+
+
+def create_load_liquid_command(
+    liquid_id: str = "liquid-id",
+    labware_id: str = "labware-id",
+    volume_by_well: Dict[str, float] = {"A1": 30, "B2": 100},
+) -> cmd.LoadLiquid:
+    """Get a completed Load Liquid command."""
+    params = cmd.LoadLiquidParams(
+        liquidId=liquid_id,
+        labwareId=labware_id,
+        volumeByWell=volume_by_well,
+    )
+    result = cmd.LoadLiquidResult()
+
+    return cmd.LoadLiquid(
         id="command-id",
         key="command-key",
         status=cmd.CommandStatus.SUCCEEDED,

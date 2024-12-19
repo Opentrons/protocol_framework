@@ -1,8 +1,7 @@
-import * as React from 'react'
 import { css } from 'styled-components'
 import { BORDERS, COLORS } from '../../helix-design-system'
 import { Flex } from '../../primitives'
-import { ALIGN_CENTER, DIRECTION_ROW } from '../../styles'
+import { ALIGN_CENTER, DIRECTION_ROW, FLEX_MAX_CONTENT } from '../../styles'
 import { RESPONSIVENESS, SPACING, TYPOGRAPHY } from '../../ui-style-constants'
 import { Icon } from '../../icons'
 import { LegacyStyledText } from '../StyledText'
@@ -11,7 +10,7 @@ import type { IconName } from '../../icons'
 
 export type TagType = 'default' | 'interactive' | 'branded'
 
-interface TagProps {
+export interface TagProps {
   /** Tag content */
   text: string
   /** name constant of the text color and the icon color to display */
@@ -20,6 +19,7 @@ interface TagProps {
   iconPosition?: 'left' | 'right'
   /** Tagicon */
   iconName?: IconName
+  shrinkToContent?: boolean
 }
 
 const defaultColors = {
@@ -43,11 +43,12 @@ const TAG_PROPS_BY_TYPE: Record<
 }
 
 export function Tag(props: TagProps): JSX.Element {
-  const { iconName, type, text, iconPosition } = props
+  const { iconName, type, text, iconPosition, shrinkToContent = false } = props
 
   const DEFAULT_CONTAINER_STYLE = css`
     padding: ${SPACING.spacing2} ${SPACING.spacing8};
     border-radius: ${BORDERS.borderRadius4};
+    width: ${shrinkToContent ? FLEX_MAX_CONTENT : 'none'};
     @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
       border-radius: ${BORDERS.borderRadius8};
       padding: ${SPACING.spacing8} ${SPACING.spacing12};

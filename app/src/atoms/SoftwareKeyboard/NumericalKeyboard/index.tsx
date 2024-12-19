@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { KeyboardReact as Keyboard } from 'react-simple-keyboard'
 import { numericalKeyboardLayout, numericalCustom } from '../constants'
 
@@ -36,7 +36,7 @@ export function NumericalKeyboard({
      */
     <Keyboard
       keyboardRef={r => (keyboardRef.current = r)}
-      theme={'hg-theme-default oddTheme1 numerical-keyboard'}
+      theme="hg-theme-default oddTheme1 numerical-keyboard"
       onInit={keyboard => {
         keyboard.setInput(initialValue)
       }}

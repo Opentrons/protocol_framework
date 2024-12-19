@@ -31,6 +31,7 @@ import type {
 import type { RunTimeCommand, LabwareLocation } from '../command/types'
 import type { AddressableAreaName, CutoutFixtureId, CutoutId } from '../deck'
 import type { PipetteName } from './pipettes'
+import type { CommandAnnotation } from '../commandAnnotation/types'
 
 export type RobotType = 'OT-2 Standard' | 'OT-3 Standard'
 
@@ -53,6 +54,7 @@ export interface WellDefinition {
   y: number
   z: number
   'total-liquid-volume': number
+  geometryDefinitionId?: string | null
 }
 
 // typedef for labware definitions under v1 labware schema
@@ -85,7 +87,7 @@ export type LabwareDisplayCategory =
   | 'trash'
   | 'other'
   | 'adapter'
-
+  | 'lid'
 export type LabwareVolumeUnits = 'µL' | 'mL' | 'L'
 
 // TODO(mc, 2019-05-29): Remove this enum in favor of string + exported
@@ -131,19 +133,19 @@ export interface LabwareBrand {
   links?: string[]
 }
 
-export interface CircularWellShapeProperties {
+export interface CircularWellShape {
   shape: 'circular'
   diameter: number
 }
-export interface RectangularWellShapeProperties {
+export interface RectangularWellShape {
   shape: 'rectangular'
   xDimension: number
   yDimension: number
 }
 
 export type LabwareWellShapeProperties =
-  | CircularWellShapeProperties
-  | RectangularWellShapeProperties
+  | CircularWellShape
+  | RectangularWellShape
 
 // well without x,y,z
 export type LabwareWellProperties = LabwareWellShapeProperties & {
@@ -155,6 +157,63 @@ export type LabwareWell = LabwareWellProperties & {
   x: number
   y: number
   z: number
+  geometryDefinitionId?: string
+}
+
+export interface SphericalSegment {
+  shape: 'spherical'
+  radiusOfCurvature: number
+  topHeight: number
+  bottomHeight: number
+}
+
+export interface ConicalFrustum {
+  shape: 'conical'
+  bottomDiameter: number
+  topDiameter: number
+  topHeight: number
+  bottomHeight: number
+}
+
+export interface CuboidalFrustum {
+  shape: 'cuboidal'
+  bottomXDimension: number
+  bottomYDimension: number
+  topXDimension: number
+  topYDimension: number
+  topHeight: number
+  bottomHeight: number
+}
+
+export interface SquaredConeSegment {
+  shape: 'squaredcone'
+  bottomCrossSection: string
+  circleDiameter: number
+  rectangleXDimension: number
+  rectangleYDimension: number
+  topHeight: number
+  bottomHeight: number
+}
+
+export interface RoundedCuboidSegment {
+  shape: 'roundedcuboid'
+  bottomCrossSection: string
+  circleDiameter: number
+  rectangleXDimension: number
+  rectangleYDimension: number
+  topHeight: number
+  bottomHeight: number
+}
+
+export type WellSegment =
+  | CuboidalFrustum
+  | ConicalFrustum
+  | SquaredConeSegment
+  | SphericalSegment
+  | RoundedCuboidSegment
+
+export interface InnerWellGeometry {
+  sections: WellSegment[]
 }
 
 // TODO(mc, 2019-03-21): exact object is tough to use with the initial value in
@@ -173,7 +232,12 @@ export interface LabwareWellGroup {
   brand?: LabwareBrand
 }
 
-export type LabwareRoles = 'labware' | 'adapter' | 'fixture' | 'maintenance'
+export type LabwareRoles =
+  | 'labware'
+  | 'adapter'
+  | 'fixture'
+  | 'maintenance'
+  | 'lid'
 
 // NOTE: must be synced with shared-data/labware/schemas/2.json
 export interface LabwareDefinition2 {
@@ -191,6 +255,24 @@ export interface LabwareDefinition2 {
   allowedRoles?: LabwareRoles[]
   stackingOffsetWithLabware?: Record<string, LabwareOffset>
   stackingOffsetWithModule?: Record<string, LabwareOffset>
+}
+
+export interface LabwareDefinition3 {
+  version: number
+  schemaVersion: 3
+  namespace: string
+  metadata: LabwareMetadata
+  dimensions: LabwareDimensions
+  cornerOffsetFromSlot: LabwareOffset
+  parameters: LabwareParameters
+  brand: LabwareBrand
+  ordering: string[][]
+  wells: LabwareWellMap
+  groups: LabwareWellGroup[]
+  allowedRoles?: LabwareRoles[]
+  stackingOffsetWithLabware?: Record<string, LabwareOffset>
+  stackingOffsetWithModule?: Record<string, LabwareOffset>
+  innerLabwareGeometry?: Record<string, InnerWellGeometry> | null
 }
 
 export interface LabwareDefByDefURI {
@@ -300,6 +382,7 @@ type AreaType =
   | 'wasteChute'
   | 'fixedTrash'
   | 'stagingSlot'
+  | 'lidDock'
 
 export interface AddressableArea {
   id: AddressableAreaName
@@ -610,6 +693,106 @@ export interface Liquid {
   displayColor?: string
 }
 
+// TODO(ND, 12/17/2024): investigate why typescript doesn't allow Array<[number, number]>
+type LiquidHandlingPropertyByVolume = number[][]
+type PositionReference =
+  | 'well-bottom'
+  | 'well-top'
+  | 'well-center'
+  | 'liquid-meniscus'
+type BlowoutLocation = 'source' | 'destination' | 'trash'
+interface DelayParams {
+  duration: number
+}
+interface DelayProperties {
+  enable: boolean
+  params?: DelayParams
+}
+interface TouchTipParams {
+  zOffset: number
+  mmToEdge: number
+  speed: number
+}
+interface TouchTipProperties {
+  enable: boolean
+  params?: TouchTipParams
+}
+
+interface MixParams {
+  repetitions: number
+  volume: number
+}
+interface MixProperties {
+  enable: boolean
+  params?: MixParams
+}
+interface BlowoutParams {
+  location: BlowoutLocation
+  flowRate: number
+}
+interface BlowoutProperties {
+  enable: boolean
+  params?: BlowoutParams
+}
+interface Submerge {
+  positionReference: PositionReference
+  offset: Coordinates
+  speed: number
+  delay: DelayProperties
+}
+interface BaseRetract {
+  positionReference: PositionReference
+  offset: Coordinates
+  speed: number
+  airGapByVolume: LiquidHandlingPropertyByVolume
+  touchTip: TouchTipProperties
+  delay: DelayProperties
+}
+type RetractAspirate = BaseRetract
+interface RetractDispense extends BaseRetract {
+  blowout: BlowoutProperties
+}
+interface BaseLiquidHandlingProperties<RetractType> {
+  submerge: Submerge
+  retract: RetractType
+  positionReference: PositionReference
+  offset: Coordinates
+  flowRateByVolume: LiquidHandlingPropertyByVolume
+  correctionByVolume: LiquidHandlingPropertyByVolume
+  delay: DelayProperties
+}
+interface AspirateProperties
+  extends BaseLiquidHandlingProperties<RetractAspirate> {
+  preWet: boolean
+  mix: MixProperties
+}
+interface SingleDispenseProperties
+  extends BaseLiquidHandlingProperties<RetractDispense> {
+  mix: MixProperties
+  pushOutByVolume: LiquidHandlingPropertyByVolume
+}
+interface MultiDispenseProperties {
+  conditioningByVolume: LiquidHandlingPropertyByVolume
+  disposalByVolume: LiquidHandlingPropertyByVolume
+}
+interface ByTipTypeSetting {
+  tiprack: string
+  aspirate: AspirateProperties
+  singleDispense: SingleDispenseProperties
+  multiDispense?: MultiDispenseProperties
+}
+interface ByPipetteSetting {
+  pipetteModel: string
+  byTipType: ByTipTypeSetting[]
+}
+export interface LiquidClass {
+  liquidClassName: string
+  displayName: string
+  schemaVersion: number
+  namespace: string
+  byPipette: ByPipetteSetting[]
+}
+
 export interface AnalysisError {
   id: string
   detail: string
@@ -720,6 +903,7 @@ export interface CompletedProtocolAnalysis {
   errors: AnalysisError[]
   robotType?: RobotType | null
   runTimeParameters?: RunTimeParameter[]
+  commandAnnotations?: CommandAnnotation[]
 }
 
 export interface ResourceFile {
@@ -801,3 +985,10 @@ export interface CutoutConfig {
 }
 
 export type DeckConfiguration = CutoutConfig[]
+
+export type NozzleLayoutConfig =
+  | 'single'
+  | 'column'
+  | 'row'
+  | 'full'
+  | 'subrect'

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 
 import { WASTE_CHUTE_CUTOUT } from '@opentrons/shared-data'
 
@@ -8,6 +8,7 @@ import { SlotClip } from './SlotClip'
 import { WasteChute } from './WasteChuteFixture'
 
 import type { DeckDefinition, ModuleType } from '@opentrons/shared-data'
+import type { DeckLabelProps } from '../../molecules'
 
 interface WasteChuteStagingAreaFixtureProps
   extends React.SVGProps<SVGGElement> {
@@ -18,6 +19,8 @@ interface WasteChuteStagingAreaFixtureProps
   slotClipColor?: React.SVGProps<SVGPathElement>['stroke']
   wasteChuteColor?: string
   showExtensions?: boolean
+  showHighlight?: boolean
+  tagInfo?: DeckLabelProps[]
 }
 
 export function WasteChuteStagingAreaFixture(
@@ -29,6 +32,8 @@ export function WasteChuteStagingAreaFixture(
     fixtureBaseColor = COLORS.grey35,
     slotClipColor = COLORS.grey60,
     wasteChuteColor = COLORS.grey50,
+    showHighlight,
+    tagInfo,
     ...restProps
   } = props
 
@@ -62,6 +67,8 @@ export function WasteChuteStagingAreaFixture(
       <WasteChute
         wasteIconColor={fixtureBaseColor}
         backgroundColor={wasteChuteColor}
+        showHighlight={showHighlight}
+        tagInfo={tagInfo}
       />
     </g>
   )

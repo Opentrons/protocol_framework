@@ -32,7 +32,7 @@ class UnsafeEngageAxesResult(BaseModel):
 class UnsafeEngageAxesImplementation(
     AbstractCommandImpl[
         UnsafeEngageAxesParams,
-        SuccessData[UnsafeEngageAxesResult, None],
+        SuccessData[UnsafeEngageAxesResult],
     ]
 ):
     """Enable axes command implementation."""
@@ -48,16 +48,15 @@ class UnsafeEngageAxesImplementation(
 
     async def execute(
         self, params: UnsafeEngageAxesParams
-    ) -> SuccessData[UnsafeEngageAxesResult, None]:
+    ) -> SuccessData[UnsafeEngageAxesResult]:
         """Enable exes."""
         ot3_hardware_api = ensure_ot3_hardware(self._hardware_api)
         await ot3_hardware_api.engage_axes(
-            [
-                self._gantry_mover.motor_axis_to_hardware_axis(axis)
-                for axis in params.axes
-            ]
+            self._gantry_mover.motor_axes_to_present_hardware_axes(params.axes)
         )
-        return SuccessData(public=UnsafeEngageAxesResult(), private=None)
+        return SuccessData(
+            public=UnsafeEngageAxesResult(),
+        )
 
 
 class UnsafeEngageAxes(

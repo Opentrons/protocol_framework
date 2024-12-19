@@ -3,7 +3,7 @@ from decoy import Decoy
 
 from opentrons.hardware_control.modules import HeaterShaker
 
-from opentrons.protocol_engine.state import StateView
+from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.state.module_substates import (
     HeaterShakerModuleSubState,
     HeaterShakerModuleId,
@@ -50,5 +50,5 @@ async def test_wait_for_temperature(
         await hs_hardware.await_temperature(awaiting_temperature=123.45), times=1
     )
     assert result == SuccessData(
-        public=heater_shaker.WaitForTemperatureResult(), private=None
+        public=heater_shaker.WaitForTemperatureResult(),
     )

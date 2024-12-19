@@ -1,18 +1,20 @@
-import * as React from 'react'
+import { useState } from 'react'
 import {
   Flex,
   DIRECTION_COLUMN,
   SPACING,
   LegacyStyledText,
+  RadioButton,
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { OneColumn } from './OneColumn'
-import { RadioButton } from '../../atoms/buttons/RadioButton'
+
+import type { ChangeEventHandler } from 'react'
 
 export interface ButtonProps {
   label: string
   value: string
-  onChange?: React.ChangeEventHandler<HTMLInputElement>
+  onChange?: ChangeEventHandler<HTMLInputElement>
 }
 
 export interface ModalContentOneColSimpleButtonsProps {
@@ -20,14 +22,14 @@ export interface ModalContentOneColSimpleButtonsProps {
   firstButton: ButtonProps
   secondButton: ButtonProps
   furtherButtons?: ButtonProps[]
-  onSelect?: React.ChangeEventHandler<HTMLInputElement>
+  onSelect?: ChangeEventHandler<HTMLInputElement>
   initialSelected?: string
 }
 
 export function ModalContentOneColSimpleButtons(
   props: ModalContentOneColSimpleButtonsProps
 ): JSX.Element {
-  const [selected, setSelected] = React.useState<string | null>(
+  const [selected, setSelected] = useState<string | null>(
     props.initialSelected ?? null
   )
   const furtherButtons = props.furtherButtons ?? []

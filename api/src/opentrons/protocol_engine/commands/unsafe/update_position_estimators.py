@@ -23,7 +23,11 @@ class UpdatePositionEstimatorsParams(BaseModel):
     """Payload required for an UpdatePositionEstimators command."""
 
     axes: List[MotorAxis] = Field(
-        ..., description="The axes for which to update the position estimators."
+        ...,
+        description=(
+            "The axes for which to update the position estimators."
+            " Any axes that are not physically present will be ignored."
+        ),
     )
 
 
@@ -34,7 +38,7 @@ class UpdatePositionEstimatorsResult(BaseModel):
 class UpdatePositionEstimatorsImplementation(
     AbstractCommandImpl[
         UpdatePositionEstimatorsParams,
-        SuccessData[UpdatePositionEstimatorsResult, None],
+        SuccessData[UpdatePositionEstimatorsResult],
     ]
 ):
     """Update position estimators command implementation."""
@@ -50,16 +54,15 @@ class UpdatePositionEstimatorsImplementation(
 
     async def execute(
         self, params: UpdatePositionEstimatorsParams
-    ) -> SuccessData[UpdatePositionEstimatorsResult, None]:
+    ) -> SuccessData[UpdatePositionEstimatorsResult]:
         """Update axis position estimators from their encoders."""
         ot3_hardware_api = ensure_ot3_hardware(self._hardware_api)
         await ot3_hardware_api.update_axis_position_estimations(
-            [
-                self._gantry_mover.motor_axis_to_hardware_axis(axis)
-                for axis in params.axes
-            ]
+            self._gantry_mover.motor_axes_to_present_hardware_axes(params.axes)
         )
-        return SuccessData(public=UpdatePositionEstimatorsResult(), private=None)
+        return SuccessData(
+            public=UpdatePositionEstimatorsResult(),
+        )
 
 
 class UpdatePositionEstimators(

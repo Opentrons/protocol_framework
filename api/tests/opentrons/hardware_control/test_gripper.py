@@ -104,8 +104,13 @@ def test_reload_instrument_cal_ot3_conf_changed(
         "fakeid123",
         jaw_max_offset=15,
     )
-    new_conf = fake_gripper_conf.copy(
-        update={"grip_force_profile": {"default_grip_force": 1}}
+    new_conf = fake_gripper_conf.model_copy(
+        update={
+            "grip_force_profile": fake_gripper_conf.grip_force_profile.model_copy(
+                update={"default_grip_force": 1}
+            )
+        },
+        deep=True,
     )
     assert new_conf != old_gripper.config
 
@@ -121,14 +126,14 @@ def test_reload_instrument_cal_ot3_conf_changed(
 
 @pytest.mark.ot3_only
 def test_jaw_calibration_error_checking() -> None:
-    subject = gripper.Gripper(fake_gripper_conf, fake_offset, "fakeid123")
+    subject = gripper.Gripper(fake_gripper_conf, fake_offset, "fakeid123")  # type: ignore[arg-type]
     with pytest.raises(MotionFailedError):
         subject.update_jaw_open_position_from_closed_position(0)
 
 
 @pytest.mark.ot3_only
 def test_jaw_calibration() -> None:
-    subject = gripper.Gripper(fake_gripper_conf, fake_offset, "fakeid123")
+    subject = gripper.Gripper(fake_gripper_conf, fake_offset, "fakeid123")  # type: ignore[arg-type]
     subject.update_jaw_open_position_from_closed_position(
         (
             fake_gripper_conf.geometry.jaw_width["max"]

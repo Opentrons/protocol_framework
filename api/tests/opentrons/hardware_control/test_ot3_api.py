@@ -1,5 +1,6 @@
 """ Tests for behaviors specific to the OT3 hardware controller.
 """
+import asyncio
 from typing import (
     AsyncIterator,
     Iterator,
@@ -26,7 +27,6 @@ from opentrons.config.types import (
     GantryLoad,
     CapacitivePassSettings,
     LiquidProbeSettings,
-    OutputOptions,
 )
 from opentrons.hardware_control.dev_types import (
     AttachedGripper,
@@ -59,14 +59,13 @@ from opentrons.hardware_control.types import (
     EstopStateNotification,
     TipStateType,
 )
-from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType
 from opentrons.hardware_control.errors import InvalidCriticalPoint
 from opentrons.hardware_control.ot3api import OT3API
 from opentrons.hardware_control import ThreadManager
 
 from opentrons.hardware_control.backends.ot3simulator import OT3Simulator
 from opentrons_hardware.firmware_bindings.constants import NodeId
-from opentrons.types import Point, Mount
+from opentrons.types import Point, Mount, NozzleConfigurationType
 
 from opentrons_hardware.hardware_control.motion_planning.types import Move
 
@@ -98,6 +97,8 @@ from opentrons.hardware_control.modules import (
 from opentrons.hardware_control.module_control import AttachedModulesControl
 from opentrons.hardware_control.backends.types import HWStopCondition
 
+from opentrons_hardware.firmware_bindings.constants import SensorId
+from opentrons_hardware.sensors.types import SensorDataType
 
 # TODO (spp, 2023-08-22): write tests for ot3api.stop & ot3api.halt
 
@@ -109,7 +110,6 @@ def fake_settings() -> CapacitivePassSettings:
         max_overrun_distance_mm=2,
         speed_mm_per_s=4,
         sensor_threshold_pf=1.0,
-        output_option=OutputOptions.sync_only,
     )
 
 
@@ -120,9 +120,11 @@ def fake_liquid_settings() -> LiquidProbeSettings:
         plunger_speed=15,
         plunger_impulse_time=0.2,
         sensor_threshold_pascals=15,
-        output_option=OutputOptions.can_bus_only,
         aspirate_while_sensing=False,
-        data_files={InstrumentProbeType.PRIMARY: "fake_file_name"},
+        z_overlap_between_passes_mm=0.1,
+        plunger_reset_offset=2.0,
+        samples_for_baselining=20,
+        sample_time_sec=0.004,
     )
 
 
@@ -484,8 +486,6 @@ def mock_backend_capacitive_probe(
             speed_mm_per_s: float,
             threshold_pf: float,
             probe: InstrumentProbeType,
-            output_option: OutputOptions = OutputOptions.sync_only,
-            data_file: Optional[str] = None,
         ) -> None:
             hardware_backend._position[moving] += distance_mm / 2
 
@@ -667,7 +667,11 @@ async def test_pickup_moves(
 
 @pytest.mark.parametrize("load_configs", load_pipette_configs)
 @given(blowout_volume=strategies.floats(min_value=0, max_value=10))
-@settings(suppress_health_check=[HealthCheck.function_scoped_fixture], max_examples=10)
+@settings(
+    suppress_health_check=[HealthCheck.function_scoped_fixture],
+    max_examples=10,
+    deadline=400,
+)
 @example(blowout_volume=0.0)
 async def test_blow_out_position(
     ot3_hardware: ThreadManager[OT3API],
@@ -808,7 +812,7 @@ async def test_liquid_probe(
     pipette = ot3_hardware.hardware_pipettes[mount.to_mount()]
 
     assert pipette
-    await ot3_hardware.add_tip(mount, 100)
+    ot3_hardware.add_tip(mount, 100)
     await ot3_hardware.home()
     mock_move_to.return_value = None
 
@@ -823,13 +827,17 @@ async def test_liquid_probe(
             plunger_speed=15,
             plunger_impulse_time=0.2,
             sensor_threshold_pascals=15,
-            output_option=OutputOptions.can_bus_only,
             aspirate_while_sensing=True,
-            data_files={InstrumentProbeType.PRIMARY: "fake_file_name"},
+            z_overlap_between_passes_mm=0.1,
+            plunger_reset_offset=2.0,
+            samples_for_baselining=20,
+            sample_time_sec=0.004,
         )
         fake_max_z_dist = 10.0
         non_responsive_z_mm = ot3_hardware.liquid_probe_non_responsive_z_distance(
-            fake_settings_aspirate.mount_speed
+            fake_settings_aspirate.mount_speed,
+            fake_settings_aspirate.samples_for_baselining,
+            fake_settings_aspirate.sample_time_sec,
         )
 
         probe_pass_overlap = 0.1
@@ -849,10 +857,11 @@ async def test_liquid_probe(
             (fake_settings_aspirate.plunger_speed * -1),
             fake_settings_aspirate.sensor_threshold_pascals,
             fake_settings_aspirate.plunger_impulse_time,
-            fake_settings_aspirate.output_option,
-            fake_settings_aspirate.data_files,
+            fake_settings_aspirate.samples_for_baselining,
+            probe_safe_reset_mm,
             probe=InstrumentProbeType.PRIMARY,
             force_both_sensors=False,
+            response_queue=None,
         )
 
         await ot3_hardware.liquid_probe(
@@ -894,7 +903,7 @@ async def test_liquid_probe_plunger_moves(
     pipette = ot3_hardware.hardware_pipettes[mount.to_mount()]
 
     assert pipette
-    await ot3_hardware.add_tip(mount, 100)
+    ot3_hardware.add_tip(mount, 100)
     await ot3_hardware.home()
     mock_move_to.return_value = None
 
@@ -912,11 +921,15 @@ async def test_liquid_probe_plunger_moves(
         fake_max_z_dist = 75.0
         config = ot3_hardware.config.liquid_sense
         mount_speed = config.mount_speed
+        samples_for_baselining = config.samples_for_baselining
+        sample_time_sec = config.sample_time_sec
         non_responsive_z_mm = ot3_hardware.liquid_probe_non_responsive_z_distance(
-            mount_speed
+            mount_speed,
+            samples_for_baselining,
+            sample_time_sec,
         )
 
-        probe_pass_overlap = 0.1
+        probe_pass_overlap = config.z_overlap_between_passes_mm
         probe_pass_z_offset_mm = non_responsive_z_mm + probe_pass_overlap
         probe_safe_reset_mm = max(2.0, probe_pass_z_offset_mm)
 
@@ -997,7 +1010,7 @@ async def test_liquid_probe_mount_moves(
     pipette = ot3_hardware.hardware_pipettes[mount.to_mount()]
 
     assert pipette
-    await ot3_hardware.add_tip(mount, 100)
+    ot3_hardware.add_tip(mount, 100)
     await ot3_hardware.home()
     mock_move_to.return_value = None
 
@@ -1008,11 +1021,15 @@ async def test_liquid_probe_mount_moves(
         fake_max_z_dist = 10.0
         config = ot3_hardware.config.liquid_sense
         mount_speed = config.mount_speed
+        samples_for_baselining = config.samples_for_baselining
+        sample_time_sec = config.sample_time_sec
         non_responsive_z_mm = ot3_hardware.liquid_probe_non_responsive_z_distance(
-            mount_speed
+            mount_speed,
+            samples_for_baselining,
+            sample_time_sec,
         )
 
-        probe_pass_overlap = 0.1
+        probe_pass_overlap = config.z_overlap_between_passes_mm
         probe_pass_z_offset_mm = non_responsive_z_mm + probe_pass_overlap
         probe_safe_reset_mm = max(2.0, probe_pass_z_offset_mm)
 
@@ -1054,7 +1071,7 @@ async def test_multi_liquid_probe(
     await ot3_hardware.cache_pipette(OT3Mount.LEFT, instr_data, None)
     pipette = ot3_hardware.hardware_pipettes[OT3Mount.LEFT.to_mount()]
     assert pipette
-    await ot3_hardware.add_tip(OT3Mount.LEFT, 100)
+    ot3_hardware.add_tip(OT3Mount.LEFT, 100)
     await ot3_hardware.home()
     mock_move_to.return_value = None
 
@@ -1079,9 +1096,11 @@ async def test_multi_liquid_probe(
             plunger_speed=71.5,
             plunger_impulse_time=0.2,
             sensor_threshold_pascals=15,
-            output_option=OutputOptions.can_bus_only,
             aspirate_while_sensing=True,
-            data_files={InstrumentProbeType.PRIMARY: "fake_file_name"},
+            z_overlap_between_passes_mm=0.1,
+            plunger_reset_offset=2.0,
+            samples_for_baselining=20,
+            sample_time_sec=0.004,
         )
         fake_max_z_dist = 10.0
         await ot3_hardware.liquid_probe(
@@ -1095,10 +1114,11 @@ async def test_multi_liquid_probe(
             (fake_settings_aspirate.plunger_speed * -1),
             fake_settings_aspirate.sensor_threshold_pascals,
             fake_settings_aspirate.plunger_impulse_time,
-            fake_settings_aspirate.output_option,
-            fake_settings_aspirate.data_files,
+            fake_settings_aspirate.samples_for_baselining,
+            2.0,
             probe=InstrumentProbeType.PRIMARY,
             force_both_sensors=False,
+            response_queue=None,
         )
         assert mock_liquid_probe.call_count == 3
 
@@ -1118,7 +1138,7 @@ async def test_liquid_not_found(
     await ot3_hardware.cache_pipette(OT3Mount.LEFT, instr_data, None)
     pipette = ot3_hardware.hardware_pipettes[OT3Mount.LEFT.to_mount()]
     assert pipette
-    await ot3_hardware.add_tip(OT3Mount.LEFT, 100)
+    ot3_hardware.add_tip(OT3Mount.LEFT, 100)
     await ot3_hardware.home()
     await ot3_hardware.move_to(OT3Mount.LEFT, Point(10, 10, 10))
 
@@ -1130,10 +1150,13 @@ async def test_liquid_not_found(
         plunger_speed: float,
         threshold_pascals: float,
         plunger_impulse_time: float,
-        output_format: OutputOptions = OutputOptions.can_bus_only,
-        data_files: Optional[Dict[InstrumentProbeType, str]] = None,
+        num_baseline_reads: int,
+        z_offset_for_plunger_prep: float,
         probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
         force_both_sensors: bool = False,
+        response_queue: Optional[
+            asyncio.Queue[Dict[SensorId, List[SensorDataType]]]
+        ] = None,
     ) -> float:
         pos = self._position
         pos[Axis.by_mount(mount)] += mount_speed * (
@@ -1151,9 +1174,11 @@ async def test_liquid_not_found(
         plunger_speed=71.5,
         plunger_impulse_time=0.2,
         sensor_threshold_pascals=15,
-        output_option=OutputOptions.can_bus_only,
         aspirate_while_sensing=True,
-        data_files={InstrumentProbeType.PRIMARY: "fake_file_name"},
+        z_overlap_between_passes_mm=0.1,
+        plunger_reset_offset=2.0,
+        samples_for_baselining=20,
+        sample_time_sec=0.004,
     )
     # with a mount speed of 5, pass overlap of 0.5 and a 0.2s delay on z
     # the actual distance traveled is 3.5mm per pass
@@ -1204,8 +1229,6 @@ async def test_capacitive_probe(
         4,
         1.0,
         InstrumentProbeType.PRIMARY,
-        fake_settings.output_option,
-        fake_settings.data_files,
     )
 
     original = moving.set_in_point(here, 0)
@@ -1604,7 +1627,7 @@ async def test_prepare_for_aspirate(
     await ot3_hardware.cache_pipette(mount, instr_data, None)
     assert ot3_hardware.hardware_pipettes[mount.to_mount()]
 
-    await ot3_hardware.add_tip(mount, 100)
+    ot3_hardware.add_tip(mount, 100)
     await ot3_hardware.prepare_for_aspirate(OT3Mount.LEFT)
     mock_move_to_plunger_bottom.assert_called_once_with(OT3Mount.LEFT, 1.0)
 
@@ -1639,7 +1662,7 @@ async def test_plunger_ready_to_aspirate_after_dispense(
     await ot3_hardware.cache_pipette(mount, instr_data, None)
     assert ot3_hardware.hardware_pipettes[mount.to_mount()]
 
-    await ot3_hardware.add_tip(mount, 100)
+    ot3_hardware.add_tip(mount, 100)
     await ot3_hardware.prepare_for_aspirate(OT3Mount.LEFT)
     assert ot3_hardware.hardware_pipettes[mount.to_mount()].ready_to_aspirate
 
@@ -1676,13 +1699,11 @@ async def test_move_to_plunger_bottom(
     backlash_pos[pip_ax] += pipette.backlash_distance
 
     # plunger will move at different speeds, depending on if:
-    #  - no tip attached (max speed)
-    #  - tip attached and moving down (blowout speed)
+    #  - tip not attached (max speed)
+    #  - tip attached and moving down (max speed)
     #  - tip attached and moving up (aspirate speed)
     expected_speed_no_tip = max_speeds[ot3_hardware.gantry_load][OT3AxisKind.P]
-    expected_speed_moving_down = ot3_hardware._pipette_handler.plunger_speed(
-        pipette, pipette.blow_out_flow_rate, "dispense"
-    )
+    expected_speed_moving_down = expected_speed_no_tip
     expected_speed_moving_up = ot3_hardware._pipette_handler.plunger_speed(
         pipette, pipette.aspirate_flow_rate, "aspirate"
     )
@@ -1702,7 +1723,7 @@ async def test_move_to_plunger_bottom(
 
     # tip attached, moving DOWN towards "bottom" position
     await ot3_hardware.home()
-    await ot3_hardware.add_tip(mount, 100)
+    ot3_hardware.add_tip(mount, 100)
     mock_move.reset_mock()
     await ot3_hardware.prepare_for_aspirate(mount)
     # make sure we've done the backlash compensation
@@ -2011,34 +2032,45 @@ async def test_drop_tip_full_tiprack(
         assert len(tip_action.call_args_list) == 2
         # first call should be "clamp", moving down
         first_target = tip_action.call_args_list[0][-1]["targets"][0][0]
-        assert list(first_target.keys()) == [Axis.Q]
-        assert first_target[Axis.Q] == 10
+        assert first_target == 10
         # next call should be "clamp", moving back up
         second_target = tip_action.call_args_list[1][-1]["targets"][0][0]
-        assert list(second_target.keys()) == [Axis.Q]
-        assert second_target[Axis.Q] < 10
+        assert second_target < 10
         # home should be called after tip_action is done
         assert len(mock_home_gear_motors.call_args_list) == 1
 
 
 @pytest.mark.parametrize(
-    "axes",
-    [[Axis.X], [Axis.X, Axis.Y], [Axis.X, Axis.Y, Axis.P_L], None],
+    ("axes_in", "axes_present", "expected_axes"),
+    [
+        ([Axis.X, Axis.Y], [Axis.X, Axis.Y], [Axis.X, Axis.Y]),
+        ([Axis.X, Axis.Y], [Axis.Y, Axis.Z_L], [Axis.Y]),
+        (None, list(Axis), list(Axis)),
+        (None, [Axis.Y, Axis.Z_L], [Axis.Y, Axis.Z_L]),
+    ],
 )
 async def test_update_position_estimation(
     ot3_hardware: ThreadManager[OT3API],
     hardware_backend: OT3Simulator,
-    axes: List[Axis],
+    axes_in: List[Axis],
+    axes_present: List[Axis],
+    expected_axes: List[Axis],
 ) -> None:
+    def _axis_is_present(axis: Axis) -> bool:
+        return axis in axes_present
+
     with patch.object(
         hardware_backend,
         "update_motor_estimation",
         AsyncMock(spec=hardware_backend.update_motor_estimation),
-    ) as mock_update:
-        await ot3_hardware._update_position_estimation(axes)
-        if axes is None:
-            axes = [ax for ax in Axis]
-        mock_update.assert_called_once_with(axes)
+    ) as mock_update, patch.object(
+        hardware_backend,
+        "axis_is_present",
+        Mock(spec=hardware_backend.axis_is_present),
+    ) as mock_axis_is_present:
+        mock_axis_is_present.side_effect = _axis_is_present
+        await ot3_hardware._update_position_estimation(axes_in)
+        mock_update.assert_called_once_with(expected_axes)
 
 
 async def test_refresh_positions(

@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 
@@ -22,14 +21,14 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import {
-  getDeckDefFromRobotType,
-  getLoadedLabwareDefinitionsByUri,
-  getModuleType,
-  inferModuleOrientationFromXCoordinate,
   OT2_ROBOT_TYPE,
   TC_MODULE_LOCATION_OT2,
   TC_MODULE_LOCATION_OT3,
   THERMOCYCLER_MODULE_TYPE,
+  inferModuleOrientationFromXCoordinate,
+  getDeckDefFromRobotType,
+  getLoadedLabwareDefinitionsByUri,
+  getModuleType,
 } from '@opentrons/shared-data'
 
 import {
@@ -38,12 +37,10 @@ import {
   getLabwareNameFromRunData,
   getModuleModelFromRunData,
 } from './utils'
-import { Divider } from '../../atoms/structure'
-import {
-  getLoadedLabware,
-  getLoadedModule,
-} from '../../molecules/Command/utils/accessors'
-import { useNotifyDeckConfigurationQuery } from '../../resources/deck_configuration'
+import { Divider } from '/app/atoms/structure'
+import { getLoadedModule } from '/app/local-resources/modules'
+import { getLoadedLabware } from '/app/local-resources/labware'
+import { useNotifyDeckConfigurationQuery } from '/app/resources/deck_configuration'
 
 import type {
   CompletedProtocolAnalysis,
@@ -136,7 +133,7 @@ export function MoveLabwareInterventionContent({
     deckDef
   )
   const oldLabwareLocation =
-    getLoadedLabware(run, command.params.labwareId)?.location ?? null
+    getLoadedLabware(run.labware, command.params.labwareId)?.location ?? null
 
   const labwareName = getLabwareNameFromRunData(
     run,
@@ -194,7 +191,6 @@ export function MoveLabwareInterventionContent({
         <Flex width="50%">
           <Box margin="0 auto" width="100%">
             <MoveLabwareOnDeck
-              key={command.id} // important so that back to back move labware commands bust the cache
               robotType={robotType}
               deckFill={isOnDevice ? COLORS.grey35 : '#e6e6e6'}
               initialLabwareLocation={oldLabwareLocation}
@@ -276,8 +272,8 @@ function LabwareDisplayLocation(
       console.warn('labware is located on an unknown module model')
     } else {
       const slotName =
-        getLoadedModule(protocolData, location.moduleId)?.location?.slotName ??
-        ''
+        getLoadedModule(protocolData.modules, location.moduleId)?.location
+          ?.slotName ?? ''
       const isModuleUnderAdapterThermocycler =
         getModuleType(moduleModel) === THERMOCYCLER_MODULE_TYPE
       if (isModuleUnderAdapterThermocycler) {
@@ -310,8 +306,8 @@ function LabwareDisplayLocation(
         console.warn('labware is located on an adapter on an unknown module')
       } else {
         const slotName =
-          getLoadedModule(protocolData, adapter.location.moduleId)?.location
-            ?.slotName ?? ''
+          getLoadedModule(protocolData.modules, adapter.location.moduleId)
+            ?.location?.slotName ?? ''
         const isModuleUnderAdapterThermocycler =
           getModuleType(moduleModel) === THERMOCYCLER_MODULE_TYPE
         if (isModuleUnderAdapterThermocycler) {

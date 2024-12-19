@@ -9,11 +9,11 @@ import subprocess
 from datetime import datetime
 import os
 from abr_testing.data_collection.error_levels import ERROR_LEVELS_PATH
-from typing import List, Dict, Any, Tuple, Set
+from typing import List, Dict, Any, Tuple, Set, Optional
 import time as t
 import json
 import requests
-import sys
+from abr_testing.tools import plate_reader
 
 
 def lpc_data(
@@ -76,7 +76,76 @@ def command_time(command: Dict[str, str]) -> float:
     return start_to_complete
 
 
-def instrument_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
+def count_command_in_run_data(
+    commands: List[Dict[str, Any]], command_of_interest: str, find_avg_time: bool
+) -> Tuple[int, float]:
+    """Count number of times command occurs in a run."""
+    total_command = 0
+    total_time = 0.0
+    for command in commands:
+        command_type = command["commandType"]
+        if command_type == command_of_interest:
+            total_command += 1
+            if find_avg_time:
+                started_at = command.get("startedAt", "")
+                completed_at = command.get("completedAt", "")
+
+                if started_at and completed_at:
+                    try:
+                        start_time = datetime.strptime(
+                            started_at, "%Y-%m-%dT%H:%M:%S.%f%z"
+                        )
+                        end_time = datetime.strptime(
+                            completed_at, "%Y-%m-%dT%H:%M:%S.%f%z"
+                        )
+                        total_time += (end_time - start_time).total_seconds()
+                    except ValueError:
+                        # Handle case where date parsing fails
+                        pass
+    avg_time = total_time / total_command if total_command > 0 else 0.0
+    return total_command, avg_time
+
+
+def identify_labware_ids(
+    file_results: Dict[str, Any], labware_name: Optional[str]
+) -> List[str]:
+    """Determine what type of labware is being picked up."""
+    list_of_labware_ids: List[str] = []
+    if labware_name:
+        labwares = file_results.get("labware", "")
+        list_of_labware_ids = []
+        if len(labwares) > 1:
+            for labware in labwares:
+                load_name = labware["loadName"]
+                if load_name == labware_name:
+                    labware_id = labware["id"]
+                    list_of_labware_ids.append(labware_id)
+    return list_of_labware_ids
+
+
+def match_pipette_to_action(
+    command_dict: Dict[str, Any],
+    commandTypes: List[str],
+    right_pipette: Optional[str],
+    left_pipette: Optional[str],
+) -> Tuple[int, int]:
+    """Match pipette id to id in command."""
+    right_pipette_add = 0
+    left_pipette_add = 0
+    for command in commandTypes:
+        command_type = command_dict["commandType"]
+        command_params = command_dict.get("params", "")
+        command_pipette = command_params.get("pipetteId", "")
+        if command_type == command and command_pipette == right_pipette:
+            right_pipette_add = 1
+        elif command_type == command and command_pipette == left_pipette:
+            left_pipette_add = 1
+    return left_pipette_add, right_pipette_add
+
+
+def instrument_commands(
+    file_results: Dict[str, Any], labware_name: Optional[str]
+) -> Dict[str, float]:
     """Count number of pipette and gripper commands per run."""
     pipettes = file_results.get("pipettes", "")
     commandData = file_results.get("commands", "")
@@ -89,6 +158,9 @@ def instrument_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
     right_pipette_id = ""
     left_pipette_id = ""
     gripper_pickups = 0.0
+    gripper_labware_of_interest = 0.0
+    avg_liquid_probe_time_sec = 0.0
+    list_of_labware_ids = identify_labware_ids(file_results, labware_name)
     # Match pipette mount to id
     for pipette in pipettes:
         if pipette["mount"] == "right":
@@ -96,30 +168,37 @@ def instrument_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
         elif pipette["mount"] == "left":
             left_pipette_id = pipette["id"]
     for command in commandData:
-        commandType = command["commandType"]
-        # Count tip pick ups
-        if commandType == "pickUpTip":
-            if command["params"].get("pipetteId", "") == right_pipette_id:
-                right_tip_pick_up += 1
-            elif command["params"].get("pipetteId", "") == left_pipette_id:
-                left_tip_pick_up += 1
+        # Count pick ups
+        single_left_pickup, single_right_pickup = match_pipette_to_action(
+            command, ["pickUpTip"], right_pipette_id, left_pipette_id
+        )
+        right_tip_pick_up += single_right_pickup
+        left_tip_pick_up += single_left_pickup
         # Count aspirates
-        elif commandType == "aspirate":
-            if command["params"].get("pipetteId", "") == right_pipette_id:
-                right_aspirate += 1
-            elif command["params"].get("pipetteId", "") == left_pipette_id:
-                left_aspirate += 1
+        single_left_aspirate, single_right_aspirate = match_pipette_to_action(
+            command, ["aspirate"], right_pipette_id, left_pipette_id
+        )
+        right_aspirate += single_right_aspirate
+        left_aspirate += single_left_aspirate
         # count dispenses/blowouts
-        elif commandType == "dispense" or commandType == "blowout":
-            if command["params"].get("pipetteId", "") == right_pipette_id:
-                right_dispense += 1
-            elif command["params"].get("pipetteId", "") == left_pipette_id:
-                left_dispense += 1
-        elif (
+        single_left_dispense, single_right_dispense = match_pipette_to_action(
+            command, ["blowOut", "dispense"], right_pipette_id, left_pipette_id
+        )
+        right_dispense += single_right_dispense
+        left_dispense += single_left_dispense
+        # count gripper actions
+        commandType = command["commandType"]
+        if (
             commandType == "moveLabware"
             and command["params"]["strategy"] == "usingGripper"
         ):
             gripper_pickups += 1
+            labware_moving = command["params"]["labwareId"]
+            if labware_moving in list_of_labware_ids:
+                gripper_labware_of_interest += 1
+    liquid_probes, avg_liquid_probe_time_sec = count_command_in_run_data(
+        commandData, "liquidProbe", True
+    )
     pipette_dict = {
         "Left Pipette Total Tip Pick Up(s)": left_tip_pick_up,
         "Left Pipette Total Aspirates": left_aspirate,
@@ -128,8 +207,176 @@ def instrument_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
         "Right Pipette Total Aspirates": right_aspirate,
         "Right Pipette Total Dispenses": right_dispense,
         "Gripper Pick Ups": gripper_pickups,
+        f"Gripper Pick Ups of {labware_name}": gripper_labware_of_interest,
+        "Total Liquid Probes": liquid_probes,
+        "Average Liquid Probe Time (sec)": avg_liquid_probe_time_sec,
     }
     return pipette_dict
+
+
+def get_comment_result_by_string(file_results: Dict[str, Any], key_phrase: str) -> str:
+    """Get comment string based off ky phrase."""
+    commandData = file_results.get("commands", "")
+    result_str = command_str = ""
+    for command in commandData:
+        commandType = command["commandType"]
+        if commandType == "comment":
+            command_str = command["params"].get("message", "")
+        try:
+            result_str = command_str.split(key_phrase)[1]
+        except IndexError:
+            continue
+    return result_str
+
+
+def get_protocol_version_number(file_results: Dict[str, Any]) -> str:
+    """Get protocol version number."""
+    return get_comment_result_by_string(file_results, "Protocol Version: ")
+
+
+def get_liquid_waste_height(file_results: Dict[str, Any]) -> float:
+    """Find liquid waste height."""
+    result_str = get_comment_result_by_string(
+        file_results, "Liquid Waste Total Height: "
+    )
+    try:
+        height = float(result_str)
+    except ValueError:
+        height = 0.0
+    return height
+
+
+def liquid_height_commands(
+    file_results: Dict[str, Any], all_heights_list: List[List[Any]]
+) -> List[List[Any]]:
+    """Record found liquid heights during a protocol."""
+    commandData = file_results.get("commands", "")
+    robot = file_results.get("robot_name", "")
+    run_id = file_results.get("run_id", "")
+    list_of_heights = []
+    print(robot)
+    liquid_waste_height = 0.0
+    for command in commandData:
+        commandType = command["commandType"]
+        if commandType == "comment":
+            result = command["params"].get("message", "")
+            try:
+                result_str = "'" + result.split("result: {")[1] + "'"
+                entries = result_str.split(", (")
+                comment_time = command["completedAt"]
+                for entry in entries:
+                    height = float(entry.split(": ")[1].split("'")[0].split("}")[0])
+                    labware_type = str(
+                        entry.split(",")[0].replace("'", "").replace("(", "")
+                    )
+                    well_location = str(entry.split(", ")[1].split(" ")[0])
+                    slot_location = str(entry.split("slot ")[1].split(")")[0])
+                    labware_name = str(entry.split("of ")[1].split(" on")[0])
+                    if labware_name == "Liquid Waste":
+                        liquid_waste_height += height
+                    one_entry = {
+                        "Timestamp": comment_time,
+                        "Labware Name": labware_name,
+                        "Labware Type": labware_type,
+                        "Slot Location": slot_location,
+                        "Well Location": well_location,
+                        "All Heights (mm)": height,
+                    }
+                    list_of_heights.append(one_entry)
+            except (IndexError, ValueError):
+                continue
+    if len(list_of_heights) > 0:
+        all_heights_list[0].append(robot)
+        all_heights_list[1].append(run_id)
+        all_heights_list[2].append(list_of_heights)
+        all_heights_list[3].append(liquid_waste_height)
+    return all_heights_list
+
+
+def plate_reader_commands(
+    file_results: Dict[str, Any],
+    hellma_plate_standards: List[Dict[str, Any]],
+    orientation: bool,
+) -> Dict[str, object]:
+    """Plate Reader Command Counts."""
+    commandData = file_results.get("commands", "")
+    move_lid_count: int = 0
+    initialize_count: int = 0
+    read = "no"
+    final_result = {}
+    read_num = 0
+    # Count Number of Reads per measure mode
+    read_count, avg_read_time = count_command_in_run_data(
+        commandData, "absorbanceReader/read", True
+    )
+    # Count Number of Initializations per measure mode
+    initialize_count, avg_initialize_time = count_command_in_run_data(
+        commandData, "absorbanceReader/initialize", True
+    )
+    # Count Number of Lid Movements
+    for command in commandData:
+        commandType = command["commandType"]
+        if (
+            commandType == "absorbanceReader/openLid"
+            or commandType == "absorbanceReader/closeLid"
+        ):
+            move_lid_count += 1
+        elif commandType == "absorbanceReader/read":
+            read = "yes"
+        elif read == "yes" and commandType == "comment":
+            result = command["params"].get("message", "")
+            if "result:" in result or "Result:" in result:
+                try:
+                    plate_name = result.split("result:")[0]
+                    formatted_result = result.split("result: ")[1]
+                except IndexError:
+                    plate_name = result.split("Result:")[0]
+                    formatted_result = result.split("Result: ")[1]
+                result_dict = eval(formatted_result)
+                result_dict_keys = list(result_dict.keys())
+                if len(result_dict_keys) > 1:
+                    read_type = "multi"
+                else:
+                    read_type = "single"
+                if "hellma_plate" in plate_name:
+                    for wavelength in result_dict_keys:
+                        one_wavelength_dict = result_dict.get(wavelength)
+                        result_ndarray = plate_reader.convert_read_dictionary_to_array(
+                            one_wavelength_dict
+                        )
+                        for item in hellma_plate_standards:
+                            wavelength_of_interest = item["wavelength"]
+                            if str(wavelength) == str(wavelength_of_interest):
+                                error_cells = plate_reader.check_byonoy_data_accuracy(
+                                    result_ndarray, item, orientation
+                                )
+                                if len(error_cells[0]) > 0:
+                                    percent = (96 - len(error_cells)) / 96 * 100
+                                    for cell in error_cells:
+                                        print(
+                                            "FAIL: Cell "
+                                            + str(cell)
+                                            + " out of accuracy spec."
+                                        )
+                                else:
+                                    percent = 100
+                                    print(
+                                        f"PASS: {wavelength_of_interest} meet accuracy spec."
+                                    )
+                                final_result[read_type, wavelength, read_num] = percent
+                                read_num += 1
+                else:
+                    final_result = result_dict
+                read = "no"
+    plate_dict = {
+        "Plate Reader # of Reads": read_count,
+        "Plate Reader Avg Read Time (sec)": avg_read_time,
+        "Plate Reader # of Initializations": initialize_count,
+        "Plate Reader Avg Initialize Time (sec)": avg_initialize_time,
+        "Plate Reader # of Lid Movements": move_lid_count,
+        "Plate Reader Result": final_result,
+    }
+    return plate_dict
 
 
 def hs_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
@@ -188,8 +435,9 @@ def hs_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
             )
     if temp_time is not None and deactivate_time is None:
         # If heater shaker module is not deactivated, protocol completedAt time stamp used.
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - temp_time).total_seconds()
         hs_temps[hs_temp] = hs_temps.get(hs_temp, 0.0) + temp_duration
@@ -236,8 +484,9 @@ def temperature_module_commands(file_results: Dict[str, Any]) -> Dict[str, Any]:
                 tm_temps[tm_temp] = tm_temps.get(tm_temp, 0.0) + temp_duration
     if temp_time is not None and deactivate_time is None:
         # If temperature module is not deactivated, protocol completedAt time stamp used.
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - temp_time).total_seconds()
         tm_temps[tm_temp] = tm_temps.get(tm_temp, 0.0) + temp_duration
@@ -272,7 +521,10 @@ def thermocycler_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
             or commandType == "thermocycler/closeLid"
         ):
             lid_engagements += 1
-        if commandType == "thermocycler/setTargetBlockTemperature":
+        if (
+            commandType == "thermocycler/setTargetBlockTemperature"
+            and command["status"] != "queued"
+        ):
             block_temp = command["params"]["celsius"]
             block_temp_changes += 1
             block_on_time = datetime.strptime(
@@ -317,15 +569,17 @@ def thermocycler_commands(file_results: Dict[str, Any]) -> Dict[str, float]:
                 block_temps[block_temp] = block_temps.get(block_temp, 0.0) + block_time
     if block_on_time is not None and block_off_time is None:
         # If thermocycler block not deactivated protocol completedAt time stamp used
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - block_on_time).total_seconds()
-        block_temps[block_temp] = block_temps.get(block_temp, 0.0) + temp_duration
+
     if lid_on_time is not None and lid_off_time is None:
         # If thermocycler lid not deactivated protocol completedAt time stamp used
+        default = commandData[len(commandData) - 1].get("completedAt")
         protocol_end = datetime.strptime(
-            file_results.get("completedAt", ""), "%Y-%m-%dT%H:%M:%S.%f%z"
+            file_results.get("completedAt", default), "%Y-%m-%dT%H:%M:%S.%f%z"
         )
         temp_duration = (protocol_end - lid_on_time).total_seconds()
         lid_temps[lid_temp] = block_temps.get(lid_temp, 0.0) + temp_duration
@@ -362,50 +616,61 @@ def create_abr_data_sheet(
     return sheet_location
 
 
-def get_error_info(file_results: Dict[str, Any]) -> Tuple[int, str, str, str, str]:
+def get_error_info(file_results: Dict[str, Any]) -> Dict[str, Any]:
     """Determines if errors exist in run log and documents them."""
-    error_levels = []
-    error_level = ""
     # Read error levels file
     with open(ERROR_LEVELS_PATH, "r") as error_file:
-        error_levels = list(csv.reader(error_file))
-    num_of_errors = len(file_results["errors"])
-    if num_of_errors == 0:
-        error_type = ""
-        error_code = ""
-        error_instrument = ""
-        error_level = ""
-        return 0, error_type, error_code, error_instrument, error_level
+        error_levels = {row[1]: row[4] for row in csv.reader(error_file)}
+    # Initialize Variables
+    recoverable_errors: Dict[str, int] = dict()
+    total_recoverable_errors = 0
+    end_run_errors = len(file_results["errors"])
     commands_of_run: List[Dict[str, Any]] = file_results.get("commands", [])
+    error_recovery = file_results.get("hasEverEnteredErrorRecovery", False)
+    # Count recoverable errors
+    if error_recovery:
+        for command in commands_of_run:
+            error_info = command.get("error", {})
+            if error_info.get("isDefined"):
+                total_recoverable_errors += 1
+                error_type = error_info.get("errorType", "")
+                recoverable_errors[error_type] = (
+                    recoverable_errors.get(error_type, 0) + 1
+                )
+    # Get run-ending error info
     try:
-        run_command_error: Dict[str, Any] = commands_of_run[-1]
-        error_str: int = len(run_command_error.get("error", ""))
-    except IndexError:
-        error_str = 0
-    if error_str > 1:
-        error_type = run_command_error["error"].get("errorType", "")
+        run_command_error = commands_of_run[-1]["error"]
+        error_type = run_command_error.get("errorType", "")
         if error_type == "PythonException":
-            # Reassign error_type to be more descriptive
-            error_type = run_command_error.get("detail", "").split(":")[0]
-        error_code = run_command_error["error"].get("errorCode", "")
+            error_type = commands_of_run[-1].get("detail", "").split(":")[0]
+        error_code = run_command_error.get("errorCode", "")
+        error_instrument = run_command_error.get("errorInfo", {}).get(
+            "node", run_command_error.get("errorInfo", {}).get("port", "")
+        )
+    except (IndexError, KeyError):
         try:
-            # Instrument Error
-            error_instrument = run_command_error["error"]["errorInfo"]["node"]
-        except KeyError:
-            # Module
-            error_instrument = run_command_error["error"]["errorInfo"].get("port", "")
+            error_details = file_results.get("errors", [{}])[0]
+        except IndexError:
+            error_details = {}
+        error_type = error_details.get("errorType", "")
+        error_code = error_details.get("errorCode", "")
+        error_instrument = error_details.get("detail", "")
+    # Determine error level
+    if end_run_errors > 0:
+        error_level = error_levels.get(error_code, "4")
     else:
-        error_type = file_results["errors"][0]["errorType"]
-        error_code = file_results["errors"][0]["errorCode"]
-        error_instrument = file_results["errors"][0]["detail"]
-    for error in error_levels:
-        code_error = error[1]
-        if code_error == error_code:
-            error_level = error[4]
-    if len(error_level) < 1:
-        error_level = str(4)
-
-    return num_of_errors, error_type, error_code, error_instrument, error_level
+        error_level = ""
+    # Create dictionary with all error descriptions
+    error_dict = {
+        "Total Recoverable Error(s)": total_recoverable_errors,
+        "Recoverable Error(s) Description": recoverable_errors,
+        "Run Ending Error": end_run_errors,
+        "Error_Code": error_code,
+        "Error_Type": error_type,
+        "Error_Instrument": error_instrument,
+        "Error_Level": error_level,
+    }
+    return error_dict
 
 
 def write_to_local_and_google_sheet(
@@ -527,7 +792,7 @@ def get_calibration_offsets(
         print(f"Connected to {ip}")
     except Exception:
         print(f"ERROR: Failed to read IP address: {ip}")
-        sys.exit()
+        pass
     health_data = response.json()
     robot_name = health_data.get("name", "")
     api_version = health_data.get("api_version", "")
@@ -570,10 +835,10 @@ def get_calibration_offsets(
 def get_logs(storage_directory: str, ip: str) -> List[str]:
     """Get Robot logs."""
     log_types: List[Dict[str, Any]] = [
-        {"log type": "api.log", "records": 1000},
+        {"log type": "api.log", "records": 10000},
         {"log type": "server.log", "records": 10000},
         {"log type": "serial.log", "records": 10000},
-        {"log type": "touchscreen.log", "records": 1000},
+        {"log type": "touchscreen.log", "records": 10000},
     ]
     all_paths = []
     for log_type in log_types:

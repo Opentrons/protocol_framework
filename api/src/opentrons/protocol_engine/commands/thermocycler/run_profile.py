@@ -1,9 +1,10 @@
 """Command models to execute a Thermocycler profile."""
 from __future__ import annotations
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING, Any
 from typing_extensions import Literal, Type
 
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.hardware_control.modules.types import ThermocyclerStep
 
@@ -11,11 +12,15 @@ from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, Succe
 from ...errors.error_occurrence import ErrorOccurrence
 
 if TYPE_CHECKING:
-    from opentrons.protocol_engine.state import StateView
+    from opentrons.protocol_engine.state.state import StateView
     from opentrons.protocol_engine.execution import EquipmentHandler
 
 
 RunProfileCommandType = Literal["thermocycler/runProfile"]
+
+
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
 
 
 class RunProfileStepParams(BaseModel):
@@ -35,10 +40,11 @@ class RunProfileParams(BaseModel):
         ...,
         description="Array of profile steps with target temperature and temperature hold time.",
     )
-    blockMaxVolumeUl: Optional[float] = Field(
+    blockMaxVolumeUl: float | SkipJsonSchema[None] = Field(
         None,
         description="Amount of liquid in uL of the most-full well"
         " in labware loaded onto the thermocycler.",
+        json_schema_extra=_remove_default,
     )
 
 
@@ -47,7 +53,7 @@ class RunProfileResult(BaseModel):
 
 
 class RunProfileImpl(
-    AbstractCommandImpl[RunProfileParams, SuccessData[RunProfileResult, None]]
+    AbstractCommandImpl[RunProfileParams, SuccessData[RunProfileResult]]
 ):
     """Execution implementation of a Thermocycler's run profile command."""
 
@@ -60,9 +66,7 @@ class RunProfileImpl(
         self._state_view = state_view
         self._equipment = equipment
 
-    async def execute(
-        self, params: RunProfileParams
-    ) -> SuccessData[RunProfileResult, None]:
+    async def execute(self, params: RunProfileParams) -> SuccessData[RunProfileResult]:
         """Run a Thermocycler profile."""
         thermocycler_state = self._state_view.modules.get_thermocycler_module_substate(
             params.moduleId
@@ -96,7 +100,9 @@ class RunProfileImpl(
                 steps=steps, repetitions=1, volume=target_volume
             )
 
-        return SuccessData(public=RunProfileResult(), private=None)
+        return SuccessData(
+            public=RunProfileResult(),
+        )
 
 
 class RunProfile(BaseCommand[RunProfileParams, RunProfileResult, ErrorOccurrence]):
@@ -104,7 +110,7 @@ class RunProfile(BaseCommand[RunProfileParams, RunProfileResult, ErrorOccurrence
 
     commandType: RunProfileCommandType = "thermocycler/runProfile"
     params: RunProfileParams
-    result: Optional[RunProfileResult]
+    result: Optional[RunProfileResult] = None
 
     _ImplementationCls: Type[RunProfileImpl] = RunProfileImpl
 

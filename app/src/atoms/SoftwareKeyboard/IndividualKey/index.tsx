@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { KeyboardReact as Keyboard } from 'react-simple-keyboard'
 import type { KeyboardReactInterface } from 'react-simple-keyboard'
 import '../index.css'
@@ -34,7 +34,7 @@ export function IndividualKey({
      */
     <Keyboard
       keyboardRef={r => (keyboardRef.current = r)}
-      theme={'hg-theme-default oddTheme1 individual-key'}
+      theme="hg-theme-default oddTheme1 individual-key"
       onChange={onChange}
       layoutName="default"
       display={customDisplay}

@@ -1,12 +1,11 @@
 """Base command data model and type definitions."""
 
-
 from __future__ import annotations
 
+import dataclasses
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
+import enum
 from typing import (
     TYPE_CHECKING,
     Generic,
@@ -15,12 +14,15 @@ from typing import (
     List,
     Type,
     Union,
+    Any,
+    Dict,
 )
 
 from pydantic import BaseModel, Field
-from pydantic.generics import GenericModel
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.hardware_control import HardwareControlAPI
+from opentrons.protocol_engine.state.update_types import StateUpdate
 
 from ..resources import ModelUtils
 from ..errors import ErrorOccurrence
@@ -29,7 +31,7 @@ from ..notes import CommandNote, CommandNoteAdder
 # Work around type-only circular dependencies.
 if TYPE_CHECKING:
     from .. import execution
-    from ..state import StateView
+    from ..state.state import StateView
 
 
 _ParamsT = TypeVar("_ParamsT", bound=BaseModel)
@@ -38,10 +40,9 @@ _ResultT = TypeVar("_ResultT", bound=BaseModel)
 _ResultT_co = TypeVar("_ResultT_co", bound=BaseModel, covariant=True)
 _ErrorT = TypeVar("_ErrorT", bound=ErrorOccurrence)
 _ErrorT_co = TypeVar("_ErrorT_co", bound=ErrorOccurrence, covariant=True)
-_PrivateResultT_co = TypeVar("_PrivateResultT_co", covariant=True)
 
 
-class CommandStatus(str, Enum):
+class CommandStatus(str, enum.Enum):
     """Command execution status."""
 
     QUEUED = "queued"
@@ -50,7 +51,7 @@ class CommandStatus(str, Enum):
     FAILED = "failed"
 
 
-class CommandIntent(str, Enum):
+class CommandIntent(str, enum.Enum):
     """Run intent for a given command.
 
     Props:
@@ -63,8 +64,12 @@ class CommandIntent(str, Enum):
     FIXIT = "fixit"
 
 
+def _pop_default(s: Dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 class BaseCommandCreate(
-    GenericModel,
+    BaseModel,
     # These type parameters need to be invariant because our fields are mutable.
     Generic[_ParamsT],
 ):
@@ -82,7 +87,7 @@ class BaseCommandCreate(
         ),
     )
     params: _ParamsT = Field(..., description="Command execution data payload")
-    intent: Optional[CommandIntent] = Field(
+    intent: CommandIntent | SkipJsonSchema[None] = Field(
         None,
         description=(
             "The reason the command was added. If not specified or `protocol`,"
@@ -95,30 +100,36 @@ class BaseCommandCreate(
             "Use setup commands for activities like pre-run calibration checks"
             " and module setup, like pre-heating."
         ),
+        json_schema_extra=_pop_default,
     )
-    key: Optional[str] = Field(
+    key: str | SkipJsonSchema[None] = Field(
         None,
         description=(
             "A key value, unique in this run, that can be used to track"
             " the same logical command across multiple runs of the same protocol."
             " If a value is not provided, one will be generated."
         ),
+        json_schema_extra=_pop_default,
     )
 
 
-@dataclass(frozen=True)
-class SuccessData(Generic[_ResultT_co, _PrivateResultT_co]):
+@dataclasses.dataclass(frozen=True)
+class SuccessData(Generic[_ResultT_co]):
     """Data from the successful completion of a command."""
 
     public: _ResultT_co
     """Public result data. Exposed over HTTP and stored in databases."""
 
-    private: _PrivateResultT_co
-    """Additional result data, only given to `opentrons.protocol_engine` internals."""
+    state_update: StateUpdate = dataclasses.field(
+        # todo(mm, 2024-08-22): Remove the default once all command implementations
+        # use this, to make it harder to forget in new command implementations.
+        default_factory=StateUpdate
+    )
+    """How the engine state should be updated to reflect this command success."""
 
 
-@dataclass(frozen=True)
-class DefinedErrorData(Generic[_ErrorT_co, _PrivateResultT_co]):
+@dataclasses.dataclass(frozen=True)
+class DefinedErrorData(Generic[_ErrorT_co]):
     """Data from a command that failed with a defined error.
 
     This should only be used for "defined" errors, not any error.
@@ -128,12 +139,77 @@ class DefinedErrorData(Generic[_ErrorT_co, _PrivateResultT_co]):
     public: _ErrorT_co
     """Public error data. Exposed over HTTP and stored in databases."""
 
-    private: _PrivateResultT_co
-    """Additional error data, only given to `opentrons.protocol_engine` internals."""
+    state_update: StateUpdate = dataclasses.field(
+        # todo(mm, 2024-08-22): Remove the default once all command implementations
+        # use this, to make it harder to forget in new command implementations.
+        default_factory=StateUpdate
+    )
+    """How the engine state should be updated to reflect this command failure."""
+
+    state_update_if_false_positive: StateUpdate = dataclasses.field(
+        default_factory=StateUpdate
+    )
+
+
+_ExecuteReturnT_co = TypeVar(
+    "_ExecuteReturnT_co",
+    bound=Union[
+        SuccessData[BaseModel],
+        DefinedErrorData[ErrorOccurrence],
+    ],
+    covariant=True,
+)
+
+
+class AbstractCommandImpl(
+    ABC,
+    Generic[_ParamsT_contra, _ExecuteReturnT_co],
+):
+    """Abstract command creation and execution implementation.
+
+    A given command request should map to a specific command implementation,
+    which defines how to execute the command and map data from execution into the
+    result model.
+    """
+
+    def __init__(
+        self,
+        state_view: StateView,
+        hardware_api: HardwareControlAPI,
+        equipment: execution.EquipmentHandler,
+        file_provider: execution.FileProvider,
+        movement: execution.MovementHandler,
+        gantry_mover: execution.GantryMover,
+        labware_movement: execution.LabwareMovementHandler,
+        pipetting: execution.PipettingHandler,
+        tip_handler: execution.TipHandler,
+        run_control: execution.RunControlHandler,
+        rail_lights: execution.RailLightsHandler,
+        model_utils: ModelUtils,
+        status_bar: execution.StatusBarHandler,
+        command_note_adder: CommandNoteAdder,
+    ) -> None:
+        """Initialize the command implementation with execution handlers."""
+        pass
+
+    @abstractmethod
+    async def execute(self, params: _ParamsT_contra) -> _ExecuteReturnT_co:
+        """Execute the command, mapping data from execution into a response model.
+
+        This should either:
+
+        - Return a `SuccessData`, if the command completed normally.
+        - Return a `DefinedErrorData`, if the command failed with a "defined error."
+          Defined errors are errors that are documented as part of the robot's public
+          API.
+        - Raise an exception, if the command failed with any other error
+          (in other words, an undefined error).
+        """
+        ...
 
 
 class BaseCommand(
-    GenericModel,
+    BaseModel,
     # These type parameters need to be invariant because our fields are mutable.
     Generic[_ParamsT, _ResultT, _ErrorT],
 ):
@@ -173,7 +249,9 @@ class BaseCommand(
     )
     error: Union[
         _ErrorT,
-        # ErrorOccurrence here is for undefined errors not captured by _ErrorT.
+        # ErrorOccurrence here is a catch-all for undefined errors not captured by
+        # _ErrorT, or defined errors that don't parse into _ErrorT because, for example,
+        # they are from an older software version that was missing some fields.
         ErrorOccurrence,
         None,
     ] = Field(
@@ -219,70 +297,12 @@ class BaseCommand(
                     # Our _ImplementationCls must return public result data that can fit
                     # in our `result` field:
                     _ResultT,
-                    # But we don't care (here) what kind of private result data it returns:
-                    object,
                 ],
                 DefinedErrorData[
-                    # Likewise, for our `error` field:
+                    # Our _ImplementationCls must return public error data that can fit
+                    # in our `error` field:
                     _ErrorT,
-                    object,
                 ],
             ],
         ]
     ]
-
-
-_ExecuteReturnT_co = TypeVar(
-    "_ExecuteReturnT_co",
-    bound=Union[
-        SuccessData[BaseModel, object],
-        DefinedErrorData[ErrorOccurrence, object],
-    ],
-    covariant=True,
-)
-
-
-class AbstractCommandImpl(
-    ABC,
-    Generic[_ParamsT_contra, _ExecuteReturnT_co],
-):
-    """Abstract command creation and execution implementation.
-
-    A given command request should map to a specific command implementation,
-    which defines how to execute the command and map data from execution into the
-    result model.
-    """
-
-    def __init__(
-        self,
-        state_view: StateView,
-        hardware_api: HardwareControlAPI,
-        equipment: execution.EquipmentHandler,
-        movement: execution.MovementHandler,
-        gantry_mover: execution.GantryMover,
-        labware_movement: execution.LabwareMovementHandler,
-        pipetting: execution.PipettingHandler,
-        tip_handler: execution.TipHandler,
-        run_control: execution.RunControlHandler,
-        rail_lights: execution.RailLightsHandler,
-        model_utils: ModelUtils,
-        status_bar: execution.StatusBarHandler,
-        command_note_adder: CommandNoteAdder,
-    ) -> None:
-        """Initialize the command implementation with execution handlers."""
-        pass
-
-    @abstractmethod
-    async def execute(self, params: _ParamsT_contra) -> _ExecuteReturnT_co:
-        """Execute the command, mapping data from execution into a response model.
-
-        This should either:
-
-        - Return a `SuccessData`, if the command completed normally.
-        - Return a `DefinedErrorData`, if the command failed with a "defined error."
-          Defined errors are errors that are documented as part of the robot's public
-          API.
-        - Raise an exception, if the command failed with any other error
-          (in other words, an undefined error).
-        """
-        ...

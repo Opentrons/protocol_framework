@@ -1,4 +1,5 @@
 """Tests for the ProtocolEngine class."""
+
 import inspect
 from datetime import datetime
 from typing import Any
@@ -10,6 +11,7 @@ from decoy import Decoy
 from opentrons_shared_data.robot.types import RobotType
 
 from opentrons.protocol_engine.actions.actions import SetErrorRecoveryPolicyAction
+from opentrons.protocol_engine.state.update_types import StateUpdate
 from opentrons.types import DeckSlotName
 from opentrons.hardware_control import HardwareControlAPI, OT2HardwareControlAPI
 from opentrons.hardware_control.modules import MagDeck, TempDeck
@@ -31,15 +33,19 @@ from opentrons.protocol_engine.types import (
     ModuleModel,
     Liquid,
     PostRunHardwareState,
-    AddressableAreaLocation,
 )
 from opentrons.protocol_engine.execution import (
     QueueWorker,
     HardwareStopper,
     DoorWatcher,
 )
-from opentrons.protocol_engine.resources import ModelUtils, ModuleDataProvider
-from opentrons.protocol_engine.state import Config, StateStore
+from opentrons.protocol_engine.resources import (
+    FileProvider,
+    ModelUtils,
+    ModuleDataProvider,
+)
+from opentrons.protocol_engine.state.config import Config
+from opentrons.protocol_engine.state.state import StateStore
 from opentrons.protocol_engine.plugins import AbstractPlugin, PluginStarter
 from opentrons.protocol_engine.errors import ProtocolCommandFailedError, ErrorOccurrence
 
@@ -117,6 +123,12 @@ def module_data_provider(decoy: Decoy) -> ModuleDataProvider:
     return decoy.mock(cls=ModuleDataProvider)
 
 
+@pytest.fixture
+def file_provider(decoy: Decoy) -> FileProvider:
+    """Get a mock FileProvider."""
+    return decoy.mock(cls=FileProvider)
+
+
 @pytest.fixture(autouse=True)
 def _mock_slot_standardization_module(
     decoy: Decoy, monkeypatch: pytest.MonkeyPatch
@@ -147,6 +159,7 @@ def subject(
     hardware_stopper: HardwareStopper,
     door_watcher: DoorWatcher,
     module_data_provider: ModuleDataProvider,
+    file_provider: FileProvider,
 ) -> ProtocolEngine:
     """Get a ProtocolEngine test subject with its dependencies stubbed out."""
     return ProtocolEngine(
@@ -159,6 +172,7 @@ def subject(
         hardware_stopper=hardware_stopper,
         door_watcher=door_watcher,
         module_data_provider=module_data_provider,
+        file_provider=file_provider,
     )
 
 
@@ -612,20 +626,31 @@ def test_pause(
     )
 
 
+@pytest.mark.parametrize("reconcile_false_positive", [True, False])
 def test_resume_from_recovery(
     decoy: Decoy,
     state_store: StateStore,
     action_dispatcher: ActionDispatcher,
     subject: ProtocolEngine,
+    reconcile_false_positive: bool,
 ) -> None:
     """It should dispatch a ResumeFromRecoveryAction."""
-    expected_action = ResumeFromRecoveryAction()
+    decoy.when(state_store.commands.get_state_update_for_false_positive()).then_return(
+        sentinel.state_update_for_false_positive
+    )
+    empty_state_update = StateUpdate()
+
+    expected_action = ResumeFromRecoveryAction(
+        sentinel.state_update_for_false_positive
+        if reconcile_false_positive
+        else empty_state_update
+    )
 
     decoy.when(
         state_store.commands.validate_action_allowed(expected_action)
     ).then_return(expected_action)
 
-    subject.resume_from_recovery()
+    subject.resume_from_recovery(reconcile_false_positive)
 
     decoy.verify(action_dispatcher.dispatch(expected_action))
 
@@ -659,7 +684,7 @@ async def test_finish(
     """It should be able to gracefully tell the engine it's done."""
     completed_at = datetime(2021, 1, 1, 0, 0)
 
-    decoy.when(state_store.commands.state.stopped_by_estop).then_return(False)
+    decoy.when(state_store.commands.get_is_stopped_by_estop()).then_return(False)
     decoy.when(model_utils.get_timestamp()).then_return(completed_at)
 
     await subject.finish(
@@ -694,7 +719,7 @@ async def test_finish_with_defaults(
     state_store: StateStore,
 ) -> None:
     """It should be able to gracefully tell the engine it's done."""
-    decoy.when(state_store.commands.state.stopped_by_estop).then_return(False)
+    decoy.when(state_store.commands.get_is_stopped_by_estop()).then_return(False)
     await subject.finish()
 
     decoy.verify(
@@ -736,7 +761,7 @@ async def test_finish_with_error(
         error=error,
     )
 
-    decoy.when(state_store.commands.state.stopped_by_estop).then_return(
+    decoy.when(state_store.commands.get_is_stopped_by_estop()).then_return(
         stopped_by_estop
     )
     decoy.when(model_utils.generate_id()).then_return("error-id")
@@ -779,9 +804,9 @@ async def test_finish_with_estop_error_will_not_drop_tip_and_home(
 ) -> None:
     """It should be able to tell the engine it's finished because of an error and will not drop tip and home."""
     error = ProtocolCommandFailedError(
-        original_error=ErrorOccurrence.construct(  # type: ignore[call-arg]
+        original_error=ErrorOccurrence.model_construct(  # type: ignore[call-arg]
             wrappedErrors=[
-                ErrorOccurrence.construct(errorCode="3008")  # type: ignore[call-arg]
+                ErrorOccurrence.model_construct(errorCode="3008")  # type: ignore[call-arg]
             ]
         )
     )
@@ -836,7 +861,7 @@ async def test_finish_stops_hardware_if_queue_worker_join_fails(
         await queue_worker.join(),
     ).then_raise(exception)
 
-    decoy.when(state_store.commands.state.stopped_by_estop).then_return(False)
+    decoy.when(state_store.commands.get_is_stopped_by_estop()).then_return(False)
 
     error_id = "error-id"
     completed_at = datetime(2021, 1, 1, 0, 0)
@@ -972,8 +997,7 @@ async def test_estop_noops_if_invalid(
     subject.estop()  # Should not raise.
 
     decoy.verify(
-        action_dispatcher.dispatch(),  # type: ignore
-        ignore_extra_args=True,
+        action_dispatcher.dispatch(expected_action),
         times=0,
     )
     decoy.verify(
@@ -1095,11 +1119,7 @@ def test_add_addressable_area(
 
     decoy.verify(
         action_dispatcher.dispatch(
-            AddAddressableAreaAction(
-                addressable_area=AddressableAreaLocation(
-                    addressableAreaName="my_funky_area"
-                )
-            )
+            AddAddressableAreaAction(addressable_area_name="my_funky_area")
         )
     )
 
@@ -1108,21 +1128,18 @@ def test_add_liquid(
     decoy: Decoy,
     action_dispatcher: ActionDispatcher,
     subject: ProtocolEngine,
+    state_store: StateStore,
 ) -> None:
     """It should dispatch an AddLiquidAction action."""
+    liquid_obj = Liquid(id="water-id", displayName="water", description="water desc")
+    decoy.when(
+        state_store.liquid.validate_liquid_allowed(liquid=liquid_obj)
+    ).then_return(liquid_obj)
     subject.add_liquid(
         id="water-id", name="water", description="water desc", color=None
     )
 
-    decoy.verify(
-        action_dispatcher.dispatch(
-            AddLiquidAction(
-                liquid=Liquid(
-                    id="water-id", displayName="water", description="water desc"
-                )
-            )
-        )
-    )
+    decoy.verify(action_dispatcher.dispatch(AddLiquidAction(liquid=liquid_obj)))
 
 
 async def test_use_attached_temp_and_mag_modules(

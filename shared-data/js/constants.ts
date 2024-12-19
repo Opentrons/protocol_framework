@@ -145,7 +145,9 @@ export const OT3_PIPETTES = [
   'p50_single_flex',
   'p50_multi_flex',
   'p1000_multi_flex',
+  'p1000_multi_em_flex',
   'p1000_96',
+  'p200_96',
 ]
 export const OT2_PIPETTES = [
   'p300_single',
@@ -371,6 +373,14 @@ export const ABSORBANCE_READER_B3_ADDRESSABLE_AREA: 'absorbanceReaderV1B3' =
   'absorbanceReaderV1B3'
 export const ABSORBANCE_READER_A3_ADDRESSABLE_AREA: 'absorbanceReaderV1A3' =
   'absorbanceReaderV1A3'
+export const ABSORBANCE_READER_LID_DOCK_A4_ADDRESSABLE_AREA: 'absorbanceReaderV1LidDockA4' =
+  'absorbanceReaderV1LidDockA4'
+export const ABSORBANCE_READER_LID_DOCK_B4_ADDRESSABLE_AREA: 'absorbanceReaderV1LidDockB4' =
+  'absorbanceReaderV1LidDockB4'
+export const ABSORBANCE_READER_LID_DOCK_C4_ADDRESSABLE_AREA: 'absorbanceReaderV1LidDockC4' =
+  'absorbanceReaderV1LidDockC4'
+export const ABSORBANCE_READER_LID_DOCK_D4_ADDRESSABLE_AREA: 'absorbanceReaderV1LidDockD4' =
+  'absorbanceReaderV1LidDockD4'
 
 export const MAGNETIC_BLOCK_ADDRESSABLE_AREAS: AddressableAreaName[] = [
   MAGNETIC_BLOCK_A1_ADDRESSABLE_AREA,
@@ -414,6 +424,10 @@ export const ABSORBANCE_READER_ADDRESSABLE_AREAS: AddressableAreaName[] = [
   ABSORBANCE_READER_B3_ADDRESSABLE_AREA,
   ABSORBANCE_READER_C3_ADDRESSABLE_AREA,
   ABSORBANCE_READER_D3_ADDRESSABLE_AREA,
+  ABSORBANCE_READER_LID_DOCK_A4_ADDRESSABLE_AREA,
+  ABSORBANCE_READER_LID_DOCK_B4_ADDRESSABLE_AREA,
+  ABSORBANCE_READER_LID_DOCK_C4_ADDRESSABLE_AREA,
+  ABSORBANCE_READER_LID_DOCK_D4_ADDRESSABLE_AREA,
 ]
 
 export const FLEX_USB_MODULE_ADDRESSABLE_AREAS: AddressableAreaName[] = [
@@ -501,6 +515,7 @@ export const SINGLE_RIGHT_SLOT_FIXTURE: 'singleRightSlot' = 'singleRightSlot'
 export const STAGING_AREA_RIGHT_SLOT_FIXTURE: 'stagingAreaRightSlot' =
   'stagingAreaRightSlot'
 
+export const TRASH_BIN_FIXTURE: 'trashBin' = 'trashBin'
 export const TRASH_BIN_ADAPTER_FIXTURE: 'trashBinAdapter' = 'trashBinAdapter'
 
 export const WASTE_CHUTE_RIGHT_ADAPTER_COVERED_FIXTURE: 'wasteChuteRightAdapterCovered' =

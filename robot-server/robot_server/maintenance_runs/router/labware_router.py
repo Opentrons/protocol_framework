@@ -1,4 +1,5 @@
 """Router for /maintenance_runs endpoints dealing with labware offsets and definitions."""
+from typing import Annotated
 import logging
 from fastapi import APIRouter, Depends, status
 
@@ -37,10 +38,10 @@ labware_router = APIRouter()
 )
 async def add_labware_offset(
     request_body: RequestModel[LabwareOffsetCreate],
-    run_orchestrator_store: MaintenanceRunOrchestratorStore = Depends(
-        get_maintenance_run_orchestrator_store
-    ),
-    run: MaintenanceRun = Depends(get_run_data_from_url),
+    run_orchestrator_store: Annotated[
+        MaintenanceRunOrchestratorStore, Depends(get_maintenance_run_orchestrator_store)
+    ],
+    run: Annotated[MaintenanceRun, Depends(get_run_data_from_url)],
 ) -> PydanticResponse[SimpleBody[LabwareOffset]]:
     """Add a labware offset to a maintenance run.
 
@@ -53,7 +54,7 @@ async def add_labware_offset(
     log.info(f'Added labware offset "{added_offset.id}"' f' to run "{run.id}".')
 
     return await PydanticResponse.create(
-        content=SimpleBody.construct(data=added_offset),
+        content=SimpleBody.model_construct(data=added_offset),
         status_code=status.HTTP_201_CREATED,
     )
 
@@ -76,10 +77,10 @@ async def add_labware_offset(
 )
 async def add_labware_definition(
     request_body: RequestModel[LabwareDefinition],
-    run_orchestrator_store: MaintenanceRunOrchestratorStore = Depends(
-        get_maintenance_run_orchestrator_store
-    ),
-    run: MaintenanceRun = Depends(get_run_data_from_url),
+    run_orchestrator_store: Annotated[
+        MaintenanceRunOrchestratorStore, Depends(get_maintenance_run_orchestrator_store)
+    ],
+    run: Annotated[MaintenanceRun, Depends(get_run_data_from_url)],
 ) -> PydanticResponse[SimpleBody[LabwareDefinitionSummary]]:
     """Add a labware offset to a run.
 
@@ -92,8 +93,8 @@ async def add_labware_definition(
     log.info(f'Added labware definition "{uri}"' f' to run "{run.id}".')
 
     return PydanticResponse(
-        content=SimpleBody.construct(
-            data=LabwareDefinitionSummary.construct(definitionUri=uri)
+        content=SimpleBody.model_construct(
+            data=LabwareDefinitionSummary.model_construct(definitionUri=uri)
         ),
         status_code=status.HTTP_201_CREATED,
     )

@@ -8,6 +8,28 @@ By installing and using Opentrons software, you agree to the Opentrons End-User 
 
 ---
 
+## Opentrons Robot Software Changes in 8.2.0
+
+Welcome to the v8.2.0 release of the Opentrons robot software! This release adds support for the Opentrons Absorbance Plate Reader Module.
+
+### New Features
+
+- Create and run Python protocols that use the Opentrons Absorbance Plate Reader.
+
+### Improved Features
+
+- Liquid presence detection no longer checks for liquid before every aspiration in a `mix()` command.
+
+### Bug Fixes
+
+- Error recovery no longer causes an `AssertionError` when a Python protocol changes the pipette speed.
+
+### Known Issues
+
+- You can't downgrade the robot software with an Absorbance Plate Reader attached. Disconnect the module first if you need to downgrade.
+
+---
+
 ## Opentrons Robot Software Changes in 8.1.0
 
 Welcome to the v8.1.0 release of the Opentrons robot software!

@@ -1,4 +1,5 @@
 {
+  "commandAnnotations": [],
   "commands": [
     {
       "commandType": "home",
@@ -8002,7 +8003,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8035,7 +8037,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8068,7 +8071,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8101,7 +8105,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8134,7 +8139,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8167,7 +8173,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8200,7 +8207,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8233,7 +8241,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8266,7 +8275,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8299,7 +8309,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8332,7 +8343,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8365,7 +8377,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8398,7 +8411,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8431,7 +8445,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8464,7 +8479,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8497,7 +8513,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8530,7 +8547,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8563,7 +8581,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8596,7 +8615,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8629,7 +8649,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8662,7 +8683,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8694,7 +8716,8 @@
             "y": 0.0,
             "z": 4.9999999999999964
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8726,7 +8749,8 @@
             "y": 0.0,
             "z": 4.9999999999999964
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8759,7 +8783,8 @@
             "y": 0.0,
             "z": 0.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8792,7 +8817,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -8825,7 +8851,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -8858,7 +8885,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A3"
       },
@@ -8891,7 +8919,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A4"
       },
@@ -8924,7 +8953,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A5"
       },
@@ -8957,7 +8987,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A6"
       },
@@ -8989,7 +9020,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A6"
       },
@@ -9021,7 +9053,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9054,7 +9087,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9087,7 +9121,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9120,7 +9155,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9153,7 +9189,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9186,7 +9223,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9219,7 +9257,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9252,7 +9291,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9285,7 +9325,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9318,7 +9359,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9351,7 +9393,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9384,7 +9427,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9417,7 +9461,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9450,7 +9495,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9483,7 +9529,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9516,7 +9563,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9549,7 +9597,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9582,7 +9631,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9615,7 +9665,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9648,7 +9699,8 @@
             "y": 0.0,
             "z": -26.450000000000003
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9681,7 +9733,8 @@
             "y": 0.0,
             "z": -26.650000000000002
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9713,7 +9766,8 @@
             "y": 0.0,
             "z": 4.9999999999999964
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9745,7 +9799,8 @@
             "y": 0.0,
             "z": 4.9999999999999964
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -9778,7 +9833,8 @@
             "y": 0.0,
             "z": 0.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A7"
       },
@@ -9811,7 +9867,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A7"
       },
@@ -9844,7 +9901,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A8"
       },
@@ -9877,7 +9935,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A9"
       },
@@ -9910,7 +9969,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A10"
       },
@@ -9943,7 +10003,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A11"
       },
@@ -9976,7 +10037,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A12"
       },
@@ -10008,7 +10070,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A12"
       },
@@ -10035,9 +10098,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -10120,7 +10183,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10152,7 +10216,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10184,7 +10249,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10217,7 +10283,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10250,7 +10317,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10282,7 +10350,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10314,7 +10383,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10347,7 +10417,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -10380,7 +10451,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10412,7 +10484,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10444,7 +10517,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10477,7 +10551,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A3"
       },
@@ -10510,7 +10585,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10542,7 +10618,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10574,7 +10651,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10607,7 +10685,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A4"
       },
@@ -10640,7 +10719,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10672,7 +10752,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10704,7 +10785,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10737,7 +10819,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A5"
       },
@@ -10770,7 +10853,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10802,7 +10886,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10834,7 +10919,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10867,7 +10953,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A6"
       },
@@ -10900,7 +10987,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10932,7 +11020,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10964,7 +11053,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -10997,7 +11087,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A7"
       },
@@ -11030,7 +11121,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11062,7 +11154,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11094,7 +11187,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11127,7 +11221,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A8"
       },
@@ -11160,7 +11255,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11192,7 +11288,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11224,7 +11321,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11257,7 +11355,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A9"
       },
@@ -11290,7 +11389,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11322,7 +11422,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11354,7 +11455,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11387,7 +11489,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A10"
       },
@@ -11420,7 +11523,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11452,7 +11556,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11484,7 +11589,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11517,7 +11623,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A11"
       },
@@ -11550,7 +11657,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11582,7 +11690,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11614,7 +11723,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11647,7 +11757,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A12"
       },
@@ -11680,7 +11791,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11712,7 +11824,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11744,7 +11857,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11777,7 +11891,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11810,7 +11925,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11842,7 +11958,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11874,7 +11991,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11907,7 +12025,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -11940,7 +12059,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -11972,7 +12092,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12004,7 +12125,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12037,7 +12159,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A3"
       },
@@ -12070,7 +12193,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12102,7 +12226,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12134,7 +12259,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12167,7 +12293,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A4"
       },
@@ -12200,7 +12327,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12232,7 +12360,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12264,7 +12393,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12297,7 +12427,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A5"
       },
@@ -12330,7 +12461,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12362,7 +12494,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12394,7 +12527,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12427,7 +12561,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A6"
       },
@@ -12460,7 +12595,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12492,7 +12628,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12524,7 +12661,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12557,7 +12695,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A7"
       },
@@ -12590,7 +12729,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12622,7 +12762,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12654,7 +12795,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12687,7 +12829,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A8"
       },
@@ -12720,7 +12863,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12752,7 +12896,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12784,7 +12929,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12817,7 +12963,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A9"
       },
@@ -12850,7 +12997,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12882,7 +13030,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12914,7 +13063,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -12947,7 +13097,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A10"
       },
@@ -12980,7 +13131,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13012,7 +13164,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13044,7 +13197,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13077,7 +13231,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A11"
       },
@@ -13110,7 +13265,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13142,7 +13298,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13174,7 +13331,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13207,7 +13365,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A12"
       },
@@ -13235,9 +13394,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -13304,7 +13463,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13336,7 +13496,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13368,7 +13529,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13401,7 +13563,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13434,7 +13597,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13466,7 +13630,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13498,7 +13663,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13531,7 +13697,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -13564,7 +13731,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13596,7 +13764,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13628,7 +13797,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13661,7 +13831,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A3"
       },
@@ -13694,7 +13865,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13726,7 +13898,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13758,7 +13931,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13791,7 +13965,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A4"
       },
@@ -13824,7 +13999,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13856,7 +14032,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13888,7 +14065,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13921,7 +14099,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A5"
       },
@@ -13954,7 +14133,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -13986,7 +14166,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14018,7 +14199,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14051,7 +14233,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A6"
       },
@@ -14084,7 +14267,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14116,7 +14300,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14148,7 +14333,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14181,7 +14367,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A7"
       },
@@ -14214,7 +14401,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14246,7 +14434,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14278,7 +14467,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14311,7 +14501,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A8"
       },
@@ -14344,7 +14535,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14376,7 +14568,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14408,7 +14601,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14441,7 +14635,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A9"
       },
@@ -14474,7 +14669,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14506,7 +14702,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14538,7 +14735,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14571,7 +14769,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A10"
       },
@@ -14604,7 +14803,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14636,7 +14836,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14668,7 +14869,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14701,7 +14903,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A11"
       },
@@ -14734,7 +14937,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14766,7 +14970,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14798,7 +15003,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14831,7 +15037,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A12"
       },
@@ -14864,7 +15071,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14896,7 +15104,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14928,7 +15137,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14961,7 +15171,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -14994,7 +15205,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15026,7 +15238,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15058,7 +15271,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15091,7 +15305,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -15124,7 +15339,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15156,7 +15372,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15188,7 +15405,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15221,7 +15439,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A3"
       },
@@ -15254,7 +15473,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15286,7 +15506,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15318,7 +15539,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15351,7 +15573,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A4"
       },
@@ -15384,7 +15607,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15416,7 +15640,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15448,7 +15673,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15481,7 +15707,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A5"
       },
@@ -15514,7 +15741,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15546,7 +15774,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15578,7 +15807,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15611,7 +15841,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A6"
       },
@@ -15644,7 +15875,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15676,7 +15908,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15708,7 +15941,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15741,7 +15975,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A7"
       },
@@ -15774,7 +16009,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15806,7 +16042,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15838,7 +16075,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15871,7 +16109,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A8"
       },
@@ -15904,7 +16143,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15936,7 +16176,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -15968,7 +16209,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16001,7 +16243,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A9"
       },
@@ -16034,7 +16277,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16066,7 +16310,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16098,7 +16343,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16131,7 +16377,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A10"
       },
@@ -16164,7 +16411,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16196,7 +16444,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16228,7 +16477,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16261,7 +16511,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A11"
       },
@@ -16294,7 +16545,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16326,7 +16578,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16358,7 +16611,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16391,7 +16645,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A12"
       },
@@ -16419,9 +16674,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -16488,7 +16743,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16520,7 +16776,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16552,7 +16809,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16585,7 +16843,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16618,7 +16877,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16650,7 +16910,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16682,7 +16943,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16715,7 +16977,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A2"
       },
@@ -16748,7 +17011,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16780,7 +17044,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16812,7 +17077,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16845,7 +17111,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A3"
       },
@@ -16878,7 +17145,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16910,7 +17178,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16942,7 +17211,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -16975,7 +17245,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A4"
       },
@@ -17008,7 +17279,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17040,7 +17312,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17072,7 +17345,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17105,7 +17379,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A5"
       },
@@ -17138,7 +17413,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17170,7 +17446,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17202,7 +17479,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17235,7 +17513,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A6"
       },
@@ -17268,7 +17547,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17300,7 +17580,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17332,7 +17613,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17365,7 +17647,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A7"
       },
@@ -17398,7 +17681,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17430,7 +17714,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17462,7 +17747,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17495,7 +17781,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A8"
       },
@@ -17528,7 +17815,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17560,7 +17848,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17592,7 +17881,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17625,7 +17915,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A9"
       },
@@ -17658,7 +17949,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17690,7 +17982,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17722,7 +18015,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17755,7 +18049,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A10"
       },
@@ -17788,7 +18083,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17820,7 +18116,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17852,7 +18149,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17885,7 +18183,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A11"
       },
@@ -17918,7 +18217,8 @@
             "y": 0.0,
             "z": -39.35
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17950,7 +18250,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -17982,7 +18283,8 @@
             "y": 0.0,
             "z": 5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A1"
       },
@@ -18015,7 +18317,8 @@
             "y": 0.0,
             "z": -5.0
           },
-          "origin": "top"
+          "origin": "top",
+          "volumeOffset": 0.0
         },
         "wellName": "A12"
       },
@@ -18043,9 +18346,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -18175,6 +18478,7 @@
       }
     }
   ],
+  "liquidClasses": [],
   "liquids": [
     {
       "description": "Equilibration Buffer",

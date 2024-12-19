@@ -21,9 +21,7 @@ import type {
   SelectStepAction,
   SelectMultipleStepsAction,
   SelectTerminalItemAction,
-  ToggleStepCollapsedAction,
-  ExpandMultipleStepsAction,
-  CollapseMultipleStepsAction,
+  Selection,
 } from './actions/types'
 
 export type CollapsedStepsState = Record<StepIdType, boolean>
@@ -50,18 +48,6 @@ const collapsedSteps: Reducer<CollapsedStepsState, any> = handleActions(
       state: CollapsedStepsState,
       action: DeleteMultipleStepsAction
     ) => omit(state, action.payload),
-    TOGGLE_STEP_COLLAPSED: (
-      state: CollapsedStepsState,
-      { payload }: ToggleStepCollapsedAction
-    ) => ({ ...state, [payload]: !state[payload] }),
-    EXPAND_MULTIPLE_STEPS: (
-      state: CollapsedStepsState,
-      { payload }: ExpandMultipleStepsAction
-    ) => payload.reduce((acc, stepId) => ({ ...acc, [stepId]: false }), state),
-    COLLAPSE_MULTIPLE_STEPS: (
-      state: CollapsedStepsState,
-      { payload }: CollapseMultipleStepsAction
-    ) => payload.reduce((acc, stepId) => ({ ...acc, [stepId]: true }), state),
     LOAD_FILE: (
       state: CollapsedStepsState,
       action: LoadFileAction // default all steps to collapsed
@@ -191,12 +177,71 @@ const wellSelectionLabwareKey: Reducer<string | null, any> = handleActions(
   },
   null
 )
+
+const selectedSubstep: Reducer<StepIdType | null, any> = handleActions(
+  {
+    TOGGLE_VIEW_SUBSTEP: (
+      state,
+      action: {
+        payload: StepIdType
+      }
+    ) => action.payload,
+  },
+  null
+)
+const hoveredDropdownItem: Reducer<Selection, any> = handleActions(
+  {
+    HOVER_DROPDOWN_ITEM: (
+      state,
+      action: {
+        payload: Selection
+      }
+    ) => action.payload,
+  },
+  { id: null, text: null }
+)
+const selectedDropdownItem: Reducer<Selection[], any> = handleActions(
+  {
+    SELECT_DROPDOWN_ITEM: (
+      state: Selection[],
+      action: {
+        payload: {
+          selection: Selection | null
+          mode: 'add' | 'clear'
+        }
+      }
+    ) => {
+      const { selection, mode } = action.payload
+
+      switch (mode) {
+        case 'clear':
+          return []
+        case 'add': {
+          if (!selection) {
+            return state
+          }
+          const updatedState = state.filter(
+            sel => sel.field !== selection.field
+          )
+
+          return [...updatedState, selection]
+        }
+        default:
+          return state
+      }
+    },
+  },
+  []
+)
 export interface StepsState {
   collapsedSteps: CollapsedStepsState
   selectedItem: SelectedItemState
   hoveredItem: HoveredItemState
   hoveredSubstep: SubstepIdentifier
   wellSelectionLabwareKey: string | null
+  selectedSubstep: StepIdType | null
+  hoveredDropdownItem: Selection
+  selectedDropdownItem: Selection[]
 }
 export const _allReducers = {
   collapsedSteps,
@@ -204,6 +249,9 @@ export const _allReducers = {
   hoveredItem,
   hoveredSubstep,
   wellSelectionLabwareKey,
+  selectedSubstep,
+  hoveredDropdownItem,
+  selectedDropdownItem,
 }
 export const rootReducer: Reducer<StepsState, Action> = combineReducers(
   _allReducers

@@ -15,8 +15,7 @@ describe('heaterShakerFormToArgs', () => {
       latchOpen: false,
       targetHeaterShakerTemperature: '40',
       targetSpeed: '400',
-      heaterShakerTimerMinutes: '1',
-      heaterShakerTimerSeconds: '10',
+      heaterShakerTimer: '1:10',
     }
 
     const expected = {
@@ -42,8 +41,7 @@ describe('heaterShakerFormToArgs', () => {
       latchOpen: false,
       targetHeaterShakerTemperature: '40',
       targetSpeed: null,
-      heaterShakerTimerMinutes: null,
-      heaterShakerTimerSeconds: null,
+      heaterShakerTimer: null,
     }
 
     const expected = {
