@@ -13,6 +13,7 @@ import {
   HEATERSHAKER_MODULE_TYPE,
   MAGNETIC_BLOCK_TYPE,
   ABSORBANCE_READER_TYPE,
+  ABSORBANCE_READER_V1,
 } from '@opentrons/shared-data'
 
 import type { ModuleModel, ModuleType } from '@opentrons/shared-data'
@@ -103,6 +104,7 @@ export const MOAM_MODELS: ModuleModel[] = [
   TEMPERATURE_MODULE_V2,
   HEATERSHAKER_MODULE_V1,
   MAGNETIC_BLOCK_V1,
+  ABSORBANCE_READER_V1,
 ]
 
 export const MAX_MOAM_MODULES = 7

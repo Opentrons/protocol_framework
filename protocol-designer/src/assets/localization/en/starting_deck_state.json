@@ -48,6 +48,7 @@
   "onDeck": "On deck",
   "one_item": "No more than 1 {{hardware}} allowed on the deck at one time",
   "only_display_rec": "Only display recommended labware",
+  "plate_reader_no_labware": "Labware cannot be loaded onto a plate reader. You can move labware onto the plate reader when building your protocol",
   "protocol_starting_deck": "Protocol starting deck",
   "read_more_gen1_gen2": "Read more about the differences between GEN1 and GEN2 Magnetic Modules",
   "rename_lab": "Rename labware",

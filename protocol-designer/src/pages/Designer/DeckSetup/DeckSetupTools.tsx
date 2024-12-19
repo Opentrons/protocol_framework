@@ -18,6 +18,7 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import {
+  ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
   FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
   getModuleDisplayName,
@@ -228,7 +229,9 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     disabled:
       selectedFixture === 'wasteChute' ||
       selectedFixture === 'wasteChuteAndStagingArea' ||
-      selectedFixture === 'trashBin',
+      selectedFixture === 'trashBin' ||
+      selectedModuleModel === ABSORBANCE_READER_V1,
+    disabledReasonForTooltip: t('plate_reader_no_labware'),
     isActive: tab === 'labware',
     onClick: () => {
       setTab('labware')
