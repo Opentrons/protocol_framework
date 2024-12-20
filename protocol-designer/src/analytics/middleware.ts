@@ -158,12 +158,9 @@ export const reduxActionToAnalyticsEvent = (
             name: `${modifiedStepName}Step`,
             properties: {
               ...stepArgModified,
-              aspirateAirGap:
-                stepArgModified.aspirateAirGapVolume ?? DEFAULT_VALUE,
-              aspirateFlowRate:
-                stepArgModified.aspirateFlowRateUlSec ?? DEFAULT_VALUE,
-              dispenseFlowRate:
-                stepArgModified.dispenseFlowRateUlSec ?? DEFAULT_VALUE,
+              aspirateAirGap: stepArgModified.aspirateAirGapVolume,
+              aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
+              dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
               blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
               aspirateOffsetFromBottomMm:
                 stepArgModified.aspirateOffsetFromBottomMm ===
