@@ -158,9 +158,14 @@ export const reduxActionToAnalyticsEvent = (
             name: `${modifiedStepName}Step`,
             properties: {
               ...stepArgModified,
-              aspirateAirGap: stepArgModified.aspirateAirGapVolume,
-              aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
-              dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
+              aspirateAirGap:
+                stepArgModified.aspirateAirGapVolume ?? DEFAULT_VALUE,
+              aspirateFlowRate:
+                stepArgModified.aspirateFlowRateUlSec ?? DEFAULT_VALUE,
+              dispenseFlowRate:
+                stepArgModified.dispenseFlowRateUlSec ?? DEFAULT_VALUE,
+              dispenseAirGap:
+                stepArgModified.dispenseAirGapVolume ?? DEFAULT_VALUE,
               blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
               aspirateOffsetFromBottomMm:
                 stepArgModified.aspirateOffsetFromBottomMm ===
@@ -202,8 +207,10 @@ export const reduxActionToAnalyticsEvent = (
             name: `mixStep`,
             properties: {
               ...stepArgModified,
-              aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
-              dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
+              aspirateFlowRate:
+                stepArgModified.aspirateFlowRateUlSec ?? DEFAULT_VALUE,
+              dispenseFlowRate:
+                stepArgModified.dispenseFlowRateUlSec ?? DEFAULT_VALUE,
               blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
               aspirateOffsetFromBottomMm:
                 stepArgModified.aspirateOffsetFromBottomMm ===
