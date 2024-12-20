@@ -18,6 +18,7 @@ from opentrons.protocol_api.module_contexts import (
 from typing import List, Union, Dict, Tuple
 from opentrons.hardware_control.modules.types import ThermocyclerStep
 from opentrons_shared_data.errors.exceptions import PipetteLiquidNotFoundError
+from opentrons.drivers.stacker.slas_demo import StackerModule
 
 # FUNCTIONS FOR LOADING COMMON CONFIGURATIONS
 
@@ -596,6 +597,8 @@ def load_wells_with_water(
     for well, volume in zip(wells, volumes):
         well.load_liquid(water, volume)
 
+
+# Stacker Command Functions
 
 # CONSTANTS
 
