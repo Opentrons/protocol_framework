@@ -19,10 +19,16 @@ class StackerModule:
     }
 
     def __init__(
-        self, serial_number: str, labware_name: str, slot: str, protocol: ProtocolContext
+        self,
+        serial_number: str,
+        labware_name: str,
+        slot: str,
+        protocol: ProtocolContext,
     ):
         self.stacker = (
-            FlexStacker.create_from_sn(serial_number) if not protocol.is_simulating() else None
+            FlexStacker.create_from_sn(serial_number)
+            if not protocol.is_simulating()
+            else None
         )
         self.labware_name = labware_name
         self.slot = slot
@@ -47,9 +53,7 @@ class StackerModule:
             lw, self.slot, use_gripper=True, drop_offset=self.STACKER_GRIPPER_OFFSET
         )
         if self.stacker:
-            self.stacker.load_labware(
-                self.LABWARE_Z_OFFSET[self.labware_name]
-            )
+            self.stacker.load_labware(self.LABWARE_Z_OFFSET[self.labware_name])
         del self.protocol.deck[self.slot]
 
 
