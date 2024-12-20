@@ -339,7 +339,6 @@ def run(protocol: ProtocolContext) -> None:
                         sample_plate_1,
                         thermocycler,
                         flex_stacker=True,
-                        deck_riser=deck_riser,  # add stacker and deck riser offset
                     )
                 else:
                     thermocycler.close_lid()
@@ -424,7 +423,6 @@ def run(protocol: ProtocolContext) -> None:
                     sample_plate_1,
                     thermocycler,
                     flex_stacker=True,
-                    deck_riser=deck_riser,
                 )
             else:
                 thermocycler.close_lid()
@@ -745,7 +743,6 @@ def run(protocol: ProtocolContext) -> None:
                             sample_plate_1,
                             thermocycler,
                             flex_stacker=True,
-                            deck_riser=deck_riser,
                         )
                     else:
                         thermocycler.close_lid()

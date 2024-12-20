@@ -277,7 +277,6 @@ def run(protocol: ProtocolContext) -> None:
                 sample_plate,
                 tc_mod,
                 flex_stacker=True,
-                deck_riser=True,
             )
         else:
             tc_mod.close_lid()
@@ -339,7 +338,6 @@ def run(protocol: ProtocolContext) -> None:
                 sample_plate,
                 tc_mod,
                 flex_stacker=True,
-                deck_riser=True,
             )
         else:
             tc_mod.close_lid()
@@ -405,7 +403,6 @@ def run(protocol: ProtocolContext) -> None:
                 sample_plate,
                 tc_mod,
                 flex_stacker=True,
-                deck_riser=True,
             )
         else:
             tc_mod.close_lid()
@@ -474,7 +471,6 @@ def run(protocol: ProtocolContext) -> None:
                 sample_plate_2,
                 tc_mod,
                 flex_stacker=True,
-                deck_riser=True,
             )
         else:
             tc_mod.close_lid()

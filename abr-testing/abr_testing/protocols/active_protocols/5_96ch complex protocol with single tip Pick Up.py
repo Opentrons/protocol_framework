@@ -57,7 +57,7 @@ def run(protocol: ProtocolContext) -> None:
     deactivate_modules_bool = protocol.params.deactivate_modules  # type: ignore[attr-defined]
 
     waste_chute = protocol.load_waste_chute()
-    helpers.comment_protocol_version(protocol, "02")
+    helpers.comment_protocol_version(protocol, "01")
 
     thermocycler: ThermocyclerContext = protocol.load_module(
         helpers.tc_str
@@ -130,27 +130,42 @@ def run(protocol: ProtocolContext) -> None:
 
             def reset_labware() -> None:
                 """Reset the labware to the reset location."""
-                helpers.move_labware_to_destination(
-                    protocol=protocol,
-                    labware=labware_to_move,
-                    dest=reset_location,
-                    use_gripper=use_gripper,
-                )
+                if reset_location in ["C4"] or helpers.get_parent(labware_to_move) in [
+                    "C4"
+                ]:
+                    helpers.move_labware_to_destination(
+                        protocol=protocol,
+                        labware=labware_to_move,
+                        dest=reset_location,
+                        use_gripper=True,
+                        flex_stacker=True,
+                    )
+                else:
+                    protocol.move_labware(
+                        labware_to_move, reset_location, use_gripper=use_gripper
+                    )
 
             if len(move_locations) == 0:
                 return
 
             for location in move_locations:
-                helpers.move_labware_to_destination(
-                    protocol=protocol,
-                    labware=labware_to_move,
-                    dest=location,
-                    use_gripper=use_gripper,
-                )
+                if location in ["C4"] or helpers.get_parent(labware_to_move) in [
+                    "C4",
+                ]:
+                    helpers.move_labware_to_destination(
+                        protocol=protocol,
+                        labware=labware_to_move,
+                        dest=location,
+                        use_gripper=True,
+                        flex_stacker=True,
+                    )
+                else:
+                    protocol.move_labware(
+                        labware_to_move, location, use_gripper=use_gripper
+                    )
 
                 if reset_after_each_move:
                     reset_labware()
-
             if not reset_after_each_move:
                 reset_labware()
 
@@ -220,7 +235,6 @@ def run(protocol: ProtocolContext) -> None:
                     h_s_adapter,
                 ],  # Module Moves
             ]
-
             run_moves(
                 labware,
                 staging_area_slot_4_move_sequence,
@@ -261,20 +275,28 @@ def run(protocol: ProtocolContext) -> None:
         )
         staging_area_slot_3_moves(dest_pcr_plate, STAGING_AREA_SLOT_3_RESET_LOCATION)
 
-        protocol.move_labware(
-            dest_pcr_plate,
-            STAGING_AREA_SLOT_4_RESET_LOCATION,
+        helpers.move_labware_to_destination(
+            protocol=protocol,
+            labware=dest_pcr_plate,
+            dest=STAGING_AREA_SLOT_4_RESET_LOCATION,
             use_gripper=USING_GRIPPER,
+            flex_stacker=True,
         )
         staging_area_slot_4_moves(dest_pcr_plate, STAGING_AREA_SLOT_4_RESET_LOCATION)
-
         module_locations = [thermocycler] + adapters
         module_moves(dest_pcr_plate, module_locations)
+
         protocol.move_labware(dest_pcr_plate, thermocycler, use_gripper=USING_GRIPPER)
 
     def test_manual_moves() -> None:
         """Test manual moves."""
-        protocol.move_labware(source_reservoir, "D4", use_gripper=USING_GRIPPER)
+        helpers.move_labware_to_destination(
+            protocol=protocol,
+            labware=source_reservoir,
+            dest="D4",
+            use_gripper=USING_GRIPPER,
+            flex_stacker=True,
+        )
 
     def test_pipetting() -> None:
         """Test pipetting."""
@@ -330,12 +352,7 @@ def run(protocol: ProtocolContext) -> None:
                 pipette_96_channel.dispense(25, dest_pcr_plate[tiprack_well].bottom(b))
                 pipette_96_channel.blow_out(location=liquid_waste["A1"])
                 pipette_96_channel.drop_tip()
-            helpers.move_labware_to_destination(
-                protocol=protocol,
-                labware=tip_rack_3,
-                dest=waste_chute,
-                use_gripper=USING_GRIPPER,
-            )
+            protocol.move_labware(tip_rack_3, waste_chute, use_gripper=USING_GRIPPER)
 
         def test_full_tip_rack_usage() -> None:
             """Full Tip Pick Up."""
@@ -369,12 +386,7 @@ def run(protocol: ProtocolContext) -> None:
                     unused_lids,
                     used_lids,
                 ) = helpers.use_disposable_lid_with_tc(
-                    protocol,
-                    unused_lids,
-                    used_lids,
-                    dest_pcr_plate,
-                    thermocycler,
-                    deck_riser=deck_riser,
+                    protocol, unused_lids, used_lids, dest_pcr_plate, thermocycler
                 )
             thermocycler.set_block_temperature(4)
             thermocycler.set_lid_temperature(105)
@@ -397,19 +409,9 @@ def run(protocol: ProtocolContext) -> None:
             thermocycler.open_lid()
             if disposable_lid:
                 if len(used_lids) <= 1:
-                    helpers.move_labware_to_destination(
-                        protocol=protocol,
-                        labware=lid_on_plate,
-                        dest=waste_chute,
-                        use_gripper=True,
-                    )
+                    protocol.move_labware(lid_on_plate, waste_chute, use_gripper=True)
                 else:
-                    helpers.move_labware_to_destination(
-                        protocol=protocol,
-                        labware=lid_on_plate,
-                        dest=used_lids[-2],
-                        use_gripper=True,
-                    )
+                    protocol.move_labware(lid_on_plate, used_lids[-2], use_gripper=True)
             thermocycler.deactivate()
 
         def test_h_s() -> None:
@@ -438,9 +440,7 @@ def run(protocol: ProtocolContext) -> None:
     test_gripper_moves()
     test_module_usage(unused_lids, used_lids)
     test_manual_moves()
-    helpers.move_labware_to_destination(
-        protocol=protocol, labware=source_reservoir, dest="C2", use_gripper=True
-    )
+    protocol.move_labware(source_reservoir, "C2", use_gripper=True)
     helpers.clean_up_plates(
         pipette_96_channel, [dest_pcr_plate, source_reservoir], liquid_waste["A1"], 50
     )
