@@ -84,7 +84,7 @@ async def handle_module_gcode_shortcut(
 
     if output:
         try:
-            with open(output, "w") as result_file:
+            with open(output, "a") as result_file:
                 if "OK" in mr:
                     status = command + ": SUCCESS"
                 else:

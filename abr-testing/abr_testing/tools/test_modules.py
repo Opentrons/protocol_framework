@@ -1,10 +1,11 @@
 """Modules Tests Script!"""
 import asyncio
 import time
-import traceback
+from datetime import datetime
 import os
 import module_control  # type: ignore
 from typing import Any, Tuple, Dict
+import traceback
 
 # To run:
 # SSH into robot
@@ -88,14 +89,19 @@ async def main(module: str) -> None:
         print(f"{i}) {test} : {description}")
     selected_test = int(input("Please select a test: "))
     try:
-        print('testing 1...')
         function, description = tests[list(tests.keys())[selected_test]]
-        print('testing 2...')
         test_dir = BASE_DIRECTORY + f"{module}/test/{list(tests.keys())[selected_test]}"
-        print('testing 3...')
         print(f"{i}, {description}")
-        print(f'TEST DIR: {test_dir}')
-        output_file = os.path.join(test_dir, "results.txt")
+        print(f"TEST DIR: {test_dir}")
+        date = datetime.now()
+        filename = f"results_{datetime.strftime(date, '%Y-%m-%d_%H:%M:%S')}.txt"
+        output_file = os.path.join(test_dir, filename)
+        try:
+            if not os.path.exists(test_dir):
+                os.makedirs(test_dir)
+            open(output_file, "a").close()
+        except Exception:
+            traceback.print_exc()
         print(f"PATH: {output_file} ")
         await (function(module, output_file))
     except Exception:
