@@ -22739,7 +22739,7 @@ vitest-when@0.5.0:
   dependencies:
     pretty-format "^29.7.0"
 
-vitest@^2.1.8:
+vitest@2.1.8:
   version "2.1.8"
   resolved "https://registry.yarnpkg.com/vitest/-/vitest-2.1.8.tgz#2e6a00bc24833574d535c96d6602fb64163092fa"
   integrity sha512-1vBKTZskHw/aosXqQUlVWWlGUxSJR8YtiyZDJAFeW2kPAeX6S3Sool0mjspO+kXLuxVWlEDDowBAeqeAQefqLQ==

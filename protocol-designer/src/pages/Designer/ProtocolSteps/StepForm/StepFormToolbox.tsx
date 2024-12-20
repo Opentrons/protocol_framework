@@ -18,7 +18,7 @@ import {
 } from '@opentrons/components'
 import { stepIconsByType } from '../../../../form-types'
 import {
-  BUTTON_LINK_STYLE,
+  LINK_BUTTON_STYLE,
   LINE_CLAMP_TEXT_STYLE,
   NAV_BAR_HEIGHT_REM,
 } from '../../../../atoms'
@@ -299,7 +299,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
             onClick={() => {
               setIsRename(true)
             }}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
             textDecoration={TYPOGRAPHY.textDecorationUnderline}
           >
             <StyledText desktopStyle="bodyDefaultRegular">
