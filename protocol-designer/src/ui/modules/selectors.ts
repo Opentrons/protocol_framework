@@ -15,7 +15,7 @@ import {
   getMagnetLabwareEngageHeight as getMagnetLabwareEngageHeightUtil,
   getModulesOnDeckByType,
 } from './utils'
-import type { Options } from '@opentrons/components'
+import type { DropdownOption } from '@opentrons/components'
 import type { Selector } from '../../types'
 import type { LabwareNamesByModuleId } from '../../steplist/types'
 
@@ -35,7 +35,9 @@ export const getLabwareNamesByModuleId: Selector<LabwareNamesByModuleId> = creat
 )
 
 /** Returns dropdown option for labware placed on magnetic module */
-export const getMagneticLabwareOptions: Selector<Options> = createSelector(
+export const getMagneticLabwareOptions: Selector<
+  DropdownOption[]
+> = createSelector(
   getInitialDeckSetup,
   getLabwareNicknamesById,
   (initialDeckSetup, nicknamesById) => {
@@ -48,7 +50,9 @@ export const getMagneticLabwareOptions: Selector<Options> = createSelector(
 )
 
 /** Returns dropdown option for labware placed on temperature module */
-export const getTemperatureLabwareOptions: Selector<Options> = createSelector(
+export const getTemperatureLabwareOptions: Selector<
+  DropdownOption[]
+> = createSelector(
   getInitialDeckSetup,
   getLabwareNicknamesById,
   (initialDeckSetup, nicknamesById) => {
@@ -62,7 +66,9 @@ export const getTemperatureLabwareOptions: Selector<Options> = createSelector(
 )
 
 /** Returns dropdown option for labware placed on heater shaker module */
-export const getHeaterShakerLabwareOptions: Selector<Options> = createSelector(
+export const getHeaterShakerLabwareOptions: Selector<
+  DropdownOption[]
+> = createSelector(
   getInitialDeckSetup,
   getLabwareNicknamesById,
   (initialDeckSetup, nicknamesById) => {

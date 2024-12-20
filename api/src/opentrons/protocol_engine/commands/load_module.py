@@ -1,8 +1,9 @@
 """Implementation, request models, and response models for the load module command."""
 from __future__ import annotations
-from typing import TYPE_CHECKING, Optional, Type
+from typing import TYPE_CHECKING, Optional, Type, Any
 from typing_extensions import Literal
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.protocol_engine.state.update_types import StateUpdate
 
@@ -25,6 +26,10 @@ if TYPE_CHECKING:
 
 
 LoadModuleCommandType = Literal["loadModule"]
+
+
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
 
 
 class LoadModuleParams(BaseModel):
@@ -59,12 +64,13 @@ class LoadModuleParams(BaseModel):
         ),
     )
 
-    moduleId: Optional[str] = Field(
+    moduleId: str | SkipJsonSchema[None] = Field(
         None,
         description=(
             "An optional ID to assign to this module."
             " If None, an ID will be generated."
         ),
+        json_schema_extra=_remove_default,
     )
 
 
@@ -77,7 +83,7 @@ class LoadModuleResult(BaseModel):
 
     # TODO(mm, 2023-04-13): Remove this field. Jira RSS-221.
     definition: ModuleDefinition = Field(
-        deprecated=True,
+        json_schema_extra={"deprecated": True},
         description=(
             "The definition of the connected module."
             " This field is an implementation detail. We might change or remove it without warning."
@@ -204,7 +210,7 @@ class LoadModule(BaseCommand[LoadModuleParams, LoadModuleResult, ErrorOccurrence
 
     commandType: LoadModuleCommandType = "loadModule"
     params: LoadModuleParams
-    result: Optional[LoadModuleResult]
+    result: Optional[LoadModuleResult] = None
 
     _ImplementationCls: Type[LoadModuleImplementation] = LoadModuleImplementation
 

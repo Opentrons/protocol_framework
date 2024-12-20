@@ -576,7 +576,6 @@ describe('ProtocolSetup', () => {
     render(`/runs/${RUN_ID}/setup/`)
 
     fireEvent.click(screen.getByRole('button', { name: 'play' }))
-    expect(mockTrackProtocolRunEvent).toBeCalledTimes(1)
     expect(mockTrackProtocolRunEvent).toHaveBeenCalledWith({
       name: ANALYTICS_PROTOCOL_RUN_ACTION.START,
       properties: {},

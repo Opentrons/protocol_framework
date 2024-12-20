@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
@@ -136,13 +135,6 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     tab === 'dispense' && (isWasteChuteSelected || isTrashBinSelected)
 
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
-
-  // auto-collapse blowout field if disposal volume is checked
-  useEffect(() => {
-    if (formData.disposalVolume_checkbox) {
-      propsForFields.blowout_checkbox.updateValue(false)
-    }
-  }, [formData.disposalVolume_checkbox])
 
   return toolboxStep === 0 ? (
     <Flex

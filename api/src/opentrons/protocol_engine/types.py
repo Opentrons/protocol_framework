@@ -1,30 +1,30 @@
 """Public protocol engine value types and models."""
 from __future__ import annotations
-import re
 from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass
 from pathlib import Path
+from typing import (
+    Any,
+    Dict,
+    FrozenSet,
+    List,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Tuple,
+    Union,
+)
+
 from pydantic import (
+    ConfigDict,
     BaseModel,
     Field,
+    RootModel,
     StrictBool,
     StrictFloat,
     StrictInt,
     StrictStr,
-    validator,
-    Extra,
-)
-from typing import (
-    Optional,
-    Union,
-    List,
-    Dict,
-    Any,
-    NamedTuple,
-    Tuple,
-    FrozenSet,
-    Mapping,
 )
 from typing_extensions import Literal, TypeGuard
 
@@ -554,7 +554,7 @@ class ModuleDimensions(BaseModel):
 
     bareOverallHeight: float
     overLabwareHeight: float
-    lidHeight: Optional[float]
+    lidHeight: Optional[float] = None
 
 
 class Vec3f(BaseModel):
@@ -709,8 +709,8 @@ class LoadedModule(BaseModel):
 
     id: str
     model: ModuleModel
-    location: Optional[DeckSlotLocation]
-    serialNumber: Optional[str]
+    location: Optional[DeckSlotLocation] = None
+    serialNumber: Optional[str] = None
 
 
 class LabwareOffsetLocation(BaseModel):
@@ -819,17 +819,10 @@ class LoadedLabware(BaseModel):
     )
 
 
-class HexColor(BaseModel):
+class HexColor(RootModel[str]):
     """Hex color representation."""
 
-    __root__: str
-
-    @validator("__root__")
-    def _color_is_a_valid_hex(cls, v: str) -> str:
-        match = re.search(r"^#(?:[0-9a-fA-F]{3,4}){1,2}$", v)
-        if not match:
-            raise ValueError("Color is not a valid hex color.")
-        return v
+    root: str = Field(pattern=r"^#(?:[0-9a-fA-F]{3,4}){1,2}$")
 
 
 EmptyLiquidId = Literal["EMPTY"]
@@ -842,7 +835,7 @@ class Liquid(BaseModel):
     id: str
     displayName: str
     description: str
-    displayColor: Optional[HexColor]
+    displayColor: Optional[HexColor] = None
 
 
 class LiquidClassRecord(ByTipTypeSetting, frozen=True):
@@ -885,7 +878,7 @@ class LiquidClassRecord(ByTipTypeSetting, frozen=True):
                 for field_name, value in d.items()
             )
 
-        return hash(dict_to_tuple(self.dict()))
+        return hash(dict_to_tuple(self.model_dump()))
 
 
 class LiquidClassRecordWithId(LiquidClassRecord, frozen=True):
@@ -1051,12 +1044,12 @@ class QuadrantNozzleLayoutConfiguration(BaseModel):
     )
     frontRightNozzle: str = Field(
         ...,
-        regex=NOZZLE_NAME_REGEX,
+        pattern=NOZZLE_NAME_REGEX,
         description="The front right nozzle in your configuration.",
     )
     backLeftNozzle: str = Field(
         ...,
-        regex=NOZZLE_NAME_REGEX,
+        pattern=NOZZLE_NAME_REGEX,
         description="The back left nozzle in your configuration.",
     )
 
@@ -1186,11 +1179,7 @@ class CustomCommandAnnotation(BaseCommandAnnotation):
     """Annotates a group of atomic commands in some manner that Opentrons software does not anticipate or originate."""
 
     annotationType: Literal["custom"] = "custom"
-
-    class Config:
-        """Config to allow extra, non-defined properties."""
-
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")
 
 
 CommandAnnotation = Union[SecondOrderCommandAnnotation, CustomCommandAnnotation]

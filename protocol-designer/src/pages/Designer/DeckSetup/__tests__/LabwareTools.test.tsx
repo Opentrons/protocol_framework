@@ -25,6 +25,7 @@ import type { LabwareDefinition2, PipetteV2Specs } from '@opentrons/shared-data'
 
 vi.mock('../../../../utils')
 vi.mock('../../../../step-forms/selectors')
+vi.mock('../../../../feature-flags/selectors')
 vi.mock('../../../../file-data/selectors')
 vi.mock('../../../../labware-defs/selectors')
 vi.mock('../../../../labware-defs/actions')

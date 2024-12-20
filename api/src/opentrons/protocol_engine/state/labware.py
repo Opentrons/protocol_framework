@@ -131,7 +131,7 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
             for fixed_labware in deck_fixed_labware
         }
         labware_by_id = {
-            fixed_labware.labware_id: LoadedLabware.construct(
+            fixed_labware.labware_id: LoadedLabware.model_construct(
                 id=fixed_labware.labware_id,
                 location=fixed_labware.location,
                 loadName=fixed_labware.definition.parameters.loadName,
@@ -159,7 +159,7 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
             self._set_labware_location(state_update)
 
         if isinstance(action, AddLabwareOffsetAction):
-            labware_offset = LabwareOffset.construct(
+            labware_offset = LabwareOffset.model_construct(
                 id=action.labware_offset_id,
                 createdAt=action.created_at,
                 definitionUri=action.request.definitionUri,
@@ -212,7 +212,7 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
 
             self._state.labware_by_id[
                 loaded_labware_update.labware_id
-            ] = LoadedLabware.construct(
+            ] = LoadedLabware.model_construct(
                 id=loaded_labware_update.labware_id,
                 location=location,
                 loadName=loaded_labware_update.definition.parameters.loadName,
@@ -998,11 +998,15 @@ class LabwareView:
             return None
         else:
             return LabwareMovementOffsetData(
-                pickUpOffset=cast(
-                    LabwareOffsetVector, parsed_offsets[offset_key].pickUpOffset
+                pickUpOffset=LabwareOffsetVector.model_construct(
+                    x=parsed_offsets[offset_key].pickUpOffset.x,
+                    y=parsed_offsets[offset_key].pickUpOffset.y,
+                    z=parsed_offsets[offset_key].pickUpOffset.z,
                 ),
-                dropOffset=cast(
-                    LabwareOffsetVector, parsed_offsets[offset_key].dropOffset
+                dropOffset=LabwareOffsetVector.model_construct(
+                    x=parsed_offsets[offset_key].dropOffset.x,
+                    y=parsed_offsets[offset_key].dropOffset.y,
+                    z=parsed_offsets[offset_key].dropOffset.z,
                 ),
             )
 

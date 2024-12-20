@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import {
@@ -17,42 +17,43 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { getFileMetadata } from '../../file-data/selectors'
-import { selectTerminalItem } from '../../ui/steps/actions/actions'
-import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import {
+  selectDropdownItem,
+  selectTerminalItem,
+} from '../../ui/steps/actions/actions'
+import { LINE_CLAMP_TEXT_STYLE, NAV_BAR_HEIGHT_REM } from '../../atoms'
 import { useKitchen } from '../Kitchen/hooks'
-import { LiquidButton } from './LiquidButton'
+import { LiquidButton } from '../../molecules/LiquidButton'
 
 import type { StyleProps, TabProps } from '@opentrons/components'
 
-export const PROTOCOL_NAV_BAR_HEIGHT_REM = 4
-
-interface ProtocolNavBarProps {
+interface DesignerNavigationProps {
   hasZoomInSlot?: boolean
   tabs?: TabProps[]
   hasTrashEntity?: boolean
   showLiquidOverflowMenu?: (liquidOverflowMenu: boolean) => void
-  liquidPage?: boolean
 }
-
-export function ProtocolNavBar({
+// Note: this navigation is used in design page and liquids page
+export function DesignerNavigation({
   hasZoomInSlot,
   tabs = [],
   hasTrashEntity,
   showLiquidOverflowMenu,
-  liquidPage = false,
-}: ProtocolNavBarProps): JSX.Element {
+}: DesignerNavigationProps): JSX.Element {
   const { t } = useTranslation('starting_deck_state')
+  const location = useLocation()
   const metadata = useSelector(getFileMetadata)
   const { makeSnackbar } = useKitchen()
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const isLiquidsPage = location.pathname === '/liquids'
 
-  const showProtocolEditButtons = !(hasZoomInSlot || liquidPage)
+  const showProtocolEditButtons = !(hasZoomInSlot === true || isLiquidsPage)
 
   let metadataText = t('edit_protocol')
-  if (liquidPage) {
+  if (isLiquidsPage) {
     metadataText = t('add_liquid')
-  } else if (hasZoomInSlot) {
+  } else if (hasZoomInSlot === true) {
     metadataText = t('add_hardware_labware')
   }
   return (
@@ -78,12 +79,18 @@ export function ProtocolNavBar({
           <LiquidButton showLiquidOverflowMenu={showLiquidOverflowMenu} />
         ) : null}
 
-        {liquidPage ? null : (
+        {isLiquidsPage ? null : (
           <SecondaryButton
             onClick={() => {
-              if (hasTrashEntity) {
+              if (hasTrashEntity === true) {
                 navigate('/overview')
                 dispatch(selectTerminalItem('__initial_setup__'))
+                dispatch(
+                  selectDropdownItem({
+                    selection: null,
+                    mode: 'clear',
+                  })
+                )
               } else {
                 makeSnackbar(t('trash_required') as string)
               }
@@ -100,12 +107,12 @@ export function ProtocolNavBar({
 const NavContainer = styled(Flex)<{ showShadow: boolean }>`
   z-index: ${props => (props.showShadow === true ? 11 : 0)};
   padding: ${SPACING.spacing12};
-  height: ${PROTOCOL_NAV_BAR_HEIGHT_REM}rem;
+  height: ${NAV_BAR_HEIGHT_REM}rem;
   width: 100%;
   justify-content: ${JUSTIFY_SPACE_BETWEEN};
   align-items: ${ALIGN_CENTER};
   box-shadow: ${props =>
-    props.showShadow
+    props.showShadow === true
       ? `0px 1px 3px 0px ${COLORS.black90}${COLORS.opacity20HexCode}`
       : 'none'};
 `
@@ -119,7 +126,7 @@ const MetadataContainer = styled.div.withConfig<MetadataProps>({
   display: flex;
   flex-direction: ${DIRECTION_COLUMN};
   text-align: ${props =>
-    props.showProtocolEditButtons === true
+    props.showProtocolEditButtons
       ? TYPOGRAPHY.textAlignCenter
       : TYPOGRAPHY.textAlignLeft};
 

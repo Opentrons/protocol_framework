@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+
 import {
   COLORS,
   Banner,
@@ -14,6 +15,8 @@ import {
   SPACING,
 } from '@opentrons/components'
 import { useUpdateRobotNameMutation } from '@opentrons/react-api-client'
+import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
+
 import {
   removeRobot,
   getConnectableRobots,
@@ -152,6 +155,7 @@ export function RenameRobotSlideout({
       properties: {
         previousRobotName,
         newRobotName: newRobotName,
+        robotType: isFlex ? FLEX_ROBOT_TYPE : OT2_ROBOT_TYPE,
       },
     })
     handleSubmit(onSubmit)()

@@ -62,5 +62,7 @@ async def _get_current_response(
 ) -> PydanticResponse[SimpleBody[ResponseData]]:
     is_enabled = store.get_is_enabled()
     return await PydanticResponse.create(
-        SimpleBody.construct(data=ResponseData.construct(enabled=is_enabled))
+        SimpleBody.model_construct(
+            data=ResponseData.model_construct(enabled=is_enabled)
+        )
     )

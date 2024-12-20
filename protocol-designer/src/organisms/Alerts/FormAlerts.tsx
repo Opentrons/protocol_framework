@@ -184,6 +184,7 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
     <Flex
       flexDirection={DIRECTION_COLUMN}
       padding={`${SPACING.spacing16} ${SPACING.spacing16} 0`}
+      gridGap={SPACING.spacing4}
     >
       {showFormErrors
         ? formErrors.map((error, key) => makeAlert('error', error, key))

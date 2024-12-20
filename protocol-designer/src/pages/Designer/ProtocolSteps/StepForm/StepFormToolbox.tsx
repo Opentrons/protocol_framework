@@ -17,13 +17,17 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { stepIconsByType } from '../../../../form-types'
-import { FormAlerts, PROTOCOL_NAV_BAR_HEIGHT_REM } from '../../../../organisms'
+import {
+  BUTTON_LINK_STYLE,
+  LINE_CLAMP_TEXT_STYLE,
+  NAV_BAR_HEIGHT_REM,
+} from '../../../../atoms'
+import { FormAlerts } from '../../../../organisms'
 import { useKitchen } from '../../../../organisms/Kitchen/hooks'
 import { RenameStepModal } from '../../../../organisms/RenameStepModal'
 import { getFormWarningsForSelectedStep } from '../../../../dismiss/selectors'
 import { getTimelineWarningsForSelectedStep } from '../../../../top-selectors/timelineWarnings'
 import { getRobotStateTimeline } from '../../../../file-data/selectors'
-import { BUTTON_LINK_STYLE, LINE_CLAMP_TEXT_STYLE } from '../../../../atoms'
 import { analyticsEvent } from '../../../../analytics/actions'
 import {
   getFormLevelErrorsForUnsavedForm,
@@ -61,6 +65,10 @@ import type {
   LiquidHandlingTab,
   StepFormProps,
 } from './types'
+import {
+  hoverSelection,
+  selectDropdownItem,
+} from '../../../../ui/steps/actions/actions'
 
 type StepFormMap = {
   [K in StepType]?: React.ComponentType<StepFormProps> | null
@@ -235,6 +243,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
         })
       )
       dispatch(analyticsEvent(stepDuration))
+      dispatch(selectDropdownItem({ selection: null, mode: 'clear' }))
+      dispatch(hoverSelection({ id: null, text: null }))
     } else {
       setShowFormErrors(true)
       if (tab === 'aspirate' && isDispenseError && !isAspirateError) {
@@ -273,7 +283,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
       ) : null}
       <Toolbox
         height="100%"
-        maxHeight={`calc(100vh - ${PROTOCOL_NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
+        maxHeight={`calc(100vh - ${NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
         position={POSITION_RELATIVE}
         subHeader={
           isMultiStepToolbox ? (
@@ -296,7 +306,16 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
           </Btn>
         }
         childrenPadding="0"
-        onCloseClick={handleClose}
+        onCloseClick={() => {
+          handleClose()
+          dispatch(
+            selectDropdownItem({
+              selection: null,
+              mode: 'clear',
+            })
+          )
+          dispatch(hoverSelection({ id: null, text: null }))
+        }}
         closeButton={<Icon size="2rem" name="close" />}
         confirmButton={
           <Flex gridGap={SPACING.spacing8}>

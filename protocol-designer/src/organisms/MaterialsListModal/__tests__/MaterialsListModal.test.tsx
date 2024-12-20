@@ -137,7 +137,7 @@ describe('MaterialsListModal', () => {
           lidTargetTemp: null,
           lidOpen: false,
         },
-        slot: 'span7_8_10_11',
+        slot: '7',
         type: 'thermocyclerModuleType',
       },
     ] as ModuleOnDeck[]
@@ -162,6 +162,7 @@ describe('MaterialsListModal', () => {
           ingredientId: mockId,
           name: 'mockName',
           displayColor: 'mockDisplayColor',
+          liquidClass: null,
         },
       ],
     }
