@@ -23,7 +23,7 @@ async def test_get_device_info(
 ) -> None:
     """It should send a get device info command"""
     connection.send_command.return_value = (
-        "M115 FW:0.0.1 HW:a1 SerialNo:STCA120230605001"
+        "M115 FW:0.0.1 HW:Opentrons-flex-stacker-a1 SerialNo:STCA120230605001"
     )
     response = await subject.get_device_info()
     assert response == types.StackerInfo(
