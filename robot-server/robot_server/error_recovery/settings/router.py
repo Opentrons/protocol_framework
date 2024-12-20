@@ -5,12 +5,13 @@ from typing import Annotated
 
 import fastapi
 
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.service.json_api import PydanticResponse, RequestModel, SimpleBody
 from .models import RequestData, ResponseData
 from .store import ErrorRecoverySettingStore, get_error_recovery_setting_store
 
 
-router = fastapi.APIRouter()
+router = FastBuildRouter()
 _PATH = "/errorRecovery/settings"
 
 

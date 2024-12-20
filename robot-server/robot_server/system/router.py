@@ -5,15 +5,15 @@ Endpoints include:
 - /system/time: allows the client to read & update robot system time
 """
 from datetime import datetime
-from fastapi import APIRouter
 
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.service.json_api.resource_links import ResourceLinkKey, ResourceLink
 
 from .models import SystemTimeRequest, SystemTimeResponse, SystemTimeResponseAttributes
 from .time_utils import get_system_time, set_system_time
 
 
-system_router = APIRouter()
+system_router = FastBuildRouter()
 """Router for /system endpoints."""
 
 

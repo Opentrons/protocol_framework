@@ -1,5 +1,7 @@
 """Application routes."""
-from fastapi import APIRouter, Depends, status
+from fastapi import Depends, status
+
+from robot_server.fast_build_router import FastBuildRouter
 
 from .constants import V1_TAG
 from .errors.error_responses import LegacyErrorResponse
@@ -26,7 +28,7 @@ from .service.tip_length.router import router as tl_router
 from .subsystems.router import subsystems_router
 from .system.router import system_router
 
-router = APIRouter()
+router = FastBuildRouter()
 
 # Legacy routes
 router.include_router(

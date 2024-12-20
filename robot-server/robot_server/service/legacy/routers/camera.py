@@ -4,16 +4,18 @@ import io
 import tempfile
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException
+from fastapi import HTTPException
 from starlette import status
 from starlette.background import BackgroundTask
 from starlette.responses import StreamingResponse
 from opentrons.system import camera
 
+from robot_server.fast_build_router import FastBuildRouter
+
 
 log = logging.getLogger(__name__)
 
-router = APIRouter()
+router = FastBuildRouter()
 
 JPG = "image/jpg"
 

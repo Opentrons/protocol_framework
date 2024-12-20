@@ -1,7 +1,7 @@
 """Router for top-level /commands endpoints."""
 from typing import Annotated, Final, List, Literal, Optional, cast
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import Depends, Query, status
 
 from opentrons.protocol_engine import CommandIntent
 from opentrons.protocol_engine.errors import CommandDoesNotExistError
@@ -11,6 +11,7 @@ from opentrons.protocol_runner import RunOrchestrator
 from opentrons_shared_data.errors import ErrorCodes
 
 from robot_server.errors.error_responses import ErrorDetails, ErrorBody
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.service.json_api import (
     MultiBodyMeta,
     RequestModel,
@@ -25,7 +26,7 @@ from .stateless_commands import StatelessCommand, StatelessCommandCreate
 _DEFAULT_COMMAND_LIST_LENGTH: Final = 20
 
 
-commands_router = APIRouter()
+commands_router = FastBuildRouter()
 
 
 class CommandNotFound(ErrorDetails):

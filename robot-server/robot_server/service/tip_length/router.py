@@ -1,10 +1,11 @@
 from starlette import status
-from fastapi import APIRouter, Depends, Query
+from fastapi import Depends, Query
 from typing import Annotated, Optional, cast
 
 from opentrons.calibration_storage import types as cal_types
 from opentrons.calibration_storage.ot2 import tip_length, models
 
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.hardware import get_ot2_hardware
 from robot_server.errors.error_responses import ErrorBody
 from robot_server.service.tip_length import models as tl_models
@@ -15,7 +16,7 @@ from opentrons.hardware_control import API
 from opentrons_shared_data.pipette.types import LabwareUri
 
 
-router = APIRouter()
+router = FastBuildRouter()
 
 
 def _format_calibration(

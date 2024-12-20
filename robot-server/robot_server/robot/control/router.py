@@ -1,9 +1,10 @@
 """Router for /robot/control endpoints."""
-from fastapi import APIRouter, status, Depends
+from fastapi import status, Depends
 from typing import Annotated, TYPE_CHECKING
 
 from opentrons_shared_data.robot.types import RobotType
 from opentrons_shared_data.robot.types import RobotTypeEnum
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.hardware import get_robot_type
 
 from robot_server.errors.error_responses import ErrorBody
@@ -22,7 +23,7 @@ from opentrons.config import feature_flags as ff
 if TYPE_CHECKING:
     from opentrons.hardware_control.ot3api import OT3API  # noqa: F401
 
-control_router = APIRouter()
+control_router = FastBuildRouter()
 
 
 async def _get_estop_status_response(

@@ -1,7 +1,7 @@
 import typing
 import asyncio
 from starlette import status
-from fastapi import Path, APIRouter, Depends
+from fastapi import Path, Depends
 
 from opentrons.hardware_control import modules, HardwareControlAPI
 from opentrons.hardware_control.modules import AbstractModule
@@ -10,6 +10,7 @@ from opentrons_shared_data.errors.exceptions import APIRemoved, ModuleNotPresent
 from opentrons_shared_data.errors.codes import ErrorCodes
 
 from robot_server.errors.error_responses import LegacyErrorResponse
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.hardware import get_hardware
 from robot_server.versioning import get_requested_version
 from robot_server.service.legacy.models import V1BasicResponse
@@ -21,7 +22,7 @@ from robot_server.service.legacy.models.modules import (
     PhysicalPort,
 )
 
-router = APIRouter()
+router = FastBuildRouter()
 
 
 # NOTE(mc, 2022-03-22): replaced by robot_server.modules.router.get_attached_modules

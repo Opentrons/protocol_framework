@@ -8,7 +8,7 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Annotated, Callable, Final, Literal, Optional, Union
 
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import Depends, status, Query
 from pydantic import BaseModel, Field
 
 from opentrons_shared_data.errors import ErrorCodes
@@ -22,6 +22,8 @@ from opentrons.protocol_engine.types import CSVRuntimeParamPaths, DeckSlotLocati
 from opentrons.protocol_engine import (
     errors as pe_errors,
 )
+
+from robot_server.fast_build_router import FastBuildRouter
 
 from robot_server.data_files.models import FileIdNotFound, FileIdNotFoundError
 from robot_server.data_files.dependencies import (
@@ -87,7 +89,7 @@ from opentrons.protocol_engine.resources.file_provider import FileProvider
 from robot_server.service.notifications import get_pe_notify_publishers
 
 log = logging.getLogger(__name__)
-base_router = APIRouter()
+base_router = FastBuildRouter()
 
 _DEFAULT_COMMAND_ERROR_LIST_LENGTH: Final = 20
 

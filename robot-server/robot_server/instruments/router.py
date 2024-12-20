@@ -1,13 +1,14 @@
 """Instruments routes."""
 from typing import Annotated, Optional, Dict, List, cast
 
-from fastapi import APIRouter, status, Depends
+from fastapi import status, Depends
 
 from opentrons.hardware_control.instruments.ot3.instrument_calibration import (
     PipetteOffsetSummary,
 )
 from opentrons.protocol_engine.errors import HardwareNotSupportedError
 
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.hardware import get_hardware
 from robot_server.service.json_api import (
     SimpleMultiBody,
@@ -50,7 +51,7 @@ from robot_server.subsystems.router import status_route_for, update_route_for
 
 from opentrons.hardware_control import OT3HardwareControlAPI
 
-instruments_router = APIRouter()
+instruments_router = FastBuildRouter()
 
 
 def _pipette_dict_to_pipette_res(

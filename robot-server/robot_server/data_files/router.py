@@ -4,9 +4,10 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Annotated, Optional, Literal, Union
 
-from fastapi import APIRouter, UploadFile, File, Form, Depends, Response, status
+from fastapi import UploadFile, File, Form, Depends, Response, status
 from opentrons.protocol_reader import FileHasher, FileReaderWriter
 
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.service.json_api import (
     SimpleBody,
     SimpleMultiBody,
@@ -32,7 +33,7 @@ from .models import (
 from ..protocols.dependencies import get_file_hasher, get_file_reader_writer
 from ..service.dependencies import get_current_time, get_unique_id
 
-datafiles_router = APIRouter()
+datafiles_router = FastBuildRouter()
 
 
 class MultipleDataFileSources(ErrorDetails):

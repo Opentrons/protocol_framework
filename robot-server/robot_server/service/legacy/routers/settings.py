@@ -3,7 +3,7 @@ import logging
 from dataclasses import asdict
 from typing import cast, Annotated, Any, Dict, List, Optional, Union
 from starlette import status
-from fastapi import APIRouter, Depends
+from fastapi import Depends
 
 from opentrons_shared_data.errors import ErrorCodes
 from opentrons.hardware_control import (
@@ -30,6 +30,7 @@ from robot_server.deck_configuration.fastapi_dependencies import (
 from robot_server.deck_configuration.store import DeckConfigurationStore
 
 from robot_server.errors.error_responses import LegacyErrorResponse
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.hardware import (
     get_hardware,
     get_robot_type_enum,
@@ -60,7 +61,7 @@ from opentrons_shared_data.robot.types import RobotTypeEnum
 
 log = logging.getLogger(__name__)
 
-router = APIRouter()
+router = FastBuildRouter()
 
 
 # TODO: (ba, 2024-04-11): We should have a proper IPC mechanism to talk between

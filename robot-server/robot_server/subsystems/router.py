@@ -3,9 +3,10 @@
 from datetime import datetime
 from typing import Annotated, Optional, TYPE_CHECKING
 
-from fastapi import APIRouter, status, Depends, Response, Request
+from fastapi import status, Depends, Response, Request
 from typing_extensions import Literal
 
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.service.json_api import (
     SimpleMultiBody,
     PydanticResponse,
@@ -45,7 +46,7 @@ from opentrons.hardware_control import ThreadManagedHardware
 if TYPE_CHECKING:
     from opentrons.hardware_control.ot3api import OT3API  # noqa: F401
 
-subsystems_router = APIRouter()
+subsystems_router = FastBuildRouter()
 
 
 def status_route_for(subsystem: SubSystem) -> str:

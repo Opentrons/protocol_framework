@@ -1,10 +1,11 @@
 """Router for /runs actions endpoints."""
 import logging
 
-from fastapi import APIRouter, Depends, status
+from fastapi import Depends, status
 from datetime import datetime
 from typing import Annotated, Literal, Union
 
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.errors.error_responses import ErrorDetails, ErrorBody
 from robot_server.service.dependencies import get_current_time, get_unique_id
 from robot_server.service.json_api import RequestModel, SimpleBody, PydanticResponse
@@ -37,7 +38,7 @@ from robot_server.service.notifications import (
 )
 
 log = logging.getLogger(__name__)
-actions_router = APIRouter()
+actions_router = FastBuildRouter()
 
 
 class RunActionNotAllowed(ErrorDetails):

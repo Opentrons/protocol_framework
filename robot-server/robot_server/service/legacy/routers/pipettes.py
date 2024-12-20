@@ -1,5 +1,5 @@
 import typing
-from fastapi import APIRouter, Query, Depends
+from fastapi import Query, Depends
 
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons.hardware_control.types import Axis
@@ -9,10 +9,11 @@ from opentrons.protocol_engine.errors import HardwareNotSupportedError
 from opentrons.protocol_engine.resources import ot3_validation
 from opentrons.types import Mount
 
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.hardware import get_hardware
 from robot_server.service.legacy.models import pipettes
 
-router = APIRouter()
+router = FastBuildRouter()
 
 
 @router.get(

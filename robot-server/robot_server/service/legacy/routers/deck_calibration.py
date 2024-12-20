@@ -1,10 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import Depends
 
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.calibration_storage import helpers
 
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.hardware import get_hardware
 from robot_server.service.legacy.models.deck_calibration import (
     CalibrationStatus,
@@ -16,7 +17,7 @@ from robot_server.service.legacy.models.deck_calibration import (
 )
 from robot_server.service.shared_models import calibration as cal_model
 
-router = APIRouter()
+router = FastBuildRouter()
 
 DEFAULT_INSTR_OFFSET = InstrumentOffset(single=(0, 0, 0), multi=(0, 0, 0))
 

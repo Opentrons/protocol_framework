@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import Depends
 
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.versioning import check_version_header, set_version_response_headers
 
 from . import (
@@ -14,7 +15,7 @@ from . import (
     logs,
 )
 
-legacy_routes = APIRouter()
+legacy_routes = FastBuildRouter()
 
 legacy_routes.include_router(
     router=networking.router,

@@ -1,11 +1,12 @@
 """Modules routes."""
-from fastapi import APIRouter, Depends, status
+from fastapi import Depends, status
 from typing import Annotated, List, Dict
 
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.hardware_control.modules import module_calibration
 from opentrons.protocol_engine.types import Vec3f
 
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.hardware import get_hardware
 from robot_server.versioning import get_requested_version
 from robot_server.service.legacy.routers.modules import (
@@ -21,7 +22,7 @@ from .module_models import AttachedModule, ModuleCalibrationData
 from .module_identifier import ModuleIdentifier
 from .module_data_mapper import ModuleDataMapper
 
-modules_router = APIRouter()
+modules_router = FastBuildRouter()
 
 
 @PydanticResponse.wrap_route(

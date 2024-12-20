@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from starlette import status
-from fastapi import APIRouter, Depends
+from fastapi import Depends
 from pydantic import ValidationError
 
 from opentrons_shared_data.errors import ErrorCodes
@@ -12,11 +12,12 @@ from opentrons.protocol_engine.errors import HardwareNotSupportedError
 from opentrons.protocol_engine.resources.ot3_validation import ensure_ot3_hardware
 
 from robot_server.errors.error_responses import LegacyErrorResponse
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.hardware import get_hardware
 from robot_server.service.legacy.models import V1BasicResponse
 from robot_server.service.legacy.models import motors as model
 
-router = APIRouter()
+router = FastBuildRouter()
 
 
 @router.get(

@@ -3,13 +3,15 @@ import textwrap
 from typing import Annotated, Optional, Union
 from typing_extensions import Final, Literal
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import Depends, Query, status
 
 from opentrons.protocol_engine import (
     CommandPointer,
     commands as pe_commands,
 )
 from opentrons.protocol_engine.errors import CommandDoesNotExistError
+
+from robot_server.fast_build_router import FastBuildRouter
 
 from robot_server.errors.error_responses import ErrorDetails, ErrorBody
 from robot_server.service.json_api import (
@@ -39,7 +41,7 @@ from .base_router import RunNotFound
 
 _DEFAULT_COMMAND_LIST_LENGTH: Final = 20
 
-commands_router = APIRouter()
+commands_router = FastBuildRouter()
 
 
 class CommandNotFound(ErrorDetails):

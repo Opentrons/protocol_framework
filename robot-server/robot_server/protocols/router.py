@@ -15,7 +15,6 @@ from opentrons_shared_data.robot import user_facing_robot_type
 from opentrons.util.performance_helpers import TrackingFunctions
 
 from fastapi import (
-    APIRouter,
     Depends,
     File,
     HTTPException,
@@ -35,6 +34,7 @@ from opentrons.protocol_reader import (
 )
 from opentrons_shared_data.robot.types import RobotType
 
+from robot_server.fast_build_router import FastBuildRouter
 from robot_server.errors.error_responses import ErrorDetails, ErrorBody
 from robot_server.hardware import get_robot_type
 from robot_server.service.dependencies import get_unique_id, get_current_time
@@ -151,7 +151,7 @@ class ProtocolLinks(BaseModel):
     )
 
 
-protocols_router = APIRouter()
+protocols_router = FastBuildRouter()
 
 
 @PydanticResponse.wrap_route(
