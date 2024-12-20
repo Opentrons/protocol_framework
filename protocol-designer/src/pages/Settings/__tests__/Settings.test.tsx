@@ -32,7 +32,10 @@ const render = () => {
 
 describe('Settings', () => {
   beforeEach(() => {
-    vi.mocked(getHasOptedIn).mockReturnValue(false)
+    vi.mocked(getHasOptedIn).mockReturnValue({
+      hasOptedIn: false,
+      appVersion: '8.2.1',
+    })
     vi.mocked(getFeatureFlagData).mockReturnValue({})
     vi.mocked(getCanClearHintDismissals).mockReturnValue(true)
   })

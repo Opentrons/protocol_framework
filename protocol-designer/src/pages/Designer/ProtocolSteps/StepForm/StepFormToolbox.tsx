@@ -45,6 +45,7 @@ import {
   MoveLabwareTools,
   MoveLiquidTools,
   PauseTools,
+  PlateReaderTools,
   TemperatureTools,
   ThermocyclerTools,
 } from './StepTools'
@@ -84,6 +85,7 @@ const STEP_FORM_MAP: StepFormMap = {
   thermocycler: ThermocyclerTools,
   heaterShaker: HeaterShakerTools,
   comment: CommentTools,
+  plateReader: PlateReaderTools,
 }
 
 interface StepFormToolboxProps {

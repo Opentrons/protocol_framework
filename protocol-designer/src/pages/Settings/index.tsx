@@ -42,17 +42,15 @@ export function Settings(): JSX.Element {
   const [showAnnouncementModal, setShowAnnouncementModal] = useState<boolean>(
     false
   )
-  const hasOptedIn = useSelector(analyticsSelectors.getHasOptedIn)
+  const { hasOptedIn } = useSelector(analyticsSelectors.getHasOptedIn)
   const flags = useSelector(getFeatureFlagData)
   const canClearHintDismissals = useSelector(
     tutorialSelectors.getCanClearHintDismissals
   )
-  const _toggleOptedIn = hasOptedIn
-    ? analyticsActions.optOut
-    : analyticsActions.optIn
+
+  const pdVersion = process.env.OT_PD_VERSION
 
   const prereleaseModeEnabled = flags.PRERELEASE_MODE === true
-  const pdVersion = process.env.OT_PD_VERSION
 
   const allFlags = Object.keys(flags) as FlagTypes[]
 
@@ -280,7 +278,13 @@ export function Settings(): JSX.Element {
                       ? TOGGLE_ENABLED_STYLES
                       : TOGGLE_DISABLED_STYLES
                   }
-                  onClick={() => dispatch(_toggleOptedIn())}
+                  onClick={() =>
+                    dispatch(
+                      hasOptedIn
+                        ? analyticsActions.optOut()
+                        : analyticsActions.optIn()
+                    )
+                  }
                 >
                   <Icon
                     name={

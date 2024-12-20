@@ -3,15 +3,19 @@ import { useSelector } from 'react-redux'
 import { DeckLabelSet } from '@opentrons/components'
 import {
   FLEX_ROBOT_TYPE,
+  FLEX_STANDARD_DECKID,
   HEATERSHAKER_MODULE_TYPE,
-  MAGNETIC_MODULE_TYPE,
+  OT2_STANDARD_DECKID,
   TEMPERATURE_MODULE_TYPE,
-  THERMOCYCLER_MODULE_TYPE,
   getModuleDef2,
 } from '@opentrons/shared-data'
 import { getRobotType } from '../../../file-data/selectors'
 import type { DeckLabelProps } from '@opentrons/components'
-import type { CoordinateTuple, ModuleModel } from '@opentrons/shared-data'
+import type {
+  CoordinateTuple,
+  DeckSlotId,
+  ModuleModel,
+} from '@opentrons/shared-data'
 
 interface ModuleLabelProps {
   moduleModel: ModuleModel
@@ -19,6 +23,7 @@ interface ModuleLabelProps {
   orientation: 'left' | 'right'
   isSelected: boolean
   isLast: boolean
+  slot: DeckSlotId | null
   isZoomed?: boolean
   labwareInfos?: DeckLabelProps[]
   labelName?: string
@@ -33,6 +38,7 @@ export const ModuleLabel = (props: ModuleLabelProps): JSX.Element => {
     labwareInfos = [],
     isZoomed = true,
     labelName,
+    slot,
   } = props
   const robotType = useSelector(getRobotType)
   const labelContainerRef = useRef<HTMLDivElement>(null)
@@ -45,30 +51,21 @@ export const ModuleLabel = (props: ModuleLabelProps): JSX.Element => {
   }, [labwareInfos])
 
   const def = getModuleDef2(moduleModel)
-  const overhang =
-    def?.dimensions.labwareInterfaceXDimension != null
-      ? def.dimensions.xDimension - def?.dimensions.labwareInterfaceXDimension
+  const slotTransformKey =
+    robotType === FLEX_ROBOT_TYPE ? FLEX_STANDARD_DECKID : OT2_STANDARD_DECKID
+  const cornerOffsetsFromSlotFromTransform =
+    slot != null && !isZoomed
+      ? def?.slotTransforms?.[slotTransformKey]?.[slot]?.cornerOffsetFromSlot
+      : null
+  const tempAdjustmentX =
+    def?.moduleType === TEMPERATURE_MODULE_TYPE && orientation === 'right'
+      ? def?.dimensions.xDimension - (def?.dimensions.footprintXDimension ?? 0) // shift depending on side of deck
       : 0
-  let leftOverhang = overhang
-
-  switch (def?.moduleType) {
-    case TEMPERATURE_MODULE_TYPE:
-      leftOverhang = overhang * 2
-      break
-    case HEATERSHAKER_MODULE_TYPE:
-      leftOverhang = overhang + 14
-      break
-    case MAGNETIC_MODULE_TYPE:
-      leftOverhang = overhang + 8
-      break
-    case THERMOCYCLER_MODULE_TYPE:
-      if (!isZoomed && robotType === FLEX_ROBOT_TYPE) {
-        leftOverhang = overhang + 20
-      }
-      break
-    default:
-      break
-  }
+  const tempAdjustmentY = def?.moduleType === TEMPERATURE_MODULE_TYPE ? -1 : 0
+  const heaterShakerAdjustmentX =
+    def?.moduleType === HEATERSHAKER_MODULE_TYPE && orientation === 'right' // shift depending on side of deck
+      ? 7 // TODO(ND: 12/18/2024): investigate further why the module definition does not contain sufficient info to find this offset
+      : 0
 
   return (
     <DeckLabelSet
@@ -84,11 +81,20 @@ export const ModuleLabel = (props: ModuleLabelProps): JSX.Element => {
         ...labwareInfos,
       ]}
       x={
-        (orientation === 'right'
-          ? position[0] - overhang
-          : position[0] - leftOverhang) - def?.cornerOffsetFromSlot.x
+        position[0] +
+        def.cornerOffsetFromSlot.x +
+        (cornerOffsetsFromSlotFromTransform?.[0][3] ?? 0) +
+        tempAdjustmentX +
+        heaterShakerAdjustmentX -
+        1
       }
-      y={position[1] + def?.cornerOffsetFromSlot.y - labelContainerHeight}
+      y={
+        position[1] +
+        def.cornerOffsetFromSlot.y +
+        (cornerOffsetsFromSlotFromTransform?.[1][3] ?? 0) -
+        labelContainerHeight +
+        tempAdjustmentY
+      }
       width={def?.dimensions.xDimension + 2}
       height={def?.dimensions.yDimension + 2}
     />

@@ -45,6 +45,7 @@ def test_check_all_models_are_valid() -> None:
                 model_version.pipette_type,
                 model_version.pipette_channels,
                 model_version.pipette_version,
+                model_version.oem_type,
             )
         except json.JSONDecodeError:
             print(
@@ -81,11 +82,13 @@ def test_pick_up_configs_configuration_by_nozzle_map_keys() -> None:
                     model_version.pipette_type,
                     model_version.pipette_channels,
                     model_version.pipette_version,
+                    model_version.oem_type,
                 )
                 valid_nozzle_maps = load_valid_nozzle_maps(
                     model_version.pipette_type,
                     model_version.pipette_channels,
                     model_version.pipette_version,
+                    model_version.oem_type,
                 )
 
                 pipette_maps = list(
@@ -123,11 +126,13 @@ def test_pick_up_configs_configuration_ordered_from_smallest_to_largest() -> Non
                     model_version.pipette_type,
                     model_version.pipette_channels,
                     model_version.pipette_version,
+                    model_version.oem_type,
                 )
                 valid_nozzle_maps = load_valid_nozzle_maps(
                     model_version.pipette_type,
                     model_version.pipette_channels,
                     model_version.pipette_version,
+                    model_version.oem_type,
                 )
 
                 map_keys = list(valid_nozzle_maps.maps.keys())
@@ -154,6 +159,7 @@ def test_serializer() -> None:
         types.PipetteModelType.p1000,
         types.PipetteChannelType.NINETY_SIX_CHANNEL,
         types.PipetteVersionType(3, 3),
+        types.PipetteOEMType.OT,
     )
     quirk_0 = types.Quirks.pickupTipShake
     quirk_1 = types.Quirks.dropTipShake

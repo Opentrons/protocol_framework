@@ -17,11 +17,11 @@ from robot_server.service.json_api import (
     MultiBodyMeta,
     PydanticResponse,
     SimpleMultiBody,
+    RequestModel,
 )
 from robot_server.robot.control.dependencies import require_estop_in_good_state
 
 from ..command_models import (
-    RequestModelWithCommandCreate,
     CommandCollectionLinks,
     CommandLink,
     CommandLinkMeta,
@@ -155,7 +155,7 @@ async def get_current_run_from_url(
     },
 )
 async def create_run_command(
-    request_body: RequestModelWithCommandCreate,
+    request_body: RequestModel[pe_commands.CommandCreate],
     run_orchestrator_store: Annotated[
         RunOrchestratorStore, Depends(get_run_orchestrator_store)
     ],

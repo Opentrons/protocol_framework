@@ -188,6 +188,7 @@ export const SelectedHoveredItems = (
               orientation={orientation}
               isSelected={true}
               labwareInfos={labwareInfos}
+              slot={selectedSlot.slot}
             />
           ) : null}
         </>
