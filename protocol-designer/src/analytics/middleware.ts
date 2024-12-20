@@ -158,9 +158,14 @@ export const reduxActionToAnalyticsEvent = (
             name: `${modifiedStepName}Step`,
             properties: {
               ...stepArgModified,
-              aspirateAirGap: stepArgModified.aspirateAirGapVolume,
-              aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
-              dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
+              aspirateAirGap:
+                stepArgModified.aspirateAirGapVolume ?? DEFAULT_VALUE,
+              aspirateFlowRate:
+                stepArgModified.aspirateFlowRateUlSec ?? DEFAULT_VALUE,
+              dispenseFlowRate:
+                stepArgModified.dispenseFlowRateUlSec ?? DEFAULT_VALUE,
+              dispenseAirGap:
+                stepArgModified.dispenseAirGapVolume ?? DEFAULT_VALUE,
               blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
               aspirateOffsetFromBottomMm:
                 stepArgModified.aspirateOffsetFromBottomMm ===
@@ -202,9 +207,10 @@ export const reduxActionToAnalyticsEvent = (
             name: `mixStep`,
             properties: {
               ...stepArgModified,
-              aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
-              dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
-              blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
+              aspirateFlowRate:
+                stepArgModified.aspirateFlowRateUlSec ?? DEFAULT_VALUE,
+              dispenseFlowRate:
+                stepArgModified.dispenseFlowRateUlSec ?? DEFAULT_VALUE,
               aspirateOffsetFromBottomMm:
                 stepArgModified.aspirateOffsetFromBottomMm ===
                 DEFAULT_MM_FROM_BOTTOM_ASPIRATE
@@ -246,7 +252,6 @@ export const reduxActionToAnalyticsEvent = (
 
   if (action.type === 'COMPUTE_ROBOT_STATE_TIMELINE_SUCCESS') {
     const robotTimeline = getRobotStateTimeline(state)
-    console.log('hit here with robotTimeline as', robotTimeline?.timeline)
     const { errors, timeline } = robotTimeline
     const commandAndRobotState = timeline.filter(t => t.warnings != null)
     const warnings =
