@@ -430,10 +430,15 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
                                             )
                                           }
                                         )
-                                      : getLabwareCompatibleWithAdapter(
-                                          loadName
-                                        ).map(nestedDefUri => {
-                                          const nestedDef = defs[nestedDefUri]
+                                      : [
+                                          ...getLabwareCompatibleWithAdapter(
+                                            loadName
+                                          ),
+                                          ...Object.keys(customLabwareDefs),
+                                        ].map(nestedDefUri => {
+                                          const nestedDef =
+                                            defs[nestedDefUri] ??
+                                            customLabwareDefs[nestedDefUri]
 
                                           return (
                                             <ListButtonRadioButton
