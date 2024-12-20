@@ -54,7 +54,7 @@ async def hs_test_1(module: str, path_to_file: str) -> None:
 
 async def input_codes(module: str, path_to_file: str) -> None:
     """Opens serial for manual code input."""
-    await module_control._main(module, path_to_file)
+    await module_control._main(module, output=path_to_file)
 
 
 hs_tests: Dict[str, Tuple[Any, str]] = {
@@ -88,9 +88,13 @@ async def main(module: str) -> None:
         print(f"{i}) {test} : {description}")
     selected_test = int(input("Please select a test: "))
     try:
+        print('testing 1...')
         function, description = tests[list(tests.keys())[selected_test]]
-        test_dir = BASE_DIRECTORY + f"{module}/test{list(tests.keys())[selected_test]}"
+        print('testing 2...')
+        test_dir = BASE_DIRECTORY + f"{module}/test/{list(tests.keys())[selected_test]}"
+        print('testing 3...')
         print(f"{i}, {description}")
+        print(f'TEST DIR: {test_dir}')
         output_file = os.path.join(test_dir, "results.txt")
         print(f"PATH: {output_file} ")
         await (function(module, output_file))
