@@ -7,7 +7,7 @@ export enum Actions {
   SelectOT2 = 'Select Opentrons OT-2',
   Confirm = 'Confirm',
   GoBack = 'Go back',
-  SingleChannelPipette = 'Select Pipette',
+  SingleChannelPipette50 = 'Select Pipette',
 }
 
 export enum Verifications {
@@ -17,6 +17,7 @@ export enum Verifications {
   OT2Selected = 'Opentrons OT-2 selected.',
   NinetySixChannel = '96-Channel option is available.',
   NotNinetySixChannel = '96-Channel option is not available.',
+  StepTwo50uL = 'StepTwo50uL',
 }
 
 export enum Content {
@@ -26,12 +27,19 @@ export enum Content {
   NinetySixChannel = '96-Channel',
   SingleChannel = '1-Channel',
   EightChannel = '8-Channel',
+  TipRack = 'Filter Tip Rack 50 µL',
+  PipetteType = 'Pipette type',
+  PipetteVolume = 'Pipette volume',
   GoBack = 'Go back',
   Confirm = 'Confirm',
   OpentronsFlex = 'Opentrons Flex',
   OpentronsOT2 = 'Opentrons OT-2',
   LetsGetStarted = 'Let’s start with the basics',
   WhatKindOfRobot = 'What kind of robot do you have?',
+  Volume50 = '50 µL',
+  Volume1000 = '1000 µL',
+  FilterTiprack50 = 'Filter Tip Rack 50 µL',
+  Tiprack50 = 'Tip Rack 50 µL',
 }
 
 export enum Locators {
@@ -63,12 +71,11 @@ const executeAction = (action: Actions | UniversalActions): void => {
     case Actions.GoBack:
       cy.contains(Content.GoBack).should('be.visible').click()
       break
-    case Actions.SingleChannelPipette:
+    case Actions.SingleChannelPipette50:
       cy.contains('label', Content.SingleChannel)
         .should('exist')
         .and('be.visible')
         .click()
-
       break
 
     default:
@@ -104,6 +111,15 @@ const verifyStep = (verification: Verifications): void => {
       break
     case Verifications.NotNinetySixChannel:
       cy.contains(Content.NinetySixChannel).should('not.exist')
+      break
+    case Verifications.StepTwo50uL:
+      // This function should get used after you select 50uL fully
+      cy.contains(Content.PipetteVolume)
+      cy.contains(Content.Volume50).should('be.visible')
+      cy.contains(Content.Volume1000).should('be.visible')
+      cy.contains(Content.FilterTiprack50).should('be.visible')
+      cy.contains(Content.FilterTiprack50).should('be.visible')
+      // cy.contains('Filter Tip Rack 50 µL').should('be.visible')
       break
     default:
       throw new Error(
