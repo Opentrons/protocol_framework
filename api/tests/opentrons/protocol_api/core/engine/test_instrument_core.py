@@ -108,12 +108,13 @@ def mock_transfer_components_executor(
 def patch_mock_transfer_components_executor(
     decoy: Decoy,
     monkeypatch: pytest.MonkeyPatch,
+    mock_transfer_components_executor: TransferComponentsExecutor,
 ) -> None:
     """Replace transfer_components_executor functions with mocks."""
     monkeypatch.setattr(
         transfer_components_executor,
-        "get_transfer_components_executor",
-        decoy.mock(func=transfer_components_executor.get_transfer_components_executor),
+        "TransferComponentsExecutor",
+        mock_transfer_components_executor,
     )
     monkeypatch.setattr(
         transfer_components_executor,
@@ -1614,7 +1615,7 @@ def test_aspirate_liquid_class(
         )
     ).then_return(Point(1, 2, 3))
     decoy.when(
-        transfer_components_executor.get_transfer_components_executor(
+        transfer_components_executor.TransferComponentsExecutor(
             instrument_core=subject,
             transfer_properties=test_transfer_properties,
             target_location=Location(Point(1, 2, 3), labware=None),

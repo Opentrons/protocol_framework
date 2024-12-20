@@ -257,21 +257,6 @@ class TransferComponentsExecutor:
             self._instrument.delay(dispense_delay.duration)
 
 
-def get_transfer_components_executor(
-    instrument_core: InstrumentCore,
-    transfer_properties: TransferProperties,
-    target_location: Location,
-    target_well: WellCore,
-) -> TransferComponentsExecutor:
-    """Get a TransferComponentsExecutor."""
-    return TransferComponentsExecutor(
-        instrument_core=instrument_core,
-        transfer_properties=transfer_properties,
-        target_location=target_location,
-        target_well=target_well,
-    )
-
-
 def absolute_point_from_position_reference_and_offset(
     well: WellCore,
     position_reference: PositionReference,

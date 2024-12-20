@@ -1003,7 +1003,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         )
         aspirate_location = Location(aspirate_point, labware=source_loc.labware)
 
-        components_executer = tx_comps_executor.get_transfer_components_executor(
+        components_executer = tx_comps_executor.TransferComponentsExecutor(
             instrument_core=self,
             transfer_properties=transfer_properties,
             target_location=aspirate_location,
