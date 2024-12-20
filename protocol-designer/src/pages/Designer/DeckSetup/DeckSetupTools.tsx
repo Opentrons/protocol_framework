@@ -326,11 +326,6 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     if (selectedModuleModel != null) {
       //  create module
       const moduleType = getModuleType(selectedModuleModel)
-      // enforce gripper present in order to add plate reader
-      if (moduleType === ABSORBANCE_READER_TYPE && !isGripperAttached) {
-        makeSnackbar(t('gripper_required_for_plate_reader') as string)
-        return
-      }
 
       const moduleSteps = Object.values(savedSteps).filter(step => {
         return (
