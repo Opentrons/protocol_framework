@@ -72,6 +72,7 @@ describe('DeckSetupTools', () => {
       additionalEquipmentOnDeck: {},
       pipettes: {},
     })
+    vi.mocked(getSavedStepForms).mockReturnValue({})
     vi.mocked(getDismissedHints).mockReturnValue([])
     vi.mocked(getAdditionalEquipment).mockReturnValue({})
     vi.mocked(useKitchen).mockReturnValue({

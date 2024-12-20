@@ -67,6 +67,13 @@ import type { AddressableAreaName, ModuleModel } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../../types'
 import type { Fixture } from './constants'
 
+const mapModTypeToStepType: Record<string, string> = {
+  heaterShakerModuleType: 'heaterShaker',
+  magneticModuleType: 'magnet',
+  temperatureModuleType: 'temperature',
+  thermocyclerModuleType: 'thermocycler',
+}
+
 interface DeckSetupToolsProps {
   onCloseClick: () => void
   setHoveredLabware: (defUri: string | null) => void
@@ -91,6 +98,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
   const { makeSnackbar } = useKitchen()
   const selectedSlotInfo = useSelector(selectors.getZoomedInSlotInfo)
   const robotType = useSelector(getRobotType)
+  const savedSteps = useSelector(getSavedStepForms)
   const [showDeleteLabwareModal, setShowDeleteLabwareModal] = useState<
     ModuleModel | 'clear' | null
   >(null)
@@ -272,7 +280,11 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       if (
         createdLabwareForSlot != null &&
         (!keepExistingLabware ||
-          createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri)
+          createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri ||
+          //  if nested labware changes but labware doesn't, still delete both
+          (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
+            createdNestedLabwareForSlot?.labwareDefURI !==
+              selectedNestedLabwareDefUri))
       ) {
         dispatch(deleteContainer({ labwareId: createdLabwareForSlot.id }))
       }
@@ -333,10 +345,12 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
         return
       }
       dispatch(
-        createModule({
+        createModuleEntityAndChangeForm({
           slot,
           type: moduleType,
           model: selectedModuleModel,
+          moduleSteps,
+          pauseSteps,
         })
       )
     }
@@ -364,7 +378,11 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     if (
       selectedModuleModel != null &&
       selectedLabwareDefUri != null &&
-      createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri
+      (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
+        //  if nested labware changes but labware doesn't, still create both both
+        (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
+          createdNestedLabwareForSlot?.labwareDefURI !==
+            selectedNestedLabwareDefUri))
     ) {
       //   create adapter + labware on module
       dispatch(
