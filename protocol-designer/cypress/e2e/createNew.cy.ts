@@ -37,7 +37,10 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Verifications.OnStep2,
       Verifications.NotNinetySixChannel,
       UniversalActions.Snapshot,
+      Actions.SingleChannelPipette,
     ]
+    // Everything after Actions.SingleChannelPipette
+    // Is going to be for transferSettings.cy.js
 
     runCreateTest(steps)
   })

@@ -1,11 +1,13 @@
 import { executeUniversalAction, UniversalActions } from './universalActions'
 import { isEnumValue } from './utils'
+import '../support/commands.ts'
 
 export enum Actions {
   SelectFlex = 'Select Opentrons Flex',
   SelectOT2 = 'Select Opentrons OT-2',
   Confirm = 'Confirm',
   GoBack = 'Go back',
+  SingleChannelPipette = 'Select Pipette',
 }
 
 export enum Verifications {
@@ -22,6 +24,8 @@ export enum Content {
   Step2Title = 'Step 2',
   AddPipette = 'Add a pipette',
   NinetySixChannel = '96-Channel',
+  SingleChannel = '1-Channel',
+  EightChannel = '8-Channel',
   GoBack = 'Go back',
   Confirm = 'Confirm',
   OpentronsFlex = 'Opentrons Flex',
@@ -59,6 +63,14 @@ const executeAction = (action: Actions | UniversalActions): void => {
     case Actions.GoBack:
       cy.contains(Content.GoBack).should('be.visible').click()
       break
+    case Actions.SingleChannelPipette:
+      cy.contains('label', Content.SingleChannel)
+        .should('exist')
+        .and('be.visible')
+        .click()
+
+      break
+
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
   }

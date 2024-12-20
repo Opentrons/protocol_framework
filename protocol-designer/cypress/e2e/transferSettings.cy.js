@@ -1,5 +1,5 @@
 import '../support/commands.ts' // Importing the custom commands file
-
+import '..support/createNew.ts'
 /*
 These constants will help us run through both test suites in one go
 */
@@ -53,7 +53,7 @@ describe('Happy Path Transfer Tests', () => {
 
     const wantGripper = 'Yes'
 
-    function step3Gripper (wantGripper) {
+    function step3Gripper(wantGripper) {
       cy.contains('Add a gripper').should('be.visible')
       cy.contains(
         'Do you want to move labware automatically with the gripper?'
@@ -66,7 +66,7 @@ describe('Happy Path Transfer Tests', () => {
     }
     step3Gripper(wantGripper)
     // Maybe a module selection function?
-    function step4modules () {
+    function step4modules() {
       cy.contains('Thermocycler Module GEN2').click()
       cy.get('img[alt="thermocyclerModuleType"]').should('be.visible')
       cy.contains('Heater-Shaker Module GEN1').click()
