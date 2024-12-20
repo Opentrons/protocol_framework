@@ -1,9 +1,16 @@
 from typing import Protocol
 
-from .types import StackerAxis, PlatformStatus, Direction, MoveParams, StackerInfo
+from .types import (
+    StackerAxis,
+    PlatformStatus,
+    Direction,
+    MoveParams,
+    StackerInfo,
+    LEDColor,
+)
 
 
-class StackerDriver(Protocol):
+class AbstractStackerDriver(Protocol):
     """Protocol for the Stacker driver."""
 
     async def connect(self) -> None:
@@ -26,12 +33,12 @@ class StackerDriver(Protocol):
         """Get Device Info."""
         ...
 
-    async def set_serial_number(self, sn: str) -> None:
+    async def set_serial_number(self, sn: str) -> bool:
         """Set Serial Number."""
         ...
 
-    async def stop_motor(self) -> None:
-        """Stop motor movement."""
+    async def stop_motors(self) -> bool:
+        """Stop all motor movement."""
         ...
 
     async def get_limit_switch(self, axis: StackerAxis, direction: Direction) -> bool:
@@ -61,12 +68,22 @@ class StackerDriver(Protocol):
 
     async def move_in_mm(
         self, axis: StackerAxis, distance: float, params: MoveParams | None = None
-    ) -> None:
+    ) -> bool:
         """Move axis."""
         ...
 
     async def move_to_limit_switch(
         self, axis: StackerAxis, direction: Direction, params: MoveParams | None = None
-    ) -> None:
+    ) -> bool:
         """Move until limit switch is triggered."""
+        ...
+
+    async def home_axis(self, axis: StackerAxis, direction: Direction) -> bool:
+        """Home axis."""
+        ...
+
+    async def set_led(
+        self, power: float, color: LEDColor | None = None, external: bool | None = None
+    ) -> bool:
+        """Set LED color of status bar."""
         ...

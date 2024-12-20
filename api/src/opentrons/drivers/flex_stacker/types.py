@@ -10,7 +10,7 @@ class GCODE(str, Enum):
     MOVE_TO = "G0"
     MOVE_TO_SWITCH = "G5"
     HOME_AXIS = "G28"
-    STOP_MOTOR = "M0"
+    STOP_MOTORS = "M0"
     GET_RESET_REASON = "M114"
     DEVICE_INFO = "M115"
     GET_LIMIT_SWITCH = "M119"

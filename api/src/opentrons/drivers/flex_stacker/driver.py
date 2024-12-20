@@ -5,7 +5,7 @@ from typing import Optional
 from opentrons.drivers.command_builder import CommandBuilder
 from opentrons.drivers.asyncio.communication import AsyncResponseSerialConnection
 
-from .abstract import StackerDriver
+from .abstract import AbstractStackerDriver
 from .types import (
     GCODE,
     StackerAxis,
@@ -28,14 +28,15 @@ DEFAULT_COMMAND_RETRIES = 0
 GCODE_ROUNDING_PRECISION = 2
 
 
-class FlexStackerDriver(StackerDriver):
+class FlexStackerDriver(AbstractStackerDriver):
     """FLEX Stacker driver."""
 
     @classmethod
     def parse_device_info(cls, response: str) -> StackerInfo:
         """Parse stacker info."""
+        # TODO: Validate serial number format once established
         _RE = re.compile(
-            f"^{GCODE.DEVICE_INFO} FW:(?P<fw>.+) HW:Opentrons-flex-stacker-(?P<hw>.+) SerialNo:(?P<sn>.+)"
+            f"^{GCODE.DEVICE_INFO} FW:(?P<fw>\\S+) HW:Opentrons-flex-stacker-(?P<hw>\\S+) SerialNo:(?P<sn>\\S+)$"
         )
         m = _RE.match(response)
         if not m:
@@ -49,7 +50,7 @@ class FlexStackerDriver(StackerDriver):
         """Parse limit switch statuses."""
         field_names = LimitSwitchStatus.get_fields()
         pattern = r"\s".join([rf"{name}:(?P<{name}>\d)" for name in field_names])
-        _RE = re.compile(f"^{GCODE.GET_LIMIT_SWITCH} {pattern}")
+        _RE = re.compile(f"^{GCODE.GET_LIMIT_SWITCH} {pattern}$")
         m = _RE.match(response)
         if not m:
             raise ValueError(f"Incorrect Response for limit switch status: {response}")
@@ -60,7 +61,7 @@ class FlexStackerDriver(StackerDriver):
         """Parse platform statuses."""
         field_names = PlatformStatus.get_fields()
         pattern = r"\s".join([rf"{name}:(?P<{name}>\d)" for name in field_names])
-        _RE = re.compile(f"^{GCODE.GET_PLATFORM_SENSOR} {pattern}")
+        _RE = re.compile(f"^{GCODE.GET_PLATFORM_SENSOR} {pattern}$")
         m = _RE.match(response)
         if not m:
             raise ValueError(f"Incorrect Response for platform status: {response}")
@@ -69,7 +70,7 @@ class FlexStackerDriver(StackerDriver):
     @classmethod
     def parse_door_closed(cls, response: str) -> bool:
         """Parse door closed."""
-        _RE = re.compile(r"^M122 (\d)")
+        _RE = re.compile(r"^M122 D:(\d)$")
         match = _RE.match(response)
         if not match:
             raise ValueError(f"Incorrect Response for door closed: {response}")
@@ -137,15 +138,22 @@ class FlexStackerDriver(StackerDriver):
         await self._connection.send_command(GCODE.GET_RESET_REASON.build_command())
         return self.parse_device_info(response)
 
-    async def set_serial_number(self, sn: str) -> None:
+    async def set_serial_number(self, sn: str) -> bool:
         """Set Serial Number."""
-        await self._connection.send_command(
+        # TODO: validate the serial number format
+        resp = await self._connection.send_command(
             GCODE.SET_SERIAL_NUMBER.build_command().add_element(sn)
         )
+        if not re.match(rf"^{GCODE.SET_SERIAL_NUMBER}$", resp):
+            raise ValueError(f"Incorrect Response for set serial number: {resp}")
+        return True
 
-    async def stop_motor(self) -> None:
-        """Stop motor movement."""
-        await self._connection.send_command(GCODE.STOP_MOTOR.build_command())
+    async def stop_motors(self) -> bool:
+        """Stop all motor movement."""
+        resp = await self._connection.send_command(GCODE.STOP_MOTORS.build_command())
+        if not re.match(rf"^{GCODE.STOP_MOTORS}$", resp):
+            raise ValueError(f"Incorrect Response for stop motors: {resp}")
+        return True
 
     async def get_limit_switch(self, axis: StackerAxis, direction: Direction) -> bool:
         """Get limit switch status.
@@ -189,7 +197,7 @@ class FlexStackerDriver(StackerDriver):
 
     async def move_in_mm(
         self, axis: StackerAxis, distance: float, params: MoveParams | None = None
-    ) -> None:
+    ) -> bool:
         """Move axis."""
         command = self.append_move_params(
             GCODE.MOVE_TO.build_command().add_float(
@@ -197,33 +205,43 @@ class FlexStackerDriver(StackerDriver):
             ),
             params,
         )
-        await self._connection.send_command(command)
+        resp = await self._connection.send_command(command)
+        if not re.match(rf"^{GCODE.MOVE_TO}$", resp):
+            raise ValueError(f"Incorrect Response for move to: {resp}")
+        return True
 
     async def move_to_limit_switch(
         self, axis: StackerAxis, direction: Direction, params: MoveParams | None = None
-    ) -> None:
+    ) -> bool:
         """Move until limit switch is triggered."""
         command = self.append_move_params(
             GCODE.MOVE_TO_SWITCH.build_command().add_int(axis.name, direction.value),
             params,
         )
-        await self._connection.send_command(command)
+        resp = await self._connection.send_command(command)
+        if not re.match(rf"^{GCODE.MOVE_TO_SWITCH}$", resp):
+            raise ValueError(f"Incorrect Response for move to switch: {resp}")
+        return True
 
-    async def home_axis(self, axis: StackerAxis, direction: Direction) -> None:
+    async def home_axis(self, axis: StackerAxis, direction: Direction) -> bool:
         """Home axis."""
-        await self._connection.send_command(
+        resp = await self._connection.send_command(
             GCODE.HOME_AXIS.build_command().add_int(axis.name, direction.value)
         )
+        if not re.match(rf"^{GCODE.HOME_AXIS}$", resp):
+            raise ValueError(f"Incorrect Response for home axis: {resp}")
+        return True
 
     async def set_led(
         self, power: float, color: LEDColor | None = None, external: bool | None = None
-    ) -> None:
+    ) -> bool:
         """Set LED color.
 
         :param power: Power of the LED (0-1.0), 0 is off, 1 is full power
         :param color: Color of the LED
         :param external: True if external LED, False if internal LED
         """
+        power = max(0, min(power, 1.0))
         command = GCODE.SET_LED.build_command().add_float(
             "P", power, GCODE_ROUNDING_PRECISION
         )
@@ -231,7 +249,10 @@ class FlexStackerDriver(StackerDriver):
             command.add_int("C", color.value)
         if external is not None:
             command.add_int("E", external)
-        await self._connection.send_command(command)
+        resp = await self._connection.send_command(command)
+        if not re.match(rf"^{GCODE.SET_LED}$", resp):
+            raise ValueError(f"Incorrect Response for set led: {resp}")
+        return True
 
     async def update_firmware(self, firmware_file_path: str) -> None:
         """Updates the firmware on the device."""

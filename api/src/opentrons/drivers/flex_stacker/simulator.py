@@ -2,7 +2,7 @@ from typing import Optional
 
 from opentrons.util.async_helpers import ensure_yield
 
-from .abstract import StackerDriver
+from .abstract import AbstractStackerDriver
 from .types import (
     StackerAxis,
     PlatformStatus,
@@ -14,7 +14,7 @@ from .types import (
 )
 
 
-class SimulatingDriver(StackerDriver):
+class SimulatingDriver(AbstractStackerDriver):
     """FLEX Stacker driver simulator."""
 
     def __init__(self, serial_number: Optional[str] = None) -> None:
@@ -23,14 +23,17 @@ class SimulatingDriver(StackerDriver):
         self._platform_sensor_status = PlatformStatus(False, False)
         self._door_closed = True
 
-    def set_limit_switch(self, status: LimitSwitchStatus) -> None:
+    def set_limit_switch(self, status: LimitSwitchStatus) -> bool:
         self._limit_switch_status = status
+        return True
 
-    def set_platform_sensor(self, status: PlatformStatus) -> None:
+    def set_platform_sensor(self, status: PlatformStatus) -> bool:
         self._platform_sensor_status = status
+        return True
 
-    def set_door_closed(self, door_closed: bool) -> None:
+    def set_door_closed(self, door_closed: bool) -> bool:
         self._door_closed = door_closed
+        return True
 
     @ensure_yield
     async def connect(self) -> None:
@@ -53,14 +56,14 @@ class SimulatingDriver(StackerDriver):
         return StackerInfo(fw="stacker-fw", hw=HardwareRevision.EVT, sn=self._sn)
 
     @ensure_yield
-    async def set_serial_number(self, sn: str) -> None:
+    async def set_serial_number(self, sn: str) -> bool:
         """Set Serial Number."""
-        pass
+        return True
 
     @ensure_yield
-    async def stop_motor(self) -> None:
+    async def stop_motor(self) -> bool:
         """Stop motor movement."""
-        pass
+        return True
 
     @ensure_yield
     async def get_limit_switch(self, axis: StackerAxis, direction: Direction) -> bool:
@@ -94,13 +97,13 @@ class SimulatingDriver(StackerDriver):
     @ensure_yield
     async def move_in_mm(
         self, axis: StackerAxis, distance: float, params: MoveParams | None = None
-    ) -> None:
+    ) -> bool:
         """Move axis."""
-        pass
+        return True
 
     @ensure_yield
     async def move_to_limit_switch(
         self, axis: StackerAxis, direction: Direction, params: MoveParams | None = None
-    ) -> None:
+    ) -> bool:
         """Move until limit switch is triggered."""
-        pass
+        return True
