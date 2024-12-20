@@ -24,6 +24,7 @@ import { MenuItem } from '../../atoms/MenuList/MenuItem'
 import { Tooltip } from '../../atoms/Tooltip'
 import { StyledText } from '../../atoms/StyledText'
 import { LiquidIcon } from '../LiquidIcon'
+import { DeckInfoLabel } from '../DeckInfoLabel'
 
 export interface DropdownOption {
   name: string
@@ -32,6 +33,8 @@ export interface DropdownOption {
   liquidColor?: string
   /** optional dropdown option for adding the deck label */
   deckLabel?: string
+  /** subtext below the name */
+  subtext?: string
   disabled?: boolean
   tooltipText?: string
 }
@@ -250,7 +253,11 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
             {currentOption.liquidColor != null ? (
               <LiquidIcon color={currentOption.liquidColor} />
             ) : null}
+            {currentOption.deckLabel != null ? (
+              <DeckInfoLabel deckLabel={currentOption.deckLabel} svgSize={13} />
+            ) : null}
             <Flex
+              flexDirection={DIRECTION_COLUMN}
               css={css`
                 font-weight: ${dropdownType === 'rounded'
                   ? TYPOGRAPHY.pSemiBold
@@ -307,7 +314,26 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
                     {option.liquidColor != null ? (
                       <LiquidIcon color={option.liquidColor} />
                     ) : null}
-                    {option.name}
+                    {option.deckLabel != null ? (
+                      <DeckInfoLabel
+                        deckLabel={option.deckLabel}
+                        svgSize={13}
+                      />
+                    ) : null}
+                    <Flex
+                      flexDirection={DIRECTION_COLUMN}
+                      gridGap={option.subtext != null ? SPACING.spacing4 : '0'}
+                    >
+                      <StyledText desktopStyle="captionRegular">
+                        {option.name}
+                      </StyledText>
+                      <StyledText
+                        desktopStyle="captionRegular"
+                        color={COLORS.black70}
+                      >
+                        {option.subtext}
+                      </StyledText>
+                    </Flex>
                   </Flex>
                 </MenuItem>
                 {option.tooltipText != null ? (
