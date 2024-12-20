@@ -12,12 +12,18 @@ import {
   StyledText,
   Tag,
 } from '@opentrons/components'
-import { getModuleDisplayName } from '@opentrons/shared-data'
+import {
+  HEATERSHAKER_MODULE_V1,
+  MAGNETIC_MODULE_TYPE,
+  TEMPERATURE_MODULE_TYPE,
+  getModuleDisplayName,
+} from '@opentrons/shared-data'
 import {
   getAdditionalEquipmentEntities,
   getLabwareEntities,
   getModuleEntities,
 } from '../../../step-forms/selectors'
+import { getModuleShortNames } from '../../../ui/modules/utils'
 import { getLabwareNicknamesById } from '../../../ui/labware/selectors'
 import { LINE_CLAMP_TEXT_STYLE } from '../../../atoms'
 import type { FormData } from '../../../form-types'
@@ -124,9 +130,9 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         engageHeight,
         magnetAction,
       } = currentStep
-      const magneticModuleDisplayName = getModuleDisplayName(
-        modules[magneticModuleId].model
-      )
+      const magneticModuleDisplayName =
+        getModuleDisplayName(modules[magneticModuleId]?.model) ??
+        getModuleShortNames(MAGNETIC_MODULE_TYPE)
       stepSummaryContent =
         magnetAction === 'engage' ? (
           <StyledTrans
@@ -259,9 +265,9 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         targetTemperature,
       } = currentStep
       const isDeactivating = setTemperature === 'false'
-      const tempModuleDisplayName = getModuleDisplayName(
-        modules[tempModuleId].model
-      )
+      const tempModuleDisplayName =
+        getModuleDisplayName(modules[tempModuleId]?.model) ??
+        getModuleShortNames(TEMPERATURE_MODULE_TYPE)
       stepSummaryContent = isDeactivating ? (
         <StyledTrans
           i18nKey={'protocol_steps:temperature_module.deactivated'}
@@ -362,7 +368,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         targetSpeed,
       } = currentStep
       const moduleDisplayName = getModuleDisplayName(
-        modules[heaterShakerModuleId].model
+        modules[heaterShakerModuleId]?.model ?? HEATERSHAKER_MODULE_V1
       )
       stepSummaryContent = (
         <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
