@@ -239,7 +239,7 @@ def _finish_test(
     # there are WAY too many tips on a 96ch pipette
     # so drop them incase something bad happened during the test run
     if resources.pipette.channels == 96 and resources.pipette.has_tip:
-        resources.ctx.home()
+        resources.pipette._retract()
         if resources.pipette.current_volume > 0:
             ui.print_info("dispensing liquid to trash")
             trash_container = resources.pipette.trash_container
