@@ -33,7 +33,8 @@ import {
   createDeckFixture,
   deleteDeckFixture,
 } from '../../../step-forms/actions/additionalItems'
-import { createModule, deleteModule } from '../../../step-forms/actions'
+import { deleteModule } from '../../../step-forms/actions'
+import { getSavedStepForms } from '../../../step-forms/selectors'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
 import {
   createContainer,
@@ -50,9 +51,12 @@ import { useBlockingHint } from '../../../organisms/BlockingHintModal/useBlockin
 import { selectors } from '../../../labware-ingred/selectors'
 import { useKitchen } from '../../../organisms/Kitchen/hooks'
 import { getDismissedHints } from '../../../tutorial/selectors'
-import { createContainerAboveModule } from '../../../step-forms/actions/thunks'
-import { ConfirmDeleteStagingAreaModal } from '../../../organisms'
+import {
+  createContainerAboveModule,
+  createModuleEntityAndChangeForm,
+} from '../../../step-forms/actions/thunks'
 import { BUTTON_LINK_STYLE } from '../../../atoms'
+import { ConfirmDeleteStagingAreaModal } from '../../../organisms'
 import { getSlotInformation } from '../utils'
 import { ALL_ORDERED_CATEGORIES, FIXTURES, MOAM_MODELS } from './constants'
 import { LabwareTools } from './LabwareTools'
@@ -62,6 +66,13 @@ import { getModuleModelsBySlot, getDeckErrors } from './utils'
 import type { AddressableAreaName, ModuleModel } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../../types'
 import type { Fixture } from './constants'
+
+const mapModTypeToStepType: Record<string, string> = {
+  heaterShakerModuleType: 'heaterShaker',
+  magneticModuleType: 'magnet',
+  temperatureModuleType: 'temperature',
+  thermocyclerModuleType: 'thermocycler',
+}
 
 interface DeckSetupToolsProps {
   onCloseClick: () => void
@@ -80,6 +91,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
   const { makeSnackbar } = useKitchen()
   const selectedSlotInfo = useSelector(selectors.getZoomedInSlotInfo)
   const robotType = useSelector(getRobotType)
+  const savedSteps = useSelector(getSavedStepForms)
   const [showDeleteLabwareModal, setShowDeleteLabwareModal] = useState<
     ModuleModel | 'clear' | null
   >(null)
@@ -255,7 +267,11 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       if (
         createdLabwareForSlot != null &&
         (!keepExistingLabware ||
-          createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri)
+          createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri ||
+          //  if nested labware changes but labware doesn't, still delete both
+          (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
+            createdNestedLabwareForSlot?.labwareDefURI !==
+              selectedNestedLabwareDefUri))
       ) {
         dispatch(deleteContainer({ labwareId: createdLabwareForSlot.id }))
       }
@@ -309,11 +325,33 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     }
     if (selectedModuleModel != null) {
       //  create module
+      const moduleType = getModuleType(selectedModuleModel)
+
+      const moduleSteps = Object.values(savedSteps).filter(step => {
+        return (
+          step.stepType === mapModTypeToStepType[moduleType] &&
+          //  only update module steps that match the old moduleId
+          //  to accommodate instances of MoaM
+          step.moduleId === createdModuleForSlot?.id
+        )
+      })
+
+      const pauseSteps = Object.values(savedSteps).filter(step => {
+        return (
+          step.stepType === 'pause' &&
+          //  only update pause steps that match the old moduleId
+          //  to accommodate instances of MoaM
+          step.moduleId === createdModuleForSlot?.id
+        )
+      })
+
       dispatch(
-        createModule({
+        createModuleEntityAndChangeForm({
           slot,
-          type: getModuleType(selectedModuleModel),
+          type: moduleType,
           model: selectedModuleModel,
+          moduleSteps,
+          pauseSteps,
         })
       )
     }
@@ -344,7 +382,11 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     if (
       selectedModuleModel != null &&
       selectedLabwareDefUri != null &&
-      createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri
+      (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
+        //  if nested labware changes but labware doesn't, still create both both
+        (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
+          createdNestedLabwareForSlot?.labwareDefURI !==
+            selectedNestedLabwareDefUri))
     ) {
       //   create adapter + labware on module
       dispatch(

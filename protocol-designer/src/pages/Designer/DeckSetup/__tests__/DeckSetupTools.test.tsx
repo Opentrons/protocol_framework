@@ -10,6 +10,7 @@ import { i18n } from '../../../../assets/localization'
 import { renderWithProviders } from '../../../../__testing-utils__'
 import { deleteContainer } from '../../../../labware-ingred/actions'
 import { deleteModule } from '../../../../step-forms/actions'
+import { getSavedStepForms } from '../../../../step-forms/selectors'
 import { getRobotType } from '../../../../file-data/selectors'
 import { getEnableAbsorbanceReader } from '../../../../feature-flags/selectors'
 import { deleteDeckFixture } from '../../../../step-forms/actions/additionalItems'
@@ -19,7 +20,6 @@ import { getDeckSetupForActiveItem } from '../../../../top-selectors/labware-loc
 import { DeckSetupTools } from '../DeckSetupTools'
 import { LabwareTools } from '../LabwareTools'
 
-import type * as React from 'react'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
 vi.mock('../LabwareTools')
@@ -31,6 +31,7 @@ vi.mock('../../../../step-forms/actions')
 vi.mock('../../../../step-forms/actions/additionalItems')
 vi.mock('../../../../labware-ingred/selectors')
 vi.mock('../../../../tutorial/selectors')
+vi.mock('../../../../step-forms/selectors')
 const render = (props: React.ComponentProps<typeof DeckSetupTools>) => {
   return renderWithProviders(<DeckSetupTools {...props} />, {
     i18nInstance: i18n,
@@ -65,6 +66,7 @@ describe('DeckSetupTools', () => {
       additionalEquipmentOnDeck: {},
       pipettes: {},
     })
+    vi.mocked(getSavedStepForms).mockReturnValue({})
     vi.mocked(getDismissedHints).mockReturnValue([])
   })
   afterEach(() => {

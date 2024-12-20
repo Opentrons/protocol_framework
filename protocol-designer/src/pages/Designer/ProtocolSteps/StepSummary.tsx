@@ -79,6 +79,7 @@ interface StepSummaryProps {
 export function StepSummary(props: StepSummaryProps): JSX.Element | null {
   const { currentStep, stepDetails } = props
   const { t } = useTranslation(['protocol_steps', 'application'])
+  const unknownModule = t('unkonwn_module')
   const labwareNicknamesById = useSelector(getLabwareNicknamesById)
   const additionalEquipmentEntities = useSelector(
     getAdditionalEquipmentEntities
@@ -124,9 +125,8 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         engageHeight,
         magnetAction,
       } = currentStep
-      const magneticModuleDisplayName = getModuleDisplayName(
-        modules[magneticModuleId].model
-      )
+      const magneticModuleDisplayName =
+        getModuleDisplayName(modules[magneticModuleId]?.model) ?? unknownModule
       stepSummaryContent =
         magnetAction === 'engage' ? (
           <StyledTrans
@@ -231,9 +231,8 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
           )
           break
         case 'untilTemperature':
-          const pauseModuleDisplayName = getModuleDisplayName(
-            modules[pauseModuleId].model
-          )
+          const pauseModuleDisplayName =
+            getModuleDisplayName(modules[pauseModuleId]?.model) ?? unknownModule
           stepSummaryContent = (
             <StyledTrans
               i18nKey="protocol_steps:pause.untilTemperature"
@@ -259,9 +258,8 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         targetTemperature,
       } = currentStep
       const isDeactivating = setTemperature === 'false'
-      const tempModuleDisplayName = getModuleDisplayName(
-        modules[tempModuleId].model
-      )
+      const tempModuleDisplayName =
+        getModuleDisplayName(modules[tempModuleId]?.model) ?? unknownModule
       stepSummaryContent = isDeactivating ? (
         <StyledTrans
           i18nKey={'protocol_steps:temperature_module.deactivated'}
@@ -361,9 +359,9 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         targetHeaterShakerTemperature,
         targetSpeed,
       } = currentStep
-      const moduleDisplayName = getModuleDisplayName(
-        modules[heaterShakerModuleId].model
-      )
+      const moduleDisplayName =
+        getModuleDisplayName(modules[heaterShakerModuleId]?.model) ??
+        unknownModule
       stepSummaryContent = (
         <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
           <Flex gridGap={SPACING.spacing20} alignItems={ALIGN_CENTER}>
