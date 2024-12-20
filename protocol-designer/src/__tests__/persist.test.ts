@@ -4,9 +4,6 @@ import type { MockInstance } from 'vitest'
 import * as persist from '../persist'
 
 describe('persist', () => {
-  // let getItemSpy: MockInstance<unknown[], unknown>
-  // let setItemSpy: MockInstance<unknown[], unknown>
-
   let getItemSpy: MockInstance<(key: string) => string | null>
   let setItemSpy: MockInstance<(key: string, value: string) => void>
 
