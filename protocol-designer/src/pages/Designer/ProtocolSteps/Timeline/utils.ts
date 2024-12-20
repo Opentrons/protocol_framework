@@ -2,17 +2,6 @@ import round from 'lodash/round'
 import uniq from 'lodash/uniq'
 import { UAParser } from 'ua-parser-js'
 
-import {
-  HEATERSHAKER_MODULE_TYPE,
-  MAGNETIC_MODULE_TYPE,
-  TEMPERATURE_MODULE_TYPE,
-  THERMOCYCLER_MODULE_TYPE,
-} from '@opentrons/shared-data'
-import { getIsModuleOnDeck } from '../../../../step-forms'
-
-import type { ModuleOnDeck } from '../../../../step-forms'
-import type { StepType, StepIdType } from '../../../../form-types'
-
 export const capitalizeFirstLetterAfterNumber = (title: string): string =>
   title.replace(
     /(^[\d\W]*)([a-zA-Z])|(-[a-zA-Z])/g,
