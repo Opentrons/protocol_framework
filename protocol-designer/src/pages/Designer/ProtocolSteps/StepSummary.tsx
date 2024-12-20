@@ -12,18 +12,12 @@ import {
   StyledText,
   Tag,
 } from '@opentrons/components'
-import {
-  HEATERSHAKER_MODULE_V1,
-  MAGNETIC_MODULE_TYPE,
-  TEMPERATURE_MODULE_TYPE,
-  getModuleDisplayName,
-} from '@opentrons/shared-data'
+import { getModuleDisplayName } from '@opentrons/shared-data'
 import {
   getAdditionalEquipmentEntities,
   getLabwareEntities,
   getModuleEntities,
 } from '../../../step-forms/selectors'
-import { getModuleShortNames } from '../../../ui/modules/utils'
 import { getLabwareNicknamesById } from '../../../ui/labware/selectors'
 import { LINE_CLAMP_TEXT_STYLE } from '../../../atoms'
 import type { FormData } from '../../../form-types'
@@ -132,7 +126,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
       } = currentStep
       const magneticModuleDisplayName =
         getModuleDisplayName(modules[magneticModuleId]?.model) ??
-        getModuleShortNames(MAGNETIC_MODULE_TYPE)
+        'Unknown module'
       stepSummaryContent =
         magnetAction === 'engage' ? (
           <StyledTrans
@@ -237,9 +231,9 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
           )
           break
         case 'untilTemperature':
-          const pauseModuleDisplayName = getModuleDisplayName(
-            modules[pauseModuleId].model
-          )
+          const pauseModuleDisplayName =
+            getModuleDisplayName(modules[pauseModuleId]?.model) ??
+            'Unknown module'
           stepSummaryContent = (
             <StyledTrans
               i18nKey="protocol_steps:pause.untilTemperature"
@@ -266,8 +260,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
       } = currentStep
       const isDeactivating = setTemperature === 'false'
       const tempModuleDisplayName =
-        getModuleDisplayName(modules[tempModuleId]?.model) ??
-        getModuleShortNames(TEMPERATURE_MODULE_TYPE)
+        getModuleDisplayName(modules[tempModuleId]?.model) ?? 'Unknown module'
       stepSummaryContent = isDeactivating ? (
         <StyledTrans
           i18nKey={'protocol_steps:temperature_module.deactivated'}
@@ -367,9 +360,9 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         targetHeaterShakerTemperature,
         targetSpeed,
       } = currentStep
-      const moduleDisplayName = getModuleDisplayName(
-        modules[heaterShakerModuleId]?.model ?? HEATERSHAKER_MODULE_V1
-      )
+      const moduleDisplayName =
+        getModuleDisplayName(modules[heaterShakerModuleId]?.model) ??
+        'Unknown module'
       stepSummaryContent = (
         <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
           <Flex gridGap={SPACING.spacing20} alignItems={ALIGN_CENTER}>
