@@ -49,7 +49,6 @@ class PipetteTipType(enum.Enum):
 class PipetteChannelType(int, enum.Enum):
     SINGLE_CHANNEL = 1
     EIGHT_CHANNEL = 8
-    EIGHT_CHANNEL_EM = 82
     NINETY_SIX_CHANNEL = 96
 
     def __str__(self) -> str:
@@ -57,8 +56,6 @@ class PipetteChannelType(int, enum.Enum):
             return "96"
         elif self.value == 8:
             return "multi"
-        elif self.value == 82:
-            return "multi_em"
         else:
             return "single"
 

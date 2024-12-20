@@ -83,8 +83,6 @@ def channels_from_string(channels: str) -> PipetteChannelType:
     if channels == "96":
         return PipetteChannelType.NINETY_SIX_CHANNEL
     elif "multi" in channels:
-        if "em" in channels:
-            return PipetteChannelType.EIGHT_CHANNEL_EM
         return PipetteChannelType.EIGHT_CHANNEL
     elif channels == "single":
         return PipetteChannelType.SINGLE_CHANNEL

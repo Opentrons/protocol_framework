@@ -159,6 +159,7 @@ def test_serializer() -> None:
         types.PipetteModelType.p1000,
         types.PipetteChannelType.NINETY_SIX_CHANNEL,
         types.PipetteVersionType(3, 3),
+        types.PipetteOEMType.OT,
     )
     quirk_0 = types.Quirks.pickupTipShake
     quirk_1 = types.Quirks.dropTipShake

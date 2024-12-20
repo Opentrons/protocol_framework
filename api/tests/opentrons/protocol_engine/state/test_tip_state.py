@@ -42,12 +42,6 @@ def available_sensors() -> AvailableSensorDefinition:
 
 
 @pytest.fixture
-def available_sensors() -> AvailableSensorDefinition:
-    """Provide a list of sensors."""
-    return AvailableSensorDefinition(sensors=["pressure", "capacitive", "environment"])
-
-
-@pytest.fixture
 def subject() -> TipStore:
     """Get a TipStore test subject."""
     return TipStore()
