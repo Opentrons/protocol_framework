@@ -18,6 +18,7 @@ from opentrons.protocol_api.module_contexts import (
 from typing import List, Union, Dict, Tuple, Any
 from opentrons.hardware_control.modules.types import ThermocyclerStep
 from opentrons_shared_data.errors.exceptions import PipetteLiquidNotFoundError
+from opentrons.drivers.stacker.slas_demo import StackerModule
 
 # FUNCTIONS FOR LOADING COMMON CONFIGURATIONS
 
@@ -660,6 +661,21 @@ def get_parent(labware: Labware) -> Any:
         return get_parent(labware_location)
     else:
         return labware_location
+
+
+# Stacker Functions
+# TODO add more stacker functions and incorporate them into protocols
+def unload_and_move(
+    stacker: StackerModule,
+    new_location: Labware | str,
+) -> None:
+    """Move labware off stacker into deck."""
+    lw = stacker.unload_and_move_labware(new_location=new_location)
+
+
+def move_to_stacker_and_store(stacker: StackerModule, lw: Labware) -> None:
+    """Move labware from deck into stacker"""
+    stacker.move_and_store_labware(lw=lw)
 
 
 # CONSTANTS
