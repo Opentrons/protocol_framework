@@ -68,10 +68,7 @@ class ThermocyclerPlateLifter:
         """
         thermocycler_hardware = self._get_tc_hardware(labware_location=labware_location)
         if thermocycler_hardware is not None:
-            await self._movement.home(axes=None)
-            await thermocycler_hardware.lift_plate()
             try:
-                await thermocycler_hardware.raise_plate()
                 yield
             except asyncio.CancelledError as e:
                 raise e

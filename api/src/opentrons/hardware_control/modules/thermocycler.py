@@ -261,7 +261,6 @@ class Thermocycler(mod_abc.AbstractModule):
     async def return_from_raise_plate(self) -> None:
         """Return lid back to normal open position."""
         await self.wait_for_is_running()
-        await self._driver.jog_lid(-_TC_PLATE_LIFT_RETURN_DEGREES)
         await self.open()
         await self._wait_for_lid_status(ThermocyclerLidStatus.OPEN)
 
