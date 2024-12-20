@@ -10,8 +10,7 @@ from opentrons.drivers.command_builder import CommandBuilder
 import math
 from typing import List, Optional, Iterator
 
-import serial.tools
-import serial.tools.list_ports
+from serial.tools import list_ports
 
 class GCODE(str, Enum):
     CR = '\r\n',
@@ -137,15 +136,15 @@ class FlexStacker():
     @classmethod
     def create_from_sn(cls, sn: str, baudrate: int = 115200, timeout: float = 1.0) -> "FlexStacker":
         """Flex Stacker Driver"""
-        port = None
-        for comport in serial.tools.list_ports.comports():
-            if comport.serial_number is sn:
-                port = comport.device
+        port_name = None
+        for port in list_ports.comports():
+            if port.serial_number == sn:
+                port_name = port.device
                 break
-        if not port:
+        if not port_name:
             raise ValueError(f"Could not find connected stacker with serial number {sn}")
         
-        return cls.create(port=port, baudrate=baudrate, timeout=timeout)
+        return cls.create(port=port_name, baudrate=baudrate, timeout=timeout)
 
     def setup_stall_detection(self):
         self.enable_SG(AXIS.X, self.x_sg_value, True)
