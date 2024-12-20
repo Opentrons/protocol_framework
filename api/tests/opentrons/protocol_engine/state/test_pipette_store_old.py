@@ -770,8 +770,8 @@ def test_add_pipette_config(
     available_sensors: pipette_definition.AvailableSensorDefinition,
 ) -> None:
     """It should update state from any pipette config private result."""
-    command = cmd.LoadPipette.construct(  # type: ignore[call-arg]
-        params=cmd.LoadPipetteParams.construct(
+    command = cmd.LoadPipette.model_construct(
+        params=cmd.LoadPipetteParams.model_construct(  # type: ignore[call-arg]
             mount=MountType.LEFT, pipetteName="p300_single"  # type: ignore[arg-type]
         ),
         result=cmd.LoadPipetteResult(pipetteId="pipette-id"),

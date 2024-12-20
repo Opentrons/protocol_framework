@@ -39,6 +39,7 @@
     "moveLabware": "move",
     "moveLiquid": "transfer",
     "pause": "pause",
+    "plateReader": "absorbance reader",
     "profile_settings": "profile settings",
     "profile_steps": "profile steps",
     "temperature": "temperature",

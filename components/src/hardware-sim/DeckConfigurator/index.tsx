@@ -38,6 +38,8 @@ import { MagneticBlockFixture } from './MagneticBlockFixture'
 import { ThermocyclerFixture } from './ThermocyclerFixture'
 import { AbsorbanceReaderFixture } from './AbsorbanceReaderFixture'
 
+export * from './constants'
+
 interface DeckConfiguratorProps {
   deckConfig: DeckConfiguration
   handleClickAdd: (cutoutId: CutoutId) => void

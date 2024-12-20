@@ -109,6 +109,7 @@ export const HoveredItems = (
               orientation={orientation}
               isSelected={false}
               isLast={true}
+              slot={selectedSlot.slot}
             />
           ) : null}
         </>

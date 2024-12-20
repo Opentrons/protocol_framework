@@ -4161,9 +4161,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -4196,8 +4196,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -4230,8 +4230,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -4263,9 +4263,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -4293,9 +4293,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -4328,8 +4328,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -4362,8 +4362,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -4395,9 +4395,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -4425,9 +4425,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -4460,8 +4460,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -4494,8 +4494,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -4527,9 +4527,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -4557,9 +4557,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -4592,8 +4592,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -4626,8 +4626,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -4659,9 +4659,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -4689,9 +4689,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -4724,8 +4724,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -4758,8 +4758,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -4791,9 +4791,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -4821,9 +4821,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -4856,8 +4856,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -4890,8 +4890,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -4923,9 +4923,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -4953,9 +4953,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -4988,8 +4988,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -5022,8 +5022,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -5055,9 +5055,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -5085,9 +5085,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -5120,8 +5120,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -5154,8 +5154,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -5187,9 +5187,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -5217,9 +5217,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -5252,8 +5252,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -5286,8 +5286,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -5319,9 +5319,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -5349,9 +5349,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -5384,8 +5384,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -5418,8 +5418,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -5451,9 +5451,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -5481,9 +5481,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -5516,8 +5516,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -5550,8 +5550,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -5583,9 +5583,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -5613,9 +5613,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -5648,8 +5648,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -5682,8 +5682,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -5715,9 +5715,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -5745,9 +5745,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -5780,8 +5780,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -5814,8 +5814,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -5847,9 +5847,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -5877,9 +5877,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -5912,8 +5912,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -5946,8 +5946,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -5979,9 +5979,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -6009,9 +6009,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -6044,8 +6044,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -6078,8 +6078,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -6111,9 +6111,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -6141,9 +6141,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -6176,8 +6176,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -6210,8 +6210,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -6243,9 +6243,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -6273,9 +6273,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -6308,8 +6308,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -6342,8 +6342,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -6375,9 +6375,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -6405,9 +6405,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -6440,8 +6440,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -6474,8 +6474,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -6507,9 +6507,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -6537,9 +6537,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -6572,8 +6572,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -6606,8 +6606,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -6639,9 +6639,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -6669,9 +6669,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -6704,8 +6704,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -6738,8 +6738,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -6771,9 +6771,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -6801,9 +6801,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -6836,8 +6836,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -6870,8 +6870,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -6903,9 +6903,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -6933,9 +6933,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -6968,8 +6968,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -7002,8 +7002,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -7035,9 +7035,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -7065,9 +7065,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -7100,8 +7100,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -7134,8 +7134,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -7167,9 +7167,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -7197,9 +7197,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -7232,8 +7232,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -7266,8 +7266,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -7299,9 +7299,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -7329,9 +7329,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -7364,8 +7364,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -7398,8 +7398,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -7431,9 +7431,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -7461,9 +7461,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -7496,8 +7496,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -7530,8 +7530,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -7563,9 +7563,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -7593,9 +7593,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -7628,8 +7628,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -7662,8 +7662,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -7695,9 +7695,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -7725,9 +7725,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -7760,8 +7760,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -7794,8 +7794,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -7827,9 +7827,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -7857,9 +7857,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -7892,8 +7892,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -7926,8 +7926,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -7959,9 +7959,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -7989,9 +7989,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -8024,8 +8024,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -8058,8 +8058,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -8091,9 +8091,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -8121,9 +8121,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -8156,8 +8156,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -8190,8 +8190,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -8223,9 +8223,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -8253,9 +8253,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -8288,8 +8288,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -8322,8 +8322,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -8355,9 +8355,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -8385,9 +8385,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -8420,8 +8420,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -8454,8 +8454,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -8487,9 +8487,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -8517,9 +8517,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -8552,8 +8552,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -8586,8 +8586,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -8619,9 +8619,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -8649,9 +8649,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -8684,8 +8684,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -8718,8 +8718,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -8751,9 +8751,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -8781,9 +8781,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -8816,8 +8816,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -8850,8 +8850,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -8883,9 +8883,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -8913,9 +8913,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -8948,8 +8948,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -8982,8 +8982,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -9015,9 +9015,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -9045,9 +9045,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -9080,8 +9080,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -9114,8 +9114,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -9147,9 +9147,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -9177,9 +9177,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -9212,8 +9212,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -9246,8 +9246,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -9279,9 +9279,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -9309,9 +9309,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -9344,8 +9344,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -9378,8 +9378,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -9411,9 +9411,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -9441,9 +9441,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -9476,8 +9476,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -9510,8 +9510,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -9543,9 +9543,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -9573,9 +9573,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -9608,8 +9608,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -9642,8 +9642,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -9675,9 +9675,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -9705,9 +9705,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -9740,8 +9740,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -9774,8 +9774,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -9807,9 +9807,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -9837,9 +9837,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -9872,8 +9872,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -9906,8 +9906,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -9939,9 +9939,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -9969,9 +9969,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -10004,8 +10004,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -10038,8 +10038,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -10071,9 +10071,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -10101,9 +10101,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -10136,8 +10136,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -10170,8 +10170,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -10203,9 +10203,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -10233,9 +10233,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -10268,8 +10268,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -10302,8 +10302,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -10335,9 +10335,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -10365,9 +10365,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -10400,8 +10400,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -10434,8 +10434,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -10467,9 +10467,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -10497,9 +10497,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -10532,8 +10532,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -10566,8 +10566,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -10599,9 +10599,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -10629,9 +10629,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -10664,8 +10664,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -10698,8 +10698,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -10731,9 +10731,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -10761,9 +10761,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -10796,8 +10796,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -10830,8 +10830,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -10863,9 +10863,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -10893,9 +10893,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -10928,8 +10928,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -10962,8 +10962,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -10995,9 +10995,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -11025,9 +11025,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -11060,8 +11060,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -11094,8 +11094,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -11127,9 +11127,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -11157,9 +11157,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -11192,8 +11192,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -11226,8 +11226,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -11259,9 +11259,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -11289,9 +11289,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -11324,8 +11324,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -11358,8 +11358,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -11391,9 +11391,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -11421,9 +11421,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -11456,8 +11456,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -11490,8 +11490,8 @@
         "volume": 20.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -11523,9 +11523,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -11553,9 +11553,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -11588,8 +11588,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -11622,8 +11622,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -11655,9 +11655,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -11685,9 +11685,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -11720,8 +11720,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -11754,8 +11754,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -11787,9 +11787,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -11817,9 +11817,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -11852,8 +11852,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -11886,8 +11886,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -11919,9 +11919,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -11949,9 +11949,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -11984,8 +11984,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -12018,8 +12018,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -12051,9 +12051,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -12081,9 +12081,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -12116,8 +12116,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -12150,8 +12150,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -12183,9 +12183,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -12213,9 +12213,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -12248,8 +12248,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -12282,8 +12282,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -12315,9 +12315,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -12345,9 +12345,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -12380,8 +12380,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -12414,8 +12414,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -12447,9 +12447,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -12477,9 +12477,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -12512,8 +12512,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -12546,8 +12546,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -12579,9 +12579,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },
@@ -12609,9 +12609,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "top"
         },
@@ -12644,8 +12644,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 1.0
           },
           "origin": "bottom",
@@ -12678,8 +12678,8 @@
         "volume": 10.0,
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
+            "x": 0.0,
+            "y": 0.0,
             "z": 0.5
           },
           "origin": "bottom",
@@ -12711,9 +12711,9 @@
         "pipetteId": "UUID",
         "wellLocation": {
           "offset": {
-            "x": 0,
-            "y": 0,
-            "z": 0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
           },
           "origin": "default"
         },

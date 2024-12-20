@@ -17,6 +17,8 @@ import {
   useInstrumentsQuery,
   useModulesQuery,
 } from '@opentrons/react-api-client'
+import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
+
 import { TertiaryButton } from '/app/atoms/buttons'
 import {
   useDeckCalibrationData,
@@ -72,7 +74,9 @@ export function CalibrationDataDownload({
     e.preventDefault()
     doTrackEvent({
       name: ANALYTICS_CALIBRATION_DATA_DOWNLOADED,
-      properties: {},
+      properties: {
+        robotType: isFlex ? FLEX_ROBOT_TYPE : OT2_ROBOT_TYPE,
+      },
     })
     saveAs(
       new Blob([

@@ -1,9 +1,11 @@
 """Touch tip command request, result, and implementation models."""
 
 from __future__ import annotations
-from pydantic import Field
-from typing import TYPE_CHECKING, Optional, Type
+from typing import TYPE_CHECKING, Optional, Type, Any
+
 from typing_extensions import Literal
+from pydantic import Field
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.types import Point
 
@@ -39,6 +41,10 @@ if TYPE_CHECKING:
 TouchTipCommandType = Literal["touchTip"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 class TouchTipParams(PipetteIdMixin, WellLocationMixin):
     """Payload needed to touch a pipette tip the sides of a specific well."""
 
@@ -49,18 +55,20 @@ class TouchTipParams(PipetteIdMixin, WellLocationMixin):
         ),
     )
 
-    mmFromEdge: Optional[float] = Field(
+    mmFromEdge: float | SkipJsonSchema[None] = Field(
         None,
         description="Offset away from the the well edge, in millimeters."
         "Incompatible when a radius is included as a non 1.0 value.",
+        json_schema_extra=_remove_default,
     )
 
-    speed: Optional[float] = Field(
+    speed: float | SkipJsonSchema[None] = Field(
         None,
         description=(
             "Override the travel speed in mm/s."
             " This controls the straight linear speed of motion."
         ),
+        json_schema_extra=_remove_default,
     )
 
 
@@ -146,7 +154,7 @@ class TouchTipImplementation(
             waypoints=touch_waypoints,
             speed=touch_speed,
         )
-        final_deck_point = DeckPoint.construct(
+        final_deck_point = DeckPoint.model_construct(
             x=final_point.x, y=final_point.y, z=final_point.z
         )
         state_update = center_result.state_update.set_pipette_location(
@@ -167,7 +175,7 @@ class TouchTip(BaseCommand[TouchTipParams, TouchTipResult, StallOrCollisionError
 
     commandType: TouchTipCommandType = "touchTip"
     params: TouchTipParams
-    result: Optional[TouchTipResult]
+    result: Optional[TouchTipResult] = None
 
     _ImplementationCls: Type[TouchTipImplementation] = TouchTipImplementation
 

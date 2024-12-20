@@ -61,9 +61,6 @@ export function ProtocolRoutes(): JSX.Element {
     path: '/',
   }
   const allRoutes: RouteProps[] = [...pdRoutes, landingPage]
-  const showGateModal =
-    process.env.NODE_ENV === 'production' || process.env.OT_PD_SHOW_GATE
-
   const navigate = useNavigate()
   const handleReset = (): void => {
     navigate('/', { replace: true })
@@ -77,7 +74,7 @@ export function ProtocolRoutes(): JSX.Element {
       <Navigation />
       <Kitchen>
         <Box width="100%">
-          {showGateModal ? <GateModal /> : null}
+          <GateModal />
           <LabwareUploadModal />
           <FileUploadMessagesModal />
           <Routes>

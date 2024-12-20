@@ -14,6 +14,7 @@ import {
   WRAP,
 } from '@opentrons/components'
 import {
+  ABSORBANCE_READER_TYPE,
   ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
   getModuleDisplayName,
@@ -70,6 +71,7 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
     TEMPERATURE_MODULE_TYPE,
     HEATERSHAKER_MODULE_TYPE,
     MAGNETIC_BLOCK_TYPE,
+    ABSORBANCE_READER_TYPE,
   ]
 
   const handleAddModule = (

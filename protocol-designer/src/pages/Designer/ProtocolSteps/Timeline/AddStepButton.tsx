@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
+
 import {
   ALIGN_CENTER,
   BORDERS,
@@ -24,18 +25,30 @@ import {
   useOnClickOutside,
 } from '@opentrons/components'
 import {
+  ABSORBANCE_READER_TYPE,
+  HEATERSHAKER_MODULE_TYPE,
+  MAGNETIC_MODULE_TYPE,
+  TEMPERATURE_MODULE_TYPE,
+  THERMOCYCLER_MODULE_TYPE,
+} from '@opentrons/shared-data'
+
+import {
   actions as stepsActions,
   getIsMultiSelectMode,
 } from '../../../../ui/steps'
-import { selectors as stepFormSelectors } from '../../../../step-forms'
+import {
+  selectors as stepFormSelectors,
+  getIsModuleOnDeck,
+} from '../../../../step-forms'
 import {
   CLOSE_UNSAVED_STEP_FORM,
   ConfirmDeleteModal,
   getMainPagePortalEl,
 } from '../../../../organisms'
-import { getEnableComment } from '../../../../feature-flags/selectors'
-import { getIsStepTypeEnabled, getSupportedSteps } from './utils'
-
+import {
+  getEnableAbsorbanceReader,
+  getEnableComment,
+} from '../../../../feature-flags/selectors'
 import { AddStepOverflowButton } from './AddStepOverflowButton'
 
 import type { MouseEvent } from 'react'
@@ -74,12 +87,45 @@ export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
   const [enqueuedStepType, setEnqueuedStepType] = useState<StepType | null>(
     null
   )
+  const enableAbsorbanceReader = useSelector(getEnableAbsorbanceReader)
+
+  const getSupportedSteps = (): Array<
+    Exclude<StepType, 'manualIntervention'>
+  > => [
+    'comment',
+    'moveLabware',
+    'moveLiquid',
+    'mix',
+    'pause',
+    'heaterShaker',
+    'magnet',
+    'temperature',
+    'thermocycler',
+    'plateReader',
+  ]
+  const isStepTypeEnabled: Record<
+    Exclude<StepType, 'manualIntervention'>,
+    boolean
+  > = {
+    comment: enableComment,
+    moveLabware: true,
+    moveLiquid: true,
+    mix: true,
+    pause: true,
+    magnet: getIsModuleOnDeck(modules, MAGNETIC_MODULE_TYPE),
+    temperature: getIsModuleOnDeck(modules, TEMPERATURE_MODULE_TYPE),
+    thermocycler: getIsModuleOnDeck(modules, THERMOCYCLER_MODULE_TYPE),
+    heaterShaker: getIsModuleOnDeck(modules, HEATERSHAKER_MODULE_TYPE),
+    plateReader:
+      getIsModuleOnDeck(modules, ABSORBANCE_READER_TYPE) &&
+      enableAbsorbanceReader,
+  }
 
   const addStep = (stepType: StepType): ReturnType<any> =>
     dispatch(stepsActions.addAndSelectStep({ stepType }))
 
-  const items = getSupportedSteps(enableComment)
-    .filter(stepType => getIsStepTypeEnabled(enableComment, modules)[stepType])
+  const items = getSupportedSteps()
+    .filter(stepType => isStepTypeEnabled[stepType])
     .map(stepType => (
       <AddStepOverflowButton
         key={stepType}

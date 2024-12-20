@@ -1,10 +1,11 @@
 """Command models to read absorbance."""
 from __future__ import annotations
 from datetime import datetime
-from typing import Optional, Dict, TYPE_CHECKING, List
-from typing_extensions import Literal, Type
+from typing import Optional, Dict, TYPE_CHECKING, List, Any
 
+from typing_extensions import Literal, Type
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ...errors import CannotPerformModuleAction, StorageLimitReachedError
@@ -23,6 +24,10 @@ if TYPE_CHECKING:
     from opentrons.protocol_engine.execution import EquipmentHandler
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 ReadAbsorbanceCommandType = Literal["absorbanceReader/read"]
 
 
@@ -30,9 +35,10 @@ class ReadAbsorbanceParams(BaseModel):
     """Input parameters for an absorbance reading."""
 
     moduleId: str = Field(..., description="Unique ID of the Absorbance Reader.")
-    fileName: Optional[str] = Field(
+    fileName: str | SkipJsonSchema[None] = Field(
         None,
         description="Optional file name to use when storing the results of a measurement.",
+        json_schema_extra=_remove_default,
     )
 
 
@@ -118,7 +124,9 @@ class ReadAbsorbanceImpl(
                     )
                     asbsorbance_result[wavelength] = converted_values
                     transform_results.append(
-                        ReadData.construct(wavelength=wavelength, data=converted_values)
+                        ReadData.model_construct(
+                            wavelength=wavelength, data=converted_values
+                        )
                     )
         # Handle the virtual module case for data creation (all zeroes)
         elif self._state_view.config.use_virtual_modules:
@@ -132,7 +140,9 @@ class ReadAbsorbanceImpl(
                     )
                     asbsorbance_result[wavelength] = converted_values
                     transform_results.append(
-                        ReadData.construct(wavelength=wavelength, data=converted_values)
+                        ReadData.model_construct(
+                            wavelength=wavelength, data=converted_values
+                        )
                     )
             else:
                 raise CannotPerformModuleAction(
@@ -147,7 +157,7 @@ class ReadAbsorbanceImpl(
         file_ids: list[str] = []
         if params.fileName is not None:
             # Create the Plate Reader Transform
-            plate_read_result = PlateReaderData.construct(
+            plate_read_result = PlateReaderData.model_construct(
                 read_results=transform_results,
                 reference_wavelength=abs_reader_substate.reference_wavelength,
                 start_time=start_time,

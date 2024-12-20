@@ -191,6 +191,7 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
                 ? hoveredItem.text ?? ''
                 : selectedItemModule.text ?? ''
             }
+            slot={moduleOnDeck.slot}
           />
         )
       }
