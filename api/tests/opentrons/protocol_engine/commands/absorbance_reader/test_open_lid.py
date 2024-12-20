@@ -48,7 +48,8 @@ def absorbance_def() -> LabwareDefinition:
 
 
 @pytest.mark.parametrize(
-    "hardware_lid_status", (AbsorbanceReaderLidStatus.ON, AbsorbanceReaderLidStatus.OFF)
+    "hardware_lid_status",
+    (AbsorbanceReaderLidStatus.ON, AbsorbanceReaderLidStatus.OFF),
 )
 async def test_absorbance_reader_implementation(
     decoy: Decoy,
@@ -119,14 +120,11 @@ async def test_absorbance_reader_implementation(
     assert result == SuccessData(
         public=OpenLidResult(),
         state_update=update_types.StateUpdate(
-            files_added=update_types.FilesAddedUpdate(file_ids=[]),
             module_state_update=update_types.ModuleStateUpdate(
-                module_id="unverified-module-id",
+                module_id="module-id",
                 module_type="absorbanceReaderType",
                 absorbance_reader_lid=update_types.AbsorbanceReaderLidUpdate(
-                    is_lid_on=True
-                    if hardware_lid_status == AbsorbanceReaderLidStatus.ON
-                    else False
+                    is_lid_on=False
                 ),
             ),
         ),
