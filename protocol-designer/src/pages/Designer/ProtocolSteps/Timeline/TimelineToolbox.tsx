@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import {
   DIRECTION_COLUMN,
   Flex,
+  OVERFLOW_WRAP_ANYWHERE,
   POSITION_RELATIVE,
   SPACING,
   StyledText,
@@ -27,7 +28,14 @@ import { DraggableSteps } from './DraggableSteps'
 import type { StepIdType } from '../../../../form-types'
 import type { ThunkDispatch } from '../../../../types'
 
-export const TimelineToolbox = (): JSX.Element => {
+const SIDEBAR_MIN_WIDTH_FOR_ICON = 179
+interface TimelineToolboxProps {
+  sidebarWidth: number
+}
+
+export const TimelineToolbox = ({
+  sidebarWidth,
+}: TimelineToolboxProps): JSX.Element => {
   const { t } = useTranslation('protocol_steps')
   const orderedStepIds = useSelector(stepFormSelectors.getOrderedStepIds)
   const formData = useSelector(getUnsavedForm)
@@ -64,30 +72,44 @@ export const TimelineToolbox = (): JSX.Element => {
       position={POSITION_RELATIVE}
       height="100%"
       maxHeight={`calc(100vh - ${NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
-      width="19.5rem"
+      width={`${sidebarWidth / 16}rem`}
       title={
-        <StyledText desktopStyle="bodyLargeSemiBold">
+        <StyledText
+          desktopStyle="bodyLargeSemiBold"
+          overflowWrap={OVERFLOW_WRAP_ANYWHERE}
+        >
           {t('timeline')}
         </StyledText>
       }
       titlePadding={SPACING.spacing12}
       childrenPadding={SPACING.spacing12}
-      confirmButton={formData != null ? undefined : <AddStepButton />}
+      confirmButton={
+        formData != null ? undefined : (
+          <AddStepButton hasText={sidebarWidth > SIDEBAR_MIN_WIDTH_FOR_ICON} />
+        )
+      }
     >
       <Flex
         flexDirection={DIRECTION_COLUMN}
         gridGap={SPACING.spacing4}
         width="100%"
       >
-        <TerminalItemStep id={START_TERMINAL_ITEM_ID} />
+        <TerminalItemStep
+          id={START_TERMINAL_ITEM_ID}
+          sidebarWidth={sidebarWidth}
+        />
         <DraggableSteps
           orderedStepIds={orderedStepIds}
           reorderSteps={(stepIds: StepIdType[]) => {
             dispatch(steplistActions.reorderSteps(stepIds))
           }}
+          sidebarWidth={sidebarWidth}
         />
-        <PresavedStep />
-        <TerminalItemStep id={END_TERMINAL_ITEM_ID} />
+        <PresavedStep sidebarWidth={sidebarWidth} />
+        <TerminalItemStep
+          id={END_TERMINAL_ITEM_ID}
+          sidebarWidth={sidebarWidth}
+        />
       </Flex>
     </Toolbox>
   )
