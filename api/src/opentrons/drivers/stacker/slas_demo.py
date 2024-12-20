@@ -14,7 +14,9 @@ LID_FIXTURE_HEIGHT = 1
 
 class StackerModule:
     stacker: Optional[FlexStacker]
-    STACKER_GRIPPER_OFFSET = {"x": -3, "y": 0, "z": 12}
+    STACKER_GRIPPER_OFFSET = {"x": -3, "y": 0, "z": 13}
+    GRIPPER_LABWARE_DROP_OFFSET = {"x": 0, "y": 0, "z": -3}
+
     LABWARE_Z_OFFSET = {
         "opentrons_flex_96_tiprack_1000ul": LABWARE_Z_HEIGHT.OPENTRONS_TIPRACKS,
         "opentrons_96_wellplate_200ul_pcr_full_skirt": LABWARE_Z_HEIGHT.BIORAD_HARDSHELL_PCR,
@@ -39,6 +41,7 @@ class StackerModule:
             new_location,
             use_gripper=True,
             pick_up_offset=self.STACKER_GRIPPER_OFFSET,
+            drop_offset=self.GRIPPER_LABWARE_DROP_OFFSET,
         )
         del self.protocol.deck[self.slot]
         return lw
@@ -59,13 +62,13 @@ def run(protocol: ProtocolContext) -> None:
     hardware.cache_instruments()
 
     tiprack_stacker = StackerModule(
-        serial_number="PS241204SZEVT01",
+        serial_number="PS241204SZEVT27",
         labware_name="opentrons_flex_96_tiprack_1000ul",
         slot="C4",
         protocol=protocol,
     )
     plate_stacker = StackerModule(
-        serial_number="PS241204SZEVT01",
+        serial_number="PS241204SZEVT16",
         labware_name="opentrons_96_wellplate_200ul_pcr_full_skirt",
         slot="D4",
         protocol=protocol,
