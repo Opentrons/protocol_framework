@@ -1,5 +1,6 @@
 """Gravimetric OT3."""
 from json import load as json_load
+from traceback import format_exc
 from pathlib import Path
 import argparse
 from typing import List, Union, Dict, Optional, Any, Tuple
@@ -46,7 +47,7 @@ from .measurement.scale import Scale
 from .trial import TestResources, _change_pipettes
 from .tips import get_tips
 from hardware_testing.drivers import asair_sensor
-from opentrons.protocol_api import InstrumentContext
+from opentrons.protocol_api import InstrumentContext, disposal_locations
 from opentrons.protocols.api_support.definitions import MAX_SUPPORTED_VERSION
 from opentrons.protocol_engine.types import LabwareOffset
 
@@ -347,6 +348,11 @@ class RunArgs:
             else:
                 protocol_cfg = GRAVIMETRIC_CFG[args.pipette][args.channels]
             name = protocol_cfg.metadata["protocolName"]  # type: ignore[attr-defined]
+            api_level = protocol_cfg.requirements["apiLevel"]
+            assert api_level == API_LEVEL, (
+                f"Protocol API level ({api_level}) does not match script API level ({API_LEVEL})"
+                f", update Protocol file so that is uses {API_LEVEL}"
+            )
             assert scale
             recorder = execute._load_scale(name, scale, run_id, pipette_tag, start_time)
             assert (
@@ -682,7 +688,12 @@ if __name__ == "__main__":
             else helpers.OT3Mount.RIGHT
         )
         hw.add_tip(hw_mount, tip_length=120)  # langer than any tip, to be safe
-        run_args.pipette.move_to(run_args.pipette.trash_container)  # type: ignore[arg-type]
+        _trash = run_args.pipette.trash_container
+        if not isinstance(_trash, disposal_locations.TrashBin):
+            # FIXME: (sigler) not sure why during simulation it's a Labware
+            run_args.pipette.move_to(_trash["A1"].top())  # type: ignore[index]
+        else:
+            run_args.pipette.move_to(_trash.top())
         hw.drop_tip(hw_mount)
         hw._move_to_plunger_bottom(hw_mount, rate=1.0)
         hw.retract(hw_mount)
@@ -691,6 +702,10 @@ if __name__ == "__main__":
             if args.channels == 96 and not run_args.ctx.is_simulating():
                 ui.alert_user_ready(f"prepare the {tip}ul tipracks", hw)
             _main(args, run_args, tip, volumes)
+    except Exception as e:
+        ui.print_error(str(e))
+        ui.print_info(format_exc())
+        raise e
     finally:
         if run_args.recorder is not None:
             ui.print_info("ending recording")
