@@ -237,6 +237,7 @@ class OT3PipetteHandler:
                 "back_compat_names",
                 "supported_tips",
                 "lld_settings",
+                "available_sensors",
             ]
 
             instr_dict = instr.as_dict()
@@ -289,6 +290,7 @@ class OT3PipetteHandler:
                 "drop_tip": instr.plunger_positions.drop_tip,
             }
             result["shaft_ul_per_mm"] = instr.config.shaft_ul_per_mm
+            result["available_sensors"] = instr.config.available_sensors
         return cast(PipetteDict, result)
 
     @property
