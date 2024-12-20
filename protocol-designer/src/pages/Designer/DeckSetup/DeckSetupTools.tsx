@@ -339,7 +339,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       const pauseSteps = Object.values(savedSteps).filter(step => {
         return (
           step.stepType === 'pause' &&
-          //  only update module steps that match the old moduleId
+          //  only update pause steps that match the old moduleId
           //  to accommodate instances of MoaM
           step.moduleId === createdModuleForSlot?.id
         )
@@ -348,7 +348,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       dispatch(
         createModuleEntityAndChangeForm({
           slot,
-          type: getModuleType(selectedModuleModel),
+          type: moduleType,
           model: selectedModuleModel,
           moduleSteps,
           pauseSteps,

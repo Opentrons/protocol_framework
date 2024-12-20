@@ -79,6 +79,7 @@ interface StepSummaryProps {
 export function StepSummary(props: StepSummaryProps): JSX.Element | null {
   const { currentStep, stepDetails } = props
   const { t } = useTranslation(['protocol_steps', 'application'])
+  const unknownModule = t('unkonwn_module')
   const labwareNicknamesById = useSelector(getLabwareNicknamesById)
   const additionalEquipmentEntities = useSelector(
     getAdditionalEquipmentEntities
@@ -125,8 +126,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         magnetAction,
       } = currentStep
       const magneticModuleDisplayName =
-        getModuleDisplayName(modules[magneticModuleId]?.model) ??
-        'Unknown module'
+        getModuleDisplayName(modules[magneticModuleId]?.model) ?? unknownModule
       stepSummaryContent =
         magnetAction === 'engage' ? (
           <StyledTrans
@@ -232,8 +232,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
           break
         case 'untilTemperature':
           const pauseModuleDisplayName =
-            getModuleDisplayName(modules[pauseModuleId]?.model) ??
-            'Unknown module'
+            getModuleDisplayName(modules[pauseModuleId]?.model) ?? unknownModule
           stepSummaryContent = (
             <StyledTrans
               i18nKey="protocol_steps:pause.untilTemperature"
@@ -260,7 +259,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
       } = currentStep
       const isDeactivating = setTemperature === 'false'
       const tempModuleDisplayName =
-        getModuleDisplayName(modules[tempModuleId]?.model) ?? 'Unknown module'
+        getModuleDisplayName(modules[tempModuleId]?.model) ?? unknownModule
       stepSummaryContent = isDeactivating ? (
         <StyledTrans
           i18nKey={'protocol_steps:temperature_module.deactivated'}
@@ -362,7 +361,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
       } = currentStep
       const moduleDisplayName =
         getModuleDisplayName(modules[heaterShakerModuleId]?.model) ??
-        'Unknown module'
+        unknownModule
       stepSummaryContent = (
         <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
           <Flex gridGap={SPACING.spacing20} alignItems={ALIGN_CENTER}>
