@@ -14,7 +14,11 @@ export default mergeConfig(
       allowOnly: true,
       exclude: [...configDefaults.exclude, '**/node_modules/**', '**/dist/**'],
       setupFiles: ['./setup-vitest.mts'],
-      coverage: { provider: 'v8', reporter: ['text', 'json', 'html'] },
+      coverage: {
+        exclude: ['**/node_modules/**', '**/dist/**', '**/__tests__/**'],
+        provider: 'v8',
+        reporter: ['text', 'json', 'html'],
+      },
     },
     resolve: {
       alias: {
