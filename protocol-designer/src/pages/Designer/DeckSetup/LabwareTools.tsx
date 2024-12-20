@@ -32,7 +32,7 @@ import {
   getModuleType,
 } from '@opentrons/shared-data'
 
-import { BUTTON_LINK_STYLE } from '../../../atoms'
+import { LINK_BUTTON_STYLE } from '../../../atoms'
 import { selectors as stepFormSelectors } from '../../../step-forms'
 import { getOnlyLatestDefs } from '../../../labware-defs'
 import {
@@ -491,7 +491,7 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
         alignItems={ALIGN_CENTER}
         justifyContent={JUSTIFY_CENTER}
       >
-        <StyledLabel css={BUTTON_LINK_STYLE}>
+        <StyledLabel css={LINK_BUTTON_STYLE}>
           <StyledText desktopStyle="bodyDefaultRegular">
             {t('upload_custom_labware')}
           </StyledText>

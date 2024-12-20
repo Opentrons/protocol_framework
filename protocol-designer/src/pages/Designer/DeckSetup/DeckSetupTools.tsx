@@ -55,7 +55,7 @@ import { selectors } from '../../../labware-ingred/selectors'
 import { useKitchen } from '../../../organisms/Kitchen/hooks'
 import { getDismissedHints } from '../../../tutorial/selectors'
 import { createContainerAboveModule } from '../../../step-forms/actions/thunks'
-import { BUTTON_LINK_STYLE, NAV_BAR_HEIGHT_REM } from '../../../atoms'
+import { LINK_BUTTON_STYLE, NAV_BAR_HEIGHT_REM } from '../../../atoms'
 import { ConfirmDeleteStagingAreaModal } from '../../../organisms'
 import { getSlotInformation } from '../utils'
 import { ALL_ORDERED_CATEGORIES, FIXTURES, MOAM_MODELS } from './constants'
@@ -438,7 +438,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                 handleResetToolbox()
               }
             }}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
             textDecoration={TYPOGRAPHY.textDecorationUnderline}
           >
             <StyledText desktopStyle="bodyDefaultRegular">
