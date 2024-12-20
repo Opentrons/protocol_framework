@@ -13,6 +13,7 @@ from opentrons.protocol_api._nozzle_layout import NozzleLayout
 from opentrons.protocol_api._liquid import LiquidClass
 from ..disposal_locations import TrashBin, WasteChute
 from .well import WellCoreType
+from .labware import LabwareCoreType
 
 
 class AbstractInstrument(ABC, Generic[WellCoreType]):
@@ -318,7 +319,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         source: List[Tuple[types.Location, WellCoreType]],
         dest: List[Tuple[types.Location, WellCoreType]],
         new_tip: TransferTipPolicyV2,
-        tiprack_uri: str,
+        tipracks: List[LabwareCoreType],
         trash_location: Union[types.Location, TrashBin, WasteChute],
     ) -> None:
         """Transfer a liquid from source to dest according to liquid class properties."""

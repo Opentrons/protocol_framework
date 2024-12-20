@@ -1602,7 +1602,7 @@ class InstrumentContext(publisher.CommandPublisher):
                 for well in flat_dests_list
             ],
             new_tip=valid_new_tip,
-            tiprack_uri=tiprack.uri,
+            tipracks=[rack._core for rack in self._tip_racks],
             trash_location=checked_trash_location,
         )
         return self

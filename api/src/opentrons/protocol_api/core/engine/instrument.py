@@ -32,6 +32,8 @@ from opentrons.protocol_engine.types import (
     NozzleLayoutConfigurationType,
     AddressableOffsetVector,
     LiquidClassRecord,
+    NextTipInfo,
+    NoTipAvailable,
 )
 from opentrons.protocol_engine.errors.exceptions import TipNotAttachedError
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
@@ -45,6 +47,7 @@ from . import overlap_versions, pipette_movement_conflict
 from . import transfer_components_executor as tx_comps_executor
 
 from .well import WellCore
+from .labware import LabwareCore
 from ..instrument import AbstractInstrument
 from ...disposal_locations import TrashBin, WasteChute
 
@@ -898,9 +901,16 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         )
         return result.liquidClassId
 
-    # TODO: update with getNextTip implementation
-    def get_next_tip(self) -> None:
+    def get_next_tip(self, tip_racks: List[LabwareCore], starting_well: Optional[str]) -> NextTipInfo:
         """Get the next tip to pick up."""
+        next_tip_info = self._engine_client.execute_command_without_recovery(
+            cmd.GetNextTipParams(
+                pipetteId=self._pipette_id,
+                labwareIds=[tip_rack.labware_id for tip_rack in tip_racks],
+                startingTipWell=starting_well,
+            )
+        )
+        return next_tip_info
 
     def transfer_liquid(
         self,
@@ -909,7 +919,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         source: List[Tuple[Location, WellCore]],
         dest: List[Tuple[Location, WellCore]],
         new_tip: TransferTipPolicyV2,
-        tiprack_uri: str,
+        tip_racks: List[LabwareCore],
         trash_location: Union[Location, TrashBin, WasteChute],
     ) -> None:
         """Execute transfer using liquid class properties.
@@ -929,6 +939,9 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             tip_drop_location: Location where the tip will be dropped (if appropriate).
         """
         # This function is WIP
+        # TODO: Validate all tipracks in this list have the same uri
+        tiprack_uri = tip_racks[0].get_uri()
+
         # TODO: use the ID returned by load_liquid_class in command annotations
         self.load_liquid_class(
             liquid_class=liquid_class,
@@ -953,14 +966,32 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             max_volume=self.get_max_volume(),
         )
         if new_tip == TransferTipPolicyV2.ONCE:
-            # TODO: update this once getNextTip is implemented
-            self.get_next_tip()
+            next_tip = self.get_next_tip(
+                tip_racks=tip_racks,
+                starting_well=None,
+            )
+            if isinstance(next_tip, NoTipAvailable):
+                raise RuntimeError(
+                    f"No tip available among {tip_racks} for this transfer."
+                )
+            tiprack_id, starting_tip = next_tip
+            self.pick_up_tip()      # TODO: figure out what to do about Location
+        
         for step_volume, (src, dest) in source_dest_per_volume_step:  # type: ignore[assignment]
+            # TODO: check for PER_SOURCE tip policy
             if new_tip == TransferTipPolicyV2.ALWAYS:
-                # TODO: update this once getNextTip is implemented
-                self.get_next_tip()
+                next_tip = self.get_next_tip(
+                    tip_racks=tip_racks,
+                    starting_well=None,
+                )
+                if isinstance(next_tip, NoTipAvailable):
+                    raise RuntimeError(
+                        f"No tip available among {tip_racks} for this transfer."
+                    )
+                tiprack_id, starting_tip = next_tip
+                self.pick_up_tip()  # TODO: figure out what to do about Location
 
-            # TODO: add aspirate and dispense
+
 
             if new_tip == TransferTipPolicyV2.ALWAYS:
                 if isinstance(trash_location, (TrashBin, WasteChute)):
