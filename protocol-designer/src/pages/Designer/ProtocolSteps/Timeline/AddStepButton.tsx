@@ -17,6 +17,7 @@ import {
   SecondaryButton,
 } from '@opentrons/components'
 import {
+  ABSORBANCE_READER_TYPE,
   HEATERSHAKER_MODULE_TYPE,
   MAGNETIC_MODULE_TYPE,
   TEMPERATURE_MODULE_TYPE,
@@ -35,7 +36,10 @@ import {
   ConfirmDeleteModal,
   getMainPagePortalEl,
 } from '../../../../organisms'
-import { getEnableComment } from '../../../../feature-flags/selectors'
+import {
+  getEnableAbsorbanceReader,
+  getEnableComment,
+} from '../../../../feature-flags/selectors'
 
 import { AddStepOverflowButton } from './AddStepOverflowButton'
 
@@ -71,32 +75,22 @@ export function AddStepButton(): JSX.Element {
   const [enqueuedStepType, setEnqueuedStepType] = useState<StepType | null>(
     null
   )
+  const enableAbsorbanceReader = useSelector(getEnableAbsorbanceReader)
 
   const getSupportedSteps = (): Array<
     Exclude<StepType, 'manualIntervention'>
-  > =>
-    enableComment
-      ? [
-          'comment',
-          'moveLabware',
-          'moveLiquid',
-          'mix',
-          'pause',
-          'heaterShaker',
-          'magnet',
-          'temperature',
-          'thermocycler',
-        ]
-      : [
-          'moveLabware',
-          'moveLiquid',
-          'mix',
-          'pause',
-          'heaterShaker',
-          'magnet',
-          'temperature',
-          'thermocycler',
-        ]
+  > => [
+    'comment',
+    'moveLabware',
+    'moveLiquid',
+    'mix',
+    'pause',
+    'heaterShaker',
+    'magnet',
+    'temperature',
+    'thermocycler',
+    'plateReader',
+  ]
   const isStepTypeEnabled: Record<
     Exclude<StepType, 'manualIntervention'>,
     boolean
@@ -110,6 +104,9 @@ export function AddStepButton(): JSX.Element {
     temperature: getIsModuleOnDeck(modules, TEMPERATURE_MODULE_TYPE),
     thermocycler: getIsModuleOnDeck(modules, THERMOCYCLER_MODULE_TYPE),
     heaterShaker: getIsModuleOnDeck(modules, HEATERSHAKER_MODULE_TYPE),
+    plateReader:
+      getIsModuleOnDeck(modules, ABSORBANCE_READER_TYPE) &&
+      enableAbsorbanceReader,
   }
 
   const addStep = (stepType: StepType): ReturnType<any> =>
