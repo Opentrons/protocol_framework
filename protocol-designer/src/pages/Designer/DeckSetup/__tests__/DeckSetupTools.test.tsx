@@ -20,7 +20,6 @@ import { getDeckSetupForActiveItem } from '../../../../top-selectors/labware-loc
 import { DeckSetupTools } from '../DeckSetupTools'
 import { LabwareTools } from '../LabwareTools'
 
-import type * as React from 'react'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
 vi.mock('../LabwareTools')
@@ -32,6 +31,7 @@ vi.mock('../../../../step-forms/actions')
 vi.mock('../../../../step-forms/actions/additionalItems')
 vi.mock('../../../../labware-ingred/selectors')
 vi.mock('../../../../tutorial/selectors')
+vi.mock('../../../../step-forms/selectors')
 const render = (props: React.ComponentProps<typeof DeckSetupTools>) => {
   return renderWithProviders(<DeckSetupTools {...props} />, {
     i18nInstance: i18n,
