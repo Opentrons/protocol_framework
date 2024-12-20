@@ -158,9 +158,12 @@ export const reduxActionToAnalyticsEvent = (
             name: `${modifiedStepName}Step`,
             properties: {
               ...stepArgModified,
-              aspirateAirGap: stepArgModified.aspirateAirGapVolume,
-              aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
-              dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
+              aspirateAirGap:
+                stepArgModified.aspirateAirGapVolume ?? DEFAULT_VALUE,
+              aspirateFlowRate:
+                stepArgModified.aspirateFlowRateUlSec ?? DEFAULT_VALUE,
+              dispenseFlowRate:
+                stepArgModified.dispenseFlowRateUlSec ?? DEFAULT_VALUE,
               blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
               aspirateOffsetFromBottomMm:
                 stepArgModified.aspirateOffsetFromBottomMm ===
@@ -246,6 +249,7 @@ export const reduxActionToAnalyticsEvent = (
 
   if (action.type === 'COMPUTE_ROBOT_STATE_TIMELINE_SUCCESS') {
     const robotTimeline = getRobotStateTimeline(state)
+    console.log('hit here with robotTimeline as', robotTimeline?.timeline)
     const { errors, timeline } = robotTimeline
     const commandAndRobotState = timeline.filter(t => t.warnings != null)
     const warnings =
