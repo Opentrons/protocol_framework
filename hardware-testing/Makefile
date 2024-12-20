@@ -287,10 +287,10 @@ push-ot3-fixture:
 .PHONY: push-ot3-lld
 push-ot3-lld:
 	$(MAKE) apply-patches-fixture
-	cd ../ && $(MAKE) -C shared-data push-ot3
-	cd ../ && $(MAKE) -C hardware push-ot3
+	cd ../ && $(MAKE) -C shared-data push-no-restart-ot3
+	cd ../ && $(MAKE) -C hardware push-no-restart-ot3
+	cd ../ && $(MAKE) -C api push-no-restart-ot3
 	cd ../ && $(MAKE) -C hardware_testing push-ot3
-	cd ../ && $(MAKE) -C api push-ot3
 	$(MAKE) remove-patches-fixture
 
 
@@ -314,7 +314,7 @@ sync-ot3: sync-sw-ot3 sync-fw-ot3
 push-ot3-gravimetric:
 	$(MAKE) push-ot3
 	$(MAKE) apply-patches-gravimetric
-	cd ../ && $(MAKE) -C shared-data push-no-restart-ot3 && $(MAKE) -C api push-no-restart-ot3
+	cd ../ && $(MAKE) -C shared-data push-no-restart-ot3
 	$(MAKE) remove-patches-gravimetric
 
 .PHONY: apply-patches-gravimetric
