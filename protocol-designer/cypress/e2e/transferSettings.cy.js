@@ -1,5 +1,5 @@
-import '../support/commands.ts' // Importing the custom commands file
-import '..support/createNew.ts'
+import '../support/commands' // Importing the custom commands file
+
 /*
 These constants will help us run through both test suites in one go
 */
