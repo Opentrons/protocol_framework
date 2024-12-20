@@ -1,8 +1,9 @@
 // app info card with version and updated
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useSelector, useDispatch } from 'react-redux'
+import uuidv1 from 'uuid/v4'
 
 import {
   ALIGN_CENTER,
@@ -56,6 +57,7 @@ const GITHUB_LINK =
   'https://github.com/Opentrons/opentrons/blob/edge/app-shell/build/release-notes.md'
 
 const ENABLE_APP_UPDATE_NOTIFICATIONS = 'Enable app update notifications'
+const uuid: () => string = uuidv1
 
 export function GeneralSettings(): JSX.Element {
   const { t } = useTranslation(['app_settings', 'shared', 'branded'])
@@ -69,13 +71,17 @@ export function GeneralSettings(): JSX.Element {
 
   const appLanguage = useSelector(getAppLanguage)
   const currentLanguageOption = LANGUAGES.find(lng => lng.value === appLanguage)
-
+  let transactionId = ''
+  useEffect(() => {
+    transactionId = uuid()
+  }, [])
   const handleDropdownClick = (value: string): void => {
     dispatch(updateConfigValue('language.appLanguage', value))
     trackEvent({
       name: ANALYTICS_LANGUAGE_UPDATED_DESKTOP_APP_SETTINGS,
       properties: {
         language: value,
+        transactionId,
       },
     })
   }

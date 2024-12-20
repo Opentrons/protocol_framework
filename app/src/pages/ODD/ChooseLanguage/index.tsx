@@ -64,12 +64,6 @@ export function ChooseLanguage(): JSX.Element {
                 isSelected={lng.value === appLanguage}
                 onChange={() => {
                   dispatch(updateConfigValue('language.appLanguage', lng.value))
-                  trackEventWithRobotSerial({
-                    name: ANALYTICS_LANGUAGE_UPDATED_ODD_UNBOXING_FLOW,
-                    properties: {
-                      language: lng.value,
-                    },
-                  })
                 }}
               ></RadioButton>
             ))}
@@ -78,6 +72,12 @@ export function ChooseLanguage(): JSX.Element {
         <MediumButton
           buttonText={i18n.format(t('shared:continue'), 'capitalize')}
           onClick={() => {
+            trackEventWithRobotSerial({
+              name: ANALYTICS_LANGUAGE_UPDATED_ODD_UNBOXING_FLOW,
+              properties: {
+                language: appLanguage,
+              },
+            })
             navigate('/welcome')
           }}
           width="100%"

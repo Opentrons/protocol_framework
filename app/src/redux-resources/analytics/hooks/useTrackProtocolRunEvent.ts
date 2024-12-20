@@ -1,5 +1,7 @@
+import { useSelector } from 'react-redux'
 import { useTrackEvent } from '/app/redux/analytics'
 import { useProtocolRunAnalyticsData } from './useProtocolRunAnalyticsData'
+import { getAppLanguage } from '/app/redux/config'
 import { useRobot } from '/app/redux-resources/robots'
 
 interface ProtocolRunAnalyticsEvent {
@@ -21,7 +23,7 @@ export function useTrackProtocolRunEvent(
     runId,
     robot
   )
-
+  const appLanguage = useSelector(getAppLanguage)
   const trackProtocolRunEvent: TrackProtocolRunEvent = ({
     name,
     properties = {},
@@ -37,6 +39,7 @@ export function useTrackProtocolRunEvent(
             // It's sometimes unavoidable (namely on the desktop app) to prevent sending an event multiple times.
             // In these circumstances, we need an idempotency key to accurately filter events in Mixpanel.
             transactionId: runId,
+            appLanguage,
           },
         })
       })

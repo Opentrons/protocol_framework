@@ -74,6 +74,7 @@ export function SystemLanguagePreferenceModal(): JSX.Element | null {
       name: ANALYTICS_LANGUAGE_UPDATED_DESKTOP_APP_MODAL,
       properties: {
         language: currentOption.value,
+        systemLanguage,
         modalType: showUpdateModal
           ? 'systemLanguageUpdateModal'
           : 'appBootModal',
