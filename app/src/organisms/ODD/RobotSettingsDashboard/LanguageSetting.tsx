@@ -1,7 +1,8 @@
-import { Fragment } from 'react'
+import { Fragment, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
+import uuidv1 from 'uuid/v4'
 
 import {
   BORDERS,
@@ -14,6 +15,8 @@ import {
 } from '@opentrons/components'
 
 import { LANGUAGES } from '/app/i18n'
+import { ANALYTICS_LANGUAGE_UPDATED_ODD_SETTINGS } from '/app/redux/analytics'
+import { useTrackEventWithRobotSerial } from '/app/redux-resources/analytics'
 import { ChildNavigation } from '/app/organisms/ODD/ChildNavigation'
 import { getAppLanguage, updateConfigValue } from '/app/redux/config'
 
@@ -42,16 +45,31 @@ interface LanguageSettingProps {
   setCurrentOption: SetSettingOption
 }
 
+const uuid: () => string = uuidv1
+
 export function LanguageSetting({
   setCurrentOption,
 }: LanguageSettingProps): JSX.Element {
   const { t } = useTranslation('app_settings')
   const dispatch = useDispatch<Dispatch>()
+  const { trackEventWithRobotSerial } = useTrackEventWithRobotSerial()
+
+  let transactionId = ''
+  useEffect(() => {
+    transactionId = uuid()
+  }, [])
 
   const appLanguage = useSelector(getAppLanguage)
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
     dispatch(updateConfigValue('language.appLanguage', event.target.value))
+    trackEventWithRobotSerial({
+      name: ANALYTICS_LANGUAGE_UPDATED_ODD_SETTINGS,
+      properties: {
+        language: event.target.value,
+        transactionId,
+      },
+    })
   }
 
   return (

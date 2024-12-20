@@ -12,6 +12,7 @@ import {
   useTrackEvent,
   ANALYTICS_PROTOCOL_RUN_ACTION,
 } from '/app/redux/analytics'
+import { getAppLanguage } from '/app/redux/config'
 import { mockConnectableRobot } from '/app/redux/discovery/__fixtures__'
 import { useRobot } from '/app/redux-resources/robots'
 
@@ -23,6 +24,7 @@ vi.mock('../useProtocolRunAnalyticsData')
 vi.mock('/app/redux/discovery')
 vi.mock('/app/redux/pipettes')
 vi.mock('/app/redux/analytics')
+vi.mock('/app/redux/config')
 vi.mock('/app/redux/robot-settings')
 
 const RUN_ID = 'runId'
@@ -55,6 +57,7 @@ describe('useTrackProtocolRunEvent hook', () => {
     )
     vi.mocked(useRobot).mockReturnValue(mockConnectableRobot)
     vi.mocked(useTrackEvent).mockReturnValue(mockTrackEvent)
+    vi.mocked(getAppLanguage).mockReturnValue('en-US')
 
     when(vi.mocked(useProtocolRunAnalyticsData))
       .calledWith(RUN_ID, mockConnectableRobot)
@@ -88,7 +91,11 @@ describe('useTrackProtocolRunEvent hook', () => {
     )
     expect(mockTrackEvent).toHaveBeenCalledWith({
       name: ANALYTICS_PROTOCOL_RUN_ACTION.START,
-      properties: { ...PROTOCOL_PROPERTIES, transactionId: RUN_ID },
+      properties: {
+        ...PROTOCOL_PROPERTIES,
+        transactionId: RUN_ID,
+        appLanguage: 'en-US',
+      },
     })
   })
 
