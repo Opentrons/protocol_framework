@@ -9,7 +9,6 @@ from opentrons.hardware_control.modules import AbsorbanceReader
 from opentrons.protocol_engine import ModuleModel, DeckSlotLocation
 
 from opentrons.protocol_engine.execution import EquipmentHandler, LabwareMovementHandler
-from opentrons.protocol_engine.resources import FileProvider
 from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.state.module_substates import (
@@ -24,15 +23,21 @@ from opentrons.protocol_engine.commands.absorbance_reader import (
 from opentrons.protocol_engine.commands.absorbance_reader.open_lid import (
     OpenLidImpl,
 )
-from opentrons.protocol_engine.types import LabwareMovementOffsetData
+from opentrons.protocol_engine.types import (
+    LabwareMovementOffsetData,
+    LabwareOffsetVector,
+)
 from opentrons.types import DeckSlotName
-from opentrons_shared_data.labware import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import (
+    LabwareDefinition,
+    Parameters,
+)
 
 
 @pytest.fixture
 def absorbance_def() -> LabwareDefinition:
     """Get a tip rack Pydantic model definition value object."""
-    return LabwareDefinition.construct(  # type: ignore[call-arg]
+    return LabwareDefinition.construct(
         namespace="test",
         version=1,
         parameters=Parameters.construct(  # type: ignore[call-arg]
@@ -102,7 +107,12 @@ async def test_absorbance_reader_implementation(
             labware_definition=absorbance_def,
             slot_name=None,
         )
-    ).then_return(LabwareMovementOffsetData(å))
+    ).then_return(
+        LabwareMovementOffsetData(
+            pickUpOffset=LabwareOffsetVector(x=0, y=0, z=0),
+            dropOffset=LabwareOffsetVector(x=0, y=0, z=0),
+        )
+    )
 
     result = await subject.execute(params=params)
 
