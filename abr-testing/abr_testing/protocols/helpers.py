@@ -20,6 +20,7 @@ from opentrons.hardware_control.modules.types import ThermocyclerStep
 from opentrons_shared_data.errors.exceptions import PipetteLiquidNotFoundError
 
 import traceback
+
 # FUNCTIONS FOR LOADING COMMON CONFIGURATIONS
 
 
@@ -626,7 +627,7 @@ def move_labware_to_destination(
         z = 16
     offsets = {"x": x, "y": y, "z": z}
     print(f"OFFSETS: {offsets}")
-    print(f'LABWARE: {labware}')
+    print(f"LABWARE: {labware}")
     print(f"DESTINATION: {dest}")
     if isinstance(dest, str):
         try:
@@ -644,16 +645,16 @@ def move_labware_to_destination(
     if isinstance(dest, Labware):
         SEARCHING = True
         try:
-            print('FINDING DESTINATION LABWARE LOCATION...')
+            print("FINDING DESTINATION LABWARE LOCATION...")
             labware_location = dest.parent
             while SEARCHING:
                 if len(str(labware_location)) > 2:
-                    print('Need to get parent')
-                    labware_location = labware_location.parent
+                    print("Need to get parent")
+                    labware_location = labware_location.parent  # type: ignore
                 else:
                     break
-            print(f'Location: {labware_location}')
-            if labware_location[1] == "4":
+            print(f"Location: {labware_location}")
+            if str(labware_location)[1] == "4":
                 protocol.move_labware(
                     labware=labware,
                     new_location=dest,
