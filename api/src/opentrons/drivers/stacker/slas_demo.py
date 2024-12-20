@@ -5,7 +5,7 @@ from typing import Optional, List
 metadata = {"protocolName": "Flex Stacker SLAS Demo"}
 requirements = {"robotType": "Flex", "apiLevel": "2.17"}
 
-CYCLES = 1
+CYCLES = 100
 
 
 class StackerModule:
