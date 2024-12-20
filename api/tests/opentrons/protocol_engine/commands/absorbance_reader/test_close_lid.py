@@ -7,6 +7,7 @@ from opentrons.drivers.types import (
 )
 from opentrons.hardware_control.modules import AbsorbanceReader
 from opentrons.protocol_engine import ModuleModel, DeckSlotLocation
+from opentrons.protocol_engine.errors import CannotPerformModuleAction
 
 from opentrons.protocol_engine.execution import EquipmentHandler, LabwareMovementHandler
 from opentrons.protocol_engine.state import update_types
@@ -47,23 +48,31 @@ def absorbance_def() -> LabwareDefinition:
     )
 
 
+@pytest.fixture
+def subject(
+    state_view: StateView,
+    equipment: EquipmentHandler,
+    labware_movement: LabwareMovementHandler,
+) -> CloseLidImpl:
+    """Subject fixture."""
+    return CloseLidImpl(
+        state_view=state_view, equipment=equipment, labware_movement=labware_movement
+    )
+
+
 @pytest.mark.parametrize(
     "hardware_lid_status",
     (AbsorbanceReaderLidStatus.ON, AbsorbanceReaderLidStatus.OFF),
 )
-async def test_absorbance_reader_implementation(
+async def test_absorbance_reader_close_lid_implementation(
     decoy: Decoy,
+    subject: CloseLidImpl,
     state_view: StateView,
     equipment: EquipmentHandler,
-    labware_movement: LabwareMovementHandler,
     hardware_lid_status: AbsorbanceReaderLidStatus,
     absorbance_def: LabwareDefinition,
 ) -> None:
-    """It should validate, find hardware module if not virtualized, and disengage."""
-    subject = CloseLidImpl(
-        state_view=state_view, equipment=equipment, labware_movement=labware_movement
-    )
-
+    """It should validate, find hardware module if not virtualized, and close lid."""
     params = CloseLidParams(
         moduleId="unverified-module-id",
     )
@@ -129,3 +138,25 @@ async def test_absorbance_reader_implementation(
             ),
         ),
     )
+
+
+async def test_close_lid_raises_no_module(decoy: Decoy, state_view: StateView, equipment: EquipmentHandler, subject: CloseLidImpl) -> None:
+    """Should raise an error that the hardware module not found."""
+    params = CloseLidParams(
+        moduleId="unverified-module-id",
+    )
+
+    mabsorbance_module_substate = decoy.mock(cls=AbsorbanceReaderSubState)
+    verified_module_id = AbsorbanceReaderId("module-id")
+
+    decoy.when(
+        state_view.modules.get_absorbance_reader_substate("unverified-module-id")
+    ).then_return(mabsorbance_module_substate)
+
+    decoy.when(mabsorbance_module_substate.module_id).then_return(verified_module_id)
+
+    decoy.when(equipment.get_module_hardware_api(verified_module_id)).then_return(
+        None
+    )
+    with pytest.raises(CannotPerformModuleAction):
+        await subject.execute(params=params)
