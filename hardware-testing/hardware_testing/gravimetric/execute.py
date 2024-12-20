@@ -275,23 +275,22 @@ def _run_trial(
         trial.trial,
         trial.blank,
     )
-    pip_size = 50 if "50" in trial.pipette.name else 1000
     liquid_class = get_liquid_class(
         trial.cfg.liquid,
         trial.cfg.dilution,
-        pip_size,
+        int(trial.pipette.max_volume),
         trial.pipette.channels,
         trial.tip_volume,
         trial.volume,
     )
-    if trial.cfg.interactive and not trial.blank:
+    if trial.cfg.interactive:
         liquid_class = interactively_build_liquid_class(liquid_class)
         # store it, so that next loop we don't have to think so much
         set_liquid_class(
             liquid_class,
             trial.cfg.liquid,
             trial.cfg.dilution,
-            pip_size,
+            int(trial.pipette.max_volume),
             trial.pipette.channels,
             trial.tip_volume,
             trial.volume,

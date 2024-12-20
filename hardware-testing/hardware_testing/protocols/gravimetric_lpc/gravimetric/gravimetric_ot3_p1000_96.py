@@ -3,7 +3,7 @@ from opentrons.protocol_api import ProtocolContext
 from opentrons.protocol_api._types import OffDeckType
 
 metadata = {"protocolName": "gravimetric-ot3-p1000-96"}
-requirements = {"robotType": "Flex", "apiLevel": "2.20"}
+requirements = {"robotType": "Flex", "apiLevel": "2.22"}  # NOTE: apiLevel is ignored by script
 
 SLOT_SCALE = 4
 SLOTS_TIPRACK = {

@@ -47,9 +47,13 @@ from .trial import TestResources, _change_pipettes
 from .tips import get_tips
 from hardware_testing.drivers import asair_sensor
 from opentrons.protocol_api import InstrumentContext
+from opentrons.protocols.api_support.definitions import MAX_SUPPORTED_VERSION
 from opentrons.protocol_engine.types import LabwareOffset
 
-API_LEVEL = "2.20"
+
+# NOTE: specific tags/branches can be tied to specific versions,
+#       however for CI this should remain as latest API
+API_LEVEL = str(MAX_SUPPORTED_VERSION)
 
 LABWARE_OFFSETS: List[LabwareOffset] = []
 

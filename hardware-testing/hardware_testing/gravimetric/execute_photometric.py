@@ -162,15 +162,10 @@ def _run_trial(trial: PhotometricTrial) -> None:
         on_blowing_out=_no_op,
         on_exiting=_no_op,
     )
-    pip_size = 0
-    for vol in [50, 200, 1000]:
-        if str(vol) in trial.pipette.name:
-            pip_size = vol
-    assert pip_size > 0
     liquid_class = get_liquid_class(
         trial.cfg.liquid,
         trial.cfg.dilution,
-        pip_size,
+        int(trial.pipette.max_volume),
         trial.pipette.channels,
         trial.tip_volume,
         trial.volume,
@@ -182,7 +177,7 @@ def _run_trial(trial: PhotometricTrial) -> None:
             liquid_class,
             trial.cfg.liquid,
             trial.cfg.dilution,
-            pip_size,
+            int(trial.pipette.max_volume),
             trial.pipette.channels,
             trial.tip_volume,
             trial.volume,
