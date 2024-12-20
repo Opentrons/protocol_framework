@@ -1371,7 +1371,6 @@ class OT3API(
         ):
             await self.retract(OT3Mount.GRIPPER, 10)
             await self.disengage_axes([Axis.Z_G])
-            await self.idle_gripper()
 
         # if 96-channel pipette is attached and not being moved, it should retract
         if (
@@ -1590,14 +1589,7 @@ class OT3API(
         # we can move to safe home distance!
         if encoder_ok and motor_ok:
             origin, target_pos = await self._retrieve_home_position(axis)
-            if Axis.to_kind(axis) == OT3AxisKind.Z:
-                axis_home_dist = self._config.safe_home_distance
-            else:
-                # FIXME: (AA 2/15/23) This is a temporary workaround because of
-                # XY encoder inaccuracy. Otherwise, we should be able to use
-                # 5.0 mm for all axes.
-                # Move to 20 mm away from the home position and then home
-                axis_home_dist = 20.0
+            axis_home_dist = self._config.safe_home_distance
             if origin[axis] - target_pos[axis] > axis_home_dist:
                 target_pos[axis] += axis_home_dist
                 await self._backend.move(

@@ -157,8 +157,6 @@ class LabwareMovementHandler:
 
         gripper_mount = OT3Mount.GRIPPER
 
-        # Retract all mounts
-        await ot3api.home(axes=[Axis.Z_L, Axis.Z_R, Axis.Z_G])
         gripper_homed_position = await ot3api.gantry_position(mount=gripper_mount)
 
         # todo(mm, 2024-11-07): We should do this collision checking even when we
@@ -240,9 +238,6 @@ class LabwareMovementHandler:
                 await ot3api.move_to(
                     mount=gripper_mount, abs_position=waypoint_data.position
                 )
-
-            # this makes sure gripper jaw is closed between two move labware calls
-            await ot3api.idle_gripper()
 
     async def ensure_movement_not_obstructed_by_module(
         self, labware_id: str, new_location: LabwareLocation

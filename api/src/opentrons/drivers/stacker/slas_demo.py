@@ -5,11 +5,7 @@ from typing import Optional, List
 metadata = {"protocolName": "Flex Stacker SLAS Demo"}
 requirements = {"robotType": "Flex", "apiLevel": "2.17"}
 
-CYCLES = 1000
-STACKER_HEIGHT = 30
-TRASH_HEIGHT = 50
-SEAL_HEIGHT = 9
-LID_FIXTURE_HEIGHT = 1
+CYCLES = 1
 
 
 class StackerModule:
@@ -94,31 +90,32 @@ def run(protocol: ProtocolContext) -> None:
     # MagBlock in D2
     magnetic_block = protocol.load_module("magneticBlockV1", "D2")
 
-    """Unload and move tipracks"""
-    tipracks: List[Labware] = []
-    for adapter in tiprack_adapters:
-        tiprack = tiprack_stacker.unload_and_move_labware(adapter)
-        tipracks.append(tiprack)
+    for _ in range(CYCLES):
+        """Unload and move tipracks"""
+        tipracks: List[Labware] = []
+        for adapter in tiprack_adapters:
+            tiprack = tiprack_stacker.unload_and_move_labware(adapter)
+            tipracks.append(tiprack)
 
-    """Unload and move plate"""
-    plates: List[Labware] = []
-    plate_dests = ["C2", magnetic_block, thermocycler]
-    for dest in plate_dests:
-        plate = plate_stacker.unload_and_move_labware(dest)
-        plates.append(plate)
+        """Unload and move plate"""
+        plates: List[Labware] = []
+        plate_dests = ["C2", magnetic_block, thermocycler]
+        for dest in plate_dests:
+            plate = plate_stacker.unload_and_move_labware(dest)
+            plates.append(plate)
 
-    """Move disposable lid on thermocycler plate"""
-    protocol.move_labware(lids[-1], plates[-1], use_gripper=True)
+        """Move disposable lid on thermocycler plate"""
+        protocol.move_labware(lids[-1], plates[-1], use_gripper=True)
 
-    """Remove disposable lid from thermocycler plate"""
-    protocol.move_labware(lids[-1], lids[-2], use_gripper=True)
+        """Remove disposable lid from thermocycler plate"""
+        protocol.move_labware(lids[-1], lids[-2], use_gripper=True)
 
-    """Store plates in stacker"""
-    plates.reverse()
-    for plate in plates:
-        plate_stacker.move_and_store_labware(plate)
+        """Store plates in stacker"""
+        plates.reverse()
+        for plate in plates:
+            plate_stacker.move_and_store_labware(plate)
 
-    """Store tipracks in stacker"""
-    tipracks.reverse()
-    for tiprack in tipracks:
-        tiprack_stacker.move_and_store_labware(tiprack)
+        """Store tipracks in stacker"""
+        tipracks.reverse()
+        for tiprack in tipracks:
+            tiprack_stacker.move_and_store_labware(tiprack)

@@ -185,6 +185,7 @@ push-no-restart-ot3: sdist
 	ssh $(ssh_helper) root@$(host) "mount -o remount,rw / && mkdir -p /usr/local/bin"
 	scp $(ssh_helper) ./src/opentrons/hardware_control/scripts/ot3repl root@$(host):/usr/local/bin/
 	scp $(ssh_helper) ./src/opentrons/hardware_control/scripts/ot3gripper root@$(host):/usr/local/bin/
+	scp $(ssh_helper) ./src/opentrons/drivers/stacker/slas_demo root@$(host):/usr/local/bin/
 	ssh $(ssh_helper) root@$(host) "mount -o remount,ro /"
 
 .PHONY: push-ot3
