@@ -211,6 +211,7 @@ export const reduxActionToAnalyticsEvent = (
                 stepArgModified.aspirateFlowRateUlSec ?? DEFAULT_VALUE,
               dispenseFlowRate:
                 stepArgModified.dispenseFlowRateUlSec ?? DEFAULT_VALUE,
+              blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
               aspirateOffsetFromBottomMm:
                 stepArgModified.aspirateOffsetFromBottomMm ===
                 DEFAULT_MM_FROM_BOTTOM_ASPIRATE
