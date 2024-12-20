@@ -79,7 +79,7 @@ async def main(module: str) -> None:
     """Select test to be run."""
     # Select test to run
     # Set directory for tests
-    BASE_DIRECTORY = "\\userfs\\data\\testing_data\\"
+    BASE_DIRECTORY = "/userfs/data/testing_data/"
     if not os.path.exists(BASE_DIRECTORY):
         os.makedirs(BASE_DIRECTORY)
     tests = modules[module]
@@ -89,7 +89,7 @@ async def main(module: str) -> None:
     selected_test = int(input("Please select a test: "))
     try:
         function, description = tests[list(tests.keys())[selected_test]]
-        test_dir = BASE_DIRECTORY + f"{module}\\test{list(tests.keys())[selected_test]}"
+        test_dir = BASE_DIRECTORY + f"{module}/test{list(tests.keys())[selected_test]}"
         print(f"{i}, {description}")
         output_file = os.path.join(test_dir, "results.txt")
         print(f"PATH: {output_file} ")
