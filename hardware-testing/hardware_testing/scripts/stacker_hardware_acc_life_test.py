@@ -62,6 +62,7 @@ class Stacker_Axis_Acc_Lifetime_Test:
     async def stacker_setup(self):
         for i in range(self.num_stacker):
             self.stackers.append(flex_stacker_driver.FlexStacker(None).create(self.serial_port_name+str(i+1)))
+            self.stackers[i].setup_stall_detection()
 
     async def gripper_setup(self):
         await self.api.cache_instruments()
