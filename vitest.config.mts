@@ -13,7 +13,8 @@ export default mergeConfig(
       environment: 'jsdom',
       allowOnly: true,
       exclude: [...configDefaults.exclude, '**/node_modules/**', '**/dist/**'],
-      setupFiles: ['./setup-vitest.ts'],
+      setupFiles: ['./setup-vitest.mts'],
+      coverage: { provider: 'v8', reporter: ['text', 'json', 'html'] },
     },
     resolve: {
       alias: {
