@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import styled from 'styled-components'
 import {
   Box,
+  COLORS,
   DIRECTION_COLUMN,
   DISPLAY_FLEX,
   Flex,
@@ -17,6 +18,8 @@ interface DraggableSidebarProps {
   setTargetWidth: (width: number) => void
 }
 
+// Note (kk:2024/12/20 the designer will revisit responsive sidebar design in 2025
+// we will need to update the details to align with the updated design
 export function DraggableSidebar({
   setTargetWidth,
 }: DraggableSidebarProps): JSX.Element {
@@ -93,7 +96,7 @@ interface SidebarResizerProps {
 
 const SidebarResizer = styled(Flex)<SidebarResizerProps>`
   user-select: none;
-  width: 0.3125rem;
+  width: 2px;
   cursor: ew-resize;
   background-color: #ddd;
   position: absolute;
@@ -105,12 +108,12 @@ const SidebarResizer = styled(Flex)<SidebarResizerProps>`
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: blue; /* Hover state */
+    background-color: ${COLORS.blue50}; /* Hover state */
   }
 
   ${props =>
     props.dragging === true &&
     `
-    background-color: darkblue; /* Dragging state */
+    background-color: ${COLORS.blue55}; /* Dragging state */
   `}
 `
