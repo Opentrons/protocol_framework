@@ -2,7 +2,7 @@ import type * as React from 'react'
 import { createStore } from 'redux'
 import { Provider } from 'react-redux'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import { vi, it, expect, describe, beforeEach, afterEach } from 'vitest'
+import { vi, it, expect, describe, beforeEach } from 'vitest'
 import { when } from 'vitest-when'
 import { waitFor, renderHook } from '@testing-library/react'
 
@@ -63,10 +63,6 @@ describe('useTrackProtocolRunEvent hook', () => {
       })
   })
 
-  afterEach(() => {
-    vi.resetAllMocks()
-  })
-
   it('returns trackProtocolRunEvent function', () => {
     const { result } = renderHook(
       () => useTrackProtocolRunEvent(RUN_ID, ROBOT_NAME),
@@ -92,7 +88,7 @@ describe('useTrackProtocolRunEvent hook', () => {
     )
     expect(mockTrackEvent).toHaveBeenCalledWith({
       name: ANALYTICS_PROTOCOL_RUN_ACTION.START,
-      properties: PROTOCOL_PROPERTIES,
+      properties: { ...PROTOCOL_PROPERTIES, transactionId: RUN_ID },
     })
   })
 

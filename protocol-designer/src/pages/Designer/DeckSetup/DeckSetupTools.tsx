@@ -52,11 +52,8 @@ import { selectors } from '../../../labware-ingred/selectors'
 import { useKitchen } from '../../../organisms/Kitchen/hooks'
 import { getDismissedHints } from '../../../tutorial/selectors'
 import { createContainerAboveModule } from '../../../step-forms/actions/thunks'
-import {
-  ConfirmDeleteStagingAreaModal,
-  PROTOCOL_NAV_BAR_HEIGHT_REM,
-} from '../../../organisms'
-import { BUTTON_LINK_STYLE } from '../../../atoms'
+import { BUTTON_LINK_STYLE, NAV_BAR_HEIGHT_REM } from '../../../atoms'
+import { ConfirmDeleteStagingAreaModal } from '../../../organisms'
 import { getSlotInformation } from '../utils'
 import { ALL_ORDERED_CATEGORIES, FIXTURES, MOAM_MODELS } from './constants'
 import { LabwareTools } from './LabwareTools'
@@ -371,7 +368,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     position === POSITION_FIXED
       ? {
           right: SPACING.spacing12,
-          top: `calc(${PROTOCOL_NAV_BAR_HEIGHT_REM}rem + ${SPACING.spacing12})`,
+          top: `calc(${NAV_BAR_HEIGHT_REM}rem + ${SPACING.spacing12})`,
         }
       : {}
   return (
@@ -398,7 +395,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       ) : null}
       {changeModuleWarning}
       <Toolbox
-        height={`calc(100vh - ${PROTOCOL_NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
+        height={`calc(100vh - ${NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
         width={`${DECK_SETUP_TOOLS_WIDTH_REM}rem`}
         position={position}
         {...positionStyles}

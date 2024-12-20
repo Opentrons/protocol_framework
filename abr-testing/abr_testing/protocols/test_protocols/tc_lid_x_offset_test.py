@@ -23,8 +23,8 @@ def add_parameters(parameters: ParameterContext) -> None:
         default=5,
     )
     parameters.add_float(
-        variable_name="x_offset",
-        display_name="X Offset",
+        variable_name="offset",
+        display_name="Z Offset",
         choices=[
             {"display_name": "0.0", "value": 0.0},
             {"display_name": "0.1", "value": 0.1},
@@ -62,10 +62,10 @@ def run(protocol: ProtocolContext) -> None:
     """Runs protocol that moves lids and stacks them."""
     # Load Parameters
     lids_in_stack = protocol.params.lids_in_a_stack  # type: ignore[attr-defined]
-    x_offset = protocol.params.x_offset  # type: ignore[attr-defined]
+    offset = protocol.params.offset  # type: ignore[attr-defined]
     negative = protocol.params.negative  # type: ignore[attr-defined]
     if negative:
-        x_offset = x_offset * -1
+        offset = offset * -1
     # Thermocycler
     thermocycler: ThermocyclerContext = protocol.load_module(
         "thermocyclerModuleV2"
@@ -81,16 +81,16 @@ def run(protocol: ProtocolContext) -> None:
     lid_stack_4 = helpers.load_disposable_lids(protocol, lids_in_stack, ["C3"])
     lid_stack_5 = helpers.load_disposable_lids(protocol, lids_in_stack, ["B3"])
 
-    drop_offset = {"x": x_offset, "y": 0, "z": 0}
+    pickup_offset = {"x": 0, "y": 0, "z": offset}
     slot = 0
     lids = [lid_stack_1, lid_stack_2, lid_stack_3, lid_stack_4, lid_stack_5]
     for lid_list in lids:
         lid_to_move = lid_list[0]
 
         lid_to_move_back_to = lid_list[1]
-        protocol.comment(f"Offset {x_offset}, Lid # {slot+1}")
+        protocol.comment(f"Offset {offset}, Lid # {slot+1}")
         # move lid to plate in thermocycler
         protocol.move_labware(
-            lid_to_move, plate_in_cycler, use_gripper=True, drop_offset=drop_offset
+            lid_to_move, plate_in_cycler, use_gripper=True, pick_up_offset=pickup_offset
         )
         protocol.move_labware(lid_to_move, lid_to_move_back_to, use_gripper=True)
