@@ -2,7 +2,7 @@
 from typing import Annotated, Optional, Dict, List, cast
 
 from fastapi import status, Depends
-from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import FastBuildRouter
 
 from opentrons.hardware_control.instruments.ot3.instrument_calibration import (
     PipetteOffsetSummary,

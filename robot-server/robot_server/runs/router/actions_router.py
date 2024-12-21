@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Annotated, Literal, Union
 
 from fastapi import Depends, status
-from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import FastBuildRouter
 
 from robot_server.errors.error_responses import ErrorDetails, ErrorBody
 from robot_server.service.dependencies import get_current_time, get_unique_id

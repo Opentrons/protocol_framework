@@ -1,5 +1,5 @@
 """Runs router."""
-from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import FastBuildRouter
 
 from .base_router import base_router
 from .commands_router import commands_router

@@ -2,7 +2,7 @@
 from typing import Annotated, TYPE_CHECKING
 
 from fastapi import status, Depends
-from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import FastBuildRouter
 
 from opentrons_shared_data.robot.types import RobotType
 from opentrons_shared_data.robot.types import RobotTypeEnum

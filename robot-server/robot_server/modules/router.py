@@ -2,7 +2,7 @@
 from typing import Annotated, List, Dict
 
 from fastapi import Depends, status
-from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import FastBuildRouter
 
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.hardware_control.modules import module_calibration

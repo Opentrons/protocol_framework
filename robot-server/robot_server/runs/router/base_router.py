@@ -10,7 +10,7 @@ from typing import Annotated, Callable, Final, Literal, Optional, Union
 
 from fastapi import Depends, status, Query
 from pydantic import BaseModel, Field
-from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import FastBuildRouter
 
 
 from opentrons_shared_data.errors import ErrorCodes

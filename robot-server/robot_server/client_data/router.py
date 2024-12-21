@@ -4,7 +4,7 @@ import textwrap
 from typing import Annotated, Literal
 
 import fastapi
-from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import FastBuildRouter
 
 from robot_server.client_data.store import (
     ClientData,

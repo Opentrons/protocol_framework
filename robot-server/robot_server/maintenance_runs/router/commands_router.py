@@ -4,7 +4,7 @@ from typing import Annotated, Optional, Union
 from typing_extensions import Final, Literal
 
 from fastapi import Depends, Query, status
-from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import FastBuildRouter
 
 from opentrons.protocol_engine import (
     CommandPointer,

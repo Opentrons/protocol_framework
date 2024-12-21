@@ -1,4 +1,4 @@
-"""See the `FastBuildRouter` class."""
+"""See the `LightRouter` class."""
 
 from __future__ import annotations
 
@@ -64,12 +64,12 @@ else:
         pass
 
 
-class FastBuildRouter(_FastAPIRouteMethods):
-    """An optimized drop-in replacement for `fastapi.APIRouter`.
+class LightRouter(_FastAPIRouteMethods):
+    """A lightweight drop-in replacement for `fastapi.APIRouter`.
 
     Use it like `fastapi.APIRouter`:
 
-        foo_router = FastBuildRouter()
+        foo_router = LightRouter()
 
         @router.get("/foo/{id}")
         def get_health(id: str) -> Response:
@@ -77,7 +77,7 @@ class FastBuildRouter(_FastAPIRouteMethods):
 
         bar_router = ...
 
-        root_router = FastBuildRouter()
+        root_router = LightRouter()
         root_router.include_router(foo_router)
         root_router.include_router(bar_router)
 
@@ -118,7 +118,7 @@ class FastBuildRouter(_FastAPIRouteMethods):
 
     def include_router(
         self,
-        router: FastBuildRouter | fastapi.APIRouter,
+        router: LightRouter | fastapi.APIRouter,
         **kwargs: typing_extensions.Unpack[_RouterIncludeKwargs],
     ) -> None:
         """The optimized version of `fastapi.APIRouter.include_router()`.
@@ -142,7 +142,7 @@ class FastBuildRouter(_FastAPIRouteMethods):
                 combined_kwargs = _merge_kwargs(kwargs, route.inclusion_kwargs)
                 if isinstance(router, fastapi.APIRouter):
                     app.include_router(router, **combined_kwargs)
-                elif isinstance(route.router, FastBuildRouter):
+                elif isinstance(route.router, LightRouter):
                     router.install_on_app(app, **combined_kwargs)
             else:
                 typing_extensions.assert_type(route, _Endpoint)
@@ -237,7 +237,7 @@ def _merge_kwargs(
 
 @dataclasses.dataclass
 class _IncludedRouter:
-    router: fastapi.APIRouter | FastBuildRouter
+    router: fastapi.APIRouter | LightRouter
     inclusion_kwargs: _RouterIncludeKwargs
 
 

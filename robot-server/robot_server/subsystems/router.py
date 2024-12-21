@@ -6,7 +6,7 @@ from typing import Annotated, Optional, TYPE_CHECKING
 from fastapi import status, Depends, Response, Request
 from typing_extensions import Literal
 
-from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import FastBuildRouter
 
 from robot_server.service.json_api import (
     SimpleMultiBody,

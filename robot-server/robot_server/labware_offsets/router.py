@@ -6,7 +6,7 @@ import textwrap
 from typing import Annotated, Literal
 
 import fastapi
-from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import FastBuildRouter
 
 from opentrons.protocol_engine import LabwareOffset, LabwareOffsetCreate, ModuleModel
 from opentrons.types import DeckSlotName

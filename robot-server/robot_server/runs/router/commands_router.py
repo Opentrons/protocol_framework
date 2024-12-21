@@ -3,7 +3,7 @@ import textwrap
 from typing import Annotated, Final, Literal, Optional, Union
 
 from fastapi import Depends, Query, status
-from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import FastBuildRouter
 
 from opentrons.protocol_engine import (
     CommandPointer,

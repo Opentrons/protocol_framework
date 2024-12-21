@@ -1,6 +1,6 @@
 """Application routes."""
 from fastapi import Depends, status
-from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import FastBuildRouter
 
 
 from .constants import V1_TAG

@@ -6,7 +6,7 @@ from typing import Annotated, Optional, Literal, Union
 
 from fastapi import UploadFile, File, Form, Depends, Response, status
 from opentrons.protocol_reader import FileHasher, FileReaderWriter
-from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import FastBuildRouter
 
 from robot_server.service.json_api import (
     SimpleBody,
