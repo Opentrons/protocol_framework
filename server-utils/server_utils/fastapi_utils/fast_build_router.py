@@ -2,32 +2,10 @@ from __future__ import annotations
 
 import dataclasses
 import enum
-import functools
 import typing
 import typing_extensions
 
 import fastapi
-
-
-# Annotations for a decorator that takes a function as input and returns the same function as output.
-_PassThroughDecoratorParamSpec = typing.ParamSpec("_PassThroughDecoratorParamSpec")
-_PassThroughDecoratorReturnT = typing.TypeVar("_PassThroughDecoratorReturnT")
-
-
-class _PassThroughDecorator(typing.Protocol):
-    """Describes a decorator that takes a function as input and passes it along as output.
-
-    (This is how function decorators normally work.)
-    """
-
-    def __call__(
-        self,
-        function_input: typing.Callable[
-            _PassThroughDecoratorParamSpec, _PassThroughDecoratorReturnT
-        ],
-        /,
-    ) -> typing.Callable[_PassThroughDecoratorParamSpec, _PassThroughDecoratorReturnT]:
-        ...
 
 
 _FASTAPI_ROUTE_METHOD_NAMES = {
@@ -50,13 +28,15 @@ if typing.TYPE_CHECKING:
     _P = typing.ParamSpec("_P")
     _ReturnT = typing.TypeVar("_ReturnT")
 
-    class _MethodMimic(typing.Generic[_P, _ReturnT]):
+    # `_SomethingCallableLike(FastAPI.foo)` produces a callable with the same signature
+    # as `FastAPI.foo()`.
+    class _SomethingCallableLike(typing.Generic[_P, _ReturnT]):
         def __init__(
             self,
             method_to_mimic: typing.Callable[
                 typing.Concatenate[
-                    fastapi.FastAPI,  # The `self` parameter.
-                    _P,  # The actual args and kwargs.
+                    fastapi.FastAPI,  # The `self` parameter, which we throw away.
+                    _P,  # The actual args and kwargs, which we preserve.
                 ],
                 _ReturnT,
             ],
@@ -67,14 +47,14 @@ if typing.TYPE_CHECKING:
             raise NotImplementedError("This is only for type-checking, not runtime.")
 
     class _FastAPIRouteMethods:
-        get: typing.Final = _MethodMimic(fastapi.FastAPI.get)
-        put: typing.Final = _MethodMimic(fastapi.FastAPI.put)
-        post: typing.Final = _MethodMimic(fastapi.FastAPI.post)
-        delete: typing.Final = _MethodMimic(fastapi.FastAPI.delete)
-        options: typing.Final = _MethodMimic(fastapi.FastAPI.options)
-        head: typing.Final = _MethodMimic(fastapi.FastAPI.head)
-        patch: typing.Final = _MethodMimic(fastapi.FastAPI.patch)
-        trace: typing.Final = _MethodMimic(fastapi.FastAPI.trace)
+        get: typing.Final = _SomethingCallableLike(fastapi.FastAPI.get)
+        put: typing.Final = _SomethingCallableLike(fastapi.FastAPI.put)
+        post: typing.Final = _SomethingCallableLike(fastapi.FastAPI.post)
+        delete: typing.Final = _SomethingCallableLike(fastapi.FastAPI.delete)
+        options: typing.Final = _SomethingCallableLike(fastapi.FastAPI.options)
+        head: typing.Final = _SomethingCallableLike(fastapi.FastAPI.head)
+        patch: typing.Final = _SomethingCallableLike(fastapi.FastAPI.patch)
+        trace: typing.Final = _SomethingCallableLike(fastapi.FastAPI.trace)
 
 else:
 
@@ -128,16 +108,14 @@ class FastBuildRouter(_FastAPIRouteMethods):
         for route in self._routes:
             if isinstance(route, _IncludedRouter):
                 router = route.router
-                combined_kwargs = _inherit_include_kwargs(
-                    kwargs, route.inclusion_kwargs
-                )
+                combined_kwargs = _merge_kwargs(kwargs, route.inclusion_kwargs)
                 if isinstance(router, fastapi.APIRouter):
                     app.include_router(router, **combined_kwargs)
                 elif isinstance(route.router, FastBuildRouter):
                     router.install_on_app(app, **combined_kwargs)
             else:
                 typing_extensions.assert_type(route, _Endpoint)
-                combined_kwargs = _inherit_include_kwargs(kwargs, route.kwargs)
+                combined_kwargs = _merge_kwargs(kwargs, route.kwargs)
                 fastapi_method = getattr(app, route.method_name)
                 fastapi_decorator = fastapi_method(*route.args, **combined_kwargs)
                 fastapi_decorator(route.function)
@@ -147,12 +125,10 @@ class _RouterIncludeKwargs(typing.TypedDict):
     """The keyword arguments of `fastapi.APIRouter.include_router()`.
 
     (At least the ones that we care about, anyway.)
-
-    We do this because we need to get at these variables, e.g. Depends[] is supposed to be
-    accumulated
     """
 
-    # Arguments with defaults should be noted as NotRequired
+    # Arguments with defaults should be annotated as `NotRequired`.
+    # For example, `foo: str | None = None` becomes `NotRequired[str | None]`.
     tags: typing_extensions.NotRequired[list[str | enum.Enum] | None]
     responses: typing_extensions.NotRequired[
         dict[int | str, dict[str, typing.Any]] | None
@@ -167,38 +143,71 @@ class _RouterIncludeKwargs(typing.TypedDict):
     ]
 
 
-def _inherit_include_kwargs(
-    a: _RouterIncludeKwargs, b: _RouterIncludeKwargs
+def _merge_kwargs(
+    from_parent: _RouterIncludeKwargs, from_child: _RouterIncludeKwargs
 ) -> _RouterIncludeKwargs:
-    a = a.copy()
-    b = b.copy()
+    """Merge kwargs from different levels of a FastAPI router tree.
 
-    result: _RouterIncludeKwargs = {}
-    if "tags" in a or "tags" in b:
-        result["tags"] = [*(a.get("tags") or []), *(b.get("tags") or [])]
-        a.pop("tags", None)
-        b.pop("tags", None)
+    FastAPI keyword arguments can be specified at multiple levels in the router tree.
+    For example, the top-level router, subrouters, and finally the endpoint function
+    can each specify their own `tags`. The different levels need to be merged
+    carefully and in argument-specific ways if we want to match FastAPI behavior.
+    For example, `tags` should be the concatenation of all levels.
+    """
+    merge_result: _RouterIncludeKwargs = {}
+    remaining_from_parent = from_parent.copy()
+    remaining_from_child = from_child.copy()
 
-    colliding_keys = set(a.keys()).intersection(b.keys())
-    if colliding_keys:
-        a_collisions: dict[object, object] = {k: a[k] for k in colliding_keys}
-        b_collisions: dict[object, object] = {k: b[k] for k in colliding_keys}
+    # When we know how to merge a specific argument's values, do so.
+    # This takes care to leave the argument unset if it's unset in both parent and
+    # child, in order to leave the defaulting up to FastAPI.
+    if "tags" in remaining_from_parent or "tags" in remaining_from_child:
+        merge_result["tags"] = [
+            *(remaining_from_parent.get("tags") or []),
+            *(remaining_from_child.get("tags") or []),
+        ]
+        remaining_from_parent.pop("tags", None)
+        remaining_from_child.pop("tags", None)
+
+    # For any argument whose values we don't know how to merge, we can just pass it
+    # along opaquely, as long as the parent and child aren't both trying to set it.
+    #
+    # If the parent and child *are* both trying to set it, then we have a problem.
+    # It would likely be wrong to arbitrarily choose one to override the other,
+    # so we can only raise an error.
+    colliding_keys = set(remaining_from_parent.keys()).intersection(
+        remaining_from_child.keys()
+    )
+    if not colliding_keys:
+        merge_result.update(remaining_from_parent)
+        merge_result.update(remaining_from_child)
+    else:
+        a_collisions: dict[object, object] = {
+            k: remaining_from_parent[k] for k in colliding_keys
+        }
+        b_collisions: dict[object, object] = {
+            k: remaining_from_child[k] for k in colliding_keys
+        }
         raise NotImplementedError(
-            f"These FastAPI keyword arguments appear at different levels"
-            f" in the route tree, and we don't know how to combine them:"
-            f" {a_collisions}, {b_collisions}"
+            f"These FastAPI keyword arguments appear at different levels "
+            f"in the router tree, and we don't know how to merge their values:\n"
+            f"{a_collisions}\n{b_collisions}\n"
+            f"Modify {__name__} to handle the merge, or avoid the problem by "
+            f"setting the argument at only one level of the router tree."
         )
 
-    result.update(a)
-    result.update(b)
-
-    return result
+    return merge_result
 
 
 @dataclasses.dataclass
 class _IncludedRouter:
     router: fastapi.APIRouter | FastBuildRouter
     inclusion_kwargs: _RouterIncludeKwargs
+
+
+DecoratedFunctionT = typing.TypeVar(
+    "DecoratedFunctionT", bound=typing.Callable[..., object]
+)
 
 
 class _EndpointCaptor:
@@ -223,13 +232,8 @@ class _EndpointCaptor:
 
     def __call__(
         self, *fastapi_decorator_args: object, **fastapi_decorator_kwargs: object
-    ) -> _PassThroughDecorator:
-        P = typing.ParamSpec("P")
-        T = typing.TypeVar("T")
-
-        def decorate(
-            decorated_function: typing.Callable[P, T]
-        ) -> typing.Callable[P, T]:
+    ) -> typing.Callable[[DecoratedFunctionT], DecoratedFunctionT]:
+        def decorate(decorated_function: DecoratedFunctionT) -> DecoratedFunctionT:
             self._on_capture(
                 _Endpoint(
                     method_name=self._method_name,
@@ -238,7 +242,6 @@ class _EndpointCaptor:
                     function=decorated_function,
                 )
             )
-
             return decorated_function
 
         return decorate
@@ -247,6 +250,16 @@ class _EndpointCaptor:
 @dataclasses.dataclass
 class _Endpoint:
     method_name: str
+    """The name of the method on the FastAPI class, e.g. "get"."""
+
     args: tuple[object, ...]
+    """The positional arguments passed to the FastAPI method, e.g. the URL path."""
+
     kwargs: dict[str, object]
+    """The keyword arguments passed to the FastAPI method, e.g. `description`."""
+
     function: typing.Callable[..., object]
+    """The function actually implementing the logic of the endpoint.
+
+    (The "path operation function", in FastAPI terms.)
+    """
