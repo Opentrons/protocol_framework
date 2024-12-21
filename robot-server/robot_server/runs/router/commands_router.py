@@ -3,6 +3,7 @@ import textwrap
 from typing import Annotated, Final, Literal, Optional, Union
 
 from fastapi import Depends, Query, status
+from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
 
 from opentrons.protocol_engine import (
     CommandPointer,
@@ -20,8 +21,6 @@ from robot_server.service.json_api import (
     RequestModel,
 )
 from robot_server.robot.control.dependencies import require_estop_in_good_state
-
-from robot_server.fast_build_router import FastBuildRouter
 
 from ..command_models import (
     CommandCollectionLinks,

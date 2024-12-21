@@ -1,12 +1,13 @@
 """Router for /maintenance_runs endpoints dealing with labware offsets and definitions."""
 from typing import Annotated
 import logging
+
 from fastapi import Depends, status
+from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
 
 from opentrons.protocol_engine import LabwareOffsetCreate, LabwareOffset
 from opentrons.protocols.models import LabwareDefinition
 
-from robot_server.fast_build_router import FastBuildRouter
 from robot_server.errors.error_responses import ErrorBody
 from robot_server.service.json_api import RequestModel, SimpleBody, PydanticResponse
 

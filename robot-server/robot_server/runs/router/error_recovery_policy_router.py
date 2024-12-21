@@ -5,8 +5,7 @@ from textwrap import dedent
 from typing import Annotated
 
 from fastapi import status, Depends
-
-from robot_server.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
 
 from robot_server.errors.error_responses import ErrorBody
 from robot_server.service.json_api.request import RequestModel

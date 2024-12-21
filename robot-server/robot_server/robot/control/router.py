@@ -1,10 +1,11 @@
 """Router for /robot/control endpoints."""
-from fastapi import status, Depends
 from typing import Annotated, TYPE_CHECKING
+
+from fastapi import status, Depends
+from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
 
 from opentrons_shared_data.robot.types import RobotType
 from opentrons_shared_data.robot.types import RobotTypeEnum
-from robot_server.fast_build_router import FastBuildRouter
 from robot_server.hardware import get_robot_type
 
 from robot_server.errors.error_responses import ErrorBody

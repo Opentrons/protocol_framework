@@ -10,12 +10,11 @@ from typing_extensions import Literal
 
 from fastapi import Depends, status
 from pydantic import BaseModel, Field
+from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
 
 from robot_server.errors.error_responses import ErrorDetails, ErrorBody
 from robot_server.service.dependencies import get_current_time, get_unique_id
 from robot_server.robot.control.dependencies import require_estop_in_good_state
-
-from robot_server.fast_build_router import FastBuildRouter
 
 from robot_server.service.json_api import (
     RequestModel,

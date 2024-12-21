@@ -6,10 +6,11 @@ import textwrap
 from typing import Annotated, Literal
 
 import fastapi
+from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+
 from opentrons.protocol_engine import LabwareOffset, LabwareOffsetCreate, ModuleModel
 from opentrons.types import DeckSlotName
 
-from robot_server.fast_build_router import FastBuildRouter
 from robot_server.labware_offsets.models import LabwareOffsetNotFound
 from robot_server.service.dependencies import get_current_time, get_unique_id
 from robot_server.service.json_api.request import RequestModel

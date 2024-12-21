@@ -2,13 +2,13 @@
 from typing import Annotated, Optional, Dict, List, cast
 
 from fastapi import status, Depends
+from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
 
 from opentrons.hardware_control.instruments.ot3.instrument_calibration import (
     PipetteOffsetSummary,
 )
 from opentrons.protocol_engine.errors import HardwareNotSupportedError
 
-from robot_server.fast_build_router import FastBuildRouter
 from robot_server.hardware import get_hardware
 from robot_server.service.json_api import (
     SimpleMultiBody,

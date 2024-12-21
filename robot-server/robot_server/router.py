@@ -1,7 +1,7 @@
 """Application routes."""
 from fastapi import Depends, status
+from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
 
-from robot_server.fast_build_router import FastBuildRouter
 
 from .constants import V1_TAG
 from .errors.error_responses import LegacyErrorResponse

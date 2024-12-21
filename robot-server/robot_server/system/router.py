@@ -6,7 +6,8 @@ Endpoints include:
 """
 from datetime import datetime
 
-from robot_server.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+
 from robot_server.service.json_api.resource_links import ResourceLinkKey, ResourceLink
 
 from .models import SystemTimeRequest, SystemTimeResponse, SystemTimeResponseAttributes

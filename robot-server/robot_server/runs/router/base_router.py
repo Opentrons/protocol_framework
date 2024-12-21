@@ -10,6 +10,8 @@ from typing import Annotated, Callable, Final, Literal, Optional, Union
 
 from fastapi import Depends, status, Query
 from pydantic import BaseModel, Field
+from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
+
 
 from opentrons_shared_data.errors import ErrorCodes
 from opentrons_shared_data.robot.types import RobotTypeEnum
@@ -22,8 +24,6 @@ from opentrons.protocol_engine.types import CSVRuntimeParamPaths, DeckSlotLocati
 from opentrons.protocol_engine import (
     errors as pe_errors,
 )
-
-from robot_server.fast_build_router import FastBuildRouter
 
 from robot_server.data_files.models import FileIdNotFound, FileIdNotFoundError
 from robot_server.data_files.dependencies import (

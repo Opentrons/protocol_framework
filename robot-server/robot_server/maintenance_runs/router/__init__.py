@@ -1,5 +1,5 @@
 """Maintenance Runs router."""
-from robot_server.fast_build_router import FastBuildRouter
+from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
 
 from .base_router import base_router
 

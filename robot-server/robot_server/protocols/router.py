@@ -25,6 +25,7 @@ from fastapi import (
 )
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
+from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
 
 from opentrons.protocol_reader import (
     ProtocolReader,
@@ -34,7 +35,6 @@ from opentrons.protocol_reader import (
 )
 from opentrons_shared_data.robot.types import RobotType
 
-from robot_server.fast_build_router import FastBuildRouter
 from robot_server.errors.error_responses import ErrorDetails, ErrorBody
 from robot_server.hardware import get_robot_type
 from robot_server.service.dependencies import get_unique_id, get_current_time

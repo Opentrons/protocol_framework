@@ -6,11 +6,11 @@ from typing import Annotated, Union
 
 import fastapi
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
+from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
 
 from opentrons_shared_data.deck.types import DeckDefinitionV5
 
 from robot_server.errors.error_responses import ErrorBody
-from robot_server.fast_build_router import FastBuildRouter
 from robot_server.hardware import get_deck_definition
 from robot_server.service.dependencies import get_current_time
 from robot_server.service.json_api import PydanticResponse, RequestModel, SimpleBody

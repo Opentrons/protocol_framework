@@ -7,10 +7,10 @@ from typing import Annotated, Optional
 from typing_extensions import Literal, NoReturn
 
 from fastapi import Depends, status
+from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
 
 from opentrons_shared_data.errors import ErrorCodes
 from robot_server.errors.error_responses import ErrorDetails, ErrorBody
-from robot_server.fast_build_router import FastBuildRouter
 from robot_server.versioning import get_requested_version
 from robot_server.service.labware import models as lw_models
 from robot_server.service.errors import RobotServerError, CommonErrorDef

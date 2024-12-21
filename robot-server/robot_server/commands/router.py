@@ -2,6 +2,7 @@
 from typing import Annotated, Final, List, Literal, Optional, cast
 
 from fastapi import Depends, Query, status
+from server_utils.fastapi_utils.fast_build_router import FastBuildRouter
 
 from opentrons.protocol_engine import CommandIntent
 from opentrons.protocol_engine.errors import CommandDoesNotExistError
@@ -11,7 +12,6 @@ from opentrons.protocol_runner import RunOrchestrator
 from opentrons_shared_data.errors import ErrorCodes
 
 from robot_server.errors.error_responses import ErrorDetails, ErrorBody
-from robot_server.fast_build_router import FastBuildRouter
 from robot_server.service.json_api import (
     MultiBodyMeta,
     RequestModel,
