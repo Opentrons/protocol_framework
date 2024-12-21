@@ -1,3 +1,5 @@
+"""See the `FastBuildRouter` class."""
+
 from __future__ import annotations
 
 import dataclasses
@@ -63,29 +65,52 @@ else:
 
 
 class FastBuildRouter(_FastAPIRouteMethods):
-    """An optimized, stripped-down, drop-in replacement for `fastapi.APIRouter`.
+    """An optimized drop-in replacement for `fastapi.APIRouter`.
 
-    An essential part of the way we organize our code is to have a tree of topic-based
-    subdirectories that each define their own HTTP routes with a local
-    `fastapi.APIRouter`, and then combine those into a single `fastapi.FastAPI` app.
+    Use it like `fastapi.APIRouter`:
 
-    Unfortunately, the standard FastAPI way of doing this, with
-    `APIRouter.include_router()` and `FastAPI.include_router()`, appears to have severe
-    performance problems. Supposedly, the bad performance has to do with reduntantly
-    constructing Pydantic objects at each level of nesting
-    (https://github.com/pydantic/pydantic/issues/6768#issuecomment-1644532429).
-    This severely impacts server startup time.
+        foo_router = FastBuildRouter()
 
-    This class, a reimplementation of the `fastapi.APIRouter` interface, fixes that.
-    This gives something like a 1.6x speedup for `import robot_server.app`.
-    Not all features of `fastapi.APIRouter` are supported,
-    only the ones that we actually need.
+        @router.get("/foo/{id}")
+        def get_health(id: str) -> Response:
+            ...
+
+        bar_router = ...
+
+        root_router = FastBuildRouter()
+        root_router.include_router(foo_router)
+        root_router.include_router(bar_router)
+
+        app = fastapi.FastAPI()
+        root_router.install_on_app(app)
+
+    Rationale:
+
+    With FastAPI's standard `FastAPI` and `APIRouter` classes, the `.include_router()`
+    method has a lot of overhead, accounting for something like 30-40% of
+    robot-server's startup time, which is multiple minutes long at the time of writing.
+    (https://github.com/pydantic/pydantic/issues/6768#issuecomment-1644532429)
+
+    We could avoid the overhead by adding endpoints directly to the top-level FastAPI
+    app, "flat," instead of using `.include_router()`. But that would be bad for code
+    organization; we want to keep our tree of sub-routers. So this class reimplements
+    the important parts of `fastapi.APIRouter`, so we can keep our router tree, but
+    in a lighter-weight way.
+
+    When you call `@router.get()` or `router.include_router()` on this class, it appends
+    to a lightweight internal structure and completely avoids slow calls into FastAPI.
+    Later on, when you do `router.install_on_app()`, everything in the tree is added to
+    the FastAPI app.
     """
 
     def __init__(self) -> None:
         self._routes: list[_Endpoint | _IncludedRouter] = []
 
     def __getattr__(self, name: str) -> object:
+        """Supply the optimized version of `@router.get()`, `@router.post()`, etc.
+
+        See the FastAPI docs for usage details.
+        """
         if name in _FASTAPI_ROUTE_METHOD_NAMES:
             return _EndpointCaptor(method_name=name, on_capture=self._routes.append)
         else:
@@ -96,7 +121,10 @@ class FastBuildRouter(_FastAPIRouteMethods):
         router: FastBuildRouter | fastapi.APIRouter,
         **kwargs: typing_extensions.Unpack[_RouterIncludeKwargs],
     ) -> None:
-        """The optimized version of `fastapi.APIRouter.include_router()`."""  # noqa: D402
+        """The optimized version of `fastapi.APIRouter.include_router()`.
+
+        See the FastAPI docs for argument details.
+        """  # noqa: D402
         self._routes.append(_IncludedRouter(router=router, inclusion_kwargs=kwargs))
 
     def install_on_app(
@@ -104,7 +132,10 @@ class FastBuildRouter(_FastAPIRouteMethods):
         app: fastapi.FastAPI,
         **kwargs: typing_extensions.Unpack[_RouterIncludeKwargs],
     ) -> None:
-        """The optimized version of `fastapi.FastAPI.include_router()`."""
+        """The optimized version of `fastapi.FastAPI.include_router()`.
+
+        See the FastAPI docs for argument details..
+        """
         for route in self._routes:
             if isinstance(route, _IncludedRouter):
                 router = route.router
@@ -125,13 +156,14 @@ class FastBuildRouter(_FastAPIRouteMethods):
 
 
 class _RouterIncludeKwargs(typing.TypedDict):
-    """The keyword arguments of `fastapi.APIRouter.include_router()`.
+    """The keyword arguments of FastAPI's `.include_router()` method.
 
-    (At least the ones that we care about, anyway.)
+    (At least the arguments that we actually use, anyway.)
     """
 
     # Arguments with defaults should be annotated as `NotRequired`.
     # For example, `foo: str | None = None` becomes `NotRequired[str | None]`.
+
     tags: typing_extensions.NotRequired[list[str | enum.Enum] | None]
     responses: typing_extensions.NotRequired[
         dict[int | str, dict[str, typing.Any]] | None
@@ -155,7 +187,8 @@ def _merge_kwargs(
     For example, the top-level router, subrouters, and finally the endpoint function
     can each specify their own `tags`. The different levels need to be merged
     carefully and in argument-specific ways if we want to match FastAPI behavior.
-    For example, `tags` should be the concatenation of all levels.
+    For example, the final `tags` value should be the concatenation of the values
+    from all levels.
     """
     merge_result: _RouterIncludeKwargs = {}
     remaining_from_parent = from_parent.copy()
@@ -208,35 +241,38 @@ class _IncludedRouter:
     inclusion_kwargs: _RouterIncludeKwargs
 
 
-DecoratedFunctionT = typing.TypeVar(
-    "DecoratedFunctionT", bound=typing.Callable[..., object]
+_DecoratedFunctionT = typing.TypeVar(
+    "_DecoratedFunctionT", bound=typing.Callable[..., object]
 )
 
 
 class _EndpointCaptor:
+    """A callable that pretends to be a FastAPI path operation decorator.
+
+    `method_name` is the FastAPI method to pretend to be, e.g. "get" or "post".
+
+    Supposing you have an `_EndpointCaptor` named `get`, when this whole enchilada
+    happens:
+
+        @get("/foo/{id}", description="blah blah")
+        def get_some_endpoint(id: str) -> Response:
+            ...
+
+    Then information about the whole enchilada is sent to the `on_capture` callback.
+    """
+
     def __init__(
         self,
         method_name: str,
         on_capture: typing.Callable[[_Endpoint], None],
     ) -> None:
-        """
-        Params:
-            method_name: The name of the method on the fastapi.FastAPI class that this
-                should proxy, e.g. "get" or "post".
-            on_capture: Called when we capture a call,
-                i.e. when some router module does:
-
-                @router.get("/foo")
-                def get_foo() -> FooResponse:
-                    ...
-        """
         self._method_name = method_name
         self._on_capture = on_capture
 
     def __call__(
         self, *fastapi_decorator_args: object, **fastapi_decorator_kwargs: object
-    ) -> typing.Callable[[DecoratedFunctionT], DecoratedFunctionT]:
-        def decorate(decorated_function: DecoratedFunctionT) -> DecoratedFunctionT:
+    ) -> typing.Callable[[_DecoratedFunctionT], _DecoratedFunctionT]:
+        def decorate(decorated_function: _DecoratedFunctionT) -> _DecoratedFunctionT:
             self._on_capture(
                 _Endpoint(
                     method_name=self._method_name,
@@ -252,6 +288,8 @@ class _EndpointCaptor:
 
 @dataclasses.dataclass
 class _Endpoint:
+    """Information about an endpoint that's been added to a router."""
+
     method_name: str
     """The name of the method on the FastAPI class, e.g. "get"."""
 
