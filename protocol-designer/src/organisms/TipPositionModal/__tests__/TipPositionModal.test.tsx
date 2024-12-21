@@ -5,10 +5,10 @@ import { i18n } from '../../../assets/localization'
 import { TipPositionSideView } from '../TipPositionSideView'
 import { TipPositionModal } from '..'
 
-import type * as React from 'react'
+import type { ComponentProps } from 'react'
 
 vi.mock('../TipPositionSideView')
-const render = (props: React.ComponentProps<typeof TipPositionModal>) => {
+const render = (props: ComponentProps<typeof TipPositionModal>) => {
   return renderWithProviders(<TipPositionModal {...props} />, {
     i18nInstance: i18n,
   })[0]
@@ -19,7 +19,7 @@ const mockUpdateXSpec = vi.fn()
 const mockUpdateYSpec = vi.fn()
 
 describe('TipPositionModal', () => {
-  let props: React.ComponentProps<typeof TipPositionModal>
+  let props: ComponentProps<typeof TipPositionModal>
 
   beforeEach(() => {
     props = {
