@@ -9,10 +9,6 @@ import typing_extensions
 import fastapi
 
 
-_ReturnT = typing.TypeVar("_ReturnT")
-_ParamSpec = typing.ParamSpec("_ParamSpec")
-
-
 # Annotations for a decorator that takes a function as input and returns the same function as output.
 _PassThroughDecoratorParamSpec = typing.ParamSpec("_PassThroughDecoratorParamSpec")
 _PassThroughDecoratorReturnT = typing.TypeVar("_PassThroughDecoratorReturnT")
@@ -34,74 +30,59 @@ class _PassThroughDecorator(typing.Protocol):
         ...
 
 
-class _CallReplayer(typing.Protocol):
-    def replay_on(
-        self, app: fastapi.FastAPI, router_kwargs: _RouterIncludeKwargs
-    ) -> None:
-        ...
-        # TODO: assert type(replay_on) is FastAPI.
+_FASTAPI_ROUTE_METHOD_NAMES = {
+    "get",
+    "put",
+    "post",
+    "delete",
+    "options",
+    "head",
+    "patch",
+    "trace",
+}
+
+if typing.TYPE_CHECKING:
+    # This is some chicanery so that @router.get(...), @router.post(...), etc. give us
+    # type-checking and autocomplete that exactly match the regular FastAPI version.
+    # These methods have a lot of parameters with complicated types and it would be
+    # a bear to manually keep them in sync with FastAPI.
+
+    _P = typing.ParamSpec("_P")
+    _ReturnT = typing.TypeVar("_ReturnT")
+
+    class _MethodMimic(typing.Generic[_P, _ReturnT]):
+        def __init__(
+            self,
+            method_to_mimic: typing.Callable[
+                typing.Concatenate[
+                    fastapi.FastAPI,  # The `self` parameter.
+                    _P,  # The actual args and kwargs.
+                ],
+                _ReturnT,
+            ],
+        ) -> None:
+            raise NotImplementedError("This is only for type-checking, not runtime.")
+
+        def __call__(self, *args: _P.args, **kwargs: _P.kwargs) -> _ReturnT:
+            raise NotImplementedError("This is only for type-checking, not runtime.")
+
+    class _FastAPIRouteMethods:
+        get: typing.Final = _MethodMimic(fastapi.FastAPI.get)
+        put: typing.Final = _MethodMimic(fastapi.FastAPI.put)
+        post: typing.Final = _MethodMimic(fastapi.FastAPI.post)
+        delete: typing.Final = _MethodMimic(fastapi.FastAPI.delete)
+        options: typing.Final = _MethodMimic(fastapi.FastAPI.options)
+        head: typing.Final = _MethodMimic(fastapi.FastAPI.head)
+        patch: typing.Final = _MethodMimic(fastapi.FastAPI.patch)
+        trace: typing.Final = _MethodMimic(fastapi.FastAPI.trace)
+
+else:
+
+    class _FastAPIRouteMethods:
+        pass
 
 
-class _CallCaptor(typing.Generic[_ParamSpec]):
-    def __init__(
-        self,
-        method_to_emulate: typing.Callable[
-            typing.Concatenate[fastapi.FastAPI, _ParamSpec], _PassThroughDecorator
-        ],
-        on_capture: typing.Callable[[_CallReplayer], None],
-    ) -> None:
-        """
-        Params:
-            method_to_emulate: The fastapi.FastAPI method to mimic, e.g.
-                fastapi.FastAPI.get or fastapi.FastAPI.post.
-            on_capture: Called when we capture a call,
-                i.e. when some router module does:
-
-                @router.get("/foo")
-                def get_foo() -> FooResponse:
-                    ...
-        """
-        self._fastapi_method = method_to_emulate
-        self._on_capture = on_capture
-
-    def __call__(
-        self, *args: _ParamSpec.args, **kwargs: _ParamSpec.kwargs
-    ) -> _PassThroughDecorator:
-        P = typing.ParamSpec("P")
-        T = typing.TypeVar("T")
-
-        def decorate(endpoint_function: typing.Callable[P, T]) -> typing.Callable[P, T]:
-            class ConcreteCallReplayer:
-                @staticmethod
-                def replay_on(
-                    app: fastapi.FastAPI, router_kwargs: _RouterIncludeKwargs
-                ) -> None:
-                    # We are effectively going to call, for example, `app.get(...)` like
-                    # `FastAPI.get(app, ...)`, sort of manually supplying the `self`
-                    # argument to `FastAPI.get`. Since this bypasses normal method
-                    # resolution, I am pretty sure it would run the wrong code if
-                    # someone passed us a subclass of `FastAPI` instead of an actual
-                    # `FastAPI`.
-                    assert type(app) is fastapi.FastAPI
-
-                    nonlocal args
-                    nonlocal kwargs
-                    # TODO: See "Rejected Alternatives > Concatenating Keyword Parameters" in PEP 612)
-                    # TODO: Combine with reducer func
-                    kwargs = _inherit_include_kwargs(router_kwargs, kwargs)  # type: ignore
-
-                    fastapi_decorator = self._fastapi_method(app, *args, **kwargs)
-
-                    fastapi_decorator(endpoint_function)
-
-            self._on_capture(ConcreteCallReplayer())
-
-            return endpoint_function
-
-        return decorate
-
-
-class FastBuildRouter:
+class FastBuildRouter(_FastAPIRouteMethods):
     """An optimized, stripped-down, drop-in replacement for `fastapi.APIRouter`.
 
     An essential part of the way we organize our code is to have a tree of topic-based
@@ -122,32 +103,13 @@ class FastBuildRouter:
     """
 
     def __init__(self) -> None:
-        self._routes: list[_CallReplayer | _IncludedRouter] = []
+        self._routes: list[_Endpoint | _IncludedRouter] = []
 
-        self.get: typing.Final = _CallCaptor(
-            method_to_emulate=fastapi.FastAPI.get, on_capture=self._routes.append
-        )
-        self.put: typing.Final = _CallCaptor(
-            method_to_emulate=fastapi.FastAPI.put, on_capture=self._routes.append
-        )
-        self.post: typing.Final = _CallCaptor(
-            method_to_emulate=fastapi.FastAPI.post, on_capture=self._routes.append
-        )
-        self.delete: typing.Final = _CallCaptor(
-            method_to_emulate=fastapi.FastAPI.delete, on_capture=self._routes.append
-        )
-        self.options: typing.Final = _CallCaptor(
-            method_to_emulate=fastapi.FastAPI.options, on_capture=self._routes.append
-        )
-        self.head: typing.Final = _CallCaptor(
-            method_to_emulate=fastapi.FastAPI.head, on_capture=self._routes.append
-        )
-        self.patch: typing.Final = _CallCaptor(
-            method_to_emulate=fastapi.FastAPI.patch, on_capture=self._routes.append
-        )
-        self.trace: typing.Final = _CallCaptor(
-            method_to_emulate=fastapi.FastAPI.trace, on_capture=self._routes.append
-        )
+    def __getattr__(self, name: str) -> object:
+        if name in _FASTAPI_ROUTE_METHOD_NAMES:
+            return _EndpointCaptor(method_name=name, on_capture=self._routes.append)
+        else:
+            raise AttributeError(name=name)
 
     def include_router(
         self,
@@ -170,14 +132,15 @@ class FastBuildRouter:
                     kwargs, route.inclusion_kwargs
                 )
                 if isinstance(router, fastapi.APIRouter):
-                    # TODO: May need to pass along tags and deps
                     app.include_router(router, **combined_kwargs)
                 elif isinstance(route.router, FastBuildRouter):
                     router.install_on_app(app, **combined_kwargs)
             else:
-                # TODO: May need to pass along tags and deps, or at least assert
-                # that there is no conflict.
-                route.replay_on(app, kwargs)
+                typing_extensions.assert_type(route, _Endpoint)
+                combined_kwargs = _inherit_include_kwargs(kwargs, route.kwargs)
+                fastapi_method = getattr(app, route.method_name)
+                fastapi_decorator = fastapi_method(*route.args, **combined_kwargs)
+                fastapi_decorator(route.function)
 
 
 class _RouterIncludeKwargs(typing.TypedDict):
@@ -236,3 +199,54 @@ def _inherit_include_kwargs(
 class _IncludedRouter:
     router: fastapi.APIRouter | FastBuildRouter
     inclusion_kwargs: _RouterIncludeKwargs
+
+
+class _EndpointCaptor:
+    def __init__(
+        self,
+        method_name: str,
+        on_capture: typing.Callable[[_Endpoint], None],
+    ) -> None:
+        """
+        Params:
+            method_name: The name of the method on the fastapi.FastAPI class that this
+                should proxy, e.g. "get" or "post".
+            on_capture: Called when we capture a call,
+                i.e. when some router module does:
+
+                @router.get("/foo")
+                def get_foo() -> FooResponse:
+                    ...
+        """
+        self._method_name = method_name
+        self._on_capture = on_capture
+
+    def __call__(
+        self, *fastapi_decorator_args: object, **fastapi_decorator_kwargs: object
+    ) -> _PassThroughDecorator:
+        P = typing.ParamSpec("P")
+        T = typing.TypeVar("T")
+
+        def decorate(
+            decorated_function: typing.Callable[P, T]
+        ) -> typing.Callable[P, T]:
+            self._on_capture(
+                _Endpoint(
+                    method_name=self._method_name,
+                    args=fastapi_decorator_args,
+                    kwargs=fastapi_decorator_kwargs,
+                    function=decorated_function,
+                )
+            )
+
+            return decorated_function
+
+        return decorate
+
+
+@dataclasses.dataclass
+class _Endpoint:
+    method_name: str
+    args: tuple[object, ...]
+    kwargs: dict[str, object]
+    function: typing.Callable[..., object]
