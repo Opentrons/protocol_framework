@@ -12,7 +12,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     cy.contains('button', 'Confirm').click()
   })
 
-  it('All steps for onboarding flow', () => {
+  it('content and step 1 flow works', () => {
     cy.clickCreateNew()
     cy.verifyCreateNewHeader()
     verifyCreateProtocolPage()
@@ -38,7 +38,19 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Verifications.OnStep3,
       Actions.YesGripper,
       Actions.Confirm,
-      Verifications.Step4VerificationPart1,
+      Verifications.Step4Verification,
+      Actions.AddThermocycler,
+      Verifications.ThermocyclerImg,
+      Actions.AddHeaterShaker,
+      Verifications.HeaterShakerImg,
+      Actions.AddMagBlock,
+      Verifications.MagBlockImg,
+      Actions.AddTempdeck2,
+      Verifications.Tempdeck2Img,
+      Actions.Confirm,
+      Actions.Confirm,
+      Actions.Confirm,
+      Actions.EditProtocol,
     ]
 
     // Everything after Actions.SingleChannelPipette

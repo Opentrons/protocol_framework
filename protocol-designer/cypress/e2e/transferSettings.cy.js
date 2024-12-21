@@ -1,29 +1,19 @@
 import '../support/commands' // Importing the custom commands file
-
 /*
 These constants will help us run through both test suites in one go
 */
 const Flex_Home = 'Opentrons Flex'
 // const OT2_Home = 'Opentrons OT-2';
 const pipette = '1-Channel'
-
 describe('Happy Path Transfer Tests', () => {
   it('It should verify the working function of every permutation of transfer checkboxes', () => {
     cy.visit('/') // Replace with the appropriate URL or navigation
     cy.verifyHomePage() // This calls the custom command from commands.ts
     cy.clickCreateNew()
     cy.robotSelection(Flex_Home)
-    /*
-    function putPipette (pipette) {
-      cy.contains('label', pipette).should('exist').and('be.visible').click()
-    }
-    */
-
     cy.contains('label', pipette).should('exist').and('be.visible').click()
-
     // lint error for now putPipette(pipette)
     // Check step 2 has the right text
-
     cy.contains('Step 2')
     cy.contains('Add a pipette')
     cy.contains(
@@ -34,7 +24,6 @@ describe('Happy Path Transfer Tests', () => {
     cy.robotSelection(Flex_Home)
     // putPipette(pipette) remove because lint error
     cy.contains('label', pipette).should('exist').and('be.visible').click()
-
     // Make a function for this later that selects a pipette and its tips
     const tip_volume = '50 µL'
     const tip_rack = 'Filter Tip Rack 50 µL'
@@ -143,7 +132,6 @@ describe('Happy Path Transfer Tests', () => {
     cy.contains('button', 'Done').click({
       force: true,
     })
-
     cy.chooseDeckSlot('C3').click()
     cy.contains('Add hardware/labware').click()
     // cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click()

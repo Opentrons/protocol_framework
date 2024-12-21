@@ -1,6 +1,11 @@
 import { executeUniversalAction, UniversalActions } from './universalActions'
 import { isEnumValue } from './utils'
 import '../support/commands'
+// ToDo Future planning should have Step 5, Step 6, and 7 verification
+// Todo ProtocolOverview page. This might change from deck map revamp,
+// so let's hold off until then.
+// This PR unblocks Sara and I to work on this separately, so I want
+// To prioritize its getting pulled into the repo
 export enum Actions {
   SelectFlex = 'Select Opentrons Flex',
   SelectOT2 = 'Select Opentrons OT-2',
@@ -8,24 +13,36 @@ export enum Actions {
   GoBack = 'Go back',
   SingleChannelPipette50 = 'Select 50uL Single-Channel Pipette',
   YesGripper = 'Select Yes to gripper',
+  NoGripper = 'Select no to gripper',
+  AddThermocycler = 'Thermocycler Module GEN2',
+  AddHeaterShaker = 'Heater-Shaker Module GEN1',
+  AddTempdeck2 = 'Temperature Module GEN2',
+  AddMagBlock = 'Magnetic Block GEN1',
+  EditProtocol = 'Blue button edit protocol',
 }
 
 export enum Verifications {
   OnStep1 = 'On Step 1 page.',
   OnStep2 = 'On Step 2 page.',
-  OnStep3 = 'On Step 3 page',
+  OnStep3 = 'on Step 3 page',
   FlexSelected = 'Opentrons Flex selected.',
   OT2Selected = 'Opentrons OT-2 selected.',
   NinetySixChannel = '96-Channel option is available.',
   NotNinetySixChannel = '96-Channel option is not available.',
   StepTwo50uL = 'Step Two part two',
   StepTwoPart3 = 'Step Two part three',
-  Step4VerificationPart1 = 'Step 4 part 1',
+  Step4Verification = 'Step 4 part 1',
+  ThermocyclerImg = 'Thermocycler Module GEN2',
+  HeaterShakerImg = 'Heater-Shaker Module GEN1',
+  Tempdeck2Img = 'Temperature Module GEN2',
+  MagBlockImg = 'Magnetic Block GEN1',
 }
 
 export enum Content {
   Step1Title = 'Step 1',
   Step2Title = 'Step 2',
+  Step3Title = 'Step3',
+  Step4Title = 'Step4',
   AddPipette = 'Add a pipette',
   NinetySixChannel = '96-Channel',
   SingleChannel = '1-Channel',
@@ -51,6 +68,9 @@ export enum Content {
   HeaterShaker = 'Heater-Shaker Module GEN1',
   Tempdeck2 = 'Temperature Module GEN2',
   MagBlock = 'Magnetic Block GEN1',
+  ModulePageH = 'Add your modules',
+  ModulePageB = 'Select modules to use in your protocol.',
+  EditProtocol = 'Edit protocol',
 }
 
 export enum Locators {
@@ -61,6 +81,10 @@ export enum Locators {
   FlexOption = 'button:contains("Opentrons Flex")',
   OT2Option = 'button:contains("Opentrons OT-2")',
   NinetySixChannel = 'div:contains("96-Channel")',
+  ThermocyclerImage = 'img[alt="temperatureModuleType"]',
+  MagblockImage = 'img[alt="magneticBlockType"]',
+  HeaterShakerImage = 'img[alt="heaterShakerModuleType"]',
+  TemperatureModuleImage = 'img[alt="temperatureModuleType"]',
 }
 
 const executeAction = (action: Actions | UniversalActions): void => {
@@ -93,10 +117,27 @@ const executeAction = (action: Actions | UniversalActions): void => {
       // instead of clicking the filter tiprack?
       // cy.contains(Content.FilterTiprack50).click()
       break
+    case Actions.AddThermocycler:
+      cy.contains(Content.Thermocycler).click()
+      break
+    case Actions.AddHeaterShaker:
+      cy.contains(Content.HeaterShaker).click()
+      break
+    case Actions.AddTempdeck2:
+      cy.contains(Content.Tempdeck2).click()
+      break
+    case Actions.AddMagBlock:
+      cy.contains(Content.MagBlock).click()
+      break
     case Actions.YesGripper:
       cy.contains(Content.Yes).click()
       break
-
+    case Actions.NoGripper:
+      cy.contains(Content.No).click()
+      break
+    case Actions.EditProtocol:
+      cy.contains(Content.EditProtocol).click()
+      break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
   }
@@ -158,18 +199,22 @@ const verifyStep = (verification: Verifications): void => {
       cy.contains(Content.Yes).should('be.visible')
       cy.contains(Content.No).should('be.visible')
       break
-    case Verifications.Step4VerificationPart1:
+    case Verifications.Step4Verification:
+      cy.contains(Content.ModulePageH).should('be.visible')
+      cy.contains(Content.ModulePageB).should('be.visible')
       cy.contains(Content.Thermocycler).should('be.visible')
-
       cy.contains(Content.HeaterShaker).should('be.visible')
-
       cy.contains(Content.MagBlock).should('be.visible')
       cy.contains(Content.Tempdeck2).should('be.visible')
-
-      cy.get('img[alt="temperatureModuleType"]').should('be.visible')
-      cy.get('img[alt="magneticBlockType"]').should('be.visible')
-      cy.get('img[alt="heaterShakerModuleType"]').should('be.visible')
-      cy.get('img[alt="thermocyclerModuleType"]').should('be.visible')
+      break
+    case Verifications.ThermocyclerImg:
+      cy.get(Locators.TemperatureModuleImage).should('be.visible')
+      break
+    case Verifications.HeaterShakerImg:
+      cy.get(Locators.HeaterShakerImage).should('be.visible')
+      break
+    case Verifications.Tempdeck2Img:
+      cy.contains(Content.Tempdeck2).should('be.visible')
       break
     default:
       throw new Error(
