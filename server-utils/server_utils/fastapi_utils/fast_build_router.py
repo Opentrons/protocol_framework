@@ -115,7 +115,10 @@ class FastBuildRouter(_FastAPIRouteMethods):
                     router.install_on_app(app, **combined_kwargs)
             else:
                 typing_extensions.assert_type(route, _Endpoint)
-                combined_kwargs = _merge_kwargs(kwargs, route.kwargs)
+                combined_kwargs = _merge_kwargs(
+                    kwargs,
+                    route.kwargs,  # type: ignore[arg-type]
+                )
                 fastapi_method = getattr(app, route.method_name)
                 fastapi_decorator = fastapi_method(*route.args, **combined_kwargs)
                 fastapi_decorator(route.function)
@@ -183,10 +186,10 @@ def _merge_kwargs(
         merge_result.update(remaining_from_child)
     else:
         a_collisions: dict[object, object] = {
-            k: remaining_from_parent[k] for k in colliding_keys
+            k: remaining_from_parent[k] for k in colliding_keys  # type: ignore[literal-required]
         }
         b_collisions: dict[object, object] = {
-            k: remaining_from_child[k] for k in colliding_keys
+            k: remaining_from_child[k] for k in colliding_keys  # type: ignore[literal-required]
         }
         raise NotImplementedError(
             f"These FastAPI keyword arguments appear at different levels "
