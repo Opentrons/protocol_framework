@@ -2,20 +2,21 @@
 from contextlib import AsyncExitStack
 from logging import getLogger
 from typing import Dict, Optional, Union, AsyncGenerator, Callable
-from opentrons.protocol_engine.actions.actions import (
-    ResumeFromRecoveryAction,
-    SetErrorRecoveryPolicyAction,
-)
 
-from opentrons.protocols.models import LabwareDefinition
-from opentrons.hardware_control import HardwareControlAPI
-from opentrons.hardware_control.modules import AbstractModule as HardwareModuleAPI
-from opentrons.hardware_control.types import PauseType as HardwarePauseType
 from opentrons_shared_data.errors import (
     ErrorCodes,
     EnumeratedError,
 )
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
+from opentrons.hardware_control import HardwareControlAPI
+from opentrons.hardware_control.modules import AbstractModule as HardwareModuleAPI
+from opentrons.hardware_control.types import PauseType as HardwarePauseType
+
+from .actions.actions import (
+    ResumeFromRecoveryAction,
+    SetErrorRecoveryPolicyAction,
+)
 from .errors import ProtocolCommandFailedError, ErrorOccurrence, CommandNotAllowedError
 from .errors.exceptions import EStopActivatedError
 from .error_recovery_policy import ErrorRecoveryPolicy

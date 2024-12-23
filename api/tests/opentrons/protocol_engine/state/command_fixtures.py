@@ -4,9 +4,9 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional, cast, Dict
 
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons.types import MountType
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.protocol_engine import ErrorOccurrence, commands as cmd
 from opentrons.protocol_engine.types import (
     DeckPoint,

@@ -15,6 +15,7 @@ from opentrons_shared_data.pipette.types import LabwareUri
 from opentrons_shared_data.labware import load_definition
 from opentrons_shared_data.labware.labware_definition import (
     Parameters,
+    LabwareDefinition,
     LabwareRole,
     OverlapOffset as SharedDataOverlapOffset,
     GripperOffsets,
@@ -25,7 +26,6 @@ from opentrons.protocols.api_support.deck_type import (
     STANDARD_OT2_DECK,
     STANDARD_OT3_DECK,
 )
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.types import DeckSlotName, MountType
 
 from opentrons.protocol_engine import errors

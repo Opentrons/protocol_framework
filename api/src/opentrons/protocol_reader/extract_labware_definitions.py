@@ -6,7 +6,7 @@ from typing import List
 
 import anyio
 
-from opentrons.protocols.models import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 from .protocol_source import ProtocolFileRole, ProtocolSource, ProtocolType
 

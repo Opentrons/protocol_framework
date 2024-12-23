@@ -14,13 +14,15 @@ from typing import (
 from math import isinf, isnan
 from typing_extensions import TypeGuard
 
-from opentrons_shared_data.labware.labware_definition import LabwareRole
+from opentrons_shared_data.labware.labware_definition import (
+    LabwareDefinition,
+    LabwareRole,
+)
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.robot.types import RobotType
 
 from opentrons.protocols.api_support.types import APIVersion, ThermocyclerStep
 from opentrons.protocols.api_support.util import APIVersionError
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
 from opentrons.types import (
     Mount,
