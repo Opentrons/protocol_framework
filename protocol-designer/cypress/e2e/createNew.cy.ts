@@ -12,6 +12,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
   })
 
   it('content and step 1 flow works', () => {
+    cy.closeAnalyticsModal()
     cy.clickCreateNew()
     cy.verifyCreateNewHeader()
     verifyCreateProtocolPage()

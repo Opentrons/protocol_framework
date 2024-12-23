@@ -4,6 +4,7 @@ import textwrap
 from typing import Annotated, Literal
 
 import fastapi
+from server_utils.fastapi_utils.light_router import LightRouter
 
 from robot_server.client_data.store import (
     ClientData,
@@ -18,7 +19,7 @@ from robot_server.service.notifications.publishers.client_data_publisher import 
     get_client_data_publisher,
 )
 
-router = fastapi.APIRouter()
+router = LightRouter()
 
 
 Key = Annotated[
@@ -73,7 +74,7 @@ async def put_client_data(  # noqa: D103
 ) -> SimpleBody[ClientData]:
     store.put(key, request_body.data)
     client_data_publisher.publish_client_data(key)
-    return SimpleBody.construct(data=store.get(key))
+    return SimpleBody.model_construct(data=store.get(key))
 
 
 @router.get(
@@ -92,7 +93,7 @@ async def get_client_data(  # noqa: D103
     store: Annotated[ClientDataStore, fastapi.Depends(get_client_data_store)],
 ) -> SimpleBody[ClientData]:
     try:
-        return SimpleBody.construct(data=store.get(key))
+        return SimpleBody.model_construct(data=store.get(key))
     except KeyError as e:
         raise ClientDataKeyDoesNotExist.from_exc(e).as_error(
             fastapi.status.HTTP_404_NOT_FOUND
@@ -125,7 +126,7 @@ async def delete_client_data(  # noqa: D103
         ) from e
     else:
         client_data_publisher.publish_client_data(key)
-        return SimpleEmptyBody.construct()
+        return SimpleEmptyBody.model_construct()
 
 
 @router.delete(
@@ -143,4 +144,4 @@ async def delete_all_client_data(  # noqa: D103
     store.delete_all()
     for deleted_key in keys_that_will_be_deleted:
         client_data_publisher.publish_client_data(deleted_key)
-    return SimpleEmptyBody.construct()
+    return SimpleEmptyBody.model_construct()

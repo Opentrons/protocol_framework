@@ -17,15 +17,19 @@ import type { AnalyticsEventAction } from '../../../analytics/actions'
 import type { TerminalItemId, SubstepIdentifier } from '../../../steplist/types'
 import type {
   AddStepAction,
+  ClearWellSelectionLabwareKeyAction,
   HoverOnStepAction,
   HoverOnSubstepAction,
-  SelectTerminalItemAction,
   HoverOnTerminalItemAction,
-  SetWellSelectionLabwareKeyAction,
-  ClearWellSelectionLabwareKeyAction,
-  SelectStepAction,
+  hoverSelectionAction,
+  Mode,
+  selectDropdownItemAction,
+  Selection,
   SelectMultipleStepsAction,
   SelectMultipleStepsForGroupAction,
+  SelectStepAction,
+  SelectTerminalItemAction,
+  SetWellSelectionLabwareKeyAction,
   ToggleViewSubstepAction,
   ViewSubstep,
 } from './types'
@@ -48,6 +52,28 @@ export const addStep = (args: {
     },
   }
 }
+export const hoverSelection = (args: Selection): hoverSelectionAction => ({
+  type: 'HOVER_DROPDOWN_ITEM',
+  payload: { id: args.id, text: args.text },
+})
+export const selectDropdownItem = (args: {
+  selection: Selection | null
+  mode: Mode
+}): selectDropdownItemAction => ({
+  type: 'SELECT_DROPDOWN_ITEM',
+  payload: {
+    selection:
+      args.selection != null
+        ? {
+            id: args.selection.id,
+            text: args.selection.text,
+            field: args.selection.field,
+          }
+        : null,
+    mode: args.mode,
+  },
+})
+
 export const hoverOnSubstep = (
   payload: SubstepIdentifier
 ): HoverOnSubstepAction => ({
@@ -95,7 +121,95 @@ export const resetSelectStep = (stepId: StepIdType): ThunkAction<any> => (
     type: 'POPULATE_FORM',
     payload: null,
   })
+  dispatch({
+    type: 'SELECT_DROPDOWN_ITEM',
+    payload: {
+      selection: {
+        id: null,
+        text: null,
+      },
+      mode: 'clear',
+    },
+  })
   resetScrollElements()
+}
+
+const setSelection = (
+  formData: {
+    [x: string]: any
+    stepType: StepType
+    id: string
+  },
+  dispatch: ThunkDispatch<any>
+): void => {
+  if (formData.stepType === 'moveLabware') {
+    dispatch({
+      type: 'SELECT_DROPDOWN_ITEM',
+      payload: {
+        selection: { id: formData.labware, text: 'Selected', field: '1' },
+        mode: 'add',
+      },
+    })
+    dispatch({
+      type: 'SELECT_DROPDOWN_ITEM',
+      payload: {
+        selection: { id: formData.newLocation, text: 'Location', field: '2' },
+        mode: 'add',
+      },
+    })
+  } else if (formData.stepType === 'moveLiquid') {
+    dispatch({
+      type: 'SELECT_DROPDOWN_ITEM',
+      payload: {
+        selection: {
+          id: formData.aspirate_labware,
+          text: 'Source',
+          field: '1',
+        },
+        mode: 'add',
+      },
+    })
+    dispatch({
+      type: 'SELECT_DROPDOWN_ITEM',
+      payload: {
+        selection: {
+          id: formData.dispense_labware,
+          text: 'Destination',
+          field: '2',
+        },
+        mode: 'add',
+      },
+    })
+  } else if (formData.stepType === 'mix') {
+    dispatch({
+      type: 'SELECT_DROPDOWN_ITEM',
+      payload: {
+        selection: {
+          id: formData.labware,
+          text: 'Selected',
+          field: '1',
+        },
+        mode: 'add',
+      },
+    })
+  } else if (
+    formData.stepType === 'heaterShaker' ||
+    formData.stepType === 'temperature' ||
+    formData.stepType === 'thermocycler' ||
+    formData.stepType === 'magnet'
+  ) {
+    dispatch({
+      type: 'SELECT_DROPDOWN_ITEM',
+      payload: {
+        selection: {
+          id: formData.moduleId,
+          text: 'Selected',
+          field: '1',
+        },
+        mode: 'add',
+      },
+    })
+  }
 }
 
 export const populateForm = (stepId: StepIdType): ThunkAction<any> => (
@@ -108,9 +222,9 @@ export const populateForm = (stepId: StepIdType): ThunkAction<any> => (
     type: 'POPULATE_FORM',
     payload: formData,
   })
+  setSelection(formData, dispatch)
   resetScrollElements()
 }
-
 export const selectStep = (stepId: StepIdType): ThunkAction<any> => (
   dispatch: ThunkDispatch<any>,
   getState: GetState
@@ -126,9 +240,8 @@ export const selectStep = (stepId: StepIdType): ThunkAction<any> => (
     type: 'POPULATE_FORM',
     payload: formData,
   })
-  resetScrollElements()
+  setSelection(formData, dispatch)
 }
-
 // NOTE(sa, 2020-12-11): this is a thunk so that we can populate the batch edit form with things later
 export const selectMultipleSteps = (
   stepIds: StepIdType[],

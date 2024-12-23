@@ -37,6 +37,7 @@ beforeEach(() => {
     def: {
       parameters: {
         magneticModuleEngageHeight: EXAMPLE_ENGAGE_HEIGHT,
+        isTiprack: false,
       },
     },
   }

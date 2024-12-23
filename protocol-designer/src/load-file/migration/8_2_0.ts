@@ -10,8 +10,11 @@ const getTimeFromIndividualUnits = (
   minutes: any,
   hours?: any
 ): string => {
-  const hoursString = hours !== undefined ? `${hours ?? 0}:` : ''
-  return `${hoursString}${minutes ?? 0}:${seconds ?? 0}`
+  const pad = (num: number): string => String(num).padStart(2, '0')
+  const hoursString = hours !== undefined ? `${pad(Number(hours) ?? 0)}:` : ''
+  return `${hoursString}${pad(Number(minutes) ?? 0)}:${pad(
+    Number(seconds) ?? 0
+  )}`
 }
 
 export const migrateFile = (

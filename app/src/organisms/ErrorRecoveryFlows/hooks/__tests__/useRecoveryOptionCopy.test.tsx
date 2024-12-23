@@ -1,5 +1,3 @@
-import type * as React from 'react'
-
 import { describe, it } from 'vitest'
 import { screen } from '@testing-library/react'
 
@@ -9,6 +7,8 @@ import { ERROR_KINDS, RECOVERY_MAP } from '../../constants'
 import type { ErrorKind, RecoveryRoute } from '../../types'
 import { renderWithProviders } from '/app/__testing-utils__'
 import { i18n } from '/app/i18n'
+
+import type { ComponentProps } from 'react'
 
 function MockRenderCmpt({
   route,
@@ -26,7 +26,7 @@ function MockRenderCmpt({
   )
 }
 
-const render = (props: React.ComponentProps<typeof MockRenderCmpt>) => {
+const render = (props: ComponentProps<typeof MockRenderCmpt>) => {
   return renderWithProviders(<MockRenderCmpt {...props} />, {
     i18nInstance: i18n,
   })[0]

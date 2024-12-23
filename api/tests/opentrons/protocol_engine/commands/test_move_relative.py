@@ -85,7 +85,7 @@ async def test_move_relative_stalls(
     result = await subject.execute(data)
 
     assert result == DefinedErrorData(
-        public=StallOrCollisionError.construct(
+        public=StallOrCollisionError.model_construct(
             id=test_id, createdAt=timestamp, wrappedErrors=[matchers.Anything()]
         ),
         state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),

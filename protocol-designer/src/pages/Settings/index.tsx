@@ -27,7 +27,7 @@ import {
   selectors as tutorialSelectors,
 } from '../../tutorial'
 import { ToggleButton } from '../../atoms/ToggleButton'
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import { actions as featureFlagActions } from '../../feature-flags'
 import { getFeatureFlagData } from '../../feature-flags/selectors'
 import type { FlagTypes } from '../../feature-flags'
@@ -42,17 +42,15 @@ export function Settings(): JSX.Element {
   const [showAnnouncementModal, setShowAnnouncementModal] = useState<boolean>(
     false
   )
-  const hasOptedIn = useSelector(analyticsSelectors.getHasOptedIn)
+  const { hasOptedIn } = useSelector(analyticsSelectors.getHasOptedIn)
   const flags = useSelector(getFeatureFlagData)
   const canClearHintDismissals = useSelector(
     tutorialSelectors.getCanClearHintDismissals
   )
-  const _toggleOptedIn = hasOptedIn
-    ? analyticsActions.optOut
-    : analyticsActions.optIn
+
+  const pdVersion = process.env.OT_PD_VERSION
 
   const prereleaseModeEnabled = flags.PRERELEASE_MODE === true
-  const pdVersion = process.env.OT_PD_VERSION
 
   const allFlags = Object.keys(flags) as FlagTypes[]
 
@@ -144,7 +142,7 @@ export function Settings(): JSX.Element {
                 </Flex>
                 <Flex gridGap={SPACING.spacing16} alignItems={ALIGN_CENTER}>
                   <LinkComponent
-                    css={BUTTON_LINK_STYLE}
+                    css={LINK_BUTTON_STYLE}
                     textDecoration={TYPOGRAPHY.textDecorationUnderline}
                     href={DOC_URL}
                     external
@@ -156,7 +154,7 @@ export function Settings(): JSX.Element {
                   </LinkComponent>
 
                   <Btn
-                    css={BUTTON_LINK_STYLE}
+                    css={LINK_BUTTON_STYLE}
                     textDecoration={TYPOGRAPHY.textDecorationUnderline}
                     onClick={() => {
                       setShowAnnouncementModal(true)
@@ -280,7 +278,13 @@ export function Settings(): JSX.Element {
                       ? TOGGLE_ENABLED_STYLES
                       : TOGGLE_DISABLED_STYLES
                   }
-                  onClick={() => dispatch(_toggleOptedIn())}
+                  onClick={() =>
+                    dispatch(
+                      hasOptedIn
+                        ? analyticsActions.optOut()
+                        : analyticsActions.optIn()
+                    )
+                  }
                 >
                   <Icon
                     name={

@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { Provider } from 'react-redux'
 import configureStore from 'redux-mock-store'
 import { when } from 'vitest-when'
@@ -27,6 +26,7 @@ import {
 import { useLaunchLegacyLPC } from '../useLaunchLegacyLPC'
 import { LegacyLabwarePositionCheck } from '..'
 
+import type { FunctionComponent, ReactNode } from 'react'
 import type { Mock } from 'vitest'
 import type { LabwareOffset } from '@opentrons/api-client'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
@@ -57,7 +57,7 @@ const mockCurrentOffsets: LabwareOffset[] = [
 const mockLabwareDef = fixtureTiprack300ul as LabwareDefinition2
 
 describe('useLaunchLPC hook', () => {
-  let wrapper: React.FunctionComponent<{ children: React.ReactNode }>
+  let wrapper: FunctionComponent<{ children: ReactNode }>
   let mockCreateMaintenanceRun: Mock
   let mockCreateLabwareDefinition: Mock
   let mockDeleteMaintenanceRun: Mock

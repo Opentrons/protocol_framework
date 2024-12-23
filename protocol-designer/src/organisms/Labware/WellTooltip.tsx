@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { Fragment, useState } from 'react'
 import { useSelector } from 'react-redux'
 import map from 'lodash/map'
 import reduce from 'lodash/reduce'
@@ -9,6 +9,8 @@ import { getMainPagePortalEl } from '../../organisms'
 import { selectors } from '../../labware-ingred/selectors'
 import { formatVolume } from '../../pages/Designer/ProtocolSteps/Timeline/utils'
 import { swatchColors } from '../DefineLiquidsModal/swatchColors'
+
+import type { MouseEvent, ReactNode } from 'react'
 import type { LocationLiquidState } from '@opentrons/step-generation'
 import type { WellIngredientNames } from '../../steplist/types'
 
@@ -19,13 +21,13 @@ interface WellTooltipParams {
   makeHandleMouseEnterWell: (
     wellName: string,
     wellIngreds: LocationLiquidState
-  ) => (e: React.MouseEvent<any>) => void
+  ) => (e: MouseEvent<any>) => void
   handleMouseLeaveWell: (val: unknown) => void
   tooltipWellName?: string | null
 }
 
 interface WellTooltipProps {
-  children: (wellTooltipParams: WellTooltipParams) => React.ReactNode
+  children: (wellTooltipParams: WellTooltipParams) => ReactNode
   ingredNames: WellIngredientNames
 }
 
@@ -46,14 +48,12 @@ const initialTooltipState: State = {
 
 export const WellTooltip = (props: WellTooltipProps): JSX.Element => {
   const { children } = props
-  const [tooltipState, setTooltipState] = React.useState<State>(
-    initialTooltipState
-  )
+  const [tooltipState, setTooltipState] = useState<State>(initialTooltipState)
 
   const makeHandleMouseEnterWell: (
     wellName: string,
     wellIngreds: LocationLiquidState
-  ) => (e: React.MouseEvent) => void = (wellName, wellIngreds) => e => {
+  ) => (e: MouseEvent) => void = (wellName, wellIngreds) => e => {
     const { target } = e
     if (target instanceof Element) {
       const wellBoundingRect = target.getBoundingClientRect()
@@ -211,7 +211,7 @@ export const WellTooltip = (props: WellTooltipProps): JSX.Element => {
                       </tbody>
                     </table>
                     {hasMultipleIngreds && (
-                      <React.Fragment>
+                      <Fragment>
                         <div
                           css={css`
                             height: 1px;
@@ -229,7 +229,7 @@ export const WellTooltip = (props: WellTooltipProps): JSX.Element => {
                           <span>{`${tooltipWellName} Total Volume`}</span>
                           <span>{formatVolume(totalLiquidVolume, 2)}µl</span>
                         </div>
-                      </React.Fragment>
+                      </Fragment>
                     )}
                   </div>
                   <div

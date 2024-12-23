@@ -92,11 +92,11 @@ export function BatchEditMixTools(props: BatchEditMixToolsProps): JSX.Element {
               propsForFields.mix_wellOrder_second.updateValue
             }
             firstValue={
-              (propsForFields.mix_wellOrder_first.name ??
+              (propsForFields.mix_wellOrder_first?.value ??
                 't2b') as WellOrderOption
             }
             secondValue={
-              (propsForFields.mix_wellOrder_second.name ??
+              (propsForFields.mix_wellOrder_second?.value ??
                 'l2r') as WellOrderOption
             }
             firstName="mix_wellOrder_first"

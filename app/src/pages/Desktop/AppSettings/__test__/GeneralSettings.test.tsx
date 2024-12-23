@@ -12,6 +12,10 @@ import {
   US_ENGLISH_DISPLAY_NAME,
 } from '/app/i18n'
 import { getAlertIsPermanentlyIgnored } from '/app/redux/alerts'
+import {
+  ANALYTICS_LANGUAGE_UPDATED_DESKTOP_APP_SETTINGS,
+  useTrackEvent,
+} from '/app/redux/analytics'
 import { getAppLanguage, updateConfigValue } from '/app/redux/config'
 import * as Shell from '/app/redux/shell'
 import { GeneralSettings } from '../GeneralSettings'
@@ -32,11 +36,14 @@ const render = (): ReturnType<typeof renderWithProviders> => {
   )
 }
 
+const mockTrackEvent = vi.fn()
+
 describe('GeneralSettings', () => {
   beforeEach(() => {
     vi.mocked(Shell.getAvailableShellUpdate).mockReturnValue(null)
     vi.mocked(getAlertIsPermanentlyIgnored).mockReturnValue(false)
     vi.mocked(getAppLanguage).mockReturnValue(US_ENGLISH)
+    vi.mocked(useTrackEvent).mockReturnValue(mockTrackEvent)
   })
   afterEach(() => {
     vi.resetAllMocks()
@@ -118,5 +125,12 @@ describe('GeneralSettings', () => {
       'language.appLanguage',
       SIMPLIFIED_CHINESE
     )
+    expect(mockTrackEvent).toHaveBeenCalledWith({
+      name: ANALYTICS_LANGUAGE_UPDATED_DESKTOP_APP_SETTINGS,
+      properties: {
+        language: SIMPLIFIED_CHINESE,
+        transactionId: expect.anything(),
+      },
+    })
   })
 })

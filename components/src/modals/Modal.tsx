@@ -24,6 +24,7 @@ export interface ModalProps extends StyleProps {
   zIndexOverlay?: number
   showOverlay?: boolean
   position?: Position
+  hasHeader?: boolean
 }
 
 /**
@@ -43,6 +44,7 @@ export const Modal = (props: ModalProps): JSX.Element => {
     zIndexOverlay,
     position,
     showOverlay,
+    hasHeader = true,
     ...styleProps
   } = props
 
@@ -83,7 +85,7 @@ export const Modal = (props: ModalProps): JSX.Element => {
       showOverlay={showOverlay}
       zIndexOverlay={zIndexOverlay}
       width={styleProps.width ?? '31.25rem'}
-      header={modalHeader}
+      header={hasHeader ? modalHeader : undefined}
       onOutsideClick={closeOnOutsideClick ?? false ? onClose : undefined}
       // center within viewport aside from nav
       marginLeft={styleProps.marginLeft ?? '5.656rem'}
