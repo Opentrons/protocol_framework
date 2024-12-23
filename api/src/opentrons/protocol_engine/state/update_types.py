@@ -273,6 +273,7 @@ class AbsorbanceReaderInitializeUpdate:
 @dataclasses.dataclass
 class ModuleStateUpdate:
     """An update to the module state."""
+
     module_id: str
     module_type: ModuleType
     absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
