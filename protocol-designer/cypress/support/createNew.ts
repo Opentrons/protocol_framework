@@ -19,6 +19,19 @@ export enum Actions {
   AddTempdeck2 = 'Temperature Module GEN2',
   AddMagBlock = 'Magnetic Block GEN1',
   EditProtocol = 'Blue button edit protocol',
+  choseDeckSlot = 'Chose each deck slot',
+  ChoseDeckSlotA1 = 'Choose deck slot A1',
+  ChoseDeckSlotA2 = 'Choose deck slot A2',
+  ChoseDeckSlotA3 = 'Choose deck slot A3',
+  ChoseDeckSlotB1 = 'Choose deck slot B1',
+  ChoseDeckSlotB2 = 'Choose deck slot B2',
+  ChoseDeckSlotB3 = 'Choose deck slot B3',
+  ChoseDeckSlotC1 = 'Choose deck slot C1',
+  ChoseDeckSlotC2 = 'Choose deck slot C2',
+  ChoseDeckSlotC3 = 'Choose deck slot C3',
+  ChoseDeckSlotD1 = 'Choose deck slot D1',
+  ChoseDeckSlotD2 = 'Choose deck slot D2',
+  ChoseDeckSlotD3 = 'Choose deck slot D3',
 }
 
 export enum Verifications {
@@ -86,6 +99,52 @@ export enum Locators {
   HeaterShakerImage = 'img[alt="heaterShakerModuleType"]',
   TemperatureModuleImage = 'img[alt="temperatureModuleType"]',
 }
+// Cypress Command Implementation
+Cypress.Commands.add('chooseDeckSlot', (slot: string) => {
+  const deckSlots: Record<
+    | 'A1'
+    | 'A2'
+    | 'A3'
+    | 'B1'
+    | 'B2'
+    | 'B3'
+    | 'C1'
+    | 'C2'
+    | 'C3'
+    | 'D1'
+    | 'D2'
+    | 'D3',
+    () => Cypress.Chainable<JQuery<HTMLElement>>
+  > = {
+    A1: () =>
+      cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click(),
+    A2: () =>
+      cy.contains('foreignObject[x="164"][y="321"]', 'Edit slot').click(),
+    A3: () =>
+      cy.contains('foreignObject[x="328"][y="321"]', 'Edit slot').click(),
+    B1: () => cy.contains('foreignObject[x="0"][y="214"]', 'Edit slot').click(),
+    B2: () =>
+      cy.contains('foreignObject[x="164"][y="214"]', 'Edit slot').click(),
+    B3: () =>
+      cy.contains('foreignObject[x="328"][y="214"]', 'Edit slot').click(),
+    C1: () => cy.contains('foreignObject[x="0"][y="107"]', 'Edit slot').click(),
+    C2: () =>
+      cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot').click(),
+    C3: () =>
+      cy.contains('foreignObject[x="328"][y="107"]', 'Edit slot').click(),
+    D1: () => cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot').click(),
+    D2: () => cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot').click(),
+    D3: () => cy.contains('foreignObject[x="328"][y="0"]', 'Edit slot').click(),
+  }
+
+  const slotAction = deckSlots[slot as keyof typeof deckSlots]
+
+  if (slotAction) {
+    slotAction()
+  } else {
+    throw new Error(`Slot ${slot} not found in deck slots.`)
+  }
+})
 
 const executeAction = (action: Actions | UniversalActions): void => {
   if (isEnumValue([UniversalActions], [action])) {
@@ -97,6 +156,7 @@ const executeAction = (action: Actions | UniversalActions): void => {
     case Actions.SelectFlex:
       cy.contains(Content.OpentronsFlex).should('be.visible').click()
       break
+
     case Actions.SelectOT2:
       cy.contains(Content.OpentronsOT2).should('be.visible').click()
       break
@@ -137,6 +197,42 @@ const executeAction = (action: Actions | UniversalActions): void => {
       break
     case Actions.EditProtocol:
       cy.contains(Content.EditProtocol).click()
+      break
+    case Actions.ChoseDeckSlotA1:
+      cy.chooseDeckSlot('A1')
+      break
+    case Actions.ChoseDeckSlotA2:
+      cy.chooseDeckSlot('A2')
+      break
+    case Actions.ChoseDeckSlotA3:
+      cy.chooseDeckSlot('A3')
+      break
+    case Actions.ChoseDeckSlotB1:
+      cy.chooseDeckSlot('B1')
+      break
+    case Actions.ChoseDeckSlotB2:
+      cy.chooseDeckSlot('B2')
+      break
+    case Actions.ChoseDeckSlotB3:
+      cy.chooseDeckSlot('B3')
+      break
+    case Actions.ChoseDeckSlotC1:
+      cy.chooseDeckSlot('C1')
+      break
+    case Actions.ChoseDeckSlotC2:
+      cy.chooseDeckSlot('C2')
+      break
+    case Actions.ChoseDeckSlotC3:
+      cy.chooseDeckSlot('C3')
+      break
+    case Actions.ChoseDeckSlotD1:
+      cy.chooseDeckSlot('D1')
+      break
+    case Actions.ChoseDeckSlotD2:
+      cy.chooseDeckSlot('D2')
+      break
+    case Actions.ChoseDeckSlotD3:
+      cy.chooseDeckSlot('D3')
       break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)

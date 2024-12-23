@@ -51,6 +51,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.Confirm,
       Actions.Confirm,
       Actions.EditProtocol,
+      Actions.ChoseDeckSlotC2,
     ]
 
     // Everything after Actions.SingleChannelPipette

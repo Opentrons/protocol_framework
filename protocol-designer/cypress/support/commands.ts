@@ -170,13 +170,8 @@ Cypress.Commands.add('verifySettingsPage', () => {
 Cypress.Commands.add('closeAnnouncementModal', () => {
   // ComputingSpinner sometimes covers the announcement modal button and prevents the button click
   // this will retry until the ComputingSpinner does not exist
-  cy.get('[data-test="ComputingSpinner"]', { timeout: 30000 }).should(
-    'not.exist'
-  )
-  cy.get('button')
-    .contains('Got It!')
-    .should('be.visible')
-    .click({ force: true })
+  cy.visit('/')
+  cy.contains('button', 'Confirm').click()
 })
 
 //

@@ -5,11 +5,11 @@ import {
   verifyCreateProtocolPage,
 } from '../support/createNew'
 import { UniversalActions } from '../support/universalActions'
+import '../support/commands'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
-    cy.visit('/')
-    cy.contains('button', 'Confirm').click()
+    cy.closeAnnouncementModal()
   })
 
   it('content and step 1 flow works', () => {
