@@ -3,6 +3,8 @@
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional, Type
+from warnings import filterwarnings
+import warnings
 
 import pytest
 from decoy import Decoy
@@ -689,12 +691,22 @@ def test_get_state_summary_failure(
         protocol_id=None,
         created_at=datetime(year=2021, month=1, day=1, tzinfo=timezone.utc),
     )
-    subject.update_run_state(
-        run_id="run-id",
-        summary=invalid_state_summary,
-        commands=[],
-        run_time_parameters=[],
-    )
+
+    with warnings.catch_warnings():
+        # Pydantic raises a warning because invalid_state_summary (deliberately)
+        # has a wrongly-typed value in one of its fields. Ignore the warning.
+        warnings.filterwarnings(
+            action="ignore",
+            category=UserWarning,
+            module="pydantic",
+        )
+        subject.update_run_state(
+            run_id="run-id",
+            summary=invalid_state_summary,
+            commands=[],
+            run_time_parameters=[],
+        )
+
     result = subject.get_state_summary(run_id="run-id")
     assert isinstance(result, BadStateSummary)
     assert result.dataError.code == ErrorCodes.INVALID_STORED_DATA
