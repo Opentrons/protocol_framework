@@ -303,30 +303,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             self._handle_absorbance_reader_commands(
                 state_update, state_update.module_state_update.module_id
             )
-            # module_id = state_update.absorbance_reader_lid.module_id
-            # is_lid_on = state_update.absorbance_reader_lid.is_lid_on
-            #
-            # # Get current values:
-            # absorbance_reader_substate = self._state.substate_by_module_id[module_id]
-            # assert isinstance(
-            #     absorbance_reader_substate, AbsorbanceReaderSubState
-            # ), f"{module_id} is not an absorbance plate reader."
-            # configured = absorbance_reader_substate.configured
-            # measure_mode = absorbance_reader_substate.measure_mode
-            # configured_wavelengths = absorbance_reader_substate.configured_wavelengths
-            # reference_wavelength = absorbance_reader_substate.reference_wavelength
-            # data = absorbance_reader_substate.data
-            #
-            # self._state.substate_by_module_id[module_id] = AbsorbanceReaderSubState(
-            #     module_id=AbsorbanceReaderId(module_id),
-            #     configured=configured,
-            #     measured=True,
-            #     is_lid_on=is_lid_on,
-            #     measure_mode=measure_mode,
-            #     configured_wavelengths=configured_wavelengths,
-            #     reference_wavelength=reference_wavelength,
-            #     data=data,
-            # )
 
     def _add_module_substate(
         self,
@@ -630,18 +606,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             != update_types.NO_CHANGE
         ):
             data = state_update.module_state_update.absorbance_reader_data.read_result
-            #
-            # self._state.substate_by_module_id[module_id] = AbsorbanceReaderSubState(
-            #     module_id=AbsorbanceReaderId(module_id),
-            #     configured=configured,
-            #     measured=True,
-            #     is_lid_on=is_lid_on,
-            #     measure_mode=measure_mode,
-            #     configured_wavelengths=configured_wavelengths,
-            #     reference_wavelength=reference_wavelength,
-            #     data=state_update.absorbance_reader_data.read_data,
-            # )
-
         self._state.substate_by_module_id[module_id] = AbsorbanceReaderSubState(
             module_id=AbsorbanceReaderId(module_id),
             configured=configured,
