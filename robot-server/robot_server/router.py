@@ -1,6 +1,6 @@
 """Application routes."""
 from fastapi import Depends, status
-from server_utils.fastapi_utils.light_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import LightRouter
 
 
 from .constants import V1_TAG
@@ -28,15 +28,15 @@ from .service.tip_length.router import router as tl_router
 from .subsystems.router import subsystems_router
 from .system.router import system_router
 
-router = FastBuildRouter()
+router = LightRouter()
 
 # Legacy routes
 router.include_router(
     router=legacy_routes,
     tags=[V1_TAG],
     # todo(mm, 2024-12-19): This `responses` setting is preventing us from
-    # porting legacy_routes from fastapi.APIRouter to our FastBuildRouter.
-    # Either teach FastBuildRouter how to handle `responses` or stop doing
+    # porting legacy_routes from fastapi.APIRouter to our LightRouter.
+    # Either teach LightRouter how to handle `responses` or stop doing
     # a custom 422 response on these endpoints.
     responses={
         status.HTTP_422_UNPROCESSABLE_ENTITY: {
@@ -50,8 +50,8 @@ router.include_router(
     dependencies=[Depends(check_version_header)],
     responses={
         # todo(mm, 2024-12-19): This `responses` setting is preventing us from
-        # porting health_router from fastapi.APIRouter to our FastBuildRouter.
-        # Either teach FastBuildRouter how to handle `responses` or stop doing
+        # porting health_router from fastapi.APIRouter to our LightRouter.
+        # Either teach LightRouter how to handle `responses` or stop doing
         # a custom 422 response on these endpoints.
         status.HTTP_422_UNPROCESSABLE_ENTITY: {
             "model": LegacyErrorResponse,

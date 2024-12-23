@@ -2,7 +2,7 @@
 from typing import Annotated, Optional, Dict, List, cast
 
 from fastapi import status, Depends
-from server_utils.fastapi_utils.light_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import LightRouter
 
 from opentrons.hardware_control.instruments.ot3.instrument_calibration import (
     PipetteOffsetSummary,
@@ -51,7 +51,7 @@ from robot_server.subsystems.router import status_route_for, update_route_for
 
 from opentrons.hardware_control import OT3HardwareControlAPI
 
-instruments_router = FastBuildRouter()
+instruments_router = LightRouter()
 
 
 def _pipette_dict_to_pipette_res(

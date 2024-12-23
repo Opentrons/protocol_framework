@@ -6,7 +6,7 @@ import textwrap
 from typing import Annotated, Literal
 
 import fastapi
-from server_utils.fastapi_utils.light_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import LightRouter
 
 from opentrons.protocol_engine import LabwareOffset, LabwareOffsetCreate, ModuleModel
 from opentrons.types import DeckSlotName
@@ -26,7 +26,7 @@ from .store import LabwareOffsetNotFoundError, LabwareOffsetStore
 from .fastapi_dependencies import get_labware_offset_store
 
 
-router = FastBuildRouter()
+router = LightRouter()
 
 
 @PydanticResponse.wrap_route(

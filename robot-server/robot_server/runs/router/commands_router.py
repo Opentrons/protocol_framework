@@ -3,7 +3,7 @@ import textwrap
 from typing import Annotated, Final, Literal, Optional, Union
 
 from fastapi import Depends, Query, status
-from server_utils.fastapi_utils.light_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import LightRouter
 
 from opentrons.protocol_engine import (
     CommandPointer,
@@ -45,7 +45,7 @@ from .base_router import RunNotFound, RunStopped
 
 _DEFAULT_COMMAND_LIST_LENGTH: Final = 20
 
-commands_router = FastBuildRouter()
+commands_router = LightRouter()
 
 
 class CommandNotFound(ErrorDetails):

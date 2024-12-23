@@ -2,7 +2,7 @@
 from typing import Annotated, Final, List, Literal, Optional, cast
 
 from fastapi import Depends, Query, status
-from server_utils.fastapi_utils.light_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import LightRouter
 
 from opentrons.protocol_engine import CommandIntent
 from opentrons.protocol_engine.errors import CommandDoesNotExistError
@@ -26,7 +26,7 @@ from .stateless_commands import StatelessCommand, StatelessCommandCreate
 _DEFAULT_COMMAND_LIST_LENGTH: Final = 20
 
 
-commands_router = FastBuildRouter()
+commands_router = LightRouter()
 
 
 class CommandNotFound(ErrorDetails):

@@ -25,7 +25,7 @@ from fastapi import (
 )
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
-from server_utils.fastapi_utils.light_router import FastBuildRouter
+from server_utils.fastapi_utils.light_router import LightRouter
 
 from opentrons.protocol_reader import (
     ProtocolReader,
@@ -151,7 +151,7 @@ class ProtocolLinks(BaseModel):
     )
 
 
-protocols_router = FastBuildRouter()
+protocols_router = LightRouter()
 
 
 @PydanticResponse.wrap_route(
