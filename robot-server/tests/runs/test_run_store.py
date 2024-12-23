@@ -3,7 +3,6 @@
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional, Type
-from warnings import filterwarnings
 import warnings
 
 import pytest
