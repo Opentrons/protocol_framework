@@ -18,7 +18,6 @@ declare global {
         left_pipette_selector: string,
         right_pipette_selector: string
       ) => Cypress.Chainable<void>
-      chooseDeckSlot: (slot: string) => Cypress.Chainable<void>
       selectTipRacks: (left: string, right: string) => Cypress.Chainable<void>
       addLiquid: (
         liquidName: string,
@@ -193,48 +192,6 @@ Cypress.Commands.add(
     cy.get(rightPipetteSelector).click()
   }
 )
-
-Cypress.Commands.add('chooseDeckSlot', (slot: string) => {
-  // Define the deckSlots object with a Record type for valid keys
-  const deckSlots: Record<
-    | 'A1'
-    | 'A2'
-    | 'A3'
-    | 'B1'
-    | 'B2'
-    | 'B3'
-    | 'C1'
-    | 'C2'
-    | 'C3'
-    | 'D1'
-    | 'D2'
-    | 'D3',
-    () => Cypress.Chainable<JQuery<HTMLElement>>
-  > = {
-    A1: () => cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot'),
-    A2: () => cy.contains('foreignObject[x="164"][y="321"]', 'Edit slot'),
-    A3: () => cy.contains('foreignObject[x="328"][y="321"]', 'Edit slot'),
-    B1: () => cy.contains('foreignObject[x="0"][y="214"]', 'Edit slot'),
-    B2: () => cy.contains('foreignObject[x="164"][y="214"]', 'Edit slot'),
-    B3: () => cy.contains('foreignObject[x="328"][y="214"]', 'Edit slot'),
-    C1: () => cy.contains('foreignObject[x="0"][y="107"]', 'Edit slot'),
-    C2: () => cy.contains('foreignObject[x="164"][y="107"]', 'Edit slot'),
-    C3: () => cy.contains('foreignObject[x="328"][y="107"]', 'Edit slot'),
-    D1: () => cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot'),
-    D2: () => cy.contains('foreignObject[x="0"][y="0"]', 'Edit slot'),
-    D3: () => cy.contains('foreignObject[x="328"][y="0"]', 'Edit slot'),
-  }
-
-  // Type-safe slot action assignment
-  const slotAction = deckSlots[slot as keyof typeof deckSlots]
-
-  // Check if slotAction exists and call it, else throw an error
-  if (slotAction) {
-    slotAction() // Execute the Cypress command for the selected slot
-  } else {
-    throw new Error(`Slot ${slot} not found in deck slots.`)
-  }
-})
 
 Cypress.Commands.add('selectTipRacks', (left, right) => {
   if (left.length > 0) {
