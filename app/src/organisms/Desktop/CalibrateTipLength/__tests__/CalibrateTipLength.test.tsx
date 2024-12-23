@@ -14,7 +14,7 @@ import {
   CalibrationError,
 } from '/app/organisms/Desktop/CalibrationError'
 
-import type { ComponentProps } from 'react'
+import type { ComponentProps, ComponentType } from 'react'
 import type { TipLengthCalibrationStep } from '/app/redux/sessions/types'
 
 vi.mock('@opentrons/shared-data', async importOriginal => {

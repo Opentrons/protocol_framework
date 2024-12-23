@@ -13,7 +13,7 @@ import {
   CalibrationError,
 } from '/app/organisms/Desktop/CalibrationError'
 
-import type { ComponentProps } from 'react'
+import type { ComponentProps, ComponentType } from 'react'
 import type { DeckCalibrationStep } from '/app/redux/sessions/types'
 import type { DispatchRequestsType } from '/app/redux/robot-api'
 

@@ -12,7 +12,7 @@ import {
 } from '/app/organisms/Desktop/CalibrationError'
 import { CalibratePipetteOffset } from '../index'
 
-import type { ComponentProps } from 'react'
+import type { ComponentProps, ComponentType } from 'react'
 import type { PipetteOffsetCalibrationStep } from '/app/redux/sessions/types'
 import type { DispatchRequestsType } from '/app/redux/robot-api'
 

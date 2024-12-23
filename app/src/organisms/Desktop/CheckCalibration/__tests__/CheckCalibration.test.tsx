@@ -11,7 +11,7 @@ import { mockCalibrationCheckSessionAttributes } from '/app/redux/sessions/__fix
 
 import { CheckCalibration } from '../index'
 
-import type { ComponentProps } from 'react'
+import type { ComponentProps, ComponentType } from 'react'
 import type { RobotCalibrationCheckStep } from '/app/redux/sessions/types'
 
 vi.mock('/app/redux/calibration/selectors')
