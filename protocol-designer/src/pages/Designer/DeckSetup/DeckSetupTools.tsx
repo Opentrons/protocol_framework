@@ -18,6 +18,8 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import {
+  ABSORBANCE_READER_TYPE,
+  ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
   FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
   getModuleDisplayName,
@@ -35,6 +37,7 @@ import {
   deleteDeckFixture,
 } from '../../../step-forms/actions/additionalItems'
 import { createModule, deleteModule } from '../../../step-forms/actions'
+import { getAdditionalEquipment } from '../../../step-forms/selectors'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
 import {
   createContainer,
@@ -52,11 +55,8 @@ import { selectors } from '../../../labware-ingred/selectors'
 import { useKitchen } from '../../../organisms/Kitchen/hooks'
 import { getDismissedHints } from '../../../tutorial/selectors'
 import { createContainerAboveModule } from '../../../step-forms/actions/thunks'
-import {
-  ConfirmDeleteStagingAreaModal,
-  PROTOCOL_NAV_BAR_HEIGHT_REM,
-} from '../../../organisms'
-import { BUTTON_LINK_STYLE } from '../../../atoms'
+import { LINK_BUTTON_STYLE, NAV_BAR_HEIGHT_REM } from '../../../atoms'
+import { ConfirmDeleteStagingAreaModal } from '../../../organisms'
 import { getSlotInformation } from '../utils'
 import { ALL_ORDERED_CATEGORIES, FIXTURES, MOAM_MODELS } from './constants'
 import { LabwareTools } from './LabwareTools'
@@ -111,6 +111,10 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
 
   const [changeModuleWarningInfo, displayModuleWarning] = useState<boolean>(
     false
+  )
+  const additionalEquipment = useSelector(getAdditionalEquipment)
+  const isGripperAttached = Object.values(additionalEquipment).some(
+    equipment => equipment?.name === 'gripper'
   )
   const [selectedHardware, setSelectedHardware] = useState<
     ModuleModel | Fixture | null
@@ -231,7 +235,9 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     disabled:
       selectedFixture === 'wasteChute' ||
       selectedFixture === 'wasteChuteAndStagingArea' ||
-      selectedFixture === 'trashBin',
+      selectedFixture === 'trashBin' ||
+      selectedModuleModel === ABSORBANCE_READER_V1,
+    disabledReasonForTooltip: t('plate_reader_no_labware'),
     isActive: tab === 'labware',
     onClick: () => {
       setTab('labware')
@@ -320,10 +326,16 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     }
     if (selectedModuleModel != null) {
       //  create module
+      const moduleType = getModuleType(selectedModuleModel)
+      // enforce gripper present in order to add plate reader
+      if (moduleType === ABSORBANCE_READER_TYPE && !isGripperAttached) {
+        makeSnackbar(t('gripper_required_for_plate_reader') as string)
+        return
+      }
       dispatch(
         createModule({
           slot,
-          type: getModuleType(selectedModuleModel),
+          type: moduleType,
           model: selectedModuleModel,
         })
       )
@@ -371,7 +383,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     position === POSITION_FIXED
       ? {
           right: SPACING.spacing12,
-          top: `calc(${PROTOCOL_NAV_BAR_HEIGHT_REM}rem + ${SPACING.spacing12})`,
+          top: `calc(${NAV_BAR_HEIGHT_REM}rem + ${SPACING.spacing12})`,
         }
       : {}
   return (
@@ -398,7 +410,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       ) : null}
       {changeModuleWarning}
       <Toolbox
-        height={`calc(100vh - ${PROTOCOL_NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
+        height={`calc(100vh - ${NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
         width={`${DECK_SETUP_TOOLS_WIDTH_REM}rem`}
         position={position}
         {...positionStyles}
@@ -426,7 +438,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                 handleResetToolbox()
               }
             }}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
             textDecoration={TYPOGRAPHY.textDecorationUnderline}
           >
             <StyledText desktopStyle="bodyDefaultRegular">

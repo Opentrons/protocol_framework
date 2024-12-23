@@ -226,7 +226,7 @@ class Aspirate(
 
     commandType: AspirateCommandType = "aspirate"
     params: AspirateParams
-    result: Optional[AspirateResult]
+    result: Optional[AspirateResult] = None
 
     _ImplementationCls: Type[AspirateImplementation] = AspirateImplementation
 

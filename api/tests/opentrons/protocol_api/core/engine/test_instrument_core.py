@@ -1,4 +1,5 @@
 """Test for the ProtocolEngine-based instrument API core."""
+
 from typing import cast, Optional
 
 from opentrons_shared_data.errors.exceptions import PipetteLiquidNotFoundError
@@ -99,7 +100,7 @@ def subject(
 ) -> InstrumentCore:
     """Get a InstrumentCore test subject with its dependencies mocked out."""
     decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
-        LoadedPipette.construct(mount=MountType.LEFT)  # type: ignore[call-arg]
+        LoadedPipette.model_construct(mount=MountType.LEFT)  # type: ignore[call-arg]
     )
 
     decoy.when(mock_engine_client.state.pipettes.get_flow_rates("abc123")).then_return(
@@ -130,7 +131,7 @@ def test_get_pipette_name(
 ) -> None:
     """It should get the pipette's load name."""
     decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
-        LoadedPipette.construct(pipetteName=PipetteNameType.P300_SINGLE)  # type: ignore[call-arg]
+        LoadedPipette.model_construct(pipetteName=PipetteNameType.P300_SINGLE)  # type: ignore[call-arg]
     )
 
     result = subject.get_pipette_name()
@@ -143,7 +144,7 @@ def test_get_mount(
 ) -> None:
     """It should get the pipette's mount."""
     decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
-        LoadedPipette.construct(mount=MountType.LEFT)  # type: ignore[call-arg]
+        LoadedPipette.model_construct(mount=MountType.LEFT)  # type: ignore[call-arg]
     )
 
     result = subject.get_mount()
@@ -161,7 +162,7 @@ def test_get_hardware_state(
     pipette_dict = cast(PipetteDict, {"display_name": "Cool Pipette", "has_tip": True})
 
     decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
-        LoadedPipette.construct(mount=MountType.LEFT)  # type: ignore[call-arg]
+        LoadedPipette.model_construct(mount=MountType.LEFT)  # type: ignore[call-arg]
     )
     decoy.when(mock_sync_hardware.get_attached_instrument(Mount.LEFT)).then_return(
         pipette_dict
@@ -530,7 +531,7 @@ def test_aspirate_from_well(
             pipette_id="abc123",
             labware_id="123abc",
             well_name="my cool well",
-            well_location=WellLocation(
+            well_location=LiquidHandlingWellLocation(
                 origin=WellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)
             ),
         ),
@@ -828,7 +829,7 @@ def test_dispense_to_well(
             pipette_id="abc123",
             labware_id="123abc",
             well_name="my cool well",
-            well_location=WellLocation(
+            well_location=LiquidHandlingWellLocation(
                 origin=WellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)
             ),
         ),
@@ -1438,7 +1439,7 @@ def test_detect_liquid_presence(
             )
         )
     ).then_return(
-        cmd.TryLiquidProbeResult.construct(
+        cmd.TryLiquidProbeResult.model_construct(
             z_position=returned_from_engine,
             position=object(),  # type: ignore[arg-type]
         )

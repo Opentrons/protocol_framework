@@ -25,7 +25,7 @@ import three from '../../assets/images/onboarding_animation_3.webm'
 import four from '../../assets/images/onboarding_animation_4.webm'
 import five from '../../assets/images/onboarding_animation_5.webm'
 import six from '../../assets/images/onboarding_animation_6.webm'
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import type { RobotType } from '@opentrons/shared-data'
 
 interface WizardBodyProps {
@@ -144,7 +144,7 @@ export function WizardBody(props: WizardBodyProps): JSX.Element {
           alignItems={ALIGN_CENTER}
         >
           {goBack != null ? (
-            <Btn onClick={goBack} css={BUTTON_LINK_STYLE} height="1.5rem">
+            <Btn onClick={goBack} css={LINK_BUTTON_STYLE} height="1.5rem">
               <StyledText desktopStyle="bodyLargeSemiBold">
                 {t('go_back')}
               </StyledText>

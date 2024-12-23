@@ -130,7 +130,7 @@ class BlowOut(
 
     commandType: BlowOutCommandType = "blowout"
     params: BlowOutParams
-    result: Optional[BlowOutResult]
+    result: Optional[BlowOutResult] = None
 
     _ImplementationCls: Type[BlowOutImplementation] = BlowOutImplementation
 

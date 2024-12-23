@@ -17,7 +17,7 @@ import {
   StyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import { AnnouncementModal } from '../../organisms'
 import { actions as loadFileActions } from '../../load-file'
 import { getFileMetadata } from '../../file-data/selectors'
@@ -38,7 +38,7 @@ export function Landing(): JSX.Element {
   const [showAnnouncementModal, setShowAnnouncementModal] = useState<boolean>(
     false
   )
-  const hasOptedIn = useSelector(getHasOptedIn)
+  const { hasOptedIn } = useSelector(getHasOptedIn)
   const { bakeToast, eatToast } = useKitchen()
   const announcements = useAnnouncements()
   const lastAnnouncement = announcements[announcements.length - 1]
@@ -137,7 +137,7 @@ export function Landing(): JSX.Element {
           />
         </StyledNavLink>
         <StyledLabel>
-          <Flex css={BUTTON_LINK_STYLE}>
+          <Flex css={LINK_BUTTON_STYLE}>
             <StyledText desktopStyle="bodyLargeRegular">
               {t('edit_existing')}
             </StyledText>

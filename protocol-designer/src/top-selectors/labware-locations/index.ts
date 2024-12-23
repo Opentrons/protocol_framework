@@ -166,8 +166,8 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
               {
                 name:
                   modIdWithAdapter != null
-                    ? `${adapterDisplayName} on top of ${moduleUnderAdapter} in slot ${moduleSlotInfo}`
-                    : `${adapterDisplayName} on slot ${adapterSlotInfo}`,
+                    ? `${moduleSlotInfo} on ${moduleUnderAdapter} with ${adapterDisplayName}`
+                    : `${adapterSlotInfo} with ${adapterDisplayName}`,
                 value: labwareId,
               },
             ]
@@ -186,13 +186,9 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
           : [
               ...acc,
               {
-                name: `${getModuleDisplayName(
+                name: `${modOnDeck.slot} on ${getModuleDisplayName(
                   moduleEntities[modId].model
-                )} in slot ${
-                  modOnDeck.slot === 'span7_8_10_11'
-                    ? '7, 8, 10, 11'
-                    : modOnDeck.slot
-                }`,
+                )}`,
                 value: modId,
               },
             ]
@@ -234,7 +230,7 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
         )
       })
       .map(slotId => ({ name: slotId, value: slotId }))
-    const offDeck = { name: 'Off-Deck', value: 'offDeck' }
+    const offDeck = { name: 'Off-deck', value: 'offDeck' }
     const wasteChuteSlot = {
       name: 'Waste Chute in D3',
       value: WASTE_CHUTE_CUTOUT,

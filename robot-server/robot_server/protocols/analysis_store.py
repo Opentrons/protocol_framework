@@ -195,7 +195,7 @@ class AnalysisStore:
         else:
             result = AnalysisResult.OK
 
-        completed_analysis = CompletedAnalysis.construct(
+        completed_analysis = CompletedAnalysis.model_construct(
             id=analysis_id,
             result=result,
             robotType=robot_type,
@@ -237,7 +237,7 @@ class AnalysisStore:
         errors: List[ErrorOccurrence],
     ) -> None:
         """Commit the failed analysis to store."""
-        completed_analysis = CompletedAnalysis.construct(
+        completed_analysis = CompletedAnalysis.model_construct(
             id=analysis_id,
             result=AnalysisResult.NOT_OK,
             robotType=robot_type,
@@ -305,7 +305,9 @@ class AnalysisStore:
             protocol_id=protocol_id
         )
         completed_analysis_summaries = [
-            AnalysisSummary.construct(id=analysis_id, status=AnalysisStatus.COMPLETED)
+            AnalysisSummary.model_construct(
+                id=analysis_id, status=AnalysisStatus.COMPLETED
+            )
             for analysis_id in completed_analysis_ids
         ]
 
@@ -455,7 +457,7 @@ class _PendingAnalysisStore:
             protocol_id not in self._analysis_ids_by_protocol_id
         ), "Protocol must not already have a pending analysis."
 
-        new_pending_analysis = PendingAnalysis.construct(
+        new_pending_analysis = PendingAnalysis.model_construct(
             id=analysis_id,
             runTimeParameters=run_time_parameters,
         )

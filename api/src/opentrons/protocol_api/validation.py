@@ -75,6 +75,7 @@ _PIPETTE_NAMES_MAP = {
     "flex_8channel_50": PipetteNameType.P50_MULTI_FLEX,
     "flex_1channel_1000": PipetteNameType.P1000_SINGLE_FLEX,
     "flex_8channel_1000": PipetteNameType.P1000_MULTI_FLEX,
+    "flex_8channel_1000_em": PipetteNameType.P1000_MULTI_EM,
     "flex_96channel_1000": PipetteNameType.P1000_96,
     "flex_96channel_200": PipetteNameType.P200_96,
 }

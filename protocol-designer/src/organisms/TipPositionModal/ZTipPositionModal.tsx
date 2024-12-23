@@ -17,7 +17,7 @@ import {
 } from '@opentrons/components'
 import { DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP } from '../../constants'
 import { getIsTouchTipField } from '../../form-types'
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import { getMainPagePortalEl } from '../Portal'
 import * as utils from './utils'
 import { TOO_MANY_DECIMALS } from './constants'
@@ -156,7 +156,7 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
             onClick={() => {
               setValue(utils.roundValue(defaultMm, 'up').toString())
             }}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
           >
             {t('shared:reset_to_default')}
           </Btn>

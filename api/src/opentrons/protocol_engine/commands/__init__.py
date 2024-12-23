@@ -35,8 +35,10 @@ from .command import (
 
 from .command_unions import (
     Command,
+    CommandAdapter,
     CommandParams,
     CommandCreate,
+    CommandCreateAdapter,
     CommandResult,
     CommandType,
     CommandDefinedErrorData,
@@ -381,8 +383,10 @@ from .liquid_probe import (
 __all__ = [
     # command type unions
     "Command",
+    "CommandAdapter",
     "CommandParams",
     "CommandCreate",
+    "CommandCreateAdapter",
     "CommandResult",
     "CommandType",
     "CommandPrivateResult",

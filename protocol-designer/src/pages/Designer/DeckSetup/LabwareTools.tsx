@@ -32,12 +32,13 @@ import {
   getModuleType,
 } from '@opentrons/shared-data'
 
-import { BUTTON_LINK_STYLE } from '../../../atoms'
+import { LINK_BUTTON_STYLE } from '../../../atoms'
 import { selectors as stepFormSelectors } from '../../../step-forms'
 import { getOnlyLatestDefs } from '../../../labware-defs'
 import {
   ADAPTER_96_CHANNEL,
   getLabwareIsCompatible as _getLabwareIsCompatible,
+  getLabwareCompatibleWithAbsorbanceReader,
 } from '../../../utils/labwareModuleCompatibility'
 import { getHas96Channel } from '../../../utils'
 import { createCustomLabwareDef } from '../../../labware-defs/actions'
@@ -49,6 +50,7 @@ import {
   selectLabware,
   selectNestedLabware,
 } from '../../../labware-ingred/actions'
+import { getEnableAbsorbanceReader } from '../../../feature-flags/selectors'
 import {
   ALL_ORDERED_CATEGORIES,
   CUSTOM_CATEGORY,
@@ -132,13 +134,17 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
     robotType === OT2_ROBOT_TYPE ? isNextToHeaterShaker : false
   )
 
+  const enablePlateReader = useSelector(getEnableAbsorbanceReader)
+
   const getLabwareCompatible = useCallback(
     (def: LabwareDefinition2) => {
       // assume that custom (non-standard) labware is (potentially) compatible
       if (moduleType == null || !getLabwareDefIsStandard(def)) {
         return true
       }
-      return _getLabwareIsCompatible(def, moduleType)
+      return moduleType === ABSORBANCE_READER_TYPE
+        ? getLabwareCompatibleWithAbsorbanceReader(def)
+        : _getLabwareIsCompatible(def, moduleType)
     },
     [moduleType]
   )
@@ -167,7 +173,8 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
           moduleType !== HEATERSHAKER_MODULE_TYPE) ||
         (isAdapter96Channel && !has96Channel) ||
         (slot === 'offDeck' && isAdapter) ||
-        (PLATE_READER_LOADNAME === parameters.loadName &&
+        (!enablePlateReader &&
+          PLATE_READER_LOADNAME === parameters.loadName &&
           moduleType !== ABSORBANCE_READER_TYPE)
       )
     },
@@ -484,7 +491,7 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
         alignItems={ALIGN_CENTER}
         justifyContent={JUSTIFY_CENTER}
       >
-        <StyledLabel css={BUTTON_LINK_STYLE}>
+        <StyledLabel css={LINK_BUTTON_STYLE}>
           <StyledText desktopStyle="bodyDefaultRegular">
             {t('upload_custom_labware')}
           </StyledText>

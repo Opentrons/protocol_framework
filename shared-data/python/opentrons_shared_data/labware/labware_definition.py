@@ -6,21 +6,19 @@ shared-data. It's been modified by hand to be more friendly.
 from __future__ import annotations
 
 from enum import Enum
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 from math import sqrt, asin
 from numpy import pi, trapz
 from functools import cached_property
 
 from pydantic import (
+    ConfigDict,
     BaseModel,
-    Extra,
     Field,
-    conint,
-    confloat,
     StrictInt,
     StrictFloat,
 )
-from typing_extensions import Literal
+from typing_extensions import Annotated, Literal
 
 from .constants import (
     Conical,
@@ -36,12 +34,8 @@ from .constants import (
 SAFE_STRING_REGEX = "^[a-z0-9._]+$"
 
 
-if TYPE_CHECKING:
-    _StrictNonNegativeInt = int
-    _StrictNonNegativeFloat = float
-else:
-    _StrictNonNegativeInt = conint(strict=True, ge=0)
-    _StrictNonNegativeFloat = confloat(strict=True, ge=0.0)
+_StrictNonNegativeInt = Annotated[int, Field(strict=True, ge=0)]
+_StrictNonNegativeFloat = Annotated[float, Field(strict=True, ge=0.0)]
 
 
 _Number = Union[StrictInt, StrictFloat]
@@ -178,7 +172,7 @@ class Parameters(BaseModel):
     loadName: str = Field(
         ...,
         description="Name used to reference a labware definition",
-        regex=SAFE_STRING_REGEX,
+        pattern=SAFE_STRING_REGEX,
     )
     isMagneticModuleCompatible: bool = Field(
         ...,
@@ -206,8 +200,7 @@ class Dimensions(BaseModel):
 
 
 class WellDefinition(BaseModel):
-    class Config:
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")
 
     depth: _NonNegativeNumber = Field(...)
     x: _NonNegativeNumber = Field(
@@ -276,8 +269,7 @@ class SphericalSegment(BaseModel):
     def count(self) -> int:
         return self.xCount * self.yCount
 
-    class Config:
-        keep_untouched = (cached_property,)
+    model_config = ConfigDict(ignored_types=(cached_property,))
 
 
 class ConicalFrustum(BaseModel):
@@ -311,8 +303,7 @@ class ConicalFrustum(BaseModel):
     def count(self) -> int:
         return self.xCount * self.yCount
 
-    class Config:
-        keep_untouched = (cached_property,)
+    model_config = ConfigDict(ignored_types=(cached_property,))
 
 
 class CuboidalFrustum(BaseModel):
@@ -355,8 +346,7 @@ class CuboidalFrustum(BaseModel):
     def count(self) -> int:
         return self.xCount * self.yCount
 
-    class Config:
-        keep_untouched = (cached_property,)
+    model_config = ConfigDict(ignored_types=(cached_property,))
 
 
 # A squared cone is the intersection of a cube and a cone that both
@@ -497,8 +487,7 @@ class SquaredConeSegment(BaseModel):
     def count(self) -> int:
         return self.xCount * self.yCount
 
-    class Config:
-        keep_untouched = (cached_property,)
+    model_config = ConfigDict(ignored_types=(cached_property,))
 
 
 """
@@ -623,8 +612,7 @@ class RoundedCuboidSegment(BaseModel):
     def count(self) -> int:
         return self.xCount * self.yCount
 
-    class Config:
-        keep_untouched = (cached_property,)
+    model_config = ConfigDict(ignored_types=(cached_property,))
 
 
 class Metadata1(BaseModel):
@@ -679,9 +667,9 @@ class LabwareDefinition(BaseModel):
         ...,
         description="Version of the labware definition itself "
         "(eg myPlate v1/v2/v3). An incrementing integer",
-        ge=1.0,
+        ge=1,
     )
-    namespace: str = Field(..., regex=SAFE_STRING_REGEX)
+    namespace: str = Field(..., pattern=SAFE_STRING_REGEX)
     metadata: Metadata = Field(
         ..., description="Properties used for search and display"
     )
@@ -738,11 +726,11 @@ class LabwareDefinition(BaseModel):
         "during labware movement.",
     )
     gripHeightFromLabwareBottom: Optional[float] = Field(
-        default_factory=None,
+        default=None,
         description="The Z-height, from labware bottom, where the gripper should grip the labware.",
     )
     gripForce: Optional[float] = Field(
-        default_factory=None,
+        default=None,
         description="Force, in Newtons, with which the gripper should grip the labware.",
     )
     innerLabwareGeometry: Optional[Dict[str, InnerWellGeometry]] = Field(

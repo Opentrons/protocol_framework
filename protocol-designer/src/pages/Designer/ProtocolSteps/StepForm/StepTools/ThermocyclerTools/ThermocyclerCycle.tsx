@@ -20,7 +20,7 @@ import {
   StyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { BUTTON_LINK_STYLE } from '../../../../../../atoms'
+import { LINK_BUTTON_STYLE } from '../../../../../../atoms'
 import {
   isTimeFormatMinutesSeconds,
   temperatureRangeFieldValue,
@@ -262,7 +262,7 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
           whiteSpace={NO_WRAP}
           textDecoration={TYPOGRAPHY.textDecorationUnderline}
           padding={SPACING.spacing4}
-          css={BUTTON_LINK_STYLE}
+          css={LINK_BUTTON_STYLE}
         >
           <StyledText desktopStyle="bodyDefaultRegular">
             {i18n.format(
@@ -329,7 +329,7 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
           }}
           padding={SPACING.spacing4}
           css={[
-            BUTTON_LINK_STYLE,
+            LINK_BUTTON_STYLE,
             css`
               visibility: ${hover ? 'visible' : 'hidden'};
               opacity: ${hover ? 1 : 0};
@@ -527,7 +527,7 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
             whiteSpace={NO_WRAP}
             textDecoration={TYPOGRAPHY.textDecorationUnderline}
             padding={SPACING.spacing4}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
           >
             <StyledText desktopStyle="bodyDefaultRegular">
               {i18n.format(

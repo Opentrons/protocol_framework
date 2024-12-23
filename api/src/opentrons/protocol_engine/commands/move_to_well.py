@@ -106,7 +106,7 @@ class MoveToWell(
 
     commandType: MoveToWellCommandType = "moveToWell"
     params: MoveToWellParams
-    result: Optional[MoveToWellResult]
+    result: Optional[MoveToWellResult] = None
 
     _ImplementationCls: Type[MoveToWellImplementation] = MoveToWellImplementation
 

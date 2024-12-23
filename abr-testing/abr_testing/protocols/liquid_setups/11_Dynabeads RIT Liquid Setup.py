@@ -13,7 +13,7 @@ metadata = {
 
 requirements = {
     "robotType": "Flex",
-    "apiLevel": "2.20",
+    "apiLevel": "2.21",
 }
 
 
@@ -27,8 +27,11 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     ) = load_common_liquid_setup_labware_and_instruments(protocol)
 
     reservoir_wash = protocol.load_labware("nest_12_reservoir_15ml", "D2", "Reservoir")
-    sample_plate = protocol.load_labware(
-        "nest_96_wellplate_2ml_deep", "C3", "Sample Plate"
+    sample_plate1 = protocol.load_labware(
+        "nest_96_wellplate_2ml_deep", "C3", "Sample Plate 1"
+    )
+    sample_plate2 = protocol.load_labware(
+        "nest_96_wellplate_2ml_deep", "B3", "Sample Plate 2"
     )
 
     columns = [
@@ -52,10 +55,24 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
         p1000.dispense(750, reservoir_wash[i].top())
         p1000.blow_out(location=source_reservoir["A1"].top())
     p1000.return_tip()
+    # 1 column 6000 uL
+    p1000.pick_up_tip()
+    for i in columns:
+        p1000.aspirate(750, source_reservoir["A1"].bottom(z=0.5))
+        p1000.dispense(750, reservoir_wash[i].top())
+        p1000.blow_out(location=source_reservoir["A1"].top())
+    p1000.return_tip()
     # Nest 96 Deep Well Plate 2 mL: 250 uL per well
     p1000.pick_up_tip()
     for n in columns:
         p1000.aspirate(250, source_reservoir["A1"].bottom(z=0.5))
-        p1000.dispense(250, sample_plate[n].bottom(z=1))
+        p1000.dispense(250, sample_plate1[n].bottom(z=1))
+        p1000.blow_out(location=source_reservoir["A1"].top())
+    p1000.return_tip()
+    # Nest 96 Deep Well Plate 2 mL: 250 uL per well
+    p1000.pick_up_tip()
+    for n in columns:
+        p1000.aspirate(250, source_reservoir["A1"].bottom(z=0.5))
+        p1000.dispense(250, sample_plate2[n].bottom(z=1))
         p1000.blow_out(location=source_reservoir["A1"].top())
     p1000.return_tip()
