@@ -1,7 +1,7 @@
 describe('The Settings Page', () => {
   before(() => {
     cy.visit('/')
-    cy.contains('button', 'Confirm').click()
+    cy.closeAnnouncementModal()
   })
 
   it('content and toggle state', () => {

@@ -105,7 +105,6 @@ Cypress.Commands.add('verifyCreateNewHeader', () => {
 // Home Page
 Cypress.Commands.add('verifyHomePage', () => {
   // Todo re-add when Once 8.2.2 comes back in
-  cy.contains('button', 'Confirm').click()
   cy.contains(content.welcome)
   cy.contains('button', locators.createProtocol).should('be.visible')
   cy.contains('label', locators.editProtocol).should('be.visible')
