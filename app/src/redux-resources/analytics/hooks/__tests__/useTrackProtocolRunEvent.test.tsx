@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { createStore } from 'redux'
 import { Provider } from 'react-redux'
 import { QueryClient, QueryClientProvider } from 'react-query'
@@ -16,6 +15,7 @@ import { getAppLanguage } from '/app/redux/config'
 import { mockConnectableRobot } from '/app/redux/discovery/__fixtures__'
 import { useRobot } from '/app/redux-resources/robots'
 
+import type { FunctionComponent, ReactNode } from 'react'
 import type { Store } from 'redux'
 import type { Mock } from 'vitest'
 
@@ -33,7 +33,7 @@ const PROTOCOL_PROPERTIES = { protocolType: 'python' }
 
 let mockTrackEvent: Mock
 let mockGetProtocolRunAnalyticsData: Mock
-let wrapper: React.FunctionComponent<{ children: React.ReactNode }>
+let wrapper: FunctionComponent<{ children: ReactNode }>
 let store: Store<any> = createStore(vi.fn(), {})
 
 describe('useTrackProtocolRunEvent hook', () => {
