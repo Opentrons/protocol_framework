@@ -13,12 +13,14 @@ import {
   useHoverTooltip,
 } from '@opentrons/components'
 
+import type { ReactNode } from 'react'
+
 interface CheckboxExpandStepFormFieldProps {
   title: string
   checkboxUpdateValue: (value: unknown) => void
   checkboxValue: unknown
   isChecked: boolean
-  children?: React.ReactNode
+  children?: ReactNode
   tooltipText?: string | null
   disabled?: boolean
 }

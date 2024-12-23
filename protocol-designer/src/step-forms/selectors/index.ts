@@ -29,6 +29,7 @@ import { getProfileItemsHaveErrors } from '../utils/getProfileItemsHaveErrors'
 import * as featureFlagSelectors from '../../feature-flags/selectors'
 import { denormalizePipetteEntities, getHydratedForm } from '../utils'
 import { selectors as labwareDefSelectors } from '../../labware-defs'
+import type { ComponentProps } from 'react'
 import type { Selector } from 'reselect'
 import type {
   AdditionalEquipmentEntities,
@@ -400,7 +401,7 @@ export const getEquippedPipetteOptions: Selector<
   )
 })
 // Formats pipette data specifically for file page InstrumentGroup component
-type PipettesForInstrumentGroup = React.ComponentProps<typeof InstrumentGroup>
+type PipettesForInstrumentGroup = ComponentProps<typeof InstrumentGroup>
 export const getPipettesForInstrumentGroup: Selector<
   BaseState,
   PipettesForInstrumentGroup

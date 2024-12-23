@@ -3,9 +3,11 @@
 import logging
 from typing import Annotated, Union
 
-from fastapi import APIRouter, Depends, status
+from fastapi import Depends, status
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
+
+from server_utils.fastapi_utils.light_router import LightRouter
 
 from opentrons.protocol_engine import LabwareOffsetCreate, LabwareOffset
 
@@ -23,7 +25,7 @@ from ..dependencies import get_run_orchestrator_store, get_run_data_manager
 from .base_router import RunNotFound, RunStopped, RunNotIdle, get_run_data_from_url
 
 log = logging.getLogger(__name__)
-labware_router = APIRouter()
+labware_router = LightRouter()
 
 
 @PydanticResponse.wrap_route(

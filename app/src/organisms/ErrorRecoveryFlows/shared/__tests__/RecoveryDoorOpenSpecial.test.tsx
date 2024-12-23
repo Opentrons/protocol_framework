@@ -11,11 +11,11 @@ import { i18n } from '/app/i18n'
 import { RecoveryDoorOpenSpecial } from '../RecoveryDoorOpenSpecial'
 import { RECOVERY_MAP } from '../../constants'
 
-import type * as React from 'react'
+import type { ComponentProps } from 'react'
 import { clickButtonLabeled } from '/app/organisms/ErrorRecoveryFlows/__tests__/util'
 
 describe('RecoveryDoorOpenSpecial', () => {
-  let props: React.ComponentProps<typeof RecoveryDoorOpenSpecial>
+  let props: ComponentProps<typeof RecoveryDoorOpenSpecial>
 
   beforeEach(() => {
     props = {
@@ -39,9 +39,7 @@ describe('RecoveryDoorOpenSpecial', () => {
     } as any
   })
 
-  const render = (
-    props: React.ComponentProps<typeof RecoveryDoorOpenSpecial>
-  ) => {
+  const render = (props: ComponentProps<typeof RecoveryDoorOpenSpecial>) => {
     return renderWithProviders(<RecoveryDoorOpenSpecial {...props} />, {
       i18nInstance: i18n,
     })[0]

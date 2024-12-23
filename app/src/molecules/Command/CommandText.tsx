@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { pick } from 'lodash'
 import { css } from 'styled-components'
 
@@ -14,6 +13,7 @@ import {
 
 import { useCommandTextString } from '/app/local-resources/commands'
 
+import type { ComponentProps } from 'react'
 import type {
   LabwareDefinition2,
   RobotType,
@@ -27,13 +27,13 @@ import type {
 } from '/app/local-resources/commands'
 
 interface LegacySTProps {
-  as?: React.ComponentProps<typeof LegacyStyledText>['as']
+  as?: ComponentProps<typeof LegacyStyledText>['as']
   modernStyledTextDefaults?: false
 }
 
 interface ModernSTProps {
-  desktopStyle?: React.ComponentProps<typeof StyledText>['desktopStyle']
-  oddStyle?: React.ComponentProps<typeof StyledText>['oddStyle']
+  desktopStyle?: ComponentProps<typeof StyledText>['desktopStyle']
+  oddStyle?: ComponentProps<typeof StyledText>['oddStyle']
   modernStyledTextDefaults: true
 }
 

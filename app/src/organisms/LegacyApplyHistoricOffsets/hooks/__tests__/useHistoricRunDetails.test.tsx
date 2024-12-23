@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import { when } from 'vitest-when'
 import { renderHook, waitFor } from '@testing-library/react'
@@ -8,6 +7,7 @@ import { useHistoricRunDetails } from '../useHistoricRunDetails'
 import { mockRunningRun } from '/app/resources/runs/__fixtures__'
 import { mockSuccessQueryResults } from '../../../../__fixtures__'
 
+import type { FunctionComponent, ReactNode } from 'react'
 import type { RunData } from '@opentrons/api-client'
 
 vi.mock('/app/resources/runs/useNotifyAllRunsQuery')
@@ -40,7 +40,7 @@ describe('useHistoricRunDetails', () => {
     )
 
   it('returns historical run details with newest first', async () => {
-    const wrapper: React.FunctionComponent<{ children: React.ReactNode }> = ({
+    const wrapper: FunctionComponent<{ children: ReactNode }> = ({
       children,
     }) => <div>{children}</div>
     const { result } = renderHook(useHistoricRunDetails, { wrapper })
@@ -57,7 +57,7 @@ describe('useHistoricRunDetails', () => {
           links: {},
         })
       )
-    const wrapper: React.FunctionComponent<{ children: React.ReactNode }> = ({
+    const wrapper: FunctionComponent<{ children: ReactNode }> = ({
       children,
     }) => <div>{children}</div>
     const { result } = renderHook(

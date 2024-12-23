@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { fireEvent, screen } from '@testing-library/react'
@@ -19,6 +18,7 @@ import { selectors as labwareIngredSelectors } from '../../../../labware-ingred/
 import { getNextAvailableDeckSlot } from '../../../../labware-ingred/utils'
 import { SlotOverflowMenu } from '../SlotOverflowMenu'
 
+import type { ComponentProps } from 'react'
 import type { NavigateFunction } from 'react-router-dom'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
@@ -41,7 +41,7 @@ vi.mock('react-router-dom', async importOriginal => {
   }
 })
 
-const render = (props: React.ComponentProps<typeof SlotOverflowMenu>) => {
+const render = (props: ComponentProps<typeof SlotOverflowMenu>) => {
   return renderWithProviders(<SlotOverflowMenu {...props} />, {
     i18nInstance: i18n,
   })[0]
@@ -51,7 +51,7 @@ const MOCK_STAGING_AREA_ID = 'MOCK_STAGING_AREA_ID'
 const MOCK_MAKE_SNACKBAR = vi.fn()
 
 describe('SlotOverflowMenu', () => {
-  let props: React.ComponentProps<typeof SlotOverflowMenu>
+  let props: ComponentProps<typeof SlotOverflowMenu>
 
   beforeEach(() => {
     props = {
