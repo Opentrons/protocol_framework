@@ -1,5 +1,3 @@
-import type * as React from 'react'
-
 import { MAGNETIC_MODULE_V1, MAGNETIC_MODULE_V2 } from '@opentrons/shared-data'
 
 import {
@@ -17,6 +15,7 @@ import { canPipetteUseLabware } from '../../utils'
 import { getWellRatio } from '../utils'
 import { getTimeFromForm } from '../utils/getTimeFromForm'
 
+import type { ReactNode } from 'react'
 import type { LabwareDefinition2, PipetteV2Specs } from '@opentrons/shared-data'
 import type { LabwareEntities, PipetteEntity } from '@opentrons/step-generation'
 import type { StepFieldName } from '../../form-types'
@@ -51,7 +50,7 @@ export type FormErrorKey =
 
 export interface FormError {
   title: string
-  body?: React.ReactNode
+  body?: ReactNode
   dependentFields: StepFieldName[]
   showAtField?: boolean
   showAtForm?: boolean

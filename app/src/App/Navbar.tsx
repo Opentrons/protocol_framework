@@ -25,6 +25,7 @@ import logoSvgThree from '/app/assets/images/logo_nav_three.svg'
 
 import { NAV_BAR_WIDTH } from './constants'
 
+import type { MouseEvent } from 'react'
 import type { RouteProps } from './types'
 
 const SALESFORCE_HELP_LINK = 'https://support.opentrons.com/s/'
@@ -161,7 +162,7 @@ export function Navbar({ routes }: { routes: RouteProps[] }): JSX.Element {
         <NavIconLink
           role="button"
           data-testid="Navbar_settingsLink"
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+          onClick={(e: MouseEvent<HTMLButtonElement>) => {
             e.preventDefault()
             debouncedNavigate('/app-settings')
           }}

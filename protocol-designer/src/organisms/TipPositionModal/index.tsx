@@ -25,6 +25,7 @@ import * as utils from './utils'
 import { TipPositionTopView } from './TipPositionTopView'
 import { TipPositionSideView } from './TipPositionSideView'
 
+import type { ChangeEvent } from 'react'
 import type { StepFieldName } from '../../form-types'
 
 type Offset = 'x' | 'y' | 'z'
@@ -179,9 +180,7 @@ export function TipPositionModal(
     }
   }
 
-  const handleZInputFieldChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handleZInputFieldChange = (e: ChangeEvent<HTMLInputElement>): void => {
     handleZChange(e.currentTarget.value)
     setPristine(false)
   }
@@ -200,9 +199,7 @@ export function TipPositionModal(
     }
   }
 
-  const handleXInputFieldChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handleXInputFieldChange = (e: ChangeEvent<HTMLInputElement>): void => {
     handleXChange(e.currentTarget.value)
     setPristine(false)
   }
@@ -221,9 +218,7 @@ export function TipPositionModal(
     }
   }
 
-  const handleYInputFieldChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handleYInputFieldChange = (e: ChangeEvent<HTMLInputElement>): void => {
     handleYChange(e.currentTarget.value)
     setPristine(false)
   }

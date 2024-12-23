@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { screen } from '@testing-library/react'
 import { describe, it, beforeEach, vi, expect } from 'vitest'
@@ -9,9 +8,11 @@ import { mockLabwareDef } from '/app/organisms/LegacyLabwarePositionCheck/__fixt
 import { LabwareListItem } from '../LabwareListItem'
 import { OffDeckLabwareList } from '../OffDeckLabwareList'
 
+import type { ComponentProps } from 'react'
+
 vi.mock('../LabwareListItem')
 
-const render = (props: React.ComponentProps<typeof OffDeckLabwareList>) => {
+const render = (props: ComponentProps<typeof OffDeckLabwareList>) => {
   return renderWithProviders(
     <MemoryRouter>
       <OffDeckLabwareList {...props} />

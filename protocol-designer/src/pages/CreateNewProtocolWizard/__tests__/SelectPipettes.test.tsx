@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
@@ -12,6 +11,7 @@ import { createCustomTiprackDef } from '../../../labware-defs/actions'
 import { SelectPipettes } from '../SelectPipettes'
 import { getTiprackOptions } from '../utils'
 
+import type { ComponentProps } from 'react'
 import type { NavigateFunction } from 'react-router-dom'
 import type { WizardFormState, WizardTileProps } from '../types'
 
@@ -31,7 +31,7 @@ vi.mock('react-router-dom', async importOriginal => {
   }
 })
 
-const render = (props: React.ComponentProps<typeof SelectPipettes>) => {
+const render = (props: ComponentProps<typeof SelectPipettes>) => {
   return renderWithProviders(<SelectPipettes {...props} />, {
     i18nInstance: i18n,
   })[0]
@@ -56,7 +56,7 @@ const mockWizardTileProps: Partial<WizardTileProps> = {
 }
 
 describe('SelectPipettes', () => {
-  let props: React.ComponentProps<typeof SelectPipettes>
+  let props: ComponentProps<typeof SelectPipettes>
 
   beforeEach(() => {
     props = {

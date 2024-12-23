@@ -31,7 +31,7 @@ const render = (props: ComponentProps<typeof MagnetTools>) => {
 }
 
 describe('MagnetTools', () => {
-  let props: React.ComponentProps<typeof MagnetTools>
+  let props: ComponentProps<typeof MagnetTools>
 
   beforeEach(() => {
     props = {

@@ -4,17 +4,18 @@ import { renderWithProviders } from '../../../__testing-utils__'
 import { i18n } from '../../../assets/localization'
 import { ZTipPositionModal } from '../ZTipPositionModal'
 import { TipPositionZOnlyView } from '../TipPositionZOnlyView'
-import type * as React from 'react'
+
+import type { ComponentProps } from 'react'
 
 vi.mock('../TipPositionZOnlyView')
-const render = (props: React.ComponentProps<typeof ZTipPositionModal>) => {
+const render = (props: ComponentProps<typeof ZTipPositionModal>) => {
   return renderWithProviders(<ZTipPositionModal {...props} />, {
     i18nInstance: i18n,
   })[0]
 }
 
 describe('ZTipPositionModal', () => {
-  let props: React.ComponentProps<typeof ZTipPositionModal>
+  let props: ComponentProps<typeof ZTipPositionModal>
 
   beforeEach(() => {
     props = {

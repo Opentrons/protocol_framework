@@ -6,6 +6,7 @@ import {
 } from '@opentrons/components'
 import { getModuleDisplayName } from '@opentrons/shared-data'
 
+import type { ReactNode } from 'react'
 import type { ModuleOnDeck, PipetteOnDeck } from '../../step-forms'
 import type { HintKey } from '../../tutorial'
 import type { Fixture } from './index'
@@ -20,7 +21,7 @@ interface MissingContent {
 }
 
 export interface WarningContent {
-  content: React.ReactNode
+  content: ReactNode
   heading?: string
   titleElement?: JSX.Element
   hintKey?: HintKey
