@@ -41,7 +41,7 @@ def absorbance_def() -> LabwareDefinition:
     return LabwareDefinition.construct(
         namespace="test",
         version=1,
-        parameters=Parameters.construct(  # type: ignore[call-arg]
+        parameters=Parameters.construct(
             loadName="cool-labware",
             tipOverlap=None,  # add a None value to validate serialization to dictionary
         ),
