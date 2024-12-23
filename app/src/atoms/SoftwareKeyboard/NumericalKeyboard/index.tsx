@@ -1,15 +1,16 @@
-import type * as React from 'react'
 import { KeyboardReact as Keyboard } from 'react-simple-keyboard'
 import { numericalKeyboardLayout, numericalCustom } from '../constants'
 
+import type { MutableRefObject } from 'react'
 import type { KeyboardReactInterface } from 'react-simple-keyboard'
+
 import '../index.css'
 import './index.css'
 
 // Note (kk:04/05/2024) add debug to make debugging easy
 interface NumericalKeyboardProps {
   onChange: (input: string) => void
-  keyboardRef: React.MutableRefObject<KeyboardReactInterface | null>
+  keyboardRef: MutableRefObject<KeyboardReactInterface | null>
   isDecimal?: boolean
   hasHyphen?: boolean
   debug?: boolean
