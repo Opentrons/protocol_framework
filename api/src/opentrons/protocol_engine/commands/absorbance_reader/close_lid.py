@@ -60,7 +60,6 @@ class CloseLidImpl(AbstractCommandImpl[CloseLidParams, SuccessData[CloseLidResul
         hardware_lid_status = AbsorbanceReaderLidStatus.OFF
         if not self._state_view.config.use_virtual_modules:
             abs_reader = self._equipment.get_module_hardware_api(mod_substate.module_id)
-            print(abs_reader)
             if abs_reader is not None:
                 hardware_lid_status = await abs_reader.get_current_lid_status()
             else:
