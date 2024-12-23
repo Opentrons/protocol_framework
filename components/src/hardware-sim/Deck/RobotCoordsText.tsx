@@ -1,10 +1,11 @@
-import type * as React from 'react'
 import { css } from 'styled-components'
 
-export interface RobotCoordsTextProps extends React.ComponentProps<'text'> {
+import type { ComponentProps, ReactNode } from 'react'
+
+export interface RobotCoordsTextProps extends ComponentProps<'text'> {
   x: number
   y: number
-  children?: React.ReactNode
+  children?: ReactNode
   canHighlight?: boolean
 }
 
