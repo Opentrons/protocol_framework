@@ -141,7 +141,7 @@ async def test_absorbance_reader_implementation(
     )
 
 
-async def test_close_lid_raises_no_module(
+async def test_open_lid_raises_no_module(
     decoy: Decoy,
     state_view: StateView,
     equipment: EquipmentHandler,
@@ -166,14 +166,14 @@ async def test_close_lid_raises_no_module(
         await subject.execute(params=params)
 
 
-async def test_close_lid_raises_no_gripper_offset(
+async def test_open_lid_raises_no_gripper_offset(
     decoy: Decoy,
     state_view: StateView,
     equipment: EquipmentHandler,
     subject: OpenLidImpl,
     absorbance_def: LabwareDefinition,
 ) -> None:
-    """Should raise an error that the hardware module not found."""
+    """Should raise an error that gripper offset not found."""
     params = OpenLidParams(
         moduleId="unverified-module-id",
     )

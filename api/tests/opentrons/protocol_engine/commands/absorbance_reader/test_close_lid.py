@@ -172,7 +172,7 @@ async def test_close_lid_raises_no_gripper_offset(
     subject: CloseLidImpl,
     absorbance_def: LabwareDefinition,
 ) -> None:
-    """Should raise an error that the hardware module not found."""
+    """Should raise an error that gripper offset not found."""
     params = CloseLidParams(
         moduleId="unverified-module-id",
     )
