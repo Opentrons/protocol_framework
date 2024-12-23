@@ -35,7 +35,6 @@ from opentrons.protocol_engine.state.module_substates.absorbance_reader_substate
     AbsorbanceReaderMeasureMode,
 )
 from opentrons.types import DeckSlotName, MountType, StagingSlotName
-from opentrons_shared_data.module import types
 from ..errors import ModuleNotConnectedError
 
 from ..types import (
@@ -64,7 +63,6 @@ from ..commands import (
     heater_shaker,
     temperature_module,
     thermocycler,
-    absorbance_reader,
 )
 from ..actions import (
     Action,

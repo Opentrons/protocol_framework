@@ -81,7 +81,7 @@ async def test_absorbance_reader_implementation(
         public=InitializeResult(),
         state_update=update_types.StateUpdate(
             module_state_update=update_types.ModuleStateUpdate(
-                module_id="unverified-module-id",
+                module_id="module-id",
                 module_type="absorbanceReaderType",
                 initialize_absorbance_reader_update=update_types.AbsorbanceReaderInitializeUpdate(
                     measure_mode=input_measure_mode,  # type: ignore[arg-type]

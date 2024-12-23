@@ -1,7 +1,6 @@
 """Test absorbance reader initilize command."""
 import pytest
 from decoy import Decoy
-from typing import List, Dict
 
 from opentrons.drivers.types import ABSMeasurementMode, ABSMeasurementConfig
 from opentrons.hardware_control.modules import AbsorbanceReader
@@ -80,7 +79,7 @@ async def test_absorbance_reader_implementation(
         state_update=update_types.StateUpdate(
             files_added=update_types.FilesAddedUpdate(file_ids=[]),
             module_state_update=update_types.ModuleStateUpdate(
-                module_id="unverified-module-id",
+                module_id="module-id",
                 module_type="absorbanceReaderType",
                 absorbance_reader_data=update_types.AbsorbanceReaderDataUpdate(
                     read_result=asbsorbance_result

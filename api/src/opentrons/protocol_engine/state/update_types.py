@@ -8,7 +8,6 @@ from datetime import datetime
 
 from opentrons.hardware_control.nozzle_manager import NozzleMap
 from opentrons.protocol_engine.resources import pipette_data_provider
-from opentrons.protocol_engine.resources.file_provider import PlateReaderData
 from opentrons.protocol_engine.types import (
     DeckPoint,
     LabwareLocation,
@@ -273,6 +272,7 @@ class AbsorbanceReaderInitializeUpdate:
 
 @dataclasses.dataclass
 class ModuleStateUpdate:
+    """An update to the module state."""
     module_id: str
     module_type: ModuleType
     absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
@@ -613,7 +613,6 @@ class StateUpdate:
         self, module_id: str, read_result: typing.Dict[int, typing.Dict[str, float]]
     ) -> Self:
         """Update an absorbance reader's read data. See `AbsorbanceReaderReadDataUpdate`."""
-
         self.module_state_update = ModuleStateUpdate(
             module_id=module_id,
             module_type="absorbanceReaderType",
@@ -628,6 +627,7 @@ class StateUpdate:
         sample_wave_lengths: typing.List[int],
         reference_wave_length: typing.Optional[int],
     ) -> Self:
+        """Initialize absorbance reader."""
         self.module_state_update = ModuleStateUpdate(
             module_id=module_id,
             module_type="absorbanceReaderType",

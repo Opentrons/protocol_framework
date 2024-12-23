@@ -141,7 +141,7 @@ class ReadAbsorbanceImpl(
                 )
 
         state_update.set_absorbance_reader_data(
-            module_id=params.moduleId, read_result=asbsorbance_result
+            module_id=abs_reader_substate.module_id, read_result=asbsorbance_result
         )
         # TODO (cb, 10-17-2024): FILE PROVIDER - Some day we may want to break the file provider behavior into a seperate API function.
         # When this happens, we probably will to have the change the command results handler we utilize to track file IDs in engine.
