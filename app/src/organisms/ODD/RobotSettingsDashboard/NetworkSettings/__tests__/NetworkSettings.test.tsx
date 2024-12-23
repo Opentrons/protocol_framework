@@ -1,5 +1,4 @@
 /* eslint-disable testing-library/no-node-access */
-
 import { screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
