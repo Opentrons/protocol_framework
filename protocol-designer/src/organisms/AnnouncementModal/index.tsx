@@ -25,7 +25,7 @@ export const AnnouncementModal = (
   props: AnnouncementModalProps
 ): JSX.Element => {
   const { onClose, isViewReleaseNotes = false } = props
-  const { t } = useTranslation(['modal', 'button'])
+  const { i18n, t } = useTranslation(['modal', 'button'])
   const announcements = useAnnouncements()
 
   const { announcementKey, message, heading, image } = announcements[
@@ -53,9 +53,13 @@ export const AnnouncementModal = (
           title={heading}
           type="info"
           footer={
-            <Flex justifyContent={JUSTIFY_END} padding={SPACING.spacing24}>
+            <Flex
+              justifyContent={JUSTIFY_END}
+              paddingX={SPACING.spacing24}
+              paddingBottom={SPACING.spacing24}
+            >
               <PrimaryButton onClick={handleClick}>
-                {t('button:got_it')}
+                {i18n.format(t('close'), 'capitalize')}
               </PrimaryButton>
             </Flex>
           }
