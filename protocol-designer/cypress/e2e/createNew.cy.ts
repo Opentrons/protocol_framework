@@ -9,7 +9,7 @@ import '../support/commands'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
-    cy.closeAnnouncementModal()
+    cy.closeAnalyticsModal()
   })
 
   it('content and step 1 flow works', () => {

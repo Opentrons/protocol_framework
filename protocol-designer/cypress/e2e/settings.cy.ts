@@ -1,7 +1,7 @@
 describe('The Settings Page', () => {
   before(() => {
     cy.visit('/')
-    cy.closeAnnouncementModal()
+    cy.closeAnalyticsModal()
   })
 
   it('content and toggle state', () => {

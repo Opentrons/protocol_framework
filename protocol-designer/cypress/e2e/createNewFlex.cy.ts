@@ -9,7 +9,7 @@ import { UniversalActions } from '../support/universalActions'
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
     cy.visit('/')
-    cy.closeAnnouncementModal()
+    cy.closeAnalyticsModal()
   })
 
   it('content and step 1 flow works', () => {
