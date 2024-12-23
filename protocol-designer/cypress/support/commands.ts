@@ -9,7 +9,7 @@ declare global {
       verifyFullHeader: () => Cypress.Chainable<void>
       verifyCreateNewHeader: () => Cypress.Chainable<void>
       clickCreateNew: () => Cypress.Chainable<void>
-      closeAnnouncementModal: () => Cypress.Chainable<void>
+      closeAnalyticsModal: () => Cypress.Chainable<void>
       verifyHomePage: () => Cypress.Chainable<void>
       importProtocol: (protocolFile: string) => Cypress.Chainable<void>
       verifyImportPageOldProtocol: () => Cypress.Chainable<void>
@@ -166,10 +166,9 @@ Cypress.Commands.add('verifySettingsPage', () => {
 // as a reference during test migration.
 /// /////////////////////////////////////////////////////////////////
 
-Cypress.Commands.add('closeAnnouncementModal', () => {
+Cypress.Commands.add('closeAnalyticsModal', () => {
   // ComputingSpinner sometimes covers the announcement modal button and prevents the button click
   // this will retry until the ComputingSpinner does not exist
-  cy.visit('/')
   cy.contains('button', 'Confirm').click()
 })
 
