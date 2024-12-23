@@ -30,9 +30,9 @@ if typing.TYPE_CHECKING:
     _P = typing.ParamSpec("_P")
     _ReturnT = typing.TypeVar("_ReturnT")
 
-    # `_SomethingCallableLike(FastAPI.foo)` produces a callable with the same signature
+    # `_CallableLike(FastAPI.foo)` produces a callable with the same signature
     # as `FastAPI.foo()`.
-    class _SomethingCallableLike(typing.Generic[_P, _ReturnT]):
+    class _CallableLike(typing.Generic[_P, _ReturnT]):
         def __init__(
             self,
             method_to_mimic: typing.Callable[
@@ -49,14 +49,14 @@ if typing.TYPE_CHECKING:
             raise NotImplementedError("This is only for type-checking, not runtime.")
 
     class _FastAPIRouteMethods:
-        get: typing.Final = _SomethingCallableLike(fastapi.FastAPI.get)
-        put: typing.Final = _SomethingCallableLike(fastapi.FastAPI.put)
-        post: typing.Final = _SomethingCallableLike(fastapi.FastAPI.post)
-        delete: typing.Final = _SomethingCallableLike(fastapi.FastAPI.delete)
-        options: typing.Final = _SomethingCallableLike(fastapi.FastAPI.options)
-        head: typing.Final = _SomethingCallableLike(fastapi.FastAPI.head)
-        patch: typing.Final = _SomethingCallableLike(fastapi.FastAPI.patch)
-        trace: typing.Final = _SomethingCallableLike(fastapi.FastAPI.trace)
+        get: typing.Final = _CallableLike(fastapi.FastAPI.get)
+        put: typing.Final = _CallableLike(fastapi.FastAPI.put)
+        post: typing.Final = _CallableLike(fastapi.FastAPI.post)
+        delete: typing.Final = _CallableLike(fastapi.FastAPI.delete)
+        options: typing.Final = _CallableLike(fastapi.FastAPI.options)
+        head: typing.Final = _CallableLike(fastapi.FastAPI.head)
+        patch: typing.Final = _CallableLike(fastapi.FastAPI.patch)
+        trace: typing.Final = _CallableLike(fastapi.FastAPI.trace)
 
 else:
 
