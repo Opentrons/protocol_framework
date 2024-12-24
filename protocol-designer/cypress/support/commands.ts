@@ -35,7 +35,6 @@ declare global {
     }
   }
 }
-
 // Only Header, Home, and Settings page actions are here
 // due to their simplicity
 // Create and Import page actions are in their respective files

@@ -7,6 +7,16 @@ import '../support/commands'
 // This PR unblocks Sara and I to work on this separately, so I want
 // To prioritize its getting pulled into the repo
 // Some day we should make a way to input variables into actions
+
+import 'cypress-file-upload'
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Cypress {
+    interface Chainable {
+      chooseDeckSlot: (slot: string) => Cypress.Chainable<void>
+    }
+  }
+}
 export enum Actions {
   SelectFlex = 'Select Opentrons Flex',
   SelectOT2 = 'Select Opentrons OT-2',
@@ -47,6 +57,8 @@ export enum Actions {
   LiquidDropdown = 'Dropdown for liquids when adding to well',
   SelectLiquidWells = 'Select Liquid Wells',
   SetVolumeAndSaveforWells = 'Set volume and save for wells',
+  ProtocolStepsH = 'Select Protocol Steps Header',
+  AddStep = 'Use after making sure you are on ProtocolStepsH or have already made a step',
 }
 
 export enum Verifications {
@@ -110,6 +122,8 @@ export enum Content {
   DefineALiquid = 'Define a liquid',
   LiquidButton = 'Liquid',
   SampleLiquidName = 'My liquid!',
+  ProtocolSteps = 'Protocol steps',
+  AddStep = '+ Add Step',
 }
 
 export enum Locators {
@@ -334,14 +348,14 @@ const executeAction = (action: Actions | UniversalActions): void => {
 
       cy.get(Locators.ModalShellArea)
         .find('form') // Target the form inside the modal
-        .invoke('submit', e => {
+        .invoke('submit', (e: SubmitEvent) => {
           e.preventDefault() // Prevent default form submission
         })
 
       cy.get(Locators.ModalShellArea)
         .find(Locators.SaveButton) // Locate the Save button
         .contains('Save')
-        .click() // Trigger the Save button
+        .click({ force: true }) // Trigger the Save button
       break
     case Actions.WellSelector:
       selectWells(['A1', 'A2'])
@@ -358,6 +372,12 @@ const executeAction = (action: Actions | UniversalActions): void => {
       cy.get('input[name="volume"]').type(`150`) // Set volume
       cy.contains('button', 'Save').click() // Click Save button
       cy.contains('button', 'Done').click({ force: true }) // Click Done button, forcing click if necessary
+      break
+    case Actions.ProtocolStepsH:
+      cy.contains('button', Content.ProtocolSteps).click()
+      break
+    case Actions.AddStep:
+      cy.contains('button', Content.AddStep).click()
       break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
@@ -444,8 +464,6 @@ const verifyStep = (verification: Verifications): void => {
       cy.contains('Cancel').should('be.visible')
       break
     case Verifications.TransferPopOut:
-      cy.contains('button', 'Protocol steps').click()
-      cy.contains('button', '+ Add Step').click()
       cy.contains('button', 'Transfer').should('be.visible').click()
       cy.contains('Source labware')
       cy.contains('Select source wells')

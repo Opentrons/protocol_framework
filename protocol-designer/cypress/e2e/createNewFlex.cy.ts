@@ -73,10 +73,6 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.ClickWellPlatesSection,
       Actions.SelectBioRad96WellPlate,
     ]
-
-    // Everything after Actions.SingleChannelPipette
-    // Is going to be for transferSettings.cy.js
-
     runCreateTest(steps)
   })
 })
