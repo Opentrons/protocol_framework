@@ -40,13 +40,13 @@
 // }
 
 describe('Advanced Settings for Mix Form', () => {
-  cy.visit('/')
-  // before(() => {
-  //   cy.visit('/')
-  //   cy.closeAnnouncementModal()
-  //   importProtocol()
-  //   openDesignTab()
-  // })
+  // cy.visit('/')
+  before(() => {
+    cy.visit('/')
+    //   cy.closeAnnouncementModal()
+    //   importProtocol()
+    //   openDesignTab()
+  })
   // it('should verify the batch edit form works as expected', () => {
   //   // Verify functionality of mix settings with different labware
   //   enterBatchEdit()
