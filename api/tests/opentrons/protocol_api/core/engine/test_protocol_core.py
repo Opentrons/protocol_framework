@@ -789,12 +789,12 @@ def test_load_lid(
     ).then_return(
         commands.LoadLidResult(
             labwareId="abc123",
-            definition=LabwareDefinition.construct(),  # type: ignore[call-arg]
+            definition=LabwareDefinition.model_construct(ordering=[]),  # type: ignore[call-arg]
         )
     )
 
     decoy.when(mock_engine_client.state.labware.get_definition("abc123")).then_return(
-        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
     )
 
     result = subject.load_lid(
@@ -823,7 +823,7 @@ def test_load_lid(
             slot_name=DeckSlotName.SLOT_5,
         )
     ).then_return(
-        LoadedLabware.construct(id="abc123")  # type: ignore[call-arg]
+        LoadedLabware.model_construct(id="abc123")  # type: ignore[call-arg]
     )
 
     assert subject.get_slot_item(DeckSlotName.SLOT_5) is result
@@ -862,13 +862,13 @@ def test_load_lid_stack(
         commands.LoadLidStackResult(
             stackLabwareId="abc123",
             labwareIds=["1", "2", "3", "4", "5"],
-            definition=LabwareDefinition.construct(),  # type: ignore[call-arg]
+            definition=LabwareDefinition.model_construct(),  # type: ignore[call-arg]
             location=DeckSlotLocation(slotName=DeckSlotName.SLOT_5),
         )
     )
 
     decoy.when(mock_engine_client.state.labware.get_definition("abc123")).then_return(
-        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
     )
 
     result = subject.load_lid_stack(
@@ -898,7 +898,7 @@ def test_load_lid_stack(
             slot_name=DeckSlotName.SLOT_5,
         )
     ).then_return(
-        LoadedLabware.construct(id="abc123")  # type: ignore[call-arg]
+        LoadedLabware.model_construct(id="abc123")  # type: ignore[call-arg]
     )
 
     assert subject.get_slot_item(DeckSlotName.SLOT_5) is result

@@ -37,7 +37,7 @@
   },
   "namespace": "opentrons",
   "version": 1,
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "stackingOffsetWithModule": {
     "thermocyclerModuleV2": {
       "x": 0,

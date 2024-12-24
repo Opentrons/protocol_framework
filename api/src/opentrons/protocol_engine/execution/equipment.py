@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from typing import Optional, overload, Union, List
 
 from opentrons_shared_data.pipette.types import PipetteNameType
-from opentrons_shared_data.labware.labware_definition import LabwareRole
 
 from opentrons.calibration_storage.helpers import uri_from_details
 from opentrons.protocols.models import LabwareDefinition
@@ -168,20 +167,6 @@ class EquipmentHandler:
                 namespace=namespace,
                 version=version,
             )
-
-        # Validate definition allows for load conditions
-        if LabwareRole.lid in definition.allowedRoles:
-            if isinstance(location, OnLabwareLocation):
-                parent_labware = self._state_store.labware.get_load_name(
-                    location.labwareId
-                )
-                if (
-                    definition.compatibleParentLabware is not None
-                    and parent_labware not in definition.compatibleParentLabware
-                ):
-                    raise ValueError(
-                        f"Labware Lid {load_name} may not be loaded on parent labware {self._state_store.labware.get_display_name(location.labwareId)}."
-                    )
 
         labware_id = (
             labware_id if labware_id is not None else self._model_utils.generate_id()
@@ -434,14 +419,16 @@ class EquipmentHandler:
                 version=version,
             )
 
-        if quantity > definition.stackLimit:
+        stack_limit = definition.stackLimit if definition.stackLimit is not None else 1
+        if quantity > stack_limit:
             raise ValueError(
-                f"Requested quantity {quantity} is greater than the stack limit of {definition.stackLimit} provided by definition for {load_name}."
+                f"Requested quantity {quantity} is greater than the stack limit of {stack_limit} provided by definition for {load_name}."
             )
 
         # Allow propagation of ModuleNotLoadedError.
         if (
             isinstance(location, DeckSlotLocation)
+            and definition.parameters.isDeckSlotCompatible is not None
             and not definition.parameters.isDeckSlotCompatible
         ):
             raise ValueError(

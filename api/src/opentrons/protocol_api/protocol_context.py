@@ -444,7 +444,7 @@ class ProtocolContext(CommandPublisher):
             values as the ``load_name`` parameter of :py:meth:`.load_adapter`. The
             adapter will use the same namespace as the labware, and the API will
             choose the adapter's version automatically.
-        :param lid: An lid to load the on top of the main labware. Accepts the same
+        :param lid: A lid to load the on top of the main labware. Accepts the same
             values as the ``load_name`` parameter of :py:meth:`.load_lid_stack`. The
             lid will use the same namespace as the labware, and the API will
             choose the lid's version automatically.

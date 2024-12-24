@@ -1414,7 +1414,7 @@ def test_raise_if_labware_cannot_be_stacked_on_labware_on_adapter() -> None:
 @pytest.mark.parametrize(
     argnames=[
         "allowed_roles",
-        "stacking_quirks",
+        "stack_limit",
         "exception",
     ],
     argvalues=[
@@ -1489,9 +1489,9 @@ def test_labware_stacking_height_passes_or_raises(
                 stackingOffsetWithLabware={
                     "test": SharedDataOverlapOffset(x=0, y=0, z=0)
                 },
+                stackLimit=stack_limit,
             ),
             bottom_labware_id="labware-id4",
-            stackLimit=stack_limit,
         )
 
 
