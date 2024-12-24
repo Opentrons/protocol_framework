@@ -40,6 +40,7 @@
 // }
 
 describe('Advanced Settings for Mix Form', () => {
+  cy.visit('/')
   // before(() => {
   //   cy.visit('/')
   //   cy.closeAnnouncementModal()
