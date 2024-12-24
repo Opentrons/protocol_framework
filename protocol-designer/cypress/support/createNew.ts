@@ -144,8 +144,10 @@ export enum Locators {
   LiquidsDropdown = 'div[tabindex="0"].sc-bqWxrE', // Add new locator for the dropdown
   LabwareSelectionLocation = '[data-testid="Toolbox_confirmButton"]',
 }
-// Chose deck slot implementation
-Cypress.Commands.add('chooseDeckSlot', (slot: string) => {
+
+const chooseDeckSlot = (
+  slot: string
+): Cypress.Chainable<JQuery<HTMLElement>> => {
   const deckSlots: Record<
     | 'A1'
     | 'A2'
@@ -178,12 +180,11 @@ Cypress.Commands.add('chooseDeckSlot', (slot: string) => {
   const slotAction = deckSlots[slot as keyof typeof deckSlots]
 
   if (typeof slotAction === 'function') {
-    slotAction()
+    return slotAction() // Return the chainable object
   } else {
     throw new Error(`Slot ${slot} not found in deck slots.`)
   }
-})
-
+}
 // Well name selection for liquids and in general
 const selectWells = (wells: string[]): void => {
   // Define a dictionary of well selectors
@@ -271,40 +272,40 @@ const executeAction = (action: Actions | UniversalActions): void => {
       cy.contains(Content.EditProtocol).click()
       break
     case Actions.ChoseDeckSlotA1:
-      cy.chooseDeckSlot('A1').click()
+      chooseDeckSlot('A1').click()
       break
     case Actions.ChoseDeckSlotA2:
-      cy.chooseDeckSlot('A2').click()
+      chooseDeckSlot('A2').click()
       break
     case Actions.ChoseDeckSlotA3:
-      cy.chooseDeckSlot('A3').click()
+      chooseDeckSlot('A3').click()
       break
     case Actions.ChoseDeckSlotB1:
-      cy.chooseDeckSlot('B1').click()
+      chooseDeckSlot('B1').click()
       break
     case Actions.ChoseDeckSlotB2:
-      cy.chooseDeckSlot('B2').click()
+      chooseDeckSlot('B2').click()
       break
     case Actions.ChoseDeckSlotB3:
-      cy.chooseDeckSlot('B3').click()
+      chooseDeckSlot('B3').click()
       break
     case Actions.ChoseDeckSlotC1:
-      cy.chooseDeckSlot('C1').click()
+      chooseDeckSlot('C1').click()
       break
     case Actions.ChoseDeckSlotC2:
-      cy.chooseDeckSlot('C2').click()
+      chooseDeckSlot('C2').click()
       break
     case Actions.ChoseDeckSlotC3:
-      cy.chooseDeckSlot('C3').click()
+      chooseDeckSlot('C3').click()
       break
     case Actions.ChoseDeckSlotD1:
-      cy.chooseDeckSlot('D1').click()
+      chooseDeckSlot('D1').click()
       break
     case Actions.ChoseDeckSlotD2:
-      cy.chooseDeckSlot('D2').click()
+      chooseDeckSlot('D2').click()
       break
     case Actions.ChoseDeckSlotD3:
-      cy.chooseDeckSlot('D3').click()
+      chooseDeckSlot('D3').click()
       break
     case Actions.AddHardwareLabware: // New case
       cy.contains(Content.AddLabwareToDeck).click()
@@ -318,7 +319,7 @@ const executeAction = (action: Actions | UniversalActions): void => {
     case Actions.ChoseDeckSlotC2Labware:
       // Todo Investigate making a dictionary of slot editing.
       // Maybe next PR
-      cy.chooseDeckSlot('C2')
+      chooseDeckSlot('C2')
         .find('.Box-sc-8ozbhb-0.kIDovv')
         .find('a[role="button"]')
         .contains(Content.EditSlot)
