@@ -15,7 +15,7 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import { SlotDetailsContainer } from '../../organisms'
 import { getInitialDeckSetup } from '../../step-forms/selectors'
 import { DeckThumbnail } from './DeckThumbnail'
@@ -72,7 +72,7 @@ function StartingDeckHeader(props: StartingDeckHeaderProps): JSX.Element {
             onClick={() => {
               setShowMaterialsListModal(true)
             }}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
           >
             <StyledText desktopStyle="bodyDefaultRegular">
               {t('protocol_overview:materials_list')}

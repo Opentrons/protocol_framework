@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
 import {
+  ALIGN_CENTER,
   COLORS,
   DIRECTION_COLUMN,
+  DeckInfoLabel,
   DropdownMenu,
   Flex,
   ListItem,
@@ -108,10 +110,28 @@ export function DropdownStepFormField(
             {title}
           </StyledText>
           <ListItem type="noActive">
-            <Flex padding={SPACING.spacing12}>
-              <StyledText desktopStyle="bodyDefaultRegular">
-                {options[0].name}
-              </StyledText>
+            <Flex
+              gridGap={SPACING.spacing8}
+              alignItems={ALIGN_CENTER}
+              padding={SPACING.spacing12}
+            >
+              {options[0].deckLabel != null ? (
+                <DeckInfoLabel deckLabel={options[0].deckLabel} svgSize={13} />
+              ) : null}
+              <Flex
+                flexDirection={DIRECTION_COLUMN}
+                gridGap={options[0].subtext != null ? SPACING.spacing4 : '0'}
+              >
+                <StyledText desktopStyle="captionRegular">
+                  {options[0].name}
+                </StyledText>
+                <StyledText
+                  desktopStyle="captionRegular"
+                  color={COLORS.black70}
+                >
+                  {options[0].subtext}
+                </StyledText>
+              </Flex>
             </Flex>
           </ListItem>
         </Flex>

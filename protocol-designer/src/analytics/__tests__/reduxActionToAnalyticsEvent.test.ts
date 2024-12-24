@@ -154,9 +154,10 @@ describe('reduxActionToAnalyticsEvent', () => {
         id: 'stepId',
         pipette: 'pipetteId',
         otherField: 123,
-        aspirateFlowRate: undefined,
-        dispenseFlowRate: undefined,
-        aspirateAirGap: undefined,
+        aspirateFlowRate: 'default',
+        dispenseFlowRate: 'default',
+        aspirateAirGap: 'default',
+        dispenseAirGap: 'default',
         nested: { inner: true },
         // de-nested fields
         __nested__inner: true,

@@ -6,13 +6,6 @@ import {
 } from '@opentrons/components'
 import type { FlattenSimpleInterpolation } from 'styled-components'
 
-export const BUTTON_LINK_STYLE = css`
-  color: ${COLORS.grey60};
-  &:hover {
-    color: ${COLORS.grey40};
-  }
-`
-
 export const LINK_BUTTON_STYLE = css`
   color: ${COLORS.black90};
 

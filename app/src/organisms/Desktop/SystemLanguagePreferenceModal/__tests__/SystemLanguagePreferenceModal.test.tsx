@@ -6,6 +6,10 @@ import { describe, it, vi, afterEach, beforeEach, expect } from 'vitest'
 import { renderWithProviders } from '/app/__testing-utils__'
 import { i18n } from '/app/i18n'
 import {
+  ANALYTICS_LANGUAGE_UPDATED_DESKTOP_APP_MODAL,
+  useTrackEvent,
+} from '/app/redux/analytics'
+import {
   getAppLanguage,
   getStoredSystemLanguage,
   updateConfigValue,
@@ -16,6 +20,7 @@ import { SystemLanguagePreferenceModal } from '..'
 vi.mock('react-router-dom')
 vi.mock('/app/redux/config')
 vi.mock('/app/redux/shell')
+vi.mock('/app/redux/analytics')
 
 const render = () => {
   return renderWithProviders(<SystemLanguagePreferenceModal />, {
@@ -24,6 +29,7 @@ const render = () => {
 }
 
 const mockNavigate = vi.fn()
+const mockTrackEvent = vi.fn()
 
 const MOCK_DEFAULT_LANGUAGE = 'en-US'
 
@@ -33,6 +39,7 @@ describe('SystemLanguagePreferenceModal', () => {
     vi.mocked(getSystemLanguage).mockReturnValue(MOCK_DEFAULT_LANGUAGE)
     vi.mocked(getStoredSystemLanguage).mockReturnValue(MOCK_DEFAULT_LANGUAGE)
     vi.mocked(useNavigate).mockReturnValue(mockNavigate)
+    vi.mocked(useTrackEvent).mockReturnValue(mockTrackEvent)
   })
   afterEach(() => {
     vi.resetAllMocks()
@@ -68,6 +75,14 @@ describe('SystemLanguagePreferenceModal', () => {
       'language.systemLanguage',
       MOCK_DEFAULT_LANGUAGE
     )
+    expect(mockTrackEvent).toBeCalledWith({
+      name: ANALYTICS_LANGUAGE_UPDATED_DESKTOP_APP_MODAL,
+      properties: {
+        language: MOCK_DEFAULT_LANGUAGE,
+        systemLanguage: MOCK_DEFAULT_LANGUAGE,
+        modalType: 'appBootModal',
+      },
+    })
   })
 
   it('should default to English (US) if system language is unsupported', () => {
@@ -90,6 +105,14 @@ describe('SystemLanguagePreferenceModal', () => {
       MOCK_DEFAULT_LANGUAGE
     )
     expect(updateConfigValue).toBeCalledWith('language.systemLanguage', 'es-MX')
+    expect(mockTrackEvent).toBeCalledWith({
+      name: ANALYTICS_LANGUAGE_UPDATED_DESKTOP_APP_MODAL,
+      properties: {
+        language: MOCK_DEFAULT_LANGUAGE,
+        systemLanguage: 'es-MX',
+        modalType: 'appBootModal',
+      },
+    })
   })
 
   it('should set a supported app language when system language is an unsupported locale of the same language', () => {
@@ -112,6 +135,14 @@ describe('SystemLanguagePreferenceModal', () => {
       MOCK_DEFAULT_LANGUAGE
     )
     expect(updateConfigValue).toBeCalledWith('language.systemLanguage', 'en-GB')
+    expect(mockTrackEvent).toBeCalledWith({
+      name: ANALYTICS_LANGUAGE_UPDATED_DESKTOP_APP_MODAL,
+      properties: {
+        language: MOCK_DEFAULT_LANGUAGE,
+        systemLanguage: 'en-GB',
+        modalType: 'appBootModal',
+      },
+    })
   })
 
   it('should render the correct header, description, and buttons when system language changes', () => {
@@ -139,6 +170,14 @@ describe('SystemLanguagePreferenceModal', () => {
       'language.systemLanguage',
       'zh-CN'
     )
+    expect(mockTrackEvent).toBeCalledWith({
+      name: ANALYTICS_LANGUAGE_UPDATED_DESKTOP_APP_MODAL,
+      properties: {
+        language: 'zh-CN',
+        systemLanguage: 'zh-CN',
+        modalType: 'systemLanguageUpdateModal',
+      },
+    })
     fireEvent.click(secondaryButton)
     expect(updateConfigValue).toHaveBeenNthCalledWith(
       3,
@@ -168,6 +207,14 @@ describe('SystemLanguagePreferenceModal', () => {
       'language.systemLanguage',
       'zh-Hant'
     )
+    expect(mockTrackEvent).toBeCalledWith({
+      name: ANALYTICS_LANGUAGE_UPDATED_DESKTOP_APP_MODAL,
+      properties: {
+        language: 'zh-CN',
+        systemLanguage: 'zh-Hant',
+        modalType: 'systemLanguageUpdateModal',
+      },
+    })
     fireEvent.click(secondaryButton)
     expect(updateConfigValue).toHaveBeenNthCalledWith(
       3,

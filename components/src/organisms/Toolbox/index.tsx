@@ -11,11 +11,13 @@ import { BORDERS, COLORS } from '../../helix-design-system'
 import { SPACING } from '../../ui-style-constants'
 import { PrimaryButton } from '../../atoms'
 import { textDecorationUnderline } from '../../ui-style-constants/typography'
+
+import type { ReactNode } from 'react'
 import type { StyleProps } from '../../primitives'
 
 export interface ToolboxProps extends StyleProps {
   title: JSX.Element
-  children: React.ReactNode
+  children: ReactNode
   disableCloseButton?: boolean
   confirmButtonText?: string
   onConfirmClick?: () => void

@@ -14,6 +14,8 @@ import { getDeckSetupForActiveItem } from '../../../../top-selectors/labware-loc
 import { getAllWellContentsForActiveItem } from '../../../../top-selectors/well-contents'
 import { OffDeckDetails } from '../OffDeckDetails'
 import { HighlightOffdeckSlot } from '../HighlightOffdeckSlot'
+
+import type { ComponentProps } from 'react'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type * as Components from '@opentrons/components'
 
@@ -31,14 +33,14 @@ vi.mock('@opentrons/components', async importOriginal => {
   }
 })
 
-const render = (props: React.ComponentProps<typeof OffDeckDetails>) => {
+const render = (props: ComponentProps<typeof OffDeckDetails>) => {
   return renderWithProviders(<OffDeckDetails {...props} />, {
     i18nInstance: i18n,
   })[0]
 }
 
 describe('OffDeckDetails', () => {
-  let props: React.ComponentProps<typeof OffDeckDetails>
+  let props: ComponentProps<typeof OffDeckDetails>
 
   beforeEach(() => {
     props = {

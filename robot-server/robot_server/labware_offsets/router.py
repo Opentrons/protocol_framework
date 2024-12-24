@@ -6,6 +6,8 @@ import textwrap
 from typing import Annotated, Literal
 
 import fastapi
+from server_utils.fastapi_utils.light_router import LightRouter
+
 from opentrons.protocol_engine import LabwareOffset, LabwareOffsetCreate, ModuleModel
 from opentrons.types import DeckSlotName
 
@@ -24,12 +26,12 @@ from .store import LabwareOffsetNotFoundError, LabwareOffsetStore
 from .fastapi_dependencies import get_labware_offset_store
 
 
-router = fastapi.APIRouter(prefix="/labwareOffsets")
+router = LightRouter()
 
 
 @PydanticResponse.wrap_route(
     router.post,
-    path="",
+    path="/labwareOffsets",
     summary="Store a labware offset",
     description=textwrap.dedent(
         """\
@@ -63,7 +65,7 @@ async def post_labware_offset(  # noqa: D103
 
 @PydanticResponse.wrap_route(
     router.get,
-    path="",
+    path="/labwareOffsets",
     summary="Search for labware offsets",
     description=(
         "Get a filtered list of all the labware offsets currently stored on the robot."
@@ -158,7 +160,7 @@ async def get_labware_offsets(  # noqa: D103
 
 @PydanticResponse.wrap_route(
     router.delete,
-    path="/{id}",
+    path="/labwareOffsets/{id}",
     summary="Delete a single labware offset",
     description="Delete a single labware offset. The deleted offset is returned.",
 )
@@ -181,7 +183,7 @@ async def delete_labware_offset(  # noqa: D103
 
 @PydanticResponse.wrap_route(
     router.delete,
-    path="",
+    path="/labwareOffsets",
     summary="Delete all labware offsets",
 )
 async def delete_all_labware_offsets(  # noqa: D103

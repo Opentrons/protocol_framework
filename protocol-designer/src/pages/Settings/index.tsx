@@ -27,7 +27,7 @@ import {
   selectors as tutorialSelectors,
 } from '../../tutorial'
 import { ToggleButton } from '../../atoms/ToggleButton'
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import { actions as featureFlagActions } from '../../feature-flags'
 import { getFeatureFlagData } from '../../feature-flags/selectors'
 import type { FlagTypes } from '../../feature-flags'
@@ -142,7 +142,7 @@ export function Settings(): JSX.Element {
                 </Flex>
                 <Flex gridGap={SPACING.spacing16} alignItems={ALIGN_CENTER}>
                   <LinkComponent
-                    css={BUTTON_LINK_STYLE}
+                    css={LINK_BUTTON_STYLE}
                     textDecoration={TYPOGRAPHY.textDecorationUnderline}
                     href={DOC_URL}
                     external
@@ -154,7 +154,7 @@ export function Settings(): JSX.Element {
                   </LinkComponent>
 
                   <Btn
-                    css={BUTTON_LINK_STYLE}
+                    css={LINK_BUTTON_STYLE}
                     textDecoration={TYPOGRAPHY.textDecorationUnderline}
                     onClick={() => {
                       setShowAnnouncementModal(true)

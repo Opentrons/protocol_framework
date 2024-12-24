@@ -9,6 +9,7 @@ from opentrons_shared_data.pipette.types import (
     PipetteChannelType,
     PipetteModelType,
     PipetteVersionType,
+    PipetteOEMType,
     PipetteTipType,
     Quirks,
     LiquidClasses,
@@ -20,6 +21,7 @@ def test_load_pipette_definition() -> None:
         PipetteModelType.p50,
         PipetteChannelType.SINGLE_CHANNEL,
         PipetteVersionType(major=3, minor=3),
+        PipetteOEMType.OT,
     )
 
     assert pipette_config_one.channels == 1
@@ -38,6 +40,7 @@ def test_load_pipette_definition() -> None:
         PipetteModelType.p50,
         PipetteChannelType.SINGLE_CHANNEL,
         PipetteVersionType(major=1, minor=0),
+        PipetteOEMType.OT,
     )
 
     assert pipette_config_two.channels == 1
@@ -83,7 +86,10 @@ def test_update_pipette_configuration(
         cast(types.PipetteModel, pipette_model)
     )
     base_configurations = load_data.load_definition(
-        model_name.pipette_type, model_name.pipette_channels, model_name.pipette_version
+        model_name.pipette_type,
+        model_name.pipette_channels,
+        model_name.pipette_version,
+        model_name.oem_type,
     )
 
     updated_configurations = load_data.update_pipette_configuration(
