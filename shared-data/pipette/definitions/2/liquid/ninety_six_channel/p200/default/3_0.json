@@ -12,8 +12,8 @@
         "valuesByApiLevel": { "2.14": 6 }
       },
       "defaultBlowOutFlowRate": {
-        "default": 80,
-        "valuesByApiLevel": { "2.14": 80 }
+        "default": 6.5,
+        "valuesByApiLevel": { "2.14": 6.5 }
       },
       "defaultFlowAcceleration": 16000.0,
       "defaultTipLength": 52.0,
@@ -61,8 +61,8 @@
         "valuesByApiLevel": { "2.14": 6 }
       },
       "defaultBlowOutFlowRate": {
-        "default": 80,
-        "valuesByApiLevel": { "2.14": 80 }
+        "default": 6.5,
+        "valuesByApiLevel": { "2.14": 6.5 }
       },
       "defaultFlowAcceleration": 16000.0,
       "defaultTipLength": 57.9,
@@ -116,16 +116,16 @@
     "t200": {
       "uiMaxFlowRate": 194,
       "defaultAspirateFlowRate": {
-        "default": 80,
-        "valuesByApiLevel": { "2.14": 80 }
+        "default": 6.5,
+        "valuesByApiLevel": { "2.14": 6.5 }
       },
       "defaultDispenseFlowRate": {
-        "default": 80,
-        "valuesByApiLevel": { "2.14": 80 }
+        "default": 6.5,
+        "valuesByApiLevel": { "2.14": 6.5 }
       },
       "defaultBlowOutFlowRate": {
-        "default": 80,
-        "valuesByApiLevel": { "2.14": 80 }
+        "default": 6.5,
+        "valuesByApiLevel": { "2.14": 6.5 }
       },
       "defaultFlowAcceleration": 16000.0,
       "defaultTipLength": 58.35,
