@@ -38,10 +38,10 @@ from opentrons_shared_data.labware.labware_definition import (
 @pytest.fixture
 def absorbance_def() -> LabwareDefinition:
     """Get a tip rack Pydantic model definition value object."""
-    return LabwareDefinition.construct(  # type:ignore[call-arg]
+    return LabwareDefinition.construct(
         namespace="test",
         version=1,
-        parameters=Parameters.construct(  # type:ignore[call-arg]
+        parameters=Parameters.construct(
             loadName="cool-labware",
             tipOverlap=None,  # add a None value to validate serialization to dictionary
         ),
