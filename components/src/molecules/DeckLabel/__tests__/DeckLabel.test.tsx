@@ -7,12 +7,14 @@ import { FLEX_MAX_CONTENT } from '../../../styles'
 import { renderWithProviders } from '../../../testing/utils'
 import { DeckLabel } from '..'
 
-const render = (props: React.ComponentProps<typeof DeckLabel>) => {
+import type { ComponentProps } from 'react'
+
+const render = (props: ComponentProps<typeof DeckLabel>) => {
   return renderWithProviders(<DeckLabel {...props} />)
 }
 
 describe('DeckLabel', () => {
-  let props: React.ComponentProps<typeof DeckLabel>
+  let props: ComponentProps<typeof DeckLabel>
 
   beforeEach(() => {
     props = {
