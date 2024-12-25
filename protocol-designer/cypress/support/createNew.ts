@@ -123,7 +123,7 @@ export enum Content {
   LiquidButton = 'Liquid',
   SampleLiquidName = 'My liquid!',
   ProtocolSteps = 'Protocol steps',
-  AddStep = '+ Add Step',
+  AddStep = 'Add Step',
 }
 
 export enum Locators {
