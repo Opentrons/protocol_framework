@@ -569,7 +569,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--mode", type=str, choices=["", "default", "lowVolumeDefault"], default=""
     )
-    parser.add_argument("--pre-heat", action="store_true")
+    parser.add_argument("--pre-heat", type=float, default=23.0)
     args = parser.parse_args()
     run_args = RunArgs.build_run_args(args)
     if not run_args.ctx.is_simulating():
@@ -587,7 +587,7 @@ if __name__ == "__main__":
         ui.print_info("homing...")
         run_args.ctx.home()
 
-        if args.pre_heat:
+        if args.pre_heat != 23.0:
             ui.print_header("PRE-HEAT")
             mnt = OT3Mount.LEFT
             hw.add_tip(mnt, 1)
@@ -596,7 +596,7 @@ if __name__ == "__main__":
                 mnt.name.lower(), hw.is_simulator, run_args.environment_sensor
             )
             start_temp = env_data.celsius_pipette
-            temp_limit = 27
+            temp_limit = args.pre_heat
             max_pre_heat_seconds = 60 * 60 * 4
             now = time()
             start_time = now
