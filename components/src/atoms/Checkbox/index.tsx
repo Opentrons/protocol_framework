@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { css } from 'styled-components'
 import { COLORS, BORDERS } from '../../helix-design-system'
 import { Flex } from '../../primitives'
@@ -14,13 +13,15 @@ import {
 import { RESPONSIVENESS, SPACING } from '../../ui-style-constants'
 import { StyledText } from '../StyledText'
 
+import type { MouseEventHandler } from 'react'
+
 export interface CheckboxProps {
   /** checkbox is checked if value is true */
   isChecked: boolean
   /** label text that describes the option */
   labelText: string
   /** callback click/tap handler */
-  onClick: React.MouseEventHandler
+  onClick: MouseEventHandler
   /** html tabindex property */
   tabIndex?: number
   /** if disabled is true, mouse events will not trigger onClick callback */

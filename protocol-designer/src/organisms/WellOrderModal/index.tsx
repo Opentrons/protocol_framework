@@ -14,7 +14,7 @@ import {
   DropdownMenu,
   ALIGN_CENTER,
 } from '@opentrons/components'
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import { getMainPagePortalEl } from '../Portal'
 import { WellOrderVisualization } from './WellOrderVisualization'
 import type { WellOrderOption } from '../../form-types'
@@ -164,7 +164,7 @@ export function WellOrderModal(props: WellOrderModalProps): JSX.Element | null {
           padding={`0 ${SPACING.spacing24} ${SPACING.spacing24}`}
           alignItems={ALIGN_CENTER}
         >
-          <Btn onClick={handleReset} css={BUTTON_LINK_STYLE}>
+          <Btn onClick={handleReset} css={LINK_BUTTON_STYLE}>
             {t('shared:reset_to_default')}
           </Btn>
           <Flex gridGap={SPACING.spacing8}>

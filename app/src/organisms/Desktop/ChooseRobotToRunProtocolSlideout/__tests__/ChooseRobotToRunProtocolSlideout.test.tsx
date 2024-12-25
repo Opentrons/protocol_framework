@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { vi, it, describe, expect, beforeEach, afterEach } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
@@ -32,6 +31,7 @@ import { ChooseRobotToRunProtocolSlideout } from '../'
 import { useNotifyDataReady } from '/app/resources/useNotifyDataReady'
 import { useCurrentRunId, useCloseCurrentRun } from '/app/resources/runs'
 
+import type { ComponentProps } from 'react'
 import type { State } from '/app/redux/types'
 
 vi.mock('/app/organisms/Desktop/Devices/hooks')
@@ -49,7 +49,7 @@ vi.mock('/app/resources/useNotifyDataReady')
 vi.mock('/app/resources/runs')
 
 const render = (
-  props: React.ComponentProps<typeof ChooseRobotToRunProtocolSlideout>
+  props: ComponentProps<typeof ChooseRobotToRunProtocolSlideout>
 ) => {
   return renderWithProviders(
     <MemoryRouter>

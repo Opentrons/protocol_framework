@@ -23,7 +23,7 @@ import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import * as labwareIngredActions from '../../labware-ingred/actions'
 
-import type { MouseEvent } from 'react'
+import type { MouseEvent, RefObject } from 'react'
 import type { ThunkDispatch } from '../../types'
 
 const NAV_HEIGHT = '64px'
@@ -31,7 +31,7 @@ const NAV_HEIGHT = '64px'
 interface LiquidsOverflowMenuProps {
   onClose: () => void
   showLiquidsModal: () => void
-  overflowWrapperRef: React.RefObject<HTMLDivElement>
+  overflowWrapperRef: RefObject<HTMLDivElement>
 }
 
 export function LiquidsOverflowMenu(

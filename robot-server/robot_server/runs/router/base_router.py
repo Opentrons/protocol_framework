@@ -8,8 +8,10 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Annotated, Callable, Final, Literal, Optional, Union
 
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import Depends, status, Query
 from pydantic import BaseModel, Field
+from server_utils.fastapi_utils.light_router import LightRouter
+
 
 from opentrons_shared_data.errors import ErrorCodes
 from opentrons_shared_data.robot.types import RobotTypeEnum
@@ -87,7 +89,7 @@ from opentrons.protocol_engine.resources.file_provider import FileProvider
 from robot_server.service.notifications import get_pe_notify_publishers
 
 log = logging.getLogger(__name__)
-base_router = APIRouter()
+base_router = LightRouter()
 
 _DEFAULT_COMMAND_ERROR_LIST_LENGTH: Final = 20
 

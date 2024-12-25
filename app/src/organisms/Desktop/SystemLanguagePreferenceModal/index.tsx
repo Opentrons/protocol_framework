@@ -17,6 +17,10 @@ import {
 
 import { LANGUAGES } from '/app/i18n'
 import {
+  ANALYTICS_LANGUAGE_UPDATED_DESKTOP_APP_MODAL,
+  useTrackEvent,
+} from '/app/redux/analytics'
+import {
   getAppLanguage,
   getStoredSystemLanguage,
   updateConfigValue,
@@ -32,7 +36,7 @@ type ArrayElement<
 
 export function SystemLanguagePreferenceModal(): JSX.Element | null {
   const { i18n, t } = useTranslation(['app_settings', 'shared', 'branded'])
-
+  const trackEvent = useTrackEvent()
   const [currentOption, setCurrentOption] = useState<DropdownOption>(
     LANGUAGES[0]
   )
@@ -66,6 +70,16 @@ export function SystemLanguagePreferenceModal(): JSX.Element | null {
   const handlePrimaryClick = (): void => {
     dispatch(updateConfigValue('language.appLanguage', currentOption.value))
     dispatch(updateConfigValue('language.systemLanguage', systemLanguage))
+    trackEvent({
+      name: ANALYTICS_LANGUAGE_UPDATED_DESKTOP_APP_MODAL,
+      properties: {
+        language: currentOption.value,
+        systemLanguage,
+        modalType: showUpdateModal
+          ? 'systemLanguageUpdateModal'
+          : 'appBootModal',
+      },
+    })
   }
 
   const handleDropdownClick = (value: string): void => {

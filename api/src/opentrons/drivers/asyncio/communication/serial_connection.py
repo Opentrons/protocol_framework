@@ -298,6 +298,7 @@ class AsyncResponseSerialConnection(SerialConnection):
         alarm_keyword: Optional[str] = None,
         reset_buffer_before_write: bool = False,
         async_error_ack: Optional[str] = None,
+        number_of_retries: int = 0,
     ) -> AsyncResponseSerialConnection:
         """
         Create a connection.
@@ -340,6 +341,7 @@ class AsyncResponseSerialConnection(SerialConnection):
             error_keyword=error_keyword or "err",
             alarm_keyword=alarm_keyword or "alarm",
             async_error_ack=async_error_ack or "async",
+            number_of_retries=number_of_retries,
         )
 
     def __init__(
@@ -352,6 +354,7 @@ class AsyncResponseSerialConnection(SerialConnection):
         error_keyword: str,
         alarm_keyword: str,
         async_error_ack: str,
+        number_of_retries: int = 0,
     ) -> None:
         """
         Constructor
@@ -383,6 +386,7 @@ class AsyncResponseSerialConnection(SerialConnection):
         self._name = name
         self._ack = ack.encode()
         self._retry_wait_time_seconds = retry_wait_time_seconds
+        self._number_of_retries = number_of_retries
         self._error_keyword = error_keyword.lower()
         self._alarm_keyword = alarm_keyword.lower()
         self._async_error_ack = async_error_ack.lower()
@@ -403,7 +407,9 @@ class AsyncResponseSerialConnection(SerialConnection):
         Raises: SerialException
         """
         return await self.send_data(
-            data=command.build(), retries=retries, timeout=timeout
+            data=command.build(),
+            retries=retries or self._number_of_retries,
+            timeout=timeout,
         )
 
     async def send_data(
@@ -424,7 +430,9 @@ class AsyncResponseSerialConnection(SerialConnection):
         async with super().send_data_lock, self._serial.timeout_override(
             "timeout", timeout
         ):
-            return await self._send_data(data=data, retries=retries)
+            return await self._send_data(
+                data=data, retries=retries or self._number_of_retries
+            )
 
     async def _send_data(self, data: str, retries: int = 0) -> str:
         """
@@ -439,6 +447,7 @@ class AsyncResponseSerialConnection(SerialConnection):
         Raises: SerialException
         """
         data_encode = data.encode()
+        retries = retries or self._number_of_retries
 
         for retry in range(retries + 1):
             log.debug(f"{self._name}: Write -> {data_encode!r}")

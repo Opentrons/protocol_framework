@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { screen } from '@testing-library/react'
@@ -17,6 +16,8 @@ import { getDesignerTab } from '../../../../file-data/selectors'
 import { LabwareOnDeck } from '../../../../organisms'
 import { FixtureRender } from '../FixtureRender'
 import { SelectedHoveredItems } from '../SelectedHoveredItems'
+
+import type { ComponentProps } from 'react'
 import type * as OpentronsComponents from '@opentrons/components'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
@@ -34,12 +35,12 @@ vi.mock('@opentrons/components', async importOriginal => {
   }
 })
 
-const render = (props: React.ComponentProps<typeof SelectedHoveredItems>) => {
+const render = (props: ComponentProps<typeof SelectedHoveredItems>) => {
   return renderWithProviders(<SelectedHoveredItems {...props} />)[0]
 }
 
 describe('SelectedHoveredItems', () => {
-  let props: React.ComponentProps<typeof SelectedHoveredItems>
+  let props: ComponentProps<typeof SelectedHoveredItems>
 
   beforeEach(() => {
     props = {

@@ -17,6 +17,8 @@ import SINGLE_IMAGE from '../../../../../assets/images/path_single_transfers.svg
 import MULTI_DISPENSE_IMAGE from '../../../../../assets/images/path_multi_dispense.svg'
 import MULTI_ASPIRATE_IMAGE from '../../../../../assets/images/path_multi_aspirate.svg'
 import { getDisabledPathMap } from './utils'
+
+import type { ChangeEvent, ReactNode } from 'react'
 import type { PathOption } from '../../../../../form-types'
 import type { FieldProps } from '../types'
 import type { DisabledPathMap, ValuesForPath } from './utils'
@@ -60,10 +62,10 @@ interface PathButtonProps {
   disabled: boolean
   selected: boolean
   subtitle: string
-  onClick: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onClick: (e: ChangeEvent<HTMLInputElement>) => void
   path: PathOption
   id?: string
-  children?: React.ReactNode
+  children?: ReactNode
 }
 
 function PathButton(props: PathButtonProps): JSX.Element {

@@ -25,6 +25,8 @@ import {
   getSavedStepForms,
   getUnsavedForm,
 } from '../../../../step-forms/selectors'
+
+import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
 import type { ThunkDispatch } from 'redux-thunk'
 import type { BaseState } from '../../../../types'
 import type { StepIdType } from '../../../../form-types'
@@ -32,9 +34,9 @@ import type { AnalyticsEvent } from '../../../../analytics/mixpanel'
 
 interface StepOverflowMenuProps {
   stepId: string
-  menuRootRef: React.MutableRefObject<HTMLDivElement | null>
+  menuRootRef: MutableRefObject<HTMLDivElement | null>
   top: number
-  setOpenedOverflowMenuId: React.Dispatch<React.SetStateAction<string | null>>
+  setOpenedOverflowMenuId: Dispatch<SetStateAction<string | null>>
   handleEdit: () => void
   confirmDelete: () => void
   confirmMultiDelete: () => void
@@ -106,7 +108,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
         boxShadow="0px 1px 3px rgba(0, 0, 0, 0.2)"
         backgroundColor={COLORS.white}
         flexDirection={DIRECTION_COLUMN}
-        onClick={(e: React.MouseEvent) => {
+        onClick={(e: MouseEvent) => {
           e.preventDefault()
           e.stopPropagation()
         }}

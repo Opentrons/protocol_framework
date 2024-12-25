@@ -1,8 +1,9 @@
-import type * as React from 'react'
 import { vi, describe, it, expect } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 
 import { ModalContentOneColSimpleButtons } from '../ModalContentOneColSimpleButtons'
+
+import type { ChangeEventHandler } from 'react'
 
 /* eslint-disable testing-library/no-node-access */
 const inputElForButtonFromButtonText = (text: string): HTMLInputElement =>
@@ -88,7 +89,7 @@ describe('InterventionModal', () => {
         firstButton={{
           label: 'first button',
           value: 'first',
-          onChange: onChange as React.ChangeEventHandler<HTMLInputElement>,
+          onChange: onChange as ChangeEventHandler<HTMLInputElement>,
         }}
         secondButton={{ label: 'second button', value: 'second' }}
         furtherButtons={[{ label: 'third button', value: 'third' }]}

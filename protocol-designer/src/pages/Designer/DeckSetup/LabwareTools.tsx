@@ -32,7 +32,7 @@ import {
   getModuleType,
 } from '@opentrons/shared-data'
 
-import { BUTTON_LINK_STYLE } from '../../../atoms'
+import { LINK_BUTTON_STYLE } from '../../../atoms'
 import { selectors as stepFormSelectors } from '../../../step-forms'
 import { getOnlyLatestDefs } from '../../../labware-defs'
 import {
@@ -61,6 +61,7 @@ import {
   getLabwareCompatibleWithAdapter,
 } from './utils'
 
+import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
 import type { DeckSlotId, LabwareDefinition2 } from '@opentrons/shared-data'
 import type { ModuleOnDeck } from '../../../step-forms'
 import type { ThunkDispatch } from '../../../types'
@@ -75,9 +76,9 @@ interface LabwareToolsProps {
   slot: DeckSlotId
   setHoveredLabware: (defUri: string | null) => void
   searchTerm: string
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>
+  setSearchTerm: Dispatch<SetStateAction<string>>
   areCategoriesExpanded: CategoryExpand
-  setAreCategoriesExpanded: React.Dispatch<React.SetStateAction<CategoryExpand>>
+  setAreCategoriesExpanded: Dispatch<SetStateAction<CategoryExpand>>
   handleReset: () => void
 }
 
@@ -274,7 +275,7 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
         (isNextToHeaterShaker && robotType === OT2_ROBOT_TYPE) ? (
           <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
             <CheckboxField
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 isNextToHeaterShaker
                   ? setFilterHeight(e.currentTarget.checked)
                   : setFilterRecommended(e.currentTarget.checked)
@@ -491,7 +492,7 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
         alignItems={ALIGN_CENTER}
         justifyContent={JUSTIFY_CENTER}
       >
-        <StyledLabel css={BUTTON_LINK_STYLE}>
+        <StyledLabel css={LINK_BUTTON_STYLE}>
           <StyledText desktopStyle="bodyDefaultRegular">
             {t('upload_custom_labware')}
           </StyledText>

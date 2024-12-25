@@ -1,9 +1,9 @@
 import {
-  Flex,
-  MoveLabwareOnDeck,
   COLORS,
-  Module,
+  Flex,
   LabwareRender,
+  Module,
+  MoveLabwareOnDeck,
 } from '@opentrons/components'
 import { inferModuleOrientationFromXCoordinate } from '@opentrons/shared-data'
 
@@ -14,7 +14,7 @@ import { RecoveryFooterButtons } from './RecoveryFooterButtons'
 import { LeftColumnLabwareInfo } from './LeftColumnLabwareInfo'
 import { RECOVERY_MAP } from '../constants'
 
-import type * as React from 'react'
+import type { ComponentProps } from 'react'
 import type { RecoveryContentProps } from '../types'
 import type { InterventionContent } from '/app/molecules/InterventionModal/InterventionContent'
 
@@ -100,7 +100,7 @@ export function TwoColLwInfoAndDeck(
     }
   }
 
-  const buildType = (): React.ComponentProps<
+  const buildType = (): ComponentProps<
     typeof InterventionContent
   >['infoProps']['type'] => {
     switch (selectedRecoveryOption) {

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
+
 import {
   ALIGN_CENTER,
   COLORS,
@@ -10,6 +11,7 @@ import {
   JUSTIFY_CENTER,
   JUSTIFY_SPACE_BETWEEN,
   POSITION_FIXED,
+  POSITION_RELATIVE,
   SPACING,
   StyledText,
   Tag,
@@ -30,7 +32,7 @@ import {
 } from '../../../ui/steps/selectors'
 import { DeckSetupContainer } from '../DeckSetup'
 import { OffDeck } from '../Offdeck'
-import { TimelineToolbox, SubstepsToolbox } from './Timeline'
+import { SubStepsToolbox } from './Timeline'
 import { StepForm } from './StepForm'
 import { StepSummary } from './StepSummary'
 import { BatchEditToolbox } from './BatchEditToolbox'
@@ -39,6 +41,7 @@ import {
   getRobotStateTimeline,
 } from '../../../file-data/selectors'
 import { TimelineAlerts } from '../../../organisms'
+import { DraggableSidebar } from './DraggableSidebar'
 
 const CONTENT_MAX_WIDTH = '44.6704375rem'
 
@@ -56,6 +59,7 @@ export function ProtocolSteps(): JSX.Element {
   const [deckView, setDeckView] = useState<
     typeof leftString | typeof rightString
   >(leftString)
+  const [targetWidth, setTargetWidth] = useState<number>(350)
 
   const currentHoveredStepId = useSelector(getHoveredStepId)
   const currentSelectedStepId = useSelector(getSelectedStepId)
@@ -82,15 +86,17 @@ export function ProtocolSteps(): JSX.Element {
       width="100%"
       padding={SPACING.spacing12}
       gridGap={SPACING.spacing16}
-      justifyContent={JUSTIFY_SPACE_BETWEEN}
     >
-      <TimelineToolbox />
+      <Flex flex="1" height="100%">
+        <DraggableSidebar setTargetWidth={setTargetWidth} />
+      </Flex>
       <Flex
         alignItems={ALIGN_CENTER}
         flexDirection={DIRECTION_COLUMN}
         gridGap={SPACING.spacing16}
-        width="100%"
+        flex="2.85"
         paddingTop={showTimelineAlerts ? '0' : SPACING.spacing24}
+        position={POSITION_RELATIVE}
       >
         <Flex
           flexDirection={DIRECTION_COLUMN}
@@ -142,9 +148,9 @@ export function ProtocolSteps(): JSX.Element {
         {enableHoyKeyDisplay ? (
           <Flex
             position={POSITION_FIXED}
-            left="21rem"
+            left={`calc(1.5rem + ${targetWidth}px)`}
             bottom="0.75rem"
-            gridGap={SPACING.spacing6}
+            gridGap={SPACING.spacing4}
             flexDirection={DIRECTION_COLUMN}
           >
             <Tag
@@ -166,7 +172,7 @@ export function ProtocolSteps(): JSX.Element {
         ) : null}
       </Flex>
       {formData == null && selectedSubstep ? (
-        <SubstepsToolbox stepId={selectedSubstep} />
+        <SubStepsToolbox stepId={selectedSubstep} />
       ) : null}
       <StepForm />
       {isMultiSelectMode ? <BatchEditToolbox /> : null}

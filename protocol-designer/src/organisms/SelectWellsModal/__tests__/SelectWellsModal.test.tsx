@@ -14,6 +14,8 @@ import {
 } from '../../../step-forms/selectors'
 import { SelectableLabware } from '../../Labware/SelectableLabware'
 import { SelectWellsModal } from '..'
+
+import type { ComponentProps } from 'react'
 import type { LabwareDefinition2, PipetteName } from '@opentrons/shared-data'
 
 vi.mock('../../../step-forms/selectors')
@@ -21,7 +23,7 @@ vi.mock('../../../labware-ingred/selectors')
 vi.mock('../../../top-selectors/well-contents')
 vi.mock('../../Labware/SelectableLabware')
 
-const render = (props: React.ComponentProps<typeof SelectWellsModal>) => {
+const render = (props: ComponentProps<typeof SelectWellsModal>) => {
   return renderWithProviders(<SelectWellsModal {...props} />, {
     i18nInstance: i18n,
   })[0]
@@ -30,7 +32,7 @@ const render = (props: React.ComponentProps<typeof SelectWellsModal>) => {
 const labwareId = 'mockId'
 const pipId = 'mockPipId'
 describe('SelectWellsModal', () => {
-  let props: React.ComponentProps<typeof SelectWellsModal>
+  let props: ComponentProps<typeof SelectWellsModal>
 
   beforeEach(() => {
     props = {

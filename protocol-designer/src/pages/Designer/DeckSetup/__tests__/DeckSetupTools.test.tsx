@@ -22,7 +22,7 @@ import { getDeckSetupForActiveItem } from '../../../../top-selectors/labware-loc
 import { DeckSetupTools } from '../DeckSetupTools'
 import { LabwareTools } from '../LabwareTools'
 
-import type * as React from 'react'
+import type { ComponentProps } from 'react'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
 vi.mock('../LabwareTools')
@@ -36,7 +36,7 @@ vi.mock('../../../../labware-ingred/selectors')
 vi.mock('../../../../tutorial/selectors')
 vi.mock('../../../../step-forms/selectors')
 vi.mock('../../../../organisms/Kitchen/hooks')
-const render = (props: React.ComponentProps<typeof DeckSetupTools>) => {
+const render = (props: ComponentProps<typeof DeckSetupTools>) => {
   return renderWithProviders(<DeckSetupTools {...props} />, {
     i18nInstance: i18n,
   })[0]
@@ -45,7 +45,7 @@ const render = (props: React.ComponentProps<typeof DeckSetupTools>) => {
 const mockMakeSnackbar = vi.fn()
 
 describe('DeckSetupTools', () => {
-  let props: React.ComponentProps<typeof DeckSetupTools>
+  let props: ComponentProps<typeof DeckSetupTools>
 
   beforeEach(() => {
     props = {
