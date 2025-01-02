@@ -78,9 +78,8 @@ async def test_absorbance_reader_implementation(
         ),
         state_update=update_types.StateUpdate(
             files_added=update_types.FilesAddedUpdate(file_ids=[]),
-            module_state_update=update_types.ModuleStateUpdate(
+            absorbance_reader_state_update=update_types.AbsorbanceReaderStateUpdate(
                 module_id="module-id",
-                module_type="absorbanceReaderType",
                 absorbance_reader_data=update_types.AbsorbanceReaderDataUpdate(
                     read_result=asbsorbance_result
                 ),

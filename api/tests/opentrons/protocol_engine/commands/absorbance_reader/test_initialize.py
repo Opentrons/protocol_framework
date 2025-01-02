@@ -80,9 +80,8 @@ async def test_absorbance_reader_implementation(
     assert result == SuccessData(
         public=InitializeResult(),
         state_update=update_types.StateUpdate(
-            module_state_update=update_types.ModuleStateUpdate(
+            absorbance_reader_state_update=update_types.AbsorbanceReaderStateUpdate(
                 module_id="module-id",
-                module_type="absorbanceReaderType",
                 initialize_absorbance_reader_update=update_types.AbsorbanceReaderInitializeUpdate(
                     measure_mode=input_measure_mode,  # type: ignore[arg-type]
                     sample_wave_lengths=input_sample_wave_length,

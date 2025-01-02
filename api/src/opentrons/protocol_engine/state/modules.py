@@ -35,6 +35,7 @@ from opentrons.protocol_engine.state.module_substates.absorbance_reader_substate
     AbsorbanceReaderMeasureMode,
 )
 from opentrons.types import DeckSlotName, MountType, StagingSlotName
+from .update_types import AbsorbanceReaderStateUpdate
 from ..errors import ModuleNotConnectedError
 
 from ..types import (
@@ -296,12 +297,9 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             self._handle_thermocycler_module_commands(command)
 
     def _handle_state_update(self, state_update: update_types.StateUpdate) -> None:
-        if (
-            state_update.module_state_update != update_types.NO_CHANGE
-            and state_update.module_state_update.module_type == "absorbanceReaderType"
-        ):
+        if state_update.absorbance_reader_state_update != update_types.NO_CHANGE:
             self._handle_absorbance_reader_commands(
-                state_update, state_update.module_state_update.module_id
+                state_update.absorbance_reader_state_update
             )
 
     def _add_module_substate(
@@ -561,9 +559,10 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             )
 
     def _handle_absorbance_reader_commands(
-        self, state_update: update_types.StateUpdate, module_id: str
+        self, absorbance_reader_state_update: AbsorbanceReaderStateUpdate
     ) -> None:
         # Get current values:
+        module_id = absorbance_reader_state_update.module_id
         absorbance_reader_substate = self._state.substate_by_module_id[module_id]
         assert isinstance(
             absorbance_reader_substate, AbsorbanceReaderSubState
@@ -576,36 +575,32 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         reference_wavelength = absorbance_reader_substate.reference_wavelength
         data = absorbance_reader_substate.data
         if (
-            state_update.module_state_update != update_types.NO_CHANGE
-            and state_update.module_state_update.absorbance_reader_lid
+            absorbance_reader_state_update.absorbance_reader_lid
             != update_types.NO_CHANGE
         ):
-            is_lid_on = state_update.module_state_update.absorbance_reader_lid.is_lid_on
+            is_lid_on = absorbance_reader_state_update.absorbance_reader_lid.is_lid_on
         elif (
-            state_update.module_state_update != update_types.NO_CHANGE
-            and state_update.module_state_update.initialize_absorbance_reader_update
+            absorbance_reader_state_update.initialize_absorbance_reader_update
             != update_types.NO_CHANGE
         ):
-            module_id = AbsorbanceReaderId(module_id)
             configured = True
             measured = False
             is_lid_on = is_lid_on
             measure_mode = AbsorbanceReaderMeasureMode(
-                state_update.module_state_update.initialize_absorbance_reader_update.measure_mode
+                absorbance_reader_state_update.initialize_absorbance_reader_update.measure_mode
             )
             configured_wavelengths = (
-                state_update.module_state_update.initialize_absorbance_reader_update.sample_wave_lengths
+                absorbance_reader_state_update.initialize_absorbance_reader_update.sample_wave_lengths
             )
             reference_wavelength = (
-                state_update.module_state_update.initialize_absorbance_reader_update.reference_wave_length
+                absorbance_reader_state_update.initialize_absorbance_reader_update.reference_wave_length
             )
             data = None
         elif (
-            state_update.module_state_update != update_types.NO_CHANGE
-            and state_update.module_state_update.absorbance_reader_data
+            absorbance_reader_state_update.absorbance_reader_data
             != update_types.NO_CHANGE
         ):
-            data = state_update.module_state_update.absorbance_reader_data.read_result
+            data = absorbance_reader_state_update.absorbance_reader_data.read_result
         self._state.substate_by_module_id[module_id] = AbsorbanceReaderSubState(
             module_id=AbsorbanceReaderId(module_id),
             configured=configured,

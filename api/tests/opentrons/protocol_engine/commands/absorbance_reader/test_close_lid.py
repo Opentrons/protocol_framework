@@ -129,9 +129,8 @@ async def test_absorbance_reader_close_lid_implementation(
     assert result == SuccessData(
         public=CloseLidResult(),
         state_update=update_types.StateUpdate(
-            module_state_update=update_types.ModuleStateUpdate(
+            absorbance_reader_state_update=update_types.AbsorbanceReaderStateUpdate(
                 module_id="module-id",
-                module_type="absorbanceReaderType",
                 absorbance_reader_lid=update_types.AbsorbanceReaderLidUpdate(
                     is_lid_on=True
                 ),

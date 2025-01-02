@@ -18,7 +18,6 @@ from opentrons.protocol_engine.types import (
 )
 from opentrons.types import MountType
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
-from opentrons_shared_data.module.types import ModuleType
 from opentrons_shared_data.pipette.types import PipetteNameType
 
 
@@ -271,11 +270,10 @@ class AbsorbanceReaderInitializeUpdate:
 
 
 @dataclasses.dataclass
-class ModuleStateUpdate:
-    """An update to the module state."""
+class AbsorbanceReaderStateUpdate:
+    """An update to the absorbance reader module state."""
 
     module_id: str
-    module_type: ModuleType
     absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
     absorbance_reader_data: AbsorbanceReaderDataUpdate | NoChangeType = NO_CHANGE
     initialize_absorbance_reader_update: AbsorbanceReaderInitializeUpdate | NoChangeType = (
@@ -339,7 +337,9 @@ class StateUpdate:
 
     liquid_operated: LiquidOperatedUpdate | NoChangeType = NO_CHANGE
 
-    module_state_update: ModuleStateUpdate | NoChangeType = NO_CHANGE
+    absorbance_reader_state_update: AbsorbanceReaderStateUpdate | NoChangeType = (
+        NO_CHANGE
+    )
 
     liquid_class_loaded: LiquidClassLoadedUpdate | NoChangeType = NO_CHANGE
 
@@ -603,9 +603,8 @@ class StateUpdate:
 
     def set_absorbance_reader_lid(self: Self, module_id: str, is_lid_on: bool) -> Self:
         """Update an absorbance reader's lid location. See `AbsorbanceReaderLidUpdate`."""
-        self.module_state_update = ModuleStateUpdate(
+        self.absorbance_reader_state_update = AbsorbanceReaderStateUpdate(
             module_id=module_id,
-            module_type="absorbanceReaderType",
             absorbance_reader_lid=AbsorbanceReaderLidUpdate(is_lid_on=is_lid_on),
         )
         return self
@@ -614,9 +613,8 @@ class StateUpdate:
         self, module_id: str, read_result: typing.Dict[int, typing.Dict[str, float]]
     ) -> Self:
         """Update an absorbance reader's read data. See `AbsorbanceReaderReadDataUpdate`."""
-        self.module_state_update = ModuleStateUpdate(
+        self.absorbance_reader_state_update = AbsorbanceReaderStateUpdate(
             module_id=module_id,
-            module_type="absorbanceReaderType",
             absorbance_reader_data=AbsorbanceReaderDataUpdate(read_result=read_result),
         )
         return self
@@ -629,9 +627,8 @@ class StateUpdate:
         reference_wave_length: typing.Optional[int],
     ) -> Self:
         """Initialize absorbance reader."""
-        self.module_state_update = ModuleStateUpdate(
+        self.absorbance_reader_state_update = AbsorbanceReaderStateUpdate(
             module_id=module_id,
-            module_type="absorbanceReaderType",
             initialize_absorbance_reader_update=AbsorbanceReaderInitializeUpdate(
                 measure_mode=measure_mode,
                 sample_wave_lengths=sample_wave_lengths,
