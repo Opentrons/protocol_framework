@@ -177,6 +177,21 @@ def test_get_pipette_name(
     assert result == "p300_single"
 
 
+def test_get_pipette_load_name(
+    decoy: Decoy, mock_engine_client: EngineClient, subject: InstrumentCore
+) -> None:
+    """It should get the pipette's API-specific load name"""
+    decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
+        LoadedPipette.construct(pipetteName=PipetteNameType.P300_SINGLE)  # type: ignore[call-arg]
+    )
+    assert subject.get_pipette_load_name() == "p300_single"
+
+    decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
+        LoadedPipette.construct(pipetteName=PipetteNameType.P1000_96)  # type: ignore[call-arg]
+    )
+    assert subject.get_pipette_load_name() == "flex_96channel_1000"
+
+
 def test_get_mount(
     decoy: Decoy, mock_engine_client: EngineClient, subject: InstrumentCore
 ) -> None:

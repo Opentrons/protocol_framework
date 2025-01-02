@@ -38,7 +38,7 @@ from opentrons.protocol_engine.types import (
 from opentrons.protocol_engine.errors.exceptions import TipNotAttachedError
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocols.api_support.definitions import MAX_SUPPORTED_VERSION
-from opentrons_shared_data.pipette.types import PipetteNameType
+from opentrons_shared_data.pipette.types import PipetteNameType, PIPETTE_API_NAMES_MAP
 from opentrons_shared_data.errors.exceptions import (
     UnsupportedHardwareCommand,
 )
@@ -708,6 +708,18 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             else pipette.pipetteName
         )
 
+    def get_pipette_load_name(self) -> str:
+        """Get the pipette's requested API load name.
+
+        This is the load name that is specified in the `ProtocolContext.load_instrument()`
+        method. This name might differ from the engine-specific pipette name.
+        """
+        pipette = self._engine_client.state.pipettes.get(self._pipette_id)
+        assert pipette.pipetteName in PIPETTE_API_NAMES_MAP.values()
+        for pip_api_name, pip_name in PIPETTE_API_NAMES_MAP.items():
+            if pip_name == pipette.pipetteName:
+                return pip_api_name
+
     def get_model(self) -> str:
         return self._engine_client.state.pipettes.get_model_name(self._pipette_id)
 
@@ -952,12 +964,11 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         # TODO: use the ID returned by load_liquid_class in command annotations
         self.load_liquid_class(
             liquid_class=liquid_class,
-            pipette_load_name=self.get_pipette_name(),  # TODO: update this to use load name instead
+            pipette_load_name=self.get_pipette_load_name(),
             tiprack_uri=tiprack_uri,
         )
         transfer_props = liquid_class.get_for(
-            # update this to fetch load name instead
-            pipette=self.get_pipette_name(),
+            pipette=self.get_pipette_load_name(),
             tiprack=tiprack_uri,
         )
         # TODO: add multi-channel pipette handling here
@@ -1080,7 +1091,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         5. Delay- wait inside the liquid
         6. Aspirate retract
 
-        Return: The last liquid and air gap pair in tip.
+        Return: List of liquid and air gap pairs in tip.
         """
         aspirate_props = transfer_properties.aspirate
         check_valid_volume_parameters(
@@ -1166,7 +1177,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         9. Retract
 
         Return:
-            The last liquid and air gap pair in tip.
+            List of liquid and air gap pairs in tip.
         """
         dispense_props = transfer_properties.dispense
         dest_loc, dest_well = dest
