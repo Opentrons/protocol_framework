@@ -65,6 +65,7 @@ from opentrons.protocol_api.core.engine import (
 )
 from opentrons.protocols.api_support.definitions import MAX_SUPPORTED_VERSION
 from opentrons.protocols.api_support.types import APIVersion
+from opentrons.protocols.advanced_control.transfers import common as tx_commons
 from opentrons.types import Location, Mount, MountType, Point, NozzleConfigurationType
 
 from ... import versions_below, versions_at_or_above
@@ -97,6 +98,15 @@ def patch_mock_pipette_movement_safety_check(
     monkeypatch.setattr(
         pipette_movement_conflict, "check_safe_for_pipette_movement", mock
     )
+
+
+@pytest.fixture(autouse=True)
+def patch_mock_check_valid_volume_parameters(
+    decoy: Decoy, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Replace tx_commons.check_valid_volume_parameters() with a mock."""
+    mock = decoy.mock(func=tx_commons.check_valid_volume_parameters)
+    monkeypatch.setattr(tx_commons, "check_valid_volume_parameters", mock)
 
 
 @pytest.fixture
@@ -179,7 +189,7 @@ def test_get_pipette_name(
 def test_get_pipette_load_name(
     decoy: Decoy, mock_engine_client: EngineClient, subject: InstrumentCore
 ) -> None:
-    """It should get the pipette's API-specific load name"""
+    """It should get the pipette's API-specific load name."""
     decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
         LoadedPipette.construct(pipetteName=PipetteNameType.P300_SINGLE)  # type: ignore[call-arg]
     )
@@ -1664,7 +1674,7 @@ def test_aspirate_liquid_class(
         mock_transfer_components_executor.aspirate_and_wait(volume=123),
         mock_transfer_components_executor.retract_after_aspiration(volume=123),
     )
-    assert result == LiquidAndAirGapPair(air_gap=222, liquid=111)
+    assert result == [LiquidAndAirGapPair(air_gap=222, liquid=111)]
 
 
 def test_dispense_liquid_class(
@@ -1733,4 +1743,4 @@ def test_dispense_liquid_class(
             source_well=source_well,
         ),
     )
-    assert result == LiquidAndAirGapPair(air_gap=444, liquid=333)
+    assert result == [LiquidAndAirGapPair(air_gap=444, liquid=333)]
