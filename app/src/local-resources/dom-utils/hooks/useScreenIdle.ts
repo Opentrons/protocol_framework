@@ -29,7 +29,7 @@ const DEFAULT_OPTIONS = {
  * @param {object} options (events that the app need to check, initialState: initial state true => idle)
  * @returns {boolean}
  */
-export function useIdle(
+export function useScreenIdle(
   idleTime: number,
   options?: Partial<{
     events: Array<keyof DocumentEventMap>
