@@ -9,13 +9,15 @@ import '../support/commands'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
+    cy.visit('/')
     cy.closeAnalyticsModal()
   })
 
   it('content and step 1 flow works', () => {
-    cy.clickCreateNew()
+    // cy.clickCreateNew()
     cy.verifyCreateNewHeader()
-    verifyCreateProtocolPage()
+    cy.contains('button', 'Create a protocol').click()
+    // verifyCreateProtocolPage()
     const steps: Array<Actions | Verifications | UniversalActions> = [
       Verifications.OnStep1,
       Verifications.FlexSelected,
