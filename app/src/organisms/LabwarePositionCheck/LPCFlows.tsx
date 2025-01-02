@@ -3,6 +3,7 @@ import { useState } from 'react'
 import {
   useCreateMaintenanceRunLabwareDefinitionMutation,
   useDeleteMaintenanceRunMutation,
+  useRunLoadedLabwareDefinitions,
 } from '@opentrons/react-api-client'
 
 import {
@@ -10,7 +11,6 @@ import {
   useNotifyRunQuery,
   useMostRecentCompletedAnalysis,
 } from '/app/resources/runs'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import { LPCWizardContainer } from './LPCWizardContainer'
 
 import type {
@@ -61,22 +61,33 @@ export function useLPCFlows({
     deleteMaintenanceRun,
     isLoading: isDeletingMaintenanceRun,
   } = useDeleteMaintenanceRunMutation()
+  useRunLoadedLabwareDefinitions(runId, {
+    // TOME TODO: Ideally we don't have to do this POST, since the server has the defs already?
+    onSuccess: res => {
+      Promise.all(
+        res.data.map(def => {
+          if ('schemaVersion' in def) {
+            createLabwareDefinition({
+              maintenanceRunId: maintenanceRunId as string,
+              labwareDef: def,
+            })
+          }
+        })
+      ).then(() => {
+        setHasCreatedLPCRun(true)
+      })
+    },
+    onSettled: () => {
+      // TOME TODO: Think about potentially error handling if there's some sort of failure here?
+      setIsLaunching(false)
+    },
+    enabled: maintenanceRunId != null,
+  })
 
   const { data: runRecord } = useNotifyRunQuery(runId, { staleTime: Infinity })
   const mostRecentAnalysis = useMostRecentCompletedAnalysis(runId)
 
   const currentOffsets = runRecord?.data?.labwareOffsets ?? []
-
-  const handleCloseLPC = (): void => {
-    if (maintenanceRunId != null) {
-      deleteMaintenanceRun(maintenanceRunId, {
-        onSettled: () => {
-          setMaintenanceRunId(null)
-          setHasCreatedLPCRun(false)
-        },
-      })
-    }
-  }
 
   const launchLPC = (): Promise<void> => {
     setIsLaunching(true)
@@ -89,27 +100,20 @@ export function useLPCFlows({
           definitionUri,
         })
       ),
-    }).then(maintenanceRun =>
-      // TOME: TODO: Swap this out with the nifty new hook.
+    }).then(maintenanceRun => {
+      setMaintenanceRunId(maintenanceRun.data.id)
+    })
+  }
 
-      // TODO(BC, 2023-05-15): replace this with a call to the protocol run's GET labware_definitions
-      // endpoint once it's made we should be adding the definitions to the maintenance run by
-      // reading from the current protocol run, and not from the analysis
-      Promise.all(
-        getLabwareDefinitionsFromCommands(
-          mostRecentAnalysis?.commands ?? []
-        ).map(def => {
-          createLabwareDefinition({
-            maintenanceRunId: maintenanceRun?.data?.id,
-            labwareDef: def,
-          })
-        })
-      ).then(() => {
-        setMaintenanceRunId(maintenanceRun.data.id)
-        setIsLaunching(false)
-        setHasCreatedLPCRun(true)
+  const handleCloseLPC = (): void => {
+    if (maintenanceRunId != null) {
+      deleteMaintenanceRun(maintenanceRunId, {
+        onSettled: () => {
+          setMaintenanceRunId(null)
+          setHasCreatedLPCRun(false)
+        },
       })
-    )
+    }
   }
 
   const showLPC =
