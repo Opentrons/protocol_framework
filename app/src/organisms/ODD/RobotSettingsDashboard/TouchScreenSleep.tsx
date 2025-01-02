@@ -14,7 +14,7 @@ import {
   getOnDeviceDisplaySettings,
   updateConfigValue,
 } from '/app/redux/config'
-import { SLEEP_NEVER_MS } from '/app/local-resources/config'
+import { SLEEP_NEVER_MS } from '/app/local-resources/dom-utils'
 
 import type { ChangeEvent } from 'react'
 import type { Dispatch } from '/app/redux/types'
