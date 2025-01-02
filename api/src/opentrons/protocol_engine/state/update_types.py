@@ -15,6 +15,7 @@ from opentrons.protocol_engine.types import (
     TipGeometry,
     AspiratedFluid,
     LiquidClassRecord,
+    ABSMeasureMode,
 )
 from opentrons.types import MountType
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
@@ -284,8 +285,35 @@ class PipetteEmptyFluidUpdate:
 class AbsorbanceReaderLidUpdate:
     """An update to an absorbance reader's lid location."""
 
-    module_id: str
     is_lid_on: bool
+
+
+@dataclasses.dataclass
+class AbsorbanceReaderDataUpdate:
+    """An update to an absorbance reader's lid location."""
+
+    read_result: typing.Dict[int, typing.Dict[str, float]]
+
+
+@dataclasses.dataclass(frozen=True)
+class AbsorbanceReaderInitializeUpdate:
+    """An update to an absorbance reader's initialization."""
+
+    measure_mode: ABSMeasureMode
+    sample_wave_lengths: typing.List[int]
+    reference_wave_length: typing.Optional[int]
+
+
+@dataclasses.dataclass
+class AbsorbanceReaderStateUpdate:
+    """An update to the absorbance reader module state."""
+
+    module_id: str
+    absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
+    absorbance_reader_data: AbsorbanceReaderDataUpdate | NoChangeType = NO_CHANGE
+    initialize_absorbance_reader_update: AbsorbanceReaderInitializeUpdate | NoChangeType = (
+        NO_CHANGE
+    )
 
 
 @dataclasses.dataclass
@@ -348,7 +376,9 @@ class StateUpdate:
 
     liquid_operated: LiquidOperatedUpdate | NoChangeType = NO_CHANGE
 
-    absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
+    absorbance_reader_state_update: AbsorbanceReaderStateUpdate | NoChangeType = (
+        NO_CHANGE
+    )
 
     liquid_class_loaded: LiquidClassLoadedUpdate | NoChangeType = NO_CHANGE
 
@@ -644,8 +674,40 @@ class StateUpdate:
 
     def set_absorbance_reader_lid(self: Self, module_id: str, is_lid_on: bool) -> Self:
         """Update an absorbance reader's lid location. See `AbsorbanceReaderLidUpdate`."""
-        self.absorbance_reader_lid = AbsorbanceReaderLidUpdate(
-            module_id=module_id, is_lid_on=is_lid_on
+        assert self.absorbance_reader_state_update == NO_CHANGE
+        self.absorbance_reader_state_update = AbsorbanceReaderStateUpdate(
+            module_id=module_id,
+            absorbance_reader_lid=AbsorbanceReaderLidUpdate(is_lid_on=is_lid_on),
+        )
+        return self
+
+    def set_absorbance_reader_data(
+        self, module_id: str, read_result: typing.Dict[int, typing.Dict[str, float]]
+    ) -> Self:
+        """Update an absorbance reader's read data. See `AbsorbanceReaderReadDataUpdate`."""
+        assert self.absorbance_reader_state_update == NO_CHANGE
+        self.absorbance_reader_state_update = AbsorbanceReaderStateUpdate(
+            module_id=module_id,
+            absorbance_reader_data=AbsorbanceReaderDataUpdate(read_result=read_result),
+        )
+        return self
+
+    def initialize_absorbance_reader(
+        self,
+        module_id: str,
+        measure_mode: ABSMeasureMode,
+        sample_wave_lengths: typing.List[int],
+        reference_wave_length: typing.Optional[int],
+    ) -> Self:
+        """Initialize absorbance reader."""
+        assert self.absorbance_reader_state_update == NO_CHANGE
+        self.absorbance_reader_state_update = AbsorbanceReaderStateUpdate(
+            module_id=module_id,
+            initialize_absorbance_reader_update=AbsorbanceReaderInitializeUpdate(
+                measure_mode=measure_mode,
+                sample_wave_lengths=sample_wave_lengths,
+                reference_wave_length=reference_wave_length,
+            ),
         )
         return self
 
