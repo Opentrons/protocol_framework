@@ -1,5 +1,5 @@
 import { isEqual } from 'lodash'
-import { SECTIONS } from '../constants'
+import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
 import { getLabwareDefURI, getPipetteNameSpecs } from '@opentrons/shared-data'
 import { getLabwareLocationCombos } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/getLabwareLocationCombos'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
@@ -29,17 +29,17 @@ export const getProbeBasedLPCSteps = (
   protocolData: CompletedProtocolAnalysis
 ): LabwarePositionCheckStep[] => {
   return [
-    { section: SECTIONS.BEFORE_BEGINNING },
+    { section: NAV_STEPS.BEFORE_BEGINNING },
     {
-      section: SECTIONS.ATTACH_PROBE,
+      section: NAV_STEPS.ATTACH_PROBE,
       pipetteId: getPrimaryPipetteId(protocolData.pipettes),
     },
     ...getAllCheckSectionSteps(protocolData),
     {
-      section: SECTIONS.DETACH_PROBE,
+      section: NAV_STEPS.DETACH_PROBE,
       pipetteId: getPrimaryPipetteId(protocolData.pipettes),
     },
-    { section: SECTIONS.RESULTS_SUMMARY },
+    { section: NAV_STEPS.RESULTS_SUMMARY },
   ]
 }
 
@@ -78,7 +78,7 @@ function getAllCheckSectionSteps(
 
   return labwareLocations.map(
     ({ location, labwareId, moduleId, adapterId, definitionUri }) => ({
-      section: SECTIONS.CHECK_POSITIONS,
+      section: NAV_STEPS.CHECK_POSITIONS,
       labwareId: labwareId,
       pipetteId: getPrimaryPipetteId(pipettes),
       location,

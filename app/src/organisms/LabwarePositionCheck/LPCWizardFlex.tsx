@@ -32,50 +32,37 @@ import {
 import { getLabwarePositionCheckSteps } from './getLabwarePositionCheckSteps'
 
 import type {
-  CompletedProtocolAnalysis,
   Coordinates,
   CreateCommand,
   DropTipCreateCommand,
-  RobotType,
 } from '@opentrons/shared-data'
 import type {
   LabwareOffsetCreateData,
-  LabwareOffset,
   CommandData,
 } from '@opentrons/api-client'
 import type { Axis, Sign, StepSize } from '/app/molecules/JogControls/types'
 import type { RegisterPositionAction, WorkingOffset } from './types'
+import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck/LPCFlows'
 
 const RUN_REFETCH_INTERVAL = 5000
 const JOG_COMMAND_TIMEOUT = 10000 // 10 seconds
-interface LabwarePositionCheckModalProps {
-  runId: string
-  maintenanceRunId: string
-  robotType: RobotType
-  mostRecentAnalysis: CompletedProtocolAnalysis | null
-  existingOffsets: LabwareOffset[]
-  onCloseClick: () => unknown
-  protocolName: string
-  setMaintenanceRunId: (id: string | null) => void
-  isDeletingMaintenanceRun: boolean
-  caughtError?: Error
-}
 
-export const LabwarePositionCheckComponent = (
-  props: LabwarePositionCheckModalProps
-): JSX.Element | null => {
+export const LPCWizardFlex = (props: LPCFlowsProps): JSX.Element | null => {
   const {
     mostRecentAnalysis,
     existingOffsets,
     robotType,
     runId,
-    maintenanceRunId,
     onCloseClick,
-    setMaintenanceRunId,
     protocolName,
-    isDeletingMaintenanceRun,
+    maintenanceRunUtils,
   } = props
   const { t } = useTranslation(['labware_position_check', 'shared'])
+  const {
+    maintenanceRunId,
+    setMaintenanceRunId,
+    isDeletingMaintenanceRun,
+  } = maintenanceRunUtils
   const isOnDevice = useSelector(getIsOnDevice)
   const protocolData = mostRecentAnalysis
   const shouldUseMetalProbe = robotType === FLEX_ROBOT_TYPE
@@ -236,8 +223,12 @@ export const LabwarePositionCheckComponent = (
       ],
       true
     )
-      .then(() => props.onCloseClick())
-      .catch(() => props.onCloseClick())
+      .then(() => {
+        props.onCloseClick()
+      })
+      .catch(() => {
+        props.onCloseClick()
+      })
   }
   const {
     confirm: confirmExitLPC,

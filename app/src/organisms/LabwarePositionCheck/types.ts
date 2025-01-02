@@ -1,4 +1,4 @@
-import type { SECTIONS } from './constants'
+import type { NAV_STEPS } from './constants'
 import type { useCreateCommandMutation } from '@opentrons/react-api-client'
 import type { LabwareOffsetLocation, VectorOffset } from '@opentrons/api-client'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
@@ -14,10 +14,10 @@ export type LabwarePositionCheckStep =
   | DetachProbeStep
   | ResultsSummaryStep
 export interface BeforeBeginningStep {
-  section: typeof SECTIONS.BEFORE_BEGINNING
+  section: typeof NAV_STEPS.BEFORE_BEGINNING
 }
 export interface CheckTipRacksStep {
-  section: typeof SECTIONS.CHECK_TIP_RACKS
+  section: typeof NAV_STEPS.CHECK_TIP_RACKS
   pipetteId: string
   labwareId: string
   location: LabwareOffsetLocation
@@ -25,11 +25,11 @@ export interface CheckTipRacksStep {
   adapterId?: string
 }
 export interface AttachProbeStep {
-  section: typeof SECTIONS.ATTACH_PROBE
+  section: typeof NAV_STEPS.ATTACH_PROBE
   pipetteId: string
 }
 export interface PickUpTipStep {
-  section: typeof SECTIONS.PICK_UP_TIP
+  section: typeof NAV_STEPS.PICK_UP_TIP
   pipetteId: string
   labwareId: string
   location: LabwareOffsetLocation
@@ -37,7 +37,7 @@ export interface PickUpTipStep {
   adapterId?: string
 }
 export interface CheckPositionsStep {
-  section: typeof SECTIONS.CHECK_POSITIONS
+  section: typeof NAV_STEPS.CHECK_POSITIONS
   pipetteId: string
   labwareId: string
   location: LabwareOffsetLocation
@@ -45,7 +45,7 @@ export interface CheckPositionsStep {
   moduleId?: string
 }
 export interface CheckLabwareStep {
-  section: typeof SECTIONS.CHECK_LABWARE
+  section: typeof NAV_STEPS.CHECK_LABWARE
   pipetteId: string
   labwareId: string
   location: LabwareOffsetLocation
@@ -54,7 +54,7 @@ export interface CheckLabwareStep {
   adapterId?: string
 }
 export interface ReturnTipStep {
-  section: typeof SECTIONS.RETURN_TIP
+  section: typeof NAV_STEPS.RETURN_TIP
   pipetteId: string
   labwareId: string
   location: LabwareOffsetLocation
@@ -62,11 +62,11 @@ export interface ReturnTipStep {
   adapterId?: string
 }
 export interface DetachProbeStep {
-  section: typeof SECTIONS.DETACH_PROBE
+  section: typeof NAV_STEPS.DETACH_PROBE
   pipetteId: string
 }
 export interface ResultsSummaryStep {
-  section: typeof SECTIONS.RESULTS_SUMMARY
+  section: typeof NAV_STEPS.RESULTS_SUMMARY
 }
 
 type CreateCommandMutate = ReturnType<

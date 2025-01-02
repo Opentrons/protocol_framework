@@ -1,5 +1,5 @@
 import { isEqual } from 'lodash'
-import { SECTIONS } from '../constants'
+import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import {
   getLabwareDefURI,
@@ -43,7 +43,7 @@ export const getTipBasedLPCSteps = (
     checkTipRacksSectionSteps[checkTipRacksSectionSteps.length - 1]
 
   const pickUpTipSectionStep: PickUpTipStep = {
-    section: SECTIONS.PICK_UP_TIP,
+    section: NAV_STEPS.PICK_UP_TIP,
     labwareId: lastTiprackCheckStep.labwareId,
     pipetteId: lastTiprackCheckStep.pipetteId,
     location: lastTiprackCheckStep.location,
@@ -53,7 +53,7 @@ export const getTipBasedLPCSteps = (
   const checkLabwareSectionSteps = getCheckLabwareSectionSteps(args)
 
   const returnTipSectionStep: ReturnTipStep = {
-    section: SECTIONS.RETURN_TIP,
+    section: NAV_STEPS.RETURN_TIP,
     labwareId: lastTiprackCheckStep.labwareId,
     pipetteId: lastTiprackCheckStep.pipetteId,
     location: lastTiprackCheckStep.location,
@@ -62,15 +62,17 @@ export const getTipBasedLPCSteps = (
   }
 
   return [
-    { section: SECTIONS.BEFORE_BEGINNING },
+    { section: NAV_STEPS.BEFORE_BEGINNING },
     ...allButLastTiprackCheckSteps,
     pickUpTipSectionStep,
     ...checkLabwareSectionSteps,
     returnTipSectionStep,
-    { section: SECTIONS.RESULTS_SUMMARY },
+    { section: NAV_STEPS.RESULTS_SUMMARY },
   ]
 }
 
+// TOME: TODO: Once you get things stable, you can do the labware definition stuff to get
+// whether or not is a tiprack.
 function getCheckTipRackSectionSteps(args: LPCArgs): CheckTipRacksStep[] {
   const {
     secondaryPipetteId,
@@ -137,7 +139,7 @@ function getCheckTipRackSectionSteps(args: LPCArgs): CheckTipRacksStep[] {
     return [
       ...acc,
       ...labwareLocations.map(({ location, adapterId, definitionUri }) => ({
-        section: SECTIONS.CHECK_TIP_RACKS,
+        section: NAV_STEPS.CHECK_TIP_RACKS,
         labwareId: params.labwareId,
         pipetteId: params.pipetteId,
         location,
@@ -183,7 +185,7 @@ function getCheckLabwareSectionSteps(args: LPCArgs): CheckLabwareStep[] {
       return [
         ...acc,
         {
-          section: SECTIONS.CHECK_LABWARE,
+          section: NAV_STEPS.CHECK_LABWARE,
           labwareId,
           pipetteId: primaryPipetteId,
           location,
