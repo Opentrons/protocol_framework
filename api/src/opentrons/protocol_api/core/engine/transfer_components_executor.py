@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from enum import Enum
 from typing import TYPE_CHECKING, Optional, Union
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     PositionReference,
@@ -28,8 +28,8 @@ if TYPE_CHECKING:
 class LiquidAndAirGapPair:
     """Pairing of a liquid and air gap in a tip, in that order."""
 
-    liquid: float
-    air_gap: float
+    liquid: float = 0
+    air_gap: float = 0
 
 
 @dataclass
@@ -50,9 +50,8 @@ class TipState:
 
     ready_to_aspirate: bool = True
     # TODO: maybe use the tip contents from engine state instead.
-    last_liquid_and_air_gap_in_tip: LiquidAndAirGapPair = LiquidAndAirGapPair(
-        liquid=0,
-        air_gap=0,
+    last_liquid_and_air_gap_in_tip: LiquidAndAirGapPair = field(
+        default_factory=LiquidAndAirGapPair
     )
 
     def add_liquid(self, volume: float) -> None:

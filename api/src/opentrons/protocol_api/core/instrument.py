@@ -16,7 +16,7 @@ from .well import WellCoreType
 from .labware import LabwareCoreType
 
 
-class AbstractInstrument(ABC, Generic[WellCoreType]):
+class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
     @abstractmethod
     def get_default_speed(self) -> float:
         ...
@@ -359,4 +359,4 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         """Check if the nozzle configuration currently supports LLD."""
 
 
-InstrumentCoreType = TypeVar("InstrumentCoreType", bound=AbstractInstrument[Any])
+InstrumentCoreType = TypeVar("InstrumentCoreType", bound=AbstractInstrument[Any, Any])
