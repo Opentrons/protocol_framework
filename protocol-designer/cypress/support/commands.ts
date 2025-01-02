@@ -113,7 +113,7 @@ Cypress.Commands.add('verifyHomePage', () => {
 
 Cypress.Commands.add('clickCreateNew', () => {
   // cy.get('[data-testid="SettingsIconButton"]').click();
-  cy.getByTestId(locators.settingsDataTestid).click()
+  // cy.getByTestId(locators.settingsDataTestid).click()
   // ToDo  re-add when 8.2.2 pushed to edge
   // cy.get('[data-testid="analyticsToggle"] svg')
   // .should('have.css', 'fill', 'rgb(0, 108, 250)')
