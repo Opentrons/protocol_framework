@@ -49,6 +49,7 @@ class TipState:
     """
 
     ready_to_aspirate: bool = True
+    # TODO: maybe use the tip contents from engine state instead.
     last_liquid_and_air_gap_in_tip: LiquidAndAirGapPair = LiquidAndAirGapPair(
         liquid=0,
         air_gap=0,
@@ -83,20 +84,6 @@ class TipState:
             self.last_liquid_and_air_gap_in_tip.air_gap == volume
         ), "Last air gap volume doe not match the volume being removed"
         self.last_liquid_and_air_gap_in_tip.air_gap = 0
-
-    def update(
-        self,
-        liquid: Optional[float] = None,
-        air_gap: Optional[float] = None,
-        ready_to_aspirate: Optional[bool] = None,
-    ) -> None:
-        """Update the tip state contents with given values."""
-        if liquid is not None:
-            self.last_liquid_and_air_gap_in_tip.liquid = liquid
-        if air_gap is not None:
-            self.last_liquid_and_air_gap_in_tip.air_gap = air_gap
-        if ready_to_aspirate is not None:
-            self.ready_to_aspirate = ready_to_aspirate
 
 
 class TransferType(Enum):
@@ -333,7 +320,7 @@ class TransferComponentsExecutor:
             )
         )
 
-    def retract_after_dispensing(  # noqa: C901
+    def retract_after_dispensing(
         self,
         trash_location: Union[Location, TrashBin, WasteChute],
         source_location: Optional[Location],
@@ -385,42 +372,6 @@ class TransferComponentsExecutor:
             assert retract_delay.duration is not None
             self._instrument.delay(retract_delay.duration)
 
-        def _do_touch_tip_and_air_gap() -> None:
-            touch_tip_props = retract_props.touch_tip
-            if touch_tip_props.enabled:
-                assert (
-                    touch_tip_props.speed is not None
-                    and touch_tip_props.z_offset is not None
-                    and touch_tip_props.mm_to_edge is not None
-                )
-                # TODO: update this once touch tip has mmToEdge
-                self._instrument.touch_tip(
-                    location=retract_location,
-                    well_core=self._target_well,
-                    radius=1,
-                    z_offset=touch_tip_props.z_offset,
-                    speed=touch_tip_props.speed,
-                )
-                self._instrument.move_to(
-                    location=retract_location,
-                    well_core=self._target_well,
-                    force_direct=True,
-                    minimum_z_height=None,
-                    # Full speed because the tip will already be out of the liquid
-                    speed=None,
-                )
-
-            if self._transfer_type != TransferType.ONE_TO_MANY:
-                # TODO: check if it is okay to just do `prepare_to_aspirate` unconditionally
-                if not self._tip_state.ready_to_aspirate:
-                    self._instrument.prepare_to_aspirate()
-                    self._tip_state.ready_to_aspirate = True
-                self._add_air_gap(
-                    air_gap_volume=self._transfer_properties.aspirate.retract.air_gap_by_volume.get_for_volume(
-                        0
-                    )
-                )
-
         blowout_props = retract_props.blowout
         if (
             blowout_props.enabled
@@ -434,32 +385,97 @@ class TransferComponentsExecutor:
                 in_place=True,
             )
             self._tip_state.ready_to_aspirate = False
-        _do_touch_tip_and_air_gap()
+        self._do_touch_tip_and_air_gap(
+            location=retract_location, well=self._target_well
+        )
 
         if (
             blowout_props.enabled
-            and not blowout_props.location == BlowoutLocation.DESTINATION
+            and blowout_props.location != BlowoutLocation.DESTINATION
         ):
             assert blowout_props.flow_rate is not None
             self._instrument.set_flow_rate(blow_out=blowout_props.flow_rate)
+            touch_tip_and_air_gap_location: Optional[Location]
             if blowout_props.location == BlowoutLocation.SOURCE:
                 if source_location is None:
                     raise RuntimeError(
-                        "Blowout location is source but source location is not provided."
+                        "Blowout location is 'source' but source location is not provided."
                     )
                 self._instrument.blow_out(
                     location=source_location,
                     well_core=source_well,
                     in_place=False,
                 )
+                touch_tip_and_air_gap_location = source_location
+                touch_tip_and_air_gap_well = source_well
             else:
                 self._instrument.blow_out(
                     location=trash_location,
-                    well_core=None,  # Update this to correct well core
+                    well_core=None,  # TODO: Update this to correct well core
                     in_place=False,
                 )
+                touch_tip_and_air_gap_location = (
+                    trash_location if isinstance(trash_location, Location) else None
+                )
+                touch_tip_and_air_gap_well = (
+                    None  # TODO: Update this to correct well core
+                )
+            last_air_gap = self._tip_state.last_liquid_and_air_gap_in_tip.air_gap
+            self._tip_state.remove_air_gap(last_air_gap)
             self._tip_state.ready_to_aspirate = False
-            _do_touch_tip_and_air_gap()
+            self._do_touch_tip_and_air_gap(
+                location=touch_tip_and_air_gap_location,
+                well=touch_tip_and_air_gap_well,
+            )
+
+    def _do_touch_tip_and_air_gap(
+        self,
+        location: Optional[Location],
+        well: Optional[WellCore],
+    ) -> None:
+        """Perform touch tip and air gap as part of post-dispense retract."""
+        touch_tip_props = self._transfer_properties.dispense.retract.touch_tip
+        if touch_tip_props.enabled:
+            assert (
+                touch_tip_props.speed is not None
+                and touch_tip_props.z_offset is not None
+                and touch_tip_props.mm_to_edge is not None
+            )
+            # TODO: update this once touch tip has mmToEdge
+            #  Also, check that when blow out is a non-dest-well,
+            #  whether the touch tip params from transfer props should be used for
+            #  both dest-well touch tip and non-dest-well touch tip.
+            if well is not None and location is not None:
+                self._instrument.touch_tip(
+                    location=location,
+                    well_core=well,
+                    radius=1,
+                    z_offset=touch_tip_props.z_offset,
+                    speed=touch_tip_props.speed,
+                )
+            else:
+                raise RuntimeError(
+                    "Invalid touch tip location for post-dispense retraction."
+                )
+            self._instrument.move_to(
+                location=location,
+                well_core=well,
+                force_direct=True,
+                minimum_z_height=None,
+                # Full speed because the tip will already be out of the liquid
+                speed=None,
+            )
+
+        if self._transfer_type != TransferType.ONE_TO_MANY:
+            # TODO: check if it is okay to just do `prepare_to_aspirate` unconditionally
+            if not self._tip_state.ready_to_aspirate:
+                self._instrument.prepare_to_aspirate()
+                self._tip_state.ready_to_aspirate = True
+            self._add_air_gap(
+                air_gap_volume=self._transfer_properties.aspirate.retract.air_gap_by_volume.get_for_volume(
+                    0
+                )
+            )
 
     def _add_air_gap(self, air_gap_volume: float) -> None:
         """Add an air gap."""

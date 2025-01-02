@@ -1013,7 +1013,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                 liquid=0,
                 air_gap=0,
             )
-        components_executer = tx_comps_executor.TransferComponentsExecutor(
+        components_executor = tx_comps_executor.TransferComponentsExecutor(
             instrument_core=self,
             transfer_properties=transfer_properties,
             target_location=aspirate_location,
@@ -1040,10 +1040,10 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         self,
         volume: float,
         dest: Tuple[Location, WellCore],
+        source: Optional[Tuple[Location, WellCore]],
         transfer_properties: TransferProperties,
         transfer_type: tx_comps_executor.TransferType,
         tip_contents: List[tx_comps_executor.LiquidAndAirGapPair],
-        source: Optional[Tuple[Location, WellCore]],
         trash_location: Union[Location, TrashBin, WasteChute],
     ) -> tx_comps_executor.LiquidAndAirGapPair:
         """Execute single-dispense steps.
@@ -1092,7 +1092,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                 liquid=0,
                 air_gap=0,
             )
-        components_executor = tx_comps_executor.get_transfer_components_executor(
+        components_executor = tx_comps_executor.TransferComponentsExecutor(
             instrument_core=self,
             transfer_properties=transfer_properties,
             target_location=dispense_location,
