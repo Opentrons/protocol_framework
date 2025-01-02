@@ -174,6 +174,22 @@ from .load_pipette import (
     LoadPipetteCommandType,
 )
 
+from .load_lid_stack import (
+    LoadLidStack,
+    LoadLidStackParams,
+    LoadLidStackCreate,
+    LoadLidStackResult,
+    LoadLidStackCommandType,
+)
+
+from .load_lid import (
+    LoadLid,
+    LoadLidParams,
+    LoadLidCreate,
+    LoadLidResult,
+    LoadLidCommandType,
+)
+
 from .move_labware import (
     MoveLabware,
     MoveLabwareParams,
@@ -476,6 +492,20 @@ __all__ = [
     "LoadPipetteResult",
     "LoadPipetteCommandType",
     "LoadPipettePrivateResult",
+    # load lid stack command models
+    "LoadLidStack",
+    "LoadLidStackCreate",
+    "LoadLidStackParams",
+    "LoadLidStackResult",
+    "LoadLidStackCommandType",
+    "LoadLidStackPrivateResult",
+    # load lid command models
+    "LoadLid",
+    "LoadLidCreate",
+    "LoadLidParams",
+    "LoadLidResult",
+    "LoadLidCommandType",
+    "LoadLidPrivateResult",
     # move labware command models
     "MoveLabware",
     "MoveLabwareCreate",

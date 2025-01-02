@@ -2080,6 +2080,159 @@
       "title": "LoadLabwareParams",
       "type": "object"
     },
+    "LoadLidCreate": {
+      "description": "Load lid command creation request.",
+      "properties": {
+        "commandType": {
+          "const": "loadLid",
+          "default": "loadLid",
+          "enum": ["loadLid"],
+          "title": "Commandtype",
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/$defs/CommandIntent",
+          "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
+          "title": "Intent"
+        },
+        "key": {
+          "description": "A key value, unique in this run, that can be used to track the same logical command across multiple runs of the same protocol. If a value is not provided, one will be generated.",
+          "title": "Key",
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/$defs/LoadLidParams"
+        }
+      },
+      "required": ["params"],
+      "title": "LoadLidCreate",
+      "type": "object"
+    },
+    "LoadLidParams": {
+      "description": "Payload required to load a lid onto a labware.",
+      "properties": {
+        "loadName": {
+          "description": "Name used to reference a lid labware definition.",
+          "title": "Loadname",
+          "type": "string"
+        },
+        "location": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DeckSlotLocation"
+            },
+            {
+              "$ref": "#/$defs/ModuleLocation"
+            },
+            {
+              "$ref": "#/$defs/OnLabwareLocation"
+            },
+            {
+              "const": "offDeck",
+              "enum": ["offDeck"],
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/AddressableAreaLocation"
+            }
+          ],
+          "description": "Labware the lid should be loaded onto.",
+          "title": "Location"
+        },
+        "namespace": {
+          "description": "The namespace the lid labware definition belongs to.",
+          "title": "Namespace",
+          "type": "string"
+        },
+        "version": {
+          "description": "The lid labware definition version.",
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": ["location", "loadName", "namespace", "version"],
+      "title": "LoadLidParams",
+      "type": "object"
+    },
+    "LoadLidStackCreate": {
+      "description": "Load lid stack command creation request.",
+      "properties": {
+        "commandType": {
+          "const": "loadLidStack",
+          "default": "loadLidStack",
+          "enum": ["loadLidStack"],
+          "title": "Commandtype",
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/$defs/CommandIntent",
+          "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
+          "title": "Intent"
+        },
+        "key": {
+          "description": "A key value, unique in this run, that can be used to track the same logical command across multiple runs of the same protocol. If a value is not provided, one will be generated.",
+          "title": "Key",
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/$defs/LoadLidStackParams"
+        }
+      },
+      "required": ["params"],
+      "title": "LoadLidStackCreate",
+      "type": "object"
+    },
+    "LoadLidStackParams": {
+      "description": "Payload required to load a lid stack onto a location.",
+      "properties": {
+        "loadName": {
+          "description": "Name used to reference a lid labware definition.",
+          "title": "Loadname",
+          "type": "string"
+        },
+        "location": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DeckSlotLocation"
+            },
+            {
+              "$ref": "#/$defs/ModuleLocation"
+            },
+            {
+              "$ref": "#/$defs/OnLabwareLocation"
+            },
+            {
+              "const": "offDeck",
+              "enum": ["offDeck"],
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/AddressableAreaLocation"
+            }
+          ],
+          "description": "Location the lid stack should be loaded into.",
+          "title": "Location"
+        },
+        "namespace": {
+          "description": "The namespace the lid labware definition belongs to.",
+          "title": "Namespace",
+          "type": "string"
+        },
+        "quantity": {
+          "description": "The quantity of lids to load.",
+          "title": "Quantity",
+          "type": "integer"
+        },
+        "version": {
+          "description": "The lid labware definition version.",
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": ["location", "loadName", "namespace", "version", "quantity"],
+      "title": "LoadLidStackParams",
+      "type": "object"
+    },
     "LoadLiquidClassCreate": {
       "description": "Load Liquid Class command creation request.",
       "properties": {
@@ -5580,6 +5733,8 @@
       "home": "#/$defs/HomeCreate",
       "liquidProbe": "#/$defs/LiquidProbeCreate",
       "loadLabware": "#/$defs/LoadLabwareCreate",
+      "loadLid": "#/$defs/LoadLidCreate",
+      "loadLidStack": "#/$defs/LoadLidStackCreate",
       "loadLiquid": "#/$defs/LoadLiquidCreate",
       "loadLiquidClass": "#/$defs/LoadLiquidClassCreate",
       "loadModule": "#/$defs/LoadModuleCreate",
@@ -5695,6 +5850,12 @@
     },
     {
       "$ref": "#/$defs/LoadPipetteCreate"
+    },
+    {
+      "$ref": "#/$defs/LoadLidStackCreate"
+    },
+    {
+      "$ref": "#/$defs/LoadLidCreate"
     },
     {
       "$ref": "#/$defs/MoveLabwareCreate"
