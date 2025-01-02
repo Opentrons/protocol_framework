@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useScreenIdle } from '../useScreenIdle'
+import { SLEEP_NEVER_MS } from '/app/local-resources/dom-utils'
 
 const MOCK_EVENTS: Array<keyof DocumentEventMap> = [
   'mousedown',
@@ -64,5 +65,14 @@ describe('useIdle', () => {
     setTimeout(() => {
       expect(result.current).toBe(true)
     }, 3600001)
+  })
+
+  it(`should always return false if the idle time is exactly ${SLEEP_NEVER_MS}`, () => {
+    const mockTime = SLEEP_NEVER_MS
+    const { result } = renderHook(() => useScreenIdle(mockTime, MOCK_OPTIONS))
+    expect(result.current).toBe(false)
+    setTimeout(() => {
+      expect(result.current).toBe(false)
+    }, 604800001)
   })
 })
