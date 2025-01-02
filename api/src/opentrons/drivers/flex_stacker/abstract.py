@@ -10,7 +10,7 @@ from .types import (
 )
 
 
-class AbstractStackerDriver(Protocol):
+class AbstractFlexStackerDriver(Protocol):
     """Protocol for the Stacker driver."""
 
     async def connect(self) -> None:
@@ -86,4 +86,8 @@ class AbstractStackerDriver(Protocol):
         self, power: float, color: LEDColor | None = None, external: bool | None = None
     ) -> bool:
         """Set LED color of status bar."""
+        ...
+
+    async def enter_programming_mode(self) -> None:
+        """Reboot into programming mode"""
         ...

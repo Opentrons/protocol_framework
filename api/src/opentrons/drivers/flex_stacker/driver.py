@@ -5,7 +5,7 @@ from typing import Optional
 from opentrons.drivers.command_builder import CommandBuilder
 from opentrons.drivers.asyncio.communication import AsyncResponseSerialConnection
 
-from .abstract import AbstractStackerDriver
+from .abstract import AbstractFlexStackerDriver
 from .types import (
     GCODE,
     StackerAxis,
@@ -28,7 +28,7 @@ DEFAULT_COMMAND_RETRIES = 0
 GCODE_ROUNDING_PRECISION = 2
 
 
-class FlexStackerDriver(AbstractStackerDriver):
+class FlexStackerDriver(AbstractFlexStackerDriver):
     """FLEX Stacker driver."""
 
     @classmethod
@@ -254,7 +254,8 @@ class FlexStackerDriver(AbstractStackerDriver):
             raise ValueError(f"Incorrect Response for set led: {resp}")
         return True
 
-    async def update_firmware(self, firmware_file_path: str) -> None:
-        """Updates the firmware on the device."""
-        # TODO: Implement firmware update
-        pass
+    async def enter_programming_mode(self) -> None:
+        """Reboot into programming mode"""
+        command = GCODE.ENTER_BOOTLOADER.build_command()
+        await self._connection.send_dfu_command(command)
+        await self._connection.close()

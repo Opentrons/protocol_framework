@@ -2,7 +2,7 @@ from typing import Optional
 
 from opentrons.util.async_helpers import ensure_yield
 
-from .abstract import AbstractStackerDriver
+from .abstract import AbstractFlexStackerDriver
 from .types import (
     StackerAxis,
     PlatformStatus,
@@ -14,7 +14,7 @@ from .types import (
 )
 
 
-class SimulatingDriver(AbstractStackerDriver):
+class SimulatingDriver(AbstractFlexStackerDriver):
     """FLEX Stacker driver simulator."""
 
     def __init__(self, serial_number: Optional[str] = None) -> None:

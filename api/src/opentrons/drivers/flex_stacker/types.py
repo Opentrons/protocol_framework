@@ -1,6 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass, fields
-from typing import List
+from typing import List, Dict
 
 from opentrons.drivers.command_builder import CommandBuilder
 
@@ -44,6 +44,14 @@ class StackerInfo:
     fw: str
     hw: HardwareRevision
     sn: str
+
+    def to_dict(self) -> Dict[str, str]:
+        """Build command."""
+        return {
+            "serial": self.sn,
+            "version": self.fw,
+            "model": self.hw.value,
+        }
 
 
 class StackerAxis(Enum):

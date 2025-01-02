@@ -27,6 +27,7 @@ if TYPE_CHECKING:
         HeaterShakerModuleType,
         MagneticBlockType,
         AbsorbanceReaderType,
+        FlexStackerType,
     )
 
 
@@ -62,6 +63,7 @@ class ModuleType(str, Enum):
     HEATER_SHAKER: HeaterShakerModuleType = "heaterShakerModuleType"
     MAGNETIC_BLOCK: MagneticBlockType = "magneticBlockType"
     ABSORBANCE_READER: AbsorbanceReaderType = "absorbanceReaderType"
+    FLEX_STACKER: FlexStackerType = "flexStackerType"
 
     @classmethod
     def from_model(cls, model: ModuleModel) -> ModuleType:
@@ -77,6 +79,8 @@ class ModuleType(str, Enum):
             return cls.MAGNETIC_BLOCK
         if isinstance(model, AbsorbanceReaderModel):
             return cls.ABSORBANCE_READER
+        if isinstance(model, FlexStackerModel):
+            return cls.FLEX_STACKER
 
     @classmethod
     def to_module_fixture_id(cls, module_type: ModuleType) -> str:
@@ -91,6 +95,8 @@ class ModuleType(str, Enum):
             return "magneticBlockV1"
         if module_type == ModuleType.ABSORBANCE_READER:
             return "absorbanceReaderV1"
+        if module_type == ModuleType.FLEX_STACKER:
+            return "flexStackerV1"
         else:
             raise ValueError(
                 f"Module Type {module_type} does not have a related fixture ID."
@@ -124,6 +130,10 @@ class AbsorbanceReaderModel(str, Enum):
     ABSORBANCE_READER_V1: str = "absorbanceReaderV1"
 
 
+class FlexStackerModel(str, Enum):
+    FLEX_STACKER_V1: str = "flexStackerV1"
+
+
 def module_model_from_string(model_string: str) -> ModuleModel:
     for model_enum in {
         MagneticModuleModel,
@@ -132,6 +142,7 @@ def module_model_from_string(model_string: str) -> ModuleModel:
         HeaterShakerModuleModel,
         MagneticBlockModel,
         AbsorbanceReaderModel,
+        FlexStackerModel,
     }:
         try:
             return cast(ModuleModel, model_enum(model_string))
@@ -184,6 +195,7 @@ ModuleModel = Union[
     HeaterShakerModuleModel,
     MagneticBlockModel,
     AbsorbanceReaderModel,
+    FlexStackerModel,
 ]
 
 

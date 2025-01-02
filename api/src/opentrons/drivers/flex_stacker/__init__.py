@@ -1,9 +1,9 @@
-from .abstract import AbstractStackerDriver
+from .abstract import AbstractFlexStackerDriver
 from .driver import FlexStackerDriver
 from .simulator import SimulatingDriver
 
 __all__ = [
-    "AbstractStackerDriver",
+    "AbstractFlexStackerDriver",
     "FlexStackerDriver",
     "SimulatingDriver",
 ]
