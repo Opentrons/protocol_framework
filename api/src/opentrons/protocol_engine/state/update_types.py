@@ -603,6 +603,7 @@ class StateUpdate:
 
     def set_absorbance_reader_lid(self: Self, module_id: str, is_lid_on: bool) -> Self:
         """Update an absorbance reader's lid location. See `AbsorbanceReaderLidUpdate`."""
+        assert self.absorbance_reader_state_update == NO_CHANGE
         self.absorbance_reader_state_update = AbsorbanceReaderStateUpdate(
             module_id=module_id,
             absorbance_reader_lid=AbsorbanceReaderLidUpdate(is_lid_on=is_lid_on),
@@ -613,6 +614,7 @@ class StateUpdate:
         self, module_id: str, read_result: typing.Dict[int, typing.Dict[str, float]]
     ) -> Self:
         """Update an absorbance reader's read data. See `AbsorbanceReaderReadDataUpdate`."""
+        assert self.absorbance_reader_state_update == NO_CHANGE
         self.absorbance_reader_state_update = AbsorbanceReaderStateUpdate(
             module_id=module_id,
             absorbance_reader_data=AbsorbanceReaderDataUpdate(read_result=read_result),
@@ -627,6 +629,7 @@ class StateUpdate:
         reference_wave_length: typing.Optional[int],
     ) -> Self:
         """Initialize absorbance reader."""
+        assert self.absorbance_reader_state_update == NO_CHANGE
         self.absorbance_reader_state_update = AbsorbanceReaderStateUpdate(
             module_id=module_id,
             initialize_absorbance_reader_update=AbsorbanceReaderInitializeUpdate(
