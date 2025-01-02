@@ -1,1 +1,1 @@
-"""Tests for Magnetic Module commands."""
+"""Tests for absorbance reader commands."""
