@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { forwardRef } from 'react'
 import styled from 'styled-components'
 import { Box } from '../../primitives'
 import { BORDERS, COLORS } from '../../helix-design-system'
@@ -7,6 +7,7 @@ import { RobotCoordsForeignDiv } from '../../hardware-sim'
 import { DeckLabel } from '../../molecules/DeckLabel'
 import { SPACING } from '../../ui-style-constants'
 
+import type { ForwardedRef } from 'react'
 import type { DeckLabelProps } from '../../molecules/DeckLabel'
 
 interface DeckLabelSetProps {
@@ -20,7 +21,7 @@ interface DeckLabelSetProps {
 
 const DeckLabelSetComponent = (
   props: DeckLabelSetProps,
-  ref: React.ForwardedRef<HTMLDivElement>
+  ref: ForwardedRef<HTMLDivElement>
 ): JSX.Element => {
   const { deckLabels, x, y, width, height, invert = false } = props
 
@@ -56,7 +57,7 @@ const DeckLabelSetComponent = (
   )
 }
 
-export const DeckLabelSet = React.forwardRef<HTMLDivElement, DeckLabelSetProps>(
+export const DeckLabelSet = forwardRef<HTMLDivElement, DeckLabelSetProps>(
   DeckLabelSetComponent
 )
 

@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { fireEvent, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
@@ -12,17 +11,19 @@ import { useProtocolMetadata } from '/app/resources/protocols'
 import { getIsOnDevice } from '/app/redux/config'
 import { ReturnTip } from '../ReturnTip'
 
+import type { ComponentProps } from 'react'
+
 vi.mock('/app/redux/config')
 vi.mock('/app/resources/protocols')
 
-const render = (props: React.ComponentProps<typeof ReturnTip>) => {
+const render = (props: ComponentProps<typeof ReturnTip>) => {
   return renderWithProviders(<ReturnTip {...props} />, {
     i18nInstance: i18n,
   })[0]
 }
 
 describe('ReturnTip', () => {
-  let props: React.ComponentProps<typeof ReturnTip>
+  let props: ComponentProps<typeof ReturnTip>
   let mockChainRunCommands
 
   beforeEach(() => {

@@ -12,7 +12,7 @@ import {
   StyledText,
 } from '@opentrons/components'
 import { getMainPagePortalEl } from '../Portal'
-import type * as React from 'react'
+import type { MouseEvent } from 'react'
 
 export const DELETE_PROFILE_CYCLE: 'deleteProfileCycle' = 'deleteProfileCycle'
 export const CLOSE_STEP_FORM_WITH_CHANGES: 'closeStepFormWithChanges' =
@@ -36,7 +36,7 @@ interface Props {
   modalType: DeleteModalType
   onCancelClick: () => unknown
   // TODO(sa, 2021-7-2): iron out this type, I think the weirdness comes from the return type of onConditionalConfirm
-  onContinueClick: ((event: React.MouseEvent) => unknown) | (() => unknown)
+  onContinueClick: ((event: MouseEvent) => unknown) | (() => unknown)
 }
 
 export function ConfirmDeleteModal(props: Props): JSX.Element {

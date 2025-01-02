@@ -1,12 +1,14 @@
-import * as React from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { css } from 'styled-components'
+
+import type { ReactNode, MouseEventHandler } from 'react'
 import type { DragRect, GenericRect } from '../../collision-types'
 
 interface SelectionRectProps {
   onSelectionMove?: (e: MouseEvent, arg: GenericRect) => void
   onSelectionDone?: (e: MouseEvent, arg: GenericRect) => void
   svg?: boolean // set true if this is an embedded SVG
-  children?: React.ReactNode
+  children?: ReactNode
   originXOffset?: number
   originYOffset?: number
 }
@@ -20,9 +22,9 @@ export function SelectionRect(props: SelectionRectProps): JSX.Element {
     originXOffset = 0,
     originYOffset = 0,
   } = props
-  const [positions, setPositions] = React.useState<DragRect | null>(null)
-  const parentRef = React.useRef<HTMLElement | SVGElement | null>(null)
-  const renderRect = (args: DragRect): React.ReactNode => {
+  const [positions, setPositions] = useState<DragRect | null>(null)
+  const parentRef = useRef<HTMLElement | SVGElement | null>(null)
+  const renderRect = (args: DragRect): ReactNode => {
     const { xStart, yStart, xDynamic, yDynamic } = args
     const left = Math.min(xStart, xDynamic)
     const top = Math.min(yStart, yDynamic)
@@ -117,7 +119,7 @@ export function SelectionRect(props: SelectionRectProps): JSX.Element {
     onSelectionDone && finalRect && onSelectionDone(e, finalRect)
   }
 
-  const handleMouseDown: React.MouseEventHandler = e => {
+  const handleMouseDown: MouseEventHandler = e => {
     setPositions({
       xStart: e.clientX,
       xDynamic: e.clientX,
@@ -126,7 +128,7 @@ export function SelectionRect(props: SelectionRectProps): JSX.Element {
     })
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.addEventListener('mousemove', handleDrag)
     document.addEventListener('mouseup', handleMouseUp)
     return () => {

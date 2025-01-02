@@ -56,6 +56,8 @@ import {
   capitalizeFirstLetter,
   getIsErrorOnCurrentPage,
 } from './utils'
+
+import type { ComponentType } from 'react'
 import type { StepFieldName } from '../../../../steplist/fieldLevel'
 import type { FormData, StepType } from '../../../../form-types'
 import type { AnalyticsEvent } from '../../../../analytics/mixpanel'
@@ -72,7 +74,7 @@ import {
 } from '../../../../ui/steps/actions/actions'
 
 type StepFormMap = {
-  [K in StepType]?: React.ComponentType<StepFormProps> | null
+  [K in StepType]?: ComponentType<StepFormProps> | null
 }
 
 const STEP_FORM_MAP: StepFormMap = {

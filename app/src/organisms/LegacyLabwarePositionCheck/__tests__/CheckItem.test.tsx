@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { fireEvent, screen } from '@testing-library/react'
 import { describe, it, vi, beforeEach, afterEach, expect } from 'vitest'
 
@@ -15,6 +14,7 @@ import { CheckItem } from '../CheckItem'
 import { SECTIONS } from '../constants'
 import { mockCompletedAnalysis, mockExistingOffsets } from '../__fixtures__'
 
+import type { ComponentProps } from 'react'
 import type { Mock } from 'vitest'
 
 vi.mock('/app/redux/config')
@@ -23,14 +23,14 @@ vi.mock('../../Desktop/Devices/hooks')
 const mockStartPosition = { x: 10, y: 20, z: 30 }
 const mockEndPosition = { x: 9, y: 19, z: 29 }
 
-const render = (props: React.ComponentProps<typeof CheckItem>) => {
+const render = (props: ComponentProps<typeof CheckItem>) => {
   return renderWithProviders(<CheckItem {...props} />, {
     i18nInstance: i18n,
   })[0]
 }
 
 describe('CheckItem', () => {
-  let props: React.ComponentProps<typeof CheckItem>
+  let props: ComponentProps<typeof CheckItem>
   let mockChainRunCommands: Mock
 
   beforeEach(() => {

@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { beforeEach, describe, it, vi, afterEach, expect } from 'vitest'
 import { act, renderHook, screen } from '@testing-library/react'
 
@@ -12,7 +11,9 @@ import {
 } from '../RecoveryInProgress'
 import { RECOVERY_MAP } from '../constants'
 
-const render = (props: React.ComponentProps<typeof RecoveryInProgress>) => {
+import type { ComponentProps } from 'react'
+
+const render = (props: ComponentProps<typeof RecoveryInProgress>) => {
   return renderWithProviders(<RecoveryInProgress {...props} />, {
     i18nInstance: i18n,
   })[0]
@@ -28,7 +29,7 @@ describe('RecoveryInProgress', () => {
     ROBOT_SKIPPING_STEP,
     ROBOT_RELEASING_LABWARE,
   } = RECOVERY_MAP
-  let props: React.ComponentProps<typeof RecoveryInProgress>
+  let props: ComponentProps<typeof RecoveryInProgress>
 
   beforeEach(() => {
     props = {

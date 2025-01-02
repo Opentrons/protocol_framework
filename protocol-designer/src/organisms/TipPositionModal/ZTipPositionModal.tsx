@@ -23,6 +23,7 @@ import * as utils from './utils'
 import { TOO_MANY_DECIMALS } from './constants'
 import { TipPositionZOnlyView } from './TipPositionZOnlyView'
 
+import type { ChangeEvent } from 'react'
 import type { StepFieldName } from '../../form-types'
 
 interface ZTipPositionModalProps {
@@ -131,9 +132,7 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
     }
   }
 
-  const handleInputFieldChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handleInputFieldChange = (e: ChangeEvent<HTMLInputElement>): void => {
     handleChange(e.currentTarget.value)
     setPristine(false)
   }

@@ -1,20 +1,22 @@
-import * as React from 'react'
+import { forwardRef } from 'react'
 import { css } from 'styled-components'
 
 import { Btn } from '../../primitives'
 import { BORDERS, COLORS } from '../../helix-design-system'
 import { SPACING } from '../../ui-style-constants'
 
-interface OverflowBtnProps extends React.ComponentProps<typeof Btn> {
+import type { ComponentProps, ForwardedRef, ReactNode } from 'react'
+
+interface OverflowBtnProps extends ComponentProps<typeof Btn> {
   fillColor?: string
 }
 export const OverflowBtn: (
   props: OverflowBtnProps,
-  ref: React.ForwardedRef<HTMLInputElement>
-) => React.ReactNode = React.forwardRef(
+  ref: ForwardedRef<HTMLInputElement>
+) => ReactNode = forwardRef(
   (
     props: OverflowBtnProps,
-    ref: React.ForwardedRef<HTMLInputElement>
+    ref: ForwardedRef<HTMLInputElement>
   ): JSX.Element => {
     const { fillColor, ...restProps } = props
     return (

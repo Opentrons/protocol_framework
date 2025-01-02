@@ -1,12 +1,11 @@
-import type * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { CONTEXT_MENU } from '@opentrons/components'
 import { SelectField } from '/app/atoms/SelectField'
 import { NetworkOptionLabel, NetworkActionLabel } from './NetworkOptionLabel'
 
+import type { ComponentProps } from 'react'
 import type { TFunction } from 'i18next'
 import type { SelectOptionOrGroup } from '@opentrons/components'
-
 import type { WifiNetwork } from '../types'
 
 export interface SelectSsidProps {
@@ -51,7 +50,7 @@ export function SelectSsid(props: SelectSsidProps): JSX.Element {
     }
   }
 
-  const formatOptionLabel: React.ComponentProps<
+  const formatOptionLabel: ComponentProps<
     typeof SelectField
   >['formatOptionLabel'] = (option, { context }): JSX.Element | null => {
     const { value, label } = option

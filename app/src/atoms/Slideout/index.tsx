@@ -22,17 +22,19 @@ import {
 
 import { Divider } from '../structure'
 
+import type { ReactElement, ReactNode } from 'react'
+
 export interface MultiSlideoutSpecs {
   currentStep: number
   maxSteps: number
 }
 export interface SlideoutProps {
-  title: string | React.ReactElement
-  children: React.ReactNode
+  title: string | ReactElement
+  children: ReactNode
   onCloseClick: () => void
   //  isExpanded is for collapse and expand animation
   isExpanded?: boolean
-  footer?: React.ReactNode
+  footer?: ReactNode
   multiSlideoutSpecs?: MultiSlideoutSpecs
 }
 
