@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import {
   useCreateMaintenanceRunLabwareDefinitionMutation,
@@ -11,13 +11,10 @@ import {
   useNotifyRunQuery,
   useMostRecentCompletedAnalysis,
 } from '/app/resources/runs'
-import { LPCWizardContainer } from './LPCWizardContainer'
+import { useNotifyCurrentMaintenanceRun } from '/app/resources/maintenance_runs'
 
-import type {
-  RobotType,
-  CompletedProtocolAnalysis,
-} from '@opentrons/shared-data'
-import type { LabwareOffset } from '@opentrons/api-client'
+import type { RobotType } from '@opentrons/shared-data'
+import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck/LPCFlows/LPCFlows'
 
 interface UseLPCFlowsBase {
   showLPC: boolean
@@ -51,16 +48,19 @@ export function useLPCFlows({
   const [isLaunching, setIsLaunching] = useState(false)
   const [hasCreatedLPCRun, setHasCreatedLPCRun] = useState(false)
 
+  const { data: runRecord } = useNotifyRunQuery(runId, { staleTime: Infinity })
+  const currentOffsets = runRecord?.data?.labwareOffsets ?? []
+  const mostRecentAnalysis = useMostRecentCompletedAnalysis(runId)
+
+  useMonitorMaintenanceRunForDeletion({ maintenanceRunId, setMaintenanceRunId })
+
   const {
     createTargetedMaintenanceRun,
   } = useCreateTargetedMaintenanceRunMutation()
   const {
     createLabwareDefinition,
   } = useCreateMaintenanceRunLabwareDefinitionMutation()
-  const {
-    deleteMaintenanceRun,
-    isLoading: isDeletingMaintenanceRun,
-  } = useDeleteMaintenanceRunMutation()
+  const { deleteMaintenanceRun } = useDeleteMaintenanceRunMutation()
   useRunLoadedLabwareDefinitions(runId, {
     // TOME TODO: Ideally we don't have to do this POST, since the server has the defs already?
     onSuccess: res => {
@@ -83,11 +83,6 @@ export function useLPCFlows({
     },
     enabled: maintenanceRunId != null,
   })
-
-  const { data: runRecord } = useNotifyRunQuery(runId, { staleTime: Infinity })
-  const mostRecentAnalysis = useMostRecentCompletedAnalysis(runId)
-
-  const currentOffsets = runRecord?.data?.labwareOffsets ?? []
 
   const launchLPC = (): Promise<void> => {
     setIsLaunching(true)
@@ -131,32 +126,53 @@ export function useLPCFlows({
           existingOffsets: currentOffsets,
           mostRecentAnalysis,
           protocolName,
-          maintenanceRunUtils: {
-            maintenanceRunId,
-            setMaintenanceRunId,
-            isDeletingMaintenanceRun,
-          },
+          maintenanceRunId,
         },
       }
     : { launchLPC, isLaunchingLPC: isLaunching, lpcProps: null, showLPC }
 }
 
-interface LPCFlowsMaintenanceRunProps {
-  maintenanceRunId: string
+const RUN_REFETCH_INTERVAL = 5000
+
+// TODO(jh, 01-02-25): Monitor for deletion behavior exists in several other flows. We should consolidate it.
+
+// Closes the modal in case the run was deleted by the terminate activity modal on the ODD
+function useMonitorMaintenanceRunForDeletion({
+  maintenanceRunId,
+  setMaintenanceRunId,
+}: {
+  maintenanceRunId: string | null
   setMaintenanceRunId: (id: string | null) => void
-  isDeletingMaintenanceRun: boolean
-}
+}): void {
+  const [
+    monitorMaintenanceRunForDeletion,
+    setMonitorMaintenanceRunForDeletion,
+  ] = useState<boolean>(false)
 
-export interface LPCFlowsProps {
-  onCloseClick: () => void
-  runId: string
-  robotType: RobotType
-  existingOffsets: LabwareOffset[]
-  mostRecentAnalysis: CompletedProtocolAnalysis | null
-  protocolName: string
-  maintenanceRunUtils: LPCFlowsMaintenanceRunProps
-}
+  // We should start checking for run deletion only after the maintenance run is created
+  // and the useCurrentRun poll has returned that created id
+  const { data: maintenanceRunData } = useNotifyCurrentMaintenanceRun({
+    refetchInterval: RUN_REFETCH_INTERVAL,
+    enabled: maintenanceRunId != null,
+  })
 
-export function LPCFlows(props: LPCFlowsProps): JSX.Element {
-  return <LPCWizardContainer {...props} />
+  useEffect(() => {
+    if (
+      maintenanceRunId !== null &&
+      maintenanceRunData?.data.id === maintenanceRunId
+    ) {
+      setMonitorMaintenanceRunForDeletion(true)
+    }
+    if (
+      maintenanceRunData?.data.id !== maintenanceRunId &&
+      monitorMaintenanceRunForDeletion
+    ) {
+      setMaintenanceRunId(null)
+    }
+  }, [
+    maintenanceRunData?.data.id,
+    maintenanceRunId,
+    monitorMaintenanceRunForDeletion,
+    setMaintenanceRunId,
+  ])
 }

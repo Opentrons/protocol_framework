@@ -1,4 +1,4 @@
-import { useState, useEffect, useReducer } from 'react'
+import { useState, useReducer } from 'react'
 import { createPortal } from 'react-dom'
 import isEqual from 'lodash/isEqual'
 import { useSelector } from 'react-redux'
@@ -25,10 +25,7 @@ import { ReturnTip } from './ReturnTip'
 import { ResultsSummary } from './ResultsSummary'
 import { FatalError } from './FatalErrorModal'
 import { RobotMotionLoader } from './RobotMotionLoader'
-import {
-  useChainMaintenanceCommands,
-  useNotifyCurrentMaintenanceRun,
-} from '/app/resources/maintenance_runs'
+import { useChainMaintenanceCommands } from '/app/resources/maintenance_runs'
 import { getLabwarePositionCheckSteps } from './getLabwarePositionCheckSteps'
 
 import type {
@@ -44,7 +41,6 @@ import type { Axis, Sign, StepSize } from '/app/molecules/JogControls/types'
 import type { RegisterPositionAction, WorkingOffset } from './types'
 import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck/LPCFlows'
 
-const RUN_REFETCH_INTERVAL = 5000
 const JOG_COMMAND_TIMEOUT = 10000 // 10 seconds
 
 export const LPCWizardFlex = (props: LPCFlowsProps): JSX.Element | null => {
@@ -55,51 +51,12 @@ export const LPCWizardFlex = (props: LPCFlowsProps): JSX.Element | null => {
     runId,
     onCloseClick,
     protocolName,
-    maintenanceRunUtils,
+    maintenanceRunId,
   } = props
   const { t } = useTranslation(['labware_position_check', 'shared'])
-  const {
-    maintenanceRunId,
-    setMaintenanceRunId,
-    isDeletingMaintenanceRun,
-  } = maintenanceRunUtils
   const isOnDevice = useSelector(getIsOnDevice)
   const protocolData = mostRecentAnalysis
   const shouldUseMetalProbe = robotType === FLEX_ROBOT_TYPE
-
-  // we should start checking for run deletion only after the maintenance run is created
-  // and the useCurrentRun poll has returned that created id
-  const [
-    monitorMaintenanceRunForDeletion,
-    setMonitorMaintenanceRunForDeletion,
-  ] = useState<boolean>(false)
-
-  const { data: maintenanceRunData } = useNotifyCurrentMaintenanceRun({
-    refetchInterval: RUN_REFETCH_INTERVAL,
-    enabled: maintenanceRunId != null,
-  })
-
-  // this will close the modal in case the run was deleted by the terminate
-  // activity modal on the ODD
-  useEffect(() => {
-    if (
-      maintenanceRunId !== null &&
-      maintenanceRunData?.data.id === maintenanceRunId
-    ) {
-      setMonitorMaintenanceRunForDeletion(true)
-    }
-    if (
-      maintenanceRunData?.data.id !== maintenanceRunId &&
-      monitorMaintenanceRunForDeletion
-    ) {
-      setMaintenanceRunId(null)
-    }
-  }, [
-    maintenanceRunData?.data.id,
-    maintenanceRunId,
-    monitorMaintenanceRunForDeletion,
-    setMaintenanceRunId,
-  ])
 
   const [fatalError, setFatalError] = useState<string | null>(null)
   const [isApplyingOffsets, setIsApplyingOffsets] = useState<boolean>(false)
@@ -306,11 +263,9 @@ export const LPCWizardFlex = (props: LPCFlowsProps): JSX.Element | null => {
     Promise.all(offsets.map(data => createLabwareOffset({ runId, data })))
       .then(() => {
         onCloseClick()
-        setIsApplyingOffsets(false)
       })
       .catch((e: Error) => {
         setFatalError(`error applying labware offsets: ${e.message}`)
-        setIsApplyingOffsets(false)
       })
   }
 
@@ -393,7 +348,6 @@ export const LPCWizardFlex = (props: LPCFlowsProps): JSX.Element | null => {
           existingOffsets,
           handleApplyOffsets,
           isApplyingOffsets,
-          isDeletingMaintenanceRun,
         }}
       />
     )
