@@ -25,10 +25,6 @@ class AbstractStackerDriver(Protocol):
         """Check connection to stacker."""
         ...
 
-    async def update_firmware(self, firmware_file_path: str) -> None:
-        """Updates the firmware on the device."""
-        ...
-
     async def get_device_info(self) -> StackerInfo:
         """Get Device Info."""
         ...
@@ -86,4 +82,8 @@ class AbstractStackerDriver(Protocol):
         self, power: float, color: LEDColor | None = None, external: bool | None = None
     ) -> bool:
         """Set LED color of status bar."""
+        ...
+
+    async def enter_programming_mode(self) -> None:
+        """Enter programming mode."""
         ...

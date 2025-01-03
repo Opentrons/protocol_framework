@@ -254,7 +254,8 @@ class FlexStackerDriver(AbstractStackerDriver):
             raise ValueError(f"Incorrect Response for set led: {resp}")
         return True
 
-    async def update_firmware(self, firmware_file_path: str) -> None:
-        """Updates the firmware on the device."""
-        # TODO: Implement firmware update
-        pass
+    async def enter_programming_mode(self) -> None:
+        await self._connection.send_dfu_command(
+            GCODE.ENTER_BOOTLOADER.build_command()
+        )
+        await self._connection.close()

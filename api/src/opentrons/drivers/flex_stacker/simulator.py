@@ -11,6 +11,7 @@ from .types import (
     HardwareRevision,
     MoveParams,
     LimitSwitchStatus,
+    LEDColor,
 )
 
 
@@ -61,7 +62,7 @@ class SimulatingDriver(AbstractStackerDriver):
         return True
 
     @ensure_yield
-    async def stop_motor(self) -> bool:
+    async def stop_motors(self) -> bool:
         """Stop motor movement."""
         return True
 
@@ -77,9 +78,17 @@ class SimulatingDriver(AbstractStackerDriver):
     async def get_limit_switches_status(self) -> LimitSwitchStatus:
         """Get limit switch statuses for all axes."""
         return self._limit_switch_status
+q
+    @ensure_yield
+    async def get_platform_sensor(self, direction: Direction) -> bool:
+        """Get platform sensor status.
+
+        :return: True if platform is present, False otherwise
+        """
+        return True
 
     @ensure_yield
-    async def get_platform_sensor_status(self) -> PlatformStatus:
+    async def get_platform_status(self) -> PlatformStatus:
         """Get platform sensor status.
 
         :return: True if platform is detected, False otherwise
@@ -107,3 +116,19 @@ class SimulatingDriver(AbstractStackerDriver):
     ) -> bool:
         """Move until limit switch is triggered."""
         return True
+    
+    @ensure_yield
+    async def home_axis(self, axis: StackerAxis, direction: Direction) -> bool:
+        """Home axis."""
+        return True
+    
+    @ensure_yield
+    async def set_led(
+        self, power: float, color: LEDColor | None = None, external: bool | None = None
+    ) -> bool:
+        """Set LED color of status bar."""
+        return True
+
+    @ensure_yield
+    async def enter_programming_mode(self) -> None:
+        pass

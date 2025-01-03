@@ -45,6 +45,14 @@ class StackerInfo:
     hw: HardwareRevision
     sn: str
 
+    def asdict(self) -> dict[str, str]:
+        """Convert to dict."""
+        return {
+            "model": self.hw.value,
+            "version": self.fw,
+            "serial": self.sn,
+        }
+
 
 class StackerAxis(Enum):
     """Stacker Axis."""

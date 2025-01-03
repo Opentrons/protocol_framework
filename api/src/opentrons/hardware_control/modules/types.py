@@ -237,3 +237,9 @@ class LidStatus(str, Enum):
     OFF = "off"
     UNKNOWN = "unknown"
     ERROR = "error"
+
+
+class StackerStatus(str, Enum):
+    IDLE = "idle"
+    RUNNING = "running"
+    ERROR = "error"
