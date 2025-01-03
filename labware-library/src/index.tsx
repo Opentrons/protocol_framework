@@ -18,7 +18,7 @@ if (!$root) {
 
 const Root = (): JSX.Element => {
   useEffect(() => {
-    fetch('https://10.14.19.57:31950/health')
+    fetch('http://10.14.19.57:31950/health')
       .then(response => {
         console.log(response)
       })
