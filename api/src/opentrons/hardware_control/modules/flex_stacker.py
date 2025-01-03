@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Any, Callable, Dict, Optional, Mapping, List, Tuple
+from typing import Callable, Optional, Mapping
 
 from opentrons.drivers.rpi_drivers.types import USBPort
 from opentrons.drivers.flex_stacker import (
@@ -26,6 +26,7 @@ log = logging.getLogger(__name__)
 
 POLLING_FREQUENCY_SEC = 2.0
 SIM_POLLING_FREQUENCY_SEC = POLLING_FREQUENCY_SEC / 50.0
+DFU_PID = "df11"
 
 
 class StackerReader(Reader):
@@ -42,13 +43,13 @@ class StackerReader(Reader):
     def on_error(self, exception: Exception) -> None:
         if self._handle_error is not None:
             self._handle_error(exception)
-    
+
     async def read(self) -> None:
         """Read data from the FLEX Stacker."""
         pass
 
 
-class StackerController(mod_abc.AbstractModule):
+class FlexStacker(mod_abc.AbstractModule):
     """Hardware control interface for an attached FLEX Stacker module."""
 
     MODULE_TYPE = ModuleType.STACKER
@@ -65,7 +66,7 @@ class StackerController(mod_abc.AbstractModule):
         sim_model: Optional[str] = None,
         sim_serial_number: Optional[str] = None,
         disconnected_callback: ModuleDisconnectedCallback = None,
-    ) -> "StackerController":
+    ) -> "FlexStacker":
         """
         Build and connect to a FLEX Stacker controller.
 
@@ -86,9 +87,7 @@ class StackerController(mod_abc.AbstractModule):
         """
         driver: AbstractStackerDriver
         if not simulating:
-            driver = await FlexStackerDriver.create(
-                port, hw_control_loop
-            )
+            driver = await FlexStackerDriver.create(port, hw_control_loop)
             await driver.connect()
             poll_interval_seconds = poll_interval_seconds or POLLING_FREQUENCY_SEC
         else:

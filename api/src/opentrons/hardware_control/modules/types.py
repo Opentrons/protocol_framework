@@ -79,7 +79,7 @@ class ModuleType(str, Enum):
             return cls.MAGNETIC_BLOCK
         if isinstance(model, AbsorbanceReaderModel):
             return cls.ABSORBANCE_READER
-        if isinstance(model, StackerType):
+        if isinstance(model, StackerModel):
             return cls.STACKER
 
     @classmethod
@@ -95,7 +95,7 @@ class ModuleType(str, Enum):
             return "magneticBlockV1"
         if module_type == ModuleType.ABSORBANCE_READER:
             return "absorbanceReaderV1"
-        if moduleType == ModuleType.STACKER:
+        if module_type == ModuleType.STACKER:
             return "flexStackerV1"
         else:
             raise ValueError(
@@ -131,7 +131,7 @@ class AbsorbanceReaderModel(str, Enum):
 
 
 class StackerModel(str, Enum):
-    FLEX_Stacker_V1: str = "flexStackerV1"
+    FLEX_STACKER_V1: str = "flexStackerV1"
 
 
 def module_model_from_string(model_string: str) -> ModuleModel:

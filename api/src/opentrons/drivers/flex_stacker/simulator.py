@@ -54,7 +54,7 @@ class SimulatingDriver(AbstractStackerDriver):
     @ensure_yield
     async def get_device_info(self) -> StackerInfo:
         """Get Device Info."""
-        return StackerInfo(fw="stacker-fw", hw=HardwareRevision.EVT, sn=self._sn)
+        return StackerInfo(fw="dummyVersionFS", hw=HardwareRevision.EVT, sn=self._sn)
 
     @ensure_yield
     async def set_serial_number(self, sn: str) -> bool:
@@ -78,7 +78,7 @@ class SimulatingDriver(AbstractStackerDriver):
     async def get_limit_switches_status(self) -> LimitSwitchStatus:
         """Get limit switch statuses for all axes."""
         return self._limit_switch_status
-q
+
     @ensure_yield
     async def get_platform_sensor(self, direction: Direction) -> bool:
         """Get platform sensor status.
@@ -116,12 +116,12 @@ q
     ) -> bool:
         """Move until limit switch is triggered."""
         return True
-    
+
     @ensure_yield
     async def home_axis(self, axis: StackerAxis, direction: Direction) -> bool:
         """Home axis."""
         return True
-    
+
     @ensure_yield
     async def set_led(
         self, power: float, color: LEDColor | None = None, external: bool | None = None

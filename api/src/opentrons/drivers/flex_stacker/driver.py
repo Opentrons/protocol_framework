@@ -255,7 +255,5 @@ class FlexStackerDriver(AbstractStackerDriver):
         return True
 
     async def enter_programming_mode(self) -> None:
-        await self._connection.send_dfu_command(
-            GCODE.ENTER_BOOTLOADER.build_command()
-        )
+        await self._connection.send_dfu_command(GCODE.ENTER_BOOTLOADER.build_command())
         await self._connection.close()
