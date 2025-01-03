@@ -11,8 +11,18 @@ import {
 import { ProtocolRoutes } from './ProtocolRoutes'
 import { PortalRoot } from './organisms'
 import { getEnableReactScan } from './feature-flags/selectors'
+import { useEffect } from 'react'
 
 export function ProtocolEditor(): JSX.Element {
+  useEffect(() => {
+    fetch('http://10.14.19.57:31950/health')
+      .then(response => {
+        console.log(response)
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }, [])
   // note for react-scan
   const enableReactScan = useSelector(getEnableReactScan)
   // Dynamically import `react-scan` to avoid build errors
