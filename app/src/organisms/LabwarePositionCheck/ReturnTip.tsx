@@ -26,17 +26,22 @@ import type {
   RobotType,
   MoveLabwareCreateCommand,
 } from '@opentrons/shared-data'
-import type { VectorOffset } from '@opentrons/api-client'
 import type { useChainRunCommands } from '/app/resources/runs'
 import type { ReturnTipStep } from './types'
 import type { TFunction } from 'i18next'
+import type { Dispatch } from 'react'
+import type {
+  LPCWizardAction,
+  LPCWizardState,
+} from '/app/organisms/LabwarePositionCheck/redux'
 
 interface ReturnTipProps extends ReturnTipStep {
   protocolData: CompletedProtocolAnalysis
   proceed: () => void
   chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
   setFatalError: (errorMessage: string) => void
-  tipPickUpOffset: VectorOffset | null
+  dispatch: Dispatch<LPCWizardAction>
+  state: LPCWizardState
   isRobotMoving: boolean
   robotType: RobotType
 }
@@ -48,12 +53,13 @@ export const ReturnTip = (props: ReturnTipProps): JSX.Element | null => {
     location,
     protocolData,
     proceed,
-    tipPickUpOffset,
+    state,
     isRobotMoving,
     chainRunCommands,
     setFatalError,
     adapterId,
   } = props
+  const { tipPickUpOffset } = state
 
   const isOnDevice = useSelector(getIsOnDevice)
 

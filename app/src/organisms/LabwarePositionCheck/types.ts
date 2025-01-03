@@ -1,6 +1,5 @@
 import type { NAV_STEPS } from './constants'
-import type { useCreateCommandMutation } from '@opentrons/react-api-client'
-import type { LabwareOffsetLocation, VectorOffset } from '@opentrons/api-client'
+import type { LabwareOffsetLocation } from '@opentrons/api-client'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
 export type LabwarePositionCheckStep =
@@ -67,41 +66,6 @@ export interface DetachProbeStep {
 }
 export interface ResultsSummaryStep {
   section: typeof NAV_STEPS.RESULTS_SUMMARY
-}
-
-type CreateCommandMutate = ReturnType<
-  typeof useCreateCommandMutation
->['createCommand']
-export type CreateRunCommand = (
-  params: Omit<Parameters<CreateCommandMutate>[0], 'runId'>,
-  options?: Parameters<CreateCommandMutate>[1]
-) => ReturnType<CreateCommandMutate>
-
-interface InitialPositionAction {
-  type: 'initialPosition'
-  labwareId: string
-  location: LabwareOffsetLocation
-  position: VectorOffset | null
-}
-interface FinalPositionAction {
-  type: 'finalPosition'
-  labwareId: string
-  location: LabwareOffsetLocation
-  position: VectorOffset | null
-}
-interface TipPickUpOffsetAction {
-  type: 'tipPickUpOffset'
-  offset: VectorOffset | null
-}
-export type RegisterPositionAction =
-  | InitialPositionAction
-  | FinalPositionAction
-  | TipPickUpOffsetAction
-export interface WorkingOffset {
-  labwareId: string
-  location: LabwareOffsetLocation
-  initialPosition: VectorOffset | null
-  finalPosition: VectorOffset | null
 }
 
 export interface LabwareToOrder {

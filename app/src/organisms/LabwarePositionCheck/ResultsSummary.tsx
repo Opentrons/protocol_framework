@@ -42,6 +42,7 @@ import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analy
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import { getDisplayLocation } from './utils/getDisplayLocation'
 
+import type { Dispatch } from 'react'
 import type {
   CompletedProtocolAnalysis,
   LabwareDefinition2,
@@ -50,15 +51,20 @@ import type {
   LabwareOffset,
   LabwareOffsetCreateData,
 } from '@opentrons/api-client'
-import type { ResultsSummaryStep, WorkingOffset } from './types'
+import type { ResultsSummaryStep } from './types'
 import type { TFunction } from 'i18next'
+import type {
+  LPCWizardAction,
+  LPCWizardState,
+} from '/app/organisms/LabwarePositionCheck/redux'
 
 const LPC_HELP_LINK_URL =
   'https://support.opentrons.com/s/article/How-Labware-Offsets-work-on-the-OT-2'
 
 interface ResultsSummaryProps extends ResultsSummaryStep {
   protocolData: CompletedProtocolAnalysis
-  workingOffsets: WorkingOffset[]
+  dispatch: Dispatch<LPCWizardAction>
+  state: LPCWizardState
   existingOffsets: LabwareOffset[]
   handleApplyOffsets: (offsets: LabwareOffsetCreateData[]) => void
   isApplyingOffsets: boolean
@@ -69,11 +75,12 @@ export const ResultsSummary = (
   const { i18n, t } = useTranslation('labware_position_check')
   const {
     protocolData,
-    workingOffsets,
+    state,
     handleApplyOffsets,
     existingOffsets,
     isApplyingOffsets,
   } = props
+  const { workingOffsets } = state
   const labwareDefinitions = getLabwareDefinitionsFromCommands(
     protocolData.commands
   )

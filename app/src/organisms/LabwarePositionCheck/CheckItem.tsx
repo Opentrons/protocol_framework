@@ -28,6 +28,10 @@ import { UnorderedList } from '/app/molecules/UnorderedList'
 import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
 import { getIsOnDevice } from '/app/redux/config'
 import { getDisplayLocation } from './utils/getDisplayLocation'
+import {
+  setFinalPosition,
+  setInitialPosition,
+} from '/app/organisms/LabwarePositionCheck/redux/actions'
 
 import type { Dispatch } from 'react'
 import type { LabwareOffset } from '@opentrons/api-client'
@@ -39,13 +43,13 @@ import type {
   RobotType,
 } from '@opentrons/shared-data'
 import type { useChainRunCommands } from '/app/resources/runs'
-import type {
-  CheckLabwareStep,
-  RegisterPositionAction,
-  WorkingOffset,
-} from './types'
+import type { CheckLabwareStep } from './types'
 import type { Jog } from '/app/molecules/JogControls/types'
 import type { TFunction } from 'i18next'
+import type {
+  LPCWizardAction,
+  LPCWizardState,
+} from '/app/organisms/LabwarePositionCheck/redux'
 
 const PROBE_LENGTH_MM = 44.5
 
@@ -55,8 +59,8 @@ interface CheckItemProps extends Omit<CheckLabwareStep, 'section'> {
   proceed: () => void
   chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
   setFatalError: (errorMessage: string) => void
-  registerPosition: Dispatch<RegisterPositionAction>
-  workingOffsets: WorkingOffset[]
+  dispatch: Dispatch<LPCWizardAction>
+  state: LPCWizardState
   existingOffsets: LabwareOffset[]
   handleJog: Jog
   isRobotMoving: boolean
@@ -72,8 +76,8 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
     location,
     protocolData,
     chainRunCommands,
-    registerPosition,
-    workingOffsets,
+    state,
+    dispatch,
     proceed,
     handleJog,
     isRobotMoving,
@@ -83,6 +87,7 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
     shouldUseMetalProbe,
   } = props
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
+  const { workingOffsets } = state
   const isOnDevice = useSelector(getIsOnDevice)
   const labwareDef = getLabwareDef(labwareId, protocolData)
   const pipette = protocolData.pipettes.find(
@@ -306,12 +311,13 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
         const finalResponse = responses[responses.length - 1]
         if (finalResponse.data.commandType === 'savePosition') {
           const { position } = finalResponse.data?.result ?? { position: null }
-          registerPosition({
-            type: 'initialPosition',
-            labwareId,
-            location,
-            position,
-          })
+          dispatch(
+            setInitialPosition({
+              labwareId,
+              location,
+              position,
+            })
+          )
         } else {
           setFatalError(
             `CheckItem failed to save position for initial placement.`
@@ -397,12 +403,13 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
         const firstResponse = responses[0]
         if (firstResponse.data.commandType === 'savePosition') {
           const { position } = firstResponse.data?.result ?? { position: null }
-          registerPosition({
-            type: 'finalPosition',
-            labwareId,
-            location,
-            position,
-          })
+          dispatch(
+            setFinalPosition({
+              labwareId,
+              location,
+              position,
+            })
+          )
           proceed()
         } else {
           setFatalError('CheckItem failed to save final position with message')
@@ -424,12 +431,13 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
       false
     )
       .then(() => {
-        registerPosition({
-          type: 'initialPosition',
-          labwareId,
-          location,
-          position: null,
-        })
+        dispatch(
+          setInitialPosition({
+            labwareId,
+            location,
+            position: null,
+          })
+        )
       })
       .catch((e: Error) => {
         setFatalError(`CheckItem failed to home: ${e.message}`)

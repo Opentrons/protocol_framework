@@ -36,22 +36,27 @@ import type {
 } from '@opentrons/shared-data'
 import type { useChainRunCommands } from '/app/resources/runs'
 import type { Jog } from '/app/molecules/JogControls/types'
-import type {
-  PickUpTipStep,
-  RegisterPositionAction,
-  WorkingOffset,
-} from './types'
+import type { PickUpTipStep } from './types'
 import type { LabwareOffset } from '@opentrons/api-client'
 import type { TFunction } from 'i18next'
+import type {
+  LPCWizardAction,
+  LPCWizardState,
+} from '/app/organisms/LabwarePositionCheck/redux'
+import {
+  setFinalPosition,
+  setInitialPosition,
+  setTipPickupOffset,
+} from '/app/organisms/LabwarePositionCheck/redux/actions'
 
 interface PickUpTipProps extends PickUpTipStep {
   protocolData: CompletedProtocolAnalysis
   proceed: () => void
-  registerPosition: Dispatch<RegisterPositionAction>
   chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
   setFatalError: (errorMessage: string) => void
-  workingOffsets: WorkingOffset[]
   existingOffsets: LabwareOffset[]
+  dispatch: Dispatch<LPCWizardAction>
+  state: LPCWizardState
   handleJog: Jog
   isRobotMoving: boolean
   robotType: RobotType
@@ -67,17 +72,18 @@ export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
     protocolData,
     proceed,
     chainRunCommands,
-    registerPosition,
+    dispatch,
+    state,
     handleJog,
     isRobotMoving,
     existingOffsets,
-    workingOffsets,
     setFatalError,
     adapterId,
     robotType,
     protocolHasModules,
     currentStepIndex,
   } = props
+  const { workingOffsets } = state
   const [showTipConfirmation, setShowTipConfirmation] = useState(false)
   const isOnDevice = useSelector(getIsOnDevice)
   const labwareDef = getLabwareDef(labwareId, protocolData)
@@ -197,12 +203,13 @@ export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
         const finalResponse = responses[responses.length - 1]
         if (finalResponse.data.commandType === 'savePosition') {
           const { position } = finalResponse.data?.result ?? { position: null }
-          registerPosition({
-            type: 'initialPosition',
-            labwareId,
-            location,
-            position,
-          })
+          dispatch(
+            setInitialPosition({
+              labwareId,
+              location,
+              position,
+            })
+          )
         } else {
           setFatalError(
             `PickUpTip failed to save position for initial placement.`
@@ -227,13 +234,14 @@ export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
             initialPosition != null && position != null
               ? getVectorDifference(position, initialPosition)
               : undefined
-          registerPosition({
-            type: 'finalPosition',
-            labwareId,
-            location,
-            position,
-          })
-          registerPosition({ type: 'tipPickUpOffset', offset: offset ?? null })
+          dispatch(
+            setFinalPosition({
+              labwareId,
+              location,
+              position,
+            })
+          )
+          dispatch(setTipPickupOffset(offset ?? null))
           chainRunCommands(
             [
               {
@@ -350,13 +358,14 @@ export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
       false
     )
       .then(() => {
-        registerPosition({ type: 'tipPickUpOffset', offset: null })
-        registerPosition({
-          type: 'finalPosition',
-          labwareId,
-          location,
-          position: null,
-        })
+        dispatch(setTipPickupOffset(null))
+        dispatch(
+          setFinalPosition({
+            labwareId,
+            location,
+            position: null,
+          })
+        )
         setShowTipConfirmation(false)
       })
       .catch((e: Error) => {
@@ -378,12 +387,13 @@ export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
       false
     )
       .then(() => {
-        registerPosition({
-          type: 'initialPosition',
-          labwareId,
-          location,
-          position: null,
-        })
+        dispatch(
+          setInitialPosition({
+            labwareId,
+            location,
+            position: null,
+          })
+        )
       })
       .catch((e: Error) => {
         setFatalError(

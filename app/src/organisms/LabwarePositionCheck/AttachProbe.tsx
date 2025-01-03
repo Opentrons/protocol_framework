@@ -23,19 +23,19 @@ import type {
 import type { LabwareOffset } from '@opentrons/api-client'
 import type { Jog } from '/app/molecules/JogControls/types'
 import type { useChainRunCommands } from '/app/resources/runs'
+import type { AttachProbeStep } from './types'
 import type {
-  AttachProbeStep,
-  RegisterPositionAction,
-  WorkingOffset,
-} from './types'
+  LPCWizardAction,
+  LPCWizardState,
+} from '/app/organisms/LabwarePositionCheck/redux'
 
 interface AttachProbeProps extends AttachProbeStep {
   protocolData: CompletedProtocolAnalysis
   proceed: () => void
-  registerPosition: Dispatch<RegisterPositionAction>
+  dispatch: Dispatch<LPCWizardAction>
+  state: LPCWizardState
   chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
   setFatalError: (errorMessage: string) => void
-  workingOffsets: WorkingOffset[]
   existingOffsets: LabwareOffset[]
   handleJog: Jog
   isRobotMoving: boolean

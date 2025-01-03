@@ -64,7 +64,7 @@ export function useLPCFlows({
   useRunLoadedLabwareDefinitions(runId, {
     // TOME TODO: Ideally we don't have to do this POST, since the server has the defs already?
     onSuccess: res => {
-      Promise.all(
+      void Promise.all(
         res.data.map(def => {
           if ('schemaVersion' in def) {
             createLabwareDefinition({

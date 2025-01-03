@@ -1,6 +1,5 @@
-import { useState, useReducer } from 'react'
+import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import isEqual from 'lodash/isEqual'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 
@@ -27,6 +26,8 @@ import { FatalError } from './FatalErrorModal'
 import { RobotMotionLoader } from './RobotMotionLoader'
 import { useChainMaintenanceCommands } from '/app/resources/maintenance_runs'
 import { getLabwarePositionCheckSteps } from './getLabwarePositionCheckSteps'
+import { useLPCInitialState } from '/app/organisms/LabwarePositionCheck/hooks'
+import { useLPCReducer } from '/app/organisms/LabwarePositionCheck/redux'
 
 import type {
   Coordinates,
@@ -38,12 +39,11 @@ import type {
   CommandData,
 } from '@opentrons/api-client'
 import type { Axis, Sign, StepSize } from '/app/molecules/JogControls/types'
-import type { RegisterPositionAction, WorkingOffset } from './types'
 import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck/LPCFlows'
 
 const JOG_COMMAND_TIMEOUT = 10000 // 10 seconds
 
-export const LPCWizardFlex = (props: LPCFlowsProps): JSX.Element | null => {
+export function LPCWizardFlex(props: LPCFlowsProps): JSX.Element | null {
   const {
     mostRecentAnalysis,
     existingOffsets,
@@ -60,74 +60,12 @@ export const LPCWizardFlex = (props: LPCFlowsProps): JSX.Element | null => {
 
   const [fatalError, setFatalError] = useState<string | null>(null)
   const [isApplyingOffsets, setIsApplyingOffsets] = useState<boolean>(false)
-  const [{ workingOffsets, tipPickUpOffset }, registerPosition] = useReducer(
-    (
-      state: {
-        workingOffsets: WorkingOffset[]
-        tipPickUpOffset: Coordinates | null
-      },
-      action: RegisterPositionAction
-    ) => {
-      if (action.type === 'tipPickUpOffset') {
-        return { ...state, tipPickUpOffset: action.offset }
-      }
 
-      if (
-        action.type === 'initialPosition' ||
-        action.type === 'finalPosition'
-      ) {
-        const { labwareId, location, position } = action
-        const existingRecordIndex = state.workingOffsets.findIndex(
-          record =>
-            record.labwareId === labwareId && isEqual(record.location, location)
-        )
-        if (existingRecordIndex >= 0) {
-          if (action.type === 'initialPosition') {
-            return {
-              ...state,
-              workingOffsets: [
-                ...state.workingOffsets.slice(0, existingRecordIndex),
-                {
-                  ...state.workingOffsets[existingRecordIndex],
-                  initialPosition: position,
-                  finalPosition: null,
-                },
-                ...state.workingOffsets.slice(existingRecordIndex + 1),
-              ],
-            }
-          } else if (action.type === 'finalPosition') {
-            return {
-              ...state,
-              workingOffsets: [
-                ...state.workingOffsets.slice(0, existingRecordIndex),
-                {
-                  ...state.workingOffsets[existingRecordIndex],
-                  finalPosition: position,
-                },
-                ...state.workingOffsets.slice(existingRecordIndex + 1),
-              ],
-            }
-          }
-        }
-        return {
-          ...state,
-          workingOffsets: [
-            ...state.workingOffsets,
-            {
-              labwareId,
-              location,
-              initialPosition:
-                action.type === 'initialPosition' ? position : null,
-              finalPosition: action.type === 'finalPosition' ? position : null,
-            },
-          ],
-        }
-      } else {
-        return state
-      }
-    },
-    { workingOffsets: [], tipPickUpOffset: null }
-  )
+  // TOME TODO: Like with ER, separate wizard and content. The wizard injects the data layer to the content layer.
+
+  const initialState = useLPCInitialState()
+  const { state, dispatch } = useLPCReducer(initialState)
+
   const [isExiting, setIsExiting] = useState(false)
   const {
     createMaintenanceCommand: createSilentCommand,
@@ -250,10 +188,10 @@ export const LPCWizardFlex = (props: LPCFlowsProps): JSX.Element | null => {
     protocolData,
     chainRunCommands: chainMaintenanceRunCommands,
     setFatalError,
-    registerPosition,
+    dispatch,
     handleJog,
     isRobotMoving: isCommandChainLoading,
-    workingOffsets,
+    state,
     existingOffsets,
     robotType,
   }
@@ -331,24 +269,19 @@ export const LPCWizardFlex = (props: LPCFlowsProps): JSX.Element | null => {
       />
     )
   } else if (currentStep.section === 'RETURN_TIP') {
-    modalContent = (
-      <ReturnTip
-        {...currentStep}
-        {...movementStepProps}
-        {...{ tipPickUpOffset }}
-      />
-    )
+    modalContent = <ReturnTip {...currentStep} {...movementStepProps} />
   } else if (currentStep.section === 'RESULTS_SUMMARY') {
     modalContent = (
       <ResultsSummary
         {...currentStep}
         protocolData={protocolData}
         {...{
-          workingOffsets,
           existingOffsets,
           handleApplyOffsets,
           isApplyingOffsets,
         }}
+        state={state}
+        dispatch={dispatch}
       />
     )
   }

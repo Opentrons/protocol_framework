@@ -18,21 +18,21 @@ import type { Dispatch } from 'react'
 import type { CompletedProtocolAnalysis } from '@opentrons/shared-data'
 import type { Jog } from '/app/molecules/JogControls/types'
 import type { useChainRunCommands } from '/app/resources/runs'
-import type {
-  DetachProbeStep,
-  RegisterPositionAction,
-  WorkingOffset,
-} from './types'
+import type { DetachProbeStep } from './types'
 import type { LabwareOffset } from '@opentrons/api-client'
+import type {
+  LPCWizardAction,
+  LPCWizardState,
+} from '/app/organisms/LabwarePositionCheck/redux'
 
 interface DetachProbeProps extends DetachProbeStep {
   protocolData: CompletedProtocolAnalysis
   proceed: () => void
-  registerPosition: Dispatch<RegisterPositionAction>
   chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
   setFatalError: (errorMessage: string) => void
-  workingOffsets: WorkingOffset[]
   existingOffsets: LabwareOffset[]
+  dispatch: Dispatch<LPCWizardAction>
+  state: LPCWizardState
   handleJog: Jog
   isRobotMoving: boolean
 }
