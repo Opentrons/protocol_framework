@@ -1,6 +1,7 @@
 from typing import Protocol
 
 from .types import (
+    LimitSwitchStatus,
     StackerAxis,
     PlatformStatus,
     Direction,
@@ -42,6 +43,10 @@ class AbstractFlexStackerDriver(Protocol):
 
         :return: True if limit switch is triggered, False otherwise
         """
+        ...
+
+    async def get_limit_switches_status(self) -> LimitSwitchStatus:
+        """Get limit switch statuses for all axes."""
         ...
 
     async def get_platform_sensor(self, direction: Direction) -> bool:

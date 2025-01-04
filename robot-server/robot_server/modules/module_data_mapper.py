@@ -161,6 +161,11 @@ class ModuleDataMapper:
             module_cls = FlexStackerModule
             module_data = FlexStackerModuleData(
                 status=live_data["status"],
+                plarformState=cast(str, live_data.get("platformState")),
+                axisStateX=cast(str, live_data.get("axisStateX")),
+                axisStateZ=cast(str, live_data.get("axisStateZ")),
+                axisStateL=cast(str, live_data.get("axisStateL")),
+                hopperDoorClosed=cast(bool, live_data.get("hopperDoorClosed")),
             )
         else:
             assert False, f"Invalid module type {module_type}"

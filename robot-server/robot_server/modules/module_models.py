@@ -358,6 +358,13 @@ class FlexStackerModuleData(BaseModel):
         ...,
         description="Overall status of the module.",
     )
+    plarformState: str = Field(..., description="The state of the platform.")
+    axisStateX: str = Field(..., description="The state of the X axis limit switches.")
+    axisStateZ: str = Field(..., description="The state of the Z axis limit switches.")
+    axisStateL: str = Field(..., description="The state of the L axis limit switches.")
+    hopperDoorClosed: bool = Field(
+        ..., description="Whether the hopper door is closed."
+    )
 
 
 class FlexStackerModule(

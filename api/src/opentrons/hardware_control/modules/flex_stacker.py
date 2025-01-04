@@ -2,8 +2,13 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Optional, Mapping
+from typing import Dict, Optional, Mapping
 
+from opentrons.drivers.flex_stacker.types import (
+    PlatformState,
+    StackerAxis,
+    StackerAxisState,
+)
 from opentrons.drivers.rpi_drivers.types import USBPort
 from opentrons.drivers.flex_stacker.driver import FlexStackerDriver
 from opentrons.drivers.flex_stacker.abstract import AbstractFlexStackerDriver
@@ -140,6 +145,21 @@ class FlexStacker(mod_abc.AbstractModule):
         return update.upload_via_dfu
 
     @property
+    def platform_state(self) -> PlatformState:
+        """The state of the platform."""
+        return self._reader.platform_state
+
+    @property
+    def limit_switch_status(self) -> Dict[StackerAxis, StackerAxisState]:
+        """The status of the Limit switches."""
+        return self._reader.limit_switch_status
+
+    @property
+    def hopper_door_closed(self) -> bool:
+        """The status of the hopper door."""
+        return self._reader.hopper_door_closed
+
+    @property
     def device_info(self) -> Mapping[str, str]:
         return self._device_info
 
@@ -148,6 +168,11 @@ class FlexStacker(mod_abc.AbstractModule):
         return {
             "status": self.status,
             "data": {
+                "platformState": self.platform_state.value,
+                "axisStateX": self.limit_switch_status[StackerAxis.X].value,
+                "axisStateZ": self.limit_switch_status[StackerAxis.Z].value,
+                "axisStateL": self.limit_switch_status[StackerAxis.L].value,
+                "hopperDoorClosed": self.hopper_door_closed,
                 "errorDetails": self._reader.error,
             },
         }
@@ -163,12 +188,13 @@ class FlexStacker(mod_abc.AbstractModule):
 
     async def prep_for_update(self) -> str:
         await self._poller.stop()
+        await self._driver.stop_motors()
         await self._driver.enter_programming_mode()
         dfu_info = await update.find_dfu_device(pid=DFU_PID, expected_device_count=2)
         return dfu_info
 
     async def deactivate(self, must_be_running: bool = True) -> None:
-        pass
+        await self._driver.stop_motors()
 
 
 class FlexStackerReader(Reader):
@@ -177,9 +203,35 @@ class FlexStackerReader(Reader):
     def __init__(self, driver: AbstractFlexStackerDriver) -> None:
         self.error: Optional[str] = None
         self._driver = driver
+        self.limit_switch_status = {
+            axis: StackerAxisState.UNKNOWN for axis in StackerAxis
+        }
+        self.platform_state = PlatformState.UNKNOWN
+        self.hopper_door_closed = False
 
     async def read(self) -> None:
+        await self.get_limit_switch_status()
+        await self.get_platform_sensor_state()
+        await self.get_door_closed()
         self._set_error(None)
+
+    async def get_limit_switch_status(self) -> None:
+        """Get the limit switch status."""
+        status = await self._driver.get_limit_switches_status()
+        self.limit_switch_status = {
+            StackerAxis.X: StackerAxisState.from_status(status, StackerAxis.X),
+            StackerAxis.Z: StackerAxisState.from_status(status, StackerAxis.Z),
+            StackerAxis.L: StackerAxisState.from_status(status, StackerAxis.L),
+        }
+
+    async def get_platform_sensor_state(self) -> None:
+        """Get the platform state."""
+        status = await self._driver.get_platform_status()
+        self.platform_state = PlatformState.from_status(status)
+
+    async def get_door_closed(self) -> None:
+        """Check if the hopper door is closed."""
+        self.hopper_door_closed = await self._driver.get_hopper_door_closed()
 
     def on_error(self, exception: Exception) -> None:
         self._set_error(exception)
