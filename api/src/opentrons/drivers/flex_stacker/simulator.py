@@ -4,6 +4,7 @@ from opentrons.util.async_helpers import ensure_yield
 
 from .abstract import AbstractFlexStackerDriver
 from .types import (
+    LEDColor,
     StackerAxis,
     PlatformStatus,
     Direction,
@@ -61,8 +62,8 @@ class SimulatingDriver(AbstractFlexStackerDriver):
         return True
 
     @ensure_yield
-    async def stop_motor(self) -> bool:
-        """Stop motor movement."""
+    async def stop_motors(self) -> bool:
+        """Stop all motor movement."""
         return True
 
     @ensure_yield
@@ -78,12 +79,15 @@ class SimulatingDriver(AbstractFlexStackerDriver):
         """Get limit switch statuses for all axes."""
         return self._limit_switch_status
 
-    @ensure_yield
-    async def get_platform_sensor_status(self) -> PlatformStatus:
+    async def get_platform_sensor(self, direction: Direction) -> bool:
         """Get platform sensor status.
 
-        :return: True if platform is detected, False otherwise
+        :return: True if platform is present, False otherwise
         """
+        return True
+
+    async def get_platform_status(self) -> PlatformStatus:
+        """Get platform status."""
         return self._platform_sensor_status
 
     @ensure_yield
@@ -107,3 +111,17 @@ class SimulatingDriver(AbstractFlexStackerDriver):
     ) -> bool:
         """Move until limit switch is triggered."""
         return True
+
+    async def home_axis(self, axis: StackerAxis, direction: Direction) -> bool:
+        """Home axis."""
+        return True
+
+    async def set_led(
+        self, power: float, color: LEDColor | None = None, external: bool | None = None
+    ) -> bool:
+        """Set LED color."""
+        return True
+
+    async def enter_programming_mode(self) -> None:
+        """Reboot into programming mode"""
+        pass

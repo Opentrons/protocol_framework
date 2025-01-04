@@ -25,10 +25,6 @@ class AbstractFlexStackerDriver(Protocol):
         """Check connection to stacker."""
         ...
 
-    async def update_firmware(self, firmware_file_path: str) -> None:
-        """Updates the firmware on the device."""
-        ...
-
     async def get_device_info(self) -> StackerInfo:
         """Get Device Info."""
         ...

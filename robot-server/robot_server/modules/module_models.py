@@ -343,11 +343,35 @@ class AbsorbanceReaderModule(
         AbsorbanceReaderModuleData,
     ]
 ):
-    """An attached Heater-Shaker Module."""
+    """An attached Absorbance Reader Module."""
 
     moduleType: Literal[ModuleType.ABSORBANCE_READER]
     moduleModel: Literal[ModuleModel.ABSORBANCE_READER_V1]
     data: AbsorbanceReaderModuleData
+
+
+class FlexStackerModuleData(BaseModel):
+    """Live data from a Flex Stacker module."""
+
+    # TODO: add rest of data
+    status: str = Field(
+        ...,
+        description="Overall status of the module.",
+    )
+
+
+class FlexStackerModule(
+    _GenericModule[
+        Literal[ModuleType.FLEX_STACKER],
+        Literal[ModuleModel.FLEX_STACKER_MODULE_V1],
+        FlexStackerModuleData,
+    ]
+):
+    """An attached Flex Stacker Module."""
+
+    moduleType: Literal[ModuleType.FLEX_STACKER]
+    moduleModel: Literal[ModuleModel.FLEX_STACKER_MODULE_V1]
+    data: FlexStackerModuleData
 
 
 AttachedModule = Union[
@@ -356,6 +380,7 @@ AttachedModule = Union[
     ThermocyclerModule,
     HeaterShakerModule,
     AbsorbanceReaderModule,
+    FlexStackerModule,
 ]
 
 
@@ -365,4 +390,5 @@ AttachedModuleData = Union[
     ThermocyclerModuleData,
     HeaterShakerModuleData,
     AbsorbanceReaderModuleData,
+    FlexStackerModuleData,
 ]

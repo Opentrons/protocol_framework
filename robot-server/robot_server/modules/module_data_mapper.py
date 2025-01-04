@@ -28,6 +28,8 @@ from .module_identifier import ModuleIdentity
 from .module_models import (
     AttachedModule,
     AttachedModuleData,
+    FlexStackerModule,
+    FlexStackerModuleData,
     MagneticModule,
     MagneticModuleData,
     ModuleCalibrationData,
@@ -154,6 +156,11 @@ class ModuleDataMapper:
                 referenceWavelength=cast(
                     int, live_data["data"].get("referenceWavelength")
                 ),
+            )
+        elif module_type == ModuleType.FLEX_STACKER:
+            module_cls = FlexStackerModule
+            module_data = FlexStackerModuleData(
+                status=live_data["status"],
             )
         else:
             assert False, f"Invalid module type {module_type}"

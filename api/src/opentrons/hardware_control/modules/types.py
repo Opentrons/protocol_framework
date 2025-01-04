@@ -27,7 +27,7 @@ if TYPE_CHECKING:
         HeaterShakerModuleType,
         MagneticBlockType,
         AbsorbanceReaderType,
-        FlexStackerType,
+        FlexStackerModuleType,
     )
 
 
@@ -63,7 +63,7 @@ class ModuleType(str, Enum):
     HEATER_SHAKER: HeaterShakerModuleType = "heaterShakerModuleType"
     MAGNETIC_BLOCK: MagneticBlockType = "magneticBlockType"
     ABSORBANCE_READER: AbsorbanceReaderType = "absorbanceReaderType"
-    FLEX_STACKER: FlexStackerType = "flexStackerType"
+    FLEX_STACKER: FlexStackerModuleType = "flexStackerModuleType"
 
     @classmethod
     def from_model(cls, model: ModuleModel) -> ModuleType:
@@ -79,7 +79,7 @@ class ModuleType(str, Enum):
             return cls.MAGNETIC_BLOCK
         if isinstance(model, AbsorbanceReaderModel):
             return cls.ABSORBANCE_READER
-        if isinstance(model, FlexStackerModel):
+        if isinstance(model, FlexStackerModuleModel):
             return cls.FLEX_STACKER
 
     @classmethod
@@ -96,7 +96,7 @@ class ModuleType(str, Enum):
         if module_type == ModuleType.ABSORBANCE_READER:
             return "absorbanceReaderV1"
         if module_type == ModuleType.FLEX_STACKER:
-            return "flexStackerV1"
+            return "flexStackerModuleV1"
         else:
             raise ValueError(
                 f"Module Type {module_type} does not have a related fixture ID."
@@ -130,8 +130,8 @@ class AbsorbanceReaderModel(str, Enum):
     ABSORBANCE_READER_V1: str = "absorbanceReaderV1"
 
 
-class FlexStackerModel(str, Enum):
-    FLEX_STACKER_V1: str = "flexStackerV1"
+class FlexStackerModuleModel(str, Enum):
+    FLEX_STACKER_V1: str = "flexStackerModuleV1"
 
 
 def module_model_from_string(model_string: str) -> ModuleModel:
@@ -142,7 +142,7 @@ def module_model_from_string(model_string: str) -> ModuleModel:
         HeaterShakerModuleModel,
         MagneticBlockModel,
         AbsorbanceReaderModel,
-        FlexStackerModel,
+        FlexStackerModuleModel,
     }:
         try:
             return cast(ModuleModel, model_enum(model_string))
@@ -195,7 +195,7 @@ ModuleModel = Union[
     HeaterShakerModuleModel,
     MagneticBlockModel,
     AbsorbanceReaderModel,
-    FlexStackerModel,
+    FlexStackerModuleModel,
 ]
 
 

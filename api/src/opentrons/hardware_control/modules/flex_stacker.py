@@ -131,7 +131,7 @@ class FlexStacker(mod_abc.AbstractModule):
     @staticmethod
     def _model_from_revision(revision: Optional[str]) -> str:
         """Defines the revision -> model mapping"""
-        return "flexStackerV1"
+        return "flexStackerModuleV1"
 
     def model(self) -> str:
         return self._model_from_revision(self._device_info.get("model"))
@@ -166,6 +166,9 @@ class FlexStacker(mod_abc.AbstractModule):
         await self._driver.enter_programming_mode()
         dfu_info = await update.find_dfu_device(pid=DFU_PID, expected_device_count=2)
         return dfu_info
+
+    async def deactivate(self, must_be_running: bool = True) -> None:
+        pass
 
 
 class FlexStackerReader(Reader):

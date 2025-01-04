@@ -482,7 +482,7 @@ class OT3Controller(FlexBackend):
     ) -> SystemDrivers:
         gpio = OT3GPIO("hardware_control")
         eeprom_driver = eeprom_driver or EEPROMDriver(gpio)
-        eeprom_driver.setup()
+        # eeprom_driver.setup()
         gpio_dev: Union[OT3GPIO, RemoteOT3GPIO] = gpio
         usb_messenger: Optional[BinaryMessenger] = None
         if usb_driver:
@@ -529,9 +529,9 @@ class OT3Controller(FlexBackend):
     async def update_motor_status(self) -> None:
         """Retreieve motor and encoder status and position from all present nodes"""
         motor_nodes = self._motor_nodes()
-        assert len(motor_nodes)
-        response = await get_motor_position(self._messenger, motor_nodes)
-        self._handle_motor_status_response(response)
+        if motor_nodes:
+            response = await get_motor_position(self._messenger, motor_nodes)
+            self._handle_motor_status_response(response)
 
     async def update_motor_estimation(self, axes: Sequence[Axis]) -> None:
         """Update motor position estimation for commanded nodes, and update cache of data."""
