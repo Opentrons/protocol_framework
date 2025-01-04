@@ -284,6 +284,42 @@ async def mod_flexstacker() -> AsyncIterator[AbstractModule]:
     await flexstacker.cleanup()
 
 
+@pytest.fixture(
+    params=[
+        (ModuleType.TEMPERATURE,),
+        (ModuleType.MAGNETIC,),
+        (ModuleType.THERMOCYCLER, "thermocyclerModelV1"),
+        (ModuleType.THERMOCYCLER, "thermocyclerModelV2"),
+        (ModuleType.HEATER_SHAKER,),
+        (ModuleType.ABSORBANCE_READER,),
+        (ModuleType.STACKER,),
+    ]
+)
+async def abstract_module(request) -> AsyncIterator[AbstractModule]:
+    usb_port = USBPort(
+        name="",
+        hub=False,
+        port_number=0,
+        device_path="/dev/ot_module_simport0",
+    )
+
+    abs_mod = await build_module(
+        port="/dev/ot_module_simport0",
+        usb_port=usb_port,
+        type=request.param[0],
+        simulating=True,
+        hw_control_loop=asyncio.get_running_loop(),
+        execution_manager=ExecutionManager(),
+        sim_model=request.param[1] if len(request.param) > 1 else None,
+    )
+    yield abs_mod
+    await abs_mod.cleanup()
+
+
+async def test_module_fixtures(abstract_module: AbstractModule) -> None:
+    
+
+
 async def test_module_update_integration(
     monkeypatch: pytest.MonkeyPatch,
     mod_tempdeck: AbstractModule,
