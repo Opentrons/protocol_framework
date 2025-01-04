@@ -245,7 +245,7 @@
         },
         "8622d8f8-acbc-48ff-86f8-0476d1de0e02": {
           "heaterShakerSetTimer": true,
-          "heaterShakerTimer": "1:0",
+          "heaterShakerTimer": "0:1:0",
           "latchOpen": false,
           "moduleId": "23347241-80bb-4a7e-9c91-5d9727a9e483:heaterShakerModuleType",
           "setHeaterShakerTemperature": false,
