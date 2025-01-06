@@ -28,7 +28,7 @@ import { useSelector } from 'react-redux'
 import { TwoUpTileLayout } from './TwoUpTileLayout'
 import { getTopPortalEl } from '/app/App/portal'
 import { SmallButton } from '/app/atoms/buttons'
-import { TerseOffsetTable } from '../ResultsSummary'
+import { TerseOffsetTable } from '/app/organisms/TerseOffsetTable'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 
 import type { LabwareOffset } from '@opentrons/api-client'
