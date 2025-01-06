@@ -13,8 +13,8 @@ import {
   getLabwareDefURI,
 } from '@opentrons/shared-data'
 
-import { SmallButton } from '/app/atoms/buttons'
-import { TerseOffsetTable } from './ResultsSummary'
+import { SmallButton } from '../../atoms/buttons'
+import { TerseOffsetTable } from './steps/ResultsSummary'
 
 import type { Story, Meta } from '@storybook/react'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
@@ -24,6 +24,8 @@ export default {
   component: TerseOffsetTable,
   parameters: VIEWPORT.touchScreenViewport,
 } as Meta
+
+// TOME TODO: This should be moved into whatever dir handles the actual component.
 
 // Note: 59rem(944px) is the size of ODD
 const Template: Story<React.ComponentProps<typeof TerseOffsetTable>> = ({

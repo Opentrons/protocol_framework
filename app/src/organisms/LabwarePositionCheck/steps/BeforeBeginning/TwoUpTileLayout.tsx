@@ -43,6 +43,8 @@ export interface TwoUpTileLayoutProps {
   footer: React.ReactNode
 }
 
+// TOME TODO: Just used with IntroScreen, so can move there.
+
 export function TwoUpTileLayout(props: TwoUpTileLayoutProps): JSX.Element {
   const { title, body, rightElement, footer } = props
   return (

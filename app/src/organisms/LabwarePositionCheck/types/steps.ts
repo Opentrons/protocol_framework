@@ -4,12 +4,8 @@ import type { LPCWizardContentProps } from './content'
 
 export type LabwarePositionCheckStep =
   | BeforeBeginningStep
-  | CheckTipRacksStep
   | AttachProbeStep
-  | PickUpTipStep
-  | CheckLabwareStep
   | CheckPositionsStep
-  | ReturnTipStep
   | DetachProbeStep
   | ResultsSummaryStep
 
@@ -40,24 +36,8 @@ export interface AttachProbeStep {
   pipetteId: string
 }
 
-export interface CheckTipRacksStep extends PerformLPCStep {
-  section: typeof NAV_STEPS.CHECK_TIP_RACKS
-}
-
 export interface CheckPositionsStep extends PerformLPCStep {
   section: typeof NAV_STEPS.CHECK_POSITIONS
-}
-
-export interface CheckLabwareStep extends PerformLPCStep {
-  section: typeof NAV_STEPS.CHECK_LABWARE
-}
-
-export interface PickUpTipStep extends PerformLPCStep {
-  section: typeof NAV_STEPS.PICK_UP_TIP
-}
-
-export interface ReturnTipStep extends PerformLPCStep {
-  section: typeof NAV_STEPS.RETURN_TIP
 }
 
 export interface DetachProbeStep {

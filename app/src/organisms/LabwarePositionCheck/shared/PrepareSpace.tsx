@@ -29,15 +29,7 @@ import { useNotifyDeckConfigurationQuery } from '/app/resources/deck_configurati
 
 import type { ReactNode } from 'react'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
-import type {
-  CheckLabwareStep,
-  CheckPositionsStep,
-  CheckTipRacksStep,
-  LPCStepProps,
-  PerformLPCStep,
-  PickUpTipStep,
-  ReturnTipStep,
-} from './types'
+import type { CheckPositionsStep, LPCStepProps, PerformLPCStep } from '../types'
 
 const LPC_HELP_LINK_URL =
   'https://support.opentrons.com/s/article/How-Labware-Offsets-work-on-the-OT-2'
@@ -61,14 +53,7 @@ const Title = styled.h1`
   }
 `
 
-interface PrepareSpaceProps
-  extends LPCStepProps<
-    | CheckLabwareStep
-    | CheckTipRacksStep
-    | CheckPositionsStep
-    | PickUpTipStep
-    | ReturnTipStep
-  > {
+interface PrepareSpaceProps extends LPCStepProps<CheckPositionsStep> {
   header: ReactNode
   body: ReactNode
   labwareDef: LabwareDefinition2

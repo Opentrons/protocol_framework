@@ -3,6 +3,7 @@ import styled, { css } from 'styled-components'
 import { useSelector } from 'react-redux'
 import isEqual from 'lodash/isEqual'
 import { useTranslation } from 'react-i18next'
+
 import {
   getLabwareDefURI,
   getLabwareDisplayName,
@@ -11,7 +12,6 @@ import {
   getVectorSum,
   IDENTITY_VECTOR,
 } from '@opentrons/shared-data'
-import { NeedHelpLink } from '/app/molecules/OT2CalibrationNeedHelpLink'
 import {
   ALIGN_CENTER,
   ALIGN_FLEX_END,
@@ -31,6 +31,8 @@ import {
   TYPOGRAPHY,
   DIRECTION_ROW,
 } from '@opentrons/components'
+
+import { NeedHelpLink } from '/app/molecules/OT2CalibrationNeedHelpLink'
 import { PythonLabwareOffsetSnippet } from '/app/molecules/PythonLabwareOffsetSnippet'
 import {
   getIsLabwareOffsetCodeSnippetsOn,
@@ -40,19 +42,19 @@ import { SmallButton } from '/app/atoms/buttons'
 import { LabwareOffsetTabs } from '/app/organisms/LabwareOffsetTabs'
 import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
-import { getDisplayLocation } from './utils/getDisplayLocation'
+import { getDisplayLocation } from '/app/organisms/LabwarePositionCheck/utils'
 
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type { LabwareOffsetCreateData } from '@opentrons/api-client'
-import type { LPCStepProps, ResultsSummaryStep } from './types'
+import type { LPCStepProps, ResultsSummaryStep } from '../types'
 import type { TFunction } from 'i18next'
 
 const LPC_HELP_LINK_URL =
   'https://support.opentrons.com/s/article/How-Labware-Offsets-work-on-the-OT-2'
 
-export const ResultsSummary = (
+export function ResultsSummary(
   props: LPCStepProps<ResultsSummaryStep>
-): JSX.Element | null => {
+): JSX.Element {
   const { i18n, t } = useTranslation('labware_position_check')
   const {
     protocolData,
@@ -332,6 +334,9 @@ const OffsetTable = (props: OffsetTableProps): JSX.Element => {
     </Table>
   )
 }
+
+// TODO TOME: This needs to be an organism. It's used outside of LPC, too. Be sure
+// to move the story, too.
 
 // Very similar to the OffsetTable, but abbreviates certain things to be optimized
 // for smaller screens

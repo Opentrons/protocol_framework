@@ -10,19 +10,20 @@ import {
 } from '@opentrons/react-api-client'
 
 import { getTopPortalEl } from '/app/App/portal'
-// import { useTrackEvent } from '/app/redux/analytics'
-import { BeforeBeginning } from './BeforeBeginning'
-import { ExitConfirmation } from './ExitConfirmation'
-import { CheckItem } from './CheckItem'
+import {
+  BeforeBeginning,
+  CheckItem,
+  AttachProbe,
+  DetachProbe,
+  ResultsSummary,
+} from '/app/organisms/LabwarePositionCheck/steps'
+import {
+  RobotMotionLoader,
+  ExitConfirmation,
+} from '/app/organisms/LabwarePositionCheck/shared'
 import { WizardHeader } from '/app/molecules/WizardHeader'
 import { getIsOnDevice } from '/app/redux/config'
-import { AttachProbe } from './AttachProbe'
-import { DetachProbe } from './DetachProbe'
-import { PickUpTip } from './PickUpTip'
-import { ReturnTip } from './ReturnTip'
-import { ResultsSummary } from './ResultsSummary'
 import { FatalError } from './FatalErrorModal'
-import { RobotMotionLoader } from './RobotMotionLoader'
 import { useChainMaintenanceCommands } from '/app/resources/maintenance_runs'
 import { getLabwarePositionCheckSteps } from './getLabwarePositionCheckSteps'
 import { useLPCInitialState } from '/app/organisms/LabwarePositionCheck/hooks'
@@ -264,8 +265,6 @@ function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
       return <BeforeBeginning {...restProps} step={step} />
 
     case NAV_STEPS.CHECK_POSITIONS:
-    case NAV_STEPS.CHECK_TIP_RACKS:
-    case NAV_STEPS.CHECK_LABWARE:
       return <CheckItem {...restProps} step={step} />
 
     case NAV_STEPS.ATTACH_PROBE:
@@ -273,12 +272,6 @@ function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
 
     case NAV_STEPS.DETACH_PROBE:
       return <DetachProbe {...restProps} step={step} />
-
-    case NAV_STEPS.PICK_UP_TIP:
-      return <PickUpTip {...restProps} step={step} />
-
-    case NAV_STEPS.RETURN_TIP:
-      return <ReturnTip {...restProps} step={step} />
 
     case NAV_STEPS.RESULTS_SUMMARY:
       return <ResultsSummary {...restProps} step={step} />

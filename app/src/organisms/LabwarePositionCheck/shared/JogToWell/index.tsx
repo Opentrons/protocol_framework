@@ -43,21 +43,15 @@ import type { WellStroke } from '@opentrons/components'
 import type { VectorOffset } from '@opentrons/api-client'
 import type { Jog } from '/app/molecules/JogControls'
 import type {
-  CheckLabwareStep,
   CheckPositionsStep,
-  CheckTipRacksStep,
   LPCStepProps,
-  PickUpTipStep,
 } from '/app/organisms/LabwarePositionCheck/types'
 
 const DECK_MAP_VIEWBOX = '-10 -10 150 105'
 const LPC_HELP_LINK_URL =
   'https://support.opentrons.com/s/article/How-Labware-Offsets-work-on-the-OT-2'
 
-interface JogToWellProps
-  extends LPCStepProps<
-    CheckLabwareStep | CheckTipRacksStep | CheckPositionsStep | PickUpTipStep
-  > {
+interface JogToWellProps extends LPCStepProps<CheckPositionsStep> {
   header: ReactNode
   body: ReactNode
   labwareDef: LabwareDefinition2

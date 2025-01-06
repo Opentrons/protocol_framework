@@ -18,6 +18,8 @@ interface RobotMotionLoaderProps {
   body?: string
 }
 
+// TOME TODO: IDK if this actually needs to be a shared component. It would be ideal if it wasn't.
+
 export function RobotMotionLoader(props: RobotMotionLoaderProps): JSX.Element {
   const { header, body } = props
   return (

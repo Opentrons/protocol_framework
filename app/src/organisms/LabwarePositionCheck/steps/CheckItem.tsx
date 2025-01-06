@@ -1,16 +1,21 @@
 import { useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import omit from 'lodash/omit'
 import isEqual from 'lodash/isEqual'
 import { Trans, useTranslation } from 'react-i18next'
+
 import {
   DIRECTION_COLUMN,
   Flex,
   LegacyStyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { RobotMotionLoader } from './RobotMotionLoader'
-import { PrepareSpace } from './PrepareSpace'
-import { JogToWell } from './JogToWell'
+
+import {
+  RobotMotionLoader,
+  PrepareSpace,
+  JogToWell,
+} from '/app/organisms/LabwarePositionCheck/shared'
 import {
   getIsTiprack,
   getLabwareDefURI,
@@ -20,13 +25,14 @@ import {
   IDENTITY_VECTOR,
   THERMOCYCLER_MODULE_TYPE,
 } from '@opentrons/shared-data'
-import { useSelector } from 'react-redux'
-import { getLabwareDef } from './utils/labware'
+import {
+  getLabwareDef,
+  getDisplayLocation,
+} from '/app/organisms/LabwarePositionCheck/utils'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import { UnorderedList } from '/app/molecules/UnorderedList'
 import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
 import { getIsOnDevice } from '/app/redux/config'
-import { getDisplayLocation } from './utils/getDisplayLocation'
 import {
   setFinalPosition,
   setInitialPosition,
@@ -36,21 +42,18 @@ import type {
   CreateCommand,
   LabwareLocation,
   MoveLabwareCreateCommand,
+  LabwareDefinition2,
+  PipetteName,
 } from '@opentrons/shared-data'
-import type {
-  CheckLabwareStep,
-  CheckPositionsStep,
-  CheckTipRacksStep,
-  LPCStepProps,
-} from './types'
+import type { CheckPositionsStep, LPCStepProps } from '../types'
 import type { TFunction } from 'i18next'
 
 const PROBE_LENGTH_MM = 44.5
 
 // TOME TODO: Get rid of the 'null' or jsx here.
 export function CheckItem(
-  props: LPCStepProps<CheckLabwareStep | CheckPositionsStep | CheckTipRacksStep>
-): JSX.Element | null {
+  props: LPCStepProps<CheckPositionsStep>
+): JSX.Element {
   const {
     step,
     protocolData,
@@ -67,7 +70,10 @@ export function CheckItem(
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
   const { workingOffsets } = state
   const isOnDevice = useSelector(getIsOnDevice)
-  const labwareDef = getLabwareDef(labwareId, protocolData)
+  const labwareDef = getLabwareDef(
+    labwareId,
+    protocolData
+  ) as LabwareDefinition2
   const pipette = protocolData.pipettes.find(
     pipette => pipette.id === pipetteId
   )
@@ -77,7 +83,7 @@ export function CheckItem(
       : ''
 
   const pipetteMount = pipette?.mount
-  const pipetteName = pipette?.pipetteName
+  const pipetteName = pipette?.pipetteName as PipetteName
   let modulePrepCommands: CreateCommand[] = []
   const moduleType =
     (moduleId != null &&
@@ -127,8 +133,9 @@ export function CheckItem(
     }
   }, [moduleId])
 
-  if (pipetteName == null || labwareDef == null || pipetteMount == null)
-    return null
+  // TOME TODO: Error instead of returning null.
+  // if (pipetteName == null || labwareDef == null || pipetteMount == null)
+  //   return null
 
   const labwareDefs = getLabwareDefinitionsFromCommands(protocolData.commands)
   const pipetteZMotorAxis: 'leftZ' | 'rightZ' =

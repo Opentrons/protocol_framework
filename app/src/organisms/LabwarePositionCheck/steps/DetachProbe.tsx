@@ -1,24 +1,27 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
+
 import {
   LegacyStyledText,
   RESPONSIVENESS,
   SPACING,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { RobotMotionLoader } from './RobotMotionLoader'
 import { getPipetteNameSpecs } from '@opentrons/shared-data'
+
+import { RobotMotionLoader } from '/app/organisms/LabwarePositionCheck/shared'
+import { GenericWizardTile } from '/app/molecules/GenericWizardTile'
+
 import detachProbe1 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_1.webm'
 import detachProbe8 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_8.webm'
 import detachProbe96 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_96.webm'
-import { GenericWizardTile } from '/app/molecules/GenericWizardTile'
 
-import type { DetachProbeStep, LPCStepProps } from './types'
+import type { DetachProbeStep, LPCStepProps } from '../types'
 
 export const DetachProbe = (
   props: LPCStepProps<DetachProbeStep>
-): JSX.Element | null => {
+): JSX.Element => {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
   const {
     step,
@@ -58,7 +61,8 @@ export const DetachProbe = (
     })
   }, [])
 
-  if (pipetteName == null || pipetteMount == null) return null
+  // TOME TODO: Error instead of returning null.
+  // if (pipetteName == null || pipetteMount == null) return null
 
   const pipetteZMotorAxis: 'leftZ' | 'rightZ' =
     pipetteMount === 'left' ? 'leftZ' : 'rightZ'

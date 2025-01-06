@@ -18,14 +18,14 @@ import {
   LegacyStyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { RobotMotionLoader } from '../RobotMotionLoader'
+import { RobotMotionLoader } from '/app/organisms/LabwarePositionCheck/shared'
 import { getPrepCommands } from './getPrepCommands'
 import { WizardRequiredEquipmentList } from '/app/molecules/WizardRequiredEquipmentList'
 import { getLatestCurrentOffsets } from '/app/transformations/runs'
 import { getIsOnDevice } from '/app/redux/config'
 import { NeedHelpLink } from '/app/molecules/OT2CalibrationNeedHelpLink'
 import { useSelector } from 'react-redux'
-import { TwoUpTileLayout } from '../TwoUpTileLayout'
+import { TwoUpTileLayout } from './TwoUpTileLayout'
 import { getTopPortalEl } from '/app/App/portal'
 import { SmallButton } from '/app/atoms/buttons'
 import { TerseOffsetTable } from '../ResultsSummary'
