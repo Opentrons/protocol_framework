@@ -30,14 +30,14 @@
   },
   "parameters": {
     "format": "irregular",
-    "quirks": ["stackingMaxFive"],
+    "quirks": [],
     "isTiprack": false,
     "isMagneticModuleCompatible": false,
     "loadName": "opentrons_tough_pcr_auto_sealing_lid"
   },
   "namespace": "opentrons",
   "version": 1,
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "stackingOffsetWithModule": {
     "thermocyclerModuleV2": {
       "x": 0,
@@ -77,6 +77,12 @@
       "z": 34
     }
   },
+  "stackLimit": 5,
+  "compatibleParentLabware": [
+    "armadillo_96_wellplate_200ul_pcr_full_skirt",
+    "opentrons_96_wellplate_200ul_pcr_full_skirt",
+    "opentrons_tough_pcr_auto_sealing_lid"
+  ],
   "gripForce": 15,
   "gripHeightFromLabwareBottom": 7.91,
   "gripperOffsets": {

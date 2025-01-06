@@ -143,6 +143,7 @@ export type StepType =
   | 'pause'
   | 'temperature'
   | 'thermocycler'
+  | 'plateReader'
 
 export const stepIconsByType: Record<StepType, IconName> = {
   comment: 'comment',
@@ -155,6 +156,7 @@ export const stepIconsByType: Record<StepType, IconName> = {
   temperature: 'ot-temperature-v2',
   thermocycler: 'ot-thermocycler',
   heaterShaker: 'ot-heater-shaker',
+  plateReader: 'ot-absorbance',
 }
 // ===== Unprocessed form types =====
 export interface AnnotationFields {
@@ -360,7 +362,7 @@ export interface HydratedTemperatureFormData {
   targetTemperature: string | null
 }
 export interface HydratedHeaterShakerFormData {
-  heaterShakerSetTimer: 'true' | 'false' | null
+  heaterShakerSetTimer: boolean | null
   heaterShakerTimer: string | null
   id: string
   latchOpen: boolean

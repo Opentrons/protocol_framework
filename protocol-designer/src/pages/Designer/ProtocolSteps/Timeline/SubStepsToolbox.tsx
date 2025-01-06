@@ -22,12 +22,12 @@ import { ThermocyclerProfileSubsteps } from './ThermocyclerProfileSubsteps'
 import type { SubstepIdentifier } from '../../../../steplist'
 import type { HoverOnSubstepAction } from '../../../../ui/steps'
 
-interface SubstepsToolboxProps {
+interface SubStepsToolboxProps {
   stepId: string
 }
 
-export function SubstepsToolbox(
-  props: SubstepsToolboxProps
+export function SubStepsToolbox(
+  props: SubStepsToolboxProps
 ): JSX.Element | null {
   const { stepId } = props
   const { t, i18n } = useTranslation([

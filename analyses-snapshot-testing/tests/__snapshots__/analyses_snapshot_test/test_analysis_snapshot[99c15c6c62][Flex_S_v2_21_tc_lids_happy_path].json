@@ -1,0 +1,195 @@
+{
+  "commandAnnotations": [],
+  "commands": [
+    {
+      "commandType": "home",
+      "completedAt": "TIMESTAMP",
+      "createdAt": "TIMESTAMP",
+      "id": "UUID",
+      "key": "50c7ae73a4e3f7129874f39dfb514803",
+      "notes": [],
+      "params": {},
+      "result": {},
+      "startedAt": "TIMESTAMP",
+      "status": "succeeded"
+    },
+    {
+      "commandType": "loadLabware",
+      "completedAt": "TIMESTAMP",
+      "createdAt": "TIMESTAMP",
+      "id": "UUID",
+      "key": "73d9d4d55ae8466f3a793ceb70545fa5",
+      "notes": [],
+      "params": {
+        "loadName": "opentrons_flex_deck_riser",
+        "location": {
+          "slotName": "B2"
+        },
+        "namespace": "opentrons",
+        "version": 1
+      },
+      "result": {
+        "definition": {
+          "allowedRoles": [
+            "adapter"
+          ],
+          "brand": {
+            "brand": "Opentrons",
+            "brandId": []
+          },
+          "cornerOffsetFromSlot": {
+            "x": -6.125,
+            "y": -6.125,
+            "z": 0
+          },
+          "dimensions": {
+            "xDimension": 140,
+            "yDimension": 98,
+            "zDimension": 55
+          },
+          "gripperOffsets": {},
+          "groups": [
+            {
+              "metadata": {},
+              "wells": []
+            }
+          ],
+          "metadata": {
+            "displayCategory": "adapter",
+            "displayName": "Opentrons Flex Deck Riser",
+            "displayVolumeUnits": "µL",
+            "tags": []
+          },
+          "namespace": "opentrons",
+          "ordering": [],
+          "parameters": {
+            "format": "96Standard",
+            "isMagneticModuleCompatible": false,
+            "isTiprack": false,
+            "loadName": "opentrons_flex_deck_riser",
+            "quirks": []
+          },
+          "schemaVersion": 2,
+          "stackingOffsetWithLabware": {},
+          "stackingOffsetWithModule": {},
+          "version": 1,
+          "wells": {}
+        },
+        "labwareId": "UUID"
+      },
+      "startedAt": "TIMESTAMP",
+      "status": "succeeded"
+    },
+    {
+      "commandType": "loadLabware",
+      "completedAt": "TIMESTAMP",
+      "createdAt": "TIMESTAMP",
+      "error": {
+        "createdAt": "TIMESTAMP",
+        "detail": "ValueError: Labware Lid opentrons_tough_pcr_auto_sealing_lid may not be loaded on parent labware Opentrons Flex Deck Riser.",
+        "errorCode": "4000",
+        "errorInfo": {
+          "args": "('Labware Lid opentrons_tough_pcr_auto_sealing_lid may not be loaded on parent labware Opentrons Flex Deck Riser.',)",
+          "class": "ValueError",
+          "traceback": "  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocol_engine/execution/command_executor.py\", line N, in execute\n    result = await command_impl.execute(\n\n  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocol_engine/commands/load_labware.py\", line N, in execute\n    raise ValueError(\n"
+        },
+        "errorType": "PythonException",
+        "id": "UUID",
+        "isDefined": false,
+        "wrappedErrors": []
+      },
+      "id": "UUID",
+      "key": "50de88d471ad3910c29207fb6df4502e",
+      "notes": [
+        {
+          "longMessage": "Handling this command failure with FAIL_RUN.",
+          "noteKind": "debugErrorRecovery",
+          "shortMessage": "Handling this command failure with FAIL_RUN.",
+          "source": "execution"
+        }
+      ],
+      "params": {
+        "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+        "location": {
+          "labwareId": "UUID"
+        },
+        "namespace": "opentrons",
+        "version": 1
+      },
+      "startedAt": "TIMESTAMP",
+      "status": "failed"
+    }
+  ],
+  "config": {
+    "apiVersion": [
+      2,
+      21
+    ],
+    "protocolType": "python"
+  },
+  "createdAt": "TIMESTAMP",
+  "errors": [
+    {
+      "createdAt": "TIMESTAMP",
+      "detail": "ProtocolCommandFailedError [line 60]: Error 4000 GENERAL_ERROR (ProtocolCommandFailedError): PythonException: ValueError: Labware Lid opentrons_tough_pcr_auto_sealing_lid may not be loaded on parent labware Opentrons Flex Deck Riser.",
+      "errorCode": "4000",
+      "errorInfo": {},
+      "errorType": "ExceptionInProtocolError",
+      "id": "UUID",
+      "isDefined": false,
+      "wrappedErrors": [
+        {
+          "createdAt": "TIMESTAMP",
+          "detail": "PythonException: ValueError: Labware Lid opentrons_tough_pcr_auto_sealing_lid may not be loaded on parent labware Opentrons Flex Deck Riser.",
+          "errorCode": "4000",
+          "errorInfo": {},
+          "errorType": "ProtocolCommandFailedError",
+          "id": "UUID",
+          "isDefined": false,
+          "wrappedErrors": [
+            {
+              "createdAt": "TIMESTAMP",
+              "detail": "ValueError: Labware Lid opentrons_tough_pcr_auto_sealing_lid may not be loaded on parent labware Opentrons Flex Deck Riser.",
+              "errorCode": "4000",
+              "errorInfo": {
+                "args": "('Labware Lid opentrons_tough_pcr_auto_sealing_lid may not be loaded on parent labware Opentrons Flex Deck Riser.',)",
+                "class": "ValueError",
+                "traceback": "  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocol_engine/execution/command_executor.py\", line N, in execute\n    result = await command_impl.execute(\n\n  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocol_engine/commands/load_labware.py\", line N, in execute\n    raise ValueError(\n"
+              },
+              "errorType": "PythonException",
+              "id": "UUID",
+              "isDefined": false,
+              "wrappedErrors": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "name": "Flex_S_v2_21_tc_lids_happy_path.py",
+      "role": "main"
+    }
+  ],
+  "labware": [
+    {
+      "definitionUri": "opentrons/opentrons_flex_deck_riser/1",
+      "id": "UUID",
+      "loadName": "opentrons_flex_deck_riser",
+      "location": {
+        "slotName": "B2"
+      }
+    }
+  ],
+  "liquidClasses": [],
+  "liquids": [],
+  "metadata": {
+    "protocolName": "Opentrons Flex Deck Riser with TC Lids Test"
+  },
+  "modules": [],
+  "pipettes": [],
+  "result": "not-ok",
+  "robotType": "OT-3 Standard",
+  "runTimeParameters": []
+}

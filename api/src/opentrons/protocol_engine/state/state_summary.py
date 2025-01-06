@@ -28,8 +28,8 @@ class StateSummary(BaseModel):
     pipettes: List[LoadedPipette]
     modules: List[LoadedModule]
     labwareOffsets: List[LabwareOffset]
-    startedAt: Optional[datetime]
-    completedAt: Optional[datetime]
+    startedAt: Optional[datetime] = None
+    completedAt: Optional[datetime] = None
     liquids: List[Liquid] = Field(default_factory=list)
     wells: List[WellInfoSummary] = Field(default_factory=list)
     files: List[str] = Field(default_factory=list)

@@ -122,6 +122,10 @@ health_router = APIRouter()
             "description": "Robot motor controller is not ready",
         }
     },
+    # response_model_exclude_none=True preserves behavior from older FastAPI and/or
+    # Pydantic versions. It's unclear exactly what changed and why this is only
+    # necessary for this endpoint in particular.
+    response_model_exclude_none=True,
 )
 async def get_health(
     hardware: Annotated[HardwareControlAPI, Depends(get_hardware)],

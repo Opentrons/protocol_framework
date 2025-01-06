@@ -1,4 +1,5 @@
 """Tests for the ProtocolEngine class."""
+
 import inspect
 from datetime import datetime
 from typing import Any
@@ -803,9 +804,9 @@ async def test_finish_with_estop_error_will_not_drop_tip_and_home(
 ) -> None:
     """It should be able to tell the engine it's finished because of an error and will not drop tip and home."""
     error = ProtocolCommandFailedError(
-        original_error=ErrorOccurrence.construct(  # type: ignore[call-arg]
+        original_error=ErrorOccurrence.model_construct(  # type: ignore[call-arg]
             wrappedErrors=[
-                ErrorOccurrence.construct(errorCode="3008")  # type: ignore[call-arg]
+                ErrorOccurrence.model_construct(errorCode="3008")  # type: ignore[call-arg]
             ]
         )
     )

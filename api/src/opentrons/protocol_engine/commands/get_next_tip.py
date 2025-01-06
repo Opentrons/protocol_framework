@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 from pydantic import BaseModel, Field
-from typing import TYPE_CHECKING, Optional, Type, List, Literal, Union
+from typing import TYPE_CHECKING, Any, Optional, Type, List, Literal, Union
+
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.types import NozzleConfigurationType
 
@@ -21,6 +23,10 @@ if TYPE_CHECKING:
     from ..state.state import StateView
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 GetNextTipCommandType = Literal["getNextTip"]
 
 
@@ -32,10 +38,11 @@ class GetNextTipParams(PipetteIdMixin):
         description="Labware ID(s) of tip racks to resolve next available tip(s) from"
         " Labware IDs will be resolved sequentially",
     )
-    startingTipWell: Optional[str] = Field(
+    startingTipWell: str | SkipJsonSchema[None] = Field(
         None,
         description="Name of starting tip rack 'well'."
         " This only applies to the first tip rack in the list provided in labwareIDs",
+        json_schema_extra=_remove_default,
     )
 
 

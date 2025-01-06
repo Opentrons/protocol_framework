@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { describe, it, beforeEach, vi, expect, afterEach } from 'vitest'
 import { screen } from '@testing-library/react'
 
@@ -15,6 +14,7 @@ import { useLPCDisabledReason } from '/app/resources/runs'
 import { getLatestCurrentOffsets } from '/app/transformations/runs'
 import { CurrentOffsetsTable } from '../CurrentOffsetsTable'
 
+import type { ComponentProps } from 'react'
 import type { CompletedProtocolAnalysis } from '@opentrons/shared-data'
 import type { LabwareOffset } from '@opentrons/api-client'
 
@@ -31,7 +31,7 @@ vi.mock('@opentrons/shared-data', async importOriginal => {
   }
 })
 
-const render = (props: React.ComponentProps<typeof CurrentOffsetsTable>) => {
+const render = (props: ComponentProps<typeof CurrentOffsetsTable>) => {
   return renderWithProviders(<CurrentOffsetsTable {...props} />, {
     i18nInstance: i18n,
   })[0]
@@ -64,7 +64,7 @@ const mockCurrentOffsets: LabwareOffset[] = [
 ]
 
 describe('CurrentOffsetsTable', () => {
-  let props: React.ComponentProps<typeof CurrentOffsetsTable>
+  let props: ComponentProps<typeof CurrentOffsetsTable>
   beforeEach(() => {
     props = {
       currentOffsets: mockCurrentOffsets,

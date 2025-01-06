@@ -1,9 +1,10 @@
-import type * as React from 'react'
 import { Flex } from '../../../primitives'
 import { DIRECTION_COLUMN } from '../../../styles'
 
+import type { ReactNode } from 'react'
+
 interface ListButtonAccordionContainerProps {
-  children: React.ReactNode
+  children: ReactNode
   id: string
 }
 /*

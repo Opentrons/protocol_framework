@@ -1,4 +1,5 @@
 """Tests for base /runs routes."""
+
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons_shared_data.robot.types import RobotTypeEnum
 import pytest
@@ -776,7 +777,7 @@ async def test_get_run_commands_errors_raises_no_run(
 
 @pytest.mark.parametrize(
     "error_list, expected_cursor_result",
-    [([], 0), ([pe_errors.ErrorOccurrence.construct(id="error-id")], 1)],
+    [([], 0), ([pe_errors.ErrorOccurrence.model_construct(id="error-id")], 1)],
 )
 async def test_get_run_commands_errors_defualt_cursor(
     decoy: Decoy,
@@ -864,7 +865,7 @@ async def test_get_current_state_success(
     )
 
     assert result.status_code == 200
-    assert result.content.data == RunCurrentState.construct(
+    assert result.content.data == RunCurrentState.model_construct(
         estopEngaged=False,
         activeNozzleLayouts={
             "mock-pipette-id": ActiveNozzleLayout(
@@ -874,6 +875,7 @@ async def test_get_current_state_success(
             )
         },
         tipStates={"mock-pipette-id": TipState(hasTip=True)},
+        placeLabwareState=None,
     )
     assert result.content.links == CurrentStateLinks(
         lastCompleted=CommandLinkNoMeta(

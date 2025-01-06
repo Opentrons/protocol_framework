@@ -1,6 +1,7 @@
 describe('The Settings Page', () => {
   before(() => {
     cy.visit('/')
+    cy.closeAnalyticsModal()
   })
 
   it('content and toggle state', () => {
@@ -19,19 +20,19 @@ describe('The Settings Page', () => {
     cy.getByTestId('analyticsToggle')
       .should('exist')
       .should('be.visible')
-      .find('path[aria-roledescription="ot-toggle-input-off"]')
+      .find('path[aria-roledescription="ot-toggle-input-on"]')
       .should('exist')
     // Toggle the share sessions with Opentrons setting
     cy.getByTestId('analyticsToggle').click()
     cy.getByTestId('analyticsToggle')
-      .find('path[aria-roledescription="ot-toggle-input-on"]')
+      .find('path[aria-roledescription="ot-toggle-input-off"]')
       .should('exist')
     // Navigate away from the settings page
     // Then return to see privacy toggle remains toggled on
     cy.visit('/')
     cy.openSettingsPage()
     cy.getByTestId('analyticsToggle').find(
-      'path[aria-roledescription="ot-toggle-input-on"]'
+      'path[aria-roledescription="ot-toggle-input-off"]'
     )
     // Toggle off editing timeline tips
     // Navigate away from the settings page

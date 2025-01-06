@@ -1,6 +1,8 @@
 import { useSelector } from 'react-redux'
 import { getDismissedHints } from '../../tutorial/selectors'
 import { BlockingHintModal } from './index'
+
+import type { ReactNode } from 'react'
 import type { HintKey } from '../../tutorial'
 
 export interface HintProps {
@@ -9,7 +11,7 @@ export interface HintProps {
    * useBlockingHint expects the parent to disable the hint on cancel/continue */
   enabled: boolean
   hintKey: HintKey | null
-  content: React.ReactNode
+  content: ReactNode
   handleCancel: () => void
   handleContinue: () => void
 }

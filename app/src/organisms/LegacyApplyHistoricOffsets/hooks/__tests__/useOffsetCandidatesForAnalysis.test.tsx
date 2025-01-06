@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { when } from 'vitest-when'
 import { renderHook, waitFor } from '@testing-library/react'
@@ -13,6 +12,7 @@ import { getLabwareLocationCombos } from '../getLabwareLocationCombos'
 import { useOffsetCandidatesForAnalysis } from '../useOffsetCandidatesForAnalysis'
 import { storedProtocolData as storedProtocolDataFixture } from '/app/redux/protocol-storage/__fixtures__'
 
+import type { FunctionComponent, ReactNode } from 'react'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type { OffsetCandidate } from '../useOffsetCandidatesForAnalysis'
 
@@ -102,7 +102,7 @@ describe('useOffsetCandidatesForAnalysis', () => {
   })
 
   it('returns an empty array if robot ip but no analysis output', async () => {
-    const wrapper: React.FunctionComponent<{ children: React.ReactNode }> = ({
+    const wrapper: FunctionComponent<{ children: ReactNode }> = ({
       children,
     }) => <div>{children}</div>
     const { result } = renderHook(
@@ -115,7 +115,7 @@ describe('useOffsetCandidatesForAnalysis', () => {
   })
 
   it('returns an empty array if no robot ip', async () => {
-    const wrapper: React.FunctionComponent<{ children: React.ReactNode }> = ({
+    const wrapper: FunctionComponent<{ children: ReactNode }> = ({
       children,
     }) => <div>{children}</div>
     const { result } = renderHook(
@@ -131,7 +131,7 @@ describe('useOffsetCandidatesForAnalysis', () => {
     })
   })
   it('returns candidates for each first match with newest first', async () => {
-    const wrapper: React.FunctionComponent<{ children: React.ReactNode }> = ({
+    const wrapper: FunctionComponent<{ children: ReactNode }> = ({
       children,
     }) => <div>{children}</div>
     const { result } = renderHook(

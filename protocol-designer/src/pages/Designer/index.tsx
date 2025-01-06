@@ -13,7 +13,10 @@ import {
   ToggleGroup,
   useOnClickOutside,
 } from '@opentrons/components'
-import { selectTerminalItem } from '../../ui/steps/actions/actions'
+import {
+  selectDropdownItem,
+  selectTerminalItem,
+} from '../../ui/steps/actions/actions'
 import { useKitchen } from '../../organisms/Kitchen/hooks'
 import { getDeckSetupForActiveItem } from '../../top-selectors/labware-locations'
 import { generateNewProtocol } from '../../labware-ingred/actions'
@@ -68,6 +71,12 @@ export function Designer(): JSX.Element {
     isActive: tab === 'startingDeck',
     onClick: () => {
       dispatch(selectDesignerTab({ tab: 'startingDeck' }))
+      dispatch(
+        selectDropdownItem({
+          selection: null,
+          mode: 'clear',
+        })
+      )
     },
   }
   const protocolStepTab = {

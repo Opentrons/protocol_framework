@@ -18,6 +18,8 @@ import { actions as loadFileActions } from '../../load-file'
 import { LINK_BUTTON_STYLE } from '../../atoms'
 import { getHasUnsavedChanges } from '../../load-file/selectors'
 import { SettingsIcon } from '../SettingsIcon'
+
+import type { ChangeEvent } from 'react'
 import type { ThunkDispatch } from '../../types'
 
 export function Navigation(): JSX.Element | null {
@@ -25,9 +27,7 @@ export function Navigation(): JSX.Element | null {
   const location = useLocation()
   const navigate = useNavigate()
   const dispatch: ThunkDispatch<any> = useDispatch()
-  const loadFile = (
-    fileChangeEvent: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const loadFile = (fileChangeEvent: ChangeEvent<HTMLInputElement>): void => {
     dispatch(loadFileActions.loadProtocolFile(fileChangeEvent))
     dispatch(toggleNewProtocolModal(false))
   }

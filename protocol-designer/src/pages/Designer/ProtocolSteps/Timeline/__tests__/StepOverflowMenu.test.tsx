@@ -20,7 +20,8 @@ import {
   toggleViewSubstep,
 } from '../../../../../ui/steps/actions/actions'
 import { StepOverflowMenu } from '../StepOverflowMenu'
-import type * as React from 'react'
+
+import type { ComponentProps } from 'react'
 import type * as OpentronsComponents from '@opentrons/components'
 
 const mockConfirm = vi.fn()
@@ -46,7 +47,7 @@ vi.mock('@opentrons/components', async importOriginal => {
     })),
   }
 })
-const render = (props: React.ComponentProps<typeof StepOverflowMenu>) => {
+const render = (props: ComponentProps<typeof StepOverflowMenu>) => {
   return renderWithProviders(<StepOverflowMenu {...props} />, {
     i18nInstance: i18n,
   })[0]
@@ -54,7 +55,7 @@ const render = (props: React.ComponentProps<typeof StepOverflowMenu>) => {
 
 const moveLiquidStepId = 'mockId'
 describe('StepOverflowMenu', () => {
-  let props: React.ComponentProps<typeof StepOverflowMenu>
+  let props: ComponentProps<typeof StepOverflowMenu>
 
   beforeEach(() => {
     props = {

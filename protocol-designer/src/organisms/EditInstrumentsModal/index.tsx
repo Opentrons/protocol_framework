@@ -64,7 +64,7 @@ import { setFeatureFlags } from '../../feature-flags/actions'
 import { createCustomTiprackDef } from '../../labware-defs/actions'
 import { deleteContainer } from '../../labware-ingred/actions'
 import { selectors as stepFormSelectors } from '../../step-forms'
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import { getMainPagePortalEl } from '../Portal'
 import {
   getSectionsFromPipetteName,
@@ -236,7 +236,7 @@ export function EditInstrumentsModal(
                 {has96Channel ||
                 (leftPipette == null && rightPipette == null) ? null : (
                   <Btn
-                    css={BUTTON_LINK_STYLE}
+                    css={LINK_BUTTON_STYLE}
                     onClick={() =>
                       dispatch(
                         changeSavedStepForm({
@@ -354,7 +354,7 @@ export function EditInstrumentsModal(
                           </StyledText>
                         </Flex>
                         <Btn
-                          css={BUTTON_LINK_STYLE}
+                          css={LINK_BUTTON_STYLE}
                           textDecoration={TYPOGRAPHY.textDecorationUnderline}
                           padding={SPACING.spacing4}
                           id="hello"
