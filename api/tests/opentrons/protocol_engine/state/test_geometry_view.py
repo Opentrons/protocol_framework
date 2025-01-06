@@ -3397,7 +3397,7 @@ def test_get_well_height_at_volume(
         def_dir = str(get_shared_data_root()) + f"/labware/definitions/3/{labware_id}"
         version_str = max([str(version) for version in listdir(def_dir)])
         def_path = path.join(def_dir, version_str)
-        _labware_def = LabwareDefinition.parse_obj(
+        _labware_def = LabwareDefinition.model_validate(
             json.loads(load_shared_data(def_path).decode("utf-8"))
         )
         return _labware_def
@@ -3461,7 +3461,7 @@ def test_get_well_volume_at_height(
         def_dir = str(get_shared_data_root()) + f"/labware/definitions/3/{labware_id}"
         version_str = max([str(version) for version in listdir(def_dir)])
         def_path = path.join(def_dir, version_str)
-        _labware_def = LabwareDefinition.parse_obj(
+        _labware_def = LabwareDefinition.model_validate(
             json.loads(load_shared_data(def_path).decode("utf-8"))
         )
         return _labware_def

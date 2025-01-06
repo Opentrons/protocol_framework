@@ -205,23 +205,31 @@
     "cuboidalWell": {
       "sections": [
         {
+          "shape": "spherical",
+          "radiusOfCurvature": 1.5362,
+          "topHeight": 0.250,
+          "bottomHeight": 0.0,
+          "yCount": 8
+        },
+        {
           "shape": "squaredcone",
           "bottomCrossSection": "circular",
-          "circleDiameter": 2.5,
-          "rectangleXDimension": 7.98,
-          "rectangleYDimension": 70.98,
-          "topHeight": 4.05,
-          "bottomHeight": 0.0,
+          "circleDiameter": 1.68,
+          "rectangleXDimension": 7.9,
+          "rectangleYDimension": 7.9,
+          "topHeight": 4.0,
+          "bottomHeight": 0.25,
+          "xCount": 1,
           "yCount": 8
         },
         {
           "shape": "cuboidal",
           "topXDimension": 8.34,
           "topYDimension": 71.85,
-          "bottomXDimension": 7.98,
-          "bottomYDimension": 70.98,
+          "bottomXDimension": 7.9,
+          "bottomYDimension": 71.75,
           "topHeight": 41.75,
-          "bottomHeight": 4.05
+          "bottomHeight": 4.00
         }
       ]
     }

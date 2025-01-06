@@ -5,8 +5,6 @@ Each labware has 2 nominal volumes calculated in solidworks.
 - The other is a nominal top volume, calculated some set distance from the top of the inside of the well.
 """
 labware_to_test = [
-    # "opentrons_96_aluminumblock_generic_pcr_strip_200ul",
-    # "opentrons_24_tuberack_generic_2ml_screwcap",
     "appliedbiosystemsmicroamp_384_wellplate_40ul",
     "biorad_384_wellplate_50ul",
     "corning_96_wellplate_360ul_flat",
@@ -71,14 +69,11 @@ INNER_WELL_GEOMETRY_TEST_PARAMS = [
         3.0,
         3.0,
     ],
-    # weird one
     ["nest_1_reservoir_290ml", "cuboidalWell", 16570.380, 271690.520, 3.0, 3.0],
-    # failing isclose
     ["opentrons_24_tuberack_nest_2ml_snapcap", "conicalWell", 69.62, 2148.5, 3.0, 3.0],
     ["nest_96_wellplate_2ml_deep", "cuboidalWell", 118.3, 2060.4, 3.0, 3.0],
     ["opentrons_24_tuberack_nest_1.5ml_snapcap", "conicalWell", 27.8, 1682.3, 3.0, 3.0],
     ["nest_12_reservoir_15ml", "cuboidalWell", 1219.0, 13236.1, 3.0, 3.0],
-    # weird one
     ["nest_1_reservoir_195ml", "cuboidalWell", 14034.2, 172301.9, 3.0, 3.0],
     [
         "opentrons_24_tuberack_nest_0.5ml_screwcap",
@@ -114,11 +109,16 @@ INNER_WELL_GEOMETRY_TEST_PARAMS = [
         3.0,
         3.0,
     ],
-    # failed - squared cone
-    ["usascientific_12_reservoir_22ml", "cuboidalWell", 61.6, 21111.5, 3.0, 3.0],
+    ["usascientific_12_reservoir_22ml", "cuboidalWell", 529.36, 21111.5, 3.0, 3.0],
     ["thermoscientificnunc_96_wellplate_2000ul", "conicalWell", 73.5, 1768.0, 3.0, 3.0],
-    # skipped usascientific_96_wellplate_2.4ml_deep since it doesnt have a definition yet
-    # weird one
+    [
+        "usascientific_96_wellplate_2.4ml_deep",
+        "cuboidalWell",
+        72.220,
+        2241.360,
+        3.0,
+        3.0,
+    ],
     ["agilent_1_reservoir_290ml", "cuboidalWell", 15652.9, 268813.8, 3.0, 3.0],
     [
         "opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap",
@@ -135,7 +135,6 @@ INNER_WELL_GEOMETRY_TEST_PARAMS = [
     ["corning_48_wellplate_1.6ml_flat", "conicalWell", 268.9, 1327.0, 3.0, 3.0],
     ["biorad_96_wellplate_200ul_pcr", "conicalWell", 17.9, 161.2, 3.0, 3.0],
     ["axygen_1_reservoir_90ml", "cuboidalWell", 22373.4, 70450.6, 3.0, 3.0],
-    # fails- this one thought it was a rectangle ?
     ["corning_384_wellplate_112ul_flat", "flatWell", 22.4, 77.4, 2.88, 3.0],
     ["corning_96_wellplate_360ul_flat", "conicalWell", 97.2, 257.1, 3.0, 3.0],
     ["biorad_384_wellplate_50ul", "conicalWell", 7.7, 27.8, 3.0, 3.0],
@@ -153,7 +152,7 @@ INNER_WELL_GEOMETRY_TEST_PARAMS = [
         60.940,
         2163.980,
         3.0,
-        3.0
+        3.0,
     ],
     [
         "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical",
@@ -161,7 +160,7 @@ INNER_WELL_GEOMETRY_TEST_PARAMS = [
         16.690,
         15546.930,
         3.0,
-        5.0
+        5.0,
     ],
     [
         "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical",
@@ -169,7 +168,7 @@ INNER_WELL_GEOMETRY_TEST_PARAMS = [
         111.200,
         56110.279,
         3.0,
-        5.0
+        5.0,
     ],
     [
         "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical",
@@ -177,7 +176,7 @@ INNER_WELL_GEOMETRY_TEST_PARAMS = [
         40.830,
         15956.600,
         3.0,
-        3.0
+        3.0,
     ],
     [
         "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical",
@@ -185,32 +184,6 @@ INNER_WELL_GEOMETRY_TEST_PARAMS = [
         163.860,
         57720.510,
         3.0,
-        3.0
-    ]
-]
-print(f"len of existing labware = {len(INNER_WELL_GEOMETRY_TEST_PARAMS)}")
-existing_names = [param[0] for param in INNER_WELL_GEOMETRY_TEST_PARAMS]
-diff = set(labware_to_test).difference(set(existing_names))
-print("\nlabware missing:")
-for missing in diff:
-    print(missing)
-
-gotta_add = [
-    # "opentrons_24_tuberack_eppendorf_2ml_safelock_snapcap",
-    # check if the test is looking for the right name below
-    # "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical-15mL-ONLY",
-    # "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical-50mL-ONLY",
-    # "opentrons_24_tuberack_generic_2ml_screwcap", # doesnt have volume estimates
-    # check if the test is looking for the right name below
-    # "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical-50mL-ONLY",
-    # "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical-15mL-ONLY",
-    "usascientific_96_wellplate_2.4ml_deep" # definition isnt in yet
-]
-failing = [
-    "corning_384_wellplate_112ul_flat",
-    "agilent_1_reservoir_290ml",
-    "usascientific_12_reservoir_22ml",
-    "nest_1_reservoir_195ml",
-    "opentrons_24_tuberack_nest_2ml_snapcap",
-    "nest_1_reservoir_290ml",
+        3.0,
+    ],
 ]

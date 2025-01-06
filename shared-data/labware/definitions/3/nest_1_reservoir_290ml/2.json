@@ -57,22 +57,22 @@
       "sections": [
         {
           "shape": "cuboidal",
-          "topXDimension": 70.6,
-          "topYDimension": 106.8,
-          "bottomXDimension": 71.3,
-          "bottomYDimension": 107.3,
-          "topHeight": 2.05,
+          "topXDimension": 7.75,
+          "topYDimension": 70.75,
+          "bottomXDimension": 3.127,
+          "bottomYDimension": 66.85,
+          "topHeight": 2.00,
           "bottomHeight": 0.0,
           "xCount": 12
         },
         {
           "shape": "cuboidal",
-          "topXDimension": 107.72,
-          "topYDimension": 71.0,
+          "topXDimension": 107.76,
+          "topYDimension": 71.00,
           "bottomXDimension": 106.75,
           "bottomYDimension": 70.75,
           "topHeight": 39.550,
-          "bottomHeight": 2.05
+          "bottomHeight": 2.00
         }
       ]
     }
