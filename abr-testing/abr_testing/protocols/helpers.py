@@ -670,11 +670,11 @@ def unload_and_move(
     new_location: Labware | str,
 ) -> None:
     """Move labware off stacker into deck."""
-    lw = stacker.unload_and_move_labware(new_location=new_location)
+    stacker.unload_and_move_labware(new_location=new_location)
 
 
 def move_to_stacker_and_store(stacker: StackerModule, lw: Labware) -> None:
-    """Move labware from deck into stacker"""
+    """Move labware from deck into stacker."""
     stacker.move_and_store_labware(lw=lw)
 
 
