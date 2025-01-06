@@ -1,6 +1,8 @@
 import { isEqual } from 'lodash'
-import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
+
 import { getLabwareDefURI, getPipetteNameSpecs } from '@opentrons/shared-data'
+
+import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
 import { getLabwareLocationCombos } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/getLabwareLocationCombos'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 
@@ -8,7 +10,10 @@ import type {
   CompletedProtocolAnalysis,
   LoadedPipette,
 } from '@opentrons/shared-data'
-import type { LabwarePositionCheckStep, CheckPositionsStep } from '../types'
+import type {
+  LabwarePositionCheckStep,
+  CheckPositionsStep,
+} from '/app/organisms/LabwarePositionCheck/types'
 import type { LabwareLocationCombo } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/getLabwareLocationCombos'
 
 function getPrimaryPipetteId(pipettes: LoadedPipette[]): string {
@@ -17,6 +22,7 @@ function getPrimaryPipetteId(pipettes: LoadedPipette[]): string {
       'no pipettes in protocol, cannot determine primary pipette for LPC'
     )
   }
+
   return pipettes.reduce((acc, pip) => {
     return (getPipetteNameSpecs(acc.pipetteName)?.channels ?? 0) >
       (getPipetteNameSpecs(pip.pipetteName)?.channels ?? 0)

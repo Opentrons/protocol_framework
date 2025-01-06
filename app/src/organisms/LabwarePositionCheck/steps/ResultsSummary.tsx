@@ -5,6 +5,7 @@ import isEqual from 'lodash/isEqual'
 import { useTranslation } from 'react-i18next'
 
 import {
+  FLEX_ROBOT_TYPE,
   getLabwareDefURI,
   getLabwareDisplayName,
   getVectorDifference,
@@ -37,14 +38,15 @@ import {
 import { SmallButton } from '/app/atoms/buttons'
 import { LabwareOffsetTabs } from '/app/organisms/LabwareOffsetTabs'
 import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
-import { getDisplayLocation } from '/app/organisms/LabwarePositionCheck/utils'
+import {
+  getLabwareDefinitionsFromCommands,
+  getLabwareDisplayLocation,
+} from '/app/local-resources/labware'
 import { TerseOffsetTable } from '/app/organisms/TerseOffsetTable'
 
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type { LabwareOffsetCreateData } from '@opentrons/api-client'
 import type { LPCStepProps, ResultsSummaryStep } from '../types'
-import type { TFunction } from 'i18next'
 
 const LPC_HELP_LINK_URL =
   'https://support.opentrons.com/s/article/How-Labware-Offsets-work-on-the-OT-2'
@@ -52,7 +54,6 @@ const LPC_HELP_LINK_URL =
 export function ResultsSummary(
   props: LPCStepProps<ResultsSummaryStep>
 ): JSX.Element {
-  const { i18n, t } = useTranslation('labware_position_check')
   const {
     protocolData,
     state,
@@ -60,7 +61,10 @@ export function ResultsSummary(
     existingOffsets,
     isApplyingOffsets,
   } = props
+  const { i18n, t } = useTranslation('labware_position_check')
   const { workingOffsets } = state
+
+  // TOME TODO: Yeah no. Hoist this out of everything and make it a content prop.
   const labwareDefinitions = getLabwareDefinitionsFromCommands(
     protocolData.commands
   )
@@ -70,6 +74,7 @@ export function ResultsSummary(
   )
   const isOnDevice = useSelector(getIsOnDevice)
 
+  // TOME: TODO: I believe this should be in a selector.
   const offsetsToApply = useMemo(() => {
     return workingOffsets.map<LabwareOffsetCreateData>(
       ({ initialPosition, finalPosition, labwareId, location }) => {
@@ -114,6 +119,7 @@ export function ResultsSummary(
     <OffsetTable
       offsets={offsetsToApply}
       labwareDefinitions={labwareDefinitions}
+      {...props}
     />
   )
   const JupyterSnippet = (
@@ -247,14 +253,18 @@ const Header = styled.h1`
   }
 `
 
-interface OffsetTableProps {
+interface OffsetTableProps extends LPCStepProps<ResultsSummaryStep> {
   offsets: LabwareOffsetCreateData[]
   labwareDefinitions: LabwareDefinition2[]
 }
 
-const OffsetTable = (props: OffsetTableProps): JSX.Element => {
-  const { offsets, labwareDefinitions } = props
-  const { t, i18n } = useTranslation('labware_position_check')
+const OffsetTable = ({
+  offsets,
+  labwareDefinitions,
+  protocolData,
+}: OffsetTableProps): JSX.Element => {
+  const { t } = useTranslation('labware_position_check')
+
   return (
     <Table>
       <thead>
@@ -267,6 +277,16 @@ const OffsetTable = (props: OffsetTableProps): JSX.Element => {
 
       <tbody>
         {offsets.map(({ location, definitionUri, vector }, index) => {
+          const displayLocation = getLabwareDisplayLocation({
+            location,
+            allRunDefs: labwareDefinitions,
+            detailLevel: 'full',
+            t,
+            loadedModules: protocolData.modules,
+            loadedLabwares: protocolData.labware,
+            robotType: FLEX_ROBOT_TYPE,
+          })
+
           const labwareDef = labwareDefinitions.find(
             def => getLabwareDefURI(def) === definitionUri
           )
@@ -285,12 +305,7 @@ const OffsetTable = (props: OffsetTableProps): JSX.Element => {
                   as="p"
                   textTransform={TYPOGRAPHY.textTransformCapitalize}
                 >
-                  {getDisplayLocation(
-                    location,
-                    labwareDefinitions,
-                    t as TFunction,
-                    i18n
-                  )}
+                  {displayLocation}
                 </LegacyStyledText>
               </TableDatum>
               <TableDatum>

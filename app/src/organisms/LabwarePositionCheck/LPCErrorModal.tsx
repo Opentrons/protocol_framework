@@ -25,7 +25,7 @@ import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/
 
 const SUPPORT_EMAIL = 'support@opentrons.com'
 
-export function FatalError({
+export function LPCErrorModal({
   errorMessage,
   onCloseClick,
 }: LPCWizardContentProps): JSX.Element {

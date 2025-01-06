@@ -23,9 +23,9 @@ import {
 } from '/app/organisms/LabwarePositionCheck/shared'
 import { WizardHeader } from '/app/molecules/WizardHeader'
 import { getIsOnDevice } from '/app/redux/config'
-import { FatalError } from './FatalErrorModal'
+import { LPCErrorModal } from './LPCErrorModal'
 import { useChainMaintenanceCommands } from '/app/resources/maintenance_runs'
-import { getLabwarePositionCheckSteps } from './getLabwarePositionCheckSteps'
+import { getLPCSteps } from './utils'
 import { useLPCInitialState } from '/app/organisms/LabwarePositionCheck/hooks'
 import { useLPCReducer } from '/app/organisms/LabwarePositionCheck/redux'
 
@@ -122,7 +122,7 @@ export function LPCWizardFlex(
         : currentStepIndex
     )
   }
-  const LPCSteps = getLabwarePositionCheckSteps(mostRecentAnalysis)
+  const LPCSteps = getLPCSteps(mostRecentAnalysis)
   const totalStepCount = LPCSteps.length - 1
   const currentStep = LPCSteps?.[currentStepIndex]
 
@@ -253,7 +253,7 @@ function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
     return <RobotMotionLoader header={t('stand_back_robot_is_in_motion')} />
   }
   if (props.errorMessage != null) {
-    return <FatalError {...props} />
+    return <LPCErrorModal {...props} />
   }
   if (props.showConfirmation) {
     return <ExitConfirmation {...props} />

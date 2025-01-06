@@ -1,11 +1,11 @@
-import { getProbeBasedLPCSteps } from './utils/getProbeBasedLPCSteps'
+import { getProbeBasedLPCSteps } from './getProbeBasedLPCSteps'
 
 import type { CompletedProtocolAnalysis } from '@opentrons/shared-data'
-import type { LabwarePositionCheckStep } from './types'
+import type { LabwarePositionCheckStep } from '/app/organisms/LabwarePositionCheck/types'
 
-export const getLabwarePositionCheckSteps = (
+export function getLPCSteps(
   protocolData: CompletedProtocolAnalysis
-): LabwarePositionCheckStep[] => {
+): LabwarePositionCheckStep[] {
   if ('pipettes' in protocolData) {
     if (protocolData.pipettes.length === 0) {
       throw new Error(

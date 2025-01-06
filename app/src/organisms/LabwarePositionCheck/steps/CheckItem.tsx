@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import omit from 'lodash/omit'
 import isEqual from 'lodash/isEqual'
 import { Trans, useTranslation } from 'react-i18next'
 
@@ -17,6 +16,7 @@ import {
   JogToWell,
 } from '/app/organisms/LabwarePositionCheck/shared'
 import {
+  FLEX_ROBOT_TYPE,
   getIsTiprack,
   getLabwareDefURI,
   getLabwareDisplayName,
@@ -25,11 +25,11 @@ import {
   IDENTITY_VECTOR,
   THERMOCYCLER_MODULE_TYPE,
 } from '@opentrons/shared-data'
+import { getLabwareDef } from '/app/organisms/LabwarePositionCheck/utils'
 import {
-  getLabwareDef,
-  getDisplayLocation,
-} from '/app/organisms/LabwarePositionCheck/utils'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
+  getLabwareDefinitionsFromCommands,
+  getLabwareDisplayLocation,
+} from '/app/local-resources/labware'
 import { UnorderedList } from '/app/molecules/UnorderedList'
 import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
 import { getIsOnDevice } from '/app/redux/config'
@@ -46,7 +46,6 @@ import type {
   PipetteName,
 } from '@opentrons/shared-data'
 import type { CheckPositionsStep, LPCStepProps } from '../types'
-import type { TFunction } from 'i18next'
 
 const PROBE_LENGTH_MM = 44.5
 
@@ -67,7 +66,7 @@ export function CheckItem(
     setErrorMessage,
   } = props
   const { labwareId, pipetteId, moduleId, adapterId, location } = step
-  const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
+  const { t } = useTranslation(['labware_position_check', 'shared'])
   const { workingOffsets } = state
   const isOnDevice = useSelector(getIsOnDevice)
   const labwareDef = getLabwareDef(
@@ -137,23 +136,30 @@ export function CheckItem(
   // if (pipetteName == null || labwareDef == null || pipetteMount == null)
   //   return null
 
+  // TOME TODO: This runs every check item. This needs to be memoized.
+
   const labwareDefs = getLabwareDefinitionsFromCommands(protocolData.commands)
   const pipetteZMotorAxis: 'leftZ' | 'rightZ' =
     pipetteMount === 'left' ? 'leftZ' : 'rightZ'
   const isTiprack = getIsTiprack(labwareDef)
-  const displayLocation = getDisplayLocation(
+  const displayLocation = getLabwareDisplayLocation({
     location,
-    labwareDefs,
-    t as TFunction,
-    i18n
-  )
-  const slotOnlyDisplayLocation = getDisplayLocation(
+    allRunDefs: labwareDefs,
+    detailLevel: 'full',
+    t,
+    loadedModules: protocolData.modules,
+    loadedLabwares: protocolData.labware,
+    robotType: FLEX_ROBOT_TYPE,
+  })
+  const slotOnlyDisplayLocation = getLabwareDisplayLocation({
     location,
-    labwareDefs,
-    t as TFunction,
-    i18n,
-    true
-  )
+    detailLevel: 'slot-only',
+    t,
+    loadedModules: protocolData.modules,
+    loadedLabwares: protocolData.labware,
+    robotType: FLEX_ROBOT_TYPE,
+  })
+
   const labwareDisplayName = getLabwareDisplayName(labwareDef)
 
   let placeItemInstruction: JSX.Element = (
@@ -196,12 +202,7 @@ export function CheckItem(
         tOptions={{
           adapter: adapterDisplayName,
           labware: labwareDisplayName,
-          location: getDisplayLocation(
-            omit(location, ['definitionUri']), // only want the adapter's location here
-            labwareDefs,
-            t as TFunction,
-            i18n
-          ),
+          location: slotOnlyDisplayLocation,
         }}
         components={{
           bold: (
