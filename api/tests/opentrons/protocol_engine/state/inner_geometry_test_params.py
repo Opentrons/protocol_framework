@@ -4,45 +4,6 @@ Each labware has 2 nominal volumes calculated in solidworks.
 - One is a nominal bottom volume, calculated some set distance from the bottom of the inside of the well.
 - The other is a nominal top volume, calculated some set distance from the top of the inside of the well.
 """
-labware_to_test = [
-    "appliedbiosystemsmicroamp_384_wellplate_40ul",
-    "biorad_384_wellplate_50ul",
-    "corning_96_wellplate_360ul_flat",
-    "corning_384_wellplate_112ul_flat",
-    "axygen_1_reservoir_90ml",
-    "biorad_96_wellplate_200ul_pcr",
-    "corning_48_wellplate_1.6ml_flat",
-    "corning_6_wellplate_16.8ml_flat",
-    "corning_24_wellplate_3.4ml_flat",
-    "corning_12_wellplate_6.9ml_flat",
-    "thermoscientificnunc_96_wellplate_1300ul",
-    "opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap",
-    "opentrons_24_tuberack_eppendorf_2ml_safelock_snapcap",
-    "agilent_1_reservoir_290ml",
-    "usascientific_96_wellplate_2.4ml_deep",
-    "thermoscientificnunc_96_wellplate_2000ul",
-    "usascientific_12_reservoir_22ml",
-    "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical-15mL-ONLY",
-    "opentrons_10_tuberack_falcon_4x50ml_6x15ml_conical-50mL-ONLY",
-    "nest_96_wellplate_200ul_flat",
-    "nest_96_wellplate_100ul_pcr_full_skirt",
-    "opentrons_96_wellplate_200ul_pcr_full_skirt",
-    "opentrons_24_tuberack_nest_0.5ml_screwcap",
-    "nest_1_reservoir_195ml",
-    "nest_12_reservoir_15ml",
-    "opentrons_24_tuberack_nest_1.5ml_snapcap",
-    "nest_96_wellplate_2ml_deep",
-    "opentrons_24_tuberack_nest_2ml_snapcap",
-    "nest_1_reservoir_290ml",
-    "opentrons_24_tuberack_nest_1.5ml_screwcap",
-    "opentrons_24_tuberack_nest_2ml_screwcap",
-    "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical-50mL-ONLY",
-    "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical-15mL-ONLY",
-]
-print(f"len of list = {len(labware_to_test)}")
-print(f"len of set = {len(set(labware_to_test))}")
-
-
 INNER_WELL_GEOMETRY_TEST_PARAMS = [
     [
         "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical",
