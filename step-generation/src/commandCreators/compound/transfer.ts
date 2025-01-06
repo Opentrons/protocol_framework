@@ -192,12 +192,6 @@ export const transfer: CommandCreator<TransferArgs> = (
   //  account for minVolume for lowVolume pipettes
   const pipetteMinVol = Math.min(...liquidMinVolumes)
   const chunksPerSubTransfer = Math.ceil(args.volume / effectiveTransferVol)
-  console.log(
-    chunksPerSubTransfer,
-    args.volume,
-    effectiveTransferVol,
-    getPipetteWithTipMaxVol(args.pipette, invariantContext, tipRack)
-  )
   const lastSubTransferVol =
     args.volume - (chunksPerSubTransfer - 1) * effectiveTransferVol
   // volume of each chunk in a sub-transfer
