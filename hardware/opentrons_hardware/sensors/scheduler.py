@@ -396,8 +396,8 @@ class SensorScheduler:
     ) -> AsyncIterator[None]:
         """While acquired, bind the specified sensor to control sync."""
         flags = [SensorOutputBinding.sync]
-        # if do_log:
-        flags.append(SensorOutputBinding.report)
+        if do_log:
+            flags.append(SensorOutputBinding.report)
         error = await can_messenger.ensure_send(
             node_id=target_sensor.node_id,
             message=BindSensorOutputRequest(
