@@ -42,6 +42,7 @@ export const ModalHeader = (props: ModalHeaderProps): JSX.Element => {
       <StyledModalHeader
         backgroundColor={backgroundColor}
         data-testid="Modal_header"
+        role="heading"
       >
         <Flex alignItems={ALIGN_CENTER} gridGap={SPACING.spacing16}>
           {icon != null && <Icon {...icon} data-testid="Modal_header_icon" />}
