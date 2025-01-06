@@ -42,7 +42,7 @@ export const isTimeFormat: ErrorChecker = (value: unknown): string | null => {
 export const isTimeFormatMinutesSeconds: ErrorChecker = (
   value: unknown
 ): string | null => {
-  const timeRegex = new RegExp(/^\d{1,2}:\d{1,2}$/g)
+  const timeRegex = new RegExp(/^\d+:\d{1,2}$/g)
   return (typeof value === 'string' && timeRegex.test(value)) || !value
     ? null
     : FIELD_ERRORS.BAD_TIME_MS
