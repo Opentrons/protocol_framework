@@ -77,11 +77,13 @@ from .module_substates import (
     TemperatureModuleSubState,
     ThermocyclerModuleSubState,
     AbsorbanceReaderSubState,
+    FlexStackerSubState,
     MagneticModuleId,
     HeaterShakerModuleId,
     TemperatureModuleId,
     ThermocyclerModuleId,
     AbsorbanceReaderId,
+    FlexStackerId,
     MagneticBlockSubState,
     MagneticBlockId,
     ModuleSubStateType,
@@ -754,6 +756,22 @@ class ModuleView:
             module_id=module_id,
             expected_type=AbsorbanceReaderSubState,
             expected_name="Absorbance Reader",
+        )
+    
+    def get_flex_stacker_substate(
+        self, module_id: str
+    ) -> FlexStackerSubState:
+        """Return a `FlexStackerSubState` for the given Flex Stacker.
+
+        Raises:
+           ModuleNotLoadedError: If module_id has not been loaded.
+           WrongModuleTypeError: If module_id has been loaded,
+               but it's not a Flex Stacker.
+        """
+        return self._get_module_substate(
+            module_id=module_id,
+            expected_type=FlexStackerSubState,
+            expected_name="Flex Stacker",
         )
 
     def get_location(self, module_id: str) -> DeckSlotLocation:
