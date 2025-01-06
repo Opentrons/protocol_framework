@@ -1032,26 +1032,20 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 air_gap=0,
             )
         ]
-        src_dest_combo: Tuple[Tuple[Location, WellCore], Tuple[Location, WellCore]]
         for step_volume, src_dest_combo in source_dest_per_volume_step:
-            step_source: Tuple[Location, WellCore]
-            step_destination: Tuple[Location, WellCore]
             step_source, step_destination = src_dest_combo
             if new_tip == TransferTipPolicyV2.ALWAYS or (
                 new_tip == TransferTipPolicyV2.PER_SOURCE and step_source != prev_src
             ):
-                if (
-                    new_tip == TransferTipPolicyV2.PER_SOURCE
-                    and step_source != prev_src
-                ):
+                if prev_src is not None:
                     _drop_tip()
-                    post_disp_tip_contents = [
-                        tx_comps_executor.LiquidAndAirGapPair(
-                            liquid=0,
-                            air_gap=0,
-                        )
-                    ]
                 _pick_up_tip()
+                post_disp_tip_contents = [
+                    tx_comps_executor.LiquidAndAirGapPair(
+                        liquid=0,
+                        air_gap=0,
+                    )
+                ]
 
             post_asp_tip_contents = self.aspirate_liquid_class(
                 volume=step_volume,
@@ -1069,16 +1063,10 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 tip_contents=post_asp_tip_contents,
                 trash_location=trash_location,
             )
-
-            if new_tip == TransferTipPolicyV2.ALWAYS:
-                _drop_tip()
-                post_disp_tip_contents = [
-                    tx_comps_executor.LiquidAndAirGapPair(
-                        liquid=0,
-                        air_gap=0,
-                    )
-                ]
             prev_src = step_source
+        if new_tip != TransferTipPolicyV2.NEVER:
+            # TODO: make sure that the tip has air gap when moving to the trash
+            _drop_tip()
 
     def _get_location_and_well_core_from_next_tip_info(
         self,
