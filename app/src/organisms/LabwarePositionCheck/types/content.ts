@@ -42,6 +42,7 @@ export interface LPCWizardContentProps
   protocolHasModules: boolean
   handleApplyOffsets: (offsets: LabwareOffsetCreateData[]) => void
   isApplyingOffsets: boolean
+  labwareDefs: LabwareDefinition2[]
 }
 
 export interface LabwareToOrder {

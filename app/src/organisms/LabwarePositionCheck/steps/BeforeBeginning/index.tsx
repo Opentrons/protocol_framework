@@ -29,7 +29,6 @@ import { TwoUpTileLayout } from './TwoUpTileLayout'
 import { getTopPortalEl } from '/app/App/portal'
 import { SmallButton } from '/app/atoms/buttons'
 import { TerseOffsetTable } from '/app/organisms/TerseOffsetTable'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 
 import type { LabwareOffset } from '@opentrons/api-client'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
@@ -49,6 +48,7 @@ export function BeforeBeginning({
   setErrorMessage,
   existingOffsets,
   protocolName,
+  labwareDefs,
 }: LPCStepProps<BeforeBeginningStep>): JSX.Element {
   const isOnDevice = useSelector(getIsOnDevice)
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
@@ -99,9 +99,7 @@ export function BeforeBeginning({
           {isOnDevice ? (
             <ViewOffsets
               existingOffsets={existingOffsets}
-              labwareDefinitions={getLabwareDefinitionsFromCommands(
-                protocolData.commands
-              )}
+              labwareDefinitions={labwareDefs}
             />
           ) : (
             <NeedHelpLink href={SUPPORT_PAGE_URL} />

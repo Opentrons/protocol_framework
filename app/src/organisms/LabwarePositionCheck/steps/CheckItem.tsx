@@ -25,11 +25,8 @@ import {
   IDENTITY_VECTOR,
   THERMOCYCLER_MODULE_TYPE,
 } from '@opentrons/shared-data'
-import { getLabwareDef } from '/app/organisms/LabwarePositionCheck/utils'
-import {
-  getLabwareDefinitionsFromCommands,
-  getLabwareDisplayLocation,
-} from '/app/local-resources/labware'
+import { getItemLabwareDef } from '/app/organisms/LabwarePositionCheck/utils'
+import { getLabwareDisplayLocation } from '/app/local-resources/labware'
 import { UnorderedList } from '/app/molecules/UnorderedList'
 import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
 import { getIsOnDevice } from '/app/redux/config'
@@ -42,14 +39,12 @@ import type {
   CreateCommand,
   LabwareLocation,
   MoveLabwareCreateCommand,
-  LabwareDefinition2,
   PipetteName,
 } from '@opentrons/shared-data'
 import type { CheckPositionsStep, LPCStepProps } from '../types'
 
 const PROBE_LENGTH_MM = 44.5
 
-// TOME TODO: Get rid of the 'null' or jsx here.
 export function CheckItem(
   props: LPCStepProps<CheckPositionsStep>
 ): JSX.Element {
@@ -64,21 +59,27 @@ export function CheckItem(
     isRobotMoving,
     existingOffsets,
     setErrorMessage,
+    labwareDefs,
   } = props
   const { labwareId, pipetteId, moduleId, adapterId, location } = step
   const { t } = useTranslation(['labware_position_check', 'shared'])
   const { workingOffsets } = state
   const isOnDevice = useSelector(getIsOnDevice)
-  const labwareDef = getLabwareDef(
+  const labwareDef = getItemLabwareDef({
     labwareId,
-    protocolData
-  ) as LabwareDefinition2
+    loadedLabware: protocolData.labware,
+    labwareDefs,
+  })
   const pipette = protocolData.pipettes.find(
     pipette => pipette.id === pipetteId
   )
   const adapterDisplayName =
     adapterId != null
-      ? getLabwareDef(adapterId, protocolData)?.metadata.displayName
+      ? getItemLabwareDef({
+          labwareId: adapterId,
+          loadedLabware: protocolData.labware,
+          labwareDefs,
+        })?.metadata.displayName
       : ''
 
   const pipetteMount = pipette?.mount
@@ -136,9 +137,6 @@ export function CheckItem(
   // if (pipetteName == null || labwareDef == null || pipetteMount == null)
   //   return null
 
-  // TOME TODO: This runs every check item. This needs to be memoized.
-
-  const labwareDefs = getLabwareDefinitionsFromCommands(protocolData.commands)
   const pipetteZMotorAxis: 'leftZ' | 'rightZ' =
     pipetteMount === 'left' ? 'leftZ' : 'rightZ'
   const isTiprack = getIsTiprack(labwareDef)

@@ -1,2 +1,2 @@
-export * from './labware'
+export * from './getItemLabwareDef'
 export * from './getLPCSteps'

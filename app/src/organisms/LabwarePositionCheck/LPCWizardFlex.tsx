@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
@@ -38,19 +38,14 @@ import type { Axis, Sign, StepSize } from '/app/molecules/JogControls/types'
 import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck/LPCFlows'
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
+import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 
 const JOG_COMMAND_TIMEOUT = 10000 // 10 seconds
 
 export function LPCWizardFlex(
   props: Omit<LPCFlowsProps, 'robotType'>
 ): JSX.Element {
-  const {
-    mostRecentAnalysis,
-    runId,
-    onCloseClick,
-    protocolName,
-    maintenanceRunId,
-  } = props
+  const { mostRecentAnalysis, runId, onCloseClick, maintenanceRunId } = props
   const isOnDevice = useSelector(getIsOnDevice)
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -69,6 +64,11 @@ export function LPCWizardFlex(
     chainRunCommands,
     isCommandMutationLoading: isCommandChainLoading,
   } = useChainMaintenanceCommands()
+
+  const labwareDefs = useMemo(
+    () => getLabwareDefinitionsFromCommands(mostRecentAnalysis.commands),
+    [mostRecentAnalysis]
+  )
 
   const { createLabwareOffset } = useCreateLabwareOffsetMutation()
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0)
@@ -122,7 +122,10 @@ export function LPCWizardFlex(
         : currentStepIndex
     )
   }
-  const LPCSteps = getLPCSteps(mostRecentAnalysis)
+  const LPCSteps = getLPCSteps({
+    protocolData: mostRecentAnalysis,
+    labwareDefs,
+  })
   const totalStepCount = LPCSteps.length - 1
   const currentStep = LPCSteps?.[currentStepIndex]
 
@@ -178,10 +181,8 @@ export function LPCWizardFlex(
 
   return (
     <LPCWizardFlexComponent
-      {...props}
       step={currentStep}
       protocolData={mostRecentAnalysis}
-      protocolName={protocolName}
       proceed={proceed}
       dispatch={dispatch}
       state={state}
@@ -200,6 +201,8 @@ export function LPCWizardFlex(
       isRobotMoving={isCommandChainLoading}
       isOnDevice={isOnDevice}
       protocolHasModules={protocolHasModules}
+      labwareDefs={labwareDefs}
+      {...props}
     />
   )
 }
@@ -262,22 +265,22 @@ function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
   // Handle step-based routing.
   switch (step.section) {
     case NAV_STEPS.BEFORE_BEGINNING:
-      return <BeforeBeginning {...restProps} step={step} />
+      return <BeforeBeginning step={step} {...restProps} />
 
     case NAV_STEPS.CHECK_POSITIONS:
-      return <CheckItem {...restProps} step={step} />
+      return <CheckItem step={step} {...restProps} />
 
     case NAV_STEPS.ATTACH_PROBE:
-      return <AttachProbe {...restProps} step={step} />
+      return <AttachProbe step={step} {...restProps} />
 
     case NAV_STEPS.DETACH_PROBE:
-      return <DetachProbe {...restProps} step={step} />
+      return <DetachProbe step={step} {...restProps} />
 
     case NAV_STEPS.RESULTS_SUMMARY:
-      return <ResultsSummary {...restProps} step={step} />
+      return <ResultsSummary step={step} {...restProps} />
 
     default:
       console.error('Unhandled LPC step.')
-      return <BeforeBeginning {...restProps} step={step} />
+      return <BeforeBeginning step={step} {...restProps} />
   }
 }

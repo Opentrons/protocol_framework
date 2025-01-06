@@ -4,17 +4,34 @@ import { getLabwareDefURI, getPipetteNameSpecs } from '@opentrons/shared-data'
 
 import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
 import { getLabwareLocationCombos } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/getLabwareLocationCombos'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 
-import type {
-  CompletedProtocolAnalysis,
-  LoadedPipette,
-} from '@opentrons/shared-data'
+import type { LoadedPipette } from '@opentrons/shared-data'
 import type {
   LabwarePositionCheckStep,
   CheckPositionsStep,
 } from '/app/organisms/LabwarePositionCheck/types'
 import type { LabwareLocationCombo } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/getLabwareLocationCombos'
+import type { GetLPCStepsParams } from '.'
+
+export const getProbeBasedLPCSteps = (
+  params: GetLPCStepsParams
+): LabwarePositionCheckStep[] => {
+  const { protocolData } = params
+
+  return [
+    { section: NAV_STEPS.BEFORE_BEGINNING },
+    {
+      section: NAV_STEPS.ATTACH_PROBE,
+      pipetteId: getPrimaryPipetteId(protocolData.pipettes),
+    },
+    ...getAllCheckSectionSteps(params),
+    {
+      section: NAV_STEPS.DETACH_PROBE,
+      pipetteId: getPrimaryPipetteId(protocolData.pipettes),
+    },
+    { section: NAV_STEPS.RESULTS_SUMMARY },
+  ]
+}
 
 function getPrimaryPipetteId(pipettes: LoadedPipette[]): string {
   if (pipettes.length < 1) {
@@ -31,37 +48,19 @@ function getPrimaryPipetteId(pipettes: LoadedPipette[]): string {
   }, pipettes[0]).id
 }
 
-export const getProbeBasedLPCSteps = (
-  protocolData: CompletedProtocolAnalysis
-): LabwarePositionCheckStep[] => {
-  return [
-    { section: NAV_STEPS.BEFORE_BEGINNING },
-    {
-      section: NAV_STEPS.ATTACH_PROBE,
-      pipetteId: getPrimaryPipetteId(protocolData.pipettes),
-    },
-    ...getAllCheckSectionSteps(protocolData),
-    {
-      section: NAV_STEPS.DETACH_PROBE,
-      pipetteId: getPrimaryPipetteId(protocolData.pipettes),
-    },
-    { section: NAV_STEPS.RESULTS_SUMMARY },
-  ]
-}
-
-function getAllCheckSectionSteps(
-  protocolData: CompletedProtocolAnalysis
-): CheckPositionsStep[] {
+function getAllCheckSectionSteps({
+  labwareDefs,
+  protocolData,
+}: GetLPCStepsParams): CheckPositionsStep[] {
   const { pipettes, commands, labware, modules = [] } = protocolData
   const labwareLocationCombos = getLabwareLocationCombos(
     commands,
     labware,
     modules
   )
-  const labwareDefinitions = getLabwareDefinitionsFromCommands(commands)
   const labwareLocations = labwareLocationCombos.reduce<LabwareLocationCombo[]>(
     (acc, labwareLocationCombo) => {
-      const labwareDef = labwareDefinitions.find(
+      const labwareDef = labwareDefs.find(
         def => getLabwareDefURI(def) === labwareLocationCombo.definitionUri
       )
       if (

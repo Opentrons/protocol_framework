@@ -38,10 +38,7 @@ import {
 import { SmallButton } from '/app/atoms/buttons'
 import { LabwareOffsetTabs } from '/app/organisms/LabwareOffsetTabs'
 import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
-import {
-  getLabwareDefinitionsFromCommands,
-  getLabwareDisplayLocation,
-} from '/app/local-resources/labware'
+import { getLabwareDisplayLocation } from '/app/local-resources/labware'
 import { TerseOffsetTable } from '/app/organisms/TerseOffsetTable'
 
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
@@ -60,14 +57,11 @@ export function ResultsSummary(
     handleApplyOffsets,
     existingOffsets,
     isApplyingOffsets,
+    labwareDefs,
   } = props
   const { i18n, t } = useTranslation('labware_position_check')
   const { workingOffsets } = state
 
-  // TOME TODO: Yeah no. Hoist this out of everything and make it a content prop.
-  const labwareDefinitions = getLabwareDefinitionsFromCommands(
-    protocolData.commands
-  )
   const isSubmittingAndClosing = isApplyingOffsets
   const isLabwareOffsetCodeSnippetsOn = useSelector(
     getIsLabwareOffsetCodeSnippetsOn
@@ -113,12 +107,12 @@ export function ResultsSummary(
   const TableComponent = isOnDevice ? (
     <TerseOffsetTable
       offsets={offsetsToApply}
-      labwareDefinitions={labwareDefinitions}
+      labwareDefinitions={labwareDefs}
     />
   ) : (
     <OffsetTable
       offsets={offsetsToApply}
-      labwareDefinitions={labwareDefinitions}
+      labwareDefinitions={labwareDefs}
       {...props}
     />
   )
