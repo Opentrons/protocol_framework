@@ -1,7 +1,6 @@
 import isEqual from 'lodash/isEqual'
 
-import type { LPCWizardAction } from './types'
-import type { WorkingOffset } from '/app/organisms/LabwarePositionCheck/types'
+import type { LPCWizardAction, WorkingOffset } from './types'
 
 export function updateWorkingOffset(
   workingOffsets: WorkingOffset[],

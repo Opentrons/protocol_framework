@@ -21,15 +21,11 @@ import { useSelector } from 'react-redux'
 import { getIsOnDevice } from '/app/redux/config'
 import { SmallButton } from '/app/atoms/buttons'
 
-interface ExitConfirmationProps {
-  onGoBack: () => void
-  onConfirmExit: () => void
-  shouldUseMetalProbe: boolean
-}
+import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
-export const ExitConfirmation = (props: ExitConfirmationProps): JSX.Element => {
+export const ExitConfirmation = (props: LPCWizardContentProps): JSX.Element => {
   const { i18n, t } = useTranslation(['labware_position_check', 'shared'])
-  const { onGoBack, onConfirmExit, shouldUseMetalProbe } = props
+  const { confirmExitLPC, cancelExitLPC, shouldUseMetalProbe } = props
   const isOnDevice = useSelector(getIsOnDevice)
   return (
     <Flex
@@ -79,12 +75,12 @@ export const ExitConfirmation = (props: ExitConfirmationProps): JSX.Element => {
           gridGap={SPACING.spacing8}
         >
           <SmallButton
-            onClick={onGoBack}
+            onClick={cancelExitLPC}
             buttonText={i18n.format(t('shared:go_back'), 'capitalize')}
             buttonType="secondary"
           />
           <SmallButton
-            onClick={onConfirmExit}
+            onClick={confirmExitLPC}
             buttonText={
               shouldUseMetalProbe
                 ? t('remove_calibration_probe')
@@ -101,11 +97,11 @@ export const ExitConfirmation = (props: ExitConfirmationProps): JSX.Element => {
           alignItems={ALIGN_CENTER}
         >
           <Flex gridGap={SPACING.spacing8}>
-            <SecondaryButton onClick={onGoBack}>
+            <SecondaryButton onClick={cancelExitLPC}>
               {t('shared:go_back')}
             </SecondaryButton>
             <AlertPrimaryButton
-              onClick={onConfirmExit}
+              onClick={confirmExitLPC}
               textTransform={TYPOGRAPHY.textTransformCapitalize}
             >
               {shouldUseMetalProbe

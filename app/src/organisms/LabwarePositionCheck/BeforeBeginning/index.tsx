@@ -32,41 +32,26 @@ import { CALIBRATION_PROBE } from '/app/organisms/PipetteWizardFlows/constants'
 import { TerseOffsetTable } from '../ResultsSummary'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 
-import type { Dispatch } from 'react'
 import type { LabwareOffset } from '@opentrons/api-client'
+import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
-  CompletedProtocolAnalysis,
-  LabwareDefinition2,
-} from '@opentrons/shared-data'
-import type { useChainRunCommands } from '/app/resources/runs'
-import type { Jog } from '/app/molecules/JogControls'
-import type {
-  LPCWizardAction,
-  LPCWizardState,
-} from '/app/organisms/LabwarePositionCheck/redux'
+  LPCStepProps,
+  BeforeBeginningStep,
+} from '/app/organisms/LabwarePositionCheck/types'
 
 // TODO(BC, 09/01/23): replace updated support article link for LPC on OT-2/Flex
 const SUPPORT_PAGE_URL = 'https://support.opentrons.com/s/ot2-calibration'
 
-export const IntroScreen = (props: {
-  proceed: () => void
-  protocolData: CompletedProtocolAnalysis
-  dispatch: Dispatch<LPCWizardAction>
-  state: LPCWizardState
-  chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
-  handleJog: Jog
-  setFatalError: (errorMessage: string) => void
-  isRobotMoving: boolean
-  existingOffsets: LabwareOffset[]
-  protocolName: string
-  shouldUseMetalProbe: boolean
-}): JSX.Element | null => {
+// TOME TODO: Get rid of the null.
+export function BeforeBeginning(
+  props: LPCStepProps<BeforeBeginningStep>
+): JSX.Element | null {
   const {
     proceed,
     protocolData,
     chainRunCommands,
     isRobotMoving,
-    setFatalError,
+    setErrorMessage,
     existingOffsets,
     protocolName,
     shouldUseMetalProbe,
@@ -80,7 +65,7 @@ export const IntroScreen = (props: {
         proceed()
       })
       .catch((e: Error) => {
-        setFatalError(
+        setErrorMessage(
           `IntroScreen failed to issue prep commands with message: ${e.message}`
         )
       })

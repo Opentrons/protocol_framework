@@ -14,40 +14,22 @@ import detachProbe8 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach
 import detachProbe96 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_96.webm'
 import { GenericWizardTile } from '/app/molecules/GenericWizardTile'
 
-import type { Dispatch } from 'react'
-import type { CompletedProtocolAnalysis } from '@opentrons/shared-data'
-import type { Jog } from '/app/molecules/JogControls/types'
-import type { useChainRunCommands } from '/app/resources/runs'
-import type { DetachProbeStep } from './types'
-import type { LabwareOffset } from '@opentrons/api-client'
-import type {
-  LPCWizardAction,
-  LPCWizardState,
-} from '/app/organisms/LabwarePositionCheck/redux'
+import type { DetachProbeStep, LPCStepProps } from './types'
 
-interface DetachProbeProps extends DetachProbeStep {
-  protocolData: CompletedProtocolAnalysis
-  proceed: () => void
-  chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
-  setFatalError: (errorMessage: string) => void
-  existingOffsets: LabwareOffset[]
-  dispatch: Dispatch<LPCWizardAction>
-  state: LPCWizardState
-  handleJog: Jog
-  isRobotMoving: boolean
-}
-export const DetachProbe = (props: DetachProbeProps): JSX.Element | null => {
+export const DetachProbe = (
+  props: LPCStepProps<DetachProbeStep>
+): JSX.Element | null => {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
   const {
-    pipetteId,
+    step,
     protocolData,
     proceed,
     chainRunCommands,
     isRobotMoving,
-    setFatalError,
+    setErrorMessage,
   } = props
 
-  const pipette = protocolData.pipettes.find(p => p.id === pipetteId)
+  const pipette = protocolData.pipettes.find(p => p.id === step.pipetteId)
   const pipetteName = pipette?.pipetteName
   const pipetteChannels =
     pipetteName != null ? getPipetteNameSpecs(pipetteName)?.channels ?? 1 : 1
@@ -72,7 +54,7 @@ export const DetachProbe = (props: DetachProbeProps): JSX.Element | null => {
       ],
       false
     ).catch(error => {
-      setFatalError(error.message as string)
+      setErrorMessage(error.message as string)
     })
   }, [])
 
@@ -105,7 +87,7 @@ export const DetachProbe = (props: DetachProbeProps): JSX.Element | null => {
         proceed()
       })
       .catch((e: Error) => {
-        setFatalError(
+        setErrorMessage(
           `DetachProbe failed to move to safe location after probe detach with message: ${e.message}`
         )
       })

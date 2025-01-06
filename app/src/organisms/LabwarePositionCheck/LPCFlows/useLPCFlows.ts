@@ -112,7 +112,10 @@ export function useLPCFlows({
   }
 
   const showLPC =
-    hasCreatedLPCRun && maintenanceRunId != null && protocolName != null
+    hasCreatedLPCRun &&
+    maintenanceRunId != null &&
+    protocolName != null &&
+    mostRecentAnalysis != null
 
   return showLPC
     ? {

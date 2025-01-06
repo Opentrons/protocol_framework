@@ -22,6 +22,8 @@ interface LabwarePositionCheckModalProps {
   existingOffsets: LabwareOffset[]
   mostRecentAnalysis: CompletedProtocolAnalysis | null
   protocolName: string
+  setMaintenanceRunId?: (id: string | null) => void
+  isDeletingMaintenanceRun?: boolean
   caughtError?: Error
 }
 

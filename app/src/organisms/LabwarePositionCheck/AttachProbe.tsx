@@ -15,44 +15,23 @@ import attachProbe8 from '/app/assets/videos/pipette-wizard-flows/Pipette_Attach
 import attachProbe96 from '/app/assets/videos/pipette-wizard-flows/Pipette_Attach_Probe_96.webm'
 import { GenericWizardTile } from '/app/molecules/GenericWizardTile'
 
-import type { Dispatch } from 'react'
-import type {
-  CompletedProtocolAnalysis,
-  CreateCommand,
-} from '@opentrons/shared-data'
-import type { LabwareOffset } from '@opentrons/api-client'
-import type { Jog } from '/app/molecules/JogControls/types'
-import type { useChainRunCommands } from '/app/resources/runs'
-import type { AttachProbeStep } from './types'
-import type {
-  LPCWizardAction,
-  LPCWizardState,
-} from '/app/organisms/LabwarePositionCheck/redux'
+import type { CreateCommand } from '@opentrons/shared-data'
+import type { AttachProbeStep, LPCStepProps } from './types'
 
-interface AttachProbeProps extends AttachProbeStep {
-  protocolData: CompletedProtocolAnalysis
-  proceed: () => void
-  dispatch: Dispatch<LPCWizardAction>
-  state: LPCWizardState
-  chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
-  setFatalError: (errorMessage: string) => void
-  existingOffsets: LabwareOffset[]
-  handleJog: Jog
-  isRobotMoving: boolean
-  isOnDevice: boolean
-}
-
-export const AttachProbe = (props: AttachProbeProps): JSX.Element | null => {
+export const AttachProbe = (
+  props: LPCStepProps<AttachProbeStep>
+): JSX.Element | null => {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
   const {
-    pipetteId,
+    step,
     protocolData,
     proceed,
     chainRunCommands,
     isRobotMoving,
-    setFatalError,
+    setErrorMessage,
     isOnDevice,
   } = props
+  const { pipetteId } = step
   const [showUnableToDetect, setShowUnableToDetect] = useState<boolean>(false)
 
   const pipette = protocolData.pipettes.find(p => p.id === pipetteId)
@@ -84,7 +63,7 @@ export const AttachProbe = (props: AttachProbeProps): JSX.Element | null => {
       ],
       false
     ).catch(error => {
-      setFatalError(error.message as string)
+      setErrorMessage(error.message as string)
     })
   }, [])
 
@@ -128,7 +107,7 @@ export const AttachProbe = (props: AttachProbeProps): JSX.Element | null => {
             proceed()
           })
           .catch((e: Error) => {
-            setFatalError(
+            setErrorMessage(
               `AttachProbe failed to move to safe location after probe attach with message: ${e.message}`
             )
           })

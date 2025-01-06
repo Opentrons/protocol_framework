@@ -12,7 +12,7 @@ import { FIXED_TRASH_ID, FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 
 import { getTopPortalEl } from '/app/App/portal'
 // import { useTrackEvent } from '/app/redux/analytics'
-import { IntroScreen } from './IntroScreen'
+import { BeforeBeginning } from './BeforeBeginning'
 import { ExitConfirmation } from './ExitConfirmation'
 import { CheckItem } from './CheckItem'
 import { WizardHeader } from '/app/molecules/WizardHeader'
@@ -40,25 +40,25 @@ import type {
 } from '@opentrons/api-client'
 import type { Axis, Sign, StepSize } from '/app/molecules/JogControls/types'
 import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck/LPCFlows'
+import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
+import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
 
 const JOG_COMMAND_TIMEOUT = 10000 // 10 seconds
 
-export function LPCWizardFlex(props: LPCFlowsProps): JSX.Element | null {
+export function LPCWizardFlex(props: LPCFlowsProps): JSX.Element {
   const {
     mostRecentAnalysis,
-    existingOffsets,
     robotType,
     runId,
     onCloseClick,
     protocolName,
     maintenanceRunId,
   } = props
-  const { t } = useTranslation(['labware_position_check', 'shared'])
   const isOnDevice = useSelector(getIsOnDevice)
   const protocolData = mostRecentAnalysis
   const shouldUseMetalProbe = robotType === FLEX_ROBOT_TYPE
 
-  const [fatalError, setFatalError] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isApplyingOffsets, setIsApplyingOffsets] = useState<boolean>(false)
 
   // TOME TODO: Like with ER, separate wizard and content. The wizard injects the data layer to the content layer.
@@ -138,14 +138,12 @@ export function LPCWizardFlex(props: LPCFlowsProps): JSX.Element | null {
         : currentStepIndex
     )
   }
-  if (protocolData == null) return null
   const LPCSteps = getLabwarePositionCheckSteps(
     protocolData,
     shouldUseMetalProbe
   )
   const totalStepCount = LPCSteps.length - 1
   const currentStep = LPCSteps?.[currentStepIndex]
-  if (currentStep == null) return null
 
   const protocolHasModules = protocolData.modules.length > 0
 
@@ -172,10 +170,12 @@ export function LPCWizardFlex(props: LPCFlowsProps): JSX.Element | null {
           )
         })
         .catch((e: Error) => {
-          setFatalError(`error issuing jog command: ${e.message}`)
+          setErrorMessage(`error issuing jog command: ${e.message}`)
         })
     } else {
-      setFatalError(`could not find pipette to jog with id: ${pipetteId ?? ''}`)
+      setErrorMessage(
+        `could not find pipette to jog with id: ${pipetteId ?? ''}`
+      )
     }
   }
   const chainMaintenanceRunCommands = (
@@ -183,18 +183,6 @@ export function LPCWizardFlex(props: LPCFlowsProps): JSX.Element | null {
     continuePastCommandFailure: boolean
   ): Promise<CommandData[]> =>
     chainRunCommands(maintenanceRunId, commands, continuePastCommandFailure)
-  const movementStepProps = {
-    proceed,
-    protocolData,
-    chainRunCommands: chainMaintenanceRunCommands,
-    setFatalError,
-    dispatch,
-    handleJog,
-    isRobotMoving: isCommandChainLoading,
-    state,
-    existingOffsets,
-    robotType,
-  }
 
   const handleApplyOffsets = (offsets: LabwareOffsetCreateData[]): void => {
     setIsApplyingOffsets(true)
@@ -203,111 +191,121 @@ export function LPCWizardFlex(props: LPCFlowsProps): JSX.Element | null {
         onCloseClick()
       })
       .catch((e: Error) => {
-        setFatalError(`error applying labware offsets: ${e.message}`)
+        setErrorMessage(`error applying labware offsets: ${e.message}`)
       })
   }
 
-  let modalContent: JSX.Element = <div>UNASSIGNED STEP</div>
-  if (isExiting) {
-    modalContent = (
-      <RobotMotionLoader header={t('shared:stand_back_robot_is_in_motion')} />
-    )
-  } else if (fatalError != null) {
-    modalContent = (
-      <FatalError
-        errorMessage={fatalError}
-        shouldUseMetalProbe={shouldUseMetalProbe}
-        onClose={onCloseClick}
-      />
-    )
-  } else if (showConfirmation) {
-    modalContent = (
-      <ExitConfirmation
-        onGoBack={cancelExitLPC}
-        onConfirmExit={confirmExitLPC}
-        shouldUseMetalProbe={shouldUseMetalProbe}
-      />
-    )
-  } else if (currentStep.section === 'BEFORE_BEGINNING') {
-    modalContent = (
-      <IntroScreen
-        {...movementStepProps}
-        {...{ existingOffsets }}
-        protocolName={protocolName}
-        shouldUseMetalProbe={shouldUseMetalProbe}
-      />
-    )
-  } else if (
-    currentStep.section === 'CHECK_POSITIONS' ||
-    currentStep.section === 'CHECK_TIP_RACKS' ||
-    currentStep.section === 'CHECK_LABWARE'
-  ) {
-    modalContent = (
-      <CheckItem
-        {...currentStep}
-        {...movementStepProps}
-        shouldUseMetalProbe={shouldUseMetalProbe}
-      />
-    )
-  } else if (currentStep.section === 'ATTACH_PROBE') {
-    modalContent = (
-      <AttachProbe
-        {...currentStep}
-        {...movementStepProps}
-        isOnDevice={isOnDevice}
-      />
-    )
-  } else if (currentStep.section === 'DETACH_PROBE') {
-    modalContent = <DetachProbe {...currentStep} {...movementStepProps} />
-  } else if (currentStep.section === 'PICK_UP_TIP') {
-    modalContent = (
-      <PickUpTip
-        {...currentStep}
-        {...movementStepProps}
-        protocolHasModules={protocolHasModules}
-        currentStepIndex={currentStepIndex}
-      />
-    )
-  } else if (currentStep.section === 'RETURN_TIP') {
-    modalContent = <ReturnTip {...currentStep} {...movementStepProps} />
-  } else if (currentStep.section === 'RESULTS_SUMMARY') {
-    modalContent = (
-      <ResultsSummary
-        {...currentStep}
-        protocolData={protocolData}
-        {...{
-          existingOffsets,
-          handleApplyOffsets,
-          isApplyingOffsets,
-        }}
-        state={state}
-        dispatch={dispatch}
-      />
-    )
-  }
-  const wizardHeader = (
+  return (
+    <LPCWizardFlexComponent
+      {...props}
+      step={currentStep}
+      protocolData={protocolData}
+      protocolName={protocolName}
+      proceed={proceed}
+      dispatch={dispatch}
+      state={state}
+      shouldUseMetalProbe={true}
+      currentStepIndex={currentStepIndex}
+      totalStepCount={totalStepCount}
+      showConfirmation={showConfirmation}
+      isExiting={isExiting}
+      confirmExitLPC={confirmExitLPC}
+      cancelExitLPC={cancelExitLPC}
+      chainRunCommands={chainMaintenanceRunCommands}
+      errorMessage={errorMessage}
+      setErrorMessage={setErrorMessage}
+      handleJog={handleJog}
+      handleApplyOffsets={handleApplyOffsets}
+      isApplyingOffsets={isApplyingOffsets}
+      isRobotMoving={isCommandChainLoading}
+      isOnDevice={isOnDevice}
+      protocolHasModules={protocolHasModules}
+    />
+  )
+}
+
+function LPCWizardFlexComponent(props: LPCWizardContentProps): JSX.Element {
+  return createPortal(
+    props.isOnDevice ? (
+      <ModalShell fullPage>
+        <LPCWizardHeader {...props} />
+        <LPCWizardContent {...props} />
+      </ModalShell>
+    ) : (
+      <ModalShell width="47rem" header={<LPCWizardHeader {...props} />}>
+        <LPCWizardContent {...props} />
+      </ModalShell>
+    ),
+    getTopPortalEl()
+  )
+}
+
+function LPCWizardHeader({
+  errorMessage,
+  currentStepIndex,
+  totalStepCount,
+  showConfirmation,
+  isExiting,
+  confirmExitLPC,
+}: LPCWizardContentProps): JSX.Element {
+  const { t } = useTranslation('labware_position_check')
+
+  return (
     <WizardHeader
       title={t('labware_position_check_title')}
-      currentStep={fatalError != null ? undefined : currentStepIndex}
-      totalSteps={fatalError != null ? undefined : totalStepCount}
+      currentStep={errorMessage != null ? undefined : currentStepIndex}
+      totalSteps={errorMessage != null ? undefined : totalStepCount}
       onExit={
-        showConfirmation || isExiting || fatalError != null
+        showConfirmation || isExiting || errorMessage != null
           ? undefined
           : confirmExitLPC
       }
     />
   )
-  return createPortal(
-    isOnDevice ? (
-      <ModalShell fullPage>
-        {wizardHeader}
-        {modalContent}
-      </ModalShell>
-    ) : (
-      <ModalShell width="47rem" header={wizardHeader}>
-        {modalContent}
-      </ModalShell>
-    ),
-    getTopPortalEl()
-  )
+}
+
+function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
+  const { step, ...restProps } = props
+  const { t } = useTranslation('shared')
+
+  // Handle special cases first.
+  if (props.isExiting) {
+    return <RobotMotionLoader header={t('stand_back_robot_is_in_motion')} />
+  }
+  if (props.errorMessage != null) {
+    return <FatalError {...props} />
+  }
+  if (props.showConfirmation) {
+    return <ExitConfirmation {...props} />
+  }
+
+  // Handle step-based routing.
+  switch (step.section) {
+    case NAV_STEPS.BEFORE_BEGINNING:
+      return <BeforeBeginning {...restProps} step={step} />
+
+    case NAV_STEPS.CHECK_POSITIONS:
+    case NAV_STEPS.CHECK_TIP_RACKS:
+    case NAV_STEPS.CHECK_LABWARE:
+      return <CheckItem {...restProps} step={step} />
+
+    case NAV_STEPS.ATTACH_PROBE:
+      return <AttachProbe {...restProps} step={step} />
+
+    case NAV_STEPS.DETACH_PROBE:
+      return <DetachProbe {...restProps} step={step} />
+
+    case NAV_STEPS.PICK_UP_TIP:
+      return <PickUpTip {...restProps} step={step} />
+
+    case NAV_STEPS.RETURN_TIP:
+      return <ReturnTip {...restProps} step={step} />
+
+    case NAV_STEPS.RESULTS_SUMMARY:
+      return <ResultsSummary {...restProps} step={step} />
+
+    default:
+      console.error('Unhandled LPC step.')
+      return <BeforeBeginning {...restProps} step={step} />
+  }
 }

@@ -11,7 +11,7 @@ export interface LPCFlowsProps {
   runId: string
   robotType: RobotType
   existingOffsets: LabwareOffset[]
-  mostRecentAnalysis: CompletedProtocolAnalysis | null
+  mostRecentAnalysis: CompletedProtocolAnalysis
   protocolName: string
   maintenanceRunId: string
 }

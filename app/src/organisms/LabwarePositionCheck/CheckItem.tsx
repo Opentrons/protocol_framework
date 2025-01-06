@@ -33,47 +33,27 @@ import {
   setInitialPosition,
 } from '/app/organisms/LabwarePositionCheck/redux/actions'
 
-import type { Dispatch } from 'react'
-import type { LabwareOffset } from '@opentrons/api-client'
 import type {
-  CompletedProtocolAnalysis,
   CreateCommand,
   LabwareLocation,
   MoveLabwareCreateCommand,
-  RobotType,
 } from '@opentrons/shared-data'
-import type { useChainRunCommands } from '/app/resources/runs'
-import type { CheckLabwareStep } from './types'
-import type { Jog } from '/app/molecules/JogControls/types'
-import type { TFunction } from 'i18next'
 import type {
-  LPCWizardAction,
-  LPCWizardState,
-} from '/app/organisms/LabwarePositionCheck/redux'
+  CheckLabwareStep,
+  CheckPositionsStep,
+  CheckTipRacksStep,
+  LPCStepProps,
+} from './types'
+import type { TFunction } from 'i18next'
 
 const PROBE_LENGTH_MM = 44.5
 
-interface CheckItemProps extends Omit<CheckLabwareStep, 'section'> {
-  section: 'CHECK_LABWARE' | 'CHECK_TIP_RACKS' | 'CHECK_POSITIONS'
-  protocolData: CompletedProtocolAnalysis
-  proceed: () => void
-  chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
-  setFatalError: (errorMessage: string) => void
-  dispatch: Dispatch<LPCWizardAction>
-  state: LPCWizardState
-  existingOffsets: LabwareOffset[]
-  handleJog: Jog
-  isRobotMoving: boolean
-  robotType: RobotType
-  shouldUseMetalProbe: boolean
-}
-export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
+// TOME TODO: Get rid of the 'null' or jsx here.
+export function CheckItem(
+  props: LPCStepProps<CheckLabwareStep | CheckPositionsStep | CheckTipRacksStep>
+): JSX.Element | null {
   const {
-    labwareId,
-    pipetteId,
-    moduleId,
-    adapterId,
-    location,
+    step,
     protocolData,
     chainRunCommands,
     state,
@@ -82,10 +62,11 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
     handleJog,
     isRobotMoving,
     existingOffsets,
-    setFatalError,
+    setErrorMessage,
     robotType,
     shouldUseMetalProbe,
   } = props
+  const { labwareId, pipetteId, moduleId, adapterId, location } = step
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
   const { workingOffsets } = state
   const isOnDevice = useSelector(getIsOnDevice)
@@ -142,7 +123,7 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
       chainRunCommands(modulePrepCommands, false)
         .then(() => {})
         .catch((e: Error) => {
-          setFatalError(
+          setErrorMessage(
             `CheckItem module prep commands failed with message: ${e?.message}`
           )
         })
@@ -319,13 +300,13 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
             })
           )
         } else {
-          setFatalError(
+          setErrorMessage(
             `CheckItem failed to save position for initial placement.`
           )
         }
       })
       .catch((e: Error) => {
-        setFatalError(
+        setErrorMessage(
           `CheckItem failed to save position for initial placement with message: ${e.message}`
         )
       })
@@ -412,11 +393,13 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
           )
           proceed()
         } else {
-          setFatalError('CheckItem failed to save final position with message')
+          setErrorMessage(
+            'CheckItem failed to save final position with message'
+          )
         }
       })
       .catch((e: Error) => {
-        setFatalError(
+        setErrorMessage(
           `CheckItem failed to move from final position with message: ${e.message}`
         )
       })
@@ -440,7 +423,7 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
         )
       })
       .catch((e: Error) => {
-        setFatalError(`CheckItem failed to home: ${e.message}`)
+        setErrorMessage(`CheckItem failed to home: ${e.message}`)
       })
   }
 
@@ -512,6 +495,7 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
           labwareDef={labwareDef}
           confirmPlacement={handleConfirmPlacement}
           robotType={robotType}
+          location={step.location}
         />
       )}
     </Flex>

@@ -1,7 +1,7 @@
 import type { Coordinates } from '@opentrons/shared-data'
 import type { LabwareOffsetLocation, VectorOffset } from '@opentrons/api-client'
 
-interface WorkingOffset {
+export interface WorkingOffset {
   labwareId: string
   location: LabwareOffsetLocation
   initialPosition: VectorOffset | null

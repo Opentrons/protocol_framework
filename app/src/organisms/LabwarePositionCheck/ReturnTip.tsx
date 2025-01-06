@@ -21,44 +21,26 @@ import { useSelector } from 'react-redux'
 import { getIsOnDevice } from '/app/redux/config'
 
 import type {
-  CompletedProtocolAnalysis,
   CreateCommand,
-  RobotType,
   MoveLabwareCreateCommand,
 } from '@opentrons/shared-data'
-import type { useChainRunCommands } from '/app/resources/runs'
-import type { ReturnTipStep } from './types'
+import type { LPCStepProps, ReturnTipStep } from './types'
 import type { TFunction } from 'i18next'
-import type { Dispatch } from 'react'
-import type {
-  LPCWizardAction,
-  LPCWizardState,
-} from '/app/organisms/LabwarePositionCheck/redux'
 
-interface ReturnTipProps extends ReturnTipStep {
-  protocolData: CompletedProtocolAnalysis
-  proceed: () => void
-  chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
-  setFatalError: (errorMessage: string) => void
-  dispatch: Dispatch<LPCWizardAction>
-  state: LPCWizardState
-  isRobotMoving: boolean
-  robotType: RobotType
-}
-export const ReturnTip = (props: ReturnTipProps): JSX.Element | null => {
+export const ReturnTip = (
+  props: LPCStepProps<ReturnTipStep>
+): JSX.Element | null => {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
   const {
-    pipetteId,
-    labwareId,
-    location,
     protocolData,
     proceed,
     state,
     isRobotMoving,
     chainRunCommands,
-    setFatalError,
-    adapterId,
+    setErrorMessage,
+    step,
   } = props
+  const { pipetteId, location, labwareId, adapterId } = step
   const { tipPickUpOffset } = state
 
   const isOnDevice = useSelector(getIsOnDevice)
@@ -212,7 +194,7 @@ export const ReturnTip = (props: ReturnTipProps): JSX.Element | null => {
         proceed()
       })
       .catch((e: Error) => {
-        setFatalError(`ReturnTip failed with message: ${e.message}`)
+        setErrorMessage(`ReturnTip failed with message: ${e.message}`)
       })
   }
 
@@ -228,6 +210,7 @@ export const ReturnTip = (props: ReturnTipProps): JSX.Element | null => {
         body={<UnorderedList items={instructions} />}
         labwareDef={labwareDef}
         confirmPlacement={handleConfirmPlacement}
+        location={step.location}
       />
     </Flex>
   )

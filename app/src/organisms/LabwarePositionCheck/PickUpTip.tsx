@@ -26,49 +26,24 @@ import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import { getDisplayLocation } from './utils/getDisplayLocation'
 import { useSelector } from 'react-redux'
 import { getIsOnDevice } from '/app/redux/config'
-
-import type { Dispatch } from 'react'
-import type {
-  CompletedProtocolAnalysis,
-  CreateCommand,
-  MoveLabwareCreateCommand,
-  RobotType,
-} from '@opentrons/shared-data'
-import type { useChainRunCommands } from '/app/resources/runs'
-import type { Jog } from '/app/molecules/JogControls/types'
-import type { PickUpTipStep } from './types'
-import type { LabwareOffset } from '@opentrons/api-client'
-import type { TFunction } from 'i18next'
-import type {
-  LPCWizardAction,
-  LPCWizardState,
-} from '/app/organisms/LabwarePositionCheck/redux'
 import {
   setFinalPosition,
   setInitialPosition,
   setTipPickupOffset,
 } from '/app/organisms/LabwarePositionCheck/redux/actions'
 
-interface PickUpTipProps extends PickUpTipStep {
-  protocolData: CompletedProtocolAnalysis
-  proceed: () => void
-  chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
-  setFatalError: (errorMessage: string) => void
-  existingOffsets: LabwareOffset[]
-  dispatch: Dispatch<LPCWizardAction>
-  state: LPCWizardState
-  handleJog: Jog
-  isRobotMoving: boolean
-  robotType: RobotType
-  protocolHasModules: boolean
-  currentStepIndex: number
-}
-export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
+import type {
+  CreateCommand,
+  MoveLabwareCreateCommand,
+} from '@opentrons/shared-data'
+import type { LPCStepProps, PickUpTipStep } from './types'
+import type { TFunction } from 'i18next'
+
+export const PickUpTip = (
+  props: LPCStepProps<PickUpTipStep>
+): JSX.Element | null => {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
   const {
-    labwareId,
-    pipetteId,
-    location,
     protocolData,
     proceed,
     chainRunCommands,
@@ -77,12 +52,13 @@ export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
     handleJog,
     isRobotMoving,
     existingOffsets,
-    setFatalError,
-    adapterId,
+    setErrorMessage,
     robotType,
     protocolHasModules,
     currentStepIndex,
+    step,
   } = props
+  const { labwareId, pipetteId, location, adapterId } = step
   const { workingOffsets } = state
   const [showTipConfirmation, setShowTipConfirmation] = useState(false)
   const isOnDevice = useSelector(getIsOnDevice)
@@ -211,13 +187,13 @@ export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
             })
           )
         } else {
-          setFatalError(
+          setErrorMessage(
             `PickUpTip failed to save position for initial placement.`
           )
         }
       })
       .catch((e: Error) => {
-        setFatalError(
+        setErrorMessage(
           `PickUpTip failed to save position for initial placement with message: ${e.message}`
         )
       })
@@ -260,14 +236,14 @@ export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
               setShowTipConfirmation(true)
             })
             .catch((e: Error) => {
-              setFatalError(
+              setErrorMessage(
                 `PickUpTip failed to move from final position with message: ${e.message}`
               )
             })
         }
       })
       .catch((e: Error) => {
-        setFatalError(
+        setErrorMessage(
           `PickUpTip failed to save final position with message: ${e.message}`
         )
       })
@@ -329,7 +305,7 @@ export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
         proceed()
       })
       .catch((e: Error) => {
-        setFatalError(
+        setErrorMessage(
           `PickUpTip failed to move to safe location after tip pick up with message: ${e.message}`
         )
       })
@@ -369,7 +345,9 @@ export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
         setShowTipConfirmation(false)
       })
       .catch((e: Error) => {
-        setFatalError(`PickUpTip failed to drop tip with message: ${e.message}`)
+        setErrorMessage(
+          `PickUpTip failed to drop tip with message: ${e.message}`
+        )
       })
   }
   const handleGoBack = (): void => {
@@ -396,7 +374,7 @@ export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
         )
       })
       .catch((e: Error) => {
-        setFatalError(
+        setErrorMessage(
           `PickUpTip failed to clear tip rack with message: ${e.message}`
         )
       })
@@ -463,6 +441,7 @@ export const PickUpTip = (props: PickUpTipProps): JSX.Element | null => {
           labwareDef={labwareDef}
           confirmPlacement={handleConfirmPlacement}
           robotType={robotType}
+          location={step.location}
         />
       )}
     </Flex>

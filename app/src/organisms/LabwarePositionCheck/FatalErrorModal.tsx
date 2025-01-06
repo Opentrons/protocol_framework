@@ -1,6 +1,6 @@
-import { createPortal } from 'react-dom'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
+
 import {
   ALIGN_CENTER,
   ALIGN_FLEX_END,
@@ -14,57 +14,19 @@ import {
   RESPONSIVENESS,
   SPACING,
   LegacyStyledText,
-  ModalShell,
   TEXT_ALIGN_CENTER,
   TEXT_TRANSFORM_CAPITALIZE,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { getTopPortalEl } from '/app/App/portal'
-import { WizardHeader } from '/app/molecules/WizardHeader'
+
 import { i18n } from '/app/i18n'
 
+import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
+
 const SUPPORT_EMAIL = 'support@opentrons.com'
-interface FatalErrorProps {
-  errorMessage: string
-  shouldUseMetalProbe: boolean
-  onClose: () => void
-}
 
-interface FatalErrorModalProps extends FatalErrorProps {
-  isOnDevice: boolean
-}
-
-export function FatalErrorModal(props: FatalErrorModalProps): JSX.Element {
-  const { t } = useTranslation(['labware_position_check', 'shared', 'branded'])
-  const { onClose, isOnDevice } = props
-  return createPortal(
-    isOnDevice ? (
-      <ModalShell fullPage>
-        <WizardHeader
-          title={t('labware_position_check_title')}
-          onExit={onClose}
-        />
-        <FatalError {...props} />
-      </ModalShell>
-    ) : (
-      <ModalShell
-        width="47rem"
-        header={
-          <WizardHeader
-            title={t('labware_position_check_title')}
-            onExit={onClose}
-          />
-        }
-      >
-        <FatalError {...props} />
-      </ModalShell>
-    ),
-    getTopPortalEl()
-  )
-}
-
-export function FatalError(props: FatalErrorProps): JSX.Element {
-  const { errorMessage, shouldUseMetalProbe, onClose } = props
+export function FatalError(props: LPCWizardContentProps): JSX.Element {
+  const { errorMessage, shouldUseMetalProbe, onCloseClick } = props
   const { t } = useTranslation(['labware_position_check', 'shared', 'branded'])
   return (
     <Flex
@@ -101,7 +63,7 @@ export function FatalError(props: FatalErrorProps): JSX.Element {
       <PrimaryButton
         textTransform={TEXT_TRANSFORM_CAPITALIZE}
         alignSelf={ALIGN_FLEX_END}
-        onClick={onClose}
+        onClick={onCloseClick}
       >
         {t('shared:exit')}
       </PrimaryButton>
