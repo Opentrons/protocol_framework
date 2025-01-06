@@ -1,6 +1,6 @@
 {
   "$otSharedSchema": "module/schemas/3",
-  "moduleType": "stackerType",
+  "moduleType": "flexStackerType",
   "model": "flexStackerV1",
   "labwareOffset": {
     "x": 0.0,

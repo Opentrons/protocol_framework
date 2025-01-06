@@ -84,7 +84,7 @@
         "heaterShakerModuleType",
         "magneticBlockType",
         "absorbanceReaderType",
-        "stackerType"
+        "flexStackerType"
       ],
       "type": "string"
     },
