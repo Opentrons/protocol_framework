@@ -1,25 +1,22 @@
 """Python shared data models for liquid class definitions."""
 
 from enum import Enum
-from typing import TYPE_CHECKING, Literal, Union, Optional, Dict, Any, Sequence, Tuple
+from typing import Literal, Union, Optional, Sequence, Tuple, Any
 
 from pydantic import (
     BaseModel,
-    validator,
+    field_validator,
+    ValidationInfo,
     Field,
-    conint,
-    confloat,
     StrictInt,
     StrictFloat,
 )
+from pydantic.json_schema import SkipJsonSchema
+from typing_extensions import Annotated
 
 
-if TYPE_CHECKING:
-    _StrictNonNegativeInt = int
-    _StrictNonNegativeFloat = float
-else:
-    _StrictNonNegativeInt = conint(strict=True, ge=0)
-    _StrictNonNegativeFloat = confloat(strict=True, ge=0.0)
+_StrictNonNegativeInt = Annotated[int, Field(strict=True, ge=0)]
+_StrictNonNegativeFloat = Annotated[float, Field(strict=True, ge=0.0)]
 
 
 _Number = Union[StrictInt, StrictFloat]
@@ -33,6 +30,10 @@ LiquidHandlingPropertyByVolume = Sequence[Tuple[_NonNegativeNumber, _NonNegative
 
 CorrectionByVolume = Sequence[Tuple[_NonNegativeNumber, _Number]]
 """Settings for correctionByVolume, which unlike other `byVolume` properties allows negative values with volume."""
+
+
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default")
 
 
 class PositionReference(Enum):
@@ -72,15 +73,18 @@ class DelayProperties(BaseModel):
     """Shared properties for delay.."""
 
     enable: bool = Field(..., description="Whether delay is enabled.")
-    params: Optional[DelayParams] = Field(
-        None, description="Parameters for the delay function."
+    params: DelayParams | SkipJsonSchema[None] = Field(
+        None,
+        description="Parameters for the delay function.",
+        json_schema_extra=_remove_default,
     )
 
-    @validator("params")
+    @field_validator("params")
+    @classmethod
     def _validate_params(
-        cls, v: Optional[DelayParams], values: Dict[str, Any]
+        cls, v: Optional[DelayParams], info: ValidationInfo
     ) -> Optional[DelayParams]:
-        if v is None and values["enable"]:
+        if v is None and info.data.get("enable", False):
             raise ValueError("If enable is true parameters for delay must be defined.")
         return v
 
@@ -108,15 +112,18 @@ class TouchTipProperties(BaseModel):
     """Shared properties for the touch-tip function."""
 
     enable: bool = Field(..., description="Whether touch-tip is enabled.")
-    params: Optional[LiquidClassTouchTipParams] = Field(
-        None, description="Parameters for the touch-tip function."
+    params: LiquidClassTouchTipParams | SkipJsonSchema[None] = Field(
+        None,
+        description="Parameters for the touch-tip function.",
+        json_schema_extra=_remove_default,
     )
 
-    @validator("params")
+    @field_validator("params")
+    @classmethod
     def _validate_params(
-        cls, v: Optional[LiquidClassTouchTipParams], values: Dict[str, Any]
+        cls, v: Optional[LiquidClassTouchTipParams], info: ValidationInfo
     ) -> Optional[LiquidClassTouchTipParams]:
-        if v is None and values["enable"]:
+        if v is None and info.data.get("enable", False):
             raise ValueError(
                 "If enable is true parameters for touch tip must be defined."
             )
@@ -136,15 +143,18 @@ class MixProperties(BaseModel):
     """Mixing properties."""
 
     enable: bool = Field(..., description="Whether mix is enabled.")
-    params: Optional[MixParams] = Field(
-        None, description="Parameters for the mix function."
+    params: MixParams | SkipJsonSchema[None] = Field(
+        None,
+        description="Parameters for the mix function.",
+        json_schema_extra=_remove_default,
     )
 
-    @validator("params")
+    @field_validator("params")
+    @classmethod
     def _validate_params(
-        cls, v: Optional[MixParams], values: Dict[str, Any]
+        cls, v: Optional[MixParams], info: ValidationInfo
     ) -> Optional[MixParams]:
-        if v is None and values["enable"]:
+        if v is None and info.data.get("enable", False):
             raise ValueError("If enable is true parameters for mix must be defined.")
         return v
 
@@ -164,15 +174,18 @@ class BlowoutProperties(BaseModel):
     """Blowout properties."""
 
     enable: bool = Field(..., description="Whether blow-out is enabled.")
-    params: Optional[BlowoutParams] = Field(
-        None, description="Parameters for the blowout function."
+    params: BlowoutParams | SkipJsonSchema[None] = Field(
+        None,
+        description="Parameters for the blowout function.",
+        json_schema_extra=_remove_default,
     )
 
-    @validator("params")
+    @field_validator("params")
+    @classmethod
     def _validate_params(
-        cls, v: Optional[BlowoutParams], values: Dict[str, Any]
+        cls, v: Optional[BlowoutParams], info: ValidationInfo
     ) -> Optional[BlowoutParams]:
-        if v is None and values["enable"]:
+        if v is None and info.data.get("enable", False):
             raise ValueError(
                 "If enable is true parameters for blowout must be defined."
             )
@@ -344,8 +357,10 @@ class ByTipTypeSetting(BaseModel):
     singleDispense: SingleDispenseProperties = Field(
         ..., description="Single dispense parameters for this tip type."
     )
-    multiDispense: Optional[MultiDispenseProperties] = Field(
-        None, description="Optional multi-dispense parameters for this tip type."
+    multiDispense: MultiDispenseProperties | SkipJsonSchema[None] = Field(
+        None,
+        description="Optional multi-dispense parameters for this tip type.",
+        json_schema_extra=_remove_default,
     )
 
 

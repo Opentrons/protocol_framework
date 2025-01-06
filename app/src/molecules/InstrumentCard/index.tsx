@@ -1,5 +1,3 @@
-import type * as React from 'react'
-
 import {
   ALIGN_CENTER,
   ALIGN_FLEX_START,
@@ -22,6 +20,7 @@ import flexGripper from '/app/assets/images/flex_gripper.png'
 
 import { MenuOverlay } from './MenuOverlay'
 
+import type { ReactNode } from 'react'
 import type { InstrumentDiagramProps, StyleProps } from '@opentrons/components'
 import type { MenuOverlayItemProps } from './MenuOverlay'
 
@@ -33,7 +32,7 @@ interface InstrumentCardProps extends StyleProps {
   instrumentDiagramProps?: InstrumentDiagramProps
   // special casing the gripper at least for now
   isGripperAttached?: boolean
-  banner?: React.ReactNode
+  banner?: ReactNode
   isEstopNotDisengaged: boolean
 }
 

@@ -6,7 +6,17 @@ from enum import Enum
 from math import pi
 from subprocess import run, Popen
 from time import time
-from typing import Callable, Coroutine, Dict, List, Optional, Tuple, Union, cast
+from typing import (
+    Callable,
+    Coroutine,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+    Sequence,
+)
 import atexit
 from opentrons_hardware.drivers.can_bus import DriverSettings, build, CanMessenger
 from opentrons_hardware.drivers.can_bus import settings as can_bus_settings
@@ -146,7 +156,7 @@ def _create_attached_instruments_dict(
 
 
 async def update_firmware(
-    api: OT3API, force: bool = False, subsystems: Optional[List[SubSystem]] = None
+    api: OT3API, force: bool = False, subsystems: Optional[Sequence[SubSystem]] = None
 ) -> None:
     """Update firmware of OT3."""
     if not api.is_simulator:

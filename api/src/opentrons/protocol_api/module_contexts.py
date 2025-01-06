@@ -125,6 +125,7 @@ class ModuleContext(CommandPublisher):
         namespace: Optional[str] = None,
         version: Optional[int] = None,
         adapter: Optional[str] = None,
+        lid: Optional[str] = None,
     ) -> Labware:
         """Load a labware onto the module using its load parameters.
 
@@ -180,6 +181,19 @@ class ModuleContext(CommandPublisher):
             version=version,
             location=load_location,
         )
+        if lid is not None:
+            if self._api_version < validation.LID_STACK_VERSION_GATE:
+                raise APIVersionError(
+                    api_element="Loading a lid on a Labware",
+                    until_version="2.23",
+                    current_version=f"{self._api_version}",
+                )
+            self._protocol_core.load_lid(
+                load_name=lid,
+                location=labware_core,
+                namespace=namespace,
+                version=version,
+            )
 
         if isinstance(self._core, LegacyModuleCore):
             labware = self._core.add_labware_core(cast(LegacyLabwareCore, labware_core))

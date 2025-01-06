@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { renderHook, act, screen } from '@testing-library/react'
 
@@ -34,6 +33,8 @@ import {
   ErrorDetailsModal,
   RecoveryDoorOpenSpecial,
 } from '../shared'
+
+import type { ComponentProps } from 'react'
 
 vi.mock('../RecoveryOptions')
 vi.mock('../RecoveryInProgress')
@@ -96,7 +97,7 @@ describe('useERWizard', () => {
 })
 
 const renderRecoveryComponent = (
-  props: React.ComponentProps<typeof ErrorRecoveryComponent>
+  props: ComponentProps<typeof ErrorRecoveryComponent>
 ) => {
   return renderWithProviders(<ErrorRecoveryComponent {...props} />, {
     i18nInstance: i18n,
@@ -104,7 +105,7 @@ const renderRecoveryComponent = (
 }
 
 describe('ErrorRecoveryComponent', () => {
-  let props: React.ComponentProps<typeof ErrorRecoveryComponent>
+  let props: ComponentProps<typeof ErrorRecoveryComponent>
 
   beforeEach(() => {
     props = mockRecoveryContentProps
@@ -158,7 +159,7 @@ describe('ErrorRecoveryComponent', () => {
 })
 
 const renderRecoveryContent = (
-  props: React.ComponentProps<typeof ErrorRecoveryContent>
+  props: ComponentProps<typeof ErrorRecoveryContent>
 ) => {
   return renderWithProviders(<ErrorRecoveryContent {...props} />, {
     i18nInstance: i18n,
@@ -192,7 +193,7 @@ describe('ErrorRecoveryContent', () => {
     HOME_AND_RETRY,
   } = RECOVERY_MAP
 
-  let props: React.ComponentProps<typeof ErrorRecoveryContent>
+  let props: ComponentProps<typeof ErrorRecoveryContent>
 
   beforeEach(() => {
     props = mockRecoveryContentProps

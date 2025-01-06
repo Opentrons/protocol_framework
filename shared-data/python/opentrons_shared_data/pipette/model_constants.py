@@ -20,7 +20,6 @@ MOUNT_CONFIG_LOOKUP_TABLE = {
     PipetteGenerationType.FLEX: {
         PipetteChannelType.SINGLE_CHANNEL: RobotMountConfigs(2133.33, 230.15, 80),
         PipetteChannelType.EIGHT_CHANNEL: RobotMountConfigs(2133.33, 230.15, 80),
-        PipetteChannelType.EIGHT_CHANNEL_EM: RobotMountConfigs(2133.33, 230.15, 80),
         PipetteChannelType.NINETY_SIX_CHANNEL: RobotMountConfigs(2133.33, 230.15, 80),
     },
 }

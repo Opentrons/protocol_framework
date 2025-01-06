@@ -350,7 +350,7 @@ async def test_liquid_not_found_error(
     )
     if isinstance(subject, LiquidProbeImplementation):
         assert result == DefinedErrorData(
-            public=LiquidNotFoundError.construct(
+            public=LiquidNotFoundError.model_construct(
                 id=error_id,
                 createdAt=error_timestamp,
                 wrappedErrors=[matchers.Anything()],
@@ -726,7 +726,7 @@ async def test_liquid_probe_stall(
     result = await subject.execute(data)
 
     assert result == DefinedErrorData(
-        public=StallOrCollisionError.construct(
+        public=StallOrCollisionError.model_construct(
             id=error_id, createdAt=timestamp, wrappedErrors=[matchers.Anything()]
         ),
         state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),

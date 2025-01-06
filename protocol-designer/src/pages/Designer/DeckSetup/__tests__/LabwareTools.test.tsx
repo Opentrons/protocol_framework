@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { fireEvent, screen } from '@testing-library/react'
@@ -21,24 +20,27 @@ import { createCustomLabwareDef } from '../../../../labware-defs/actions'
 import { getCustomLabwareDefsByURI } from '../../../../labware-defs/selectors'
 import { getRobotType } from '../../../../file-data/selectors'
 import { LabwareTools } from '../LabwareTools'
+
+import type { ComponentProps } from 'react'
 import type { LabwareDefinition2, PipetteV2Specs } from '@opentrons/shared-data'
 
 vi.mock('../../../../utils')
 vi.mock('../../../../step-forms/selectors')
+vi.mock('../../../../feature-flags/selectors')
 vi.mock('../../../../file-data/selectors')
 vi.mock('../../../../labware-defs/selectors')
 vi.mock('../../../../labware-defs/actions')
 vi.mock('../../../../labware-ingred/selectors')
 vi.mock('../../../../labware-ingred/actions')
 
-const render = (props: React.ComponentProps<typeof LabwareTools>) => {
+const render = (props: ComponentProps<typeof LabwareTools>) => {
   return renderWithProviders(<LabwareTools {...props} />, {
     i18nInstance: i18n,
   })[0]
 }
 
 describe('LabwareTools', () => {
-  let props: React.ComponentProps<typeof LabwareTools>
+  let props: ComponentProps<typeof LabwareTools>
 
   beforeEach(() => {
     props = {

@@ -17,12 +17,13 @@ import {
 } from '@opentrons/components'
 import { DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP } from '../../constants'
 import { getIsTouchTipField } from '../../form-types'
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import { getMainPagePortalEl } from '../Portal'
 import * as utils from './utils'
 import { TOO_MANY_DECIMALS } from './constants'
 import { TipPositionZOnlyView } from './TipPositionZOnlyView'
 
+import type { ChangeEvent } from 'react'
 import type { StepFieldName } from '../../form-types'
 
 interface ZTipPositionModalProps {
@@ -131,9 +132,7 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
     }
   }
 
-  const handleInputFieldChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handleInputFieldChange = (e: ChangeEvent<HTMLInputElement>): void => {
     handleChange(e.currentTarget.value)
     setPristine(false)
   }
@@ -156,7 +155,7 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
             onClick={() => {
               setValue(utils.roundValue(defaultMm, 'up').toString())
             }}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
           >
             {t('shared:reset_to_default')}
           </Btn>

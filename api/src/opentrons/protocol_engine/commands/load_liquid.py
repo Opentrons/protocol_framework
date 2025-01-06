@@ -81,7 +81,7 @@ class LoadLiquid(BaseCommand[LoadLiquidParams, LoadLiquidResult, ErrorOccurrence
 
     commandType: LoadLiquidCommandType = "loadLiquid"
     params: LoadLiquidParams
-    result: Optional[LoadLiquidResult]
+    result: Optional[LoadLiquidResult] = None
 
     _ImplementationCls: Type[LoadLiquidImplementation] = LoadLiquidImplementation
 

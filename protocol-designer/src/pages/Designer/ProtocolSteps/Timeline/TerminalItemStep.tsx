@@ -1,5 +1,7 @@
+import { useTranslation } from 'react-i18next'
 import { useSelector, useDispatch } from 'react-redux'
 import { useConditionalConfirm } from '@opentrons/components'
+
 import {
   getHoveredTerminalItemId,
   getSelectedTerminalItemId,
@@ -10,6 +12,7 @@ import {
   getCurrentFormIsPresaved,
   getCurrentFormHasUnsavedChanges,
 } from '../../../../step-forms/selectors'
+import { START_TERMINAL_ITEM_ID } from '../../../../steplist'
 import {
   CLOSE_STEP_FORM_WITH_CHANGES,
   CLOSE_UNSAVED_STEP_FORM,
@@ -28,14 +31,14 @@ import type {
 } from '../../../../ui/steps'
 import type { TerminalItemId } from '../../../../steplist'
 import type { ThunkDispatch } from '../../../../types'
-import { useTranslation } from 'react-i18next'
 
 export interface TerminalItemStepProps {
   id: TerminalItemId
+  sidebarWidth: number
 }
 
 export function TerminalItemStep(props: TerminalItemStepProps): JSX.Element {
-  const { id } = props
+  const { id, sidebarWidth } = props
   const { t } = useTranslation('protocol_steps')
   const hovered = useSelector(getHoveredTerminalItemId) === id
   const selected = useSelector(getSelectedTerminalItemId) === id
@@ -84,7 +87,7 @@ export function TerminalItemStep(props: TerminalItemStepProps): JSX.Element {
       <StepContainer
         {...{
           stepId: `TerminalItem_${id}`,
-          iconName: id === '__initial_setup__' ? 'ot-start' : 'ot-end',
+          iconName: id === START_TERMINAL_ITEM_ID ? 'ot-start' : 'ot-end',
           hovered,
           selected,
           title:
@@ -93,6 +96,7 @@ export function TerminalItemStep(props: TerminalItemStepProps): JSX.Element {
           onMouseEnter,
           onMouseLeave,
         }}
+        sidebarWidth={sidebarWidth}
       />
     </>
   )
