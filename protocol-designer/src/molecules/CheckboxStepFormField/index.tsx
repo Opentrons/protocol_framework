@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import {
   Checkbox,
   Flex,
@@ -7,13 +6,15 @@ import {
   Tooltip,
   useHoverTooltip,
 } from '@opentrons/components'
+
+import type { ReactElement, ReactNode } from 'react'
 import type { Placement } from '@opentrons/components'
 import type { FieldProps } from '../../pages/Designer/ProtocolSteps/StepForm/types'
 
 type CheckboxStepFormFieldProps = FieldProps & {
-  children?: React.ReactElement
+  children?: ReactElement
   label?: string
-  tooltipContent?: React.ReactNode
+  tooltipContent?: ReactNode
   tooltipPlacement?: Placement
 }
 

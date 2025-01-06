@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { describe, it, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { screen } from '@testing-library/react'
@@ -14,6 +13,8 @@ import { getCustomLabwareDefsByURI } from '../../../../labware-defs/selectors'
 import { getDesignerTab } from '../../../../file-data/selectors'
 import { FixtureRender } from '../FixtureRender'
 import { HoveredItems } from '../HoveredItems'
+
+import type { ComponentProps } from 'react'
 import type * as OpentronsComponents from '@opentrons/components'
 
 vi.mock('../FixtureRender')
@@ -29,12 +30,12 @@ vi.mock('@opentrons/components', async importOriginal => {
   }
 })
 
-const render = (props: React.ComponentProps<typeof HoveredItems>) => {
+const render = (props: ComponentProps<typeof HoveredItems>) => {
   return renderWithProviders(<HoveredItems {...props} />)[0]
 }
 
 describe('HoveredItems', () => {
-  let props: React.ComponentProps<typeof HoveredItems>
+  let props: ComponentProps<typeof HoveredItems>
 
   beforeEach(() => {
     props = {

@@ -20,7 +20,7 @@ import {
   StyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { BUTTON_LINK_STYLE } from '../../../../../../atoms'
+import { LINK_BUTTON_STYLE } from '../../../../../../atoms'
 import {
   isTimeFormatMinutesSeconds,
   temperatureRangeFieldValue,
@@ -33,6 +33,7 @@ import {
 import { uuid } from '../../../../../../utils'
 import { getTimeFromString, getStepIndex } from './utils'
 
+import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
 import type { ThermocyclerStepTypeGeneral } from './ThermocyclerProfileModal'
 import type { ThermocyclerStepType } from './ThermocyclerStep'
 
@@ -57,12 +58,12 @@ interface CycleStepType {
 
 interface ThermocyclerCycleProps {
   steps: ThermocyclerStepTypeGeneral[]
-  setSteps: React.Dispatch<React.SetStateAction<ThermocyclerStepTypeGeneral[]>>
-  setShowCreateNewCycle: React.Dispatch<React.SetStateAction<boolean>>
+  setSteps: Dispatch<SetStateAction<ThermocyclerStepTypeGeneral[]>>
+  setShowCreateNewCycle: Dispatch<SetStateAction<boolean>>
   step?: ThermocyclerCycleType
   backgroundColor?: string
   readOnly?: boolean
-  setIsInEdit: React.Dispatch<React.SetStateAction<boolean>>
+  setIsInEdit: Dispatch<SetStateAction<boolean>>
 }
 
 export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
@@ -262,7 +263,7 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
           whiteSpace={NO_WRAP}
           textDecoration={TYPOGRAPHY.textDecorationUnderline}
           padding={SPACING.spacing4}
-          css={BUTTON_LINK_STYLE}
+          css={LINK_BUTTON_STYLE}
         >
           <StyledText desktopStyle="bodyDefaultRegular">
             {i18n.format(
@@ -329,7 +330,7 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
           }}
           padding={SPACING.spacing4}
           css={[
-            BUTTON_LINK_STYLE,
+            LINK_BUTTON_STYLE,
             css`
               visibility: ${hover ? 'visible' : 'hidden'};
               opacity: ${hover ? 1 : 0};
@@ -394,7 +395,7 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
                     'capitalize'
                   )}
                   value={stepState.name.value}
-                  onChange={(e: React.ChangeEvent<any>) => {
+                  onChange={(e: ChangeEvent<any>) => {
                     handleValueUpdate(
                       cycleStepId,
                       'name',
@@ -417,7 +418,7 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
                   )}
                   units={t('units.degrees')}
                   value={stepState.temp.value}
-                  onChange={(e: React.ChangeEvent<any>) => {
+                  onChange={(e: ChangeEvent<any>) => {
                     handleValueUpdate(
                       cycleStepId,
                       'temp',
@@ -454,7 +455,7 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
                   )}
                   units={t('units.time')}
                   value={stepState.time.value}
-                  onChange={(e: React.ChangeEvent<any>) => {
+                  onChange={(e: ChangeEvent<any>) => {
                     handleValueUpdate(
                       cycleStepId,
                       'time',
@@ -527,7 +528,7 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
             whiteSpace={NO_WRAP}
             textDecoration={TYPOGRAPHY.textDecorationUnderline}
             padding={SPACING.spacing4}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
           >
             <StyledText desktopStyle="bodyDefaultRegular">
               {i18n.format(

@@ -46,6 +46,8 @@ import { SelectModules } from './SelectModules'
 import { SelectFixtures } from './SelectFixtures'
 import { AddMetadata } from './AddMetadata'
 import { getTrashSlot } from './utils'
+
+import type { Dispatch, SetStateAction } from 'react'
 import type { ThunkDispatch } from 'redux-thunk'
 import type { NormalizedPipette } from '@opentrons/step-generation'
 import type { BaseState } from '../../types'
@@ -389,7 +391,7 @@ interface CreateFileFormProps {
   createProtocolFile: (values: WizardFormState) => void
   goBack: () => void
   proceed: () => void
-  setWizardSteps: React.Dispatch<React.SetStateAction<WizardStep[]>>
+  setWizardSteps: Dispatch<SetStateAction<WizardStep[]>>
   analyticsStartTime: Date
 }
 

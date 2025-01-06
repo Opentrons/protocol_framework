@@ -62,11 +62,7 @@ export function ToggleExpandStepFormField(
         resetFieldValue()
       }
     } else if (toggleValue == null) {
-      toggleUpdateValue(
-        name === 'targetTemperature' || name === 'heaterShakerTimer'
-          ? 'true'
-          : true
-      )
+      toggleUpdateValue(name === 'targetTemperature' ? 'true' : true)
     } else {
       toggleUpdateValue(!toggleValue)
       if (toggleValue) {

@@ -9,6 +9,7 @@ declare global {
       verifyFullHeader: () => Cypress.Chainable<void>
       verifyCreateNewHeader: () => Cypress.Chainable<void>
       clickCreateNew: () => Cypress.Chainable<void>
+      closeAnalyticsModal: () => Cypress.Chainable<void>
       closeAnnouncementModal: () => Cypress.Chainable<void>
       verifyHomePage: () => Cypress.Chainable<void>
       importProtocol: (protocolFile: string) => Cypress.Chainable<void>
@@ -61,6 +62,7 @@ export const locators = {
   eula: 'a[href="https://opentrons.com/eula"]',
   privacyToggle: 'Settings_hotKeys',
   analyticsToggleTestId: 'analyticsToggle',
+  confirm: 'Confirm',
 }
 
 // General Custom Commands
@@ -109,6 +111,13 @@ Cypress.Commands.add('verifyHomePage', () => {
 
 Cypress.Commands.add('clickCreateNew', () => {
   cy.contains(locators.createProtocol).click()
+})
+
+Cypress.Commands.add('closeAnalyticsModal', () => {
+  cy.get('button')
+    .contains(locators.confirm)
+    .should('be.visible')
+    .click({ force: true })
 })
 
 // Header Import

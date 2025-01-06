@@ -18,13 +18,14 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { getIsTouchTipField } from '../../form-types'
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import { getMainPagePortalEl } from '../Portal'
 import { TOO_MANY_DECIMALS, PERCENT_RANGE_TO_SHOW_WARNING } from './constants'
 import * as utils from './utils'
 import { TipPositionTopView } from './TipPositionTopView'
 import { TipPositionSideView } from './TipPositionSideView'
 
+import type { ChangeEvent } from 'react'
 import type { StepFieldName } from '../../form-types'
 
 type Offset = 'x' | 'y' | 'z'
@@ -179,9 +180,7 @@ export function TipPositionModal(
     }
   }
 
-  const handleZInputFieldChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handleZInputFieldChange = (e: ChangeEvent<HTMLInputElement>): void => {
     handleZChange(e.currentTarget.value)
     setPristine(false)
   }
@@ -200,9 +199,7 @@ export function TipPositionModal(
     }
   }
 
-  const handleXInputFieldChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handleXInputFieldChange = (e: ChangeEvent<HTMLInputElement>): void => {
     handleXChange(e.currentTarget.value)
     setPristine(false)
   }
@@ -221,9 +218,7 @@ export function TipPositionModal(
     }
   }
 
-  const handleYInputFieldChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handleYInputFieldChange = (e: ChangeEvent<HTMLInputElement>): void => {
     handleYChange(e.currentTarget.value)
     setPristine(false)
   }
@@ -257,7 +252,7 @@ export function TipPositionModal(
               setYValue('0')
               setZValue('1')
             }}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
           >
             {t('shared:reset_to_default')}
           </Btn>
@@ -331,7 +326,7 @@ export function TipPositionModal(
               </StyledText>
               <Btn
                 fontWeight={TYPOGRAPHY.fontWeightSemiBold}
-                css={BUTTON_LINK_STYLE}
+                css={LINK_BUTTON_STYLE}
                 onClick={() => {
                   setView(view === 'side' ? 'top' : 'side')
                 }}

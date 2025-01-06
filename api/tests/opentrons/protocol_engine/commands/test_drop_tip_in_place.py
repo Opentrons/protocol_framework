@@ -104,7 +104,7 @@ async def test_tip_attached_error(
     result = await subject.execute(params)
 
     assert result == DefinedErrorData(
-        public=TipPhysicallyAttachedError.construct(
+        public=TipPhysicallyAttachedError.model_construct(
             id="error-id",
             createdAt=datetime(year=1, month=2, day=3),
             wrappedErrors=[matchers.Anything()],

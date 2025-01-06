@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux'
-import type { Dispatch, SetStateAction } from 'react'
+
 import { useTranslation } from 'react-i18next'
 import { useConditionalConfirm } from '@opentrons/components'
 import * as timelineWarningSelectors from '../../../../top-selectors/timelineWarnings'
@@ -34,6 +34,7 @@ import {
   nonePressed,
 } from './utils'
 
+import type { Dispatch, MouseEvent, SetStateAction } from 'react'
 import type { ThunkDispatch } from 'redux-thunk'
 import type {
   HoverOnStepAction,
@@ -49,6 +50,7 @@ export interface ConnectedStepInfoProps {
   dragHovered?: boolean
   openedOverflowMenuId?: string | null
   setOpenedOverflowMenuId?: Dispatch<SetStateAction<string | null>>
+  sidebarWidth: number
 }
 
 export function ConnectedStepInfo(props: ConnectedStepInfoProps): JSX.Element {
@@ -58,6 +60,7 @@ export function ConnectedStepInfo(props: ConnectedStepInfoProps): JSX.Element {
     dragHovered = false,
     openedOverflowMenuId,
     setOpenedOverflowMenuId,
+    sidebarWidth,
   } = props
   const { t } = useTranslation('application')
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
@@ -115,7 +118,7 @@ export function ConnectedStepInfo(props: ConnectedStepInfoProps): JSX.Element {
     dispatch(stepsActions.hoverOnStep(stepId))
   const unhighlightStep = (): HoverOnStepAction =>
     dispatch(stepsActions.hoverOnStep(null))
-  const handleSelectStep = (event: React.MouseEvent): void => {
+  const handleSelectStep = (event: MouseEvent): void => {
     if (selectedStep !== stepId) {
       dispatch(toggleViewSubstep(null))
       dispatch(hoverOnStep(null))
@@ -227,6 +230,7 @@ export function ConnectedStepInfo(props: ConnectedStepInfoProps): JSX.Element {
           step.stepName || t(`stepType.${step.stepType}`)
         }`}
         dragHovered={dragHovered}
+        sidebarWidth={sidebarWidth}
       />
     </>
   )

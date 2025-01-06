@@ -1,10 +1,10 @@
-import type * as React from 'react'
 import { Box, BORDERS } from '@opentrons/components'
+import type { ReactNode } from 'react'
 
 export function StandInContent({
   children,
 }: {
-  children?: React.ReactNode
+  children?: ReactNode
 }): JSX.Element {
   return (
     <Box

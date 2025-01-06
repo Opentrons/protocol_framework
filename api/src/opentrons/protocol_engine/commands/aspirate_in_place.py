@@ -165,7 +165,7 @@ class AspirateInPlace(
 
     commandType: AspirateInPlaceCommandType = "aspirateInPlace"
     params: AspirateInPlaceParams
-    result: Optional[AspirateInPlaceResult]
+    result: Optional[AspirateInPlaceResult] = None
 
     _ImplementationCls: Type[
         AspirateInPlaceImplementation

@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect'
-import { SLEEP_NEVER_MS } from '/app/local-resources/config'
+import { SLEEP_NEVER_MS } from '/app/local-resources/dom-utils'
 import type { State } from '../types'
 import type {
   Config,

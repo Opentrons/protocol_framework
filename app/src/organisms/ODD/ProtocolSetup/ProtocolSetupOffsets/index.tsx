@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Chip,
@@ -24,9 +23,11 @@ import {
 } from '/app/resources/runs'
 import { getLatestCurrentOffsets } from '/app/transformations/runs'
 
+import type { Dispatch, SetStateAction } from 'react'
+
 export interface ProtocolSetupOffsetsProps {
   runId: string
-  setSetupScreen: React.Dispatch<React.SetStateAction<SetupScreens>>
+  setSetupScreen: Dispatch<SetStateAction<SetupScreens>>
   lpcDisabledReason: string | null
   launchLPC: () => void
   LPCWizard: JSX.Element | null

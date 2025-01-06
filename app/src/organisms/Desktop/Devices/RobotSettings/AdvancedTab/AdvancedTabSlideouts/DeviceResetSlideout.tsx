@@ -20,6 +20,7 @@ import {
   LegacyStyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
+import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 
 import { Slideout } from '/app/atoms/Slideout'
 import { Divider } from '/app/atoms/structure'
@@ -107,7 +108,9 @@ export function DeviceResetSlideout({
     e.preventDefault()
     doTrackEvent({
       name: ANALYTICS_CALIBRATION_DATA_DOWNLOADED,
-      properties: {},
+      properties: {
+        robotType: isFlex ? FLEX_ROBOT_TYPE : OT2_ROBOT_TYPE,
+      },
     })
     saveAs(
       new Blob([

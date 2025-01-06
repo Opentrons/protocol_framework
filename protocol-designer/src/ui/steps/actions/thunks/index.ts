@@ -1,16 +1,23 @@
 import last from 'lodash/last'
 import {
+  HEATERSHAKER_MODULE_TYPE,
+  MAGNETIC_MODULE_TYPE,
+  TEMPERATURE_MODULE_TYPE,
+  THERMOCYCLER_MODULE_TYPE,
+} from '@opentrons/shared-data'
+import {
   getUnsavedForm,
   getUnsavedFormIsPristineSetTempForm,
   getUnsavedFormIsPristineHeaterShakerForm,
   getOrderedStepIds,
+  getInitialDeckSetup,
 } from '../../../../step-forms/selectors'
 import { changeFormInput } from '../../../../steplist/actions/actions'
 import { PRESAVED_STEP_ID } from '../../../../steplist/types'
 import { PAUSE_UNTIL_TEMP } from '../../../../constants'
 import { uuid } from '../../../../utils'
 import { getMultiSelectLastSelected, getSelectedStepId } from '../../selectors'
-import { addStep } from '../actions'
+import { addStep, selectDropdownItem } from '../actions'
 import {
   actions as tutorialActions,
   selectors as tutorialSelectors,
@@ -23,16 +30,128 @@ import type {
   DuplicateMultipleStepsAction,
   SelectMultipleStepsAction,
 } from '../types'
+
 export const addAndSelectStep: (arg: {
   stepType: StepType
 }) => ThunkAction<any> = payload => (dispatch, getState) => {
   const robotStateTimeline = fileDataSelectors.getRobotStateTimeline(getState())
+  const initialDeckSetup = getInitialDeckSetup(getState())
+  const { modules, labware } = initialDeckSetup
   dispatch(
     addStep({
       stepType: payload.stepType,
       robotStateTimeline,
     })
   )
+  if (payload.stepType === 'thermocycler') {
+    const tcId = Object.entries(modules).find(
+      ([key, module]) => module.type === THERMOCYCLER_MODULE_TYPE
+    )?.[0]
+    if (tcId != null) {
+      dispatch(
+        selectDropdownItem({
+          selection: {
+            id: tcId,
+            text: 'Selected',
+            field: '1',
+          },
+          mode: 'add',
+        })
+      )
+    }
+  } else if (payload.stepType === 'magnet') {
+    const magId = Object.entries(modules).find(
+      ([key, module]) => module.type === MAGNETIC_MODULE_TYPE
+    )?.[0]
+    if (magId != null) {
+      dispatch(
+        selectDropdownItem({
+          selection: {
+            id: magId,
+            text: 'Selected',
+            field: '1',
+          },
+          mode: 'add',
+        })
+      )
+    }
+  } else if (payload.stepType === 'temperature') {
+    const temperatureModules = Object.entries(modules).filter(
+      ([key, module]) => module.type === TEMPERATURE_MODULE_TYPE
+    )
+    //  only set selected temperature module if only 1 type is on deck
+    const tempId =
+      temperatureModules.length === 1 ? temperatureModules[0][0] : null
+    if (tempId != null) {
+      dispatch(
+        selectDropdownItem({
+          selection: {
+            id: tempId,
+            text: 'Selected',
+            field: '1',
+          },
+          mode: 'add',
+        })
+      )
+    }
+  } else if (payload.stepType === 'heaterShaker') {
+    const hsModules = Object.entries(modules).filter(
+      ([key, module]) => module.type === HEATERSHAKER_MODULE_TYPE
+    )
+    //  only set selected h-s module if only 1 type is on deck
+    const hsId = hsModules.length === 1 ? hsModules[0][0] : null
+    if (hsId != null) {
+      dispatch(
+        selectDropdownItem({
+          selection: {
+            id: hsId,
+            text: 'Selected',
+            field: '1',
+          },
+          mode: 'add',
+        })
+      )
+    }
+  } else if (payload.stepType === 'mix' || payload.stepType === 'moveLiquid') {
+    const labwares = Object.entries(labware).filter(
+      ([key, lw]) =>
+        !lw.def.parameters.isTiprack &&
+        !lw.def.allowedRoles?.includes('adapter') &&
+        !lw.def.allowedRoles?.includes('lid')
+    )
+    //  only set selected labware if only 1 available labware is on deck
+    const labwareId = labwares.length === 1 ? labwares[0][0] : null
+    if (labwareId != null) {
+      dispatch(
+        selectDropdownItem({
+          selection: {
+            id: labwareId,
+            text: payload.stepType === 'moveLiquid' ? 'Source' : 'Selected',
+            field: '1',
+          },
+          mode: 'add',
+        })
+      )
+    }
+  } else if (payload.stepType === 'moveLabware') {
+    const labwares = Object.entries(labware).filter(
+      ([key, lw]) => !lw.def.allowedRoles?.includes('adapter')
+    )
+    //  only set selected labware if only 1 available labware/tiprack/lid is on deck
+    const labwareId = labwares.length === 1 ? labwares[0][0] : null
+    if (labwareId != null) {
+      dispatch(
+        selectDropdownItem({
+          selection: {
+            id: labwareId,
+            text: 'Selected',
+            field: '1',
+          },
+          mode: 'add',
+        })
+      )
+    }
+  }
 }
 export interface ReorderSelectedStepAction {
   type: 'REORDER_SELECTED_STEP'
