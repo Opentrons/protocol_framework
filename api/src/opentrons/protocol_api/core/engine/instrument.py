@@ -904,7 +904,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
 
         liquid_class_record = LiquidClassRecord(
             liquidClassName=liquid_class.name,
-            pipetteModel=self.get_model(),  # TODO: verify this is the correct 'model' to use
+            pipetteModel=pipette_load_name,  # TODO: verify this is the correct 'model' to use
             tiprack=tiprack_uri,
             aspirate=transfer_props.aspirate.as_shared_data_model(),
             singleDispense=transfer_props.dispense.as_shared_data_model(),
@@ -923,14 +923,16 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         self, tip_racks: List[LabwareCore], starting_well: Optional[str]
     ) -> Optional[NextTipInfo]:
         """Get the next tip to pick up."""
-        next_tip_info = self._engine_client.execute_command_without_recovery(
+        result = self._engine_client.execute_command_without_recovery(
             cmd.GetNextTipParams(
                 pipetteId=self._pipette_id,
                 labwareIds=[tip_rack.labware_id for tip_rack in tip_racks],
                 startingTipWell=starting_well,
             )
         )
-        return next_tip_info if isinstance(next_tip_info, NextTipInfo) else None
+        return (
+            result.nextTipInfo if isinstance(result.nextTipInfo, NextTipInfo) else None
+        )
 
     def transfer_liquid(  # noqa: C901
         self,
@@ -1001,7 +1003,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 tip_racks=[core for loc, core in tip_racks],
                 starting_well=None,
             )
-            if not next_tip:
+            if next_tip is None:
                 raise RuntimeError(
                     f"No tip available among {tip_racks} for this transfer."
                 )
@@ -1081,7 +1083,12 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         tiprack_loc = [
             loc for loc, lw_core in tip_racks if lw_core == tiprack_labware_core
         ]
-        return _TipInfo(tiprack_loc[0], tiprack_labware_core.get_uri(), tip_well)
+
+        return _TipInfo(
+            Location(tip_well.get_top(0), tiprack_loc[0].labware),
+            tiprack_labware_core.get_uri(),
+            tip_well,
+        )
 
     def aspirate_liquid_class(
         self,
