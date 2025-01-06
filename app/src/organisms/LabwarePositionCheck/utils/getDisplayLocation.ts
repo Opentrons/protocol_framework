@@ -8,6 +8,8 @@ import type { i18n, TFunction } from 'i18next'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type { LabwareOffsetLocation } from '@opentrons/api-client'
 
+// TOME TODO: I think this is no longer needed given the new utils, but double check.
+
 export function getDisplayLocation(
   location: LabwareOffsetLocation,
   labwareDefinitions: LabwareDefinition2[],

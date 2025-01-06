@@ -24,13 +24,10 @@ import {
 } from '@opentrons/components'
 import {
   getIsTiprack,
-  getPipetteNameSpecs,
   getVectorDifference,
   getVectorSum,
 } from '@opentrons/shared-data'
 
-import levelWithTip from '/app/assets/images/lpc_level_with_tip.svg'
-import levelWithLabware from '/app/assets/images/lpc_level_with_labware.svg'
 import levelProbeWithTip from '/app/assets/images/lpc_level_probe_with_tip.svg'
 import levelProbeWithLabware from '/app/assets/images/lpc_level_probe_with_labware.svg'
 import { getIsOnDevice } from '/app/redux/config'
@@ -45,37 +42,45 @@ import type { PipetteName, LabwareDefinition2 } from '@opentrons/shared-data'
 import type { WellStroke } from '@opentrons/components'
 import type { VectorOffset } from '@opentrons/api-client'
 import type { Jog } from '/app/molecules/JogControls'
+import type {
+  CheckLabwareStep,
+  CheckPositionsStep,
+  CheckTipRacksStep,
+  LPCStepProps,
+  PickUpTipStep,
+} from '/app/organisms/LabwarePositionCheck/types'
 
 const DECK_MAP_VIEWBOX = '-10 -10 150 105'
 const LPC_HELP_LINK_URL =
   'https://support.opentrons.com/s/article/How-Labware-Offsets-work-on-the-OT-2'
 
-interface JogToWellProps {
+interface JogToWellProps
+  extends LPCStepProps<
+    CheckLabwareStep | CheckTipRacksStep | CheckPositionsStep | PickUpTipStep
+  > {
+  header: ReactNode
+  body: ReactNode
+  labwareDef: LabwareDefinition2
+  initialPosition: VectorOffset
   handleConfirmPosition: () => void
   handleGoBack: () => void
   handleJog: Jog
-  pipetteName: PipetteName
-  labwareDef: LabwareDefinition2
-  header: ReactNode
-  body: ReactNode
-  initialPosition: VectorOffset
   existingOffset: VectorOffset
-  shouldUseMetalProbe: boolean
+  pipetteName: PipetteName
 }
-export const JogToWell = (props: JogToWellProps): JSX.Element | null => {
+
+export function JogToWell({
+  header,
+  body,
+  pipetteName,
+  labwareDef,
+  handleConfirmPosition,
+  handleGoBack,
+  handleJog,
+  initialPosition,
+  existingOffset,
+}: JogToWellProps): JSX.Element {
   const { t } = useTranslation(['labware_position_check', 'shared'])
-  const {
-    header,
-    body,
-    pipetteName,
-    labwareDef,
-    handleConfirmPosition,
-    handleGoBack,
-    handleJog,
-    initialPosition,
-    existingOffset,
-    shouldUseMetalProbe,
-  } = props
 
   const [joggedPosition, setJoggedPosition] = useState<VectorOffset>(
     initialPosition
@@ -97,16 +102,7 @@ export const JogToWell = (props: JogToWellProps): JSX.Element | null => {
     }
   }, [])
 
-  let wellsToHighlight: string[] = []
-  if (
-    getPipetteNameSpecs(pipetteName)?.channels === 8 &&
-    !shouldUseMetalProbe
-  ) {
-    wellsToHighlight = labwareDef.ordering[0]
-  } else {
-    wellsToHighlight = ['A1']
-  }
-
+  const wellsToHighlight = ['A1']
   const wellStroke: WellStroke = wellsToHighlight.reduce(
     (acc, wellName) => ({ ...acc, [wellName]: COLORS.blue50 }),
     {}
@@ -117,10 +113,8 @@ export const JogToWell = (props: JogToWellProps): JSX.Element | null => {
     getVectorDifference(joggedPosition, initialPosition)
   )
   const isTipRack = getIsTiprack(labwareDef)
-  let levelSrc = isTipRack ? levelWithTip : levelWithLabware
-  if (shouldUseMetalProbe) {
-    levelSrc = isTipRack ? levelProbeWithTip : levelProbeWithLabware
-  }
+  const levelSrc = isTipRack ? levelProbeWithTip : levelProbeWithLabware
+
   return (
     <Flex
       flexDirection={DIRECTION_COLUMN}
@@ -154,7 +148,7 @@ export const JogToWell = (props: JogToWellProps): JSX.Element | null => {
                 <PipetteRender
                   labwareDef={labwareDef}
                   pipetteName={pipetteName}
-                  usingMetalProbe={shouldUseMetalProbe}
+                  usingMetalProbe={true}
                 />
               </>
             )}

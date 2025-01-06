@@ -16,7 +16,11 @@ import {
   BaseDeck,
   ALIGN_FLEX_START,
 } from '@opentrons/components'
-import { THERMOCYCLER_MODULE_TYPE, getModuleType } from '@opentrons/shared-data'
+import {
+  THERMOCYCLER_MODULE_TYPE,
+  getModuleType,
+  FLEX_ROBOT_TYPE,
+} from '@opentrons/shared-data'
 
 import { getIsOnDevice } from '/app/redux/config'
 import { SmallButton } from '/app/atoms/buttons'
@@ -72,21 +76,18 @@ interface PrepareSpaceProps
   confirmPlacement: () => void
 }
 
-export const PrepareSpace = ({
+export function PrepareSpace({
   location,
   labwareDef,
   protocolData,
   header,
   body,
-  robotType,
   confirmPlacement,
-}: PrepareSpaceProps): JSX.Element | null => {
+}: PrepareSpaceProps): JSX.Element {
   const { i18n, t } = useTranslation(['labware_position_check', 'shared'])
 
   const isOnDevice = useSelector(getIsOnDevice)
   const deckConfig = useNotifyDeckConfigurationQuery().data ?? []
-
-  if (protocolData == null || robotType == null) return null
 
   return (
     <Flex css={TILE_CONTAINER_STYLE}>
@@ -105,7 +106,7 @@ export const PrepareSpace = ({
           alignItems={ALIGN_FLEX_START}
         >
           <BaseDeck
-            robotType={robotType}
+            robotType={FLEX_ROBOT_TYPE}
             modulesOnDeck={protocolData.modules.map(mod => ({
               moduleModel: mod.model,
               moduleLocation: mod.location,

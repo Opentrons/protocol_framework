@@ -8,7 +8,6 @@ import {
   useCreateLabwareOffsetMutation,
   useCreateMaintenanceCommandMutation,
 } from '@opentrons/react-api-client'
-import { FIXED_TRASH_ID, FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 
 import { getTopPortalEl } from '/app/App/portal'
 // import { useTrackEvent } from '/app/redux/analytics'
@@ -29,11 +28,7 @@ import { getLabwarePositionCheckSteps } from './getLabwarePositionCheckSteps'
 import { useLPCInitialState } from '/app/organisms/LabwarePositionCheck/hooks'
 import { useLPCReducer } from '/app/organisms/LabwarePositionCheck/redux'
 
-import type {
-  Coordinates,
-  CreateCommand,
-  DropTipCreateCommand,
-} from '@opentrons/shared-data'
+import type { Coordinates, CreateCommand } from '@opentrons/shared-data'
 import type {
   LabwareOffsetCreateData,
   CommandData,
@@ -45,18 +40,17 @@ import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
 
 const JOG_COMMAND_TIMEOUT = 10000 // 10 seconds
 
-export function LPCWizardFlex(props: LPCFlowsProps): JSX.Element {
+export function LPCWizardFlex(
+  props: Omit<LPCFlowsProps, 'robotType'>
+): JSX.Element {
   const {
     mostRecentAnalysis,
-    robotType,
     runId,
     onCloseClick,
     protocolName,
     maintenanceRunId,
   } = props
   const isOnDevice = useSelector(getIsOnDevice)
-  const protocolData = mostRecentAnalysis
-  const shouldUseMetalProbe = robotType === FLEX_ROBOT_TYPE
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isApplyingOffsets, setIsApplyingOffsets] = useState<boolean>(false)
@@ -79,17 +73,7 @@ export function LPCWizardFlex(props: LPCFlowsProps): JSX.Element {
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0)
   const handleCleanUpAndClose = (): void => {
     setIsExiting(true)
-    const dropTipToBeSafeCommands: DropTipCreateCommand[] = shouldUseMetalProbe
-      ? []
-      : (protocolData?.pipettes ?? []).map(pip => ({
-          commandType: 'dropTip' as const,
-          params: {
-            pipetteId: pip.id,
-            labwareId: FIXED_TRASH_ID,
-            wellName: 'A1',
-            wellLocation: { origin: 'default' as const },
-          },
-        }))
+
     chainRunCommands(
       maintenanceRunId,
       [
@@ -113,7 +97,6 @@ export function LPCWizardFlex(props: LPCFlowsProps): JSX.Element {
           commandType: 'retractAxis' as const,
           params: { axis: 'y' },
         },
-        ...dropTipToBeSafeCommands,
         { commandType: 'home' as const, params: {} },
       ],
       true
@@ -138,14 +121,11 @@ export function LPCWizardFlex(props: LPCFlowsProps): JSX.Element {
         : currentStepIndex
     )
   }
-  const LPCSteps = getLabwarePositionCheckSteps(
-    protocolData,
-    shouldUseMetalProbe
-  )
+  const LPCSteps = getLabwarePositionCheckSteps(mostRecentAnalysis)
   const totalStepCount = LPCSteps.length - 1
   const currentStep = LPCSteps?.[currentStepIndex]
 
-  const protocolHasModules = protocolData.modules.length > 0
+  const protocolHasModules = mostRecentAnalysis.modules.length > 0
 
   const handleJog = (
     axis: Axis,
@@ -199,12 +179,11 @@ export function LPCWizardFlex(props: LPCFlowsProps): JSX.Element {
     <LPCWizardFlexComponent
       {...props}
       step={currentStep}
-      protocolData={protocolData}
+      protocolData={mostRecentAnalysis}
       protocolName={protocolName}
       proceed={proceed}
       dispatch={dispatch}
       state={state}
-      shouldUseMetalProbe={true}
       currentStepIndex={currentStepIndex}
       totalStepCount={totalStepCount}
       showConfirmation={showConfirmation}

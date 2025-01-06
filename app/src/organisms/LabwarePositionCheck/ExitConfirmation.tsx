@@ -23,9 +23,12 @@ import { SmallButton } from '/app/atoms/buttons'
 
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
-export const ExitConfirmation = (props: LPCWizardContentProps): JSX.Element => {
+export const ExitConfirmation = ({
+  confirmExitLPC,
+  cancelExitLPC,
+}: LPCWizardContentProps): JSX.Element => {
   const { i18n, t } = useTranslation(['labware_position_check', 'shared'])
-  const { confirmExitLPC, cancelExitLPC, shouldUseMetalProbe } = props
+
   const isOnDevice = useSelector(getIsOnDevice)
   return (
     <Flex
@@ -44,9 +47,7 @@ export const ExitConfirmation = (props: LPCWizardContentProps): JSX.Element => {
         {isOnDevice ? (
           <>
             <ConfirmationHeaderODD>
-              {shouldUseMetalProbe
-                ? t('remove_probe_before_exit')
-                : t('exit_screen_title')}
+              {t('remove_probe_before_exit')}
             </ConfirmationHeaderODD>
             <Flex textAlign={TEXT_ALIGN_CENTER}>
               <ConfirmationBodyODD>
@@ -57,9 +58,7 @@ export const ExitConfirmation = (props: LPCWizardContentProps): JSX.Element => {
         ) : (
           <>
             <ConfirmationHeader>
-              {shouldUseMetalProbe
-                ? t('remove_probe_before_exit')
-                : t('exit_screen_title')}
+              {t('remove_probe_before_exit')}
             </ConfirmationHeader>
             <LegacyStyledText as="p" marginTop={SPACING.spacing8}>
               {t('exit_screen_subtitle')}
@@ -81,11 +80,7 @@ export const ExitConfirmation = (props: LPCWizardContentProps): JSX.Element => {
           />
           <SmallButton
             onClick={confirmExitLPC}
-            buttonText={
-              shouldUseMetalProbe
-                ? t('remove_calibration_probe')
-                : i18n.format(t('shared:exit'), 'capitalize')
-            }
+            buttonText={t('remove_calibration_probe')}
             buttonType="alert"
           />
         </Flex>
@@ -104,9 +99,7 @@ export const ExitConfirmation = (props: LPCWizardContentProps): JSX.Element => {
               onClick={confirmExitLPC}
               textTransform={TYPOGRAPHY.textTransformCapitalize}
             >
-              {shouldUseMetalProbe
-                ? t('remove_calibration_probe')
-                : i18n.format(t('shared:exit'), 'capitalize')}
+              {t('remove_calibration_probe')}
             </AlertPrimaryButton>
           </Flex>
         </Flex>

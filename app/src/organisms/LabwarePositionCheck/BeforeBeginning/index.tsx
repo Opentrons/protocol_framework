@@ -28,7 +28,6 @@ import { useSelector } from 'react-redux'
 import { TwoUpTileLayout } from '../TwoUpTileLayout'
 import { getTopPortalEl } from '/app/App/portal'
 import { SmallButton } from '/app/atoms/buttons'
-import { CALIBRATION_PROBE } from '/app/organisms/PipetteWizardFlows/constants'
 import { TerseOffsetTable } from '../ResultsSummary'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 
@@ -42,20 +41,15 @@ import type {
 // TODO(BC, 09/01/23): replace updated support article link for LPC on OT-2/Flex
 const SUPPORT_PAGE_URL = 'https://support.opentrons.com/s/ot2-calibration'
 
-// TOME TODO: Get rid of the null.
-export function BeforeBeginning(
-  props: LPCStepProps<BeforeBeginningStep>
-): JSX.Element | null {
-  const {
-    proceed,
-    protocolData,
-    chainRunCommands,
-    isRobotMoving,
-    setErrorMessage,
-    existingOffsets,
-    protocolName,
-    shouldUseMetalProbe,
-  } = props
+export function BeforeBeginning({
+  proceed,
+  protocolData,
+  chainRunCommands,
+  isRobotMoving,
+  setErrorMessage,
+  existingOffsets,
+  protocolName,
+}: LPCStepProps<BeforeBeginningStep>): JSX.Element {
   const isOnDevice = useSelector(getIsOnDevice)
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
   const handleClickStartLPC = (): void => {
@@ -80,10 +74,8 @@ export function BeforeBeginning(
       }),
     },
   ]
-  if (shouldUseMetalProbe) {
-    requiredEquipmentList.push(CALIBRATION_PROBE)
-  }
 
+  // TOME TODO: Render this above if possible.
   if (isRobotMoving) {
     return (
       <RobotMotionLoader header={t('shared:stand_back_robot_is_in_motion')} />

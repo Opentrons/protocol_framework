@@ -12,7 +12,6 @@ import { RobotMotionLoader } from './RobotMotionLoader'
 import { PrepareSpace } from './PrepareSpace'
 import { JogToWell } from './JogToWell'
 import {
-  FLEX_ROBOT_TYPE,
   getIsTiprack,
   getLabwareDefURI,
   getLabwareDisplayName,
@@ -63,8 +62,6 @@ export function CheckItem(
     isRobotMoving,
     existingOffsets,
     setErrorMessage,
-    robotType,
-    shouldUseMetalProbe,
   } = props
   const { labwareId, pipetteId, moduleId, adapterId, location } = step
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
@@ -277,10 +274,7 @@ export function CheckItem(
             wellName: 'A1',
             wellLocation: {
               origin: 'top' as const,
-              offset:
-                robotType === FLEX_ROBOT_TYPE
-                  ? { x: 0, y: 0, z: PROBE_LENGTH_MM }
-                  : IDENTITY_VECTOR,
+              offset: { x: 0, y: 0, z: PROBE_LENGTH_MM },
             },
           },
         },
@@ -442,6 +436,7 @@ export function CheckItem(
     <Flex flexDirection={DIRECTION_COLUMN} minHeight="29.5rem">
       {initialPosition != null ? (
         <JogToWell
+          {...props}
           header={t('check_item_in_location', {
             item: isTiprack ? t('tip_rack') : t('labware'),
             location: slotOnlyDisplayLocation,
@@ -455,9 +450,7 @@ export function CheckItem(
                   : 'ensure_nozzle_position_desktop'
               }
               values={{
-                tip_type: shouldUseMetalProbe
-                  ? t('calibration_probe')
-                  : t('pipette_nozzle'),
+                tip_type: t('calibration_probe'),
                 item_location: isTiprack
                   ? t('check_tip_location')
                   : t('check_well_location'),
@@ -475,7 +468,6 @@ export function CheckItem(
           handleJog={handleJog}
           initialPosition={initialPosition}
           existingOffset={existingOffset}
-          shouldUseMetalProbe={shouldUseMetalProbe}
         />
       ) : (
         <PrepareSpace
@@ -494,7 +486,6 @@ export function CheckItem(
           }
           labwareDef={labwareDef}
           confirmPlacement={handleConfirmPlacement}
-          robotType={robotType}
           location={step.location}
         />
       )}

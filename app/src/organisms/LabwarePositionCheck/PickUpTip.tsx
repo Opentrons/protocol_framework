@@ -53,7 +53,6 @@ export const PickUpTip = (
     isRobotMoving,
     existingOffsets,
     setErrorMessage,
-    robotType,
     protocolHasModules,
     currentStepIndex,
     step,
@@ -400,6 +399,7 @@ export const PickUpTip = (
     <Flex flexDirection={DIRECTION_COLUMN}>
       {initialPosition != null ? (
         <JogToWell
+          {...props}
           header={t('pick_up_tip_from_rack_in_location', {
             location: displayLocation,
           })}
@@ -428,7 +428,6 @@ export const PickUpTip = (
           handleJog={handleJog}
           initialPosition={initialPosition}
           existingOffset={existingOffset}
-          shouldUseMetalProbe={false}
         />
       ) : (
         <PrepareSpace
@@ -440,7 +439,6 @@ export const PickUpTip = (
           body={<UnorderedList items={instructions} />}
           labwareDef={labwareDef}
           confirmPlacement={handleConfirmPlacement}
-          robotType={robotType}
           location={step.location}
         />
       )}

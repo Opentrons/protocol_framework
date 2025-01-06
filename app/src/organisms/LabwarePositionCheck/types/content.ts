@@ -2,7 +2,6 @@ import type { Dispatch } from 'react'
 import type {
   CompletedProtocolAnalysis,
   LabwareDefinition2,
-  RobotType,
 } from '@opentrons/shared-data'
 import type {
   LabwareOffset,
@@ -19,15 +18,14 @@ import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck'
 
 // TOME TODO: REDUX! Pretty much all of this should be in redux or in the data layer.
 
-export interface LPCWizardContentProps extends LPCFlowsProps {
+export interface LPCWizardContentProps
+  extends Omit<LPCFlowsProps, 'robotType'> {
   step: LabwarePositionCheckStep
   protocolName: string
   protocolData: CompletedProtocolAnalysis
   proceed: () => void
   dispatch: Dispatch<LPCWizardAction>
   state: LPCWizardState
-  // TOME TODO: Get rid of this and all supportive logic now that flows are basically Flex only.
-  shouldUseMetalProbe: boolean
   currentStepIndex: number
   totalStepCount: number
   showConfirmation: boolean
@@ -44,8 +42,6 @@ export interface LPCWizardContentProps extends LPCFlowsProps {
   protocolHasModules: boolean
   handleApplyOffsets: (offsets: LabwareOffsetCreateData[]) => void
   isApplyingOffsets: boolean
-  // TOME TODO: Can safely remove this too.
-  robotType: RobotType
 }
 
 export interface LabwareToOrder {

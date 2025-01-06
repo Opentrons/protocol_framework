@@ -25,8 +25,10 @@ import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/
 
 const SUPPORT_EMAIL = 'support@opentrons.com'
 
-export function FatalError(props: LPCWizardContentProps): JSX.Element {
-  const { errorMessage, shouldUseMetalProbe, onCloseClick } = props
+export function FatalError({
+  errorMessage,
+  onCloseClick,
+}: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation(['labware_position_check', 'shared', 'branded'])
   return (
     <Flex
@@ -45,15 +47,13 @@ export function FatalError(props: LPCWizardContentProps): JSX.Element {
       <ErrorHeader>
         {i18n.format(t('shared:something_went_wrong'), 'sentenceCase')}
       </ErrorHeader>
-      {shouldUseMetalProbe ? (
-        <LegacyStyledText
-          as="p"
-          fontWeight={TYPOGRAPHY.fontWeightSemiBold}
-          textAlign={TEXT_ALIGN_CENTER}
-        >
-          {t('remove_probe_before_exit')}
-        </LegacyStyledText>
-      ) : null}
+      <LegacyStyledText
+        as="p"
+        fontWeight={TYPOGRAPHY.fontWeightSemiBold}
+        textAlign={TEXT_ALIGN_CENTER}
+      >
+        {t('remove_probe_before_exit')}
+      </LegacyStyledText>
       <LegacyStyledText as="p" textAlign={TEXT_ALIGN_CENTER}>
         {t('branded:help_us_improve_send_error_report', {
           support_email: SUPPORT_EMAIL,
