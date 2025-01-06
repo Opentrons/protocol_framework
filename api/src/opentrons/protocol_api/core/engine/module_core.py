@@ -37,6 +37,7 @@ from ..module import (
     AbstractHeaterShakerCore,
     AbstractMagneticBlockCore,
     AbstractAbsorbanceReaderCore,
+    AbstractFlexStackerCore,
 )
 from .exceptions import InvalidMagnetEngageHeightError
 
@@ -692,3 +693,17 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
             self.module_id
         )
         return abs_state.is_lid_on
+
+
+class FlexStackerCore(ModuleCore, AbstractFlexStackerCore):
+    """Flex Stacker core logic implementation for Python protocols."""
+    
+    _sync_module_hardware: SynchronousAdapter[hw_modules.FlexStacker]
+
+    def retrieve(self) -> None:
+        """Retrieve a labware from the bottom of the Flex Stacker's stack."""
+        pass
+
+    def store(self, labware_id: str) -> None:
+        """Store a labware at the bottom of the Flex Stacker's stack."""
+        pass
