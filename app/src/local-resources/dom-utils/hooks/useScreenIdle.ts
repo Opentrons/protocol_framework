@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { SLEEP_NEVER_MS } from '/app/local-resources/dom-utils'
 
 const USER_EVENTS: Array<keyof DocumentEventMap> = [
   'click',
@@ -29,7 +30,7 @@ const DEFAULT_OPTIONS = {
  * @param {object} options (events that the app need to check, initialState: initial state true => idle)
  * @returns {boolean}
  */
-export function useIdle(
+export function useScreenIdle(
   idleTime: number,
   options?: Partial<{
     events: Array<keyof DocumentEventMap>
@@ -48,9 +49,12 @@ export function useIdle(
         window.clearTimeout(idleTimer.current)
       }
 
-      idleTimer.current = window.setTimeout(() => {
-        setIdle(true)
-      }, idleTime)
+      // See RQA-3813 and associated PR.
+      if (idleTime !== SLEEP_NEVER_MS) {
+        idleTimer.current = window.setTimeout(() => {
+          setIdle(true)
+        }, idleTime)
+      }
     }
 
     events.forEach(event => {

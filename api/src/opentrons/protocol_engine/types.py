@@ -813,6 +813,10 @@ class LoadedLabware(BaseModel):
     location: LabwareLocation = Field(
         ..., description="The labware's current location."
     )
+    lid_id: Optional[str] = Field(
+        None,
+        description=("Labware ID of a Lid currently loaded on top of the labware."),
+    )
     offsetId: Optional[str] = Field(
         None,
         description=(

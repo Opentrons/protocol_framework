@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { css } from 'styled-components'
 
 import { Btn } from '../../primitives'
@@ -16,6 +15,7 @@ import {
 } from '../..'
 import { Icon } from '../../icons'
 
+import type { ReactNode } from 'react'
 import type { StyleProps } from '../../primitives'
 import type { IconName } from '../../icons'
 
@@ -126,7 +126,7 @@ interface LargeButtonProps extends StyleProps {
   type?: 'submit'
   onClick?: () => void
   buttonType?: LargeButtonTypes
-  buttonText: React.ReactNode
+  buttonText: ReactNode
   iconName?: IconName
   disabled?: boolean
   /** aria-disabled for displaying snack bar. */

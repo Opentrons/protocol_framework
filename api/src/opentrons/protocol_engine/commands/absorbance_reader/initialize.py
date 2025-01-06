@@ -12,6 +12,7 @@ from opentrons.protocol_engine.types import ABSMeasureMode
 from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ...errors.error_occurrence import ErrorOccurrence
 from ...errors import InvalidWavelengthError
+from ...state import update_types
 
 if TYPE_CHECKING:
     from opentrons.protocol_engine.state.state import StateView
@@ -60,6 +61,7 @@ class InitializeImpl(
 
     async def execute(self, params: InitializeParams) -> SuccessData[InitializeResult]:
         """Initiate a single absorbance measurement."""
+        state_update = update_types.StateUpdate()
         abs_reader_substate = self._state_view.modules.get_absorbance_reader_substate(
             module_id=params.moduleId
         )
@@ -120,9 +122,14 @@ class InitializeImpl(
                 reference_wavelength=params.referenceWavelength,
             )
 
-        return SuccessData(
-            public=InitializeResult(),
+        state_update.initialize_absorbance_reader(
+            abs_reader_substate.module_id,
+            params.measureMode,
+            params.sampleWavelengths,
+            params.referenceWavelength,
         )
+
+        return SuccessData(public=InitializeResult(), state_update=state_update)
 
 
 class Initialize(BaseCommand[InitializeParams, InitializeResult, ErrorOccurrence]):

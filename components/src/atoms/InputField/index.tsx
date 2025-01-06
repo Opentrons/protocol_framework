@@ -20,6 +20,7 @@ import type {
   ChangeEventHandler,
   FocusEvent,
   MouseEvent,
+  MutableRefObject,
   ReactNode,
 } from 'react'
 import type { IconName } from '../../icons'
@@ -81,7 +82,7 @@ export interface InputFieldProps {
   /** small or medium input field height, relevant only */
   size?: 'medium' | 'small'
   /** react useRef to control input field instead of react event */
-  ref?: React.MutableRefObject<HTMLInputElement | null>
+  ref?: MutableRefObject<HTMLInputElement | null>
   /** optional IconName to display icon aligned to left of input field */
   leftIcon?: IconName
   /** if true, show delete icon aligned to right of input field */

@@ -2,19 +2,27 @@ import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
+import { css } from 'styled-components'
+
 import {
-  useHoverTooltip,
-  TOOLTIP_TOP,
-  TOOLTIP_FIXED,
-  Tooltip,
+  ALIGN_CENTER,
+  BORDERS,
   COLORS,
   DIRECTION_COLUMN,
+  DISPLAY_FLEX,
   Flex,
-  POSITION_ABSOLUTE,
-  BORDERS,
+  Icon,
+  JUSTIFY_CENTER,
   NO_WRAP,
-  useOnClickOutside,
+  POSITION_ABSOLUTE,
   SecondaryButton,
+  SPACING,
+  StyledText,
+  TOOLTIP_FIXED,
+  TOOLTIP_TOP,
+  Tooltip,
+  useHoverTooltip,
+  useOnClickOutside,
 } from '@opentrons/components'
 import {
   ABSORBANCE_READER_TYPE,
@@ -23,6 +31,7 @@ import {
   TEMPERATURE_MODULE_TYPE,
   THERMOCYCLER_MODULE_TYPE,
 } from '@opentrons/shared-data'
+
 import {
   actions as stepsActions,
   getIsMultiSelectMode,
@@ -40,7 +49,6 @@ import {
   getEnableAbsorbanceReader,
   getEnableComment,
 } from '../../../../feature-flags/selectors'
-
 import { AddStepOverflowButton } from './AddStepOverflowButton'
 
 import type { MouseEvent } from 'react'
@@ -48,7 +56,11 @@ import type { ThunkDispatch } from 'redux-thunk'
 import type { BaseState } from '../../../../types'
 import type { StepType } from '../../../../form-types'
 
-export function AddStepButton(): JSX.Element {
+interface AddStepButtonProps {
+  hasText: boolean
+}
+
+export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
   const { t } = useTranslation(['tooltip', 'button'])
   const enableComment = useSelector(getEnableComment)
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
@@ -151,16 +163,8 @@ export function AddStepButton(): JSX.Element {
 
       {showStepOverflowMenu ? (
         <Flex
-          position={POSITION_ABSOLUTE}
-          zIndex={5}
+          css={STEP_OVERFLOW_MENU_STYLE}
           ref={overflowWrapperRef}
-          left="19.5rem"
-          whiteSpace={NO_WRAP}
-          bottom="4.2rem"
-          borderRadius={BORDERS.borderRadius8}
-          boxShadow="0px 1px 3px rgba(0, 0, 0, 0.2)"
-          backgroundColor={COLORS.white}
-          flexDirection={DIRECTION_COLUMN}
           onClick={(e: MouseEvent) => {
             e.preventDefault()
             e.stopPropagation()
@@ -176,6 +180,10 @@ export function AddStepButton(): JSX.Element {
         </Tooltip>
       )}
       <SecondaryButton
+        display={DISPLAY_FLEX}
+        justifyContent={JUSTIFY_CENTER}
+        alignItems={ALIGN_CENTER}
+        gridGap={SPACING.spacing10}
         width="100%"
         {...targetProps}
         id="AddStepButton"
@@ -184,8 +192,21 @@ export function AddStepButton(): JSX.Element {
         }}
         disabled={isStepCreationDisabled}
       >
-        {t('button:add_step')}
+        <Icon name="plus" size="1rem" />
+        {hasText ? <StyledText>{t('button:add_step')}</StyledText> : null}
       </SecondaryButton>
     </>
   )
 }
+
+const STEP_OVERFLOW_MENU_STYLE = css`
+  position: ${POSITION_ABSOLUTE};
+  z-index: 5;
+  right: -7.75rem;
+  white-space: ${NO_WRAP};
+  bottom: 4.2rem;
+  border-radius: ${BORDERS.borderRadius8};
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
+  background-color: ${COLORS.white};
+  flex-direction: ${DIRECTION_COLUMN};
+`

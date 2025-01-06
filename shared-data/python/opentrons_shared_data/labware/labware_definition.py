@@ -112,6 +112,7 @@ class DisplayCategory(str, Enum):
     adapter = "adapter"
     other = "other"
     lid = "lid"
+    system = "system"
 
 
 class LabwareRole(str, Enum):
@@ -120,6 +121,7 @@ class LabwareRole(str, Enum):
     adapter = "adapter"
     maintenance = "maintenance"
     lid = "lid"
+    system = "system"
 
 
 class Metadata(BaseModel):
@@ -179,6 +181,11 @@ class Parameters(BaseModel):
     )
     magneticModuleEngageHeight: Optional[_NonNegativeNumber] = Field(
         None, description="Distance to move magnetic module magnets to engage"
+    )
+    isDeckSlotCompatible: Optional[bool] = Field(
+        None,
+        description="Flag marking whether a labware is compatible with placement"
+        " or load into a base deck slot, will be treated as true if unspecified.",
     )
 
 
@@ -729,4 +736,13 @@ class LabwareDefinition(BaseModel):
     innerLabwareGeometry: Optional[Dict[str, InnerWellGeometry]] = Field(
         None,
         description="A dictionary holding all unique inner well geometries in a labware.",
+    )
+    stackLimit: Optional[int] = Field(
+        None,
+        description="The limit representing the maximum stack size for a given labware,"
+        " defaults to 1 when unspecified indicating a single labware with no labware below it.",
+    )
+    compatibleParentLabware: Optional[List[str]] = Field(
+        None,
+        description="List of parent Labware on which a labware may be loaded, primarily the labware which owns a lid.",
     )

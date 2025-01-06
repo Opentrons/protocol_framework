@@ -608,6 +608,7 @@ def minimal_labware_def() -> LabwareDefinition:
             "displayCategory": "other",
             "displayVolumeUnits": "mL",
         },
+        "allowedRoles": ["labware"],
         "cornerOffsetFromSlot": {"x": 10, "y": 10, "z": 5},
         "parameters": {
             "isTiprack": False,

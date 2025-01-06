@@ -28,6 +28,7 @@ import { useAnnouncements } from '../../organisms/AnnouncementModal/announcement
 import { getLocalStorageItem, localStorageAnnouncementKey } from '../../persist'
 import welcomeImage from '../../assets/images/welcome_page.png'
 
+import type { ChangeEvent, ComponentProps } from 'react'
 import type { ThunkDispatch } from '../../types'
 
 export function Landing(): JSX.Element {
@@ -77,9 +78,7 @@ export function Landing(): JSX.Element {
     }
   }, [metadata, navigate])
 
-  const loadFile = (
-    fileChangeEvent: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const loadFile = (fileChangeEvent: ChangeEvent<HTMLInputElement>): void => {
     dispatch(loadFileActions.loadProtocolFile(fileChangeEvent))
   }
 
@@ -165,7 +164,7 @@ const ButtonText = styled.span`
   font-weight: ${TYPOGRAPHY.fontWeightSemiBold};
 `
 
-const StyledNavLink = styled(NavLink)<React.ComponentProps<typeof NavLink>>`
+const StyledNavLink = styled(NavLink)<ComponentProps<typeof NavLink>>`
   color: ${COLORS.white};
   text-decoration: none;
 `

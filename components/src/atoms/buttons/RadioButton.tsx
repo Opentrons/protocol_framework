@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import styled, { css } from 'styled-components'
 import { Flex } from '../../primitives'
 import { COLORS, BORDERS } from '../../helix-design-system'
@@ -12,14 +11,16 @@ import {
   Icon,
   StyledText,
 } from '../../index'
+
+import type { ChangeEventHandler, ReactNode } from 'react'
+import type { FlattenSimpleInterpolation } from 'styled-components'
 import type { IconName } from '../../icons'
 import type { StyleProps } from '../../primitives'
-import type { FlattenSimpleInterpolation } from 'styled-components'
 
 interface RadioButtonProps extends StyleProps {
-  buttonLabel: string | React.ReactNode
+  buttonLabel: string | ReactNode
   buttonValue: string | number
-  onChange: React.ChangeEventHandler<HTMLInputElement>
+  onChange: ChangeEventHandler<HTMLInputElement>
   disabled?: boolean
   iconName?: IconName
   isSelected?: boolean

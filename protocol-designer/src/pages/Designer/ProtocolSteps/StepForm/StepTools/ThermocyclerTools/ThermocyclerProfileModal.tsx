@@ -17,6 +17,7 @@ import {
 import { ThermocyclerCycle } from './ThermocyclerCycle'
 import { ThermocyclerStep } from './ThermocyclerStep'
 
+import type { Dispatch, SetStateAction } from 'react'
 import type { FormData } from '../../../../../../form-types'
 import type { FieldPropsByName } from '../../types'
 import type { ThermocyclerCycleType } from './ThermocyclerCycle'
@@ -29,7 +30,7 @@ export type ThermocyclerStepTypeGeneral =
 interface ThermocyclerModalProps {
   formData: FormData
   propsForFields: FieldPropsByName
-  setShowProfileModal: React.Dispatch<React.SetStateAction<boolean>>
+  setShowProfileModal: Dispatch<SetStateAction<boolean>>
 }
 
 export function ThermocyclerProfileModal(
