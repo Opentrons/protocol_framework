@@ -2,14 +2,14 @@ import styled, { css } from 'styled-components'
 
 import { Icon } from '../icons'
 import { Box, Btn, Flex } from '../primitives'
-import { LegacyStyledText } from '../atoms'
+import { StyledText } from '../atoms'
 import {
   ALIGN_CENTER,
   DISPLAY_FLEX,
   JUSTIFY_CENTER,
   JUSTIFY_SPACE_BETWEEN,
 } from '../styles'
-import { SPACING, TYPOGRAPHY } from '../ui-style-constants'
+import { SPACING } from '../ui-style-constants'
 import { COLORS } from '../helix-design-system'
 
 import type { MouseEventHandler, ReactNode } from 'react'
@@ -48,13 +48,9 @@ export const ModalHeader = (props: ModalHeaderProps): JSX.Element => {
           {titleElement1}
           {titleElement2}
           {/* TODO (nd: 08/07/2024) Convert to StyledText once designs are resolved */}
-          <LegacyStyledText
-            as="h3"
-            fontWeight={TYPOGRAPHY.fontWeightSemiBold}
-            color={color}
-          >
+          <StyledText color={color} desktopStyle="bodyLargeSemiBold">
             {title}
-          </LegacyStyledText>
+          </StyledText>
         </Flex>
         {closeButton != null ||
           (onClose != null && (
