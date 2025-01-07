@@ -33,6 +33,11 @@ from .errors import (
     AbsorbanceReaderDisconnectedError,
 )
 
+# TODO: update this after FlexStacker is implemented
+from typing import NewType
+
+FlexStacker = NewType("FlexStacker", AbstractModule)
+
 
 __all__ = [
     "MODULE_TYPE_BY_NAME",
@@ -62,7 +67,6 @@ __all__ = [
     "AbsorbanceReader",
     "AbsorbanceReaderStatus",
     "AbsorbanceReaderDisconnectedError",
-    "ModuleDisconnectedCallback",
     "FlexStacker",
     "FlexStackerStatus",
     "PlatformState",

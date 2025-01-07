@@ -704,6 +704,6 @@ class FlexStackerCore(ModuleCore, AbstractFlexStackerCore):
         """Retrieve a labware from the bottom of the Flex Stacker's stack."""
         pass
 
-    def store(self, labware_id: str) -> None:
+    def store(self) -> None:
         """Store a labware at the bottom of the Flex Stacker's stack."""
         pass
