@@ -17,6 +17,7 @@ from opentrons.protocol_engine.commands import (
     heater_shaker as hs_commands,
     temperature_module as temp_commands,
     thermocycler as tc_commands,
+    absorbance_reader as ar_commands,
 )
 from opentrons.protocol_engine.types import (
     DeckSlotLocation,
@@ -44,6 +45,8 @@ from opentrons.protocol_engine.state.module_substates import (
     TemperatureModuleSubState,
     ThermocyclerModuleId,
     ThermocyclerModuleSubState,
+    AbsorbanceReaderSubState,
+    AbsorbanceReaderId,
     ModuleSubStateType,
 )
 
@@ -721,5 +724,91 @@ def test_handle_thermocycler_lid_commands(
             is_lid_open=False,
             target_block_temperature=None,
             target_lid_temperature=None,
+        )
+    }
+
+
+def test_handle_absorbance_reader_commands(
+    abs_reader_v1_def: ModuleDefinition,
+) -> None:
+    """It should update absorbance reader state."""
+    load_module_cmd = commands.LoadModule.model_construct(  # type: ignore[call-arg]
+        params=commands.LoadModuleParams(
+            model=ModuleModel.ABSORBANCE_READER_V1,
+            location=DeckSlotLocation(slotName=DeckSlotName.SLOT_1),
+        ),
+        result=commands.LoadModuleResult(
+            moduleId="module-id",
+            model=ModuleModel.ABSORBANCE_READER_V1,
+            serialNumber="serial-number",
+            definition=abs_reader_v1_def,
+        ),
+    )
+
+    initialize_reader = ar_commands.Initialize.model_construct(  # type: ignore[call-arg]
+        params=ar_commands.InitializeParams(
+            moduleId="module-id", measureMode="single", sampleWavelengths=[1]
+        ),
+        result=ar_commands.InitializeResult(),
+    )
+    open_lid = ar_commands.OpenLid.model_construct(  # type: ignore[call-arg]
+        params=ar_commands.OpenLidParams(moduleId="module-id"),
+        result=ar_commands.OpenLidResult(),
+    )
+
+    close_lid = ar_commands.CloseLid.model_construct(  # type: ignore[call-arg]
+        params=ar_commands.CloseLidParams(moduleId="module-id"),
+        result=ar_commands.CloseLidResult(),
+    )
+
+    subject = ModuleStore(
+        Config(
+            use_simulated_deck_config=False,
+            robot_type="OT-3 Standard",
+            deck_type=DeckType.OT3_STANDARD,
+        ),
+        deck_fixed_labware=[],
+    )
+
+    subject.handle_action(actions.SucceedCommandAction(command=load_module_cmd))
+    subject.handle_action(actions.SucceedCommandAction(command=initialize_reader))
+    assert subject.state.substate_by_module_id == {
+        "module-id": AbsorbanceReaderSubState(
+            module_id=AbsorbanceReaderId("module-id"),
+            is_lid_on=True,
+            configured=False,
+            measured=False,
+            data=None,
+            configured_wavelengths=None,
+            measure_mode=None,
+            reference_wavelength=None,
+        )
+    }
+
+    subject.handle_action(actions.SucceedCommandAction(command=open_lid))
+    assert subject.state.substate_by_module_id == {
+        "module-id": AbsorbanceReaderSubState(
+            module_id=AbsorbanceReaderId("module-id"),
+            is_lid_on=True,
+            configured=False,
+            measured=False,
+            data=None,
+            configured_wavelengths=None,
+            measure_mode=None,
+            reference_wavelength=None,
+        )
+    }
+
+    subject.handle_action(actions.SucceedCommandAction(command=close_lid))
+    assert subject.state.substate_by_module_id == {
+        "module-id": AbsorbanceReaderSubState(
+            module_id=AbsorbanceReaderId("module-id"),
+            is_lid_on=True,  # is this a bug?
+            configured=False,
+            measured=False,
+            data=None,
+            configured_wavelengths=None,
+            measure_mode=None,
+            reference_wavelength=None,
         )
     }
