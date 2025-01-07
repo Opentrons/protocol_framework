@@ -2,11 +2,11 @@
 import pytest
 
 from opentrons_shared_data.labware.labware_definition import (
+    LabwareDefinition,
     LabwareRole,
     OverlapOffset,
     Parameters,
 )
-from opentrons.protocols.models import LabwareDefinition
 
 from opentrons.protocol_engine.resources import labware_validation as subject
 
