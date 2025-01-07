@@ -25,7 +25,11 @@ import { toggleNewProtocolModal } from '../../navigation/actions'
 import { useKitchen } from '../../organisms/Kitchen/hooks'
 import { getHasOptedIn } from '../../analytics/selectors'
 import { useAnnouncements } from '../../organisms/AnnouncementModal/announcements'
-import { getLocalStorageItem, localStorageAnnouncementKey } from '../../persist'
+import {
+  getLocalStorageItem,
+  localStorageAnnouncementKey,
+  setLocalStorageItem,
+} from '../../persist'
 import welcomeImage from '../../assets/images/welcome_page.png'
 
 import type { ChangeEvent, ComponentProps } from 'react'
@@ -39,7 +43,7 @@ export function Landing(): JSX.Element {
   const [showAnnouncementModal, setShowAnnouncementModal] = useState<boolean>(
     false
   )
-  const { hasOptedIn } = useSelector(getHasOptedIn)
+  const { hasOptedIn, appVersion } = useSelector(getHasOptedIn)
   const { bakeToast, eatToast } = useKitchen()
   const announcements = useAnnouncements()
   const lastAnnouncement = announcements[announcements.length - 1]
@@ -52,7 +56,11 @@ export function Landing(): JSX.Element {
     hasOptedIn != null
 
   useEffect(() => {
-    if (userHasNotSeenAnnouncement) {
+    if (
+      userHasNotSeenAnnouncement &&
+      appVersion != null &&
+      hasOptedIn != null
+    ) {
       const toastId = bakeToast(
         t('learn_more', { version: process.env.OT_PD_VERSION }) as string,
         INFO_TOAST,
@@ -60,6 +68,9 @@ export function Landing(): JSX.Element {
           heading: t('updated_protocol_designer'),
           closeButton: true,
           linkText: t('view_release_notes'),
+          onClose: () => {
+            setLocalStorageItem(localStorageAnnouncementKey, announcementKey)
+          },
           onLinkClick: () => {
             eatToast(toastId)
             setShowAnnouncementModal(true)
@@ -69,7 +80,7 @@ export function Landing(): JSX.Element {
         }
       )
     }
-  }, [userHasNotSeenAnnouncement])
+  }, [userHasNotSeenAnnouncement, appVersion, hasOptedIn])
 
   useEffect(() => {
     if (metadata?.created != null) {
