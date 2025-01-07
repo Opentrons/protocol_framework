@@ -17,6 +17,7 @@ from typing import (
 from typing_extensions import TypedDict
 from pathlib import Path
 
+from opentrons.drivers.flex_stacker.types import LimitSwitchStatus, PlatformStatus, StackerAxis
 from opentrons.drivers.rpi_drivers.types import USBPort
 
 if TYPE_CHECKING:
@@ -237,3 +238,55 @@ class LidStatus(str, Enum):
     OFF = "off"
     UNKNOWN = "unknown"
     ERROR = "error"
+
+
+class FlexStackerStatus(str, Enum):
+    IDLE = "idle"
+    RUNNING = "running"
+    ERROR = "error"
+
+
+class PlatformState(str, Enum):
+    UNKNOWN = "unknown"
+    EXTENDED = "extended"
+    RETRACTED = "retracted"
+
+    @classmethod
+    def from_status(cls, status: PlatformStatus) -> "PlatformState":
+        """Get the state from the platform status."""
+        if status.E and not status.R:
+            return PlatformState.EXTENDED
+        if status.R and not status.E:
+            return PlatformState.RETRACTED
+        return PlatformState.UNKNOWN
+
+
+class StackerAxisState(str, Enum):
+    UNKNOWN = "unknown"
+    EXTENDED = "extended"
+    RETRACTED = "retracted"
+
+    @classmethod
+    def from_status(
+        cls, status: LimitSwitchStatus, axis: StackerAxis
+    ) -> "StackerAxisState":
+        """Get the axis state from the limit switch status."""
+        match axis:
+            case StackerAxis.X:
+                if status.XE and not status.XR:
+                    return StackerAxisState.EXTENDED
+                if status.XR and not status.XE:
+                    return StackerAxisState.RETRACTED
+            case StackerAxis.Z:
+                if status.ZE and not status.ZR:
+                    return StackerAxisState.EXTENDED
+                if status.ZR and not status.ZE:
+                    return StackerAxisState.RETRACTED
+            case StackerAxis.L:
+                return (
+                    StackerAxisState.EXTENDED
+                    if status.LR
+                    else StackerAxisState.RETRACTED
+                )
+        return StackerAxisState.UNKNOWN
+

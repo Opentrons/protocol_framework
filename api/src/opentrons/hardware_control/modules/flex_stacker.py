@@ -5,9 +5,7 @@ import logging
 from typing import Dict, Optional, Mapping
 
 from opentrons.drivers.flex_stacker.types import (
-    PlatformState,
     StackerAxis,
-    StackerAxisState,
 )
 from opentrons.drivers.rpi_drivers.types import USBPort
 from opentrons.drivers.flex_stacker.driver import FlexStackerDriver
@@ -17,8 +15,11 @@ from opentrons.hardware_control.execution_manager import ExecutionManager
 from opentrons.hardware_control.poller import Reader, Poller
 from opentrons.hardware_control.modules import mod_abc, update
 from opentrons.hardware_control.modules.types import (
+    FlexStackerStatus,
     ModuleDisconnectedCallback,
     ModuleType,
+    PlatformState,
+    StackerAxisState,
     UploadFunction,
     LiveData,
 )
@@ -141,9 +142,6 @@ class FlexStacker(mod_abc.AbstractModule):
     def model(self) -> str:
         return self._model_from_revision(self._device_info.get("model"))
 
-    def bootloader(self) -> UploadFunction:
-        return update.upload_via_dfu
-
     @property
     def platform_state(self) -> PlatformState:
         """The state of the platform."""
@@ -164,9 +162,19 @@ class FlexStacker(mod_abc.AbstractModule):
         return self._device_info
 
     @property
+    def status(self) -> FlexStackerStatus:
+        """Module status or error state details."""
+        # TODO: Implement getting device status from the stacker
+        return FlexStackerStatus.IDLE
+
+    @property
+    def is_simulated(self) -> bool:
+        return isinstance(self._driver, SimulatingDriver)
+
+    @property
     def live_data(self) -> LiveData:
         return {
-            "status": self.status,
+            "status": self.status.value,
             "data": {
                 "platformState": self.platform_state.value,
                 "axisStateX": self.limit_switch_status[StackerAxis.X].value,
@@ -177,21 +185,15 @@ class FlexStacker(mod_abc.AbstractModule):
             },
         }
 
-    @property
-    def status(self) -> str:
-        """Module status or error state details."""
-        return "idle"
-
-    @property
-    def is_simulated(self) -> bool:
-        return isinstance(self._driver, SimulatingDriver)
-
     async def prep_for_update(self) -> str:
         await self._poller.stop()
         await self._driver.stop_motors()
         await self._driver.enter_programming_mode()
         dfu_info = await update.find_dfu_device(pid=DFU_PID, expected_device_count=2)
         return dfu_info
+
+    def bootloader(self) -> UploadFunction:
+        return update.upload_via_dfu
 
     async def deactivate(self, must_be_running: bool = True) -> None:
         await self._driver.stop_motors()

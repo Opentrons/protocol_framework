@@ -20,6 +20,9 @@ from .types import (
     MagneticStatus,
     HeaterShakerStatus,
     AbsorbanceReaderStatus,
+    PlatformState,
+    StackerAxisState,
+    FlexStackerStatus,
     SpeedStatus,
     LiveData,
 )
@@ -57,4 +60,7 @@ __all__ = [
     "AbsorbanceReaderDisconnectedError",
     "ModuleDisconnectedCallback",
     "FlexStacker",
+    "FlexStackerStatus",
+    "PlatformState",
+    "StackerAxisState",
 ]

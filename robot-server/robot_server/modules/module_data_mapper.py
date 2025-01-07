@@ -12,6 +12,9 @@ from opentrons.hardware_control.modules import (
     HeaterShakerStatus,
     SpeedStatus,
     AbsorbanceReaderStatus,
+    PlatformState,
+    StackerAxisState,
+    FlexStackerStatus,
 )
 from opentrons.hardware_control.modules.magdeck import OFFSET_TO_LABWARE_BOTTOM
 from opentrons.drivers.types import (
@@ -160,12 +163,14 @@ class ModuleDataMapper:
         elif module_type == ModuleType.FLEX_STACKER:
             module_cls = FlexStackerModule
             module_data = FlexStackerModuleData(
-                status=live_data["status"],
-                plarformState=cast(str, live_data.get("platformState")),
-                axisStateX=cast(str, live_data.get("axisStateX")),
-                axisStateZ=cast(str, live_data.get("axisStateZ")),
-                axisStateL=cast(str, live_data.get("axisStateL")),
-                hopperDoorClosed=cast(bool, live_data.get("hopperDoorClosed")),
+                status=FlexStackerStatus(live_data["status"]),
+                platformState=cast(
+                    PlatformState, live_data["data"].get("platformState")
+                ),
+                axisStateX=cast(StackerAxisState, live_data["data"].get("axisStateX")),
+                axisStateZ=cast(StackerAxisState, live_data["data"].get("axisStateZ")),
+                axisStateL=cast(StackerAxisState, live_data["data"].get("axisStateL")),
+                hopperDoorClosed=cast(bool, live_data["data"].get("hopperDoorClosed")),
             )
         else:
             assert False, f"Invalid module type {module_type}"

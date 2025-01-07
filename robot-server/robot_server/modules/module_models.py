@@ -12,6 +12,8 @@ from opentrons.hardware_control.modules import (
     HeaterShakerStatus,
     SpeedStatus,
     AbsorbanceReaderStatus,
+    PlatformState,
+    StackerAxisState,
 )
 from opentrons.drivers.types import (
     ThermocyclerLidStatus,
@@ -358,10 +360,16 @@ class FlexStackerModuleData(BaseModel):
         ...,
         description="Overall status of the module.",
     )
-    plarformState: str = Field(..., description="The state of the platform.")
-    axisStateX: str = Field(..., description="The state of the X axis limit switches.")
-    axisStateZ: str = Field(..., description="The state of the Z axis limit switches.")
-    axisStateL: str = Field(..., description="The state of the L axis limit switches.")
+    platformState: PlatformState = Field(..., description="The state of the platform.")
+    axisStateX: StackerAxisState = Field(
+        ..., description="The state of the X axis limit switches."
+    )
+    axisStateZ: StackerAxisState = Field(
+        ..., description="The state of the Z axis limit switches."
+    )
+    axisStateL: StackerAxisState = Field(
+        ..., description="The state of the L axis limit switches."
+    )
     hopperDoorClosed: bool = Field(
         ..., description="Whether the hopper door is closed."
     )
