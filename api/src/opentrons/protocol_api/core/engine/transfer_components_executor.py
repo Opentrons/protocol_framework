@@ -478,6 +478,8 @@ class TransferComponentsExecutor:
 
     def _add_air_gap(self, air_gap_volume: float) -> None:
         """Add an air gap."""
+        if air_gap_volume == 0:
+            return
         aspirate_props = self._transfer_properties.aspirate
         # The maximum flow rate should be air_gap_volume per second
         flow_rate = min(
