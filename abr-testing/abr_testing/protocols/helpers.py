@@ -665,6 +665,12 @@ def get_parent(labware: Labware) -> Any:
 
 # Stacker Functions
 # TODO add more stacker functions and incorporate them into protocols
+def load_stacker_module(protocol: ProtocolContext, serial_number: str, slot:str, labware_name: str)-> StackerModule:
+    hardware = protocol._hw_manager.hardware
+    hardware.cache_instruments()
+    return StackerModule(serial_number = serial_number, labware_name = "", slot = slot, protocol=protocol)
+    
+    
 def unload_and_move(
     stacker: StackerModule,
     new_location: Labware | str,
