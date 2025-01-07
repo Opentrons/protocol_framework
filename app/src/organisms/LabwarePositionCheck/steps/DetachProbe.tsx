@@ -10,7 +10,6 @@ import {
 } from '@opentrons/components'
 import { getPipetteNameSpecs } from '@opentrons/shared-data'
 
-import { RobotMotionLoader } from '/app/organisms/LabwarePositionCheck/shared'
 import { GenericWizardTile } from '/app/molecules/GenericWizardTile'
 
 import detachProbe1 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_1.webm'
@@ -29,7 +28,6 @@ export const DetachProbe = ({
   const {
     moveToMaintenancePosition,
     createProbeDetachmentHandler,
-    isRobotMoving,
   } = commandUtils
 
   const pipette = protocolData.pipettes.find(p => p.id === step.pipetteId)
@@ -52,11 +50,6 @@ export const DetachProbe = ({
 
   // TOME TODO: Error instead of returning null.
   // if (pipetteName == null || pipetteMount == null) return null
-
-  if (isRobotMoving)
-    return (
-      <RobotMotionLoader header={t('shared:stand_back_robot_is_in_motion')} />
-    )
 
   return (
     <GenericWizardTile

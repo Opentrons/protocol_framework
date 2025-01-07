@@ -127,10 +127,15 @@ function LPCWizardHeader({
 function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('shared')
   const { step, ...restProps } = props
-  const { isExiting, errorMessage, showExitConfirmation } = props.commandUtils
+  const {
+    isExiting,
+    isRobotMoving,
+    errorMessage,
+    showExitConfirmation,
+  } = props.commandUtils
 
   // Handle special cases first.
-  if (isExiting) {
+  if (isExiting || isRobotMoving) {
     return <RobotMotionLoader header={t('stand_back_robot_is_in_motion')} />
   }
   if (errorMessage != null) {

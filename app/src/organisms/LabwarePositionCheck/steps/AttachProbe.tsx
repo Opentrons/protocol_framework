@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
+import { css } from 'styled-components'
+
 import {
   RESPONSIVENESS,
   SPACING,
@@ -7,9 +9,8 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { getPipetteNameSpecs } from '@opentrons/shared-data'
-import { css } from 'styled-components'
+
 import { ProbeNotAttached } from '/app/organisms/PipetteWizardFlows/ProbeNotAttached'
-import { RobotMotionLoader } from '/app/organisms/LabwarePositionCheck/shared'
 import { GenericWizardTile } from '/app/molecules/GenericWizardTile'
 
 import attachProbe1 from '/app/assets/videos/pipette-wizard-flows/Pipette_Attach_Probe_1.webm'
@@ -30,7 +31,6 @@ export function AttachProbe({
     moveToMaintenancePosition,
     setShowUnableToDetect,
     unableToDetect,
-    isRobotMoving,
     createProbeAttachmentHandler,
   } = commandUtils
 
@@ -63,11 +63,7 @@ export function AttachProbe({
   // TOME TODO: Instead of returning null, show an error.
   // if (pipetteName == null || pipetteMount == null) return null
 
-  if (isRobotMoving)
-    return (
-      <RobotMotionLoader header={t('shared:stand_back_robot_is_in_motion')} />
-    )
-  else if (unableToDetect)
+  if (unableToDetect)
     return (
       <ProbeNotAttached
         handleOnClick={handleProbeAttached}

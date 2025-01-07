@@ -10,7 +10,6 @@ import {
 } from '@opentrons/components'
 
 import {
-  RobotMotionLoader,
   PrepareSpace,
   JogToWell,
 } from '/app/organisms/LabwarePositionCheck/shared'
@@ -54,7 +53,6 @@ export function CheckItem(
     handleConfirmLwModulePlacement,
     handleConfirmLwFinalPosition,
     handleResetLwModulesOnDeck,
-    isRobotMoving,
   } = commandUtils
   const { workingOffsets } = state
   const { t } = useTranslation(['labware_position_check', 'shared'])
@@ -214,10 +212,6 @@ export function CheckItem(
       location
     )?.vector ?? IDENTITY_VECTOR
 
-  if (isRobotMoving)
-    return (
-      <RobotMotionLoader header={t('shared:stand_back_robot_is_in_motion')} />
-    )
   return (
     <Flex flexDirection={DIRECTION_COLUMN} minHeight="29.5rem">
       {initialPosition != null ? (

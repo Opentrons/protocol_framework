@@ -18,7 +18,7 @@ import {
   LegacyStyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { RobotMotionLoader } from '/app/organisms/LabwarePositionCheck/shared'
+
 import { WizardRequiredEquipmentList } from '/app/molecules/WizardRequiredEquipmentList'
 import { getLatestCurrentOffsets } from '/app/transformations/runs'
 import { NeedHelpLink } from '/app/molecules/OT2CalibrationNeedHelpLink'
@@ -46,7 +46,7 @@ export function BeforeBeginning({
   isOnDevice,
 }: LPCStepProps<BeforeBeginningStep>): JSX.Element {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
-  const { createStartLPCHandler, isRobotMoving } = commandUtils
+  const { createStartLPCHandler } = commandUtils
 
   const handleStartLPC = createStartLPCHandler(proceed)
 
@@ -61,12 +61,6 @@ export function BeforeBeginning({
     },
   ]
 
-  // TOME TODO: Render this above if possible.
-  if (isRobotMoving) {
-    return (
-      <RobotMotionLoader header={t('shared:stand_back_robot_is_in_motion')} />
-    )
-  }
   return (
     <TwoUpTileLayout
       title={t('shared:before_you_begin')}
