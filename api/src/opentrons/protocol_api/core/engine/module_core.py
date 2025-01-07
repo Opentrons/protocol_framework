@@ -697,7 +697,7 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
 
 class FlexStackerCore(ModuleCore, AbstractFlexStackerCore):
     """Flex Stacker core logic implementation for Python protocols."""
-    
+
     _sync_module_hardware: SynchronousAdapter[hw_modules.FlexStacker]
 
     def retrieve(self) -> None:

@@ -757,10 +757,8 @@ class ModuleView:
             expected_type=AbsorbanceReaderSubState,
             expected_name="Absorbance Reader",
         )
-    
-    def get_flex_stacker_substate(
-        self, module_id: str
-    ) -> FlexStackerSubState:
+
+    def get_flex_stacker_substate(self, module_id: str) -> FlexStackerSubState:
         """Return a `FlexStackerSubState` for the given Flex Stacker.
 
         Raises:

@@ -37,7 +37,7 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
     async def execute(self, params: StoreParams) -> SuccessData[StoreResult]:
         """Execute the labware storage command."""
         return SuccessData(public=StoreResult())
-    
+
 
 class Store(BaseCommand[StoreParams, StoreResult, ErrorOccurrence]):
     """A command to store a labware in a Flex Stacker."""
