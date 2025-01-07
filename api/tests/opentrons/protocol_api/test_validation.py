@@ -9,6 +9,7 @@ import re
 
 from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
 from opentrons_shared_data.labware.labware_definition import (
+    LabwareDefinition,
     LabwareRole,
     Parameters as LabwareDefinitionParameters,
 )
@@ -33,7 +34,6 @@ from opentrons.hardware_control.modules.types import (
     HeaterShakerModuleModel,
     ThermocyclerStep,
 )
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocols.api_support.util import APIVersionError
 from opentrons.protocol_api import (

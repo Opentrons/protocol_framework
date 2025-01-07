@@ -1,7 +1,9 @@
 """Validation file for labware role and location checking functions."""
 
-from opentrons_shared_data.labware.labware_definition import LabwareRole
-from opentrons.protocols.models import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import (
+    LabwareDefinition,
+    LabwareRole,
+)
 
 
 def is_flex_trash(load_name: str) -> bool:

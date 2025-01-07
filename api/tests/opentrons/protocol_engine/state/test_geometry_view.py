@@ -19,10 +19,10 @@ from opentrons.protocol_engine.state.update_types import (
 from opentrons_shared_data import get_shared_data_root, load_shared_data
 from opentrons_shared_data.deck.types import DeckDefinitionV5
 from opentrons_shared_data.deck import load as load_deck
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.labware.types import LabwareUri
 from opentrons_shared_data.pipette import pipette_definition
 from opentrons.calibration_storage.helpers import uri_from_details
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.types import Point, DeckSlotName, MountType, StagingSlotName
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.labware.labware_definition import (
