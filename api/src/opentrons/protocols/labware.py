@@ -169,21 +169,21 @@ def verify_definition(  # noqa: C901
         try:
             to_return = json.loads(contents)
         except json.JSONDecodeError as e:
-            raise NotALabwareError("invalid-json", [e])
+            raise NotALabwareError("invalid-json", [e]) from e
     try:
         schema_version = to_return["schemaVersion"]
     except KeyError as e:
-        raise NotALabwareError("no-schema-id", [e])
+        raise NotALabwareError("no-schema-id", [e]) from e
 
     try:
         schema = schemata_by_version[schema_version]
     except KeyError as e:
-        raise NotALabwareError("bad-schema-id", [e])
+        raise NotALabwareError("bad-schema-id", [e]) from e
 
     try:
         jsonschema.validate(to_return, schema)
     except jsonschema.ValidationError as e:
-        raise NotALabwareError("schema-mismatch", [e])
+        raise NotALabwareError("schema-mismatch", [e]) from e
 
     # we can type ignore this because if it passes the jsonschema it has
     # the correct structure
