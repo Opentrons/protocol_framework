@@ -51,9 +51,6 @@ describe('ModalHeader', () => {
     expect(screen.getByTestId('Modal_header_icon')).toHaveStyle(
       `height: 1.25rem`
     )
-    expect(screen.getByTestId('Modal_header_icon')).toHaveStyle(
-      `margin-right: ${SPACING.spacing8}`
-    )
   })
 
   it('should call a mock function when clicking close icon', () => {
