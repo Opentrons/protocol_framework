@@ -48,7 +48,6 @@ export const ModalHeader = (props: ModalHeaderProps): JSX.Element => {
           {icon != null && <Icon {...icon} data-testid="Modal_header_icon" />}
           {titleElement1}
           {titleElement2}
-          {/* TODO (nd: 08/07/2024) Convert to StyledText once designs are resolved */}
           <StyledText color={color} desktopStyle="bodyLargeSemiBold">
             {title}
           </StyledText>
