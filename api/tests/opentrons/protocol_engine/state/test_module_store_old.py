@@ -7,6 +7,8 @@ treating ModuleState as a private implementation detail.
 from typing import List, Set, cast, Dict, Optional
 
 import pytest
+
+from opentrons.protocol_engine.state import update_types
 from opentrons_shared_data.robot.types import RobotType
 from opentrons_shared_data.deck.types import DeckDefinitionV5
 from pytest_lazyfixture import lazy_fixture  # type: ignore[import-untyped]
@@ -756,6 +758,11 @@ def test_handle_absorbance_reader_commands(
         result=ar_commands.OpenLidResult(),
     )
 
+    read_data = ar_commands.ReadAbsorbance.model_construct(  # type: ignore[call-arg]
+        params=ar_commands.ReadAbsorbanceParams(moduleId="module-id"),
+        result=ar_commands.ReadAbsorbanceResult(data=None, fileIds=None),
+    )
+
     close_lid = ar_commands.CloseLid.model_construct(  # type: ignore[call-arg]
         params=ar_commands.CloseLidParams(moduleId="module-id"),
         result=ar_commands.CloseLidResult(),
@@ -770,45 +777,87 @@ def test_handle_absorbance_reader_commands(
         deck_fixed_labware=[],
     )
 
-    subject.handle_action(actions.SucceedCommandAction(command=load_module_cmd))
+    subject.handle_action(
+        actions.SucceedCommandAction(
+            command=load_module_cmd,
+            state_update=update_types.StateUpdate().initialize_absorbance_reader(
+                "module-id", "single", [1], None
+            ),
+        )
+    )
     subject.handle_action(actions.SucceedCommandAction(command=initialize_reader))
     assert subject.state.substate_by_module_id == {
         "module-id": AbsorbanceReaderSubState(
             module_id=AbsorbanceReaderId("module-id"),
             is_lid_on=True,
-            configured=False,
+            configured=True,
             measured=False,
             data=None,
-            configured_wavelengths=None,
-            measure_mode=None,
+            configured_wavelengths=[1],
+            measure_mode="single",  # type: ignore[arg-type]
             reference_wavelength=None,
         )
     }
 
-    subject.handle_action(actions.SucceedCommandAction(command=open_lid))
+    subject.handle_action(
+        actions.SucceedCommandAction(
+            command=open_lid,
+            state_update=update_types.StateUpdate().set_absorbance_reader_lid(
+                module_id="module-id", is_lid_on=False
+            ),
+        )
+    )
+    assert subject.state.substate_by_module_id == {
+        "module-id": AbsorbanceReaderSubState(
+            module_id=AbsorbanceReaderId("module-id"),
+            is_lid_on=False,
+            configured=True,
+            measured=True,
+            data=None,
+            configured_wavelengths=[1],
+            measure_mode="single",  # type: ignore[arg-type]
+            reference_wavelength=None,
+        )
+    }
+
+    subject.handle_action(
+        actions.SucceedCommandAction(
+            command=read_data,
+            state_update=update_types.StateUpdate().set_absorbance_reader_data(
+                module_id="module-id", read_result={1: {"A1": 1.2}}
+            ),
+        )
+    )
+    assert subject.state.substate_by_module_id == {
+        "module-id": AbsorbanceReaderSubState(
+            module_id=AbsorbanceReaderId("module-id"),
+            is_lid_on=False,
+            configured=True,
+            measured=True,
+            data={1: {"A1": 1.2}},
+            configured_wavelengths=[1],
+            measure_mode="single",  # type: ignore[arg-type]
+            reference_wavelength=None,
+        )
+    }
+
+    subject.handle_action(
+        actions.SucceedCommandAction(
+            command=close_lid,
+            state_update=update_types.StateUpdate().set_absorbance_reader_lid(
+                module_id="module-id", is_lid_on=True
+            ),
+        )
+    )
     assert subject.state.substate_by_module_id == {
         "module-id": AbsorbanceReaderSubState(
             module_id=AbsorbanceReaderId("module-id"),
             is_lid_on=True,
-            configured=False,
-            measured=False,
-            data=None,
-            configured_wavelengths=None,
-            measure_mode=None,
-            reference_wavelength=None,
-        )
-    }
-
-    subject.handle_action(actions.SucceedCommandAction(command=close_lid))
-    assert subject.state.substate_by_module_id == {
-        "module-id": AbsorbanceReaderSubState(
-            module_id=AbsorbanceReaderId("module-id"),
-            is_lid_on=True,  # is this a bug?
-            configured=False,
-            measured=False,
-            data=None,
-            configured_wavelengths=None,
-            measure_mode=None,
+            configured=True,
+            measured=True,
+            data={1: {"A1": 1.2}},
+            configured_wavelengths=[1],
+            measure_mode="single",  # type: ignore[arg-type]
             reference_wavelength=None,
         )
     }
