@@ -4,7 +4,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { renderWithProviders } from '../../testing/utils'
 import { COLORS } from '../../helix-design-system'
-import { SPACING } from '../../ui-style-constants'
 import { ALIGN_CENTER, JUSTIFY_CENTER } from '../../styles'
 import { ModalHeader } from '../ModalHeader'
 
