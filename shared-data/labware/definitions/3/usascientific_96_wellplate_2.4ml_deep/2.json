@@ -1223,11 +1223,11 @@
         },
         {
           "shape": "cuboidal",
-          "topXDimension": 8.20,
-          "topYDimension": 8.20,
+          "topXDimension": 8.2,
+          "topYDimension": 8.2,
           "bottomXDimension": 7.52,
           "bottomYDimension": 7.52,
-          "topHeight": 41.30,
+          "topHeight": 41.3,
           "bottomHeight": 2.63
         }
       ]

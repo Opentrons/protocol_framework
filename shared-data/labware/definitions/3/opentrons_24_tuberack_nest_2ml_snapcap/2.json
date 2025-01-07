@@ -363,7 +363,7 @@
         {
           "shape": "conical",
           "topDiameter": 8.74,
-          "bottomDiameter": 8.00,
+          "bottomDiameter": 8.0,
           "topHeight": 6.26,
           "bottomHeight": 3.98
         },

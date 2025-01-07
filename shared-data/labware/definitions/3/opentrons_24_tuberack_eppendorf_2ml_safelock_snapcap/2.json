@@ -345,7 +345,7 @@
           "shape": "conical",
           "topDiameter": 6.0,
           "bottomDiameter": 5.0,
-          "topHeight": 2.20,
+          "topHeight": 2.2,
           "bottomHeight": 1.45
         },
         {
@@ -353,12 +353,12 @@
           "topDiameter": 6.4,
           "bottomDiameter": 6.0,
           "topHeight": 2.45,
-          "bottomHeight": 2.20
+          "bottomHeight": 2.2
         },
         {
           "shape": "conical",
-          "topDiameter": 6.80,
-          "bottomDiameter": 6.40,
+          "topDiameter": 6.8,
+          "bottomDiameter": 6.4,
           "topHeight": 2.75,
           "bottomHeight": 2.45
         },
@@ -371,8 +371,8 @@
         },
         {
           "shape": "conical",
-          "topDiameter": 7.60,
-          "bottomDiameter": 7.20,
+          "topDiameter": 7.6,
+          "bottomDiameter": 7.2,
           "topHeight": 3.67,
           "bottomHeight": 3.14
         },
@@ -450,7 +450,7 @@
           "shape": "conical",
           "topDiameter": 9.2,
           "bottomDiameter": 9.1,
-          "topHeight": 32.50,
+          "topHeight": 32.5,
           "bottomHeight": 25.26
         },
         {
@@ -458,7 +458,7 @@
           "topDiameter": 9.6,
           "bottomDiameter": 9.2,
           "topHeight": 33.96,
-          "bottomHeight": 32.50
+          "bottomHeight": 32.5
         },
         {
           "shape": "conical",
