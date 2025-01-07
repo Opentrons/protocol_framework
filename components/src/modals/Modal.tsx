@@ -74,7 +74,7 @@ export const Modal = (props: ModalProps): JSX.Element => {
       title={title}
       titleElement1={titleElement1}
       titleElement2={titleElement2}
-      icon={['error', 'warning'].includes(type) ? modalIcon : undefined}
+      icon={['error', 'warning'].includes(type) ? modalIcon : null}
       color={COLORS.black90}
       backgroundColor={COLORS.white}
     />
