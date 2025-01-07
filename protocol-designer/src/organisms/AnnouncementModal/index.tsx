@@ -40,7 +40,9 @@ export const AnnouncementModal = (
   )
 
   const handleClick = (): void => {
-    if (onClose != null) onClose()
+    if (onClose != null) {
+      onClose()
+    }
     setLocalStorageItem(localStorageAnnouncementKey, announcementKey)
     setShowAnnouncementModal(false)
   }
