@@ -1397,7 +1397,11 @@ class OT3Controller(FlexBackend):
             return
 
         if hasattr(self, "_event_watcher"):
-            if loop.is_running() and self._event_watcher:
+            if (
+                loop.is_running()
+                and self._event_watcher
+                and not self._event_watcher.closed
+            ):
                 self._event_watcher.close()
 
         messenger = getattr(self, "_messenger", None)
