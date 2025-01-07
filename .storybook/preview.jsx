@@ -1,6 +1,8 @@
+import i18n from 'i18next'
+import { initReactI18next } from 'react-i18next'
 import { I18nextProvider } from 'react-i18next'
 import { GlobalStyle } from '../app/src/atoms/GlobalStyle'
-import { i18n } from '../app/src/i18n'
+import { resources } from '../app/src/assets/localization'
 
 global.APP_SHELL_REMOTE = {
   ipcRenderer: {
@@ -42,6 +44,17 @@ export const customViewports = {
     },
   },
 }
+
+// need to initialize i18n before importing any components
+i18n.use(initReactI18next).init({
+  resources,
+  lng: 'en',
+  fallbackLng: 'en',
+  debug: true,
+  interpolation: {
+    escapeValue: false,
+  },
+})
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
