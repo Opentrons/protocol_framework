@@ -483,7 +483,7 @@ export const distribute: CommandCreator<DistributeArgs> = (
             }),
           ]
         : []
-
+      const aspirateDisposalVolumeOnce = chunkIndex === 0 ? disposalVolume : 0
       return [
         ...tipCommands,
         ...configureForVolumeCommand,
@@ -492,8 +492,11 @@ export const distribute: CommandCreator<DistributeArgs> = (
           pipette,
           volume:
             args.volume * destWellChunk.length +
-            //  only add disposal volume if its the 1st chunk
-            (chunkIndex === 0 ? disposalVolume : 0),
+            //  only add disposal volume if its the 1st chunk and changing tip once
+            //  and not blowing out after dispenses
+            (args.changeTip === 'once' && blowoutLocation == null
+              ? aspirateDisposalVolumeOnce
+              : disposalVolume),
           labware: args.sourceLabware,
           well: args.sourceWell,
           flowRate: aspirateFlowRateUlSec,
