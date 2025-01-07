@@ -31,7 +31,7 @@
   "wells": {
     "C1": {
       "shape": "circular",
-      "depth": 17.53,
+      "depth": 17.399,
       "diameter": 22.73,
       "totalLiquidVolume": 6900,
       "x": 24.94,
@@ -41,7 +41,7 @@
     },
     "B1": {
       "shape": "circular",
-      "depth": 17.53,
+      "depth": 17.399,
       "diameter": 22.73,
       "totalLiquidVolume": 6900,
       "x": 24.94,
@@ -51,7 +51,7 @@
     },
     "A1": {
       "shape": "circular",
-      "depth": 17.53,
+      "depth": 17.399,
       "diameter": 22.73,
       "totalLiquidVolume": 6900,
       "x": 24.94,
@@ -61,7 +61,7 @@
     },
     "C2": {
       "shape": "circular",
-      "depth": 17.53,
+      "depth": 17.399,
       "diameter": 22.73,
       "totalLiquidVolume": 6900,
       "x": 50.95,
@@ -71,7 +71,7 @@
     },
     "B2": {
       "shape": "circular",
-      "depth": 17.53,
+      "depth": 17.399,
       "diameter": 22.73,
       "totalLiquidVolume": 6900,
       "x": 50.95,
@@ -81,7 +81,7 @@
     },
     "A2": {
       "shape": "circular",
-      "depth": 17.53,
+      "depth": 17.399,
       "diameter": 22.73,
       "totalLiquidVolume": 6900,
       "x": 50.95,
@@ -91,7 +91,7 @@
     },
     "C3": {
       "shape": "circular",
-      "depth": 17.53,
+      "depth": 17.399,
       "diameter": 22.73,
       "totalLiquidVolume": 6900,
       "x": 76.96,
@@ -101,7 +101,7 @@
     },
     "B3": {
       "shape": "circular",
-      "depth": 17.53,
+      "depth": 17.399,
       "diameter": 22.73,
       "totalLiquidVolume": 6900,
       "x": 76.96,
@@ -111,7 +111,7 @@
     },
     "A3": {
       "shape": "circular",
-      "depth": 17.53,
+      "depth": 17.399,
       "diameter": 22.73,
       "totalLiquidVolume": 6900,
       "x": 76.96,
@@ -121,7 +121,7 @@
     },
     "C4": {
       "shape": "circular",
-      "depth": 17.53,
+      "depth": 17.399,
       "diameter": 22.73,
       "totalLiquidVolume": 6900,
       "x": 102.97,
@@ -131,7 +131,7 @@
     },
     "B4": {
       "shape": "circular",
-      "depth": 17.53,
+      "depth": 17.399,
       "diameter": 22.73,
       "totalLiquidVolume": 6900,
       "x": 102.97,
@@ -141,7 +141,7 @@
     },
     "A4": {
       "shape": "circular",
-      "depth": 17.53,
+      "depth": 17.399,
       "diameter": 22.73,
       "totalLiquidVolume": 6900,
       "x": 102.97,

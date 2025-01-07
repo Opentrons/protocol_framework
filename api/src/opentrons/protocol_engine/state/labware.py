@@ -20,14 +20,15 @@ from opentrons.protocol_engine.state import update_types
 from opentrons_shared_data.deck.types import DeckDefinitionV5
 from opentrons_shared_data.gripper.constants import LABWARE_GRIP_FORCE
 from opentrons_shared_data.labware.labware_definition import (
-    LabwareRole,
     InnerWellGeometry,
+    LabwareDefinition,
+    LabwareRole,
+    WellDefinition,
 )
 from opentrons_shared_data.pipette.types import LabwareUri
 
 from opentrons.types import DeckSlotName, StagingSlotName, MountType
 from opentrons.protocols.api_support.constants import OPENTRONS_NAMESPACE
-from opentrons.protocols.models import LabwareDefinition, WellDefinition
 from opentrons.calibration_storage.helpers import uri_from_details
 
 from .. import errors
@@ -524,7 +525,6 @@ class LabwareView:
         will be used.
         """
         definition = self.get_definition(labware_id)
-
         if well_name is None:
             well_name = definition.ordering[0][0]
 
