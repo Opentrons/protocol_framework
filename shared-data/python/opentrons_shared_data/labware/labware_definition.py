@@ -300,6 +300,30 @@ class ConicalFrustum(BaseModel):
     )
 
     @cached_property
+    def height_to_volume_table(self) -> Dict[float, float]:
+        """Return a lookup table of heights to volumes."""
+        # the accuracy of this method is approximately +- 10*dx so for dx of 0.001 we have a +- 0.01 ul
+        dx = 0.005
+        total_height = self.topHeight - self.bottomHeight
+        y = 0.0
+        table: Dict[float, float] = {}
+        # fill in the table
+        a = self.topDiameter / 2
+        b = self.bottomDiameter / 2
+        while y < total_height:
+            r_y = (y / total_height) * (a - b) + b
+            table[y] = (pi * y / 3) * (b**2 + b * r_y + r_y**2)
+            y = y + dx
+
+        # we always want to include the volume at the max height
+        table[total_height] = (pi * total_height / 3) * (b**2 + a * b + a**2)
+        return table
+
+    @cached_property
+    def volume_to_height_table(self) -> Dict[float, float]:
+        return dict((v, k) for k, v in self.height_to_volume_table.items())
+
+    @cached_property
     def count(self) -> int:
         return self.xCount * self.yCount
 

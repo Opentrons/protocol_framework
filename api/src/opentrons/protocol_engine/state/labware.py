@@ -525,7 +525,6 @@ class LabwareView:
         will be used.
         """
         definition = self.get_definition(labware_id)
-
         if well_name is None:
             well_name = definition.ordering[0][0]
 
