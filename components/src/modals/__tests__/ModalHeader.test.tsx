@@ -3,10 +3,10 @@ import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { renderWithProviders } from '../../testing/utils'
-import { ModalHeader } from '../ModalHeader'
 import { COLORS } from '../../helix-design-system'
 import { SPACING } from '../../ui-style-constants'
 import { ALIGN_CENTER, JUSTIFY_CENTER } from '../../styles'
+import { ModalHeader } from '../ModalHeader'
 
 import type { ComponentProps } from 'react'
 
@@ -40,7 +40,6 @@ describe('ModalHeader', () => {
       name: 'ot-alert',
       color: COLORS.black90,
       size: '1.25rem',
-      marginRight: SPACING.spacing8,
     }
     render(props)
     expect(screen.getByTestId('Modal_header_icon')).toHaveStyle(

@@ -22,7 +22,7 @@ export interface ModalHeaderProps {
   titleElement2?: JSX.Element
   backgroundColor?: string
   color?: string
-  icon: IconProps | null
+  icon?: IconProps
   closeButton?: ReactNode
 }
 
