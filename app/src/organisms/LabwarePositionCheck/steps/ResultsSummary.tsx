@@ -31,10 +31,7 @@ import {
 
 import { NeedHelpLink } from '/app/molecules/OT2CalibrationNeedHelpLink'
 import { PythonLabwareOffsetSnippet } from '/app/molecules/PythonLabwareOffsetSnippet'
-import {
-  getIsLabwareOffsetCodeSnippetsOn,
-  getIsOnDevice,
-} from '/app/redux/config'
+import { getIsLabwareOffsetCodeSnippetsOn } from '/app/redux/config'
 import { SmallButton } from '/app/atoms/buttons'
 import { LabwareOffsetTabs } from '/app/organisms/LabwareOffsetTabs'
 import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
@@ -57,6 +54,7 @@ export function ResultsSummary(
     existingOffsets,
     labwareDefs,
     commandUtils,
+    isOnDevice,
   } = props
   const { isApplyingOffsets, handleApplyOffsets } = commandUtils
   const { i18n, t } = useTranslation('labware_position_check')
@@ -66,9 +64,6 @@ export function ResultsSummary(
   const isLabwareOffsetCodeSnippetsOn = useSelector(
     getIsLabwareOffsetCodeSnippetsOn
   )
-
-  // TOME TODO: This should be a global prop.
-  const isOnDevice = useSelector(getIsOnDevice)
 
   // TOME: TODO: I believe this should be in a selector.
   const offsetsToApply = useMemo(() => {

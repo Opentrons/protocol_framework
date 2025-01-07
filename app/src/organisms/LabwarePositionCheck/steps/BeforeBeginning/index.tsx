@@ -21,9 +21,7 @@ import {
 import { RobotMotionLoader } from '/app/organisms/LabwarePositionCheck/shared'
 import { WizardRequiredEquipmentList } from '/app/molecules/WizardRequiredEquipmentList'
 import { getLatestCurrentOffsets } from '/app/transformations/runs'
-import { getIsOnDevice } from '/app/redux/config'
 import { NeedHelpLink } from '/app/molecules/OT2CalibrationNeedHelpLink'
-import { useSelector } from 'react-redux'
 import { TwoUpTileLayout } from './TwoUpTileLayout'
 import { getTopPortalEl } from '/app/App/portal'
 import { SmallButton } from '/app/atoms/buttons'
@@ -45,8 +43,8 @@ export function BeforeBeginning({
   protocolName,
   labwareDefs,
   commandUtils,
+  isOnDevice,
 }: LPCStepProps<BeforeBeginningStep>): JSX.Element {
-  const isOnDevice = useSelector(getIsOnDevice)
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
   const { createStartLPCHandler, isRobotMoving } = commandUtils
 

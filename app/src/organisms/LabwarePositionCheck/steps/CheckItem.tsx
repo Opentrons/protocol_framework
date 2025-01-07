@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
 import isEqual from 'lodash/isEqual'
 import { Trans, useTranslation } from 'react-i18next'
 
@@ -26,7 +25,6 @@ import { getItemLabwareDef } from '/app/organisms/LabwarePositionCheck/utils'
 import { getLabwareDisplayLocation } from '/app/local-resources/labware'
 import { UnorderedList } from '/app/molecules/UnorderedList'
 import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
-import { getIsOnDevice } from '/app/redux/config'
 import {
   setFinalPosition,
   setInitialPosition,
@@ -47,6 +45,7 @@ export function CheckItem(
     existingOffsets,
     labwareDefs,
     commandUtils,
+    isOnDevice,
   } = props
   const { labwareId, pipetteId, moduleId, adapterId, location } = step
   const {
@@ -59,7 +58,6 @@ export function CheckItem(
   } = commandUtils
   const { workingOffsets } = state
   const { t } = useTranslation(['labware_position_check', 'shared'])
-  const isOnDevice = useSelector(getIsOnDevice)
   const labwareDef = getItemLabwareDef({
     labwareId,
     loadedLabware: protocolData.labware,
