@@ -490,7 +490,10 @@ export const distribute: CommandCreator<DistributeArgs> = (
         ...mixBeforeAspirateCommands,
         curryCommandCreator(aspirate, {
           pipette,
-          volume: args.volume * destWellChunk.length + disposalVolume,
+          volume:
+            args.volume * destWellChunk.length +
+            //  only add disposal volume if its the 1st chunk
+            (chunkIndex === 0 ? disposalVolume : 0),
           labware: args.sourceLabware,
           well: args.sourceWell,
           flowRate: aspirateFlowRateUlSec,
