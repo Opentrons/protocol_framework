@@ -3,11 +3,7 @@ import { createPortal } from 'react-dom'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 
-import { useConditionalConfirm, ModalShell } from '@opentrons/components'
-import {
-  useCreateLabwareOffsetMutation,
-  useCreateMaintenanceCommandMutation,
-} from '@opentrons/react-api-client'
+import { ModalShell } from '@opentrons/components'
 
 import { getTopPortalEl } from '/app/App/portal'
 import {
@@ -24,97 +20,35 @@ import {
 import { WizardHeader } from '/app/molecules/WizardHeader'
 import { getIsOnDevice } from '/app/redux/config'
 import { LPCErrorModal } from './LPCErrorModal'
-import { useChainMaintenanceCommands } from '/app/resources/maintenance_runs'
 import { getLPCSteps } from './utils'
-import { useLPCInitialState } from '/app/organisms/LabwarePositionCheck/hooks'
+import {
+  useLPCCommands,
+  useLPCInitialState,
+} from '/app/organisms/LabwarePositionCheck/hooks'
 import { useLPCReducer } from '/app/organisms/LabwarePositionCheck/redux'
-
-import type { Coordinates, CreateCommand } from '@opentrons/shared-data'
-import type {
-  LabwareOffsetCreateData,
-  CommandData,
-} from '@opentrons/api-client'
-import type { Axis, Sign, StepSize } from '/app/molecules/JogControls/types'
-import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck/LPCFlows'
-import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 
-const JOG_COMMAND_TIMEOUT = 10000 // 10 seconds
+import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck/LPCFlows'
+import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
 export function LPCWizardFlex(
   props: Omit<LPCFlowsProps, 'robotType'>
 ): JSX.Element {
-  const { mostRecentAnalysis, runId, onCloseClick, maintenanceRunId } = props
+  const { mostRecentAnalysis } = props
+  const [currentStepIndex, setCurrentStepIndex] = useState<number>(0)
   const isOnDevice = useSelector(getIsOnDevice)
-
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [isApplyingOffsets, setIsApplyingOffsets] = useState<boolean>(false)
-
-  // TOME TODO: Like with ER, separate wizard and content. The wizard injects the data layer to the content layer.
-
-  const initialState = useLPCInitialState()
-  const { state, dispatch } = useLPCReducer(initialState)
-
-  const [isExiting, setIsExiting] = useState(false)
-  const {
-    createMaintenanceCommand: createSilentCommand,
-  } = useCreateMaintenanceCommandMutation()
-  const {
-    chainRunCommands,
-    isCommandMutationLoading: isCommandChainLoading,
-  } = useChainMaintenanceCommands()
-
   const labwareDefs = useMemo(
     () => getLabwareDefinitionsFromCommands(mostRecentAnalysis.commands),
     [mostRecentAnalysis]
   )
 
-  const { createLabwareOffset } = useCreateLabwareOffsetMutation()
-  const [currentStepIndex, setCurrentStepIndex] = useState<number>(0)
-  const handleCleanUpAndClose = (): void => {
-    setIsExiting(true)
-
-    chainRunCommands(
-      maintenanceRunId,
-      [
-        {
-          commandType: 'retractAxis' as const,
-          params: {
-            axis: 'leftZ',
-          },
-        },
-        {
-          commandType: 'retractAxis' as const,
-          params: {
-            axis: 'rightZ',
-          },
-        },
-        {
-          commandType: 'retractAxis' as const,
-          params: { axis: 'x' },
-        },
-        {
-          commandType: 'retractAxis' as const,
-          params: { axis: 'y' },
-        },
-        { commandType: 'home' as const, params: {} },
-      ],
-      true
-    )
-      .then(() => {
-        props.onCloseClick()
-      })
-      .catch(() => {
-        props.onCloseClick()
-      })
-  }
-  const {
-    confirm: confirmExitLPC,
-    showConfirmation,
-    cancel: cancelExitLPC,
-  } = useConditionalConfirm(handleCleanUpAndClose, true)
-
+  const LPCSteps = getLPCSteps({
+    protocolData: mostRecentAnalysis,
+    labwareDefs,
+  })
+  const totalStepCount = LPCSteps.length - 1
+  const currentStep = LPCSteps?.[currentStepIndex]
   const proceed = (): void => {
     setCurrentStepIndex(
       currentStepIndex !== LPCSteps.length - 1
@@ -122,62 +56,13 @@ export function LPCWizardFlex(
         : currentStepIndex
     )
   }
-  const LPCSteps = getLPCSteps({
-    protocolData: mostRecentAnalysis,
-    labwareDefs,
-  })
-  const totalStepCount = LPCSteps.length - 1
-  const currentStep = LPCSteps?.[currentStepIndex]
 
-  const protocolHasModules = mostRecentAnalysis.modules.length > 0
+  // TOME TODO: Like with ER, separate wizard and content. The wizard injects the data layer to the content layer.
 
-  const handleJog = (
-    axis: Axis,
-    dir: Sign,
-    step: StepSize,
-    onSuccess?: (position: Coordinates | null) => void
-  ): void => {
-    const pipetteId = 'pipetteId' in currentStep ? currentStep.pipetteId : null
-    if (pipetteId != null) {
-      createSilentCommand({
-        maintenanceRunId,
-        command: {
-          commandType: 'moveRelative',
-          params: { pipetteId, distance: step * dir, axis },
-        },
-        waitUntilComplete: true,
-        timeout: JOG_COMMAND_TIMEOUT,
-      })
-        .then(data => {
-          onSuccess?.(
-            (data?.data?.result?.position ?? null) as Coordinates | null
-          )
-        })
-        .catch((e: Error) => {
-          setErrorMessage(`error issuing jog command: ${e.message}`)
-        })
-    } else {
-      setErrorMessage(
-        `could not find pipette to jog with id: ${pipetteId ?? ''}`
-      )
-    }
-  }
-  const chainMaintenanceRunCommands = (
-    commands: CreateCommand[],
-    continuePastCommandFailure: boolean
-  ): Promise<CommandData[]> =>
-    chainRunCommands(maintenanceRunId, commands, continuePastCommandFailure)
+  const initialState = useLPCInitialState()
+  const { state, dispatch } = useLPCReducer(initialState)
 
-  const handleApplyOffsets = (offsets: LabwareOffsetCreateData[]): void => {
-    setIsApplyingOffsets(true)
-    Promise.all(offsets.map(data => createLabwareOffset({ runId, data })))
-      .then(() => {
-        onCloseClick()
-      })
-      .catch((e: Error) => {
-        setErrorMessage(`error applying labware offsets: ${e.message}`)
-      })
-  }
+  const LPCHandlerUtils = useLPCCommands({ ...props, step: currentStep })
 
   return (
     <LPCWizardFlexComponent
@@ -188,20 +73,9 @@ export function LPCWizardFlex(
       state={state}
       currentStepIndex={currentStepIndex}
       totalStepCount={totalStepCount}
-      showConfirmation={showConfirmation}
-      isExiting={isExiting}
-      confirmExitLPC={confirmExitLPC}
-      cancelExitLPC={cancelExitLPC}
-      chainRunCommands={chainMaintenanceRunCommands}
-      errorMessage={errorMessage}
-      setErrorMessage={setErrorMessage}
-      handleJog={handleJog}
-      handleApplyOffsets={handleApplyOffsets}
-      isApplyingOffsets={isApplyingOffsets}
-      isRobotMoving={isCommandChainLoading}
       isOnDevice={isOnDevice}
-      protocolHasModules={protocolHasModules}
       labwareDefs={labwareDefs}
+      commandUtils={LPCHandlerUtils}
       {...props}
     />
   )
@@ -224,14 +98,17 @@ function LPCWizardFlexComponent(props: LPCWizardContentProps): JSX.Element {
 }
 
 function LPCWizardHeader({
-  errorMessage,
   currentStepIndex,
   totalStepCount,
-  showConfirmation,
-  isExiting,
-  confirmExitLPC,
+  commandUtils,
 }: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
+  const {
+    errorMessage,
+    showExitConfirmation,
+    isExiting,
+    confirmExitLPC,
+  } = commandUtils
 
   return (
     <WizardHeader
@@ -239,7 +116,7 @@ function LPCWizardHeader({
       currentStep={errorMessage != null ? undefined : currentStepIndex}
       totalSteps={errorMessage != null ? undefined : totalStepCount}
       onExit={
-        showConfirmation || isExiting || errorMessage != null
+        showExitConfirmation || isExiting || errorMessage != null
           ? undefined
           : confirmExitLPC
       }
@@ -248,17 +125,18 @@ function LPCWizardHeader({
 }
 
 function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
-  const { step, ...restProps } = props
   const { t } = useTranslation('shared')
+  const { step, ...restProps } = props
+  const { isExiting, errorMessage, showExitConfirmation } = props.commandUtils
 
   // Handle special cases first.
-  if (props.isExiting) {
+  if (isExiting) {
     return <RobotMotionLoader header={t('stand_back_robot_is_in_motion')} />
   }
-  if (props.errorMessage != null) {
+  if (errorMessage != null) {
     return <LPCErrorModal {...props} />
   }
-  if (props.showConfirmation) {
+  if (showExitConfirmation) {
     return <ExitConfirmation {...props} />
   }
 

@@ -19,18 +19,18 @@ import detachProbe96 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detac
 
 import type { DetachProbeStep, LPCStepProps } from '../types'
 
-export const DetachProbe = (
-  props: LPCStepProps<DetachProbeStep>
-): JSX.Element => {
+export const DetachProbe = ({
+  step,
+  protocolData,
+  proceed,
+  commandUtils,
+}: LPCStepProps<DetachProbeStep>): JSX.Element => {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
   const {
-    step,
-    protocolData,
-    proceed,
-    chainRunCommands,
+    moveToMaintenancePosition,
+    createProbeDetachmentHandler,
     isRobotMoving,
-    setErrorMessage,
-  } = props
+  } = commandUtils
 
   const pipette = protocolData.pipettes.find(p => p.id === step.pipetteId)
   const pipetteName = pipette?.pipetteName
@@ -42,60 +42,16 @@ export const DetachProbe = (
   } else if (pipetteChannels === 96) {
     probeVideoSrc = detachProbe96
   }
-  const pipetteMount = pipette?.mount
+
+  const handleProbeDetached = createProbeDetachmentHandler(pipette, proceed)
 
   useEffect(() => {
     // move into correct position for probe detach on mount
-    chainRunCommands(
-      [
-        {
-          commandType: 'calibration/moveToMaintenancePosition' as const,
-          params: {
-            mount: pipetteMount ?? 'left',
-          },
-        },
-      ],
-      false
-    ).catch(error => {
-      setErrorMessage(error.message as string)
-    })
+    moveToMaintenancePosition(pipette)
   }, [])
 
   // TOME TODO: Error instead of returning null.
   // if (pipetteName == null || pipetteMount == null) return null
-
-  const pipetteZMotorAxis: 'leftZ' | 'rightZ' =
-    pipetteMount === 'left' ? 'leftZ' : 'rightZ'
-
-  const handleProbeDetached = (): void => {
-    chainRunCommands(
-      [
-        {
-          commandType: 'retractAxis' as const,
-          params: {
-            axis: pipetteZMotorAxis,
-          },
-        },
-        {
-          commandType: 'retractAxis' as const,
-          params: { axis: 'x' },
-        },
-        {
-          commandType: 'retractAxis' as const,
-          params: { axis: 'y' },
-        },
-      ],
-      false
-    )
-      .then(() => {
-        proceed()
-      })
-      .catch((e: Error) => {
-        setErrorMessage(
-          `DetachProbe failed to move to safe location after probe detach with message: ${e.message}`
-        )
-      })
-  }
 
   if (isRobotMoving)
     return (

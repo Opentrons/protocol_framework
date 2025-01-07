@@ -19,7 +19,6 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { RobotMotionLoader } from '/app/organisms/LabwarePositionCheck/shared'
-import { getPrepCommands } from './getPrepCommands'
 import { WizardRequiredEquipmentList } from '/app/molecules/WizardRequiredEquipmentList'
 import { getLatestCurrentOffsets } from '/app/transformations/runs'
 import { getIsOnDevice } from '/app/redux/config'
@@ -42,28 +41,17 @@ const SUPPORT_PAGE_URL = 'https://support.opentrons.com/s/ot2-calibration'
 
 export function BeforeBeginning({
   proceed,
-  protocolData,
-  chainRunCommands,
-  isRobotMoving,
-  setErrorMessage,
   existingOffsets,
   protocolName,
   labwareDefs,
+  commandUtils,
 }: LPCStepProps<BeforeBeginningStep>): JSX.Element {
   const isOnDevice = useSelector(getIsOnDevice)
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
-  const handleClickStartLPC = (): void => {
-    const prepCommands = getPrepCommands(protocolData)
-    chainRunCommands(prepCommands, false)
-      .then(() => {
-        proceed()
-      })
-      .catch((e: Error) => {
-        setErrorMessage(
-          `IntroScreen failed to issue prep commands with message: ${e.message}`
-        )
-      })
-  }
+  const { createStartLPCHandler, isRobotMoving } = commandUtils
+
+  const handleStartLPC = createStartLPCHandler(proceed)
+
   const requiredEquipmentList = [
     {
       loadName: t('all_modules_and_labware_from_protocol', {
@@ -107,10 +95,10 @@ export function BeforeBeginning({
           {isOnDevice ? (
             <SmallButton
               buttonText={t('shared:get_started')}
-              onClick={handleClickStartLPC}
+              onClick={handleStartLPC}
             />
           ) : (
-            <PrimaryButton onClick={handleClickStartLPC}>
+            <PrimaryButton onClick={handleStartLPC}>
               {i18n.format(t('shared:get_started'), 'capitalize')}
             </PrimaryButton>
           )}

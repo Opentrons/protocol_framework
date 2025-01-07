@@ -26,10 +26,12 @@ import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/
 const SUPPORT_EMAIL = 'support@opentrons.com'
 
 export function LPCErrorModal({
-  errorMessage,
+  commandUtils,
   onCloseClick,
 }: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation(['labware_position_check', 'shared', 'branded'])
+  const { errorMessage } = commandUtils
+
   return (
     <Flex
       padding={SPACING.spacing32}

@@ -16,6 +16,28 @@ import type {
   TCOpenLidCreateCommand,
   AbsorbanceReaderOpenLidCreateCommand,
 } from '@opentrons/shared-data'
+import type { UseLPCCommandWithChainRunChildProps } from './types'
+
+export interface UseHandleStartLPCResult {
+  createStartLPCHandler: (onSuccess: () => void) => () => void
+}
+
+export function useHandleStartLPC({
+  chainLPCCommands,
+  mostRecentAnalysis,
+}: UseLPCCommandWithChainRunChildProps): UseHandleStartLPCResult {
+  const createStartLPCHandler = (onSuccess: () => void): (() => void) => {
+    const prepCommands = getPrepCommands(mostRecentAnalysis)
+
+    return (): void => {
+      void chainLPCCommands(prepCommands, false).then(() => {
+        onSuccess()
+      })
+    }
+  }
+
+  return { createStartLPCHandler }
+}
 
 type LPCPrepCommand =
   | HomeCreateCommand
@@ -25,7 +47,7 @@ type LPCPrepCommand =
   | HeaterShakerCloseLatchCreateCommand
   | AbsorbanceReaderOpenLidCreateCommand
 
-export function getPrepCommands(
+function getPrepCommands(
   protocolData: CompletedProtocolAnalysis
 ): LPCPrepCommand[] {
   // load commands come from the protocol resource

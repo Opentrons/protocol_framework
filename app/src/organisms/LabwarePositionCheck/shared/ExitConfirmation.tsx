@@ -24,10 +24,10 @@ import { SmallButton } from '/app/atoms/buttons'
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
 export const ExitConfirmation = ({
-  confirmExitLPC,
-  cancelExitLPC,
+  commandUtils,
 }: LPCWizardContentProps): JSX.Element => {
   const { i18n, t } = useTranslation(['labware_position_check', 'shared'])
+  const { confirmExitLPC, cancelExitLPC } = commandUtils
 
   const isOnDevice = useSelector(getIsOnDevice)
   return (

@@ -3,50 +3,29 @@ import type {
   CompletedProtocolAnalysis,
   LabwareDefinition2,
 } from '@opentrons/shared-data'
-import type {
-  LabwareOffset,
-  LabwareOffsetCreateData,
-} from '@opentrons/api-client'
-import type { Jog } from '/app/molecules/JogControls/types'
-import type { useChainRunCommands } from '/app/resources/runs'
+import type { LabwareOffset } from '@opentrons/api-client'
 import type {
   LPCWizardAction,
   LPCWizardState,
 } from '/app/organisms/LabwarePositionCheck/redux'
 import type { LabwarePositionCheckStep } from './steps'
 import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck'
+import type { UseLPCCommandsResult } from '/app/organisms/LabwarePositionCheck/hooks'
 
 // TOME TODO: REDUX! Pretty much all of this should be in redux or in the data layer.
 
-export interface LPCWizardContentProps
-  extends Omit<LPCFlowsProps, 'robotType'> {
+export type LPCWizardContentProps = Omit<LPCFlowsProps, 'robotType'> & {
   step: LabwarePositionCheckStep
   protocolName: string
   protocolData: CompletedProtocolAnalysis
   proceed: () => void
   dispatch: Dispatch<LPCWizardAction>
   state: LPCWizardState
+  // TOME TODO: Consider adding the commands state to the state state.
+  commandUtils: UseLPCCommandsResult
   currentStepIndex: number
   totalStepCount: number
-  showConfirmation: boolean
-  isExiting: boolean
-  confirmExitLPC: () => void
-  cancelExitLPC: () => void
-  chainRunCommands: ReturnType<typeof useChainRunCommands>['chainRunCommands']
-  errorMessage: string | null
-  setErrorMessage: (errorMessage: string) => void
   existingOffsets: LabwareOffset[]
-  handleJog: Jog
-  isRobotMoving: boolean
   isOnDevice: boolean
-  protocolHasModules: boolean
-  handleApplyOffsets: (offsets: LabwareOffsetCreateData[]) => void
-  isApplyingOffsets: boolean
   labwareDefs: LabwareDefinition2[]
-}
-
-export interface LabwareToOrder {
-  definition: LabwareDefinition2
-  labwareId: string
-  slot: string
 }

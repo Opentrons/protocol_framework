@@ -54,11 +54,11 @@ export function ResultsSummary(
   const {
     protocolData,
     state,
-    handleApplyOffsets,
     existingOffsets,
-    isApplyingOffsets,
     labwareDefs,
+    commandUtils,
   } = props
+  const { isApplyingOffsets, handleApplyOffsets } = commandUtils
   const { i18n, t } = useTranslation('labware_position_check')
   const { workingOffsets } = state
 
@@ -66,6 +66,8 @@ export function ResultsSummary(
   const isLabwareOffsetCodeSnippetsOn = useSelector(
     getIsLabwareOffsetCodeSnippetsOn
   )
+
+  // TOME TODO: This should be a global prop.
   const isOnDevice = useSelector(getIsOnDevice)
 
   // TOME: TODO: I believe this should be in a selector.

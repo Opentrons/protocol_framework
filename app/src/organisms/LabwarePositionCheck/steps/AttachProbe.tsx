@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import {
   RESPONSIVENESS,
@@ -16,23 +16,25 @@ import attachProbe1 from '/app/assets/videos/pipette-wizard-flows/Pipette_Attach
 import attachProbe8 from '/app/assets/videos/pipette-wizard-flows/Pipette_Attach_Probe_8.webm'
 import attachProbe96 from '/app/assets/videos/pipette-wizard-flows/Pipette_Attach_Probe_96.webm'
 
-import type { CreateCommand } from '@opentrons/shared-data'
 import type { AttachProbeStep, LPCStepProps } from '../types'
 
-export function AttachProbe(props: LPCStepProps<AttachProbeStep>): JSX.Element {
+export function AttachProbe({
+  step,
+  protocolData,
+  proceed,
+  isOnDevice,
+  commandUtils,
+}: LPCStepProps<AttachProbeStep>): JSX.Element {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
   const {
-    step,
-    protocolData,
-    proceed,
-    chainRunCommands,
+    moveToMaintenancePosition,
+    setShowUnableToDetect,
+    unableToDetect,
     isRobotMoving,
-    setErrorMessage,
-    isOnDevice,
-  } = props
-  const { pipetteId } = step
-  const [showUnableToDetect, setShowUnableToDetect] = useState<boolean>(false)
+    createProbeAttachmentHandler,
+  } = commandUtils
 
+  const { pipetteId } = step
   const pipette = protocolData.pipettes.find(p => p.id === pipetteId)
   const pipetteName = pipette?.pipetteName
   const pipetteChannels =
@@ -47,81 +49,25 @@ export function AttachProbe(props: LPCStepProps<AttachProbeStep>): JSX.Element {
     probeVideoSrc = attachProbe96
   }
 
-  const pipetteMount = pipette?.mount
+  const handleProbeAttached = createProbeAttachmentHandler(
+    pipetteId,
+    pipette,
+    proceed
+  )
 
   useEffect(() => {
     // move into correct position for probe attach on mount
-    chainRunCommands(
-      [
-        {
-          commandType: 'calibration/moveToMaintenancePosition' as const,
-          params: {
-            mount: pipetteMount ?? 'left',
-          },
-        },
-      ],
-      false
-    ).catch(error => {
-      setErrorMessage(error.message as string)
-    })
+    moveToMaintenancePosition(pipette)
   }, [])
 
   // TOME TODO: Instead of returning null, show an error.
   // if (pipetteName == null || pipetteMount == null) return null
 
-  const pipetteZMotorAxis: 'leftZ' | 'rightZ' =
-    pipetteMount === 'left' ? 'leftZ' : 'rightZ'
-
-  const handleProbeAttached = (): void => {
-    const verifyCommands: CreateCommand[] = [
-      {
-        commandType: 'verifyTipPresence',
-        params: {
-          pipetteId,
-          expectedState: 'present',
-          followSingularSensor: 'primary',
-        },
-      },
-    ]
-    const homeCommands: CreateCommand[] = [
-      { commandType: 'home', params: { axes: [pipetteZMotorAxis] } },
-      {
-        commandType: 'retractAxis' as const,
-        params: {
-          axis: pipetteZMotorAxis,
-        },
-      },
-      {
-        commandType: 'retractAxis' as const,
-        params: { axis: 'x' },
-      },
-      {
-        commandType: 'retractAxis' as const,
-        params: { axis: 'y' },
-      },
-    ]
-    chainRunCommands(verifyCommands, false)
-      .then(() => {
-        chainRunCommands(homeCommands, false)
-          .then(() => {
-            proceed()
-          })
-          .catch((e: Error) => {
-            setErrorMessage(
-              `AttachProbe failed to move to safe location after probe attach with message: ${e.message}`
-            )
-          })
-      })
-      .catch((e: Error) => {
-        setShowUnableToDetect(true)
-      })
-  }
-
   if (isRobotMoving)
     return (
       <RobotMotionLoader header={t('shared:stand_back_robot_is_in_motion')} />
     )
-  else if (showUnableToDetect)
+  else if (unableToDetect)
     return (
       <ProbeNotAttached
         handleOnClick={handleProbeAttached}
