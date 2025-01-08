@@ -15,4 +15,4 @@ class FlexStackerSubState:
     """
 
     module_id: FlexStackerId
-    labware_name: str
+    labware_name: str = ""

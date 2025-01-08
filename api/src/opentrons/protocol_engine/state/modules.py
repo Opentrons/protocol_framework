@@ -366,6 +366,10 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 configured_wavelengths=None,
                 reference_wavelength=None,
             )
+        elif ModuleModel.is_flex_stacker(actual_model):
+            self._state.substate_by_module_id[module_id] = FlexStackerSubState(
+                module_id=FlexStackerId(module_id),
+            )
 
     def _update_additional_slots_occupied_by_thermocycler(
         self,
