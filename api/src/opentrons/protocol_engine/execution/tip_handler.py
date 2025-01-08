@@ -62,6 +62,7 @@ class TipHandler(TypingProtocol):
         pipette_id: str,
         labware_id: str,
         well_name: str,
+        do_not_ignore_tip_presence: bool = True,
     ) -> TipGeometry:
         """Pick up the named tip.
 
@@ -230,6 +231,7 @@ class HardwareTipHandler(TipHandler):
         pipette_id: str,
         labware_id: str,
         well_name: str,
+        do_not_ignore_tip_presence: bool = True,
     ) -> TipGeometry:
         """See documentation on abstract base class."""
         hw_mount = self._get_hw_mount(pipette_id)
@@ -253,10 +255,11 @@ class HardwareTipHandler(TipHandler):
         await self._hardware_api.tip_pickup_moves(
             mount=hw_mount, presses=None, increment=None
         )
-        try:
-            await self.verify_tip_presence(pipette_id, TipPresenceStatus.PRESENT)
-        except TipNotAttachedError as e:
-            raise PickUpTipTipNotAttachedError(tip_geometry=tip_geometry) from e
+        if do_not_ignore_tip_presence:
+            try:
+                await self.verify_tip_presence(pipette_id, TipPresenceStatus.PRESENT)
+            except TipNotAttachedError as e:
+                raise PickUpTipTipNotAttachedError(tip_geometry=tip_geometry) from e
 
         self.cache_tip(pipette_id, tip_geometry)
 
@@ -383,6 +386,7 @@ class VirtualTipHandler(TipHandler):
         pipette_id: str,
         labware_id: str,
         well_name: str,
+        do_not_ignore_tip_presence: bool = True,
     ) -> TipGeometry:
         """Pick up a tip at the current location using a virtual pipette.
 

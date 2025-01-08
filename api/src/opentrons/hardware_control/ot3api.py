@@ -1241,6 +1241,7 @@ class OT3API(
         position: Mapping[Axis, float],
         speed: Optional[float] = None,
         max_speeds: Optional[Dict[Axis, float]] = None,
+        _expect_stalls: bool = False,
     ) -> None:
         """Moves the effectors of the specified axis to the specified position.
         The effector of the x,y axis is the center of the carriage.
@@ -1296,7 +1297,7 @@ class OT3API(
             if axis not in absolute_positions:
                 absolute_positions[axis] = position_value
 
-        await self._move(target_position=absolute_positions, speed=speed)
+        await self._move(target_position=absolute_positions, speed=speed, expect_stalls=_expect_stalls)
 
     async def move_rel(
         self,
