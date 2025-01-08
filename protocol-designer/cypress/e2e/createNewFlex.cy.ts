@@ -49,7 +49,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.AddHardwareLabware,
       Actions.ClickLabwareHeader,
       Actions.ClickWellPlatesSection,
-      Actions.SelectArmadillo96WellPlate,
+      Actions.SelectArmadillo96WellPlateDefinition,
       Actions.ChoseDeckSlotC2Labware,
       Actions.AddLiquid,
       Actions.ClickLiquidButton,
@@ -65,7 +65,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.AddHardwareLabware,
       Actions.ClickLabwareHeader,
       Actions.ClickWellPlatesSection,
-      Actions.SelectBioRad96WellPlate,
+      Actions.SelectBioRad96WellPlateTransfer,
     ]
     runCreateTest(steps)
   })

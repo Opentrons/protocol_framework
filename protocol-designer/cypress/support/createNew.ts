@@ -39,7 +39,6 @@ export enum Actions {
   ChoseDeckSlotB3 = 'Choose deck slot B3',
   ChoseDeckSlotC1 = 'Choose deck slot C1',
   ChoseDeckSlotC2 = 'Choose deck slot C2',
-  ChoseDeckSlotC2Labware = 'Chose labware on deck slot C2',
   ChoseDeckSlotC3 = 'Choose deck slot C3',
   ChoseDeckSlotD1 = 'Choose deck slot D1',
   ChoseDeckSlotD2 = 'Choose deck slot D2',
@@ -47,8 +46,10 @@ export enum Actions {
   AddHardwareLabware = 'Adds labware to deck slot by chose deck slot',
   ClickLabwareHeader = 'Click Labware',
   ClickWellPlatesSection = 'Click Well plates',
-  SelectArmadillo96WellPlate = 'Select Armadillo 96 Well Plate',
-  SelectBioRad96WellPlate = 'Select Bio-Rad 96 Well Plate',
+  SelectArmadillo96WellPlateDefinition = 'Select Armadillo 96 Well Plate to define it on deck',
+  SelectArmadillo96WellPlateTransfer = 'Select Select Armadillo 96 Well Plate for transfer',
+  SelectBioRad96WellPlateDefinition = 'Select Bio-Rad 96 Well Plate to define it on deck',
+  SelectBioRad96WellPlateTransfer = 'Select Bio-Rad 96 Well Plate to define it on deck',
   AddLiquid = 'Add liquid',
   DefineLiquid = 'Define a liquid',
   ClickLiquidButton = 'Click Liquid button',
@@ -59,6 +60,23 @@ export enum Actions {
   SetVolumeAndSaveforWells = 'Set volume and save for wells',
   ProtocolStepsH = 'Select Protocol Steps Header',
   AddStep = 'Use after making sure you are on ProtocolStepsH or have already made a step',
+  AddSourceLabwareDropdown = 'List the available options',
+  ChoseDeckSlotA1Labware = 'Edit labware on slot A1',
+  ChoseDeckSlotA2Labware = 'Edit labware on slot A2',
+  ChoseDeckSlotA3Labware = 'Edit labware on slot A3',
+  ChoseDeckSlotB1Labware = 'Edit labware on slot B1',
+  ChoseDeckSlotB2Labware = 'Edit labware on slot B2',
+  ChoseDeckSlotB3Labware = 'Edit labware on slot B3',
+  ChoseDeckSlotC1Labware = 'Edit labware on slot C1',
+  ChoseDeckSlotC2Labware = 'Edit labware on slot C2',
+  ChoseDeckSlotC3Labware = 'Edit labware on slot C3',
+  ChoseDeckSlotD1Labware = 'Edit labware on slot D1',
+  ChoseDeckSlotD2Labware = 'Edit labware on slot D2',
+  ChoseDeckSlotD3Labware = 'Edit labware on slot D3',
+  SelectTransfer = 'Select Transfer from add step dropdown',
+  ChoseSourceLabware = 'Chose source labware dropdown',
+  ChoseDestinationLabware = 'Chose desitination labware',
+  SourceWellPopout = 'Brings you to selecting the wells',
 }
 
 export enum Verifications {
@@ -124,6 +142,14 @@ export enum Content {
   SampleLiquidName = 'My liquid!',
   ProtocolSteps = 'Protocol steps',
   AddStep = 'Add Step',
+  ChoseOption = 'Chose option',
+  SourceLabware = 'Source labware',
+  SelectSourceWells = 'Select source wells',
+  DestinationLabware = 'Destination labware',
+  VolumePerWell = 'Volume per well',
+  TipHandling = 'Tip handling',
+  TipDrop = 'Tip drop location',
+  ChoseOptionSource = 'Choose option',
 }
 
 export enum Locators {
@@ -143,6 +169,8 @@ export enum Locators {
   SaveButton = 'button[type="submit"]',
   LiquidsDropdown = 'div[tabindex="0"].sc-bqWxrE', // Add new locator for the dropdown
   LabwareSelectionLocation = '[data-testid="Toolbox_confirmButton"]',
+  AddInitialVolume = 'input[name="volume"]',
+  AspirateWells = 'input[name="aspirate_wells"]',
 }
 
 const chooseDeckSlot = (
@@ -316,20 +344,95 @@ const executeAction = (action: Actions | UniversalActions): void => {
     case Actions.ClickWellPlatesSection: // New case
       cy.contains(Content.WellPlatesCat).click()
       break
+    case Actions.ChoseDeckSlotA1Labware:
+      chooseDeckSlot('A1')
+        .find('.Box-sc-8ozbhb-0.kIDovv')
+        .find('a[role="button"]')
+        .contains(Content.EditSlot)
+        .click({ force: true })
+      break
+    case Actions.ChoseDeckSlotA2Labware:
+      chooseDeckSlot('A2')
+        .find('.Box-sc-8ozbhb-0.kIDovv')
+        .find('a[role="button"]')
+        .contains(Content.EditSlot)
+        .click({ force: true })
+      break
+    case Actions.ChoseDeckSlotA3Labware:
+      chooseDeckSlot('A3')
+        .find('.Box-sc-8ozbhb-0.kIDovv')
+        .find('a[role="button"]')
+        .contains(Content.EditSlot)
+        .click({ force: true })
+      break
+    case Actions.ChoseDeckSlotB1Labware:
+      chooseDeckSlot('B1')
+        .find('.Box-sc-8ozbhb-0.kIDovv')
+        .find('a[role="button"]')
+        .contains(Content.EditSlot)
+        .click({ force: true })
+      break
+    case Actions.ChoseDeckSlotB2Labware:
+      chooseDeckSlot('B2')
+        .find('.Box-sc-8ozbhb-0.kIDovv')
+        .find('a[role="button"]')
+        .contains(Content.EditSlot)
+        .click({ force: true })
+      break
+    case Actions.ChoseDeckSlotB3Labware:
+      chooseDeckSlot('B3')
+        .find('.Box-sc-8ozbhb-0.kIDovv')
+        .find('a[role="button"]')
+        .contains(Content.EditSlot)
+        .click({ force: true })
+      break
+    case Actions.ChoseDeckSlotC1Labware:
+      chooseDeckSlot('C1')
+        .find('.Box-sc-8ozbhb-0.kIDovv')
+        .find('a[role="button"]')
+        .contains(Content.EditSlot)
+        .click({ force: true })
+      break
     case Actions.ChoseDeckSlotC2Labware:
-      // Todo Investigate making a dictionary of slot editing.
-      // Maybe next PR
       chooseDeckSlot('C2')
         .find('.Box-sc-8ozbhb-0.kIDovv')
         .find('a[role="button"]')
         .contains(Content.EditSlot)
         .click({ force: true })
       break
-    case Actions.SelectArmadillo96WellPlate: // New case for selecting Armadillo plate
+    case Actions.ChoseDeckSlotC3Labware:
+      chooseDeckSlot('C3')
+        .find('.Box-sc-8ozbhb-0.kIDovv')
+        .find('a[role="button"]')
+        .contains(Content.EditSlot)
+        .click({ force: true })
+      break
+    case Actions.ChoseDeckSlotD1Labware:
+      chooseDeckSlot('D1')
+        .find('.Box-sc-8ozbhb-0.kIDovv')
+        .find('a[role="button"]')
+        .contains(Content.EditSlot)
+        .click({ force: true })
+      break
+    case Actions.ChoseDeckSlotD2Labware:
+      chooseDeckSlot('D2')
+        .find('.Box-sc-8ozbhb-0.kIDovv')
+        .find('a[role="button"]')
+        .contains(Content.EditSlot)
+        .click({ force: true })
+      break
+    case Actions.ChoseDeckSlotD3Labware:
+      chooseDeckSlot('D3')
+        .find('.Box-sc-8ozbhb-0.kIDovv')
+        .find('a[role="button"]')
+        .contains(Content.EditSlot)
+        .click({ force: true })
+      break
+    case Actions.SelectArmadillo96WellPlateDefinition: // New case for selecting Armadillo plate
       cy.contains(Content.Armadillo96WellPlate200uL).click({ force: true })
       cy.get(Locators.LabwareSelectionLocation).click({ force: true })
       break
-    case Actions.SelectBioRad96WellPlate: // New case for selecting Armadillo plate
+    case Actions.SelectBioRad96WellPlateDefinition: // New case for selecting Armadillo plate
       cy.contains(Content.Biorad96WellPlate200uL).click({ force: true })
       cy.get(Locators.LabwareSelectionLocation).click({ force: true })
       break
@@ -370,7 +473,7 @@ const executeAction = (action: Actions | UniversalActions): void => {
       cy.contains('My liquid!').click() // Action for clicking 'My liquid!'
       break
     case Actions.SetVolumeAndSaveforWells:
-      cy.get('input[name="volume"]').type(`150`) // Set volume
+      cy.get(Locators.AddInitialVolume).type(`150`) // Set volume
       cy.contains('button', 'Save').click() // Click Save button
       cy.contains('button', 'Done').click({ force: true }) // Click Done button, forcing click if necessary
       break
@@ -379,6 +482,36 @@ const executeAction = (action: Actions | UniversalActions): void => {
       break
     case Actions.AddStep:
       cy.contains('button', Content.AddStep).click()
+      break
+    case Actions.SelectArmadillo96WellPlateTransfer: // New case for selecting Armadillo plate
+      cy.contains(Content.Armadillo96WellPlate200uL).click({ force: true })
+      break
+    case Actions.SelectBioRad96WellPlateTransfer: // New case for selecting Armadillo plate
+      cy.contains('Bio-Rad 96 Well Plate 200 µL PCR in C3').click({
+        force: true,
+      })
+      break
+    case Actions.SelectTransfer:
+      cy.contains('button', 'Transfer').should('be.visible').click()
+      break
+    case Actions.ChoseSourceLabware:
+      cy.get('div.Flex-sc-1qhp8l7-0.sc-bqWxrE.jKLbYH.gEhMNQ')
+        .eq(0)
+        .contains('Choose option')
+        .click()
+      // cy.contains('p', Content.ChoseOption).click()
+      break
+    case Actions.ChoseDestinationLabware:
+      cy.get('div.Flex-sc-1qhp8l7-0.sc-bqWxrE.jKLbYH.gEhMNQ')
+        .eq(1)
+        .contains('Choose option')
+        .click()
+      // cy.contains('p', Content.ChoseOption).click()
+      break
+    case Actions.AddSourceLabwareDropdown:
+      cy.get(Locators.AspirateWells) // Use the `name` attribute
+        .should('have.value', 'Choose wells') // Verify the initial value
+        .click() // Simulate a click on the input field
       break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
@@ -465,14 +598,12 @@ const verifyStep = (verification: Verifications): void => {
       cy.contains('Cancel').should('be.visible')
       break
     case Verifications.TransferPopOut:
-      cy.contains('button', 'Transfer').should('be.visible').click()
-      cy.contains('Source labware')
-      cy.contains('Select source wells')
-      cy.contains('Destination labware')
-      cy.contains('Volume per well')
-      cy.contains('Tip handling')
-      cy.contains('Tip handling')
-      cy.contains('Tip drop location')
+      cy.contains(Content.SourceLabware)
+      cy.contains(Content.SelectSourceWells)
+      cy.contains(Content.DestinationLabware)
+      cy.contains(Content.VolumePerWell)
+      cy.contains(Content.TipHandling)
+      cy.contains(Content.TipDrop)
       break
 
     default:

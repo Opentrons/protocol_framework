@@ -50,7 +50,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.AddHardwareLabware,
       Actions.ClickLabwareHeader,
       Actions.ClickWellPlatesSection,
-      Actions.SelectArmadillo96WellPlate,
+      Actions.SelectArmadillo96WellPlateDefinition,
       Actions.ChoseDeckSlotC2Labware,
       Actions.AddLiquid,
       Actions.ClickLiquidButton,
@@ -66,13 +66,37 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.AddHardwareLabware,
       Actions.ClickLabwareHeader,
       Actions.ClickWellPlatesSection,
-      Actions.SelectBioRad96WellPlate,
+      Actions.SelectBioRad96WellPlateDefinition,
       Actions.ProtocolStepsH,
       Actions.AddStep,
+      Actions.SelectTransfer,
       Verifications.TransferPopOut,
       UniversalActions.Snapshot,
+      Actions.ChoseSourceLabware,
+      Actions.SelectArmadillo96WellPlateTransfer,
+      Actions.ChoseDestinationLabware,
+      Actions.SelectBioRad96WellPlateTransfer,
     ]
     runCreateTest(steps)
+    /*
+    cy.contains('p', 'Source labware')
+    cy.contains('p', 'Choose option').click()
+    cy.contains(
+      '(Retired) Armadillo 96 Well Plate 200 µL PCR Full Skirt in C2'
+    ).click()
+
+    cy.contains('p', 'Source labware')
+    cy.get('input[name="aspirate_wells"]')
+      .should('have.value', 'Choose wells')
+      .click()
+
+    cy.contains('Select source wells').should('be.visible')
+    cy.contains('Chose wells').click()
+
+    cy.contains('p', 'Destination labware').click()
+    cy.contains('p', 'Choose option').click()
+    cy.contains('p', 'Bio-Rad 96 Well Plate 200 µL PCR in C3').click()
+    */
     /* Future work
     We need a better selector for source and destinatino wells.. they have the same selector
     Source wells
@@ -83,6 +107,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     */
   })
 })
+
 /*
 <div tabindex="0" class="Flex-sc-1qhp8l7-0 sc-bqWxrE jKLbYH gEhMNQ">
 <div class="Flex-sc-1qhp8l7-0 icZZqw"><div class="Flex-sc-1qhp8l7-0 sc-ksBlkl jKLbYH cQzqYP">
