@@ -69,7 +69,6 @@ export const ModalHeader = (props: ModalHeaderProps): JSX.Element => {
               />
             </Btn>
           ))}
-        {/* </Flex> */}
       </StyledModalHeader>
       <StyledDivider data-testid="divider" />
     </>
