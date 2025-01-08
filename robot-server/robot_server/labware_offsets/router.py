@@ -42,6 +42,7 @@ router = LightRouter()
         """
     ),
     status_code=201,
+    include_in_schema=False,  # todo(mm, 2025-01-08): Include for v8.4.0.
 )
 async def post_labware_offset(  # noqa: D103
     store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)],
@@ -72,6 +73,7 @@ async def post_labware_offset(  # noqa: D103
         " Filters are ANDed together."
         " Results are returned in order from oldest to newest."
     ),
+    include_in_schema=False,  # todo(mm, 2025-01-08): Include for v8.4.0.
 )
 async def get_labware_offsets(  # noqa: D103
     store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)],
@@ -163,6 +165,7 @@ async def get_labware_offsets(  # noqa: D103
     path="/labwareOffsets/{id}",
     summary="Delete a single labware offset",
     description="Delete a single labware offset. The deleted offset is returned.",
+    include_in_schema=False,  # todo(mm, 2025-01-08): Include for v8.4.0.
 )
 async def delete_labware_offset(  # noqa: D103
     store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)],
@@ -185,6 +188,7 @@ async def delete_labware_offset(  # noqa: D103
     router.delete,
     path="/labwareOffsets",
     summary="Delete all labware offsets",
+    include_in_schema=False,  # todo(mm, 2025-01-08): Include for v8.4.0.
 )
 async def delete_all_labware_offsets(  # noqa: D103
     store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)]
