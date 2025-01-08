@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { createPortal } from 'react-dom'
 import styled, { css } from 'styled-components'
-import mapValues from 'lodash/mapValues'
 
 import {
   ALIGN_CENTER,
@@ -14,16 +13,11 @@ import {
   COLORS,
   CURSOR_POINTER,
   DIRECTION_COLUMN,
-  DIRECTION_ROW,
   DISPLAY_FLEX,
   DISPLAY_INLINE_BLOCK,
-  EmptySelectorButton,
   FLEX_MAX_CONTENT,
   Flex,
-  Icon,
   JUSTIFY_END,
-  JUSTIFY_SPACE_BETWEEN,
-  ListItem,
   Modal,
   OVERFLOW_AUTO,
   PrimaryButton,
@@ -48,11 +42,7 @@ import {
   getPipetteEntities,
 } from '../../step-forms/selectors'
 import { getHas96Channel, removeOpentronsPhrases } from '../../utils'
-import { changeSavedStepForm } from '../../steplist/actions'
-import { INITIAL_DECK_SETUP_STEP_ID } from '../../constants'
-import { PipetteInfoItem } from '../PipetteInfoItem'
-import { deletePipettes } from '../../step-forms/actions'
-import { toggleIsGripperRequired } from '../../step-forms/actions/additionalItems'
+
 import { getRobotType } from '../../file-data/selectors'
 import {
   PIPETTE_GENS,
@@ -62,17 +52,12 @@ import {
 import { getLabwareDefsByURI } from '../../labware-defs/selectors'
 import { setFeatureFlags } from '../../feature-flags/actions'
 import { createCustomTiprackDef } from '../../labware-defs/actions'
-import { deleteContainer } from '../../labware-ingred/actions'
 import { selectors as stepFormSelectors } from '../../step-forms'
-import { LINK_BUTTON_STYLE } from '../../atoms'
 import { getMainPagePortalEl } from '../Portal'
-import {
-  getSectionsFromPipetteName,
-  getShouldShowPipetteType,
-  getTiprackOptions,
-} from './utils'
+import { getShouldShowPipetteType, getTiprackOptions } from './utils'
 import { editPipettes } from './editPipettes'
 import { HandleEnter } from '../../atoms/HandleEnter'
+import { PipetteOverview } from './PipetteOverview'
 
 import type { PipetteMount, PipetteName } from '@opentrons/shared-data'
 import type {
@@ -92,7 +77,7 @@ export function EditInstrumentsModal(
 ): JSX.Element {
   const { onClose } = props
   const dispatch = useDispatch<ThunkDispatch<any>>()
-  const { i18n, t } = useTranslation([
+  const { t } = useTranslation([
     'create_new_protocol',
     'protocol_overview',
     'shared',
@@ -124,36 +109,11 @@ export function EditInstrumentsModal(
       ? `${pipetteVolume}_${pipetteType}`
       : `${pipetteVolume}_${pipetteType}_${pipetteGen.toLowerCase()}`
 
-  const swapPipetteUpdate = mapValues(pipettes, pipette => {
-    if (!pipette.mount) return pipette.mount
-    return pipette.mount === 'left' ? 'right' : 'left'
-  })
-
   const resetFields = (): void => {
     setPipetteType(null)
     setPipetteGen('flex')
     setPipetteVolume(null)
   }
-
-  const previousLeftPipetteTipracks = Object.values(labware)
-    .filter(lw => lw.def.parameters.isTiprack)
-    .filter(tip => leftPipette?.tiprackDefURI.includes(tip.labwareDefURI))
-  const previousRightPipetteTipracks = Object.values(labware)
-    .filter(lw => lw.def.parameters.isTiprack)
-    .filter(tip => rightPipette?.tiprackDefURI.includes(tip.labwareDefURI))
-
-  const rightInfo =
-    rightPipette != null
-      ? getSectionsFromPipetteName(rightPipette.name, rightPipette.spec)
-      : null
-  const leftInfo =
-    leftPipette != null
-      ? getSectionsFromPipetteName(leftPipette.name, leftPipette.spec)
-      : null
-
-  // Note (kk:2024/10/09)
-  // if a user removes all pipettes, left mount is the first target.
-  const targetPipetteMount = leftPipette == null ? 'left' : 'right'
 
   const handleOnSave = (): void => {
     if (page === 'overview') {
@@ -224,164 +184,21 @@ export function EditInstrumentsModal(
         }
       >
         {page === 'overview' ? (
-          <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing24}>
-            <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
-              <Flex
-                justifyContent={JUSTIFY_SPACE_BETWEEN}
-                alignItems={ALIGN_CENTER}
-              >
-                <StyledText desktopStyle="bodyLargeSemiBold">
-                  {t('your_pipettes')}
-                </StyledText>
-                {has96Channel ||
-                (leftPipette == null && rightPipette == null) ? null : (
-                  <Btn
-                    css={LINK_BUTTON_STYLE}
-                    onClick={() =>
-                      dispatch(
-                        changeSavedStepForm({
-                          stepId: INITIAL_DECK_SETUP_STEP_ID,
-                          update: {
-                            pipetteLocationUpdate: swapPipetteUpdate,
-                          },
-                        })
-                      )
-                    }
-                  >
-                    <Flex flexDirection={DIRECTION_ROW}>
-                      <Icon
-                        name="swap-horizontal"
-                        size="1rem"
-                        transform="rotate(90deg)"
-                      />
-                      <StyledText desktopStyle="captionSemiBold">
-                        {t('swap_pipette_mounts')}
-                      </StyledText>
-                    </Flex>
-                  </Btn>
-                )}
-              </Flex>
-              <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
-                {leftPipette?.tiprackDefURI != null && leftInfo != null ? (
-                  <PipetteInfoItem
-                    mount="left"
-                    pipetteName={leftPipette.name}
-                    tiprackDefURIs={leftPipette.tiprackDefURI}
-                    editClick={() => {
-                      setPage('add')
-                      setMount('left')
-                      setPipetteType(leftInfo.type)
-                      setPipetteGen(leftInfo.gen)
-                      setPipetteVolume(leftInfo.volume)
-                      setSelectedTips(leftPipette.tiprackDefURI as string[])
-                    }}
-                    cleanForm={() => {
-                      dispatch(deletePipettes([leftPipette.id as string]))
-                      previousLeftPipetteTipracks.forEach(tip =>
-                        dispatch(deleteContainer({ labwareId: tip.id }))
-                      )
-                    }}
-                  />
-                ) : null}
-                {rightPipette?.tiprackDefURI != null && rightInfo != null ? (
-                  <PipetteInfoItem
-                    mount="right"
-                    pipetteName={rightPipette.name}
-                    tiprackDefURIs={rightPipette.tiprackDefURI}
-                    editClick={() => {
-                      setPage('add')
-                      setMount('right')
-                      setPipetteType(rightInfo.type)
-                      setPipetteGen(rightInfo.gen)
-                      setPipetteVolume(rightInfo.volume)
-                      setSelectedTips(rightPipette.tiprackDefURI as string[])
-                    }}
-                    cleanForm={() => {
-                      dispatch(deletePipettes([rightPipette.id as string]))
-                      previousRightPipetteTipracks.forEach(tip =>
-                        dispatch(deleteContainer({ labwareId: tip.id }))
-                      )
-                    }}
-                  />
-                ) : null}
-                {has96Channel ||
-                (leftPipette != null && rightPipette != null) ? null : (
-                  <EmptySelectorButton
-                    onClick={() => {
-                      setPage('add')
-                      setMount(targetPipetteMount)
-                    }}
-                    text={t('add_pipette')}
-                    textAlignment="left"
-                    iconName="plus"
-                  />
-                )}
-              </Flex>
-            </Flex>
-            {robotType === FLEX_ROBOT_TYPE ? (
-              <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
-                <Flex
-                  justifyContent={JUSTIFY_SPACE_BETWEEN}
-                  alignItems={ALIGN_CENTER}
-                >
-                  <StyledText desktopStyle="bodyLargeSemiBold">
-                    {t('protocol_overview:your_gripper')}
-                  </StyledText>
-                </Flex>
-                <Flex
-                  flexDirection={DIRECTION_COLUMN}
-                  gridGap={SPACING.spacing8}
-                >
-                  {gripper != null ? (
-                    <ListItem type="noActive">
-                      <Flex
-                        padding={SPACING.spacing12}
-                        justifyContent={JUSTIFY_SPACE_BETWEEN}
-                        width="100%"
-                      >
-                        <Flex
-                          gridGap={SPACING.spacing4}
-                          flexDirection={DIRECTION_COLUMN}
-                        >
-                          <StyledText desktopStyle="bodyDefaultSemiBold">
-                            {t('protocol_overview:extension')}
-                          </StyledText>
-                          <StyledText
-                            desktopStyle="bodyDefaultRegular"
-                            color={COLORS.grey60}
-                          >
-                            {i18n.format(t('gripper'), 'capitalize')}
-                          </StyledText>
-                        </Flex>
-                        <Btn
-                          css={LINK_BUTTON_STYLE}
-                          textDecoration={TYPOGRAPHY.textDecorationUnderline}
-                          padding={SPACING.spacing4}
-                          id="hello"
-                          onClick={() => {
-                            dispatch(toggleIsGripperRequired())
-                          }}
-                        >
-                          <StyledText desktopStyle="bodyDefaultRegular">
-                            {t('remove')}
-                          </StyledText>
-                        </Btn>
-                      </Flex>
-                    </ListItem>
-                  ) : (
-                    <EmptySelectorButton
-                      onClick={() => {
-                        dispatch(toggleIsGripperRequired())
-                      }}
-                      text={t('protocol_overview:add_gripper')}
-                      textAlignment="left"
-                      iconName="plus"
-                    />
-                  )}
-                </Flex>
-              </Flex>
-            ) : null}
-          </Flex>
+          <PipetteOverview
+            has96Channel={has96Channel}
+            labware={labware}
+            pipettes={pipettes}
+            robotType={robotType}
+            setPage={setPage}
+            setMount={setMount}
+            setPipetteType={setPipetteType}
+            setPipetteGen={setPipetteGen}
+            setPipetteVolume={setPipetteVolume}
+            setSelectedTips={setSelectedTips}
+            leftPipette={leftPipette}
+            rightPipette={rightPipette}
+            gripper={gripper}
+          />
         ) : (
           <Flex
             flexDirection="column"
