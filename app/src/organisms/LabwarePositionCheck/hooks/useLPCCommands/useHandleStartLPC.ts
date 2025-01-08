@@ -1,20 +1,10 @@
-import {
-  getModuleType,
-  HEATERSHAKER_MODULE_TYPE,
-  THERMOCYCLER_MODULE_TYPE,
-  ABSORBANCE_READER_TYPE,
-} from '@opentrons/shared-data'
+import { fullHomeCommands, moduleInitBeforeAnyLPCCommands } from './commands'
 
 import type {
   CompletedProtocolAnalysis,
   CreateCommand,
-  HeaterShakerCloseLatchCreateCommand,
-  HeaterShakerDeactivateShakerCreateCommand,
-  HomeCreateCommand,
   RunTimeCommand,
   SetupRunTimeCommand,
-  TCOpenLidCreateCommand,
-  AbsorbanceReaderOpenLidCreateCommand,
 } from '@opentrons/shared-data'
 import type { UseLPCCommandWithChainRunChildProps } from './types'
 
@@ -27,10 +17,14 @@ export function useHandleStartLPC({
   mostRecentAnalysis,
 }: UseLPCCommandWithChainRunChildProps): UseHandleStartLPCResult {
   const createStartLPCHandler = (onSuccess: () => void): (() => void) => {
-    const prepCommands = getPrepCommands(mostRecentAnalysis)
+    const startCommands: CreateCommand[] = [
+      ...buildInstrumentLabwarePrepCommands(mostRecentAnalysis),
+      ...moduleInitBeforeAnyLPCCommands(mostRecentAnalysis),
+      ...fullHomeCommands(),
+    ]
 
     return (): void => {
-      void chainLPCCommands(prepCommands, false).then(() => {
+      void chainLPCCommands(startCommands, false).then(() => {
         onSuccess()
       })
     }
@@ -39,22 +33,16 @@ export function useHandleStartLPC({
   return { createStartLPCHandler }
 }
 
-type LPCPrepCommand =
-  | HomeCreateCommand
-  | SetupRunTimeCommand
-  | TCOpenLidCreateCommand
-  | HeaterShakerDeactivateShakerCreateCommand
-  | HeaterShakerCloseLatchCreateCommand
-  | AbsorbanceReaderOpenLidCreateCommand
-
-function getPrepCommands(
+// Load all pipettes and labware into the maintenance run by utilizing the protocol resource.
+// Labware is loaded off-deck so that LPC can move them on individually later.
+// Next, emit module-specific setup commands to prepare for LPC.
+function buildInstrumentLabwarePrepCommands(
   protocolData: CompletedProtocolAnalysis
-): LPCPrepCommand[] {
-  // load commands come from the protocol resource
-  const loadCommands: LPCPrepCommand[] =
+): SetupRunTimeCommand[] {
+  return (
     protocolData.commands
       .filter(isLoadCommand)
-      .reduce<LPCPrepCommand[]>((acc, command) => {
+      .reduce<SetupRunTimeCommand[]>((acc, command) => {
         if (
           command.commandType === 'loadPipette' &&
           command.result?.pipetteId != null
@@ -72,7 +60,6 @@ function getPrepCommands(
           command.commandType === 'loadLabware' &&
           command.result?.labwareId != null
         ) {
-          // load all labware off-deck so that LPC can move them on individually later
           return [
             ...acc,
             {
@@ -105,69 +92,7 @@ function getPrepCommands(
         }
         return [...acc, command]
       }, []) ?? []
-
-  const TCCommands = protocolData.modules.reduce<TCOpenLidCreateCommand[]>(
-    (acc, module) => {
-      if (getModuleType(module.model) === THERMOCYCLER_MODULE_TYPE) {
-        return [
-          ...acc,
-          {
-            commandType: 'thermocycler/openLid',
-            params: { moduleId: module.id },
-          },
-        ]
-      }
-      return acc
-    },
-    []
   )
-
-  const AbsorbanceCommands = protocolData.modules.reduce<LPCPrepCommand[]>(
-    (acc, module) => {
-      if (getModuleType(module.model) === ABSORBANCE_READER_TYPE) {
-        return [
-          ...acc,
-          {
-            commandType: 'home',
-            params: {},
-          },
-          {
-            commandType: 'absorbanceReader/openLid',
-            params: { moduleId: module.id },
-          },
-        ]
-      }
-      return acc
-    },
-    []
-  )
-
-  const HSCommands = protocolData.modules.reduce<
-    HeaterShakerCloseLatchCreateCommand[]
-  >((acc, module) => {
-    if (getModuleType(module.model) === HEATERSHAKER_MODULE_TYPE) {
-      return [
-        ...acc,
-        {
-          commandType: 'heaterShaker/closeLabwareLatch',
-          params: { moduleId: module.id },
-        },
-      ]
-    }
-    return acc
-  }, [])
-  const homeCommand: HomeCreateCommand = {
-    commandType: 'home',
-    params: {},
-  }
-  // prepCommands will be run when a user starts LPC
-  return [
-    ...loadCommands,
-    ...TCCommands,
-    ...AbsorbanceCommands,
-    ...HSCommands,
-    homeCommand,
-  ]
 }
 
 function isLoadCommand(

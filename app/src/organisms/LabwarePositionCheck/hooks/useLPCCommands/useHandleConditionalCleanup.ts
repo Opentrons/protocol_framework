@@ -1,8 +1,12 @@
 import { useState } from 'react'
+
 import { useConditionalConfirm } from '@opentrons/components'
+
 import { useChainMaintenanceCommands } from '/app/resources/maintenance_runs'
+import { retractSafelyAndHomeCommands } from './commands'
 
 import type { UseLPCCommandChildProps } from './types'
+import type { CreateCommand } from '@opentrons/shared-data'
 
 export interface UseHandleConditionalCleanupResult {
   isExiting: boolean
@@ -10,9 +14,6 @@ export interface UseHandleConditionalCleanupResult {
   confirmExitLPC: () => void
   cancelExitLPC: () => void
 }
-
-// TOME TODO: Pull out all the commands into their own file, since there is a good
-// bit of redundancy.
 
 export function useHandleConditionalCleanup({
   onCloseClick,
@@ -25,35 +26,13 @@ export function useHandleConditionalCleanup({
   const handleCleanUpAndClose = (): void => {
     setIsExiting(true)
 
-    void chainRunCommands(
-      maintenanceRunId,
-      [
-        {
-          commandType: 'retractAxis' as const,
-          params: {
-            axis: 'leftZ',
-          },
-        },
-        {
-          commandType: 'retractAxis' as const,
-          params: {
-            axis: 'rightZ',
-          },
-        },
-        {
-          commandType: 'retractAxis' as const,
-          params: { axis: 'x' },
-        },
-        {
-          commandType: 'retractAxis' as const,
-          params: { axis: 'y' },
-        },
-        { commandType: 'home' as const, params: {} },
-      ],
-      true
-    ).finally(() => {
-      onCloseClick()
-    })
+    const cleanupCommands: CreateCommand[] = [...retractSafelyAndHomeCommands()]
+
+    void chainRunCommands(maintenanceRunId, cleanupCommands, true).finally(
+      () => {
+        onCloseClick()
+      }
+    )
   }
 
   const {

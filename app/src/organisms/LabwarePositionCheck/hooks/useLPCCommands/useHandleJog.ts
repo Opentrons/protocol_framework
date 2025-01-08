@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { useCreateMaintenanceCommandMutation } from '@opentrons/react-api-client'
 
+import { moveRelativeCommand } from './commands'
+
 import type { Coordinates } from '@opentrons/shared-data'
 import type {
   Axis,
@@ -9,7 +11,6 @@ import type {
   Sign,
   StepSize,
 } from '/app/molecules/JogControls/types'
-
 import type { UseLPCCommandChildProps } from './types'
 
 const JOG_COMMAND_TIMEOUT_MS = 10000
@@ -49,10 +50,7 @@ export function useHandleJog({
         if (pipetteId != null) {
           createSilentCommand({
             maintenanceRunId,
-            command: {
-              commandType: 'moveRelative',
-              params: { pipetteId, distance: step * dir, axis },
-            },
+            command: moveRelativeCommand({ pipetteId, axis, dir, step }),
             waitUntilComplete: true,
             timeout: JOG_COMMAND_TIMEOUT_MS,
           })

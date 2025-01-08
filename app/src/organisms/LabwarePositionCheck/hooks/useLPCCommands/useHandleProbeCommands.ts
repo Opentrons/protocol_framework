@@ -1,6 +1,13 @@
+import { useState } from 'react'
+
+import {
+  moveToMaintenancePositionCommands,
+  retractPipetteAxesSequentiallyCommands,
+  verifyProbeAttachmentAndHomeCommands,
+} from './commands'
+
 import type { CreateCommand, LoadedPipette } from '@opentrons/shared-data'
 import type { UseLPCCommandWithChainRunChildProps } from './types'
-import { useState } from 'react'
 
 export interface UseProbeCommandsResult {
   moveToMaintenancePosition: (pipette: LoadedPipette | undefined) => void
@@ -25,19 +32,11 @@ export function useHandleProbeCommands({
   const moveToMaintenancePosition = (
     pipette: LoadedPipette | undefined
   ): void => {
-    const pipetteMount = pipette?.mount
+    const maintenancePositionCommands: CreateCommand[] = [
+      ...moveToMaintenancePositionCommands(pipette),
+    ]
 
-    void chainLPCCommands(
-      [
-        {
-          commandType: 'calibration/moveToMaintenancePosition' as const,
-          params: {
-            mount: pipetteMount ?? 'left',
-          },
-        },
-      ],
-      false
-    )
+    void chainLPCCommands(maintenancePositionCommands, false)
   }
 
   const createProbeAttachmentHandler = (
@@ -45,47 +44,19 @@ export function useHandleProbeCommands({
     pipette: LoadedPipette | undefined,
     onSuccess: () => void
   ): (() => Promise<void>) => {
-    const pipetteMount = pipette?.mount
-    const pipetteZMotorAxis: 'leftZ' | 'rightZ' =
-      pipetteMount === 'left' ? 'leftZ' : 'rightZ'
-
-    const verifyCommands: CreateCommand[] = [
-      {
-        commandType: 'verifyTipPresence',
-        params: {
-          pipetteId,
-          expectedState: 'present',
-          followSingularSensor: 'primary',
-        },
-      },
-    ]
-    const homeCommands: CreateCommand[] = [
-      { commandType: 'home', params: { axes: [pipetteZMotorAxis] } },
-      {
-        commandType: 'retractAxis' as const,
-        params: {
-          axis: pipetteZMotorAxis,
-        },
-      },
-      {
-        commandType: 'retractAxis' as const,
-        params: { axis: 'x' },
-      },
-      {
-        commandType: 'retractAxis' as const,
-        params: { axis: 'y' },
-      },
+    const attachmentCommands: CreateCommand[] = [
+      ...verifyProbeAttachmentAndHomeCommands(pipetteId, pipette),
     ]
 
     return () =>
-      chainLPCCommands(verifyCommands, false)
-        .then(() => chainLPCCommands(homeCommands, false))
+      chainLPCCommands(attachmentCommands, false)
         .then(() => {
           onSuccess()
         })
         .catch(() => {
           setShowUnableToDetect(true)
 
+          // TOME TODO: You probably want to hoist this component out of the step.
           // Stop propagation to prevent error screen routing.
           return Promise.resolve()
         })
@@ -95,30 +66,12 @@ export function useHandleProbeCommands({
     pipette: LoadedPipette | undefined,
     onSuccess: () => void
   ): (() => Promise<void>) => {
-    const pipetteMount = pipette?.mount
-    const pipetteZMotorAxis: 'leftZ' | 'rightZ' =
-      pipetteMount === 'left' ? 'leftZ' : 'rightZ'
+    const detatchmentCommands: CreateCommand[] = [
+      ...retractPipetteAxesSequentiallyCommands(pipette),
+    ]
 
     return () =>
-      chainLPCCommands(
-        [
-          {
-            commandType: 'retractAxis' as const,
-            params: {
-              axis: pipetteZMotorAxis,
-            },
-          },
-          {
-            commandType: 'retractAxis' as const,
-            params: { axis: 'x' },
-          },
-          {
-            commandType: 'retractAxis' as const,
-            params: { axis: 'y' },
-          },
-        ],
-        false
-      ).then(() => {
+      chainLPCCommands(detatchmentCommands, false).then(() => {
         onSuccess()
       })
   }

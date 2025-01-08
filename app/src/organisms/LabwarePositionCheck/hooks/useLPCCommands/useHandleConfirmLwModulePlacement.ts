@@ -1,14 +1,16 @@
-import { getModuleType, HEATERSHAKER_MODULE_TYPE } from '@opentrons/shared-data'
+import {
+  moduleInitDuringLPCCommands,
+  moveToWellCommands,
+  savePositionCommands,
+} from './commands'
 
 import type {
-  CreateCommand,
   MoveLabwareCreateCommand,
   Coordinates,
+  CreateCommand,
 } from '@opentrons/shared-data'
 import type { UseLPCCommandWithChainRunChildProps } from './types'
 import type { CheckPositionsStep } from '/app/organisms/LabwarePositionCheck/types'
-
-const PROBE_LENGTH_MM = 44.5
 
 export interface UseHandleConfirmPlacementProps
   extends UseLPCCommandWithChainRunChildProps {
@@ -31,39 +33,16 @@ export function useHandleConfirmLwModulePlacement({
   const handleConfirmLwModulePlacement = (
     params: BuildMoveLabwareCommandParams
   ): Promise<Coordinates | null> => {
-    const { pipetteId, labwareId } = params.step
+    const { pipetteId } = params.step
 
-    return chainLPCCommands(
-      [
-        ...buildMoveLabwareCommand(params),
-        ...mostRecentAnalysis.modules.reduce<CreateCommand[]>((acc, mod) => {
-          if (getModuleType(mod.model) === HEATERSHAKER_MODULE_TYPE) {
-            return [
-              ...acc,
-              {
-                commandType: 'heaterShaker/closeLabwareLatch',
-                params: { moduleId: mod.id },
-              },
-            ]
-          }
-          return acc
-        }, []),
-        {
-          commandType: 'moveToWell' as const,
-          params: {
-            pipetteId,
-            labwareId,
-            wellName: 'A1',
-            wellLocation: {
-              origin: 'top' as const,
-              offset: { x: 0, y: 0, z: PROBE_LENGTH_MM },
-            },
-          },
-        },
-        { commandType: 'savePosition', params: { pipetteId } },
-      ],
-      false
-    ).then(responses => {
+    const confirmCommands: CreateCommand[] = [
+      ...buildMoveLabwareCommand(params),
+      ...moduleInitDuringLPCCommands(mostRecentAnalysis),
+      ...moveToWellCommands(params.step),
+      ...savePositionCommands(pipetteId),
+    ]
+
+    return chainLPCCommands(confirmCommands, false).then(responses => {
       const finalResponse = responses[responses.length - 1]
       if (finalResponse.data.commandType === 'savePosition') {
         const { position } = finalResponse.data.result ?? { position: null }

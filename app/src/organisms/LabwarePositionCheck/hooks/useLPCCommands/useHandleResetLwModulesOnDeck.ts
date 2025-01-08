@@ -1,10 +1,15 @@
-import { buildModulePrepCommands, buildMoveLabwareOffDeck } from './helpers'
+import {
+  fullHomeCommands,
+  modulePrepCommands,
+  moveLabwareOffDeckCommands,
+} from './commands'
 
+import type { CreateCommand } from '@opentrons/shared-data'
 import type { UseLPCCommandWithChainRunChildProps } from './types'
 import type {
   BuildMoveLabwareOffDeckParams,
   BuildModulePrepCommandsParams,
-} from './helpers'
+} from './commands'
 
 export interface UseHandleResetLwModulesOnDeckResult {
   handleResetLwModulesOnDeck: (
@@ -17,15 +22,15 @@ export function useHandleResetLwModulesOnDeck({
 }: UseLPCCommandWithChainRunChildProps): UseHandleResetLwModulesOnDeckResult {
   const handleResetLwModulesOnDeck = (
     params: BuildModulePrepCommandsParams & BuildMoveLabwareOffDeckParams
-  ): Promise<void> =>
-    chainLPCCommands(
-      [
-        ...buildModulePrepCommands(params),
-        { commandType: 'home', params: {} },
-        ...buildMoveLabwareOffDeck(params),
-      ],
-      false
-    ).then(() => Promise.resolve())
+  ): Promise<void> => {
+    const resetCommands: CreateCommand[] = [
+      ...modulePrepCommands(params),
+      ...fullHomeCommands(),
+      ...moveLabwareOffDeckCommands(params as BuildMoveLabwareOffDeckParams),
+    ]
+
+    return chainLPCCommands(resetCommands, false).then(() => Promise.resolve())
+  }
 
   return { handleResetLwModulesOnDeck }
 }

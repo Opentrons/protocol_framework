@@ -1,13 +1,17 @@
-import { getModuleType, HEATERSHAKER_MODULE_TYPE } from '@opentrons/shared-data'
-import { buildMoveLabwareOffDeck } from './helpers'
+import {
+  moduleCleanupDuringLPCCommands,
+  moveLabwareOffDeckCommands,
+  retractPipetteAxesSequentiallyCommands,
+  savePositionCommands,
+} from './commands'
 
 import type {
-  CreateCommand,
   LoadedPipette,
   Coordinates,
+  CreateCommand,
 } from '@opentrons/shared-data'
 import type { UseLPCCommandWithChainRunChildProps } from './types'
-import type { BuildMoveLabwareOffDeckParams } from './helpers'
+import type { BuildMoveLabwareOffDeckParams } from './commands'
 
 interface UseHandleConfirmPositionProps
   extends UseLPCCommandWithChainRunChildProps {
@@ -36,54 +40,16 @@ export function useHandleConfirmLwFinalPosition({
     }
   ): Promise<Coordinates | null> => {
     const { onSuccess, pipette, step } = params
-    const { moduleId, pipetteId, location } = step
+    const { pipetteId } = step
 
-    const moduleType =
-      (moduleId != null &&
-        'moduleModel' in location &&
-        location.moduleModel != null &&
-        getModuleType(location.moduleModel)) ??
-      null
-    const pipetteZMotorAxis: 'leftZ' | 'rightZ' =
-      pipette?.mount === 'left' ? 'leftZ' : 'rightZ'
-
-    const heaterShakerPrepCommands: CreateCommand[] =
-      moduleId != null &&
-      moduleType != null &&
-      moduleType === HEATERSHAKER_MODULE_TYPE
-        ? [
-            {
-              commandType: 'heaterShaker/openLabwareLatch',
-              params: { moduleId },
-            },
-          ]
-        : []
-    const confirmPositionCommands: CreateCommand[] = [
-      {
-        commandType: 'retractAxis' as const,
-        params: {
-          axis: pipetteZMotorAxis,
-        },
-      },
-      {
-        commandType: 'retractAxis' as const,
-        params: { axis: 'x' },
-      },
-      {
-        commandType: 'retractAxis' as const,
-        params: { axis: 'y' },
-      },
-      ...heaterShakerPrepCommands,
-      ...buildMoveLabwareOffDeck(params),
+    const confirmCommands: CreateCommand[] = [
+      ...savePositionCommands(pipetteId),
+      ...retractPipetteAxesSequentiallyCommands(pipette),
+      ...moduleCleanupDuringLPCCommands(step),
+      ...moveLabwareOffDeckCommands(params),
     ]
 
-    return chainLPCCommands(
-      [
-        { commandType: 'savePosition', params: { pipetteId } },
-        ...confirmPositionCommands,
-      ],
-      false
-    ).then(responses => {
+    return chainLPCCommands(confirmCommands, false).then(responses => {
       const firstResponse = responses[0]
       if (firstResponse.data.commandType === 'savePosition') {
         const { position } = firstResponse.data?.result ?? { position: null }

@@ -1,8 +1,9 @@
-import { buildModulePrepCommands } from './helpers'
+import { modulePrepCommands } from './commands'
 
 import type { VectorOffset } from '@opentrons/api-client'
+import type { CreateCommand } from '@opentrons/shared-data'
 import type { UseLPCCommandWithChainRunChildProps } from './types'
-import type { BuildModulePrepCommandsParams } from './helpers'
+import type { BuildModulePrepCommandsParams } from './commands'
 
 interface HandlePrepModulesParams extends BuildModulePrepCommandsParams {
   initialPosition: VectorOffset | undefined | null
@@ -12,6 +13,7 @@ export interface UseHandlePrepModulesResult {
   handlePrepModules: (params: HandlePrepModulesParams) => void
 }
 
+// Prep module(s) before LPCing a specific labware involving module(s).
 export function useHandlePrepModules({
   chainLPCCommands,
 }: UseLPCCommandWithChainRunChildProps): UseHandlePrepModulesResult {
@@ -19,10 +21,10 @@ export function useHandlePrepModules({
     initialPosition,
     ...rest
   }: HandlePrepModulesParams): void => {
-    const prepCmds = buildModulePrepCommands(rest)
+    const prepCommands: CreateCommand[] = modulePrepCommands(rest)
 
-    if (initialPosition == null && prepCmds.length > 0) {
-      void chainLPCCommands(prepCmds, false)
+    if (initialPosition == null && prepCommands.length > 0) {
+      void chainLPCCommands(prepCommands, false)
     }
   }
 
