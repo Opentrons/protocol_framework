@@ -13,7 +13,6 @@ from opentrons.types import DeckSlotName
 from opentrons.protocol_engine.types import (
     DeckSlotLocation,
     ModuleModel,
-    ModuleDefinition,
 )
 from opentrons.protocol_engine.execution import EquipmentHandler, LoadedModuleData
 from opentrons.protocol_engine import ModuleModel as EngineModuleModel
