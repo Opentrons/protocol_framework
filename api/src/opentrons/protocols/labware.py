@@ -258,6 +258,7 @@ def _get_path_to_labware(
     version: Optional[int] = None,
     base_path: Optional[Path] = None,
 ) -> Path:
+    version_filename = f"{version}.json" if version else "1.json"
     if namespace == OPENTRONS_NAMESPACE:
         # all labware in OPENTRONS_NAMESPACE is stored in shared data
         schema_3_dir = get_shared_data_root() / STANDARD_DEFS_PATH / "3" / load_name
@@ -267,7 +268,6 @@ def _get_path_to_labware(
             schema_3_path = schema_3_dir / version_filename
             if schema_3_path.exists():
                 return schema_3_path
-        version_filename = f"{version}.json" if version else "1.json"
         schema_2_path = (
             get_shared_data_root()
             / STANDARD_DEFS_PATH
@@ -279,6 +279,5 @@ def _get_path_to_labware(
             return schema_2_path
     if not base_path:
         base_path = USER_DEFS_PATH
-    version_filename = f"{version}.json" if version else "1.json"
-    def_path = base_path / namespace / load_name / f"{version_filename}.json"
+    def_path = base_path / namespace / load_name / version_filename
     return def_path
