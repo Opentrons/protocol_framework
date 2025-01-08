@@ -238,9 +238,8 @@ def _get_standard_labware_definition(
         raise FileNotFoundError(
             error_msg_string.format(load_name, checked_version, OPENTRONS_NAMESPACE)
         )
-
     namespace = namespace.lower()
-    def_path = _get_path_to_labware(load_name, namespace, checked_version)
+    def_path = _get_path_to_labware(load_name, namespace, version)
 
     try:
         with open(def_path, "rb") as f:
@@ -254,26 +253,31 @@ def _get_standard_labware_definition(
 
 
 def _get_path_to_labware(
-    load_name: str, namespace: str, version: int, base_path: Optional[Path] = None
+    load_name: str,
+    namespace: str,
+    version: Optional[int] = None,
+    base_path: Optional[Path] = None,
 ) -> Path:
+    version_filename = f"{version}.json" if version else "1.json"
     if namespace == OPENTRONS_NAMESPACE:
         # all labware in OPENTRONS_NAMESPACE is stored in shared data
-        schema_3_path = (
-            get_shared_data_root()
-            / STANDARD_DEFS_PATH
-            / "3"
-            / load_name
-            / f"{version}.json"
-        )
+        schema_3_dir = get_shared_data_root() / STANDARD_DEFS_PATH / "3" / load_name
+        if schema_3_dir.exists():
+            schema_3_files = os.listdir(schema_3_dir)
+            version_filename = f"{version}.json" if version else max(schema_3_files)
+            schema_3_path = schema_3_dir / version_filename
+            if schema_3_path.exists():
+                return schema_3_path
         schema_2_path = (
             get_shared_data_root()
             / STANDARD_DEFS_PATH
             / "2"
             / load_name
-            / f"{version}.json"
+            / version_filename
         )
-        return schema_3_path if schema_3_path.exists() else schema_2_path
+        if schema_2_path.exists():
+            return schema_2_path
     if not base_path:
         base_path = USER_DEFS_PATH
-    def_path = base_path / namespace / load_name / f"{version}.json"
+    def_path = base_path / namespace / load_name / version_filename
     return def_path
