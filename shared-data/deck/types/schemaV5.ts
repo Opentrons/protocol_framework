@@ -64,6 +64,10 @@ export type FlexAddressableAreaName =
   | 'absorbanceReaderV1LidDockB4'
   | 'absorbanceReaderV1LidDockC4'
   | 'absorbanceReaderV1LidDockD4'
+  | 'flexStackerV1A4'
+  | 'flexStackerV1B4'
+  | 'flexStackerV1C4'
+  | 'flexStackerV1D4'
 
 export type OT2AddressableAreaName =
   | '1'
@@ -126,6 +130,8 @@ export type WasteChuteCutoutFixtureId =
   | 'wasteChuteRightAdapterNoCover'
   | 'stagingAreaSlotWithWasteChuteRightAdapterCovered'
   | 'stagingAreaSlotWithWasteChuteRightAdapterNoCover'
+  | 'flexStackerV1WithWasteChuteRightAdapterCovered'
+  | 'flexStackerV1WithWasteChuteRightAdapterNoCover'
 
 export type FlexModuleCutoutFixtureId =
   | 'heaterShakerModuleV1'
@@ -135,6 +141,7 @@ export type FlexModuleCutoutFixtureId =
   | 'thermocyclerModuleV2Rear'
   | 'thermocyclerModuleV2Front'
   | 'absorbanceReaderV1'
+  | 'flexStackerV1'
 
 export type OT2SingleStandardSlot = 'singleStandardSlot'
 
