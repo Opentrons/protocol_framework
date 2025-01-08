@@ -137,14 +137,14 @@ class FlexStacker():
     @classmethod
     def create_from_sn(cls, sn: str, baudrate: int = 115200, timeout: float = 1.0) -> "FlexStacker":
         """Flex Stacker Driver"""
-        port = None
+        port = sn
         for comport in serial.tools.list_ports.comports():
             print(comport)
             if comport.serial_number == sn:
                 port = comport.device
                 break
         if not port:
-            raise ValueError(f"Could not find connected stacker with serial number {sn}")
+            raise ValueError(f"Could not find connected stacker with serial number {sn} at {port}")
         
         return cls.create(port=port, baudrate=baudrate, timeout=timeout)
 
