@@ -3,10 +3,11 @@ from typing import Annotated
 import logging
 
 from fastapi import Depends, status
+
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from server_utils.fastapi_utils.light_router import LightRouter
 
 from opentrons.protocol_engine import LabwareOffsetCreate, LabwareOffset
-from opentrons.protocols.models import LabwareDefinition
 
 from robot_server.errors.error_responses import ErrorBody
 from robot_server.service.json_api import RequestModel, SimpleBody, PydanticResponse

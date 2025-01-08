@@ -20,7 +20,7 @@
   "gripHeightFromLabwareBottom": 16.8,
   "wells": {
     "A1": {
-      "depth": 25,
+      "depth": 26.85,
       "shape": "rectangular",
       "xDimension": 106.8,
       "yDimension": 71.2,
@@ -71,11 +71,11 @@
         {
           "shape": "cuboidal",
           "topXDimension": 71.3,
-          "topYDimension": 70.6,
-          "bottomXDimension": 107.3,
+          "topYDimension": 107.3,
+          "bottomXDimension": 70.6,
           "bottomYDimension": 106.8,
           "topHeight": 26.85,
-          "bottomHeight": 2
+          "bottomHeight": 2.0
         }
       ]
     }

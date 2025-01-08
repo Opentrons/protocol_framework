@@ -31,7 +31,7 @@ describe('AnnouncementModal', () => {
     const heading = screen.getByText('mockHeading')
     expect(heading).toBeVisible()
     screen.getByText('mockImage')
-    fireEvent.click(screen.getByRole('button', { name: 'Got It!' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     expect(vi.mocked(setLocalStorageItem)).toHaveBeenCalled()
     expect(heading).not.toBeVisible()
   })

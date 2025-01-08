@@ -143,8 +143,8 @@ export function DefineLiquidsModal(
     saveForm({
       name: values.name,
       displayColor: values.displayColor,
-      liquidClass: values.liquidClass ? values.liquidClass : null,
-      description: values.description ? values.description : null,
+      liquidClass: values.liquidClass !== '' ? values.liquidClass : null,
+      description: values.description !== '' ? values.description : null,
       serialize: values.serialize ?? false,
     })
   }
