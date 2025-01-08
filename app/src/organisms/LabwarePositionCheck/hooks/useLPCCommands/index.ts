@@ -24,8 +24,9 @@ import type { UseHandlePrepModulesResult } from './useHandlePrepModules'
 import type { UseHandleConfirmPlacementResult } from './useHandleConfirmLwModulePlacement'
 import type { UseHandleConfirmPositionResult } from './useHandleConfirmLwFinalPosition'
 import type { UseHandleResetLwModulesOnDeckResult } from './useHandleResetLwModulesOnDeck'
+import type { LPCWizardFlexProps } from '/app/organisms/LabwarePositionCheck/LPCWizardFlex'
 
-export interface UseLPCCommandsProps extends Omit<LPCFlowsProps, 'robotType'> {
+export interface UseLPCCommandsProps extends LPCWizardFlexProps {
   step: LabwarePositionCheckStep
 }
 

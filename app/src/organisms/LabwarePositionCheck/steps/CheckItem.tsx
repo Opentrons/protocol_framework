@@ -29,7 +29,7 @@ import {
   setInitialPosition,
 } from '/app/organisms/LabwarePositionCheck/redux/actions'
 
-import type { PipetteName } from '@opentrons/shared-data'
+import type { PipetteName, LabwareDefinition2 } from '@opentrons/shared-data'
 import type { CheckPositionsStep, LPCStepProps } from '../types'
 
 export function CheckItem(
@@ -46,7 +46,7 @@ export function CheckItem(
     commandUtils,
     isOnDevice,
   } = props
-  const { labwareId, pipetteId, moduleId, adapterId, location } = step
+  const { labwareId, pipetteId, moduleId, location } = step
   const {
     handleJog,
     handlePrepModules,
@@ -56,7 +56,10 @@ export function CheckItem(
   } = commandUtils
   const { workingOffsets } = state
   const { t } = useTranslation(['labware_position_check', 'shared'])
-  const labwareDef = getItemLabwareDef({
+
+  // TOME TODO: Pretty mcuh all of this goes into selectors.
+
+  const itemLabwareDef = getItemLabwareDef({
     labwareId,
     loadedLabware: protocolData.labware,
     labwareDefs,
@@ -64,14 +67,6 @@ export function CheckItem(
   const pipette = protocolData.pipettes.find(
     pipette => pipette.id === pipetteId
   )
-  const adapterDisplayName =
-    adapterId != null
-      ? getItemLabwareDef({
-          labwareId: adapterId,
-          loadedLabware: protocolData.labware,
-          labwareDefs,
-        })?.metadata.displayName
-      : ''
 
   const pipetteName = pipette?.pipetteName as PipetteName
 
@@ -126,20 +121,7 @@ export function CheckItem(
     })
   }
 
-  // TOME TODO: Error instead of returning null.
-  // if (pipetteName == null || labwareDef == null || pipetteMount == null)
-  //   return null
-
-  const isTiprack = getIsTiprack(labwareDef)
-  const displayLocation = getLabwareDisplayLocation({
-    location,
-    allRunDefs: labwareDefs,
-    detailLevel: 'full',
-    t,
-    loadedModules: protocolData.modules,
-    loadedLabwares: protocolData.labware,
-    robotType: FLEX_ROBOT_TYPE,
-  })
+  const isLwTiprack = getIsTiprack(itemLabwareDef)
   const slotOnlyDisplayLocation = getLabwareDisplayLocation({
     location,
     detailLevel: 'slot-only',
@@ -149,26 +131,119 @@ export function CheckItem(
     robotType: FLEX_ROBOT_TYPE,
   })
 
-  const labwareDisplayName = getLabwareDisplayName(labwareDef)
+  const existingOffset =
+    getCurrentOffsetForLabwareInLocation(
+      existingOffsets,
+      getLabwareDefURI(itemLabwareDef) as string,
+      location
+    )?.vector ?? IDENTITY_VECTOR
 
-  let placeItemInstruction: JSX.Element = (
-    <Trans
-      t={t}
-      i18nKey="place_labware_in_location"
-      tOptions={{ labware: labwareDisplayName, location: displayLocation }}
-      components={{
-        bold: (
-          <LegacyStyledText
-            as="span"
-            fontWeight={TYPOGRAPHY.fontWeightSemiBold}
-          />
-        ),
-      }}
-    />
+  return (
+    <Flex flexDirection={DIRECTION_COLUMN} minHeight="29.5rem">
+      {initialPosition != null ? (
+        <JogToWell
+          header={t('check_item_in_location', {
+            item: isLwTiprack ? t('tip_rack') : t('labware'),
+            location: slotOnlyDisplayLocation,
+          })}
+          body={
+            <Trans
+              t={t}
+              i18nKey={
+                isOnDevice
+                  ? 'ensure_nozzle_position_odd'
+                  : 'ensure_nozzle_position_desktop'
+              }
+              values={{
+                tip_type: t('calibration_probe'),
+                item_location: isLwTiprack
+                  ? t('check_tip_location')
+                  : t('check_well_location'),
+              }}
+              components={{
+                block: <LegacyStyledText as="p" />,
+                bold: <strong />,
+              }}
+            />
+          }
+          labwareDef={itemLabwareDef}
+          pipetteName={pipetteName}
+          handleConfirmPosition={handleDispatchConfirmFinalPlacement}
+          handleGoBack={handleDispatchResetLwModulesOnDeck}
+          handleJog={handleJog}
+          initialPosition={initialPosition}
+          existingOffset={existingOffset}
+          {...props}
+        />
+      ) : (
+        <PrepareSpace
+          header={t('prepare_item_in_location', {
+            item: isLwTiprack ? t('tip_rack') : t('labware'),
+            location: slotOnlyDisplayLocation,
+          })}
+          body={
+            <UnorderedList
+              items={[
+                isOnDevice ? t('clear_all_slots_odd') : t('clear_all_slots'),
+                <PlaceItemInstruction
+                  key={slotOnlyDisplayLocation}
+                  itemLabwareDef={itemLabwareDef}
+                  isLwTiprack={isLwTiprack}
+                  slotOnlyDisplayLocation={slotOnlyDisplayLocation}
+                  {...props}
+                />,
+              ]}
+            />
+          }
+          labwareDef={itemLabwareDef}
+          confirmPlacement={handleDispatchConfirmInitialPlacement}
+          location={step.location}
+          {...props}
+        />
+      )}
+    </Flex>
   )
+}
 
-  if (isTiprack) {
-    placeItemInstruction = (
+interface PlaceItemInstructionProps extends LPCStepProps<CheckPositionsStep> {
+  itemLabwareDef: LabwareDefinition2
+  isLwTiprack: boolean
+  slotOnlyDisplayLocation: string
+}
+
+function PlaceItemInstruction({
+  protocolData,
+  labwareDefs,
+  step,
+  itemLabwareDef,
+  isLwTiprack,
+  slotOnlyDisplayLocation,
+}: PlaceItemInstructionProps): JSX.Element {
+  const { t } = useTranslation('labware_position_check')
+  const { location, adapterId } = step
+  const labwareDisplayName = getLabwareDisplayName(itemLabwareDef)
+
+  const displayLocation = getLabwareDisplayLocation({
+    location,
+    allRunDefs: labwareDefs,
+    detailLevel: 'full',
+    t,
+    loadedModules: protocolData.modules,
+    loadedLabwares: protocolData.labware,
+    robotType: FLEX_ROBOT_TYPE,
+  })
+
+  const adapterDisplayName =
+    adapterId != null
+      ? getItemLabwareDef({
+          labwareId: adapterId,
+          loadedLabware: protocolData.labware,
+          labwareDefs,
+        })?.metadata.displayName
+      : ''
+
+  if (isLwTiprack) {
+    return (
       <Trans
         t={t}
         i18nKey="place_a_full_tip_rack_in_location"
@@ -184,7 +259,7 @@ export function CheckItem(
       />
     )
   } else if (adapterId != null) {
-    placeItemInstruction = (
+    return (
       <Trans
         t={t}
         i18nKey="place_labware_in_adapter_in_location"
@@ -203,72 +278,21 @@ export function CheckItem(
         }}
       />
     )
+  } else {
+    return (
+      <Trans
+        t={t}
+        i18nKey="place_labware_in_location"
+        tOptions={{ labware: labwareDisplayName, location: displayLocation }}
+        components={{
+          bold: (
+            <LegacyStyledText
+              as="span"
+              fontWeight={TYPOGRAPHY.fontWeightSemiBold}
+            />
+          ),
+        }}
+      />
+    )
   }
-
-  const existingOffset =
-    getCurrentOffsetForLabwareInLocation(
-      existingOffsets,
-      getLabwareDefURI(labwareDef),
-      location
-    )?.vector ?? IDENTITY_VECTOR
-
-  return (
-    <Flex flexDirection={DIRECTION_COLUMN} minHeight="29.5rem">
-      {initialPosition != null ? (
-        <JogToWell
-          header={t('check_item_in_location', {
-            item: isTiprack ? t('tip_rack') : t('labware'),
-            location: slotOnlyDisplayLocation,
-          })}
-          body={
-            <Trans
-              t={t}
-              i18nKey={
-                isOnDevice
-                  ? 'ensure_nozzle_position_odd'
-                  : 'ensure_nozzle_position_desktop'
-              }
-              values={{
-                tip_type: t('calibration_probe'),
-                item_location: isTiprack
-                  ? t('check_tip_location')
-                  : t('check_well_location'),
-              }}
-              components={{
-                block: <LegacyStyledText as="p" />,
-                bold: <strong />,
-              }}
-            />
-          }
-          labwareDef={labwareDef}
-          pipetteName={pipetteName}
-          handleConfirmPosition={handleDispatchConfirmFinalPlacement}
-          handleGoBack={handleDispatchResetLwModulesOnDeck}
-          handleJog={handleJog}
-          initialPosition={initialPosition}
-          existingOffset={existingOffset}
-          {...props}
-        />
-      ) : (
-        <PrepareSpace
-          header={t('prepare_item_in_location', {
-            item: isTiprack ? t('tip_rack') : t('labware'),
-            location: slotOnlyDisplayLocation,
-          })}
-          body={
-            <UnorderedList
-              items={[
-                isOnDevice ? t('clear_all_slots_odd') : t('clear_all_slots'),
-                placeItemInstruction,
-              ]}
-            />
-          }
-          labwareDef={labwareDef}
-          confirmPlacement={handleDispatchConfirmInitialPlacement}
-          location={step.location}
-          {...props}
-        />
-      )}
-    </Flex>
-  )
 }

@@ -30,6 +30,7 @@ export const DetachProbe = ({
     createProbeDetachmentHandler,
   } = commandUtils
 
+  // TOME: TODO: Yeah, same sort of selector here.
   const pipette = protocolData.pipettes.find(p => p.id === step.pipetteId)
   const pipetteName = pipette?.pipetteName
   const pipetteChannels =
@@ -48,24 +49,12 @@ export const DetachProbe = ({
     moveToMaintenancePosition(pipette)
   }, [])
 
-  // TOME TODO: Error instead of returning null.
-  // if (pipetteName == null || pipetteMount == null) return null
-
   return (
     <GenericWizardTile
       header={i18n.format(t('detach_probe'), 'capitalize')}
       //  todo(jr, 5/30/23): update animations! these are not final for 1, 8 and 96
       rightHandBody={
-        <video
-          css={css`
-            padding-top: ${SPACING.spacing4};
-            width: 100%;
-            min-height: 18rem;
-          `}
-          autoPlay={true}
-          loop={true}
-          controls={false}
-        >
+        <video css={VIDEO_STYLE} autoPlay={true} loop={true} controls={false}>
           <source src={probeVideoSrc} />
         </video>
       }
@@ -80,7 +69,13 @@ export const DetachProbe = ({
   )
 }
 
-export const BODY_STYLE = css`
+const VIDEO_STYLE = css`
+  padding-top: ${SPACING.spacing4};
+  width: 100%;
+  min-height: 18rem;
+`
+
+const BODY_STYLE = css`
   ${TYPOGRAPHY.pRegular};
 
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
