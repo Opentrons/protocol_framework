@@ -678,6 +678,44 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                 location=location, mount=self.get_mount()
             )
 
+    def evotip_seal(self, location: Location, in_place: bool) -> None:
+        self._engine_client.execute_command(
+            cmd.EvotipSealPipetteParams(
+                pipetteId=self._pipette_id,
+                labwareId=labware_id,
+                wellName=well_name,
+                wellLocation=well_location,
+                homeAfter=home_after,
+                alternateDropLocation=alternate_drop_location,
+            )
+        )
+
+    def evotip_unseal(
+        self, location: Union[Location, TrashBin, WasteChute], in_place: bool
+    ) -> None:
+        self._engine_client.execute_command(
+            cmd.EvotipUnsealPipetteParams(
+                pipetteId=self._pipette_id,
+                labwareId=labware_id,
+                wellName=well_name,
+                wellLocation=well_location,
+                homeAfter=home_after,
+            )
+        )
+
+    def evotip_dispense(
+        self, location: Location, volume: float, speed: float, in_place: bool
+    ) -> None:
+        plunger_position = self._robot_core.get_plunger_position_from_volume(mount, volume, action, robot_type)
+        self._engine_client.execute_command(
+            cmd.EvotipDispenseInPlace(
+                pipetteId=self._pipette_id,
+                plungerPosition=plunger_position,
+                wellName=well_name,
+                speed=speed,
+            )
+        )
+
     def get_mount(self) -> Mount:
         """Get the mount the pipette is attached to."""
         return self._engine_client.state.pipettes.get(

@@ -181,6 +181,18 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         ...
 
     @abstractmethod
+    def seal(self, location: types.Location) -> None:
+        ...
+
+    @abstractmethod
+    def unseal(self, location: Union[types.Location, TrashBin, WasteChute]) -> None:
+        ...
+
+    @abstractmethod
+    def pressurize(self, location: types.Location, volume: float, speed: float) -> None:
+        ...
+
+    @abstractmethod
     def get_mount(self) -> types.Mount:
         ...
 

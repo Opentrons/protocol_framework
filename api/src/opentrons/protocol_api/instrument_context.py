@@ -1729,8 +1729,72 @@ class InstrumentContext(publisher.CommandPublisher):
 
         :type location: :py:class:`~.types.Location`
         """
-        # with ExitStack() as contexts:
+        with publisher.publish_context(
+            broker=self.broker,
+            command=cmds.seal(
+                instrument=self,
+                location=location,
+            ),
+        ):
+            self._core.seal(location)
         return self
+
+    @requires_version(2, 22)
+    def unseal(
+        self,
+        location: types.Location,
+    ) -> InstrumentContext:
+        """Release resin tips from the pipette.
+
+        The location provided should be a valid location to drop resin tips.
+
+        See :ref:`unseal` for examples.
+
+        :param location: A location containing that can accept tips.
+
+        :type location: :py:class:`~.types.Location`
+        """
+        with publisher.publish_context(
+            broker=self.broker,
+            command=cmds.unseal(
+                instrument=self,
+                location=location,
+            ),
+        ):
+            self._core.unseal(location)
+
+        return self
+
+    @requires_version(2, 22)
+    def pressurize(
+        self,
+        location: types.Location,
+        volume: float,
+        speed: float,
+    ) -> InstrumentContext:
+        """Seal resin tips onto the pipette.
+
+        The location provided should contain resin tips. Sealing the
+        tip will perform a `pick up` action but there will be no tip tracking
+        associated with the pipette.
+
+        See :ref:`seal` for examples.
+
+        :param location: A location containing resin tips.
+
+        :type location: :py:class:`~.types.Location`
+        """
+        with publisher.publish_context(
+            broker=self.broker,
+            command=cmds.pressurize(
+                instrument=self,
+                location=location,
+                volume=volume,
+                speed=speed,
+            ),
+        ):
+            self._core.pressurize(location, volume, speed)
+            return self
 
     @requires_version(2, 18)
     def _retract(
