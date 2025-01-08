@@ -101,7 +101,7 @@ FINAL_TEST_FAIL_INFOR = []
 
 
 _available_tips: Dict[int, List[str]] = {}
-
+_available_tips_fixture: Dict[int, List[str]] = {}
 
 @dataclass
 class TestConfig:
@@ -425,8 +425,9 @@ async def _pick_up_tip_for_fixture(
     pip = api.hardware_pipettes[mount.to_mount()]
     assert pip
     pip_channels = pip.channels.value
-    tip = _available_tips[tip_volume][0]
-    _available_tips[tip_volume] = _available_tips[tip_volume][pip_channels:]
+    tip = _available_tips_fixture[tip_volume][0]
+    print("tip",tip)
+    _available_tips_fixture[tip_volume] = _available_tips_fixture[tip_volume][pip_channels:]
     print("1",IDEAL_LABWARE_LOCATIONS.fixture)
     print("2",CALIBRATED_LABWARE_LOCATIONS.fixture)
     CALIBRATED_LABWARE_LOCATIONS.fixture = await _pick_up_tip_newfixture(
@@ -751,7 +752,6 @@ async def _fixture_check_pressure(
     )
     results.append(r)
     # aspirate 50uL
-    print(111)
     await api.aspirate(mount, PRESSURE_FIXTURE_ASPIRATE_VOLUME[pip_vol])
     await asyncio.sleep(2)
     if pip_vol == 50:
@@ -771,7 +771,6 @@ async def _fixture_check_pressure(
     )
     results.append(r)
     # dispense
-    print(1)
     await api.dispense(mount, PRESSURE_FIXTURE_ASPIRATE_VOLUME[pip_vol],0.5)
     input("jxxx")
     await asyncio.sleep(2)
@@ -786,7 +785,6 @@ async def _fixture_check_pressure(
         pip_channels,
     )
     results.append(r)
-    print(2)
     # retract out of fixture
     #await api.move_rel(mount, Point(z=fixture_depth))
     await api.drop_tip(mount, home_after=False)
@@ -818,6 +816,9 @@ async def _fixture_check_pressure(
 def _reset_available_tip() -> None:
     for tip_size in [50, 200, 1000]:
         _available_tips[tip_size] = [
+            f"{row}{col + 1}" for col in range(12) for row in "ABCDEFGH"
+        ]
+        _available_tips_fixture[tip_size] = [
             f"{row}{col + 1}" for col in range(12) for row in "ABCDEFGH"
         ]
 
