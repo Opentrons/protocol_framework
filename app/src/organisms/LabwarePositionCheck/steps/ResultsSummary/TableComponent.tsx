@@ -7,12 +7,13 @@ import type {
   ResultsSummaryStep,
 } from '/app/organisms/LabwarePositionCheck/types'
 
-interface TableComponent extends LPCStepProps<ResultsSummaryStep> {
+interface TableComponentProps extends LPCStepProps<ResultsSummaryStep> {
   offsetsToApply: LabwareOffsetCreateData[]
 }
 
-export function TableComponent(props: TableComponent): JSX.Element {
-  const { isOnDevice, labwareDefs, offsetsToApply } = props
+export function TableComponent(props: TableComponentProps): JSX.Element {
+  const { state, offsetsToApply } = props
+  const { isOnDevice, labwareDefs } = state
 
   return isOnDevice ? (
     <TerseOffsetTable

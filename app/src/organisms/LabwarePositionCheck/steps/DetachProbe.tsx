@@ -19,12 +19,13 @@ import detachProbe96 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detac
 import type { DetachProbeStep, LPCStepProps } from '../types'
 
 export const DetachProbe = ({
+  state,
   step,
-  protocolData,
   proceed,
   commandUtils,
 }: LPCStepProps<DetachProbeStep>): JSX.Element => {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
+  const { protocolData } = state
   const {
     moveToMaintenancePosition,
     createProbeDetachmentHandler,

@@ -20,20 +20,20 @@ import attachProbe96 from '/app/assets/videos/pipette-wizard-flows/Pipette_Attac
 import type { AttachProbeStep, LPCStepProps } from '../types'
 
 export function AttachProbe({
-  step,
-  protocolData,
   proceed,
-  isOnDevice,
   commandUtils,
+  state,
+  step,
 }: LPCStepProps<AttachProbeStep>): JSX.Element {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
+  const { protocolData, isOnDevice } = state
+  const { pipetteId } = step
   const {
     moveToMaintenancePosition,
     setShowUnableToDetect,
     unableToDetect,
     createProbeAttachmentHandler,
   } = commandUtils
-  const { pipetteId } = step
   // TOME TODO: This pipette logic should almost certainly be in a selector, too.
   const pipette = protocolData.pipettes.find(p => p.id === pipetteId)
   const handleProbeAttached = createProbeAttachmentHandler(

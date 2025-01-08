@@ -13,8 +13,6 @@ import { useHandleResetLwModulesOnDeck } from '/app/organisms/LabwarePositionChe
 
 import type { CreateCommand } from '@opentrons/shared-data'
 import type { CommandData } from '@opentrons/api-client'
-import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck'
-import type { LabwarePositionCheckStep } from '/app/organisms/LabwarePositionCheck/types'
 import type { UseProbeCommandsResult } from './useHandleProbeCommands'
 import type { UseHandleConditionalCleanupResult } from './useHandleConditionalCleanup'
 import type { UseHandleJogResult } from './useHandleJog'
@@ -25,9 +23,10 @@ import type { UseHandleConfirmPlacementResult } from './useHandleConfirmLwModule
 import type { UseHandleConfirmPositionResult } from './useHandleConfirmLwFinalPosition'
 import type { UseHandleResetLwModulesOnDeckResult } from './useHandleResetLwModulesOnDeck'
 import type { LPCWizardFlexProps } from '/app/organisms/LabwarePositionCheck/LPCWizardFlex'
+import type { LPCWizardState } from '/app/organisms/LabwarePositionCheck/redux'
 
 export interface UseLPCCommandsProps extends LPCWizardFlexProps {
-  step: LabwarePositionCheckStep
+  state: LPCWizardState
 }
 
 export type UseLPCCommandsResult = UseApplyLPCOffsetsResult &

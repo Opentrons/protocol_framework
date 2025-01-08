@@ -1,5 +1,7 @@
-import type { Coordinates } from '@opentrons/shared-data'
+import type { Coordinates, LabwareDefinition2 } from '@opentrons/shared-data'
 import type { LabwareOffsetLocation, VectorOffset } from '@opentrons/api-client'
+import type { LPCWizardFlexProps } from '/app/organisms/LabwarePositionCheck/LPCWizardFlex'
+import type { LabwarePositionCheckStep } from '/app/organisms/LabwarePositionCheck/types'
 
 export interface WorkingOffset {
   labwareId: string
@@ -12,6 +14,11 @@ export interface PositionParams {
   labwareId: string
   location: LabwareOffsetLocation
   position: VectorOffset | null
+}
+
+export interface ProceedStepAction {
+  type: 'PROCEED_STEP'
+  payload: Record<never, never>
 }
 
 export interface InitialPositionAction {
@@ -31,12 +38,24 @@ export interface TipPickUpOffsetAction {
   }
 }
 
-export interface LPCWizardState {
+interface StepsInfo {
+  currentStepIndex: number
+  totalStepCount: number
+  current: LabwarePositionCheckStep
+  all: LabwarePositionCheckStep[]
+}
+
+export interface LPCWizardState extends LPCWizardFlexProps {
+  isOnDevice: boolean
   workingOffsets: WorkingOffset[]
   tipPickUpOffset: Coordinates | null
+  protocolData: LPCWizardFlexProps['mostRecentAnalysis']
+  labwareDefs: LabwareDefinition2[]
+  steps: StepsInfo
 }
 
 export type LPCWizardAction =
   | InitialPositionAction
   | FinalPositionAction
   | TipPickUpOffsetAction
+  | ProceedStepAction

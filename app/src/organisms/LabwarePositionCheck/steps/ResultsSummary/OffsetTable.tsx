@@ -35,9 +35,10 @@ interface OffsetTableProps extends LPCStepProps<ResultsSummaryStep> {
 export function OffsetTable({
   offsets,
   labwareDefinitions,
-  protocolData,
+  state,
 }: OffsetTableProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
+  const { protocolData } = state
 
   return (
     <Table>

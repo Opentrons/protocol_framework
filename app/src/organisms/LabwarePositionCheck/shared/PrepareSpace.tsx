@@ -64,12 +64,13 @@ interface PrepareSpaceProps extends LPCStepProps<CheckPositionsStep> {
 export function PrepareSpace({
   location,
   labwareDef,
-  protocolData,
+  state,
   header,
   body,
   confirmPlacement,
 }: PrepareSpaceProps): JSX.Element {
   const { i18n, t } = useTranslation(['labware_position_check', 'shared'])
+  const { protocolData } = state
 
   const isOnDevice = useSelector(getIsOnDevice)
   const deckConfig = useNotifyDeckConfigurationQuery().data ?? []

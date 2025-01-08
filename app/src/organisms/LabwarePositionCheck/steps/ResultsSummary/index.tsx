@@ -45,16 +45,10 @@ const LPC_HELP_LINK_URL =
 export function ResultsSummary(
   props: LPCStepProps<ResultsSummaryStep>
 ): JSX.Element {
-  const {
-    protocolData,
-    state,
-    existingOffsets,
-    commandUtils,
-    isOnDevice,
-  } = props
+  const { existingOffsets, commandUtils, state } = props
+  const { protocolData, isOnDevice, workingOffsets } = state
   const { isApplyingOffsets, handleApplyOffsets } = commandUtils
   const { i18n, t } = useTranslation('labware_position_check')
-  const { workingOffsets } = state
   const isLabwareOffsetCodeSnippetsOn = useSelector(
     getIsLabwareOffsetCodeSnippetsOn
   )

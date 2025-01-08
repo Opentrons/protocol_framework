@@ -36,15 +36,12 @@ export function CheckItem(
   props: LPCStepProps<CheckPositionsStep>
 ): JSX.Element {
   const {
-    step,
-    protocolData,
     state,
     dispatch,
     proceed,
     existingOffsets,
-    labwareDefs,
     commandUtils,
-    isOnDevice,
+    step,
   } = props
   const { labwareId, pipetteId, moduleId, location } = step
   const {
@@ -54,7 +51,7 @@ export function CheckItem(
     handleConfirmLwFinalPosition,
     handleResetLwModulesOnDeck,
   } = commandUtils
-  const { workingOffsets } = state
+  const { workingOffsets, isOnDevice, labwareDefs, protocolData } = state
   const { t } = useTranslation(['labware_position_check', 'shared'])
 
   // TOME TODO: Pretty mcuh all of this goes into selectors.
@@ -212,14 +209,14 @@ interface PlaceItemInstructionProps extends LPCStepProps<CheckPositionsStep> {
 }
 
 function PlaceItemInstruction({
-  protocolData,
-  labwareDefs,
   step,
   itemLabwareDef,
   isLwTiprack,
   slotOnlyDisplayLocation,
+  state,
 }: PlaceItemInstructionProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
+  const { protocolData, labwareDefs } = state
   const { location, adapterId } = step
   const labwareDisplayName = getLabwareDisplayName(itemLabwareDef)
 

@@ -27,9 +27,11 @@ export interface UseHandleJogResult {
 // TODO(jh, 01-06-25): This debounced jog logic is used elsewhere in the app, ex, Drop tip wizard. We should consolidate it.
 export function useHandleJog({
   maintenanceRunId,
-  step: currentStep,
+  state,
   setErrorMessage,
 }: UseHandleJogProps): UseHandleJogResult {
+  const { current: currentStep } = state.steps
+
   const [isJogging, setIsJogging] = useState(false)
   const [jogQueue, setJogQueue] = useState<Array<() => Promise<void>>>([])
   const {
