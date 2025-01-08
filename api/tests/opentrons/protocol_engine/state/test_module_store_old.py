@@ -19,7 +19,6 @@ from opentrons.protocol_engine.commands import (
     heater_shaker as hs_commands,
     temperature_module as temp_commands,
     thermocycler as tc_commands,
-    absorbance_reader as ar_commands,
 )
 from opentrons.protocol_engine.types import (
     DeckSlotLocation,
@@ -747,25 +746,23 @@ def test_handle_absorbance_reader_commands(
         ),
     )
 
-    initialize_reader = ar_commands.Initialize.model_construct(  # type: ignore[call-arg]
-        params=ar_commands.InitializeParams(
-            moduleId="module-id", measureMode="single", sampleWavelengths=[1]
-        ),
-        result=ar_commands.InitializeResult(),
+    initialize_reader = commands.Comment.model_construct(  # type: ignore[call-arg]
+        params=commands.CommentParams(message="hello"),
+        result=commands.CommentResult(),
     )
-    open_lid = ar_commands.OpenLid.model_construct(  # type: ignore[call-arg]
-        params=ar_commands.OpenLidParams(moduleId="module-id"),
-        result=ar_commands.OpenLidResult(),
+    open_lid = commands.Comment.model_construct(  # type: ignore[call-arg]
+        params=commands.CommentParams(message="hello dude"),
+        result=commands.CommentResult(),
     )
 
-    read_data = ar_commands.ReadAbsorbance.model_construct(  # type: ignore[call-arg]
-        params=ar_commands.ReadAbsorbanceParams(moduleId="module-id"),
-        result=ar_commands.ReadAbsorbanceResult(data=None, fileIds=None),
+    read_data = commands.Comment.model_construct(  # type: ignore[call-arg]
+        params=commands.CommentParams(message="hello man"),
+        result=commands.CommentResult(),
     )
 
-    close_lid = ar_commands.CloseLid.model_construct(  # type: ignore[call-arg]
-        params=ar_commands.CloseLidParams(moduleId="module-id"),
-        result=ar_commands.CloseLidResult(),
+    close_lid = commands.Comment.model_construct(  # type: ignore[call-arg]
+        params=commands.CommentParams(message="hello ladies"),
+        result=commands.CommentResult(),
     )
 
     subject = ModuleStore(
