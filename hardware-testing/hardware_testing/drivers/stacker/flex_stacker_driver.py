@@ -78,8 +78,8 @@ MOVE_ACCELERATION_L = 800
 MAX_SPEED_DISCONTINUITY_X = 40
 MAX_SPEED_DISCONTINUITY_Z = 40
 MAX_SPEED_DISCONTINUITY_L = 40
-HOME_CURRENT_X = 1.5
-HOME_CURRENT_Z = 1.5
+HOME_CURRENT_X = 1.8
+HOME_CURRENT_Z = 1.8
 HOME_CURRENT_L = 0.8
 MOVE_CURRENT_X = 1.0
 MOVE_CURRENT_Z = 1.5
@@ -88,9 +88,9 @@ MOVE_SPEED_X = 200
 MOVE_SPEED_UPZ = 200
 MOVE_SPEED_L = 100
 MOVE_SPEED_DOWNZ = 200
-x_sg_value = 8
-z_sg_value = 16
-l_sg_value = 8
+x_sg_value = 1
+z_sg_value = 1
+l_sg_value = 1
 
 class FlexStacker():
     """Flex Stacker Driver."""
@@ -169,30 +169,34 @@ class FlexStacker():
         data_encode = data.encode()
         self._stacker_connection.write(data=data_encode)
         start = time.time()
-        while True:
+        condition = True
+        while condition:
             response = self._stacker_connection.readline()
-            print(response)
+            #print(f"res:{response}")
             #if (self._ack in response) or (self._stall in response):
-            if (self._ack in response):
+            if (self._ack.decode() == response[-3:].decode()):
                 # Remove ack from response
-                response = response.replace(self._ack, b"OK\n")
+                # response = response.replace(self._ack, b"OK\n")
                 str_response = self.process_raw_response(
                     command=data, response=response.decode()
                 )
-                return str_response
+                #print(f'ack: {str_response}')
+                condition = False
+                break
             elif (self._stall in response):
                 # Remove ack from response
                 str_response = self.process_raw_response(
                     command=data, response=response.decode()
                 )
-                print(str_response)
-                return str_response
+                condition = False
+                #print(f'Stall: {str_response}')
+                break
             end = time.time()
             if (end-start) > 120:
                 str_response = b"OK\n"
-                return str_response
+                condition = False
 
-        self.on_retry()
+        return str_response
 
     def on_retry(self) -> None:
         """
@@ -235,7 +239,7 @@ class FlexStacker():
         """Get the serial number of the flex stacker unit"""
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.DEVICE_INFO)
-        print(c)
+        #print(c)
         response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
         return response
 
@@ -253,7 +257,7 @@ class FlexStacker():
         """Set the serial number of the flex stacker unit"""
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.SET_SERIAL_NUM).add_element(serial_number)
-        print(c)
+        #print(c)
         response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
 
     def enable_motor(self, axis: AXIS):
@@ -264,7 +268,7 @@ class FlexStacker():
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.ENABLE_MOTOR
         ).add_element(axis.upper())
-        print(c)
+        #print(c)
         response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
 
     def disable_motor(self, axis: AXIS):
@@ -275,7 +279,7 @@ class FlexStacker():
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.DISABLE_MOTOR
         ).add_element(axis.upper())
-        print(c)
+        #print(c)
         response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
 
     def get_sensor_states(self):
@@ -364,7 +368,7 @@ class FlexStacker():
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.CURRENT_MOTION_PARMS
         ).add_element(axis)
-        print(c)
+        #print(c)
         response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('CMD: rrr')
         return response
 
@@ -374,18 +378,21 @@ class FlexStacker():
                 current: Optional[float] = None):
         if axis == AXIS.X:
             current = self.set_default(current, MOVE_CURRENT_X)
+            #print(f"move current set: {current}")
             self.set_run_current(current, AXIS.X)
             velocity = self.set_default(velocity, MOVE_SPEED_X)
             acceleration = self.set_default(acceleration, MOVE_ACCELERATION_X)
             msd = self.set_default(msd, MAX_SPEED_DISCONTINUITY_X)
         elif axis == AXIS.Z:
             current = self.set_default(current, MOVE_CURRENT_Z)
+            #print(f"move current set: {current}")
             self.set_run_current(current, AXIS.Z)
             velocity = self.set_default(velocity, MOVE_SPEED_DOWNZ)
             acceleration = self.set_default(acceleration, MOVE_ACCELERATION_Z)
             msd = self.set_default(msd, MAX_SPEED_DISCONTINUITY_Z)
         elif axis == AXIS.L:
             current = self.set_default(current, MOVE_CURRENT_L)
+            #print(f"move current set: {current}")
             self.set_run_current(current, AXIS.L)
             velocity = self.set_default(velocity, MOVE_SPEED_L)
             acceleration = self.set_default(acceleration, MOVE_ACCELERATION_L)
@@ -446,20 +453,22 @@ class FlexStacker():
         # Set this to max current to overcome spring force on platforms
         if axis == AXIS.X:
             current = self.set_default(current, HOME_CURRENT_X)
-            #print(f"current set: {current}")
+            #print(f"home current set: {current}")
             self.set_run_current(current, AXIS.X)
             velocity = self.set_default(velocity, self.home_speed)
             acceleration = self.set_default(acceleration, self.home_acceleration)
             # msd = self.set_default(msd, MAX_SPEED_DISCONTINUITY_X)
         elif axis == AXIS.Z:
             current = self.set_default(current, HOME_CURRENT_Z)
+            #print(f"home current set: {current}")
             self.set_run_current(current, AXIS.Z)
             velocity = self.set_default(velocity, self.home_speed)
             acceleration = self.set_default(acceleration, self.home_acceleration)
-            self.set_ihold_current(1.8, AXIS.Z)
+            # self.set_ihold_current(1.8, AXIS.Z)
             # msd = self.set_default(msd, MAX_SPEED_DISCONTINUITY_Z)
         elif axis == AXIS.L:
             current = self.set_default(current, HOME_CURRENT_L)
+            #print(f"home current set: {current}")
             self.set_run_current(current, AXIS.L)
             velocity = self.set_default(velocity, self.home_speed_l)
             acceleration = self.set_default(acceleration, self.home_acceleration_l)
@@ -520,7 +529,9 @@ class FlexStacker():
             gcode=GCODE.SET_IHOLD_CURRENT
         ).add_element(axis + f'{current}')
         #print(c)
-        self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
+        response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
+        time.sleep(0.3)
+        return response
 
     def set_run_current(self, current: float, axis: AXIS) -> str:
         """ M906 - Set axis peak run current in Amps ex: M906 X1.5"""
@@ -528,9 +539,10 @@ class FlexStacker():
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.SET_PEAK_CURRENT
         ).add_element(axis + f'{current}')
-        print(c)
-        self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
-        time.sleep(0.1)
+        #print(c)
+        response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
+        time.sleep(0.3)
+        return response
 
     def close_latch(self, velocity: Optional[float] = None, acceleration: Optional[float] = None):
         velocity = self.set_default(velocity, MOVE_SPEED_L)
@@ -620,7 +632,7 @@ class FlexStacker():
         c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
             gcode=GCODE.WRITE_TO_REGISTER
         ).add_element(axis.upper()).add_element(register)
-        print(c)
+        #print(c)
 
         response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES).strip('OK')
 
