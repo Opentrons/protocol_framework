@@ -238,7 +238,6 @@ def _get_standard_labware_definition(
         raise FileNotFoundError(
             error_msg_string.format(load_name, checked_version, OPENTRONS_NAMESPACE)
         )
-
     namespace = namespace.lower()
     def_path = _get_path_to_labware(load_name, namespace, version)
 
@@ -266,17 +265,18 @@ def _get_path_to_labware(
             schema_3_files = os.listdir(schema_3_dir)
             version_filename = f"{version}.json" if version else max(schema_3_files)
             schema_3_path = schema_3_dir / version_filename
-            return schema_3_path
-        else:
-            version_filename = f"{version}.json" if version else "1.json"
-            schema_2_path = (
-                get_shared_data_root()
-                / STANDARD_DEFS_PATH
-                / "2"
-                / load_name
-                / f"{version_filename}.json"
-            )
-        return schema_2_path
+            if schema_3_path.exists():
+                return schema_3_path
+        version_filename = f"{version}.json" if version else "1.json"
+        schema_2_path = (
+            get_shared_data_root()
+            / STANDARD_DEFS_PATH
+            / "2"
+            / load_name
+            / version_filename
+        )
+        if schema_2_path.exists():
+            return schema_2_path
     if not base_path:
         base_path = USER_DEFS_PATH
     version_filename = f"{version}.json" if version else "1.json"
