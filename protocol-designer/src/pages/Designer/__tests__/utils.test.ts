@@ -7,7 +7,7 @@ import {
   WASTE_CHUTE_CUTOUT,
   fixture96Plate,
 } from '@opentrons/shared-data'
-import { getSlotInformation } from '../utils'
+import { getSlotInformation, formatTime } from '../utils'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type { AdditionalEquipmentName } from '@opentrons/step-generation'
 import type { AllTemporalPropertiesForTimelineFrame } from '../../../step-forms'
@@ -192,5 +192,23 @@ describe('getSlotInformation', () => {
       createFixtureForSlots: [mockWasteChute, mockStagingArea],
       preSelectedFixture: 'wasteChuteAndStagingArea',
     })
+  })
+})
+
+describe('formatTime', () => {
+  it('input is 3:3:3 and output is 03:03:03', () => {
+    expect(formatTime('3:3:3')).toEqual('03:03:03')
+  })
+  it('input is 3:3 and output is 03:03', () => {
+    expect(formatTime('3:3')).toEqual('03:03')
+  })
+  it('input is 30:12 and output is 30:12', () => {
+    expect(formatTime('30:12')).toEqual('30:12')
+  })
+  it('input is 12:23:34 and output is 12:23:34', () => {
+    expect(formatTime('12:23:34')).toEqual('12:23:34')
+  })
+  it('input is 0:03 and output is 00:03', () => {
+    expect(formatTime('0:03')).toEqual('00:03')
   })
 })
