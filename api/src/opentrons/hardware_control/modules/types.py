@@ -17,7 +17,11 @@ from typing import (
 from typing_extensions import TypedDict
 from pathlib import Path
 
-from opentrons.drivers.flex_stacker.types import LimitSwitchStatus, PlatformStatus, StackerAxis
+from opentrons.drivers.flex_stacker.types import (
+    LimitSwitchStatus,
+    PlatformStatus,
+    StackerAxis,
+)
 from opentrons.drivers.rpi_drivers.types import USBPort
 
 if TYPE_CHECKING:
@@ -289,4 +293,3 @@ class StackerAxisState(str, Enum):
                     else StackerAxisState.RETRACTED
                 )
         return StackerAxisState.UNKNOWN
-

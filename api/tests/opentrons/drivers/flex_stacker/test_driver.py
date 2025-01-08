@@ -66,6 +66,25 @@ async def test_stop_motors(subject: FlexStackerDriver, connection: AsyncMock) ->
         await subject.get_device_info()
 
 
+async def test_get_motion_params(
+    subject: FlexStackerDriver, connection: AsyncMock
+) -> None:
+    """It should send a get motion params command."""
+    connection.send_command.return_value = "M120 M:X V:200.000 A:1500.000 D:5.000"
+    response = await subject.get_motion_params(types.StackerAxis.X)
+    assert response == types.MoveParams(
+        axis=types.StackerAxis.X,
+        acceleration=1500.0,
+        max_speed=200.0,
+        max_speed_discont=5.0,
+    )
+    
+    command = types.GCODE.GET_MOVE_PARAMS.build_command().add_element(types.StackerAxis.X.name)
+    response = await connection.send_command(command)
+    connection.send_command.assert_any_call(command)
+    connection.reset_mock()
+
+
 async def test_set_serial_number(
     subject: FlexStackerDriver, connection: AsyncMock
 ) -> None:
@@ -93,6 +112,29 @@ async def test_set_serial_number(
     connection.send_command.assert_any_call(set_serial_number)
     connection.reset_mock()
 
+
+async def test_enable_motors(subject: FlexStackerDriver, connection: AsyncMock) -> None:
+    """It should send a enable motors command"""
+    connection.send_command.return_value = "M17"
+    response = await subject.enable_motors([types.StackerAxis.X])
+    assert response
+
+    move_to = types.GCODE.ENABLE_MOTORS.build_command().add_element(types.StackerAxis.X.value)
+    connection.send_command.assert_any_call(move_to)
+    connection.reset_mock()
+
+    # Test no arg to disable all motors
+    response = await subject.enable_motors(list(types.StackerAxis))
+    assert response
+
+    move_to = types.GCODE.ENABLE_MOTORS.build_command()
+    move_to.add_element(types.StackerAxis.X.value)
+    move_to.add_element(types.StackerAxis.Z.value)
+    move_to.add_element(types.StackerAxis.L.value)
+
+    print("MOVE TO",move_to)
+    connection.send_command.assert_any_call(move_to)
+    connection.reset_mock()
 
 async def test_get_limit_switch(
     subject: FlexStackerDriver, connection: AsyncMock

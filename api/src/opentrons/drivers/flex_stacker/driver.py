@@ -1,6 +1,6 @@
 import asyncio
 import re
-from typing import Optional
+from typing import List, Optional
 
 from opentrons.drivers.command_builder import CommandBuilder
 from opentrons.drivers.asyncio.communication import AsyncResponseSerialConnection
@@ -77,6 +77,27 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
         return bool(int(match.group(1)))
 
     @classmethod
+    def parse_move_params(cls, response: str) -> MoveParams:
+        """Parse move params."""
+        field_names = MoveParams.get_fields()
+        pattern = r"\s".join(
+            [
+                rf"{f}:(?P<{f}>(\d*\.)?\d+)" if f != "M" else rf"{f}:(?P<{f}>[X,Z,L])"
+                for f in field_names
+            ]
+        )
+        _RE = re.compile(f"^{GCODE.GET_MOVE_PARAMS} {pattern}$")
+        m = _RE.match(response)
+        if not m:
+            raise ValueError(f"Incorrect Response for move params: {response}")
+        return MoveParams(
+            axis=StackerAxis(m.group("M")),
+            max_speed=float(m.group("V")),
+            acceleration=float(m.group("A")),
+            max_speed_discont=float(m.group("D")),
+        )
+
+    @classmethod
     def append_move_params(
         cls, command: CommandBuilder, params: MoveParams | None
     ) -> CommandBuilder:
@@ -148,12 +169,29 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
             raise ValueError(f"Incorrect Response for set serial number: {resp}")
         return True
 
+    async def enable_motors(self, axis: List[StackerAxis]) -> bool:
+        """Enables the axis motor if present, disables it otherwise."""
+        command = GCODE.ENABLE_MOTORS.build_command()
+        for a in axis:
+            command.add_element(a.name)
+        resp = await self._connection.send_command(command)
+        if not re.match(rf"^{GCODE.ENABLE_MOTORS}$", resp):
+            raise ValueError(f"Incorrect Response for enable motors: {resp}")
+        return True
+
     async def stop_motors(self) -> bool:
         """Stop all motor movement."""
         resp = await self._connection.send_command(GCODE.STOP_MOTORS.build_command())
         if not re.match(rf"^{GCODE.STOP_MOTORS}$", resp):
             raise ValueError(f"Incorrect Response for stop motors: {resp}")
         return True
+
+    async def get_motion_params(self, axis: StackerAxis) -> MoveParams:
+        """Get the motion parameters used by the given axis motor."""
+        response = await self._connection.send_command(
+            GCODE.GET_MOVE_PARAMS.build_command().add_element(axis.name)
+        )
+        return self.parse_move_params(response)
 
     async def get_limit_switch(self, axis: StackerAxis, direction: Direction) -> bool:
         """Get limit switch status.

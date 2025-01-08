@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from opentrons.util.async_helpers import ensure_yield
 
@@ -61,10 +61,18 @@ class SimulatingDriver(AbstractFlexStackerDriver):
         """Set Serial Number."""
         return True
 
+    async def enable_motors(self, axis: List[StackerAxis]) -> bool:
+        """Enables the axis motor if present, disables it otherwise."""
+        return True
+
     @ensure_yield
     async def stop_motors(self) -> bool:
         """Stop all motor movement."""
         return True
+
+    async def get_motion_params(self, axis: StackerAxis) -> MoveParams:
+        """Get the motion parameters used by the given axis motor."""
+        return MoveParams(axis, 1, 1, 1)
 
     @ensure_yield
     async def get_limit_switch(self, axis: StackerAxis, direction: Direction) -> bool:
