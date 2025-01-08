@@ -78,8 +78,10 @@ async def test_get_motion_params(
         max_speed=200.0,
         max_speed_discont=5.0,
     )
-    
-    command = types.GCODE.GET_MOVE_PARAMS.build_command().add_element(types.StackerAxis.X.name)
+
+    command = types.GCODE.GET_MOVE_PARAMS.build_command().add_element(
+        types.StackerAxis.X.name
+    )
     response = await connection.send_command(command)
     connection.send_command.assert_any_call(command)
     connection.reset_mock()
@@ -119,7 +121,9 @@ async def test_enable_motors(subject: FlexStackerDriver, connection: AsyncMock) 
     response = await subject.enable_motors([types.StackerAxis.X])
     assert response
 
-    move_to = types.GCODE.ENABLE_MOTORS.build_command().add_element(types.StackerAxis.X.value)
+    move_to = types.GCODE.ENABLE_MOTORS.build_command().add_element(
+        types.StackerAxis.X.value
+    )
     connection.send_command.assert_any_call(move_to)
     connection.reset_mock()
 
@@ -132,9 +136,10 @@ async def test_enable_motors(subject: FlexStackerDriver, connection: AsyncMock) 
     move_to.add_element(types.StackerAxis.Z.value)
     move_to.add_element(types.StackerAxis.L.value)
 
-    print("MOVE TO",move_to)
+    print("MOVE TO", move_to)
     connection.send_command.assert_any_call(move_to)
     connection.reset_mock()
+
 
 async def test_get_limit_switch(
     subject: FlexStackerDriver, connection: AsyncMock

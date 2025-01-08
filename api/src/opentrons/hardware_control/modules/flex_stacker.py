@@ -5,10 +5,16 @@ import logging
 from typing import Dict, Optional, Mapping
 
 from opentrons.drivers.flex_stacker.types import (
+    Direction,
+    MoveParams,
+    MoveResult,
     StackerAxis,
 )
 from opentrons.drivers.rpi_drivers.types import USBPort
-from opentrons.drivers.flex_stacker.driver import FlexStackerDriver
+from opentrons.drivers.flex_stacker.driver import (
+    STACKER_MOTION_CONFIG,
+    FlexStackerDriver,
+)
 from opentrons.drivers.flex_stacker.abstract import AbstractFlexStackerDriver
 from opentrons.drivers.flex_stacker.simulator import SimulatingDriver
 from opentrons.hardware_control.execution_manager import ExecutionManager
@@ -198,6 +204,74 @@ class FlexStacker(mod_abc.AbstractModule):
     async def deactivate(self, must_be_running: bool = True) -> None:
         await self._driver.stop_motors()
 
+    async def move_axis(
+        self,
+        axis: StackerAxis,
+        direction: Direction,
+        distance: float,
+        speed: Optional[float] = None,
+        acceleration: Optional[float] = None,
+        current: Optional[float] = None,
+    ) -> bool:
+        """Move the axis in a direction by the given distance in mm."""
+        motion_params = STACKER_MOTION_CONFIG[axis]["move"]
+        await self._driver.set_run_current(axis, current or motion_params.current or 0)
+        if any([speed, acceleration]):
+            motion_params.max_speed = speed or motion_params.max_speed
+            motion_params.acceleration = acceleration or motion_params.acceleration
+        distance = direction.distance(distance)
+        success = await self._driver.move_in_mm(axis, distance, params=motion_params)
+        # TODO: This can return a stall, handle that here
+        return success == MoveResult.NO_ERROR
+
+    async def home_axis(
+        self,
+        axis: StackerAxis,
+        direction: Direction,
+        speed: Optional[float] = None,
+        acceleration: Optional[float] = None,
+        current: Optional[float] = None,
+    ) -> bool:
+        motion_params = STACKER_MOTION_CONFIG[axis]["home"]
+        await self._driver.set_run_current(axis, current or motion_params.current or 0)
+        # Set the max hold current for the Z axis
+        if axis == StackerAxis.Z:
+            await self._driver.set_ihold_current(axis, 1.8)
+        if any([speed, acceleration]):
+            motion_params.max_speed = speed or motion_params.max_speed
+            motion_params.acceleration = acceleration or motion_params.acceleration
+        success = await self._driver.move_to_limit_switch(
+            axis=axis, direction=direction, params=motion_params
+        )
+        # TODO: This can return a stall, handle that here
+        return success == MoveResult.NO_ERROR
+
+    async def close_latch(
+        self,
+        velocity: Optional[float] = None,
+        acceleration: Optional[float] = None,
+    ) -> bool:
+        """Close the latch, dropping any labware its holding."""
+        motion_params = STACKER_MOTION_CONFIG[StackerAxis.L]["move"]
+        speed = velocity or motion_params.max_speed
+        accel = acceleration or motion_params.acceleration
+        return await self.home_axis(
+            StackerAxis.L, Direction.RETRACT, speed=speed, acceleration=accel
+        )
+
+    async def open_latch(
+        self,
+        velocity: Optional[float] = None,
+        acceleration: Optional[float] = None,
+    ) -> bool:
+        """Open the latch."""
+        motion_params = STACKER_MOTION_CONFIG[StackerAxis.L]["move"]
+        speed = velocity or motion_params.max_speed
+        accel = acceleration or motion_params.acceleration
+        return await self.home_axis(
+            StackerAxis.L, Direction.EXTENT, speed=speed, acceleration=accel
+        )
+
 
 class FlexStackerReader(Reader):
     error: Optional[str]
@@ -210,11 +284,16 @@ class FlexStackerReader(Reader):
         }
         self.platform_state = PlatformState.UNKNOWN
         self.hopper_door_closed = False
+        self.motion_params = {axis: MoveParams(axis=axis) for axis in StackerAxis}
+        self.get_config = True
 
     async def read(self) -> None:
         await self.get_limit_switch_status()
         await self.get_platform_sensor_state()
         await self.get_door_closed()
+        if self.get_config:
+            await self.get_motion_parameters()
+            self.get_config = False
         self._set_error(None)
 
     async def get_limit_switch_status(self) -> None:
@@ -224,6 +303,12 @@ class FlexStackerReader(Reader):
             StackerAxis.X: StackerAxisState.from_status(status, StackerAxis.X),
             StackerAxis.Z: StackerAxisState.from_status(status, StackerAxis.Z),
             StackerAxis.L: StackerAxisState.from_status(status, StackerAxis.L),
+        }
+
+    async def get_motion_parameters(self) -> None:
+        """Get the motion parameters used by the axis motors."""
+        self.move_params = {
+            axis: self._driver.get_motion_params(axis) for axis in StackerAxis
         }
 
     async def get_platform_sensor_state(self) -> None:

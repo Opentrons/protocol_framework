@@ -5,6 +5,7 @@ from opentrons.util.async_helpers import ensure_yield
 from .abstract import AbstractFlexStackerDriver
 from .types import (
     LEDColor,
+    MoveResult,
     StackerAxis,
     PlatformStatus,
     Direction,
@@ -70,6 +71,14 @@ class SimulatingDriver(AbstractFlexStackerDriver):
         """Stop all motor movement."""
         return True
 
+    async def set_run_current(self, axis: StackerAxis, current: float) -> bool:
+        """Set axis peak run current in amps."""
+        return True
+
+    async def set_ihold_current(self, axis: StackerAxis, current: float) -> bool:
+        """Set axis hold current in amps."""
+        return True
+
     async def get_motion_params(self, axis: StackerAxis) -> MoveParams:
         """Get the motion parameters used by the given axis motor."""
         return MoveParams(axis, 1, 1, 1)
@@ -109,16 +118,16 @@ class SimulatingDriver(AbstractFlexStackerDriver):
     @ensure_yield
     async def move_in_mm(
         self, axis: StackerAxis, distance: float, params: MoveParams | None = None
-    ) -> bool:
-        """Move axis."""
-        return True
+    ) -> MoveResult:
+        """Move axis by the given distance in mm."""
+        return MoveResult.NO_ERROR
 
     @ensure_yield
     async def move_to_limit_switch(
         self, axis: StackerAxis, direction: Direction, params: MoveParams | None = None
-    ) -> bool:
+    ) -> MoveResult:
         """Move until limit switch is triggered."""
-        return True
+        return MoveResult.NO_ERROR
 
     async def home_axis(self, axis: StackerAxis, direction: Direction) -> bool:
         """Home axis."""

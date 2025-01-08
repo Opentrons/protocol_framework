@@ -8,6 +8,7 @@ from opentrons.drivers.asyncio.communication import AsyncResponseSerialConnectio
 from .abstract import AbstractFlexStackerDriver
 from .types import (
     GCODE,
+    MoveResult,
     StackerAxis,
     PlatformStatus,
     Direction,
@@ -26,6 +27,58 @@ FS_ERROR_KEYWORD = "err"
 FS_ASYNC_ERROR_ACK = "async"
 DEFAULT_COMMAND_RETRIES = 0
 GCODE_ROUNDING_PRECISION = 2
+
+
+STACKER_MOTION_CONFIG = {
+    StackerAxis.X: {
+        "home": MoveParams(
+            StackerAxis.X,
+            max_speed=10.0,
+            acceleration=100.0,
+            max_speed_discont=40,
+            current=1.5,
+        ),
+        "move": MoveParams(
+            StackerAxis.X,
+            max_speed=200.0,
+            acceleration=1500.0,
+            max_speed_discont=40,
+            current=1.0,
+        ),
+    },
+    StackerAxis.Z: {
+        "home": MoveParams(
+            StackerAxis.Z,
+            max_speed=10.0,
+            acceleration=100.0,
+            max_speed_discont=40,
+            current=1.5,
+        ),
+        "move": MoveParams(
+            StackerAxis.Z,
+            max_speed=200.0,
+            acceleration=500.0,
+            max_speed_discont=40,
+            current=1.5,
+        ),
+    },
+    StackerAxis.L: {
+        "home": MoveParams(
+            StackerAxis.L,
+            max_speed=100.0,
+            acceleration=800.0,
+            max_speed_discont=40,
+            current=0.8,
+        ),
+        "move": MoveParams(
+            StackerAxis.L,
+            max_speed=100.0,
+            acceleration=800.0,
+            max_speed_discont=40,
+            current=0.6,
+        ),
+    },
+}
 
 
 class FlexStackerDriver(AbstractFlexStackerDriver):
@@ -186,6 +239,24 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
             raise ValueError(f"Incorrect Response for stop motors: {resp}")
         return True
 
+    async def set_run_current(self, axis: StackerAxis, current: float) -> bool:
+        """Set axis peak run current in amps."""
+        resp = await self._connection.send_command(
+            GCODE.SET_RUN_CURRENT.build_command().add_float(axis.name, current)
+        )
+        if not re.match(rf"^{GCODE.SET_RUN_CURRENT}$", resp):
+            raise ValueError(f"Incorrect Response for set run current: {resp}")
+        return True
+
+    async def set_ihold_current(self, axis: StackerAxis, current: float) -> bool:
+        """Set axis hold current in amps."""
+        resp = await self._connection.send_command(
+            GCODE.SET_IHOLD_CURRENT.build_command().add_float(axis.name, current)
+        )
+        if not re.match(rf"^{GCODE.SET_IHOLD_CURRENT}$", resp):
+            raise ValueError(f"Incorrect Response for set ihold current: {resp}")
+        return True
+
     async def get_motion_params(self, axis: StackerAxis) -> MoveParams:
         """Get the motion parameters used by the given axis motor."""
         response = await self._connection.send_command(
@@ -235,8 +306,8 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
 
     async def move_in_mm(
         self, axis: StackerAxis, distance: float, params: MoveParams | None = None
-    ) -> bool:
-        """Move axis."""
+    ) -> MoveResult:
+        """Move axis by the given distance in mm."""
         command = self.append_move_params(
             GCODE.MOVE_TO.build_command().add_float(
                 axis.name, distance, GCODE_ROUNDING_PRECISION
@@ -246,11 +317,12 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
         resp = await self._connection.send_command(command)
         if not re.match(rf"^{GCODE.MOVE_TO}$", resp):
             raise ValueError(f"Incorrect Response for move to: {resp}")
-        return True
+        # TODO: handle STALL_ERROR
+        return MoveResult.NO_ERROR
 
     async def move_to_limit_switch(
         self, axis: StackerAxis, direction: Direction, params: MoveParams | None = None
-    ) -> bool:
+    ) -> MoveResult:
         """Move until limit switch is triggered."""
         command = self.append_move_params(
             GCODE.MOVE_TO_SWITCH.build_command().add_int(axis.name, direction.value),
@@ -259,7 +331,8 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
         resp = await self._connection.send_command(command)
         if not re.match(rf"^{GCODE.MOVE_TO_SWITCH}$", resp):
             raise ValueError(f"Incorrect Response for move to switch: {resp}")
-        return True
+        # TODO: handle STALL_ERROR
+        return MoveResult.NO_ERROR
 
     async def home_axis(self, axis: StackerAxis, direction: Direction) -> bool:
         """Home axis."""

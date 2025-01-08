@@ -2,6 +2,7 @@ from typing import List, Protocol
 
 from .types import (
     LimitSwitchStatus,
+    MoveResult,
     StackerAxis,
     PlatformStatus,
     Direction,
@@ -42,6 +43,14 @@ class AbstractFlexStackerDriver(Protocol):
         """Stop all motor movement."""
         ...
 
+    async def set_run_current(self, axis: StackerAxis, current: float) -> bool:
+        """Set axis peak run current in amps."""
+        ...
+
+    async def set_ihold_current(self, axis: StackerAxis, current: float) -> bool:
+        """Set axis hold current in amps."""
+        ...
+
     async def get_motion_params(self, axis: StackerAxis) -> MoveParams:
         """Get the motion parameters used by the given axis motor."""
         ...
@@ -77,13 +86,13 @@ class AbstractFlexStackerDriver(Protocol):
 
     async def move_in_mm(
         self, axis: StackerAxis, distance: float, params: MoveParams | None = None
-    ) -> bool:
-        """Move axis."""
+    ) -> MoveResult:
+        """Move axis by the given distance in mm."""
         ...
 
     async def move_to_limit_switch(
         self, axis: StackerAxis, direction: Direction, params: MoveParams | None = None
-    ) -> bool:
+    ) -> MoveResult:
         """Move until limit switch is triggered."""
         ...
 
