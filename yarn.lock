@@ -4765,7 +4765,7 @@
     "@smithy/types" "^3.0.0"
     tslib "^2.6.2"
 
-"@storybook/addon-actions@7.6.17", "@storybook/addon-actions@^7.6.16":
+"@storybook/addon-actions@7.6.17":
   version "7.6.17"
   resolved "https://registry.yarnpkg.com/@storybook/addon-actions/-/addon-actions-7.6.17.tgz#b1be5ab28b22b4a50c6aa0cd0a3671ca5b6f5f71"
   integrity sha512-TBphs4v6LRfyTpFo/WINF0TkMaE3rrNog7wW5mbz6n0j8o53kDN4o9ZEcygSL5zQX43CAaghQTeDCss7ueG7ZQ==
@@ -4820,7 +4820,7 @@
     remark-slug "^6.0.0"
     ts-dedent "^2.0.0"
 
-"@storybook/addon-essentials@^7.6.16":
+"@storybook/addon-essentials@7.6.17":
   version "7.6.17"
   resolved "https://registry.yarnpkg.com/@storybook/addon-essentials/-/addon-essentials-7.6.17.tgz#d49d9a77edc999518c6871b66032a647787c39f4"
   integrity sha512-qlSpamxuYfT2taF953nC9QijGF2pSbg1ewMNpdwLTj16PTZvR/d8NCDMTJujI1bDwM2m18u8Yc43ibh5LEmxCw==
@@ -4847,7 +4847,7 @@
   dependencies:
     "@storybook/global" "^5.0.0"
 
-"@storybook/addon-links@^7.6.16":
+"@storybook/addon-links@7.6.17":
   version "7.6.17"
   resolved "https://registry.yarnpkg.com/@storybook/addon-links/-/addon-links-7.6.17.tgz#5a678ff09c1b5056b67cb345c115cfcd343ffe86"
   integrity sha512-iFUwKObRn0EKI0zMETsil2p9a/81rCuSMEWECsi+khkCAs1FUnD2cT6Ag5ydcNcBXsdtdfDJdtXQrkw+TSoStQ==
@@ -5292,7 +5292,7 @@
   resolved "https://registry.yarnpkg.com/@storybook/react-dom-shim/-/react-dom-shim-7.6.17.tgz#5875915316f687bf658cc6686ea49f2928eae4b2"
   integrity sha512-32Sa/G+WnvaPiQ1Wvjjw5UM9rr2c4GDohwCcWVv3/LJuiFPqNS6zglAtmnsrlIBnUwRBMLMh/ekCTdqMiUmfDw==
 
-"@storybook/react-vite@^7.6.16":
+"@storybook/react-vite@7.6.17":
   version "7.6.17"
   resolved "https://registry.yarnpkg.com/@storybook/react-vite/-/react-vite-7.6.17.tgz#29ea46ef27595d10ad115b33833ed5b167f02960"
   integrity sha512-4dIm3CuRl44X1TLzN3WoZh/bChzJF7Ud28li9atj9C8db0bb/y0zl8cahrsRFoR7/LyfqdOVLqaztrnA5SsWfg==
@@ -5305,7 +5305,7 @@
     magic-string "^0.30.0"
     react-docgen "^7.0.0"
 
-"@storybook/react@7.6.17", "@storybook/react@^7.6.16":
+"@storybook/react@7.6.17":
   version "7.6.17"
   resolved "https://registry.yarnpkg.com/@storybook/react/-/react-7.6.17.tgz#3e585b37f4a45d01b60543e1952a46ae3da70e81"
   integrity sha512-lVqzQSU03rRJWYW+gK2gq6mSo3/qtnVICY8B8oP7gc36jVu4ksDIu45bTfukM618ODkUZy0vZe6T4engK3azjA==
@@ -20800,7 +20800,7 @@ storybook-addon-pseudo-states@2.0.0:
   resolved "https://registry.yarnpkg.com/storybook-addon-pseudo-states/-/storybook-addon-pseudo-states-2.0.0.tgz#4fa251aaea04ebc6d17b7e57e5f09ea240f14583"
   integrity sha512-tLuuwB1k+xFsX8C1fn4G/vJm5wX33jvSLeqTsJgWwI3/AKJUf6Thbg/kg14I2AwN8nqffjun2PzE05Iea23n0w==
 
-storybook@^7.6.16:
+storybook@7.6.17:
   version "7.6.17"
   resolved "https://registry.yarnpkg.com/storybook/-/storybook-7.6.17.tgz#d7fdbbf57d61d386b3ccc6721285bc914f54269b"
   integrity sha512-8+EIo91bwmeFWPg1eysrxXlhIYv3OsXrznTr4+4Eq0NikqAoq6oBhtlN5K2RGS2lBVF537eN+9jTCNbR+WrzDA==
