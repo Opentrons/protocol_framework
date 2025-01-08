@@ -81,7 +81,9 @@
   "compatibleParentLabware": [
     "armadillo_96_wellplate_200ul_pcr_full_skirt",
     "opentrons_96_wellplate_200ul_pcr_full_skirt",
-    "opentrons_tough_pcr_auto_sealing_lid"
+    "opentrons_tough_pcr_auto_sealing_lid",
+    "biorad_96_wellplate_200ul_pcr",
+    "opentrons_flex_deck_riser"
   ],
   "gripForce": 15,
   "gripHeightFromLabwareBottom": 7.91,
