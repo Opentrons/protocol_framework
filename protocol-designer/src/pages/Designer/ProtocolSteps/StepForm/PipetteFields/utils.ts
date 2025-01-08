@@ -135,14 +135,21 @@ export function getDisabledPathMap(
     airGapVolume,
   })
 
-  if (!withinCapacityForMultiDispense && (values.volume != null && values.volume !== '')) {
+  if (
+    !withinCapacityForMultiDispense &&
+    values.volume != null &&
+    values.volume !== ''
+  ) {
     disabledPathMap = {
       ...disabledPathMap,
       multiDispense: t('step_edit_form.field.path.subtitle.volume_too_high'),
     }
   }
-console.log(values.volume == null, values.volume === '')
-  if (!withinCapacityForMultiAspirate && (values.volume != null && values.volume !== '')) {
+  if (
+    !withinCapacityForMultiAspirate &&
+    values.volume != null &&
+    values.volume !== ''
+  ) {
     disabledPathMap = {
       ...disabledPathMap,
       multiAspirate: t('step_edit_form.field.path.subtitle.volume_too_high'),
