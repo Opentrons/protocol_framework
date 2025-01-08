@@ -1072,6 +1072,7 @@ class OT3Controller(FlexBackend):
                     converted_name.pipette_type,
                     converted_name.pipette_channels,
                     converted_name.pipette_version,
+                    converted_name.oem_type,
                 ),
                 "id": OT3Controller._combine_serial_number(attached),
             }
@@ -1396,7 +1397,11 @@ class OT3Controller(FlexBackend):
             return
 
         if hasattr(self, "_event_watcher"):
-            if loop.is_running() and self._event_watcher:
+            if (
+                loop.is_running()
+                and self._event_watcher
+                and not self._event_watcher.closed
+            ):
                 self._event_watcher.close()
 
         messenger = getattr(self, "_messenger", None)
@@ -1493,6 +1498,7 @@ class OT3Controller(FlexBackend):
         threshold_pascals: float,
         plunger_impulse_time: float,
         num_baseline_reads: int,
+        z_offset_for_plunger_prep: float,
         probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
         force_both_sensors: bool = False,
         response_queue: Optional[PipetteSensorResponseQueue] = None,
@@ -1535,6 +1541,7 @@ class OT3Controller(FlexBackend):
             threshold_pascals=threshold_pascals,
             plunger_impulse_time=plunger_impulse_time,
             num_baseline_reads=num_baseline_reads,
+            z_offset_for_plunger_prep=z_offset_for_plunger_prep,
             sensor_id=sensor_id_for_instrument(probe),
             force_both_sensors=force_both_sensors,
             emplace_data=response_capture,

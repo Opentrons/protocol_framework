@@ -22,6 +22,7 @@ import { selectors as labwareIngredSelectors } from '../../labware-ingred/select
 import * as wellContentsSelectors from '../../top-selectors/well-contents'
 import * as fieldProcessors from '../../steplist/fieldLevel/processing'
 import * as labwareIngredActions from '../../labware-ingred/actions'
+import { getLiquidClassDisplayName } from '../../liquid-defs/utils'
 import { getSelectedWells } from '../../well-selection/selectors'
 import { getLabwareNicknamesById } from '../../ui/labware/selectors'
 import {
@@ -31,6 +32,8 @@ import {
 import { deselectAllWells } from '../../well-selection/actions'
 import { DefineLiquidsModal } from '../DefineLiquidsModal'
 import { LiquidCard } from './LiquidCard'
+
+import type { ChangeEvent } from 'react'
 import type { DropdownOption } from '@opentrons/components'
 import type { ContentsByWell } from '../../labware-ingred/types'
 
@@ -38,6 +41,7 @@ export interface LiquidInfo {
   name: string
   color: string
   liquidIndex: string
+  liquidClassDisplayName: string | null
 }
 
 interface ValidFormValues {
@@ -129,9 +133,7 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
     }
   }
 
-  const handleChangeVolume: (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => void = e => {
+  const handleChangeVolume: (e: ChangeEvent<HTMLInputElement>) => void = e => {
     const value: string | null | undefined = e.currentTarget.value
     const masked = fieldProcessors.composeMaskers(
       fieldProcessors.maskToFloat,
@@ -214,6 +216,9 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
         liquidIndex: liquid,
         name: foundLiquid?.name ?? '',
         color: foundLiquid?.displayColor ?? '',
+        liquidClassDisplayName: getLiquidClassDisplayName(
+          foundLiquid?.liquidClass ?? null
+        ),
       }
     })
     .filter(Boolean)

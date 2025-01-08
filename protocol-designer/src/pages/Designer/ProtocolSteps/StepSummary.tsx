@@ -12,7 +12,10 @@ import {
   StyledText,
   Tag,
 } from '@opentrons/components'
-import { getModuleDisplayName } from '@opentrons/shared-data'
+import {
+  WASTE_CHUTE_CUTOUT,
+  getModuleDisplayName,
+} from '@opentrons/shared-data'
 import {
   getAdditionalEquipmentEntities,
   getLabwareEntities,
@@ -285,6 +288,8 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         newLocationName = labwareNicknamesById[newLocation]
       } else if (newLocation === 'offDeck') {
         newLocationName = t('off_deck')
+      } else if (newLocation === WASTE_CHUTE_CUTOUT) {
+        newLocationName = t('shared:wasteChute')
       }
       stepSummaryContent = (
         <StyledTrans

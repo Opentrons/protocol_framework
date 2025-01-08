@@ -3,7 +3,7 @@
 from collections.abc import Collection
 from typing import Annotated, Type, Union, get_type_hints
 
-from pydantic import Field
+from pydantic import Field, TypeAdapter
 
 from opentrons.util.get_union_elements import get_union_elements
 
@@ -159,6 +159,22 @@ from .load_pipette import (
     LoadPipetteCreate,
     LoadPipetteResult,
     LoadPipetteCommandType,
+)
+
+from .load_lid_stack import (
+    LoadLidStack,
+    LoadLidStackParams,
+    LoadLidStackCreate,
+    LoadLidStackResult,
+    LoadLidStackCommandType,
+)
+
+from .load_lid import (
+    LoadLid,
+    LoadLidParams,
+    LoadLidCreate,
+    LoadLidResult,
+    LoadLidCommandType,
 )
 
 from .move_labware import (
@@ -367,6 +383,8 @@ Command = Annotated[
         LoadLiquidClass,
         LoadModule,
         LoadPipette,
+        LoadLidStack,
+        LoadLid,
         MoveLabware,
         MoveRelative,
         MoveToCoordinates,
@@ -448,6 +466,8 @@ CommandParams = Union[
     HomeParams,
     RetractAxisParams,
     LoadLabwareParams,
+    LoadLidStackParams,
+    LoadLidParams,
     ReloadLabwareParams,
     LoadLiquidParams,
     LoadLiquidClassParams,
@@ -537,6 +557,8 @@ CommandType = Union[
     LoadLiquidClassCommandType,
     LoadModuleCommandType,
     LoadPipetteCommandType,
+    LoadLidStackCommandType,
+    LoadLidCommandType,
     MoveLabwareCommandType,
     MoveRelativeCommandType,
     MoveToCoordinatesCommandType,
@@ -622,6 +644,8 @@ CommandCreate = Annotated[
         LoadLiquidClassCreate,
         LoadModuleCreate,
         LoadPipetteCreate,
+        LoadLidStackCreate,
+        LoadLidCreate,
         MoveLabwareCreate,
         MoveRelativeCreate,
         MoveToCoordinatesCreate,
@@ -686,6 +710,13 @@ CommandCreate = Annotated[
     Field(discriminator="commandType"),
 ]
 
+# Each time a TypeAdapter is instantiated, it will construct a new validator and
+# serializer. To improve performance, TypeAdapters are instantiated once.
+# See https://docs.pydantic.dev/latest/concepts/performance/#typeadapter-instantiated-once
+CommandCreateAdapter: TypeAdapter[CommandCreate] = TypeAdapter(CommandCreate)
+
+CommandAdapter: TypeAdapter[Command] = TypeAdapter(Command)
+
 CommandResult = Union[
     AirGapInPlaceResult,
     AspirateResult,
@@ -708,6 +739,8 @@ CommandResult = Union[
     LoadLiquidClassResult,
     LoadModuleResult,
     LoadPipetteResult,
+    LoadLidStackResult,
+    LoadLidResult,
     MoveLabwareResult,
     MoveRelativeResult,
     MoveToCoordinatesResult,

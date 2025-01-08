@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { fireEvent, screen } from '@testing-library/react'
 import {
+  ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
   HEATERSHAKER_MODULE_V1,
   fixture96Plate,
@@ -9,7 +10,9 @@ import {
 import { i18n } from '../../../../assets/localization'
 import { renderWithProviders } from '../../../../__testing-utils__'
 import { deleteContainer } from '../../../../labware-ingred/actions'
+import { useKitchen } from '../../../../organisms/Kitchen/hooks'
 import { deleteModule } from '../../../../step-forms/actions'
+import { getAdditionalEquipment } from '../../../../step-forms/selectors'
 import { getRobotType } from '../../../../file-data/selectors'
 import { getEnableAbsorbanceReader } from '../../../../feature-flags/selectors'
 import { deleteDeckFixture } from '../../../../step-forms/actions/additionalItems'
@@ -19,7 +22,7 @@ import { getDeckSetupForActiveItem } from '../../../../top-selectors/labware-loc
 import { DeckSetupTools } from '../DeckSetupTools'
 import { LabwareTools } from '../LabwareTools'
 
-import type * as React from 'react'
+import type { ComponentProps } from 'react'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
 vi.mock('../LabwareTools')
@@ -31,14 +34,18 @@ vi.mock('../../../../step-forms/actions')
 vi.mock('../../../../step-forms/actions/additionalItems')
 vi.mock('../../../../labware-ingred/selectors')
 vi.mock('../../../../tutorial/selectors')
-const render = (props: React.ComponentProps<typeof DeckSetupTools>) => {
+vi.mock('../../../../step-forms/selectors')
+vi.mock('../../../../organisms/Kitchen/hooks')
+const render = (props: ComponentProps<typeof DeckSetupTools>) => {
   return renderWithProviders(<DeckSetupTools {...props} />, {
     i18nInstance: i18n,
   })[0]
 }
 
+const mockMakeSnackbar = vi.fn()
+
 describe('DeckSetupTools', () => {
-  let props: React.ComponentProps<typeof DeckSetupTools>
+  let props: ComponentProps<typeof DeckSetupTools>
 
   beforeEach(() => {
     props = {
@@ -66,6 +73,12 @@ describe('DeckSetupTools', () => {
       pipettes: {},
     })
     vi.mocked(getDismissedHints).mockReturnValue([])
+    vi.mocked(getAdditionalEquipment).mockReturnValue({})
+    vi.mocked(useKitchen).mockReturnValue({
+      makeSnackbar: mockMakeSnackbar,
+      bakeToast: vi.fn(),
+      eatToast: vi.fn(),
+    })
   })
   afterEach(() => {
     vi.resetAllMocks()
@@ -163,5 +176,33 @@ describe('DeckSetupTools', () => {
     fireEvent.click(screen.getByText('Waste chute and staging area slot'))
     fireEvent.click(screen.getByText('Done'))
     expect(props.onCloseClick).toHaveBeenCalled()
+  })
+  it('should save plate reader if gripper configured', () => {
+    vi.mocked(getAdditionalEquipment).mockReturnValue({
+      gripperUri: { name: 'gripper', id: 'gripperId' },
+    })
+    vi.mocked(selectors.getZoomedInSlotInfo).mockReturnValue({
+      selectedLabwareDefUri: null,
+      selectedNestedLabwareDefUri: null,
+      selectedFixture: null,
+      selectedModuleModel: ABSORBANCE_READER_V1,
+      selectedSlot: { slot: 'D3', cutout: 'cutoutD3' },
+    })
+    render(props)
+    fireEvent.click(screen.getByText('Done'))
+    expect(props.onCloseClick).toHaveBeenCalled()
+  })
+  it('should prevent saving plate reader and make toast if gripper not configured', () => {
+    vi.mocked(selectors.getZoomedInSlotInfo).mockReturnValue({
+      selectedLabwareDefUri: null,
+      selectedNestedLabwareDefUri: null,
+      selectedFixture: null,
+      selectedModuleModel: ABSORBANCE_READER_V1,
+      selectedSlot: { slot: 'D3', cutout: 'cutoutD3' },
+    })
+    render(props)
+    fireEvent.click(screen.getByText('Done'))
+    expect(props.onCloseClick).not.toHaveBeenCalled()
+    expect(mockMakeSnackbar).toHaveBeenCalled()
   })
 })

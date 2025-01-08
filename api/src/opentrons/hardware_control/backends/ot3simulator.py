@@ -353,6 +353,7 @@ class OT3Simulator(FlexBackend):
         threshold_pascals: float,
         plunger_impulse_time: float,
         num_baseline_reads: int,
+        z_offset_for_plunger_prep: float,
         probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
         force_both_sensors: bool = False,
         response_queue: Optional[PipetteSensorResponseQueue] = None,
@@ -510,6 +511,7 @@ class OT3Simulator(FlexBackend):
                         converted_name.pipette_type,
                         converted_name.pipette_channels,
                         converted_name.pipette_version,
+                        converted_name.oem_type,
                     ),
                     "id": None,
                 }
@@ -532,6 +534,7 @@ class OT3Simulator(FlexBackend):
                     converted_name.pipette_type,
                     converted_name.pipette_channels,
                     converted_name.pipette_version,
+                    converted_name.oem_type,
                 ),
                 "id": init_instr["id"],
             }
@@ -543,6 +546,7 @@ class OT3Simulator(FlexBackend):
                     converted_name.pipette_type,
                     converted_name.pipette_channels,
                     converted_name.pipette_version,
+                    converted_name.oem_type,
                 ),
                 "id": None,
             }

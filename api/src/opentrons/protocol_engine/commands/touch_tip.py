@@ -1,13 +1,19 @@
 """Touch tip command request, result, and implementation models."""
 
 from __future__ import annotations
-from pydantic import Field
-from typing import TYPE_CHECKING, Optional, Type
+from typing import TYPE_CHECKING, Optional, Type, Any
+
 from typing_extensions import Literal
+from pydantic import Field
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.types import Point
 
-from ..errors import TouchTipDisabledError, LabwareIsTipRackError
+from ..errors import (
+    TouchTipDisabledError,
+    TouchTipIncompatibleArgumentsError,
+    LabwareIsTipRackError,
+)
 from ..types import DeckPoint
 from .command import (
     AbstractCommandImpl,
@@ -35,6 +41,10 @@ if TYPE_CHECKING:
 TouchTipCommandType = Literal["touchTip"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 class TouchTipParams(PipetteIdMixin, WellLocationMixin):
     """Payload needed to touch a pipette tip the sides of a specific well."""
 
@@ -45,12 +55,20 @@ class TouchTipParams(PipetteIdMixin, WellLocationMixin):
         ),
     )
 
-    speed: Optional[float] = Field(
+    mmFromEdge: float | SkipJsonSchema[None] = Field(
+        None,
+        description="Offset away from the the well edge, in millimeters."
+        "Incompatible when a radius is included as a non 1.0 value.",
+        json_schema_extra=_remove_default,
+    )
+
+    speed: float | SkipJsonSchema[None] = Field(
         None,
         description=(
             "Override the travel speed in mm/s."
             " This controls the straight linear speed of motion."
         ),
+        json_schema_extra=_remove_default,
     )
 
 
@@ -89,6 +107,11 @@ class TouchTipImplementation(
         labware_id = params.labwareId
         well_name = params.wellName
 
+        if params.radius != 1.0 and params.mmFromEdge is not None:
+            raise TouchTipIncompatibleArgumentsError(
+                "Cannot use mmFromEdge with a radius that is not 1.0"
+            )
+
         if self._state_view.labware.get_has_quirk(labware_id, "touchTipDisabled"):
             raise TouchTipDisabledError(
                 f"Touch tip not allowed on labware {labware_id}"
@@ -112,11 +135,13 @@ class TouchTipImplementation(
             pipette_id, params.speed
         )
 
+        mm_from_edge = params.mmFromEdge if params.mmFromEdge is not None else 0
         touch_waypoints = self._state_view.motion.get_touch_tip_waypoints(
             pipette_id=pipette_id,
             labware_id=labware_id,
             well_name=well_name,
             radius=params.radius,
+            mm_from_edge=mm_from_edge,
             center_point=Point(
                 center_result.public.position.x,
                 center_result.public.position.y,
@@ -129,7 +154,7 @@ class TouchTipImplementation(
             waypoints=touch_waypoints,
             speed=touch_speed,
         )
-        final_deck_point = DeckPoint.construct(
+        final_deck_point = DeckPoint.model_construct(
             x=final_point.x, y=final_point.y, z=final_point.z
         )
         state_update = center_result.state_update.set_pipette_location(
@@ -150,7 +175,7 @@ class TouchTip(BaseCommand[TouchTipParams, TouchTipResult, StallOrCollisionError
 
     commandType: TouchTipCommandType = "touchTip"
     params: TouchTipParams
-    result: Optional[TouchTipResult]
+    result: Optional[TouchTipResult] = None
 
     _ImplementationCls: Type[TouchTipImplementation] = TouchTipImplementation
 

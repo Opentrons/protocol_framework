@@ -1,5 +1,4 @@
 import { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
 import { NavLink, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import debounce from 'lodash/debounce'
@@ -26,6 +25,7 @@ import logoSvgThree from '/app/assets/images/logo_nav_three.svg'
 
 import { NAV_BAR_WIDTH } from './constants'
 
+import type { MouseEvent } from 'react'
 import type { RouteProps } from './types'
 
 const SALESFORCE_HELP_LINK = 'https://support.opentrons.com/s/'
@@ -111,8 +111,6 @@ const LogoImg = styled('img')`
 `
 
 export function Navbar({ routes }: { routes: RouteProps[] }): JSX.Element {
-  const { t } = useTranslation('top_navigation')
-
   const navigate = useNavigate()
   const navRoutes = routes.filter(
     ({ navLinkTo }: RouteProps) => navLinkTo != null
@@ -151,7 +149,7 @@ export function Navbar({ routes }: { routes: RouteProps[] }): JSX.Element {
               as="h3"
               margin={`${SPACING.spacing8} 0 ${SPACING.spacing8} ${SPACING.spacing12}`}
             >
-              {t(name)}
+              {name}
             </LegacyStyledText>
           </NavbarLink>
         ))}
@@ -164,7 +162,7 @@ export function Navbar({ routes }: { routes: RouteProps[] }): JSX.Element {
         <NavIconLink
           role="button"
           data-testid="Navbar_settingsLink"
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+          onClick={(e: MouseEvent<HTMLButtonElement>) => {
             e.preventDefault()
             debouncedNavigate('/app-settings')
           }}

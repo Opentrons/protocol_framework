@@ -1,9 +1,10 @@
-import type * as React from 'react'
 import { css } from 'styled-components'
 import { Flex } from '../../primitives'
 import { RESPONSIVENESS, SPACING } from '../../ui-style-constants'
 import { BORDERS, COLORS } from '../../helix-design-system'
 import { FLEX_MAX_CONTENT } from '../../styles'
+
+import type { ReactNode } from 'react'
 import type { StyleProps } from '../../primitives'
 
 export * from './ListItemChildren'
@@ -19,7 +20,7 @@ interface ListItemProps extends StyleProps {
   /** ListItem state type */
   type: ListItemType
   /** ListItem contents */
-  children: React.ReactNode
+  children: ReactNode
   onClick?: () => void
   onMouseEnter?: () => void
   onMouseLeave?: () => void

@@ -27,6 +27,7 @@ import {
   SkipStepInfo,
 } from '../shared'
 
+import type { ChangeEvent } from 'react'
 import type { RecoveryContentProps } from '../types'
 
 export function IgnoreErrorSkipStep(props: RecoveryContentProps): JSX.Element {
@@ -143,7 +144,7 @@ export function IgnoreErrorStepHome({
       >
         <RecoveryRadioGroup
           value={selectedOption}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
             setSelectedOption(e.currentTarget.value as IgnoreOption)
           }}
           options={IGNORE_OPTIONS_IN_ORDER.map(option => {

@@ -5,8 +5,9 @@ import {
   FLEX_ROBOT_TYPE,
   FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
   HEATERSHAKER_MODULE_TYPE,
-  MAGNETIC_BLOCK_V1,
+  HEATERSHAKER_MODULE_V1,
   OT2_ROBOT_TYPE,
+  TEMPERATURE_MODULE_V2,
   THERMOCYCLER_MODULE_TYPE,
   THERMOCYCLER_MODULE_V2,
   getAreSlotsAdjacent,
@@ -21,6 +22,7 @@ import {
   RECOMMENDED_LABWARE_BY_MODULE,
 } from './constants'
 
+import type { Dispatch, SetStateAction } from 'react'
 import type {
   AddressableAreaName,
   CutoutFixture,
@@ -61,33 +63,32 @@ export function getModuleModelsBySlot(
   robotType: RobotType,
   slot: DeckSlotId
 ): ModuleModel[] {
-  const FLEX_MIDDLE_SLOTS = ['B2', 'C2', 'A2', 'D2']
+  const FLEX_MIDDLE_SLOTS = new Set(['B2', 'C2', 'A2', 'D2'])
   const OT2_MIDDLE_SLOTS = ['2', '5', '8', '11']
-  const FILTERED_MODULES = enableAbsorbanceReader
-    ? FLEX_MODULE_MODELS
-    : FLEX_MODULE_MODELS.filter(model => model !== ABSORBANCE_READER_V1)
 
-  let moduleModels: ModuleModel[] = FILTERED_MODULES
+  const FLEX_RIGHT_SLOTS = new Set(['A3', 'B3', 'C3', 'D3'])
+
+  let moduleModels: ModuleModel[] = FLEX_MODULE_MODELS
 
   switch (robotType) {
     case FLEX_ROBOT_TYPE: {
-      if (slot !== 'B1' && !FLEX_MIDDLE_SLOTS.includes(slot)) {
-        moduleModels = FILTERED_MODULES.filter(
-          model => model !== THERMOCYCLER_MODULE_V2
-        )
-      }
-      if (FLEX_MIDDLE_SLOTS.includes(slot)) {
-        moduleModels = FILTERED_MODULES.filter(
-          model => model === MAGNETIC_BLOCK_V1
-        )
-      }
-      if (
-        FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS.includes(
-          slot as AddressableAreaName
-        )
-      ) {
-        moduleModels = []
-      }
+      moduleModels = FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS.includes(
+        slot as AddressableAreaName
+      )
+        ? []
+        : FLEX_MODULE_MODELS.filter(model => {
+            if (model === THERMOCYCLER_MODULE_V2) {
+              return slot === 'B1'
+            } else if (model === ABSORBANCE_READER_V1) {
+              return FLEX_RIGHT_SLOTS.has(slot) && enableAbsorbanceReader
+            } else if (
+              model === TEMPERATURE_MODULE_V2 ||
+              model === HEATERSHAKER_MODULE_V1
+            ) {
+              return !FLEX_MIDDLE_SLOTS.has(slot)
+            }
+            return true
+          })
       break
     }
     case OT2_ROBOT_TYPE: {
@@ -229,7 +230,7 @@ export function zoomInOnCoordinate(props: ZoomInOnCoordinateProps): string {
 export interface AnimateZoomProps {
   targetViewBox: string
   viewBox: string
-  setViewBox: React.Dispatch<React.SetStateAction<string>>
+  setViewBox: Dispatch<SetStateAction<string>>
 }
 
 type ViewBox = [number, number, number, number]

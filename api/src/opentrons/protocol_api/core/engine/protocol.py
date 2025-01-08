@@ -6,6 +6,7 @@ from opentrons_shared_data.liquid_classes import LiquidClassDefinitionDoesNotExi
 
 from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.commands import LoadModuleResult
+
 from opentrons_shared_data.deck.types import DeckDefinitionV5, SlotDefV3
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.labware.types import LabwareDefinition as LabwareDefDict
@@ -192,7 +193,7 @@ class ProtocolCore(
     ) -> LabwareLoadParams:
         """Add a labware definition to the set of loadable definitions."""
         uri = self._engine_client.add_labware_definition(
-            LabwareDefinition.parse_obj(definition)
+            LabwareDefinition.model_validate(definition)
         )
         return LabwareLoadParams.from_uri(uri)
 
@@ -232,6 +233,9 @@ class ProtocolCore(
         )
         # FIXME(jbl, 2023-08-14) validating after loading the object issue
         validation.ensure_definition_is_labware(load_result.definition)
+        validation.ensure_definition_is_not_lid_after_api_version(
+            self.api_version, load_result.definition
+        )
 
         # FIXME(mm, 2023-02-21):
         #
@@ -319,6 +323,52 @@ class ProtocolCore(
 
         self._labware_cores_by_id[labware_core.labware_id] = labware_core
 
+        return labware_core
+
+    def load_lid(
+        self,
+        load_name: str,
+        location: LabwareCore,
+        namespace: Optional[str],
+        version: Optional[int],
+    ) -> LabwareCore:
+        """Load an individual lid using its identifying parameters. Must be loaded on an existing Labware."""
+        load_location = self._convert_labware_location(location=location)
+        custom_labware_params = (
+            self._engine_client.state.labware.find_custom_labware_load_params()
+        )
+        namespace, version = load_labware_params.resolve(
+            load_name, namespace, version, custom_labware_params
+        )
+        load_result = self._engine_client.execute_command_without_recovery(
+            cmd.LoadLidParams(
+                loadName=load_name,
+                location=load_location,
+                namespace=namespace,
+                version=version,
+            )
+        )
+        # FIXME(chb, 2024-12-06) validating after loading the object issue
+        validation.ensure_definition_is_lid(load_result.definition)
+
+        deck_conflict.check(
+            engine_state=self._engine_client.state,
+            new_labware_id=load_result.labwareId,
+            existing_disposal_locations=self._disposal_locations,
+            # TODO: We can now fetch these IDs from engine too.
+            #  See comment in self.load_labware().
+            #
+            # Wrapping .keys() in list() is just to make Decoy verification easier.
+            existing_labware_ids=list(self._labware_cores_by_id.keys()),
+            existing_module_ids=list(self._module_cores_by_id.keys()),
+        )
+
+        labware_core = LabwareCore(
+            labware_id=load_result.labwareId,
+            engine_client=self._engine_client,
+        )
+
+        self._labware_cores_by_id[labware_core.labware_id] = labware_core
         return labware_core
 
     def move_labware(
@@ -643,6 +693,72 @@ class ProtocolCore(
         self._last_location = location
         self._last_mount = mount
 
+    def load_lid_stack(
+        self,
+        load_name: str,
+        location: Union[DeckSlotName, StagingSlotName, LabwareCore],
+        quantity: int,
+        namespace: Optional[str],
+        version: Optional[int],
+    ) -> LabwareCore:
+        """Load a Stack of Lids to a given location, creating a Lid Stack."""
+        if quantity < 1:
+            raise ValueError(
+                "When loading a lid stack quantity cannot be less than one."
+            )
+        if isinstance(location, DeckSlotName) or isinstance(location, StagingSlotName):
+            load_location = self._convert_labware_location(location=location)
+        else:
+            if isinstance(location, LabwareCore):
+                load_location = self._convert_labware_location(location=location)
+            else:
+                raise ValueError(
+                    "Expected type of Labware Location for lid stack must be Labware, not Legacy Labware or Well."
+                )
+
+        custom_labware_params = (
+            self._engine_client.state.labware.find_custom_labware_load_params()
+        )
+        namespace, version = load_labware_params.resolve(
+            load_name, namespace, version, custom_labware_params
+        )
+
+        load_result = self._engine_client.execute_command_without_recovery(
+            cmd.LoadLidStackParams(
+                loadName=load_name,
+                location=load_location,
+                namespace=namespace,
+                version=version,
+                quantity=quantity,
+            )
+        )
+
+        # FIXME(CHB, 2024-12-04) just like load labware and load adapter we have a validating after loading the object issue
+        validation.ensure_definition_is_lid(load_result.definition)
+
+        deck_conflict.check(
+            engine_state=self._engine_client.state,
+            new_labware_id=load_result.stackLabwareId,
+            existing_disposal_locations=self._disposal_locations,
+            # TODO (spp, 2023-11-27): We've been using IDs from _labware_cores_by_id
+            #  and _module_cores_by_id instead of getting the lists directly from engine
+            #  because of the chance of engine carrying labware IDs from LPC too.
+            #  But with https://github.com/Opentrons/opentrons/pull/13943,
+            #  & LPC in maintenance runs, we can now rely on engine state for these IDs too.
+            # Wrapping .keys() in list() is just to make Decoy verification easier.
+            existing_labware_ids=list(self._labware_cores_by_id.keys()),
+            existing_module_ids=list(self._module_cores_by_id.keys()),
+        )
+
+        labware_core = LabwareCore(
+            labware_id=load_result.stackLabwareId,
+            engine_client=self._engine_client,
+        )
+
+        self._labware_cores_by_id[labware_core.labware_id] = labware_core
+
+        return labware_core
+
     def get_deck_definition(self) -> DeckDefinitionV5:
         """Get the geometry definition of the robot's deck."""
         return self._engine_client.state.labware.get_deck_definition()
@@ -736,9 +852,7 @@ class ProtocolCore(
             _id=liquid.id,
             name=liquid.displayName,
             description=liquid.description,
-            display_color=(
-                liquid.displayColor.__root__ if liquid.displayColor else None
-            ),
+            display_color=(liquid.displayColor.root if liquid.displayColor else None),
         )
 
     def define_liquid_class(self, name: str) -> LiquidClass:

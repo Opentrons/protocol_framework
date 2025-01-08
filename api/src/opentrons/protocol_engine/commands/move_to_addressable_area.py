@@ -160,7 +160,7 @@ class MoveToAddressableArea(
 
     commandType: MoveToAddressableAreaCommandType = "moveToAddressableArea"
     params: MoveToAddressableAreaParams
-    result: Optional[MoveToAddressableAreaResult]
+    result: Optional[MoveToAddressableAreaResult] = None
 
     _ImplementationCls: Type[
         MoveToAddressableAreaImplementation

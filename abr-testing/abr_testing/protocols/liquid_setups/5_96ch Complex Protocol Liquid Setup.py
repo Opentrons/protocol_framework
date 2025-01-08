@@ -5,14 +5,14 @@ from abr_testing.protocols.helpers import (
 )
 
 metadata = {
-    "protocolName": "DVT2ABR5 and 6 Liquids: 96ch Complex Protocol",
+    "protocolName": "DVT2ABR5 Liquids: 96ch Complex Protocol",
     "author": "Rhyann clarke <rhyann.clarke@opentrons.com>",
     "source": "Protocol Library",
 }
 
 requirements = {
     "robotType": "Flex",
-    "apiLevel": "2.16",
+    "apiLevel": "2.21",
 }
 
 
@@ -29,7 +29,7 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
         "nest_96_wellplate_2ml_deep", "D2", "Reservoir"
     )  # Reservoir
 
-    vol = 500
+    vol = 1000
 
     column_list = [
         "A1",
@@ -45,9 +45,9 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
         "A11",
         "A12",
     ]
+    p1000.pick_up_tip()
     for i in column_list:
-        p1000.pick_up_tip()
         p1000.aspirate(vol, source_reservoir["A1"].bottom(z=0.5))
         p1000.dispense(vol, reservoir[i].top())
         p1000.blow_out(location=source_reservoir["A1"].top())
-        p1000.return_tip()
+    p1000.return_tip()

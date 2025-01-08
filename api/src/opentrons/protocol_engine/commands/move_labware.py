@@ -1,14 +1,17 @@
 """Models and implementation for the ``moveLabware`` command."""
 
 from __future__ import annotations
+from typing import TYPE_CHECKING, Optional, Type, Any
+
+from pydantic.json_schema import SkipJsonSchema
+from pydantic import BaseModel, Field
+from typing_extensions import Literal
+
 from opentrons_shared_data.errors.exceptions import (
     FailedGripperPickupError,
     LabwareDroppedError,
     StallOrCollisionDetectedError,
 )
-from pydantic import BaseModel, Field
-from typing import TYPE_CHECKING, Optional, Type
-from typing_extensions import Literal
 
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
 from opentrons.types import Point
@@ -49,6 +52,10 @@ if TYPE_CHECKING:
 MoveLabwareCommandType = Literal["moveLabware"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 # Extra buffer on top of minimum distance to move to the right
 _TRASH_CHUTE_DROP_BUFFER_MM = 8
 
@@ -63,15 +70,17 @@ class MoveLabwareParams(BaseModel):
         description="Whether to use the gripper to perform the labware movement"
         " or to perform a manual movement with an option to pause.",
     )
-    pickUpOffset: Optional[LabwareOffsetVector] = Field(
+    pickUpOffset: LabwareOffsetVector | SkipJsonSchema[None] = Field(
         None,
         description="Offset to use when picking up labware. "
         "Experimental param, subject to change",
+        json_schema_extra=_remove_default,
     )
-    dropOffset: Optional[LabwareOffsetVector] = Field(
+    dropOffset: LabwareOffsetVector | SkipJsonSchema[None] = Field(
         None,
         description="Offset to use when dropping off labware. "
         "Experimental param, subject to change",
+        json_schema_extra=_remove_default,
     )
 
 
@@ -359,7 +368,7 @@ class MoveLabware(
 
     commandType: MoveLabwareCommandType = "moveLabware"
     params: MoveLabwareParams
-    result: Optional[MoveLabwareResult]
+    result: Optional[MoveLabwareResult] = None
 
     _ImplementationCls: Type[MoveLabwareImplementation] = MoveLabwareImplementation
 

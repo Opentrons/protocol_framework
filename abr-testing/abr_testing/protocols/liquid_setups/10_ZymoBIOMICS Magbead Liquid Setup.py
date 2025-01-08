@@ -13,7 +13,7 @@ metadata = {
 
 requirements = {
     "robotType": "Flex",
-    "apiLevel": "2.20",
+    "apiLevel": "2.21",
 }
 
 
@@ -26,14 +26,17 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
         p1000,
     ) = load_common_liquid_setup_labware_and_instruments(protocol)
 
-    res1 = protocol.load_labware("nest_12_reservoir_15ml", "C3", "R1")
-    res2 = protocol.load_labware("nest_12_reservoir_15ml", "B3", "R2")
+    res1 = protocol.load_labware("nest_12_reservoir_15ml", "D3", "Reagent Reservoir 1")
+    res2 = protocol.load_labware("nest_12_reservoir_15ml", "C3", "Reagent Reservoir 2")
+    res3 = protocol.load_labware("nest_12_reservoir_15ml", "B3", "Reagent Reservoir 3")
 
     lysis_and_pk = 12320 / 8
     beads_and_binding = 11875 / 8
     binding2 = 13500 / 8
-    wash2 = 9000 / 8
+    wash2 = 9800 / 8
     wash2_list = [wash2] * 12
+    final_elution = 7500 / 8
+
     # Fill up Plates
     # Res1
     p1000.transfer(
@@ -42,7 +45,10 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
             beads_and_binding,
             beads_and_binding,
             beads_and_binding,
-            binding2,
+            beads_and_binding,
+            beads_and_binding,
+            beads_and_binding,
+            beads_and_binding,
             binding2,
             binding2,
             binding2,
@@ -58,6 +64,9 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
             res1["A6"].top(),
             res1["A7"].top(),
             res1["A8"].top(),
+            res1["A9"].top(),
+            res1["A10"].top(),
+            res1["A11"].top(),
             res1["A12"].top(),
         ],
         blow_out=True,
@@ -66,9 +75,18 @@ def run(protocol: protocol_api.ProtocolContext) -> None:
     )
     # Res2
     p1000.transfer(
-        volume=wash2_list,
-        source=source_reservoir["A1"],
+        volume=[final_elution] + wash2_list[:11],
+        source=[source_reservoir["A1"]] * 12,
         dest=res2.wells(),
+        blow_out=True,
+        blowout_location="source well",
+        trash=False,
+    )
+    # Res 3
+    p1000.transfer(
+        volume=[wash2, wash2],
+        source=[source_reservoir["A1"], source_reservoir["A1"]],
+        dest=[res3["A1"], res3["A2"]],
         blow_out=True,
         blowout_location="source well",
         trash=False,

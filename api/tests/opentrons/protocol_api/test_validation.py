@@ -1,4 +1,5 @@
 """Tests for Protocol API input validation."""
+
 from typing import ContextManager, List, Type, Union, Optional, Dict, Sequence, Any
 from contextlib import nullcontext as do_not_raise
 
@@ -8,6 +9,7 @@ import re
 
 from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
 from opentrons_shared_data.labware.labware_definition import (
+    LabwareDefinition,
     LabwareRole,
     Parameters as LabwareDefinitionParameters,
 )
@@ -32,7 +34,6 @@ from opentrons.hardware_control.modules.types import (
     HeaterShakerModuleModel,
     ThermocyclerStep,
 )
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocols.api_support.util import APIVersionError
 from opentrons.protocol_api import (
@@ -223,7 +224,9 @@ def test_ensure_deck_slot_invalid(
     """It should raise an exception if given an invalid name."""
     with pytest.raises(expected_error_type, match=expected_error_match):
         subject.ensure_and_convert_deck_slot(
-            input_value, input_api_version, input_robot_type  # type: ignore[arg-type]
+            input_value,  # type: ignore[arg-type]
+            input_api_version,
+            input_robot_type,
         )
 
 
@@ -243,23 +246,23 @@ def test_ensure_lowercase_name_invalid() -> None:
     ("definition", "expected_raise"),
     [
         (
-            LabwareDefinition.construct(  # type: ignore[call-arg]
+            LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 allowedRoles=[LabwareRole.labware],
-                parameters=LabwareDefinitionParameters.construct(loadName="Foo"),  # type: ignore[call-arg]
+                parameters=LabwareDefinitionParameters.model_construct(loadName="Foo"),  # type: ignore[call-arg]
             ),
             do_not_raise(),
         ),
         (
-            LabwareDefinition.construct(  # type: ignore[call-arg]
+            LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 allowedRoles=[],
-                parameters=LabwareDefinitionParameters.construct(loadName="Foo"),  # type: ignore[call-arg]
+                parameters=LabwareDefinitionParameters.model_construct(loadName="Foo"),  # type: ignore[call-arg]
             ),
             do_not_raise(),
         ),
         (
-            LabwareDefinition.construct(  # type: ignore[call-arg]
+            LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 allowedRoles=[LabwareRole.adapter],
-                parameters=LabwareDefinitionParameters.construct(loadName="Foo"),  # type: ignore[call-arg]
+                parameters=LabwareDefinitionParameters.model_construct(loadName="Foo"),  # type: ignore[call-arg]
             ),
             pytest.raises(subject.LabwareDefinitionIsNotLabwareError),
         ),
@@ -277,23 +280,23 @@ def test_ensure_definition_is_labware(
     ("definition", "expected_raise"),
     [
         (
-            LabwareDefinition.construct(  # type: ignore[call-arg]
+            LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 allowedRoles=[LabwareRole.adapter],
-                parameters=LabwareDefinitionParameters.construct(loadName="Foo"),  # type: ignore[call-arg]
+                parameters=LabwareDefinitionParameters.model_construct(loadName="Foo"),  # type: ignore[call-arg]
             ),
             do_not_raise(),
         ),
         (
-            LabwareDefinition.construct(  # type: ignore[call-arg]
+            LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 allowedRoles=[],
-                parameters=LabwareDefinitionParameters.construct(loadName="Foo"),  # type: ignore[call-arg]
+                parameters=LabwareDefinitionParameters.model_construct(loadName="Foo"),  # type: ignore[call-arg]
             ),
             pytest.raises(subject.LabwareDefinitionIsNotAdapterError),
         ),
         (
-            LabwareDefinition.construct(  # type: ignore[call-arg]
+            LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 allowedRoles=[LabwareRole.labware],
-                parameters=LabwareDefinitionParameters.construct(loadName="Foo"),  # type: ignore[call-arg]
+                parameters=LabwareDefinitionParameters.model_construct(loadName="Foo"),  # type: ignore[call-arg]
             ),
             pytest.raises(subject.LabwareDefinitionIsNotAdapterError),
         ),
@@ -547,7 +550,8 @@ def test_validate_with_wrong_location() -> None:
     """Should raise a LocationTypeError."""
     with pytest.raises(subject.LocationTypeError):
         subject.validate_location(
-            location=42, last_location=None  # type: ignore[arg-type]
+            location=42,  # type: ignore[arg-type]
+            last_location=None,
         )
 
 

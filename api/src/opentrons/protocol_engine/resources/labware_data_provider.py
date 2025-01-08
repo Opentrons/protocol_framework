@@ -6,7 +6,8 @@ abstract away rough edges until we can improve those underlying interfaces.
 import logging
 from anyio import to_thread
 
-from opentrons.protocols.models import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
+
 from opentrons.protocols.labware import get_labware_definition
 
 # TODO (lc 09-26-2022) We should conditionally import ot2 or ot3 calibration
@@ -44,7 +45,7 @@ class LabwareDataProvider:
     def _get_labware_definition_sync(
         load_name: str, namespace: str, version: int
     ) -> LabwareDefinition:
-        return LabwareDefinition.parse_obj(
+        return LabwareDefinition.model_validate(
             get_labware_definition(load_name, namespace, version)
         )
 

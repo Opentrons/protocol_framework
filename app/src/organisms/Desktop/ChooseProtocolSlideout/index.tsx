@@ -492,7 +492,7 @@ export function ChooseProtocolSlideoutComponent(
                                 <LinkComponent
                                   color={COLORS.blue55}
                                   role="button"
-                                  to={''}
+                                  to=""
                                 />
                               ),
                             }}

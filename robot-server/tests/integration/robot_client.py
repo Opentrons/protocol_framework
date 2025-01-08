@@ -10,7 +10,7 @@ import httpx
 from httpx import Response
 
 
-_STARTUP_WAIT = 20
+_STARTUP_WAIT = 40
 _SHUTDOWN_WAIT = 20
 
 _RUN_POLL_INTERVAL = 0.1

@@ -14,13 +14,15 @@ from typing import (
 from math import isinf, isnan
 from typing_extensions import TypeGuard
 
-from opentrons_shared_data.labware.labware_definition import LabwareRole
+from opentrons_shared_data.labware.labware_definition import (
+    LabwareDefinition,
+    LabwareRole,
+)
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.robot.types import RobotType
 
 from opentrons.protocols.api_support.types import APIVersion, ThermocyclerStep
 from opentrons.protocols.api_support.util import APIVersionError
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
 from opentrons.types import (
     Mount,
@@ -53,6 +55,9 @@ _COORDINATE_DECK_LABEL_VERSION_GATE = APIVersion(2, 15)
 # The first APIVersion where Python protocols can specify staging deck slots (e.g. "D4")
 _STAGING_DECK_SLOT_VERSION_GATE = APIVersion(2, 16)
 
+# The first APIVersion where Python protocols can load lids as stacks and treat them as attributes of a parent labware.
+LID_STACK_VERSION_GATE = APIVersion(2, 23)
+
 # Mapping of public Python Protocol API pipette load names
 # to names used by the internal Opentrons system
 _PIPETTE_NAMES_MAP = {
@@ -72,6 +77,7 @@ _PIPETTE_NAMES_MAP = {
     "flex_8channel_50": PipetteNameType.P50_MULTI_FLEX,
     "flex_1channel_1000": PipetteNameType.P1000_SINGLE_FLEX,
     "flex_8channel_1000": PipetteNameType.P1000_MULTI_FLEX,
+    "flex_8channel_1000_em": PipetteNameType.P1000_MULTI_EM,
     "flex_96channel_1000": PipetteNameType.P1000_96,
     "flex_96channel_200": PipetteNameType.P200_96,
 }
@@ -360,6 +366,27 @@ def ensure_definition_is_labware(definition: LabwareDefinition) -> None:
     if definition.allowedRoles and LabwareRole.labware not in definition.allowedRoles:
         raise LabwareDefinitionIsNotLabwareError(
             f"Labware {definition.parameters.loadName} is not defined as a normal labware."
+        )
+
+
+def ensure_definition_is_lid(definition: LabwareDefinition) -> None:
+    """Ensure that one of the definition's allowed roles is `lid` or that that field is empty."""
+    if LabwareRole.lid not in definition.allowedRoles:
+        raise LabwareDefinitionIsNotLabwareError(
+            f"Labware {definition.parameters.loadName} is not a lid."
+        )
+
+
+def ensure_definition_is_not_lid_after_api_version(
+    api_version: APIVersion, definition: LabwareDefinition
+) -> None:
+    """Ensure that one of the definition's allowed roles is not `lid` or that the API Version is below the release where lid loading was seperated."""
+    if (
+        LabwareRole.lid in definition.allowedRoles
+        and api_version >= LID_STACK_VERSION_GATE
+    ):
+        raise APIVersionError(
+            f"Labware Lids cannot be loaded like standard labware in Protocols written with an API version greater than {LID_STACK_VERSION_GATE}."
         )
 
 
