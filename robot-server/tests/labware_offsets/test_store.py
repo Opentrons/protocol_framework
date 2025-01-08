@@ -71,7 +71,7 @@ def test_filters() -> None:
 
 
 def test_delete() -> None:
-    """Test the `delete()` method."""
+    """Test the `delete()` and `delete_all()` methods."""
     a, b, c = [
         LabwareOffset(
             id=id,
@@ -95,3 +95,6 @@ def test_delete() -> None:
     assert _get_all(subject) == [a, c]
     with pytest.raises(LabwareOffsetNotFoundError):
         subject.delete(b.id)
+
+    subject.delete_all()
+    assert _get_all(subject) == []
