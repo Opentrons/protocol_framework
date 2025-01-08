@@ -203,6 +203,11 @@ def test_get_provided_addressable_area_names(
                     cutout_fixture_id="stagingAreaRightSlot",
                     provided_addressable_areas=frozenset({"D3", "D4"}),
                 ),
+                PotentialCutoutFixture(
+                    cutout_id="cutoutD3",
+                    cutout_fixture_id="flexStackerV1",
+                    provided_addressable_areas=frozenset({"D3", "flexStackerV1D4"}),
+                ),
             },
             lazy_fixture("ot3_standard_deck_def"),
         ),
