@@ -1,5 +1,6 @@
 import last from 'lodash/last'
 import {
+  ALL,
   HEATERSHAKER_MODULE_TYPE,
   MAGNETIC_MODULE_TYPE,
   TEMPERATURE_MODULE_TYPE,
@@ -74,6 +75,29 @@ const _patchDefaultPipette = (args: {
     const updatedFields = handleFormChange(
       {
         pipette: defaultPipetteId,
+      },
+      formData,
+      pipetteEntities,
+      labwareEntities
+    )
+    return updatedFields
+  }
+
+  return null
+}
+
+const _patchDefaultNozzle = (args: {
+  labwareEntities: LabwareEntities
+  pipetteEntities: PipetteEntities
+}): FormUpdater => formData => {
+  const { labwareEntities, pipetteEntities } = args
+
+  const formHasNozzlesField = formData && 'nozzles' in formData
+
+  if (formHasNozzlesField) {
+    const updatedFields = handleFormChange(
+      {
+        nozzles: ALL,
       },
       formData,
       pipetteEntities,
@@ -335,6 +359,11 @@ export const createPresavedStepForm = ({
     stepType,
   })
 
+  const updateDefaultNozzles = _patchDefaultNozzle({
+    labwareEntities,
+    pipetteEntities,
+  })
+
   const updateDefaultDropTip = _patchDefaultDropTipLocation({
     labwareEntities,
     pipetteEntities,
@@ -392,6 +421,7 @@ export const createPresavedStepForm = ({
     updateHeaterShakerModuleId,
     updateMagneticModuleId,
     updateDefaultLabwareLocations,
+    updateDefaultNozzles,
   ].reduce<FormData>(
     (acc, updater: FormUpdater) => {
       const updates = updater(acc)
