@@ -1,6 +1,7 @@
-import { Flex } from '@opentrons/components'
+import { MemoryRouter } from 'react-router-dom'
 import { I18nextProvider } from 'react-i18next'
 import { i18n } from '../../assets/localization'
+import { Flex } from '@opentrons/components'
 import { SlotInformation as SlotInformationComponent } from '.'
 
 import type { Meta, StoryObj } from '@storybook/react'
@@ -37,11 +38,13 @@ const meta: Meta<typeof SlotInformationComponent> = {
   },
   decorators: [
     Story => (
-      <I18nextProvider i18n={i18n}>
-        <Flex width="21rem">
-          <Story />
-        </Flex>
-      </I18nextProvider>
+      <MemoryRouter>
+        <I18nextProvider i18n={i18n}>
+          <Flex width="21rem">
+            <Story />
+          </Flex>
+        </I18nextProvider>
+      </MemoryRouter>
     ),
   ],
 }
