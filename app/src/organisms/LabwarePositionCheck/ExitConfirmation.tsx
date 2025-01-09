@@ -1,5 +1,7 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
+
 import {
   AlertPrimaryButton,
   ALIGN_CENTER,
@@ -17,32 +19,23 @@ import {
   TEXT_ALIGN_CENTER,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { useSelector } from 'react-redux'
+
 import { getIsOnDevice } from '/app/redux/config'
 import { SmallButton } from '/app/atoms/buttons'
 
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
-export const ExitConfirmation = ({
+export function ExitConfirmation({
   commandUtils,
-}: LPCWizardContentProps): JSX.Element => {
+}: LPCWizardContentProps): JSX.Element {
   const { i18n, t } = useTranslation(['labware_position_check', 'shared'])
   const { confirmExitLPC, cancelExitLPC } = commandUtils
 
   const isOnDevice = useSelector(getIsOnDevice)
+
   return (
-    <Flex
-      flexDirection={DIRECTION_COLUMN}
-      padding={SPACING.spacing32}
-      minHeight="29.5rem"
-    >
-      <Flex
-        flex="1"
-        flexDirection={DIRECTION_COLUMN}
-        justifyContent={JUSTIFY_CENTER}
-        alignItems={ALIGN_CENTER}
-        paddingX={SPACING.spacing32}
-      >
+    <Flex css={CONTAINER_STYLE}>
+      <Flex css={CONTENT_CONTAINER_STYLE}>
         <Icon name="ot-alert" size={SIZE_3} color={COLORS.yellow50} />
         {isOnDevice ? (
           <>
@@ -67,12 +60,7 @@ export const ExitConfirmation = ({
         )}
       </Flex>
       {isOnDevice ? (
-        <Flex
-          width="100%"
-          justifyContent={JUSTIFY_FLEX_END}
-          alignItems={ALIGN_CENTER}
-          gridGap={SPACING.spacing8}
-        >
+        <Flex css={BUTTON_CONTAINER_STYLE_ODD}>
           <SmallButton
             onClick={cancelExitLPC}
             buttonText={i18n.format(t('shared:go_back'), 'capitalize')}
@@ -85,12 +73,7 @@ export const ExitConfirmation = ({
           />
         </Flex>
       ) : (
-        <Flex
-          width="100%"
-          marginTop={SPACING.spacing32}
-          justifyContent={JUSTIFY_FLEX_END}
-          alignItems={ALIGN_CENTER}
-        >
+        <Flex css={BUTTON_CONTAINER_STYLE}>
           <Flex gridGap={SPACING.spacing8}>
             <SecondaryButton onClick={cancelExitLPC}>
               {t('shared:go_back')}
@@ -108,6 +91,35 @@ export const ExitConfirmation = ({
   )
 }
 
+const CONTAINER_STYLE = css`
+  flex-direction: ${DIRECTION_COLUMN};
+  padding: ${SPACING.spacing32};
+  min-height: 29.5rem;
+`
+
+const CONTENT_CONTAINER_STYLE = css`
+  flex: 1;
+  flex-direction: ${DIRECTION_COLUMN};
+  justify-content: ${JUSTIFY_CENTER};
+  align-items: ${ALIGN_CENTER};
+  padding-left: ${SPACING.spacing32};
+  padding-right: ${SPACING.spacing32};
+`
+
+const BUTTON_CONTAINER_STYLE = css`
+  width: 100%;
+  margin-top: ${SPACING.spacing32};
+  justify-content: ${JUSTIFY_FLEX_END};
+  align-items: ${ALIGN_CENTER};
+`
+
+const BUTTON_CONTAINER_STYLE_ODD = css`
+  width: 100%;
+  justify-content: ${JUSTIFY_FLEX_END};
+  align-items: ${ALIGN_CENTER};
+  grid-gap: ${SPACING.spacing8};
+`
+
 const ConfirmationHeader = styled.h1`
   margin-top: ${SPACING.spacing24};
   ${TYPOGRAPHY.h1Default}
@@ -123,6 +135,7 @@ const ConfirmationHeaderODD = styled.h1`
     ${TYPOGRAPHY.level4HeaderSemiBold}
   }
 `
+
 const ConfirmationBodyODD = styled.h1`
   ${TYPOGRAPHY.level4HeaderRegular}
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {

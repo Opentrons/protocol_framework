@@ -11,10 +11,8 @@ import {
   DetachProbe,
   ResultsSummary,
 } from '/app/organisms/LabwarePositionCheck/steps'
-import {
-  RobotMotionLoader,
-  ExitConfirmation,
-} from '/app/organisms/LabwarePositionCheck/shared'
+import { ExitConfirmation } from './ExitConfirmation'
+import { RobotMotionLoader } from './RobotMotionLoader'
 import { WizardHeader } from '/app/molecules/WizardHeader'
 import { LPCErrorModal } from './LPCErrorModal'
 import {
