@@ -60,7 +60,11 @@ from opentrons.protocols.api_support.deck_type import (
             DeckSlotName.SLOT_D3,
         ),
         (ModuleModel.ABSORBANCE_READER_V1, "abs_reader_v1_def", DeckSlotName.SLOT_D3),
-        (ModuleModel.FLEX_STACKER_V1, "flex_stacker_v1_def", DeckSlotName.SLOT_D3),
+        (
+            ModuleModel.FLEX_STACKER_MODULE_V1,
+            "flex_stacker_v1_def",
+            DeckSlotName.SLOT_D3,
+        ),
     ],
 )
 async def test_load_module_implementation(
