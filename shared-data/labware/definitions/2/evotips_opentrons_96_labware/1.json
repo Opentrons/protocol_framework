@@ -1010,7 +1010,7 @@
   "allowedRoles": ["labware"],
   "version": 1,
   "stackLimit": 5,
-  "compatibleParentLabware": ["nest_96_wellplate_2ml_deep"],
+  "compatibleParentLabware": ["nest_96_wellplate_2ml_deep", "nest_1_reservoir_195ml"],
   "schemaVersion": 2,
   "cornerOffsetFromSlot": {
     "x": 0,
