@@ -56,7 +56,7 @@ _labware = {
         "opentrons_15_tuberack_falcon_15ml_conical",
         "opentrons_24_tuberack_eppendorf_2ml_safelock_snapcap",
         "opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap",
-    ]
+    ],
 }
 
 
@@ -66,17 +66,16 @@ def _get_tag(n: str) -> str:
 
 def add_parameters_pipette(
     params: ParameterContext,
-    name: str = "",
+    label: str,
     default_name: str = "",
     default_mount: str = "",
     exclude_name: bool = False,
     exclude_mount: bool = False,
 ) -> None:
-    _name = _get_tag(name)
     if not exclude_name:
         params.add_str(
-            variable_name=f"pip_name{_name}",
-            display_name=f"pip_name{_name}",
+            variable_name=f"{label}_name",
+            display_name=f"{label}_name",
             choices=[
                 {"display_name": "P50S", "value": "flex_1channel_50"},
                 {"display_name": "P1000S", "value": "flex_1channel_1000"},
@@ -88,8 +87,8 @@ def add_parameters_pipette(
         )
     if not exclude_mount:
         params.add_str(
-            variable_name=f"pip_mount{_name}",
-            display_name=f"pip_mount{_name}",
+            variable_name=f"{label}_mount",
+            display_name=f"{label}_mount",
             choices=[
                 {"display_name": "left", "value": "left"},
                 {"display_name": "right", "value": "right"},
@@ -98,101 +97,122 @@ def add_parameters_pipette(
         )
 
 
-def _add_list_of_names(
-        params: ParameterContext,
-        str_list: List[str],
-        in_use: str,
-        name: str = "",
-        default: str = "") -> None:
-    name = _get_tag(name)
+def add_parameter_slot(
+    params: ParameterContext,
+    label: str,
+    default_slot: str = "",
+) -> None:
+    if default_slot:
+        assert default_slot in _slots
+    params.add_str(
+        variable_name=label,
+        display_name=label,
+        choices=[{"display_name": n, "value": n} for n in _slots],
+        default=default_slot if default_slot else _slots[0],
+    )
+
+
+def _add_list_of_strings(
+    params: ParameterContext, label: str, default: str, str_list: List[str]
+) -> None:
     if default:
         assert default in str_list
     params.add_str(
-        variable_name=f"{in_use}_name{name}",
-        display_name=f"{in_use}_name{name}",
-        choices=[
-            {"display_name": n, "value": n}
-            for n in str_list
-        ],
+        variable_name=label,
+        display_name=label,
+        choices=[{"display_name": n, "value": n} for n in str_list],
         default=default if default else str_list[0],
     )
 
 
 def _add_labware_by_type(
     params: ParameterContext,
-    in_use: str = "",
-    name: str = "",
-    default_name: str = "",
-    default_slot: str = "",
-    exclude_name: bool = False,
-    exclude_slot: bool = False,
+    label: str,
+    default_name: str,
+    default_slot: str,
+    exclude_name: bool,
+    exclude_slot: bool,
+    labware_type: str,
 ) -> None:
     if not exclude_name:
-        _add_list_of_names(params, str_list=_labware[in_use], in_use=in_use, name=name, default=default_name)
+        _add_list_of_strings(
+            params, label, default_name, str_list=_labware[labware_type]
+        )
     if not exclude_slot:
-        add_parameters_slots(params, name, default_slot, for_use_with=in_use)
-
-
-def add_parameters_slots(
-    params: ParameterContext,
-    name: str = "",
-    default_slot: str = "",
-    for_use_with: str = "",
-) -> None:
-    name = _get_tag(name)
-    prepend = f"{for_use_with}_" if for_use_with else ""
-    if default_slot:
-        assert default_slot in _slots
-    params.add_str(
-        variable_name=f"{prepend}slot{name}",
-        display_name=f"{prepend}slot{name}",
-        choices=[
-            {"display_name": n, "value": n}
-            for n in _slots
-        ],
-        default=default_slot if default_slot else _slots[0],
-    )
+        add_parameter_slot(params, label, default_slot)
 
 
 def add_parameters_tiprack(
     params: ParameterContext,
-    name: str = "",
+    label: str,
     default_name: str = "",
     default_slot: str = "",
     exclude_name: bool = False,
     exclude_slot: bool = False,
 ) -> None:
-    _add_labware_by_type(params, "tiprack", name, default_name, default_slot, exclude_name, exclude_slot)
+    _add_labware_by_type(
+        params,
+        label,
+        default_name,
+        default_slot,
+        exclude_name,
+        exclude_slot,
+        labware_type="tiprack",
+    )
 
 
 def add_parameters_wellplate(
     params: ParameterContext,
-    name: str = "",
+    label: str,
     default_name: str = "",
     default_slot: str = "",
     exclude_name: bool = False,
     exclude_slot: bool = False,
 ) -> None:
-    _add_labware_by_type(params, "wellplate", name, default_name, default_slot, exclude_name, exclude_slot)
+    _add_labware_by_type(
+        params,
+        label,
+        default_name,
+        default_slot,
+        exclude_name,
+        exclude_slot,
+        labware_type="wellplate",
+    )
 
 
 def add_parameters_tuberack(
     params: ParameterContext,
-    name: str = "",
+    label: str,
     default_name: str = "",
     default_slot: str = "",
     exclude_name: bool = False,
     exclude_slot: bool = False,
 ) -> None:
-    _add_labware_by_type(params, "tuberack", name, default_name, default_slot, exclude_name, exclude_slot)
+    _add_labware_by_type(
+        params,
+        label,
+        default_name,
+        default_slot,
+        exclude_name,
+        exclude_slot,
+        labware_type="tuberack",
+    )
 
 
 def add_parameters_reservoir(
     params: ParameterContext,
-    name: str = "",
+    label: str,
     default_name: str = "",
     default_slot: str = "",
     exclude_name: bool = False,
     exclude_slot: bool = False,
 ) -> None:
-    _add_labware_by_type(params, "reservoir", name, default_name, default_slot, exclude_name, exclude_slot)
+    _add_labware_by_type(
+        params,
+        label,
+        default_name,
+        default_slot,
+        exclude_name,
+        exclude_slot,
+        labware_type="reservoir",
+    )
