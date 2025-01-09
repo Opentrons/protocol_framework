@@ -84,7 +84,8 @@ class AbstractProtocol(
         ],
         label: Optional[str],
         namespace: Optional[str],
-        version: Optional[int],
+        version: Optional[int] = None,
+        schema: Optional[int] = 2,
     ) -> LabwareCoreType:
         """Load a labware using its identifying parameters."""
         ...

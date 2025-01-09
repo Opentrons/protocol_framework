@@ -80,6 +80,8 @@ def resolve(
     namespace: Optional[str],
     version: Optional[int],
     custom_load_labware_params: List[LabwareLoadParams],
+    api_level: Optional[Tuple[int, int]] = None,
+    schema_version: Optional[int] = 2,
 ) -> Tuple[str, int]:
     """Resolve the load labware parameters that best matches any custom labware, or default to opentrons standards
 
@@ -89,6 +91,8 @@ def resolve(
         version: Optionally provided labware definition version
         custom_load_labware_params: List of load labware parameters associated with custom labware that
                                     match given parameters
+        api_level: Current api level.
+        schema_version: The desired labware schema version to draw a definition from.
 
     Returns:
         A tuple of the resolved namespace and version
@@ -115,10 +119,16 @@ def resolve(
         # custom labware matching that namespace, so we will always take this path in
         # that case.
         resolved_namespace = namespace if namespace is not None else OPENTRONS_NAMESPACE
+        api_level = api_level if api_level else (2, 14)
+        schema_version = schema_version if schema_version else 2
         resolved_version = (
             version
             if version is not None
-            else _get_default_version_for_standard_labware(load_name=load_name)
+            else _get_default_version_for_standard_labware(
+                load_name=load_name,
+                current_api_level=api_level,
+                schema_version=schema_version,
+            )
         )
 
     elif len(filtered_custom_params) > 1:
@@ -136,11 +146,13 @@ def resolve(
 
 
 def _get_default_version_for_standard_labware(
-    load_name: str, api_level: Tuple[int, int] = (2, 14)
+    load_name: str,
+    current_api_level: Tuple[int, int] = (2, 14),
+    schema_version: int = 2,
 ) -> int:
     # We know the protocol is running at least apiLevel 2.14 by this point because
     # apiLevel 2.13 and below has its own separate code path for resolving labware.
-    if api_level >= (2, 21):
+    if current_api_level >= (2, 21) and schema_version == 3:
         found_version = _APILEVEL_2_21_OT_DEFAULT_VERSIONS.get(load_name, None)
         if found_version:
             return found_version
