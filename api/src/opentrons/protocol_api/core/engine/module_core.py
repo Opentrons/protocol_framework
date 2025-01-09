@@ -702,8 +702,16 @@ class FlexStackerCore(ModuleCore, AbstractFlexStackerCore):
 
     def retrieve(self) -> None:
         """Retrieve a labware from the bottom of the Flex Stacker's stack."""
-        pass
+        self._engine_client.execute_command(
+            cmd.flex_stacker.RetrieveParams(
+                moduleId=self.module_id,
+            )
+        )
 
     def store(self) -> None:
         """Store a labware at the bottom of the Flex Stacker's stack."""
-        pass
+        self._engine_client.execute_command(
+            cmd.flex_stacker.StoreParams(
+                moduleId=self.module_id,
+            )
+        )
