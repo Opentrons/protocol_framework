@@ -78,7 +78,7 @@ async def post_labware_offset(  # noqa: D103
 async def get_labware_offsets(  # noqa: D103
     store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)],
     id: Annotated[
-        str | SkipJsonSchema[Type[DO_NOT_FILTER]],
+        Json[str] | SkipJsonSchema[Type[DO_NOT_FILTER]],
         fastapi.Query(description="Filter for exact matches on the `id` field."),
     ] = DO_NOT_FILTER,
     definition_uri: Annotated[
