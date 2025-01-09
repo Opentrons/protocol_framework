@@ -83,7 +83,7 @@ stages:
   # Just a basic test here. More complicated tests for the filters belong in the unit tests.
   - name: Test getting labware offsets with a filter
     request:
-      url: '{ot3_server_base_url}/labwareOffsets?locationSlotName=A2'
+      url: '{ot3_server_base_url}/labwareOffsets?locationSlotName="A2"'
       method: GET
     response:
       json:
