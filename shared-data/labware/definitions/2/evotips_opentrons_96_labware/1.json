@@ -1001,15 +1001,16 @@
   ],
   "parameters": {
     "format": "96Standard",
-    "quirks": ["stackingMaxFive", "stackingOnly"],
+    "quirks": ["stackingOnly"],
     "isTiprack": false,
     "isMagneticModuleCompatible": false,
     "loadName": "evotips_opentrons_96_labware"
   },
   "namespace": "opentrons",
-  "allowedRoles": ["labware", "lid"],
+  "allowedRoles": ["labware"],
   "version": 1,
   "stackLimit": 5,
+  "compatibleParentLabware": ["nest_96_wellplate_2ml_deep"],
   "schemaVersion": 2,
   "cornerOffsetFromSlot": {
     "x": 0,
