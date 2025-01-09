@@ -421,7 +421,6 @@ const verifyStep = (verification: Verifications): void => {
       cy.contains(Content.Volume1000).should('be.visible')
       cy.contains(Content.Tiprack50).should('be.visible')
       cy.contains(Content.FilterTiprack50).should('be.visible')
-      // cy.contains('Filter Tip Rack 50 µL').should('be.visible')
       break
     case Verifications.StepTwoPart3:
       // This function should get used after you select 50uL fully
