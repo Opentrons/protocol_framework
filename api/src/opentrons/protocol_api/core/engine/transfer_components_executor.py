@@ -387,6 +387,7 @@ class TransferComponentsExecutor:
             blowout_props.enabled
             and blowout_props.location != BlowoutLocation.DESTINATION
         ):
+            # TODO: no-op touch tip if touch tip is enabled and blowout is in trash/ reservoir/ any labware with touch-tip disabled
             assert blowout_props.flow_rate is not None
             self._instrument.set_flow_rate(blow_out=blowout_props.flow_rate)
             touch_tip_and_air_gap_location: Optional[Location]
