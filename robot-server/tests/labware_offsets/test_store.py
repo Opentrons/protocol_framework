@@ -1,7 +1,7 @@
 # noqa: D100
 
 
-from datetime import datetime
+from datetime import datetime, timezone
 from opentrons.protocol_engine import (
     LabwareOffset,
     LabwareOffsetLocation,
@@ -9,17 +9,24 @@ from opentrons.protocol_engine import (
 )
 from opentrons.types import DeckSlotName
 import pytest
+import sqlalchemy
 from robot_server.labware_offsets.store import (
     LabwareOffsetStore,
     LabwareOffsetNotFoundError,
 )
 
 
+@pytest.fixture
+def subject(sql_engine: sqlalchemy.engine.Engine) -> LabwareOffsetStore:
+    """Return a test subject."""
+    return LabwareOffsetStore(sql_engine)
+
+
 def _get_all(store: LabwareOffsetStore) -> list[LabwareOffset]:
     return store.search()
 
 
-def test_filters() -> None:
+def test_filters(subject: LabwareOffsetStore) -> None:
     """Test that the `.search()` method applies filters correctly."""
     ids_and_definition_uris = [
         ("id-1", "definition-uri-a"),
@@ -32,15 +39,13 @@ def test_filters() -> None:
     labware_offsets = [
         LabwareOffset(
             id=id,
-            createdAt=datetime.now(),
+            createdAt=datetime.now(timezone.utc),
             definitionUri=definition_uri,
             location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_A1),
             vector=LabwareOffsetVector(x=1, y=2, z=3),
         )
         for (id, definition_uri) in ids_and_definition_uris
     ]
-
-    subject = LabwareOffsetStore()
 
     for labware_offset in labware_offsets:
         subject.add(labware_offset)
@@ -70,20 +75,18 @@ def test_filters() -> None:
     assert result == []
 
 
-def test_delete() -> None:
+def test_delete(subject: LabwareOffsetStore) -> None:
     """Test the `delete()` and `delete_all()` methods."""
     a, b, c = [
         LabwareOffset(
             id=id,
-            createdAt=datetime.now(),
+            createdAt=datetime.now(timezone.utc),
             definitionUri="",
             location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_A1),
             vector=LabwareOffsetVector(x=1, y=2, z=3),
         )
         for id in ["id-a", "id-b", "id-c"]
     ]
-
-    subject = LabwareOffsetStore()
 
     with pytest.raises(LabwareOffsetNotFoundError):
         subject.delete("b")
