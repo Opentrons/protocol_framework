@@ -35,10 +35,10 @@ declare global {
     }
   }
 }
+
 // Only Header, Home, and Settings page actions are here
 // due to their simplicity
 // Create and Import page actions are in their respective files
-// Fixed clickCreateNew and above commands for 8.2.2
 
 export const content = {
   siteTitle: 'Opentrons Protocol Designer',
@@ -57,13 +57,14 @@ export const locators = {
   createProtocol: 'Create a protocol',
   Flex_Home: 'Opentrons Flex',
   OT2_Home: 'Opentrons OT-2',
-  editProtocol: 'Edit existing protocol',
+  importProtocol: 'Import existing protocol',
   settingsDataTestid: 'SettingsIconButton',
   settings: 'Settings',
   privacyPolicy: 'a[href="https://opentrons.com/privacy-policy"]',
   eula: 'a[href="https://opentrons.com/eula"]',
   privacyToggle: 'Settings_hotKeys',
   analyticsToggleTestId: 'analyticsToggle',
+  confirm: 'Confirm',
 }
 
 // General Custom Commands
@@ -102,23 +103,23 @@ Cypress.Commands.add('verifyCreateNewHeader', () => {
 
 // Home Page
 Cypress.Commands.add('verifyHomePage', () => {
-  // Todo re-add when Once 8.2.2 comes back in
   cy.contains(content.welcome)
   cy.contains('button', locators.createProtocol).should('be.visible')
-  cy.contains('label', locators.editProtocol).should('be.visible')
+  cy.contains('label', locators.importProtocol).should('be.visible')
   cy.getByTestId(locators.settingsDataTestid).should('be.visible')
   cy.get(locators.privacyPolicy).should('exist').and('be.visible')
   cy.get(locators.eula).should('exist').and('be.visible')
 })
 
 Cypress.Commands.add('clickCreateNew', () => {
-  // cy.get('[data-testid="SettingsIconButton"]').click();
-  // cy.getByTestId(locators.settingsDataTestid).click()
-  // ToDo  re-add when 8.2.2 pushed to edge
-  // cy.get('[data-testid="analyticsToggle"] svg')
-  // .should('have.css', 'fill', 'rgb(0, 108, 250)')
-  // cy.getByTestId(locators.settingsDataTestid).click()
   cy.contains(locators.createProtocol).click()
+})
+
+Cypress.Commands.add('closeAnalyticsModal', () => {
+  cy.get('button')
+    .contains(locators.confirm)
+    .should('be.visible')
+    .click({ force: true })
 })
 
 // Header Import
