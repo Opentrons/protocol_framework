@@ -143,5 +143,6 @@
   "volume_per_well": "Volume per well",
   "well_name": "Well {{wellName}}",
   "well_order_title": "{{prefix}} well order",
-  "well_position": "Well position: X {{x}} Y {{y}} Z {{z}} (mm)"
+  "well_position": "Well position: X {{x}} Y {{y}} Z {{z}} (mm)",
+  "unknown_module": "Unknown module"
 }

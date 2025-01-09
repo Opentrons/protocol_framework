@@ -8,11 +8,11 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional, Union
 
-from opentrons.protocols.models import LabwareDefinition
+from opentrons_shared_data.errors import EnumeratedError
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
+
 from opentrons.hardware_control.types import DoorState
 from opentrons.hardware_control.modules import LiveData
-
-from opentrons_shared_data.errors import EnumeratedError
 
 from ..commands import (
     Command,

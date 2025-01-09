@@ -2,10 +2,10 @@
 from dataclasses import dataclass
 from typing import Optional, overload, Union, List
 
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType
 
 from opentrons.calibration_storage.helpers import uri_from_details
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.types import MountType
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.hardware_control.modules import (

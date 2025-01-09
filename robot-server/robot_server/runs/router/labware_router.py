@@ -5,14 +5,11 @@ from typing import Annotated, Union
 
 from fastapi import Depends, status
 
-from opentrons_shared_data.labware.labware_definition import (
-    LabwareDefinition as SD_LabwareDefinition,
-)
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 from server_utils.fastapi_utils.light_router import LightRouter
 
 from opentrons.protocol_engine import LabwareOffsetCreate, LabwareOffset
-from opentrons.protocols.models import LabwareDefinition
 
 from robot_server.errors.error_responses import ErrorBody
 from robot_server.service.json_api import (
@@ -136,14 +133,14 @@ async def add_labware_definition(
         " Repeated definitions will be deduplicated."
     ),
     responses={
-        status.HTTP_200_OK: {"model": SimpleBody[list[SD_LabwareDefinition]]},
+        status.HTTP_200_OK: {"model": SimpleBody[list[LabwareDefinition]]},
         status.HTTP_409_CONFLICT: {"model": ErrorBody[RunStopped]},
     },
 )
 async def get_run_loaded_labware_definitions(
     runId: str,
     run_data_manager: Annotated[RunDataManager, Depends(get_run_data_manager)],
-) -> PydanticResponse[SimpleBody[list[SD_LabwareDefinition]]]:
+) -> PydanticResponse[SimpleBody[list[LabwareDefinition]]]:
     """Get a run's loaded labware definition by the run ID.
 
     Args:
