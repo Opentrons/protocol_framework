@@ -55,7 +55,7 @@ export const locators = {
   import: 'Import',
   createNew: 'Create new',
   createProtocol: 'Create a protocol',
-  editProtocol: 'Edit existing protocol',
+  editProtocol: 'Import existing protocol',
   settingsDataTestid: 'SettingsIconButton',
   settings: 'Settings',
   privacyPolicy: 'a[href="https://opentrons.com/privacy-policy"]',
