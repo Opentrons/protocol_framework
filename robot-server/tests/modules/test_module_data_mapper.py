@@ -1,6 +1,5 @@
 """Tests for robot_server.modules.module_data_mapper."""
 import pytest
-from typing import Dict
 
 from opentrons.protocol_engine import ModuleModel, DeckType
 from opentrons.protocol_engine.types import Vec3f
