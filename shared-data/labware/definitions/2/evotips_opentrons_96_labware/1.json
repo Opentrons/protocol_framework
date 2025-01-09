@@ -1009,6 +1009,7 @@
   "namespace": "opentrons",
   "allowedRoles": ["labware", "lid"],
   "version": 1,
+  "stackLimit": 5,
   "schemaVersion": 2,
   "cornerOffsetFromSlot": {
     "x": 0,
