@@ -25,6 +25,7 @@ import { editPipettes } from './editPipettes'
 import { HandleEnter } from '../../atoms/HandleEnter'
 import { PipetteOverview } from './PipetteOverview'
 import { PipetteConfiguration } from './PipetteConfiguration'
+import { usePipetteConfig } from './usePipetteConfig'
 
 import type { PipetteMount, PipetteName } from '@opentrons/shared-data'
 import type {
@@ -44,15 +45,15 @@ export function EditInstrumentsModal(
   const dispatch = useDispatch<ThunkDispatch<any>>()
   const { t } = useTranslation([
     'create_new_protocol',
-    'protocol_overview',
     'shared',
   ])
-  const [page, setPage] = useState<'add' | 'overview'>('overview')
-  const [mount, setMount] = useState<PipetteMount>('left')
-  const [pipetteType, setPipetteType] = useState<PipetteType | null>(null)
-  const [pipetteGen, setPipetteGen] = useState<Gen | 'flex'>('flex')
-  const [pipetteVolume, setPipetteVolume] = useState<string | null>(null)
-  const [selectedTips, setSelectedTips] = useState<string[]>([])
+  const pipetteConfig = usePipetteConfig()
+  // const [page, setPage] = useState<'add' | 'overview'>('overview')
+  // const [mount, setMount] = useState<PipetteMount>('left')
+  // const [pipetteType, setPipetteType] = useState<PipetteType | null>(null)
+  // const [pipetteGen, setPipetteGen] = useState<Gen | 'flex'>('flex')
+  // const [pipetteVolume, setPipetteVolume] = useState<string | null>(null)
+  // const [selectedTips, setSelectedTips] = useState<string[]>([])
   const robotType = useSelector(getRobotType)
   const orderedStepIds = useSelector(stepFormSelectors.getOrderedStepIds)
   const initialDeckSetup = useSelector(getInitialDeckSetup)
@@ -66,16 +67,17 @@ export function EditInstrumentsModal(
   const gripper = Object.values(additionalEquipment).find(
     ae => ae.name === 'gripper'
   )
+  const { page, mount, pipetteType, pipetteGen, pipetteVolume, selectedTips, setPage, resetFields } = pipetteConfig
   const selectedPipette =
     pipetteType === '96' || pipetteGen === 'GEN1'
       ? `${pipetteVolume}_${pipetteType}`
       : `${pipetteVolume}_${pipetteType}_${pipetteGen.toLowerCase()}`
 
-  const resetFields = (): void => {
-    setPipetteType(null)
-    setPipetteGen('flex')
-    setPipetteVolume(null)
-  }
+  // const resetFields = (): void => {
+  //   setPipetteType(null)
+  //   setPipetteGen('flex')
+  //   setPipetteVolume(null)
+  // }
 
   const handleOnSave = (): void => {
     if (page === 'overview') {
@@ -151,32 +153,34 @@ export function EditInstrumentsModal(
             labware={labware}
             pipettes={pipettes}
             robotType={robotType}
-            setPage={setPage}
-            setMount={setMount}
-            setPipetteType={setPipetteType}
-            setPipetteGen={setPipetteGen}
-            setPipetteVolume={setPipetteVolume}
-            setSelectedTips={setSelectedTips}
+            // setPage={setPage}
+            // setMount={setMount}
+            // setPipetteType={setPipetteType}
+            // setPipetteGen={setPipetteGen}
+            // setPipetteVolume={setPipetteVolume}
+            // setSelectedTips={setSelectedTips}
             leftPipette={leftPipette}
             rightPipette={rightPipette}
             gripper={gripper}
+            pipetteConfig={pipetteConfig}
           />
         ) : (
           <PipetteConfiguration
             has96Channel={has96Channel}
             robotType={robotType}
-            pipetteType={pipetteType}
-            pipetteGen={pipetteGen}
-            mount={mount}
-            pipetteVolume={pipetteVolume}
-            selectedTips={selectedTips}
+            // pipetteType={pipetteType}
+            // pipetteGen={pipetteGen}
+            // mount={mount}
+            // pipetteVolume={pipetteVolume}
+            // selectedTips={selectedTips}
             selectedPipette={selectedPipette}
-            setPipetteGen={setPipetteGen}
-            setPipetteType={setPipetteType}
-            setPipetteVolume={setPipetteVolume}
-            setSelectedTips={setSelectedTips}
+            // setPipetteGen={setPipetteGen}
+            // setPipetteType={setPipetteType}
+            // setPipetteVolume={setPipetteVolume}
+            // setSelectedTips={setSelectedTips}
             leftPipette={leftPipette}
             rightPipette={rightPipette}
+            pipetteConfig={pipetteConfig}
           />
         )}
       </Modal>

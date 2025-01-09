@@ -28,18 +28,19 @@ import { getSectionsFromPipetteName } from './utils'
 import { INITIAL_DECK_SETUP_STEP_ID } from '../../constants'
 import { LINK_BUTTON_STYLE } from '../../atoms'
 
-import type { Dispatch, SetStateAction } from 'react'
+// import type { Dispatch, SetStateAction } from 'react'
 import type { AdditionalEquipmentName } from '@opentrons/step-generation'
-import type { PipetteMount, RobotType } from '@opentrons/shared-data'
+import type { /* PipetteMount, */ RobotType } from '@opentrons/shared-data'
 import type {
   AllTemporalPropertiesForTimelineFrame,
   PipetteOnDeck,
 } from '../../step-forms'
-import type {
-  Gen,
-  PipetteType,
-} from '../../pages/CreateNewProtocolWizard/types'
+// import type {
+//   Gen,
+//   PipetteType,
+// } from '../../pages/CreateNewProtocolWizard/types'
 import type { ThunkDispatch } from '../../types'
+import type { usePipetteConfig } from './usePipetteConfig'
 
 interface Gripper {
   name: AdditionalEquipmentName
@@ -52,12 +53,13 @@ interface PipetteOverviewProps {
   pipettes: AllTemporalPropertiesForTimelineFrame['pipettes']
   labware: AllTemporalPropertiesForTimelineFrame['labware']
   robotType: RobotType
-  setPage: Dispatch<SetStateAction<'add' | 'overview'>>
-  setMount: Dispatch<SetStateAction<PipetteMount>>
-  setPipetteType: Dispatch<SetStateAction<PipetteType | null>>
-  setPipetteGen: Dispatch<SetStateAction<Gen | 'flex'>>
-  setPipetteVolume: Dispatch<SetStateAction<string | null>>
-  setSelectedTips: Dispatch<SetStateAction<string[]>>
+  // setPage: Dispatch<SetStateAction<'add' | 'overview'>>
+  // setMount: Dispatch<SetStateAction<PipetteMount>>
+  // setPipetteType: Dispatch<SetStateAction<PipetteType | null>>
+  // setPipetteGen: Dispatch<SetStateAction<Gen | 'flex'>>
+  // setPipetteVolume: Dispatch<SetStateAction<string | null>>
+  // setSelectedTips: Dispatch<SetStateAction<string[]>>
+  pipetteConfig: ReturnType<typeof usePipetteConfig>
   leftPipette?: PipetteOnDeck
   rightPipette?: PipetteOnDeck
   gripper?: Gripper
@@ -68,17 +70,18 @@ export function PipetteOverview({
   pipettes,
   labware,
   robotType,
-  setPage,
-  setMount,
-  setPipetteType,
-  setPipetteGen,
-  setPipetteVolume,
-  setSelectedTips,
+  // setPage,
+  // setMount,
+  // setPipetteType,
+  // setPipetteGen,
+  // setPipetteVolume,
+  // setSelectedTips,
+  pipetteConfig,
   leftPipette,
   rightPipette,
   gripper,
 }: PipetteOverviewProps): JSX.Element {
-  const { i18n, t } = useTranslation('create_new_protocol')
+  const { i18n, t } = useTranslation(['create_new_protocol', 'protocol_overview'])
   const dispatch = useDispatch<ThunkDispatch<any>>()
 
   const swapPipetteUpdate = mapValues(pipettes, pipette => {
@@ -104,6 +107,15 @@ export function PipetteOverview({
     .filter(lw => lw.def.parameters.isTiprack)
     .filter(tip => rightPipette?.tiprackDefURI.includes(tip.labwareDefURI))
 
+  const {
+    setPage,
+    setMount,
+    setPipetteType,
+    setPipetteGen,
+    setPipetteVolume,
+    setSelectedTips,
+  } = pipetteConfig;
+
   return (
     <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing24}>
       <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
@@ -112,7 +124,7 @@ export function PipetteOverview({
             {t('your_pipettes')}
           </StyledText>
           {has96Channel ||
-          (leftPipette == null && rightPipette == null) ? null : (
+            (leftPipette == null && rightPipette == null) ? null : (
             <Btn
               css={LINK_BUTTON_STYLE}
               onClick={() =>
@@ -183,7 +195,7 @@ export function PipetteOverview({
             />
           ) : null}
           {has96Channel ||
-          (leftPipette != null && rightPipette != null) ? null : (
+            (leftPipette != null && rightPipette != null) ? null : (
             <EmptySelectorButton
               onClick={() => {
                 setPage('add')
