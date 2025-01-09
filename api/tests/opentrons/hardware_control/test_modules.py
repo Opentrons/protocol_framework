@@ -404,7 +404,7 @@ async def test_module_update_integration(  # noqa: C901
 
     # test flex stacker update with dfu bootloader
     async def mock_find_dfu_device_fs2(pid: str, expected_device_count: int) -> str:
-        if expected_device_count == 2:
+        if expected_device_count == 3:
             return "df11"
         return "none"
 
