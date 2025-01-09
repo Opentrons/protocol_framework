@@ -10,7 +10,6 @@ declare global {
       verifyCreateNewHeader: () => Cypress.Chainable<void>
       clickCreateNew: () => Cypress.Chainable<void>
       closeAnalyticsModal: () => Cypress.Chainable<void>
-      closeAnnouncementModal: () => Cypress.Chainable<void>
       verifyHomePage: () => Cypress.Chainable<void>
       importProtocol: (protocolFile: string) => Cypress.Chainable<void>
       verifyImportPageOldProtocol: () => Cypress.Chainable<void>
@@ -28,6 +27,7 @@ declare global {
       openDesignPage: () => Cypress.Chainable<void>
       addStep: (stepName: string) => Cypress.Chainable<void>
       openSettingsPage: () => Cypress.Chainable<void>
+      robotSelection: (robotName: string) => Cypress.Chainable<void>
       verifySettingsPage: () => Cypress.Chainable<void>
       verifyCreateNewPage: () => Cypress.Chainable<void>
       togglePreWetTip: () => Cypress.Chainable<void>
@@ -55,6 +55,8 @@ export const locators = {
   import: 'Import',
   createNew: 'Create new',
   createProtocol: 'Create a protocol',
+  Flex_Home: 'Opentrons Flex',
+  OT2_Home: 'Opentrons OT-2',
   importProtocol: 'Import existing protocol',
   settingsDataTestid: 'SettingsIconButton',
   settings: 'Settings',
@@ -128,6 +130,17 @@ Cypress.Commands.add('importProtocol', (protocolFilePath: string) => {
     .selectFile(protocolFilePath, { force: true })
 })
 
+Cypress.Commands.add('robotSelection', (robotName: string) => {
+  if (robotName === 'Opentrons OT-2') {
+    cy.contains('label', locators.OT2_Home).should('be.visible').click()
+  } else {
+    // Just checking that the selection modal works
+    cy.contains('label', locators.OT2_Home).should('be.visible').click()
+    cy.contains('label', locators.Flex_Home).should('be.visible').click()
+  }
+  cy.contains('button', 'Confirm').should('be.visible').click()
+})
+
 // Settings Page Actions
 Cypress.Commands.add('openSettingsPage', () => {
   cy.getByTestId(locators.settingsDataTestid).click()
@@ -152,16 +165,10 @@ Cypress.Commands.add('verifySettingsPage', () => {
 // as a reference during test migration.
 /// /////////////////////////////////////////////////////////////////
 
-Cypress.Commands.add('closeAnnouncementModal', () => {
+Cypress.Commands.add('closeAnalyticsModal', () => {
   // ComputingSpinner sometimes covers the announcement modal button and prevents the button click
   // this will retry until the ComputingSpinner does not exist
-  cy.get('[data-test="ComputingSpinner"]', { timeout: 30000 }).should(
-    'not.exist'
-  )
-  cy.get('button')
-    .contains('Got It!')
-    .should('be.visible')
-    .click({ force: true })
+  cy.contains('button', 'Confirm').click({ force: true })
 })
 
 //
