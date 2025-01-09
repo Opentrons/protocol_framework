@@ -19,7 +19,6 @@ import { PipetteConfiguration } from '../PipetteConfiguration'
 import { EditInstrumentsModal } from '..'
 
 import type { ComponentProps } from 'react'
-import { fi } from 'date-fns/locale'
 
 vi.mock('../../../file-data/selectors')
 vi.mock('../../../step-forms/selectors')
