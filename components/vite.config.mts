@@ -10,14 +10,18 @@ import lostCss from 'lost'
 export default defineConfig({
   build: {
     // Relative to the root
-    ssr: 'src/index.ts',
     outDir: 'lib',
     // do not delete the outdir, typescript types might live there and we dont want to delete them
     emptyOutDir: false,
-    commonjsOptions: {
-      transformMixedEsModules: true,
-      esmExternals: true,
+    lib: {
+      entry: 'src/index.ts',
+      formats: ['es', 'cjs'], // Generate both ES Module and CommonJS outputs
+      fileName: (format) => (format === 'es' ? 'index.mjs' : 'index.cjs'),
     },
+    rollupOptions: {
+      external: ['react', 'react-dom', 'styled-components'], // Ensure peer dependencies are not bundled
+    },
+    target: 'es2017', // Transpile down to a compatible version for Next.js (for Protocol Library)
   },
   plugins: [
     react({
@@ -32,6 +36,7 @@ export default defineConfig({
     esbuildOptions: {
       target: 'es2020',
     },
+    exclude: ['styled-components'], // Avoid pre-bundling styled-components
   },
   css: {
     postcss: {
@@ -55,5 +60,6 @@ export default defineConfig({
         '../components/src/index.module.css'
       ),
     },
+    dedupe: ['styled-components'], // Prevent duplicate styled-components instances
   },
 })
