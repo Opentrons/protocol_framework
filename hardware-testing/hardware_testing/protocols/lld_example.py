@@ -9,54 +9,34 @@ def add_parameters(params: ParameterContext) -> None:
     rtp.add_parameters_tiprack(params, "tiprack", default_slot="B3")
     rtp.add_parameters_tiprack(
         params,
-        "diluent_tiprack",
+        label="diluent_tiprack",
         default_slot="B3",
         default_name="opentrons_flex_96_tiprack_200uL",
     )
     rtp.add_parameters_reservoir(
-        params, "diluent_src", default_slot="A3", default_name="nest_12_reservoir_15ml"
+        params,
+        label="diluent_src",
+        default_slot="A3",
+        default_name="nest_12_reservoir_15ml",
     )
     rtp.add_parameters_wellplate(
         params,
-        "red_dye_src",
+        label="red_dye_src",
         default_slot="C3",
         default_name="opentrons_96_wellplate_200ul_pcr_full_skirt",
     )
     rtp.add_parameters_wellplate(
         params,
-        "optical_dst",
+        label="optical_dst",
         default_slot="D3",
         default_name="corning_96_wellplate_360ul_flat",
     )
-    params.add_int("starting_volume", "starting_volume", 100, unit="uL")
-    params.add_int("trials", "trials", 48, unit="x")
-    params.add_float("aspirate_volume", "aspirate_volume", 1.0, unit="uL")
-    params.add_float("submerge", "submerge", -1.5, unit="mm")
-    params.add_str(
-        "dye_well",
-        "dye_well",
-        "A1",
-        choices=[
-            {
-                "display_name": f"{r}{c + 1}",
-                "value": f"{r}{c + 1}",
-            }
-            for r in "ABCDEFGH"
-            for c in range(12)
-        ],
-    )
-    params.add_str(
-        "diluent_well",
-        "diluent_well",
-        "A1",
-        choices=[
-            {
-                "display_name": f"{r}1",
-                "value": f"{r}1",
-            }
-            for r in "ABCDEFGH"
-        ],
-    )
+    params.add_int("starting_volume", "starting_volume", default=100, unit="uL")
+    params.add_int("trials", "trials", default=48, unit="qty")
+    params.add_float("aspirate_volume", "aspirate_volume", default=1.0, unit="uL")
+    params.add_float("submerge", "submerge", default=-1.5, unit="mm")
+    params.add_str("dye_well", "dye_well", default="A1")
+    params.add_str("diluent_well", "diluent_well", default="A1")
 
 
 def run(ctx: ProtocolContext) -> None:
@@ -89,10 +69,9 @@ def run(ctx: ProtocolContext) -> None:
         p.pipette_mount,
         tip_racks=[ctx.load_labware(p.tiprack_name, p.tiprack_slot)],
     )
-    multi_mount = {"left": "right", "right": "left"}[p.pip_mount]
     multi = ctx.load_instrument(
         "flex_8channel_1000",
-        multi_mount,
+        {"left": "right", "right": "left"}[p.pip_mount],
         tip_racks=[ctx.load_labware(p.diluent_tiprack_name, p.diluent_tiprack_slot)],
     )
 
