@@ -1,19 +1,29 @@
 # noqa: D100
 
-from typing import Type
+import enum
+from typing import Final, Literal, Type, TypeAlias
 
 from opentrons.protocol_engine import LabwareOffset, ModuleModel
 from opentrons.types import DeckSlotName
 
 
-class DO_NOT_FILTER:
-    """A sentinel value for when a filter should not be applied.
+class _DoNotFilter(enum.Enum):
+    DO_NOT_FILTER = enum.auto()
 
-    This is different from filtering on `None`, which returns only entries where the
-    value is equal to `None`.
-    """
 
-    pass
+DO_NOT_FILTER: Final = _DoNotFilter.DO_NOT_FILTER
+"""A sentinel value for when a filter should not be applied.
+
+This is different from filtering on `None`, which returns only entries where the
+value is equal to `None`.
+"""
+
+
+DoNotFilterType: TypeAlias = Literal[_DoNotFilter.DO_NOT_FILTER]
+"""The type of `DO_NOT_FILTER`, as `NoneType` is to `None`.
+
+Unfortunately, mypy doesn't let us write `Literal[DO_NOT_FILTER]`. Use this instead.
+"""
 
 
 # todo(mm, 2024-12-06): Convert to be SQL-based and persistent instead of in-memory.
@@ -31,15 +41,13 @@ class LabwareOffsetStore:
 
     def search(
         self,
-        id_filter: str | Type[DO_NOT_FILTER] = DO_NOT_FILTER,
-        definition_uri_filter: str | Type[DO_NOT_FILTER] = DO_NOT_FILTER,
-        location_slot_name_filter: DeckSlotName | Type[DO_NOT_FILTER] = DO_NOT_FILTER,
+        id_filter: str | DoNotFilterType = DO_NOT_FILTER,
+        definition_uri_filter: str | DoNotFilterType = DO_NOT_FILTER,
+        location_slot_name_filter: DeckSlotName | DoNotFilterType = DO_NOT_FILTER,
         location_module_model_filter: ModuleModel
         | None
-        | Type[DO_NOT_FILTER] = DO_NOT_FILTER,
-        location_definition_uri_filter: str
-        | None
-        | Type[DO_NOT_FILTER] = DO_NOT_FILTER,
+        | DoNotFilterType = DO_NOT_FILTER,
+        location_definition_uri_filter: str | None | DoNotFilterType = DO_NOT_FILTER,
         # todo(mm, 2024-12-06): Support pagination (cursor & pageLength query params).
         # The logic for that is currently duplicated across several places in
         # robot-server and api. We should try to clean that up, or at least avoid
