@@ -6,6 +6,7 @@ from opentrons_shared_data.module import load_definition
 
 from opentrons.hardware_control.modules import (
     LiveData,
+    ModuleDataValidator,
     ModuleType,
     MagneticStatus,
     TemperatureStatus,
@@ -71,7 +72,7 @@ class ModuleDataMapper:
         # rely on Pydantic to check/coerce data fields from dicts at run time
         if module_type == ModuleType.MAGNETIC:
             module_cls = MagneticModule
-
+            assert ModuleDataValidator.is_magnetic_module_data(live_data["data"])
             live_data_height = live_data["data"].get("height")
             assert isinstance(
                 live_data_height, (int, float)
@@ -92,6 +93,7 @@ class ModuleDataMapper:
 
         elif module_type == ModuleType.TEMPERATURE:
             module_cls = TemperatureModule
+            assert ModuleDataValidator.is_temperature_module_data(live_data["data"])
             module_data = TemperatureModuleData(
                 status=TemperatureStatus(live_data["status"]),
                 targetTemperature=cast(float, live_data["data"].get("targetTemp")),
@@ -100,6 +102,7 @@ class ModuleDataMapper:
 
         elif module_type == ModuleType.THERMOCYCLER:
             module_cls = ThermocyclerModule
+            assert ModuleDataValidator.is_thermocycler_data(live_data["data"])
             module_data = ThermocyclerModuleData(
                 status=TemperatureStatus(live_data["status"]),
                 targetTemperature=cast(float, live_data["data"].get("targetTemp")),
@@ -120,6 +123,7 @@ class ModuleDataMapper:
 
         elif module_type == ModuleType.HEATER_SHAKER:
             module_cls = HeaterShakerModule
+            assert ModuleDataValidator.is_heater_shaker_data(live_data["data"])
             module_data = HeaterShakerModuleData(
                 status=HeaterShakerStatus(live_data["status"]),
                 labwareLatchStatus=cast(
@@ -137,6 +141,7 @@ class ModuleDataMapper:
                 errorDetails=cast(str, live_data["data"].get("errorDetails")),
             )
         elif module_type == ModuleType.ABSORBANCE_READER:
+            assert ModuleDataValidator.is_absorbance_reader_data(live_data["data"])
             module_cls = AbsorbanceReaderModule
             module_data = AbsorbanceReaderModuleData(
                 status=AbsorbanceReaderStatus(live_data["status"]),
