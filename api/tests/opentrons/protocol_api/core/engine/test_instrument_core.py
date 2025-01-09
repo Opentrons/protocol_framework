@@ -206,12 +206,12 @@ def test_get_pipette_load_name(
     decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
         LoadedPipette.construct(pipetteName=PipetteNameType.P300_SINGLE)  # type: ignore[call-arg]
     )
-    assert subject.get_pipette_load_name() == "p300_single"
+    assert subject.get_load_name() == "p300_single"
 
     decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
         LoadedPipette.construct(pipetteName=PipetteNameType.P1000_96)  # type: ignore[call-arg]
     )
-    assert subject.get_pipette_load_name() == "flex_96channel_1000"
+    assert subject.get_load_name() == "flex_96channel_1000"
 
 
 def test_get_mount(
@@ -1596,6 +1596,9 @@ def test_load_liquid_class(
     test_liq_class = decoy.mock(cls=LiquidClass)
     test_transfer_props = decoy.mock(cls=TransferProperties)
 
+    decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
+        LoadedPipette.construct(pipetteName=PipetteNameType.P50_SINGLE_FLEX)  # type: ignore[call-arg]
+    )
     decoy.when(
         test_liq_class.get_for("flex_1channel_50", "opentrons_flex_96_tiprack_50ul")
     ).then_return(test_transfer_props)
@@ -1627,8 +1630,8 @@ def test_load_liquid_class(
         )
     ).then_return(cmd.LoadLiquidClassResult(liquidClassId="liquid-class-id"))
     result = subject.load_liquid_class(
-        liquid_class=test_liq_class,
-        pipette_load_name="flex_1channel_50",
+        name=test_liq_class.name,
+        transfer_properties=test_transfer_props,
         tiprack_uri="opentrons_flex_96_tiprack_50ul",
     )
     assert result == "liquid-class-id"
