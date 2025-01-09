@@ -8,12 +8,12 @@ _slots = ["D1", "D2", "D3", "C1", "C2", "C3", "B1", "B2", "B3", "A1", "A2", "A3"
 
 _labware = {
     "tiprack": [
-        "opentrons_flex_96_tiprack_50uL",
-        "opentrons_flex_96_tiprack_200uL",
-        "opentrons_flex_96_tiprack_1000uL",
-        "opentrons_flex_96_filtertiprack_50uL",
-        "opentrons_flex_96_filtertiprack_200uL",
-        "opentrons_flex_96_filtertiprack_1000uL",
+        "opentrons_flex_96_tiprack_50ul",
+        "opentrons_flex_96_tiprack_200ul",
+        "opentrons_flex_96_tiprack_1000ul",
+        "opentrons_flex_96_filtertiprack_50ul",
+        "opentrons_flex_96_filtertiprack_200ul",
+        "opentrons_flex_96_filtertiprack_1000ul",
     ],
     "wellplate": [
         "opentrons_96_wellplate_200ul_pcr_full_skirt",
@@ -120,7 +120,7 @@ def _add_list_of_strings(
     params.add_str(
         variable_name=label,
         display_name=label,
-        choices=[{"display_name": n, "value": n} for n in str_list],
+        choices=[{"display_name": n[-30:], "value": n} for n in str_list],
         default=default if default else str_list[0],
     )
 
@@ -136,10 +136,10 @@ def _add_labware_by_type(
 ) -> None:
     if not exclude_name:
         _add_list_of_strings(
-            params, label, default_name, str_list=_labware[labware_type]
+            params, f"{label}_name", default_name, str_list=_labware[labware_type]
         )
     if not exclude_slot:
-        add_parameter_slot(params, label, default_slot)
+        add_parameter_slot(params, f"{label}_slot", default_slot)
 
 
 def add_parameters_tiprack(
