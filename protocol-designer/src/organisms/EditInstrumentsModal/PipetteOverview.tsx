@@ -28,17 +28,12 @@ import { getSectionsFromPipetteName } from './utils'
 import { INITIAL_DECK_SETUP_STEP_ID } from '../../constants'
 import { LINK_BUTTON_STYLE } from '../../atoms'
 
-// import type { Dispatch, SetStateAction } from 'react'
 import type { AdditionalEquipmentName } from '@opentrons/step-generation'
-import type { /* PipetteMount, */ RobotType } from '@opentrons/shared-data'
+import type { RobotType } from '@opentrons/shared-data'
 import type {
   AllTemporalPropertiesForTimelineFrame,
   PipetteOnDeck,
 } from '../../step-forms'
-// import type {
-//   Gen,
-//   PipetteType,
-// } from '../../pages/CreateNewProtocolWizard/types'
 import type { ThunkDispatch } from '../../types'
 import type { PipetteConfig } from './usePipetteConfig'
 
@@ -53,12 +48,6 @@ interface PipetteOverviewProps {
   pipettes: AllTemporalPropertiesForTimelineFrame['pipettes']
   labware: AllTemporalPropertiesForTimelineFrame['labware']
   robotType: RobotType
-  // setPage: Dispatch<SetStateAction<'add' | 'overview'>>
-  // setMount: Dispatch<SetStateAction<PipetteMount>>
-  // setPipetteType: Dispatch<SetStateAction<PipetteType | null>>
-  // setPipetteGen: Dispatch<SetStateAction<Gen | 'flex'>>
-  // setPipetteVolume: Dispatch<SetStateAction<string | null>>
-  // setSelectedTips: Dispatch<SetStateAction<string[]>>
   pipetteConfig: PipetteConfig
   leftPipette?: PipetteOnDeck
   rightPipette?: PipetteOnDeck
@@ -70,12 +59,6 @@ export function PipetteOverview({
   pipettes,
   labware,
   robotType,
-  // setPage,
-  // setMount,
-  // setPipetteType,
-  // setPipetteGen,
-  // setPipetteVolume,
-  // setSelectedTips,
   pipetteConfig,
   leftPipette,
   rightPipette,

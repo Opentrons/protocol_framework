@@ -1,11 +1,11 @@
 import { useState } from 'react'
+
+import type { Dispatch, SetStateAction } from 'react'
 import type { PipetteMount } from '@opentrons/shared-data'
 import type {
   Gen,
   PipetteType,
 } from '../../pages/CreateNewProtocolWizard/types'
-
-import type { Dispatch, SetStateAction } from 'react'
 
 export interface PipetteConfig {
   page: 'add' | 'overview'

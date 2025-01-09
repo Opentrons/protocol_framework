@@ -41,7 +41,6 @@ import {
   PIPETTE_VOLUMES,
 } from '../../pages/CreateNewProtocolWizard/constants'
 
-// import type { Dispatch, SetStateAction } from 'react'
 import type {
   // PipetteMount,
   PipetteName,
@@ -60,16 +59,7 @@ import type { PipetteConfig } from './usePipetteConfig'
 interface PipetteConfigurationProps {
   has96Channel: boolean
   robotType: RobotType
-  // pipetteType: PipetteType | null
-  // pipetteGen: Gen | 'flex'
-  // mount: PipetteMount
-  // pipetteVolume: string | null
-  // selectedTips: string[]
   selectedPipette: string
-  // setPipetteGen: Dispatch<SetStateAction<Gen | 'flex'>>
-  // setPipetteType: Dispatch<SetStateAction<PipetteType | null>>
-  // setPipetteVolume: Dispatch<SetStateAction<string | null>>
-  // setSelectedTips: Dispatch<SetStateAction<string[]>>
   pipetteConfig: PipetteConfig
   leftPipette?: PipetteOnDeck
   rightPipette?: PipetteOnDeck
@@ -78,16 +68,7 @@ interface PipetteConfigurationProps {
 export function PipetteConfiguration({
   has96Channel,
   robotType,
-  // pipetteType,
-  // pipetteGen,
-  // mount,
-  // pipetteVolume,
-  // selectedTips,
   selectedPipette,
-  // setPipetteGen,
-  // setPipetteType,
-  // setPipetteVolume,
-  // setSelectedTips,
   pipetteConfig,
   leftPipette,
   rightPipette,
