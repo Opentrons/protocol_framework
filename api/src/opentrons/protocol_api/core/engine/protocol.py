@@ -210,8 +210,8 @@ class ProtocolCore(
         ],
         label: Optional[str],
         namespace: Optional[str],
-        version: Optional[int] = None,
-        schema: Optional[int] = 2,
+        version: Optional[int],
+        schema: Optional[int],
     ) -> LabwareCore:
         """Load a labware using its identifying parameters."""
         load_location = self._convert_labware_location(location=location)
