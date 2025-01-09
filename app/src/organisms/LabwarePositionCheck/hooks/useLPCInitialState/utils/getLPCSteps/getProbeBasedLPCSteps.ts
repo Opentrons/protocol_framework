@@ -13,9 +13,9 @@ import type {
 import type { LabwareLocationCombo } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/getLabwareLocationCombos'
 import type { GetLPCStepsParams } from '.'
 
-export const getProbeBasedLPCSteps = (
+export function getProbeBasedLPCSteps(
   params: GetLPCStepsParams
-): LabwarePositionCheckStep[] => {
+): LabwarePositionCheckStep[] {
   const { protocolData } = params
 
   return [
@@ -89,7 +89,7 @@ function getAllCheckSectionSteps({
       location,
       moduleId,
       adapterId,
-      definitionUri: definitionUri,
+      definitionUri,
     })
   )
 }

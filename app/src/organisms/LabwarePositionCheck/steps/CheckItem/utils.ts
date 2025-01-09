@@ -21,5 +21,5 @@ export function getItemLabwareDef({
 
   return labwareDefs.find(
     def => getLabwareDefURI(def) === labwareDefUri
-  ) as LabwareDefinition2 // Safe assumption
+  ) as LabwareDefinition2
 }

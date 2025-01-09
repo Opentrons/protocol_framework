@@ -2,8 +2,8 @@ import { useSelector } from 'react-redux'
 
 import { getIsOnDevice } from '/app/redux/config'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
-import { getLPCSteps } from '/app/organisms/LabwarePositionCheck/utils'
 import { useNotifyDeckConfigurationQuery } from '/app/resources/deck_configuration'
+import { getLPCSteps } from './utils'
 
 import type { RunTimeCommand } from '@opentrons/shared-data'
 import type { LPCWizardState } from '/app/organisms/LabwarePositionCheck/redux'

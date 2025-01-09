@@ -11,6 +11,7 @@ export interface GetLPCStepsParams {
   labwareDefs: LabwareDefinition2[]
 }
 
+// Prepare all LPC steps for injection.
 export function getLPCSteps(
   params: GetLPCStepsParams
 ): LabwarePositionCheckStep[] {

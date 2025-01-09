@@ -16,7 +16,6 @@ import {
   getLabwareDisplayName,
   IDENTITY_VECTOR,
 } from '@opentrons/shared-data'
-import { getItemLabwareDef } from '/app/organisms/LabwarePositionCheck/utils'
 import { getLabwareDisplayLocation } from '/app/local-resources/labware'
 import { UnorderedList } from '/app/molecules/UnorderedList'
 import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
@@ -26,6 +25,7 @@ import {
 } from '/app/organisms/LabwarePositionCheck/redux/actions'
 import { JogToWell } from './JogToWell'
 import { PrepareSpace } from './PrepareSpace'
+import { getItemLabwareDef } from './utils'
 
 import type { PipetteName, LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
