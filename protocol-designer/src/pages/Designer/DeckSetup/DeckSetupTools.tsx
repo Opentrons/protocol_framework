@@ -36,9 +36,11 @@ import {
   createDeckFixture,
   deleteDeckFixture,
 } from '../../../step-forms/actions/additionalItems'
-import { getAdditionalEquipment } from '../../../step-forms/selectors'
+import {
+  getAdditionalEquipment,
+  getSavedStepForms,
+} from '../../../step-forms/selectors'
 import { deleteModule } from '../../../step-forms/actions'
-import { getSavedStepForms } from '../../../step-forms/selectors'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
 import {
   createContainer,
