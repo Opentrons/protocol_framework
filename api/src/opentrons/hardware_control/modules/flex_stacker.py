@@ -22,6 +22,8 @@ from opentrons.hardware_control.poller import Reader, Poller
 from opentrons.hardware_control.modules import mod_abc, update
 from opentrons.hardware_control.modules.types import (
     FlexStackerStatus,
+    HopperDoorState,
+    LatchState,
     ModuleDisconnectedCallback,
     ModuleType,
     PlatformState,
@@ -36,6 +38,9 @@ POLL_PERIOD = 1.0
 SIMULATING_POLL_PERIOD = POLL_PERIOD / 20.0
 
 DFU_PID = "df11"
+
+# Distance in mm the latch can travel to open/close
+LATCH_TRAVEL = 25.0
 
 
 class FlexStacker(mod_abc.AbstractModule):
@@ -125,6 +130,7 @@ class FlexStacker(mod_abc.AbstractModule):
         self._driver = driver
         self._reader = reader
         self._poller = poller
+        self._stacker_status = FlexStackerStatus.IDLE
 
     async def cleanup(self) -> None:
         """Stop the poller task"""
@@ -149,19 +155,24 @@ class FlexStacker(mod_abc.AbstractModule):
         return self._model_from_revision(self._device_info.get("model"))
 
     @property
+    def latch_state(self) -> LatchState:
+        """The state of the latch."""
+        return LatchState.from_state(self.limit_switch_status[StackerAxis.L])
+
+    @property
     def platform_state(self) -> PlatformState:
         """The state of the platform."""
         return self._reader.platform_state
 
     @property
+    def hopper_door_state(self) -> HopperDoorState:
+        """The status of the hopper door."""
+        return HopperDoorState.from_state(self._reader.hopper_door_closed)
+
+    @property
     def limit_switch_status(self) -> Dict[StackerAxis, StackerAxisState]:
         """The status of the Limit switches."""
         return self._reader.limit_switch_status
-
-    @property
-    def hopper_door_closed(self) -> bool:
-        """The status of the hopper door."""
-        return self._reader.hopper_door_closed
 
     @property
     def device_info(self) -> Mapping[str, str]:
@@ -170,8 +181,7 @@ class FlexStacker(mod_abc.AbstractModule):
     @property
     def status(self) -> FlexStackerStatus:
         """Module status or error state details."""
-        # TODO: Implement getting device status from the stacker
-        return FlexStackerStatus.IDLE
+        return self._stacker_status
 
     @property
     def is_simulated(self) -> bool:
@@ -182,11 +192,11 @@ class FlexStacker(mod_abc.AbstractModule):
         return {
             "status": self.status.value,
             "data": {
+                "latchState": self.latch_state.value,
                 "platformState": self.platform_state.value,
+                "hopperDoorState": self.hopper_door_state.value,
                 "axisStateX": self.limit_switch_status[StackerAxis.X].value,
                 "axisStateZ": self.limit_switch_status[StackerAxis.Z].value,
-                "axisStateL": self.limit_switch_status[StackerAxis.L].value,
-                "hopperDoorClosed": self.hopper_door_closed,
                 "errorDetails": self._reader.error,
             },
         }
@@ -195,7 +205,8 @@ class FlexStacker(mod_abc.AbstractModule):
         await self._poller.stop()
         await self._driver.stop_motors()
         await self._driver.enter_programming_mode()
-        dfu_info = await update.find_dfu_device(pid=DFU_PID, expected_device_count=2)
+        # flex stacker has three unique "devices" over DFU
+        dfu_info = await update.find_dfu_device(pid=DFU_PID, expected_device_count=3)
         return dfu_info
 
     def bootloader(self) -> UploadFunction:
@@ -252,11 +263,24 @@ class FlexStacker(mod_abc.AbstractModule):
         acceleration: Optional[float] = None,
     ) -> bool:
         """Close the latch, dropping any labware its holding."""
+        # Dont move the latch if its already closed.
+        if self.limit_switch_status[StackerAxis.L] == StackerAxisState.EXTENDED:
+            return True
         motion_params = STACKER_MOTION_CONFIG[StackerAxis.L]["move"]
         speed = velocity or motion_params.max_speed
         accel = acceleration or motion_params.acceleration
-        return await self.home_axis(
-            StackerAxis.L, Direction.RETRACT, speed=speed, acceleration=accel
+        success = await self.move_axis(
+            StackerAxis.L,
+            Direction.RETRACT,
+            distance=LATCH_TRAVEL,
+            speed=speed,
+            acceleration=accel,
+        )
+        # Check that the latch is closed.
+        await self._reader.get_limit_switch_status()
+        return (
+            success
+            and self.limit_switch_status[StackerAxis.L] == StackerAxisState.EXTENDED
         )
 
     async def open_latch(
@@ -265,12 +289,34 @@ class FlexStacker(mod_abc.AbstractModule):
         acceleration: Optional[float] = None,
     ) -> bool:
         """Open the latch."""
+        # Dont move the latch if its already opened.
+        if self.limit_switch_status[StackerAxis.L] == StackerAxisState.RETRACTED:
+            return True
         motion_params = STACKER_MOTION_CONFIG[StackerAxis.L]["move"]
         speed = velocity or motion_params.max_speed
         accel = acceleration or motion_params.acceleration
-        return await self.home_axis(
-            StackerAxis.L, Direction.EXTENT, speed=speed, acceleration=accel
+        success = await self.move_axis(
+            StackerAxis.L,
+            Direction.EXTENT,
+            distance=LATCH_TRAVEL,
+            speed=speed,
+            acceleration=accel,
         )
+        # Check that the latch is opened.
+        await self._reader.get_limit_switch_status()
+        return (
+            success
+            and self.limit_switch_status[StackerAxis.L] == StackerAxisState.RETRACTED
+        )
+
+    # NOTE: We are defining the interface, will implement in seperate pr.
+    async def dispense(self) -> bool:
+        """Dispenses the next labware in the stacker."""
+        return True
+
+    async def store(self) -> bool:
+        """Stores a labware in the stacker."""
+        return True
 
 
 class FlexStackerReader(Reader):

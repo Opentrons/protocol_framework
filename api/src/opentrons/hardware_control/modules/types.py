@@ -246,7 +246,8 @@ class LidStatus(str, Enum):
 
 class FlexStackerStatus(str, Enum):
     IDLE = "idle"
-    RUNNING = "running"
+    DISPENSING = "dispensing"
+    STORING = "storing"
     ERROR = "error"
 
 
@@ -259,10 +260,10 @@ class PlatformState(str, Enum):
     def from_status(cls, status: PlatformStatus) -> "PlatformState":
         """Get the state from the platform status."""
         if status.E and not status.R:
-            return PlatformState.EXTENDED
+            return cls.EXTENDED
         if status.R and not status.E:
-            return PlatformState.RETRACTED
-        return PlatformState.UNKNOWN
+            return cls.RETRACTED
+        return cls.UNKNOWN
 
 
 class StackerAxisState(str, Enum):
@@ -278,18 +279,34 @@ class StackerAxisState(str, Enum):
         match axis:
             case StackerAxis.X:
                 if status.XE and not status.XR:
-                    return StackerAxisState.EXTENDED
+                    return cls.EXTENDED
                 if status.XR and not status.XE:
-                    return StackerAxisState.RETRACTED
+                    return cls.RETRACTED
             case StackerAxis.Z:
                 if status.ZE and not status.ZR:
-                    return StackerAxisState.EXTENDED
+                    return cls.EXTENDED
                 if status.ZR and not status.ZE:
-                    return StackerAxisState.RETRACTED
+                    return cls.RETRACTED
             case StackerAxis.L:
-                return (
-                    StackerAxisState.EXTENDED
-                    if status.LR
-                    else StackerAxisState.RETRACTED
-                )
-        return StackerAxisState.UNKNOWN
+                return cls.EXTENDED if status.LR else cls.RETRACTED
+        return cls.UNKNOWN
+
+
+class LatchState(str, Enum):
+    CLOSED = "closed"
+    OPENED = "opened"
+
+    @classmethod
+    def from_state(cls, state: StackerAxisState) -> "LatchState":
+        """Get the latch state from the axis state."""
+        return cls.CLOSED if state == StackerAxisState.EXTENDED else cls.OPENED
+
+
+class HopperDoorState(str, Enum):
+    CLOSED = "closed"
+    OPENED = "opened"
+
+    @classmethod
+    def from_state(cls, state: bool) -> "HopperDoorState":
+        """Get the hopper door state from the door state boolean."""
+        return cls.CLOSED if state else cls.OPENED

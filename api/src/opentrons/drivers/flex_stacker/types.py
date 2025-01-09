@@ -102,11 +102,11 @@ class Direction(Enum):
 class LimitSwitchStatus:
     """Stacker Limit Switch Statuses."""
 
-    XE: bool = False
-    XR: bool = False
-    ZE: bool = False
-    ZR: bool = False
-    LR: bool = False
+    XE: bool
+    XR: bool
+    ZE: bool
+    ZR: bool
+    LR: bool
 
     @classmethod
     def get_fields(cls) -> List[str]:
@@ -128,8 +128,8 @@ class LimitSwitchStatus:
 class PlatformStatus:
     """Stacker Platform Statuses."""
 
-    E: bool = False
-    R: bool = False
+    E: bool
+    R: bool
 
     @classmethod
     def get_fields(cls) -> List[str]:

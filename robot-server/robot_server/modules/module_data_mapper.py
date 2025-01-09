@@ -25,6 +25,7 @@ from opentrons.drivers.types import (
 )
 from opentrons.drivers.rpi_drivers.types import USBPort as HardwareUSBPort
 
+from opentrons.hardware_control.modules.types import HopperDoorState, LatchState
 from opentrons.protocol_engine import ModuleModel, DeckType
 
 from .module_identifier import ModuleIdentity
@@ -164,13 +165,15 @@ class ModuleDataMapper:
             module_cls = FlexStackerModule
             module_data = FlexStackerModuleData(
                 status=FlexStackerStatus(live_data["status"]),
+                latchState=cast(LatchState, live_data["data"].get("latchState")),
                 platformState=cast(
                     PlatformState, live_data["data"].get("platformState")
                 ),
+                hopperDoorState=cast(
+                    HopperDoorState, live_data["data"].get("hopperDoorState")
+                ),
                 axisStateX=cast(StackerAxisState, live_data["data"].get("axisStateX")),
                 axisStateZ=cast(StackerAxisState, live_data["data"].get("axisStateZ")),
-                axisStateL=cast(StackerAxisState, live_data["data"].get("axisStateL")),
-                hopperDoorClosed=cast(bool, live_data["data"].get("hopperDoorClosed")),
             )
         else:
             assert False, f"Invalid module type {module_type}"

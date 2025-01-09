@@ -21,6 +21,7 @@ from opentrons.drivers.types import (
     AbsorbanceReaderLidStatus,
     AbsorbanceReaderPlatePresence,
 )
+from opentrons.hardware_control.modules.types import HopperDoorState, LatchState
 from opentrons.protocol_engine import ModuleModel
 from opentrons.protocol_engine.types import Vec3f
 
@@ -355,23 +356,20 @@ class AbsorbanceReaderModule(
 class FlexStackerModuleData(BaseModel):
     """Live data from a Flex Stacker module."""
 
-    # TODO: add rest of data
     status: str = Field(
         ...,
         description="Overall status of the module.",
     )
+    latchState: LatchState = Field(..., description="The state of the labware latch.")
     platformState: PlatformState = Field(..., description="The state of the platform.")
+    hopperDoorState: HopperDoorState = Field(
+        ..., description="The state of the hopper door."
+    )
     axisStateX: StackerAxisState = Field(
         ..., description="The state of the X axis limit switches."
     )
     axisStateZ: StackerAxisState = Field(
         ..., description="The state of the Z axis limit switches."
-    )
-    axisStateL: StackerAxisState = Field(
-        ..., description="The state of the L axis limit switches."
-    )
-    hopperDoorClosed: bool = Field(
-        ..., description="Whether the hopper door is closed."
     )
 
 
