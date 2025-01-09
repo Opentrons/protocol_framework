@@ -4,6 +4,9 @@ from opentrons.protocol_api import ProtocolContext, ParameterContext
 from hardware_testing.opentrons_api import runtime_parameters as rtp
 
 
+DILUENT_DEAD_VOL = 3000
+
+
 def add_parameters(params: ParameterContext) -> None:
     rtp.add_parameters_pipette(params, "pipette")
     rtp.add_parameters_tiprack(params, "tiprack", default_slot="B3")
@@ -25,11 +28,10 @@ def add_parameters(params: ParameterContext) -> None:
         default_slot="C3",
         default_name="opentrons_96_wellplate_200ul_pcr_full_skirt",
     )
-    rtp.add_parameters_wellplate(
+    rtp.add_parameter_slot(
         params,
-        label="optical_dst",
+        label="optical_slot",
         default_slot="D3",
-        default_name="corning_96_wellplate_360ul_flat",
     )
     params.add_int("starting_volume", "starting_volume", default=100, unit="uL")
     params.add_int("trials", "trials", default=48, unit="qty")
@@ -41,58 +43,62 @@ def add_parameters(params: ParameterContext) -> None:
 
 def run(ctx: ProtocolContext) -> None:
     p = ctx.params
-    assert (
-        p.starting_volume > p.trials * p.aspirate_volume
-    ), f"Bad Runtime Variables ({p.starting_volume},{p.trials},{p.aspirate_volume})"
 
+    # load labware
+    labware_red_dye = ctx.load_labware(
+        load_name=p.red_dye_src_name, location=p.red_dye_src_slot
+    )
+    labware_red_dye.load_empty()
+    labware_diluent = ctx.load_labware(
+        load_name=p.diluent_src_name, location=p.diluent_src_slot
+    )
+    labware_diluent.load_empty()
+    labware_optical = ctx.load_labware(
+        load_name="corning_96_wellplate_360ul_flat", location=p.optical_slot
+    )
+    labware_optical.load_empty()
+
+    # load liquid
     red_dye = ctx.define_liquid("red-dye", display_color="#FF0000")
+    labware_red_dye.load_liquid([p.src_well], p.starting_volume, red_dye)
     blue_diluent = ctx.define_liquid("blue-diluent", display_color="#0000FF")
-
-    red_dye_src = ctx.load_labware(p.red_dye_src_name, p.red_dye_src_slot)
-    diluent_src = ctx.load_labware(p.diluent_src_name, p.diluent_src_slot)
-    dst = ctx.load_labware(p.optical_dst_name, p.optical_dst_slot)
-    red_dye_src.load_empty()
-    diluent_src.load_empty()
-    dst.load_empty()
-
-    red_dye_src.load_liquid([p.src_well], p.starting_volume, red_dye)
     diluent_ul_per_well = max(200 - p.aspirate_volume, 0)
     if diluent_ul_per_well:
         diluent_ul_required = diluent_ul_per_well * p.trials
-        diluent_ul_per_reservoir_src = (diluent_ul_required / 2) + 3000
-        diluent_src.load_liquid(
+        diluent_ul_per_reservoir_src = (diluent_ul_required / 2) + DILUENT_DEAD_VOL
+        labware_diluent.load_liquid(
             [p.diluent_well], diluent_ul_per_reservoir_src, blue_diluent
         )
 
+    # load pipettes
     pipette = ctx.load_instrument(
-        p.pipette_name,
-        p.pipette_mount,
+        instrument_name=p.pipette_name,
+        mount=p.pipette_mount,
         tip_racks=[ctx.load_labware(p.tiprack_name, p.tiprack_slot)],
     )
     multi = ctx.load_instrument(
-        "flex_8channel_1000",
-        {"left": "right", "right": "left"}[p.pip_mount],
+        instrument_name="flex_8channel_1000",
+        mount={"left": "right", "right": "left"}[p.pip_mount],
         tip_racks=[ctx.load_labware(p.diluent_tiprack_name, p.diluent_tiprack_slot)],
     )
 
     # spread the diluent
     multi.pick_up_tip()
-    multi.require_liquid_presence(diluent_src[p.diluent_well])
+    multi.require_liquid_presence(labware_diluent[p.diluent_well])
     for trial in range(0, p.trials, multi.channels):
         multi.aspirate(
-            diluent_ul_per_well, diluent_src[p.diluent_well].meniscus(p.submerge)
+            diluent_ul_per_well, labware_diluent[p.diluent_well].meniscus(p.submerge)
         )
-        multi.dispense(multi.current_volume, dst.wells()[trial].meniscus(p.submerge))
+        multi.dispense(
+            multi.current_volume, labware_optical.wells()[trial].meniscus(p.submerge)
+        )
     multi.drop_tip()
 
     # spread the dye
     for trial in range(p.trials):
-        # pick-up tip, then probe source well to find new meniscus position
         pipette.pick_up_tip()
-        pipette.require_liquid_presence(red_dye_src[p.dye_well])
-        # aspirate the "submerge" depth below the meniscus
-        asp_loc = red_dye_src[p.dye_well].meniscus(p.aspirate_submerge)
+        pipette.require_liquid_presence(labware_red_dye[p.dye_well])
+        asp_loc = labware_red_dye[p.dye_well].meniscus(p.aspirate_submerge)
         pipette.aspirate(p.aspirate_volume, asp_loc)
-        # contact-dispense (
-        disp_loc = dst.wells()[trial].meniscus(p.submerge)
+        disp_loc = labware_optical.wells()[trial].meniscus(p.submerge)
         pipette.dispense(pipette.current_volume, disp_loc)
