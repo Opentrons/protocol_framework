@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "opentronsDeckSchemaV5",
+  "$id": "opentronsDeckSchemaV6",
   "definitions": {
     "positiveNumber": {
       "type": "number",
@@ -47,6 +47,20 @@
         "yDimension": { "$ref": "#/definitions/positiveNumber" },
         "zDimension": { "$ref": "#/definitions/positiveNumber" }
       }
+    },
+    "locatingFeature": {
+      "type": "object",
+      "required": ["locatingFeatureId", "offsetVector"],
+      "properties": {
+        "locatingFeatureId": {
+          "type": "string",
+          "description": "The name of a kind of locating feature that will be looked up in labware. Common ones are backLeft, frontLeft, wellA1, center, but others may be used."
+        },
+        "offsetVector": {
+          "$ref": "#/definitions/xyzArray",
+          "description": "A vector from the origin of the thing that has the locating feature (i.e. an addressable area) to the key point of the locating feature."
+        }
+      }
     }
   },
   "description": "Deck specifications, where x,y,z (0,0,0) is at front the bottom left corner.",
@@ -69,7 +83,7 @@
     },
     "schemaVersion": {
       "description": "Schema version of a deck is a single integer",
-      "enum": [5]
+      "enum": [6]
     },
     "cornerOffsetFromOrigin": {
       "$ref": "#/definitions/xyzArray",
@@ -154,9 +168,12 @@
                 "$ref": "#/definitions/xyzArray",
                 "description": "The offset from the origin of the cutout fixture that's providing this addressable area (which is currently identical to the position of the underlying cutout), to the -x, -y, -z corner of this addressable area's bounding box."
               },
-              "matingSurfaceUnitVector": {
-                "$ref": "#/definitions/unitVector",
-                "description": "An optional diagonal direction of force, defined by spring location, which governs the mating surface of objects placed in this addressable area. Meant to be used when this addressable area is a slot."
+              "locatingFeatures": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/locatingFeature",
+                  "description": "A locating feature to which a labware can be related. The array is in order of preference."
+                }
               },
               "boundingBox": {
                 "description": "The active area (both pipettes can reach) of this addressable area.",
