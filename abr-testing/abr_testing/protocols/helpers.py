@@ -688,9 +688,12 @@ def unload_and_move(
     stacker.unload_and_move_labware(new_location=new_location)
 
 
-def move_to_stacker_and_store(stacker: StackerModule, lw: Labware) -> None:
+def move_to_stacker_and_store(
+    stacker: StackerModule, list_of_labware: List[Labware]
+) -> None:
     """Move labware from deck into stacker."""
-    stacker.move_and_store_labware(lw=lw)
+    for labware in list_of_labware:
+        stacker.move_and_store_labware(lw=labware)
 
 
 def move_lid_from_stacker_to_tc_plate(
