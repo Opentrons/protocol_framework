@@ -6,6 +6,7 @@ import textwrap
 from typing import Annotated, Literal, Type
 
 import fastapi
+from pydantic import Json
 from pydantic.json_schema import SkipJsonSchema
 from server_utils.fastapi_utils.light_router import LightRouter
 
@@ -81,7 +82,7 @@ async def get_labware_offsets(  # noqa: D103
         fastapi.Query(description="Filter for exact matches on the `id` field."),
     ] = DO_NOT_FILTER,
     definition_uri: Annotated[
-        str | SkipJsonSchema[Type[DO_NOT_FILTER]],
+        Json[str] | SkipJsonSchema[Type[DO_NOT_FILTER]],
         fastapi.Query(
             alias="definitionUri",
             description=(
@@ -91,21 +92,21 @@ async def get_labware_offsets(  # noqa: D103
         ),
     ] = DO_NOT_FILTER,
     location_slot_name: Annotated[
-        DeckSlotName | SkipJsonSchema[Type[DO_NOT_FILTER]],
+        Json[DeckSlotName] | SkipJsonSchema[Type[DO_NOT_FILTER]],
         fastapi.Query(
             alias="locationSlotName",
             description="Filter for exact matches on the `location.slotName` field.",
         ),
     ] = DO_NOT_FILTER,
     location_module_model: Annotated[
-        ModuleModel | None | SkipJsonSchema[Type[DO_NOT_FILTER]],
+        Json[ModuleModel | None] | SkipJsonSchema[Type[DO_NOT_FILTER]],
         fastapi.Query(
             alias="locationModuleModel",
             description="Filter for exact matches on the `location.moduleModel` field.",
         ),
     ] = DO_NOT_FILTER,
     location_definition_uri: Annotated[
-        str | None | SkipJsonSchema[Type[DO_NOT_FILTER]],
+        Json[str | None] | SkipJsonSchema[Type[DO_NOT_FILTER]],
         fastapi.Query(
             alias="locationDefinitionUri",
             description=(
