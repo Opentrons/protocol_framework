@@ -50,9 +50,64 @@ UploadFunction = Callable[[str, str, Dict[str, Any]], Awaitable[Tuple[bool, str]
 ModuleDisconnectedCallback = Optional[Callable[[str, str | None], None]]
 
 
+class MagneticModuleData(TypedDict):
+    engaged: bool
+    height: float
+
+
+class TemperatureModuleData(TypedDict):
+    currentTemp: float
+    targetTemp: float | None
+
+
+class HeaterShakerData(TypedDict):
+    temperatureStatus: str
+    speedStatus: str
+    labwareLatchStatus: str
+    currentTemp: float
+    targetTemp: float | None
+    currentSpeed: int
+    targetSpeed: int | None
+    errorDetails: str | None
+
+
+class ThermocyclerData(TypedDict):
+    lid: str
+    lidTarget: float | None
+    lidTemp: float
+    lidTempStatus: str
+    currentTemp: float | None
+    targetTemp: float | None
+    holdTime: float | None
+    rampRate: float | None
+    currentCycleIndex: int | None
+    totalCycleCount: int | None
+    currentStepIndex: int | None
+    totalStepCount: int | None
+
+
+class AbsorbanceReaderData(TypedDict):
+    uptime: int
+    deviceStatus: str
+    lidStatus: str
+    platePresence: str
+    measureMode: str
+    sampleWavelengths: List[int]
+    referenceWavelength: int
+
+
+ModuleData = Union[
+    MagneticModuleData,
+    TemperatureModuleData,
+    HeaterShakerData,
+    ThermocyclerData,
+    AbsorbanceReaderData,
+]
+
+
 class LiveData(TypedDict):
     status: str
-    data: Dict[str, Union[float, str, bool, List[int], None]]
+    data: ModuleData | None
 
 
 class ModuleType(str, Enum):
