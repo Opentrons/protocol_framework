@@ -5,7 +5,25 @@ import type {
   PipetteType,
 } from '../../pages/CreateNewProtocolWizard/types'
 
-export function usePipetteConfig() {
+import type { Dispatch, SetStateAction } from 'react'
+
+export interface PipetteConfig {
+  page: 'add' | 'overview'
+  mount: PipetteMount
+  pipetteType: PipetteType | null
+  pipetteGen: Gen | 'flex'
+  pipetteVolume: string | null
+  selectedTips: string[]
+  setPage: Dispatch<SetStateAction<'add' | 'overview'>>
+  setMount: Dispatch<SetStateAction<PipetteMount>>
+  setPipetteType: Dispatch<SetStateAction<PipetteType | null>>
+  setPipetteGen: Dispatch<SetStateAction<Gen | 'flex'>>
+  setPipetteVolume: Dispatch<SetStateAction<string | null>>
+  setSelectedTips: Dispatch<SetStateAction<string[]>>
+  resetFields: () => void
+}
+
+export const usePipetteConfig = (): PipetteConfig => {
   const [page, setPage] = useState<'add' | 'overview'>('overview')
   const [mount, setMount] = useState<PipetteMount>('left')
   const [pipetteType, setPipetteType] = useState<PipetteType | null>(null)

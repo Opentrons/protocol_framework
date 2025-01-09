@@ -40,7 +40,7 @@ import type {
 //   PipetteType,
 // } from '../../pages/CreateNewProtocolWizard/types'
 import type { ThunkDispatch } from '../../types'
-import type { usePipetteConfig } from './usePipetteConfig'
+import type { PipetteConfig } from './usePipetteConfig'
 
 interface Gripper {
   name: AdditionalEquipmentName
@@ -59,7 +59,7 @@ interface PipetteOverviewProps {
   // setPipetteGen: Dispatch<SetStateAction<Gen | 'flex'>>
   // setPipetteVolume: Dispatch<SetStateAction<string | null>>
   // setSelectedTips: Dispatch<SetStateAction<string[]>>
-  pipetteConfig: ReturnType<typeof usePipetteConfig>
+  pipetteConfig: PipetteConfig
   leftPipette?: PipetteOnDeck
   rightPipette?: PipetteOnDeck
   gripper?: Gripper
@@ -81,7 +81,10 @@ export function PipetteOverview({
   rightPipette,
   gripper,
 }: PipetteOverviewProps): JSX.Element {
-  const { i18n, t } = useTranslation(['create_new_protocol', 'protocol_overview'])
+  const { i18n, t } = useTranslation([
+    'create_new_protocol',
+    'protocol_overview',
+  ])
   const dispatch = useDispatch<ThunkDispatch<any>>()
 
   const swapPipetteUpdate = mapValues(pipettes, pipette => {
@@ -114,7 +117,7 @@ export function PipetteOverview({
     setPipetteGen,
     setPipetteVolume,
     setSelectedTips,
-  } = pipetteConfig;
+  } = pipetteConfig
 
   return (
     <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing24}>
@@ -124,7 +127,7 @@ export function PipetteOverview({
             {t('your_pipettes')}
           </StyledText>
           {has96Channel ||
-            (leftPipette == null && rightPipette == null) ? null : (
+          (leftPipette == null && rightPipette == null) ? null : (
             <Btn
               css={LINK_BUTTON_STYLE}
               onClick={() =>
@@ -195,7 +198,7 @@ export function PipetteOverview({
             />
           ) : null}
           {has96Channel ||
-            (leftPipette != null && rightPipette != null) ? null : (
+          (leftPipette != null && rightPipette != null) ? null : (
             <EmptySelectorButton
               onClick={() => {
                 setPage('add')

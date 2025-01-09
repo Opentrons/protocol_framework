@@ -55,8 +55,7 @@ import type {
   PipetteType,
 } from '../../pages/CreateNewProtocolWizard/types'
 import type { ThunkDispatch } from '../../types'
-import type { usePipetteConfig } from './usePipetteConfig'
-
+import type { PipetteConfig } from './usePipetteConfig'
 
 interface PipetteConfigurationProps {
   has96Channel: boolean
@@ -71,7 +70,7 @@ interface PipetteConfigurationProps {
   // setPipetteType: Dispatch<SetStateAction<PipetteType | null>>
   // setPipetteVolume: Dispatch<SetStateAction<string | null>>
   // setSelectedTips: Dispatch<SetStateAction<string[]>>
-  pipetteConfig: ReturnType<typeof usePipetteConfig>
+  pipetteConfig: PipetteConfig
   leftPipette?: PipetteOnDeck
   rightPipette?: PipetteOnDeck
 }
@@ -108,7 +107,7 @@ export function PipetteConfiguration({
     setPipetteVolume,
     selectedTips,
     setSelectedTips,
-  } = pipetteConfig;
+  } = pipetteConfig
 
   return (
     <Flex
@@ -168,9 +167,9 @@ export function PipetteConfiguration({
         </Flex>
       ) : null}
       {(pipetteType != null && robotType === FLEX_ROBOT_TYPE) ||
-        (pipetteGen !== 'flex' &&
-          pipetteType != null &&
-          robotType === OT2_ROBOT_TYPE) ? (
+      (pipetteGen !== 'flex' &&
+        pipetteType != null &&
+        robotType === OT2_ROBOT_TYPE) ? (
         <Flex
           flexDirection={DIRECTION_COLUMN}
           gridGap={SPACING.spacing8}
@@ -223,75 +222,75 @@ export function PipetteConfiguration({
       ) : null}
       {allPipetteOptions.includes(selectedPipette as PipetteName)
         ? (() => {
-          const tiprackOptions = getTiprackOptions({
-            allLabware,
-            allowAllTipracks,
-            selectedPipetteName: selectedPipette,
-          })
-          return (
-            <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
-              <StyledText desktopStyle="bodyLargeSemiBold">
-                {t('pipette_tips')}
-              </StyledText>
-              <StyledBox>
-                {tiprackOptions.map(option => (
-                  <Checkbox
-                    key={option.value}
-                    disabled={
-                      selectedTips.length === 3 &&
-                      !selectedTips.includes(option.value)
-                    }
-                    isChecked={selectedTips.includes(option.value)}
-                    labelText={removeOpentronsPhrases(option.name)}
-                    onClick={() => {
-                      const updatedTips = selectedTips.includes(option.value)
-                        ? selectedTips.filter(v => v !== option.value)
-                        : [...selectedTips, option.value]
-                      setSelectedTips(updatedTips)
-                    }}
-                  />
-                ))}
-                <Flex
-                  gridGap={SPACING.spacing8}
-                  padding={SPACING.spacing4}
-                  width={FLEX_MAX_CONTENT}
-                >
-                  <StyledLabel>
-                    <StyledText desktopStyle="bodyDefaultRegular">
-                      {t('add_custom_tips')}
-                    </StyledText>
-                    <input
-                      data-testid="SelectPipettes_customTipInput"
-                      type="file"
-                      onChange={e => dispatch(createCustomTiprackDef(e))}
-                    />
-                  </StyledLabel>
-                  {pipetteVolume === 'p1000' &&
-                    robotType === FLEX_ROBOT_TYPE ? null : (
-                    <Btn
+            const tiprackOptions = getTiprackOptions({
+              allLabware,
+              allowAllTipracks,
+              selectedPipetteName: selectedPipette,
+            })
+            return (
+              <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
+                <StyledText desktopStyle="bodyLargeSemiBold">
+                  {t('pipette_tips')}
+                </StyledText>
+                <StyledBox>
+                  {tiprackOptions.map(option => (
+                    <Checkbox
+                      key={option.value}
+                      disabled={
+                        selectedTips.length === 3 &&
+                        !selectedTips.includes(option.value)
+                      }
+                      isChecked={selectedTips.includes(option.value)}
+                      labelText={removeOpentronsPhrases(option.name)}
                       onClick={() => {
-                        dispatch(
-                          setFeatureFlags({
-                            OT_PD_ALLOW_ALL_TIPRACKS: !allowAllTipracks,
-                          })
-                        )
+                        const updatedTips = selectedTips.includes(option.value)
+                          ? selectedTips.filter(v => v !== option.value)
+                          : [...selectedTips, option.value]
+                        setSelectedTips(updatedTips)
                       }}
-                      textDecoration={TYPOGRAPHY.textDecorationUnderline}
-                    >
-                      <StyledLabel>
-                        <StyledText desktopStyle="bodyDefaultRegular">
-                          {allowAllTipracks
-                            ? t('show_default_tips')
-                            : t('show_all_tips')}
-                        </StyledText>
-                      </StyledLabel>{' '}
-                    </Btn>
-                  )}
-                </Flex>
-              </StyledBox>
-            </Flex>
-          )
-        })()
+                    />
+                  ))}
+                  <Flex
+                    gridGap={SPACING.spacing8}
+                    padding={SPACING.spacing4}
+                    width={FLEX_MAX_CONTENT}
+                  >
+                    <StyledLabel>
+                      <StyledText desktopStyle="bodyDefaultRegular">
+                        {t('add_custom_tips')}
+                      </StyledText>
+                      <input
+                        data-testid="SelectPipettes_customTipInput"
+                        type="file"
+                        onChange={e => dispatch(createCustomTiprackDef(e))}
+                      />
+                    </StyledLabel>
+                    {pipetteVolume === 'p1000' &&
+                    robotType === FLEX_ROBOT_TYPE ? null : (
+                      <Btn
+                        onClick={() => {
+                          dispatch(
+                            setFeatureFlags({
+                              OT_PD_ALLOW_ALL_TIPRACKS: !allowAllTipracks,
+                            })
+                          )
+                        }}
+                        textDecoration={TYPOGRAPHY.textDecorationUnderline}
+                      >
+                        <StyledLabel>
+                          <StyledText desktopStyle="bodyDefaultRegular">
+                            {allowAllTipracks
+                              ? t('show_default_tips')
+                              : t('show_all_tips')}
+                          </StyledText>
+                        </StyledLabel>{' '}
+                      </Btn>
+                    )}
+                  </Flex>
+                </StyledBox>
+              </Flex>
+            )
+          })()
         : null}
     </Flex>
   )
