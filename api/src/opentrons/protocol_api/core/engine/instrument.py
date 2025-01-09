@@ -1189,6 +1189,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         8. Mix using the same flow rate and delays as specified for asp+disp,
            with the volume and the number of repetitions specified. Use the delays in asp & disp.
             - If the dispense position is outside the liquid, then raise error if mix is enabled.
+              Can only be checked if using liquid level detection/ meniscus-based positioning.
             - If the user wants to perform a mix then they should specify a dispense position that’s inside the liquid OR do mix() on the wells after transfer.
             - Do push out at the last dispense.
         9. Retract
