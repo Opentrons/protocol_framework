@@ -461,6 +461,16 @@ class LabwareView:
             return self.get_parent_location(parent.labwareId)
         return parent
 
+    def get_highest_child_labware(self, labware_id: str) -> str:
+        """Get labware's highest child labware returning the labware ID."""
+        for labware in self._state.labware_by_id.values():
+            if (
+                isinstance(labware.location, OnLabwareLocation)
+                and labware.location.labwareId == labware_id
+            ):
+                return self.get_highest_child_labware(labware_id=labware.id)
+        return labware_id
+
     def get_labware_stack(
         self, labware_stack: List[LoadedLabware]
     ) -> List[LoadedLabware]:
@@ -470,6 +480,22 @@ class LabwareView:
             labware_stack.append(self.get(parent.labwareId))
             return self.get_labware_stack(labware_stack)
         return labware_stack
+
+    def get_lid_by_labware_id(self, labware_id) -> LoadedLabware | None:
+        """Get the Lid Labware that is currently on top of a given labware, if there is one."""
+        lid_id = self._state.labware_by_id[labware_id].lid_id
+        if lid_id:
+            return self._state.labware_by_id[lid_id]
+        else:
+            return None
+
+    def get_labware_by_lid_id(self, lid_id: str) -> LoadedLabware | None:
+        """Get the labware that is currently covered by a given lid, if there is one."""
+        loaded_labware = list(self._state.labware_by_id.values())
+        for labware in loaded_labware:
+            if labware.lid_id == lid_id:
+                return labware
+        return None
 
     def get_all(self) -> List[LoadedLabware]:
         """Get a list of all labware entries in state."""

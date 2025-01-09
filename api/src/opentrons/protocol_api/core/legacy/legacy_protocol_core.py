@@ -307,6 +307,25 @@ class LegacyProtocolCore(
         """Move labware to new location."""
         raise APIVersionError(api_element="Labware movement")
 
+    def move_lid(
+        self,
+        source_location: Union[DeckSlotName, StagingSlotName, LegacyLabwareCore],
+        new_location: Union[
+            DeckSlotName,
+            StagingSlotName,
+            LegacyLabwareCore,
+            OffDeckType,
+            WasteChute,
+            TrashBin,
+        ],
+        use_gripper: bool,
+        pause_for_manual_move: bool,
+        pick_up_offset: Optional[Tuple[float, float, float]],
+        drop_offset: Optional[Tuple[float, float, float]],
+    ) -> LegacyLabwareCore | None:
+        """Move lid to new location."""
+        raise APIVersionError(api_element="Lid movement")
+
     def load_module(
         self,
         model: ModuleModel,

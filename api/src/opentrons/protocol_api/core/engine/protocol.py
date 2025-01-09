@@ -77,6 +77,7 @@ from .module_core import (
 )
 from .exceptions import InvalidModuleLocationError
 from . import load_labware_params, deck_conflict, overlap_versions
+from opentrons.protocol_engine.resources import labware_validation
 
 if TYPE_CHECKING:
     from ...labware import Labware
@@ -441,6 +442,110 @@ class ProtocolCore(
             ],
             existing_module_ids=list(self._module_cores_by_id.keys()),
         )
+
+    def move_lid(
+        self,
+        source_location: Union[DeckSlotName, StagingSlotName, LabwareCore],
+        new_location: Union[
+            DeckSlotName,
+            StagingSlotName,
+            LabwareCore,
+            OffDeckType,
+            WasteChute,
+            TrashBin,
+        ],
+        use_gripper: bool,
+        pause_for_manual_move: bool,
+        pick_up_offset: Optional[Tuple[float, float, float]],
+        drop_offset: Optional[Tuple[float, float, float]],
+    ) -> LabwareCore | None:
+        """Move the given lid to a new location."""
+        if use_gripper:
+            strategy = LabwareMovementStrategy.USING_GRIPPER
+        elif pause_for_manual_move:
+            strategy = LabwareMovementStrategy.MANUAL_MOVE_WITH_PAUSE
+        else:
+            strategy = LabwareMovementStrategy.MANUAL_MOVE_WITHOUT_PAUSE
+
+        if isinstance(source_location, LabwareCore):
+            # if this is a labware stack, we need to find the labware at the top of the stack
+            if labware_validation.is_lid_stack(
+                source_location.get_load_params().load_name
+            ):
+                lid_id = self._engine_client.state.labware.get_highest_child_labware(
+                    source_location.labware_id
+                )
+            # if this is a labware with a lid, we just need to find its lid_id
+            else:
+                lid = self._engine_client.state.labware.get_lid_by_labware_id(
+                    source_location.labware_id
+                )
+                if lid is not None:
+                    lid_id = lid.id
+                else:
+                    raise ValueError("Cannot move a lid off of a labware with no lid.")
+        else:
+            # Find the source labware at the provided deck slot
+            labware = self._engine_client.state.labware.get_by_slot(source_location)
+            if labware is not None:
+                lid_id = labware.id
+            else:
+                raise LabwareNotLoadedOnLabwareError(
+                    "Lid cannot be loaded on non-labware position."
+                )
+
+        _pick_up_offset = (
+            LabwareOffsetVector(
+                x=pick_up_offset[0], y=pick_up_offset[1], z=pick_up_offset[2]
+            )
+            if pick_up_offset
+            else None
+        )
+        _drop_offset = (
+            LabwareOffsetVector(x=drop_offset[0], y=drop_offset[1], z=drop_offset[2])
+            if drop_offset
+            else None
+        )
+
+        to_location = self._convert_labware_location(location=new_location)
+
+        self._engine_client.execute_command(
+            cmd.MoveLidParams(
+                labwareId=lid_id,
+                newLocation=to_location,
+                strategy=strategy,
+                pickUpOffset=_pick_up_offset,
+                dropOffset=_drop_offset,
+            )
+        )
+
+        if strategy == LabwareMovementStrategy.USING_GRIPPER:
+            # Clear out last location since it is not relevant to pipetting
+            # and we only use last location for in-place pipetting commands
+            self.set_last_location(location=None, mount=Mount.EXTENSION)
+
+        # FIXME(jbl, 2024-01-04) deck conflict after execution logic issue, read notes in load_labware for more info:
+        deck_conflict.check(
+            engine_state=self._engine_client.state,
+            new_labware_id=lid_id,
+            existing_disposal_locations=self._disposal_locations,
+            # TODO: We can now fetch these IDs from engine too.
+            #  See comment in self.load_labware().
+            existing_labware_ids=[
+                labware_id
+                for labware_id in self._labware_cores_by_id
+                if labware_id != labware_id
+            ],
+            existing_module_ids=list(self._module_cores_by_id.keys()),
+        )
+
+        # If we end up spawning a new lid stack we need to return it
+        # look at the lid ID for this lid
+        # if the labware under it is a lid stack, return that
+        parent = self._engine_client.state.labware.get_labware_by_lid_id(lid_id=lid_id)
+        if parent is not None and labware_validation.is_lid_stack(parent.loadName):
+            return LabwareCore(labware_id=parent.id, engine_client=self._engine_client)
+        return None
 
     def _resolve_module_hardware(
         self, serial_number: str, model: ModuleModel

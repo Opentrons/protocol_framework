@@ -152,7 +152,7 @@ class LabwareLidUpdate:
     parent_labware_id: str
     """The unique ID of the parent labware."""
 
-    lid_id: str
+    lid_id: str | None
     """The unique IDs of the new lids."""
 
 
@@ -534,7 +534,7 @@ class StateUpdate:
     def set_lid(
         self: Self,
         parent_labware_id: str,
-        lid_id: str,
+        lid_id: str | None,
     ) -> Self:
         """Update the labware parent of a loaded or moved lid. See `LabwareLidUpdate`."""
         self.labware_lid = LabwareLidUpdate(

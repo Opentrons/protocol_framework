@@ -186,6 +186,14 @@ from .move_labware import (
     MoveLabwareCommandType,
 )
 
+from .move_lid import (
+    MoveLid,
+    MoveLidParams,
+    MoveLidCreate,
+    MoveLidResult,
+    MoveLidCommandType,
+)
+
 from .move_relative import (
     MoveRelative,
     MoveRelativeParams,
@@ -386,6 +394,7 @@ Command = Annotated[
         LoadLidStack,
         LoadLid,
         MoveLabware,
+        MoveLid,
         MoveRelative,
         MoveToCoordinates,
         MoveToWell,
@@ -474,6 +483,7 @@ CommandParams = Union[
     LoadModuleParams,
     LoadPipetteParams,
     MoveLabwareParams,
+    MoveLidParams,
     MoveRelativeParams,
     MoveToCoordinatesParams,
     MoveToWellParams,
@@ -560,6 +570,7 @@ CommandType = Union[
     LoadLidStackCommandType,
     LoadLidCommandType,
     MoveLabwareCommandType,
+    MoveLidCommandType,
     MoveRelativeCommandType,
     MoveToCoordinatesCommandType,
     MoveToWellCommandType,
@@ -647,6 +658,7 @@ CommandCreate = Annotated[
         LoadLidStackCreate,
         LoadLidCreate,
         MoveLabwareCreate,
+        MoveLidCreate,
         MoveRelativeCreate,
         MoveToCoordinatesCreate,
         MoveToWellCreate,
@@ -742,6 +754,7 @@ CommandResult = Union[
     LoadLidStackResult,
     LoadLidResult,
     MoveLabwareResult,
+    MoveLidResult,
     MoveRelativeResult,
     MoveToCoordinatesResult,
     MoveToWellResult,

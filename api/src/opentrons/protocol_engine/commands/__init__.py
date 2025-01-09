@@ -198,6 +198,14 @@ from .move_labware import (
     MoveLabwareCommandType,
 )
 
+from .move_lid import (
+    MoveLid,
+    MoveLidParams,
+    MoveLidCreate,
+    MoveLidResult,
+    MoveLidCommandType,
+)
+
 from .move_relative import (
     MoveRelative,
     MoveRelativeParams,
@@ -512,6 +520,12 @@ __all__ = [
     "MoveLabwareParams",
     "MoveLabwareResult",
     "MoveLabwareCommandType",
+    # move lid command models
+    "MoveLid",
+    "MoveLidCreate",
+    "MoveLidParams",
+    "MoveLidResult",
+    "MoveLidCommandType",
     # move relative command models
     "MoveRelative",
     "MoveRelativeParams",
