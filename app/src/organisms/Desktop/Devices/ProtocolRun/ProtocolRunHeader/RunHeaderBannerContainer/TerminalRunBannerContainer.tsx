@@ -118,14 +118,10 @@ function ProtocolRunErrorBanner({
 
   const { closeCurrentRun } = useCloseCurrentRun()
 
-  const { highestPriorityError, commandErrorList } = runErrors
+  const { highestPriorityError } = runErrors
 
   const handleFailedRunClick = (): void => {
-    // TODO(jh, 08-15-24): Revisit the control flow here here after
-    //  commandErrorList may be fetched for a non-current run.
-    if (commandErrorList == null) {
-      closeCurrentRun()
-    }
+    closeCurrentRun()
     runHeaderModalContainerUtils.runFailedModalUtils.toggleModal()
   }
 

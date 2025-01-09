@@ -111,17 +111,13 @@ export function useRunHeaderDropTip({
     }
   }, [runStatus, robotType, isRunCurrent])
 
-  // TODO(jh, 08-15-24): The enteredER condition is a hack, because errorCommands are only returned when a run is current.
-  // Ideally the run should not need to be current to view errorCommands.
-
   // If the run terminates with a "stopped" status, close the run if no tips are attached after running tip check at least once.
   // This marks the robot as "not busy" if drop tip CTAs are unnecessary.
   useEffect(() => {
     if (
       runStatus === RUN_STATUS_STOPPED &&
       isRunCurrent &&
-      (initialPipettesWithTipsCount === 0 || robotType === OT2_ROBOT_TYPE) &&
-      !enteredER
+      (initialPipettesWithTipsCount === 0 || robotType === OT2_ROBOT_TYPE)
     ) {
       closeCurrentRun()
     }
