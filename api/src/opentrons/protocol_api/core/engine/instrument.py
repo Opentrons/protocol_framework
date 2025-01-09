@@ -1114,7 +1114,6 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         transfer_type: tx_comps_executor.TransferType,
         tip_contents: List[tx_comps_executor.LiquidAndAirGapPair],
     ) -> List[tx_comps_executor.LiquidAndAirGapPair]:
-        print("!!!!", tip_contents)
         """Execute aspiration steps.
 
         1. Submerge
