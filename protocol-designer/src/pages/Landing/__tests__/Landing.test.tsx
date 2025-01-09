@@ -58,7 +58,7 @@ describe('Landing', () => {
     )
     fireEvent.click(screen.getByRole('button', { name: 'Create a protocol' }))
     expect(vi.mocked(toggleNewProtocolModal)).toHaveBeenCalled()
-    screen.getByText('Edit existing protocol')
+    screen.getByText('Import existing protocol')
     screen.getByRole('img', { name: 'welcome image' })
   })
 
