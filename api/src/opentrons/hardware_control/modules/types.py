@@ -13,6 +13,7 @@ from typing import (
     Optional,
     cast,
     TYPE_CHECKING,
+    TypeGuard,
 )
 from typing_extensions import TypedDict
 from pathlib import Path
@@ -97,12 +98,45 @@ class AbsorbanceReaderData(TypedDict):
 
 
 ModuleData = Union[
+    Dict[Any, Any],  # This allows an empty dict as module data
     MagneticModuleData,
     TemperatureModuleData,
     HeaterShakerData,
     ThermocyclerData,
     AbsorbanceReaderData,
 ]
+
+
+class ModuleDataValidator:
+    @classmethod
+    def is_magnetic_module_data(
+        cls, data: ModuleData | None
+    ) -> TypeGuard[MagneticModuleData]:
+        return data is not None and "engaged" in data.keys()
+
+    @classmethod
+    def is_temperature_module_data(
+        cls, data: ModuleData | None
+    ) -> TypeGuard[TemperatureModuleData]:
+        return data is not None and "targetTemp" in data.keys()
+
+    @classmethod
+    def is_heater_shaker_data(
+        cls, data: ModuleData | None
+    ) -> TypeGuard[HeaterShakerData]:
+        return data is not None and "labwareLatchStatus" in data.keys()
+
+    @classmethod
+    def is_thermocycler_data(
+        cls, data: ModuleData | None
+    ) -> TypeGuard[ThermocyclerData]:
+        return data is not None and "lid" in data.keys()
+
+    @classmethod
+    def is_absorbance_reader_data(
+        cls, data: ModuleData | None
+    ) -> TypeGuard[AbsorbanceReaderData]:
+        return data is not None and "uptime" in data.keys()
 
 
 class LiveData(TypedDict):
