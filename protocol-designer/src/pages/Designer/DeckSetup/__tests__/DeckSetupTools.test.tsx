@@ -13,6 +13,7 @@ import { deleteContainer } from '../../../../labware-ingred/actions'
 import { useKitchen } from '../../../../organisms/Kitchen/hooks'
 import { deleteModule } from '../../../../step-forms/actions'
 import { getAdditionalEquipment } from '../../../../step-forms/selectors'
+import { getSavedStepForms } from '../../../../step-forms/selectors'
 import { getRobotType } from '../../../../file-data/selectors'
 import { getEnableAbsorbanceReader } from '../../../../feature-flags/selectors'
 import { deleteDeckFixture } from '../../../../step-forms/actions/additionalItems'
@@ -72,6 +73,7 @@ describe('DeckSetupTools', () => {
       additionalEquipmentOnDeck: {},
       pipettes: {},
     })
+    vi.mocked(getSavedStepForms).mockReturnValue({})
     vi.mocked(getDismissedHints).mockReturnValue([])
     vi.mocked(getAdditionalEquipment).mockReturnValue({})
     vi.mocked(useKitchen).mockReturnValue({
