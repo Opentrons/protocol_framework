@@ -10,10 +10,6 @@ import {
 } from '@opentrons/components'
 
 import {
-  PrepareSpace,
-  JogToWell,
-} from '/app/organisms/LabwarePositionCheck/shared'
-import {
   FLEX_ROBOT_TYPE,
   getIsTiprack,
   getLabwareDefURI,
@@ -28,9 +24,14 @@ import {
   setFinalPosition,
   setInitialPosition,
 } from '/app/organisms/LabwarePositionCheck/redux/actions'
+import { JogToWell } from './JogToWell'
+import { PrepareSpace } from './PrepareSpace'
 
 import type { PipetteName, LabwareDefinition2 } from '@opentrons/shared-data'
-import type { CheckPositionsStep, LPCStepProps } from '../types'
+import type {
+  CheckPositionsStep,
+  LPCStepProps,
+} from '/app/organisms/LabwarePositionCheck/types'
 
 export function CheckItem(
   props: LPCStepProps<CheckPositionsStep>
@@ -54,7 +55,8 @@ export function CheckItem(
   const { workingOffsets, isOnDevice, labwareDefs, protocolData } = state
   const { t } = useTranslation(['labware_position_check', 'shared'])
 
-  // TOME TODO: Pretty mcuh all of this goes into selectors.
+  // TOME TODO: Pretty mcuh all of this goes into selectors, and a lot of it
+  // should go into JogToWell as well.
 
   const itemLabwareDef = getItemLabwareDef({
     labwareId,
@@ -194,7 +196,6 @@ export function CheckItem(
           }
           labwareDef={itemLabwareDef}
           confirmPlacement={handleDispatchConfirmInitialPlacement}
-          location={step.location}
           {...props}
         />
       )}

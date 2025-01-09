@@ -1,4 +1,8 @@
-import type { Coordinates, LabwareDefinition2 } from '@opentrons/shared-data'
+import type {
+  Coordinates,
+  DeckConfiguration,
+  LabwareDefinition2,
+} from '@opentrons/shared-data'
 import type { LabwareOffsetLocation, VectorOffset } from '@opentrons/api-client'
 import type { LPCWizardFlexProps } from '/app/organisms/LabwarePositionCheck/LPCWizardFlex'
 import type { LabwarePositionCheckStep } from '/app/organisms/LabwarePositionCheck/types'
@@ -51,6 +55,7 @@ export interface LPCWizardState extends LPCWizardFlexProps {
   tipPickUpOffset: Coordinates | null
   protocolData: LPCWizardFlexProps['mostRecentAnalysis']
   labwareDefs: LabwareDefinition2[]
+  deckConfig: DeckConfiguration
   steps: StepsInfo
 }
 

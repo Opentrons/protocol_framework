@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
 import styled, { css } from 'styled-components'
+
 import {
   ALIGN_CENTER,
   ALIGN_FLEX_START,
@@ -28,9 +28,6 @@ import {
   getVectorSum,
 } from '@opentrons/shared-data'
 
-import levelProbeWithTip from '/app/assets/images/lpc_level_probe_with_tip.svg'
-import levelProbeWithLabware from '/app/assets/images/lpc_level_probe_with_labware.svg'
-import { getIsOnDevice } from '/app/redux/config'
 import { getTopPortalEl } from '/app/App/portal'
 import { SmallButton } from '/app/atoms/buttons'
 import { NeedHelpLink } from '/app/molecules/OT2CalibrationNeedHelpLink'
@@ -46,6 +43,9 @@ import type {
   CheckPositionsStep,
   LPCStepProps,
 } from '/app/organisms/LabwarePositionCheck/types'
+
+import levelProbeWithTip from '/app/assets/images/lpc_level_probe_with_tip.svg'
+import levelProbeWithLabware from '/app/assets/images/lpc_level_probe_with_labware.svg'
 
 const DECK_MAP_VIEWBOX = '-10 -10 150 105'
 const LPC_HELP_LINK_URL =
@@ -73,13 +73,14 @@ export function JogToWell({
   handleJog,
   initialPosition,
   existingOffset,
+  state,
 }: JogToWellProps): JSX.Element {
   const { t } = useTranslation(['labware_position_check', 'shared'])
+  const { isOnDevice } = state
 
   const [joggedPosition, setJoggedPosition] = useState<VectorOffset>(
     initialPosition
   )
-  const isOnDevice = useSelector(getIsOnDevice)
   const [showFullJogControls, setShowFullJogControls] = useState(false)
   useEffect(() => {
     //  NOTE: this will perform a "null" jog when the jog controls mount so
@@ -96,6 +97,9 @@ export function JogToWell({
     }
   }, [])
 
+  // TOME TODO: Steps should honestly should include more details about the instruments used
+  // or be made into selectors.
+
   const wellsToHighlight = ['A1']
   const wellStroke: WellStroke = wellsToHighlight.reduce(
     (acc, wellName) => ({ ...acc, [wellName]: COLORS.blue50 }),
@@ -110,24 +114,14 @@ export function JogToWell({
   const levelSrc = isTipRack ? levelProbeWithTip : levelProbeWithLabware
 
   return (
-    <Flex
-      flexDirection={DIRECTION_COLUMN}
-      justifyContent={JUSTIFY_SPACE_BETWEEN}
-      padding={SPACING.spacing32}
-      minHeight="29.5rem"
-    >
-      <Flex gridGap={SPACING.spacing24}>
-        <Flex
-          flex="1"
-          flexDirection={DIRECTION_COLUMN}
-          gridGap={SPACING.spacing8}
-          alignItems={ALIGN_FLEX_START}
-        >
+    <Flex css={CONTAINER_STYLE}>
+      <Flex css={CONTENT_GRID_STYLE}>
+        <Flex css={INFO_CONTAINER_STYLE}>
           <Header>{header}</Header>
           {body}
           <LiveOffsetValue {...liveOffset} />
         </Flex>
-        <Flex flex="1" alignItems={ALIGN_CENTER} gridGap={SPACING.spacing20}>
+        <Flex css={RENDER_CONTAINER_STYLE}>
           <RobotWorkSpace viewBox={DECK_MAP_VIEWBOX}>
             {() => (
               <>
@@ -156,18 +150,13 @@ export function JogToWell({
         </Flex>
       </Flex>
       {isOnDevice ? (
-        <Flex
-          width="100%"
-          marginTop={SPACING.spacing32}
-          justifyContent={JUSTIFY_SPACE_BETWEEN}
-          alignItems={ALIGN_CENTER}
-        >
+        <Flex css={FOOTER_CONTAINER_STYLE}>
           <SmallButton
             buttonType="tertiaryLowLight"
             buttonText={t('shared:go_back')}
             onClick={handleGoBack}
           />
-          <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
+          <Flex css={BUTTON_GROUP_STYLE}>
             <SmallButton
               buttonType="secondary"
               buttonText={t('move_pipette')}
@@ -230,14 +219,9 @@ export function JogToWell({
               handleJog(axis, direction, step, setJoggedPosition)
             }
           />
-          <Flex
-            width="100%"
-            marginTop={SPACING.spacing32}
-            justifyContent={JUSTIFY_SPACE_BETWEEN}
-            alignItems={ALIGN_CENTER}
-          >
+          <Flex css={FOOTER_CONTAINER_STYLE}>
             <NeedHelpLink href={LPC_HELP_LINK_URL} />
-            <Flex gridGap={SPACING.spacing8}>
+            <Flex css={BUTTON_GROUP_STYLE}>
               <SecondaryButton onClick={handleGoBack}>
                 {t('shared:go_back')}
               </SecondaryButton>
@@ -251,6 +235,42 @@ export function JogToWell({
     </Flex>
   )
 }
+
+const CONTAINER_STYLE = css`
+  flex-direction: ${DIRECTION_COLUMN};
+  justify-content: ${JUSTIFY_SPACE_BETWEEN};
+  padding: ${SPACING.spacing32};
+  min-height: 29.5rem;
+`
+
+const CONTENT_GRID_STYLE = css`
+  grid-gap: ${SPACING.spacing24};
+`
+
+const INFO_CONTAINER_STYLE = css`
+  flex: 1;
+  flex-direction: ${DIRECTION_COLUMN};
+  grid-gap: ${SPACING.spacing8};
+  align-items: ${ALIGN_FLEX_START};
+`
+
+const RENDER_CONTAINER_STYLE = css`
+  flex: 1;
+  align-items: ${ALIGN_CENTER};
+  grid-gap: ${SPACING.spacing20};
+`
+
+const FOOTER_CONTAINER_STYLE = css`
+  width: 100%;
+  margin-top: ${SPACING.spacing32};
+  justify-content: ${JUSTIFY_SPACE_BETWEEN};
+  align-items: ${ALIGN_CENTER};
+`
+
+const BUTTON_GROUP_STYLE = css`
+  grid-gap: ${SPACING.spacing8};
+  align-items: ${ALIGN_CENTER};
+`
 
 const Header = styled.h1`
   ${TYPOGRAPHY.h1Default}

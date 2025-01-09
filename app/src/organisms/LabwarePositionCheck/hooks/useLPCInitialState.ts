@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { getIsOnDevice } from '/app/redux/config'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import { getLPCSteps } from '/app/organisms/LabwarePositionCheck/utils'
+import { useNotifyDeckConfigurationQuery } from '/app/resources/deck_configuration'
 
 import type { RunTimeCommand } from '@opentrons/shared-data'
 import type { LPCWizardState } from '/app/organisms/LabwarePositionCheck/redux'
@@ -18,7 +19,7 @@ export function useLPCInitialState(
 
   const protocolCommands: RunTimeCommand[] = mostRecentAnalysis.commands
   const labwareDefs = getLabwareDefinitionsFromCommands(protocolCommands)
-
+  const deckConfig = useNotifyDeckConfigurationQuery().data ?? []
   const LPCSteps = getLPCSteps({
     protocolData: mostRecentAnalysis,
     labwareDefs,
@@ -31,6 +32,7 @@ export function useLPCInitialState(
     labwareDefs,
     workingOffsets: [],
     tipPickUpOffset: null,
+    deckConfig,
     steps: {
       currentStepIndex: 0,
       totalStepCount: LPCSteps.length - 1,
