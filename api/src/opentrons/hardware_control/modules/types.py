@@ -13,6 +13,7 @@ from typing import (
     Optional,
     cast,
     TYPE_CHECKING,
+    TypeGuard,
 )
 from typing_extensions import TypedDict
 from pathlib import Path
@@ -56,9 +57,113 @@ UploadFunction = Callable[[str, str, Dict[str, Any]], Awaitable[Tuple[bool, str]
 ModuleDisconnectedCallback = Optional[Callable[[str, str | None], None]]
 
 
+class MagneticModuleData(TypedDict):
+    engaged: bool
+    height: float
+
+
+class TemperatureModuleData(TypedDict):
+    currentTemp: float
+    targetTemp: float | None
+
+
+class HeaterShakerData(TypedDict):
+    temperatureStatus: str
+    speedStatus: str
+    labwareLatchStatus: str
+    currentTemp: float
+    targetTemp: float | None
+    currentSpeed: int
+    targetSpeed: int | None
+    errorDetails: str | None
+
+
+class ThermocyclerData(TypedDict):
+    lid: str
+    lidTarget: float | None
+    lidTemp: float
+    lidTempStatus: str
+    currentTemp: float | None
+    targetTemp: float | None
+    holdTime: float | None
+    rampRate: float | None
+    currentCycleIndex: int | None
+    totalCycleCount: int | None
+    currentStepIndex: int | None
+    totalStepCount: int | None
+
+
+class AbsorbanceReaderData(TypedDict):
+    uptime: int
+    deviceStatus: str
+    lidStatus: str
+    platePresence: str
+    measureMode: str
+    sampleWavelengths: List[int]
+    referenceWavelength: int
+
+
+class FlexStackerData(TypedDict):
+    latchState: str
+    platformState: str
+    hopperDoorState: str
+    axisStateX: str
+    axisStateZ: str
+    errorDetails: str | None
+
+
+ModuleData = Union[
+    Dict[Any, Any],  # This allows an empty dict as module data
+    MagneticModuleData,
+    TemperatureModuleData,
+    HeaterShakerData,
+    ThermocyclerData,
+    AbsorbanceReaderData,
+    FlexStackerData,
+]
+
+
+class ModuleDataValidator:
+    @classmethod
+    def is_magnetic_module_data(
+        cls, data: ModuleData | None
+    ) -> TypeGuard[MagneticModuleData]:
+        return data is not None and "engaged" in data.keys()
+
+    @classmethod
+    def is_temperature_module_data(
+        cls, data: ModuleData | None
+    ) -> TypeGuard[TemperatureModuleData]:
+        return data is not None and "targetTemp" in data.keys()
+
+    @classmethod
+    def is_heater_shaker_data(
+        cls, data: ModuleData | None
+    ) -> TypeGuard[HeaterShakerData]:
+        return data is not None and "labwareLatchStatus" in data.keys()
+
+    @classmethod
+    def is_thermocycler_data(
+        cls, data: ModuleData | None
+    ) -> TypeGuard[ThermocyclerData]:
+        return data is not None and "lid" in data.keys()
+
+    @classmethod
+    def is_absorbance_reader_data(
+        cls, data: ModuleData | None
+    ) -> TypeGuard[AbsorbanceReaderData]:
+        return data is not None and "uptime" in data.keys()
+
+    @classmethod
+    def is_flex_stacker_data(
+        cls, data: ModuleData | None
+    ) -> TypeGuard[FlexStackerData]:
+        return data is not None and "platformState" in data.keys()
+
+
 class LiveData(TypedDict):
     status: str
-    data: Dict[str, Union[float, str, bool, List[int], None]]
+    data: ModuleData | None
 
 
 class ModuleType(str, Enum):
