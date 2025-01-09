@@ -103,6 +103,15 @@ class AbsorbanceReaderData(TypedDict):
     referenceWavelength: int
 
 
+class FlexStackerData(TypedDict):
+    latchState: str
+    platformState: str
+    hopperDoorState: str
+    axisStateX: str
+    axisStateZ: str
+    errorDetails: str | None
+
+
 ModuleData = Union[
     Dict[Any, Any],  # This allows an empty dict as module data
     MagneticModuleData,
@@ -110,6 +119,7 @@ ModuleData = Union[
     HeaterShakerData,
     ThermocyclerData,
     AbsorbanceReaderData,
+    FlexStackerData,
 ]
 
 
@@ -143,6 +153,12 @@ class ModuleDataValidator:
         cls, data: ModuleData | None
     ) -> TypeGuard[AbsorbanceReaderData]:
         return data is not None and "uptime" in data.keys()
+
+    @classmethod
+    def is_flex_stacker_data(
+        cls, data: ModuleData | None
+    ) -> TypeGuard[FlexStackerData]:
+        return data is not None and "platformState" in data.keys()
 
 
 class LiveData(TypedDict):

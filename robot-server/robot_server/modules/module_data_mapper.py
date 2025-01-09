@@ -168,6 +168,7 @@ class ModuleDataMapper:
             )
         elif module_type == ModuleType.FLEX_STACKER:
             module_cls = FlexStackerModule
+            assert ModuleDataValidator.is_flex_stacker_data(live_data["data"])
             module_data = FlexStackerModuleData(
                 status=FlexStackerStatus(live_data["status"]),
                 latchState=cast(LatchState, live_data["data"].get("latchState")),
