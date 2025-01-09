@@ -1,6 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass, fields
-from typing import List
+from typing import List, Dict, Optional
 
 from opentrons.drivers.command_builder import CommandBuilder
 
@@ -11,13 +11,17 @@ class GCODE(str, Enum):
     MOVE_TO_SWITCH = "G5"
     HOME_AXIS = "G28"
     STOP_MOTORS = "M0"
+    ENABLE_MOTORS = "M17"
     GET_RESET_REASON = "M114"
     DEVICE_INFO = "M115"
     GET_LIMIT_SWITCH = "M119"
-    SET_LED = "M200"
+    GET_MOVE_PARAMS = "M120"
     GET_PLATFORM_SENSOR = "M121"
     GET_DOOR_SWITCH = "M122"
+    SET_LED = "M200"
     SET_SERIAL_NUMBER = "M996"
+    SET_RUN_CURRENT = "M906"
+    SET_IHOLD_CURRENT = "M907"
     ENTER_BOOTLOADER = "dfu"
 
     def build_command(self) -> CommandBuilder:
@@ -44,6 +48,14 @@ class StackerInfo:
     fw: str
     hw: HardwareRevision
     sn: str
+
+    def to_dict(self) -> Dict[str, str]:
+        """Build command."""
+        return {
+            "serial": self.sn,
+            "version": self.fw,
+            "model": self.hw.value,
+        }
 
 
 class StackerAxis(Enum):
@@ -128,11 +140,33 @@ class PlatformStatus:
         """Get platform status."""
         return self.E if direction == Direction.EXTENT else self.R
 
+    def to_dict(self) -> Dict[str, bool]:
+        """Dict of the data."""
+        return {
+            "extent": self.E,
+            "retract": self.R,
+        }
+
 
 @dataclass
 class MoveParams:
     """Move Parameters."""
 
-    max_speed: float | None = None
-    acceleration: float | None = None
-    max_speed_discont: float | None = None
+    axis: Optional[StackerAxis] = None
+    max_speed: Optional[float] = None
+    acceleration: Optional[float] = None
+    max_speed_discont: Optional[float] = None
+    current: Optional[float] = 0
+
+    @classmethod
+    def get_fields(cls) -> List[str]:
+        """Get parsing fields."""
+        return ["M", "V", "A", "D"]
+
+
+class MoveResult(str, Enum):
+    """The result of a move command."""
+
+    NO_ERROR = "ok"
+    STALL_ERROR = "stall"
+    UNKNOWN_ERROR = "unknown"
