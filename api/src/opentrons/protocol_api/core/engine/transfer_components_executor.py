@@ -396,12 +396,17 @@ class TransferComponentsExecutor:
                     raise RuntimeError(
                         "Blowout location is 'source' but source location is not provided."
                     )
+                # TODO: check if we should add a blowout location z-offset in liq class definition
                 self._instrument.blow_out(
-                    location=source_location,
+                    location=Location(
+                        source_well.get_top(0), labware=source_location.labware
+                    ),
                     well_core=source_well,
                     in_place=False,
                 )
-                touch_tip_and_air_gap_location = source_location
+                touch_tip_and_air_gap_location = Location(
+                    source_well.get_top(0), labware=source_location.labware
+                )
                 touch_tip_and_air_gap_well = source_well
             else:
                 self._instrument.blow_out(
@@ -449,10 +454,7 @@ class TransferComponentsExecutor:
                     z_offset=touch_tip_props.z_offset,
                     speed=touch_tip_props.speed,
                 )
-            else:
-                raise RuntimeError(
-                    "Invalid touch tip location for post-dispense retraction."
-                )
+            # No touch tip if the there's no trash well, likely due to trash being trash bin or waste chute
             self._instrument.move_to(
                 location=location,
                 well_core=well,
