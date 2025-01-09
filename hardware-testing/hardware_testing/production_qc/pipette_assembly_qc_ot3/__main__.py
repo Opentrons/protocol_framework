@@ -734,9 +734,7 @@ async def _fixture_check_pressure(
     # : unknown amount of pressure here (depends on where Z was calibrated)
     fixture_depth = 80
     await api.move_rel(mount, Point(z=fixture_depth))
-    #input("JX")
     await _drop_tip_in_trash(api, mount)
-    #await _move_to_fixture(api, mount)
     await api.move_rel(mount, Point(z=fixture_depth))
     await _pick_up_tip_for_fixture(api, mount, tip_volume=tip_volume,movez=False)
     await asyncio.sleep(10)
@@ -772,7 +770,6 @@ async def _fixture_check_pressure(
     results.append(r)
     # dispense
     await api.dispense(mount, PRESSURE_FIXTURE_ASPIRATE_VOLUME[pip_vol],0.5)
-    input("jxxx")
     await asyncio.sleep(2)
     r, _ = await _read_pressure_and_check_results(
         api,
@@ -1463,7 +1460,7 @@ async def _test_diagnostics(api: OT3API, mount: OT3Mount, write_cb: Callable) ->
     #print(f"pressure: {_bool_to_pass_fail(pressure_pass)}")
     LOG_GING.info(f"pressure: {_bool_to_pass_fail(pressure_pass)}")
     write_cb(["diagnostics-pressure", _bool_to_pass_fail(pressure_pass)])
-    #return environment_pass and pressure_pass and encoder_pass and capacitance_pass
+    return environment_pass and pressure_pass and encoder_pass and capacitance_pass
 
 
 async def _test_plunger_positions(
@@ -2309,7 +2306,8 @@ async def _main(test_config: TestConfig) -> None:  # noqa: C901
             LOG_GING = _save_logging_print("Pipette-test-system-err")
         LOG_GING.error(printsig)
         LOG_GING.critical(err)
-
+        await api.home()
+        await api.drop_tip(mount, home_after=False)
 
 
 if __name__ == "__main__":
