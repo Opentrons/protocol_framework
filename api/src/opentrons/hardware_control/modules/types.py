@@ -19,6 +19,11 @@ from typing import (
 from typing_extensions import TypedDict
 from pathlib import Path
 
+from opentrons.drivers.flex_stacker.types import (
+    LimitSwitchStatus,
+    PlatformStatus,
+    StackerAxis,
+)
 from opentrons.drivers.rpi_drivers.types import USBPort
 
 if TYPE_CHECKING:
@@ -29,6 +34,7 @@ if TYPE_CHECKING:
         HeaterShakerModuleType,
         MagneticBlockType,
         AbsorbanceReaderType,
+        FlexStackerModuleType,
     )
 
 
@@ -152,6 +158,7 @@ class ModuleType(str, Enum):
     HEATER_SHAKER: HeaterShakerModuleType = "heaterShakerModuleType"
     MAGNETIC_BLOCK: MagneticBlockType = "magneticBlockType"
     ABSORBANCE_READER: AbsorbanceReaderType = "absorbanceReaderType"
+    FLEX_STACKER: FlexStackerModuleType = "flexStackerModuleType"
 
     @classmethod
     def from_model(cls, model: ModuleModel) -> ModuleType:
@@ -167,6 +174,8 @@ class ModuleType(str, Enum):
             return cls.MAGNETIC_BLOCK
         if isinstance(model, AbsorbanceReaderModel):
             return cls.ABSORBANCE_READER
+        if isinstance(model, FlexStackerModuleModel):
+            return cls.FLEX_STACKER
 
     @classmethod
     def to_module_fixture_id(cls, module_type: ModuleType) -> str:
@@ -181,6 +190,8 @@ class ModuleType(str, Enum):
             return "magneticBlockV1"
         if module_type == ModuleType.ABSORBANCE_READER:
             return "absorbanceReaderV1"
+        if module_type == ModuleType.FLEX_STACKER:
+            return "flexStackerModuleV1"
         else:
             raise ValueError(
                 f"Module Type {module_type} does not have a related fixture ID."
@@ -214,6 +225,10 @@ class AbsorbanceReaderModel(str, Enum):
     ABSORBANCE_READER_V1: str = "absorbanceReaderV1"
 
 
+class FlexStackerModuleModel(str, Enum):
+    FLEX_STACKER_V1: str = "flexStackerModuleV1"
+
+
 def module_model_from_string(model_string: str) -> ModuleModel:
     for model_enum in {
         MagneticModuleModel,
@@ -222,6 +237,7 @@ def module_model_from_string(model_string: str) -> ModuleModel:
         HeaterShakerModuleModel,
         MagneticBlockModel,
         AbsorbanceReaderModel,
+        FlexStackerModuleModel,
     }:
         try:
             return cast(ModuleModel, model_enum(model_string))
@@ -274,6 +290,7 @@ ModuleModel = Union[
     HeaterShakerModuleModel,
     MagneticBlockModel,
     AbsorbanceReaderModel,
+    FlexStackerModuleModel,
 ]
 
 
@@ -315,3 +332,71 @@ class LidStatus(str, Enum):
     OFF = "off"
     UNKNOWN = "unknown"
     ERROR = "error"
+
+
+class FlexStackerStatus(str, Enum):
+    IDLE = "idle"
+    DISPENSING = "dispensing"
+    STORING = "storing"
+    ERROR = "error"
+
+
+class PlatformState(str, Enum):
+    UNKNOWN = "unknown"
+    EXTENDED = "extended"
+    RETRACTED = "retracted"
+
+    @classmethod
+    def from_status(cls, status: PlatformStatus) -> "PlatformState":
+        """Get the state from the platform status."""
+        if status.E and not status.R:
+            return cls.EXTENDED
+        if status.R and not status.E:
+            return cls.RETRACTED
+        return cls.UNKNOWN
+
+
+class StackerAxisState(str, Enum):
+    UNKNOWN = "unknown"
+    EXTENDED = "extended"
+    RETRACTED = "retracted"
+
+    @classmethod
+    def from_status(
+        cls, status: LimitSwitchStatus, axis: StackerAxis
+    ) -> "StackerAxisState":
+        """Get the axis state from the limit switch status."""
+        match axis:
+            case StackerAxis.X:
+                if status.XE and not status.XR:
+                    return cls.EXTENDED
+                if status.XR and not status.XE:
+                    return cls.RETRACTED
+            case StackerAxis.Z:
+                if status.ZE and not status.ZR:
+                    return cls.EXTENDED
+                if status.ZR and not status.ZE:
+                    return cls.RETRACTED
+            case StackerAxis.L:
+                return cls.EXTENDED if status.LR else cls.RETRACTED
+        return cls.UNKNOWN
+
+
+class LatchState(str, Enum):
+    CLOSED = "closed"
+    OPENED = "opened"
+
+    @classmethod
+    def from_state(cls, state: StackerAxisState) -> "LatchState":
+        """Get the latch state from the axis state."""
+        return cls.CLOSED if state == StackerAxisState.EXTENDED else cls.OPENED
+
+
+class HopperDoorState(str, Enum):
+    CLOSED = "closed"
+    OPENED = "opened"
+
+    @classmethod
+    def from_state(cls, state: bool) -> "HopperDoorState":
+        """Get the hopper door state from the door state boolean."""
+        return cls.CLOSED if state else cls.OPENED

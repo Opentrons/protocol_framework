@@ -16,13 +16,7 @@ from robot_server.labware_offsets.store import (
 
 
 def _get_all(store: LabwareOffsetStore) -> list[LabwareOffset]:
-    return store.search(
-        id_filter=None,
-        definition_uri_filter=None,
-        location_definition_uri_filter=None,
-        location_module_model_filter=None,
-        location_slot_name_filter=None,
-    )
+    return store.search()
 
 
 def test_filters() -> None:
@@ -52,25 +46,10 @@ def test_filters() -> None:
         subject.add(labware_offset)
 
     # No filters:
-    assert (
-        subject.search(
-            id_filter=None,
-            definition_uri_filter=None,
-            location_definition_uri_filter=None,
-            location_module_model_filter=None,
-            location_slot_name_filter=None,
-        )
-        == labware_offsets
-    )
+    assert subject.search() == labware_offsets
 
     # Filter on one thing:
-    result = subject.search(
-        id_filter=None,
-        definition_uri_filter="definition-uri-b",
-        location_definition_uri_filter=None,
-        location_module_model_filter=None,
-        location_slot_name_filter=None,
-    )
+    result = subject.search(definition_uri_filter="definition-uri-b")
     assert len(result) == 3
     assert result == [
         entry for entry in labware_offsets if entry.definitionUri == "definition-uri-b"
@@ -80,9 +59,6 @@ def test_filters() -> None:
     result = subject.search(
         id_filter="id-2",
         definition_uri_filter="definition-uri-b",
-        location_definition_uri_filter=None,
-        location_module_model_filter=None,
-        location_slot_name_filter=None,
     )
     assert result == [labware_offsets[1]]
 
@@ -90,9 +66,6 @@ def test_filters() -> None:
     result = subject.search(
         id_filter="id-1",
         definition_uri_filter="definition-uri-b",
-        location_definition_uri_filter=None,
-        location_module_model_filter=None,
-        location_slot_name_filter=None,
     )
     assert result == []
 

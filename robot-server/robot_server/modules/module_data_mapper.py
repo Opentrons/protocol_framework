@@ -13,6 +13,9 @@ from opentrons.hardware_control.modules import (
     HeaterShakerStatus,
     SpeedStatus,
     AbsorbanceReaderStatus,
+    PlatformState,
+    StackerAxisState,
+    FlexStackerStatus,
 )
 from opentrons.hardware_control.modules.magdeck import OFFSET_TO_LABWARE_BOTTOM
 from opentrons.drivers.types import (
@@ -23,12 +26,15 @@ from opentrons.drivers.types import (
 )
 from opentrons.drivers.rpi_drivers.types import USBPort as HardwareUSBPort
 
+from opentrons.hardware_control.modules.types import HopperDoorState, LatchState
 from opentrons.protocol_engine import ModuleModel, DeckType
 
 from .module_identifier import ModuleIdentity
 from .module_models import (
     AttachedModule,
     AttachedModuleData,
+    FlexStackerModule,
+    FlexStackerModuleData,
     MagneticModule,
     MagneticModuleData,
     ModuleCalibrationData,
@@ -159,6 +165,20 @@ class ModuleDataMapper:
                 referenceWavelength=cast(
                     int, live_data["data"].get("referenceWavelength")
                 ),
+            )
+        elif module_type == ModuleType.FLEX_STACKER:
+            module_cls = FlexStackerModule
+            module_data = FlexStackerModuleData(
+                status=FlexStackerStatus(live_data["status"]),
+                latchState=cast(LatchState, live_data["data"].get("latchState")),
+                platformState=cast(
+                    PlatformState, live_data["data"].get("platformState")
+                ),
+                hopperDoorState=cast(
+                    HopperDoorState, live_data["data"].get("hopperDoorState")
+                ),
+                axisStateX=cast(StackerAxisState, live_data["data"].get("axisStateX")),
+                axisStateZ=cast(StackerAxisState, live_data["data"].get("axisStateZ")),
             )
         else:
             assert False, f"Invalid module type {module_type}"

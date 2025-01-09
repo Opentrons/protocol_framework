@@ -4,6 +4,7 @@ from .magdeck import MagDeck
 from .thermocycler import Thermocycler
 from .heater_shaker import HeaterShaker
 from .absorbance_reader import AbsorbanceReader
+from .flex_stacker import FlexStacker
 from .update import update_firmware
 from .utils import MODULE_TYPE_BY_NAME, build
 from .types import (
@@ -19,6 +20,9 @@ from .types import (
     MagneticStatus,
     HeaterShakerStatus,
     AbsorbanceReaderStatus,
+    PlatformState,
+    StackerAxisState,
+    FlexStackerStatus,
     SpeedStatus,
     LiveData,
     ModuleData,
@@ -59,4 +63,8 @@ __all__ = [
     "AbsorbanceReaderStatus",
     "AbsorbanceReaderDisconnectedError",
     "ModuleDisconnectedCallback",
+    "FlexStacker",
+    "FlexStackerStatus",
+    "PlatformState",
+    "StackerAxisState",
 ]
