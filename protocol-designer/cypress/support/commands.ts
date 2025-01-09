@@ -55,7 +55,7 @@ export const locators = {
   import: 'Import',
   createNew: 'Create new',
   createProtocol: 'Create a protocol',
-  editProtocol: 'Edit existing protocol',
+  importProtocol: 'Import existing protocol',
   settingsDataTestid: 'SettingsIconButton',
   settings: 'Settings',
   privacyPolicy: 'a[href="https://opentrons.com/privacy-policy"]',
@@ -103,7 +103,7 @@ Cypress.Commands.add('verifyCreateNewHeader', () => {
 Cypress.Commands.add('verifyHomePage', () => {
   cy.contains(content.welcome)
   cy.contains('button', locators.createProtocol).should('be.visible')
-  cy.contains('label', locators.editProtocol).should('be.visible')
+  cy.contains('label', locators.importProtocol).should('be.visible')
   cy.getByTestId(locators.settingsDataTestid).should('be.visible')
   cy.get(locators.privacyPolicy).should('exist').and('be.visible')
   cy.get(locators.eula).should('exist').and('be.visible')
