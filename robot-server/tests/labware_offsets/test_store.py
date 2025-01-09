@@ -1,15 +1,18 @@
 # noqa: D100
 
-
 from datetime import datetime, timezone
+
+import pytest
+import sqlalchemy
+
 from opentrons.protocol_engine import (
     LabwareOffset,
     LabwareOffsetLocation,
     LabwareOffsetVector,
 )
+from opentrons.protocol_engine.types import ModuleModel
 from opentrons.types import DeckSlotName
-import pytest
-import sqlalchemy
+
 from robot_server.labware_offsets.store import (
     LabwareOffsetStore,
     LabwareOffsetNotFoundError,
@@ -26,8 +29,64 @@ def _get_all(store: LabwareOffsetStore) -> list[LabwareOffset]:
     return store.search()
 
 
-def test_filters(subject: LabwareOffsetStore) -> None:
-    """Test that the `.search()` method applies filters correctly."""
+def test_filter_fields(subject: LabwareOffsetStore) -> None:
+    """Test each filterable field to make sure it returns only matching entries."""
+    offset_a = LabwareOffset(
+        id="a",
+        createdAt=datetime.now(timezone.utc),
+        definitionUri="definitionUri a",
+        location=LabwareOffsetLocation(
+            slotName=DeckSlotName.SLOT_A1,
+            moduleModel=ModuleModel.THERMOCYCLER_MODULE_V1,
+            definitionUri="location.definitionUri a",
+        ),
+        vector=LabwareOffsetVector(x=1, y=2, z=3),
+    )
+    offset_b = LabwareOffset(
+        id="b",
+        createdAt=datetime.now(timezone.utc),
+        definitionUri="definitionUri b",
+        location=LabwareOffsetLocation(
+            slotName=DeckSlotName.SLOT_B1,
+            moduleModel=ModuleModel.MAGNETIC_BLOCK_V1,
+            definitionUri="location.definitionUri b",
+        ),
+        vector=LabwareOffsetVector(x=1, y=2, z=3),
+    )
+
+    subject.add(offset_a)
+    subject.add(offset_b)
+
+    assert subject.search(id_filter=offset_a.id) == [offset_a]
+    assert subject.search(id_filter=offset_b.id) == [offset_b]
+
+    assert subject.search(definition_uri_filter=offset_a.definitionUri) == [offset_a]
+    assert subject.search(definition_uri_filter=offset_b.definitionUri) == [offset_b]
+
+    assert subject.search(location_slot_name_filter=offset_a.location.slotName) == [
+        offset_a
+    ]
+    assert subject.search(location_slot_name_filter=offset_b.location.slotName) == [
+        offset_b
+    ]
+
+    assert subject.search(
+        location_module_model_filter=offset_a.location.moduleModel
+    ) == [offset_a]
+    assert subject.search(
+        location_module_model_filter=offset_b.location.moduleModel
+    ) == [offset_b]
+
+    assert subject.search(
+        location_definition_uri_filter=offset_a.location.definitionUri
+    ) == [offset_a]
+    assert subject.search(
+        location_definition_uri_filter=offset_b.location.definitionUri
+    ) == [offset_b]
+
+
+def test_filter_combinations(subject: LabwareOffsetStore) -> None:
+    """Test that multiple filters are combined correctly."""
     ids_and_definition_uris = [
         ("id-1", "definition-uri-a"),
         ("id-2", "definition-uri-b"),
