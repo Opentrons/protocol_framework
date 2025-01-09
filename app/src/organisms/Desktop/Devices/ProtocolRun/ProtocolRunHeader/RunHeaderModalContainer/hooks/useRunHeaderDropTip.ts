@@ -5,13 +5,8 @@ import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 
 import { useDropTipWizardFlows } from '/app/organisms/DropTipWizardFlows'
 import { useProtocolDropTipModal } from '../modals'
-import {
-  useCloseCurrentRun,
-  useCurrentRunCommands,
-  useIsRunCurrent,
-} from '/app/resources/runs'
+import { useCloseCurrentRun, useIsRunCurrent } from '/app/resources/runs'
 import { isTerminalRunStatus } from '../../utils'
-import { lastRunCommandPromptedErrorRecovery } from '/app/local-resources/commands'
 import { useTipAttachmentStatus } from '/app/resources/instruments'
 
 import type { RobotType } from '@opentrons/shared-data'
@@ -104,32 +99,17 @@ export function useRunHeaderDropTip({
       : { showDTWiz: false, dtWizProps: null }
   }
 
-  const runSummaryNoFixit = useCurrentRunCommands(
-    {
-      includeFixitCommands: false,
-      pageLength: 1,
-    },
-    { enabled: isTerminalRunStatus(runStatus) }
-  )
   // Manage tip checking
   useEffect(() => {
     // If a user begins a new run without navigating away from the run page, reset tip status.
     if (robotType === FLEX_ROBOT_TYPE) {
       if (runStatus === RUN_STATUS_IDLE) {
         resetTipStatus()
-      }
-      // Only determine tip status when necessary as this can be an expensive operation. Error Recovery handles tips, so don't
-      // have to do it here if done during Error Recovery.
-      // Note that it's possible to cancel a run before executing any commands, and we still should check for tips in this case.
-      else if (
-        runSummaryNoFixit != null &&
-        !lastRunCommandPromptedErrorRecovery(runSummaryNoFixit) &&
-        isTerminalRunStatus(runStatus)
-      ) {
+      } else if (isRunCurrent && isTerminalRunStatus(runStatus)) {
         void determineTipStatus()
       }
     }
-  }, [runStatus, robotType, runSummaryNoFixit])
+  }, [runStatus, robotType, isRunCurrent])
 
   // TODO(jh, 08-15-24): The enteredER condition is a hack, because errorCommands are only returned when a run is current.
   // Ideally the run should not need to be current to view errorCommands.
