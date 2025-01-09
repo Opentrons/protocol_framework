@@ -237,7 +237,7 @@ def abs_reader_v1_def() -> ModuleDefinition:
 @pytest.fixture(scope="session")
 def flex_stacker_v1_def() -> ModuleDefinition:
     """Get the definition of a V1 Flex Stacker."""
-    definition = load_shared_data("module/definitions/3/flexStackerV1.json")
+    definition = load_shared_data("module/definitions/3/flexStackerModuleV1.json")
     return ModuleDefinition.model_validate_json(definition)
 
 
