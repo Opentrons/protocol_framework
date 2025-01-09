@@ -25,6 +25,8 @@ from .types import (
     FlexStackerStatus,
     SpeedStatus,
     LiveData,
+    ModuleData,
+    ModuleDataValidator,
 )
 from .errors import (
     UpdateError,
@@ -55,6 +57,8 @@ __all__ = [
     "HeaterShakerStatus",
     "SpeedStatus",
     "LiveData",
+    "ModuleData",
+    "ModuleDataValidator",
     "AbsorbanceReader",
     "AbsorbanceReaderStatus",
     "AbsorbanceReaderDisconnectedError",

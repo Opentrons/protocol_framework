@@ -30,6 +30,7 @@ from opentrons.hardware_control.modules.types import (
     StackerAxisState,
     UploadFunction,
     LiveData,
+    FlexStackerData,
 )
 
 log = logging.getLogger(__name__)
@@ -189,17 +190,15 @@ class FlexStacker(mod_abc.AbstractModule):
 
     @property
     def live_data(self) -> LiveData:
-        return {
-            "status": self.status.value,
-            "data": {
-                "latchState": self.latch_state.value,
-                "platformState": self.platform_state.value,
-                "hopperDoorState": self.hopper_door_state.value,
-                "axisStateX": self.limit_switch_status[StackerAxis.X].value,
-                "axisStateZ": self.limit_switch_status[StackerAxis.Z].value,
-                "errorDetails": self._reader.error,
-            },
+        data: FlexStackerData = {
+            "latchState": self.latch_state.value,
+            "platformState": self.platform_state.value,
+            "hopperDoorState": self.hopper_door_state.value,
+            "axisStateX": self.limit_switch_status[StackerAxis.X].value,
+            "axisStateZ": self.limit_switch_status[StackerAxis.Z].value,
+            "errorDetails": self._reader.error,
         }
+        return {"status": self.status.value, "data": data}
 
     async def prep_for_update(self) -> str:
         await self._poller.stop()

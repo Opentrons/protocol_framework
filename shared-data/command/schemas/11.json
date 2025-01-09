@@ -2712,7 +2712,8 @@
         "thermocyclerModuleV2",
         "heaterShakerModuleV1",
         "magneticBlockV1",
-        "absorbanceReaderV1"
+        "absorbanceReaderV1",
+        "flexStackerModuleV1"
       ],
       "title": "ModuleModel",
       "type": "string"
