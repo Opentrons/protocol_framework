@@ -431,7 +431,6 @@ const verifyStep = (verification: Verifications): void => {
       cy.contains(Content.Step2Title)
       cy.contains('Robot pipettes')
       cy.contains(Content.AddPipette)
-      // cy.contains('Filter Tip Rack 50 µL').should('be.visible')
       break
     case Verifications.OnStep3:
       cy.contains('Add a gripper').should('be.visible')

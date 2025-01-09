@@ -6,7 +6,6 @@ import { TestFilePath } from '../support/testFiles'
 describe('Protocol fixtures migrate and match snapshots', () => {
   beforeEach(() => {
     cy.visit('/')
-    // Get rid of the analytics
     cy.closeAnalyticsModal()
   })
 

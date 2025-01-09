@@ -73,19 +73,5 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       UniversalActions.Snapshot,
     ]
     runCreateTest(steps)
-    /* Future work
-    We need a better selector for source and destinatino wells.. they have the same selector
-    Source wells
-    cy.get(':nth-child(5) > .bsOFGI > .jmUzTo > .jBlELz > .sc-bqWxrE')
-    cy.get('div[tabindex="0"].sc-bqWxrE').contains('Choose wells').click()
-    Destination wells
-    cy.get(':nth-child(7) > .bsOFGI > .jmUzTo > .jBlELz > .sc-bqWxrE')
-    */
   })
 })
-/*
-<div tabindex="0" class="Flex-sc-1qhp8l7-0 sc-bqWxrE jKLbYH gEhMNQ">
-<div class="Flex-sc-1qhp8l7-0 icZZqw"><div class="Flex-sc-1qhp8l7-0 sc-ksBlkl jKLbYH cQzqYP">
-<p class="Text-sc-1wb1h0f-0 StyledText__DesktopStyledText-sc-18lb8jp-0 StyledText-sc-18lb8jp-1 DropdownMenu___StyledStyledText-sc-ffghyc-0 cJXFkZ jAyaeC fjZvnJ">
-Choose option</p></div></div><svg aria-hidden="true" 
-*/
