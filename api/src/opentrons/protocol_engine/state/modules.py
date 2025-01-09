@@ -35,7 +35,7 @@ from opentrons.protocol_engine.state.module_substates.absorbance_reader_substate
     AbsorbanceReaderMeasureMode,
 )
 from opentrons.types import DeckSlotName, MountType, StagingSlotName
-from .update_types import AbsorbanceReaderStateUpdate
+from .update_types import AbsorbanceReaderStateUpdate, FlexStackerStateUpdate
 from ..errors import ModuleNotConnectedError
 
 from ..types import (
@@ -303,6 +303,8 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             self._handle_absorbance_reader_commands(
                 state_update.absorbance_reader_state_update
             )
+        if state_update.flex_stacker_state_update != update_types.NO_CHANGE:
+            self._handle_flex_stacker_commands(state_update.flex_stacker_state_update)
 
     def _add_module_substate(
         self,
@@ -610,6 +612,13 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             reference_wavelength=reference_wavelength,
             data=data,
         )
+
+    def _handle_flex_stacker_commands(
+        self, flex_stacker_state_update: FlexStackerStateUpdate
+    ) -> None:
+        """Handle Flex Stacker state updates."""
+        # TODO: Implement Flex Stacker state updates
+        pass
 
 
 class ModuleView:
@@ -1312,7 +1321,7 @@ class ModuleView:
         elif model == ModuleModel.FLEX_STACKER_MODULE_V1:
             # only allowed in column 4
             assert deck_slot.value[-1] == "4"
-            return f"flexStackerV1{deck_slot.value}"
+            return f"flexStackerModuleV1{deck_slot.value}"
 
         raise ValueError(
             f"Unknown module {model.name} has no addressable areas to provide."
