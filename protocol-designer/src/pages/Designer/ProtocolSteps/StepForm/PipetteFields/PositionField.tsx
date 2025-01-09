@@ -220,7 +220,6 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
           isIndeterminate={isIndeterminate}
           units={t('units.millimeter')}
           id={`TipPositionField_${zName}`}
-          padding={padding}
         />
       )}
     </>
