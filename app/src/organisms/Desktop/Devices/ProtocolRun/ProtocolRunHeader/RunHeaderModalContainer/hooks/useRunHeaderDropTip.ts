@@ -120,9 +120,9 @@ export function useRunHeaderDropTip({
       }
       // Only determine tip status when necessary as this can be an expensive operation. Error Recovery handles tips, so don't
       // have to do it here if done during Error Recovery.
+      // Note that it's possible to cancel a run before executing any commands, and we still should check for tips in this case.
       else if (
         runSummaryNoFixit != null &&
-        runSummaryNoFixit.length > 0 &&
         !lastRunCommandPromptedErrorRecovery(runSummaryNoFixit) &&
         isTerminalRunStatus(runStatus)
       ) {
