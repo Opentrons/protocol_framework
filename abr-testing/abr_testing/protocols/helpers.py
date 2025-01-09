@@ -636,7 +636,7 @@ def move_labware_to_destination(
         except IndexError:
             print("OT-2")
             return
-    if isinstance(dest, Labware):
+    elif isinstance(dest, Labware):
         labware_location = get_parent(dest)  # type: ignore
         if str(labware_location)[1] == "4":
             protocol.move_labware(
@@ -645,13 +645,14 @@ def move_labware_to_destination(
                 use_gripper=use_gripper,
                 drop_offset=offsets,
             )
-        return
-    protocol.move_labware(
-        labware=labware,
-        new_location=dest,
-        use_gripper=use_gripper,
-        pick_up_offset=offsets,
-    )
+    else:
+        protocol.move_labware(
+            labware=labware,
+            new_location=dest,
+            use_gripper=use_gripper,
+            pick_up_offset=offsets,
+        )
+    print(f"{labware.load_name} was moved to {labware.parent}")
 
 
 def get_parent(labware: Labware) -> Any:
@@ -665,12 +666,20 @@ def get_parent(labware: Labware) -> Any:
 
 # Stacker Functions
 # TODO add more stacker functions and incorporate them into protocols
-def load_stacker_module(protocol: ProtocolContext, serial_number: str, slot:str, labware_name: str)-> StackerModule:
+def load_stacker_module(
+    protocol: ProtocolContext, serial_number: str, slot: str, labware_name: str
+) -> StackerModule:
+    """Load stacker module."""
     hardware = protocol._hw_manager.hardware
     hardware.cache_instruments()
-    return StackerModule(serial_number = serial_number, labware_name = "", slot = slot, protocol=protocol)
-    
-    
+    return StackerModule(
+        serial_number=serial_number,
+        labware_name=labware_name,
+        slot=slot,
+        protocol=protocol,
+    )
+
+
 def unload_and_move(
     stacker: StackerModule,
     new_location: Labware | str,
@@ -682,6 +691,18 @@ def unload_and_move(
 def move_to_stacker_and_store(stacker: StackerModule, lw: Labware) -> None:
     """Move labware from deck into stacker."""
     stacker.move_and_store_labware(lw=lw)
+
+
+def move_lid_from_stacker_to_tc_plate(
+    stacker: StackerModule,
+    plate_on_thermocycler: Labware,
+    thermocycler: ThermocyclerContext,
+) -> Labware:
+    """Move lid from stacker to thermocycler plate."""
+    thermocycler.open_lid()
+    lid_on_plate = stacker.unload_and_move_labware(plate_on_thermocycler)
+    thermocycler.close_lid()
+    return lid_on_plate
 
 
 # CONSTANTS
