@@ -11,6 +11,7 @@ import {
   isAddressableAreaStandardSlot,
   MOVABLE_TRASH_ADDRESSABLE_AREAS,
   FLEX_MODULE_ADDRESSABLE_AREAS,
+  FLEX_STACKER_ADDRESSABLE_AREAS,
 } from '@opentrons/shared-data'
 import { COLUMN_4_SLOTS, getHasWasteChute } from '@opentrons/step-generation'
 import {
@@ -226,7 +227,8 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
           !isTrashSlot &&
           !WASTE_CHUTE_ADDRESSABLE_AREAS.includes(slotId) &&
           !notSelectedStagingAreaAddressableAreas.includes(slotId) &&
-          !FLEX_MODULE_ADDRESSABLE_AREAS.includes(slotId)
+          !FLEX_MODULE_ADDRESSABLE_AREAS.includes(slotId) &&
+          !FLEX_STACKER_ADDRESSABLE_AREAS.includes(slotId)
         )
       })
       .map(slotId => ({ name: slotId, value: slotId }))
