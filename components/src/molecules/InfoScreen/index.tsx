@@ -16,7 +16,7 @@ export function InfoScreen({
   content,
   subContent,
   backgroundColor = COLORS.grey30,
-  height = "100%",
+  height = '100%',
 }: InfoScreenProps): JSX.Element {
   return (
     <Flex

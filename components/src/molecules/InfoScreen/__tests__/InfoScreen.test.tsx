@@ -37,9 +37,7 @@ describe('InfoScreen', () => {
     expect(screen.getByLabelText('alert')).toHaveStyle(
       `color: ${COLORS.grey60}`
     )
-    expect(screen.getByTestId('InfoScreen')).toHaveStyle(
-      `height: 100%`
-    )
+    expect(screen.getByTestId('InfoScreen')).toHaveStyle(`height: 100%`)
   })
 
   it('should render set height, subContent and backgroundColor', () => {
@@ -54,8 +52,6 @@ describe('InfoScreen', () => {
     expect(screen.getByTestId('InfoScreen')).toHaveStyle(
       `background-color: ${COLORS.blue50}`
     )
-    expect(screen.getByTestId('InfoScreen')).toHaveStyle(
-      `height: 10rem`
-    )
+    expect(screen.getByTestId('InfoScreen')).toHaveStyle(`height: 10rem`)
   })
 })
