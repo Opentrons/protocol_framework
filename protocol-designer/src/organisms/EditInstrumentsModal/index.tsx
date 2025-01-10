@@ -64,8 +64,6 @@ export function EditInstrumentsModal(
     resetFields,
   } = pipetteConfig
 
-  console.log('obj', JSON.stringify(pipettesOnDeck, null, 4))
-
   const selectedPipette =
     pipetteType === '96' || pipetteGen === 'GEN1'
       ? `${pipetteVolume}_${pipetteType}`
