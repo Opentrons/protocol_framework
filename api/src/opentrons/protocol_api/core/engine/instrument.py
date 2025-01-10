@@ -1126,7 +1126,6 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         Return: List of liquid and air gap pairs in tip.
         """
         aspirate_props = transfer_properties.aspirate
-        _tip_contents = tip_contents.copy()
         tx_commons.check_valid_volume_parameters(
             disposal_volume=0,  # No disposal volume for 1-to-1 transfer
             air_gap=aspirate_props.retract.air_gap_by_volume.get_for_volume(volume),
@@ -1141,14 +1140,14 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             )
         )
         aspirate_location = Location(aspirate_point, labware=source_loc.labware)
-        if len(_tip_contents) > 0:
-            last_liquid_and_airgap_in_tip = _tip_contents[-1]
-        else:
-            last_liquid_and_airgap_in_tip = tx_comps_executor.LiquidAndAirGapPair(
+        last_liquid_and_airgap_in_tip = (
+            tip_contents[-1]
+            if tip_contents
+            else tx_comps_executor.LiquidAndAirGapPair(
                 liquid=0,
                 air_gap=0,
             )
-            _tip_contents = [last_liquid_and_airgap_in_tip]
+        )
         components_executor = tx_comps_executor.TransferComponentsExecutor(
             instrument_core=self,
             transfer_properties=transfer_properties,
@@ -1170,9 +1169,11 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         )
         components_executor.aspirate_and_wait(volume=volume)
         components_executor.retract_after_aspiration(volume=volume)
+
+        # return copy of tip_contents with last entry replaced by tip state from executor
         last_contents = components_executor.tip_state.last_liquid_and_air_gap_in_tip
-        _tip_contents[-1] = last_contents
-        return _tip_contents
+        new_tip_contents = tip_contents[0:-1] + [last_contents]
+        return new_tip_contents
 
     def dispense_liquid_class(
         self,
@@ -1216,7 +1217,6 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         """
         dispense_props = transfer_properties.dispense
         dest_loc, dest_well = dest
-        _tip_contents = tip_contents.copy()
         dispense_point = (
             tx_comps_executor.absolute_point_from_position_reference_and_offset(
                 well=dest_well,
@@ -1225,14 +1225,14 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             )
         )
         dispense_location = Location(dispense_point, labware=dest_loc.labware)
-        if len(_tip_contents) > 0:
-            last_liquid_and_airgap_in_tip = _tip_contents[-1]
-        else:
-            last_liquid_and_airgap_in_tip = tx_comps_executor.LiquidAndAirGapPair(
+        last_liquid_and_airgap_in_tip = (
+            tip_contents[-1]
+            if tip_contents
+            else tx_comps_executor.LiquidAndAirGapPair(
                 liquid=0,
                 air_gap=0,
             )
-            _tip_contents = [last_liquid_and_airgap_in_tip]
+        )
         components_executor = tx_comps_executor.TransferComponentsExecutor(
             instrument_core=self,
             transfer_properties=transfer_properties,
@@ -1263,8 +1263,8 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             source_well=source[1] if source else None,
         )
         last_contents = components_executor.tip_state.last_liquid_and_air_gap_in_tip
-        _tip_contents[-1] = last_contents
-        return _tip_contents
+        new_tip_contents = tip_contents[0:-1] + [last_contents]
+        return new_tip_contents
 
     def retract(self) -> None:
         """Retract this instrument to the top of the gantry."""
