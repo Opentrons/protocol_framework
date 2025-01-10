@@ -36,8 +36,11 @@ def _import_labware_offsets_from_runs(connection: sqlalchemy.engine.Connection) 
     """Seed the new labware_offset table with records scraped from existing runs."""
     raw_state_summaries = (
         connection.execute(
-            sqlalchemy.select(schema_9.run_table.c.state_summary)
-            .where(schema_9.run_table.c.state_summary.is_not(None))
+            sqlalchemy.select(schema_9.run_table.c.state_summary).where(
+                schema_9.run_table.c.state_summary.is_not(None)
+            )
+            # Be careful to preserve order.
+            # Offsets from newer runs should shadow offsets from older runs.
             .order_by(sqlite_rowid)
         )
         .scalars()
@@ -50,6 +53,8 @@ def _import_labware_offsets_from_runs(connection: sqlalchemy.engine.Connection) 
     )
 
     for state_summary in state_summaries:
+        # Be careful to preserve order.
+        # Offsets added later to a run should shadow offsets added earlier to a run.
         for labware_offset in state_summary.labwareOffsets:
             converted = _pydantic_labware_offset_to_sql(labware_offset)
             connection.execute(
