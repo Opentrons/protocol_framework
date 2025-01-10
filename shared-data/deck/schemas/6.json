@@ -29,16 +29,6 @@
         }
       }
     },
-    "unitVector": {
-      "type": "array",
-      "description": "Array of 3 unit directions, [x, y, z]",
-      "items": {
-        "type": "number",
-        "enum": [1, -1]
-      },
-      "minItems": 3,
-      "maxItems": 3
-    },
     "boundingBox": {
       "type": "object",
       "required": ["xDimension", "yDimension", "zDimension"],
