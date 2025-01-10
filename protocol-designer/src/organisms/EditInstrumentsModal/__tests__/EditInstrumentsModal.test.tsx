@@ -111,10 +111,10 @@ describe('EditInstrumentsModal', () => {
     vi.mocked(usePipetteConfig).mockReturnValue({
       page: 'overview',
       mount: 'left',
-      pipetteType: 'single',
+      pipetteType: null,
       pipetteGen: 'flex',
-      pipetteVolume: 'p1000',
-      selectedTips: ['A1'],
+      pipetteVolume: null,
+      selectedTips: [],
       setPage: vi.fn(),
       setMount: vi.fn(),
       setPipetteType: vi.fn(),
@@ -124,8 +124,7 @@ describe('EditInstrumentsModal', () => {
       resetFields: vi.fn(),
     })
     render(props)
-    fireEvent.click(screen.getByText('Save'))
-    expect(mockOnClose).toHaveBeenCalled()
+    expect(screen.getByText('Save')).toBeDisabled()
   })
 
   it('should render text and buttons - pipette overview', () => {
