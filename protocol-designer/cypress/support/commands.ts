@@ -1,4 +1,5 @@
 import 'cypress-file-upload'
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
@@ -27,11 +28,12 @@ declare global {
       openDesignPage: () => Cypress.Chainable<void>
       addStep: (stepName: string) => Cypress.Chainable<void>
       openSettingsPage: () => Cypress.Chainable<void>
-      robotSelection: (robotName: string) => Cypress.Chainable<void>
       verifySettingsPage: () => Cypress.Chainable<void>
       verifyCreateNewPage: () => Cypress.Chainable<void>
       togglePreWetTip: () => Cypress.Chainable<void>
       mixaspirate: () => Cypress.Chainable<void>
+      clickConfirm: () => Cypress.Chainable<void>
+      verifyOverflowBtn: () => Cypress.Chainable<void>
     }
   }
 }
@@ -49,14 +51,18 @@ export const content = {
   appSettings: 'App Info',
   privacy: 'Privacy',
   shareSessions: 'Share analytics with Opentrons',
+  move: "Move",
+  transfer: "Transfer",
+  mix: "Mix",
+  pause: "Pause",
+  heaterShaker: "Heater-shaker",
+  thermocyler: "Thermocycler",
 }
 
 export const locators = {
   import: 'Import',
   createNew: 'Create new',
   createProtocol: 'Create a protocol',
-  Flex_Home: 'Opentrons Flex',
-  OT2_Home: "Opentrons OT-2",
   editProtocol: 'Edit existing protocol',
   settingsDataTestid: 'SettingsIconButton',
   settings: 'Settings',
@@ -64,6 +70,7 @@ export const locators = {
   eula: 'a[href="https://opentrons.com/eula"]',
   privacyToggle: 'Settings_hotKeys',
   analyticsToggleTestId: 'analyticsToggle',
+  confirmButton: 'Confirm',
 }
 
 // General Custom Commands
@@ -103,15 +110,20 @@ Cypress.Commands.add('verifyCreateNewHeader', () => {
 // Home Page
 Cypress.Commands.add('verifyHomePage', () => {
   cy.contains(content.welcome)
+  cy.get(locators.privacyPolicy).should('exist').and('be.visible')
+  cy.get(locators.eula).should('exist').and('be.visible')
+  cy.contains(locators.confirmButton).click()
   cy.contains('button', locators.createProtocol).should('be.visible')
   cy.contains('label', locators.editProtocol).should('be.visible')
   cy.getByTestId(locators.settingsDataTestid).should('be.visible')
-  cy.get(locators.privacyPolicy).should('exist').and('be.visible')
-  cy.get(locators.eula).should('exist').and('be.visible')
 })
 
 Cypress.Commands.add('clickCreateNew', () => {
   cy.contains(locators.createProtocol).click()
+})
+
+Cypress.Commands.add('clickConfirm', () => {
+  cy.contains(locators.confirmButton).click()
 })
 
 // Header Import
@@ -120,21 +132,6 @@ Cypress.Commands.add('importProtocol', (protocolFilePath: string) => {
   cy.get('[data-cy="landing-page"]')
     .find('input[type=file]')
     .selectFile(protocolFilePath, { force: true })
-})
-
-Cypress.Commands.add('robotSelection',(robotName:string) =>{
-  if (robotName ==='Opentrons OT-2') {
-  cy.contains('label', locators.OT2_Home ).should('be.visible').click()
-  
-  }
-  else {
-  // Just checking that the selection modal works 
-  cy.contains('label', locators.OT2_Home ).should('be.visible').click()
-  cy.contains('label', locators.Flex_Home).should('be.visible').click()
-
-  }
-  cy.contains('button', "Confirm").should('be.visible').click()
-  
 })
 
 // Settings Page Actions
@@ -152,6 +149,15 @@ Cypress.Commands.add('verifySettingsPage', () => {
   cy.getByTestId(locators.analyticsToggleTestId)
     .should('exist')
     .should('be.visible')
+})
+
+Cypress.Commands.add('verifyOverflowBtn', () => {
+  cy.contains(content.move).should('exist').should('be.visible')
+  cy.contains(content.transfer).should('exist').should('be.visible')
+  cy.contains(content.mix).should('exist').should('be.visible')
+  cy.contains(content.pause).should('exist').should('be.visible')
+  cy.contains(content.heaterShaker).should('exist').should('be.visible')
+  cy.contains(content.thermocyler).should('exist').should('be.visible')
 })
 
 /// /////////////////////////////////////////////////////////////////
@@ -185,9 +191,7 @@ Cypress.Commands.add('openFilePage', () => {
 // Pipette Page Actions
 //
 
-Cypress.Commands.add(
-  'choosePipettes',
-  (leftPipetteSelector, rightPipetteSelector) => {
+Cypress.Commands.add('choosePipettes', (leftPipetteSelector, rightPipetteSelector) => {
     cy.get('[id="PipetteSelect_left"]').click()
     cy.get(leftPipetteSelector).click()
     cy.get('[id="PipetteSelect_right"]').click()
