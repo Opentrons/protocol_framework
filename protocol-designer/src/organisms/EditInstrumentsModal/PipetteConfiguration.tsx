@@ -41,11 +41,7 @@ import {
   PIPETTE_VOLUMES,
 } from '../../pages/CreateNewProtocolWizard/constants'
 
-import type {
-  // PipetteMount,
-  PipetteName,
-  RobotType,
-} from '@opentrons/shared-data'
+import type { PipetteName, RobotType } from '@opentrons/shared-data'
 import type { PipetteOnDeck } from '../../step-forms'
 import type {
   Gen,
@@ -264,7 +260,7 @@ export function PipetteConfiguration({
                               ? t('show_default_tips')
                               : t('show_all_tips')}
                           </StyledText>
-                        </StyledLabel>{' '}
+                        </StyledLabel>
                       </Btn>
                     )}
                   </Flex>
