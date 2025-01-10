@@ -72,8 +72,10 @@ class LabwareOffsetStore:
         # making it worse.
     ) -> list[LabwareOffset]:
         """Return all matching labware offsets in order from oldest-added to newest."""
-        statement = sqlalchemy.select(labware_offset_table).order_by(
-            labware_offset_table.c.row_id
+        statement = (
+            sqlalchemy.select(labware_offset_table)
+            .order_by(labware_offset_table.c.row_id)
+            .where(labware_offset_table.c.active == True)  # noqa: E712
         )
 
         if id_filter is not DO_NOT_FILTER:
@@ -119,11 +121,14 @@ class LabwareOffsetStore:
                 ).one()
             except sqlalchemy.exc.NoResultFound:
                 raise LabwareOffsetNotFoundError(bad_offset_id=offset_id) from None
+            if not row_to_delete.active:
+                # Already soft-deleted.
+                raise LabwareOffsetNotFoundError(bad_offset_id=offset_id)
 
             transaction.execute(
-                sqlalchemy.delete(labware_offset_table).where(
-                    labware_offset_table.c.offset_id == offset_id
-                )
+                sqlalchemy.update(labware_offset_table)
+                .where(labware_offset_table.c.offset_id == offset_id)
+                .values(active=False)
             )
 
         return _sql_to_pydantic(row_to_delete)
@@ -131,7 +136,9 @@ class LabwareOffsetStore:
     def delete_all(self) -> None:
         """Delete all labware offsets."""
         with self._sql_engine.begin() as transaction:
-            transaction.execute(sqlalchemy.delete(labware_offset_table))
+            transaction.execute(
+                sqlalchemy.update(labware_offset_table).values(active=False)
+            )
 
 
 class LabwareOffsetNotFoundError(KeyError):
