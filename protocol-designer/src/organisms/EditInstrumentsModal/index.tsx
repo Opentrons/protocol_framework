@@ -120,11 +120,12 @@ export function EditInstrumentsModal(
             </SecondaryButton>
             <PrimaryButton
               disabled={
-                page === 'add' &&
-                (pipetteVolume == null ||
-                  pipetteType == null ||
-                  pipetteGen == null ||
-                  selectedTips.length === 0)
+                (page === 'add' &&
+                  (pipetteVolume == null ||
+                    pipetteType == null ||
+                    pipetteGen == null ||
+                    selectedTips.length === 0)) ||
+                (page === 'overview' && pipettesOnDeck.length === 0)
               }
               onClick={handleOnSave}
             >
