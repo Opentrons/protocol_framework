@@ -335,8 +335,8 @@ class FlexStacker(mod_abc.AbstractModule):
         await self.close_latch()
 
         # Move platform along the Z then X axis
-        offset = (labware_height / 2 + OFFSET_MD)
-        await self._move_and_home_axis( StackerAxis.Z, Direction.RETRACT, offset)
+        offset = labware_height / 2 + OFFSET_MD
+        await self._move_and_home_axis(StackerAxis.Z, Direction.RETRACT, offset)
         await self._move_and_home_axis(StackerAxis.X, Direction.EXTENT, OFFSET_SM)
         return True
 
