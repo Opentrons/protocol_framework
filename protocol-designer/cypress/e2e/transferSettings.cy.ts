@@ -80,7 +80,11 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.ChoseDestinationLabware,
       Actions.SelectBiorad,
       Actions.SelectDestinationWells,
+      Actions.WellSelector_A1,
+      Actions.SaveSelectedWells,
+      Actions.InputTransferVolume30,
     ]
     runCreateTest(steps)
+    cy.contains('Continue').click()
   })
 })

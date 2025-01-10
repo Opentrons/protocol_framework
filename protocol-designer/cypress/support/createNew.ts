@@ -80,6 +80,7 @@ export enum Actions {
   WellSelector_A1 = 'Select A1',
   SaveSelectedWells = 'Save selected source or destination wells',
   SelectDestinationWells = 'Select Desintation wells for transfer',
+  InputTransferVolume30 = 'Input volume per well', // TODO: Please refactor for any volume input
 }
 
 export enum Verifications {
@@ -468,7 +469,9 @@ const executeAction = (action: Actions | UniversalActions): void => {
       selectWells(['A1', 'A2'])
       break
     case Actions.WellSelector_A1:
-      selectWells(['A1'])
+      cy.get('circle[data-wellname="A1"]')
+        .should('exist') // Verify the element exists
+        .click()
       break
     case Actions.LiquidDropdown: // New case for dropdown
       cy.get(Locators.LiquidsDropdown)
@@ -518,12 +521,17 @@ const executeAction = (action: Actions | UniversalActions): void => {
         .click() // Simulate a click on the input field
       break
     case Actions.SelectDestinationWells:
-      cy.contains('Select destination wells').should('be.visible')
-      cy.contains('Chose wells').click()
+      cy.get('input[name="dispense_wells"]')
+        .should('have.value', 'Choose wells') // Verify initial value
+        .click()
       break
 
     case Actions.SaveSelectedWells:
       cy.contains('Save').click()
+      break
+
+    case Actions.InputTransferVolume30:
+      cy.get('input[name="volume"]').type('30')
       break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
