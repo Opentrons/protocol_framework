@@ -87,7 +87,7 @@ def run(protocol: ProtocolContext) -> None:
     magblock: MagneticBlockContext = protocol.load_module(
         "magneticBlockV1", "C1"
     )  # type: ignore[assignment]
-    liquid_waste = protocol.load_labware("nest_1_reservoir_195ml", "B3", "Liquid Waste")
+    liquid_waste = protocol.load_labware("nest_1_reservoir_290ml", "B3", "Liquid Waste")
     waste = liquid_waste.wells()[0].top()
 
     lysis_reservoir = protocol.load_labware(deepwell_type, "D2", "Lysis reservoir")
