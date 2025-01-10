@@ -39,8 +39,12 @@ SIMULATING_POLL_PERIOD = POLL_PERIOD / 20.0
 
 DFU_PID = "df11"
 
-# Distance in mm the latch can travel to open/close
-LATCH_TRAVEL = 25.0
+# Maximum distance in mm the axis can travel.
+MAX_TRAVEL = {
+    StackerAxis.X: 192.5,
+    StackerAxis.Z: 136.0,
+    StackerAxis.L: 23.0,
+}
 
 
 class FlexStacker(mod_abc.AbstractModule):
@@ -269,10 +273,9 @@ class FlexStacker(mod_abc.AbstractModule):
         motion_params = STACKER_MOTION_CONFIG[StackerAxis.L]["move"]
         speed = velocity or motion_params.max_speed
         accel = acceleration or motion_params.acceleration
-        success = await self.move_axis(
+        success = await self.home_axis(
             StackerAxis.L,
             Direction.RETRACT,
-            distance=LATCH_TRAVEL,
             speed=speed,
             acceleration=accel,
         )
@@ -295,27 +298,74 @@ class FlexStacker(mod_abc.AbstractModule):
         motion_params = STACKER_MOTION_CONFIG[StackerAxis.L]["move"]
         speed = velocity or motion_params.max_speed
         accel = acceleration or motion_params.acceleration
+        distance = MAX_TRAVEL[StackerAxis.L]
+        # The latch only has one limit switch, so we have to travel a fixed distance
+        # to open the latch.
         success = await self.move_axis(
             StackerAxis.L,
             Direction.EXTENT,
-            distance=LATCH_TRAVEL,
+            distance=distance,
             speed=speed,
             acceleration=accel,
         )
         # Check that the latch is opened.
         await self._reader.get_limit_switch_status()
-        return (
-            success
-            and self.limit_switch_status[StackerAxis.L] == StackerAxisState.RETRACTED
-        )
+        axis_state = self.limit_switch_status[StackerAxis.L]
+        return success and axis_state == StackerAxisState.RETRACTED
 
-    # NOTE: We are defining the interface, will implement in seperate pr.
-    async def dispense(self) -> bool:
+    async def dispense_labware(self, labware_height: float) -> bool:
         """Dispenses the next labware in the stacker."""
+        await self._prepare_for_action()
+
+        # Move platform along the X then Z axis
+        await self._move_and_home_axis(StackerAxis.X, Direction.RETRACT, 5)
+        await self._move_and_home_axis(StackerAxis.Z, Direction.EXTENT, 5)
+
+        # Transfer
+        await self.open_latch()
+        await self.move_axis(StackerAxis.Z, Direction.RETRACT, (labware_height / 2) + 2)
+        await self.close_latch()
+
+        # Move platform along the Z then X axis
+        await self._move_and_home_axis(
+            StackerAxis.Z, Direction.RETRACT, (labware_height / 2 + 10)
+        )
+        await self._move_and_home_axis(StackerAxis.X, Direction.EXTENT, 5)
         return True
 
-    async def store(self) -> bool:
+    async def store_labware(self, labware_height: float) -> bool:
         """Stores a labware in the stacker."""
+        await self._prepare_for_action()
+
+        # Move X then Z axis
+        distance = MAX_TRAVEL[StackerAxis.Z] - (labware_height / 2) - 10
+        await self._move_and_home_axis(StackerAxis.X, Direction.RETRACT, 5)
+        await self.move_axis(StackerAxis.Z, Direction.EXTENT, distance)
+
+        # Transfer
+        await self.open_latch()
+        await self.move_axis(StackerAxis.Z, Direction.EXTENT, (labware_height / 2))
+        await self.home_axis(StackerAxis.Z, Direction.EXTENT)
+        await self.close_latch()
+
+        # Move Z then X axis
+        await self._move_and_home_axis(StackerAxis.Z, Direction.RETRACT, 20)
+        await self._move_and_home_axis(StackerAxis.X, Direction.EXTENT, 5)
+        return True
+
+    async def _move_and_home_axis(
+        self, axis: StackerAxis, direction: Direction, offset: float = 0
+    ) -> bool:
+        distance = MAX_TRAVEL[axis] - offset
+        await self.move_axis(axis, direction, distance)
+        return await self.home_axis(axis, direction)
+
+    async def _prepare_for_action(self) -> bool:
+        """Helper to prepare axis for dispensing or storing labware."""
+        # TODO: check if we need to home first
+        await self.home_axis(StackerAxis.X, Direction.EXTENT)
+        await self.home_axis(StackerAxis.Z, Direction.RETRACT)
+        await self.close_latch()
         return True
 
 
