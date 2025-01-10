@@ -327,31 +327,24 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 model=actual_model,
             )
         elif ModuleModel.is_heater_shaker_module_model(actual_model):
-            if live_data is None:
-                labware_latch_status = HeaterShakerLatchStatus.UNKNOWN
-            elif live_data["labwareLatchStatus"] == "idle_closed":
-                labware_latch_status = HeaterShakerLatchStatus.CLOSED
-            else:
-                labware_latch_status = HeaterShakerLatchStatus.OPEN
-            self._state.substate_by_module_id[module_id] = HeaterShakerModuleSubState(
+            self._state.substate_by_module_id[
+                module_id
+            ] = HeaterShakerModuleSubState.from_live_data(
                 module_id=HeaterShakerModuleId(module_id),
-                labware_latch_status=labware_latch_status,
-                is_plate_shaking=(
-                    live_data is not None and live_data["targetSpeed"] is not None
-                ),
-                plate_target_temperature=live_data["targetTemp"] if live_data else None,  # type: ignore[arg-type]
+                data=live_data,
             )
         elif ModuleModel.is_temperature_module_model(actual_model):
-            self._state.substate_by_module_id[module_id] = TemperatureModuleSubState(
+            self._state.substate_by_module_id[
+                module_id
+            ] = TemperatureModuleSubState.from_live_data(
                 module_id=TemperatureModuleId(module_id),
-                plate_target_temperature=live_data["targetTemp"] if live_data else None,  # type: ignore[arg-type]
+                data=live_data,
             )
         elif ModuleModel.is_thermocycler_module_model(actual_model):
-            self._state.substate_by_module_id[module_id] = ThermocyclerModuleSubState(
-                module_id=ThermocyclerModuleId(module_id),
-                is_lid_open=live_data is not None and live_data["lid"] == "open",
-                target_block_temperature=live_data["targetTemp"] if live_data else None,  # type: ignore[arg-type]
-                target_lid_temperature=live_data["lidTarget"] if live_data else None,  # type: ignore[arg-type]
+            self._state.substate_by_module_id[
+                module_id
+            ] = ThermocyclerModuleSubState.from_live_data(
+                module_id=ThermocyclerModuleId(module_id), data=live_data
             )
             self._update_additional_slots_occupied_by_thermocycler(
                 module_id=module_id, slot_name=slot_name

@@ -84,13 +84,13 @@
         "heaterShakerModuleType",
         "magneticBlockType",
         "absorbanceReaderType",
-        "flexStackerType"
+        "flexStackerModuleType"
       ],
       "type": "string"
     },
     "model": {
       "type": "string",
-      "pattern": "^(temperatureModule|magneticModule|thermocyclerModule|heaterShakerModule|magneticBlock|absorbanceReader|flexStacker)V[0-9]+$"
+      "pattern": "^(temperatureModule|magneticModule|thermocyclerModule|heaterShakerModule|magneticBlock|absorbanceReader|flexStackerModule)V[0-9]+$"
     },
     "labwareOffset": { "$ref": "#/definitions/coordinates" },
     "dimensions": {
