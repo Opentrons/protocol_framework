@@ -55,6 +55,7 @@ export function GripperIsHoldingLabware({
     // after the user has extricated the labware from the gripper jaws.
     void handleMotionRouting(true)
       .then(() => homeExceptPlungers())
+      .finally(() => handleMotionRouting(false))
       .then(() => {
         switch (selectedRecoveryOption) {
           case MANUAL_MOVE_AND_SKIP.ROUTE:
@@ -73,7 +74,6 @@ export function GripperIsHoldingLabware({
           }
         }
       })
-      .finally(() => handleMotionRouting(false))
   }
 
   const primaryOnClick = (): void => {
