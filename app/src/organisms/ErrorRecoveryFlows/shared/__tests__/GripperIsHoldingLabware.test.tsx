@@ -97,14 +97,14 @@ describe('GripperIsHoldingLabware', () => {
     })
 
     await waitFor(() => {
+      expect(mockHandleMotionRouting).toHaveBeenCalledWith(false)
+    })
+
+    await waitFor(() => {
       expect(mockProceedToRouteAndStep).toHaveBeenCalledWith(
         RECOVERY_MAP.MANUAL_MOVE_AND_SKIP.ROUTE,
         RECOVERY_MAP.MANUAL_MOVE_AND_SKIP.STEPS.MANUAL_MOVE
       )
-    })
-
-    await waitFor(() => {
-      expect(mockHandleMotionRouting).toHaveBeenCalledWith(false)
     })
   })
 
