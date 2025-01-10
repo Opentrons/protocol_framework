@@ -65,10 +65,8 @@ import {
   useRunCreatedAtTimestamp,
   useCloseCurrentRun,
   EMPTY_TIMESTAMP,
-  useCurrentRunCommands,
 } from '/app/resources/runs'
 import { handleTipsAttachedModal } from '/app/organisms/DropTipWizardFlows'
-import { lastRunCommandPromptedErrorRecovery } from '/app/local-resources/commands'
 import { useTipAttachmentStatus } from '/app/resources/instruments'
 
 import type { IconName } from '@opentrons/components'
@@ -236,21 +234,9 @@ export function RunSummary(): JSX.Element {
     runRecord: runRecord ?? null,
   })
 
-  // Determine tip status on initial render only. Error Recovery always handles tip status, so don't show it twice.
-  const runSummaryNoFixit = useCurrentRunCommands({
-    includeFixitCommands: false,
-    pageLength: 1,
-  })
   useEffect(() => {
-    if (
-      isRunCurrent &&
-      runSummaryNoFixit != null &&
-      runSummaryNoFixit.length > 0 &&
-      !lastRunCommandPromptedErrorRecovery(runSummaryNoFixit)
-    ) {
-      void determineTipStatus()
-    }
-  }, [runSummaryNoFixit, isRunCurrent])
+    void determineTipStatus()
+  }, [])
 
   const returnToQuickTransfer = (): void => {
     closeCurrentRunIfValid(() => {
