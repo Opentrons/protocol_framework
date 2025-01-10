@@ -1,6 +1,7 @@
 """Executor for liquid class based complex commands."""
 from __future__ import annotations
 
+from copy import deepcopy
 from enum import Enum
 from typing import TYPE_CHECKING, Optional, Union
 from dataclasses import dataclass, field
@@ -105,7 +106,7 @@ class TransferComponentsExecutor:
         self._transfer_properties = transfer_properties
         self._target_location = target_location
         self._target_well = target_well
-        self._tip_state: TipState = tip_state
+        self._tip_state: TipState = deepcopy(tip_state)  # don't modify caller's object
         self._transfer_type: TransferType = transfer_type
 
     @property
