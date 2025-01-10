@@ -49,7 +49,6 @@ export enum Actions {
   SelectArmadillo96WellPlateDefinition = 'Select Armadillo 96 Well Plate to define it on deck',
   SelectArmadillo96WellPlateTransfer = 'Select Select Armadillo 96 Well Plate for transfer',
   SelectBioRad96WellPlateDefinition = 'Select Bio-Rad 96 Well Plate to define it on deck',
-  SelectBioRad96WellPlateTransfer = 'Select Bio-Rad 96 Well Plate to define it on deck',
   AddLiquid = 'Add liquid',
   DefineLiquid = 'Define a liquid',
   ClickLiquidButton = 'Click Liquid button',
@@ -77,6 +76,10 @@ export enum Actions {
   ChoseSourceLabware = 'Chose source labware dropdown',
   ChoseDestinationLabware = 'Chose desitination labware',
   SourceWellPopout = 'Brings you to selecting the wells',
+  SelectBiorad = 'Biorad source transfer',
+  WellSelector_A1 = 'Select A1',
+  SaveSelectedWells = 'Save selected source or destination wells',
+  SelectDestinationWells = 'Select Desintation wells for transfer',
 }
 
 export enum Verifications {
@@ -464,6 +467,9 @@ const executeAction = (action: Actions | UniversalActions): void => {
     case Actions.WellSelector:
       selectWells(['A1', 'A2'])
       break
+    case Actions.WellSelector_A1:
+      selectWells(['A1'])
+      break
     case Actions.LiquidDropdown: // New case for dropdown
       cy.get(Locators.LiquidsDropdown)
         .should('be.visible') // Ensure the dropdown is visible
@@ -486,10 +492,8 @@ const executeAction = (action: Actions | UniversalActions): void => {
     case Actions.SelectArmadillo96WellPlateTransfer: // New case for selecting Armadillo plate
       cy.contains(Content.Armadillo96WellPlate200uL).click({ force: true })
       break
-    case Actions.SelectBioRad96WellPlateTransfer: // New case for selecting Armadillo plate
-      cy.contains('Bio-Rad 96 Well Plate 200 µL PCR in C3').click({
-        force: true,
-      })
+    case Actions.SelectBiorad: // New case for selecting Armadillo plate
+      cy.contains('Bio-Rad 96 Well Plate 200 µL PCR').click({ force: true })
       break
     case Actions.SelectTransfer:
       cy.contains('button', 'Transfer').should('be.visible').click()
@@ -512,6 +516,14 @@ const executeAction = (action: Actions | UniversalActions): void => {
       cy.get(Locators.AspirateWells) // Use the `name` attribute
         .should('have.value', 'Choose wells') // Verify the initial value
         .click() // Simulate a click on the input field
+      break
+    case Actions.SelectDestinationWells:
+      cy.contains('Select destination wells').should('be.visible')
+      cy.contains('Chose wells').click()
+      break
+
+    case Actions.SaveSelectedWells:
+      cy.contains('Save').click()
       break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
