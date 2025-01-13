@@ -53,7 +53,8 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
         stacker = self._equipment.get_module_hardware_api(stacker_substate.module_id)
 
         if stacker is not None:
-            await stacker.store()
+            # TODO: get labware height from labware state view
+            await stacker.store_labware(labware_height=50.0)
 
         return SuccessData(public=StoreResult(), state_update=state_update)
 
