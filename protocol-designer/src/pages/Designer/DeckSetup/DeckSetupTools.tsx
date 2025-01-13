@@ -68,15 +68,12 @@ import { getSlotInformation } from '../utils'
 import { ALL_ORDERED_CATEGORIES, FIXTURES, MOAM_MODELS } from './constants'
 import { LabwareTools } from './LabwareTools'
 import { MagnetModuleChangeContent } from './MagnetModuleChangeContent'
-import {
-  getModuleModelsBySlot,
-  getDeckErrors,
-  ModuleModelsExtended,
-} from './utils'
+import { getModuleModelsBySlot, getDeckErrors } from './utils'
 
 import type { AddressableAreaName, ModuleModel } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../../types'
 import type { Fixture } from './constants'
+import type { ModuleModelsExtended } from './utils'
 
 const mapModTypeToStepType: Record<string, string> = {
   heaterShakerModuleType: 'heaterShaker',

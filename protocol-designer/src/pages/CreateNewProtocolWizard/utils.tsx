@@ -33,8 +33,7 @@ import type { AdditionalEquipment, WizardFormState } from './types'
 const TOTAL_OUTER_SLOTS = 8
 const MIDDLE_SLOT_NUM = 4
 const MAX_MAGNETIC_BLOCK_SLOTS = 12
-const TOTAL_OUTER_RIGHT_SLOTS = 4
-const TOTAL_OUTER_LEFT_SLOTS = 4
+const TOTAL_LEFT_SLOTS = 4
 export const getNumOptions = (length: number): DropdownOption[] => {
   return Array.from({ length }, (_, i) => ({
     name: `${i + 1}`,
@@ -64,8 +63,8 @@ export const getNumSlotsAvailable = (
     module => module.type === MAGNETIC_BLOCK_TYPE
   )
   const magneticBlockCount = magneticBlocks.length
-
-  let filteredModuleLength = modules != null ? Object.keys(modules).length : 0
+  const moduleCount = modules != null ? Object.keys(modules).length : 0
+  let filteredModuleLength = moduleCount
   if (magneticBlockCount <= MIDDLE_SLOT_NUM) {
     // Subtract magnetic blocks directly if their count is ≤ 4
     filteredModuleLength -= magneticBlockCount
@@ -113,19 +112,19 @@ export const getNumSlotsAvailable = (
         (filteredModuleLength + filteredAdditionalEquipmentLength)
       )
     }
-    //  TODO: need to do additional overhaul for this logic
-    //  it mostly works but still some edge cases - seems like it's not properly subtracting mag blocks 
-    //  that go into the 3rd column for the staging area to be added as well
+
     case 'stagingArea': {
-      const adjustedModuleLength =
-        filteredModuleLength > 4
-          ? filteredModuleLength - TOTAL_OUTER_LEFT_SLOTS
-          : 0
+      const lengthMinusMagneticBlock =
+        moduleCount + (hasTC ? 1 : 0) - magneticBlockCount
+      let adjustedModuleLength = 0
+      if (lengthMinusMagneticBlock > TOTAL_LEFT_SLOTS) {
+        adjustedModuleLength = lengthMinusMagneticBlock - TOTAL_LEFT_SLOTS
+      }
 
       const occupiedSlots =
         adjustedModuleLength + filteredAdditionalEquipmentLength
 
-      return TOTAL_OUTER_RIGHT_SLOTS - occupiedSlots
+      return TOTAL_LEFT_SLOTS - occupiedSlots
     }
     case 'wasteChute': {
       const adjustmentForStagingArea = numStagingAreas >= 1 ? 1 : 0
