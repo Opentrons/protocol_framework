@@ -581,7 +581,11 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                             />
                             <StyledText desktopStyle="bodyDefaultRegular">
                               {model === 'stagingAreaAndMagneticBlock'
-                                ? 'Magnetic Block and Staging Area'
+                                ? t('shared:magneticBlockAndStagingArea', {
+                                    module: getModuleDisplayName(
+                                      MAGNETIC_BLOCK_V1
+                                    ),
+                                  })
                                 : getModuleDisplayName(selectedModel)}
                             </StyledText>
                           </Flex>
