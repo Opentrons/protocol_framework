@@ -3,7 +3,7 @@
 
 from datetime import datetime
 import textwrap
-from typing import Annotated, Literal, Type
+from typing import Annotated, Literal
 
 import fastapi
 from pydantic import Json
@@ -24,7 +24,12 @@ from robot_server.service.json_api.response import (
     SimpleMultiBody,
 )
 
-from .store import DO_NOT_FILTER, LabwareOffsetNotFoundError, LabwareOffsetStore
+from .store import (
+    DO_NOT_FILTER,
+    DoNotFilterType,
+    LabwareOffsetNotFoundError,
+    LabwareOffsetStore,
+)
 from .fastapi_dependencies import get_labware_offset_store
 
 
@@ -78,11 +83,11 @@ async def post_labware_offset(  # noqa: D103
 async def get_labware_offsets(  # noqa: D103
     store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)],
     id: Annotated[
-        Json[str] | SkipJsonSchema[Type[DO_NOT_FILTER]],
+        Json[str] | SkipJsonSchema[DoNotFilterType],
         fastapi.Query(description="Filter for exact matches on the `id` field."),
     ] = DO_NOT_FILTER,
     definition_uri: Annotated[
-        Json[str] | SkipJsonSchema[Type[DO_NOT_FILTER]],
+        Json[str] | SkipJsonSchema[DoNotFilterType],
         fastapi.Query(
             alias="definitionUri",
             description=(
@@ -92,21 +97,21 @@ async def get_labware_offsets(  # noqa: D103
         ),
     ] = DO_NOT_FILTER,
     location_slot_name: Annotated[
-        Json[DeckSlotName] | SkipJsonSchema[Type[DO_NOT_FILTER]],
+        Json[DeckSlotName] | SkipJsonSchema[DoNotFilterType],
         fastapi.Query(
             alias="locationSlotName",
             description="Filter for exact matches on the `location.slotName` field.",
         ),
     ] = DO_NOT_FILTER,
     location_module_model: Annotated[
-        Json[ModuleModel | None] | SkipJsonSchema[Type[DO_NOT_FILTER]],
+        Json[ModuleModel | None] | SkipJsonSchema[DoNotFilterType],
         fastapi.Query(
             alias="locationModuleModel",
             description="Filter for exact matches on the `location.moduleModel` field.",
         ),
     ] = DO_NOT_FILTER,
     location_definition_uri: Annotated[
-        Json[str | None] | SkipJsonSchema[Type[DO_NOT_FILTER]],
+        Json[str | None] | SkipJsonSchema[DoNotFilterType],
         fastapi.Query(
             alias="locationDefinitionUri",
             description=(
