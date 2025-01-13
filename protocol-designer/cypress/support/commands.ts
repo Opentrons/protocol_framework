@@ -73,7 +73,6 @@ export const locators = {
   privacyToggle: 'Settings_hotKeys',
   analyticsToggleTestId: 'analyticsToggle',
   confirm: 'Confirm',
-  confirmButton: 'Confirm',
 }
 
 // General Custom Commands
@@ -115,7 +114,7 @@ Cypress.Commands.add('verifyHomePage', () => {
   cy.contains(content.welcome)
   cy.get(locators.privacyPolicy).should('exist').and('be.visible')
   cy.get(locators.eula).should('exist').and('be.visible')
-  cy.contains(locators.confirmButton).click()
+  cy.contains(locators.confirm).click()
   cy.contains('button', locators.createProtocol).should('be.visible')
   cy.contains('label', locators.importProtocol).should('be.visible')
   cy.getByTestId(locators.settingsDataTestid).should('be.visible')
@@ -133,7 +132,7 @@ Cypress.Commands.add('closeAnalyticsModal', () => {
 })
 
 Cypress.Commands.add('clickConfirm', () => {
-  cy.contains(locators.confirmButton).click()
+  cy.contains(locators.confirm).click()
 })
 
 // Header Import
