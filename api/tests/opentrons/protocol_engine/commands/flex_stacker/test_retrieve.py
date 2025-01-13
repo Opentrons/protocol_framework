@@ -27,9 +27,7 @@ async def test_retrieve(
     fs_hardware = decoy.mock(cls=FlexStacker)
 
     decoy.when(
-        state_view.modules.get_flex_stacker_substate(
-            module_id="flex-stacker-id"
-        )
+        state_view.modules.get_flex_stacker_substate(module_id="flex-stacker-id")
     ).then_return(fs_module_substate)
 
     decoy.when(fs_module_substate.module_id).then_return(

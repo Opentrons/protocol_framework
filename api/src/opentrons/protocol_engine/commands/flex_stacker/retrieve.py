@@ -51,7 +51,6 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
         # Allow propagation of ModuleNotAttachedError.
         stacker = self._equipment.get_module_hardware_api(stacker_substate.module_id)
 
-
         if stacker is not None:
             # TODO: get labware height from labware state view
             await stacker.dispense_labware(labware_height=50.0)
