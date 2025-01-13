@@ -5,6 +5,10 @@ import { useCreateLabwareOffsetMutation } from '@opentrons/react-api-client'
 import type { LabwareOffsetCreateData } from '@opentrons/api-client'
 import type { UseLPCCommandChildProps } from './types'
 
+export interface UseApplyLPCOffsetsProps extends UseLPCCommandChildProps {
+  setErrorMessage: (msg: string | null) => void
+}
+
 export interface UseApplyLPCOffsetsResult {
   handleApplyOffsets: (offsets: LabwareOffsetCreateData[]) => void
   isApplyingOffsets: boolean
@@ -13,7 +17,8 @@ export interface UseApplyLPCOffsetsResult {
 export function useApplyLPCOffsets({
   onCloseClick,
   runId,
-}: UseLPCCommandChildProps): UseApplyLPCOffsetsResult {
+  setErrorMessage,
+}: UseApplyLPCOffsetsProps): UseApplyLPCOffsetsResult {
   const [isApplyingOffsets, setIsApplyingOffsets] = useState<boolean>(false)
 
   const { createLabwareOffset } = useCreateLabwareOffsetMutation()
@@ -26,7 +31,7 @@ export function useApplyLPCOffsets({
         setIsApplyingOffsets(false)
       })
       .catch((e: Error) => {
-        throw new Error(`error applying labware offsets: ${e.message}`)
+        setErrorMessage(`Error applying labware offsets: ${e.message}`)
       })
   }
 

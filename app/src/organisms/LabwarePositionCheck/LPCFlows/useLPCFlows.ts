@@ -62,7 +62,6 @@ export function useLPCFlows({
   } = useCreateMaintenanceRunLabwareDefinitionMutation()
   const { deleteMaintenanceRun } = useDeleteMaintenanceRunMutation()
   useRunLoadedLabwareDefinitions(runId, {
-    // TOME TODO: Ideally we don't have to do this POST, since the server has the defs already?
     onSuccess: res => {
       void Promise.all(
         res.data.map(def => {

@@ -1,13 +1,7 @@
-import { useMemo } from 'react'
 import styled, { css } from 'styled-components'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 
-import {
-  getVectorDifference,
-  getVectorSum,
-  IDENTITY_VECTOR,
-} from '@opentrons/shared-data'
 import {
   ALIGN_CENTER,
   ALIGN_FLEX_END,
@@ -29,10 +23,8 @@ import { PythonLabwareOffsetSnippet } from '/app/molecules/PythonLabwareOffsetSn
 import { getIsLabwareOffsetCodeSnippetsOn } from '/app/redux/config'
 import { SmallButton } from '/app/atoms/buttons'
 import { LabwareOffsetTabs } from '/app/organisms/LabwareOffsetTabs'
-import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
 import { TableComponent } from './TableComponent'
 
-import type { LabwareOffsetCreateData } from '@opentrons/api-client'
 import type {
   LPCStepProps,
   ResultsSummaryStep,
@@ -45,51 +37,18 @@ const LPC_HELP_LINK_URL =
 export function ResultsSummary(
   props: LPCStepProps<ResultsSummaryStep>
 ): JSX.Element {
-  const { existingOffsets, commandUtils, state } = props
-  const { protocolData, isOnDevice, workingOffsets } = state
-  const { isApplyingOffsets, handleApplyOffsets } = commandUtils
+  const { commandUtils, state } = props
+  const { protocolData, isOnDevice } = state
+  const {
+    isApplyingOffsets,
+    handleApplyOffsets,
+    buildOffsetsToApply,
+  } = commandUtils
   const { i18n, t } = useTranslation('labware_position_check')
+  const offsetsToApply = buildOffsetsToApply()
   const isLabwareOffsetCodeSnippetsOn = useSelector(
     getIsLabwareOffsetCodeSnippetsOn
   )
-
-  // TOME: TODO: I believe this should be in a utility fn.
-  //  The one tricky thing here is handling the error, because you want to bubble this.
-  //  Just make this a command AND a selector. You have access to state.
-  const offsetsToApply = useMemo(() => {
-    return workingOffsets.map<LabwareOffsetCreateData>(
-      ({ initialPosition, finalPosition, labwareId, location }) => {
-        const definitionUri =
-          protocolData.labware.find(l => l.id === labwareId)?.definitionUri ??
-          null
-        if (
-          finalPosition == null ||
-          initialPosition == null ||
-          definitionUri == null
-        ) {
-          throw new Error(
-            `cannot create offset for labware with id ${labwareId}, in location ${JSON.stringify(
-              location
-            )}, with initial position ${String(
-              initialPosition
-            )}, and final position ${String(finalPosition)}`
-          )
-        }
-
-        const existingOffset =
-          getCurrentOffsetForLabwareInLocation(
-            existingOffsets,
-            definitionUri,
-            location
-          )?.vector ?? IDENTITY_VECTOR
-        const vector = getVectorSum(
-          existingOffset,
-          getVectorDifference(finalPosition, initialPosition)
-        )
-        return { definitionUri, location, vector }
-      }
-    )
-  }, [workingOffsets])
 
   return (
     <Flex css={PARENT_CONTAINER_STYLE}>

@@ -32,6 +32,8 @@ export function LiveOffsetValue(
   const { x, y, z, state, ...styleProps } = props
   const { i18n, t } = useTranslation('labware_position_check')
 
+  // TOME TODO: Pull these out into their own CSS styles.
+
   return (
     <Flex
       flexDirection={DIRECTION_COLUMN}

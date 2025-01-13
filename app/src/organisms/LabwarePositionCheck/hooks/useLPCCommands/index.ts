@@ -9,7 +9,8 @@ import { useHandleStartLPC } from './useHandleStartLPC'
 import { useHandlePrepModules } from './useHandlePrepModules'
 import { useHandleConfirmLwModulePlacement } from './useHandleConfirmLwModulePlacement'
 import { useHandleConfirmLwFinalPosition } from './useHandleConfirmLwFinalPosition'
-import { useHandleResetLwModulesOnDeck } from '/app/organisms/LabwarePositionCheck/hooks/useLPCCommands/useHandleResetLwModulesOnDeck'
+import { useHandleResetLwModulesOnDeck } from './useHandleResetLwModulesOnDeck'
+import { useBuildOffsetsToApply } from './useBuildOffsetsToApply'
 
 import type { CreateCommand } from '@opentrons/shared-data'
 import type { CommandData } from '@opentrons/api-client'
@@ -24,6 +25,7 @@ import type { UseHandleConfirmPositionResult } from './useHandleConfirmLwFinalPo
 import type { UseHandleResetLwModulesOnDeckResult } from './useHandleResetLwModulesOnDeck'
 import type { LPCWizardFlexProps } from '/app/organisms/LabwarePositionCheck/LPCWizardFlex'
 import type { LPCWizardState } from '/app/organisms/LabwarePositionCheck/redux'
+import type { UseBuildOffsetsToApplyResult } from './useBuildOffsetsToApply'
 
 export interface UseLPCCommandsProps extends LPCWizardFlexProps {
   state: LPCWizardState
@@ -37,6 +39,7 @@ export type UseLPCCommandsResult = UseApplyLPCOffsetsResult &
   UseHandlePrepModulesResult &
   UseHandleConfirmPlacementResult &
   UseHandleConfirmPositionResult &
+  UseBuildOffsetsToApplyResult &
   UseHandleResetLwModulesOnDeckResult & {
     errorMessage: string | null
     isRobotMoving: boolean
@@ -66,7 +69,8 @@ export function useLPCCommands(
       return Promise.resolve([])
     })
 
-  const applyLPCOffsetsUtils = useApplyLPCOffsets(props)
+  const applyLPCOffsetsUtils = useApplyLPCOffsets({ ...props, setErrorMessage })
+  const buildLPCOffsets = useBuildOffsetsToApply({ ...props, setErrorMessage })
   const handleJogUtils = useHandleJog({ ...props, setErrorMessage })
   const handleConditionalCleanupUtils = useHandleConditionalCleanup(props)
   const handleProbeCommands = useHandleProbeCommands({
@@ -94,6 +98,7 @@ export function useLPCCommands(
     errorMessage,
     isRobotMoving,
     ...applyLPCOffsetsUtils,
+    ...buildLPCOffsets,
     ...handleJogUtils,
     ...handleConditionalCleanupUtils,
     ...handleProbeCommands,

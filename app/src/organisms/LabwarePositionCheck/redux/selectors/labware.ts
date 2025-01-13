@@ -5,6 +5,8 @@ import {
   getIsTiprack,
   getLabwareDisplayName,
   getLabwareDefURI,
+  getVectorSum,
+  getVectorDifference,
   IDENTITY_VECTOR,
 } from '@opentrons/shared-data'
 
@@ -59,6 +61,47 @@ export const selectActiveLwExistingOffset = (
     )
   }
 }
+
+export const selectOffsetsToApply = createSelector(
+  (state: LPCWizardState) => state.workingOffsets,
+  (state: LPCWizardState) => state.protocolData,
+  (state: LPCWizardState) => state.existingOffsets,
+  (workingOffsets, protocolData, existingOffsets) => {
+    return workingOffsets.map(
+      ({ initialPosition, finalPosition, labwareId, location }) => {
+        const definitionUri =
+          protocolData.labware.find(l => l.id === labwareId)?.definitionUri ??
+          null
+
+        if (
+          finalPosition == null ||
+          initialPosition == null ||
+          definitionUri == null
+        ) {
+          throw new Error(
+            `cannot create offset for labware with id ${labwareId}, in location ${JSON.stringify(
+              location
+            )}, with initial position ${String(
+              initialPosition
+            )}, and final position ${String(finalPosition)}`
+          )
+        } else {
+          const existingOffset =
+            getCurrentOffsetForLabwareInLocation(
+              existingOffsets,
+              definitionUri,
+              location
+            )?.vector ?? IDENTITY_VECTOR
+          const vector = getVectorSum(
+            existingOffset,
+            getVectorDifference(finalPosition, initialPosition)
+          )
+          return { definitionUri, location, vector }
+        }
+      }
+    )
+  }
+)
 
 export const selectIsActiveLwTipRack = (state: LPCWizardState): boolean => {
   if ('labwareId' in state.steps.current) {
