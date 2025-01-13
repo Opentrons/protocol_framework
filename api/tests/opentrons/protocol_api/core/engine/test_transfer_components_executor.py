@@ -634,12 +634,14 @@ def test_retract_after_dispense_with_blowout_in_source(
             speed=None,
         ),
         mock_instrument_core.prepare_to_aspirate(),
-        mock_instrument_core.air_gap_in_place(
-            volume=air_gap_volume, flow_rate=air_gap_volume
+        *(
+            add_final_air_gap
+            and [mock_instrument_core.air_gap_in_place(volume=air_gap_volume, flow_rate=air_gap_volume)]
+            or []
+        ),
+        *(
+            add_final_air_gap and [mock_instrument_core.delay(0.2)] or []
         )
-        if add_final_air_gap is True
-        else None,
-        mock_instrument_core.delay(0.2) if add_final_air_gap is True else None,
     )
 
 
