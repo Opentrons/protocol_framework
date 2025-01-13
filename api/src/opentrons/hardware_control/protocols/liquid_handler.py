@@ -224,3 +224,13 @@ class LiquidHandler(
         volume: float,
     ) -> None:
         ...
+
+    async def dispense_while_tracking(
+        self,
+        mount: MountArgType,
+        z_distance: float,
+        flow_rate: float,
+        volume: float,
+        push_out: Optional[float],
+    ) -> None:
+        ...

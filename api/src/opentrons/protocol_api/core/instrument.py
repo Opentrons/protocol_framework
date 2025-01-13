@@ -52,6 +52,8 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
             rate: The rate for how quickly to aspirate.
             flow_rate: The flow rate in µL/s to aspirate at.
             in_place: Whether this is in-place.
+            is_meniscus: whether the aspirate location specified is relative to a liquid meniscus.
+            is_tracking: whether the z motor is to move with the liquid meniscus.
         """
         ...
 
@@ -66,6 +68,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         in_place: bool,
         push_out: Optional[float],
         is_meniscus: Optional[bool] = None,
+        is_tracking: Optional[bool] = None,
     ) -> None:
         """Dispense a given volume of liquid into the specified location.
         Args:
@@ -76,6 +79,8 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
             flow_rate: The flow rate in µL/s to dispense at.
             in_place: Whether this is in-place.
             push_out: The amount to push the plunger below bottom position.
+            is_meniscus: whether the aspirate location specified is relative to a liquid meniscus.
+            is_tracking: whether the z motor is to move with the liquid meniscus.
         """
         ...
 

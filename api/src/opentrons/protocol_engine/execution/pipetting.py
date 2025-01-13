@@ -56,6 +56,17 @@ class PipettingHandler(TypingProtocol):
     ) -> float:
         """Set flow-rate and aspirate while tracking."""
 
+    async def dispense_while_tracking(
+        self,
+        pipette_id: str,
+        labware_id: str,
+        well_name: str,
+        volume: float,
+        flow_rate: float,
+        push_out: Optional[float],
+    ) -> float:
+        """Set flow-rate and dispense while tracking."""
+
     async def dispense_in_place(
         self,
         pipette_id: str,
@@ -129,6 +140,23 @@ class HardwarePipettingHandler(PipettingHandler):
         )
         return _hw_pipette, _adjusted_volume
 
+    def get_hw_dispense_params(
+        self,
+        pipette_id: str,
+        volume: float,
+    ) -> Tuple[HardwarePipette, float]:
+        """Get params for hardware dispense."""
+        _adjusted_volume = _validate_dispense_volume(
+            state_view=self._state_view,
+            pipette_id=pipette_id,
+            dispense_volume=volume,
+        )
+        _hw_pipette = self._state_view.pipettes.get_hardware_pipette(
+            pipette_id=pipette_id,
+            attached_pipettes=self._hardware_api.attached_instruments,
+        )
+        return _hw_pipette, _adjusted_volume
+
     async def aspirate_while_tracking(
         self,
         pipette_id: str,
@@ -159,6 +187,39 @@ class HardwarePipettingHandler(PipettingHandler):
                 z_distance=aspirate_z_distance,
                 flow_rate=flow_rate,
                 volume=adjusted_volume,
+            )
+
+        return adjusted_volume
+
+    async def dispense_while_tracking(
+        self,
+        pipette_id: str,
+        labware_id: str,
+        well_name: str,
+        volume: float,
+        flow_rate: float,
+        push_out: Optional[float],
+    ) -> float:
+        """Set flow-rate and dispense.
+
+        Raises:
+            PipetteOverpressureError, propagated as-is from the hardware controller.
+        """
+        # get mount and config data from state and hardware controller
+        hw_pipette, adjusted_volume = self.get_hw_dispense_params(pipette_id, volume)
+
+        dispense_z_distance = self._state_view.geometry.get_liquid_handling_z_change(
+            labware_id=labware_id,
+            well_name=well_name,  # make sure the protocol engine actually has the well name atp ?
+            operation_volume=volume,
+        )
+        with self._set_flow_rate(pipette=hw_pipette, dispense_flow_rate=flow_rate):
+            await self._hardware_api.dispense_while_tracking(
+                mount=hw_pipette.mount,
+                z_distance=dispense_z_distance,
+                flow_rate=flow_rate,
+                volume=adjusted_volume,
+                push_out=push_out,
             )
 
         return adjusted_volume
@@ -194,13 +255,7 @@ class HardwarePipettingHandler(PipettingHandler):
         push_out: Optional[float],
     ) -> float:
         """Dispense liquid without moving the pipette."""
-        adjusted_volume = _validate_dispense_volume(
-            state_view=self._state_view, pipette_id=pipette_id, dispense_volume=volume
-        )
-        hw_pipette = self._state_view.pipettes.get_hardware_pipette(
-            pipette_id=pipette_id,
-            attached_pipettes=self._hardware_api.attached_instruments,
-        )
+        hw_pipette, adjusted_volume = self.get_hw_dispense_params(pipette_id, volume)
         # TODO (tz, 8-23-23): add a check for push_out not larger that the max volume allowed when working on this https://opentrons.atlassian.net/browse/RSS-329
         if push_out and push_out < 0:
             raise InvalidPushOutVolumeError(
@@ -370,6 +425,18 @@ class VirtualPipettingHandler(PipettingHandler):
         command_note_adder: CommandNoteAdder,
     ) -> float:
         """Aspirate while moving the z stage with the liquid meniscus."""
+        return 0.0
+
+    async def dispense_while_tracking(
+        self,
+        pipette_id: str,
+        labware_id: str,
+        well_name: str,
+        volume: float,
+        flow_rate: float,
+        push_out: Optional[float],
+    ) -> float:
+        """Dispense while moving the z stage with the liquid meniscus."""
         return 0.0
 
 

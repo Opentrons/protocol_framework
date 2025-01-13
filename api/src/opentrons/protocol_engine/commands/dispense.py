@@ -16,6 +16,8 @@ from .pipetting_common import (
     BaseLiquidHandlingResult,
     OverpressureError,
     dispense_in_place,
+    dispense_while_tracking,
+    IsTrackingMixin,
 )
 from .movement_common import (
     LiquidHandlingWellLocationMixin,
@@ -45,7 +47,11 @@ def _remove_default(s: dict[str, Any]) -> None:
 
 
 class DispenseParams(
-    PipetteIdMixin, DispenseVolumeMixin, FlowRateMixin, LiquidHandlingWellLocationMixin
+    PipetteIdMixin,
+    DispenseVolumeMixin,
+    FlowRateMixin,
+    LiquidHandlingWellLocationMixin,
+    IsTrackingMixin,
 ):
     """Payload required to dispense to a specific well."""
 
@@ -89,7 +95,6 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
         well_location = params.wellLocation
         labware_id = params.labwareId
         well_name = params.wellName
-        volume = params.volume
 
         # TODO(pbm, 10-15-24): call self._state_view.geometry.validate_dispense_volume_into_well()
 
@@ -100,24 +105,44 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
             labware_id=labware_id,
             well_name=well_name,
             well_location=well_location,
+            is_tracking=params.is_tracking,
         )
         if isinstance(move_result, DefinedErrorData):
             return move_result
-        dispense_result = await dispense_in_place(
-            pipette_id=params.pipetteId,
-            volume=volume,
-            flow_rate=params.flowRate,
-            push_out=params.pushOut,
-            location_if_error={
-                "retryLocation": (
-                    move_result.public.position.x,
-                    move_result.public.position.y,
-                    move_result.public.position.z,
-                )
-            },
-            pipetting=self._pipetting,
-            model_utils=self._model_utils,
-        )
+        if params.is_tracking:
+            dispense_result = await dispense_while_tracking(
+                pipette_id=params.pipetteId,
+                labware_id=labware_id,
+                well_name=well_name,
+                volume=params.volume,
+                flow_rate=params.flowRate,
+                push_out=params.pushOut,
+                location_if_error={
+                    "retryLocation": (
+                        move_result.public.position.x,
+                        move_result.public.position.y,
+                        move_result.public.position.z,
+                    )
+                },
+                pipetting=self._pipetting,
+                model_utils=self._model_utils,
+            )
+        else:
+            dispense_result = await dispense_in_place(
+                pipette_id=params.pipetteId,
+                volume=params.volume,
+                flow_rate=params.flowRate,
+                push_out=params.pushOut,
+                location_if_error={
+                    "retryLocation": (
+                        move_result.public.position.x,
+                        move_result.public.position.y,
+                        move_result.public.position.z,
+                    )
+                },
+                pipetting=self._pipetting,
+                model_utils=self._model_utils,
+            )
 
         if isinstance(dispense_result, DefinedErrorData):
             return DefinedErrorData(

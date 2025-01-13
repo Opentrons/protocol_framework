@@ -3008,6 +3008,50 @@ class OT3API(
         else:
             aspirate_spec.instr.add_current_volume(aspirate_spec.volume)
 
+    async def dispense_while_tracking(
+        self,
+        mount: Union[top_types.Mount, OT3Mount],
+        z_distance: float,
+        flow_rate: float,
+        volume: float,
+        push_out: Optional[float],
+    ) -> None:
+        """
+        Aspirate a volume of liquid (in microliters/uL) using this pipette."""
+        realmount = OT3Mount.from_mount(mount)
+        dispense_spec = self._pipette_handler.plan_check_dispense(
+            realmount, volume, flow_rate, push_out
+        )
+        if not dispense_spec:
+            return
+
+        target_pos = target_positions_from_plunger_tracking(
+            realmount,
+            dispense_spec.plunger_distance,
+            z_distance,
+            self._current_position,
+        )
+
+        try:
+            await self._backend.set_active_current(
+                {dispense_spec.axis: dispense_spec.current}
+            )
+            async with self.restore_system_constrants():
+                await self.set_system_constraints_for_plunger_acceleration(
+                    realmount, dispense_spec.acceleration
+                )
+                await self._move(
+                    target_pos,
+                    speed=dispense_spec.speed,
+                    home_flagged_axes=False,
+                )
+        except Exception:
+            self._log.exception("dispense failed")
+            dispense_spec.instr.set_current_volume(0)
+            raise
+        else:
+            dispense_spec.instr.add_current_volume(dispense_spec.volume)
+
     @property
     def attached_subsystems(self) -> Dict[SubSystem, SubSystemState]:
         """Get a view of the state of the currently-attached subsystems."""
