@@ -32,7 +32,6 @@ from opentrons.types import (
     AxisType,
     AxisMapType,
     StringAxisMap,
-    Point,
 )
 from opentrons.hardware_control.modules.types import (
     ModuleModel,
@@ -699,7 +698,7 @@ def ensure_valid_trash_location_for_transfer_v2(
     if isinstance(trash_location, TrashBin) or isinstance(trash_location, WasteChute):
         return trash_location
     elif isinstance(trash_location, Well):
-        return Location(Point(), labware=trash_location)
+        return trash_location.top()
     elif isinstance(trash_location, Location):
         _, maybe_well = trash_location.labware.get_parent_labware_and_well()
 

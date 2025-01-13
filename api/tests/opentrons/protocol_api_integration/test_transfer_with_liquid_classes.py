@@ -190,7 +190,8 @@ def test_order_of_water_transfer_steps(
                 source=mock.ANY,
                 transfer_properties=mock.ANY,
                 transfer_type=TransferType.ONE_TO_ONE,
-                tip_contents=[LiquidAndAirGapPair(liquid=0, air_gap=0.1)],
+                tip_contents=[LiquidAndAirGapPair(liquid=40, air_gap=0.1)],
+                add_final_air_gap=True,
                 trash_location=mock.ANY,
             ),
             mock.call.drop_tip_in_disposal_location(
@@ -222,6 +223,7 @@ def test_order_of_water_transfer_steps(
                 transfer_properties=mock.ANY,
                 transfer_type=TransferType.ONE_TO_ONE,
                 tip_contents=[LiquidAndAirGapPair(liquid=40, air_gap=0.1)],
+                add_final_air_gap=True,
                 trash_location=mock.ANY,
             ),
             mock.call.drop_tip_in_disposal_location(
