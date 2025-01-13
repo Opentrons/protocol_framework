@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from numpy import interp
-from typing import Optional, Dict, Sequence, Tuple, List
+from typing import Optional, Dict, Sequence, Tuple, List, Any
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     AspirateProperties as SharedDataAspirateProperties,
@@ -84,7 +84,20 @@ class LiquidHandlingPropertyByVolume:
 
 
 @dataclass
-class DelayProperties:
+class _BaseProperties:
+    def __setattr__(self, key: str, value: Any) -> None:
+        # This is very hacky but since the purpose of this check is to prevent user errors when setting properties and
+        # not block random attribute setting all-together, this is the most straightforward way of accomplishing this.
+        # If we don't include the `startswith` check this breaks init.
+        if not key.startswith("_") and not hasattr(self, key):
+            # Since we already know we don't have this attribute, calling this will raise an attribute error but will
+            # helpfully use Python's built in "Did you mean:" for variables closely misspelled properties
+            getattr(self, key)
+        super().__setattr__(key, value)
+
+
+@dataclass
+class DelayProperties(_BaseProperties):
 
     _enabled: bool
     _duration: Optional[float]
@@ -119,7 +132,7 @@ class DelayProperties:
 
 
 @dataclass
-class TouchTipProperties:
+class TouchTipProperties(_BaseProperties):
 
     _enabled: bool
     _z_offset: Optional[float]
@@ -191,7 +204,7 @@ class TouchTipProperties:
 
 
 @dataclass
-class MixProperties:
+class MixProperties(_BaseProperties):
 
     _enabled: bool
     _repetitions: Optional[int]
@@ -244,7 +257,7 @@ class MixProperties:
 
 
 @dataclass
-class BlowoutProperties:
+class BlowoutProperties(_BaseProperties):
 
     _enabled: bool
     _location: Optional[BlowoutLocation]
@@ -298,7 +311,7 @@ class BlowoutProperties:
 
 
 @dataclass
-class SubmergeRetractCommon:
+class SubmergeRetractCommon(_BaseProperties):
 
     _position_reference: PositionReference
     _offset: Coordinate
@@ -406,7 +419,7 @@ class RetractDispense(SubmergeRetractCommon):
 
 
 @dataclass
-class BaseLiquidHandlingProperties:
+class BaseLiquidHandlingProperties(_BaseProperties):
 
     _submerge: Submerge
     _position_reference: PositionReference
