@@ -22,7 +22,7 @@ if TYPE_CHECKING:
         DeckSchemaVersion6,
     )
 
-DEFAULT_DECK_DEFINITION_VERSION: Final = 6
+DEFAULT_DECK_DEFINITION_VERSION: Final = 5
 
 
 class Offset(NamedTuple):
