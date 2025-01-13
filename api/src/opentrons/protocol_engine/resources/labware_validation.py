@@ -1,7 +1,9 @@
 """Validation file for labware role and location checking functions."""
 
-from opentrons_shared_data.labware.labware_definition import LabwareRole
-from opentrons.protocols.models import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import (
+    LabwareDefinition,
+    LabwareRole,
+)
 
 
 def is_flex_trash(load_name: str) -> bool:
@@ -30,6 +32,11 @@ def validate_definition_is_adapter(definition: LabwareDefinition) -> bool:
 def validate_definition_is_lid(definition: LabwareDefinition) -> bool:
     """Validate that one of the definition's allowed roles is `lid`."""
     return LabwareRole.lid in definition.allowedRoles
+
+
+def validate_definition_is_system(definition: LabwareDefinition) -> bool:
+    """Validate that one of the definition's allowed roles is `system`."""
+    return LabwareRole.system in definition.allowedRoles
 
 
 def validate_labware_can_be_stacked(

@@ -11,10 +11,10 @@ from opentrons.types import Point, DeckSlotName, StagingSlotName, MountType
 
 from opentrons_shared_data.errors.exceptions import InvalidStoredData
 from opentrons_shared_data.labware.constants import WELL_NAME_PATTERN
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.deck.types import CutoutFixture
 from opentrons_shared_data.pipette import PIPETTE_X_SPAN
 from opentrons_shared_data.pipette.types import ChannelCount
-from opentrons.protocols.models import LabwareDefinition
 
 from .. import errors
 from ..errors import (
@@ -489,7 +489,7 @@ class GeometryView:
                 well_depth=well_depth,
                 operation_volume=operation_volume,
             )
-            offset = offset.copy(update={"z": offset.z + offset_adjustment})
+            offset = offset.model_copy(update={"z": offset.z + offset_adjustment})
             self.validate_well_position(
                 well_location=well_location, z_offset=offset.z, pipette_id=pipette_id
             )

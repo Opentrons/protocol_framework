@@ -4,6 +4,8 @@ import { fixture96Plate, fixtureTiprackAdapter } from '@opentrons/shared-data'
 import { i18n } from '/app/i18n'
 import { renderWithProviders } from '/app/__testing-utils__'
 import { LabwareOffsetTable } from '../LabwareOffsetTable'
+
+import type { ComponentProps } from 'react'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type { OffsetCandidate } from '../hooks/useOffsetCandidatesForAnalysis'
 
@@ -52,7 +54,7 @@ const mockFourthCandidate: OffsetCandidate = {
   runCreatedAt: '2022-05-12T13:33:51.012179+00:00',
 }
 const render = () =>
-  renderWithProviders<React.ComponentProps<typeof LabwareOffsetTable>>(
+  renderWithProviders<ComponentProps<typeof LabwareOffsetTable>>(
     <LabwareOffsetTable
       labwareDefinitions={[mockLabwareDef, mockAdapterDef]}
       offsetCandidates={[

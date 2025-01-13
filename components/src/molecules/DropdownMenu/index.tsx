@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { css } from 'styled-components'
 
 import { BORDERS, COLORS } from '../../helix-design-system'
@@ -24,12 +24,19 @@ import { MenuItem } from '../../atoms/MenuList/MenuItem'
 import { Tooltip } from '../../atoms/Tooltip'
 import { StyledText } from '../../atoms/StyledText'
 import { LiquidIcon } from '../LiquidIcon'
+import { DeckInfoLabel } from '../DeckInfoLabel'
+
+import type { FocusEventHandler } from 'react'
 
 export interface DropdownOption {
   name: string
   value: string
   /** optional dropdown option for adding the liquid color icon */
   liquidColor?: string
+  /** optional dropdown option for adding the deck label */
+  deckLabel?: string
+  /** subtext below the name */
+  subtext?: string
   disabled?: boolean
   tooltipText?: string
 }
@@ -58,13 +65,15 @@ export interface DropdownMenuProps {
   /** optional error */
   error?: string | null
   /** focus handler */
-  onFocus?: React.FocusEventHandler<HTMLButtonElement>
+  onFocus?: FocusEventHandler<HTMLButtonElement>
   /** blur handler */
-  onBlur?: React.FocusEventHandler<HTMLButtonElement>
+  onBlur?: FocusEventHandler<HTMLButtonElement>
   /** optional disabled */
   disabled?: boolean
   /** optional placement of the menu */
   menuPlacement?: 'auto' | 'top' | 'bottom'
+  onEnter?: (id: string) => void
+  onExit?: () => void
 }
 
 // TODO: (smb: 4/15/22) refactor this to use html select for accessibility
@@ -84,24 +93,26 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
     disabled = false,
     onFocus,
     onBlur,
+    onEnter,
+    onExit,
     menuPlacement = 'auto',
   } = props
   const [targetProps, tooltipProps] = useHoverTooltip()
-  const [showDropdownMenu, setShowDropdownMenu] = React.useState<boolean>(false)
+  const [showDropdownMenu, setShowDropdownMenu] = useState<boolean>(false)
   const [optionTargetProps, optionTooltipProps] = useHoverTooltip({
     placement: 'top-end',
   })
 
-  const [dropdownPosition, setDropdownPosition] = React.useState<
-    'top' | 'bottom'
-  >('bottom')
+  const [dropdownPosition, setDropdownPosition] = useState<'top' | 'bottom'>(
+    'bottom'
+  )
   const dropDownMenuWrapperRef = useOnClickOutside<HTMLDivElement>({
     onClickOutside: () => {
       setShowDropdownMenu(false)
     },
   })
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (menuPlacement !== 'auto') {
       setDropdownPosition(menuPlacement)
       return
@@ -244,7 +255,11 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
             {currentOption.liquidColor != null ? (
               <LiquidIcon color={currentOption.liquidColor} />
             ) : null}
+            {currentOption.deckLabel != null ? (
+              <DeckInfoLabel deckLabel={currentOption.deckLabel} svgSize={13} />
+            ) : null}
             <Flex
+              flexDirection={DIRECTION_COLUMN}
               css={css`
                 font-weight: ${dropdownType === 'rounded'
                   ? TYPOGRAPHY.pSemiBold
@@ -280,7 +295,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
             maxHeight="20rem" // Set the maximum display number to 10.
           >
             {filterOptions.map((option, index) => (
-              <React.Fragment key={`${option.name}-${index}`}>
+              <Fragment key={`${option.name}-${index}`}>
                 <MenuItem
                   disabled={option.disabled}
                   zIndex={3}
@@ -290,6 +305,8 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
                     setShowDropdownMenu(false)
                   }}
                   border="none"
+                  onMouseEnter={() => onEnter?.(option.value)}
+                  onMouseLeave={onExit}
                 >
                   <Flex
                     gridGap={SPACING.spacing8}
@@ -299,7 +316,26 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
                     {option.liquidColor != null ? (
                       <LiquidIcon color={option.liquidColor} />
                     ) : null}
-                    {option.name}
+                    {option.deckLabel != null ? (
+                      <DeckInfoLabel
+                        deckLabel={option.deckLabel}
+                        svgSize={13}
+                      />
+                    ) : null}
+                    <Flex
+                      flexDirection={DIRECTION_COLUMN}
+                      gridGap={option.subtext != null ? SPACING.spacing4 : '0'}
+                    >
+                      <StyledText desktopStyle="captionRegular">
+                        {option.name}
+                      </StyledText>
+                      <StyledText
+                        desktopStyle="captionRegular"
+                        color={COLORS.black70}
+                      >
+                        {option.subtext}
+                      </StyledText>
+                    </Flex>
                   </Flex>
                 </MenuItem>
                 {option.tooltipText != null ? (
@@ -307,7 +343,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
                     {option.tooltipText}
                   </Tooltip>
                 ) : null}
-              </React.Fragment>
+              </Fragment>
             ))}
           </Flex>
         )}

@@ -1,3 +1,4 @@
+import type { Dispatch, SetStateAction } from 'react'
 import type { FormData, StepFieldName } from '../../../../form-types'
 import type { StepFormErrors } from '../../../../steplist'
 export interface FocusHandlers {
@@ -30,7 +31,7 @@ export interface StepFormProps {
   visibleFormErrors: StepFormErrors
   showFormErrors: boolean
   focusedField?: string | null
-  setShowFormErrors?: React.Dispatch<React.SetStateAction<boolean>>
+  setShowFormErrors?: Dispatch<SetStateAction<boolean>>
   tab: LiquidHandlingTab
-  setTab: React.Dispatch<React.SetStateAction<LiquidHandlingTab>>
+  setTab: Dispatch<SetStateAction<LiquidHandlingTab>>
 }

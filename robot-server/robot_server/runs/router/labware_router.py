@@ -1,15 +1,15 @@
 """Router for /runs endpoints dealing with labware offsets and definitions."""
+
 import logging
 from typing import Annotated, Union
 
-from fastapi import APIRouter, Depends, status
+from fastapi import Depends, status
 
-from opentrons_shared_data.labware.labware_definition import (
-    LabwareDefinition as SD_LabwareDefinition,
-)
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
+
+from server_utils.fastapi_utils.light_router import LightRouter
 
 from opentrons.protocol_engine import LabwareOffsetCreate, LabwareOffset
-from opentrons.protocols.models import LabwareDefinition
 
 from robot_server.errors.error_responses import ErrorBody
 from robot_server.service.json_api import (
@@ -25,7 +25,7 @@ from ..dependencies import get_run_orchestrator_store, get_run_data_manager
 from .base_router import RunNotFound, RunStopped, RunNotIdle, get_run_data_from_url
 
 log = logging.getLogger(__name__)
-labware_router = APIRouter()
+labware_router = LightRouter()
 
 
 @PydanticResponse.wrap_route(
@@ -69,7 +69,7 @@ async def add_labware_offset(
     log.info(f'Added labware offset "{added_offset.id}"' f' to run "{run.id}".')
 
     return await PydanticResponse.create(
-        content=SimpleBody.construct(data=added_offset),
+        content=SimpleBody.model_construct(data=added_offset),
         status_code=status.HTTP_201_CREATED,
     )
 
@@ -113,8 +113,8 @@ async def add_labware_definition(
     log.info(f'Added labware definition "{uri}"' f' to run "{run.id}".')
 
     return PydanticResponse(
-        content=SimpleBody.construct(
-            data=LabwareDefinitionSummary.construct(definitionUri=uri)
+        content=SimpleBody.model_construct(
+            data=LabwareDefinitionSummary.model_construct(definitionUri=uri)
         ),
         status_code=status.HTTP_201_CREATED,
     )
@@ -133,14 +133,14 @@ async def add_labware_definition(
         " Repeated definitions will be deduplicated."
     ),
     responses={
-        status.HTTP_200_OK: {"model": SimpleBody[list[SD_LabwareDefinition]]},
+        status.HTTP_200_OK: {"model": SimpleBody[list[LabwareDefinition]]},
         status.HTTP_409_CONFLICT: {"model": ErrorBody[RunStopped]},
     },
 )
 async def get_run_loaded_labware_definitions(
     runId: str,
     run_data_manager: Annotated[RunDataManager, Depends(get_run_data_manager)],
-) -> PydanticResponse[SimpleBody[list[SD_LabwareDefinition]]]:
+) -> PydanticResponse[SimpleBody[list[LabwareDefinition]]]:
     """Get a run's loaded labware definition by the run ID.
 
     Args:
@@ -155,6 +155,6 @@ async def get_run_loaded_labware_definitions(
         raise RunStopped(detail=str(e)).as_error(status.HTTP_409_CONFLICT) from e
 
     return await PydanticResponse.create(
-        content=SimpleBody.construct(data=labware_definitions),
+        content=SimpleBody.model_construct(data=labware_definitions),
         status_code=status.HTTP_200_OK,
     )

@@ -1072,6 +1072,7 @@ class OT3Controller(FlexBackend):
                     converted_name.pipette_type,
                     converted_name.pipette_channels,
                     converted_name.pipette_version,
+                    converted_name.oem_type,
                 ),
                 "id": OT3Controller._combine_serial_number(attached),
             }
@@ -1396,7 +1397,11 @@ class OT3Controller(FlexBackend):
             return
 
         if hasattr(self, "_event_watcher"):
-            if loop.is_running() and self._event_watcher:
+            if (
+                loop.is_running()
+                and self._event_watcher
+                and not self._event_watcher.closed
+            ):
                 self._event_watcher.close()
 
         messenger = getattr(self, "_messenger", None)

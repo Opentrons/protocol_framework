@@ -1,4 +1,5 @@
 """Test for the ProtocolEngine-based protocol API core."""
+
 import inspect
 from typing import Optional, Type, cast, Tuple
 
@@ -179,7 +180,7 @@ def subject(
     decoy.when(
         mock_engine_client.state.labware.get_definition("fixed-trash-123")
     ).then_return(
-        LabwareDefinition.construct(ordering=[["A1"]])  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(ordering=[["A1"]])  # type: ignore[call-arg]
     )
 
     return ProtocolCore(
@@ -358,13 +359,13 @@ def test_load_labware(
     ).then_return(
         commands.LoadLabwareResult(
             labwareId="abc123",
-            definition=LabwareDefinition.construct(),  # type: ignore[call-arg]
+            definition=LabwareDefinition.model_construct(),  # type: ignore[call-arg]
             offsetId=None,
         )
     )
 
     decoy.when(mock_engine_client.state.labware.get_definition("abc123")).then_return(
-        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
     )
 
     result = subject.load_labware(
@@ -394,7 +395,7 @@ def test_load_labware(
             slot_name=DeckSlotName.SLOT_5,
         )
     ).then_return(
-        LoadedLabware.construct(id="abc123")  # type: ignore[call-arg]
+        LoadedLabware.model_construct(id="abc123")  # type: ignore[call-arg]
     )
 
     assert subject.get_slot_item(DeckSlotName.SLOT_5) is result
@@ -432,13 +433,13 @@ def test_load_labware_on_staging_slot(
     ).then_return(
         commands.LoadLabwareResult(
             labwareId="abc123",
-            definition=LabwareDefinition.construct(),  # type: ignore[call-arg]
+            definition=LabwareDefinition.model_construct(),  # type: ignore[call-arg]
             offsetId=None,
         )
     )
 
     decoy.when(mock_engine_client.state.labware.get_definition("abc123")).then_return(
-        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
     )
 
     result = subject.load_labware(
@@ -468,7 +469,7 @@ def test_load_labware_on_staging_slot(
             slot_name=StagingSlotName.SLOT_B4,
         )
     ).then_return(
-        LoadedLabware.construct(id="abc123")  # type: ignore[call-arg]
+        LoadedLabware.model_construct(id="abc123")  # type: ignore[call-arg]
     )
 
     assert subject.get_slot_item(StagingSlotName.SLOT_B4) is result
@@ -509,13 +510,13 @@ def test_load_labware_on_labware(
     ).then_return(
         commands.LoadLabwareResult(
             labwareId="abc123",
-            definition=LabwareDefinition.construct(),  # type: ignore[call-arg]
+            definition=LabwareDefinition.model_construct(),  # type: ignore[call-arg]
             offsetId=None,
         )
     )
 
     decoy.when(mock_engine_client.state.labware.get_definition("abc123")).then_return(
-        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
     )
 
     decoy.when(
@@ -579,13 +580,13 @@ def test_load_labware_off_deck(
     ).then_return(
         commands.LoadLabwareResult(
             labwareId="abc123",
-            definition=LabwareDefinition.construct(),  # type: ignore[call-arg]
+            definition=LabwareDefinition.model_construct(),  # type: ignore[call-arg]
             offsetId=None,
         )
     )
 
     decoy.when(mock_engine_client.state.labware.get_definition("abc123")).then_return(
-        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
     )
 
     result = subject.load_labware(
@@ -642,13 +643,13 @@ def test_load_adapter(
     ).then_return(
         commands.LoadLabwareResult(
             labwareId="abc123",
-            definition=LabwareDefinition.construct(),  # type: ignore[call-arg]
+            definition=LabwareDefinition.model_construct(),  # type: ignore[call-arg]
             offsetId=None,
         )
     )
 
     decoy.when(mock_engine_client.state.labware.get_definition("abc123")).then_return(
-        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
     )
 
     result = subject.load_adapter(
@@ -677,7 +678,7 @@ def test_load_adapter(
             slot_name=DeckSlotName.SLOT_5,
         )
     ).then_return(
-        LoadedLabware.construct(id="abc123")  # type: ignore[call-arg]
+        LoadedLabware.model_construct(id="abc123")  # type: ignore[call-arg]
     )
 
     assert subject.get_slot_item(DeckSlotName.SLOT_5) is result
@@ -714,13 +715,13 @@ def test_load_adapter_on_staging_slot(
     ).then_return(
         commands.LoadLabwareResult(
             labwareId="abc123",
-            definition=LabwareDefinition.construct(),  # type: ignore[call-arg]
+            definition=LabwareDefinition.model_construct(),  # type: ignore[call-arg]
             offsetId=None,
         )
     )
 
     decoy.when(mock_engine_client.state.labware.get_definition("abc123")).then_return(
-        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
     )
 
     result = subject.load_adapter(
@@ -749,10 +750,158 @@ def test_load_adapter_on_staging_slot(
             slot_name=StagingSlotName.SLOT_B4,
         )
     ).then_return(
-        LoadedLabware.construct(id="abc123")  # type: ignore[call-arg]
+        LoadedLabware.model_construct(id="abc123")  # type: ignore[call-arg]
     )
 
     assert subject.get_slot_item(StagingSlotName.SLOT_B4) is result
+
+
+def test_load_lid(
+    decoy: Decoy,
+    mock_engine_client: EngineClient,
+    subject: ProtocolCore,
+) -> None:
+    """It should issue a LoadLid command."""
+    mock_labware_core = decoy.mock(cls=LabwareCore)
+    decoy.when(mock_labware_core.labware_id).then_return("labware-id")
+    decoy.when(
+        mock_engine_client.state.labware.find_custom_labware_load_params()
+    ).then_return([EngineLabwareLoadParams("hello", "world", 654)])
+
+    decoy.when(
+        load_labware_params.resolve(
+            "some_labware",
+            "a_namespace",
+            456,
+            [EngineLabwareLoadParams("hello", "world", 654)],
+        )
+    ).then_return(("some_namespace", 9001))
+
+    decoy.when(
+        mock_engine_client.execute_command_without_recovery(
+            cmd.LoadLidParams(
+                location=OnLabwareLocation(labwareId="labware-id"),
+                loadName="some_labware",
+                namespace="some_namespace",
+                version=9001,
+            )
+        )
+    ).then_return(
+        commands.LoadLidResult(
+            labwareId="abc123",
+            definition=LabwareDefinition.model_construct(ordering=[]),  # type: ignore[call-arg]
+        )
+    )
+
+    decoy.when(mock_engine_client.state.labware.get_definition("abc123")).then_return(
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
+    )
+
+    result = subject.load_lid(
+        load_name="some_labware",
+        location=mock_labware_core,
+        namespace="a_namespace",
+        version=456,
+    )
+
+    assert isinstance(result, LabwareCore)
+    assert result.labware_id == "abc123"
+    assert subject.get_labware_cores() == [result]
+
+    decoy.verify(
+        deck_conflict.check(
+            engine_state=mock_engine_client.state,
+            existing_labware_ids=[],
+            existing_module_ids=[],
+            existing_disposal_locations=[],
+            new_labware_id="abc123",
+        )
+    )
+
+    decoy.when(
+        mock_engine_client.state.geometry.get_slot_item(
+            slot_name=DeckSlotName.SLOT_5,
+        )
+    ).then_return(
+        LoadedLabware.model_construct(id="abc123")  # type: ignore[call-arg]
+    )
+
+    assert subject.get_slot_item(DeckSlotName.SLOT_5) is result
+
+
+def test_load_lid_stack(
+    decoy: Decoy,
+    mock_engine_client: EngineClient,
+    subject: ProtocolCore,
+) -> None:
+    """It should issue a LoadLidStack command."""
+    decoy.when(
+        mock_engine_client.state.labware.find_custom_labware_load_params()
+    ).then_return([EngineLabwareLoadParams("hello", "world", 654)])
+
+    decoy.when(
+        load_labware_params.resolve(
+            "some_labware",
+            "a_namespace",
+            456,
+            [EngineLabwareLoadParams("hello", "world", 654)],
+        )
+    ).then_return(("some_namespace", 9001))
+
+    decoy.when(
+        mock_engine_client.execute_command_without_recovery(
+            cmd.LoadLidStackParams(
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_5),
+                loadName="some_labware",
+                namespace="some_namespace",
+                version=9001,
+                quantity=5,
+            )
+        )
+    ).then_return(
+        commands.LoadLidStackResult(
+            stackLabwareId="abc123",
+            labwareIds=["1", "2", "3", "4", "5"],
+            definition=LabwareDefinition.model_construct(),  # type: ignore[call-arg]
+            location=DeckSlotLocation(slotName=DeckSlotName.SLOT_5),
+        )
+    )
+
+    decoy.when(mock_engine_client.state.labware.get_definition("abc123")).then_return(
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
+    )
+
+    result = subject.load_lid_stack(
+        load_name="some_labware",
+        location=DeckSlotName.SLOT_5,
+        namespace="a_namespace",
+        version=456,
+        quantity=5,
+    )
+
+    assert isinstance(result, LabwareCore)
+    assert result.labware_id == "abc123"
+    assert subject.get_labware_cores() == [result]
+
+    decoy.verify(
+        deck_conflict.check(
+            engine_state=mock_engine_client.state,
+            existing_labware_ids=[],
+            existing_module_ids=[],
+            existing_disposal_locations=[],
+            new_labware_id="abc123",
+        )
+    )
+
+    decoy.when(
+        mock_engine_client.state.geometry.get_slot_item(
+            slot_name=DeckSlotName.SLOT_5,
+        )
+    ).then_return(
+        LoadedLabware.model_construct(id="abc123")  # type: ignore[call-arg]
+    )
+
+    assert subject.get_slot_item(DeckSlotName.SLOT_5) is result
 
 
 def test_load_trash_bin(
@@ -860,7 +1009,7 @@ def test_move_labware(
     decoy.when(
         mock_engine_client.state.labware.get_definition("labware-id")
     ).then_return(
-        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
     )
     labware = LabwareCore(labware_id="labware-id", engine_client=mock_engine_client)
     subject.move_labware(
@@ -903,7 +1052,7 @@ def test_move_labware_on_staging_slot(
     decoy.when(
         mock_engine_client.state.labware.get_definition("labware-id")
     ).then_return(
-        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
     )
     labware = LabwareCore(labware_id="labware-id", engine_client=mock_engine_client)
     subject.move_labware(
@@ -944,7 +1093,7 @@ def test_move_labware_on_non_connected_module(
     decoy.when(
         mock_engine_client.state.labware.get_definition("labware-id")
     ).then_return(
-        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
     )
     labware = LabwareCore(labware_id="labware-id", engine_client=mock_engine_client)
     non_connected_module_core = NonConnectedModuleCore(
@@ -990,7 +1139,7 @@ def test_move_labware_off_deck(
     decoy.when(
         mock_engine_client.state.labware.get_definition("labware-id")
     ).then_return(
-        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
     )
     labware = LabwareCore(labware_id="labware-id", engine_client=mock_engine_client)
 
@@ -1056,13 +1205,13 @@ def test_load_labware_on_module(
     ).then_return(
         commands.LoadLabwareResult(
             labwareId="abc123",
-            definition=LabwareDefinition.construct(),  # type: ignore[call-arg]
+            definition=LabwareDefinition.model_construct(),  # type: ignore[call-arg]
             offsetId=None,
         )
     )
 
     decoy.when(mock_engine_client.state.labware.get_definition("abc123")).then_return(
-        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
     )
 
     module_core = ModuleCore(
@@ -1133,13 +1282,13 @@ def test_load_labware_on_non_connected_module(
     ).then_return(
         commands.LoadLabwareResult(
             labwareId="abc123",
-            definition=LabwareDefinition.construct(),  # type: ignore[call-arg]
+            definition=LabwareDefinition.model_construct(),  # type: ignore[call-arg]
             offsetId=None,
         )
     )
 
     decoy.when(mock_engine_client.state.labware.get_definition("abc123")).then_return(
-        LabwareDefinition.construct(ordering=[])  # type: ignore[call-arg]
+        LabwareDefinition.model_construct(ordering=[])  # type: ignore[call-arg]
     )
 
     non_connected_module_core = NonConnectedModuleCore(
@@ -1185,7 +1334,7 @@ def test_add_labware_definition(
     """It should add a labware definition to the engine."""
     decoy.when(
         mock_engine_client.add_labware_definition(
-            definition=LabwareDefinition.parse_obj(minimal_labware_def)
+            definition=LabwareDefinition.model_validate(minimal_labware_def)
         )
     ).then_return(LabwareUri("hello/world/123"))
 
@@ -1261,7 +1410,7 @@ def test_load_module(
     robot_type: RobotType,
 ) -> None:
     """It should issue a load module engine command."""
-    definition = ModuleDefinition.construct()  # type: ignore[call-arg]
+    definition = ModuleDefinition.model_construct()  # type: ignore[call-arg]
 
     mock_hw_mod_1 = decoy.mock(cls=AbstractModule)
     mock_hw_mod_2 = decoy.mock(cls=AbstractModule)
@@ -1315,7 +1464,7 @@ def test_load_module(
             slot_name=slot_name,
         )
     ).then_return(
-        LoadedModule.construct(id="abc123")  # type: ignore[call-arg]
+        LoadedModule.model_construct(id="abc123")  # type: ignore[call-arg]
     )
     decoy.when(mock_engine_client.state.labware.get_id_by_module("abc123")).then_raise(
         LabwareNotLoadedOnModuleError("oh no")
@@ -1333,7 +1482,7 @@ def test_load_mag_block(
     subject: ProtocolCore,
 ) -> None:
     """It should issue a load module engine command."""
-    definition = ModuleDefinition.construct()  # type: ignore[call-arg]
+    definition = ModuleDefinition.model_construct()  # type: ignore[call-arg]
 
     decoy.when(mock_engine_client.state.config.robot_type).then_return("OT-3 Standard")
 
@@ -1378,7 +1527,7 @@ def test_load_mag_block(
             slot_name=DeckSlotName.SLOT_1,
         )
     ).then_return(
-        LoadedModule.construct(id="abc123")  # type: ignore[call-arg]
+        LoadedModule.model_construct(id="abc123")  # type: ignore[call-arg]
     )
     decoy.when(mock_engine_client.state.labware.get_id_by_module("abc123")).then_raise(
         LabwareNotLoadedOnModuleError("oh no")
@@ -1413,7 +1562,7 @@ def test_load_module_thermocycler_with_no_location(
     expected_slot: DeckSlotName,
 ) -> None:
     """It should issue a load module engine command with location at 7."""
-    definition = ModuleDefinition.construct()  # type: ignore[call-arg]
+    definition = ModuleDefinition.model_construct()  # type: ignore[call-arg]
 
     mock_hw_mod = decoy.mock(cls=AbstractModule)
     decoy.when(mock_hw_mod.device_info).then_return({"serial": "xyz789"})
@@ -1670,11 +1819,11 @@ def test_add_liquid(
     subject: ProtocolCore,
 ) -> None:
     """It should return the created liquid."""
-    liquid = PE_Liquid.construct(
+    liquid = PE_Liquid.model_construct(
         id="water-id",
         displayName="water",
         description="water desc",
-        displayColor=HexColor(__root__="#fff"),
+        displayColor=HexColor("#fff"),
     )
 
     expected_result = Liquid(

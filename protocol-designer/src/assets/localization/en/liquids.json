@@ -10,6 +10,10 @@
   "display_color": "Color",
   "liquid_volume": "Liquid volume by well",
   "liquid": "Liquid",
+  "liquid_class": {
+    "title": "Liquid class",
+    "tooltip": "Applies predefined pipetting settings to transfer and mix steps using this liquid"
+  },
   "liquids_added": "Liquids added",
   "liquids": "Liquids",
   "microliters": "µL",

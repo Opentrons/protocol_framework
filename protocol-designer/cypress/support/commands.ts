@@ -1,5 +1,4 @@
 import 'cypress-file-upload'
-
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
@@ -10,7 +9,7 @@ declare global {
       verifyFullHeader: () => Cypress.Chainable<void>
       verifyCreateNewHeader: () => Cypress.Chainable<void>
       clickCreateNew: () => Cypress.Chainable<void>
-      closeAnnouncementModal: () => Cypress.Chainable<void>
+      closeAnalyticsModal: () => Cypress.Chainable<void>
       verifyHomePage: () => Cypress.Chainable<void>
       importProtocol: (protocolFile: string) => Cypress.Chainable<void>
       verifyImportPageOldProtocol: () => Cypress.Chainable<void>
@@ -28,6 +27,7 @@ declare global {
       openDesignPage: () => Cypress.Chainable<void>
       addStep: (stepName: string) => Cypress.Chainable<void>
       openSettingsPage: () => Cypress.Chainable<void>
+      robotSelection: (robotName: string) => Cypress.Chainable<void>
       verifySettingsPage: () => Cypress.Chainable<void>
       verifyCreateNewPage: () => Cypress.Chainable<void>
       togglePreWetTip: () => Cypress.Chainable<void>
@@ -63,13 +63,16 @@ export const locators = {
   import: 'Import',
   createNew: 'Create new',
   createProtocol: 'Create a protocol',
-  editProtocol: 'Edit existing protocol',
+  Flex_Home: 'Opentrons Flex',
+  OT2_Home: 'Opentrons OT-2',
+  importProtocol: 'Import existing protocol',
   settingsDataTestid: 'SettingsIconButton',
   settings: 'Settings',
   privacyPolicy: 'a[href="https://opentrons.com/privacy-policy"]',
   eula: 'a[href="https://opentrons.com/eula"]',
   privacyToggle: 'Settings_hotKeys',
   analyticsToggleTestId: 'analyticsToggle',
+  confirm: 'Confirm',
   confirmButton: 'Confirm',
 }
 
@@ -114,12 +117,19 @@ Cypress.Commands.add('verifyHomePage', () => {
   cy.get(locators.eula).should('exist').and('be.visible')
   cy.contains(locators.confirmButton).click()
   cy.contains('button', locators.createProtocol).should('be.visible')
-  cy.contains('label', locators.editProtocol).should('be.visible')
+  cy.contains('label', locators.importProtocol).should('be.visible')
   cy.getByTestId(locators.settingsDataTestid).should('be.visible')
 })
 
 Cypress.Commands.add('clickCreateNew', () => {
   cy.contains(locators.createProtocol).click()
+})
+
+Cypress.Commands.add('closeAnalyticsModal', () => {
+  cy.get('button')
+    .contains(locators.confirm)
+    .should('be.visible')
+    .click({ force: true })
 })
 
 Cypress.Commands.add('clickConfirm', () => {
@@ -132,6 +142,17 @@ Cypress.Commands.add('importProtocol', (protocolFilePath: string) => {
   cy.get('[data-cy="landing-page"]')
     .find('input[type=file]')
     .selectFile(protocolFilePath, { force: true })
+})
+
+Cypress.Commands.add('robotSelection', (robotName: string) => {
+  if (robotName === 'Opentrons OT-2') {
+    cy.contains('label', locators.OT2_Home).should('be.visible').click()
+  } else {
+    // Just checking that the selection modal works
+    cy.contains('label', locators.OT2_Home).should('be.visible').click()
+    cy.contains('label', locators.Flex_Home).should('be.visible').click()
+  }
+  cy.contains('button', 'Confirm').should('be.visible').click()
 })
 
 // Settings Page Actions
@@ -167,16 +188,10 @@ Cypress.Commands.add('verifyOverflowBtn', () => {
 // as a reference during test migration.
 /// /////////////////////////////////////////////////////////////////
 
-Cypress.Commands.add('closeAnnouncementModal', () => {
+Cypress.Commands.add('closeAnalyticsModal', () => {
   // ComputingSpinner sometimes covers the announcement modal button and prevents the button click
   // this will retry until the ComputingSpinner does not exist
-  cy.get('[data-test="ComputingSpinner"]', { timeout: 30000 }).should(
-    'not.exist'
-  )
-  cy.get('button')
-    .contains('Got It!')
-    .should('be.visible')
-    .click({ force: true })
+  cy.contains('button', 'Confirm').click({ force: true })
 })
 
 //

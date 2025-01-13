@@ -1,7 +1,9 @@
 """Load labware command request, result, and implementation models."""
 from __future__ import annotations
+from typing import TYPE_CHECKING, Optional, Type, Any
+
 from pydantic import BaseModel, Field
-from typing import TYPE_CHECKING, Optional, Type
+from pydantic.json_schema import SkipJsonSchema
 from typing_extensions import Literal
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
@@ -29,6 +31,10 @@ if TYPE_CHECKING:
 LoadLabwareCommandType = Literal["loadLabware"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 class LoadLabwareParams(BaseModel):
     """Payload required to load a labware into a slot."""
 
@@ -48,18 +54,20 @@ class LoadLabwareParams(BaseModel):
         ...,
         description="The labware definition version.",
     )
-    labwareId: Optional[str] = Field(
+    labwareId: str | SkipJsonSchema[None] = Field(
         None,
         description="An optional ID to assign to this labware. If None, an ID "
         "will be generated.",
+        json_schema_extra=_remove_default,
     )
-    displayName: Optional[str] = Field(
+    displayName: str | SkipJsonSchema[None] = Field(
         None,
         description="An optional user-specified display name "
         "or label for this labware.",
         # NOTE: v4/5 JSON protocols will always have a displayName which will be the
         #  user-specified label OR the displayName property of the labware's definition.
         # TODO: Make sure v6 JSON protocols don't do that.
+        json_schema_extra=_remove_default,
     )
 
 
@@ -164,6 +172,19 @@ class LoadLabwareImplementation(
                 top_labware_definition=loaded_labware.definition,
                 bottom_labware_id=verified_location.labwareId,
             )
+            # Validate load location is valid for lids
+            if (
+                labware_validation.validate_definition_is_lid(
+                    definition=loaded_labware.definition
+                )
+                and loaded_labware.definition.compatibleParentLabware is not None
+                and self._state_view.labware.get_load_name(verified_location.labwareId)
+                not in loaded_labware.definition.compatibleParentLabware
+            ):
+                raise ValueError(
+                    f"Labware Lid {params.loadName} may not be loaded on parent labware {self._state_view.labware.get_display_name(verified_location.labwareId)}."
+                )
+
         # Validate labware for the absorbance reader
         elif isinstance(params.location, ModuleLocation):
             module = self._state_view.modules.get(params.location.moduleId)
@@ -171,7 +192,6 @@ class LoadLabwareImplementation(
                 self._state_view.labware.raise_if_labware_incompatible_with_plate_reader(
                     loaded_labware.definition
                 )
-
         return SuccessData(
             public=LoadLabwareResult(
                 labwareId=loaded_labware.labware_id,
@@ -187,7 +207,7 @@ class LoadLabware(BaseCommand[LoadLabwareParams, LoadLabwareResult, ErrorOccurre
 
     commandType: LoadLabwareCommandType = "loadLabware"
     params: LoadLabwareParams
-    result: Optional[LoadLabwareResult]
+    result: Optional[LoadLabwareResult] = None
 
     _ImplementationCls: Type[LoadLabwareImplementation] = LoadLabwareImplementation
 

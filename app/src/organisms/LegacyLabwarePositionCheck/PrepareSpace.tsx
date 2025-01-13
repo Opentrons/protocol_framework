@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import styled, { css } from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
@@ -23,6 +22,7 @@ import { SmallButton } from '/app/atoms/buttons'
 import { NeedHelpLink } from '/app/molecules/OT2CalibrationNeedHelpLink'
 import { useNotifyDeckConfigurationQuery } from '/app/resources/deck_configuration'
 
+import type { ReactNode } from 'react'
 import type {
   CompletedProtocolAnalysis,
   LabwareDefinition2,
@@ -61,8 +61,8 @@ interface PrepareSpaceProps extends Omit<CheckLabwareStep, 'section'> {
   labwareDef: LabwareDefinition2
   protocolData: CompletedProtocolAnalysis
   confirmPlacement: () => void
-  header: React.ReactNode
-  body: React.ReactNode
+  header: ReactNode
+  body: ReactNode
   robotType: RobotType
 }
 export const PrepareSpace = (props: PrepareSpaceProps): JSX.Element | null => {

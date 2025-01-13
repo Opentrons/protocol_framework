@@ -149,7 +149,7 @@ def get_sample_parent_module_view(
 ) -> ModuleView:
     """Get a ModuleView with attached modules including a requested matching module."""
     definition = load_shared_data("module/definitions/2/magneticModuleV1.json")
-    magdeck_def = ModuleDefinition.parse_raw(definition)
+    magdeck_def = ModuleDefinition.model_validate_json(definition)
 
     return make_module_view(
         slot_by_module_id={
@@ -1735,13 +1735,13 @@ def test_get_by_slot() -> None:
         hardware_by_module_id={
             "1": HardwareModule(
                 serial_number="serial-number-1",
-                definition=ModuleDefinition.construct(  # type: ignore[call-arg]
+                definition=ModuleDefinition.model_construct(  # type: ignore[call-arg]
                     model=ModuleModel.TEMPERATURE_MODULE_V1
                 ),
             ),
             "2": HardwareModule(
                 serial_number="serial-number-2",
-                definition=ModuleDefinition.construct(  # type: ignore[call-arg]
+                definition=ModuleDefinition.model_construct(  # type: ignore[call-arg]
                     model=ModuleModel.TEMPERATURE_MODULE_V2
                 ),
             ),
@@ -1773,13 +1773,13 @@ def test_get_by_slot_prefers_later() -> None:
         hardware_by_module_id={
             "1": HardwareModule(
                 serial_number="serial-number-1",
-                definition=ModuleDefinition.construct(  # type: ignore[call-arg]
+                definition=ModuleDefinition.model_construct(  # type: ignore[call-arg]
                     model=ModuleModel.TEMPERATURE_MODULE_V1
                 ),
             ),
             "1-again": HardwareModule(
                 serial_number="serial-number-1-again",
-                definition=ModuleDefinition.construct(  # type: ignore[call-arg]
+                definition=ModuleDefinition.model_construct(  # type: ignore[call-arg]
                     model=ModuleModel.TEMPERATURE_MODULE_V1
                 ),
             ),

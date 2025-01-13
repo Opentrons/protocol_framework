@@ -7,6 +7,8 @@ import {
   layoutCandidates,
   customDisplay,
 } from '../constants'
+
+import type { MutableRefObject } from 'react'
 import type { KeyboardReactInterface } from 'react-simple-keyboard'
 
 import '../index.css'
@@ -15,7 +17,7 @@ import './index.css'
 // TODO (kk:04/05/2024) add debug to make debugging easy
 interface AlphanumericKeyboardProps {
   onChange: (input: string) => void
-  keyboardRef: React.MutableRefObject<KeyboardReactInterface | null>
+  keyboardRef: MutableRefObject<KeyboardReactInterface | null>
   debug?: boolean
 }
 

@@ -1,30 +1,30 @@
 """Public protocol engine value types and models."""
 from __future__ import annotations
-import re
 from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass
 from pathlib import Path
+from typing import (
+    Any,
+    Dict,
+    FrozenSet,
+    List,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Tuple,
+    Union,
+)
+
 from pydantic import (
+    ConfigDict,
     BaseModel,
     Field,
+    RootModel,
     StrictBool,
     StrictFloat,
     StrictInt,
     StrictStr,
-    validator,
-    Extra,
-)
-from typing import (
-    Optional,
-    Union,
-    List,
-    Dict,
-    Any,
-    NamedTuple,
-    Tuple,
-    FrozenSet,
-    Mapping,
 )
 from typing_extensions import Literal, TypeGuard
 
@@ -476,6 +476,7 @@ class ModuleModel(str, Enum):
     HEATER_SHAKER_MODULE_V1 = "heaterShakerModuleV1"
     MAGNETIC_BLOCK_V1 = "magneticBlockV1"
     ABSORBANCE_READER_V1 = "absorbanceReaderV1"
+    FLEX_STACKER_MODULE_V1 = "flexStackerModuleV1"
 
     def as_type(self) -> ModuleType:
         """Get the ModuleType of this model."""
@@ -491,6 +492,8 @@ class ModuleModel(str, Enum):
             return ModuleType.MAGNETIC_BLOCK
         elif ModuleModel.is_absorbance_reader(self):
             return ModuleType.ABSORBANCE_READER
+        elif ModuleModel.is_flex_stacker(self):
+            return ModuleType.FLEX_STACKER
 
         assert False, f"Invalid ModuleModel {self}"
 
@@ -534,6 +537,11 @@ class ModuleModel(str, Enum):
         """Whether a given model is an Absorbance Plate Reader."""
         return model == cls.ABSORBANCE_READER_V1
 
+    @classmethod
+    def is_flex_stacker(cls, model: ModuleModel) -> TypeGuard[AbsorbanceReaderModel]:
+        """Whether a given model is a Flex Stacker.."""
+        return model == cls.FLEX_STACKER_MODULE_V1
+
 
 TemperatureModuleModel = Literal[
     ModuleModel.TEMPERATURE_MODULE_V1, ModuleModel.TEMPERATURE_MODULE_V2
@@ -547,6 +555,7 @@ ThermocyclerModuleModel = Literal[
 HeaterShakerModuleModel = Literal[ModuleModel.HEATER_SHAKER_MODULE_V1]
 MagneticBlockModel = Literal[ModuleModel.MAGNETIC_BLOCK_V1]
 AbsorbanceReaderModel = Literal[ModuleModel.ABSORBANCE_READER_V1]
+FlexStackerModuleModel = Literal[ModuleModel.FLEX_STACKER_MODULE_V1]
 
 
 class ModuleDimensions(BaseModel):
@@ -554,7 +563,7 @@ class ModuleDimensions(BaseModel):
 
     bareOverallHeight: float
     overLabwareHeight: float
-    lidHeight: Optional[float]
+    lidHeight: Optional[float] = None
 
 
 class Vec3f(BaseModel):
@@ -709,8 +718,8 @@ class LoadedModule(BaseModel):
 
     id: str
     model: ModuleModel
-    location: Optional[DeckSlotLocation]
-    serialNumber: Optional[str]
+    location: Optional[DeckSlotLocation] = None
+    serialNumber: Optional[str] = None
 
 
 class LabwareOffsetLocation(BaseModel):
@@ -804,6 +813,10 @@ class LoadedLabware(BaseModel):
     location: LabwareLocation = Field(
         ..., description="The labware's current location."
     )
+    lid_id: Optional[str] = Field(
+        None,
+        description=("Labware ID of a Lid currently loaded on top of the labware."),
+    )
     offsetId: Optional[str] = Field(
         None,
         description=(
@@ -819,17 +832,10 @@ class LoadedLabware(BaseModel):
     )
 
 
-class HexColor(BaseModel):
+class HexColor(RootModel[str]):
     """Hex color representation."""
 
-    __root__: str
-
-    @validator("__root__")
-    def _color_is_a_valid_hex(cls, v: str) -> str:
-        match = re.search(r"^#(?:[0-9a-fA-F]{3,4}){1,2}$", v)
-        if not match:
-            raise ValueError("Color is not a valid hex color.")
-        return v
+    root: str = Field(pattern=r"^#(?:[0-9a-fA-F]{3,4}){1,2}$")
 
 
 EmptyLiquidId = Literal["EMPTY"]
@@ -842,7 +848,7 @@ class Liquid(BaseModel):
     id: str
     displayName: str
     description: str
-    displayColor: Optional[HexColor]
+    displayColor: Optional[HexColor] = None
 
 
 class LiquidClassRecord(ByTipTypeSetting, frozen=True):
@@ -885,7 +891,7 @@ class LiquidClassRecord(ByTipTypeSetting, frozen=True):
                 for field_name, value in d.items()
             )
 
-        return hash(dict_to_tuple(self.dict()))
+        return hash(dict_to_tuple(self.model_dump()))
 
 
 class LiquidClassRecordWithId(LiquidClassRecord, frozen=True):
@@ -1051,12 +1057,12 @@ class QuadrantNozzleLayoutConfiguration(BaseModel):
     )
     frontRightNozzle: str = Field(
         ...,
-        regex=NOZZLE_NAME_REGEX,
+        pattern=NOZZLE_NAME_REGEX,
         description="The front right nozzle in your configuration.",
     )
     backLeftNozzle: str = Field(
         ...,
-        regex=NOZZLE_NAME_REGEX,
+        pattern=NOZZLE_NAME_REGEX,
         description="The back left nozzle in your configuration.",
     )
 
@@ -1186,11 +1192,7 @@ class CustomCommandAnnotation(BaseCommandAnnotation):
     """Annotates a group of atomic commands in some manner that Opentrons software does not anticipate or originate."""
 
     annotationType: Literal["custom"] = "custom"
-
-    class Config:
-        """Config to allow extra, non-defined properties."""
-
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")
 
 
 CommandAnnotation = Union[SecondOrderCommandAnnotation, CustomCommandAnnotation]
