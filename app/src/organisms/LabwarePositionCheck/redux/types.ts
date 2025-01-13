@@ -35,13 +35,6 @@ export interface FinalPositionAction {
   payload: PositionParams
 }
 
-export interface TipPickUpOffsetAction {
-  type: 'SET_TIP_PICKUP_OFFSET'
-  payload: {
-    offset: Coordinates | null
-  }
-}
-
 interface StepsInfo {
   currentStepIndex: number
   totalStepCount: number
@@ -62,5 +55,4 @@ export interface LPCWizardState extends LPCWizardFlexProps {
 export type LPCWizardAction =
   | InitialPositionAction
   | FinalPositionAction
-  | TipPickUpOffsetAction
   | ProceedStepAction

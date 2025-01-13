@@ -3,7 +3,6 @@ import {
   PROCEED_STEP,
   SET_INITIAL_POSITION,
   SET_FINAL_POSITION,
-  SET_TIP_PICKUP_OFFSET,
 } from './constants'
 
 import type { LPCWizardAction } from './types'
@@ -30,9 +29,6 @@ export function LPCReducer(
         },
       }
     }
-
-    case SET_TIP_PICKUP_OFFSET:
-      return { ...state, tipPickUpOffset: action.payload.offset }
 
     case SET_INITIAL_POSITION:
     case SET_FINAL_POSITION:
