@@ -204,3 +204,15 @@ def test_liquid_handling_property_by_volume() -> None:
     # Test bounds
     assert subject.get_for_volume(1) == 50.0
     assert subject.get_for_volume(1000) == 250.0
+
+
+def test_non_existent_property_raises_error() -> None:
+    """It should raise an attribute error if the set property does not exist."""
+    fixture_data = load_shared_data("liquid-class/fixtures/1/fixture_glycerol50.json")
+    liquid_class_model = LiquidClassSchemaV1.model_validate_json(fixture_data)
+    aspirate_data = liquid_class_model.byPipette[0].byTipType[0].aspirate
+
+    aspirate_properties = build_aspirate_properties(aspirate_data)
+
+    with pytest.raises(AttributeError):
+        aspirate_properties.mix.enable = True

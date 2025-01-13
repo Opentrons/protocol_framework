@@ -90,8 +90,7 @@ class _BaseProperties:
         # not block random attribute setting all-together, this is the most straightforward way of accomplishing this.
         # If we don't include the `startswith` check this breaks init.
         if not key.startswith("_") and not hasattr(self, key):
-            # Since we already know we don't have this attribute, calling this will raise an attribute error but will
-            # helpfully use Python's built in "Did you mean:" for variables closely misspelled properties
+            # Since we already know we don't have this attribute, this will raise the appropriate attribute error
             getattr(self, key)
         super().__setattr__(key, value)
 
