@@ -73,7 +73,7 @@ import { getModuleModelsBySlot, getDeckErrors } from './utils'
 import type { AddressableAreaName, ModuleModel } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../../types'
 import type { Fixture } from './constants'
-import type { ModuleModelsExtended } from './utils'
+import type { ModuleModelExtended } from './utils'
 
 const mapModTypeToStepType: Record<string, string> = {
   heaterShakerModuleType: 'heaterShaker',
@@ -133,7 +133,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     equipment => equipment?.name === 'gripper'
   )
   const [selectedHardware, setSelectedHardware] = useState<
-    ModuleModelsExtended | Fixture | null
+    ModuleModelExtended | Fixture | null
   >(null)
 
   //  initialize the previously selected hardware because for some reason it does not

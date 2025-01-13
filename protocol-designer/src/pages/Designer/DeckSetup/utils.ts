@@ -43,7 +43,7 @@ import type { Fixture } from './constants'
 const OT2_TC_SLOTS = ['7', '8', '10', '11']
 const FLEX_TC_SLOTS = ['A1', 'B1']
 
-export type ModuleModelsExtended = ModuleModel | 'stagingAreaAndMagneticBlock'
+export type ModuleModelExtended = ModuleModel | 'stagingAreaAndMagneticBlock'
 
 export function getCutoutIdForAddressableArea(
   addressableArea: AddressableAreaName,
@@ -64,13 +64,13 @@ export function getModuleModelsBySlot(
   enableAbsorbanceReader: boolean,
   robotType: RobotType,
   slot: DeckSlotId
-): ModuleModelsExtended[] {
+): ModuleModelExtended[] {
   const FLEX_MIDDLE_SLOTS = new Set(['B2', 'C2', 'A2', 'D2'])
   const OT2_MIDDLE_SLOTS = ['2', '5', '8', '11']
 
   const FLEX_RIGHT_SLOTS = new Set(['A3', 'B3', 'C3', 'D3'])
 
-  let moduleModels: ModuleModelsExtended[] = [
+  let moduleModels: ModuleModelExtended[] = [
     ...FLEX_MODULE_MODELS,
     'stagingAreaAndMagneticBlock',
   ]
@@ -83,7 +83,7 @@ export function getModuleModelsBySlot(
         ? []
         : [
             ...FLEX_MODULE_MODELS,
-            'stagingAreaAndMagneticBlock' as ModuleModelsExtended,
+            'stagingAreaAndMagneticBlock' as ModuleModelExtended,
           ].filter(model => {
             if (model === THERMOCYCLER_MODULE_V2) {
               return slot === 'B1'
@@ -95,7 +95,7 @@ export function getModuleModelsBySlot(
             ) {
               return !FLEX_MIDDLE_SLOTS.has(slot)
             } else if (
-              model === ('stagingAreaAndMagneticBlock' as ModuleModelsExtended)
+              model === ('stagingAreaAndMagneticBlock' as ModuleModelExtended)
             ) {
               return FLEX_RIGHT_SLOTS.has(slot)
             }
