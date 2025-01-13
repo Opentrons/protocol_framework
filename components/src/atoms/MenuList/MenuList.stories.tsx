@@ -4,10 +4,10 @@ import { MenuItem } from './MenuItem'
 
 import type { Meta, StoryObj } from '@storybook/react'
 
-const menuBtn = 'example menu btn'
+const menuBtn = 'Example menu btn'
 
 const meta: Meta<typeof MenuListComponent> = {
-  title: 'Library/Atoms/MenuList',
+  title: 'Helix/Atoms/MenuList',
   component: MenuListComponent,
   args: {
     onClick: action('clicked'),

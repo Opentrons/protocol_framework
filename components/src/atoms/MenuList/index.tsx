@@ -1,6 +1,7 @@
 import { BORDERS, COLORS } from '../../helix-design-system'
 import {
   DIRECTION_COLUMN,
+  FLEX_MAX_CONTENT,
   JUSTIFY_CENTER,
   POSITION_ABSOLUTE,
 } from '../../styles'
@@ -21,7 +22,7 @@ export const MenuList = (props: MenuListProps): JSX.Element | null => {
   return isOnDevice && onClick != null ? (
     <ModalShell
       borderRadius={BORDERS.borderRadius16}
-      width="max-content"
+      width={FLEX_MAX_CONTENT}
       onOutsideClick={onClick}
     >
       <Flex
@@ -42,7 +43,7 @@ export const MenuList = (props: MenuListProps): JSX.Element | null => {
       top="2.6rem"
       right={`calc(50% + ${SPACING.spacing4})`}
       flexDirection={DIRECTION_COLUMN}
-      width="max-content"
+      width={FLEX_MAX_CONTENT}
     >
       {children}
     </Flex>
