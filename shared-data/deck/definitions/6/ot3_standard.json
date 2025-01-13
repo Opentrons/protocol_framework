@@ -1142,6 +1142,50 @@
           "zDimension": 0
         },
         "displayName": "Absorbance Reader Lid Dock in A4"
+      },
+      {
+        "id": "flexStackerV1D4",
+        "areaType": "flexStacker",
+        "offsetFromCutoutFixture": [161.0, 0.0, 31.0],
+        "boundingBox": {
+          "xDimension": 128.0,
+          "yDimension": 86.0,
+          "zDimension": 0
+        },
+        "displayName": "Flex Stacker in D4"
+      },
+      {
+        "id": "flexStackerV1C4",
+        "areaType": "flexStacker",
+        "offsetFromCutoutFixture": [161.0, 0.0, 31.0],
+        "boundingBox": {
+          "xDimension": 128.0,
+          "yDimension": 86.0,
+          "zDimension": 0
+        },
+        "displayName": "Flex Stacker in C4"
+      },
+      {
+        "id": "flexStackerV1B4",
+        "areaType": "flexStacker",
+        "offsetFromCutoutFixture": [161.0, 0.0, 31.0],
+        "boundingBox": {
+          "xDimension": 128.0,
+          "yDimension": 86.0,
+          "zDimension": 0
+        },
+        "displayName": "Flex Stacker in B4"
+      },
+      {
+        "id": "flexStackerV1A4",
+        "areaType": "flexStacker",
+        "offsetFromCutoutFixture": [161.0, 0.0, 31.0],
+        "boundingBox": {
+          "xDimension": 128.0,
+          "yDimension": 86.0,
+          "zDimension": 0
+        },
+        "displayName": "Flex Stacker in A4"
       }
     ],
     "cutouts": [
@@ -1356,6 +1400,34 @@
       "height": 124.5
     },
     {
+      "id": "flexStackerV1WithWasteChuteRightAdapterCovered",
+      "expectOpentronsModuleSerialNumber": true,
+      "mayMountTo": ["cutoutD3"],
+      "displayName": "Flex Stacker With Waste Chute Adapter for 96 Channel Pipette or Gripper",
+      "providesAddressableAreas": {
+        "cutoutD3": ["1ChannelWasteChute", "8ChannelWasteChute", "D4"]
+      },
+      "fixtureGroup": {},
+      "height": 124.5
+    },
+    {
+      "id": "flexStackerV1WithWasteChuteRightAdapterNoCover",
+      "expectOpentronsModuleSerialNumber": true,
+      "mayMountTo": ["cutoutD3"],
+      "displayName": "Flex Stacker With Waste Chute Adapter",
+      "providesAddressableAreas": {
+        "cutoutD3": [
+          "1ChannelWasteChute",
+          "8ChannelWasteChute",
+          "96ChannelWasteChute",
+          "gripperWasteChute",
+          "flexStackerV1D4"
+        ]
+      },
+      "fixtureGroup": {},
+      "height": 124.5
+    },
+    {
       "id": "thermocyclerModuleV2Rear",
       "expectOpentronsModuleSerialNumber": true,
       "mayMountTo": ["cutoutA1"],
@@ -1504,6 +1576,20 @@
         "cutoutC3": ["absorbanceReaderV1C3", "absorbanceReaderV1LidDockC4"],
         "cutoutB3": ["absorbanceReaderV1B3", "absorbanceReaderV1LidDockB4"],
         "cutoutA3": ["absorbanceReaderV1A3", "absorbanceReaderV1LidDockA4"]
+      },
+      "fixtureGroup": {},
+      "height": 10.65
+    },
+    {
+      "id": "flexStackerV1",
+      "expectOpentronsModuleSerialNumber": true,
+      "mayMountTo": ["cutoutD3", "cutoutC3", "cutoutB3", "cutoutA3"],
+      "displayName": "Slot With a Flex Stacker",
+      "providesAddressableAreas": {
+        "cutoutD3": ["flexStackerV1D4", "D3"],
+        "cutoutC3": ["flexStackerV1C4", "C3"],
+        "cutoutB3": ["flexStackerV1B4", "B3"],
+        "cutoutA3": ["flexStackerV1A4", "A3"]
       },
       "fixtureGroup": {},
       "height": 10.65
