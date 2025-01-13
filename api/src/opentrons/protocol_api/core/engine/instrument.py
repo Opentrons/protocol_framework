@@ -1045,6 +1045,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         ]
         for step_volume, src_dest_combo in source_dest_per_volume_step:
             step_source, step_destination = src_dest_combo
+            is_last_step = len([source_dest_per_volume_step]) > 0
             if new_tip == TransferTipPolicyV2.ALWAYS or (
                 new_tip == TransferTipPolicyV2.PER_SOURCE and step_source != prev_src
             ):
@@ -1072,19 +1073,14 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 transfer_properties=transfer_props,
                 transfer_type=tx_comps_executor.TransferType.ONE_TO_ONE,
                 tip_contents=post_asp_tip_contents,
+                add_final_air_gap=False
+                if is_last_step and new_tip == TransferTipPolicyV2.NEVER
+                else True,
                 trash_location=trash_location,
             )
             prev_src = step_source
         if new_tip != TransferTipPolicyV2.NEVER:
-            # TODO: make sure that the tip has air gap when moving to the trash
             _drop_tip()
-
-        post_disp_tip_contents = [
-            tx_comps_executor.LiquidAndAirGapPair(
-                liquid=45,
-                air_gap=67,
-            )
-        ]
 
     def _get_location_and_well_core_from_next_tip_info(
         self,
@@ -1183,6 +1179,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         transfer_properties: TransferProperties,
         transfer_type: tx_comps_executor.TransferType,
         tip_contents: List[tx_comps_executor.LiquidAndAirGapPair],
+        add_final_air_gap: bool,
         trash_location: Union[Location, TrashBin, WasteChute],
     ) -> List[tx_comps_executor.LiquidAndAirGapPair]:
         """Execute single-dispense steps.
@@ -1261,6 +1258,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             trash_location=trash_location,
             source_location=source[0] if source else None,
             source_well=source[1] if source else None,
+            add_final_air_gap=add_final_air_gap,
         )
         last_contents = components_executor.tip_state.last_liquid_and_air_gap_in_tip
         new_tip_contents = tip_contents[0:-1] + [last_contents]

@@ -1739,6 +1739,7 @@ def test_dispense_liquid_class(
         transfer_properties=test_transfer_properties,
         transfer_type=TransferType.ONE_TO_ONE,
         tip_contents=[],
+        add_final_air_gap=True,
         trash_location=Location(Point(1, 2, 3), labware=None),
     )
     decoy.verify(
@@ -1757,6 +1758,7 @@ def test_dispense_liquid_class(
             trash_location=Location(Point(1, 2, 3), labware=None),
             source_location=source_location,
             source_well=source_well,
+            add_final_air_gap=True,
         ),
     )
     assert result == [LiquidAndAirGapPair(air_gap=444, liquid=333)]
