@@ -1,4 +1,6 @@
 import { action } from '@storybook/addon-actions'
+import { Flex } from '../../primitives'
+import { DIRECTION_COLUMN } from '../../styles'
 import { MenuList as MenuListComponent } from './index'
 import { MenuItem } from './MenuItem'
 
@@ -21,11 +23,12 @@ type Story = StoryObj<typeof MenuListComponent>
 export const MenuList: Story = {
   args: {
     children: (
-      <>
+      <Flex flexDirection={DIRECTION_COLUMN}>
         <MenuItem>{menuBtn}</MenuItem>
         <MenuItem>{menuBtn}</MenuItem>
         <MenuItem>{menuBtn}</MenuItem>
-      </>
+      </Flex>
     ),
+    isOnDevice: false,
   },
 }
