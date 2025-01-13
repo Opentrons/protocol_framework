@@ -636,19 +636,26 @@ def test_retract_after_dispense_with_blowout_in_source(
         mock_instrument_core.prepare_to_aspirate(),
         *(
             add_final_air_gap
-            and [mock_instrument_core.air_gap_in_place(volume=air_gap_volume, flow_rate=air_gap_volume)]
+            and [
+                mock_instrument_core.air_gap_in_place(  # type: ignore[func-returns-value]
+                    volume=air_gap_volume, flow_rate=air_gap_volume
+                ),
+                mock_instrument_core.delay(0.2),  # type: ignore[func-returns-value]
+            ]
             or []
         ),
-        *(
-            add_final_air_gap and [mock_instrument_core.delay(0.2)] or []
-        )
     )
 
 
+@pytest.mark.parametrize(
+    "add_final_air_gap",
+    [True, False],
+)
 def test_retract_after_dispense_with_blowout_in_destination(
     decoy: Decoy,
     mock_instrument_core: InstrumentCore,
     sample_transfer_props: TransferProperties,
+    add_final_air_gap: bool,
 ) -> None:
     """It should execute steps to retract from well after a dispense."""
     source_well = decoy.mock(cls=WellCore)
@@ -714,17 +721,28 @@ def test_retract_after_dispense_with_blowout_in_destination(
             minimum_z_height=None,
             speed=None,
         ),
-        mock_instrument_core.air_gap_in_place(
-            volume=air_gap_volume, flow_rate=air_gap_volume
+        *(
+            add_final_air_gap
+            and [
+                mock_instrument_core.air_gap_in_place(  # type: ignore[func-returns-value]
+                    volume=air_gap_volume, flow_rate=air_gap_volume
+                ),
+                mock_instrument_core.delay(0.2),  # type: ignore[func-returns-value]
+            ]
+            or []
         ),
-        mock_instrument_core.delay(0.2),
     )
 
 
+@pytest.mark.parametrize(
+    "add_final_air_gap",
+    [True, False],
+)
 def test_retract_after_dispense_with_blowout_in_trash_well(
     decoy: Decoy,
     mock_instrument_core: InstrumentCore,
     sample_transfer_props: TransferProperties,
+    add_final_air_gap: bool,
 ) -> None:
     """It should execute steps to retract from well after a dispense."""
     source_location = Location(Point(1, 2, 3), labware=None)
@@ -804,17 +822,28 @@ def test_retract_after_dispense_with_blowout_in_trash_well(
             minimum_z_height=None,
             speed=None,
         ),
-        mock_instrument_core.air_gap_in_place(
-            volume=air_gap_volume, flow_rate=air_gap_volume
+        *(
+            add_final_air_gap
+            and [
+                mock_instrument_core.air_gap_in_place(  # type: ignore[func-returns-value]
+                    volume=air_gap_volume, flow_rate=air_gap_volume
+                ),
+                mock_instrument_core.delay(0.2),  # type: ignore[func-returns-value]
+            ]
+            or []
         ),
-        mock_instrument_core.delay(0.2),
     )
 
 
+@pytest.mark.parametrize(
+    "add_final_air_gap",
+    [True, False],
+)
 def test_retract_after_dispense_with_blowout_in_disposal_location(
     decoy: Decoy,
     mock_instrument_core: InstrumentCore,
     sample_transfer_props: TransferProperties,
+    add_final_air_gap: bool,
 ) -> None:
     """It should execute steps to retract from well after a dispense."""
     source_location = Location(Point(1, 2, 3), labware=None)
@@ -877,10 +906,16 @@ def test_retract_after_dispense_with_blowout_in_disposal_location(
             well_core=None,
             in_place=False,
         ),
-        mock_instrument_core.air_gap_in_place(
-            volume=air_gap_volume, flow_rate=air_gap_volume
+        *(
+            add_final_air_gap
+            and [
+                mock_instrument_core.air_gap_in_place(  # type: ignore[func-returns-value]
+                    volume=air_gap_volume, flow_rate=air_gap_volume
+                ),
+                mock_instrument_core.delay(0.2),  # type: ignore[func-returns-value]
+            ]
+            or []
         ),
-        mock_instrument_core.delay(0.2),
     )
 
 
