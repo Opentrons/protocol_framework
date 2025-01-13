@@ -1,6 +1,5 @@
 """Validate a deck configuration."""
 
-
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import DefaultDict, FrozenSet, List, Set, Tuple, Union, Optional
@@ -88,7 +87,7 @@ ConfigurationError = Union[
 
 
 def get_configuration_errors(  # noqa: C901
-    deck_definition: deck_types.DeckDefinitionV5,
+    deck_definition: deck_types.DeckDefinitionV6,
     placements: List[Placement],
 ) -> Set[ConfigurationError]:
     """Return all the problems with the given deck configration.
@@ -176,7 +175,7 @@ def get_configuration_errors(  # noqa: C901
 
 
 def _find_cutout_fixture(
-    deck_definition: deck_types.DeckDefinitionV5, cutout_fixture_id: str
+    deck_definition: deck_types.DeckDefinitionV6, cutout_fixture_id: str
 ) -> Union[deck_types.CutoutFixture, UnrecognizedCutoutFixtureError]:
     cutout_fixtures = deck_definition["cutoutFixtures"]
     try:
