@@ -276,9 +276,10 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
     def _set_labware_lid(self, state_update: update_types.StateUpdate) -> None:
         labware_lid_update = state_update.labware_lid
         if labware_lid_update != update_types.NO_CHANGE:
-            parent_labware_id = labware_lid_update.parent_labware_id
-            lid_id = labware_lid_update.lid_id
-            self._state.labware_by_id[parent_labware_id].lid_id = lid_id
+            parent_labware_ids = labware_lid_update.parent_labware_ids
+            for i in range(len(parent_labware_ids)):
+                lid_id = labware_lid_update.lid_ids[i]
+                self._state.labware_by_id[parent_labware_ids[i]].lid_id = lid_id
 
     def _set_labware_location(self, state_update: update_types.StateUpdate) -> None:
         labware_location_update = state_update.labware_location

@@ -1,7 +1,7 @@
 """Models and implementation for the ``moveLid`` command."""
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Optional, Type, Any
+from typing import TYPE_CHECKING, Optional, Type, Any, Dict, List
 
 from pydantic.json_schema import SkipJsonSchema
 from pydantic import BaseModel, Field
@@ -16,11 +16,9 @@ from opentrons_shared_data.errors.exceptions import (
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
 from opentrons.types import Point
 from ..types import (
-    ModuleModel,
     CurrentWell,
     LabwareLocation,
     DeckSlotLocation,
-    ModuleLocation,
     OnLabwareLocation,
     AddressableAreaLocation,
     LabwareMovementStrategy,
@@ -44,6 +42,7 @@ from .command import (
 from ..errors.error_occurrence import ErrorOccurrence
 from ..state.update_types import StateUpdate
 from opentrons_shared_data.gripper.constants import GRIPPER_PADDLE_WIDTH
+from .move_labware import GripperMovementError
 
 if TYPE_CHECKING:
     from ..execution import EquipmentHandler, RunControlHandler, LabwareMovementHandler
@@ -106,17 +105,6 @@ class MoveLidResult(BaseModel):
     )
 
 
-class GripperMovementError(ErrorOccurrence):
-    """Returned when something physically goes wrong when the gripper moves labware.
-
-    When this error happens, the engine will leave the labware in its original place.
-    """
-
-    isDefined: bool = True
-
-    errorType: Literal["gripperMovement"] = "gripperMovement"
-
-
 _ExecuteReturn = SuccessData[MoveLidResult] | DefinedErrorData[GripperMovementError]
 
 
@@ -145,7 +133,7 @@ class MoveLidImplementation(AbstractCommandImpl[MoveLidParams, _ExecuteReturn]):
             self._state_view.labware.get_definition(params.labwareId)
         ):
             raise ValueError(
-                "MoveLid command can only move labware with allowed role 'lid'."
+                f"MoveLid command can only move labware with allowed role 'lid'. {self._state_view.labware.get_load_name(params.labwareId)}" 
             )
 
         # Allow propagation of LabwareNotLoadedError.
@@ -329,25 +317,29 @@ class MoveLidImplementation(AbstractCommandImpl[MoveLidParams, _ExecuteReturn]):
         ):
             state_update.clear_all_pipette_locations()
 
-        # If the Lid originated on a parent labware, update the parent labware
-        parent_labware = self._state_view.labware.get_labware_by_lid_id(
-            lid_id=params.labwareId
-        )
-        if parent_labware:
-            if labware_validation.is_lid_stack(load_name=parent_labware.loadName):
-                # Move the empty Lid Stack Object to the Invalidated location
-                state_update.set_labware_location(
-                    labware_id=parent_labware.id,
-                    new_location="invalidated",
-                    new_offset_id=None,
-                )
-            else:
-                state_update.set_lid(
-                    parent_labware_id=parent_labware.id,
-                    lid_id=None,
-                )
+        parent_updates: List[str] = []
+        lid_updates: List[str | None] = []
+        # when moving a lid between locations we need to:
+        assert isinstance(current_labware.location, OnLabwareLocation)
+        if labware_validation.is_lid_stack(
+            self._state_view.labware.get_load_name(current_labware.location.labwareId)
+        ):
+            # if the source location is a labware stack, then this is the final lid in the stack and remove it
+            # NEW FUNCTION IN STATE UPDATE TO MAKE INVALIDATED LOCATION
+            raise ValueError("Lid Stack Invalidated")
+        elif (
+            self._state_view.labware.get_lid_by_labware_id(
+                current_labware.location.labwareId
+            )
+            is not None
+        ):
+            # if the source location was a parent labware and not a lid stack or lid, update the parent labware lid ID to None (no more lid)
+            parent_updates.append(current_labware.location.labwareId)
+            lid_updates.append(None)
 
-        # If moving to a location with no lid stack, create one
+        # --- otherwise the source location was another lid, theres nothing to do so move on ---
+
+        # if the new location is a empty deck slot, make a new lid stack there
         if isinstance(available_new_location, DeckSlotLocation) or (
             isinstance(available_new_location, OnLabwareLocation)
             and labware_validation.validate_definition_is_adapter(
@@ -379,18 +371,120 @@ class MoveLidImplementation(AbstractCommandImpl[MoveLidParams, _ExecuteReturn]):
                 location=available_new_location,
             )
 
-            # Update the labware location to the new lid stack
+            # Update the lid labware location to the new lid stack
             state_update.set_labware_location(
                 labware_id=params.labwareId,
                 new_location=OnLabwareLocation(labwareId=lid_stack_object.labware_id),
                 new_offset_id=new_offset_id,
             )
+        # update the LIDs labware location to new location
         else:
             state_update.set_labware_location(
                 labware_id=params.labwareId,
                 new_location=available_new_location,
                 new_offset_id=new_offset_id,
             )
+            # If we're moving to a non lid object, add to the setlids list of things to do
+            if isinstance(
+                available_new_location, OnLabwareLocation
+            ) and not labware_validation.validate_definition_is_lid(
+                self._state_view.labware.get_definition(
+                    available_new_location.labwareId
+                )
+            ):
+                parent_updates.append(available_new_location.labwareId)
+                lid_updates.append(params.labwareId)
+        # Add to setlids
+        if len(parent_updates) > 0:
+            state_update.set_lids(
+                parent_labware_ids=parent_updates,
+                lid_ids=lid_updates,
+            )
+        # if len(parent_updates) > 1:
+        #     raise ValueError(f"parents: {parent_updates} {self._state_view.labware.get_load_name(parent_updates[0])} lids: {lid_updates} --- labware location of the lid object currently: {current_labware.location} desired location: {available_new_location}")
+        #     state_update.set_lids(
+        #         parent_labware_ids=parent_updates,
+        #         lid_ids=lid_updates,
+        #     )
+
+        # parent_updates: List[str] = []
+        # lid_updates: List[str | None] = []
+        # # If the Lid originated on a parent labware, update the parent labware
+
+        # parent_labware = self._state_view.labware.get_labware_by_lid_id(
+        #     lid_id=params.labwareId
+        # )
+        # if parent_labware:
+        #     if labware_validation.is_lid_stack(load_name=parent_labware.loadName):
+        #         # Move the empty Lid Stack Object to the Invalidated location
+        #         # CASEY NOTE: NEED NEW STATE UPDATE TO INVALIDATE LID STACK
+        #         state_update.set_labware_location(
+        #             labware_id=parent_labware.id,
+        #             new_location="invalidated",
+        #             new_offset_id=None,
+        #         )
+        #     else:
+        #         parent_updates.append(parent_labware.id)
+        #         lid_updates.append(None)
+
+        # # If moving to a location with no lid stack, create one
+        # if isinstance(available_new_location, DeckSlotLocation) or (
+        #     isinstance(available_new_location, OnLabwareLocation)
+        #     and labware_validation.validate_definition_is_adapter(
+        #         self._state_view.labware.get_definition(
+        #             available_new_location.labwareId
+        #         )
+        #     )
+        # ):
+        #     # we will need to generate a labware ID for a new lid stack
+        #     lid_stack_object = await self._equipment.load_labware(
+        #         load_name=_LID_STACK_PE_LABWARE,
+        #         namespace=_LID_STACK_PE_NAMESPACE,
+        #         version=_LID_STACK_PE_VERSION,
+        #         location=available_new_location,
+        #         labware_id=None,
+        #     )
+        #     if not labware_validation.validate_definition_is_system(
+        #         lid_stack_object.definition
+        #     ):
+        #         raise ProtocolEngineError(
+        #             message="Lid Stack Labware Object Labware Definition does not contain required allowed role 'system'."
+        #         )
+        #     # we will need to state update to add the lid stack to this position in space
+        #     state_update.set_loaded_labware(
+        #         definition=lid_stack_object.definition,
+        #         labware_id=lid_stack_object.labware_id,
+        #         offset_id=lid_stack_object.offsetId,
+        #         display_name=None,
+        #         location=available_new_location,
+        #     )
+
+        #     # Update the labware location to the new lid stack
+        #     state_update.set_labware_location(
+        #         labware_id=params.labwareId,
+        #         new_location=OnLabwareLocation(labwareId=lid_stack_object.labware_id),
+        #         new_offset_id=new_offset_id,
+        #     )
+        # else:
+        #     state_update.set_labware_location(
+        #         labware_id=params.labwareId,
+        #         new_location=available_new_location,
+        #         new_offset_id=new_offset_id,
+        #     )
+        #     if isinstance(
+        #         available_new_location, OnLabwareLocation
+        #     ) and not labware_validation.is_lid_stack(
+        #         self._state_view.labware.get_load_name(available_new_location.labwareId)
+        #     ):
+        #         parent_updates.append(available_new_location.labwareId)
+        #         lid_updates.append(params.labwareId)
+        # # Update relevant Lid States
+        # state_update.set_lids(
+        #     parent_labware_ids=parent_updates,
+        #     lid_ids=lid_updates,
+        # )
+        # if len(parent_updates) > 1:
+        #     raise ValueError(f"parents: {parent_updates} lids: {lid_updates}")
 
         return SuccessData(
             public=MoveLidResult(offsetId=new_offset_id),

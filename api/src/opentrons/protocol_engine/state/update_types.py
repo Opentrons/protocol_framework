@@ -149,10 +149,10 @@ class LoadedLidStackUpdate:
 class LabwareLidUpdate:
     """An update that identifies a lid on a given parent labware."""
 
-    parent_labware_id: str
-    """The unique ID of the parent labware."""
+    parent_labware_ids: typing.List[str]
+    """The unique IDs of the parent labwares."""
 
-    lid_id: str | None
+    lid_ids: typing.List[str | None]
     """The unique IDs of the new lids."""
 
 
@@ -531,15 +531,15 @@ class StateUpdate:
         )
         return self
 
-    def set_lid(
+    def set_lids(
         self: Self,
-        parent_labware_id: str,
-        lid_id: str | None,
+        parent_labware_ids: typing.List[str],
+        lid_ids: typing.List[str | None],
     ) -> Self:
         """Update the labware parent of a loaded or moved lid. See `LabwareLidUpdate`."""
         self.labware_lid = LabwareLidUpdate(
-            parent_labware_id=parent_labware_id,
-            lid_id=lid_id,
+            parent_labware_ids=parent_labware_ids,
+            lid_ids=lid_ids,
         )
         return self
 

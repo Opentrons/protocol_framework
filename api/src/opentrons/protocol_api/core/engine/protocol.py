@@ -467,32 +467,34 @@ class ProtocolCore(
         else:
             strategy = LabwareMovementStrategy.MANUAL_MOVE_WITHOUT_PAUSE
 
-        if isinstance(source_location, LabwareCore):
-            # if this is a labware stack, we need to find the labware at the top of the stack
-            if labware_validation.is_lid_stack(
-                source_location.get_load_params().load_name
-            ):
-                lid_id = self._engine_client.state.labware.get_highest_child_labware(
-                    source_location.labware_id
-                )
-            # if this is a labware with a lid, we just need to find its lid_id
-            else:
-                lid = self._engine_client.state.labware.get_lid_by_labware_id(
-                    source_location.labware_id
-                )
-                if lid is not None:
-                    lid_id = lid.id
-                else:
-                    raise ValueError("Cannot move a lid off of a labware with no lid.")
-        else:
+        if isinstance(source_location, DeckSlotName) or isinstance(source_location, StagingSlotName):
             # Find the source labware at the provided deck slot
-            labware = self._engine_client.state.labware.get_by_slot(source_location)
-            if labware is not None:
-                lid_id = labware.id
-            else:
+            labware_in_slot = self._engine_client.state.labware.get_by_slot(source_location)
+            if labware_in_slot is None:
                 raise LabwareNotLoadedOnLabwareError(
                     "Lid cannot be loaded on non-labware position."
                 )
+            else:
+                labware = LabwareCore(labware_in_slot.id, self._engine_client)
+        else:
+            labware = source_location
+            
+        # if this is a labware stack, we need to find the labware at the top of the stack
+        if labware_validation.is_lid_stack(
+            labware.load_name
+        ):
+            lid_id = self._engine_client.state.labware.get_highest_child_labware(
+                labware.labware_id
+            )
+        # if this is a labware with a lid, we just need to find its lid_id
+        else:
+            lid = self._engine_client.state.labware.get_lid_by_labware_id(
+                labware.labware_id
+            )
+            if lid is not None:
+                lid_id = lid.id
+            else:
+                raise ValueError("Cannot move a lid off of a labware with no lid.")
 
         _pick_up_offset = (
             LabwareOffsetVector(
@@ -507,7 +509,23 @@ class ProtocolCore(
             else None
         )
 
-        to_location = self._convert_labware_location(location=new_location)
+        if isinstance(new_location, DeckSlotName) or isinstance(new_location, StagingSlotName):
+            # Find the destination labware at the provided deck slot
+            destination_labware_in_slot = self._engine_client.state.labware.get_by_slot(new_location)
+            if destination_labware_in_slot is None:
+                to_location = self._convert_labware_location(location=new_location)
+            else:
+                highest_child_location = self._engine_client.state.labware.get_highest_child_labware(
+                    destination_labware_in_slot.id
+                )
+                to_location = self._convert_labware_location(location=LabwareCore(highest_child_location, self._engine_client))
+        elif isinstance(new_location, LabwareCore):
+            highest_child_location = self._engine_client.state.labware.get_highest_child_labware(
+                    new_location.labware_id
+                )
+            to_location = self._convert_labware_location(location=LabwareCore(highest_child_location, self._engine_client))
+        else:
+            to_location = self._convert_labware_location(location=new_location)
 
         self._engine_client.execute_command(
             cmd.MoveLidParams(
@@ -539,12 +557,10 @@ class ProtocolCore(
             existing_module_ids=list(self._module_cores_by_id.keys()),
         )
 
-        # If we end up spawning a new lid stack we need to return it
-        # look at the lid ID for this lid
-        # if the labware under it is a lid stack, return that
-        parent = self._engine_client.state.labware.get_labware_by_lid_id(lid_id=lid_id)
-        if parent is not None and labware_validation.is_lid_stack(parent.loadName):
-            return LabwareCore(labware_id=parent.id, engine_client=self._engine_client)
+        # If we end up create a new lid stack, return the lid stack
+        parent_location = self._engine_client.state.labware.get_location(lid_id)
+        if isinstance(parent_location, OnLabwareLocation) and labware_validation.is_lid_stack(self._engine_client.state.labware.get_load_name(parent_location.labwareId)):
+            return LabwareCore(labware_id=parent_location.labwareId, engine_client=self._engine_client)
         return None
 
     def _resolve_module_hardware(
