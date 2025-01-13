@@ -93,7 +93,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
 
   const is96Channel =
     propsForFields.pipette.value != null &&
-    pipettes[String(propsForFields.pipette.value)].name === 'p1000_96'
+    pipettes[String(propsForFields.pipette.value)].spec.channels === 96
   const is8Channel =
     propsForFields.pipette.value != null &&
     pipettes[String(propsForFields.pipette.value)].spec.channels === 8
