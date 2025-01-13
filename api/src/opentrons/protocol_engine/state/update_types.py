@@ -105,6 +105,14 @@ class LabwareLocationUpdate:
 
 
 @dataclasses.dataclass
+class LabwareInvalidationUpdate:
+    """Invalidate a labware's location."""
+
+    labware_id: str
+    """The ID of the already-loaded labware."""
+
+
+@dataclasses.dataclass
 class LoadedLabwareUpdate:
     """An update that loads a new labware."""
 
@@ -362,6 +370,8 @@ class StateUpdate:
 
     labware_location: LabwareLocationUpdate | NoChangeType = NO_CHANGE
 
+    invalidate_labware: LabwareInvalidationUpdate | NoChangeType = NO_CHANGE
+
     loaded_labware: LoadedLabwareUpdate | NoChangeType = NO_CHANGE
 
     loaded_lid_stack: LoadedLidStackUpdate | NoChangeType = NO_CHANGE
@@ -541,6 +551,15 @@ class StateUpdate:
             parent_labware_ids=parent_labware_ids,
             lid_ids=lid_ids,
         )
+        return self
+
+    def set_labware_invalidated(
+        self: Self,
+        *,
+        labware_id: str,
+    ) -> Self:
+        """Invalidate a labware's location. See `LabwareInvalidationUpdate`."""
+        self.invalidate_labware = LabwareInvalidationUpdate(labware_id=labware_id)
         return self
 
     def set_load_pipette(

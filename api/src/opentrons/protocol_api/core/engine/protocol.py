@@ -443,7 +443,7 @@ class ProtocolCore(
             existing_module_ids=list(self._module_cores_by_id.keys()),
         )
 
-    def move_lid(
+    def move_lid(  # noqa: C901
         self,
         source_location: Union[DeckSlotName, StagingSlotName, LabwareCore],
         new_location: Union[
@@ -467,9 +467,13 @@ class ProtocolCore(
         else:
             strategy = LabwareMovementStrategy.MANUAL_MOVE_WITHOUT_PAUSE
 
-        if isinstance(source_location, DeckSlotName) or isinstance(source_location, StagingSlotName):
+        if isinstance(source_location, DeckSlotName) or isinstance(
+            source_location, StagingSlotName
+        ):
             # Find the source labware at the provided deck slot
-            labware_in_slot = self._engine_client.state.labware.get_by_slot(source_location)
+            labware_in_slot = self._engine_client.state.labware.get_by_slot(
+                source_location
+            )
             if labware_in_slot is None:
                 raise LabwareNotLoadedOnLabwareError(
                     "Lid cannot be loaded on non-labware position."
@@ -478,11 +482,9 @@ class ProtocolCore(
                 labware = LabwareCore(labware_in_slot.id, self._engine_client)
         else:
             labware = source_location
-            
+
         # if this is a labware stack, we need to find the labware at the top of the stack
-        if labware_validation.is_lid_stack(
-            labware.load_name
-        ):
+        if labware_validation.is_lid_stack(labware.load_name):
             lid_id = self._engine_client.state.labware.get_highest_child_labware(
                 labware.labware_id
             )
@@ -509,21 +511,33 @@ class ProtocolCore(
             else None
         )
 
-        if isinstance(new_location, DeckSlotName) or isinstance(new_location, StagingSlotName):
+        if isinstance(new_location, DeckSlotName) or isinstance(
+            new_location, StagingSlotName
+        ):
             # Find the destination labware at the provided deck slot
-            destination_labware_in_slot = self._engine_client.state.labware.get_by_slot(new_location)
+            destination_labware_in_slot = self._engine_client.state.labware.get_by_slot(
+                new_location
+            )
             if destination_labware_in_slot is None:
                 to_location = self._convert_labware_location(location=new_location)
             else:
-                highest_child_location = self._engine_client.state.labware.get_highest_child_labware(
-                    destination_labware_in_slot.id
+                highest_child_location = (
+                    self._engine_client.state.labware.get_highest_child_labware(
+                        destination_labware_in_slot.id
+                    )
                 )
-                to_location = self._convert_labware_location(location=LabwareCore(highest_child_location, self._engine_client))
+                to_location = self._convert_labware_location(
+                    location=LabwareCore(highest_child_location, self._engine_client)
+                )
         elif isinstance(new_location, LabwareCore):
-            highest_child_location = self._engine_client.state.labware.get_highest_child_labware(
+            highest_child_location = (
+                self._engine_client.state.labware.get_highest_child_labware(
                     new_location.labware_id
                 )
-            to_location = self._convert_labware_location(location=LabwareCore(highest_child_location, self._engine_client))
+            )
+            to_location = self._convert_labware_location(
+                location=LabwareCore(highest_child_location, self._engine_client)
+            )
         else:
             to_location = self._convert_labware_location(location=new_location)
 
@@ -559,8 +573,14 @@ class ProtocolCore(
 
         # If we end up create a new lid stack, return the lid stack
         parent_location = self._engine_client.state.labware.get_location(lid_id)
-        if isinstance(parent_location, OnLabwareLocation) and labware_validation.is_lid_stack(self._engine_client.state.labware.get_load_name(parent_location.labwareId)):
-            return LabwareCore(labware_id=parent_location.labwareId, engine_client=self._engine_client)
+        if isinstance(
+            parent_location, OnLabwareLocation
+        ) and labware_validation.is_lid_stack(
+            self._engine_client.state.labware.get_load_name(parent_location.labwareId)
+        ):
+            return LabwareCore(
+                labware_id=parent_location.labwareId, engine_client=self._engine_client
+            )
         return None
 
     def _resolve_module_hardware(

@@ -49,6 +49,7 @@ from ..types import (
     LabwareMovementOffsetData,
     OnDeckLabwareLocation,
     OFF_DECK_LOCATION,
+    INVALIDATED_LOCATION,
 )
 from ..actions import (
     Action,
@@ -303,6 +304,15 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
 
                 self._state.labware_by_id[labware_id].location = new_location
 
+    def _set_labware_invalidated(self, state_update: update_types.StateUpdate) -> None:
+        labware_invalidation_update = state_update.invalidate_labware
+        if labware_invalidation_update != update_types.NO_CHANGE:
+            labware_id = labware_invalidation_update.labware_id
+
+            self._state.labware_by_id[labware_id].offsetId = None
+
+            self._state.labware_by_id[labware_id].location = INVALIDATED_LOCATION
+
 
 class LabwareView:
     """Read-only labware state view."""
@@ -482,7 +492,7 @@ class LabwareView:
             return self.get_labware_stack(labware_stack)
         return labware_stack
 
-    def get_lid_by_labware_id(self, labware_id) -> LoadedLabware | None:
+    def get_lid_by_labware_id(self, labware_id: str) -> LoadedLabware | None:
         """Get the Lid Labware that is currently on top of a given labware, if there is one."""
         lid_id = self._state.labware_by_id[labware_id].lid_id
         if lid_id:
@@ -966,7 +976,7 @@ class LabwareView:
             for lw in labware_stack:
                 if not labware_validation.validate_definition_is_adapter(
                     self.get_definition(lw.id)
-                ):
+                ) and not labware_validation.is_lid_stack(self.get_load_name(lw.id)):
                     stack_without_adapters.append(lw)
             if len(stack_without_adapters) >= self.get_labware_stacking_maximum(
                 top_labware_definition
