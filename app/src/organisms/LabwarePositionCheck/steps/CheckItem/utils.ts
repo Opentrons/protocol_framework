@@ -15,11 +15,15 @@ export function getItemLabwareDef({
   labwareId,
   loadedLabware,
   labwareDefs,
-}: GetLabwareDefsForLPCParams): LabwareDefinition2 {
-  const labwareDefUri = loadedLabware.find(l => l.id === labwareId)
-    ?.definitionUri
+}: GetLabwareDefsForLPCParams): LabwareDefinition2 | null {
+  const labwareDefUri =
+    loadedLabware.find(l => l.id === labwareId)?.definitionUri ?? null
 
-  return labwareDefs.find(
-    def => getLabwareDefURI(def) === labwareDefUri
-  ) as LabwareDefinition2
+  if (labwareDefUri == null) {
+    console.warn(`Null labware def found for labwareId: ${labwareId}`)
+  }
+
+  return (
+    labwareDefs.find(def => getLabwareDefURI(def) === labwareDefUri) ?? null
+  )
 }

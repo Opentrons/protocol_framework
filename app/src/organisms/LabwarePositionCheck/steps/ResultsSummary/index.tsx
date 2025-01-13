@@ -53,7 +53,9 @@ export function ResultsSummary(
     getIsLabwareOffsetCodeSnippetsOn
   )
 
-  // TOME: TODO: I believe this should be in a selector.
+  // TOME: TODO: I believe this should be in a utility fn.
+  //  The one tricky thing here is handling the error, because you want to bubble this.
+  //  Just make this a command AND a selector. You have access to state.
   const offsetsToApply = useMemo(() => {
     return workingOffsets.map<LabwareOffsetCreateData>(
       ({ initialPosition, finalPosition, labwareId, location }) => {

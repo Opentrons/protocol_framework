@@ -33,8 +33,11 @@ interface ViewOffsetsProps {
 export function ViewOffsets(props: ViewOffsetsProps): JSX.Element {
   const { existingOffsets, labwareDefinitions } = props
   const { t, i18n } = useTranslation('labware_position_check')
+
   const [showOffsetsTable, setShowOffsetsModal] = useState(false)
+
   const latestCurrentOffsets = getLatestCurrentOffsets(existingOffsets)
+
   return existingOffsets.length > 0 ? (
     <>
       <Btn

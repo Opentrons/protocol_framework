@@ -6,7 +6,7 @@ import type { UseLPCCommandWithChainRunChildProps } from './types'
 import type { BuildModulePrepCommandsParams } from './commands'
 
 interface HandlePrepModulesParams extends BuildModulePrepCommandsParams {
-  initialPosition: VectorOffset | undefined | null
+  initialPosition: VectorOffset | null
 }
 
 export interface UseHandlePrepModulesResult {

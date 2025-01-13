@@ -3,12 +3,7 @@ import styled from 'styled-components'
 import isEqual from 'lodash/isEqual'
 import { useTranslation } from 'react-i18next'
 
-import {
-  FLEX_ROBOT_TYPE,
-  getLabwareDefURI,
-  getLabwareDisplayName,
-  IDENTITY_VECTOR,
-} from '@opentrons/shared-data'
+import { FLEX_ROBOT_TYPE, IDENTITY_VECTOR } from '@opentrons/shared-data'
 import {
   BORDERS,
   COLORS,
@@ -18,6 +13,7 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 
+import { selectLwDisplayName } from '/app/organisms/LabwarePositionCheck/redux'
 import { getLabwareDisplayLocation } from '/app/local-resources/labware'
 
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
@@ -37,8 +33,9 @@ export function OffsetTable({
   labwareDefinitions,
   state,
 }: OffsetTableProps): JSX.Element {
-  const { t } = useTranslation('labware_position_check')
   const { protocolData } = state
+
+  const { t } = useTranslation('labware_position_check')
 
   return (
     <Table>
@@ -51,7 +48,7 @@ export function OffsetTable({
       </thead>
 
       <tbody>
-        {offsets.map(({ location, definitionUri, vector }, index) => {
+        {offsets.map(({ location, vector }, index) => {
           const displayLocation = getLabwareDisplayLocation({
             location,
             allRunDefs: labwareDefinitions,
@@ -61,12 +58,6 @@ export function OffsetTable({
             loadedLabwares: protocolData.labware,
             robotType: FLEX_ROBOT_TYPE,
           })
-
-          const labwareDef = labwareDefinitions.find(
-            def => getLabwareDefURI(def) === definitionUri
-          )
-          const labwareDisplayName =
-            labwareDef != null ? getLabwareDisplayName(labwareDef) : ''
 
           return (
             <TableRow key={index}>
@@ -84,7 +75,9 @@ export function OffsetTable({
                 </LegacyStyledText>
               </TableDatum>
               <TableDatum>
-                <LegacyStyledText as="p">{labwareDisplayName}</LegacyStyledText>
+                <LegacyStyledText as="p">
+                  {selectLwDisplayName(state)}
+                </LegacyStyledText>
               </TableDatum>
               <TableDatum
                 css={`

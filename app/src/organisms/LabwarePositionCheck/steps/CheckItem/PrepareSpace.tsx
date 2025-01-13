@@ -30,6 +30,7 @@ import type {
   CheckPositionsStep,
   LPCStepProps,
 } from '/app/organisms/LabwarePositionCheck/types'
+import { selectItemLabwareDef } from '/app/organisms/LabwarePositionCheck/redux'
 
 const LPC_HELP_LINK_URL =
   'https://support.opentrons.com/s/article/How-Labware-Offsets-work-on-the-OT-2'
@@ -37,12 +38,10 @@ const LPC_HELP_LINK_URL =
 interface PrepareSpaceProps extends LPCStepProps<CheckPositionsStep> {
   header: ReactNode
   body: ReactNode
-  labwareDef: LabwareDefinition2
   confirmPlacement: () => void
 }
 
 export function PrepareSpace({
-  labwareDef,
   state,
   header,
   body,
@@ -51,6 +50,7 @@ export function PrepareSpace({
   const { i18n, t } = useTranslation(['labware_position_check', 'shared'])
   const { protocolData, isOnDevice, deckConfig, steps } = state
   const { location } = steps.current as CheckPositionsStep // safely enforced by iface
+  const labwareDef = selectItemLabwareDef(state) as LabwareDefinition2 // CheckItem always has lwId on step.
 
   return (
     <Flex css={PARENT_CONTAINER_STYLE}>

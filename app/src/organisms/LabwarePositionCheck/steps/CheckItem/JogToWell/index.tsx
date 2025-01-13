@@ -23,9 +23,9 @@ import {
   WELL_LABEL_OPTIONS,
 } from '@opentrons/components'
 import {
-  getIsTiprack,
   getVectorDifference,
   getVectorSum,
+  IDENTITY_VECTOR,
 } from '@opentrons/shared-data'
 
 import { getTopPortalEl } from '/app/App/portal'
@@ -33,10 +33,16 @@ import { SmallButton } from '/app/atoms/buttons'
 import { NeedHelpLink } from '/app/molecules/OT2CalibrationNeedHelpLink'
 import { JogControls } from '/app/molecules/JogControls'
 import { LiveOffsetValue } from './LiveOffsetValue'
+import {
+  selectActiveLwExistingOffset,
+  selectActiveLwInitialPosition,
+  selectActivePipette,
+  selectIsActiveLwTipRack,
+  selectItemLabwareDef,
+} from '/app/organisms/LabwarePositionCheck/redux'
 
 import type { ReactNode } from 'react'
-import type { PipetteName, LabwareDefinition2 } from '@opentrons/shared-data'
-import type { WellStroke } from '@opentrons/components'
+import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type { VectorOffset } from '@opentrons/api-client'
 import type { Jog } from '/app/molecules/JogControls'
 import type {
@@ -54,34 +60,40 @@ const LPC_HELP_LINK_URL =
 interface JogToWellProps extends LPCStepProps<CheckPositionsStep> {
   header: ReactNode
   body: ReactNode
-  labwareDef: LabwareDefinition2
-  initialPosition: VectorOffset
   handleConfirmPosition: () => void
   handleGoBack: () => void
   handleJog: Jog
-  existingOffset: VectorOffset
-  pipetteName: PipetteName
 }
 
-export function JogToWell({
-  header,
-  body,
-  pipetteName,
-  labwareDef,
-  handleConfirmPosition,
-  handleGoBack,
-  handleJog,
-  initialPosition,
-  existingOffset,
-  state,
-}: JogToWellProps): JSX.Element {
+export function JogToWell(props: JogToWellProps): JSX.Element {
+  const {
+    header,
+    body,
+    handleConfirmPosition,
+    handleGoBack,
+    handleJog,
+    state,
+  } = props
   const { t } = useTranslation(['labware_position_check', 'shared'])
   const { isOnDevice } = state
+
+  const initialPosition =
+    selectActiveLwInitialPosition(state) ?? IDENTITY_VECTOR
+  const pipetteName = selectActivePipette(state)?.pipetteName ?? 'p1000_single'
+  const itemLwDef = selectItemLabwareDef(state) as LabwareDefinition2 // Safe if component only used with CheckItem step.
+  const isTipRack = selectIsActiveLwTipRack(state)
 
   const [joggedPosition, setJoggedPosition] = useState<VectorOffset>(
     initialPosition
   )
   const [showFullJogControls, setShowFullJogControls] = useState(false)
+
+  const levelSrc = isTipRack ? levelProbeWithTip : levelProbeWithLabware
+  const liveOffset = getVectorSum(
+    selectActiveLwExistingOffset(state),
+    getVectorDifference(joggedPosition, initialPosition)
+  )
+
   useEffect(() => {
     //  NOTE: this will perform a "null" jog when the jog controls mount so
     //  if a user reaches the "confirm exit" modal (unmounting this component)
@@ -97,44 +109,28 @@ export function JogToWell({
     }
   }, [])
 
-  // TOME TODO: Steps should honestly should include more details about the instruments used
-  // or be made into selectors.
-
-  const wellsToHighlight = ['A1']
-  const wellStroke: WellStroke = wellsToHighlight.reduce(
-    (acc, wellName) => ({ ...acc, [wellName]: COLORS.blue50 }),
-    {}
-  )
-
-  const liveOffset = getVectorSum(
-    existingOffset,
-    getVectorDifference(joggedPosition, initialPosition)
-  )
-  const isTipRack = getIsTiprack(labwareDef)
-  const levelSrc = isTipRack ? levelProbeWithTip : levelProbeWithLabware
-
   return (
     <Flex css={CONTAINER_STYLE}>
       <Flex css={CONTENT_GRID_STYLE}>
         <Flex css={INFO_CONTAINER_STYLE}>
           <Header>{header}</Header>
           {body}
-          <LiveOffsetValue {...liveOffset} />
+          <LiveOffsetValue {...liveOffset} {...props} />
         </Flex>
         <Flex css={RENDER_CONTAINER_STYLE}>
           <RobotWorkSpace viewBox={DECK_MAP_VIEWBOX}>
             {() => (
               <>
                 <LabwareRender
-                  definition={labwareDef}
-                  wellStroke={wellStroke}
+                  definition={itemLwDef}
+                  wellStroke={{ A1: COLORS.blue50 }}
                   wellLabelOption={WELL_LABEL_OPTIONS.SHOW_LABEL_OUTSIDE}
-                  highlightedWellLabels={{ wells: wellsToHighlight }}
+                  highlightedWellLabels={{ wells: ['A1'] }}
                   labwareStroke={COLORS.grey30}
                   wellLabelColor={COLORS.grey30}
                 />
                 <PipetteRender
-                  labwareDef={labwareDef}
+                  labwareDef={itemLwDef}
                   pipetteName={pipetteName}
                   usingMetalProbe={true}
                 />

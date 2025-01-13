@@ -8,9 +8,12 @@ import {
   SPACING,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { getPipetteNameSpecs } from '@opentrons/shared-data'
 
 import { GenericWizardTile } from '/app/molecules/GenericWizardTile'
+import {
+  selectActivePipette,
+  selectActivePipetteChannelCount,
+} from '/app/organisms/LabwarePositionCheck/redux'
 
 import detachProbe1 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_1.webm'
 import detachProbe8 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_8.webm'
@@ -20,28 +23,27 @@ import type { DetachProbeStep, LPCStepProps } from '../types'
 
 export const DetachProbe = ({
   state,
-  step,
   proceed,
   commandUtils,
 }: LPCStepProps<DetachProbeStep>): JSX.Element => {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
-  const { protocolData } = state
   const {
     moveToMaintenancePosition,
     createProbeDetachmentHandler,
   } = commandUtils
+  const pipette = selectActivePipette(state)
+  const probeVideoSrc = ((): string => {
+    const channels = selectActivePipetteChannelCount(state)
 
-  // TOME: TODO: Yeah, same sort of selector here.
-  const pipette = protocolData.pipettes.find(p => p.id === step.pipetteId)
-  const pipetteName = pipette?.pipetteName
-  const pipetteChannels =
-    pipetteName != null ? getPipetteNameSpecs(pipetteName)?.channels ?? 1 : 1
-  let probeVideoSrc = detachProbe1
-  if (pipetteChannels === 8) {
-    probeVideoSrc = detachProbe8
-  } else if (pipetteChannels === 96) {
-    probeVideoSrc = detachProbe96
-  }
+    switch (channels) {
+      case 1:
+        return detachProbe1
+      case 8:
+        return detachProbe8
+      case 96:
+        return detachProbe96
+    }
+  })()
 
   const handleProbeDetached = createProbeDetachmentHandler(pipette, proceed)
 

@@ -1,4 +1,6 @@
 import { Fragment } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import {
   ALIGN_CENTER,
   BORDERS,
@@ -12,11 +14,11 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 
-import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
-import { getIsOnDevice } from '/app/redux/config'
-
 import type { StyleProps } from '@opentrons/components'
+import type {
+  CheckPositionsStep,
+  LPCStepProps,
+} from '/app/organisms/LabwarePositionCheck/types'
 
 interface OffsetVectorProps extends StyleProps {
   x: number
@@ -24,11 +26,11 @@ interface OffsetVectorProps extends StyleProps {
   z: number
 }
 
-export function LiveOffsetValue(props: OffsetVectorProps): JSX.Element {
-  const { x, y, z, ...styleProps } = props
-  const axisLabels = ['X', 'Y', 'Z']
+export function LiveOffsetValue(
+  props: OffsetVectorProps & LPCStepProps<CheckPositionsStep>
+): JSX.Element {
+  const { x, y, z, state, ...styleProps } = props
   const { i18n, t } = useTranslation('labware_position_check')
-  const isOnDevice = useSelector(getIsOnDevice)
 
   return (
     <Flex
@@ -39,7 +41,7 @@ export function LiveOffsetValue(props: OffsetVectorProps): JSX.Element {
       <LegacyStyledText
         as="label"
         fontWeight={
-          isOnDevice
+          state.isOnDevice
             ? TYPOGRAPHY.fontWeightRegular
             : TYPOGRAPHY.fontWeightSemiBold
         }
@@ -53,7 +55,7 @@ export function LiveOffsetValue(props: OffsetVectorProps): JSX.Element {
         padding={SPACING.spacing8}
         {...styleProps}
       >
-        <Icon name="reticle" size={isOnDevice ? '1.5rem' : SIZE_1} />
+        <Icon name="reticle" size={state.isOnDevice ? '1.5rem' : SIZE_1} />
         {[x, y, z].map((axis, index) => (
           <Fragment key={index}>
             <LegacyStyledText
@@ -62,7 +64,7 @@ export function LiveOffsetValue(props: OffsetVectorProps): JSX.Element {
               marginRight={SPACING.spacing4}
               fontWeight={TYPOGRAPHY.fontWeightSemiBold}
             >
-              {axisLabels[index]}
+              {['X', 'Y', 'Z'][index]}
             </LegacyStyledText>
             <LegacyStyledText as="p">{axis.toFixed(1)}</LegacyStyledText>
           </Fragment>
