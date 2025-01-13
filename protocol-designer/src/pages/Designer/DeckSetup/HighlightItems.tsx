@@ -5,7 +5,6 @@ import {
   STANDARD_FLEX_SLOTS,
   STANDARD_OT2_SLOTS,
   THERMOCYCLER_MODULE_TYPE,
-  THERMOCYCLER_MODULE_V1,
   THERMOCYCLER_MODULE_V2,
   WASTE_CHUTE_CUTOUT,
   getAddressableAreaFromSlotId,
@@ -37,6 +36,7 @@ interface HighlightItemsProps {
   deckDef: DeckDefinition
   robotType: RobotType
 }
+//  TODO(ja, 1/13/25): get actual coordinates from thermocycler and deck definitions
 const FLEX_TC_POSITION: CoordinateTuple = [-20, 282, 0]
 const OT2_TC_GEN_1_POSITION: CoordinateTuple = [0, 264, 0]
 const OT2_TC_GEN_2_POSITION: CoordinateTuple = [0, 250, 0]
@@ -140,13 +140,11 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
         const position = getPositionFromSlotId(labwareSlot, deckDef)
         if (position != null) {
           let tcPosition: CoordinateTuple = FLEX_TC_POSITION
-          if (tcModel === THERMOCYCLER_MODULE_V1 && labwareSlot === '7') {
-            tcPosition = OT2_TC_GEN_1_POSITION
-          } else if (
-            tcModel === THERMOCYCLER_MODULE_V2 &&
-            labwareSlot === '7'
-          ) {
-            tcPosition = OT2_TC_GEN_2_POSITION
+          if (labwareSlot === '7') {
+            tcPosition =
+              tcModel === THERMOCYCLER_MODULE_V2
+                ? OT2_TC_GEN_2_POSITION
+                : OT2_TC_GEN_1_POSITION
           }
 
           items.push(
