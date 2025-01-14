@@ -72,18 +72,18 @@ const StyledBox = styled(Box)<StyledBoxProps>`
 `
 
 const LabelContainer = styled.div`
-  padding-left: ${SPACING.spacing8};
-  & > *:not(:first-child):not(:last-child) {
-    border-bottom-right-radius: ${BORDERS.borderRadius4};
-    border-top-right-radius: ${BORDERS.borderRadius4};
-  }
+  padding-left: ${SPACING.spacing12};
 
   & > *:first-child {
     border-bottom-right-radius: ${BORDERS.borderRadius4};
   }
 
+  & > *:not(:first-child) {
+    border-top-right-radius: ${BORDERS.borderRadius4};
+    border-bottom-right-radius: ${BORDERS.borderRadius4};
+  }
+
   & > *:last-child {
     border-bottom-left-radius: ${BORDERS.borderRadius4};
-    border-bottom-right-radius: ${BORDERS.borderRadius4};
   }
 `
