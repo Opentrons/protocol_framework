@@ -1043,9 +1043,19 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 air_gap=0,
             )
         ]
-        for step_volume, src_dest_combo in source_dest_per_volume_step:
+        next_step_volume, next_src_dest_combo = next(source_dest_per_volume_step)
+        is_last_step = False
+        while not is_last_step:
+            step_volume = next_step_volume
+            src_dest_combo = next_src_dest_combo
             step_source, step_destination = src_dest_combo
-            is_last_step = len([source_dest_per_volume_step]) > 0
+            try:
+                next_step_volume, next_src_dest_combo = next(
+                    source_dest_per_volume_step
+                )
+            except StopIteration:
+                is_last_step = True
+
             if new_tip == TransferTipPolicyV2.ALWAYS or (
                 new_tip == TransferTipPolicyV2.PER_SOURCE and step_source != prev_src
             ):
