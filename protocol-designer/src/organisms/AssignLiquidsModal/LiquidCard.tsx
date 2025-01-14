@@ -166,7 +166,7 @@ export function LiquidCard(props: LiquidCardProps): JSX.Element {
       </Flex>
       {isExpanded ? (
         <>
-          <Divider borderBottom={`1px solid ${String(COLORS.grey35)}`} />
+          <Divider borderBottom={`1px solid ${COLORS.grey40}`} />
           <Flex flexDirection={DIRECTION_COLUMN} padding={SPACING.spacing16}>
             <Flex gridGap={SPACING.spacing4} color={COLORS.grey60}>
               <StyledText width="50%" desktopStyle="bodyDefaultRegular">
@@ -178,7 +178,7 @@ export function LiquidCard(props: LiquidCardProps): JSX.Element {
                 </StyledText>
               </Flex>
             </Flex>
-            <Divider borderColor={COLORS.grey35} />
+            <Divider borderBottom={`1px solid ${COLORS.grey40}`} />
             {info.liquidIndex != null
               ? fullWellsByLiquid[info.liquidIndex]
                   .sort((a, b) =>
@@ -194,7 +194,9 @@ export function LiquidCard(props: LiquidCardProps): JSX.Element {
                         <WellContents wellName={wellName} volume={volume} />
                         {wellliquidIndex <
                         fullWellsByLiquid[liquidIndex].length - 1 ? (
-                          <Divider borderColor={COLORS.grey35} />
+                          <Divider
+                            borderBottom={`1px solid ${COLORS.grey40}`}
+                          />
                         ) : null}
                       </>
                     )
