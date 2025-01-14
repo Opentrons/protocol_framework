@@ -75,7 +75,7 @@ clean_all_cmd = $(clean_cmd) dist
 #   * Doing `pipenv run env PYTHONDEVMODE=1 uvicorn ...` works, except it's
 #     probably POSIX-only.
 dev_port ?= "31950"
-dev_host ?= "localhost"
+dev_host ?= "0.0.0.0"
 run_dev ?= uvicorn "robot_server.app:app" --host $(dev_host) --port $(dev_port) --ws wsproto --lifespan on --reload
 
 .PHONY: all
