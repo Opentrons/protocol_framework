@@ -215,4 +215,4 @@ def test_non_existent_property_raises_error() -> None:
     aspirate_properties = build_aspirate_properties(aspirate_data)
 
     with pytest.raises(AttributeError):
-        aspirate_properties.mix.enable = True
+        aspirate_properties.mix.enable = True  # type: ignore[attr-defined]

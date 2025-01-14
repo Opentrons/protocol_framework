@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from numpy import interp
-from typing import Optional, Dict, Sequence, Tuple, List, Any
+from typing import Optional, Dict, Sequence, Tuple, List
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     AspirateProperties as SharedDataAspirateProperties,
@@ -83,20 +83,8 @@ class LiquidHandlingPropertyByVolume:
         )
 
 
-@dataclass
-class _BaseProperties:
-    def __setattr__(self, key: str, value: Any) -> None:
-        # This is very hacky but since the purpose of this check is to prevent user errors when setting properties and
-        # not block random attribute setting all-together, this is the most straightforward way of accomplishing this.
-        # If we don't include the `startswith` check this breaks init.
-        if not key.startswith("_") and not hasattr(self, key):
-            # Since we already know we don't have this attribute, this will raise the appropriate attribute error
-            getattr(self, key)
-        super().__setattr__(key, value)
-
-
-@dataclass
-class DelayProperties(_BaseProperties):
+@dataclass(slots=True)
+class DelayProperties:
 
     _enabled: bool
     _duration: Optional[float]
@@ -130,8 +118,8 @@ class DelayProperties(_BaseProperties):
         )
 
 
-@dataclass
-class TouchTipProperties(_BaseProperties):
+@dataclass(slots=True)
+class TouchTipProperties:
 
     _enabled: bool
     _z_offset: Optional[float]
@@ -202,8 +190,8 @@ class TouchTipProperties(_BaseProperties):
         )
 
 
-@dataclass
-class MixProperties(_BaseProperties):
+@dataclass(slots=True)
+class MixProperties:
 
     _enabled: bool
     _repetitions: Optional[int]
@@ -255,8 +243,8 @@ class MixProperties(_BaseProperties):
         )
 
 
-@dataclass
-class BlowoutProperties(_BaseProperties):
+@dataclass(slots=True)
+class BlowoutProperties:
 
     _enabled: bool
     _location: Optional[BlowoutLocation]
@@ -309,8 +297,8 @@ class BlowoutProperties(_BaseProperties):
         )
 
 
-@dataclass
-class SubmergeRetractCommon(_BaseProperties):
+@dataclass(slots=True)
+class SubmergeRetractCommon:
 
     _position_reference: PositionReference
     _offset: Coordinate
@@ -348,10 +336,8 @@ class SubmergeRetractCommon(_BaseProperties):
         return self._delay
 
 
-@dataclass
+@dataclass(slots=True)
 class Submerge(SubmergeRetractCommon):
-    ...
-
     def as_shared_data_model(self) -> SharedDataSubmerge:
         return SharedDataSubmerge(
             positionReference=self._position_reference,
@@ -361,7 +347,7 @@ class Submerge(SubmergeRetractCommon):
         )
 
 
-@dataclass
+@dataclass(slots=True)
 class RetractAspirate(SubmergeRetractCommon):
 
     _air_gap_by_volume: LiquidHandlingPropertyByVolume
@@ -386,7 +372,7 @@ class RetractAspirate(SubmergeRetractCommon):
         )
 
 
-@dataclass
+@dataclass(slots=True)
 class RetractDispense(SubmergeRetractCommon):
 
     _air_gap_by_volume: LiquidHandlingPropertyByVolume
@@ -417,8 +403,8 @@ class RetractDispense(SubmergeRetractCommon):
         )
 
 
-@dataclass
-class BaseLiquidHandlingProperties(_BaseProperties):
+@dataclass(slots=True)
+class BaseLiquidHandlingProperties:
 
     _submerge: Submerge
     _position_reference: PositionReference
@@ -461,7 +447,7 @@ class BaseLiquidHandlingProperties(_BaseProperties):
         return self._delay
 
 
-@dataclass
+@dataclass(slots=True)
 class AspirateProperties(BaseLiquidHandlingProperties):
 
     _retract: RetractAspirate
@@ -499,7 +485,7 @@ class AspirateProperties(BaseLiquidHandlingProperties):
         )
 
 
-@dataclass
+@dataclass(slots=True)
 class SingleDispenseProperties(BaseLiquidHandlingProperties):
 
     _retract: RetractDispense
@@ -532,7 +518,7 @@ class SingleDispenseProperties(BaseLiquidHandlingProperties):
         )
 
 
-@dataclass
+@dataclass(slots=True)
 class MultiDispenseProperties(BaseLiquidHandlingProperties):
 
     _retract: RetractDispense
@@ -565,7 +551,7 @@ class MultiDispenseProperties(BaseLiquidHandlingProperties):
         )
 
 
-@dataclass
+@dataclass(slots=True)
 class TransferProperties:
     _aspirate: AspirateProperties
     _dispense: SingleDispenseProperties
