@@ -83,6 +83,9 @@ class LiquidHandlingPropertyByVolume:
         )
 
 
+# We use slots for this dataclass (and the rest of liquid properties) to prevent dynamic creation of attributes
+# not defined in the class, not for any performance reasons. This is so that mistyping properties when overriding
+# values will cause the protocol to fail analysis, rather than silently passing.
 @dataclass(slots=True)
 class DelayProperties:
 
@@ -157,7 +160,7 @@ class TouchTipProperties:
     @mm_to_edge.setter
     def mm_to_edge(self, new_mm: float) -> None:
         validated_mm = validation.ensure_float(new_mm)
-        self._z_offset = validated_mm
+        self._mm_to_edge = validated_mm
 
     @property
     def speed(self) -> Optional[float]:
