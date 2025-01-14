@@ -1,15 +1,4 @@
 import { useState } from 'react'
-import {
-  Flex,
-  Box,
-  DIRECTION_COLUMN,
-  SPACING,
-  ALIGN_CENTER,
-  TEXT_TRANSFORM_UPPERCASE,
-  COLORS,
-  TYPOGRAPHY,
-  LegacyStyledText,
-} from '@opentrons/components'
 
 import type {
   CompletedProtocolAnalysis,
@@ -20,6 +9,15 @@ import type {
   PipetteEntity,
   TimelineFrame,
 } from '@opentrons/step-generation'
+import { Box, Flex } from '../../primitives'
+import {
+  ALIGN_CENTER,
+  DIRECTION_COLUMN,
+  TEXT_TRANSFORM_UPPERCASE,
+} from '../../styles'
+import { LegacyStyledText } from '../../atoms'
+import { SPACING, TYPOGRAPHY } from '../../ui-style-constants'
+import { COLORS } from '../../helix-design-system'
 
 interface PipetteMountVizProps {
   pipetteId: string | null

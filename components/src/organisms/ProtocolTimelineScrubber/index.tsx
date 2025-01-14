@@ -2,19 +2,7 @@ import { useMemo, useState, useEffect, useRef } from 'react'
 import map from 'lodash/map'
 import reduce from 'lodash/reduce'
 import ViewportList from 'react-viewport-list'
-import {
-  Flex,
-  DIRECTION_COLUMN,
-  SPACING,
-  ALIGN_CENTER,
-  JUSTIFY_SPACE_BETWEEN,
-  ALIGN_STRETCH,
-  LegacyStyledText,
-  BaseDeck,
-  PrimaryButton,
-  OVERFLOW_SCROLL,
-  COLORS,
-} from '@opentrons/components'
+
 import { getResultingTimelineFrameFromRunCommands } from '@opentrons/step-generation'
 import {
   FLEX_ROBOT_TYPE,
@@ -23,11 +11,11 @@ import {
 } from '@opentrons/shared-data'
 import { PipetteMountViz } from './PipetteVisuals'
 import {
+  getLabwareDefinitionsFromCommands,
   getAllWellContentsForActiveItem,
   wellFillFromWellContents,
 } from './utils'
-import { CommandItem } from './CommandItem'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
+// import { CommandItem } from './CommandItem'
 
 import type { ComponentProps } from 'react'
 import type { ViewportListRef } from 'react-viewport-list'
@@ -39,7 +27,21 @@ import type {
   RunTimeCommand,
 } from '@opentrons/shared-data'
 import type { ModuleTemporalProperties } from '@opentrons/step-generation'
-import type { LabwareOnDeck, Module } from '@opentrons/components'
+import {
+  ALIGN_CENTER,
+  ALIGN_STRETCH,
+  BaseDeck,
+  COLORS,
+  DIRECTION_COLUMN,
+  Flex,
+  JUSTIFY_SPACE_BETWEEN,
+  LabwareOnDeck,
+  LegacyStyledText,
+  Module,
+  OVERFLOW_SCROLL,
+  PrimaryButton,
+  SPACING,
+} from '../..'
 
 const SEC_PER_FRAME = 1000
 export const COMMAND_WIDTH_PX = 240
@@ -284,15 +286,16 @@ export function ProtocolTimelineScrubber(
           axis="x"
         >
           {(command, index) => (
-            <CommandItem
-              index={index}
-              command={command}
-              currentCommandIndex={currentCommandIndex}
-              setCurrentCommandIndex={setCurrentCommandIndex}
-              analysis={analysis}
-              robotType={robotType}
-              allRunDefs={allRunDefs}
-            />
+            <Flex key={index}>{command}</Flex>
+            // <CommandItem
+            //   index={index}
+            //   command={command}
+            //   currentCommandIndex={currentCommandIndex}
+            //   setCurrentCommandIndex={setCurrentCommandIndex}
+            //   analysis={analysis}
+            //   robotType={robotType}
+            //   allRunDefs={allRunDefs}
+            // />
           )}
         </ViewportList>
       </Flex>

@@ -1,10 +1,10 @@
 import reduce from 'lodash/reduce'
 import omitBy from 'lodash/omitBy'
 import mapValues from 'lodash/mapValues'
+import { getLabwareDefURI } from '@opentrons/shared-data'
 import { DEFAULT_LIQUID_COLORS } from '@opentrons/shared-data'
 import { COLORS } from '@opentrons/components'
-
-import type { LabwareDefinition2 } from '@opentrons/shared-data'
+import type { LabwareDefinition2, RunTimeCommand } from '@opentrons/shared-data'
 import type {
   LabwareEntities,
   LocationLiquidState,
@@ -139,4 +139,23 @@ export function getAllWellContentsForActiveItem(
   )
 
   return wellContentsByLabwareId
+}
+
+// Note: This is an O(n) operation.
+export function getLabwareDefinitionsFromCommands(
+  commands: RunTimeCommand[]
+): LabwareDefinition2[] {
+  return commands.reduce<LabwareDefinition2[]>((acc, command) => {
+    const isLoadingNewDef =
+      command.commandType === 'loadLabware' &&
+      !acc.some(
+        def =>
+          command.result?.definition != null &&
+          getLabwareDefURI(def) === getLabwareDefURI(command.result?.definition)
+      )
+
+    return isLoadingNewDef && command.result?.definition != null
+      ? [...acc, command.result?.definition]
+      : acc
+  }, [])
 }
