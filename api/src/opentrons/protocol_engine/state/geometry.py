@@ -1,6 +1,7 @@
 """Geometry state getters."""
 
 import enum
+
 # import logging
 from numpy import array, dot, double as npdouble
 from numpy.typing import NDArray
@@ -1423,9 +1424,7 @@ class GeometryView:
             initial_height=initial_handling_height,
             volume=operation_volume,
         )
-        # uncomment this
-        # return final_height - initial_handling_height
-        return initial_handling_height - final_height
+        return final_height - initial_handling_height
 
     def get_well_offset_adjustment(
         self,
