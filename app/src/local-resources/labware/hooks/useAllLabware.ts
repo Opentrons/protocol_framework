@@ -4,6 +4,7 @@ import { getAllDefinitions } from '../utils'
 import type { LabwareSort, LabwareFilter, LabwareDefAndDate } from '../types'
 
 // labware to filter out from the labware tab of the desktop app
+// TODO (sb:1/14/25) remove evotips from blocklist before public launch
 const LABWARE_LOADNAME_BLOCKLIST = [
   'evotips_flex_96_tiprack_adapter',
   'evotips_opentrons_96_labware',
