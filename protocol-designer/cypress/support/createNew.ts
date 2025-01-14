@@ -100,6 +100,11 @@ export enum Verifications {
   MagBlockImg = 'Magnetic Block GEN1',
   LiquidPage = 'Liquid page content is visible',
   TransferPopOut = 'Verify Step 1 of the transfer function is present',
+  Delay = 'Delay option is unchecked',
+  PreWet = 'Pre-wet tip option is unchecked',
+  TouchTip = 'Touch tip option is unchecked',
+  Mix = 'Mix option is unchecked',
+  AirGap = 'Air gap option is unchecked',
 }
 export enum Content {
   Step1Title = 'Step 1',
@@ -154,6 +159,10 @@ export enum Content {
   TipHandling = 'Tip handling',
   TipDrop = 'Tip drop location',
   ChoseOptionSource = 'Choose option',
+  Delay = 'Delay',
+  PreWetTip = 'Pre-wet tip',
+  TouchTip = 'Touch tip',
+  AirGap = 'Air gap',
 }
 
 export enum Locators {
@@ -175,6 +184,10 @@ export enum Locators {
   LabwareSelectionLocation = '[data-testid="Toolbox_confirmButton"]',
   AddInitialVolume = 'input[name="volume"]',
   AspirateWells = 'input[name="aspirate_wells"]',
+  div = 'div',
+  button = 'button',
+  svg = 'svg',
+  exist = 'exist',
 }
 
 const chooseDeckSlot = (
@@ -625,6 +638,46 @@ const verifyStep = (verification: Verifications): void => {
       cy.contains(Content.TipHandling)
       cy.contains(Content.TipDrop)
       break
+    case Verifications.Delay:
+      cy.contains('Delay')
+        .closest('div')
+        .find('button')
+        .find('svg')
+        .should('exist')
+        .and('have.attr', 'aria-hidden', 'true')
+      break
+    case Verifications.PreWet:
+      cy.contains('Pre-wet tip')
+        .closest('div')
+        .find('button')
+        .find('svg')
+        .should('exist')
+        .and('have.attr', 'aria-hidden', 'true')
+      break
+    case Verifications.TouchTip:
+      cy.contains('Touch tip')
+        .closest('div')
+        .find('button')
+        .find('svg')
+        .should('exist')
+        .and('have.attr', 'aria-hidden', 'true')
+      break
+    case Verifications.Mix:
+      cy.contains('Mix')
+        .closest('div')
+        .find('button')
+        .find('svg')
+        .should('exist')
+        .and('have.attr', 'aria-hidden', 'true')
+      break
+    case Verifications.AirGap:
+      cy.contains('Air gap')
+        .closest('div')
+        .find('button')
+        .find('svg')
+        .should('exist')
+        .and('have.attr', 'aria-hidden', 'true')
+      break
 
     default:
       throw new Error(
@@ -661,4 +714,42 @@ export const verifyCreateProtocolPage = (): void => {
   cy.contains(Content.OpentronsFlex).should('exist').should('be.visible')
   cy.contains(Content.OpentronsOT2).should('exist').should('be.visible')
   cy.contains(Content.Confirm).should('exist').should('be.visible')
+}
+
+export const VerifyTransferPageStep1 = (): void => {
+  cy.contains('Delay')
+    .closest('div')
+    .find('button')
+    .find('svg')
+    .should('exist')
+    .and('have.attr', 'aria-hidden', 'true')
+
+  cy.contains('Pre-wet tip')
+    .closest('div')
+    .find('button')
+    .find('svg')
+    .should('exist')
+    .and('have.attr', 'aria-hidden', 'true')
+
+  cy.contains('Touch tip')
+    .closest('div')
+    .find('button')
+    .find('svg')
+    .should('exist')
+    .and('have.attr', 'aria-hidden', 'true')
+
+  cy.contains('Mix')
+    .closest('div')
+    .find('button')
+    .find('svg')
+    .should('exist')
+    .and('have.attr', 'aria-hidden', 'true')
+
+  cy.contains('Air gap')
+    .closest('div')
+    .find('button')
+    .find('svg')
+    .should('exist')
+    .and('have.attr', 'aria-hidden', 'true')
+  // Verify step 1 and page content
 }
