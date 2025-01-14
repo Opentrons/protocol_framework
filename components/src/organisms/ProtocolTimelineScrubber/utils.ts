@@ -3,15 +3,21 @@ import omitBy from 'lodash/omitBy'
 import mapValues from 'lodash/mapValues'
 import { getLabwareDefURI } from '@opentrons/shared-data'
 import { DEFAULT_LIQUID_COLORS } from '@opentrons/shared-data'
-import { COLORS } from '@opentrons/components'
-import type { LabwareDefinition2, RunTimeCommand } from '@opentrons/shared-data'
+import type {
+  CompletedProtocolAnalysis,
+  LabwareDefinition2,
+  ProtocolAnalysisOutput,
+  RunTimeCommand,
+} from '@opentrons/shared-data'
 import type {
   LabwareEntities,
   LocationLiquidState,
   RunCommandTimelineFrame,
   SingleLabwareLiquidState,
 } from '@opentrons/step-generation'
-import type { WellFill } from '@opentrons/components'
+import type { CommandTextData } from './types'
+import { COLORS } from '../../helix-design-system'
+import { WellFill } from '../../hardware-sim'
 
 //  copied from protocol-designer
 export interface WellContents {
@@ -158,4 +164,14 @@ export function getLabwareDefinitionsFromCommands(
       ? [...acc, command.result?.definition]
       : acc
   }, [])
+}
+
+export function getCommandTextData(
+  protocolData: CompletedProtocolAnalysis | ProtocolAnalysisOutput,
+  protocolCommands?: RunTimeCommand[]
+): CommandTextData {
+  const { pipettes, labware, modules, liquids } = protocolData
+  const commands =
+    'commands' in protocolData ? protocolData.commands : protocolCommands ?? []
+  return { commands, pipettes, labware, modules, liquids }
 }

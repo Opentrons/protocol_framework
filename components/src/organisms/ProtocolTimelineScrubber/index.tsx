@@ -15,7 +15,7 @@ import {
   getAllWellContentsForActiveItem,
   wellFillFromWellContents,
 } from './utils'
-// import { CommandItem } from './CommandItem'
+import { CommandItem } from './CommandItem'
 
 import type { ComponentProps } from 'react'
 import type { ViewportListRef } from 'react-viewport-list'
@@ -286,16 +286,15 @@ export function ProtocolTimelineScrubber(
           axis="x"
         >
           {(command, index) => (
-            <Flex key={index}>{command.id}</Flex>
-            // <CommandItem
-            //   index={index}
-            //   command={command}
-            //   currentCommandIndex={currentCommandIndex}
-            //   setCurrentCommandIndex={setCurrentCommandIndex}
-            //   analysis={analysis}
-            //   robotType={robotType}
-            //   allRunDefs={allRunDefs}
-            // />
+            <CommandItem
+              index={index}
+              command={command}
+              currentCommandIndex={currentCommandIndex}
+              setCurrentCommandIndex={setCurrentCommandIndex}
+              analysis={analysis}
+              robotType={robotType}
+              allRunDefs={allRunDefs}
+            />
           )}
         </ViewportList>
       </Flex>
