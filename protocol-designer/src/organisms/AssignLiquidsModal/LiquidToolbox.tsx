@@ -409,7 +409,6 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
           <InfoScreen
             content={t('no_liquids_defined')}
             subContent={t('select_wells_to_add')}
-            height="100%"
           />
         )}
       </Toolbox>
