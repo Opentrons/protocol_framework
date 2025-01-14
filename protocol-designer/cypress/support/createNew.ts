@@ -471,7 +471,7 @@ const executeAction = (action: Actions | UniversalActions): void => {
     case Actions.WellSelector_A1:
       cy.get('circle[data-wellname="A1"]')
         .should('exist') // Verify the element exists
-        .click()
+        .click({ force: true })
       break
     case Actions.LiquidDropdown: // New case for dropdown
       cy.get(Locators.LiquidsDropdown)
@@ -527,7 +527,7 @@ const executeAction = (action: Actions | UniversalActions): void => {
       break
 
     case Actions.SaveSelectedWells:
-      cy.contains('Save').click()
+      cy.contains('Save').click({ force: true })
       break
 
     case Actions.InputTransferVolume30:

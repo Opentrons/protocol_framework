@@ -75,16 +75,67 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.ChoseSourceLabware,
       Actions.SelectArmadillo96WellPlateTransfer,
       Actions.AddSourceLabwareDropdown,
-      Actions.WellSelector_A1,
+      Actions.WellSelector,
       Actions.SaveSelectedWells,
       Actions.ChoseDestinationLabware,
       Actions.SelectBiorad,
       Actions.SelectDestinationWells,
-      Actions.WellSelector_A1,
+      Actions.WellSelector,
       Actions.SaveSelectedWells,
       Actions.InputTransferVolume30,
     ]
     runCreateTest(steps)
+    // ToDo @AlexJoel42 why does WellSelector work and WellSelector_A1 doesn't?
+
     cy.contains('Continue').click()
+    // Verifications
+    cy.contains('Pre-wet tip')
+    cy.contains('Delay')
+    cy.contains('Touch tip')
+    cy.contains('Mix')
+    cy.contains('Air gap')
+    // Actions
+    cy.contains('Pre-wet tip').closest('div').find('button').click()
+    cy.contains('Delay').closest('div').find('button').click()
+    cy.contains('Touch tip').closest('div').find('button').click()
+    cy.contains('Mix').closest('div').find('button').click()
+    cy.contains('Air gap').closest('div').find('button').click()
+
+    // Verifications
+
+    cy.contains('Delay')
+      .closest('div')
+      .find('button')
+      .find('svg')
+      .should('exist')
+      .and('have.attr', 'aria-hidden', 'true')
+
+    cy.contains('Pre-wet tip')
+      .closest('div')
+      .find('button')
+      .find('svg')
+      .should('exist')
+      .and('have.attr', 'aria-hidden', 'true')
+
+    cy.contains('Touch tip')
+      .closest('div')
+      .find('button')
+      .find('svg')
+      .should('exist')
+      .and('have.attr', 'aria-hidden', 'true')
+
+    cy.contains('Mix')
+      .closest('div')
+      .find('button')
+      .find('svg')
+      .should('exist')
+      .and('have.attr', 'aria-hidden', 'true')
+
+    cy.contains('Air gap')
+      .closest('div')
+      .find('button')
+      .find('svg')
+      .should('exist')
+      .and('have.attr', 'aria-hidden', 'true')
   })
 })
