@@ -149,7 +149,7 @@ export function Landing(): JSX.Element {
         <StyledLabel>
           <Flex css={LINK_BUTTON_STYLE}>
             <StyledText desktopStyle="bodyLargeRegular">
-              {t('edit_existing')}
+              {t('import_existing_protocol')}
             </StyledText>
           </Flex>
           <input type="file" onChange={loadFile} />

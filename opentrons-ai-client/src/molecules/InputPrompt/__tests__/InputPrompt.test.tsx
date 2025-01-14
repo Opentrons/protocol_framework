@@ -1,10 +1,11 @@
-import type * as React from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import { FormProvider, useForm } from 'react-hook-form'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../../__testing-utils__'
 import { i18n } from '../../../i18n'
 import { InputPrompt } from '../index'
+
+import type { ReactNode } from 'react'
 
 const mockUseTrackEvent = vi.fn()
 
@@ -17,7 +18,7 @@ vi.mock('../../../hooks/useTrackEvent', () => ({
 }))
 
 const WrappingForm = (wrappedComponent: {
-  children: React.ReactNode
+  children: ReactNode
 }): JSX.Element => {
   const methods = useForm({
     defaultValues: {

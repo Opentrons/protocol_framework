@@ -5,10 +5,10 @@ import { useLocation } from 'react-router-dom'
 import {
   ALIGN_CENTER,
   BORDERS,
-  Box,
   COLORS,
   CURSOR_POINTER,
   DIRECTION_COLUMN,
+  Divider,
   Flex,
   Icon,
   LiquidIcon,
@@ -92,7 +92,7 @@ export function LiquidsOverflowMenu(
         )
       })}
       {liquids.length > 0 ? (
-        <Box width="100%" border={`1px solid ${COLORS.grey20}`} />
+        <Divider color={COLORS.grey20} marginY="0" />
       ) : null}
       <MenuItem
         data-testid="defineLiquid"
