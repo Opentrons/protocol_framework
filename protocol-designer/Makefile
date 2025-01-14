@@ -47,10 +47,13 @@ benchmarks:
 	node ../scripts/runBenchmarks "./benchmarks/*.js" | \
 	ntee "./benchmarks/output/$(benchmark_output)"
 
+dev_port ?= 5178
+dev_host ?= 0.0.0.0
+
 .PHONY: dev
 dev: export NODE_ENV := development
 dev:
-	vite serve
+	vite serve --host $(dev_host) --port $(dev_port)
 
 # production assets server
 .PHONY: serve
