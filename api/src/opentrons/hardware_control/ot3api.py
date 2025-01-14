@@ -3050,7 +3050,7 @@ class OT3API(
             dispense_spec.instr.set_current_volume(0)
             raise
         else:
-            dispense_spec.instr.add_current_volume(dispense_spec.volume)
+            dispense_spec.instr.remove_current_volume(dispense_spec.volume)
 
     @property
     def attached_subsystems(self) -> Dict[SubSystem, SubSystemState]:

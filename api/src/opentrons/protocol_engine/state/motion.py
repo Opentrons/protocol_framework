@@ -131,7 +131,7 @@ class MotionView:
         extra_waypoints = self._geometry.get_extra_waypoints(
             location=location, to_slot=destination_slot
         )
-
+        # baddie here
         try:
             return motion_planning.get_waypoints(
                 move_type=move_type,

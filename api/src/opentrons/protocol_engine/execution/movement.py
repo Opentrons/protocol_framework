@@ -138,6 +138,7 @@ class MovementHandler:
             force_direct=force_direct,
             minimum_z_height=minimum_z_height,
             operation_volume=operation_volume,
+            is_tracking=is_tracking
         )
 
         speed = self._state_store.pipettes.get_movement_speed(

@@ -179,12 +179,12 @@ class HardwarePipettingHandler(PipettingHandler):
         aspirate_z_distance = self._state_view.geometry.get_liquid_handling_z_change(
             labware_id=labware_id,
             well_name=well_name,  # make sure the protocol engine actually has the well name atp ?
-            operation_volume=volume,
+            operation_volume=volume * -1, # try this tomorrow
         )
         with self._set_flow_rate(pipette=hw_pipette, aspirate_flow_rate=flow_rate):
             await self._hardware_api.aspirate_while_tracking(
                 mount=hw_pipette.mount,
-                z_distance=aspirate_z_distance,
+                z_distance=aspirate_z_distance * -1,
                 flow_rate=flow_rate,
                 volume=adjusted_volume,
             )
@@ -216,7 +216,7 @@ class HardwarePipettingHandler(PipettingHandler):
         with self._set_flow_rate(pipette=hw_pipette, dispense_flow_rate=flow_rate):
             await self._hardware_api.dispense_while_tracking(
                 mount=hw_pipette.mount,
-                z_distance=dispense_z_distance,
+                z_distance=(dispense_z_distance * -1),
                 flow_rate=flow_rate,
                 volume=adjusted_volume,
                 push_out=push_out,

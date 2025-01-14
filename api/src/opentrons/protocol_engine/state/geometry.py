@@ -1,6 +1,7 @@
 """Geometry state getters."""
 
 import enum
+# import logging
 from numpy import array, dot, double as npdouble
 from numpy.typing import NDArray
 from typing import Optional, List, Tuple, Union, cast, TypeVar, Dict
@@ -1422,7 +1423,8 @@ class GeometryView:
             initial_height=initial_handling_height,
             volume=operation_volume,
         )
-        # make sure we handle aspirate and dispense both directions
+        # uncomment this
+        # return final_height - initial_handling_height
         return initial_handling_height - final_height
 
     def get_well_offset_adjustment(
@@ -1445,6 +1447,10 @@ class GeometryView:
             well_location=well_location,
             well_depth=well_depth,
         )
+        # _log = logging.getLogger(__name__)
+        # raise ValueError(
+        #     f"initial handling height {initial_handling_height} \n is_tracking {is_tracking}"
+        # )
         if is_tracking:
             return initial_handling_height
         if isinstance(well_location, PickUpTipWellLocation):
@@ -1473,6 +1479,9 @@ class GeometryView:
         well_liquid = self._wells.get_well_liquid_info(
             labware_id=labware_id, well_name=well_name
         )
+        # raise ValueError(f"well = {well_liquid}")
+        # raise ValueError(f"prbed_height not none{well_liquid.probed_height is not None}\n \
+        # height.height is not None {well_liquid.probed_height.height is not None}")
         if (
             well_liquid.probed_height is not None
             and well_liquid.probed_height.height is not None
@@ -1515,6 +1524,7 @@ class GeometryView:
         elif well_location.origin == WellOrigin.CENTER:
             handling_height = well_depth / 2.0
         elif well_location.origin == WellOrigin.MENISCUS:
+            # baddie here
             handling_height = self.get_meniscus_height(
                 labware_id=labware_id, well_name=well_name
             )
