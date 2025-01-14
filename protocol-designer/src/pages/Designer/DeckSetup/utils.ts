@@ -14,7 +14,6 @@ import {
   getModuleType,
 } from '@opentrons/shared-data'
 
-import { getOnlyLatestDefs } from '../../../labware-defs'
 import { getStagingAreaAddressableAreas } from '../../../utils'
 import {
   FLEX_MODULE_MODELS,
@@ -33,6 +32,7 @@ import type {
   ModuleModel,
   RobotType,
 } from '@opentrons/shared-data'
+import type { LabwareDefByDefURI } from '../../../labware-defs'
 import type {
   AllTemporalPropertiesForTimelineFrame,
   InitialDeckSetup,
@@ -132,14 +132,12 @@ export const getLabwareIsRecommended = (
 }
 
 export const getLabwareCompatibleWithAdapter = (
+  defs: LabwareDefByDefURI,
   adapterLoadName?: string
 ): string[] => {
-  const defs = getOnlyLatestDefs()
-
   if (adapterLoadName == null) {
     return []
   }
-
   return Object.entries(defs)
     .filter(
       ([, { stackingOffsetWithLabware }]) =>
