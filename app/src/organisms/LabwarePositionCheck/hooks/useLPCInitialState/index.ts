@@ -35,9 +35,10 @@ export function useLPCInitialState(
     deckConfig,
     steps: {
       currentStepIndex: 0,
-      totalStepCount: LPCSteps.length - 1,
+      totalStepCount: LPCSteps.length,
       current: LPCSteps[0],
       all: LPCSteps,
+      next: LPCSteps[1],
     },
   }
 }

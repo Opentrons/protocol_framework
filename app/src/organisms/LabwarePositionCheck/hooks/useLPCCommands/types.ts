@@ -8,6 +8,7 @@ export interface UseLPCCommandWithChainRunChildProps
   extends UseLPCCommandChildProps {
   chainLPCCommands: (
     commands: CreateCommand[],
-    continuePastCommandFailure: boolean
+    continuePastCommandFailure: boolean,
+    shouldPropogateError?: boolean
   ) => Promise<CommandData[]>
 }

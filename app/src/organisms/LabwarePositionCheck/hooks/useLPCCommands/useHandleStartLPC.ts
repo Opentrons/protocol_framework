@@ -1,4 +1,8 @@
-import { fullHomeCommands, moduleInitBeforeAnyLPCCommands } from './commands'
+import {
+  fullHomeCommands,
+  moduleInitBeforeAnyLPCCommands,
+  moveToMaintenancePosition,
+} from './commands'
 
 import type {
   CompletedProtocolAnalysis,
@@ -15,12 +19,14 @@ export interface UseHandleStartLPCResult {
 export function useHandleStartLPC({
   chainLPCCommands,
   mostRecentAnalysis,
+  state,
 }: UseLPCCommandWithChainRunChildProps): UseHandleStartLPCResult {
   const createStartLPCHandler = (onSuccess: () => void): (() => void) => {
     const startCommands: CreateCommand[] = [
       ...buildInstrumentLabwarePrepCommands(mostRecentAnalysis),
       ...moduleInitBeforeAnyLPCCommands(mostRecentAnalysis),
       ...fullHomeCommands(),
+      ...moveToMaintenancePosition(state.steps.current, state),
     ]
 
     return (): void => {

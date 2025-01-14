@@ -23,12 +23,11 @@ const SUPPORT_PAGE_URL = 'https://support.opentrons.com/s/ot2-calibration'
 
 export function BeforeBeginning({
   proceed,
-  existingOffsets,
   commandUtils,
   state,
 }: LPCStepProps<BeforeBeginningStep>): JSX.Element {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
-  const { isOnDevice, protocolName, labwareDefs } = state
+  const { isOnDevice, protocolName, labwareDefs, existingOffsets } = state
   const { createStartLPCHandler } = commandUtils
 
   const handleStartLPC = createStartLPCHandler(proceed)

@@ -75,11 +75,13 @@ export function JogToWell(props: JogToWellProps): JSX.Element {
     state,
   } = props
   const { t } = useTranslation(['labware_position_check', 'shared'])
-  const { isOnDevice } = state
+  const { isOnDevice, steps } = state
+  const { current: currentStep } = steps
 
   const initialPosition =
-    selectActiveLwInitialPosition(state) ?? IDENTITY_VECTOR
-  const pipetteName = selectActivePipette(state)?.pipetteName ?? 'p1000_single'
+    selectActiveLwInitialPosition(currentStep, state) ?? IDENTITY_VECTOR
+  const pipetteName =
+    selectActivePipette(currentStep, state)?.pipetteName ?? 'p1000_single'
   const itemLwDef = selectItemLabwareDef(state) as LabwareDefinition2 // Safe if component only used with CheckItem step.
   const isTipRack = selectIsActiveLwTipRack(state)
 

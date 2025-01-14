@@ -1,12 +1,17 @@
 import { fullHomeCommands } from './gantry'
+import { selectActivePipette } from '/app/organisms/LabwarePositionCheck/redux'
 
 import type {
   CreateCommand,
   LoadedPipette,
   MotorAxes,
 } from '@opentrons/shared-data'
-import type { CheckPositionsStep } from '/app/organisms/LabwarePositionCheck/types'
+import type {
+  CheckPositionsStep,
+  LabwarePositionCheckStep,
+} from '/app/organisms/LabwarePositionCheck/types'
 import type { Axis, Sign, StepSize } from '/app/molecules/JogControls/types'
+import type { LPCWizardState } from '/app/organisms/LabwarePositionCheck/redux'
 
 const PROBE_LENGTH_MM = 44.5
 
@@ -99,9 +104,11 @@ export const moveRelativeCommand = ({
   params: { pipetteId, distance: step * dir, axis },
 })
 
-export const moveToMaintenancePositionCommands = (
-  pipette: LoadedPipette | undefined
+export const moveToMaintenancePosition = (
+  step: LabwarePositionCheckStep,
+  state: LPCWizardState
 ): CreateCommand[] => {
+  const pipette = selectActivePipette(step, state)
   const pipetteMount = pipette?.mount
 
   return [

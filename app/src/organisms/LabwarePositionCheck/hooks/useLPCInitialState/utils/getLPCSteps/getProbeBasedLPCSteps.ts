@@ -2,7 +2,7 @@ import { isEqual } from 'lodash'
 
 import { getLabwareDefURI, getPipetteNameSpecs } from '@opentrons/shared-data'
 
-import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
+import { NAV_STEPS } from '../../../../constants'
 import { getLabwareLocationCombos } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/getLabwareLocationCombos'
 
 import type { LoadedPipette } from '@opentrons/shared-data'

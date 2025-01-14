@@ -10,29 +10,35 @@ import {
   IDENTITY_VECTOR,
 } from '@opentrons/shared-data'
 
-import { getItemLabwareDef } from '/app/organisms/LabwarePositionCheck/steps/CheckItem/utils'
+import { getItemLabwareDef } from '/app/organisms/LabwarePositionCheck/utils'
+import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
 
 import type { VectorOffset } from '@opentrons/api-client'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type { LPCWizardState } from '/app/organisms/LabwarePositionCheck/redux/types'
-import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
+import type { LabwarePositionCheckStep } from '/app/organisms/LabwarePositionCheck/types'
 
 // TODO(jh, 01-13-25): Remove the explicit type casting after restructuring "step".
 
 export const selectActiveLwInitialPosition = (
+  step: LabwarePositionCheckStep | null,
   state: LPCWizardState
 ): VectorOffset | null => {
-  const labwareId =
-    'labwareId' in state.steps.current ? state.steps.current.labwareId : ''
+  if (step != null) {
+    const labwareId = 'labwareId' in step ? step.labwareId : ''
+    const location = 'location' in step ? step.location : ''
 
-  return (
-    state.workingOffsets.find(
-      o =>
-        o.labwareId === labwareId &&
-        isEqual(o.location, location) &&
-        o.initialPosition != null
-    )?.initialPosition ?? null
-  )
+    return (
+      state.workingOffsets.find(
+        o =>
+          o.labwareId === labwareId &&
+          isEqual(o.location, location) &&
+          o.initialPosition != null
+      )?.initialPosition ?? null
+    )
+  } else {
+    return null
+  }
 }
 
 export const selectActiveLwExistingOffset = (
@@ -55,9 +61,11 @@ export const selectActiveLwExistingOffset = (
     )
 
     return (
-      // @ts-expect-error Typechecking for slotName done above.
-      getCurrentOffsetForLabwareInLocation(existingOffsets, lwUri, location)
-        ?.vector ?? IDENTITY_VECTOR
+      getCurrentOffsetForLabwareInLocation(
+        existingOffsets,
+        lwUri,
+        steps.current.location
+      )?.vector ?? IDENTITY_VECTOR
     )
   }
 }
@@ -137,7 +145,6 @@ export const selectActiveAdapterDisplayName = (
     : ''
 }
 
-// TOME TODO: getItemLabwareDef should be moved to a general utils place I think.
 export const selectItemLabwareDef = createSelector(
   (state: LPCWizardState) => state.steps.current,
   (state: LPCWizardState) => state.labwareDefs,

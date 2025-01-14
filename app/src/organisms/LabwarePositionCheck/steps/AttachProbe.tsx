@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 
@@ -29,20 +28,26 @@ export function AttachProbe({
   step,
 }: LPCStepProps<AttachProbeStep>): JSX.Element {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
-  const { isOnDevice } = state
+  const { isOnDevice, steps } = state
   const { pipetteId } = step
   const {
-    moveToMaintenancePosition,
     setShowUnableToDetect,
     unableToDetect,
     createProbeAttachmentHandler,
+    handleCheckItemsPrepModules,
   } = commandUtils
-  const pipette = selectActivePipette(state)
+  const pipette = selectActivePipette(step, state)
+  const handleProbeAttached = createProbeAttachmentHandler(
+    pipetteId,
+    pipette,
+    proceed
+  )
+
   const { probeLocation, probeVideoSrc } = ((): {
     probeLocation: string
     probeVideoSrc: string
   } => {
-    const channels = selectActivePipetteChannelCount(state)
+    const channels = selectActivePipetteChannelCount(step, state)
 
     switch (channels) {
       case 1:
@@ -57,16 +62,11 @@ export function AttachProbe({
     }
   })()
 
-  const handleProbeAttached = createProbeAttachmentHandler(
-    pipetteId,
-    pipette,
-    proceed
-  )
-
-  // Move into correct position for probe attach on mount
-  useEffect(() => {
-    moveToMaintenancePosition(pipette)
-  }, [])
+  const handleConfirmProbeAttached = (): void => {
+    void handleProbeAttached().then(() => {
+      handleCheckItemsPrepModules(steps.next)
+    })
+  }
 
   if (unableToDetect) {
     return (
@@ -98,7 +98,7 @@ export function AttachProbe({
           </LegacyStyledText>
         }
         proceedButtonText={i18n.format(t('shared:continue'), 'capitalize')}
-        proceed={handleProbeAttached}
+        proceed={handleConfirmProbeAttached}
       />
     )
   }

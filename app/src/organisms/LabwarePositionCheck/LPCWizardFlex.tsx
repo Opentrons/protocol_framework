@@ -36,7 +36,7 @@ export function LPCWizardFlex(props: LPCWizardFlexProps): JSX.Element {
 
   const LPCHandlerUtils = useLPCCommands({ ...props, state })
 
-  // TOME TODO: Confirm Go back functionality works if we have it?
+  // TODO(jh, 01-14-25): Also inject goBack functionality once designs are finalized.
   const proceed = (): void => {
     dispatch(proceedStep())
   }
@@ -84,7 +84,7 @@ function LPCWizardHeader({
   return (
     <WizardHeader
       title={t('labware_position_check_title')}
-      currentStep={errorMessage != null ? undefined : currentStepIndex}
+      currentStep={errorMessage != null ? undefined : currentStepIndex + 1}
       totalSteps={errorMessage != null ? undefined : totalStepCount}
       onExit={
         showExitConfirmation || isExiting || errorMessage != null
@@ -104,6 +104,8 @@ function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
     errorMessage,
     showExitConfirmation,
   } = props.commandUtils
+
+  // TODO(jh, 01-14-25): Handle open door behavior.
 
   // Handle special cases that are shared by multiple steps first.
   if (isExiting || isRobotMoving) {

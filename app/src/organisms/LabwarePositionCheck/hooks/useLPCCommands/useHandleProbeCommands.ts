@@ -1,7 +1,6 @@
 import { useState } from 'react'
 
 import {
-  moveToMaintenancePositionCommands,
   retractPipetteAxesSequentiallyCommands,
   verifyProbeAttachmentAndHomeCommands,
 } from './commands'
@@ -10,7 +9,6 @@ import type { CreateCommand, LoadedPipette } from '@opentrons/shared-data'
 import type { UseLPCCommandWithChainRunChildProps } from './types'
 
 export interface UseProbeCommandsResult {
-  moveToMaintenancePosition: (pipette: LoadedPipette | undefined) => void
   createProbeAttachmentHandler: (
     pipetteId: string,
     pipette: LoadedPipette | undefined,
@@ -29,16 +27,6 @@ export function useHandleProbeCommands({
 }: UseLPCCommandWithChainRunChildProps): UseProbeCommandsResult {
   const [showUnableToDetect, setShowUnableToDetect] = useState<boolean>(false)
 
-  const moveToMaintenancePosition = (
-    pipette: LoadedPipette | undefined
-  ): void => {
-    const maintenancePositionCommands: CreateCommand[] = [
-      ...moveToMaintenancePositionCommands(pipette),
-    ]
-
-    void chainLPCCommands(maintenancePositionCommands, false)
-  }
-
   const createProbeAttachmentHandler = (
     pipetteId: string,
     pipette: LoadedPipette | undefined,
@@ -49,14 +37,13 @@ export function useHandleProbeCommands({
     ]
 
     return () =>
-      chainLPCCommands(attachmentCommands, false)
+      chainLPCCommands(attachmentCommands, false, true)
         .then(() => {
           onSuccess()
         })
         .catch(() => {
           setShowUnableToDetect(true)
 
-          // TOME TODO: You probably want to hoist this component out of the step.
           // Stop propagation to prevent error screen routing.
           return Promise.resolve()
         })
@@ -77,7 +64,6 @@ export function useHandleProbeCommands({
   }
 
   return {
-    moveToMaintenancePosition,
     createProbeAttachmentHandler,
     unableToDetect: showUnableToDetect,
     setShowUnableToDetect,

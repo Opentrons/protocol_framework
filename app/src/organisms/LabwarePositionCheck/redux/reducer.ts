@@ -16,9 +16,13 @@ export function LPCReducer(
     case PROCEED_STEP: {
       const { currentStepIndex, totalStepCount } = state.steps
       const newStepIdx =
-        currentStepIndex !== totalStepCount
+        currentStepIndex + 1 < totalStepCount
           ? currentStepIndex + 1
           : currentStepIndex
+
+      const nextStepIdx =
+        newStepIdx + 1 < totalStepCount ? newStepIdx + 1 : null
+      const nextStep = nextStepIdx != null ? state.steps.all[nextStepIdx] : null
 
       return {
         ...state,
@@ -26,6 +30,7 @@ export function LPCReducer(
           ...state.steps,
           currentStepIndex: newStepIdx,
           current: state.steps.all[newStepIdx],
+          next: nextStep,
         },
       }
     }

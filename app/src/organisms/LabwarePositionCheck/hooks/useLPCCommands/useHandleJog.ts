@@ -24,7 +24,6 @@ export interface UseHandleJogResult {
   handleJog: Jog
 }
 
-// TODO(jh, 01-06-25): This debounced jog logic is used elsewhere in the app, ex, Drop tip wizard. We should consolidate it.
 export function useHandleJog({
   maintenanceRunId,
   state,
@@ -45,7 +44,7 @@ export function useHandleJog({
       step: StepSize,
       onSuccess?: (position: Coordinates | null) => void
     ): Promise<void> => {
-      return new Promise<void>(() => {
+      return new Promise<void>((resolve, reject) => {
         const pipetteId =
           'pipetteId' in currentStep ? currentStep.pipetteId : null
 
@@ -60,18 +59,22 @@ export function useHandleJog({
               onSuccess?.(
                 (data?.data?.result?.position ?? null) as Coordinates | null
               )
+              resolve()
             })
             .catch((e: Error) => {
               setErrorMessage(`Error issuing jog command: ${e.message}`)
+              reject(e)
             })
         } else {
-          setErrorMessage(
+          const error = new Error(
             `Could not find pipette to jog with id: ${pipetteId ?? ''}`
           )
+          setErrorMessage(error.message)
+          reject(error)
         }
       })
     },
-    [currentStep, maintenanceRunId]
+    [currentStep, maintenanceRunId, createSilentCommand, setErrorMessage]
   )
 
   const processJogQueue = useCallback((): void => {

@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 
 import { DIRECTION_COLUMN, Flex, LegacyStyledText } from '@opentrons/components'
@@ -23,37 +22,49 @@ import type {
   CheckPositionsStep,
   LPCStepProps,
 } from '/app/organisms/LabwarePositionCheck/types'
+import type { DisplayLocationParams } from '/app/local-resources/labware'
 
 export function CheckItem(
   props: LPCStepProps<CheckPositionsStep>
 ): JSX.Element {
   const { state, dispatch, proceed, commandUtils, step } = props
-  const { labwareId, moduleId, location } = step
+  const { labwareId, location } = step
   const {
     handleJog,
-    handlePrepModules,
+    handleCheckItemsPrepModules,
     handleConfirmLwModulePlacement,
     handleConfirmLwFinalPosition,
     handleResetLwModulesOnDeck,
+    handleValidMoveToMaintenancePosition,
   } = commandUtils
-  const { isOnDevice, protocolData } = state
+  const { isOnDevice, protocolData, labwareDefs, steps } = state
   const { t } = useTranslation(['labware_position_check', 'shared'])
+  const { t: commandTextT } = useTranslation('protocol_command_text')
 
-  const pipette = selectActivePipette(state)
-  const initialPosition = selectActiveLwInitialPosition(state)
+  const pipette = selectActivePipette(step, state)
+  const initialPosition = selectActiveLwInitialPosition(step, state)
   const isLwTiprack = selectIsActiveLwTipRack(state)
-  const slotOnlyDisplayLocation = getLabwareDisplayLocation({
-    location,
-    detailLevel: 'slot-only',
-    t,
+
+  const buildDisplayParams = (): Omit<
+    DisplayLocationParams,
+    'detailLevel'
+  > => ({
+    t: commandTextT,
     loadedModules: protocolData.modules,
     loadedLabwares: protocolData.labware,
     robotType: FLEX_ROBOT_TYPE,
+    location,
   })
 
-  useEffect(() => {
-    handlePrepModules({ step, initialPosition })
-  }, [moduleId])
+  const slotOnlyDisplayLocation = getLabwareDisplayLocation({
+    detailLevel: 'slot-only',
+    ...buildDisplayParams(),
+  })
+  const fullDisplayLocation = getLabwareDisplayLocation({
+    detailLevel: 'full',
+    allRunDefs: labwareDefs,
+    ...buildDisplayParams(),
+  })
 
   const handleDispatchConfirmInitialPlacement = (): void => {
     void handleConfirmLwModulePlacement({ step }).then(position => {
@@ -67,20 +78,28 @@ export function CheckItem(
     })
   }
 
+  // TODO(jh, 01-14-25): Revisit next step injection after refactoring the store (after designs settle).
   const handleDispatchConfirmFinalPlacement = (): void => {
     void handleConfirmLwFinalPosition({
       step,
       onSuccess: proceed,
       pipette,
-    }).then(position => {
-      dispatch(
-        setFinalPosition({
-          labwareId,
-          location,
-          position,
-        })
-      )
     })
+      .then(position => {
+        dispatch(
+          setFinalPosition({
+            labwareId,
+            location,
+            position,
+          })
+        )
+      })
+      .then(() => {
+        handleCheckItemsPrepModules(steps.next)
+      })
+      .then(() => {
+        handleValidMoveToMaintenancePosition(steps.next)
+      })
   }
 
   const handleDispatchResetLwModulesOnDeck = (): void => {
@@ -142,6 +161,7 @@ export function CheckItem(
                   key={slotOnlyDisplayLocation}
                   isLwTiprack={isLwTiprack}
                   slotOnlyDisplayLocation={slotOnlyDisplayLocation}
+                  fullDisplayLocation={fullDisplayLocation}
                   {...props}
                 />,
               ]}

@@ -39,6 +39,7 @@ interface StepsInfo {
   currentStepIndex: number
   totalStepCount: number
   current: LabwarePositionCheckStep
+  next: LabwarePositionCheckStep | null
   all: LabwarePositionCheckStep[]
 }
 

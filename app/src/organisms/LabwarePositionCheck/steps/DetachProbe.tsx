@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 
@@ -27,13 +26,11 @@ export const DetachProbe = ({
   commandUtils,
 }: LPCStepProps<DetachProbeStep>): JSX.Element => {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
-  const {
-    moveToMaintenancePosition,
-    createProbeDetachmentHandler,
-  } = commandUtils
-  const pipette = selectActivePipette(state)
+  const { current: currentStep } = state.steps
+  const { createProbeDetachmentHandler } = commandUtils
+  const pipette = selectActivePipette(currentStep, state)
   const probeVideoSrc = ((): string => {
-    const channels = selectActivePipetteChannelCount(state)
+    const channels = selectActivePipetteChannelCount(currentStep, state)
 
     switch (channels) {
       case 1:
@@ -46,11 +43,6 @@ export const DetachProbe = ({
   })()
 
   const handleProbeDetached = createProbeDetachmentHandler(pipette, proceed)
-
-  useEffect(() => {
-    // move into correct position for probe detach on mount
-    moveToMaintenancePosition(pipette)
-  }, [])
 
   return (
     <GenericWizardTile

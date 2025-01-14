@@ -11,6 +11,7 @@ import { useHandleConfirmLwModulePlacement } from './useHandleConfirmLwModulePla
 import { useHandleConfirmLwFinalPosition } from './useHandleConfirmLwFinalPosition'
 import { useHandleResetLwModulesOnDeck } from './useHandleResetLwModulesOnDeck'
 import { useBuildOffsetsToApply } from './useBuildOffsetsToApply'
+import { useHandleValidMoveToMaintenancePosition } from './useHandleValidMoveToMaintenancePosition'
 
 import type { CreateCommand } from '@opentrons/shared-data'
 import type { CommandData } from '@opentrons/api-client'
@@ -26,6 +27,7 @@ import type { UseHandleResetLwModulesOnDeckResult } from './useHandleResetLwModu
 import type { LPCWizardFlexProps } from '/app/organisms/LabwarePositionCheck/LPCWizardFlex'
 import type { LPCWizardState } from '/app/organisms/LabwarePositionCheck/redux'
 import type { UseBuildOffsetsToApplyResult } from './useBuildOffsetsToApply'
+import type { UseHandleValidMoveToMaintenancePositionResult } from './useHandleValidMoveToMaintenancePosition'
 
 export interface UseLPCCommandsProps extends LPCWizardFlexProps {
   state: LPCWizardState
@@ -40,7 +42,8 @@ export type UseLPCCommandsResult = UseApplyLPCOffsetsResult &
   UseHandleConfirmPlacementResult &
   UseHandleConfirmPositionResult &
   UseBuildOffsetsToApplyResult &
-  UseHandleResetLwModulesOnDeckResult & {
+  UseHandleResetLwModulesOnDeckResult &
+  UseHandleValidMoveToMaintenancePositionResult & {
     errorMessage: string | null
     isRobotMoving: boolean
   }
@@ -58,15 +61,20 @@ export function useLPCCommands(
 
   const chainLPCCommands = (
     commands: CreateCommand[],
-    continuePastCommandFailure: boolean
+    continuePastCommandFailure: boolean,
+    shouldPropogateError?: boolean // Let a higher level handler manage the error.
   ): Promise<CommandData[]> =>
     chainRunCommands(
       props.maintenanceRunId,
       commands,
       continuePastCommandFailure
     ).catch((e: Error) => {
-      setErrorMessage(`Error during LPC command: ${e.message}`)
-      return Promise.resolve([])
+      if (!shouldPropogateError) {
+        setErrorMessage(`Error during LPC command: ${e.message}`)
+        return Promise.resolve([])
+      } else {
+        return Promise.reject(e)
+      }
     })
 
   const applyLPCOffsetsUtils = useApplyLPCOffsets({ ...props, setErrorMessage })
@@ -93,6 +101,9 @@ export function useLPCCommands(
     ...props,
     chainLPCCommands,
   })
+  const handleValidMoveToMaintenancePosition = useHandleValidMoveToMaintenancePosition(
+    { ...props, chainLPCCommands }
+  )
 
   return {
     errorMessage,
@@ -107,5 +118,6 @@ export function useLPCCommands(
     ...handleConfirmLwModulePlacement,
     ...handleConfirmLwFinalPosition,
     ...handleResetLwModulesOnDeck,
+    ...handleValidMoveToMaintenancePosition,
   }
 }

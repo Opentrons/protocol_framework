@@ -1,5 +1,6 @@
 import { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
+import { css } from 'styled-components'
 
 import {
   ALIGN_CENTER,
@@ -32,14 +33,8 @@ export function LiveOffsetValue(
   const { x, y, z, state, ...styleProps } = props
   const { i18n, t } = useTranslation('labware_position_check')
 
-  // TOME TODO: Pull these out into their own CSS styles.
-
   return (
-    <Flex
-      flexDirection={DIRECTION_COLUMN}
-      marginY={SPACING.spacing8}
-      gridGap={SPACING.spacing4}
-    >
+    <Flex css={FLEX_CONTAINER_STYLE}>
       <LegacyStyledText
         as="label"
         fontWeight={
@@ -50,22 +45,11 @@ export function LiveOffsetValue(
       >
         {i18n.format(t('labware_offset_data'), 'capitalize')}
       </LegacyStyledText>
-      <Flex
-        alignItems={ALIGN_CENTER}
-        border={`${BORDERS.styleSolid} 1px ${COLORS.grey30}`}
-        borderRadius={BORDERS.borderRadius4}
-        padding={SPACING.spacing8}
-        {...styleProps}
-      >
+      <Flex css={OFFSET_CONTAINER_STYLE} {...styleProps}>
         <Icon name="reticle" size={state.isOnDevice ? '1.5rem' : SIZE_1} />
         {[x, y, z].map((axis, index) => (
           <Fragment key={index}>
-            <LegacyStyledText
-              as="p"
-              marginLeft={SPACING.spacing8}
-              marginRight={SPACING.spacing4}
-              fontWeight={TYPOGRAPHY.fontWeightSemiBold}
-            >
+            <LegacyStyledText css={OFFSET_LABEL_STYLE}>
               {['X', 'Y', 'Z'][index]}
             </LegacyStyledText>
             <LegacyStyledText as="p">{axis.toFixed(1)}</LegacyStyledText>
@@ -75,3 +59,23 @@ export function LiveOffsetValue(
     </Flex>
   )
 }
+
+const FLEX_CONTAINER_STYLE = css`
+  flex-direction: ${DIRECTION_COLUMN};
+  margin-top: ${SPACING.spacing8};
+  margin-bottom: ${SPACING.spacing8};
+  grid-gap: ${SPACING.spacing4};
+`
+
+const OFFSET_CONTAINER_STYLE = css`
+  align-items: ${ALIGN_CENTER};
+  border: ${BORDERS.styleSolid} 1px ${COLORS.grey30};
+  border-radius: ${BORDERS.borderRadius4};
+  padding: ${SPACING.spacing8};
+`
+
+const OFFSET_LABEL_STYLE = css`
+  margin-left: ${SPACING.spacing8};
+  margin-right: ${SPACING.spacing4};
+  font-weight: ${TYPOGRAPHY.fontWeightSemiBold};
+`

@@ -25,8 +25,6 @@ export interface PerformLPCStep {
   moduleId?: string
 }
 
-// TOME TODO: This all should be in redux.
-
 export interface BeforeBeginningStep {
   section: typeof NAV_STEPS.BEFORE_BEGINNING
 }

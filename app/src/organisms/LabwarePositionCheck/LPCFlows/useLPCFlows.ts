@@ -61,6 +61,8 @@ export function useLPCFlows({
     createLabwareDefinition,
   } = useCreateMaintenanceRunLabwareDefinitionMutation()
   const { deleteMaintenanceRun } = useDeleteMaintenanceRunMutation()
+  // TODO(jh, 01-14-25): There's no external error handing if LPC fails this series of POST requests.
+  // If the server doesn't absorb this functionality for the redesign, add error handling.
   useRunLoadedLabwareDefinitions(runId, {
     onSuccess: res => {
       void Promise.all(
@@ -77,7 +79,6 @@ export function useLPCFlows({
       })
     },
     onSettled: () => {
-      // TOME TODO: Think about potentially error handling if there's some sort of failure here?
       setIsLaunching(false)
     },
     enabled: maintenanceRunId != null,
@@ -102,7 +103,7 @@ export function useLPCFlows({
   const handleCloseLPC = (): void => {
     if (maintenanceRunId != null) {
       deleteMaintenanceRun(maintenanceRunId, {
-        onSettled: () => {
+        onSuccess: () => {
           setMaintenanceRunId(null)
           setHasCreatedLPCRun(false)
         },
@@ -115,6 +116,11 @@ export function useLPCFlows({
     maintenanceRunId != null &&
     protocolName != null &&
     mostRecentAnalysis != null
+  console.log('=>(useLPCFlows.ts:119) mostRecentAnalysis', mostRecentAnalysis)
+  console.log('=>(useLPCFlows.ts:119) protocolName', protocolName)
+  console.log('=>(useLPCFlows.ts:119) maintenanceRunId', maintenanceRunId)
+  console.log('=>(useLPCFlows.ts:119) hasCreatedLPCRun', hasCreatedLPCRun)
+  console.log('=>(useLPCFlows.ts:119) showLPC', showLPC)
 
   return showLPC
     ? {
@@ -159,13 +165,14 @@ function useMonitorMaintenanceRunForDeletion({
   })
 
   useEffect(() => {
-    if (
+    if (maintenanceRunId === null) {
+      setMonitorMaintenanceRunForDeletion(false)
+    } else if (
       maintenanceRunId !== null &&
       maintenanceRunData?.data.id === maintenanceRunId
     ) {
       setMonitorMaintenanceRunForDeletion(true)
-    }
-    if (
+    } else if (
       maintenanceRunData?.data.id !== maintenanceRunId &&
       monitorMaintenanceRunForDeletion
     ) {
