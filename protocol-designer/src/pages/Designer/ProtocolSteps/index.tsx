@@ -101,7 +101,7 @@ export function ProtocolSteps(): JSX.Element {
         <Flex
           flexDirection={DIRECTION_COLUMN}
           gridGap={SPACING.spacing16}
-          maxWidth={CONTENT_MAX_WIDTH}
+          width={CONTENT_MAX_WIDTH}
         >
           {showTimelineAlerts ? (
             <TimelineAlerts
