@@ -132,6 +132,7 @@ async def test_drop_tip_implementation(
             minimum_z_height=None,
             speed=None,
             operation_volume=None,
+            is_tracking=False,
         )
     ).then_return(Point(x=111, y=222, z=333))
 
@@ -218,6 +219,7 @@ async def test_drop_tip_with_alternating_locations(
             minimum_z_height=None,
             speed=None,
             operation_volume=None,
+            is_tracking=False,
         )
     ).then_return(Point(x=111, y=222, z=333))
 
@@ -289,6 +291,7 @@ async def test_tip_attached_error(
             minimum_z_height=None,
             speed=None,
             operation_volume=None,
+            is_tracking=False,
         )
     ).then_return(Point(x=111, y=222, z=333))
     decoy.when(
@@ -385,6 +388,7 @@ async def test_stall_error(
             minimum_z_height=None,
             speed=None,
             operation_volume=None,
+            is_tracking=False,
         )
     ).then_raise(StallOrCollisionDetectedError())
 

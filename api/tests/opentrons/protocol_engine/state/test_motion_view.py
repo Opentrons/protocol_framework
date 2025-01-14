@@ -310,7 +310,7 @@ def test_get_movement_waypoints_to_well_for_y_center(
 
     decoy.when(
         geometry_view.get_well_position(
-            "labware-id", "well-name", WellLocation(), None, "pipette-id"
+            "labware-id", "well-name", WellLocation(), None, "pipette-id", False
         )
     ).then_return(Point(x=4, y=5, z=6))
 
@@ -394,7 +394,7 @@ def test_get_movement_waypoints_to_well_for_xy_center(
 
     decoy.when(
         geometry_view.get_well_position(
-            "labware-id", "well-name", WellLocation(), None, "pipette-id"
+            "labware-id", "well-name", WellLocation(), None, "pipette-id", False
         )
     ).then_return(Point(x=4, y=5, z=6))
 
@@ -466,6 +466,7 @@ def test_get_movement_waypoints_to_well_raises(
             well_location=None,
             operation_volume=None,
             pipette_id="pipette-id",
+            is_tracking=False,
         )
     ).then_return(Point(x=4, y=5, z=6))
     decoy.when(pipette_view.get_current_location()).then_return(None)
