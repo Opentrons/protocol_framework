@@ -21,7 +21,8 @@ class StackerModule:
         "opentrons_flex_96_tiprack_200ul": LABWARE_Z_HEIGHT.OPENTRONS_TIPRACKS,
         "opentrons_96_wellplate_200ul_pcr_full_skirt": LABWARE_Z_HEIGHT.BIORAD_HARDSHELL_PCR,
         "armadillo_96_wellplate_200ul_pcr_full_skirt": LABWARE_Z_HEIGHT.BIORAD_HARDSHELL_PCR,
-        "opentrons_tough_pcr_auto_sealing_lid": LABWARE_Z_HEIGHT.THERMOCYLER_LID_WITH_ADAPTER
+        "opentrons_tough_pcr_auto_sealing_lid": LABWARE_Z_HEIGHT.THERMOCYLER_LID_WITH_ADAPTER,
+        "nest_96_wellplate_2ml_deep": LABWARE_Z_HEIGHT.DEEPWELL_96
     }
 
     def __init__(
