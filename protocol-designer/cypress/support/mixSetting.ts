@@ -5,7 +5,7 @@ export enum Actions {
   Confirm = 'Confirm',
   GoBack = 'Go back',
   Edit = 'Edit',
-
+  SelectMix = "Select Mix",
   SelectLabware = 'Select on deck labware',
   SelectWells = 'Select wells',
   EnterVolume = 'Enter a valid volume to mix',
@@ -15,13 +15,8 @@ export enum Actions {
 }
 
 export enum Verifications {
-  // OnStep1 = 'On Step 1 page.',
-  // OnStep2 = 'On Step 2 page.',
-  // FlexSelected = 'Opentrons Flex selected.',
-  // OT2Selected = 'Opentrons OT-2 selected.',
-  // NinetySixChannel = '96-Channel option is available.',
-  // NotNinetySixChannel = '96-Channel option is not available.',
-  // ProtocolTitleHeader = 'Protocol Title is displayed',
+  MixPopout = 'Verify the the configuration of mix settings',
+
 
 }
 
@@ -70,11 +65,14 @@ const executeAction = (action: Actions | UniversalActions): void => {
 
 
   switch (action) {
+    case Actions.SelectMix:
+      cy.get('button').contains('Mix').click()
+      break
     case Actions.SelectLabware:
       cy.contains(Content.ChooseOption).should('be.visible').click()
       cy.contains(Content.Reservoir).should('be.visible').click()
       break
-      case Actions.SelectWells:
+    case Actions.SelectWells:
       cy.get(Locators.WellInputField).should('be.visible').click()
       cy.get(Locators.Save).click()
       break
@@ -89,41 +87,24 @@ const executeAction = (action: Actions | UniversalActions): void => {
   }
 }
 
-// const verifyStep = (verification: Verifications): void => {
-//   switch (verification) {
-//     case Verifications.OnStep1:
-//       cy.contains(Content.Step1Title).should('be.visible')
-//       break
-//     case Verifications.OnStep2:
-//       cy.contains(Content.Step2Title).should('be.visible')
-//       cy.contains(Content.AddPipette).should('be.visible')
-//       break
-//     case Verifications.FlexSelected:
-//       cy.contains(Content.OpentronsFlex).should(
-//         'have.css',
-//         'background-color',
-//         'rgb(0, 108, 250)'
-//       )
-//       break
-//     case Verifications.OT2Selected:
-//       cy.contains(Content.OpentronsOT2).should(
-//         'have.css',
-//         'background-color',
-//         'rgb(0, 108, 250)'
-//       )
-//       break
-//     case Verifications.NinetySixChannel:
-//       cy.contains(Content.NinetySixChannel).should('be.visible')
-//       break
-//     case Verifications.NotNinetySixChannel:
-//       cy.contains(Content.NinetySixChannel).should('not.exist')
-//       break
-//     default:
-//       throw new Error(
-//         `Unrecognized verification: ${verification as Verifications}`
-//       )
-//   }
-// }
+const verifyStep = (verification: Verifications): void => {
+  switch (verification) {
+    case Verifications.MixPopout:
+        cy.contains(Content.Pipette).should('exist').should('be.visible')
+        cy.contains(Content.Tiprack).should('exist').should('be.visible')
+        cy.contains(Content.Labware).should('exist').should('be.visible')
+        cy.contains(Content.SelectWells).should('exist').should('be.visible')
+        cy.contains(Content.VolumePerWell).should('exist').should('be.visible')
+        cy.contains(Content.MixRepetitions).should('exist').should('be.visible')
+        cy.contains(Content.TipHandling).should('exist').should('be.visible')
+        cy.contains(Content.TipDropLocation).should('exist').should('be.visible')
+        break
+    default:
+      throw new Error(
+        `Unrecognized verification: ${verification as Verifications}`
+      )
+  }
+}
 
 export const runMixSetup = (
   steps: Array<Actions | Verifications | UniversalActions>
@@ -137,25 +118,25 @@ export const runMixSetup = (
   steps.forEach(step => {
     if (isEnumValue([Actions], step)) {
       executeAction(step as Actions)
-    // } else if (isEnumValue([Verifications], step)) {
-    //   verifyStep(step as Verifications)
+    } else if (isEnumValue([Verifications], step)) {
+      verifyStep(step as Verifications)
     } else if (isEnumValue([UniversalActions], step)) {
       executeAction(step as UniversalActions)
     }
   })
 }
 
-export const verifyMixSetup = (): void => {
-  cy.contains(Content.Pipette).should('exist').should('be.visible')
-  cy.contains(Content.Tiprack).should('exist').should('be.visible')
-  cy.contains(Content.Labware).should('exist').should('be.visible')
-  cy.contains(Content.SelectWells).should('exist').should('be.visible')
-  cy.contains(Content.VolumePerWell).should('exist').should('be.visible')
-  cy.contains(Content.MixRepetitions).should('exist').should('be.visible')
-  cy.contains(Content.TipHandling).should('exist').should('be.visible')
-  cy.contains(Content.TipDropLocation).should('exist').should('be.visible')
-}
+// export const verifyMixSetup = (): void => {
+//   cy.contains(Content.Pipette).should('exist').should('be.visible')
+//   cy.contains(Content.Tiprack).should('exist').should('be.visible')
+//   cy.contains(Content.Labware).should('exist').should('be.visible')
+//   cy.contains(Content.SelectWells).should('exist').should('be.visible')
+//   cy.contains(Content.VolumePerWell).should('exist').should('be.visible')
+//   cy.contains(Content.MixRepetitions).should('exist').should('be.visible')
+//   cy.contains(Content.TipHandling).should('exist').should('be.visible')
+//   cy.contains(Content.TipDropLocation).should('exist').should('be.visible')
+// }
 
-export const selectMix = (): void => {
-  cy.get('button').contains('Mix').click()
-}
+// export const selectMix = (): void => {
+//   cy.get('button').contains('Mix').click()
+// }

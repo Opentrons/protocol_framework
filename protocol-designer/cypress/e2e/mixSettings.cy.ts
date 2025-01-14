@@ -1,12 +1,9 @@
 import '../support/commands.ts'; // Importing the custom commands file
 import {
   Actions,
-  selectMix,
   Verifications,
-  verifyMixSetup,
   runMixSetup,
   Locators,
-  // selectWells
 } from '../support/mixSetting'
 import { UniversalActions } from '../support/universalActions'
 import { TestFilePath, getTestFile } from '../support/testFiles'
@@ -18,6 +15,7 @@ import {
 describe('Redesigned Mixing Steps - Happy Path', () => {
   beforeEach(() => {
     cy.visit('/')
+    cy.closeAnalyticsModal()
     const protocol = getTestFile(TestFilePath.DoItAllV8)
     cy.importProtocol(protocol.path)
     verifyImportProtocolPage(protocol)
@@ -25,15 +23,15 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
     // NOTE: vv make this chunk better//
     cy.contains("Edit protocol").click()
     cy.contains("Protocol steps").click()
-    cy.get('[id="AddStepButton"]').contains("+ Add Step").click()
+    cy.get('[id="AddStepButton"]').contains("Add Step").click()
     cy.verifyOverflowBtn()
-    selectMix()
-    verifyMixSetup()
   });
 
 
   it('It should verify the working function of every permutation of mix checkboxes', () => {
     const steps: Array<Actions | Verifications | UniversalActions> = [
+      Actions.SelectMix,
+      Verifications.MixPopout,
       Actions.SelectLabware,
       Actions.SelectWells,
       
