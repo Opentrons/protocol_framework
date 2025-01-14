@@ -211,6 +211,7 @@ const MAGNETIC_BLOCK_INITIAL_STATE: MagneticBlockState = {
 const ABSORBANCE_READER_INITIAL_STATE: AbsorbanceReaderState = {
   type: ABSORBANCE_READER_TYPE,
   lidOpen: null,
+  initialization: null,
 }
 
 const _getInitialDeckSetup = (
