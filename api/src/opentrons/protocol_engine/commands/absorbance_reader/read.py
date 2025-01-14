@@ -209,7 +209,7 @@ class ReadAbsorbance(
 
     commandType: ReadAbsorbanceCommandType = "absorbanceReader/read"
     params: ReadAbsorbanceParams
-    result: Optional[ReadAbsorbanceResult]
+    result: Optional[ReadAbsorbanceResult] = None
 
     _ImplementationCls: Type[ReadAbsorbanceImpl] = ReadAbsorbanceImpl
 

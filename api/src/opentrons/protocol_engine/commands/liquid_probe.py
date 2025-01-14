@@ -361,7 +361,7 @@ class LiquidProbe(
 
     commandType: LiquidProbeCommandType = "liquidProbe"
     params: LiquidProbeParams
-    result: Optional[LiquidProbeResult]
+    result: Optional[LiquidProbeResult] = None
 
     _ImplementationCls: Type[LiquidProbeImplementation] = LiquidProbeImplementation
 
@@ -373,7 +373,7 @@ class TryLiquidProbe(
 
     commandType: TryLiquidProbeCommandType = "tryLiquidProbe"
     params: TryLiquidProbeParams
-    result: Optional[TryLiquidProbeResult]
+    result: Optional[TryLiquidProbeResult] = None
 
     _ImplementationCls: Type[
         TryLiquidProbeImplementation
