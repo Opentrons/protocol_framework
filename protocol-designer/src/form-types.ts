@@ -1,5 +1,7 @@
 import type {
   ABSORBANCE_READER_INITIALIZE,
+  ABSORBANCE_READER_INITIALIZE_MODE_MULTI,
+  ABSORBANCE_READER_INITIALIZE_MODE_SINGLE,
   ABSORBANCE_READER_LID,
   ABSORBANCE_READER_READ,
   PAUSE_UNTIL_RESUME,
@@ -382,12 +384,15 @@ export interface HydratedAbsorbanceReaderFormData {
     | typeof ABSORBANCE_READER_INITIALIZE
     | typeof ABSORBANCE_READER_READ
     | typeof ABSORBANCE_READER_LID
-  filePath: null
-  lidOpen: null
-  mode: null
-  moduleId: null
-  referenceWavelength: null
-  wavelengths: null
+  filePath: string | null
+  lidOpen: boolean | null
+  mode:
+    | typeof ABSORBANCE_READER_INITIALIZE_MODE_MULTI
+    | typeof ABSORBANCE_READER_INITIALIZE_MODE_SINGLE
+    | null
+  moduleId: string
+  referenceWavelength: number | null
+  wavelengths: number[] | null
 }
 // TODO: Ian 2019-01-17 Moving away from this and towards nesting all form fields
 // inside `fields` key, but deprecating transfer/consolidate/distribute is a pre-req
