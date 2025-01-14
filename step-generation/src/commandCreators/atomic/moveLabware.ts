@@ -130,7 +130,7 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
       initialModuleState.type === ABSORBANCE_READER_TYPE &&
       initialModuleState.lidOpen !== true
     ) {
-      errors.push(errorCreators.plateReaderLidClosed())
+      errors.push(errorCreators.absorbanceReaderLidClosed())
     }
   }
   const destModuleId =
@@ -181,7 +181,7 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
       }
     } else if (destModuleState.type === ABSORBANCE_READER_TYPE) {
       if (destModuleState.lidOpen !== true) {
-        errors.push(errorCreators.plateReaderLidClosed())
+        errors.push(errorCreators.absorbanceReaderLidClosed())
       }
     }
   }

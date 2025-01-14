@@ -92,6 +92,7 @@ export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
   const getSupportedSteps = (): Array<
     Exclude<StepType, 'manualIntervention'>
   > => [
+    'absorbanceReader',
     'comment',
     'moveLabware',
     'moveLiquid',
@@ -101,7 +102,6 @@ export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
     'magnet',
     'temperature',
     'thermocycler',
-    'plateReader',
   ]
   const isStepTypeEnabled: Record<
     Exclude<StepType, 'manualIntervention'>,
@@ -116,7 +116,7 @@ export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
     temperature: getIsModuleOnDeck(modules, TEMPERATURE_MODULE_TYPE),
     thermocycler: getIsModuleOnDeck(modules, THERMOCYCLER_MODULE_TYPE),
     heaterShaker: getIsModuleOnDeck(modules, HEATERSHAKER_MODULE_TYPE),
-    plateReader:
+    absorbanceReader:
       getIsModuleOnDeck(modules, ABSORBANCE_READER_TYPE) &&
       enableAbsorbanceReader,
   }
