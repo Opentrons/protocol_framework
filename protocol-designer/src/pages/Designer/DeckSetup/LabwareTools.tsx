@@ -385,7 +385,7 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
                             />
 
                             {uri === selectedLabwareDefUri &&
-                              getLabwareCompatibleWithAdapter(loadName)
+                              getLabwareCompatibleWithAdapter(defs, loadName)
                                 ?.length > 0 && (
                                 <ListButtonAccordionContainer
                                   id={`nestedAccordionContainer_${loadName}`}
@@ -435,12 +435,10 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
                                             )
                                           }
                                         )
-                                      : [
-                                          ...getLabwareCompatibleWithAdapter(
-                                            loadName
-                                          ),
-                                          ...Object.keys(customLabwareDefs),
-                                        ].map(nestedDefUri => {
+                                      : getLabwareCompatibleWithAdapter(
+                                          { ...defs, ...customLabwareDefs },
+                                          loadName
+                                        ).map(nestedDefUri => {
                                           const nestedDef =
                                             defs[nestedDefUri] ??
                                             customLabwareDefs[nestedDefUri]
