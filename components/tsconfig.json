@@ -3,6 +3,9 @@
   "references": [
     {
       "path": "../shared-data"
+    },
+    {
+      "path": "../step-generation"
     }
   ],
   "compilerOptions": {

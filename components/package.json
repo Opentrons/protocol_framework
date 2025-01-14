@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@opentrons/shared-data": "link:../shared-data",
+    "@opentrons/step-generation": "link:../step-generation",
     "@popperjs/core": "2.1.1",
     "@react-spring/types": "9.6.1",
     "@react-spring/web": "9.6.1",
@@ -37,6 +38,7 @@
     "react-popper": "1.0.0",
     "react-remove-scroll": "2.4.3",
     "react-select": "5.4.0",
+    "react-viewport-list": "6.3.0",
     "redux": "4.0.5",
     "styled-components": "5.3.6"
   },

@@ -286,7 +286,7 @@ export function ProtocolTimelineScrubber(
           axis="x"
         >
           {(command, index) => (
-            <Flex key={index}>{command}</Flex>
+            <Flex key={index}>{command.id}</Flex>
             // <CommandItem
             //   index={index}
             //   command={command}
