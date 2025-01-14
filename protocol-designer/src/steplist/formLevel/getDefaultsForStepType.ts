@@ -175,7 +175,16 @@ export function getDefaultsForStepType(
         profileVolume: null,
         thermocyclerFormType: 'thermocyclerState',
       }
-
+    case 'absorbanceReader':
+      return {
+        filePath: null,
+        lidOpen: null,
+        mode: null,
+        moduleId: null,
+        absorbanceReaderFormType: 'initialize',
+        referenceWavelength: null,
+        wavelengths: null,
+      }
     default:
       return {}
   }

@@ -133,6 +133,7 @@ export type StepFieldName = string
 
 // TODO Ian 2019-01-16 factor out to some constants.js ? See #2926
 export type StepType =
+  | 'absorbanceReader'
   | 'comment'
   | 'heaterShaker'
   | 'magnet'
@@ -143,9 +144,9 @@ export type StepType =
   | 'pause'
   | 'temperature'
   | 'thermocycler'
-  | 'plateReader'
 
 export const stepIconsByType: Record<StepType, IconName> = {
+  absorbanceReader: 'ot-absorbance',
   comment: 'comment',
   moveLabware: 'ot-move',
   moveLiquid: 'transfer',
@@ -156,7 +157,6 @@ export const stepIconsByType: Record<StepType, IconName> = {
   temperature: 'ot-temperature-v2',
   thermocycler: 'ot-thermocycler',
   heaterShaker: 'ot-heater-shaker',
-  plateReader: 'ot-absorbance',
 }
 // ===== Unprocessed form types =====
 export interface AnnotationFields {
