@@ -8,6 +8,8 @@ REDOC := npx @redocly/cli
 
 # Path of source package
 SRC_PATH = robot_server
+SCRIPTS_PATH = scripts
+TESTS_PATH = tests
 
 # Project to get the version for
 ot_project := $(OPENTRONS_PROJECT)
@@ -125,9 +127,9 @@ test-cov:
 
 .PHONY: lint
 lint:
-	$(python) -m mypy $(SRC_PATH) $(tests)
+	$(python) -m mypy $(SRC_PATH) $(SCRIPTS_PATH) $(TESTS_PATH)
 	$(python) -m black $(black_opts) --check .
-	$(python) -m flake8 $(SRC_PATH) $(tests) setup.py
+	$(python) -m flake8 $(SRC_PATH) $(SCRIPTS_PATH) $(TESTS_PATH) setup.py
 
 .PHONY: format
 format:
