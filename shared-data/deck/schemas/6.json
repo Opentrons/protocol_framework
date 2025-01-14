@@ -38,19 +38,98 @@
         "zDimension": { "$ref": "#/definitions/positiveNumber" }
       }
     },
-    "locatingFeature": {
+    "backLeftLocatingFeature": {
+      "description": "Sets the position of the back left corner of a contained item, with the contained z=0 at the z coordinate",
       "type": "object",
+      "additionalProperties": true,
+      "required": ["locatingFeatureId", "offsetVector"],
+      "properties": {
+        "locatingFeatureId": {
+          "const": "backLeft",
+          "description": "The ID of the locating feature"
+        },
+        "offsetVector": {
+          "$ref": "#/definitions/xyzArray",
+          "description": "A vector from the origin of the object to the position of its locating feature"
+        }
+      }
+    },
+    "frontLeftLocatingFeature": {
+      "description": "Sets the position of the front left corner of a contained item, with the contained z=0 at the z coordinate",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["locatingFeatureId", "offsetVector"],
+      "properties": {
+        "locatingFeatureId": {
+          "const": "frontLeft",
+          "description": "The ID of the locating feature"
+        },
+        "offsetVector": {
+          "$ref": "#/definitions/xyzArray",
+          "description": "A vector from the origin of the object to the position of its locating feature"
+        }
+      }
+    },
+    "wellLocatingFeature": {
+      "description": "Sets the position of a specific well of a contained item, with the contained z=0 at the z coordinate",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["locatingFeatureId", "offsetVector", "wellName"],
+      "properties": {
+        "locatingFeatureId": {
+          "const": "well",
+          "description": "The ID of the locating feature"
+        },
+        "offsetVector": {
+          "$ref": "#/definitions/xyzArray",
+          "description": "A vector from the origin of the object to the position of its locating feature"
+        },
+        "wellName": {
+          "type": "string",
+          "description": "The standard well name (e.g. A1 or B2) for the well that is constrained by this locating feature"
+        }
+      }
+    },
+    "centerLocatingFeature": {
+      "description": "Sets the position of the center (halfway between the external outer faces in X and Y) of the contained item with its z=0 at the z coordinate",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["locatingFeatureId", "offsetVector"],
+      "properties": {
+        "locatingFeatureId": {
+          "const": "center",
+          "description": "The ID of the locating feature"
+        },
+        "offsetVector": {
+          "$ref": "#/definitions/xyzArray",
+          "description": "A vector from the origin of the object to the position of its locating feature"
+        }
+      }
+    },
+    "uncontrolledLocatingFeature": {
+      "description": "Sets the position of something that isn't in the schema",
+      "type": "object",
+      "additionalProperties": true,
       "required": ["locatingFeatureId", "offsetVector"],
       "properties": {
         "locatingFeatureId": {
           "type": "string",
-          "description": "The name of a kind of locating feature that will be looked up in labware. Common ones are backLeft, frontLeft, wellA1, center, but others may be used."
+          "description": "The ID of the locating feature"
         },
         "offsetVector": {
           "$ref": "#/definitions/xyzArray",
-          "description": "A vector from the origin of the thing that has the locating feature (i.e. an addressable area) to the key point of the locating feature."
+          "description": "A vector from the origin of the obejct to the position of its locating feature"
         }
       }
+    },
+    "locatingFeature": {
+      "anyOf": [
+        { "$ref": "#/definitions/backLeftLocatingFeature" },
+        { "$ref": "#/definitions/frontLeftLocatingFeature" },
+        { "$ref": "#/definitions/wellLocatingFeature" },
+        { "$ref": "#/definitions/centerLocatingFeature" },
+        { "$ref": "#/definitions/uncontrolledLocatingFeature" }
+      ]
     }
   },
   "description": "Deck specifications, where x,y,z (0,0,0) is at front the bottom left corner.",

@@ -17,11 +17,11 @@
         "areaType": "slot",
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -38,11 +38,11 @@
         "areaType": "slot",
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -60,11 +60,11 @@
         "offsetFromCutoutFixture": [0.0, 0.0, 0.0],
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -81,11 +81,11 @@
         "offsetFromCutoutFixture": [0.0, 0.0, 0.0],
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -102,11 +102,11 @@
         "offsetFromCutoutFixture": [0.0, 0.0, 0.0],
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -123,11 +123,11 @@
         "offsetFromCutoutFixture": [0.0, 0.0, 0.0],
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -144,11 +144,11 @@
         "offsetFromCutoutFixture": [0.0, 0, 0.0],
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -165,11 +165,11 @@
         "offsetFromCutoutFixture": [0.0, 0.0, 0.0],
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -186,11 +186,11 @@
         "offsetFromCutoutFixture": [0.0, 0.0, 0.0],
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -207,11 +207,11 @@
         "offsetFromCutoutFixture": [0.0, 0.0, 0.0],
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -228,11 +228,11 @@
         "offsetFromCutoutFixture": [0.0, 0.0, 0.0],
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -250,11 +250,11 @@
         "offsetFromCutoutFixture": [0.0, 0.0, 0.0],
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -272,11 +272,11 @@
         "offsetFromCutoutFixture": [164.0, 0.0, 14.5],
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -294,11 +294,11 @@
         "offsetFromCutoutFixture": [164.0, 0.0, 14.5],
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -316,11 +316,11 @@
         "offsetFromCutoutFixture": [164.0, 0.0, 14.5],
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -338,11 +338,11 @@
         "offsetFromCutoutFixture": [164.0, 0.0, 14.5],
         "locatingFeatures": [
           {
-            "locatingFeatureId": "frontLeft",
+            "locatingFeatureId": "backLeft",
             "offsetVector": [0.0, 86.0, 0.0]
           },
           {
-            "locatingFeatureId": "backLeft",
+            "locatingFeatureId": "frontLeft",
             "offsetVector": [0.0, 0.0, 0.0]
           }
         ],
@@ -504,12 +504,14 @@
         "offsetFromCutoutFixture": [-20.005, 67.96, 10.96],
         "locatingFeatures": [
           {
-            "locatingFeatureId": "wellB2",
-            "offsetVector": [23.38, 65.24, 0.0]
+            "locatingFeatureId": "well",
+            "offsetVector": [23.38, 65.24, 0.0],
+            "wellName": "B2"
           },
           {
-            "locatingFeatureId": "wellA1",
-            "offsetVector": [14.38, 74.24, 0.0]
+            "locatingFeatureId": "well",
+            "offsetVector": [14.38, 74.24, 0.0],
+            "wellName": "A1"
           },
           {
             "locatingFeatureId": "frontLeft",
