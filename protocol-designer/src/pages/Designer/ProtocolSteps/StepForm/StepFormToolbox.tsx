@@ -38,6 +38,7 @@ import {
   FORM_WARNINGS_EVENT,
 } from '../../../../analytics/constants'
 import {
+  AbsorbanceReaderTools,
   CommentTools,
   HeaterShakerTools,
   MagnetTools,
@@ -45,7 +46,6 @@ import {
   MoveLabwareTools,
   MoveLiquidTools,
   PauseTools,
-  PlateReaderTools,
   TemperatureTools,
   ThermocyclerTools,
 } from './StepTools'
@@ -87,7 +87,7 @@ const STEP_FORM_MAP: StepFormMap = {
   thermocycler: ThermocyclerTools,
   heaterShaker: HeaterShakerTools,
   comment: CommentTools,
-  plateReader: PlateReaderTools,
+  absorbanceReader: AbsorbanceReaderTools,
 }
 
 interface StepFormToolboxProps {
