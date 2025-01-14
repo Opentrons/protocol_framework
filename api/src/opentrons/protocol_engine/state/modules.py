@@ -371,6 +371,7 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         elif ModuleModel.is_flex_stacker(actual_model):
             self._state.substate_by_module_id[module_id] = FlexStackerSubState(
                 module_id=FlexStackerId(module_id),
+                hopper_labware_ids=[],
             )
 
     def _update_additional_slots_occupied_by_thermocycler(
@@ -614,11 +615,18 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         )
 
     def _handle_flex_stacker_commands(
-        self, flex_stacker_state_update: FlexStackerStateUpdate
+        self, state_update: FlexStackerStateUpdate
     ) -> None:
         """Handle Flex Stacker state updates."""
-        # TODO: Implement Flex Stacker state updates
-        pass
+        module_id = state_update.module_id
+        prev_substate = self._state.substate_by_module_id[module_id]
+        assert isinstance(
+            prev_substate, FlexStackerSubState
+        ), f"{module_id} is not a Flex Stacker."
+
+        self._state.substate_by_module_id[
+            module_id
+        ] = prev_substate.new_from_state_change(state_update)
 
 
 class ModuleView:

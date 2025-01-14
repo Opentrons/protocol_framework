@@ -317,10 +317,27 @@ class AbsorbanceReaderStateUpdate:
 
 
 @dataclasses.dataclass
+class FlexStackerAddHopperLabware:
+    """An update to the Flex Stacker module static state."""
+
+    labware_id: str
+
+
+@dataclasses.dataclass
+class FlexStackerRemoveHopperLabware:
+    """An update to the Flex Stacker module static state."""
+
+    labware_id: str
+
+
+@dataclasses.dataclass
 class FlexStackerStateUpdate:
     """An update to the Flex Stacker module state."""
 
     module_id: str
+    hopper_labware_update: FlexStackerAddHopperLabware | FlexStackerRemoveHopperLabware | NoChangeType = (
+        NO_CHANGE
+    )
 
 
 @dataclasses.dataclass
@@ -724,5 +741,17 @@ class StateUpdate:
         """Mark that an addressable area has been used. See `AddressableAreaUsedUpdate`."""
         self.addressable_area_used = AddressableAreaUsedUpdate(
             addressable_area_name=addressable_area_name
+        )
+        return self
+
+    def add_flex_stacker_hopper_labware(
+        self,
+        module_id: str,
+        labware_id: str,
+    ) -> Self:
+        """Add a labware definition to the engine."""
+        self.flex_stacker_state_update = FlexStackerStateUpdate(
+            module_id=module_id,
+            hopper_labware_update=FlexStackerAddHopperLabware(labware_id=labware_id),
         )
         return self

@@ -20,6 +20,10 @@ from opentrons.protocol_engine.types import (
     DeckSlotLocation,
     LabwareLocation,
     OnLabwareLocation,
+    ModuleLocation,
+    ModuleModel,
+    LoadedModule,
+    OFF_DECK_LOCATION,
 )
 from opentrons.protocol_engine.execution import LoadedLabwareData, EquipmentHandler
 from opentrons.protocol_engine.resources import labware_validation
@@ -27,6 +31,8 @@ from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.state.update_types import (
     AddressableAreaUsedUpdate,
     LoadedLabwareUpdate,
+    FlexStackerStateUpdate,
+    FlexStackerAddHopperLabware,
     StateUpdate,
 )
 
@@ -235,3 +241,71 @@ async def test_load_labware_raises_if_location_occupied(
 
     with pytest.raises(LocationIsOccupiedError):
         await subject.execute(data)
+
+
+@pytest.mark.parametrize("display_name", ["My custom display name", None])
+async def test_load_labware_in_flex_stacker(
+    decoy: Decoy,
+    well_plate_def: LabwareDefinition,
+    equipment: EquipmentHandler,
+    state_view: StateView,
+    display_name: Optional[str],
+) -> None:
+    """A LoadLabware command should have an execution implementation."""
+    subject = LoadLabwareImplementation(equipment=equipment, state_view=state_view)
+
+    data = LoadLabwareParams(
+        location=ModuleLocation(moduleId="some-module-id"),
+        loadName="some-load-name",
+        namespace="opentrons-test",
+        version=1,
+        displayName=display_name,
+    )
+
+    decoy.when(state_view.modules.get("some-module-id")).then_return(
+        LoadedModule(
+            id="some-module-id",
+            model=ModuleModel.FLEX_STACKER_MODULE_V1,
+        )
+    )
+
+    decoy.when(
+        await equipment.load_labware(
+            location=OFF_DECK_LOCATION,
+            load_name="some-load-name",
+            namespace="opentrons-test",
+            version=1,
+            labware_id=None,
+        )
+    ).then_return(
+        LoadedLabwareData(
+            labware_id="labware-id",
+            definition=well_plate_def,
+            offsetId="labware-offset-id",
+        )
+    )
+
+    result = await subject.execute(data)
+
+    assert result == SuccessData(
+        public=LoadLabwareResult(
+            labwareId="labware-id",
+            definition=well_plate_def,
+            offsetId="labware-offset-id",
+        ),
+        state_update=StateUpdate(
+            loaded_labware=LoadedLabwareUpdate(
+                labware_id="labware-id",
+                definition=well_plate_def,
+                offset_id="labware-offset-id",
+                new_location=OFF_DECK_LOCATION,
+                display_name=display_name,
+            ),
+            flex_stacker_state_update=FlexStackerStateUpdate(
+                module_id="some-module-id",
+                hopper_labware_update=FlexStackerAddHopperLabware(
+                    labware_id="labware-id"
+                ),
+            ),
+        ),
+    )
