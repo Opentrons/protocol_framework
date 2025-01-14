@@ -1,4 +1,7 @@
 import type {
+  ABSORBANCE_READER_INITIALIZE,
+  ABSORBANCE_READER_LID,
+  ABSORBANCE_READER_READ,
   PAUSE_UNTIL_RESUME,
   PAUSE_UNTIL_TEMP,
   PAUSE_UNTIL_TIME,
@@ -373,6 +376,18 @@ export interface HydratedHeaterShakerFormData {
   stepType: 'heaterShaker'
   targetHeaterShakerTemperature: string | null
   targetSpeed: string | null
+}
+export interface HydratedAbsorbanceReaderFormData {
+  absorbanceReaderFormType:
+    | typeof ABSORBANCE_READER_INITIALIZE
+    | typeof ABSORBANCE_READER_READ
+    | typeof ABSORBANCE_READER_LID
+  filePath: null
+  lidOpen: null
+  mode: null
+  moduleId: null
+  referenceWavelength: null
+  wavelengths: null
 }
 // TODO: Ian 2019-01-17 Moving away from this and towards nesting all form fields
 // inside `fields` key, but deprecating transfer/consolidate/distribute is a pre-req

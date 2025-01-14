@@ -177,11 +177,11 @@ export function getDefaultsForStepType(
       }
     case 'absorbanceReader':
       return {
+        absorbanceReaderFormType: 'initialize',
         filePath: null,
         lidOpen: null,
         mode: null,
         moduleId: null,
-        absorbanceReaderFormType: 'initialize',
         referenceWavelength: null,
         wavelengths: null,
       }

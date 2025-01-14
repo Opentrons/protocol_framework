@@ -539,6 +539,7 @@ export interface TimelineFrame {
 export type RobotState = TimelineFrame // legacy name alias
 
 export type ErrorType =
+  | 'ABSORBANCE_READER_LID_CLOSED'
   | 'CANNOT_MOVE_WITH_GRIPPER'
   | 'DROP_TIP_LOCATION_DOES_NOT_EXIST'
   | 'EQUIPMENT_DOES_NOT_EXIST'
@@ -567,7 +568,6 @@ export type ErrorType =
   | 'PIPETTE_HAS_TIP'
   | 'PIPETTE_VOLUME_EXCEEDED'
   | 'PIPETTING_INTO_COLUMN_4'
-  | 'PLATE_READER_LID_CLOSED'
   | 'POSSIBLE_PIPETTE_COLLISION'
   | 'REMOVE_96_CHANNEL_TIPRACK_ADAPTER'
   | 'TALL_LABWARE_EAST_WEST_OF_HEATER_SHAKER'
