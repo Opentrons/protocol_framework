@@ -74,6 +74,7 @@ from .module_core import (
     NonConnectedModuleCore,
     MagneticBlockCore,
     AbsorbanceReaderCore,
+    FlexStackerCore,
 )
 from .exceptions import InvalidModuleLocationError
 from . import load_labware_params, deck_conflict, overlap_versions
@@ -527,6 +528,7 @@ class ProtocolCore(
             ModuleType.THERMOCYCLER: ThermocyclerModuleCore,
             ModuleType.HEATER_SHAKER: HeaterShakerModuleCore,
             ModuleType.ABSORBANCE_READER: AbsorbanceReaderCore,
+            ModuleType.FLEX_STACKER: FlexStackerCore,
         }
 
         module_type = load_module_result.model.as_type()

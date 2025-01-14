@@ -1112,6 +1112,32 @@ class FlexStackerContext(ModuleContext):
 
     _core: FlexStackerCore
 
+    @requires_version(2, 23)
+    def load_labware_to_hopper(
+        self,
+        load_name: str,
+        quantity: int,
+        label: Optional[str] = None,
+        namespace: Optional[str] = None,
+        version: Optional[int] = None,
+        lid: Optional[str] = None,
+    ) -> None:
+        """Load one or more labware onto the flex stacker.
+
+        The parameters of this function behave like those of
+        :py:obj:`ProtocolContext.load_labware` (which loads labware directly
+        onto the deck). Note that the parameter ``name`` here corresponds to
+        ``load_name`` on the ``ProtocolContext`` function.
+
+        :returns: The initialized and loaded labware object.
+
+        .. versionadded:: 2.23
+            The *label,* *namespace,* and *version* parameters.
+        """
+        load_name = validation.ensure_lowercase_name(load_name)
+        for _ in range(quantity):
+            self.load_labware(load_name, label, namespace, version, lid)
+
     @property
     @requires_version(2, 23)
     def serial_number(self) -> str:

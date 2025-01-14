@@ -21,6 +21,7 @@ from opentrons_shared_data.labware.labware_definition import (
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.robot.types import RobotType
 
+from opentrons.motion_planning.adjacent_slots_getters import get_west_of_staging_slot
 from opentrons.protocols.api_support.types import APIVersion, ThermocyclerStep
 from opentrons.protocols.api_support.util import APIVersionError
 from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
@@ -41,6 +42,7 @@ from opentrons.hardware_control.modules.types import (
     HeaterShakerModuleModel,
     MagneticBlockModel,
     AbsorbanceReaderModel,
+    FlexStackerModuleModel,
 )
 
 from .disposal_locations import TrashBin, WasteChute
@@ -413,6 +415,7 @@ _MODULE_MODELS: Dict[str, ModuleModel] = {
     "heaterShakerModuleV1": HeaterShakerModuleModel.HEATER_SHAKER_V1,
     "magneticBlockV1": MagneticBlockModel.MAGNETIC_BLOCK_V1,
     "absorbanceReaderV1": AbsorbanceReaderModel.ABSORBANCE_READER_V1,
+    "flexStackerModuleV1": FlexStackerModuleModel.FLEX_STACKER_V1,
 }
 
 
@@ -744,3 +747,16 @@ def ensure_valid_tip_drop_location_for_transfer_v2(
             f" or `Well` (e.g. `reservoir.wells()[0]`) or an instance of `TrashBin` or `WasteChute`."
             f" However, it is '{tip_drop_location}'."
         )
+
+
+def convert_flex_stacker_load_slot(slot_name: StagingSlotName) -> DeckSlotName:
+    """
+    Ensure a Flex Stacker load location to a deck slot location.
+
+    Args:
+        slot_name: The input staging slot location.
+
+    Returns:
+        A `DeckSlotName` on the deck.
+    """
+    return get_west_of_staging_slot(slot_name)

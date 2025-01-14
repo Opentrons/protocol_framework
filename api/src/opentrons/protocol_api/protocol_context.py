@@ -22,6 +22,7 @@ from opentrons.legacy_broker import LegacyBroker
 from opentrons.hardware_control.modules.types import (
     MagneticBlockModel,
     AbsorbanceReaderModel,
+    FlexStackerModuleModel,
 )
 from opentrons.legacy_commands import protocol_commands as cmds, types as cmd_types
 from opentrons.legacy_commands.helpers import stringify_labware_movement_command
@@ -58,6 +59,7 @@ from .core.module import (
     AbstractHeaterShakerCore,
     AbstractMagneticBlockCore,
     AbstractAbsorbanceReaderCore,
+    AbstractFlexStackerCore,
 )
 from .robot_context import RobotContext, HardwareManager
 from .core.engine import ENGINE_CORE_API_VERSION
@@ -76,6 +78,7 @@ from .module_contexts import (
     HeaterShakerContext,
     MagneticBlockContext,
     AbsorbanceReaderContext,
+    FlexStackerContext,
     ModuleContext,
 )
 from ._parameters import Parameters
@@ -91,6 +94,7 @@ ModuleTypes = Union[
     HeaterShakerContext,
     MagneticBlockContext,
     AbsorbanceReaderContext,
+    FlexStackerContext,
 ]
 
 
@@ -859,7 +863,11 @@ class ProtocolContext(CommandPublisher):
 
                   .. versionchanged:: 2.15
                     Added ``MagneticBlockContext`` return value.
+
+                  .. versionchanged:: 2.23
+                    Added ``FlexStackerModuleContext`` return value.
         """
+        flex_stacker_valid_since = APIVersion(2, 23)
         if configuration:
             if self._api_version < APIVersion(2, 4):
                 raise APIVersionError(
@@ -887,7 +895,18 @@ class ProtocolContext(CommandPublisher):
             requested_model, AbsorbanceReaderModel
         ) and self._api_version < APIVersion(2, 21):
             raise APIVersionError(
-                f"Module of type {module_name} is only available in versions 2.21 and above."
+                api_element=f"Module of type {module_name}",
+                until_version="2.21",
+                current_version=f"{self._api_version}",
+            )
+        if (
+            isinstance(requested_model, FlexStackerModuleModel)
+            and self._api_version < flex_stacker_valid_since
+        ):
+            raise APIVersionError(
+                api_element=f"Module of type {module_name}",
+                until_version=str(flex_stacker_valid_since),
+                current_version=f"{self._api_version}",
             )
 
         deck_slot = (
@@ -898,7 +917,11 @@ class ProtocolContext(CommandPublisher):
             )
         )
         if isinstance(deck_slot, StagingSlotName):
-            raise ValueError("Cannot load a module onto a staging slot.")
+            # flex stacker modules can only be loaded into staging slot inside a protocol
+            if isinstance(requested_model, FlexStackerModuleModel):
+                deck_slot = validation.convert_flex_stacker_load_slot(deck_slot)
+            else:
+                raise ValueError(f"Cannot load {module_name} onto a staging slot.")
 
         module_core = self._core.load_module(
             model=requested_model,
@@ -1462,6 +1485,8 @@ def _create_module_context(
         module_cls = MagneticBlockContext
     elif isinstance(module_core, AbstractAbsorbanceReaderCore):
         module_cls = AbsorbanceReaderContext
+    elif isinstance(module_core, AbstractFlexStackerCore):
+        module_cls = FlexStackerContext
     else:
         assert False, "Unsupported module type"
 
