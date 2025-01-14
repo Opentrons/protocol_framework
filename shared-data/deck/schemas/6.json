@@ -39,7 +39,7 @@
       }
     },
     "backLeftLocatingFeature": {
-      "description": "Sets the position of the back left corner of a contained item, with the contained z=0 at the z coordinate",
+      "description": "Sets the position of the back left corner of a contained item",
       "type": "object",
       "additionalProperties": true,
       "required": ["locatingFeatureId", "offsetVector"],
@@ -55,7 +55,7 @@
       }
     },
     "frontLeftLocatingFeature": {
-      "description": "Sets the position of the front left corner of a contained item, with the contained z=0 at the z coordinate",
+      "description": "Sets the position of the front left corner of a contained item",
       "type": "object",
       "additionalProperties": true,
       "required": ["locatingFeatureId", "offsetVector"],
@@ -71,7 +71,7 @@
       }
     },
     "wellLocatingFeature": {
-      "description": "Sets the position of a specific well of a contained item, with the contained z=0 at the z coordinate",
+      "description": "Sets the position of a specific well of a contained item",
       "type": "object",
       "additionalProperties": true,
       "required": ["locatingFeatureId", "offsetVector", "wellName"],
@@ -91,7 +91,7 @@
       }
     },
     "centerLocatingFeature": {
-      "description": "Sets the position of the center (halfway between the external outer faces in X and Y) of the contained item with its z=0 at the z coordinate",
+      "description": "Sets the position of the center (halfway between the external outer faces in X and Y) of the contained item",
       "type": "object",
       "additionalProperties": true,
       "required": ["locatingFeatureId", "offsetVector"],
