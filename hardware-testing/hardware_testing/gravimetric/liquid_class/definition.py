@@ -28,8 +28,6 @@ class DispenseSettings(LiquidSettings):
 
     push_out: Optional[float]  # microliters
     break_off_flow_acceleration: Optional[float]  # ul/sec^2
-    break_off_flow_rate: Optional[float]
-    break_off_ul: Optional[float]
     blow_out: Optional[bool]
 
 

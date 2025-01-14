@@ -192,16 +192,6 @@ def _pipette_with_liquid_settings(  # noqa: C901
     air_gap = liquid_class.aspirate.air_gap if liquid_class.aspirate.air_gap else 0
     aspirate_flow_rate = liquid_class.aspirate.flow_rate
     dispense_flow_rate = liquid_class.dispense.flow_rate
-    break_off_flow_rate = (
-        liquid_class.dispense.break_off_flow_rate
-        if liquid_class.dispense.break_off_flow_rate
-        else 0
-    )
-    break_off_acceleration = (
-        liquid_class.dispense.break_off_flow_acceleration
-        if liquid_class.dispense.break_off_flow_acceleration
-        else 0
-    )
 
     # ASPIRATE/DISPENSE SEQUENCE HAS THREE PHASES:
     #  1. APPROACH
@@ -331,52 +321,17 @@ def _pipette_with_liquid_settings(  # noqa: C901
         default_flow_accel = float(hw_pipette.flow_acceleration)
         try:
             push_out: Optional[float] = liquid_class.dispense.push_out
-            break_off: Optional[float] = liquid_class.dispense.break_off_ul
             assert (
                 push_out is None or push_out <= _get_max_blow_out_ul()
             ), f"push-out ({push_out}) cannot exceed {_get_max_blow_out_ul()}"
-            if not break_off:
-                if liquid_class.dispense.break_off_flow_acceleration:
-                    hw_pipette.flow_acceleration = (
-                        liquid_class.dispense.break_off_flow_acceleration
-                    )
-                pipette.dispense(push_out=push_out)
-            else:
-                assert (
-                    push_out is not None
-                ), "push-out must be specified when setting a break-off volume"
-                if break_off == push_out:
-                    break_off = push_out + 0.1
-
-                def _break_off_cfg() -> None:
-                    pipette.flow_rate.dispense = break_off_flow_rate
-                    pipette.flow_rate.blow_out = break_off_flow_rate
-                    hw_api.set_flow_rate(hw_mount, blow_out=break_off_flow_rate)
-                    if break_off_acceleration:
-                        hw_pipette.flow_acceleration = break_off_acceleration
-
-                if break_off < push_out:
-                    # 1) dispense w/ push-out (minus break-out ul)
-                    _reduced_push_out_ul = push_out - break_off
-                    pipette.dispense(push_out=_reduced_push_out_ul)
-                    # 2) blow-out using break-off ul and speed
-                    _break_off_cfg()
-                    hw_api.blow_out(
-                        OT3Mount.LEFT, push_out
-                    )  # NOTE: volume is absolute below "bottom"
-                elif break_off > push_out:
-                    # 1) dispense a reduced amount
-                    _remaining_ul = break_off - push_out
-                    pipette.dispense(pipette.current_volume - _remaining_ul)
-                    # 1) dispense remaininng liquid plus push-out
-                    _break_off_cfg()
-                    pipette.dispense(_remaining_ul, push_out=push_out)
+            if liquid_class.dispense.break_off_flow_acceleration:
+                hw_pipette.flow_acceleration = (
+                    liquid_class.dispense.break_off_flow_acceleration
+                )
+            hw_api.dispense(hw_mount, push_out=push_out)
+            pipette.dispense(push_out=push_out)
         finally:
             hw_pipette.flow_acceleration = default_flow_accel
-            pipette.flow_rate.dispense = dispense_flow_rate
-            hw_api.set_flow_rate(
-                hw_mount, blow_out=dispense_flow_rate
-            )  # FIXME: is this correct?
         # delay
         _delay_seconds = float(dispense_delay)
         if dispense_submerge_mm >= 0:
