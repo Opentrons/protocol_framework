@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { animated, useSpring, easings } from '@react-spring/web'
 import {
@@ -22,6 +22,8 @@ import type {
   DeckDefinition,
   DeckConfiguration,
 } from '@opentrons/shared-data'
+
+import type { ReactNode } from 'react'
 import type { StyleProps } from '../../primitives'
 
 const getModulePosition = (
@@ -136,7 +138,7 @@ interface MoveLabwareOnDeckProps extends StyleProps {
   loadedModules: LoadedModule[]
   loadedLabware: LoadedLabware[]
   deckConfig: DeckConfiguration
-  backgroundItems?: React.ReactNode
+  backgroundItems?: ReactNode
   deckFill?: string
 }
 export function MoveLabwareOnDeck(
@@ -153,9 +155,7 @@ export function MoveLabwareOnDeck(
     backgroundItems = null,
     ...styleProps
   } = props
-  const deckDef = React.useMemo(() => getDeckDefFromRobotType(robotType), [
-    robotType,
-  ])
+  const deckDef = useMemo(() => getDeckDefFromRobotType(robotType), [robotType])
 
   const initialSlotId =
     initialLabwareLocation === 'offDeck' ||
@@ -252,9 +252,9 @@ function usePositionChangeReset(
   initialPosition: { x: number; y: number },
   finalPosition: { x: number; y: number }
 ): boolean {
-  const [shouldReset, setShouldReset] = React.useState(false)
+  const [shouldReset, setShouldReset] = useState(false)
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (shouldReset) {
       setShouldReset(false)
       return
@@ -274,8 +274,8 @@ function usePositionChangeReset(
     previousFinalRef.current = finalPosition
   }, [initialPosition, finalPosition])
 
-  const previousInitialRef = React.useRef(initialPosition)
-  const previousFinalRef = React.useRef(finalPosition)
+  const previousInitialRef = useRef(initialPosition)
+  const previousFinalRef = useRef(finalPosition)
 
   return shouldReset
 }

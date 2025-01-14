@@ -4,6 +4,7 @@ import textwrap
 from typing import Annotated, Literal
 
 import fastapi
+from server_utils.fastapi_utils.light_router import LightRouter
 
 from robot_server.client_data.store import (
     ClientData,
@@ -18,13 +19,13 @@ from robot_server.service.notifications.publishers.client_data_publisher import 
     get_client_data_publisher,
 )
 
-router = fastapi.APIRouter()
+router = LightRouter()
 
 
 Key = Annotated[
     str,
     fastapi.Path(
-        regex="^[a-zA-Z0-9-_]*$",
+        pattern="^[a-zA-Z0-9-_]*$",
         description=(
             "A key for storing and retrieving the piece of data."
             " This should be chosen to avoid colliding with other clients,"

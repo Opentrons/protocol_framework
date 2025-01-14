@@ -26,13 +26,15 @@ import four from '../../assets/images/onboarding_animation_4.webm'
 import five from '../../assets/images/onboarding_animation_5.webm'
 import six from '../../assets/images/onboarding_animation_6.webm'
 import { LINK_BUTTON_STYLE } from '../../atoms'
+
+import type { ReactNode } from 'react'
 import type { RobotType } from '@opentrons/shared-data'
 
 interface WizardBodyProps {
   robotType: RobotType
   stepNumber: number
   header: string
-  children: React.ReactNode
+  children: ReactNode
   proceed: () => void
   disabled?: boolean
   goBack?: () => void

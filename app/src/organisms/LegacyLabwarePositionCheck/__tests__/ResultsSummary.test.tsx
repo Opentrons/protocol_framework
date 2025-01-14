@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest'
 import { fireEvent, screen } from '@testing-library/react'
 import { i18n } from '/app/i18n'
@@ -13,16 +12,18 @@ import {
   mockWorkingOffsets,
 } from '../__fixtures__'
 
+import type { ComponentProps } from 'react'
+
 vi.mock('/app/redux/config')
 
-const render = (props: React.ComponentProps<typeof ResultsSummary>) => {
+const render = (props: ComponentProps<typeof ResultsSummary>) => {
   return renderWithProviders(<ResultsSummary {...props} />, {
     i18nInstance: i18n,
   })[0]
 }
 
 describe('ResultsSummary', () => {
-  let props: React.ComponentProps<typeof ResultsSummary>
+  let props: ComponentProps<typeof ResultsSummary>
 
   beforeEach(() => {
     props = {

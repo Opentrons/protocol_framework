@@ -9,7 +9,6 @@ import {
   COLORS,
   OVERFLOW_AUTO,
   POSITION_RELATIVE,
-  useIdle,
   useScrolling,
 } from '@opentrons/components'
 import { ApiHostProvider } from '@opentrons/react-api-client'
@@ -52,7 +51,7 @@ import {
   updateConfigValue,
 } from '/app/redux/config'
 import { updateBrightness } from '/app/redux/shell'
-import { SLEEP_NEVER_MS } from '/app/local-resources/config'
+import { useScreenIdle, SLEEP_NEVER_MS } from '/app/local-resources/dom-utils'
 import { useProtocolReceiptToast, useSoftwareUpdatePoll } from './hooks'
 import { ODDTopLevelRedirects } from './ODDTopLevelRedirects'
 import { ReactQueryDevtools } from '/app/App/tools'
@@ -166,7 +165,7 @@ export const OnDeviceDisplayApp = (): JSX.Element => {
     initialState: false,
   }
   const dispatch = useDispatch<Dispatch>()
-  const isIdle = useIdle(sleepTime, options)
+  const isIdle = useScreenIdle(sleepTime, options)
 
   useEffect(() => {
     if (isIdle) {

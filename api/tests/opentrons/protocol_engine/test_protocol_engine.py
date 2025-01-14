@@ -9,6 +9,7 @@ import pytest
 from decoy import Decoy
 
 from opentrons_shared_data.robot.types import RobotType
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 from opentrons.protocol_engine.actions.actions import SetErrorRecoveryPolicyAction
 from opentrons.protocol_engine.state.update_types import StateUpdate
@@ -16,7 +17,6 @@ from opentrons.types import DeckSlotName
 from opentrons.hardware_control import HardwareControlAPI, OT2HardwareControlAPI
 from opentrons.hardware_control.modules import MagDeck, TempDeck
 from opentrons.hardware_control.types import PauseType as HardwarePauseType
-from opentrons.protocols.models import LabwareDefinition
 
 from opentrons.protocol_engine import ProtocolEngine, commands, slot_standardization
 from opentrons.protocol_engine.errors.exceptions import (

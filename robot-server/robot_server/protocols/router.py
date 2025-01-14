@@ -15,7 +15,6 @@ from opentrons_shared_data.robot import user_facing_robot_type
 from opentrons.util.performance_helpers import TrackingFunctions
 
 from fastapi import (
-    APIRouter,
     Depends,
     File,
     HTTPException,
@@ -26,6 +25,7 @@ from fastapi import (
 )
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
+from server_utils.fastapi_utils.light_router import LightRouter
 
 from opentrons.protocol_reader import (
     ProtocolReader,
@@ -151,7 +151,7 @@ class ProtocolLinks(BaseModel):
     )
 
 
-protocols_router = APIRouter()
+protocols_router = LightRouter()
 
 
 @PydanticResponse.wrap_route(
@@ -449,7 +449,7 @@ async def create_protocol(  # noqa: C901
         files=[ProtocolFile(name=f.path.name, role=f.role) for f in source.files],
     )
 
-    log.info(f'Created protocol "{protocol_id}" and started analysis "{analysis_id}".')
+    log.info(f'Created protocol "{protocol_id}".')
 
     return await PydanticResponse.create(
         content=SimpleBody.model_construct(data=data),
@@ -504,6 +504,9 @@ async def _start_new_analysis_if_necessary(
                 new_parameters=analyzer.get_verified_run_time_parameters(),
             )
         ):
+            log.info(
+                f'Starting new analysis "{analysis_id}" for protocol "{protocol_id}".'
+            )
             started_new_analysis = True
             analyses.append(
                 await analyses_manager.start_analysis(

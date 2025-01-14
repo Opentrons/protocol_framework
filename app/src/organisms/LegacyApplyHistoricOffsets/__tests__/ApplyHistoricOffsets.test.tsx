@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { fireEvent, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 
@@ -10,6 +9,7 @@ import { getIsLabwareOffsetCodeSnippetsOn } from '/app/redux/config'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import { LegacyApplyHistoricOffsets } from '..'
 
+import type { ComponentProps } from 'react'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type { OffsetCandidate } from '../hooks/useOffsetCandidatesForAnalysis'
 
@@ -64,11 +64,9 @@ const mockFourthCandidate: OffsetCandidate = {
 describe('ApplyHistoricOffsets', () => {
   const mockSetShouldApplyOffsets = vi.fn()
   const render = (
-    props?: Partial<React.ComponentProps<typeof LegacyApplyHistoricOffsets>>
+    props?: Partial<ComponentProps<typeof LegacyApplyHistoricOffsets>>
   ) =>
-    renderWithProviders<
-      React.ComponentProps<typeof LegacyApplyHistoricOffsets>
-    >(
+    renderWithProviders<ComponentProps<typeof LegacyApplyHistoricOffsets>>(
       <LegacyApplyHistoricOffsets
         offsetCandidates={[
           mockFirstCandidate,

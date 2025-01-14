@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { describe, it, beforeEach, expect, vi } from 'vitest'
 import { screen, act, renderHook } from '@testing-library/react'
 
@@ -16,6 +15,8 @@ import {
   GripperErrorBanner,
   StallErrorBanner,
 } from '../ErrorDetailsModal'
+
+import type { ComponentProps } from 'react'
 
 vi.mock('react-dom', () => ({
   ...vi.importActual('react-dom'),
@@ -47,14 +48,14 @@ describe('useErrorDetailsModal', () => {
   })
 })
 
-const render = (props: React.ComponentProps<typeof ErrorDetailsModal>) => {
+const render = (props: ComponentProps<typeof ErrorDetailsModal>) => {
   return renderWithProviders(<ErrorDetailsModal {...props} />, {
     i18nInstance: i18n,
   })[0]
 }
 
 describe('ErrorDetailsModal', () => {
-  let props: React.ComponentProps<typeof ErrorDetailsModal>
+  let props: ComponentProps<typeof ErrorDetailsModal>
 
   beforeEach(() => {
     props = {

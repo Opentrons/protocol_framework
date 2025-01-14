@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import styled, { css } from 'styled-components'
 import {
   DIRECTION_COLUMN,
@@ -11,6 +10,8 @@ import {
   RESPONSIVENESS,
   DISPLAY_INLINE_BLOCK,
 } from '@opentrons/components'
+
+import type { ReactNode } from 'react'
 
 const Title = styled.h1`
   ${TYPOGRAPHY.h1Default};
@@ -36,11 +37,11 @@ export interface TwoUpTileLayoutProps {
   /** main header text on left half */
   title: string
   /** paragraph text below title on left half */
-  body: React.ReactNode
+  body: ReactNode
   /** entire contents of the right half */
-  rightElement: React.ReactNode
+  rightElement: ReactNode
   /** footer underneath both halves of content */
-  footer: React.ReactNode
+  footer: ReactNode
 }
 
 export function TwoUpTileLayout(props: TwoUpTileLayoutProps): JSX.Element {
