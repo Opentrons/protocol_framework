@@ -98,9 +98,10 @@ describe('DeckSetupTools', () => {
     screen.getByText('Magnetic Block GEN1')
     screen.getByText('Temperature Module GEN2')
     screen.getByText('Staging area')
-    screen.getByText('Waste chute')
+    screen.getByText('Waste Chute')
     screen.getByText('Trash Bin')
-    screen.getByText('Waste chute and staging area slot')
+    screen.getByText('Waste Chute with Staging Area')
+    screen.getByText('Magnetic Block GEN1 with Staging Area')
   })
   it('should render the labware tab', () => {
     render(props)
@@ -175,7 +176,7 @@ describe('DeckSetupTools', () => {
       selectedSlot: { slot: 'D3', cutout: 'cutoutD3' },
     })
     render(props)
-    fireEvent.click(screen.getByText('Waste chute and staging area slot'))
+    fireEvent.click(screen.getByText('Waste Chute with Staging Area'))
     fireEvent.click(screen.getByText('Done'))
     expect(props.onCloseClick).toHaveBeenCalled()
   })
