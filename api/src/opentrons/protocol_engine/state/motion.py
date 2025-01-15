@@ -98,6 +98,7 @@ class MotionView:
         force_direct: bool = False,
         minimum_z_height: Optional[float] = None,
         operation_volume: Optional[float] = None,
+        is_tracking: Optional[bool] = False,
     ) -> List[motion_planning.Waypoint]:
         """Calculate waypoints to a destination that's specified as a well."""
         location = current_well or self._pipettes.get_current_location()
@@ -114,6 +115,7 @@ class MotionView:
             well_location=well_location,
             operation_volume=operation_volume,
             pipette_id=pipette_id,
+            is_tracking=is_tracking,
         )
 
         move_type = _move_types.get_move_type_to_well(
@@ -129,7 +131,7 @@ class MotionView:
         extra_waypoints = self._geometry.get_extra_waypoints(
             location=location, to_slot=destination_slot
         )
-
+        # baddie here
         try:
             return motion_planning.get_waypoints(
                 move_type=move_type,

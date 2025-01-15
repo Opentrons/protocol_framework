@@ -74,6 +74,7 @@ class MovementHandler:
         minimum_z_height: Optional[float] = None,
         speed: Optional[float] = None,
         operation_volume: Optional[float] = None,
+        is_tracking: Optional[bool] = False,
     ) -> Point:
         """Move to a specific well."""
         self._state_store.labware.raise_if_labware_inaccessible_by_pipette(
@@ -137,6 +138,7 @@ class MovementHandler:
             force_direct=force_direct,
             minimum_z_height=minimum_z_height,
             operation_volume=operation_volume,
+            is_tracking=is_tracking,
         )
 
         speed = self._state_store.pipettes.get_movement_speed(

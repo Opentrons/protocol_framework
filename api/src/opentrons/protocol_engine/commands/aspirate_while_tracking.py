@@ -10,7 +10,7 @@ from .pipetting_common import (
     AspirateVolumeMixin,
     FlowRateMixin,
     BaseLiquidHandlingResult,
-    aspirate_in_place,
+    aspirate_while_tracking,
     prepare_for_aspirate,
 )
 from .movement_common import (
@@ -46,7 +46,7 @@ if TYPE_CHECKING:
 AspirateCommandType = Literal["aspirate"]
 
 
-class AspirateParams(
+class AspirateWhileTrackingParams(
     PipetteIdMixin,
     AspirateVolumeMixin,
     FlowRateMixin,
@@ -69,7 +69,7 @@ _ExecuteReturn = Union[
 ]
 
 
-class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]):
+class AspirateImplementation(AbstractCommandImpl[AspirateWhileTrackingParams, _ExecuteReturn]):
     """Aspirate command implementation."""
 
     def __init__(
@@ -89,7 +89,7 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
         self._command_note_adder = command_note_adder
         self._model_utils = model_utils
 
-    async def execute(self, params: AspirateParams) -> _ExecuteReturn:
+    async def execute(self, params: AspirateWhileTrackingParams) -> _ExecuteReturn:
         """Move to and aspirate from the requested well.
 
         Raises:
@@ -161,7 +161,7 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
             well_location=well_location,
             current_well=current_well,
             operation_volume=-params.volume,
-            is_tracking=False,
+            is_tracking=True,
         )
         state_update.append(move_result.state_update)
         if isinstance(move_result, DefinedErrorData):
@@ -169,8 +169,10 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
                 public=move_result.public, state_update=state_update
             )
 
-        aspirate_result = await aspirate_in_place(
+        aspirate_result = await aspirate_while_tracking(
             pipette_id=pipette_id,
+            labware_id=labware_id,
+            well_name=well_name,
             volume=params.volume,
             flow_rate=params.flowRate,
             location_if_error={
@@ -223,22 +225,22 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
 
 class Aspirate(
     BaseCommand[
-        AspirateParams, AspirateResult, OverpressureError | StallOrCollisionError
+        AspirateWhileTrackingParams, AspirateResult, OverpressureError | StallOrCollisionError
     ]
 ):
     """Aspirate command model."""
 
     commandType: AspirateCommandType = "aspirate"
-    params: AspirateParams
+    params: AspirateWhileTrackingParams
     result: Optional[AspirateResult] = None
 
     _ImplementationCls: Type[AspirateImplementation] = AspirateImplementation
 
 
-class AspirateCreate(BaseCommandCreate[AspirateParams]):
+class AspirateCreate(BaseCommandCreate[AspirateWhileTrackingParams]):
     """Create aspirate command request model."""
 
     commandType: AspirateCommandType = "aspirate"
-    params: AspirateParams
+    params: AspirateWhileTrackingParams
 
     _CommandCls: Type[Aspirate] = Aspirate

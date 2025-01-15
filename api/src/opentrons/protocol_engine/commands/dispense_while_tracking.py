@@ -15,8 +15,7 @@ from .pipetting_common import (
     FlowRateMixin,
     BaseLiquidHandlingResult,
     OverpressureError,
-    dispense_in_place,
-    IsTrackingMixin,
+    dispense_while_tracking,
 )
 from .movement_common import (
     LiquidHandlingWellLocationMixin,
@@ -45,7 +44,7 @@ def _remove_default(s: dict[str, Any]) -> None:
     s.pop("default", None)
 
 
-class DispenseParams(
+class DispenseWhileTrackingParams(
     PipetteIdMixin,
     DispenseVolumeMixin,
     FlowRateMixin,
@@ -60,19 +59,19 @@ class DispenseParams(
     )
 
 
-class DispenseResult(BaseLiquidHandlingResult, DestinationPositionResult):
+class DispenseWhileTrackingResult(BaseLiquidHandlingResult, DestinationPositionResult):
     """Result data from the execution of a Dispense command."""
 
     pass
 
 
 _ExecuteReturn = Union[
-    SuccessData[DispenseResult],
+    SuccessData[DispenseWhileTrackingResult],
     DefinedErrorData[OverpressureError] | DefinedErrorData[StallOrCollisionError],
 ]
 
 
-class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]):
+class DispenseWhileTrackingImplementation(AbstractCommandImpl[DispenseWhileTrackingParams, _ExecuteReturn]):
     """Dispense command implementation."""
 
     def __init__(
@@ -88,7 +87,7 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
         self._pipetting = pipetting
         self._model_utils = model_utils
 
-    async def execute(self, params: DispenseParams) -> _ExecuteReturn:
+    async def execute(self, params: DispenseWhileTrackingParams) -> _ExecuteReturn:
         """Move to and dispense to the requested well."""
         well_location = params.wellLocation
         labware_id = params.labwareId
@@ -103,12 +102,14 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
             labware_id=labware_id,
             well_name=well_name,
             well_location=well_location,
-            is_tracking=False,
+            is_tracking=True,
         )
         if isinstance(move_result, DefinedErrorData):
             return move_result
-        dispense_result = await dispense_in_place(
+        dispense_result = await dispense_while_tracking(
             pipette_id=params.pipetteId,
+            labware_id=labware_id,
+            well_name=well_name,
             volume=params.volume,
             flow_rate=params.flowRate,
             push_out=params.pushOut,
@@ -153,7 +154,7 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
                     labware_id, well_name, params.pipetteId
                 )
             return SuccessData(
-                public=DispenseResult(
+                public=DispenseWhileTrackingResult(
                     volume=dispense_result.public.volume,
                     position=move_result.public.position,
                 ),
@@ -173,24 +174,24 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
             )
 
 
-class Dispense(
+class DispenseWhileTracking(
     BaseCommand[
-        DispenseParams, DispenseResult, OverpressureError | StallOrCollisionError
+        DispenseWhileTrackingParams, DispenseWhileTrackingResult, OverpressureError | StallOrCollisionError
     ]
 ):
     """Dispense command model."""
 
     commandType: DispenseCommandType = "dispense"
-    params: DispenseParams
-    result: Optional[DispenseResult] = None
+    params: DispenseWhileTrackingParams
+    result: Optional[DispenseWhileTrackingResult] = None
 
-    _ImplementationCls: Type[DispenseImplementation] = DispenseImplementation
+    _ImplementationCls: Type[DispenseWhileTrackingImplementation] = DispenseWhileTrackingImplementation
 
 
-class DispenseCreate(BaseCommandCreate[DispenseParams]):
+class DispenseWhileTrackingCreate(BaseCommandCreate[DispenseWhileTrackingParams]):
     """Create dispense command request model."""
 
     commandType: DispenseCommandType = "dispense"
-    params: DispenseParams
+    params: DispenseWhileTrackingParams
 
-    _CommandCls: Type[Dispense] = Dispense
+    _CommandCls: Type[DispenseWhileTracking] = DispenseWhileTracking

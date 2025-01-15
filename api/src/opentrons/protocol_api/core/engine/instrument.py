@@ -141,6 +141,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         flow_rate: float,
         in_place: bool,
         is_meniscus: Optional[bool] = None,
+        is_tracking: Optional[bool] = False,
     ) -> None:
         """Aspirate a given volume of liquid from the specified location.
         Args:
@@ -150,6 +151,8 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             rate: Not used in this core.
             flow_rate: The flow rate in µL/s to aspirate at.
             in_place: whether this is a in-place command.
+            is_meniscus: whether the aspirate location specified is relative to a liquid meniscus.
+            is_tracking: whether the z motor is to move with the liquid meniscus.
         """
         if well_core is None:
             if not in_place:
@@ -198,6 +201,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                     wellLocation=well_location,
                     volume=volume,
                     flowRate=flow_rate,
+                    is_tracking=is_tracking if is_tracking else False,
                 )
             )
 
@@ -213,6 +217,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         in_place: bool,
         push_out: Optional[float],
         is_meniscus: Optional[bool] = None,
+        is_tracking: Optional[bool] = False,
     ) -> None:
         """Dispense a given volume of liquid into the specified location.
         Args:
@@ -223,6 +228,8 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             flow_rate: The flow rate in µL/s to dispense at.
             in_place: whether this is a in-place command.
             push_out: The amount to push the plunger below bottom position.
+            is_meniscus: whether the aspirate location specified is relative to a liquid meniscus.
+            is_tracking: whether the z motor is to move with the liquid meniscus.
         """
         if self._protocol_core.api_version < _DISPENSE_VOLUME_VALIDATION_ADDED_IN:
             # In older API versions, when you try to dispense more than you can,
@@ -290,6 +297,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                     volume=volume,
                     flowRate=flow_rate,
                     pushOut=push_out,
+                    is_tracking=is_tracking if is_tracking else False,
                 )
             )
 

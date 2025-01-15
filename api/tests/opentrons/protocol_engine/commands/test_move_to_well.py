@@ -72,6 +72,7 @@ async def test_move_to_well_implementation(
             speed=7.89,
             current_well=None,
             operation_volume=None,
+            is_tracking=False,
         )
     ).then_return(Point(x=9, y=8, z=7))
 
@@ -136,6 +137,7 @@ async def test_move_to_well_stall_defined_error(
             speed=7.89,
             current_well=None,
             operation_volume=None,
+            is_tracking=False,
         )
     ).then_raise(StallOrCollisionDetectedError())
     decoy.when(mock_model_utils.generate_id()).then_return(error_id)

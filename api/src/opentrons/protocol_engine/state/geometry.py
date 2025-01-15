@@ -1,6 +1,8 @@
 """Geometry state getters."""
 
 import enum
+
+# import logging
 from numpy import array, dot, double as npdouble
 from numpy.typing import NDArray
 from typing import Optional, List, Tuple, Union, cast, TypeVar, Dict
@@ -473,6 +475,7 @@ class GeometryView:
         well_location: Optional[WellLocations] = None,
         operation_volume: Optional[float] = None,
         pipette_id: Optional[str] = None,
+        is_tracking: Optional[bool] = False,
     ) -> Point:
         """Given relative well location in a labware, get absolute position."""
         labware_pos = self.get_labware_position(labware_id)
@@ -488,6 +491,7 @@ class GeometryView:
                 well_location=well_location,
                 well_depth=well_depth,
                 operation_volume=operation_volume,
+                is_tracking=is_tracking,
             )
             offset = offset.model_copy(update={"z": offset.z + offset_adjustment})
             self.validate_well_position(
@@ -1404,6 +1408,24 @@ class GeometryView:
 
         return None
 
+    def get_liquid_handling_z_change(
+        self,
+        labware_id: str,
+        well_name: str,
+        operation_volume: float,
+    ) -> float:
+        """Get the change in height from a liquid handling operation."""
+        initial_handling_height = self.get_meniscus_height(
+            labware_id=labware_id, well_name=well_name
+        )
+        final_height = self.get_well_height_after_volume(
+            labware_id=labware_id,
+            well_name=well_name,
+            initial_height=initial_handling_height,
+            volume=operation_volume,
+        )
+        return final_height - initial_handling_height
+
     def get_well_offset_adjustment(
         self,
         labware_id: str,
@@ -1411,6 +1433,7 @@ class GeometryView:
         well_location: WellLocations,
         well_depth: float,
         operation_volume: Optional[float] = None,
+        is_tracking: Optional[bool] = False,
     ) -> float:
         """Return a z-axis distance that accounts for well handling height and operation volume.
 
@@ -1423,6 +1446,12 @@ class GeometryView:
             well_location=well_location,
             well_depth=well_depth,
         )
+        # _log = logging.getLogger(__name__)
+        # raise ValueError(
+        #     f"initial handling height {initial_handling_height} \n is_tracking {is_tracking}"
+        # )
+        if is_tracking:
+            return initial_handling_height
         if isinstance(well_location, PickUpTipWellLocation):
             volume = 0.0
         elif isinstance(well_location.volumeOffset, float):
@@ -1449,6 +1478,9 @@ class GeometryView:
         well_liquid = self._wells.get_well_liquid_info(
             labware_id=labware_id, well_name=well_name
         )
+        # raise ValueError(f"well = {well_liquid}")
+        # raise ValueError(f"prbed_height not none{well_liquid.probed_height is not None}\n \
+        # height.height is not None {well_liquid.probed_height.height is not None}")
         if (
             well_liquid.probed_height is not None
             and well_liquid.probed_height.height is not None
@@ -1491,6 +1523,7 @@ class GeometryView:
         elif well_location.origin == WellOrigin.CENTER:
             handling_height = well_depth / 2.0
         elif well_location.origin == WellOrigin.MENISCUS:
+            # baddie here
             handling_height = self.get_meniscus_height(
                 labware_id=labware_id, well_name=well_name
             )

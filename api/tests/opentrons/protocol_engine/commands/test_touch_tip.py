@@ -88,6 +88,7 @@ async def test_touch_tip_implementation(
             minimum_z_height=None,
             speed=None,
             operation_volume=None,
+            is_tracking=False,
         )
     ).then_return(Point(x=1, y=2, z=3))
 
@@ -178,6 +179,7 @@ async def test_touch_tip_implementation_with_mm_to_edge(
             minimum_z_height=None,
             speed=None,
             operation_volume=None,
+            is_tracking=False,
         )
     ).then_return(Point(x=1, y=2, z=3))
 
