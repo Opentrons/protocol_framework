@@ -30,35 +30,11 @@ const updatePatchOnAbsorbanceReaderFormType = (
   return patch
 }
 
-const updatePatchOnAbsorbanceReaderModuleId = (
-  patch: FormPatch,
-  rawForm: FormData
-): FormPatch => {
-  if (
-    rawForm.absorbanceReaderFormType !== null &&
-    fieldHasChanged(rawForm, patch, 'moduleId')
-  ) {
-    return {
-      ...patch,
-      ...getDefaultFields(
-        'absorbanceReaderFormType',
-        'wavelengths',
-        'referenceWavelength',
-        'lidOpen',
-        'mode',
-        'filePath'
-      ),
-    }
-  }
-  return patch
-}
-
-export function dependentFieldsUpdateAbsorbanceReader(
+export const dependentFieldsUpdateAbsorbanceReader = (
   originalPatch: FormPatch,
   rawForm: FormData
-): FormPatch {
+): FormPatch => {
   return chainPatchUpdaters(originalPatch, [
     chainPatch => updatePatchOnAbsorbanceReaderFormType(chainPatch, rawForm),
-    chainPatch => updatePatchOnAbsorbanceReaderModuleId(chainPatch, rawForm),
   ])
 }

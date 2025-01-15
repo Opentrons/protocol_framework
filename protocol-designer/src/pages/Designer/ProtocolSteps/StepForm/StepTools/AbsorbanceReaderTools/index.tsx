@@ -31,7 +31,7 @@ export function AbsorbanceReaderTools(props: StepFormProps): JSX.Element {
   const { formData, propsForFields, toolboxStep } = props
   const { moduleId } = formData
   const dispatch = useDispatch()
-  const { t } = useTranslation()
+  const { t } = useTranslation('form')
   const robotState = useSelector(getRobotStateAtActiveItem)
   const absorbanceReaderOptions = useSelector(getAbsorbanceReaderLabwareOptions)
   const { labware = {}, modules = {} } = robotState ?? {}

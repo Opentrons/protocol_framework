@@ -14,7 +14,7 @@ interface ReadSettingsProps {
 
 export function ReadSettings(props: ReadSettingsProps): JSX.Element {
   const { propsForFields } = props
-  const { t } = useTranslation()
+  const { t } = useTranslation('form')
   return (
     <Flex
       flexDirection={DIRECTION_COLUMN}
