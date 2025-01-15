@@ -65,6 +65,15 @@ export interface MoveLabwareRunTimeCommand
     MoveLabwareCreateCommand {
   result?: MoveLabwareResult
 }
+export interface MoveLidCreateCommand extends CommonCommandCreateInfo {
+  commandType: 'moveLid'
+  params: MoveLidParams
+}
+export interface MoveLidRunTimeCommand
+  extends CommonCommandRunTimeInfo,
+    MoveLidCreateCommand {
+  result?: MoveLidResult
+}
 export interface LoadModuleCreateCommand extends CommonCommandCreateInfo {
   commandType: 'loadModule'
   params: LoadModuleParams
@@ -109,6 +118,7 @@ export type SetupRunTimeCommand =
   | MoveLabwareRunTimeCommand
   | LoadLidRunTimeCommand
   | LoadLidStackRunTimeCommand
+  | MoveLidCreateCommand
 
 export type SetupCreateCommand =
   | ConfigureNozzleLayoutCreateCommand
@@ -120,6 +130,7 @@ export type SetupCreateCommand =
   | MoveLabwareCreateCommand
   | LoadLidCreateCommand
   | LoadLidRunTimeCommand
+  | MoveLidRunTimeCommand
 
 export type LabwareLocation =
   | 'offDeck'
@@ -185,7 +196,14 @@ export interface MoveLabwareParams {
 interface MoveLabwareResult {
   offsetId: string
 }
-
+interface MoveLidParams {
+  labwareId: string
+  newLocation: LabwareLocation
+  strategy: LabwareMovementStrategy
+}
+interface MoveLidResult {
+  offsetId: string
+}
 interface LoadModuleParams {
   moduleId?: string
   location: ModuleLocation

@@ -17,7 +17,7 @@ export function getAddressableAreasInProtocol(
     (acc, command) => {
       const { commandType, params } = command
       if (
-        commandType === 'moveLabware' &&
+        (commandType === 'moveLabware' || commandType === 'moveLid') &&
         params.newLocation !== 'offDeck' &&
         params.newLocation !== 'systemLocation' &&
         'slotName' in params.newLocation &&
@@ -34,7 +34,7 @@ export function getAddressableAreasInProtocol(
           return [...acc, addressableAreaName]
         }
       } else if (
-        commandType === 'moveLabware' &&
+        (commandType === 'moveLabware' || commandType === 'moveLid') &&
         params.newLocation !== 'offDeck' &&
         params.newLocation !== 'systemLocation' &&
         'addressableAreaName' in params.newLocation &&
@@ -42,7 +42,9 @@ export function getAddressableAreasInProtocol(
       ) {
         return [...acc, params.newLocation.addressableAreaName]
       } else if (
-        commandType === 'loadLabware' &&
+        (commandType === 'loadLabware' ||
+          commandType === 'loadLid' ||
+          commandType === 'loadLidStack') &&
         params.location !== 'offDeck' &&
         params.location !== 'systemLocation' &&
         'slotName' in params.location &&
@@ -75,7 +77,9 @@ export function getAddressableAreasInProtocol(
 
         return [...acc, ...addressableAreaNames]
       } else if (
-        commandType === 'loadLabware' &&
+        (commandType === 'loadLabware' ||
+          commandType === 'loadLid' ||
+          commandType === 'loadLidStack') &&
         params.location !== 'offDeck' &&
         params.location !== 'systemLocation' &&
         'addressableAreaName' in params.location &&
