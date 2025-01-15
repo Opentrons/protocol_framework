@@ -64,10 +64,7 @@ export function PipetteOverview({
   rightPipette,
   gripper,
 }: PipetteOverviewProps): JSX.Element {
-  const { i18n, t } = useTranslation([
-    'create_new_protocol',
-    'protocol_overview',
-  ])
+  const { t } = useTranslation(['create_new_protocol', 'protocol_overview'])
   const dispatch = useDispatch<ThunkDispatch<any>>()
 
   const swapPipetteUpdate = mapValues(pipettes, pipette => {
@@ -223,7 +220,8 @@ export function PipetteOverview({
                       desktopStyle="bodyDefaultRegular"
                       color={COLORS.grey60}
                     >
-                      {i18n.format(t('gripper'), 'capitalize')}
+                      {/* {i18n.format(t('gripper'), 'capitalize')} */}
+                      {t('protocol_overview:flex_gripper')}
                     </StyledText>
                   </Flex>
                   <Btn
