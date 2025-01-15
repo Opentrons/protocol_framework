@@ -1,6 +1,5 @@
 export * from './getLabwareSetupItemGroups'
 export * from './getProtocolUsesGripper'
-export * from '@opentrons/components/src/organisms/CommandText/useCommandTextString/utils/formatDuration'
 export * from './formatInterval'
 export * from './getModuleInitialLoadInfo'
 export * from './getNestedLabwareInfo'

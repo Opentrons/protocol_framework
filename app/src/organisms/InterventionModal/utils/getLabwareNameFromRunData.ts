@@ -1,6 +1,8 @@
 import { getLabwareDefURI, getLabwareDisplayName } from '@opentrons/shared-data'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
-import { getLoadedLabware } from '@opentrons/components'
+import {
+  getLoadedLabware,
+  getLabwareDefinitionsFromCommands,
+} from '@opentrons/components'
 
 import type { RunTimeCommand } from '@opentrons/shared-data'
 import type { RunData } from '@opentrons/api-client'

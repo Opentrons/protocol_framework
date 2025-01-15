@@ -16,10 +16,10 @@ import {
   OVERFLOW_AUTO,
   SPACING,
   TYPOGRAPHY,
+  getLabwareDefinitionsFromCommands,
 } from '@opentrons/components'
 
 import { CommandIcon } from '/app/molecules/Command'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import type {
   CompletedProtocolAnalysis,
   ProtocolAnalysisOutput,

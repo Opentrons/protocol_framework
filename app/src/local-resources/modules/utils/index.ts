@@ -1,5 +1,2 @@
-export * from '@opentrons/components/src/organisms/CommandText/useCommandTextString/utils/getLoadedModule'
-export * from '@opentrons/components/src/organisms/CommandText/useCommandTextString/utils/getModuleDisplayLocation'
 export * from './getModuleImage'
-export * from '@opentrons/components/src/organisms/CommandText/useCommandTextString/utils/getModuleModel'
 export * from './getModulePrepCommands'

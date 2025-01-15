@@ -19,6 +19,7 @@ import {
   POSITION_FIXED,
   PrimaryButton,
   SPACING,
+  getLabwareDefinitionsFromCommands,
   TYPOGRAPHY,
 } from '@opentrons/components'
 
@@ -32,7 +33,6 @@ import {
 import { CommandIcon } from '/app/molecules/Command'
 import { Divider } from '/app/atoms/structure'
 import { NAV_BAR_WIDTH } from '/app/App/constants'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 
 import type { ForwardedRef } from 'react'
 import type { ViewportListRef } from 'react-viewport-list'
