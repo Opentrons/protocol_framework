@@ -1,8 +1,9 @@
 import reduce from 'lodash/reduce'
 import omitBy from 'lodash/omitBy'
 import mapValues from 'lodash/mapValues'
-import { getLabwareDefURI } from '@opentrons/shared-data'
-import { DEFAULT_LIQUID_COLORS } from '@opentrons/shared-data'
+import { getLabwareDefURI, DEFAULT_LIQUID_COLORS } from '@opentrons/shared-data'
+import { COLORS } from '../../helix-design-system'
+import { WellFill } from '../../hardware-sim'
 import type {
   CompletedProtocolAnalysis,
   LabwareDefinition2,
@@ -16,8 +17,6 @@ import type {
   SingleLabwareLiquidState,
 } from '@opentrons/step-generation'
 import type { CommandTextData } from './types'
-import { COLORS } from '../../helix-design-system'
-import { WellFill } from '../../hardware-sim'
 
 //  copied from protocol-designer
 export interface WellContents {

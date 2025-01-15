@@ -1,6 +1,5 @@
 import { getLoadedModule } from './getLoadedModule'
-
-import type { LoadedModules } from '../types'
+import type { LoadedModules } from './types'
 
 export function getModuleDisplayLocation(
   loadedModules: LoadedModules,

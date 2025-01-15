@@ -2,18 +2,16 @@ import { screen } from '@testing-library/react'
 import { vi, describe, it, beforeEach } from 'vitest'
 import { useTranslation } from 'react-i18next'
 
-import { renderWithProviders } from '/app/__testing-utils__'
-import { i18n } from '/app/i18n'
-import {
-  getLabwareDefinitionsFromCommands,
-  getLabwareName,
-  getLoadedLabware,
-  getLabwareDisplayLocation,
-} from '/app/local-resources/labware'
+import { renderWithProviders } from '../../../../../../testing/utils'
+import { i18n } from '../../../../../../i18n'
 import { getPipettingCommandText } from '../getPipettingCommandText'
 import { getLabwareDefURI } from '@opentrons/shared-data'
 import { getFinalLabwareLocation } from '../../getFinalLabwareLocation'
 import { getWellRange } from '../../getWellRange'
+import { getLabwareDefinitionsFromCommands } from '../../getLabwareDefinitionsFromCommands'
+import { getLabwareName } from '../../getLabwareName'
+import { getLoadedLabware } from '../../getLoadedLabware'
+import { getLabwareDisplayLocation } from '../../getLabwareDisplayLocation'
 import { getFinalMoveToAddressableAreaCmd } from '../../getFinalAddressableAreaCmd'
 import { getAddressableAreaDisplayName } from '../../getAddressableAreaDisplayName'
 

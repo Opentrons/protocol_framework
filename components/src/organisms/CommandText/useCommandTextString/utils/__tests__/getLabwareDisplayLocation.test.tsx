@@ -10,14 +10,11 @@ import {
   getLabwareDefURI,
   getLabwareDisplayName,
 } from '@opentrons/shared-data'
-
-import { renderWithProviders } from '/app/__testing-utils__'
-import { i18n } from '/app/i18n'
-import { getLabwareDisplayLocation } from '/app/local-resources/labware'
-import {
-  getModuleModel,
-  getModuleDisplayLocation,
-} from '/app/local-resources/modules'
+import { renderWithProviders } from '../../../../../testing/utils'
+import { i18n } from '../../../../../i18n'
+import { getLabwareDisplayLocation } from '../getLabwareDisplayLocation'
+import { getModuleDisplayLocation } from '../getModuleDisplayLocation'
+import { getModuleModel } from '../getModuleModel'
 
 import type { ComponentProps } from 'react'
 import type { LabwareLocation } from '@opentrons/shared-data'
@@ -33,11 +30,6 @@ vi.mock('@opentrons/shared-data', async () => {
     getLabwareDisplayName: vi.fn(),
   }
 })
-
-vi.mock('/app/local-resources/modules', () => ({
-  getModuleModel: vi.fn(),
-  getModuleDisplayLocation: vi.fn(),
-}))
 
 const TestWrapper = ({
   location,

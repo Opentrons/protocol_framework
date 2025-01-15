@@ -1,14 +1,4 @@
 import { useState } from 'react'
-
-import type {
-  CompletedProtocolAnalysis,
-  ProtocolAnalysisOutput,
-} from '@opentrons/shared-data'
-import type {
-  LocationLiquidState,
-  PipetteEntity,
-  TimelineFrame,
-} from '@opentrons/step-generation'
 import { Box, Flex } from '../../primitives'
 import {
   ALIGN_CENTER,
@@ -18,6 +8,15 @@ import {
 import { LegacyStyledText } from '../../atoms'
 import { SPACING, TYPOGRAPHY } from '../../ui-style-constants'
 import { COLORS } from '../../helix-design-system'
+import type {
+  CompletedProtocolAnalysis,
+  ProtocolAnalysisOutput,
+} from '@opentrons/shared-data'
+import type {
+  LocationLiquidState,
+  PipetteEntity,
+  TimelineFrame,
+} from '@opentrons/step-generation'
 
 interface PipetteMountVizProps {
   pipetteId: string | null

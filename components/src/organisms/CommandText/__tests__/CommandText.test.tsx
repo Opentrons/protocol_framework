@@ -6,11 +6,9 @@ import {
   OT2_ROBOT_TYPE,
   GRIPPER_WASTE_CHUTE_ADDRESSABLE_AREA,
 } from '@opentrons/shared-data'
-import { renderWithProviders } from '/app/__testing-utils__'
-import { i18n } from '/app/i18n'
-import { CommandText } from '../CommandText'
-import { mockCommandTextData } from '../__fixtures__'
-import { getCommandTextData } from '/app/local-resources/commands/utils'
+import { i18n } from '../../../i18n'
+import { renderWithProviders } from '../../../testing/utils'
+import { CommandText } from '../index'
 
 import type {
   AspirateInPlaceRunTimeCommand,
@@ -31,6 +29,17 @@ import type {
   RunTimeCommand,
   MoveToAddressableAreaForDropTipRunTimeCommand,
 } from '@opentrons/shared-data'
+import type { CommandTextData } from '../../ProtocolTimelineScrubber'
+import { getCommandTextData } from '../../ProtocolTimelineScrubber/utils'
+import { mockRobotSideAnalysis } from '../fixtures'
+
+const mockCommandTextData: CommandTextData = {
+  commands: mockRobotSideAnalysis.commands,
+  pipettes: mockRobotSideAnalysis.pipettes,
+  labware: mockRobotSideAnalysis.labware,
+  modules: mockRobotSideAnalysis.modules,
+  liquids: mockRobotSideAnalysis.liquids,
+}
 
 describe('CommandText', () => {
   it('renders correct text for aspirate', () => {

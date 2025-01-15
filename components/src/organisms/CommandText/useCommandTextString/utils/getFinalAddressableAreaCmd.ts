@@ -1,5 +1,4 @@
-import { findLastAt } from '/app/local-resources/commands/hooks/useCommandTextString/utils/helpers'
-
+import { findLastAt } from './helpers'
 import type { RunTimeCommand } from '@opentrons/shared-data'
 /**
  * given a list of commands and a labwareId, calculate the resulting location

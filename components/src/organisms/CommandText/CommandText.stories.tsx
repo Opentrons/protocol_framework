@@ -1,9 +1,8 @@
-import { Box } from '@opentrons/components'
-import { CommandText as CommandTextComponent } from '.'
+import * as Fixtures from '../../../../app/src/molecules/Command/__fixtures__'
+import { getLabwareDefinitionsFromCommands } from '../ProtocolTimelineScrubber/utils'
+import { Box } from '../../primitives'
+import { CommandText as CommandTextComponent } from './index'
 import type { RobotType } from '@opentrons/shared-data'
-import * as Fixtures from './__fixtures__'
-import { getLabwareDefinitionsFromCommands } from '../../local-resources/labware'
-
 import type { Meta, StoryObj } from '@storybook/react'
 
 interface StorybookArgs {
@@ -64,16 +63,16 @@ type Story = StoryObj<typeof CommandTextComponent>
 
 export const DesktopCommandText: Story = {
   args: {
-    onDevice: false,
-    commandIndex: 0,
+    isOnDevice: false,
+    allRunDefs: [],
     robotType: 'OT-3 Standard',
   },
 }
 
 export const ODDCommandText: Story = {
   args: {
-    onDevice: true,
-    commandIndex: 0,
+    isOnDevice: true,
+    allRunDefs: [],
     robotType: 'OT-2 Standard',
   },
 }

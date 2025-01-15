@@ -1,5 +1,5 @@
 import type { LoadedLabware } from '@opentrons/shared-data'
-import type { LoadedLabwares } from '/app/local-resources/labware'
+import type { LoadedLabwares } from './types'
 
 export function getLoadedLabware(
   loadedLabware: LoadedLabwares,

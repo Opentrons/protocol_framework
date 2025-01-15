@@ -9,6 +9,21 @@ import {
   THERMOCYCLER_MODULE_TYPE,
   getSimplestDeckConfigForProtocol,
 } from '@opentrons/shared-data'
+import {
+  ALIGN_CENTER,
+  ALIGN_STRETCH,
+  BaseDeck,
+  COLORS,
+  DIRECTION_COLUMN,
+  Flex,
+  JUSTIFY_SPACE_BETWEEN,
+  LabwareOnDeck,
+  LegacyStyledText,
+  Module,
+  OVERFLOW_SCROLL,
+  PrimaryButton,
+  SPACING,
+} from '../..'
 import { PipetteMountViz } from './PipetteVisuals'
 import {
   getLabwareDefinitionsFromCommands,
@@ -27,21 +42,8 @@ import type {
   RunTimeCommand,
 } from '@opentrons/shared-data'
 import type { ModuleTemporalProperties } from '@opentrons/step-generation'
-import {
-  ALIGN_CENTER,
-  ALIGN_STRETCH,
-  BaseDeck,
-  COLORS,
-  DIRECTION_COLUMN,
-  Flex,
-  JUSTIFY_SPACE_BETWEEN,
-  LabwareOnDeck,
-  LegacyStyledText,
-  Module,
-  OVERFLOW_SCROLL,
-  PrimaryButton,
-  SPACING,
-} from '../..'
+
+export * from './types'
 
 const SEC_PER_FRAME = 1000
 export const COMMAND_WIDTH_PX = 240

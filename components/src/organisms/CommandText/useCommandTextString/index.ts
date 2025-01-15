@@ -1,26 +1,29 @@
+import { useTranslation } from 'react-i18next'
 import * as utils from './utils'
 
+import type { TFunction } from 'i18next'
 import type {
   RunTimeCommand,
   RobotType,
   LabwareDefinition2,
 } from '@opentrons/shared-data'
+import type { CommandTextData } from '../../ProtocolTimelineScrubber/types'
 import type {
   TCProfileStepText,
   TCProfileCycleText,
   GetDirectTranslationCommandText,
 } from './utils'
-import { CommandTextData } from '../../ProtocolTimelineScrubber/types'
+
+export * from './utils'
 
 export interface UseCommandTextStringParams {
   command: RunTimeCommand | null
   allRunDefs: LabwareDefinition2[]
   commandTextData: CommandTextData | null
   robotType: RobotType
-  t?: any
 }
 
-export type GetCommandText = UseCommandTextStringParams
+export type GetCommandText = UseCommandTextStringParams & { t: TFunction }
 export interface GetGenericCommandTextResult {
   kind: 'generic'
   /* The actual command text. Ex "Homing all gantry, pipette, and plunger axes" */
@@ -49,7 +52,8 @@ export type GetCommandTextResult =
 export function useCommandTextString(
   params: UseCommandTextStringParams
 ): GetCommandTextResult {
-  const { command, t } = params
+  const { command } = params
+  const { t } = useTranslation('protocol_command_text')
 
   const fullParams = { ...params, t }
 

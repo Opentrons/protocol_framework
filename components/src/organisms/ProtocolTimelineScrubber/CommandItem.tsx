@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { COMMAND_WIDTH_PX } from './index'
 import { Flex } from '../../primitives'
 import { COLORS } from '../../helix-design-system'
 import { SPACING } from '../../ui-style-constants'
 import { ALIGN_FLEX_END, DIRECTION_COLUMN, OVERFLOW_SCROLL } from '../../styles'
 import { LegacyStyledText } from '../../atoms'
+import { COMMAND_WIDTH_PX } from './index'
+import { CommandText } from '../CommandText'
+import { getCommandTextData } from './utils'
 import type {
   CompletedProtocolAnalysis,
   LabwareDefinition2,
@@ -12,7 +14,6 @@ import type {
   RobotType,
   RunTimeCommand,
 } from '@opentrons/shared-data'
-import { getCommandTextData } from './utils'
 
 interface CommandItemProps {
   command: RunTimeCommand

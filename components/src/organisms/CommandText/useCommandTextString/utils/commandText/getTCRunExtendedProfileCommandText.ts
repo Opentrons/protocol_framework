@@ -1,4 +1,4 @@
-import { formatDurationLabeled } from '/app/transformations/commands'
+import { formatDurationLabeled } from '../formatDuration'
 import type {
   TCRunExtendedProfileRunTimeCommand,
   TCProfileCycle,

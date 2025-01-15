@@ -3,7 +3,7 @@ import { getLabwareDefURI, getLabwareDisplayName } from '@opentrons/shared-data'
 import { getLoadedLabware } from './getLoadedLabware'
 
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
-import type { LoadedLabwares } from '/app/local-resources/labware'
+import type { LoadedLabwares } from './types'
 
 const FIXED_TRASH_DEF_URIS = [
   'opentrons/opentrons_1_trash_850ml_fixed/1',

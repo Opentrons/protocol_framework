@@ -11,7 +11,6 @@ import { fetchProtocols, getStoredProtocol } from '/app/redux/protocol-storage'
 
 import type { Dispatch, State } from '/app/redux/types'
 import type { DesktopRouteParams } from '/app/App/types'
-import { CommandText } from '/app/molecules/Command'
 
 export function ProtocolTimeline(): JSX.Element {
   const { protocolKey } = useParams<

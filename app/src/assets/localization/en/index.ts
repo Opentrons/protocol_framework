@@ -3,7 +3,6 @@ import anonymous from './anonymous.json'
 import app_settings from './app_settings.json'
 import branded from './branded.json'
 import change_pipette from './change_pipette.json'
-import protocol_command_text from './protocol_command_text.json'
 import device_details from './device_details.json'
 import device_settings from './device_settings.json'
 import devices_landing from './devices_landing.json'
@@ -35,7 +34,6 @@ export const en = {
   app_settings,
   branded,
   change_pipette,
-  protocol_command_text,
   device_details,
   device_settings,
   devices_landing,

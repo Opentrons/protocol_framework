@@ -10,11 +10,12 @@ import {
 import { getLabwareLocation } from './getLabwareLocation'
 
 import type { TFunction } from 'i18next'
-import type {
-  LocationSlotOnlyParams,
-  LocationFullParams,
-} from './getLabwareLocation'
+
 import type { AddressableAreaName } from '@opentrons/shared-data'
+import type {
+  LocationFullParams,
+  LocationSlotOnlyParams,
+} from './getLabwareLocation'
 
 export interface DisplayLocationSlotOnlyParams extends LocationSlotOnlyParams {
   t: TFunction

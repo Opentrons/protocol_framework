@@ -1,22 +1,24 @@
 import pick from 'lodash/pick'
 import { css } from 'styled-components'
-
+import { LegacyStyledText, StyledText } from '../../atoms'
+import { ALIGN_CENTER, DIRECTION_COLUMN } from '../../styles'
+import { RESPONSIVENESS, SPACING } from '../../ui-style-constants'
+import { Flex } from '../../primitives'
+import { useCommandTextString } from './useCommandTextString'
 import type { ComponentProps } from 'react'
 import type {
   LabwareDefinition2,
   RobotType,
   RunTimeCommand,
 } from '@opentrons/shared-data'
-import { Flex } from '../../primitives'
 import type { StyleProps } from '../../primitives'
-
-import { LegacyStyledText, StyledText } from '../../atoms'
-import { ALIGN_CENTER, DIRECTION_COLUMN } from '../../styles'
-import { RESPONSIVENESS, SPACING } from '../../ui-style-constants'
-import { useCommandTextString } from './useCommandTextString'
-import type { GetTCRunExtendedProfileCommandTextResult } from './useCommandTextString'
+import type {
+  GetTCRunExtendedProfileCommandTextResult,
+  GetTCRunProfileCommandTextResult,
+} from './useCommandTextString'
 import type { CommandTextData } from '../ProtocolTimelineScrubber/types'
 
+export * from './useCommandTextString'
 interface LegacySTProps {
   as?: ComponentProps<typeof LegacyStyledText>['as']
   modernStyledTextDefaults?: false

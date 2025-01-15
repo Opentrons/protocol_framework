@@ -7,11 +7,8 @@ import {
 
 import { getPipetteNameOnMount } from '../getPipetteNameOnMount'
 import { getLiquidDisplayName } from '../getLiquidDisplayName'
-
-import {
-  getLabwareName,
-  getLabwareDisplayLocation,
-} from '/app/local-resources/labware'
+import { getLabwareName } from '../getLabwareName'
+import { getLabwareDisplayLocation } from '../getLabwareDisplayLocation'
 
 import type { GetCommandText } from '../..'
 

@@ -2,18 +2,14 @@ import { getLabwareDefURI } from '@opentrons/shared-data'
 
 import { getFinalLabwareLocation } from '../getFinalLabwareLocation'
 import { getWellRange } from '../getWellRange'
-
-import {
-  getLabwareDefinitionsFromCommands,
-  getLabwareName,
-  getLoadedLabware,
-  getLabwareDisplayLocation,
-} from '/app/local-resources/labware'
-
+import { getLabwareDisplayLocation } from '../getLabwareDisplayLocation'
+import { getLabwareName } from '../getLabwareName'
+import { getLoadedLabware } from '../getLoadedLabware'
+import { getLabwareDefinitionsFromCommands } from '../getLabwareDefinitionsFromCommands'
+import { getFinalMoveToAddressableAreaCmd } from '../getFinalAddressableAreaCmd'
+import { getAddressableAreaDisplayName } from '../getAddressableAreaDisplayName'
 import type { PipetteName, RunTimeCommand } from '@opentrons/shared-data'
 import type { GetCommandText } from '../..'
-import { getFinalMoveToAddressableAreaCmd } from '/app/local-resources/commands/hooks/useCommandTextString/utils/getFinalAddressableAreaCmd'
-import { getAddressableAreaDisplayName } from '/app/local-resources/commands/hooks/useCommandTextString/utils/getAddressableAreaDisplayName'
 
 export const getPipettingCommandText = ({
   command,

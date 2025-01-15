@@ -1,18 +1,14 @@
 import { getLabwareDefURI, getLabwareDisplayName } from '@opentrons/shared-data'
 
-import {
-  getModuleDisplayLocation,
-  getModuleModel,
-} from '/app/local-resources/modules'
-
 import type {
   LabwareDefinition2,
   LabwareLocation,
   ModuleModel,
   RobotType,
 } from '@opentrons/shared-data'
-import type { LoadedLabwares } from '/app/local-resources/labware'
-import type { LoadedModules } from '/app/local-resources/modules'
+import type { LoadedLabwares, LoadedModules } from './types'
+import { getModuleDisplayLocation } from './getModuleDisplayLocation'
+import { getModuleModel } from './getModuleModel'
 
 export interface LocationResult {
   slotName: string
