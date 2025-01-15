@@ -71,7 +71,9 @@ _ExecuteReturn = Union[
 ]
 
 
-class DispenseWhileTrackingImplementation(AbstractCommandImpl[DispenseWhileTrackingParams, _ExecuteReturn]):
+class DispenseWhileTrackingImplementation(
+    AbstractCommandImpl[DispenseWhileTrackingParams, _ExecuteReturn]
+):
     """Dispense command implementation."""
 
     def __init__(
@@ -176,7 +178,9 @@ class DispenseWhileTrackingImplementation(AbstractCommandImpl[DispenseWhileTrack
 
 class DispenseWhileTracking(
     BaseCommand[
-        DispenseWhileTrackingParams, DispenseWhileTrackingResult, OverpressureError | StallOrCollisionError
+        DispenseWhileTrackingParams,
+        DispenseWhileTrackingResult,
+        OverpressureError | StallOrCollisionError,
     ]
 ):
     """Dispense command model."""
@@ -185,7 +189,9 @@ class DispenseWhileTracking(
     params: DispenseWhileTrackingParams
     result: Optional[DispenseWhileTrackingResult] = None
 
-    _ImplementationCls: Type[DispenseWhileTrackingImplementation] = DispenseWhileTrackingImplementation
+    _ImplementationCls: Type[
+        DispenseWhileTrackingImplementation
+    ] = DispenseWhileTrackingImplementation
 
 
 class DispenseWhileTrackingCreate(BaseCommandCreate[DispenseWhileTrackingParams]):

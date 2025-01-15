@@ -69,7 +69,9 @@ _ExecuteReturn = Union[
 ]
 
 
-class AspirateImplementation(AbstractCommandImpl[AspirateWhileTrackingParams, _ExecuteReturn]):
+class AspirateImplementation(
+    AbstractCommandImpl[AspirateWhileTrackingParams, _ExecuteReturn]
+):
     """Aspirate command implementation."""
 
     def __init__(
@@ -225,7 +227,9 @@ class AspirateImplementation(AbstractCommandImpl[AspirateWhileTrackingParams, _E
 
 class Aspirate(
     BaseCommand[
-        AspirateWhileTrackingParams, AspirateResult, OverpressureError | StallOrCollisionError
+        AspirateWhileTrackingParams,
+        AspirateResult,
+        OverpressureError | StallOrCollisionError,
     ]
 ):
     """Aspirate command model."""

@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from contextlib import ExitStack
-from typing import Any, List, Optional, Sequence, Union, cast, Dict
+from typing import Any, List, Optional, Sequence, Union, cast, Dict, Tuple
 from opentrons_shared_data.errors.exceptions import (
     CommandPreconditionViolated,
     CommandParameterLimitViolated,
@@ -2538,7 +2538,31 @@ class InstrumentContext(publisher.CommandPublisher):
         self._raise_if_pressure_not_supported_by_pipette()
         loc = well.top()
         height = self._core.liquid_probe_without_recovery(well._core, loc)
+        # return current projected volume, height of liquid found, projected height after aspirate
         return height
+
+    @requires_version(2, 20)
+    def hw_testing_liquid_probe(
+        self, well: labware.Well, operation_volume: float
+    ) -> Tuple[float, float, float]:
+        """Check the height of the liquid within a well.
+
+        :returns: The height, in mm, of the liquid from the deck.
+
+        :meta private:
+
+        This is intended for Opentrons internal use only and is not a guaranteed API.
+        """
+        self._raise_if_pressure_not_supported_by_pipette()
+        loc = well.top()
+        (
+            current_height,
+            estimated_current_volume,
+            projected_final_height,
+        ) = self._core.liquid_probe_testing_data(
+            well_core=well._core, loc=loc, operation_volume=operation_volume
+        )
+        return current_height, estimated_current_volume, projected_final_height
 
     def _raise_if_configuration_not_supported_by_pipette(
         self, style: NozzleLayout

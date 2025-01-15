@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING, cast, Union, List
+from typing import Optional, TYPE_CHECKING, cast, Union, List, Tuple
 from opentrons.types import Location, Mount, NozzleConfigurationType, NozzleMapInterface
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.dev_types import PipetteDict
@@ -975,6 +975,43 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         )
 
         self._protocol_core.set_last_location(location=loc, mount=self.get_mount())
+
+    def liquid_probe_testing_data(
+        self,
+        well_core: WellCore,
+        loc: Location,
+        operation_volume: float,
+    ) -> Tuple[float, float, float]:
+        labware_id = well_core.labware_id
+        well_name = well_core.get_name()
+        well_location = WellLocation(
+            origin=WellOrigin.TOP, offset=WellOffset(x=0, y=0, z=2)
+        )
+        result = self._engine_client.execute_command_without_recovery(
+            cmd.LiquidProbeParams(
+                labwareId=labware_id,
+                wellName=well_name,
+                wellLocation=well_location,
+                pipetteId=self.pipette_id,
+            )
+        )
+
+        self._protocol_core.set_last_location(location=loc, mount=self.get_mount())
+        projected_current_volume = (
+            self._engine_client.state.geometry.get_well_volume_at_height(
+                labware_id=labware_id, well_name=well_name, height=result.z_position
+            )
+        )
+        projected_final_height = (
+            self._engine_client.state.geometry.get_well_height_after_volume(
+                labware_id=labware_id,
+                well_name=well_name,
+                initial_height=result.z_position,
+                volume=operation_volume,
+            )
+        )
+
+        return result.z_position, projected_current_volume, projected_final_height
 
     def liquid_probe_without_recovery(
         self, well_core: WellCore, loc: Location

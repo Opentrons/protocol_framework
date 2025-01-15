@@ -362,6 +362,8 @@ def find_volume_at_well_height(
     volumetric_capacity = get_well_volumetric_capacity(well_geometry)
     max_height = volumetric_capacity[-1][0]
     if target_height < 0 or target_height > max_height:
+        # find where we fail bc height < lld minimum and kick off error recovery
+        # to allow the pipette to go to well.bottom() rather than probe in the future
         raise InvalidLiquidHeightFound(f"Invalid target height {target_height}.")
     # volumes in volumetric_capacity are relative to each frustum,
     # so we have to find the volume of all the full sections enclosed
