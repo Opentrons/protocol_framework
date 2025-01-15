@@ -1,6 +1,5 @@
 """Unit tests for robot_server.deck_configuration.defaults."""
 
-
 from typing_extensions import Final
 
 import pytest
@@ -12,7 +11,7 @@ from robot_server.deck_configuration import validation
 from robot_server.deck_configuration import validation_mapping
 
 
-DECK_DEFINITION_VERSION: Final = 5
+DECK_DEFINITION_VERSION: Final = 6
 
 
 @pytest.mark.parametrize(

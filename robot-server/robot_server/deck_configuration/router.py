@@ -1,6 +1,5 @@
 """The HTTP API for getting and setting the robot's current deck configuration."""
 
-
 from datetime import datetime
 from typing import Annotated, Union
 
@@ -8,7 +7,7 @@ import fastapi
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 from server_utils.fastapi_utils.light_router import LightRouter
 
-from opentrons_shared_data.deck.types import DeckDefinitionV5
+from opentrons_shared_data.deck.types import DeckDefinitionV6
 
 from robot_server.errors.error_responses import ErrorBody
 from robot_server.hardware import get_deck_definition
@@ -67,7 +66,7 @@ async def put_deck_configuration(  # noqa: D103
         DeckConfigurationStore, fastapi.Depends(get_deck_configuration_store)
     ],
     now: Annotated[datetime, fastapi.Depends(get_current_time)],
-    deck_definition: Annotated[DeckDefinitionV5, fastapi.Depends(get_deck_definition)],
+    deck_definition: Annotated[DeckDefinitionV6, fastapi.Depends(get_deck_definition)],
 ) -> PydanticResponse[
     Union[
         SimpleBody[models.DeckConfigurationResponse],

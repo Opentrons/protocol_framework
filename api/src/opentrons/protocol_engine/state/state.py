@@ -1,11 +1,12 @@
 """Protocol engine state management."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, Sequence, TypeVar
 from typing_extensions import ParamSpec
 
-from opentrons_shared_data.deck.types import DeckDefinitionV5
+from opentrons_shared_data.deck.types import DeckDefinitionV6
 from opentrons_shared_data.robot.types import RobotDefinition
 
 from opentrons.protocol_engine.error_recovery_policy import ErrorRecoveryPolicy
@@ -177,7 +178,7 @@ class StateStore(StateView, ActionHandler):
         self,
         *,
         config: Config,
-        deck_definition: DeckDefinitionV5,
+        deck_definition: DeckDefinitionV6,
         deck_fixed_labware: Sequence[DeckFixedLabware],
         robot_definition: RobotDefinition,
         is_door_open: bool,

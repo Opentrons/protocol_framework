@@ -4,6 +4,7 @@ DEPRECATED: Testing LabwareStore independently of LabwareView is no
 longer helpful. Try to add new tests to test_labware_state.py, where they can be
 tested together, treating LabwareState as a private implementation detail.
 """
+
 from typing import Optional
 from opentrons.protocol_engine.state import update_types
 import pytest
@@ -11,7 +12,7 @@ import pytest
 from datetime import datetime
 
 from opentrons.calibration_storage.helpers import uri_from_details
-from opentrons_shared_data.deck.types import DeckDefinitionV5
+from opentrons_shared_data.deck.types import DeckDefinitionV6
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons.types import DeckSlotName
 
@@ -38,7 +39,7 @@ from .command_fixtures import (
 
 @pytest.fixture
 def subject(
-    ot2_standard_deck_def: DeckDefinitionV5,
+    ot2_standard_deck_def: DeckDefinitionV6,
 ) -> LabwareStore:
     """Get a LabwareStore test subject."""
     return LabwareStore(
@@ -48,7 +49,7 @@ def subject(
 
 
 def test_initial_state(
-    ot2_standard_deck_def: DeckDefinitionV5,
+    ot2_standard_deck_def: DeckDefinitionV6,
     subject: LabwareStore,
 ) -> None:
     """It should create the labware store with preloaded fixed labware."""

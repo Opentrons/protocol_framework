@@ -1,4 +1,5 @@
 """Hardware API wrapper module for initialization and management."""
+
 import asyncio
 import logging
 from pathlib import Path
@@ -349,9 +350,9 @@ async def get_deck_type() -> DeckType:
 
 async def get_deck_definition(
     deck_type: Annotated[DeckType, Depends(get_deck_type)],
-) -> deck.types.DeckDefinitionV5:
+) -> deck.types.DeckDefinitionV6:
     """Return this robot's deck definition."""
-    return deck.load(deck_type, version=5)
+    return deck.load(deck_type, version=6)
 
 
 async def _postinit_ot2_tasks(

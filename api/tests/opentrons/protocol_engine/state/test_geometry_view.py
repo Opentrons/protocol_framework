@@ -17,7 +17,7 @@ from opentrons.protocol_engine.state.update_types import (
 )
 
 from opentrons_shared_data import get_shared_data_root, load_shared_data
-from opentrons_shared_data.deck.types import DeckDefinitionV5
+from opentrons_shared_data.deck.types import DeckDefinitionV6
 from opentrons_shared_data.deck import load as load_deck
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.labware.types import LabwareUri
@@ -157,9 +157,9 @@ def use_mocks() -> bool:
 
 
 @pytest.fixture
-def deck_definition(state_config: Config) -> DeckDefinitionV5:
+def deck_definition(state_config: Config) -> DeckDefinitionV6:
     """Override as parameter to use a non-flex deck def."""
-    return load_deck(name=state_config.deck_type.value, version=5)
+    return load_deck(name=state_config.deck_type.value, version=6)
 
 
 @pytest.fixture
@@ -172,7 +172,7 @@ def state_config() -> Config:
 
 
 @pytest.fixture
-def labware_store(deck_definition: DeckDefinitionV5) -> LabwareStore:
+def labware_store(deck_definition: DeckDefinitionV6) -> LabwareStore:
     """Get a labware store that can accept actions."""
     return LabwareStore(deck_definition=deck_definition, deck_fixed_labware=[])
 
@@ -223,7 +223,7 @@ def pipette_view(pipette_store: PipetteStore) -> PipetteView:
 
 @pytest.fixture
 def addressable_area_store(
-    state_config: Config, deck_definition: DeckDefinitionV5
+    state_config: Config, deck_definition: DeckDefinitionV6
 ) -> AddressableAreaStore:
     """Get an addressable area store that can accept actions."""
     return AddressableAreaStore(
@@ -315,9 +315,9 @@ def subject(
         well_view=mock_well_view if use_mocks else well_view,
         module_view=mock_module_view if use_mocks else module_view,
         pipette_view=mock_pipette_view if use_mocks else pipette_view,
-        addressable_area_view=mock_addressable_area_view
-        if use_mocks
-        else addressable_area_view,
+        addressable_area_view=(
+            mock_addressable_area_view if use_mocks else addressable_area_view
+        ),
     )
 
 
@@ -368,7 +368,7 @@ def test_get_labware_parent_position_on_module(
     mock_labware_view: LabwareView,
     mock_module_view: ModuleView,
     mock_addressable_area_view: AddressableAreaView,
-    ot2_standard_deck_def: DeckDefinitionV5,
+    ot2_standard_deck_def: DeckDefinitionV6,
     subject: GeometryView,
 ) -> None:
     """It should return a module position for labware on a module."""
@@ -427,7 +427,7 @@ def test_get_labware_parent_position_on_labware(
     mock_labware_view: LabwareView,
     mock_module_view: ModuleView,
     mock_addressable_area_view: AddressableAreaView,
-    ot2_standard_deck_def: DeckDefinitionV5,
+    ot2_standard_deck_def: DeckDefinitionV6,
     subject: GeometryView,
 ) -> None:
     """It should return a labware position for labware on a labware on a module."""
@@ -504,7 +504,7 @@ def test_module_calibration_offset_rotation(
     decoy: Decoy,
     mock_labware_view: LabwareView,
     mock_module_view: ModuleView,
-    ot2_standard_deck_def: DeckDefinitionV5,
+    ot2_standard_deck_def: DeckDefinitionV6,
     subject: GeometryView,
 ) -> None:
     """Return the rotated module calibration offset if the module was moved from one side of the deck to the other."""
@@ -633,7 +633,7 @@ def test_get_module_labware_highest_z(
     mock_labware_view: LabwareView,
     mock_module_view: ModuleView,
     mock_addressable_area_view: AddressableAreaView,
-    ot2_standard_deck_def: DeckDefinitionV5,
+    ot2_standard_deck_def: DeckDefinitionV6,
     subject: GeometryView,
 ) -> None:
     """It should get the absolute location of a labware's highest Z point."""
@@ -939,7 +939,7 @@ def test_get_highest_z_in_slot_with_single_module(
     mock_module_view: ModuleView,
     mock_addressable_area_view: AddressableAreaView,
     subject: GeometryView,
-    ot2_standard_deck_def: DeckDefinitionV5,
+    ot2_standard_deck_def: DeckDefinitionV6,
 ) -> None:
     """It should get the highest Z in slot with just a single module."""
     # Case: Slot has a module that doesn't have any labware on it. Highest z is equal to module height.
@@ -1078,7 +1078,7 @@ def test_get_highest_z_in_slot_with_labware_stack_on_module(
     mock_addressable_area_view: AddressableAreaView,
     subject: GeometryView,
     well_plate_def: LabwareDefinition,
-    ot2_standard_deck_def: DeckDefinitionV5,
+    ot2_standard_deck_def: DeckDefinitionV6,
 ) -> None:
     """It should get the highest z in slot of labware on module.
 
@@ -1333,7 +1333,7 @@ def test_get_module_labware_well_position(
     mock_labware_view: LabwareView,
     mock_module_view: ModuleView,
     mock_addressable_area_view: AddressableAreaView,
-    ot2_standard_deck_def: DeckDefinitionV5,
+    ot2_standard_deck_def: DeckDefinitionV6,
     subject: GeometryView,
 ) -> None:
     """It should be able to get the position of a well top in a labware on module."""
@@ -2356,7 +2356,7 @@ def test_get_labware_grip_point_for_labware_on_module(
     mock_labware_view: LabwareView,
     mock_module_view: ModuleView,
     mock_addressable_area_view: AddressableAreaView,
-    ot2_standard_deck_def: DeckDefinitionV5,
+    ot2_standard_deck_def: DeckDefinitionV6,
     subject: GeometryView,
 ) -> None:
     """It should return the grip point for labware directly on a module."""

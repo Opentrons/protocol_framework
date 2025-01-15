@@ -1,11 +1,12 @@
 """Basic addressable area data state and store."""
+
 from dataclasses import dataclass
 from functools import cached_property
 from typing import Dict, List, Optional, Set
 
 from opentrons_shared_data.robot.types import RobotType, RobotDefinition
 from opentrons_shared_data.deck.types import (
-    DeckDefinitionV5,
+    DeckDefinitionV6,
     SlotDefV3,
     CutoutFixture,
 )
@@ -53,7 +54,7 @@ class AddressableAreaState:
 
     potential_cutout_fixtures_by_cutout_id: Dict[str, Set[PotentialCutoutFixture]]
 
-    deck_definition: DeckDefinitionV5
+    deck_definition: DeckDefinitionV6
 
     deck_configuration: Optional[DeckConfigurationType]
     """The host robot's full deck configuration.
@@ -94,7 +95,7 @@ _FLEX_ORDERED_STAGING_SLOTS = ["D4", "C4", "B4", "A4"]
 def _get_conflicting_addressable_areas_error_string(
     potential_cutout_fixtures: Set[PotentialCutoutFixture],
     loaded_addressable_areas: Dict[str, AddressableArea],
-    deck_definition: DeckDefinitionV5,
+    deck_definition: DeckDefinitionV6,
 ) -> str:
     loaded_areas_on_cutout = set()
     for fixture in potential_cutout_fixtures:
@@ -158,7 +159,7 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
         self,
         deck_configuration: DeckConfigurationType,
         config: Config,
-        deck_definition: DeckDefinitionV5,
+        deck_definition: DeckDefinitionV6,
         robot_definition: RobotDefinition,
     ) -> None:
         """Initialize an addressable area store and its state."""
@@ -208,7 +209,7 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
 
     @staticmethod
     def _get_addressable_areas_from_deck_configuration(
-        deck_config: DeckConfigurationType, deck_definition: DeckDefinitionV5
+        deck_config: DeckConfigurationType, deck_definition: DeckDefinitionV6
     ) -> Dict[str, AddressableArea]:
         """Return all addressable areas provided by the given deck configuration."""
         addressable_areas = []
