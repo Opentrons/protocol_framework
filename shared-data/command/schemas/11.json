@@ -2523,7 +2523,8 @@
         "thermocyclerModuleV2",
         "heaterShakerModuleV1",
         "magneticBlockV1",
-        "absorbanceReaderV1"
+        "absorbanceReaderV1",
+        "flexStackerModuleV1"
       ],
       "title": "ModuleModel",
       "type": "string"
@@ -3921,6 +3922,47 @@
       "title": "RetractDispense",
       "type": "object"
     },
+    "RetrieveCreate": {
+      "description": "A request to execute a Flex Stacker retrieve command.",
+      "properties": {
+        "commandType": {
+          "const": "flexStacker/retrieve",
+          "default": "flexStacker/retrieve",
+          "enum": ["flexStacker/retrieve"],
+          "title": "Commandtype",
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/$defs/CommandIntent",
+          "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
+          "title": "Intent"
+        },
+        "key": {
+          "description": "A key value, unique in this run, that can be used to track the same logical command across multiple runs of the same protocol. If a value is not provided, one will be generated.",
+          "title": "Key",
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/$defs/RetrieveParams"
+        }
+      },
+      "required": ["params"],
+      "title": "RetrieveCreate",
+      "type": "object"
+    },
+    "RetrieveParams": {
+      "description": "Input parameters for a labware retrieval command.",
+      "properties": {
+        "moduleId": {
+          "description": "Unique ID of the Flex Stacker.",
+          "title": "Moduleid",
+          "type": "string"
+        }
+      },
+      "required": ["moduleId"],
+      "title": "RetrieveParams",
+      "type": "object"
+    },
     "RowNozzleLayoutConfiguration": {
       "description": "Minimum information required for a new nozzle configuration.",
       "properties": {
@@ -4529,6 +4571,47 @@
       "enum": ["idle", "confirm", "updating", "disco", "off"],
       "title": "StatusBarAnimation",
       "type": "string"
+    },
+    "StoreCreate": {
+      "description": "A request to execute a Flex Stacker store command.",
+      "properties": {
+        "commandType": {
+          "const": "flexStacker/store",
+          "default": "flexStacker/store",
+          "enum": ["flexStacker/store"],
+          "title": "Commandtype",
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/$defs/CommandIntent",
+          "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
+          "title": "Intent"
+        },
+        "key": {
+          "description": "A key value, unique in this run, that can be used to track the same logical command across multiple runs of the same protocol. If a value is not provided, one will be generated.",
+          "title": "Key",
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/$defs/StoreParams"
+        }
+      },
+      "required": ["params"],
+      "title": "StoreCreate",
+      "type": "object"
+    },
+    "StoreParams": {
+      "description": "Input parameters for a labware storage command.",
+      "properties": {
+        "moduleId": {
+          "description": "Unique ID of the flex stacker.",
+          "title": "Moduleid",
+          "type": "string"
+        }
+      },
+      "required": ["moduleId"],
+      "title": "StoreParams",
+      "type": "object"
     },
     "Submerge": {
       "description": "Shared properties for the submerge function before aspiration or dispense.",
@@ -5721,6 +5804,8 @@
       "dispenseInPlace": "#/$defs/DispenseInPlaceCreate",
       "dropTip": "#/$defs/DropTipCreate",
       "dropTipInPlace": "#/$defs/DropTipInPlaceCreate",
+      "flexStacker/retrieve": "#/$defs/RetrieveCreate",
+      "flexStacker/store": "#/$defs/StoreCreate",
       "getNextTip": "#/$defs/GetNextTipCreate",
       "getTipPresence": "#/$defs/GetTipPresenceCreate",
       "heaterShaker/closeLabwareLatch": "#/$defs/CloseLabwareLatchCreate",
@@ -5991,6 +6076,12 @@
     },
     {
       "$ref": "#/$defs/ReadAbsorbanceCreate"
+    },
+    {
+      "$ref": "#/$defs/RetrieveCreate"
+    },
+    {
+      "$ref": "#/$defs/StoreCreate"
     },
     {
       "$ref": "#/$defs/CalibrateGripperCreate"
