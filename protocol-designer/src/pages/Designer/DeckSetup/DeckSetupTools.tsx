@@ -24,6 +24,7 @@ import {
   FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
   getModuleDisplayName,
   getModuleType,
+  MAGNETIC_BLOCK_V1,
   MAGNETIC_MODULE_TYPE,
   MAGNETIC_MODULE_V1,
   MAGNETIC_MODULE_V2,
@@ -72,6 +73,7 @@ import { getModuleModelsBySlot, getDeckErrors } from './utils'
 import type { AddressableAreaName, ModuleModel } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../../types'
 import type { Fixture } from './constants'
+import type { ModuleModelExtended } from './utils'
 
 const mapModTypeToStepType: Record<string, string> = {
   heaterShakerModuleType: 'heaterShaker',
@@ -131,14 +133,21 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     equipment => equipment?.name === 'gripper'
   )
   const [selectedHardware, setSelectedHardware] = useState<
-    ModuleModel | Fixture | null
+    ModuleModelExtended | Fixture | null
   >(null)
 
   //  initialize the previously selected hardware because for some reason it does not
   //  work initiating it in the above useState
   useEffect(() => {
     if (selectedModuleModel !== null || selectedFixture != null) {
-      setSelectedHardware(selectedModuleModel ?? selectedFixture ?? null)
+      if (
+        selectedModuleModel === MAGNETIC_BLOCK_V1 &&
+        selectedFixture === 'stagingArea'
+      ) {
+        setSelectedHardware('stagingAreaAndMagneticBlock')
+      } else {
+        setSelectedHardware(selectedModuleModel ?? selectedFixture ?? null)
+      }
     }
   }, [selectedModuleModel, selectedFixture])
 
@@ -513,6 +522,10 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                   gridGap={SPACING.spacing4}
                 >
                   {moduleModels?.map(model => {
+                    const selectedModel =
+                      model === 'stagingAreaAndMagneticBlock'
+                        ? MAGNETIC_BLOCK_V1
+                        : model
                     const modelSomewhereOnDeck = Object.values(
                       deckSetupModules
                     ).filter(
@@ -522,7 +535,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                       deckSetupModules
                     ).filter(
                       module =>
-                        module.type === getModuleType(model) &&
+                        module.type === getModuleType(selectedModel) &&
                         module.slot !== slot
                     )
                     const moamModels = MOAM_MODELS
@@ -530,7 +543,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                     const collisionError = getDeckErrors({
                       modules: deckSetupModules,
                       selectedSlot: slot,
-                      selectedModel: model,
+                      selectedModel,
                       labware: deckSetupLabware,
                       robotType,
                     })
@@ -541,10 +554,19 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                           if (onDeckProps?.setHoveredModule != null) {
                             onDeckProps.setHoveredModule(null)
                           }
+                          if (onDeckProps?.setHoveredFixture != null) {
+                            onDeckProps.setHoveredFixture(null)
+                          }
                         }}
                         setHovered={() => {
                           if (onDeckProps?.setHoveredModule != null) {
-                            onDeckProps.setHoveredModule(model)
+                            onDeckProps.setHoveredModule(selectedModel)
+                          }
+                          if (
+                            onDeckProps?.setHoveredFixture != null &&
+                            model === 'stagingAreaAndMagneticBlock'
+                          ) {
+                            onDeckProps.setHoveredFixture('stagingArea')
                           }
                         }}
                         largeDesktopBorderRadius
@@ -555,10 +577,16 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                           >
                             <ModuleIcon
                               size="1rem"
-                              moduleType={getModuleType(model)}
+                              moduleType={getModuleType(selectedModel)}
                             />
                             <StyledText desktopStyle="bodyDefaultRegular">
-                              {getModuleDisplayName(model)}
+                              {model === 'stagingAreaAndMagneticBlock'
+                                ? t('shared:magneticBlockAndStagingArea', {
+                                    module: getModuleDisplayName(
+                                      MAGNETIC_BLOCK_V1
+                                    ),
+                                  })
+                                : getModuleDisplayName(selectedModel)}
                             </StyledText>
                           </Flex>
                         }
@@ -567,12 +595,12 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                         onChange={() => {
                           if (
                             modelSomewhereOnDeck.length === 1 &&
-                            !moamModels.includes(model) &&
+                            !moamModels.includes(selectedModel) &&
                             robotType === FLEX_ROBOT_TYPE
                           ) {
                             makeSnackbar(
                               t('one_item', {
-                                hardware: getModuleDisplayName(model),
+                                hardware: getModuleDisplayName(selectedModel),
                               }) as string
                             )
                           } else if (
@@ -582,7 +610,9 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                             makeSnackbar(
                               t('one_item', {
                                 hardware: t(
-                                  `shared:${getModuleType(model).toLowerCase()}`
+                                  `shared:${getModuleType(
+                                    selectedModel
+                                  ).toLowerCase()}`
                                 ),
                               }) as string
                             )
@@ -600,11 +630,20 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                             (selectedFixture === 'wasteChuteAndStagingArea' &&
                               matchingLabwareFor4thColumn != null)
                           ) {
-                            setShowDeleteLabwareModal(model)
+                            setShowDeleteLabwareModal(selectedModel)
                           } else {
                             setSelectedHardware(model)
-                            dispatch(selectFixture({ fixture: null }))
-                            dispatch(selectModule({ moduleModel: model }))
+                            dispatch(
+                              selectFixture({
+                                fixture:
+                                  model === 'stagingAreaAndMagneticBlock'
+                                    ? 'stagingArea'
+                                    : null,
+                              })
+                            )
+                            dispatch(
+                              selectModule({ moduleModel: selectedModel })
+                            )
                             dispatch(selectLabware({ labwareDefUri: null }))
                             dispatch(
                               selectNestedLabware({ nestedLabwareDefUri: null })
