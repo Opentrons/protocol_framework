@@ -31,14 +31,18 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
   it('It should verify the working function of every permutation of mix checkboxes', () => {
     const steps: Array<Actions | Verifications | UniversalActions> = [
       Actions.SelectMix,
+      UniversalActions.Snapshot,
+      Verifications.PartOne,
       Verifications.MixPopout,
       Actions.SelectLabware,
-      Actions.SelectWells,
+      Actions.SelectWellInputField,
+      Verifications.WellSelectPopout,
+      UniversalActions.Snapshot,
+      Actions.Save,
       
     ]
 
     runMixSetup(steps)
-    // selectWells(1)
   });
 });
 
@@ -48,16 +52,16 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
 -select protocol steps -DONE
 -click add step -DONE
 -validate move, transfer, mix, pause, and any modules are available options -DONE
--select mix
--validate step number followed by mix
+-select mix - Done
+-validate step number followed by mix - Done
 -Side Panel Appears on the right
 -check that it contains:
-  -Part 1/2
-  -Pipette
+  -Part 1/2 -DONE
+  -Pipette <<< NOTE: NEED TO THINK ABOUT THIS
     -Textbox with selected pipette
-  -Tip rack
+  -Tip rack <<< NOTE: NEED TO THINK ABOUT THIS
     -dropdown with appropriate list of tip rack options
-  -Labware
+  -Labware - DONE
     -dropdown of all labware
   -Choose wells - click
     -pop up modal with grid of wells
