@@ -28,7 +28,7 @@ export function BeforeBeginning({
 }: LPCStepProps<BeforeBeginningStep>): JSX.Element {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
   const { isOnDevice, protocolName, labwareDefs, existingOffsets } = state
-  const { createStartLPCHandler } = commandUtils
+  const { createStartLPCHandler, toggleRobotMoving } = commandUtils
 
   const handleStartLPC = createStartLPCHandler(proceed)
 
@@ -42,6 +42,12 @@ export function BeforeBeginning({
       }),
     },
   ]
+
+  const handleProceed = (): void => {
+    void toggleRobotMoving(true)
+      .then(() => handleStartLPC())
+      .finally(() => toggleRobotMoving(false))
+  }
 
   return (
     <TwoUpTileLayout
@@ -69,10 +75,10 @@ export function BeforeBeginning({
           {isOnDevice ? (
             <SmallButton
               buttonText={t('shared:get_started')}
-              onClick={handleStartLPC}
+              onClick={handleProceed}
             />
           ) : (
-            <PrimaryButton onClick={handleStartLPC}>
+            <PrimaryButton onClick={handleProceed}>
               {i18n.format(t('shared:get_started'), 'capitalize')}
             </PrimaryButton>
           )}

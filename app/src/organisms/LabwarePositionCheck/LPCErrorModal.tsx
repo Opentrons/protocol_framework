@@ -30,7 +30,13 @@ export function LPCErrorModal({
   onCloseClick,
 }: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation(['labware_position_check', 'shared', 'branded'])
-  const { errorMessage } = commandUtils
+  const { errorMessage, toggleRobotMoving } = commandUtils
+
+  const handleClose = (): void => {
+    void toggleRobotMoving(true).then(() => {
+      onCloseClick()
+    })
+  }
 
   return (
     <Flex
@@ -65,7 +71,7 @@ export function LPCErrorModal({
       <PrimaryButton
         textTransform={TEXT_TRANSFORM_CAPITALIZE}
         alignSelf={ALIGN_FLEX_END}
-        onClick={onCloseClick}
+        onClick={handleClose}
       >
         {t('shared:exit')}
       </PrimaryButton>

@@ -35,6 +35,7 @@ export function AttachProbe({
     unableToDetect,
     createProbeAttachmentHandler,
     handleCheckItemsPrepModules,
+    toggleRobotMoving,
   } = commandUtils
   const pipette = selectActivePipette(step, state)
   const handleProbeAttached = createProbeAttachmentHandler(
@@ -62,10 +63,11 @@ export function AttachProbe({
     }
   })()
 
-  const handleConfirmProbeAttached = (): void => {
-    void handleProbeAttached().then(() => {
-      handleCheckItemsPrepModules(steps.next)
-    })
+  const handleProceed = (): void => {
+    void toggleRobotMoving(true)
+      .then(() => handleProbeAttached())
+      .then(() => handleCheckItemsPrepModules(steps.next))
+      .finally(() => toggleRobotMoving(false))
   }
 
   if (unableToDetect) {
@@ -98,7 +100,7 @@ export function AttachProbe({
           </LegacyStyledText>
         }
         proceedButtonText={i18n.format(t('shared:continue'), 'capitalize')}
-        proceed={handleConfirmProbeAttached}
+        proceed={handleProceed}
       />
     )
   }

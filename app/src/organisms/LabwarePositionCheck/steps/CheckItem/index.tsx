@@ -36,6 +36,7 @@ export function CheckItem(
     handleConfirmLwFinalPosition,
     handleResetLwModulesOnDeck,
     handleValidMoveToMaintenancePosition,
+    toggleRobotMoving,
   } = commandUtils
   const { isOnDevice, protocolData, labwareDefs, steps } = state
   const { t } = useTranslation(['labware_position_check', 'shared'])
@@ -66,25 +67,31 @@ export function CheckItem(
     ...buildDisplayParams(),
   })
 
-  const handleDispatchConfirmInitialPlacement = (): void => {
-    void handleConfirmLwModulePlacement({ step }).then(position => {
-      dispatch(
-        setInitialPosition({
-          labwareId,
-          location,
-          position,
-        })
-      )
-    })
+  const handlePrepareProceed = (): void => {
+    void toggleRobotMoving(true)
+      .then(() => handleConfirmLwModulePlacement({ step }))
+      .then(position => {
+        dispatch(
+          setInitialPosition({
+            labwareId,
+            location,
+            position,
+          })
+        )
+      })
+      .finally(() => toggleRobotMoving(false))
   }
 
   // TODO(jh, 01-14-25): Revisit next step injection after refactoring the store (after designs settle).
-  const handleDispatchConfirmFinalPlacement = (): void => {
-    void handleConfirmLwFinalPosition({
-      step,
-      onSuccess: proceed,
-      pipette,
-    })
+  const handleJogProceed = (): void => {
+    void toggleRobotMoving(true)
+      .then(() =>
+        handleConfirmLwFinalPosition({
+          step,
+          onSuccess: proceed,
+          pipette,
+        })
+      )
       .then(position => {
         dispatch(
           setFinalPosition({
@@ -94,26 +101,27 @@ export function CheckItem(
           })
         )
       })
-      .then(() => {
-        handleCheckItemsPrepModules(steps.next)
-      })
-      .then(() => {
-        handleValidMoveToMaintenancePosition(steps.next)
-      })
+      .then(() => handleCheckItemsPrepModules(steps.next))
+      .then(() => handleValidMoveToMaintenancePosition(steps.next))
+      .finally(() => toggleRobotMoving(false))
   }
 
-  const handleDispatchResetLwModulesOnDeck = (): void => {
-    void handleResetLwModulesOnDeck({ step }).then(() => {
-      dispatch(
-        setInitialPosition({
-          labwareId,
-          location,
-          position: null,
-        })
-      )
-    })
+  const handleGoBack = (): void => {
+    void toggleRobotMoving(true)
+      .then(() => handleResetLwModulesOnDeck({ step }))
+      .then(() => {
+        dispatch(
+          setInitialPosition({
+            labwareId,
+            location,
+            position: null,
+          })
+        )
+      })
+      .finally(() => toggleRobotMoving(false))
   }
 
+  // TODO(jh 01-15-24): These should be separate steps, but let's wait for designs to settle.
   return (
     <Flex flexDirection={DIRECTION_COLUMN} minHeight="29.5rem">
       {initialPosition != null ? (
@@ -142,8 +150,8 @@ export function CheckItem(
               }}
             />
           }
-          handleConfirmPosition={handleDispatchConfirmFinalPlacement}
-          handleGoBack={handleDispatchResetLwModulesOnDeck}
+          handleConfirmPosition={handleJogProceed}
+          handleGoBack={handleGoBack}
           handleJog={handleJog}
           {...props}
         />
@@ -167,7 +175,7 @@ export function CheckItem(
               ]}
             />
           }
-          confirmPlacement={handleDispatchConfirmInitialPlacement}
+          confirmPlacement={handlePrepareProceed}
           {...props}
         />
       )}

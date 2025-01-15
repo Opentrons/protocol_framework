@@ -81,6 +81,7 @@ function LPCWizardHeader({
     confirmExitLPC,
   } = commandUtils
 
+  // TODO(jh 01-15-24): Revisit the onExit conditions. Can we simplify?
   return (
     <WizardHeader
       title={t('labware_position_check_title')}
@@ -99,7 +100,6 @@ function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('shared')
   const { current: currentStep } = props.state.steps
   const {
-    isExiting,
     isRobotMoving,
     errorMessage,
     showExitConfirmation,
@@ -108,7 +108,7 @@ function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
   // TODO(jh, 01-14-25): Handle open door behavior.
 
   // Handle special cases that are shared by multiple steps first.
-  if (isExiting || isRobotMoving) {
+  if (isRobotMoving) {
     return <RobotMotionLoader header={t('stand_back_robot_is_in_motion')} />
   }
   if (errorMessage != null) {

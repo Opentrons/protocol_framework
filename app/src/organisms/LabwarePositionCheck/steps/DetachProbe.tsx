@@ -27,7 +27,7 @@ export const DetachProbe = ({
 }: LPCStepProps<DetachProbeStep>): JSX.Element => {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
   const { current: currentStep } = state.steps
-  const { createProbeDetachmentHandler } = commandUtils
+  const { createProbeDetachmentHandler, toggleRobotMoving } = commandUtils
   const pipette = selectActivePipette(currentStep, state)
   const probeVideoSrc = ((): string => {
     const channels = selectActivePipetteChannelCount(currentStep, state)
@@ -44,6 +44,12 @@ export const DetachProbe = ({
 
   const handleProbeDetached = createProbeDetachmentHandler(pipette, proceed)
 
+  const handleProceed = (): void => {
+    void toggleRobotMoving(true)
+      .then(() => handleProbeDetached())
+      .finally(() => toggleRobotMoving(false))
+  }
+
   return (
     <GenericWizardTile
       header={i18n.format(t('detach_probe'), 'capitalize')}
@@ -59,7 +65,7 @@ export const DetachProbe = ({
         </LegacyStyledText>
       }
       proceedButtonText={t('confirm_detached')}
-      proceed={handleProbeDetached}
+      proceed={handleProceed}
     />
   )
 }

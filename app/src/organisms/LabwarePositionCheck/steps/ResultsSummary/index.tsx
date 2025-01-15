@@ -41,14 +41,21 @@ export function ResultsSummary(
   const { protocolData, isOnDevice } = state
   const {
     isApplyingOffsets,
-    handleApplyOffsets,
+    handleApplyOffsetsAndClose,
     buildOffsetsToApply,
+    toggleRobotMoving,
   } = commandUtils
   const { i18n, t } = useTranslation('labware_position_check')
   const offsetsToApply = buildOffsetsToApply()
   const isLabwareOffsetCodeSnippetsOn = useSelector(
     getIsLabwareOffsetCodeSnippetsOn
   )
+
+  const handleProceed = (): void => {
+    void toggleRobotMoving(true).then(() =>
+      handleApplyOffsetsAndClose(offsetsToApply)
+    )
+  }
 
   return (
     <Flex css={PARENT_CONTAINER_STYLE}>
@@ -86,9 +93,7 @@ export function ResultsSummary(
       {isOnDevice ? (
         <SmallButton
           alignSelf={ALIGN_FLEX_END}
-          onClick={() => {
-            handleApplyOffsets(offsetsToApply)
-          }}
+          onClick={handleProceed}
           buttonText={i18n.format(t('apply_offsets'), 'capitalize')}
           iconName={isApplyingOffsets ? 'ot-spinner' : null}
           iconPlacement={isApplyingOffsets ? 'startIcon' : null}
@@ -97,12 +102,7 @@ export function ResultsSummary(
       ) : (
         <Flex css={DESKTOP_BUTTON_STYLE}>
           <NeedHelpLink href={LPC_HELP_LINK_URL} />
-          <PrimaryButton
-            onClick={() => {
-              handleApplyOffsets(offsetsToApply)
-            }}
-            disabled={isApplyingOffsets}
-          >
+          <PrimaryButton onClick={handleProceed} disabled={isApplyingOffsets}>
             <Flex>
               {isApplyingOffsets ? (
                 <Icon

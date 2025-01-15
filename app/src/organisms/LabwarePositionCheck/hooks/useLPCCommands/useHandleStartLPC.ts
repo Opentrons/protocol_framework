@@ -13,7 +13,7 @@ import type {
 import type { UseLPCCommandWithChainRunChildProps } from './types'
 
 export interface UseHandleStartLPCResult {
-  createStartLPCHandler: (onSuccess: () => void) => () => void
+  createStartLPCHandler: (onSuccess: () => void) => () => Promise<void>
 }
 
 export function useHandleStartLPC({
@@ -21,7 +21,9 @@ export function useHandleStartLPC({
   mostRecentAnalysis,
   state,
 }: UseLPCCommandWithChainRunChildProps): UseHandleStartLPCResult {
-  const createStartLPCHandler = (onSuccess: () => void): (() => void) => {
+  const createStartLPCHandler = (
+    onSuccess: () => void
+  ): (() => Promise<void>) => {
     const startCommands: CreateCommand[] = [
       ...buildInstrumentLabwarePrepCommands(mostRecentAnalysis),
       ...moduleInitBeforeAnyLPCCommands(mostRecentAnalysis),
@@ -29,11 +31,10 @@ export function useHandleStartLPC({
       ...moveToMaintenancePosition(state.steps.current, state),
     ]
 
-    return (): void => {
-      void chainLPCCommands(startCommands, false).then(() => {
+    return () =>
+      chainLPCCommands(startCommands, false).then(() => {
         onSuccess()
       })
-    }
   }
 
   return { createStartLPCHandler }

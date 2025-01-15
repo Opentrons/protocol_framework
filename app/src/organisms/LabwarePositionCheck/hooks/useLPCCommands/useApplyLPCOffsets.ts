@@ -10,7 +10,9 @@ export interface UseApplyLPCOffsetsProps extends UseLPCCommandChildProps {
 }
 
 export interface UseApplyLPCOffsetsResult {
-  handleApplyOffsets: (offsets: LabwareOffsetCreateData[]) => void
+  handleApplyOffsetsAndClose: (
+    offsets: LabwareOffsetCreateData[]
+  ) => Promise<void>
   isApplyingOffsets: boolean
 }
 
@@ -23,17 +25,22 @@ export function useApplyLPCOffsets({
 
   const { createLabwareOffset } = useCreateLabwareOffsetMutation()
 
-  const handleApplyOffsets = (offsets: LabwareOffsetCreateData[]): void => {
+  const handleApplyOffsetsAndClose = (
+    offsets: LabwareOffsetCreateData[]
+  ): Promise<void> => {
     setIsApplyingOffsets(true)
-    Promise.all(offsets.map(data => createLabwareOffset({ runId, data })))
+    return Promise.all(
+      offsets.map(data => createLabwareOffset({ runId, data }))
+    )
       .then(() => {
         onCloseClick()
         setIsApplyingOffsets(false)
       })
       .catch((e: Error) => {
         setErrorMessage(`Error applying labware offsets: ${e.message}`)
+        return Promise.reject(new Error('Could not apply offsets.'))
       })
   }
 
-  return { isApplyingOffsets, handleApplyOffsets }
+  return { isApplyingOffsets, handleApplyOffsetsAndClose }
 }

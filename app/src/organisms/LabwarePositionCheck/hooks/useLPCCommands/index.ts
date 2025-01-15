@@ -46,6 +46,7 @@ export type UseLPCCommandsResult = UseApplyLPCOffsetsResult &
   UseHandleValidMoveToMaintenancePositionResult & {
     errorMessage: string | null
     isRobotMoving: boolean
+    toggleRobotMoving: (isMoving: boolean) => Promise<void>
   }
 
 // Consolidates all command handlers and handler state for injection into LPC.
@@ -53,11 +54,9 @@ export function useLPCCommands(
   props: UseLPCCommandsProps
 ): UseLPCCommandsResult {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isRobotMoving, setIsRobotMoving] = useState(false)
 
-  const {
-    chainRunCommands,
-    isCommandMutationLoading: isRobotMoving,
-  } = useChainMaintenanceCommands()
+  const { chainRunCommands } = useChainMaintenanceCommands()
 
   const chainLPCCommands = (
     commands: CreateCommand[],
@@ -108,6 +107,11 @@ export function useLPCCommands(
   return {
     errorMessage,
     isRobotMoving,
+    toggleRobotMoving: (isMoving: boolean) =>
+      new Promise<void>(resolve => {
+        setIsRobotMoving(isMoving)
+        resolve()
+      }),
     ...applyLPCOffsetsUtils,
     ...buildLPCOffsets,
     ...handleJogUtils,

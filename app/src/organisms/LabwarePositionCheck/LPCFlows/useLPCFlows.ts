@@ -116,11 +116,6 @@ export function useLPCFlows({
     maintenanceRunId != null &&
     protocolName != null &&
     mostRecentAnalysis != null
-  console.log('=>(useLPCFlows.ts:119) mostRecentAnalysis', mostRecentAnalysis)
-  console.log('=>(useLPCFlows.ts:119) protocolName', protocolName)
-  console.log('=>(useLPCFlows.ts:119) maintenanceRunId', maintenanceRunId)
-  console.log('=>(useLPCFlows.ts:119) hasCreatedLPCRun', hasCreatedLPCRun)
-  console.log('=>(useLPCFlows.ts:119) showLPC', showLPC)
 
   return showLPC
     ? {

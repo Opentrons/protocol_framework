@@ -28,7 +28,13 @@ export function ExitConfirmation({
   state,
 }: LPCWizardContentProps): JSX.Element {
   const { i18n, t } = useTranslation(['labware_position_check', 'shared'])
-  const { confirmExitLPC, cancelExitLPC } = commandUtils
+  const { confirmExitLPC, cancelExitLPC, toggleRobotMoving } = commandUtils
+
+  const handleConfirmExit = (): void => {
+    toggleRobotMoving(true).then(() => {
+      confirmExitLPC()
+    })
+  }
 
   return (
     <Flex css={CONTAINER_STYLE}>
@@ -64,7 +70,7 @@ export function ExitConfirmation({
             buttonType="secondary"
           />
           <SmallButton
-            onClick={confirmExitLPC}
+            onClick={handleConfirmExit}
             buttonText={t('remove_calibration_probe')}
             buttonType="alert"
           />
@@ -76,7 +82,7 @@ export function ExitConfirmation({
               {t('shared:go_back')}
             </SecondaryButton>
             <AlertPrimaryButton
-              onClick={confirmExitLPC}
+              onClick={handleConfirmExit}
               textTransform={TYPOGRAPHY.textTransformCapitalize}
             >
               {t('remove_calibration_probe')}
