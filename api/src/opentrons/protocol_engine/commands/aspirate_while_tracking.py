@@ -10,7 +10,7 @@ from .pipetting_common import (
     AspirateVolumeMixin,
     FlowRateMixin,
     BaseLiquidHandlingResult,
-    aspirate_in_place,
+    aspirate_while_tracking,
     prepare_for_aspirate,
 )
 from .movement_common import (
@@ -43,10 +43,10 @@ if TYPE_CHECKING:
     from ..notes import CommandNoteAdder
 
 
-AspirateCommandType = Literal["aspirate"]
+AspirateWhileTrackingCommandType = Literal["aspirateWhileTracking"]
 
 
-class AspirateParams(
+class AspirateWhileTrackingParams(
     PipetteIdMixin,
     AspirateVolumeMixin,
     FlowRateMixin,
@@ -57,20 +57,22 @@ class AspirateParams(
     pass
 
 
-class AspirateResult(BaseLiquidHandlingResult, DestinationPositionResult):
+class AspirateWhileTrackingResult(BaseLiquidHandlingResult, DestinationPositionResult):
     """Result data from execution of an Aspirate command."""
 
     pass
 
 
 _ExecuteReturn = Union[
-    SuccessData[AspirateResult],
+    SuccessData[AspirateWhileTrackingResult],
     DefinedErrorData[OverpressureError] | DefinedErrorData[StallOrCollisionError],
 ]
 
 
-class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]):
-    """Aspirate command implementation."""
+class AspirateWhileTrackingImplementation(
+    AbstractCommandImpl[AspirateWhileTrackingParams, _ExecuteReturn]
+):
+    """AspirateWhileTracking command implementation."""
 
     def __init__(
         self,
@@ -89,7 +91,7 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
         self._command_note_adder = command_note_adder
         self._model_utils = model_utils
 
-    async def execute(self, params: AspirateParams) -> _ExecuteReturn:
+    async def execute(self, params: AspirateWhileTrackingParams) -> _ExecuteReturn:
         """Move to and aspirate from the requested well.
 
         Raises:
@@ -151,7 +153,6 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
                 labware_id=labware_id,
                 well_name=well_name,
             )
-
         move_result = await move_to_well(
             movement=self._movement,
             model_utils=self._model_utils,
@@ -160,7 +161,6 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
             well_name=well_name,
             well_location=well_location,
             current_well=current_well,
-            operation_volume=-params.volume,
         )
         state_update.append(move_result.state_update)
         if isinstance(move_result, DefinedErrorData):
@@ -168,8 +168,10 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
                 public=move_result.public, state_update=state_update
             )
 
-        aspirate_result = await aspirate_in_place(
+        aspirate_result = await aspirate_while_tracking(
             pipette_id=pipette_id,
+            labware_id=labware_id,
+            well_name=well_name,
             volume=params.volume,
             flow_rate=params.flowRate,
             location_if_error={
@@ -212,7 +214,7 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
         )
 
         return SuccessData(
-            public=AspirateResult(
+            public=AspirateWhileTrackingResult(
                 volume=aspirate_result.public.volume,
                 position=move_result.public.position,
             ),
@@ -220,24 +222,28 @@ class AspirateImplementation(AbstractCommandImpl[AspirateParams, _ExecuteReturn]
         )
 
 
-class Aspirate(
+class AspirateWhileTracking(
     BaseCommand[
-        AspirateParams, AspirateResult, OverpressureError | StallOrCollisionError
+        AspirateWhileTrackingParams,
+        AspirateWhileTrackingResult,
+        OverpressureError | StallOrCollisionError,
     ]
 ):
-    """Aspirate command model."""
+    """AspirateWhileTracking command model."""
 
-    commandType: AspirateCommandType = "aspirate"
-    params: AspirateParams
-    result: Optional[AspirateResult] = None
+    commandType: AspirateWhileTrackingCommandType = "aspirateWhileTracking"
+    params: AspirateWhileTrackingParams
+    result: Optional[AspirateWhileTrackingResult] = None
 
-    _ImplementationCls: Type[AspirateImplementation] = AspirateImplementation
+    _ImplementationCls: Type[
+        AspirateWhileTrackingImplementation
+    ] = AspirateWhileTrackingImplementation
 
 
-class AspirateCreate(BaseCommandCreate[AspirateParams]):
+class AspirateWhileTrackingCreate(BaseCommandCreate[AspirateWhileTrackingParams]):
     """Create aspirate command request model."""
 
-    commandType: AspirateCommandType = "aspirate"
-    params: AspirateParams
+    commandType: AspirateWhileTrackingCommandType = "aspirateWhileTracking"
+    params: AspirateWhileTrackingParams
 
-    _CommandCls: Type[Aspirate] = Aspirate
+    _CommandCls: Type[AspirateWhileTracking] = AspirateWhileTracking
