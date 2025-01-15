@@ -22,8 +22,8 @@ beforeEach(() => {
   hydratedForm = {
     id: 'stepId',
     stepType: 'mix',
-    stepName: 'mix',
-    stepDetails: '',
+    stepName: 'Cool Mix Step',
+    stepDetails: 'Here we mix 2 wells',
     changeTip: 'always',
     labware: {
       id: 'labwareId',
@@ -72,6 +72,39 @@ afterEach(() => {
 })
 
 describe('mix step form -> command creator args', () => {
+  it('mixFormToArgs propagates form fields to MixStepArgs', () => {
+    const args = mixFormToArgs(hydratedForm)
+    expect(args).toMatchObject({
+      commandCreatorFnName: 'mix',
+      name: 'Cool Mix Step', // make sure name and description are present
+      description: 'Here we mix 2 wells',
+      labware: 'labwareId',
+      wells: ['A1', 'A2'],
+      volume: '12',
+      times: '2',
+      touchTip: false,
+      touchTipMmFromBottom: 9.54,
+      changeTip: 'always',
+      blowoutLocation: null,
+      pipette: 'pipetteId',
+      aspirateFlowRateUlSec: 5, // make sure flow rates are numbers instead of strings
+      dispenseFlowRateUlSec: 4,
+      blowoutFlowRateUlSec: 1000,
+      aspirateOffsetFromBottomMm: 0.5,
+      dispenseOffsetFromBottomMm: 0.5,
+      blowoutOffsetFromTopMm: 0,
+      aspirateDelaySeconds: null,
+      tipRack: 'mockTiprack',
+      dispenseDelaySeconds: null,
+      dropTipLocation: undefined,
+      nozzles: undefined,
+      aspirateXOffset: 0,
+      dispenseXOffset: 0,
+      aspirateYOffset: 0,
+      dispenseYOffset: 0,
+    })
+  })
+
   it('mixFormToArgs calls getOrderedWells correctly', () => {
     mixFormToArgs(hydratedForm)
 

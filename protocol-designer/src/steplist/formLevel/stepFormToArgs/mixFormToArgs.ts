@@ -89,10 +89,8 @@ export const mixFormToArgs = (
   )
   return {
     commandCreatorFnName: 'mix',
-    name: `Mix ${hydratedFormData.id}`,
-    // TODO real name for steps
-    description: 'description would be here 2018-03-01',
-    // TODO get from form
+    name: hydratedFormData.stepName,
+    description: hydratedFormData.stepDetails,
     labware: labware.id,
     wells: orderedWells,
     volume,
