@@ -45,10 +45,7 @@ def _remove_default(s: dict[str, Any]) -> None:
 
 
 class DispenseParams(
-    PipetteIdMixin,
-    DispenseVolumeMixin,
-    FlowRateMixin,
-    LiquidHandlingWellLocationMixin,
+    PipetteIdMixin, DispenseVolumeMixin, FlowRateMixin, LiquidHandlingWellLocationMixin
 ):
     """Payload required to dispense to a specific well."""
 
@@ -92,6 +89,7 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
         well_location = params.wellLocation
         labware_id = params.labwareId
         well_name = params.wellName
+        volume = params.volume
 
         # TODO(pbm, 10-15-24): call self._state_view.geometry.validate_dispense_volume_into_well()
 
@@ -107,7 +105,7 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
             return move_result
         dispense_result = await dispense_in_place(
             pipette_id=params.pipetteId,
-            volume=params.volume,
+            volume=volume,
             flow_rate=params.flowRate,
             push_out=params.pushOut,
             location_if_error={
