@@ -1,10 +1,11 @@
 import { createSelector } from 'reselect'
 import mapValues from 'lodash/mapValues'
 import {
+  ABSORBANCE_READER_TYPE,
   getLabwareDisplayName,
+  HEATERSHAKER_MODULE_TYPE,
   MAGNETIC_MODULE_TYPE,
   TEMPERATURE_MODULE_TYPE,
-  HEATERSHAKER_MODULE_TYPE,
 } from '@opentrons/shared-data'
 import { getInitialDeckSetup } from '../../step-forms/selectors'
 import { getLabwareNicknamesById } from '../labware/selectors'
@@ -78,6 +79,22 @@ export const getHeaterShakerLabwareOptions: Selector<
       HEATERSHAKER_MODULE_TYPE
     )
     return heaterShakerModuleOptions
+  }
+)
+
+/** Returns dropdown option for labware placed on absorbance reader module */
+export const getAbsorbanceReaderLabwareOptions: Selector<
+  DropdownOption[]
+> = createSelector(
+  getInitialDeckSetup,
+  getLabwareNicknamesById,
+  (initialDeckSetup, nicknamesById) => {
+    const absorbanceReaderModuleOptions = getModuleLabwareOptions(
+      initialDeckSetup,
+      nicknamesById,
+      ABSORBANCE_READER_TYPE
+    )
+    return absorbanceReaderModuleOptions
   }
 )
 
