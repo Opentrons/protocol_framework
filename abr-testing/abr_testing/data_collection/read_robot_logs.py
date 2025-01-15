@@ -663,7 +663,6 @@ def get_error_info(file_results: Dict[str, Any]) -> Dict[str, Any]:
                         model = module_list["model"]
                         if model == module_dict[module]:
                             error_instrument = module_list["serialNumber"]
-                            print(f"entered loop {error_instrument}")
     except (IndexError, KeyError):
         try:
             error_details = file_results.get("errors", [{}])[0]
