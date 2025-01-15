@@ -1136,7 +1136,13 @@ class FlexStackerContext(ModuleContext):
         """
         load_name = validation.ensure_lowercase_name(load_name)
         for _ in range(quantity):
-            self.load_labware(load_name, label, namespace, version, lid)
+            self.load_labware(
+                name=load_name,
+                label=label,
+                namespace=namespace,
+                version=version,
+                lid=lid,
+            )
 
     @property
     @requires_version(2, 23)
