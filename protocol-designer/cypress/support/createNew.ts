@@ -7,24 +7,6 @@ import '../support/commands'
 // This PR unblocks Sara and I to work on this separately, so I want
 // To prioritize its getting pulled into the repo
 // Some day we should make a way to input variables into actions
-
-import 'cypress-file-upload'
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace Cypress {
-    interface Chainable {
-      chooseDeckSlot: (slot: string) => Cypress.Chainable<void>
-    }
-  }
-}
-import '../support/commands'
-// ToDo Future planning should have Step 5, Step 6, and 7 verification
-// Todo ProtocolOverview page. This might change from deck map revamp,
-// so let's hold off until then.
-// This PR unblocks Sara and I to work on this separately, so I want
-// To prioritize its getting pulled into the repo
-// Some day we should make a way to input variables into actions
-
 import 'cypress-file-upload'
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -39,9 +21,43 @@ export enum Actions {
   SelectOT2 = 'Select Opentrons OT-2',
   Confirm = 'Confirm',
   GoBack = 'Go back',
+  SingleChannelPipette50 = 'Select 50uL Single-Channel Pipette',
+  YesGripper = 'Select Yes to gripper',
+  NoGripper = 'Select no to gripper',
+  AddThermocycler = 'Thermocycler Module GEN2',
+  AddHeaterShaker = 'Heater-Shaker Module GEN1',
+  AddTempdeck2 = 'Temperature Module GEN2',
+  AddMagBlock = 'Magnetic Block GEN1',
+  EditProtocolA = 'Blue button edit protocol',
+  choseDeckSlot = 'Chose each deck slot',
+  ChoseDeckSlotA1 = 'Choose deck slot A1',
+  ChoseDeckSlotA2 = 'Choose deck slot A2',
+  ChoseDeckSlotA3 = 'Choose deck slot A3',
+  ChoseDeckSlotB1 = 'Choose deck slot B1',
+  ChoseDeckSlotB2 = 'Choose deck slot B2',
+  ChoseDeckSlotB3 = 'Choose deck slot B3',
+  ChoseDeckSlotC1 = 'Choose deck slot C1',
+  ChoseDeckSlotC2 = 'Choose deck slot C2',
+  ChoseDeckSlotC3 = 'Choose deck slot C3',
+  ChoseDeckSlotD1 = 'Choose deck slot D1',
+  ChoseDeckSlotD2 = 'Choose deck slot D2',
+  ChoseDeckSlotD3 = 'Choose deck slot D3',
+  AddHardwareLabware = 'Adds labware to deck slot by chose deck slot',
+  ClickLabwareHeader = 'Click Labware',
+  ClickWellPlatesSection = 'Click Well plates',
   SelectArmadillo96WellPlateDefinition = 'Select Armadillo 96 Well Plate to define it on deck',
   SelectArmadillo96WellPlateTransfer = 'Select Select Armadillo 96 Well Plate for transfer',
   SelectBioRad96WellPlateDefinition = 'Select Bio-Rad 96 Well Plate to define it on deck',
+  AddLiquid = 'Add liquid',
+  DefineLiquid = 'Define a liquid',
+  ClickLiquidButton = 'Click Liquid button',
+  LiquidSaveWIP = 'Save liquid, is functional but could use a refactor',
+  WellSelector = 'Select wells with strings A1, A2, etc. comman separated LIST',
+  LiquidDropdown = 'Dropdown for liquids when adding to well',
+  SelectLiquidWells = 'Select Liquid Wells',
+  SetVolumeAndSaveforWells = 'Set volume and save for wells',
+  ProtocolStepsH = 'Select Protocol Steps Header',
+  AddStep = 'Use after making sure you are on ProtocolStepsH or have already made a step',
   AddSourceLabwareDropdown = 'List the available options',
   ChoseDeckSlotA1Labware = 'Edit labware on slot A1',
   ChoseDeckSlotA2Labware = 'Edit labware on slot A2',
@@ -70,48 +86,11 @@ export enum Actions {
   TouchTipAspirate = 'Enable Touch tip for aspiration',
   MixAspirate = 'Enable Mix for aspiration',
   AirGapAspirate = 'Enable Air gap for aspiration',
-  SingleChannelPipette50 = 'Select 50uL Single-Channel Pipette',
-  YesGripper = 'Select Yes to gripper',
-  NoGripper = 'Select no to gripper',
-  AddThermocycler = 'Thermocycler Module GEN2',
-  AddHeaterShaker = 'Heater-Shaker Module GEN1',
-  AddTempdeck2 = 'Temperature Module GEN2',
-  AddMagBlock = 'Magnetic Block GEN1',
-  EditProtocolA = 'Blue button edit protocol',
-  choseDeckSlot = 'Chose each deck slot',
-  ChoseDeckSlotA1 = 'Choose deck slot A1',
-  ChoseDeckSlotA2 = 'Choose deck slot A2',
-  ChoseDeckSlotA3 = 'Choose deck slot A3',
-  ChoseDeckSlotB1 = 'Choose deck slot B1',
-  ChoseDeckSlotB2 = 'Choose deck slot B2',
-  ChoseDeckSlotB3 = 'Choose deck slot B3',
-  ChoseDeckSlotC1 = 'Choose deck slot C1',
-  ChoseDeckSlotC2 = 'Choose deck slot C2',
-  ChoseDeckSlotC3 = 'Choose deck slot C3',
-  ChoseDeckSlotD1 = 'Choose deck slot D1',
-  ChoseDeckSlotD2 = 'Choose deck slot D2',
-  ChoseDeckSlotD3 = 'Choose deck slot D3',
-  AddHardwareLabware = 'Adds labware to deck slot by chose deck slot',
-  ClickLabwareHeader = 'Click Labware',
-  ClickWellPlatesSection = 'Click Well plates',
-  SelectArmadillo96WellPlate = 'Select Armadillo 96 Well Plate',
-  SelectBioRad96WellPlate = 'Select Bio-Rad 96 Well Plate',
-  AddLiquid = 'Add liquid',
-  DefineLiquid = 'Define a liquid',
-  ClickLiquidButton = 'Click Liquid button',
-  LiquidSaveWIP = 'Save liquid, is functional but could use a refactor',
-  WellSelector = 'Select wells with strings A1, A2, etc. comman separated LIST',
-  LiquidDropdown = 'Dropdown for liquids when adding to well',
-  SelectLiquidWells = 'Select Liquid Wells',
-  SetVolumeAndSaveforWells = 'Set volume and save for wells',
-  ProtocolStepsH = 'Select Protocol Steps Header',
-  AddStep = 'Use after making sure you are on ProtocolStepsH or have already made a step',
 }
 
 export enum Verifications {
   OnStep1 = 'On Step 1 page.',
   OnStep2 = 'On Step 2 page.',
-  OnStep3 = 'on Step 3 page',
   OnStep3 = 'on Step 3 page',
   FlexSelected = 'Opentrons Flex selected.',
   OT2Selected = 'Opentrons OT-2 selected.',
@@ -140,6 +119,7 @@ export enum Content {
   Step4Title = 'Step4',
   AddPipette = 'Add a pipette',
   NinetySixChannel = '96-Channel',
+  SingleChannel = '1-Channel',
   EightChannel = '8-Channel',
   TipRack = 'Filter Tip Rack 50 µL',
   PipetteType = 'Pipette type',
@@ -387,70 +367,6 @@ const executeAction = (action: Actions | UniversalActions): void => {
     case Actions.ClickWellPlatesSection: // New case
       cy.contains(Content.WellPlatesCat).click()
       break
-    case Actions.ChoseDeckSlotC2Labware:
-      // Todo Investigate making a dictionary of slot editing.
-      // Maybe next PR
-      chooseDeckSlot('C2')
-        .find('.Box-sc-8ozbhb-0.kIDovv')
-        .find('a[role="button"]')
-        .contains(Content.EditSlot)
-        .click({ force: true })
-      break
-    case Actions.SelectArmadillo96WellPlate: // New case for selecting Armadillo plate
-      cy.contains(Content.Armadillo96WellPlate200uL).click({ force: true })
-      cy.get(Locators.LabwareSelectionLocation).click({ force: true })
-      break
-    case Actions.SelectBioRad96WellPlate: // New case for selecting Armadillo plate
-      cy.contains(Content.Biorad96WellPlate200uL).click({ force: true })
-      cy.get(Locators.LabwareSelectionLocation).click({ force: true })
-      break
-
-    case Actions.AddLiquid: // New case for "Add liquid"
-      cy.contains('button', Content.AddLiquid).click()
-      break
-    case Actions.ClickLiquidButton: // New case for "Liquid button"
-      cy.contains('button', Content.LiquidButton).click()
-      break
-    case Actions.DefineLiquid: // New case for "Define a liquid"
-      cy.contains('button', Content.DefineALiquid).click()
-      break
-    case Actions.LiquidSaveWIP:
-      cy.get(Locators.LiquidNameInput) // Locate the input with name="name"
-        .type(Content.SampleLiquidName)
-
-      cy.get(Locators.ModalShellArea)
-        .find('form') // Target the form inside the modal
-        .invoke('submit', (e: SubmitEvent) => {
-          e.preventDefault() // Prevent default form submission
-        })
-
-      cy.get(Locators.ModalShellArea)
-        .find(Locators.SaveButton) // Locate the Save button
-        .contains('Save')
-        .click({ force: true }) // Trigger the Save button
-      break
-    case Actions.WellSelector:
-      selectWells(['A1', 'A2'])
-      break
-    case Actions.LiquidDropdown: // New case for dropdown
-      cy.get(Locators.LiquidsDropdown)
-        .should('be.visible') // Ensure the dropdown is visible
-        .click() // Click the dropdown
-      break
-    case Actions.SelectLiquidWells:
-      cy.contains('My liquid!').click() // Action for clicking 'My liquid!'
-      break
-    case Actions.SetVolumeAndSaveforWells:
-      cy.get('input[name="volume"]').type(`150`) // Set volume
-      cy.contains('button', 'Save').click() // Click Save button
-      cy.contains('button', 'Done').click({ force: true }) // Click Done button, forcing click if necessary
-      break
-    case Actions.ProtocolStepsH:
-      cy.contains('button', Content.ProtocolSteps).click()
-      break
-    case Actions.AddStep:
-      cy.contains('button', Content.AddStep).click()
-      break
     case Actions.ChoseDeckSlotA1Labware:
       chooseDeckSlot('A1')
         .find('.Box-sc-8ozbhb-0.kIDovv')
@@ -500,7 +416,13 @@ const executeAction = (action: Actions | UniversalActions): void => {
         .contains(Content.EditSlot)
         .click({ force: true })
       break
-
+    case Actions.ChoseDeckSlotC2Labware:
+      chooseDeckSlot('C2')
+        .find('.Box-sc-8ozbhb-0.kIDovv')
+        .find('a[role="button"]')
+        .contains(Content.EditSlot)
+        .click({ force: true })
+      break
     case Actions.ChoseDeckSlotC3Labware:
       chooseDeckSlot('C3')
         .find('.Box-sc-8ozbhb-0.kIDovv')
@@ -537,10 +459,57 @@ const executeAction = (action: Actions | UniversalActions): void => {
       cy.contains(Content.Biorad96WellPlate200uL).click({ force: true })
       cy.get(Locators.LabwareSelectionLocation).click({ force: true })
       break
+
+    case Actions.AddLiquid: // New case for "Add liquid"
+      cy.contains('button', Content.AddLiquid).click()
+      break
+    case Actions.ClickLiquidButton: // New case for "Liquid button"
+      cy.contains('button', Content.LiquidButton).click()
+      break
+    case Actions.DefineLiquid: // New case for "Define a liquid"
+      cy.contains('button', Content.DefineALiquid).click()
+      break
+    case Actions.LiquidSaveWIP:
+      cy.get(Locators.LiquidNameInput) // Locate the input with name="name"
+        .type(Content.SampleLiquidName)
+
+      cy.get(Locators.ModalShellArea)
+        .find('form') // Target the form inside the modal
+        .invoke('submit', (e: SubmitEvent) => {
+          e.preventDefault() // Prevent default form submission
+        })
+
+      cy.get(Locators.ModalShellArea)
+        .find(Locators.SaveButton) // Locate the Save button
+        .contains('Save')
+        .click({ force: true }) // Trigger the Save button
+      break
+    case Actions.WellSelector:
+      selectWells(['A1', 'A2'])
+      break
     case Actions.WellSelector_A1:
       cy.get('circle[data-wellname="A1"]')
         .should('exist') // Verify the element exists
         .click({ force: true })
+      break
+    case Actions.LiquidDropdown: // New case for dropdown
+      cy.get(Locators.LiquidsDropdown)
+        .should('be.visible') // Ensure the dropdown is visible
+        .click() // Click the dropdown
+      break
+    case Actions.SelectLiquidWells:
+      cy.contains('My liquid!').click() // Action for clicking 'My liquid!'
+      break
+    case Actions.SetVolumeAndSaveforWells:
+      cy.get(Locators.AddInitialVolume).type(`150`) // Set volume
+      cy.contains('button', 'Save').click() // Click Save button
+      cy.contains('button', 'Done').click({ force: true }) // Click Done button, forcing click if necessary
+      break
+    case Actions.ProtocolStepsH:
+      cy.contains('button', Content.ProtocolSteps).click()
+      break
+    case Actions.AddStep:
+      cy.contains('button', Content.AddStep).click()
       break
     case Actions.SelectArmadillo96WellPlateTransfer: // New case for selecting Armadillo plate
       cy.contains(Content.Armadillo96WellPlate200uL).click({ force: true })
@@ -732,65 +701,6 @@ const verifyStep = (verification: Verifications): void => {
         .find('svg')
         .should('exist')
         .and('have.attr', 'aria-hidden', 'true')
-      break
-
-    case Verifications.StepTwo50uL:
-      // This function should get used after you select 50uL fully
-      cy.contains(Content.PipetteVolume)
-      cy.contains(Content.Volume50).should('be.visible')
-      cy.contains(Content.Volume1000).should('be.visible')
-      cy.contains(Content.Tiprack50).should('be.visible')
-      cy.contains(Content.FilterTiprack50).should('be.visible')
-      break
-    case Verifications.StepTwoPart3:
-      // This function should get used after you select 50uL fully
-      cy.contains(Content.FullP50SingleName).should('be.visible')
-      cy.contains(Content.FullP50TiprackName).should('be.visible')
-      cy.contains('Left Mount').should('be.visible')
-      cy.contains(Content.Step2Title)
-      cy.contains('Robot pipettes')
-      cy.contains(Content.AddPipette)
-      break
-    case Verifications.OnStep3:
-      cy.contains('Add a gripper').should('be.visible')
-      cy.contains(
-        'Do you want to move labware automatically with the gripper?'
-      ).should('be.visible')
-      cy.contains(Content.Yes).should('be.visible')
-      cy.contains(Content.No).should('be.visible')
-      break
-    case Verifications.Step4Verification:
-      cy.contains(Content.ModulePageH).should('be.visible')
-      cy.contains(Content.ModulePageB).should('be.visible')
-      cy.contains(Content.Thermocycler).should('be.visible')
-      cy.contains(Content.HeaterShaker).should('be.visible')
-      cy.contains(Content.MagBlock).should('be.visible')
-      cy.contains(Content.Tempdeck2).should('be.visible')
-      break
-    case Verifications.ThermocyclerImg:
-      cy.get(Locators.TemperatureModuleImage).should('be.visible')
-      break
-    case Verifications.HeaterShakerImg:
-      cy.get(Locators.HeaterShakerImage).should('be.visible')
-      break
-    case Verifications.Tempdeck2Img:
-      cy.contains(Content.Tempdeck2).should('be.visible')
-      break
-    case Verifications.LiquidPage:
-      cy.contains('Liquid').should('be.visible')
-      cy.contains('Add liquid').should('be.visible')
-      cy.contains('Liquid volume by well').should('be.visible')
-      cy.contains('Cancel').should('be.visible')
-      break
-    case Verifications.TransferPopOut:
-      cy.contains('button', 'Transfer').should('be.visible').click()
-      cy.contains('Source labware')
-      cy.contains('Select source wells')
-      cy.contains('Destination labware')
-      cy.contains('Volume per well')
-      cy.contains('Tip handling')
-      cy.contains('Tip handling')
-      cy.contains('Tip drop location')
       break
 
     default:

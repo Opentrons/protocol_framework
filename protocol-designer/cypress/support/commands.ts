@@ -57,11 +57,8 @@ export const locators = {
   createProtocol: 'Create a protocol',
   Flex_Home: 'Opentrons Flex',
   OT2_Home: 'Opentrons OT-2',
-<<<<<<< HEAD
   editProtocol: 'Edit existing protocol',
-=======
   importProtocol: 'Import existing protocol',
->>>>>>> edge
   settingsDataTestid: 'SettingsIconButton',
   settings: 'Settings',
   privacyPolicy: 'a[href="https://opentrons.com/privacy-policy"]',

@@ -9,14 +9,9 @@ describe('The Redesigned Create Protocol Landing Page', () => {
   })
 
   it('content and step 1 flow works', () => {
-<<<<<<< HEAD
     // cy.clickCreateNew()
     cy.verifyCreateNewHeader()
     cy.contains('button', 'Create a protocol').click()
-=======
-    cy.verifyCreateNewHeader()
-    cy.clickCreateNew()
->>>>>>> edge
     const steps: Array<Actions | Verifications | UniversalActions> = [
       Verifications.OnStep1,
       Verifications.FlexSelected,
