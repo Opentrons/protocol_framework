@@ -31,6 +31,8 @@ interface LabwarePositionCheckModalProps {
 // the component's dependencies (like useLabwarePositionCheck). If we wrapped the contents of LabwarePositionCheckComponent
 // in an ErrorBoundary as part of its return value (render), an error could occur before this point, meaning the error boundary
 // would never get invoked
+
+// LegacyFlows are utilized by the OT-2, and should never actually be utilized by the Flex despite offering Flex support.
 export const LegacyLabwarePositionCheck = (
   props: LabwarePositionCheckModalProps
 ): JSX.Element => {

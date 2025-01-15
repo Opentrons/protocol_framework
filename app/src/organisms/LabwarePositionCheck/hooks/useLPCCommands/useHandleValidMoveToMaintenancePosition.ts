@@ -28,7 +28,7 @@ export function useHandleValidMoveToMaintenancePosition({
       } else {
         return Promise.reject(
           new Error(
-            'Does not move to maintenance position if step is not a probe step.'
+            `Does not move to maintenance position if step is not a probe step. Step: ${step?.section}`
           )
         )
       }

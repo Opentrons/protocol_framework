@@ -35,11 +35,13 @@ export function useHandlePrepModules({
         prepCommands.length > 0
       ) {
         return chainLPCCommands(prepCommands, false)
+      } else {
+        return Promise.resolve([])
       }
     }
 
     return Promise.reject(
-      new Error('Cannot prep modules during unsupported step.')
+      new Error(`Cannot prep modules during unsupported step: ${step?.section}`)
     )
   }
 

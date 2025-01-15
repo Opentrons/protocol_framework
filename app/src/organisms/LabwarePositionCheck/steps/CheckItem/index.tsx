@@ -2,6 +2,7 @@ import { Trans, useTranslation } from 'react-i18next'
 
 import { DIRECTION_COLUMN, Flex, LegacyStyledText } from '@opentrons/components'
 
+import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import { getLabwareDisplayLocation } from '/app/local-resources/labware'
 import { UnorderedList } from '/app/molecules/UnorderedList'
@@ -101,8 +102,13 @@ export function CheckItem(
           })
         )
       })
-      .then(() => handleCheckItemsPrepModules(steps.next))
-      .then(() => handleValidMoveToMaintenancePosition(steps.next))
+      .then(() => {
+        if (state.steps.next?.section === NAV_STEPS.CHECK_POSITIONS) {
+          return handleCheckItemsPrepModules(steps.next)
+        } else {
+          return handleValidMoveToMaintenancePosition(steps.next)
+        }
+      })
       .finally(() => toggleRobotMoving(false))
   }
 
