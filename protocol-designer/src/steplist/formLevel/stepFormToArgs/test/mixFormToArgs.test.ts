@@ -76,18 +76,18 @@ describe('mix step form -> command creator args', () => {
     const args = mixFormToArgs(hydratedForm)
     expect(args).toMatchObject({
       commandCreatorFnName: 'mix',
-      name: 'Cool Mix Step',  // make sure name and description are present
+      name: 'Cool Mix Step', // make sure name and description are present
       description: 'Here we mix 2 wells',
       labware: 'labwareId',
-      wells: [ 'A1', 'A2' ],
+      wells: ['A1', 'A2'],
       volume: '12',
       times: '2',
       touchTip: false,
-      touchTipMmFromBottom: 9.54,  // where does this number come from?
+      touchTipMmFromBottom: 9.54, // where does this number come from?
       changeTip: 'always',
       blowoutLocation: null,
       pipette: 'pipetteId',
-      aspirateFlowRateUlSec: 5,  // make sure flow rates are numbers instead of strings
+      aspirateFlowRateUlSec: 5, // make sure flow rates are numbers instead of strings
       dispenseFlowRateUlSec: 4,
       blowoutFlowRateUlSec: 1000,
       aspirateOffsetFromBottomMm: 0.5,
@@ -101,7 +101,7 @@ describe('mix step form -> command creator args', () => {
       aspirateXOffset: 0,
       dispenseXOffset: 0,
       aspirateYOffset: 0,
-      dispenseYOffset: 0    
+      dispenseYOffset: 0,
     })
   })
 
