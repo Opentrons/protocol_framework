@@ -1,5 +1,4 @@
-import { action } from '@storybook/addon-actions'
-import { Flex } from '../../primitives'
+import { Flex, STYLE_PROPS } from '../../primitives'
 import { DIRECTION_COLUMN } from '../../styles'
 import { MenuList as MenuListComponent } from './index'
 import { MenuItem } from './MenuItem'
@@ -11,8 +10,18 @@ const menuBtn = 'Example menu btn'
 const meta: Meta<typeof MenuListComponent> = {
   title: 'Helix/Atoms/MenuList',
   component: MenuListComponent,
-  args: {
-    onClick: action('clicked'),
+  argTypes: {
+    // Disable all StyleProps
+    ...Object.fromEntries(
+      [
+        ...STYLE_PROPS,
+        'as',
+        'ref',
+        'theme',
+        'forwardedAs',
+        'className',
+      ].map(prop => [prop, { table: { disable: true } }])
+    ),
   },
 }
 

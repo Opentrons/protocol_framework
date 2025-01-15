@@ -1,5 +1,5 @@
+import { STYLE_PROPS } from '../../primitives'
 import { VIEWPORT } from '../../ui-style-constants'
-import { allDefaultStorybookControlsWithStyleProps } from '../../constants'
 import { MenuItem as MenuItemComponent } from './MenuItem'
 import type { Meta, StoryObj } from '@storybook/react'
 
@@ -10,7 +10,7 @@ const meta: Meta<typeof MenuItemComponent> = {
   argTypes: {
     // Disable all StyleProps
     ...Object.fromEntries(
-      allDefaultStorybookControlsWithStyleProps.map(prop => [
+      [...STYLE_PROPS, 'as', 'ref', 'theme', 'forwardedAs'].map(prop => [
         prop,
         { table: { disable: true } },
       ])
