@@ -842,8 +842,9 @@ def test_ensure_valid_trash_location_for_transfer_v2(
     mock_location = Location(point=Point(x=1, y=1, z=1), labware=mock_well)
     mock_trash_bin = decoy.mock(cls=TrashBin)
     mock_waste_chute = decoy.mock(cls=WasteChute)
+    decoy.when(mock_well.top()).then_return(Location(Point(1, 2, 3), labware=mock_well))
     assert subject.ensure_valid_trash_location_for_transfer_v2(mock_well) == Location(
-        Point(0, 0, 0), labware=mock_well
+        Point(1, 2, 3), labware=mock_well
     )
     assert (
         subject.ensure_valid_trash_location_for_transfer_v2(mock_location)
