@@ -83,7 +83,7 @@ describe('mix step form -> command creator args', () => {
       volume: '12',
       times: '2',
       touchTip: false,
-      touchTipMmFromBottom: 9.54, // where does this number come from?
+      touchTipMmFromBottom: 9.54,
       changeTip: 'always',
       blowoutLocation: null,
       pipette: 'pipetteId',
