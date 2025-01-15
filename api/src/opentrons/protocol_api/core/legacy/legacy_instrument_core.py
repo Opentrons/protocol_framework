@@ -84,8 +84,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
         rate: float,
         flow_rate: float,
         in_place: bool,
-        is_meniscus: Optional[bool] = None,
-        is_tracking: Optional[bool] = None,
+        meniscus_tracking: Optional[types.MeniscusTracking] = None,
     ) -> None:
         """Aspirate a given volume of liquid from the specified location.
         Args:
@@ -95,8 +94,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
             rate: The rate in µL/s to aspirate at.
             flow_rate: Not used in this core.
             in_place: Whether we should move_to location.
-            is_meniscus: whether the aspirate location specified is relative to a liquid meniscus.
-            is_tracking: whether the z motor is to move with the liquid meniscus.
+            meniscus_tracking: Optional data about where to aspirate from.
         """
         if self.get_current_volume() == 0:
             # Make sure we're at the top of the labware and clear of any
@@ -130,8 +128,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
         flow_rate: float,
         in_place: bool,
         push_out: Optional[float],
-        is_meniscus: Optional[bool] = None,
-        is_tracking: Optional[bool] = None,
+        meniscus_tracking: Optional[types.MeniscusTracking] = None,
     ) -> None:
         """Dispense a given volume of liquid into the specified location.
         Args:
@@ -142,8 +139,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
             flow_rate: Not used in this core.
             in_place: Whether we should move_to location.
             push_out: The amount to push the plunger below bottom position.
-            is_meniscus: whether the aspirate location specified is relative to a liquid meniscus.
-            is_tracking: whether the z motor is to move with the liquid meniscus.
+            meniscus_tracking: Optional data about where to dispense from.
         """
         if isinstance(location, (TrashBin, WasteChute)):
             raise APIVersionError(

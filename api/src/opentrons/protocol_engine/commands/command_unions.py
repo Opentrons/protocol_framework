@@ -57,6 +57,14 @@ from .aspirate_in_place import (
     AspirateInPlaceCommandType,
 )
 
+from .aspirate_while_tracking import (
+    AspirateWhileTracking,
+    AspirateWhileTrackingParams,
+    AspirateWhileTrackingCreate,
+    AspirateWhileTrackingResult,
+    AspirateWhileTrackingCommandType
+)
+
 from .comment import (
     Comment,
     CommentParams,
@@ -79,6 +87,14 @@ from .dispense import (
     DispenseCreate,
     DispenseResult,
     DispenseCommandType,
+)
+
+from .dispense_while_tracking import (
+    DispenseWhileTracking,
+    DispenseWhileTrackingParams,
+    DispenseWhileTrackingCreate,
+    DispenseWhileTrackingResult,
+    DispenseWhileTrackingCommandType
 )
 
 from .dispense_in_place import (
@@ -365,10 +381,12 @@ Command = Annotated[
         AirGapInPlace,
         Aspirate,
         AspirateInPlace,
+        AspirateWhileTracking,
         Comment,
         Custom,
         Dispense,
         DispenseInPlace,
+        DispenseWhileTracking,
         BlowOut,
         BlowOutInPlace,
         ConfigureForVolume,
@@ -452,6 +470,7 @@ Command = Annotated[
 CommandParams = Union[
     AirGapInPlaceParams,
     AspirateParams,
+    AspirateWhileTrackingParams,
     AspirateInPlaceParams,
     CommentParams,
     ConfigureForVolumeParams,
@@ -459,6 +478,7 @@ CommandParams = Union[
     CustomParams,
     DispenseParams,
     DispenseInPlaceParams,
+    DispenseWhileTrackingParams,
     BlowOutParams,
     BlowOutInPlaceParams,
     DropTipParams,
@@ -538,6 +558,7 @@ CommandParams = Union[
 CommandType = Union[
     AirGapInPlaceCommandType,
     AspirateCommandType,
+    AspirateWhileTrackingCommandType,
     AspirateInPlaceCommandType,
     CommentCommandType,
     ConfigureForVolumeCommandType,
@@ -545,6 +566,7 @@ CommandType = Union[
     CustomCommandType,
     DispenseCommandType,
     DispenseInPlaceCommandType,
+    DispenseWhileTrackingCommandType,
     BlowOutCommandType,
     BlowOutInPlaceCommandType,
     DropTipCommandType,
@@ -625,6 +647,7 @@ CommandCreate = Annotated[
     Union[
         AirGapInPlaceCreate,
         AspirateCreate,
+        AspirateWhileTrackingCreate,
         AspirateInPlaceCreate,
         CommentCreate,
         ConfigureForVolumeCreate,
@@ -632,6 +655,7 @@ CommandCreate = Annotated[
         CustomCreate,
         DispenseCreate,
         DispenseInPlaceCreate,
+        DispenseWhileTrackingCreate,
         BlowOutCreate,
         BlowOutInPlaceCreate,
         DropTipCreate,
@@ -720,6 +744,7 @@ CommandAdapter: TypeAdapter[Command] = TypeAdapter(Command)
 CommandResult = Union[
     AirGapInPlaceResult,
     AspirateResult,
+    AspirateWhileTrackingResult,
     AspirateInPlaceResult,
     CommentResult,
     ConfigureForVolumeResult,
@@ -727,6 +752,7 @@ CommandResult = Union[
     CustomResult,
     DispenseResult,
     DispenseInPlaceResult,
+    DispenseWhileTrackingResult,
     BlowOutResult,
     BlowOutInPlaceResult,
     DropTipResult,

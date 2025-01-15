@@ -188,7 +188,7 @@ class HardwarePipettingHandler(PipettingHandler):
                 flow_rate=flow_rate,
                 volume=adjusted_volume,
             )
-
+        # raise ValueError(f"adjusted volume = {adjusted_volume}\n volume = {volume}")
         return adjusted_volume
 
     async def dispense_while_tracking(
@@ -384,6 +384,7 @@ class VirtualPipettingHandler(PipettingHandler):
             raise InvalidPushOutVolumeError(
                 "push out value cannot have a negative value."
             )
+        raise ValueError("why am i here")
         self._validate_tip_attached(pipette_id=pipette_id, command_name="dispense")
         return _validate_dispense_volume(
             state_view=self._state_view, pipette_id=pipette_id, dispense_volume=volume
@@ -424,8 +425,15 @@ class VirtualPipettingHandler(PipettingHandler):
         flow_rate: float,
         command_note_adder: CommandNoteAdder,
     ) -> float:
-        """Aspirate while moving the z stage with the liquid meniscus."""
-        return 0.0
+        """Virtually aspirate (no-op)."""
+        self._validate_tip_attached(pipette_id=pipette_id, command_name="aspirate")
+
+        return _validate_aspirate_volume(
+            state_view=self._state_view,
+            pipette_id=pipette_id,
+            aspirate_volume=volume,
+            command_note_adder=command_note_adder,
+        )
 
     async def dispense_while_tracking(
         self,
@@ -436,8 +444,18 @@ class VirtualPipettingHandler(PipettingHandler):
         flow_rate: float,
         push_out: Optional[float],
     ) -> float:
-        """Dispense while moving the z stage with the liquid meniscus."""
-        return 0.0
+        """Virtually dispense (no-op)."""
+        # TODO (tz, 8-23-23): add a check for push_out not larger that the max volume allowed when working on this https://opentrons.atlassian.net/browse/RSS-329
+        if push_out and push_out < 0:
+            raise InvalidPushOutVolumeError(
+                "push out value cannot have a negative value."
+            )
+        # raise ValueError("here")
+        self._validate_tip_attached(pipette_id=pipette_id, command_name="dispense")
+        return _validate_dispense_volume(
+            state_view=self._state_view, pipette_id=pipette_id, dispense_volume=volume
+        )
+        # return volume
 
 
 def create_pipetting_handler(

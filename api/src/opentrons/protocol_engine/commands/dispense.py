@@ -16,7 +16,6 @@ from .pipetting_common import (
     BaseLiquidHandlingResult,
     OverpressureError,
     dispense_in_place,
-    IsTrackingMixin,
 )
 from .movement_common import (
     LiquidHandlingWellLocationMixin,
@@ -103,7 +102,6 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
             labware_id=labware_id,
             well_name=well_name,
             well_location=well_location,
-            is_tracking=False,
         )
         if isinstance(move_result, DefinedErrorData):
             return move_result

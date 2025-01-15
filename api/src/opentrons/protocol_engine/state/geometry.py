@@ -9,7 +9,13 @@ from typing import Optional, List, Tuple, Union, cast, TypeVar, Dict
 from dataclasses import dataclass
 from functools import cached_property
 
-from opentrons.types import Point, DeckSlotName, StagingSlotName, MountType
+from opentrons.types import (
+    Point,
+    DeckSlotName,
+    StagingSlotName,
+    MountType,
+    MeniscusTracking,
+)
 
 from opentrons_shared_data.errors.exceptions import InvalidStoredData
 from opentrons_shared_data.labware.constants import WELL_NAME_PATTERN
@@ -465,7 +471,8 @@ class GeometryView:
                 )
             else:
                 raise OperationLocationNotInWellError(
-                    f"Specifying {well_location.origin} with an offset of {well_location.offset} and a volume offset of {well_location.volumeOffset} results in an operation location below the bottom of the well"
+                    # f"Specifying {well_location.origin} with an offset of {well_location.offset} and a volume offset of {well_location.volumeOffset} results in an operation location below the bottom of the well"
+                    f"well = {well_location}"
                 )
 
     def get_well_position(
@@ -475,7 +482,6 @@ class GeometryView:
         well_location: Optional[WellLocations] = None,
         operation_volume: Optional[float] = None,
         pipette_id: Optional[str] = None,
-        is_tracking: Optional[bool] = False,
     ) -> Point:
         """Given relative well location in a labware, get absolute position."""
         labware_pos = self.get_labware_position(labware_id)
@@ -491,7 +497,6 @@ class GeometryView:
                 well_location=well_location,
                 well_depth=well_depth,
                 operation_volume=operation_volume,
-                is_tracking=is_tracking,
             )
             offset = offset.model_copy(update={"z": offset.z + offset_adjustment})
             self.validate_well_position(
@@ -536,13 +541,13 @@ class GeometryView:
         labware_id: str,
         well_name: str,
         absolute_point: Point,
-        is_meniscus: Optional[bool] = None,
+        meniscus_tracking: Optional[MeniscusTracking] = None,
     ) -> LiquidHandlingWellLocation:
         """Given absolute position, get relative location of a well in a labware.
 
         If is_meniscus is True, absolute_point will hold the z-offset in its z field.
         """
-        if is_meniscus:
+        if meniscus_tracking:
             return LiquidHandlingWellLocation(
                 origin=WellOrigin.MENISCUS,
                 offset=WellOffset(x=0, y=0, z=absolute_point.z),
@@ -1433,7 +1438,6 @@ class GeometryView:
         well_location: WellLocations,
         well_depth: float,
         operation_volume: Optional[float] = None,
-        is_tracking: Optional[bool] = False,
     ) -> float:
         """Return a z-axis distance that accounts for well handling height and operation volume.
 
@@ -1446,11 +1450,10 @@ class GeometryView:
             well_location=well_location,
             well_depth=well_depth,
         )
-        # _log = logging.getLogger(__name__)
-        # raise ValueError(
-        #     f"initial handling height {initial_handling_height} \n is_tracking {is_tracking}"
-        # )
-        if is_tracking:
+        if (
+            well_location.origin == WellOrigin.MENISCUS
+            and not well_location.volumeOffset
+        ):
             return initial_handling_height
         if isinstance(well_location, PickUpTipWellLocation):
             volume = 0.0

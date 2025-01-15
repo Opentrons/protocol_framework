@@ -63,15 +63,6 @@ class FlowRateMixin(BaseModel):
     )
 
 
-class IsTrackingMixin(BaseModel):
-    """Mixin for the 'is_tracking' field of aspirate commands."""
-
-    is_tracking: bool = Field(
-        False,
-        description="Whether or not the pipette should move with the liquid while aspirating.",
-    )
-
-
 class BaseLiquidHandlingResult(BaseModel):
     """Base properties of a liquid handling result."""
 

@@ -508,7 +508,6 @@ def test_aspirate_from_well(
             labware_id="123abc",
             well_name="my cool well",
             absolute_point=Point(1, 2, 3),
-            is_meniscus=None,
         )
     ).then_return(
         LiquidHandlingWellLocation(
@@ -607,7 +606,6 @@ def test_aspirate_from_meniscus(
             labware_id="123abc",
             well_name="my cool well",
             absolute_point=Point(1, 2, 3),
-            is_meniscus=True,
         )
     ).then_return(
         LiquidHandlingWellLocation(
@@ -622,7 +620,6 @@ def test_aspirate_from_meniscus(
         rate=5.6,
         flow_rate=7.8,
         in_place=False,
-        is_meniscus=True,
     )
 
     decoy.verify(
@@ -805,7 +802,6 @@ def test_dispense_to_well(
             labware_id="123abc",
             well_name="my cool well",
             absolute_point=Point(1, 2, 3),
-            is_meniscus=None,
         )
     ).then_return(
         LiquidHandlingWellLocation(

@@ -155,7 +155,6 @@ async def test_liquid_probe_implementation(
             minimum_z_height=None,
             speed=None,
             operation_volume=None,
-            is_tracking=False,
         ),
     ).then_return(Point(x=1, y=2, z=3))
 
@@ -316,7 +315,6 @@ async def test_liquid_not_found_error(
             minimum_z_height=None,
             speed=None,
             operation_volume=None,
-            is_tracking=False,
         ),
     ).then_return(position)
 
@@ -717,7 +715,6 @@ async def test_liquid_probe_stall(
             minimum_z_height=None,
             speed=None,
             operation_volume=None,
-            is_tracking=False,
         ),
     ).then_raise(StallOrCollisionDetectedError())
 

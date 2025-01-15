@@ -342,7 +342,6 @@ def test_aspirate(
             volume=42.0,
             rate=1.23,
             flow_rate=5.67,
-            is_meniscus=None,
         ),
         times=1,
     )
@@ -380,7 +379,6 @@ def test_aspirate_well_location(
             volume=42.0,
             rate=1.23,
             flow_rate=5.67,
-            is_meniscus=None,
         ),
         times=1,
     )
@@ -394,9 +392,7 @@ def test_aspirate_meniscus_well_location(
 ) -> None:
     """It should aspirate to a well."""
     mock_well = decoy.mock(cls=Well)
-    input_location = Location(
-        point=Point(2, 2, 2), labware=mock_well, _ot_internal_is_meniscus=True
-    )
+    input_location = Location(point=Point(2, 2, 2), labware=mock_well)
     last_location = Location(point=Point(9, 9, 9), labware=None)
     decoy.when(mock_instrument_core.get_mount()).then_return(Mount.RIGHT)
 
@@ -420,7 +416,6 @@ def test_aspirate_meniscus_well_location(
             volume=42.0,
             rate=1.23,
             flow_rate=5.67,
-            is_meniscus=True,
         ),
         times=1,
     )
@@ -457,7 +452,6 @@ def test_aspirate_from_coordinates(
             volume=42.0,
             rate=1.23,
             flow_rate=5.67,
-            is_meniscus=None,
         ),
         times=1,
     )
@@ -971,7 +965,6 @@ def test_dispense_with_location(
             rate=1.23,
             flow_rate=5.67,
             push_out=None,
-            is_meniscus=None,
         ),
         times=1,
     )
@@ -1010,7 +1003,6 @@ def test_dispense_with_well_location(
             rate=1.23,
             flow_rate=3.0,
             push_out=7,
-            is_meniscus=None,
         ),
         times=1,
     )
@@ -1051,7 +1043,6 @@ def test_dispense_with_well(
             rate=1.23,
             flow_rate=5.67,
             push_out=None,
-            is_meniscus=None,
         ),
         times=1,
     )
@@ -1306,7 +1297,6 @@ def test_dispense_0_volume_means_dispense_everything(
             rate=1.23,
             flow_rate=5.67,
             push_out=None,
-            is_meniscus=None,
         ),
         times=1,
     )
@@ -1336,7 +1326,6 @@ def test_dispense_0_volume_means_dispense_nothing(
             rate=1.23,
             flow_rate=5.67,
             push_out=None,
-            is_meniscus=None,
         ),
         times=1,
     )
@@ -1376,7 +1365,6 @@ def test_aspirate_0_volume_means_aspirate_everything(
             volume=200,
             rate=1.23,
             flow_rate=5.67,
-            is_meniscus=None,
         ),
         times=1,
     )
@@ -1416,7 +1404,6 @@ def test_aspirate_0_volume_means_aspirate_nothing(
             volume=0,
             rate=1.23,
             flow_rate=5.67,
-            is_meniscus=None,
         ),
         times=1,
     )

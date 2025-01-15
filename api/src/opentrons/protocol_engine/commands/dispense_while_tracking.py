@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from ..state.state import StateView
 
 
-DispenseCommandType = Literal["dispense"]
+DispenseWhileTrackingCommandType = Literal["dispenseWhileTracking"]
 
 
 def _remove_default(s: dict[str, Any]) -> None:
@@ -104,7 +104,6 @@ class DispenseWhileTrackingImplementation(
             labware_id=labware_id,
             well_name=well_name,
             well_location=well_location,
-            is_tracking=True,
         )
         if isinstance(move_result, DefinedErrorData):
             return move_result
@@ -185,7 +184,7 @@ class DispenseWhileTracking(
 ):
     """Dispense command model."""
 
-    commandType: DispenseCommandType = "dispense"
+    commandType: DispenseWhileTrackingCommandType = "dispenseWhileTracking"
     params: DispenseWhileTrackingParams
     result: Optional[DispenseWhileTrackingResult] = None
 
@@ -197,7 +196,7 @@ class DispenseWhileTracking(
 class DispenseWhileTrackingCreate(BaseCommandCreate[DispenseWhileTrackingParams]):
     """Create dispense command request model."""
 
-    commandType: DispenseCommandType = "dispense"
+    commandType: DispenseWhileTrackingCommandType = "dispenseWhileTracking"
     params: DispenseWhileTrackingParams
 
     _CommandCls: Type[DispenseWhileTracking] = DispenseWhileTracking
