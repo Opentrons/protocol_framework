@@ -24,6 +24,7 @@ import {
   useUnmatchedModulesForProtocol,
 } from '/app/resources/runs'
 import { useRobotType } from '/app/redux-resources/robots'
+import { useLPCFlows } from '/app/organisms/LabwarePositionCheck'
 
 import type { Mock } from 'vitest'
 
@@ -34,6 +35,7 @@ vi.mock('/app/redux/config')
 vi.mock('../../../hooks/useLPCSuccessToast')
 vi.mock('@opentrons/react-api-client')
 vi.mock('/app/resources/runs')
+vi.mock('/app/organisms/LabwarePositionCheck')
 
 const DISABLED_REASON = 'MOCK_DISABLED_REASON'
 const ROBOT_NAME = 'otie'
@@ -51,7 +53,7 @@ const render = () => {
         setOffsetsConfirmed={confirmOffsets}
         robotName={ROBOT_NAME}
         runId={RUN_ID}
-        isNewLpc={false}
+        isNewLPC={false}
       />
     </MemoryRouter>,
     {
@@ -106,6 +108,7 @@ describe('SetupLabwarePositionCheck', () => {
     vi.mocked(useProtocolAnalysisAsDocumentQuery).mockReturnValue({
       data: null,
     } as any)
+    vi.mocked(useLPCFlows).mockReturnValue({ launchLPC: mockLaunchLPC } as any)
   })
 
   afterEach(() => {

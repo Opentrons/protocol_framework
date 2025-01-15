@@ -86,7 +86,7 @@ export function ProtocolRunSetup({
     orderedApplicableSteps,
   } = useRequiredSetupStepsInOrder({ runId, protocolAnalysis })
   const modules = parseAllRequiredModuleModels(protocolAnalysis?.commands ?? [])
-  const isNewLpc = useFeatureFlag('lpcRedesign')
+  const isNewLPC = useFeatureFlag('lpcRedesign')
   const robot = useRobot(robotName)
   const calibrationStatusRobot = useRunCalibrationStatus(robotName, runId)
   const calibrationStatusModules = useModuleCalibrationStatus(robotName, runId)
@@ -225,7 +225,7 @@ export function ProtocolRunSetup({
             }
           }}
           offsetsConfirmed={!missingSteps.includes(LPC_STEP_KEY)}
-          isNewLpc={isNewLpc}
+          isNewLPC={isNewLPC}
         />
       ),
       description: t('labware_position_check_step_description'),

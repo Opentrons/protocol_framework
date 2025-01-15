@@ -107,7 +107,7 @@ export function ChooseProtocolSlideoutComponent(
   const { robot, showSlideout, onCloseClick } = props
   const { name } = robot
 
-  const isNewLpc = useFeatureFlag('lpcRedesign')
+  const isNewLPC = useFeatureFlag('lpcRedesign')
 
   const [
     selectedProtocol,
@@ -655,7 +655,7 @@ export function ChooseProtocolSlideoutComponent(
           }
         >
           {currentPage === 1
-            ? !isNewLpc && (
+            ? !isNewLPC && (
                 <LegacyApplyHistoricOffsets
                   offsetCandidates={offsetCandidates}
                   shouldApplyOffsets={shouldApplyOffsets}

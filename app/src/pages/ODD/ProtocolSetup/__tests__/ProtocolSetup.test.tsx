@@ -65,6 +65,7 @@ import {
 import { mockConnectableRobot } from '/app/redux/discovery/__fixtures__'
 import { mockRunTimeParameterData } from '/app/organisms/ODD/ProtocolSetup/__fixtures__'
 import { useScrollPosition } from '/app/local-resources/dom-utils'
+import { useLPCFlows } from '/app/organisms/LabwarePositionCheck'
 
 import type { UseQueryResult } from 'react-query'
 import type * as SharedData from '@opentrons/shared-data'
@@ -115,6 +116,7 @@ vi.mock('/app/redux-resources/analytics')
 vi.mock('/app/redux-resources/robots')
 vi.mock('/app/resources/modules')
 vi.mock('/app/local-resources/dom-utils')
+vi.mock('/app/organisms/LabwarePositionCheck')
 
 const render = (path = '/') => {
   return renderWithProviders(
@@ -328,6 +330,7 @@ describe('ProtocolSetup', () => {
       isScrolled: false,
       scrollRef: {} as any,
     })
+    vi.mocked(useLPCFlows).mockReturnValue({ launchLPC: mockLaunchLPC } as any)
   })
 
   it('should render text, image, and buttons', () => {

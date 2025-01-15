@@ -62,7 +62,7 @@ interface ResultsSummaryProps extends ResultsSummaryStep {
   existingOffsets: LabwareOffset[]
   handleApplyOffsets: (offsets: LabwareOffsetCreateData[]) => void
   isApplyingOffsets: boolean
-  isDeletingMaintenanceRun: boolean
+  isDeletingMaintenanceRun?: boolean
 }
 export const ResultsSummary = (
   props: ResultsSummaryProps

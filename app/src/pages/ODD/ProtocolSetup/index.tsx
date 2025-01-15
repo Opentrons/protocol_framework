@@ -88,6 +88,7 @@ import {
   useRequiredProtocolHardwareFromAnalysis,
   useMissingProtocolHardwareFromAnalysis,
 } from '/app/transformations/commands'
+import { useLPCFlows, LPCFlows } from '/app/organisms/LabwarePositionCheck'
 
 import type { Dispatch, SetStateAction } from 'react'
 import type { Run } from '@opentrons/api-client'
@@ -658,7 +659,7 @@ export function ProtocolSetup(): JSX.Element {
   const { runId } = useParams<
     keyof OnDeviceRouteParams
   >() as OnDeviceRouteParams
-  const isNewLpc = useFeatureFlag('lpcRedesign')
+  const isNewLPC = useFeatureFlag('lpcRedesign')
   const { data: runRecord } = useNotifyRunQuery(runId, { staleTime: Infinity })
   const { analysisErrors } = useProtocolAnalysisErrors(runId)
   const { t } = useTranslation(['protocol_setup'])
@@ -741,6 +742,11 @@ export function ProtocolSetup(): JSX.Element {
     robotType,
     protocolName
   )
+  const { launchLPC, showLPC, lpcProps } = useLPCFlows({
+    runId,
+    robotType,
+    protocolName,
+  })
 
   const { trackProtocolRunEvent } = useTrackProtocolRunEvent(runId, robotName)
   const robotAnalyticsData = useRobotAnalyticsData(robotName)
@@ -824,11 +830,18 @@ export function ProtocolSetup(): JSX.Element {
         runId={runId}
         setSetupScreen={setSetupScreen}
         lpcDisabledReason={lpcDisabledReason}
-        launchLPC={launchLegacyLPC}
-        LPCWizard={LegacyLPCWizard}
+        launchLPC={isNewLPC ? launchLPC : launchLegacyLPC}
+        LPCWizard={
+          isNewLPC ? (
+            showLPC ? (
+              <LPCFlows {...lpcProps} />
+            ) : null
+          ) : (
+            LegacyLPCWizard
+          )
+        }
         isConfirmed={offsetsConfirmed}
         setIsConfirmed={setOffsetsConfirmed}
-        isNewLpc={isNewLpc}
       />
     ),
     labware: (
