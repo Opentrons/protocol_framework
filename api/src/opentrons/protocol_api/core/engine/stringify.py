@@ -50,6 +50,9 @@ def _labware_location_string(
     elif location == "offDeck":
         return "[off-deck]"
 
+    elif location == "invalidated":
+        return "[invalidated]"
+
 
 def _labware_name(engine_client: SyncClient, labware_id: str) -> str:
     """Return the user-specified labware label, or fall back to the display name from the def."""

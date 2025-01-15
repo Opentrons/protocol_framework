@@ -22,6 +22,7 @@ from opentrons_shared_data.robot.types import RobotType
 from . import commands
 from .types import (
     OFF_DECK_LOCATION,
+    INVALIDATED_LOCATION,
     DeckSlotLocation,
     LabwareLocation,
     AddressableAreaLocation,
@@ -128,6 +129,7 @@ def _standardize_labware_location(
             original, (ModuleLocation, OnLabwareLocation, AddressableAreaLocation)
         )
         or original == OFF_DECK_LOCATION
+        or original == INVALIDATED_LOCATION
     ):
         return original
 

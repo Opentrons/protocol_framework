@@ -52,3 +52,10 @@ def move_labware(text: str) -> command_types.MoveLabwareCommand:
         "name": command_types.MOVE_LABWARE,
         "payload": {"text": text},
     }
+
+
+def move_lid(text: str) -> command_types.MoveLidCommand:
+    return {
+        "name": command_types.MOVE_LID,
+        "payload": {"text": text},
+    }
