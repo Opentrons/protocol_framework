@@ -1,5 +1,6 @@
 import last from 'lodash/last'
 import {
+  ABSORBANCE_READER_TYPE,
   HEATERSHAKER_MODULE_TYPE,
   MAGNETIC_MODULE_TYPE,
   TEMPERATURE_MODULE_TYPE,
@@ -284,6 +285,33 @@ const _patchHeaterShakerModuleId = (args: {
   return null
 }
 
+const _patchAbsorbanceReaderModuleId = (args: {
+  initialDeckSetup: InitialDeckSetup
+  orderedStepIds: OrderedStepIdsState
+  savedStepForms: SavedStepFormState
+  stepType: StepType
+}): FormUpdater => () => {
+  const { initialDeckSetup, stepType } = args
+  const numOfModules =
+    Object.values(initialDeckSetup.modules).filter(
+      module => module.type === ABSORBANCE_READER_TYPE
+    )?.length ?? 1
+  const hasAbsorbanceReaderModuleId = stepType === 'absorbanceReader'
+
+  if (hasAbsorbanceReaderModuleId && numOfModules === 1) {
+    const moduleId =
+      getModuleOnDeckByType(initialDeckSetup, ABSORBANCE_READER_TYPE)?.id ??
+      null
+    if (moduleId != null) {
+      return {
+        moduleId,
+      }
+    }
+  }
+
+  return null
+}
+
 const _patchThermocyclerFields = (args: {
   initialDeckSetup: InitialDeckSetup
   stepType: StepType
@@ -376,6 +404,13 @@ export const createPresavedStepForm = ({
     stepType,
   })
 
+  const updateAbsorbanceReaderModuleId = _patchAbsorbanceReaderModuleId({
+    initialDeckSetup,
+    orderedStepIds,
+    savedStepForms,
+    stepType,
+  })
+
   const updateThermocyclerFields = _patchThermocyclerFields({
     initialDeckSetup,
     stepType,
@@ -391,6 +426,7 @@ export const createPresavedStepForm = ({
     updateThermocyclerFields,
     updateHeaterShakerModuleId,
     updateMagneticModuleId,
+    updateAbsorbanceReaderModuleId,
     updateDefaultLabwareLocations,
   ].reduce<FormData>(
     (acc, updater: FormUpdater) => {

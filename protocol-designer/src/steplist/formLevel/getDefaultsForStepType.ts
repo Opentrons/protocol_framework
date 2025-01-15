@@ -177,7 +177,7 @@ export function getDefaultsForStepType(
       }
     case 'absorbanceReader':
       return {
-        absorbanceReaderFormType: 'initialize',
+        absorbanceReaderFormType: null,
         filePath: null,
         lidOpen: null,
         mode: null,
