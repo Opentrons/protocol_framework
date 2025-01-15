@@ -3,7 +3,7 @@ import omitBy from 'lodash/omitBy'
 import mapValues from 'lodash/mapValues'
 import { getLabwareDefURI, DEFAULT_LIQUID_COLORS } from '@opentrons/shared-data'
 import { COLORS } from '../../helix-design-system'
-import { WellFill } from '../../hardware-sim'
+import type { WellFill } from '../../hardware-sim'
 import type {
   CompletedProtocolAnalysis,
   LabwareDefinition2,

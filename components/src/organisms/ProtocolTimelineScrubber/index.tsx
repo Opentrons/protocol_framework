@@ -17,9 +17,7 @@ import {
   DIRECTION_COLUMN,
   Flex,
   JUSTIFY_SPACE_BETWEEN,
-  LabwareOnDeck,
   LegacyStyledText,
-  Module,
   OVERFLOW_SCROLL,
   PrimaryButton,
   SPACING,
@@ -42,8 +40,9 @@ import type {
   RunTimeCommand,
 } from '@opentrons/shared-data'
 import type { ModuleTemporalProperties } from '@opentrons/step-generation'
-
+import type { LabwareOnDeck, Module } from '../..'
 export * from './types'
+export * from './utils'
 
 const SEC_PER_FRAME = 1000
 export const COMMAND_WIDTH_PX = 240

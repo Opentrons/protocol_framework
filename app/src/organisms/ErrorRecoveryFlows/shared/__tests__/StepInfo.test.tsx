@@ -5,11 +5,11 @@ import { renderWithProviders } from '/app/__testing-utils__'
 import { mockRecoveryContentProps, mockFailedCommand } from '../../__fixtures__'
 import { i18n } from '/app/i18n'
 import { StepInfo } from '../StepInfo'
-import { CommandText } from '/app/molecules/Command'
+import { CommandText } from '@opentrons/components'
 
 import type { ComponentProps } from 'react'
 
-vi.mock('/app/molecules/Command')
+vi.mock('@opentrons/components')
 
 const render = (props: ComponentProps<typeof StepInfo>) => {
   return renderWithProviders(<StepInfo {...props} />, {

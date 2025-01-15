@@ -5,10 +5,12 @@ import {
   RUN_STATUS_IDLE,
 } from '@opentrons/api-client'
 import { useTranslation } from 'react-i18next'
-
-import { getCommandTextData } from '/app/local-resources/commands'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
-import { LegacyStyledText, CommandText } from '@opentrons/components'
+import {
+  LegacyStyledText,
+  CommandText,
+  getCommandTextData,
+} from '@opentrons/components'
 import { TERMINAL_RUN_STATUSES } from '../constants'
 
 import type { ReactNode } from 'react'
