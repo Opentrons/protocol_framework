@@ -205,6 +205,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   }
 
   const isMultiStepToolbox =
+    formData.stepType === 'absorbanceReader' ||
     formData.stepType === 'moveLiquid' ||
     formData.stepType === 'mix' ||
     formData.stepType === 'thermocycler'

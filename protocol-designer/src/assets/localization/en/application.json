@@ -31,6 +31,7 @@
   "protocol_name": "Protocol Name",
   "save": "save",
   "stepType": {
+    "absorbanceReader": "absorbance plate reader",
     "comment": "comment",
     "ending_hold": "ending hold",
     "heaterShaker": "heater-shaker",
@@ -39,7 +40,6 @@
     "moveLabware": "move",
     "moveLiquid": "transfer",
     "pause": "pause",
-    "plateReader": "absorbance reader",
     "profile_settings": "profile settings",
     "profile_steps": "profile steps",
     "temperature": "temperature",
@@ -57,6 +57,7 @@
     "microliter": "μL",
     "microliterPerSec": "μL/s",
     "millimeter": "mm",
+    "nanometer": "nm",
     "minutes": "m",
     "rpm": "rpm",
     "seconds": "s",

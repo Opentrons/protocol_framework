@@ -93,7 +93,7 @@ export const getModuleShortNames = (type: ModuleType): string => {
     case THERMOCYCLER_MODULE_TYPE:
       return 'Thermocycler'
     case ABSORBANCE_READER_TYPE:
-      return 'Absorbance Reader'
+      return 'Absorbance Plate Reader'
   }
 }
 

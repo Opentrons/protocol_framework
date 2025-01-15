@@ -379,11 +379,14 @@ export interface HydratedHeaterShakerFormData {
   targetHeaterShakerTemperature: string | null
   targetSpeed: string | null
 }
+
+export type AbsorbanceReaderFormType =
+  | typeof ABSORBANCE_READER_INITIALIZE
+  | typeof ABSORBANCE_READER_READ
+  | typeof ABSORBANCE_READER_LID
+
 export interface HydratedAbsorbanceReaderFormData {
-  absorbanceReaderFormType:
-    | typeof ABSORBANCE_READER_INITIALIZE
-    | typeof ABSORBANCE_READER_READ
-    | typeof ABSORBANCE_READER_LID
+  absorbanceReaderFormType: AbsorbanceReaderFormType | null
   filePath: string | null
   lidOpen: boolean | null
   mode:
