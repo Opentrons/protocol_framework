@@ -220,8 +220,7 @@ export function PipetteOverview({
                       desktopStyle="bodyDefaultRegular"
                       color={COLORS.grey60}
                     >
-                      {/* {i18n.format(t('gripper'), 'capitalize')} */}
-                      {t('protocol_overview:flex_gripper')}
+                      {t('protocol_overview:gripper')}
                     </StyledText>
                   </Flex>
                   <Btn
