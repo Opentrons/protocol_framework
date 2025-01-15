@@ -19,6 +19,8 @@ import { getModuleModel } from '../getModuleModel'
 import type { ComponentProps } from 'react'
 import type { LabwareLocation } from '@opentrons/shared-data'
 
+vi.mock('../getModuleModel')
+vi.mock('../getModuleDisplayLocation')
 vi.mock('@opentrons/shared-data', async () => {
   const actual = await vi.importActual('@opentrons/shared-data')
   return {

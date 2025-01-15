@@ -18,9 +18,12 @@ import { getAddressableAreaDisplayName } from '../../getAddressableAreaDisplayNa
 vi.mock('@opentrons/shared-data')
 vi.mock('../../getFinalLabwareLocation')
 vi.mock('../../getWellRange')
-vi.mock('/app/local-resources/labware')
+vi.mock('../../getLabwareDefinitionsFromCommands')
 vi.mock('../../getFinalAddressableAreaCmd')
 vi.mock('../../getAddressableAreaDisplayName')
+vi.mock('../../getLabwareName')
+vi.mock('../../getLabwareDisplayLocation')
+vi.mock('../../getLoadedLabware')
 
 const baseCommandData = {
   allRunDefs: {},

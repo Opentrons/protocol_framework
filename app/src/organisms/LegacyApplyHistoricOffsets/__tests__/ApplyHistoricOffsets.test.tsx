@@ -12,10 +12,17 @@ import { LegacyApplyHistoricOffsets } from '..'
 import type { ComponentProps } from 'react'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type { OffsetCandidate } from '../hooks/useOffsetCandidatesForAnalysis'
+import type * as OpentronsComponents from '@opentrons/components'
 
+vi.mock('@opentrons/components', async importOriginal => {
+  const actualComponents = await importOriginal<typeof OpentronsComponents>()
+  return {
+    ...actualComponents,
+    getLabwareDefinitionsFromCommands: vi.fn(),
+  }
+})
 vi.mock('/app/redux/config')
 vi.mock('/app/organisms/LegacyLabwarePositionCheck/utils/labware')
-vi.mock('@opentrons/components')
 
 const mockLabwareDef = fixture96Plate as LabwareDefinition2
 const mockAdapterDef = opentrons96PcrAdapterV1 as LabwareDefinition2

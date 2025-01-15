@@ -8,8 +8,15 @@ import { StepInfo } from '../StepInfo'
 import { CommandText } from '@opentrons/components'
 
 import type { ComponentProps } from 'react'
+import type * as OpentronsComponents from '@opentrons/components'
 
-vi.mock('@opentrons/components')
+vi.mock('@opentrons/components', async importOriginal => {
+  const actualComponents = await importOriginal<typeof OpentronsComponents>()
+  return {
+    ...actualComponents,
+    CommandText: vi.fn(),
+  }
+})
 
 const render = (props: ComponentProps<typeof StepInfo>) => {
   return renderWithProviders(<StepInfo {...props} />, {

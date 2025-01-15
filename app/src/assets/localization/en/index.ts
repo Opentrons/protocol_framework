@@ -1,3 +1,5 @@
+import { protocolCommandTextEn as protocol_command_text } from '@opentrons/shared-data'
+
 import shared from './shared.json'
 import anonymous from './anonymous.json'
 import app_settings from './app_settings.json'
@@ -29,7 +31,6 @@ import error_recovery from './error_recovery.json'
 import incompatible_modules from './incompatible_modules.json'
 
 export const en = {
-  shared,
   anonymous,
   app_settings,
   branded,
@@ -38,15 +39,18 @@ export const en = {
   device_settings,
   devices_landing,
   drop_tip_wizard,
+  error_recovery,
   firmware_update,
   gripper_wizard_flows,
   heater_shaker,
+  incompatible_modules,
   instruments_dashboard,
   labware_details,
   labware_landing,
   labware_position_check,
   module_wizard_flows,
   pipette_wizard_flows,
+  protocol_command_text,
   protocol_details,
   protocol_info,
   protocol_list,
@@ -55,7 +59,6 @@ export const en = {
   robot_calibration,
   robot_controls,
   run_details,
+  shared,
   top_navigation,
-  error_recovery,
-  incompatible_modules,
 }
