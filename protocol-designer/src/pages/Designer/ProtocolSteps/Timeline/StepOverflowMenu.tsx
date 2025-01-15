@@ -94,6 +94,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
   return (
     <>
       <MenuList
+        zIndex={12}
         ref={menuRootRef}
         top={top}
         left="18.75rem"

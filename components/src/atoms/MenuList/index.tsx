@@ -29,6 +29,7 @@ export const MenuList = forwardRef<HTMLDivElement, MenuListProps>(
       top = '2.6rem',
       right = `calc(50% + ${SPACING.spacing4})`,
       width = FLEX_MAX_CONTENT,
+      zIndex = 10,
       ...restProps
     } = props
     return isOnDevice ? (
@@ -48,7 +49,7 @@ export const MenuList = forwardRef<HTMLDivElement, MenuListProps>(
     ) : (
       <Flex
         borderRadius={BORDERS.borderRadius8}
-        zIndex={12}
+        zIndex={zIndex}
         boxShadow="0px 1px 3px rgba(0, 0, 0, 0.2)"
         position={POSITION_ABSOLUTE}
         backgroundColor={COLORS.white}

@@ -14,7 +14,6 @@ import {
   MenuItem,
   MenuList,
   OVERFLOW_AUTO,
-  POSITION_ABSOLUTE,
   SPACING,
   StyledText,
   TYPOGRAPHY,
@@ -44,7 +43,6 @@ export function LiquidsOverflowMenu(
   const dispatch: ThunkDispatch<any> = useDispatch()
   return (
     <MenuList
-      position={POSITION_ABSOLUTE}
       zIndex={12}
       right={location.pathname === '/liquids' ? SPACING.spacing12 : '3.125rem'}
       top={`calc(${NAV_HEIGHT} - 6px)`}
