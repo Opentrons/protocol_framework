@@ -11,7 +11,6 @@ from opentrons.hardware_control import API as HardwareAPI
 from opentrons.hardware_control.types import TipStateType
 from opentrons.hardware_control.protocols.types import OT2RobotType, FlexRobotType
 
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.types import TipGeometry, TipPresenceStatus
 from opentrons.protocol_engine.resources import LabwareDataProvider
@@ -20,6 +19,7 @@ from opentrons_shared_data.errors.exceptions import (
     CommandPreconditionViolated,
     CommandParameterLimitViolated,
 )
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons.protocol_engine.execution.tip_handler import (
     HardwareTipHandler,
     VirtualTipHandler,

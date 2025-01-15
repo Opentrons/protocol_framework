@@ -66,7 +66,6 @@ export const Modal = (props: ModalProps): JSX.Element => {
     name: 'ot-alert',
     color: iconColor(type),
     size: '1.25rem',
-    marginRight: SPACING.spacing8,
   }
 
   const modalHeader = (

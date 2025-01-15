@@ -33,7 +33,7 @@ def add_parameters(parameters: ParameterContext) -> None:
     parameters.add_int(
         variable_name="number_of_runs",
         display_name="Number of Runs",
-        default=2,
+        default=4,
         minimum=1,
         maximum=4,
     )
@@ -53,7 +53,7 @@ def run(protocol: ProtocolContext) -> None:
     bind_vol = 300.0
     sample_vol = 180.0
     elution_vol = 100.0
-    helpers.comment_protocol_version(protocol, "01")
+    helpers.comment_protocol_version(protocol, "02")
     # Same for all HDQ Extractions
     deepwell_type = "nest_96_wellplate_2ml_deep"
     if not dry_run:
@@ -87,7 +87,7 @@ def run(protocol: ProtocolContext) -> None:
     magblock: MagneticBlockContext = protocol.load_module(
         "magneticBlockV1", "C1"
     )  # type: ignore[assignment]
-    liquid_waste = protocol.load_labware("nest_1_reservoir_195ml", "B3", "Liquid Waste")
+    liquid_waste = protocol.load_labware("nest_1_reservoir_290ml", "B3", "Liquid Waste")
     waste = liquid_waste.wells()[0].top()
 
     lysis_reservoir = protocol.load_labware(deepwell_type, "D2", "Lysis reservoir")
@@ -417,7 +417,6 @@ def run(protocol: ProtocolContext) -> None:
             elutionplate,
             wash2_reservoir,
             wash1_reservoir,
-            liquid_waste,
         ]
         helpers.clean_up_plates(pip, plates_to_clean, liquid_waste["A1"], 1000)
 

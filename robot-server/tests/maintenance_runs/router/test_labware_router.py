@@ -4,10 +4,10 @@ from datetime import datetime
 from decoy import Decoy
 
 from opentrons_shared_data.labware.types import LabwareDefinition as LabwareDefDict
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 from opentrons.types import DeckSlotName
 from opentrons.protocol_engine import EngineStatus, types as pe_types
-from opentrons.protocols.models import LabwareDefinition
 
 from robot_server.service.json_api import RequestModel, SimpleBody
 from robot_server.maintenance_runs.maintenance_run_models import (

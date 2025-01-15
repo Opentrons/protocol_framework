@@ -75,9 +75,16 @@ export interface MagneticBlockState {
   type: typeof MAGNETIC_BLOCK_TYPE
 }
 
+export interface Initialization {
+  mode: 'single' | 'multi'
+  wavelengths: number[]
+  referenceWavelength?: number
+}
+
 export interface AbsorbanceReaderState {
   type: typeof ABSORBANCE_READER_TYPE
   lidOpen: boolean | null
+  initialization: Initialization | null
 }
 
 export type ModuleState =
@@ -532,6 +539,7 @@ export interface TimelineFrame {
 export type RobotState = TimelineFrame // legacy name alias
 
 export type ErrorType =
+  | 'ABSORBANCE_READER_LID_CLOSED'
   | 'CANNOT_MOVE_WITH_GRIPPER'
   | 'DROP_TIP_LOCATION_DOES_NOT_EXIST'
   | 'EQUIPMENT_DOES_NOT_EXIST'

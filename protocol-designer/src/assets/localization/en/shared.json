@@ -37,6 +37,7 @@
   "heatershakermoduletype": "Heater-shaker Module",
   "hints": "Hints",
   "import": "Import",
+  "import_existing_protocol": "Import existing protocol",
   "incorrect_file_header": "Invalid file type",
   "incorrect_file_type_body": "Protocol Designer only accepts JSON protocol files created with Protocol Designer. Upload a valid file to continue.",
   "invalid_json_file_body": "This JSON file is either missing required information or contains sections that Protocol Designer cannot read. At this time we do not support JSON files created outside of Protocol Designer.",

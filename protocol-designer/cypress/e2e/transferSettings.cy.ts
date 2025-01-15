@@ -50,7 +50,11 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.AddHardwareLabware,
       Actions.ClickLabwareHeader,
       Actions.ClickWellPlatesSection,
+<<<<<<< HEAD
       Actions.SelectArmadillo96WellPlateDefinition,
+=======
+      Actions.SelectArmadillo96WellPlate,
+>>>>>>> edge
       Actions.ChoseDeckSlotC2Labware,
       Actions.AddLiquid,
       Actions.ClickLiquidButton,
@@ -66,6 +70,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.AddHardwareLabware,
       Actions.ClickLabwareHeader,
       Actions.ClickWellPlatesSection,
+<<<<<<< HEAD
       Actions.SelectBioRad96WellPlateDefinition,
       Actions.ProtocolStepsH,
       Actions.AddStep,
@@ -100,5 +105,14 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     cy.get('input[name = "aspirate_mix_times"]').type('2')
     cy.get('input[name = "aspirate_airGap_volume"]').type('10')
     cy.contains('Dispense').click()
+=======
+      Actions.SelectBioRad96WellPlate,
+      Actions.ProtocolStepsH,
+      Actions.AddStep,
+      Verifications.TransferPopOut,
+      UniversalActions.Snapshot,
+    ]
+    runCreateTest(steps)
+>>>>>>> edge
   })
 })

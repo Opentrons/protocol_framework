@@ -157,6 +157,14 @@ export const heaterShakerLatchClosed = (): CommandCreatorError => {
   }
 }
 
+export const absorbanceReaderLidClosed = (): CommandCreatorError => {
+  return {
+    type: 'ABSORBANCE_READER_LID_CLOSED',
+    message:
+      'Attempted to interact with contents of an absorbance reader with the lid closed.',
+  }
+}
+
 export const heaterShakerIsShaking = (): CommandCreatorError => {
   return {
     type: 'HEATER_SHAKER_IS_SHAKING',
