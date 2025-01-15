@@ -1,4 +1,5 @@
 """ProtocolEngine-based Protocol API core implementation."""
+
 from __future__ import annotations
 from typing import Dict, Optional, Type, Union, List, Tuple, TYPE_CHECKING
 
@@ -7,7 +8,7 @@ from opentrons_shared_data.liquid_classes import LiquidClassDefinitionDoesNotExi
 from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.commands import LoadModuleResult
 
-from opentrons_shared_data.deck.types import DeckDefinitionV5, SlotDefV3
+from opentrons_shared_data.deck.types import DeckDefinitionV6, SlotDefV3
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.labware.types import LabwareDefinition as LabwareDefDict
 from opentrons_shared_data import liquid_classes
@@ -759,7 +760,7 @@ class ProtocolCore(
 
         return labware_core
 
-    def get_deck_definition(self) -> DeckDefinitionV5:
+    def get_deck_definition(self) -> DeckDefinitionV6:
         """Get the geometry definition of the robot's deck."""
         return self._engine_client.state.labware.get_deck_definition()
 

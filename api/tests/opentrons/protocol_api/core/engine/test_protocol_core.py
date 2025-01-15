@@ -12,7 +12,7 @@ from decoy import Decoy
 
 from opentrons_shared_data.deck import load as load_deck
 from opentrons_shared_data.deck.types import (
-    DeckDefinitionV5,
+    DeckDefinitionV6,
     SlotDefV3,
 )
 from opentrons_shared_data.pipette.types import PipetteNameType
@@ -95,15 +95,15 @@ from ... import versions_below, versions_at_or_above
 
 
 @pytest.fixture(scope="session")
-def ot2_standard_deck_def() -> DeckDefinitionV5:
+def ot2_standard_deck_def() -> DeckDefinitionV6:
     """Get the OT-2 standard deck definition."""
-    return load_deck(STANDARD_OT2_DECK, 5)
+    return load_deck(STANDARD_OT2_DECK, 6)
 
 
 @pytest.fixture(scope="session")
-def ot3_standard_deck_def() -> DeckDefinitionV5:
+def ot3_standard_deck_def() -> DeckDefinitionV6:
     """Get the OT-2 standard deck definition."""
-    return load_deck(STANDARD_OT3_DECK, 5)
+    return load_deck(STANDARD_OT3_DECK, 6)
 
 
 @pytest.fixture(autouse=True)
@@ -199,7 +199,7 @@ def test_api_version(
 
 
 def test_get_slot_definition(
-    ot2_standard_deck_def: DeckDefinitionV5, subject: ProtocolCore, decoy: Decoy
+    ot2_standard_deck_def: DeckDefinitionV6, subject: ProtocolCore, decoy: Decoy
 ) -> None:
     """It should return a deck slot's definition."""
     expected_slot_def = cast(
@@ -1026,9 +1026,9 @@ def test_move_labware(
                 labwareId="labware-id",
                 newLocation=DeckSlotLocation(slotName=DeckSlotName.SLOT_5),
                 strategy=expected_strategy,
-                pickUpOffset=LabwareOffsetVector(x=4, y=5, z=6)
-                if pick_up_offset
-                else None,
+                pickUpOffset=(
+                    LabwareOffsetVector(x=4, y=5, z=6) if pick_up_offset else None
+                ),
                 dropOffset=LabwareOffsetVector(x=4, y=5, z=6) if drop_offset else None,
             )
         ),
@@ -1712,7 +1712,7 @@ def test_get_deck_definition(
     decoy: Decoy, mock_engine_client: EngineClient, subject: ProtocolCore
 ) -> None:
     """It should return the loaded deck definition from engine state."""
-    deck_definition = cast(DeckDefinitionV5, {"schemaVersion": "5"})
+    deck_definition = cast(DeckDefinitionV6, {"schemaVersion": "6"})
 
     decoy.when(mock_engine_client.state.labware.get_deck_definition()).then_return(
         deck_definition
