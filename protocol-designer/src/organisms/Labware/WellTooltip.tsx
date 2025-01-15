@@ -220,7 +220,7 @@ const PopperContent = styled.div`
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.13), 0 3px 6px rgba(0, 0, 0, 0.23);
   padding: ${SPACING.spacing8};
   cursor: ${CURSOR_POINTER};
-  z-index: 10001;
+  z-index: 10000;
   border-radius: ${BORDERS.borderRadius8};
 `
 
