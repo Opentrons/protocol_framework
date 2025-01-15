@@ -81,6 +81,12 @@ export enum Actions {
   SaveSelectedWells = 'Save selected source or destination wells',
   SelectDestinationWells = 'Select Desintation wells for transfer',
   InputTransferVolume30 = 'Input volume per well', // TODO: Please refactor for any volume input
+  Continue = 'Continue button on forms',
+  PrewetAspirate = 'Enable Pre-wet tip for aspiration',
+  DelayAspirate = 'Enable Delay for aspiration',
+  TouchTipAspirate = 'Enable Touch tip for aspiration',
+  MixAspirate = 'Enable Mix for aspiration',
+  AirGapAspirate = 'Enable Air gap for aspiration',
 }
 
 export enum Verifications {
@@ -103,7 +109,7 @@ export enum Verifications {
   Delay = 'Delay option is unchecked',
   PreWet = 'Pre-wet tip option is unchecked',
   TouchTip = 'Touch tip option is unchecked',
-  Mix = 'Mix option is unchecked',
+  MixT = 'Mix option is unchecked',
   AirGap = 'Air gap option is unchecked',
 }
 export enum Content {
@@ -546,6 +552,24 @@ const executeAction = (action: Actions | UniversalActions): void => {
     case Actions.InputTransferVolume30:
       cy.get('input[name="volume"]').type('30')
       break
+    case Actions.Continue:
+      cy.contains('Continue').click()
+      break
+    case Actions.PrewetAspirate:
+      cy.contains('Pre-wet tip').closest('div').find('button').click()
+      break
+    case Actions.DelayAspirate:
+      cy.contains('Delay').closest('div').find('button').click()
+      break
+    case Actions.TouchTipAspirate:
+      cy.contains('Touch tip').closest('div').find('button').click()
+      break
+    case Actions.MixAspirate:
+      cy.contains('Mix').closest('div').find('button').click()
+      break
+    case Actions.AirGapAspirate:
+      cy.contains('Air gap').closest('div').find('button').click()
+      break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
   }
@@ -662,7 +686,7 @@ const verifyStep = (verification: Verifications): void => {
         .should('exist')
         .and('have.attr', 'aria-hidden', 'true')
       break
-    case Verifications.Mix:
+    case Verifications.MixT:
       cy.contains('Mix')
         .closest('div')
         .find('button')
@@ -715,7 +739,7 @@ export const verifyCreateProtocolPage = (): void => {
   cy.contains(Content.OpentronsOT2).should('exist').should('be.visible')
   cy.contains(Content.Confirm).should('exist').should('be.visible')
 }
-
+/* Todo Evaluate if this is an easier option
 export const VerifyTransferPageStep1 = (): void => {
   cy.contains('Delay')
     .closest('div')
@@ -753,3 +777,4 @@ export const VerifyTransferPageStep1 = (): void => {
     .and('have.attr', 'aria-hidden', 'true')
   // Verify step 1 and page content
 }
+*/
