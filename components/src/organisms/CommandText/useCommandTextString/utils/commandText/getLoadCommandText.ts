@@ -73,6 +73,13 @@ export const getLoadCommandText = ({
         display_location: displayLocation,
       })
     }
+    // TODO: finish these strings
+    case 'loadLid': {
+      return t('load_lid')
+    }
+    case 'loadLidStack': {
+      return t('load_lid_stack')
+    }
     case 'reloadLabware': {
       const { labwareId } = command.params
       const labware =
