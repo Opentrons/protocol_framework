@@ -33,7 +33,6 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
       Actions.SelectMix,
       UniversalActions.Snapshot,
       Verifications.PartOne,
-      Verifications.MixPopout,
       Actions.SelectLabware,
       Actions.SelectWellInputField,
       Verifications.WellSelectPopout,
@@ -44,7 +43,7 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
       Actions.SelectTipHandling,
       UniversalActions.Snapshot,
       Actions.Continue,
-      
+      Verifications.PartTwo,
     ]
 
     runMixSetup(steps)

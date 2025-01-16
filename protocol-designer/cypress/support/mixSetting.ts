@@ -18,9 +18,8 @@ export enum Actions {
 }
 
 export enum Verifications {
-  MixPopout = 'Verify the the configuration of mix settings',
-  PartOne = 'Verify Part 1, and check continue button for mix set up',
-  PartTwo = 'Verify Part 2, and check goback and save button for mix set up',
+  PartOne = 'Verify Part 1, the configuration of mix settings, and check continue button',
+  PartTwo = 'Verify Part 2, the configuration of asp/disp settings and check go back and save button',
   WellSelectPopout = 'validate labware image and available wells',
 }
 
@@ -125,21 +124,19 @@ const verifyStep = (verification: Verifications): void => {
   switch (verification) {
     case Verifications.PartOne:
       cy.contains(Content.PartOne).should('exist').should('be.visible')
+      cy.contains(Content.Pipette).should('exist').should('be.visible')
+      cy.contains(Content.PipettePreselect).should('exist').should('be.visible')
+      cy.contains(Content.Tiprack).should('exist').should('be.visible')
+      cy.contains(Content.TiprackPreselect).should('exist').should('be.visible')
+      cy.contains(Content.Labware).should('exist').should('be.visible')
+      cy.contains(Content.SelectWells).should('exist').should('be.visible')
+      cy.contains(Content.VolumePerWell).should('exist').should('be.visible')
+      cy.contains(Content.MixRepetitions).should('exist').should('be.visible')
+      cy.contains(Content.TipHandling).should('exist').should('be.visible')
+      cy.contains(Content.TipDropLocation).should('exist').should('be.visible')
+      cy.contains(Content.WasteChute).should('exist').should('be.visible')
       cy.get(Locators.Continue).should('exist').should('be.visible')
       break
-    case Verifications.MixPopout:
-        cy.contains(Content.Pipette).should('exist').should('be.visible')
-        cy.contains(Content.PipettePreselect).should('exist').should('be.visible')
-        cy.contains(Content.Tiprack).should('exist').should('be.visible')
-        cy.contains(Content.TiprackPreselect).should('exist').should('be.visible')
-        cy.contains(Content.Labware).should('exist').should('be.visible')
-        cy.contains(Content.SelectWells).should('exist').should('be.visible')
-        cy.contains(Content.VolumePerWell).should('exist').should('be.visible')
-        cy.contains(Content.MixRepetitions).should('exist').should('be.visible')
-        cy.contains(Content.TipHandling).should('exist').should('be.visible')
-        cy.contains(Content.TipDropLocation).should('exist').should('be.visible')
-        cy.contains(Content.WasteChute).should('exist').should('be.visible')
-        break
       case Verifications.WellSelectPopout:
         cy.contains(Content.WellSelectTitle).should('exist').should('be.visible')
         cy.contains(Content.ClickAndDragWellSelect).should('exist').should('be.visible')
