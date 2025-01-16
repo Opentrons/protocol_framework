@@ -2,7 +2,6 @@ import { getModuleDef2 } from '@opentrons/shared-data'
 
 import { getNextRobotStateAndWarnings } from '../getNextRobotStateAndWarnings'
 import { MODULE_INITIAL_STATE_BY_TYPE } from '../constants'
-import { constructInvariantContextFromRunCommands } from './constructInvariantContextFromRunCommands'
 import { makeInitialRobotState } from './misc'
 
 import type { RunTimeCommand } from '@opentrons/shared-data'
@@ -24,7 +23,7 @@ interface ResultingTimelineFrame {
 export function getResultingTimelineFrameFromRunCommands(
   commands: RunTimeCommand[],
   invariantContext: InvariantContext,
-  initialRobotStateFromPd?: TimelineFrame
+  pdInitialRobotState?: TimelineFrame
 ): ResultingTimelineFrame {
   const pipetteLocations = commands.reduce<RobotState['pipettes']>(
     (acc, command) => {
@@ -94,7 +93,7 @@ export function getResultingTimelineFrameFromRunCommands(
       ...getNextRobotStateAndWarnings(
         commands,
         invariantContext,
-        initialRobotStateFromPd ?? initialRobotState
+        pdInitialRobotState ?? initialRobotState
       ),
       command: commands[commands.length - 1],
     },

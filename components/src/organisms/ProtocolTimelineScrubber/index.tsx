@@ -3,7 +3,10 @@ import map from 'lodash/map'
 import reduce from 'lodash/reduce'
 import ViewportList from 'react-viewport-list'
 
-import { getResultingTimelineFrameFromRunCommands } from '@opentrons/step-generation'
+import {
+  getResultingTimelineFrameFromRunCommands,
+  constructInvariantContextFromRunCommands,
+} from '@opentrons/step-generation'
 import {
   FLEX_ROBOT_TYPE,
   THERMOCYCLER_MODULE_TYPE,
@@ -42,11 +45,10 @@ import type {
 import type {
   InvariantContext,
   ModuleTemporalProperties,
-  Timeline,
   TimelineFrame,
 } from '@opentrons/step-generation'
 import type { LabwareOnDeck, Module } from '../..'
-import { constructInvariantContextFromRunCommands } from '@opentrons/step-generation'
+
 export * from './types'
 export * from './utils'
 
@@ -57,8 +59,10 @@ interface ProtocolTimelineScrubberProps {
   commands: RunTimeCommand[]
   analysis: CompletedProtocolAnalysis | ProtocolAnalysisOutput
   robotType?: RobotType
-  invariantContextFromPD?: InvariantContext
-  initialRobotStateFromPD?: TimelineFrame
+  pdResource?: {
+    pdInvariantContext: InvariantContext
+    pdInitialRobotState: TimelineFrame
+  }
 }
 
 export const DECK_LAYER_BLOCKLIST = [
@@ -74,13 +78,7 @@ export const DECK_LAYER_BLOCKLIST = [
 export function ProtocolTimelineScrubber(
   props: ProtocolTimelineScrubberProps
 ): JSX.Element {
-  const {
-    commands,
-    analysis,
-    robotType = FLEX_ROBOT_TYPE,
-    invariantContextFromPD,
-    initialRobotStateFromPD,
-  } = props
+  const { commands, analysis, robotType = FLEX_ROBOT_TYPE, pdResource } = props
   const wrapperRef = useRef<HTMLDivElement>(null)
   const commandListRef = useRef<ViewportListRef>(null)
   const [currentCommandIndex, setCurrentCommandIndex] = useState<number>(0)
@@ -92,8 +90,8 @@ export function ProtocolTimelineScrubber(
   )
   const { frame, invariantContext } = getResultingTimelineFrameFromRunCommands(
     currentCommandsSlice,
-    invariantContextFromPD ?? invariantContextFromRunCommands,
-    initialRobotStateFromPD
+    pdResource?.pdInvariantContext ?? invariantContextFromRunCommands,
+    pdResource?.pdInitialRobotState
   )
   const handlePlayPause = (): void => {
     setIsPlaying(!isPlaying)

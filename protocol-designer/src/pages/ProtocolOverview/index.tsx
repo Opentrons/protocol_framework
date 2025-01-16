@@ -15,7 +15,6 @@ import {
   JUSTIFY_SPACE_BETWEEN,
   LargeButton,
   NO_WRAP,
-  ProtocolTimelineScrubber,
   SPACING,
   StyledText,
   WRAP,
@@ -29,6 +28,7 @@ import {
 import { selectors as fileSelectors } from '../../file-data'
 import { selectors as stepFormSelectors } from '../../step-forms'
 import { actions as loadFileActions } from '../../load-file'
+import { getEnableTimelineScrubber } from '../../feature-flags/selectors'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import { MaterialsListModal } from '../../organisms/MaterialsListModal'
 import { LINE_CLAMP_TEXT_STYLE, COLUMN_STYLE } from '../../atoms'
@@ -81,6 +81,7 @@ export function ProtocolOverview(): JSX.Element {
     showEditInstrumentsModal,
     setShowEditInstrumentsModal,
   ] = useState<boolean>(false)
+  const enableTimelineScrubber = useSelector(getEnableTimelineScrubber)
   const [showEditMetadataModal, setShowEditMetadataModal] = useState<boolean>(
     false
   )
@@ -321,7 +322,7 @@ export function ProtocolOverview(): JSX.Element {
             css={COLUMN_STYLE}
             gridGap={SPACING.spacing12}
           >
-            <ScrubberContainer />
+            {enableTimelineScrubber ? <ScrubberContainer /> : null}
             <StartingDeck
               robotType={robotType}
               setShowMaterialsListModal={setShowMaterialsListModal}

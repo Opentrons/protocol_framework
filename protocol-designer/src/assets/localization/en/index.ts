@@ -17,7 +17,8 @@ import shared from './shared.json'
 import starting_deck_state from './starting_deck_state.json'
 import tooltip from './tooltip.json'
 import well_selection from './well_selection.json'
-import { protocolCommandTextEn as protocol_command_text } from '@opentrons/shared-data'
+import protocol_command_text from './protocol_command_text.json'
+
 export const en = {
   alert,
   application,
@@ -32,11 +33,11 @@ export const en = {
   modal,
   modules,
   nav,
+  protocol_command_text,
   protocol_overview,
   protocol_steps,
   shared,
   starting_deck_state,
   tooltip,
   well_selection,
-  protocol_command_text,
 }

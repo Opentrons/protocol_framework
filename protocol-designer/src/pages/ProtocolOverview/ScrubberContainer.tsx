@@ -85,8 +85,10 @@ export function ScrubberContainer(): JSX.Element {
       commands={nonLoadCommands}
       analysis={analysis}
       robotType={robotType}
-      invariantContextFromPD={invariantContext}
-      initialRobotStateFromPD={initialRobotState}
+      pdResource={{
+        pdInvariantContext: invariantContext,
+        pdInitialRobotState: initialRobotState,
+      }}
     />
   )
 }

@@ -49,3 +49,7 @@ export const getEnableLiquidClasses: Selector<boolean> = createSelector(
   getFeatureFlagData,
   flags => flags.OT_PD_ENABLE_LIQUID_CLASSES ?? false
 )
+export const getEnableTimelineScrubber: Selector<boolean> = createSelector(
+  getFeatureFlagData,
+  flags => flags.OT_PD_ENABLE_TIMELINE_SCRUBBER ?? false
+)

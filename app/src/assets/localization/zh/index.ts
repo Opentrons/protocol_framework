@@ -1,4 +1,3 @@
-import { protocolCommandTextZh as protocol_command_text } from '@opentrons/shared-data'
 import shared from './shared.json'
 import anonymous from './anonymous.json'
 import app_settings from './app_settings.json'
