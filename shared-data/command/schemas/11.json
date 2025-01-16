@@ -2059,8 +2059,8 @@
               "type": "string"
             },
             {
-              "const": "invalidated",
-              "enum": ["invalidated"],
+              "const": "systemLocation",
+              "enum": ["systemLocation"],
               "type": "string"
             },
             {
@@ -2138,8 +2138,8 @@
               "type": "string"
             },
             {
-              "const": "invalidated",
-              "enum": ["invalidated"],
+              "const": "systemLocation",
+              "enum": ["systemLocation"],
               "type": "string"
             },
             {
@@ -2195,6 +2195,14 @@
     "LoadLidStackParams": {
       "description": "Payload required to load a lid stack onto a location.",
       "properties": {
+        "labwareIds": {
+          "description": "An optional list of IDs to assign to the lids in the stack.If None, an ID will be generated.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Labwareids",
+          "type": "array"
+        },
         "loadName": {
           "description": "Name used to reference a lid labware definition.",
           "title": "Loadname",
@@ -2217,8 +2225,8 @@
               "type": "string"
             },
             {
-              "const": "invalidated",
-              "enum": ["invalidated"],
+              "const": "systemLocation",
+              "enum": ["systemLocation"],
               "type": "string"
             },
             {
@@ -2237,6 +2245,11 @@
           "description": "The quantity of lids to load.",
           "title": "Quantity",
           "type": "integer"
+        },
+        "stackLabwareId": {
+          "description": "An optional ID to assign to the lid stack labware object created.If None, an ID will be generated.",
+          "title": "Stacklabwareid",
+          "type": "string"
         },
         "version": {
           "description": "The lid labware definition version.",
@@ -2728,8 +2741,8 @@
               "type": "string"
             },
             {
-              "const": "invalidated",
-              "enum": ["invalidated"],
+              "const": "systemLocation",
+              "enum": ["systemLocation"],
               "type": "string"
             },
             {
@@ -2751,89 +2764,6 @@
       },
       "required": ["labwareId", "newLocation", "strategy"],
       "title": "MoveLabwareParams",
-      "type": "object"
-    },
-    "MoveLidCreate": {
-      "description": "A request to create a ``moveLid`` command.",
-      "properties": {
-        "commandType": {
-          "const": "moveLid",
-          "default": "moveLid",
-          "enum": ["moveLid"],
-          "title": "Commandtype",
-          "type": "string"
-        },
-        "intent": {
-          "$ref": "#/$defs/CommandIntent",
-          "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
-          "title": "Intent"
-        },
-        "key": {
-          "description": "A key value, unique in this run, that can be used to track the same logical command across multiple runs of the same protocol. If a value is not provided, one will be generated.",
-          "title": "Key",
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/$defs/MoveLidParams"
-        }
-      },
-      "required": ["params"],
-      "title": "MoveLidCreate",
-      "type": "object"
-    },
-    "MoveLidParams": {
-      "description": "Input parameters for a ``moveLid`` command.",
-      "properties": {
-        "dropOffset": {
-          "$ref": "#/$defs/LabwareOffsetVector",
-          "description": "Offset to use when dropping off labware. Experimental param, subject to change",
-          "title": "Dropoffset"
-        },
-        "labwareId": {
-          "description": "The ID of the labware to move.",
-          "title": "Labwareid",
-          "type": "string"
-        },
-        "newLocation": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/DeckSlotLocation"
-            },
-            {
-              "$ref": "#/$defs/ModuleLocation"
-            },
-            {
-              "$ref": "#/$defs/OnLabwareLocation"
-            },
-            {
-              "const": "offDeck",
-              "enum": ["offDeck"],
-              "type": "string"
-            },
-            {
-              "const": "invalidated",
-              "enum": ["invalidated"],
-              "type": "string"
-            },
-            {
-              "$ref": "#/$defs/AddressableAreaLocation"
-            }
-          ],
-          "description": "Where to move the labware.",
-          "title": "Newlocation"
-        },
-        "pickUpOffset": {
-          "$ref": "#/$defs/LabwareOffsetVector",
-          "description": "Offset to use when picking up labware. Experimental param, subject to change",
-          "title": "Pickupoffset"
-        },
-        "strategy": {
-          "$ref": "#/$defs/LabwareMovementStrategy",
-          "description": "Whether to use the gripper to perform the labware movement or to perform a manual movement with an option to pause."
-        }
-      },
-      "required": ["labwareId", "newLocation", "strategy"],
-      "title": "MoveLidParams",
       "type": "object"
     },
     "MoveRelativeCreate": {
@@ -5845,7 +5775,6 @@
       "magneticModule/disengage": "#/$defs/DisengageCreate",
       "magneticModule/engage": "#/$defs/EngageCreate",
       "moveLabware": "#/$defs/MoveLabwareCreate",
-      "moveLid": "#/$defs/MoveLidCreate",
       "moveRelative": "#/$defs/MoveRelativeCreate",
       "moveToAddressableArea": "#/$defs/MoveToAddressableAreaCreate",
       "moveToAddressableAreaForDropTip": "#/$defs/MoveToAddressableAreaForDropTipCreate",
@@ -5963,9 +5892,6 @@
     },
     {
       "$ref": "#/$defs/MoveLabwareCreate"
-    },
-    {
-      "$ref": "#/$defs/MoveLidCreate"
     },
     {
       "$ref": "#/$defs/MoveRelativeCreate"

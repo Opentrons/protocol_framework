@@ -209,7 +209,11 @@ export function getLabwareStackCountAndLocation(
 
   const labwareLocation = loadLabwareCommand.params.location
 
-  if (labwareLocation !== 'offDeck' && labwareLocation !== 'systemLocation' && 'labwareId' in labwareLocation) {
+  if (
+    labwareLocation !== 'offDeck' &&
+    labwareLocation !== 'systemLocation' &&
+    'labwareId' in labwareLocation
+  ) {
     const lowerLabwareCommand = loadLabwareCommands?.find(command =>
       command.result != null
         ? command.result?.labwareId === labwareLocation.labwareId

@@ -23,7 +23,6 @@ PAUSE: Final = "command.PAUSE"
 RESUME: Final = "command.RESUME"
 COMMENT: Final = "command.COMMENT"
 MOVE_LABWARE: Final = "command.MOVE_LABWARE"
-MOVE_LID: Final = "command.MOVE_LID"
 
 # Pipette #
 
@@ -541,15 +540,6 @@ class MoveLabwareCommand(TypedDict):
     payload: MoveLabwareCommandPayload
 
 
-class MoveLidCommandPayload(TextOnlyPayload):
-    pass
-
-
-class MoveLidCommand(TypedDict):
-    name: Literal["command.MOVE_LID"]
-    payload: MoveLidCommandPayload
-
-
 Command = Union[
     DropTipCommand,
     DropTipInDisposalLocationCommand,
@@ -598,7 +588,6 @@ Command = Union[
     MoveToCommand,
     MoveToDisposalLocationCommand,
     MoveLabwareCommand,
-    MoveLidCommand,
 ]
 
 
@@ -648,7 +637,6 @@ CommandPayload = Union[
     MoveToCommandPayload,
     MoveToDisposalLocationCommandPayload,
     MoveLabwareCommandPayload,
-    MoveLidCommandPayload,
 ]
 
 

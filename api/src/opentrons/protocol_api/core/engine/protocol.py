@@ -590,16 +590,6 @@ class ProtocolCore(
         else:
             destination = to_location
 
-        # GET RID OF MOVE LID COMMANDS?
-        # self._engine_client.execute_command(
-        #     cmd.MoveLidParams(
-        #         labwareId=lid_id,
-        #         newLocation=destination,
-        #         strategy=strategy,
-        #         pickUpOffset=_pick_up_offset,
-        #         dropOffset=_drop_offset,
-        #     )
-        # )
         self._engine_client.execute_command(
             cmd.MoveLabwareParams(
                 labwareId=lid_id,
