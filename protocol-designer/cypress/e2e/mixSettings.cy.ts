@@ -40,7 +40,10 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
       UniversalActions.Snapshot,
       Actions.Save,
       Actions.EnterVolume,
-      Actions.EnterMixReps
+      Actions.EnterMixReps,
+      Actions.SelectTipHandling,
+      UniversalActions.Snapshot,
+      Actions.Continue,
       
     ]
 

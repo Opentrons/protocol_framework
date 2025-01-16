@@ -48,6 +48,13 @@ export enum Content {
   ClickAndDragWellSelect = "Click and drag to select wells",
   PipettePreselect = 'Flex 1-Channel 1000 μL',
   TiprackPreselect = 'Opentrons Flex 96 Tip Rack 1000 µL',
+  BeforeEveryAsp = 'Before every aspirate',
+  OnceAtStartStep = 'Once at the start of step',
+  PerSourceWell = 'Per source well',
+  PerDestWell = 'Per destination well',
+  Never = 'Never',
+  WasteChute = 'Waste chute',
+
 }
 
 export enum Locators {
@@ -91,6 +98,15 @@ const executeAction = (action: Actions | UniversalActions): void => {
       break
     case Actions.EnterMixReps:
       cy.get(Locators.MixReps).should('exist').type('5')
+      break
+    case Actions.SelectTipHandling:
+      cy.contains(Content.BeforeEveryAsp).should('exist').should('be.visible').click()
+      cy.contains(Content.OnceAtStartStep).should('exist').should('be.visible')
+      cy.contains(Content.PerSourceWell).should('exist').should('be.visible')
+      cy.contains(Content.PerDestWell).should('exist').should('be.visible')
+      cy.contains(Content.Never).should('exist').should('be.visible')
+      cy.contains(Content.OnceAtStartStep).click()
+      break
     case Actions.Save:
       cy.get(Locators.Save).should('exist').should('be.visible').click()
       break
@@ -98,8 +114,8 @@ const executeAction = (action: Actions | UniversalActions): void => {
       cy.get(Locators.Back).should('exist').should('be.visible').click()
       break
     case Actions.Continue:
-      cy.get(Locators.Continue).should('exist').should('be.visible').click()
-
+      cy.get(Locators.Continue).should('exist').should('be.visible').click({force: true})
+      break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
   }
@@ -122,6 +138,7 @@ const verifyStep = (verification: Verifications): void => {
         cy.contains(Content.MixRepetitions).should('exist').should('be.visible')
         cy.contains(Content.TipHandling).should('exist').should('be.visible')
         cy.contains(Content.TipDropLocation).should('exist').should('be.visible')
+        cy.contains(Content.WasteChute).should('exist').should('be.visible')
         break
       case Verifications.WellSelectPopout:
         cy.contains(Content.WellSelectTitle).should('exist').should('be.visible')
