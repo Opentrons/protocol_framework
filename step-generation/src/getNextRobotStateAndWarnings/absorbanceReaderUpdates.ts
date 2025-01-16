@@ -14,7 +14,7 @@ import type {
 const _getAbsorbanceReaderState = (
   robotState: RobotState,
   module: string
-): AbsorbanceReaderState => {
+): AbsorbanceReaderState | null => {
   const moduleState = getModuleState(robotState, module)
 
   if (moduleState.type === ABSORBANCE_READER_TYPE) {
@@ -23,9 +23,7 @@ const _getAbsorbanceReaderState = (
     console.error(
       `Absorbance reader state updater expected ${module} moduleState to be absorbanceReader, but it was ${moduleState.type}`
     )
-    // return some object instead of an error :/
-    const fallback: any = {}
-    return fallback
+    return null
   }
 }
 
@@ -38,7 +36,9 @@ export const forAbsorbanceReaderOpenLid = (
   const { moduleId } = params
   const moduleState = _getAbsorbanceReaderState(robotState, moduleId)
 
+  if (moduleState != null) {
   moduleState.lidOpen = true
+}
 }
 
 export const forAbsorbanceReaderCloseLid = (
@@ -50,7 +50,9 @@ export const forAbsorbanceReaderCloseLid = (
   const { moduleId } = params
   const moduleState = _getAbsorbanceReaderState(robotState, moduleId)
 
+  if (moduleState != null) {
   moduleState.lidOpen = false
+}
 }
 
 export const forAbsorbanceReaderInitialize = (
@@ -67,10 +69,12 @@ export const forAbsorbanceReaderInitialize = (
   } = params
 
   const moduleState = _getAbsorbanceReaderState(robotState, moduleId)
+  if (moduleState != null) {
   moduleState.initialization = {
     mode: measureMode,
     wavelengths: sampleWavelengths,
     referenceWavelength,
   }
   moduleState.lidOpen = false
+}
 }

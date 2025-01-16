@@ -315,7 +315,6 @@ function _getNextRobotStateAndWarningsSingleCommand(
         robotStateAndWarnings
       )
       break
-    case 'absorbanceReader/read':
     case 'absorbanceReader/closeLid':
       forAbsorbanceReaderCloseLid(
         command.params,
@@ -329,6 +328,8 @@ function _getNextRobotStateAndWarningsSingleCommand(
         invariantContext,
         robotStateAndWarnings
       )
+      break
+    case 'absorbanceReader/read':
       break
     default:
       assert(

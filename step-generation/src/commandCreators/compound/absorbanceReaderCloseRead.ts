@@ -1,10 +1,12 @@
 import * as errorCreators from '../../errorCreators'
+import { absorbanceReaderStateGetter } from '../../robotStateSelectors'
 import { curryCommandCreator, reduceCommandCreators } from '../../utils'
 import { absorbanceReaderCloseLid, absorbanceReaderRead } from '../atomic'
 
 import type {
   AbsorbanceReaderReadArgs,
   CommandCreator,
+  CommandCreatorError,
   CurriedCommandCreator,
 } from '../../types'
 
@@ -13,12 +15,22 @@ export const absorbanceReaderCloseRead: CommandCreator<AbsorbanceReaderReadArgs>
   invariantContext,
   prevRobotState
 ) => {
-  if (args.module == null) {
-    return {
-      errors: [errorCreators.missingModuleError()],
-    }
+  const errors: CommandCreatorError[] = []
+  const absorbanceReaderState = absorbanceReaderStateGetter(
+    prevRobotState,
+    args.module
+  )
+  if (absorbanceReaderState == null || args.module == null) {
+    errors.push(errorCreators.missingModuleError())
   }
-  const { module, filePath } = args
+  if (absorbanceReaderState?.initialization == null) {
+    errors.push(errorCreators.absorbanceReaderNoInitialization())
+  }
+  if (errors.length > 0) {
+    return { errors }
+  }
+
+  const { module, fileName } = args
   const commandCreators: CurriedCommandCreator[] = [
     curryCommandCreator(absorbanceReaderCloseLid, {
       commandCreatorFnName: 'absorbanceReaderCloseLid',

@@ -1,5 +1,6 @@
 import { absorbanceReaderCloseLid, absorbanceReaderInitialize } from '../atomic'
 import * as errorCreators from '../../errorCreators'
+import { absorbanceReaderStateGetter } from '../../robotStateSelectors'
 import { curryCommandCreator, reduceCommandCreators } from '../../utils'
 
 import type {
@@ -13,7 +14,12 @@ export const absorbanceReaderCloseInitialize: CommandCreator<AbsorbanceReaderIni
   invariantContext,
   prevRobotState
 ) => {
-  if (args.module == null) {
+  const absorbanceReaderState = absorbanceReaderStateGetter(
+    prevRobotState,
+    args.module
+  )
+
+  if (args.module == null || absorbanceReaderState == null) {
     return {
       errors: [errorCreators.missingModuleError()],
     }

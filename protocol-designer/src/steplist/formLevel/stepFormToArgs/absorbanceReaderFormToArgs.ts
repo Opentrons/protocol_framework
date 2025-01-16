@@ -31,7 +31,7 @@ export const absorbanceReaderFormToArgs = (
     case ABSORBANCE_READER_INITIALIZE:
       return {
         module: moduleId,
-        mode: 'multi',
+        mode: 'multi', // TODO (nd: 1/16/2025): reflect actual `mode` form field
         commandCreatorFnName: 'absorbanceReaderInitialize',
         ...DUMMY_INITIALIZATION,
       }
