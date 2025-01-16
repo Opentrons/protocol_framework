@@ -175,3 +175,11 @@ export const STAGING_AREA_CUTOUTS_ORDERED: CutoutId[] = [
   'cutoutD3',
   'cutoutA3',
 ]
+export const ABSORBANCE_READER_INITIALIZE_MODE_SINGLE = 'single'
+export const ABSORBANCE_READER_INITIALIZE_MODE_MULTI = 'multi'
+export const ABSORBANCE_READER_INITIALIZE: 'absorbanceReaderInitialize' =
+  'absorbanceReaderInitialize'
+export const ABSORBANCE_READER_READ: 'absorbanceReaderRead' =
+  'absorbanceReaderRead'
+export const ABSORBANCE_READER_LID: 'absorbanceReaderLid' =
+  'absorbanceReaderLid'

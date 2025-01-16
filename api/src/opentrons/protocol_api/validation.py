@@ -18,7 +18,7 @@ from opentrons_shared_data.labware.labware_definition import (
     LabwareDefinition,
     LabwareRole,
 )
-from opentrons_shared_data.pipette.types import PipetteNameType
+from opentrons_shared_data.pipette.types import PipetteNameType, PIPETTE_API_NAMES_MAP
 from opentrons_shared_data.robot.types import RobotType
 
 from opentrons.protocols.api_support.types import APIVersion, ThermocyclerStep
@@ -57,30 +57,6 @@ _STAGING_DECK_SLOT_VERSION_GATE = APIVersion(2, 16)
 
 # The first APIVersion where Python protocols can load lids as stacks and treat them as attributes of a parent labware.
 LID_STACK_VERSION_GATE = APIVersion(2, 23)
-
-# Mapping of public Python Protocol API pipette load names
-# to names used by the internal Opentrons system
-_PIPETTE_NAMES_MAP = {
-    "p10_single": PipetteNameType.P10_SINGLE,
-    "p10_multi": PipetteNameType.P10_MULTI,
-    "p20_single_gen2": PipetteNameType.P20_SINGLE_GEN2,
-    "p20_multi_gen2": PipetteNameType.P20_MULTI_GEN2,
-    "p50_single": PipetteNameType.P50_SINGLE,
-    "p50_multi": PipetteNameType.P50_MULTI,
-    "p300_single": PipetteNameType.P300_SINGLE,
-    "p300_multi": PipetteNameType.P300_MULTI,
-    "p300_single_gen2": PipetteNameType.P300_SINGLE_GEN2,
-    "p300_multi_gen2": PipetteNameType.P300_MULTI_GEN2,
-    "p1000_single": PipetteNameType.P1000_SINGLE,
-    "p1000_single_gen2": PipetteNameType.P1000_SINGLE_GEN2,
-    "flex_1channel_50": PipetteNameType.P50_SINGLE_FLEX,
-    "flex_8channel_50": PipetteNameType.P50_MULTI_FLEX,
-    "flex_1channel_1000": PipetteNameType.P1000_SINGLE_FLEX,
-    "flex_8channel_1000": PipetteNameType.P1000_MULTI_FLEX,
-    "flex_8channel_1000_em": PipetteNameType.P1000_MULTI_EM,
-    "flex_96channel_1000": PipetteNameType.P1000_96,
-    "flex_96channel_200": PipetteNameType.P200_96,
-}
 
 
 class InvalidPipetteMountError(ValueError):
@@ -194,7 +170,7 @@ def ensure_pipette_name(pipette_name: str) -> PipetteNameType:
     pipette_name = ensure_lowercase_name(pipette_name)
 
     try:
-        return _PIPETTE_NAMES_MAP[pipette_name]
+        return PIPETTE_API_NAMES_MAP[pipette_name]
     except KeyError:
         raise ValueError(
             f"Cannot resolve {pipette_name} to pipette, must be given valid pipette name."
@@ -713,20 +689,18 @@ def ensure_valid_flat_wells_list_for_transfer_v2(
         )
 
 
-def ensure_valid_tip_drop_location_for_transfer_v2(
-    tip_drop_location: Union[Location, Well, TrashBin, WasteChute]
-) -> Union[Location, Well, TrashBin, WasteChute]:
-    """Ensure that the tip drop location is valid for v2 transfer."""
+def ensure_valid_trash_location_for_transfer_v2(
+    trash_location: Union[Location, Well, TrashBin, WasteChute]
+) -> Union[Location, TrashBin, WasteChute]:
+    """Ensure that the trash location is valid for v2 transfer."""
     from .labware import Well
 
-    if (
-        isinstance(tip_drop_location, Well)
-        or isinstance(tip_drop_location, TrashBin)
-        or isinstance(tip_drop_location, WasteChute)
-    ):
-        return tip_drop_location
-    elif isinstance(tip_drop_location, Location):
-        _, maybe_well = tip_drop_location.labware.get_parent_labware_and_well()
+    if isinstance(trash_location, TrashBin) or isinstance(trash_location, WasteChute):
+        return trash_location
+    elif isinstance(trash_location, Well):
+        return trash_location.top()
+    elif isinstance(trash_location, Location):
+        _, maybe_well = trash_location.labware.get_parent_labware_and_well()
 
         if maybe_well is None:
             raise TypeError(
@@ -736,11 +710,11 @@ def ensure_valid_tip_drop_location_for_transfer_v2(
                 " since that is where a tip is dropped."
                 " However, the given location doesn't refer to any well."
             )
-        return tip_drop_location
+        return trash_location
     else:
         raise TypeError(
             f"If specified, location should be an instance of"
             f" `types.Location` (e.g. the return value from `Well.top()`)"
             f" or `Well` (e.g. `reservoir.wells()[0]`) or an instance of `TrashBin` or `WasteChute`."
-            f" However, it is '{tip_drop_location}'."
+            f" However, it is '{trash_location}'."
         )

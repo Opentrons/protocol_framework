@@ -28,6 +28,7 @@ import run_details from './run_details.json'
 import top_navigation from './top_navigation.json'
 import error_recovery from './error_recovery.json'
 import incompatible_modules from './incompatible_modules.json'
+import protocol_command_text from './protocol_command_text.json'
 
 export const zh = {
   anonymous,

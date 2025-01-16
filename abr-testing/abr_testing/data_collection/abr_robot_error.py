@@ -24,10 +24,8 @@ def retrieve_protocol_file(
 ) -> Path | str:
     """Find and copy protocol file on robot with error."""
     protocol_dir = f"/var/lib/opentrons-robot-server/7.1/protocols/{protocol_id}"
-
-    print(f"FILE TO FIND: {protocol_dir}/{protocol_id}")
-    # Copy protocol file found in robot oto host computer
-    save_dir = Path(f"{storage}/protocol_errors")
+    # Copy protocol file found in robot onto host computer
+    save_dir = Path(f"{storage}")
     command = ["scp", "-r", f"root@{robot_ip}:{protocol_dir}", save_dir]
     try:
         # If file found and copied return path to file
@@ -62,7 +60,6 @@ def compare_current_trh_to_average(
     # Find average conditions of errored time period
     df_all_trh = pd.DataFrame(all_trh_data)
     # Convert timestamps to datetime objects
-    print(f'TIMESTAMP: {df_all_trh["Timestamp"]}')
     try:
         df_all_trh["Timestamp"] = pd.to_datetime(
             df_all_trh["Timestamp"], format="mixed", utc=True
@@ -196,7 +193,6 @@ def read_each_log(folder_path: str, issue_url: str) -> None:
     for file_name in os.listdir(folder_path):
         file_path = os.path.join(folder_path, file_name)
         not_found_words = []
-        print(file_path)
         if file_path.endswith(".log"):
             with open(file_path) as file:
                 lines = file.readlines()
@@ -341,11 +337,8 @@ def get_robot_state(
     if "8.2" in affects_version:
         labels.append("8_2_0")
     parent = affects_version + " Bugs"
-    print(components)
     end_time = datetime.now()
-    print(end_time)
     start_time = end_time - timedelta(hours=2)
-    print(start_time)
     # Get current temp/rh compared to historical data
     temp_rh_string = compare_current_trh_to_average(
         parent, start_time, end_time, "", storage_directory
@@ -554,11 +547,17 @@ if __name__ == "__main__":
         sys.exit()
     if len(run_or_other) < 1:
         # Retrieve the most recently run protocol file
-        protocol_files_path = retrieve_protocol_file(
+        protocol_folder = retrieve_protocol_file(
             protocol_ids[-1], ip, storage_directory
         )
+        protocol_folder_path = os.path.join(protocol_folder, protocol_ids[-1])
+        # Path to protocol folder
+        list_of_files = os.listdir(protocol_folder_path)
+        for file in list_of_files:
+            if str(file).endswith(".py"):
+                protocol_file_path = os.path.join(protocol_folder_path, file)
         # Set protocol_found to true if python protocol was successfully copied over
-        if protocol_files_path:
+        if protocol_file_path:
             protocol_found = True
 
         one_run = error_runs[-1]  # Most recent run with error.
@@ -612,15 +611,13 @@ if __name__ == "__main__":
     # OPEN TICKET
     issue_url = ticket.open_issue(issue_key)
     # MOVE FILES TO ERROR FOLDER.
-    print(protocol_files_path)
-    error_files = [saved_file_path_calibration, run_log_file_path] + file_paths
+    error_files = [
+        saved_file_path_calibration,
+        run_log_file_path,
+        protocol_file_path,
+    ] + file_paths
 
-    # Move protocol file(s) to error folder
-    if protocol_files_path:
-        for file in os.listdir(protocol_files_path):
-            error_files.append(os.path.join(protocol_files_path, file))
-
-    error_folder_path = os.path.join(storage_directory, "issue_key")
+    error_folder_path = os.path.join(storage_directory, issue_key)
     os.makedirs(error_folder_path, exist_ok=True)
     for source_file in error_files:
         try:
