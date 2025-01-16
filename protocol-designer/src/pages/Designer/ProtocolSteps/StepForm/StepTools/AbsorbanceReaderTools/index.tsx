@@ -87,7 +87,11 @@ export function AbsorbanceReaderTools(props: StepFormProps): JSX.Element {
   )
 
   const page1Content = (
-    <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
+    <Flex
+      flexDirection={DIRECTION_COLUMN}
+      gridGap={SPACING.spacing12}
+      width="100%"
+    >
       <DropdownStepFormField
         options={absorbanceReaderOptions}
         title={t('module')}
