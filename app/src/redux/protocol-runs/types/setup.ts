@@ -6,7 +6,7 @@ import type {
   LIQUID_SETUP_STEP_KEY,
   UPDATE_RUN_SETUP_STEPS_COMPLETE,
   UPDATE_RUN_SETUP_STEPS_REQUIRED,
-} from './constants'
+} from '../constants'
 
 export type RobotCalibrationStepKey = typeof ROBOT_CALIBRATION_STEP_KEY
 export type ModuleSetupStepKey = typeof MODULE_SETUP_STEP_KEY
@@ -31,14 +31,6 @@ export type StepMap<V> = { [Step in StepKey]: V }
 export type RunSetupStatus = {
   [Step in StepKey]: StepState
 }
-
-export interface PerRunUIState {
-  setup: RunSetupStatus
-}
-
-export type ProtocolRunState = Partial<{
-  readonly [runId: string]: PerRunUIState
-}>
 
 export interface UpdateRunSetupStepsCompleteAction {
   type: typeof UPDATE_RUN_SETUP_STEPS_COMPLETE
