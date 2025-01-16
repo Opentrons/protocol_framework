@@ -1854,6 +1854,16 @@ class InstrumentContext(publisher.CommandPublisher):
         return self._core.get_pipette_name()
 
     @property
+    @requires_version(2, 23)
+    def load_name(self) -> str:
+        """The load name string for the pipette.
+
+        This is the load name that is specified in the `ProtocolContext.load_instrument()`.
+        This might differ from the `name` property of the instrument.
+        """
+        return self._core.get_load_name()
+
+    @property
     @requires_version(2, 0)
     def model(self) -> str:
         """

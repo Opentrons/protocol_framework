@@ -232,6 +232,15 @@ def test_mount(
     assert subject.mount == "right"
 
 
+@pytest.mark.parametrize("api_version", [APIVersion(2, 23)])
+def test_load_name(
+    decoy: Decoy, mock_instrument_core: InstrumentCore, subject: InstrumentContext
+) -> None:
+    """It should have a load name property."""
+    decoy.when(mock_instrument_core.get_load_name()).then_return("pipette-load-name")
+    assert subject.load_name == "pipette-load-name"
+
+
 def test_move_to(
     decoy: Decoy, mock_instrument_core: InstrumentCore, subject: InstrumentContext
 ) -> None:
