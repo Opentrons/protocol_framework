@@ -10,12 +10,11 @@ import {
   OT2_ROBOT_TYPE,
   THERMOCYCLER_MODULE_V1,
 } from '@opentrons/shared-data'
-
+import { getLabwareLocation } from '@opentrons/components'
 import {
   getRunLabwareRenderInfo,
   getRunModuleRenderInfo,
 } from '/app/organisms/InterventionModal/utils'
-import { getLabwareLocation } from '/app/local-resources/labware'
 
 import type { Run } from '@opentrons/api-client'
 import type {
