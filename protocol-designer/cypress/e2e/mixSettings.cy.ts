@@ -43,7 +43,10 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
       Actions.SelectTipHandling,
       UniversalActions.Snapshot,
       Actions.Continue,
-      Verifications.PartTwo,
+      Verifications.PartTwoAsp,
+      Actions.Dispense,
+      Verifications.PartTwoDisp,
+
     ]
 
     runMixSetup(steps)
@@ -51,6 +54,8 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
 });
 
 /*
+NEED TO ADD RENAME
+
 -make selector for confirming that the protocol was made on an older version << doesn't pop up
 -edit protocol -DONE
 -select protocol steps -DONE
