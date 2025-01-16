@@ -5,8 +5,6 @@ from decoy import Decoy
 from opentrons.hardware_control import SynchronousAdapter
 from opentrons.hardware_control.modules import FlexStacker
 from opentrons.hardware_control.modules.types import (
-    TemperatureStatus,
-    SpeedStatus,
     ModuleType,
 )
 from opentrons.protocol_engine import commands as cmd

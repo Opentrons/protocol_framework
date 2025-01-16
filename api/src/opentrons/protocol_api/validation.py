@@ -21,7 +21,6 @@ from opentrons_shared_data.labware.labware_definition import (
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.robot.types import RobotType
 
-from opentrons.motion_planning.adjacent_slots_getters import get_west_of_staging_slot
 from opentrons.protocols.api_support.types import APIVersion, ThermocyclerStep
 from opentrons.protocols.api_support.util import APIVersionError
 from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
@@ -759,4 +758,10 @@ def convert_flex_stacker_load_slot(slot_name: StagingSlotName) -> DeckSlotName:
     Returns:
         A `DeckSlotName` on the deck.
     """
-    return get_west_of_staging_slot(slot_name)
+    _map = {
+        StagingSlotName.SLOT_A4: DeckSlotName.SLOT_A3,
+        StagingSlotName.SLOT_B4: DeckSlotName.SLOT_B3,
+        StagingSlotName.SLOT_C4: DeckSlotName.SLOT_C3,
+        StagingSlotName.SLOT_D4: DeckSlotName.SLOT_D3,
+    }
+    return _map[slot_name]
