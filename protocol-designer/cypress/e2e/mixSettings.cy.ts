@@ -19,7 +19,7 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
     const protocol = getTestFile(TestFilePath.DoItAllV8)
     cy.importProtocol(protocol.path)
     verifyImportProtocolPage(protocol)
-
+    
     // NOTE: vv make this chunk better//
     cy.contains("Edit protocol").click()
     cy.contains("Protocol steps").click()
@@ -39,6 +39,8 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
       Verifications.WellSelectPopout,
       UniversalActions.Snapshot,
       Actions.Save,
+      Actions.EnterVolume,
+      Actions.EnterMixReps
       
     ]
 

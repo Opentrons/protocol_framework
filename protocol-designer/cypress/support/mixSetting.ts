@@ -57,6 +57,8 @@ export enum Locators {
   WellInputField = '[name="wells"]',
   Save = 'button:contains("Save")',
   OneWellReservoirImg = '[data-wellname="A1"]',
+  Volume = '[name="volume"]',
+  MixReps = '[name="times"]',
   // Step1Indicator = 'p:contains("Step 1")',
   // Step2Indicator = 'p:contains("Step 2")',
   // FlexOption = 'button:contains("Opentrons Flex")',
@@ -84,6 +86,11 @@ const executeAction = (action: Actions | UniversalActions): void => {
     case Actions.SelectWellInputField:
       cy.get(Locators.WellInputField).should('be.visible').click()
       break
+    case Actions.EnterVolume:
+      cy.get(Locators.Volume).should('exist').type('100')
+      break
+    case Actions.EnterMixReps:
+      cy.get(Locators.MixReps).should('exist').type('5')
     case Actions.Save:
       cy.get(Locators.Save).should('exist').should('be.visible').click()
       break
