@@ -47,6 +47,7 @@ from opentrons.protocol_engine import (
 from opentrons.protocol_engine.types import (
     ModuleModel as ProtocolEngineModuleModel,
     OFF_DECK_LOCATION,
+    SYSTEM_LOCATION,
     LabwareLocation,
     NonStackedLocation,
 )
@@ -511,6 +512,8 @@ class ProtocolCore(
             else None
         )
 
+        create_new_lid_stack = False
+
         if isinstance(new_location, DeckSlotName) or isinstance(
             new_location, StagingSlotName
         ):
@@ -520,12 +523,22 @@ class ProtocolCore(
             )
             if destination_labware_in_slot is None:
                 to_location = self._convert_labware_location(location=new_location)
+                # absolutely must make a new lid stack
+                create_new_lid_stack = True
             else:
                 highest_child_location = (
                     self._engine_client.state.labware.get_highest_child_labware(
                         destination_labware_in_slot.id
                     )
                 )
+                if labware_validation.validate_definition_is_adapter(
+                    self._engine_client.state.labware.get_definition(
+                        highest_child_location
+                    )
+                ):
+                    # absolutely must make a new lid stack
+                    create_new_lid_stack = True
+
                 to_location = self._convert_labware_location(
                     location=LabwareCore(highest_child_location, self._engine_client)
                 )
@@ -535,21 +548,86 @@ class ProtocolCore(
                     new_location.labware_id
                 )
             )
+            if labware_validation.validate_definition_is_adapter(
+                self._engine_client.state.labware.get_definition(highest_child_location)
+            ):
+                # absolutely must make a new lid stack
+                create_new_lid_stack = True
             to_location = self._convert_labware_location(
                 location=LabwareCore(highest_child_location, self._engine_client)
             )
         else:
             to_location = self._convert_labware_location(location=new_location)
 
+        output_result = None
+        if create_new_lid_stack:
+            # Make a new lid stack object that is empty
+            result = self._engine_client.execute_command_without_recovery(
+                cmd.LoadLidStackParams(
+                    location=SYSTEM_LOCATION,
+                    loadName="empty",
+                    version=1,
+                    namespace="empty",
+                    quantity=0,
+                )
+            )
+
+            # Move the lid stack object from the SYSTEM_LOCATION space to the desired deck location
+            self._engine_client.execute_command(
+                cmd.MoveLabwareParams(
+                    labwareId=result.stackLabwareId,
+                    newLocation=to_location,
+                    strategy=LabwareMovementStrategy.MANUAL_MOVE_WITHOUT_PAUSE,
+                    pickUpOffset=None,
+                    dropOffset=None,
+                )
+            )
+
+            output_result = LabwareCore(
+                labware_id=result.stackLabwareId, engine_client=self._engine_client
+            )
+            destination = self._convert_labware_location(location=output_result)
+        else:
+            destination = to_location
+
+        # GET RID OF MOVE LID COMMANDS?
+        # self._engine_client.execute_command(
+        #     cmd.MoveLidParams(
+        #         labwareId=lid_id,
+        #         newLocation=destination,
+        #         strategy=strategy,
+        #         pickUpOffset=_pick_up_offset,
+        #         dropOffset=_drop_offset,
+        #     )
+        # )
         self._engine_client.execute_command(
-            cmd.MoveLidParams(
+            cmd.MoveLabwareParams(
                 labwareId=lid_id,
-                newLocation=to_location,
+                newLocation=destination,
                 strategy=strategy,
                 pickUpOffset=_pick_up_offset,
                 dropOffset=_drop_offset,
             )
         )
+
+        # Handle leftover empty lid stack if there is one
+        if (
+            labware_validation.is_lid_stack(labware.load_name)
+            and self._engine_client.state.labware.get_highest_child_labware(
+                labware_id=labware.labware_id
+            )
+            == labware.labware_id
+        ):
+            # The originating lid stack is now empty, so we need to move it to the SYSTEM_LOCATION
+            self._engine_client.execute_command(
+                cmd.MoveLabwareParams(
+                    labwareId=labware.labware_id,
+                    newLocation=SYSTEM_LOCATION,
+                    strategy=LabwareMovementStrategy.MANUAL_MOVE_WITHOUT_PAUSE,
+                    pickUpOffset=None,
+                    dropOffset=None,
+                )
+            )
 
         if strategy == LabwareMovementStrategy.USING_GRIPPER:
             # Clear out last location since it is not relevant to pipetting
@@ -571,17 +649,7 @@ class ProtocolCore(
             existing_module_ids=list(self._module_cores_by_id.keys()),
         )
 
-        # If we end up create a new lid stack, return the lid stack
-        parent_location = self._engine_client.state.labware.get_location(lid_id)
-        if isinstance(
-            parent_location, OnLabwareLocation
-        ) and labware_validation.is_lid_stack(
-            self._engine_client.state.labware.get_load_name(parent_location.labwareId)
-        ):
-            return LabwareCore(
-                labware_id=parent_location.labwareId, engine_client=self._engine_client
-            )
-        return None
+        return output_result
 
     def _resolve_module_hardware(
         self, serial_number: str, model: ModuleModel
@@ -875,6 +943,7 @@ class ProtocolCore(
         )
 
         # FIXME(CHB, 2024-12-04) just like load labware and load adapter we have a validating after loading the object issue
+        assert load_result.definition is not None
         validation.ensure_definition_is_lid(load_result.definition)
 
         deck_conflict.check(

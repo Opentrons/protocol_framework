@@ -34,6 +34,7 @@ export const getLabwareRenderInfo = (
       const labwareDef = command.result?.definition
       if (
         location === 'offDeck' ||
+        location === 'systemLocation' ||
         'moduleId' in location ||
         'labwareId' in location
       )

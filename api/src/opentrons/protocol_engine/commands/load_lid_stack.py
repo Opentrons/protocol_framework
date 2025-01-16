@@ -1,7 +1,8 @@
 """Load lid stack command request, result, and implementation models."""
 from __future__ import annotations
 from pydantic import BaseModel, Field
-from typing import TYPE_CHECKING, Optional, Type, List
+from typing import TYPE_CHECKING, Optional, Type, List, Any
+from pydantic.json_schema import SkipJsonSchema
 from typing_extensions import Literal
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
@@ -10,6 +11,7 @@ from ..errors import LabwareIsNotAllowedInLocationError, ProtocolEngineError
 from ..resources import fixture_validation, labware_validation
 from ..types import (
     LabwareLocation,
+    SYSTEM_LOCATION,
     OnLabwareLocation,
     DeckSlotLocation,
     AddressableAreaLocation,
@@ -21,10 +23,15 @@ from ..state.update_types import StateUpdate
 
 if TYPE_CHECKING:
     from ..state.state import StateView
-    from ..execution import EquipmentHandler
+    from ..execution import LoadedLabwareData, EquipmentHandler
 
 
 LoadLidStackCommandType = Literal["loadLidStack"]
+
+
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
 
 _LID_STACK_PE_LABWARE = "protocol_engine_lid_stack_object"
 _LID_STACK_PE_NAMESPACE = "opentrons"
@@ -50,6 +57,18 @@ class LoadLidStackParams(BaseModel):
         ...,
         description="The lid labware definition version.",
     )
+    stackLabwareId: str | SkipJsonSchema[None] = Field(
+        None,
+        description="An optional ID to assign to the lid stack labware object created."
+        "If None, an ID will be generated.",
+        json_schema_extra=_remove_default,
+    )
+    labwareIds: List[str] | SkipJsonSchema[None] = Field(
+        None,
+        description="An optional list of IDs to assign to the lids in the stack."
+        "If None, an ID will be generated.",
+        json_schema_extra=_remove_default,
+    )
     quantity: int = Field(
         ...,
         description="The quantity of lids to load.",
@@ -67,7 +86,7 @@ class LoadLidStackResult(BaseModel):
         ...,
         description="A list of lid labware IDs to reference the lids in this stack by. The first ID is the bottom of the stack.",
     )
-    definition: LabwareDefinition = Field(
+    definition: LabwareDefinition | None = Field(
         ...,
         description="The full definition data for this lid labware.",
     )
@@ -107,6 +126,10 @@ class LoadLidStackImplementation(
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
                 params.location.slotName.id
             )
+        if params.quantity <= 0 and params.location != SYSTEM_LOCATION:
+            raise ProtocolEngineError(
+                message="Lid Stack Labware Object with quantity 0 must be loaded onto System Location."
+            )
 
         verified_location = self._state_view.geometry.ensure_location_not_occupied(
             params.location
@@ -117,8 +140,9 @@ class LoadLidStackImplementation(
             namespace=_LID_STACK_PE_NAMESPACE,
             version=_LID_STACK_PE_VERSION,
             location=verified_location,
-            labware_id=None,
+            labware_id=params.stackLabwareId,
         )
+
         if not labware_validation.validate_definition_is_system(
             lid_stack_object.definition
         ):
@@ -126,13 +150,29 @@ class LoadLidStackImplementation(
                 message="Lid Stack Labware Object Labware Definition does not contain required allowed role 'system'."
             )
 
-        loaded_lid_labwares = await self._equipment.load_lids(
-            load_name=params.loadName,
-            namespace=params.namespace,
-            version=params.version,
-            location=OnLabwareLocation(labwareId=lid_stack_object.labware_id),
-            quantity=params.quantity,
-        )
+        loaded_lid_labwares: List[LoadedLabwareData] = []
+        lid_labware_definition = None
+
+        if params.quantity > 0:
+            loaded_lid_labwares = await self._equipment.load_lids(
+                load_name=params.loadName,
+                namespace=params.namespace,
+                version=params.version,
+                location=OnLabwareLocation(labwareId=lid_stack_object.labware_id),
+                quantity=params.quantity,
+                labware_ids=params.labwareIds,
+            )
+
+            lid_labware_definition = loaded_lid_labwares[0].definition
+
+            if isinstance(verified_location, OnLabwareLocation):
+                self._state_view.labware.raise_if_labware_cannot_be_stacked(
+                    top_labware_definition=loaded_lid_labwares[
+                        params.quantity - 1
+                    ].definition,
+                    bottom_labware_id=verified_location.labwareId,
+                )
+
         loaded_lid_locations_by_id = {}
         load_location = OnLabwareLocation(labwareId=lid_stack_object.labware_id)
         for loaded_lid in loaded_lid_labwares:
@@ -144,24 +184,15 @@ class LoadLidStackImplementation(
             stack_id=lid_stack_object.labware_id,
             stack_object_definition=lid_stack_object.definition,
             stack_location=verified_location,
-            labware_ids=list(loaded_lid_locations_by_id.keys()),
-            labware_definition=loaded_lid_labwares[0].definition,
             locations=loaded_lid_locations_by_id,
+            labware_definition=lid_labware_definition,
         )
-
-        if isinstance(verified_location, OnLabwareLocation):
-            self._state_view.labware.raise_if_labware_cannot_be_stacked(
-                top_labware_definition=loaded_lid_labwares[
-                    params.quantity - 1
-                ].definition,
-                bottom_labware_id=verified_location.labwareId,
-            )
 
         return SuccessData(
             public=LoadLidStackResult(
                 stackLabwareId=lid_stack_object.labware_id,
                 labwareIds=list(loaded_lid_locations_by_id.keys()),
-                definition=loaded_lid_labwares[0].definition,
+                definition=lid_labware_definition,
                 location=params.location,
             ),
             state_update=state_update,

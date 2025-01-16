@@ -50,8 +50,8 @@ def _labware_location_string(
     elif location == "offDeck":
         return "[off-deck]"
 
-    elif location == "invalidated":
-        return "[invalidated]"
+    elif location == "systemLocation":
+        return "[systemLocation]"
 
 
 def _labware_name(engine_client: SyncClient, labware_id: str) -> str:

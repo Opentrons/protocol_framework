@@ -416,7 +416,11 @@ export function getSlotNameAndLwLocFrom(
       robotType: FLEX_ROBOT_TYPE,
     })?.slotName ?? null
 
-  if (location == null || location === 'offDeck') {
+  if (
+    location == null ||
+    location === 'offDeck' ||
+    location === 'systemLocation'
+  ) {
     return [null, null]
   } else if ('moduleId' in location) {
     if (excludeModules) {

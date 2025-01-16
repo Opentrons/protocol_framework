@@ -105,14 +105,6 @@ class LabwareLocationUpdate:
 
 
 @dataclasses.dataclass
-class LabwareInvalidationUpdate:
-    """Invalidate a labware's location."""
-
-    labware_id: str
-    """The ID of the already-loaded labware."""
-
-
-@dataclasses.dataclass
 class LoadedLabwareUpdate:
     """An update that loads a new labware."""
 
@@ -143,13 +135,10 @@ class LoadedLidStackUpdate:
     stack_location: LabwareLocation
     "The initial location of the Lid Stack Object."
 
-    labware_ids: typing.List[str]
-    """The unique IDs of the new lids."""
-
     new_locations_by_id: typing.Dict[str, OnLabwareLocation]
     """Each lid's initial location keyed by Labware ID."""
 
-    definition: LabwareDefinition
+    definition: LabwareDefinition | None
     "The Labware Definition of the Lid Labware(s) loaded."
 
 
@@ -370,8 +359,6 @@ class StateUpdate:
 
     labware_location: LabwareLocationUpdate | NoChangeType = NO_CHANGE
 
-    invalidate_labware: LabwareInvalidationUpdate | NoChangeType = NO_CHANGE
-
     loaded_labware: LoadedLabwareUpdate | NoChangeType = NO_CHANGE
 
     loaded_lid_stack: LoadedLidStackUpdate | NoChangeType = NO_CHANGE
@@ -526,9 +513,8 @@ class StateUpdate:
         stack_id: str,
         stack_object_definition: LabwareDefinition,
         stack_location: LabwareLocation,
-        labware_definition: LabwareDefinition,
-        labware_ids: typing.List[str],
         locations: typing.Dict[str, OnLabwareLocation],
+        labware_definition: LabwareDefinition | None,
     ) -> Self:
         """Add a new lid stack to state. See `LoadedLidStackUpdate`."""
         self.loaded_lid_stack = LoadedLidStackUpdate(
@@ -536,7 +522,6 @@ class StateUpdate:
             stack_object_definition=stack_object_definition,
             stack_location=stack_location,
             definition=labware_definition,
-            labware_ids=labware_ids,
             new_locations_by_id=locations,
         )
         return self
@@ -551,15 +536,6 @@ class StateUpdate:
             parent_labware_ids=parent_labware_ids,
             lid_ids=lid_ids,
         )
-        return self
-
-    def set_labware_invalidated(
-        self: Self,
-        *,
-        labware_id: str,
-    ) -> Self:
-        """Invalidate a labware's location. See `LabwareInvalidationUpdate`."""
-        self.invalidate_labware = LabwareInvalidationUpdate(labware_id=labware_id)
         return self
 
     def set_load_pipette(

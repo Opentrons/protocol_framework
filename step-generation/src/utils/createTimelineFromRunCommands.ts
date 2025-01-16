@@ -43,7 +43,7 @@ export function getResultingTimelineFrameFromRunCommands(
     (acc, command) => {
       if (command.commandType === 'loadLabware' && command.result != null) {
         let slot
-        if (command.params.location === 'offDeck') {
+        if (command.params.location === 'offDeck' || command.params.location === 'systemLocation') {
           slot = command.params.location
         } else if ('slotName' in command.params.location) {
           slot = command.params.location.slotName

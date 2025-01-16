@@ -29,7 +29,6 @@ from ..errors import (
     LabwareMovementNotAllowedError,
     NotSupportedOnRobotType,
     LabwareOffsetDoesNotExistError,
-    ProtocolEngineError,
 )
 from ..resources import labware_validation, fixture_validation
 from .command import (
@@ -328,14 +327,7 @@ class MoveLidImplementation(AbstractCommandImpl[MoveLidParams, _ExecuteReturn]):
         lid_updates: List[str | None] = []
         # when moving a lid between locations we need to:
         assert isinstance(current_labware.location, OnLabwareLocation)
-        if labware_validation.is_lid_stack(
-            self._state_view.labware.get_load_name(current_labware.location.labwareId)
-        ):
-            # if the source location is a labware stack, then this is the final lid in the stack and remove it
-            state_update.set_labware_invalidated(
-                labware_id=current_labware.location.labwareId
-            )
-        elif (
+        if (
             self._state_view.labware.get_lid_by_labware_id(
                 current_labware.location.labwareId
             )
@@ -348,60 +340,21 @@ class MoveLidImplementation(AbstractCommandImpl[MoveLidParams, _ExecuteReturn]):
         # --- otherwise the source location was another lid, theres nothing to do so move on ---
 
         # if the new location is a empty deck slot, make a new lid stack there
-        if isinstance(available_new_location, DeckSlotLocation) or (
-            isinstance(available_new_location, OnLabwareLocation)
-            and labware_validation.validate_definition_is_adapter(
-                self._state_view.labware.get_definition(
-                    available_new_location.labwareId
-                )
-            )
-        ):
-            # we will need to generate a labware ID for a new lid stack
-            lid_stack_object = await self._equipment.load_labware(
-                load_name=_LID_STACK_PE_LABWARE,
-                namespace=_LID_STACK_PE_NAMESPACE,
-                version=_LID_STACK_PE_VERSION,
-                location=available_new_location,
-                labware_id=None,
-            )
-            if not labware_validation.validate_definition_is_system(
-                lid_stack_object.definition
-            ):
-                raise ProtocolEngineError(
-                    message="Lid Stack Labware Object Labware Definition does not contain required allowed role 'system'."
-                )
-            # we will need to state update to add the lid stack to this position in space
-            state_update.set_loaded_labware(
-                definition=lid_stack_object.definition,
-                labware_id=lid_stack_object.labware_id,
-                offset_id=lid_stack_object.offsetId,
-                display_name=None,
-                location=available_new_location,
-            )
 
-            # Update the lid labware location to the new lid stack
-            state_update.set_labware_location(
-                labware_id=params.labwareId,
-                new_location=OnLabwareLocation(labwareId=lid_stack_object.labware_id),
-                new_offset_id=new_offset_id,
-            )
         # update the LIDs labware location to new location
-        else:
-            state_update.set_labware_location(
-                labware_id=params.labwareId,
-                new_location=available_new_location,
-                new_offset_id=new_offset_id,
-            )
-            # If we're moving to a non lid object, add to the setlids list of things to do
-            if isinstance(
-                available_new_location, OnLabwareLocation
-            ) and not labware_validation.validate_definition_is_lid(
-                self._state_view.labware.get_definition(
-                    available_new_location.labwareId
-                )
-            ):
-                parent_updates.append(available_new_location.labwareId)
-                lid_updates.append(params.labwareId)
+        state_update.set_labware_location(
+            labware_id=params.labwareId,
+            new_location=available_new_location,
+            new_offset_id=new_offset_id,
+        )
+        # If we're moving to a non lid object, add to the setlids list of things to do
+        if isinstance(
+            available_new_location, OnLabwareLocation
+        ) and not labware_validation.validate_definition_is_lid(
+            self._state_view.labware.get_definition(available_new_location.labwareId)
+        ):
+            parent_updates.append(available_new_location.labwareId)
+            lid_updates.append(params.labwareId)
         # Add to setlids
         if len(parent_updates) > 0:
             state_update.set_lids(

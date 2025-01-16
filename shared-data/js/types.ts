@@ -88,6 +88,7 @@ export type LabwareDisplayCategory =
   | 'other'
   | 'adapter'
   | 'lid'
+  | 'system'
 export type LabwareVolumeUnits = 'µL' | 'mL' | 'L'
 
 // TODO(mc, 2019-05-29): Remove this enum in favor of string + exported

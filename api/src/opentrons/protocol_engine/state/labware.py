@@ -49,7 +49,7 @@ from ..types import (
     LabwareMovementOffsetData,
     OnDeckLabwareLocation,
     OFF_DECK_LOCATION,
-    INVALIDATED_LOCATION,
+    SYSTEM_LOCATION,
 )
 from ..actions import (
     Action,
@@ -248,7 +248,11 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
             )
 
             # Add the Lids on top of the stack object
-            for i in range(len(loaded_lid_stack_update.labware_ids)):
+            for labware_id in loaded_lid_stack_update.new_locations_by_id:
+                if loaded_lid_stack_update.definition is None:
+                    raise ValueError(
+                        "Lid Stack Labware Definition cannot be None when multiple lids are loaded."
+                    )
                 definition_uri = uri_from_details(
                     namespace=loaded_lid_stack_update.definition.namespace,
                     load_name=loaded_lid_stack_update.definition.parameters.loadName,
@@ -259,14 +263,10 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                     definition_uri
                 ] = loaded_lid_stack_update.definition
 
-                location = loaded_lid_stack_update.new_locations_by_id[
-                    loaded_lid_stack_update.labware_ids[i]
-                ]
+                location = loaded_lid_stack_update.new_locations_by_id[labware_id]
 
-                self._state.labware_by_id[
-                    loaded_lid_stack_update.labware_ids[i]
-                ] = LoadedLabware.construct(
-                    id=loaded_lid_stack_update.labware_ids[i],
+                self._state.labware_by_id[labware_id] = LoadedLabware.construct(
+                    id=labware_id,
                     location=location,
                     loadName=loaded_lid_stack_update.definition.parameters.loadName,
                     definitionUri=definition_uri,
@@ -303,15 +303,6 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                     new_location = OFF_DECK_LOCATION
 
                 self._state.labware_by_id[labware_id].location = new_location
-
-    def _set_labware_invalidated(self, state_update: update_types.StateUpdate) -> None:
-        labware_invalidation_update = state_update.invalidate_labware
-        if labware_invalidation_update != update_types.NO_CHANGE:
-            labware_id = labware_invalidation_update.labware_id
-
-            self._state.labware_by_id[labware_id].offsetId = None
-
-            self._state.labware_by_id[labware_id].location = INVALIDATED_LOCATION
 
 
 class LabwareView:
@@ -908,7 +899,9 @@ class LabwareView:
                     f"Cannot move pipette to {labware.loadName},"
                     f" labware is on staging slot {labware_location.addressableAreaName}"
                 )
-        elif labware_location == OFF_DECK_LOCATION:
+        elif (
+            labware_location == OFF_DECK_LOCATION or labware_location == SYSTEM_LOCATION
+        ):
             raise errors.LocationNotAccessibleByPipetteError(
                 f"Cannot move pipette to {labware.loadName}, labware is off-deck."
             )

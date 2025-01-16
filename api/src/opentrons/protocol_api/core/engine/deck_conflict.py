@@ -25,7 +25,7 @@ from opentrons.protocol_engine import (
     OnLabwareLocation,
     AddressableAreaLocation,
     OFF_DECK_LOCATION,
-    INVALIDATED_LOCATION,
+    SYSTEM_LOCATION,
 )
 from opentrons.protocol_engine.errors.exceptions import LabwareNotLoadedOnModuleError
 from opentrons.types import DeckSlotName, StagingSlotName, Point
@@ -248,7 +248,7 @@ def _map_labware(
 
     elif (
         location_from_engine == OFF_DECK_LOCATION
-        or location_from_engine == INVALIDATED_LOCATION
+        or location_from_engine == SYSTEM_LOCATION
     ):
         # This labware is off-deck. Exclude it from conflict checking.
         # todo(mm, 2023-02-23): Move this logic into wrapped_deck_conflict.
