@@ -1327,9 +1327,9 @@ class ModuleView:
             assert deck_slot.value[-1] == "3"
             return f"absorbanceReaderV1{deck_slot.value}"
         elif model == ModuleModel.FLEX_STACKER_MODULE_V1:
-            # only allowed in column 4
-            assert deck_slot.value[-1] == "4"
-            return f"flexStackerModuleV1{deck_slot.value}"
+            # loaded to column 3 but the addressable area is in column 4
+            assert deck_slot.value[-1] == "3"
+            return f"flexStackerModuleV1{deck_slot.value[0]}4"
 
         raise ValueError(
             f"Unknown module {model.name} has no addressable areas to provide."
