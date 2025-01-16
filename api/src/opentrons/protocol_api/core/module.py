@@ -397,4 +397,3 @@ class AbstractFlexStackerCore(AbstractModuleCore):
     @abstractmethod
     def store(self) -> None:
         """Store a labware at the bottom of the labware stack."""
-        pass

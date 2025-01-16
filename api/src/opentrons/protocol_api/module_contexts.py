@@ -1163,4 +1163,5 @@ class FlexStackerContext(ModuleContext):
 
         :param labware: The labware object to store.
         """
+        assert labware._core is not None
         self._core.store()

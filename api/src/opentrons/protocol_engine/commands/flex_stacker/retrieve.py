@@ -53,7 +53,6 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
 
     async def execute(self, params: RetrieveParams) -> SuccessData[RetrieveResult]:
         """Execute the labware retrieval command."""
-
         stacker_state = self._state_view.modules.get_flex_stacker_substate(
             params.moduleId
         )
@@ -90,7 +89,7 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
             new_location=ModuleLocation(moduleId=params.moduleId),
             new_offset_id=None,
         )
-        state_update.remove_flex_stacker_hopper_labware(
+        state_update.retrieve_flex_stacker_labware(
             module_id=params.moduleId, labware_id=lw_id
         )
         return SuccessData(

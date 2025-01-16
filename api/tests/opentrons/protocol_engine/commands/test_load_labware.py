@@ -32,7 +32,7 @@ from opentrons.protocol_engine.state.update_types import (
     AddressableAreaUsedUpdate,
     LoadedLabwareUpdate,
     FlexStackerStateUpdate,
-    FlexStackerAddHopperLabware,
+    FlexStackerLoadHopperLabware,
     StateUpdate,
 )
 
@@ -303,7 +303,7 @@ async def test_load_labware_in_flex_stacker(
             ),
             flex_stacker_state_update=FlexStackerStateUpdate(
                 module_id="some-module-id",
-                hopper_labware_update=FlexStackerAddHopperLabware(
+                hopper_labware_update=FlexStackerLoadHopperLabware(
                     labware_id="labware-id"
                 ),
             ),

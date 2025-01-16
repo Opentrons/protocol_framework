@@ -217,7 +217,7 @@ class LoadLabwareImplementation(
         if self._is_loading_to_module(
             params.location, ModuleModel.FLEX_STACKER_MODULE_V1
         ):
-            state_update.add_flex_stacker_hopper_labware(
+            state_update.load_flex_stacker_hopper_labware(
                 module_id=params.location.moduleId,
                 labware_id=loaded_labware.labware_id,
             )

@@ -12,6 +12,7 @@ from opentrons.protocol_engine.execution import EquipmentHandler
 from opentrons.protocol_engine.commands import flex_stacker
 from opentrons.protocol_engine.commands.command import SuccessData
 from opentrons.protocol_engine.commands.flex_stacker.retrieve import RetrieveImpl
+from opentrons.protocol_engine.types import Dimensions
 
 
 async def test_retrieve(
@@ -33,6 +34,10 @@ async def test_retrieve(
     decoy.when(fs_module_substate.module_id).then_return(
         FlexStackerId("flex-stacker-id")
     )
+    decoy.when(fs_module_substate.hopper_labware_ids).then_return(["labware-id"])
+    decoy.when(state_view.labware.get_dimensions(labware_id="labware-id")).then_return(
+        Dimensions(x=1, y=1, z=1)
+    )
 
     decoy.when(
         equipment.get_module_hardware_api(FlexStackerId("flex-stacker-id"))
@@ -41,5 +46,5 @@ async def test_retrieve(
     result = await subject.execute(data)
     decoy.verify(await fs_hardware.dispense_labware(labware_height=50.0), times=1)
     assert result == SuccessData(
-        public=flex_stacker.RetrieveResult(),
+        public=flex_stacker.RetrieveResult(labware_id="labware-id"),
     )
