@@ -29,7 +29,6 @@ export const absorbanceReaderCloseRead: CommandCreator<AbsorbanceReaderReadArgs>
   if (errors.length > 0) {
     return { errors }
   }
-
   const { module, fileName } = args
   const commandCreators: CurriedCommandCreator[] = [
     curryCommandCreator(absorbanceReaderCloseLid, {
