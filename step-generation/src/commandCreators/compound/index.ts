@@ -1,3 +1,5 @@
+export { absorbanceReaderCloseInitialize } from './absorbanceReaderCloseInitialize'
+export { absorbanceReaderCloseRead } from './absorbanceReaderCloseRead'
 export { consolidate } from './consolidate'
 export { distribute } from './distribute'
 export { mix } from './mix'

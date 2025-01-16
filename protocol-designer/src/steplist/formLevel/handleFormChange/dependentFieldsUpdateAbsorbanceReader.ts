@@ -22,7 +22,7 @@ const updatePatchOnAbsorbanceReaderFormType = (
         'referenceWavelength',
         'lidOpen',
         'mode',
-        'filePath'
+        'fileName'
       ),
     }
   }
