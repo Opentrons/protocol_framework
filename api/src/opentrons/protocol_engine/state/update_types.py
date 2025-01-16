@@ -755,3 +755,15 @@ class StateUpdate:
             hopper_labware_update=FlexStackerAddHopperLabware(labware_id=labware_id),
         )
         return self
+
+    def remove_flex_stacker_hopper_labware(
+        self,
+        module_id: str,
+        labware_id: str,
+    ) -> Self:
+        """Add a labware definition to the engine."""
+        self.flex_stacker_state_update = FlexStackerStateUpdate(
+            module_id=module_id,
+            hopper_labware_update=FlexStackerRemoveHopperLabware(labware_id=labware_id),
+        )
+        return self

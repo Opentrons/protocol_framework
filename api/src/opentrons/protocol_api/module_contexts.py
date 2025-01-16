@@ -1151,9 +1151,11 @@ class FlexStackerContext(ModuleContext):
         return self._core.get_serial_number()
 
     @requires_version(2, 23)
-    def retrieve(self) -> None:
+    def retrieve(self) -> Labware:
         """Release and return a labware at the bottom of the labware stack."""
         self._core.retrieve()
+        assert self.labware is not None
+        return self.labware
 
     @requires_version(2, 23)
     def store(self, labware: Labware) -> None:

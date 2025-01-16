@@ -6,8 +6,13 @@ from typing_extensions import Type
 from pydantic import BaseModel, Field
 
 from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
-from ...errors.error_occurrence import ErrorOccurrence
+from ...errors import (
+    ErrorOccurrence,
+    CannotPerformModuleAction,
+    LocationIsOccupiedError,
+)
 from ...state import update_types
+from ...types import ModuleModel, AddressableAreaLocation, ModuleLocation
 
 if TYPE_CHECKING:
     from opentrons.protocol_engine.state.state import StateView
@@ -28,6 +33,11 @@ class RetrieveParams(BaseModel):
 class RetrieveResult(BaseModel):
     """Result data from a labware retrieval command."""
 
+    labware_id: str = Field(
+        ...,
+        description="The labware ID of the retrieved labware.",
+    )
+
 
 class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResult]]):
     """Implementation of a labware retrieval command."""
@@ -43,19 +53,49 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
 
     async def execute(self, params: RetrieveParams) -> SuccessData[RetrieveResult]:
         """Execute the labware retrieval command."""
-        state_update = update_types.StateUpdate()
-        stacker_substate = self._state_view.modules.get_flex_stacker_substate(
-            module_id=params.moduleId
+
+        stacker_state = self._state_view.modules.get_flex_stacker_substate(
+            params.moduleId
         )
-
+        stacker_loc = ModuleLocation(moduleId=params.moduleId)
         # Allow propagation of ModuleNotAttachedError.
-        stacker = self._equipment.get_module_hardware_api(stacker_substate.module_id)
+        stacker_hw = self._equipment.get_module_hardware_api(stacker_state.module_id)
 
-        if stacker is not None:
-            # TODO: get labware height from labware state view
-            await stacker.dispense_labware(labware_height=50.0)
+        if not stacker_state.hopper_labware_ids:
+            raise CannotPerformModuleAction(
+                f"Flex Stacker {params.moduleId} has no labware to retrieve"
+            )
 
-        return SuccessData(public=RetrieveResult(), state_update=state_update)
+        try:
+            self._state_view.labware.raise_if_labware_in_location(stacker_loc)
+        except Exception as e:
+            raise CannotPerformModuleAction(
+                f"Cannot retrieve a labware from Flex Stacker if the carriage is occupied: {e}"
+            )
+
+        state_update = update_types.StateUpdate()
+
+        # Get the labware dimensions for the labware being retrieved,
+        # which is the first one in the hopper labware id list
+        lw_id = stacker_state.hopper_labware_ids[0]
+        lw_dim = self._state_view.labware.get_dimensions(labware_id=lw_id)
+
+        if stacker_hw is not None:
+            # Dispense the labware from the Flex Stacker using the labware height
+            await stacker_hw.dispense_labware(labware_height=lw_dim.z)
+
+        # update the state to reflect the labware is now in the flex stacker slot
+        state_update.set_labware_location(
+            labware_id=lw_id,
+            new_location=ModuleLocation(moduleId=params.moduleId),
+            new_offset_id=None,
+        )
+        state_update.remove_flex_stacker_hopper_labware(
+            module_id=params.moduleId, labware_id=lw_id
+        )
+        return SuccessData(
+            public=RetrieveResult(labware_id=lw_id), state_update=state_update
+        )
 
 
 class Retrieve(BaseCommand[RetrieveParams, RetrieveResult, ErrorOccurrence]):
