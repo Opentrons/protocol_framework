@@ -13,10 +13,9 @@ from opentrons.protocol_api._nozzle_layout import NozzleLayout
 from opentrons.protocol_api._liquid import LiquidClass
 from ..disposal_locations import TrashBin, WasteChute
 from .well import WellCoreType
-from .labware import LabwareCoreType
 
 
-class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
+class AbstractInstrument(ABC, Generic[WellCoreType]):
     @abstractmethod
     def get_default_speed(self) -> float:
         ...
@@ -42,7 +41,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
         rate: float,
         flow_rate: float,
         in_place: bool,
-        is_meniscus: Optional[bool] = None,
+        meniscus_tracking: Optional[types.MeniscusTracking] = None,
     ) -> None:
         """Aspirate a given volume of liquid from the specified location.
         Args:
@@ -52,6 +51,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
             rate: The rate for how quickly to aspirate.
             flow_rate: The flow rate in µL/s to aspirate at.
             in_place: Whether this is in-place.
+            meniscus_tracking: Optional data about where to aspirate from.
         """
         ...
 
@@ -65,7 +65,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
         flow_rate: float,
         in_place: bool,
         push_out: Optional[float],
-        is_meniscus: Optional[bool] = None,
+        meniscus_tracking: Optional[types.MeniscusTracking] = None,
     ) -> None:
         """Dispense a given volume of liquid into the specified location.
         Args:
@@ -76,6 +76,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
             flow_rate: The flow rate in µL/s to dispense at.
             in_place: Whether this is in-place.
             push_out: The amount to push the plunger below bottom position.
+            meniscus_tracking: Optional data about where to dispense from.
         """
         ...
 
@@ -312,15 +313,27 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
         ...
 
     @abstractmethod
-    def transfer_liquid(
+    def load_liquid_class(
         self,
         liquid_class: LiquidClass,
+        pipette_load_name: str,
+        tiprack_uri: str,
+    ) -> str:
+        """Load the liquid class properties of given pipette and tiprack into the engine.
+
+        Returns: ID of the liquid class record
+        """
+        ...
+
+    @abstractmethod
+    def transfer_liquid(
+        self,
+        liquid_class_id: str,
         volume: float,
-        source: List[Tuple[types.Location, WellCoreType]],
-        dest: List[Tuple[types.Location, WellCoreType]],
+        source: List[WellCoreType],
+        dest: List[WellCoreType],
         new_tip: TransferTipPolicyV2,
-        tip_racks: List[Tuple[types.Location, LabwareCoreType]],
-        trash_location: Union[types.Location, TrashBin, WasteChute],
+        trash_location: Union[WellCoreType, types.Location, TrashBin, WasteChute],
     ) -> None:
         """Transfer a liquid from source to dest according to liquid class properties."""
         ...
@@ -355,8 +368,17 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
         ...
 
     @abstractmethod
+    def liquid_probe_testing_data(
+        self,
+        well_core: types.WellCore,
+        loc: types.Location,
+        operation_volume: float,
+    ) -> Tuple[float, float, float]:
+        ...
+
+    @abstractmethod
     def nozzle_configuration_valid_for_lld(self) -> bool:
         """Check if the nozzle configuration currently supports LLD."""
 
 
-InstrumentCoreType = TypeVar("InstrumentCoreType", bound=AbstractInstrument[Any, Any])
+InstrumentCoreType = TypeVar("InstrumentCoreType", bound=AbstractInstrument[Any])

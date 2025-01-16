@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional, Union, List, Tuple
+from typing import TYPE_CHECKING, Optional, Union, List
 
 from opentrons import types
 from opentrons.hardware_control import CriticalPoint
@@ -25,7 +25,6 @@ from opentrons.protocol_api._liquid import LiquidClass
 from ...disposal_locations import TrashBin, WasteChute
 from ..instrument import AbstractInstrument
 from .legacy_well_core import LegacyWellCore
-from .legacy_labware_core import LegacyLabwareCore
 from .legacy_module_core import LegacyThermocyclerCore, LegacyHeaterShakerCore
 
 if TYPE_CHECKING:
@@ -38,7 +37,7 @@ _PRE_2_2_TIP_DROP_HEIGHT_MM = 10
 """In PAPIv2.1 and below, tips are always dropped 10 mm from the bottom of the well."""
 
 
-class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore, LegacyLabwareCore]):
+class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
     """Implementation of the InstrumentContext interface."""
 
     def __init__(
@@ -85,7 +84,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore, LegacyLabwareCore]
         rate: float,
         flow_rate: float,
         in_place: bool,
-        is_meniscus: Optional[bool] = None,
+        meniscus_tracking: Optional[types.MeniscusTracking] = None,
     ) -> None:
         """Aspirate a given volume of liquid from the specified location.
         Args:
@@ -95,6 +94,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore, LegacyLabwareCore]
             rate: The rate in µL/s to aspirate at.
             flow_rate: Not used in this core.
             in_place: Whether we should move_to location.
+            meniscus_tracking: Optional data about where to aspirate from.
         """
         if self.get_current_volume() == 0:
             # Make sure we're at the top of the labware and clear of any
@@ -128,7 +128,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore, LegacyLabwareCore]
         flow_rate: float,
         in_place: bool,
         push_out: Optional[float],
-        is_meniscus: Optional[bool] = None,
+        meniscus_tracking: Optional[types.MeniscusTracking] = None,
     ) -> None:
         """Dispense a given volume of liquid into the specified location.
         Args:
@@ -139,6 +139,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore, LegacyLabwareCore]
             flow_rate: Not used in this core.
             in_place: Whether we should move_to location.
             push_out: The amount to push the plunger below bottom position.
+            meniscus_tracking: Optional data about where to dispense from.
         """
         if isinstance(location, (TrashBin, WasteChute)):
             raise APIVersionError(
@@ -557,15 +558,24 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore, LegacyLabwareCore]
         """This will never be called because it was added in API 2.16."""
         pass
 
-    def transfer_liquid(
+    def load_liquid_class(
         self,
         liquid_class: LiquidClass,
+        pipette_load_name: str,
+        tiprack_uri: str,
+    ) -> str:
+        """This will never be called because it was added in .."""
+        # TODO(spp, 2024-11-20): update the docstring and error to include API version
+        assert False, "load_liquid_class is not supported in legacy context"
+
+    def transfer_liquid(
+        self,
+        liquid_class_id: str,
         volume: float,
-        source: List[Tuple[types.Location, LegacyWellCore]],
-        dest: List[Tuple[types.Location, LegacyWellCore]],
+        source: List[LegacyWellCore],
+        dest: List[LegacyWellCore],
         new_tip: TransferTipPolicyV2,
-        tip_racks: List[Tuple[types.Location, LegacyLabwareCore]],
-        trash_location: Union[types.Location, TrashBin, WasteChute],
+        trash_location: Union[LegacyWellCore, types.Location, TrashBin, WasteChute],
     ) -> None:
         """This will never be called because it was added in .."""
         # TODO(spp, 2024-11-20): update the docstring and error to include API version

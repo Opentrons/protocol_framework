@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional, Union, List, Tuple
+from typing import TYPE_CHECKING, Optional, Union, List
 
 from opentrons import types
 from opentrons.hardware_control.dev_types import PipetteDict
@@ -23,7 +23,6 @@ from opentrons_shared_data.errors.exceptions import (
     UnexpectedTipAttachError,
 )
 
-from ..legacy.legacy_labware_core import LegacyLabwareCore
 from ...disposal_locations import TrashBin, WasteChute
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
 from opentrons.protocol_api._liquid import LiquidClass
@@ -43,9 +42,7 @@ _PRE_2_2_TIP_DROP_HEIGHT_MM = 10
 """In PAPIv2.1 and below, tips are always dropped 10 mm from the bottom of the well."""
 
 
-class LegacyInstrumentCoreSimulator(
-    AbstractInstrument[LegacyWellCore, LegacyLabwareCore]
-):
+class LegacyInstrumentCoreSimulator(AbstractInstrument[LegacyWellCore]):
     """A simulation of an instrument context."""
 
     def __init__(
@@ -98,7 +95,6 @@ class LegacyInstrumentCoreSimulator(
         rate: float,
         flow_rate: float,
         in_place: bool,
-        is_meniscus: Optional[bool] = None,
     ) -> None:
         if self.get_current_volume() == 0:
             # Make sure we're at the top of the labware and clear of any
@@ -140,7 +136,6 @@ class LegacyInstrumentCoreSimulator(
         flow_rate: float,
         in_place: bool,
         push_out: Optional[float],
-        is_meniscus: Optional[bool] = None,
     ) -> None:
         if isinstance(location, (TrashBin, WasteChute)):
             raise APIVersionError(
@@ -477,15 +472,24 @@ class LegacyInstrumentCoreSimulator(
         """This will never be called because it was added in API 2.15."""
         pass
 
-    def transfer_liquid(
+    def load_liquid_class(
         self,
         liquid_class: LiquidClass,
+        pipette_load_name: str,
+        tiprack_uri: str,
+    ) -> str:
+        """This will never be called because it was added in .."""
+        # TODO(spp, 2024-11-20): update the docstring and error to include API version
+        assert False, "load_liquid_class is not supported in legacy context"
+
+    def transfer_liquid(
+        self,
+        liquid_class_id: str,
         volume: float,
-        source: List[Tuple[types.Location, LegacyWellCore]],
-        dest: List[Tuple[types.Location, LegacyWellCore]],
+        source: List[LegacyWellCore],
+        dest: List[LegacyWellCore],
         new_tip: TransferTipPolicyV2,
-        tip_racks: List[Tuple[types.Location, LegacyLabwareCore]],
-        trash_location: Union[types.Location, TrashBin, WasteChute],
+        trash_location: Union[LegacyWellCore, types.Location, TrashBin, WasteChute],
     ) -> None:
         """Transfer a liquid from source to dest according to liquid class properties."""
         # TODO(spp, 2024-11-20): update the docstring and error to include API version
