@@ -75,8 +75,7 @@ export function ProtocolSetupOffsets({
   const nonIdentityOffsets = getLatestCurrentOffsets(sortedOffsets)
   return (
     <>
-      {LPCWizard}
-      {LPCWizard == null && (
+      {LPCWizard ?? (
         <>
           <Flex
             flexDirection={DIRECTION_ROW}
