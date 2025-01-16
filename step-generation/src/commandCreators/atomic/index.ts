@@ -1,3 +1,7 @@
+import { absorbanceReaderCloseLid } from './absorbanceReaderCloseLid'
+import { absorbanceReaderInitialize } from './absorbanceReaderInitialize'
+import { absorbanceReaderOpenLid } from './absorbanceReaderOpenLid'
+import { absorbanceReaderRead } from './absorbanceReaderRead'
 import { aspirate } from './aspirate'
 import { aspirateInPlace } from './aspirateInPlace'
 import { blowout } from './blowout'
@@ -22,6 +26,10 @@ import { setTemperature } from './setTemperature'
 import { touchTip } from './touchTip'
 import { waitForTemperature } from './waitForTemperature'
 export {
+  absorbanceReaderCloseLid,
+  absorbanceReaderInitialize,
+  absorbanceReaderOpenLid,
+  absorbanceReaderRead,
   aspirate,
   aspirateInPlace,
   blowout,
