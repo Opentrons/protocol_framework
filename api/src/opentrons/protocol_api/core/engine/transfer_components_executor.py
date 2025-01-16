@@ -293,13 +293,13 @@ class TransferComponentsExecutor:
                 and touch_tip_props.z_offset is not None
                 and touch_tip_props.mm_to_edge is not None
             )
-            # TODO: update this once touch tip has mmToEdge
             self._instrument.touch_tip(
                 location=retract_location,
                 well_core=self._target_well,
                 radius=1,
                 z_offset=touch_tip_props.z_offset,
                 speed=touch_tip_props.speed,
+                mm_from_edge=touch_tip_props.mm_to_edge,
             )
             self._instrument.move_to(
                 location=retract_location,
@@ -460,8 +460,7 @@ class TransferComponentsExecutor:
                 and touch_tip_props.z_offset is not None
                 and touch_tip_props.mm_to_edge is not None
             )
-            # TODO: update this once touch tip has mmToEdge
-            #  Also, check that when blow out is a non-dest-well,
+            # TODO:, check that when blow out is a non-dest-well,
             #  whether the touch tip params from transfer props should be used for
             #  both dest-well touch tip and non-dest-well touch tip.
             if well is not None and location is not None:
@@ -472,6 +471,7 @@ class TransferComponentsExecutor:
                         radius=1,
                         z_offset=touch_tip_props.z_offset,
                         speed=touch_tip_props.speed,
+                        mm_from_edge=touch_tip_props.mm_to_edge,
                     )
                 except TouchTipDisabledError:
                     # TODO: log a warning

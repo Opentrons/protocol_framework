@@ -180,7 +180,10 @@ class LegacyInstrumentCoreSimulator(
         radius: float,
         z_offset: float,
         speed: float,
+        mm_from_edge: Optional[float] = None,
     ) -> None:
+        if mm_from_edge is not None:
+            raise APIVersionError(api_element="mm_from_edge argument")
         self.move_to(location)
 
     def pick_up_tip(
