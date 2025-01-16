@@ -13,6 +13,7 @@ from opentrons.types import (
     DeckSlotName,
     StagingSlotName,
     MountType,
+    MeniscusTracking,
 )
 
 from opentrons_shared_data.errors.exceptions import InvalidStoredData
@@ -494,7 +495,8 @@ class GeometryView:
                 )
             else:
                 raise OperationLocationNotInWellError(
-                    f"Specifying {well_location.origin} with an offset of {well_location.offset} and a volume offset of {well_location.volumeOffset} results in an operation location below the bottom of the well"
+                    # f"Specifying {well_location.origin} with an offset of {well_location.offset} and a volume offset of {well_location.volumeOffset} results in an operation location below the bottom of the well"
+                    f"well = {well_location}"
                 )
 
     def get_well_position(
@@ -566,13 +568,13 @@ class GeometryView:
         labware_id: str,
         well_name: str,
         absolute_point: Point,
-        is_meniscus: Optional[bool] = None,
+        meniscus_tracking: Optional[MeniscusTracking] = None,
     ) -> LiquidHandlingWellLocation:
         """Given absolute position, get relative location of a well in a labware.
 
         If is_meniscus is True, absolute_point will hold the z-offset in its z field.
         """
-        if is_meniscus:
+        if meniscus_tracking:
             return LiquidHandlingWellLocation(
                 origin=WellOrigin.MENISCUS,
                 offset=WellOffset(x=0, y=0, z=absolute_point.z),
