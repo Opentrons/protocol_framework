@@ -1,16 +1,18 @@
 import { uuid } from '../../utils'
 import { missingModuleError } from '../../errorCreators'
-import { getModuleState } from '../../robotStateSelectors'
+import { absorbanceReaderStateGetter } from '../../robotStateSelectors'
 
-import type { ModuleOnlyParams } from '@opentrons/shared-data/protocol/types/schemaV4'
-import type { CommandCreator } from '../../types'
+import type { AbsorbanceReaderLidArgs, CommandCreator } from '../../types'
 
-export const absorbanceReaderOpenLid: CommandCreator<ModuleOnlyParams> = (
+export const absorbanceReaderOpenLid: CommandCreator<AbsorbanceReaderLidArgs> = (
   args,
   invariantContext,
   prevRobotState
 ) => {
-  const absorbanceReaderState = getModuleState(prevRobotState, args.module)
+  const absorbanceReaderState = absorbanceReaderStateGetter(
+    prevRobotState,
+    args.module
+  )
   if (args.module == null || absorbanceReaderState == null) {
     return {
       errors: [missingModuleError()],
