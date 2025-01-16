@@ -9,10 +9,9 @@ from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, Succe
 from ...errors import (
     ErrorOccurrence,
     CannotPerformModuleAction,
-    LocationIsOccupiedError,
 )
 from ...state import update_types
-from ...types import ModuleModel, AddressableAreaLocation, ModuleLocation
+from ...types import ModuleLocation
 
 if TYPE_CHECKING:
     from opentrons.protocol_engine.state.state import StateView
