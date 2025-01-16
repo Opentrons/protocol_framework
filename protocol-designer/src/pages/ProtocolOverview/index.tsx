@@ -15,6 +15,7 @@ import {
   JUSTIFY_SPACE_BETWEEN,
   LargeButton,
   NO_WRAP,
+  ProtocolTimelineScrubber,
   SPACING,
   StyledText,
   WRAP,
@@ -47,7 +48,7 @@ import {
   getUnusedStagingAreas,
   getUnusedTrash,
 } from './utils'
-
+import { ScrubberContainer } from './ScrubberContainer'
 import type { CreateCommand } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../types'
 
@@ -320,6 +321,7 @@ export function ProtocolOverview(): JSX.Element {
             css={COLUMN_STYLE}
             gridGap={SPACING.spacing12}
           >
+            <ScrubberContainer />
             <StartingDeck
               robotType={robotType}
               setShowMaterialsListModal={setShowMaterialsListModal}

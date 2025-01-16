@@ -39,8 +39,14 @@ import type {
   RobotType,
   RunTimeCommand,
 } from '@opentrons/shared-data'
-import type { ModuleTemporalProperties } from '@opentrons/step-generation'
+import type {
+  InvariantContext,
+  ModuleTemporalProperties,
+  Timeline,
+  TimelineFrame,
+} from '@opentrons/step-generation'
 import type { LabwareOnDeck, Module } from '../..'
+import { constructInvariantContextFromRunCommands } from '@opentrons/step-generation'
 export * from './types'
 export * from './utils'
 
@@ -51,6 +57,8 @@ interface ProtocolTimelineScrubberProps {
   commands: RunTimeCommand[]
   analysis: CompletedProtocolAnalysis | ProtocolAnalysisOutput
   robotType?: RobotType
+  invariantContextFromPD?: InvariantContext
+  initialRobotStateFromPD?: TimelineFrame
 }
 
 export const DECK_LAYER_BLOCKLIST = [
@@ -62,23 +70,30 @@ export const DECK_LAYER_BLOCKLIST = [
   'removableDeckOutline',
   'screwHoles',
 ]
-export const VIEWBOX_MIN_X = -84
-export const VIEWBOX_MIN_Y = -10
-export const VIEWBOX_WIDTH = 600
-export const VIEWBOX_HEIGHT = 460
 
 export function ProtocolTimelineScrubber(
   props: ProtocolTimelineScrubberProps
 ): JSX.Element {
-  const { commands, analysis, robotType = FLEX_ROBOT_TYPE } = props
+  const {
+    commands,
+    analysis,
+    robotType = FLEX_ROBOT_TYPE,
+    invariantContextFromPD,
+    initialRobotStateFromPD,
+  } = props
   const wrapperRef = useRef<HTMLDivElement>(null)
   const commandListRef = useRef<ViewportListRef>(null)
   const [currentCommandIndex, setCurrentCommandIndex] = useState<number>(0)
   const [isPlaying, setIsPlaying] = useState<boolean>(true)
 
   const currentCommandsSlice = commands.slice(0, currentCommandIndex + 1)
+  const invariantContextFromRunCommands = constructInvariantContextFromRunCommands(
+    commands
+  )
   const { frame, invariantContext } = getResultingTimelineFrameFromRunCommands(
-    currentCommandsSlice
+    currentCommandsSlice,
+    invariantContextFromPD ?? invariantContextFromRunCommands,
+    initialRobotStateFromPD
   )
   const handlePlayPause = (): void => {
     setIsPlaying(!isPlaying)
@@ -100,7 +115,7 @@ export function ProtocolTimelineScrubber(
     }
   }, [isPlaying, commands])
 
-  const { robotState } = frame
+  const robotState = frame.robotState
 
   const [leftPipetteId] = Object.entries(robotState.pipettes).find(
     ([_pipetteId, pipette]) => pipette?.mount === 'left'
@@ -120,7 +135,7 @@ export function ProtocolTimelineScrubber(
 
   const allWellContentsForActiveItem = getAllWellContentsForActiveItem(
     invariantContext.labwareEntities,
-    frame
+    robotState
   )
   const liquidDisplayColors = analysis.liquids.map(
     liquid => liquid.displayColor ?? COLORS.blue50
@@ -128,21 +143,18 @@ export function ProtocolTimelineScrubber(
 
   const isValidRobotSideAnalysis = analysis != null
   const allRunDefs = useMemo(
-    () =>
-      analysis != null
-        ? getLabwareDefinitionsFromCommands(analysis.commands)
-        : [],
+    () => getLabwareDefinitionsFromCommands(commands),
     [isValidRobotSideAnalysis]
   )
 
   return (
     <Flex
-      height="95vh"
+      height="auto"
       flexDirection={DIRECTION_COLUMN}
       gridGap={SPACING.spacing8}
     >
       <Flex gridGap={SPACING.spacing8} flex="1 1 0">
-        <Flex height="60vh">
+        <Flex height="40vh">
           <BaseDeck
             robotType={robotType}
             deckConfig={getSimplestDeckConfigForProtocol(analysis)}
@@ -263,14 +275,14 @@ export function ProtocolTimelineScrubber(
           mount="left"
           pipetteId={leftPipetteId}
           pipetteEntity={leftPipetteEntity}
-          timelineFrame={frame.robotState}
+          timelineFrame={robotState}
           analysis={analysis}
         />
         <PipetteMountViz
           mount="right"
           pipetteId={rightPipetteId}
           pipetteEntity={rightPipetteEntity}
-          timelineFrame={frame.robotState}
+          timelineFrame={robotState}
           analysis={analysis}
         />
       </Flex>

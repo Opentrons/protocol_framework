@@ -10,6 +10,7 @@ import type {
   InvariantContext,
   RobotState,
   RobotStateAndWarnings,
+  TimelineFrame,
 } from '../types'
 
 export type RunCommandTimelineFrame = RobotStateAndWarnings & {
@@ -21,15 +22,16 @@ interface ResultingTimelineFrame {
   invariantContext: InvariantContext
 }
 export function getResultingTimelineFrameFromRunCommands(
-  commands: RunTimeCommand[]
+  commands: RunTimeCommand[],
+  invariantContext: InvariantContext,
+  initialRobotStateFromPd?: TimelineFrame
 ): ResultingTimelineFrame {
-  const invariantContext = constructInvariantContextFromRunCommands(commands)
   const pipetteLocations = commands.reduce<RobotState['pipettes']>(
     (acc, command) => {
-      if (command.commandType === 'loadPipette' && command.result != null) {
+      if (command.commandType === 'loadPipette') {
         return {
           ...acc,
-          [command.result.pipetteId]: {
+          [command.params.pipetteId]: {
             mount: command.params.mount,
           },
         }
@@ -41,7 +43,7 @@ export function getResultingTimelineFrameFromRunCommands(
 
   const labwareLocations = commands.reduce<RobotState['labware']>(
     (acc, command) => {
-      if (command.commandType === 'loadLabware' && command.result != null) {
+      if (command.commandType === 'loadLabware') {
         let slot
         if (command.params.location === 'offDeck') {
           slot = command.params.location
@@ -56,7 +58,7 @@ export function getResultingTimelineFrameFromRunCommands(
         }
         return {
           ...acc,
-          [command.result.labwareId]: {
+          [command.result?.labwareId ?? command.params.labwareId ?? 'test']: {
             slot: slot,
           },
         }
@@ -67,11 +69,11 @@ export function getResultingTimelineFrameFromRunCommands(
   )
   const moduleLocations = commands.reduce<RobotState['modules']>(
     (acc, command) => {
-      if (command.commandType === 'loadModule' && command.result != null) {
+      if (command.commandType === 'loadModule') {
         const moduleType = getModuleDef2(command.params.model).moduleType
         return {
           ...acc,
-          [command.result.moduleId]: {
+          [command.result?.moduleId ?? command.params.moduleId ?? 'test']: {
             slot: command.params.location.slotName,
             moduleState: MODULE_INITIAL_STATE_BY_TYPE[moduleType],
           },
@@ -92,7 +94,7 @@ export function getResultingTimelineFrameFromRunCommands(
       ...getNextRobotStateAndWarnings(
         commands,
         invariantContext,
-        initialRobotState
+        initialRobotStateFromPd ?? initialRobotState
       ),
       command: commands[commands.length - 1],
     },
