@@ -1,4 +1,10 @@
 export {
+  absorbanceReaderCloseInitialize,
+  absorbanceReaderCloseLid,
+  absorbanceReaderCloseRead,
+  absorbanceReaderInitialize,
+  absorbanceReaderOpenLid,
+  absorbanceReaderRead,
   aspirate,
   waitForTemperature,
   blowout,

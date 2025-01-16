@@ -32,7 +32,7 @@ export function ReadSettings(props: ReadSettingsProps): JSX.Element {
       </Flex>
       <InputStepFormField
         padding="0"
-        {...propsForFields.filePath}
+        {...propsForFields.fileName}
         title={t('exported_file_name')}
       />
     </Flex>

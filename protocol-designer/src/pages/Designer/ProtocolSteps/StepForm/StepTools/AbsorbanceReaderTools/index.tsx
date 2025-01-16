@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -35,8 +35,9 @@ export function AbsorbanceReaderTools(props: StepFormProps): JSX.Element {
   const robotState = useSelector(getRobotStateAtActiveItem)
   const absorbanceReaderOptions = useSelector(getAbsorbanceReaderLabwareOptions)
   const { labware = {}, modules = {} } = robotState ?? {}
-  const isLabwareOnAbsorbanceReader = Object.values(labware).some(
-    lw => lw.slot === propsForFields.moduleId.value
+  const isLabwareOnAbsorbanceReader = useMemo(
+    () => Object.values(labware).some(lw => lw.slot === moduleId),
+    [moduleId]
   )
   const absorbanceReaderFormType = formData.absorbanceReaderFormType as AbsorbanceReaderFormType
   const absorbanceReaderState = modules[moduleId]
@@ -86,7 +87,11 @@ export function AbsorbanceReaderTools(props: StepFormProps): JSX.Element {
   )
 
   const page1Content = (
-    <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
+    <Flex
+      flexDirection={DIRECTION_COLUMN}
+      gridGap={SPACING.spacing12}
+      width="100%"
+    >
       <DropdownStepFormField
         options={absorbanceReaderOptions}
         title={t('module')}
