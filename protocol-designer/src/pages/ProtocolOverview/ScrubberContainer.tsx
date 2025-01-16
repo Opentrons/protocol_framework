@@ -1,20 +1,11 @@
-import { LoadedPipettes, ProtocolTimelineScrubber } from '@opentrons/components'
 import { useSelector } from 'react-redux'
-import reduce from 'lodash/reduce'
+import flatMap from 'lodash/flatMap'
+import { ProtocolTimelineScrubber } from '@opentrons/components'
 import {
   getInitialRobotState,
   getRobotStateTimeline,
   getRobotType,
 } from '../../file-data/selectors'
-import {
-  CompletedProtocolAnalysis,
-  Liquid,
-  LoadedLabware,
-  LoadedModule,
-  LoadedPipette,
-  RunTimeCommand,
-} from '@opentrons/shared-data'
-import { flatMap } from 'lodash'
 import { uuid } from '../../utils'
 import {
   getInitialDeckSetup,
@@ -23,8 +14,14 @@ import {
 import { getLabwareNicknamesById } from '../../ui/labware/selectors'
 import { selectors as ingredSelectors } from '../../labware-ingred/selectors'
 import { swatchColors } from '../../organisms/DefineLiquidsModal/swatchColors'
-import { LiquidGroup } from '../../labware-ingred/types'
-import { getNextRobotStateAndWarnings } from '@opentrons/step-generation'
+import type {
+  CompletedProtocolAnalysis,
+  Liquid,
+  LoadedLabware,
+  LoadedModule,
+  LoadedPipette,
+  RunTimeCommand,
+} from '@opentrons/shared-data'
 
 export function ScrubberContainer(): JSX.Element {
   const robotType = useSelector(getRobotType)
@@ -50,7 +47,7 @@ export function ScrubberContainer(): JSX.Element {
   const loadModules: LoadedModule[] = Object.values(modules).map(module => ({
     id: module.id,
     model: module.model,
-    serialNumber: '1', // todo what is this,
+    serialNumber: '1', // todo: what is this? seems like we don't need it for command text though,
     location: {
       slotName: module.slot,
     },
@@ -65,7 +62,7 @@ export function ScrubberContainer(): JSX.Element {
   const liquids: Liquid[] = Object.entries(ingredients).map(
     ([liquidId, liquidData]) => ({
       id: liquidId,
-      displayName: liquidData.name ?? 'undefined liquid',
+      displayName: liquidData.name ?? 'undefined liquid name',
       description: liquidData.description ?? '',
       displayColor: liquidData.displayColor ?? swatchColors(liquidId),
     })
@@ -82,12 +79,6 @@ export function ScrubberContainer(): JSX.Element {
     errors: [],
     robotType,
   }
-
-  const robotStateAndWarnings = getNextRobotStateAndWarnings(
-    nonLoadCommands,
-    invariantContext,
-    initialRobotState
-  )
 
   return (
     <ProtocolTimelineScrubber
