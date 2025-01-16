@@ -762,7 +762,7 @@
         "displayName": "Absorbance Reader Lid Dock in A4"
       },
       {
-        "id": "flexStackerModuleV1D4",
+        "id": "flexStackerModuleV1D3",
         "areaType": "flexStacker",
         "offsetFromCutoutFixture": [161.0, 0.0, 31.0],
         "boundingBox": {
@@ -773,7 +773,7 @@
         "displayName": "Flex Stacker in D4"
       },
       {
-        "id": "flexStackerModuleV1C4",
+        "id": "flexStackerModuleV1C3",
         "areaType": "flexStacker",
         "offsetFromCutoutFixture": [161.0, 0.0, 31.0],
         "boundingBox": {
@@ -784,7 +784,7 @@
         "displayName": "Flex Stacker in C4"
       },
       {
-        "id": "flexStackerModuleV1B4",
+        "id": "flexStackerModuleV1B3",
         "areaType": "flexStacker",
         "offsetFromCutoutFixture": [161.0, 0.0, 31.0],
         "boundingBox": {
@@ -792,10 +792,10 @@
           "yDimension": 86.0,
           "zDimension": 0
         },
-        "displayName": "Flex Stacker in B4"
+        "displayName": "Flex Stacker in B3"
       },
       {
-        "id": "flexStackerModuleV1A4",
+        "id": "flexStackerModuleV1A3",
         "areaType": "flexStacker",
         "offsetFromCutoutFixture": [161.0, 0.0, 31.0],
         "boundingBox": {
@@ -1204,10 +1204,10 @@
       "mayMountTo": ["cutoutD3", "cutoutC3", "cutoutB3", "cutoutA3"],
       "displayName": "Slot With a Flex Stacker",
       "providesAddressableAreas": {
-        "cutoutD3": ["flexStackerModuleV1D4", "D3"],
-        "cutoutC3": ["flexStackerModuleV1C4", "C3"],
-        "cutoutB3": ["flexStackerModuleV1B4", "B3"],
-        "cutoutA3": ["flexStackerModuleV1A4", "A3"]
+        "cutoutD3": ["flexStackerModuleV1D3", "D3"],
+        "cutoutC3": ["flexStackerModuleV1C3", "C3"],
+        "cutoutB3": ["flexStackerModuleV1B3", "B3"],
+        "cutoutA3": ["flexStackerModuleV1A3", "A3"]
       },
       "fixtureGroup": {},
       "height": 10.65

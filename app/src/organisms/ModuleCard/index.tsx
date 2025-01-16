@@ -31,6 +31,7 @@ import {
   THERMOCYCLER_MODULE_TYPE,
   MODULE_MODELS_OT2_ONLY,
   ABSORBANCE_READER_TYPE,
+  FLEX_STACKER_MODULE_TYPE,
 } from '@opentrons/shared-data'
 import { RUN_STATUS_FINISHING, RUN_STATUS_RUNNING } from '@opentrons/api-client'
 
@@ -125,13 +126,13 @@ export const ModuleCard = (props: ModuleCardProps): JSX.Element | null => {
   const [showCalModal, setShowCalModal] = useState(false)
 
   const [targetProps, tooltipProps] = useHoverTooltip()
-
   const runStatus = useCurrentRunStatus()
   const isFlex = useIsFlex(robotName)
   const requireModuleCalibration =
     isFlex &&
     !MODULE_MODELS_OT2_ONLY.some(modModel => modModel === module.moduleModel) &&
     module.moduleType !== ABSORBANCE_READER_TYPE &&
+    module.moduleType !== FLEX_STACKER_MODULE_TYPE &&
     module.moduleOffset?.last_modified == null
   const isPipetteReady =
     !Boolean(attachPipetteRequired) &&
