@@ -241,7 +241,7 @@ class AspirateWhileTracking(
 
 
 class AspirateWhileTrackingCreate(BaseCommandCreate[AspirateWhileTrackingParams]):
-    """Create aspirate command request model."""
+    """Create aspirateWhileTracking command request model."""
 
     commandType: AspirateWhileTrackingCommandType = "aspirateWhileTracking"
     params: AspirateWhileTrackingParams

@@ -194,7 +194,7 @@ class DispenseWhileTracking(
 
 
 class DispenseWhileTrackingCreate(BaseCommandCreate[DispenseWhileTrackingParams]):
-    """Create dispense command request model."""
+    """Create dispenseWhileTracking command request model."""
 
     commandType: DispenseWhileTrackingCommandType = "dispenseWhileTracking"
     params: DispenseWhileTrackingParams

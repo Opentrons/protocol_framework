@@ -338,7 +338,7 @@
       "type": "object"
     },
     "AspirateWhileTrackingCreate": {
-      "description": "Create aspirate command request model.",
+      "description": "Create aspirateWhileTracking command request model.",
       "properties": {
         "commandType": {
           "const": "aspirateWhileTracking",
@@ -1534,7 +1534,7 @@
       "type": "object"
     },
     "DispenseWhileTrackingCreate": {
-      "description": "Create dispense command request model.",
+      "description": "Create dispenseWhileTracking command request model.",
       "properties": {
         "commandType": {
           "const": "dispenseWhileTracking",
