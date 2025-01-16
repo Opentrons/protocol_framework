@@ -44,19 +44,23 @@ CALIBRATION_SQUARE_EDGES: Dict[str, Offset] = {
 
 
 @overload
-def load(name: str, version: "DeckSchemaVersion6") -> "DeckDefinitionV6": ...
+def load(name: str, version: "DeckSchemaVersion6") -> "DeckDefinitionV6":
+    ...
 
 
 @overload
-def load(name: str, version: "DeckSchemaVersion5") -> "DeckDefinitionV5": ...
+def load(name: str, version: "DeckSchemaVersion5") -> "DeckDefinitionV5":
+    ...
 
 
 @overload
-def load(name: str, version: "DeckSchemaVersion4") -> "DeckDefinitionV4": ...
+def load(name: str, version: "DeckSchemaVersion4") -> "DeckDefinitionV4":
+    ...
 
 
 @overload
-def load(name: str, version: "DeckSchemaVersion3") -> "DeckDefinitionV3": ...
+def load(name: str, version: "DeckSchemaVersion3") -> "DeckDefinitionV3":
+    ...
 
 
 def load(name: str, version: int = DEFAULT_DECK_DEFINITION_VERSION) -> "DeckDefinition":
