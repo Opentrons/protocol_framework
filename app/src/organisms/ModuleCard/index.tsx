@@ -77,6 +77,7 @@ import type { State, Dispatch } from '/app/redux/types'
 import type { RequestState } from '/app/redux/robot-api/types'
 import { AbsorbanceReaderData } from './AbsorbanceReaderData'
 import { AbsorbanceReaderSlideout } from './AbsorbanceReaderSlideout'
+import { FlexStackerModuleData } from './FlexStackerModuleData'
 
 interface ModuleCardProps {
   module: AttachedModule
@@ -213,6 +214,11 @@ export const ModuleCard = (props: ModuleCardProps): JSX.Element | null => {
 
     case ABSORBANCE_READER_TYPE: {
       moduleData = <AbsorbanceReaderData moduleData={module.data} />
+      break
+    }
+
+    case FLEX_STACKER_MODULE_TYPE: {
+      moduleData = <FlexStackerModuleData moduleData={module.data} />
       break
     }
   }
