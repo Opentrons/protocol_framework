@@ -17,7 +17,7 @@ export const absorbanceReaderFormToArgs = (
 ): AbsorbanceReaderArgs | null => {
   const {
     absorbanceReaderFormType,
-    filePath,
+    fileName,
     lidOpen,
     moduleId,
     // mode,
@@ -39,7 +39,7 @@ export const absorbanceReaderFormToArgs = (
       return {
         module: moduleId,
         commandCreatorFnName: 'absorbanceReaderRead',
-        filePath,
+        fileName,
       }
     case ABSORBANCE_READER_LID:
       return {

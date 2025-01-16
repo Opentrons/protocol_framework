@@ -12,7 +12,7 @@ export const absorbanceReaderRead: CommandCreator<AbsorbanceReaderReadArgs> = (
   invariantContext,
   prevRobotState
 ) => {
-  const { module, filePath } = args
+  const { module, fileName } = args
   const errors: CommandCreatorError[] = []
   const absorbanceReaderState = absorbanceReaderStateGetter(
     prevRobotState,
@@ -37,7 +37,7 @@ export const absorbanceReaderRead: CommandCreator<AbsorbanceReaderReadArgs> = (
             key: uuid(),
             params: {
               moduleId: module,
-              ...(filePath != null ? { filePath } : {}),
+              ...(fileName != null ? { fileName } : {}),
             },
           },
         ],

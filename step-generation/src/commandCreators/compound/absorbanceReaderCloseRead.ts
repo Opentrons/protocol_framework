@@ -39,7 +39,7 @@ export const absorbanceReaderCloseRead: CommandCreator<AbsorbanceReaderReadArgs>
     curryCommandCreator(absorbanceReaderRead, {
       commandCreatorFnName: 'absorbanceReaderRead',
       module,
-      filePath,
+      fileName,
     }),
   ]
   return reduceCommandCreators(

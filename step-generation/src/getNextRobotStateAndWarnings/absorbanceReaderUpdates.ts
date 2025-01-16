@@ -37,8 +37,8 @@ export const forAbsorbanceReaderOpenLid = (
   const moduleState = _getAbsorbanceReaderState(robotState, moduleId)
 
   if (moduleState != null) {
-  moduleState.lidOpen = true
-}
+    moduleState.lidOpen = true
+  }
 }
 
 export const forAbsorbanceReaderCloseLid = (
@@ -51,8 +51,8 @@ export const forAbsorbanceReaderCloseLid = (
   const moduleState = _getAbsorbanceReaderState(robotState, moduleId)
 
   if (moduleState != null) {
-  moduleState.lidOpen = false
-}
+    moduleState.lidOpen = false
+  }
 }
 
 export const forAbsorbanceReaderInitialize = (
@@ -70,11 +70,11 @@ export const forAbsorbanceReaderInitialize = (
 
   const moduleState = _getAbsorbanceReaderState(robotState, moduleId)
   if (moduleState != null) {
-  moduleState.initialization = {
-    mode: measureMode,
-    wavelengths: sampleWavelengths,
-    referenceWavelength,
+    moduleState.initialization = {
+      mode: measureMode,
+      wavelengths: sampleWavelengths,
+      referenceWavelength,
+    }
+    moduleState.lidOpen = false
   }
-  moduleState.lidOpen = false
-}
 }

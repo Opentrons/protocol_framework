@@ -450,7 +450,7 @@ export interface AbsorbanceReaderInitializeArgs {
 export interface AbsorbanceReaderReadArgs {
   module: string
   commandCreatorFnName: 'absorbanceReaderRead'
-  filePath: string | null
+  fileName: string | null
   message?: string
 }
 
