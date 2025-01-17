@@ -9,6 +9,7 @@ from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, Succe
 from ...errors import (
     ErrorOccurrence,
     CannotPerformModuleAction,
+    LocationIsOccupiedError,
 )
 from ...state import update_types
 from ...types import ModuleLocation
@@ -72,7 +73,7 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
 
         try:
             self._state_view.labware.raise_if_labware_in_location(stacker_loc)
-        except Exception:
+        except LocationIsOccupiedError:
             raise CannotPerformModuleAction(
                 "Cannot retrieve a labware from Flex Stacker if the carriage is occupied"
             )

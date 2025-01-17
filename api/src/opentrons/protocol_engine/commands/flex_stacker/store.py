@@ -6,7 +6,11 @@ from typing_extensions import Type
 from pydantic import BaseModel, Field
 
 from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
-from ...errors import ErrorOccurrence, CannotPerformModuleAction
+from ...errors import (
+    ErrorOccurrence,
+    CannotPerformModuleAction,
+    LabwareNotLoadedOnModuleError,
+)
 from ...state import update_types
 from ...types import OFF_DECK_LOCATION
 
@@ -59,7 +63,7 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
 
         try:
             lw_id = self._state_view.labware.get_id_by_module(params.moduleId)
-        except Exception:
+        except LabwareNotLoadedOnModuleError:
             raise CannotPerformModuleAction(
                 "Cannot store labware if Flex Stacker carriage is empty"
             )
