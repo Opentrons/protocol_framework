@@ -314,10 +314,35 @@ class AbsorbanceReaderStateUpdate:
 
 
 @dataclasses.dataclass
+class FlexStackerLoadHopperLabware:
+    """An update to the Flex Stacker module static state."""
+
+    labware_id: str
+
+
+@dataclasses.dataclass
+class FlexStackerRetrieveLabware:
+    """An update to the Flex Stacker module static state."""
+
+    labware_id: str
+
+
+@dataclasses.dataclass
+class FlexStackerStoreLabware:
+    """An update to the Flex Stacker module static state."""
+
+    labware_id: str
+
+
+@dataclasses.dataclass
 class FlexStackerStateUpdate:
     """An update to the Flex Stacker module state."""
 
     module_id: str
+    in_static_mode: bool | NoChangeType = NO_CHANGE
+    hopper_labware_update: FlexStackerLoadHopperLabware | FlexStackerRetrieveLabware | FlexStackerStoreLabware | NoChangeType = (
+        NO_CHANGE
+    )
 
 
 @dataclasses.dataclass
@@ -719,5 +744,53 @@ class StateUpdate:
         """Mark that an addressable area has been used. See `AddressableAreaUsedUpdate`."""
         self.addressable_area_used = AddressableAreaUsedUpdate(
             addressable_area_name=addressable_area_name
+        )
+        return self
+
+    def load_flex_stacker_hopper_labware(
+        self,
+        module_id: str,
+        labware_id: str,
+    ) -> Self:
+        """Add a labware definition to the engine."""
+        self.flex_stacker_state_update = FlexStackerStateUpdate(
+            module_id=module_id,
+            hopper_labware_update=FlexStackerLoadHopperLabware(labware_id=labware_id),
+        )
+        return self
+
+    def retrieve_flex_stacker_labware(
+        self,
+        module_id: str,
+        labware_id: str,
+    ) -> Self:
+        """Add a labware definition to the engine."""
+        self.flex_stacker_state_update = FlexStackerStateUpdate(
+            module_id=module_id,
+            hopper_labware_update=FlexStackerRetrieveLabware(labware_id=labware_id),
+        )
+        return self
+
+    def store_flex_stacker_labware(
+        self,
+        module_id: str,
+        labware_id: str,
+    ) -> Self:
+        """Add a labware definition to the engine."""
+        self.flex_stacker_state_update = FlexStackerStateUpdate(
+            module_id=module_id,
+            hopper_labware_update=FlexStackerStoreLabware(labware_id=labware_id),
+        )
+        return self
+
+    def update_flex_stacker_mode(
+        self,
+        module_id: str,
+        static_mode: bool,
+    ) -> Self:
+        """Update the mode of the Flex Stacker."""
+        self.flex_stacker_state_update = FlexStackerStateUpdate(
+            module_id=module_id,
+            in_static_mode=static_mode,
         )
         return self
