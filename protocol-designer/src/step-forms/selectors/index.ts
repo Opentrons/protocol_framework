@@ -260,6 +260,7 @@ const _getInitialDeckSetup = (
     ),
     modules: mapValues<Record<DeckSlot, string>, ModuleOnDeck>(
       moduleLocations as Record<DeckSlot, string>,
+      // @ts-expect-error Flex stacker not yet supported in PD
       (slot: DeckSlot, moduleId: string): ModuleOnDeck => {
         const moduleEntity = moduleEntities[moduleId]
 
