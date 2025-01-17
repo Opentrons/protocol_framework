@@ -55,36 +55,4 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
 
 /*
 NEED TO ADD RENAME
-
--make selector for confirming that the protocol was made on an older version << doesn't pop up
--edit protocol -DONE
--select protocol steps -DONE
--click add step -DONE
--validate move, transfer, mix, pause, and any modules are available options -DONE
--select mix - Done
--validate step number followed by mix - Done
--Side Panel Appears on the right
--check that it contains:
-  -Part 1/2 -DONE
-  -Pipette <<< NOTE: NEED TO THINK ABOUT THIS
-    -Textbox with selected pipette
-  -Tip rack <<< NOTE: NEED TO THINK ABOUT THIS
-    -dropdown with appropriate list of tip rack options
-  -Labware - DONE
-    -dropdown of all labware
-  -Choose wells - click
-    -pop up modal with grid of wells
-    -click and drag to highlight all
-      -after selection, the number should update
-    -click to deselect single well
-      -after selection, the number should update
-    -click to reselect single well
-    -after selection, the number should update
-    -Volume per well to mix
-      enter some number
-    -Tip handling
-      -check dropdown
-    -Tip drop location
-      -will display option with respect to deck configs
-
 */
