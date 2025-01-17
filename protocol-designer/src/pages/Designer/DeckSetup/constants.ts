@@ -60,6 +60,7 @@ export const ORDERED_CATEGORIES: string[] = [
 export const CUSTOM_CATEGORY = 'custom'
 export const ALL_ORDERED_CATEGORIES = [CUSTOM_CATEGORY, ...ORDERED_CATEGORIES]
 
+// @ts-expect-error Flex stacker not yet supported in PD
 export const RECOMMENDED_LABWARE_BY_MODULE: { [K in ModuleType]: string[] } = {
   [TEMPERATURE_MODULE_TYPE]: [
     'opentrons_24_aluminumblock_generic_2ml_screwcap',
