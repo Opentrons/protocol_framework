@@ -23,6 +23,7 @@ from . import commands
 from .types import (
     OFF_DECK_LOCATION,
     DeckSlotLocation,
+    StagingSlotLocation,
     LabwareLocation,
     AddressableAreaLocation,
     LabwareOffsetCreate,
@@ -122,7 +123,11 @@ def _standardize_labware_location(
     original: LabwareLocation, robot_type: RobotType
 ) -> LabwareLocation:
     if isinstance(original, DeckSlotLocation):
-        return _standardize_deck_slot_location(original, robot_type)
+        location = _standardize_deck_slot_location(original, robot_type)
+        if isinstance(location, DeckSlotLocation):
+            return location
+        elif isinstance(location, StagingSlotLocation):
+            return AddressableAreaLocation(addressableAreaName=location.slotName.id)
     elif (
         isinstance(
             original, (ModuleLocation, OnLabwareLocation, AddressableAreaLocation)
@@ -133,8 +138,8 @@ def _standardize_labware_location(
 
 
 def _standardize_deck_slot_location(
-    original: DeckSlotLocation, robot_type: RobotType
-) -> DeckSlotLocation:
+    original: DeckSlotLocation | StagingSlotLocation, robot_type: RobotType
+) -> DeckSlotLocation | StagingSlotLocation:
     return original.model_copy(
         update={"slotName": original.slotName.to_equivalent_for_robot_type(robot_type)}
     )

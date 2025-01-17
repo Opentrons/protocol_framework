@@ -718,7 +718,7 @@ class LoadedModule(BaseModel):
 
     id: str
     model: ModuleModel
-    location: Optional[DeckSlotLocation] = None
+    location: Optional[DeckSlotLocation | StagingSlotLocation] = None
     serialNumber: Optional[str] = None
 
 

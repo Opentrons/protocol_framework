@@ -26,7 +26,7 @@ from opentrons_shared_data.robot.types import RobotType
 from opentrons_shared_data.deck.types import DeckDefinitionV5
 
 from opentrons_shared_data import load_shared_data
-from opentrons.types import DeckSlotName, MountType
+from opentrons.types import DeckSlotName, StagingSlotName, MountType
 from opentrons.protocol_engine import errors
 from opentrons.protocol_engine.types import (
     LoadedModule,
@@ -118,7 +118,9 @@ def get_addressable_area_view(
 
 def make_module_view(
     deck_type: Optional[DeckType] = None,
-    slot_by_module_id: Optional[Dict[str, Optional[DeckSlotName]]] = None,
+    slot_by_module_id: Optional[
+        Dict[str, Optional[DeckSlotName | StagingSlotName]]
+    ] = None,
     requested_model_by_module_id: Optional[Dict[str, Optional[ModuleModel]]] = None,
     hardware_by_module_id: Optional[Dict[str, HardwareModule]] = None,
     substate_by_module_id: Optional[Dict[str, ModuleSubStateType]] = None,

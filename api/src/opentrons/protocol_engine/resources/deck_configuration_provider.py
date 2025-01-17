@@ -3,7 +3,7 @@ from typing import List, Set, Tuple
 
 from opentrons_shared_data.deck.types import DeckDefinitionV5, CutoutFixture
 
-from opentrons.types import DeckSlotName
+from opentrons.types import DeckSlotName, StagingSlotName
 
 from ..types import (
     AddressableArea,
@@ -98,10 +98,14 @@ def get_potential_cutout_fixtures(
 def get_addressable_area_from_name(
     addressable_area_name: str,
     cutout_position: DeckPoint,
-    base_slot: DeckSlotName,
+    base_slot: DeckSlotName | StagingSlotName,
     deck_definition: DeckDefinitionV5,
 ) -> AddressableArea:
     """Given a name and a cutout position, get an addressable area on the deck."""
+    if isinstance(base_slot, StagingSlotName):
+        slot = DeckSlotName(base_slot.id[0] + "3")
+    else:
+        slot = base_slot
     for addressable_area in deck_definition["locations"]["addressableAreas"]:
         if addressable_area["id"] == addressable_area_name:
             area_offset = addressable_area["offsetFromCutoutFixture"]
@@ -119,7 +123,7 @@ def get_addressable_area_from_name(
             return AddressableArea(
                 area_name=addressable_area["id"],
                 area_type=AreaType(addressable_area["areaType"]),
-                base_slot=base_slot,
+                base_slot=slot,
                 display_name=addressable_area["displayName"],
                 bounding_box=bounding_box,
                 position=position,

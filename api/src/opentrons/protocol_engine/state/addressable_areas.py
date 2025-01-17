@@ -10,7 +10,7 @@ from opentrons_shared_data.deck.types import (
     CutoutFixture,
 )
 
-from opentrons.types import Point, DeckSlotName
+from opentrons.types import Point, DeckSlotName, StagingSlotName
 
 from ..errors import (
     IncompatibleAddressableAreaError,
@@ -116,7 +116,7 @@ def _get_conflicting_addressable_areas_error_string(
 # can only take deck slots as input.
 # Long-term solution: Check for conflicts based on bounding boxes, not slot adjacencies.
 # Shorter-term: Change the conflict-checking code to take cutouts instead of deck slots.
-CUTOUT_TO_DECK_SLOT_MAP: Dict[str, DeckSlotName] = {
+CUTOUT_TO_DECK_SLOT_MAP: Dict[str, DeckSlotName | StagingSlotName] = {
     # OT-2
     "cutout1": DeckSlotName.SLOT_1,
     "cutout2": DeckSlotName.SLOT_2,
@@ -143,6 +143,11 @@ CUTOUT_TO_DECK_SLOT_MAP: Dict[str, DeckSlotName] = {
     "cutoutD1": DeckSlotName.SLOT_D1,
     "cutoutD2": DeckSlotName.SLOT_D2,
     "cutoutD3": DeckSlotName.SLOT_D3,
+    # Flex Staging slot module loads resolve to cutout column 3
+    "cutoutA3": StagingSlotName.SLOT_A4,
+    "cutoutB3": StagingSlotName.SLOT_B4,
+    "cutoutC3": StagingSlotName.SLOT_C4,
+    "cutoutD3": StagingSlotName.SLOT_D4,
 }
 DECK_SLOT_TO_CUTOUT_MAP = {
     deck_slot: cutout for cutout, deck_slot in CUTOUT_TO_DECK_SLOT_MAP.items()
@@ -524,7 +529,9 @@ class AddressableAreaView:
             z=position.z,
         )
 
-    def get_cutout_id_by_deck_slot_name(self, slot_name: DeckSlotName) -> str:
+    def get_cutout_id_by_deck_slot_name(
+        self, slot_name: DeckSlotName | StagingSlotName
+    ) -> str:
         """Get the Cutout ID of a given Deck Slot by Deck Slot Name."""
         return DECK_SLOT_TO_CUTOUT_MAP[slot_name]
 
@@ -566,7 +573,7 @@ class AddressableAreaView:
         return cutout_fixture["height"]
 
     def get_fixture_serial_from_deck_configuration_by_deck_slot(
-        self, slot_name: DeckSlotName
+        self, slot_name: DeckSlotName | StagingSlotName
     ) -> Optional[str]:
         """Get the serial number provided by the deck configuration for a Fixture at a given location."""
         deck_config = self._state.deck_configuration

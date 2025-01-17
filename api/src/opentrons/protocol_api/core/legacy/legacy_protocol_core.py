@@ -310,7 +310,7 @@ class LegacyProtocolCore(
     def load_module(
         self,
         model: ModuleModel,
-        deck_slot: Optional[DeckSlotName],
+        deck_slot: Optional[DeckSlotName | StagingSlotName],
         configuration: Optional[str],
     ) -> legacy_module_core.LegacyModuleCore:
         """Load a module."""

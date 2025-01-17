@@ -918,9 +918,7 @@ class ProtocolContext(CommandPublisher):
         )
         if isinstance(deck_slot, StagingSlotName):
             # flex stacker modules can only be loaded into staging slot inside a protocol
-            if isinstance(requested_model, FlexStackerModuleModel):
-                deck_slot = validation.convert_flex_stacker_load_slot(deck_slot)
-            else:
+            if not isinstance(requested_model, FlexStackerModuleModel):
                 raise ValueError(f"Cannot load {module_name} onto a staging slot.")
 
         module_core = self._core.load_module(

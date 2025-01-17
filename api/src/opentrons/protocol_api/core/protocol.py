@@ -135,7 +135,7 @@ class AbstractProtocol(
     def load_module(
         self,
         model: ModuleModel,
-        deck_slot: Optional[DeckSlotName],
+        deck_slot: Optional[DeckSlotName | StagingSlotName],
         configuration: Optional[str],
     ) -> ModuleCoreType:
         ...

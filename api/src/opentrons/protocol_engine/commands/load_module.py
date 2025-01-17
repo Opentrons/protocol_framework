@@ -11,11 +11,13 @@ from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, Succes
 from ..errors.error_occurrence import ErrorOccurrence
 from ..types import (
     DeckSlotLocation,
+    StagingSlotLocation,
+    AddressableAreaLocation,
     ModuleType,
     ModuleModel,
     ModuleDefinition,
 )
-from opentrons.types import DeckSlotName
+from opentrons.types import DeckSlotName, StagingSlotName
 
 from opentrons.protocol_engine.resources import deck_configuration_provider
 
@@ -54,7 +56,7 @@ class LoadModuleParams(BaseModel):
     # single deck slot precludes loading a Thermocycler in its special "shifted slightly
     # to the left" position. This is okay for now because neither the Python Protocol
     # API nor Protocol Designer attempt to support it, either.
-    location: DeckSlotLocation = Field(
+    location: DeckSlotLocation | StagingSlotLocation = Field(
         ...,
         description=(
             "The location into which this module should be loaded."
@@ -136,6 +138,7 @@ class LoadModuleImplementation(
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
                 params.location.slotName.id
             )
+            addressable_area_provided_by_module = params.location.slotName.id
         else:
             addressable_area_provided_by_module = (
                 self._state_view.modules.ensure_and_convert_module_fixture_location(
@@ -148,10 +151,12 @@ class LoadModuleImplementation(
             )
 
         verified_location = self._state_view.geometry.ensure_location_not_occupied(
-            params.location
+            location=AddressableAreaLocation(
+                addressableAreaName=addressable_area_provided_by_module
+            )
         )
         state_update.set_addressable_area_used(
-            addressable_area_name=params.location.slotName.id
+            addressable_area_name=addressable_area_provided_by_module
         )
 
         if params.model == ModuleModel.MAGNETIC_BLOCK_V1:
@@ -163,7 +168,7 @@ class LoadModuleImplementation(
         else:
             loaded_module = await self._equipment.load_module(
                 model=params.model,
-                location=verified_location,
+                location=params.location,
                 module_id=params.moduleId,
             )
 
@@ -178,7 +183,7 @@ class LoadModuleImplementation(
         )
 
     def _ensure_module_location(
-        self, slot: DeckSlotName, module_type: ModuleType
+        self, slot: DeckSlotName | StagingSlotName, module_type: ModuleType
     ) -> None:
         # todo(mm, 2024-12-03): Theoretically, we should be able to deal with
         # addressable areas and deck configurations the same way between OT-2 and Flex.

@@ -489,6 +489,15 @@ class StagingSlotName(enum.Enum):
         """
         return self.value
 
+    def to_equivalent_for_robot_type(self, robot_type: RobotType) -> StagingSlotName:
+        """Return the staging slot name exclusively for OT3.
+
+        See `to_ot2_equivalent()` and `to_ot3_equivalent()`.
+        """
+        if robot_type == "OT-2 Standard":
+            raise ValueError("OT-2 is forbidden from using Staging Area Slots.")
+        return self
+
     def __str__(self) -> str:
         """Stringify to the unique ID.
 

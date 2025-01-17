@@ -35,6 +35,7 @@ from opentrons.protocols.api_support.types import APIVersion
 
 from opentrons.protocol_engine import (
     DeckSlotLocation,
+    StagingSlotLocation,
     AddressableAreaLocation,
     ModuleLocation,
     OnLabwareLocation,
@@ -459,7 +460,7 @@ class ProtocolCore(
     def load_module(
         self,
         model: ModuleModel,
-        deck_slot: Optional[DeckSlotName],
+        deck_slot: Optional[DeckSlotName | StagingSlotName],
         configuration: Optional[str],
     ) -> Union[ModuleCore, NonConnectedModuleCore]:
         """Load a module into the protocol."""
@@ -478,12 +479,18 @@ class ProtocolCore(
         robot_type = self._engine_client.state.config.robot_type
         # todo(mm, 2024-12-03): This might be possible to remove:
         # Protocol Engine will normalize the deck slot itself.
-        normalized_deck_slot = deck_slot.to_equivalent_for_robot_type(robot_type)
+        normalized_deck_slot: DeckSlotLocation | StagingSlotLocation
+        if isinstance(deck_slot, StagingSlotName):
+            normalized_deck_slot = StagingSlotLocation(slotName=deck_slot)
+        else:
+            normalized_deck_slot = DeckSlotLocation(
+                slotName=deck_slot.to_equivalent_for_robot_type(robot_type)
+            )
 
         result = self._engine_client.execute_command_without_recovery(
             cmd.LoadModuleParams(
                 model=EngineModuleModel(model),
-                location=DeckSlotLocation(slotName=normalized_deck_slot),
+                location=normalized_deck_slot,
             )
         )
 

@@ -42,6 +42,7 @@ from ..state.modules import HardwareModule
 from ..types import (
     LabwareLocation,
     DeckSlotLocation,
+    StagingSlotLocation,
     ModuleLocation,
     OnLabwareLocation,
     LabwareOffset,
@@ -323,7 +324,7 @@ class EquipmentHandler:
     async def load_module(
         self,
         model: ModuleModel,
-        location: DeckSlotLocation,
+        location: DeckSlotLocation | StagingSlotLocation,
         module_id: Optional[str],
     ) -> LoadedModuleData:
         """Ensure the required module is attached.

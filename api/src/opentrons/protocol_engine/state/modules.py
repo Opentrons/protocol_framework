@@ -46,6 +46,7 @@ from ..types import (
     ModuleType,
     ModuleDefinition,
     DeckSlotLocation,
+    StagingSlotLocation,
     ModuleDimensions,
     LabwareOffsetVector,
     HeaterShakerLatchStatus,
@@ -148,7 +149,7 @@ class HardwareModule:
 class ModuleState:
     """The internal data to keep track of loaded modules."""
 
-    slot_by_module_id: Dict[str, Optional[DeckSlotName]]
+    slot_by_module_id: Dict[str, Optional[DeckSlotName | StagingSlotName]]
     """The deck slot that each module has been loaded into.
 
     This will be None when the module was added via
@@ -311,7 +312,7 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         module_id: str,
         serial_number: Optional[str],
         definition: ModuleDefinition,
-        slot_name: Optional[DeckSlotName],
+        slot_name: Optional[DeckSlotName | StagingSlotName],
         requested_model: Optional[ModuleModel],
         module_live_data: Optional[LiveData],
     ) -> None:
@@ -350,6 +351,7 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             ] = ThermocyclerModuleSubState.from_live_data(
                 module_id=ThermocyclerModuleId(module_id), data=live_data
             )
+            assert isinstance(slot_name, DeckSlotName)
             self._update_additional_slots_occupied_by_thermocycler(
                 module_id=module_id, slot_name=slot_name
             )
@@ -647,9 +649,11 @@ class ModuleView:
         except KeyError as e:
             raise errors.ModuleNotLoadedError(module_id=module_id) from e
 
-        location = (
-            DeckSlotLocation(slotName=slot_name) if slot_name is not None else None
-        )
+        location: DeckSlotLocation | StagingSlotLocation | None = None
+        if isinstance(slot_name, DeckSlotName):
+            location = DeckSlotLocation(slotName=slot_name)
+        elif isinstance(slot_name, StagingSlotName):
+            location = StagingSlotLocation(slotName=slot_name)
 
         return LoadedModule.model_construct(
             id=module_id,
@@ -1143,7 +1147,7 @@ class ModuleView:
     def select_hardware_module_to_load(  # noqa: C901
         self,
         model: ModuleModel,
-        location: DeckSlotLocation,
+        location: DeckSlotLocation | StagingSlotLocation,
         attached_modules: Sequence[HardwareModule],
         expected_serial_number: Optional[str] = None,
     ) -> HardwareModule:
@@ -1291,7 +1295,7 @@ class ModuleView:
 
     def ensure_and_convert_module_fixture_location(
         self,
-        deck_slot: DeckSlotName,
+        deck_slot: DeckSlotName | StagingSlotName,
         model: ModuleModel,
     ) -> str:
         """Ensure module fixture load location is valid.
@@ -1304,8 +1308,9 @@ class ModuleView:
             raise ValueError(
                 f"Invalid Deck Type: {deck_type.name} - Does not support modules as fixtures."
             )
+        if isinstance(deck_slot, DeckSlotName):
+            assert deck_slot in DeckSlotName.ot3_slots()
 
-        assert deck_slot in DeckSlotName.ot3_slots()
         if model == ModuleModel.MAGNETIC_BLOCK_V1:
             return f"magneticBlockV1{deck_slot.value}"
 
@@ -1327,8 +1332,7 @@ class ModuleView:
             assert deck_slot.value[-1] == "3"
             return f"absorbanceReaderV1{deck_slot.value}"
         elif model == ModuleModel.FLEX_STACKER_MODULE_V1:
-            # loaded to column 3 but the addressable area is in column 4
-            assert deck_slot.value[-1] == "3"
+            # loaded to column 4
             return f"flexStackerModuleV1{deck_slot.value[0]}4"
 
         raise ValueError(
