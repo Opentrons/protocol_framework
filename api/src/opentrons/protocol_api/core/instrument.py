@@ -103,6 +103,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
         radius: float,
         z_offset: float,
         speed: float,
+        mm_from_edge: Optional[float] = None,
     ) -> None:
         ...
 

@@ -393,6 +393,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         radius: float,
         z_offset: float,
         speed: float,
+        mm_from_edge: Optional[float] = None,
     ) -> None:
         """Touch pipette tip to edges of the well
 
@@ -402,7 +403,11 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             radius: Percentage modifier for well radius to touch.
             z_offset: Vertical offset for pipette tip during touch tip.
             speed: Speed for the touch tip movements.
+            mm_from_edge: Offset from the edge of the well to move to. Requires a radius of 1.
         """
+        if mm_from_edge is not None and radius != 1.0:
+            raise ValueError("radius must be set to 1.0 if mm_from_edge is provided.")
+
         well_name = well_core.get_name()
         labware_id = well_core.labware_id
 
@@ -424,6 +429,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 wellName=well_name,
                 wellLocation=well_location,
                 radius=radius,
+                mmFromEdge=mm_from_edge,
                 speed=speed,
             )
         )
