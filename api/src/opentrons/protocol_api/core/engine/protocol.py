@@ -372,6 +372,37 @@ class ProtocolCore(
         self._labware_cores_by_id[labware_core.labware_id] = labware_core
         return labware_core
 
+    def load_labware_to_flex_stacker_hopper(
+        self,
+        module_core: Union[ModuleCore, NonConnectedModuleCore],
+        load_name: str,
+        quantity: int,
+        label: Optional[str] = None,
+        namespace: Optional[str] = None,
+        version: Optional[int] = None,
+        lid: Optional[str] = None,
+    ) -> None:
+        """Load one or more labware with or without a lid to the flex stacker hopper."""
+        assert (
+            isinstance(module_core, ModuleCore)
+            and module_core.MODULE_TYPE == ModuleType.FLEX_STACKER
+        )
+        for _ in range(quantity):
+            labware_core = self.load_labware(
+                load_name=load_name,
+                location=module_core,
+                label=label,
+                namespace=namespace,
+                version=version,
+            )
+            if lid is not None:
+                self.load_lid(
+                    load_name=lid,
+                    location=labware_core,
+                    namespace=namespace,
+                    version=version,
+                )
+
     def move_labware(
         self,
         labware_core: LabwareCore,

@@ -57,5 +57,7 @@ def test_add_module_action(
     result = module_view.get_flex_stacker_substate("someModuleId")
 
     assert result == FlexStackerSubState(
-        module_id=FlexStackerId("someModuleId"), hopper_labware_ids=[]
+        module_id=FlexStackerId("someModuleId"),
+        in_static_mode=False,
+        hopper_labware_ids=[],
     )

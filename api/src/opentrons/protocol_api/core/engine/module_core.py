@@ -700,8 +700,17 @@ class FlexStackerCore(ModuleCore, AbstractFlexStackerCore):
 
     _sync_module_hardware: SynchronousAdapter[hw_modules.FlexStacker]
 
+    def set_static_mode(self, static: bool) -> None:
+        """Set the Flex Stacker's static mode."""
+        self._engine_client.execute_command(
+            cmd.flex_stacker.ConfigureParams(
+                moduleId=self.module_id,
+                static=static,
+            )
+        )
+
     def retrieve(self) -> None:
-        """Retrieve a labware from the bottom of the Flex Stacker's stack."""
+        """Retrieve a labware id from the bottom of the Flex Stacker's stack."""
         self._engine_client.execute_command(
             cmd.flex_stacker.RetrieveParams(
                 moduleId=self.module_id,

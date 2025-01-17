@@ -55,6 +55,12 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
         stacker_state = self._state_view.modules.get_flex_stacker_substate(
             params.moduleId
         )
+
+        if stacker_state.in_static_mode:
+            raise CannotPerformModuleAction(
+                "Cannot retrieve labware from Flex Stacker while in static mode"
+            )
+
         stacker_loc = ModuleLocation(moduleId=params.moduleId)
         # Allow propagation of ModuleNotAttachedError.
         stacker_hw = self._equipment.get_module_hardware_api(stacker_state.module_id)

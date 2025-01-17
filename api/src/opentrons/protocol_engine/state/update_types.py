@@ -342,6 +342,7 @@ class FlexStackerStateUpdate:
     """An update to the Flex Stacker module state."""
 
     module_id: str
+    in_static_mode: bool | NoChangeType = NO_CHANGE
     hopper_labware_update: FlexStackerLoadHopperLabware | FlexStackerRetrieveLabware | FlexStackerStoreLabware | NoChangeType = (
         NO_CHANGE
     )
@@ -784,5 +785,17 @@ class StateUpdate:
         self.flex_stacker_state_update = FlexStackerStateUpdate(
             module_id=module_id,
             hopper_labware_update=FlexStackerStoreLabware(labware_id=labware_id),
+        )
+        return self
+
+    def update_flex_stacker_mode(
+        self,
+        module_id: str,
+        static_mode: bool,
+    ) -> Self:
+        """Update the mode of the Flex Stacker."""
+        self.flex_stacker_state_update = FlexStackerStateUpdate(
+            module_id=module_id,
+            in_static_mode=static_mode,
         )
         return self

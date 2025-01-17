@@ -157,12 +157,17 @@ class LoadLabwareImplementation(
             state_update.set_addressable_area_used(params.location.slotName.id)
 
         verified_location: LabwareLocation
-        if self._is_loading_to_module(
-            params.location, ModuleModel.FLEX_STACKER_MODULE_V1
+        if (
+            self._is_loading_to_module(
+                params.location, ModuleModel.FLEX_STACKER_MODULE_V1
+            )
+            and not self._state_view.modules.get_flex_stacker_substate(
+                params.location.moduleId
+            ).in_static_mode
         ):
             # labware loaded to the flex stacker hopper is considered offdeck. This is
             # a temporary solution until the hopper can be represented as non-addressable
-            # addressable area in the deck
+            # addressable area in the deck configuration.
             verified_location = OFF_DECK_LOCATION
         else:
             verified_location = self._state_view.geometry.ensure_location_not_occupied(

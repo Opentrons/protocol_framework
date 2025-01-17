@@ -505,6 +505,19 @@ class LegacyProtocolCore(
         """Load a Stack of Lids to a given location, creating a Lid Stack."""
         raise APIVersionError(api_element="Lid stack")
 
+    def load_labware_to_flex_stacker_hopper(
+        self,
+        module_core: legacy_module_core.LegacyModuleCore,
+        load_name: str,
+        quantity: int,
+        label: str | None = None,
+        namespace: str | None = None,
+        version: int | None = None,
+        lid: str | None = None,
+    ) -> None:
+        """Load labware to a Flex stacker hopper."""
+        raise APIVersionError(api_element="Flex stacker")
+
     def get_module_cores(self) -> List[legacy_module_core.LegacyModuleCore]:
         """Get loaded module cores."""
         return self._module_cores

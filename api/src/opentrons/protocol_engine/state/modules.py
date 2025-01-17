@@ -371,6 +371,7 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         elif ModuleModel.is_flex_stacker(actual_model):
             self._state.substate_by_module_id[module_id] = FlexStackerSubState(
                 module_id=FlexStackerId(module_id),
+                in_static_mode=False,
                 hopper_labware_ids=[],
             )
 
@@ -1224,7 +1225,10 @@ class ModuleView:
     ) -> None:
         """Raise if the given location has a module in it."""
         for module in self.get_all():
-            if module.location == location:
+            if (
+                module.location == location
+                and module.model != ModuleModel.FLEX_STACKER_MODULE_V1
+            ):
                 raise errors.LocationIsOccupiedError(
                     f"Module {module.model} is already present at {location}."
                 )

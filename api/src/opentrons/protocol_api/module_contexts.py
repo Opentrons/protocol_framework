@@ -1134,15 +1134,35 @@ class FlexStackerContext(ModuleContext):
         .. versionadded:: 2.23
             The *label,* *namespace,* and *version* parameters.
         """
-        load_name = validation.ensure_lowercase_name(load_name)
-        for _ in range(quantity):
-            self.load_labware(
-                name=load_name,
-                label=label,
-                namespace=namespace,
-                version=version,
-                lid=lid,
-            )
+        self._protocol_core.load_labware_to_flex_stacker_hopper(
+            module_core=self._core,
+            load_name=load_name,
+            quantity=quantity,
+            label=label,
+            namespace=namespace,
+            version=version,
+            lid=lid,
+        )
+
+    def enter_static_mode(self) -> None:
+        """Enter static mode.
+
+        In static mode, the Flex Stacker will not move labware between the hopper and
+        the deck. The stacker can be used as a staging slot area.
+
+        .. versionadded:: 2.23
+        """
+        self._core.set_static_mode(static=True)
+
+    def exit_static_mode(self) -> None:
+        """End static mode.
+
+        In static mode, the Flex Stacker will not move labware between the hopper and
+        the deck. This is useful for debugging and manual operation.
+
+        .. versionadded:: 2.23
+        """
+        self._core.set_static_mode(static=False)
 
     @property
     @requires_version(2, 23)
@@ -1154,8 +1174,22 @@ class FlexStackerContext(ModuleContext):
     def retrieve(self) -> Labware:
         """Release and return a labware at the bottom of the labware stack."""
         self._core.retrieve()
-        assert self.labware is not None
-        return self.labware
+        labware_core = self._protocol_core.get_labware_on_module(self._core)
+        assert labware_core is not None, "Retrieve failed to return labware"
+        # check core map first
+        try:
+            labware = self._core_map.get(labware_core)
+        except KeyError:
+            # If the labware is not already in the core map,
+            # create a new Labware object
+            labware = Labware(
+                core=labware_core,
+                api_version=self._api_version,
+                protocol_core=self._protocol_core,
+                core_map=self._core_map,
+            )
+            self._core_map.add(labware_core, labware)
+        return labware
 
     @requires_version(2, 23)
     def store(self, labware: Labware) -> None:
