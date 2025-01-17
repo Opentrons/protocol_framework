@@ -51,11 +51,13 @@ export function getLabwareLatestSlotFromCurrentStepIndex(
   const hasWasteChute = getHasWasteChute(additionalEquipmentOnDeck)
 
   //  latest moveLabware step related to labwareId at given index
-  const moveLabwareStepId = filteredSavedStepFormIds.find(
-    id =>
-      savedStepForms[id].stepType === 'moveLabware' &&
-      savedStepForms[id].labware === labwareId
-  )
+  const moveLabwareStepId = filteredSavedStepFormIds
+    .filter(
+      id =>
+        savedStepForms[id].stepType === 'moveLabware' &&
+        savedStepForms[id].labware === labwareId
+    )
+    .pop()
   const moveLabwareStep =
     moveLabwareStepId != null ? savedStepForms[moveLabwareStepId] : null
 
