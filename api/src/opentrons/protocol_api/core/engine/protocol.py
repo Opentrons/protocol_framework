@@ -75,6 +75,7 @@ from .module_core import (
     NonConnectedModuleCore,
     MagneticBlockCore,
     AbsorbanceReaderCore,
+    FlexStackerCore,
 )
 from .exceptions import InvalidModuleLocationError
 from . import load_labware_params, deck_conflict, overlap_versions
@@ -372,6 +373,34 @@ class ProtocolCore(
 
         self._labware_cores_by_id[labware_core.labware_id] = labware_core
         return labware_core
+
+    def load_labware_to_flex_stacker_hopper(
+        self,
+        module_core: Union[ModuleCore, NonConnectedModuleCore],
+        load_name: str,
+        quantity: int,
+        label: Optional[str],
+        namespace: Optional[str],
+        version: Optional[int],
+        lid: Optional[str],
+    ) -> None:
+        """Load one or more labware with or without a lid to the flex stacker hopper."""
+        assert isinstance(module_core, FlexStackerCore)
+        for _ in range(quantity):
+            labware_core = self.load_labware(
+                load_name=load_name,
+                location=module_core,
+                label=label,
+                namespace=namespace,
+                version=version,
+            )
+            if lid is not None:
+                self.load_lid(
+                    load_name=lid,
+                    location=labware_core,
+                    namespace=namespace,
+                    version=version,
+                )
 
     def move_labware(
         self,
@@ -726,6 +755,7 @@ class ProtocolCore(
             ModuleType.THERMOCYCLER: ThermocyclerModuleCore,
             ModuleType.HEATER_SHAKER: HeaterShakerModuleCore,
             ModuleType.ABSORBANCE_READER: AbsorbanceReaderCore,
+            ModuleType.FLEX_STACKER: FlexStackerCore,
         }
 
         module_type = load_module_result.model.as_type()

@@ -30,6 +30,7 @@ from opentrons.hardware_control.modules.types import (
     MagneticModuleModel,
     ThermocyclerModuleModel,
     HeaterShakerModuleModel,
+    FlexStackerModuleModel,
 )
 from opentrons_shared_data.deck.types import (
     DeckDefinitionV5,
@@ -216,6 +217,13 @@ async def test_load_module_raises_if_location_occupied(
         (
             HeaterShakerModuleModel.HEATER_SHAKER_V1,
             EngineModuleModel.HEATER_SHAKER_MODULE_V1,
+            load_deck(STANDARD_OT3_DECK, 5),
+            DeckSlotName.SLOT_A2,
+            "OT-3 Standard",
+        ),
+        (
+            FlexStackerModuleModel.FLEX_STACKER_V1,
+            EngineModuleModel.FLEX_STACKER_MODULE_V1,
             load_deck(STANDARD_OT3_DECK, 5),
             DeckSlotName.SLOT_A2,
             "OT-3 Standard",

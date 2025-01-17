@@ -282,7 +282,6 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
                 raise LabwareMovementNotAllowedError(
                     f"Cannot move adapter '{current_labware_definition.parameters.loadName}' with gripper."
                 )
-
             validated_current_loc = (
                 self._state_view.geometry.ensure_valid_gripper_location(
                     current_labware.location
