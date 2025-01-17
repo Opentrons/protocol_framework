@@ -32,6 +32,7 @@ export const SUPPORTED_MODULE_TYPES: ModuleType[] = [
   ABSORBANCE_READER_TYPE,
 ]
 type SupportedSlotMap = Record<ModuleType, DropdownOption[]>
+// @ts-expect-error Flex stacker not yet supported in PD
 export const SUPPORTED_MODULE_SLOTS_OT2: SupportedSlotMap = {
   [MAGNETIC_MODULE_TYPE]: [
     {
@@ -65,6 +66,7 @@ export const SUPPORTED_MODULE_SLOTS_OT2: SupportedSlotMap = {
   ],
   [ABSORBANCE_READER_TYPE]: [],
 }
+// @ts-expect-error Flex stacker not yet supported in PD
 export const SUPPORTED_MODULE_SLOTS_FLEX: SupportedSlotMap = {
   [MAGNETIC_MODULE_TYPE]: [
     {

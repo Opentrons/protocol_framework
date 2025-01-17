@@ -79,7 +79,7 @@ export function getModuleUnderLabware(
     return location === moduleOnDeck.id
   })
 }
-
+// @ts-expect-error Flex stacker not yet supported in PD
 export const getModuleShortNames = (type: ModuleType): string => {
   switch (type) {
     case HEATERSHAKER_MODULE_TYPE:

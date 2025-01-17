@@ -45,6 +45,7 @@ export const getNumSlotsAvailable = (
   modules: WizardFormState['modules'],
   additionalEquipment: WizardFormState['additionalEquipment'],
   type: ModuleModel | AdditionalEquipment
+  // @ts-expect-error flex stacker not yet supported in PD
 ): number => {
   const additionalEquipmentLength = additionalEquipment.filter(
     ae => ae !== 'gripper'
