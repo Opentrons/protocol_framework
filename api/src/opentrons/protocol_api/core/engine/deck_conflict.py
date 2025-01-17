@@ -296,6 +296,14 @@ def _map_module(
                 is_semi_configuration=False,
             ),
         )
+    if module_type == ModuleType.FLEX_STACKER:
+        return (
+            mapped_location,
+            wrapped_deck_conflict.FlexStackerModule(
+                name_for_errors=name_for_errors,
+                highest_z_including_labware=highest_z_including_labware,
+            ),
+        )
     else:
         return (
             mapped_location,

@@ -78,6 +78,9 @@ class _Module:
 class HeaterShakerModule(_Module):
     """A Heater-Shaker module."""
 
+@dataclass
+class FlexStackerModule(_Module):
+    """A Heater-Shaker module."""
 
 @dataclass
 class MagneticBlockModule(_Module):
@@ -97,7 +100,7 @@ class ThermocyclerModule(_Module):
 
 @dataclass
 class OtherModule(_Module):
-    """A module that's not a Heater-Shaker or Thermocycler."""
+    """A module that's not a Heater-Shaker or Thermocycler or a Flex Stacker."""
 
 
 DeckItem = Union[
@@ -304,7 +307,7 @@ def _create_flex_restrictions(
         )
     ]
 
-    if isinstance(item, (HeaterShakerModule, OtherModule)):
+    if isinstance(item, (HeaterShakerModule, OtherModule)) and not isinstance(item, FlexStackerModule):
         if isinstance(location, StagingSlotName):
             raise DeckConflictError(
                 "Cannot have a module loaded on a staging area slot."
