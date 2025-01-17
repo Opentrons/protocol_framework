@@ -8,6 +8,7 @@ import { updateWorkingOffset } from './transforms'
 
 import type { LPCWizardAction, LPCWizardState } from '../types'
 
+// TODO(jh, 01-17-25): A lot of this state should live above the LPC slice, in the general protocolRuns slice instead.
 export function LPCReducer(
   state: LPCWizardState,
   action: LPCWizardAction
