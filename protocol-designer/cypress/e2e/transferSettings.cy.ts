@@ -94,11 +94,25 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Verifications.TouchTip,
       Verifications.MixT,
       Verifications.AirGap,
+      Actions.AspirateMixVolume,
+      Actions.AspirateMixTimes,
+      Actions.AspirateAirGapVolume,
+      Actions.SelectDispense,
+      Actions.DelayAspirate,
+      Actions.TouchTipAspirate,
+      Actions.MixAspirate,
+      Actions.AirGapAspirate,
+      Actions.DispenseMixVolume,
+      Actions.DispenseMixTimes,
+      Actions.DispenseAirGapVolume,
     ]
     runCreateTest(steps)
-    cy.get('input[name = "aspirate_mix_volume"]').type('20')
-    cy.get('input[name = "aspirate_mix_times"]').type('2')
-    cy.get('input[name = "aspirate_airGap_volume"]').type('10')
-    cy.contains('Dispense').click()
+    cy.contains('Blowout').closest('div').find('button').click()
+    cy.contains('Blowout location')
+    cy.contains('Blowout flow rate')
+    cy.contains('Blowout position from top')
+    cy.contains('Choose option').click()
+    cy.contains('Destination Well').click()
+    cy.contains('Save').click()
   })
 })

@@ -86,6 +86,13 @@ export enum Actions {
   TouchTipAspirate = 'Enable Touch tip for aspiration',
   MixAspirate = 'Enable Mix for aspiration',
   AirGapAspirate = 'Enable Air gap for aspiration',
+  AspirateMixVolume = 'Mix volume for transfer aspirate',
+  AspirateMixTimes = 'Mix times for transfer aspirate',
+  AspirateAirGapVolume = 'Air gap volume for transfer aspirate',
+  SelectDispense = 'Dispense tab in the transfer step form',
+  DispenseMixVolume = 'Mix volume for transfer dispense',
+  DispenseMixTimes = 'Mix times for transfer dispense',
+  DispenseAirGapVolume = 'Air gap volume for transfer dispense',
 }
 
 export enum Verifications {
@@ -521,18 +528,15 @@ const executeAction = (action: Actions | UniversalActions): void => {
       cy.contains('button', 'Transfer').should('be.visible').click()
       break
     case Actions.ChoseSourceLabware:
-      cy.get('div.Flex-sc-1qhp8l7-0.sc-bqWxrE.jKLbYH.gEhMNQ')
-        .eq(0)
-        .contains('Choose option')
-        .click()
+      cy.contains('p', 'Choose option').closest('div[tabindex="0"]').click()
       // cy.contains('p', Content.ChoseOption).click()
       break
     case Actions.ChoseDestinationLabware:
+      // ToDo: Please make a better selector
       cy.get('div.Flex-sc-1qhp8l7-0.sc-bqWxrE.jKLbYH.gEhMNQ')
         .eq(1)
         .contains('Choose option')
         .click()
-      // cy.contains('p', Content.ChoseOption).click()
       break
     case Actions.AddSourceLabwareDropdown:
       cy.get(Locators.AspirateWells) // Use the `name` attribute
@@ -569,6 +573,27 @@ const executeAction = (action: Actions | UniversalActions): void => {
       break
     case Actions.AirGapAspirate:
       cy.contains('Air gap').closest('div').find('button').click()
+      break
+    case Actions.AspirateMixVolume:
+      cy.get('input[name = "aspirate_mix_volume"]').type('20')
+      break
+    case Actions.AspirateMixTimes:
+      cy.get('input[name = "aspirate_mix_times"]').type('2')
+      break
+    case Actions.AspirateAirGapVolume:
+      cy.get('input[name = "aspirate_airGap_volume"]').type('10')
+      break
+    case Actions.SelectDispense:
+      cy.contains('Dispense').click()
+      break
+    case Actions.DispenseMixVolume:
+      cy.get('input[name = "dispense_mix_volume"]').type('20')
+      break
+    case Actions.DispenseMixTimes:
+      cy.get('input[name = "dispense_mix_times"]').type('2')
+      break
+    case Actions.DispenseAirGapVolume:
+      cy.get('input[name = "dispense_airGap_volume"]').type('10')
       break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
@@ -739,42 +764,3 @@ export const verifyCreateProtocolPage = (): void => {
   cy.contains(Content.OpentronsOT2).should('exist').should('be.visible')
   cy.contains(Content.Confirm).should('exist').should('be.visible')
 }
-/* Todo Evaluate if this is an easier option
-export const VerifyTransferPageStep1 = (): void => {
-  cy.contains('Delay')
-    .closest('div')
-    .find('button')
-    .find('svg')
-    .should('exist')
-    .and('have.attr', 'aria-hidden', 'true')
-
-  cy.contains('Pre-wet tip')
-    .closest('div')
-    .find('button')
-    .find('svg')
-    .should('exist')
-    .and('have.attr', 'aria-hidden', 'true')
-
-  cy.contains('Touch tip')
-    .closest('div')
-    .find('button')
-    .find('svg')
-    .should('exist')
-    .and('have.attr', 'aria-hidden', 'true')
-
-  cy.contains('Mix')
-    .closest('div')
-    .find('button')
-    .find('svg')
-    .should('exist')
-    .and('have.attr', 'aria-hidden', 'true')
-
-  cy.contains('Air gap')
-    .closest('div')
-    .find('button')
-    .find('svg')
-    .should('exist')
-    .and('have.attr', 'aria-hidden', 'true')
-  // Verify step 1 and page content
-}
-*/
