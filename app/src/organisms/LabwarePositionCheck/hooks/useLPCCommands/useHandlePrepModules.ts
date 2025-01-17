@@ -1,11 +1,14 @@
+import { useSelector } from 'react-redux'
+
 import { modulePrepCommands } from './commands'
 import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
-import { selectActiveLwInitialPosition } from '/app/organisms/LabwarePositionCheck/redux'
+import { selectActiveLwInitialPosition } from '/app/redux/protocol-runs'
 
 import type { CreateCommand } from '@opentrons/shared-data'
 import type { UseLPCCommandWithChainRunChildProps } from './types'
 import type { LabwarePositionCheckStep } from '/app/organisms/LabwarePositionCheck/types'
 import type { CommandData } from '@opentrons/api-client'
+import type { State } from '/app/redux/types'
 
 export interface UseHandlePrepModulesResult {
   handleCheckItemsPrepModules: (
@@ -15,13 +18,18 @@ export interface UseHandlePrepModulesResult {
 
 // Prep module(s) before LPCing a specific labware involving module(s).
 export function useHandlePrepModules({
+  runId,
   chainLPCCommands,
-  state,
 }: UseLPCCommandWithChainRunChildProps): UseHandlePrepModulesResult {
+  const selectInitialPositionFrom = useSelector(
+    (state: State) => (step: LabwarePositionCheckStep | null) =>
+      selectActiveLwInitialPosition(step, runId, state)
+  )
+
   const handleCheckItemsPrepModules = (
     step: LabwarePositionCheckStep | null
   ): Promise<CommandData[]> => {
-    const initialPosition = selectActiveLwInitialPosition(step, state)
+    const initialPosition = selectInitialPositionFrom(step)
 
     if (step?.section === NAV_STEPS.CHECK_POSITIONS) {
       const prepCommands: CreateCommand[] = modulePrepCommands({

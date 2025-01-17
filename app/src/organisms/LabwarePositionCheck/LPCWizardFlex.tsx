@@ -1,5 +1,6 @@
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { ModalShell } from '@opentrons/components'
 
@@ -19,42 +20,57 @@ import {
   useLPCCommands,
   useLPCInitialState,
 } from '/app/organisms/LabwarePositionCheck/hooks'
-import {
-  proceedStep,
-  useLPCReducer,
-} from '/app/organisms/LabwarePositionCheck/redux'
 import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
+import { closeLPC, proceedStep } from '/app/redux/protocol-runs'
+import { getIsOnDevice } from '/app/redux/config'
 
 import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck/LPCFlows'
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
+import type { State } from '/app/redux/types'
+import { useEffect } from 'react'
 
 export interface LPCWizardFlexProps extends Omit<LPCFlowsProps, 'robotType'> {}
 
 export function LPCWizardFlex(props: LPCWizardFlexProps): JSX.Element {
-  const initialState = useLPCInitialState({ ...props })
-  const { state, dispatch } = useLPCReducer(initialState)
-
-  const LPCHandlerUtils = useLPCCommands({ ...props, state })
+  const { onCloseClick, ...rest } = props
 
   // TODO(jh, 01-14-25): Also inject goBack functionality once designs are finalized.
   const proceed = (): void => {
-    dispatch(proceedStep())
+    dispatch(proceedStep(props.runId))
   }
+  const onCloseClickDispatch = (): void => {
+    onCloseClick()
+  }
+  const dispatch = useDispatch()
+  const LPCHandlerUtils = useLPCCommands({
+    ...props,
+    onCloseClick: onCloseClickDispatch,
+  })
+
+  useLPCInitialState({ ...rest })
+
+  // Clean up state on LPC close.
+  useEffect(() => {
+    return () => {
+      dispatch(closeLPC(props.runId))
+    }
+  }, [])
 
   return (
     <LPCWizardFlexComponent
-      proceed={proceed}
-      dispatch={dispatch}
-      state={state}
-      commandUtils={LPCHandlerUtils}
       {...props}
+      proceed={proceed}
+      commandUtils={LPCHandlerUtils}
+      onCloseClick={onCloseClickDispatch}
     />
   )
 }
 
 function LPCWizardFlexComponent(props: LPCWizardContentProps): JSX.Element {
+  const isOnDevice = useSelector(getIsOnDevice)
+
   return createPortal(
-    props.state.isOnDevice ? (
+    isOnDevice ? (
       <ModalShell fullPage>
         <LPCWizardHeader {...props} />
         <LPCWizardContent {...props} />
@@ -69,11 +85,15 @@ function LPCWizardFlexComponent(props: LPCWizardContentProps): JSX.Element {
 }
 
 function LPCWizardHeader({
-  state,
+  runId,
   commandUtils,
 }: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
-  const { currentStepIndex, totalStepCount } = state.steps
+  const { currentStepIndex, totalStepCount } = useSelector((state: State) => ({
+    currentStepIndex:
+      state.protocolRuns[runId]?.lpc?.steps.currentStepIndex ?? 0,
+    totalStepCount: state.protocolRuns[runId]?.lpc?.steps.totalStepCount ?? 0,
+  }))
   const {
     errorMessage,
     showExitConfirmation,
@@ -98,7 +118,10 @@ function LPCWizardHeader({
 
 function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('shared')
-  const { current: currentStep } = props.state.steps
+  const currentStep = useSelector(
+    (state: State) =>
+      state.protocolRuns[props.runId]?.lpc?.steps.current ?? null
+  )
   const {
     isRobotMoving,
     errorMessage,
@@ -116,6 +139,10 @@ function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
   }
   if (showExitConfirmation) {
     return <ExitConfirmation {...props} />
+  }
+  if (currentStep == null) {
+    console.error('LPC store not properly initialized.')
+    return <></>
   }
 
   // Handle step-based routing.

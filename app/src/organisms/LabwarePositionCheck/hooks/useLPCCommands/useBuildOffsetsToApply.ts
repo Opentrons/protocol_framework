@@ -1,6 +1,10 @@
+import { useStore } from 'react-redux'
+
+import { selectOffsetsToApply } from '/app/redux/protocol-runs'
+
+import type { State } from '/app/redux/types'
 import type { LabwareOffsetCreateData } from '@opentrons/api-client'
 import type { UseLPCCommandChildProps } from '/app/organisms/LabwarePositionCheck/hooks/useLPCCommands/types'
-import { selectOffsetsToApply } from '/app/organisms/LabwarePositionCheck/redux'
 
 export interface UseBuildOffsetsToApplyResult {
   buildOffsetsToApply: () => LabwareOffsetCreateData[]
@@ -11,13 +15,19 @@ export interface UseApplyLPCOffsetsProps extends UseLPCCommandChildProps {
 }
 
 export function useBuildOffsetsToApply({
-  state,
+  runId,
   setErrorMessage,
 }: UseApplyLPCOffsetsProps): UseBuildOffsetsToApplyResult {
+  // Utilizing useStore instead of useSelector enables error handling within the selector
+  // but only invoke the selector when it's actually needed.
+  const store = useStore<State>()
+
   return {
     buildOffsetsToApply: () => {
       try {
-        return selectOffsetsToApply(state)
+        const selectOffsets = selectOffsetsToApply(runId)
+        const offsetsToApply = selectOffsets(store.getState())
+        return offsetsToApply
       } catch (e) {
         if (e instanceof Error) {
           setErrorMessage(e.message)

@@ -11,7 +11,7 @@ export const INITIAL_RUN_SETUP_STATE: RunSetupStatus = {
   [Constants.LIQUID_SETUP_STEP_KEY]: INITIAL_SETUP_STEP_STATE,
 }
 
-export function setup(
+export function setupReducer(
   state: RunSetupStatus = INITIAL_RUN_SETUP_STATE,
   action: ProtocolRunAction
 ): RunSetupStatus {

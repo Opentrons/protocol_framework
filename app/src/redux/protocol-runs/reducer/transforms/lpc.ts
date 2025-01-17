@@ -1,6 +1,6 @@
 import isEqual from 'lodash/isEqual'
 
-import type { LPCWizardAction, WorkingOffset } from './types'
+import type { LPCWizardAction, WorkingOffset } from '../../types'
 
 export function updateWorkingOffset(
   workingOffsets: WorkingOffset[],

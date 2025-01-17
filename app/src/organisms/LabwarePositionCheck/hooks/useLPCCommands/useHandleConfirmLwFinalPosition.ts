@@ -24,7 +24,7 @@ export interface UseHandleConfirmPositionResult {
   handleConfirmLwFinalPosition: (
     params: BuildMoveLabwareOffDeckParams & {
       onSuccess: () => void
-      pipette: LoadedPipette | undefined
+      pipette: LoadedPipette | null
     }
   ) => Promise<Coordinates | null>
 }
@@ -36,7 +36,7 @@ export function useHandleConfirmLwFinalPosition({
   const handleConfirmLwFinalPosition = (
     params: BuildMoveLabwareOffDeckParams & {
       onSuccess: () => void
-      pipette: LoadedPipette | undefined
+      pipette: LoadedPipette | null
     }
   ): Promise<Coordinates | null> => {
     const { onSuccess, pipette, step } = params

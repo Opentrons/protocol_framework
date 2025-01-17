@@ -11,11 +11,11 @@ import type { UseLPCCommandWithChainRunChildProps } from './types'
 export interface UseProbeCommandsResult {
   createProbeAttachmentHandler: (
     pipetteId: string,
-    pipette: LoadedPipette | undefined,
+    pipette: LoadedPipette | null,
     onSuccess: () => void
   ) => () => Promise<void>
   createProbeDetachmentHandler: (
-    pipette: LoadedPipette | undefined,
+    pipette: LoadedPipette | null,
     onSuccess: () => void
   ) => () => Promise<void>
   unableToDetect: boolean
@@ -29,7 +29,7 @@ export function useHandleProbeCommands({
 
   const createProbeAttachmentHandler = (
     pipetteId: string,
-    pipette: LoadedPipette | undefined,
+    pipette: LoadedPipette | null,
     onSuccess: () => void
   ): (() => Promise<void>) => {
     const attachmentCommands: CreateCommand[] = [
@@ -38,19 +38,18 @@ export function useHandleProbeCommands({
 
     return () =>
       chainLPCCommands(attachmentCommands, false, true)
-        .then(() => {
-          onSuccess()
-        })
         .catch(() => {
           setShowUnableToDetect(true)
-
-          // Stop propagation to prevent error screen routing.
-          return Promise.resolve()
+          return Promise.reject(new Error('Unable to detect probe.'))
+        })
+        .then(() => {
+          setShowUnableToDetect(false)
+          onSuccess()
         })
   }
 
   const createProbeDetachmentHandler = (
-    pipette: LoadedPipette | undefined,
+    pipette: LoadedPipette | null,
     onSuccess: () => void
   ): (() => Promise<void>) => {
     const detatchmentCommands: CreateCommand[] = [

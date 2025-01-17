@@ -1,5 +1,6 @@
 import styled, { css } from 'styled-components'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 
 import {
   AlertPrimaryButton,
@@ -20,15 +21,16 @@ import {
 } from '@opentrons/components'
 
 import { SmallButton } from '/app/atoms/buttons'
+import { getIsOnDevice } from '/app/redux/config'
 
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
 export function ExitConfirmation({
   commandUtils,
-  state,
 }: LPCWizardContentProps): JSX.Element {
   const { i18n, t } = useTranslation(['labware_position_check', 'shared'])
   const { confirmExitLPC, cancelExitLPC, toggleRobotMoving } = commandUtils
+  const isOnDevice = useSelector(getIsOnDevice)
 
   const handleConfirmExit = (): void => {
     toggleRobotMoving(true).then(() => {
@@ -40,7 +42,7 @@ export function ExitConfirmation({
     <Flex css={CONTAINER_STYLE}>
       <Flex css={CONTENT_CONTAINER_STYLE}>
         <Icon name="ot-alert" size={SIZE_3} color={COLORS.yellow50} />
-        {state.isOnDevice ? (
+        {isOnDevice ? (
           <>
             <ConfirmationHeaderODD>
               {t('remove_probe_before_exit')}
@@ -62,7 +64,7 @@ export function ExitConfirmation({
           </>
         )}
       </Flex>
-      {state.isOnDevice ? (
+      {isOnDevice ? (
         <Flex css={BUTTON_CONTAINER_STYLE_ODD}>
           <SmallButton
             onClick={cancelExitLPC}

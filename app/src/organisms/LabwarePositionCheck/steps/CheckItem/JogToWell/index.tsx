@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import styled, { css } from 'styled-components'
+import { useSelector } from 'react-redux'
 
 import {
   ALIGN_CENTER,
@@ -39,7 +40,8 @@ import {
   selectActivePipette,
   selectIsActiveLwTipRack,
   selectItemLabwareDef,
-} from '/app/organisms/LabwarePositionCheck/redux'
+} from '/app/redux/protocol-runs'
+import { getIsOnDevice } from '/app/redux/config'
 
 import type { ReactNode } from 'react'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
@@ -49,9 +51,11 @@ import type {
   CheckPositionsStep,
   LPCStepProps,
 } from '/app/organisms/LabwarePositionCheck/types'
+import type { LPCWizardState } from '/app/redux/protocol-runs'
 
 import levelProbeWithTip from '/app/assets/images/lpc_level_probe_with_tip.svg'
 import levelProbeWithLabware from '/app/assets/images/lpc_level_probe_with_labware.svg'
+import type { State } from '/app/redux/types'
 
 const DECK_MAP_VIEWBOX = '-10 -10 150 105'
 const LPC_HELP_LINK_URL =
@@ -67,23 +71,39 @@ interface JogToWellProps extends LPCStepProps<CheckPositionsStep> {
 
 export function JogToWell(props: JogToWellProps): JSX.Element {
   const {
+    runId,
     header,
     body,
     handleConfirmPosition,
     handleGoBack,
     handleJog,
-    state,
   } = props
   const { t } = useTranslation(['labware_position_check', 'shared'])
-  const { isOnDevice, steps } = state
+  const { steps } = useSelector(
+    (state: State) => state.protocolRuns[runId]?.lpc as LPCWizardState
+  )
   const { current: currentStep } = steps
 
-  const initialPosition =
-    selectActiveLwInitialPosition(currentStep, state) ?? IDENTITY_VECTOR
-  const pipetteName =
-    selectActivePipette(currentStep, state)?.pipetteName ?? 'p1000_single'
-  const itemLwDef = selectItemLabwareDef(state) as LabwareDefinition2 // Safe if component only used with CheckItem step.
-  const isTipRack = selectIsActiveLwTipRack(state)
+  const isOnDevice = useSelector(getIsOnDevice)
+  const initialPosition = useSelector(
+    (state: State) =>
+      selectActiveLwInitialPosition(currentStep, runId, state) ??
+      IDENTITY_VECTOR
+  )
+  const pipetteName = useSelector(
+    (state: State) =>
+      selectActivePipette(currentStep, runId, state)?.pipetteName ??
+      'p1000_single'
+  )
+  const itemLwDef = useSelector(
+    selectItemLabwareDef(runId)
+  ) as LabwareDefinition2 // Safe if component only used with CheckItem step.
+  const isTipRack = useSelector((state: State) =>
+    selectIsActiveLwTipRack(runId, state)
+  )
+  const activeLwExistingOffset = useSelector((state: State) =>
+    selectActiveLwExistingOffset(runId, state)
+  )
 
   const [joggedPosition, setJoggedPosition] = useState<VectorOffset>(
     initialPosition
@@ -92,7 +112,7 @@ export function JogToWell(props: JogToWellProps): JSX.Element {
 
   const levelSrc = isTipRack ? levelProbeWithTip : levelProbeWithLabware
   const liveOffset = getVectorSum(
-    selectActiveLwExistingOffset(state),
+    activeLwExistingOffset,
     getVectorDifference(joggedPosition, initialPosition)
   )
 

@@ -25,13 +25,10 @@ import type { UseHandleConfirmPlacementResult } from './useHandleConfirmLwModule
 import type { UseHandleConfirmPositionResult } from './useHandleConfirmLwFinalPosition'
 import type { UseHandleResetLwModulesOnDeckResult } from './useHandleResetLwModulesOnDeck'
 import type { LPCWizardFlexProps } from '/app/organisms/LabwarePositionCheck/LPCWizardFlex'
-import type { LPCWizardState } from '/app/organisms/LabwarePositionCheck/redux'
 import type { UseBuildOffsetsToApplyResult } from './useBuildOffsetsToApply'
 import type { UseHandleValidMoveToMaintenancePositionResult } from './useHandleValidMoveToMaintenancePosition'
 
-export interface UseLPCCommandsProps extends LPCWizardFlexProps {
-  state: LPCWizardState
-}
+export interface UseLPCCommandsProps extends LPCWizardFlexProps {}
 
 export type UseLPCCommandsResult = UseApplyLPCOffsetsResult &
   UseHandleJogResult &

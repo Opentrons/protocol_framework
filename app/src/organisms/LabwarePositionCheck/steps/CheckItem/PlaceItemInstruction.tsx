@@ -1,12 +1,14 @@
 import { Trans, useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 
 import { TYPOGRAPHY, LegacyStyledText } from '@opentrons/components'
 
 import {
   selectActiveAdapterDisplayName,
   selectLwDisplayName,
-} from '/app/organisms/LabwarePositionCheck/redux'
+} from '/app/redux/protocol-runs'
 
+import type { State } from '/app/redux/types'
 import type {
   CheckPositionsStep,
   LPCStepProps,
@@ -19,17 +21,21 @@ interface PlaceItemInstructionProps extends LPCStepProps<CheckPositionsStep> {
 }
 
 export function PlaceItemInstruction({
+  runId,
   step,
   isLwTiprack,
   slotOnlyDisplayLocation,
   fullDisplayLocation,
-  state,
 }: PlaceItemInstructionProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
   const { adapterId } = step
 
-  const labwareDisplayName = selectLwDisplayName(state)
-  const adapterDisplayName = selectActiveAdapterDisplayName(state)
+  const labwareDisplayName = useSelector((state: State) =>
+    selectLwDisplayName(runId, state)
+  )
+  const adapterDisplayName = useSelector((state: State) =>
+    selectActiveAdapterDisplayName(runId, state)
+  )
 
   if (isLwTiprack) {
     return (

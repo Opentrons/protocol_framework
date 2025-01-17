@@ -1,21 +1,24 @@
-import { useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 
-import { getIsOnDevice } from '/app/redux/config'
 import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import { useNotifyDeckConfigurationQuery } from '/app/resources/deck_configuration'
+import { startLPC } from '/app/redux/protocol-runs'
 import { getLPCSteps } from './utils'
 
 import type { RunTimeCommand } from '@opentrons/shared-data'
-import type { LPCWizardState } from '/app/organisms/LabwarePositionCheck/redux'
+import type { LPCWizardState } from '/app/redux/protocol-runs'
 import type { LPCWizardFlexProps } from '/app/organisms/LabwarePositionCheck/LPCWizardFlex'
 
-export interface UseLPCInitialStateProps extends LPCWizardFlexProps {}
+export interface UseLPCInitialStateProps
+  extends Omit<LPCWizardFlexProps, 'onCloseClick'> {}
 
-export function useLPCInitialState(
-  props: UseLPCInitialStateProps
-): LPCWizardState {
-  const { mostRecentAnalysis } = props
-  const isOnDevice = useSelector(getIsOnDevice)
+// Inject initial LPC state into Redux.
+export function useLPCInitialState({
+  mostRecentAnalysis,
+  runId,
+  ...rest
+}: UseLPCInitialStateProps): void {
+  const dispatch = useDispatch()
 
   const protocolCommands: RunTimeCommand[] = mostRecentAnalysis.commands
   const labwareDefs = getLabwareDefinitionsFromCommands(protocolCommands)
@@ -25,13 +28,11 @@ export function useLPCInitialState(
     labwareDefs,
   })
 
-  return {
-    ...props,
-    protocolData: props.mostRecentAnalysis,
-    isOnDevice,
+  const initialState: LPCWizardState = {
+    ...rest,
+    protocolData: mostRecentAnalysis,
     labwareDefs,
     workingOffsets: [],
-    tipPickUpOffset: null,
     deckConfig,
     steps: {
       currentStepIndex: 0,
@@ -41,4 +42,6 @@ export function useLPCInitialState(
       next: LPCSteps[1],
     },
   }
+
+  dispatch(startLPC(runId, initialState))
 }

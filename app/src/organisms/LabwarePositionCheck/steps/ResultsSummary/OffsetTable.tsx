@@ -2,6 +2,7 @@ import { Fragment } from 'react'
 import styled from 'styled-components'
 import isEqual from 'lodash/isEqual'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 
 import { FLEX_ROBOT_TYPE, IDENTITY_VECTOR } from '@opentrons/shared-data'
 import {
@@ -13,7 +14,7 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 
-import { selectLwDisplayName } from '/app/organisms/LabwarePositionCheck/redux'
+import { selectLwDisplayName } from '/app/redux/protocol-runs'
 import { getLabwareDisplayLocation } from '/app/local-resources/labware'
 
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
@@ -22,6 +23,8 @@ import type {
   LPCStepProps,
   ResultsSummaryStep,
 } from '/app/organisms/LabwarePositionCheck/types'
+import type { LPCWizardState } from '/app/redux/protocol-runs'
+import type { State } from '/app/redux/types'
 
 interface OffsetTableProps extends LPCStepProps<ResultsSummaryStep> {
   offsets: LabwareOffsetCreateData[]
@@ -30,10 +33,15 @@ interface OffsetTableProps extends LPCStepProps<ResultsSummaryStep> {
 
 export function OffsetTable({
   offsets,
+  runId,
   labwareDefinitions,
-  state,
 }: OffsetTableProps): JSX.Element {
-  const { protocolData } = state
+  const { protocolData } = useSelector(
+    (state: State) => state.protocolRuns[runId]?.lpc as LPCWizardState
+  )
+  const lwDisplayName = useSelector((state: State) =>
+    selectLwDisplayName(runId, state)
+  )
 
   const { t } = useTranslation('labware_position_check')
 
@@ -75,9 +83,7 @@ export function OffsetTable({
                 </LegacyStyledText>
               </TableDatum>
               <TableDatum>
-                <LegacyStyledText as="p">
-                  {selectLwDisplayName(state)}
-                </LegacyStyledText>
+                <LegacyStyledText as="p">{lwDisplayName}</LegacyStyledText>
               </TableDatum>
               <TableDatum
                 css={`

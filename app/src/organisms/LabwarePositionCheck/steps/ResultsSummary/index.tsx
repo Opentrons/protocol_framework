@@ -20,7 +20,10 @@ import {
 
 import { NeedHelpLink } from '/app/molecules/OT2CalibrationNeedHelpLink'
 import { PythonLabwareOffsetSnippet } from '/app/molecules/PythonLabwareOffsetSnippet'
-import { getIsLabwareOffsetCodeSnippetsOn } from '/app/redux/config'
+import {
+  getIsLabwareOffsetCodeSnippetsOn,
+  getIsOnDevice,
+} from '/app/redux/config'
 import { SmallButton } from '/app/atoms/buttons'
 import { LabwareOffsetTabs } from '/app/organisms/LabwareOffsetTabs'
 import { TableComponent } from './TableComponent'
@@ -29,6 +32,8 @@ import type {
   LPCStepProps,
   ResultsSummaryStep,
 } from '/app/organisms/LabwarePositionCheck/types'
+import type { State } from '/app/redux/types'
+import type { LPCWizardState } from '/app/redux/protocol-runs'
 
 // TODO(jh, 01-08-25): This support link will likely need updating as a part of RPRD-173, too.
 const LPC_HELP_LINK_URL =
@@ -37,8 +42,11 @@ const LPC_HELP_LINK_URL =
 export function ResultsSummary(
   props: LPCStepProps<ResultsSummaryStep>
 ): JSX.Element {
-  const { commandUtils, state } = props
-  const { protocolData, isOnDevice } = state
+  const { commandUtils, runId } = props
+  const isOnDevice = useSelector(getIsOnDevice)
+  const { protocolData } = useSelector(
+    (state: State) => state.protocolRuns[runId]?.lpc as LPCWizardState
+  )
   const {
     isApplyingOffsets,
     handleApplyOffsetsAndClose,

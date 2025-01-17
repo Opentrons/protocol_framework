@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 
 import { useCreateMaintenanceCommandMutation } from '@opentrons/react-api-client'
 
@@ -11,6 +12,7 @@ import type {
   Sign,
   StepSize,
 } from '/app/molecules/JogControls/types'
+import type { State } from '/app/redux/types'
 import type { UseLPCCommandChildProps } from './types'
 
 const JOG_COMMAND_TIMEOUT_MS = 10000
@@ -25,11 +27,12 @@ export interface UseHandleJogResult {
 }
 
 export function useHandleJog({
+  runId,
   maintenanceRunId,
-  state,
   setErrorMessage,
 }: UseHandleJogProps): UseHandleJogResult {
-  const { current: currentStep } = state.steps
+  const { current: currentStep } =
+    useSelector((state: State) => state.protocolRuns[runId]?.lpc?.steps) ?? {}
 
   const [isJogging, setIsJogging] = useState(false)
   const [jogQueue, setJogQueue] = useState<Array<() => Promise<void>>>([])
@@ -46,7 +49,9 @@ export function useHandleJog({
     ): Promise<void> => {
       return new Promise<void>((resolve, reject) => {
         const pipetteId =
-          'pipetteId' in currentStep ? currentStep.pipetteId : null
+          currentStep != null && 'pipetteId' in currentStep
+            ? currentStep.pipetteId
+            : null
 
         if (pipetteId != null) {
           createSilentCommand({

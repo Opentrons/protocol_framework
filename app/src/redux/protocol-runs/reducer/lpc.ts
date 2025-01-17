@@ -1,17 +1,17 @@
-import { updateWorkingOffset } from './transforms'
 import {
   PROCEED_STEP,
   SET_INITIAL_POSITION,
   SET_FINAL_POSITION,
-} from './constants'
+  FINISH_LPC,
+} from '../constants'
+import { updateWorkingOffset } from './transforms'
 
-import type { LPCWizardAction } from './types'
-import type { LPCWizardState } from '.'
+import type { LPCWizardAction, LPCWizardState } from '../types'
 
 export function LPCReducer(
   state: LPCWizardState,
   action: LPCWizardAction
-): LPCWizardState {
+): LPCWizardState | undefined {
   switch (action.type) {
     case PROCEED_STEP: {
       const { currentStepIndex, totalStepCount } = state.steps
@@ -41,6 +41,9 @@ export function LPCReducer(
         ...state,
         workingOffsets: updateWorkingOffset(state.workingOffsets, action),
       }
+
+    case FINISH_LPC:
+      return undefined
 
     default:
       return state

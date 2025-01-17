@@ -1,6 +1,7 @@
 import { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
+import { useSelector } from 'react-redux'
 
 import {
   ALIGN_CENTER,
@@ -14,6 +15,8 @@ import {
   LegacyStyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
+
+import { getIsOnDevice } from '/app/redux/config'
 
 import type { StyleProps } from '@opentrons/components'
 import type {
@@ -30,15 +33,16 @@ interface OffsetVectorProps extends StyleProps {
 export function LiveOffsetValue(
   props: OffsetVectorProps & LPCStepProps<CheckPositionsStep>
 ): JSX.Element {
-  const { x, y, z, state, ...styleProps } = props
+  const { x, y, z, ...styleProps } = props
   const { i18n, t } = useTranslation('labware_position_check')
+  const isOnDevice = useSelector(getIsOnDevice)
 
   return (
     <Flex css={FLEX_CONTAINER_STYLE}>
       <LegacyStyledText
         as="label"
         fontWeight={
-          state.isOnDevice
+          isOnDevice
             ? TYPOGRAPHY.fontWeightRegular
             : TYPOGRAPHY.fontWeightSemiBold
         }
@@ -46,7 +50,7 @@ export function LiveOffsetValue(
         {i18n.format(t('labware_offset_data'), 'capitalize')}
       </LegacyStyledText>
       <Flex css={OFFSET_CONTAINER_STYLE} {...styleProps}>
-        <Icon name="reticle" size={state.isOnDevice ? '1.5rem' : SIZE_1} />
+        <Icon name="reticle" size={isOnDevice ? '1.5rem' : SIZE_1} />
         {[x, y, z].map((axis, index) => (
           <Fragment key={index}>
             <LegacyStyledText css={OFFSET_LABEL_STYLE}>

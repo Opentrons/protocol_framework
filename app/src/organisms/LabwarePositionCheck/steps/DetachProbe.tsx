@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
+import { useSelector } from 'react-redux'
 
 import {
   LegacyStyledText,
@@ -12,26 +13,34 @@ import { GenericWizardTile } from '/app/molecules/GenericWizardTile'
 import {
   selectActivePipette,
   selectActivePipetteChannelCount,
-} from '/app/organisms/LabwarePositionCheck/redux'
+} from '/app/redux/protocol-runs'
 
 import detachProbe1 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_1.webm'
 import detachProbe8 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_8.webm'
 import detachProbe96 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_96.webm'
 
 import type { DetachProbeStep, LPCStepProps } from '../types'
+import type { State } from '/app/redux/types'
+import type { StepsInfo } from '/app/organisms/LabwarePositionCheck/redux/types'
 
 export const DetachProbe = ({
-  state,
+  runId,
   proceed,
   commandUtils,
 }: LPCStepProps<DetachProbeStep>): JSX.Element => {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
-  const { current: currentStep } = state.steps
+  const { current: currentStep } = useSelector(
+    (state: State) => state.protocolRuns[runId]?.lpc?.steps as StepsInfo
+  )
   const { createProbeDetachmentHandler, toggleRobotMoving } = commandUtils
-  const pipette = selectActivePipette(currentStep, state)
-  const probeVideoSrc = ((): string => {
-    const channels = selectActivePipetteChannelCount(currentStep, state)
+  const pipette = useSelector((state: State) =>
+    selectActivePipette(currentStep, runId, state)
+  )
+  const channels = useSelector((state: State) =>
+    selectActivePipetteChannelCount(currentStep, runId, state)
+  )
 
+  const probeVideoSrc = ((): string => {
     switch (channels) {
       case 1:
         return detachProbe1

@@ -48,6 +48,6 @@ export interface UpdateRunSetupStepsRequiredAction {
   }
 }
 
-export type ProtocolRunAction =
+export type RunSetupStepsAction =
   | UpdateRunSetupStepsCompleteAction
   | UpdateRunSetupStepsRequiredAction

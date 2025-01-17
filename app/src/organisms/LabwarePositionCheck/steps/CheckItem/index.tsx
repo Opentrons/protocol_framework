@@ -1,4 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { DIRECTION_COLUMN, Flex, LegacyStyledText } from '@opentrons/components'
 
@@ -9,7 +10,7 @@ import { UnorderedList } from '/app/molecules/UnorderedList'
 import {
   setFinalPosition,
   setInitialPosition,
-} from '/app/organisms/LabwarePositionCheck/redux/actions'
+} from '/app/redux/protocol-runs/actions'
 import { JogToWell } from './JogToWell'
 import { PrepareSpace } from './PrepareSpace'
 import { PlaceItemInstruction } from './PlaceItemInstruction'
@@ -17,18 +18,21 @@ import {
   selectActiveLwInitialPosition,
   selectActivePipette,
   selectIsActiveLwTipRack,
-} from '/app/organisms/LabwarePositionCheck/redux'
+} from '/app/redux/protocol-runs'
+import { getIsOnDevice } from '/app/redux/config'
 
 import type {
   CheckPositionsStep,
   LPCStepProps,
 } from '/app/organisms/LabwarePositionCheck/types'
 import type { DisplayLocationParams } from '/app/local-resources/labware'
+import type { State } from '/app/redux/types'
+import type { LPCWizardState } from '/app/redux/protocol-runs'
 
 export function CheckItem(
   props: LPCStepProps<CheckPositionsStep>
 ): JSX.Element {
-  const { state, dispatch, proceed, commandUtils, step } = props
+  const { runId, proceed, commandUtils, step } = props
   const { labwareId, location } = step
   const {
     handleJog,
@@ -39,13 +43,24 @@ export function CheckItem(
     handleValidMoveToMaintenancePosition,
     toggleRobotMoving,
   } = commandUtils
-  const { isOnDevice, protocolData, labwareDefs, steps } = state
+  const dispatch = useDispatch()
+
+  const isOnDevice = useSelector(getIsOnDevice)
+  const { protocolData, labwareDefs, steps } = useSelector(
+    (state: State) => state.protocolRuns[runId]?.lpc as LPCWizardState
+  )
   const { t } = useTranslation(['labware_position_check', 'shared'])
   const { t: commandTextT } = useTranslation('protocol_command_text')
 
-  const pipette = selectActivePipette(step, state)
-  const initialPosition = selectActiveLwInitialPosition(step, state)
-  const isLwTiprack = selectIsActiveLwTipRack(state)
+  const pipette = useSelector(
+    (state: State) => selectActivePipette(step, runId, state) ?? null
+  )
+  const initialPosition = useSelector((state: State) =>
+    selectActiveLwInitialPosition(step, runId, state)
+  )
+  const isLwTiprack = useSelector((state: State) =>
+    selectIsActiveLwTipRack(runId, state)
+  )
 
   const buildDisplayParams = (): Omit<
     DisplayLocationParams,
@@ -73,7 +88,7 @@ export function CheckItem(
       .then(() => handleConfirmLwModulePlacement({ step }))
       .then(position => {
         dispatch(
-          setInitialPosition({
+          setInitialPosition(runId, {
             labwareId,
             location,
             position,
@@ -95,7 +110,7 @@ export function CheckItem(
       )
       .then(position => {
         dispatch(
-          setFinalPosition({
+          setFinalPosition(runId, {
             labwareId,
             location,
             position,
@@ -103,10 +118,10 @@ export function CheckItem(
         )
       })
       .then(() => {
-        if (state.steps.next?.section === NAV_STEPS.CHECK_POSITIONS) {
+        if (steps.next?.section === NAV_STEPS.CHECK_POSITIONS) {
           return handleCheckItemsPrepModules(steps.next)
         } else {
-          return handleValidMoveToMaintenancePosition(steps.next)
+          return handleValidMoveToMaintenancePosition(pipette, steps.next)
         }
       })
       .finally(() => toggleRobotMoving(false))
@@ -117,7 +132,7 @@ export function CheckItem(
       .then(() => handleResetLwModulesOnDeck({ step }))
       .then(() => {
         dispatch(
-          setInitialPosition({
+          setInitialPosition(runId, {
             labwareId,
             location,
             position: null,

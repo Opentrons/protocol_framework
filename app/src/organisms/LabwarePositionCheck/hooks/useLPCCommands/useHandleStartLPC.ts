@@ -9,26 +9,30 @@ import type {
   CreateCommand,
   RunTimeCommand,
   SetupRunTimeCommand,
+  LoadedPipette,
 } from '@opentrons/shared-data'
 import type { UseLPCCommandWithChainRunChildProps } from './types'
 
 export interface UseHandleStartLPCResult {
-  createStartLPCHandler: (onSuccess: () => void) => () => Promise<void>
+  createStartLPCHandler: (
+    pipette: LoadedPipette | null,
+    onSuccess: () => void
+  ) => () => Promise<void>
 }
 
 export function useHandleStartLPC({
   chainLPCCommands,
   mostRecentAnalysis,
-  state,
 }: UseLPCCommandWithChainRunChildProps): UseHandleStartLPCResult {
   const createStartLPCHandler = (
+    pipette: LoadedPipette | null,
     onSuccess: () => void
   ): (() => Promise<void>) => {
     const startCommands: CreateCommand[] = [
       ...buildInstrumentLabwarePrepCommands(mostRecentAnalysis),
       ...moduleInitBeforeAnyLPCCommands(mostRecentAnalysis),
       ...fullHomeCommands(),
-      ...moveToMaintenancePosition(state.steps.current, state),
+      ...moveToMaintenancePosition(pipette),
     ]
 
     return () =>

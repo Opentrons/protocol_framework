@@ -1,19 +1,27 @@
+import { useSelector } from 'react-redux'
+
 import { TerseOffsetTable } from '/app/organisms/TerseOffsetTable'
 import { OffsetTable } from './OffsetTable'
+import { getIsOnDevice } from '/app/redux/config'
 
 import type { LabwareOffsetCreateData } from '@opentrons/api-client'
 import type {
   LPCStepProps,
   ResultsSummaryStep,
 } from '/app/organisms/LabwarePositionCheck/types'
+import type { State } from '/app/redux/types'
+import type { LPCWizardState } from '/app/redux/protocol-runs'
 
 interface TableComponentProps extends LPCStepProps<ResultsSummaryStep> {
   offsetsToApply: LabwareOffsetCreateData[]
 }
 
 export function TableComponent(props: TableComponentProps): JSX.Element {
-  const { state, offsetsToApply } = props
-  const { isOnDevice, labwareDefs } = state
+  const { offsetsToApply, runId } = props
+  const isOnDevice = useSelector(getIsOnDevice)
+  const { labwareDefs } = useSelector(
+    (state: State) => state.protocolRuns[runId]?.lpc as LPCWizardState
+  )
 
   return isOnDevice ? (
     <TerseOffsetTable
