@@ -4,7 +4,7 @@ from decoy import Decoy
 
 from opentrons.legacy_broker import LegacyBroker
 from opentrons.protocols.api_support.types import APIVersion
-from opentrons.protocol_api import FlexStackerContext, Labware
+from opentrons.protocol_api import FlexStackerContext
 from opentrons.protocol_api.core.common import (
     ProtocolCore,
     LabwareCore,
@@ -82,85 +82,43 @@ def test_load_labware_to_hopper(
     decoy: Decoy,
     mock_core: FlexStackerCore,
     mock_protocol_core: ProtocolCore,
-    mock_core_map: LoadedCoreMap,
     subject: FlexStackerContext,
 ) -> None:
     """It should create two labware to the core map."""
-    labware_core = decoy.mock(cls=LabwareCore)
-    decoy.when(labware_core.get_well_columns()).then_return([])
-    decoy.when(
-        mock_protocol_core.load_labware(
+    subject.load_labware_to_hopper(load_name="some-load-name", quantity=2)
+    decoy.verify(
+        mock_protocol_core.load_labware_to_flex_stacker_hopper(
+            module_core=mock_core,
             load_name="some-load-name",
+            quantity=2,
             label=None,
             namespace=None,
             version=None,
-            location=mock_core,
-        )
-    ).then_return(labware_core)
-
-    labware = Labware(
-        core=labware_core,
-        api_version=subject.api_version,
-        protocol_core=mock_protocol_core,
-        core_map=mock_core_map,
+            lid=None,
+        ),
+        times=1,
     )
-
-    subject.load_labware_to_hopper(load_name="some-load-name", quantity=2)
-
-    # labware is added twice
-    decoy.verify(mock_core_map.add(labware_core, labware), times=2)
 
 
 def test_load_labware_with_lid_to_hopper(
     decoy: Decoy,
     mock_core: FlexStackerCore,
     mock_protocol_core: ProtocolCore,
-    mock_core_map: LoadedCoreMap,
     subject: FlexStackerContext,
 ) -> None:
     """It should create two labware to the core map."""
-    labware_core = decoy.mock(cls=LabwareCore)
-    decoy.when(labware_core.get_well_columns()).then_return([])
-    lid_core = decoy.mock(cls=LabwareCore)
-    decoy.when(lid_core.get_well_columns()).then_return([])
-
-    decoy.when(
-        mock_protocol_core.load_labware(
-            load_name="some-load-name",
-            label=None,
-            namespace=None,
-            version=None,
-            location=mock_core,
-        )
-    ).then_return(labware_core)
-
-    decoy.when(
-        mock_protocol_core.load_lid(
-            load_name="some-lid-name",
-            location=labware_core,
-            namespace=None,
-            version=None,
-        )
-    ).then_return(lid_core)
-
-    labware = Labware(
-        core=labware_core,
-        api_version=subject.api_version,
-        protocol_core=mock_protocol_core,
-        core_map=mock_core_map,
-    )
-    lid = Labware(
-        core=lid_core,
-        api_version=subject.api_version,
-        protocol_core=mock_protocol_core,
-        core_map=mock_core_map,
-    )
-
     subject.load_labware_to_hopper(
         load_name="some-load-name", quantity=2, lid="some-lid-name"
     )
-
-    # labware is added twice to the map
-    decoy.verify(mock_core_map.add(labware_core, labware), times=2)
-    # lid is never added to the map
-    decoy.verify(mock_core_map.add(lid_core, lid), times=0)
+    decoy.verify(
+        mock_protocol_core.load_labware_to_flex_stacker_hopper(
+            module_core=mock_core,
+            load_name="some-load-name",
+            quantity=2,
+            label=None,
+            namespace=None,
+            version=None,
+            lid="some-lid-name",
+        ),
+        times=1,
+    )

@@ -51,7 +51,7 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
         )
         if stacker_state.in_static_mode:
             raise CannotPerformModuleAction(
-                "Cannot store labware from Flex Stacker while in static mode"
+                "Cannot store labware in Flex Stacker while in static mode"
             )
 
         # Allow propagation of ModuleNotAttachedError.

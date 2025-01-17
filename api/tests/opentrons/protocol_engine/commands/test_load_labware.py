@@ -35,6 +35,10 @@ from opentrons.protocol_engine.state.update_types import (
     FlexStackerLoadHopperLabware,
     StateUpdate,
 )
+from opentrons.protocol_engine.state.module_substates import (
+    FlexStackerSubState,
+    FlexStackerId,
+)
 
 from opentrons.protocol_engine.commands.command import SuccessData
 from opentrons.protocol_engine.commands.load_labware import (
@@ -266,6 +270,15 @@ async def test_load_labware_in_flex_stacker(
         LoadedModule(
             id="some-module-id",
             model=ModuleModel.FLEX_STACKER_MODULE_V1,
+        )
+    )
+    decoy.when(
+        state_view.modules.get_flex_stacker_substate("some-module-id")
+    ).then_return(
+        FlexStackerSubState(
+            module_id=FlexStackerId("some-module-id"),
+            in_static_mode=False,
+            hopper_labware_ids=[],
         )
     )
 
