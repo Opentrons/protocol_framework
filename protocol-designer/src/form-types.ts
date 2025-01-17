@@ -387,7 +387,7 @@ export type AbsorbanceReaderFormType =
 
 export interface HydratedAbsorbanceReaderFormData {
   absorbanceReaderFormType: AbsorbanceReaderFormType | null
-  filePath: string | null
+  fileName: string | null
   lidOpen: boolean | null
   mode:
     | typeof ABSORBANCE_READER_INITIALIZE_MODE_MULTI
