@@ -140,9 +140,6 @@ class LoadLabwareImplementation(
             )
             state_update.set_addressable_area_used(area_name)
         elif isinstance(params.location, DeckSlotLocation):
-            self._state_view.labware.raise_if_labware_cannot_be_ondeck(
-                labware_id=params.labwareId
-            )
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
                 params.location.slotName.id
             )
@@ -195,6 +192,10 @@ class LoadLabwareImplementation(
                 self._state_view.labware.raise_if_labware_incompatible_with_plate_reader(
                     loaded_labware.definition
                 )
+        elif isinstance(params.location, DeckSlotLocation):
+            self._state_view.labware.raise_if_labware_cannot_be_ondeck(
+                location=params.location, labware_definition=loaded_labware.definition
+            )
         return SuccessData(
             public=LoadLabwareResult(
                 labwareId=loaded_labware.labware_id,
