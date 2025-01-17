@@ -964,6 +964,7 @@ class AreaType(Enum):
     TEMPERATURE = "temperatureModule"
     MAGNETICBLOCK = "magneticBlock"
     ABSORBANCE_READER = "absorbanceReader"
+    FLEX_STACKER = "flexStacker"
     LID_DOCK = "lidDock"
 
 

@@ -7,7 +7,6 @@ from opentrons.hardware_control.modules import FlexStacker
 from opentrons.hardware_control.modules.types import (
     ModuleType,
 )
-from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocol_api.core.engine.module_core import FlexStackerCore
 from opentrons.protocol_api import MAX_SUPPORTED_VERSION

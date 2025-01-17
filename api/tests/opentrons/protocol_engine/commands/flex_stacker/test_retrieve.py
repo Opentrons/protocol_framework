@@ -4,6 +4,12 @@ from decoy import Decoy
 from opentrons.hardware_control.modules import FlexStacker
 
 from opentrons.protocol_engine.state.state import StateView
+from opentrons.protocol_engine.state.update_types import (
+    StateUpdate,
+    FlexStackerStateUpdate,
+    FlexStackerRetrieveLabware,
+    LabwareLocationUpdate,
+)
 from opentrons.protocol_engine.state.module_substates import (
     FlexStackerSubState,
     FlexStackerId,
@@ -12,7 +18,7 @@ from opentrons.protocol_engine.execution import EquipmentHandler
 from opentrons.protocol_engine.commands import flex_stacker
 from opentrons.protocol_engine.commands.command import SuccessData
 from opentrons.protocol_engine.commands.flex_stacker.retrieve import RetrieveImpl
-from opentrons.protocol_engine.types import Dimensions
+from opentrons.protocol_engine.types import Dimensions, ModuleLocation
 
 
 async def test_retrieve(
@@ -44,7 +50,21 @@ async def test_retrieve(
     ).then_return(fs_hardware)
 
     result = await subject.execute(data)
-    decoy.verify(await fs_hardware.dispense_labware(labware_height=50.0), times=1)
+    decoy.verify(await fs_hardware.dispense_labware(labware_height=1), times=1)
+
     assert result == SuccessData(
         public=flex_stacker.RetrieveResult(labware_id="labware-id"),
+        state_update=StateUpdate(
+            labware_location=LabwareLocationUpdate(
+                labware_id="labware-id",
+                new_location=ModuleLocation(moduleId="flex-stacker-id"),
+                offset_id=None,
+            ),
+            flex_stacker_state_update=FlexStackerStateUpdate(
+                module_id="flex-stacker-id",
+                hopper_labware_update=FlexStackerRetrieveLabware(
+                    labware_id="labware-id"
+                ),
+            ),
+        ),
     )

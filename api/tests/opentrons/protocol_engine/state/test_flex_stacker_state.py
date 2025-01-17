@@ -8,8 +8,8 @@ from opentrons.protocol_engine.state.module_substates import (
 )
 from opentrons.protocol_engine.state.config import Config
 
-from opentrons.protocol_engine import commands, actions
-from opentrons.protocol_engine.types import DeckType, ModuleDefinition, ModuleModel
+from opentrons.protocol_engine import actions
+from opentrons.protocol_engine.types import DeckType, ModuleDefinition
 import opentrons.protocol_engine.errors as errors
 
 

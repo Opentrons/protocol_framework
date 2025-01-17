@@ -8,12 +8,7 @@ from pydantic import BaseModel, Field
 from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ...errors import ErrorOccurrence, CannotPerformModuleAction
 from ...state import update_types
-from ...types import (
-    ModuleModel,
-    AddressableAreaLocation,
-    ModuleLocation,
-    OFF_DECK_LOCATION,
-)
+from ...types import OFF_DECK_LOCATION
 
 
 if TYPE_CHECKING:
@@ -59,14 +54,13 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
 
         try:
             lw_id = self._state_view.labware.get_id_by_module(params.moduleId)
-        except Exception as e:
+        except Exception:
             raise CannotPerformModuleAction(
-                f"Cannot store labware if Flex Stacker carriage is empty"
+                "Cannot store labware if Flex Stacker carriage is empty"
             )
+
         lw_dim = self._state_view.labware.get_dimensions(labware_id=lw_id)
-
         # TODO: check the type of the labware should match that already in the stack
-
         state_update = update_types.StateUpdate()
 
         if stacker_hw is not None:
