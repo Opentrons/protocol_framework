@@ -75,6 +75,11 @@
       "x": 0,
       "y": 0,
       "z": 34
+    },
+    "protocol_engine_lid_stack_object": {
+      "x": 0,
+      "y": 0,
+      "z": 0
     }
   },
   "stackLimit": 5,
@@ -83,7 +88,8 @@
     "opentrons_96_wellplate_200ul_pcr_full_skirt",
     "opentrons_tough_pcr_auto_sealing_lid",
     "biorad_96_wellplate_200ul_pcr",
-    "opentrons_flex_deck_riser"
+    "opentrons_flex_deck_riser",
+    "protocol_engine_lid_stack_object"
   ],
   "gripForce": 15,
   "gripHeightFromLabwareBottom": 7.91,

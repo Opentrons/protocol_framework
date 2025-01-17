@@ -99,9 +99,9 @@ class LoadLidImplementation(
         state_update = StateUpdate()
 
         # In the case of lids being loaded on top of other labware, set the parent labware's lid
-        state_update.set_lid(
-            parent_labware_id=params.location.labwareId,
-            lid_id=loaded_labware.labware_id,
+        state_update.set_lids(
+            parent_labware_ids=[params.location.labwareId],
+            lid_ids=[loaded_labware.labware_id],
         )
 
         state_update.set_loaded_labware(

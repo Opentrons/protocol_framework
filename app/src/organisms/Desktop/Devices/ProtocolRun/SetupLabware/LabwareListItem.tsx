@@ -191,6 +191,7 @@ export function LabwareListItem(
         const matchingHeaterShaker =
           attachedModuleInfo != null &&
           initialLocation !== 'offDeck' &&
+          initialLocation !== 'systemLocation' &&
           'moduleId' in initialLocation &&
           attachedModuleInfo[initialLocation.moduleId] != null
             ? attachedModuleInfo[initialLocation.moduleId].attachedModuleMatch

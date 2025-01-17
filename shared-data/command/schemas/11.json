@@ -2248,6 +2248,11 @@
               "type": "string"
             },
             {
+              "const": "systemLocation",
+              "enum": ["systemLocation"],
+              "type": "string"
+            },
+            {
               "$ref": "#/$defs/AddressableAreaLocation"
             }
           ],
@@ -2322,6 +2327,11 @@
               "type": "string"
             },
             {
+              "const": "systemLocation",
+              "enum": ["systemLocation"],
+              "type": "string"
+            },
+            {
               "$ref": "#/$defs/AddressableAreaLocation"
             }
           ],
@@ -2374,6 +2384,14 @@
     "LoadLidStackParams": {
       "description": "Payload required to load a lid stack onto a location.",
       "properties": {
+        "labwareIds": {
+          "description": "An optional list of IDs to assign to the lids in the stack.If None, an ID will be generated.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Labwareids",
+          "type": "array"
+        },
         "loadName": {
           "description": "Name used to reference a lid labware definition.",
           "title": "Loadname",
@@ -2396,6 +2414,11 @@
               "type": "string"
             },
             {
+              "const": "systemLocation",
+              "enum": ["systemLocation"],
+              "type": "string"
+            },
+            {
               "$ref": "#/$defs/AddressableAreaLocation"
             }
           ],
@@ -2411,6 +2434,11 @@
           "description": "The quantity of lids to load.",
           "title": "Quantity",
           "type": "integer"
+        },
+        "stackLabwareId": {
+          "description": "An optional ID to assign to the lid stack labware object created.If None, an ID will be generated.",
+          "title": "Stacklabwareid",
+          "type": "string"
         },
         "version": {
           "description": "The lid labware definition version.",
@@ -2900,6 +2928,11 @@
             {
               "const": "offDeck",
               "enum": ["offDeck"],
+              "type": "string"
+            },
+            {
+              "const": "systemLocation",
+              "enum": ["systemLocation"],
               "type": "string"
             },
             {
