@@ -188,7 +188,7 @@ def _map_labware(
     engine_state: StateView,
     labware_id: str,
 ) -> Optional[
-    Tuple[Union[DeckSlotName, StagingSlotName], wrapped_deck_conflict.DeckItem]
+    Tuple[Union[DeckSlotName, StagingSlotName, AddressableAreaLocation], wrapped_deck_conflict.DeckItem]
 ]:
     location_from_engine = engine_state.labware.get_location(labware_id=labware_id)
 
@@ -198,9 +198,19 @@ def _map_labware(
         try:
             slot = DeckSlotName.from_primitive(location_from_engine.addressableAreaName)
         except ValueError:
-            slot = StagingSlotName.from_primitive(
-                location_from_engine.addressableAreaName
-            )
+            if "flexStacker" in location_from_engine.addressableAreaName:
+                if "A4" in location_from_engine.addressableAreaName:
+                    slot = StagingSlotName.SLOT_A4
+                elif "B4" in location_from_engine.addressableAreaName:
+                    slot = StagingSlotName.SLOT_B4
+                elif "C4" in location_from_engine.addressableAreaName:
+                    slot = StagingSlotName.SLOT_C4
+                elif "D4" in location_from_engine.addressableAreaName:
+                    slot = StagingSlotName.SLOT_D4
+            else:
+                slot = StagingSlotName.from_primitive(
+                    location_from_engine.addressableAreaName
+                )
         return (
             slot,
             wrapped_deck_conflict.Labware(
