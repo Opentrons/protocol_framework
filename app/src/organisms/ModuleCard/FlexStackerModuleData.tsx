@@ -8,9 +8,9 @@ interface FlexStackerModuleProps {
   moduleData: FlexStackerModule['data']
 }
 
-export const FlexStackerModuleData = (
+export function FlexStackerModuleData(
   props: FlexStackerModuleProps
-): JSX.Element | null => {
+): JSX.Element | null {
   const { moduleData } = props
   const { t, i18n } = useTranslation(['device_details', 'shared'])
 
@@ -39,18 +39,17 @@ export const FlexStackerModuleData = (
     }
   }
   const lidDisplayStatus =
-    moduleData.hopperDoorState === 'opened'
+    moduleData.hopperDoorState === 'closed'
       ? i18n.format(t('shared:closed'), 'capitalize')
       : i18n.format(t('shared:open'), 'capitalize')
-
   return (
     <>
       <StatusLabel {...StatusLabelProps} />
       <StyledText
         desktopStyle="bodyDefaultRegular"
-        data-testid="abs_module_data"
+        data-testid="stacker_module_data"
       >
-        {t('abs_reader_lid_status', {
+        {t('flex_stacker_door_status', {
           status: lidDisplayStatus,
         })}
       </StyledText>

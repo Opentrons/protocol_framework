@@ -59,7 +59,6 @@ import { TemperatureModuleSlideout } from './TemperatureModuleSlideout'
 import { AboutModuleSlideout } from './AboutModuleSlideout'
 import { HeaterShakerModuleData } from './HeaterShakerModuleData'
 import { HeaterShakerSlideout } from './HeaterShakerSlideout'
-import { FlexStackerModuleSlideout } from './FlexStackerModuleSlideout'
 import { TestShakeSlideout } from './TestShakeSlideout'
 import { ModuleWizardFlows } from '/app/organisms/ModuleWizardFlows'
 import { getModulePrepCommands } from '/app/local-resources/modules'
@@ -77,7 +76,6 @@ import type {
 import type { State, Dispatch } from '/app/redux/types'
 import type { RequestState } from '/app/redux/robot-api/types'
 import { AbsorbanceReaderData } from './AbsorbanceReaderData'
-import { AbsorbanceReaderSlideout } from './AbsorbanceReaderSlideout'
 import { FlexStackerModuleData } from './FlexStackerModuleData'
 
 interface ModuleCardProps {
@@ -428,6 +426,10 @@ export const ModuleCard = (props: ModuleCardProps): JSX.Element | null => {
                   {module?.usbPort !== null
                     ? t('usb_port', {
                         port: module?.usbPort?.port,
+                        hubPort:
+                          module?.usbPort?.hubPort != null
+                            ? `.${module.usbPort.hubPort}`
+                            : '',
                       })
                     : t('usb_port_not_connected')}
                 </LegacyStyledText>
@@ -541,14 +543,6 @@ const ModuleSlideout = (props: ModuleSlideoutProps): JSX.Element => {
         isExpanded={showSlideout}
       />
     )
-  } else if (module.moduleType === ABSORBANCE_READER_TYPE) {
-    return (
-      <AbsorbanceReaderSlideout
-        module={module}
-        onCloseClick={onCloseClick}
-        isExpanded={showSlideout}
-      />
-    )
   } else if (module.moduleType === HEATERSHAKER_MODULE_TYPE) {
     return (
       <HeaterShakerSlideout
@@ -558,12 +552,6 @@ const ModuleSlideout = (props: ModuleSlideoutProps): JSX.Element => {
       />
     )
   } else {
-    return (
-      <FlexStackerModuleSlideout
-        module={module}
-        onCloseClick={onCloseClick}
-        isExpanded={showSlideout}
-      />
-    )
+    return <></>
   }
 }

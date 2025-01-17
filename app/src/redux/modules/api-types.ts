@@ -16,6 +16,7 @@ export interface PhysicalPort {
   path: string | null
   port: number
   hub: boolean
+  hubPort?: number
   portGroup: PortGroup
 }
 
