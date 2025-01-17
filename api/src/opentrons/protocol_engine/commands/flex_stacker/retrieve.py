@@ -72,9 +72,9 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
 
         try:
             self._state_view.labware.raise_if_labware_in_location(stacker_loc)
-        except Exception as e:
+        except Exception:
             raise CannotPerformModuleAction(
-                f"Cannot retrieve a labware from Flex Stacker if the carriage is occupied: {e}"
+                "Cannot retrieve a labware from Flex Stacker if the carriage is occupied"
             )
 
         state_update = update_types.StateUpdate()

@@ -59,6 +59,9 @@ _STAGING_DECK_SLOT_VERSION_GATE = APIVersion(2, 16)
 # The first APIVersion where Python protocols can load lids as stacks and treat them as attributes of a parent labware.
 LID_STACK_VERSION_GATE = APIVersion(2, 23)
 
+# The first APIVersion where Python protocols can use the Flex Stacker module.
+FLEX_STACKER_VERSION_GATE = APIVersion(2, 23)
+
 
 class InvalidPipetteMountError(ValueError):
     """An error raised when attempting to load pipettes on an invalid mount."""

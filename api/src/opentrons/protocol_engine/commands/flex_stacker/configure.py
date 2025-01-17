@@ -45,7 +45,7 @@ class ConfigureImpl(AbstractCommandImpl[ConfigureParams, SuccessData[ConfigureRe
         self._state_view = state_view
 
     async def execute(self, params: ConfigureParams) -> SuccessData[ConfigureResult]:
-        """Execute the labware retrieval command."""
+        """Execute the configurecommand."""
         stacker_state = self._state_view.modules.get_flex_stacker_substate(
             params.moduleId
         )
@@ -58,7 +58,7 @@ class ConfigureImpl(AbstractCommandImpl[ConfigureParams, SuccessData[ConfigureRe
 
 
 class Configure(BaseCommand[ConfigureParams, ConfigureResult, ErrorOccurrence]):
-    """A command to Configure a labware from a Flex Stacker."""
+    """A command to configure the Flex Stacker."""
 
     commandType: ConfigureCommandType = "flexStacker/configure"
     params: ConfigureParams

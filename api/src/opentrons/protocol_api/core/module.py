@@ -396,8 +396,8 @@ class AbstractFlexStackerCore(AbstractModuleCore):
 
     @abstractmethod
     def retrieve(self) -> None:
-        """Release and return a labware at the bottom of the labware stack."""
+        """Release a labware from the hopper to the staging slot."""
 
     @abstractmethod
     def store(self) -> None:
-        """Store a labware at the bottom of the labware stack."""
+        """Store a labware in the stacker hopper."""

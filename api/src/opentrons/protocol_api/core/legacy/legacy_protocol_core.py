@@ -529,10 +529,10 @@ class LegacyProtocolCore(
         module_core: legacy_module_core.LegacyModuleCore,
         load_name: str,
         quantity: int,
-        label: str | None = None,
-        namespace: str | None = None,
-        version: int | None = None,
-        lid: str | None = None,
+        label: Optional[str],
+        namespace: Optional[str],
+        version: Optional[int],
+        lid: Optional[str],
     ) -> None:
         """Load labware to a Flex stacker hopper."""
         raise APIVersionError(api_element="Flex stacker")

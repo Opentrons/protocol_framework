@@ -701,7 +701,12 @@ class FlexStackerCore(ModuleCore, AbstractFlexStackerCore):
     _sync_module_hardware: SynchronousAdapter[hw_modules.FlexStacker]
 
     def set_static_mode(self, static: bool) -> None:
-        """Set the Flex Stacker's static mode."""
+        """Set the Flex Stacker's static mode.
+
+        The Flex Stacker cannot retrieve and or store when in static mode.
+        This allows the Flex Stacker carriage to be used as a staging slot,
+        and allowed the labware to be loaded onto it.
+        """
         self._engine_client.execute_command(
             cmd.flex_stacker.ConfigureParams(
                 moduleId=self.module_id,
@@ -710,7 +715,7 @@ class FlexStackerCore(ModuleCore, AbstractFlexStackerCore):
         )
 
     def retrieve(self) -> None:
-        """Retrieve a labware id from the bottom of the Flex Stacker's stack."""
+        """Retrieve a labware from the Flex Stacker's hopper."""
         self._engine_client.execute_command(
             cmd.flex_stacker.RetrieveParams(
                 moduleId=self.module_id,
@@ -718,7 +723,7 @@ class FlexStackerCore(ModuleCore, AbstractFlexStackerCore):
         )
 
     def store(self) -> None:
-        """Store a labware at the bottom of the Flex Stacker's stack."""
+        """Store a labware into Flex Stacker's hopper."""
         self._engine_client.execute_command(
             cmd.flex_stacker.StoreParams(
                 moduleId=self.module_id,

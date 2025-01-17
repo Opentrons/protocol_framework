@@ -870,7 +870,6 @@ class ProtocolContext(CommandPublisher):
                   .. versionchanged:: 2.23
                     Added ``FlexStackerModuleContext`` return value.
         """
-        flex_stacker_valid_since = APIVersion(2, 23)
         if configuration:
             if self._api_version < APIVersion(2, 4):
                 raise APIVersionError(
@@ -904,11 +903,11 @@ class ProtocolContext(CommandPublisher):
             )
         if (
             isinstance(requested_model, FlexStackerModuleModel)
-            and self._api_version < flex_stacker_valid_since
+            and self._api_version < validation.FLEX_STACKER_VERSION_GATE
         ):
             raise APIVersionError(
                 api_element=f"Module of type {module_name}",
-                until_version=str(flex_stacker_valid_since),
+                until_version=str(validation.FLEX_STACKER_VERSION_GATE),
                 current_version=f"{self._api_version}",
             )
 

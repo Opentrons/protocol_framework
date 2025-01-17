@@ -379,16 +379,13 @@ class ProtocolCore(
         module_core: Union[ModuleCore, NonConnectedModuleCore],
         load_name: str,
         quantity: int,
-        label: Optional[str] = None,
-        namespace: Optional[str] = None,
-        version: Optional[int] = None,
-        lid: Optional[str] = None,
+        label: Optional[str],
+        namespace: Optional[str],
+        version: Optional[int],
+        lid: Optional[str],
     ) -> None:
         """Load one or more labware with or without a lid to the flex stacker hopper."""
-        assert (
-            isinstance(module_core, ModuleCore)
-            and module_core.MODULE_TYPE == ModuleType.FLEX_STACKER
-        )
+        assert isinstance(module_core, FlexStackerCore)
         for _ in range(quantity):
             labware_core = self.load_labware(
                 load_name=load_name,

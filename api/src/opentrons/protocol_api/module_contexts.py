@@ -1122,18 +1122,7 @@ class FlexStackerContext(ModuleContext):
         version: Optional[int] = None,
         lid: Optional[str] = None,
     ) -> None:
-        """Load one or more labware onto the flex stacker.
-
-        The parameters of this function behave like those of
-        :py:obj:`ProtocolContext.load_labware` (which loads labware directly
-        onto the deck). Note that the parameter ``name`` here corresponds to
-        ``load_name`` on the ``ProtocolContext`` function.
-
-        :returns: The initialized and loaded labware object.
-
-        .. versionadded:: 2.23
-            The *label,* *namespace,* and *version* parameters.
-        """
+        """Load one or more labware onto the flex stacker."""
         self._protocol_core.load_labware_to_flex_stacker_hopper(
             module_core=self._core,
             load_name=load_name,
@@ -1144,23 +1133,21 @@ class FlexStackerContext(ModuleContext):
             lid=lid,
         )
 
+    @requires_version(2, 23)
     def enter_static_mode(self) -> None:
         """Enter static mode.
 
         In static mode, the Flex Stacker will not move labware between the hopper and
-        the deck. The stacker can be used as a staging slot area.
-
-        .. versionadded:: 2.23
+        the deck, and can be used as a staging slot area.
         """
         self._core.set_static_mode(static=True)
 
+    @requires_version(2, 23)
     def exit_static_mode(self) -> None:
         """End static mode.
 
         In static mode, the Flex Stacker will not move labware between the hopper and
-        the deck. This is useful for debugging and manual operation.
-
-        .. versionadded:: 2.23
+        the deck, and can be used as a staging slot area.
         """
         self._core.set_static_mode(static=False)
 
