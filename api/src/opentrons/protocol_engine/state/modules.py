@@ -35,7 +35,7 @@ from opentrons.protocol_engine.state.module_substates.absorbance_reader_substate
     AbsorbanceReaderMeasureMode,
 )
 from opentrons.types import DeckSlotName, MountType, StagingSlotName
-from .update_types import AbsorbanceReaderStateUpdate
+from .update_types import AbsorbanceReaderStateUpdate, FlexStackerStateUpdate
 from ..errors import ModuleNotConnectedError
 
 from ..types import (
@@ -77,11 +77,13 @@ from .module_substates import (
     TemperatureModuleSubState,
     ThermocyclerModuleSubState,
     AbsorbanceReaderSubState,
+    FlexStackerSubState,
     MagneticModuleId,
     HeaterShakerModuleId,
     TemperatureModuleId,
     ThermocyclerModuleId,
     AbsorbanceReaderId,
+    FlexStackerId,
     MagneticBlockSubState,
     MagneticBlockId,
     ModuleSubStateType,
@@ -301,6 +303,8 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             self._handle_absorbance_reader_commands(
                 state_update.absorbance_reader_state_update
             )
+        if state_update.flex_stacker_state_update != update_types.NO_CHANGE:
+            self._handle_flex_stacker_commands(state_update.flex_stacker_state_update)
 
     def _add_module_substate(
         self,
@@ -327,31 +331,24 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 model=actual_model,
             )
         elif ModuleModel.is_heater_shaker_module_model(actual_model):
-            if live_data is None:
-                labware_latch_status = HeaterShakerLatchStatus.UNKNOWN
-            elif live_data["labwareLatchStatus"] == "idle_closed":
-                labware_latch_status = HeaterShakerLatchStatus.CLOSED
-            else:
-                labware_latch_status = HeaterShakerLatchStatus.OPEN
-            self._state.substate_by_module_id[module_id] = HeaterShakerModuleSubState(
+            self._state.substate_by_module_id[
+                module_id
+            ] = HeaterShakerModuleSubState.from_live_data(
                 module_id=HeaterShakerModuleId(module_id),
-                labware_latch_status=labware_latch_status,
-                is_plate_shaking=(
-                    live_data is not None and live_data["targetSpeed"] is not None
-                ),
-                plate_target_temperature=live_data["targetTemp"] if live_data else None,  # type: ignore[arg-type]
+                data=live_data,
             )
         elif ModuleModel.is_temperature_module_model(actual_model):
-            self._state.substate_by_module_id[module_id] = TemperatureModuleSubState(
+            self._state.substate_by_module_id[
+                module_id
+            ] = TemperatureModuleSubState.from_live_data(
                 module_id=TemperatureModuleId(module_id),
-                plate_target_temperature=live_data["targetTemp"] if live_data else None,  # type: ignore[arg-type]
+                data=live_data,
             )
         elif ModuleModel.is_thermocycler_module_model(actual_model):
-            self._state.substate_by_module_id[module_id] = ThermocyclerModuleSubState(
-                module_id=ThermocyclerModuleId(module_id),
-                is_lid_open=live_data is not None and live_data["lid"] == "open",
-                target_block_temperature=live_data["targetTemp"] if live_data else None,  # type: ignore[arg-type]
-                target_lid_temperature=live_data["lidTarget"] if live_data else None,  # type: ignore[arg-type]
+            self._state.substate_by_module_id[
+                module_id
+            ] = ThermocyclerModuleSubState.from_live_data(
+                module_id=ThermocyclerModuleId(module_id), data=live_data
             )
             self._update_additional_slots_occupied_by_thermocycler(
                 module_id=module_id, slot_name=slot_name
@@ -370,6 +367,10 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 measure_mode=None,
                 configured_wavelengths=None,
                 reference_wavelength=None,
+            )
+        elif ModuleModel.is_flex_stacker(actual_model):
+            self._state.substate_by_module_id[module_id] = FlexStackerSubState(
+                module_id=FlexStackerId(module_id),
             )
 
     def _update_additional_slots_occupied_by_thermocycler(
@@ -612,6 +613,13 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             data=data,
         )
 
+    def _handle_flex_stacker_commands(
+        self, flex_stacker_state_update: FlexStackerStateUpdate
+    ) -> None:
+        """Handle Flex Stacker state updates."""
+        # TODO: Implement Flex Stacker state updates
+        pass
+
 
 class ModuleView:
     """Read-only view of computed module state."""
@@ -761,6 +769,20 @@ class ModuleView:
             module_id=module_id,
             expected_type=AbsorbanceReaderSubState,
             expected_name="Absorbance Reader",
+        )
+
+    def get_flex_stacker_substate(self, module_id: str) -> FlexStackerSubState:
+        """Return a `FlexStackerSubState` for the given Flex Stacker.
+
+        Raises:
+           ModuleNotLoadedError: If module_id has not been loaded.
+           WrongModuleTypeError: If module_id has been loaded,
+               but it's not a Flex Stacker.
+        """
+        return self._get_module_substate(
+            module_id=module_id,
+            expected_type=FlexStackerSubState,
+            expected_name="Flex Stacker",
         )
 
     def get_location(self, module_id: str) -> DeckSlotLocation:
@@ -1296,6 +1318,10 @@ class ModuleView:
             # only allowed in column 3
             assert deck_slot.value[-1] == "3"
             return f"absorbanceReaderV1{deck_slot.value}"
+        elif model == ModuleModel.FLEX_STACKER_MODULE_V1:
+            # only allowed in column 4
+            assert deck_slot.value[-1] == "4"
+            return f"flexStackerModuleV1{deck_slot.value}"
 
         raise ValueError(
             f"Unknown module {model.name} has no addressable areas to provide."

@@ -2,10 +2,10 @@
 from dataclasses import dataclass
 from typing import Optional, overload, Union, List
 
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType
 
 from opentrons.calibration_storage.helpers import uri_from_details
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.types import MountType
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.hardware_control.modules import (
@@ -15,6 +15,7 @@ from opentrons.hardware_control.modules import (
     TempDeck,
     Thermocycler,
     AbsorbanceReader,
+    FlexStacker,
 )
 from opentrons.hardware_control.nozzle_manager import NozzleMap
 from opentrons.protocol_engine.state.module_substates import (
@@ -23,6 +24,7 @@ from opentrons.protocol_engine.state.module_substates import (
     TemperatureModuleId,
     ThermocyclerModuleId,
     AbsorbanceReaderId,
+    FlexStackerId,
 )
 from ..errors import (
     FailedToLoadPipetteError,
@@ -591,6 +593,13 @@ class EquipmentHandler:
         self,
         module_id: AbsorbanceReaderId,
     ) -> Optional[AbsorbanceReader]:
+        ...
+
+    @overload
+    def get_module_hardware_api(
+        self,
+        module_id: FlexStackerId,
+    ) -> Optional[FlexStacker]:
         ...
 
     def get_module_hardware_api(self, module_id: str) -> Optional[AbstractModule]:

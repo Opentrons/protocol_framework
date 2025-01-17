@@ -1,6 +1,6 @@
 import { isEqual } from 'lodash'
 import { SECTIONS } from '../constants'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
+import { getLabwareDefinitionsFromCommands } from '@opentrons/components'
 import {
   getLabwareDefURI,
   getIsTiprack,

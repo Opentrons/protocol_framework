@@ -126,7 +126,7 @@ export function OffDeck(props: DeckSetupTabType): JSX.Element {
               justifyContent={JUSTIFY_CENTER}
               alignItems={ALIGN_CENTER}
               borderRadius={BORDERS.borderRadius8}
-              backgroundColor={COLORS.grey20}
+              backgroundColor={COLORS.white}
             >
               <Flex
                 padding={SPACING.spacing60}

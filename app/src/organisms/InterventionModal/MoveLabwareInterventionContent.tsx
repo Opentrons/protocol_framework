@@ -19,6 +19,8 @@ import {
   LegacyStyledText,
   TEXT_TRANSFORM_UPPERCASE,
   TYPOGRAPHY,
+  getLoadedLabware,
+  getLoadedModule,
 } from '@opentrons/components'
 import {
   OT2_ROBOT_TYPE,
@@ -38,8 +40,6 @@ import {
   getModuleModelFromRunData,
 } from './utils'
 import { Divider } from '/app/atoms/structure'
-import { getLoadedModule } from '/app/local-resources/modules'
-import { getLoadedLabware } from '/app/local-resources/labware'
 import { useNotifyDeckConfigurationQuery } from '/app/resources/deck_configuration'
 
 import type {

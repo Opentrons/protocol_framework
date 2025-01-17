@@ -483,6 +483,7 @@ class ModuleModel(str, Enum):
     HEATER_SHAKER_MODULE_V1 = "heaterShakerModuleV1"
     MAGNETIC_BLOCK_V1 = "magneticBlockV1"
     ABSORBANCE_READER_V1 = "absorbanceReaderV1"
+    FLEX_STACKER_MODULE_V1 = "flexStackerModuleV1"
 
     def as_type(self) -> ModuleType:
         """Get the ModuleType of this model."""
@@ -498,6 +499,8 @@ class ModuleModel(str, Enum):
             return ModuleType.MAGNETIC_BLOCK
         elif ModuleModel.is_absorbance_reader(self):
             return ModuleType.ABSORBANCE_READER
+        elif ModuleModel.is_flex_stacker(self):
+            return ModuleType.FLEX_STACKER
 
         assert False, f"Invalid ModuleModel {self}"
 
@@ -541,6 +544,11 @@ class ModuleModel(str, Enum):
         """Whether a given model is an Absorbance Plate Reader."""
         return model == cls.ABSORBANCE_READER_V1
 
+    @classmethod
+    def is_flex_stacker(cls, model: ModuleModel) -> TypeGuard[FlexStackerModuleModel]:
+        """Whether a given model is a Flex Stacker.."""
+        return model == cls.FLEX_STACKER_MODULE_V1
+
 
 TemperatureModuleModel = Literal[
     ModuleModel.TEMPERATURE_MODULE_V1, ModuleModel.TEMPERATURE_MODULE_V2
@@ -554,6 +562,7 @@ ThermocyclerModuleModel = Literal[
 HeaterShakerModuleModel = Literal[ModuleModel.HEATER_SHAKER_MODULE_V1]
 MagneticBlockModel = Literal[ModuleModel.MAGNETIC_BLOCK_V1]
 AbsorbanceReaderModel = Literal[ModuleModel.ABSORBANCE_READER_V1]
+FlexStackerModuleModel = Literal[ModuleModel.FLEX_STACKER_MODULE_V1]
 
 
 class ModuleDimensions(BaseModel):

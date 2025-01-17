@@ -1,6 +1,8 @@
-from typing import Protocol
+from typing import List, Protocol
 
 from .types import (
+    LimitSwitchStatus,
+    MoveResult,
     StackerAxis,
     PlatformStatus,
     Direction,
@@ -10,7 +12,7 @@ from .types import (
 )
 
 
-class AbstractStackerDriver(Protocol):
+class AbstractFlexStackerDriver(Protocol):
     """Protocol for the Stacker driver."""
 
     async def connect(self) -> None:
@@ -25,10 +27,6 @@ class AbstractStackerDriver(Protocol):
         """Check connection to stacker."""
         ...
 
-    async def update_firmware(self, firmware_file_path: str) -> None:
-        """Updates the firmware on the device."""
-        ...
-
     async def get_device_info(self) -> StackerInfo:
         """Get Device Info."""
         ...
@@ -37,8 +35,24 @@ class AbstractStackerDriver(Protocol):
         """Set Serial Number."""
         ...
 
+    async def enable_motors(self, axis: List[StackerAxis]) -> bool:
+        """Enables the axis motor if present, disables it otherwise."""
+        ...
+
     async def stop_motors(self) -> bool:
         """Stop all motor movement."""
+        ...
+
+    async def set_run_current(self, axis: StackerAxis, current: float) -> bool:
+        """Set axis peak run current in amps."""
+        ...
+
+    async def set_ihold_current(self, axis: StackerAxis, current: float) -> bool:
+        """Set axis hold current in amps."""
+        ...
+
+    async def get_motion_params(self, axis: StackerAxis) -> MoveParams:
+        """Get the motion parameters used by the given axis motor."""
         ...
 
     async def get_limit_switch(self, axis: StackerAxis, direction: Direction) -> bool:
@@ -46,6 +60,10 @@ class AbstractStackerDriver(Protocol):
 
         :return: True if limit switch is triggered, False otherwise
         """
+        ...
+
+    async def get_limit_switches_status(self) -> LimitSwitchStatus:
+        """Get limit switch statuses for all axes."""
         ...
 
     async def get_platform_sensor(self, direction: Direction) -> bool:
@@ -68,13 +86,13 @@ class AbstractStackerDriver(Protocol):
 
     async def move_in_mm(
         self, axis: StackerAxis, distance: float, params: MoveParams | None = None
-    ) -> bool:
-        """Move axis."""
+    ) -> MoveResult:
+        """Move axis by the given distance in mm."""
         ...
 
     async def move_to_limit_switch(
         self, axis: StackerAxis, direction: Direction, params: MoveParams | None = None
-    ) -> bool:
+    ) -> MoveResult:
         """Move until limit switch is triggered."""
         ...
 
@@ -86,4 +104,8 @@ class AbstractStackerDriver(Protocol):
         self, power: float, color: LEDColor | None = None, external: bool | None = None
     ) -> bool:
         """Set LED color of status bar."""
+        ...
+
+    async def enter_programming_mode(self) -> None:
+        """Reboot into programming mode"""
         ...
