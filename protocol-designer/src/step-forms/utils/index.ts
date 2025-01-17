@@ -370,6 +370,7 @@ export const getUnoccupiedSlotForTrash = (
       const newLocation = command.params.newLocation
       if (
         newLocation !== 'offDeck' &&
+        newLocation !== 'systemLocation' &&
         newLocation !== null &&
         'slotName' in newLocation
       ) {
