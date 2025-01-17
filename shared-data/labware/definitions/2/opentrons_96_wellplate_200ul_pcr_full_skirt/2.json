@@ -31,8 +31,6 @@
     "y": 0,
     "z": 0
   },
-  "stackLimit": 4,
-  "compatibleParentLabware": ["opentrons_96_wellplate_200ul_pcr_full_skirt"],
   "stackingOffsetWithLabware": {
     "opentrons_96_pcr_adapter": {
       "x": 0,
@@ -43,11 +41,6 @@
       "x": 0,
       "y": 0,
       "z": 11.91
-    },
-    "opentrons_96_wellplate_200ul_pcr_full_skirt": {
-      "x": 0,
-      "y": 0,
-      "z": 3.0
     }
   },
   "stackingOffsetWithModule": {
