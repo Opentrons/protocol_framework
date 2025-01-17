@@ -18,7 +18,7 @@ export const absorbanceReaderInitialize: CommandCreator<AbsorbanceReaderInitiali
         key: uuid(),
         params: {
           moduleId,
-          measureMode: mode ?? 'single',
+          measureMode: mode,
           sampleWavelengths: wavelengths,
           ...(referenceWavelength != null ? { referenceWavelength } : {}),
         },
