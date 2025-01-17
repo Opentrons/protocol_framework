@@ -20,6 +20,7 @@ const updatePatchOnAbsorbanceReaderFormType = (
       ...getDefaultFields(
         'wavelengths',
         'referenceWavelength',
+        'referenceWavelengthActive',
         'lidOpen',
         'mode',
         'fileName'

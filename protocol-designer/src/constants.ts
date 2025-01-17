@@ -175,6 +175,8 @@ export const STAGING_AREA_CUTOUTS_ORDERED: CutoutId[] = [
   'cutoutD3',
   'cutoutA3',
 ]
+
+// Values for absorbance reader
 export const ABSORBANCE_READER_INITIALIZE_MODE_SINGLE = 'single'
 export const ABSORBANCE_READER_INITIALIZE_MODE_MULTI = 'multi'
 export const ABSORBANCE_READER_INITIALIZE: 'absorbanceReaderInitialize' =
@@ -183,3 +185,5 @@ export const ABSORBANCE_READER_READ: 'absorbanceReaderRead' =
   'absorbanceReaderRead'
 export const ABSORBANCE_READER_LID: 'absorbanceReaderLid' =
   'absorbanceReaderLid'
+export const ABSORBANCE_READER_MIN_WAVELENGTH_NM = 350
+export const ABSORBANCE_READER_MAX_WAVELENGTH_NM = 1000

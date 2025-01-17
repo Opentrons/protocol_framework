@@ -349,7 +349,7 @@ export const capitalizeFirstLetter = (stepName: string): string => {
   }
 }
 
-type ErrorMappedToField = Record<string, FormError>
+export type ErrorMappedToField = Record<string, FormError>
 
 export const getFormErrorsMappedToField = (
   formErrors: StepFormErrors
