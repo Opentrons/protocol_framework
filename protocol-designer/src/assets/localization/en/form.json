@@ -33,7 +33,7 @@
     "absorbanceReader": {
       "add_wavelength": {
         "disabled": "Maximum allowed wavelengths reached",
-        "label": "Add wavelength"
+        "label": "Add a wavelength"
       },
       "color_parentheses": "({{color}})",
       "current_initialization_settings": "Current initialization settings",
