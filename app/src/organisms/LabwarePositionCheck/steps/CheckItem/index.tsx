@@ -1,11 +1,15 @@
 import { Trans, useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { DIRECTION_COLUMN, Flex, LegacyStyledText } from '@opentrons/components'
+import {
+  DIRECTION_COLUMN,
+  Flex,
+  LegacyStyledText,
+  getLabwareDisplayLocation,
+} from '@opentrons/components'
 
 import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
-import { getLabwareDisplayLocation } from '/app/local-resources/labware'
 import { UnorderedList } from '/app/molecules/UnorderedList'
 import {
   setFinalPosition,
@@ -21,11 +25,11 @@ import {
 } from '/app/redux/protocol-runs'
 import { getIsOnDevice } from '/app/redux/config'
 
+import type { DisplayLocationParams } from '@opentrons/components'
 import type {
   CheckPositionsStep,
   LPCStepProps,
 } from '/app/organisms/LabwarePositionCheck/types'
-import type { DisplayLocationParams } from '/app/local-resources/labware'
 import type { State } from '/app/redux/types'
 import type { LPCWizardState } from '/app/redux/protocol-runs'
 

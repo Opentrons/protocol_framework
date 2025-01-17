@@ -1,6 +1,7 @@
 import { useDispatch } from 'react-redux'
 
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
+import { getLabwareDefinitionsFromCommands } from '@opentrons/components'
+
 import { useNotifyDeckConfigurationQuery } from '/app/resources/deck_configuration'
 import { startLPC } from '/app/redux/protocol-runs'
 import { getLPCSteps } from './utils'

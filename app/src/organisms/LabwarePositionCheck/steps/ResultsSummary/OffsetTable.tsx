@@ -12,10 +12,10 @@ import {
   SPACING,
   LegacyStyledText,
   TYPOGRAPHY,
+  getLabwareDisplayLocation,
 } from '@opentrons/components'
 
 import { selectLwDisplayName } from '/app/redux/protocol-runs'
-import { getLabwareDisplayLocation } from '/app/local-resources/labware'
 
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type { LabwareOffsetCreateData } from '@opentrons/api-client'
