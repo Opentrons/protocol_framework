@@ -1,12 +1,9 @@
 """Tip pick up test."""
-from opentrons.protocol_api import (
-    ProtocolContext,
-    ParameterContext,
-)
+from opentrons.protocol_api import ProtocolContext, ParameterContext, SINGLE
 from abr_testing.protocols import helpers
 
 metadata = {
-    "protocolName": "Pipette Pick up test.",
+    "protocolName": "Partial Tip Pick up test.",
     "author": "Rhyann Clarke, opentrons",
     "description": "Protocol to test pick up",
 }
@@ -25,9 +22,15 @@ def add_parameters(parameters: ParameterContext) -> None:
     parameters.add_int(
         variable_name="reps",
         display_name="Number of Repetitions",
-        default=12,
+        default=36,
         minimum=1,
-        maximum=120,
+        maximum=288,
+    )
+    parameters.add_bool(
+        variable_name="single_tip_pick_up",
+        display_name="Display Name",
+        description="Turn on to activate single tip pick up.",
+        default=False,
     )
 
 
@@ -37,17 +40,19 @@ def run(protocol: ProtocolContext) -> None:
     pipette_right = protocol.params.right_mount  # type: ignore[attr-defined]
     mount_to_test = protocol.params.pipette_mount  # type: ignore[attr-defined]
     tip_type = protocol.params.tip_size  # type: ignore[attr-defined]
+    single_tip_pick_up = protocol.params.single_tip_pick_up  # type: ignore [attr-defined]
     reps = protocol.params.reps  # type: ignore[attr-defined]
-    tip_rack = protocol.load_labware(tip_type, "D2")
+    protocol.load_trash_bin("A3")
+    tip_rack_2 = protocol.load_labware(tip_type, "D2")
+    tip_rack_3 = protocol.load_labware(tip_type, "D3")
+    tip_rack_1 = protocol.load_labware(tip_type, "D1")
+    rack_list = [tip_rack_1, tip_rack_2, tip_rack_3]
     if mount_to_test == "left":
-        pipette = protocol.load_instrument(pipette_left, "left", tip_racks=[tip_rack])
+        pipette = protocol.load_instrument(pipette_left, "left", tip_racks=rack_list)
     else:
-        pipette = protocol.load_instrument(pipette_right, "right", tip_racks=[tip_rack])
-    tip_count = 0
+        pipette = protocol.load_instrument(pipette_right, "right", tip_racks=rack_list)
+    if single_tip_pick_up:
+        pipette.configure_nozzle_layout(style=SINGLE, start="H1", tip_racks=rack_list)
     for i in range(reps):
         pipette.pick_up_tip()
-        pipette.return_tip()
-        tip_count += 1
-        if tip_count > 12:
-            pipette.reset_tipracks()
-            tip_count = 0
+        pipette.drop_tip()

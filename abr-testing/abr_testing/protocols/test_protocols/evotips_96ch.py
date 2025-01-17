@@ -50,10 +50,10 @@ def run(protocol: ProtocolContext) -> None:
 
     # Load Labware
     stacked_deepwell_plate = protocol.load_labware(
-        "custom_nest_96_wellplate_2ml_deep", "C1", adapter="evo_flex_96_tiprack_adapter"
+        "custom_nest_96_wellplate_2ml_deep", "A3", adapter="evo_flex_96_tiprack_adapter"
     )
     stacked_deepwell_plate_2 = protocol.load_labware(
-        "custom_nest_96_wellplate_2ml_deep", "C4", adapter="evo_flex_96_tiprack_adapter"
+        "custom_nest_96_wellplate_2ml_deep", "C4"
     )
     evotip_rack = stacked_deepwell_plate.load_labware(
         "opentrons_evo_96_wellplate_300ul"
@@ -70,11 +70,9 @@ def run(protocol: ProtocolContext) -> None:
 
     soak_plate = protocol.load_labware("nest_1_reservoir_195ml", "B2", "Propanol")
 
-    protocol.load_trash_bin("D3")
-
     tips_200 = protocol.load_labware(
         "opentrons_flex_96_tiprack_200ul",
-        "B1",
+        "A2",
         "200uL tips",
         adapter="opentrons_flex_96_tiprack_adapter",
     )
@@ -146,6 +144,7 @@ def run(protocol: ProtocolContext) -> None:
     p1k_96.move_to(tips_200.wells()[0].top(z=40))
 
     p1k_96.return_tip()
+    # TODO: have gripper pick up then pause
     if dry_run:
         protocol.pause("Check layers in evo tips")
 
@@ -240,11 +239,17 @@ def run(protocol: ProtocolContext) -> None:
         # Probe liquid ejected
         if not dry_run:
             # TODO: figure out which labware it is pushing liquid out of
+            p1k_96.tip_racks = tips_50
+            p1k_96.reset_tipracks()
             p1k_96.pick_up_tip()
             helpers.find_liquid_height(p1k_96, stacked_deepwell_plate["A1"])
+            p1k_96.return_tip()
 
     move_evo_tips_and_probe()
+    # move evotips back to original plate
+    protocol.move_labware(evotip_rack, stacked_deepwell_plate, use_gripper=True)
     # Pick up evo sep tips
+
     pick_up_evo_tips()
     push_out_liquid_and_drop()
     move_evo_tips_and_probe()
