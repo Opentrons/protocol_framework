@@ -1134,15 +1134,15 @@ class FlexStackerContext(ModuleContext):
         .. versionadded:: 2.23
             The *label,* *namespace,* and *version* parameters.
         """
-        load_name = validation.ensure_lowercase_name(load_name)
-        for _ in range(quantity):
-            self.load_labware(
-                name=load_name,
-                label=label,
-                namespace=namespace,
-                version=version,
-                lid=lid,
-            )
+        self._protocol_core.load_labware_to_flex_stacker_hopper(
+            module_core=self._core,
+            load_name=load_name,
+            quantity=quantity,
+            label=label,
+            namespace=namespace,
+            version=version,
+            lid=lid,
+        )
 
     @property
     @requires_version(2, 23)

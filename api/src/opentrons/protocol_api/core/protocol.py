@@ -110,6 +110,20 @@ class AbstractProtocol(
     ) -> LabwareCoreType:
         """Load an individual lid labware using its identifying parameters. Must be loaded on a labware."""
         ...
+    
+    @abstractmethod
+    def load_labware_to_flex_stacker_hopper(
+        self,
+        module_core: ModuleCoreType,
+        load_name: str,
+        quantity: int,
+        label: Optional[str] = None,
+        namespace: Optional[str] = None,
+        version: Optional[int] = None,
+        lid: Optional[str] = None,
+    ) -> None:
+        """Load one or more labware with or without a lid to the flex stacker hopper."""
+        ...
 
     @abstractmethod
     def move_labware(
