@@ -6,6 +6,10 @@ import textwrap
 from typing import Annotated, Literal
 
 import fastapi
+from pydantic import Json
+from pydantic.json_schema import SkipJsonSchema
+from server_utils.fastapi_utils.light_router import LightRouter
+
 from opentrons.protocol_engine import LabwareOffset, LabwareOffsetCreate, ModuleModel
 from opentrons.types import DeckSlotName
 
@@ -20,16 +24,21 @@ from robot_server.service.json_api.response import (
     SimpleMultiBody,
 )
 
-from .store import LabwareOffsetNotFoundError, LabwareOffsetStore
+from .store import (
+    DO_NOT_FILTER,
+    DoNotFilterType,
+    LabwareOffsetNotFoundError,
+    LabwareOffsetStore,
+)
 from .fastapi_dependencies import get_labware_offset_store
 
 
-router = fastapi.APIRouter(prefix="/labwareOffsets")
+router = LightRouter()
 
 
 @PydanticResponse.wrap_route(
     router.post,
-    path="",
+    path="/labwareOffsets",
     summary="Store a labware offset",
     description=textwrap.dedent(
         """\
@@ -47,7 +56,7 @@ async def post_labware_offset(  # noqa: D103
     new_offset_created_at: Annotated[datetime, fastapi.Depends(get_current_time)],
     request_body: Annotated[RequestModel[LabwareOffsetCreate], fastapi.Body()],
 ) -> PydanticResponse[SimpleBody[LabwareOffset]]:
-    new_offset = LabwareOffset.construct(
+    new_offset = LabwareOffset.model_construct(
         id=new_offset_id,
         createdAt=new_offset_created_at,
         definitionUri=request_body.data.definitionUri,
@@ -56,14 +65,14 @@ async def post_labware_offset(  # noqa: D103
     )
     store.add(new_offset)
     return await PydanticResponse.create(
-        content=SimpleBody.construct(data=new_offset),
+        content=SimpleBody.model_construct(data=new_offset),
         status_code=201,
     )
 
 
 @PydanticResponse.wrap_route(
     router.get,
-    path="",
+    path="/labwareOffsets",
     summary="Search for labware offsets",
     description=(
         "Get a filtered list of all the labware offsets currently stored on the robot."
@@ -74,11 +83,11 @@ async def post_labware_offset(  # noqa: D103
 async def get_labware_offsets(  # noqa: D103
     store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)],
     id: Annotated[
-        str | None,
+        Json[str] | SkipJsonSchema[DoNotFilterType],
         fastapi.Query(description="Filter for exact matches on the `id` field."),
-    ] = None,
+    ] = DO_NOT_FILTER,
     definition_uri: Annotated[
-        str | None,
+        Json[str] | SkipJsonSchema[DoNotFilterType],
         fastapi.Query(
             alias="definitionUri",
             description=(
@@ -86,23 +95,23 @@ async def get_labware_offsets(  # noqa: D103
                 " (Not to be confused with `location.definitionUri`.)"
             ),
         ),
-    ] = None,
+    ] = DO_NOT_FILTER,
     location_slot_name: Annotated[
-        DeckSlotName | None,
+        Json[DeckSlotName] | SkipJsonSchema[DoNotFilterType],
         fastapi.Query(
             alias="locationSlotName",
             description="Filter for exact matches on the `location.slotName` field.",
         ),
-    ] = None,
+    ] = DO_NOT_FILTER,
     location_module_model: Annotated[
-        ModuleModel | None,
+        Json[ModuleModel | None] | SkipJsonSchema[DoNotFilterType],
         fastapi.Query(
             alias="locationModuleModel",
             description="Filter for exact matches on the `location.moduleModel` field.",
         ),
-    ] = None,
+    ] = DO_NOT_FILTER,
     location_definition_uri: Annotated[
-        str | None,
+        Json[str | None] | SkipJsonSchema[DoNotFilterType],
         fastapi.Query(
             alias="locationDefinitionUri",
             description=(
@@ -110,9 +119,9 @@ async def get_labware_offsets(  # noqa: D103
                 " (Not to be confused with just `definitionUri`.)"
             ),
         ),
-    ] = None,
+    ] = DO_NOT_FILTER,
     cursor: Annotated[
-        int | None,
+        int | SkipJsonSchema[None],
         fastapi.Query(
             description=(
                 "The first index to return out of the overall filtered result list."
@@ -142,14 +151,14 @@ async def get_labware_offsets(  # noqa: D103
         location_module_model_filter=location_module_model,
     )
 
-    meta = MultiBodyMeta.construct(
+    meta = MultiBodyMeta.model_construct(
         # todo(mm, 2024-12-06): Update this when pagination is supported.
         cursor=0,
         totalLength=len(result_data),
     )
 
     return await PydanticResponse.create(
-        SimpleMultiBody[LabwareOffset].construct(
+        SimpleMultiBody[LabwareOffset].model_construct(
             data=result_data,
             meta=meta,
         )
@@ -158,7 +167,7 @@ async def get_labware_offsets(  # noqa: D103
 
 @PydanticResponse.wrap_route(
     router.delete,
-    path="/{id}",
+    path="/labwareOffsets/{id}",
     summary="Delete a single labware offset",
     description="Delete a single labware offset. The deleted offset is returned.",
 )
@@ -174,16 +183,18 @@ async def delete_labware_offset(  # noqa: D103
     except LabwareOffsetNotFoundError as e:
         raise LabwareOffsetNotFound.build(bad_offset_id=e.bad_offset_id).as_error(404)
     else:
-        return await PydanticResponse.create(SimpleBody.construct(data=deleted_offset))
+        return await PydanticResponse.create(
+            SimpleBody.model_construct(data=deleted_offset)
+        )
 
 
 @PydanticResponse.wrap_route(
     router.delete,
-    path="",
+    path="/labwareOffsets",
     summary="Delete all labware offsets",
 )
 async def delete_all_labware_offsets(  # noqa: D103
     store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)]
 ) -> PydanticResponse[SimpleEmptyBody]:
     store.delete_all()
-    return await PydanticResponse.create(SimpleEmptyBody.construct())
+    return await PydanticResponse.create(SimpleEmptyBody.model_construct())

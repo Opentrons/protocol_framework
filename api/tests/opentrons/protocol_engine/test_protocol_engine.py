@@ -1,4 +1,5 @@
 """Tests for the ProtocolEngine class."""
+
 import inspect
 from datetime import datetime
 from typing import Any
@@ -8,6 +9,7 @@ import pytest
 from decoy import Decoy
 
 from opentrons_shared_data.robot.types import RobotType
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 from opentrons.protocol_engine.actions.actions import SetErrorRecoveryPolicyAction
 from opentrons.protocol_engine.state.update_types import StateUpdate
@@ -15,7 +17,6 @@ from opentrons.types import DeckSlotName
 from opentrons.hardware_control import HardwareControlAPI, OT2HardwareControlAPI
 from opentrons.hardware_control.modules import MagDeck, TempDeck
 from opentrons.hardware_control.types import PauseType as HardwarePauseType
-from opentrons.protocols.models import LabwareDefinition
 
 from opentrons.protocol_engine import ProtocolEngine, commands, slot_standardization
 from opentrons.protocol_engine.errors.exceptions import (
@@ -803,9 +804,9 @@ async def test_finish_with_estop_error_will_not_drop_tip_and_home(
 ) -> None:
     """It should be able to tell the engine it's finished because of an error and will not drop tip and home."""
     error = ProtocolCommandFailedError(
-        original_error=ErrorOccurrence.construct(  # type: ignore[call-arg]
+        original_error=ErrorOccurrence.model_construct(  # type: ignore[call-arg]
             wrappedErrors=[
-                ErrorOccurrence.construct(errorCode="3008")  # type: ignore[call-arg]
+                ErrorOccurrence.model_construct(errorCode="3008")  # type: ignore[call-arg]
             ]
         )
     )

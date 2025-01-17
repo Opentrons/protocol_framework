@@ -1,11 +1,15 @@
 import { I18nextProvider } from 'react-i18next'
+import { Provider } from 'react-redux'
+
 import { i18n } from '../../assets/localization'
+import { configureStore } from '../../configureStore'
 import { MaterialsListModal as MaterialsListModalComponent } from '.'
 
 import type { Meta, StoryObj } from '@storybook/react'
 import type { LabwareOnDeck, ModuleOnDeck } from '../../step-forms'
 import type { FixtureInList } from '.'
 
+const mockStore = configureStore()
 const mockHardware = [
   {
     id: 'mockHardware',
@@ -49,9 +53,11 @@ const meta: Meta<typeof MaterialsListModalComponent> = {
   component: MaterialsListModalComponent,
   decorators: [
     Story => (
-      <I18nextProvider i18n={i18n}>
-        <Story />
-      </I18nextProvider>
+      <Provider store={mockStore}>
+        <I18nextProvider i18n={i18n}>
+          <Story />
+        </I18nextProvider>
+      </Provider>
     ),
   ],
 }

@@ -1,10 +1,11 @@
 import { createSelector } from 'reselect'
 import mapValues from 'lodash/mapValues'
 import {
+  ABSORBANCE_READER_TYPE,
   getLabwareDisplayName,
+  HEATERSHAKER_MODULE_TYPE,
   MAGNETIC_MODULE_TYPE,
   TEMPERATURE_MODULE_TYPE,
-  HEATERSHAKER_MODULE_TYPE,
 } from '@opentrons/shared-data'
 import { getInitialDeckSetup } from '../../step-forms/selectors'
 import { getLabwareNicknamesById } from '../labware/selectors'
@@ -15,7 +16,7 @@ import {
   getMagnetLabwareEngageHeight as getMagnetLabwareEngageHeightUtil,
   getModulesOnDeckByType,
 } from './utils'
-import type { Options } from '@opentrons/components'
+import type { DropdownOption } from '@opentrons/components'
 import type { Selector } from '../../types'
 import type { LabwareNamesByModuleId } from '../../steplist/types'
 
@@ -35,7 +36,9 @@ export const getLabwareNamesByModuleId: Selector<LabwareNamesByModuleId> = creat
 )
 
 /** Returns dropdown option for labware placed on magnetic module */
-export const getMagneticLabwareOptions: Selector<Options> = createSelector(
+export const getMagneticLabwareOptions: Selector<
+  DropdownOption[]
+> = createSelector(
   getInitialDeckSetup,
   getLabwareNicknamesById,
   (initialDeckSetup, nicknamesById) => {
@@ -48,7 +51,9 @@ export const getMagneticLabwareOptions: Selector<Options> = createSelector(
 )
 
 /** Returns dropdown option for labware placed on temperature module */
-export const getTemperatureLabwareOptions: Selector<Options> = createSelector(
+export const getTemperatureLabwareOptions: Selector<
+  DropdownOption[]
+> = createSelector(
   getInitialDeckSetup,
   getLabwareNicknamesById,
   (initialDeckSetup, nicknamesById) => {
@@ -62,7 +67,9 @@ export const getTemperatureLabwareOptions: Selector<Options> = createSelector(
 )
 
 /** Returns dropdown option for labware placed on heater shaker module */
-export const getHeaterShakerLabwareOptions: Selector<Options> = createSelector(
+export const getHeaterShakerLabwareOptions: Selector<
+  DropdownOption[]
+> = createSelector(
   getInitialDeckSetup,
   getLabwareNicknamesById,
   (initialDeckSetup, nicknamesById) => {
@@ -72,6 +79,22 @@ export const getHeaterShakerLabwareOptions: Selector<Options> = createSelector(
       HEATERSHAKER_MODULE_TYPE
     )
     return heaterShakerModuleOptions
+  }
+)
+
+/** Returns dropdown option for labware placed on absorbance reader module */
+export const getAbsorbanceReaderLabwareOptions: Selector<
+  DropdownOption[]
+> = createSelector(
+  getInitialDeckSetup,
+  getLabwareNicknamesById,
+  (initialDeckSetup, nicknamesById) => {
+    const absorbanceReaderModuleOptions = getModuleLabwareOptions(
+      initialDeckSetup,
+      nicknamesById,
+      ABSORBANCE_READER_TYPE
+    )
+    return absorbanceReaderModuleOptions
   }
 )
 

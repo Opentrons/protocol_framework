@@ -79,6 +79,18 @@ class SyncClient:
 
     @overload
     def execute_command_without_recovery(
+        self, params: commands.LoadLidStackParams
+    ) -> commands.LoadLidStackResult:
+        pass
+
+    @overload
+    def execute_command_without_recovery(
+        self, params: commands.LoadLidParams
+    ) -> commands.LoadLidResult:
+        pass
+
+    @overload
+    def execute_command_without_recovery(
         self, params: commands.LiquidProbeParams
     ) -> commands.LiquidProbeResult:
         pass
@@ -93,6 +105,12 @@ class SyncClient:
     def execute_command_without_recovery(
         self, params: commands.LoadLiquidClassParams
     ) -> commands.LoadLiquidClassResult:
+        pass
+
+    @overload
+    def execute_command_without_recovery(
+        self, params: commands.GetNextTipParams
+    ) -> commands.GetNextTipResult:
         pass
 
     def execute_command_without_recovery(

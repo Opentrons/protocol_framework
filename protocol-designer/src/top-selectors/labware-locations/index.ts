@@ -11,6 +11,7 @@ import {
   isAddressableAreaStandardSlot,
   MOVABLE_TRASH_ADDRESSABLE_AREAS,
   FLEX_MODULE_ADDRESSABLE_AREAS,
+  FLEX_STACKER_ADDRESSABLE_AREAS,
 } from '@opentrons/shared-data'
 import { COLUMN_4_SLOTS, getHasWasteChute } from '@opentrons/step-generation'
 import {
@@ -166,8 +167,8 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
               {
                 name:
                   modIdWithAdapter != null
-                    ? `${adapterDisplayName} on top of ${moduleUnderAdapter} in slot ${moduleSlotInfo}`
-                    : `${adapterDisplayName} on slot ${adapterSlotInfo}`,
+                    ? `${moduleSlotInfo} on ${moduleUnderAdapter} with ${adapterDisplayName}`
+                    : `${adapterSlotInfo} with ${adapterDisplayName}`,
                 value: labwareId,
               },
             ]
@@ -186,13 +187,9 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
           : [
               ...acc,
               {
-                name: `${getModuleDisplayName(
+                name: `${modOnDeck.slot} on ${getModuleDisplayName(
                   moduleEntities[modId].model
-                )} in slot ${
-                  modOnDeck.slot === 'span7_8_10_11'
-                    ? '7, 8, 10, 11'
-                    : modOnDeck.slot
-                }`,
+                )}`,
                 value: modId,
               },
             ]
@@ -230,11 +227,12 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
           !isTrashSlot &&
           !WASTE_CHUTE_ADDRESSABLE_AREAS.includes(slotId) &&
           !notSelectedStagingAreaAddressableAreas.includes(slotId) &&
-          !FLEX_MODULE_ADDRESSABLE_AREAS.includes(slotId)
+          !FLEX_MODULE_ADDRESSABLE_AREAS.includes(slotId) &&
+          !FLEX_STACKER_ADDRESSABLE_AREAS.includes(slotId)
         )
       })
       .map(slotId => ({ name: slotId, value: slotId }))
-    const offDeck = { name: 'Off-Deck', value: 'offDeck' }
+    const offDeck = { name: 'Off-deck', value: 'offDeck' }
     const wasteChuteSlot = {
       name: 'Waste Chute in D3',
       value: WASTE_CHUTE_CUTOUT,

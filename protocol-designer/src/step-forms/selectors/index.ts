@@ -29,6 +29,7 @@ import { getProfileItemsHaveErrors } from '../utils/getProfileItemsHaveErrors'
 import * as featureFlagSelectors from '../../feature-flags/selectors'
 import { denormalizePipetteEntities, getHydratedForm } from '../utils'
 import { selectors as labwareDefSelectors } from '../../labware-defs'
+import type { ComponentProps } from 'react'
 import type { Selector } from 'reselect'
 import type {
   AdditionalEquipmentEntities,
@@ -209,6 +210,8 @@ const MAGNETIC_BLOCK_INITIAL_STATE: MagneticBlockState = {
 }
 const ABSORBANCE_READER_INITIAL_STATE: AbsorbanceReaderState = {
   type: ABSORBANCE_READER_TYPE,
+  lidOpen: null,
+  initialization: null,
 }
 
 const _getInitialDeckSetup = (
@@ -257,6 +260,7 @@ const _getInitialDeckSetup = (
     ),
     modules: mapValues<Record<DeckSlot, string>, ModuleOnDeck>(
       moduleLocations as Record<DeckSlot, string>,
+      // @ts-expect-error Flex stacker not yet supported in PD
       (slot: DeckSlot, moduleId: string): ModuleOnDeck => {
         const moduleEntity = moduleEntities[moduleId]
 
@@ -399,7 +403,7 @@ export const getEquippedPipetteOptions: Selector<
   )
 })
 // Formats pipette data specifically for file page InstrumentGroup component
-type PipettesForInstrumentGroup = React.ComponentProps<typeof InstrumentGroup>
+type PipettesForInstrumentGroup = ComponentProps<typeof InstrumentGroup>
 export const getPipettesForInstrumentGroup: Selector<
   BaseState,
   PipettesForInstrumentGroup

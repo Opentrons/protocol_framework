@@ -1,4 +1,5 @@
 import {
+  ABSORBANCE_READER_TYPE,
   HEATERSHAKER_MODULE_TYPE,
   THERMOCYCLER_MODULE_TYPE,
 } from '@opentrons/shared-data'
@@ -47,6 +48,7 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
 
   const newLocationInWasteChute =
     newLocation !== 'offDeck' &&
+    newLocation !== 'systemLocation' &&
     'addressableAreaName' in newLocation &&
     newLocation.addressableAreaName === 'gripperWasteChute'
 
@@ -55,7 +57,9 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
   )
 
   const newLocationSlot =
-    newLocation !== 'offDeck' && 'slotName' in newLocation
+    newLocation !== 'offDeck' &&
+    newLocation !== 'systemLocation' &&
+    'slotName' in newLocation
       ? newLocation.slotName
       : null
 
@@ -125,15 +129,24 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
       } else if (initialModuleState.targetSpeed !== null) {
         errors.push(errorCreators.heaterShakerIsShaking())
       }
+    } else if (
+      initialModuleState.type === ABSORBANCE_READER_TYPE &&
+      initialModuleState.lidOpen !== true
+    ) {
+      errors.push(errorCreators.absorbanceReaderLidClosed())
     }
   }
   const destModuleId =
-    newLocation !== 'offDeck' && 'moduleId' in newLocation
+    newLocation !== 'offDeck' &&
+    newLocation !== 'systemLocation' &&
+    'moduleId' in newLocation
       ? newLocation.moduleId
       : null
 
   const destAdapterId =
-    newLocation !== 'offDeck' && 'labwareId' in newLocation
+    newLocation !== 'offDeck' &&
+    newLocation !== 'systemLocation' &&
+    'labwareId' in newLocation
       ? newLocation.labwareId
       : null
 
@@ -172,6 +185,10 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
       }
       if (destModuleState.targetSpeed !== null) {
         errors.push(errorCreators.heaterShakerIsShaking())
+      }
+    } else if (destModuleState.type === ABSORBANCE_READER_TYPE) {
+      if (destModuleState.lidOpen !== true) {
+        errors.push(errorCreators.absorbanceReaderLidClosed())
       }
     }
   }

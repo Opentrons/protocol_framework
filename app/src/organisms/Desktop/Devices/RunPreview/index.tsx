@@ -8,6 +8,7 @@ import {
   ALIGN_CENTER,
   BORDERS,
   COLORS,
+  CommandText,
   DIRECTION_COLUMN,
   DISPLAY_FLEX,
   DISPLAY_NONE,
@@ -18,6 +19,7 @@ import {
   POSITION_FIXED,
   PrimaryButton,
   SPACING,
+  getLabwareDefinitionsFromCommands,
   TYPOGRAPHY,
 } from '@opentrons/components'
 
@@ -28,14 +30,15 @@ import {
   useMostRecentCompletedAnalysis,
   useLastRunCommand,
 } from '/app/resources/runs'
-import { CommandText, CommandIcon } from '/app/molecules/Command'
+import { CommandIcon } from '/app/molecules/Command'
 import { Divider } from '/app/atoms/structure'
 import { NAV_BAR_WIDTH } from '/app/App/constants'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 
+import type { ForwardedRef } from 'react'
+import type { ViewportListRef } from 'react-viewport-list'
 import type { RunStatus } from '@opentrons/api-client'
 import type { RobotType } from '@opentrons/shared-data'
-import type { ViewportListRef } from 'react-viewport-list'
+
 const COLOR_FADE_MS = 500
 const LIVE_RUN_COMMANDS_POLL_MS = 3000
 // arbitrary large number of commands
@@ -49,10 +52,11 @@ interface RunPreviewProps {
 }
 export const RunPreviewComponent = (
   { runId, jumpedIndex, makeHandleScrollToStep, robotType }: RunPreviewProps,
-  ref: React.ForwardedRef<ViewportListRef>
+  ref: ForwardedRef<ViewportListRef>
 ): JSX.Element | null => {
   const { t } = useTranslation(['run_details', 'protocol_setup'])
   const robotSideAnalysis = useMostRecentCompletedAnalysis(runId)
+  console.log(robotSideAnalysis)
   const runStatus = useRunStatus(runId)
   const { data: runRecord } = useNotifyRunQuery(runId)
   const isRunTerminal =

@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Chip,
@@ -8,6 +7,7 @@ import {
   InfoScreen,
   JUSTIFY_SPACE_BETWEEN,
   SPACING,
+  getLabwareDefinitionsFromCommands,
   StyledText,
 } from '@opentrons/components'
 
@@ -17,16 +17,17 @@ import { ODDBackButton } from '/app/molecules/ODDBackButton'
 import { FloatingActionButton, SmallButton } from '/app/atoms/buttons'
 import type { SetupScreens } from '../types'
 import { TerseOffsetTable } from '/app/organisms/TerseOffsetTable'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import {
   useNotifyRunQuery,
   useMostRecentCompletedAnalysis,
 } from '/app/resources/runs'
 import { getLatestCurrentOffsets } from '/app/transformations/runs'
 
+import type { Dispatch, SetStateAction } from 'react'
+
 export interface ProtocolSetupOffsetsProps {
   runId: string
-  setSetupScreen: React.Dispatch<React.SetStateAction<SetupScreens>>
+  setSetupScreen: Dispatch<SetStateAction<SetupScreens>>
   lpcDisabledReason: string | null
   launchLPC: () => void
   LPCWizard: JSX.Element | null

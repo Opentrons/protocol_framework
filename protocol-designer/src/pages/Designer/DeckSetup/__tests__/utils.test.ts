@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
+  ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
   HEATERSHAKER_MODULE_TYPE,
   HEATERSHAKER_MODULE_V1,
@@ -45,12 +46,13 @@ describe('getModuleModelsBySlot', () => {
   })
   it('renders all flex modules for B1', () => {
     expect(getModuleModelsBySlot(true, FLEX_ROBOT_TYPE, 'B1')).toEqual(
-      FLEX_MODULE_MODELS
+      FLEX_MODULE_MODELS.filter(model => model !== ABSORBANCE_READER_V1)
     )
   })
   it('renders all flex modules for C1', () => {
     const noTC = FLEX_MODULE_MODELS.filter(
-      model => model !== THERMOCYCLER_MODULE_V2
+      model =>
+        model !== THERMOCYCLER_MODULE_V2 && model !== ABSORBANCE_READER_V1
     )
     expect(getModuleModelsBySlot(true, FLEX_ROBOT_TYPE, 'C1')).toEqual(noTC)
   })

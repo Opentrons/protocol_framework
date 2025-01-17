@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { screen, fireEvent } from '@testing-library/react'
 import { when } from 'vitest-when'
@@ -23,10 +22,11 @@ import {
 import { RECOVERY_MAP, ERROR_KINDS } from '../../constants'
 import { clickButtonLabeled } from '../../__tests__/util'
 
+import type { ComponentProps } from 'react'
 import type { Mock } from 'vitest'
 
 const renderSelectRecoveryOption = (
-  props: React.ComponentProps<typeof SelectRecoveryOption>
+  props: ComponentProps<typeof SelectRecoveryOption>
 ) => {
   return renderWithProviders(
     <SelectRecoveryOption {...{ ...mockRecoveryContentProps, ...props }} />,
@@ -37,7 +37,7 @@ const renderSelectRecoveryOption = (
 }
 
 const renderRecoveryOptions = (
-  props: React.ComponentProps<typeof RecoveryOptions>
+  props: ComponentProps<typeof RecoveryOptions>
 ) => {
   return renderWithProviders(<RecoveryOptions {...props} />, {
     i18nInstance: i18n,
@@ -45,7 +45,7 @@ const renderRecoveryOptions = (
 }
 describe('SelectRecoveryOption', () => {
   const { RETRY_STEP, RETRY_NEW_TIPS } = RECOVERY_MAP
-  let props: React.ComponentProps<typeof SelectRecoveryOption>
+  let props: ComponentProps<typeof SelectRecoveryOption>
   let mockProceedToRouteAndStep: Mock
   let mockSetSelectedRecoveryOption: Mock
   let mockGetRecoveryOptionCopy: Mock
@@ -253,7 +253,7 @@ describe('SelectRecoveryOption', () => {
   })
 })
 describe('RecoveryOptions', () => {
-  let props: React.ComponentProps<typeof RecoveryOptions>
+  let props: ComponentProps<typeof RecoveryOptions>
   let mockSetSelectedRoute: Mock
   let mockGetRecoveryOptionCopy: Mock
 

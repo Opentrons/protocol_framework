@@ -75,8 +75,16 @@ export interface MagneticBlockState {
   type: typeof MAGNETIC_BLOCK_TYPE
 }
 
+export interface Initialization {
+  mode: 'single' | 'multi'
+  wavelengths: number[]
+  referenceWavelength?: number
+}
+
 export interface AbsorbanceReaderState {
   type: typeof ABSORBANCE_READER_TYPE
+  lidOpen: boolean | null
+  initialization: Initialization | null
 }
 
 export type ModuleState =
@@ -430,6 +438,33 @@ export interface ThermocyclerStateStepArgs {
   message?: string
 }
 
+export interface AbsorbanceReaderInitializeArgs {
+  module: string
+  commandCreatorFnName: 'absorbanceReaderInitialize'
+  mode: 'single' | 'multi'
+  wavelengths: number[]
+  referenceWavelength?: number | null
+  message?: string
+}
+
+export interface AbsorbanceReaderReadArgs {
+  module: string
+  commandCreatorFnName: 'absorbanceReaderRead'
+  fileName: string | null
+  message?: string
+}
+
+export interface AbsorbanceReaderLidArgs {
+  module: string
+  commandCreatorFnName: 'absorbanceReaderOpenLid' | 'absorbanceReaderCloseLid'
+  message?: string
+}
+
+export type AbsorbanceReaderArgs =
+  | AbsorbanceReaderInitializeArgs
+  | AbsorbanceReaderReadArgs
+  | AbsorbanceReaderLidArgs
+
 export interface MoveLabwareArgs extends CommonArgs {
   commandCreatorFnName: 'moveLabware'
   labware: string
@@ -443,6 +478,9 @@ export interface CommentArgs extends CommonArgs {
 }
 
 export type CommandCreatorArgs =
+  | AbsorbanceReaderInitializeArgs
+  | AbsorbanceReaderReadArgs
+  | AbsorbanceReaderLidArgs
   | ConsolidateArgs
   | DistributeArgs
   | MixArgs
@@ -531,6 +569,8 @@ export interface TimelineFrame {
 export type RobotState = TimelineFrame // legacy name alias
 
 export type ErrorType =
+  | 'ABSORBANCE_READER_LID_CLOSED'
+  | 'ABSORBANCE_READER_NO_INITIALIZATION'
   | 'CANNOT_MOVE_WITH_GRIPPER'
   | 'DROP_TIP_LOCATION_DOES_NOT_EXIST'
   | 'EQUIPMENT_DOES_NOT_EXIST'

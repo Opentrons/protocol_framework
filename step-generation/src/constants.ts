@@ -58,11 +58,14 @@ export const HEATERSHAKER_MODULE_INITIAL_STATE: HeaterShakerModuleState = {
 
 const ABSORBANCE_READER_INITIAL_STATE: AbsorbanceReaderState = {
   type: 'absorbanceReaderType',
+  lidOpen: null,
+  initialization: null,
 }
 const MAGNETIC_BLOCK_INITIAL_STATE: MagneticBlockState = {
   type: 'magneticBlockType',
 }
 
+// @ts-expect-error Flex stacker not yet supported in step-generation
 export const MODULE_INITIAL_STATE_BY_TYPE: {
   [moduleType in ModuleType]: ModuleState
 } = {

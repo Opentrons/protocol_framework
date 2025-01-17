@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { vi, describe, expect, it, beforeEach } from 'vitest'
 import { screen, renderHook } from '@testing-library/react'
 
@@ -24,6 +23,7 @@ import { useERWizard, ErrorRecoveryWizard } from '../ErrorRecoveryWizard'
 import { useRecoverySplash, RecoverySplash } from '../RecoverySplash'
 import { useRunLoadedLabwareDefinitionsByUri } from '/app/resources/runs'
 
+import type { ComponentProps } from 'react'
 import type { RunStatus } from '@opentrons/api-client'
 
 vi.mock('../ErrorRecoveryWizard')
@@ -128,14 +128,14 @@ describe('useErrorRecoveryFlows', () => {
   })
 })
 
-const render = (props: React.ComponentProps<typeof ErrorRecoveryFlows>) => {
+const render = (props: ComponentProps<typeof ErrorRecoveryFlows>) => {
   return renderWithProviders(<ErrorRecoveryFlows {...props} />, {
     i18nInstance: i18n,
   })[0]
 }
 
 describe('ErrorRecoveryFlows', () => {
-  let props: React.ComponentProps<typeof ErrorRecoveryFlows>
+  let props: ComponentProps<typeof ErrorRecoveryFlows>
 
   beforeEach(() => {
     props = {

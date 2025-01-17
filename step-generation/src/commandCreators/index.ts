@@ -6,9 +6,15 @@ export {
   thermocyclerProfileStep,
   thermocyclerStateStep,
   heaterShaker,
+  absorbanceReaderCloseInitialize,
+  absorbanceReaderCloseRead,
 } from './compound'
 
 export {
+  absorbanceReaderCloseLid,
+  absorbanceReaderInitialize,
+  absorbanceReaderOpenLid,
+  absorbanceReaderRead,
   aspirate,
   waitForTemperature,
   blowout,

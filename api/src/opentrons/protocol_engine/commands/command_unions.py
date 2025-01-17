@@ -3,7 +3,7 @@
 from collections.abc import Collection
 from typing import Annotated, Type, Union, get_type_hints
 
-from pydantic import Field
+from pydantic import Field, TypeAdapter
 
 from opentrons.util.get_union_elements import get_union_elements
 
@@ -16,6 +16,7 @@ from .pipetting_common import (
 from .movement_common import StallOrCollisionError
 
 from . import absorbance_reader
+from . import flex_stacker
 from . import heater_shaker
 from . import magnetic_module
 from . import temperature_module
@@ -159,6 +160,22 @@ from .load_pipette import (
     LoadPipetteCreate,
     LoadPipetteResult,
     LoadPipetteCommandType,
+)
+
+from .load_lid_stack import (
+    LoadLidStack,
+    LoadLidStackParams,
+    LoadLidStackCreate,
+    LoadLidStackResult,
+    LoadLidStackCommandType,
+)
+
+from .load_lid import (
+    LoadLid,
+    LoadLidParams,
+    LoadLidCreate,
+    LoadLidResult,
+    LoadLidCommandType,
 )
 
 from .move_labware import (
@@ -367,6 +384,8 @@ Command = Annotated[
         LoadLiquidClass,
         LoadModule,
         LoadPipette,
+        LoadLidStack,
+        LoadLid,
         MoveLabware,
         MoveRelative,
         MoveToCoordinates,
@@ -412,6 +431,8 @@ Command = Annotated[
         absorbance_reader.OpenLid,
         absorbance_reader.Initialize,
         absorbance_reader.ReadAbsorbance,
+        flex_stacker.Retrieve,
+        flex_stacker.Store,
         calibration.CalibrateGripper,
         calibration.CalibratePipette,
         calibration.CalibrateModule,
@@ -448,6 +469,8 @@ CommandParams = Union[
     HomeParams,
     RetractAxisParams,
     LoadLabwareParams,
+    LoadLidStackParams,
+    LoadLidParams,
     ReloadLabwareParams,
     LoadLiquidParams,
     LoadLiquidClassParams,
@@ -498,6 +521,8 @@ CommandParams = Union[
     absorbance_reader.OpenLidParams,
     absorbance_reader.InitializeParams,
     absorbance_reader.ReadAbsorbanceParams,
+    flex_stacker.RetrieveParams,
+    flex_stacker.StoreParams,
     calibration.CalibrateGripperParams,
     calibration.CalibratePipetteParams,
     calibration.CalibrateModuleParams,
@@ -537,6 +562,8 @@ CommandType = Union[
     LoadLiquidClassCommandType,
     LoadModuleCommandType,
     LoadPipetteCommandType,
+    LoadLidStackCommandType,
+    LoadLidCommandType,
     MoveLabwareCommandType,
     MoveRelativeCommandType,
     MoveToCoordinatesCommandType,
@@ -582,6 +609,8 @@ CommandType = Union[
     absorbance_reader.OpenLidCommandType,
     absorbance_reader.InitializeCommandType,
     absorbance_reader.ReadAbsorbanceCommandType,
+    flex_stacker.RetrieveCommandType,
+    flex_stacker.StoreCommandType,
     calibration.CalibrateGripperCommandType,
     calibration.CalibratePipetteCommandType,
     calibration.CalibrateModuleCommandType,
@@ -622,6 +651,8 @@ CommandCreate = Annotated[
         LoadLiquidClassCreate,
         LoadModuleCreate,
         LoadPipetteCreate,
+        LoadLidStackCreate,
+        LoadLidCreate,
         MoveLabwareCreate,
         MoveRelativeCreate,
         MoveToCoordinatesCreate,
@@ -667,6 +698,8 @@ CommandCreate = Annotated[
         absorbance_reader.OpenLidCreate,
         absorbance_reader.InitializeCreate,
         absorbance_reader.ReadAbsorbanceCreate,
+        flex_stacker.RetrieveCreate,
+        flex_stacker.StoreCreate,
         calibration.CalibrateGripperCreate,
         calibration.CalibratePipetteCreate,
         calibration.CalibrateModuleCreate,
@@ -685,6 +718,13 @@ CommandCreate = Annotated[
     ],
     Field(discriminator="commandType"),
 ]
+
+# Each time a TypeAdapter is instantiated, it will construct a new validator and
+# serializer. To improve performance, TypeAdapters are instantiated once.
+# See https://docs.pydantic.dev/latest/concepts/performance/#typeadapter-instantiated-once
+CommandCreateAdapter: TypeAdapter[CommandCreate] = TypeAdapter(CommandCreate)
+
+CommandAdapter: TypeAdapter[Command] = TypeAdapter(Command)
 
 CommandResult = Union[
     AirGapInPlaceResult,
@@ -708,6 +748,8 @@ CommandResult = Union[
     LoadLiquidClassResult,
     LoadModuleResult,
     LoadPipetteResult,
+    LoadLidStackResult,
+    LoadLidResult,
     MoveLabwareResult,
     MoveRelativeResult,
     MoveToCoordinatesResult,
@@ -753,6 +795,8 @@ CommandResult = Union[
     absorbance_reader.OpenLidResult,
     absorbance_reader.InitializeResult,
     absorbance_reader.ReadAbsorbanceResult,
+    flex_stacker.RetrieveResult,
+    flex_stacker.StoreResult,
     calibration.CalibrateGripperResult,
     calibration.CalibratePipetteResult,
     calibration.CalibrateModuleResult,

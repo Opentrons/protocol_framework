@@ -18,6 +18,8 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import {
+  ABSORBANCE_READER_TYPE,
+  ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
   FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
   getModuleDisplayName,
@@ -34,7 +36,11 @@ import {
   createDeckFixture,
   deleteDeckFixture,
 } from '../../../step-forms/actions/additionalItems'
-import { createModule, deleteModule } from '../../../step-forms/actions'
+import {
+  getAdditionalEquipment,
+  getSavedStepForms,
+} from '../../../step-forms/selectors'
+import { deleteModule } from '../../../step-forms/actions'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
 import {
   createContainer,
@@ -51,12 +57,12 @@ import { useBlockingHint } from '../../../organisms/BlockingHintModal/useBlockin
 import { selectors } from '../../../labware-ingred/selectors'
 import { useKitchen } from '../../../organisms/Kitchen/hooks'
 import { getDismissedHints } from '../../../tutorial/selectors'
-import { createContainerAboveModule } from '../../../step-forms/actions/thunks'
+import { LINK_BUTTON_STYLE, NAV_BAR_HEIGHT_REM } from '../../../atoms'
 import {
-  ConfirmDeleteStagingAreaModal,
-  PROTOCOL_NAV_BAR_HEIGHT_REM,
-} from '../../../organisms'
-import { BUTTON_LINK_STYLE } from '../../../atoms'
+  createContainerAboveModule,
+  createModuleEntityAndChangeForm,
+} from '../../../step-forms/actions/thunks'
+import { ConfirmDeleteStagingAreaModal } from '../../../organisms'
 import { getSlotInformation } from '../utils'
 import { ALL_ORDERED_CATEGORIES, FIXTURES, MOAM_MODELS } from './constants'
 import { LabwareTools } from './LabwareTools'
@@ -66,6 +72,13 @@ import { getModuleModelsBySlot, getDeckErrors } from './utils'
 import type { AddressableAreaName, ModuleModel } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../../types'
 import type { Fixture } from './constants'
+
+const mapModTypeToStepType: Record<string, string> = {
+  heaterShakerModuleType: 'heaterShaker',
+  magneticModuleType: 'magnet',
+  temperatureModuleType: 'temperature',
+  thermocyclerModuleType: 'thermocycler',
+}
 
 interface DeckSetupToolsProps {
   onCloseClick: () => void
@@ -91,6 +104,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
   const { makeSnackbar } = useKitchen()
   const selectedSlotInfo = useSelector(selectors.getZoomedInSlotInfo)
   const robotType = useSelector(getRobotType)
+  const savedSteps = useSelector(getSavedStepForms)
   const [showDeleteLabwareModal, setShowDeleteLabwareModal] = useState<
     ModuleModel | 'clear' | null
   >(null)
@@ -111,6 +125,10 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
 
   const [changeModuleWarningInfo, displayModuleWarning] = useState<boolean>(
     false
+  )
+  const additionalEquipment = useSelector(getAdditionalEquipment)
+  const isGripperAttached = Object.values(additionalEquipment).some(
+    equipment => equipment?.name === 'gripper'
   )
   const [selectedHardware, setSelectedHardware] = useState<
     ModuleModel | Fixture | null
@@ -231,7 +249,9 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     disabled:
       selectedFixture === 'wasteChute' ||
       selectedFixture === 'wasteChuteAndStagingArea' ||
-      selectedFixture === 'trashBin',
+      selectedFixture === 'trashBin' ||
+      selectedModuleModel === ABSORBANCE_READER_V1,
+    disabledReasonForTooltip: t('plate_reader_no_labware'),
     isActive: tab === 'labware',
     onClick: () => {
       setTab('labware')
@@ -266,7 +286,11 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       if (
         createdLabwareForSlot != null &&
         (!keepExistingLabware ||
-          createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri)
+          createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri ||
+          //  if nested labware changes but labware doesn't, still delete both
+          (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
+            createdNestedLabwareForSlot?.labwareDefURI !==
+              selectedNestedLabwareDefUri))
       ) {
         dispatch(deleteContainer({ labwareId: createdLabwareForSlot.id }))
       }
@@ -320,11 +344,38 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     }
     if (selectedModuleModel != null) {
       //  create module
+      const moduleType = getModuleType(selectedModuleModel)
+      // enforce gripper present in order to add plate reader
+      if (moduleType === ABSORBANCE_READER_TYPE && !isGripperAttached) {
+        makeSnackbar(t('gripper_required_for_plate_reader') as string)
+        return
+      }
+
+      const moduleSteps = Object.values(savedSteps).filter(step => {
+        return (
+          step.stepType === mapModTypeToStepType[moduleType] &&
+          //  only update module steps that match the old moduleId
+          //  to accommodate instances of MoaM
+          step.moduleId === createdModuleForSlot?.id
+        )
+      })
+
+      const pauseSteps = Object.values(savedSteps).filter(step => {
+        return (
+          step.stepType === 'pause' &&
+          //  only update pause steps that match the old moduleId
+          //  to accommodate instances of MoaM
+          step.moduleId === createdModuleForSlot?.id
+        )
+      })
+
       dispatch(
-        createModule({
+        createModuleEntityAndChangeForm({
           slot,
-          type: getModuleType(selectedModuleModel),
+          type: moduleType,
           model: selectedModuleModel,
+          moduleSteps,
+          pauseSteps,
         })
       )
     }
@@ -352,7 +403,11 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     if (
       selectedModuleModel != null &&
       selectedLabwareDefUri != null &&
-      createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri
+      (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
+        //  if nested labware changes but labware doesn't, still create both both
+        (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
+          createdNestedLabwareForSlot?.labwareDefURI !==
+            selectedNestedLabwareDefUri))
     ) {
       //   create adapter + labware on module
       dispatch(
@@ -371,7 +426,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     position === POSITION_FIXED
       ? {
           right: SPACING.spacing12,
-          top: `calc(${PROTOCOL_NAV_BAR_HEIGHT_REM}rem + ${SPACING.spacing12})`,
+          top: `calc(${NAV_BAR_HEIGHT_REM}rem + ${SPACING.spacing12})`,
         }
       : {}
   return (
@@ -398,7 +453,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       ) : null}
       {changeModuleWarning}
       <Toolbox
-        height={`calc(100vh - ${PROTOCOL_NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
+        height={`calc(100vh - ${NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
         width={`${DECK_SETUP_TOOLS_WIDTH_REM}rem`}
         position={position}
         {...positionStyles}
@@ -426,7 +481,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                 handleResetToolbox()
               }
             }}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
             textDecoration={TYPOGRAPHY.textDecorationUnderline}
           >
             <StyledText desktopStyle="bodyDefaultRegular">

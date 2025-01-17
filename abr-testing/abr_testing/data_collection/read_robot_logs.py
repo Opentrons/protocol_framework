@@ -134,7 +134,8 @@ def match_pipette_to_action(
     left_pipette_add = 0
     for command in commandTypes:
         command_type = command_dict["commandType"]
-        command_pipette = command_dict.get("pipetteId", "")
+        command_params = command_dict.get("params", "")
+        command_pipette = command_params.get("pipetteId", "")
         if command_type == command and command_pipette == right_pipette:
             right_pipette_add = 1
         elif command_type == command and command_pipette == left_pipette:
@@ -213,6 +214,38 @@ def instrument_commands(
     return pipette_dict
 
 
+def get_comment_result_by_string(file_results: Dict[str, Any], key_phrase: str) -> str:
+    """Get comment string based off ky phrase."""
+    commandData = file_results.get("commands", "")
+    result_str = command_str = ""
+    for command in commandData:
+        commandType = command["commandType"]
+        if commandType == "comment":
+            command_str = command["params"].get("message", "")
+        try:
+            result_str = command_str.split(key_phrase)[1]
+        except IndexError:
+            continue
+    return result_str
+
+
+def get_protocol_version_number(file_results: Dict[str, Any]) -> str:
+    """Get protocol version number."""
+    return get_comment_result_by_string(file_results, "Protocol Version: ")
+
+
+def get_liquid_waste_height(file_results: Dict[str, Any]) -> float:
+    """Find liquid waste height."""
+    result_str = get_comment_result_by_string(
+        file_results, "Liquid Waste Total Height: "
+    )
+    try:
+        height = float(result_str)
+    except ValueError:
+        height = 0.0
+    return height
+
+
 def liquid_height_commands(
     file_results: Dict[str, Any], all_heights_list: List[List[Any]]
 ) -> List[List[Any]]:
@@ -220,6 +253,9 @@ def liquid_height_commands(
     commandData = file_results.get("commands", "")
     robot = file_results.get("robot_name", "")
     run_id = file_results.get("run_id", "")
+    list_of_heights = []
+    print(robot)
+    liquid_waste_height = 0.0
     for command in commandData:
         commandType = command["commandType"]
         if commandType == "comment":
@@ -236,16 +272,24 @@ def liquid_height_commands(
                     well_location = str(entry.split(", ")[1].split(" ")[0])
                     slot_location = str(entry.split("slot ")[1].split(")")[0])
                     labware_name = str(entry.split("of ")[1].split(" on")[0])
-                    all_heights_list[0].append(robot)
-                    all_heights_list[1].append(run_id)
-                    all_heights_list[2].append(comment_time)
-                    all_heights_list[3].append(labware_type)
-                    all_heights_list[4].append(labware_name)
-                    all_heights_list[5].append(slot_location)
-                    all_heights_list[6].append(well_location)
-                    all_heights_list[7].append(height)
+                    if labware_name == "Liquid Waste":
+                        liquid_waste_height += height
+                    one_entry = {
+                        "Timestamp": comment_time,
+                        "Labware Name": labware_name,
+                        "Labware Type": labware_type,
+                        "Slot Location": slot_location,
+                        "Well Location": well_location,
+                        "All Heights (mm)": height,
+                    }
+                    list_of_heights.append(one_entry)
             except (IndexError, ValueError):
                 continue
+    if len(list_of_heights) > 0:
+        all_heights_list[0].append(robot)
+        all_heights_list[1].append(run_id)
+        all_heights_list[2].append(list_of_heights)
+        all_heights_list[3].append(liquid_waste_height)
     return all_heights_list
 
 
@@ -281,10 +325,13 @@ def plate_reader_commands(
             read = "yes"
         elif read == "yes" and commandType == "comment":
             result = command["params"].get("message", "")
-            if "result:" in result:
-                plate_name = result.split("result:")[0]
-                formatted_result = result.split("result: ")[1]
-                print(formatted_result)
+            if "result:" in result or "Result:" in result:
+                try:
+                    plate_name = result.split("result:")[0]
+                    formatted_result = result.split("result: ")[1]
+                except IndexError:
+                    plate_name = result.split("Result:")[0]
+                    formatted_result = result.split("Result: ")[1]
                 result_dict = eval(formatted_result)
                 result_dict_keys = list(result_dict.keys())
                 if len(result_dict_keys) > 1:
@@ -591,6 +638,11 @@ def get_error_info(file_results: Dict[str, Any]) -> Dict[str, Any]:
                     recoverable_errors.get(error_type, 0) + 1
                 )
     # Get run-ending error info
+    module_dict = {
+        "heatershaker": "heaterShakerModuleV1",
+        "thermocycler": "thermocyclerModuleV2",
+        "temperature module": "temperatureModuleV2",
+    }
     try:
         run_command_error = commands_of_run[-1]["error"]
         error_type = run_command_error.get("errorType", "")
@@ -600,6 +652,17 @@ def get_error_info(file_results: Dict[str, Any]) -> Dict[str, Any]:
         error_instrument = run_command_error.get("errorInfo", {}).get(
             "node", run_command_error.get("errorInfo", {}).get("port", "")
         )
+        if "gripper" in error_instrument:
+            # get gripper serial number
+            error_instrument = file_results["extension"]
+        else:
+            # get module serial number
+            for module in module_dict.keys():
+                if module in error_instrument:
+                    for module_list in file_results["modules"]:
+                        model = module_list["model"]
+                        if model == module_dict[module]:
+                            error_instrument = module_list["serialNumber"]
     except (IndexError, KeyError):
         try:
             error_details = file_results.get("errors", [{}])[0]

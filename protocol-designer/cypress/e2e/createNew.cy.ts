@@ -1,20 +1,16 @@
-import {
-  Actions,
-  Verifications,
-  runCreateTest,
-  verifyCreateProtocolPage,
-} from '../support/createNew'
+import { Actions, Verifications, runCreateTest } from '../support/createNew'
 import { UniversalActions } from '../support/universalActions'
+import '../support/commands'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
     cy.visit('/')
+    cy.closeAnalyticsModal()
   })
 
   it('content and step 1 flow works', () => {
-    cy.clickCreateNew()
     cy.verifyCreateNewHeader()
-    verifyCreateProtocolPage()
+    cy.clickCreateNew()
     const steps: Array<Actions | Verifications | UniversalActions> = [
       Verifications.OnStep1,
       Verifications.FlexSelected,

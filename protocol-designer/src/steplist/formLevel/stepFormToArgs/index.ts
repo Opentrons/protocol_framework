@@ -9,9 +9,11 @@ import { heaterShakerFormToArgs } from './heaterShakerFormToArgs'
 import { moveLiquidFormToArgs } from './moveLiquidFormToArgs'
 import { moveLabwareFormToArgs } from './moveLabwareFormToArgs'
 import { commentFormToArgs } from './commentFormToArgs'
+import { absorbanceReaderFormToArgs } from './absorbanceReaderFormToArgs'
 import type { CommandCreatorArgs } from '@opentrons/step-generation'
 import type {
   FormData,
+  HydratedAbsorbanceReaderFormData,
   HydratedCommentFormData,
   HydratedHeaterShakerFormData,
   HydratedMagnetFormData,
@@ -72,6 +74,12 @@ export const stepFormToArgs = (hydratedForm: FormData): StepArgs => {
         fields: castForm,
       }
       return commentFormToArgs(commentFormData)
+    }
+
+    case 'absorbanceReader': {
+      return absorbanceReaderFormToArgs(
+        castForm as HydratedAbsorbanceReaderFormData
+      )
     }
 
     default:

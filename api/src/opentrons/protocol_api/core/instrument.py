@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod, ABC
-from typing import Any, Generic, Optional, TypeVar, Union, List
+from typing import Any, Generic, Optional, TypeVar, Union, List, Tuple
 
 from opentrons import types
 from opentrons.hardware_control.dev_types import PipetteDict
@@ -13,9 +13,10 @@ from opentrons.protocol_api._nozzle_layout import NozzleLayout
 from opentrons.protocol_api._liquid import LiquidClass
 from ..disposal_locations import TrashBin, WasteChute
 from .well import WellCoreType
+from .labware import LabwareCoreType
 
 
-class AbstractInstrument(ABC, Generic[WellCoreType]):
+class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
     @abstractmethod
     def get_default_speed(self) -> float:
         ...
@@ -102,6 +103,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         radius: float,
         z_offset: float,
         speed: float,
+        mm_from_edge: Optional[float] = None,
     ) -> None:
         ...
 
@@ -311,27 +313,15 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         ...
 
     @abstractmethod
-    def load_liquid_class(
-        self,
-        liquid_class: LiquidClass,
-        pipette_load_name: str,
-        tiprack_uri: str,
-    ) -> str:
-        """Load the liquid class properties of given pipette and tiprack into the engine.
-
-        Returns: ID of the liquid class record
-        """
-        ...
-
-    @abstractmethod
     def transfer_liquid(
         self,
-        liquid_class_id: str,
+        liquid_class: LiquidClass,
         volume: float,
-        source: List[WellCoreType],
-        dest: List[WellCoreType],
+        source: List[Tuple[types.Location, WellCoreType]],
+        dest: List[Tuple[types.Location, WellCoreType]],
         new_tip: TransferTipPolicyV2,
-        trash_location: Union[WellCoreType, types.Location, TrashBin, WasteChute],
+        tip_racks: List[Tuple[types.Location, LabwareCoreType]],
+        trash_location: Union[types.Location, TrashBin, WasteChute],
     ) -> None:
         """Transfer a liquid from source to dest according to liquid class properties."""
         ...
@@ -370,4 +360,4 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         """Check if the nozzle configuration currently supports LLD."""
 
 
-InstrumentCoreType = TypeVar("InstrumentCoreType", bound=AbstractInstrument[Any])
+InstrumentCoreType = TypeVar("InstrumentCoreType", bound=AbstractInstrument[Any, Any])

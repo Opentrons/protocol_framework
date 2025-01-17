@@ -7,6 +7,7 @@ import {
 describe('The Import Page', () => {
   beforeEach(() => {
     cy.visit('/')
+    cy.closeAnalyticsModal()
   })
 
   it('successfully loads a protocol exported on a previous version', () => {

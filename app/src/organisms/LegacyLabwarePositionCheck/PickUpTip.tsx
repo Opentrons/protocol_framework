@@ -5,6 +5,7 @@ import {
   DIRECTION_COLUMN,
   Flex,
   LegacyStyledText,
+  getLabwareDefinitionsFromCommands,
   TYPOGRAPHY,
 } from '@opentrons/components'
 import {
@@ -22,7 +23,6 @@ import { UnorderedList } from '/app/molecules/UnorderedList'
 import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
 import { TipConfirmation } from './TipConfirmation'
 import { getLabwareDef } from './utils/labware'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import { getDisplayLocation } from './utils/getDisplayLocation'
 import { useSelector } from 'react-redux'
 import { getIsOnDevice } from '/app/redux/config'

@@ -1,4 +1,5 @@
 """Test equipment command execution side effects."""
+
 import pytest
 from _pytest.fixtures import SubRequest
 import inspect
@@ -8,6 +9,7 @@ from typing import Any, Optional, cast, Dict
 
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.pipette import pipette_definition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.labware.types import LabwareUri
 
 from opentrons.calibration_storage.helpers import uri_from_details
@@ -20,7 +22,6 @@ from opentrons.hardware_control.modules import (
     AbstractModule,
 )
 from opentrons.hardware_control.dev_types import PipetteDict
-from opentrons.protocols.models import LabwareDefinition
 
 from opentrons.protocol_engine import errors
 from opentrons.protocol_engine.types import (
@@ -648,7 +649,7 @@ async def test_load_pipette(
     decoy.when(state_store.config.use_virtual_pipettes).then_return(False)
     decoy.when(model_utils.generate_id()).then_return("unique-id")
     decoy.when(state_store.pipettes.get_by_mount(MountType.RIGHT)).then_return(
-        LoadedPipette.construct(pipetteName=PipetteNameType.P300_MULTI)  # type: ignore[call-arg]
+        LoadedPipette.model_construct(pipetteName=PipetteNameType.P300_MULTI)  # type: ignore[call-arg]
     )
     decoy.when(hardware_api.get_attached_instrument(mount=HwMount.LEFT)).then_return(
         pipette_dict

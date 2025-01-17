@@ -29,6 +29,7 @@ import {
   SPACING,
   LegacyStyledText,
   TYPOGRAPHY,
+  getLabwareDefinitionsFromCommands,
   DIRECTION_ROW,
 } from '@opentrons/components'
 import { PythonLabwareOffsetSnippet } from '/app/molecules/PythonLabwareOffsetSnippet'
@@ -39,7 +40,6 @@ import {
 import { SmallButton } from '/app/atoms/buttons'
 import { LabwareOffsetTabs } from '/app/organisms/LabwareOffsetTabs'
 import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import { getDisplayLocation } from './utils/getDisplayLocation'
 
 import type {

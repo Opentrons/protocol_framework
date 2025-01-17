@@ -158,9 +158,14 @@ export const reduxActionToAnalyticsEvent = (
             name: `${modifiedStepName}Step`,
             properties: {
               ...stepArgModified,
-              aspirateAirGap: stepArgModified.aspirateAirGapVolume,
-              aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
-              dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
+              aspirateAirGap:
+                stepArgModified.aspirateAirGapVolume ?? DEFAULT_VALUE,
+              aspirateFlowRate:
+                stepArgModified.aspirateFlowRateUlSec ?? DEFAULT_VALUE,
+              dispenseFlowRate:
+                stepArgModified.dispenseFlowRateUlSec ?? DEFAULT_VALUE,
+              dispenseAirGap:
+                stepArgModified.dispenseAirGapVolume ?? DEFAULT_VALUE,
               blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
               aspirateOffsetFromBottomMm:
                 stepArgModified.aspirateOffsetFromBottomMm ===
@@ -202,8 +207,10 @@ export const reduxActionToAnalyticsEvent = (
             name: `mixStep`,
             properties: {
               ...stepArgModified,
-              aspirateFlowRate: stepArgModified.aspirateFlowRateUlSec,
-              dispenseFlowRate: stepArgModified.dispenseFlowRateUlSec,
+              aspirateFlowRate:
+                stepArgModified.aspirateFlowRateUlSec ?? DEFAULT_VALUE,
+              dispenseFlowRate:
+                stepArgModified.dispenseFlowRateUlSec ?? DEFAULT_VALUE,
               blowoutFlowRate: stepArgModified.blowoutFlowRateUlSec,
               aspirateOffsetFromBottomMm:
                 stepArgModified.aspirateOffsetFromBottomMm ===
@@ -398,6 +405,7 @@ export const reduxActionToAnalyticsEvent = (
           )) ||
         (command.commandType === 'moveLabware' &&
           command.params.newLocation !== 'offDeck' &&
+          command.params.newLocation !== 'systemLocation' &&
           'addressableAreaName' in command.params.newLocation &&
           command.params.newLocation.addressableAreaName ===
             'gripperWasteChute')
@@ -414,10 +422,12 @@ export const reduxActionToAnalyticsEvent = (
           command =>
             (command.commandType === 'loadLabware' &&
               command.params.location !== 'offDeck' &&
+              command.params.location !== 'systemLocation' &&
               'addressableAreaName' in command.params.location &&
               command.params.location.addressableAreaName === location) ||
             (command.commandType === 'moveLabware' &&
               command.params.newLocation !== 'offDeck' &&
+              command.params.newLocation !== 'systemLocation' &&
               'addressableAreaName' in command.params.newLocation &&
               command.params.newLocation.addressableAreaName === location)
         )
@@ -499,7 +509,7 @@ export const trackEventMiddleware: Middleware<BaseState, any> = ({
   // NOTE: this is the Redux state AFTER the action has been fully dispatched
   const state = getState()
 
-  const optedIn = getHasOptedIn(state as BaseState) ?? false
+  const optedIn = getHasOptedIn(state as BaseState)?.hasOptedIn ?? false
   const event = reduxActionToAnalyticsEvent(state as BaseState, action)
 
   if (event != null) {

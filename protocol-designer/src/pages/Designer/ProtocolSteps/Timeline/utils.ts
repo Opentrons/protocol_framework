@@ -1,13 +1,15 @@
 import round from 'lodash/round'
 import uniq from 'lodash/uniq'
 import { UAParser } from 'ua-parser-js'
+
+import type { MouseEvent } from 'react'
 import type { StepIdType } from '../../../../form-types'
 
 export const capitalizeFirstLetterAfterNumber = (title: string): string =>
   title.replace(
     /(^[\d\W]*)([a-zA-Z])|(-[a-zA-Z])/g,
     (match, prefix, firstLetter) => {
-      if (prefix) {
+      if (prefix != null) {
         return `${prefix}${firstLetter.toUpperCase()}`
       } else {
         return `${match.charAt(0)}${match.charAt(1).toUpperCase()}`
@@ -118,7 +120,7 @@ export const nonePressed = (keysPressed: boolean[]): boolean =>
   keysPressed.every(keyPress => keyPress === false)
 
 export const getMouseClickKeyInfo = (
-  event: React.MouseEvent
+  event: MouseEvent
 ): { isShiftKeyPressed: boolean; isMetaKeyPressed: boolean } => {
   const isMac: boolean = getUserOS() === 'Mac OS'
   const isShiftKeyPressed: boolean = event.shiftKey

@@ -32,6 +32,8 @@ import {
 import { deselectAllWells } from '../../well-selection/actions'
 import { DefineLiquidsModal } from '../DefineLiquidsModal'
 import { LiquidCard } from './LiquidCard'
+
+import type { ChangeEvent } from 'react'
 import type { DropdownOption } from '@opentrons/components'
 import type { ContentsByWell } from '../../labware-ingred/types'
 
@@ -131,9 +133,7 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
     }
   }
 
-  const handleChangeVolume: (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => void = e => {
+  const handleChangeVolume: (e: ChangeEvent<HTMLInputElement>) => void = e => {
     const value: string | null | undefined = e.currentTarget.value
     const masked = fieldProcessors.composeMaskers(
       fieldProcessors.maskToFloat,
@@ -409,7 +409,6 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
           <InfoScreen
             content={t('no_liquids_defined')}
             subContent={t('select_wells_to_add')}
-            height="100%"
           />
         )}
       </Toolbox>

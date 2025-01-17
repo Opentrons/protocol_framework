@@ -24,7 +24,10 @@ from opentrons.hardware_control.modules.types import (
     AbsorbanceReaderModel,
 )
 from opentrons.legacy_commands import protocol_commands as cmds, types as cmd_types
-from opentrons.legacy_commands.helpers import stringify_labware_movement_command
+from opentrons.legacy_commands.helpers import (
+    stringify_labware_movement_command,
+    stringify_lid_movement_command,
+)
 from opentrons.legacy_commands.publisher import (
     CommandPublisher,
     publish,
@@ -399,6 +402,7 @@ class ProtocolContext(CommandPublisher):
         namespace: Optional[str] = None,
         version: Optional[int] = None,
         adapter: Optional[str] = None,
+        lid: Optional[str] = None,
     ) -> Labware:
         """Load a labware onto a location.
 
@@ -443,6 +447,10 @@ class ProtocolContext(CommandPublisher):
             values as the ``load_name`` parameter of :py:meth:`.load_adapter`. The
             adapter will use the same namespace as the labware, and the API will
             choose the adapter's version automatically.
+        :param lid: A lid to load the on top of the main labware. Accepts the same
+            values as the ``load_name`` parameter of :py:meth:`.load_lid_stack`. The
+            lid will use the same namespace as the labware, and the API will
+            choose the lid's version automatically.
 
                         .. versionadded:: 2.15
         """
@@ -482,6 +490,20 @@ class ProtocolContext(CommandPublisher):
             namespace=namespace,
             version=version,
         )
+
+        if lid is not None:
+            if self._api_version < validation.LID_STACK_VERSION_GATE:
+                raise APIVersionError(
+                    api_element="Loading a Lid on a Labware",
+                    until_version="2.23",
+                    current_version=f"{self._api_version}",
+                )
+            self._core.load_lid(
+                load_name=lid,
+                location=labware_core,
+                namespace=namespace,
+                version=version,
+            )
 
         labware = Labware(
             core=labware_core,
@@ -1333,6 +1355,201 @@ class ProtocolContext(CommandPublisher):
     def door_closed(self) -> bool:
         """Returns ``True`` if the front door of the robot is closed."""
         return self._core.door_closed()
+
+    @requires_version(2, 23)
+    def load_lid_stack(
+        self,
+        load_name: str,
+        location: Union[DeckLocation, Labware],
+        quantity: int,
+        adapter: Optional[str] = None,
+        namespace: Optional[str] = None,
+        version: Optional[int] = None,
+    ) -> Labware:
+        """
+        Load a stack of Lids onto a valid Deck Location or Adapter.
+
+        :param str load_name: A string to use for looking up a lid definition.
+            You can find the ``load_name`` for any standard lid on the Opentrons
+            `Labware Library <https://labware.opentrons.com>`_.
+        :param location: Either a :ref:`deck slot <deck-slots>`,
+            like ``1``, ``"1"``, or ``"D1"``, or the a valid Opentrons Adapter.
+        :param int quantity: The quantity of lids to be loaded in the stack.
+        :param adapter: An adapter to load the lid stack on top of. Accepts the same
+            values as the ``load_name`` parameter of :py:meth:`.load_adapter`. The
+            adapter will use the same namespace as the lid labware, and the API will
+            choose the adapter's version automatically.
+        :param str namespace: The namespace that the lid labware definition belongs to.
+            If unspecified, the API will automatically search two namespaces:
+
+              - ``"opentrons"``, to load standard Opentrons labware definitions.
+              - ``"custom_beta"``, to load custom labware definitions created with the
+                `Custom Labware Creator <https://labware.opentrons.com/create>`__.
+
+            You might need to specify an explicit ``namespace`` if you have a custom
+            definition whose ``load_name`` is the same as an Opentrons-verified
+            definition, and you want to explicitly choose one or the other.
+
+        :param version: The version of the labware definition. You should normally
+            leave this unspecified to let ``load_lid_stack()`` choose a version
+            automatically.
+
+        :return:  The initialized and loaded labware object representing the Lid Stack.
+        """
+        if self._api_version < validation.LID_STACK_VERSION_GATE:
+            raise APIVersionError(
+                api_element="Loading a Lid Stack",
+                until_version="2.23",
+                current_version=f"{self._api_version}",
+            )
+
+        load_location: Union[DeckSlotName, StagingSlotName, LabwareCore]
+        if isinstance(location, Labware):
+            load_location = location._core
+        else:
+            load_location = validation.ensure_and_convert_deck_slot(
+                location, self._api_version, self._core.robot_type
+            )
+
+        if adapter is not None:
+            if isinstance(load_location, DeckSlotName) or isinstance(
+                load_location, StagingSlotName
+            ):
+                loaded_adapter = self.load_adapter(
+                    load_name=adapter,
+                    location=load_location.value,
+                    namespace=namespace,
+                )
+                load_location = loaded_adapter._core
+            else:
+                raise ValueError(
+                    "Location cannot be a Labware or Adapter when the 'adapter' field is not None."
+                )
+
+        load_name = validation.ensure_lowercase_name(load_name)
+
+        result = self._core.load_lid_stack(
+            load_name=load_name,
+            location=load_location,
+            quantity=quantity,
+            namespace=namespace,
+            version=version,
+        )
+
+        labware = Labware(
+            core=result,
+            api_version=self._api_version,
+            protocol_core=self._core,
+            core_map=self._core_map,
+        )
+        return labware
+
+    @requires_version(2, 23)
+    def move_lid(
+        self,
+        source_location: Union[DeckLocation, Labware],
+        new_location: Union[DeckLocation, Labware, OffDeckType, WasteChute, TrashBin],
+        use_gripper: bool = False,
+        pick_up_offset: Optional[Mapping[str, float]] = None,
+        drop_offset: Optional[Mapping[str, float]] = None,
+    ) -> Labware | None:
+        """Move a lid from a valid source to a new location. Can return a Lid Stack if one is created.
+
+        :param source_location: Where to take the lid from. This is either:
+
+                * A deck slot like ``1``, ``"1"``, or ``"D1"``. See :ref:`deck-slots`.
+                * A labware or adapter that's already been loaded on the deck
+                  with :py:meth:`load_labware` or :py:meth:`load_adapter`.
+                * A lid stack that's already been loaded on the deck with
+                  with :py:meth:`load_lid_stack`.
+
+        :param new_location: Where to move the lid to. This is either:
+
+                * A deck slot like ``1``, ``"1"``, or ``"D1"``. See :ref:`deck-slots`.
+                * A hardware module that's already been loaded on the deck
+                  with :py:meth:`load_module`.
+                * A labware or adapter that's already been loaded on the deck
+                  with :py:meth:`load_labware` or :py:meth:`load_adapter`.
+                * The special constant :py:obj:`OFF_DECK`.
+
+        :param use_gripper: Whether to use the Flex Gripper for this movement.
+
+                * If ``True``, use the gripper to perform an automatic
+                  movement. This will raise an error in an OT-2 protocol.
+                * If ``False``, pause protocol execution until the user
+                  performs the movement. Protocol execution remains paused until
+                  the user presses **Confirm and resume**.
+
+        Gripper-only parameters:
+
+        :param pick_up_offset: Optional x, y, z vector offset to use when picking up a lid.
+        :param drop_offset: Optional x, y, z vector offset to use when dropping off a lid.
+
+        Before moving a lid to or from a labware in a hardware module, make sure that the
+        labware's current and new locations are accessible, i.e., open the Thermocycler lid
+        or open the Heater-Shaker's labware latch.
+        """
+        source: Union[LabwareCore, DeckSlotName, StagingSlotName]
+        if isinstance(source_location, Labware):
+            source = source_location._core
+        else:
+            source = validation.ensure_and_convert_deck_slot(
+                source_location, self._api_version, self._core.robot_type
+            )
+
+        destination: Union[
+            ModuleCore,
+            LabwareCore,
+            WasteChute,
+            OffDeckType,
+            DeckSlotName,
+            StagingSlotName,
+            TrashBin,
+        ]
+        if isinstance(new_location, Labware):
+            destination = new_location._core
+        elif isinstance(new_location, (OffDeckType, WasteChute, TrashBin)):
+            destination = new_location
+        else:
+            destination = validation.ensure_and_convert_deck_slot(
+                new_location, self._api_version, self._core.robot_type
+            )
+
+        _pick_up_offset = (
+            validation.ensure_valid_labware_offset_vector(pick_up_offset)
+            if pick_up_offset
+            else None
+        )
+        _drop_offset = (
+            validation.ensure_valid_labware_offset_vector(drop_offset)
+            if drop_offset
+            else None
+        )
+        with publish_context(
+            broker=self.broker,
+            command=cmds.move_labware(
+                # This needs to be called from protocol context and not the command for import loop reasons
+                text=stringify_lid_movement_command(
+                    source_location, new_location, use_gripper
+                )
+            ),
+        ):
+            result = self._core.move_lid(
+                source_location=source,
+                new_location=destination,
+                use_gripper=use_gripper,
+                pause_for_manual_move=True,
+                pick_up_offset=_pick_up_offset,
+                drop_offset=_drop_offset,
+            )
+        if result is not None:
+            return Labware(
+                core=result,
+                api_version=self._api_version,
+                protocol_core=self._core,
+                core_map=self._core_map,
+            )
+        return None
 
 
 def _create_module_context(

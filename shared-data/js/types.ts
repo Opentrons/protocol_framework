@@ -27,6 +27,8 @@ import type {
   GRIPPER_V1_3,
   EXTENSION,
   MAGNETIC_BLOCK_V1,
+  FLEX_STACKER_MODULE_V1,
+  FLEX_STACKER_MODULE_TYPE,
 } from './constants'
 import type { RunTimeCommand, LabwareLocation } from '../command/types'
 import type { AddressableAreaName, CutoutFixtureId, CutoutId } from '../deck'
@@ -88,6 +90,7 @@ export type LabwareDisplayCategory =
   | 'other'
   | 'adapter'
   | 'lid'
+  | 'system'
 export type LabwareVolumeUnits = 'µL' | 'mL' | 'L'
 
 // TODO(mc, 2019-05-29): Remove this enum in favor of string + exported
@@ -238,6 +241,7 @@ export type LabwareRoles =
   | 'fixture'
   | 'maintenance'
   | 'lid'
+  | 'system'
 
 // NOTE: must be synced with shared-data/labware/schemas/2.json
 export interface LabwareDefinition2 {
@@ -289,6 +293,7 @@ export type ModuleType =
   | typeof HEATERSHAKER_MODULE_TYPE
   | typeof MAGNETIC_BLOCK_TYPE
   | typeof ABSORBANCE_READER_TYPE
+  | typeof FLEX_STACKER_MODULE_TYPE
 
 // ModuleModel corresponds to top-level keys in shared-data/module/definitions/2
 export type MagneticModuleModel =
@@ -309,6 +314,8 @@ export type MagneticBlockModel = typeof MAGNETIC_BLOCK_V1
 
 export type AbsorbanceReaderModel = typeof ABSORBANCE_READER_V1
 
+export type FlexStackerModuleModel = typeof FLEX_STACKER_MODULE_V1
+
 export type ModuleModel =
   | MagneticModuleModel
   | TemperatureModuleModel
@@ -316,6 +323,7 @@ export type ModuleModel =
   | HeaterShakerModuleModel
   | MagneticBlockModel
   | AbsorbanceReaderModel
+  | FlexStackerModuleModel
 
 export type GripperModel =
   | typeof GRIPPER_V1
