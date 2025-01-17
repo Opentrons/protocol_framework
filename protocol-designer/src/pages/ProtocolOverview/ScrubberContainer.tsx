@@ -1,6 +1,7 @@
 import { useSelector } from 'react-redux'
 import flatMap from 'lodash/flatMap'
 import { ProtocolTimelineScrubber } from '@opentrons/components'
+import { OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
   getInitialRobotState,
   getRobotStateTimeline,
@@ -26,7 +27,7 @@ import type {
   RunTimeCommand,
 } from '@opentrons/shared-data'
 
-export function ScrubberContainer(): JSX.Element {
+export function ScrubberContainer(): JSX.Element | null {
   const robotType = useSelector(getRobotType)
   const labwareNickNames = useSelector(getLabwareNicknamesById)
   const robotStateTimeline = useSelector(getRobotStateTimeline)
@@ -35,6 +36,10 @@ export function ScrubberContainer(): JSX.Element {
   const ingredientLocations = useSelector(ingredSelectors.getLiquidsByLabwareId)
   const invariantContext = useSelector(getInvariantContext)
   const initialDeckSetup = useSelector(getInitialDeckSetup)
+
+  if (robotType === OT2_ROBOT_TYPE) {
+    return null
+  }
 
   const { pipetteEntities, labwareEntities, moduleEntities } = invariantContext
   const {
