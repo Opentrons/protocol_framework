@@ -1,6 +1,10 @@
 import { MAGNETIC_MODULE_V1, MAGNETIC_MODULE_V2 } from '@opentrons/shared-data'
 
 import {
+  ABSORBANCE_READER_INITIALIZE,
+  ABSORBANCE_READER_MAX_WAVELENGTH_NM,
+  ABSORBANCE_READER_MIN_WAVELENGTH_NM,
+  ABSORBANCE_READER_READ,
   MIN_ENGAGE_HEIGHT_V1,
   MAX_ENGAGE_HEIGHT_V1,
   MIN_ENGAGE_HEIGHT_V2,
@@ -351,6 +355,41 @@ const BLOWOUT_LOCATION_REQUIRED: FormError = {
   showAtField: true,
   page: 1,
   tab: 'dispense',
+}
+const WAVELENGTH_REQUIRED: FormError = {
+  title: 'Custom wavelength required',
+  dependentFields: ['wavelengths'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+}
+const WAVELENGTH_OUT_OF_RANGE: FormError = {
+  title: 'Value falls outside of accepted range',
+  dependentFields: ['wavelengths'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+}
+const REFERENCE_WAVELENGTH_OUT_OF_RANGE: FormError = {
+  title: 'Value falls outside of accepted range',
+  dependentFields: ['referenceWavelength'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+}
+const REFERENCE_WAVELENGTH_REQUIRED: FormError = {
+  title: 'Custom wavelength required',
+  dependentFields: ['referenceWavelength'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+}
+const FILENAME_REQUIRED: FormError = {
+  title: 'File name required',
+  dependentFields: ['fileName'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
 }
 
 export interface HydratedFormData {
@@ -775,6 +814,87 @@ export const blowoutLocationRequired = (
     ? BLOWOUT_LOCATION_REQUIRED
     : null
 }
+export const wavelengthRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { absorbanceReaderFormType, wavelengths, mode } = fields
+  if (!wavelengths) {
+    return null
+  }
+  const wavelengthsToCheck = wavelengths.slice(
+    0,
+    mode === 'single' ? 1 : wavelengths.length
+  )
+  return wavelengthsToCheck?.some((wavelength: string[]) => !wavelength) &&
+    absorbanceReaderFormType === ABSORBANCE_READER_INITIALIZE
+    ? WAVELENGTH_REQUIRED
+    : null
+}
+export const referenceWavelengthRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const {
+    absorbanceReaderFormType,
+    referenceWavelength,
+    referenceWavelengthActive,
+  } = fields
+  return referenceWavelengthActive &&
+    !referenceWavelength &&
+    absorbanceReaderFormType === ABSORBANCE_READER_INITIALIZE
+    ? REFERENCE_WAVELENGTH_REQUIRED
+    : null
+}
+export const wavelengthOutOfRange = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { absorbanceReaderFormType, wavelengths, mode } = fields
+  if (
+    !wavelengths ||
+    absorbanceReaderFormType !== ABSORBANCE_READER_INITIALIZE
+  ) {
+    return null
+  }
+  const wavelengthsToCheck = wavelengths.slice(
+    0,
+    mode === 'single' ? 1 : wavelengths.length
+  )
+  return wavelengthsToCheck.some(
+    (wavelength: any) =>
+      getIsOutOfRange(
+        wavelength,
+        ABSORBANCE_READER_MIN_WAVELENGTH_NM,
+        ABSORBANCE_READER_MAX_WAVELENGTH_NM
+      ) && wavelength
+  )
+    ? WAVELENGTH_OUT_OF_RANGE
+    : null
+}
+export const referenceWavelengthOutOfRange = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { absorbanceReaderFormType, referenceWavelength } = fields
+  if (
+    !referenceWavelength ||
+    absorbanceReaderFormType !== ABSORBANCE_READER_INITIALIZE
+  ) {
+    return null
+  }
+  return getIsOutOfRange(
+    referenceWavelength,
+    ABSORBANCE_READER_MIN_WAVELENGTH_NM,
+    ABSORBANCE_READER_MAX_WAVELENGTH_NM
+  )
+    ? REFERENCE_WAVELENGTH_OUT_OF_RANGE
+    : null
+}
+export const fileNameRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { absorbanceReaderFormType, fileName } = fields
+  return !fileName && absorbanceReaderFormType === ABSORBANCE_READER_READ
+    ? FILENAME_REQUIRED
+    : null
+}
 
 /*******************
  **     Helpers    **
@@ -789,3 +909,12 @@ export const composeErrors: ComposeErrors = (
     const possibleError = errorChecker(value)
     return possibleError ? [...acc, possibleError] : acc
   }, [])
+
+export const getIsOutOfRange = (
+  value: any,
+  min: number,
+  max: number
+): boolean => {
+  const castValue = Number(value)
+  return castValue < min || castValue > max
+}

@@ -180,10 +180,11 @@ export function getDefaultsForStepType(
         absorbanceReaderFormType: null,
         fileName: null,
         lidOpen: null,
-        mode: null,
+        mode: 'single',
         moduleId: null,
         referenceWavelength: null,
-        wavelengths: null,
+        referenceWavelengthActive: false,
+        wavelengths: [''],
       }
     default:
       return {}
