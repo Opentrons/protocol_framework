@@ -76,7 +76,7 @@
       "z": 8.25
     }
   },
-  "stackLimit": 5,
+  "stackLimit": 1,
   "compatibleParentLabware": [
     "opentrons_flex_96_tiprack_20ul",
     "opentrons_flex_96_tiprack_50ul",
