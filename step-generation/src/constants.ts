@@ -59,6 +59,7 @@ export const HEATERSHAKER_MODULE_INITIAL_STATE: HeaterShakerModuleState = {
 const ABSORBANCE_READER_INITIAL_STATE: AbsorbanceReaderState = {
   type: 'absorbanceReaderType',
   lidOpen: null,
+  initialization: null,
 }
 const MAGNETIC_BLOCK_INITIAL_STATE: MagneticBlockState = {
   type: 'magneticBlockType',

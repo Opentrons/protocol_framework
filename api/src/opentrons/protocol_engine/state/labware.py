@@ -50,6 +50,7 @@ from ..types import (
     LabwareMovementOffsetData,
     OnDeckLabwareLocation,
     OFF_DECK_LOCATION,
+    SYSTEM_LOCATION,
 )
 from ..actions import (
     Action,
@@ -248,7 +249,11 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
             )
 
             # Add the Lids on top of the stack object
-            for i in range(len(loaded_lid_stack_update.labware_ids)):
+            for labware_id in loaded_lid_stack_update.new_locations_by_id:
+                if loaded_lid_stack_update.definition is None:
+                    raise ValueError(
+                        "Lid Stack Labware Definition cannot be None when multiple lids are loaded."
+                    )
                 definition_uri = uri_from_details(
                     namespace=loaded_lid_stack_update.definition.namespace,
                     load_name=loaded_lid_stack_update.definition.parameters.loadName,
@@ -259,14 +264,10 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                     definition_uri
                 ] = loaded_lid_stack_update.definition
 
-                location = loaded_lid_stack_update.new_locations_by_id[
-                    loaded_lid_stack_update.labware_ids[i]
-                ]
+                location = loaded_lid_stack_update.new_locations_by_id[labware_id]
 
-                self._state.labware_by_id[
-                    loaded_lid_stack_update.labware_ids[i]
-                ] = LoadedLabware.construct(
-                    id=loaded_lid_stack_update.labware_ids[i],
+                self._state.labware_by_id[labware_id] = LoadedLabware.construct(
+                    id=labware_id,
                     location=location,
                     loadName=loaded_lid_stack_update.definition.parameters.loadName,
                     definitionUri=definition_uri,
@@ -277,9 +278,10 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
     def _set_labware_lid(self, state_update: update_types.StateUpdate) -> None:
         labware_lid_update = state_update.labware_lid
         if labware_lid_update != update_types.NO_CHANGE:
-            parent_labware_id = labware_lid_update.parent_labware_id
-            lid_id = labware_lid_update.lid_id
-            self._state.labware_by_id[parent_labware_id].lid_id = lid_id
+            parent_labware_ids = labware_lid_update.parent_labware_ids
+            for i in range(len(parent_labware_ids)):
+                lid_id = labware_lid_update.lid_ids[i]
+                self._state.labware_by_id[parent_labware_ids[i]].lid_id = lid_id
 
     def _set_labware_location(self, state_update: update_types.StateUpdate) -> None:
         labware_location_update = state_update.labware_location
@@ -462,6 +464,16 @@ class LabwareView:
             return self.get_parent_location(parent.labwareId)
         return parent
 
+    def get_highest_child_labware(self, labware_id: str) -> str:
+        """Get labware's highest child labware returning the labware ID."""
+        for labware in self._state.labware_by_id.values():
+            if (
+                isinstance(labware.location, OnLabwareLocation)
+                and labware.location.labwareId == labware_id
+            ):
+                return self.get_highest_child_labware(labware_id=labware.id)
+        return labware_id
+
     def get_labware_stack(
         self, labware_stack: List[LoadedLabware]
     ) -> List[LoadedLabware]:
@@ -471,6 +483,22 @@ class LabwareView:
             labware_stack.append(self.get(parent.labwareId))
             return self.get_labware_stack(labware_stack)
         return labware_stack
+
+    def get_lid_by_labware_id(self, labware_id: str) -> LoadedLabware | None:
+        """Get the Lid Labware that is currently on top of a given labware, if there is one."""
+        lid_id = self._state.labware_by_id[labware_id].lid_id
+        if lid_id:
+            return self._state.labware_by_id[lid_id]
+        else:
+            return None
+
+    def get_labware_by_lid_id(self, lid_id: str) -> LoadedLabware | None:
+        """Get the labware that is currently covered by a given lid, if there is one."""
+        loaded_labware = list(self._state.labware_by_id.values())
+        for labware in loaded_labware:
+            if labware.lid_id == lid_id:
+                return labware
+        return None
 
     def get_all(self) -> List[LoadedLabware]:
         """Get a list of all labware entries in state."""
@@ -871,7 +899,9 @@ class LabwareView:
                     f"Cannot move pipette to {labware.loadName},"
                     f" labware is on staging slot {labware_location.addressableAreaName}"
                 )
-        elif labware_location == OFF_DECK_LOCATION:
+        elif (
+            labware_location == OFF_DECK_LOCATION or labware_location == SYSTEM_LOCATION
+        ):
             raise errors.LocationNotAccessibleByPipetteError(
                 f"Cannot move pipette to {labware.loadName}, labware is off-deck."
             )
@@ -939,7 +969,7 @@ class LabwareView:
             for lw in labware_stack:
                 if not labware_validation.validate_definition_is_adapter(
                     self.get_definition(lw.id)
-                ):
+                ) and not labware_validation.is_lid_stack(self.get_load_name(lw.id)):
                     stack_without_adapters.append(lw)
             if len(stack_without_adapters) >= self.get_labware_stacking_maximum(
                 top_labware_definition

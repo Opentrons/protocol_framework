@@ -180,13 +180,16 @@ class OnLabwareLocation(BaseModel):
 
 
 _OffDeckLocationType = Literal["offDeck"]
+_SystemLocationType = Literal["systemLocation"]
 OFF_DECK_LOCATION: _OffDeckLocationType = "offDeck"
+SYSTEM_LOCATION: _SystemLocationType = "systemLocation"
 
 LabwareLocation = Union[
     DeckSlotLocation,
     ModuleLocation,
     OnLabwareLocation,
     _OffDeckLocationType,
+    _SystemLocationType,
     AddressableAreaLocation,
 ]
 """Union of all locations where it's legal to keep a labware."""
@@ -196,7 +199,11 @@ OnDeckLabwareLocation = Union[
 ]
 
 NonStackedLocation = Union[
-    DeckSlotLocation, AddressableAreaLocation, ModuleLocation, _OffDeckLocationType
+    DeckSlotLocation,
+    AddressableAreaLocation,
+    ModuleLocation,
+    _OffDeckLocationType,
+    _SystemLocationType,
 ]
 """Union of all locations where it's legal to keep a labware that can't be stacked on another labware"""
 

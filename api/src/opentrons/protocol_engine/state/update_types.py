@@ -135,13 +135,10 @@ class LoadedLidStackUpdate:
     stack_location: LabwareLocation
     "The initial location of the Lid Stack Object."
 
-    labware_ids: typing.List[str]
-    """The unique IDs of the new lids."""
-
     new_locations_by_id: typing.Dict[str, OnLabwareLocation]
     """Each lid's initial location keyed by Labware ID."""
 
-    definition: LabwareDefinition
+    definition: LabwareDefinition | None
     "The Labware Definition of the Lid Labware(s) loaded."
 
 
@@ -149,10 +146,10 @@ class LoadedLidStackUpdate:
 class LabwareLidUpdate:
     """An update that identifies a lid on a given parent labware."""
 
-    parent_labware_id: str
-    """The unique ID of the parent labware."""
+    parent_labware_ids: typing.List[str]
+    """The unique IDs of the parent labwares."""
 
-    lid_id: str
+    lid_ids: typing.List[str | None]
     """The unique IDs of the new lids."""
 
 
@@ -550,9 +547,8 @@ class StateUpdate:
         stack_id: str,
         stack_object_definition: LabwareDefinition,
         stack_location: LabwareLocation,
-        labware_definition: LabwareDefinition,
-        labware_ids: typing.List[str],
         locations: typing.Dict[str, OnLabwareLocation],
+        labware_definition: LabwareDefinition | None,
     ) -> Self:
         """Add a new lid stack to state. See `LoadedLidStackUpdate`."""
         self.loaded_lid_stack = LoadedLidStackUpdate(
@@ -560,20 +556,19 @@ class StateUpdate:
             stack_object_definition=stack_object_definition,
             stack_location=stack_location,
             definition=labware_definition,
-            labware_ids=labware_ids,
             new_locations_by_id=locations,
         )
         return self
 
-    def set_lid(
+    def set_lids(
         self: Self,
-        parent_labware_id: str,
-        lid_id: str,
+        parent_labware_ids: typing.List[str],
+        lid_ids: typing.List[str | None],
     ) -> Self:
         """Update the labware parent of a loaded or moved lid. See `LabwareLidUpdate`."""
         self.labware_lid = LabwareLidUpdate(
-            parent_labware_id=parent_labware_id,
-            lid_id=lid_id,
+            parent_labware_ids=parent_labware_ids,
+            lid_ids=lid_ids,
         )
         return self
 

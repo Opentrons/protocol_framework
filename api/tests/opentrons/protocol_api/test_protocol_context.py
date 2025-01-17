@@ -787,7 +787,7 @@ def test_load_labware_with_lid(
             load_name="lowercase_lid",
             location=mock_labware_core,
             namespace="some_namespace",
-            version=None,
+            version=1337,
         )
     ).then_return(mock_lid_core)
 
@@ -801,7 +801,7 @@ def test_load_labware_with_lid(
         label="some_display_name",
         namespace="some_namespace",
         version=1337,
-        lid="UPPERCASE_LID",
+        lid="lowercase_lid",
     )
 
     assert isinstance(result, Labware)
