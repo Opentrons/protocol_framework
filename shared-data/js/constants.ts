@@ -42,8 +42,8 @@ export const THERMOCYCLER_MODULE_V2: 'thermocyclerModuleV2' =
 export const HEATERSHAKER_MODULE_V1: 'heaterShakerModuleV1' =
   'heaterShakerModuleV1'
 export const ABSORBANCE_READER_V1: 'absorbanceReaderV1' = 'absorbanceReaderV1'
-export const FLEX_STACKER_MODULE_V1: 'flexStackerModuleV1' = 'flexStackerModuleV1'
-
+export const FLEX_STACKER_MODULE_V1: 'flexStackerModuleV1' =
+  'flexStackerModuleV1'
 
 export const MAGNETIC_BLOCK_V1: 'magneticBlockV1' = 'magneticBlockV1'
 
@@ -577,7 +577,7 @@ export const MODULE_FIXTURES_BY_MODEL: {
     THERMOCYCLER_V2_FRONT_FIXTURE,
   ],
   [ABSORBANCE_READER_V1]: [ABSORBANCE_READER_V1_FIXTURE],
-  [FLEX_STACKER_MODULE_V1]: [FLEX_STACKER_V1_FIXTURE]
+  [FLEX_STACKER_MODULE_V1]: [FLEX_STACKER_V1_FIXTURE],
 }
 
 export const FLEX_USB_MODULE_FIXTURES: CutoutFixtureId[] = [

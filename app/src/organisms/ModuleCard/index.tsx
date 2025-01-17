@@ -127,6 +127,7 @@ export const ModuleCard = (props: ModuleCardProps): JSX.Element | null => {
   const [showCalModal, setShowCalModal] = useState(false)
 
   const [targetProps, tooltipProps] = useHoverTooltip()
+
   const runStatus = useCurrentRunStatus()
   const isFlex = useIsFlex(robotName)
   const requireModuleCalibration =

@@ -22,7 +22,7 @@ export const FlexStackerModuleData = (
     pulse: false,
   }
   switch (moduleData.status) {
-    case 'storing': 
+    case 'storing':
     case 'dispensing': {
       StatusLabelProps.status = moduleData.status
       StatusLabelProps.backgroundColor = COLORS.blue30

@@ -272,7 +272,8 @@ function ModuleTableItem({
           isModuleReady &&
           (module.attachedModuleMatch?.moduleOffset?.last_modified != null ||
             module.attachedModuleMatch?.moduleType === ABSORBANCE_READER_TYPE ||
-            module.attachedModuleMatch?.moduleType === FLEX_STACKER_MODULE_TYPE) &&
+            module.attachedModuleMatch?.moduleType ===
+              FLEX_STACKER_MODULE_TYPE) &&
           conflictedFixture == null
             ? COLORS.green35
             : isNonConnectingModule && conflictedFixture == null
