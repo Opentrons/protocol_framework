@@ -13,6 +13,7 @@ import {
 } from '../../step-forms/selectors'
 import { getLabwareNicknamesById } from '../../ui/labware/selectors'
 import { selectors as ingredSelectors } from '../../labware-ingred/selectors'
+import { getLoadCommands } from '../../file-data/selectors/utils'
 import type {
   AddressableAreaName,
   CompletedProtocolAnalysis,
@@ -24,7 +25,6 @@ import type {
   LoadedPipette,
   RunTimeCommand,
 } from '@opentrons/shared-data'
-import { getLoadCommands } from '../../file-data/selectors/utils'
 
 export function ScrubberContainer(): JSX.Element {
   const robotType = useSelector(getRobotType)
@@ -163,5 +163,5 @@ export function ScrubberContainer(): JSX.Element {
     robotType,
   }
 
-  return <ProtocolTimelineScrubber analysis={analysis} />
+  return <ProtocolTimelineScrubber analysis={analysis} height="40vh" />
 }

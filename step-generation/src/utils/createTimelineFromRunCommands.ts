@@ -25,10 +25,10 @@ export function getResultingTimelineFrameFromRunCommands(
 ): ResultingTimelineFrame {
   const pipetteLocations = commands.reduce<RobotState['pipettes']>(
     (acc, command) => {
-      if (command.commandType === 'loadPipette') {
+      if (command.commandType === 'loadPipette' && command.result != null) {
         return {
           ...acc,
-          [command.params.pipetteId]: {
+          [command.result.pipetteId]: {
             mount: command.params.mount,
           },
         }

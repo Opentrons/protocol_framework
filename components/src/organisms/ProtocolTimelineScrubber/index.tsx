@@ -51,6 +51,7 @@ export const COMMAND_WIDTH_PX = 240
 
 interface ProtocolTimelineScrubberProps {
   analysis: CompletedProtocolAnalysis | ProtocolAnalysisOutput
+  height?: string
 }
 
 export const DECK_LAYER_BLOCKLIST = [
@@ -66,7 +67,7 @@ export const DECK_LAYER_BLOCKLIST = [
 export function ProtocolTimelineScrubber(
   props: ProtocolTimelineScrubberProps
 ): JSX.Element {
-  const { analysis } = props
+  const { analysis, height } = props
   const { commands, robotType, liquids } = analysis
   const wrapperRef = useRef<HTMLDivElement>(null)
   const commandListRef = useRef<ViewportListRef>(null)
@@ -140,7 +141,7 @@ export function ProtocolTimelineScrubber(
       gridGap={SPACING.spacing8}
     >
       <Flex gridGap={SPACING.spacing8} flex="1 1 0">
-        <Flex height="40vh">
+        <Flex height={height ?? '60vh'}>
           <BaseDeck
             robotType={robotType ?? FLEX_ROBOT_TYPE}
             deckConfig={getSimplestDeckConfigForProtocol(analysis)}
